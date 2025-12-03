@@ -54,13 +54,6 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
-    pattern: /^\/api\/structures-ofii$/,
-    routes: {
-      GET: "either",
-      POST: "either",
-    },
-  },
-  {
     pattern: /^\/api\/auth(?:\/.*)?$/,
     routes: {
       GET: "none",
