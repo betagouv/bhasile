@@ -5,6 +5,7 @@ import {
   Activite,
   Budget,
   Contact,
+  EvenementIndesirableGrave,
   FileUpload,
   Form,
   FormStep,
@@ -20,6 +21,7 @@ import { AdresseWithTypologies, createFakeAdresses } from "./adresse.seed";
 import { createFakeBudget } from "./budget.seed";
 import { createFakeContact } from "./contact.seed";
 import { ControleWithFileUploads, createFakeControle } from "./controle.seed";
+import { createFakeEvenementIndesirableGrave } from "./evenement-indesirable-grave.seed";
 import { createFakeFileUpload } from "./file-upload.seed";
 import { createFakeFormWithSteps } from "./form.seed";
 import { generateDatePair } from "./seed-util";
@@ -137,6 +139,10 @@ type StructureWithRelations = Structure & {
     FileUpload,
     "id" | "structureDnaCode" | "controleId" | "parentFileUploadId"
   >[];
+  evenementsIndesirablesGraves: Omit<
+    EvenementIndesirableGrave,
+    "id" | "structureDnaCode"
+  >[];
   forms: (Omit<Form, "id" | "structureDnaCode"> & {
     formSteps: Omit<FormStep, "id" | "formId">[];
   })[];
@@ -188,6 +194,9 @@ export const createFakeStuctureWithRelations = ({
       })
     ),
     activites: createFakeActivites(),
+    evenementsIndesirablesGraves: Array.from({ length: 5 }, () =>
+      createFakeEvenementIndesirableGrave()
+    ),
     forms,
   } as StructureWithRelations;
 

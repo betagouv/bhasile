@@ -132,7 +132,7 @@ model EvenementIndesirableGrave {
   id               Int       @id @default(autoincrement())
   structure        Structure @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
   structureDnaCode String
-  numeroDossier    String
+  numeroDossier    String    @unique
   evenementDate    DateTime
   declarationDate  DateTime
   type             String
