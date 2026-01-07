@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { getStructureTypologyIndexForAYear } from "@/app/utils/structure.util";
+import { getTypologieIndexForAYear } from "@/app/utils/structure.util";
 import { nullishFrenchDateToISO, zSafeYear } from "@/app/utils/zodCustomFields";
 import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 import { CURRENT_YEAR } from "@/constants";
@@ -38,11 +38,11 @@ export const structureTypologiesAutoSaveSchema = z.object({
 
 export const structureTypologiesWithMandatoryEvolutionSchema =
   structureTypologiesSchema.superRefine((data, ctx) => {
-    const currentStructureTypologyIndex = getStructureTypologyIndexForAYear(
+    const currentStructureTypologyIndex = getTypologieIndexForAYear(
       data.structureTypologies,
       CURRENT_YEAR
     );
-    
+
     if (currentStructureTypologyIndex === -1) {
       return;
     }
@@ -125,9 +125,9 @@ export const structureTypologiesWithMandatoryEvolutionSchema =
     }
   });
 
-  export type StructureTypologieWithoutEvolutionSchemaTypeFormValues = z.infer<
-    typeof structureTypologieWithoutEvolutionSchema
-  >;
+export type StructureTypologieWithoutEvolutionSchemaTypeFormValues = z.infer<
+  typeof structureTypologieWithoutEvolutionSchema
+>;
 export type structureTypologieSchemaTypeFormValues = z.infer<
   typeof structureTypologieSchema
 >;

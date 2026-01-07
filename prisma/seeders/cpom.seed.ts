@@ -193,7 +193,7 @@ export const createFakeCpoms = async (
         cpomStructure.yearStart ?? yearStart,
         cpomStructure.yearEnd ?? yearEnd
       );
-
+      console.log("is in cpom", structureDnaCode);
       for (const millesimeYear of millesimeYears) {
         await prisma.structureMillesime.upsert({
           where: {

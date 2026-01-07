@@ -1,16 +1,22 @@
 import { useForm, useFormContext } from "react-hook-form";
 
 import { getYearRange } from "@/app/utils/date.util";
-import { getBudgetIndexForAYear } from "@/app/utils/structure.util";
+import { getTypologieIndexForAYear } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
+import { Granularity } from "@/types/document-financier";
 
 import InputWithValidation from "../../InputWithValidation";
 
+const SCOPE = {
+  [Granularity.STRUCTURE]: "budgets",
+  [Granularity.CPOM]: "cpomMillesimes",
+};
 export const BudgetTableLine = ({
   name,
   label,
   subLabel,
   budgets,
+  granularity,
   disabledYearsStart,
   enabledYears,
 }: Props) => {
@@ -33,8 +39,8 @@ export const BudgetTableLine = ({
         <td key={year}>
           <span className="flex items-center gap-2">
             <InputWithValidation
-              name={`budgets.${getBudgetIndexForAYear(budgets, year)}.${name}`}
-              id={`gestionBudgetaire.${getBudgetIndexForAYear(budgets, year)}.${name}`}
+              name={`${SCOPE[granularity]}.${getTypologieIndexForAYear(budgets, year)}.${name}`}
+              id={`gestionBudgetaire.${getTypologieIndexForAYear(budgets, year)}.${name}`}
               control={control}
               type="number"
               min={0}
@@ -59,9 +65,10 @@ export const BudgetTableLine = ({
 
 interface Props {
   name: string;
-  label: string;
+  label: string | React.ReactNode;
   subLabel?: string;
   budgets: BudgetApiType[];
+  granularity: Granularity.CPOM | Granularity.STRUCTURE;
   disabledYearsStart?: number;
   enabledYears?: number[];
 }

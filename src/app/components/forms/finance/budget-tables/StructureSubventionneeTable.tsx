@@ -5,7 +5,7 @@ import { Table } from "@/app/components/common/Table";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { getYearRange } from "@/app/utils/date.util";
 
-export const StructureSubventionnee = () => {
+export const StructureSubventionneeTable = () => {
   const parentFormContext = useFormContext();
 
   const localForm = useForm();

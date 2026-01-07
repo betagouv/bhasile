@@ -236,6 +236,19 @@ export const findOne = async (id: number): Promise<Structure> => {
           year: "desc",
         },
       },
+      cpomStructures: {
+        include: {
+          cpom: {
+            include: {
+              cpomMillesimes: {
+                orderBy: {
+                  year: "desc",
+                },
+              },
+            },
+          },
+        },
+      },
       evaluations: {
         include: {
           fileUploads: true,

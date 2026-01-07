@@ -31,6 +31,7 @@ export const cpomApiSchema = z.object({
   structureIds: z.array(z.number()).optional(),
   millesimes: z.array(cpomMillesimeApiSchema).optional(),
   fileUploads: z.array(fileApiSchema).optional(),
+  cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
 });
 
 export type CpomApiType = z.infer<typeof cpomApiSchema>;

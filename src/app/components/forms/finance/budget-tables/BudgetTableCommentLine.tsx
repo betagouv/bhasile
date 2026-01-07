@@ -5,20 +5,22 @@ import { useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { getYearRange } from "@/app/utils/date.util";
-import { getBudgetIndexForAYear } from "@/app/utils/structure.util";
+import { getTypologieIndexForAYear } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-
-const modal = createModal({
-  id: "commentaire-modal",
-  isOpenedByDefault: false,
-});
+import { Granularity } from "@/types/document-financier";
 
 export const BudgetTableCommentLine = ({
   label,
   budgets,
   disabledYearsStart,
   enabledYears,
+  granularity,
 }: Props) => {
+  const modal = createModal({
+    id: `${granularity}-commentaire-modal`,
+    isOpenedByDefault: false,
+  });
+
   const parentFormContext = useFormContext();
 
   const { register, setValue } = parentFormContext;
@@ -32,7 +34,7 @@ export const BudgetTableCommentLine = ({
   >(undefined);
 
   const handleOpenModal = (year: number) => {
-    const newCommentIndex = getBudgetIndexForAYear(budgets, year);
+    const newCommentIndex = getTypologieIndexForAYear(budgets, year);
     setCurrentCommentIndex(newCommentIndex);
     if (inputModalRef.current) {
       inputModalRef.current.value = budgets[newCommentIndex]?.commentaire || "";
@@ -74,16 +76,16 @@ export const BudgetTableCommentLine = ({
                     : false
               }
             >
-              {budgets[getBudgetIndexForAYear(budgets, year)]?.commentaire
+              {budgets[getTypologieIndexForAYear(budgets, year)]?.commentaire
                 ? "Modifier"
                 : "Ajouter"}
             </Button>
 
             <input
               type="hidden"
-              id={`gestionBudgetaire.${getBudgetIndexForAYear(budgets, year)}.commentaire`}
+              id={`gestionBudgetaire.${getTypologieIndexForAYear(budgets, year)}.commentaire`}
               {...register(
-                `budgets.${getBudgetIndexForAYear(budgets, year)}.commentaire`
+                `budgets.${getTypologieIndexForAYear(budgets, year)}.commentaire`
               )}
             />
           </td>
@@ -134,8 +136,8 @@ export const BudgetTableCommentLine = ({
 
 interface Props {
   label: string;
-  subLabel?: string;
   budgets: BudgetApiType[];
   disabledYearsStart?: number;
   enabledYears?: number[];
+  granularity: Granularity.CPOM | Granularity.STRUCTURE;
 }

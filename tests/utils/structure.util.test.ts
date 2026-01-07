@@ -5,8 +5,8 @@ import {
   getLastVisitInMonths,
   getPlacesByCommunes,
   getRepartition,
-  getStructureMillesimeIndexForAYear,
-  getStructureTypologyIndexForAYear,
+  getTypologieIndexForAYear,
+  getTypologieIndexForAYear,
   isStructureAutorisee,
   isStructureInCpom,
   isStructureSubventionnee,
@@ -549,7 +549,7 @@ describe("structure util", () => {
     });
   });
 
-  describe("getStructureTypologyIndexForAYear", () => {
+  describe("getTypologieIndexForAYear", () => {
     it("should return the correct index when the year exists in the array", () => {
       // GIVEN
       const structureTypologies = [
@@ -560,10 +560,7 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getStructureTypologyIndexForAYear(
-        structureTypologies,
-        2024
-      );
+      const result = getTypologieIndexForAYear(structureTypologies, 2024);
 
       // THEN
       expect(result).toBe(1);
@@ -578,10 +575,7 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getStructureTypologyIndexForAYear(
-        structureTypologies,
-        2025
-      );
+      const result = getTypologieIndexForAYear(structureTypologies, 2025);
 
       // THEN
       expect(result).toBe(-1);
@@ -596,7 +590,7 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getStructureTypologyIndexForAYear(structureTypologies);
+      const result = getTypologieIndexForAYear(structureTypologies);
 
       // THEN
       expect(result).toBe(1);
@@ -607,17 +601,14 @@ describe("structure util", () => {
       const structureTypologies: StructureTypologieApiType[] = [];
 
       // WHEN
-      const result = getStructureTypologyIndexForAYear(
-        structureTypologies,
-        2025
-      );
+      const result = getTypologieIndexForAYear(structureTypologies, 2025);
 
       // THEN
       expect(result).toBe(-1);
     });
   });
 
-  describe("getStructureMillesimeIndexForAYear", () => {
+  describe("getTypologieIndexForAYear", () => {
     it("should return the correct index when the year exists in the array", () => {
       // GIVEN
       const structureMillesimes = [
@@ -628,10 +619,7 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getStructureMillesimeIndexForAYear(
-        structureMillesimes,
-        2024
-      );
+      const result = getTypologieIndexForAYear(structureMillesimes, 2024);
 
       // THEN
       expect(result).toBe(1);
@@ -646,10 +634,7 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getStructureMillesimeIndexForAYear(
-        structureMillesimes,
-        2025
-      );
+      const result = getTypologieIndexForAYear(structureMillesimes, 2025);
 
       // THEN
       expect(result).toBe(-1);
@@ -664,7 +649,7 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getStructureMillesimeIndexForAYear(structureMillesimes);
+      const result = getTypologieIndexForAYear(structureMillesimes);
 
       // THEN
       expect(result).toBe(1);
@@ -675,10 +660,7 @@ describe("structure util", () => {
       const structureMillesimes: StructureMillesimeApiType[] = [];
 
       // WHEN
-      const result = getStructureMillesimeIndexForAYear(
-        structureMillesimes,
-        2025
-      );
+      const result = getTypologieIndexForAYear(structureMillesimes, 2025);
 
       // THEN
       expect(result).toBe(-1);

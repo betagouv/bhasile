@@ -7,6 +7,7 @@ import {
 } from "@/schemas/api/adresse.schema";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
+import { CpomMillesimeApiType } from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import {
   StructureAgentUpdateApiType,
@@ -176,23 +177,11 @@ export const getCurrentCpomStructureDates = (
   };
 };
 
-export const getStructureTypologyIndexForAYear = (
-  structureTypologies: StructureTypologieApiType[],
+export const getTypologieIndexForAYear = (
+  typologies:
+    | StructureTypologieApiType[]
+    | StructureMillesimeApiType[]
+    | BudgetApiType[]
+    | CpomMillesimeApiType[],
   year: number = CURRENT_YEAR
-): number =>
-  structureTypologies?.findIndex(
-    (structureTypology) => structureTypology.year === year
-  ) ?? -1;
-
-export const getStructureMillesimeIndexForAYear = (
-  structureMillesimes: StructureMillesimeApiType[],
-  year: number = CURRENT_YEAR
-): number =>
-  structureMillesimes?.findIndex(
-    (structureMillesime) => structureMillesime.year === year
-  ) ?? -1;
-
-export const getBudgetIndexForAYear = (
-  budgets: BudgetApiType[],
-  year: number = CURRENT_YEAR
-): number => budgets?.findIndex((budget) => budget.year === year) ?? -1;
+): number => typologies?.findIndex((typology) => typology.year === year) ?? -1;
