@@ -66,7 +66,7 @@ WITH -- Last typology by structure
       public."Budget" b
     ORDER BY
       b."structureDnaCode",
-      b."date" DESC
+      b."year" DESC
   ),
   -- Aggregate budgets by structure
   budgets_agreges AS (

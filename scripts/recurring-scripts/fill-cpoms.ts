@@ -8,7 +8,7 @@ import { createPrismaClient } from "@/prisma-client";
 
 import { loadCsvFromS3 } from "../utils/csv-loader";
 import { ensureOperateursExist } from "../utils/ensure-operateurs-exist";
-import { parseDate, parseYear } from "../utils/parse-date";
+import { parseYear } from "../utils/parse-date";
 
 const prisma = createPrismaClient();
 const bucketName = process.env.DOCS_BUCKET_NAME!;
@@ -111,8 +111,6 @@ const loadCpomsFromCsv = async () => {
         cpom = await prisma.cpom.create({
           data: {
             name: cpomData.name,
-            debutCpom: parseDate(cpomData.yearStart.toString(), `yearStart`),
-            finCpom: parseDate(cpomData.yearEnd.toString(), `yearEnd`),
             yearStart: cpomData.yearStart,
             yearEnd: cpomData.yearEnd,
             operateurId: cpomData.operateurId,
@@ -216,7 +214,6 @@ const loadCpomsFromCsv = async () => {
           },
           create: {
             structureDnaCode: row.code_dna,
-            date: parseDate(millesimeYear.toString(), `millesimeYear`),
             year: millesimeYear,
             cpom: true,
           },

@@ -84,7 +84,7 @@ const partialstructureOperateurUpdateApiSchema =
       .array(documentFinancierApiSchema.partial())
       .optional(),
     structureTypologies: z
-      .array(structureTypologieApiSchema.partial())
+      .array(structureTypologieApiSchema.partial().required({ year: true }))
       .optional(),
     structureMillesimes: z.array(structureMillesimeApiSchema).optional(),
   });
