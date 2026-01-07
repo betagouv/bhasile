@@ -13,8 +13,6 @@ import {
   TOTAL_PRODUITS_DISABLED_YEARS_START,
 } from "@/constants";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomMillesimeApiType } from "@/schemas/api/cpom.schema";
-import { Granularity } from "@/types/document-financier";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLine } from "./BudgetTableLine";
@@ -87,14 +85,12 @@ export const StructureAutoriseeTable = () => {
         label="Dotation demandée"
         budgets={structure.budgets}
         disabledYearsStart={DOTATION_DEMANDEE_DISABLED_YEARS_START}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableLine
         name="dotationAccordee"
         label="Dotation accordée"
         budgets={structure.budgets}
         disabledYearsStart={DOTATION_ACCORDEE_DISABLED_YEARS}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableTitleLine label="Résultat" />
       <BudgetTableLine
@@ -103,7 +99,6 @@ export const StructureAutoriseeTable = () => {
         subLabel="dont dotation État"
         budgets={structure.budgets}
         disabledYearsStart={TOTAL_PRODUITS_DISABLED_YEARS_START}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableLine
         name="totalProduits"
@@ -111,7 +106,6 @@ export const StructureAutoriseeTable = () => {
         subLabel="dont dotation État"
         budgets={structure.budgets}
         disabledYearsStart={TOTAL_PRODUITS_DISABLED_YEARS_START}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableLine
         name="totalChargesProposees"
@@ -119,7 +113,6 @@ export const StructureAutoriseeTable = () => {
         subLabel="par l'opérateur"
         budgets={structure.budgets}
         disabledYearsStart={OTHER_DISABLED_YEARS_START}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableLine
         name="totalCharges"
@@ -127,7 +120,6 @@ export const StructureAutoriseeTable = () => {
         subLabel="par l'autorité tarifaire"
         budgets={structure.budgets}
         disabledYearsStart={OTHER_DISABLED_YEARS_START}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableLine
         name="repriseEtat"
@@ -147,7 +139,6 @@ export const StructureAutoriseeTable = () => {
         }
         budgets={structure.budgets}
         disabledYearsStart={OTHER_DISABLED_YEARS_START}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableLine
         name="affectationReservesFondsDedies"
@@ -155,7 +146,6 @@ export const StructureAutoriseeTable = () => {
         subLabel="réserves & provision"
         budgets={structure.budgets}
         disabledYearsStart={OTHER_DISABLED_YEARS_START}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableTitleLine label="Détail affectation" />
       <BudgetTableLine
@@ -163,68 +153,52 @@ export const StructureAutoriseeTable = () => {
         label="Réserve"
         subLabel="dédiée à l'investissement"
         budgets={structure.budgets}
-        disabledYearsStart={OTHER_DISABLED_YEARS_START}
         enabledYears={detailAffectationEnabledYears}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableLine
         name="chargesNonReconductibles"
         label="Charges"
         subLabel="non reductibles"
         budgets={structure.budgets}
-        disabledYearsStart={OTHER_DISABLED_YEARS_START}
         enabledYears={detailAffectationEnabledYears}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableLine
         name="reserveCompensationDeficits"
         label="Réserve de compensation "
         subLabel="des déficits"
         budgets={structure.budgets}
-        disabledYearsStart={OTHER_DISABLED_YEARS_START}
         enabledYears={detailAffectationEnabledYears}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableLine
         name="reserveCompensationBFR"
         label="Réserve de couverture"
         subLabel="de BFR"
         budgets={structure.budgets}
-        disabledYearsStart={OTHER_DISABLED_YEARS_START}
         enabledYears={detailAffectationEnabledYears}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableLine
         name="reserveCompensationAmortissements"
         label="Réserve de compensation"
         subLabel="des amortissements"
         budgets={structure.budgets}
-        disabledYearsStart={OTHER_DISABLED_YEARS_START}
         enabledYears={detailAffectationEnabledYears}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableLine
         name="reportANouveau"
         label="Report à nouveau"
         budgets={structure.budgets}
-        disabledYearsStart={OTHER_DISABLED_YEARS_START}
         enabledYears={detailAffectationEnabledYears}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableLine
         name="autre"
         label="Autre"
         budgets={structure.budgets}
-        disabledYearsStart={OTHER_DISABLED_YEARS_START}
         enabledYears={detailAffectationEnabledYears}
-        granularity={Granularity.STRUCTURE}
       />
       <BudgetTableCommentLine
         label="Commentaire"
         budgets={structure.budgets}
-        disabledYearsStart={OTHER_DISABLED_YEARS_START}
         enabledYears={detailAffectationEnabledYears}
-        granularity={Granularity.STRUCTURE}
       />
     </Table>
   );

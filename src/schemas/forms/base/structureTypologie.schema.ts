@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { getTypologieIndexForAYear } from "@/app/utils/structure.util";
+import { getMillesimendexForAYear } from "@/app/utils/structure.util";
 import { nullishFrenchDateToISO, zSafeYear } from "@/app/utils/zodCustomFields";
 import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 import { CURRENT_YEAR } from "@/constants";
@@ -38,7 +38,7 @@ export const structureTypologiesAutoSaveSchema = z.object({
 
 export const structureTypologiesWithMandatoryEvolutionSchema =
   structureTypologiesSchema.superRefine((data, ctx) => {
-    const currentStructureTypologyIndex = getTypologieIndexForAYear(
+    const currentStructureTypologyIndex = getMillesimendexForAYear(
       data.structureTypologies,
       CURRENT_YEAR
     );

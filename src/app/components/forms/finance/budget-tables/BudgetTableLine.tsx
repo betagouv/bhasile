@@ -1,22 +1,21 @@
 import { useForm, useFormContext } from "react-hook-form";
 
 import { getYearRange } from "@/app/utils/date.util";
-import { getTypologieIndexForAYear } from "@/app/utils/structure.util";
+import {
+  getCpomStructureIndexAndCpomMillesimeIndexForAYear,
+  getMillesimendexForAYear,
+} from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { Granularity } from "@/types/document-financier";
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 
 import InputWithValidation from "../../InputWithValidation";
 
-const SCOPE = {
-  [Granularity.STRUCTURE]: "budgets",
-  [Granularity.CPOM]: "cpomMillesimes",
-};
 export const BudgetTableLine = ({
   name,
   label,
   subLabel,
   budgets,
-  granularity,
+  cpomStructures,
   disabledYearsStart,
   enabledYears,
 }: Props) => {
@@ -27,6 +26,10 @@ export const BudgetTableLine = ({
   const { control } = parentFormContext || localForm;
 
   const { years } = getYearRange({ order: "desc" });
+
+  if (!budgets && !cpomStructures) {
+    return null;
+  }
 
   return (
     <tr>
@@ -39,21 +42,20 @@ export const BudgetTableLine = ({
         <td key={year}>
           <span className="flex items-center gap-2">
             <InputWithValidation
-              name={`${SCOPE[granularity]}.${getTypologieIndexForAYear(budgets, year)}.${name}`}
-              id={`gestionBudgetaire.${getTypologieIndexForAYear(budgets, year)}.${name}`}
+              name={getName(name, year, budgets, cpomStructures)}
+              id={getName(name, year, budgets, cpomStructures)}
               control={control}
               type="number"
               min={0}
               label=""
               className="mb-0 mx-auto items-center [&_p]:hidden [&_input]:w-full"
               variant="simple"
-              disabled={
-                enabledYears
-                  ? !enabledYears.includes(year)
-                  : disabledYearsStart
-                    ? year >= disabledYearsStart
-                    : false
-              }
+              disabled={isInputDisabled(
+                year,
+                disabledYearsStart,
+                enabledYears,
+                cpomStructures
+              )}
             />
             &nbsp;€
           </span>
@@ -63,12 +65,51 @@ export const BudgetTableLine = ({
   );
 };
 
+export const isInputDisabled = (
+  year: number,
+  disabledYearsStart?: number,
+  enabledYears?: number[],
+  cpomStructures?: CpomStructureApiType[]
+): boolean => {
+  if (cpomStructures) {
+    const { cpomStructureIndex, cpomMillesimeIndex } =
+      getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
+    if (cpomStructureIndex === -1 || cpomMillesimeIndex === -1) {
+      return true;
+    }
+  }
+  if (disabledYearsStart) {
+    return year >= disabledYearsStart;
+  }
+  if (enabledYears) {
+    return !enabledYears.includes(year);
+  }
+  return false;
+};
+
+export const getName = (
+  name: string,
+  year: number,
+  budgets?: BudgetApiType[],
+  cpomStructures?: CpomStructureApiType[]
+): string => {
+  if (cpomStructures) {
+    const { cpomStructureIndex, cpomMillesimeIndex } =
+      getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
+    return `cpomStructures.${cpomStructureIndex}.cpom.${cpomMillesimeIndex}.${name}`;
+  }
+  if (budgets) {
+    return `budgets.${getMillesimendexForAYear(budgets, year)}.${name}`;
+  }
+  return "";
+};
+
 interface Props {
   name: string;
   label: string | React.ReactNode;
   subLabel?: string;
-  budgets: BudgetApiType[];
-  granularity: Granularity.CPOM | Granularity.STRUCTURE;
+  budgets?: BudgetApiType[];
+  cpomStructures?: CpomStructureApiType[];
   disabledYearsStart?: number;
   enabledYears?: number[];
 }

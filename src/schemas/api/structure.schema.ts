@@ -8,7 +8,7 @@ import { adresseApiSchema } from "./adresse.schema";
 import { budgetApiSchema } from "./budget.schema";
 import { contactApiSchema } from "./contact.schema";
 import { controleApiSchema } from "./controle.schema";
-import { cpomMillesimeApiSchema } from "./cpom.schema";
+import { cpomMillesimeApiSchema, cpomStructureApiSchema } from "./cpom.schema";
 import { documentFinancierApiSchema } from "./documentFinancier.schema";
 import { evaluationApiSchema } from "./evaluation.schema";
 import { evenementIndesirableGraveApiSchema } from "./evenement-indesirable-grave.schema";
@@ -24,6 +24,7 @@ export const structureMinimalApiSchema = z.object({
   nom: z.string().optional(),
   structureMillesimes: z.array(structureMillesimeApiSchema).optional(),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
+  cpomStructures: z.array(cpomStructureApiSchema).optional(),
   nomOfii: z.string().optional(),
   directionTerritoriale: z.string().optional(),
   activeInOfiiFileSince: z.string().datetime().nullish(),

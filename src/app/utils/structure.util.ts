@@ -7,7 +7,10 @@ import {
 } from "@/schemas/api/adresse.schema";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
-import { CpomMillesimeApiType } from "@/schemas/api/cpom.schema";
+import {
+  CpomMillesimeApiType,
+  CpomStructureApiType,
+} from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import {
   StructureAgentUpdateApiType,
@@ -177,7 +180,7 @@ export const getCurrentCpomStructureDates = (
   };
 };
 
-export const getTypologieIndexForAYear = (
+export const getMillesimendexForAYear = (
   typologies:
     | StructureTypologieApiType[]
     | StructureMillesimeApiType[]
@@ -185,3 +188,22 @@ export const getTypologieIndexForAYear = (
     | CpomMillesimeApiType[],
   year: number = CURRENT_YEAR
 ): number => typologies?.findIndex((typology) => typology.year === year) ?? -1;
+
+export const getCpomStructureIndexAndCpomMillesimeIndexForAYear = (
+  cpomStructures: CpomStructureApiType[],
+  year: number = CURRENT_YEAR
+): { cpomStructureIndex: number; cpomMillesimeIndex: number } => {
+  let cpomMillesimeIndex = -1;
+  const cpomStructureIndex = cpomStructures.findIndex((cpomStructure) => {
+    cpomMillesimeIndex =
+      cpomStructure.cpom.cpomMillesimes?.findIndex(
+        (cpomMillesime) => cpomMillesime.year === year
+      ) ?? -1;
+    if (cpomMillesimeIndex !== -1) {
+      return true;
+    }
+    return false;
+  });
+
+  return { cpomStructureIndex, cpomMillesimeIndex };
+};

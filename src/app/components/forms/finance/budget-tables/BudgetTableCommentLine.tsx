@@ -5,55 +5,68 @@ import { useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { getYearRange } from "@/app/utils/date.util";
-import { getTypologieIndexForAYear } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { Granularity } from "@/types/document-financier";
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+
+import { getName } from "./BudgetTableLine";
 
 export const BudgetTableCommentLine = ({
   label,
   budgets,
+  cpomStructures,
   disabledYearsStart,
   enabledYears,
-  granularity,
 }: Props) => {
   const modal = createModal({
-    id: `${granularity}-commentaire-modal`,
+    id: `${cpomStructures ? "cpom" : "structure"}-commentaire-modal`,
     isOpenedByDefault: false,
   });
 
   const parentFormContext = useFormContext();
 
-  const { register, setValue } = parentFormContext;
+  const { setValue, watch } = parentFormContext;
 
   const { years } = getYearRange({ order: "desc" });
 
   const inputModalRef = useRef<HTMLTextAreaElement>(null);
 
-  const [currentCommentIndex, setCurrentCommentIndex] = useState<
+  const [currentCommentPath, setCurrentCommentPath] = useState<
+    string | undefined
+  >(undefined);
+  const [currentCommentYear, setCurrentCommentYear] = useState<
     number | undefined
   >(undefined);
 
+  const currentComment = currentCommentPath
+    ? watch(currentCommentPath)
+    : undefined;
+
   const handleOpenModal = (year: number) => {
-    const newCommentIndex = getTypologieIndexForAYear(budgets, year);
-    setCurrentCommentIndex(newCommentIndex);
+    const commentPath = getName("commentaire", year, budgets, cpomStructures);
+    setCurrentCommentPath(commentPath);
+    setCurrentCommentYear(year);
     if (inputModalRef.current) {
-      inputModalRef.current.value = budgets[newCommentIndex]?.commentaire || "";
+      inputModalRef.current.value = watch(commentPath) || "";
     }
     modal.open();
   };
 
   const handleCloseModal = () => {
-    setCurrentCommentIndex(undefined);
+    setCurrentCommentPath(undefined);
+    setCurrentCommentYear(undefined);
     modal.close();
   };
 
   const handleSaveModal = () => {
-    setValue(
-      `budgets.${currentCommentIndex}.commentaire`,
-      inputModalRef.current?.value || ""
-    );
+    if (currentCommentPath) {
+      setValue(currentCommentPath, inputModalRef.current?.value || "");
+    }
     handleCloseModal();
   };
+
+  if (!budgets && !cpomStructures) {
+    return null;
+  }
 
   return (
     <>
@@ -76,26 +89,14 @@ export const BudgetTableCommentLine = ({
                     : false
               }
             >
-              {budgets[getTypologieIndexForAYear(budgets, year)]?.commentaire
-                ? "Modifier"
-                : "Ajouter"}
+              {currentComment ? "Modifier" : "Ajouter"}
             </Button>
-
-            <input
-              type="hidden"
-              id={`gestionBudgetaire.${getTypologieIndexForAYear(budgets, year)}.commentaire`}
-              {...register(
-                `budgets.${getTypologieIndexForAYear(budgets, year)}.commentaire`
-              )}
-            />
           </td>
         ))}
       </tr>
       <modal.Component
         title={
-          currentCommentIndex && budgets?.[currentCommentIndex]?.commentaire
-            ? "Modifier un commentaire"
-            : "Ajouter un commentaire"
+          currentComment ? "Modifier un commentaire" : "Ajouter un commentaire"
         }
         size="large"
         buttons={[
@@ -106,10 +107,7 @@ export const BudgetTableCommentLine = ({
           },
           {
             doClosesModal: true,
-            children:
-              currentCommentIndex && budgets?.[currentCommentIndex]?.commentaire
-                ? "Modifier"
-                : "Ajouter",
+            children: currentComment ? "Modifier" : "Ajouter",
             type: "button",
             onClick: () => {
               handleSaveModal();
@@ -119,7 +117,7 @@ export const BudgetTableCommentLine = ({
       >
         <p className="font-bold text-xl">
           Détail affectation réserves et provisions du CPOM — Année{" "}
-          {(currentCommentIndex && budgets?.[currentCommentIndex]?.year) || ""}
+          {currentCommentYear || ""}
         </p>
 
         <Input
@@ -136,8 +134,8 @@ export const BudgetTableCommentLine = ({
 
 interface Props {
   label: string;
-  budgets: BudgetApiType[];
+  budgets?: BudgetApiType[];
+  cpomStructures?: CpomStructureApiType[];
   disabledYearsStart?: number;
   enabledYears?: number[];
-  granularity: Granularity.CPOM | Granularity.STRUCTURE;
 }

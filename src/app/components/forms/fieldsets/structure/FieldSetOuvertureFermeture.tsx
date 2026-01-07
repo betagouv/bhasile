@@ -1,7 +1,7 @@
 import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useFormContext } from "react-hook-form";
 
-import { getTypologieIndexForAYear } from "@/app/utils/structure.util";
+import { getMillesimendexForAYear } from "@/app/utils/structure.util";
 import { CURRENT_YEAR } from "@/constants";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 import { FormKind } from "@/types/global";
@@ -18,7 +18,7 @@ export const FieldSetOuvertureFermeture = ({
   const structureTypologies: StructureTypologieApiType[] = watch(
     "structureTypologies"
   );
-  const currentStructureTypologyIndex = getTypologieIndexForAYear(
+  const currentStructureTypologyIndex = getMillesimendexForAYear(
     structureTypologies,
     CURRENT_YEAR
   );
