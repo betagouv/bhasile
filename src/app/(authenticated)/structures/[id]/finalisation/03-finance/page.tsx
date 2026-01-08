@@ -48,7 +48,8 @@ export default function FinalisationFinance(): ReactElement {
   const isAutorisee = isStructureAutorisee(structure.type);
   const isSubventionnee = isStructureSubventionnee(structure.type);
 
-  let schema;
+  const financeSchema = getFinanceSchema(structure);
+
   if (isAutorisee) {
     schema = isInCpom ? autoriseeAvecCpomSchema : autoriseeSchema;
   } else if (isSubventionnee) {

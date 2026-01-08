@@ -4,6 +4,7 @@ import { zSafeDecimalsNullish, zSafeYear } from "@/app/utils/zodCustomFields";
 import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 
 import { budgetBaseSchema } from "./budget.base.schema";
+import { avecCpomSchema } from "./budget.cpom.schema";
 
 export const subventionneeFirstYearsSchema = z.object({
   id: z.preprocess(

@@ -9,7 +9,7 @@ import {
   DOTATION_ACCORDEE_DISABLED_YEARS,
   DOTATION_DEMANDEE_DISABLED_YEARS_START,
   OTHER_DISABLED_YEARS_START,
-  TOTAL_PRODUITS_DISABLED_YEARS_START,
+  AUTORISEE_TOTAL_PRODUITS_DISABLED_YEARS_START,
 } from "@/constants";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 
@@ -80,14 +80,14 @@ export const CpomTable = () => {
         label="Total produits proposés"
         subLabel="dont dotation État"
         cpomStructures={structure.cpomStructures}
-        disabledYearsStart={TOTAL_PRODUITS_DISABLED_YEARS_START}
+        disabledYearsStart={AUTORISEE_TOTAL_PRODUITS_DISABLED_YEARS_START}
       />
       <BudgetTableLine
         name="totalProduits"
         label="Total produits retenus"
         subLabel="dont dotation État"
         cpomStructures={structure.cpomStructures}
-        disabledYearsStart={TOTAL_PRODUITS_DISABLED_YEARS_START}
+        disabledYearsStart={AUTORISEE_TOTAL_PRODUITS_DISABLED_YEARS_START}
       />
       <BudgetTableLine
         name="totalChargesProposees"

@@ -12,10 +12,53 @@ export const budgetBaseSchema = z.object({
   ),
   year: zSafeYear(),
 
+  // Indicateurs généraux
   ETP: zSafeDecimals(),
   tauxEncadrement: zSafeDecimals(),
   coutJournalier: zSafeDecimals(),
 
+  commentaire: z.string().nullish(),
+});
+
+export const budgetAutoriseeNotOpenSchema = budgetBaseSchema.extend({
+  dotationDemandee: zSafeDecimals(),
+});
+
+export const budgetAutoriseeOpenYear1Schema =
+  budgetAutoriseeNotOpenSchema.extend({
+    dotationAccordee: zSafeDecimals(),
+  });
+
+const budgetAutoriseeOpenSchemaWithoutRefinement =
+  budgetAutoriseeOpenYear1Schema.extend({
+    // Résultat
+    totalProduitsProposes: zSafeDecimals(),
+    totalProduits: zSafeDecimals(),
+    totalChargesProposees: zSafeDecimals(),
+    repriseEtat: zSafeDecimals(),
+    excedentRecupere: zSafeDecimals(),
+    excedentDeduit: zSafeDecimals(),
+    fondsDedies: zSafeDecimals(),
+    affectationReservesFondsDedies: zSafeDecimals(),
+
+    // Détail affectation
+    reserveInvestissement: zSafeDecimalsNullish(),
+    chargesNonReconductibles: zSafeDecimalsNullish(),
+    reserveCompensationDeficits: zSafeDecimalsNullish(),
+    reserveCompensationBFR: zSafeDecimalsNullish(),
+    reserveCompensationAmortissements: zSafeDecimalsNullish(),
+    reportANouveau: zSafeDecimalsNullish(),
+    autre: zSafeDecimalsNullish(),
+  });
+
+export const budgetAutoriseeOpenSchema =
+  budgetAutoriseeOpenSchemaWithoutRefinement.superRefine(
+    validateAffectationReservesDetails
+  );
+
+export const budgetSubventionneeNotOpenSchema = budgetBaseSchema; // Duplicated for comprehensibility
+
+export const budgetSubventionneeOpenSchema = budgetBaseSchema.extend({
   dotationDemandee: zSafeDecimals(),
   dotationAccordee: zSafeDecimals(),
   totalProduits: zSafeDecimals(),
@@ -24,54 +67,8 @@ export const budgetBaseSchema = z.object({
   excedentRecupere: zSafeDecimals(),
   excedentDeduit: zSafeDecimals(),
   fondsDedies: zSafeDecimals(),
-
-  affectationReservesFondsDedies: zSafeDecimals(),
-
-  // Champs variables
-  cumulResultatsNetsCPOM: zSafeDecimals(),
-  totalChargesProposees: zSafeDecimals(),
-
-  // Détail affectation
-  reserveInvestissement: zSafeDecimalsNullish(),
-  chargesNonReconductibles: zSafeDecimalsNullish(),
-  reserveCompensationDeficits: zSafeDecimalsNullish(),
-  reserveCompensationBFR: zSafeDecimalsNullish(),
-  reserveCompensationAmortissements: zSafeDecimalsNullish(),
-  reportANouveau: zSafeDecimalsNullish(),
-  autre: zSafeDecimalsNullish(),
-
-  commentaire: z.string().nullish(),
 });
 
-export const budgetSchema = budgetBaseSchema.superRefine(
-  validateAffectationReservesDetails
-);
-
-export const budgetAutoSaveSchema = budgetBaseSchema
-  .extend({
-    ETP: zSafeDecimalsNullish(),
-    tauxEncadrement: zSafeDecimalsNullish(),
-    coutJournalier: zSafeDecimalsNullish(),
-    dotationDemandee: zSafeDecimalsNullish(),
-    dotationAccordee: zSafeDecimalsNullish(),
-    totalProduits: zSafeDecimalsNullish(),
-    totalCharges: zSafeDecimalsNullish(),
-    repriseEtat: zSafeDecimalsNullish(),
-    excedentRecupere: zSafeDecimalsNullish(),
-    excedentDeduit: zSafeDecimalsNullish(),
-    affectationReservesFondsDedies: zSafeDecimalsNullish(),
-    cumulResultatsNetsCPOM: zSafeDecimalsNullish(),
-    totalChargesProposees: zSafeDecimalsNullish(),
-    reserveInvestissement: zSafeDecimalsNullish(),
-    chargesNonReconductibles: zSafeDecimalsNullish(),
-    reserveCompensationDeficits: zSafeDecimalsNullish(),
-    reserveCompensationBFR: zSafeDecimalsNullish(),
-    reserveCompensationAmortissements: zSafeDecimalsNullish(),
-    fondsDedies: zSafeDecimalsNullish(),
-    reportANouveau: zSafeDecimalsNullish(),
-    autre: zSafeDecimalsNullish(),
-  })
+export const budgetAutoSaveSchema = budgetAutoriseeOpenSchemaWithoutRefinement
   .partial()
-  .extend({
-    year: zSafeYear(),
-  });
+  .and(budgetSubventionneeOpenSchema.partial());
