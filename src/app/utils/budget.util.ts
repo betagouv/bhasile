@@ -1,11 +1,11 @@
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { budgetsSchemaTypeFormValues } from "@/schemas/forms/base/budget.schema";
+import { anyFinanceFormValues } from "@/schemas/forms/base/budget.schema";
 
 import { getYearRange } from "./date.util";
 
 export const getBudgetsDefaultValues = (
   structureBudgets: BudgetApiType[]
-): budgetsSchemaTypeFormValues => {
+): anyFinanceFormValues => {
   const { years } = getYearRange();
 
   const budgets = Array(years.length)
@@ -50,7 +50,7 @@ export const getBudgetsDefaultValues = (
         };
       }
       return emptyBudget;
-    }) as budgetsSchemaTypeFormValues;
+    }) as anyFinanceFormValues;
 
   return budgets;
 };

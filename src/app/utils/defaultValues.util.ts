@@ -3,7 +3,7 @@ import { ContactApiType } from "@/schemas/api/contact.schema";
 import { StructureApiType } from "@/schemas/api/structure.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
-import { budgetsSchemaTypeFormValues } from "@/schemas/forms/base/budget.schema";
+import { anyFinanceFormValues } from "@/schemas/forms/base/budget.schema";
 import { ControleFormValues } from "@/schemas/forms/base/controle.schema";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { EvaluationFormValues } from "@/schemas/forms/base/evaluation.schema";
@@ -146,6 +146,6 @@ type StructureDefaultValues = Omit<
   actesAdministratifs: ActeAdministratifFormValues[];
   controles: ControleFormValues[];
   evaluations: EvaluationFormValues[];
-  budgets: budgetsSchemaTypeFormValues;
+  budgets: anyFinanceFormValues;
   structureTypologies: structureTypologieSchemaTypeFormValues[];
 };

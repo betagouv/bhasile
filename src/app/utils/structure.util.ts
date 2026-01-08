@@ -141,8 +141,11 @@ export const isStructureInCpom = (
   year: number = CURRENT_YEAR
 ): boolean => {
   return (
-    structure.structureMillesimes?.find((millesime) => millesime.year === year)
-      ?.cpom ?? false
+    structure.cpomStructures?.some((cpomStructure) => {
+      return cpomStructure.cpom.cpomMillesimes?.some(
+        (cpomMillesime) => cpomMillesime.year === year
+      );
+    }) ?? false
   );
 };
 

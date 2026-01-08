@@ -16,19 +16,10 @@ import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
 import {
-  isStructureAutorisee,
-  isStructureInCpom,
-  isStructureSubventionnee,
-} from "@/app/utils/structure.util";
-import {
-  autoriseeAvecCpomSchema,
-  autoriseeSchema,
-  basicAutoSaveFormValues,
-  basicAutoSaveSchema,
-  basicSchema,
-  subventionneeAvecCpomSchema,
-  subventionneeSchema,
+  BudgetsAutoSaveFormValues,
+  budgetsAutoSaveSchema,
 } from "@/schemas/forms/base/budget.schema";
+import { getFinanceSchema } from "@/schemas/forms/base/budget/getFinanceSchema";
 import { FetchState } from "@/types/fetch-state.type";
 import { StepStatus } from "@/types/form.type";
 
@@ -44,24 +35,14 @@ export default function FinalisationFinance(): ReactElement {
     structure
   );
 
-  const isInCpom = isStructureInCpom(structure);
-  const isAutorisee = isStructureAutorisee(structure.type);
-  const isSubventionnee = isStructureSubventionnee(structure.type);
-
   const financeSchema = getFinanceSchema(structure);
-
-  if (isAutorisee) {
-    schema = isInCpom ? autoriseeAvecCpomSchema : autoriseeSchema;
-  } else if (isSubventionnee) {
-    schema = isInCpom ? subventionneeAvecCpomSchema : subventionneeSchema;
-  }
 
   const defaultValues = getDefaultValues({ structure });
 
   const { handleValidation, handleAutoSave, backendError } =
     useAgentFormHandling({ currentStep });
 
-  const onAutoSave = async (data: basicAutoSaveFormValues) => {
+  const onAutoSave = async (data: BudgetsAutoSaveFormValues) => {
     await handleAutoSave({ ...data, dnaCode: structure.dnaCode });
   };
 
@@ -72,7 +53,7 @@ export default function FinalisationFinance(): ReactElement {
     <div>
       <Tabs currentStep={currentStep} />
       <FormWrapper
-        schema={schema || basicSchema}
+        schema={financeSchema}
         defaultValues={defaultValues}
         submitButtonText="Je valide la saisie de cette page"
         availableFooterButtons={[FooterButtonType.SUBMIT]}
@@ -80,7 +61,7 @@ export default function FinalisationFinance(): ReactElement {
         className="rounded-t-none"
         showAutoSaveMention
       >
-        <AutoSave schema={basicAutoSaveSchema} onSave={onAutoSave} />
+        <AutoSave schema={budgetsAutoSaveSchema} onSave={onAutoSave} />
 
         <InformationBar
           variant={

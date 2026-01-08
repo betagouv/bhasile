@@ -6,7 +6,7 @@ import {
   basicSchema,
   subventionneeAvecCpomSchema,
   subventionneeSchema,
-} from "@/schemas/forms/base/budget.schema";
+} from "@/schemas/forms/base/budget.schema.old";
 import { DocumentsFinanciersFlexibleSchema } from "@/schemas/forms/base/documentFinancier.schema";
 
 export const ModificationFinanceBasicSchema = basicSchema.and(

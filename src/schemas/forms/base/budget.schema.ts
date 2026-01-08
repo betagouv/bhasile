@@ -1,115 +1,94 @@
 import z from "zod";
 
-import { getYearRange } from "@/app/utils/date.util";
+import { zSafeDecimalsNullish, zSafeYear } from "@/app/utils/zodCustomFields";
+import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 
-import {
-  autoriseeCurrentYearSchema,
-  autoriseeY2Schema,
-} from "./budget/budget.autorisee.schema";
-import {
-  budgetAutoSaveSchema,
-  budgetSchema,
-} from "./budget/budget.base.schema";
-import { sansCpomSchema } from "./budget/budget.cpom.schema";
-import { avecCpomSchema } from "./budget/budget.cpom.schema";
-import {
-  subventionneeFirstYearsSchema,
-  subventionneeSansCpomSchema,
-} from "./budget/budget.subventionee.schema";
+import { validateAffectationReservesDetails } from "./budget/validateAffectationReservesDetails";
 
-const { years } = getYearRange();
+export const budgetBaseSchema = z.object({
+  id: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z.number().optional()
+  ),
+  year: zSafeYear(),
 
-const yearsWithoutFirstTwo = years.slice(2);
+  // Indicateurs généraux
+  ETP: zSafeDecimals(),
+  tauxEncadrement: zSafeDecimals(),
+  coutJournalier: zSafeDecimals(),
 
-const budgetSchemas = years.map(() => budgetSchema) as [
-  typeof budgetSchema,
-  ...(typeof budgetSchema)[],
-];
-
-export const basicSchema = z.object({
-  budgets: z.tuple(budgetSchemas),
+  commentaire: z.string().nullish(),
 });
 
-const basicAutoSaveSchemas = years.map(() => budgetAutoSaveSchema) as [
-  typeof budgetAutoSaveSchema,
-  ...(typeof budgetAutoSaveSchema)[],
-];
-export const basicAutoSaveSchema = z
-  .object({
-    budgets: z.tuple(basicAutoSaveSchemas),
-  })
-  .partial();
-
-const sansCpomSchemas = yearsWithoutFirstTwo.map(() => sansCpomSchema) as [
-  typeof sansCpomSchema,
-  ...(typeof sansCpomSchema)[],
-];
-
-export const autoriseeSchema = z.object({
-  budgets: z.tuple([
-    autoriseeCurrentYearSchema,
-    autoriseeY2Schema,
-    ...sansCpomSchemas,
-  ]),
+export const budgetAutoriseeNotOpenSchema = budgetBaseSchema.extend({
+  dotationDemandee: zSafeDecimals(),
 });
 
-const avecCpomSchemas = yearsWithoutFirstTwo.map(() => avecCpomSchema) as [
-  typeof avecCpomSchema,
-  ...(typeof avecCpomSchema)[],
-];
+export const budgetAutoriseeOpenYear1Schema =
+  budgetAutoriseeNotOpenSchema.extend({
+    dotationAccordee: zSafeDecimals(),
+  });
 
-export const autoriseeAvecCpomSchema = z.object({
-  budgets: z.tuple([
-    autoriseeCurrentYearSchema,
-    autoriseeY2Schema,
-    ...avecCpomSchemas,
-  ]),
+const budgetAutoriseeOpenSchemaWithoutRefinement =
+  budgetAutoriseeOpenYear1Schema.extend({
+    // Résultat
+    totalProduitsProposes: zSafeDecimals(),
+    totalProduits: zSafeDecimals(),
+    totalChargesProposees: zSafeDecimals(),
+    repriseEtat: zSafeDecimals(),
+    excedentRecupere: zSafeDecimals(),
+    excedentDeduit: zSafeDecimals(),
+    fondsDedies: zSafeDecimals(),
+    affectationReservesFondsDedies: zSafeDecimals(),
+
+    // Détail affectation
+    reserveInvestissement: zSafeDecimalsNullish(),
+    chargesNonReconductibles: zSafeDecimalsNullish(),
+    reserveCompensationDeficits: zSafeDecimalsNullish(),
+    reserveCompensationBFR: zSafeDecimalsNullish(),
+    reserveCompensationAmortissements: zSafeDecimalsNullish(),
+    reportANouveau: zSafeDecimalsNullish(),
+    autre: zSafeDecimalsNullish(),
+  });
+
+export const budgetAutoriseeOpenSchema =
+  budgetAutoriseeOpenSchemaWithoutRefinement.superRefine(
+    validateAffectationReservesDetails
+  );
+
+export const budgetSubventionneeNotOpenSchema = budgetBaseSchema; // Duplicated for comprehensibility
+
+export const budgetSubventionneeOpenSchema = budgetBaseSchema.extend({
+  dotationDemandee: zSafeDecimals(),
+  dotationAccordee: zSafeDecimals(),
+  totalProduits: zSafeDecimals(),
+  totalCharges: zSafeDecimals(),
+  repriseEtat: zSafeDecimals(),
+  excedentRecupere: zSafeDecimals(),
+  excedentDeduit: zSafeDecimals(),
+  fondsDedies: zSafeDecimals(),
 });
 
-const subventionneeSansCpomSchemas = yearsWithoutFirstTwo.map(
-  () => subventionneeSansCpomSchema
-) as [
-  typeof subventionneeSansCpomSchema,
-  ...(typeof subventionneeSansCpomSchema)[],
-];
+export const budgetAutoSaveSchema = budgetAutoriseeOpenSchemaWithoutRefinement
+  .partial()
+  .and(budgetSubventionneeOpenSchema.partial())
+  .and(
+    z.object({
+      year: zSafeYear(),
+    })
+  );
 
-export const subventionneeSchema = z.object({
-  budgets: z.tuple([
-    subventionneeFirstYearsSchema,
-    subventionneeFirstYearsSchema,
-    ...subventionneeSansCpomSchemas,
-  ]),
+export const budgetsAutoSaveSchema = z.object({
+  budgets: z.array(budgetAutoSaveSchema),
 });
 
-export const subventionneeAvecCpomSchema = z.object({
-  budgets: z.tuple([
-    subventionneeFirstYearsSchema,
-    subventionneeFirstYearsSchema,
-    ...avecCpomSchemas,
-  ]),
-});
+export type BudgetsAutoSaveFormValues = z.infer<typeof budgetsAutoSaveSchema>;
 
-type budgetSchemaTypeFormValues = z.infer<typeof budgetSchema>;
-
-export type budgetsSchemaTypeFormValues = budgetSchemaTypeFormValues[];
-
-export type basicSchemaTypeFormValues = z.infer<typeof basicSchema>;
-export type autoriseeSchemaTypeFormValues = z.infer<typeof autoriseeSchema>;
-export type autoriseeAvecCpomSchemaTypeFormValues = z.infer<
-  typeof autoriseeAvecCpomSchema
+export type anyFinanceFormValues = Array<
+  | z.infer<typeof budgetAutoriseeNotOpenSchema>
+  | z.infer<typeof budgetAutoriseeOpenYear1Schema>
+  | z.infer<typeof budgetAutoriseeOpenSchema>
+  | z.infer<typeof budgetSubventionneeNotOpenSchema>
+  | z.infer<typeof budgetSubventionneeOpenSchema>
+  | z.infer<typeof budgetAutoSaveSchema>
 >;
-export type subventionneeSchemaTypeFormValues = z.infer<
-  typeof subventionneeSchema
->;
-type subventionneeAvecCpomSchemaTypeFormValues = z.infer<
-  typeof subventionneeAvecCpomSchema
->;
-
-export type anyFinanceFormValues =
-  | basicSchemaTypeFormValues
-  | autoriseeSchemaTypeFormValues
-  | autoriseeAvecCpomSchemaTypeFormValues
-  | subventionneeSchemaTypeFormValues
-  | subventionneeAvecCpomSchemaTypeFormValues;
-
-export type basicAutoSaveFormValues = z.infer<typeof basicAutoSaveSchema>;

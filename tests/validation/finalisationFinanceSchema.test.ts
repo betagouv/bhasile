@@ -4,7 +4,7 @@ import {
   basicSchema,
   subventionneeAvecCpomSchema,
   subventionneeSchema,
-} from "@/schemas/forms/base/budget.schema";
+} from "@/schemas/forms/base/budget.schema.old";
 
 vi.mock("@/constants", async () => {
   const actual = await vi.importActual("@/constants");
