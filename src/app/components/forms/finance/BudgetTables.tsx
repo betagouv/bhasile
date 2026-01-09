@@ -9,7 +9,6 @@ import {
 import { getFinanceFormTutorialLink } from "@/app/utils/tutorials.util";
 
 import { useStructureContext } from "../../../(authenticated)/structures/[id]/_context/StructureClientContext";
-import { CpomTable } from "./budget-tables/CpomTable";
 import { StructureTable } from "./budget-tables/StructureTable";
 
 export const BudgetTables = () => {
@@ -65,7 +64,6 @@ export const BudgetTables = () => {
             affectations, ce tableau reflète le flux annuel et ne constitue en
             aucun cas un calcul ou du stock.
           </p>
-          <CpomTable />
         </fieldset>
       )}
     </>
