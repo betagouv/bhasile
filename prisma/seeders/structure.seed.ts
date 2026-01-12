@@ -194,8 +194,9 @@ export const createFakeStuctureWithRelations = ({
       })
     ),
     activites: createFakeActivites(),
-    evenementsIndesirablesGraves: Array.from({ length: 5 }, () =>
-      createFakeEvenementIndesirableGrave()
+    evenementsIndesirablesGraves: Array.from(
+      { length: faker.number.int({ min: 0, max: 5 }) },
+      () => createFakeEvenementIndesirableGrave()
     ),
     forms,
   } as StructureWithRelations;

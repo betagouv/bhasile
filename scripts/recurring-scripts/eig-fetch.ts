@@ -1,3 +1,6 @@
+// Remplir la table EvenementIndesirableGrave avec les EIG venant de l'API de Démarches Simplifiées
+// Usage: npx tsx scripts/eig-fetch.ts
+
 import "dotenv/config";
 
 import { EvenementIndesirableGrave } from "@/generated/prisma/client";
@@ -166,6 +169,7 @@ const getAllEIGs = async (): Promise<
   })
     .filter((appEIG) => appEIG !== undefined)
     .filter((appEIG) => appEIG?.structureDnaCode?.length === 5);
+  console.log(appEIGs);
   console.log("📝", appEIGs.length, "EIGs récupérés");
   return appEIGs;
 };
@@ -180,8 +184,8 @@ const dnaCodes = structureDnaCodes.map(
 for (const EIG of await getAllEIGs()) {
   if (dnaCodes.includes(EIG.structureDnaCode)) {
     await prisma.evenementIndesirableGrave.upsert({
-      where: { numeroDossier: EIG.numeroDossier },
-      update: EIG,
+      where: { numeroDossier: EIG.numeroDossier || "" },
+      update: {},
       create: EIG,
     });
   }
