@@ -151,14 +151,16 @@ const getAllEIGs = async (): Promise<
   const DSEIGs = await getEIGsFromDS();
   const appEIGs = DSEIGs.map((DSEIG) => {
     const structureDnaCode = getValueByLabel(DSEIG, DNA_CODE_LABEL);
-    if (!structureDnaCode) {
+    const evenementDate = getValueByLabel(DSEIG, EVENEMENT_DATE_LABEL);
+    const declarationDate = getValueByLabel(DSEIG, DECLARATION_DATE_LABEL);
+    if (!structureDnaCode || !evenementDate || !declarationDate) {
       return;
     }
     return {
       structureDnaCode,
       numeroDossier: getValueByLabel(DSEIG, NUMERO_DOSSIER_LABEL),
-      evenementDate: new Date(getValueByLabel(DSEIG, EVENEMENT_DATE_LABEL)),
-      declarationDate: new Date(getValueByLabel(DSEIG, DECLARATION_DATE_LABEL)),
+      evenementDate: new Date(evenementDate),
+      declarationDate: new Date(declarationDate),
       type: getValueByLabel(DSEIG, TYPE_LABEL).toString(),
     };
   })
