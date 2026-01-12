@@ -34,7 +34,12 @@ export const DownloadItem = ({ fileUpload }: Props): ReactElement => {
       );
       const startYear = getYearFromDate(fileUpload.startDate);
       const endYear = getYearFromDate(fileUpload.endDate);
-      if (isNaN(startYear) || isNaN(endYear)) {
+      if (
+        isNaN(startYear) ||
+        isNaN(endYear) ||
+        startYear === -1 ||
+        endYear === -1
+      ) {
         return categoryLabel;
       }
       return `${categoryLabel} ${startYear} - ${endYear}`;
