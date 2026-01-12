@@ -73,10 +73,11 @@ export const AdressImporter = ({
         <div className="text-red-500 pt-2">
           <i>L’import du tableur n’a pas fonctionné.</i>
           <br />
-          Veillez à ce que ces conditions soient remplies :
+          Il se peut que vous n’ayez pas respecté tous les pré-requis. Vérifiez
+          les conditions ci-dessous :
           <ul>
             <li>
-              utilisez{" "}
+              Avez-vous bien utilisé{" "}
               <Link
                 href={
                   typeBati === Repartition.DIFFUS
@@ -87,16 +88,24 @@ export const AdressImporter = ({
               >
                 le tableur pré-formaté disponible au téléchargement
               </Link>{" "}
-              et non un tableur créé par vous-même ;
-            </li>
-            <li>pour le nombre de places autorisées, renseignez un nombre ;</li>
-            <li>
-              dans la colonne “Logement social” veuillez indiquer “Oui” si le
-              logement est loué à un bailleur social et “Non” le cas échéant ;
+              et non un tableur créé par vous-même ?
             </li>
             <li>
-              dans la colonne “QPV”, veuillez vérifier si l’adresse en question
-              fait partie d’un Quartier Prioritaire de la Ville sur{" "}
+              Avez-vous bien saisi les adresses postales en enlevant toutes
+              autres indications (ex : numéro d’appartement) ?
+            </li>
+            <li>
+              Pour le nombre de places autorisées, avez-vous bien renseigné un
+              nombre différent de 0 ?
+            </li>
+            <li>
+              Dans la colonne “Logement social”, avez-vous bien indiqué “Oui” si
+              le logement est loué à un bailleur social et “Non” le cas échéant
+              ?
+            </li>
+            <li>
+              Dans la colonne “QPV”, après avoir vérifié si l’adresse en
+              question faisait partie d’un Quartier Prioritaire de la Ville sur
               <Link
                 href="https://sig.ville.gouv.fr/"
                 className="underline"
@@ -105,8 +114,8 @@ export const AdressImporter = ({
               >
                 ce lien
               </Link>{" "}
-              et indiquer “Oui” si c’est le cas et “Non” le cas échéant ou si
-              vous n’obtenez pas de réponse.
+              avez-vous bien indiqué “Oui” si c’était le cas et “Non” le cas
+              échéant ou si vous n’obtenez pas de réponse ?
             </li>
           </ul>
         </div>
