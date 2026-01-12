@@ -4,6 +4,7 @@ import { ReactElement } from "react";
 import { formatDate } from "@/app/utils/date.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
+import { DemarchesSimplifieesInfo } from "./DemarchesSimplifiesInfo";
 
 export const EIGTable = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -19,12 +20,20 @@ export const EIGTable = (): ReactElement => {
   };
 
   return (
-    <Table
-      bordered={true}
-      className="m-0"
-      caption=""
-      data={getEvenementsIndesirablesGraves() || []}
-      headers={["DOSSIER", "ÉVÉNEMENT", "DÉCLARATION", "NATURE DE L'INCIDENT"]}
-    />
+    <>
+      <Table
+        bordered={true}
+        className="full-width-table"
+        caption=""
+        data={getEvenementsIndesirablesGraves() || []}
+        headers={[
+          "DOSSIER",
+          "ÉVÉNEMENT",
+          "DÉCLARATION",
+          "NATURE DE L'INCIDENT",
+        ]}
+      />
+      <DemarchesSimplifieesInfo />
+    </>
   );
 };
