@@ -239,6 +239,9 @@ export const StructureTable = () => {
       <BudgetTableCommentLine
         label="Commentaire"
         budgets={structure.budgets}
+        disabledYearsStart={
+          isSubventionnee ? SUBVENTIONNEE_OPEN_YEAR : undefined
+        }
         enabledYears={isAutorisee ? detailAffectationEnabledYears : undefined}
       />
     </Table>
