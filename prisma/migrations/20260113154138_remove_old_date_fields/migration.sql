@@ -21,9 +21,6 @@ DROP INDEX "CpomMillesime_cpomId_date_key";
 -- DropIndex
 DROP INDEX "StructureMillesime_structureDnaCode_date_key";
 
--- DropIndex
-DROP INDEX "StructureTypologie_structureDnaCode_date_key";
-
 -- AlterTable
 ALTER TABLE "AdresseTypologie" DROP COLUMN "date",
 ALTER COLUMN "year" DROP DEFAULT;
@@ -38,8 +35,7 @@ ALTER COLUMN "yearEnd" DROP DEFAULT,
 ALTER COLUMN "yearStart" DROP DEFAULT;
 
 -- AlterTable
-ALTER TABLE "CpomMillesime" DROP COLUMN "date",
-ALTER COLUMN "year" DROP DEFAULT;
+ALTER TABLE "CpomMillesime" DROP COLUMN "date";
 
 -- AlterTable
 ALTER TABLE "CpomStructure" DROP COLUMN "dateDebut",

@@ -440,11 +440,10 @@ model CpomStructure {
 }
 
 model CpomMillesime {
-  id                                Int       @id @default(autoincrement())
+  id                                Int     @id @default(autoincrement())
   cpomId                            Int
-  cpom                              Cpom      @relation(fields: [cpomId], references: [id])
-  date                              DateTime?
-  year                              Int       @default(0)
+  cpom                              Cpom    @relation(fields: [cpomId], references: [id])
+  year                              Int     @default(0)
   dotationDemandee                  Float?
   dotationAccordee                  Float?
   cumulResultatNet                  Float?
