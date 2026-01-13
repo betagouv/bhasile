@@ -298,6 +298,7 @@ model Budget {
   coutJournalier                    Float?
   dotationDemandee                  Float?
   dotationAccordee                  Float?
+  totalProduitsProposes             Float?
   totalProduits                     Float?
   totalCharges                      Float?
   totalChargesProposees             Float?

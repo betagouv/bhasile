@@ -72,6 +72,12 @@ export const budgetSubventionneeOpenSchema = budgetBaseSchema.extend({
 
 export const budgetAutoSaveSchema = budgetAutoriseeOpenSchemaWithoutRefinement
   .partial()
+  // TODO: understand why this is needed (I got no idea, but it does not work without it)
+  .merge(
+    z.object({
+      totalProduitsProposes: zSafeDecimalsNullish(),
+    })
+  )
   .and(budgetSubventionneeOpenSchema.partial())
   .and(
     z.object({
