@@ -16,8 +16,8 @@ import {
   budgetAutoSaveSchema,
   budgetSubventionneeNotOpenSchema,
   budgetSubventionneeOpenSchema,
-  cpomStructureSchema,
 } from "../budget.schema";
+import { cpomStructureSchema } from "../cpomStructure.schema";
 
 type BudgetSchema =
   | typeof budgetAutoSaveSchema

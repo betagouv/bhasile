@@ -96,7 +96,7 @@ export const getName = (
   if (cpomStructures) {
     const { cpomStructureIndex, cpomMillesimeIndex } =
       getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
-    return `cpomStructures.${cpomStructureIndex}.cpom.${cpomMillesimeIndex}.${name}`;
+    return `cpomStructures.${cpomStructureIndex}.cpom.cpomMillesimes.${cpomMillesimeIndex}.${name}`;
   }
   if (budgets) {
     return `budgets.${getMillesimendexForAYear(budgets, year)}.${name}`;

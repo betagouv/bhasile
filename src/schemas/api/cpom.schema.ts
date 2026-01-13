@@ -28,8 +28,8 @@ export type CpomMillesimeApiType = z.infer<typeof cpomMillesimeApiSchema>;
 export const cpomApiSchema = z.object({
   id: z.number().optional(),
   name: z.string().nullish(),
-  debutCpom: z.string().datetime(),
-  finCpom: z.string().datetime(),
+  debutCpom: z.string().datetime().nullish(),
+  finCpom: z.string().datetime().nullish(),
   structureIds: z.array(z.number()).optional(),
   fileUploads: z.array(fileApiSchema).optional(),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
