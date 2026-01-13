@@ -45,7 +45,7 @@ export const GestionBudgetaireAvecCpomTable = (): ReactElement => {
     if (!totalCharges || !totalProduits) {
       return 0;
     }
-    return totalCharges - totalProduits;
+    return totalProduits - totalCharges;
   };
 
   const isBudgetEmpty = (budget: BudgetApiType): boolean => {

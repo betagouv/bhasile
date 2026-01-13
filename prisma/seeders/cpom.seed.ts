@@ -239,6 +239,16 @@ export const createFakeCpoms = async (
           cpomId: cpom.id,
           year: millesimeYear,
           date: millesimeDate,
+          dotationDemandee: faker.number.float({
+            min: 0,
+            max: 1000000,
+            fractionDigits: 2,
+          }),
+          dotationAccordee: faker.number.float({
+            min: 0,
+            max: 1000000,
+            fractionDigits: 2,
+          }),
           cumulResultatNet: faker.number.float({
             min: -100000,
             max: 500000,
@@ -249,47 +259,47 @@ export const createFakeCpoms = async (
             max: 50000,
             fractionDigits: 2,
           }),
-          affectationTotal: faker.number.float({
-            min: 0,
-            max: 1000000,
-            fractionDigits: 2,
-          }),
-          affectationReserveInvestissement: faker.number.float({
-            min: 0,
-            max: 200000,
-            fractionDigits: 2,
-          }),
-          affectationChargesNonReproductibles: faker.number.float({
-            min: 0,
-            max: 100000,
-            fractionDigits: 2,
-          }),
-          affectationReserveCompensationDeficits: faker.number.float({
-            min: 0,
-            max: 150000,
-            fractionDigits: 2,
-          }),
-          affectationReserveCouvertureBFR: faker.number.float({
-            min: 0,
-            max: 100000,
-            fractionDigits: 2,
-          }),
-          affectationReserveCompensationAmortissements: faker.number.float({
-            min: 0,
-            max: 200000,
-            fractionDigits: 2,
-          }),
-          affectationFondsDedies: faker.number.float({
+          affectationReservesFondsDedies: faker.number.float({
             min: 0,
             max: 300000,
             fractionDigits: 2,
           }),
-          affectationReportANouveau: faker.number.float({
+          reserveInvestissement: faker.number.float({
+            min: 0,
+            max: 200000,
+            fractionDigits: 2,
+          }),
+          chargesNonReconductibles: faker.number.float({
+            min: 0,
+            max: 100000,
+            fractionDigits: 2,
+          }),
+          reserveCompensationDeficits: faker.number.float({
+            min: 0,
+            max: 150000,
+            fractionDigits: 2,
+          }),
+          reserveCompensationBFR: faker.number.float({
+            min: 0,
+            max: 100000,
+            fractionDigits: 2,
+          }),
+          reserveCompensationAmortissements: faker.number.float({
+            min: 0,
+            max: 200000,
+            fractionDigits: 2,
+          }),
+          fondsDedies: faker.number.float({
+            min: 0,
+            max: 300000,
+            fractionDigits: 2,
+          }),
+          reportANouveau: faker.number.float({
             min: 0,
             max: 50000,
             fractionDigits: 2,
           }),
-          affectationAutre: faker.number.float({
+          autre: faker.number.float({
             min: 0,
             max: 100000,
             fractionDigits: 2,

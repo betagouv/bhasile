@@ -1,5 +1,6 @@
 import readXlsxFile, { Schema } from "read-excel-file";
 
+import { CURRENT_YEAR } from "@/constants";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { Repartition } from "@/types/adresse.type";
 
@@ -34,7 +35,7 @@ export const useSpreadsheetParse = (): UseExcelParseResult => {
         adresseTypologies: [
           {
             placesAutorisees: row.placesAutorisees,
-            date: new Date().toISOString(),
+            year: CURRENT_YEAR,
             qpv: row.qpv?.toLowerCase() === "oui",
             logementSocial: row.logementSocial?.toLowerCase() === "oui",
           },

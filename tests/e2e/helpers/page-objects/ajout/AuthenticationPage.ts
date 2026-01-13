@@ -13,12 +13,11 @@ export class AuthenticationPage {
       .locator('input[type="password"]')
       .count();
 
+    const password = process.env.OPERATEUR_PASSWORD?.split(",")[0];
+
     if (passwordInput > 0) {
       // Password protection is active - authenticate
-      await this.page.fill(
-        'input[type="password"]',
-        process.env.PAGE_PASSWORD!
-      );
+      await this.page.fill('input[type="password"]', password!);
       await this.page.click("button.fr-btn");
 
       // Wait for the page to load after authentication

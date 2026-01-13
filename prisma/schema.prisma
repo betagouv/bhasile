@@ -69,7 +69,6 @@ model Structure {
   operateurId                  Int?
   forms                        Form[]
   campaigns                    Campaign[]
-  referential                  Referential?                @relation("StructureToReferential")
   departement                  Departement?                @relation(fields: [departementAdministratif], references: [numero])
 
   createdAt DateTime @default(now())
@@ -133,7 +132,7 @@ model EvenementIndesirableGrave {
   id               Int       @id @default(autoincrement())
   structure        Structure @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
   structureDnaCode String
-  numeroDossier    String
+  numeroDossier    String    @unique
   evenementDate    DateTime
   declarationDate  DateTime
   type             String
@@ -398,14 +397,6 @@ model Campaign {
   @@schema("public")
 }
 
-model Referential {
-  dnaCode   String     @id
-  name      String?
-  structure Structure? @relation("StructureToReferential", fields: [dnaCode], references: [dnaCode])
-
-  @@schema("reporting")
-}
-
 model Operateur {
   id                Int             @id @default(autoincrement())
   name              String          @unique
@@ -459,23 +450,25 @@ model CpomStructure {
 }
 
 model CpomMillesime {
-  id                                           Int       @id @default(autoincrement())
-  cpomId                                       Int
-  cpom                                         Cpom      @relation(fields: [cpomId], references: [id])
-  date                                         DateTime?
-  year                                         Int       @default(0)
-  cumulResultatNet                             Float?
-  repriseEtat                                  Float?
-  affectationTotal                             Float?
-  affectationReserveInvestissement             Float?
-  affectationChargesNonReproductibles          Float?
-  affectationReserveCompensationDeficits       Float?
-  affectationReserveCouvertureBFR              Float?
-  affectationReserveCompensationAmortissements Float?
-  affectationFondsDedies                       Float?
-  affectationReportANouveau                    Float?
-  affectationAutre                             Float?
-  commentaire                                  String?
+  id                                Int       @id @default(autoincrement())
+  cpomId                            Int
+  cpom                              Cpom      @relation(fields: [cpomId], references: [id])
+  date                              DateTime?
+  year                              Int       @default(0)
+  dotationDemandee                  Float?
+  dotationAccordee                  Float?
+  cumulResultatNet                  Float?
+  repriseEtat                       Float?
+  affectationReservesFondsDedies    Float?
+  reserveInvestissement             Float?
+  chargesNonReconductibles          Float?
+  reserveCompensationDeficits       Float?
+  reserveCompensationBFR            Float?
+  reserveCompensationAmortissements Float?
+  fondsDedies                       Float?
+  reportANouveau                    Float?
+  autre                             Float?
+  commentaire                       String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -657,5 +650,5 @@ view StructuresOrder {
   hasForms                 Boolean?
 
   @@map("structures_order")
-  @@schema("reporting")
+  @@schema("public")
 }

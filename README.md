@@ -112,9 +112,10 @@ npx patch-package @codegouvfr/react-dsfr
 
 ## 🔓 Gestion des pages protégées par mot de passe
 
-Pour le moment seule la route `/ajout-structure` est protégée par mot de passe. Les pages de dashboard sont protégées par un accès ProConnect.
+Les routes `/ajout-structure` et `/ajout-adresses` sont protégées par mot de passe. Les pages de dashboard sont protégées par un accès ProConnect.
 
-Pour définir le mot de passe il suffit d'ajouter la variable `PAGE_PASSWORD` dans le fichier `.env`.
+Pour définir un ou plusieurs mots de passe, il suffit d'ajouter la variable `OPERATEUR_PASSWORDS` dans le fichier `.env`. Les mots de passe devront être séparées par des virgules.
+`PAGE_PASSWORD` est une variable d'environnement legacy et sera bientôt supprimée.
 
 En mode développement, il est possible aussi de bypasser ces accès privés grace à la variable d'environnement `DEV_AUTH_BYPASS=1`
 Les pages sont ensuite accessibles via :

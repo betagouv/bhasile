@@ -3,13 +3,12 @@ import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
-// import { EIGTable } from "./EIGTable";
 import { getLastVisitInMonths } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
-// import { DemarchesSimplifieesInfo } from "./DemarchesSimplifiesInfo";
 import { ControleAccordion } from "./ControleAccordion";
 import { ControleTable } from "./ControleTable";
+import { EIGTable } from "./EIGTable";
 import { EvaluationTable } from "./EvaluationTable";
 
 export const ControlesBlock = (): ReactElement => {
@@ -19,8 +18,8 @@ export const ControlesBlock = (): ReactElement => {
 
   const evaluations = structure.evaluations || [];
   const controles = structure.controles || [];
-  // const evenementsIndesirablesGraves =
-  //   structure.evenementsIndesirablesGraves || [];
+  const evenementsIndesirablesGraves =
+    structure.evenementsIndesirablesGraves || [];
 
   return (
     <Block
@@ -48,10 +47,10 @@ export const ControlesBlock = (): ReactElement => {
             />
           </div>
         )}
-        {/* <InformationCard
+        <InformationCard
           primaryInformation={evenementsIndesirablesGraves.length}
           secondaryInformation="événements indésirables graves"
-        /> */}
+        />
       </div>
       <div className="pt-3">
         {evaluations.length > 0 && (
@@ -70,15 +69,14 @@ export const ControlesBlock = (): ReactElement => {
             <ControleTable />
           </ControleAccordion>
         )}
-        {/* <ControleAccordion
-          title="Événements indésirables graves"
-          lastVisit={evenementsIndesirablesGraves[0]?.evenementDate}
-        >
-          <>
+        {evenementsIndesirablesGraves.length > 0 && (
+          <ControleAccordion
+            title="Événements indésirables graves"
+            lastVisit={evenementsIndesirablesGraves[0]?.evenementDate}
+          >
             <EIGTable />
-            <DemarchesSimplifieesInfo />
-          </>
-        </ControleAccordion> */}
+          </ControleAccordion>
+        )}
       </div>
     </Block>
   );

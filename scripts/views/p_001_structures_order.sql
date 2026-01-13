@@ -1,5 +1,6 @@
 -- Objective: enable structure ordering in front-end
-CREATE OR REPLACE VIEW:"SCHEMA"."structures_order" AS
+-- This view is in public to prevent interruption in the application if the reporting schema is not created yet
+CREATE OR REPLACE VIEW "public"."structures_order" AS
 WITH
   dernier_millesime_structure_typologie AS (
     SELECT DISTINCT

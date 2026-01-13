@@ -6,7 +6,7 @@ import { getApiRouteProtection } from "./app/utils/proxy.util";
 import { authOptions } from "./lib/next-auth/auth";
 import {
   noProtectionPage,
-  passwordProtectedPage,
+  passwordProtectedPages,
   proConnectProtectedPages,
 } from "./proxy-config";
 
@@ -24,11 +24,14 @@ const proConnectPagesProxy = withAuth(() => NextResponse.next(), {
 const passwordPagesProxy = (request: NextRequest): NextResponse | null => {
   const url = request.nextUrl;
 
-  if (!passwordProtectedPage.some((path) => url.pathname.startsWith(path))) {
+  if (!passwordProtectedPages.some((path) => url.pathname.startsWith(path))) {
     return null;
   }
   const passwordCookie = request.cookies.get("mot-de-passe");
-  if (passwordCookie?.value !== process.env.PAGE_PASSWORD) {
+  const passwords = process.env.OPERATEUR_PASSWORDS?.split(",").map(
+    (password) => password.trim()
+  );
+  if (!passwordCookie || !passwords?.includes(passwordCookie?.value)) {
     const loginUrl = new URL(noProtectionPage, request.url);
     loginUrl.searchParams.set("from", url.pathname);
     return NextResponse.redirect(loginUrl);
@@ -43,7 +46,11 @@ const protectApiWithAuth = async (
   const session = await getServerSession(authOptions);
   const hasProconnectSession = !!session?.user;
   const passwordCookie = request.cookies.get("mot-de-passe");
-  const hasPassword = passwordCookie?.value === process.env.PAGE_PASSWORD;
+  const passwords = process.env.OPERATEUR_PASSWORDS?.split(",").map(
+    (password) => password.trim()
+  );
+  const hasPassword =
+    passwordCookie && passwords?.includes(passwordCookie?.value);
 
   if (protection === "none" || request.nextUrl.pathname === noProtectionPage) {
     return NextResponse.next();
