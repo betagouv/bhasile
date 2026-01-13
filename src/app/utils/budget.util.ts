@@ -26,6 +26,7 @@ export const getBudgetsDefaultValues = (
           coutJournalier: budget.coutJournalier ?? undefined,
           dotationDemandee: budget.dotationDemandee ?? undefined,
           dotationAccordee: budget.dotationAccordee ?? undefined,
+          totalProduitsProposes: budget.totalProduitsProposes ?? undefined,
           totalProduits: budget.totalProduits ?? undefined,
           totalCharges: budget.totalCharges ?? undefined,
           totalChargesProposees: budget.totalChargesProposees ?? undefined,
