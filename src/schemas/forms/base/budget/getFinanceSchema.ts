@@ -14,18 +14,11 @@ import {
   budgetAutoriseeOpenSchema,
   budgetAutoriseeOpenYear1Schema,
   budgetAutoSaveSchema,
+  budgetInCpomSchema,
   budgetSubventionneeNotOpenSchema,
   budgetSubventionneeOpenSchema,
 } from "../budget.schema";
 import { cpomStructureSchema } from "../cpomStructure.schema";
-
-type BudgetSchema =
-  | typeof budgetAutoSaveSchema
-  | typeof budgetAutoriseeOpenYear1Schema
-  | typeof budgetAutoriseeOpenSchema
-  | typeof budgetAutoriseeNotOpenSchema
-  | typeof budgetSubventionneeOpenSchema
-  | typeof budgetSubventionneeNotOpenSchema;
 
 export const getFinanceSchema = (structure: StructureApiType) => {
   const { years } = getYearRange();
@@ -38,7 +31,7 @@ export const getFinanceSchema = (structure: StructureApiType) => {
 
   const schema = years.map((year, index) => {
     if (isInCpomPerYear[index]) {
-      return budgetAutoSaveSchema;
+      return budgetInCpomSchema;
     }
 
     if (isAutorisee) {
@@ -68,3 +61,12 @@ export const getFinanceSchema = (structure: StructureApiType) => {
     })
     .and(cpomStructureSchema);
 };
+
+type BudgetSchema =
+  | typeof budgetAutoSaveSchema
+  | typeof budgetInCpomSchema
+  | typeof budgetAutoriseeOpenYear1Schema
+  | typeof budgetAutoriseeOpenSchema
+  | typeof budgetAutoriseeNotOpenSchema
+  | typeof budgetSubventionneeOpenSchema
+  | typeof budgetSubventionneeNotOpenSchema;

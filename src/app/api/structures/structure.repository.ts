@@ -355,7 +355,7 @@ const updateOne = async (
     const {
       contacts,
       budgets,
-      cpomMillesimes,
+      cpomStructures,
       structureTypologies,
       adresses,
       actesAdministratifs,
@@ -365,6 +365,11 @@ const updateOne = async (
       forms,
       structureMillesimes,
     } = structure;
+
+    const cpomMillesimes = cpomStructures
+      ?.map((cpomStructure) => cpomStructure.cpom.cpomMillesimes)
+      .flat()
+      .filter((millesime) => millesime !== undefined);
 
     return await prisma.$transaction(async (tx) => {
       const updatedStructure = await createOrUpdateStructure(tx, structure);

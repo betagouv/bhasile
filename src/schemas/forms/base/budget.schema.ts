@@ -79,6 +79,18 @@ export const budgetAutoSaveSchema = budgetAutoriseeOpenSchemaWithoutRefinement
     })
   );
 
+export const budgetInCpomSchema = budgetAutoriseeOpenSchemaWithoutRefinement
+  .partial()
+  .and(budgetSubventionneeOpenSchema.partial())
+  .and(
+    z.object({
+      year: zSafeYear(),
+      ETP: zSafeDecimals(),
+      tauxEncadrement: zSafeDecimals(),
+      coutJournalier: zSafeDecimals(),
+    })
+  );
+
 export const budgetsAutoSaveSchema = z
   .object({
     budgets: z.array(budgetAutoSaveSchema),
