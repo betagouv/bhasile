@@ -2,12 +2,10 @@ import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
-import { Badge } from "@/app/components/common/Badge";
 import { Table } from "@/app/components/common/Table";
 import { getYearRange } from "@/app/utils/date.util";
 import {
   isStructureAutorisee,
-  isStructureInCpom,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
@@ -16,6 +14,7 @@ import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLine } from "./BudgetTableLine";
 import { BudgetTableTitleLine } from "./BudgetTableTitleLine";
+import { getBudgetTableHeading } from "./getBudgetTableHeading";
 
 export const StructureTable = () => {
   const parentFormContext = useFormContext();
@@ -66,19 +65,7 @@ export const StructureTable = () => {
     <Table
       ariaLabelledBy="gestionBudgetaire"
       hasErrors={hasErrors}
-      headings={[
-        " ",
-        ...years.map((year) => (
-          <th scope="col" key={year}>
-            {year}{" "}
-            {isStructureInCpom(structure, year) ? (
-              <Badge type="info">CPOM</Badge>
-            ) : (
-              <Badge type="success">Hors CPOM</Badge>
-            )}
-          </th>
-        )),
-      ]}
+      headings={getBudgetTableHeading({ years, structure })}
       enableBorders
     >
       <BudgetTableTitleLine label="Budget" />
@@ -119,14 +106,14 @@ export const StructureTable = () => {
       />
       {isAutorisee && (
         <BudgetTableLine
-        name="totalChargesProposees"
-        label="Total charges proposées"
-        subLabel="par l'opérateur"
-        budgets={structure.budgets}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
-        }
-      />
+          name="totalChargesProposees"
+          label="Total charges proposées"
+          subLabel="par l'opérateur"
+          budgets={structure.budgets}
+          disabledYearsStart={
+            isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          }
+        />
       )}
       <BudgetTableLine
         name="totalCharges"

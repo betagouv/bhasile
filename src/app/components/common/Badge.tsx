@@ -17,6 +17,7 @@ export const Badge = ({
       warning: "fr-badge--warning",
       new: "fr-badge--new",
       purple: "fr-badge--purple-glycine",
+      disabled: "fr-badge--disabled",
     };
     return types[type];
   };
@@ -43,4 +44,5 @@ export type BadgeType =
   | "error"
   | "warning"
   | "new"
-  | "purple";
+  | "purple"
+  | "disabled";

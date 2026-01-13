@@ -33,14 +33,14 @@ export const BudgetTableLine = ({
 
   return (
     <tr>
-      <td className="text-left">
-        <strong>{label}</strong>
+      <td className="text-left!">
+        <strong className="whitespace-nowrap">{label}</strong>
         <br />
-        {subLabel}
+        <span className="text-xs">{subLabel}</span>
       </td>
       {years.map((year) => (
         <td key={year}>
-          <span className="flex items-center gap-2">
+          <span className="flex items-center justify-center gap-2">
             <InputWithValidation
               name={getName(name, year, budgets, cpomStructures)}
               id={getName(name, year, budgets, cpomStructures)}
@@ -48,7 +48,7 @@ export const BudgetTableLine = ({
               type="number"
               min={0}
               label=""
-              className="mb-0 mx-auto items-center [&_p]:hidden [&_input]:w-full"
+              className="mb-0 items-center [&_p]:hidden [&_input]:w-full"
               variant="simple"
               disabled={isInputDisabled(
                 year,

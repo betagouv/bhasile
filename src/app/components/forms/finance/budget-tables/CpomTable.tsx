@@ -1,7 +1,6 @@
 import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
-import { Badge } from "@/app/components/common/Badge";
 import { Table } from "@/app/components/common/Table";
 import { getYearRange } from "@/app/utils/date.util";
 import {
@@ -13,6 +12,7 @@ import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLine } from "./BudgetTableLine";
 import { BudgetTableTitleLine } from "./BudgetTableTitleLine";
+import { getBudgetTableHeading } from "./getBudgetTableHeading";
 
 export const CpomTable = () => {
   const { structure } = useStructureContext();
@@ -32,19 +32,7 @@ export const CpomTable = () => {
   return (
     <Table
       ariaLabelledBy="gestionBudgetaire"
-      headings={[
-        " ",
-        ...years.map((year) => (
-          <th scope="col" key={year}>
-            {year}{" "}
-            {isStructureInCpom(structure, year) ? (
-              <Badge type="info">CPOM</Badge>
-            ) : (
-              <Badge type="success">Hors CPOM</Badge>
-            )}
-          </th>
-        )),
-      ]}
+      headings={getBudgetTableHeading({ years, structure })}
       enableBorders
     >
       <BudgetTableTitleLine label="Budget" />
