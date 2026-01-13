@@ -1,16 +1,15 @@
+import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { Badge } from "@/app/components/common/Badge";
 import { Table } from "@/app/components/common/Table";
 import { getYearRange } from "@/app/utils/date.util";
-import { isStructureInCpom } from "@/app/utils/structure.util";
 import {
-  DOTATION_ACCORDEE_DISABLED_YEARS,
-  DOTATION_DEMANDEE_DISABLED_YEARS_START,
-  OTHER_DISABLED_YEARS_START,
-  AUTORISEE_TOTAL_PRODUITS_DISABLED_YEARS_START,
-} from "@/constants";
+  isStructureAutorisee,
+  isStructureInCpom,
+} from "@/app/utils/structure.util";
+import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
@@ -22,6 +21,8 @@ export const CpomTable = () => {
 
   const { structure } = useStructureContext();
 
+  const isAutorisee = isStructureAutorisee(structure?.type);
+
   const { years } = getYearRange({ order: "desc" });
 
   const localForm = useForm();
@@ -30,6 +31,10 @@ export const CpomTable = () => {
   if (!structure.budgets) {
     return null;
   }
+
+  const yearsInCpom = years.filter((year) =>
+    isStructureInCpom(structure, year)
+  );
 
   const budgets = watch("budgets") as BudgetApiType[];
   const detailAffectationEnabledYears = budgets
@@ -66,55 +71,58 @@ export const CpomTable = () => {
         name="dotationDemandee"
         label="Dotation demandée"
         cpomStructures={structure.cpomStructures}
-        disabledYearsStart={DOTATION_DEMANDEE_DISABLED_YEARS_START}
+        enabledYears={yearsInCpom}
       />
       <BudgetTableLine
         name="dotationAccordee"
         label="Dotation accordée"
         cpomStructures={structure.cpomStructures}
-        disabledYearsStart={DOTATION_ACCORDEE_DISABLED_YEARS}
+        disabledYearsStart={
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR
+        }
+        enabledYears={yearsInCpom}
       />
       <BudgetTableTitleLine label="Résultat" />
       <BudgetTableLine
-        name="totalProduitsProposes"
-        label="Total produits proposés"
-        subLabel="dont dotation État"
+        name="cumulResultatNet"
+        label="Cumul des résultats"
+        subLabel="des structures du CPOM"
         cpomStructures={structure.cpomStructures}
-        disabledYearsStart={AUTORISEE_TOTAL_PRODUITS_DISABLED_YEARS_START}
-      />
-      <BudgetTableLine
-        name="totalProduits"
-        label="Total produits retenus"
-        subLabel="dont dotation État"
-        cpomStructures={structure.cpomStructures}
-        disabledYearsStart={AUTORISEE_TOTAL_PRODUITS_DISABLED_YEARS_START}
-      />
-      <BudgetTableLine
-        name="totalChargesProposees"
-        label="Total charges proposées"
-        subLabel="par l'opérateur"
-        cpomStructures={structure.cpomStructures}
-        disabledYearsStart={OTHER_DISABLED_YEARS_START}
-      />
-      <BudgetTableLine
-        name="totalCharges"
-        label="Total charges retenu"
-        subLabel="par l'autorité tarifaire"
-        cpomStructures={structure.cpomStructures}
-        disabledYearsStart={OTHER_DISABLED_YEARS_START}
+        disabledYearsStart={
+          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+        }
+        enabledYears={yearsInCpom}
       />
       <BudgetTableLine
         name="repriseEtat"
-        label="Reprise état"
+        label={
+          <Tooltip
+            title={
+              <>
+                <span>Négatif : reprise excédent</span>
+                <br />
+                <span>Positif : compensation déficit</span>
+              </>
+            }
+          >
+            Reprise état{" "}
+            <i className="fr-icon-information-line before:scale-50 before:origin-left" />
+          </Tooltip>
+        }
         cpomStructures={structure.cpomStructures}
-        disabledYearsStart={OTHER_DISABLED_YEARS_START}
+        disabledYearsStart={
+          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+        }
+        enabledYears={yearsInCpom}
       />
+
       <BudgetTableLine
         name="affectationReservesFondsDedies"
         label="Affectation"
-        subLabel="réserves & provision"
+        subLabel="réserves & fonds dédiés"
         cpomStructures={structure.cpomStructures}
-        disabledYearsStart={OTHER_DISABLED_YEARS_START}
+        disabledYearsStart={AUTORISEE_OPEN_YEAR - 1}
+        enabledYears={yearsInCpom}
       />
       <BudgetTableTitleLine label="Détail affectation" />
       <BudgetTableLine
@@ -149,6 +157,12 @@ export const CpomTable = () => {
         name="reserveCompensationAmortissements"
         label="Réserve de compensation"
         subLabel="des amortissements"
+        cpomStructures={structure.cpomStructures}
+        enabledYears={detailAffectationEnabledYears}
+      />
+      <BudgetTableLine
+        name="fondsDedies"
+        label="Fonds dédiés"
         cpomStructures={structure.cpomStructures}
         enabledYears={detailAffectationEnabledYears}
       />

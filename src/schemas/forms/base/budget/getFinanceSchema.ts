@@ -16,6 +16,7 @@ import {
   budgetAutoSaveSchema,
   budgetSubventionneeNotOpenSchema,
   budgetSubventionneeOpenSchema,
+  cpomStructureSchema,
 } from "../budget.schema";
 
 type BudgetSchema =
@@ -61,7 +62,9 @@ export const getFinanceSchema = (structure: StructureApiType) => {
     return budgetAutoSaveSchema;
   }) as [BudgetSchema, ...BudgetSchema[]];
 
-  return z.object({
-    budgets: z.tuple(schema),
-  });
+  return z
+    .object({
+      budgets: z.tuple(schema),
+    })
+    .and(cpomStructureSchema);
 };

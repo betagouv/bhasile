@@ -62,6 +62,8 @@ export const StructureTable = () => {
     })
     .map((budget) => budget.year);
 
+  const 
+
   return (
     <Table
       ariaLabelledBy="gestionBudgetaire"
@@ -116,7 +118,15 @@ export const StructureTable = () => {
           isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
         }
       />
-      c
+      {isAutorisee && (
+        <BudgetTableLine
+          name="totalChargesProposees"
+          label="Total charges proposées"
+          subLabel="par l'opérateur"
+          budgets={structure.budgets}
+          disabledYearsStart={AUTORISEE_OPEN_YEAR - 1}
+        />
+      )}
       <BudgetTableLine
         name="totalCharges"
         label="Total charges retenu"

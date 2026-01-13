@@ -2,6 +2,7 @@ import z from "zod";
 
 import { zSafeDecimalsNullish, zSafeYear } from "@/app/utils/zodCustomFields";
 import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
+import { cpomStructureApiSchema } from "@/schemas/api/cpom.schema";
 
 import { validateAffectationReservesDetails } from "./budget/validateAffectationReservesDetails";
 
@@ -78,9 +79,15 @@ export const budgetAutoSaveSchema = budgetAutoriseeOpenSchemaWithoutRefinement
     })
   );
 
-export const budgetsAutoSaveSchema = z.object({
-  budgets: z.array(budgetAutoSaveSchema),
+export const cpomStructureSchema = z.object({
+  cpomStructures: z.array(cpomStructureApiSchema),
 });
+
+export const budgetsAutoSaveSchema = z
+  .object({
+    budgets: z.array(budgetAutoSaveSchema),
+  })
+  .and(cpomStructureSchema);
 
 export type BudgetsAutoSaveFormValues = z.infer<typeof budgetsAutoSaveSchema>;
 
