@@ -117,6 +117,17 @@ export const StructureTable = () => {
           isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
         }
       />
+      {isAutorisee && (
+        <BudgetTableLine
+        name="totalChargesProposees"
+        label="Total charges proposées"
+        subLabel="par l'opérateur"
+        budgets={structure.budgets}
+        disabledYearsStart={
+          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+        }
+      />
+      )}
       <BudgetTableLine
         name="totalCharges"
         label="Total charges retenu"
