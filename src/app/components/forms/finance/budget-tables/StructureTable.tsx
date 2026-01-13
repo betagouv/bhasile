@@ -86,6 +86,7 @@ export const StructureTable = () => {
         name="dotationDemandee"
         label="Dotation demandée"
         budgets={structure.budgets}
+        disabledYearsStart={isAutorisee ? 0 : SUBVENTIONNEE_OPEN_YEAR}
       />
       <BudgetTableLine
         name="dotationAccordee"
@@ -116,7 +117,6 @@ export const StructureTable = () => {
           isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
         }
       />
-      c
       <BudgetTableLine
         name="totalCharges"
         label="Total charges retenu"
@@ -239,7 +239,7 @@ export const StructureTable = () => {
       <BudgetTableCommentLine
         label="Commentaire"
         budgets={structure.budgets}
-        enabledYears={detailAffectationEnabledYears}
+        enabledYears={isAutorisee ? detailAffectationEnabledYears : undefined}
       />
     </Table>
   );

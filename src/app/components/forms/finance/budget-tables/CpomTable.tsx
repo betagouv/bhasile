@@ -10,23 +10,17 @@ import {
   isStructureInCpom,
 } from "@/app/utils/structure.util";
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
-import { BudgetApiType } from "@/schemas/api/budget.schema";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLine } from "./BudgetTableLine";
 import { BudgetTableTitleLine } from "./BudgetTableTitleLine";
 
 export const CpomTable = () => {
-  const parentFormContext = useFormContext();
-
   const { structure } = useStructureContext();
 
   const isAutorisee = isStructureAutorisee(structure?.type);
 
   const { years } = getYearRange({ order: "desc" });
-
-  const localForm = useForm();
-  const { watch } = parentFormContext || localForm;
 
   if (!structure.budgets) {
     return null;
@@ -35,18 +29,6 @@ export const CpomTable = () => {
   const yearsInCpom = years.filter((year) =>
     isStructureInCpom(structure, year)
   );
-
-  const budgets = watch("budgets") as BudgetApiType[];
-  const detailAffectationEnabledYears = budgets
-    .filter((budget) => {
-      const totalValue = Number(
-        String(budget?.affectationReservesFondsDedies)
-          .replaceAll(" ", "")
-          .replace(",", ".") || 0
-      );
-      return totalValue > 0;
-    })
-    .map((budget) => budget.year);
 
   return (
     <Table
@@ -72,6 +54,7 @@ export const CpomTable = () => {
         label="Dotation demandée"
         cpomStructures={structure.cpomStructures}
         enabledYears={yearsInCpom}
+        disabledYearsStart={isAutorisee ? 0 : SUBVENTIONNEE_OPEN_YEAR}
       />
       <BudgetTableLine
         name="dotationAccordee"
@@ -121,7 +104,9 @@ export const CpomTable = () => {
         label="Affectation"
         subLabel="réserves & fonds dédiés"
         cpomStructures={structure.cpomStructures}
-        disabledYearsStart={AUTORISEE_OPEN_YEAR - 1}
+        disabledYearsStart={
+          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+        }
         enabledYears={yearsInCpom}
       />
       <BudgetTableTitleLine label="Détail affectation" />
@@ -130,58 +115,85 @@ export const CpomTable = () => {
         label="Réserve"
         subLabel="dédiée à l'investissement"
         cpomStructures={structure.cpomStructures}
-        enabledYears={detailAffectationEnabledYears}
+        disabledYearsStart={
+          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+        }
+        enabledYears={yearsInCpom}
       />
       <BudgetTableLine
         name="chargesNonReconductibles"
         label="Charges"
         subLabel="non reductibles"
         cpomStructures={structure.cpomStructures}
-        enabledYears={detailAffectationEnabledYears}
+        disabledYearsStart={
+          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+        }
+        enabledYears={yearsInCpom}
       />
       <BudgetTableLine
         name="reserveCompensationDeficits"
         label="Réserve de compensation "
         subLabel="des déficits"
         cpomStructures={structure.cpomStructures}
-        enabledYears={detailAffectationEnabledYears}
+        disabledYearsStart={
+          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+        }
+        enabledYears={yearsInCpom}
       />
       <BudgetTableLine
         name="reserveCompensationBFR"
         label="Réserve de couverture"
         subLabel="de BFR"
         cpomStructures={structure.cpomStructures}
-        enabledYears={detailAffectationEnabledYears}
+        disabledYearsStart={
+          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+        }
+        enabledYears={yearsInCpom}
       />
       <BudgetTableLine
         name="reserveCompensationAmortissements"
         label="Réserve de compensation"
         subLabel="des amortissements"
         cpomStructures={structure.cpomStructures}
-        enabledYears={detailAffectationEnabledYears}
+        disabledYearsStart={
+          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+        }
+        enabledYears={yearsInCpom}
       />
       <BudgetTableLine
         name="fondsDedies"
         label="Fonds dédiés"
         cpomStructures={structure.cpomStructures}
-        enabledYears={detailAffectationEnabledYears}
+        disabledYearsStart={
+          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+        }
+        enabledYears={yearsInCpom}
       />
       <BudgetTableLine
         name="reportANouveau"
         label="Report à nouveau"
         cpomStructures={structure.cpomStructures}
-        enabledYears={detailAffectationEnabledYears}
+        disabledYearsStart={
+          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+        }
+        enabledYears={yearsInCpom}
       />
       <BudgetTableLine
         name="autre"
         label="Autre"
         cpomStructures={structure.cpomStructures}
-        enabledYears={detailAffectationEnabledYears}
+        disabledYearsStart={
+          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+        }
+        enabledYears={yearsInCpom}
       />
       <BudgetTableCommentLine
         label="Commentaire"
         cpomStructures={structure.cpomStructures}
-        enabledYears={detailAffectationEnabledYears}
+        disabledYearsStart={
+          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+        }
+        enabledYears={yearsInCpom}
       />
     </Table>
   );
