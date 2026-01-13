@@ -3,7 +3,7 @@ import { useForm, useFormContext } from "react-hook-form";
 import { getYearRange } from "@/app/utils/date.util";
 import {
   getCpomStructureIndexAndCpomMillesimeIndexForAYear,
-  getMillesimendexForAYear,
+  getMillesimeIndexForAYear,
 } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
@@ -99,7 +99,7 @@ export const getName = (
     return `cpomStructures.${cpomStructureIndex}.cpom.cpomMillesimes.${cpomMillesimeIndex}.${name}`;
   }
   if (budgets) {
-    return `budgets.${getMillesimendexForAYear(budgets, year)}.${name}`;
+    return `budgets.${getMillesimeIndexForAYear(budgets, year)}.${name}`;
   }
   return "";
 };

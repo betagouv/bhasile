@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import {
   getCurrentCpomStructureDates,
   getLastVisitInMonths,
-  getMillesimendexForAYear,
+  getMillesimeIndexForAYear,
   getPlacesByCommunes,
   getRepartition,
   isStructureAutorisee,
@@ -629,7 +629,7 @@ describe("structure util", () => {
     });
   });
 
-  describe("getMillesimendexForAYear", () => {
+  describe("getMillesimeIndexForAYear", () => {
     it("should return the correct index when the year exists in the array", () => {
       // GIVEN
       const structureTypologies = [
@@ -640,7 +640,7 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getMillesimendexForAYear(structureTypologies, 2024);
+      const result = getMillesimeIndexForAYear(structureTypologies, 2024);
 
       // THEN
       expect(result).toBe(1);
@@ -655,7 +655,7 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getMillesimendexForAYear(structureTypologies, 2025);
+      const result = getMillesimeIndexForAYear(structureTypologies, 2025);
 
       // THEN
       expect(result).toBe(-1);
@@ -670,7 +670,7 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getMillesimendexForAYear(structureTypologies);
+      const result = getMillesimeIndexForAYear(structureTypologies);
 
       // THEN
       expect(result).toBe(1);
@@ -681,14 +681,14 @@ describe("structure util", () => {
       const structureTypologies: StructureTypologieApiType[] = [];
 
       // WHEN
-      const result = getMillesimendexForAYear(structureTypologies, 2025);
+      const result = getMillesimeIndexForAYear(structureTypologies, 2025);
 
       // THEN
       expect(result).toBe(-1);
     });
   });
 
-  describe("getMillesimendexForAYear", () => {
+  describe("getMillesimeIndexForAYear", () => {
     it("should return the correct index when the year exists in the array", () => {
       // GIVEN
       const structureMillesimes = [
@@ -699,7 +699,7 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getMillesimendexForAYear(structureMillesimes, 2024);
+      const result = getMillesimeIndexForAYear(structureMillesimes, 2024);
 
       // THEN
       expect(result).toBe(1);
@@ -714,7 +714,7 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getMillesimendexForAYear(structureMillesimes, 2025);
+      const result = getMillesimeIndexForAYear(structureMillesimes, 2025);
 
       // THEN
       expect(result).toBe(-1);
@@ -729,7 +729,7 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getMillesimendexForAYear(structureMillesimes);
+      const result = getMillesimeIndexForAYear(structureMillesimes);
 
       // THEN
       expect(result).toBe(1);
@@ -740,7 +740,7 @@ describe("structure util", () => {
       const structureMillesimes: StructureMillesimeApiType[] = [];
 
       // WHEN
-      const result = getMillesimendexForAYear(structureMillesimes, 2025);
+      const result = getMillesimeIndexForAYear(structureMillesimes, 2025);
 
       // THEN
       expect(result).toBe(-1);

@@ -17,7 +17,7 @@ export const Badge = ({
       warning: "fr-badge--warning",
       new: "fr-badge--new",
       purple: "fr-badge--purple-glycine",
-      disabled: "fr-badge--disabled",
+      disabled: "",
     };
     return types[type];
   };

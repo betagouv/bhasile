@@ -1,7 +1,7 @@
 import { useFormContext } from "react-hook-form";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
-import { getMillesimendexForAYear } from "@/app/utils/structure.util";
+import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 
 export const YearlyTypePlace = ({ year }: Props) => {
@@ -10,7 +10,7 @@ export const YearlyTypePlace = ({ year }: Props) => {
   const structureTypologies: StructureTypologieApiType[] = watch(
     "structureTypologies"
   );
-  const currentStructureTypologyIndex = getMillesimendexForAYear(
+  const currentStructureTypologyIndex = getMillesimeIndexForAYear(
     structureTypologies,
     year
   );

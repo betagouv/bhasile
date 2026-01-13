@@ -183,7 +183,7 @@ export const getCurrentCpomStructureDates = (
   };
 };
 
-export const getMillesimendexForAYear = (
+export const getMillesimeIndexForAYear = (
   typologies:
     | StructureTypologieApiType[]
     | StructureMillesimeApiType[]
