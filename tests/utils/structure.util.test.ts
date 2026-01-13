@@ -280,15 +280,29 @@ describe("structure util", () => {
       vi.useRealTimers();
     });
 
-    it("should return true when there is a millesime for the current year with cpom: true", () => {
+    it("should return true when there is a cpomMillesime for the current year", () => {
       // GIVEN
       const structure = createStructure({
         id: 1,
-        structureMillesimes: [
+        cpomStructures: [
           {
-            year: 2025,
-            cpom: true,
-            operateurComment: null,
+            id: 1,
+            cpomId: 1,
+            structureId: 1,
+            dateDebut: null,
+            dateFin: null,
+            cpom: {
+              id: 1,
+              name: "CPOM Test",
+              debutCpom: "2024-01-01T00:00:00.000Z",
+              finCpom: "2026-12-31T23:59:59.999Z",
+              cpomMillesimes: [
+                {
+                  id: 1,
+                  year: 2025,
+                },
+              ],
+            },
           },
         ],
       });
@@ -300,15 +314,33 @@ describe("structure util", () => {
       expect(result).toBe(true);
     });
 
-    it("should return false when there is a millesime for the current year with cpom: false", () => {
+    it("should return false when there is no cpomMillesime for the current year", () => {
       // GIVEN
       const structure = createStructure({
         id: 2,
-        structureMillesimes: [
+        cpomStructures: [
           {
-            year: 2025,
-            cpom: false,
-            operateurComment: null,
+            id: 2,
+            cpomId: 1,
+            structureId: 2,
+            dateDebut: null,
+            dateFin: null,
+            cpom: {
+              id: 1,
+              name: "CPOM Test",
+              debutCpom: "2024-01-01T00:00:00.000Z",
+              finCpom: "2026-12-31T23:59:59.999Z",
+              cpomMillesimes: [
+                {
+                  id: 1,
+                  year: 2024,
+                },
+                {
+                  id: 2,
+                  year: 2026,
+                },
+              ],
+            },
           },
         ],
       });
@@ -320,23 +352,13 @@ describe("structure util", () => {
       expect(result).toBe(false);
     });
 
-    it("should return false when there is no millesime for the current year", () => {
+    it("should return false when cpomStructures is undefined", () => {
       // GIVEN
       const structure = createStructure({
         id: 3,
-        structureMillesimes: [
-          {
-            year: 2024,
-            cpom: true,
-            operateurComment: null,
-          },
-          {
-            year: 2026,
-            cpom: true,
-            operateurComment: null,
-          },
-        ],
+        cpomStructures: [],
       });
+      structure.cpomStructures = undefined;
 
       // WHEN
       const result = isStructureInCpom(structure);
@@ -345,13 +367,12 @@ describe("structure util", () => {
       expect(result).toBe(false);
     });
 
-    it("should return false when structureMillesimes is undefined", () => {
+    it("should return false when cpomStructures is an empty array", () => {
       // GIVEN
       const structure = createStructure({
         id: 4,
-        structureMillesimes: [],
+        cpomStructures: [],
       });
-      structure.structureMillesimes = undefined;
 
       // WHEN
       const result = isStructureInCpom(structure);
@@ -360,39 +381,48 @@ describe("structure util", () => {
       expect(result).toBe(false);
     });
 
-    it("should return false when structureMillesimes is an empty array", () => {
+    it("should return true when there are multiple cpomStructures and one has a cpomMillesime for the current year", () => {
       // GIVEN
       const structure = createStructure({
         id: 5,
-        structureMillesimes: [],
-      });
-
-      // WHEN
-      const result = isStructureInCpom(structure);
-
-      // THEN
-      expect(result).toBe(false);
-    });
-
-    it("should return true when there are multiple millesimes and one for the current year has cpom: true", () => {
-      // GIVEN
-      const structure = createStructure({
-        id: 6,
-        structureMillesimes: [
+        cpomStructures: [
           {
-            year: 2024,
-            cpom: false,
-            operateurComment: null,
+            id: 3,
+            cpomId: 1,
+            structureId: 5,
+            dateDebut: null,
+            dateFin: null,
+            cpom: {
+              id: 1,
+              name: "CPOM Test 1",
+              debutCpom: "2024-01-01T00:00:00.000Z",
+              finCpom: "2024-12-31T23:59:59.999Z",
+              cpomMillesimes: [
+                {
+                  id: 1,
+                  year: 2024,
+                },
+              ],
+            },
           },
           {
-            year: 2025,
-            cpom: true,
-            operateurComment: null,
-          },
-          {
-            year: 2026,
-            cpom: false,
-            operateurComment: null,
+            id: 4,
+            cpomId: 2,
+            structureId: 5,
+            dateDebut: null,
+            dateFin: null,
+            cpom: {
+              id: 2,
+              name: "CPOM Test 2",
+              debutCpom: "2025-01-01T00:00:00.000Z",
+              finCpom: "2026-12-31T23:59:59.999Z",
+              cpomMillesimes: [
+                {
+                  id: 2,
+                  year: 2025,
+                },
+              ],
+            },
           },
         ],
       });
@@ -402,6 +432,57 @@ describe("structure util", () => {
 
       // THEN
       expect(result).toBe(true);
+    });
+
+    it("should return false when cpomMillesimes is undefined or empty", () => {
+      // GIVEN
+      const structure1 = createStructure({
+        id: 6,
+        cpomStructures: [
+          {
+            id: 5,
+            cpomId: 1,
+            structureId: 6,
+            dateDebut: null,
+            dateFin: null,
+            cpom: {
+              id: 1,
+              name: "CPOM Test",
+              debutCpom: "2024-01-01T00:00:00.000Z",
+              finCpom: "2026-12-31T23:59:59.999Z",
+              cpomMillesimes: undefined,
+            },
+          },
+        ],
+      });
+
+      const structure2 = createStructure({
+        id: 7,
+        cpomStructures: [
+          {
+            id: 6,
+            cpomId: 1,
+            structureId: 7,
+            dateDebut: null,
+            dateFin: null,
+            cpom: {
+              id: 1,
+              name: "CPOM Test",
+              debutCpom: "2024-01-01T00:00:00.000Z",
+              finCpom: "2026-12-31T23:59:59.999Z",
+              cpomMillesimes: [],
+            },
+          },
+        ],
+      });
+
+      // WHEN
+      const result1 = isStructureInCpom(structure1);
+      const result2 = isStructureInCpom(structure2);
+
+      // THEN
+      expect(result1).toBe(false);
+      expect(result2).toBe(false);
     });
   });
 
