@@ -66,6 +66,7 @@ export const BudgetTableCommentButtonAndModal = ({
           handleOpenModal(year);
         }}
         priority="tertiary no outline"
+        size="small"
         disabled={isInputDisabled(
           year,
           disabledYearsStart,
