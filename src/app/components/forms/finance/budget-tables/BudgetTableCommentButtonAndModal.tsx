@@ -1,7 +1,7 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { BudgetApiType } from "@/schemas/api/budget.schema";
