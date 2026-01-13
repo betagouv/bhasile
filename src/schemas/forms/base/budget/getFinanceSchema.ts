@@ -8,6 +8,7 @@ import {
 } from "@/app/utils/structure.util";
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 import { StructureApiType } from "@/schemas/api/structure.schema";
+import { FormKind } from "@/types/global";
 
 import {
   budgetAutoriseeNotOpenSchema,
@@ -19,8 +20,12 @@ import {
   budgetSubventionneeOpenSchema,
 } from "../budget.schema";
 import { cpomStructureSchema } from "../cpomStructure.schema";
+import { DocumentsFinanciersFlexibleSchema } from "../documentFinancier.schema";
 
-export const getFinanceSchema = (structure: StructureApiType) => {
+export const getFinanceSchema = (
+  structure: StructureApiType,
+  formKind: FormKind = FormKind.FINALISATION
+) => {
   const { years } = getYearRange();
   const isAutorisee = isStructureAutorisee(structure.type);
   const isSubventionnee = isStructureSubventionnee(structure.type);
@@ -55,11 +60,20 @@ export const getFinanceSchema = (structure: StructureApiType) => {
     return budgetAutoSaveSchema;
   }) as [BudgetSchema, ...BudgetSchema[]];
 
+  if (formKind === FormKind.FINALISATION) {
+    return z
+      .object({
+        budgets: z.tuple(schema),
+      })
+      .and(cpomStructureSchema);
+  }
+
   return z
     .object({
       budgets: z.tuple(schema),
     })
-    .and(cpomStructureSchema);
+    .and(cpomStructureSchema)
+    .and(DocumentsFinanciersFlexibleSchema);
 };
 
 type BudgetSchema =

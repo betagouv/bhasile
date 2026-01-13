@@ -178,8 +178,8 @@ export const getCurrentCpomStructureDates = (
     currentCpomStructure.dateFin ?? currentCpomStructure.cpom.finCpom;
 
   return {
-    debutCpom: currentCpomStructureDateDebut,
-    finCpom: currentCpomStructureDateFin,
+    debutCpom: currentCpomStructureDateDebut ?? undefined,
+    finCpom: currentCpomStructureDateFin ?? undefined,
   };
 };
 

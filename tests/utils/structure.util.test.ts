@@ -3,10 +3,9 @@ import dayjs from "dayjs";
 import {
   getCurrentCpomStructureDates,
   getLastVisitInMonths,
+  getMillesimendexForAYear,
   getPlacesByCommunes,
   getRepartition,
-  getMillesimendexForAYear,
-  getMillesimendexForAYear,
   isStructureAutorisee,
   isStructureInCpom,
   isStructureSubventionnee,

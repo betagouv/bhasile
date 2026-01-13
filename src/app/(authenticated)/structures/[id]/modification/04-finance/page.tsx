@@ -10,43 +10,17 @@ import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
-import {
-  isStructureAutorisee,
-  isStructureInCpom,
-  isStructureSubventionnee,
-} from "@/app/utils/structure.util";
-import {
-  anyModificationFinanceFormValues,
-  ModificationFinanceAutoriseeAvecCpomSchema,
-  ModificationFinanceAutoriseeSchema,
-  ModificationFinanceBasicSchema,
-  ModificationFinanceSubventionneeAvecCpomSchema,
-  ModificationFinanceSubventionneeSchema,
-} from "@/schemas/forms/modification/modificationFinance.schema";
+import { getFinanceSchema } from "@/schemas/forms/base/budget/getFinanceSchema";
+import { anyModificationFinanceFormValues } from "@/schemas/forms/modification/modificationFinance.schema";
 import { FetchState } from "@/types/fetch-state.type";
+import { FormKind } from "@/types/global";
 
 import { ModificationTitle } from "../components/ModificationTitle";
 
 export default function ModificationFinanceForm() {
   const { structure } = useStructureContext();
 
-  const isInCpom = isStructureInCpom(structure);
-  const isAutorisee = isStructureAutorisee(structure?.type);
-  const isSubventionnee = isStructureSubventionnee(structure?.type);
-
-  let schema;
-
-  if (isAutorisee) {
-    schema = isInCpom
-      ? ModificationFinanceAutoriseeAvecCpomSchema
-      : ModificationFinanceAutoriseeSchema;
-  } else if (isSubventionnee) {
-    schema = isInCpom
-      ? ModificationFinanceSubventionneeAvecCpomSchema
-      : ModificationFinanceSubventionneeSchema;
-  } else {
-    schema = ModificationFinanceBasicSchema;
-  }
+  const financeSchema = getFinanceSchema(structure, FormKind.MODIFICATION);
 
   const defaultValues = getDefaultValues({ structure });
 
@@ -81,10 +55,8 @@ export default function ModificationFinanceForm() {
         closeLink={`/structures/${structure.id}`}
       />
       <FormWrapper
-        schema={schema || ModificationFinanceBasicSchema}
-        defaultValues={
-          defaultValues as unknown as anyModificationFinanceFormValues
-        }
+        schema={financeSchema}
+        defaultValues={defaultValues}
         resetRoute={`/structures/${structure.id}`}
         submitButtonText="Valider"
         availableFooterButtons={[
