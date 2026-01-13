@@ -450,23 +450,25 @@ model CpomStructure {
 }
 
 model CpomMillesime {
-  id                                           Int       @id @default(autoincrement())
-  cpomId                                       Int
-  cpom                                         Cpom      @relation(fields: [cpomId], references: [id])
-  date                                         DateTime?
-  year                                         Int       @default(0)
-  cumulResultatNet                             Float?
-  repriseEtat                                  Float?
-  affectationTotal                             Float?
-  affectationReserveInvestissement             Float?
-  affectationChargesNonReproductibles          Float?
-  affectationReserveCompensationDeficits       Float?
-  affectationReserveCouvertureBFR              Float?
-  affectationReserveCompensationAmortissements Float?
-  affectationFondsDedies                       Float?
-  affectationReportANouveau                    Float?
-  affectationAutre                             Float?
-  commentaire                                  String?
+  id                                Int       @id @default(autoincrement())
+  cpomId                            Int
+  cpom                              Cpom      @relation(fields: [cpomId], references: [id])
+  date                              DateTime?
+  year                              Int       @default(0)
+  dotationDemandee                  Float?
+  dotationAccordee                  Float?
+  cumulResultatNet                  Float?
+  repriseEtat                       Float?
+  affectationReservesFondsDedies    Float?
+  reserveInvestissement             Float?
+  chargesNonReconductibles          Float?
+  reserveCompensationDeficits       Float?
+  reserveCompensationBFR            Float?
+  reserveCompensationAmortissements Float?
+  fondsDedies                       Float?
+  reportANouveau                    Float?
+  autre                             Float?
+  commentaire                       String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
