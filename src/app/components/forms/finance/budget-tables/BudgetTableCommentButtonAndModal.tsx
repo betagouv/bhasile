@@ -41,7 +41,6 @@ export const BudgetTableCommentButtonAndModal = ({
   const handleOpenModal = (year: number) => {
     const commentPath = getName("commentaire", year, budgets, cpomStructures);
     if (inputModalRef.current) {
-      console.log("watch(commentPath)", watch(commentPath));
       inputModalRef.current.value = watch(commentPath) || "";
     }
 
