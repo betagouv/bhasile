@@ -4,11 +4,17 @@ import { ReactElement } from "react";
 import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
+import { FileUploadGranularity } from "@/generated/prisma/enums";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 import { FileUploadCategoryType } from "@/types/file-upload.type";
 
-export const DownloadItem = ({ fileUpload }: Props): ReactElement => {
+import { DocumentGranularityBadge } from "./DocumentGranularityBadge";
+
+export const DownloadItem = ({
+  fileUpload,
+  displayGranularity = false,
+}: Props): ReactElement => {
   const { getDownloadLink } = useFileUpload();
 
   const getFileType = (filename: string): string => {
@@ -49,6 +55,13 @@ export const DownloadItem = ({ fileUpload }: Props): ReactElement => {
         </div>
       </button>
       <div>
+        {displayGranularity && (
+          <div className="pr-1 inline">
+            <DocumentGranularityBadge
+              granularity={fileUpload.granularity as FileUploadGranularity}
+            />
+          </div>
+        )}
         {getFileType(fileUpload.originalName || "")} -{" "}
         {prettyBytes(fileUpload.fileSize || 0)}
       </div>
@@ -58,4 +71,5 @@ export const DownloadItem = ({ fileUpload }: Props): ReactElement => {
 
 type Props = {
   fileUpload: ActeAdministratifApiType | DocumentFinancierApiType;
+  displayGranularity?: boolean;
 };
