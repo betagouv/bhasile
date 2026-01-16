@@ -34,10 +34,10 @@ export const BudgetTableCommentLine = ({
   );
 };
 
-type Props {
+type Props = {
   label: string;
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];
   disabledYearsStart?: number;
   enabledYears?: number[];
-}
+};

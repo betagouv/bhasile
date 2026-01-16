@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { getName, isInputDisabled } from "@/app/utils/budget.util";
@@ -62,12 +63,12 @@ export const BudgetTableLine = ({
   );
 };
 
-type Props {
+type Props = {
   name: string;
-  label: string | React.ReactNode;
+  label: string | ReactNode;
   subLabel?: string;
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];
   disabledYearsStart?: number;
   enabledYears?: number[];
-}
+};

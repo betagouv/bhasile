@@ -111,10 +111,10 @@ export const BudgetTableCommentButtonAndModal = ({
   );
 };
 
-type Props {
+type Props = {
   year: number;
   disabledYearsStart?: number;
   enabledYears?: number[];
   cpomStructures?: CpomStructureApiType[];
   budgets?: BudgetApiType[];
-}
+};
