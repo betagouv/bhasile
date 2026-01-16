@@ -3,6 +3,7 @@ import z from "zod";
 import { zSafeDecimalsNullish, zSafeYear } from "@/app/utils/zodCustomFields";
 import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 
+import { createAutoSaveSchema } from "./budget/createAutoSaveSchema";
 import { validateAffectationReservesDetails } from "./budget/validateAffectationReservesDetails";
 import { cpomStructureSchema } from "./cpomStructure.schema";
 
@@ -30,7 +31,7 @@ export const budgetAutoriseeOpenYear1Schema =
     dotationAccordee: zSafeDecimals(),
   });
 
-const budgetAutoriseeOpenSchemaWithoutRefinement =
+export const budgetAutoriseeOpenSchemaWithoutRefinement =
   budgetAutoriseeOpenYear1Schema.extend({
     // Résultat
     totalProduitsProposes: zSafeDecimals(),
@@ -70,14 +71,7 @@ export const budgetSubventionneeOpenSchema = budgetBaseSchema.extend({
   fondsDedies: zSafeDecimals(),
 });
 
-export const budgetAutoSaveSchema = budgetAutoriseeOpenSchemaWithoutRefinement
-  .partial()
-  .and(budgetSubventionneeOpenSchema.partial())
-  .and(
-    z.object({
-      year: zSafeYear(),
-    })
-  );
+export const budgetAutoSaveSchema = createAutoSaveSchema();
 
 export const budgetInCpomSchema = budgetAutoriseeOpenSchemaWithoutRefinement
   .partial()

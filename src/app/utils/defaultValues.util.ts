@@ -1,5 +1,6 @@
 import { getRepartition } from "@/app/utils/structure.util";
 import { ContactApiType } from "@/schemas/api/contact.schema";
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { StructureApiType } from "@/schemas/api/structure.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
@@ -89,6 +90,7 @@ export const getDefaultValues = ({
     actesAdministratifs,
     controles,
     evaluations,
+    cpomStructures: structure.cpomStructures ?? [],
   };
 };
 
@@ -120,6 +122,7 @@ type StructureDefaultValues = Omit<
   | "evaluations"
   | "budgets"
   | "structureTypologies"
+  | "cpomStructures"
 > & {
   creationDate: string;
   nom: string;
@@ -148,4 +151,5 @@ type StructureDefaultValues = Omit<
   evaluations: EvaluationFormValues[];
   budgets: anyFinanceFormValues;
   structureTypologies: structureTypologieSchemaTypeFormValues[];
+  cpomStructures: CpomStructureApiType[];
 };
