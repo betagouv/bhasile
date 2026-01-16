@@ -1,10 +1,7 @@
 import { useForm, useFormContext } from "react-hook-form";
 
+import { getName, isInputDisabled } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
-import {
-  getCpomStructureIndexAndCpomMillesimeIndexForAYear,
-  getMillesimeIndexForAYear,
-} from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 
@@ -63,45 +60,6 @@ export const BudgetTableLine = ({
       ))}
     </tr>
   );
-};
-
-export const isInputDisabled = (
-  year: number,
-  disabledYearsStart?: number,
-  enabledYears?: number[],
-  cpomStructures?: CpomStructureApiType[]
-): boolean => {
-  if (cpomStructures) {
-    const { cpomStructureIndex, cpomMillesimeIndex } =
-      getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
-    if (cpomStructureIndex === -1 || cpomMillesimeIndex === -1) {
-      return true;
-    }
-  }
-  if (disabledYearsStart) {
-    return year >= disabledYearsStart;
-  }
-  if (enabledYears) {
-    return !enabledYears.includes(year);
-  }
-  return false;
-};
-
-export const getName = (
-  name: string,
-  year: number,
-  budgets?: BudgetApiType[],
-  cpomStructures?: CpomStructureApiType[]
-): string => {
-  if (cpomStructures) {
-    const { cpomStructureIndex, cpomMillesimeIndex } =
-      getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
-    return `cpomStructures.${cpomStructureIndex}.cpom.cpomMillesimes.${cpomMillesimeIndex}.${name}`;
-  }
-  if (budgets) {
-    return `budgets.${getMillesimeIndexForAYear(budgets, year)}.${name}`;
-  }
-  return "";
 };
 
 interface Props {

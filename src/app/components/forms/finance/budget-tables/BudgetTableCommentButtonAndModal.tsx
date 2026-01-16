@@ -4,10 +4,9 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useMemo, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { getName, isInputDisabled } from "@/app/utils/budget.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
-
-import { getName, isInputDisabled } from "./BudgetTableLine";
 
 export const BudgetTableCommentButtonAndModal = ({
   year,

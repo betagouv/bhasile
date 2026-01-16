@@ -1,7 +1,12 @@
 import { BudgetApiType } from "@/schemas/api/budget.schema";
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { anyFinanceFormValues } from "@/schemas/forms/base/budget.schema";
 
 import { getYearRange } from "./date.util";
+import {
+  getCpomStructureIndexAndCpomMillesimeIndexForAYear,
+  getMillesimeIndexForAYear,
+} from "./structure.util";
 
 export const getBudgetsDefaultValues = (
   structureBudgets: BudgetApiType[]
@@ -54,4 +59,43 @@ export const getBudgetsDefaultValues = (
     }) as anyFinanceFormValues;
 
   return budgets;
+};
+
+export const isInputDisabled = (
+  year: number,
+  disabledYearsStart?: number,
+  enabledYears?: number[],
+  cpomStructures?: CpomStructureApiType[]
+): boolean => {
+  if (cpomStructures) {
+    const { cpomStructureIndex, cpomMillesimeIndex } =
+      getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
+    if (cpomStructureIndex === -1 || cpomMillesimeIndex === -1) {
+      return true;
+    }
+  }
+  if (disabledYearsStart) {
+    return year >= disabledYearsStart;
+  }
+  if (enabledYears) {
+    return !enabledYears.includes(year);
+  }
+  return false;
+};
+
+export const getName = (
+  name: string,
+  year: number,
+  budgets?: BudgetApiType[],
+  cpomStructures?: CpomStructureApiType[]
+): string => {
+  if (cpomStructures) {
+    const { cpomStructureIndex, cpomMillesimeIndex } =
+      getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
+    return `cpomStructures.${cpomStructureIndex}.cpom.cpomMillesimes.${cpomMillesimeIndex}.${name}`;
+  }
+  if (budgets) {
+    return `budgets.${getMillesimeIndexForAYear(budgets, year)}.${name}`;
+  }
+  return "";
 };
