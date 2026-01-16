@@ -96,6 +96,7 @@ describe("finalisationFinanceSchema", () => {
     totalProduitsProposes: 95000,
     totalProduits: 95000,
     totalChargesProposees: 90000,
+    totalCharges: 90000,
     repriseEtat: 0,
     excedentRecupere: 0,
     excedentDeduit: 0,
@@ -178,6 +179,7 @@ describe("finalisationFinanceSchema", () => {
     totalProduitsProposes: 95000,
     totalProduits: 95000,
     totalChargesProposees: 90000,
+    totalCharges: 90000,
     repriseEtat: 0,
     excedentRecupere: 0,
     excedentDeduit: 0,
@@ -206,6 +208,7 @@ describe("finalisationFinanceSchema", () => {
     totalProduitsProposes: 95000,
     totalProduits: 95000,
     totalChargesProposees: 90000,
+    totalCharges: 90000,
     repriseEtat: 0,
     excedentRecupere: 0,
     excedentDeduit: 0,
@@ -266,6 +269,8 @@ describe("finalisationFinanceSchema", () => {
           expect(errorPaths).toContain(
             "budgets.0.reserveCompensationAmortissements"
           );
+          expect(errorPaths).toContain("budgets.0.reportANouveau");
+          expect(errorPaths).toContain("budgets.0.autre");
         }
       });
 
