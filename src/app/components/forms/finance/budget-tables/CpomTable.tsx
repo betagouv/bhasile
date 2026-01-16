@@ -1,4 +1,5 @@
 import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
+import { useForm, useFormContext } from "react-hook-form";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { Table } from "@/app/components/common/Table";
@@ -15,19 +16,26 @@ import { BudgetTableTitleLine } from "./BudgetTableTitleLine";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
 
 export const CpomTable = () => {
+  const parentFormContext = useFormContext();
+
   const { structure } = useStructureContext();
 
   const isAutorisee = isStructureAutorisee(structure?.type);
 
   const { years } = getYearRange({ order: "desc" });
 
-  if (!structure.budgets) {
-    return null;
-  }
+  const localForm = useForm();
+  const { watch } = parentFormContext || localForm;
+
+  const cpomStructures = watch("cpomStructures");
 
   const yearsInCpom = years.filter((year) =>
     isStructureInCpom(structure, year)
   );
+
+  if (!cpomStructures) {
+    return null;
+  }
 
   return (
     <Table
@@ -39,14 +47,14 @@ export const CpomTable = () => {
       <BudgetTableLine
         name="dotationDemandee"
         label="Dotation demandée"
-        cpomStructures={structure.cpomStructures}
+        cpomStructures={cpomStructures}
         enabledYears={yearsInCpom}
         disabledYearsStart={isAutorisee ? 0 : SUBVENTIONNEE_OPEN_YEAR + 1}
       />
       <BudgetTableLine
         name="dotationAccordee"
         label="Dotation accordée"
-        cpomStructures={structure.cpomStructures}
+        cpomStructures={cpomStructures}
         disabledYearsStart={
           isAutorisee ? AUTORISEE_OPEN_YEAR + 1 : SUBVENTIONNEE_OPEN_YEAR + 1
         }
@@ -57,7 +65,7 @@ export const CpomTable = () => {
         name="cumulResultatNet"
         label="Cumul des résultats"
         subLabel="des structures du CPOM"
-        cpomStructures={structure.cpomStructures}
+        cpomStructures={cpomStructures}
         disabledYearsStart={
           isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
@@ -79,7 +87,7 @@ export const CpomTable = () => {
             <i className="fr-icon-information-line before:scale-50 before:origin-left" />
           </Tooltip>
         }
-        cpomStructures={structure.cpomStructures}
+        cpomStructures={cpomStructures}
         disabledYearsStart={
           isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
@@ -90,7 +98,7 @@ export const CpomTable = () => {
         name="affectationReservesFondsDedies"
         label="Affectation"
         subLabel="réserves & fonds dédiés"
-        cpomStructures={structure.cpomStructures}
+        cpomStructures={cpomStructures}
         disabledYearsStart={
           isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
@@ -101,7 +109,7 @@ export const CpomTable = () => {
         name="reserveInvestissement"
         label="Réserve"
         subLabel="dédiée à l'investissement"
-        cpomStructures={structure.cpomStructures}
+        cpomStructures={cpomStructures}
         disabledYearsStart={
           isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
@@ -111,7 +119,7 @@ export const CpomTable = () => {
         name="chargesNonReconductibles"
         label="Charges"
         subLabel="non reductibles"
-        cpomStructures={structure.cpomStructures}
+        cpomStructures={cpomStructures}
         disabledYearsStart={
           isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
@@ -121,7 +129,7 @@ export const CpomTable = () => {
         name="reserveCompensationDeficits"
         label="Réserve de compensation "
         subLabel="des déficits"
-        cpomStructures={structure.cpomStructures}
+        cpomStructures={cpomStructures}
         disabledYearsStart={
           isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
@@ -131,7 +139,7 @@ export const CpomTable = () => {
         name="reserveCompensationBFR"
         label="Réserve de couverture"
         subLabel="de BFR"
-        cpomStructures={structure.cpomStructures}
+        cpomStructures={cpomStructures}
         disabledYearsStart={
           isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
@@ -141,7 +149,7 @@ export const CpomTable = () => {
         name="reserveCompensationAmortissements"
         label="Réserve de compensation"
         subLabel="des amortissements"
-        cpomStructures={structure.cpomStructures}
+        cpomStructures={cpomStructures}
         disabledYearsStart={
           isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
@@ -150,7 +158,7 @@ export const CpomTable = () => {
       <BudgetTableLine
         name="fondsDedies"
         label="Fonds dédiés"
-        cpomStructures={structure.cpomStructures}
+        cpomStructures={cpomStructures}
         disabledYearsStart={
           isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
@@ -159,7 +167,7 @@ export const CpomTable = () => {
       <BudgetTableLine
         name="reportANouveau"
         label="Report à nouveau"
-        cpomStructures={structure.cpomStructures}
+        cpomStructures={cpomStructures}
         disabledYearsStart={
           isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
@@ -168,7 +176,7 @@ export const CpomTable = () => {
       <BudgetTableLine
         name="autre"
         label="Autre"
-        cpomStructures={structure.cpomStructures}
+        cpomStructures={cpomStructures}
         disabledYearsStart={
           isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
@@ -176,7 +184,7 @@ export const CpomTable = () => {
       />
       <BudgetTableCommentLine
         label="Commentaire"
-        cpomStructures={structure.cpomStructures}
+        cpomStructures={cpomStructures}
         disabledYearsStart={
           isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
