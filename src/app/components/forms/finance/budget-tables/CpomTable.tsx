@@ -1,4 +1,3 @@
-import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
@@ -12,6 +11,7 @@ import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLine } from "./BudgetTableLine";
+import { BudgetTableRepriseEtatTooltip } from "./BudgetTableRepriseEtatTooltip";
 import { BudgetTableTitleLine } from "./BudgetTableTitleLine";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
 
@@ -73,27 +73,13 @@ export const CpomTable = () => {
       />
       <BudgetTableLine
         name="repriseEtat"
-        label={
-          <Tooltip
-            title={
-              <>
-                <span>Négatif : reprise excédent</span>
-                <br />
-                <span>Positif : compensation déficit</span>
-              </>
-            }
-          >
-            Reprise état{" "}
-            <i className="fr-icon-information-line before:scale-50 before:origin-left" />
-          </Tooltip>
-        }
+        label={<BudgetTableRepriseEtatTooltip />}
         cpomStructures={cpomStructures}
         disabledYearsStart={
           isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
       />
-
       <BudgetTableLine
         name="affectationReservesFondsDedies"
         label="Affectation"

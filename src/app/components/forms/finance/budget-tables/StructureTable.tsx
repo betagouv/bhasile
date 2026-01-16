@@ -1,4 +1,3 @@
-import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
@@ -12,8 +11,8 @@ import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
-import { BudgetTableLine } from "./BudgetTableLine";
-import { BudgetTableTitleLine } from "./BudgetTableTitleLine";
+import { BudgetTableLines } from "./BudgetTableLines";
+import { BudgetTableRepriseEtatTooltip } from "./BudgetTableRepriseEtatTooltip";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
 
 export const StructureTable = () => {
@@ -69,172 +68,10 @@ export const StructureTable = () => {
       headings={getBudgetTableHeading({ years, structure })}
       enableBorders
     >
-      <BudgetTableTitleLine label="Budget" />
-      <BudgetTableLine
-        name="dotationDemandee"
-        label="Dotation demandée"
+      <BudgetTableLines
+        lines={getLines(isAutorisee, detailAffectationEnabledYears)}
         budgets={budgets}
-        disabledYearsStart={isAutorisee ? 0 : SUBVENTIONNEE_OPEN_YEAR + 1}
       />
-      <BudgetTableLine
-        name="dotationAccordee"
-        label="Dotation accordée"
-        budgets={budgets}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR + 1 : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-      />
-      <BudgetTableTitleLine label="Résultat" />
-      {isAutorisee && (
-        <BudgetTableLine
-          name="totalProduitsProposes"
-          label="Total produits proposés"
-          subLabel="dont dotation État"
-          budgets={budgets}
-          disabledYearsStart={
-            isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-          }
-        />
-      )}
-      <BudgetTableLine
-        name="totalProduits"
-        label="Total produits retenus"
-        subLabel="dont dotation État"
-        budgets={budgets}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-      />
-      {isAutorisee && (
-        <BudgetTableLine
-          name="totalChargesProposees"
-          label="Total charges proposées"
-          subLabel="par l'opérateur"
-          budgets={budgets}
-          disabledYearsStart={
-            isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-          }
-        />
-      )}
-      <BudgetTableLine
-        name="totalCharges"
-        label="Total charges retenu"
-        subLabel="par l'autorité tarifaire"
-        budgets={budgets}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-      />
-      {isSubventionnee && (
-        <>
-          <BudgetTableLine
-            name="repriseEtat"
-            label="Déficit compensé"
-            subLabel="par l'État"
-            budgets={budgets}
-            disabledYearsStart={SUBVENTIONNEE_OPEN_YEAR + 1}
-          />
-          <BudgetTableLine
-            name="excedentRecupere"
-            label="Excédent récupéré"
-            subLabel="en titre de recette"
-            budgets={budgets}
-            disabledYearsStart={SUBVENTIONNEE_OPEN_YEAR + 1}
-          />
-          <BudgetTableLine
-            name="excedentDeduit"
-            label="Excédent réemployé"
-            subLabel="À réemployer dans dotation à venir"
-            budgets={budgets}
-            disabledYearsStart={SUBVENTIONNEE_OPEN_YEAR + 1}
-          />
-          <BudgetTableLine
-            name="fondsDedies"
-            label="Restant fonds dédiés"
-            subLabel=""
-            budgets={budgets}
-            disabledYearsStart={SUBVENTIONNEE_OPEN_YEAR + 1}
-          />
-        </>
-      )}
-      {isAutorisee && (
-        <>
-          <BudgetTableLine
-            name="repriseEtat"
-            label={
-              <Tooltip
-                title={
-                  <>
-                    <span>Négatif : reprise excédent</span>
-                    <br />
-                    <span>Positif : compensation déficit</span>
-                  </>
-                }
-              >
-                Reprise état{" "}
-                <i className="fr-icon-information-line before:scale-50 before:origin-left" />
-              </Tooltip>
-            }
-            budgets={budgets}
-            disabledYearsStart={AUTORISEE_OPEN_YEAR}
-          />
-          <BudgetTableLine
-            name="affectationReservesFondsDedies"
-            label="Affectation"
-            subLabel="réserves & provision"
-            budgets={budgets}
-            disabledYearsStart={AUTORISEE_OPEN_YEAR}
-          />
-          <BudgetTableTitleLine label="Détail affectation" />
-          <BudgetTableLine
-            name="reserveInvestissement"
-            label="Réserve"
-            subLabel="dédiée à l'investissement"
-            budgets={budgets}
-            enabledYears={detailAffectationEnabledYears}
-          />
-          <BudgetTableLine
-            name="chargesNonReconductibles"
-            label="Charges"
-            subLabel="non reductibles"
-            budgets={budgets}
-            enabledYears={detailAffectationEnabledYears}
-          />
-          <BudgetTableLine
-            name="reserveCompensationDeficits"
-            label="Réserve de compensation "
-            subLabel="des déficits"
-            budgets={budgets}
-            enabledYears={detailAffectationEnabledYears}
-          />
-          <BudgetTableLine
-            name="reserveCompensationBFR"
-            label="Réserve de couverture"
-            subLabel="de BFR"
-            budgets={budgets}
-            enabledYears={detailAffectationEnabledYears}
-          />
-          <BudgetTableLine
-            name="reserveCompensationAmortissements"
-            label="Réserve de compensation"
-            subLabel="des amortissements"
-            budgets={budgets}
-            enabledYears={detailAffectationEnabledYears}
-          />
-          <BudgetTableLine
-            name="reportANouveau"
-            label="Report à nouveau"
-            budgets={budgets}
-            enabledYears={detailAffectationEnabledYears}
-          />
-          <BudgetTableLine
-            name="autre"
-            label="Autre"
-            budgets={budgets}
-            enabledYears={detailAffectationEnabledYears}
-          />
-        </>
-      )}
       <BudgetTableCommentLine
         label="Commentaire"
         budgets={budgets}
@@ -245,4 +82,171 @@ export const StructureTable = () => {
       />
     </Table>
   );
+};
+
+const getLines = (
+  isAutorisee: boolean,
+  detailAffectationEnabledYears: number[]
+) => {
+  if (isAutorisee) {
+    return [
+      {
+        title: "Budget",
+        lines: [
+          {
+            name: "dotationDemandee",
+            label: "Dotation demandée",
+          },
+          {
+            name: "dotationAccordee",
+            label: "Dotation accordée",
+            disabledYearsStart: AUTORISEE_OPEN_YEAR,
+          },
+        ],
+      },
+      {
+        title: "Résultat",
+        lines: [
+          {
+            name: "totalProduitsProposes",
+            label: "Total produits proposés",
+            subLabel: "dont dotation État",
+            disabledYearsStart: AUTORISEE_OPEN_YEAR,
+          },
+          {
+            name: "totalProduits",
+            label: "Total produits retenus",
+            subLabel: "dont dotation État",
+            disabledYearsStart: AUTORISEE_OPEN_YEAR,
+          },
+          {
+            name: "totalChargesProposees",
+            label: "Total charges proposées",
+            subLabel: "par l'opérateur",
+            disabledYearsStart: AUTORISEE_OPEN_YEAR,
+          },
+          {
+            name: "totalCharges",
+            label: "Total charges retenu",
+            subLabel: "par l'autorité tarifaire",
+            disabledYearsStart: AUTORISEE_OPEN_YEAR,
+          },
+          {
+            name: "repriseEtat",
+            label: <BudgetTableRepriseEtatTooltip />,
+            disabledYearsStart: AUTORISEE_OPEN_YEAR,
+          },
+          {
+            name: "affectationReservesFondsDedies",
+            label: "Affectation",
+            subLabel: "réserves & provision",
+            disabledYearsStart: AUTORISEE_OPEN_YEAR,
+          },
+        ],
+      },
+      {
+        title: "Détail affectation",
+        lines: [
+          {
+            name: "reserveInvestissement",
+            label: "Réserve",
+            subLabel: "dédiée à l'investissement",
+            enabledYears: detailAffectationEnabledYears,
+          },
+          {
+            name: "chargesNonReconductibles",
+            label: "Charges",
+            subLabel: "non reductibles",
+            enabledYears: detailAffectationEnabledYears,
+          },
+          {
+            name: "reserveCompensationDeficits",
+            label: "Réserve de compensation",
+            subLabel: "des déficits",
+            enabledYears: detailAffectationEnabledYears,
+          },
+          {
+            name: "reserveCompensationBFR",
+            label: "Réserve de couverture",
+            subLabel: "de BFR",
+            enabledYears: detailAffectationEnabledYears,
+          },
+          {
+            name: "reserveCompensationAmortissements",
+            label: "Réserve de compensation",
+            subLabel: "des amortissements",
+            enabledYears: detailAffectationEnabledYears,
+          },
+          {
+            name: "reportANouveau",
+            label: "Report à nouveau",
+            enabledYears: detailAffectationEnabledYears,
+          },
+          {
+            name: "autre",
+            label: "Autre",
+            enabledYears: detailAffectationEnabledYears,
+          },
+        ],
+      },
+    ];
+  }
+
+  return [
+    {
+      title: "Budget",
+      lines: [
+        {
+          name: "dotationDemandee",
+          label: "Dotation demandée",
+        },
+        {
+          name: "dotationAccordee",
+          label: "Dotation accordée",
+          disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+      ],
+    },
+    {
+      title: "Résultat",
+      lines: [
+        {
+          name: "totalProduits",
+          label: "Total produits retenus",
+          subLabel: "dont dotation État",
+          disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "totalCharges",
+          label: "Total charges retenu",
+          subLabel: "par l'autorité tarifaire",
+          disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "repriseEtat",
+          label: "Déficit compensé",
+          subLabel: "par l'État",
+          disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "excedentRecupere",
+          label: "Excédent récupéré",
+          subLabel: "en titre de recette",
+          disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "excedentDeduit",
+          label: "Excédent réemployé",
+          subLabel: "À réemployer dans dotation à venir",
+          disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "fondsDedies",
+          label: "Restant fonds dédiés",
+          subLabel: "",
+          disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+      ],
+    },
+  ];
 };
