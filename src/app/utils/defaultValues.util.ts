@@ -4,7 +4,7 @@ import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { StructureApiType } from "@/schemas/api/structure.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
-import { anyFinanceFormValues } from "@/schemas/forms/base/budget.schema";
+import { anyBudgetFormValues } from "@/schemas/forms/base/budget.schema";
 import { ControleFormValues } from "@/schemas/forms/base/controle.schema";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { EvaluationFormValues } from "@/schemas/forms/base/evaluation.schema";
@@ -149,7 +149,7 @@ type StructureDefaultValues = Omit<
   actesAdministratifs: ActeAdministratifFormValues[];
   controles: ControleFormValues[];
   evaluations: EvaluationFormValues[];
-  budgets: anyFinanceFormValues;
+  budgets: anyBudgetFormValues;
   structureTypologies: structureTypologieSchemaTypeFormValues[];
   cpomStructures: CpomStructureApiType[];
 };

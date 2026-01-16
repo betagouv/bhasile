@@ -119,7 +119,7 @@ export const budgetsAutoSaveSchema = z
 
 export type BudgetsAutoSaveFormValues = z.infer<typeof budgetsAutoSaveSchema>;
 
-export type anyFinanceFormValues = Array<
+export type anyBudgetFormValues = Array<
   | z.infer<typeof budgetAutoriseeNotOpenSchema>
   | z.infer<typeof budgetAutoriseeOpenYear1Schema>
   | z.infer<typeof budgetAutoriseeOpenSchema>

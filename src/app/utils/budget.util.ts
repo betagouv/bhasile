@@ -1,6 +1,6 @@
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
-import { anyFinanceFormValues } from "@/schemas/forms/base/budget.schema";
+import { anyBudgetFormValues } from "@/schemas/forms/base/budget.schema";
 
 import { getYearRange } from "./date.util";
 import {
@@ -10,7 +10,7 @@ import {
 
 export const getBudgetsDefaultValues = (
   structureBudgets: BudgetApiType[]
-): anyFinanceFormValues => {
+): anyBudgetFormValues => {
   const { years } = getYearRange();
 
   const budgets = Array(years.length)
@@ -56,7 +56,7 @@ export const getBudgetsDefaultValues = (
         };
       }
       return emptyBudget;
-    }) as anyFinanceFormValues;
+    }) as anyBudgetFormValues;
 
   return budgets;
 };
