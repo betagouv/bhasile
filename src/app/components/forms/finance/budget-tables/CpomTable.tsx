@@ -10,9 +10,8 @@ import {
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
-import { BudgetTableLine } from "./BudgetTableLine";
+import { BudgetTableLines } from "./BudgetTableLines";
 import { BudgetTableRepriseEtatTooltip } from "./BudgetTableRepriseEtatTooltip";
-import { BudgetTableTitleLine } from "./BudgetTableTitleLine";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
 
 export const CpomTable = () => {
@@ -43,130 +42,9 @@ export const CpomTable = () => {
       headings={getBudgetTableHeading({ years, structure })}
       enableBorders
     >
-      <BudgetTableTitleLine label="Budget" />
-      <BudgetTableLine
-        name="dotationDemandee"
-        label="Dotation demandée"
+      <BudgetTableLines
+        lines={getLines(isAutorisee)}
         cpomStructures={cpomStructures}
-        enabledYears={yearsInCpom}
-        disabledYearsStart={isAutorisee ? 0 : SUBVENTIONNEE_OPEN_YEAR + 1}
-      />
-      <BudgetTableLine
-        name="dotationAccordee"
-        label="Dotation accordée"
-        cpomStructures={cpomStructures}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR + 1 : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-        enabledYears={yearsInCpom}
-      />
-      <BudgetTableTitleLine label="Résultat" />
-      <BudgetTableLine
-        name="cumulResultatNet"
-        label="Cumul des résultats"
-        subLabel="des structures du CPOM"
-        cpomStructures={cpomStructures}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-        enabledYears={yearsInCpom}
-      />
-      <BudgetTableLine
-        name="repriseEtat"
-        label={<BudgetTableRepriseEtatTooltip />}
-        cpomStructures={cpomStructures}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-        enabledYears={yearsInCpom}
-      />
-      <BudgetTableLine
-        name="affectationReservesFondsDedies"
-        label="Affectation"
-        subLabel="réserves & fonds dédiés"
-        cpomStructures={cpomStructures}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-        enabledYears={yearsInCpom}
-      />
-      <BudgetTableTitleLine label="Détail affectation" />
-      <BudgetTableLine
-        name="reserveInvestissement"
-        label="Réserve"
-        subLabel="dédiée à l'investissement"
-        cpomStructures={cpomStructures}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-        enabledYears={yearsInCpom}
-      />
-      <BudgetTableLine
-        name="chargesNonReconductibles"
-        label="Charges"
-        subLabel="non reductibles"
-        cpomStructures={cpomStructures}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-        enabledYears={yearsInCpom}
-      />
-      <BudgetTableLine
-        name="reserveCompensationDeficits"
-        label="Réserve de compensation "
-        subLabel="des déficits"
-        cpomStructures={cpomStructures}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-        enabledYears={yearsInCpom}
-      />
-      <BudgetTableLine
-        name="reserveCompensationBFR"
-        label="Réserve de couverture"
-        subLabel="de BFR"
-        cpomStructures={cpomStructures}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-        enabledYears={yearsInCpom}
-      />
-      <BudgetTableLine
-        name="reserveCompensationAmortissements"
-        label="Réserve de compensation"
-        subLabel="des amortissements"
-        cpomStructures={cpomStructures}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-        enabledYears={yearsInCpom}
-      />
-      <BudgetTableLine
-        name="fondsDedies"
-        label="Fonds dédiés"
-        cpomStructures={cpomStructures}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-        enabledYears={yearsInCpom}
-      />
-      <BudgetTableLine
-        name="reportANouveau"
-        label="Report à nouveau"
-        cpomStructures={cpomStructures}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-        enabledYears={yearsInCpom}
-      />
-      <BudgetTableLine
-        name="autre"
-        label="Autre"
-        cpomStructures={cpomStructures}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
-        enabledYears={yearsInCpom}
       />
       <BudgetTableCommentLine
         label="Commentaire"
@@ -178,4 +56,120 @@ export const CpomTable = () => {
       />
     </Table>
   );
+};
+
+const getLines = (isAutorisee: boolean) => {
+  return [
+    {
+      title: "Budget",
+      lines: [
+        {
+          name: "dotationDemandee",
+          label: "Dotation demandée",
+          disabledYearsStart: isAutorisee ? 0 : SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "dotationAccordee",
+          label: "Dotation accordée",
+          disabledYearsStart: isAutorisee
+            ? AUTORISEE_OPEN_YEAR + 1
+            : SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+      ],
+    },
+    {
+      title: "Résultat",
+      lines: [
+        {
+          name: "cumulResultatNet",
+          label: "Cumul des résultats",
+          subLabel: "des structures du CPOM",
+          disabledYearsStart: isAutorisee
+            ? AUTORISEE_OPEN_YEAR
+            : SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "repriseEtat",
+          label: <BudgetTableRepriseEtatTooltip />,
+          disabledYearsStart: isAutorisee
+            ? AUTORISEE_OPEN_YEAR
+            : SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "affectationReservesFondsDedies",
+          label: "Affectation",
+          subLabel: "réserves & fonds dédiés",
+          disabledYearsStart: isAutorisee
+            ? AUTORISEE_OPEN_YEAR
+            : SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+      ],
+    },
+    {
+      title: "Détail affectation",
+      lines: [
+        {
+          name: "reserveInvestissement",
+          label: "Réserve",
+          subLabel: "dédiée à l'investissement",
+          disabledYearsStart: isAutorisee
+            ? AUTORISEE_OPEN_YEAR
+            : SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "chargesNonReconductibles",
+          label: "Charges",
+          subLabel: "non reductibles",
+          disabledYearsStart: isAutorisee
+            ? AUTORISEE_OPEN_YEAR
+            : SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "reserveCompensationDeficits",
+          label: "Réserve de compensation",
+          subLabel: "des déficits",
+          disabledYearsStart: isAutorisee
+            ? AUTORISEE_OPEN_YEAR
+            : SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "reserveCompensationBFR",
+          label: "Réserve de couverture",
+          subLabel: "de BFR",
+          disabledYearsStart: isAutorisee
+            ? AUTORISEE_OPEN_YEAR
+            : SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "reserveCompensationAmortissements",
+          label: "Réserve de compensation",
+          subLabel: "des amortissements",
+          disabledYearsStart: isAutorisee
+            ? AUTORISEE_OPEN_YEAR
+            : SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "fondsDedies",
+          label: "Fonds dédiés",
+          disabledYearsStart: isAutorisee
+            ? AUTORISEE_OPEN_YEAR
+            : SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "reportANouveau",
+          label: "Report à nouveau",
+          disabledYearsStart: isAutorisee
+            ? AUTORISEE_OPEN_YEAR
+            : SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+        {
+          name: "autre",
+          label: "Autre",
+          disabledYearsStart: isAutorisee
+            ? AUTORISEE_OPEN_YEAR
+            : SUBVENTIONNEE_OPEN_YEAR + 1,
+        },
+      ],
+    },
+  ];
 };

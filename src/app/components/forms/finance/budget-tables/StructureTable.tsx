@@ -212,13 +212,13 @@ const getLines = (
       lines: [
         {
           name: "totalProduits",
-          label: "Total produits retenus",
+          label: "Total produits",
           subLabel: "dont dotation État",
           disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
         },
         {
           name: "totalCharges",
-          label: "Total charges retenu",
+          label: "Total charges retenues",
           subLabel: "par l'autorité tarifaire",
           disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
         },
@@ -237,7 +237,7 @@ const getLines = (
         {
           name: "excedentDeduit",
           label: "Excédent réemployé",
-          subLabel: "À réemployer dans dotation à venir",
+          subLabel: "dans la dotation à venir",
           disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
         },
         {
