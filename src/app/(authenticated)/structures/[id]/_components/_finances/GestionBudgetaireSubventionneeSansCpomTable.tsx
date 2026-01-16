@@ -93,7 +93,7 @@ export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
           {budgets?.map((budget) => (
             <tr key={budget.id} className="border-t border-default-grey">
               <td className="py-2 px-4 text-center text-sm">{budget.year}</td>
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {!isNullOrUndefined(budget.dotationDemandee) ? (
                   <NumberDisplay
                     value={budget.dotationDemandee}
@@ -103,7 +103,7 @@ export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
                   <EmptyCell />
                 )}
               </td>
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {!isNullOrUndefined(budget.dotationAccordee) ? (
                   <NumberDisplay
                     value={budget.dotationAccordee}
@@ -113,7 +113,7 @@ export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
                   <EmptyCell />
                 )}
               </td>
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {!isNullOrUndefined(budget.totalCharges) &&
                 !isNullOrUndefined(budget.totalProduits) ? (
                   <>
@@ -136,14 +136,14 @@ export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
                   <EmptyCell />
                 )}
               </td>
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {!isNullOrUndefined(budget.excedentRecupere) ? (
                   <NumberDisplay value={budget.repriseEtat} type="currency" />
                 ) : (
                   <EmptyCell />
                 )}
               </td>
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {!isNullOrUndefined(budget.excedentRecupere) ? (
                   <NumberDisplay
                     value={budget.excedentRecupere}
@@ -153,7 +153,7 @@ export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
                   <EmptyCell />
                 )}
               </td>
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {!isNullOrUndefined(budget.excedentDeduit) ? (
                   <NumberDisplay
                     value={budget.excedentDeduit}
@@ -163,7 +163,7 @@ export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
                   <EmptyCell />
                 )}
               </td>
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {!isNullOrUndefined(budget.fondsDedies) ? (
                   <NumberDisplay value={budget.fondsDedies} type="currency" />
                 ) : (
@@ -171,7 +171,7 @@ export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
                 )}
               </td>
 
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {budget.commentaire ?? <EmptyCell />}
               </td>
             </tr>

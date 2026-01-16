@@ -53,7 +53,14 @@ export const ActiviteHistorique = (): ReactElement => {
     return selectedMonths.map((selectedMonth) => {
       const currentActivite = getCurrentActivite(activites, selectedMonth);
       if (currentActivite) {
-        return currentActivite?.[typeActivite] as number;
+        if (typeActivite === "placesAutorisees") {
+          return currentActivite?.placesAutorisees;
+        }
+        return (
+          ((currentActivite?.[typeActivite] as number) /
+            currentActivite?.placesAutorisees) *
+          100
+        );
       }
       return 0;
     });
@@ -64,16 +71,20 @@ export const ActiviteHistorique = (): ReactElement => {
       selectedMonths.map((selectedMonth) => {
         return getCurrentActivite(activites, selectedMonth);
       });
-    return currentActivites.map((activite) => {
-      const seuilRecommande = typesActivite[typeActivite]?.seuil || 0;
-      return (seuilRecommande * (activite?.placesAutorisees || 0)) / 100;
-    });
+    return currentActivites.map(() => typesActivite[typeActivite]?.seuil || 0);
   };
 
   const getAverage = (): number[] => {
     const activitesData = getActivitesData();
     const average = computeAverage(activitesData);
     return Array(selectedMonths.length).fill(average);
+  };
+
+  const getSeries = (): number[][] => {
+    if (typesActivite[typeActivite]?.seuil) {
+      return [getActivitesData(), getSeuilRecommande(), getAverage()];
+    }
+    return [getActivitesData(), getAverage()];
   };
 
   return (
@@ -97,9 +108,20 @@ export const ActiviteHistorique = (): ReactElement => {
           <LineChart
             data={{
               labels: selectedMonths.map(formatForCharts),
-              series: [getActivitesData(), getSeuilRecommande(), getAverage()],
+              series: getSeries(),
             }}
-            options={{ fullWidth: true, axisX: { showGrid: false } }}
+            options={{
+              fullWidth: true,
+              axisX: { showGrid: false },
+              axisY: {
+                offset: 50,
+                labelInterpolationFnc: (value) => {
+                  return typesActivite[typeActivite]?.seuil
+                    ? value + " %"
+                    : value;
+                },
+              },
+            }}
           />
         </div>
         <div className="pl-5">
@@ -107,12 +129,16 @@ export const ActiviteHistorique = (): ReactElement => {
             <div className="w-[40px] border-b-2 border-b-background-flat-blue-cumulus mr-2 shrink-0 grow-0" />
             {typesActivite[typeActivite]?.label}
           </div>
+          {typesActivite[typeActivite]?.seuil && (
+            <div className="pb-1 flex items-center">
+              <div className="w-[40px] border-b-2 border-b-background-flat-blue-ecume border-dashed mr-2 shrink-0 grow-0" />
+              Seuil recommandé
+            </div>
+          )}
           <div className="pb-1 flex items-center">
-            <div className="w-[40px] border-b-2 border-b-background-flat-blue-ecume border-dashed mr-2 shrink-0 grow-0" />
-            Seuil recommandé
-          </div>
-          <div className="pb-1 flex items-center">
-            <div className="w-[40px] border-b-2 border-b-background-flat-green-bourgeon border-dashed mr-2 shrink-0 grow-0" />
+            <div
+              className={`w-[40px] border-b-2 border-b-background-flat-${typesActivite[typeActivite]?.seuil ? "green-bourgeon" : "blue-ecume"} border-dashed mr-2 shrink-0 grow-0`}
+            />
             Moyenne sur la période
           </div>
         </div>
