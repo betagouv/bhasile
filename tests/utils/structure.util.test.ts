@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 
 import {
+  getCpomStructureIndexAndCpomMillesimeIndexForAYear,
   getCurrentCpomStructureDates,
   getLastVisitInMonths,
   getMillesimeIndexForAYear,
@@ -12,6 +13,7 @@ import {
 } from "@/app/utils/structure.util";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
@@ -744,6 +746,328 @@ describe("structure util", () => {
 
       // THEN
       expect(result).toBe(-1);
+    });
+  });
+
+  describe("getCpomStructureIndexAndCpomMillesimeIndexForAYear", () => {
+    it("should return correct indices when finding matching structure and millesime", () => {
+      // GIVEN
+      const cpomStructures: CpomStructureApiType[] = [
+        {
+          id: 1,
+          cpomId: 1,
+          structureId: 1,
+          dateDebut: null,
+          dateFin: null,
+          cpom: {
+            id: 1,
+            name: "CPOM Test",
+            debutCpom: "2024-01-01T00:00:00.000Z",
+            finCpom: "2026-12-31T23:59:59.999Z",
+            cpomMillesimes: [
+              {
+                id: 1,
+                year: 2025,
+              },
+            ],
+          },
+        },
+      ];
+
+      // WHEN
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+        cpomStructures,
+        2025
+      );
+
+      // THEN
+      expect(result).toEqual({ cpomStructureIndex: 0, cpomMillesimeIndex: 0 });
+    });
+
+    it("should return -1 for both indices when given empty array", () => {
+      // GIVEN
+      const cpomStructures: CpomStructureApiType[] = [];
+
+      // WHEN
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+        cpomStructures,
+        2025
+      );
+
+      // THEN
+      expect(result).toEqual({
+        cpomStructureIndex: -1,
+        cpomMillesimeIndex: -1,
+      });
+    });
+
+    it("should return -1 for both indices when no structure has matching year", () => {
+      // GIVEN
+      const cpomStructures: CpomStructureApiType[] = [
+        {
+          id: 1,
+          cpomId: 1,
+          structureId: 1,
+          dateDebut: null,
+          dateFin: null,
+          cpom: {
+            id: 1,
+            name: "CPOM Test",
+            debutCpom: "2024-01-01T00:00:00.000Z",
+            finCpom: "2026-12-31T23:59:59.999Z",
+            cpomMillesimes: [
+              {
+                id: 1,
+                year: 2024,
+              },
+              {
+                id: 2,
+                year: 2026,
+              },
+            ],
+          },
+        },
+      ];
+
+      // WHEN
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+        cpomStructures,
+        2025
+      );
+
+      // THEN
+      expect(result).toEqual({
+        cpomStructureIndex: -1,
+        cpomMillesimeIndex: -1,
+      });
+    });
+
+    it("should return indices for first structure when it has matching year", () => {
+      // GIVEN
+      const cpomStructures: CpomStructureApiType[] = [
+        {
+          id: 1,
+          cpomId: 1,
+          structureId: 1,
+          dateDebut: null,
+          dateFin: null,
+          cpom: {
+            id: 1,
+            name: "CPOM Test 1",
+            debutCpom: "2024-01-01T00:00:00.000Z",
+            finCpom: "2026-12-31T23:59:59.999Z",
+            cpomMillesimes: [
+              {
+                id: 1,
+                year: 2025,
+              },
+            ],
+          },
+        },
+        {
+          id: 2,
+          cpomId: 2,
+          structureId: 1,
+          dateDebut: null,
+          dateFin: null,
+          cpom: {
+            id: 2,
+            name: "CPOM Test 2",
+            debutCpom: "2024-01-01T00:00:00.000Z",
+            finCpom: "2026-12-31T23:59:59.999Z",
+            cpomMillesimes: [
+              {
+                id: 2,
+                year: 2025,
+              },
+            ],
+          },
+        },
+      ];
+
+      // WHEN
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+        cpomStructures,
+        2025
+      );
+
+      // THEN
+      expect(result).toEqual({ cpomStructureIndex: 0, cpomMillesimeIndex: 0 });
+    });
+
+    it("should return indices for later structure when first does not match", () => {
+      // GIVEN
+      const cpomStructures: CpomStructureApiType[] = [
+        {
+          id: 1,
+          cpomId: 1,
+          structureId: 1,
+          dateDebut: null,
+          dateFin: null,
+          cpom: {
+            id: 1,
+            name: "CPOM Test 1",
+            debutCpom: "2024-01-01T00:00:00.000Z",
+            finCpom: "2024-12-31T23:59:59.999Z",
+            cpomMillesimes: [
+              {
+                id: 1,
+                year: 2024,
+              },
+            ],
+          },
+        },
+        {
+          id: 2,
+          cpomId: 2,
+          structureId: 1,
+          dateDebut: null,
+          dateFin: null,
+          cpom: {
+            id: 2,
+            name: "CPOM Test 2",
+            debutCpom: "2025-01-01T00:00:00.000Z",
+            finCpom: "2026-12-31T23:59:59.999Z",
+            cpomMillesimes: [
+              {
+                id: 2,
+                year: 2025,
+              },
+            ],
+          },
+        },
+      ];
+
+      // WHEN
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+        cpomStructures,
+        2025
+      );
+
+      // THEN
+      expect(result).toEqual({ cpomStructureIndex: 1, cpomMillesimeIndex: 0 });
+    });
+
+    it("should skip structure with null or undefined cpomMillesimes", () => {
+      // GIVEN
+      const cpomStructures: CpomStructureApiType[] = [
+        {
+          id: 1,
+          cpomId: 1,
+          structureId: 1,
+          dateDebut: null,
+          dateFin: null,
+          cpom: {
+            id: 1,
+            name: "CPOM Test 1",
+            debutCpom: "2024-01-01T00:00:00.000Z",
+            finCpom: "2024-12-31T23:59:59.999Z",
+            cpomMillesimes: undefined,
+          },
+        },
+        {
+          id: 2,
+          cpomId: 2,
+          structureId: 1,
+          dateDebut: null,
+          dateFin: null,
+          cpom: {
+            id: 2,
+            name: "CPOM Test 2",
+            debutCpom: "2025-01-01T00:00:00.000Z",
+            finCpom: "2026-12-31T23:59:59.999Z",
+            cpomMillesimes: [
+              {
+                id: 2,
+                year: 2025,
+              },
+            ],
+          },
+        },
+      ];
+
+      // WHEN
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+        cpomStructures,
+        2025
+      );
+
+      // THEN
+      expect(result).toEqual({ cpomStructureIndex: 1, cpomMillesimeIndex: 0 });
+    });
+
+    it("should return correct millesime index when structure has multiple millesimes", () => {
+      // GIVEN
+      const cpomStructures: CpomStructureApiType[] = [
+        {
+          id: 1,
+          cpomId: 1,
+          structureId: 1,
+          dateDebut: null,
+          dateFin: null,
+          cpom: {
+            id: 1,
+            name: "CPOM Test",
+            debutCpom: "2024-01-01T00:00:00.000Z",
+            finCpom: "2026-12-31T23:59:59.999Z",
+            cpomMillesimes: [
+              {
+                id: 1,
+                year: 2024,
+              },
+              {
+                id: 2,
+                year: 2025,
+              },
+              {
+                id: 3,
+                year: 2026,
+              },
+            ],
+          },
+        },
+      ];
+
+      // WHEN
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+        cpomStructures,
+        2025
+      );
+
+      // THEN
+      expect(result).toEqual({ cpomStructureIndex: 0, cpomMillesimeIndex: 1 });
+    });
+
+    it("should use CURRENT_YEAR as default when no year is provided", () => {
+      // GIVEN
+      const cpomStructures: CpomStructureApiType[] = [
+        {
+          id: 1,
+          cpomId: 1,
+          structureId: 1,
+          dateDebut: null,
+          dateFin: null,
+          cpom: {
+            id: 1,
+            name: "CPOM Test",
+            debutCpom: "2024-01-01T00:00:00.000Z",
+            finCpom: "2026-12-31T23:59:59.999Z",
+            cpomMillesimes: [
+              {
+                id: 1,
+                year: 2025,
+              },
+            ],
+          },
+        },
+      ];
+
+      // WHEN
+      const result =
+        getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures);
+
+      // THEN
+      expect(result).toEqual({ cpomStructureIndex: 0, cpomMillesimeIndex: 0 });
     });
   });
 });
