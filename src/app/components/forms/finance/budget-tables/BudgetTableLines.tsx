@@ -7,7 +7,6 @@ import { BudgetTableLine } from "./BudgetTableLine";
 import { BudgetTableTitleLine } from "./BudgetTableTitleLine";
 
 export const BudgetTableLines = ({ lines, budgets, cpomStructures }: Props) => {
-  console.log(lines);
   return (
     <>
       {lines.map((block) => (
