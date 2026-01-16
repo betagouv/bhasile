@@ -102,7 +102,7 @@ export const GestionBudgetaireAvecCpomTable = (): ReactElement => {
             .map((budget) => (
               <tr key={budget.id} className="border-t border-default-grey">
                 <td className="py-2 px-4 text-center text-sm">{budget.year}</td>
-                <td className="py-2 px-4 text-center test-sm">
+                <td className="py-2 px-4 text-center text-sm">
                   {!isNullOrUndefined(budget.dotationDemandee) ? (
                     <NumberDisplay
                       value={budget.dotationDemandee}
@@ -112,7 +112,7 @@ export const GestionBudgetaireAvecCpomTable = (): ReactElement => {
                     <EmptyCell />
                   )}
                 </td>
-                <td className="py-2 px-4 text-center test-sm">
+                <td className="py-2 px-4 text-center text-sm">
                   {!isNullOrUndefined(budget.dotationAccordee) ? (
                     <NumberDisplay
                       value={budget.dotationAccordee}
@@ -122,7 +122,7 @@ export const GestionBudgetaireAvecCpomTable = (): ReactElement => {
                     <EmptyCell />
                   )}
                 </td>
-                <td className="py-2 px-4 text-center test-sm">
+                <td className="py-2 px-4 text-center text-sm">
                   {!isNullOrUndefined(budget.totalCharges) &&
                   !isNullOrUndefined(budget.totalProduits) ? (
                     <>
@@ -145,7 +145,7 @@ export const GestionBudgetaireAvecCpomTable = (): ReactElement => {
                     <EmptyCell />
                   )}
                 </td>
-                <td className="py-2 px-4 text-center test-sm">
+                <td className="py-2 px-4 text-center text-sm">
                   {!isNullOrUndefined(budget.cumulResultatsNetsCPOM) ? (
                     <>
                       <NumberDisplay
@@ -159,14 +159,14 @@ export const GestionBudgetaireAvecCpomTable = (): ReactElement => {
                     <EmptyCell />
                   )}
                 </td>
-                <td className="py-2 px-4 text-center test-sm">
+                <td className="py-2 px-4 text-center text-sm">
                   {!isNullOrUndefined(budget.repriseEtat) ? (
                     <NumberDisplay value={budget.repriseEtat} type="currency" />
                   ) : (
                     <EmptyCell />
                   )}
                 </td>
-                <td className="py-2 px-4 text-center test-sm">
+                <td className="py-2 px-4 text-center text-sm">
                   {!isNullOrUndefined(budget.affectationReservesFondsDedies) &&
                   budget.affectationReservesFondsDedies !== 0 ? (
                     <NumberDisplay

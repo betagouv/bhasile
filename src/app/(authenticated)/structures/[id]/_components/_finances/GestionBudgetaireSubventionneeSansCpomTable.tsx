@@ -1,4 +1,6 @@
-import { ReactElement } from "react";
+import Button from "@codegouvfr/react-dsfr/Button";
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { ReactElement, useState } from "react";
 
 import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
@@ -7,8 +9,18 @@ import { isNullOrUndefined } from "@/app/utils/common.util";
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { AmountBadge } from "./AmountBadge";
 
+const commentaireModal = createModal({
+  id: "commentaire-modal",
+  isOpenedByDefault: false,
+});
+
 export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
   const { structure } = useStructureContext();
+
+  const [selectedComment, setSelectedComment] = useState<
+    string | null | undefined
+  >(null);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
   const budgets = structure?.budgets?.filter((budget) => {
     return (
@@ -93,7 +105,7 @@ export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
           {budgets?.map((budget) => (
             <tr key={budget.id} className="border-t border-default-grey">
               <td className="py-2 px-4 text-center text-sm">{budget.year}</td>
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {!isNullOrUndefined(budget.dotationDemandee) ? (
                   <NumberDisplay
                     value={budget.dotationDemandee}
@@ -103,7 +115,7 @@ export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
                   <EmptyCell />
                 )}
               </td>
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {!isNullOrUndefined(budget.dotationAccordee) ? (
                   <NumberDisplay
                     value={budget.dotationAccordee}
@@ -113,7 +125,7 @@ export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
                   <EmptyCell />
                 )}
               </td>
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {!isNullOrUndefined(budget.totalCharges) &&
                 !isNullOrUndefined(budget.totalProduits) ? (
                   <>
@@ -136,14 +148,14 @@ export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
                   <EmptyCell />
                 )}
               </td>
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {!isNullOrUndefined(budget.excedentRecupere) ? (
                   <NumberDisplay value={budget.repriseEtat} type="currency" />
                 ) : (
                   <EmptyCell />
                 )}
               </td>
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {!isNullOrUndefined(budget.excedentRecupere) ? (
                   <NumberDisplay
                     value={budget.excedentRecupere}
@@ -153,7 +165,7 @@ export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
                   <EmptyCell />
                 )}
               </td>
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {!isNullOrUndefined(budget.excedentDeduit) ? (
                   <NumberDisplay
                     value={budget.excedentDeduit}
@@ -163,7 +175,7 @@ export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
                   <EmptyCell />
                 )}
               </td>
-              <td className="py-2 px-4 text-center test-sm">
+              <td className="py-2 px-4 text-center text-sm">
                 {!isNullOrUndefined(budget.fondsDedies) ? (
                   <NumberDisplay value={budget.fondsDedies} type="currency" />
                 ) : (
@@ -171,13 +183,35 @@ export const GestionBudgetaireSubventionneeSansCpomTable = (): ReactElement => {
                 )}
               </td>
 
-              <td className="py-2 px-4 text-center test-sm">
-                {budget.commentaire ?? <EmptyCell />}
+              <td className="py-2 px-4 text-center text-sm">
+                {budget.commentaire ? (
+                  <Button
+                    key={budget.id}
+                    className="fr-btn fr-btn--tertiary-no-outline fr-icon-eye-line fr-btn--icon-left"
+                    onClick={() => {
+                      setSelectedComment(budget.commentaire);
+                      setSelectedYear(budget.year);
+                      setTimeout(() => {
+                        commentaireModal.open();
+                      }, 0);
+                    }}
+                  >
+                    Voir
+                  </Button>
+                ) : (
+                  <EmptyCell />
+                )}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <commentaireModal.Component title="Voir le commentaire">
+        <h2 className="text-sm">
+          Détail affectation du résultat - Année {selectedYear}
+        </h2>
+        <p>{selectedComment}</p>
+      </commentaireModal.Component>
     </div>
   );
 };
