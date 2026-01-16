@@ -3,7 +3,7 @@ import { ReactElement, useCallback, useEffect, useRef } from "react";
 import { Control, useFieldArray, useFormContext } from "react-hook-form";
 
 import { useFileUpload } from "@/app/hooks/useFileUpload";
-import { getStructureMillesimeIndexForAYear } from "@/app/utils/structure.util";
+import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import {
   DocumentFinancierFlexibleFormValues,
@@ -33,7 +33,7 @@ export const FieldSetYearlyDocumentsFinanciers = ({
     "structureMillesimes"
   ) as StructureMillesimeApiType[];
 
-  const index = getStructureMillesimeIndexForAYear(structureMillesimes, year);
+  const index = getMillesimeIndexForAYear(structureMillesimes, year);
 
   const documentsFinanciers: DocumentFinancierFlexibleFormValues[] = watch(
     "documentsFinanciers"

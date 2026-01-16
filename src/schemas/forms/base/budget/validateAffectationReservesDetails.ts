@@ -9,8 +9,7 @@ export const validateAffectationReservesDetails = (
   // Accepts partial data to handle missing properties
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any,
-  ctx: z.RefinementCtx,
-  cpom = true
+  ctx: z.RefinementCtx
 ) => {
   if (
     data.affectationReservesFondsDedies !== null &&
@@ -35,10 +34,6 @@ export const validateAffectationReservesDetails = (
       { field: "autre", value: data.autre },
     ];
 
-    if (cpom) {
-      requiredFields.push({ field: "fondsDedies", value: data.fondsDedies });
-    }
-
     requiredFields.forEach(({ field, value }) => {
       if (value === null || value === undefined) {
         ctx.addIssue({
@@ -50,13 +45,4 @@ export const validateAffectationReservesDetails = (
       }
     });
   }
-};
-
-export const validateAffectationReservesDetailsSansCpom = (
-  // Accepts partial data to handle missing properties
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: Partial<any>,
-  ctx: z.RefinementCtx
-) => {
-  return validateAffectationReservesDetails(data, ctx, false);
 };

@@ -36,6 +36,10 @@ export const createFakeBudget = ({
     coutJournalier: faker.number.int({ min: 1, max: 30 }),
     dotationDemandee: faker.number.int({ min: 1, max: 10000 }),
     dotationAccordee: faker.number.int({ min: 1, max: 10000 }),
+    totalProduitsProposes:
+      year <= CURRENT_YEAR - 2
+        ? faker.number.int({ min: 1, max: 10000 })
+        : null,
     totalProduits:
       year <= CURRENT_YEAR - 2
         ? faker.number.int({ min: 1, max: 10000 })
