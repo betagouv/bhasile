@@ -73,14 +73,14 @@ export const StructureTable = () => {
         name="dotationDemandee"
         label="Dotation demandée"
         budgets={structure.budgets}
-        disabledYearsStart={isAutorisee ? 0 : SUBVENTIONNEE_OPEN_YEAR}
+        disabledYearsStart={isAutorisee ? 0 : SUBVENTIONNEE_OPEN_YEAR + 1}
       />
       <BudgetTableLine
         name="dotationAccordee"
         label="Dotation accordée"
         budgets={structure.budgets}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR + 1 : SUBVENTIONNEE_OPEN_YEAR + 1
         }
       />
       <BudgetTableTitleLine label="Résultat" />
@@ -91,7 +91,7 @@ export const StructureTable = () => {
           subLabel="dont dotation État"
           budgets={structure.budgets}
           disabledYearsStart={
-            isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+            isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
           }
         />
       )}
@@ -101,7 +101,7 @@ export const StructureTable = () => {
         subLabel="dont dotation État"
         budgets={structure.budgets}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
       />
       {isAutorisee && (
@@ -111,7 +111,7 @@ export const StructureTable = () => {
           subLabel="par l'opérateur"
           budgets={structure.budgets}
           disabledYearsStart={
-            isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+            isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
           }
         />
       )}
@@ -121,7 +121,7 @@ export const StructureTable = () => {
         subLabel="par l'autorité tarifaire"
         budgets={structure.budgets}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
       />
       {isSubventionnee && (
@@ -131,28 +131,28 @@ export const StructureTable = () => {
             label="Déficit compensé"
             subLabel="par l'État"
             budgets={structure.budgets}
-            disabledYearsStart={SUBVENTIONNEE_OPEN_YEAR}
+            disabledYearsStart={SUBVENTIONNEE_OPEN_YEAR + 1}
           />
           <BudgetTableLine
             name="excedentRecupere"
             label="Excédent récupéré"
             subLabel="en titre de recette"
             budgets={structure.budgets}
-            disabledYearsStart={SUBVENTIONNEE_OPEN_YEAR}
+            disabledYearsStart={SUBVENTIONNEE_OPEN_YEAR + 1}
           />
           <BudgetTableLine
             name="excedentDeduit"
             label="Excédent réemployé"
             subLabel="À réemployer dans dotation à venir"
             budgets={structure.budgets}
-            disabledYearsStart={SUBVENTIONNEE_OPEN_YEAR}
+            disabledYearsStart={SUBVENTIONNEE_OPEN_YEAR + 1}
           />
           <BudgetTableLine
             name="fondsDedies"
             label="Restant fonds dédiés"
             subLabel=""
             budgets={structure.budgets}
-            disabledYearsStart={SUBVENTIONNEE_OPEN_YEAR}
+            disabledYearsStart={SUBVENTIONNEE_OPEN_YEAR + 1}
           />
         </>
       )}
@@ -175,14 +175,14 @@ export const StructureTable = () => {
               </Tooltip>
             }
             budgets={structure.budgets}
-            disabledYearsStart={AUTORISEE_OPEN_YEAR - 1}
+            disabledYearsStart={AUTORISEE_OPEN_YEAR}
           />
           <BudgetTableLine
             name="affectationReservesFondsDedies"
             label="Affectation"
             subLabel="réserves & provision"
             budgets={structure.budgets}
-            disabledYearsStart={AUTORISEE_OPEN_YEAR - 1}
+            disabledYearsStart={AUTORISEE_OPEN_YEAR}
           />
           <BudgetTableTitleLine label="Détail affectation" />
           <BudgetTableLine
@@ -238,7 +238,7 @@ export const StructureTable = () => {
         label="Commentaire"
         budgets={structure.budgets}
         disabledYearsStart={
-          isSubventionnee ? SUBVENTIONNEE_OPEN_YEAR : undefined
+          isSubventionnee ? SUBVENTIONNEE_OPEN_YEAR + 1 : undefined
         }
         enabledYears={isAutorisee ? detailAffectationEnabledYears : undefined}
       />

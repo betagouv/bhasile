@@ -36,10 +36,8 @@ export const budgetAutoriseeOpenSchemaWithoutRefinement =
     totalProduitsProposes: zSafeDecimals(),
     totalProduits: zSafeDecimals(),
     totalChargesProposees: zSafeDecimals(),
+    totalCharges: zSafeDecimals(),
     repriseEtat: zSafeDecimals(),
-    excedentRecupere: zSafeDecimals(),
-    excedentDeduit: zSafeDecimals(),
-    fondsDedies: zSafeDecimals(),
     affectationReservesFondsDedies: zSafeDecimals(),
 
     // Détail affectation

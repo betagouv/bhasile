@@ -41,14 +41,14 @@ export const CpomTable = () => {
         label="Dotation demandée"
         cpomStructures={structure.cpomStructures}
         enabledYears={yearsInCpom}
-        disabledYearsStart={isAutorisee ? 0 : SUBVENTIONNEE_OPEN_YEAR}
+        disabledYearsStart={isAutorisee ? 0 : SUBVENTIONNEE_OPEN_YEAR + 1}
       />
       <BudgetTableLine
         name="dotationAccordee"
         label="Dotation accordée"
         cpomStructures={structure.cpomStructures}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR + 1 : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
       />
@@ -59,7 +59,7 @@ export const CpomTable = () => {
         subLabel="des structures du CPOM"
         cpomStructures={structure.cpomStructures}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
       />
@@ -81,7 +81,7 @@ export const CpomTable = () => {
         }
         cpomStructures={structure.cpomStructures}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
       />
@@ -92,7 +92,7 @@ export const CpomTable = () => {
         subLabel="réserves & fonds dédiés"
         cpomStructures={structure.cpomStructures}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
       />
@@ -103,7 +103,7 @@ export const CpomTable = () => {
         subLabel="dédiée à l'investissement"
         cpomStructures={structure.cpomStructures}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
       />
@@ -113,7 +113,7 @@ export const CpomTable = () => {
         subLabel="non reductibles"
         cpomStructures={structure.cpomStructures}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
       />
@@ -123,7 +123,7 @@ export const CpomTable = () => {
         subLabel="des déficits"
         cpomStructures={structure.cpomStructures}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
       />
@@ -133,7 +133,7 @@ export const CpomTable = () => {
         subLabel="de BFR"
         cpomStructures={structure.cpomStructures}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
       />
@@ -143,7 +143,7 @@ export const CpomTable = () => {
         subLabel="des amortissements"
         cpomStructures={structure.cpomStructures}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
       />
@@ -152,7 +152,7 @@ export const CpomTable = () => {
         label="Fonds dédiés"
         cpomStructures={structure.cpomStructures}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
       />
@@ -161,7 +161,7 @@ export const CpomTable = () => {
         label="Report à nouveau"
         cpomStructures={structure.cpomStructures}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
       />
@@ -170,7 +170,7 @@ export const CpomTable = () => {
         label="Autre"
         cpomStructures={structure.cpomStructures}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
       />
@@ -178,7 +178,7 @@ export const CpomTable = () => {
         label="Commentaire"
         cpomStructures={structure.cpomStructures}
         disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR - 1 : SUBVENTIONNEE_OPEN_YEAR
+          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
       />
