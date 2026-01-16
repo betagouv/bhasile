@@ -948,7 +948,7 @@ describe("structure util", () => {
       expect(result).toEqual({ cpomStructureIndex: 1, cpomMillesimeIndex: 0 });
     });
 
-    it("should skip structure with null or undefined cpomMillesimes", () => {
+    it("should skip structure undefined cpomMillesimes", () => {
       // GIVEN
       const cpomStructures: CpomStructureApiType[] = [
         {
