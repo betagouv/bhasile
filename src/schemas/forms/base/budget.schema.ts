@@ -3,7 +3,6 @@ import z from "zod";
 import { zSafeDecimalsNullish, zSafeYear } from "@/app/utils/zodCustomFields";
 import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 
-import { createAutoSaveSchema } from "./budget/createAutoSaveSchema";
 import { validateAffectationReservesDetails } from "./budget/validateAffectationReservesDetails";
 import { cpomStructureSchema } from "./cpomStructure.schema";
 
@@ -71,7 +70,36 @@ export const budgetSubventionneeOpenSchema = budgetBaseSchema.extend({
   fondsDedies: zSafeDecimals(),
 });
 
-export const budgetAutoSaveSchema = createAutoSaveSchema();
+// TODO: cannot find a way to avoid duplication
+export const budgetAutoSaveSchema = z.object({
+  id: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z.number().optional()
+  ),
+  year: zSafeYear(),
+  ETP: zSafeDecimalsNullish(),
+  tauxEncadrement: zSafeDecimalsNullish(),
+  coutJournalier: zSafeDecimalsNullish(),
+  dotationDemandee: zSafeDecimalsNullish(),
+  dotationAccordee: zSafeDecimalsNullish(),
+  totalProduitsProposes: zSafeDecimalsNullish(),
+  totalProduits: zSafeDecimalsNullish(),
+  totalChargesProposees: zSafeDecimalsNullish(),
+  totalCharges: zSafeDecimalsNullish(),
+  repriseEtat: zSafeDecimalsNullish(),
+  excedentRecupere: zSafeDecimalsNullish(),
+  excedentDeduit: zSafeDecimalsNullish(),
+  fondsDedies: zSafeDecimalsNullish(),
+  affectationReservesFondsDedies: zSafeDecimalsNullish(),
+  reserveInvestissement: zSafeDecimalsNullish(),
+  chargesNonReconductibles: zSafeDecimalsNullish(),
+  reserveCompensationDeficits: zSafeDecimalsNullish(),
+  reserveCompensationBFR: zSafeDecimalsNullish(),
+  reserveCompensationAmortissements: zSafeDecimalsNullish(),
+  reportANouveau: zSafeDecimalsNullish(),
+  autre: zSafeDecimalsNullish(),
+  commentaire: z.string().nullish(),
+});
 
 export const budgetInCpomSchema = budgetAutoriseeOpenSchemaWithoutRefinement
   .partial()

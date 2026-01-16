@@ -8,30 +8,37 @@ import {
 } from "../budget.schema";
 
 export const createAutoSaveSchema = () => {
-  const autoriseeShape = budgetAutoriseeOpenSchemaWithoutRefinement.shape;
-  const subventionneeShape = budgetSubventionneeOpenSchema.shape;
+  // Merge both schemas to get all fields
+  const merged = budgetAutoriseeOpenSchemaWithoutRefinement.merge(
+    budgetSubventionneeOpenSchema
+  );
 
-  const allKeys = new Set([
-    ...Object.keys(autoriseeShape),
-    ...Object.keys(subventionneeShape),
-  ]);
+  // Get all field names from the merged schema
+  const allFieldNames = Object.keys(merged.shape) as Array<
+    keyof typeof merged.shape
+  >;
 
-  const schemaObject: Record<string, z.ZodTypeAny> = {};
+  // Build a new schema object where all decimal fields are nullish
+  // but we derive the field list from the merged schema to avoid duplication
+  const autoSaveFields = allFieldNames.reduce(
+    (acc, fieldName) => {
+      if (fieldName === "year") {
+        acc[fieldName] = zSafeYear();
+      } else if (fieldName === "id") {
+        acc[fieldName] = z.preprocess(
+          (val) => (val === "" ? undefined : val),
+          z.number().optional()
+        );
+      } else if (fieldName === "commentaire") {
+        acc[fieldName] = z.string().nullish();
+      } else {
+        // All other fields (decimal fields) should be nullish
+        acc[fieldName] = zSafeDecimalsNullish();
+      }
+      return acc;
+    },
+    {} as Record<string, z.ZodTypeAny>
+  );
 
-  for (const key of allKeys) {
-    if (key === "year") {
-      schemaObject[key] = zSafeYear();
-    } else if (key === "id") {
-      schemaObject[key] = z.preprocess(
-        (val) => (val === "" ? undefined : val),
-        z.number().optional()
-      );
-    } else if (key === "commentaire") {
-      schemaObject[key] = z.string().nullish();
-    } else {
-      schemaObject[key] = zSafeDecimalsNullish();
-    }
-  }
-
-  return z.object(schemaObject);
+  return z.object(autoSaveFields);
 };
