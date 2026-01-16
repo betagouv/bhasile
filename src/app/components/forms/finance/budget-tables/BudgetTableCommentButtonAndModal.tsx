@@ -111,7 +111,7 @@ export const BudgetTableCommentButtonAndModal = ({
   );
 };
 
-interface Props {
+type Props {
   year: number;
   disabledYearsStart?: number;
   enabledYears?: number[];

@@ -34,7 +34,7 @@ export const BudgetTableCommentLine = ({
   );
 };
 
-interface Props {
+type Props {
   label: string;
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];

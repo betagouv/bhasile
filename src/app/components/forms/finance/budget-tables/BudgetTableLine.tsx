@@ -62,7 +62,7 @@ export const BudgetTableLine = ({
   );
 };
 
-interface Props {
+type Props {
   name: string;
   label: string | React.ReactNode;
   subLabel?: string;

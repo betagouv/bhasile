@@ -14,6 +14,6 @@ export const BudgetTableTitleLine = ({ label }: Props) => {
   );
 };
 
-interface Props {
+type Props {
   label: string;
 }
