@@ -24,6 +24,7 @@ import {
   ModificationFinanceSubventionneeSchema,
 } from "@/schemas/forms/modification/modificationFinance.schema";
 import { FetchState } from "@/types/fetch-state.type";
+import { FormKind } from "@/types/global";
 
 import { ModificationTitle } from "../components/ModificationTitle";
 
@@ -94,7 +95,11 @@ export default function ModificationFinanceForm() {
         onSubmit={onSubmit}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <DocumentsFinanciers className="mb-6" hasAccordion />
+        <DocumentsFinanciers
+          className="mb-6"
+          hasAccordion
+          formKind={FormKind.MODIFICATION}
+        />
         <IndicateursGeneraux />
         <hr />
 
