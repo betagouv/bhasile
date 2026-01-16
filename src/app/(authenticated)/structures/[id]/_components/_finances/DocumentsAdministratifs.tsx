@@ -57,7 +57,10 @@ export const DocumentsAdministratifs = (): ReactElement => {
                 getDocumentsFinanciersToDisplay(budget).map(
                   (documentFinancier) => (
                     <div key={documentFinancier.key} className="pb-5">
-                      <DownloadItem fileUpload={documentFinancier} />
+                      <DownloadItem
+                        fileUpload={documentFinancier}
+                        displayGranularity={true}
+                      />
                     </div>
                   )
                 )

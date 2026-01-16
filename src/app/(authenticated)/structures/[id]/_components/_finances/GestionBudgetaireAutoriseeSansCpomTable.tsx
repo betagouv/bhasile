@@ -161,7 +161,7 @@ export const GestionBudgetaireAutoriseeSansCpomTable = (): ReactElement => {
               </td>
               <td className="py-2 px-4 text-center test-sm">
                 {!isNullOrUndefined(budget.affectationReservesFondsDedies) &&
-                budget.affectationReservesFondsDedies! > 0 ? (
+                budget.affectationReservesFondsDedies !== 0 ? (
                   <NumberDisplay
                     value={budget.affectationReservesFondsDedies}
                     type="currency"

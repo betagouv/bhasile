@@ -15,4 +15,5 @@ export const fileApiSchema = z.object({
   parentFileUploadId: z.number().nullish(),
   controleId: z.number().nullish(),
   evaluationId: z.number().nullish(),
+  granularity: z.string().optional(),
 });
