@@ -4,8 +4,7 @@ import { isStructureInCpom } from "@/app/utils/structure.util";
 export const DocumentsFinanciersCpomDisclaimer = ({ year }: Props) => {
   const { structure } = useStructureContext();
 
-  console.log(year);
-  const isInCpom = isStructureInCpom(structure /*year*/);
+  const isInCpom = isStructureInCpom(structure, year);
 
   return isInCpom ? (
     <p>
