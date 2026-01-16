@@ -43,7 +43,7 @@ export const StructuresTable = ({
           ))}
         </StructuresTableHeadings>
         <div className="pt-4 flex justify-center items-center">
-          <Pagination totalStructures={totalStructures} />
+          <Pagination totalElements={totalStructures} />
         </div>
       </div>
       <finalisationModal.Component
