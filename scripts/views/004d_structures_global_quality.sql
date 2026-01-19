@@ -27,7 +27,13 @@ SELECT
   COALESCE(fin."has_issue_authorized_excedent_affectations_mismatch", FALSE) AS "has_issue_authorized_excedent_affectations_mismatch",
   COALESCE(fin."has_issue_authorized_negative_affectations", FALSE) AS "has_issue_authorized_negative_affectations",
   COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE) AS "has_issue_subsidized_deficit_nonzero_boxes",
-  COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE) AS "has_issue_subsidized_excedent_rules"
+  COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE) AS "has_issue_subsidized_excedent_rules",
+  -- Count total number of issues (true values)
+  (
+    (COALESCE(cal."has_authorisation_dates_undefined", FALSE)::int) + (COALESCE(cal."has_issue_authorisation_period_not_15y", FALSE)::int) + (COALESCE(cal."has_convention_dates_undefined", FALSE)::int) + (COALESCE(cal."has_issue_authorized_convention_not_5y", FALSE)::int) + (
+      COALESCE(cal."has_issue_authorized_convention_outside_authorisation_period", FALSE)::int
+    ) + (COALESCE(cal."has_issue_subsidized_convention_gt_3y", FALSE)::int) + (COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE)::int) + (COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_max_gt_25", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_max_gt_25", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_resultat_net_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_authorized_excedent_affectations_mismatch", FALSE)::int) + (COALESCE(fin."has_issue_authorized_negative_affectations", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE)::int)
+  ) AS "issues_count"
 FROM
   public."Structure" s
   LEFT JOIN:"SCHEMA"."structures_calendar_quality" cal ON cal."dnaCode" = s."dnaCode"
