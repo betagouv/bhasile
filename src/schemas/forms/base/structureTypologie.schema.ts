@@ -32,6 +32,7 @@ export const structureTypologiesAutoSaveSchema = z.object({
   structureTypologies: z.array(
     structureTypologieWithoutEvolutionSchema
       .partial()
+      .extend({ year: zSafeYear() })
       .and(placesEvolutionSchema.partial())
   ),
 });
@@ -42,7 +43,7 @@ export const structureTypologiesWithMandatoryEvolutionSchema =
       data.structureTypologies,
       CURRENT_YEAR
     );
-    
+
     if (currentStructureTypologyIndex === -1) {
       return;
     }
@@ -125,9 +126,10 @@ export const structureTypologiesWithMandatoryEvolutionSchema =
     }
   });
 
-  export type StructureTypologieWithoutEvolutionSchemaTypeFormValues = z.infer<
-    typeof structureTypologieWithoutEvolutionSchema
-  >;
+export type StructureTypologieWithoutEvolutionSchemaTypeFormValues = z.infer<
+  typeof structureTypologieWithoutEvolutionSchema
+>;
+
 export type structureTypologieSchemaTypeFormValues = z.infer<
   typeof structureTypologieSchema
 >;

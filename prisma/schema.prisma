@@ -160,12 +160,11 @@ model Adresse {
 }
 
 model AdresseTypologie {
-  id               Int       @id @default(autoincrement())
-  adresse          Adresse   @relation(fields: [adresseId], references: [id], onDelete: Cascade)
+  id               Int     @id @default(autoincrement())
+  adresse          Adresse @relation(fields: [adresseId], references: [id], onDelete: Cascade)
   adresseId        Int
   placesAutorisees Int
-  date             DateTime?
-  year             Int       @default(0)
+  year             Int
   qpv              Int
   logementSocial   Int
 
@@ -198,8 +197,7 @@ model StructureMillesime {
   id                   Int                 @id @default(autoincrement())
   structure            Structure           @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
   structureDnaCode     String
-  date                 DateTime?
-  year                 Int                 @default(0)
+  year                 Int
   cpom                 Boolean             @default(false) // temporary field, while we are not sure of existing cpoms
   operateurComment     String?
   structureTypologieId Int?
@@ -210,7 +208,6 @@ model StructureMillesime {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@unique([structureDnaCode, date])
   @@unique([structureDnaCode, year])
   @@schema("public")
 }
@@ -219,8 +216,7 @@ model StructureTypologie {
   id                    Int                 @id @default(autoincrement())
   structure             Structure           @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
   structureDnaCode      String
-  date                  DateTime?
-  year                  Int                 @default(0)
+  year                  Int
   placesAutorisees      Int?
   pmr                   Int?
   lgbt                  Int?
@@ -291,7 +287,6 @@ model Budget {
   id                                Int                 @id @default(autoincrement())
   structure                         Structure?          @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
   structureDnaCode                  String
-  date                              DateTime?
   year                              Int                 @default(0)
   ETP                               Float?
   tauxEncadrement                   Float?
@@ -321,7 +316,6 @@ model Budget {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@unique([structureDnaCode, date])
   @@unique([structureDnaCode, year])
   @@schema("public")
 }
@@ -417,10 +411,8 @@ model Cpom {
   id             Int             @id @default(autoincrement())
   name           String?
   structures     CpomStructure[]
-  debutCpom      DateTime?
-  yearStart      Int             @default(0)
-  finCpom        DateTime?
-  yearEnd        Int             @default(0)
+  yearStart      Int
+  yearEnd        Int
   cpomMillesimes CpomMillesime[]
   operateur      Operateur       @relation(fields: [operateurId], references: [id])
   operateurId    Int
@@ -435,10 +427,8 @@ model CpomStructure {
   id          Int       @id @default(autoincrement())
   cpomId      Int
   structureId Int
-  dateDebut   DateTime? // Date when the structure joined the CPOM (null = from the beginning of the CPOM)
-  yearStart   Int?
-  dateFin     DateTime? // Date when the structure left the CPOM (null = until the end of the CPOM)
-  yearEnd     Int?
+  yearStart   Int? // Year when the structure joined the CPOM (null = from the beginning of the CPOM)
+  yearEnd     Int? // Year when the structure left the CPOM (null = until the end of the CPOM)
   cpom        Cpom      @relation(fields: [cpomId], references: [id], onDelete: Cascade)
   structure   Structure @relation(fields: [structureId], references: [id])
 
@@ -450,11 +440,10 @@ model CpomStructure {
 }
 
 model CpomMillesime {
-  id                                Int       @id @default(autoincrement())
+  id                                Int     @id @default(autoincrement())
   cpomId                            Int
-  cpom                              Cpom      @relation(fields: [cpomId], references: [id])
-  date                              DateTime?
-  year                              Int       @default(0)
+  cpom                              Cpom    @relation(fields: [cpomId], references: [id])
+  year                              Int     @default(0)
   dotationDemandee                  Float?
   dotationAccordee                  Float?
   cumulResultatNet                  Float?
@@ -473,7 +462,6 @@ model CpomMillesime {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@unique([cpomId, date])
   @@unique([cpomId, year])
   @@schema("public")
 }

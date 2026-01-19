@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Ici on veut migrer les places à fermer et places à créer en prod
 // vers la StructureTypologie associée à la structure sur l'année 2025.
 // Usage : yarn one-off 20251204-migrate-placeacreer-fermer-to-typologie

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off script: populate newly added `year` columns from existing `date` fields
 // Tables: Budget, StructureMillesime, StructureTypologie, AdresseTypologie, Cpom, CpomMillesime, CpomStructure
 // Usage: yarn one-off 20251215-move-date-to-years
