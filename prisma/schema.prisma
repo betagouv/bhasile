@@ -54,6 +54,7 @@ model Structure {
   directionTerritoriale        String?
   activeInOfiiFileSince        DateTime? // date d'entrée dans le document Ofii
   inactiveInOfiiFileSince      DateTime? // date de sortie du document Ofii
+  noEvaluationStructure        Boolean                     @default(false)
   controles                    Controle[]
   evaluations                  Evaluation[]
   evenementsIndesirablesGraves EvenementIndesirableGrave[]

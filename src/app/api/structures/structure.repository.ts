@@ -431,6 +431,7 @@ const createOrUpdateStructure = async (
     directionTerritoriale,
     activeInOfiiFileSince,
     inactiveInOfiiFileSince,
+    noEvaluationStructure,
   } = structure;
 
   const updatedStructure = await tx.structure.update({
@@ -465,6 +466,7 @@ const createOrUpdateStructure = async (
       directionTerritoriale,
       activeInOfiiFileSince,
       inactiveInOfiiFileSince,
+      noEvaluationStructure,
       departement: departementAdministratif
         ? {
             connect: {

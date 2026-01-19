@@ -21,6 +21,10 @@ import { AdresseWithTypologies, createFakeAdresses } from "./adresse.seed";
 import { createFakeBudget } from "./budget.seed";
 import { createFakeContact } from "./contact.seed";
 import { ControleWithFileUploads, createFakeControle } from "./controle.seed";
+import {
+  createFakeEvaluation,
+  EvaluationWithFileUploads,
+} from "./evaluation.seed";
 import { createFakeEvenementIndesirableGrave } from "./evenement-indesirable-grave.seed";
 import { createFakeFileUpload } from "./file-upload.seed";
 import { createFakeFormWithSteps } from "./form.seed";
@@ -91,8 +95,8 @@ export const createFakeStructure = ({
       departementAdministratif,
       counter,
     }),
-    // TODO : à gérer quand les filiales d'opérateurs seront en DB
-    filiale: "",
+    filiale:
+      faker.helpers.maybe(() => faker.word.noun(), { probability: 0.5 }) || "",
     adresseAdministrative: faker.location.streetAddress(),
     communeAdministrative: faker.location.city(),
     codePostalAdministratif: faker.location.zipCode(),
@@ -120,6 +124,7 @@ export const createFakeStructure = ({
     echeancePlacesACreer: faker.date.future(),
     echeancePlacesAFermer: faker.date.future(),
     notes: faker.lorem.lines(2),
+    noEvaluationStructure: faker.datatype.boolean(),
     activeInOfiiFileSince:
       faker.helpers.maybe(
         () => faker.date.between({ from: creationDate, to: new Date() }),
@@ -132,6 +137,7 @@ type StructureWithRelations = Structure & {
   contacts: Omit<Contact, "id" | "structureDnaCode">[];
   adresses: Omit<AdresseWithTypologies, "id" | "structureDnaCode">[];
   controles: Omit<ControleWithFileUploads, "id" | "structureDnaCode">[];
+  evaluations: Omit<EvaluationWithFileUploads, "id" | "structureDnaCode">[];
   structureTypologies: Omit<StructureTypologie, "id" | "structureDnaCode">[];
   budgets: Omit<Budget, "id" | "structureDnaCode">[];
   activites: Omit<Activite, "id" | "structureDnaCode">[];
@@ -216,6 +222,12 @@ export const createFakeStuctureWithRelations = ({
         createFakeControle(),
         createFakeControle(),
       ],
+      evaluations:
+        fakeStructure.noEvaluationStructure && !isStructureAutorisee(type)
+          ? []
+          : Array.from({ length: faker.number.int({ min: 1, max: 5 }) }, () =>
+              createFakeEvaluation()
+            ),
     };
   }
 

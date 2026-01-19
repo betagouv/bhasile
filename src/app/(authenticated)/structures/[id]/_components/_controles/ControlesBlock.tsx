@@ -47,7 +47,7 @@ export const ControlesBlock = (): ReactElement => {
         {evaluations[0]?.note !== undefined && (
           <div className="pr-4">
             <InformationCard
-              primaryInformation={`${evaluations[0]?.note}/5`}
+              primaryInformation={`${evaluations[0]?.note} / 4`}
               secondaryInformation="de moyenne à la dernière évaluation"
             />
           </div>
