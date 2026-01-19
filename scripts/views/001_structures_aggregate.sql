@@ -35,6 +35,7 @@ WITH -- Last typology by structure
   activite_dernier_millesime AS (
     SELECT DISTINCT
       ON (sa."structureDnaCode") sa."structureDnaCode",
+      sa."date",
       sa."placesAutorisees"
     FROM
       public."Activite" sa
