@@ -3,7 +3,7 @@ import { ReactElement, useCallback } from "react";
 
 import { DEFAULT_PAGE_SIZE } from "@/constants";
 
-export const Pagination = ({ totalStructures }: Props): ReactElement | null => {
+export const Pagination = ({ totalElements }: Props): ReactElement | null => {
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -18,7 +18,7 @@ export const Pagination = ({ totalStructures }: Props): ReactElement | null => {
     [searchParams, router]
   );
 
-  const totalPages = Math.ceil(totalStructures / DEFAULT_PAGE_SIZE);
+  const totalPages = Math.ceil(totalElements / DEFAULT_PAGE_SIZE);
 
   return (
     <nav role="navigation" className="fr-pagination" aria-label="Pagination">
@@ -99,5 +99,5 @@ export const Pagination = ({ totalStructures }: Props): ReactElement | null => {
 };
 
 type Props = {
-  totalStructures: number;
+  totalElements: number;
 };
