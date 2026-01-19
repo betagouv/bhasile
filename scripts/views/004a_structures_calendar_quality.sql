@@ -4,16 +4,21 @@
 -- Notes:
 -- - "Conventions" are stored on `public."Structure"`: `debutConvention`, `finConvention`.
 -- - "Période d'autorisation" is stored on `public."Structure"`: `debutPeriodeAutorisation`, `finPeriodeAutorisation`.
-CREATE OR REPLACE VIEW :"SCHEMA"."structures_calendar_quality" AS WITH structures AS (
-    SELECT s."dnaCode",
+CREATE OR REPLACE VIEW:"SCHEMA"."structures_calendar_quality" AS
+WITH
+  structures AS (
+    SELECT
+      s."dnaCode",
       s."type" AS "structureType",
       s."debutPeriodeAutorisation",
       s."finPeriodeAutorisation",
       s."debutConvention",
       s."finConvention"
-    FROM public."Structure" s
+    FROM
+      public."Structure" s
   )
-SELECT s."dnaCode" AS "dnaCode",
+SELECT
+  s."dnaCode" AS "dnaCode",
   -- Base data presence flags
   CASE
     WHEN s."structureType" IN ('CADA', 'CPH') THEN (
@@ -37,10 +42,12 @@ SELECT s."dnaCode" AS "dnaCode",
       AND (
         EXTRACT(
           YEAR
-          FROM s."finPeriodeAutorisation"
+          FROM
+            s."finPeriodeAutorisation"
         )::int - EXTRACT(
           YEAR
-          FROM s."debutPeriodeAutorisation"
+          FROM
+            s."debutPeriodeAutorisation"
         )::int
       ) <> 15
     )
@@ -54,10 +61,12 @@ SELECT s."dnaCode" AS "dnaCode",
       AND (
         EXTRACT(
           YEAR
-          FROM s."finConvention"
+          FROM
+            s."finConvention"
         )::int - EXTRACT(
           YEAR
-          FROM s."debutConvention"
+          FROM
+            s."debutConvention"
         )::int
       ) <> 5
     )
@@ -73,17 +82,21 @@ SELECT s."dnaCode" AS "dnaCode",
       AND (
         EXTRACT(
           YEAR
-          FROM s."debutConvention"
+          FROM
+            s."debutConvention"
         )::int < EXTRACT(
           YEAR
-          FROM s."debutPeriodeAutorisation"
+          FROM
+            s."debutPeriodeAutorisation"
         )::int
         OR EXTRACT(
           YEAR
-          FROM s."finConvention"
+          FROM
+            s."finConvention"
         )::int > EXTRACT(
           YEAR
-          FROM s."finPeriodeAutorisation"
+          FROM
+            s."finPeriodeAutorisation"
         )::int
       )
     )
@@ -97,13 +110,16 @@ SELECT s."dnaCode" AS "dnaCode",
       AND (
         EXTRACT(
           YEAR
-          FROM s."finConvention"
+          FROM
+            s."finConvention"
         )::int - EXTRACT(
           YEAR
-          FROM s."debutConvention"
+          FROM
+            s."debutConvention"
         )::int
       ) > 3
     )
     ELSE FALSE
   END AS "has_issue_subsidized_convention_gt_3y"
-FROM structures s;
+FROM
+  structures s;
