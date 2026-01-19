@@ -72,7 +72,7 @@
     "prisma": "^7.2.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-hook-form": "^7.70.0",
+    "react-hook-form": "^7.71.0",
     "react-leaflet": "^5.0.0",
     "react-number-format": "^5.4.4",
     "read-excel-file": "^6.0.1",
@@ -105,13 +105,13 @@
     "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
     "prettier": "^3.7.4",
-    "sass": "^1.97.1",
+    "sass": "^1.97.2",
     "sql-formatter": "^15.6.12",
     "stylelint": "^16.26.1",
     "stylelint-config-standard": "^39.0.1",
     "tsx": "^4.21.0",
     "typescript": "^5",
-    "vite-tsconfig-paths": "^6.0.3",
+    "vite-tsconfig-paths": "^6.0.4",
     "vitest": "^4.0.16"
   }
 }
