@@ -10,12 +10,11 @@ datasource db {
 }
 
 model Departement {
-  id             Int             @id @default(autoincrement())
-  numero         String          @unique
-  name           String
-  region         String
-  structuresOfii StructureOfii[]
-  structures     Structure[]
+  id         Int         @id @default(autoincrement())
+  numero     String      @unique
+  name       String
+  region     String
+  structures Structure[]
 
   @@schema("public")
 }
@@ -34,7 +33,6 @@ model Structure {
   nom                          String?
   debutConvention              DateTime?
   finConvention                DateTime?
-  cpom                         Boolean?
   creationDate                 DateTime?
   date303                      DateTime?
   finessCode                   String?
@@ -43,8 +41,6 @@ model Structure {
   public                       PublicType?
   debutPeriodeAutorisation     DateTime?
   finPeriodeAutorisation       DateTime?
-  debutCpom                    DateTime?
-  finCpom                      DateTime?
   notes                        String?
   nomOfii                      String?
   directionTerritoriale        String?
@@ -66,26 +62,6 @@ model Structure {
   forms                        Form[]
   campaigns                    Campaign[]
   departement                  Departement?                @relation(fields: [departementAdministratif], references: [numero])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@schema("public")
-}
-
-model StructureOfii {
-  id                    Int           @id @default(autoincrement())
-  dnaCode               String        @unique
-  type                  StructureType
-  nom                   String?
-  operateur             Operateur?    @relation(fields: [operateurId], references: [id])
-  operateurId           Int?
-  departement           Departement?  @relation(fields: [departementNumero], references: [numero])
-  departementNumero     String?
-  directionTerritoriale String?
-  nomOfii               String?
-  activeSince           DateTime?
-  inactiveSince         DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -292,7 +268,6 @@ model Budget {
   totalProduits                     Float?
   totalCharges                      Float?
   totalChargesProposees             Float?
-  cumulResultatsNetsCPOM            Float?
   repriseEtat                       Float?
   excedentRecupere                  Float?
   excedentDeduit                    Float?
@@ -388,10 +363,9 @@ model Campaign {
 }
 
 model Operateur {
-  id                Int             @id @default(autoincrement())
-  name              String          @unique
+  id                Int         @id @default(autoincrement())
+  name              String      @unique
   structures        Structure[]
-  structuresOfii    StructureOfii[]
   directionGenerale String?
   siret             String?
   siegeSocial       String?
