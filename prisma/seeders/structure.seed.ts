@@ -43,7 +43,6 @@ const generateDnaCode = ({
 };
 
 export const createFakeStructure = ({
-  cpom,
   type,
   ofii,
   operateurName,
@@ -52,7 +51,6 @@ export const createFakeStructure = ({
 }: FakeStructureOptions): Partial<Structure> => {
   const [debutConvention, finConvention] = generateDatePair();
   const [debutPeriodeAutorisation, finPeriodeAutorisation] = generateDatePair();
-  const [debutCpom, finCpom] = generateDatePair();
 
   const isAutorisee = isStructureAutorisee(type);
   const createdAt = faker.date.past();
@@ -67,7 +65,9 @@ export const createFakeStructure = ({
     type,
     nom: faker.lorem.words(2),
     nomOfii: faker.lorem.words(2),
-    departementAdministratif,
+    departement: {
+      connect: { numero: departementAdministratif },
+    },
     directionTerritoriale: "DT " + faker.location.city(),
     createdAt,
     updatedAt: createdAt,
@@ -109,7 +109,6 @@ export const createFakeStructure = ({
     date303: null,
     debutConvention,
     finConvention,
-    cpom,
     creationDate,
     finessCode: isAutorisee ? faker.number.int(1000000000).toString() : null,
     lgbt: faker.datatype.boolean(),
@@ -117,8 +116,6 @@ export const createFakeStructure = ({
     public: faker.helpers.enumValue(PublicType),
     debutPeriodeAutorisation: isAutorisee ? debutPeriodeAutorisation : null,
     finPeriodeAutorisation: isAutorisee ? finPeriodeAutorisation : null,
-    debutCpom: cpom ? debutCpom : null,
-    finCpom: cpom ? finCpom : null,
     notes: faker.lorem.lines(2),
     activeInOfiiFileSince:
       faker.helpers.maybe(
