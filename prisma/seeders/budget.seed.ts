@@ -45,13 +45,7 @@ export const createFakeBudget = ({
         ? faker.number.int({ min: 1, max: 10000 })
         : null,
     totalChargesProposees:
-      year <= CURRENT_YEAR - 2
-        ? faker.number.int({ min: 1, max: 10000 })
-        : null,
-    cumulResultatsNetsCPOM:
-      year <= CURRENT_YEAR - 2
-        ? faker.number.int({ min: 1, max: 10000 })
-        : null,
+      year <= CURRENT_YEAR - 2 ? faker.number.int({ min: 1, max: 10000 }) : null,
     repriseEtat:
       year <= CURRENT_YEAR - 2
         ? faker.number.int({ min: 1, max: 10000 })
