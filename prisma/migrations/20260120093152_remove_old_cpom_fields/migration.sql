@@ -15,10 +15,10 @@ ALTER TABLE "StructureOfii" DROP CONSTRAINT "StructureOfii_departementNumero_fke
 ALTER TABLE "StructureOfii" DROP CONSTRAINT "StructureOfii_operateurId_fkey";
 
 -- AlterTable
-ALTER TABLE "public"."Budget" DROP COLUMN "cumulResultatsNetsCPOM";
+ALTER TABLE "Budget" DROP COLUMN "cumulResultatsNetsCPOM";
 
 -- AlterTable
-ALTER TABLE "public"."Structure" DROP COLUMN "cpom",
+ALTER TABLE "Structure" DROP COLUMN "cpom",
 DROP COLUMN "debutCpom",
 DROP COLUMN "finCpom";
 
