@@ -183,6 +183,7 @@ const dnaCodes = structureDnaCodes.map(
 
 for (const EIG of await getAllEIGs()) {
   if (dnaCodes.includes(EIG.structureDnaCode)) {
+    console.log("====", EIG);
     await prisma.evenementIndesirableGrave.upsert({
       where: { numeroDossier: EIG.numeroDossier || "" },
       update: {},
