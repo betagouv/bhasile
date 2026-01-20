@@ -9,9 +9,11 @@ import {
   DocumentFinancierFlexibleFormValues,
   DocumentsFinanciersFlexibleFormValues,
 } from "@/schemas/forms/base/documentFinancier.schema";
+import { FormKind } from "@/types/global";
 
 import { DocumentsFinanciersCheckboxIsInCpom } from "../../finance/documents/DocumentsFinanciersCheckboxIsInCpom";
 import { DocumentsFinanciersCommentaire } from "../../finance/documents/DocumentsFinanciersCommentaire";
+import { DocumentsFinanciersCpomDisclaimer } from "../../finance/documents/DocumentsFinanciersCpomDisclaimer";
 import { DocumentsFinanciersList } from "../../finance/documents/DocumentsFinanciersList";
 import { YearlyFileUpload } from "../../finance/documents/YearlyFileUpload";
 
@@ -21,6 +23,7 @@ export const FieldSetYearlyDocumentsFinanciers = ({
   isAutorisee,
   control,
   hasAccordion,
+  formKind,
 }: Props): ReactElement | null => {
   const { watch, formState } = useFormContext();
 
@@ -114,7 +117,11 @@ export const FieldSetYearlyDocumentsFinanciers = ({
         </p>
       )}
 
-      <DocumentsFinanciersCheckboxIsInCpom year={year} index={index} />
+      {formKind === FormKind.AJOUT ? (
+        <DocumentsFinanciersCheckboxIsInCpom year={year} index={index} />
+      ) : (
+        <DocumentsFinanciersCpomDisclaimer year={year} />
+      )}
 
       {isInCpom && (
         <Notice
@@ -150,4 +157,5 @@ type Props = {
   isAutorisee: boolean;
   control: Control<DocumentsFinanciersFlexibleFormValues>;
   hasAccordion?: boolean;
+  formKind?: FormKind;
 };

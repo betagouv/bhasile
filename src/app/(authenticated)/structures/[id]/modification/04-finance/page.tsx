@@ -66,7 +66,11 @@ export default function ModificationFinanceForm() {
         onSubmit={onSubmit}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <DocumentsFinanciers className="mb-6" hasAccordion />
+        <DocumentsFinanciers
+          className="mb-6"
+          hasAccordion
+          formKind={FormKind.MODIFICATION}
+        />
         <IndicateursGeneraux />
         <hr />
 

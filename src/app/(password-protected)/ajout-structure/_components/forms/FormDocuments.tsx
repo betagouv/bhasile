@@ -11,6 +11,7 @@ import { getDocumentsFinanciersYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { DocumentsFinanciersFlexibleSchema } from "@/schemas/forms/base/documentFinancier.schema";
+import { FormKind } from "@/types/global";
 
 export default function FormDocuments() {
   const params = useParams();
@@ -97,6 +98,7 @@ export default function FormDocuments() {
                 startYear={startYear}
                 isAutorisee={isAutorisee}
                 control={control}
+                formKind={FormKind.AJOUT}
               />
             ))}
           </>
