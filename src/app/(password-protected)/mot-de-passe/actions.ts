@@ -11,11 +11,11 @@ export async function verifyPassword(
     const passwords = process.env.OPERATEUR_PASSWORDS?.split(",").map(
       (password) => password.trim()
     );
-    const isValid = passwords?.includes(password);
+    const isValid = passwords?.includes(password.trim());
 
     if (isValid) {
       const cookieStore = await cookies();
-      cookieStore.set("mot-de-passe", password, {
+      cookieStore.set("mot-de-passe", password.trim(), {
         httpOnly: true,
         path: "/",
         maxAge: ONE_WEEK_IN_SECONDS,
