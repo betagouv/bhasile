@@ -70,6 +70,18 @@ export async function POST(request: NextRequest) {
       data.communeAdministrative = communeAdministrative;
     }
 
+    if (departementAdministratif) {
+      await prisma.departement.upsert({
+        where: { numero: departementAdministratif },
+        update: {},
+        create: {
+          numero: departementAdministratif,
+          name: "Département de test",
+          region: "Région de test",
+        },
+      });
+    }
+
     await prisma.structure.upsert({
       where: { dnaCode },
       update: data,
@@ -79,7 +91,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ dnaCode }, { status: 201 });
   } catch (error) {
     console.error("Failed to create minimal structure:", error);
-    return NextResponse.json({ error: "Erreur interne" }, { status: 500 });
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json(
+      { error: "Erreur interne", details: message },
+      { status: 500 }
+    );
   }
 }
 

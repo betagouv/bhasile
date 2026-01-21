@@ -100,7 +100,7 @@ const getLines = (
           {
             name: "dotationAccordee",
             label: "Dotation accordée",
-            disabledYearsStart: AUTORISEE_OPEN_YEAR,
+            disabledYearsStart: AUTORISEE_OPEN_YEAR + 1,
           },
         ],
       },

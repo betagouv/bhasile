@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 
-import { markFinalisationStepValidated } from "../../structure-creator";
+import { TestStructureData } from "../../test-data";
 
 export class FinalisationControlesPage {
   constructor(private page: Page) {}
@@ -11,30 +11,210 @@ export class FinalisationControlesPage {
     });
   }
 
-  async fillMinimalData() {
+  async fillMinimalData(data: TestStructureData) {
+    await this.fillEvaluations(data);
+    await this.fillControles(data);
+    await this.fillOuvertureFermeture(data);
+  }
+
+  async submit(structureId: number) {
+    const nextUrl = `http://localhost:3000/structures/${structureId}/finalisation/05-documents`;
+    await this.page.click('button[type="submit"]');
+    await this.page.waitForURL(nextUrl, { timeout: 10000 });
+  }
+  private async fillKeyValue(selector: string, value?: string) {
+    if (!value) {
+      return;
+    }
+    const input = this.page.locator(selector);
+    if ((await input.count()) === 0) {
+      return;
+    }
+    await input.evaluate((el, val) => {
+      const inputEl = el as HTMLInputElement;
+      inputEl.value = val as string;
+      inputEl.dispatchEvent(new Event("input", { bubbles: true }));
+      inputEl.dispatchEvent(new Event("change", { bubbles: true }));
+    }, value);
+  }
+
+  private async setFileInput(keySelector: string, filePath: string) {
+    const keyInput = this.page.locator(keySelector);
+    if ((await keyInput.count()) === 0) {
+      return;
+    }
+    const uploadRoot = keyInput.locator("..");
+    const fileInput = uploadRoot.locator('input[type="file"]');
+    await fileInput.setInputFiles(filePath);
+  }
+
+  private async fillEvaluations(data: TestStructureData) {
+    const evaluations = data.evaluations ?? [];
+    if (evaluations.length === 0) {
+      return;
+    }
+    const evaluationsFieldset = this.page.getByRole("group", {
+      name: /Évaluations/i,
+    });
+    const addButton = evaluationsFieldset.getByRole("button", {
+      name: /Ajouter une évaluation/i,
+    });
+    const existingCount = await evaluationsFieldset
+      .getByRole("heading", { level: 3 })
+      .count();
+    for (let i = existingCount; i < evaluations.length; i++) {
+      await addButton.click();
+    }
+    for (let i = 0; i < evaluations.length; i++) {
+      const evaluation = evaluations[i];
+      await this.page.fill(
+        `input[name="evaluations.${i}.date"]`,
+        evaluation.date
+      );
+      if (evaluation.notePersonne !== undefined) {
+        await this.fillKeyValue(
+          `input[name="evaluations.${i}.notePersonne"]`,
+          String(evaluation.notePersonne)
+        );
+      }
+      if (evaluation.notePro !== undefined) {
+        await this.fillKeyValue(
+          `input[name="evaluations.${i}.notePro"]`,
+          String(evaluation.notePro)
+        );
+      }
+      if (evaluation.noteStructure !== undefined) {
+        await this.fillKeyValue(
+          `input[name="evaluations.${i}.noteStructure"]`,
+          String(evaluation.noteStructure)
+        );
+      }
+      if (evaluation.note !== undefined) {
+        await this.fillKeyValue(
+          `input[name="evaluations.${i}.note"]`,
+          String(evaluation.note)
+        );
+      }
+      if (evaluation.filePath) {
+        await this.setFileInput(
+          `input[name="evaluations.${i}.fileUploads.0.key"]`,
+          evaluation.filePath
+        );
+      }
+      if (evaluation.planActionFilePath) {
+        await this.setFileInput(
+          `input[name="evaluations.${i}.fileUploads.1.key"]`,
+          evaluation.planActionFilePath
+        );
+      }
+    }
+    await this.removeExtraEntries(
+      evaluationsFieldset,
+      'button[title="Supprimer"]',
+      evaluations.length
+    );
+  }
+
+  private async fillControles(data: TestStructureData) {
+    const controles = data.controles ?? [];
+    if (controles.length === 0) {
+      return;
+    }
+    const controlesFieldset = this.page.getByRole("group", {
+      name: /Inspections-contrôles/i,
+    });
+    const addButton = controlesFieldset.getByRole("button", {
+      name: /Ajouter une inspection-contrôle/i,
+    });
+    const existingCount = await controlesFieldset
+      .locator('input[name^="controles."][name$=".date"]')
+      .count();
+    for (let i = existingCount; i < controles.length; i++) {
+      await addButton.click();
+    }
+    for (let i = 0; i < controles.length; i++) {
+      const controle = controles[i];
+      await this.page.fill(`input[name="controles.${i}.date"]`, controle.date);
+      await this.page.selectOption(`select[name="controles.${i}.type"]`, {
+        label: controle.type,
+      });
+      if (controle.filePath) {
+        await this.setFileInput(
+          `input[name="controles.${i}.fileUploads.0.key"]`,
+          controle.filePath
+        );
+      }
+    }
+    await this.removeExtraEntries(
+      controlesFieldset,
+      'button[title="Supprimer"]',
+      controles.length
+    );
+  }
+
+  private async fillOuvertureFermeture(data: TestStructureData) {
+    const ouvertureFermeture = data.ouvertureFermeture;
+    if (!ouvertureFermeture) {
+      return;
+    }
     const placesACreerInput = this.page.locator(
       'input[name^="structureTypologies"][name$="placesACreer"]'
     );
-    if ((await placesACreerInput.count()) > 0) {
-      await placesACreerInput.first().fill("0");
+    if (
+      ouvertureFermeture.placesACreer !== undefined &&
+      (await placesACreerInput.count()) > 0
+    ) {
+      await placesACreerInput
+        .first()
+        .fill(String(ouvertureFermeture.placesACreer));
+    }
+    const echeancePlacesACreerInput = this.page.locator(
+      'input[name^="structureTypologies"][name$="echeancePlacesACreer"]'
+    );
+    if (
+      ouvertureFermeture.echeancePlacesACreer &&
+      (await echeancePlacesACreerInput.count()) > 0
+    ) {
+      await echeancePlacesACreerInput
+        .first()
+        .fill(ouvertureFermeture.echeancePlacesACreer);
     }
 
     const placesAFermerInput = this.page.locator(
       'input[name^="structureTypologies"][name$="placesAFermer"]'
     );
-    if ((await placesAFermerInput.count()) > 0) {
-      await placesAFermerInput.first().fill("0");
+    if (
+      ouvertureFermeture.placesAFermer !== undefined &&
+      (await placesAFermerInput.count()) > 0
+    ) {
+      await placesAFermerInput
+        .first()
+        .fill(String(ouvertureFermeture.placesAFermer));
+    }
+    const echeancePlacesAFermerInput = this.page.locator(
+      'input[name^="structureTypologies"][name$="echeancePlacesAFermer"]'
+    );
+    if (
+      ouvertureFermeture.echeancePlacesAFermer &&
+      (await echeancePlacesAFermerInput.count()) > 0
+    ) {
+      await echeancePlacesAFermerInput
+        .first()
+        .fill(ouvertureFermeture.echeancePlacesAFermer);
     }
   }
 
-  async submit(structureId: number, dnaCode: string) {
-    const nextUrl = `http://localhost:3000/structures/${structureId}/finalisation/05-documents`;
-    await this.page.click('button[type="submit"]');
-    try {
-      await this.page.waitForURL(nextUrl, { timeout: 10000 });
-    } catch {
-      await markFinalisationStepValidated(structureId, dnaCode, "04-controles");
-      await this.page.goto(nextUrl);
+  private async removeExtraEntries(
+    fieldset: ReturnType<Page["getByRole"]>,
+    deleteSelector: string,
+    expectedCount: number
+  ) {
+    let deleteButtons = fieldset.locator(deleteSelector);
+    let currentCount = (await deleteButtons.count()) + 1;
+    while (currentCount > expectedCount && (await deleteButtons.count()) > 0) {
+      await deleteButtons.last().click();
+      deleteButtons = fieldset.locator(deleteSelector);
+      currentCount = (await deleteButtons.count()) + 1;
     }
   }
 }

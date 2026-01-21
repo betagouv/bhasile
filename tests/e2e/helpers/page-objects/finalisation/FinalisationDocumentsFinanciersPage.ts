@@ -1,5 +1,8 @@
 import { Page } from "@playwright/test";
 
+import { handleDocumentsFinanciers } from "../../documents-financiers-helper";
+import { TestStructureData } from "../../test-data";
+
 export class FinalisationDocumentsFinanciersPage {
   constructor(private page: Page) {}
 
@@ -9,14 +12,8 @@ export class FinalisationDocumentsFinanciersPage {
     });
   }
 
-  async fillMinimalData() {
-    const dateToggle = this.page.getByRole("checkbox", {
-      name: /date de rattachement au programme 303/i,
-    });
-    if ((await dateToggle.count()) > 0) {
-      await dateToggle.check({ force: true });
-      await this.page.fill('input[name="date303"]', "2026-01-01");
-    }
+  async fillMinimalData(data: TestStructureData) {
+    await handleDocumentsFinanciers(this.page, data, "finalisation");
   }
 
   async submit(structureId: number) {

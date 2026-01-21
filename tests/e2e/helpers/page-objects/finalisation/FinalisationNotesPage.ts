@@ -1,5 +1,7 @@
 import { Page } from "@playwright/test";
 
+import { TestStructureData } from "../../test-data";
+
 export class FinalisationNotesPage {
   constructor(private page: Page) {}
 
@@ -9,8 +11,18 @@ export class FinalisationNotesPage {
     });
   }
 
-  async fillNotes(notes: string = "Notes de test pour la finalisation") {
+  async fillNotes(data: TestStructureData) {
+    const notes =
+      data.finalisationNotes || "Notes de test pour la finalisation";
+    const saveResponse = this.page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/structures") &&
+        response.request().method() === "PUT" &&
+        response.status() < 400,
+      { timeout: 10000 }
+    );
     await this.page.fill('textarea[name="notes"]', notes);
+    await saveResponse;
   }
 
   async submit(structureId: number) {
@@ -21,7 +33,16 @@ export class FinalisationNotesPage {
     );
   }
 
-  async verifySuccess() {
-    await this.page.waitForTimeout(1000);
+  async finalizeAndGoToStructure(structureId: number) {
+    await this.page
+      .getByRole("button", { name: "Finaliser la création" })
+      .click();
+    const confirmButton = this.page.getByRole("button", {
+      name: "J’ai compris",
+    });
+    await confirmButton.click();
+    await this.page.waitForURL(
+      `http://localhost:3000/structures/${structureId}`
+    );
   }
 }

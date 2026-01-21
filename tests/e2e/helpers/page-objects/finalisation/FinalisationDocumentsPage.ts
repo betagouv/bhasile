@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 
-import { markFinalisationStepValidated } from "../../structure-creator";
+import { TestStructureData } from "../../test-data";
 
 export class FinalisationDocumentsPage {
   constructor(private page: Page) {}
@@ -11,59 +11,112 @@ export class FinalisationDocumentsPage {
     });
   }
 
-  async fillMinimalData(options: UploadOptions) {
-    const groups = this.page
-      .locator("fieldset")
-      .filter({ has: this.page.getByRole("button", { name: /Ajouter/ }) });
-    const groupCount = await groups.count();
-    for (let i = 0; i < groupCount; i++) {
-      const group = groups.nth(i);
-      const addButton = group
-        .getByRole("button", { name: /Ajouter/ })
-        .first();
-      await addButton.click();
+  async fillMinimalData(data: TestStructureData) {
+    const actes = data.actesAdministratifs ?? [];
+    const actesByCategory = actes.reduce(
+      (acc, acte) => {
+        acc[acte.category] = acc[acte.category] || [];
+        acc[acte.category].push(acte);
+        return acc;
+      },
+      {} as Record<string, typeof actes>
+    );
 
-      const startDateInput = group.locator(
-        'input[name^="actesAdministratifs."][name$=".startDate"]'
-      );
-      if ((await startDateInput.count()) > 0) {
-        await startDateInput.last().fill(options.startDate);
+    for (const [category, entries] of Object.entries(actesByCategory)) {
+      const groupLabel = getActeGroupLabel(category);
+      const group = this.page.getByRole("group", { name: groupLabel });
+      const addButton = group.getByRole("button", { name: /Ajouter/i });
+
+      let rowCount = await group.locator('input[type="file"]').count();
+      for (let i = rowCount; i < entries.length; i++) {
+        await addButton.click();
       }
 
-      const endDateInput = group.locator(
-        'input[name^="actesAdministratifs."][name$=".endDate"]'
-      );
-      if ((await endDateInput.count()) > 0) {
-        await endDateInput.last().fill(options.endDate);
+      rowCount = await group.locator('input[type="file"]').count();
+      while (rowCount > entries.length) {
+        const deleteButtons = group.locator('button[title="Supprimer"]');
+        if ((await deleteButtons.count()) === 0) {
+          break;
+        }
+        await deleteButtons.last().click();
+        rowCount = await group.locator('input[type="file"]').count();
       }
 
-      const categoryNameInput = group.locator(
-        'input[name^="actesAdministratifs."][name$=".categoryName"]'
-      );
-      if ((await categoryNameInput.count()) > 0) {
-        await categoryNameInput.last().fill(options.categoryName);
+      for (let i = 0; i < entries.length; i++) {
+        const acte = entries[i];
+        if (acte.startDate) {
+          await this.fillIfExistsAtIndex(
+            group,
+            'input[name^="actesAdministratifs."][name$=".startDate"]',
+            i,
+            acte.startDate
+          );
+        }
+        if (acte.endDate) {
+          await this.fillIfExistsAtIndex(
+            group,
+            'input[name^="actesAdministratifs."][name$=".endDate"]',
+            i,
+            acte.endDate
+          );
+        }
+        if (acte.categoryName) {
+          await this.fillIfExistsAtIndex(
+            group,
+            'input[name^="actesAdministratifs."][name$=".categoryName"]',
+            i,
+            acte.categoryName
+          );
+        }
+        const fileInput = group.locator('input[type="file"]').nth(i);
+        await fileInput.setInputFiles(acte.filePath);
       }
-
-      const fileInput = group.locator('input[type="file"]').last();
-      await fileInput.setInputFiles(options.filePath);
     }
   }
 
-  async submit(structureId: number, dnaCode: string) {
+  async submit(structureId: number) {
     const nextUrl = `http://localhost:3000/structures/${structureId}/finalisation/06-notes`;
     await this.page.click('button[type="submit"]');
-    try {
-      await this.page.waitForURL(nextUrl, { timeout: 10000 });
-    } catch {
-      await markFinalisationStepValidated(structureId, dnaCode, "05-documents");
-      await this.page.goto(nextUrl);
+    await this.page.waitForURL(nextUrl, { timeout: 10000 });
+  }
+
+  private async fillIfExists(
+    group: ReturnType<Page["locator"]>,
+    selector: string,
+    value: string
+  ) {
+    const input = group.locator(selector);
+    if ((await input.count()) > 0) {
+      await input.last().fill(value);
+    }
+  }
+
+  private async fillIfExistsAtIndex(
+    group: ReturnType<Page["locator"]>,
+    selector: string,
+    index: number,
+    value: string
+  ) {
+    const input = group.locator(selector);
+    if ((await input.count()) > index) {
+      await input.nth(index).fill(value);
     }
   }
 }
 
-type UploadOptions = {
-  filePath: string;
-  startDate: string;
-  endDate: string;
-  categoryName: string;
+const getActeGroupLabel = (category: string): RegExp => {
+  switch (category) {
+    case "ARRETE_AUTORISATION":
+      return /Arrêtés d'autorisation/i;
+    case "ARRETE_TARIFICATION":
+      return /Arrêtés de tarification/i;
+    case "CONVENTION":
+      return /Conventions/i;
+    case "CPOM":
+      return /CPOM/i;
+    case "AUTRE":
+      return /Autres documents/i;
+    default:
+      return new RegExp(category, "i");
+  }
 };

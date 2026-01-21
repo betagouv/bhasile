@@ -1,16 +1,41 @@
 import { expect, Page } from "@playwright/test";
 
+import { handleDocumentsFinanciers } from "../../documents-financiers-helper";
+import { TestStructureData } from "../../test-data";
+
 export class DocumentsPage {
   constructor(private page: Page) {}
 
-  async fillForm(options?: UploadOptions | UploadOptions[]) {
+  async fillForm(
+    options?: UploadOptions | UploadOptions[] | TestStructureData
+  ) {
     if (!options) {
       return;
     }
 
+    if (!Array.isArray(options) && "documentsFinanciers" in options) {
+      await handleDocumentsFinanciers(this.page, options, "ajout");
+      return;
+    }
+
     const uploads = Array.isArray(options) ? options : [options];
-    for (const upload of uploads) {
-      await this.addUpload(upload);
+    const uploadsByYear = uploads.reduce(
+      (acc, upload) => {
+        const year = upload.year ?? 2025;
+        acc[year] = acc[year] || [];
+        acc[year].push({ ...upload, year });
+        return acc;
+      },
+      {} as Record<number, UploadOptions[]>
+    );
+
+    const years = Object.keys(uploadsByYear)
+      .map((year) => Number(year))
+      .sort((a, b) => b - a);
+    for (const year of years) {
+      for (const upload of uploadsByYear[year]) {
+        await this.addUpload(upload);
+      }
     }
   }
 
