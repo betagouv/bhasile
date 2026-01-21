@@ -218,7 +218,7 @@ export const createFakeStuctureWithRelations = ({
         createFakeControle(),
       ],
       evaluations: isStructureAutorisee(type)
-        ? Array.from({ length: faker.number.int({ min: 1, max: 5 }) }, () =>
+        ? Array.from({ length: faker.number.int({ min: 0, max: 5 }) }, () =>
             createFakeEvaluation()
           )
         : [],

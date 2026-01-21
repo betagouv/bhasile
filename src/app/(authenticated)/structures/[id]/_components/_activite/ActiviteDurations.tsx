@@ -13,16 +13,16 @@ export const ActiviteDurations = ({
   debutConvention,
   finConvention,
 }: Props): ReactElement => {
-  const [selectedDuration, setSelectedDuration] = useState("convention");
+  const [selectedDuration, setSelectedDuration] = useState("6months");
   const [customStartDate, setCustomStartDate] = useState<string | null>(null);
   const [customEndDate, setCustomEndDate] = useState<string | null>(null);
 
   const getSelectedMonths = (selectedDuration: string): dayjs.Dayjs[] => {
     const selectedMonths: Record<string, dayjs.Dayjs[]> = {
-      convention: getMonthsBetween(debutConvention, finConvention),
       "6months": getLastMonths(6),
       "12months": getLastMonths(12),
       "24months": getLastMonths(24),
+      convention: getMonthsBetween(debutConvention, finConvention),
       custom: getMonthsBetween(customStartDate, customEndDate),
     };
     return selectedMonths[selectedDuration];
@@ -44,10 +44,6 @@ export const ActiviteDurations = ({
 
   const durations: SegmentedControlProps.Segments = [
     {
-      label: "Convention",
-      nativeInputProps: getNativeInputProps("convention"),
-    },
-    {
       label: "6 mois",
       nativeInputProps: getNativeInputProps("6months"),
     },
@@ -58,6 +54,10 @@ export const ActiviteDurations = ({
     {
       label: "24 mois",
       nativeInputProps: getNativeInputProps("24months"),
+    },
+    {
+      label: "Convention",
+      nativeInputProps: getNativeInputProps("convention"),
     },
     {
       label: "Autre",

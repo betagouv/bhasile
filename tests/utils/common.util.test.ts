@@ -73,9 +73,19 @@ describe("common util", () => {
       // THEN
       expect(result).toBe(0);
     });
-    it("should return the average when given a corrrect array of numbers", () => {
+    it("should return the average when given a correct array of numbers", () => {
       // GIVEN
       const array = [3, 8, 5, 1, 0];
+
+      // WHEN
+      const result = computeAverage(array);
+
+      // THEN
+      expect(result).toBe(3.4);
+    });
+    it("should return the average when given an array of null and numbers", () => {
+      // GIVEN
+      const array = [3, 8, 5, 1, 0, null, null];
 
       // WHEN
       const result = computeAverage(array);

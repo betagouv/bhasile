@@ -24,14 +24,15 @@ export const getPercentage = (
   }
 };
 
-export const computeAverage = (array: number[]): number => {
+export const computeAverage = (array: (number | null)[]): number => {
   if (array.length === 0) {
     return 0;
   }
+  const arrayWithoutNullValues = array.filter((element) => element !== null);
   return (
-    array.reduce(
+    arrayWithoutNullValues.reduce(
       (firstElement, secondElement) => firstElement + secondElement
-    ) / array.length
+    ) / arrayWithoutNullValues.length
   );
 };
 
