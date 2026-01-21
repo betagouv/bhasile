@@ -6,14 +6,15 @@ export class IdentificationPage extends BasePage {
   async fillForm(data: TestStructureData) {
     // Filiale (if provided)
     if (data.filiale) {
-      const filialeToggle = this.page.getByRole("checkbox", {
-        name: /filiale d'opérateur/i,
-      });
-      if (await filialeToggle.count()) {
-        await filialeToggle.check();
-        await expect(this.page.locator("#filiale")).toBeVisible();
-        await this.page.fill("#filiale", data.filiale);
+      // ToggleSwitch for filiale - check if it's already checked, if not, click it
+      const filialeToggle = this.page.locator('#managed-by-a-filiale');
+      const isChecked = await filialeToggle.isChecked().catch(() => false);
+      if (!isChecked) {
+        await filialeToggle.click();
       }
+      // Wait for the filiale input to appear
+      await this.page.waitForSelector("#filiale", { state: "visible", timeout: 5000 });
+      await this.page.fill("#filiale", data.filiale);
     }
 
     // Date de création
