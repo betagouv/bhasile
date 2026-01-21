@@ -3,15 +3,17 @@ import { ReactElement, useCallback, useEffect, useRef } from "react";
 import { Control, useFieldArray, useFormContext } from "react-hook-form";
 
 import { useFileUpload } from "@/app/hooks/useFileUpload";
-import { getStructureMillesimeIndexForAYear } from "@/app/utils/structure.util";
+import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import {
   DocumentFinancierFlexibleFormValues,
   DocumentsFinanciersFlexibleFormValues,
 } from "@/schemas/forms/base/documentFinancier.schema";
+import { FormKind } from "@/types/global";
 
 import { DocumentsFinanciersCheckboxIsInCpom } from "../../finance/documents/DocumentsFinanciersCheckboxIsInCpom";
 import { DocumentsFinanciersCommentaire } from "../../finance/documents/DocumentsFinanciersCommentaire";
+import { DocumentsFinanciersCpomDisclaimer } from "../../finance/documents/DocumentsFinanciersCpomDisclaimer";
 import { DocumentsFinanciersList } from "../../finance/documents/DocumentsFinanciersList";
 import { YearlyFileUpload } from "../../finance/documents/YearlyFileUpload";
 
@@ -21,6 +23,7 @@ export const FieldSetYearlyDocumentsFinanciers = ({
   isAutorisee,
   control,
   hasAccordion,
+  formKind,
 }: Props): ReactElement | null => {
   const { watch, formState } = useFormContext();
 
@@ -30,7 +33,7 @@ export const FieldSetYearlyDocumentsFinanciers = ({
     "structureMillesimes"
   ) as StructureMillesimeApiType[];
 
-  const index = getStructureMillesimeIndexForAYear(structureMillesimes, year);
+  const index = getMillesimeIndexForAYear(structureMillesimes, year);
 
   const documentsFinanciers: DocumentFinancierFlexibleFormValues[] = watch(
     "documentsFinanciers"
@@ -114,7 +117,11 @@ export const FieldSetYearlyDocumentsFinanciers = ({
         </p>
       )}
 
-      <DocumentsFinanciersCheckboxIsInCpom year={year} index={index} />
+      {formKind === FormKind.AJOUT ? (
+        <DocumentsFinanciersCheckboxIsInCpom year={year} index={index} />
+      ) : (
+        <DocumentsFinanciersCpomDisclaimer year={year} />
+      )}
 
       {isInCpom && (
         <Notice
@@ -150,4 +157,5 @@ type Props = {
   isAutorisee: boolean;
   control: Control<DocumentsFinanciersFlexibleFormValues>;
   hasAccordion?: boolean;
+  formKind?: FormKind;
 };

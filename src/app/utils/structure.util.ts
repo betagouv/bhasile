@@ -5,7 +5,12 @@ import {
   AdresseApiType,
   AdresseTypologieApiType,
 } from "@/schemas/api/adresse.schema";
+import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
+import {
+  CpomMillesimeApiType,
+  CpomStructureApiType,
+} from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import {
   StructureAgentUpdateApiType,
@@ -131,11 +136,16 @@ export const getOperateurLabel = (
   return filiale ? `${filiale} (${operateur})` : operateur;
 };
 
-export const isStructureInCpom = (structure: StructureApiType): boolean => {
+export const isStructureInCpom = (
+  structure: StructureApiType,
+  year: number = CURRENT_YEAR
+): boolean => {
   return (
-    structure.structureMillesimes?.find(
-      (millesime) => millesime.year === CURRENT_YEAR
-    )?.cpom ?? false
+    structure.cpomStructures?.some((cpomStructure) => {
+      return cpomStructure.cpom.cpomMillesimes?.some(
+        (cpomMillesime) => cpomMillesime.year === year
+      );
+    }) ?? false
   );
 };
 
@@ -168,23 +178,35 @@ export const getCurrentCpomStructureDates = (
     currentCpomStructure.dateFin ?? currentCpomStructure.cpom.finCpom;
 
   return {
-    debutCpom: currentCpomStructureDateDebut,
-    finCpom: currentCpomStructureDateFin,
+    debutCpom: currentCpomStructureDateDebut ?? undefined,
+    finCpom: currentCpomStructureDateFin ?? undefined,
   };
 };
 
-export const getStructureTypologyIndexForAYear = (
-  structureTypologies: StructureTypologieApiType[],
+export const getMillesimeIndexForAYear = (
+  typologies:
+    | StructureTypologieApiType[]
+    | StructureMillesimeApiType[]
+    | BudgetApiType[]
+    | CpomMillesimeApiType[],
   year: number = CURRENT_YEAR
-): number =>
-  structureTypologies?.findIndex(
-    (structureTypology) => structureTypology.year === year
-  ) ?? -1;
+): number => typologies?.findIndex((typology) => typology.year === year) ?? -1;
 
-export const getStructureMillesimeIndexForAYear = (
-  structureMillesimes: StructureMillesimeApiType[],
+export const getCpomStructureIndexAndCpomMillesimeIndexForAYear = (
+  cpomStructures: CpomStructureApiType[],
   year: number = CURRENT_YEAR
-): number =>
-  structureMillesimes?.findIndex(
-    (structureMillesime) => structureMillesime.year === year
-  ) ?? -1;
+): { cpomStructureIndex: number; cpomMillesimeIndex: number } => {
+  let cpomMillesimeIndex = -1;
+  const cpomStructureIndex = cpomStructures.findIndex((cpomStructure) => {
+    cpomMillesimeIndex =
+      cpomStructure.cpom.cpomMillesimes?.findIndex(
+        (cpomMillesime) => cpomMillesime.year === year
+      ) ?? -1;
+    if (cpomMillesimeIndex !== -1) {
+      return true;
+    }
+    return false;
+  });
+
+  return { cpomStructureIndex, cpomMillesimeIndex };
+};
