@@ -56,7 +56,9 @@ export class SelectionPage {
   private extractDepartement(searchTerm: string): string {
     const match = searchTerm.match(/\d{5}/);
     if (!match) {
-      return "75";
+      throw new Error(
+        `Impossible d'extraire le département depuis le terme de recherche : "${searchTerm}"`
+      );
     }
     return match[0].slice(0, 2);
   }
