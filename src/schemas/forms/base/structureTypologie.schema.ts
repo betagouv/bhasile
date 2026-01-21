@@ -32,6 +32,7 @@ export const structureTypologiesAutoSaveSchema = z.object({
   structureTypologies: z.array(
     structureTypologieWithoutEvolutionSchema
       .partial()
+      .extend({ year: zSafeYear() })
       .and(placesEvolutionSchema.partial())
   ),
 });

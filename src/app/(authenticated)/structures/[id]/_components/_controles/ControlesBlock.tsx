@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { ReactElement } from "react";
 
@@ -20,6 +21,10 @@ export const ControlesBlock = (): ReactElement => {
   const controles = structure.controles || [];
   const evenementsIndesirablesGraves =
     structure.evenementsIndesirablesGraves || [];
+
+  const last12MonthsEIG = evenementsIndesirablesGraves.filter((eig) =>
+    dayjs(eig.evenementDate).isAfter(dayjs().subtract(12, "month"))
+  );
 
   return (
     <Block
@@ -48,8 +53,8 @@ export const ControlesBlock = (): ReactElement => {
           </div>
         )}
         <InformationCard
-          primaryInformation={evenementsIndesirablesGraves.length}
-          secondaryInformation="événements indésirables graves"
+          primaryInformation={`${last12MonthsEIG.length} EIG`}
+          secondaryInformation="sur ces 12 derniers mois"
         />
       </div>
       <div className="pt-3">

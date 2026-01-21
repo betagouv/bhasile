@@ -8,17 +8,16 @@ import {
 } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
+import { FormKind } from "@/types/global";
 
 import { FieldSetYearlyDocumentsFinanciers } from "../../fieldsets/structure/FieldSetYearlyDocumentsFinanciers";
 import { DocumentsFinanciersAccordion } from "./DocumentsFinanciersAccordion";
 
 export const DocumentsFinanciers = ({
   hasAccordion,
+  formKind,
   className,
-}: {
-  hasAccordion?: boolean;
-  className?: string;
-}) => {
+}: Props) => {
   const { structure } = useStructureContext();
   const { control } = useFormContext<DocumentsFinanciersFlexibleFormValues>();
   const isAutorisee = isStructureAutorisee(structure?.type);
@@ -55,9 +54,16 @@ export const DocumentsFinanciers = ({
             isAutorisee={isAutorisee}
             control={control}
             hasAccordion={hasAccordion}
+            formKind={formKind}
           />
         </DocumentsFinanciersAccordion>
       ))}
     </div>
   );
+};
+
+type Props = {
+  hasAccordion?: boolean;
+  formKind?: FormKind;
+  className?: string;
 };

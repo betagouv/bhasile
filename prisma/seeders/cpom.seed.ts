@@ -88,8 +88,6 @@ export const createFakeCpoms = async (
       max: currentYear,
     });
     const yearEnd = yearStart + dureeAnnees;
-    const debutCpom = new Date(yearStart, 0, 1, 13);
-    const finCpom = new Date(yearEnd, 0, 1, 13);
 
     const cpomName = `CPOM ${operateurIdStr} ${region} ${yearStart}-${yearEnd}`;
 
@@ -108,9 +106,7 @@ export const createFakeCpoms = async (
       data: {
         name: cpomName,
         operateurId: Number(operateurIdStr),
-        debutCpom,
         yearStart,
-        finCpom,
         yearEnd,
         structures: {
           create: selectedStructures.map((structureId) => {
@@ -118,8 +114,8 @@ export const createFakeCpoms = async (
             const joinLater = faker.datatype.boolean({ probability: 0.1 });
             const leaveEarly = faker.datatype.boolean({ probability: 0.1 });
 
-            let dateDebut: Date | null = null;
-            let dateFin: Date | null = null;
+            let yearJoin: number | null = null;
+            let yearLeave: number | null = null;
 
             if (joinLater) {
               const joinMin = Math.min(yearStart + 1, currentYear);
@@ -128,11 +124,10 @@ export const createFakeCpoms = async (
                 currentYear
               );
               if (joinMin <= joinMax) {
-                const anneeRejointe = faker.number.int({
+                yearJoin = faker.number.int({
                   min: joinMin,
                   max: joinMax,
                 });
-                dateDebut = new Date(anneeRejointe, 0, 1, 13);
               }
             }
 
@@ -146,18 +141,17 @@ export const createFakeCpoms = async (
                 leaveMax
               );
               if (leaveMin <= leaveMax) {
-                const anneeQuitte = faker.number.int({
+                yearLeave = faker.number.int({
                   min: leaveMin,
                   max: leaveMax,
                 });
-                dateFin = new Date(anneeQuitte + 1, 0, 1, 13);
               }
             }
 
             return {
               structureId: structureId,
-              dateDebut,
-              dateFin,
+              yearStart: yearJoin,
+              yearEnd: yearLeave,
             };
           }),
         },
@@ -208,7 +202,6 @@ export const createFakeCpoms = async (
           create: {
             structureDnaCode,
             year: millesimeYear,
-            date: new Date(millesimeYear, 0, 1, 13),
             cpom: true,
           },
         });
@@ -221,13 +214,10 @@ export const createFakeCpoms = async (
     );
 
     for (const millesimeYear of millesimeYears) {
-      const millesimeDate = new Date(millesimeYear, 0, 1, 13);
-
       await prisma.cpomMillesime.create({
         data: {
           cpomId: cpom.id,
           year: millesimeYear,
-          date: millesimeDate,
           dotationDemandee: faker.number.float({
             min: 0,
             max: 1000000,
