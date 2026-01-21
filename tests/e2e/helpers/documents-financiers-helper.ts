@@ -35,10 +35,13 @@ export async function handleDocumentsFinanciers(
         (mode === "finalisation" && formKind === "finalisation");
       const shouldRequireImported =
         mode === "finalisation" && formKind === "ajout";
+
       const isImported = await isDocumentImported(container, document.category);
 
       if (shouldRequireImported) {
-        await expectDocumentImported(container, document.category, year);
+        if (!isImported) {
+          await expectDocumentImported(container, document.category, year);
+        }
         continue;
       }
 

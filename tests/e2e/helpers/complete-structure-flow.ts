@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { AdressesPage } from "./page-objects/ajout/AdressesPage";
 import { AuthenticationPage } from "./page-objects/ajout/AuthenticationPage";
 import { ConfirmationPage } from "./page-objects/ajout/ConfirmationPage";
-import { DocumentsPage } from "./page-objects/ajout/DocumentsPage";
+import { DocumentsFinanciersPage } from "./page-objects/ajout/DocumentsFinanciersPage";
 import { IdentificationPage } from "./page-objects/ajout/IdentificationPage";
 import { PresentationPage } from "./page-objects/ajout/PresentationPage";
 import { SelectionPage } from "./page-objects/ajout/SelectionPage";
@@ -48,9 +48,9 @@ export const completeStructureFlow = async (
   await typePlacesPage.fillForm(formData);
   await typePlacesPage.submit(formData.dnaCode);
 
-  const documentsPage = new DocumentsPage(page);
-  await documentsPage.fillForm(formData);
-  await documentsPage.submit(formData.dnaCode);
+  const documentsFinanciersPage = new DocumentsFinanciersPage(page);
+  await documentsFinanciersPage.fillForm(formData);
+  await documentsFinanciersPage.submit(formData.dnaCode);
 
   const verificationPage = new VerificationPage(page);
   await verificationPage.verifyData(formData);
