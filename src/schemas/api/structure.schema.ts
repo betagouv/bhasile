@@ -74,7 +74,7 @@ export const structureOperateurUpdateApiSchema =
     documentsFinanciers: z.array(documentFinancierApiSchema),
   });
 
-const partialstructureOperateurUpdateApiSchema =
+const partialStructureOperateurUpdateApiSchema =
   structureOperateurUpdateApiSchema.partial().extend({
     dnaCode: z.string().min(1, "Le code DNA est requis"),
     adresses: z.array(adresseApiSchema.partial()).optional(),
@@ -89,12 +89,13 @@ const partialstructureOperateurUpdateApiSchema =
     structureMillesimes: z.array(structureMillesimeApiSchema).optional(),
   });
 
-const remainingstructureAgentUpdateApiSchema = z.object({
+const remainingStructureAgentUpdateApiSchema = z.object({
   id: z.number().optional(),
   placesACreer: z.number().int().min(0).nullish(),
   placesAFermer: z.number().int().min(0).nullish(),
   echeancePlacesACreer: z.string().datetime().nullish(),
   echeancePlacesAFermer: z.string().datetime().nullish(),
+  noEvaluationStructure: z.boolean().optional(),
   notes: z.string().nullish(),
   controles: z.array(controleApiSchema).optional(),
   evaluations: z.array(evaluationApiSchema).optional(),
@@ -108,12 +109,12 @@ const remainingstructureAgentUpdateApiSchema = z.object({
 });
 
 export const structureAgentUpdateApiSchema =
-  partialstructureOperateurUpdateApiSchema.and(
-    remainingstructureAgentUpdateApiSchema
+  partialStructureOperateurUpdateApiSchema.and(
+    remainingStructureAgentUpdateApiSchema
   );
 
 export const structureApiSchema = structureOperateurUpdateApiSchema.and(
-  remainingstructureAgentUpdateApiSchema.extend({
+  remainingStructureAgentUpdateApiSchema.extend({
     id: z.number(),
   })
 );

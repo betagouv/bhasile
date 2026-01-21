@@ -1,10 +1,10 @@
 import z from "zod";
 
 import { controlesSchema } from "../base/controle.schema";
-import { evaluationsSchema } from "../base/evaluation.schema";
+import { evaluationsSchemaWithConditionalValidation } from "../base/evaluation.schema";
 
 export const modificationQualiteSchema = controlesSchema.and(
-  evaluationsSchema.optional()
+  evaluationsSchemaWithConditionalValidation.optional()
 );
 
 export type ModificationQualiteFormValues = z.infer<
