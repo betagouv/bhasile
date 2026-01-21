@@ -81,11 +81,11 @@ export class StructureDetailsPage {
     data: TestStructureData,
     overrides: StructureDetailsOverrides
   ) {
-    const publicValue = overrides.publicValue ?? data.identification.public;
+    const publicValue = overrides.publicValue ?? data.public;
     const publicLabel =
       PublicType[publicValue as keyof typeof PublicType] ?? publicValue;
-    const lgbt = overrides.lgbt ?? data.identification.lgbt;
-    const fvvTeh = overrides.fvvTeh ?? data.identification.fvvTeh;
+    const lgbt = overrides.lgbt ?? data.lgbt;
+    const fvvTeh = overrides.fvvTeh ?? data.fvvTeh;
     const vulnerabilites: string[] = [];
     if (lgbt) {
       vulnerabilites.push("LGBT");
@@ -97,21 +97,21 @@ export class StructureDetailsPage {
 
     await expect(
       block.getByText("Date de création", { exact: true }).locator("..")
-    ).toContainText(formatDate(data.identification.creationDate));
+    ).toContainText(formatDate(data.creationDate));
     await expect(
       block.getByText("Type de structure", { exact: true }).locator("..")
     ).toContainText(data.type);
     await expect(
       block.getByText("Code DNA (OFII)", { exact: true }).locator("..")
     ).toContainText(data.dnaCode);
-    if (data.identification.finessCode) {
+    if (data.finessCode) {
       await expect(
         block.getByText("Code FINESS", { exact: true }).locator("..")
-      ).toContainText(data.identification.finessCode.replaceAll(" ", ""));
+      ).toContainText(data.finessCode.replaceAll(" ", ""));
     }
     const operateurLabel = getOperateurLabel(
-      data.identification.filiale,
-      data.identification.operateur.name
+      data.filiale,
+      data.operateur.name
     );
     if (operateurLabel) {
       await expect(
@@ -126,13 +126,13 @@ export class StructureDetailsPage {
     ).toContainText(vulnerabiliteLabel);
 
     const { addressLine, postalCode, city } = parseAddressParts(
-      data.adresses.adresseAdministrative.complete
+      data.adresseAdministrative.complete
     );
     const addressRow = block.getByText("Adresse administrative", {
       exact: true,
     });
-    if (data.adresses.nom) {
-      await expect(addressRow.locator("..")).toContainText(data.adresses.nom);
+    if (data.nom) {
+      await expect(addressRow.locator("..")).toContainText(data.nom);
     }
     if (addressLine) {
       await expect(addressRow.locator("..")).toContainText(addressLine);
@@ -151,8 +151,8 @@ export class StructureDetailsPage {
     overrides: StructureDetailsOverrides
   ) {
     await this.showContacts();
-    const contactPrincipal = data.identification.contactPrincipal;
-    const contactSecondaire = data.identification.contactSecondaire;
+    const contactPrincipal = data.contactPrincipal;
+    const contactSecondaire = data.contactSecondaire;
     const principalEmail = overrides.contactEmail || contactPrincipal.email;
 
     await this.expectContactLine(block, {
@@ -191,7 +191,7 @@ export class StructureDetailsPage {
   private async expectTypeBati(block: Locator, data: TestStructureData) {
     await expect(
       block.getByText("Type de bâti", { exact: true }).locator("..")
-    ).toContainText(data.adresses.typeBati);
+    ).toContainText(data.typeBati);
   }
 
   private async expectTypePlaces(data: TestStructureData) {
@@ -202,7 +202,7 @@ export class StructureDetailsPage {
     await historyButton.click();
 
     const historyTable = typePlacesBlock.getByRole("table").first();
-    for (const typologie of data.typologies) {
+    for (const typologie of data.structureTypologies) {
       await expect(historyTable).toContainText(
         typologie.placesAutorisees.toString()
       );

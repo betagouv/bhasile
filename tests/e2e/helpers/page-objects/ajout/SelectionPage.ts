@@ -16,10 +16,9 @@ export class SelectionPage {
   async selectStructure(data: TestStructureData): Promise<void> {
     await this.waitForLoad();
     await this.page.selectOption("#type", data.type);
-    await this.selectOperateur(data.identification.operateur.searchTerm);
-    await this.selectDepartement(
-      data.adresses.adresseAdministrative.searchTerm
-    );
+    await this.selectOperateur(data.operateur.searchTerm);
+    const departement = data.departementAdministratif;
+    await this.selectDepartement(departement);
 
     const structureLabel = this.page.locator(`label[for="${data.dnaCode}"]`);
     await expect(structureLabel).toBeVisible({ timeout: 10000 });
@@ -43,23 +42,12 @@ export class SelectionPage {
     await this.page.click("#suggestion-0");
   }
 
-  private async selectDepartement(searchTerm: string): Promise<void> {
-    const departement = this.extractDepartement(searchTerm);
+  private async selectDepartement(departement: string): Promise<void> {
     await this.page.fill("#departement", departement);
     await this.page.waitForSelector("#suggestion-0", {
       state: "visible",
       timeout: 5000,
     });
     await this.page.click("#suggestion-0");
-  }
-
-  private extractDepartement(searchTerm: string): string {
-    const match = searchTerm.match(/\d{5}/);
-    if (!match) {
-      throw new Error(
-        `Impossible d'extraire le département depuis le terme de recherche : "${searchTerm}"`
-      );
-    }
-    return match[0].slice(0, 2);
   }
 }

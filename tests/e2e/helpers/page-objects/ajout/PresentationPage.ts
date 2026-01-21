@@ -3,7 +3,7 @@ import { expect, Page } from "@playwright/test";
 export class PresentationPage {
   constructor(private page: Page) {}
 
-  async verifyPageContent(): Promise<void> {
+  private async verifyPageContent(): Promise<void> {
     // Vérifier que la page de présentation est bien affichée
     await expect(
       this.page
@@ -13,14 +13,16 @@ export class PresentationPage {
 
     // Vérifier la présence du bouton principal
     await expect(
-      this.page.locator('text="Je commence à remplir le formulaire"')
+      this.page.getByRole("link", {
+        name: "Je commence à remplir le formulaire",
+      })
     ).toBeVisible();
   }
 
-  async startForm(): Promise<void> {
+  private async startForm(): Promise<void> {
     // Cliquer sur le bouton pour commencer le formulaire
     await this.page
-      .locator('text="Je commence à remplir le formulaire"')
+      .getByRole("link", { name: "Je commence à remplir le formulaire" })
       .click();
   }
 
@@ -32,8 +34,6 @@ export class PresentationPage {
     await this.startForm();
 
     // Vérifier qu'on arrive bien sur l'étape de sélection
-    await expect(this.page).toHaveURL(
-      new RegExp(`/ajout-structure/selection`)
-    );
+    await expect(this.page).toHaveURL(new RegExp(`/ajout-structure/selection`));
   }
 }

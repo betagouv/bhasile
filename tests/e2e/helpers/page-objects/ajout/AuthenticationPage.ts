@@ -29,9 +29,12 @@ export class AuthenticationPage {
       await this.page.waitForURL("http://localhost:3000/ajout-structure", {
         timeout: 15000,
       });
-    } else {
-      // Auth is bypassed - just wait for the form to load
-      await this.page.waitForTimeout(1000);
     }
+
+    // Wait for the presentation page to be ready (the "start form" link)
+    await this.page.waitForSelector('a[href="/ajout-structure/selection"]', {
+      state: "visible",
+      timeout: 5000,
+    });
   }
 }

@@ -8,42 +8,39 @@ export const caesSansCpom: TestStructureData = {
   dnaCode: "K1234",
   type: StructureType.CAES,
   cpom: false,
-  identification: {
-    operateur: {
-      name: "Opérateur CAES",
-      searchTerm: "Opér",
-    },
-    creationDate: "2018-04-20",
-    public: "Personnes isolées",
-    lgbt: false,
-    fvvTeh: true,
-    contactPrincipal: {
-      prenom: "Pierre",
-      nom: "Dubois",
-      role: "Directeur·rice",
-      email: "pierre.dubois@example.com",
-      telephone: "+33456789012",
-    },
-    contactSecondaire: {
-      prenom: "Claire",
-      nom: "Petit",
-      role: "Responsable administratif",
-      email: "claire.petit@example.com",
-      telephone: "+33856789012",
-    },
-    debutConvention: "2023-01-01",
-    finConvention: "2026-12-31",
+  operateur: {
+    name: "Opérateur CAES",
+    searchTerm: "Opér",
   },
-  adresses: {
-    nom: "CAES Test",
-    adresseAdministrative: {
-      complete: "15 Boulevard de la Liberté 13001 Marseille",
-      searchTerm: "15 boulevard liberte marseille",
-    },
-    typeBati: Repartition.COLLECTIF,
-    sameAddress: true,
+  creationDate: "2018-04-20",
+  public: "Personnes isolées",
+  lgbt: false,
+  fvvTeh: true,
+  contactPrincipal: {
+    prenom: "Pierre",
+    nom: "Dubois",
+    role: "Directeur·rice",
+    email: "pierre.dubois@example.com",
+    telephone: "+33456789012",
   },
-  typologies: [
+  contactSecondaire: {
+    prenom: "Claire",
+    nom: "Petit",
+    role: "Responsable administratif",
+    email: "claire.petit@example.com",
+    telephone: "+33856789012",
+  },
+  debutConvention: "2023-01-01",
+  finConvention: "2026-12-31",
+  nom: "CAES Test",
+  adresseAdministrative: {
+    complete: "15 Boulevard de la Liberté 13001 Marseille",
+    searchTerm: "15 boulevard liberte marseille",
+  },
+  departementAdministratif: "13",
+  typeBati: Repartition.COLLECTIF,
+  sameAddress: true,
+  structureTypologies: [
     { placesAutorisees: 30, pmr: 3, lgbt: 4, fvvTeh: 5 },
     { placesAutorisees: 28, pmr: 3, lgbt: 4, fvvTeh: 5 },
     { placesAutorisees: 25, pmr: 2, lgbt: 3, fvvTeh: 4 },
@@ -64,9 +61,6 @@ export const caesSansCpom: TestStructureData = {
 export const caesAvecCpom: TestStructureData = {
   ...caesSansCpom,
   cpom: true,
-  identification: {
-    ...caesSansCpom.identification,
-    debutCpom: "2024-03-01",
-    finCpom: "2029-02-28",
-  },
+  debutCpom: "2024-03-01",
+  finCpom: "2029-02-28",
 };

@@ -17,7 +17,7 @@ export class VerificationPage {
     // Basic verification - just check that some key data is present
     // The email should be visible somewhere on the page
     await expect(
-      this.page.locator(`text=${data.identification.contactPrincipal.email}`)
+      this.page.locator(`text=${data.contactPrincipal.email}`)
     ).toBeVisible({ timeout: 5000 });
   }
 

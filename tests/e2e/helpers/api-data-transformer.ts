@@ -4,8 +4,6 @@ import { TestStructureData } from "./test-data";
  * Transforms test data format to API structure creation format
  */
 export function transformTestDataToApiFormat(testData: TestStructureData) {
-  const { identification, adresses, typologies } = testData;
-
   // Extract department from postal code (first 2 digits for most, or "2A"/"2B" for Corsica)
   const extractDepartment = (postalCode: string): string => {
     if (postalCode.startsWith("20")) {
@@ -38,31 +36,31 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
     };
   };
 
-  const adminAddress = parseAddress(adresses.adresseAdministrative.searchTerm);
+  const adminAddress = parseAddress(testData.adresseAdministrative.searchTerm);
 
   // Transform contacts to array
   const contacts = [
     {
-      prenom: identification.contactPrincipal.prenom,
-      nom: identification.contactPrincipal.nom,
-      telephone: identification.contactPrincipal.telephone,
-      email: identification.contactPrincipal.email,
-      role: identification.contactPrincipal.role,
+      prenom: testData.contactPrincipal.prenom,
+      nom: testData.contactPrincipal.nom,
+      telephone: testData.contactPrincipal.telephone,
+      email: testData.contactPrincipal.email,
+      role: testData.contactPrincipal.role,
     },
   ];
 
-  if (identification.contactSecondaire) {
+  if (testData.contactSecondaire) {
     contacts.push({
-      prenom: identification.contactSecondaire.prenom,
-      nom: identification.contactSecondaire.nom,
-      telephone: identification.contactSecondaire.telephone,
-      email: identification.contactSecondaire.email,
-      role: identification.contactSecondaire.role,
+      prenom: testData.contactSecondaire.prenom,
+      nom: testData.contactSecondaire.nom,
+      telephone: testData.contactSecondaire.telephone,
+      email: testData.contactSecondaire.email,
+      role: testData.contactSecondaire.role,
     });
   }
 
   // Transform typologies with years
-  const transformedTypologies = typologies.map((typo, index) => ({
+  const transformedTypologies = testData.structureTypologies.map((typo, index) => ({
     year: 2025 - index, // 2025, 2024, 2023
     placesAutorisees: typo.placesAutorisees,
     pmr: typo.pmr,
@@ -71,16 +69,16 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
   }));
 
   // Transform addresses with nested typologies
-  const transformedAdresses = adresses.sameAddress
+  const transformedAdresses = testData.sameAddress
     ? [
         {
           adresse: adminAddress.street,
           codePostal: adminAddress.postalCode,
           commune: adminAddress.city,
-          repartition: adresses.typeBati,
+          repartition: testData.typeBati,
           adresseTypologies: [
             {
-              placesAutorisees: typologies[0].placesAutorisees,
+              placesAutorisees: testData.structureTypologies[0].placesAutorisees,
               year: 2025,
               qpv: 0, // Convert boolean to number
               logementSocial: 0, // Convert boolean to number
@@ -88,13 +86,13 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
           ],
         },
       ]
-    : (adresses.adresses || []).map((addr) => {
+    : (testData.adresses || []).map((addr) => {
         const parsed = parseAddress(addr.searchTerm);
         return {
           adresse: parsed.street,
           codePostal: parsed.postalCode,
           commune: parsed.city,
-          repartition: addr.repartition || adresses.typeBati,
+          repartition: addr.repartition || testData.typeBati,
           adresseTypologies: [
             {
               placesAutorisees: addr.placesAutorisees,
@@ -111,37 +109,37 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
     dnaCode: testData.dnaCode,
     operateur: {
       id: 1, // Use known test operateur ID
-      name: identification.operateur.name,
+      name: testData.operateur.name,
     },
-    filiale: identification.filiale,
+    filiale: testData.filiale,
     type: testData.type,
     adresseAdministrative: adminAddress.street,
     codePostalAdministratif: adminAddress.postalCode,
     communeAdministrative: adminAddress.city,
-    departementAdministratif: adminAddress.department,
-    nom: adresses.nom,
-    debutConvention: identification.debutConvention
-      ? new Date(identification.debutConvention)
+    departementAdministratif: testData.departementAdministratif || adminAddress.department,
+    nom: testData.nom,
+    debutConvention: testData.debutConvention
+      ? new Date(testData.debutConvention)
       : null,
-    finConvention: identification.finConvention
-      ? new Date(identification.finConvention)
+    finConvention: testData.finConvention
+      ? new Date(testData.finConvention)
       : null,
     cpom: testData.cpom,
-    creationDate: new Date(identification.creationDate),
-    finessCode: identification.finessCode,
-    lgbt: identification.lgbt,
-    fvvTeh: identification.fvvTeh,
-    public: identification.public,
-    debutPeriodeAutorisation: identification.debutPeriodeAutorisation
-      ? new Date(identification.debutPeriodeAutorisation)
+    creationDate: new Date(testData.creationDate),
+    finessCode: testData.finessCode,
+    lgbt: testData.lgbt,
+    fvvTeh: testData.fvvTeh,
+    public: testData.public,
+    debutPeriodeAutorisation: testData.debutPeriodeAutorisation
+      ? new Date(testData.debutPeriodeAutorisation)
       : null,
-    finPeriodeAutorisation: identification.finPeriodeAutorisation
-      ? new Date(identification.finPeriodeAutorisation)
+    finPeriodeAutorisation: testData.finPeriodeAutorisation
+      ? new Date(testData.finPeriodeAutorisation)
       : null,
-    debutCpom: identification.debutCpom
-      ? new Date(identification.debutCpom)
+    debutCpom: testData.debutCpom
+      ? new Date(testData.debutCpom)
       : null,
-    finCpom: identification.finCpom ? new Date(identification.finCpom) : null,
+    finCpom: testData.finCpom ? new Date(testData.finCpom) : null,
     adresses: transformedAdresses,
     contacts,
     structureTypologies: transformedTypologies,

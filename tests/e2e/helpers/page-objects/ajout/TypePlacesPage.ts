@@ -6,9 +6,7 @@ export class TypePlacesPage {
   constructor(private page: Page) {}
 
   async fillForm(data: TestStructureData) {
-    const { typologies } = data;
-
-    for (const [i, typologie] of typologies.entries()) {
+    for (const [i, typologie] of data.structureTypologies.entries()) {
       // Fill typologie fields (date is auto-filled by the form)
       await this.page.fill(
         `input[id="typologies.${i}.placesAutorisees"]`,

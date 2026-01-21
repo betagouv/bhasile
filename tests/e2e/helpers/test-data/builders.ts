@@ -11,11 +11,8 @@ export const buildTestData = (
 ): TestStructureData => ({
   ...base,
   dnaCode,
-  identification: {
-    ...base.identification,
-    operateur: {
-      name: operateurName,
-      searchTerm: operateurName,
-    },
+  operateur: {
+    name: operateurName,
+    searchTerm: operateurName,
   },
 });

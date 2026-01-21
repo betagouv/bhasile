@@ -5,54 +5,52 @@ export type TestStructureData = {
   dnaCode: string;
   type: StructureType;
   cpom: boolean;
-  identification: {
-    filiale?: string;
-    operateur: {
-      name: string;
-      searchTerm: string;
-    };
-    creationDate: string;
-    finessCode?: string;
-    public: string;
-    lgbt: boolean;
-    fvvTeh: boolean;
-    contactPrincipal: {
-      prenom: string;
-      nom: string;
-      role: string;
-      email: string;
-      telephone: string;
-    };
-    contactSecondaire?: {
-      prenom: string;
-      nom: string;
-      role: string;
-      email: string;
-      telephone: string;
-    };
-    debutPeriodeAutorisation?: string;
-    finPeriodeAutorisation?: string;
-    debutConvention?: string;
-    finConvention?: string;
-    debutCpom?: string;
-    finCpom?: string;
+  filiale?: string;
+  operateur: {
+    name: string;
+    searchTerm: string;
   };
-  adresses: {
-    nom?: string;
-    adresseAdministrative: {
-      complete: string;
-      searchTerm: string;
-    };
-    typeBati: Repartition;
-    sameAddress: boolean;
-    adresses?: Array<{
-      adresseComplete: string;
-      searchTerm: string;
-      placesAutorisees: number;
-      repartition?: Repartition;
-    }>;
+  creationDate: string;
+  finessCode?: string;
+  public: string;
+  lgbt: boolean;
+  fvvTeh: boolean;
+  contactPrincipal: {
+    prenom: string;
+    nom: string;
+    role: string;
+    email: string;
+    telephone: string;
   };
-  typologies: Array<{
+  contactSecondaire?: {
+    prenom: string;
+    nom: string;
+    role: string;
+    email: string;
+    telephone: string;
+  };
+  debutPeriodeAutorisation?: string;
+  finPeriodeAutorisation?: string;
+  debutConvention?: string;
+  finConvention?: string;
+  debutCpom?: string;
+  finCpom?: string;
+
+  nom?: string;
+  adresseAdministrative: {
+    complete: string;
+    searchTerm: string;
+  };
+  departementAdministratif: string;
+  typeBati: Repartition;
+  sameAddress: boolean;
+  adresses?: Array<{
+    adresseComplete: string;
+    searchTerm: string;
+    placesAutorisees: number;
+    repartition?: Repartition;
+  }>;
+  structureTypologies: Array<{
     placesAutorisees: number;
     pmr: number;
     lgbt: number;
