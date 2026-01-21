@@ -14,6 +14,7 @@ export type DeepPartial<T> = T extends object
   : T;
 
 export const FormKind = {
+  AJOUT: "ajout",
   MODIFICATION: "modification",
   FINALISATION: "finalisation",
   ADRESSES_RECOVERY: "adresses-recovery",

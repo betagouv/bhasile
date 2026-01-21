@@ -236,6 +236,19 @@ export const findOne = async (id: number): Promise<Structure> => {
           year: "desc",
         },
       },
+      cpomStructures: {
+        include: {
+          cpom: {
+            include: {
+              cpomMillesimes: {
+                orderBy: {
+                  year: "desc",
+                },
+              },
+            },
+          },
+        },
+      },
       evaluations: {
         include: {
           fileUploads: true,
@@ -342,7 +355,7 @@ const updateOne = async (
     const {
       contacts,
       budgets,
-      cpomMillesimes,
+      cpomStructures,
       structureTypologies,
       adresses,
       actesAdministratifs,
@@ -352,6 +365,11 @@ const updateOne = async (
       forms,
       structureMillesimes,
     } = structure;
+
+    const cpomMillesimes = cpomStructures
+      ?.map((cpomStructure) => cpomStructure.cpom.cpomMillesimes)
+      ?.flat()
+      ?.filter((millesime) => millesime !== undefined);
 
     return await prisma.$transaction(async (tx) => {
       const updatedStructure = await createOrUpdateStructure(tx, structure);
