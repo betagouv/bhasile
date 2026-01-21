@@ -1,6 +1,8 @@
 import { Page } from "@playwright/test";
 import { v4 as uuidv4 } from "uuid";
 
+import { BASE_URL } from "../constants";
+
 type FileApiMockOptions = {
   mockFileKey: string;
   originalName?: string;
@@ -29,7 +31,7 @@ export async function mockFileApi(
     if (method === "POST" && url.pathname.endsWith("/api/files")) {
       uploadCounter += 1;
       const generatedKey = `${mockFileKey}-${uploadCounter}-${uuidv4()}`;
-      await page.request.post("http://localhost:3000/api/test/files", {
+      await page.request.post(`${BASE_URL}/api/test/files`, {
         data: {
           key: generatedKey,
           mimeType,

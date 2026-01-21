@@ -1,10 +1,12 @@
 import { Page } from "@playwright/test";
 
+import { TIMEOUTS, URLS } from "../../constants";
+
 export class AuthenticationPage {
   constructor(private page: Page) {}
 
   async authenticate() {
-    await this.page.goto("http://localhost:3000/ajout-structure", {
+    await this.page.goto(URLS.AJOUT_STRUCTURE, {
       waitUntil: "domcontentloaded",
     });
 
@@ -26,15 +28,15 @@ export class AuthenticationPage {
       await this.page.click("button.fr-btn");
 
       // Wait for the page to load after authentication
-      await this.page.waitForURL("http://localhost:3000/ajout-structure", {
-        timeout: 15000,
+      await this.page.waitForURL(URLS.AJOUT_STRUCTURE, {
+        timeout: TIMEOUTS.SUBMIT,
       });
     }
 
     // Wait for the presentation page to be ready (the "start form" link)
     await this.page.waitForSelector('a[href="/ajout-structure/selection"]', {
       state: "visible",
-      timeout: 5000,
+      timeout: TIMEOUTS.AUTOCOMPLETE,
     });
   }
 }

@@ -2,6 +2,8 @@ import { Page } from "@playwright/test";
 
 import { Repartition } from "@/types/adresse.type";
 
+import { TIMEOUTS, URLS } from "../../constants";
+import { getRepartitionLabel } from "../../shared-utils";
 import { TestStructureData } from "../../test-data";
 
 export class AdressesPage {
@@ -27,20 +29,23 @@ export class AdressesPage {
 
     // Wait for autocomplete suggestions (fail if not visible).
     const firstSuggestion = this.page.locator('[role="option"]').first();
-    await firstSuggestion.waitFor({ state: "visible", timeout: 5000 });
+    await firstSuggestion.waitFor({
+      state: "visible",
+      timeout: TIMEOUTS.AUTOCOMPLETE,
+    });
     await firstSuggestion.click();
 
     // Wait for address to be populated
-    await this.page.waitForTimeout(500);
+    await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
 
     // Type de bâti - select dropdown
     await this.page.selectOption(
       'select[name="typeBati"]',
-      this.getRepartitionLabel(data.typeBati)
+      getRepartitionLabel(data.typeBati)
     );
 
     // Wait for the UI to update after selecting type de bâti
-    await this.page.waitForTimeout(500);
+    await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
 
     // Same address toggle (only for COLLECTIF)
     if (data.sameAddress && data.typeBati === Repartition.COLLECTIF) {
@@ -48,7 +53,7 @@ export class AdressesPage {
       await this.page.click('input[title="Adresse d\'hébergement identique"]');
 
       // Wait for the address to be auto-filled
-      await this.page.waitForTimeout(500);
+      await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
 
       // Fill places autorisées in the auto-filled address
       // The first address should now be populated
@@ -75,10 +80,13 @@ export class AdressesPage {
         );
 
         const addressSuggestion = this.page.locator('[role="option"]').first();
-        await addressSuggestion.waitFor({ state: "visible", timeout: 5000 });
+        await addressSuggestion.waitFor({
+          state: "visible",
+          timeout: TIMEOUTS.AUTOCOMPLETE,
+        });
         await addressSuggestion.click();
 
-        await this.page.waitForTimeout(500);
+        await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
 
         // Fill places autorisées
         await this.page.fill(
@@ -91,7 +99,7 @@ export class AdressesPage {
           const repartitionSelector = `select[name="adresses.${i}.repartition"]`;
           await this.page.selectOption(
             repartitionSelector,
-            this.getRepartitionLabel(adresse.repartition)
+            getRepartitionLabel(adresse.repartition)
           );
         }
       }
@@ -100,21 +108,6 @@ export class AdressesPage {
 
   async submit(dnaCode: string) {
     await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(
-      `http://localhost:3000/ajout-structure/${dnaCode}/03-type-places`
-    );
-  }
-
-  private getRepartitionLabel(repartition: Repartition): string {
-    switch (repartition) {
-      case Repartition.COLLECTIF:
-        return "Collectif";
-      case Repartition.DIFFUS:
-        return "Diffus";
-      case Repartition.MIXTE:
-        return "Mixte";
-      default:
-        return repartition;
-    }
+    await this.page.waitForURL(URLS.ajoutStep(dnaCode, "03-type-places"));
   }
 }

@@ -1,8 +1,10 @@
 import { Page } from "@playwright/test";
 
 export async function mockAddressApi(page: Page, fullAddress: string) {
-  const addressSuggestion = buildAddressSuggestion(fullAddress);
   await page.route("https://api-adresse.data.gouv.fr/**", async (route) => {
+    const url = new URL(route.request().url());
+    const query = url.searchParams.get("q")?.trim();
+    const addressSuggestion = buildAddressSuggestion(query || fullAddress);
     await route.fulfill({
       status: 200,
       contentType: "application/json",

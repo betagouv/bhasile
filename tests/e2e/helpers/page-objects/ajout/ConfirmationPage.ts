@@ -1,5 +1,7 @@
 import { expect, Page } from "@playwright/test";
 
+import { TIMEOUTS } from "../../constants";
+
 export class ConfirmationPage {
   constructor(private page: Page) {}
 
@@ -9,7 +11,7 @@ export class ConfirmationPage {
       this.page.getByRole("heading", {
         name: /Vous avez terminé la création de cette structure/i,
       })
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: TIMEOUTS.NAVIGATION });
 
     // Also check for success icon
     await expect(this.page.locator(".fr-icon-success-line")).toBeVisible();

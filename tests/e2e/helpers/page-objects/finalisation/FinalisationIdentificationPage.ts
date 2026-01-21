@@ -1,20 +1,21 @@
 import { Page } from "@playwright/test";
 
+import { TIMEOUTS, URLS } from "../../constants";
+
 export class FinalisationIdentificationPage {
   constructor(private page: Page) {}
 
   async waitForLoad() {
-    // Wait for the form to load
     await this.page.waitForSelector('button[type="submit"]', {
-      timeout: 10000,
+      timeout: TIMEOUTS.NAVIGATION,
     });
   }
 
   async submit(structureId: number) {
     await this.page.click('button[type="submit"]');
     await this.page.waitForURL(
-      `http://localhost:3000/structures/${structureId}/finalisation/02-documents-financiers`,
-      { timeout: 10000 }
+      URLS.finalisationStep(structureId, "02-documents-financiers"),
+      { timeout: TIMEOUTS.NAVIGATION }
     );
   }
 }

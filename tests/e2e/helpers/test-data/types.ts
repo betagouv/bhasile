@@ -57,6 +57,7 @@ export type TestStructureData = {
     fvvTeh: number;
   }>;
   documentsFinanciers: {
+    allAddedViaAjout: boolean;
     files: Array<{
       year: string;
       category: string;

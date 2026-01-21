@@ -1,10 +1,12 @@
 import { expect, Page } from "@playwright/test";
 
+import { URLS } from "../../constants";
+
 export class StructuresListPage {
   constructor(private page: Page) {}
 
   async navigate() {
-    await this.page.goto("http://localhost:3000/structures");
+    await this.page.goto(URLS.STRUCTURES);
   }
 
   async searchByDna(dnaCode: string) {

@@ -3,7 +3,7 @@ import { StructureType } from "@/types/structure.type";
 
 import { TestStructureData } from "./types";
 
-export const cadaSansCpom: TestStructureData = {
+export const cada1: TestStructureData = {
   dnaCode: "C1234",
   type: StructureType.CADA,
   cpom: false,
@@ -36,7 +36,7 @@ export const cadaSansCpom: TestStructureData = {
   nom: "Structure Test",
   adresseAdministrative: {
     complete: "1 Rue de la Paix 75001 Paris",
-    searchTerm: "1 rue de la paix paris",
+    searchTerm: "1 Rue de la Paix 75001 Paris",
   },
   departementAdministratif: "75",
   typeBati: Repartition.DIFFUS,
@@ -44,13 +44,13 @@ export const cadaSansCpom: TestStructureData = {
   adresses: [
     {
       adresseComplete: "1 Rue de la Paix 75001 Paris",
-      searchTerm: "1 rue de la paix paris",
+      searchTerm: "1 Rue de la Paix 75001 Paris",
       placesAutorisees: 50,
       repartition: Repartition.DIFFUS,
     },
     {
       adresseComplete: "2 Rue de la Paix 75001 Paris",
-      searchTerm: "2 rue de la paix paris",
+      searchTerm: "2 Rue de la Paix 75001 Paris",
       placesAutorisees: 150,
       repartition: Repartition.DIFFUS,
     },
@@ -76,6 +76,7 @@ export const cadaSansCpom: TestStructureData = {
     },
   ],
   documentsFinanciers: {
+    allAddedViaAjout: true,
     files: [
       {
         year: "2025",

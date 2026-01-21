@@ -1,5 +1,7 @@
 import { expect, Page } from "@playwright/test";
 
+import { TIMEOUTS, URLS } from "../../constants";
+
 export class ModificationDescriptionPage {
   constructor(private page: Page) {}
 
@@ -8,7 +10,7 @@ export class ModificationDescriptionPage {
       this.page.getByRole("heading", { name: /Modification/i })
     ).toBeVisible();
     await this.page.waitForSelector('button[type="submit"]', {
-      timeout: 10000,
+      timeout: TIMEOUTS.NAVIGATION,
     });
   }
 
@@ -33,10 +35,9 @@ export class ModificationDescriptionPage {
 
   async submit(structureId: number) {
     await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(
-      `http://localhost:3000/structures/${structureId}`,
-      { timeout: 10000 }
-    );
+    await this.page.waitForURL(URLS.structure(structureId), {
+      timeout: TIMEOUTS.NAVIGATION,
+    });
   }
 
   private async toggleCheckbox(selector: string, shouldBeChecked: boolean) {

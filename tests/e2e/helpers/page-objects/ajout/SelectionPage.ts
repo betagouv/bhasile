@@ -1,5 +1,6 @@
 import { expect, Page } from "@playwright/test";
 
+import { TIMEOUTS } from "../../constants";
 import { TestStructureData } from "../../test-data";
 
 export class SelectionPage {
@@ -21,11 +22,11 @@ export class SelectionPage {
     await this.selectDepartement(departement);
 
     const structureLabel = this.page.locator(`label[for="${data.dnaCode}"]`);
-    await expect(structureLabel).toBeVisible({ timeout: 10000 });
+    await expect(structureLabel).toBeVisible({ timeout: TIMEOUTS.NAVIGATION });
     await structureLabel.click();
 
     await this.page
-      .getByRole("button", { name: "J’ai trouvé ma structure" })
+      .getByRole("button", { name: "J'ai trouvé ma structure" })
       .click();
     await expect(this.page).toHaveURL(
       new RegExp(`/ajout-structure/${data.dnaCode}/01-identification`)
@@ -37,7 +38,7 @@ export class SelectionPage {
     await this.page.fill('input[name="operateur.name"]', searchTerm);
     await this.page.waitForSelector("#suggestion-0", {
       state: "visible",
-      timeout: 5000,
+      timeout: TIMEOUTS.AUTOCOMPLETE,
     });
     await this.page.click("#suggestion-0");
   }
@@ -46,7 +47,7 @@ export class SelectionPage {
     await this.page.fill("#departement", departement);
     await this.page.waitForSelector("#suggestion-0", {
       state: "visible",
-      timeout: 5000,
+      timeout: TIMEOUTS.AUTOCOMPLETE,
     });
     await this.page.click("#suggestion-0");
   }

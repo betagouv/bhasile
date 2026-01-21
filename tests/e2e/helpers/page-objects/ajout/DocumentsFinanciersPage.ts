@@ -1,5 +1,6 @@
 import { Page } from "@playwright/test";
 
+import { TIMEOUTS, URLS } from "../../constants";
 import { handleDocumentsFinanciers } from "../../documents-financiers-helper";
 import { TestStructureData } from "../../test-data";
 
@@ -12,9 +13,8 @@ export class DocumentsFinanciersPage {
 
   async submit(dnaCode: string) {
     await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(
-      `http://localhost:3000/ajout-structure/${dnaCode}/05-verification`,
-      { timeout: 10000 }
-    );
+    await this.page.waitForURL(URLS.ajoutStep(dnaCode, "05-verification"), {
+      timeout: TIMEOUTS.NAVIGATION,
+    });
   }
 }

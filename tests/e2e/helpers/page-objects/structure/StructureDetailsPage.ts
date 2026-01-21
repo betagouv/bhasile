@@ -6,13 +6,21 @@ import { formatPhoneNumber } from "@/app/utils/phone.util";
 import { getOperateurLabel } from "@/app/utils/structure.util";
 import { PublicType } from "@/types/structure.type";
 
+import { URLS } from "../../constants";
+import {
+  escapeForRegex,
+  getActesCategoryLabel,
+  getRepartitionLabel,
+  normalizeDocumentCategory,
+  parseAddressParts,
+} from "../../shared-utils";
 import { TestStructureData } from "../../test-data";
 
 export class StructureDetailsPage {
   constructor(private page: Page) {}
 
   async navigateTo(structureId: number) {
-    await this.page.goto(`http://localhost:3000/structures/${structureId}`);
+    await this.page.goto(URLS.structure(structureId));
   }
 
   async waitForLoad() {
@@ -109,10 +117,7 @@ export class StructureDetailsPage {
         block.getByText("Code FINESS", { exact: true }).locator("..")
       ).toContainText(data.finessCode.replaceAll(" ", ""));
     }
-    const operateurLabel = getOperateurLabel(
-      data.filiale,
-      data.operateur.name
-    );
+    const operateurLabel = getOperateurLabel(data.filiale, data.operateur.name);
     if (operateurLabel) {
       await expect(
         block.getByText("Opérateur", { exact: true }).locator("..")
@@ -189,9 +194,11 @@ export class StructureDetailsPage {
   }
 
   private async expectTypeBati(block: Locator, data: TestStructureData) {
+    // Convert enum value to display label
+    const typeBatiLabel = getRepartitionLabel(data.typeBati);
     await expect(
       block.getByText("Type de bâti", { exact: true }).locator("..")
-    ).toContainText(data.typeBati);
+    ).toContainText(typeBatiLabel);
   }
 
   private async expectTypePlaces(data: TestStructureData) {
@@ -253,7 +260,7 @@ export class StructureDetailsPage {
       return;
     }
     for (const acte of actes) {
-      const accordionLabel = getActesAccordionLabel(acte.category);
+      const accordionLabel = getActesCategoryLabel(acte.category);
       const accordionButton = actesBlock.getByRole("button", {
         name: accordionLabel,
       });
@@ -283,10 +290,6 @@ export class StructureDetailsPage {
   }
 }
 
-const normalizeDocumentCategory = (category: string) => {
-  return category.replace(" (ou exécutoire)", "");
-};
-
 type StructureDetailsOverrides = {
   publicValue?: string;
   lgbt?: boolean;
@@ -304,35 +307,4 @@ type StructureDetailsOverrides = {
     startDate?: string;
     endDate?: string;
   }>;
-};
-
-const parseAddressParts = (fullAddress: string) => {
-  const parts = fullAddress.trim().split(/\s+/);
-  const postalCodeMatch = parts.find((part) => /^\d{5}$/.test(part));
-  const postalCode = postalCodeMatch || "";
-  const postalIndex = parts.findIndex((part) => part === postalCode);
-  const city = postalIndex > -1 ? parts.slice(postalIndex + 1).join(" ") : "";
-  const addressLine =
-    postalIndex > -1 ? parts.slice(0, postalIndex).join(" ") : fullAddress;
-  return { addressLine, postalCode, city };
-};
-
-const escapeForRegex = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-const getActesAccordionLabel = (category: string): string => {
-  switch (category) {
-    case "ARRETE_AUTORISATION":
-      return "Arrêtés d'autorisation";
-    case "ARRETE_TARIFICATION":
-      return "Arrêtés de tarification";
-    case "CONVENTION":
-      return "Conventions";
-    case "CPOM":
-      return "CPOM";
-    case "AUTRE":
-      return "Autres documents";
-    default:
-      return category;
-  }
 };

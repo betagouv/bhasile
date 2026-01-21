@@ -1,5 +1,7 @@
 import { Page } from "@playwright/test";
 
+import { TIMEOUTS, URLS } from "../../constants";
+import { getActesCategoryRegex } from "../../shared-utils";
 import { TestStructureData } from "../../test-data";
 
 export class FinalisationDocumentsPage {
@@ -7,11 +9,11 @@ export class FinalisationDocumentsPage {
 
   async waitForLoad() {
     await this.page.waitForSelector('button[type="submit"]', {
-      timeout: 10000,
+      timeout: TIMEOUTS.NAVIGATION,
     });
   }
 
-  async fillMinimalData(data: TestStructureData) {
+  async fillForm(data: TestStructureData) {
     const actes = data.actesAdministratifs ?? [];
     const actesByCategory = actes.reduce(
       (acc, acte) => {
@@ -23,7 +25,7 @@ export class FinalisationDocumentsPage {
     );
 
     for (const [category, entries] of Object.entries(actesByCategory)) {
-      const groupLabel = getActeGroupLabel(category);
+      const groupLabel = getActesCategoryRegex(category);
       const group = this.page.getByRole("group", { name: groupLabel });
       const addButton = group.getByRole("button", { name: /Ajouter/i });
 
@@ -75,9 +77,10 @@ export class FinalisationDocumentsPage {
   }
 
   async submit(structureId: number) {
-    const nextUrl = `http://localhost:3000/structures/${structureId}/finalisation/06-notes`;
     await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(nextUrl, { timeout: 10000 });
+    await this.page.waitForURL(URLS.finalisationStep(structureId, "06-notes"), {
+      timeout: TIMEOUTS.NAVIGATION,
+    });
   }
 
   private async fillIfExistsAtIndex(
@@ -92,20 +95,3 @@ export class FinalisationDocumentsPage {
     }
   }
 }
-
-const getActeGroupLabel = (category: string): RegExp => {
-  switch (category) {
-    case "ARRETE_AUTORISATION":
-      return /Arrêtés d'autorisation/i;
-    case "ARRETE_TARIFICATION":
-      return /Arrêtés de tarification/i;
-    case "CONVENTION":
-      return /Conventions/i;
-    case "CPOM":
-      return /CPOM/i;
-    case "AUTRE":
-      return /Autres documents/i;
-    default:
-      return new RegExp(category, "i");
-  }
-};

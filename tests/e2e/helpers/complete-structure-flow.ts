@@ -1,24 +1,26 @@
 import { Page } from "@playwright/test";
 import { v4 as uuidv4 } from "uuid";
 
-import { AdressesPage } from "./page-objects/ajout/AdressesPage";
-import { AuthenticationPage } from "./page-objects/ajout/AuthenticationPage";
-import { ConfirmationPage } from "./page-objects/ajout/ConfirmationPage";
-import { DocumentsFinanciersPage } from "./page-objects/ajout/DocumentsFinanciersPage";
-import { IdentificationPage } from "./page-objects/ajout/IdentificationPage";
-import { PresentationPage } from "./page-objects/ajout/PresentationPage";
-import { SelectionPage } from "./page-objects/ajout/SelectionPage";
-import { TypePlacesPage } from "./page-objects/ajout/TypePlacesPage";
-import { VerificationPage } from "./page-objects/ajout/VerificationPage";
-import { FinalisationControlesPage } from "./page-objects/finalisation/FinalisationControlesPage";
-import { FinalisationDocumentsFinanciersPage } from "./page-objects/finalisation/FinalisationDocumentsFinanciersPage";
-import { FinalisationDocumentsPage } from "./page-objects/finalisation/FinalisationDocumentsPage";
-import { FinalisationFinancePage } from "./page-objects/finalisation/FinalisationFinancePage";
-import { FinalisationIdentificationPage } from "./page-objects/finalisation/FinalisationIdentificationPage";
-import { FinalisationNotesPage } from "./page-objects/finalisation/FinalisationNotesPage";
-import { ModificationDescriptionPage } from "./page-objects/modification/ModificationDescriptionPage";
-import { StructureDetailsPage } from "./page-objects/structure/StructureDetailsPage";
-import { StructuresListPage } from "./page-objects/structure/StructuresListPage";
+import {
+  AdressesPage,
+  AuthenticationPage,
+  ConfirmationPage,
+  DocumentsFinanciersPage,
+  FinalisationControlesPage,
+  FinalisationDocumentsFinanciersPage,
+  FinalisationDocumentsPage,
+  FinalisationFinancePage,
+  FinalisationIdentificationPage,
+  FinalisationNotesPage,
+  IdentificationPage,
+  ModificationDescriptionPage,
+  PresentationPage,
+  SelectionPage,
+  StructureDetailsPage,
+  StructuresListPage,
+  TypePlacesPage,
+  VerificationPage,
+} from "./page-objects";
 import { getStructureId } from "./structure-creator";
 import { TestStructureData } from "./test-data";
 
@@ -75,27 +77,27 @@ export const completeStructureFlow = async (
   const finalisationDocumentsFinanciersPage =
     new FinalisationDocumentsFinanciersPage(page);
   await finalisationDocumentsFinanciersPage.waitForLoad();
-  await finalisationDocumentsFinanciersPage.fillMinimalData(formData);
+  await finalisationDocumentsFinanciersPage.fillForm(formData);
   await finalisationDocumentsFinanciersPage.submit(structureId);
 
   const finalisationFinancePage = new FinalisationFinancePage(page);
   await finalisationFinancePage.waitForLoad();
-  await finalisationFinancePage.fillMinimalData(formData);
+  await finalisationFinancePage.fillForm(formData);
   await finalisationFinancePage.submit(structureId);
 
   const finalisationControlesPage = new FinalisationControlesPage(page);
   await finalisationControlesPage.waitForLoad();
-  await finalisationControlesPage.fillMinimalData(formData);
+  await finalisationControlesPage.fillForm(formData);
   await finalisationControlesPage.submit(structureId);
 
   const finalisationDocumentsPage = new FinalisationDocumentsPage(page);
   await finalisationDocumentsPage.waitForLoad();
-  await finalisationDocumentsPage.fillMinimalData(formData);
+  await finalisationDocumentsPage.fillForm(formData);
   await finalisationDocumentsPage.submit(structureId);
 
   const finalisationNotesPage = new FinalisationNotesPage(page);
   await finalisationNotesPage.waitForLoad();
-  await finalisationNotesPage.fillNotes(formData);
+  await finalisationNotesPage.fillForm(formData);
   await finalisationNotesPage.submit(structureId);
   await finalisationNotesPage.finalizeAndGoToStructure(structureId);
 

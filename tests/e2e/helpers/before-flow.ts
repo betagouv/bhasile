@@ -1,16 +1,26 @@
 import { Page } from "@playwright/test";
-import { v4 as uuidv4 } from "uuid";
 
 import { mockAddressApi } from "./mocks/address-api";
 import { mockFileApi } from "./mocks/file-api";
 import { seedStructureForSelection } from "./structure-creator";
-import { buildTestData, TestStructureData } from "./test-data";
+import { createCadaTestData, TestStructureData } from "./test-data";
 
-export async function beforeFlow(data: TestStructureData, page: Page) {
-  const formData = buildTestData(data, {
-    dnaCode: `C${uuidv4()}`,
-    operateurName: `Operateur E2E ${Date.now()}`,
-  });
+type TestDataOverrides = Partial<TestStructureData> & {
+  dnaCode?: string;
+  operateurName?: string;
+};
+
+/**
+ * Sets up the test environment before running the flow
+ * - Generates unique test data
+ * - Mocks file and address APIs
+ * - Seeds the structure for selection
+ */
+export async function beforeFlow(
+  overrides: TestDataOverrides,
+  page: Page
+): Promise<TestStructureData> {
+  const formData = createCadaTestData(overrides);
 
   await mockFileApi(page, { mockFileKey: "e2e-cada-doc" });
   await mockAddressApi(page, formData.adresseAdministrative.complete);

@@ -1,5 +1,6 @@
 import { expect, Page } from "@playwright/test";
 
+import { URLS } from "../../constants";
 import { TestStructureData } from "../../test-data";
 
 export class TypePlacesPage {
@@ -70,8 +71,6 @@ export class TypePlacesPage {
 
   async submit(dnaCode: string) {
     await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(
-      `http://localhost:3000/ajout-structure/${dnaCode}/04-documents`
-    );
+    await this.page.waitForURL(URLS.ajoutStep(dnaCode, "04-documents"));
   }
 }

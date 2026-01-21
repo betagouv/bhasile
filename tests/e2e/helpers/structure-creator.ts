@@ -1,6 +1,7 @@
 import { StructureApiType } from "@/schemas/api/structure.schema";
 
 import { transformTestDataToApiFormat } from "./api-data-transformer";
+import { BASE_URL } from "./constants";
 import { TestStructureData } from "./test-data";
 
 type MinimalStructureSeed = {
@@ -22,7 +23,7 @@ export async function deleteStructureViaApi(dnaCode: string): Promise<void> {
   const headers: Record<string, string> = getAuthHeaders();
 
   const response = await fetch(
-    `http://localhost:3000/api/test/structures?dnaCode=${dnaCode}`,
+    `${BASE_URL}/api/test/structures?dnaCode=${dnaCode}`,
     {
       method: "DELETE",
       headers,
@@ -43,12 +44,9 @@ export async function deleteStructureViaApi(dnaCode: string): Promise<void> {
 export async function getStructureId(dnaCode: string): Promise<number> {
   const headers: Record<string, string> = getAuthHeaders();
 
-  const response = await fetch(
-    `http://localhost:3000/api/structures/dna/${dnaCode}`,
-    {
-      headers,
-    }
-  );
+  const response = await fetch(`${BASE_URL}/api/structures/dna/${dnaCode}`, {
+    headers,
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch structure");
@@ -64,65 +62,6 @@ export async function getStructureId(dnaCode: string): Promise<number> {
 }
 
 /**
- * Marks a finalisation step as validated for a given structure.
- */
-export async function markFinalisationStepValidated(
-  structureId: number,
-  dnaCode: string,
-  stepSlug: string
-): Promise<void> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...getAuthHeaders(),
-  };
-
-  const response = await fetch(
-    `http://localhost:3000/api/structures/${structureId}`,
-    { headers }
-  );
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch structure ${dnaCode}`);
-  }
-
-  const structure = (await response.json()) as StructureApiType | null;
-  if (!structure) {
-    throw new Error(`Structure with dnaCode ${dnaCode} not found`);
-  }
-
-  const forms = structure.forms?.map((form) => {
-    if (form.formDefinition.name !== "finalisation") {
-      return form;
-    }
-    if (!form.formSteps) {
-      return form;
-    }
-    return {
-      ...form,
-      formSteps: form.formSteps.map((step) => {
-        if (step.stepDefinition.slug === stepSlug) {
-          return { ...step, status: "VALIDE" };
-        }
-        return step;
-      }),
-    };
-  });
-
-  const updateResponse = await fetch("http://localhost:3000/api/structures", {
-    method: "PUT",
-    headers,
-    body: JSON.stringify({ dnaCode, forms }),
-  });
-
-  if (!updateResponse.ok) {
-    const errorText = await updateResponse.text();
-    throw new Error(
-      `Failed to update finalisation step ${stepSlug} for ${dnaCode}: ${errorText}`
-    );
-  }
-}
-
-/**
  * Creates a minimal structure entry in DB so the operator update can succeed.
  */
 export async function createMinimalStructureViaApi(
@@ -133,7 +72,7 @@ export async function createMinimalStructureViaApi(
     ...getAuthHeaders(),
   };
 
-  const response = await fetch("http://localhost:3000/api/test/structures", {
+  const response = await fetch(`${BASE_URL}/api/test/structures`, {
     method: "POST",
     headers,
     body: JSON.stringify(seed),

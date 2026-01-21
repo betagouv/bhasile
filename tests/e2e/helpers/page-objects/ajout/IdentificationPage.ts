@@ -1,5 +1,6 @@
 import { expect, Page } from "@playwright/test";
 
+import { URLS } from "../../constants";
 import { TestStructureData } from "../../test-data";
 
 export class IdentificationPage {
@@ -9,7 +10,7 @@ export class IdentificationPage {
     // Filiale (if provided)
     if (data.filiale) {
       const filialeToggle = this.page.getByRole("checkbox", {
-        name: /filiale d’opérateur/i,
+        name: /filiale d'opérateur/i,
       });
       if (await filialeToggle.count()) {
         await filialeToggle.check();
@@ -111,8 +112,6 @@ export class IdentificationPage {
 
   async submit(dnaCode: string) {
     await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(
-      `http://localhost:3000/ajout-structure/${dnaCode}/02-adresses`
-    );
+    await this.page.waitForURL(URLS.ajoutStep(dnaCode, "02-adresses"));
   }
 }

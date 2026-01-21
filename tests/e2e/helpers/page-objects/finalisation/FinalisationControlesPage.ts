@@ -1,5 +1,6 @@
 import { Page } from "@playwright/test";
 
+import { TIMEOUTS, URLS } from "../../constants";
 import { TestStructureData } from "../../test-data";
 
 export class FinalisationControlesPage {
@@ -7,35 +8,22 @@ export class FinalisationControlesPage {
 
   async waitForLoad() {
     await this.page.waitForSelector('button[type="submit"]', {
-      timeout: 10000,
+      timeout: TIMEOUTS.NAVIGATION,
     });
   }
 
-  async fillMinimalData(data: TestStructureData) {
+  async fillForm(data: TestStructureData) {
     await this.fillEvaluations(data);
     await this.fillControles(data);
     await this.fillOuvertureFermeture(data);
   }
 
   async submit(structureId: number) {
-    const nextUrl = `http://localhost:3000/structures/${structureId}/finalisation/05-documents`;
     await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(nextUrl, { timeout: 10000 });
-  }
-  private async fillKeyValue(selector: string, value?: string) {
-    if (!value) {
-      return;
-    }
-    const input = this.page.locator(selector);
-    if ((await input.count()) === 0) {
-      return;
-    }
-    await input.evaluate((el, val) => {
-      const inputEl = el as HTMLInputElement;
-      inputEl.value = val as string;
-      inputEl.dispatchEvent(new Event("input", { bubbles: true }));
-      inputEl.dispatchEvent(new Event("change", { bubbles: true }));
-    }, value);
+    await this.page.waitForURL(
+      URLS.finalisationStep(structureId, "05-documents"),
+      { timeout: TIMEOUTS.NAVIGATION }
+    );
   }
 
   private async setFileInput(keySelector: string, filePath: string) {
@@ -51,6 +39,12 @@ export class FinalisationControlesPage {
   private async fillEvaluations(data: TestStructureData) {
     const evaluations = data.evaluations ?? [];
     if (evaluations.length === 0) {
+      const noEvaluationCheckbox = this.page.getByRole("checkbox", {
+        name: /n'a pas encore fait l'objet d'évaluation/i,
+      });
+      if ((await noEvaluationCheckbox.count()) > 0) {
+        await noEvaluationCheckbox.check({ force: true });
+      }
       return;
     }
     const evaluationsFieldset = this.page.getByRole("group", {
@@ -72,25 +66,25 @@ export class FinalisationControlesPage {
         evaluation.date
       );
       if (evaluation.notePersonne !== undefined) {
-        await this.fillKeyValue(
+        await this.fillInputValue(
           `input[name="evaluations.${i}.notePersonne"]`,
           String(evaluation.notePersonne)
         );
       }
       if (evaluation.notePro !== undefined) {
-        await this.fillKeyValue(
+        await this.fillInputValue(
           `input[name="evaluations.${i}.notePro"]`,
           String(evaluation.notePro)
         );
       }
       if (evaluation.noteStructure !== undefined) {
-        await this.fillKeyValue(
+        await this.fillInputValue(
           `input[name="evaluations.${i}.noteStructure"]`,
           String(evaluation.noteStructure)
         );
       }
       if (evaluation.note !== undefined) {
-        await this.fillKeyValue(
+        await this.fillInputValue(
           `input[name="evaluations.${i}.note"]`,
           String(evaluation.note)
         );
@@ -202,6 +196,14 @@ export class FinalisationControlesPage {
         .first()
         .fill(ouvertureFermeture.echeancePlacesAFermer);
     }
+  }
+
+  private async fillInputValue(selector: string, value: string) {
+    const input = this.page.locator(selector);
+    if ((await input.count()) === 0) {
+      return;
+    }
+    await input.fill(value);
   }
 
   private async removeExtraEntries(
