@@ -1,5 +1,5 @@
 // Remplir la table EvenementIndesirableGrave avec les EIG venant de l'API de Démarches Simplifiées
-// Usage: npx tsx scripts/eig-fetch.ts
+// Usage: yarn script eig-fetch eig-fetch.ts
 
 import "dotenv/config";
 
@@ -161,7 +161,7 @@ const getAllEIGs = async (): Promise<
     }
     return {
       structureDnaCode,
-      numeroDossier: getValueByLabel(DSEIG, NUMERO_DOSSIER_LABEL),
+      numeroDossier: getValueByLabel(DSEIG, NUMERO_DOSSIER_LABEL).toString(),
       evenementDate: new Date(evenementDate),
       declarationDate: new Date(declarationDate),
       type: getValueByLabel(DSEIG, TYPE_LABEL).toString(),

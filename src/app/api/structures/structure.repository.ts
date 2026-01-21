@@ -272,7 +272,7 @@ export const findOne = async (id: number): Promise<Structure> => {
       },
       evenementsIndesirablesGraves: {
         orderBy: {
-          createdAt: "desc",
+          evenementDate: "desc",
         },
       },
       fileUploads: {
