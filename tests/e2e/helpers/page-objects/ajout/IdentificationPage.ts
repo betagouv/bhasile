@@ -20,24 +20,6 @@ export class IdentificationPage {
       }
     }
 
-    // Opérateur (autocomplete)
-    const operateurInput = this.page.locator('input[name="operateur.name"]');
-    await expect(operateurInput).toBeVisible();
-    const existingOperateur = await operateurInput.inputValue();
-    const existingOperateurId = await this.page
-      .locator('input[name="operateur.id"]')
-      .inputValue();
-
-    if (!existingOperateur || !existingOperateurId) {
-      await operateurInput.click();
-      await operateurInput.fill(identification.operateur.searchTerm);
-      await this.page.waitForSelector("#suggestion-0", {
-        state: "visible",
-        timeout: 10000,
-      });
-      await this.page.click("#suggestion-0");
-    }
-
     // Date de création
     await this.page.fill(
       'input[name="creationDate"]',

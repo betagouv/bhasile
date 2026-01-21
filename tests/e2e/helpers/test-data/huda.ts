@@ -41,9 +41,16 @@ export const hudaSansCpom: TestStructureData = {
     { placesAutorisees: 58, pmr: 6, lgbt: 8, fvvTeh: 5 },
     { placesAutorisees: 55, pmr: 5, lgbt: 7, fvvTeh: 4 },
   ],
-  documents: {
-    less5Years: true,
-    files: [],
+  documentsFinanciers: {
+    files: [
+      {
+        year: "2025",
+        category: "Budget prévisionnel demandé",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+    ],
   },
 };
 

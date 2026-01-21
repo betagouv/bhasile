@@ -80,17 +80,6 @@ export class FinalisationDocumentsPage {
     await this.page.waitForURL(nextUrl, { timeout: 10000 });
   }
 
-  private async fillIfExists(
-    group: ReturnType<Page["locator"]>,
-    selector: string,
-    value: string
-  ) {
-    const input = group.locator(selector);
-    if ((await input.count()) > 0) {
-      await input.last().fill(value);
-    }
-  }
-
   private async fillIfExistsAtIndex(
     group: ReturnType<Page["locator"]>,
     selector: string,

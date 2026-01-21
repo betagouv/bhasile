@@ -48,9 +48,16 @@ export const caesSansCpom: TestStructureData = {
     { placesAutorisees: 28, pmr: 3, lgbt: 4, fvvTeh: 5 },
     { placesAutorisees: 25, pmr: 2, lgbt: 3, fvvTeh: 4 },
   ],
-  documents: {
-    less5Years: true,
-    files: [],
+  documentsFinanciers: {
+    files: [
+      {
+        year: "2025",
+        category: "Budget prévisionnel demandé",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+    ],
   },
 };
 

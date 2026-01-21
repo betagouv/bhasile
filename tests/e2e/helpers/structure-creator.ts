@@ -16,46 +16,6 @@ type MinimalStructureSeed = {
 };
 
 /**
- * Creates a structure via the API endpoint
- * Returns the structure's dnaCode for use in tests
- */
-export async function createStructureViaApi(
-  testData: TestStructureData
-): Promise<string> {
-  await createMinimalStructureViaApi({ dnaCode: testData.dnaCode });
-  const apiData = transformTestDataToApiFormat(testData);
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...getAuthHeaders(),
-  };
-
-  const response = await fetch("http://localhost:3000/api/structures", {
-    method: "POST",
-    headers,
-    body: JSON.stringify(apiData),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    let errorPayload: unknown = errorText;
-    try {
-      errorPayload = JSON.parse(errorText);
-    } catch {
-      // Keep raw text if it is not JSON.
-    }
-    throw new Error(
-      `Failed to create structure via API (${response.status} ${response.statusText}): ${JSON.stringify(
-        errorPayload
-      )}`
-    );
-  }
-
-  // Structure is created with state A_FINALISER by default
-  return testData.dnaCode;
-}
-
-/**
  * Deletes a structure via the API endpoint (for cleanup)
  */
 export async function deleteStructureViaApi(dnaCode: string): Promise<void> {

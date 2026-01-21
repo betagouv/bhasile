@@ -50,9 +50,16 @@ export const cphSansCpom: TestStructureData = {
     { placesAutorisees: 38, pmr: 4, lgbt: 5, fvvTeh: 6 },
     { placesAutorisees: 35, pmr: 3, lgbt: 4, fvvTeh: 5 },
   ],
-  documents: {
-    less5Years: true,
-    files: [],
+  documentsFinanciers: {
+    files: [
+      {
+        year: "2025",
+        category: "Budget prévisionnel demandé",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+    ],
   },
 };
 
