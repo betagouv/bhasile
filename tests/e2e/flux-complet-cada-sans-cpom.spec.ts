@@ -10,7 +10,6 @@ import {
 } from "./helpers/structure-creator";
 import { buildTestData, cadaSansCpom } from "./helpers/test-data";
 
-// Increase timeout for the full create -> finalise -> modify flow
 test.setTimeout(60000);
 
 test("CADA sans CPOM - Flux complet (création, finalisation, modification)", async ({
@@ -23,7 +22,6 @@ test("CADA sans CPOM - Flux complet (création, finalisation, modification)", as
 
   await mockFileApi(page, { mockFileKey: `e2e-doc-${uuidv4()}` });
   await mockAddressApi(page, formData.adresses.adresseAdministrative.complete);
-
   await seedStructureForSelection(formData);
 
   try {
