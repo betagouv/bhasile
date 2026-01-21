@@ -20,7 +20,7 @@ export const buildTestData = (
   ...rest,
   dnaCode: dnaCode ?? base.dnaCode,
   operateur: operateurName
-    ? { name: operateurName, searchTerm: operateurName }
+    ? { name: operateurName, searchTerm: "Operateur E2E" }
     : base.operateur,
 });
 
@@ -49,7 +49,6 @@ export function createCadaTestData(
  */
 export const cada1Config: TestDataOverrides = {
   // Uses all defaults from baseCadaData
-  filiale: "Filiale Test",
 };
 
 /**

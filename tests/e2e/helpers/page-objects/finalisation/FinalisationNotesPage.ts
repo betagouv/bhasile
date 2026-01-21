@@ -38,7 +38,7 @@ export class FinalisationNotesPage {
       .getByRole("button", { name: "Finaliser la création" })
       .click();
     const confirmButton = this.page.getByRole("button", {
-      name: "J'ai compris",
+      name: /J.?ai compris/i,
     });
     await confirmButton.click();
     await this.page.waitForURL(URLS.structure(structureId));

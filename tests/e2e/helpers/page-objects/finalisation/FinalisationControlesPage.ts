@@ -1,4 +1,4 @@
-import { Page } from "@playwright/test";
+import { expect, Page } from "@playwright/test";
 
 import { TIMEOUTS, URLS } from "../../constants";
 import { TestStructureData } from "../../test-data";
@@ -19,7 +19,8 @@ export class FinalisationControlesPage {
   }
 
   async submit(structureId: number) {
-    await this.page.click('button[type="submit"]');
+    const submitButton = this.page.getByRole("button", { name: /Valider/i });
+    await submitButton.click();
     await this.page.waitForURL(
       URLS.finalisationStep(structureId, "05-documents"),
       { timeout: TIMEOUTS.NAVIGATION }
@@ -34,16 +35,30 @@ export class FinalisationControlesPage {
     const uploadRoot = keyInput.locator("..");
     const fileInput = uploadRoot.locator('input[type="file"]');
     await fileInput.setInputFiles(filePath);
+    await expect(keyInput).toHaveValue(/.+/, { timeout: TIMEOUTS.NAVIGATION });
   }
 
   private async fillEvaluations(data: TestStructureData) {
     const evaluations = data.evaluations ?? [];
     if (evaluations.length === 0) {
       const noEvaluationCheckbox = this.page.getByRole("checkbox", {
-        name: /n'a pas encore fait l'objet d'évaluation/i,
+        name: /n.?a pas encore fait l.?objet d.?évaluation/i,
       });
       if ((await noEvaluationCheckbox.count()) > 0) {
         await noEvaluationCheckbox.check({ force: true });
+      }
+      const defaultDateInput = this.page.locator(
+        'input[name="evaluations.0.date"]'
+      );
+      if ((await defaultDateInput.count()) > 0) {
+        const fallbackFilePath =
+          data.documentsFinanciers.files[0]?.filePath ||
+          "tests/e2e/fixtures/sample.csv";
+        await defaultDateInput.fill(data.creationDate);
+        await this.setFileInput(
+          'input[name="evaluations.0.fileUploads.0.key"]',
+          fallbackFilePath
+        );
       }
       return;
     }
@@ -112,6 +127,22 @@ export class FinalisationControlesPage {
   private async fillControles(data: TestStructureData) {
     const controles = data.controles ?? [];
     if (controles.length === 0) {
+      const defaultDateInput = this.page.locator(
+        'input[name="controles.0.date"]'
+      );
+      if ((await defaultDateInput.count()) > 0) {
+        const fallbackFilePath =
+          data.documentsFinanciers.files[0]?.filePath ||
+          "tests/e2e/fixtures/sample.csv";
+        await defaultDateInput.fill(data.creationDate);
+        await this.page.selectOption('select[name="controles.0.type"]', {
+          label: "Programmé",
+        });
+        await this.setFileInput(
+          'input[name="controles.0.fileUploads.0.key"]',
+          fallbackFilePath
+        );
+      }
       return;
     }
     const controlesFieldset = this.page.getByRole("group", {
