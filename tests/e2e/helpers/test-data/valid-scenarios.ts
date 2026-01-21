@@ -71,13 +71,11 @@ export const validCada2: TestDataOverrides = {
       adresseComplete: "1 Rue de la Paix 75001 Paris",
       searchTerm: "1 Rue de la Paix 75001 Paris",
       placesAutorisees: 50,
-      repartition: Repartition.DIFFUS,
     },
     {
       adresseComplete: "2 Rue de la Paix 75001 Paris",
       searchTerm: "2 Rue de la Paix 75001 Paris",
       placesAutorisees: 150,
-      repartition: Repartition.DIFFUS,
     },
   ],
   documentsFinanciers: {
@@ -163,7 +161,6 @@ export const validCada4: TestDataOverrides = {
       adresseComplete: "1 Rue de la Paix 75001 Paris",
       searchTerm: "1 Rue de la Paix 75001 Paris",
       placesAutorisees: 50,
-      repartition: Repartition.COLLECTIF,
     },
   ],
   // Ensure structureTypologies match the single address - need 3 entries (one per year: 2023-2025)
@@ -200,19 +197,16 @@ export const validCada5: TestDataOverrides = {
       adresseComplete: "1 Rue de la Paix 75001 Paris",
       searchTerm: "1 Rue de la Paix 75001 Paris",
       placesAutorisees: 50,
-      repartition: Repartition.DIFFUS,
     },
     {
       adresseComplete: "2 Rue de la Paix 75001 Paris",
       searchTerm: "2 Rue de la Paix 75001 Paris",
       placesAutorisees: 150,
-      repartition: Repartition.DIFFUS,
     },
     {
       adresseComplete: "3 Rue de la Paix 75001 Paris",
       searchTerm: "3 Rue de la Paix 75001 Paris",
       placesAutorisees: 100,
-      repartition: Repartition.DIFFUS,
     },
   ],
   structureTypologies: [
@@ -258,7 +252,6 @@ export const validCph1: TestDataOverrides = {
       adresseComplete: "1 Rue de la Paix 75001 Paris",
       searchTerm: "1 Rue de la Paix 75001 Paris",
       placesAutorisees: 50,
-      repartition: Repartition.COLLECTIF,
     },
   ],
   // Ensure structureTypologies match the single address - need 3 entries (one per year: 2023-2025)
@@ -338,13 +331,11 @@ export const validCph3: TestDataOverrides = {
       adresseComplete: "1 Rue de la Paix 75001 Paris",
       searchTerm: "1 Rue de la Paix 75001 Paris",
       placesAutorisees: 50,
-      repartition: Repartition.DIFFUS,
     },
     {
       adresseComplete: "2 Rue de la Paix 75001 Paris",
       searchTerm: "2 Rue de la Paix 75001 Paris",
       placesAutorisees: 150,
-      repartition: Repartition.DIFFUS,
     },
   ],
   documentsFinanciers: {
@@ -379,7 +370,6 @@ export const validHuda1: TestDataOverrides = {
       adresseComplete: "1 Rue de la Paix 75001 Paris",
       searchTerm: "1 Rue de la Paix 75001 Paris",
       placesAutorisees: 50,
-      repartition: Repartition.COLLECTIF,
     },
   ],
   // Ensure structureTypologies match the single address - need 3 entries (one per year: 2023-2025)
@@ -414,13 +404,11 @@ export const validHuda2: TestDataOverrides = {
       adresseComplete: "1 Rue de la Paix 75001 Paris",
       searchTerm: "1 Rue de la Paix 75001 Paris",
       placesAutorisees: 50,
-      repartition: Repartition.DIFFUS,
     },
     {
       adresseComplete: "2 Rue de la Paix 75001 Paris",
       searchTerm: "2 Rue de la Paix 75001 Paris",
       placesAutorisees: 150,
-      repartition: Repartition.DIFFUS,
     },
   ],
   documentsFinanciers: {
@@ -490,7 +478,6 @@ export const validCaes1: TestDataOverrides = {
       adresseComplete: "1 Rue de la Paix 75001 Paris",
       searchTerm: "1 Rue de la Paix 75001 Paris",
       placesAutorisees: 50,
-      repartition: Repartition.COLLECTIF,
     },
   ],
   // Ensure structureTypologies match the single address - need 3 entries (one per year: 2023-2025)
@@ -525,13 +512,11 @@ export const validCaes2: TestDataOverrides = {
       adresseComplete: "1 Rue de la Paix 75001 Paris",
       searchTerm: "1 Rue de la Paix 75001 Paris",
       placesAutorisees: 50,
-      repartition: Repartition.DIFFUS,
     },
     {
       adresseComplete: "2 Rue de la Paix 75001 Paris",
       searchTerm: "2 Rue de la Paix 75001 Paris",
       placesAutorisees: 150,
-      repartition: Repartition.DIFFUS,
     },
   ],
   documentsFinanciers: {

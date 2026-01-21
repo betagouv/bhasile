@@ -36,13 +36,34 @@ export class AdressesPage extends BasePage {
     await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
 
     // Type de bâti - select dropdown
+    // IMPORTANT: Select typeBati BEFORE filling addresses to ensure repartition is set correctly
     await this.page.selectOption(
       'select[name="typeBati"]',
       getRepartitionLabel(data.typeBati)
     );
 
     // Wait for the UI to update after selecting type de bâti
-    await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
+    // When typeBati changes, the form's handleTypeBatiChange updates addresses' repartition
+    // For COLLECTIF, the form limits addresses to 1 and sets repartition automatically
+    // For DIFFUS, the form sets repartition automatically
+    // For MIXTE, repartition must be set per address
+    // Wait longer to ensure the form has fully processed the change
+    await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE * 3);
+
+    // Verify that addresses array is correctly initialized
+    // When typeBati is COLLECTIF, there should be exactly 1 address
+    if (data.typeBati === Repartition.COLLECTIF) {
+      // Wait for the form to ensure only 1 address exists
+      const addressCount = await this.page
+        .locator('input[name^="adresses."][name$=".adresseComplete"]')
+        .count();
+      // Should have exactly 1 address for COLLECTIF
+      if (addressCount > 1) {
+        throw new Error(
+          `Expected 1 address for COLLECTIF typeBati, but found ${addressCount}`
+        );
+      }
+    }
 
     // Same address toggle (only for COLLECTIF)
     if (data.sameAddress && data.typeBati === Repartition.COLLECTIF) {
@@ -85,13 +106,45 @@ export class AdressesPage extends BasePage {
 
         await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
 
-        // Fill places autorisées
-        await this.page.fill(
-          `input[name="adresses.${i}.adresseTypologies.0.placesAutorisees"]`,
-          adresse.placesAutorisees.toString()
-        );
+        // WORKAROUND: After filling the address autocomplete, ensure repartition is set correctly.
+        // For COLLECTIF and DIFFUS, the form should automatically set repartition when typeBati
+        // is selected, but the address autocomplete might reset it. We'll directly set it via
+        // the form's setValue method by triggering the typeBati change again.
+        if (data.typeBati !== Repartition.MIXTE) {
+          // Get the current typeBati value to ensure it's still correct
+          const currentTypeBati = await this.page.inputValue(
+            'select[name="typeBati"]'
+          );
+          const expectedTypeBati = getRepartitionLabel(data.typeBati);
 
-        // If type bâti is MIXTE, select repartition for each address
+          if (currentTypeBati !== expectedTypeBati) {
+            // If typeBati changed, re-select it
+            await this.page.selectOption(
+              'select[name="typeBati"]',
+              expectedTypeBati
+            );
+            await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
+          } else {
+            // Re-trigger the change event to ensure handleTypeBatiChange runs again
+            // and updates the repartition for the newly filled address
+            await this.page.evaluate(() => {
+              const select = document.querySelector(
+                'select[name="typeBati"]'
+              ) as HTMLSelectElement;
+              if (select) {
+                // Dispatch change event to trigger handleTypeBatiChange
+                const event = new Event("change", {
+                  bubbles: true,
+                  cancelable: true,
+                });
+                select.dispatchEvent(event);
+              }
+            });
+            await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
+          }
+        }
+
+        // For MIXTE, repartition field is visible and must be set per address
         if (data.typeBati === Repartition.MIXTE && adresse.repartition) {
           const repartitionSelector = `select[name="adresses.${i}.repartition"]`;
           await this.page.selectOption(
@@ -99,6 +152,12 @@ export class AdressesPage extends BasePage {
             getRepartitionLabel(adresse.repartition)
           );
         }
+
+        // Fill places autorisées
+        await this.page.fill(
+          `input[name="adresses.${i}.adresseTypologies.0.placesAutorisees"]`,
+          adresse.placesAutorisees.toString()
+        );
       }
     }
   }
