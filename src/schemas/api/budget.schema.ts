@@ -10,6 +10,7 @@ export const budgetApiSchema = z.object({
   coutJournalier: z.number().nullish(),
   dotationDemandee: z.number().nullish(),
   dotationAccordee: z.number().nullish(),
+  totalProduitsProposes: z.number().nullish(),
   totalProduits: z.number().nullish(),
   totalCharges: z.number().nullish(),
   totalChargesProposees: z.number().nullish(),

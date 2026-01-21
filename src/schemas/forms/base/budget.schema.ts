@@ -1,115 +1,129 @@
 import z from "zod";
 
-import { getYearRange } from "@/app/utils/date.util";
+import { zSafeDecimalsNullish, zSafeYear } from "@/app/utils/zodCustomFields";
+import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 
-import {
-  autoriseeCurrentYearSchema,
-  autoriseeY2Schema,
-} from "./budget/budget.autorisee.schema";
-import {
-  budgetAutoSaveSchema,
-  budgetSchema,
-} from "./budget/budget.base.schema";
-import { sansCpomSchema } from "./budget/budget.cpom.schema";
-import { avecCpomSchema } from "./budget/budget.cpom.schema";
-import {
-  subventionneeFirstYearsSchema,
-  subventionneeSansCpomSchema,
-} from "./budget/budget.subventionee.schema";
+import { validateAffectationReservesDetails } from "./budget/validateAffectationReservesDetails";
+import { cpomStructureSchema } from "./cpomStructure.schema";
 
-const { years } = getYearRange();
+export const budgetBaseSchema = z.object({
+  id: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z.number().optional()
+  ),
+  year: zSafeYear(),
 
-const yearsWithoutFirstTwo = years.slice(2);
+  // Indicateurs généraux
+  ETP: zSafeDecimals(),
+  tauxEncadrement: zSafeDecimals(),
+  coutJournalier: zSafeDecimals(),
 
-const budgetSchemas = years.map(() => budgetSchema) as [
-  typeof budgetSchema,
-  ...(typeof budgetSchema)[],
-];
-
-export const basicSchema = z.object({
-  budgets: z.tuple(budgetSchemas),
+  commentaire: z.string().nullish(),
 });
 
-const basicAutoSaveSchemas = years.map(() => budgetAutoSaveSchema) as [
-  typeof budgetAutoSaveSchema,
-  ...(typeof budgetAutoSaveSchema)[],
-];
-export const basicAutoSaveSchema = z
+export const budgetAutoriseeNotOpenSchema = budgetBaseSchema.extend({
+  dotationDemandee: zSafeDecimals(),
+});
+
+export const budgetAutoriseeOpenYear1Schema =
+  budgetAutoriseeNotOpenSchema.extend({
+    dotationAccordee: zSafeDecimals(),
+  });
+
+export const budgetAutoriseeOpenSchemaWithoutRefinement =
+  budgetAutoriseeOpenYear1Schema.extend({
+    // Résultat
+    totalProduitsProposes: zSafeDecimals(),
+    totalProduits: zSafeDecimals(),
+    totalChargesProposees: zSafeDecimals(),
+    totalCharges: zSafeDecimals(),
+    repriseEtat: zSafeDecimals(),
+    affectationReservesFondsDedies: zSafeDecimals(),
+
+    // Détail affectation
+    reserveInvestissement: zSafeDecimalsNullish(),
+    chargesNonReconductibles: zSafeDecimalsNullish(),
+    reserveCompensationDeficits: zSafeDecimalsNullish(),
+    reserveCompensationBFR: zSafeDecimalsNullish(),
+    reserveCompensationAmortissements: zSafeDecimalsNullish(),
+    reportANouveau: zSafeDecimalsNullish(),
+    autre: zSafeDecimalsNullish(),
+  });
+
+export const budgetAutoriseeOpenSchema =
+  budgetAutoriseeOpenSchemaWithoutRefinement.superRefine(
+    validateAffectationReservesDetails
+  );
+
+export const budgetSubventionneeNotOpenSchema = budgetBaseSchema; // Duplicated for comprehensibility
+
+export const budgetSubventionneeOpenSchema = budgetBaseSchema.extend({
+  dotationDemandee: zSafeDecimals(),
+  dotationAccordee: zSafeDecimals(),
+  totalProduits: zSafeDecimals(),
+  totalCharges: zSafeDecimals(),
+  repriseEtat: zSafeDecimals(),
+  excedentRecupere: zSafeDecimals(),
+  excedentDeduit: zSafeDecimals(),
+  fondsDedies: zSafeDecimals(),
+});
+
+// TODO: cannot find a way to avoid duplication
+export const budgetAutoSaveSchema = z.object({
+  id: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    z.number().optional()
+  ),
+  year: zSafeYear(),
+  ETP: zSafeDecimalsNullish(),
+  tauxEncadrement: zSafeDecimalsNullish(),
+  coutJournalier: zSafeDecimalsNullish(),
+  dotationDemandee: zSafeDecimalsNullish(),
+  dotationAccordee: zSafeDecimalsNullish(),
+  totalProduitsProposes: zSafeDecimalsNullish(),
+  totalProduits: zSafeDecimalsNullish(),
+  totalChargesProposees: zSafeDecimalsNullish(),
+  totalCharges: zSafeDecimalsNullish(),
+  repriseEtat: zSafeDecimalsNullish(),
+  excedentRecupere: zSafeDecimalsNullish(),
+  excedentDeduit: zSafeDecimalsNullish(),
+  fondsDedies: zSafeDecimalsNullish(),
+  affectationReservesFondsDedies: zSafeDecimalsNullish(),
+  reserveInvestissement: zSafeDecimalsNullish(),
+  chargesNonReconductibles: zSafeDecimalsNullish(),
+  reserveCompensationDeficits: zSafeDecimalsNullish(),
+  reserveCompensationBFR: zSafeDecimalsNullish(),
+  reserveCompensationAmortissements: zSafeDecimalsNullish(),
+  reportANouveau: zSafeDecimalsNullish(),
+  autre: zSafeDecimalsNullish(),
+  commentaire: z.string().nullish(),
+});
+
+export const budgetInCpomSchema = budgetAutoriseeOpenSchemaWithoutRefinement
+  .partial()
+  .and(budgetSubventionneeOpenSchema.partial())
+  .and(
+    z.object({
+      year: zSafeYear(),
+      ETP: zSafeDecimals(),
+      tauxEncadrement: zSafeDecimals(),
+      coutJournalier: zSafeDecimals(),
+    })
+  );
+
+export const budgetsAutoSaveSchema = z
   .object({
-    budgets: z.tuple(basicAutoSaveSchemas),
+    budgets: z.array(budgetAutoSaveSchema),
   })
-  .partial();
+  .and(cpomStructureSchema);
 
-const sansCpomSchemas = yearsWithoutFirstTwo.map(() => sansCpomSchema) as [
-  typeof sansCpomSchema,
-  ...(typeof sansCpomSchema)[],
-];
+export type BudgetsAutoSaveFormValues = z.infer<typeof budgetsAutoSaveSchema>;
 
-export const autoriseeSchema = z.object({
-  budgets: z.tuple([
-    autoriseeCurrentYearSchema,
-    autoriseeY2Schema,
-    ...sansCpomSchemas,
-  ]),
-});
-
-const avecCpomSchemas = yearsWithoutFirstTwo.map(() => avecCpomSchema) as [
-  typeof avecCpomSchema,
-  ...(typeof avecCpomSchema)[],
-];
-
-export const autoriseeAvecCpomSchema = z.object({
-  budgets: z.tuple([
-    autoriseeCurrentYearSchema,
-    autoriseeY2Schema,
-    ...avecCpomSchemas,
-  ]),
-});
-
-const subventionneeSansCpomSchemas = yearsWithoutFirstTwo.map(
-  () => subventionneeSansCpomSchema
-) as [
-  typeof subventionneeSansCpomSchema,
-  ...(typeof subventionneeSansCpomSchema)[],
-];
-
-export const subventionneeSchema = z.object({
-  budgets: z.tuple([
-    subventionneeFirstYearsSchema,
-    subventionneeFirstYearsSchema,
-    ...subventionneeSansCpomSchemas,
-  ]),
-});
-
-export const subventionneeAvecCpomSchema = z.object({
-  budgets: z.tuple([
-    subventionneeFirstYearsSchema,
-    subventionneeFirstYearsSchema,
-    ...avecCpomSchemas,
-  ]),
-});
-
-type budgetSchemaTypeFormValues = z.infer<typeof budgetSchema>;
-
-export type budgetsSchemaTypeFormValues = budgetSchemaTypeFormValues[];
-
-export type basicSchemaTypeFormValues = z.infer<typeof basicSchema>;
-export type autoriseeSchemaTypeFormValues = z.infer<typeof autoriseeSchema>;
-export type autoriseeAvecCpomSchemaTypeFormValues = z.infer<
-  typeof autoriseeAvecCpomSchema
+export type anyBudgetFormValues = Array<
+  | z.infer<typeof budgetAutoriseeNotOpenSchema>
+  | z.infer<typeof budgetAutoriseeOpenYear1Schema>
+  | z.infer<typeof budgetAutoriseeOpenSchema>
+  | z.infer<typeof budgetSubventionneeNotOpenSchema>
+  | z.infer<typeof budgetSubventionneeOpenSchema>
+  | z.infer<typeof budgetAutoSaveSchema>
 >;
-export type subventionneeSchemaTypeFormValues = z.infer<
-  typeof subventionneeSchema
->;
-type subventionneeAvecCpomSchemaTypeFormValues = z.infer<
-  typeof subventionneeAvecCpomSchema
->;
-
-export type anyFinanceFormValues =
-  | basicSchemaTypeFormValues
-  | autoriseeSchemaTypeFormValues
-  | autoriseeAvecCpomSchemaTypeFormValues
-  | subventionneeSchemaTypeFormValues
-  | subventionneeAvecCpomSchemaTypeFormValues;
-
-export type basicAutoSaveFormValues = z.infer<typeof basicAutoSaveSchema>;

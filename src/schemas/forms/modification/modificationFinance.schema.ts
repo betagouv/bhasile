@@ -1,51 +1,26 @@
 import z from "zod";
 
-import {
-  autoriseeAvecCpomSchema,
-  autoriseeSchema,
-  basicSchema,
-  subventionneeAvecCpomSchema,
-  subventionneeSchema,
-} from "@/schemas/forms/base/budget.schema";
 import { DocumentsFinanciersFlexibleSchema } from "@/schemas/forms/base/documentFinancier.schema";
 
-export const ModificationFinanceBasicSchema = basicSchema.and(
-  DocumentsFinanciersFlexibleSchema
-);
+import {
+  budgetAutoriseeNotOpenSchema,
+  budgetAutoriseeOpenSchema,
+  budgetAutoriseeOpenYear1Schema,
+  budgetAutoSaveSchema,
+  budgetSubventionneeNotOpenSchema,
+  budgetSubventionneeOpenSchema,
+} from "../base/budget.schema";
+import { cpomStructureSchema } from "../base/cpomStructure.schema";
 
-export const ModificationFinanceAutoriseeAvecCpomSchema =
-  autoriseeAvecCpomSchema.and(DocumentsFinanciersFlexibleSchema);
+type BudgetSchema =
+  | z.infer<typeof budgetAutoriseeNotOpenSchema>
+  | z.infer<typeof budgetAutoriseeOpenYear1Schema>
+  | z.infer<typeof budgetAutoriseeOpenSchema>
+  | z.infer<typeof budgetSubventionneeNotOpenSchema>
+  | z.infer<typeof budgetSubventionneeOpenSchema>
+  | z.infer<typeof budgetAutoSaveSchema>;
 
-export const ModificationFinanceAutoriseeSchema = autoriseeSchema.and(
-  DocumentsFinanciersFlexibleSchema
-);
-
-export const ModificationFinanceSubventionneeAvecCpomSchema =
-  subventionneeAvecCpomSchema.and(DocumentsFinanciersFlexibleSchema);
-
-export const ModificationFinanceSubventionneeSchema = subventionneeSchema.and(
-  DocumentsFinanciersFlexibleSchema
-);
-
-type ModificationFinanceBasicFormValues = z.infer<
-  typeof ModificationFinanceBasicSchema
->;
-type ModificationFinanceAutoriseeAvecCpomFormValues = z.infer<
-  typeof ModificationFinanceAutoriseeAvecCpomSchema
->;
-type ModificationFinanceAutoriseeFormValues = z.infer<
-  typeof ModificationFinanceAutoriseeSchema
->;
-type ModificationFinanceSubventionneeAvecCpomFormValues = z.infer<
-  typeof ModificationFinanceSubventionneeAvecCpomSchema
->;
-type ModificationFinanceSubventionneeFormValues = z.infer<
-  typeof ModificationFinanceSubventionneeSchema
->;
-
-export type anyModificationFinanceFormValues =
-  | ModificationFinanceBasicFormValues
-  | ModificationFinanceAutoriseeAvecCpomFormValues
-  | ModificationFinanceAutoriseeFormValues
-  | ModificationFinanceSubventionneeAvecCpomFormValues
-  | ModificationFinanceSubventionneeFormValues;
+export type anyModificationFinanceFormValues = {
+  budgets: BudgetSchema[];
+} & z.infer<typeof cpomStructureSchema> &
+  z.infer<typeof DocumentsFinanciersFlexibleSchema>;
