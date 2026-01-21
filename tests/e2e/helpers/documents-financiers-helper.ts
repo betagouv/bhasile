@@ -27,50 +27,49 @@ export async function handleDocumentsFinanciers(
     .sort((a, b) => b - a);
 
   for (const year of years) {
-    const fieldset = await getYearFieldset(page, year);
+    const container = await getYearContainer(page, year);
     for (const document of documentsByYear[year]) {
       const formKind = document.formKind ?? "ajout";
-      const isImported = await isDocumentImported(fieldset, document.category);
+      const shouldAdd =
+        (mode === "ajout" && formKind === "ajout") ||
+        (mode === "finalisation" && formKind === "finalisation");
+      const shouldRequireImported =
+        mode === "finalisation" && formKind === "ajout";
+      const isImported = await isDocumentImported(container, document.category);
 
-      if (mode === "ajout") {
-        if (formKind === "ajout" && !isImported) {
-          await addDocumentViaDropzone(fieldset, document);
-        }
+      if (shouldRequireImported) {
+        await expectDocumentImported(container, document.category, year);
         continue;
       }
 
-      if (formKind === "ajout") {
-        const categoryButton = getCategoryButton(fieldset, document.category);
-        await expect(categoryButton).toContainText("Importé");
-        continue;
-      }
-
-      if (!isImported) {
-        await addDocumentViaDropzone(fieldset, document);
+      if (shouldAdd && !isImported) {
+        await addDocumentViaDropzone(container, document);
       }
     }
   }
 }
 
-const getYearFieldset = async (page: Page, year: number) => {
+const getYearContainer = async (page: Page, year: number) => {
   const heading = page.getByRole("heading", {
     name: String(year),
     level: 2,
   });
   await expect(heading).toBeVisible();
-  const primary = heading.locator("..");
-  if ((await primary.getByRole("button").count()) > 0) {
-    return primary;
+  const fieldset = page.locator("fieldset").filter({ has: heading }).first();
+  if ((await fieldset.count()) > 0) {
+    await expect(fieldset).toBeVisible();
+    return fieldset;
   }
-  const fallback = primary.locator("..");
+  const fallback = heading.locator("..");
+  await expect(fallback).toBeVisible();
   return fallback;
 };
 
 const isDocumentImported = async (
-  fieldset: ReturnType<Page["locator"]>,
+  container: ReturnType<Page["locator"]>,
   label: string
 ) => {
-  const categoryButton = getCategoryButton(fieldset, label);
+  const categoryButton = getCategoryButton(container, label);
   if ((await categoryButton.count()) === 0) {
     return false;
   }
@@ -79,33 +78,44 @@ const isDocumentImported = async (
 };
 
 const addDocumentViaDropzone = async (
-  fieldset: ReturnType<Page["locator"]>,
+  container: ReturnType<Page["locator"]>,
   document: TestStructureData["documentsFinanciers"]["files"][number]
 ) => {
-  const fileInput = fieldset.locator('input[type="file"]').first();
+  const fileInput = container.locator('input[type="file"]').first();
   await fileInput.setInputFiles(path.join(process.cwd(), document.filePath));
 
-  const categorySelect = fieldset.getByRole("combobox", {
+  const categorySelect = container.getByRole("combobox", {
     name: "Type de document",
   });
   await expect(categorySelect).toBeVisible();
   await categorySelect.selectOption({ label: document.category });
 
-  const addButton = fieldset.getByRole("button", {
+  const addButton = container.getByRole("button", {
     name: "Ajouter le document",
   });
   await expect(addButton).toBeEnabled();
   await addButton.click();
 
-  const categoryButton = getCategoryButton(fieldset, document.category);
-  if ((await categoryButton.count()) > 0) {
-    await expect(categoryButton).toContainText("Importé");
-  }
+  await expectDocumentImported(container, document.category);
 };
 
 const getCategoryButton = (
-  fieldset: ReturnType<Page["locator"]>,
+  container: ReturnType<Page["locator"]>,
   label: string
 ) => {
-  return fieldset.locator("button").filter({ hasText: label }).first();
+  return container.locator("button").filter({ hasText: label }).first();
+};
+
+const expectDocumentImported = async (
+  container: ReturnType<Page["locator"]>,
+  label: string,
+  year?: number
+) => {
+  const categoryButton = getCategoryButton(container, label);
+  if ((await categoryButton.count()) === 0) {
+    throw new Error(
+      `Document financier introuvable${year ? ` pour ${year}` : ""}: ${label}`
+    );
+  }
+  await expect(categoryButton).toContainText("Importé");
 };

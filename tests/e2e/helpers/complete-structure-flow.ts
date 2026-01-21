@@ -76,7 +76,6 @@ export const completeStructureFlow = async (
     new FinalisationDocumentsFinanciersPage(page);
   await finalisationDocumentsFinanciersPage.waitForLoad();
   await finalisationDocumentsFinanciersPage.fillMinimalData(formData);
-  await page.waitForTimeout(10000);
   await finalisationDocumentsFinanciersPage.submit(structureId);
 
   const finalisationFinancePage = new FinalisationFinancePage(page);
