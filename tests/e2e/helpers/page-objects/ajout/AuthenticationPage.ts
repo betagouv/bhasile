@@ -1,9 +1,7 @@
-import { Page } from "@playwright/test";
-
 import { TIMEOUTS, URLS } from "../../constants";
+import { BasePage } from "../BasePage";
 
-export class AuthenticationPage {
-  constructor(private page: Page) {}
+export class AuthenticationPage extends BasePage {
 
   async authenticate() {
     await this.page.goto(URLS.AJOUT_STRUCTURE, {

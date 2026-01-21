@@ -10,6 +10,13 @@ export abstract class BasePage {
   constructor(protected page: Page) {}
 
   /**
+   * Get the page instance (for cases where direct access is needed)
+   */
+  getPage(): Page {
+    return this.page;
+  }
+
+  /**
    * Wait for the page to be ready (typically the submit button)
    */
   async waitForLoad(): Promise<void> {
@@ -25,9 +32,7 @@ export abstract class BasePage {
     name: string | RegExp,
     level?: 1 | 2 | 3 | 4 | 5 | 6
   ): Promise<void> {
-    await expect(
-      this.page.getByRole("heading", { name, level })
-    ).toBeVisible();
+    await expect(this.page.getByRole("heading", { name, level })).toBeVisible();
   }
 
   /**

@@ -2,16 +2,9 @@ import { expect, Page } from "@playwright/test";
 
 import { TIMEOUTS, URLS } from "../../constants";
 import { TestStructureData } from "../../test-data";
+import { BasePage } from "../BasePage";
 
-export class FinalisationControlesPage {
-  constructor(private page: Page) {}
-
-  async waitForLoad() {
-    await this.page.waitForSelector('button[type="submit"]', {
-      timeout: TIMEOUTS.NAVIGATION,
-    });
-  }
-
+export class FinalisationControlesPage extends BasePage {
   async fillForm(data: TestStructureData) {
     await this.fillEvaluations(data);
     await this.fillControles(data);
@@ -230,11 +223,7 @@ export class FinalisationControlesPage {
   }
 
   private async fillInputValue(selector: string, value: string) {
-    const input = this.page.locator(selector);
-    if ((await input.count()) === 0) {
-      return;
-    }
-    await input.fill(value);
+    await this.fillIfExists(selector, value);
   }
 
   private async removeExtraEntries(

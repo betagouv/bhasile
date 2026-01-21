@@ -1,17 +1,8 @@
-import { Page } from "@playwright/test";
-
 import { TIMEOUTS, URLS } from "../../constants";
 import { FinanceYearData, TestStructureData } from "../../test-data";
+import { BasePage } from "../BasePage";
 
-export class FinalisationFinancePage {
-  constructor(private page: Page) {}
-
-  async waitForLoad() {
-    await this.page.waitForSelector('button[type="submit"]', {
-      timeout: TIMEOUTS.NAVIGATION,
-    });
-  }
-
+export class FinalisationFinancePage extends BasePage {
   async fillForm(data: TestStructureData) {
     const finances = data.finances;
     if (!finances) {
@@ -45,14 +36,14 @@ export class FinalisationFinancePage {
   }
 
   async submit(structureId: number) {
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(
-      URLS.finalisationStep(structureId, "04-controles"),
-      { timeout: TIMEOUTS.NAVIGATION }
+    await this.submitAndWaitForUrl(
+      URLS.finalisationStep(structureId, "04-controles")
     );
   }
 
-  private async getBudgetIndexByYear(finances: Record<number, FinanceYearData>) {
+  private async getBudgetIndexByYear(
+    finances: Record<number, FinanceYearData>
+  ) {
     const yearInputs = this.page.locator(
       'input[name^="budgets."][name$=".year"]'
     );

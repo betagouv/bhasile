@@ -1,9 +1,9 @@
-import { expect, Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 
 import { URLS } from "../../constants";
+import { BasePage } from "../BasePage";
 
-export class StructuresListPage {
-  constructor(private page: Page) {}
+export class StructuresListPage extends BasePage {
 
   async navigate() {
     await this.page.goto(URLS.STRUCTURES);

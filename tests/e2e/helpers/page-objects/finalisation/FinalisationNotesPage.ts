@@ -1,16 +1,10 @@
-import { Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 
 import { TIMEOUTS, URLS } from "../../constants";
 import { TestStructureData } from "../../test-data";
+import { BasePage } from "../BasePage";
 
-export class FinalisationNotesPage {
-  constructor(private page: Page) {}
-
-  async waitForLoad() {
-    await this.page.waitForSelector('button[type="submit"]', {
-      timeout: TIMEOUTS.NAVIGATION,
-    });
-  }
+export class FinalisationNotesPage extends BasePage {
 
   async fillForm(data: TestStructureData) {
     const notes =
@@ -27,10 +21,9 @@ export class FinalisationNotesPage {
   }
 
   async submit(structureId: number) {
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(URLS.finalisationStep(structureId, "06-notes"), {
-      timeout: TIMEOUTS.NAVIGATION,
-    });
+    await this.submitAndWaitForUrl(
+      URLS.finalisationStep(structureId, "06-notes")
+    );
   }
 
   async finalizeAndGoToStructure(structureId: number) {

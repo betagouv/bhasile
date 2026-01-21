@@ -1,4 +1,4 @@
-import { expect, Locator, Page } from "@playwright/test";
+import { expect, Locator } from "@playwright/test";
 
 import { formatDate, getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
@@ -15,15 +15,14 @@ import {
   parseAddressParts,
 } from "../../shared-utils";
 import { TestStructureData } from "../../test-data";
+import { BasePage } from "../BasePage";
 
-export class StructureDetailsPage {
-  constructor(private page: Page) {}
-
+export class StructureDetailsPage extends BasePage {
   async navigateTo(structureId: number) {
     await this.page.goto(URLS.structure(structureId));
   }
 
-  async waitForLoad() {
+  override async waitForLoad() {
     await expect(
       this.page.getByRole("heading", { name: "Description" })
     ).toBeVisible();

@@ -1,20 +1,15 @@
-import { Page } from "@playwright/test";
-
 import { TIMEOUTS, URLS } from "../../constants";
 import { handleDocumentsFinanciers } from "../../documents-financiers-helper";
 import { TestStructureData } from "../../test-data";
+import { BasePage } from "../BasePage";
 
-export class DocumentsFinanciersPage {
-  constructor(private page: Page) {}
+export class DocumentsFinanciersPage extends BasePage {
 
   async fillForm(data: TestStructureData) {
     await handleDocumentsFinanciers(this.page, data, "ajout");
   }
 
   async submit(dnaCode: string) {
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(URLS.ajoutStep(dnaCode, "05-verification"), {
-      timeout: TIMEOUTS.NAVIGATION,
-    });
+    await this.submitAndWaitForUrl(URLS.ajoutStep(dnaCode, "05-verification"));
   }
 }

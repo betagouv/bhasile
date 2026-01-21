@@ -1,14 +1,11 @@
-import { Page } from "@playwright/test";
-
 import { Repartition } from "@/types/adresse.type";
 
 import { TIMEOUTS, URLS } from "../../constants";
 import { getRepartitionLabel } from "../../shared-utils";
 import { TestStructureData } from "../../test-data";
+import { BasePage } from "../BasePage";
 
-export class AdressesPage {
-  constructor(private page: Page) {}
-
+export class AdressesPage extends BasePage {
   async fillForm(data: TestStructureData) {
     // Nom (should already be filled via selection page)
     if (data.nom) {
@@ -107,7 +104,6 @@ export class AdressesPage {
   }
 
   async submit(dnaCode: string) {
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(URLS.ajoutStep(dnaCode, "03-type-places"));
+    await this.submitAndWaitForUrl(URLS.ajoutStep(dnaCode, "03-type-places"));
   }
 }

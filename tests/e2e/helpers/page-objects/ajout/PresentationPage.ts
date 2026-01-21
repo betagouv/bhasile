@@ -1,7 +1,8 @@
-import { expect, Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 
-export class PresentationPage {
-  constructor(private page: Page) {}
+import { BasePage } from "../BasePage";
+
+export class PresentationPage extends BasePage {
 
   private async verifyPageContent(): Promise<void> {
     // Vérifier que la page de présentation est bien affichée

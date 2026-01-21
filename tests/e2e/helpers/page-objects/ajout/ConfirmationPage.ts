@@ -1,19 +1,16 @@
-import { expect, Page } from "@playwright/test";
-
 import { TIMEOUTS } from "../../constants";
+import { BasePage } from "../BasePage";
 
-export class ConfirmationPage {
-  constructor(private page: Page) {}
+export class ConfirmationPage extends BasePage {
 
   async verifySuccess() {
     // Wait for confirmation message or success indicator
-    await expect(
-      this.page.getByRole("heading", {
-        name: /Vous avez terminé la création de cette structure/i,
-      })
-    ).toBeVisible({ timeout: TIMEOUTS.NAVIGATION });
+    await this.waitForHeading(
+      /Vous avez terminé la création de cette structure/i
+    );
 
     // Also check for success icon
+    const { expect } = await import("@playwright/test");
     await expect(this.page.locator(".fr-icon-success-line")).toBeVisible();
   }
 }

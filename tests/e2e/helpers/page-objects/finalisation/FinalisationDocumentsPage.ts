@@ -1,17 +1,11 @@
 import { Page } from "@playwright/test";
 
-import { TIMEOUTS, URLS } from "../../constants";
+import { URLS } from "../../constants";
 import { getActesCategoryRegex } from "../../shared-utils";
 import { TestStructureData } from "../../test-data";
+import { BasePage } from "../BasePage";
 
-export class FinalisationDocumentsPage {
-  constructor(private page: Page) {}
-
-  async waitForLoad() {
-    await this.page.waitForSelector('button[type="submit"]', {
-      timeout: TIMEOUTS.NAVIGATION,
-    });
-  }
+export class FinalisationDocumentsPage extends BasePage {
 
   async fillForm(data: TestStructureData) {
     const actes = data.actesAdministratifs ?? [];
@@ -77,10 +71,9 @@ export class FinalisationDocumentsPage {
   }
 
   async submit(structureId: number) {
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(URLS.finalisationStep(structureId, "06-notes"), {
-      timeout: TIMEOUTS.NAVIGATION,
-    });
+    await this.submitAndWaitForUrl(
+      URLS.finalisationStep(structureId, "06-notes")
+    );
   }
 
   private async fillIfExistsAtIndex(

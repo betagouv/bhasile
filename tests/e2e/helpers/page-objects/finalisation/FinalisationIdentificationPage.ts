@@ -1,21 +1,10 @@
-import { Page } from "@playwright/test";
+import { URLS } from "../../constants";
+import { BasePage } from "../BasePage";
 
-import { TIMEOUTS, URLS } from "../../constants";
-
-export class FinalisationIdentificationPage {
-  constructor(private page: Page) {}
-
-  async waitForLoad() {
-    await this.page.waitForSelector('button[type="submit"]', {
-      timeout: TIMEOUTS.NAVIGATION,
-    });
-  }
-
+export class FinalisationIdentificationPage extends BasePage {
   async submit(structureId: number) {
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(
-      URLS.finalisationStep(structureId, "02-documents-financiers"),
-      { timeout: TIMEOUTS.NAVIGATION }
+    await this.submitAndWaitForUrl(
+      URLS.finalisationStep(structureId, "02-documents-financiers")
     );
   }
 }

@@ -1,4 +1,4 @@
-import { expect, Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 
 import { formatCityName } from "@/app/utils/adresse.util";
 import { formatDate } from "@/app/utils/date.util";
@@ -7,18 +7,16 @@ import { formatPhoneNumber } from "@/app/utils/phone.util";
 import { TIMEOUTS, URLS } from "../../constants";
 import { parseAddressParts } from "../../shared-utils";
 import { TestStructureData } from "../../test-data";
+import { BasePage } from "../BasePage";
 
-export class VerificationPage {
-  constructor(private page: Page) {}
+export class VerificationPage extends BasePage {
 
   async verifyData(data: TestStructureData) {
     // Wait for the verification page to load
     await this.page.waitForTimeout(1000);
 
     // Verify we're on the verification page by checking for the main heading
-    await expect(
-      this.page.getByRole("heading", { name: /Vérification des données/i })
-    ).toBeVisible({ timeout: TIMEOUTS.NAVIGATION });
+    await this.waitForHeading(/Vérification des données/i);
 
     await this.expectIdentification(data);
     await this.expectAdresses(data);

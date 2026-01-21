@@ -1,10 +1,10 @@
-import { expect, Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 
 import { URLS } from "../../constants";
 import { TestStructureData } from "../../test-data";
+import { BasePage } from "../BasePage";
 
-export class TypePlacesPage {
-  constructor(private page: Page) {}
+export class TypePlacesPage extends BasePage {
 
   async fillForm(data: TestStructureData) {
     const rows = this.page
@@ -70,7 +70,6 @@ export class TypePlacesPage {
   }
 
   async submit(dnaCode: string) {
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(URLS.ajoutStep(dnaCode, "04-documents"));
+    await this.submitAndWaitForUrl(URLS.ajoutStep(dnaCode, "04-documents"));
   }
 }

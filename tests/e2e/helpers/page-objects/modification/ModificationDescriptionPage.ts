@@ -1,17 +1,12 @@
-import { expect, Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 
-import { TIMEOUTS, URLS } from "../../constants";
+import { URLS } from "../../constants";
+import { BasePage } from "../BasePage";
 
-export class ModificationDescriptionPage {
-  constructor(private page: Page) {}
-
-  async waitForLoad() {
-    await expect(
-      this.page.getByRole("heading", { name: /Modification/i })
-    ).toBeVisible();
-    await this.page.waitForSelector('button[type="submit"]', {
-      timeout: TIMEOUTS.NAVIGATION,
-    });
+export class ModificationDescriptionPage extends BasePage {
+  override async waitForLoad() {
+    await this.waitForHeading(/Modification/i);
+    await super.waitForLoad();
   }
 
   async updatePublic(publicValue: string) {
@@ -34,10 +29,7 @@ export class ModificationDescriptionPage {
   }
 
   async submit(structureId: number) {
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(URLS.structure(structureId), {
-      timeout: TIMEOUTS.NAVIGATION,
-    });
+    await this.submitAndWaitForUrl(URLS.structure(structureId));
   }
 
   private async toggleCheckbox(selector: string, shouldBeChecked: boolean) {

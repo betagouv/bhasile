@@ -1,12 +1,11 @@
-import { expect, Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 
 import { TIMEOUTS } from "../../constants";
 import { TestStructureData } from "../../test-data";
+import { BasePage } from "../BasePage";
 
-export class SelectionPage {
-  constructor(private page: Page) {}
-
-  async waitForLoad(): Promise<void> {
+export class SelectionPage extends BasePage {
+  override async waitForLoad(): Promise<void> {
     await expect(
       this.page.getByRole("heading", {
         name: "Quelle structure voulez-vous ajouter ?",

@@ -1,11 +1,8 @@
-import { expect, Page } from "@playwright/test";
-
 import { URLS } from "../../constants";
 import { TestStructureData } from "../../test-data";
+import { BasePage } from "../BasePage";
 
-export class IdentificationPage {
-  constructor(private page: Page) {}
-
+export class IdentificationPage extends BasePage {
   async fillForm(data: TestStructureData) {
     // Filiale (if provided)
     if (data.filiale) {
@@ -111,7 +108,6 @@ export class IdentificationPage {
   }
 
   async submit(dnaCode: string) {
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(URLS.ajoutStep(dnaCode, "02-adresses"));
+    await this.submitAndWaitForUrl(URLS.ajoutStep(dnaCode, "02-adresses"));
   }
 }
