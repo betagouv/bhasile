@@ -53,13 +53,11 @@ export const baseHudaData: Omit<TestStructureData, "dnaCode"> = {
       adresseComplete: "1 Rue de la Paix 75001 Paris",
       searchTerm: "1 Rue de la Paix 75001 Paris",
       placesAutorisees: 50,
-      repartition: Repartition.DIFFUS,
     },
     {
       adresseComplete: "2 Rue de la Paix 75001 Paris",
       searchTerm: "2 Rue de la Paix 75001 Paris",
       placesAutorisees: 150,
-      repartition: Repartition.DIFFUS,
     },
   ],
   structureTypologies: [

@@ -582,31 +582,26 @@ export const validCadaEdgeCase: TestDataOverrides = {
       adresseComplete: "1 Rue de la Paix 75001 Paris",
       searchTerm: "1 Rue de la Paix 75001 Paris",
       placesAutorisees: 50,
-      repartition: Repartition.DIFFUS,
     },
     {
       adresseComplete: "2 Rue de la Paix 75001 Paris",
       searchTerm: "2 Rue de la Paix 75001 Paris",
       placesAutorisees: 60,
-      repartition: Repartition.DIFFUS,
     },
     {
       adresseComplete: "3 Rue de la Paix 75001 Paris",
       searchTerm: "3 Rue de la Paix 75001 Paris",
       placesAutorisees: 40,
-      repartition: Repartition.DIFFUS,
     },
     {
       adresseComplete: "4 Rue de la Paix 75001 Paris",
       searchTerm: "4 Rue de la Paix 75001 Paris",
       placesAutorisees: 30,
-      repartition: Repartition.DIFFUS,
     },
     {
       adresseComplete: "5 Rue de la Paix 75001 Paris",
       searchTerm: "5 Rue de la Paix 75001 Paris",
       placesAutorisees: 20,
-      repartition: Repartition.DIFFUS,
     },
   ],
   structureTypologies: [
