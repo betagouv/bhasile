@@ -10,6 +10,9 @@ export default defineConfig({
     headless: true,
     viewport: { width: 1280, height: 800 },
     ignoreHTTPSErrors: true,
+    extraHTTPHeaders: {
+      "x-dev-auth-bypass": "1",
+    },
     video: "retain-on-failure",
     screenshot: "only-on-failure",
   },

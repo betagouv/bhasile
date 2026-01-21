@@ -61,9 +61,9 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
     });
   }
 
-  // Transform typologies with dates
+  // Transform typologies with years
   const transformedTypologies = typologies.map((typo, index) => ({
-    date: new Date(`${2025 - index}-01-01`), // 2025, 2024, 2023
+    year: 2025 - index, // 2025, 2024, 2023
     placesAutorisees: typo.placesAutorisees,
     pmr: typo.pmr,
     lgbt: typo.lgbt,
@@ -81,7 +81,7 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
           adresseTypologies: [
             {
               placesAutorisees: typologies[0].placesAutorisees,
-              date: new Date("2025-01-01"),
+              year: 2025,
               qpv: 0, // Convert boolean to number
               logementSocial: 0, // Convert boolean to number
             },
@@ -98,7 +98,7 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
           adresseTypologies: [
             {
               placesAutorisees: addr.placesAutorisees,
-              date: new Date("2025-01-01"),
+              year: 2025,
               qpv: 0,
               logementSocial: 0,
             },
@@ -144,7 +144,8 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
     finCpom: identification.finCpom ? new Date(identification.finCpom) : null,
     adresses: transformedAdresses,
     contacts,
-    typologies: transformedTypologies,
+    structureTypologies: transformedTypologies,
+    documentsFinanciers: [],
     fileUploads: [], // Empty - file uploads will be skipped in finalisation tests
   };
 

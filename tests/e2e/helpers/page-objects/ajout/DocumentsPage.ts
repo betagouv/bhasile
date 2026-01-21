@@ -1,24 +1,17 @@
-import { Page } from "@playwright/test";
-
-import { TestStructureData } from "../../test-data";
+import { expect, Page } from "@playwright/test";
 
 export class DocumentsPage {
   constructor(private page: Page) {}
 
-  async fillForm(data: TestStructureData) {
-    const { documents } = data;
-
-    // Check "less than 5 years" checkbox if needed
-    if (documents.less5Years) {
-      const checkbox = this.page.locator('input[name="less5Years"]');
-      const isChecked = await checkbox.isChecked();
-      if (!isChecked) {
-        await this.page.click('input[name="less5Years"] + label');
-      }
+  async fillForm(options?: UploadOptions | UploadOptions[]) {
+    if (!options) {
+      return;
     }
 
-    // For now, we'll skip file uploads since they're complex
-    // In a real test, you would upload files using page.setInputFiles()
+    const uploads = Array.isArray(options) ? options : [options];
+    for (const upload of uploads) {
+      await this.addUpload(upload);
+    }
   }
 
   async submit(dnaCode: string) {
@@ -28,4 +21,35 @@ export class DocumentsPage {
       { timeout: 10000 }
     );
   }
+
+  private async addUpload({
+    filePath,
+    year = 2025,
+    categoryLabel,
+  }: UploadOptions) {
+    const yearHeading = this.page.getByRole("heading", {
+      name: String(year),
+    });
+    const yearFieldset = this.page.locator("fieldset", { has: yearHeading });
+    const fileInput = yearFieldset.locator('input[type="file"]').last();
+    await fileInput.setInputFiles(filePath);
+
+    const categorySelect = yearFieldset.getByRole("combobox", {
+      name: "Type de document",
+    });
+    await expect(categorySelect).toBeVisible();
+    await categorySelect.selectOption({ label: categoryLabel });
+
+    const addButton = yearFieldset.getByRole("button", {
+      name: "Ajouter le document",
+    });
+    await expect(addButton).toBeEnabled();
+    await addButton.click();
+  }
 }
+
+type UploadOptions = {
+  filePath: string;
+  categoryLabel: string;
+  year?: number;
+};

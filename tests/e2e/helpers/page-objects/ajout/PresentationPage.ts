@@ -24,16 +24,16 @@ export class PresentationPage {
       .click();
   }
 
-  async navigateToFirstStep(dnaCode: string): Promise<void> {
+  async navigateToSelectionStep(): Promise<void> {
     // Vérifier le contenu de la page
     await this.verifyPageContent();
 
     // Commencer le formulaire
     await this.startForm();
 
-    // Vérifier qu'on arrive bien sur la première étape (identification)
+    // Vérifier qu'on arrive bien sur l'étape de sélection
     await expect(this.page).toHaveURL(
-      new RegExp(`/ajout-structure/${dnaCode}/01-identification`)
+      new RegExp(`/ajout-structure/selection`)
     );
   }
 }

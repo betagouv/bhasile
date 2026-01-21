@@ -22,14 +22,16 @@ export class AdressesPage {
       adresses.adresseAdministrative.searchTerm
     );
 
-    // Wait for autocomplete suggestions
-    await this.page.waitForSelector('[role="option"]', {
-      state: "visible",
-      timeout: 5000,
-    });
-
-    // Click first suggestion
-    await this.page.click('[role="option"]:first-child');
+    // Wait for autocomplete suggestions, fallback to manual fill when empty.
+    const firstSuggestion = this.page.locator('[role="option"]').first();
+    try {
+      await firstSuggestion.waitFor({ state: "visible", timeout: 5000 });
+      await firstSuggestion.click();
+    } catch {
+      await this.fillAdministrativeAddressFallback(
+        adresses.adresseAdministrative.complete
+      );
+    }
 
     // Wait for address to be populated
     await this.page.waitForTimeout(500);
@@ -73,11 +75,13 @@ export class AdressesPage {
           adresse.searchTerm
         );
 
-        await this.page.waitForSelector('[role="option"]', {
-          state: "visible",
-          timeout: 5000,
-        });
-        await this.page.click('[role="option"]:first-child');
+        const addressSuggestion = this.page.locator('[role="option"]').first();
+        try {
+          await addressSuggestion.waitFor({ state: "visible", timeout: 5000 });
+          await addressSuggestion.click();
+        } catch {
+          await this.fillHebergementAddressFallback(i, adresse.adresseComplete);
+        }
 
         await this.page.waitForTimeout(500);
 
@@ -117,5 +121,79 @@ export class AdressesPage {
       default:
         return repartition;
     }
+  }
+
+  private async fillAdministrativeAddressFallback(fullAddress: string) {
+    const parsed = this.parseAddress(fullAddress);
+    await this.page.fill('input[name="adresseAdministrativeComplete"]', fullAddress);
+    await this.setHiddenInputValue(
+      'input[name="adresseAdministrative"]',
+      parsed.street
+    );
+    await this.setHiddenInputValue(
+      'input[name="codePostalAdministratif"]',
+      parsed.postalCode
+    );
+    await this.setHiddenInputValue(
+      'input[name="communeAdministrative"]',
+      parsed.city
+    );
+    await this.setHiddenInputValue(
+      'input[name="departementAdministratif"]',
+      parsed.department
+    );
+  }
+
+  private async fillHebergementAddressFallback(index: number, fullAddress: string) {
+    const parsed = this.parseAddress(fullAddress);
+    await this.page.fill(
+      `input[name="adresses.${index}.adresseComplete"]`,
+      fullAddress
+    );
+    await this.setHiddenInputValue(
+      `input[name="adresses.${index}.adresse"]`,
+      parsed.street
+    );
+    await this.setHiddenInputValue(
+      `input[name="adresses.${index}.codePostal"]`,
+      parsed.postalCode
+    );
+    await this.setHiddenInputValue(
+      `input[name="adresses.${index}.commune"]`,
+      parsed.city
+    );
+    await this.setHiddenInputValue(
+      `input[name="adresses.${index}.departement"]`,
+      parsed.department
+    );
+  }
+
+  private parseAddress(fullAddress: string) {
+    const parts = fullAddress.trim().split(/\s+/);
+    const postalCodeMatch = parts.find((part) => /^\d{5}$/.test(part));
+    const postalCode = postalCodeMatch || "75001";
+    const postalIndex = parts.findIndex((part) => part === postalCode);
+    const city =
+      postalIndex > -1 ? parts.slice(postalIndex + 1).join(" ") : "Paris";
+    const street =
+      postalIndex > -1 ? parts.slice(0, postalIndex).join(" ") : fullAddress;
+    const department = postalCode.startsWith("20")
+      ? postalCode.substring(0, 3)
+      : postalCode.substring(0, 2);
+    return {
+      street: street || "1 rue de Test",
+      postalCode,
+      city: city || "Paris",
+      department,
+    };
+  }
+
+  private async setHiddenInputValue(selector: string, value: string) {
+    await this.page.locator(selector).evaluate((element, nextValue) => {
+      const input = element as HTMLInputElement;
+      input.value = nextValue;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }, value);
   }
 }

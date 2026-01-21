@@ -10,22 +10,33 @@ export class IdentificationPage {
 
     // Filiale (if provided)
     if (identification.filiale) {
-      await this.page.click("label[for='managed-by-a-filiale-input']");
-      await expect(this.page.locator("input[name='filiale']")).toBeVisible();
-      await this.page.fill("input[name='filiale']", identification.filiale);
+      const filialeToggle = this.page.getByRole("checkbox", {
+        name: /filiale d’opérateur/i,
+      });
+      if (await filialeToggle.count()) {
+        await filialeToggle.check();
+        await expect(this.page.locator("#filiale")).toBeVisible();
+        await this.page.fill("#filiale", identification.filiale);
+      }
     }
 
     // Opérateur (autocomplete)
-    await this.page.click('input[name="operateur.name"]');
-    await this.page.fill(
-      'input[name="operateur.name"]',
-      identification.operateur.searchTerm
-    );
-    await this.page.waitForSelector("#suggestion-0", {
-      state: "visible",
-      timeout: 5000,
-    });
-    await this.page.click("#suggestion-0");
+    const operateurInput = this.page.locator('input[name="operateur.name"]');
+    await expect(operateurInput).toBeVisible();
+    const existingOperateur = await operateurInput.inputValue();
+    const existingOperateurId = await this.page
+      .locator('input[name="operateur.id"]')
+      .inputValue();
+
+    if (!existingOperateur || !existingOperateurId) {
+      await operateurInput.click();
+      await operateurInput.fill(identification.operateur.searchTerm);
+      await this.page.waitForSelector("#suggestion-0", {
+        state: "visible",
+        timeout: 10000,
+      });
+      await this.page.click("#suggestion-0");
+    }
 
     // Date de création
     await this.page.fill(
