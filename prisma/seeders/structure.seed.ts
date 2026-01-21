@@ -124,7 +124,6 @@ export const createFakeStructure = ({
     echeancePlacesACreer: faker.date.future(),
     echeancePlacesAFermer: faker.date.future(),
     notes: faker.lorem.lines(2),
-    noEvaluationStructure: faker.datatype.boolean(),
     activeInOfiiFileSince:
       faker.helpers.maybe(
         () => faker.date.between({ from: creationDate, to: new Date() }),
@@ -222,12 +221,11 @@ export const createFakeStuctureWithRelations = ({
         createFakeControle(),
         createFakeControle(),
       ],
-      evaluations:
-        fakeStructure.noEvaluationStructure && !isStructureAutorisee(type)
-          ? []
-          : Array.from({ length: faker.number.int({ min: 1, max: 5 }) }, () =>
-              createFakeEvaluation()
-            ),
+      evaluations: isStructureAutorisee(type)
+        ? Array.from({ length: faker.number.int({ min: 1, max: 5 }) }, () =>
+            createFakeEvaluation()
+          )
+        : [],
     };
   }
 

@@ -82,7 +82,6 @@ export const getDefaultValues = ({
     echeancePlacesACreer: structure.echeancePlacesACreer ?? undefined,
     echeancePlacesAFermer: structure.echeancePlacesAFermer ?? undefined,
     date303: structure.date303 ?? undefined,
-    noEvaluationStructure: structure.noEvaluationStructure,
     budgets,
     structureTypologies,
     structureMillesimes,
