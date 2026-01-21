@@ -22,40 +22,189 @@ export const validCada1: TestDataOverrides = {
   documentsFinanciers: {
     allAddedViaAjout: true,
     files: [
-      { year: "2025", category: "Budget prévisionnel demandé", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2025", category: "Budget prévisionnel retenu (ou exécutoire)", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2024", category: "Budget prévisionnel demandé", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2024", category: "Budget prévisionnel retenu (ou exécutoire)", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2024", category: "Compte administratif soumis", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2024", category: "Rapport d'activité", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2023", category: "Budget prévisionnel demandé", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2023", category: "Budget prévisionnel retenu (ou exécutoire)", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2023", category: "Compte administratif soumis", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2023", category: "Rapport d'activité", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2023", category: "Compte administratif retenu", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2022", category: "Budget prévisionnel demandé", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2022", category: "Budget prévisionnel retenu (ou exécutoire)", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2022", category: "Compte administratif soumis", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2022", category: "Rapport d'activité", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2022", category: "Compte administratif retenu", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2021", category: "Budget prévisionnel demandé", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2021", category: "Budget prévisionnel retenu (ou exécutoire)", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2021", category: "Compte administratif soumis", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2021", category: "Rapport d'activité", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
-      { year: "2021", category: "Compte administratif retenu", fileName: "sample.csv", filePath: "tests/e2e/fixtures/sample.csv", formKind: "ajout" },
+      {
+        year: "2025",
+        category: "Budget prévisionnel demandé",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2025",
+        category: "Budget prévisionnel retenu (ou exécutoire)",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2024",
+        category: "Budget prévisionnel demandé",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2024",
+        category: "Budget prévisionnel retenu (ou exécutoire)",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2024",
+        category: "Compte administratif soumis",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2024",
+        category: "Rapport d'activité",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2023",
+        category: "Budget prévisionnel demandé",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2023",
+        category: "Budget prévisionnel retenu (ou exécutoire)",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2023",
+        category: "Compte administratif soumis",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2023",
+        category: "Rapport d'activité",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2023",
+        category: "Compte administratif retenu",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2022",
+        category: "Budget prévisionnel demandé",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2022",
+        category: "Budget prévisionnel retenu (ou exécutoire)",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2022",
+        category: "Compte administratif soumis",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2022",
+        category: "Rapport d'activité",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2022",
+        category: "Compte administratif retenu",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2021",
+        category: "Budget prévisionnel demandé",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2021",
+        category: "Budget prévisionnel retenu (ou exécutoire)",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2021",
+        category: "Compte administratif soumis",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2021",
+        category: "Rapport d'activité",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
+      {
+        year: "2021",
+        category: "Compte administratif retenu",
+        fileName: "sample.csv",
+        filePath: "tests/e2e/fixtures/sample.csv",
+        formKind: "ajout",
+      },
     ],
   },
   evaluations: [
     { date: "2021-05-12", filePath: "tests/e2e/fixtures/sample.csv" },
   ],
   controles: [
-    { date: "2022-11-05", type: "Programmé", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      date: "2022-11-05",
+      type: "Programmé",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
   actesAdministratifs: [
-    { category: "ARRETE_AUTORISATION", startDate: "2020-01-01", endDate: "2025-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
-    { category: "CONVENTION", startDate: "2021-01-01", endDate: "2024-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
-    { category: "ARRETE_TARIFICATION", startDate: "2022-01-01", endDate: "2023-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
-    { category: "AUTRE", categoryName: "Document e2e", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      category: "ARRETE_AUTORISATION",
+      startDate: "2020-01-01",
+      endDate: "2025-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      category: "CONVENTION",
+      startDate: "2021-01-01",
+      endDate: "2024-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      category: "ARRETE_TARIFICATION",
+      startDate: "2022-01-01",
+      endDate: "2023-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      category: "AUTRE",
+      categoryName: "Document e2e",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
 };
 
@@ -80,6 +229,7 @@ export const validCada2: TestDataOverrides = {
   ],
   documentsFinanciers: {
     allAddedViaAjout: false,
+    files: [],
     // Base data has all required documents - we'll override formKind for some to test mixed scenario
     // Don't override files - use base data's full set, just change allAddedViaAjout flag
   },
@@ -96,8 +246,18 @@ export const validCada2: TestDataOverrides = {
   controles: [],
   // Required actes for autorisée structures
   actesAdministratifs: [
-    { category: "ARRETE_AUTORISATION", startDate: "2020-01-01", endDate: "2025-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
-    { category: "ARRETE_TARIFICATION", startDate: "2022-01-01", endDate: "2023-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      category: "ARRETE_AUTORISATION",
+      startDate: "2020-01-01",
+      endDate: "2025-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      category: "ARRETE_TARIFICATION",
+      startDate: "2022-01-01",
+      endDate: "2023-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
 };
 
@@ -125,6 +285,7 @@ export const validCada3: TestDataOverrides = {
   ],
   documentsFinanciers: {
     allAddedViaAjout: false,
+    files: [],
     // Use base data's full document set - all documents will be at ajout, which is fine for testing
     // At finalisation, they'll be imported (expected behavior)
   },
@@ -140,12 +301,31 @@ export const validCada3: TestDataOverrides = {
     },
   ],
   controles: [
-    { date: "2022-11-05", type: "Programmé", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      date: "2022-11-05",
+      type: "Programmé",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
   actesAdministratifs: [
-    { category: "ARRETE_AUTORISATION", startDate: "2020-01-01", endDate: "2025-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
-    { category: "ARRETE_TARIFICATION", startDate: "2022-01-01", endDate: "2023-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
-    { category: "CONVENTION", startDate: "2021-01-01", endDate: "2024-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      category: "ARRETE_AUTORISATION",
+      startDate: "2020-01-01",
+      endDate: "2025-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      category: "ARRETE_TARIFICATION",
+      startDate: "2022-01-01",
+      endDate: "2023-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      category: "CONVENTION",
+      startDate: "2021-01-01",
+      endDate: "2024-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
 };
 
@@ -178,8 +358,18 @@ export const validCada4: TestDataOverrides = {
   controles: [],
   // Required actes for autorisée structures
   actesAdministratifs: [
-    { category: "ARRETE_AUTORISATION", startDate: "2020-01-01", endDate: "2025-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
-    { category: "ARRETE_TARIFICATION", startDate: "2022-01-01", endDate: "2023-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      category: "ARRETE_AUTORISATION",
+      startDate: "2020-01-01",
+      endDate: "2025-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      category: "ARRETE_TARIFICATION",
+      startDate: "2022-01-01",
+      endDate: "2023-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
   // Use base data's full finances - "minimal" just means we don't override
 };
@@ -217,6 +407,7 @@ export const validCada5: TestDataOverrides = {
   documentsFinanciers: {
     allAddedViaAjout: false,
     // Use base data's full document set
+    files: [],
   },
   evaluations: [
     {
@@ -230,9 +421,21 @@ export const validCada5: TestDataOverrides = {
     },
   ],
   controles: [
-    { date: "2022-11-05", type: "Programmé", filePath: "tests/e2e/fixtures/sample.csv" },
-    { date: "2024-03-14", type: "Inopiné", filePath: "tests/e2e/fixtures/sample.csv" },
-    { date: "2024-06-20", type: "Programmé", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      date: "2022-11-05",
+      type: "Programmé",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      date: "2024-03-14",
+      type: "Inopiné",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      date: "2024-06-20",
+      type: "Programmé",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
 };
 
@@ -266,12 +469,26 @@ export const validCph1: TestDataOverrides = {
     { date: "2021-05-12", filePath: "tests/e2e/fixtures/sample.csv" },
   ],
   controles: [
-    { date: "2022-11-05", type: "Programmé", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      date: "2022-11-05",
+      type: "Programmé",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
   // Required actes for autorisée structures
   actesAdministratifs: [
-    { category: "ARRETE_AUTORISATION", startDate: "2020-01-01", endDate: "2025-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
-    { category: "ARRETE_TARIFICATION", startDate: "2022-01-01", endDate: "2023-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      category: "ARRETE_AUTORISATION",
+      startDate: "2020-01-01",
+      endDate: "2025-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      category: "ARRETE_TARIFICATION",
+      startDate: "2022-01-01",
+      endDate: "2023-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
 };
 
@@ -299,6 +516,7 @@ export const validCph2: TestDataOverrides = {
   documentsFinanciers: {
     allAddedViaAjout: false,
     // Use base data's full document set
+    files: [],
   },
   evaluations: [
     {
@@ -313,8 +531,18 @@ export const validCph2: TestDataOverrides = {
   controles: [],
   // Required actes for autorisée structures
   actesAdministratifs: [
-    { category: "ARRETE_AUTORISATION", startDate: "2020-01-01", endDate: "2025-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
-    { category: "ARRETE_TARIFICATION", startDate: "2022-01-01", endDate: "2023-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      category: "ARRETE_AUTORISATION",
+      startDate: "2020-01-01",
+      endDate: "2025-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      category: "ARRETE_TARIFICATION",
+      startDate: "2022-01-01",
+      endDate: "2023-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
 };
 
@@ -341,6 +569,7 @@ export const validCph3: TestDataOverrides = {
   documentsFinanciers: {
     allAddedViaAjout: false,
     // Use base data's full document set
+    files: [],
   },
   // TODO: remove evaluation
   evaluations: [
@@ -349,8 +578,18 @@ export const validCph3: TestDataOverrides = {
   controles: [],
   // Required actes for autorisée structures
   actesAdministratifs: [
-    { category: "ARRETE_AUTORISATION", startDate: "2020-01-01", endDate: "2025-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
-    { category: "ARRETE_TARIFICATION", startDate: "2022-01-01", endDate: "2023-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      category: "ARRETE_AUTORISATION",
+      startDate: "2020-01-01",
+      endDate: "2025-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      category: "ARRETE_TARIFICATION",
+      startDate: "2022-01-01",
+      endDate: "2023-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
   // Use base data's full finances - "minimal" just means we don't override
 };
@@ -387,7 +626,12 @@ export const validHuda1: TestDataOverrides = {
   controles: [],
   // Required actes for subventionnée structures (CONVENTION is required)
   actesAdministratifs: [
-    { category: "CONVENTION", startDate: "2020-01-01", endDate: "2023-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      category: "CONVENTION",
+      startDate: "2020-01-01",
+      endDate: "2023-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
   // Use base data's full finances - "minimal" just means we don't override
 };
@@ -413,17 +657,31 @@ export const validHuda2: TestDataOverrides = {
   ],
   documentsFinanciers: {
     allAddedViaAjout: false,
+    files: [],
     // Use base data's full document set
   },
   evaluations: [
     { date: "2021-05-12", filePath: "tests/e2e/fixtures/sample.csv" },
   ],
   controles: [
-    { date: "2022-11-05", type: "Programmé", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      date: "2022-11-05",
+      type: "Programmé",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
   actesAdministratifs: [
-    { category: "CONVENTION", startDate: "2020-01-01", endDate: "2023-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
-    { category: "AUTRE", categoryName: "Document e2e", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      category: "CONVENTION",
+      startDate: "2020-01-01",
+      endDate: "2023-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      category: "AUTRE",
+      categoryName: "Document e2e",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
 };
 
@@ -451,6 +709,7 @@ export const validHuda3: TestDataOverrides = {
   ],
   documentsFinanciers: {
     allAddedViaAjout: false,
+    files: [],
     // Use base data's full document set
   },
   evaluations: [
@@ -459,7 +718,12 @@ export const validHuda3: TestDataOverrides = {
   controles: [],
   // Required actes for subventionnée structures (CONVENTION is required)
   actesAdministratifs: [
-    { category: "CONVENTION", startDate: "2020-01-01", endDate: "2023-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      category: "CONVENTION",
+      startDate: "2020-01-01",
+      endDate: "2023-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
 };
 
@@ -494,7 +758,12 @@ export const validCaes1: TestDataOverrides = {
   controles: [],
   // Required actes for subventionnée structures (CONVENTION is required)
   actesAdministratifs: [
-    { category: "CONVENTION", startDate: "2020-01-01", endDate: "2023-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      category: "CONVENTION",
+      startDate: "2020-01-01",
+      endDate: "2023-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
   // Use base data's full finances - "minimal" just means we don't override
 };
@@ -521,13 +790,18 @@ export const validCaes2: TestDataOverrides = {
   ],
   documentsFinanciers: {
     allAddedViaAjout: false,
+    files: [],
     // Use base data's full document set
   },
   evaluations: [
     { date: "2021-05-12", filePath: "tests/e2e/fixtures/sample.csv" },
   ],
   controles: [
-    { date: "2022-11-05", type: "Programmé", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      date: "2022-11-05",
+      type: "Programmé",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
 };
 
@@ -555,6 +829,7 @@ export const validCaes3: TestDataOverrides = {
   ],
   documentsFinanciers: {
     allAddedViaAjout: false,
+    files: [],
     // Use base data's full document set
   },
   evaluations: [
@@ -563,7 +838,12 @@ export const validCaes3: TestDataOverrides = {
   controles: [],
   // Required actes for subventionnée structures (CONVENTION is required)
   actesAdministratifs: [
-    { category: "CONVENTION", startDate: "2020-01-01", endDate: "2023-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      category: "CONVENTION",
+      startDate: "2020-01-01",
+      endDate: "2023-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
   // Use base data's full finances - "minimal" just means we don't override
 };
@@ -634,15 +914,50 @@ export const validCadaEdgeCase: TestDataOverrides = {
     },
   ],
   controles: [
-    { date: "2022-11-05", type: "Programmé", filePath: "tests/e2e/fixtures/sample.csv" },
-    { date: "2024-03-14", type: "Inopiné", filePath: "tests/e2e/fixtures/sample.csv" },
-    { date: "2024-06-20", type: "Programmé", filePath: "tests/e2e/fixtures/sample.csv" },
-    { date: "2024-09-10", type: "Inopiné", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      date: "2022-11-05",
+      type: "Programmé",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      date: "2024-03-14",
+      type: "Inopiné",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      date: "2024-06-20",
+      type: "Programmé",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      date: "2024-09-10",
+      type: "Inopiné",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
   actesAdministratifs: [
-    { category: "ARRETE_AUTORISATION", startDate: "2020-01-01", endDate: "2025-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
-    { category: "CONVENTION", startDate: "2021-01-01", endDate: "2024-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
-    { category: "ARRETE_TARIFICATION", startDate: "2022-01-01", endDate: "2023-12-31", filePath: "tests/e2e/fixtures/sample.csv" },
-    { category: "AUTRE", categoryName: "Document e2e", filePath: "tests/e2e/fixtures/sample.csv" },
+    {
+      category: "ARRETE_AUTORISATION",
+      startDate: "2020-01-01",
+      endDate: "2025-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      category: "CONVENTION",
+      startDate: "2021-01-01",
+      endDate: "2024-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      category: "ARRETE_TARIFICATION",
+      startDate: "2022-01-01",
+      endDate: "2023-12-31",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
+    {
+      category: "AUTRE",
+      categoryName: "Document e2e",
+      filePath: "tests/e2e/fixtures/sample.csv",
+    },
   ],
 };

@@ -47,8 +47,17 @@ export class AdressesPage extends BasePage {
     // For COLLECTIF, the form limits addresses to 1 and sets repartition automatically
     // For DIFFUS, the form sets repartition automatically
     // For MIXTE, repartition must be set per address
-    // Wait longer to ensure the form has fully processed the change
-    await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE * 3);
+    // Wait for the form to fully process the change
+    await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE * 2);
+    
+    // Verify typeBati is correctly set
+    const selectedTypeBati = await this.page.inputValue('select[name="typeBati"]');
+    const expectedTypeBati = getRepartitionLabel(data.typeBati);
+    if (selectedTypeBati !== expectedTypeBati) {
+      throw new Error(
+        `Expected typeBati to be "${expectedTypeBati}", but got "${selectedTypeBati}"`
+      );
+    }
 
     // Verify that addresses array is correctly initialized
     // When typeBati is COLLECTIF, there should be exactly 1 address

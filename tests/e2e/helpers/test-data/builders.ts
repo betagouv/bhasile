@@ -1,10 +1,11 @@
-import { Repartition } from "@/types/adresse.type";
 import { v4 as uuidv4 } from "uuid";
 
+import { Repartition } from "@/types/adresse.type";
+
 import { baseCadaData } from "./base-cada";
+import { baseCaesData } from "./base-caes";
 import { baseCphData } from "./base-cph";
 import { baseHudaData } from "./base-huda";
-import { baseCaesData } from "./base-caes";
 import { TestStructureData } from "./types";
 
 export type TestDataOverrides = Partial<TestStructureData> & {
@@ -21,15 +22,16 @@ export const buildTestData = (
   { dnaCode, operateurName, documentsFinanciers, ...rest }: TestDataOverrides
 ): TestStructureData => {
   let mergedDocumentsFinanciers = base.documentsFinanciers;
-  
+
   if (documentsFinanciers) {
     // If files are explicitly provided, use them; otherwise keep base files
     mergedDocumentsFinanciers = {
       ...base.documentsFinanciers,
       ...documentsFinanciers,
-      files: documentsFinanciers.files !== undefined 
-        ? documentsFinanciers.files 
-        : base.documentsFinanciers.files,
+      files:
+        documentsFinanciers.files !== undefined
+          ? documentsFinanciers.files
+          : base.documentsFinanciers.files,
     };
   }
 
@@ -164,5 +166,6 @@ export const cada2Config: TestDataOverrides = {
   ],
   // No controls
   controles: [],
-  finalisationNotes: "Notes de finalisation (CADA 2 - jeune structure) : pas encore d'évaluation.",
+  finalisationNotes:
+    "Notes de finalisation (CADA 2 - jeune structure) : pas encore d'évaluation.",
 };

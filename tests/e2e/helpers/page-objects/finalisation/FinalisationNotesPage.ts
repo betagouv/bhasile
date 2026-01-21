@@ -1,11 +1,8 @@
-import { expect } from "@playwright/test";
-
 import { TIMEOUTS, URLS } from "../../constants";
 import { TestStructureData } from "../../test-data";
 import { BasePage } from "../BasePage";
 
 export class FinalisationNotesPage extends BasePage {
-
   async fillForm(data: TestStructureData) {
     const notes =
       data.finalisationNotes || "Notes de test pour la finalisation";

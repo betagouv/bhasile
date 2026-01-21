@@ -2,30 +2,30 @@ import { test } from "@playwright/test";
 
 import { beforeFlow } from "./helpers/before-flow";
 import {
-  attemptInvalidIdentificationSubmission,
   attemptInvalidAdressesSubmission,
   attemptInvalidDocumentsSubmission,
+  attemptInvalidIdentificationSubmission,
 } from "./helpers/invalid-submission-flow";
 import { deleteStructureViaApi } from "./helpers/structure-creator";
 import {
-  invalidMissingFiness,
-  invalidMissingCreationDate,
+  invalidConventionDates,
+  invalidDateFormat,
+  invalidDepartmentCode,
+  invalidEmailFormat,
+  invalidFinessFormat,
+  invalidMissingAdminAddress,
   invalidMissingContactEmail,
   invalidMissingContactPhone,
-  invalidMissingAdminAddress,
-  invalidMissingTypologies,
-  invalidEmailFormat,
-  invalidPhoneFormat,
-  invalidDateFormat,
-  invalidPeriodeAutorisation,
-  invalidConventionDates,
-  invalidNegativePlaces,
+  invalidMissingCreationDate,
   invalidMissingDocsAutorisee,
   invalidMissingDocsSubventionnee,
+  invalidMissingFiness,
+  invalidMissingTypologies,
+  invalidNegativePlaces,
   invalidNoAddresses,
+  invalidPeriodeAutorisation,
+  invalidPhoneFormat,
   invalidTypologiesMismatch,
-  invalidDepartmentCode,
-  invalidFinessFormat,
 } from "./helpers/test-data/invalid-scenarios";
 
 const invalidTestCases = [
@@ -34,7 +34,9 @@ const invalidTestCases = [
     config: invalidMissingFiness,
     step: "01-identification",
     helper: attemptInvalidIdentificationSubmission,
-    expectedErrors: ["Le code FINESS est obligatoire pour les structures autorisées"],
+    expectedErrors: [
+      "Le code FINESS est obligatoire pour les structures autorisées",
+    ],
   },
   {
     name: "Missing creation date",
@@ -157,7 +159,7 @@ const invalidTestCases = [
   },
 ];
 
-for (const { name, config, step, helper, expectedErrors } of invalidTestCases) {
+for (const { name, config, helper, expectedErrors } of invalidTestCases) {
   test(`Invalid: ${name}`, async ({ page }) => {
     const formData = await beforeFlow(config, page);
 

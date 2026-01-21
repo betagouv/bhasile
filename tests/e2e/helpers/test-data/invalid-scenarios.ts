@@ -1,3 +1,4 @@
+import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
 import { TestDataOverrides } from "./builders";
@@ -65,7 +66,7 @@ export const invalidMissingAdminAddress: TestDataOverrides = {
  */
 export const invalidMissingTypeBati: TestDataOverrides = {
   // This will be tested by not selecting typeBati in the form
-  typeBati: undefined as any,
+  typeBati: undefined as unknown as Repartition,
 };
 
 /**

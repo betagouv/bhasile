@@ -1,6 +1,6 @@
 /**
  * Example test file for invalid data scenarios
- * 
+ *
  * This file demonstrates how to use the invalid submission helpers.
  * Copy and modify this pattern for your actual invalid test scenarios.
  */
@@ -9,9 +9,9 @@ import { test } from "@playwright/test";
 
 import { beforeFlow } from "./helpers/before-flow";
 import {
-  attemptInvalidIdentificationSubmission,
   attemptInvalidAdressesSubmission,
   attemptInvalidDocumentsSubmission,
+  attemptInvalidIdentificationSubmission,
 } from "./helpers/invalid-submission-flow";
 
 // Example: Missing FINESS code for CADA (autorisée structure)

@@ -1,10 +1,9 @@
-import { TIMEOUTS, URLS } from "../../constants";
+import { URLS } from "../../constants";
 import { handleDocumentsFinanciers } from "../../documents-financiers-helper";
 import { TestStructureData } from "../../test-data";
 import { BasePage } from "../BasePage";
 
 export class DocumentsFinanciersPage extends BasePage {
-
   async fillForm(data: TestStructureData) {
     await handleDocumentsFinanciers(this.page, data, "ajout");
   }

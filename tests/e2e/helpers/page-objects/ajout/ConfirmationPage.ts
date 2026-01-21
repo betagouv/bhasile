@@ -1,8 +1,6 @@
-import { TIMEOUTS } from "../../constants";
 import { BasePage } from "../BasePage";
 
 export class ConfirmationPage extends BasePage {
-
   async verifySuccess() {
     // Wait for confirmation message or success indicator
     await this.waitForHeading(

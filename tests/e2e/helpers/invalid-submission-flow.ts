@@ -1,4 +1,4 @@
-import { Page, expect } from "@playwright/test";
+import { expect, Page } from "@playwright/test";
 
 import { TIMEOUTS, URLS } from "./constants";
 import {
@@ -47,10 +47,10 @@ async function navigateToStep(
 
 /**
  * Attempts to submit a form with invalid data and expects validation to prevent navigation
- * 
+ *
  * IMPORTANT: When testing step N, formData must have VALID data for steps 1..N-1.
  * Only the target step (N) should have invalid data.
- * 
+ *
  * @param page - Playwright page instance
  * @param formData - Test data (must be valid for previous steps, invalid for target step)
  * @param step - The step to test validation on
@@ -82,7 +82,7 @@ export async function attemptInvalidSubmission(
       } catch (error) {
         throw new Error(
           `Cannot test invalid adresses submission: identification step failed to submit. ` +
-          `Ensure formData has valid identification data. Original error: ${error}`
+            `Ensure formData has valid identification data. Original error: ${error}`
         );
       }
 
@@ -99,7 +99,7 @@ export async function attemptInvalidSubmission(
       } catch (error) {
         throw new Error(
           `Cannot test invalid type-places submission: identification step failed. ` +
-          `Ensure formData has valid identification data. Original error: ${error}`
+            `Ensure formData has valid identification data. Original error: ${error}`
         );
       }
 
@@ -110,7 +110,7 @@ export async function attemptInvalidSubmission(
       } catch (error) {
         throw new Error(
           `Cannot test invalid type-places submission: adresses step failed. ` +
-          `Ensure formData has valid adresses data. Original error: ${error}`
+            `Ensure formData has valid adresses data. Original error: ${error}`
         );
       }
 
@@ -127,7 +127,7 @@ export async function attemptInvalidSubmission(
       } catch (error) {
         throw new Error(
           `Cannot test invalid documents submission: identification step failed. ` +
-          `Ensure formData has valid identification data. Original error: ${error}`
+            `Ensure formData has valid identification data. Original error: ${error}`
         );
       }
 
@@ -138,7 +138,7 @@ export async function attemptInvalidSubmission(
       } catch (error) {
         throw new Error(
           `Cannot test invalid documents submission: adresses step failed. ` +
-          `Ensure formData has valid adresses data. Original error: ${error}`
+            `Ensure formData has valid adresses data. Original error: ${error}`
         );
       }
 
@@ -149,7 +149,7 @@ export async function attemptInvalidSubmission(
       } catch (error) {
         throw new Error(
           `Cannot test invalid documents submission: type-places step failed. ` +
-          `Ensure formData has valid type-places data. Original error: ${error}`
+            `Ensure formData has valid type-places data. Original error: ${error}`
         );
       }
 
@@ -182,19 +182,19 @@ export async function attemptInvalidSubmission(
       // Try to find the error message - it might be in various places
       const errorLocator = page.getByText(errorMessage, { exact: false });
       const errorCount = await errorLocator.count();
-      
+
       if (errorCount === 0) {
         // Also check for error messages in input state-related messages
         const errorInputs = page.locator(
           'input[aria-invalid="true"], select[aria-invalid="true"]'
         );
         const inputCount = await errorInputs.count();
-        
+
         if (inputCount === 0) {
           // Check for error styling
           const errorElements = page.locator(".border-red-500, .text-red-500");
           const elementCount = await errorElements.count();
-          
+
           if (elementCount === 0) {
             throw new Error(
               `Expected error message "${errorMessage}" not found on page. Current URL: ${currentUrl}`
@@ -213,12 +213,12 @@ export async function attemptInvalidSubmission(
       'input[aria-invalid="true"], select[aria-invalid="true"]'
     );
     const errorCount = await errorInputs.count();
-    
+
     if (errorCount === 0) {
       // Check for error styling as fallback
       const errorElements = page.locator(".border-red-500, .text-red-500");
       const elementCount = await errorElements.count();
-      
+
       if (elementCount === 0) {
         throw new Error(
           `Expected validation errors but none found. Form may have incorrectly submitted. Current URL: ${currentUrl}`

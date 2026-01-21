@@ -7,9 +7,9 @@ import { mockFileApi } from "./mocks/file-api";
 import { seedStructureForSelection } from "./structure-creator";
 import {
   createCadaTestData,
+  createCaesTestData,
   createCphTestData,
   createHudaTestData,
-  createCaesTestData,
   TestDataOverrides,
   TestStructureData,
 } from "./test-data";
@@ -25,7 +25,7 @@ export async function beforeFlow(
   page: Page
 ): Promise<TestStructureData> {
   const structureType = overrides.type || StructureType.CADA;
-  
+
   let formData: TestStructureData;
   switch (structureType) {
     case StructureType.CPH:
