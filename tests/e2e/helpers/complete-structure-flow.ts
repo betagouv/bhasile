@@ -34,18 +34,16 @@ export const completeStructureFlow = async (
   formData: Partial<TestStructureData>,
   options?: { failingStep?: FailingStep }
 ) => {
+  if (!formData.dnaCode) {
+    throw new Error("dnaCode is required");
+  }
+  const dataWithDna = formData as TestStructureDataWithDnaCode;
+
   const authPage = new AuthenticationPage(page);
   await authPage.authenticate();
 
   const presentationPage = new PresentationPage(page);
   await presentationPage.navigateToSelectionStep();
-
-  if (!formData.dnaCode) {
-    throw new Error("dnaCode is required");
-  }
-
-  // At this point, we know dnaCode exists, so we can safely cast
-  const dataWithDna = formData as TestStructureDataWithDnaCode;
 
   const selectionPage = new SelectionPage(page);
   await selectionPage.selectStructure(dataWithDna as TestStructureData);
