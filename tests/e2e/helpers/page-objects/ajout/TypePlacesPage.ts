@@ -56,7 +56,6 @@ export class TypePlacesPage extends BasePage {
         break;
       }
 
-      // Fill typologie fields (date is auto-filled by the form)
       await this.formHelper.fillInput(
         `input[id="typologies.${i}.placesAutorisees"]`,
         typologie.placesAutorisees.toString()

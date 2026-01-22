@@ -10,25 +10,16 @@ import { SELECTORS } from "../selectors";
 export abstract class BasePage {
   constructor(protected page: Page) {}
 
-  /**
-   * Get the page instance (for cases where direct access is needed)
-   */
   getPage(): Page {
     return this.page;
   }
 
-  /**
-   * Wait for the page to be ready (typically the submit button)
-   */
   async waitForLoad(): Promise<void> {
     await this.page.waitForSelector(SELECTORS.SUBMIT_BUTTON, {
       timeout: TIMEOUTS.NAVIGATION,
     });
   }
 
-  /**
-   * Wait for a heading to be visible
-   */
   protected async waitForHeading(
     name: string | RegExp,
     level?: 1 | 2 | 3 | 4 | 5 | 6
@@ -36,10 +27,6 @@ export abstract class BasePage {
     await expect(this.page.getByRole("heading", { name, level })).toBeVisible();
   }
 
-  /**
-   * Fill an input field if it exists and is enabled
-   * Returns true if the field was filled, false otherwise
-   */
   protected async fillIfExists(
     selector: string,
     value: string
@@ -56,9 +43,6 @@ export abstract class BasePage {
     return false;
   }
 
-  /**
-   * Click submit button and wait for navigation
-   */
   protected async submitAndWaitForUrl(
     expectedUrl: string | RegExp,
     timeout = TIMEOUTS.NAVIGATION
@@ -67,9 +51,6 @@ export abstract class BasePage {
     await this.page.waitForURL(expectedUrl, { timeout });
   }
 
-  /**
-   * Submit form by clicking a button with specific text (e.g., "Valider")
-   */
   protected async submitByButtonText(
     buttonText: string | RegExp,
     expectedUrl: string | RegExp,
@@ -80,10 +61,6 @@ export abstract class BasePage {
     await this.page.waitForURL(expectedUrl, { timeout });
   }
 
-  /**
-   * Submit form and wait for navigation without specifying URL
-   * Useful when you just want to wait for navigation to complete
-   */
   protected async submitAndWaitForNavigation(
     timeout = TIMEOUTS.SUBMIT
   ): Promise<void> {

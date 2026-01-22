@@ -28,7 +28,6 @@ export const completeStructureFlow = async (
   page: Page,
   formData: TestStructureData
 ) => {
-  // Step 1: Ajout
   const authPage = new AuthenticationPage(page);
   await authPage.authenticate();
 
@@ -61,7 +60,6 @@ export const completeStructureFlow = async (
   const confirmationPage = new ConfirmationPage(page);
   await confirmationPage.verifySuccess();
 
-  // Step 2: Finalisation
   const structureId = await getStructureId(formData.dnaCode);
   const structuresListPage = new StructuresListPage(page);
   await structuresListPage.navigate();
@@ -101,7 +99,6 @@ export const completeStructureFlow = async (
   await finalisationNotesPage.submit(structureId);
   await finalisationNotesPage.finalizeAndGoToStructure(structureId);
 
-  // Step 3: Modification (TODO: add dynamic modification flow)
   const structurePage = new StructureDetailsPage(page);
   await structurePage.navigateTo(structureId);
   await structurePage.waitForLoad();
@@ -121,7 +118,6 @@ export const completeStructureFlow = async (
   await modificationDescriptionPage.updateContactPrincipalEmail(updatedEmail);
   await modificationDescriptionPage.submit(structureId);
 
-  // Step 4: Page structure
   await structurePage.waitForLoad();
   await structurePage.expectAllData(formData, {
     publicValue: updatedPublic,

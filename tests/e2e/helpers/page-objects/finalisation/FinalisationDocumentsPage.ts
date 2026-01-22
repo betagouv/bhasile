@@ -70,7 +70,6 @@ export class FinalisationDocumentsPage extends BasePage {
         const fileInput = group.locator(SELECTORS.FILE_INPUT).nth(i);
         await fileInput.setInputFiles(acte.filePath);
 
-        // Wait for upload to complete - check that the key input is populated
         const keyInput = this.page.locator(
           `input[name="actesAdministratifs.${i}.key"]`
         );

@@ -24,7 +24,6 @@ export class AdressesPage extends BasePage {
   }
 
   async fillForm(data: TestStructureData) {
-    // Adresse administrative (autocomplete)
     await this.autocompleteHelper.fillAndSelectFirst(
       SELECTORS.ADRESSE_ADMINISTRATIVE_COMPLETE,
       data.adresseAdministrative.searchTerm
@@ -32,16 +31,13 @@ export class AdressesPage extends BasePage {
 
     await this.waitHelper.waitForUIUpdate();
 
-    // Type de bâti - select dropdown
     await this.formHelper.selectOption(
       'select[name="typeBati"]',
       getRepartitionLabel(data.typeBati)
     );
 
-    // Wait for the UI to update
     await this.waitHelper.waitForUIUpdate(2);
 
-    // Same address toggle (only for COLLECTIF)
     if (data.sameAddress && data.typeBati === Repartition.COLLECTIF) {
       await this.formHelper.toggleSwitch(
         'input[title="Adresse d\'hébergement identique"]',
@@ -52,7 +48,6 @@ export class AdressesPage extends BasePage {
         data.structureTypologies[0].placesAutorisees.toString()
       );
     } else if (data.adresses) {
-      // Fill addresses
       for (const [i, adresse] of data.adresses.entries()) {
         if (i > 0) {
           await this.page
@@ -73,7 +68,6 @@ export class AdressesPage extends BasePage {
           adresse.placesAutorisees.toString()
         );
 
-        // For MIXTE, set repartition per address
         if (data.typeBati === Repartition.MIXTE && adresse.repartition) {
           await this.formHelper.selectOption(
             `select[name="adresses.${i}.repartition"]`,

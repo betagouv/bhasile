@@ -46,7 +46,6 @@ export class FinalisationControlesPage extends BasePage {
         name: /n.?a pas encore fait l.?objet d.?évaluation/i,
       });
       if ((await noEvaluationCheckbox.count()) > 0) {
-        // Use locator's click with force since CheckboxHelper expects selector string
         await noEvaluationCheckbox.check({ force: true });
       }
       const defaultDateInput = this.page.locator(

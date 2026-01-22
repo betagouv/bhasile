@@ -21,22 +21,17 @@ export class IdentificationPage extends BasePage {
   }
 
   async fillForm(data: TestStructureData) {
-    // Filiale (if provided)
     if (data.filiale) {
-      // ToggleSwitch for filiale
       await this.formHelper.toggleSwitch(SELECTORS.FILIALE_TOGGLE, true);
-      // Wait for the filiale input to appear
       await this.waitHelper.waitForFormFieldReady(SELECTORS.FILIALE_INPUT);
       await this.formHelper.fillInput(SELECTORS.FILIALE_INPUT, data.filiale);
     }
 
-    // Date de création
     await this.formHelper.fillDate(
       'input[name="creationDate"]',
       data.creationDate
     );
 
-    // Code FINESS (if required for autorisée structures)
     if (data.finessCode) {
       await this.formHelper.fillInput(
         'input[name="finessCode"]',
@@ -44,10 +39,8 @@ export class IdentificationPage extends BasePage {
       );
     }
 
-    // Public ciblé
     await this.formHelper.selectOption(SELECTORS.PUBLIC_SELECT, data.public);
 
-    // Checkboxes labellisées
     if (data.lgbt) {
       await this.checkboxHelper.check('input[name="lgbt"]', { useLabel: true });
     }
@@ -57,13 +50,11 @@ export class IdentificationPage extends BasePage {
       });
     }
 
-    // Contact Principal
     await this.formHelper.fillContact(
       "contactPrincipal",
       data.contactPrincipal
     );
 
-    // Contact Secondaire (if provided)
     if (data.contactSecondaire) {
       await this.formHelper.fillContact(
         "contactSecondaire",
@@ -71,7 +62,6 @@ export class IdentificationPage extends BasePage {
       );
     }
 
-    // Période d'autorisation (for autorisée structures)
     if (data.debutPeriodeAutorisation) {
       await this.formHelper.fillDate(
         'input[name="debutPeriodeAutorisation"]',
@@ -85,7 +75,6 @@ export class IdentificationPage extends BasePage {
       );
     }
 
-    // Convention (for subventionnée structures)
     if (data.debutConvention) {
       await this.formHelper.fillDate(
         'input[name="debutConvention"]',

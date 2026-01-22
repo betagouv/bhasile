@@ -21,10 +21,7 @@ export class VerificationPage extends BasePage {
   }
 
   async verifyData(data: TestStructureData) {
-    // Wait for the verification page to load
     await this.waitHelper.waitForUIUpdate(2);
-
-    // Verify we're on the verification page by checking for the main heading
     await this.waitForHeading(/Vérification des données/i);
 
     await this.expectIdentification(data);
