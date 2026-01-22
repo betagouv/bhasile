@@ -8,7 +8,6 @@ export class AuthenticationPage extends BasePage {
       waitUntil: "domcontentloaded",
     });
 
-    // Check if auth is bypassed (DEV_AUTH_BYPASS=1)
     const passwordInput = await this.page
       .locator('input[type="password"]')
       .count();
