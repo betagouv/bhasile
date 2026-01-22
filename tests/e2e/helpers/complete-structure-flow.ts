@@ -22,7 +22,7 @@ import {
   VerificationPage,
 } from "./page-objects";
 import { getStructureId } from "./structure-creator";
-import { TestStructureData } from "./test-data";
+import { TestStructureData } from "./test-data/types";
 
 export const completeStructureFlow = async (
   page: Page,
@@ -101,7 +101,7 @@ export const completeStructureFlow = async (
   await finalisationNotesPage.submit(structureId);
   await finalisationNotesPage.finalizeAndGoToStructure(structureId);
 
-  // Step 3: Modification
+  // Step 3: Modification (TODO: add dynamic modification flow)
   const structurePage = new StructureDetailsPage(page);
   await structurePage.navigateTo(structureId);
   await structurePage.waitForLoad();
@@ -128,6 +128,5 @@ export const completeStructureFlow = async (
     lgbt: true,
     fvvTeh: false,
     contactEmail: updatedEmail,
-    notes: formData.finalisationNotes,
   });
 };

@@ -2,7 +2,7 @@ import { expect, Page } from "@playwright/test";
 
 import { TIMEOUTS, URLS } from "../../constants";
 import { getActesCategoryRegex } from "../../shared-utils";
-import { TestStructureData } from "../../test-data";
+import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class FinalisationDocumentsPage extends BasePage {

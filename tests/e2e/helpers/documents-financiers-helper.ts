@@ -2,7 +2,7 @@ import path from "node:path";
 
 import { expect, Page } from "@playwright/test";
 
-import { TestStructureData } from "./test-data";
+import { TestStructureData } from "./test-data/types";
 
 export type DocumentsFinanciersMode = "ajout" | "finalisation";
 

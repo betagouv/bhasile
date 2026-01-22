@@ -2,7 +2,7 @@ import { Repartition } from "@/types/adresse.type";
 
 import { TIMEOUTS, URLS } from "../../constants";
 import { getRepartitionLabel } from "../../shared-utils";
-import { TestStructureData } from "../../test-data";
+import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class AdressesPage extends BasePage {

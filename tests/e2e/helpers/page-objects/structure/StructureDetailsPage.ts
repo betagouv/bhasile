@@ -10,11 +10,10 @@ import { URLS } from "../../constants";
 import {
   escapeForRegex,
   getActesCategoryLabel,
-  getRepartitionLabel,
   normalizeDocumentCategory,
   parseAddressParts,
 } from "../../shared-utils";
-import { TestStructureData } from "../../test-data";
+import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class StructureDetailsPage extends BasePage {
@@ -69,7 +68,6 @@ export class StructureDetailsPage extends BasePage {
     const descriptionBlock = this.getBlockByTitle("Description");
     await this.expectDescriptionData(descriptionBlock, data, overrides);
     await this.expectContactsData(descriptionBlock, data, overrides);
-    // TypeBati check removed - repartition is derived from addresses
     await this.expectTypePlaces(data);
     await this.expectDocumentsFinanciers(data);
     await this.expectActesAdministratifs(
@@ -190,14 +188,6 @@ export class StructureDetailsPage extends BasePage {
         block.getByText(new RegExp(escapeForRegex(formattedPhone)))
       ).toBeVisible();
     }
-  }
-
-  private async expectTypeBati(block: Locator, data: TestStructureData) {
-    // Convert enum value to display label
-    const typeBatiLabel = getRepartitionLabel(data.typeBati);
-    await expect(
-      block.getByText("Type de bâti", { exact: true }).locator("..")
-    ).toContainText(typeBatiLabel);
   }
 
   private async expectTypePlaces(data: TestStructureData) {

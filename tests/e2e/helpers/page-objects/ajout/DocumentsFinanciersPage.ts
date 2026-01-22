@@ -1,6 +1,6 @@
 import { URLS } from "../../constants";
 import { handleDocumentsFinanciers } from "../../documents-financiers-helper";
-import { TestStructureData } from "../../test-data";
+import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class DocumentsFinanciersPage extends BasePage {

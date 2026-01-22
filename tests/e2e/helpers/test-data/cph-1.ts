@@ -3,12 +3,17 @@ import { StructureType } from "@/types/structure.type";
 
 import { TestStructureScenario } from "./types";
 
-export const cada1: TestStructureScenario = {
-  name: "CADA 1 - Collectif, same address, one contact, all docs, old eval, controls, every actes administratifs",
+/**
+ * CPH 1: Collectif, single address, one contact, all docs at ajout,
+ * old evaluation, with controls, with filiale
+ */
+export const cph1: TestStructureScenario = {
+  name: "CPH 1 - Collectif, single address, one contact, all docs, old eval, controls, filiale",
   formData: {
     dnaCode: "C1234",
-    type: StructureType.CADA,
+    type: StructureType.CPH,
     cpom: false,
+    filiale: "Filiale Test",
     operateur: {
       name: "Opérateur Test",
       searchTerm: "Opér",
@@ -34,12 +39,18 @@ export const cada1: TestStructureScenario = {
     },
     departementAdministratif: "75",
     typeBati: Repartition.COLLECTIF,
-    sameAddress: true,
-    adresses: [],
+    sameAddress: false,
+    adresses: [
+      {
+        adresseComplete: "1 Rue de la Paix 75001 Paris",
+        searchTerm: "1 Rue de la Paix 75001 Paris",
+        placesAutorisees: 50,
+      },
+    ],
     structureTypologies: [
       { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
-      { placesAutorisees: 48, pmr: 5, lgbt: 10, fvvTeh: 8 },
-      { placesAutorisees: 45, pmr: 4, lgbt: 8, fvvTeh: 7 },
+      { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
+      { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
     ],
     documentsFinanciers: {
       allAddedViaAjout: true,
@@ -305,24 +316,13 @@ export const cada1: TestStructureScenario = {
         filePath: "tests/e2e/fixtures/sample.csv",
       },
       {
-        category: "CONVENTION",
-        startDate: "2021-01-01",
-        endDate: "2024-12-31",
-        filePath: "tests/e2e/fixtures/sample.csv",
-      },
-      {
         category: "ARRETE_TARIFICATION",
         startDate: "2022-01-01",
         endDate: "2023-12-31",
         filePath: "tests/e2e/fixtures/sample.csv",
       },
-      {
-        category: "AUTRE",
-        categoryName: "Document e2e",
-        filePath: "tests/e2e/fixtures/sample.csv",
-      },
     ],
     finalisationNotes:
-      "Notes de finalisation dynamiques (CADA) : contrôle OK, suivi actif.",
+      "Notes de finalisation dynamiques (CPH) : contrôle OK, suivi actif.",
   },
 };

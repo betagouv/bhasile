@@ -1,7 +1,7 @@
 import { expect } from "@playwright/test";
 
 import { TIMEOUTS } from "../../constants";
-import { TestStructureData } from "../../test-data";
+import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class SelectionPage extends BasePage {

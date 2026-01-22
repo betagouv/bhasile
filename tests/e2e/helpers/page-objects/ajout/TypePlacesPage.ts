@@ -1,11 +1,10 @@
 import { expect } from "@playwright/test";
 
 import { URLS } from "../../constants";
-import { TestStructureData } from "../../test-data";
+import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class TypePlacesPage extends BasePage {
-
   async fillForm(data: TestStructureData) {
     const rows = this.page
       .locator("table tr")

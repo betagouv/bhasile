@@ -6,11 +6,10 @@ import { formatPhoneNumber } from "@/app/utils/phone.util";
 
 import { TIMEOUTS, URLS } from "../../constants";
 import { parseAddressParts } from "../../shared-utils";
-import { TestStructureData } from "../../test-data";
+import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class VerificationPage extends BasePage {
-
   async verifyData(data: TestStructureData) {
     // Wait for the verification page to load
     await this.page.waitForTimeout(1000);

@@ -10,7 +10,7 @@ import {
   SelectionPage,
   TypePlacesPage,
 } from "./page-objects";
-import { TestStructureData } from "./test-data";
+import { TestStructureData } from "./test-data/types";
 
 export type InvalidSubmissionStep =
   | "01-identification"

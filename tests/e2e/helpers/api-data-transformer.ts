@@ -1,4 +1,4 @@
-import { TestStructureData } from "./test-data";
+import { TestStructureData } from "./test-data/types";
 
 /**
  * Transforms test data format to API structure creation format
@@ -60,13 +60,15 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
   }
 
   // Transform typologies with years
-  const transformedTypologies = testData.structureTypologies.map((typo, index) => ({
-    year: 2025 - index, // 2025, 2024, 2023
-    placesAutorisees: typo.placesAutorisees,
-    pmr: typo.pmr,
-    lgbt: typo.lgbt,
-    fvvTeh: typo.fvvTeh,
-  }));
+  const transformedTypologies = testData.structureTypologies.map(
+    (typo, index) => ({
+      year: 2025 - index, // 2025, 2024, 2023
+      placesAutorisees: typo.placesAutorisees,
+      pmr: typo.pmr,
+      lgbt: typo.lgbt,
+      fvvTeh: typo.fvvTeh,
+    })
+  );
 
   // Transform addresses with nested typologies
   const transformedAdresses = testData.sameAddress
@@ -78,7 +80,8 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
           repartition: testData.typeBati,
           adresseTypologies: [
             {
-              placesAutorisees: testData.structureTypologies[0].placesAutorisees,
+              placesAutorisees:
+                testData.structureTypologies[0].placesAutorisees,
               year: 2025,
               qpv: 0, // Convert boolean to number
               logementSocial: 0, // Convert boolean to number
@@ -116,7 +119,8 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
     adresseAdministrative: adminAddress.street,
     codePostalAdministratif: adminAddress.postalCode,
     communeAdministrative: adminAddress.city,
-    departementAdministratif: testData.departementAdministratif || adminAddress.department,
+    departementAdministratif:
+      testData.departementAdministratif || adminAddress.department,
     nom: testData.nom,
     debutConvention: testData.debutConvention
       ? new Date(testData.debutConvention)
@@ -136,9 +140,7 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
     finPeriodeAutorisation: testData.finPeriodeAutorisation
       ? new Date(testData.finPeriodeAutorisation)
       : null,
-    debutCpom: testData.debutCpom
-      ? new Date(testData.debutCpom)
-      : null,
+    debutCpom: testData.debutCpom ? new Date(testData.debutCpom) : null,
     finCpom: testData.finCpom ? new Date(testData.finCpom) : null,
     adresses: transformedAdresses,
     contacts,

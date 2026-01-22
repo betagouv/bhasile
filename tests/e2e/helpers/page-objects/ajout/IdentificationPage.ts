@@ -1,5 +1,5 @@
 import { URLS } from "../../constants";
-import { TestStructureData } from "../../test-data";
+import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class IdentificationPage extends BasePage {

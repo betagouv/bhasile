@@ -1,5 +1,5 @@
 import { TIMEOUTS, URLS } from "../../constants";
-import { FinanceYearData, TestStructureData } from "../../test-data";
+import { FinanceYearData, TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class FinalisationFinancePage extends BasePage {

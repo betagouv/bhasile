@@ -3,11 +3,15 @@ import { StructureType } from "@/types/structure.type";
 
 import { TestStructureScenario } from "./types";
 
-export const cada1: TestStructureScenario = {
-  name: "CADA 1 - Collectif, same address, one contact, all docs, old eval, controls, every actes administratifs",
+/**
+ * CPH 2: Mixte, multiple addresses, two contacts, mixed docs,
+ * recent evaluation, no controls
+ */
+export const cph2: TestStructureScenario = {
+  name: "CPH 2 - Mixte, multiple addresses, two contacts, mixed docs, recent eval, no controls",
   formData: {
     dnaCode: "C1234",
-    type: StructureType.CADA,
+    type: StructureType.CPH,
     cpom: false,
     operateur: {
       name: "Opérateur Test",
@@ -25,6 +29,13 @@ export const cada1: TestStructureScenario = {
       email: "john.doe@example.com",
       telephone: "+33123456789",
     },
+    contactSecondaire: {
+      prenom: "Jane",
+      nom: "Deo",
+      role: "Responsable administratif",
+      email: "jane.deo@example.com",
+      telephone: "+33623456789",
+    },
     debutPeriodeAutorisation: "2020-01-01",
     finPeriodeAutorisation: "2025-12-31",
     nom: "Structure Test",
@@ -33,51 +44,64 @@ export const cada1: TestStructureScenario = {
       searchTerm: "1 Rue de la Paix 75001 Paris",
     },
     departementAdministratif: "75",
-    typeBati: Repartition.COLLECTIF,
-    sameAddress: true,
-    adresses: [],
+    typeBati: Repartition.MIXTE,
+    sameAddress: false,
+    adresses: [
+      {
+        adresseComplete: "1 Rue de la Paix 75001 Paris",
+        searchTerm: "1 Rue de la Paix 75001 Paris",
+        placesAutorisees: 50,
+        repartition: Repartition.DIFFUS,
+      },
+      {
+        adresseComplete: "2 Rue de la Paix 75001 Paris",
+        searchTerm: "2 Rue de la Paix 75001 Paris",
+        placesAutorisees: 150,
+        repartition: Repartition.COLLECTIF,
+      },
+    ],
     structureTypologies: [
       { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
       { placesAutorisees: 48, pmr: 5, lgbt: 10, fvvTeh: 8 },
       { placesAutorisees: 45, pmr: 4, lgbt: 8, fvvTeh: 7 },
     ],
     documentsFinanciers: {
-      allAddedViaAjout: true,
+      allAddedViaAjout: false,
       files: [
         {
           year: "2025",
           category: "Budget prévisionnel demandé",
           fileName: "sample.csv",
           filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
+          formKind: "finalisation",
         },
         {
           year: "2025",
           category: "Budget prévisionnel retenu (ou exécutoire)",
           fileName: "sample.csv",
           filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
+          formKind: "finalisation",
         },
         {
           year: "2024",
           category: "Budget prévisionnel demandé",
           fileName: "sample.csv",
           filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
+          formKind: "finalisation",
         },
         {
           year: "2024",
           category: "Budget prévisionnel retenu (ou exécutoire)",
           fileName: "sample.csv",
           filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
+          formKind: "finalisation",
         },
         {
           year: "2024",
           category: "Compte administratif soumis",
           fileName: "sample.csv",
           filePath: "tests/e2e/fixtures/sample.csv",
-          formKind: "ajout",
+          formKind: "finalisation",
         },
         {
           year: "2024",
@@ -282,15 +306,16 @@ export const cada1: TestStructureScenario = {
       },
     },
     evaluations: [
-      { date: "2021-05-12", filePath: "tests/e2e/fixtures/sample.csv" },
-    ],
-    controles: [
       {
-        date: "2022-11-05",
-        type: "Programmé",
+        date: "2023-09-18",
+        notePersonne: "3",
+        notePro: "2.5",
+        noteStructure: "3.5",
+        note: "3",
         filePath: "tests/e2e/fixtures/sample.csv",
       },
     ],
+    controles: [],
     ouvertureFermeture: {
       placesACreer: "4",
       echeancePlacesACreer: "2025-09-01",
@@ -305,24 +330,13 @@ export const cada1: TestStructureScenario = {
         filePath: "tests/e2e/fixtures/sample.csv",
       },
       {
-        category: "CONVENTION",
-        startDate: "2021-01-01",
-        endDate: "2024-12-31",
-        filePath: "tests/e2e/fixtures/sample.csv",
-      },
-      {
         category: "ARRETE_TARIFICATION",
         startDate: "2022-01-01",
         endDate: "2023-12-31",
         filePath: "tests/e2e/fixtures/sample.csv",
       },
-      {
-        category: "AUTRE",
-        categoryName: "Document e2e",
-        filePath: "tests/e2e/fixtures/sample.csv",
-      },
     ],
     finalisationNotes:
-      "Notes de finalisation dynamiques (CADA) : contrôle OK, suivi actif.",
+      "Notes de finalisation dynamiques (CPH) : contrôle OK, suivi actif.",
   },
 };

@@ -135,3 +135,8 @@ export type ActeAdministratifData = {
   endDate?: string;
   categoryName?: string;
 };
+
+export type TestStructureScenario = {
+  name: string;
+  formData: TestStructureData;
+};
