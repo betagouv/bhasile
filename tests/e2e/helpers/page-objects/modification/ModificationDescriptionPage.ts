@@ -1,8 +1,9 @@
 import { Page } from "@playwright/test";
 
 import { CheckboxHelper } from "../../checkbox-helper";
-import { FormHelper } from "../../form-helper";
 import { URLS } from "../../constants";
+import { FormHelper } from "../../form-helper";
+import { SELECTORS } from "../../selectors";
 import { BasePage } from "../BasePage";
 
 export class ModificationDescriptionPage extends BasePage {
@@ -21,7 +22,7 @@ export class ModificationDescriptionPage extends BasePage {
   }
 
   async updatePublic(publicValue: string) {
-    await this.formHelper.selectOption("#public", publicValue);
+    await this.formHelper.selectOption(SELECTORS.PUBLIC_SELECT, publicValue);
   }
 
   async setVulnerabilites({
@@ -31,8 +32,12 @@ export class ModificationDescriptionPage extends BasePage {
     lgbt: boolean;
     fvvTeh: boolean;
   }) {
-    await this.checkboxHelper.toggleCheckbox('input[name="lgbt"]', lgbt, { useLabel: true });
-    await this.checkboxHelper.toggleCheckbox('input[name="fvvTeh"]', fvvTeh, { useLabel: true });
+    await this.checkboxHelper.toggleCheckbox('input[name="lgbt"]', lgbt, {
+      useLabel: true,
+    });
+    await this.checkboxHelper.toggleCheckbox('input[name="fvvTeh"]', fvvTeh, {
+      useLabel: true,
+    });
   }
 
   async updateContactPrincipalEmail(email: string) {

@@ -1,18 +1,16 @@
 import { expect, Page } from "@playwright/test";
 
-import { CheckboxHelper } from "../../checkbox-helper";
-import { FormHelper } from "../../form-helper";
 import { TIMEOUTS, URLS } from "../../constants";
+import { FormHelper } from "../../form-helper";
+import { SELECTORS } from "../../selectors";
 import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class FinalisationControlesPage extends BasePage {
-  private checkboxHelper: CheckboxHelper;
   private formHelper: FormHelper;
 
   constructor(page: Page) {
     super(page);
-    this.checkboxHelper = new CheckboxHelper(page);
     this.formHelper = new FormHelper(page);
   }
   async fillForm(data: TestStructureData) {
@@ -36,7 +34,7 @@ export class FinalisationControlesPage extends BasePage {
       return;
     }
     const uploadRoot = keyInput.locator("..");
-    const fileInput = uploadRoot.locator('input[type="file"]');
+    const fileInput = uploadRoot.locator(SELECTORS.FILE_INPUT);
     await fileInput.setInputFiles(filePath);
     await expect(keyInput).toHaveValue(/.+/, { timeout: TIMEOUTS.NAVIGATION });
   }
@@ -185,7 +183,7 @@ export class FinalisationControlesPage extends BasePage {
     }
     await this.removeExtraEntries(
       controlesFieldset,
-      'button[title="Supprimer"]',
+      SELECTORS.DELETE_BUTTON,
       controles.length
     );
   }

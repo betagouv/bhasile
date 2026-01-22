@@ -2,8 +2,9 @@ import { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
 import { AutocompleteHelper } from "../../autocomplete-helper";
-import { FormHelper } from "../../form-helper";
 import { TIMEOUTS } from "../../constants";
+import { FormHelper } from "../../form-helper";
+import { SELECTORS } from "../../selectors";
 import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
@@ -61,9 +62,9 @@ export class SelectionPage extends BasePage {
 
   private async selectDepartement(departement: string): Promise<void> {
     await this.autocompleteHelper.fillAndSelectFirst(
-      "#departement",
+      SELECTORS.DEPARTEMENT_INPUT,
       departement,
-      "#suggestion-0"
+      SELECTORS.AUTCOMPLETE_SUGGESTION
     );
   }
 }

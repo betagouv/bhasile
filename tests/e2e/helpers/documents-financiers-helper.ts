@@ -2,6 +2,7 @@ import path from "node:path";
 
 import { expect, Page } from "@playwright/test";
 
+import { ElementNotFoundError, formatErrorMessage } from "./error-handler";
 import { TestStructureData } from "./test-data/types";
 
 export type DocumentsFinanciersMode = "ajout" | "finalisation";
@@ -116,9 +117,10 @@ const expectDocumentImported = async (
 ) => {
   const categoryButton = getCategoryButton(container, label);
   if ((await categoryButton.count()) === 0) {
-    throw new Error(
-      `Document financier introuvable${year ? ` pour ${year}` : ""}: ${label}`
-    );
+    const context = year
+      ? formatErrorMessage("Document financier introuvable", `year ${year}`, label)
+      : formatErrorMessage("Document financier introuvable", undefined, label);
+    throw new ElementNotFoundError(label, context);
   }
   await expect(categoryButton).toContainText("Importé");
 };

@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 
-import { TIMEOUTS } from "../constants";
+import { TIMEOUTS } from "./constants";
 
 /**
  * Helper class for common wait patterns in e2e tests
@@ -23,7 +23,10 @@ export class WaitHelper {
    */
   async waitForPanelToClose(selector: string): Promise<void> {
     const element = this.page.locator(selector);
-    await element.waitFor({ state: "hidden", timeout: TIMEOUTS.SHORT_UI_UPDATE });
+    await element.waitFor({
+      state: "hidden",
+      timeout: TIMEOUTS.SHORT_UI_UPDATE,
+    });
   }
 
   /**

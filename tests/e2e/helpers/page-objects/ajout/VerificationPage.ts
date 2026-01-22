@@ -5,10 +5,11 @@ import { formatCityName } from "@/app/utils/adresse.util";
 import { formatDate } from "@/app/utils/date.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
 
-import { WaitHelper } from "../../wait-helper";
 import { URLS } from "../../constants";
+import { ElementNotFoundError } from "../../error-handler";
 import { parseAddressParts } from "../../shared-utils";
 import { TestStructureData } from "../../test-data/types";
+import { WaitHelper } from "../../wait-helper";
 import { BasePage } from "../BasePage";
 
 export class VerificationPage extends BasePage {
@@ -134,9 +135,7 @@ export class VerificationPage extends BasePage {
           !sectionText.includes(expectedAddress) &&
           !sectionText.includes(address.searchTerm)
         ) {
-          throw new Error(
-            `Adresse d'hébergement introuvable: ${expectedAddress}`
-          );
+          throw new ElementNotFoundError(expectedAddress, "Adresses section");
         }
         if (address.placesAutorisees) {
           await expect(section).toContainText(

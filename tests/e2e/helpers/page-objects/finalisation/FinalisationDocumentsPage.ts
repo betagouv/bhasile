@@ -1,17 +1,14 @@
 import { expect, Page } from "@playwright/test";
 
-import { FormHelper } from "../../form-helper";
 import { TIMEOUTS, URLS } from "../../constants";
+import { SELECTORS } from "../../selectors";
 import { getActesCategoryRegex } from "../../shared-utils";
 import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class FinalisationDocumentsPage extends BasePage {
-  private formHelper: FormHelper;
-
   constructor(page: Page) {
     super(page);
-    this.formHelper = new FormHelper(page);
   }
   async fillForm(data: TestStructureData) {
     const actes = data.actesAdministratifs ?? [];
@@ -29,19 +26,19 @@ export class FinalisationDocumentsPage extends BasePage {
       const group = this.page.getByRole("group", { name: groupLabel });
       const addButton = group.getByRole("button", { name: /Ajouter/i });
 
-      let rowCount = await group.locator('input[type="file"]').count();
+      let rowCount = await group.locator(SELECTORS.FILE_INPUT).count();
       for (let i = rowCount; i < entries.length; i++) {
         await addButton.click();
       }
 
-      rowCount = await group.locator('input[type="file"]').count();
+      rowCount = await group.locator(SELECTORS.FILE_INPUT).count();
       while (rowCount > entries.length) {
-        const deleteButtons = group.locator('button[title="Supprimer"]');
+        const deleteButtons = group.locator(SELECTORS.DELETE_BUTTON);
         if ((await deleteButtons.count()) === 0) {
           break;
         }
         await deleteButtons.last().click();
-        rowCount = await group.locator('input[type="file"]').count();
+        rowCount = await group.locator(SELECTORS.FILE_INPUT).count();
       }
 
       for (let i = 0; i < entries.length; i++) {
@@ -70,7 +67,7 @@ export class FinalisationDocumentsPage extends BasePage {
             acte.categoryName
           );
         }
-        const fileInput = group.locator('input[type="file"]').nth(i);
+        const fileInput = group.locator(SELECTORS.FILE_INPUT).nth(i);
         await fileInput.setInputFiles(acte.filePath);
 
         // Wait for upload to complete - check that the key input is populated
@@ -99,7 +96,10 @@ export class FinalisationDocumentsPage extends BasePage {
     const input = group.locator(selector);
     if ((await input.count()) > index) {
       const inputElement = input.nth(index);
-      await inputElement.waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION });
+      await inputElement.waitFor({
+        state: "visible",
+        timeout: TIMEOUTS.NAVIGATION,
+      });
       await inputElement.fill(value);
     }
   }

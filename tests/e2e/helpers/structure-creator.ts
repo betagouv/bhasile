@@ -2,6 +2,7 @@ import { StructureApiType } from "@/schemas/api/structure.schema";
 
 import { transformTestDataToApiFormat } from "./api-data-transformer";
 import { BASE_URL } from "./constants";
+import { ApiError, ensureResponseOk, formatErrorMessage, getResponseJson } from "./error-handler";
 import { TestStructureData } from "./test-data/types";
 
 type MinimalStructureSeed = {
@@ -18,22 +19,31 @@ type MinimalStructureSeed = {
 
 /**
  * Deletes a structure via the API endpoint (for cleanup)
+ * Silently handles errors as cleanup failures are not critical
  */
 export async function deleteStructureViaApi(dnaCode: string): Promise<void> {
   const headers: Record<string, string> = getAuthHeaders();
 
-  const response = await fetch(
-    `${BASE_URL}/api/test/structures?dnaCode=${dnaCode}`,
-    {
-      method: "DELETE",
-      headers,
-    }
-  );
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/test/structures?dnaCode=${dnaCode}`,
+      {
+        method: "DELETE",
+        headers,
+      }
+    );
 
-  if (!response.ok) {
+    if (!response.ok) {
+      // Cleanup failures are not critical, log but don't throw
+      const errorText = await response.text().catch(() => "Unknown error");
+      console.warn(
+        formatErrorMessage("Failed to delete structure", dnaCode, errorText)
+      );
+    }
+  } catch (error) {
+    // Network errors during cleanup are not critical
     console.warn(
-      `Failed to delete structure ${dnaCode}:`,
-      await response.text()
+      formatErrorMessage("Failed to delete structure", dnaCode, error instanceof Error ? error.message : String(error))
     );
   }
 }
@@ -48,14 +58,17 @@ export async function getStructureId(dnaCode: string): Promise<number> {
     headers,
   });
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch structure");
-  }
+  await ensureResponseOk(
+    response,
+    formatErrorMessage("getStructureId", dnaCode)
+  );
 
-  const structure = (await response.json()) as StructureApiType | null;
+  const structure = await getResponseJson<StructureApiType | null>(response);
 
   if (!structure) {
-    throw new Error(`Structure with dnaCode ${dnaCode} not found`);
+    throw new ApiError(
+      formatErrorMessage("Structure not found", dnaCode)
+    );
   }
 
   return structure.id;
@@ -78,12 +91,10 @@ export async function createMinimalStructureViaApi(
     body: JSON.stringify(seed),
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Failed to create minimal structure via API (${response.status} ${response.statusText}): ${errorText}`
-    );
-  }
+  await ensureResponseOk(
+    response,
+    formatErrorMessage("createMinimalStructureViaApi", seed.dnaCode)
+  );
 }
 
 /**

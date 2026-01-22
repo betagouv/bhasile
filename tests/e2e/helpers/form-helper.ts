@@ -1,6 +1,7 @@
 import { Page } from "@playwright/test";
 
-import { TIMEOUTS } from "../constants";
+import { TIMEOUTS } from "./constants";
+import { safeExecute } from "./error-handler";
 import { WaitHelper } from "./wait-helper";
 
 /**
@@ -53,7 +54,11 @@ export class FormHelper {
   ): Promise<void> {
     const toggle = this.page.locator(selector);
     await toggle.waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION });
-    const isChecked = await toggle.isChecked().catch(() => false);
+    const isChecked = await safeExecute(
+      () => toggle.isChecked(),
+      false,
+      `Failed to check toggle state for ${selector}`
+    );
     if (isChecked !== shouldBeChecked) {
       await toggle.click();
       // Wait for any UI updates after toggle

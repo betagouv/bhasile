@@ -1,8 +1,9 @@
 import { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
-import { FormHelper } from "../../form-helper";
 import { URLS } from "../../constants";
+import { FormHelper } from "../../form-helper";
+import { SELECTORS } from "../../selectors";
 import { BasePage } from "../BasePage";
 
 export class StructuresListPage extends BasePage {
@@ -18,7 +19,7 @@ export class StructuresListPage extends BasePage {
   }
 
   async searchByDna(dnaCode: string) {
-    await this.formHelper.fillInput('input#search[type="text"]', dnaCode);
+    await this.formHelper.fillInput(SELECTORS.SEARCH_INPUT, dnaCode);
   }
 
   async startFinalisationForDna(dnaCode: string) {

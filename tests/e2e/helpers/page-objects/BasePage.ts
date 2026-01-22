@@ -1,6 +1,7 @@
 import { expect, Page } from "@playwright/test";
 
 import { TIMEOUTS } from "../constants";
+import { SELECTORS } from "../selectors";
 
 /**
  * Base class for all page objects
@@ -20,7 +21,7 @@ export abstract class BasePage {
    * Wait for the page to be ready (typically the submit button)
    */
   async waitForLoad(): Promise<void> {
-    await this.page.waitForSelector('button[type="submit"]', {
+    await this.page.waitForSelector(SELECTORS.SUBMIT_BUTTON, {
       timeout: TIMEOUTS.NAVIGATION,
     });
   }
@@ -36,16 +37,21 @@ export abstract class BasePage {
   }
 
   /**
-   * Fill an input field if it exists
+   * Fill an input field if it exists and is enabled
+   * Returns true if the field was filled, false otherwise
    */
   protected async fillIfExists(
     selector: string,
     value: string
   ): Promise<boolean> {
     const input = this.page.locator(selector);
-    if ((await input.count()) > 0 && (await input.isEnabled())) {
-      await input.fill(value);
-      return true;
+    const count = await input.count();
+    if (count > 0) {
+      const isEnabled = await input.isEnabled().catch(() => false);
+      if (isEnabled) {
+        await input.fill(value);
+        return true;
+      }
     }
     return false;
   }
@@ -57,7 +63,7 @@ export abstract class BasePage {
     expectedUrl: string | RegExp,
     timeout = TIMEOUTS.NAVIGATION
   ): Promise<void> {
-    await this.page.click('button[type="submit"]');
+    await this.page.click(SELECTORS.SUBMIT_BUTTON);
     await this.page.waitForURL(expectedUrl, { timeout });
   }
 
@@ -81,7 +87,7 @@ export abstract class BasePage {
   protected async submitAndWaitForNavigation(
     timeout = TIMEOUTS.SUBMIT
   ): Promise<void> {
-    await this.page.click('button[type="submit"]');
+    await this.page.click(SELECTORS.SUBMIT_BUTTON);
     await this.page.waitForLoadState("networkidle", { timeout });
   }
 }

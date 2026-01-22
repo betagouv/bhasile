@@ -1,6 +1,6 @@
 import { expect, Page } from "@playwright/test";
 
-import { TIMEOUTS } from "../constants";
+import { TIMEOUTS } from "./constants";
 
 /**
  * Helper class for autocomplete interactions in e2e tests
@@ -79,7 +79,9 @@ export class AutocompleteHelper {
   /**
    * Wait for autocomplete suggestions to appear
    */
-  async waitForSuggestions(suggestionSelector = '[role="option"]'): Promise<void> {
+  async waitForSuggestions(
+    suggestionSelector = '[role="option"]'
+  ): Promise<void> {
     const firstSuggestion = this.page.locator(suggestionSelector).first();
     await firstSuggestion.waitFor({
       state: "visible",
@@ -90,7 +92,9 @@ export class AutocompleteHelper {
   /**
    * Get all visible suggestion texts
    */
-  async getSuggestionTexts(suggestionSelector = '[role="option"]'): Promise<string[]> {
+  async getSuggestionTexts(
+    suggestionSelector = '[role="option"]'
+  ): Promise<string[]> {
     const suggestions = this.page.locator(suggestionSelector);
     const count = await suggestions.count();
     const texts: string[] = [];

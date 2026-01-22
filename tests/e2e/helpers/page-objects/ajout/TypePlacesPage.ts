@@ -1,8 +1,8 @@
 import { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
-import { FormHelper } from "../../form-helper";
 import { URLS } from "../../constants";
+import { FormHelper } from "../../form-helper";
 import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 

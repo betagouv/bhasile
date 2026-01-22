@@ -1,5 +1,7 @@
 import { Page } from "@playwright/test";
 
+import { parseAddress } from "../shared-utils";
+
 export async function mockAddressApi(page: Page, fullAddress: string) {
   await page.route("https://api-adresse.data.gouv.fr/**", async (route) => {
     const url = new URL(route.request().url());
@@ -14,28 +16,18 @@ export async function mockAddressApi(page: Page, fullAddress: string) {
 }
 
 const buildAddressSuggestion = (fullAddress: string) => {
-  const parts = fullAddress.trim().split(/\s+/);
-  const postalCodeMatch = parts.find((part) => /^\d{5}$/.test(part));
-  const postalCode = postalCodeMatch || "75001";
-  const postalIndex = parts.findIndex((part) => part === postalCode);
-  const city =
-    postalIndex > -1 ? parts.slice(postalIndex + 1).join(" ") : "Paris";
-  const street =
-    postalIndex > -1 ? parts.slice(0, postalIndex).join(" ") : fullAddress;
-  const [housenumber, ...streetParts] = street.split(/\s+/);
-  const department = postalCode.startsWith("20")
-    ? postalCode.substring(0, 3)
-    : postalCode.substring(0, 2);
+  const parsed = parseAddress(fullAddress);
+  const [housenumber, ...streetParts] = parsed.street.split(/\s+/);
 
   return {
     properties: {
       label: fullAddress,
       score: 0.9,
       housenumber: /^\d+$/.test(housenumber) ? housenumber : undefined,
-      street: streetParts.length > 0 ? streetParts.join(" ") : street,
-      postcode: postalCode,
-      city,
-      context: `${department}, ${city}`,
+      street: streetParts.length > 0 ? streetParts.join(" ") : parsed.street,
+      postcode: parsed.postalCode,
+      city: parsed.city,
+      context: `${parsed.department}, ${parsed.city}`,
     },
     geometry: {
       coordinates: [2.3522, 48.8566],

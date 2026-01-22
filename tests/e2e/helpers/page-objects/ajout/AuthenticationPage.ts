@@ -1,6 +1,7 @@
 import { Page } from "@playwright/test";
 
 import { TIMEOUTS, URLS } from "../../constants";
+import { formatErrorMessage } from "../../error-handler";
 import { FormHelper } from "../../form-helper";
 import { BasePage } from "../BasePage";
 
@@ -27,7 +28,12 @@ export class AuthenticationPage extends BasePage {
 
     if (passwordInput > 0) {
       if (!password) {
-        throw new Error("OPERATEUR_PASSWORDS must be set for e2e auth");
+        throw new Error(
+          formatErrorMessage(
+            "OPERATEUR_PASSWORDS must be set for e2e authentication",
+            "AuthenticationPage.authenticate"
+          )
+        );
       }
       // Password protection is active - authenticate
       await this.formHelper.fillInput('input[type="password"]', password);

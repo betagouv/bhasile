@@ -1,9 +1,10 @@
 import { Page } from "@playwright/test";
 
-import { FormHelper } from "../../form-helper";
-import { WaitHelper } from "../../wait-helper";
 import { URLS } from "../../constants";
+import { safeExecute } from "../../error-handler";
+import { FormHelper } from "../../form-helper";
 import { FinanceYearData, TestStructureData } from "../../test-data/types";
+import { WaitHelper } from "../../wait-helper";
 import { BasePage } from "../BasePage";
 
 export class FinalisationFinancePage extends BasePage {
@@ -38,10 +39,16 @@ export class FinalisationFinancePage extends BasePage {
         }
         const selector = `input[name="budgets.${budgetIndex}.${field}"]`;
         const input = this.page.locator(selector);
-        if ((await input.count()) === 0) {
+        const count = await input.count();
+        if (count === 0) {
           continue;
         }
-        if (await input.isEnabled()) {
+        const isEnabled = await safeExecute(
+          () => input.isEnabled(),
+          false,
+          `Failed to check if input is enabled: ${selector}`
+        );
+        if (isEnabled) {
           await this.formHelper.fillInput(selector, String(value));
         }
       }

@@ -1,12 +1,14 @@
 import { Page } from "@playwright/test";
+
 import { Repartition } from "@/types/adresse.type";
 
 import { AutocompleteHelper } from "../../autocomplete-helper";
-import { FormHelper } from "../../form-helper";
-import { WaitHelper } from "../../wait-helper";
 import { URLS } from "../../constants";
+import { FormHelper } from "../../form-helper";
+import { SELECTORS } from "../../selectors";
 import { getRepartitionLabel } from "../../shared-utils";
 import { TestStructureData } from "../../test-data/types";
+import { WaitHelper } from "../../wait-helper";
 import { BasePage } from "../BasePage";
 
 export class AdressesPage extends BasePage {
@@ -24,7 +26,7 @@ export class AdressesPage extends BasePage {
   async fillForm(data: TestStructureData) {
     // Adresse administrative (autocomplete)
     await this.autocompleteHelper.fillAndSelectFirst(
-      'input[name="adresseAdministrativeComplete"]',
+      SELECTORS.ADRESSE_ADMINISTRATIVE_COMPLETE,
       data.adresseAdministrative.searchTerm
     );
 
@@ -60,7 +62,7 @@ export class AdressesPage extends BasePage {
         }
 
         await this.autocompleteHelper.fillAndSelectFirst(
-          `input[name="adresses.${i}.adresseComplete"]`,
+          SELECTORS.ADRESSE_COMPLETE(i),
           adresse.searchTerm
         );
 

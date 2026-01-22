@@ -1,6 +1,7 @@
-import { expect, Locator, Page } from "@playwright/test";
+import { expect, Page } from "@playwright/test";
 
-import { TIMEOUTS } from "../constants";
+import { TIMEOUTS } from "./constants";
+import { safeExecute } from "./error-handler";
 
 /**
  * Helper class for consistent checkbox interactions in e2e tests
@@ -19,7 +20,11 @@ export class CheckboxHelper {
   ): Promise<void> {
     const checkbox = this.page.locator(selector);
     await expect(checkbox).toBeVisible({ timeout: TIMEOUTS.NAVIGATION });
-    const isChecked = await checkbox.isChecked().catch(() => false);
+    const isChecked = await safeExecute(
+      () => checkbox.isChecked(),
+      false,
+      `Failed to check checkbox state for ${selector}`
+    );
 
     if (isChecked !== shouldBeChecked) {
       if (options?.useLabel) {
@@ -35,24 +40,35 @@ export class CheckboxHelper {
   /**
    * Check a checkbox (ensures it's checked)
    */
-  async check(selector: string, options?: { useLabel?: boolean; force?: boolean }): Promise<void> {
+  async check(
+    selector: string,
+    options?: { useLabel?: boolean; force?: boolean }
+  ): Promise<void> {
     await this.toggleCheckbox(selector, true, options);
   }
 
   /**
    * Uncheck a checkbox (ensures it's unchecked)
    */
-  async uncheck(selector: string, options?: { useLabel?: boolean; force?: boolean }): Promise<void> {
+  async uncheck(
+    selector: string,
+    options?: { useLabel?: boolean; force?: boolean }
+  ): Promise<void> {
     await this.toggleCheckbox(selector, false, options);
   }
 
   /**
    * Click a checkbox by value attribute (useful for filter checkboxes)
    */
-  async clickByValue(value: string, options?: { force?: boolean }): Promise<void> {
-    const checkbox = this.page.locator(`input[type="checkbox"][value="${value}"]`);
+  async clickByValue(
+    value: string,
+    options?: { force?: boolean }
+  ): Promise<void> {
+    const checkbox = this.page.locator(
+      `input[type="checkbox"][value="${value}"]`
+    );
     await checkbox.waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION });
-    
+
     if (options?.force) {
       await checkbox.click({ force: true });
     } else {
@@ -82,6 +98,10 @@ export class CheckboxHelper {
    */
   async isChecked(selector: string): Promise<boolean> {
     const checkbox = this.page.locator(selector);
-    return checkbox.isChecked().catch(() => false);
+    return safeExecute(
+      () => checkbox.isChecked(),
+      false,
+      `Failed to get checkbox state for ${selector}`
+    );
   }
 }

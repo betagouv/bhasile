@@ -1,10 +1,11 @@
 import { Page } from "@playwright/test";
 
 import { CheckboxHelper } from "../../checkbox-helper";
-import { FormHelper } from "../../form-helper";
-import { WaitHelper } from "../../wait-helper";
 import { URLS } from "../../constants";
+import { FormHelper } from "../../form-helper";
+import { SELECTORS } from "../../selectors";
 import { TestStructureData } from "../../test-data/types";
+import { WaitHelper } from "../../wait-helper";
 import { BasePage } from "../BasePage";
 
 export class IdentificationPage extends BasePage {
@@ -23,10 +24,10 @@ export class IdentificationPage extends BasePage {
     // Filiale (if provided)
     if (data.filiale) {
       // ToggleSwitch for filiale
-      await this.formHelper.toggleSwitch("#managed-by-a-filiale", true);
+      await this.formHelper.toggleSwitch(SELECTORS.FILIALE_TOGGLE, true);
       // Wait for the filiale input to appear
-      await this.waitHelper.waitForFormFieldReady("#filiale");
-      await this.formHelper.fillInput("#filiale", data.filiale);
+      await this.waitHelper.waitForFormFieldReady(SELECTORS.FILIALE_INPUT);
+      await this.formHelper.fillInput(SELECTORS.FILIALE_INPUT, data.filiale);
     }
 
     // Date de création
@@ -44,7 +45,7 @@ export class IdentificationPage extends BasePage {
     }
 
     // Public ciblé
-    await this.formHelper.selectOption("#public", data.public);
+    await this.formHelper.selectOption(SELECTORS.PUBLIC_SELECT, data.public);
 
     // Checkboxes labellisées
     if (data.lgbt) {

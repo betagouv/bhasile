@@ -1,7 +1,7 @@
 import { Page } from "@playwright/test";
 
-import { FormHelper } from "../../form-helper";
 import { TIMEOUTS, URLS } from "../../constants";
+import { FormHelper } from "../../form-helper";
 import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
