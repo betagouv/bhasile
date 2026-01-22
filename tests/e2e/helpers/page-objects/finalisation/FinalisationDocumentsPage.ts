@@ -1,12 +1,11 @@
-import { Page } from "@playwright/test";
+import { expect, Page } from "@playwright/test";
 
-import { URLS } from "../../constants";
+import { TIMEOUTS, URLS } from "../../constants";
 import { getActesCategoryRegex } from "../../shared-utils";
 import { TestStructureData } from "../../test-data";
 import { BasePage } from "../BasePage";
 
 export class FinalisationDocumentsPage extends BasePage {
-
   async fillForm(data: TestStructureData) {
     const actes = data.actesAdministratifs ?? [];
     const actesByCategory = actes.reduce(
@@ -66,6 +65,14 @@ export class FinalisationDocumentsPage extends BasePage {
         }
         const fileInput = group.locator('input[type="file"]').nth(i);
         await fileInput.setInputFiles(acte.filePath);
+
+        // Wait for upload to complete - check that the key input is populated
+        const keyInput = this.page.locator(
+          `input[name="actesAdministratifs.${i}.key"]`
+        );
+        await expect(keyInput).toHaveValue(/.+/, {
+          timeout: TIMEOUTS.NAVIGATION,
+        });
       }
     }
   }

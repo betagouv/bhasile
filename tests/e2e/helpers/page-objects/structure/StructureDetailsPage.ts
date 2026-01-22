@@ -69,7 +69,7 @@ export class StructureDetailsPage extends BasePage {
     const descriptionBlock = this.getBlockByTitle("Description");
     await this.expectDescriptionData(descriptionBlock, data, overrides);
     await this.expectContactsData(descriptionBlock, data, overrides);
-    await this.expectTypeBati(descriptionBlock, data);
+    // TypeBati check removed - repartition is derived from addresses
     await this.expectTypePlaces(data);
     await this.expectDocumentsFinanciers(data);
     await this.expectActesAdministratifs(

@@ -229,7 +229,6 @@ export const validCada2: TestDataOverrides = {
   ],
   documentsFinanciers: {
     allAddedViaAjout: false,
-    files: [],
     // Base data has all required documents - we'll override formKind for some to test mixed scenario
     // Don't override files - use base data's full set, just change allAddedViaAjout flag
   },
@@ -285,7 +284,6 @@ export const validCada3: TestDataOverrides = {
   ],
   documentsFinanciers: {
     allAddedViaAjout: false,
-    files: [],
     // Use base data's full document set - all documents will be at ajout, which is fine for testing
     // At finalisation, they'll be imported (expected behavior)
   },
@@ -407,7 +405,6 @@ export const validCada5: TestDataOverrides = {
   documentsFinanciers: {
     allAddedViaAjout: false,
     // Use base data's full document set
-    files: [],
   },
   evaluations: [
     {
@@ -516,7 +513,6 @@ export const validCph2: TestDataOverrides = {
   documentsFinanciers: {
     allAddedViaAjout: false,
     // Use base data's full document set
-    files: [],
   },
   evaluations: [
     {
@@ -569,7 +565,6 @@ export const validCph3: TestDataOverrides = {
   documentsFinanciers: {
     allAddedViaAjout: false,
     // Use base data's full document set
-    files: [],
   },
   // TODO: remove evaluation
   evaluations: [
@@ -657,7 +652,6 @@ export const validHuda2: TestDataOverrides = {
   ],
   documentsFinanciers: {
     allAddedViaAjout: false,
-    files: [],
     // Use base data's full document set
   },
   evaluations: [
@@ -709,7 +703,6 @@ export const validHuda3: TestDataOverrides = {
   ],
   documentsFinanciers: {
     allAddedViaAjout: false,
-    files: [],
     // Use base data's full document set
   },
   evaluations: [
@@ -790,7 +783,6 @@ export const validCaes2: TestDataOverrides = {
   ],
   documentsFinanciers: {
     allAddedViaAjout: false,
-    files: [],
     // Use base data's full document set
   },
   evaluations: [
@@ -829,7 +821,6 @@ export const validCaes3: TestDataOverrides = {
   ],
   documentsFinanciers: {
     allAddedViaAjout: false,
-    files: [],
     // Use base data's full document set
   },
   evaluations: [
