@@ -80,10 +80,14 @@ export class FinalisationDocumentsPage extends BasePage {
     }
   }
 
-  async submit(structureId: number) {
-    await this.submitAndWaitForUrl(
-      URLS.finalisationStep(structureId, "06-notes")
-    );
+  async submit(structureId: number, expectValidationFailure = false) {
+    if (expectValidationFailure) {
+      await this.submitAndExpectNoNavigation();
+    } else {
+      await this.submitAndWaitForUrl(
+        URLS.finalisationStep(structureId, "06-notes")
+      );
+    }
   }
 
   private async fillIfExistsAtIndex(

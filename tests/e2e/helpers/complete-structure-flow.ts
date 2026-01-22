@@ -22,18 +22,7 @@ import {
   VerificationPage,
 } from "./page-objects";
 import { getStructureId } from "./structure-creator";
-import { TestStructureData } from "./test-data/types";
-
-type FailingStep =
-  | "identification"
-  | "adresses"
-  | "type-places"
-  | "documents"
-  | "verification"
-  | "finalisationFinance"
-  | "finalisationControles"
-  | "finalisationDocuments"
-  | "finalisationNotes";
+import { FailingStep, TestStructureData } from "./test-data/types";
 
 // Helper type: Partial data but with required dnaCode
 type TestStructureDataWithDnaCode = Partial<TestStructureData> & {
@@ -120,7 +109,15 @@ export const completeStructureFlow = async (
     page
   );
   await finalisationIdentificationPage.waitForLoad();
-  await finalisationIdentificationPage.submit(structureId);
+  const shouldFailAtFinalisationIdentification =
+    options?.failingStep === "finalisationIdentification";
+  await finalisationIdentificationPage.submit(
+    structureId,
+    shouldFailAtFinalisationIdentification
+  );
+  if (shouldFailAtFinalisationIdentification) {
+    return;
+  }
 
   const finalisationDocumentsFinanciersPage =
     new FinalisationDocumentsFinanciersPage(page);
@@ -128,31 +125,67 @@ export const completeStructureFlow = async (
   await finalisationDocumentsFinanciersPage.fillForm(
     dataWithDna as TestStructureData
   );
-  await finalisationDocumentsFinanciersPage.submit(structureId);
+  const shouldFailAtFinalisationDocumentsFinanciers =
+    options?.failingStep === "finalisationDocumentsFinanciers";
+  await finalisationDocumentsFinanciersPage.submit(
+    structureId,
+    shouldFailAtFinalisationDocumentsFinanciers
+  );
+  if (shouldFailAtFinalisationDocumentsFinanciers) {
+    return;
+  }
 
   const finalisationFinancePage = new FinalisationFinancePage(page);
   await finalisationFinancePage.waitForLoad();
   await finalisationFinancePage.fillForm(dataWithDna as TestStructureData);
-  const shouldFailAtFinalisationFinance = options?.failingStep === "finalisationFinance";
-  await finalisationFinancePage.submit(structureId, shouldFailAtFinalisationFinance);
+  const shouldFailAtFinalisationFinance =
+    options?.failingStep === "finalisationFinance";
+  await finalisationFinancePage.submit(
+    structureId,
+    shouldFailAtFinalisationFinance
+  );
   if (shouldFailAtFinalisationFinance) {
-    return; // Test should pass - validation failure occurred as expected
+    return;
   }
 
   const finalisationControlesPage = new FinalisationControlesPage(page);
   await finalisationControlesPage.waitForLoad();
   await finalisationControlesPage.fillForm(dataWithDna as TestStructureData);
-  await finalisationControlesPage.submit(structureId);
+  const shouldFailAtFinalisationControles =
+    options?.failingStep === "finalisationControles";
+  await finalisationControlesPage.submit(
+    structureId,
+    shouldFailAtFinalisationControles
+  );
+  if (shouldFailAtFinalisationControles) {
+    return;
+  }
 
   const finalisationDocumentsPage = new FinalisationDocumentsPage(page);
   await finalisationDocumentsPage.waitForLoad();
   await finalisationDocumentsPage.fillForm(dataWithDna as TestStructureData);
-  await finalisationDocumentsPage.submit(structureId);
+  const shouldFailAtFinalisationDocuments =
+    options?.failingStep === "finalisationDocuments";
+  await finalisationDocumentsPage.submit(
+    structureId,
+    shouldFailAtFinalisationDocuments
+  );
+  if (shouldFailAtFinalisationDocuments) {
+    return;
+  }
 
   const finalisationNotesPage = new FinalisationNotesPage(page);
   await finalisationNotesPage.waitForLoad();
   await finalisationNotesPage.fillForm(dataWithDna as TestStructureData);
-  await finalisationNotesPage.submit(structureId);
+  const shouldFailAtFinalisationNotes =
+    options?.failingStep === "finalisationNotes";
+  await finalisationNotesPage.submit(
+    structureId,
+    shouldFailAtFinalisationNotes
+  );
+  if (shouldFailAtFinalisationNotes) {
+    return;
+  }
   await finalisationNotesPage.finalizeAndGoToStructure(structureId);
 
   const structurePage = new StructureDetailsPage(page);

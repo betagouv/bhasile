@@ -19,13 +19,17 @@ export class FinalisationControlesPage extends BasePage {
     await this.fillOuvertureFermeture(data);
   }
 
-  async submit(structureId: number) {
-    const submitButton = this.page.getByRole("button", { name: /Valider/i });
-    await submitButton.click();
-    await this.page.waitForURL(
-      URLS.finalisationStep(structureId, "05-documents"),
-      { timeout: TIMEOUTS.NAVIGATION }
-    );
+  async submit(structureId: number, expectValidationFailure = false) {
+    if (expectValidationFailure) {
+      await this.submitAndExpectNoNavigation();
+    } else {
+      const submitButton = this.page.getByRole("button", { name: /Valider/i });
+      await submitButton.click();
+      await this.page.waitForURL(
+        URLS.finalisationStep(structureId, "05-documents"),
+        { timeout: TIMEOUTS.NAVIGATION }
+      );
+    }
   }
 
   private async setFileInput(keySelector: string, filePath: string) {

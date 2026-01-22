@@ -8,9 +8,13 @@ export class FinalisationDocumentsFinanciersPage extends BasePage {
     await handleDocumentsFinanciers(this.page, data, "finalisation");
   }
 
-  async submit(structureId: number) {
-    await this.submitAndWaitForUrl(
-      URLS.finalisationStep(structureId, "03-finance")
-    );
+  async submit(structureId: number, expectValidationFailure = false) {
+    if (expectValidationFailure) {
+      await this.submitAndExpectNoNavigation();
+    } else {
+      await this.submitAndWaitForUrl(
+        URLS.finalisationStep(structureId, "03-finance")
+      );
+    }
   }
 }

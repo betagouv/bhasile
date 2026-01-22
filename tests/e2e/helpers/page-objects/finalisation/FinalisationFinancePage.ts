@@ -55,10 +55,14 @@ export class FinalisationFinancePage extends BasePage {
     }
   }
 
-  async submit(structureId: number) {
-    await this.submitAndWaitForUrl(
-      URLS.finalisationStep(structureId, "04-controles")
-    );
+  async submit(structureId: number, expectValidationFailure = false) {
+    if (expectValidationFailure) {
+      await this.submitAndExpectNoNavigation();
+    } else {
+      await this.submitAndWaitForUrl(
+        URLS.finalisationStep(structureId, "04-controles")
+      );
+    }
   }
 
   private async getBudgetIndexByYear(

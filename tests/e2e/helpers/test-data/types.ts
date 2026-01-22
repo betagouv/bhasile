@@ -136,7 +136,21 @@ export type ActeAdministratifData = {
   categoryName?: string;
 };
 
+export type FailingStep =
+  | "identification"
+  | "adresses"
+  | "type-places"
+  | "documents"
+  | "verification"
+  | "finalisationIdentification"
+  | "finalisationDocumentsFinanciers"
+  | "finalisationFinance"
+  | "finalisationControles"
+  | "finalisationDocuments"
+  | "finalisationNotes";
+
 export type TestStructureScenario = {
   name: string;
   formData: TestStructureData | Partial<TestStructureData>;
+  failingStep?: FailingStep;
 };
