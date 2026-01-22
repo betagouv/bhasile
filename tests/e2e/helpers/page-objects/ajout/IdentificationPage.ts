@@ -20,17 +20,19 @@ export class IdentificationPage extends BasePage {
     this.waitHelper = new WaitHelper(page);
   }
 
-  async fillForm(data: TestStructureData) {
+  async fillForm(data: Partial<TestStructureData>) {
     if (data.filiale) {
       await this.formHelper.toggleSwitch(SELECTORS.FILIALE_TOGGLE, true);
       await this.waitHelper.waitForFormFieldReady(SELECTORS.FILIALE_INPUT);
       await this.formHelper.fillInput(SELECTORS.FILIALE_INPUT, data.filiale);
     }
 
-    await this.formHelper.fillDate(
-      'input[name="creationDate"]',
-      data.creationDate
-    );
+    if (data.creationDate) {
+      await this.formHelper.fillDate(
+        'input[name="creationDate"]',
+        data.creationDate
+      );
+    }
 
     if (data.finessCode) {
       await this.formHelper.fillInput(
@@ -39,7 +41,9 @@ export class IdentificationPage extends BasePage {
       );
     }
 
-    await this.formHelper.selectOption(SELECTORS.PUBLIC_SELECT, data.public);
+    if (data.public) {
+      await this.formHelper.selectOption(SELECTORS.PUBLIC_SELECT, data.public);
+    }
 
     if (data.lgbt) {
       await this.checkboxHelper.check('input[name="lgbt"]', { useLabel: true });
@@ -50,10 +54,12 @@ export class IdentificationPage extends BasePage {
       });
     }
 
-    await this.formHelper.fillContact(
-      "contactPrincipal",
-      data.contactPrincipal
-    );
+    if (data.contactPrincipal) {
+      await this.formHelper.fillContact(
+        "contactPrincipal",
+        data.contactPrincipal
+      );
+    }
 
     if (data.contactSecondaire) {
       await this.formHelper.fillContact(

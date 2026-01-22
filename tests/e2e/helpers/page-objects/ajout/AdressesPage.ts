@@ -23,22 +23,33 @@ export class AdressesPage extends BasePage {
     this.waitHelper = new WaitHelper(page);
   }
 
-  async fillForm(data: TestStructureData) {
-    await this.autocompleteHelper.fillAndSelectFirst(
-      SELECTORS.ADRESSE_ADMINISTRATIVE_COMPLETE,
-      data.adresseAdministrative.searchTerm
-    );
+  async fillForm(data: Partial<TestStructureData>) {
+    if (data.adresseAdministrative) {
+      await this.autocompleteHelper.fillAndSelectFirst(
+        SELECTORS.ADRESSE_ADMINISTRATIVE_COMPLETE,
+        data.adresseAdministrative.searchTerm
+      );
 
-    await this.waitHelper.waitForUIUpdate();
+      await this.waitHelper.waitForUIUpdate();
+    }
 
-    await this.formHelper.selectOption(
-      'select[name="typeBati"]',
-      getRepartitionLabel(data.typeBati)
-    );
+    if (data.typeBati) {
+      await this.formHelper.selectOption(
+        'select[name="typeBati"]',
+        getRepartitionLabel(data.typeBati)
+      );
+    }
 
-    await this.waitHelper.waitForUIUpdate(2);
+    if (data.typeBati) {
+      await this.waitHelper.waitForUIUpdate(2);
+    }
 
-    if (data.sameAddress && data.typeBati === Repartition.COLLECTIF) {
+    if (
+      data.sameAddress &&
+      data.typeBati === Repartition.COLLECTIF &&
+      data.structureTypologies &&
+      data.structureTypologies.length > 0
+    ) {
       await this.formHelper.toggleSwitch(
         'input[title="Adresse d\'hébergement identique"]',
         true

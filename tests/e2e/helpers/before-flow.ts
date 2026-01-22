@@ -12,5 +12,9 @@ export async function beforeFlow(
   await mockFileApi(page, { mockFileKey: "e2e-cada-doc" });
   await mockAddressApi(page, data.adresseAdministrative?.complete ?? "");
 
-  await seedStructureForSelection(data as TestStructureData);
+  if (data.dnaCode) {
+    await seedStructureForSelection(
+      data as Partial<TestStructureData> & { dnaCode: string }
+    );
+  }
 }

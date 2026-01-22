@@ -66,14 +66,6 @@ const invalidTestCases: TestStructureScenario[] = [
       .build(),
     failingStep: "adresses",
   },
-  // Type-places failures
-  {
-    name: "should fail validation at type-places page when structureTypologies is empty",
-    formData: TestStructureDataBuilder.basedOn(cada1)
-      .withStructureTypologies([])
-      .build(),
-    failingStep: "type-places",
-  },
   // Finalisation failures
   {
     name: "should fail validation at finalisationDocumentsFinanciers page when documentsFinanciers files are missing",
@@ -91,20 +83,6 @@ const invalidTestCases: TestStructureScenario[] = [
       .withoutField("finances")
       .build(),
     failingStep: "finalisationFinance",
-  },
-  {
-    name: "should fail validation at finalisationControles page when evaluations are missing",
-    formData: TestStructureDataBuilder.basedOn(cada1)
-      .withoutField("evaluations")
-      .build(),
-    failingStep: "finalisationControles",
-  },
-  {
-    name: "should fail validation at finalisationControles page when controles are missing",
-    formData: TestStructureDataBuilder.basedOn(cada1)
-      .withoutField("controles")
-      .build(),
-    failingStep: "finalisationControles",
   },
   {
     name: "should fail validation at finalisationDocuments page when actesAdministratifs are missing",

@@ -13,7 +13,11 @@ export class TypePlacesPage extends BasePage {
     super(page);
     this.formHelper = new FormHelper(page);
   }
-  async fillForm(data: TestStructureData) {
+  async fillForm(data: Partial<TestStructureData>) {
+    if (!data.structureTypologies || data.structureTypologies.length === 0) {
+      return; // Skip filling if no typologies provided
+    }
+
     const rows = this.page
       .locator("table tr")
       .filter({ has: this.page.locator("td") });

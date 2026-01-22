@@ -4,19 +4,23 @@ import { TestStructureData } from "./test-data/types";
 /**
  * Transforms test data format to API structure creation format
  */
-export function transformTestDataToApiFormat(testData: TestStructureData) {
-  const adminAddress = parseAddress(testData.adresseAdministrative.searchTerm);
+export function transformTestDataToApiFormat(testData: Partial<TestStructureData> & { dnaCode: string }) {
+  const adminAddress = testData.adresseAdministrative
+    ? parseAddress(testData.adresseAdministrative.searchTerm)
+    : { street: "", postalCode: "", city: "", department: "" };
 
   // Transform contacts to array
-  const contacts = [
-    {
-      prenom: testData.contactPrincipal.prenom,
-      nom: testData.contactPrincipal.nom,
-      telephone: testData.contactPrincipal.telephone,
-      email: testData.contactPrincipal.email,
-      role: testData.contactPrincipal.role,
-    },
-  ];
+  const contacts = testData.contactPrincipal
+    ? [
+        {
+          prenom: testData.contactPrincipal.prenom,
+          nom: testData.contactPrincipal.nom,
+          telephone: testData.contactPrincipal.telephone,
+          email: testData.contactPrincipal.email,
+          role: testData.contactPrincipal.role,
+        },
+      ]
+    : [];
 
   if (testData.contactSecondaire) {
     contacts.push({
@@ -29,7 +33,7 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
   }
 
   // Transform typologies with years
-  const transformedTypologies = testData.structureTypologies.map(
+  const transformedTypologies = (testData.structureTypologies || []).map(
     (typo, index) => ({
       year: 2025 - index, // 2025, 2024, 2023
       placesAutorisees: typo.placesAutorisees,
@@ -47,15 +51,17 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
           codePostal: adminAddress.postalCode,
           commune: adminAddress.city,
           repartition: testData.typeBati,
-          adresseTypologies: [
-            {
-              placesAutorisees:
-                testData.structureTypologies[0].placesAutorisees,
-              year: 2025,
-              qpv: 0, // Convert boolean to number
-              logementSocial: 0, // Convert boolean to number
-            },
-          ],
+          adresseTypologies: testData.structureTypologies && testData.structureTypologies.length > 0
+            ? [
+                {
+                  placesAutorisees:
+                    testData.structureTypologies[0].placesAutorisees,
+                  year: 2025,
+                  qpv: 0, // Convert boolean to number
+                  logementSocial: 0, // Convert boolean to number
+                },
+              ]
+            : [],
         },
       ]
     : (testData.adresses || []).map((addr) => {
@@ -98,7 +104,7 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
       ? new Date(testData.finConvention)
       : null,
     cpom: testData.cpom,
-    creationDate: new Date(testData.creationDate),
+    creationDate: testData.creationDate ? new Date(testData.creationDate) : new Date(),
     finessCode: testData.finessCode,
     lgbt: testData.lgbt,
     fvvTeh: testData.fvvTeh,

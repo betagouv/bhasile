@@ -101,7 +101,7 @@ export async function createMinimalStructureViaApi(
  * Seeds the structure with the minimum data required for the selection list.
  */
 export async function seedStructureForSelection(
-  testData: TestStructureData
+  testData: Partial<TestStructureData> & { dnaCode: string }
 ): Promise<void> {
   const apiData = transformTestDataToApiFormat(testData);
   await createMinimalStructureViaApi({
