@@ -34,7 +34,7 @@ for (const { name, formData } of validTestCases) {
     try {
       await completeStructureFlow(page, formData);
     } finally {
-      await deleteStructureViaApi(formData.dnaCode);
+      await deleteStructureViaApi(formData.dnaCode as string);
     }
   });
 }

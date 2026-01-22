@@ -17,6 +17,8 @@ export const TIMEOUTS = {
   SHORT_UI_UPDATE: 300,
   /** Medium wait for UI updates (e.g., page load verification) */
   MEDIUM_UI_UPDATE: 1000,
+  /** Timeout for checking that navigation does NOT happen (validation failures) */
+  VALIDATION_CHECK: 2000,
 } as const;
 
 export const URLS = {

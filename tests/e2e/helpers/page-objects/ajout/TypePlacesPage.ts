@@ -75,7 +75,11 @@ export class TypePlacesPage extends BasePage {
     }
   }
 
-  async submit(dnaCode: string) {
-    await this.submitAndWaitForUrl(URLS.ajoutStep(dnaCode, "04-documents"));
+  async submit(dnaCode: string, expectValidationFailure = false) {
+    if (expectValidationFailure) {
+      await this.submitAndExpectNoNavigation();
+    } else {
+      await this.submitAndWaitForUrl(URLS.ajoutStep(dnaCode, "04-documents"));
+    }
   }
 }

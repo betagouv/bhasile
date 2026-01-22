@@ -78,7 +78,11 @@ export class AdressesPage extends BasePage {
     }
   }
 
-  async submit(dnaCode: string) {
-    await this.submitAndWaitForUrl(URLS.ajoutStep(dnaCode, "03-type-places"));
+  async submit(dnaCode: string, expectValidationFailure = false) {
+    if (expectValidationFailure) {
+      await this.submitAndExpectNoNavigation();
+    } else {
+      await this.submitAndWaitForUrl(URLS.ajoutStep(dnaCode, "03-type-places"));
+    }
   }
 }

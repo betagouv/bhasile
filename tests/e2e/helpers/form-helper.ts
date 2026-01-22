@@ -86,11 +86,14 @@ export class FormHelper {
       telephone: string;
     }
   ): Promise<void> {
-    await this.fillInput(`${prefix}.prenom`, contact.prenom);
-    await this.fillInput(`${prefix}.nom`, contact.nom);
-    await this.fillInput(`${prefix}.role`, contact.role);
-    await this.fillInput(`${prefix}.email`, contact.email);
-    await this.fillInput(`${prefix}.telephone`, contact.telephone);
+    await this.fillInput(`input[name="${prefix}.prenom"]`, contact.prenom);
+    await this.fillInput(`input[name="${prefix}.nom"]`, contact.nom);
+    await this.fillInput(`input[name="${prefix}.role"]`, contact.role);
+    await this.fillInput(`input[name="${prefix}.email"]`, contact.email);
+    await this.fillInput(
+      `input[name="${prefix}.telephone"]`,
+      contact.telephone
+    );
   }
 
   /**

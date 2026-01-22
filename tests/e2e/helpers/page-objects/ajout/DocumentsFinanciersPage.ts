@@ -8,7 +8,11 @@ export class DocumentsFinanciersPage extends BasePage {
     await handleDocumentsFinanciers(this.page, data, "ajout");
   }
 
-  async submit(dnaCode: string) {
-    await this.submitAndWaitForUrl(URLS.ajoutStep(dnaCode, "05-verification"));
+  async submit(dnaCode: string, expectValidationFailure = false) {
+    if (expectValidationFailure) {
+      await this.submitAndExpectNoNavigation();
+    } else {
+      await this.submitAndWaitForUrl(URLS.ajoutStep(dnaCode, "05-verification"));
+    }
   }
 }

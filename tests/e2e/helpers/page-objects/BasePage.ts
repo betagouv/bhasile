@@ -67,4 +67,26 @@ export abstract class BasePage {
     await this.page.click(SELECTORS.SUBMIT_BUTTON);
     await this.page.waitForLoadState("networkidle", { timeout });
   }
+
+  /**
+   * Submit form and verify that navigation does NOT happen
+   * Used for validation error scenarios
+   */
+  protected async submitAndExpectNoNavigation(
+    timeout = TIMEOUTS.VALIDATION_CHECK
+  ): Promise<void> {
+    const currentUrl = this.page.url();
+    await this.page.click(SELECTORS.SUBMIT_BUTTON);
+
+    // Wait to see if navigation happens
+    await this.page.waitForTimeout(timeout);
+
+    // Check if URL changed
+    const newUrl = this.page.url();
+    if (newUrl !== currentUrl) {
+      throw new Error(
+        `Expected no navigation after submit, but navigated from ${currentUrl} to ${newUrl}`
+      );
+    }
+  }
 }

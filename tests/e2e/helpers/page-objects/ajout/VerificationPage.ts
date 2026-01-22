@@ -30,11 +30,15 @@ export class VerificationPage extends BasePage {
     await this.expectDocumentsFinanciers(data);
   }
 
-  async submit(dnaCode: string) {
-    await this.submitByButtonText(
-      /Valider/i,
-      URLS.ajoutStep(dnaCode, "06-confirmation")
-    );
+  async submit(dnaCode: string, expectValidationFailure = false) {
+    if (expectValidationFailure) {
+      await this.submitAndExpectNoNavigation();
+    } else {
+      await this.submitByButtonText(
+        /Valider/i,
+        URLS.ajoutStep(dnaCode, "06-confirmation")
+      );
+    }
   }
 
   private getSection(title: string) {

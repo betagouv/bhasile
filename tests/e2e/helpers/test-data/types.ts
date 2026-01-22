@@ -138,5 +138,5 @@ export type ActeAdministratifData = {
 
 export type TestStructureScenario = {
   name: string;
-  formData: TestStructureData;
+  formData: TestStructureData | Partial<TestStructureData>;
 };
