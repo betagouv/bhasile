@@ -4,7 +4,9 @@ import { TestStructureData } from "./test-data/types";
 /**
  * Transforms test data format to API structure creation format
  */
-export function transformTestDataToApiFormat(testData: Partial<TestStructureData> & { dnaCode: string }) {
+export function transformTestDataToApiFormat(
+  testData: Partial<TestStructureData> & { dnaCode: string }
+) {
   const adminAddress = testData.adresseAdministrative
     ? parseAddress(testData.adresseAdministrative.searchTerm)
     : { street: "", postalCode: "", city: "", department: "" };
@@ -51,17 +53,19 @@ export function transformTestDataToApiFormat(testData: Partial<TestStructureData
           codePostal: adminAddress.postalCode,
           commune: adminAddress.city,
           repartition: testData.typeBati,
-          adresseTypologies: testData.structureTypologies && testData.structureTypologies.length > 0
-            ? [
-                {
-                  placesAutorisees:
-                    testData.structureTypologies[0].placesAutorisees,
-                  year: 2025,
-                  qpv: 0, // Convert boolean to number
-                  logementSocial: 0, // Convert boolean to number
-                },
-              ]
-            : [],
+          adresseTypologies:
+            testData.structureTypologies &&
+            testData.structureTypologies.length > 0
+              ? [
+                  {
+                    placesAutorisees:
+                      testData.structureTypologies[0].placesAutorisees,
+                    year: 2025,
+                    qpv: 0, // Convert boolean to number
+                    logementSocial: 0, // Convert boolean to number
+                  },
+                ]
+              : [],
         },
       ]
     : (testData.adresses || []).map((addr) => {
@@ -87,7 +91,7 @@ export function transformTestDataToApiFormat(testData: Partial<TestStructureData
     dnaCode: testData.dnaCode,
     operateur: {
       id: 1, // Use known test operateur ID
-      name: testData.operateur.name,
+      name: testData.operateur?.name,
     },
     filiale: testData.filiale,
     type: testData.type,
@@ -104,7 +108,9 @@ export function transformTestDataToApiFormat(testData: Partial<TestStructureData
       ? new Date(testData.finConvention)
       : null,
     cpom: testData.cpom,
-    creationDate: testData.creationDate ? new Date(testData.creationDate) : new Date(),
+    creationDate: testData.creationDate
+      ? new Date(testData.creationDate)
+      : new Date(),
     finessCode: testData.finessCode,
     lgbt: testData.lgbt,
     fvvTeh: testData.fvvTeh,
