@@ -13,6 +13,10 @@ export const TIMEOUTS = {
   AUTOCOMPLETE: 5000,
   /** Short wait for UI updates */
   UI_UPDATE: 500,
+  /** Very short wait for quick UI updates (e.g., panel animations) */
+  SHORT_UI_UPDATE: 300,
+  /** Medium wait for UI updates (e.g., page load verification) */
+  MEDIUM_UI_UPDATE: 1000,
 } as const;
 
 export const URLS = {

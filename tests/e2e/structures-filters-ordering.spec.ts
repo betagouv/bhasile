@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { TIMEOUTS } from "./helpers/constants";
+
 test.describe("Structures filters and ordering", () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to structures page
@@ -107,7 +109,7 @@ test.describe("Structures filters and ordering", () => {
 
     // Then apply ordering
     // Wait for filters panel to be hidden
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(TIMEOUTS.SHORT_UI_UPDATE);
     const operateurHeader = page.getByRole("columnheader", {
       name: /Opérateur/i,
     });
@@ -139,7 +141,7 @@ test.describe("Structures filters and ordering", () => {
     await cadaCheckbox.click({ force: true });
 
     // Wait for filters panel to close
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(TIMEOUTS.SHORT_UI_UPDATE);
     const dnaHeader = page.getByRole("columnheader", { name: /DNA/i });
     const orderButton = dnaHeader.getByRole("button", { name: /Trier par/i });
     await orderButton.click();

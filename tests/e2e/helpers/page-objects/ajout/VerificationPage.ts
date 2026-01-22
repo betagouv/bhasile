@@ -12,7 +12,7 @@ import { BasePage } from "../BasePage";
 export class VerificationPage extends BasePage {
   async verifyData(data: TestStructureData) {
     // Wait for the verification page to load
-    await this.page.waitForTimeout(1000);
+    await this.page.waitForTimeout(TIMEOUTS.MEDIUM_UI_UPDATE);
 
     // Verify we're on the verification page by checking for the main heading
     await this.waitForHeading(/Vérification des données/i);

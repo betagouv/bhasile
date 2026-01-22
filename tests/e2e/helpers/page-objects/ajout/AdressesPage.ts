@@ -47,7 +47,7 @@ export class AdressesPage extends BasePage {
           await this.page
             .getByRole("button", { name: /Ajouter un hébergement/i })
             .click();
-          await this.page.waitForTimeout(300);
+          await this.page.waitForTimeout(TIMEOUTS.SHORT_UI_UPDATE);
         }
 
         await this.page.click(`input[name="adresses.${i}.adresseComplete"]`);
