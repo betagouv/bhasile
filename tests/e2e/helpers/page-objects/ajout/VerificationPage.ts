@@ -1,18 +1,27 @@
+import { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
 import { formatCityName } from "@/app/utils/adresse.util";
 import { formatDate } from "@/app/utils/date.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
 
-import { TIMEOUTS, URLS } from "../../constants";
+import { WaitHelper } from "../../wait-helper";
+import { URLS } from "../../constants";
 import { parseAddressParts } from "../../shared-utils";
 import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class VerificationPage extends BasePage {
+  private waitHelper: WaitHelper;
+
+  constructor(page: Page) {
+    super(page);
+    this.waitHelper = new WaitHelper(page);
+  }
+
   async verifyData(data: TestStructureData) {
     // Wait for the verification page to load
-    await this.page.waitForTimeout(TIMEOUTS.MEDIUM_UI_UPDATE);
+    await this.waitHelper.waitForUIUpdate(2);
 
     // Verify we're on the verification page by checking for the main heading
     await this.waitForHeading(/Vérification des données/i);
@@ -24,10 +33,10 @@ export class VerificationPage extends BasePage {
   }
 
   async submit(dnaCode: string) {
-    await this.page.click('button:has-text("Valider")');
-    await this.page.waitForURL(URLS.ajoutStep(dnaCode, "06-confirmation"), {
-      timeout: TIMEOUTS.SUBMIT,
-    });
+    await this.submitByButtonText(
+      /Valider/i,
+      URLS.ajoutStep(dnaCode, "06-confirmation")
+    );
   }
 
   private getSection(title: string) {

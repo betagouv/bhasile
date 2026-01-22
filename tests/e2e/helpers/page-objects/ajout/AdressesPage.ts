@@ -1,42 +1,51 @@
+import { Page } from "@playwright/test";
 import { Repartition } from "@/types/adresse.type";
 
-import { TIMEOUTS, URLS } from "../../constants";
+import { AutocompleteHelper } from "../../autocomplete-helper";
+import { FormHelper } from "../../form-helper";
+import { WaitHelper } from "../../wait-helper";
+import { URLS } from "../../constants";
 import { getRepartitionLabel } from "../../shared-utils";
 import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class AdressesPage extends BasePage {
+  private autocompleteHelper: AutocompleteHelper;
+  private formHelper: FormHelper;
+  private waitHelper: WaitHelper;
+
+  constructor(page: Page) {
+    super(page);
+    this.autocompleteHelper = new AutocompleteHelper(page);
+    this.formHelper = new FormHelper(page);
+    this.waitHelper = new WaitHelper(page);
+  }
+
   async fillForm(data: TestStructureData) {
     // Adresse administrative (autocomplete)
-    await this.page.click('input[name="adresseAdministrativeComplete"]');
-    await this.page.fill(
+    await this.autocompleteHelper.fillAndSelectFirst(
       'input[name="adresseAdministrativeComplete"]',
       data.adresseAdministrative.searchTerm
     );
 
-    const firstSuggestion = this.page.locator('[role="option"]').first();
-    await firstSuggestion.waitFor({
-      state: "visible",
-      timeout: TIMEOUTS.AUTOCOMPLETE,
-    });
-    await firstSuggestion.click();
-
-    await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
+    await this.waitHelper.waitForUIUpdate();
 
     // Type de bâti - select dropdown
-    await this.page.selectOption(
+    await this.formHelper.selectOption(
       'select[name="typeBati"]',
       getRepartitionLabel(data.typeBati)
     );
 
     // Wait for the UI to update
-    await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE * 2);
+    await this.waitHelper.waitForUIUpdate(2);
 
     // Same address toggle (only for COLLECTIF)
     if (data.sameAddress && data.typeBati === Repartition.COLLECTIF) {
-      await this.page.click('input[title="Adresse d\'hébergement identique"]');
-      await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
-      await this.page.fill(
+      await this.formHelper.toggleSwitch(
+        'input[title="Adresse d\'hébergement identique"]',
+        true
+      );
+      await this.formHelper.fillInput(
         'input[name="adresses.0.adresseTypologies.0.placesAutorisees"]',
         data.structureTypologies[0].placesAutorisees.toString()
       );
@@ -47,32 +56,24 @@ export class AdressesPage extends BasePage {
           await this.page
             .getByRole("button", { name: /Ajouter un hébergement/i })
             .click();
-          await this.page.waitForTimeout(TIMEOUTS.SHORT_UI_UPDATE);
+          await this.waitHelper.waitForUIUpdate();
         }
 
-        await this.page.click(`input[name="adresses.${i}.adresseComplete"]`);
-        await this.page.fill(
+        await this.autocompleteHelper.fillAndSelectFirst(
           `input[name="adresses.${i}.adresseComplete"]`,
           adresse.searchTerm
         );
 
-        const addressSuggestion = this.page.locator('[role="option"]').first();
-        await addressSuggestion.waitFor({
-          state: "visible",
-          timeout: TIMEOUTS.AUTOCOMPLETE,
-        });
-        await addressSuggestion.click();
+        await this.waitHelper.waitForUIUpdate();
 
-        await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
-
-        await this.page.fill(
+        await this.formHelper.fillInput(
           `input[name="adresses.${i}.adresseTypologies.0.placesAutorisees"]`,
           adresse.placesAutorisees.toString()
         );
 
         // For MIXTE, set repartition per address
         if (data.typeBati === Repartition.MIXTE && adresse.repartition) {
-          await this.page.selectOption(
+          await this.formHelper.selectOption(
             `select[name="adresses.${i}.repartition"]`,
             getRepartitionLabel(adresse.repartition)
           );

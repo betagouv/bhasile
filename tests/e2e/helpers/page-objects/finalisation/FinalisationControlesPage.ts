@@ -1,10 +1,20 @@
 import { expect, Page } from "@playwright/test";
 
+import { CheckboxHelper } from "../../checkbox-helper";
+import { FormHelper } from "../../form-helper";
 import { TIMEOUTS, URLS } from "../../constants";
 import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class FinalisationControlesPage extends BasePage {
+  private checkboxHelper: CheckboxHelper;
+  private formHelper: FormHelper;
+
+  constructor(page: Page) {
+    super(page);
+    this.checkboxHelper = new CheckboxHelper(page);
+    this.formHelper = new FormHelper(page);
+  }
   async fillForm(data: TestStructureData) {
     await this.fillEvaluations(data);
     await this.fillControles(data);
@@ -38,6 +48,7 @@ export class FinalisationControlesPage extends BasePage {
         name: /n.?a pas encore fait l.?objet d.?évaluation/i,
       });
       if ((await noEvaluationCheckbox.count()) > 0) {
+        // Use locator's click with force since CheckboxHelper expects selector string
         await noEvaluationCheckbox.check({ force: true });
       }
       const defaultDateInput = this.page.locator(
@@ -47,7 +58,10 @@ export class FinalisationControlesPage extends BasePage {
         const fallbackFilePath =
           data.documentsFinanciers.files[0]?.filePath ||
           "tests/e2e/fixtures/sample.csv";
-        await defaultDateInput.fill(data.creationDate);
+        await this.formHelper.fillInput(
+          'input[name="evaluations.0.date"]',
+          data.creationDate
+        );
         await this.setFileInput(
           'input[name="evaluations.0.fileUploads.0.key"]',
           fallbackFilePath
@@ -69,7 +83,7 @@ export class FinalisationControlesPage extends BasePage {
     }
     for (let i = 0; i < evaluations.length; i++) {
       const evaluation = evaluations[i];
-      await this.page.fill(
+      await this.formHelper.fillInput(
         `input[name="evaluations.${i}.date"]`,
         evaluation.date
       );
@@ -127,8 +141,11 @@ export class FinalisationControlesPage extends BasePage {
         const fallbackFilePath =
           data.documentsFinanciers.files[0]?.filePath ||
           "tests/e2e/fixtures/sample.csv";
-        await defaultDateInput.fill(data.creationDate);
-        await this.page.selectOption('select[name="controles.0.type"]', {
+        await this.formHelper.fillInput(
+          'input[name="controles.0.date"]',
+          data.creationDate
+        );
+        await this.formHelper.selectOption('select[name="controles.0.type"]', {
           label: "Programmé",
         });
         await this.setFileInput(
@@ -152,8 +169,11 @@ export class FinalisationControlesPage extends BasePage {
     }
     for (let i = 0; i < controles.length; i++) {
       const controle = controles[i];
-      await this.page.fill(`input[name="controles.${i}.date"]`, controle.date);
-      await this.page.selectOption(`select[name="controles.${i}.type"]`, {
+      await this.formHelper.fillInput(
+        `input[name="controles.${i}.date"]`,
+        controle.date
+      );
+      await this.formHelper.selectOption(`select[name="controles.${i}.type"]`, {
         label: controle.type,
       });
       if (controle.filePath) {
@@ -182,9 +202,10 @@ export class FinalisationControlesPage extends BasePage {
       ouvertureFermeture.placesACreer !== undefined &&
       (await placesACreerInput.count()) > 0
     ) {
-      await placesACreerInput
-        .first()
-        .fill(String(ouvertureFermeture.placesACreer));
+      await this.formHelper.fillInputIfExists(
+        'input[name^="structureTypologies"][name$="placesACreer"]',
+        String(ouvertureFermeture.placesACreer)
+      );
     }
     const echeancePlacesACreerInput = this.page.locator(
       'input[name^="structureTypologies"][name$="echeancePlacesACreer"]'
@@ -193,9 +214,10 @@ export class FinalisationControlesPage extends BasePage {
       ouvertureFermeture.echeancePlacesACreer &&
       (await echeancePlacesACreerInput.count()) > 0
     ) {
-      await echeancePlacesACreerInput
-        .first()
-        .fill(ouvertureFermeture.echeancePlacesACreer);
+      await this.formHelper.fillInputIfExists(
+        'input[name^="structureTypologies"][name$="echeancePlacesACreer"]',
+        ouvertureFermeture.echeancePlacesACreer
+      );
     }
 
     const placesAFermerInput = this.page.locator(
@@ -205,9 +227,10 @@ export class FinalisationControlesPage extends BasePage {
       ouvertureFermeture.placesAFermer !== undefined &&
       (await placesAFermerInput.count()) > 0
     ) {
-      await placesAFermerInput
-        .first()
-        .fill(String(ouvertureFermeture.placesAFermer));
+      await this.formHelper.fillInputIfExists(
+        'input[name^="structureTypologies"][name$="placesAFermer"]',
+        String(ouvertureFermeture.placesAFermer)
+      );
     }
     const echeancePlacesAFermerInput = this.page.locator(
       'input[name^="structureTypologies"][name$="echeancePlacesAFermer"]'
@@ -216,14 +239,15 @@ export class FinalisationControlesPage extends BasePage {
       ouvertureFermeture.echeancePlacesAFermer &&
       (await echeancePlacesAFermerInput.count()) > 0
     ) {
-      await echeancePlacesAFermerInput
-        .first()
-        .fill(ouvertureFermeture.echeancePlacesAFermer);
+      await this.formHelper.fillInputIfExists(
+        'input[name^="structureTypologies"][name$="echeancePlacesAFermer"]',
+        ouvertureFermeture.echeancePlacesAFermer
+      );
     }
   }
 
   private async fillInputValue(selector: string, value: string) {
-    await this.fillIfExists(selector, value);
+    await this.formHelper.fillInputIfExists(selector, value);
   }
 
   private async removeExtraEntries(

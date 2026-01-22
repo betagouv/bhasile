@@ -1,8 +1,18 @@
+import { Page } from "@playwright/test";
+
+import { FormHelper } from "../../form-helper";
 import { TIMEOUTS, URLS } from "../../constants";
 import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class FinalisationNotesPage extends BasePage {
+  private formHelper: FormHelper;
+
+  constructor(page: Page) {
+    super(page);
+    this.formHelper = new FormHelper(page);
+  }
+
   async fillForm(data: TestStructureData) {
     const notes =
       data.finalisationNotes || "Notes de test pour la finalisation";
@@ -13,7 +23,7 @@ export class FinalisationNotesPage extends BasePage {
         response.status() < 400,
       { timeout: TIMEOUTS.NAVIGATION }
     );
-    await this.page.fill('textarea[name="notes"]', notes);
+    await this.formHelper.fillInput('textarea[name="notes"]', notes);
     await saveResponse;
   }
 

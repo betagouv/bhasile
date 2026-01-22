@@ -1,7 +1,16 @@
+import { Page } from "@playwright/test";
+
 import { TIMEOUTS, URLS } from "../../constants";
+import { FormHelper } from "../../form-helper";
 import { BasePage } from "../BasePage";
 
 export class AuthenticationPage extends BasePage {
+  private formHelper: FormHelper;
+
+  constructor(page: Page) {
+    super(page);
+    this.formHelper = new FormHelper(page);
+  }
 
   async authenticate() {
     await this.page.goto(URLS.AJOUT_STRUCTURE, {
@@ -21,7 +30,7 @@ export class AuthenticationPage extends BasePage {
         throw new Error("OPERATEUR_PASSWORDS must be set for e2e auth");
       }
       // Password protection is active - authenticate
-      await this.page.fill('input[type="password"]', password);
+      await this.formHelper.fillInput('input[type="password"]', password);
       await this.page.click("button.fr-btn");
 
       // Wait for the page to load after authentication

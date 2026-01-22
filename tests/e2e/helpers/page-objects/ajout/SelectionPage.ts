@@ -1,10 +1,22 @@
+import { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
+import { AutocompleteHelper } from "../../autocomplete-helper";
+import { FormHelper } from "../../form-helper";
 import { TIMEOUTS } from "../../constants";
 import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class SelectionPage extends BasePage {
+  private autocompleteHelper: AutocompleteHelper;
+  private formHelper: FormHelper;
+
+  constructor(page: Page) {
+    super(page);
+    this.autocompleteHelper = new AutocompleteHelper(page);
+    this.formHelper = new FormHelper(page);
+  }
+
   override async waitForLoad(): Promise<void> {
     await expect(
       this.page.getByRole("heading", {
@@ -15,7 +27,7 @@ export class SelectionPage extends BasePage {
 
   async selectStructure(data: TestStructureData): Promise<void> {
     await this.waitForLoad();
-    await this.page.selectOption("#type", data.type);
+    await this.formHelper.selectOption("#type", data.type);
     await this.selectOperateur(data.operateur.searchTerm, data.operateur.name);
     const departement = data.departementAdministratif;
     await this.selectDepartement(departement);
@@ -40,21 +52,18 @@ export class SelectionPage extends BasePage {
     searchTerm: string,
     operateurName: string
   ): Promise<void> {
-    await this.page.click('input[name="operateur.name"]');
-    await this.page.fill('input[name="operateur.name"]', searchTerm);
-    const suggestion = this.page.getByRole("option", {
-      name: operateurName,
-    });
-    await expect(suggestion).toBeVisible({ timeout: TIMEOUTS.AUTOCOMPLETE });
-    await suggestion.click();
+    await this.autocompleteHelper.fillAndSelectByText(
+      'input[name="operateur.name"]',
+      searchTerm,
+      operateurName
+    );
   }
 
   private async selectDepartement(departement: string): Promise<void> {
-    await this.page.fill("#departement", departement);
-    await this.page.waitForSelector("#suggestion-0", {
-      state: "visible",
-      timeout: TIMEOUTS.AUTOCOMPLETE,
-    });
-    await this.page.click("#suggestion-0");
+    await this.autocompleteHelper.fillAndSelectFirst(
+      "#departement",
+      departement,
+      "#suggestion-0"
+    );
   }
 }

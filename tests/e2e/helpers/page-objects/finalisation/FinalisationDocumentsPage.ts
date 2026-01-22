@@ -1,11 +1,18 @@
 import { expect, Page } from "@playwright/test";
 
+import { FormHelper } from "../../form-helper";
 import { TIMEOUTS, URLS } from "../../constants";
 import { getActesCategoryRegex } from "../../shared-utils";
 import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class FinalisationDocumentsPage extends BasePage {
+  private formHelper: FormHelper;
+
+  constructor(page: Page) {
+    super(page);
+    this.formHelper = new FormHelper(page);
+  }
   async fillForm(data: TestStructureData) {
     const actes = data.actesAdministratifs ?? [];
     const actesByCategory = actes.reduce(
@@ -91,7 +98,9 @@ export class FinalisationDocumentsPage extends BasePage {
   ) {
     const input = group.locator(selector);
     if ((await input.count()) > index) {
-      await input.nth(index).fill(value);
+      const inputElement = input.nth(index);
+      await inputElement.waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION });
+      await inputElement.fill(value);
     }
   }
 }

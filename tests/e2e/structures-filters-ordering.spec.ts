@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-import { TIMEOUTS } from "./helpers/constants";
+import { CheckboxHelper } from "./helpers/checkbox-helper";
+import { WaitHelper } from "./helpers/wait-helper";
 
 test.describe("Structures filters and ordering", () => {
   test.beforeEach(async ({ page }) => {
@@ -19,16 +20,9 @@ test.describe("Structures filters and ordering", () => {
 
     // When no filter is selected, all checkboxes appear checked
     // Clicking CADA will uncheck it and exclude CADA structures
-    // Wait for the panel to be visible, then click the checkbox input
-    await page.waitForSelector('input[type="checkbox"][value="CADA"]', {
-      state: "visible",
-    });
-    const cadaCheckbox = page.locator('input[type="checkbox"][value="CADA"]');
-    // Trigger both click and change events to ensure the handler fires
-    await cadaCheckbox.evaluate((el) => {
-      (el as HTMLInputElement).click();
-      el.dispatchEvent(new Event("change", { bubbles: true }));
-    });
+    const checkboxHelper = new CheckboxHelper(page);
+    await checkboxHelper.clickByValue("CADA");
+
     // Wait for URL to update
     await page.waitForURL(/.*type=.*/);
 
@@ -101,15 +95,16 @@ test.describe("Structures filters and ordering", () => {
     await page
       .getByRole("button", { name: /^Filtres (actifs|inactifs)$/ })
       .click();
-    const cadaCheckbox = page.locator('input[type="checkbox"][value="CADA"]');
-    await cadaCheckbox.click({ force: true });
+    const checkboxHelper = new CheckboxHelper(page);
+    await checkboxHelper.clickByValue("CADA", { force: true });
     // Close the filters panel by clicking outside
     await page.click("body");
     await page.waitForLoadState("networkidle");
 
     // Then apply ordering
     // Wait for filters panel to be hidden
-    await page.waitForTimeout(TIMEOUTS.SHORT_UI_UPDATE);
+    const waitHelper = new WaitHelper(page);
+    await waitHelper.waitForUIUpdate();
     const operateurHeader = page.getByRole("columnheader", {
       name: /Opérateur/i,
     });
@@ -137,11 +132,12 @@ test.describe("Structures filters and ordering", () => {
     await page
       .getByRole("button", { name: /^Filtres (actifs|inactifs)$/ })
       .click();
-    const cadaCheckbox = page.locator('input[type="checkbox"][value="CADA"]');
-    await cadaCheckbox.click({ force: true });
+    const checkboxHelper = new CheckboxHelper(page);
+    await checkboxHelper.clickByValue("CADA", { force: true });
 
     // Wait for filters panel to close
-    await page.waitForTimeout(TIMEOUTS.SHORT_UI_UPDATE);
+    const waitHelper = new WaitHelper(page);
+    await waitHelper.waitForUIUpdate();
     const dnaHeader = page.getByRole("columnheader", { name: /DNA/i });
     const orderButton = dnaHeader.getByRole("button", { name: /Trier par/i });
     await orderButton.click();

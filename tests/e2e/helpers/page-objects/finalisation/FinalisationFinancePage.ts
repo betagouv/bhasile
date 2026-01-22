@@ -1,15 +1,28 @@
-import { TIMEOUTS, URLS } from "../../constants";
+import { Page } from "@playwright/test";
+
+import { FormHelper } from "../../form-helper";
+import { WaitHelper } from "../../wait-helper";
+import { URLS } from "../../constants";
 import { FinanceYearData, TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class FinalisationFinancePage extends BasePage {
+  private waitHelper: WaitHelper;
+  private formHelper: FormHelper;
+
+  constructor(page: Page) {
+    super(page);
+    this.waitHelper = new WaitHelper(page);
+    this.formHelper = new FormHelper(page);
+  }
+
   async fillForm(data: TestStructureData) {
     const finances = data.finances;
     if (!finances) {
       return;
     }
 
-    await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
+    await this.waitHelper.waitForUIUpdate();
     const yearIndexMap = await this.getBudgetIndexByYear(finances);
 
     for (const [yearKey, fields] of Object.entries(finances)) {
@@ -29,7 +42,7 @@ export class FinalisationFinancePage extends BasePage {
           continue;
         }
         if (await input.isEnabled()) {
-          await input.fill(String(value));
+          await this.formHelper.fillInput(selector, String(value));
         }
       }
     }

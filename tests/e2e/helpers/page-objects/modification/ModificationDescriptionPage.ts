@@ -1,16 +1,27 @@
-import { expect } from "@playwright/test";
+import { Page } from "@playwright/test";
 
+import { CheckboxHelper } from "../../checkbox-helper";
+import { FormHelper } from "../../form-helper";
 import { URLS } from "../../constants";
 import { BasePage } from "../BasePage";
 
 export class ModificationDescriptionPage extends BasePage {
+  private checkboxHelper: CheckboxHelper;
+  private formHelper: FormHelper;
+
+  constructor(page: Page) {
+    super(page);
+    this.checkboxHelper = new CheckboxHelper(page);
+    this.formHelper = new FormHelper(page);
+  }
+
   override async waitForLoad() {
     await this.waitForHeading(/Modification/i);
     await super.waitForLoad();
   }
 
   async updatePublic(publicValue: string) {
-    await this.page.selectOption("#public", publicValue);
+    await this.formHelper.selectOption("#public", publicValue);
   }
 
   async setVulnerabilites({
@@ -20,24 +31,15 @@ export class ModificationDescriptionPage extends BasePage {
     lgbt: boolean;
     fvvTeh: boolean;
   }) {
-    await this.toggleCheckbox('input[name="lgbt"]', lgbt);
-    await this.toggleCheckbox('input[name="fvvTeh"]', fvvTeh);
+    await this.checkboxHelper.toggleCheckbox('input[name="lgbt"]', lgbt, { useLabel: true });
+    await this.checkboxHelper.toggleCheckbox('input[name="fvvTeh"]', fvvTeh, { useLabel: true });
   }
 
   async updateContactPrincipalEmail(email: string) {
-    await this.page.fill('input[name="contacts.0.email"]', email);
+    await this.formHelper.fillInput('input[name="contacts.0.email"]', email);
   }
 
   async submit(structureId: number) {
     await this.submitAndWaitForUrl(URLS.structure(structureId));
-  }
-
-  private async toggleCheckbox(selector: string, shouldBeChecked: boolean) {
-    const checkbox = this.page.locator(selector);
-    await expect(checkbox).toBeVisible();
-    const isChecked = await checkbox.isChecked();
-    if (isChecked !== shouldBeChecked) {
-      await this.page.click(`${selector} + label`);
-    }
   }
 }

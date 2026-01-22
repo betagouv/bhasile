@@ -1,41 +1,10 @@
+import { parseAddress } from "./shared-utils";
 import { TestStructureData } from "./test-data/types";
 
 /**
  * Transforms test data format to API structure creation format
  */
 export function transformTestDataToApiFormat(testData: TestStructureData) {
-  // Extract department from postal code (first 2 digits for most, or "2A"/"2B" for Corsica)
-  const extractDepartment = (postalCode: string): string => {
-    if (postalCode.startsWith("20")) {
-      return postalCode.substring(0, 3); // Corsica: 201, 202, etc.
-    }
-    return postalCode.substring(0, 2);
-  };
-
-  // Parse address from autocomplete format
-  const parseAddress = (searchTerm: string) => {
-    // Simple parsing - in real scenario this would match the autocomplete data
-    const parts = searchTerm.split(" ");
-    const postalCodeMatch = parts.find((p) => /^\d{5}$/.test(p));
-    const postalCode = postalCodeMatch || "75001";
-
-    // Find city name (usually after postal code)
-    const postalIndex = parts.findIndex((p) => p === postalCode);
-    const city =
-      postalIndex > -1 ? parts.slice(postalIndex + 1).join(" ") : "Paris";
-
-    // Street is everything before postal code
-    const street =
-      postalIndex > -1 ? parts.slice(0, postalIndex).join(" ") : searchTerm;
-
-    return {
-      street: street || "1 rue de Test",
-      postalCode,
-      city: city || "Paris",
-      department: extractDepartment(postalCode),
-    };
-  };
-
   const adminAddress = parseAddress(testData.adresseAdministrative.searchTerm);
 
   // Transform contacts to array
@@ -90,7 +59,7 @@ export function transformTestDataToApiFormat(testData: TestStructureData) {
         },
       ]
     : (testData.adresses || []).map((addr) => {
-        const parsed = parseAddress(addr.searchTerm);
+        const parsed = parseAddress(addr.searchTerm || addr.adresseComplete);
         return {
           adresse: parsed.street,
           codePostal: parsed.postalCode,

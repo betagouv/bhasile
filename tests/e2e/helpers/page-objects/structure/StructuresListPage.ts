@@ -1,18 +1,24 @@
+import { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
+import { FormHelper } from "../../form-helper";
 import { URLS } from "../../constants";
 import { BasePage } from "../BasePage";
 
 export class StructuresListPage extends BasePage {
+  private formHelper: FormHelper;
+
+  constructor(page: Page) {
+    super(page);
+    this.formHelper = new FormHelper(page);
+  }
 
   async navigate() {
     await this.page.goto(URLS.STRUCTURES);
   }
 
   async searchByDna(dnaCode: string) {
-    const searchInput = this.page.locator('input#search[type="text"]');
-    await expect(searchInput).toBeVisible();
-    await searchInput.fill(dnaCode);
+    await this.formHelper.fillInput('input#search[type="text"]', dnaCode);
   }
 
   async startFinalisationForDna(dnaCode: string) {

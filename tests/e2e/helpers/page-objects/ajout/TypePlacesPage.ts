@@ -1,10 +1,18 @@
+import { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
+import { FormHelper } from "../../form-helper";
 import { URLS } from "../../constants";
 import { TestStructureData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
 export class TypePlacesPage extends BasePage {
+  private formHelper: FormHelper;
+
+  constructor(page: Page) {
+    super(page);
+    this.formHelper = new FormHelper(page);
+  }
   async fillForm(data: TestStructureData) {
     const rows = this.page
       .locator("table tr")
@@ -49,19 +57,19 @@ export class TypePlacesPage extends BasePage {
       }
 
       // Fill typologie fields (date is auto-filled by the form)
-      await this.page.fill(
+      await this.formHelper.fillInput(
         `input[id="typologies.${i}.placesAutorisees"]`,
         typologie.placesAutorisees.toString()
       );
-      await this.page.fill(
+      await this.formHelper.fillInput(
         `input[id="typologies.${i}.pmr"]`,
         typologie.pmr.toString()
       );
-      await this.page.fill(
+      await this.formHelper.fillInput(
         `input[id="typologies.${i}.lgbt"]`,
         typologie.lgbt.toString()
       );
-      await this.page.fill(
+      await this.formHelper.fillInput(
         `input[id="typologies.${i}.fvvTeh"]`,
         typologie.fvvTeh.toString()
       );

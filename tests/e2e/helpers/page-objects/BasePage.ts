@@ -60,4 +60,28 @@ export abstract class BasePage {
     await this.page.click('button[type="submit"]');
     await this.page.waitForURL(expectedUrl, { timeout });
   }
+
+  /**
+   * Submit form by clicking a button with specific text (e.g., "Valider")
+   */
+  protected async submitByButtonText(
+    buttonText: string | RegExp,
+    expectedUrl: string | RegExp,
+    timeout = TIMEOUTS.NAVIGATION
+  ): Promise<void> {
+    const submitButton = this.page.getByRole("button", { name: buttonText });
+    await submitButton.click();
+    await this.page.waitForURL(expectedUrl, { timeout });
+  }
+
+  /**
+   * Submit form and wait for navigation without specifying URL
+   * Useful when you just want to wait for navigation to complete
+   */
+  protected async submitAndWaitForNavigation(
+    timeout = TIMEOUTS.SUBMIT
+  ): Promise<void> {
+    await this.page.click('button[type="submit"]');
+    await this.page.waitForLoadState("networkidle", { timeout });
+  }
 }
