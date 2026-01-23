@@ -4,10 +4,7 @@ import {
   isStructureAutorisee,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
-import {
-  nullishFrenchDateToISO,
-  optionalFrenchDateToISO,
-} from "@/app/utils/zodCustomFields";
+import { nullishFrenchDateToISO } from "@/app/utils/zodCustomFields";
 
 import { structureBaseSchema } from "./structure.base.schema";
 
