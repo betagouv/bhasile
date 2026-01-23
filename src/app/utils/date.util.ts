@@ -17,7 +17,7 @@ export const formatDate = (
 };
 
 export const formatDateToIsoString = (
-  date: string | undefined,
+  date: string | undefined | null,
   defaultToToday: boolean = false
 ): string | null => {
   if (date) {
