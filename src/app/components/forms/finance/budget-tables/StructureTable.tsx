@@ -53,7 +53,7 @@ export const StructureTable = () => {
           .replaceAll(" ", "")
           .replace(",", ".") || 0
       );
-      return totalValue > 0;
+      return totalValue !== 0 && !isNaN(totalValue);
     })
     .map((budget) => budget.year);
 
