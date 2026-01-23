@@ -12,10 +12,11 @@ const cpomStructureSchema = z.object({
 });
 
 export const cpomAjoutIdentificationSchema = z.object({
+  name: z.string().optional(),
+  structures: z.array(cpomStructureSchema),
+  yearStart: zSafeYear(),
+  yearEnd: zSafeYear(),
   operateur: operateurSchema,
   granularity: z.enum(["DEPARTEMENT", "INTERDEPARTEMENT", "REGION"]),
   departement: z.array(z.number()),
-  yearStart: zSafeYear(),
-  yearEnd: zSafeYear(),
-  structures: z.array(cpomStructureSchema),
 });
