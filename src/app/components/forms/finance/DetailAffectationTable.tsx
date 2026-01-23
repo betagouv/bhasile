@@ -165,7 +165,7 @@ export const DetailAffectationTable = ({
               .replace(",", ".") || 0
           );
 
-          const isEditable = totalValue > 0;
+          const isEditable = totalValue !== 0 && !isNaN(totalValue);
 
           return (
             <tr key={year}>
