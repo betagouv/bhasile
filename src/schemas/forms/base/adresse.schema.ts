@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { zSafeYear } from "@/app/utils/zodCustomFields";
+import { zId, zSafeYear } from "@/app/utils/zodCustomFields";
 import { Repartition } from "@/types/adresse.type";
 
 export const adresseTypologieSchema = z.object({
@@ -16,7 +16,7 @@ export const adresseTypologieSchema = z.object({
 });
 
 export const adresseSchema = z.object({
-  id: z.number().optional(),
+  id: zId(),
   structureDnaCode: z.string().optional(),
   adresseComplete: z.string().optional(),
   adresse: z.string().min(1),

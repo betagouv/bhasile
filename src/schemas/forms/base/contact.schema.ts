@@ -1,9 +1,10 @@
 import z from "zod";
 
+import { zId } from "@/app/utils/zodCustomFields";
 import { ContactType } from "@/types/contact.type";
 
 export const requiredContactSchema = z.object({
-  id: z.number().optional(),
+  id: zId(),
   prenom: z.string().nonempty("Le prénom est requis"),
   nom: z.string().nonempty("Le nom est requis"),
   role: z.string().nonempty("Le rôle est requis"),
@@ -20,7 +21,7 @@ export const requiredContactSchema = z.object({
 
 export const optionalContactSchema = z
   .object({
-    id: z.number().optional(),
+    id: zId(),
     prenom: z.string().optional(),
     nom: z.string().optional(),
     role: z.string().optional(),

@@ -9,7 +9,7 @@ const departementSchema = z.object({
 });
 
 const operateurSchema = z.object({
-  id: z.number().optional(),
+  id: zId(),
   name: z.string(),
 });
 

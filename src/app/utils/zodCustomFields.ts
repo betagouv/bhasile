@@ -71,3 +71,6 @@ export const zSafeYear = () =>
     (val) => (typeof val === "string" ? Number(val) : val),
     z.number().int().positive()
   );
+
+export const zId = () =>
+  z.preprocess((val) => (val === "" ? undefined : val), z.number().optional());
