@@ -21,16 +21,16 @@ export const LocationSelector = () => {
 
   const handleDepartementChange = (value: string) => {
     if (value) {
-      setValue("departement", [Number(value)], { shouldValidate: true });
+      setValue("departements", [Number(value)], { shouldValidate: true });
     } else {
-      setValue("departement", [], { shouldValidate: true });
+      setValue("departements", [], { shouldValidate: true });
     }
   };
 
   useEffect(() => {
     if (departementsOfRegion && granularity === CpomGranularity.REGIONALE) {
       setValue(
-        "departement",
+        "departements",
         departementsOfRegion.map((departement) => departement.numero),
         { shouldValidate: true }
       );
@@ -55,7 +55,7 @@ export const LocationSelector = () => {
       </SelectWithValidation>
       {granularity === CpomGranularity.DEPARTEMENTALE && (
         <SelectWithValidation
-          name="departement"
+          name="departements"
           control={control}
           label="Département"
           disabled={!departementsOfRegion.length}

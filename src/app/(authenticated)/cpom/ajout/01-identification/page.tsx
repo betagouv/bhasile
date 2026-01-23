@@ -7,6 +7,7 @@ import { cpomAjoutIdentificationSchema } from "@/schemas/forms/cpom/cpomAjoutIde
 import { CpomGranularity } from "@/types/cpom.type";
 
 import { FieldSetGeneral } from "./_components/FieldSetGeneral";
+import { FieldSetStructures } from "./_components/FieldSetStructures";
 
 export default function CpomAjoutIdentification() {
   const defaultValues = {
@@ -36,6 +37,7 @@ export default function CpomAjoutIdentification() {
         onSubmit={() => ""}
       >
         <FieldSetGeneral />
+        <FieldSetStructures />
       </FormWrapper>
     </>
   );

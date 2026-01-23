@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { zId } from "@/app/utils/zodCustomFields";
 import { PublicType, StructureType } from "@/types/structure.type";
 
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
@@ -18,6 +19,7 @@ import { structureMillesimeApiSchema } from "./structure-millesime.schema";
 import { structureTypologieApiSchema } from "./structure-typologie.schema";
 
 export const structureMinimalApiSchema = z.object({
+  id: zId(),
   dnaCode: z.string(),
   operateur: operateurApiSchema,
   type: z.nativeEnum(StructureType),
@@ -89,7 +91,6 @@ const partialstructureOperateurUpdateApiSchema =
   });
 
 const remainingstructureAgentUpdateApiSchema = z.object({
-  id: z.number().optional(),
   placesACreer: z.number().int().min(0).nullish(),
   placesAFermer: z.number().int().min(0).nullish(),
   echeancePlacesACreer: z.string().datetime().nullish(),

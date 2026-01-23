@@ -6,7 +6,6 @@ import { CpomGranularity } from "@/types/cpom.type";
 import { operateurSchema } from "../base/operateur.schema";
 
 const cpomStructureSchema = z.object({
-  id: zId(),
   yearStart: zSafeYear(),
   yearEnd: zSafeYear(),
   structureId: zId(),
@@ -25,5 +24,7 @@ export const cpomAjoutIdentificationSchema = z.object({
       CpomGranularity.REGIONALE,
     ])
     .optional(),
-  departement: z.array(z.number()),
+  departements: z.array(z.number()),
 });
+
+export type CpomStructureFormType = z.infer<typeof cpomStructureSchema>;
