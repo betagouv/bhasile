@@ -80,7 +80,7 @@ export default function ModificationControleForm() {
       <FormWrapper
         schema={finalisationQualiteSchema}
         onSubmit={handleValidation}
-        submitButtonText="Valider"
+        submitButtonText="Je valide la saisie de cette page"
         resetRoute={`/structures/${structure.id}`}
         availableFooterButtons={[FooterButtonType.SUBMIT]}
         defaultValues={defaultValues}
