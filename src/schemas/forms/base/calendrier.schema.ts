@@ -4,15 +4,18 @@ import {
   isStructureAutorisee,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
-import { optionalFrenchDateToISO } from "@/app/utils/zodCustomFields";
+import {
+  nullishFrenchDateToISO,
+  optionalFrenchDateToISO,
+} from "@/app/utils/zodCustomFields";
 
 import { structureBaseSchema } from "./structure.base.schema";
 
 const baseCalendrierSchema = structureBaseSchema.extend({
-  debutPeriodeAutorisation: optionalFrenchDateToISO(),
-  finPeriodeAutorisation: optionalFrenchDateToISO(),
-  debutConvention: optionalFrenchDateToISO(),
-  finConvention: optionalFrenchDateToISO(),
+  debutPeriodeAutorisation: nullishFrenchDateToISO(),
+  finPeriodeAutorisation: nullishFrenchDateToISO(),
+  debutConvention: nullishFrenchDateToISO(),
+  finConvention: nullishFrenchDateToISO(),
 });
 export const calendrierSchema = baseCalendrierSchema
   .superRefine((data, ctx) => {
