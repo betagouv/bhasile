@@ -1,14 +1,13 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { DepartementAutocomplete } from "@/app/components/forms/DepartementAutocomplete";
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { DEPARTEMENTS, REGIONS_WITHOUT_CORSE } from "@/constants";
 import { CpomGranularity } from "@/types/cpom.type";
 
 export const LocationSelector = () => {
-  const { watch, control } = useFormContext();
+  const { watch, control, setValue } = useFormContext();
 
   const granularity = watch("granularity");
 
@@ -19,6 +18,24 @@ export const LocationSelector = () => {
 
     [region]
   );
+
+  const handleDepartementChange = (value: string) => {
+    if (value) {
+      setValue("departement", [Number(value)], { shouldValidate: true });
+    } else {
+      setValue("departement", [], { shouldValidate: true });
+    }
+  };
+
+  useEffect(() => {
+    if (departementsOfRegion && granularity === CpomGranularity.REGIONALE) {
+      setValue(
+        "departement",
+        departementsOfRegion.map((departement) => departement.numero),
+        { shouldValidate: true }
+      );
+    }
+  }, [region, setValue, departementsOfRegion, granularity]);
 
   return (
     <div className="grid grid-cols-3 gap-6">
@@ -43,6 +60,7 @@ export const LocationSelector = () => {
           label="Département"
           disabled={!departementsOfRegion.length}
           required
+          onChange={handleDepartementChange}
         >
           <option value="">Sélectionnez un département</option>
           {departementsOfRegion.map((departement) => (
