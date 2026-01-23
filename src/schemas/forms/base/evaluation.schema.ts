@@ -77,8 +77,10 @@ export const evaluationsSchemaWithConditionalValidation =
     if (data.noEvaluationStructure === true) {
       return;
     }
-
-    if (!data.evaluations?.find((evaluation) => evaluation.date)) {
+    if (
+      data.evaluations?.length !== 0 &&
+      !data.evaluations?.find((evaluation) => evaluation.date)
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Au moins une évaluation est obligatoire",
