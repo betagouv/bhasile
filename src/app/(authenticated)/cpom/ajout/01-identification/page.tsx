@@ -3,8 +3,24 @@
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 
 import FormWrapper from "@/app/components/forms/FormWrapper";
+import { cpomAjoutIdentificationSchema } from "@/schemas/forms/cpom/cpomAjoutIdentification.schema";
+import { CpomGranularity } from "@/types/cpom.type";
+
+import { FieldSetGeneral } from "./_components/FieldSetGeneral";
 
 export default function CpomAjoutIdentification() {
+  const defaultValues = {
+    name: "",
+    structures: [],
+    yearStart: undefined,
+    yearEnd: undefined,
+    operateur: {
+      id: undefined,
+      name: "",
+    },
+    granularity: CpomGranularity.DEPARTEMENTALE,
+    departement: [],
+  };
   return (
     <>
       <Stepper
@@ -17,8 +33,10 @@ export default function CpomAjoutIdentification() {
         schema={cpomAjoutIdentificationSchema}
         defaultValues={defaultValues}
         submitButtonText="Étape suivante"
-        onSubmit={handleSubmit}
-      ></FormWrapper>
+        onSubmit={() => ""}
+      >
+        <FieldSetGeneral />
+      </FormWrapper>
     </>
   );
 }

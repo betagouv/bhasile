@@ -1,6 +1,7 @@
 import z from "zod";
 
 import { zId, zSafeYear } from "@/app/utils/zodCustomFields";
+import { CpomGranularity } from "@/types/cpom.type";
 
 import { operateurSchema } from "../base/operateur.schema";
 
@@ -17,6 +18,12 @@ export const cpomAjoutIdentificationSchema = z.object({
   yearStart: zSafeYear(),
   yearEnd: zSafeYear(),
   operateur: operateurSchema,
-  granularity: z.enum(["DEPARTEMENT", "INTERDEPARTEMENT", "REGION"]),
+  granularity: z
+    .enum([
+      CpomGranularity.DEPARTEMENTALE,
+      CpomGranularity.INTERDEPARTEMENTALE,
+      CpomGranularity.REGIONALE,
+    ])
+    .optional(),
   departement: z.array(z.number()),
 });

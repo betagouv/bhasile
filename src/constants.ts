@@ -552,3 +552,9 @@ export const DEPARTEMENTS: Departement[] = [
     region: "Mayotte",
   },
 ];
+
+export const REGIONS_WITHOUT_CORSE = [
+  ...new Set(DEPARTEMENTS.map((departement) => departement.region)),
+]
+  .filter((region) => region !== "Corse")
+  .sort((a, b) => a.localeCompare(b));
