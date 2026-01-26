@@ -10,7 +10,10 @@ export const generateDatePair = (): Date[] => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const convertToPrismaObject = (initialObject: unknown): any => {
+export const convertToPrismaObject = (
+  initialObject: unknown,
+  parentCodeBhasile?: string
+): any => {
   const objectNestedFields = [
     "structures",
     "contacts",
@@ -36,12 +39,31 @@ export const convertToPrismaObject = (initialObject: unknown): any => {
 
   const prismaObject: Record<string, unknown> = { ...initialObject };
 
+  // Si c'est une structure, extraire le codeBhasile pour les enfants
+  const currentCodeBhasile =
+    (prismaObject as { codeBhasile?: string }).codeBhasile ||
+    parentCodeBhasile;
+
+  // Remplir structureCodeBhasile pour toutes les tables liées si codeBhasile existe
+  if (currentCodeBhasile) {
+    const fieldsWithStructureCodeBhasile = [
+      "structureCodeBhasile",
+      "structureCodeBhasile",
+    ];
+    if (
+      "structureDnaCode" in prismaObject ||
+      "structureCodeDna" in prismaObject
+    ) {
+      prismaObject.structureCodeBhasile = currentCodeBhasile;
+    }
+  }
+
   for (const field of objectNestedFields) {
     if (Array.isArray((initialObject as Record<string, unknown>)[field])) {
       prismaObject[field] = {
         create: (
           (initialObject as Record<string, unknown>)[field] as unknown[]
-        ).map(convertToPrismaObject),
+        ).map((item) => convertToPrismaObject(item, currentCodeBhasile)),
       };
     }
   }
