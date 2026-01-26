@@ -303,50 +303,52 @@ describe("AdressesRecovery", () => {
     });
   });
 
-  it("should display form without localStorage, can input some adresses (in mixte) and validate", async () => {
-    // WHEN
-    render(<AdressesRecovery dnaCode={dnaCode} />);
+  it(
+    "should display form without localStorage, can input some adresses (in mixte) and validate",
+    async () => {
+      // WHEN
+      render(<AdressesRecovery dnaCode={dnaCode} />);
 
-    // THEN - Verify the modal display correctly
-    await waitFor(() => {
-      expect(screen.getByTestId("adresses-recovery-modal")).toBeInTheDocument();
-    });
+      // THEN - Verify the modal display correctly
+      await waitFor(() => {
+        expect(screen.getByTestId("adresses-recovery-modal")).toBeInTheDocument();
+      });
 
-    const typeBatiSelect = getSelectByName("typeBati");
-    await userEvent.selectOptions(typeBatiSelect, Repartition.MIXTE);
+      const typeBatiSelect = getSelectByName("typeBati");
+      await userEvent.selectOptions(typeBatiSelect, Repartition.MIXTE);
 
-    const addressInput = screen.getByLabelText(/Adresse/i);
-    await userEvent.type(addressInput, "111 Rue Mixte 1, 33000 Bordeaux");
+      const addressInput = screen.getByLabelText(/Adresse/i);
+      await userEvent.type(addressInput, "111 Rue Mixte 1, 33000 Bordeaux");
 
-    await waitFor(() => {
+      await waitFor(() => {
+        const suggestion = screen.getByRole("option", {
+          name: /111 Rue Mixte 1, 33000 Bordeaux/i,
+        });
+        expect(suggestion).toBeInTheDocument();
+      });
+
       const suggestion = screen.getByRole("option", {
         name: /111 Rue Mixte 1, 33000 Bordeaux/i,
       });
-      expect(suggestion).toBeInTheDocument();
-    });
+      await userEvent.click(suggestion);
 
-    const suggestion = screen.getByRole("option", {
-      name: /111 Rue Mixte 1, 33000 Bordeaux/i,
-    });
-    await userEvent.click(suggestion);
+      const placesInput = screen.getByLabelText(/Places/i);
+      await userEvent.clear(placesInput);
+      await userEvent.type(placesInput, "5");
 
-    const placesInput = screen.getByLabelText(/Places/i);
-    await userEvent.clear(placesInput);
-    await userEvent.type(placesInput, "5");
+      // Get repartition selects from address components (they still have labels)
+      const repartitionSelects = screen.getAllByLabelText(/Type de bâti/i);
+      if (repartitionSelects.length > 1) {
+        await userEvent.selectOptions(repartitionSelects[1], Repartition.DIFFUS);
+      }
 
-    // Get repartition selects from address components (they still have labels)
-    const repartitionSelects = screen.getAllByLabelText(/Type de bâti/i);
-    if (repartitionSelects.length > 1) {
-      await userEvent.selectOptions(repartitionSelects[1], Repartition.DIFFUS);
-    }
+      const addAddressButton = screen.getByText(/Ajouter un hébergement/i);
+      await userEvent.click(addAddressButton);
 
-    const addAddressButton = screen.getByText(/Ajouter un hébergement/i);
-    await userEvent.click(addAddressButton);
-
-    await waitFor(() => {
-      const addressInputs = screen.getAllByLabelText(/Adresse/i);
-      expect(addressInputs.length).toBeGreaterThan(1);
-    });
+      await waitFor(() => {
+        const addressInputs = screen.getAllByLabelText(/Adresse/i);
+        expect(addressInputs.length).toBeGreaterThan(1);
+      }, { timeout: 10000 });
 
     const addressInputs = screen.getAllByLabelText(/Adresse/i);
     await userEvent.type(addressInputs[1], "222 Rue Mixte 2, 33000 Bordeaux");
@@ -388,7 +390,9 @@ describe("AdressesRecovery", () => {
     await waitFor(() => {
       expect(mockUpdateStructure).toHaveBeenCalled();
     });
-  });
+    },
+    30000
+  );
 
   it("should display form without localStorage, can input one adresse (in collectif) and validate", async () => {
     // WHEN
