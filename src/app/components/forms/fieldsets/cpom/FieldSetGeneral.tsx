@@ -1,6 +1,6 @@
-import { DateSelector } from "./DateSelector";
-import { GranularitySelector } from "./GranularitySelector";
-import { LocationSelector } from "./LocationSelector";
+import { DateSelector } from "../../cpom/DateSelector";
+import { GranularitySelector } from "../../cpom/GranularitySelector";
+import { LocationSelector } from "../../cpom/LocationSelector";
 
 export const FieldSetGeneral = () => {
   return (

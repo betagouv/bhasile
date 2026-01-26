@@ -1,6 +1,7 @@
 import z from "zod";
 
-import { zSafeYear } from "@/app/utils/zodCustomFields";
+import { zSafeYear, zSafeYearOptional } from "@/app/utils/zodCustomFields";
+import { CpomGranularity } from "@/types/cpom.type";
 
 import { operateurApiSchema } from "./operateur.schema";
 
@@ -23,22 +24,31 @@ export const cpomMillesimeApiSchema = z.object({
   commentaire: z.string().nullish(),
 });
 
-export const cpomStructureApiSchema = z.object({
-  id: z.number().optional(),
-  cpomId: z.number().optional(),
-  structureId: z.number(),
-  yearStart: zSafeYear(),
-  yearEnd: zSafeYear(),
-});
-
-export const cpomApiSchema = z.object({
+const cpomApiBareSchema = z.object({
   id: z.number().optional(),
   name: z.string().nullish(),
   yearStart: zSafeYear(),
   yearEnd: zSafeYear(),
-  structures: z.array(cpomStructureApiSchema),
+  granularity: z.enum([
+    CpomGranularity.DEPARTEMENTALE,
+    CpomGranularity.INTERDEPARTEMENTALE,
+    CpomGranularity.REGIONALE,
+  ]),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
   operateur: operateurApiSchema,
+});
+
+export const cpomStructureApiSchema = z.object({
+  id: z.number().optional(),
+  cpomId: z.number().optional(),
+  cpom: cpomApiBareSchema,
+  structureId: z.number(),
+  yearStart: zSafeYearOptional(),
+  yearEnd: zSafeYearOptional(),
+});
+
+export const cpomApiSchema = cpomApiBareSchema.extend({
+  structures: z.array(cpomStructureApiSchema),
 });
 
 export type CpomMillesimeApiType = z.infer<typeof cpomMillesimeApiSchema>;

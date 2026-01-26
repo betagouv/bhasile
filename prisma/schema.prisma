@@ -388,12 +388,21 @@ model Cpom {
   structures     CpomStructure[]
   yearStart      Int
   yearEnd        Int
+  granularity    CpomGranularity @default(REGIONALE)
   cpomMillesimes CpomMillesime[]
   operateur      Operateur       @relation(fields: [operateurId], references: [id])
   operateurId    Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+enum CpomGranularity {
+  DEPARTEMENTALE
+  INTERDEPARTEMENTALE
+  REGIONALE
 
   @@schema("public")
 }

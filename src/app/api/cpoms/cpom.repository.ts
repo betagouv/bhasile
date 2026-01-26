@@ -1,3 +1,4 @@
+import { Cpom } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
   CpomApiType,
@@ -8,12 +9,25 @@ import { PrismaTransaction } from "@/types/prisma.type";
 
 import { findMatchingCpomForMillesime } from "./cpom.service";
 
-export const createOrUpdateCpom = async (cpom: CpomApiType): Promise<void> => {
+export const findOne = async (id: number): Promise<Cpom> => {
+  const cpom = await prisma.cpom.findFirstOrThrow({
+    where: { id },
+    include: {
+      structures: true,
+      cpomMillesimes: true,
+    },
+  });
+  return cpom;
+};
+
+export const createOrUpdateCpom = async (
+  cpom: CpomApiType
+): Promise<number> => {
   if (!cpom.operateur.id) {
     throw new Error("Operateur ID is required");
   }
 
-  await prisma.$transaction(async (tx) => {
+  const cpomId = await prisma.$transaction(async (tx) => {
     const upsertedCpom = await tx.cpom.upsert({
       where: { id: cpom.id ?? 0 },
       update: {
@@ -37,7 +51,11 @@ export const createOrUpdateCpom = async (cpom: CpomApiType): Promise<void> => {
     const cpomId = upsertedCpom.id;
 
     await createOrUpdateCpomStructures(tx, cpom.structures, cpomId);
+
+    return cpomId;
   });
+
+  return cpomId;
 };
 
 const createOrUpdateCpomStructures = async (
@@ -53,23 +71,14 @@ const createOrUpdateCpomStructures = async (
     where: { cpomId },
   });
 
-  for (const structure of structures) {
-    await tx.cpomStructure.upsert({
-      where: { id: structure.id || 0 },
-      update: {
-        yearStart: structure.yearStart,
-        yearEnd: structure.yearEnd,
-        cpomId: cpomId,
-        structureId: structure.structureId,
-      },
-      create: {
-        yearStart: structure.yearStart,
-        yearEnd: structure.yearEnd,
-        cpomId: cpomId,
-        structureId: structure.structureId,
-      },
-    });
-  }
+  await tx.cpomStructure.createMany({
+    data: structures.map((structure) => ({
+      cpomId,
+      structureId: structure.structureId,
+      yearStart: structure.yearStart ?? null,
+      yearEnd: structure.yearEnd ?? null,
+    })),
+  });
 };
 
 export const createOrUpdateCpomMillesimes = async (

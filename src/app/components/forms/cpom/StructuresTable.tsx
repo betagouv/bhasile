@@ -3,7 +3,7 @@ import { useFormContext } from "react-hook-form";
 import { Table } from "@/app/components/common/Table";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { StructureMinimalApiType } from "@/schemas/api/structure.schema";
-import { CpomStructureFormType } from "@/schemas/forms/cpom/cpomAjoutIdentification.schema";
+import { CpomStructureFormType } from "@/schemas/forms/cpom/cpomIdentification.schema";
 
 export const StructuresTable = ({ structures }: Props) => {
   const { control, watch } = useFormContext();

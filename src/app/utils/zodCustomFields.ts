@@ -45,12 +45,17 @@ export const frenchDateToYear = () =>
     })
     .pipe(z.number().int().positive());
 
-export const optionalFrenchDateToYear = () =>
+export const nullishFrenchDateToYear = () =>
   z
     .string()
-    .optional()
+    .nullish()
     .transform((val) => {
-      if (!val) return undefined;
+      if (val === null) {
+        return null;
+      }
+      if (val === undefined || val === "") {
+        return undefined;
+      }
       // Expect "DD/MM/YYYY"
       const match = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
       if (match) {
@@ -58,13 +63,13 @@ export const optionalFrenchDateToYear = () =>
         return isNaN(year) ? undefined : year;
       }
       // If already year string
-      if (/^\d{4}$/.test(val)) {
+      if (typeof val === "string" && /^\d{4}$/.test(val)) {
         const year = Number(val);
         return isNaN(year) ? undefined : year;
       }
       return undefined;
     })
-    .pipe(z.number().int().positive().optional());
+    .pipe(z.number().int().positive().nullish());
 
 export const optionalFrenchDateToISO = () =>
   z
@@ -111,6 +116,12 @@ export const zSafeYear = () =>
   z.preprocess(
     (val) => (typeof val === "string" ? Number(val) : val),
     z.number().int().positive()
+  );
+
+export const zSafeYearOptional = () =>
+  z.preprocess(
+    (val) => (typeof val === "string" ? Number(val) : val),
+    z.number().int().positive().optional()
   );
 
 export const zId = () =>

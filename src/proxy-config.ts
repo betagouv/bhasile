@@ -28,6 +28,19 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
+    pattern: /^\/api\/cpoms$/,
+    routes: {
+      PUT: "proconnect",
+      POST: "proconnect",
+    },
+  },
+  {
+    pattern: /^\/api\/cpoms\/[^/]+$/,
+    routes: {
+      GET: "proconnect",
+    },
+  },
+  {
     pattern: /^\/api\/files\/[^/]+$/,
     routes: {
       GET: "either",
