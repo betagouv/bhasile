@@ -22,10 +22,6 @@ export const createStructure = ({
     operateur: { structureDnaCode: `C000${id}`, id: 1, name: "Adoma" },
     filiale: undefined,
     type: type ?? StructureType.CADA,
-    placesACreer: 3,
-    placesAFermer: 2,
-    echeancePlacesACreer: new Date("01/02/2026").toISOString(),
-    echeancePlacesAFermer: new Date("01/02/2027").toISOString(),
     adresseAdministrative:
       adresseAdministrative ?? "1, avenue de la République",
     codePostalAdministratif: "75011",

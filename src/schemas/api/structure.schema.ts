@@ -91,10 +91,6 @@ const partialStructureOperateurUpdateApiSchema =
 
 const remainingStructureAgentUpdateApiSchema = z.object({
   id: z.number().optional(),
-  placesACreer: z.number().int().min(0).nullish(),
-  placesAFermer: z.number().int().min(0).nullish(),
-  echeancePlacesACreer: z.string().datetime().nullish(),
-  echeancePlacesAFermer: z.string().datetime().nullish(),
   noEvaluationStructure: z.boolean().optional(),
   notes: z.string().nullish(),
   controles: z.array(controleApiSchema).optional(),
