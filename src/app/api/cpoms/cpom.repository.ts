@@ -1,7 +1,76 @@
-import { CpomMillesimeApiType } from "@/schemas/api/cpom.schema";
+import prisma from "@/lib/prisma";
+import {
+  CpomApiType,
+  CpomMillesimeApiType,
+  CpomStructureApiType,
+} from "@/schemas/api/cpom.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { findMatchingCpomForMillesime } from "./cpom.service";
+
+export const createOrUpdateCpom = async (cpom: CpomApiType): Promise<void> => {
+  if (!cpom.operateur.id) {
+    throw new Error("Operateur ID is required");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    const upsertedCpom = await tx.cpom.upsert({
+      where: { id: cpom.id ?? 0 },
+      update: {
+        name: cpom.name,
+        yearStart: cpom.yearStart,
+        yearEnd: cpom.yearEnd,
+        operateur: {
+          connect: { id: cpom.operateur.id },
+        },
+      },
+      create: {
+        name: cpom.name,
+        yearStart: cpom.yearStart,
+        yearEnd: cpom.yearEnd,
+        operateur: {
+          connect: { id: cpom.operateur.id },
+        },
+      },
+    });
+
+    const cpomId = upsertedCpom.id;
+
+    await createOrUpdateCpomStructures(tx, cpom.structures, cpomId);
+  });
+};
+
+const createOrUpdateCpomStructures = async (
+  tx: PrismaTransaction,
+  structures: CpomStructureApiType[] | undefined,
+  cpomId: number
+): Promise<void> => {
+  if (!structures || structures.length === 0) {
+    return;
+  }
+
+  await tx.cpomStructure.deleteMany({
+    where: { cpomId },
+  });
+
+  for (const structure of structures) {
+    await tx.cpomStructure.upsert({
+      where: { id: structure.id || 0 },
+      update: {
+        yearStart: structure.yearStart,
+        yearEnd: structure.yearEnd,
+        cpomId: cpomId,
+        structureId: structure.structureId,
+      },
+      create: {
+        yearStart: structure.yearStart,
+        yearEnd: structure.yearEnd,
+        cpomId: cpomId,
+        structureId: structure.structureId,
+      },
+    });
+  }
+};
 
 export const createOrUpdateCpomMillesimes = async (
   tx: PrismaTransaction,

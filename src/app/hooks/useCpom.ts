@@ -5,7 +5,7 @@ export const useCpom = () => {
     data: CpomAjoutIdentificationFormValues
   ): Promise<string> => {
     try {
-      const response = await fetch("/api/cpom", {
+      const response = await fetch("/api/cpoms", {
         method: "POST",
         body: JSON.stringify(data),
       });

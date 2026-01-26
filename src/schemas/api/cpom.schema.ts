@@ -2,7 +2,7 @@ import z from "zod";
 
 import { zSafeYear } from "@/app/utils/zodCustomFields";
 
-import { fileApiSchema } from "./file.schema";
+import { operateurApiSchema } from "./operateur.schema";
 
 export const cpomMillesimeApiSchema = z.object({
   id: z.number().optional(),
@@ -23,27 +23,24 @@ export const cpomMillesimeApiSchema = z.object({
   commentaire: z.string().nullish(),
 });
 
-export type CpomMillesimeApiType = z.infer<typeof cpomMillesimeApiSchema>;
+export const cpomStructureApiSchema = z.object({
+  id: z.number().optional(),
+  cpomId: z.number().optional(),
+  structureId: z.number(),
+  yearStart: zSafeYear(),
+  yearEnd: zSafeYear(),
+});
 
 export const cpomApiSchema = z.object({
   id: z.number().optional(),
   name: z.string().nullish(),
-  debutCpom: z.string().datetime().nullish(),
-  finCpom: z.string().datetime().nullish(),
-  structureIds: z.array(z.number()).optional(),
-  fileUploads: z.array(fileApiSchema).optional(),
+  yearStart: zSafeYear(),
+  yearEnd: zSafeYear(),
+  structures: z.array(cpomStructureApiSchema),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
+  operateur: operateurApiSchema,
 });
 
+export type CpomMillesimeApiType = z.infer<typeof cpomMillesimeApiSchema>;
 export type CpomApiType = z.infer<typeof cpomApiSchema>;
-
-export const cpomStructureApiSchema = z.object({
-  id: z.number().optional(),
-  cpomId: z.number(),
-  structureId: z.number(),
-  dateDebut: z.string().datetime().nullish(),
-  dateFin: z.string().datetime().nullish(),
-  cpom: cpomApiSchema,
-});
-
 export type CpomStructureApiType = z.infer<typeof cpomStructureApiSchema>;
