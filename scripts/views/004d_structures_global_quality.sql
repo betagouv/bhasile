@@ -42,10 +42,11 @@ FROM
   public."Structure" s
   LEFT JOIN:"SCHEMA"."structures_calendar_quality" cal ON cal."dnaCode" = s."dnaCode"
   LEFT JOIN:"SCHEMA"."structures_places_quality" pl ON pl."dnaCode" = s."dnaCode"
-  LEFT JOIN:"SCHEMA"."structures_finance_quality" fin ON fin."dnaCode" = s."dnaCode";
-
-
-LEFT JOIN public."Operateur" o ON o."id" = s."operateurId";
-
-
-LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif";
+  LEFT JOIN:"SCHEMA"."structures_finance_quality" fin ON fin."dnaCode" = s."dnaCode"
+  LEFT JOIN public."Operateur" o ON o."id" = s."operateurId"
+  LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
+  LEFT JOIN public."Form" f ON f."structureCodeDna" = s."dnaCode"
+  LEFT JOIN public."FormDefinition" fd ON fd."id" = f."formDefinitionId"
+WHERE
+  fd."slug" = 'finalisation-v1'
+  AND f."status" = TRUE;
