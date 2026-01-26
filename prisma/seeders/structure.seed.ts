@@ -42,12 +42,14 @@ const generateDnaCode = ({
   return `${type}-${operateurNum}-${departementAdministratif}-${counter}`;
 };
 
+
 export const createFakeStructure = ({
   type,
   ofii,
   operateurName,
   departementAdministratif,
   counter,
+  codeBhasile,
 }: FakeStructureOptions): Partial<Structure> => {
   const [debutConvention, finConvention] = generateDatePair();
   const [debutPeriodeAutorisation, finPeriodeAutorisation] = generateDatePair();
@@ -62,6 +64,7 @@ export const createFakeStructure = ({
       departementAdministratif,
       counter,
     }),
+    codeBhasile,
     type,
     nom: faker.lorem.words(2),
     nomOfii: faker.lorem.words(2),
@@ -233,6 +236,7 @@ export type FakeStructureOptions = {
   operateurName: string;
   departementAdministratif: string;
   counter: number;
+  codeBhasile?: string | null;
 };
 
 export type FakeStructureWithRelationsOptions = FakeStructureOptions & {

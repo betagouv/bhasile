@@ -45,11 +45,8 @@ export const convertToPrismaObject = (
     parentCodeBhasile;
 
   // Remplir structureCodeBhasile pour toutes les tables liées si codeBhasile existe
+  // Ces tables ont structureDnaCode ou structureCodeDna et doivent avoir structureCodeBhasile
   if (currentCodeBhasile) {
-    const fieldsWithStructureCodeBhasile = [
-      "structureCodeBhasile",
-      "structureCodeBhasile",
-    ];
     if (
       "structureDnaCode" in prismaObject ||
       "structureCodeDna" in prismaObject

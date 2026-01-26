@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 
-const REGION_CODES = {
+export const REGION_CODES = {
   "Auvergne-Rhône-Alpes": "ARA",
   "Bourgogne-Franche-Comté": "BFC",
   "Bretagne": "BRE",
