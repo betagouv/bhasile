@@ -119,10 +119,6 @@ export const createFakeStructure = ({
     finPeriodeAutorisation: isAutorisee ? finPeriodeAutorisation : null,
     debutCpom: cpom ? debutCpom : null,
     finCpom: cpom ? finCpom : null,
-    placesACreer: faker.number.int(100),
-    placesAFermer: faker.number.int(100),
-    echeancePlacesACreer: faker.date.future(),
-    echeancePlacesAFermer: faker.date.future(),
     notes: faker.lorem.lines(2),
     activeInOfiiFileSince:
       faker.helpers.maybe(
