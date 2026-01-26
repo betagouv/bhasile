@@ -16,11 +16,11 @@ export default function CpomAjoutIdentification() {
     yearStart: undefined,
     yearEnd: undefined,
     operateur: {
-      id: undefined,
-      name: "",
+      id: 1,
+      name: "Opérateur 1",
     },
     granularity: CpomGranularity.DEPARTEMENTALE,
-    departement: [],
+    departements: [1, 3, 7, 15, 26, 38, 42, 43, 63, 69, 73, 74],
   };
   return (
     <>

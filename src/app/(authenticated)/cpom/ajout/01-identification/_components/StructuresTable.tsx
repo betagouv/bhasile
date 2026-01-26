@@ -1,34 +1,60 @@
 import { useFormContext } from "react-hook-form";
 
 import { Table } from "@/app/components/common/Table";
-import { getYearRange } from "@/app/utils/date.util";
+import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { StructureMinimalApiType } from "@/schemas/api/structure.schema";
+import { CpomStructureFormType } from "@/schemas/forms/cpom/cpomAjoutIdentification.schema";
 
 export const StructuresTable = ({ structures }: Props) => {
-  const { watch } = useFormContext();
-
-  const { years } = getYearRange({ order: "desc" });
+  const { control, watch } = useFormContext();
 
   if (!structures) {
     return null;
   }
 
-  const selectedStructuresDnaCodes = watch("structures") as string[];
+  const selectedCpomStructures = watch("structures") as CpomStructureFormType[];
 
-  const selectedStructures = structures?.filter((structure) =>
-    selectedStructuresDnaCodes.includes(structure.dnaCode)
-  );
+  const selectedStructures: StructureWithIndex[] = structures
+    ?.filter((structure) =>
+      selectedCpomStructures.find(
+        (selectedCpomStructure) =>
+          selectedCpomStructure.structureId === structure.id
+      )
+    )
+    .map((structure) => ({
+      ...structure,
+      index: selectedCpomStructures.findIndex(
+        (selectedCpomStructure) =>
+          selectedCpomStructure.structureId === structure.id
+      ),
+    }));
 
   return (
     <Table
-      headings={["DNA", ...years.map((year) => year.toString())]}
+      headings={["DNA", "Date d'entrée en CPOM", "Date de sortie du CPOM"]}
       ariaLabelledBy="structures-table"
     >
       {selectedStructures?.map((structure) => (
         <tr key={structure.dnaCode}>
           <td>{structure.dnaCode}</td>
-          {years.map((year) => (
-            <td key={year}>
+          <td>
+            <InputWithValidation
+              name={`structures.${structure.index}.yearStart`}
+              id={`structures.${structure.index}.yearStart`}
+              control={control}
+              type="date"
+              label=""
+            />
+          </td>
+          <td>
+            <InputWithValidation
+              name={`structures.${structure.index}.yearEnd`}
+              id={`structures.${structure.index}.yearEnd`}
+              control={control}
+              type="date"
+              label=""
+            />
+          </td>
         </tr>
       ))}
     </Table>
@@ -37,4 +63,8 @@ export const StructuresTable = ({ structures }: Props) => {
 
 type Props = {
   structures?: StructureMinimalApiType[];
+};
+
+type StructureWithIndex = StructureMinimalApiType & {
+  index: number;
 };
