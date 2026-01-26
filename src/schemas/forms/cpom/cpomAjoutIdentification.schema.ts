@@ -1,21 +1,25 @@
 import z from "zod";
 
-import { zId, zSafeYear } from "@/app/utils/zodCustomFields";
+import {
+  frenchDateToYear,
+  optionalFrenchDateToYear,
+  zId,
+} from "@/app/utils/zodCustomFields";
 import { CpomGranularity } from "@/types/cpom.type";
 
 import { operateurSchema } from "../base/operateur.schema";
 
 const cpomStructureSchema = z.object({
-  yearStart: zSafeYear(),
-  yearEnd: zSafeYear(),
+  yearStart: optionalFrenchDateToYear(),
+  yearEnd: optionalFrenchDateToYear(),
   structureId: zId(),
 });
 
 export const cpomAjoutIdentificationSchema = z.object({
   name: z.string().optional(),
   structures: z.array(cpomStructureSchema),
-  yearStart: zSafeYear(),
-  yearEnd: zSafeYear(),
+  yearStart: frenchDateToYear(),
+  yearEnd: frenchDateToYear(),
   operateur: operateurSchema,
   granularity: z
     .enum([

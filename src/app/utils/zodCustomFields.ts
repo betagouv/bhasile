@@ -25,6 +25,47 @@ const transformFrenchDateToISO = (
 export const frenchDateToISO = () =>
   z.string().transform(transformFrenchDateToISO).pipe(z.string().datetime());
 
+export const frenchDateToYear = () =>
+  z
+    .string()
+    .transform((val) => {
+      if (!val) return undefined;
+      // Expect "DD/MM/YYYY"
+      const match = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (match) {
+        const year = Number(match[3]);
+        return isNaN(year) ? undefined : year;
+      }
+      // If already year string
+      if (/^\d{4}$/.test(val)) {
+        const year = Number(val);
+        return isNaN(year) ? undefined : year;
+      }
+      return undefined;
+    })
+    .pipe(z.number().int().positive());
+
+export const optionalFrenchDateToYear = () =>
+  z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (!val) return undefined;
+      // Expect "DD/MM/YYYY"
+      const match = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (match) {
+        const year = Number(match[3]);
+        return isNaN(year) ? undefined : year;
+      }
+      // If already year string
+      if (/^\d{4}$/.test(val)) {
+        const year = Number(val);
+        return isNaN(year) ? undefined : year;
+      }
+      return undefined;
+    })
+    .pipe(z.number().int().positive().optional());
+
 export const optionalFrenchDateToISO = () =>
   z
     .string()
