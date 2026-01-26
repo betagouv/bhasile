@@ -2,7 +2,7 @@ import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { useFormContext } from "react-hook-form";
 
 import { StructureMinimalApiType } from "@/schemas/api/structure.schema";
-import { CpomStructureFormType } from "@/schemas/forms/cpom/cpomIdentification.schema";
+import { CpomStructureFormValues } from "@/schemas/forms/base/cpom.schema";
 
 export const StructuresList = ({ structures }: Props) => {
   const { watch, setValue } = useFormContext();
@@ -11,7 +11,7 @@ export const StructuresList = ({ structures }: Props) => {
     return null;
   }
 
-  const selectedStructures = watch("structures") as CpomStructureFormType[];
+  const selectedStructures = watch("structures") as CpomStructureFormValues[];
 
   const handleStructureChange = (structureId?: number) => {
     if (!structureId) {

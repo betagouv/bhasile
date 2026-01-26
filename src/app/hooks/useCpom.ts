@@ -1,8 +1,8 @@
-import { CpomIdentificationFormValues } from "@/schemas/forms/cpom/cpomIdentification.schema";
+import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
 
 export const useCpom = () => {
   const addCpom = async (
-    data: CpomIdentificationFormValues
+    data: CpomFormValues
   ): Promise<{ cpomId: number } | string> => {
     try {
       const response = await fetch("/api/cpoms", {
@@ -21,9 +21,7 @@ export const useCpom = () => {
     }
   };
 
-  const updateCpom = async (
-    data: CpomIdentificationFormValues
-  ): Promise<string> => {
+  const updateCpom = async (data: CpomFormValues): Promise<string> => {
     try {
       const response = await fetch(`/api/cpoms/${data.id}`, {
         method: "PUT",

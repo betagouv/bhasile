@@ -43,7 +43,7 @@ export default function FinalisationFinance(): ReactElement {
     useAgentFormHandling({ currentStep });
 
   const onAutoSave = async (data: BudgetsAutoSaveFormValues) => {
-    await handleAutoSave({ ...data, dnaCode: structure.dnaCode });
+    await handleAutoSave({ budgets: data.budgets, dnaCode: structure.dnaCode });
   };
 
   const { getFetchState } = useFetchState();

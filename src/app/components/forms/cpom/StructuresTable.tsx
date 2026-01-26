@@ -3,7 +3,7 @@ import { useFormContext } from "react-hook-form";
 import { Table } from "@/app/components/common/Table";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { StructureMinimalApiType } from "@/schemas/api/structure.schema";
-import { CpomStructureFormType } from "@/schemas/forms/cpom/cpomIdentification.schema";
+import { CpomStructureFormValues } from "@/schemas/forms/base/cpom.schema";
 
 export const StructuresTable = ({ structures }: Props) => {
   const { control, watch } = useFormContext();
@@ -12,7 +12,9 @@ export const StructuresTable = ({ structures }: Props) => {
     return null;
   }
 
-  const selectedCpomStructures = watch("structures") as CpomStructureFormType[];
+  const selectedCpomStructures = watch(
+    "structures"
+  ) as CpomStructureFormValues[];
 
   const selectedStructures: StructureWithIndex[] = structures
     ?.filter((structure) =>

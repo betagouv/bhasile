@@ -8,7 +8,7 @@ import {
 import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 
 import { validateAffectationReservesDetails } from "./budget/validateAffectationReservesDetails";
-import { cpomStructureSchema } from "./cpomStructure.schema";
+import { cpomStructureSchema } from "./cpom.schema";
 
 export const budgetBaseSchema = z.object({
   id: zId(),
@@ -113,7 +113,7 @@ export const budgetsAutoSaveSchema = z
   .object({
     budgets: z.array(budgetAutoSaveSchema),
   })
-  .and(cpomStructureSchema);
+  .and(z.object({ cpomStructures: z.array(cpomStructureSchema) }));
 
 export type BudgetsAutoSaveFormValues = z.infer<typeof budgetsAutoSaveSchema>;
 
