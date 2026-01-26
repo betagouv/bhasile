@@ -32,3 +32,7 @@ export const cpomAjoutIdentificationSchema = z.object({
 });
 
 export type CpomStructureFormType = z.infer<typeof cpomStructureSchema>;
+
+export type CpomAjoutIdentificationFormValues = z.infer<
+  typeof cpomAjoutIdentificationSchema
+>;
