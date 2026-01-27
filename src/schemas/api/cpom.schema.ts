@@ -35,7 +35,7 @@ const cpomApiBareSchema = z.object({
     CpomGranularity.REGIONALE,
   ]),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
-  operateur: operateurApiSchema.nullish(),
+  operateur: operateurApiSchema.optional(),
   operateurId: z.number().optional(),
 });
 

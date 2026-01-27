@@ -7,8 +7,6 @@ import {
 } from "@/schemas/api/cpom.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { findMatchingCpomForMillesime } from "./cpom.service";
-
 export const findOne = async (id: number): Promise<Cpom> => {
   const cpom = await prisma.cpom.findFirstOrThrow({
     where: { id },
