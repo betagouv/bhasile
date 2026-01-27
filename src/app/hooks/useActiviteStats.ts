@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+
 export type ActiviteStats = {
   averagePresencesInduesBPI: number | null;
   averagePresencesInduesDeboutees: number | null;
@@ -8,39 +10,42 @@ export type ActiviteStats = {
 };
 
 export const useActiviteStats = () => {
-  const getStats = async (
-    departement: string,
-    startDate: string,
-    endDate: string
-  ): Promise<ActiviteStats> => {
-    try {
-      const baseUrl = process.env.NEXT_URL || "";
-      const params = new URLSearchParams();
-      params.append("departement", departement);
-      params.append("startDate", startDate?.toString());
-      params.append("endDate", endDate?.toString());
-      const result = await fetch(
-        `${baseUrl}/api/activites/stats?${params.toString()}`
-      );
+  const getStats = useCallback(
+    async (
+      departement: string,
+      startDate: string,
+      endDate: string
+    ): Promise<ActiviteStats> => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_URL || "";
+        const params = new URLSearchParams();
+        params.append("departement", departement);
+        params.append("startDate", startDate?.toString());
+        params.append("endDate", endDate?.toString());
+        const result = await fetch(
+          `${baseUrl}/api/activites/stats?${params.toString()}`
+        );
 
-      if (!result.ok) {
-        throw new Error(`Failed to fetch activite stats: ${result.status}`);
+        if (!result.ok) {
+          throw new Error(`Failed to fetch activite stats: ${result.status}`);
+        }
+
+        const data = await result.json();
+        return data;
+      } catch (error) {
+        console.error("Error fetching activite stats:", error);
+        return {
+          averagePresencesInduesBPI: null,
+          averagePresencesInduesDeboutees: null,
+          averagePresencesIndues: null,
+          averagePlacesVacantes: null,
+          averagePlacesIndisponibles: null,
+          averagePlacesAutorisees: null,
+        };
       }
-
-      const data = await result.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching activite stats:", error);
-      return {
-        averagePresencesInduesBPI: null,
-        averagePresencesInduesDeboutees: null,
-        averagePresencesIndues: null,
-        averagePlacesVacantes: null,
-        averagePlacesIndisponibles: null,
-        averagePlacesAutorisees: null,
-      };
-    }
-  };
+    },
+    []
+  );
 
   return { getStats };
 };

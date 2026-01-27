@@ -34,21 +34,27 @@ describe("string util", () => {
     });
   });
   describe("capitalizeFirstLetter", () => {
-    test("preserve already capitalized string", () => {
+    it("preserve already capitalized string", () => {
       expect(capitalizeFirstLetter("Hello")).toBe("Hello");
     });
-    test("handle empty string", () => {
+    it("handle empty string", () => {
       expect(capitalizeFirstLetter("")).toBe("");
     });
-    test("handle strings starting with non-alphabetic character", () => {
+    it("handle strings starting with non-alphabetic character", () => {
       expect(capitalizeFirstLetter("1hello")).toBe("1hello");
     });
-    test("handle accented characters", () => {
+    it("handle accented characters", () => {
       expect(capitalizeFirstLetter("école")).toBe("École");
       expect(capitalizeFirstLetter("été")).toBe("Été");
     });
-    test("capitalize first letter of multiword string", () => {
+    it("capitalize first letter of multiword string", () => {
       expect(capitalizeFirstLetter("hello world")).toBe("Hello world");
+    });
+    it("returns empty string when given null", () => {
+      expect(capitalizeFirstLetter(null)).toBe("");
+    });
+    it("returns empty string when given undefined", () => {
+      expect(capitalizeFirstLetter(undefined)).toBe("");
     });
   });
 });

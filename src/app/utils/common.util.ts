@@ -29,6 +29,9 @@ export const computeAverage = (array: (number | null)[]): number => {
     return 0;
   }
   const arrayWithoutNullValues = array.filter((element) => element !== null);
+  if (arrayWithoutNullValues.length === 0) {
+    return 0;
+  }
   return (
     arrayWithoutNullValues.reduce(
       (firstElement, secondElement) => firstElement + secondElement

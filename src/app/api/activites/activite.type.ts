@@ -6,4 +6,5 @@ export type ActiviteStats = {
   averagePlacesVacantes: number | null;
   averagePresencesInduesBPI: number | null;
   averagePresencesInduesDeboutees: number | null;
+  averagePresencesIndues: number | null;
 };

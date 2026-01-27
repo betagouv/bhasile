@@ -53,8 +53,13 @@ export const ActiviteHistorique = (): ReactElement => {
       setActiviteStats(stats);
     };
     fetchStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [typeActivite, selectedMonths]);
+  }, [
+    typeActivite,
+    selectedMonths,
+    setActiviteStats,
+    structure.departementAdministratif,
+    getStats,
+  ]);
 
   const getCurrentActivite = (
     activites: ActiviteApiType[],

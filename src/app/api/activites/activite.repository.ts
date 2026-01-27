@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 
 import { ActiviteStats } from "./activite.type";
 
-export const getDepartmentActivitesAverage = async (
+export const getDepartementActivitesAverage = async (
   departementNumero: string | null,
   startDate: string | null | undefined,
   endDate: string | null | undefined
@@ -19,7 +19,8 @@ export const getDepartmentActivitesAverage = async (
       ROUND(AVG(a."placesOccupees"), 2) as "averagePlacesOccupees",
       ROUND(AVG(a."placesVacantes"), 2) as "averagePlacesVacantes",
       ROUND(AVG(a."presencesInduesBPI"), 2) as "averagePresencesInduesBPI",
-      ROUND(AVG(a."presencesInduesDeboutees"), 2) as "averagePresencesInduesDeboutees"
+      ROUND(AVG(a."presencesInduesDeboutees"), 2) as "averagePresencesInduesDeboutees",
+      ROUND(AVG(a."presencesInduesBPI" + a."presencesInduesDeboutees"), 2) as "averagePresencesIndues"
     FROM "Activite" a
     INNER JOIN "Structure" s ON a."structureDnaCode" = s."dnaCode"
     INNER JOIN "Departement" d ON s."departementAdministratif" = d."numero"

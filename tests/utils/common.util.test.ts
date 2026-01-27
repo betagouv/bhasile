@@ -93,6 +93,16 @@ describe("common util", () => {
       // THEN
       expect(result).toBe(3.4);
     });
+    it("should return 0 when given an array of null only", () => {
+      // GIVEN
+      const array = [null, null, null, null];
+
+      // WHEN
+      const result = computeAverage(array);
+
+      // THEN
+      expect(result).toBe(0);
+    });
   });
   describe("reverseObjectKeyValues", () => {
     it("should return an empty object when given an empty object", () => {
