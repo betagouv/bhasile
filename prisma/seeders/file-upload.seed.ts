@@ -11,7 +11,7 @@ import {
 } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 
-import { generateDatePair } from "./seed-util";
+import { generateDatePair } from "../utils/date";
 
 export const createFakeFileUpload = ({
   category,
@@ -87,6 +87,7 @@ const buildFakeFileUpload = ({
   const fileName = faker.system.commonFileName(ext);
 
   return {
+    structureCodeBhasile: null,
     key: `${faker.string.uuid()}-${fileName}`,
     mimeType: mime,
     fileSize: faker.number.int({ min: 1, max: 100000 }),

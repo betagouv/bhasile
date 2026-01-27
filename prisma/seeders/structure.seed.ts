@@ -16,6 +16,7 @@ import {
 } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 
+import { generateDatePair } from "../utils/date";
 import { createFakeActivites } from "./activite.seed";
 import { AdresseWithTypologies, createFakeAdresses } from "./adresse.seed";
 import { createFakeBudget } from "./budget.seed";
@@ -28,7 +29,6 @@ import {
 import { createFakeEvenementIndesirableGrave } from "./evenement-indesirable-grave.seed";
 import { createFakeFileUpload } from "./file-upload.seed";
 import { createFakeFormWithSteps } from "./form.seed";
-import { generateDatePair } from "./seed-util";
 import { createFakeStructureTypologie } from "./structure-typologie.seed";
 
 // TODO: re-add a way to name with the fact the structure is, or has been part of a CPOM
@@ -41,7 +41,6 @@ const generateDnaCode = ({
   const operateurNum = operateurName?.replace(/\D/g, "") ?? "";
   return `${type}-${operateurNum}-${departementAdministratif}-${counter}`;
 };
-
 
 export const createFakeStructure = ({
   type,
@@ -98,12 +97,17 @@ export const createFakeStructure = ({
       departementAdministratif,
       counter,
     }),
-    filiale: faker.helpers.maybe(() => faker.word.noun(), { probability: 0.5 }) || "",
+    filiale:
+      faker.helpers.maybe(() => faker.word.noun(), { probability: 0.5 }) || "",
     adresseAdministrative: faker.location.streetAddress(),
     communeAdministrative: faker.location.city(),
     codePostalAdministratif: faker.location.zipCode(),
-    latitude: Prisma.Decimal(faker.location.latitude({ min: 43.550851, max: 49.131627 })),
-    longitude: Prisma.Decimal(faker.location.longitude({ min: -0.851371, max: 5.843377 })),
+    latitude: Prisma.Decimal(
+      faker.location.latitude({ min: 43.550851, max: 49.131627 })
+    ),
+    longitude: Prisma.Decimal(
+      faker.location.longitude({ min: -0.851371, max: 5.843377 })
+    ),
     date303: null,
     debutConvention,
     finConvention,
@@ -178,7 +182,9 @@ export const createFakeStuctureWithRelations = ({
 
   let structureWithRelations = {
     ...fakeStructure,
-    contacts: Array.from({ length: faker.number.int({ min: 1, max: 4 }) }, () => createFakeContact()),
+    contacts: Array.from({ length: faker.number.int({ min: 1, max: 4 }) }, () =>
+      createFakeContact()
+    ),
     adresses: createFakeAdresses({ placesAutorisees }),
     structureTypologies: [
       createFakeStructureTypologie({ year: 2025, placesAutorisees }),

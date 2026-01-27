@@ -5,12 +5,15 @@ import { fakerFR as faker } from "@faker-js/faker";
 import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
+import { createAntenneList } from "./seeders/antenne.seed";
 import {
   generateAllBhasileCodes,
   getNextBhasileCode,
 } from "./seeders/bhasile-codes.seed";
 import { createFakeCpoms } from "./seeders/cpom.seed";
 import { createDepartements } from "./seeders/departements-seed";
+import { createDnaList } from "./seeders/dna.seed";
+import { createFinessList } from "./seeders/finess.seed";
 import {
   createFakeFormDefinition,
   createFakeFormStepDefinition,
@@ -18,15 +21,12 @@ import {
 import { createFakeOperateur } from "./seeders/operateur.seed";
 import { seedParentChildFileUploads } from "./seeders/parent-child-file-upload.seed";
 import { getRegionFromDepartement } from "./seeders/region.seed";
-import { convertToPrismaObject } from "./seeders/seed-util";
 import {
   createFakeStructure,
   createFakeStuctureWithRelations,
 } from "./seeders/structure.seed";
+import { convertToPrismaObject } from "./utils/convertToObject";
 import { wipeTables } from "./utils/wipe";
-import { createFinessList } from "./seeders/finess.seed";
-import { createDnaList } from "./seeders/dna.seed";
-import { createAntenneList } from "./seeders/antenne.seed";
 
 const prisma = createPrismaClient();
 

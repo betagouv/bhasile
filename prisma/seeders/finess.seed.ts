@@ -1,5 +1,6 @@
-import { Finess } from "@/generated/prisma/client";
 import { fakerFR as faker } from "@faker-js/faker";
+
+import { Finess } from "@/generated/prisma/client";
 
 type StructureWithCodeBhasile = {
   codeBhasile: string | null;
