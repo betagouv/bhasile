@@ -4,7 +4,10 @@ import { useForm, useFormContext } from "react-hook-form";
 import { getName, isInputDisabled } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import {
+  CpomMillesimeApiType,
+  CpomStructureApiType,
+} from "@/schemas/api/cpom.schema";
 
 import InputWithValidation from "../../InputWithValidation";
 
@@ -14,6 +17,7 @@ export const BudgetTableLine = ({
   subLabel,
   budgets,
   cpomStructures,
+  cpomMillesimes,
   disabledYearsStart,
   enabledYears,
 }: Props) => {
@@ -25,7 +29,7 @@ export const BudgetTableLine = ({
 
   const { years } = getYearRange({ order: "desc" });
 
-  if (!budgets && !cpomStructures) {
+  if (!budgets && !cpomStructures && !cpomMillesimes) {
     return null;
   }
 
@@ -40,8 +44,14 @@ export const BudgetTableLine = ({
         <td key={year}>
           <span className="flex items-center justify-center gap-2">
             <InputWithValidation
-              name={getName(name, year, budgets, cpomStructures)}
-              id={getName(name, year, budgets, cpomStructures)}
+              name={getName(
+                name,
+                year,
+                budgets,
+                cpomStructures,
+                cpomMillesimes
+              )}
+              id={getName(name, year, budgets, cpomStructures, cpomMillesimes)}
               control={control}
               type="number"
               min={0}
@@ -69,6 +79,7 @@ type Props = {
   subLabel?: string;
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];
+  cpomMillesimes?: CpomMillesimeApiType[];
   disabledYearsStart?: number;
   enabledYears?: number[];
 };

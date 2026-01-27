@@ -8,10 +8,14 @@ export const getBudgetTableHeading = ({ years, structure }: Props) => {
     ...years.map((year) => (
       <th scope="col" key={year}>
         <span className="block mb-2">{year}</span>
-        {isStructureInCpom(structure, year) ? (
-          <Badge type="new">En CPOM</Badge>
-        ) : (
-          <Badge type="disabled">Hors CPOM</Badge>
+        {structure && (
+          <>
+            {isStructureInCpom(structure, year) ? (
+              <Badge type="new">En CPOM</Badge>
+            ) : (
+              <Badge type="disabled">Hors CPOM</Badge>
+            )}
+          </>
         )}
       </th>
     )),
@@ -20,5 +24,5 @@ export const getBudgetTableHeading = ({ years, structure }: Props) => {
 
 type Props = {
   years: number[];
-  structure: StructureApiType;
+  structure?: StructureApiType;
 };

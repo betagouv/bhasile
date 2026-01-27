@@ -142,7 +142,7 @@ export const isStructureInCpom = (
 ): boolean => {
   return (
     structure.cpomStructures?.some((cpomStructure) => {
-      return cpomStructure.cpom.cpomMillesimes?.some(
+      return cpomStructure.cpom?.cpomMillesimes?.some(
         (cpomMillesime) => cpomMillesime.year === year
       );
     }) ?? false
@@ -154,8 +154,9 @@ export const getCurrentCpomStructureDates = (
 ): { yearStart?: number; yearEnd?: number } => {
   const currentCpomStructure = structure.cpomStructures?.find(
     (cpomStructure) => {
-      const yearStart = cpomStructure.yearStart ?? cpomStructure.cpom.yearStart;
-      const yearEnd = cpomStructure.yearEnd ?? cpomStructure.cpom.yearEnd;
+      const yearStart =
+        cpomStructure.yearStart ?? cpomStructure.cpom?.yearStart;
+      const yearEnd = cpomStructure.yearEnd ?? cpomStructure.cpom?.yearEnd;
 
       if (!yearStart || !yearEnd) {
         return false;
@@ -173,9 +174,9 @@ export const getCurrentCpomStructureDates = (
   }
 
   const currentCpomStructureYearStart =
-    currentCpomStructure.yearStart ?? currentCpomStructure.cpom.yearStart;
+    currentCpomStructure.yearStart ?? currentCpomStructure.cpom?.yearStart;
   const currentCpomStructureYearEnd =
-    currentCpomStructure.yearEnd ?? currentCpomStructure.cpom.yearEnd;
+    currentCpomStructure.yearEnd ?? currentCpomStructure.cpom?.yearEnd;
 
   return {
     yearStart: currentCpomStructureYearStart ?? undefined,
@@ -184,7 +185,7 @@ export const getCurrentCpomStructureDates = (
 };
 
 export const getMillesimeIndexForAYear = (
-  typologies:
+  typologies?:
     | StructureTypologieApiType[]
     | StructureMillesimeApiType[]
     | BudgetApiType[]
@@ -199,7 +200,7 @@ export const getCpomStructureIndexAndCpomMillesimeIndexForAYear = (
   let cpomMillesimeIndex = -1;
   const cpomStructureIndex = cpomStructures.findIndex((cpomStructure) => {
     cpomMillesimeIndex =
-      cpomStructure.cpom.cpomMillesimes?.findIndex(
+      cpomStructure.cpom?.cpomMillesimes?.findIndex(
         (cpomMillesime) => cpomMillesime.year === year
       ) ?? -1;
     if (cpomMillesimeIndex !== -1) {

@@ -41,7 +41,7 @@ const cpomApiBareSchema = z.object({
 export const cpomStructureApiSchema = z.object({
   id: z.number().optional(),
   cpomId: z.number().optional(),
-  cpom: cpomApiBareSchema,
+  cpom: cpomApiBareSchema.optional(),
   structureId: z.number(),
   yearStart: zSafeYearOptional(),
   yearEnd: zSafeYearOptional(),

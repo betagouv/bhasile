@@ -43,14 +43,14 @@ const bareCpomSchema = z.object({
     CpomGranularity.REGIONALE,
   ]),
   departements: z.array(zSafeDecimals()),
-  cpomMillesimes: z.array(cpomMillesimeSchema),
+  cpomMillesimes: z.array(cpomMillesimeSchema).optional(),
 });
 
 export const cpomStructureSchema = z.object({
   yearStart: nullishFrenchDateToYear(),
   yearEnd: nullishFrenchDateToYear(),
   structureId: zId(),
-  cpom: bareCpomSchema,
+  cpom: bareCpomSchema.optional(),
 });
 
 export const cpomSchema = bareCpomSchema.extend({
