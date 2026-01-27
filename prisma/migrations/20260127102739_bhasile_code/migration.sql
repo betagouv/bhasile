@@ -31,7 +31,7 @@ ALTER TABLE "Controle" ADD COLUMN     "structureCodeBhasile" TEXT;
 ALTER TABLE "Evaluation" ADD COLUMN     "structureCodeBhasile" TEXT;
 
 -- AlterTable
-ALTER TABLE "EvenementIndesirableGrave" ADD COLUMN     "structureCodeBhasile" TEXT;
+ALTER TABLE "EvenementIndesirableGrave" ADD COLUMN     "dnaCode" TEXT;
 
 -- AlterTable
 ALTER TABLE "FileUpload" ADD COLUMN     "structureCodeBhasile" TEXT;
@@ -113,6 +113,9 @@ ALTER TABLE "DnaStructure" ADD CONSTRAINT "DnaStructure_dnaId_fkey" FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE "DnaStructure" ADD CONSTRAINT "DnaStructure_structureId_fkey" FOREIGN KEY ("structureId") REFERENCES "Structure"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "EvenementIndesirableGrave" ADD CONSTRAINT "EvenementIndesirableGrave_dnaCode_fkey" FOREIGN KEY ("dnaCode") REFERENCES "Dna"("code") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Activite" ADD CONSTRAINT "Activite_dnaCode_fkey" FOREIGN KEY ("dnaCode") REFERENCES "Dna"("code") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -21,6 +21,7 @@ export const createFakeControle = (): Omit<
   "id" | "structureDnaCode"
 > => {
   return {
+    structureCodeBhasile: null,
     date: faker.date.past(),
     type: faker.helpers.enumValue(ControleType),
     fileUploads: [

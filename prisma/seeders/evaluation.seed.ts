@@ -20,6 +20,7 @@ export const createFakeEvaluation = (): Omit<
   "id" | "structureDnaCode"
 > => {
   return {
+    structureCodeBhasile: null,
     date: faker.date.past(),
     note: faker.number.float({ min: 0, max: 4, fractionDigits: 1 }),
     notePro: faker.number.float({ min: 0, max: 4, fractionDigits: 1 }),

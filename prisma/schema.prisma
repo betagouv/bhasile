@@ -74,13 +74,14 @@ model Structure {
 }
 
 model Dna {
-  id             Int            @id @default(autoincrement())
-  code           String         @unique
-  granularity    String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @default(now()) @updatedAt
-  dnasStructures DnaStructure[]
-  activites      Activite[]
+  id                           Int                         @id @default(autoincrement())
+  code                         String                      @unique
+  granularity                  String?
+  createdAt                    DateTime                    @default(now())
+  updatedAt                    DateTime                    @default(now()) @updatedAt
+  dnasStructures               DnaStructure[]
+  activites                    Activite[]
+  evenementsIndesirablesGraves EvenementIndesirableGrave[]
 
   @@schema("public")
 }
@@ -133,14 +134,15 @@ model Evaluation {
 }
 
 model EvenementIndesirableGrave {
-  id                   Int       @id @default(autoincrement())
-  structure            Structure @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode     String
-  structureCodeBhasile String?
-  numeroDossier        String    @unique
-  evenementDate        DateTime
-  declarationDate      DateTime
-  type                 String
+  id               Int        @id @default(autoincrement())
+  structure        Structure? @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
+  structureDnaCode String
+  dnaCode          String?
+  dna              Dna?       @relation(fields: [dnaCode], references: [code], onDelete: Cascade, onUpdate: Cascade)
+  numeroDossier    String     @unique
+  evenementDate    DateTime
+  declarationDate  DateTime
+  type             String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

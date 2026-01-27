@@ -32,6 +32,7 @@ export const createFakeActivite = ({
 
   return {
     date,
+    dnaCode: null,
     desinsectisation,
     placesAutorisees,
     remiseEnEtat,
