@@ -29,6 +29,7 @@ import { convertToPrismaObject } from "./utils/convertToObject";
 import { wipeTables } from "./utils/wipe";
 
 const prisma = createPrismaClient();
+const GENERATE_BHASILE_CODES = false; // Set to false to try migration one off script
 
 export async function seed(): Promise<void> {
   console.log("🗑️ Suppression des données existantes...");
@@ -81,8 +82,8 @@ export async function seed(): Promise<void> {
         const departementAdministratif = String(
           faker.number.int({ min: 1, max: 95 })
         ).padStart(2, "0");
-        const region = getRegionFromDepartement(departementAdministratif);
-        const codeBhasile = region
+        const region = getRegionFromDepartement(departementAdministratif)!;
+        const codeBhasile = GENERATE_BHASILE_CODES
           ? getNextBhasileCode(bhasileCodesMap, region)
           : null;
 
@@ -111,8 +112,8 @@ export async function seed(): Promise<void> {
         const departementAdministratif = String(
           faker.number.int({ min: 1, max: 95 })
         ).padStart(2, "0");
-        const region = getRegionFromDepartement(departementAdministratif);
-        const codeBhasile = region
+        const region = getRegionFromDepartement(departementAdministratif)!;
+        const codeBhasile = GENERATE_BHASILE_CODES
           ? getNextBhasileCode(bhasileCodesMap, region)
           : null;
 
