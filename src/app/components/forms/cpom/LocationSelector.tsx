@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
+import Select from "@codegouvfr/react-dsfr/Select";
 
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
@@ -12,31 +13,34 @@ export const LocationSelector = () => {
   const granularity = watch("granularity");
 
   const region = watch("region");
+  const departements = watch("departements");
 
   const departementsOfRegion = useMemo(
-    () => DEPARTEMENTS.filter((departement) => departement.region === region),
+    () =>
+      DEPARTEMENTS.filter((departement) =>
+        region ? departement.region === region : true
+      ),
 
     [region]
   );
 
   const handleDepartementChange = (value: string) => {
     if (value) {
-      setValue("departements", [Number(value)], { shouldValidate: true });
+      setValue("departements", [value], { shouldValidate: true });
     } else {
       setValue("departements", [], { shouldValidate: true });
     }
   };
 
   useEffect(() => {
-    if (departementsOfRegion && granularity === CpomGranularity.REGIONALE) {
-      setValue(
-        "departements",
-        departementsOfRegion.map((departement) => departement.numero),
-        { shouldValidate: true }
-      );
-    }
+    setValue(
+      "departements",
+      departementsOfRegion.map((departement) => departement.numero),
+      { shouldValidate: true }
+    );
   }, [region, setValue, departementsOfRegion, granularity]);
 
+  console.log(departements);
   return (
     <div className="grid grid-cols-3 gap-6">
       <OperateurAutocomplete />
@@ -54,13 +58,15 @@ export const LocationSelector = () => {
         ))}
       </SelectWithValidation>
       {granularity === CpomGranularity.DEPARTEMENTALE && (
-        <SelectWithValidation
-          name="departements"
-          control={control}
+        <Select
           label="Département"
+          nativeSelectProps={{
+            name: "departements",
+            value:
+              departements && departements.length === 1 ? departements[0] : "",
+            onChange: (e) => handleDepartementChange(e.target.value),
+          }}
           disabled={!departementsOfRegion.length}
-          required
-          onChange={handleDepartementChange}
         >
           <option value="">Sélectionnez un département</option>
           {departementsOfRegion.map((departement) => (
@@ -68,7 +74,7 @@ export const LocationSelector = () => {
               {departement.name}
             </option>
           ))}
-        </SelectWithValidation>
+        </Select>
       )}
     </div>
   );
