@@ -2,32 +2,33 @@ import { fakerFR as faker } from "@faker-js/faker";
 
 import { Antenne } from "@/generated/prisma/client";
 
-/**
- * Crée une antenne factice
- */
-export const createFakeAntenne = (
-  structureCodeBhasile: string
-): Omit<Antenne, "id"> => {
-  return {
-    structureCodeBhasile,
-    name: faker.location.city() + " - Antenne",
-    adresse: faker.location.streetAddress(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+type StructureWithCodeBhasile = {
+  codeBhasile: string | null;
 };
 
 /**
- * Crée des antennes pour certaines structures
- * @param structureCodesBhasile Array de codes Bhasile de structures
- * @param probability Probabilité qu'une structure ait une antenne (0-1)
+ * Génère entre 1 et 3 antennes par structure ayant un codeBhasile.
  */
-export const createFakeAntennes = (
-  structureCodesBhasile: string[],
-  probability: number = 0.2
+export const createAntenneList = (
+  structures: StructureWithCodeBhasile[]
 ): Omit<Antenne, "id">[] => {
-  return structureCodesBhasile
-    .filter(() => faker.datatype.boolean({ probability }))
-    .map((codeBhasile) => createFakeAntenne(codeBhasile));
+  const antenneList: Omit<Antenne, "id">[] = [];
+
+  for (const structure of structures) {
+    if (!structure.codeBhasile) continue;
+
+    const nbAntennes = faker.number.int({ min: 1, max: 3 });
+    for (let i = 0; i < nbAntennes; i++) {
+      antenneList.push({
+        structureCodeBhasile: structure.codeBhasile,
+        name: faker.lorem.words(2),
+        adresse: faker.location.streetAddress(),
+        createdAt: faker.date.past(),
+        updatedAt: faker.date.past(),
+      });
+    }
+  }
+
+  return antenneList;
 };
 

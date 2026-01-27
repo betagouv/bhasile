@@ -98,17 +98,12 @@ export const createFakeStructure = ({
       departementAdministratif,
       counter,
     }),
-    filiale:
-      faker.helpers.maybe(() => faker.word.noun(), { probability: 0.5 }) || "",
+    filiale: faker.helpers.maybe(() => faker.word.noun(), { probability: 0.5 }) || "",
     adresseAdministrative: faker.location.streetAddress(),
     communeAdministrative: faker.location.city(),
     codePostalAdministratif: faker.location.zipCode(),
-    latitude: Prisma.Decimal(
-      faker.location.latitude({ min: 43.550851, max: 49.131627 })
-    ),
-    longitude: Prisma.Decimal(
-      faker.location.longitude({ min: -0.851371, max: 5.843377 })
-    ),
+    latitude: Prisma.Decimal(faker.location.latitude({ min: 43.550851, max: 49.131627 })),
+    longitude: Prisma.Decimal(faker.location.longitude({ min: -0.851371, max: 5.843377 })),
     date303: null,
     debutConvention,
     finConvention,
@@ -150,6 +145,7 @@ type StructureWithRelations = Structure & {
 };
 
 export const createFakeStuctureWithRelations = ({
+  codeBhasile,
   cpom,
   type,
   isFinalised,
@@ -161,6 +157,7 @@ export const createFakeStuctureWithRelations = ({
   counter,
 }: FakeStructureWithRelationsOptions): Omit<StructureWithRelations, "id"> => {
   const fakeStructure = createFakeStructure({
+    codeBhasile,
     cpom,
     type,
     isFinalised,
@@ -181,7 +178,7 @@ export const createFakeStuctureWithRelations = ({
 
   let structureWithRelations = {
     ...fakeStructure,
-    contacts: [createFakeContact("PRINCIPAL"), createFakeContact("SECONDAIRE")],
+    contacts: Array.from({ length: faker.number.int({ min: 1, max: 4 }) }, () => createFakeContact()),
     adresses: createFakeAdresses({ placesAutorisees }),
     structureTypologies: [
       createFakeStructureTypologie({ year: 2025, placesAutorisees }),
@@ -229,6 +226,7 @@ export const createFakeStuctureWithRelations = ({
 };
 
 export type FakeStructureOptions = {
+  codeBhasile?: string | null;
   cpom: boolean;
   type: StructureType;
   isFinalised: boolean;
@@ -236,7 +234,6 @@ export type FakeStructureOptions = {
   operateurName: string;
   departementAdministratif: string;
   counter: number;
-  codeBhasile?: string | null;
 };
 
 export type FakeStructureWithRelationsOptions = FakeStructureOptions & {

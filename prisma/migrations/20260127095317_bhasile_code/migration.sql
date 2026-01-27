@@ -90,6 +90,7 @@ CREATE TABLE "Antenne" (
 -- CreateTable
 CREATE TABLE "Finess" (
     "id" SERIAL NOT NULL,
+    "structureCodeBhasile" TEXT NOT NULL,
     "code" TEXT NOT NULL,
     "granularity" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -100,9 +101,6 @@ CREATE TABLE "Finess" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Dna_code_key" ON "Dna"("code");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Antenne_structureCodeBhasile_key" ON "Antenne"("structureCodeBhasile");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Finess_code_key" ON "Finess"("code");
@@ -121,3 +119,6 @@ ALTER TABLE "Activite" ADD CONSTRAINT "Activite_dnaCode_fkey" FOREIGN KEY ("dnaC
 
 -- AddForeignKey
 ALTER TABLE "Antenne" ADD CONSTRAINT "Antenne_structureCodeBhasile_fkey" FOREIGN KEY ("structureCodeBhasile") REFERENCES "Structure"("codeBhasile") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Finess" ADD CONSTRAINT "Finess_structureCodeBhasile_fkey" FOREIGN KEY ("structureCodeBhasile") REFERENCES "Structure"("codeBhasile") ON DELETE CASCADE ON UPDATE CASCADE;

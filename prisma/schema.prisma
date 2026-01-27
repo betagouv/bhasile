@@ -64,6 +64,7 @@ model Structure {
   forms                        Form[]
   campaigns                    Campaign[]
   antennes                     Antenne[]
+  finesses                     Finess[]
   departement                  Departement?                @relation(fields: [departementAdministratif], references: [numero])
 
   createdAt DateTime @default(now())
@@ -480,7 +481,7 @@ model CpomMillesime {
 model Antenne {
   id                   Int       @id @default(autoincrement())
   structure            Structure @relation(fields: [structureCodeBhasile], references: [codeBhasile], onDelete: Cascade, onUpdate: Cascade)
-  structureCodeBhasile String    @unique
+  structureCodeBhasile String
   name                 String
   adresse              String
   createdAt            DateTime  @default(now())
@@ -490,11 +491,13 @@ model Antenne {
 }
 
 model Finess {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique
-  granularity String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
+  id                   Int       @id @default(autoincrement())
+  structure            Structure @relation(fields: [structureCodeBhasile], references: [codeBhasile], onDelete: Cascade, onUpdate: Cascade)
+  structureCodeBhasile String
+  code                 String    @unique
+  granularity          String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @default(now()) @updatedAt
 
   @@schema("public")
 }

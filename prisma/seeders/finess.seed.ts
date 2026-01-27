@@ -1,36 +1,35 @@
+import { Finess } from "@/generated/prisma/client";
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { Finess } from "@/generated/prisma/client";
-
-/**
- * Crée des codes FINESS factices
- */
-export const createFakeFiness = (): Omit<Finess, "id"> => {
-  return {
-    code: faker.number.int({ min: 100000000, max: 999999999 }).toString(),
-    granularity: faker.helpers.maybe(() => faker.helpers.arrayElement(["ET", "EJ"]), {
-      probability: 0.3,
-    }) ?? null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+type StructureWithCodeBhasile = {
+  codeBhasile: string | null;
 };
 
 /**
- * Crée plusieurs codes FINESS
+ * Génère entre 1 et 3 codes FINESS par structure ayant un codeBhasile,
+ * avec des codes FINESS uniques globalement.
  */
-export const createFakeFinessList = (count: number = 50): Omit<Finess, "id">[] => {
-  const codes = new Set<string>();
-  const finessList: Omit<Finess, "id">[] = [];
+export const createFinessList = (
+  structures: StructureWithCodeBhasile[]
+): Omit<Finess, "id">[] => {
+  const list: Omit<Finess, "id">[] = [];
+  let counter = 0;
 
-  while (finessList.length < count) {
-    const finess = createFakeFiness();
-    if (!codes.has(finess.code)) {
-      codes.add(finess.code);
-      finessList.push(finess);
+  for (const structure of structures) {
+    if (!structure.codeBhasile) continue;
+
+    const nbFiness = faker.number.int({ min: 1, max: 3 });
+    for (let i = 0; i < nbFiness; i++) {
+      const code = (100000000 + counter++).toString();
+      list.push({
+        code,
+        structureCodeBhasile: structure.codeBhasile,
+        granularity: faker.word.noun(),
+        createdAt: faker.date.past(),
+        updatedAt: faker.date.past(),
+      });
     }
   }
 
-  return finessList;
+  return list;
 };
-

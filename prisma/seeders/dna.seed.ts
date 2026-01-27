@@ -1,42 +1,22 @@
-import { fakerFR as faker } from "@faker-js/faker";
-
 import { Dna } from "@/generated/prisma/client";
 
-/**
- * Crée un code DNA factice
- */
-export const createFakeDna = (): Omit<Dna, "id"> => {
-  const dnaTypes = ["C", "H", "M"]; // CADA, HUDA, MIXTE
-  const type = faker.helpers.arrayElement(dnaTypes);
-  const numero = faker.number.int({ min: 1, max: 999 }).toString().padStart(3, "0");
-  const code = `${type}-${numero}`;
+const DNA_TYPES = ["C", "H", "K", "A"] as const;
 
-  return {
-    code,
-    granularity: faker.helpers.maybe(
-      () => faker.helpers.arrayElement(["STRUCTURE", "ADRESSE"]),
-      { probability: 0.5 }
-    ) ?? null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-};
-
-/**
- * Crée plusieurs codes DNA
- */
-export const createFakeDnaList = (count: number = 100): Omit<Dna, "id">[] => {
-  const codes = new Set<string>();
+export const createDnaList = (count: number): Omit<Dna, "id">[] => {
   const dnaList: Omit<Dna, "id">[] = [];
 
-  while (dnaList.length < count) {
-    const dna = createFakeDna();
-    if (!codes.has(dna.code)) {
-      codes.add(dna.code);
-      dnaList.push(dna);
-    }
+  for (let i = 0; i < count; i++) {
+    const type = DNA_TYPES[i % DNA_TYPES.length];
+    const numero = Math.floor(i / DNA_TYPES.length) + 1;
+    const code = `${type}-${String(numero).padStart(3, "0")}`;
+
+    dnaList.push({
+      code,
+      granularity: "STRUCTURE",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
   }
 
   return dnaList;
 };
-
