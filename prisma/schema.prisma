@@ -10,11 +10,12 @@ datasource db {
 }
 
 model Departement {
-  id         Int         @id @default(autoincrement())
-  numero     String      @unique
-  name       String
-  region     String
-  structures Structure[]
+  id                      Int                      @id @default(autoincrement())
+  numero                  String                   @unique
+  name                    String
+  region                  String
+  structures              Structure[]
+  departementAllowedUsers DepartementAllowedUser[]
 
   @@schema("public")
 }
@@ -452,6 +453,25 @@ model CpomMillesime {
   @@schema("public")
 }
 
+model AllowedUser {
+  id                      Int                      @id @default(autoincrement())
+  emailPattern            String                   @unique
+  granularity             AllowedUserGranularity
+  departementAllowedUsers DepartementAllowedUser[]
+
+  @@schema("public")
+}
+
+model DepartementAllowedUser {
+  departement   Departement @relation(fields: [departementId], references: [id])
+  departementId Int
+  allowedUser   AllowedUser @relation(fields: [allowedUserId], references: [id])
+  allowedUserId Int
+
+  @@id([departementId, allowedUserId])
+  @@schema("public")
+}
+
 // Enums
 enum Repartition {
   DIFFUS
@@ -532,6 +552,14 @@ enum StepStatus {
   A_VERIFIER
   FINALISE
   VALIDE
+
+  @@schema("public")
+}
+
+enum AllowedUserGranularity {
+  DEPARTEMENT
+  REGION
+  NATIONAL
 
   @@schema("public")
 }
