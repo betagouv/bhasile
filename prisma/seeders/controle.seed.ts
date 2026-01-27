@@ -12,16 +12,15 @@ import { createFakeFileUpload } from "./file-upload.seed";
 export type ControleWithFileUploads = Controle & {
   fileUploads: Omit<
     FileUpload,
-    "id" | "controleId" | "evaluationId" | "structureDnaCode"
+    "id" | "controleId" | "evaluationId" | "structureDnaCode" | "structureId"
   >[];
 };
 
 export const createFakeControle = (): Omit<
   ControleWithFileUploads,
-  "id" | "structureDnaCode"
+  "id" | "structureDnaCode" | "structureId"
 > => {
   return {
-    structureCodeBhasile: null,
     date: faker.date.past(),
     type: faker.helpers.enumValue(ControleType),
     fileUploads: [

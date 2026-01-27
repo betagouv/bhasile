@@ -4,7 +4,7 @@ import { Contact } from "@/generated/prisma/client";
 
 export const createFakeContact = (): Omit<
   Contact,
-  "id" | "structureDnaCode" | "structureCodeBhasile"
+  "id" | "structureDnaCode" | "structureId"
 > => {
   const prenom = faker.person.firstName();
   const nom = faker.person.lastName();

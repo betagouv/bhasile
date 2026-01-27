@@ -2,6 +2,7 @@ import "dotenv/config";
 
 import { fakerFR as faker } from "@faker-js/faker";
 
+import { REGION_CODES } from "@/app/utils/bhasileCode.util";
 import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
@@ -60,9 +61,12 @@ export async function seed(): Promise<void> {
 
   console.log(`🌍 Départements créés : ${departementsToInsert.length}`);
 
-  console.log("🔢 Génération des codes Bhasile par région...");
-  const bhasileCodesMap = generateAllBhasileCodes(500); // Not all codes will be used
-  console.log("✅ Codes Bhasile générés");
+  let bhasileCodesMap: Map<keyof typeof REGION_CODES, string[]> | undefined;
+  if (GENERATE_BHASILE_CODES) {
+    console.log("🔢 Génération des codes Bhasile par région...");
+    bhasileCodesMap = generateAllBhasileCodes(500); // Not all codes will be used
+    console.log("✅ Codes Bhasile générés");
+  }
 
   const operateursToInsert = Array.from({ length: 5 }, (_, index) =>
     createFakeOperateur(index)
@@ -82,10 +86,11 @@ export async function seed(): Promise<void> {
         const departementAdministratif = String(
           faker.number.int({ min: 1, max: 95 })
         ).padStart(2, "0");
-        const region = getRegionFromDepartement(departementAdministratif)!;
-        const codeBhasile = GENERATE_BHASILE_CODES
-          ? getNextBhasileCode(bhasileCodesMap, region)
-          : null;
+        const region = getRegionFromDepartement(departementAdministratif);
+        const codeBhasile =
+          GENERATE_BHASILE_CODES && region && bhasileCodesMap
+            ? getNextBhasileCode(bhasileCodesMap, region)
+            : null;
 
         const fakeStructure = createFakeStuctureWithRelations({
           codeBhasile,
@@ -112,10 +117,11 @@ export async function seed(): Promise<void> {
         const departementAdministratif = String(
           faker.number.int({ min: 1, max: 95 })
         ).padStart(2, "0");
-        const region = getRegionFromDepartement(departementAdministratif)!;
-        const codeBhasile = GENERATE_BHASILE_CODES
-          ? getNextBhasileCode(bhasileCodesMap, region)
-          : null;
+        const region = getRegionFromDepartement(departementAdministratif);
+        const codeBhasile =
+          GENERATE_BHASILE_CODES && region && bhasileCodesMap
+            ? getNextBhasileCode(bhasileCodesMap, region)
+            : null;
 
         const fakeStructure = createFakeStructure({
           codeBhasile,
@@ -164,7 +170,6 @@ export async function seed(): Promise<void> {
 
   await createFakeCpoms(prisma);
 
-  // Récupérer toutes les structures créées avec leurs codes Bhasile
   console.log("📊 Récupération des structures créées...");
   const allStructures = await prisma.structure.findMany({
     select: {
@@ -180,57 +185,76 @@ export async function seed(): Promise<void> {
     `✅ ${allStructures.length} structures récupérées (${structuresWithBhasile.length} avec codeBhasile)`
   );
 
-  // Créer les codes FINESS et les lier aux structures (1 à 3 par structure)
   console.log("🏥 Création et liaison des codes FINESS...");
   const finessList = createFinessList(allStructures);
   await prisma.finess.createMany({ data: finessList });
-
   console.log(`✅ ${finessList.length} codes FINESS créés et structures liées`);
 
-  // Créer les codes DNA
-  console.log("🧬 Création des codes DNA...");
-  const dnaList = createDnaList(150);
-  await prisma.dna.createMany({ data: dnaList });
+  // Si on génère des codes Bhasile en seed, on génère aussi des DNA et on crée entre 1 et 3 liens DnaStructure par structure,
+  if (GENERATE_BHASILE_CODES) {
+    console.log("🧬 Création des codes DNA (1 à 3 par structure)...");
 
-  const createdDnas = await prisma.dna.findMany({ select: { id: true } });
+    const perStructureCounts = allStructures.map((s) => ({
+      structureId: s.id,
+      count: faker.number.int({ min: 1, max: 3 }),
+    }));
+    const totalDnasNeeded = perStructureCounts.reduce(
+      (acc, { count }) => acc + count,
+      0
+    );
 
-  console.log(`✅ ${dnaList.length} codes DNA créés`);
+    const dnaList = createDnaList(totalDnasNeeded);
+    await prisma.dna.createMany({ data: dnaList });
+    console.log(`✅ ${dnaList.length} codes DNA créés`);
 
-  console.log("🔗 Création des liens DNA-Structure...");
-  const dnaStructures: Array<{
-    dnaId: number;
-    structureId: number;
-    startDate: Date | null;
-    endDate: Date | null;
-  }> = [];
-
-  for (const structure of allStructures) {
-    const numberOfDnas = faker.number.int({ min: 1, max: 3 });
-    const selectedDnas = faker.helpers.arrayElements(createdDnas, numberOfDnas);
-
-    for (const dna of selectedDnas) {
-      dnaStructures.push({
-        dnaId: dna.id,
-        structureId: structure.id,
-        startDate:
-          faker.helpers.maybe(() => faker.date.past({ years: 2 }), {
-            probability: 0.1,
-          }) ?? null,
-        endDate:
-          faker.helpers.maybe(() => faker.date.past({ years: 2 }), {
-            probability: 0.1,
-          }) ?? null,
-      });
+    const createdDnas = await prisma.dna.findMany({
+      where: {
+        code: {
+          in: dnaList.map((d) => d.code),
+        },
+      },
+      select: { id: true, code: true },
+    });
+    const dnaByCode = new Map<string, number>();
+    for (const d of createdDnas) {
+      dnaByCode.set(d.code, d.id);
     }
+
+    const dnaStructures: Array<{
+      dnaId: number;
+      structureId: number;
+      startDate: Date | null;
+      endDate: Date | null;
+    }> = [];
+
+    let cursor = 0;
+    for (const { structureId, count } of perStructureCounts) {
+      for (let i = 0; i < count; i++) {
+        const dna = dnaList[cursor++];
+        const dnaId = dnaByCode.get(dna.code);
+        if (!dnaId) continue;
+
+        dnaStructures.push({
+          dnaId,
+          structureId,
+          startDate:
+            faker.helpers.maybe(() => faker.date.past({ years: 2 }), {
+              probability: 0.1,
+            }) ?? null,
+          endDate:
+            faker.helpers.maybe(() => faker.date.past({ years: 2 }), {
+              probability: 0.1,
+            }) ?? null,
+        });
+      }
+    }
+
+    await prisma.dnaStructure.createMany({ data: dnaStructures });
+    console.log(`✅ ${dnaStructures.length} liens DnaStructure créés`);
   }
 
-  await prisma.dnaStructure.createMany({ data: dnaStructures });
-  console.log(`✅ ${dnaStructures.length} liens DNA-Structure créés`);
-
-  // Créer les antennes (1 à 3 par structure avec codeBhasile)
   console.log("📡 Création des antennes...");
   const antennes = createAntenneList(allStructures);
-
   await prisma.antenne.createMany({ data: antennes });
   console.log(`✅ ${antennes.length} antennes créées`);
 }

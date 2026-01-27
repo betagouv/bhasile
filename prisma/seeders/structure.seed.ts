@@ -128,22 +128,22 @@ export const createFakeStructure = ({
 };
 
 type StructureWithRelations = Structure & {
-  contacts: Omit<Contact, "id" | "structureDnaCode">[];
-  adresses: Omit<AdresseWithTypologies, "id" | "structureDnaCode">[];
-  controles: Omit<ControleWithFileUploads, "id" | "structureDnaCode">[];
-  evaluations: Omit<EvaluationWithFileUploads, "id" | "structureDnaCode">[];
-  structureTypologies: Omit<StructureTypologie, "id" | "structureDnaCode">[];
-  budgets: Omit<Budget, "id" | "structureDnaCode">[];
-  activites: Omit<Activite, "id" | "structureDnaCode">[];
+  contacts: Omit<Contact, "id" | "structureDnaCode" | "structureId">[];
+  adresses: Omit<AdresseWithTypologies, "id" | "structureDnaCode" | "structureId">[];
+  controles: Omit<ControleWithFileUploads, "id" | "structureDnaCode" | "structureId">[];
+  evaluations: Omit<EvaluationWithFileUploads, "id" | "structureDnaCode" | "structureId">[];
+  structureTypologies: Omit<StructureTypologie, "id" | "structureDnaCode" | "structureId">[];
+  budgets: Omit<Budget, "id" | "structureDnaCode" | "structureId">[];
+  activites: Omit<Activite, "id" | "structureDnaCode" | "structureId">[];
   fileUploads: Omit<
     FileUpload,
-    "id" | "structureDnaCode" | "controleId" | "parentFileUploadId"
+    "id" | "structureDnaCode" | "structureId" | "controleId" | "parentFileUploadId"
   >[];
   evenementsIndesirablesGraves: Omit<
     EvenementIndesirableGrave,
-    "id" | "structureDnaCode"
+    "id" | "structureDnaCode" | "structureId"
   >[];
-  forms: (Omit<Form, "id" | "structureDnaCode"> & {
+  forms: (Omit<Form, "id" | "structureDnaCode" | "structureId"> & {
     formSteps: Omit<FormStep, "id" | "formId">[];
   })[];
 };

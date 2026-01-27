@@ -44,59 +44,89 @@ async function main() {
     const codeBhasile = await generateBhasileCode(regionKey);
 
     await prisma.$transaction(async (tx) => {
+      // 1. Create Bhasile code for structure
       await tx.structure.update({
         where: { id: structure.id },
         data: { codeBhasile },
       });
 
+      // 2. Link Structure with Dna table
+      const dna =
+        (await tx.dna.findUnique({ where: { code: structure.dnaCode } })) ??
+        (await tx.dna.create({
+          data: {
+            code: structure.dnaCode,
+            granularity: null,
+          },
+        }));
+
+      const existingDnaLink = await tx.dnaStructure.findFirst({
+        where: {
+          dnaId: dna.id,
+          structureId: structure.id,
+        },
+      });
+
+      if (!existingDnaLink) {
+        await tx.dnaStructure.create({
+          data: {
+            dnaId: dna.id,
+            structureId: structure.id,
+            startDate: null,
+            endDate: null,
+          },
+        });
+      }
+
+      // 3. Update structureId on all child tables
       await tx.controle.updateMany({
         where: { structureDnaCode: structure.dnaCode },
-        data: { structureCodeBhasile: codeBhasile },
+        data: { structureId: structure.id },
       });
 
       await tx.evaluation.updateMany({
         where: { structureDnaCode: structure.dnaCode },
-        data: { structureCodeBhasile: codeBhasile },
+        data: { structureId: structure.id },
       });
 
       await tx.adresse.updateMany({
         where: { structureDnaCode: structure.dnaCode },
-        data: { structureCodeBhasile: codeBhasile },
+        data: { structureId: structure.id },
       });
 
       await tx.contact.updateMany({
         where: { structureDnaCode: structure.dnaCode },
-        data: { structureCodeBhasile: codeBhasile },
+        data: { structureId: structure.id },
       });
 
       await tx.structureMillesime.updateMany({
         where: { structureDnaCode: structure.dnaCode },
-        data: { structureCodeBhasile: codeBhasile },
+        data: { structureId: structure.id },
       });
 
       await tx.structureTypologie.updateMany({
         where: { structureDnaCode: structure.dnaCode },
-        data: { structureCodeBhasile: codeBhasile },
+        data: { structureId: structure.id },
       });
 
       await tx.fileUpload.updateMany({
         where: { structureDnaCode: structure.dnaCode },
-        data: { structureCodeBhasile: codeBhasile },
+        data: { structureId: structure.id },
       });
 
       await tx.budget.updateMany({
         where: { structureDnaCode: structure.dnaCode },
-        data: { structureCodeBhasile: codeBhasile },
+        data: { structureId: structure.id },
       });
 
       await tx.form.updateMany({
         where: { structureCodeDna: structure.dnaCode },
-        data: { structureCodeBhasile: codeBhasile },
+        data: { structureId: structure.id },
       });
 
       await tx.campaign.updateMany({
         where: { structureCodeDna: structure.dnaCode },
-        data: { structureCodeBhasile: codeBhasile },
+        data: { structureId: structure.id },
       });
     });
 

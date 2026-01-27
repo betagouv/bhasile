@@ -7,12 +7,11 @@ export const createFakeStructureTypologie = ({
   year,
 }: CreateFakeStructureTypologieOptions): Omit<
   StructureTypologie,
-  "id" | "structureDnaCode"
+  "id" | "structureDnaCode" | "structureId"
 > => {
   const lgbt = faker.number.int({ min: 0, max: placesAutorisees });
 
   return {
-    structureCodeBhasile: null,
     year,
     pmr: faker.number.int({ min: 0, max: placesAutorisees }),
     lgbt,

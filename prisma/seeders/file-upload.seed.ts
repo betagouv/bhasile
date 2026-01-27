@@ -19,7 +19,7 @@ export const createFakeFileUpload = ({
   structureType,
 }: CreateFakeFileUploadOptions): Omit<
   FileUpload,
-  "id" | "structureDnaCode" | "controleId" | "evaluationId"
+  "id" | "structureDnaCode" | "controleId" | "evaluationId" | "structureId"
 > => {
   return buildFakeFileUpload({
     category,
@@ -32,7 +32,7 @@ export const createFakeFileUploadWithParent = ({
   parentFileUploadId,
 }: CreateFakeFileUploadWithParentOptions): Omit<
   FileUpload,
-  "id" | "structureDnaCode" | "controleId" | "evaluationId"
+  "id" | "structureDnaCode" | "controleId" | "evaluationId" | "structureId"
 > => {
   return buildFakeFileUpload({
     parentFileUploadId,
@@ -79,7 +79,7 @@ const buildFakeFileUpload = ({
   parentFileUploadId,
 }: BuildFakeFileUploadOptions): Omit<
   FileUpload,
-  "id" | "structureDnaCode" | "controleId" | "evaluationId"
+  "id" | "structureDnaCode" | "controleId" | "evaluationId" | "structureId"
 > => {
   const fakeCategories = getFakeFileUploadCategories(cpom, structureType);
   const [startDate, endDate] = generateDatePair();
@@ -87,7 +87,6 @@ const buildFakeFileUpload = ({
   const fileName = faker.system.commonFileName(ext);
 
   return {
-    structureCodeBhasile: null,
     key: `${faker.string.uuid()}-${fileName}`,
     mimeType: mime,
     fileSize: faker.number.int({ min: 1, max: 100000 }),

@@ -12,41 +12,41 @@ DROP INDEX "Contact_structureDnaCode_type_key";
 ALTER TABLE "Activite" ADD COLUMN     "dnaCode" TEXT;
 
 -- AlterTable
-ALTER TABLE "Adresse" ADD COLUMN     "structureCodeBhasile" TEXT;
+ALTER TABLE "Adresse" ADD COLUMN     "structureId" INTEGER;
 
 -- AlterTable
-ALTER TABLE "Budget" ADD COLUMN     "structureCodeBhasile" TEXT;
+ALTER TABLE "Budget" ADD COLUMN     "structureId" INTEGER;
 
 -- AlterTable
-ALTER TABLE "Campaign" ADD COLUMN     "structureCodeBhasile" TEXT;
+ALTER TABLE "Campaign" ADD COLUMN     "structureId" INTEGER;
 
 -- AlterTable
 ALTER TABLE "Contact" DROP COLUMN "type",
-ADD COLUMN     "structureCodeBhasile" TEXT;
+ADD COLUMN     "structureId" INTEGER;
 
 -- AlterTable
-ALTER TABLE "Controle" ADD COLUMN     "structureCodeBhasile" TEXT;
+ALTER TABLE "Controle" ADD COLUMN     "structureId" INTEGER;
 
 -- AlterTable
-ALTER TABLE "Evaluation" ADD COLUMN     "structureCodeBhasile" TEXT;
+ALTER TABLE "Evaluation" ADD COLUMN     "structureId" INTEGER;
 
 -- AlterTable
 ALTER TABLE "EvenementIndesirableGrave" ADD COLUMN     "dnaCode" TEXT;
 
 -- AlterTable
-ALTER TABLE "FileUpload" ADD COLUMN     "structureCodeBhasile" TEXT;
+ALTER TABLE "FileUpload" ADD COLUMN     "structureId" INTEGER;
 
 -- AlterTable
-ALTER TABLE "Form" ADD COLUMN     "structureCodeBhasile" TEXT;
+ALTER TABLE "Form" ADD COLUMN     "structureId" INTEGER;
 
 -- AlterTable
 ALTER TABLE "Structure" ADD COLUMN     "codeBhasile" TEXT;
 
 -- AlterTable
-ALTER TABLE "StructureMillesime" ADD COLUMN     "structureCodeBhasile" TEXT;
+ALTER TABLE "StructureMillesime" ADD COLUMN     "structureId" INTEGER;
 
 -- AlterTable
-ALTER TABLE "StructureTypologie" ADD COLUMN     "structureCodeBhasile" TEXT;
+ALTER TABLE "StructureTypologie" ADD COLUMN     "structureId" INTEGER;
 
 -- DropEnum
 DROP TYPE "ContactType";
@@ -78,7 +78,7 @@ CREATE TABLE "DnaStructure" (
 -- CreateTable
 CREATE TABLE "Antenne" (
     "id" SERIAL NOT NULL,
-    "structureCodeBhasile" TEXT NOT NULL,
+    "structureId" INTEGER NOT NULL,
     "name" TEXT NOT NULL,
     "adresse" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -90,7 +90,7 @@ CREATE TABLE "Antenne" (
 -- CreateTable
 CREATE TABLE "Finess" (
     "id" SERIAL NOT NULL,
-    "structureCodeBhasile" TEXT NOT NULL,
+    "structureId" INTEGER NOT NULL,
     "code" TEXT NOT NULL,
     "granularity" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -121,7 +121,7 @@ ALTER TABLE "EvenementIndesirableGrave" ADD CONSTRAINT "EvenementIndesirableGrav
 ALTER TABLE "Activite" ADD CONSTRAINT "Activite_dnaCode_fkey" FOREIGN KEY ("dnaCode") REFERENCES "Dna"("code") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Antenne" ADD CONSTRAINT "Antenne_structureCodeBhasile_fkey" FOREIGN KEY ("structureCodeBhasile") REFERENCES "Structure"("codeBhasile") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Antenne" ADD CONSTRAINT "Antenne_structureId_fkey" FOREIGN KEY ("structureId") REFERENCES "Structure"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Finess" ADD CONSTRAINT "Finess_structureCodeBhasile_fkey" FOREIGN KEY ("structureCodeBhasile") REFERENCES "Structure"("codeBhasile") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Finess" ADD CONSTRAINT "Finess_structureId_fkey" FOREIGN KEY ("structureId") REFERENCES "Structure"("id") ON DELETE CASCADE ON UPDATE CASCADE;
