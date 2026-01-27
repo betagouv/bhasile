@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -25,8 +25,14 @@ applyViews();
 // Utils
 function deleteViews() {
   runPsqlOrExit(
-    `psql "${psqlUrl}" -v ON_ERROR_STOP=1 ` +
-      `-c "DROP SCHEMA IF EXISTS \"${schema}\" CASCADE;"`,
+    "psql",
+    [
+      psqlUrl,
+      "-v",
+      "ON_ERROR_STOP=1",
+      "-c",
+      `DROP SCHEMA IF EXISTS "${schema}" CASCADE;`,
+    ],
     `✅ Schema "${schema}" deleted`,
     `❌ Failed to delete schema "${schema}"`
   );
@@ -34,8 +40,14 @@ function deleteViews() {
 
 function createSchema() {
   runPsqlOrExit(
-    `psql "${psqlUrl}" -v ON_ERROR_STOP=1 ` +
-      `-c "CREATE SCHEMA \"${schema}\";"`,
+    "psql",
+    [
+      psqlUrl,
+      "-v",
+      "ON_ERROR_STOP=1",
+      "-c",
+      `CREATE SCHEMA "${schema}";`,
+    ],
     `✅ Schema "${schema}" created`,
     `❌ Failed to create schema "${schema}"`
   );
@@ -45,7 +57,16 @@ function applyViews() {
   for (const file of viewFiles) {
     console.log(`➡️ Applying ${file}`);
     runPsqlOrExit(
-      `psql "${psqlUrl}" -v ON_ERROR_STOP=1 -v SCHEMA="${schema}" -f ${scriptsPath}/${file}`,
+      "psql",
+      [
+        psqlUrl,
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-v",
+        `SCHEMA=${schema}`,
+        "-f",
+        path.join(scriptsPath, file),
+      ],
       `✅ Applied ${file}`,
       `❌ Failed to apply ${file}`
     );
@@ -64,19 +85,28 @@ function getDbUrl(rawDatabaseUrl: string): string {
 }
 
 function runPsqlOrExit(
-  command: string,
+  cmd: string,
+  args: string[],
   successMsg?: string,
   failureMsg?: string
 ): void {
   try {
-    execSync(command, { stdio: "inherit" });
+    execFileSync(cmd, args, { stdio: "inherit" });
     if (successMsg) console.log(successMsg);
   } catch (error: unknown) {
     if (failureMsg) console.error(failureMsg);
-    if (typeof error === "object" && error && "status" in error) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "status" in error
+    ) {
       console.error(`Exit code: ${(error as { status?: number }).status}`);
     }
-    if (typeof error === "object" && error && "stderr" in error) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "stderr" in error
+    ) {
       const stderr = (error as { stderr?: unknown }).stderr;
       if (stderr) console.error(String(stderr));
     }
