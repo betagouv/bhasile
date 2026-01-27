@@ -54,6 +54,12 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
+    pattern: /^\/api\/activites\/stats$/,
+    routes: {
+      GET: "proconnect",
+    },
+  },
+  {
     pattern: /^\/api\/structures-ofii$/,
     routes: {
       GET: "either",

@@ -8,5 +8,9 @@ import {
 export async function GET() {
   const maxPlacesAutorisees = await getMaxPlacesAutorisees();
   const minPlacesAutorisees = await getMinPlacesAutorisees();
-  return NextResponse.json({ maxPlacesAutorisees, minPlacesAutorisees });
+
+  return NextResponse.json({
+    maxPlacesAutorisees,
+    minPlacesAutorisees,
+  });
 }

@@ -1,7 +1,7 @@
 {
   "jobs": [
     {
-      "command": "0 10 * * MON yarn script eig-fetch eig-fetch.ts"
+      "command": "0 10 * * * yarn script eig-fetch eig-fetch.ts"
     }
   ]
 }

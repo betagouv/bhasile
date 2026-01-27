@@ -13,16 +13,20 @@ export const ActiviteDurations = ({
   debutConvention,
   finConvention,
 }: Props): ReactElement => {
-  const [selectedDuration, setSelectedDuration] = useState("convention");
-  const [customStartDate, setCustomStartDate] = useState<string | null>(null);
-  const [customEndDate, setCustomEndDate] = useState<string | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState("6months");
+  const [customStartDate, setCustomStartDate] = useState<string | undefined>(
+    undefined
+  );
+  const [customEndDate, setCustomEndDate] = useState<string | undefined>(
+    undefined
+  );
 
   const getSelectedMonths = (selectedDuration: string): dayjs.Dayjs[] => {
     const selectedMonths: Record<string, dayjs.Dayjs[]> = {
-      convention: getMonthsBetween(debutConvention, finConvention),
       "6months": getLastMonths(6),
       "12months": getLastMonths(12),
       "24months": getLastMonths(24),
+      convention: getMonthsBetween(debutConvention, finConvention),
       custom: getMonthsBetween(customStartDate, customEndDate),
     };
     return selectedMonths[selectedDuration];
@@ -42,33 +46,37 @@ export const ActiviteDurations = ({
     };
   };
 
-  const durations: SegmentedControlProps.Segments = [
-    {
-      label: "Convention",
-      nativeInputProps: getNativeInputProps("convention"),
-    },
-    {
+  const getDurations = (): SegmentedControlProps.Segments => {
+    const _6months = {
       label: "6 mois",
       nativeInputProps: getNativeInputProps("6months"),
-    },
-    {
+    };
+    const _12months = {
       label: "12 mois",
       nativeInputProps: getNativeInputProps("12months"),
-    },
-    {
+    };
+    const _24months = {
       label: "24 mois",
       nativeInputProps: getNativeInputProps("24months"),
-    },
-    {
+    };
+    const convention = {
+      label: "Convention",
+      nativeInputProps: getNativeInputProps("convention"),
+    };
+    const autre = {
       label: "Autre",
       nativeInputProps: getNativeInputProps("custom"),
-    },
-  ];
+    };
+    if (!debutConvention || !finConvention) {
+      return [_6months, _12months, _24months, autre];
+    }
+    return [_6months, _12months, _24months, convention, autre];
+  };
 
   return (
     <div className="flex items-end">
       <div className="pr-2">
-        <SegmentedControl segments={durations} hideLegend={true} />
+        <SegmentedControl segments={getDurations()} hideLegend={true} />
       </div>
       {selectedDuration === "custom" && (
         <div className="pr-2">
@@ -76,6 +84,7 @@ export const ActiviteDurations = ({
             label="Date de début"
             nativeInputProps={{
               type: "date",
+              value: customStartDate,
               onChange: (event) => {
                 setCustomStartDate(event.target.value);
                 handleDurationSelection("custom");
@@ -89,6 +98,7 @@ export const ActiviteDurations = ({
           label="Date de fin"
           nativeInputProps={{
             type: "date",
+            value: customEndDate,
             onChange: (event) => {
               setCustomEndDate(event.target.value);
               handleDurationSelection("custom");
