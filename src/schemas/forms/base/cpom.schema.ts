@@ -36,13 +36,14 @@ const bareCpomSchema = z.object({
   name: z.string().nullish(),
   yearStart: frenchDateToYear(),
   yearEnd: frenchDateToYear(),
-  operateur: operateurSchema,
+  operateur: operateurSchema.optional(),
+  operateurId: zId(),
   granularity: z.enum([
     CpomGranularity.DEPARTEMENTALE,
     CpomGranularity.INTERDEPARTEMENTALE,
     CpomGranularity.REGIONALE,
   ]),
-  departements: z.array(zSafeDecimals()),
+  departements: z.array(zSafeDecimals()).optional(),
   cpomMillesimes: z.array(cpomMillesimeSchema).optional(),
 });
 
@@ -56,6 +57,8 @@ export const cpomStructureSchema = z.object({
 export const cpomSchema = bareCpomSchema.extend({
   structures: z.array(cpomStructureSchema),
 });
+
+export type CpomMillesimeFormValues = z.infer<typeof cpomMillesimeSchema>;
 
 export type CpomStructureFormValues = z.infer<typeof cpomStructureSchema>;
 

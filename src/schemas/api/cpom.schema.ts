@@ -35,7 +35,8 @@ const cpomApiBareSchema = z.object({
     CpomGranularity.REGIONALE,
   ]),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
-  operateur: operateurApiSchema,
+  operateur: operateurApiSchema.nullish(),
+  operateurId: z.number().optional(),
 });
 
 export const cpomStructureApiSchema = z.object({
@@ -49,6 +50,10 @@ export const cpomStructureApiSchema = z.object({
 
 export const cpomApiSchema = cpomApiBareSchema.extend({
   structures: z.array(cpomStructureApiSchema),
+});
+
+export const cpomApiAjoutSchema = cpomApiSchema.extend({
+  operateur: operateurApiSchema,
 });
 
 export type CpomMillesimeApiType = z.infer<typeof cpomMillesimeApiSchema>;

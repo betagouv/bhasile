@@ -23,9 +23,7 @@ export const findOne = async (id: number): Promise<Cpom> => {
 export const createOrUpdateCpom = async (
   cpom: CpomApiType
 ): Promise<number> => {
-  if (!cpom.operateur.id) {
-    throw new Error("Operateur ID is required");
-  }
+  const operateurId = cpom.operateur?.id ?? cpom.operateurId;
 
   const cpomId = await prisma.$transaction(async (tx) => {
     const upsertedCpom = await tx.cpom.upsert({
@@ -34,23 +32,21 @@ export const createOrUpdateCpom = async (
         name: cpom.name,
         yearStart: cpom.yearStart,
         yearEnd: cpom.yearEnd,
-        operateur: {
-          connect: { id: cpom.operateur.id },
-        },
+        operateurId,
       },
       create: {
         name: cpom.name,
         yearStart: cpom.yearStart,
         yearEnd: cpom.yearEnd,
-        operateur: {
-          connect: { id: cpom.operateur.id },
-        },
+        operateurId: operateurId as number,
       },
     });
 
     const cpomId = upsertedCpom.id;
 
     await createOrUpdateCpomStructures(tx, cpom.structures, cpomId);
+
+    await createOrUpdateCpomMillesimes(tx, cpom.cpomMillesimes, cpomId);
 
     return cpomId;
   });
@@ -84,68 +80,25 @@ const createOrUpdateCpomStructures = async (
 export const createOrUpdateCpomMillesimes = async (
   tx: PrismaTransaction,
   millesimes: CpomMillesimeApiType[] | undefined,
-  structureDnaCode: string
+  cpomId: number
 ): Promise<void> => {
   if (!millesimes || millesimes.length === 0) {
     return;
   }
 
-  const structure = await tx.structure.findUnique({
-    where: { dnaCode: structureDnaCode },
-    select: { id: true },
-  });
-
-  if (!structure) {
-    throw new Error(
-      `Structure avec le code DNA ${structureDnaCode} non trouvée`
-    );
-  }
-
-  const cpomStructures = await tx.cpomStructure.findMany({
-    where: { structureId: structure.id },
-    include: {
-      cpom: {
-        select: {
-          id: true,
-          yearStart: true,
-          yearEnd: true,
-        },
-      },
-    },
-  });
-
-  if (cpomStructures.length === 0) {
-    console.warn(
-      `Aucun CPOM associé à la structure ${structureDnaCode}, millésimes ignorés`
-    );
-    return;
-  }
-
   await Promise.all(
     millesimes.map(async (millesime) => {
-      const resolved = findMatchingCpomForMillesime(cpomStructures, millesime);
-
-      if (!resolved) {
-        console.warn(
-          `Aucun CPOM trouvé pour la structure ${structureDnaCode} avec une période couvrant l'année ${millesime.year}, millésime ignoré`
-        );
-        return;
-      }
-
-      const { cpomId, year } = resolved;
-
       return tx.cpomMillesime.upsert({
         where: {
           cpomId_year: {
             cpomId,
-            year,
+            year: millesime.year,
           },
         },
         update: millesime,
         create: {
           cpomId,
           ...millesime,
-          year,
         },
       });
     })
