@@ -60,24 +60,13 @@ export class CheckboxHelper {
   /**
    * Click a checkbox by value attribute (useful for filter checkboxes)
    */
-  async clickByValue(
-    value: string,
-    options?: { force?: boolean }
-  ): Promise<void> {
+  async clickByValue(value: string): Promise<void> {
     const checkbox = this.page.locator(
       `input[type="checkbox"][value="${value}"]`
     );
     await checkbox.waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION });
 
-    if (options?.force) {
-      await checkbox.click({ force: true });
-    } else {
-      // Trigger both click and change events to ensure the handler fires
-      await checkbox.evaluate((el) => {
-        (el as HTMLInputElement).click();
-        el.dispatchEvent(new Event("change", { bubbles: true }));
-      });
-    }
+    await checkbox.click({ force: true });
   }
 
   /**

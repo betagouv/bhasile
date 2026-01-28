@@ -8,6 +8,7 @@ import {
   formatErrorMessage,
   getResponseJson,
 } from "./error-handler";
+import { parseAddress } from "./shared-utils";
 import { TestStructureData } from "./test-data/types";
 
 type MinimalStructureSeed = {
@@ -110,16 +111,19 @@ export async function createMinimalStructureViaApi(
 export async function seedStructureForSelection(
   testData: Partial<TestStructureData> & { dnaCode: string }
 ): Promise<void> {
-  const apiData = transformTestDataToApiFormat(testData);
+  const adminAddress = testData.adresseAdministrative
+    ? parseAddress(testData.adresseAdministrative.searchTerm)
+    : { street: "", postalCode: "", city: "", department: "" };
+
   await createMinimalStructureViaApi({
     dnaCode: testData.dnaCode,
-    type: apiData.type,
-    operateurName: apiData.operateur?.name,
-    departementAdministratif: apiData.departementAdministratif,
-    nom: apiData.nom,
-    adresseAdministrative: apiData.adresseAdministrative,
-    codePostalAdministratif: apiData.codePostalAdministratif,
-    communeAdministrative: apiData.communeAdministrative,
+    type: testData.type,
+    operateurName: testData.operateur?.name,
+    departementAdministratif: testData.departementAdministratif,
+    nom: testData.nom,
+    adresseAdministrative: testData.adresseAdministrative?.complete,
+    codePostalAdministratif: adminAddress.postalCode,
+    communeAdministrative: adminAddress.city,
   });
 }
 

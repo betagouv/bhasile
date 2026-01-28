@@ -74,6 +74,7 @@ export const completeStructureFlow = async (
   }
 
   const documentsFinanciersPage = new DocumentsFinanciersPage(page);
+  await documentsFinanciersPage.waitForLoad();
   await documentsFinanciersPage.fillForm(dataWithDna as TestStructureData);
   const shouldFailAtDocuments = options?.failingStep === "documents";
   await documentsFinanciersPage.submit(

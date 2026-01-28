@@ -96,7 +96,7 @@ test.describe("Structures filters and ordering", () => {
       .getByRole("button", { name: /^Filtres (actifs|inactifs)$/ })
       .click();
     const checkboxHelper = new CheckboxHelper(page);
-    await checkboxHelper.clickByValue("CADA", { force: true });
+    await checkboxHelper.clickByValue("CADA");
     // Close the filters panel by clicking outside
     await page.click("body");
     await page.waitForLoadState("networkidle");
@@ -133,7 +133,7 @@ test.describe("Structures filters and ordering", () => {
       .getByRole("button", { name: /^Filtres (actifs|inactifs)$/ })
       .click();
     const checkboxHelper = new CheckboxHelper(page);
-    await checkboxHelper.clickByValue("CADA", { force: true });
+    await checkboxHelper.clickByValue("CADA");
 
     // Wait for filters panel to close
     const waitHelper = new WaitHelper(page);
