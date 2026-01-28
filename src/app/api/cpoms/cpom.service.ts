@@ -9,8 +9,8 @@ type CpomStructureForMatching = {
     id: number;
     yearStart: number;
     yearEnd: number;
-    dateStart: Date;
-    dateEnd: Date;
+    dateStart: Date | null;
+    dateEnd: Date | null;
   };
 };
 
@@ -33,11 +33,15 @@ export const findMatchingCpomForMillesime = (
 
     const yearDebutStructure =
       yearStartFromDate ||
-      cpomStructure.cpom.dateStart.getFullYear() ||
+      (cpomStructure.cpom.dateStart
+        ? cpomStructure.cpom.dateStart.getFullYear()
+        : null) ||
       cpomStructure.cpom.yearStart;
     const yearFinStructure =
       yearEndFromDate ||
-      cpomStructure.cpom.dateEnd.getFullYear() ||
+      (cpomStructure.cpom.dateEnd
+        ? cpomStructure.cpom.dateEnd.getFullYear()
+        : null) ||
       cpomStructure.cpom.yearEnd;
 
     return (
