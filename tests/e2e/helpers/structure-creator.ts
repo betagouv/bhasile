@@ -2,7 +2,12 @@ import { StructureApiType } from "@/schemas/api/structure.schema";
 
 import { transformTestDataToApiFormat } from "./api-data-transformer";
 import { BASE_URL } from "./constants";
-import { ApiError, ensureResponseOk, formatErrorMessage, getResponseJson } from "./error-handler";
+import {
+  ApiError,
+  ensureResponseOk,
+  formatErrorMessage,
+  getResponseJson,
+} from "./error-handler";
 import { TestStructureData } from "./test-data/types";
 
 type MinimalStructureSeed = {
@@ -43,7 +48,11 @@ export async function deleteStructureViaApi(dnaCode: string): Promise<void> {
   } catch (error) {
     // Network errors during cleanup are not critical
     console.warn(
-      formatErrorMessage("Failed to delete structure", dnaCode, error instanceof Error ? error.message : String(error))
+      formatErrorMessage(
+        "Failed to delete structure",
+        dnaCode,
+        error instanceof Error ? error.message : String(error)
+      )
     );
   }
 }
@@ -66,9 +75,7 @@ export async function getStructureId(dnaCode: string): Promise<number> {
   const structure = await getResponseJson<StructureApiType | null>(response);
 
   if (!structure) {
-    throw new ApiError(
-      formatErrorMessage("Structure not found", dnaCode)
-    );
+    throw new ApiError(formatErrorMessage("Structure not found", dnaCode));
   }
 
   return structure.id;
@@ -117,8 +124,7 @@ export async function seedStructureForSelection(
 }
 
 const getPasswordCookieHeader = (): string | null => {
-  const passwords =
-    process.env.OPERATEUR_PASSWORDS || process.env.OPERATEUR_PASSWORD;
+  const passwords = process.env.OPERATEUR_PASSWORDS;
   const password = passwords?.split(",")[0]?.trim();
   if (!password) {
     return null;

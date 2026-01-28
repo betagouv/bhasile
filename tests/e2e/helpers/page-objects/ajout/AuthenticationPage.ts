@@ -22,9 +22,7 @@ export class AuthenticationPage extends BasePage {
       .locator('input[type="password"]')
       .count();
 
-    const password =
-      process.env.OPERATEUR_PASSWORD?.split(",")[0] ||
-      process.env.OPERATEUR_PASSWORDS?.split(",")[0];
+    const password = process.env.OPERATEUR_PASSWORDS?.split(",")[0];
 
     if (passwordInput > 0) {
       if (!password) {
