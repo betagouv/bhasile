@@ -108,7 +108,7 @@ export const cada3: TestStructureScenario = {
     ],
     documentsFinanciers: {
       allAddedViaAjout: false,
-      files: [
+      fileUploads: [
         {
           year: "2025",
           category: "Budget prévisionnel demandé",

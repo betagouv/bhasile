@@ -210,7 +210,7 @@ export class StructureDetailsPage extends BasePage {
 
   private async expectDocumentsFinanciers(data: TestStructureData) {
     const financesBlock = this.getBlockByTitle("Finances");
-    const documentsByYear = data.documentsFinanciers.files.reduce(
+    const documentsByYear = data.documentsFinanciers.fileUploads.reduce(
       (acc, file) => {
         const year = Number(file.year);
         acc[year] = acc[year] || [];

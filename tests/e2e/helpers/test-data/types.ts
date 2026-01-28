@@ -58,7 +58,7 @@ export type TestStructureData = {
   }>;
   documentsFinanciers: {
     allAddedViaAjout: boolean;
-    files: Array<{
+    fileUploads: Array<{
       year: string;
       category: string;
       fileName: string;

@@ -43,7 +43,7 @@ export const cada1: TestStructureScenario = {
     ],
     documentsFinanciers: {
       allAddedViaAjout: true,
-      files: [
+      fileUploads: [
         {
           year: "2025",
           category: "Budget prévisionnel demandé",

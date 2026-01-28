@@ -57,7 +57,7 @@ export class FinalisationControlesPage extends BasePage {
       );
       if ((await defaultDateInput.count()) > 0) {
         const fallbackFilePath =
-          data.documentsFinanciers.files[0]?.filePath ||
+          data.documentsFinanciers.fileUploads[0]?.filePath ||
           "tests/e2e/fixtures/sample.csv";
         await this.formHelper.fillInput(
           'input[name="evaluations.0.date"]',
@@ -140,7 +140,7 @@ export class FinalisationControlesPage extends BasePage {
       );
       if ((await defaultDateInput.count()) > 0) {
         const fallbackFilePath =
-          data.documentsFinanciers.files[0]?.filePath ||
+          data.documentsFinanciers.fileUploads[0]?.filePath ||
           "tests/e2e/fixtures/sample.csv";
         await this.formHelper.fillInput(
           'input[name="controles.0.date"]',

@@ -60,7 +60,7 @@ export const caes1: TestStructureScenario = {
     ],
     documentsFinanciers: {
       allAddedViaAjout: true,
-      files: [
+      fileUploads: [
         {
           year: "2023",
           category: "Demande de subvention",
