@@ -3,10 +3,14 @@ import { CpomMillesimeApiType } from "@/schemas/api/cpom.schema";
 type CpomStructureForMatching = {
   yearStart: number | null;
   yearEnd: number | null;
+  dateStart: Date | null;
+  dateEnd: Date | null;
   cpom: {
     id: number;
     yearStart: number;
     yearEnd: number;
+    dateStart: Date;
+    dateEnd: Date;
   };
 };
 
@@ -15,17 +19,26 @@ export const findMatchingCpomForMillesime = (
   millesime: CpomMillesimeApiType
 ) => {
   const matchingCpom = cpomStructures.find((cpomStructure) => {
-    if (
-      millesime.year < cpomStructure.cpom.yearStart ||
-      millesime.year > cpomStructure.cpom.yearEnd
-    ) {
+    const yearStartFromDate = cpomStructure.dateStart
+      ? cpomStructure.dateStart.getFullYear()
+      : cpomStructure.yearStart!;
+    const yearEndFromDate = cpomStructure.dateEnd
+      ? cpomStructure.dateEnd.getFullYear()
+      : cpomStructure.yearEnd!;
+    const year = millesime.year;
+
+    if (year < yearStartFromDate || year > yearEndFromDate) {
       return false;
     }
 
     const yearDebutStructure =
-      cpomStructure.yearStart || cpomStructure.cpom.yearStart;
+      yearStartFromDate ||
+      cpomStructure.cpom.dateStart.getFullYear() ||
+      cpomStructure.cpom.yearStart;
     const yearFinStructure =
-      cpomStructure.yearEnd || cpomStructure.cpom.yearEnd;
+      yearEndFromDate ||
+      cpomStructure.cpom.dateEnd.getFullYear() ||
+      cpomStructure.cpom.yearEnd;
 
     return (
       millesime.year >= yearDebutStructure && millesime.year <= yearFinStructure
