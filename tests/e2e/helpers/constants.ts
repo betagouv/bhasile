@@ -19,6 +19,8 @@ export const TIMEOUTS = {
   MEDIUM_UI_UPDATE: 1000,
   /** Timeout for checking that navigation does NOT happen (validation failures) */
   VALIDATION_CHECK: 2000,
+  /** Timeout for waiting for a file to be uploaded */
+  FILE_UPLOAD: 15000,
 } as const;
 
 export const URLS = {

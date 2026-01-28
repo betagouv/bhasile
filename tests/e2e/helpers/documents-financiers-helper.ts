@@ -2,6 +2,7 @@ import path from "node:path";
 
 import { expect, Page } from "@playwright/test";
 
+import { TIMEOUTS } from "./constants";
 import { ElementNotFoundError, formatErrorMessage } from "./error-handler";
 import { TestStructureData } from "./test-data/types";
 
@@ -94,7 +95,7 @@ const addDocumentViaDropzone = async (
   const categorySelect = container.getByRole("combobox", {
     name: "Type de document",
   });
-  await expect(categorySelect).toBeVisible();
+  await expect(categorySelect).toBeVisible({ timeout: TIMEOUTS.FILE_UPLOAD });
   await categorySelect.selectOption({ label: document.category });
 
   const addButton = container.getByRole("button", {
