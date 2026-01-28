@@ -4,6 +4,7 @@ import { formatDate, getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
 import { getOperateurLabel } from "@/app/utils/structure.util";
+import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
 import { PublicType } from "@/types/structure.type";
 
 import { URLS } from "../../constants";
@@ -286,12 +287,7 @@ type StructureDetailsOverrides = {
   contactEmail?: string;
   notes?: string;
   actesAdministratifs?: Array<{
-    category:
-      | "ARRETE_AUTORISATION"
-      | "ARRETE_TARIFICATION"
-      | "CONVENTION"
-      | "CPOM"
-      | "AUTRE";
+    category: ActeAdministratifCategoryType[number];
     categoryName?: string;
     startDate?: string;
     endDate?: string;

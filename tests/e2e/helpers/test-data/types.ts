@@ -1,4 +1,6 @@
 import { Repartition } from "@/types/adresse.type";
+import { ControleType } from "@/types/controle.type";
+import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
 import { StructureType } from "@/types/structure.type";
 
 export type TestStructureData = {
@@ -112,7 +114,7 @@ export type EvaluationData = {
 
 export type ControleData = {
   date: string;
-  type: "Programmé" | "Inopiné";
+  type: ControleType[number];
   filePath?: string;
 };
 
@@ -124,12 +126,7 @@ export type OuvertureFermetureData = {
 };
 
 export type ActeAdministratifData = {
-  category:
-    | "ARRETE_AUTORISATION"
-    | "ARRETE_TARIFICATION"
-    | "CONVENTION"
-    | "CPOM"
-    | "AUTRE";
+  category: ActeAdministratifCategoryType[number];
   filePath: string;
   startDate?: string;
   endDate?: string;
