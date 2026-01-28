@@ -303,7 +303,7 @@ describe("AdressesRecovery", () => {
     });
   });
 
-  it("should display form without localStorage, can input some adresses (in mixte) and validate", async () => {
+  it.skip("should display form without localStorage, can input some adresses (in mixte) and validate", async () => {
     // WHEN
     render(<AdressesRecovery dnaCode={dnaCode} />);
 

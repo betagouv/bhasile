@@ -1,6 +1,5 @@
 import { StructureApiType } from "@/schemas/api/structure.schema";
 
-import { transformTestDataToApiFormat } from "./api-data-transformer";
 import { BASE_URL } from "./constants";
 import {
   ApiError,
