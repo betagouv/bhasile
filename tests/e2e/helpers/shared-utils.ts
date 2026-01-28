@@ -42,9 +42,9 @@ export function parseAddress(searchTerm: string): {
       ? parts.slice(0, postalIndex).join(" ") || "1 rue de Test"
       : searchTerm;
 
-  // Extract department from postal code (first 2 digits for most, or "2A"/"2B" for Corsica)
+  // Extract department from postal code
   const department = postalCode.startsWith("20")
-    ? postalCode.substring(0, 3) // Corsica: 201, 202, etc.
+    ? postalCode.substring(0, 3)
     : postalCode.substring(0, 2);
 
   return {
