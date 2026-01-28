@@ -22,7 +22,7 @@ export class VerificationPage extends BasePage {
 
   async verifyData(data: TestStructureData) {
     await this.waitHelper.waitForUIUpdate(2);
-    await this.waitForHeading(/Vérification des données/i);
+    await this.waitForHeading(/Vérification des données/i, 1);
 
     await this.expectIdentification(data);
     await this.expectAdresses(data);

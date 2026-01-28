@@ -152,14 +152,11 @@ test.describe("Structures filters and ordering", () => {
     // Verify filters and ordering are still applied
     expect(page.url()).toBe(url);
 
-    // Verify active indicators are shown
+    // Verify filter button shows "Filtres actifs"
     const filterButton = page.getByRole("button", {
-      name: /^Filtres (actifs|inactifs)$/,
+      name: /^Filtres actifs$/,
     });
-    const indicator = filterButton.locator(
-      "span .bg-border-action-high-warning"
-    );
-    await expect(indicator).toBeVisible();
+    await expect(filterButton).toBeVisible();
 
     // Verify no CADA structures are still shown
     const cadaCells = page.locator('tbody tr td[aria-label="CADA"]');
