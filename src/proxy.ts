@@ -70,13 +70,12 @@ const protectApiWithAuth = async (
 };
 
 export async function proxy(request: NextRequest) {
-  if (process.env.DEV_AUTH_BYPASS) {
-    return NextResponse.next();
-  }
-  if (
-    process.env.NODE_ENV !== "production" &&
-    request.headers.get("x-dev-auth-bypass") === "1"
-  ) {
+  const doBypass =
+    process.env.DEV_AUTH_BYPASS ||
+    (process.env.NODE_ENV !== "production" &&
+      request.headers.get("x-dev-auth-bypass") === "1");
+
+  if (doBypass) {
     return NextResponse.next();
   }
 
