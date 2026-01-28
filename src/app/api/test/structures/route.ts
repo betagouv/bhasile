@@ -4,21 +4,7 @@ import { createPrismaClient } from "../../../../../prisma/client";
 
 const prisma = createPrismaClient();
 
-const isBypassAllowed = (request: NextRequest): boolean => {
-  if (process.env.DEV_AUTH_BYPASS) {
-    return true;
-  }
-  return (
-    process.env.NODE_ENV !== "production" &&
-    request.headers.get("x-dev-auth-bypass") === "1"
-  );
-};
-
 export async function POST(request: NextRequest) {
-  if (!isBypassAllowed(request)) {
-    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-  }
-
   try {
     const body = await request.json();
     const dnaCode = body?.dnaCode;
@@ -100,10 +86,6 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  if (!isBypassAllowed(request)) {
-    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-  }
-
   try {
     const dnaCode = request.nextUrl.searchParams.get("dnaCode");
     if (!dnaCode) {

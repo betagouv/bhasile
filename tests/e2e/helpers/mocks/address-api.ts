@@ -22,12 +22,10 @@ const buildAddressSuggestion = (fullAddress: string) => {
   return {
     properties: {
       label: fullAddress,
-      score: 0.9,
-      housenumber: /^\d+$/.test(housenumber) ? housenumber : undefined,
+      housenumber,
       street: streetParts.length > 0 ? streetParts.join(" ") : parsed.street,
       postcode: parsed.postalCode,
       city: parsed.city,
-      context: `${parsed.department}, ${parsed.city}`,
     },
     geometry: {
       coordinates: [2.3522, 48.8566],
