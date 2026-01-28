@@ -40,7 +40,7 @@ export class TestStructureDataBuilder {
       ],
       documentsFinanciers: {
         allAddedViaAjout: true,
-        files: [],
+        fileUploads: [],
       },
     };
   }

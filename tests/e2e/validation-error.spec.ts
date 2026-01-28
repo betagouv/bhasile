@@ -72,7 +72,7 @@ const invalidTestCases: TestStructureScenario[] = [
     formData: TestStructureDataBuilder.basedOn(cada1)
       .withDocumentsFinanciers({
         allAddedViaAjout: false,
-        files: [],
+        fileUploads: [],
       })
       .build(),
     failingStep: "finalisationDocumentsFinanciers",

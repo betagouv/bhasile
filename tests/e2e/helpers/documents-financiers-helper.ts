@@ -12,7 +12,7 @@ export async function handleDocumentsFinanciers(
   data: TestStructureData,
   mode: DocumentsFinanciersMode
 ) {
-  const documents = data.documentsFinanciers?.files ?? [];
+  const documents = data.documentsFinanciers?.fileUploads ?? [];
   const documentsByYear = documents.reduce(
     (acc, document) => {
       const year = Number(document.year);
@@ -20,7 +20,10 @@ export async function handleDocumentsFinanciers(
       acc[year].push(document);
       return acc;
     },
-    {} as Record<number, TestStructureData["documentsFinanciers"]["files"]>
+    {} as Record<
+      number,
+      TestStructureData["documentsFinanciers"]["fileUploads"]
+    >
   );
 
   const years = Object.keys(documentsByYear)
@@ -83,7 +86,7 @@ const isDocumentImported = async (
 
 const addDocumentViaDropzone = async (
   container: ReturnType<Page["locator"]>,
-  document: TestStructureData["documentsFinanciers"]["files"][number]
+  document: TestStructureData["documentsFinanciers"]["fileUploads"][number]
 ) => {
   const fileInput = container.locator('input[type="file"]').first();
   await fileInput.setInputFiles(path.join(process.cwd(), document.filePath));
@@ -118,7 +121,11 @@ const expectDocumentImported = async (
   const categoryButton = getCategoryButton(container, label);
   if ((await categoryButton.count()) === 0) {
     const context = year
-      ? formatErrorMessage("Document financier introuvable", `year ${year}`, label)
+      ? formatErrorMessage(
+          "Document financier introuvable",
+          `year ${year}`,
+          label
+        )
       : formatErrorMessage("Document financier introuvable", undefined, label);
     throw new ElementNotFoundError(label, context);
   }
