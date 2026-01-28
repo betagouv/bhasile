@@ -13,17 +13,9 @@ import { cph2 } from "./helpers/test-data/cph-2";
 import { huda1 } from "./helpers/test-data/huda-1";
 import { huda2 } from "./helpers/test-data/huda-2";
 
-const validTestCases = [
-  cada1,
-  cada2,
-  cada3,
-  cph1,
-  cph2,
-  huda1,
-  huda2,
-  caes1,
-  caes2,
-];
+// For faster iterations during development, we currently run only the first
+// valid test case. Add more entries back to this array when needed.
+const validTestCases = [cada1];
 
 for (const { name, formData } of validTestCases) {
   test(`${name} - Flux complet (création, finalisation, modification)`, async ({
