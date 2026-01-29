@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { createPrismaClient } from "../../../../../prisma/client";
-
-const prisma = createPrismaClient();
+import {
+  createMinimalStructure,
+  deleteStructure,
+} from "./structure.repository";
 
 export async function POST(request: NextRequest) {
   if (process.env.NODE_ENV !== "development") {
@@ -12,13 +13,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const dnaCode = body?.dnaCode;
     const type = body?.type;
-    const operateurName = body?.operateurName;
     const operateurId = body?.operateurId;
     const departementAdministratif = body?.departementAdministratif;
     const nom = body?.nom;
     const adresseAdministrative = body?.adresseAdministrative;
     const codePostalAdministratif = body?.codePostalAdministratif;
     const communeAdministrative = body?.communeAdministrative;
+
     if (!dnaCode) {
       return NextResponse.json(
         { error: "dnaCode is required" },
@@ -26,55 +27,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let resolvedOperateurId: number | undefined = operateurId;
-    if (operateurName) {
-      const operateur = await prisma.operateur.upsert({
-        where: { name: operateurName },
-        update: {},
-        create: { name: operateurName },
-      });
-      resolvedOperateurId = operateur.id;
-    }
-
-    const data: Record<string, unknown> = {};
-    if (type) {
-      data.type = type;
-    }
-    if (resolvedOperateurId) {
-      data.operateurId = resolvedOperateurId;
-    }
-    if (departementAdministratif) {
-      data.departementAdministratif = departementAdministratif;
-    }
-    if (nom) {
-      data.nom = nom;
-    }
-    if (adresseAdministrative) {
-      data.adresseAdministrative = adresseAdministrative;
-    }
-    if (codePostalAdministratif) {
-      data.codePostalAdministratif = codePostalAdministratif;
-    }
-    if (communeAdministrative) {
-      data.communeAdministrative = communeAdministrative;
-    }
-
-    if (departementAdministratif) {
-      await prisma.departement.upsert({
-        where: { numero: departementAdministratif },
-        update: {},
-        create: {
-          numero: departementAdministratif,
-          name: "Département de test",
-          region: "Région de test",
-        },
-      });
-    }
-
-    await prisma.structure.upsert({
-      where: { dnaCode },
-      update: data,
-      create: { dnaCode, ...data },
+    await createMinimalStructure({
+      dnaCode,
+      type,
+      operateurId,
+      departementAdministratif,
+      nom,
+      adresseAdministrative,
+      codePostalAdministratif,
+      communeAdministrative,
     });
 
     return NextResponse.json({ dnaCode }, { status: 201 });
@@ -101,7 +62,8 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await prisma.structure.deleteMany({ where: { dnaCode } });
+    await deleteStructure(dnaCode);
+
     return NextResponse.json({ dnaCode }, { status: 200 });
   } catch (error) {
     console.error("Failed to delete structure:", error);

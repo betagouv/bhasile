@@ -98,6 +98,8 @@ export async function createMinimalStructureViaApi(
     body: JSON.stringify(seed),
   });
 
+  console.log("reponse");
+
   await ensureResponseOk(
     response,
     formatErrorMessage("createMinimalStructureViaApi", seed.dnaCode)
@@ -118,6 +120,7 @@ export async function seedStructureForSelection(
     dnaCode: testData.dnaCode,
     type: testData.type,
     operateurName: testData.operateur?.name,
+    operateurId: testData.operateur?.id,
     departementAdministratif: testData.departementAdministratif,
     nom: testData.nom,
     adresseAdministrative: testData.adresseAdministrative?.complete,

@@ -11,6 +11,7 @@ export type TestStructureData = {
   operateur: {
     name: string;
     searchTerm: string;
+    id: number;
   };
   creationDate: string;
   finessCode?: string;

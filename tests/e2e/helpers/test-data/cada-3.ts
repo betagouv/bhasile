@@ -15,8 +15,9 @@ export const cada3: TestStructureScenario = {
     type: StructureType.CADA,
     cpom: false,
     operateur: {
-      name: "Opérateur Test",
+      name: "Opérateur 1",
       searchTerm: "Opér",
+      id: 1,
     },
     creationDate: "2015-06-01",
     finessCode: "123456789",

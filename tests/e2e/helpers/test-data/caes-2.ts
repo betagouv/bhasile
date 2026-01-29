@@ -14,8 +14,9 @@ export const caes2: TestStructureScenario = {
     type: StructureType.CAES,
     cpom: false,
     operateur: {
-      name: "Opérateur Test",
+      name: "Opérateur 1",
       searchTerm: "Opér",
+      id: 1,
     },
     creationDate: "2015-06-01",
     public: "Tout public",
