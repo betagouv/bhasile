@@ -9,7 +9,7 @@ export const MaxSizeNotice = () => {
       description={
         <>
           Taille maximale par fichier : 10 Mo. Formats supportés : pdf, xls,
-          xlsx, csv et ods.{" "}
+          xlsx, xlsm, csv et ods.{" "}
           <a
             target="_blank"
             className="underline"

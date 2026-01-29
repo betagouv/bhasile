@@ -31,7 +31,7 @@ const passwordPagesProxy = (request: NextRequest): NextResponse | null => {
   const passwords = process.env.OPERATEUR_PASSWORDS?.split(",").map(
     (password) => password.trim()
   );
-  if (!passwordCookie || !passwords?.includes(passwordCookie?.value)) {
+  if (!passwordCookie || !passwords?.includes(passwordCookie?.value?.trim())) {
     const loginUrl = new URL(noProtectionPage, request.url);
     loginUrl.searchParams.set("from", url.pathname);
     return NextResponse.redirect(loginUrl);
@@ -50,7 +50,7 @@ const protectApiWithAuth = async (
     (password) => password.trim()
   );
   const hasPassword =
-    passwordCookie && passwords?.includes(passwordCookie?.value);
+    passwordCookie && passwords?.includes(passwordCookie?.value?.trim());
 
   if (protection === "none" || request.nextUrl.pathname === noProtectionPage) {
     return NextResponse.next();

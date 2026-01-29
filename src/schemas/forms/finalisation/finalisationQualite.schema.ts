@@ -3,7 +3,7 @@ import z from "zod";
 import { controlesAutoSaveSchema } from "../base/controle.schema";
 import {
   evaluationsAutoSaveSchema,
-  evaluationsSchema,
+  evaluationsSchemaWithConditionalValidation,
 } from "../base/evaluation.schema";
 import {
   structureTypologiesAutoSaveSchema,
@@ -11,7 +11,7 @@ import {
 } from "../base/structureTypologie.schema";
 
 export const finalisationQualiteSchema = controlesAutoSaveSchema
-  .and(evaluationsSchema)
+  .and(evaluationsSchemaWithConditionalValidation)
   .and(structureTypologiesWithMandatoryEvolutionSchema);
 
 export const finalisationQualiteAutoSaveSchema = controlesAutoSaveSchema
