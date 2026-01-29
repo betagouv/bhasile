@@ -54,7 +54,7 @@ export const BudgetTables = () => {
         </p>
         <StructureTable />
       </fieldset>
-      {isInCpom && (
+      {/* {isInCpom && (
         <fieldset className="flex flex-col gap-6 min-w-0 w-full">
           <legend className="text-xl font-bold mb-8 text-title-blue-france">
             Gestion budgétaire du CPOM
@@ -67,7 +67,7 @@ export const BudgetTables = () => {
           </p>
           <CpomTable />
         </fieldset>
-      )}
+      )} */}
     </>
   );
 };
