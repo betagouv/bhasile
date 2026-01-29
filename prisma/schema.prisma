@@ -385,6 +385,8 @@ model Cpom {
   yearStart      Int
   yearEnd        Int
   granularity    CpomGranularity @default(REGIONALE)
+  dateStart      DateTime?
+  dateEnd        DateTime?
   cpomMillesimes CpomMillesime[]
   operateur      Operateur       @relation(fields: [operateurId], references: [id])
   operateurId    Int
@@ -409,6 +411,8 @@ model CpomStructure {
   structureId Int
   yearStart   Int? // Year when the structure joined the CPOM (null = from the beginning of the CPOM)
   yearEnd     Int? // Year when the structure left the CPOM (null = until the end of the CPOM)
+  dateStart   DateTime?
+  dateEnd     DateTime?
   cpom        Cpom      @relation(fields: [cpomId], references: [id], onDelete: Cascade)
   structure   Structure @relation(fields: [structureId], references: [id])
 
