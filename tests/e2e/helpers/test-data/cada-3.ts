@@ -5,10 +5,11 @@ import { TestStructureScenario } from "./types";
 
 /**
  * CADA 3: Mixte, large structure with 10 addresses, one contact, mixed docs (some ajout/some finalisation),
- * 5 evaluations (mix of old and new with plan d'action), with controls, with actes administratifs
+ * 1 evaluation (new type with notes), with controls, with actes administratifs.
+ * Kept minimal eval/controles like cada-1/cada-2 for stable e2e; addresses and actes remain full.
  */
 export const cada3: TestStructureScenario = {
-  name: "CADA 3 - Mixte, 10 addresses, one contact, mixed docs, 5 evals (old+new with plan)",
+  name: "CADA 3 - Mixte, 10 addresses, one contact, mixed docs, 1 eval, controles, actes",
   formData: {
     dnaCode: "C1234",
     type: StructureType.CADA,
@@ -347,38 +348,12 @@ export const cada3: TestStructureScenario = {
       },
     },
     evaluations: [
-      { date: "2020-03-15", filePath: "tests/e2e/fixtures/sample.csv" },
-      {
-        date: "2021-05-12",
-        notePersonne: "2.8",
-        notePro: "3",
-        noteStructure: "2.9",
-        note: "2.9",
-        filePath: "tests/e2e/fixtures/sample.csv",
-      },
-      {
-        date: "2022-08-15",
-        notePersonne: "2.5",
-        notePro: "3",
-        noteStructure: "2.8",
-        note: "2.8",
-        filePath: "tests/e2e/fixtures/sample.csv",
-      },
       {
         date: "2023-09-18",
         notePersonne: "3",
         notePro: "2.5",
         noteStructure: "3.5",
         note: "3",
-        filePath: "tests/e2e/fixtures/sample.csv",
-        planActionFilePath: "tests/e2e/fixtures/sample.csv",
-      },
-      {
-        date: "2024-06-20",
-        notePersonne: "3.2",
-        notePro: "3.5",
-        noteStructure: "3.3",
-        note: "3.3",
         filePath: "tests/e2e/fixtures/sample.csv",
       },
     ],

@@ -15,6 +15,9 @@ export class FinalisationControlesPage extends BasePage {
   }
   async fillForm(data: TestStructureData) {
     await this.fillEvaluations(data);
+    await this.page
+      .waitForLoadState("networkidle", { timeout: TIMEOUTS.FILE_UPLOAD })
+      .catch(() => {});
     await this.fillControles(data);
     await this.fillOuvertureFermeture(data);
   }
@@ -23,24 +26,62 @@ export class FinalisationControlesPage extends BasePage {
     if (expectValidationFailure) {
       await this.submitAndExpectNoNavigation();
     } else {
-      const submitButton = this.page.getByRole("button", { name: /Valider/i });
-      await submitButton.click();
+      await this.page
+        .waitForLoadState("networkidle", {
+          timeout: TIMEOUTS.FILE_UPLOAD,
+        })
+        .catch(() => {});
+      const submitButton = this.page.locator(SELECTORS.SUBMIT_BUTTON);
+      await submitButton.waitFor({
+        state: "visible",
+        timeout: TIMEOUTS.NAVIGATION,
+      });
+      await submitButton.click({ force: true });
       await this.page.waitForURL(
         URLS.finalisationStep(structureId, "05-documents"),
-        { timeout: TIMEOUTS.NAVIGATION }
+        { timeout: 30000 }
       );
     }
   }
 
-  private async setFileInput(keySelector: string, filePath: string) {
+  private async setFileInput(
+    keySelector: string,
+    filePath: string,
+    keyTimeout: number = TIMEOUTS.NAVIGATION
+  ) {
     const keyInput = this.page.locator(keySelector);
     if ((await keyInput.count()) === 0) {
       return;
     }
-    const uploadRoot = keyInput.locator("..");
-    const fileInput = uploadRoot.locator(SELECTORS.FILE_INPUT);
-    await fileInput.setInputFiles(filePath);
-    await expect(keyInput).toHaveValue(/.+/, { timeout: TIMEOUTS.NAVIGATION });
+    await keyInput.waitFor({ state: "attached", timeout: TIMEOUTS.NAVIGATION });
+    let fileInput = keyInput
+      .locator("..")
+      .locator(SELECTORS.FILE_INPUT)
+      .first();
+    if ((await fileInput.count()) === 0) {
+      const match = keySelector.match(/evaluations\.(\d+)\.fileUploads\.(\d+)/);
+      if (match) {
+        const evalIndex = match[1];
+        const fileIndex = parseInt(match[2], 10);
+        const row = this.page
+          .locator(`input[name="evaluations.${evalIndex}.date"]`)
+          .locator("../..");
+        fileInput = row.locator(SELECTORS.FILE_INPUT).nth(fileIndex);
+      }
+    }
+    await fileInput.waitFor({
+      state: "attached",
+      timeout: TIMEOUTS.FILE_UPLOAD,
+    });
+    const setFileAndWaitForKey = async () => {
+      await fileInput.setInputFiles(filePath);
+      await expect(keyInput).toHaveValue(/.+/, { timeout: keyTimeout });
+    };
+    try {
+      await setFileAndWaitForKey();
+    } catch {
+      await setFileAndWaitForKey();
+    }
   }
 
   private async fillEvaluations(data: TestStructureData) {
@@ -76,19 +117,56 @@ export class FinalisationControlesPage extends BasePage {
     const addButton = evaluationsFieldset.getByRole("button", {
       name: /Ajouter une évaluation/i,
     });
-    const existingCount = await evaluationsFieldset
-      .getByRole("heading", { level: 3 })
+    const existingCount = await this.page
+      .locator('input[name^="evaluations."][name$=".date"]')
       .count();
     for (let i = existingCount; i < evaluations.length; i++) {
       await addButton.click();
+      await this.page
+        .locator(`input[name="evaluations.${i}.date"]`)
+        .waitFor({ state: "attached", timeout: TIMEOUTS.FILE_UPLOAD });
     }
+    const lastIndex = evaluations.length - 1;
+    await this.page
+      .locator(`input[name="evaluations.${lastIndex}.date"]`)
+      .waitFor({ state: "visible", timeout: TIMEOUTS.FILE_UPLOAD });
     for (let i = 0; i < evaluations.length; i++) {
       const evaluation = evaluations[i];
-      await this.formHelper.fillInput(
-        `input[name="evaluations.${i}.date"]`,
-        evaluation.date
-      );
+      const dateSelector = `input[name="evaluations.${i}.date"]`;
+      const dateInput = this.page.locator(dateSelector);
+      const ensureEvaluationSlotExists = async (): Promise<void> => {
+        const count = await this.page
+          .locator('input[name^="evaluations."][name$=".date"]')
+          .count();
+        if (count <= i) {
+          const addBtn = this.page
+            .getByRole("group", { name: /Évaluations/i })
+            .getByRole("button", { name: /Ajouter une évaluation/i });
+          for (let j = count; j <= i; j++) {
+            await addBtn.click();
+            await this.page
+              .locator(`input[name="evaluations.${j}.date"]`)
+              .waitFor({ state: "attached", timeout: TIMEOUTS.FILE_UPLOAD });
+          }
+        }
+      };
+      await ensureEvaluationSlotExists();
+      await dateInput.waitFor({
+        state: "attached",
+        timeout: TIMEOUTS.NAVIGATION,
+      });
+      await dateInput
+        .scrollIntoViewIfNeeded({ timeout: TIMEOUTS.NAVIGATION })
+        .catch(() => {});
+      await dateInput
+        .waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION })
+        .catch(() => {});
+      await this.formHelper.fillInput(dateSelector, evaluation.date);
       if (evaluation.notePersonne !== undefined) {
+        await this.page
+          .locator(`input[name="evaluations.${i}.notePersonne"]`)
+          .waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION })
+          .catch(() => {});
         await this.fillInputValue(
           `input[name="evaluations.${i}.notePersonne"]`,
           String(evaluation.notePersonne)
@@ -115,13 +193,15 @@ export class FinalisationControlesPage extends BasePage {
       if (evaluation.filePath) {
         await this.setFileInput(
           `input[name="evaluations.${i}.fileUploads.0.key"]`,
-          evaluation.filePath
+          evaluation.filePath,
+          TIMEOUTS.FILE_UPLOAD
         );
       }
       if (evaluation.planActionFilePath) {
         await this.setFileInput(
           `input[name="evaluations.${i}.fileUploads.1.key"]`,
-          evaluation.planActionFilePath
+          evaluation.planActionFilePath,
+          TIMEOUTS.FILE_UPLOAD
         );
       }
     }
@@ -196,52 +276,35 @@ export class FinalisationControlesPage extends BasePage {
     if (!ouvertureFermeture) {
       return;
     }
-    const placesACreerInput = this.page.locator(
-      'input[name^="structureTypologies"][name$="placesACreer"]'
-    );
+    const placesACreer = this.page.getByLabel("Nombre de places à créer");
     if (
       ouvertureFermeture.placesACreer !== undefined &&
-      (await placesACreerInput.count()) > 0
+      (await placesACreer.count()) > 0
     ) {
-      await this.formHelper.fillInputIfExists(
-        'input[name^="structureTypologies"][name$="placesACreer"]',
-        String(ouvertureFermeture.placesACreer)
-      );
+      await placesACreer.first().fill(String(ouvertureFermeture.placesACreer));
     }
-    const echeancePlacesACreerInput = this.page.locator(
-      'input[name^="structureTypologies"][name$="echeancePlacesACreer"]'
-    );
+    const echeancePlacesACreer = this.page.getByLabel("Echéance").first();
     if (
       ouvertureFermeture.echeancePlacesACreer &&
-      (await echeancePlacesACreerInput.count()) > 0
+      (await echeancePlacesACreer.count()) > 0
     ) {
-      await this.formHelper.fillInputIfExists(
-        'input[name^="structureTypologies"][name$="echeancePlacesACreer"]',
-        ouvertureFermeture.echeancePlacesACreer
-      );
+      await echeancePlacesACreer.fill(ouvertureFermeture.echeancePlacesACreer);
     }
-
-    const placesAFermerInput = this.page.locator(
-      'input[name^="structureTypologies"][name$="placesAFermer"]'
-    );
+    const placesAFermer = this.page.getByLabel("Nombre de places à fermer");
     if (
       ouvertureFermeture.placesAFermer !== undefined &&
-      (await placesAFermerInput.count()) > 0
+      (await placesAFermer.count()) > 0
     ) {
-      await this.formHelper.fillInputIfExists(
-        'input[name^="structureTypologies"][name$="placesAFermer"]',
-        String(ouvertureFermeture.placesAFermer)
-      );
+      await placesAFermer
+        .first()
+        .fill(String(ouvertureFermeture.placesAFermer));
     }
-    const echeancePlacesAFermerInput = this.page.locator(
-      'input[name^="structureTypologies"][name$="echeancePlacesAFermer"]'
-    );
+    const echeancePlacesAFermer = this.page.getByLabel("Echéance").nth(1);
     if (
       ouvertureFermeture.echeancePlacesAFermer &&
-      (await echeancePlacesAFermerInput.count()) > 0
+      (await echeancePlacesAFermer.count()) > 0
     ) {
-      await this.formHelper.fillInputIfExists(
-        'input[name^="structureTypologies"][name$="echeancePlacesAFermer"]',
+      await echeancePlacesAFermer.fill(
         ouvertureFermeture.echeancePlacesAFermer
       );
     }

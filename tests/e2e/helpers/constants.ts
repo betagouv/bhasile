@@ -7,8 +7,8 @@ export const BASE_URL = process.env.E2E_BASE_URL || "http://localhost:3000";
 export const TIMEOUTS = {
   /** Default timeout for page navigation */
   NAVIGATION: 10000,
-  /** Timeout for form submissions */
-  SUBMIT: 15000,
+  /** Timeout for form submissions (finalisation steps with file uploads can be slow) */
+  SUBMIT: 30000,
   /** Timeout for autocomplete suggestions */
   AUTOCOMPLETE: 5000,
   /** Short wait for UI updates */

@@ -223,9 +223,11 @@ export class StructureDetailsPage extends BasePage {
 
     for (const [year, categories] of Object.entries(documentsByYear)) {
       const yearButton = financesBlock.getByRole("button", {
-        name: year,
+        name: String(year),
       });
-      await yearButton.click();
+      if ((await yearButton.count()) === 0) continue;
+      await yearButton.scrollIntoViewIfNeeded({ timeout: 10000 }).catch(() => {});
+      await yearButton.click({ timeout: 10000 });
       const financesText = (await financesBlock.textContent()) || "";
       if (financesText.includes("Aucun document importé")) {
         continue;

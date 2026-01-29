@@ -1,5 +1,7 @@
 import { expect, Page } from "@playwright/test";
 
+import { ActeAdministratifCategory } from "@/types/file-upload.type";
+
 import { TIMEOUTS, URLS } from "../../constants";
 import { SELECTORS } from "../../selectors";
 import { getActesCategoryRegex } from "../../shared-utils";
@@ -21,7 +23,9 @@ export class FinalisationDocumentsPage extends BasePage {
       {} as Record<string, typeof actes>
     );
 
-    for (const [category, entries] of Object.entries(actesByCategory)) {
+    for (const category of ActeAdministratifCategory) {
+      const entries = actesByCategory[category];
+      if (!entries?.length) continue;
       const groupLabel = getActesCategoryRegex(category);
       const group = this.page.getByRole("group", { name: groupLabel });
       const addButton = group.getByRole("button", { name: /Ajouter/i });
@@ -67,14 +71,19 @@ export class FinalisationDocumentsPage extends BasePage {
             acte.categoryName
           );
         }
+        // Use i-th row in this group (works for both autorisee and subventionnée category order)
         const fileInput = group.locator(SELECTORS.FILE_INPUT).nth(i);
         await fileInput.setInputFiles(acte.filePath);
 
-        const keyInput = this.page.locator(
-          `input[name="actesAdministratifs.${i}.key"]`
-        );
-        await expect(keyInput).toHaveValue(/.+/, {
-          timeout: TIMEOUTS.NAVIGATION,
+        await this.page
+          .waitForLoadState("networkidle", { timeout: TIMEOUTS.FILE_UPLOAD })
+          .catch(() => {});
+
+        const keyInputInGroup = group
+          .locator('input[name^="actesAdministratifs."][name$=".key"]')
+          .nth(i);
+        await expect(keyInputInGroup).toHaveValue(/.+/, {
+          timeout: TIMEOUTS.FILE_UPLOAD,
         });
       }
     }
@@ -84,8 +93,20 @@ export class FinalisationDocumentsPage extends BasePage {
     if (expectValidationFailure) {
       await this.submitAndExpectNoNavigation();
     } else {
-      await this.submitAndWaitForUrl(
-        URLS.finalisationStep(structureId, "06-notes")
+      await this.page
+        .waitForLoadState("networkidle", {
+          timeout: TIMEOUTS.FILE_UPLOAD,
+        })
+        .catch(() => {});
+      const submitButton = this.page.locator(SELECTORS.SUBMIT_BUTTON);
+      await submitButton.waitFor({
+        state: "visible",
+        timeout: TIMEOUTS.NAVIGATION,
+      });
+      await submitButton.click({ force: true });
+      await this.page.waitForURL(
+        URLS.finalisationStep(structureId, "06-notes"),
+        { timeout: TIMEOUTS.SUBMIT, waitUntil: "commit" }
       );
     }
   }
