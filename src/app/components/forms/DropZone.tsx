@@ -150,7 +150,7 @@ export const DropZone = ({ className, onChange, children }: Props) => {
           type="file"
           onChange={handleFileChange}
           style={{ display: "none" }}
-          accept=".pdf,.xls,.xlsx,.csv,.ods"
+          accept=".pdf,.xls,.xlsx,.xlsm,.csv,.ods"
         />
         <span className="fr-icon-file-add-fill [&::before]:[--icon-size:2.5rem] text-title-blue-france mb-3" />
         {currentState === "loading" ? (
@@ -165,7 +165,7 @@ export const DropZone = ({ className, onChange, children }: Props) => {
           </p>
         )}
         <span className="text-center text-disabled-grey text-sm">
-          PDF, XLS, XLSX, CSV et ODS seulement - Taille maximale : 10 Mo
+          PDF, XLS, XLSX, XLSM, CSV et ODS seulement - Taille maximale : 10 Mo
         </span>
         {currentErrorMessage && (
           <span className="text-center text-default-error text-sm">

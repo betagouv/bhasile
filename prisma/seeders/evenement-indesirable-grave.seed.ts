@@ -21,8 +21,8 @@ export const createFakeEvenementIndesirableGrave = (): Omit<
   usedNumeroDossiers.add(numeroDossier);
 
   return {
-    declarationDate: faker.date.past(),
-    evenementDate: faker.date.past(),
+    declarationDate: faker.date.past({ years: 3 }),
+    evenementDate: faker.date.past({ years: 3 }),
     numeroDossier,
     type: faker.helpers.arrayElement([
       "Vol",

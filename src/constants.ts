@@ -7,6 +7,7 @@ export const FRANCE_CENTER: LatLngTuple = [46.6055983, 1.8750922];
 export const DEFAULT_MAP_ZOOM = 6;
 
 export const DEFAULT_PAGE_SIZE = 20;
+export const SHORT_PAGE_SIZE = 6;
 
 // Cookie expiration times
 export const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7;
@@ -23,6 +24,7 @@ export const SPREADSHEET_MIME_TYPES = [
   "application/vnd.ms-excel",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/vnd.oasis.opendocument.spreadsheet",
+  "application/vnd.ms-excel.sheet.macroenabled.12",
   "text/csv",
 ];
 export const ALLOWED_MIME_TYPES = [

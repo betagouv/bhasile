@@ -272,7 +272,7 @@ export const findOne = async (id: number): Promise<Structure> => {
       },
       evenementsIndesirablesGraves: {
         orderBy: {
-          createdAt: "desc",
+          evenementDate: "desc",
         },
       },
       fileUploads: {
@@ -428,10 +428,6 @@ const createOrUpdateStructure = async (
     communeAdministrative,
     filiale,
     type,
-    placesACreer,
-    placesAFermer,
-    echeancePlacesACreer,
-    echeancePlacesAFermer,
     latitude,
     longitude,
     nom,
@@ -462,10 +458,6 @@ const createOrUpdateStructure = async (
       communeAdministrative,
       filiale,
       type,
-      placesACreer,
-      placesAFermer,
-      echeancePlacesACreer,
-      echeancePlacesAFermer,
       latitude,
       longitude,
       nom,

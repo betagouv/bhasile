@@ -21,6 +21,10 @@ import { AdresseWithTypologies, createFakeAdresses } from "./adresse.seed";
 import { createFakeBudget } from "./budget.seed";
 import { createFakeContact } from "./contact.seed";
 import { ControleWithFileUploads, createFakeControle } from "./controle.seed";
+import {
+  createFakeEvaluation,
+  EvaluationWithFileUploads,
+} from "./evaluation.seed";
 import { createFakeEvenementIndesirableGrave } from "./evenement-indesirable-grave.seed";
 import { createFakeFileUpload } from "./file-upload.seed";
 import { createFakeFormWithSteps } from "./form.seed";
@@ -91,8 +95,8 @@ export const createFakeStructure = ({
       departementAdministratif,
       counter,
     }),
-    // TODO : à gérer quand les filiales d'opérateurs seront en DB
-    filiale: "",
+    filiale:
+      faker.helpers.maybe(() => faker.word.noun(), { probability: 0.5 }) || "",
     adresseAdministrative: faker.location.streetAddress(),
     communeAdministrative: faker.location.city(),
     codePostalAdministratif: faker.location.zipCode(),
@@ -115,10 +119,6 @@ export const createFakeStructure = ({
     finPeriodeAutorisation: isAutorisee ? finPeriodeAutorisation : null,
     debutCpom: cpom ? debutCpom : null,
     finCpom: cpom ? finCpom : null,
-    placesACreer: faker.number.int(100),
-    placesAFermer: faker.number.int(100),
-    echeancePlacesACreer: faker.date.future(),
-    echeancePlacesAFermer: faker.date.future(),
     notes: faker.lorem.lines(2),
     activeInOfiiFileSince:
       faker.helpers.maybe(
@@ -132,6 +132,7 @@ type StructureWithRelations = Structure & {
   contacts: Omit<Contact, "id" | "structureDnaCode">[];
   adresses: Omit<AdresseWithTypologies, "id" | "structureDnaCode">[];
   controles: Omit<ControleWithFileUploads, "id" | "structureDnaCode">[];
+  evaluations: Omit<EvaluationWithFileUploads, "id" | "structureDnaCode">[];
   structureTypologies: Omit<StructureTypologie, "id" | "structureDnaCode">[];
   budgets: Omit<Budget, "id" | "structureDnaCode">[];
   activites: Omit<Activite, "id" | "structureDnaCode">[];
@@ -195,7 +196,7 @@ export const createFakeStuctureWithRelations = ({
     ),
     activites: createFakeActivites(),
     evenementsIndesirablesGraves: Array.from(
-      { length: faker.number.int({ min: 0, max: 5 }) },
+      { length: faker.number.int({ min: 0, max: 15 }) },
       () => createFakeEvenementIndesirableGrave()
     ),
     forms,
@@ -216,6 +217,11 @@ export const createFakeStuctureWithRelations = ({
         createFakeControle(),
         createFakeControle(),
       ],
+      evaluations: isStructureAutorisee(type)
+        ? Array.from({ length: faker.number.int({ min: 0, max: 5 }) }, () =>
+            createFakeEvaluation()
+          )
+        : [],
     };
   }
 

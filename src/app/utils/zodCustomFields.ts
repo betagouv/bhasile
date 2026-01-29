@@ -46,7 +46,7 @@ export const nullishFrenchDateToISO = () =>
         return null;
       }
       if (val === undefined || val === "") {
-        return undefined;
+        return null; // We return null instead of undefined to send it to the backend (and erase previous value)
       }
       return transformFrenchDateToISO(val);
     })

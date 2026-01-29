@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeAccents } from "@/app/utils/string.util";
+import {
+  capitalizeFirstLetter,
+  normalizeAccents,
+} from "@/app/utils/string.util";
 
 describe("string util", () => {
   describe("normalizeAccents", () => {
@@ -28,6 +31,30 @@ describe("string util", () => {
 
     it("gère les caractères accentués mélangés à des caractères non accentués", () => {
       expect(normalizeAccents("Joël & Zoë")).toBe("joel & zoe");
+    });
+  });
+  describe("capitalizeFirstLetter", () => {
+    it("preserve already capitalized string", () => {
+      expect(capitalizeFirstLetter("Hello")).toBe("Hello");
+    });
+    it("handle empty string", () => {
+      expect(capitalizeFirstLetter("")).toBe("");
+    });
+    it("handle strings starting with non-alphabetic character", () => {
+      expect(capitalizeFirstLetter("1hello")).toBe("1hello");
+    });
+    it("handle accented characters", () => {
+      expect(capitalizeFirstLetter("école")).toBe("École");
+      expect(capitalizeFirstLetter("été")).toBe("Été");
+    });
+    it("capitalize first letter of multiword string", () => {
+      expect(capitalizeFirstLetter("hello world")).toBe("Hello world");
+    });
+    it("returns empty string when given null", () => {
+      expect(capitalizeFirstLetter(null)).toBe("");
+    });
+    it("returns empty string when given undefined", () => {
+      expect(capitalizeFirstLetter(undefined)).toBe("");
     });
   });
 });

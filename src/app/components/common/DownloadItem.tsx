@@ -40,7 +40,7 @@ export const DownloadItem = ({
       );
       const startYear = getYearFromDate(fileUpload.startDate);
       const endYear = getYearFromDate(fileUpload.endDate);
-      if (isNaN(startYear) || isNaN(endYear)) {
+      if (startYear === -1 || endYear === -1) {
         return categoryLabel;
       }
       return `${categoryLabel} ${startYear} - ${endYear}`;

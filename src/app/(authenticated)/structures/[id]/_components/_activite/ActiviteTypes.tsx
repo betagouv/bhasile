@@ -7,35 +7,29 @@ export const ActiviteTypes = ({
   typeActivite,
   setTypeActivite,
 }: Props): ReactElement => {
-  const tags = [
+  const tags: ActiviteTag[] = [
     {
       label: "Présences indues BPI",
-      onClick: () => setTypeActivite("presencesInduesBPI"),
       value: "presencesInduesBPI",
     },
     {
       label: "Présences indues déboutées",
-      onClick: () => setTypeActivite("presencesInduesDeboutees"),
       value: "presencesInduesDeboutees",
     },
     {
       label: "Présences indues totales",
-      onClick: () => setTypeActivite("presencesIndues"),
       value: "presencesIndues",
     },
     {
       label: "Vacantes",
-      onClick: () => setTypeActivite("placesVacantes"),
       value: "placesVacantes",
     },
     {
       label: "Indisponibles",
-      onClick: () => setTypeActivite("placesIndisponibles"),
       value: "placesIndisponibles",
     },
     {
       label: "Total",
-      onClick: () => setTypeActivite("placesAutorisees"),
       value: "placesAutorisees",
     },
   ];
@@ -46,7 +40,20 @@ export const ActiviteTypes = ({
         <div key={`tag-${index}`} className="pr-2">
           <Tag
             nativeButtonProps={{
-              onClick: tag.onClick,
+              onClick: (event) => {
+                if (tag.value === typeActivite) {
+                  event.preventDefault();
+                  return;
+                }
+                setTypeActivite(tag.value);
+              },
+              style:
+                tag.value === typeActivite
+                  ? {
+                      pointerEvents: "none",
+                      cursor: "default",
+                    }
+                  : {},
             }}
             pressed={tag.value === typeActivite}
           >
@@ -61,4 +68,9 @@ export const ActiviteTypes = ({
 type Props = {
   typeActivite: keyof ActiviteApiType;
   setTypeActivite: (typeActivite: keyof ActiviteApiType) => void;
+};
+
+type ActiviteTag = {
+  label: string;
+  value: keyof ActiviteApiType;
 };
