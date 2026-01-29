@@ -3,7 +3,7 @@ import { Page } from "@playwright/test";
 import { parseAddress } from "../shared-utils";
 
 export async function mockAddressApi(page: Page, fullAddress: string) {
-  await page.route("https://api-adresse.data.gouv.fr/**", async (route) => {
+  await page.route("https://data.geopf.fr/geocodage/**", async (route) => {
     const url = new URL(route.request().url());
     const query = url.searchParams.get("q")?.trim();
     const addressSuggestion = buildAddressSuggestion(query || fullAddress);
