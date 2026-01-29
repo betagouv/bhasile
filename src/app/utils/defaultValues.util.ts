@@ -78,10 +78,6 @@ export const getDefaultValues = ({
     departementAdministratif: structure.departementAdministratif || "",
     typeBati: repartition,
     adresses: transformApiAdressesToFormAdresses(structure.adresses),
-    placesACreer: structure.placesACreer ?? undefined,
-    placesAFermer: structure.placesAFermer ?? undefined,
-    echeancePlacesACreer: structure.echeancePlacesACreer ?? undefined,
-    echeancePlacesAFermer: structure.echeancePlacesAFermer ?? undefined,
     date303: structure.date303 ?? undefined,
     budgets,
     structureTypologies,
@@ -112,10 +108,6 @@ type StructureDefaultValues = Omit<
   | "communeAdministrative"
   | "departementAdministratif"
   | "adresses"
-  | "placesACreer"
-  | "placesAFermer"
-  | "echeancePlacesACreer"
-  | "echeancePlacesAFermer"
   | "actesAdministratifs"
   | "documentsFinanciers"
   | "controles"
@@ -141,10 +133,6 @@ type StructureDefaultValues = Omit<
   departementAdministratif: string;
   typeBati: Repartition;
   adresses: FormAdresse[];
-  placesACreer?: number;
-  placesAFermer?: number;
-  echeancePlacesACreer?: string;
-  echeancePlacesAFermer?: string;
   documentsFinanciers: DocumentFinancierFlexibleFormValues[];
   actesAdministratifs: ActeAdministratifFormValues[];
   controles: ControleFormValues[];

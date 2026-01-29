@@ -1,15 +1,17 @@
 "use client";
 
-import dayjs from "dayjs";
-import { ReactElement, useState } from "react";
+import dayjs, { Dayjs } from "dayjs";
+import { ReactElement, useEffect, useState } from "react";
 
 import LineChart from "@/app/components/common/LineChart";
+import { ActiviteStats, useActiviteStats } from "@/app/hooks/useActiviteStats";
 import { computeAverage } from "@/app/utils/common.util";
 import {
   formatForCharts,
-  getMonthsBetween,
+  getLastMonths,
   getYearFromDate,
 } from "@/app/utils/date.util";
+import { capitalizeFirstLetter } from "@/app/utils/string.util";
 import { ActiviteApiType } from "@/schemas/api/activite.schema";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -32,10 +34,32 @@ export const ActiviteHistorique = (): ReactElement => {
   const { activites = [], debutConvention, finConvention } = structure;
 
   const [selectedMonths, setSelectedMonths] = useState<dayjs.Dayjs[]>(
-    getMonthsBetween(debutConvention, finConvention)
+    getLastMonths(6)
   );
   const [typeActivite, setTypeActivite] =
     useState<keyof ActiviteApiType>("presencesInduesBPI");
+
+  const [activiteStats, setActiviteStats] = useState<ActiviteStats>();
+
+  const { getStats } = useActiviteStats();
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const stats = await getStats(
+        structure.departementAdministratif,
+        selectedMonths[0]?.toISOString(),
+        (selectedMonths.at(-1) as Dayjs)?.toISOString()
+      );
+      setActiviteStats(stats);
+    };
+    fetchStats();
+  }, [
+    typeActivite,
+    selectedMonths,
+    setActiviteStats,
+    structure.departementAdministratif,
+    getStats,
+  ]);
 
   const getCurrentActivite = (
     activites: ActiviteApiType[],
@@ -49,7 +73,7 @@ export const ActiviteHistorique = (): ReactElement => {
     });
   };
 
-  const getActivitesData = (): number[] => {
+  const getActivitesData = (): (number | null)[] => {
     return selectedMonths.map((selectedMonth) => {
       const currentActivite = getCurrentActivite(activites, selectedMonth);
       if (currentActivite) {
@@ -62,11 +86,11 @@ export const ActiviteHistorique = (): ReactElement => {
           100
         );
       }
-      return 0;
+      return null;
     });
   };
 
-  const getSeuilRecommande = (): number[] => {
+  const getSeuilCahierDesCharges = (): number[] => {
     const currentActivites: (ActiviteApiType | undefined)[] =
       selectedMonths.map((selectedMonth) => {
         return getCurrentActivite(activites, selectedMonth);
@@ -74,17 +98,29 @@ export const ActiviteHistorique = (): ReactElement => {
     return currentActivites.map(() => typesActivite[typeActivite]?.seuil || 0);
   };
 
-  const getAverage = (): number[] => {
+  const getStructureAverage = (): number[] => {
     const activitesData = getActivitesData();
     const average = computeAverage(activitesData);
     return Array(selectedMonths.length).fill(average);
   };
 
-  const getSeries = (): number[][] => {
+  const getDepartmentAverage = (): number[] => {
+    const activiteStatsKey =
+      `average${capitalizeFirstLetter(typeActivite)}` as keyof ActiviteStats;
+    const average = activiteStats?.[activiteStatsKey];
+    return Array(selectedMonths.length).fill(average);
+  };
+
+  const getSeries = (): (number | null)[][] => {
     if (typesActivite[typeActivite]?.seuil) {
-      return [getActivitesData(), getSeuilRecommande(), getAverage()];
+      return [
+        getActivitesData(),
+        getSeuilCahierDesCharges(),
+        getStructureAverage(),
+        getDepartmentAverage(),
+      ];
     }
-    return [getActivitesData(), getAverage()];
+    return [getActivitesData()];
   };
 
   return (
@@ -112,7 +148,13 @@ export const ActiviteHistorique = (): ReactElement => {
             }}
             options={{
               fullWidth: true,
-              axisX: { showGrid: false },
+              axisX: {
+                showGrid: false,
+                labelInterpolationFnc: (value, index) => {
+                  const skip = Math.ceil(selectedMonths.length / 8);
+                  return index % skip === 0 ? value : null;
+                },
+              },
               axisY: {
                 offset: 50,
                 labelInterpolationFnc: (value) => {
@@ -125,22 +167,28 @@ export const ActiviteHistorique = (): ReactElement => {
           />
         </div>
         <div className="pl-5">
-          <div className="pb-1 flex items-center">
-            <div className="w-[40px] border-b-2 border-b-background-flat-blue-cumulus mr-2 shrink-0 grow-0" />
+          <div className="pb-1 flex items-center text-sm">
+            <div className="w-[40px] border-b-2 border-b-background-flat-blue-france mr-2 shrink-0 grow-0" />
             {typesActivite[typeActivite]?.label}
           </div>
           {typesActivite[typeActivite]?.seuil && (
-            <div className="pb-1 flex items-center">
-              <div className="w-[40px] border-b-2 border-b-background-flat-blue-ecume border-dashed mr-2 shrink-0 grow-0" />
-              Seuil recommandé
+            <div className="pb-1 flex items-center text-sm">
+              <div className="w-[40px] border-b-2 border-default-blue-france border-dashed mr-2 shrink-0 grow-0" />
+              Seuil cahier des charges
             </div>
           )}
-          <div className="pb-1 flex items-center">
-            <div
-              className={`w-[40px] border-b-2 border-b-background-flat-${typesActivite[typeActivite]?.seuil ? "green-bourgeon" : "blue-ecume"} border-dashed mr-2 shrink-0 grow-0`}
-            />
-            Moyenne sur la période
-          </div>
+          {typesActivite[typeActivite]?.seuil && (
+            <div className="pb-1 flex items-center text-sm">
+              <div className="w-[40px] border-b-2 border-default-green-archipel border-dashed mr-2 shrink-0 grow-0" />
+              Moyenne de la structure sur la période
+            </div>
+          )}
+          {typesActivite[typeActivite]?.seuil && (
+            <div className="pb-1 flex items-center text-sm">
+              <div className="w-[40px] border-b-2 border-default-purple-glycine border-dashed mr-2 shrink-0 grow-0" />
+              Moyenne départementale sur la période
+            </div>
+          )}
         </div>
       </div>
     </div>

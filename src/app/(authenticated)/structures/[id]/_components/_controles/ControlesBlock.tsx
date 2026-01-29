@@ -36,18 +36,25 @@ export const ControlesBlock = (): ReactElement => {
     >
       <div className="flex">
         <div className="pr-4">
-          <InformationCard
-            primaryInformation={`${getLastVisitInMonths(
-              evaluations,
-              controles
-            )} mois`}
-            secondaryInformation="depuis la dernière visite"
-          />
+          {evaluations.length === 0 && controles.length === 0 ? (
+            <InformationCard
+              primaryInformation="Aucune visite"
+              secondaryInformation="renseignée pour cette structure"
+            />
+          ) : (
+            <InformationCard
+              primaryInformation={`${getLastVisitInMonths(
+                evaluations,
+                controles
+              )} mois`}
+              secondaryInformation="depuis la dernière visite"
+            />
+          )}
         </div>
         {evaluations[0]?.note !== undefined && (
           <div className="pr-4">
             <InformationCard
-              primaryInformation={`${evaluations[0]?.note}/5`}
+              primaryInformation={`${evaluations[0]?.note} / 4`}
               secondaryInformation="de moyenne à la dernière évaluation"
             />
           </div>

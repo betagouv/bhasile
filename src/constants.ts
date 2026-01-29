@@ -24,6 +24,7 @@ export const SPREADSHEET_MIME_TYPES = [
   "application/vnd.ms-excel",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/vnd.oasis.opendocument.spreadsheet",
+  "application/vnd.ms-excel.sheet.macroenabled.12",
   "text/csv",
 ];
 export const ALLOWED_MIME_TYPES = [

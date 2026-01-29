@@ -8,6 +8,10 @@
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_global_quality" AS
 SELECT
   s."dnaCode" AS "dnaCode",
+  s.id AS "id",
+  o."name" AS "operateur",
+  d."region" AS "region",
+  s."updatedAt" AS "updatedAt",
   -- Calendar indicators
   COALESCE(cal."has_authorisation_dates_undefined", FALSE) AS "has_authorisation_dates_undefined",
   COALESCE(cal."has_issue_authorisation_period_not_15y", FALSE) AS "has_issue_authorisation_period_not_15y",
@@ -38,4 +42,11 @@ FROM
   public."Structure" s
   LEFT JOIN:"SCHEMA"."structures_calendar_quality" cal ON cal."dnaCode" = s."dnaCode"
   LEFT JOIN:"SCHEMA"."structures_places_quality" pl ON pl."dnaCode" = s."dnaCode"
-  LEFT JOIN:"SCHEMA"."structures_finance_quality" fin ON fin."dnaCode" = s."dnaCode";
+  LEFT JOIN:"SCHEMA"."structures_finance_quality" fin ON fin."dnaCode" = s."dnaCode"
+  LEFT JOIN public."Operateur" o ON o."id" = s."operateurId"
+  LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
+  LEFT JOIN public."Form" f ON f."structureCodeDna" = s."dnaCode"
+  LEFT JOIN public."FormDefinition" fd ON fd."id" = f."formDefinitionId"
+WHERE
+  fd."slug" = 'finalisation-v1'
+  AND f."status" = TRUE;
