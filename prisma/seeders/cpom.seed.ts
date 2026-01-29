@@ -87,7 +87,16 @@ export const createFakeCpoms = async (
       min: currentYear - dureeAnnees,
       max: currentYear,
     });
+    const dateStart = faker.date.between({
+      from: new Date(yearStart, 0, 1),
+      to: new Date(yearStart, 11, 31),
+    });
+
     const yearEnd = yearStart + dureeAnnees;
+    const dateEnd = faker.date.between({
+      from: new Date(yearEnd, 0, 1),
+      to: new Date(yearEnd, 11, 31),
+    });
 
     const cpomName = `CPOM ${operateurIdStr} ${region} ${yearStart}-${yearEnd}`;
 
@@ -108,6 +117,8 @@ export const createFakeCpoms = async (
         operateurId: Number(operateurIdStr),
         yearStart,
         yearEnd,
+        dateStart,
+        dateEnd,
         structures: {
           create: selectedStructures.map((structureId) => {
             // 10% chance that a structure joins or leaves the CPOM in the middle
@@ -116,6 +127,8 @@ export const createFakeCpoms = async (
 
             let yearJoin: number | null = null;
             let yearLeave: number | null = null;
+            let dateJoin: Date | null = null;
+            let dateLeave: Date | null = null;
 
             if (joinLater) {
               const joinMin = Math.min(yearStart + 1, currentYear);
@@ -127,6 +140,10 @@ export const createFakeCpoms = async (
                 yearJoin = faker.number.int({
                   min: joinMin,
                   max: joinMax,
+                });
+                dateJoin = faker.date.between({
+                  from: new Date(yearJoin, 0, 1),
+                  to: new Date(yearJoin, 11, 31),
                 });
               }
             }
@@ -145,13 +162,19 @@ export const createFakeCpoms = async (
                   min: leaveMin,
                   max: leaveMax,
                 });
+                dateLeave = faker.date.between({
+                  from: new Date(yearLeave, 0, 1),
+                  to: new Date(yearLeave, 11, 31),
+                });
               }
             }
 
             return {
               structureId: structureId,
               yearStart: yearJoin,
+              dateStart: dateJoin,
               yearEnd: yearLeave,
+              dateEnd: dateLeave,
             };
           }),
         },
