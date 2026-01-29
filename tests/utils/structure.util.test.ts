@@ -296,7 +296,7 @@ describe("structure util", () => {
             yearEnd: undefined,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
-              operateur: {name: "Opérateur 1"},
+              operateur: { name: "Opérateur 1" },
               id: 1,
               name: "CPOM Test",
               yearStart: 2024,
@@ -332,7 +332,7 @@ describe("structure util", () => {
             yearEnd: undefined,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
-              operateur: {name: "Opérateur 1"},
+              operateur: { name: "Opérateur 1" },
               id: 1,
               name: "CPOM Test",
               yearStart: 2024,
@@ -401,7 +401,7 @@ describe("structure util", () => {
             yearEnd: undefined,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
-              operateur: {name: "Opérateur 1"},
+              operateur: { name: "Opérateur 1" },
               id: 1,
               name: "CPOM Test 1",
               yearStart: 2024,
@@ -422,7 +422,7 @@ describe("structure util", () => {
             yearEnd: undefined,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
-              operateur: {name: "Opérateur 1"},
+              operateur: { name: "Opérateur 1" },
               id: 2,
               name: "CPOM Test 2",
               yearStart: 2025,
@@ -458,7 +458,7 @@ describe("structure util", () => {
             yearEnd: undefined,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
-              operateur: {name: "Opérateur 1"},
+              operateur: { name: "Opérateur 1" },
               id: 1,
               name: "CPOM Test",
               yearStart: 2024,
@@ -480,7 +480,7 @@ describe("structure util", () => {
             yearEnd: undefined,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
-              operateur: {name: "Opérateur 1"},
+              operateur: { name: "Opérateur 1" },
               id: 1,
               name: "CPOM Test",
               yearStart: 2024,
@@ -519,7 +519,7 @@ describe("structure util", () => {
             yearEnd: 2025,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
-              operateur: {name: "Opérateur 1"},
+              operateur: { name: "Opérateur 1" },
               id: 1,
               yearStart: 2024,
               yearEnd: 2026,
@@ -555,7 +555,7 @@ describe("structure util", () => {
             yearEnd: 2025,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
-              operateur: {name: "Opérateur 1"},
+              operateur: { name: "Opérateur 1" },
               id: 1,
               yearStart: 2025,
               yearEnd: 2025,
@@ -587,7 +587,7 @@ describe("structure util", () => {
             yearEnd: 2024,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
-              operateur: {name: "Opérateur 1"},
+              operateur: { name: "Opérateur 1" },
               id: 1,
               yearStart: 2024,
               yearEnd: 2024,
@@ -632,7 +632,7 @@ describe("structure util", () => {
             yearEnd: undefined,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
-              operateur: {name: "Opérateur 1"},
+              operateur: { name: "Opérateur 1" },
               id: 1,
               yearStart: 2025,
               yearEnd: 2025,
@@ -782,7 +782,7 @@ describe("structure util", () => {
           yearEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
-            operateur: {name: "Opérateur 1"},
+            operateur: { name: "Opérateur 1" },
             id: 1,
             name: "CPOM Test",
             yearStart: 2024,
@@ -835,7 +835,7 @@ describe("structure util", () => {
           yearEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
-            operateur: {name: "Opérateur 1"},
+            operateur: { name: "Opérateur 1" },
             id: 1,
             name: "CPOM Test",
             yearStart: 2024,
@@ -878,7 +878,7 @@ describe("structure util", () => {
           yearEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
-            operateur: {name: "Opérateur 1"},
+            operateur: { name: "Opérateur 1" },
             id: 1,
             name: "CPOM Test 1",
             yearStart: 2024,
@@ -899,7 +899,7 @@ describe("structure util", () => {
           yearEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
-            operateur: {name: "Opérateur 1"},
+            operateur: { name: "Opérateur 1" },
             id: 2,
             name: "CPOM Test 2",
             yearStart: 2024,
@@ -935,7 +935,7 @@ describe("structure util", () => {
           yearEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
-            operateur: {name: "Opérateur 1"},
+            operateur: { name: "Opérateur 1" },
             id: 1,
             name: "CPOM Test 1",
             yearStart: 2024,
@@ -956,7 +956,7 @@ describe("structure util", () => {
           yearEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
-            operateur: {name: "Opérateur 1"},
+            operateur: { name: "Opérateur 1" },
             id: 2,
             name: "CPOM Test 2",
             yearStart: 2025,
@@ -992,7 +992,7 @@ describe("structure util", () => {
           yearEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
-            operateur: {name: "Opérateur 1"},
+            operateur: { name: "Opérateur 1" },
             id: 1,
             name: "CPOM Test 1",
             yearStart: 2024,
@@ -1008,7 +1008,7 @@ describe("structure util", () => {
           yearEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
-            operateur: {name: "Opérateur 1"},
+            operateur: { name: "Opérateur 1" },
             id: 2,
             name: "CPOM Test 2",
             yearStart: 2025,
@@ -1044,7 +1044,7 @@ describe("structure util", () => {
           yearEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
-            operateur: {name: "Opérateur 1"},
+            operateur: { name: "Opérateur 1" },
             id: 1,
             name: "CPOM Test",
             yearStart: 2024,
@@ -1088,7 +1088,7 @@ describe("structure util", () => {
           yearEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
-            operateur: {name: "Opérateur 1"},
+            operateur: { name: "Opérateur 1" },
             id: 1,
             name: "CPOM Test",
             yearStart: 2024,

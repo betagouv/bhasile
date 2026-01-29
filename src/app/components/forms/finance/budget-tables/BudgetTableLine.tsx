@@ -4,10 +4,14 @@ import { useForm, useFormContext } from "react-hook-form";
 import { getName, isInputDisabled } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
+<<<<<<< HEAD
 import {
   CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
+=======
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+>>>>>>> origin/migration
 
 import InputWithValidation from "../../InputWithValidation";
 
@@ -17,7 +21,10 @@ export const BudgetTableLine = ({
   subLabel,
   budgets,
   cpomStructures,
+<<<<<<< HEAD
   cpomMillesimes,
+=======
+>>>>>>> origin/migration
   disabledYearsStart,
   enabledYears,
 }: Props) => {
@@ -29,7 +36,11 @@ export const BudgetTableLine = ({
 
   const { years } = getYearRange({ order: "desc" });
 
+<<<<<<< HEAD
   if (!budgets && !cpomStructures && !cpomMillesimes) {
+=======
+  if (!budgets && !cpomStructures) {
+>>>>>>> origin/migration
     return null;
   }
 
@@ -44,6 +55,7 @@ export const BudgetTableLine = ({
         <td key={year}>
           <span className="flex items-center justify-center gap-2">
             <InputWithValidation
+<<<<<<< HEAD
               name={getName(
                 name,
                 year,
@@ -52,6 +64,10 @@ export const BudgetTableLine = ({
                 cpomMillesimes
               )}
               id={getName(name, year, budgets, cpomStructures, cpomMillesimes)}
+=======
+              name={getName(name, year, budgets, cpomStructures)}
+              id={getName(name, year, budgets, cpomStructures)}
+>>>>>>> origin/migration
               control={control}
               type="number"
               min={0}
@@ -79,7 +95,10 @@ type Props = {
   subLabel?: string;
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];
+<<<<<<< HEAD
   cpomMillesimes?: CpomMillesimeApiType[];
+=======
+>>>>>>> origin/migration
   disabledYearsStart?: number;
   enabledYears?: number[];
 };

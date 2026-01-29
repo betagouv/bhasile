@@ -47,7 +47,7 @@ export const evaluationSchema = evaluationAutoSaveSchema
   )
   .refine(
     (data) => {
-      if (data.fileUploads && data.fileUploads.length !== 0) {
+      if (data.date && data.fileUploads && data.fileUploads.length !== 0) {
         return (
           data.fileUploads[0]?.key !== undefined &&
           data.fileUploads[0]?.id !== undefined
@@ -63,11 +63,30 @@ export const evaluationSchema = evaluationAutoSaveSchema
 
 export const evaluationsSchema = z.object({
   evaluations: z.array(evaluationSchema).optional(),
+  noEvaluationStructure: z.boolean().optional(),
 });
 
 export const evaluationsAutoSaveSchema = z.object({
   evaluations: z.array(evaluationAutoSaveSchema).optional(),
+  noEvaluationStructure: z.boolean().optional(),
 });
+
+export const evaluationsSchemaWithConditionalValidation =
+  evaluationsSchema.superRefine((data, ctx) => {
+    if (data.noEvaluationStructure === true) {
+      return;
+    }
+    if (
+      data.evaluations?.length !== 0 &&
+      !data.evaluations?.find((evaluation) => evaluation.date)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Au moins une évaluation est obligatoire",
+        path: ["evaluations"],
+      });
+    }
+  });
 
 export type EvaluationFormValues = z.infer<typeof evaluationSchema>;
 export type EvaluationsFormValues = z.infer<typeof evaluationsSchema>;

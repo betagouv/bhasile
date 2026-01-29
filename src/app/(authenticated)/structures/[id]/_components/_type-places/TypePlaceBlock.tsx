@@ -21,13 +21,11 @@ export const TypePlaceBlock = (): ReactElement => {
   const router = useRouter();
 
   const {
-    placesACreer,
-    placesAFermer,
-    echeancePlacesACreer,
-    echeancePlacesAFermer,
     structureTypologies,
     adresses,
   } = structure;
+
+  const { placesACreer, placesAFermer, echeancePlacesACreer, echeancePlacesAFermer } = structureTypologies?.[0] || {};
 
   return (
     <Block

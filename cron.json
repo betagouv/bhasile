@@ -1,0 +1,7 @@
+{
+  "jobs": [
+    {
+      "command": "0 10 * * * yarn script eig-fetch eig-fetch.ts"
+    }
+  ]
+}

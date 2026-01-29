@@ -1,7 +1,11 @@
 import z from "zod";
 
 import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
-import { nullishFrenchDateToISO, zId, zSafeYear } from "@/app/utils/zodCustomFields";
+import {
+  nullishFrenchDateToISO,
+  zId,
+  zSafeYear,
+} from "@/app/utils/zodCustomFields";
 import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 import { CURRENT_YEAR } from "@/constants";
 

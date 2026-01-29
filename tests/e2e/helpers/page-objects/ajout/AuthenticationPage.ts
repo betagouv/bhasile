@@ -13,7 +13,7 @@ export class AuthenticationPage {
       .locator('input[type="password"]')
       .count();
 
-    const password = process.env.OPERATEUR_PASSWORD?.split(",")[0];
+    const password = process.env.OPERATEUR_PASSWORD?.split(",")[0]?.trim();
 
     if (passwordInput > 0) {
       // Password protection is active - authenticate

@@ -1,20 +1,28 @@
 import { ReactNode } from "react";
 
 import { BudgetApiType } from "@/schemas/api/budget.schema";
+<<<<<<< HEAD
 import {
   CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
+=======
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+>>>>>>> origin/migration
 
 import { BudgetTableLine } from "./BudgetTableLine";
 import { BudgetTableTitleLine } from "./BudgetTableTitleLine";
 
+<<<<<<< HEAD
 export const BudgetTableLines = ({
   lines,
   budgets,
   cpomStructures,
   cpomMillesimes,
 }: Props) => {
+=======
+export const BudgetTableLines = ({ lines, budgets, cpomStructures }: Props) => {
+>>>>>>> origin/migration
   return (
     <>
       {lines.map((block) => (
@@ -30,7 +38,10 @@ export const BudgetTableLines = ({
               enabledYears={line.enabledYears}
               budgets={budgets}
               cpomStructures={cpomStructures}
+<<<<<<< HEAD
               cpomMillesimes={cpomMillesimes}
+=======
+>>>>>>> origin/migration
             />
           ))}
         </>
@@ -52,5 +63,8 @@ type Props = {
   }[];
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];
+<<<<<<< HEAD
   cpomMillesimes?: CpomMillesimeApiType[];
+=======
+>>>>>>> origin/migration
 };

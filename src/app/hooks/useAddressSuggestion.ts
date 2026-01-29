@@ -6,7 +6,7 @@ export function useAddressSuggestion() {
 
     try {
       const response = await fetch(
-        `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(
+        `https://data.geopf.fr/geocodage/search/?q=${encodeURIComponent(
           query
         )}&limit=5`
       );

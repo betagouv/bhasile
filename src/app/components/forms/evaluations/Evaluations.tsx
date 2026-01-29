@@ -16,6 +16,7 @@ export const Evaluations = (): ReactElement => {
   });
 
   const evaluations = watch("evaluations") || [];
+  const noEvaluationStructure = watch("noEvaluationStructure");
 
   const createNewEvaluation = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -65,23 +66,26 @@ export const Evaluations = (): ReactElement => {
           />
         )}
       />
-      {evaluations.map((field: EvaluationFormValues, index: number) => {
-        return (
-          <Evaluation
-            key={field.id || field.uuid}
-            field={field}
-            index={index}
-            deleteEvaluation={() => deleteEvaluation(index)}
-          />
-        );
-      })}
-      <Button
-        onClick={createNewEvaluation}
-        priority="tertiary no outline"
-        className="underline font-normal p-0"
-      >
-        + Ajouter une évaluation
-      </Button>
+      {!noEvaluationStructure &&
+        evaluations.map((field: EvaluationFormValues, index: number) => {
+          return (
+            <Evaluation
+              key={field.id || field.uuid}
+              field={field}
+              index={index}
+              deleteEvaluation={() => deleteEvaluation(index)}
+            />
+          );
+        })}
+      {!noEvaluationStructure && (
+        <Button
+          onClick={createNewEvaluation}
+          priority="tertiary no outline"
+          className="underline font-normal p-0"
+        >
+          + Ajouter une évaluation
+        </Button>
+      )}
     </fieldset>
   );
 };
