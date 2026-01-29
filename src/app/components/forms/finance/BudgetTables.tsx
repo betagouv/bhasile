@@ -9,7 +9,7 @@ import {
 import { getFinanceFormTutorialLink } from "@/app/utils/tutorials.util";
 
 import { useStructureContext } from "../../../(authenticated)/structures/[id]/_context/StructureClientContext";
-import { CpomTable } from "./budget-tables/CpomTable";
+//import { CpomTable } from "./budget-tables/CpomTable";
 import { StructureTable } from "./budget-tables/StructureTable";
 
 export const BudgetTables = () => {
