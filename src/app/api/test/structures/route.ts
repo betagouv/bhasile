@@ -5,6 +5,9 @@ import { createPrismaClient } from "../../../../../prisma/client";
 const prisma = createPrismaClient();
 
 export async function POST(request: NextRequest) {
+  if (process.env.NODE_ENV !== "development") {
+    return NextResponse.json({ error: "Not allowed" }, { status: 403 });
+  }
   try {
     const body = await request.json();
     const dnaCode = body?.dnaCode;
@@ -86,6 +89,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  if (process.env.NODE_ENV !== "development") {
+    return NextResponse.json({ error: "Not allowed" }, { status: 403 });
+  }
   try {
     const dnaCode = request.nextUrl.searchParams.get("dnaCode");
     if (!dnaCode) {
