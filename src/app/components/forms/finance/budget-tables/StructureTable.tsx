@@ -53,11 +53,7 @@ export const StructureTable = () => {
           .replaceAll(" ", "")
           .replace(",", ".") || 0
       );
-<<<<<<< HEAD
       return totalValue > 0;
-=======
-      return totalValue !== 0 && !isNaN(totalValue);
->>>>>>> origin/migration
     })
     .map((budget) => budget.year);
 
@@ -104,11 +100,7 @@ const getLines = (
           {
             name: "dotationAccordee",
             label: "Dotation accordée",
-<<<<<<< HEAD
             disabledYearsStart: AUTORISEE_OPEN_YEAR + 1,
-=======
-            disabledYearsStart: AUTORISEE_OPEN_YEAR,
->>>>>>> origin/migration
           },
         ],
       },
