@@ -151,19 +151,19 @@ export const isStructureInCpom = (
 
 export const getCurrentCpomStructureDates = (
   structure: StructureApiType
-): { yearStart?: number; yearEnd?: number } => {
+): { dateStart?: string; dateEnd?: string } => {
   const currentCpomStructure = structure.cpomStructures?.find(
     (cpomStructure) => {
-      const yearStart =
-        cpomStructure.yearStart ?? cpomStructure.cpom?.yearStart;
-      const yearEnd = cpomStructure.yearEnd ?? cpomStructure.cpom?.yearEnd;
+      const dateStart =
+        cpomStructure.dateStart ?? cpomStructure.cpom?.dateStart;
+      const dateEnd = cpomStructure.dateEnd ?? cpomStructure.cpom?.dateEnd;
 
-      if (!yearStart || !yearEnd) {
+      if (!dateStart || !dateEnd) {
         return false;
       }
 
-      const yearDebut = getYearFromDate(yearStart);
-      const yearFin = getYearFromDate(yearEnd);
+      const yearDebut = getYearFromDate(dateStart);
+      const yearFin = getYearFromDate(dateEnd);
 
       return yearDebut <= CURRENT_YEAR && yearFin >= CURRENT_YEAR;
     }
@@ -173,14 +173,14 @@ export const getCurrentCpomStructureDates = (
     return {};
   }
 
-  const currentCpomStructureYearStart =
-    currentCpomStructure.yearStart ?? currentCpomStructure.cpom?.yearStart;
-  const currentCpomStructureYearEnd =
-    currentCpomStructure.yearEnd ?? currentCpomStructure.cpom?.yearEnd;
+  const currentCpomStructureDateStart =
+    currentCpomStructure.dateStart ?? currentCpomStructure.cpom?.dateStart;
+  const currentCpomStructureDateEnd =
+    currentCpomStructure.dateEnd ?? currentCpomStructure.cpom?.dateEnd;
 
   return {
-    yearStart: currentCpomStructureYearStart ?? undefined,
-    yearEnd: currentCpomStructureYearEnd ?? undefined,
+    dateStart: currentCpomStructureDateStart ?? undefined,
+    dateEnd: currentCpomStructureDateEnd ?? undefined,
   };
 };
 

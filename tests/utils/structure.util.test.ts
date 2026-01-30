@@ -292,15 +292,15 @@ describe("structure util", () => {
             id: 1,
             cpomId: 1,
             structureId: 1,
-            yearStart: undefined,
-            yearEnd: undefined,
+            dateStart: undefined,
+            dateEnd: undefined,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
               operateur: { name: "Opérateur 1" },
               id: 1,
               name: "CPOM Test",
-              yearStart: 2024,
-              yearEnd: 2026,
+              dateStart: "2024-01-01",
+              dateEnd: "2026-01-01",
               cpomMillesimes: [
                 {
                   id: 1,
@@ -328,15 +328,15 @@ describe("structure util", () => {
             id: 2,
             cpomId: 1,
             structureId: 2,
-            yearStart: undefined,
-            yearEnd: undefined,
+            dateStart: undefined,
+            dateEnd: undefined,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
               operateur: { name: "Opérateur 1" },
               id: 1,
               name: "CPOM Test",
-              yearStart: 2024,
-              yearEnd: 2026,
+              dateStart: "2024-01-01",
+              dateEnd: "2026-01-01",
               cpomMillesimes: [
                 {
                   id: 1,
@@ -397,15 +397,15 @@ describe("structure util", () => {
             id: 3,
             cpomId: 1,
             structureId: 5,
-            yearStart: undefined,
-            yearEnd: undefined,
+            dateStart: undefined,
+            dateEnd: undefined,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
               operateur: { name: "Opérateur 1" },
               id: 1,
               name: "CPOM Test 1",
-              yearStart: 2024,
-              yearEnd: 2024,
+              dateStart: "2024-01-01",
+              dateEnd: "2024-01-01",
               cpomMillesimes: [
                 {
                   id: 1,
@@ -418,15 +418,15 @@ describe("structure util", () => {
             id: 4,
             cpomId: 2,
             structureId: 5,
-            yearStart: undefined,
-            yearEnd: undefined,
+            dateStart: undefined,
+            dateEnd: undefined,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
               operateur: { name: "Opérateur 1" },
               id: 2,
               name: "CPOM Test 2",
-              yearStart: 2025,
-              yearEnd: 2026,
+              dateStart: "2025-01-01",
+              dateEnd: "2026-01-01",
               cpomMillesimes: [
                 {
                   id: 2,
@@ -454,15 +454,15 @@ describe("structure util", () => {
             id: 5,
             cpomId: 1,
             structureId: 6,
-            yearStart: undefined,
-            yearEnd: undefined,
+            dateStart: undefined,
+            dateEnd: undefined,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
               operateur: { name: "Opérateur 1" },
               id: 1,
               name: "CPOM Test",
-              yearStart: 2024,
-              yearEnd: 2026,
+              dateStart: "2024-01-01",
+              dateEnd: "2026-01-01",
               cpomMillesimes: undefined,
             },
           },
@@ -476,15 +476,15 @@ describe("structure util", () => {
             id: 6,
             cpomId: 1,
             structureId: 7,
-            yearStart: undefined,
-            yearEnd: undefined,
+            dateStart: undefined,
+            dateEnd: undefined,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
               operateur: { name: "Opérateur 1" },
               id: 1,
               name: "CPOM Test",
-              yearStart: 2024,
-              yearEnd: 2026,
+              dateStart: "2024-01-01",
+              dateEnd: "2026-01-01",
               cpomMillesimes: [],
             },
           },
@@ -515,14 +515,14 @@ describe("structure util", () => {
             id: 1,
             cpomId: 1,
             structureId: 1,
-            yearStart: 2025,
-            yearEnd: 2025,
+            dateStart: "2025-01-01",
+            dateEnd: "2025-01-01",
             cpom: {
               granularity: CpomGranularity.REGIONALE,
               operateur: { name: "Opérateur 1" },
               id: 1,
-              yearStart: 2024,
-              yearEnd: 2026,
+              dateStart: "2024-01-01",
+              dateEnd: "2026-01-01",
             },
           },
         ],
@@ -533,8 +533,8 @@ describe("structure util", () => {
 
       // THEN
       expect(result).toEqual({
-        yearStart: 2025,
-        yearEnd: 2025,
+        dateStart: "2025-01-01",
+        dateEnd: "2025-01-01",
       });
     });
 
@@ -551,14 +551,14 @@ describe("structure util", () => {
             id: 2,
             cpomId: 1,
             structureId: 1,
-            yearStart: 2025,
-            yearEnd: 2025,
+            dateStart: "2025-01-01",
+            dateEnd: "2025-01-01",
             cpom: {
               granularity: CpomGranularity.REGIONALE,
               operateur: { name: "Opérateur 1" },
               id: 1,
-              yearStart: 2025,
-              yearEnd: 2025,
+              dateStart: "2025-01-01",
+              dateEnd: "2025-01-01",
             },
           },
         ],
@@ -569,8 +569,8 @@ describe("structure util", () => {
 
       // THEN
       expect(result).toEqual({
-        yearStart: 2025,
-        yearEnd: 2025,
+        dateStart: "2025-01-01",
+        dateEnd: "2025-01-01",
       });
     });
 
@@ -583,14 +583,14 @@ describe("structure util", () => {
             id: 3,
             cpomId: 1,
             structureId: 1,
-            yearStart: 2024,
-            yearEnd: 2024,
+            dateStart: "2024-01-01",
+            dateEnd: "2024-01-01",
             cpom: {
               granularity: CpomGranularity.REGIONALE,
               operateur: { name: "Opérateur 1" },
               id: 1,
-              yearStart: 2024,
-              yearEnd: 2024,
+              dateStart: "2024-01-01",
+              dateEnd: "2024-01-01",
             },
           },
         ],
@@ -628,14 +628,14 @@ describe("structure util", () => {
             id: 6,
             cpomId: 1,
             structureId: 1,
-            yearStart: 2025,
-            yearEnd: undefined,
+            dateStart: "2025-01-01",
+            dateEnd: undefined,
             cpom: {
               granularity: CpomGranularity.REGIONALE,
               operateur: { name: "Opérateur 1" },
               id: 1,
-              yearStart: 2025,
-              yearEnd: 2025,
+              dateStart: "2025-01-01",
+              dateEnd: "2025-01-01",
             },
           },
         ],
@@ -646,8 +646,8 @@ describe("structure util", () => {
 
       // THEN
       expect(result).toEqual({
-        yearStart: 2025,
-        yearEnd: 2025,
+        dateStart: "2025-01-01",
+        dateEnd: "2025-01-01",
       });
     });
   });
@@ -778,15 +778,15 @@ describe("structure util", () => {
           id: 1,
           cpomId: 1,
           structureId: 1,
-          yearStart: undefined,
-          yearEnd: undefined,
+          dateStart: undefined,
+          dateEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
             operateur: { name: "Opérateur 1" },
             id: 1,
             name: "CPOM Test",
-            yearStart: 2024,
-            yearEnd: 2026,
+            dateStart: "2024-01-01",
+            dateEnd: "2026-01-01",
             cpomMillesimes: [
               {
                 id: 1,
@@ -831,15 +831,15 @@ describe("structure util", () => {
           id: 1,
           cpomId: 1,
           structureId: 1,
-          yearStart: undefined,
-          yearEnd: undefined,
+          dateStart: undefined,
+          dateEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
             operateur: { name: "Opérateur 1" },
             id: 1,
             name: "CPOM Test",
-            yearStart: 2024,
-            yearEnd: 2026,
+            dateStart: "2024-01-01",
+            dateEnd: "2026-01-01",
             cpomMillesimes: [
               {
                 id: 1,
@@ -874,15 +874,15 @@ describe("structure util", () => {
           id: 1,
           cpomId: 1,
           structureId: 1,
-          yearStart: undefined,
-          yearEnd: undefined,
+          dateStart: undefined,
+          dateEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
             operateur: { name: "Opérateur 1" },
             id: 1,
             name: "CPOM Test 1",
-            yearStart: 2024,
-            yearEnd: 2026,
+            dateStart: "2024-01-01",
+            dateEnd: "2026-01-01",
             cpomMillesimes: [
               {
                 id: 1,
@@ -895,15 +895,15 @@ describe("structure util", () => {
           id: 2,
           cpomId: 2,
           structureId: 1,
-          yearStart: undefined,
-          yearEnd: undefined,
+          dateStart: undefined,
+          dateEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
             operateur: { name: "Opérateur 1" },
             id: 2,
             name: "CPOM Test 2",
-            yearStart: 2024,
-            yearEnd: 2026,
+            dateStart: "2024-01-01",
+            dateEnd: "2026-01-01",
             cpomMillesimes: [
               {
                 id: 2,
@@ -931,15 +931,15 @@ describe("structure util", () => {
           id: 1,
           cpomId: 1,
           structureId: 1,
-          yearStart: undefined,
-          yearEnd: undefined,
+          dateStart: undefined,
+          dateEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
             operateur: { name: "Opérateur 1" },
             id: 1,
             name: "CPOM Test 1",
-            yearStart: 2024,
-            yearEnd: 2024,
+            dateStart: "2024-01-01",
+            dateEnd: "2024-01-01",
             cpomMillesimes: [
               {
                 id: 1,
@@ -952,15 +952,15 @@ describe("structure util", () => {
           id: 2,
           cpomId: 2,
           structureId: 1,
-          yearStart: undefined,
-          yearEnd: undefined,
+          dateStart: undefined,
+          dateEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
             operateur: { name: "Opérateur 1" },
             id: 2,
             name: "CPOM Test 2",
-            yearStart: 2025,
-            yearEnd: 2026,
+            dateStart: "2025-01-01",
+            dateEnd: "2026-01-01",
             cpomMillesimes: [
               {
                 id: 2,
@@ -988,15 +988,15 @@ describe("structure util", () => {
           id: 1,
           cpomId: 1,
           structureId: 1,
-          yearStart: undefined,
-          yearEnd: undefined,
+          dateStart: undefined,
+          dateEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
             operateur: { name: "Opérateur 1" },
             id: 1,
             name: "CPOM Test 1",
-            yearStart: 2024,
-            yearEnd: 2024,
+            dateStart: "2024-01-01",
+            dateEnd: "2024-01-01",
             cpomMillesimes: undefined,
           },
         },
@@ -1004,15 +1004,15 @@ describe("structure util", () => {
           id: 2,
           cpomId: 2,
           structureId: 1,
-          yearStart: undefined,
-          yearEnd: undefined,
+          dateStart: undefined,
+          dateEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
             operateur: { name: "Opérateur 1" },
             id: 2,
             name: "CPOM Test 2",
-            yearStart: 2025,
-            yearEnd: 2026,
+            dateStart: "2025-01-01",
+            dateEnd: "2026-01-01",
             cpomMillesimes: [
               {
                 id: 2,
@@ -1040,15 +1040,15 @@ describe("structure util", () => {
           id: 1,
           cpomId: 1,
           structureId: 1,
-          yearStart: undefined,
-          yearEnd: undefined,
+          dateStart: undefined,
+          dateEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
             operateur: { name: "Opérateur 1" },
             id: 1,
             name: "CPOM Test",
-            yearStart: 2024,
-            yearEnd: 2026,
+            dateStart: "2024-01-01",
+            dateEnd: "2026-01-01",
             cpomMillesimes: [
               {
                 id: 1,
@@ -1084,15 +1084,15 @@ describe("structure util", () => {
           id: 1,
           cpomId: 1,
           structureId: 1,
-          yearStart: undefined,
-          yearEnd: undefined,
+          dateStart: undefined,
+          dateEnd: undefined,
           cpom: {
             granularity: CpomGranularity.REGIONALE,
             operateur: { name: "Opérateur 1" },
             id: 1,
             name: "CPOM Test",
-            yearStart: 2024,
-            yearEnd: 2026,
+            dateStart: "2024-01-01",
+            dateEnd: "2026-01-01",
             cpomMillesimes: [
               {
                 id: 1,

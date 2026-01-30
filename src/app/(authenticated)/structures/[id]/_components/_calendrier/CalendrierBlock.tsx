@@ -3,7 +3,6 @@ import { ReactElement } from "react";
 
 import { DateBars } from "@/app/(authenticated)/structures/[id]/_components/_calendrier/DateBars";
 import { Block } from "@/app/components/common/Block";
-import { getYearDate } from "@/app/utils/date.util";
 import {
   getCurrentCpomStructureDates,
   isStructureInCpom,
@@ -24,7 +23,7 @@ export const CalendrierBlock = (): ReactElement => {
   } = structure;
 
   const isInCpom = isStructureInCpom(structure);
-  const { yearStart, yearEnd } = getCurrentCpomStructureDates(structure);
+  const { dateStart, dateEnd } = getCurrentCpomStructureDates(structure);
 
   const datePairs = [];
   if (debutPeriodeAutorisation && finPeriodeAutorisation) {
@@ -42,12 +41,11 @@ export const CalendrierBlock = (): ReactElement => {
     });
   }
 
-  // TODO: it shouldn't bet transformed in a date here. It should stay a year.
-  if (isInCpom && yearStart && yearEnd) {
+  if (isInCpom && dateStart && dateEnd) {
     datePairs.push({
       label: "CPOM en cours",
-      startDate: getYearDate(yearStart),
-      endDate: getYearDate(yearEnd),
+      startDate: dateStart,
+      endDate: dateEnd,
     });
   }
 

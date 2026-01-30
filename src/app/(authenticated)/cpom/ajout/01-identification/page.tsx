@@ -18,8 +18,8 @@ export default function CpomAjoutIdentification() {
   const defaultValues = {
     name: "",
     structures: [],
-    yearStart: undefined,
-    yearEnd: undefined,
+    dateStart: undefined,
+    dateEnd: undefined,
     operateur: {
       id: undefined,
       name: undefined,

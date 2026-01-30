@@ -8,15 +8,15 @@ export const DateSelector = () => {
   return (
     <div className="flex flex-col gap-2">
       <InputWithValidation
-        name={`yearStart`}
-        id={`yearStart`}
+        name={`dateStart`}
+        id={`dateStart`}
         control={control}
         type="date"
         label="Date de début"
       />
       <InputWithValidation
-        name={`yearEnd`}
-        id={`yearEnd`}
+        name={`dateEnd`}
+        id={`dateEnd`}
         control={control}
         type="date"
         label="Date de fin"

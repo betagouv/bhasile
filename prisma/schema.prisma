@@ -382,8 +382,8 @@ model Cpom {
   id             Int             @id @default(autoincrement())
   name           String?
   structures     CpomStructure[]
-  yearStart      Int
-  yearEnd        Int
+  yearStart      Int?
+  yearEnd        Int?
   granularity    CpomGranularity @default(REGIONALE)
   dateStart      DateTime?
   dateEnd        DateTime?

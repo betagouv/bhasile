@@ -10,14 +10,14 @@ export const getCpomDefaultValues = (cpom: CpomApiType): CpomFormValues => {
   return {
     ...cpom,
     name: cpom.name ?? "",
-    yearStart: cpom.yearStart ?? undefined,
-    yearEnd: cpom.yearEnd ?? undefined,
+    dateStart: cpom.dateStart ?? undefined,
+    dateEnd: cpom.dateEnd ?? undefined,
     operateur: cpom.operateur ?? undefined,
     structures: cpom.structures.map((structure) => ({
       ...structure,
       cpom: undefined,
-      yearStart: structure.yearStart ?? undefined,
-      yearEnd: structure.yearEnd ?? undefined,
+      dateStart: structure.dateStart ?? undefined,
+      dateEnd: structure.dateEnd ?? undefined,
     })),
     cpomMillesimes: getCpomMillesimesDefaultValues(cpom?.cpomMillesimes || []),
   };

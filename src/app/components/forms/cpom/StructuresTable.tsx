@@ -41,8 +41,8 @@ export const StructuresTable = ({ structures }: Props) => {
           <td>{structure.dnaCode}</td>
           <td>
             <InputWithValidation
-              name={`structures.${structure.index}.yearStart`}
-              id={`structures.${structure.index}.yearStart`}
+              name={`structures.${structure.index}.dateStart`}
+              id={`structures.${structure.index}.dateStart`}
               control={control}
               type="date"
               label=""
@@ -50,8 +50,8 @@ export const StructuresTable = ({ structures }: Props) => {
           </td>
           <td>
             <InputWithValidation
-              name={`structures.${structure.index}.yearEnd`}
-              id={`structures.${structure.index}.yearEnd`}
+              name={`structures.${structure.index}.dateEnd`}
+              id={`structures.${structure.index}.dateEnd`}
               control={control}
               type="date"
               label=""

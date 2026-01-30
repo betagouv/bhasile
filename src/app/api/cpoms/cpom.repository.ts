@@ -28,14 +28,14 @@ export const createOrUpdateCpom = async (
       where: { id: cpom.id ?? 0 },
       update: {
         name: cpom.name,
-        yearStart: cpom.yearStart,
-        yearEnd: cpom.yearEnd,
+        dateStart: cpom.dateStart,
+        dateEnd: cpom.dateEnd,
         operateurId,
       },
       create: {
         name: cpom.name,
-        yearStart: cpom.yearStart,
-        yearEnd: cpom.yearEnd,
+        dateStart: cpom.dateStart,
+        dateEnd: cpom.dateEnd,
         operateurId: operateurId as number,
       },
     });
@@ -69,8 +69,8 @@ const createOrUpdateCpomStructures = async (
     data: structures.map((structure) => ({
       cpomId,
       structureId: structure.structureId,
-      yearStart: structure.yearStart ?? null,
-      yearEnd: structure.yearEnd ?? null,
+      dateStart: structure.dateStart,
+      dateEnd: structure.dateEnd,
     })),
   });
 };

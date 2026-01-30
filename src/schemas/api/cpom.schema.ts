@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { zSafeYear, zSafeYearOptional } from "@/app/utils/zodCustomFields";
+import { zSafeYear } from "@/app/utils/zodCustomFields";
 import { CpomGranularity } from "@/types/cpom.type";
 
 import { operateurApiSchema } from "./operateur.schema";
@@ -27,8 +27,8 @@ export const cpomMillesimeApiSchema = z.object({
 const cpomApiBareSchema = z.object({
   id: z.number().optional(),
   name: z.string().nullish(),
-  yearStart: zSafeYear(),
-  yearEnd: zSafeYear(),
+  dateStart: z.string().datetime(),
+  dateEnd: z.string().datetime(),
   granularity: z.enum([
     CpomGranularity.DEPARTEMENTALE,
     CpomGranularity.INTERDEPARTEMENTALE,
@@ -44,8 +44,8 @@ export const cpomStructureApiSchema = z.object({
   cpomId: z.number().optional(),
   cpom: cpomApiBareSchema.optional(),
   structureId: z.number(),
-  yearStart: zSafeYearOptional(),
-  yearEnd: zSafeYearOptional(),
+  dateStart: z.string().datetime().nullish(),
+  dateEnd: z.string().datetime().nullish(),
 });
 
 export const cpomApiSchema = cpomApiBareSchema.extend({

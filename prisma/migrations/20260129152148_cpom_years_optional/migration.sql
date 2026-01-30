@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Cpom" ALTER COLUMN "yearEnd" DROP NOT NULL,
+ALTER COLUMN "yearStart" DROP NOT NULL;

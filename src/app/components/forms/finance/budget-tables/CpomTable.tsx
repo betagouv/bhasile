@@ -2,7 +2,7 @@ import { useFormContext } from "react-hook-form";
 
 import { useCpomContext } from "@/app/(authenticated)/cpom/[id]/_context/CpomClientContext";
 import { Table } from "@/app/components/common/Table";
-import { getYearRange } from "@/app/utils/date.util";
+import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLines } from "./BudgetTableLines";
@@ -18,7 +18,9 @@ export const CpomTable = () => {
   const { years } = getYearRange({ order: "desc" });
 
   const yearsInCpom = years.filter(
-    (year) => year >= cpom.yearStart && year <= cpom.yearEnd
+    (year) =>
+      year >= getYearFromDate(cpom.dateStart) &&
+      year <= getYearFromDate(cpom.dateEnd)
   );
 
   console.log(cpomMillesimes);

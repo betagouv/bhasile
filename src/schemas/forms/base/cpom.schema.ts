@@ -1,8 +1,8 @@
 import z from "zod";
 
 import {
-  frenchDateToYear,
-  nullishFrenchDateToYear,
+  frenchDateToISO,
+  nullishFrenchDateToISO,
   zId,
   zSafeDecimalsNullish,
   zSafeYear,
@@ -34,8 +34,8 @@ const cpomMillesimeSchema = z.object({
 const bareCpomSchema = z.object({
   id: zId(),
   name: z.string().nullish(),
-  yearStart: frenchDateToYear(),
-  yearEnd: frenchDateToYear(),
+  dateStart: frenchDateToISO(),
+  dateEnd: frenchDateToISO(),
   operateur: operateurSchema.optional(),
   operateurId: zId(),
   granularity: z.enum([
@@ -48,8 +48,8 @@ const bareCpomSchema = z.object({
 });
 
 export const cpomStructureSchema = z.object({
-  yearStart: nullishFrenchDateToYear(),
-  yearEnd: nullishFrenchDateToYear(),
+  dateStart: nullishFrenchDateToISO(),
+  dateEnd: nullishFrenchDateToISO(),
   structureId: zId(),
   cpom: bareCpomSchema.optional(),
 });

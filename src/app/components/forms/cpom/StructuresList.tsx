@@ -32,8 +32,8 @@ export const StructuresList = ({ structures }: Props) => {
       setValue("structures", [
         ...selectedStructures,
         {
-          yearStart: undefined,
-          yearEnd: undefined,
+          dateStart: undefined,
+          dateEnd: undefined,
           structureId: structureId,
         },
       ]);
