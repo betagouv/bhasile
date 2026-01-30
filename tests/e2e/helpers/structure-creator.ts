@@ -12,18 +12,6 @@ import {
 import { parseAddress } from "./shared-utils";
 import { TestStructureData } from "./test-data/types";
 
-type MinimalStructureSeed = {
-  dnaCode: string;
-  type?: string;
-  operateurName?: string;
-  operateurId?: number;
-  departementAdministratif?: string;
-  nom?: string;
-  adresseAdministrative?: string;
-  codePostalAdministratif?: string;
-  communeAdministrative?: string;
-};
-
 /**
  * Gets a structure's ID from its DNA code
  */
