@@ -26,7 +26,6 @@ const typesActivite: Partial<
   presencesIndues: { label: "Présences indues totales", seuil: 7 },
   placesVacantes: { label: "Places vacantes", seuil: 3 },
   placesIndisponibles: { label: "Places indisponibles", seuil: 3 },
-  placesAutorisees: { label: "Places totales", seuil: null },
 };
 
 export const ActiviteHistorique = (): ReactElement => {
@@ -111,18 +110,6 @@ export const ActiviteHistorique = (): ReactElement => {
     return Array(selectedMonths.length).fill(average);
   };
 
-  const getSeries = (): (number | null)[][] => {
-    if (typesActivite[typeActivite]?.seuil) {
-      return [
-        getActivitesData(),
-        getSeuilCahierDesCharges(),
-        getStructureAverage(),
-        getDepartmentAverage(),
-      ];
-    }
-    return [getActivitesData()];
-  };
-
   return (
     <div>
       <h4 className="text-lg text-title-blue-france">Historique</h4>
@@ -144,7 +131,12 @@ export const ActiviteHistorique = (): ReactElement => {
           <LineChart
             data={{
               labels: selectedMonths.map(formatForCharts),
-              series: getSeries(),
+              series: [
+                getActivitesData(),
+                getSeuilCahierDesCharges(),
+                getStructureAverage(),
+                getDepartmentAverage(),
+              ],
             }}
             options={{
               fullWidth: true,
@@ -158,9 +150,7 @@ export const ActiviteHistorique = (): ReactElement => {
               axisY: {
                 offset: 50,
                 labelInterpolationFnc: (value) => {
-                  return typesActivite[typeActivite]?.seuil
-                    ? value + " %"
-                    : value;
+                  return value + " %";
                 },
               },
             }}
@@ -171,24 +161,18 @@ export const ActiviteHistorique = (): ReactElement => {
             <div className="w-[40px] border-b-2 border-b-background-flat-blue-france mr-2 shrink-0 grow-0" />
             {typesActivite[typeActivite]?.label}
           </div>
-          {typesActivite[typeActivite]?.seuil && (
-            <div className="pb-1 flex items-center text-sm">
-              <div className="w-[40px] border-b-2 border-default-blue-france border-dashed mr-2 shrink-0 grow-0" />
-              Seuil cahier des charges
-            </div>
-          )}
-          {typesActivite[typeActivite]?.seuil && (
-            <div className="pb-1 flex items-center text-sm">
-              <div className="w-[40px] border-b-2 border-default-green-archipel border-dashed mr-2 shrink-0 grow-0" />
-              Moyenne de la structure sur la période
-            </div>
-          )}
-          {typesActivite[typeActivite]?.seuil && (
-            <div className="pb-1 flex items-center text-sm">
-              <div className="w-[40px] border-b-2 border-default-purple-glycine border-dashed mr-2 shrink-0 grow-0" />
-              Moyenne départementale sur la période
-            </div>
-          )}
+          <div className="pb-1 flex items-center text-sm">
+            <div className="w-[40px] border-b-2 border-default-blue-france border-dashed mr-2 shrink-0 grow-0" />
+            Seuil cahier des charges
+          </div>
+          <div className="pb-1 flex items-center text-sm">
+            <div className="w-[40px] border-b-2 border-default-green-archipel border-dashed mr-2 shrink-0 grow-0" />
+            Moyenne de la structure sur la période
+          </div>
+          <div className="pb-1 flex items-center text-sm">
+            <div className="w-[40px] border-b-2 border-default-purple-glycine border-dashed mr-2 shrink-0 grow-0" />
+            Moyenne départementale sur la période
+          </div>
         </div>
       </div>
     </div>

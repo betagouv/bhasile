@@ -28,10 +28,6 @@ export const ActiviteTypes = ({
       label: "Indisponibles",
       value: "placesIndisponibles",
     },
-    {
-      label: "Total",
-      value: "placesAutorisees",
-    },
   ];
 
   return (
