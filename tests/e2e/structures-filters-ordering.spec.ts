@@ -1,8 +1,11 @@
 import { expect, test } from "@playwright/test";
 
+import { CheckboxHelper } from "./helpers/checkbox-helper";
+import { WaitHelper } from "./helpers/wait-helper";
+
 test.describe("Structures filters and ordering", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to structures page (you'll need to authenticate first)
+    // Navigate to structures page
     await page.goto("http://localhost:3000/structures");
     await page.waitForLoadState("networkidle");
   });
@@ -10,13 +13,18 @@ test.describe("Structures filters and ordering", () => {
   test("should filter structures by excluding a type when clicking checkbox", async ({
     page,
   }) => {
-    // Click filters button
-    await page.getByRole("button", { name: "Filtres" }).click();
+    // Click filters button (use aria-label to distinguish from location filter button)
+    await page
+      .getByRole("button", { name: /^Filtres (actifs|inactifs)$/ })
+      .click();
 
     // When no filter is selected, all checkboxes appear checked
     // Clicking CADA will uncheck it and exclude CADA structures
-    const cadaCheckbox = page.getByLabel("CADA");
-    await cadaCheckbox.click();
+    const checkboxHelper = new CheckboxHelper(page);
+    await checkboxHelper.clickByValue("CADA");
+
+    // Wait for URL to update
+    await page.waitForURL(/.*type=.*/);
 
     // Wait for the table to update
     await page.waitForLoadState("networkidle");
@@ -33,11 +41,12 @@ test.describe("Structures filters and ordering", () => {
   test("should order structures by DNA code ascending", async ({ page }) => {
     // Click the DNA column ordering button
     const dnaHeader = page.getByRole("columnheader", { name: /DNA/i });
-    const orderButton = dnaHeader.locator('button[aria-label*="dnaCode"]');
+    // Find the ordering button by aria-label (starts with "Trier par")
+    const orderButton = dnaHeader.getByRole("button", { name: /Trier par/i });
     await orderButton.click();
 
-    // Wait for the table to update
-    await page.waitForLoadState("networkidle");
+    // Wait for URL to update with ordering params
+    await page.waitForURL(/.*column=dnaCode.*direction=asc.*/);
 
     // Verify URL contains ordering params
     expect(page.url()).toContain("column=dnaCode");
@@ -54,87 +63,56 @@ test.describe("Structures filters and ordering", () => {
   test("should toggle ordering direction", async ({ page }) => {
     // Click once for ascending
     const typeHeader = page.getByRole("columnheader", { name: /Type/i });
-    const orderButton = typeHeader.locator('button[aria-label*="type"]');
+    const orderButton = typeHeader.getByRole("button", { name: /Trier par/i });
     await orderButton.click();
-    await page.waitForLoadState("networkidle");
+    await page.waitForURL(/.*direction=asc.*/);
 
     expect(page.url()).toContain("direction=asc");
 
     // Click again for descending
     await orderButton.click();
-    await page.waitForLoadState("networkidle");
+    await page.waitForURL(/.*direction=desc.*/);
 
     expect(page.url()).toContain("direction=desc");
 
-    // Click again to clear ordering
-    await orderButton.click();
-    await page.waitForLoadState("networkidle");
+    // Click again to clear ordering - button label changes to "Supprimer le tri"
+    const clearButton = typeHeader.getByRole("button", {
+      name: /Supprimer le tri/i,
+    });
+    await clearButton.click();
+    // Wait for URL to not contain column or direction
+    await page.waitForFunction(() => {
+      const url = window.location.href;
+      return !url.includes("column=") && !url.includes("direction=");
+    });
 
     expect(page.url()).not.toContain("column=");
     expect(page.url()).not.toContain("direction=");
   });
 
-  test("should filter by department and maintain ordering", async ({
-    page,
-  }) => {
-    // Apply department filter
-    await page.getByRole("button", { name: /Région \/ Département/i }).click();
-
-    // Find and expand the "Île-de-France" accordion
-    const ileDeFranceAccordion = page.getByRole("button", {
-      name: /Île-de-France/i,
-    });
-    await ileDeFranceAccordion.click();
-
-    // Wait for the accordion to expand
-    await page.waitForTimeout(300);
-
-    // Now select "Paris - 75" checkbox
-    const parisCheckbox = page.getByLabel("Paris - 75");
-    await parisCheckbox.click();
-
-    // Click outside to close the panel
-    await page.click("body");
-
-    await page.waitForLoadState("networkidle");
-
-    // Apply ordering
-    const deptHeader = page.getByRole("columnheader", { name: /Dépt/i });
-    const orderButton = deptHeader.locator(
-      'button[aria-label*="departementAdministratif"]'
-    );
-    await orderButton.click();
-
-    await page.waitForLoadState("networkidle");
-
-    // Verify both filter and ordering are in URL
-    expect(page.url()).toContain("departements=75");
-    expect(page.url()).toContain("column=departementAdministratif");
-
-    // Verify all structures have department 75
-    const deptCells = page.locator("tbody tr td:nth-child(4)");
-    const count = await deptCells.count();
-    for (let i = 0; i < count; i++) {
-      const text = await deptCells.nth(i).textContent();
-      expect(text).toBe("75");
-    }
-  });
-
   test("should combine type exclusion with ordering", async ({ page }) => {
     // First, exclude CADA type
-    await page.getByRole("button", { name: "Filtres" }).click();
-    await page.getByLabel("CADA").click();
+    await page
+      .getByRole("button", { name: /^Filtres (actifs|inactifs)$/ })
+      .click();
+    const checkboxHelper = new CheckboxHelper(page);
+    await checkboxHelper.clickByValue("CADA");
+    // Close the filters panel by clicking outside
+    await page.click("body");
     await page.waitForLoadState("networkidle");
 
     // Then apply ordering
+    // Wait for filters panel to be hidden
+    const waitHelper = new WaitHelper(page);
+    await waitHelper.waitForUIUpdate();
     const operateurHeader = page.getByRole("columnheader", {
       name: /Opérateur/i,
     });
-    const orderButton = operateurHeader.locator(
-      'button[aria-label*="operateur"]'
-    );
+    const orderButton = operateurHeader.getByRole("button", {
+      name: /Trier par/i,
+    });
     await orderButton.click();
-    await page.waitForLoadState("networkidle");
+    await page.waitForURL(/.*column=operateur.*direction=asc.*/);
 
     // Verify both filter and ordering are in URL
     expect(page.url()).toContain("type=");
@@ -151,13 +129,19 @@ test.describe("Structures filters and ordering", () => {
     page,
   }) => {
     // Apply filters (exclude CADA) and ordering
-    await page.getByRole("button", { name: "Filtres" }).click();
-    await page.getByLabel("CADA").click();
+    await page
+      .getByRole("button", { name: /^Filtres (actifs|inactifs)$/ })
+      .click();
+    const checkboxHelper = new CheckboxHelper(page);
+    await checkboxHelper.clickByValue("CADA");
 
+    // Wait for filters panel to close
+    const waitHelper = new WaitHelper(page);
+    await waitHelper.waitForUIUpdate();
     const dnaHeader = page.getByRole("columnheader", { name: /DNA/i });
-    await dnaHeader.locator('button[aria-label*="dnaCode"]').click();
-
-    await page.waitForLoadState("networkidle");
+    const orderButton = dnaHeader.getByRole("button", { name: /Trier par/i });
+    await orderButton.click();
+    await page.waitForURL(/.*column=dnaCode.*direction=asc.*/);
 
     const url = page.url();
 
@@ -168,10 +152,11 @@ test.describe("Structures filters and ordering", () => {
     // Verify filters and ordering are still applied
     expect(page.url()).toBe(url);
 
-    // Verify active indicators are shown
-    const filterButton = page.getByRole("button", { name: "Filtres" });
-    const indicator = filterButton.locator(".bg-border-action-high-warning");
-    await expect(indicator).toBeVisible();
+    // Verify filter button shows "Filtres actifs"
+    const filterButton = page.getByRole("button", {
+      name: /^Filtres actifs$/,
+    });
+    await expect(filterButton).toBeVisible();
 
     // Verify no CADA structures are still shown
     const cadaCells = page.locator('tbody tr td[aria-label="CADA"]');

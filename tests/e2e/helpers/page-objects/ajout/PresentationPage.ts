@@ -1,39 +1,32 @@
-import { expect, Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 
-export class PresentationPage {
-  constructor(private page: Page) {}
+import { BasePage } from "../BasePage";
 
-  async verifyPageContent(): Promise<void> {
-    // Vérifier que la page de présentation est bien affichée
+export class PresentationPage extends BasePage {
+
+  private async verifyPageContent(): Promise<void> {
     await expect(
       this.page
         .locator("h2")
         .filter({ hasText: "Vous allez créer la page dédiée" })
     ).toBeVisible();
 
-    // Vérifier la présence du bouton principal
     await expect(
-      this.page.locator('text="Je commence à remplir le formulaire"')
+      this.page.getByRole("link", {
+        name: "Je commence à remplir le formulaire",
+      })
     ).toBeVisible();
   }
 
-  async startForm(): Promise<void> {
-    // Cliquer sur le bouton pour commencer le formulaire
+  private async startForm(): Promise<void> {
     await this.page
-      .locator('text="Je commence à remplir le formulaire"')
+      .getByRole("link", { name: "Je commence à remplir le formulaire" })
       .click();
   }
 
-  async navigateToFirstStep(dnaCode: string): Promise<void> {
-    // Vérifier le contenu de la page
+  async navigateToSelectionStep(): Promise<void> {
     await this.verifyPageContent();
-
-    // Commencer le formulaire
     await this.startForm();
-
-    // Vérifier qu'on arrive bien sur la première étape (identification)
-    await expect(this.page).toHaveURL(
-      new RegExp(`/ajout-structure/${dnaCode}/01-identification`)
-    );
+    await expect(this.page).toHaveURL(new RegExp(`/ajout-structure/selection`));
   }
 }
