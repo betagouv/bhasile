@@ -1,20 +1,14 @@
-import { Page } from "@playwright/test";
+import { URLS } from "../../constants";
+import { BasePage } from "../BasePage";
 
-export class FinalisationIdentificationPage {
-  constructor(private page: Page) {}
-
-  async waitForLoad() {
-    // Wait for the form to load
-    await this.page.waitForSelector('button[type="submit"]', {
-      timeout: 10000,
-    });
-  }
-
-  async submit(structureId: number) {
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(
-      `http://localhost:3000/structures/${structureId}/finalisation/02-adresses`,
-      { timeout: 10000 }
-    );
+export class FinalisationIdentificationPage extends BasePage {
+  async submit(structureId: number, expectValidationFailure = false) {
+    if (expectValidationFailure) {
+      await this.submitAndExpectNoNavigation();
+    } else {
+      await this.submitAndWaitForUrl(
+        URLS.finalisationStep(structureId, "02-documents-financiers")
+      );
+    }
   }
 }

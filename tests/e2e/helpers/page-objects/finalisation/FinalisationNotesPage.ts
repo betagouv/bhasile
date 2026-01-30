@@ -1,31 +1,50 @@
 import { Page } from "@playwright/test";
 
-export class FinalisationNotesPage {
-  constructor(private page: Page) {}
+import { TIMEOUTS, URLS } from "../../constants";
+import { FormHelper } from "../../form-helper";
+import { TestStructureData } from "../../test-data/types";
+import { BasePage } from "../BasePage";
 
-  async waitForLoad() {
-    await this.page.waitForSelector('button[type="submit"]', {
-      timeout: 10000,
-    });
+export class FinalisationNotesPage extends BasePage {
+  private formHelper: FormHelper;
+
+  constructor(page: Page) {
+    super(page);
+    this.formHelper = new FormHelper(page);
   }
 
-  async fillNotes(notes: string = "Notes de test pour la finalisation") {
-    await this.page.fill('textarea[name="notes"]', notes);
-  }
-
-  async submit(structureId: number) {
-    await this.page.click('button[type="submit"]');
-
-    // After submitting the last step, should redirect to structure page
-    await this.page.waitForURL(
-      `http://localhost:3000/structures/${structureId}`,
-      { timeout: 15000 }
+  async fillForm(data: TestStructureData) {
+    const notes =
+      data.finalisationNotes || "Notes de test pour la finalisation";
+    const saveResponse = this.page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/structures") &&
+        response.request().method() === "PUT" &&
+        response.status() < 400,
+      { timeout: TIMEOUTS.NAVIGATION }
     );
+    await this.formHelper.fillInput('textarea[name="notes"]', notes);
+    await saveResponse;
   }
 
-  async verifySuccess() {
-    // Verify we're redirected back to the structure page after finalisation
-    // The URL should be /structures/[id] without /finalisation
-    await this.page.waitForURL(/\/structures\/\d+$/, { timeout: 10000 });
+  async submit(structureId: number, expectValidationFailure = false) {
+    if (expectValidationFailure) {
+      await this.submitAndExpectNoNavigation();
+    } else {
+      await this.submitAndWaitForUrl(
+        URLS.finalisationStep(structureId, "06-notes")
+      );
+    }
+  }
+
+  async finalizeAndGoToStructure(structureId: number) {
+    await this.page
+      .getByRole("button", { name: "Finaliser la création" })
+      .click();
+    const confirmButton = this.page.getByRole("button", {
+      name: /J.?ai compris/i,
+    });
+    await confirmButton.click();
+    await this.page.waitForURL(URLS.structure(structureId));
   }
 }

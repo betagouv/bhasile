@@ -71,6 +71,7 @@ export default async function AjoutStructurePage(): Promise<ReactElement> {
         size="large"
         linkProps={{
           href: `/ajout-structure/selection`,
+          "aria-label": "Je commence à remplir le formulaire",
         }}
       >
         Je commence à remplir le formulaire

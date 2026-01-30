@@ -9,7 +9,7 @@ import {
 import { getFinanceFormTutorialLink } from "@/app/utils/tutorials.util";
 
 import { useStructureContext } from "../../../(authenticated)/structures/[id]/_context/StructureClientContext";
-import { CpomTable } from "./budget-tables/CpomTable";
+// import { CpomTable } from "./budget-tables/CpomTable";
 import { StructureTable } from "./budget-tables/StructureTable";
 
 export const BudgetTables = () => {
@@ -54,7 +54,7 @@ export const BudgetTables = () => {
         </p>
         <StructureTable />
       </fieldset>
-      {isInCpom && (
+      {/* {isInCpom && (
         <fieldset className="flex flex-col gap-6 min-w-0 w-full">
           <legend className="text-xl font-bold mb-8 text-title-blue-france">
             Gestion budgétaire du CPOM
@@ -67,7 +67,7 @@ export const BudgetTables = () => {
           </p>
           <CpomTable />
         </fieldset>
-      )}
+      )} */}
     </>
   );
 };

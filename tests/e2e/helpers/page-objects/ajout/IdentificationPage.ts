@@ -1,155 +1,105 @@
-import { expect, Page } from "@playwright/test";
+import { Page } from "@playwright/test";
 
-import { TestStructureData } from "../../test-data";
+import { CheckboxHelper } from "../../checkbox-helper";
+import { URLS } from "../../constants";
+import { FormHelper } from "../../form-helper";
+import { SELECTORS } from "../../selectors";
+import { TestStructureData } from "../../test-data/types";
+import { WaitHelper } from "../../wait-helper";
+import { BasePage } from "../BasePage";
 
-export class IdentificationPage {
-  constructor(private page: Page) {}
+export class IdentificationPage extends BasePage {
+  private checkboxHelper: CheckboxHelper;
+  private formHelper: FormHelper;
+  private waitHelper: WaitHelper;
 
-  async fillForm(data: TestStructureData) {
-    const { identification } = data;
+  constructor(page: Page) {
+    super(page);
+    this.checkboxHelper = new CheckboxHelper(page);
+    this.formHelper = new FormHelper(page);
+    this.waitHelper = new WaitHelper(page);
+  }
 
-    // Filiale (if provided)
-    if (identification.filiale) {
-      await this.page.click("label[for='managed-by-a-filiale-input']");
-      await expect(this.page.locator("input[name='filiale']")).toBeVisible();
-      await this.page.fill("input[name='filiale']", identification.filiale);
+  async fillForm(data: Partial<TestStructureData>) {
+    if (data.filiale) {
+      await this.formHelper.toggleSwitch(SELECTORS.FILIALE_TOGGLE, true);
+      await this.waitHelper.waitForFormFieldReady(SELECTORS.FILIALE_INPUT);
+      await this.formHelper.fillInput(SELECTORS.FILIALE_INPUT, data.filiale);
     }
 
-    // Opérateur (autocomplete)
-    await this.page.click('input[name="operateur.name"]');
-    await this.page.fill(
-      'input[name="operateur.name"]',
-      identification.operateur.searchTerm
-    );
-    await this.page.waitForSelector("#suggestion-0", {
-      state: "visible",
-      timeout: 5000,
-    });
-    await this.page.click("#suggestion-0");
+    if (data.creationDate) {
+      await this.formHelper.fillDate(
+        'input[name="creationDate"]',
+        data.creationDate
+      );
+    }
 
-    // Date de création
-    await this.page.fill(
-      'input[name="creationDate"]',
-      identification.creationDate
-    );
-
-    // Code FINESS (if required for autorisée structures)
-    if (identification.finessCode) {
-      await this.page.fill(
+    if (data.finessCode) {
+      await this.formHelper.fillInput(
         'input[name="finessCode"]',
-        identification.finessCode
+        data.finessCode
       );
     }
 
-    // Public ciblé
-    await this.page.selectOption("#public", identification.public);
-
-    // Checkboxes labellisées
-    if (identification.lgbt) {
-      await this.page.click('input[name="lgbt"] + label');
-    }
-    if (identification.fvvTeh) {
-      await this.page.click('input[name="fvvTeh"] + label');
+    if (data.public) {
+      await this.formHelper.selectOption(SELECTORS.PUBLIC_SELECT, data.public);
     }
 
-    // CPOM toggle switch and dates
-    if (data.cpom) {
-      // Click the CPOM toggle switch
-      await this.page.click('input[title="CPOM"]');
-
-      // Wait for CPOM date fields to appear
-      await this.page.waitForTimeout(300);
-
-      if (identification.debutCpom) {
-        await this.page.fill(
-          'input[name="debutCpom"]',
-          identification.debutCpom
-        );
-      }
-      if (identification.finCpom) {
-        await this.page.fill('input[name="finCpom"]', identification.finCpom);
-      }
+    if (data.lgbt) {
+      await this.checkboxHelper.check('input[name="lgbt"]', { useLabel: true });
+    }
+    if (data.fvvTeh) {
+      await this.checkboxHelper.check('input[name="fvvTeh"]', {
+        useLabel: true,
+      });
     }
 
-    // Contact Principal
-    await this.page.fill(
-      'input[name="contactPrincipal.prenom"]',
-      identification.contactPrincipal.prenom
-    );
-    await this.page.fill(
-      'input[name="contactPrincipal.nom"]',
-      identification.contactPrincipal.nom
-    );
-    await this.page.fill(
-      'input[name="contactPrincipal.role"]',
-      identification.contactPrincipal.role
-    );
-    await this.page.fill(
-      'input[name="contactPrincipal.email"]',
-      identification.contactPrincipal.email
-    );
-    await this.page.fill(
-      'input[name="contactPrincipal.telephone"]',
-      identification.contactPrincipal.telephone
-    );
-
-    // Contact Secondaire (if provided)
-    if (identification.contactSecondaire) {
-      await this.page.fill(
-        'input[name="contactSecondaire.prenom"]',
-        identification.contactSecondaire.prenom
-      );
-      await this.page.fill(
-        'input[name="contactSecondaire.nom"]',
-        identification.contactSecondaire.nom
-      );
-      await this.page.fill(
-        'input[name="contactSecondaire.role"]',
-        identification.contactSecondaire.role
-      );
-      await this.page.fill(
-        'input[name="contactSecondaire.email"]',
-        identification.contactSecondaire.email
-      );
-      await this.page.fill(
-        'input[name="contactSecondaire.telephone"]',
-        identification.contactSecondaire.telephone
+    if (data.contactPrincipal) {
+      await this.formHelper.fillContact(
+        "contactPrincipal",
+        data.contactPrincipal
       );
     }
 
-    // Période d'autorisation (for autorisée structures)
-    if (identification.debutPeriodeAutorisation) {
-      await this.page.fill(
+    if (data.contactSecondaire) {
+      await this.formHelper.fillContact(
+        "contactSecondaire",
+        data.contactSecondaire
+      );
+    }
+
+    if (data.debutPeriodeAutorisation) {
+      await this.formHelper.fillDate(
         'input[name="debutPeriodeAutorisation"]',
-        identification.debutPeriodeAutorisation
+        data.debutPeriodeAutorisation
       );
     }
-    if (identification.finPeriodeAutorisation) {
-      await this.page.fill(
+    if (data.finPeriodeAutorisation) {
+      await this.formHelper.fillDate(
         'input[name="finPeriodeAutorisation"]',
-        identification.finPeriodeAutorisation
+        data.finPeriodeAutorisation
       );
     }
 
-    // Convention (for subventionnée structures)
-    if (identification.debutConvention) {
-      await this.page.fill(
+    if (data.debutConvention) {
+      await this.formHelper.fillDate(
         'input[name="debutConvention"]',
-        identification.debutConvention
+        data.debutConvention
       );
     }
-    if (identification.finConvention) {
-      await this.page.fill(
+    if (data.finConvention) {
+      await this.formHelper.fillDate(
         'input[name="finConvention"]',
-        identification.finConvention
+        data.finConvention
       );
     }
   }
 
-  async submit(dnaCode: string) {
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(
-      `http://localhost:3000/ajout-structure/${dnaCode}/02-adresses`
-    );
+  async submit(dnaCode: string, expectValidationFailure = false) {
+    if (expectValidationFailure) {
+      await this.submitAndExpectNoNavigation();
+    } else {
+      await this.submitAndWaitForUrl(URLS.ajoutStep(dnaCode, "02-adresses"));
+    }
   }
 }
