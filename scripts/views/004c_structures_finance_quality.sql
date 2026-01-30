@@ -17,23 +17,30 @@ WITH
     SELECT
       b."structureDnaCode" AS "dnaCode",
       b."year" AS "year",
-      COALESCE(b."totalProduits", 0) AS "totalProduits",
-      COALESCE(b."totalCharges", 0) AS "totalCharges",
-      (COALESCE(b."totalProduits", 0) - COALESCE(b."totalCharges", 0)) AS "resultat_net",
-      COALESCE(b."repriseEtat", 0) AS "repriseEtat",
-      COALESCE(b."excedentRecupere", 0) AS "excedentRecupere",
-      COALESCE(b."excedentDeduit", 0) AS "excedentDeduit",
-      COALESCE(b."reserveInvestissement", 0) AS "reserveInvestissement",
-      COALESCE(b."chargesNonReconductibles", 0) AS "chargesNonReconductibles",
-      COALESCE(b."reserveCompensationDeficits", 0) AS "reserveCompensationDeficits",
-      COALESCE(b."reserveCompensationBFR", 0) AS "reserveCompensationBFR",
-      COALESCE(b."reserveCompensationAmortissements", 0) AS "reserveCompensationAmortissements",
-      COALESCE(b."fondsDedies", 0) AS "fondsDedies",
-      COALESCE(b."affectationReservesFondsDedies", 0) AS "affectationReservesFondsDedies",
-      COALESCE(b."reportANouveau", 0) AS "reportANouveau",
-      COALESCE(b."autre", 0) AS "autre",
-      (
-        COALESCE(b."excedentRecupere", 0) + COALESCE(b."excedentDeduit", 0) + COALESCE(b."reserveInvestissement", 0) + COALESCE(b."chargesNonReconductibles", 0) + COALESCE(b."reserveCompensationDeficits", 0) + COALESCE(b."reserveCompensationBFR", 0) + COALESCE(b."reserveCompensationAmortissements", 0) + COALESCE(b."fondsDedies", 0) + COALESCE(b."affectationReservesFondsDedies", 0) + COALESCE(b."reportANouveau", 0) + COALESCE(b."autre", 0)
+      b."totalProduits" AS "totalProduits",
+      b."totalCharges" AS "totalCharges",
+      -- Résultat net: NULL if both are null, otherwise compute the difference
+      CASE
+        WHEN b."totalProduits" IS NULL
+        AND b."totalCharges" IS NULL THEN NULL
+        ELSE COALESCE(b."totalProduits", 0) - COALESCE(b."totalCharges", 0)
+      END AS "resultat_net",
+      b."repriseEtat" AS "repriseEtat",
+      b."excedentRecupere" AS "excedentRecupere",
+      b."excedentDeduit" AS "excedentDeduit",
+      b."reserveInvestissement" AS "reserveInvestissement",
+      b."chargesNonReconductibles" AS "chargesNonReconductibles",
+      b."reserveCompensationDeficits" AS "reserveCompensationDeficits",
+      b."reserveCompensationBFR" AS "reserveCompensationBFR",
+      b."reserveCompensationAmortissements" AS "reserveCompensationAmortissements",
+      b."fondsDedies" AS "fondsDedies",
+      b."affectationReservesFondsDedies" AS "affectationReservesFondsDedies",
+      b."reportANouveau" AS "reportANouveau",
+      b."autre" AS "autre",
+      -- Sum of affectations: NULL if the sum is 0 (all NULL)
+      NULLIF(
+        COALESCE(b."excedentRecupere", 0) + COALESCE(b."excedentDeduit", 0) + COALESCE(b."reserveInvestissement", 0) + COALESCE(b."chargesNonReconductibles", 0) + COALESCE(b."reserveCompensationDeficits", 0) + COALESCE(b."reserveCompensationBFR", 0) + COALESCE(b."reserveCompensationAmortissements", 0) + COALESCE(b."fondsDedies", 0) + COALESCE(b."affectationReservesFondsDedies", 0) + COALESCE(b."reportANouveau", 0) + COALESCE(b."autre", 0),
+        0
       ) AS "sum_affectations"
     FROM
       public."Budget" b
@@ -57,46 +64,49 @@ WITH
   budget_indicators AS (
     SELECT
       s."dnaCode",
-      -- Résultat net = 0 is considered an issue 
-      -- TODO: rule applies to subsidized in the spec; we flag it globally, check if correct
+      -- Résultat net = 0 is considered an issue (exclut les NULL)
       BOOL_OR(be."resultat_net" = 0) AS "has_issue_resultat_net_eq_0",
       -- Authorized structures: if excedent, then (resultat_net - repriseEtat) should equal sum of affectations
       BOOL_OR(
         s."structureType" IN ('CADA', 'CPH')
         AND be."resultat_net" > 0
-        AND ABS((be."resultat_net" - be."repriseEtat") - be."sum_affectations") > 0.01
+        AND be."sum_affectations" IS NOT NULL -- Ignore si affectations sont toutes NULL
+        AND ABS((be."resultat_net" - COALESCE(be."repriseEtat", 0)) - be."sum_affectations") > 0.01
       ) AS "has_issue_authorized_excedent_affectations_mismatch",
-      -- Authorized structures: sum of affectations should be consistent (basic sanity: not negative)
+      -- Authorized structures: sum of affectations should be consistent (not negative)
       BOOL_OR(
         s."structureType" IN ('CADA', 'CPH')
+        AND be."sum_affectations" IS NOT NULL -- Ignore si toutes NULL
         AND be."sum_affectations" < 0
       ) AS "has_issue_authorized_negative_affectations",
-      -- Subsidized structures: deficit => all affectation buckets should be 0 except deficit compensation (interpreted as `reserveCompensationDeficits`)
+      -- Subsidized structures: deficit => all affectation buckets should be 0 or NULL except deficit compensation
       BOOL_OR(
         s."structureType" IN ('HUDA', 'CAES')
         AND be."resultat_net" < 0
         AND (
-          (be."excedentRecupere" <> 0)
-          OR (be."excedentDeduit" <> 0)
-          OR (be."reserveInvestissement" <> 0)
-          OR (be."chargesNonReconductibles" <> 0)
-          OR (be."reserveCompensationBFR" <> 0)
-          OR (be."reserveCompensationAmortissements" <> 0)
-          OR (be."fondsDedies" <> 0)
-          OR (be."affectationReservesFondsDedies" <> 0)
-          OR (be."reportANouveau" <> 0)
-          OR (be."autre" <> 0)
+          (COALESCE(be."excedentRecupere", 0) <> 0)
+          OR (COALESCE(be."excedentDeduit", 0) <> 0)
+          OR (COALESCE(be."reserveInvestissement", 0) <> 0)
+          OR (COALESCE(be."chargesNonReconductibles", 0) <> 0)
+          OR (COALESCE(be."reserveCompensationBFR", 0) <> 0)
+          OR (COALESCE(be."reserveCompensationAmortissements", 0) <> 0)
+          OR (COALESCE(be."fondsDedies", 0) <> 0)
+          OR (COALESCE(be."affectationReservesFondsDedies", 0) <> 0)
+          OR (COALESCE(be."reportANouveau", 0) <> 0)
+          OR (COALESCE(be."autre", 0) <> 0)
         )
       ) AS "has_issue_subsidized_deficit_nonzero_boxes",
-      -- Subsidized structures: excedent => deficit compensation must be 0 and
+      -- Subsidized structures: excedent => deficit compensation must be 0/NULL and
       -- (excedentRecupere + excedentDeduit + fondsDedies) should equal resultat_net
       BOOL_OR(
         s."structureType" IN ('HUDA', 'CAES')
         AND be."resultat_net" > 0
         AND (
-          be."reserveCompensationDeficits" <> 0
+          COALESCE(be."reserveCompensationDeficits", 0) <> 0
           OR ABS(
-            (be."excedentRecupere" + be."excedentDeduit" + be."fondsDedies") - be."resultat_net"
+            (
+              COALESCE(be."excedentRecupere", 0) + COALESCE(be."excedentDeduit", 0) + COALESCE(be."fondsDedies", 0)
+            ) - be."resultat_net"
           ) > 0.01
         )
       ) AS "has_issue_subsidized_excedent_rules"
