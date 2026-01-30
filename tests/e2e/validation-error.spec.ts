@@ -1,8 +1,9 @@
 import { test } from "@playwright/test";
 
+import { deleteStructure } from "@/app/api/structures/structure.repository";
+
 import { beforeFlow } from "./helpers/before-flow";
 import { completeStructureFlow } from "./helpers/complete-structure-flow";
-import { deleteStructureViaApi } from "./helpers/structure-creator";
 import { cada1 } from "./helpers/test-data/cada-1";
 import { TestStructureDataBuilder } from "./helpers/test-data/test-data-builder";
 import { TestStructureScenario } from "./helpers/test-data/types";
@@ -103,7 +104,7 @@ for (const { name, formData, failingStep } of invalidTestCases) {
       });
     } finally {
       if (formData.dnaCode) {
-        await deleteStructureViaApi(formData.dnaCode);
+        await deleteStructure(formData.dnaCode);
       }
     }
   });

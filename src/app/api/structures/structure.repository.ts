@@ -1,5 +1,5 @@
 import { DEFAULT_PAGE_SIZE } from "@/constants";
-import { Structure } from "@/generated/prisma/client";
+import { Structure, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
@@ -372,7 +372,7 @@ const updateOne = async (
       ?.filter((millesime) => millesime !== undefined);
 
     return await prisma.$transaction(async (tx) => {
-      const updatedStructure = await createOrUpdateStructure(tx, structure);
+      const updatedStructure = await updateStructure(tx, structure);
 
       await initializeDefaultForms(tx, isOperateurUpdate, structure.dnaCode);
 
@@ -415,7 +415,7 @@ const updateOne = async (
   }
 };
 
-const createOrUpdateStructure = async (
+const updateStructure = async (
   tx: PrismaTransaction,
   structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
@@ -492,4 +492,33 @@ const createOrUpdateStructure = async (
     },
   });
   return updatedStructure;
+};
+
+// Only used in e2e tests
+export const createMinimalStructure = async (structure: {
+  dnaCode: string;
+  type: StructureType;
+  operateurId: number;
+  departementAdministratif?: string;
+  nom: string;
+  adresseAdministrative: string;
+  codePostalAdministratif: string;
+  communeAdministrative: string;
+}): Promise<void> => {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("This function is only used in e2e tests");
+  }
+  await prisma.structure.upsert({
+    where: { dnaCode: structure.dnaCode },
+    update: structure,
+    create: structure,
+  });
+};
+
+// Only used in e2e tests
+export const deleteStructure = async (dnaCode: string): Promise<void> => {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("This function is only used in e2e tests");
+  }
+  await prisma.structure.delete({ where: { dnaCode } });
 };

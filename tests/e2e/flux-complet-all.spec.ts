@@ -1,8 +1,9 @@
 import { test } from "@playwright/test";
 
+import { deleteStructure } from "@/app/api/structures/structure.repository";
+
 import { beforeFlow } from "./helpers/before-flow";
 import { completeStructureFlow } from "./helpers/complete-structure-flow";
-import { deleteStructureViaApi } from "./helpers/structure-creator";
 import { cada1 } from "./helpers/test-data/cada-1";
 import { cada2 } from "./helpers/test-data/cada-2";
 import { cada3 } from "./helpers/test-data/cada-3";
@@ -35,7 +36,7 @@ for (const { name, formData } of validTestCases) {
     try {
       await completeStructureFlow(page, formData);
     } finally {
-      await deleteStructureViaApi(formData.dnaCode as string);
+      await deleteStructure(formData.dnaCode as string);
     }
   });
 }
