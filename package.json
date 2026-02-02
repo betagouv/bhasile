@@ -8,7 +8,7 @@
     "yarn": "1.22"
   },
   "scripts": {
-    "dev": "npx @tailwindcss/cli -i ./src/app/globals.css -o build.css --minify && next dev",
+    "dev": "next dev",
     "build": "npx @tailwindcss/cli -i ./src/app/globals.css -o build.css --minify && next build && npx tsx copy-assets.ts",
     "start": "node .next/standalone/server.js",
     "check:ts": "npx tsc --noEmit",
