@@ -41,7 +41,7 @@ export default function Usage(): ReactElement {
       {isLoading && (
         <div className="absolute inset-0 flex justify-center items-center">
           <div>
-            Les statistiques d'usage sont en cours de chargement : merci de
+            Les statistiques d’usage sont en cours de chargement : merci de
             patienter quelques instants.
           </div>
         </div>
