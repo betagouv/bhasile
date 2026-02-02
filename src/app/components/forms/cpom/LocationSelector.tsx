@@ -37,7 +37,6 @@ export const LocationSelector = () => {
     );
   }, [region, setValue, departementsOfRegion, granularity]);
 
-  console.log(departements);
   return (
     <div className="grid grid-cols-3 gap-6">
       <OperateurAutocomplete />

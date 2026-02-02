@@ -32,8 +32,8 @@ export const StructuresLine = ({
       </div>
       <InputWithValidation
         disabled={index === -1}
-        name={`structures.${index}.dateStart`}
-        id={`structures.${index}.dateStart`}
+        name={index !== -1 ? `structures.${index}.dateStart` : ""}
+        id={index !== -1 ? `structures.${index}.dateStart` : ""}
         control={control}
         type="date"
         label=""
@@ -41,8 +41,8 @@ export const StructuresLine = ({
 
       <InputWithValidation
         disabled={index === -1}
-        name={`structures.${index}.dateEnd`}
-        id={`structures.${index}.dateEnd`}
+        name={index !== -1 ? `structures.${index}.dateEnd` : ""}
+        id={index !== -1 ? `structures.${index}.dateEnd` : ""}
         control={control}
         type="date"
         label=""
