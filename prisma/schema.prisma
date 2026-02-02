@@ -382,8 +382,6 @@ model Cpom {
   id             Int             @id @default(autoincrement())
   name           String?
   structures     CpomStructure[]
-  yearStart      Int
-  yearEnd        Int
   dateStart      DateTime?
   dateEnd        DateTime?
   cpomMillesimes CpomMillesime[]
@@ -400,10 +398,8 @@ model CpomStructure {
   id          Int       @id @default(autoincrement())
   cpomId      Int
   structureId Int
-  yearStart   Int? // Year when the structure joined the CPOM (null = from the beginning of the CPOM)
-  yearEnd     Int? // Year when the structure left the CPOM (null = until the end of the CPOM)
-  dateStart   DateTime?
-  dateEnd     DateTime?
+  dateStart   DateTime? // Date when the structure joined the CPOM (null = from the beginning of the CPOM)
+  dateEnd     DateTime? // Date when the structure left the CPOM (null = until the end of the CPOM)
   cpom        Cpom      @relation(fields: [cpomId], references: [id], onDelete: Cascade)
   structure   Structure @relation(fields: [structureId], references: [id])
 

@@ -1,52 +1,36 @@
 import { CpomMillesimeApiType } from "@/schemas/api/cpom.schema";
 
 type CpomStructureForMatching = {
-  yearStart: number | null;
-  yearEnd: number | null;
   dateStart: Date | null;
   dateEnd: Date | null;
   cpom: {
     id: number;
-    yearStart: number;
-    yearEnd: number;
     dateStart: Date | null;
     dateEnd: Date | null;
   };
 };
 
+// TODO : checker la cohérence au moment de l'implémentation,
+// notamment si deux cpoms se "superposent" sur une année.
 export const findMatchingCpomForMillesime = (
   cpomStructures: CpomStructureForMatching[],
   millesime: CpomMillesimeApiType
 ) => {
+  const year = millesime.year;
+
   const matchingCpom = cpomStructures.find((cpomStructure) => {
-    const yearStartFromDate = cpomStructure.dateStart
-      ? cpomStructure.dateStart.getFullYear()
-      : cpomStructure.yearStart!;
-    const yearEndFromDate = cpomStructure.dateEnd
-      ? cpomStructure.dateEnd.getFullYear()
-      : cpomStructure.yearEnd!;
-    const year = millesime.year;
+    const yearStart =
+      cpomStructure.dateStart?.getFullYear() ??
+      cpomStructure.cpom.dateStart?.getFullYear() ??
+      null;
+    const yearEnd =
+      cpomStructure.dateEnd?.getFullYear() ??
+      cpomStructure.cpom.dateEnd?.getFullYear() ??
+      null;
 
-    if (year < yearStartFromDate || year > yearEndFromDate) {
-      return false;
-    }
-
-    const yearDebutStructure =
-      yearStartFromDate ||
-      (cpomStructure.cpom.dateStart
-        ? cpomStructure.cpom.dateStart.getFullYear()
-        : null) ||
-      cpomStructure.cpom.yearStart;
-    const yearFinStructure =
-      yearEndFromDate ||
-      (cpomStructure.cpom.dateEnd
-        ? cpomStructure.cpom.dateEnd.getFullYear()
-        : null) ||
-      cpomStructure.cpom.yearEnd;
-
-    return (
-      millesime.year >= yearDebutStructure && millesime.year <= yearFinStructure
-    );
+    if (yearStart !== null && year < yearStart) return false;
+    if (yearEnd !== null && year > yearEnd) return false;
+    return true;
   });
 
   if (!matchingCpom) {

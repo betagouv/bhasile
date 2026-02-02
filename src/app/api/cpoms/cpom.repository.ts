@@ -29,9 +29,7 @@ export const createOrUpdateCpomMillesimes = async (
       cpom: {
         select: {
           id: true,
-          yearStart: true,
           dateStart: true,
-          yearEnd: true,
           dateEnd: true,
         },
       },
