@@ -84,7 +84,7 @@ export const Footer = (): ReactElement => {
             <li className="fr-footer__bottom-item">
               <a
                 className="fr-footer__bottom-link"
-                href="https://github.com/betagouv/place-asile"
+                href="https://github.com/betagouv/bhasile"
                 target="_blank"
                 rel="noopener external"
                 title="Code source - nouvelle fenêtre"

@@ -52,7 +52,7 @@ describe("Menu", () => {
     const codeSource = screen.getByRole("link", { name: "Code source" });
     expect(codeSource).toHaveAttribute(
       "href",
-      "https://github.com/betagouv/place-asile"
+      "https://github.com/betagouv/bhasile"
     );
     expect(codeSource).toHaveAttribute("target", "_blank");
     expect(codeSource).toHaveAttribute("rel", "noopener external");
