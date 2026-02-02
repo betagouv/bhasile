@@ -1,4 +1,4 @@
-// Remplir la table EvenementIndesirableGrave avec les EIG venant de l'API de Démarches Simplifiées
+// Remplir la table EvenementIndesirableGrave avec les EIG venant de l'API de Démarches Numériques
 // Usage: yarn script eig-fetch eig-fetch.ts
 
 import "dotenv/config";
@@ -8,7 +8,7 @@ import { createPrismaClient } from "@/prisma-client";
 
 const prisma = createPrismaClient();
 
-type DSResponse = {
+type DNResponse = {
   data: {
     demarche: {
       dossiers: {
@@ -16,24 +16,24 @@ type DSResponse = {
           endCursor: string;
           hasNextPage: boolean;
         };
-        nodes: DSDossierNode[];
+        nodes: DNDossierNode[];
       };
     };
   };
 };
 
-type DSColumn = {
+type DNColumn = {
   label: string;
   stringValue: string;
 };
 
-type DSChamp = {
-  columns: DSColumn[];
+type DNChamp = {
+  columns: DNColumn[];
 };
 
-type DSDossierNode = {
+type DNDossierNode = {
   number: string;
-  champs: DSChamp[];
+  champs: DNChamp[];
 };
 
 const getQuery = (after?: string) => `
@@ -60,7 +60,7 @@ const getQuery = (after?: string) => `
 }
 `;
 
-const fetchEIGPage = async (after?: string): Promise<DSResponse> => {
+const fetchEIGPage = async (after?: string): Promise<DNResponse> => {
   const result = await fetch(
     "https://demarche.numerique.gouv.fr/api/v2/graphql",
     {
@@ -75,7 +75,7 @@ const fetchEIGPage = async (after?: string): Promise<DSResponse> => {
   return result.json();
 };
 
-const fetchAllEigs = async (): Promise<DSDossierNode[]> => {
+const fetchAllEigs = async (): Promise<DNDossierNode[]> => {
   let hasNextPage = null;
   let endCursor = undefined;
   const eigNodes = [];
@@ -84,13 +84,13 @@ const fetchAllEigs = async (): Promise<DSDossierNode[]> => {
     console.log(
       "📃 Récupération de la page",
       index,
-      "des EIGs depuis Démarches Simplifiées"
+      "des EIGs depuis Démarches Numériques"
     );
-    const DSResponse = await fetchEIGPage(endCursor);
-    hasNextPage = DSResponse.data.demarche.dossiers.pageInfo.hasNextPage;
-    endCursor = DSResponse.data.demarche.dossiers.pageInfo.endCursor;
+    const DNResponse = await fetchEIGPage(endCursor);
+    hasNextPage = DNResponse.data.demarche.dossiers.pageInfo.hasNextPage;
+    endCursor = DNResponse.data.demarche.dossiers.pageInfo.endCursor;
     index++;
-    eigNodes.push(...DSResponse.data.demarche.dossiers.nodes);
+    eigNodes.push(...DNResponse.data.demarche.dossiers.nodes);
   }
   return eigNodes;
 };
@@ -109,7 +109,7 @@ const fieldsToKeep = [
   TYPE_LABEL,
 ];
 
-const isIn303 = (dossier: DSDossierNode): boolean | null => {
+const isIn303 = (dossier: DNDossierNode): boolean | null => {
   const columns = dossier.champs.flatMap((champ) => champ.columns);
   let is303 = null;
   columns.forEach((column) => {
@@ -123,7 +123,7 @@ const isIn303 = (dossier: DSDossierNode): boolean | null => {
   return is303;
 };
 
-const getEIGsFromDS = async (): Promise<DSColumn[][]> => {
+const getEIGsFromDN = async (): Promise<DNColumn[][]> => {
   const dossiers = await fetchAllEigs();
   const EIGs = dossiers.filter(isIn303).map((dossier) => {
     const columns = dossier.champs.flatMap((champ) => {
@@ -143,8 +143,8 @@ const getEIGsFromDS = async (): Promise<DSColumn[][]> => {
   return EIGs;
 };
 
-const getValueByLabel = (DSEIG: DSColumn[], label: string): string => {
-  const field = DSEIG.find((DSEIGField) => DSEIGField.label === label);
+const getValueByLabel = (DNEIG: DNColumn[], label: string): string => {
+  const field = DNEIG.find((DNEIGField) => DNEIGField.label === label);
   return field?.stringValue || "";
 };
 
@@ -171,20 +171,20 @@ const cleanDate = (dateValue: string): Date | null => {
 const getAllEIGs = async (): Promise<
   Omit<EvenementIndesirableGrave, "id" | "createdAt" | "updatedAt">[]
 > => {
-  const DSEIGs = await getEIGsFromDS();
-  const appEIGs = DSEIGs.map((DSEIG) => {
-    const structureDnaCode = getValueByLabel(DSEIG, DNA_CODE_LABEL);
-    const evenementDate = getValueByLabel(DSEIG, EVENEMENT_DATE_LABEL);
-    const declarationDate = getValueByLabel(DSEIG, DECLARATION_DATE_LABEL);
+  const DNEIGs = await getEIGsFromDN();
+  const appEIGs = DNEIGs.map((DNEIG) => {
+    const structureDnaCode = getValueByLabel(DNEIG, DNA_CODE_LABEL);
+    const evenementDate = getValueByLabel(DNEIG, EVENEMENT_DATE_LABEL);
+    const declarationDate = getValueByLabel(DNEIG, DECLARATION_DATE_LABEL);
     if (!structureDnaCode || !evenementDate || !declarationDate) {
       return;
     }
     return {
       structureDnaCode,
-      numeroDossier: getValueByLabel(DSEIG, NUMERO_DOSSIER_LABEL).toString(),
+      numeroDossier: getValueByLabel(DNEIG, NUMERO_DOSSIER_LABEL).toString(),
       evenementDate: new Date(cleanDate(evenementDate)!),
       declarationDate: new Date(cleanDate(declarationDate)!),
-      type: getValueByLabel(DSEIG, TYPE_LABEL).toString(),
+      type: getValueByLabel(DNEIG, TYPE_LABEL).toString(),
     };
   })
     .filter((appEIG) => appEIG !== undefined)
