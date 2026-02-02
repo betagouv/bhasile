@@ -51,7 +51,7 @@ export const Menu = (): ReactElement => {
     },
     {
       label: "Code source",
-      url: "https://github.com/betagouv/place-asile",
+      url: "https://github.com/betagouv/bhasile",
       isExternalLink: true,
     },
   ];
