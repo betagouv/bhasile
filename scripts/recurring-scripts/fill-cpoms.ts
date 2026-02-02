@@ -2,8 +2,6 @@
 // Usage: yarn script fill-cpoms my_cpom_file.csv
 // An example of the csv file is available at /public/cpom_example.csv
 
-// TODO: if necessary again, re-add dates to cpoms and cpom structures
-
 import "dotenv/config";
 
 import { createPrismaClient } from "@/prisma-client";
@@ -72,8 +70,6 @@ const loadCpomsFromCsv = async () => {
       string,
       {
         name: string;
-        yearStart: number;
-        yearEnd: number;
         dateStart: Date;
         dateEnd: Date;
         operateurId: number;
@@ -103,8 +99,6 @@ const loadCpomsFromCsv = async () => {
       if (!cpomMap.has(key)) {
         cpomMap.set(key, {
           name: row.cpom,
-          yearStart,
-          yearEnd,
           dateStart,
           dateEnd,
           operateurId,
@@ -118,8 +112,6 @@ const loadCpomsFromCsv = async () => {
       let cpom = await prisma.cpom.findFirst({
         where: {
           name: cpomData.name,
-          yearStart: cpomData.yearStart,
-          yearEnd: cpomData.yearEnd,
           dateStart: cpomData.dateStart,
           dateEnd: cpomData.dateEnd,
           operateurId: cpomData.operateurId,
@@ -131,8 +123,6 @@ const loadCpomsFromCsv = async () => {
         cpom = await prisma.cpom.create({
           data: {
             name: cpomData.name,
-            yearStart: cpomData.yearStart,
-            yearEnd: cpomData.yearEnd,
             dateStart: cpomData.dateStart,
             dateEnd: cpomData.dateEnd,
             operateurId: cpomData.operateurId,
@@ -201,16 +191,12 @@ const loadCpomsFromCsv = async () => {
           },
         },
         update: {
-          yearStart,
-          yearEnd,
           dateStart: dateStartStructure,
           dateEnd: dateEndStructure,
         },
         create: {
           cpomId,
           structureId,
-          yearStart,
-          yearEnd,
           dateStart: dateStartStructure,
           dateEnd: dateEndStructure,
         },
@@ -222,8 +208,11 @@ const loadCpomsFromCsv = async () => {
       );
 
       const millesimeStart =
-        yearStartStructure ?? cpomStructure.yearStart ?? yearStart;
-      const millesimeEnd = yearEndStructure ?? cpomStructure.yearEnd ?? yearEnd;
+        yearStartStructure ??
+        cpomStructure.dateStart?.getFullYear() ??
+        yearStart;
+      const millesimeEnd =
+        yearEndStructure ?? cpomStructure.dateEnd?.getFullYear() ?? yearEnd;
       const millesimeYears = buildStructureMillesimeYears(
         millesimeStart,
         millesimeEnd

@@ -83,16 +83,13 @@ export const createFakeCpoms = async (
     const [operateurIdStr, region] = key.split("-");
 
     const dureeAnnees = faker.number.int({ min: 3, max: 5 });
-    const yearStart = faker.number.int({
-      min: currentYear - dureeAnnees,
-      max: currentYear,
-    });
+    const timeShift = faker.number.int({ min: -2, max: 2 });
+    const yearStart = currentYear - dureeAnnees + timeShift;
+    const yearEnd = yearStart + dureeAnnees;
     const dateStart = faker.date.between({
       from: new Date(yearStart, 0, 1),
       to: new Date(yearStart, 11, 31),
     });
-
-    const yearEnd = yearStart + dureeAnnees;
     const dateEnd = faker.date.between({
       from: new Date(yearEnd, 0, 1),
       to: new Date(yearEnd, 11, 31),
@@ -115,8 +112,6 @@ export const createFakeCpoms = async (
       data: {
         name: cpomName,
         operateurId: Number(operateurIdStr),
-        yearStart,
-        yearEnd,
         dateStart,
         dateEnd,
         structures: {
@@ -171,9 +166,7 @@ export const createFakeCpoms = async (
 
             return {
               structureId: structureId,
-              yearStart: yearJoin,
               dateStart: dateJoin,
-              yearEnd: yearLeave,
               dateEnd: dateLeave,
             };
           }),
@@ -189,8 +182,8 @@ export const createFakeCpoms = async (
       where: { cpomId: cpom.id },
       select: {
         structureId: true,
-        yearStart: true,
-        yearEnd: true,
+        dateStart: true,
+        dateEnd: true,
       },
     });
 
@@ -207,8 +200,8 @@ export const createFakeCpoms = async (
       }
 
       const millesimeYears = buildStructureMillesimeYears(
-        cpomStructure.yearStart ?? yearStart,
-        cpomStructure.yearEnd ?? yearEnd
+        cpomStructure.dateStart?.getFullYear() ?? yearStart,
+        cpomStructure.dateEnd?.getFullYear() ?? yearEnd
       );
 
       for (const millesimeYear of millesimeYears) {
