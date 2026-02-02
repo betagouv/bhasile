@@ -16,10 +16,7 @@ export const LocationSelector = () => {
   const departements = watch("departements");
 
   const departementsOfRegion = useMemo(
-    () =>
-      DEPARTEMENTS.filter((departement) =>
-        region ? departement.region === region : true
-      ),
+    () => DEPARTEMENTS.filter((departement) => departement.region === region),
 
     [region]
   );

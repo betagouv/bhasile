@@ -4,7 +4,6 @@ import { useStructuresSelection } from "@/app/hooks/useStructuresSelection";
 import { StructureType } from "@/types/structure.type";
 
 import { StructuresList } from "../../cpom/StructuresList";
-import { StructuresTable } from "../../cpom/StructuresTable";
 
 export const FieldSetStructures = () => {
   const { watch } = useFormContext();
@@ -23,13 +22,16 @@ export const FieldSetStructures = () => {
     ].join(","),
   });
 
+  if (!structures) {
+    return null;
+  }
+
   return (
     <fieldset className="flex flex-col gap-6">
       <legend className="text-xl font-bold mb-4 text-title-blue-france">
         Composition
       </legend>
       <StructuresList structures={structures} />
-      <StructuresTable structures={structures} />
     </fieldset>
   );
 };
