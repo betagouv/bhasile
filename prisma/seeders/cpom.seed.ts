@@ -88,14 +88,14 @@ export const createFakeCpoms = async (
     const yearEnd = yearStart + dureeAnnees;
     const dateStart = faker.date.between({
       from: new Date(yearStart, 0, 1),
-      to: new Date(currentYear, 11, 31),
+      to: new Date(yearStart, 11, 31),
     });
     const dateEnd = faker.date.between({
       from: new Date(yearEnd, 0, 1),
       to: new Date(yearEnd, 11, 31),
     });
 
-    const cpomName = `CPOM ${operateurIdStr} ${region} ${dateStart.getFullYear()}-${dateEnd.getFullYear()}`;
+    const cpomName = `CPOM ${operateurIdStr} ${region} ${yearStart}-${yearEnd}`;
 
     // Select between 60% and 100% of structures for this CPOM
     const nbStructures = Math.max(
