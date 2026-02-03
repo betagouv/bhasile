@@ -21,11 +21,11 @@ export default function CpomAjoutIdentification() {
     dateStart: undefined,
     dateEnd: undefined,
     operateur: {
-      id: undefined,
-      name: undefined,
+      id: 1,
+      name: "Opérateur 1",
     },
     granularity: CpomGranularity.DEPARTEMENTALE,
-    departements: undefined,
+    departements: [25, 26],
   };
 
   const handleSubmit = async (data: CpomFormValues) => {
