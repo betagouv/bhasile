@@ -1,4 +1,3 @@
-import { DateSelector } from "../../cpom/DateSelector";
 import { GranularitySelector } from "../../cpom/GranularitySelector";
 import { LocationSelector } from "../../cpom/LocationSelector";
 
@@ -10,7 +9,6 @@ export const FieldSetGeneral = () => {
       </legend>
       <GranularitySelector />
       <LocationSelector />
-      <DateSelector />
     </fieldset>
   );
 };

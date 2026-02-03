@@ -48,7 +48,7 @@ export const DepartementsSelector = ({
         <Button
           onClick={handleTogglePanel}
           disabled={departements.length === 0}
-          className="bg-contrast-grey text-black font-normal border-b-2 border-b-black w-full"
+          className="bg-contrast-grey text-black font-normal border-b-2 border-b-black w-full rounded-t-md "
         >
           {selectedDepartements.join(", ")}
         </Button>

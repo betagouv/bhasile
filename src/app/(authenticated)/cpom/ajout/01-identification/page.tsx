@@ -3,6 +3,7 @@
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
 
+import { FieldSetDocuments } from "@/app/components/forms/fieldsets/cpom/FieldSetDocuments";
 import { FieldSetGeneral } from "@/app/components/forms/fieldsets/cpom/FieldSetGeneral";
 import { FieldSetStructures } from "@/app/components/forms/fieldsets/cpom/FieldSetStructures";
 import FormWrapper from "@/app/components/forms/FormWrapper";
@@ -52,6 +53,7 @@ export default function CpomAjoutIdentification() {
         onSubmit={handleSubmit}
       >
         <FieldSetGeneral />
+        <FieldSetDocuments />
         <FieldSetStructures />
       </FormWrapper>
     </>

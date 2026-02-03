@@ -31,7 +31,7 @@ export const getCategoriesToDisplay = (
   });
 
 export const getCategoriesDisplayRules = (
-  structure: StructureApiType
+  structure?: StructureApiType
 ): CategoryDisplayRulesType => ({
   ARRETE_AUTORISATION: {
     categoryShortName: "arrêté",
@@ -68,7 +68,7 @@ export const getCategoriesDisplayRules = (
     title: "Conventions",
     canAddFile: true,
     canAddAvenant: true,
-    isOptional: !isStructureSubventionnee(structure.type),
+    isOptional: !isStructureSubventionnee(structure?.type),
     additionalFieldsType: AdditionalFieldsType.DATE_START_END,
     documentLabel: "Document",
     addFileButtonLabel: "Ajouter une convention",

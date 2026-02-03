@@ -10,6 +10,10 @@ import {
 import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 import { CpomGranularity } from "@/types/cpom.type";
 
+import {
+  acteAdministratifCpomSchema,
+  actesAdministratifsCpomSchema,
+} from "./acteAdministratif.schema";
 import { operateurSchema } from "./operateur.schema";
 
 const cpomMillesimeSchema = z.object({
@@ -45,6 +49,7 @@ const bareCpomSchema = z.object({
   ]),
   departements: z.array(zSafeDecimals()).optional(),
   cpomMillesimes: z.array(cpomMillesimeSchema).optional(),
+  actesAdministratifs: z.array(acteAdministratifCpomSchema).optional(),
 });
 
 export const cpomStructureSchema = z.object({

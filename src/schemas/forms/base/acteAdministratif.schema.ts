@@ -3,7 +3,7 @@ import z from "zod";
 import { optionalFrenchDateToISO } from "@/app/utils/zodCustomFields";
 import { ActeAdministratifCategory } from "@/types/file-upload.type";
 
-const acteAdministratifAutoSaveSchema = z.object({
+export const acteAdministratifAutoSaveSchema = z.object({
   key: z.string().optional(),
   date: optionalFrenchDateToISO(),
   category: z.enum(ActeAdministratifCategory),
@@ -44,8 +44,7 @@ const acteAdministratifAutoriseesSchema = acteAdministratifSchema.refine(
   (data) => {
     if (
       (data.category === "ARRETE_AUTORISATION" ||
-        data.category === "ARRETE_TARIFICATION" ||
-        data.category === "CPOM") &&
+        data.category === "ARRETE_TARIFICATION") &&
       !data.parentFileUploadId
     ) {
       return !!data.key && !!data.startDate && !!data.endDate;
@@ -63,10 +62,22 @@ const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
     if (
       (data.category === "ARRETE_AUTORISATION" ||
         data.category === "ARRETE_TARIFICATION" ||
-        data.category === "CONVENTION" ||
-        data.category === "CPOM") &&
+        data.category === "CONVENTION") &&
       !data.parentFileUploadId
     ) {
+      return !!data.key && !!data.startDate && !!data.endDate;
+    }
+    return true;
+  },
+  {
+    message: "Ces documents sont obligatoires.",
+    path: ["key"],
+  }
+);
+
+export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
+  (data) => {
+    if (data.category === "CPOM" && !data.parentFileUploadId) {
       return !!data.key && !!data.startDate && !!data.endDate;
     }
     return true;
