@@ -386,8 +386,8 @@ model Cpom {
   id             Int              @id @default(autoincrement())
   name           String?
   structures     CpomStructure[]
-  dateStart      DateTime?
-  dateEnd        DateTime?
+  dateStart      DateTime? // Attention : va disparaitre dans la prochaine migration au profit des dates de convention
+  dateEnd        DateTime? // Idem
   conventions    CpomConvention[]
   cpomMillesimes CpomMillesime[]
   operateur      Operateur        @relation(fields: [operateurId], references: [id])
