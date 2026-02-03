@@ -5,7 +5,7 @@ export const BudgetTableTitleLine = ({ label }: Props) => {
   return (
     <tr>
       <td
-        className="text-left! text-xs! font-bold uppercase"
+        className="text-left! text-xs! font-bold uppercase bg-default-grey-hover"
         colSpan={years.length + 1}
       >
         {label}
