@@ -1,3 +1,4 @@
+import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
@@ -138,7 +139,20 @@ const getLines = (
           },
           {
             name: "affectationReservesFondsDedies",
-            label: "Affectation",
+            label: (
+              <Tooltip
+                title={
+                  <>
+                    <span>Négatif : affectation d'un déficit</span>
+                    <br />
+                    <span>Positif : affectation d'un excédent</span>
+                  </>
+                }
+              >
+                Affectation{" "}
+                <i className="fr-icon-information-line before:scale-50 before:origin-left" />
+              </Tooltip>
+            ),
             subLabel: "réserves & provision",
             disabledYearsStart: AUTORISEE_OPEN_YEAR,
           },
