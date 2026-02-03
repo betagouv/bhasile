@@ -39,7 +39,7 @@ export const StructuresLine = ({
             },
           ]}
           className={cn(
-            "!mb-0",
+            "!my-2",
             "[&_legend]:!p-0",
             "[&_label]:text-sm [&_label]:leading-6 [&_label]:pb-0 [&_label]:text-mention-grey [&_label]:font-bold"
           )}
@@ -57,7 +57,7 @@ export const StructuresLine = ({
             label=""
             className="!mb-0 w-48"
           />
-          –
+          <span className="w-4 text-center">–</span>
           <InputWithValidation
             disabled={index === -1}
             name={index !== -1 ? `structures.${index}.dateEnd` : ""}
@@ -74,7 +74,7 @@ export const StructuresLine = ({
             <span className="w-48 text-center">
               {cpomStructure[index].dateStart ?? cpomDateStart}
             </span>
-            <span>–</span>
+            <span className="w-4 text-center">–</span>
             <span className="w-48 text-center">
               {cpomStructure[index].dateEnd ?? cpomDateEnd}
             </span>
@@ -84,13 +84,13 @@ export const StructuresLine = ({
       <div className="w-6">
         {index !== -1 && !isEditable && (
           <Button
-            iconId="fr-icon-edit-line"
+            iconId="fr-icon-edit-box-line"
             className="ml-auto rounded-4xl"
             onClick={() => {
               setIsEditable(!isEditable);
             }}
             priority="tertiary no outline"
-            title="Supprimer l'hébergement"
+            title="Éditer les dates d'entrée et de sortie"
           />
         )}
       </div>

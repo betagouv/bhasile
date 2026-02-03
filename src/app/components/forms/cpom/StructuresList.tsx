@@ -100,6 +100,10 @@ export const StructuresList = ({ structures }: Props) => {
             small
           />
         </div>
+        <div className="w-48 text-center font-bold text-sm">ENTRÉE</div>
+        <div className="w-4"></div>
+        <div className="w-48 text-center font-bold text-sm">SORTIE</div>
+        <div className="w-6"></div>
       </div>
       {structures.map((structure) => (
         <StructuresLine
