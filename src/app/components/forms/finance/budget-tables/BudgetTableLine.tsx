@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 
-import { getName, isInputDisabled } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
@@ -9,7 +8,8 @@ import {
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
 
-import InputWithValidation from "../../InputWithValidation";
+import { BudgetTableLineInput } from "./BudgetTableLineInput";
+import { BudgetTableStaticValue } from "./BudgetTableStaticValue";
 
 export const BudgetTableLine = ({
   name,
@@ -20,6 +20,7 @@ export const BudgetTableLine = ({
   cpomMillesimes,
   disabledYearsStart,
   enabledYears,
+  canEdit = true,
 }: Props) => {
   const parentFormContext = useFormContext();
 
@@ -43,29 +44,28 @@ export const BudgetTableLine = ({
       {years.map((year) => (
         <td key={year}>
           <span className="flex items-center justify-center gap-2">
-            <InputWithValidation
-              name={getName(
-                name,
-                year,
-                budgets,
-                cpomStructures,
-                cpomMillesimes
-              )}
-              id={getName(name, year, budgets, cpomStructures, cpomMillesimes)}
-              control={control}
-              type="number"
-              min={0}
-              label=""
-              className="mb-0 items-center [&_p]:hidden [&_input]:w-full"
-              variant="simple"
-              disabled={isInputDisabled(
-                year,
-                disabledYearsStart,
-                enabledYears,
-                cpomStructures
-              )}
-            />
-            &nbsp;€
+            {canEdit ? (
+              <BudgetTableLineInput
+                name={name}
+                year={year}
+                control={control}
+                budgets={budgets}
+                cpomStructures={cpomStructures}
+                cpomMillesimes={cpomMillesimes}
+                disabledYearsStart={disabledYearsStart}
+                enabledYears={enabledYears}
+              />
+            ) : (
+              <BudgetTableStaticValue
+                name={name}
+                year={year}
+                budgets={budgets}
+                cpomStructures={cpomStructures}
+                cpomMillesimes={cpomMillesimes}
+                disabledYearsStart={disabledYearsStart}
+                enabledYears={enabledYears}
+              />
+            )}
           </span>
         </td>
       ))}
@@ -82,4 +82,5 @@ type Props = {
   cpomMillesimes?: CpomMillesimeApiType[];
   disabledYearsStart?: number;
   enabledYears?: number[];
+  canEdit?: boolean;
 };

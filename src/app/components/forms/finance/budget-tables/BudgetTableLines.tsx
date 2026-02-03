@@ -14,6 +14,7 @@ export const BudgetTableLines = ({
   budgets,
   cpomStructures,
   cpomMillesimes,
+  canEdit = true,
 }: Props) => {
   return (
     <>
@@ -31,6 +32,7 @@ export const BudgetTableLines = ({
               budgets={budgets}
               cpomStructures={cpomStructures}
               cpomMillesimes={cpomMillesimes}
+              canEdit={canEdit}
             />
           ))}
         </>
@@ -53,4 +55,5 @@ type Props = {
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];
   cpomMillesimes?: CpomMillesimeApiType[];
+  canEdit?: boolean;
 };

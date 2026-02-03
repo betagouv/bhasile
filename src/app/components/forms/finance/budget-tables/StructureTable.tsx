@@ -16,7 +16,7 @@ import { BudgetTableLines } from "./BudgetTableLines";
 import { BudgetTableRepriseEtatTooltip } from "./BudgetTableRepriseEtatTooltip";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
 
-export const StructureTable = () => {
+export const StructureTable = ({ canEdit = true }: Props) => {
   const parentFormContext = useFormContext();
 
   const { structure } = useStructureContext();
@@ -45,7 +45,13 @@ export const StructureTable = () => {
         budgetItemErrors?.commentaire
     );
 
-  const budgets = watch("budgets") as BudgetApiType[];
+  const budgets = canEdit
+    ? (watch("budgets") as BudgetApiType[])
+    : structure?.budgets;
+
+  if (!budgets || budgets.length === 0) {
+    return null;
+  }
 
   const detailAffectationEnabledYears = budgets
     .filter((budget) => {
@@ -58,10 +64,6 @@ export const StructureTable = () => {
     })
     .map((budget) => budget.year);
 
-  if (budgets.length === 0) {
-    return null;
-  }
-
   return (
     <Table
       ariaLabelledBy="gestionBudgetaire"
@@ -72,17 +74,14 @@ export const StructureTable = () => {
       <BudgetTableLines
         lines={getLines(isAutorisee, detailAffectationEnabledYears)}
         budgets={budgets}
-      />
-      <BudgetTableCommentLine
-        label="Commentaire"
-        budgets={budgets}
-        disabledYearsStart={
-          isSubventionnee ? SUBVENTIONNEE_OPEN_YEAR + 1 : undefined
-        }
-        enabledYears={isAutorisee ? detailAffectationEnabledYears : undefined}
+        canEdit={canEdit}
       />
     </Table>
   );
+};
+
+type Props = {
+  canEdit?: boolean;
 };
 
 const getLines = (
