@@ -405,7 +405,7 @@ model CpomAvenant {
   id          Int          @id @default(autoincrement())
   cpomId      Int
   dateEnd     DateTime
-  date        DateTime? // date de signature de l'avenant (optionnel)
+  date        DateTime? // date de signature de l'avenant
   cpom        Cpom         @relation(fields: [cpomId], references: [id], onDelete: Cascade)
   fileUploads FileUpload[]
 

@@ -40,7 +40,7 @@ export const createOrUpdateCpomMillesimes = async (
     },
   });
 
-  // Date de fin effective = max(dateEnd, avenants.dateFinModifiee)
+  // Date de fin effective en considérant les avenants
   const cpomStructuresWithEffectiveEnd = cpomStructures.map((cs) => {
     const cpom = cs.cpom;
     const dateEndWithAvenants =
