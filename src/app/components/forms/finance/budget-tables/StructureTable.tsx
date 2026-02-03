@@ -143,9 +143,9 @@ const getLines = (
               <Tooltip
                 title={
                   <>
-                    <span>Négatif : affectation d'un déficit</span>
+                    <span>Négatif : affectation d’un déficit</span>
                     <br />
-                    <span>Positif : affectation d'un excédent</span>
+                    <span>Positif : affectation d’un excédent</span>
                   </>
                 }
               >
