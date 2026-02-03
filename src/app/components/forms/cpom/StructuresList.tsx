@@ -69,7 +69,7 @@ export const StructuresList = ({ structures }: Props) => {
       setValue("structures", []);
     }
   };
-  console.log(selectedCpomStructures);
+
   return (
     <div>
       <div className="flex items-center gap-4 border-b border-gray-200 py-2 px-4">
@@ -78,7 +78,7 @@ export const StructuresList = ({ structures }: Props) => {
             options={[
               {
                 label:
-                  checkedStatus === "checked"
+                  checkedStatus !== "unchecked"
                     ? "Tout déselectionner"
                     : "Tout sélectionner",
                 nativeInputProps: {
