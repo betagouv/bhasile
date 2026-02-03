@@ -6,7 +6,7 @@ import { getLastVisitInMonths } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ControleAccordion } from "./ControleAccordion";
-import { DemarchesSimplifieesInfo } from "./DemarchesSimplifiesInfo";
+import { DemarchesNumeriquesInfo } from "./DemarchesNumeriquesInfo";
 import { EIGTable } from "./EIGTable";
 import { EvaluationTable } from "./EvaluationTable";
 
@@ -41,7 +41,7 @@ export const HudaPrahdaControlesBlock = (): ReactElement => {
         >
           <>
             <EIGTable />
-            <DemarchesSimplifieesInfo />
+            <DemarchesNumeriquesInfo />
           </>
         </ControleAccordion>
       </div>

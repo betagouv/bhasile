@@ -1,73 +1,79 @@
+import { createMinimalStructure } from "@/app/api/structures/structure.repository";
 import { StructureApiType } from "@/schemas/api/structure.schema";
+import { StructureType } from "@/types/structure.type";
 
-import { transformTestDataToApiFormat } from "./api-data-transformer";
-import { TestStructureData } from "./test-data";
-
-/**
- * Creates a structure via the API endpoint
- * Returns the structure's dnaCode for use in tests
- */
-export async function createStructureViaApi(
-  testData: TestStructureData
-): Promise<string> {
-  const apiData = transformTestDataToApiFormat(testData);
-
-  const response = await fetch("http://localhost:3000/api/structures", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(apiData),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(
-      `Failed to create structure via API: ${JSON.stringify(error)}`
-    );
-  }
-
-  // Structure is created with state A_FINALISER by default
-  return testData.dnaCode;
-}
-
-/**
- * Deletes a structure via the API endpoint (for cleanup)
- */
-export async function deleteStructureViaApi(dnaCode: string): Promise<void> {
-  const response = await fetch(
-    `http://localhost:3000/api/structures?dnaCode=${dnaCode}`,
-    {
-      method: "DELETE",
-    }
-  );
-
-  if (!response.ok) {
-    console.warn(
-      `Failed to delete structure ${dnaCode}:`,
-      await response.text()
-    );
-  }
-}
+import { BASE_URL } from "./constants";
+import {
+  ApiError,
+  ensureResponseOk,
+  formatErrorMessage,
+  getResponseJson,
+} from "./error-handler";
+import { parseAddress } from "./shared-utils";
+import { TestStructureData } from "./test-data/types";
 
 /**
  * Gets a structure's ID from its DNA code
  */
 export async function getStructureId(dnaCode: string): Promise<number> {
-  const response = await fetch("http://localhost:3000/api/structures");
+  const headers: Record<string, string> = getAuthHeaders();
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch structures");
-  }
+  const response = await fetch(`${BASE_URL}/api/structures/dna/${dnaCode}`, {
+    headers,
+  });
 
-  const structures = await response.json();
-  const structure = structures.find(
-    (s: StructureApiType) => s.dnaCode === dnaCode
+  await ensureResponseOk(
+    response,
+    formatErrorMessage("getStructureId", dnaCode)
   );
 
+  const structure = await getResponseJson<StructureApiType | null>(response);
+
   if (!structure) {
-    throw new Error(`Structure with dnaCode ${dnaCode} not found`);
+    throw new ApiError(formatErrorMessage("Structure not found", dnaCode));
   }
 
   return structure.id;
 }
+
+/**
+ * Seeds the structure with the minimum data required for the selection list.
+ */
+export async function seedStructureForSelection(
+  testData: Partial<TestStructureData> & { dnaCode: string }
+): Promise<void> {
+  const adminAddress = testData.adresseAdministrative
+    ? parseAddress(testData.adresseAdministrative.searchTerm)
+    : { street: "", postalCode: "", city: "", department: "" };
+
+  await createMinimalStructure({
+    dnaCode: testData.dnaCode,
+    type: testData.type ?? StructureType.CADA,
+    operateurId: testData.operateur?.id ?? 1,
+    departementAdministratif: testData.departementAdministratif,
+    nom: testData.nom ?? "",
+    adresseAdministrative: testData.adresseAdministrative?.complete ?? "",
+    codePostalAdministratif: adminAddress.postalCode,
+    communeAdministrative: adminAddress.city,
+  });
+}
+
+const getPasswordCookieHeader = (): string | null => {
+  const passwords = process.env.OPERATEUR_PASSWORDS;
+  const password = passwords?.split(",")[0]?.trim();
+  if (!password) {
+    return null;
+  }
+  return `mot-de-passe=${password}`;
+};
+
+const getAuthHeaders = (): Record<string, string> => {
+  const headers: Record<string, string> = {
+    "x-dev-auth-bypass": "1",
+  };
+  const passwordCookie = getPasswordCookieHeader();
+  if (passwordCookie) {
+    headers.Cookie = passwordCookie;
+  }
+  return headers;
+};

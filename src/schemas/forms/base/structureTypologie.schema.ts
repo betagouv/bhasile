@@ -133,7 +133,6 @@ export const structureTypologiesWithMandatoryEvolutionSchema =
 export type StructureTypologieWithoutEvolutionSchemaTypeFormValues = z.infer<
   typeof structureTypologieWithoutEvolutionSchema
 >;
-
 export type structureTypologieSchemaTypeFormValues = z.infer<
   typeof structureTypologieSchema
 >;

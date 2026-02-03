@@ -24,6 +24,7 @@ export const ActivitePlaces = (): ReactElement => {
 
   const placesDisponibles = placesAutorisees - placesIndisponibles;
   const placesOccupees = placesDisponibles - placesVacantes;
+
   return (
     <div className="flex items-center pt-3">
       <div>

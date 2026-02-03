@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
 
 export default withSentryConfig(nextConfig, {
   org: "betagouv",
-  project: "place-d-asile-xd",
+  project: "bhasile",
   sentryUrl: "https://sentry.incubateur.net/",
   silent: !process.env.CI,
   tunnelRoute: "/monitoring",

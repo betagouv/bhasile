@@ -1,77 +1,97 @@
 import { Page } from "@playwright/test";
 
-export class FinalisationFinancePage {
-  constructor(private page: Page) {}
+import { URLS } from "../../constants";
+import { safeExecute } from "../../error-handler";
+import { FormHelper } from "../../form-helper";
+import { FinanceYearData, TestStructureData } from "../../test-data/types";
+import { WaitHelper } from "../../wait-helper";
+import { BasePage } from "../BasePage";
 
-  async waitForLoad() {
-    await this.page.waitForSelector('button[type="submit"]', {
-      timeout: 10000,
-    });
+export class FinalisationFinancePage extends BasePage {
+  private waitHelper: WaitHelper;
+  private formHelper: FormHelper;
+
+  constructor(page: Page) {
+    super(page);
+    this.waitHelper = new WaitHelper(page);
+    this.formHelper = new FormHelper(page);
   }
 
-  async fillMinimalData() {
-    // Finance form has many required fields per year
-    // Wait for the form to fully render
-    await this.page.waitForTimeout(1000);
+  async fillForm(data: TestStructureData) {
+    const finances = data.finances;
+    if (!finances) {
+      return;
+    }
 
-    // Fill required fields for each of the 5 years (2025, 2024, 2023, 2022, 2021)
-    for (let i = 0; i < 5; i++) {
-      // Basic indicators (required for all years)
-      await this.page.fill(`input[name="budgets.${i}.ETP"]`, "10");
-      await this.page.fill(`input[name="budgets.${i}.tauxEncadrement"]`, "0.5");
-      await this.page.fill(`input[name="budgets.${i}.coutJournalier"]`, "50");
+    await this.waitHelper.waitForUIUpdate();
+    const yearIndexMap = await this.getBudgetIndexByYear(finances);
 
-      // Year 2025 and 2024 (current/forecast years)
-      if (i <= 1) {
-        await this.page.fill(
-          `input[name="budgets.${i}.dotationDemandee"]`,
-          "100000"
-        );
-        await this.page.fill(
-          `input[name="budgets.${i}.dotationAccordee"]`,
-          "100000"
-        );
+    for (const [yearKey, fields] of Object.entries(finances)) {
+      const year = Number(yearKey);
+      const budgetIndex = yearIndexMap[year];
+      if (budgetIndex === undefined) {
+        continue;
       }
 
-      // Years 2023, 2022, 2021 (historical years - more fields required)
-      if (i >= 2) {
-        await this.page.fill(
-          `input[name="budgets.${i}.dotationDemandee"]`,
-          "100000"
+      for (const [field, value] of Object.entries(fields)) {
+        if (value === undefined || value === null) {
+          continue;
+        }
+        const selector = `input[name="budgets.${budgetIndex}.${field}"]`;
+        const input = this.page.locator(selector);
+        const count = await input.count();
+        if (count === 0) {
+          continue;
+        }
+        const isEnabled = await safeExecute(
+          () => input.isEnabled(),
+          false,
+          `Failed to check if input is enabled: ${selector}`
         );
-        await this.page.fill(
-          `input[name="budgets.${i}.dotationAccordee"]`,
-          "100000"
-        );
-        await this.page.fill(
-          `input[name="budgets.${i}.totalProduits"]`,
-          "100000"
-        );
-        await this.page.fill(
-          `input[name="budgets.${i}.totalChargesProposees"]`,
-          "95000"
-        );
-        await this.page.fill(
-          `input[name="budgets.${i}.totalCharges"]`,
-          "95000"
-        );
-        await this.page.fill(`input[name="budgets.${i}.repriseEtat"]`, "0");
-        await this.page.fill(
-          `input[name="budgets.${i}.affectationReservesFondsDedies"]`,
-          "0"
-        );
+        if (isEnabled) {
+          await this.formHelper.fillInput(selector, String(value));
+        }
+      }
+    }
+  }
+
+  async submit(structureId: number, expectValidationFailure = false) {
+    if (expectValidationFailure) {
+      await this.submitAndExpectNoNavigation();
+    } else {
+      await this.submitAndWaitForUrl(
+        URLS.finalisationStep(structureId, "04-controles")
+      );
+    }
+  }
+
+  private async getBudgetIndexByYear(
+    finances: Record<number, FinanceYearData>
+  ) {
+    const yearInputs = this.page.locator(
+      'input[name^="budgets."][name$=".year"]'
+    );
+    const count = await yearInputs.count();
+    const yearIndexMap: Record<number, number> = {};
+    for (let i = 0; i < count; i++) {
+      const input = yearInputs.nth(i);
+      const value = await input.inputValue();
+      const year = Number(value);
+      if (!Number.isNaN(year)) {
+        yearIndexMap[year] = i;
       }
     }
 
-    console.log("✅ Filled finance form with minimal test data");
-  }
+    if (Object.keys(yearIndexMap).length > 0) {
+      return yearIndexMap;
+    }
 
-  async submit(structureId: number) {
-    // Finance page has complex validation that varies by structure type
-    // Skip by navigating directly to next step for test simplicity
-    await this.page.goto(
-      `http://localhost:3000/structures/${structureId}/finalisation/04-type-places`
-    );
-    await this.page.waitForTimeout(1000);
+    const sortedYears = Object.keys(finances)
+      .map((year) => Number(year))
+      .sort((a, b) => b - a);
+    sortedYears.forEach((year, index) => {
+      yearIndexMap[year] = index;
+    });
+    return yearIndexMap;
   }
 }

@@ -1,4 +1,4 @@
-import "dayjs/locale/fr";
+import "dayjs/locale/fr.js";
 
 import dayjs from "dayjs";
 
