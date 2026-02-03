@@ -31,9 +31,36 @@ export const createOrUpdateCpomMillesimes = async (
           id: true,
           dateStart: true,
           dateEnd: true,
+          avenants: {
+            select: { dateEnd: true },
+            orderBy: { dateEnd: "desc" },
+          },
         },
       },
     },
+  });
+
+  // Date de fin effective = max(dateEnd, avenants.dateFinModifiee)
+  const cpomStructuresWithEffectiveEnd = cpomStructures.map((cs) => {
+    const cpom = cs.cpom;
+    const dateEndWithAvenants =
+      cpom.avenants.length > 0
+        ? cpom.avenants.reduce(
+            (max, a) => (a.dateEnd > max ? a.dateEnd : max),
+            cpom.dateEnd ?? cpom.avenants[0].dateEnd
+          )
+        : cpom.dateEnd;
+
+    return {
+      dateStart: cs.dateStart,
+      dateEnd: dateEndWithAvenants,
+      cpom: {
+        id: cpom.id,
+        dateStart: cpom.dateStart,
+        dateEnd: dateEndWithAvenants,
+        initialDateEnd: cpom.dateEnd,
+      },
+    };
   });
 
   if (cpomStructures.length === 0) {
@@ -45,7 +72,10 @@ export const createOrUpdateCpomMillesimes = async (
 
   await Promise.all(
     millesimes.map(async (millesime) => {
-      const resolved = findMatchingCpomForMillesime(cpomStructures, millesime);
+      const resolved = findMatchingCpomForMillesime(
+        cpomStructuresWithEffectiveEnd,
+        millesime
+      );
 
       if (!resolved) {
         console.warn(
