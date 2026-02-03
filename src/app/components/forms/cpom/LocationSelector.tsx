@@ -7,6 +7,8 @@ import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { DEPARTEMENTS, REGIONS_WITHOUT_CORSE } from "@/constants";
 import { CpomGranularity } from "@/types/cpom.type";
 
+import { DepartementsSelector } from "../DepartementsSelector";
+
 export const LocationSelector = () => {
   const { watch, control, setValue } = useFormContext();
 
@@ -71,6 +73,9 @@ export const LocationSelector = () => {
             </option>
           ))}
         </Select>
+      )}
+      {granularity === CpomGranularity.INTERDEPARTEMENTALE && (
+        <DepartementsSelector departements={departementsOfRegion} />
       )}
     </div>
   );

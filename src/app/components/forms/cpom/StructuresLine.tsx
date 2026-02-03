@@ -12,7 +12,7 @@ export const StructuresLine = ({
   const { control } = useFormContext();
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-4 border-b border-gray-200 px-2">
       <div className="flex-1">
         <Checkbox
           legend=""
@@ -37,8 +37,9 @@ export const StructuresLine = ({
         control={control}
         type="date"
         label=""
+        className="!mb-0"
       />
-
+      –
       <InputWithValidation
         disabled={index === -1}
         name={index !== -1 ? `structures.${index}.dateEnd` : ""}
