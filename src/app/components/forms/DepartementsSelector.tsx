@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from "react";
 
 import { Departement } from "@/types/departement.type";
 
-export const DepartementsSelector = ({ departements }: Props) => {
+export const DepartementsSelector = ({
+  departements,
+  selectedDepartements,
+  handleDepartementToggle,
+}: Props) => {
   const panelRef = useRef<HTMLDivElement | null>(null);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -46,35 +50,36 @@ export const DepartementsSelector = ({ departements }: Props) => {
           disabled={departements.length === 0}
           className="bg-contrast-grey text-black font-normal border-b-2 border-b-black w-full"
         >
-          DepartementsSelector
+          {selectedDepartements.join(", ")}
         </Button>
         {isOpen && (
           <div
             ref={panelRef}
             className="absolute top-full right-0 left-0 mt-0 w-96  bg-white rounded-md shadow-md z-50"
           >
-            <div className="max-h-[40.5rem] overflow-y-scroll overflow-x-hidden py-4 flex flex-col ">
+            <div className="max-h-[40.5rem] overflow-y-scroll overflow-x-hidden py-4 flex flex-col px-4">
               {departements.map((departement) => (
                 <Checkbox
-                key={departement.numero}
-                options={[
-                  {
-                    label: `${departement.name} - ${departement.numero}`,
-                    nativeInputProps: {
-                      name: "structure-departement",
-                      value: departement.numero,
-                      checked: departements.includes(departement.numero),
-                      onChange: handleDepartementToggle,
+                  key={departement.numero}
+                  options={[
+                    {
+                      label: `${departement.name} - ${departement.numero}`,
+                      nativeInputProps: {
+                        name: "structure-departement",
+                        value: departement.numero,
+                        checked: selectedDepartements.includes(
+                          departement.numero
+                        ),
+                        onChange: () =>
+                          handleDepartementToggle(departement.numero),
+                      },
                     },
-                  },
-                ]}
-                className={
-                  "[&_label]:text-sm [&_label]:leading-6 [&_label]:pb-0 mb-1"
-                }
-                small
-              />
-                  {departement.name}
-                </Checkbox>
+                  ]}
+                  className={
+                    "[&_label]:text-sm [&_label]:leading-6 [&_label]:pb-0 mb-1"
+                  }
+                  small
+                />
               ))}
             </div>
           </div>
@@ -86,4 +91,6 @@ export const DepartementsSelector = ({ departements }: Props) => {
 
 type Props = {
   departements: Departement[];
+  selectedDepartements: string[];
+  handleDepartementToggle: (value: string) => void;
 };

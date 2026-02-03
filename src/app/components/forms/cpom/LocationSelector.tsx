@@ -15,7 +15,7 @@ export const LocationSelector = () => {
   const granularity = watch("granularity");
 
   const region = watch("region");
-  const departements = watch("departements");
+  const departements = watch("departements") as string[];
 
   const departementsOfRegion = useMemo(
     () => DEPARTEMENTS.filter((departement) => departement.region === region),
@@ -39,6 +39,29 @@ export const LocationSelector = () => {
     );
   }, [region, setValue, departementsOfRegion, granularity]);
 
+  const handleDepartementToggle = (value: string) => {
+    if (departements.includes(value)) {
+      if (departements.length === 1) {
+        setValue(
+          "departements",
+          departementsOfRegion.map((departement) => departement.numero),
+          {
+            shouldValidate: true,
+          }
+        );
+      } else {
+        setValue(
+          "departements",
+          departements.filter((departement) => departement !== value),
+          { shouldValidate: true }
+        );
+      }
+    } else {
+      setValue("departements", [...departements, value], {
+        shouldValidate: true,
+      });
+    }
+  };
   return (
     <div className="grid grid-cols-3 gap-6">
       <OperateurAutocomplete />
@@ -75,7 +98,11 @@ export const LocationSelector = () => {
         </Select>
       )}
       {granularity === CpomGranularity.INTERDEPARTEMENTALE && (
-        <DepartementsSelector departements={departementsOfRegion} />
+        <DepartementsSelector
+          departements={departementsOfRegion}
+          selectedDepartements={departements}
+          handleDepartementToggle={handleDepartementToggle}
+        />
       )}
     </div>
   );

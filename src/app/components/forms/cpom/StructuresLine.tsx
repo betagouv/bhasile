@@ -21,7 +21,6 @@ export const StructuresLine = ({
   const cpomDateStart = watch("dateStart");
   const cpomDateEnd = watch("dateEnd");
 
-  console.log(cpomDateStart, cpomDateEnd);
   return (
     <div className="flex items-center gap-4 border-b border-gray-200 py-2 px-4">
       <div className="flex-1">
