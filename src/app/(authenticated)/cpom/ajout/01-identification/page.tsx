@@ -2,6 +2,7 @@
 
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
+import { v4 as uuidv4 } from "uuid";
 
 import { FieldSetDocuments } from "@/app/components/forms/fieldsets/cpom/FieldSetDocuments";
 import { FieldSetGeneral } from "@/app/components/forms/fieldsets/cpom/FieldSetGeneral";
@@ -27,6 +28,8 @@ export default function CpomAjoutIdentification() {
     },
     granularity: CpomGranularity.DEPARTEMENTALE,
     departements: [25, 26],
+    conventions: [{ uuid: uuidv4(), category: "CPOM" }],
+    actesAdministratifs: [{ uuid: uuidv4(), category: "CPOM" }],
   };
 
   const handleSubmit = async (data: CpomFormValues) => {

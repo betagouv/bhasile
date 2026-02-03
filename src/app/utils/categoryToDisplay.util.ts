@@ -56,7 +56,7 @@ export const getCategoriesDisplayRules = (
   CPOM: {
     categoryShortName: "CPOM",
     title: "CPOM",
-    canAddFile: true,
+    canAddFile: false,
     isOptional: false,
     canAddAvenant: true,
     additionalFieldsType: AdditionalFieldsType.DATE_START_END,

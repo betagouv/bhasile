@@ -3,6 +3,7 @@ import z from "zod";
 import {
   frenchDateToISO,
   nullishFrenchDateToISO,
+  optionalFrenchDateToISO,
   zId,
   zSafeDecimalsNullish,
   zSafeYear,
@@ -10,10 +11,7 @@ import {
 import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 import { CpomGranularity } from "@/types/cpom.type";
 
-import {
-  acteAdministratifCpomSchema,
-  actesAdministratifsCpomSchema,
-} from "./acteAdministratif.schema";
+import { acteAdministratifCpomSchema } from "./acteAdministratif.schema";
 import { operateurSchema } from "./operateur.schema";
 
 const cpomMillesimeSchema = z.object({
@@ -38,8 +36,8 @@ const cpomMillesimeSchema = z.object({
 const bareCpomSchema = z.object({
   id: zId(),
   name: z.string().nullish(),
-  dateStart: frenchDateToISO(),
-  dateEnd: frenchDateToISO(),
+  dateStart: optionalFrenchDateToISO(),
+  dateEnd: optionalFrenchDateToISO(),
   operateur: operateurSchema.optional(),
   operateurId: zId(),
   granularity: z.enum([
