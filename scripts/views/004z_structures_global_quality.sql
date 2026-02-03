@@ -5,6 +5,7 @@
 -- - structures_calendar_quality: calendar-related indicators (authorization, conventions)
 -- - structures_places_quality: places-related indicators (specific places vs authorized)
 -- - structures_finance_quality: finance-related indicators (budgets, affectations)
+-- - structures_characteristics_quality: characteristics (e.g. DNA vs departement)
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_global_quality" AS
 SELECT
   s."dnaCode" AS "dnaCode",
@@ -22,6 +23,8 @@ SELECT
   -- Places indicators
   COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE) AS "has_issue_specific_places_gt_places_autorisees",
   COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE) AS "has_issue_places_structure_vs_address_diff_gt_10pct",
+  -- Characteristics indicators
+  COALESCE(ch."has_issue_dept_code", FALSE) AS "has_issue_dept_code",
   -- Finance indicators
   COALESCE(fin."has_issue_taux_encadrement_max_gt_25", FALSE) AS "has_issue_taux_encadrement_max_gt_25",
   COALESCE(fin."has_issue_taux_encadrement_min_lt_15", FALSE) AS "has_issue_taux_encadrement_min_lt_15",
@@ -36,12 +39,13 @@ SELECT
   (
     (COALESCE(cal."has_authorisation_dates_undefined", FALSE)::int) + (COALESCE(cal."has_issue_authorisation_period_not_15y", FALSE)::int) + (COALESCE(cal."has_convention_dates_undefined", FALSE)::int) + (COALESCE(cal."has_issue_authorized_convention_not_5y", FALSE)::int) + (
       COALESCE(cal."has_issue_authorized_convention_outside_authorisation_period", FALSE)::int
-    ) + (COALESCE(cal."has_issue_subsidized_convention_gt_3y", FALSE)::int) + (COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE)::int) + (COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_max_gt_25", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_max_gt_25", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_resultat_net_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_authorized_excedent_affectations_mismatch", FALSE)::int) + (COALESCE(fin."has_issue_authorized_negative_affectations", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE)::int)
+    ) + (COALESCE(cal."has_issue_subsidized_convention_gt_3y", FALSE)::int) + (COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE)::int) + (COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE)::int) + (COALESCE(ch."has_issue_dept_code", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_max_gt_25", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_max_gt_25", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_resultat_net_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_authorized_excedent_affectations_mismatch", FALSE)::int) + (COALESCE(fin."has_issue_authorized_negative_affectations", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE)::int)
   ) AS "issues_count"
 FROM
   public."Structure" s
   LEFT JOIN:"SCHEMA"."structures_calendar_quality" cal ON cal."dnaCode" = s."dnaCode"
   LEFT JOIN:"SCHEMA"."structures_places_quality" pl ON pl."dnaCode" = s."dnaCode"
+  LEFT JOIN:"SCHEMA"."structures_characteristics_quality" ch ON ch."dnaCode" = s."dnaCode"
   LEFT JOIN:"SCHEMA"."structures_finance_quality" fin ON fin."dnaCode" = s."dnaCode"
   LEFT JOIN public."Operateur" o ON o."id" = s."operateurId"
   LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
