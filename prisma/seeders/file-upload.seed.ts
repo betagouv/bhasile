@@ -99,8 +99,7 @@ const buildFakeFileUpload = ({
       category === FileUploadCategory.AUTRE ? faker.lorem.word() : null,
     parentFileUploadId: parentFileUploadId ?? null,
     granularity: FileUploadGranularity.STRUCTURE,
-    cpomId: null,
-    cpomAvenantId: null,
+    cpomConventionId: null,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   };

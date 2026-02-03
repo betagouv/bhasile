@@ -29,36 +29,38 @@ export const createOrUpdateCpomMillesimes = async (
       cpom: {
         select: {
           id: true,
-          dateStart: true,
-          dateEnd: true,
-          avenants: {
-            select: { dateEnd: true },
-            orderBy: { dateEnd: "desc" },
+          conventions: {
+            select: { dateStart: true, dateEnd: true },
           },
         },
       },
     },
   });
 
-  // Date de fin effective en considérant les avenants
-  const cpomStructuresWithEffectiveEnd = cpomStructures.map((cs) => {
+  // Période du CPOM = min(dateStart) et max(dateEnd) des conventions (principale + avenants)
+  const cpomStructuresWithConventionDates = cpomStructures.map((cs) => {
     const cpom = cs.cpom;
-    const dateEndWithAvenants =
-      cpom.avenants.length > 0
-        ? cpom.avenants.reduce(
-            (max, a) => (a.dateEnd > max ? a.dateEnd : max),
-            cpom.dateEnd ?? cpom.avenants[0].dateEnd
-          )
-        : cpom.dateEnd;
+    const conventions = cpom.conventions;
+    const dateStarts = conventions
+      .map((c) => c.dateStart)
+      .filter((d): d is Date => d != null);
+    const dateEnds = conventions.map((c) => c.dateEnd);
+    const dateStart =
+      dateStarts.length > 0
+        ? new Date(Math.min(...dateStarts.map((d) => d.getTime())))
+        : null;
+    const dateEnd =
+      dateEnds.length > 0
+        ? new Date(Math.max(...dateEnds.map((d) => d.getTime())))
+        : null;
 
     return {
       dateStart: cs.dateStart,
-      dateEnd: dateEndWithAvenants,
+      dateEnd: cs.dateEnd,
       cpom: {
         id: cpom.id,
-        dateStart: cpom.dateStart,
-        dateEnd: dateEndWithAvenants,
-        initialDateEnd: cpom.dateEnd,
+        dateStart,
+        dateEnd,
       },
     };
   });
@@ -73,7 +75,7 @@ export const createOrUpdateCpomMillesimes = async (
   await Promise.all(
     millesimes.map(async (millesime) => {
       const resolved = findMatchingCpomForMillesime(
-        cpomStructuresWithEffectiveEnd,
+        cpomStructuresWithConventionDates,
         millesime
       );
 

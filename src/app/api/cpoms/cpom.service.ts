@@ -7,7 +7,6 @@ type CpomStructureForMatching = {
     id: number;
     dateStart: Date | null;
     dateEnd: Date | null;
-    initialDateEnd: Date | null;
   };
 };
 
@@ -26,7 +25,6 @@ export const findMatchingCpomForMillesime = (
       null;
     const yearEnd =
       cpomStructure.dateEnd?.getFullYear() ??
-      cpomStructure.cpom.initialDateEnd?.getFullYear() ??
       cpomStructure.cpom.dateEnd?.getFullYear() ??
       null;
 
