@@ -1,6 +1,7 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
 import type { Departement, PrismaClient } from "@/generated/prisma/client";
+import { CpomGranularity } from "@/types/cpom.type";
 
 const buildStructureMillesimeYears = (start: number, end: number): number[] => {
   const years: number[] = [];
@@ -49,11 +50,12 @@ export const createFakeCpoms = async (
       const region = departementToRegion.get(
         structure.departementAdministratif ?? ""
       );
+
       if (!region) {
         continue;
       }
       structureIdToDnaCode.set(structure.id, structure.dnaCode);
-      const key = `${operateur.id}-${region}`;
+      const key = `${operateur.id}_${region}`;
       const existingStructures = structuresByOperateurAndRegion.get(key) || [];
       structuresByOperateurAndRegion.set(key, [
         ...existingStructures,
@@ -80,7 +82,7 @@ export const createFakeCpoms = async (
 
   // Create CPOMs for valid groups
   for (const [key, structures] of validGroups) {
-    const [operateurIdStr, region] = key.split("-");
+    const [operateurIdStr, region] = key.split("_");
 
     const dureeAnnees = faker.number.int({ min: 3, max: 5 });
     const timeShift = faker.number.int({ min: -2, max: 2 });
@@ -114,6 +116,11 @@ export const createFakeCpoms = async (
         operateurId: Number(operateurIdStr),
         dateStart,
         dateEnd,
+        granularity: CpomGranularity.REGIONALE,
+        region,
+        departements: departements
+          .filter((departement) => departement.region === region)
+          .map((departement) => Number(departement.numero)),
         structures: {
           create: selectedStructures.map((structureId) => {
             // 10% chance that a structure joins or leaves the CPOM in the middle

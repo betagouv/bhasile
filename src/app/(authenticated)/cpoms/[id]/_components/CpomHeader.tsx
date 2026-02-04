@@ -2,6 +2,8 @@
 
 import { ReactElement, useEffect, useRef } from "react";
 
+import { formatCpomName } from "@/app/utils/cpom.util";
+
 import { useCpomContext } from "../_context/CpomClientContext";
 
 export const CpomHeader = (): ReactElement | null => {
@@ -38,10 +40,7 @@ export const CpomHeader = (): ReactElement | null => {
             <strong className="pr-3">Modifier un cpom</strong>
           </h2>
           <h3 className="text-title-blue-france fr-h6 mb-0">
-            <strong className="pr-2">
-              {cpom.name ||
-                `${cpom.operateur?.name} - ${cpom.region} (${cpom.departements?.join(", ")})`}
-            </strong>
+            <strong className="pr-2">{formatCpomName(cpom)}</strong>
           </h3>
         </div>
       </div>

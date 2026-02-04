@@ -4,7 +4,7 @@ import {
   CpomMillesimeFormValues,
 } from "@/schemas/forms/base/cpom.schema";
 
-import { getYearRange } from "./date.util";
+import { getYearFromDate, getYearRange } from "./date.util";
 
 export const getCpomDefaultValues = (cpom: CpomApiType): CpomFormValues => {
   return {
@@ -65,4 +65,11 @@ const getCpomMillesimesDefaultValues = (
       }
       return emptyCpomMillesime;
     });
+};
+
+export const formatCpomName = (cpom: CpomApiType): string => {
+  return (
+    cpom.name ||
+    `${cpom.operateur?.name} - ${cpom.region} (${getYearFromDate(cpom.dateStart)} - ${getYearFromDate(cpom.dateEnd)})`
+  );
 };

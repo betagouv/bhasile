@@ -1,6 +1,7 @@
 "use client";
 
 import { useCpomsSearch } from "@/app/hooks/useCpomsSearch";
+import { formatCpomName } from "@/app/utils/cpom.util";
 
 export default function CpomPage() {
   const { cpoms } = useCpomsSearch();
@@ -15,9 +16,8 @@ export default function CpomPage() {
       <ul>
         {cpoms.map((cpom) => (
           <li key={cpom.id}>
-            <a href={`/cpom/${cpom.id}/modification/01-identification`}>
-              {cpom.name ||
-                `${cpom.operateur?.name} - ${cpom.region} (${cpom.departements?.join(", ")})`}
+            <a href={`/cpoms/${cpom.id}/modification/01-identification`}>
+              {formatCpomName(cpom)}
             </a>
           </li>
         ))}
