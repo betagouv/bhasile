@@ -10,7 +10,6 @@ import InputWithValidation from "../../InputWithValidation";
 export const FieldSetCalendrier = () => {
   const { control, watch } = useFormContext();
   const type = watch("type");
-  const cpom = watch("cpom");
 
   return (
     <div className="flex flex-col gap-2">
