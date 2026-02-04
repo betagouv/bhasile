@@ -8,13 +8,14 @@ import {
   isStructureInCpom,
 } from "@/app/utils/structure.util";
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLines } from "./BudgetTableLines";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
 import { getCpomLines } from "./getCpomLines";
 
-export const StructureCpomTable = () => {
+export const StructureCpomTable = ({ canEdit = true }: Props) => {
   const parentFormContext = useFormContext();
 
   const { structure } = useStructureContext();
@@ -26,11 +27,13 @@ export const StructureCpomTable = () => {
   const localForm = useForm();
   const { watch } = parentFormContext || localForm;
 
-  const cpomStructures = watch("cpomStructures");
-
   const yearsInCpom = years.filter((year) =>
     isStructureInCpom(structure, year)
   );
+
+  const cpomStructures = canEdit
+    ? (watch("cpomStructures") as CpomStructureApiType[])
+    : structure?.cpomStructures;
 
   if (!cpomStructures) {
     return null;
@@ -45,6 +48,7 @@ export const StructureCpomTable = () => {
       <BudgetTableLines
         lines={getCpomLines(isAutorisee)}
         cpomStructures={cpomStructures}
+        canEdit={canEdit}
       />
       <BudgetTableCommentLine
         label="Commentaire"
@@ -53,7 +57,12 @@ export const StructureCpomTable = () => {
           isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
         }
         enabledYears={yearsInCpom}
+        canEdit={canEdit}
       />
     </Table>
   );
+};
+
+type Props = {
+  canEdit?: boolean;
 };

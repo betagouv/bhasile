@@ -2,7 +2,6 @@ import { useRouter } from "next/navigation";
 import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
-import { StructureTable } from "@/app/components/forms/finance/budget-tables/StructureTable";
 import {
   isStructureAutorisee,
   isStructureInCpom,
@@ -16,6 +15,7 @@ import { DetailAffectations } from "./DetailAffectations";
 import { DocumentsAdministratifs } from "./DocumentsAdministratifs";
 import { DotationChart } from "./DotationChart";
 import { HistoriqueIndicateursGeneraux } from "./HistoriqueIndicateursGeneraux";
+import { StructureStaticTable } from "./StructureStaticTable";
 
 export const FinancesBlock = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -58,7 +58,7 @@ export const FinancesBlock = (): ReactElement => {
         Gestion budgétaire
       </h4>
       <div className="pb-5">
-        <StructureTable canEdit={false} />
+        <StructureStaticTable />
       </div>
       {isDetailAffectationsDisplayed && (
         <div className="pb-5">

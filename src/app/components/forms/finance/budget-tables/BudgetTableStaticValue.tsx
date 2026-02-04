@@ -1,3 +1,5 @@
+import { EmptyCell } from "@/app/components/common/EmptyCell";
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { isInputDisabled } from "@/app/utils/budget.util";
 import { formatCurrency } from "@/app/utils/number.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
@@ -21,17 +23,25 @@ export const BudgetTableStaticValue = ({
     enabledYears,
     cpomStructures
   );
-  return isDisabled ? (
-    "-"
-  ) : (
-    <span className="text-center">
-      {formatCurrency(
-        budgets?.find((budget) => budget.year === year)?.[
-          name as keyof BudgetApiType
-        ] || 0
-      )}
-    </span>
-  );
+  if (isDisabled) {
+    return <EmptyCell />;
+  }
+
+  if (budgets) {
+    return (
+      <span className="text-center">
+        <NumberDisplay
+          value={
+            budgets?.find((budget) => budget.year === year)?.[
+              name as keyof BudgetApiType
+            ] || 0
+          }
+          type="currency"
+        />
+      </span>
+    );
+  }
+  return <span className="text-center">-</span>;
 };
 
 type Props = {

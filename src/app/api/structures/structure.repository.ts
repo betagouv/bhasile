@@ -364,11 +364,6 @@ const updateOne = async (
       structureMillesimes,
     } = structure;
 
-    const cpomMillesimes = cpomStructures
-      ?.map((cpomStructure) => cpomStructure.cpom.cpomMillesimes)
-      ?.flat()
-      ?.filter((millesime) => millesime !== undefined);
-
     return await prisma.$transaction(async (tx) => {
       const updatedStructure = await updateStructure(tx, structure);
 

@@ -76,6 +76,15 @@ export const StructureTable = ({ canEdit = true }: Props) => {
         budgets={budgets}
         canEdit={canEdit}
       />
+      <BudgetTableCommentLine
+        label="Commentaire"
+        budgets={budgets}
+        disabledYearsStart={
+          isSubventionnee ? SUBVENTIONNEE_OPEN_YEAR + 1 : undefined
+        }
+        enabledYears={years}
+        canEdit={canEdit}
+      />
     </Table>
   );
 };
