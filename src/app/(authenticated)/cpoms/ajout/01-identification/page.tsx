@@ -49,7 +49,9 @@ export default function CpomAjoutIdentification() {
     const result = await addCpom(data);
     if (typeof result === "object" && "cpomId" in result) {
       setFetchState("cpom-save", FetchState.IDLE);
-      router.push(`/cpoms/${result.cpomId}/modification/02-finance`);
+      router.push(
+        `/cpoms/${result.cpomId}/modification/02-finance?isCreation=true`
+      );
     } else {
       setFetchState("cpom-save", FetchState.ERROR);
       setBackendError(result);
