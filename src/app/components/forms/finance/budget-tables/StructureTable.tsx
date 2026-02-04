@@ -221,6 +221,7 @@ const getLines = (
         {
           name: "dotationDemandee",
           label: "Dotation demandée",
+          disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
         },
         {
           name: "dotationAccordee",

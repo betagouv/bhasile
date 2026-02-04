@@ -28,8 +28,7 @@ export default function CpomAjoutIdentification() {
     },
     granularity: CpomGranularity.DEPARTEMENTALE,
     departements: [25, 26],
-    conventions: [{ uuid: uuidv4(), category: "CPOM" }],
-    actesAdministratifs: [{ uuid: uuidv4(), category: "CPOM" }],
+    actesAdministratifs: [{ uuid: uuidv4(), category: "CPOM" as const }],
   };
 
   const handleSubmit = async (data: CpomFormValues) => {
