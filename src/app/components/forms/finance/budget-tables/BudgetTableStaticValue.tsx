@@ -2,6 +2,7 @@ import { Badge } from "@/app/components/common/Badge";
 import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { isInputDisabled } from "@/app/utils/budget.util";
+import { isNullOrUndefined } from "@/app/utils/common.util";
 import {
   getCpomStructureIndexAndCpomMillesimeIndexForAYear,
   getMillesimeIndexForAYear,
@@ -60,7 +61,7 @@ export const BudgetTableStaticValue = ({
         cpomMillesimeIndex
       ]?.[name as keyof CpomMillesimeApiType];
 
-    if (!value) {
+    if (isNullOrUndefined(value)) {
       return <EmptyCell />;
     }
 
@@ -76,14 +77,14 @@ export const BudgetTableStaticValue = ({
       </span>
     );
   }
-  console.log(colored);
+
   if (cpomMillesimes) {
     const value =
       cpomMillesimes[getMillesimeIndexForAYear(cpomMillesimes, year)]?.[
         name as keyof CpomMillesimeApiType
       ];
 
-    if (!value) {
+    if (isNullOrUndefined(value)) {
       return <EmptyCell />;
     }
 

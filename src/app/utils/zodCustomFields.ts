@@ -136,4 +136,8 @@ export const zSafeYearOptional = () =>
   );
 
 export const zId = () =>
-  z.preprocess((val) => (val === "" ? undefined : val), z.number().optional());
+  z.preprocess(
+    (val) =>
+      val === "" ? undefined : typeof val === "string" ? Number(val) : val,
+    z.number().optional()
+  );

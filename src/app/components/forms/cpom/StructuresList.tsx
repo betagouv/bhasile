@@ -12,7 +12,7 @@ export const StructuresList = ({ structures }: Props) => {
   const { watch, setValue, formState } = useFormContext();
 
   const hasErrors = useMemo(
-    () => formState.errors && formState.errors && formState.errors.structures,
+    () => !!formState.errors?.structures,
     [formState.errors]
   );
 

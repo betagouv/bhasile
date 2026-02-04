@@ -58,7 +58,6 @@ export const useStructuresSelection = ({
     };
 
     if (operateurName && departements && types) {
-      console.log("fetching structures");
       fetchStructures();
     }
   }, [operateurName, departements, types]);

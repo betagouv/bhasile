@@ -383,7 +383,7 @@ model Cpom {
   name           String?
   structures     CpomStructure[]
   region         String?
-  departements   Int[]
+  departements   String[]
   granularity    CpomGranularity @default(REGIONALE)
   dateStart      DateTime?
   dateEnd        DateTime?

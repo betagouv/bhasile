@@ -18,7 +18,7 @@ import { FetchState } from "@/types/fetch-state.type";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
 
-export default function CpomModificationIdentification() {
+export default function CpomModificationFinance() {
   const router = useRouter();
 
   const { cpom, setCpom } = useCpomContext();
@@ -49,10 +49,12 @@ export default function CpomModificationIdentification() {
   const defaultValues = getCpomDefaultValues(cpom);
 
   useEffect(() => {
+    if (!cpom?.id) return;
+
     window.history.pushState(null, "", window.location.href);
 
     const handlePopState = () => {
-      router.push(`/cpoms/${cpom.id}/modification/01-identification`);
+      router.push(`/cpoms/${cpom?.id}/modification/01-identification`);
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -78,7 +80,7 @@ export default function CpomModificationIdentification() {
       <FormWrapper
         schema={cpomSchema}
         defaultValues={defaultValues}
-        submitButtonText="Étape suivante"
+        submitButtonText="Terminer"
         onSubmit={handleSubmit}
         availableFooterButtons={[FooterButtonType.SUBMIT]}
       >

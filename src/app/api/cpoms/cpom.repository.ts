@@ -18,7 +18,7 @@ export const findAll = async (): Promise<Cpom[]> => {
 };
 
 export const countAll = async (): Promise<number> => {
-  return prisma.structuresOrder.count();
+  return prisma.cpom.count();
 };
 
 export const findOne = async (id: number): Promise<Cpom> => {
@@ -37,7 +37,7 @@ export const createOrUpdateCpom = async (
   cpom: CpomApiType
 ): Promise<number> => {
   const operateurId = cpom.operateur?.id ?? cpom.operateurId;
-  console.log(cpom);
+
   const cpomId = await prisma.$transaction(async (tx) => {
     const upsertedCpom = await tx.cpom.upsert({
       where: { id: cpom.id ?? 0 },

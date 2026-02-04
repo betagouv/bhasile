@@ -46,7 +46,7 @@ export const getCpomLines = () => {
         {
           name: "chargesNonReconductibles",
           label: "Charges",
-          subLabel: "non reductibles",
+          subLabel: "non reconductibles",
         },
         {
           name: "reserveCompensationDeficits",

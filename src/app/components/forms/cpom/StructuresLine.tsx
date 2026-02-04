@@ -34,7 +34,12 @@ export const StructuresLine = ({
                 name: "structures",
                 value: structure.id,
                 checked: index !== -1,
-                onChange: () => handleStructureChange(structure.id),
+                onChange: () => {
+                  if (index !== -1) {
+                    setIsEditable(false);
+                  }
+                  handleStructureChange(structure.id);
+                },
               },
             },
           ]}

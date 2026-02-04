@@ -17,7 +17,7 @@ export const useCpomsSearch = () => {
   }> => {
     setFetchState(`cpom-search`, FetchState.LOADING);
     try {
-      const baseUrl = process.env.NEXT_URL || "";
+      const baseUrl = process.env.NEXT_PUBLIC_URL || "";
 
       const result = await fetch(`${baseUrl}/api/cpoms`);
 

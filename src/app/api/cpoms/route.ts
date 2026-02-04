@@ -5,10 +5,16 @@ import { cpomApiAjoutSchema, cpomApiSchema } from "@/schemas/api/cpom.schema";
 import { countAll, createOrUpdateCpom, findAll } from "./cpom.repository";
 
 export async function GET() {
-  const cpoms = await findAll();
-  const totalCpoms = await countAll();
-
-  return NextResponse.json({ cpoms, totalCpoms });
+  try {
+    const [cpoms, totalCpoms] = await Promise.all([findAll(), countAll()]);
+    return NextResponse.json({ cpoms, totalCpoms });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Failed to fetch cpoms" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {

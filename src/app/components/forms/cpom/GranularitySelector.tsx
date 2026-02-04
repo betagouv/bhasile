@@ -13,7 +13,9 @@ export const GranularitySelector = () => {
 
   return (
     <div className="flex gap-6 items-center">
-      <legend className="mb-3">Quelle est l’échelle du CPOM ?</legend>
+      <label htmlFor="granularity" className="mb-3">
+        Quelle est l’échelle du CPOM ?
+      </label>
 
       <RadioButtons
         legend=""

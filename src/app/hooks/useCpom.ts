@@ -5,7 +5,7 @@ export const useCpom = () => {
   const addCpom = async (
     data: CpomFormValues
   ): Promise<{ cpomId: number } | string> => {
-    return createOrUpdateCpom(data, "PUT");
+    return createOrUpdateCpom(data, "POST");
   };
 
   const updateCpom = async (
@@ -15,8 +15,10 @@ export const useCpom = () => {
     const result = await createOrUpdateCpom(data, "PUT");
     if (typeof result === "object" && "cpomId" in result) {
       const res = await fetch(`/api/cpoms/${result.cpomId}`);
-      const updatedCpom = await res.json();
-      setCpom(updatedCpom);
+      if (res.ok) {
+        const updatedCpom = await res.json();
+        setCpom(updatedCpom);
+      }
     }
     return result;
   };
@@ -26,7 +28,7 @@ export const useCpom = () => {
     method: "POST" | "PUT"
   ): Promise<{ cpomId: number } | string> => {
     try {
-      const response = await fetch(`/api/cpodzqdzqms`, {
+      const response = await fetch(`/api/cpoms`, {
         method,
         body: JSON.stringify(data),
       });

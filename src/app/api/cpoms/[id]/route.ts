@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { findOne } from "../cpom.repository";
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const id = request.nextUrl.pathname.split("/").pop();
+    const { id } = await params;
     const cpom = await findOne(Number(id));
 
     if (!cpom) {

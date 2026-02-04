@@ -35,22 +35,26 @@ export default function CpomModificationIdentification() {
 
   const handleSubmit = async (data: CpomFormValues) => {
     setFetchState("cpom-save", FetchState.LOADING);
-    const result = await updateCpom(data, setCpom);
-    if (typeof result === "object" && "cpomId" in result) {
-      setFetchState("cpom-save", FetchState.IDLE);
-      router.push(`/cpoms/${result.cpomId}/modification/02-finance`);
-    } else {
+    try {
+      const result = await updateCpom(data, setCpom);
+      if (typeof result === "object" && "cpomId" in result) {
+        setFetchState("cpom-save", FetchState.IDLE);
+        router.push(`/cpoms/${result.cpomId}/modification/02-finance`);
+      } else {
+        setFetchState("cpom-save", FetchState.ERROR);
+        setBackendError(result);
+        console.error(result);
+      }
+    } catch (error) {
       setFetchState("cpom-save", FetchState.ERROR);
-      setBackendError(result);
-      console.error(result);
+      setBackendError(String(error));
+      console.error(error);
     }
   };
 
   if (!cpom) {
     return null;
   }
-
-  console.log("saveState", saveState);
 
   return (
     <>
