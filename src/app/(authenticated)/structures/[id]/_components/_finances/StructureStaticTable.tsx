@@ -1,7 +1,8 @@
-import { ReactElement } from "react";
+"use client";
 
-import { EmptyCell } from "@/app/components/common/EmptyCell";
-import { NumberDisplay } from "@/app/components/common/NumberDisplay";
+import Button from "@codegouvfr/react-dsfr/Button";
+import { ReactElement, useState } from "react";
+
 import { Table } from "@/app/components/common/Table";
 import { AffectationTooltip } from "@/app/components/forms/finance/budget-tables/AffectationTooltip";
 import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-tables/BudgetTableCommentLine";
@@ -13,11 +14,72 @@ import { getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
-import { AmountBadge } from "./AmountBadge";
 
-const getLines = (isAutorisee: boolean) => {
+export const StructureStaticTable = (): ReactElement => {
+  const { structure } = useStructureContext();
+
+  const isAutorisee = isStructureAutorisee(structure?.type);
+
+  const { years } = getYearRange({ order: "desc" });
+
+  const [isAffectationOpen, setIsAffectationOpen] = useState(false);
+
+  const enhancedBudgets = structure?.budgets?.map((budget) => {
+    return {
+      ...budget,
+      resultatNet: computeResultatNet(
+        budget.totalProduits,
+        budget.totalCharges
+      ),
+      resultatNetProposeParOperateur: computeResultatNetProposeParOperateur(
+        budget.totalProduits,
+        budget.totalCharges
+      ),
+      resultatNetRetenuParAutoriteTarifaire:
+        computeResultatNetRetenuParAutoriteTarifaire(
+          budget.totalProduits,
+          budget.totalCharges
+        ),
+    };
+  });
+
+  return (
+    <>
+      <Table
+        ariaLabelledBy="gestionBudgetaire"
+        headings={getBudgetTableHeading({ years, structure })}
+        enableBorders
+      >
+        <BudgetTableLines
+          lines={getLines(isAutorisee, isAffectationOpen)}
+          budgets={enhancedBudgets}
+          canEdit={false}
+        />
+        {isAffectationOpen && (
+          <BudgetTableCommentLine
+            label="Commentaire"
+            budgets={enhancedBudgets}
+            enabledYears={years}
+            canEdit={false}
+          />
+        )}
+      </Table>
+      <Button
+        priority="tertiary no outline"
+        onClick={() => setIsAffectationOpen(!isAffectationOpen)}
+        iconId={isAffectationOpen ? "fr-icon-eye-off-line" : "fr-icon-eye-line"}
+        className="mt-4 ml-16"
+        size="small"
+      >
+        {isAffectationOpen ? "Masquer" : "Voir"} le détail des affectations
+      </Button>
+    </>
+  );
+};
+
+const getLines = (isAutorisee: boolean, isAffectationOpen: boolean) => {
   if (isAutorisee) {
-    return [
+    const linesWithoutAffectation = [
       {
         title: "Budget",
         lines: [
@@ -57,6 +119,50 @@ const getLines = (isAutorisee: boolean) => {
         ],
       },
     ];
+    if (isAffectationOpen) {
+      return [
+        ...linesWithoutAffectation,
+        {
+          title: "Détail affectation",
+          lines: [
+            {
+              name: "reserveInvestissement",
+              label: "Réserve",
+              subLabel: "dédiée à l'investissement",
+            },
+            {
+              name: "chargesNonReconductibles",
+              label: "Charges",
+              subLabel: "non reductibles",
+            },
+            {
+              name: "reserveCompensationDeficits",
+              label: "Réserve de compensation",
+              subLabel: "des déficits",
+            },
+            {
+              name: "reserveCompensationBFR",
+              label: "Réserve de couverture",
+              subLabel: "de BFR",
+            },
+            {
+              name: "reserveCompensationAmortissements",
+              label: "Réserve de compensation",
+              subLabel: "des amortissements",
+            },
+            {
+              name: "reportANouveau",
+              label: "Report à nouveau",
+            },
+            {
+              name: "autre",
+              label: "Autre",
+            },
+          ],
+        },
+      ];
+    }
+    return linesWithoutAffectation;
   }
 
   return [
@@ -103,47 +209,6 @@ const getLines = (isAutorisee: boolean) => {
       ],
     },
   ];
-};
-
-export const StructureStaticTable = (): ReactElement => {
-  const { structure } = useStructureContext();
-
-  const isAutorisee = isStructureAutorisee(structure?.type);
-
-  const { years } = getYearRange({ order: "desc" });
-
-  const enhancedBudgets = structure?.budgets?.map((budget) => {
-    return {
-      ...budget,
-      resultatNet: computeResultatNet(
-        budget.totalProduits,
-        budget.totalCharges
-      ),
-      resultatNetProposeParOperateur: computeResultatNetProposeParOperateur(
-        budget.totalProduits,
-        budget.totalCharges
-      ),
-      resultatNetRetenuParAutoriteTarifaire:
-        computeResultatNetRetenuParAutoriteTarifaire(
-          budget.totalProduits,
-          budget.totalCharges
-        ),
-    };
-  });
-
-  return (
-    <Table
-      ariaLabelledBy="gestionBudgetaire"
-      headings={getBudgetTableHeading({ years, structure })}
-      enableBorders
-    >
-      <BudgetTableLines
-        lines={getLines(isAutorisee)}
-        budgets={enhancedBudgets}
-        canEdit={false}
-      />
-    </Table>
-  );
 };
 
 const computeResultatNet = (

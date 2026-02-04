@@ -4,14 +4,12 @@ import { ReactElement } from "react";
 import { Block } from "@/app/components/common/Block";
 import {
   isStructureAutorisee,
-  isStructureInCpom,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import { CURRENT_YEAR } from "@/constants";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { BudgetExecutoire } from "./BudgetExecutoire";
-import { DetailAffectations } from "./DetailAffectations";
 import { DocumentsAdministratifs } from "./DocumentsAdministratifs";
 import { DotationChart } from "./DotationChart";
 import { HistoriqueIndicateursGeneraux } from "./HistoriqueIndicateursGeneraux";
@@ -24,8 +22,6 @@ export const FinancesBlock = (): ReactElement => {
 
   const isAutorisee = isStructureAutorisee(structure.type);
   const isConventionnee = isStructureSubventionnee(structure.type);
-  const isDetailAffectationsDisplayed =
-    isAutorisee || (isConventionnee && isStructureInCpom(structure));
 
   const budgetExecutoireYear = isAutorisee
     ? CURRENT_YEAR - 1
@@ -60,11 +56,7 @@ export const FinancesBlock = (): ReactElement => {
       <div className="pb-5">
         <StructureStaticTable />
       </div>
-      {isDetailAffectationsDisplayed && (
-        <div className="pb-5">
-          <DetailAffectations />
-        </div>
-      )}
+      <hr className="mt-12 mb-12" />
       <h4 className="text-title-blue-france pb-2 fr-h6 mb-0">
         Documents administratifs et financiers transmis par l’opérateur
       </h4>
