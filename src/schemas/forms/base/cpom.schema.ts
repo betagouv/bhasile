@@ -55,9 +55,44 @@ export const cpomStructureSchema = z.object({
   cpom: bareCpomSchema.optional(),
 });
 
-export const cpomSchema = bareCpomSchema.extend({
-  structures: z.array(cpomStructureSchema),
-});
+export const cpomSchema = bareCpomSchema
+  .extend({
+    structures: z.array(cpomStructureSchema),
+  })
+  .refine(
+    (data) => {
+      if (data.dateStart && data.dateEnd) {
+        return data.dateStart <= data.dateEnd;
+      }
+      return true;
+    },
+    {
+      message: "La date de début du CPOM doit être antérieure à la date de fin",
+      path: ["dateEnd"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (!data.dateStart || !data.dateEnd || !Array.isArray(data.structures)) {
+        return true;
+      }
+      const cpomStart = data.dateStart;
+      const cpomEnd = data.dateEnd;
+      for (const structure of data.structures) {
+        if (structure.dateStart && structure.dateEnd) {
+          if (structure.dateStart < cpomStart || structure.dateEnd > cpomEnd) {
+            return false;
+          }
+        }
+      }
+      return true;
+    },
+    {
+      message:
+        "Les dates de début et de fin pour chaque structure doivent être comprises dans la plage du CPOM",
+      path: ["structures"],
+    }
+  );
 
 export type CpomMillesimeFormValues = z.infer<typeof cpomMillesimeSchema>;
 

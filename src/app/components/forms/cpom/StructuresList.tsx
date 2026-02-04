@@ -9,7 +9,12 @@ import { CpomStructureFormValues } from "@/schemas/forms/base/cpom.schema";
 import { StructuresLine } from "./StructuresLine";
 
 export const StructuresList = ({ structures }: Props) => {
-  const { watch, setValue } = useFormContext();
+  const { watch, setValue, formState } = useFormContext();
+
+  const hasErrors = useMemo(
+    () => formState.errors && formState.errors && formState.errors.structures,
+    [formState.errors]
+  );
 
   const selectedCpomStructures = watch(
     "structures"
@@ -71,7 +76,11 @@ export const StructuresList = ({ structures }: Props) => {
   };
 
   return (
-    <div>
+    <div
+      className={cn(
+        hasErrors && "border border-solid border-action-high-error rounded-lg"
+      )}
+    >
       <div className="flex items-center gap-4 border-b border-gray-200 py-2 px-4">
         <div className="flex-1">
           <Checkbox
