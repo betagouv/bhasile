@@ -29,6 +29,7 @@ export const BudgetTableLines = ({
               subLabel={line.subLabel}
               disabledYearsStart={line.disabledYearsStart}
               enabledYears={line.enabledYears}
+              colored={line.colored}
               budgets={budgets}
               cpomStructures={cpomStructures}
               cpomMillesimes={cpomMillesimes}
@@ -48,6 +49,7 @@ type Props = {
       name: string;
       label: string | ReactNode;
       subLabel?: string;
+      colored?: boolean;
       disabledYearsStart?: number;
       enabledYears?: number[];
     }[];

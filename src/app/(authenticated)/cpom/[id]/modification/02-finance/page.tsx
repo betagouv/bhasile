@@ -18,11 +18,10 @@ export default function CpomModificationIdentification() {
   const router = useRouter();
 
   const { cpom } = useCpomContext();
-  console.log(cpom);
+
   const { updateCpom } = useCpom();
 
   const handleSubmit = async (data: CpomFormValues) => {
-    console.log(data);
     const result = await updateCpom(data);
     console.log(result);
   };

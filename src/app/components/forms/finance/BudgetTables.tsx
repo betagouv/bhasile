@@ -65,7 +65,7 @@ export const BudgetTables = () => {
             affectations, ce tableau reflète le flux annuel et ne constitue en
             aucun cas un calcul ou du stock.
           </p>
-          <StructureCpomTable />
+          <StructureCpomTable canEdit={false} />
         </fieldset>
       )}
     </>

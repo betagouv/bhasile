@@ -28,6 +28,7 @@ export const getCpomLines = (isAutorisee: boolean) => {
           name: "cumulResultatNet",
           label: "Cumul des résultats",
           subLabel: "des structures du CPOM",
+          colored: true,
           disabledYearsStart: isAutorisee
             ? AUTORISEE_OPEN_YEAR
             : SUBVENTIONNEE_OPEN_YEAR + 1,

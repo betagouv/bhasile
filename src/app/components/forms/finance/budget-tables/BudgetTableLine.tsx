@@ -15,6 +15,7 @@ export const BudgetTableLine = ({
   name,
   label,
   subLabel,
+  colored,
   budgets,
   cpomStructures,
   cpomMillesimes,
@@ -59,6 +60,7 @@ export const BudgetTableLine = ({
               <BudgetTableStaticValue
                 name={name}
                 year={year}
+                colored={colored}
                 budgets={budgets}
                 cpomStructures={cpomStructures}
                 cpomMillesimes={cpomMillesimes}
@@ -77,6 +79,7 @@ type Props = {
   name: string;
   label: string | ReactNode;
   subLabel?: string;
+  colored?: boolean;
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];
   cpomMillesimes?: CpomMillesimeApiType[];
