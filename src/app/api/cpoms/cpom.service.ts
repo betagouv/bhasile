@@ -28,7 +28,10 @@ export const findMatchingCpomForMillesime = (
       cpomStructure.cpom.dateEnd?.getFullYear() ??
       null;
 
-    return (yearStart === null || year >= yearStart) && (yearEnd === null || year <= yearEnd);
+    return (
+      (yearStart === null || year >= yearStart) &&
+      (yearEnd === null || year <= yearEnd)
+    );
   });
 
   if (!matchingCpom) {
