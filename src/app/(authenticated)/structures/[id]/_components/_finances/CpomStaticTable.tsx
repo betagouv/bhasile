@@ -9,7 +9,6 @@ import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-ta
 import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/BudgetTableLines";
 import { BudgetTableRepriseEtatTooltip } from "@/app/components/forms/finance/budget-tables/BudgetTableRepriseEtatTooltip";
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
-import { isNullOrUndefined } from "@/app/utils/common.util";
 import { getYearRange } from "@/app/utils/date.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -138,43 +137,4 @@ const getLines = (isAffectationOpen: boolean) => {
     ];
   }
   return linesWithoutAffectation;
-};
-
-const computeResultatNet = (
-  totalProduits: number | null | undefined,
-  totalCharges: number | null | undefined
-): number | undefined => {
-  if (isNullOrUndefined(totalCharges) || isNullOrUndefined(totalProduits)) {
-    return undefined;
-  }
-  return Number(totalProduits) - Number(totalCharges);
-};
-
-const computeResultatNetProposeParOperateur = (
-  totalProduitsProposesParOperateur: number | null | undefined,
-  totalChargesProposeesParOperateur: number | null | undefined
-): number | undefined => {
-  if (
-    isNullOrUndefined(totalProduitsProposesParOperateur) ||
-    isNullOrUndefined(totalChargesProposeesParOperateur)
-  ) {
-    return undefined;
-  }
-  return (
-    Number(totalProduitsProposesParOperateur) -
-    Number(totalChargesProposeesParOperateur)
-  );
-};
-
-const computeResultatNetRetenuParAutoriteTarifaire = (
-  totalProduits: number | null | undefined,
-  totalChargesRetenues: number | null | undefined
-): number | undefined => {
-  if (
-    isNullOrUndefined(totalProduits) ||
-    isNullOrUndefined(totalChargesRetenues)
-  ) {
-    return undefined;
-  }
-  return Number(totalProduits) - Number(totalChargesRetenues);
 };
