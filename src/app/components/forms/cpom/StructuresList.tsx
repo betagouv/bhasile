@@ -6,7 +6,7 @@ import { cn } from "@/app/utils/classname.util";
 import { StructureMinimalApiType } from "@/schemas/api/structure.schema";
 import { CpomStructureFormValues } from "@/schemas/forms/base/cpom.schema";
 
-import { StructuresLine } from "./StructuresLine";
+import { StructureLine } from "./StructureLine";
 
 export const StructuresList = ({ structures }: Props) => {
   const { watch, setValue, formState } = useFormContext();
@@ -116,7 +116,7 @@ export const StructuresList = ({ structures }: Props) => {
         <div className="w-6"></div>
       </div>
       {structures.map((structure) => (
-        <StructuresLine
+        <StructureLine
           key={structure.id}
           structure={structure}
           index={selectedCpomStructures.findIndex(

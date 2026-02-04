@@ -8,7 +8,7 @@ import { cn } from "@/app/utils/classname.util";
 import { formatDate } from "@/app/utils/date.util";
 import { StructureMinimalApiType } from "@/schemas/api/structure.schema";
 
-export const StructuresLine = ({
+export const StructureLine = ({
   structure,
   index,
   handleStructureChange,
