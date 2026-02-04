@@ -3,7 +3,10 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useMemo } from "react";
 
 import { EmptyCell } from "@/app/components/common/EmptyCell";
-import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
+import {
+  getCpomStructureIndexAndCpomMillesimeIndexForAYear,
+  getMillesimeIndexForAYear,
+} from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
   CpomMillesimeApiType,
@@ -13,6 +16,8 @@ import {
 export const BudgetTableCommentStaticButtonAndModal = ({
   year,
   budgets,
+  cpomStructures,
+  cpomMillesimes,
 }: Props) => {
   const modal = useMemo(
     () =>
@@ -23,8 +28,25 @@ export const BudgetTableCommentStaticButtonAndModal = ({
     [budgets, year]
   );
 
-  const currentComment =
-    budgets?.[getMillesimeIndexForAYear(budgets, year)]?.commentaire;
+  let currentComment: string | undefined | null;
+
+  if (budgets) {
+    currentComment =
+      budgets?.[getMillesimeIndexForAYear(budgets, year)]?.commentaire;
+  }
+  if (cpomStructures) {
+    const { cpomStructureIndex, cpomMillesimeIndex } =
+      getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
+    currentComment =
+      cpomStructures[cpomStructureIndex]?.cpom?.cpomMillesimes?.[
+        cpomMillesimeIndex
+      ]?.commentaire;
+  }
+  if (cpomMillesimes) {
+    currentComment =
+      cpomMillesimes?.[getMillesimeIndexForAYear(cpomMillesimes, year)]
+        ?.commentaire;
+  }
 
   const handleOpenModal = () => {
     modal.open();

@@ -1,3 +1,5 @@
+"use client";
+
 import { SegmentedControl } from "@/app/components/common/SegmentedControl";
 
 export const StructureCpomSwitch = ({ handleChange }: Props) => {
