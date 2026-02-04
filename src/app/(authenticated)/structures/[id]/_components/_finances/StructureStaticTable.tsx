@@ -2,178 +2,185 @@ import { ReactElement } from "react";
 
 import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
+import { Table } from "@/app/components/common/Table";
+import { AffectationTooltip } from "@/app/components/forms/finance/budget-tables/AffectationTooltip";
+import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-tables/BudgetTableCommentLine";
+import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/BudgetTableLines";
+import { BudgetTableRepriseEtatTooltip } from "@/app/components/forms/finance/budget-tables/BudgetTableRepriseEtatTooltip";
+import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
 import { isNullOrUndefined } from "@/app/utils/common.util";
+import { getYearRange } from "@/app/utils/date.util";
+import { isStructureAutorisee } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { AmountBadge } from "./AmountBadge";
 
+const getLines = (isAutorisee: boolean) => {
+  if (isAutorisee) {
+    return [
+      {
+        title: "Budget",
+        lines: [
+          {
+            name: "dotationDemandee",
+            label: "Dotation demandée",
+          },
+          {
+            name: "dotationAccordee",
+            label: "Dotation accordée",
+          },
+        ],
+      },
+      {
+        title: "Résultat",
+        lines: [
+          {
+            name: "resultatNetProposeParOperateur",
+            label: "Résultat net proposé",
+            subLabel: "par l'opérateur",
+            colored: true,
+          },
+          {
+            name: "resultatNetRetenuParAutoriteTarifaire",
+            label: "Résultat net retenu",
+            subLabel: "par l'autorité tarifaire",
+            colored: true,
+          },
+          {
+            name: "repriseEtat",
+            label: <BudgetTableRepriseEtatTooltip />,
+          },
+          {
+            name: "affectationReservesFondsDedies",
+            label: <AffectationTooltip />,
+          },
+        ],
+      },
+    ];
+  }
+
+  return [
+    {
+      title: "Budget",
+      lines: [
+        {
+          name: "dotationDemandee",
+          label: "Dotation demandée",
+        },
+        {
+          name: "dotationAccordee",
+          label: "Dotation accordée",
+        },
+      ],
+    },
+    {
+      title: "Résultat",
+      lines: [
+        {
+          name: "resultatNet",
+          label: "Résultat net",
+          colored: true,
+        },
+        {
+          name: "repriseEtat",
+          label: "Déficit compensé",
+          subLabel: "par l'État",
+        },
+        {
+          name: "excedentRecupere",
+          subLabel: "en titre de recette",
+          label: "Excédent récupéré",
+        },
+        {
+          name: "excedentDeduit",
+          label: "Excédent réemployé",
+          subLabel: "dans la dotation à venir",
+        },
+        {
+          name: "fondsDedies",
+          label: "Restant fonds dédiés",
+        },
+      ],
+    },
+  ];
+};
+
 export const StructureStaticTable = (): ReactElement => {
   const { structure } = useStructureContext();
 
-  const primaryHeadings = [
-    { title: "BUDGET DE LA STRUCTURE", colSpan: 2 },
-    { title: "COMPTE ADMINISTRATIF DE LA STRUCTURE", colSpan: 4 },
-  ];
+  const isAutorisee = isStructureAutorisee(structure?.type);
 
-  const secondaryHeadings = [
-    "ANNÉE",
-    "DOTATION DEMANDÉE",
-    "DOTATION ACCORDÉE",
-    "RÉSULTAT NET PROPOSÉ PAR L'OPÉRATEUR",
-    "RÉSULTAT NET RETENU PAR AUTORITÉ TARIFAIRE",
-    "REPRISE ÉTAT",
-    "AFFECTATION RÉSERVES ET PROVISIONS",
-  ];
+  const { years } = getYearRange({ order: "desc" });
 
-  const computeResultatNetProposeParOperateur = (
-    totalProduitsProposesParOperateur: number | null | undefined,
-    totalChargesProposeesParOperateur: number | null | undefined
-  ): number => {
-    if (
-      !totalProduitsProposesParOperateur ||
-      !totalChargesProposeesParOperateur
-    ) {
-      return 0;
-    }
-    return (
-      totalProduitsProposesParOperateur - totalChargesProposeesParOperateur
-    );
-  };
-
-  const computeResultatNetRetenuParAutoriteTarifaire = (
-    totalProduits: number | null | undefined,
-    totalChargesRetenues: number | null | undefined
-  ): number => {
-    if (!totalProduits || !totalChargesRetenues) {
-      return 0;
-    }
-    return totalProduits - totalChargesRetenues;
-  };
+  const enhancedBudgets = structure?.budgets?.map((budget) => {
+    return {
+      ...budget,
+      resultatNet: computeResultatNet(
+        budget.totalProduits,
+        budget.totalCharges
+      ),
+      resultatNetProposeParOperateur: computeResultatNetProposeParOperateur(
+        budget.totalProduits,
+        budget.totalCharges
+      ),
+      resultatNetRetenuParAutoriteTarifaire:
+        computeResultatNetRetenuParAutoriteTarifaire(
+          budget.totalProduits,
+          budget.totalCharges
+        ),
+    };
+  });
 
   return (
-    <div
-      className="w-full bg-lifted-grey border border-default-grey rounded-lg"
-      aria-labelledby="gestionBudgetaireTitle"
+    <Table
+      ariaLabelledBy="gestionBudgetaire"
+      headings={getBudgetTableHeading({ years, structure })}
+      enableBorders
     >
-      <table className="w-full">
-        <colgroup>
-          <col />
-        </colgroup>
-        <colgroup span={2}></colgroup>
-        <colgroup span={1}></colgroup>
-        <colgroup span={3}></colgroup>
-        <thead>
-          <tr className="bg-alt-grey">
-            <th rowSpan={1} className="border-r! border-default-grey"></th>
-            {primaryHeadings.map((primaryHeading, index) => (
-              <th
-                key={primaryHeading.title}
-                colSpan={primaryHeading.colSpan}
-                scope="colgroup"
-                className={`text-xs py-2 px-4 text-center ${index === 0 ? "border-r-3! border-default-grey" : ""}`}
-              >
-                {primaryHeading.title}
-              </th>
-            ))}
-          </tr>
-          <tr className="border-t border-default-grey">
-            {secondaryHeadings.map((secondaryHeading, index) => (
-              <th
-                scope="col"
-                key={secondaryHeading}
-                className={`text-xs py-2 px-4 text-center ${index === 2 ? "border-r-3!" : ""} ${index === 0 ? "border-r!" : ""} border-default-grey`}
-              >
-                {secondaryHeading}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {structure?.budgets?.map((budget) => (
-            <tr key={budget.id} className="border-t border-default-grey">
-              <td className="py-2 px-4 text-center text-sm border-r! border-default-grey">
-                {budget.year}
-              </td>
-              <td className="py-2 px-4 text-center text-sm">
-                {!isNullOrUndefined(budget.dotationDemandee) ? (
-                  <NumberDisplay
-                    value={budget.dotationDemandee}
-                    type="currency"
-                  />
-                ) : (
-                  <EmptyCell />
-                )}
-              </td>
-              <td className="py-2 px-4 text-center text-sm border-r-3! border-default-grey">
-                {!isNullOrUndefined(budget.dotationAccordee) ? (
-                  <NumberDisplay
-                    value={budget.dotationAccordee}
-                    type="currency"
-                  />
-                ) : (
-                  <EmptyCell />
-                )}
-              </td>
-              <td className="py-2 px-4 text-center text-sm">
-                {!isNullOrUndefined(budget.totalCharges) &&
-                !isNullOrUndefined(budget.totalProduits) ? (
-                  <NumberDisplay
-                    className="pr-2"
-                    value={computeResultatNetProposeParOperateur(
-                      budget.totalProduits,
-                      budget.totalCharges
-                    )}
-                    type="currency"
-                  />
-                ) : (
-                  <EmptyCell />
-                )}
-              </td>
-              <td className="py-2 px-4 text-center text-sm">
-                {!isNullOrUndefined(budget.totalProduits) &&
-                !isNullOrUndefined(budget.totalCharges) ? (
-                  <>
-                    <NumberDisplay
-                      className="pr-2"
-                      value={computeResultatNetRetenuParAutoriteTarifaire(
-                        budget.totalProduits,
-                        budget.totalCharges
-                      )}
-                      type="currency"
-                    />
-                    <AmountBadge
-                      amount={computeResultatNetRetenuParAutoriteTarifaire(
-                        budget.totalProduits,
-                        budget.totalCharges
-                      )}
-                    />
-                  </>
-                ) : (
-                  <EmptyCell />
-                )}
-              </td>
-              <td className="py-2 px-4 text-center text-sm">
-                {!isNullOrUndefined(budget.repriseEtat) ? (
-                  <NumberDisplay value={budget.repriseEtat} type="currency" />
-                ) : (
-                  <EmptyCell />
-                )}
-              </td>
-              <td className="py-2 px-4 text-center text-sm">
-                {!isNullOrUndefined(budget.affectationReservesFondsDedies) &&
-                budget.affectationReservesFondsDedies !== 0 ? (
-                  <NumberDisplay
-                    value={budget.affectationReservesFondsDedies}
-                    type="currency"
-                  />
-                ) : (
-                  <EmptyCell />
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+      <BudgetTableLines
+        lines={getLines(isAutorisee)}
+        budgets={enhancedBudgets}
+        canEdit={false}
+      />
+    </Table>
   );
+};
+
+const computeResultatNet = (
+  totalCharges: number | null | undefined,
+  totalProduits: number | null | undefined
+): number | undefined => {
+  if (isNullOrUndefined(totalCharges) || isNullOrUndefined(totalProduits)) {
+    return undefined;
+  }
+  return Number(totalProduits) - Number(totalCharges);
+};
+
+const computeResultatNetProposeParOperateur = (
+  totalProduitsProposesParOperateur: number | null | undefined,
+  totalChargesProposeesParOperateur: number | null | undefined
+): number | undefined => {
+  if (
+    isNullOrUndefined(totalProduitsProposesParOperateur) ||
+    isNullOrUndefined(totalChargesProposeesParOperateur)
+  ) {
+    return undefined;
+  }
+  return (
+    Number(totalProduitsProposesParOperateur) -
+    Number(totalChargesProposeesParOperateur)
+  );
+};
+
+const computeResultatNetRetenuParAutoriteTarifaire = (
+  totalProduits: number | null | undefined,
+  totalChargesRetenues: number | null | undefined
+): number | undefined => {
+  if (
+    isNullOrUndefined(totalProduits) ||
+    isNullOrUndefined(totalChargesRetenues)
+  ) {
+    return undefined;
+  }
+  return Number(totalProduits) - Number(totalChargesRetenues);
 };

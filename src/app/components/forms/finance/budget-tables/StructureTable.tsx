@@ -1,4 +1,3 @@
-import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
@@ -11,6 +10,7 @@ import {
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 
+import { AffectationTooltip } from "./AffectationTooltip";
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLines } from "./BudgetTableLines";
 import { BudgetTableRepriseEtatTooltip } from "./BudgetTableRepriseEtatTooltip";
@@ -147,20 +147,7 @@ const getLines = (
           },
           {
             name: "affectationReservesFondsDedies",
-            label: (
-              <Tooltip
-                title={
-                  <>
-                    <span>Négatif : affectation d’un déficit</span>
-                    <br />
-                    <span>Positif : affectation d’un excédent</span>
-                  </>
-                }
-              >
-                Affectation{" "}
-                <i className="fr-icon-information-line before:scale-50 before:origin-left" />
-              </Tooltip>
-            ),
+            label: <AffectationTooltip />,
             subLabel: "réserves & provision",
             disabledYearsStart: AUTORISEE_OPEN_YEAR,
           },

@@ -4,9 +4,11 @@ import { StructureApiType } from "@/schemas/api/structure.schema";
 
 export const getBudgetTableHeading = ({ years, structure }: Props) => {
   return [
-    " ",
+    <th className="bg-white" key="empty">
+      {" "}
+    </th>,
     ...years.map((year) => (
-      <th scope="col" key={year}>
+      <th scope="col" key={year} className="bg-white">
         <span className="block mb-2">{year}</span>
         {structure && (
           <>

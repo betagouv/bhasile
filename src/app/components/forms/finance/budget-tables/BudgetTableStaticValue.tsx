@@ -34,16 +34,24 @@ export const BudgetTableStaticValue = ({
   }
 
   if (budgets) {
+    const value =
+      budgets[getMillesimeIndexForAYear(budgets, year)]?.[
+        name as keyof BudgetApiType
+      ];
+
+    if (isNullOrUndefined(value)) {
+      return <EmptyCell />;
+    }
+
     return (
       <span className="text-center">
-        <NumberDisplay
-          value={
-            budgets[getMillesimeIndexForAYear(budgets, year)]?.[
-              name as keyof BudgetApiType
-            ]
-          }
-          type="currency"
-        />
+        {colored ? (
+          <Badge type={Number(value) >= 0 ? "success" : "error"}>
+            <NumberDisplay value={value} type="currency" />
+          </Badge>
+        ) : (
+          <NumberDisplay value={value} type="currency" />
+        )}
       </span>
     );
   }
