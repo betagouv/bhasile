@@ -3,11 +3,7 @@ import { useForm, useFormContext } from "react-hook-form";
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { Table } from "@/app/components/common/Table";
 import { getYearRange } from "@/app/utils/date.util";
-import {
-  isStructureAutorisee,
-  isStructureInCpom,
-} from "@/app/utils/structure.util";
-import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
+import { isStructureInCpom } from "@/app/utils/structure.util";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
@@ -19,8 +15,6 @@ export const StructureCpomTable = ({ canEdit = true }: Props) => {
   const parentFormContext = useFormContext();
 
   const { structure } = useStructureContext();
-
-  const isAutorisee = isStructureAutorisee(structure?.type);
 
   const { years } = getYearRange({ order: "desc" });
 
@@ -46,16 +40,13 @@ export const StructureCpomTable = ({ canEdit = true }: Props) => {
       enableBorders
     >
       <BudgetTableLines
-        lines={getCpomLines(isAutorisee)}
+        lines={getCpomLines()}
         cpomStructures={cpomStructures}
         canEdit={canEdit}
       />
       <BudgetTableCommentLine
         label="Commentaire"
         cpomStructures={cpomStructures}
-        disabledYearsStart={
-          isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR + 1
-        }
         enabledYears={yearsInCpom}
         canEdit={canEdit}
       />

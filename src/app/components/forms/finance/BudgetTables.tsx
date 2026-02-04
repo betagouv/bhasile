@@ -1,6 +1,7 @@
 import Notice from "@codegouvfr/react-dsfr/Notice";
 import Link from "next/link";
 
+import { getYearRange } from "@/app/utils/date.util";
 import {
   isStructureAutorisee,
   isStructureInCpom,
@@ -14,7 +15,10 @@ import { StructureTable } from "./budget-tables/StructureTable";
 
 export const BudgetTables = () => {
   const { structure } = useStructureContext();
-  const isInCpom = isStructureInCpom(structure);
+  const { years } = getYearRange({ order: "desc" });
+  const isOrWasInCpom = years.some((year) =>
+    isStructureInCpom(structure, year)
+  );
   const isAutorisee = isStructureAutorisee(structure?.type);
   const isSubventionnee = isStructureSubventionnee(structure?.type);
 
@@ -31,7 +35,7 @@ export const BudgetTables = () => {
               href={getFinanceFormTutorialLink({
                 isAutorisee,
                 isSubventionnee,
-                isInCpom,
+                isOrWasInCpom,
               })}
               target="_blank"
               className="underline"
@@ -54,7 +58,7 @@ export const BudgetTables = () => {
         </p>
         <StructureTable />
       </fieldset>
-      {isInCpom && (
+      {isOrWasInCpom && (
         <fieldset className="flex flex-col gap-6 min-w-0 w-full">
           <legend className="text-xl font-bold mb-8 text-title-blue-france">
             Gestion budgétaire du CPOM

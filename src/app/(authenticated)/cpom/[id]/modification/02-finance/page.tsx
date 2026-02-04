@@ -17,12 +17,12 @@ import { useCpomContext } from "../../_context/CpomClientContext";
 export default function CpomModificationIdentification() {
   const router = useRouter();
 
-  const { cpom } = useCpomContext();
+  const { cpom, setCpom } = useCpomContext();
 
   const { updateCpom } = useCpom();
 
   const handleSubmit = async (data: CpomFormValues) => {
-    const result = await updateCpom(data);
+    const result = await updateCpom(data, setCpom);
     console.log(result);
   };
 

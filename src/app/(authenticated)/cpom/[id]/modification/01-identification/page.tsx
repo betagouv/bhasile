@@ -17,12 +17,12 @@ import { useCpomContext } from "../../_context/CpomClientContext";
 export default function CpomModificationIdentification() {
   const router = useRouter();
 
-  const { cpom } = useCpomContext();
+  const { cpom, setCpom } = useCpomContext();
 
   const { updateCpom } = useCpom();
 
   const handleSubmit = async (data: CpomFormValues) => {
-    const result = await updateCpom(data);
+    const result = await updateCpom(data, setCpom);
     if (typeof result === "object" && "cpomId" in result) {
       router.push(`/cpom/${result.cpomId}/modification/02-finance`);
     } else {
@@ -30,10 +30,10 @@ export default function CpomModificationIdentification() {
     }
   };
 
-  console.log(cpom);
   if (!cpom) {
     return null;
   }
+
   return (
     <>
       <Stepper
