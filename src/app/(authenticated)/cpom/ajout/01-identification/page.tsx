@@ -7,7 +7,9 @@ import { v4 as uuidv4 } from "uuid";
 import { FieldSetDocuments } from "@/app/components/forms/fieldsets/cpom/FieldSetDocuments";
 import { FieldSetGeneral } from "@/app/components/forms/fieldsets/cpom/FieldSetGeneral";
 import { FieldSetStructures } from "@/app/components/forms/fieldsets/cpom/FieldSetStructures";
-import FormWrapper from "@/app/components/forms/FormWrapper";
+import FormWrapper, {
+  FooterButtonType,
+} from "@/app/components/forms/FormWrapper";
 import { useCpom } from "@/app/hooks/useCpom";
 import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { CpomGranularity } from "@/types/cpom.type";
@@ -45,7 +47,7 @@ export default function CpomAjoutIdentification() {
       <Stepper
         currentStep={1}
         nextTitle="Analyse financière"
-        stepCount={4}
+        stepCount={2}
         title="Identification du cpom"
       />
       <FormWrapper
@@ -53,6 +55,7 @@ export default function CpomAjoutIdentification() {
         defaultValues={defaultValues}
         submitButtonText="Étape suivante"
         onSubmit={handleSubmit}
+        availableFooterButtons={[FooterButtonType.SUBMIT]}
       >
         <FieldSetGeneral />
         <FieldSetDocuments />

@@ -13,7 +13,8 @@ export const DepartementsSelector = ({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleTogglePanel = () => {
+  const handleTogglePanel = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     setIsOpen((prevIsOpen) => !prevIsOpen);
   };
 

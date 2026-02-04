@@ -29,14 +29,16 @@ const cpomApiBareSchema = z.object({
   name: z.string().nullish(),
   dateStart: z.string().datetime(),
   dateEnd: z.string().datetime(),
+  operateur: operateurApiSchema.optional(),
+  operateurId: z.number().optional(),
+  region: z.string().nullish(),
+  departements: z.array(z.number()).optional(),
   granularity: z.enum([
     CpomGranularity.DEPARTEMENTALE,
     CpomGranularity.INTERDEPARTEMENTALE,
     CpomGranularity.REGIONALE,
   ]),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
-  operateur: operateurApiSchema.optional(),
-  operateurId: z.number().optional(),
 });
 
 export const cpomStructureApiSchema = z.object({

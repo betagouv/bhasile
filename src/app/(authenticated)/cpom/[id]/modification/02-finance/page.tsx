@@ -1,9 +1,13 @@
 "use client";
 
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import { FieldSetFinances } from "@/app/components/forms/fieldsets/cpom/FieldSetFinances";
-import FormWrapper from "@/app/components/forms/FormWrapper";
+import FormWrapper, {
+  FooterButtonType,
+} from "@/app/components/forms/FormWrapper";
 import { useCpom } from "@/app/hooks/useCpom";
 import { getCpomDefaultValues } from "@/app/utils/cpom.util";
 import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
@@ -11,8 +15,10 @@ import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { useCpomContext } from "../../_context/CpomClientContext";
 
 export default function CpomModificationIdentification() {
-  const { cpom } = useCpomContext();
+  const router = useRouter();
 
+  const { cpom } = useCpomContext();
+  console.log(cpom);
   const { updateCpom } = useCpom();
 
   const handleSubmit = async (data: CpomFormValues) => {
@@ -23,7 +29,19 @@ export default function CpomModificationIdentification() {
 
   const defaultValues = getCpomDefaultValues(cpom);
 
-  console.log(cpom);
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+
+    const handlePopState = () => {
+      router.push(`/cpom/${cpom.id}/modification/01-identification`);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [router, cpom?.id]);
 
   if (!cpom) {
     return null;
@@ -42,6 +60,7 @@ export default function CpomModificationIdentification() {
         defaultValues={defaultValues}
         submitButtonText="Étape suivante"
         onSubmit={handleSubmit}
+        availableFooterButtons={[FooterButtonType.SUBMIT]}
       >
         <FieldSetFinances />
       </FormWrapper>

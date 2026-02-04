@@ -382,6 +382,8 @@ model Cpom {
   id             Int             @id @default(autoincrement())
   name           String?
   structures     CpomStructure[]
+  region         String?
+  departements   Int[]
   granularity    CpomGranularity @default(REGIONALE)
   dateStart      DateTime?
   dateEnd        DateTime?

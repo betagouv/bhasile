@@ -10,8 +10,12 @@ export const FieldSetStructures = () => {
   const departements = watch("departements");
   const operateur = watch("operateur");
 
+  const dateStart = watch("dateStart");
+  const dateEnd = watch("dateEnd");
+
   const { structures } = useStructuresSelection({
-    operateurName: operateur.name,
+    // We only fetch the structures if dateStart and dateEnd are defined
+    operateurName: dateStart && dateEnd ? operateur.name : undefined,
     departements: departements?.join(","),
     types: [
       StructureType.HUDA,

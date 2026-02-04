@@ -2,11 +2,7 @@
 
 import { ReactElement, useEffect, useRef } from "react";
 
-import { useCpomContext } from "../_context/CpomClientContext";
-
 export const CpomHeader = (): ReactElement | null => {
-  const { cpom } = useCpomContext();
-
   const structureHeaderRef = useRef<HTMLDivElement>(null);
   const structureHeaderHeight = useRef(0);
 
@@ -30,21 +26,18 @@ export const CpomHeader = (): ReactElement | null => {
     };
   }, []);
 
-  return cpom ? (
+  return (
     <div className="sticky top-0 z-2 bg-lifted-grey" ref={structureHeaderRef}>
       <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
         <div>
           <h2 className="text-title-blue-france text-xs uppercase mb-0">
-            <strong className="pr-3">Modifier un cpom</strong>
+            <strong className="pr-3">Ajouter un cpom</strong>
           </h2>
           <h3 className="text-title-blue-france fr-h6 mb-0">
-            <strong className="pr-2">
-              {cpom.name ||
-                `${cpom.operateur?.name} - ${cpom.region} (${cpom.departements?.join(", ")})`}
-            </strong>
+            <strong className="pr-2">Nouveau CPOM</strong>
           </h3>
         </div>
       </div>
     </div>
-  ) : null;
+  );
 };

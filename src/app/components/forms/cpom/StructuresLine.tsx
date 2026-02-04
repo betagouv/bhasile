@@ -5,6 +5,7 @@ import { useFormContext } from "react-hook-form";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { cn } from "@/app/utils/classname.util";
+import { formatDate } from "@/app/utils/date.util";
 import { StructureMinimalApiType } from "@/schemas/api/structure.schema";
 
 export const StructuresLine = ({
@@ -71,11 +72,11 @@ export const StructuresLine = ({
         index !== -1 && (
           <>
             <span className="w-48 text-center">
-              {cpomStructure[index].dateStart ?? cpomDateStart}
+              {formatDate(cpomStructure[index].dateStart ?? cpomDateStart)}
             </span>
             <span className="w-4 text-center">–</span>
             <span className="w-48 text-center">
-              {cpomStructure[index].dateEnd ?? cpomDateEnd}
+              {formatDate(cpomStructure[index].dateEnd ?? cpomDateEnd)}
             </span>
           </>
         )

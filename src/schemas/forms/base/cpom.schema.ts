@@ -10,7 +10,6 @@ import {
 import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 import { CpomGranularity } from "@/types/cpom.type";
 
-import { acteAdministratifCpomSchema } from "./acteAdministratif.schema";
 import { operateurSchema } from "./operateur.schema";
 
 const cpomMillesimeSchema = z.object({
@@ -39,14 +38,14 @@ const bareCpomSchema = z.object({
   dateEnd: optionalFrenchDateToISO(),
   operateur: operateurSchema.optional(),
   operateurId: zId(),
+  region: z.string().nullish(),
+  departements: z.array(zSafeDecimals()).optional(),
   granularity: z.enum([
     CpomGranularity.DEPARTEMENTALE,
     CpomGranularity.INTERDEPARTEMENTALE,
     CpomGranularity.REGIONALE,
   ]),
-  departements: z.array(zSafeDecimals()).optional(),
   cpomMillesimes: z.array(cpomMillesimeSchema).optional(),
-  actesAdministratifs: z.array(acteAdministratifCpomSchema).optional(),
 });
 
 export const cpomStructureSchema = z.object({
