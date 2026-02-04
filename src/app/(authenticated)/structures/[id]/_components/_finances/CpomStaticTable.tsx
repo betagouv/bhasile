@@ -1,6 +1,5 @@
 "use client";
 
-import Button from "@codegouvfr/react-dsfr/Button";
 import { ReactElement, useState } from "react";
 
 import { Table } from "@/app/components/common/Table";
@@ -12,6 +11,7 @@ import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tab
 import { getYearRange } from "@/app/utils/date.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
+import { ButtonAffectations } from "../ButtonAffectations";
 
 export const CpomStaticTable = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -45,15 +45,10 @@ export const CpomStaticTable = (): ReactElement => {
           />
         )}
       </Table>
-      <Button
-        priority="tertiary no outline"
-        onClick={() => setIsAffectationOpen(!isAffectationOpen)}
-        iconId={isAffectationOpen ? "fr-icon-eye-off-line" : "fr-icon-eye-line"}
-        className="mt-4 ml-16"
-        size="small"
-      >
-        {isAffectationOpen ? "Masquer" : "Voir"} le détail des affectations
-      </Button>
+      <ButtonAffectations
+        isAffectationOpen={isAffectationOpen}
+        setIsAffectationOpen={setIsAffectationOpen}
+      />
     </>
   );
 };
