@@ -23,8 +23,6 @@ export const CpomTable = () => {
       year <= getYearFromDate(cpom.dateEnd)
   );
 
-  console.log(cpomMillesimes);
-
   return (
     <Table
       ariaLabelledBy="gestionBudgetaire"
