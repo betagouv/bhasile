@@ -133,7 +133,7 @@ const getLines = (isAutorisee: boolean, isAffectationOpen: boolean) => {
             {
               name: "chargesNonReconductibles",
               label: "Charges",
-              subLabel: "non reductibles",
+              subLabel: "non reconductibles",
             },
             {
               name: "reserveCompensationDeficits",
@@ -212,8 +212,8 @@ const getLines = (isAutorisee: boolean, isAffectationOpen: boolean) => {
 };
 
 const computeResultatNet = (
-  totalCharges: number | null | undefined,
-  totalProduits: number | null | undefined
+  totalProduits: number | null | undefined,
+  totalCharges: number | null | undefined
 ): number | undefined => {
   if (isNullOrUndefined(totalCharges) || isNullOrUndefined(totalProduits)) {
     return undefined;
