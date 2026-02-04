@@ -142,9 +142,18 @@ export const isStructureInCpom = (
 ): boolean => {
   return (
     structure.cpomStructures?.some((cpomStructure) => {
-      return cpomStructure.cpom?.cpomMillesimes?.some(
-        (cpomMillesime) => cpomMillesime.year === year
-      );
+      const dateStart =
+        cpomStructure.dateStart ?? cpomStructure.cpom?.dateStart;
+      const dateEnd = cpomStructure.dateEnd ?? cpomStructure.cpom?.dateEnd;
+
+      if (!dateStart || !dateEnd) {
+        return false;
+      }
+
+      const yearStart = getYearFromDate(dateStart);
+      const yearEnd = getYearFromDate(dateEnd);
+
+      return yearStart <= year && yearEnd >= year;
     }) ?? false
   );
 };
