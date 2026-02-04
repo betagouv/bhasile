@@ -8,6 +8,7 @@ import { FieldSetFinances } from "@/app/components/forms/fieldsets/cpom/FieldSet
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
 import { useCpom } from "@/app/hooks/useCpom";
 import { getCpomDefaultValues } from "@/app/utils/cpom.util";
 import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
@@ -54,6 +55,7 @@ export default function CpomModificationIdentification() {
         stepCount={2}
         title="Analyse financière"
       />
+
       <FormWrapper
         schema={cpomSchema}
         defaultValues={defaultValues}
@@ -61,6 +63,15 @@ export default function CpomModificationIdentification() {
         onSubmit={handleSubmit}
         availableFooterButtons={[FooterButtonType.SUBMIT]}
       >
+        <PreviousPageLink
+          previousRoute={`/cpoms/${cpom.id}/modification/01-identification`}
+        />
+        <p>
+          Veuillez renseigner l’historique des données budgétaires{" "}
+          <strong>à l’échelle de l’ensemble du CPOM</strong>. Concernant les
+          affectations, ce tableau reflète le flux annuel et ne constitue en
+          aucun cas un calcul ou du stock.
+        </p>
         <FieldSetFinances />
       </FormWrapper>
     </>

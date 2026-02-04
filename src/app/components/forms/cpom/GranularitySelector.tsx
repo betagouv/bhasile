@@ -12,36 +12,40 @@ export const GranularitySelector = () => {
   });
 
   return (
-    <RadioButtons
-      legend="Quelle est l’échelle du CPOM ?"
-      name="granularity"
-      options={[
-        {
-          label: "Départemental",
-          nativeInputProps: {
-            ...field,
-            value: CpomGranularity.DEPARTEMENTALE,
-            checked: field.value === CpomGranularity.DEPARTEMENTALE,
+    <div className="flex gap-6 items-center">
+      <legend className="mb-3">Quelle est l’échelle du CPOM ?</legend>
+
+      <RadioButtons
+        legend=""
+        name="granularity"
+        options={[
+          {
+            label: "Départementale",
+            nativeInputProps: {
+              ...field,
+              value: CpomGranularity.DEPARTEMENTALE,
+              checked: field.value === CpomGranularity.DEPARTEMENTALE,
+            },
           },
-        },
-        {
-          label: "Interdépartemental",
-          nativeInputProps: {
-            ...field,
-            value: CpomGranularity.INTERDEPARTEMENTALE,
-            checked: field.value === CpomGranularity.INTERDEPARTEMENTALE,
+          {
+            label: "Interdépartementale",
+            nativeInputProps: {
+              ...field,
+              value: CpomGranularity.INTERDEPARTEMENTALE,
+              checked: field.value === CpomGranularity.INTERDEPARTEMENTALE,
+            },
           },
-        },
-        {
-          label: "Régional",
-          nativeInputProps: {
-            ...field,
-            value: CpomGranularity.REGIONALE,
-            checked: field.value === CpomGranularity.REGIONALE,
+          {
+            label: "Régionale",
+            nativeInputProps: {
+              ...field,
+              value: CpomGranularity.REGIONALE,
+              checked: field.value === CpomGranularity.REGIONALE,
+            },
           },
-        },
-      ]}
-      orientation="horizontal"
-    />
+        ]}
+        orientation="horizontal"
+      />
+    </div>
   );
 };

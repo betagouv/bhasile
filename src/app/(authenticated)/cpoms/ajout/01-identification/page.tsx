@@ -10,6 +10,7 @@ import { FieldSetStructures } from "@/app/components/forms/fieldsets/cpom/FieldS
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
 import { useCpom } from "@/app/hooks/useCpom";
 import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { CpomGranularity } from "@/types/cpom.type";
@@ -57,6 +58,7 @@ export default function CpomAjoutIdentification() {
         onSubmit={handleSubmit}
         availableFooterButtons={[FooterButtonType.SUBMIT]}
       >
+        <PreviousPageLink previousRoute="" />
         <FieldSetGeneral />
         <FieldSetDocuments />
         <FieldSetStructures />
