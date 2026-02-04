@@ -1,7 +1,10 @@
 import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { isInputDisabled } from "@/app/utils/budget.util";
-import { formatCurrency } from "@/app/utils/number.util";
+import {
+  getCpomStructureIndexAndCpomMillesimeIndexForAYear,
+  getMillesimeIndexForAYear,
+} from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
   CpomMillesimeApiType,
@@ -32,16 +35,53 @@ export const BudgetTableStaticValue = ({
       <span className="text-center">
         <NumberDisplay
           value={
-            budgets?.find((budget) => budget.year === year)?.[
+            budgets[getMillesimeIndexForAYear(budgets, year)]?.[
               name as keyof BudgetApiType
-            ] || 0
+            ]
           }
           type="currency"
         />
       </span>
     );
   }
-  return <span className="text-center">-</span>;
+
+  if (cpomStructures) {
+    const { cpomStructureIndex, cpomMillesimeIndex } =
+      getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
+
+    if (cpomStructureIndex === -1 || cpomMillesimeIndex === -1) {
+      return <EmptyCell />;
+    }
+
+    return (
+      <span className="text-center">
+        <NumberDisplay
+          value={
+            cpomStructures[cpomStructureIndex]?.cpom?.cpomMillesimes?.[
+              cpomMillesimeIndex
+            ]?.[name as keyof CpomMillesimeApiType]
+          }
+          type="currency"
+        />
+      </span>
+    );
+  }
+
+  if (cpomMillesimes) {
+    return (
+      <span className="text-center">
+        <NumberDisplay
+          value={
+            cpomMillesimes[getMillesimeIndexForAYear(cpomMillesimes, year)]?.[
+              name as keyof CpomMillesimeApiType
+            ]
+          }
+        />
+      </span>
+    );
+  }
+
+  return <EmptyCell />;
 };
 
 type Props = {
