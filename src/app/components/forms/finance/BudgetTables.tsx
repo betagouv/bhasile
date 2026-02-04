@@ -4,8 +4,8 @@ import Link from "next/link";
 import { getYearRange } from "@/app/utils/date.util";
 import {
   isStructureAutorisee,
-  isStructureInCpom,
   isStructureSubventionnee,
+  wasStructureInCpom,
 } from "@/app/utils/structure.util";
 import { getFinanceFormTutorialLink } from "@/app/utils/tutorials.util";
 import { PLACE_ASILE_CONTACT_EMAIL } from "@/constants";
@@ -17,9 +17,7 @@ import { StructureTable } from "./budget-tables/StructureTable";
 export const BudgetTables = () => {
   const { structure } = useStructureContext();
   const { years } = getYearRange({ order: "desc" });
-  const isOrWasInCpom = years.some((year) =>
-    isStructureInCpom(structure, year)
-  );
+  const wasInCpom = wasStructureInCpom(structure, years);
   const isAutorisee = isStructureAutorisee(structure?.type);
   const isSubventionnee = isStructureSubventionnee(structure?.type);
 
@@ -36,7 +34,7 @@ export const BudgetTables = () => {
               href={getFinanceFormTutorialLink({
                 isAutorisee,
                 isSubventionnee,
-                isOrWasInCpom,
+                wasInCpom,
               })}
               target="_blank"
               className="underline"
@@ -59,7 +57,7 @@ export const BudgetTables = () => {
         </p>
         <StructureTable />
       </fieldset>
-      {isOrWasInCpom && (
+      {wasInCpom && (
         <fieldset className="flex flex-col gap-6 min-w-0 w-full">
           <legend className="text-xl font-bold mb-8 text-title-blue-france">
             Gestion budgétaire du CPOM

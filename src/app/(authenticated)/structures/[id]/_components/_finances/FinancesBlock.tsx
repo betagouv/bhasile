@@ -1,18 +1,22 @@
 import { useRouter } from "next/navigation";
-import { ReactElement } from "react";
+import { ReactElement, useState } from "react";
 
 import { Block } from "@/app/components/common/Block";
+import { getYearRange } from "@/app/utils/date.util";
 import {
   isStructureAutorisee,
   isStructureSubventionnee,
+  wasStructureInCpom,
 } from "@/app/utils/structure.util";
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { BudgetExecutoire } from "./BudgetExecutoire";
+import { CpomStaticTable } from "./CpomStaticTable";
 import { DocumentsAdministratifs } from "./DocumentsAdministratifs";
 import { DotationChart } from "./DotationChart";
 import { HistoriqueIndicateursGeneraux } from "./HistoriqueIndicateursGeneraux";
+import { StructureCpomSwitch } from "./StructureCpomSwitch";
 import { StructureStaticTable } from "./StructureStaticTable";
 
 export const FinancesBlock = (): ReactElement => {
@@ -20,8 +24,13 @@ export const FinancesBlock = (): ReactElement => {
 
   const router = useRouter();
 
+  const [shouldShowCpom, setShouldShowCpom] = useState(false);
+
+  const { years } = getYearRange({ order: "desc" });
+
   const isAutorisee = isStructureAutorisee(structure.type);
   const isConventionnee = isStructureSubventionnee(structure.type);
+  const wasInCpom = wasStructureInCpom(structure, years);
 
   const budgetExecutoireYear = isAutorisee
     ? AUTORISEE_OPEN_YEAR
@@ -53,8 +62,15 @@ export const FinancesBlock = (): ReactElement => {
       <h4 className="text-title-blue-france fr-h6" id="gestionBudgetaireTitle">
         Gestion budgétaire
       </h4>
+      {wasInCpom && (
+        <StructureCpomSwitch
+          handleChange={() =>
+            setShouldShowCpom((prevSetShouldShowCpom) => !prevSetShouldShowCpom)
+          }
+        />
+      )}
       <div className="pb-5">
-        <StructureStaticTable />
+        {shouldShowCpom ? <CpomStaticTable /> : <StructureStaticTable />}
       </div>
       <hr className="mt-12 mb-12" />
       <h4 className="text-title-blue-france pb-2 fr-h6 mb-0">

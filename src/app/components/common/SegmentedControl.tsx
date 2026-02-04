@@ -1,13 +1,16 @@
 import { PropsWithChildren, ReactElement } from "react";
 
+import { cn } from "@/app/utils/classname.util";
+
 export const SegmentedControl = ({
   children,
+  className,
   name,
   options,
   onChange,
 }: Props): ReactElement => {
   return (
-    <fieldset className="fr-segmented fr-segmented--sm">
+    <fieldset className={cn("fr-segmented fr-segmented--sm", className)}>
       <legend className="fr-segmented__legend fr-segmented__legend--inline">
         {children}
       </legend>
@@ -43,5 +46,6 @@ type Props = PropsWithChildren<
       icon?: string;
     }>;
     onChange?: (visualization: string) => void;
+    className?: string;
   }>
 >;
