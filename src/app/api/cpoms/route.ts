@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { cpomApiAjoutSchema, cpomApiSchema } from "@/schemas/api/cpom.schema";
 
-import { createOrUpdateCpom } from "./cpom.repository";
+import { countAll, createOrUpdateCpom, findAll } from "./cpom.repository";
+
+export async function GET() {
+  const cpoms = await findAll();
+  const totalCpoms = await countAll();
+
+  return NextResponse.json({ cpoms, totalCpoms });
+}
 
 export async function POST(request: NextRequest) {
   try {

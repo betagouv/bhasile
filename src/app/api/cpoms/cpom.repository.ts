@@ -7,6 +7,20 @@ import {
 } from "@/schemas/api/cpom.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+export const findAll = async (): Promise<Cpom[]> => {
+  return prisma.cpom.findMany({
+    include: {
+      structures: true,
+      cpomMillesimes: true,
+      operateur: true,
+    },
+  });
+};
+
+export const countAll = async (): Promise<number> => {
+  return prisma.structuresOrder.count();
+};
+
 export const findOne = async (id: number): Promise<Cpom> => {
   const cpom = await prisma.cpom.findFirstOrThrow({
     where: { id },
