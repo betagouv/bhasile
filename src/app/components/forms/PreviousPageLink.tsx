@@ -1,7 +1,5 @@
 import Link from "next/link";
 
-import { cn } from "@/app/utils/classname.util";
-
 export const PreviousPageLink = ({ previousRoute }: Props) => {
   const content = (
     <>
@@ -9,7 +7,7 @@ export const PreviousPageLink = ({ previousRoute }: Props) => {
       Étape précédente
     </>
   );
-  console.log("previousRoute", previousRoute);
+
   if (!previousRoute) {
     return (
       <span className="pointer-events-none text-disabled-grey" aria-disabled>
