@@ -8,6 +8,7 @@ import {
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import { getFinanceFormTutorialLink } from "@/app/utils/tutorials.util";
+import { PLACE_ASILE_CONTACT_EMAIL } from "@/constants";
 
 import { useStructureContext } from "../../../(authenticated)/structures/[id]/_context/StructureClientContext";
 import { StructureCpomTable } from "./budget-tables/StructureCpomTable";
@@ -63,12 +64,12 @@ export const BudgetTables = () => {
           <legend className="text-xl font-bold mb-8 text-title-blue-france">
             Gestion budgétaire du CPOM
           </legend>
-          <p className="mb-0">
-            Veuillez renseigner l’historique du ces données budgétaires{" "}
-            <strong>à l’échelle de l’ensemble du CPOM.</strong> Concernant les
-            affectations, ce tableau reflète le flux annuel et ne constitue en
-            aucun cas un calcul ou du stock.
-          </p>
+          <Notice
+            severity="info"
+            title=""
+            className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey"
+            description={`L’historique des données budgétaires à l’échelle du CPOM ont déjà été renseignées lors de la saisie du CPOM. Si vous constatez une erreur et voulez apporter une modification, contactez-nous : ${PLACE_ASILE_CONTACT_EMAIL}`}
+          />
           <StructureCpomTable canEdit={false} />
         </fieldset>
       )}
