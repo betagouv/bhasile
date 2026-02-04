@@ -32,7 +32,7 @@ export default function CpomAjoutIdentification() {
       id: undefined,
       name: undefined,
     },
-    granularity: CpomGranularity.DEPARTEMENTALE,
+    granularity: "DEPARTEMENTALE" as CpomGranularity,
     region: undefined,
     departements: [],
   };

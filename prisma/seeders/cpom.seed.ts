@@ -1,7 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
 import type { Departement, PrismaClient } from "@/generated/prisma/client";
-import { CpomGranularity } from "@/types/cpom.type";
 
 const buildStructureMillesimeYears = (start: number, end: number): number[] => {
   const years: number[] = [];
@@ -116,7 +115,7 @@ export const createFakeCpoms = async (
         operateurId: Number(operateurIdStr),
         dateStart,
         dateEnd,
-        granularity: CpomGranularity.REGIONALE,
+        granularity: "REGIONALE",
         region,
         departements: departements
           .filter((departement) => departement.region === region)

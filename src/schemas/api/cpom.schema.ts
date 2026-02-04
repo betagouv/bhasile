@@ -1,7 +1,6 @@
 import z from "zod";
 
 import { zSafeYear } from "@/app/utils/zodCustomFields";
-import { CpomGranularity } from "@/types/cpom.type";
 
 import { operateurApiSchema } from "./operateur.schema";
 
@@ -33,11 +32,7 @@ const cpomApiBareSchema = z.object({
   operateurId: z.number().optional(),
   region: z.string().nullish(),
   departements: z.array(z.string()).optional(),
-  granularity: z.enum([
-    CpomGranularity.DEPARTEMENTALE,
-    CpomGranularity.INTERDEPARTEMENTALE,
-    CpomGranularity.REGIONALE,
-  ]),
+  granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
 });
 
