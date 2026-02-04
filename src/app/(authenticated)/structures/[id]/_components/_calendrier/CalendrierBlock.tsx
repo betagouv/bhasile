@@ -29,23 +29,23 @@ export const CalendrierBlock = (): ReactElement => {
   if (debutPeriodeAutorisation && finPeriodeAutorisation) {
     datePairs.push({
       label: "Période d’autorisation",
-      startDate: debutPeriodeAutorisation,
-      endDate: finPeriodeAutorisation,
+      dateStart: debutPeriodeAutorisation,
+      dateEnd: finPeriodeAutorisation,
     });
   }
   if (debutConvention && finConvention) {
     datePairs.push({
       label: "Convention en cours",
-      startDate: debutConvention,
-      endDate: finConvention,
+      dateStart: debutConvention,
+      dateEnd: finConvention,
     });
   }
 
   if (isInCpom && dateStart && dateEnd) {
     datePairs.push({
       label: "CPOM en cours",
-      startDate: dateStart,
-      endDate: dateEnd,
+      dateStart: dateStart,
+      dateEnd: dateEnd,
     });
   }
 
