@@ -24,6 +24,7 @@ export default function CpomModificationIdentification() {
 
   const handleSubmit = async (data: CpomFormValues) => {
     const result = await updateCpom(data, setCpom);
+    //TODO: redirect to a success page ?
     console.log(result);
   };
 
