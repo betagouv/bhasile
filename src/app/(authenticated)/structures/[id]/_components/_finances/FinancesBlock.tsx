@@ -6,7 +6,11 @@ import {
   isStructureAutorisee,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
-import { CURRENT_YEAR } from "@/constants";
+import {
+  AUTORISEE_OPEN_YEAR,
+  CURRENT_YEAR,
+  SUBVENTIONNEE_OPEN_YEAR,
+} from "@/constants";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { BudgetExecutoire } from "./BudgetExecutoire";
@@ -24,8 +28,8 @@ export const FinancesBlock = (): ReactElement => {
   const isConventionnee = isStructureSubventionnee(structure.type);
 
   const budgetExecutoireYear = isAutorisee
-    ? CURRENT_YEAR - 1
-    : CURRENT_YEAR - 2;
+    ? AUTORISEE_OPEN_YEAR
+    : SUBVENTIONNEE_OPEN_YEAR;
 
   return (
     <Block
