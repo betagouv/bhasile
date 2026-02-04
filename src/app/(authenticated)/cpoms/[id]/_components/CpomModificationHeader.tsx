@@ -6,7 +6,7 @@ import { formatCpomName } from "@/app/utils/cpom.util";
 
 import { useCpomContext } from "../_context/CpomClientContext";
 
-export const CpomHeader = (): ReactElement | null => {
+export const CpomModificationHeader = (): ReactElement | null => {
   const { cpom } = useCpomContext();
 
   return cpom ? (

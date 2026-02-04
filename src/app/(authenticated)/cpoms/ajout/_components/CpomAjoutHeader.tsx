@@ -2,7 +2,7 @@
 
 import { ReactElement } from "react";
 
-export const CpomHeader = (): ReactElement | null => {
+export const CpomAjoutHeader = (): ReactElement | null => {
   return (
     <div className="sticky top-0 z-2 bg-lifted-grey">
       <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
