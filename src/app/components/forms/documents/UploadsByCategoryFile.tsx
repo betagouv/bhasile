@@ -163,8 +163,7 @@ export const UploadsByCategoryFile = ({
                       <Checkbox
                         options={[
                           {
-                            label:
-                              "Cet avenant modifie la date de fin du CPOM.",
+                            label: `Cet avenant modifie la date de fin du ${categoryShortName}.`,
                             nativeInputProps: {
                               name: `actesAdministratifs.${avenantIndex}.showEndDateInput`,
                               value: "showEndDateInput",
