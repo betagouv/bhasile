@@ -10,6 +10,7 @@ export type StructureLastCpomResult = {
 // Returns the last CPOM for a structure with its start and end dates, taking into account:
 //  - Potential "avenants"
 //  - Potential early join or late leave
+// NOTA: this is a simplification, maybe in the future this wont correspond to the actual current CPOM
 export const structureLastCpom = async (
   structureId: number
 ): Promise<StructureLastCpomResult | null> => {
