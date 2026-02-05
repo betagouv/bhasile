@@ -27,8 +27,6 @@ export const cpomMillesimeApiSchema = z.object({
 const cpomApiBaseSchema = z.object({
   id: z.number().optional(),
   name: z.string().nullish(),
-  dateStart: z.string().datetime().optional(),
-  dateEnd: z.string().datetime().optional(),
   operateur: operateurApiSchema.optional(),
   operateurId: z.number().optional(),
   region: z.string().optional(),
