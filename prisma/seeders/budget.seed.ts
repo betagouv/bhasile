@@ -12,7 +12,10 @@ export const createFakeBudget = ({
   year,
   type,
   cpom,
-}: CreateFakeBudgetOptions): Omit<Budget, "id" | "structureDnaCode"> => {
+}: CreateFakeBudgetOptions): Omit<
+  Budget,
+  "id" | "structureDnaCode" | "structureId"
+> => {
   const isAutorisee = isStructureAutorisee(type);
   const isSubventionnee = isStructureSubventionnee(type);
 

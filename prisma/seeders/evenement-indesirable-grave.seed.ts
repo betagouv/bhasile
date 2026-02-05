@@ -21,6 +21,7 @@ export const createFakeEvenementIndesirableGrave = (): Omit<
   usedNumeroDossiers.add(numeroDossier);
 
   return {
+    dnaCode: null,
     declarationDate: faker.date.past({ years: 3 }),
     evenementDate: faker.date.past({ years: 3 }),
     numeroDossier,

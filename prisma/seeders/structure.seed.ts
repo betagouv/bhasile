@@ -16,6 +16,7 @@ import {
 } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 
+import { generateDatePair } from "../utils/date";
 import { createFakeActivites } from "./activite.seed";
 import { AdresseWithTypologies, createFakeAdresses } from "./adresse.seed";
 import { createFakeBudget } from "./budget.seed";
@@ -28,7 +29,6 @@ import {
 import { createFakeEvenementIndesirableGrave } from "./evenement-indesirable-grave.seed";
 import { createFakeFileUpload } from "./file-upload.seed";
 import { createFakeFormWithSteps } from "./form.seed";
-import { generateDatePair } from "./seed-util";
 import { createFakeStructureTypologie } from "./structure-typologie.seed";
 
 // TODO: re-add a way to name with the fact the structure is, or has been part of a CPOM
@@ -48,6 +48,7 @@ export const createFakeStructure = ({
   operateurName,
   departementAdministratif,
   counter,
+  codeBhasile,
 }: FakeStructureOptions): Partial<Structure> => {
   const [debutConvention, finConvention] = generateDatePair();
   const [debutPeriodeAutorisation, finPeriodeAutorisation] = generateDatePair();
@@ -62,6 +63,7 @@ export const createFakeStructure = ({
       departementAdministratif,
       counter,
     }),
+    codeBhasile,
     type,
     nom: faker.lorem.words(2),
     nomOfii: faker.lorem.words(2),
@@ -126,27 +128,28 @@ export const createFakeStructure = ({
 };
 
 type StructureWithRelations = Structure & {
-  contacts: Omit<Contact, "id" | "structureDnaCode">[];
-  adresses: Omit<AdresseWithTypologies, "id" | "structureDnaCode">[];
-  controles: Omit<ControleWithFileUploads, "id" | "structureDnaCode">[];
-  evaluations: Omit<EvaluationWithFileUploads, "id" | "structureDnaCode">[];
-  structureTypologies: Omit<StructureTypologie, "id" | "structureDnaCode">[];
-  budgets: Omit<Budget, "id" | "structureDnaCode">[];
-  activites: Omit<Activite, "id" | "structureDnaCode">[];
+  contacts: Omit<Contact, "id" | "structureDnaCode" | "structureId">[];
+  adresses: Omit<AdresseWithTypologies, "id" | "structureDnaCode" | "structureId">[];
+  controles: Omit<ControleWithFileUploads, "id" | "structureDnaCode" | "structureId">[];
+  evaluations: Omit<EvaluationWithFileUploads, "id" | "structureDnaCode" | "structureId">[];
+  structureTypologies: Omit<StructureTypologie, "id" | "structureDnaCode" | "structureId">[];
+  budgets: Omit<Budget, "id" | "structureDnaCode" | "structureId">[];
+  activites: Omit<Activite, "id" | "structureDnaCode" | "structureId">[];
   fileUploads: Omit<
     FileUpload,
-    "id" | "structureDnaCode" | "controleId" | "parentFileUploadId"
+    "id" | "structureDnaCode" | "structureId" | "controleId" | "parentFileUploadId"
   >[];
   evenementsIndesirablesGraves: Omit<
     EvenementIndesirableGrave,
-    "id" | "structureDnaCode"
+    "id" | "structureDnaCode" | "structureId"
   >[];
-  forms: (Omit<Form, "id" | "structureDnaCode"> & {
+  forms: (Omit<Form, "id" | "structureDnaCode" | "structureId"> & {
     formSteps: Omit<FormStep, "id" | "formId">[];
   })[];
 };
 
 export const createFakeStuctureWithRelations = ({
+  codeBhasile,
   cpom,
   type,
   isFinalised,
@@ -158,6 +161,7 @@ export const createFakeStuctureWithRelations = ({
   counter,
 }: FakeStructureWithRelationsOptions): Omit<StructureWithRelations, "id"> => {
   const fakeStructure = createFakeStructure({
+    codeBhasile,
     cpom,
     type,
     isFinalised,
@@ -178,7 +182,9 @@ export const createFakeStuctureWithRelations = ({
 
   let structureWithRelations = {
     ...fakeStructure,
-    contacts: [createFakeContact("PRINCIPAL"), createFakeContact("SECONDAIRE")],
+    contacts: Array.from({ length: faker.number.int({ min: 1, max: 4 }) }, () =>
+      createFakeContact()
+    ),
     adresses: createFakeAdresses({ placesAutorisees }),
     structureTypologies: [
       createFakeStructureTypologie({ year: 2025, placesAutorisees }),
@@ -226,6 +232,7 @@ export const createFakeStuctureWithRelations = ({
 };
 
 export type FakeStructureOptions = {
+  codeBhasile?: string | null;
   cpom: boolean;
   type: StructureType;
   isFinalised: boolean;

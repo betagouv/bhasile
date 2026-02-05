@@ -181,6 +181,7 @@ const getAllEIGs = async (): Promise<
     }
     return {
       structureDnaCode,
+      dnaCode: structureDnaCode,
       numeroDossier: getValueByLabel(DNEIG, NUMERO_DOSSIER_LABEL).toString(),
       evenementDate: new Date(cleanDate(evenementDate)!),
       declarationDate: new Date(cleanDate(declarationDate)!),

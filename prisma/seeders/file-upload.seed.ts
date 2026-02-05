@@ -11,7 +11,7 @@ import {
 } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 
-import { generateDatePair } from "./seed-util";
+import { generateDatePair } from "../utils/date";
 
 export const createFakeFileUpload = ({
   category,
@@ -19,7 +19,7 @@ export const createFakeFileUpload = ({
   structureType,
 }: CreateFakeFileUploadOptions): Omit<
   FileUpload,
-  "id" | "structureDnaCode" | "controleId" | "evaluationId"
+  "id" | "structureDnaCode" | "controleId" | "evaluationId" | "structureId"
 > => {
   return buildFakeFileUpload({
     category,
@@ -32,7 +32,7 @@ export const createFakeFileUploadWithParent = ({
   parentFileUploadId,
 }: CreateFakeFileUploadWithParentOptions): Omit<
   FileUpload,
-  "id" | "structureDnaCode" | "controleId" | "evaluationId"
+  "id" | "structureDnaCode" | "controleId" | "evaluationId" | "structureId"
 > => {
   return buildFakeFileUpload({
     parentFileUploadId,
@@ -79,7 +79,7 @@ const buildFakeFileUpload = ({
   parentFileUploadId,
 }: BuildFakeFileUploadOptions): Omit<
   FileUpload,
-  "id" | "structureDnaCode" | "controleId" | "evaluationId"
+  "id" | "structureDnaCode" | "controleId" | "evaluationId" | "structureId"
 > => {
   const fakeCategories = getFakeFileUploadCategories(cpom, structureType);
   const [startDate, endDate] = generateDatePair();

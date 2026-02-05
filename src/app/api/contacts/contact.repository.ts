@@ -1,43 +1,35 @@
-import { ContactType } from "@/generated/prisma/client";
 import { ContactApiType } from "@/schemas/api/contact.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
+
+// WARNING: attenion, auparavant on avait un type de contact,
+// donc on avait une unicité structureDnaCode x type.
+// Cette unicité n'existe plus donc on supprime et recrée tout : voir si effets de bord !
 
 export const createOrUpdateContacts = async (
   tx: PrismaTransaction,
   contacts: Partial<ContactApiType>[] | undefined,
   structureDnaCode: string
 ): Promise<void> => {
-  if (!contacts || contacts.length === 0) {
+  if (!contacts) {
     return;
   }
 
-  await Promise.all(
-    (contacts || []).map((contact) => {
-      return tx.contact.upsert({
-        where: {
-          structureDnaCode_type: {
-            structureDnaCode: structureDnaCode,
-            type: contact.type ?? ContactType.AUTRE,
-          },
-        },
-        update: {
-          prenom: contact.prenom ?? "",
-          nom: contact.nom ?? "",
-          telephone: contact.telephone ?? "",
-          email: contact.email ?? "",
-          role: contact.role ?? "",
-          type: contact.type ?? ContactType.AUTRE,
-        },
-        create: {
-          structureDnaCode,
-          prenom: contact.prenom ?? "",
-          nom: contact.nom ?? "",
-          telephone: contact.telephone ?? "",
-          email: contact.email ?? "",
-          role: contact.role ?? "",
-          type: contact.type ?? ContactType.AUTRE,
-        },
-      });
-    })
-  );
+  await tx.contact.deleteMany({
+    where: { structureDnaCode },
+  });
+
+  if (contacts.length === 0) {
+    return;
+  }
+
+  await tx.contact.createMany({
+    data: contacts.map((contact) => ({
+      structureDnaCode,
+      prenom: contact.prenom ?? "",
+      nom: contact.nom ?? "",
+      telephone: contact.telephone ?? "",
+      email: contact.email ?? "",
+      role: contact.role ?? "",
+    })),
+  });
 };
