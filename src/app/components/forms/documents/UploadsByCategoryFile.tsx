@@ -69,7 +69,6 @@ export const UploadsByCategoryFile = ({
     append(newField);
   };
 
-  console.log("canAddAvenant", canAddAvenant);
   return (
     <>
       <div className="grid grid-cols-[1fr_1fr_auto] gap-6 items-start">

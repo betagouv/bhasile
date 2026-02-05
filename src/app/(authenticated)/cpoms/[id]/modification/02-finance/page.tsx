@@ -47,7 +47,7 @@ export default function CpomModificationFinance() {
   };
 
   const defaultValues = getCpomDefaultValues(cpom);
-
+  console.log("cpom", cpom);
   useEffect(() => {
     if (!cpom?.id) return;
 

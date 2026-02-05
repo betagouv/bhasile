@@ -2,6 +2,7 @@ import z from "zod";
 
 import { zSafeYear } from "@/app/utils/zodCustomFields";
 
+import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
 import { operateurApiSchema } from "./operateur.schema";
 
 export const cpomMillesimeApiSchema = z.object({
@@ -34,6 +35,7 @@ const cpomApiBareSchema = z.object({
   departements: z.array(z.string()).optional(),
   granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
+  actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
 });
 
 export const cpomStructureApiSchema = z.object({

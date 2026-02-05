@@ -10,9 +10,12 @@ export const getCpomDefaultValues = (cpom: CpomApiType): CpomFormValues => {
   return {
     ...cpom,
     name: cpom.name ?? "",
+    region: cpom.region ?? "",
+    departements: cpom.departements ?? [],
+    granularity: cpom.granularity ?? "REGIONALE",
     dateStart: cpom.dateStart ?? undefined,
     dateEnd: cpom.dateEnd ?? undefined,
-    operateur: cpom.operateur ?? undefined,
+    operateur: cpom.operateur ?? { name: "", id: undefined },
     structures: cpom.structures.map((structure) => ({
       ...structure,
       cpom: undefined,
@@ -20,6 +23,7 @@ export const getCpomDefaultValues = (cpom: CpomApiType): CpomFormValues => {
       dateEnd: structure.dateEnd ?? undefined,
     })),
     cpomMillesimes: getCpomMillesimesDefaultValues(cpom?.cpomMillesimes || []),
+    actesAdministratifs: cpom.actesAdministratifs ?? [],
   };
 };
 
