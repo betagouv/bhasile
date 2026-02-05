@@ -16,6 +16,7 @@ export const UploadsByCategoryFile = ({
   documentLabel,
   handleDeleteField,
   canAddAvenant = false,
+  avenantCanExtendDateEnd = false,
   categoryShortName,
 }: UploadsByCategoryFileProps) => {
   const { control, register, watch } = useFormContext();
@@ -68,6 +69,7 @@ export const UploadsByCategoryFile = ({
     append(newField);
   };
 
+  console.log("canAddAvenant", canAddAvenant);
   return (
     <>
       <div className="grid grid-cols-[1fr_1fr_auto] gap-6 items-start">
@@ -142,6 +144,15 @@ export const UploadsByCategoryFile = ({
                     className="w-full mb-0"
                     type="date"
                   />
+                  {avenantCanExtendDateEnd && (
+                    <InputWithValidation
+                      name={`actesAdministratifs.${avenantIndex}.endDate`}
+                      control={control}
+                      label={`Fin ${categoryShortName} actualisée`}
+                      className="w-full mb-0"
+                      type="date"
+                    />
+                  )}
                   <div className="flex flex-col w-full">
                     <label className="mb-2">{documentLabel}</label>
                     <UploadWithValidation
@@ -191,4 +202,5 @@ type UploadsByCategoryFileProps = {
   categoryShortName: string;
   handleDeleteField: (index: number) => void;
   canAddAvenant: boolean;
+  avenantCanExtendDateEnd: boolean;
 };

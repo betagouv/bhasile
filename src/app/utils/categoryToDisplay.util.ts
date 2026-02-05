@@ -53,16 +53,6 @@ export const getCategoriesDisplayRules = (
     documentLabel: "Document",
     addFileButtonLabel: "Ajouter un arrêté de tarification",
   },
-  CPOM: {
-    categoryShortName: "CPOM",
-    title: "CPOM",
-    canAddFile: false,
-    isOptional: false,
-    canAddAvenant: true,
-    additionalFieldsType: AdditionalFieldsType.DATE_START_END,
-    documentLabel: "Document",
-    addFileButtonLabel: "Ajouter un CPOM",
-  },
   CONVENTION: {
     categoryShortName: "convention",
     title: "Conventions",

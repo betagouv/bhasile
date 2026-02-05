@@ -3,6 +3,7 @@
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import { FieldSetDocuments } from "@/app/components/forms/fieldsets/cpom/FieldSetDocuments";
 import { FieldSetGeneral } from "@/app/components/forms/fieldsets/cpom/FieldSetGeneral";
@@ -17,6 +18,7 @@ import { useCpom } from "@/app/hooks/useCpom";
 import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { CpomGranularity } from "@/types/cpom.type";
 import { FetchState } from "@/types/fetch-state.type";
+import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
 
 export default function CpomAjoutIdentification() {
   const router = useRouter();
@@ -35,6 +37,12 @@ export default function CpomAjoutIdentification() {
     granularity: "DEPARTEMENTALE" as CpomGranularity,
     region: undefined,
     departements: [],
+    actesAdministratifs: [
+      {
+        uuid: uuidv4(),
+        category: "CPOM" as ActeAdministratifCategoryType[number],
+      },
+    ],
   };
 
   const { getFetchState, setFetchState } = useFetchState();
@@ -46,6 +54,7 @@ export default function CpomAjoutIdentification() {
 
   const handleSubmit = async (data: CpomFormValues) => {
     setFetchState("cpom-save", FetchState.LOADING);
+
     const result = await addCpom(data);
     if (typeof result === "object" && "cpomId" in result) {
       setFetchState("cpom-save", FetchState.IDLE);
