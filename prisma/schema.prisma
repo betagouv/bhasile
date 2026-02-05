@@ -63,8 +63,9 @@ model Structure {
   campaigns                    Campaign[]
   departement                  Departement?                @relation(fields: [departementAdministratif], references: [numero])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now()) @updatedAt
+  acteAdministratifs ActeAdministratif[]
 
   @@schema("public")
 }
@@ -177,8 +178,9 @@ model StructureMillesime {
   budgetId             Int?
   budget               Budget?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now()) @updatedAt
+  documentFinanciers DocumentFinancier[]
 
   @@unique([structureDnaCode, year])
   @@schema("public")
@@ -228,18 +230,20 @@ model Activite {
 }
 
 model FileUpload {
-  id               Int                   @id @default(autoincrement())
-  structure        Structure?            @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
+  id               Int        @id @default(autoincrement())
+  structure        Structure? @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
   structureDnaCode String?
-  key              String                @unique
+  key              String     @unique
   mimeType         String
   fileSize         Int
   originalName     String
-  date             DateTime?
-  category         FileUploadCategory?
-  startDate        DateTime?
-  endDate          DateTime?
-  granularity      FileUploadGranularity @default(STRUCTURE)
+
+  // TODO remove everything behind after data migration
+  date        DateTime?
+  category    FileUploadCategory?
+  startDate   DateTime?
+  endDate     DateTime?
+  granularity FileUploadGranularity @default(STRUCTURE)
 
   controle           Controle?    @relation(fields: [controleId], references: [id], onDelete: Cascade)
   controleId         Int?
@@ -254,8 +258,68 @@ model FileUpload {
   cpomAvenant        CpomAvenant? @relation(fields: [cpomAvenantId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   cpomAvenantId      Int?
 
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @default(now()) @updatedAt
+  acteAdministratif   ActeAdministratif? @relation(fields: [acteAdministratifId], references: [id])
+  acteAdministratifId Int?
+  documentFinancier   DocumentFinancier? @relation(fields: [documentFinancierId], references: [id])
+  documentFinancierId Int?
+
+  @@schema("public")
+}
+
+model ActeAdministratif {
+  id          Int       @id @default(autoincrement())
+  date        DateTime? // signature date
+  dateStart   DateTime?
+  dateEnd     DateTime?
+  structureId Int?
+  structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cpomId      Int?
+  cpom        Cpom?     @relation(fields: [cpomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  fileUploads FileUpload[]          @relation("ActeAdministratifToFileUpload")
+  type        ActeAdministratifType
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model DocumentFinancier {
+  id                   Int                   @id @default(autoincrement())
+  structureMillesimeId Int?
+  structureMillesime   StructureMillesime    @relation(fields: [structureMillesimeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  type                 DocumentFinancierType
+  fileUploads          FileUpload[]          @relation("DocumentFinancierToFileUpload")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+enum ActeAdministratifType {
+  ARRETE_AUTORISATION
+  CONVENTION
+  ARRETE_TARIFICATION
+  CPOM
+
+  @@schema("public")
+}
+
+enum DocumentFinancierType {
+  BUDGET_PREVISIONNEL_DEMANDE
+  RAPPORT_BUDGETAIRE
+  BUDGET_PREVISIONNEL_RETENU
+  BUDGET_RECTIFICATIF
+  COMPTE_ADMINISTRATIF_SOUMIS
+  RAPPORT_ACTIVITE
+  COMPTE_ADMINISTRATIF_RETENU
+  DEMANDE_SUBVENTION
+  COMPTE_RENDU_FINANCIER
+  AUTRE_FINANCIER
 
   @@schema("public")
 }
@@ -395,8 +459,9 @@ model Cpom {
   operateurId    Int
   fileUploads    FileUpload[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now()) @updatedAt
+  acteAdministratifs ActeAdministratif[]
 
   @@schema("public")
 }
