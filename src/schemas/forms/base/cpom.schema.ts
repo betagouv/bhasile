@@ -75,8 +75,13 @@ export const cpomSchema = baseCpomSchema
       const cpomStart = data.dateStart;
       const cpomEnd = data.dateEnd;
       for (const structure of data.structures) {
-        if (structure.dateStart && structure.dateEnd) {
-          if (structure.dateStart < cpomStart || structure.dateEnd > cpomEnd) {
+        if (structure.dateStart) {
+          if (structure.dateStart < cpomStart) {
+            return false;
+          }
+        }
+        if (structure.dateEnd) {
+          if (structure.dateEnd > cpomEnd) {
             return false;
           }
         }

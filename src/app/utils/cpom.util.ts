@@ -28,7 +28,12 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
       })) ?? [],
     cpomMillesimes: getCpomMillesimesDefaultValues(cpom?.cpomMillesimes || []),
     actesAdministratifs: cpom?.actesAdministratifs?.length
-      ? cpom?.actesAdministratifs
+      ? cpom?.actesAdministratifs.map((acteAdministratif) => ({
+          ...acteAdministratif,
+          startDate: acteAdministratif.startDate ?? undefined,
+          endDate: acteAdministratif.endDate ?? undefined,
+          date: acteAdministratif.endDate ?? undefined,
+        }))
       : [
           {
             uuid: uuidv4(),
