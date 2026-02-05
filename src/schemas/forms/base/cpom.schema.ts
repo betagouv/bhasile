@@ -1,8 +1,8 @@
 import z from "zod";
 
 import {
-  frenchDateToISO,
   nullishFrenchDateToISO,
+  optionalFrenchDateToISO,
   zId,
   zSafeDecimalsNullish,
   zSafeYear,
@@ -33,8 +33,8 @@ const cpomMillesimeSchema = z.object({
 const baseCpomSchema = z.object({
   id: zId(),
   name: z.string().nullish(),
-  dateStart: frenchDateToISO(),
-  dateEnd: frenchDateToISO(),
+  dateStart: optionalFrenchDateToISO(),
+  dateEnd: optionalFrenchDateToISO(),
   operateur: operateurSchema,
   operateurId: zId(),
   region: z.string(),
