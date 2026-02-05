@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { structureLastCpom } from "../../cpoms/cpom.service";
 import { findOne } from "../structure.repository";
 import {
   addPresencesIndues,
   divideFileUploads,
   StructureWithFileUploadsAndActivites,
 } from "../structure.service";
-import { structureLastCpom } from "../../cpoms/cpom.service";
 
 export async function GET(request: NextRequest) {
   try {
