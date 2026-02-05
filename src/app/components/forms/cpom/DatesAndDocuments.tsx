@@ -3,6 +3,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { formatDateToIsoString } from "@/app/utils/date.util";
 import { AdditionalFieldsType } from "@/types/categoryToDisplay.type";
 
 import UploadsByCategory, {
@@ -32,13 +33,15 @@ export const DatesAndDocuments = () => {
     const dateEnd = actesAdministratifs.reduce((accumulator, current) => {
       if (!current.endDate) return accumulator;
 
-      const currentDate = dayjs(current.endDate, "DD/MM/YYYY");
-      if (!currentDate.isValid()) return accumulator;
+      const currentDate = formatDateToIsoString(current.endDate);
 
-      if (!accumulator) return current.endDate;
+      if (!currentDate) return accumulator;
 
-      const accDate = dayjs(accumulator, "DD/MM/YYYY");
-      return currentDate.isAfter(accDate) ? current.endDate : accumulator;
+      const accDate = formatDateToIsoString(accumulator);
+
+      if (!accDate) return currentDate;
+
+      return currentDate > accDate ? currentDate : accumulator;
     }, "");
 
     const dateStart = actesAdministratifs.find(
@@ -49,6 +52,9 @@ export const DatesAndDocuments = () => {
     setValue("dateStart", dateStart);
   }, [actesAdministratifs, actesDatesKey, setValue]);
 
+  console.log("actesAdministratifs", actesAdministratifs);
+  console.log("dateEnd", watch("dateEnd"));
+  console.log("dateStart", watch("dateStart"));
   return (
     <div className="flex gap-2">
       <InputWithValidation
