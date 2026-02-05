@@ -24,14 +24,14 @@ export const cpomMillesimeApiSchema = z.object({
   commentaire: z.string().nullish(),
 });
 
-const cpomApiBareSchema = z.object({
+const cpomApiBaseSchema = z.object({
   id: z.number().optional(),
   name: z.string().nullish(),
   dateStart: z.string().datetime(),
   dateEnd: z.string().datetime(),
   operateur: operateurApiSchema.optional(),
   operateurId: z.number().optional(),
-  region: z.string().nullish(),
+  region: z.string().optional(),
   departements: z.array(z.string()).optional(),
   granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
@@ -41,13 +41,13 @@ const cpomApiBareSchema = z.object({
 export const cpomStructureApiSchema = z.object({
   id: z.number().optional(),
   cpomId: z.number().optional(),
-  cpom: cpomApiBareSchema.optional(),
+  cpom: cpomApiBaseSchema.optional(),
   structureId: z.number(),
   dateStart: z.string().datetime().nullish(),
   dateEnd: z.string().datetime().nullish(),
 });
 
-export const cpomApiSchema = cpomApiBareSchema.extend({
+export const cpomApiSchema = cpomApiBaseSchema.extend({
   structures: z.array(cpomStructureApiSchema),
 });
 

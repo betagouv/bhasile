@@ -20,7 +20,7 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
     dateEnd: cpom?.dateEnd ?? "",
     operateur: cpom?.operateur ?? { name: "", id: undefined },
     structures:
-      cpom?.structures.map((structure) => ({
+      cpom?.structures?.map((structure) => ({
         ...(structure ?? {}),
         cpom: undefined,
         dateStart: structure.dateStart ?? undefined,

@@ -8,7 +8,7 @@ import {
   ActeAdministratifCategoryType,
 } from "@/types/file-upload.type";
 
-import { isStructureInCpom, isStructureSubventionnee } from "./structure.util";
+import { isStructureSubventionnee } from "./structure.util";
 
 export const getCategoriesToDisplay = (
   structure: StructureApiType
@@ -18,7 +18,7 @@ export const getCategoriesToDisplay = (
       return false;
     }
 
-    if (category === "CPOM" && !isStructureInCpom(structure)) {
+    if (category === "CPOM") {
       return false;
     }
 
@@ -52,6 +52,16 @@ export const getCategoriesDisplayRules = (
     additionalFieldsType: AdditionalFieldsType.DATE_START_END,
     documentLabel: "Document",
     addFileButtonLabel: "Ajouter un arrêté de tarification",
+  },
+  CPOM: {
+    categoryShortName: "CPOM",
+    title: "CPOM",
+    canAddFile: false,
+    isOptional: false,
+    canAddAvenant: true,
+    additionalFieldsType: AdditionalFieldsType.DATE_START_END,
+    documentLabel: "Document",
+    addFileButtonLabel: "Ajouter un CPOM",
   },
   CONVENTION: {
     categoryShortName: "convention",

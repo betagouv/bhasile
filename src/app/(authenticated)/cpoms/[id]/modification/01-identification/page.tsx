@@ -53,11 +53,11 @@ export default function CpomModificationIdentification() {
     }
   };
 
-  const defaultValues = getCpomDefaultValues(cpom);
-
   if (!cpom) {
     return null;
   }
+
+  const defaultValues = getCpomDefaultValues(cpom);
 
   return (
     <>

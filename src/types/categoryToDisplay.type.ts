@@ -3,7 +3,7 @@ import { ActeAdministratifCategoryType } from "./file-upload.type";
 export type CategoryDisplayRulesType = Record<
   Exclude<
     ActeAdministratifCategoryType[number],
-    "INSPECTION_CONTROLE" | "EVALUATION" | "CPOM"
+    "INSPECTION_CONTROLE" | "EVALUATION"
   >,
   {
     categoryShortName: string;
