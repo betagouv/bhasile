@@ -44,9 +44,11 @@ export const DatesAndDocuments = () => {
       return currentDate > accDate ? currentDate : accumulator;
     }, "");
 
-    const dateStart = actesAdministratifs.find(
-      (acteAdministratif) => acteAdministratif.startDate
-    )?.startDate;
+    const dateStart = formatDateToIsoString(
+      actesAdministratifs.find(
+        (acteAdministratif) => acteAdministratif.startDate
+      )?.startDate
+    );
 
     setValue("dateEnd", dateEnd);
     setValue("dateStart", dateStart);
