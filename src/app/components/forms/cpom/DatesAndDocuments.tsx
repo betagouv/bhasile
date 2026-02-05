@@ -46,8 +46,6 @@ export const DatesAndDocuments = () => {
     setValue("dateStart", dateStart);
   }, [actesAdministratifs, actesDatesKey, setValue]);
 
-  console.log("dateStart", watch("dateStart"));
-  console.log("dateEnd", watch("dateEnd"));
   return (
     <div className="flex gap-2">
       <InputWithValidation

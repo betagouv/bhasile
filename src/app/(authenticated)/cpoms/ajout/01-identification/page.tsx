@@ -3,7 +3,6 @@
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 
 import { FieldSetDocuments } from "@/app/components/forms/fieldsets/cpom/FieldSetDocuments";
 import { FieldSetGeneral } from "@/app/components/forms/fieldsets/cpom/FieldSetGeneral";
@@ -15,35 +14,16 @@ import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useCpom } from "@/app/hooks/useCpom";
+import { getCpomDefaultValues } from "@/app/utils/cpom.util";
 import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
-import { CpomGranularity } from "@/types/cpom.type";
 import { FetchState } from "@/types/fetch-state.type";
-import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
 
 export default function CpomAjoutIdentification() {
   const router = useRouter();
 
   const { addCpom } = useCpom();
 
-  const defaultValues = {
-    name: "",
-    structures: [],
-    dateStart: undefined,
-    dateEnd: undefined,
-    operateur: {
-      id: undefined,
-      name: undefined,
-    },
-    granularity: "DEPARTEMENTALE" as CpomGranularity,
-    region: undefined,
-    departements: [],
-    actesAdministratifs: [
-      {
-        uuid: uuidv4(),
-        category: "CPOM" as ActeAdministratifCategoryType[number],
-      },
-    ],
-  };
+  const defaultValues = getCpomDefaultValues();
 
   const { getFetchState, setFetchState } = useFetchState();
   const saveState = getFetchState("cpom-save");

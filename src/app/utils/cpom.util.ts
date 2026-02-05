@@ -1,29 +1,40 @@
+import { v4 as uuidv4 } from "uuid";
+
 import { CpomApiType, CpomMillesimeApiType } from "@/schemas/api/cpom.schema";
 import {
   CpomFormValues,
   CpomMillesimeFormValues,
 } from "@/schemas/forms/base/cpom.schema";
+import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
 
 import { getYearFromDate, getYearRange } from "./date.util";
 
-export const getCpomDefaultValues = (cpom: CpomApiType): CpomFormValues => {
+export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
   return {
     ...cpom,
-    name: cpom.name ?? "",
-    region: cpom.region ?? "",
-    departements: cpom.departements ?? [],
-    granularity: cpom.granularity ?? "REGIONALE",
-    dateStart: cpom.dateStart ?? undefined,
-    dateEnd: cpom.dateEnd ?? undefined,
-    operateur: cpom.operateur ?? { name: "", id: undefined },
-    structures: cpom.structures.map((structure) => ({
-      ...structure,
-      cpom: undefined,
-      dateStart: structure.dateStart ?? undefined,
-      dateEnd: structure.dateEnd ?? undefined,
-    })),
+    name: cpom?.name ?? "",
+    region: cpom?.region ?? "",
+    departements: cpom?.departements ?? [],
+    granularity: cpom?.granularity ?? "REGIONALE",
+    dateStart: cpom?.dateStart ?? "",
+    dateEnd: cpom?.dateEnd ?? "",
+    operateur: cpom?.operateur ?? { name: "", id: undefined },
+    structures:
+      cpom?.structures.map((structure) => ({
+        ...(structure ?? {}),
+        cpom: undefined,
+        dateStart: structure.dateStart ?? undefined,
+        dateEnd: structure.dateEnd ?? undefined,
+      })) ?? [],
     cpomMillesimes: getCpomMillesimesDefaultValues(cpom?.cpomMillesimes || []),
-    actesAdministratifs: cpom.actesAdministratifs ?? [],
+    actesAdministratifs: cpom?.actesAdministratifs?.length
+      ? cpom?.actesAdministratifs
+      : [
+          {
+            uuid: uuidv4(),
+            category: "CPOM" as ActeAdministratifCategoryType[number],
+          },
+        ],
   };
 };
 
