@@ -16,8 +16,8 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
     region: cpom?.region ?? "",
     departements: cpom?.departements ?? [],
     granularity: cpom?.granularity ?? "REGIONALE",
-    dateStart: cpom?.dateStart ?? "",
-    dateEnd: cpom?.dateEnd ?? "",
+    dateStart: computeCpomDates(cpom).dateStart ?? "",
+    dateEnd: computeCpomDates(cpom).dateEnd ?? "",
     operateur: cpom?.operateur ?? { name: "", id: undefined },
     structures:
       cpom?.structures?.map((structure) => ({
@@ -85,6 +85,43 @@ const getCpomMillesimesDefaultValues = (
 export const formatCpomName = (cpom: CpomApiType): string => {
   return (
     cpom.name ||
-    `${cpom.operateur?.name} - ${cpom.region} (${getYearFromDate(cpom.dateStart)} - ${getYearFromDate(cpom.dateEnd)})`
+    `${cpom.operateur?.name} - ${cpom.region} (${getYearFromDate(computeCpomDates(cpom).dateStart)} - ${getYearFromDate(computeCpomDates(cpom).dateEnd)})`
   );
+};
+
+export const computeCpomDates = (
+  cpom?: Partial<CpomApiType>
+): { dateStart?: string; dateEnd?: string } => {
+  if (!cpom || !cpom.actesAdministratifs) {
+    return {
+      dateStart: undefined,
+      dateEnd: undefined,
+    };
+  }
+
+  const dateEnd = cpom.actesAdministratifs.reduce(
+    (accumulator, current) => {
+      if (!current.endDate) {
+        return accumulator;
+      }
+      if (!accumulator) {
+        return current.endDate;
+      }
+      if (current.endDate > accumulator) {
+        return current.endDate;
+      }
+      return accumulator;
+    },
+    undefined as string | undefined
+  );
+
+  const dateStart =
+    cpom.actesAdministratifs.find(
+      (acteAdministratif) => acteAdministratif.startDate
+    )?.startDate ?? undefined;
+
+  return {
+    dateStart,
+    dateEnd,
+  };
 };

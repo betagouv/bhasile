@@ -45,8 +45,6 @@ export const createOrUpdateCpom = async (
       where: { id: cpom.id ?? 0 },
       update: {
         name: cpom.name,
-        dateStart: cpom.dateStart,
-        dateEnd: cpom.dateEnd,
         operateurId,
         region: cpom.region,
         departements: cpom.departements ?? [],
@@ -54,8 +52,6 @@ export const createOrUpdateCpom = async (
       },
       create: {
         name: cpom.name,
-        dateStart: cpom.dateStart,
-        dateEnd: cpom.dateEnd,
         operateurId: operateurId as number,
         region: cpom.region,
         departements: cpom.departements ?? [],

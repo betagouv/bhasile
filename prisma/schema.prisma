@@ -387,8 +387,6 @@ model Cpom {
   region                String?
   departements          String[]
   granularity           CpomGranularity @default(REGIONALE)
-  dateStart             DateTime?
-  dateEnd               DateTime?
   cpomMillesimes        CpomMillesime[]
   operateur             Operateur       @relation(fields: [operateurId], references: [id])
   operateurId           Int
