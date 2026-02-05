@@ -1,5 +1,5 @@
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
@@ -19,6 +19,8 @@ export const StructuresList = ({ structures }: Props) => {
   const selectedCpomStructures = watch(
     "structures"
   ) as CpomStructureFormValues[];
+
+  const departements = watch("departements");
 
   const handleStructureChange = (structureId?: number) => {
     if (!structureId) {
@@ -74,6 +76,27 @@ export const StructuresList = ({ structures }: Props) => {
       setValue("structures", []);
     }
   };
+
+  const previousDepartements = useRef<string[]>([]);
+  useEffect(() => {
+    if (previousDepartements.current === departements) {
+      return;
+    }
+    const structuresToSelect = selectedCpomStructures.filter(
+      (selectedCpomStructure) => {
+        const currentStructure = structures.find(
+          (structure) => structure.id === selectedCpomStructure.structureId
+        );
+        if (departements.includes(currentStructure?.departementAdministratif)) {
+          return true;
+        }
+        return false;
+      }
+    );
+
+    setValue("structures", structuresToSelect);
+    previousDepartements.current = departements;
+  }, [departements, structures, selectedCpomStructures, setValue]);
 
   return (
     <div
