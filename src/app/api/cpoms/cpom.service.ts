@@ -7,6 +7,8 @@ type CpomStructureForMatching = {
     id: number;
     dateStart: Date | null;
     dateEnd: Date | null;
+    /** Date de fin effective = max(dateEnd, avenants.dateFinModifiee). Utilisée pour le matching des millésimes. */
+    effectiveDateEnd: Date | null;
   };
 };
 
@@ -25,6 +27,7 @@ export const findMatchingCpomForMillesime = (
       null;
     const yearEnd =
       cpomStructure.dateEnd?.getFullYear() ??
+      cpomStructure.cpom.effectiveDateEnd?.getFullYear() ??
       cpomStructure.cpom.dateEnd?.getFullYear() ??
       null;
 
