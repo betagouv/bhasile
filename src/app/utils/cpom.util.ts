@@ -90,9 +90,22 @@ export const formatCpomName = (cpom: CpomApiType): string => {
 };
 
 export const computeCpomDates = (
-  cpom?: Partial<CpomApiType>
+  cpom?: Partial<CpomApiType> & { dateStart?: string; dateEnd?: string }
 ): { dateStart?: string; dateEnd?: string } => {
-  if (!cpom || !cpom.actesAdministratifs) {
+  if (!cpom) {
+    return {
+      dateStart: undefined,
+      dateEnd: undefined,
+    };
+  }
+
+  if (!cpom.actesAdministratifs) {
+    if (cpom.dateStart && cpom.dateEnd) {
+      return {
+        dateStart: cpom.dateStart,
+        dateEnd: cpom.dateEnd,
+      };
+    }
     return {
       dateStart: undefined,
       dateEnd: undefined,

@@ -125,7 +125,7 @@ export const createFakeCpoms = async (
           .map((departement) => departement.numero),
         actesAdministratifs: {
           create: {
-            key: `cpom-acte-${operateurIdStr}-${region}-${yearStart}-${faker.string.uuid()}`,
+            key: `cpom-acte-${operateurIdStr}-${region}-${yearStart}-${yearEnd}`,
             mimeType: "application/pdf",
             fileSize: faker.number.int({ min: 1000, max: 500000 }),
             originalName: `convention-cpom-${yearStart}-${yearEnd}.pdf`,
