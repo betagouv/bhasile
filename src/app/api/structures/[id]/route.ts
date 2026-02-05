@@ -6,6 +6,7 @@ import {
   divideFileUploads,
   StructureWithFileUploadsAndActivites,
 } from "../structure.service";
+import { structureLastCpom } from "../../cpoms/cpom.service";
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,7 +26,11 @@ export async function GET(request: NextRequest) {
     const structureWithDividedFileUploads = divideFileUploads(
       structureWithPresencesIndues
     );
-    return NextResponse.json(structureWithDividedFileUploads);
+    const lastCpom = await structureLastCpom(structure.id);
+    return NextResponse.json({
+      ...structureWithDividedFileUploads,
+      lastCpom,
+    });
   } catch (error) {
     console.error("Error in GET /api/structures/[id]", error);
     return NextResponse.json(
