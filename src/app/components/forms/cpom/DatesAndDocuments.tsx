@@ -22,7 +22,10 @@ export const DatesAndDocuments = () => {
   // We use a key to run the useEffect every time the dates change
   const actesDatesKey =
     actesAdministratifs
-      ?.map((a) => `${a?.startDate ?? ""}-${a?.endDate ?? ""}`)
+      ?.map(
+        (acteAdministratif) =>
+          `${acteAdministratif?.startDate ?? ""}-${acteAdministratif?.endDate ?? ""}`
+      )
       .join("|") ?? "";
 
   useEffect(() => {
