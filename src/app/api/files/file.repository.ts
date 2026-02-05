@@ -68,13 +68,13 @@ const deleteFileUploads = async (
   parentId: FileUploadParentId,
   category: "acteAdministratif" | "documentFinancier"
 ): Promise<void> => {
-  const whereClause =
+  const where =
     "structureDnaCode" in parentId
       ? { structureDnaCode: parentId.structureDnaCode }
       : { cpomId: parentId.cpomId };
 
   const allFileUploads = await tx.fileUpload.findMany({
-    where: whereClause,
+    where,
   });
 
   const fileUploadsToDelete = allFileUploads.filter((fileUpload) => {
