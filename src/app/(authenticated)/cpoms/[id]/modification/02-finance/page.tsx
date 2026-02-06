@@ -1,7 +1,9 @@
 "use client";
 
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { CpomTable } from "@/app/components/forms/finance/budget-tables/CpomTable";
@@ -18,8 +20,16 @@ import { FetchState } from "@/types/fetch-state.type";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
 
+const confirmationModal = createModal({
+  id: "confirmation-cpom-modal",
+  isOpenedByDefault: false,
+});
+
 export default function CpomModificationFinance() {
   const router = useRouter();
+
+  const searchParams = useSearchParams();
+  const isCreation = searchParams.get("isCreation") === "true";
 
   const { cpom, setCpom } = useCpomContext();
 
@@ -37,8 +47,7 @@ export default function CpomModificationFinance() {
     const result = await updateCpom(data, setCpom);
     if (typeof result === "object" && "cpomId" in result) {
       setFetchState("cpom-save", FetchState.IDLE);
-      //TODO: No success page yet
-      router.push(`/cpoms/${result.cpomId}/modification/03-confirmation`);
+      confirmationModal.open();
     } else {
       setFetchState("cpom-save", FetchState.ERROR);
       setBackendError(result);
@@ -49,7 +58,7 @@ export default function CpomModificationFinance() {
   const defaultValues = getCpomDefaultValues(cpom);
 
   useEffect(() => {
-    if (!cpom?.id) return;
+    if (!cpom?.id || !isCreation) return;
 
     window.history.pushState(null, "", window.location.href);
 
@@ -62,7 +71,7 @@ export default function CpomModificationFinance() {
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [router, cpom?.id]);
+  }, [router, cpom?.id, isCreation]);
 
   if (!cpom) {
     return null;
@@ -101,6 +110,28 @@ export default function CpomModificationFinance() {
           />
         )}
       </FormWrapper>
+      <confirmationModal.Component
+        title={
+          isCreation
+            ? "Vous avez créé un CPOM !"
+            : "Vous avez modifié un CPOM !"
+        }
+        buttons={[
+          {
+            doClosesModal: true,
+            children: "J’ai compris",
+            type: "button",
+            onClick: () => {
+              router.push(`/structures`);
+            },
+          },
+        ]}
+      >
+        <p>
+          Les données ont bien été enregistrées. Vous pourrez les retrouver au
+          sein des pages structures concernées par ce CPOM.
+        </p>
+      </confirmationModal.Component>
     </>
   );
 }
