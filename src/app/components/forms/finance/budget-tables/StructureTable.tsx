@@ -10,7 +10,6 @@ import {
 import { SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 
-import { AffectationTooltip } from "./AffectationTooltip";
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLines } from "./BudgetTableLines";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
