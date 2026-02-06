@@ -14,14 +14,14 @@ export const DateBar = ({ datePair }: Props): ReactElement => {
     setPercentage(percentage);
   }, [datePair]);
 
-  const isLessThan3Months = dayjs(datePair.endDate).diff(dayjs(), "month") < 3;
-  const isConventionExpiree = dayjs(datePair.endDate).isBefore(dayjs());
+  const isLessThan3Months = dayjs(datePair.dateEnd).diff(dayjs(), "month") < 3;
+  const isConventionExpiree = dayjs(datePair.dateEnd).isBefore(dayjs());
 
   return (
     <>
       <div className="flex-1 flex items-center">
         <span className="inline-block w-24 shrink-0">
-          {formatDate(datePair.startDate)}
+          {formatDate(datePair.dateStart)}
         </span>
         <div className="relative flex-1 bg-background-disabled-grey h-[10px] rounded-[5px] mr-4">
           <div
@@ -32,7 +32,7 @@ export const DateBar = ({ datePair }: Props): ReactElement => {
       </div>
       <div className="w-44 flex items-center">
         <span className="inline-block w-24 shrink-0">
-          {formatDate(datePair.endDate)}
+          {formatDate(datePair.dateEnd)}
         </span>
         {!isConventionExpiree && isLessThan3Months && (
           <div className="pl-2">
@@ -58,7 +58,7 @@ type Props = {
 };
 
 export type DatePair = {
-  startDate: string;
-  endDate: string;
+  dateStart: string;
+  dateEnd: string;
   label: string;
 };

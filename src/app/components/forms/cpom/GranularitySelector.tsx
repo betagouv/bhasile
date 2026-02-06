@@ -1,8 +1,6 @@
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { useController, useFormContext } from "react-hook-form";
 
-import { CpomGranularity } from "@/types/cpom.type";
-
 export const GranularitySelector = () => {
   const { control } = useFormContext();
 
@@ -25,24 +23,24 @@ export const GranularitySelector = () => {
             label: "Départementale",
             nativeInputProps: {
               ...field,
-              value: CpomGranularity.DEPARTEMENTALE,
-              checked: field.value === CpomGranularity.DEPARTEMENTALE,
+              value: "DEPARTEMENTALE",
+              checked: field.value === "DEPARTEMENTALE",
             },
           },
           {
             label: "Interdépartementale",
             nativeInputProps: {
               ...field,
-              value: CpomGranularity.INTERDEPARTEMENTALE,
-              checked: field.value === CpomGranularity.INTERDEPARTEMENTALE,
+              value: "INTERDEPARTEMENTALE",
+              checked: field.value === "INTERDEPARTEMENTALE",
             },
           },
           {
             label: "Régionale",
             nativeInputProps: {
               ...field,
-              value: CpomGranularity.REGIONALE,
-              checked: field.value === CpomGranularity.REGIONALE,
+              value: "REGIONALE",
+              checked: field.value === "REGIONALE",
             },
           },
         ]}

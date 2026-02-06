@@ -1,3 +1,4 @@
+import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
@@ -118,7 +119,7 @@ const getLines = (
         lines: [
           {
             name: "totalProduitsProposes",
-            label: "Total produits proposés",
+            label: "Total produits proposé",
             subLabel: "dont dotation État",
             disabledYearsStart: AUTORISEE_OPEN_YEAR,
           },
@@ -130,7 +131,7 @@ const getLines = (
           },
           {
             name: "totalChargesProposees",
-            label: "Total charges proposées",
+            label: "Total charges proposé",
             subLabel: "par l'opérateur",
             disabledYearsStart: AUTORISEE_OPEN_YEAR,
           },
@@ -228,7 +229,7 @@ const getLines = (
         },
         {
           name: "totalCharges",
-          label: "Total charges retenues",
+          label: "Total charges retenu",
           subLabel: "par l'autorité tarifaire",
           disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
         },

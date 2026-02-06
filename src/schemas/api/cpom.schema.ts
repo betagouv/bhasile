@@ -32,12 +32,8 @@ const cpomApiBareSchema = z.object({
   operateur: operateurApiSchema.optional(),
   operateurId: z.number().optional(),
   region: z.string().nullish(),
-  departements: z.array(z.number()).optional(),
-  granularity: z.enum([
-    CpomGranularity.DEPARTEMENTALE,
-    CpomGranularity.INTERDEPARTEMENTALE,
-    CpomGranularity.REGIONALE,
-  ]),
+  departements: z.array(z.string()).optional(),
+  granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
 });
 

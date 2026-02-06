@@ -7,8 +7,6 @@ import {
   zSafeDecimalsNullish,
   zSafeYear,
 } from "@/app/utils/zodCustomFields";
-import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
-import { CpomGranularity } from "@/types/cpom.type";
 
 import { operateurSchema } from "./operateur.schema";
 
@@ -31,7 +29,7 @@ const cpomMillesimeSchema = z.object({
   commentaire: z.string().nullish(),
 });
 
-const bareCpomSchema = z.object({
+const baseCpomSchema = z.object({
   id: zId(),
   name: z.string().nullish(),
   dateStart: optionalFrenchDateToISO(),
@@ -39,12 +37,8 @@ const bareCpomSchema = z.object({
   operateur: operateurSchema.optional(),
   operateurId: zId(),
   region: z.string().nullish(),
-  departements: z.array(zSafeDecimals()).optional(),
-  granularity: z.enum([
-    CpomGranularity.DEPARTEMENTALE,
-    CpomGranularity.INTERDEPARTEMENTALE,
-    CpomGranularity.REGIONALE,
-  ]),
+  departements: z.array(z.string()).optional(),
+  granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
   cpomMillesimes: z.array(cpomMillesimeSchema).optional(),
 });
 
@@ -52,10 +46,10 @@ export const cpomStructureSchema = z.object({
   dateStart: nullishFrenchDateToISO(),
   dateEnd: nullishFrenchDateToISO(),
   structureId: zId(),
-  cpom: bareCpomSchema.optional(),
+  cpom: baseCpomSchema.optional(),
 });
 
-export const cpomSchema = bareCpomSchema
+export const cpomSchema = baseCpomSchema
   .extend({
     structures: z.array(cpomStructureSchema),
   })

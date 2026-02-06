@@ -1,5 +1,7 @@
-export enum CpomGranularity {
-  DEPARTEMENTALE = "DEPARTEMENTALE",
-  INTERDEPARTEMENTALE = "INTERDEPARTEMENTALE",
-  REGIONALE = "REGIONALE",
-}
+export const CpomGranularity = [
+  "DEPARTEMENTALE",
+  "INTERDEPARTEMENTALE",
+  "REGIONALE",
+] as const;
+
+export type CpomGranularity = (typeof CpomGranularity)[number];

@@ -9,7 +9,6 @@ import { StructureProvider } from "./_context/StructureContext";
 
 async function getStructure(id: string): Promise<StructureApiType> {
   try {
-    // Use NEXT_URL instead of NEXT_PUBLIC_BASE_URL
     const baseUrl = process.env.NEXT_URL || "";
     const result = await fetch(`${baseUrl}/api/structures/${id}`, {
       cache: "no-store",

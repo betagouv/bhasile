@@ -61,7 +61,6 @@ export const createOrUpdateCpom = async (
       },
     });
 
-    console.log(upsertedCpom);
     const cpomId = upsertedCpom.id;
 
     await createOrUpdateCpomStructures(tx, cpom.structures, cpomId);

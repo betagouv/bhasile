@@ -38,9 +38,7 @@ export function useCpomContext(): CpomContextType & {
   const context = useContext(CpomContextInternal);
 
   if (context === undefined) {
-    throw new Error(
-      "useStructureContext must be used within a StructureProvider"
-    );
+    throw new Error("useCpomContext must be used within a CpomProvider");
   }
 
   if (context.cpom === null) {

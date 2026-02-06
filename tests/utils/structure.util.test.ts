@@ -305,7 +305,7 @@ describe("structure util", () => {
                   year: 2025,
                 },
               ],
-              granularity: CpomGranularity.DEPARTEMENTALE,
+              granularity: "DEPARTEMENTALE",
             },
           },
         ],
@@ -334,7 +334,7 @@ describe("structure util", () => {
               name: "CPOM Test",
               dateStart: "2024-01-01T00:00:00.000Z",
               dateEnd: "2024-12-31T23:59:59.999Z",
-              granularity: CpomGranularity.DEPARTEMENTALE,
+              granularity: "DEPARTEMENTALE",
             },
           },
         ],
@@ -398,7 +398,7 @@ describe("structure util", () => {
                   year: 2024,
                 },
               ],
-              granularity: CpomGranularity.DEPARTEMENTALE,
+              granularity: "DEPARTEMENTALE",
             },
           },
           {
@@ -418,7 +418,7 @@ describe("structure util", () => {
                   year: 2025,
                 },
               ],
-              granularity: CpomGranularity.DEPARTEMENTALE,
+              granularity: "DEPARTEMENTALE",
             },
           },
         ],
@@ -462,7 +462,7 @@ describe("structure util", () => {
               name: "CPOM Test",
               dateStart: "2025-01-01T00:00:00.000Z",
               dateEnd: null as unknown as string,
-              granularity: CpomGranularity.DEPARTEMENTALE,
+              granularity: "DEPARTEMENTALE",
             },
           },
         ],
@@ -498,7 +498,7 @@ describe("structure util", () => {
               id: 1,
               dateStart: "2024-01-01T00:00:00.000Z",
               dateEnd: "2026-12-31T23:59:59.999Z",
-              granularity: CpomGranularity.DEPARTEMENTALE,
+              granularity: "DEPARTEMENTALE",
             },
           },
         ],
@@ -533,7 +533,7 @@ describe("structure util", () => {
               id: 1,
               dateStart: "2025-01-01T00:00:00.000Z",
               dateEnd: "2025-12-31T23:59:59.999Z",
-              granularity: CpomGranularity.DEPARTEMENTALE,
+              granularity: "DEPARTEMENTALE",
             },
           },
         ],
@@ -564,7 +564,7 @@ describe("structure util", () => {
               id: 1,
               dateStart: "2024-01-01T00:00:00.000Z",
               dateEnd: "2024-12-31T23:59:59.999Z",
-              granularity: CpomGranularity.DEPARTEMENTALE,
+              granularity: "DEPARTEMENTALE",
             },
           },
         ],
@@ -608,7 +608,7 @@ describe("structure util", () => {
               id: 1,
               dateStart: "2025-01-01T00:00:00.000Z",
               dateEnd: "2025-12-31T23:59:59.999Z",
-              granularity: CpomGranularity.DEPARTEMENTALE,
+              granularity: "DEPARTEMENTALE",
             },
           },
         ],
@@ -758,7 +758,7 @@ describe("structure util", () => {
             name: "CPOM Test",
             dateStart: "2024-01-01T00:00:00.000Z",
             dateEnd: "2026-12-31T23:59:59.999Z",
-            granularity: CpomGranularity.DEPARTEMENTALE,
+            granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
                 id: 1,
@@ -810,7 +810,7 @@ describe("structure util", () => {
             name: "CPOM Test",
             dateStart: "2024-01-01T00:00:00.000Z",
             dateEnd: "2026-12-31T23:59:59.999Z",
-            granularity: CpomGranularity.DEPARTEMENTALE,
+            granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
                 id: 1,
@@ -852,7 +852,7 @@ describe("structure util", () => {
             name: "CPOM Test 1",
             dateStart: "2024-01-01T00:00:00.000Z",
             dateEnd: "2026-12-31T23:59:59.999Z",
-            granularity: CpomGranularity.DEPARTEMENTALE,
+            granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
                 id: 1,
@@ -872,7 +872,7 @@ describe("structure util", () => {
             name: "CPOM Test 2",
             dateStart: "2024-01-01T00:00:00.000Z",
             dateEnd: "2026-12-31T23:59:59.999Z",
-            granularity: CpomGranularity.DEPARTEMENTALE,
+            granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
                 id: 2,
@@ -907,7 +907,7 @@ describe("structure util", () => {
             name: "CPOM Test 1",
             dateStart: "2024-01-01T00:00:00.000Z",
             dateEnd: "2024-12-31T23:59:59.999Z",
-            granularity: CpomGranularity.DEPARTEMENTALE,
+            granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
                 id: 1,
@@ -927,7 +927,7 @@ describe("structure util", () => {
             name: "CPOM Test 2",
             dateStart: "2025-01-01T00:00:00.000Z",
             dateEnd: "2026-12-31T23:59:59.999Z",
-            granularity: CpomGranularity.DEPARTEMENTALE,
+            granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
                 id: 2,
@@ -963,7 +963,7 @@ describe("structure util", () => {
             dateStart: "2024-01-01T00:00:00.000Z",
             dateEnd: "2024-12-31T23:59:59.999Z",
             cpomMillesimes: undefined,
-            granularity: CpomGranularity.DEPARTEMENTALE,
+            granularity: "DEPARTEMENTALE",
           },
         },
         {
@@ -977,7 +977,7 @@ describe("structure util", () => {
             name: "CPOM Test 2",
             dateStart: "2025-01-01T00:00:00.000Z",
             dateEnd: "2026-12-31T23:59:59.999Z",
-            granularity: CpomGranularity.DEPARTEMENTALE,
+            granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
                 id: 2,
@@ -1012,7 +1012,7 @@ describe("structure util", () => {
             name: "CPOM Test",
             dateStart: "2024-01-01T00:00:00.000Z",
             dateEnd: "2026-12-31T23:59:59.999Z",
-            granularity: CpomGranularity.DEPARTEMENTALE,
+            granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
                 id: 1,
@@ -1055,7 +1055,7 @@ describe("structure util", () => {
             name: "CPOM Test",
             dateStart: "2024-01-01T00:00:00.000Z",
             dateEnd: "2026-12-31T23:59:59.999Z",
-            granularity: CpomGranularity.DEPARTEMENTALE,
+            granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
                 id: 1,

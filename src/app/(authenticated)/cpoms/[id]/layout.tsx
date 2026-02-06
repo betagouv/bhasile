@@ -8,7 +8,6 @@ import { CpomProvider } from "./_context/CpomContext";
 
 async function getCpom(id: string): Promise<CpomApiType> {
   try {
-    // Use NEXT_URL instead of NEXT_PUBLIC_BASE_URL
     const baseUrl = process.env.NEXT_URL || "";
     const result = await fetch(`${baseUrl}/api/cpoms/${id}`, {
       cache: "no-store",

@@ -116,11 +116,11 @@ export const createFakeCpoms = async (
         operateurId: Number(operateurIdStr),
         dateStart,
         dateEnd,
-        granularity: CpomGranularity.REGIONALE,
+        granularity: "REGIONALE",
         region,
         departements: departements
           .filter((departement) => departement.region === region)
-          .map((departement) => Number(departement.numero)),
+          .map((departement) => departement.numero),
         structures: {
           create: selectedStructures.map((structureId) => {
             // 10% chance that a structure joins or leaves the CPOM in the middle

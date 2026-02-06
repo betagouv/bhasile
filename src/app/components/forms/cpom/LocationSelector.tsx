@@ -5,7 +5,6 @@ import { useFormContext } from "react-hook-form";
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { DEPARTEMENTS, REGIONS_WITHOUT_CORSE } from "@/constants";
-import { CpomGranularity } from "@/types/cpom.type";
 
 import { DepartementsSelector } from "../DepartementsSelector";
 
@@ -79,7 +78,7 @@ export const LocationSelector = () => {
           </option>
         ))}
       </SelectWithValidation>
-      {granularity === CpomGranularity.DEPARTEMENTALE && (
+      {granularity === "DEPARTEMENTALE" && (
         <Select
           label="Département"
           nativeSelectProps={{
@@ -98,7 +97,7 @@ export const LocationSelector = () => {
           ))}
         </Select>
       )}
-      {granularity === CpomGranularity.INTERDEPARTEMENTALE && (
+      {granularity === "INTERDEPARTEMENTALE" && (
         <DepartementsSelector
           departements={departementsOfRegion}
           selectedDepartements={departements}

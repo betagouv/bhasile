@@ -156,15 +156,15 @@ export const getYearRange = ({
 };
 
 export const getElapsedPercentage = ({
-  startDate,
-  endDate,
+  dateStart,
+  dateEnd,
 }: {
-  startDate: string;
-  endDate: string;
+  dateStart: string;
+  dateEnd: string;
 }): number => {
   const now = dayjs();
-  const start = dayjs(startDate);
-  const end = dayjs(endDate);
+  const start = dayjs(dateStart);
+  const end = dayjs(dateEnd);
 
   if (now.isBefore(start)) {
     return 0;
