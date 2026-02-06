@@ -21,7 +21,7 @@ export const UploadsByCategoryFile = ({
   avenantCanExtendDateEnd = false,
   categoryShortName,
 }: UploadsByCategoryFileProps) => {
-  const { control, register, watch } = useFormContext();
+  const { control, register, watch, setValue } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
     name: "actesAdministratifs",
@@ -33,7 +33,7 @@ export const UploadsByCategoryFile = ({
   const watchFieldName = `actesAdministratifs.${index}.id`;
   const mainFileId = watch(watchFieldName);
 
-  const [showEndDateInput, setShowEndDateInput] = useState<number[]>([]);
+  const [showEndDateInput, setShowEndDateInput] = useState<string[]>([]);
 
   let avenants = fields.filter(
     (field) =>
@@ -149,7 +149,7 @@ export const UploadsByCategoryFile = ({
                         className="w-full mb-0"
                         type="date"
                       />
-                      {showEndDateInput.includes(avenantIndex) && (
+                      {showEndDateInput.includes(typedAvenant.uuid) && (
                         <InputWithValidation
                           name={`actesAdministratifs.${avenantIndex}.endDate`}
                           control={control}
@@ -165,20 +165,28 @@ export const UploadsByCategoryFile = ({
                           {
                             label: `Cet avenant modifie la date de fin du ${categoryShortName}.`,
                             nativeInputProps: {
-                              name: `actesAdministratifs.${avenantIndex}.showEndDateInput`,
+                              name: "",
                               value: "showEndDateInput",
-                              checked: showEndDateInput.includes(avenantIndex),
+                              checked: showEndDateInput.includes(
+                                typedAvenant.uuid
+                              ),
                               onChange: () => {
-                                if (showEndDateInput.includes(avenantIndex)) {
+                                if (
+                                  showEndDateInput.includes(typedAvenant.uuid)
+                                ) {
                                   setShowEndDateInput(
                                     showEndDateInput.filter(
-                                      (index) => index !== avenantIndex
+                                      (uuid) => uuid !== typedAvenant.uuid
                                     )
+                                  );
+                                  setValue(
+                                    `actesAdministratifs.${avenantIndex}.endDate`,
+                                    undefined
                                   );
                                 } else {
                                   setShowEndDateInput([
                                     ...showEndDateInput,
-                                    avenantIndex,
+                                    typedAvenant.uuid,
                                   ]);
                                 }
                               },
@@ -241,5 +249,5 @@ type UploadsByCategoryFileProps = {
   categoryShortName: string;
   handleDeleteField: (index: number) => void;
   canAddAvenant: boolean;
-  avenantCanExtendDateEnd: boolean;
+  avenantCanExtendDateEnd?: boolean;
 };
