@@ -239,6 +239,7 @@ export const findOne = async (id: number): Promise<Structure> => {
         include: {
           cpom: {
             include: {
+              actesAdministratifs: true,
               cpomMillesimes: {
                 orderBy: {
                   year: "desc",
@@ -380,13 +381,13 @@ const updateOne = async (
       await updateFileUploads(
         tx,
         actesAdministratifs,
-        structure.dnaCode,
+        { structureDnaCode: structure.dnaCode },
         "acteAdministratif"
       );
       await updateFileUploads(
         tx,
         documentsFinanciers,
-        structure.dnaCode,
+        { structureDnaCode: structure.dnaCode },
         "documentFinancier"
       );
       await createOrUpdateControles(tx, controles, structure.dnaCode);

@@ -59,6 +59,8 @@ export const useStructuresSelection = ({
 
     if (operateurName && departements && types) {
       fetchStructures();
+    } else {
+      setStructures(undefined);
     }
   }, [operateurName, departements, types]);
 

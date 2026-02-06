@@ -11,7 +11,7 @@ import { createFakeFileUpload } from "./file-upload.seed";
 export type EvaluationWithFileUploads = Evaluation & {
   fileUploads: Omit<
     FileUpload,
-    "id" | "controleId" | "evaluationId" | "structureDnaCode"
+    "id" | "controleId" | "evaluationId" | "structureDnaCode" | "cpomId"
   >[];
 };
 

@@ -56,16 +56,25 @@ export const deleteOneByKey = async (
   });
 };
 
+type FileUploadParentId =
+  | { structureDnaCode: string; cpomId?: never }
+  | { structureDnaCode?: never; cpomId: number };
+
 const deleteFileUploads = async (
   tx: PrismaTransaction,
   fileUploadsToKeep: Partial<
     ActeAdministratifApiType | DocumentFinancierApiType
   >[],
-  structureDnaCode: string,
+  parentId: FileUploadParentId,
   category: "acteAdministratif" | "documentFinancier"
 ): Promise<void> => {
+  const where =
+    "structureDnaCode" in parentId
+      ? { structureDnaCode: parentId.structureDnaCode }
+      : { cpomId: parentId.cpomId };
+
   const allFileUploads = await tx.fileUpload.findMany({
-    where: { structureDnaCode: structureDnaCode },
+    where,
   });
 
   const fileUploadsToDelete = allFileUploads.filter((fileUpload) => {
@@ -103,14 +112,24 @@ export const updateFileUploads = async (
   fileUploads:
     | Partial<ActeAdministratifApiType | DocumentFinancierApiType>[]
     | undefined,
-  structureDnaCode: string,
+  parentId: FileUploadParentId,
   category: "acteAdministratif" | "documentFinancier"
 ): Promise<void> => {
   if (!fileUploads || fileUploads.length === 0) {
     return;
   }
 
-  await deleteFileUploads(tx, fileUploads, structureDnaCode, category);
+  await deleteFileUploads(tx, fileUploads, parentId, category);
+
+  const parentData =
+    "structureDnaCode" in parentId
+      ? { structureDnaCode: parentId.structureDnaCode, cpomId: null }
+      : { structureDnaCode: null, cpomId: parentId.cpomId };
+
+  const parentLabel =
+    "structureDnaCode" in parentId
+      ? `structure "${parentId.structureDnaCode}"`
+      : `cpom "${parentId.cpomId}"`;
 
   await Promise.all(
     (fileUploads || []).map(async (fileUpload) => {
@@ -123,7 +142,7 @@ export const updateFileUploads = async (
       });
 
       if (!existingFileUpload) {
-        const message = `FileUpload with key "${fileUpload.key}" not found for structure "${structureDnaCode}" (category: ${category})`;
+        const message = `FileUpload with key "${fileUpload.key}" not found for ${parentLabel} (category: ${category})`;
         console.warn(message);
         Sentry.captureMessage(message, {
           level: "warning",
@@ -133,7 +152,7 @@ export const updateFileUploads = async (
           },
           extra: {
             key: fileUpload.key,
-            structureDnaCode,
+            parentId,
             category,
           },
         });
@@ -148,7 +167,7 @@ export const updateFileUploads = async (
           startDate: fileUpload.startDate,
           endDate: fileUpload.endDate,
           categoryName: fileUpload.categoryName,
-          structureDnaCode,
+          ...parentData,
           parentFileUploadId: fileUpload.parentFileUploadId,
           controleId: fileUpload.controleId,
           evaluationId: fileUpload.evaluationId,

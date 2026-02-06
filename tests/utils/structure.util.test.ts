@@ -296,8 +296,14 @@ describe("structure util", () => {
             cpom: {
               id: 1,
               name: "CPOM Test",
-              dateStart: "2024-01-01T00:00:00.000Z",
-              dateEnd: "2026-12-31T23:59:59.999Z",
+              actesAdministratifs: [
+                {
+                  key: "test-key",
+                  startDate: "2024-01-01T00:00:00.000Z",
+                  endDate: "2026-12-31T23:59:59.999Z",
+                  category: "CPOM",
+                },
+              ],
               cpomMillesimes: [
                 {
                   id: 1,
@@ -331,8 +337,14 @@ describe("structure util", () => {
             cpom: {
               id: 1,
               name: "CPOM Test",
-              dateStart: "2024-01-01T00:00:00.000Z",
-              dateEnd: "2024-12-31T23:59:59.999Z",
+              actesAdministratifs: [
+                {
+                  key: "test-key",
+                  startDate: "2024-01-01T00:00:00.000Z",
+                  endDate: "2024-12-31T23:59:59.999Z",
+                  category: "CPOM",
+                },
+              ],
               granularity: "DEPARTEMENTALE",
             },
           },
@@ -389,8 +401,14 @@ describe("structure util", () => {
             cpom: {
               id: 1,
               name: "CPOM Test 1",
-              dateStart: "2024-01-01T00:00:00.000Z",
-              dateEnd: "2024-12-31T23:59:59.999Z",
+              actesAdministratifs: [
+                {
+                  key: "test-key",
+                  startDate: "2024-01-01T00:00:00.000Z",
+                  endDate: "2024-12-31T23:59:59.999Z",
+                  category: "CPOM",
+                },
+              ],
               cpomMillesimes: [
                 {
                   id: 1,
@@ -409,8 +427,14 @@ describe("structure util", () => {
             cpom: {
               id: 2,
               name: "CPOM Test 2",
-              dateStart: "2025-01-01T00:00:00.000Z",
-              dateEnd: "2026-12-31T23:59:59.999Z",
+              actesAdministratifs: [
+                {
+                  key: "test-key",
+                  startDate: "2025-01-01T00:00:00.000Z",
+                  endDate: "2026-12-31T23:59:59.999Z",
+                  category: "CPOM",
+                },
+              ],
               cpomMillesimes: [
                 {
                   id: 2,
@@ -459,8 +483,14 @@ describe("structure util", () => {
             cpom: {
               id: 1,
               name: "CPOM Test",
-              dateStart: "2025-01-01T00:00:00.000Z",
-              dateEnd: null as unknown as string,
+              actesAdministratifs: [
+                {
+                  key: "test-key",
+                  startDate: "2025-01-01T00:00:00.000Z",
+                  endDate: undefined,
+                  category: "CPOM",
+                },
+              ],
               granularity: "DEPARTEMENTALE",
             },
           },
@@ -495,8 +525,14 @@ describe("structure util", () => {
             dateEnd: "2025-12-31T23:59:59.999Z",
             cpom: {
               id: 1,
-              dateStart: "2024-01-01T00:00:00.000Z",
-              dateEnd: "2026-12-31T23:59:59.999Z",
+              actesAdministratifs: [
+                {
+                  key: "test-key",
+                  startDate: "2024-01-01T00:00:00.000Z",
+                  endDate: "2026-12-31T23:59:59.999Z",
+                  category: "CPOM",
+                },
+              ],
               granularity: "DEPARTEMENTALE",
             },
           },
@@ -530,8 +566,14 @@ describe("structure util", () => {
             dateEnd: null,
             cpom: {
               id: 1,
-              dateStart: "2025-01-01T00:00:00.000Z",
-              dateEnd: "2025-12-31T23:59:59.999Z",
+              actesAdministratifs: [
+                {
+                  key: "test-key",
+                  startDate: "2025-01-01T00:00:00.000Z",
+                  endDate: "2025-12-31T23:59:59.999Z",
+                  category: "CPOM",
+                },
+              ],
               granularity: "DEPARTEMENTALE",
             },
           },
@@ -561,8 +603,14 @@ describe("structure util", () => {
             dateEnd: "2024-12-31T23:59:59.999Z",
             cpom: {
               id: 1,
-              dateStart: "2024-01-01T00:00:00.000Z",
-              dateEnd: "2024-12-31T23:59:59.999Z",
+              actesAdministratifs: [
+                {
+                  key: "test-key",
+                  startDate: "2024-01-01T00:00:00.000Z",
+                  endDate: "2024-12-31T23:59:59.999Z",
+                  category: "CPOM",
+                },
+              ],
               granularity: "DEPARTEMENTALE",
             },
           },
@@ -605,8 +653,14 @@ describe("structure util", () => {
             dateEnd: null,
             cpom: {
               id: 1,
-              dateStart: "2025-01-01T00:00:00.000Z",
-              dateEnd: "2025-12-31T23:59:59.999Z",
+              actesAdministratifs: [
+                {
+                  key: "test-key",
+                  startDate: "2025-01-01T00:00:00.000Z",
+                  endDate: "2025-12-31T23:59:59.999Z",
+                  category: "CPOM",
+                },
+              ],
               granularity: "DEPARTEMENTALE",
             },
           },
@@ -755,8 +809,14 @@ describe("structure util", () => {
           cpom: {
             id: 1,
             name: "CPOM Test",
-            dateStart: "2024-01-01T00:00:00.000Z",
-            dateEnd: "2026-12-31T23:59:59.999Z",
+            actesAdministratifs: [
+              {
+                key: "test-key",
+                startDate: "2024-01-01T00:00:00.000Z",
+                endDate: "2026-12-31T23:59:59.999Z",
+                category: "CPOM",
+              },
+            ],
             granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
@@ -807,8 +867,14 @@ describe("structure util", () => {
           cpom: {
             id: 1,
             name: "CPOM Test",
-            dateStart: "2024-01-01T00:00:00.000Z",
-            dateEnd: "2026-12-31T23:59:59.999Z",
+            actesAdministratifs: [
+              {
+                key: "test-key",
+                startDate: "2024-01-01T00:00:00.000Z",
+                endDate: "2026-12-31T23:59:59.999Z",
+                category: "CPOM",
+              },
+            ],
             granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
@@ -849,8 +915,14 @@ describe("structure util", () => {
           cpom: {
             id: 1,
             name: "CPOM Test 1",
-            dateStart: "2024-01-01T00:00:00.000Z",
-            dateEnd: "2026-12-31T23:59:59.999Z",
+            actesAdministratifs: [
+              {
+                key: "test-key",
+                startDate: "2024-01-01T00:00:00.000Z",
+                endDate: "2026-12-31T23:59:59.999Z",
+                category: "CPOM",
+              },
+            ],
             granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
@@ -869,8 +941,14 @@ describe("structure util", () => {
           cpom: {
             id: 2,
             name: "CPOM Test 2",
-            dateStart: "2024-01-01T00:00:00.000Z",
-            dateEnd: "2026-12-31T23:59:59.999Z",
+            actesAdministratifs: [
+              {
+                key: "test-key",
+                startDate: "2024-01-01T00:00:00.000Z",
+                endDate: "2026-12-31T23:59:59.999Z",
+                category: "CPOM",
+              },
+            ],
             granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
@@ -904,8 +982,14 @@ describe("structure util", () => {
           cpom: {
             id: 1,
             name: "CPOM Test 1",
-            dateStart: "2024-01-01T00:00:00.000Z",
-            dateEnd: "2024-12-31T23:59:59.999Z",
+            actesAdministratifs: [
+              {
+                key: "test-key",
+                startDate: "2024-01-01T00:00:00.000Z",
+                endDate: "2024-12-31T23:59:59.999Z",
+                category: "CPOM",
+              },
+            ],
             granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
@@ -924,8 +1008,14 @@ describe("structure util", () => {
           cpom: {
             id: 2,
             name: "CPOM Test 2",
-            dateStart: "2025-01-01T00:00:00.000Z",
-            dateEnd: "2026-12-31T23:59:59.999Z",
+            actesAdministratifs: [
+              {
+                key: "test-key",
+                startDate: "2025-01-01T00:00:00.000Z",
+                endDate: "2026-12-31T23:59:59.999Z",
+                category: "CPOM",
+              },
+            ],
             granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
@@ -959,8 +1049,14 @@ describe("structure util", () => {
           cpom: {
             id: 1,
             name: "CPOM Test 1",
-            dateStart: "2024-01-01T00:00:00.000Z",
-            dateEnd: "2024-12-31T23:59:59.999Z",
+            actesAdministratifs: [
+              {
+                key: "test-key",
+                startDate: "2024-01-01T00:00:00.000Z",
+                endDate: "2024-12-31T23:59:59.999Z",
+                category: "CPOM",
+              },
+            ],
             cpomMillesimes: undefined,
             granularity: "DEPARTEMENTALE",
           },
@@ -974,8 +1070,14 @@ describe("structure util", () => {
           cpom: {
             id: 2,
             name: "CPOM Test 2",
-            dateStart: "2025-01-01T00:00:00.000Z",
-            dateEnd: "2026-12-31T23:59:59.999Z",
+            actesAdministratifs: [
+              {
+                key: "test-key",
+                startDate: "2025-01-01T00:00:00.000Z",
+                endDate: "2026-12-31T23:59:59.999Z",
+                category: "CPOM",
+              },
+            ],
             granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
@@ -1009,8 +1111,14 @@ describe("structure util", () => {
           cpom: {
             id: 1,
             name: "CPOM Test",
-            dateStart: "2024-01-01T00:00:00.000Z",
-            dateEnd: "2026-12-31T23:59:59.999Z",
+            actesAdministratifs: [
+              {
+                key: "test-key",
+                startDate: "2024-01-01T00:00:00.000Z",
+                endDate: "2026-12-31T23:59:59.999Z",
+                category: "CPOM",
+              },
+            ],
             granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {
@@ -1052,8 +1160,14 @@ describe("structure util", () => {
           cpom: {
             id: 1,
             name: "CPOM Test",
-            dateStart: "2024-01-01T00:00:00.000Z",
-            dateEnd: "2026-12-31T23:59:59.999Z",
+            actesAdministratifs: [
+              {
+                key: "test-key",
+                startDate: "2024-01-01T00:00:00.000Z",
+                endDate: "2026-12-31T23:59:59.999Z",
+                category: "CPOM",
+              },
+            ],
             granularity: "DEPARTEMENTALE",
             cpomMillesimes: [
               {

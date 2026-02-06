@@ -14,8 +14,8 @@ import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useCpom } from "@/app/hooks/useCpom";
+import { getCpomDefaultValues } from "@/app/utils/cpom.util";
 import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
-import { CpomGranularity } from "@/types/cpom.type";
 import { FetchState } from "@/types/fetch-state.type";
 
 export default function CpomAjoutIdentification() {
@@ -23,19 +23,7 @@ export default function CpomAjoutIdentification() {
 
   const { addCpom } = useCpom();
 
-  const defaultValues = {
-    name: "",
-    structures: [],
-    dateStart: undefined,
-    dateEnd: undefined,
-    operateur: {
-      id: undefined,
-      name: undefined,
-    },
-    granularity: "DEPARTEMENTALE" as CpomGranularity,
-    region: undefined,
-    departements: [],
-  };
+  const defaultValues = getCpomDefaultValues();
 
   const { getFetchState, setFetchState } = useFetchState();
   const saveState = getFetchState("cpom-save");
@@ -46,10 +34,13 @@ export default function CpomAjoutIdentification() {
 
   const handleSubmit = async (data: CpomFormValues) => {
     setFetchState("cpom-save", FetchState.LOADING);
+
     const result = await addCpom(data);
     if (typeof result === "object" && "cpomId" in result) {
       setFetchState("cpom-save", FetchState.IDLE);
-      router.push(`/cpoms/${result.cpomId}/modification/02-finance`);
+      router.push(
+        `/cpoms/${result.cpomId}/modification/02-finance?isCreation=true`
+      );
     } else {
       setFetchState("cpom-save", FetchState.ERROR);
       setBackendError(result);
@@ -64,6 +55,7 @@ export default function CpomAjoutIdentification() {
         nextTitle="Analyse financière"
         stepCount={2}
         title="Identification du cpom"
+        className="w-1/2"
       />
       <FormWrapper
         schema={cpomSchema}

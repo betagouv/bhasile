@@ -14,6 +14,7 @@ import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useCpom } from "@/app/hooks/useCpom";
+import { getCpomDefaultValues } from "@/app/utils/cpom.util";
 import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
@@ -56,6 +57,8 @@ export default function CpomModificationIdentification() {
     return null;
   }
 
+  const defaultValues = getCpomDefaultValues(cpom);
+
   return (
     <>
       <Stepper
@@ -63,10 +66,11 @@ export default function CpomModificationIdentification() {
         nextTitle="Analyse financière"
         stepCount={2}
         title="Identification du cpom"
+        className="w-1/2"
       />
       <FormWrapper
         schema={cpomSchema}
-        defaultValues={cpom}
+        defaultValues={defaultValues}
         submitButtonText="Étape suivante"
         onSubmit={handleSubmit}
         availableFooterButtons={[FooterButtonType.SUBMIT]}
