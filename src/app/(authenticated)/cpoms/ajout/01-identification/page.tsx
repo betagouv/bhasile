@@ -53,6 +53,7 @@ export default function CpomAjoutIdentification() {
         nextTitle="Analyse financière"
         stepCount={2}
         title="Identification du cpom"
+        className="w-1/2"
       />
       <FormWrapper
         schema={cpomSchema}

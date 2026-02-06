@@ -49,7 +49,7 @@ export const DepartementsSelector = ({
         <Button
           onClick={handleTogglePanel}
           disabled={departements.length === 0}
-          className="bg-contrast-grey text-black font-normal border-b-2 border-b-black w-full rounded-t-md "
+          className="relative bg-contrast-grey text-black font-normal border-b-2 border-b-black w-full rounded-t-md "
           aria-labelledby="departementsSelector-label"
           aria-expanded={isOpen}
           aria-haspopup="listbox"
@@ -57,6 +57,7 @@ export const DepartementsSelector = ({
           {selectedDepartements.length > 0
             ? selectedDepartements.join(", ")
             : "Sélectionner des départements"}
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 fr-icon-arrow-down-s-line fr-icon--sm" />
         </Button>
         {isOpen && (
           <div
