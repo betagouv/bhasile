@@ -128,7 +128,7 @@ export default function CpomModificationFinance() {
         ]}
       >
         <p>
-          Les données ont bien été enregistrées. vous pourrez les retrouver au
+          Les données ont bien été enregistrées. Vous pourrez les retrouver au
           sein des pages structures concernées par ce CPOM.
         </p>
       </confirmationModal.Component>
