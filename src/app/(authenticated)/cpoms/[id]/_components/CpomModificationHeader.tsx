@@ -11,6 +11,7 @@ export const CpomModificationHeader = (): ReactElement | null => {
   const { cpom } = useCpomContext();
 
   const years = `${getYearFromDate(computeCpomDates(cpom).dateStart)} - ${getYearFromDate(computeCpomDates(cpom).dateEnd)}`;
+
   return cpom ? (
     <div className="sticky top-0 z-2 bg-lifted-grey">
       <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">

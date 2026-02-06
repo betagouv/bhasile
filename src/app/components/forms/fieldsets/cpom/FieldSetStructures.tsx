@@ -13,7 +13,7 @@ export const FieldSetStructures = () => {
 
   const dateStart = watch("dateStart");
   const dateEnd = watch("dateEnd");
-  console.log("departements", departements);
+
   const { structures } = useStructuresSelection({
     // We only fetch the structures if dateStart and dateEnd are defined
     operateurName: dateStart && dateEnd ? operateur.name : undefined,
