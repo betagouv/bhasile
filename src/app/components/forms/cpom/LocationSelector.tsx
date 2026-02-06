@@ -34,6 +34,9 @@ export const LocationSelector = () => {
   const firstDepartement = useMemo(() => departements[0], [departements]);
   useEffect(() => {
     if (granularity === "DEPARTEMENTALE") {
+      if (departementLength === 0) {
+        return;
+      }
       if (
         departementLength > 1 ||
         DEPARTEMENTS.find(
@@ -81,8 +84,6 @@ export const LocationSelector = () => {
       });
     }
   };
-
-  console.log("departements", departements);
 
   return (
     <div className="grid grid-cols-3 gap-6">
