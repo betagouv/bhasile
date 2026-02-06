@@ -1,7 +1,7 @@
 "use client";
 
 import { useFetchState } from "@/app/context/FetchStateContext";
-import { PLACE_ASILE_CONTACT_EMAIL } from "@/constants";
+import { BHASILE_CONTACT_EMAIL } from "@/constants";
 import { FetchState } from "@/types/fetch-state.type";
 
 export const AutoSaveErrorToast = () => {
@@ -24,7 +24,7 @@ export const AutoSaveErrorToast = () => {
         Votre avancée n’a pas pu être sauvegardée, vérifiez votre connexion. Si
         cela persiste,{" "}
         <a
-          href={`mailto:${PLACE_ASILE_CONTACT_EMAIL}`}
+          href={`mailto:${BHASILE_CONTACT_EMAIL}`}
           target="_blank"
           rel="noopener noreferrer"
           className="underline"
