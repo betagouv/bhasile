@@ -30,7 +30,7 @@ export const getStructureStaticTableLines = (
             colored: true,
           },
           {
-            name: "resultatNetRetenuParAutoriteTarifaire",
+            name: "resultatNet",
             label: "Résultat net retenu",
             subLabel: "par l'autorité tarifaire",
             colored: true,

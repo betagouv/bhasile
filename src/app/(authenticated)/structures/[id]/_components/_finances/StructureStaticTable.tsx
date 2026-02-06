@@ -31,12 +31,8 @@ export const StructureStaticTable = (): ReactElement => {
         budget.totalCharges
       ),
       resultatNetProposeParOperateur: computeResultatNet(
-        budget.totalProduits,
-        budget.totalCharges
-      ),
-      resultatNetRetenuParAutoriteTarifaire: computeResultatNet(
-        budget.totalProduits,
-        budget.totalCharges
+        budget.totalProduitsProposes,
+        budget.totalChargesProposees
       ),
     };
   });
