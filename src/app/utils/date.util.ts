@@ -12,6 +12,11 @@ export const formatDate = (
   if (!date) {
     return "N/D";
   }
+  if (typeof date === "string") {
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+      return date;
+    }
+  }
   const dateObject = date instanceof Date ? date : new Date(date);
   return dateObject.toLocaleDateString("fr-FR");
 };
@@ -151,15 +156,15 @@ export const getYearRange = ({
 };
 
 export const getElapsedPercentage = ({
-  startDate,
-  endDate,
+  dateStart,
+  dateEnd,
 }: {
-  startDate: string;
-  endDate: string;
+  dateStart: string;
+  dateEnd: string;
 }): number => {
   const now = dayjs();
-  const start = dayjs(startDate);
-  const end = dayjs(endDate);
+  const start = dayjs(dateStart);
+  const end = dayjs(dateEnd);
 
   if (now.isBefore(start)) {
     return 0;

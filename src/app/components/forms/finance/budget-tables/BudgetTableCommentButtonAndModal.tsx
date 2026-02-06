@@ -6,13 +6,17 @@ import { useFormContext } from "react-hook-form";
 
 import { getName, isInputDisabled } from "@/app/utils/budget.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import {
+  CpomMillesimeApiType,
+  CpomStructureApiType,
+} from "@/schemas/api/cpom.schema";
 
 export const BudgetTableCommentButtonAndModal = ({
   year,
   disabledYearsStart,
   enabledYears,
   cpomStructures,
+  cpomMillesimes,
   budgets,
 }: Props) => {
   const modal = useMemo(
@@ -31,14 +35,20 @@ export const BudgetTableCommentButtonAndModal = ({
   const inputModalRef = useRef<HTMLTextAreaElement>(null);
 
   const commentPath = useMemo(
-    () => getName("commentaire", year, budgets, cpomStructures),
-    [year, budgets, cpomStructures]
+    () => getName("commentaire", year, budgets, cpomStructures, cpomMillesimes),
+    [year, budgets, cpomStructures, cpomMillesimes]
   );
 
   const currentComment = watch(commentPath);
 
   const handleOpenModal = (year: number) => {
-    const commentPath = getName("commentaire", year, budgets, cpomStructures);
+    const commentPath = getName(
+      "commentaire",
+      year,
+      budgets,
+      cpomStructures,
+      cpomMillesimes
+    );
     if (inputModalRef.current) {
       inputModalRef.current.value = watch(commentPath) || "";
     }
@@ -116,5 +126,6 @@ type Props = {
   disabledYearsStart?: number;
   enabledYears?: number[];
   cpomStructures?: CpomStructureApiType[];
+  cpomMillesimes?: CpomMillesimeApiType[];
   budgets?: BudgetApiType[];
 };

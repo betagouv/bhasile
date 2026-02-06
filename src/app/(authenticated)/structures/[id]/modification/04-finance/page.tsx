@@ -38,7 +38,6 @@ export default function ModificationFinanceForm() {
       operateurComment: millesime.operateurComment ?? undefined,
     }));
     await handleSubmit({
-      ...data,
       documentsFinanciers,
       dnaCode: structure.dnaCode,
       structureMillesimes,

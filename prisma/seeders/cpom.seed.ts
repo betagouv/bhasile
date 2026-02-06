@@ -49,11 +49,12 @@ export const createFakeCpoms = async (
       const region = departementToRegion.get(
         structure.departementAdministratif ?? ""
       );
+
       if (!region) {
         continue;
       }
       structureIdToDnaCode.set(structure.id, structure.dnaCode);
-      const key = `${operateur.id}-${region}`;
+      const key = `${operateur.id}_${region}`;
       const existingStructures = structuresByOperateurAndRegion.get(key) || [];
       structuresByOperateurAndRegion.set(key, [
         ...existingStructures,
@@ -80,7 +81,7 @@ export const createFakeCpoms = async (
 
   // Create CPOMs for valid groups
   for (const [key, structures] of validGroups) {
-    const [operateurIdStr, region] = key.split("-");
+    const [operateurIdStr, region] = key.split("_");
 
     const dureeAnnees = faker.number.int({ min: 3, max: 5 });
     const timeShift = faker.number.int({ min: -2, max: 2 });
@@ -114,6 +115,11 @@ export const createFakeCpoms = async (
         operateurId: Number(operateurIdStr),
         dateStart,
         dateEnd,
+        granularity: "REGIONALE",
+        region,
+        departements: departements
+          .filter((departement) => departement.region === region)
+          .map((departement) => departement.numero),
         structures: {
           create: selectedStructures.map((structureId) => {
             // 10% chance that a structure joins or leaves the CPOM in the middle

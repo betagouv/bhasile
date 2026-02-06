@@ -1,5 +1,8 @@
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import {
+  CpomMillesimeApiType,
+  CpomStructureApiType,
+} from "@/schemas/api/cpom.schema";
 import { anyBudgetFormValues } from "@/schemas/forms/base/budget.schema";
 
 import { getYearRange } from "./date.util";
@@ -87,8 +90,12 @@ export const getName = (
   name: string,
   year: number,
   budgets?: BudgetApiType[],
-  cpomStructures?: CpomStructureApiType[]
+  cpomStructures?: CpomStructureApiType[],
+  cpomMillesimes?: CpomMillesimeApiType[]
 ): string => {
+  if (cpomMillesimes) {
+    return `cpomMillesimes.${getMillesimeIndexForAYear(cpomMillesimes, year)}.${name}`;
+  }
   if (cpomStructures) {
     const { cpomStructureIndex, cpomMillesimeIndex } =
       getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);

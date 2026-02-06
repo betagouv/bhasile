@@ -9,7 +9,6 @@ import { createOrUpdateAdresses } from "../adresses/adresse.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
 import { createOrUpdateContacts } from "../contacts/contact.repository";
 import { createOrUpdateControles } from "../controles/controle.repository";
-import { createOrUpdateCpomMillesimes } from "../cpoms/cpom.repository";
 import { createOrUpdateEvaluations } from "../evaluations/evaluation.repository";
 import { updateFileUploads } from "../files/file.repository";
 import {
@@ -355,7 +354,6 @@ const updateOne = async (
     const {
       contacts,
       budgets,
-      cpomStructures,
       structureTypologies,
       adresses,
       actesAdministratifs,
@@ -365,11 +363,6 @@ const updateOne = async (
       forms,
       structureMillesimes,
     } = structure;
-
-    const cpomMillesimes = cpomStructures
-      ?.map((cpomStructure) => cpomStructure.cpom.cpomMillesimes)
-      ?.flat()
-      ?.filter((millesime) => millesime !== undefined);
 
     return await prisma.$transaction(async (tx) => {
       const updatedStructure = await updateStructure(tx, structure);
@@ -399,7 +392,6 @@ const updateOne = async (
       await createOrUpdateControles(tx, controles, structure.dnaCode);
       await createOrUpdateForms(tx, forms, structure.dnaCode);
       await createOrUpdateEvaluations(tx, evaluations, structure.dnaCode);
-      await createOrUpdateCpomMillesimes(tx, cpomMillesimes, structure.dnaCode);
       await createOrUpdateStructureMillesimes(
         tx,
         structureMillesimes,

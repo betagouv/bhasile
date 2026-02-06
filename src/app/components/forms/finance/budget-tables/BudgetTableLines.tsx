@@ -1,12 +1,22 @@
 import { ReactNode } from "react";
 
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import {
+  CpomMillesimeApiType,
+  CpomStructureApiType,
+} from "@/schemas/api/cpom.schema";
 
 import { BudgetTableLine } from "./BudgetTableLine";
 import { BudgetTableTitleLine } from "./BudgetTableTitleLine";
 
-export const BudgetTableLines = ({ lines, budgets, cpomStructures }: Props) => {
+export const BudgetTableLines = ({
+  lines,
+  budgets,
+  cpomStructures,
+  cpomMillesimes,
+  enabledYears,
+  canEdit = true,
+}: Props) => {
   return (
     <>
       {lines.map((block) => (
@@ -19,9 +29,12 @@ export const BudgetTableLines = ({ lines, budgets, cpomStructures }: Props) => {
               label={line.label}
               subLabel={line.subLabel}
               disabledYearsStart={line.disabledYearsStart}
-              enabledYears={line.enabledYears}
+              enabledYears={enabledYears ?? line.enabledYears}
+              colored={line.colored}
               budgets={budgets}
               cpomStructures={cpomStructures}
+              cpomMillesimes={cpomMillesimes}
+              canEdit={canEdit}
             />
           ))}
         </>
@@ -37,10 +50,14 @@ type Props = {
       name: string;
       label: string | ReactNode;
       subLabel?: string;
+      colored?: boolean;
       disabledYearsStart?: number;
       enabledYears?: number[];
     }[];
   }[];
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];
+  cpomMillesimes?: CpomMillesimeApiType[];
+  enabledYears?: number[];
+  canEdit?: boolean;
 };

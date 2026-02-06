@@ -1,12 +1,16 @@
 import z from "zod";
 
 import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
-import { nullishFrenchDateToISO, zSafeYear } from "@/app/utils/zodCustomFields";
+import {
+  nullishFrenchDateToISO,
+  zId,
+  zSafeYear,
+} from "@/app/utils/zodCustomFields";
 import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 import { CURRENT_YEAR } from "@/constants";
 
 export const structureTypologieWithoutEvolutionSchema = z.object({
-  id: z.number().optional(),
+  id: zId(),
   placesAutorisees: zSafeDecimals(),
   pmr: zSafeDecimals(),
   lgbt: zSafeDecimals(),

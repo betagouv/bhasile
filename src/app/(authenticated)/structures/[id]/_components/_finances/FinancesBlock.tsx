@@ -14,10 +14,8 @@ import { BudgetExecutoire } from "./BudgetExecutoire";
 import { DetailAffectations } from "./DetailAffectations";
 import { DocumentsAdministratifs } from "./DocumentsAdministratifs";
 import { DotationChart } from "./DotationChart";
-import { GestionBudgetaireAutoriseeSansCpomTable } from "./GestionBudgetaireAutoriseeSansCpomTable";
-import { GestionBudgetaireAvecCpomTable } from "./GestionBudgetaireAvecCpomTable";
-import { GestionBudgetaireSubventionneeSansCpomTable } from "./GestionBudgetaireSubventionneeSansCpomTable";
 import { HistoriqueIndicateursGeneraux } from "./HistoriqueIndicateursGeneraux";
+import { StructureStaticTable } from "./StructureStaticTable";
 
 export const FinancesBlock = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -28,18 +26,6 @@ export const FinancesBlock = (): ReactElement => {
   const isConventionnee = isStructureSubventionnee(structure.type);
   const isDetailAffectationsDisplayed =
     isAutorisee || (isConventionnee && isStructureInCpom(structure));
-
-  const getGestionBudgetaireComponent = (): ReactElement => {
-    if (!isStructureInCpom(structure)) {
-      if (isAutorisee) {
-        return <GestionBudgetaireAutoriseeSansCpomTable />;
-      }
-      if (isConventionnee) {
-        return <GestionBudgetaireSubventionneeSansCpomTable />;
-      }
-    }
-    return <GestionBudgetaireAvecCpomTable />;
-  };
 
   const budgetExecutoireYear = isAutorisee
     ? CURRENT_YEAR - 1
@@ -71,7 +57,9 @@ export const FinancesBlock = (): ReactElement => {
       <h4 className="text-title-blue-france fr-h6" id="gestionBudgetaireTitle">
         Gestion budgétaire
       </h4>
-      <div className="pb-5">{getGestionBudgetaireComponent()}</div>
+      <div className="pb-5">
+        <StructureStaticTable />
+      </div>
       {isDetailAffectationsDisplayed && (
         <div className="pb-5">
           <DetailAffectations />

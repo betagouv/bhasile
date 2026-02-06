@@ -1,16 +1,17 @@
 import z from "zod";
 
-import { zSafeDecimalsNullish, zSafeYear } from "@/app/utils/zodCustomFields";
+import {
+  zId,
+  zSafeDecimalsNullish,
+  zSafeYear,
+} from "@/app/utils/zodCustomFields";
 import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 
 import { validateAffectationReservesDetails } from "./budget/validateAffectationReservesDetails";
-import { cpomStructureSchema } from "./cpomStructure.schema";
+import { cpomStructureSchema } from "./cpom.schema";
 
 export const budgetBaseSchema = z.object({
-  id: z.preprocess(
-    (val) => (val === "" ? undefined : val),
-    z.number().optional()
-  ),
+  id: zId(),
   year: zSafeYear(),
 
   // Indicateurs généraux
@@ -70,10 +71,7 @@ export const budgetSubventionneeOpenSchema = budgetBaseSchema.extend({
 
 // TODO: cannot find a way to avoid duplication
 export const budgetAutoSaveSchema = z.object({
-  id: z.preprocess(
-    (val) => (val === "" ? undefined : val),
-    z.number().optional()
-  ),
+  id: zId(),
   year: zSafeYear(),
   ETP: zSafeDecimalsNullish(),
   tauxEncadrement: zSafeDecimalsNullish(),
@@ -115,7 +113,7 @@ export const budgetsAutoSaveSchema = z
   .object({
     budgets: z.array(budgetAutoSaveSchema),
   })
-  .and(cpomStructureSchema);
+  .and(z.object({ cpomStructures: z.array(cpomStructureSchema) }));
 
 export type BudgetsAutoSaveFormValues = z.infer<typeof budgetsAutoSaveSchema>;
 

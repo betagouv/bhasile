@@ -2,7 +2,7 @@ import z from "zod";
 
 import { zSafeYear } from "@/app/utils/zodCustomFields";
 
-import { fileApiSchema } from "./file.schema";
+import { operateurApiSchema } from "./operateur.schema";
 
 export const cpomMillesimeApiSchema = z.object({
   id: z.number().optional(),
@@ -23,27 +23,36 @@ export const cpomMillesimeApiSchema = z.object({
   commentaire: z.string().nullish(),
 });
 
-export type CpomMillesimeApiType = z.infer<typeof cpomMillesimeApiSchema>;
-
-export const cpomApiSchema = z.object({
+const cpomApiBareSchema = z.object({
   id: z.number().optional(),
   name: z.string().nullish(),
-  debutCpom: z.string().datetime().nullish(),
-  finCpom: z.string().datetime().nullish(),
-  structureIds: z.array(z.number()).optional(),
-  fileUploads: z.array(fileApiSchema).optional(),
+  dateStart: z.string().datetime(),
+  dateEnd: z.string().datetime(),
+  operateur: operateurApiSchema.optional(),
+  operateurId: z.number().optional(),
+  region: z.string().nullish(),
+  departements: z.array(z.string()).optional(),
+  granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
 });
 
-export type CpomApiType = z.infer<typeof cpomApiSchema>;
-
 export const cpomStructureApiSchema = z.object({
   id: z.number().optional(),
-  cpomId: z.number(),
+  cpomId: z.number().optional(),
+  cpom: cpomApiBareSchema.optional(),
   structureId: z.number(),
-  dateDebut: z.string().datetime().nullish(),
-  dateFin: z.string().datetime().nullish(),
-  cpom: cpomApiSchema,
+  dateStart: z.string().datetime().nullish(),
+  dateEnd: z.string().datetime().nullish(),
 });
 
+export const cpomApiSchema = cpomApiBareSchema.extend({
+  structures: z.array(cpomStructureApiSchema),
+});
+
+export const cpomApiAjoutSchema = cpomApiSchema.extend({
+  operateur: operateurApiSchema,
+});
+
+export type CpomMillesimeApiType = z.infer<typeof cpomMillesimeApiSchema>;
+export type CpomApiType = z.infer<typeof cpomApiSchema>;
 export type CpomStructureApiType = z.infer<typeof cpomStructureApiSchema>;

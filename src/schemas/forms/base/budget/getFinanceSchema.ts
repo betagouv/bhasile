@@ -19,7 +19,7 @@ import {
   budgetSubventionneeNotOpenSchema,
   budgetSubventionneeOpenSchema,
 } from "../budget.schema";
-import { cpomStructureSchema } from "../cpomStructure.schema";
+import { cpomStructureSchema } from "../cpom.schema";
 import { DocumentsFinanciersFlexibleSchema } from "../documentFinancier.schema";
 
 export const getFinanceSchema = (
@@ -65,14 +65,14 @@ export const getFinanceSchema = (
       .object({
         budgets: z.tuple(schema),
       })
-      .and(cpomStructureSchema);
+      .and(z.object({ cpomStructures: z.array(cpomStructureSchema) }));
   }
 
   return z
     .object({
       budgets: z.tuple(schema),
+      cpomStructures: z.array(cpomStructureSchema),
     })
-    .and(cpomStructureSchema)
     .and(DocumentsFinanciersFlexibleSchema);
 };
 

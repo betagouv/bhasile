@@ -1,3 +1,4 @@
+import Tooltip from "@codegouvfr/react-dsfr/Tooltip";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
@@ -15,7 +16,7 @@ import { BudgetTableLines } from "./BudgetTableLines";
 import { BudgetTableRepriseEtatTooltip } from "./BudgetTableRepriseEtatTooltip";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
 
-export const StructureTable = () => {
+export const StructureTable = ({ canEdit = true }: Props) => {
   const parentFormContext = useFormContext();
 
   const { structure } = useStructureContext();
@@ -44,7 +45,13 @@ export const StructureTable = () => {
         budgetItemErrors?.commentaire
     );
 
-  const budgets = watch("budgets") as BudgetApiType[];
+  const budgets = canEdit
+    ? (watch("budgets") as BudgetApiType[])
+    : structure?.budgets;
+
+  if (!budgets || budgets.length === 0) {
+    return null;
+  }
 
   const detailAffectationEnabledYears = budgets
     .filter((budget) => {
@@ -53,13 +60,9 @@ export const StructureTable = () => {
           .replaceAll(" ", "")
           .replace(",", ".") || 0
       );
-      return totalValue > 0;
+      return totalValue !== 0 && !isNaN(totalValue);
     })
     .map((budget) => budget.year);
-
-  if (budgets.length === 0) {
-    return null;
-  }
 
   return (
     <Table
@@ -71,6 +74,7 @@ export const StructureTable = () => {
       <BudgetTableLines
         lines={getLines(isAutorisee, detailAffectationEnabledYears)}
         budgets={budgets}
+        canEdit={canEdit}
       />
       <BudgetTableCommentLine
         label="Commentaire"
@@ -78,10 +82,15 @@ export const StructureTable = () => {
         disabledYearsStart={
           isSubventionnee ? SUBVENTIONNEE_OPEN_YEAR + 1 : undefined
         }
-        enabledYears={isAutorisee ? detailAffectationEnabledYears : undefined}
+        enabledYears={years}
+        canEdit={canEdit}
       />
     </Table>
   );
+};
+
+type Props = {
+  canEdit?: boolean;
 };
 
 const getLines = (
@@ -138,7 +147,20 @@ const getLines = (
           },
           {
             name: "affectationReservesFondsDedies",
-            label: "Affectation",
+            label: (
+              <Tooltip
+                title={
+                  <>
+                    <span>Négatif : affectation d’un déficit</span>
+                    <br />
+                    <span>Positif : affectation d’un excédent</span>
+                  </>
+                }
+              >
+                Affectation{" "}
+                <i className="fr-icon-information-line before:scale-50 before:origin-left" />
+              </Tooltip>
+            ),
             subLabel: "réserves & provision",
             disabledYearsStart: AUTORISEE_OPEN_YEAR,
           },
@@ -199,6 +221,7 @@ const getLines = (
         {
           name: "dotationDemandee",
           label: "Dotation demandée",
+          disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
         },
         {
           name: "dotationAccordee",

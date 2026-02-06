@@ -142,27 +142,37 @@ export const isStructureInCpom = (
 ): boolean => {
   return (
     structure.cpomStructures?.some((cpomStructure) => {
-      return cpomStructure.cpom.cpomMillesimes?.some(
-        (cpomMillesime) => cpomMillesime.year === year
-      );
+      const dateStart =
+        cpomStructure.dateStart ?? cpomStructure.cpom?.dateStart;
+      const dateEnd = cpomStructure.dateEnd ?? cpomStructure.cpom?.dateEnd;
+
+      if (!dateStart || !dateEnd) {
+        return false;
+      }
+
+      const yearStart = getYearFromDate(dateStart);
+      const yearEnd = getYearFromDate(dateEnd);
+
+      return yearStart <= year && yearEnd >= year;
     }) ?? false
   );
 };
 
 export const getCurrentCpomStructureDates = (
   structure: StructureApiType
-): { debutCpom?: string; finCpom?: string } => {
+): { dateStart?: string; dateEnd?: string } => {
   const currentCpomStructure = structure.cpomStructures?.find(
     (cpomStructure) => {
-      const dateDebut = cpomStructure.dateDebut ?? cpomStructure.cpom.debutCpom;
-      const dateFin = cpomStructure.dateFin ?? cpomStructure.cpom.finCpom;
+      const dateStart =
+        cpomStructure.dateStart ?? cpomStructure.cpom?.dateStart;
+      const dateEnd = cpomStructure.dateEnd ?? cpomStructure.cpom?.dateEnd;
 
-      if (!dateDebut || !dateFin) {
+      if (!dateStart || !dateEnd) {
         return false;
       }
 
-      const yearDebut = getYearFromDate(dateDebut);
-      const yearFin = getYearFromDate(dateFin);
+      const yearDebut = getYearFromDate(dateStart);
+      const yearFin = getYearFromDate(dateEnd);
 
       return yearDebut <= CURRENT_YEAR && yearFin >= CURRENT_YEAR;
     }
@@ -172,19 +182,19 @@ export const getCurrentCpomStructureDates = (
     return {};
   }
 
-  const currentCpomStructureDateDebut =
-    currentCpomStructure.dateDebut ?? currentCpomStructure.cpom.debutCpom;
-  const currentCpomStructureDateFin =
-    currentCpomStructure.dateFin ?? currentCpomStructure.cpom.finCpom;
+  const currentCpomStructureDateStart =
+    currentCpomStructure.dateStart ?? currentCpomStructure.cpom?.dateStart;
+  const currentCpomStructureDateEnd =
+    currentCpomStructure.dateEnd ?? currentCpomStructure.cpom?.dateEnd;
 
   return {
-    debutCpom: currentCpomStructureDateDebut ?? undefined,
-    finCpom: currentCpomStructureDateFin ?? undefined,
+    dateStart: currentCpomStructureDateStart ?? undefined,
+    dateEnd: currentCpomStructureDateEnd ?? undefined,
   };
 };
 
 export const getMillesimeIndexForAYear = (
-  typologies:
+  typologies?:
     | StructureTypologieApiType[]
     | StructureMillesimeApiType[]
     | BudgetApiType[]
@@ -199,7 +209,7 @@ export const getCpomStructureIndexAndCpomMillesimeIndexForAYear = (
   let cpomMillesimeIndex = -1;
   const cpomStructureIndex = cpomStructures.findIndex((cpomStructure) => {
     cpomMillesimeIndex =
-      cpomStructure.cpom.cpomMillesimes?.findIndex(
+      cpomStructure.cpom?.cpomMillesimes?.findIndex(
         (cpomMillesime) => cpomMillesime.year === year
       ) ?? -1;
     if (cpomMillesimeIndex !== -1) {

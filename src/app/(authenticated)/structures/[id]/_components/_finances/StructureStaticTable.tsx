@@ -7,7 +7,7 @@ import { isNullOrUndefined } from "@/app/utils/common.util";
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { AmountBadge } from "./AmountBadge";
 
-export const GestionBudgetaireAutoriseeSansCpomTable = (): ReactElement => {
+export const StructureStaticTable = (): ReactElement => {
   const { structure } = useStructureContext();
 
   const primaryHeadings = [
