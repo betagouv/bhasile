@@ -7,12 +7,13 @@ import { StructuresList } from "../../cpom/StructuresList";
 
 export const FieldSetStructures = () => {
   const { watch } = useFormContext();
+
   const departements = watch("departements");
   const operateur = watch("operateur");
 
   const dateStart = watch("dateStart");
   const dateEnd = watch("dateEnd");
-
+  console.log("departements", departements);
   const { structures } = useStructuresSelection({
     // We only fetch the structures if dateStart and dateEnd are defined
     operateurName: dateStart && dateEnd ? operateur.name : undefined,

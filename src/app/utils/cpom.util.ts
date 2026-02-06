@@ -15,7 +15,7 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
     name: cpom?.name ?? "",
     region: cpom?.region ?? "",
     departements: cpom?.departements ?? [],
-    granularity: cpom?.granularity ?? "REGIONALE",
+    granularity: cpom?.granularity ?? "DEPARTEMENTALE",
     dateStart: computeCpomDates(cpom).dateStart ?? "",
     dateEnd: computeCpomDates(cpom).dateEnd ?? "",
     operateur: cpom?.operateur ?? { name: "", id: undefined },
