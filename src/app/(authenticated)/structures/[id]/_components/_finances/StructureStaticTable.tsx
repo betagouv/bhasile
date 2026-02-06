@@ -31,15 +31,14 @@ export const StructureStaticTable = (): ReactElement => {
         budget.totalProduits,
         budget.totalCharges
       ),
-      resultatNetProposeParOperateur: computeResultatNetProposeParOperateur(
+      resultatNetProposeParOperateur: computeResultatNet(
         budget.totalProduits,
         budget.totalCharges
       ),
-      resultatNetRetenuParAutoriteTarifaire:
-        computeResultatNetRetenuParAutoriteTarifaire(
-          budget.totalProduits,
-          budget.totalCharges
-        ),
+      resultatNetRetenuParAutoriteTarifaire: computeResultatNet(
+        budget.totalProduits,
+        budget.totalCharges
+      ),
     };
   });
 
@@ -219,33 +218,4 @@ const computeResultatNet = (
     return undefined;
   }
   return Number(totalProduits) - Number(totalCharges);
-};
-
-const computeResultatNetProposeParOperateur = (
-  totalProduitsProposesParOperateur: number | null | undefined,
-  totalChargesProposeesParOperateur: number | null | undefined
-): number | undefined => {
-  if (
-    isNullOrUndefined(totalProduitsProposesParOperateur) ||
-    isNullOrUndefined(totalChargesProposeesParOperateur)
-  ) {
-    return undefined;
-  }
-  return (
-    Number(totalProduitsProposesParOperateur) -
-    Number(totalChargesProposeesParOperateur)
-  );
-};
-
-const computeResultatNetRetenuParAutoriteTarifaire = (
-  totalProduits: number | null | undefined,
-  totalChargesRetenues: number | null | undefined
-): number | undefined => {
-  if (
-    isNullOrUndefined(totalProduits) ||
-    isNullOrUndefined(totalChargesRetenues)
-  ) {
-    return undefined;
-  }
-  return Number(totalProduits) - Number(totalChargesRetenues);
 };
