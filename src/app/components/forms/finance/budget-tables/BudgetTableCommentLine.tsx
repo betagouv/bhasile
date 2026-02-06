@@ -1,4 +1,3 @@
-import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { getYearRange } from "@/app/utils/date.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {

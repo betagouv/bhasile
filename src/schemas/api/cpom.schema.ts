@@ -1,7 +1,6 @@
 import z from "zod";
 
 import { zSafeYear } from "@/app/utils/zodCustomFields";
-import { CpomGranularity } from "@/types/cpom.type";
 
 import { operateurApiSchema } from "./operateur.schema";
 

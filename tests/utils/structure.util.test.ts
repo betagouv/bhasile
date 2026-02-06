@@ -17,7 +17,6 @@ import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
-import { CpomGranularity } from "@/types/cpom.type";
 import { StructureType } from "@/types/structure.type";
 
 import { Repartition } from "../../src/types/adresse.type";
