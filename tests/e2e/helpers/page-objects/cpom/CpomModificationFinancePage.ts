@@ -1,6 +1,8 @@
-import { expect, Locator, Page } from "@playwright/test";
+import { expect, Page } from "@playwright/test";
 
 import { TIMEOUTS, URLS } from "../../constants";
+import { safeExecute } from "../../error-handler";
+import { FormHelper } from "../../form-helper";
 import { TestCpomFinanceData } from "../../test-data/cpom-types";
 import { WaitHelper } from "../../wait-helper";
 import { BasePage } from "../BasePage";
@@ -8,9 +10,8 @@ import { BasePage } from "../BasePage";
 const CPOM_FINANCE_YEAR_START = 2021;
 const CPOM_FINANCE_YEAR_END = 2025; // CURRENT_YEAR in app constants
 
-/** Index of year in cpomMillesimes array (getYearRange asc: 2021..2025) */
 function getMillesimeIndexForYear(year: number): number {
-  return year - CPOM_FINANCE_YEAR_START;
+  return CPOM_FINANCE_YEAR_END - year;
 }
 
 const CPOM_FINANCE_LINE_NAMES = [
@@ -31,66 +32,62 @@ const CPOM_FINANCE_LINE_NAMES = [
 
 export class CpomModificationFinancePage extends BasePage {
   private waitHelper: WaitHelper;
+  private formHelper: FormHelper;
 
   constructor(page: Page) {
     super(page);
     this.waitHelper = new WaitHelper(page);
+    this.formHelper = new FormHelper(page);
   }
 
-  async waitForLoad(): Promise<void> {
-    await super.waitForLoad();
-    await this.waitForHeading(/Analyse financière/i);
-  }
-
-  /**
-   * Fill a single numeric input. Uses click + clear + type so React/NumericFormat
-   * controlled components receive change events and update form state.
-   */
-  private async fillNumericInput(
-    locator: Locator,
-    value: number | string
-  ): Promise<void> {
-    const el = locator.first();
-    await el.waitFor({ state: "visible", timeout: 5000 }).catch(() => {});
-    if (!(await el.isEnabled().catch(() => false))) return;
-    await el.click();
-    await el.press("Control+a");
-    await el.press("Backspace");
-    await el.pressSequentially(String(value), { delay: 30 });
-  }
-
-  async fillFinanceTable(financeData: TestCpomFinanceData): Promise<void> {
+  async fillForm(financeData: TestCpomFinanceData): Promise<void> {
     await this.waitForLoad();
 
-    // Wait for the finance table to be visible (inputs may be disabled for years outside CPOM range)
-    await this.page
-      .locator('input[name^="cpomMillesimes."][name$=".dotationDemandee"]')
-      .first()
-      .waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION });
+    await this.waitHelper.waitForUIUpdate();
+    const yearIndexMap = this.getCpomMillesimeIndexByYear(financeData);
 
-    for (const [yearStr, values] of Object.entries(financeData)) {
-      const year = parseInt(yearStr, 10);
-      if (year < CPOM_FINANCE_YEAR_START || year > CPOM_FINANCE_YEAR_END) {
+    for (const [yearKey, fields] of Object.entries(financeData)) {
+      const year = Number(yearKey);
+      const millesimeIndex = yearIndexMap[year];
+      if (millesimeIndex === undefined) {
         continue;
       }
-      const index = getMillesimeIndexForYear(year);
-      for (const lineName of CPOM_FINANCE_LINE_NAMES) {
-        const value = values[lineName as keyof typeof values];
-        if (value === undefined || value === null) continue;
-        const inputName = `cpomMillesimes.${index}.${lineName}`;
-        const input = this.page.locator(`input[name="${inputName}"]`);
-        if ((await input.count()) > 0) {
-          await this.fillNumericInput(input, value);
+
+      for (const field of CPOM_FINANCE_LINE_NAMES) {
+        const value = (fields as Record<string, unknown>)[field];
+        if (value === undefined || value === null) {
+          continue;
+        }
+        const selector = `input[name="cpomMillesimes.${millesimeIndex}.${field}"]`;
+        const input = this.page.locator(selector);
+        const count = await input.count();
+        if (count === 0) {
+          continue;
+        }
+        const isEnabled = await safeExecute(
+          () => input.first().isEnabled(),
+          false,
+          `Failed to check if input is enabled: ${selector}`
+        );
+        if (isEnabled) {
+          await this.formHelper.fillInput(selector, String(value));
         }
       }
-      if (values.commentaire) {
-        const commentName = `cpomMillesimes.${index}.commentaire`;
-        const commentInput = this.page.locator(
-          `input[name="${commentName}"], textarea[name="${commentName}"]`
-        );
+      if (fields.commentaire) {
+        const commentSelector = `input[name="cpomMillesimes.${millesimeIndex}.commentaire"], textarea[name="cpomMillesimes.${millesimeIndex}.commentaire"]`;
+        const commentInput = this.page.locator(commentSelector);
         if ((await commentInput.count()) > 0) {
-          await commentInput.first().click();
-          await commentInput.first().fill(values.commentaire);
+          const isEnabled = await safeExecute(
+            () => commentInput.first().isEnabled(),
+            false,
+            `Failed to check if comment input is enabled: ${commentSelector}`
+          );
+          if (isEnabled) {
+            await this.formHelper.fillInput(
+              commentSelector,
+              fields.commentaire
+            );
+          }
         }
       }
     }
@@ -98,10 +95,20 @@ export class CpomModificationFinancePage extends BasePage {
     await this.waitHelper.waitForUIUpdate(1);
   }
 
-  /**
-   * Verify that the finance table displays the expected saved data.
-   * Compares input values with the provided financeData (numeric values may be shown as strings).
-   */
+  private getCpomMillesimeIndexByYear(
+    financeData: TestCpomFinanceData
+  ): Record<number, number> {
+    const yearIndexMap: Record<number, number> = {};
+    const sortedYears = Object.keys(financeData)
+      .map((y) => Number(y))
+      .filter((y) => y >= CPOM_FINANCE_YEAR_START && y <= CPOM_FINANCE_YEAR_END)
+      .sort((a, b) => a - b);
+    for (const year of sortedYears) {
+      yearIndexMap[year] = getMillesimeIndexForYear(year);
+    }
+    return yearIndexMap;
+  }
+
   async verifyFinanceTable(financeData: TestCpomFinanceData): Promise<void> {
     await this.waitForLoad();
 
@@ -124,7 +131,6 @@ export class CpomModificationFinancePage extends BasePage {
         if ((await input.count()) === 0) continue;
         if (!(await input.isEnabled().catch(() => false))) continue;
         const actual = await input.inputValue();
-        // NumericFormat uses thousandSeparator=" " so value may be "100 000"
         const actualNormalized = actual.replace(/\s/g, "").replace(",", ".");
         const expectedStr = String(expected);
         expect(
@@ -151,10 +157,6 @@ export class CpomModificationFinancePage extends BasePage {
     await this.page.click('button[type="submit"]');
   }
 
-  /**
-   * Submit the finance form, wait for the confirmation modal, click "J'ai compris"
-   * and assert redirect to /structures.
-   */
   async submitAndConfirmRedirectToStructures(): Promise<void> {
     await this.submit();
     const modal = this.page.locator("#confirmation-cpom-modal");

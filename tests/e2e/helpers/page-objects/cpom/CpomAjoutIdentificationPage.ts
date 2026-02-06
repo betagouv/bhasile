@@ -24,7 +24,6 @@ export class CpomAjoutIdentificationPage extends BasePage {
   }
 
   async fillForm(data: TestCpomAjoutData): Promise<void> {
-    // 1. Granularity (default is DEPARTEMENTALE; skip if already selected, else click via label)
     const granularityLabels: Record<TestCpomAjoutData["granularity"], string> =
       {
         DEPARTEMENTALE: "Départementale",
@@ -42,19 +41,16 @@ export class CpomAjoutIdentificationPage extends BasePage {
         .click();
     }
 
-    // 2. Operateur (autocomplete)
     await this.autocompleteHelper.fillAndSelectFirst(
       SELECTORS.CPOM_OPERATEUR_INPUT,
       data.operateur.searchTerm
     );
 
-    // 3. Region
     await this.formHelper.selectOption(
       SELECTORS.CPOM_REGION_SELECT,
       data.region
     );
 
-    // 4. Département(s) - for DEPARTEMENTALE single select
     if (data.granularity === "DEPARTEMENTALE") {
       const dept =
         typeof data.departements === "string"
@@ -68,7 +64,6 @@ export class CpomAjoutIdentificationPage extends BasePage {
 
     await this.waitHelper.waitForUIUpdate(2);
 
-    // 5. Actes administratifs - first entry (main CPOM document)
     const mainActe = data.actesAdministratifs[0];
     if (mainActe) {
       await this.formHelper.fillInput(
@@ -80,7 +75,6 @@ export class CpomAjoutIdentificationPage extends BasePage {
         mainActe.endDate
       );
 
-      // Upload main document file (first file input in Documents section)
       if (mainActe.filePath) {
         const fileInput = this.page.locator('input[type="file"]').first();
         await fileInput.setInputFiles(mainActe.filePath);
@@ -91,10 +85,8 @@ export class CpomAjoutIdentificationPage extends BasePage {
       }
     }
 
-    // 6. Avenant (if second entry)
     const avenant = data.avenants[0];
     if (avenant) {
-      // Wait for "Ajouter un avenant" link (appears after main file is uploaded and has id)
       await this.page
         .getByRole("link", { name: "+ Ajouter un avenant" })
         .waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION });
@@ -104,8 +96,6 @@ export class CpomAjoutIdentificationPage extends BasePage {
 
       await this.waitHelper.waitForUIUpdate(2);
 
-      // Find the avenant block - second acte has index 1 (or next after append)
-      // Avenant date
       const avenantDateInput = this.page.locator(
         'input[name="actesAdministratifs.1.date"]'
       );
@@ -113,7 +103,6 @@ export class CpomAjoutIdentificationPage extends BasePage {
         await avenantDateInput.fill(avenant.date);
       }
 
-      // Checkbox "Cet avenant modifie la date de fin du CPOM" (click label to avoid intercept)
       const extendLabel = this.page
         .locator('label:has-text("Cet avenant modifie la date de fin du CPOM")')
         .first();
@@ -126,7 +115,6 @@ export class CpomAjoutIdentificationPage extends BasePage {
         await avenantEndInput.fill(avenant.endDate);
       }
 
-      // Upload avenant file (second file input)
       if (avenant.filePath) {
         const fileInputs = this.page.locator('input[type="file"]');
         await fileInputs.nth(1).setInputFiles(avenant.filePath);
@@ -136,7 +124,6 @@ export class CpomAjoutIdentificationPage extends BasePage {
       }
     }
 
-    // 7. Structures list appears when dateStart/dateEnd are set
     await this.waitHelper.waitForUIUpdate(2);
     if (data.structureIds === "all") {
       await this.checkboxHelper.clickByValue("isAllStructuresSelected");

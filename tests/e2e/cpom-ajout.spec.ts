@@ -34,7 +34,7 @@ test.describe("CPOM ajout", () => {
       }
 
       const financePage = new CpomModificationFinancePage(page);
-      await financePage.fillFinanceTable(cpomDepartementale.financeData);
+      await financePage.fillForm(cpomDepartementale.financeData);
       await financePage.submitAndConfirmRedirectToStructures();
 
       await page.goto(URLS.cpomModificationIdentification(cpomId), {
