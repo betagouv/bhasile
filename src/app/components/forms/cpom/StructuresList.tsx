@@ -98,8 +98,6 @@ export const StructuresList = ({ structures }: Props) => {
     previousDepartements.current = departements;
   }, [departements, structures, selectedCpomStructures, setValue]);
 
-  console.log("structures", structures);
-  console.log("selectedCpomStructures", selectedCpomStructures);
   return (
     <>
       <div
