@@ -7,6 +7,7 @@ import { StructuresList } from "../../cpom/StructuresList";
 
 export const FieldSetStructures = () => {
   const { watch } = useFormContext();
+
   const departements = watch("departements");
   const operateur = watch("operateur");
 

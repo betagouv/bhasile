@@ -8,7 +8,7 @@ import {
   ActeAdministratifCategoryType,
 } from "@/types/file-upload.type";
 
-import { isStructureInCpom, isStructureSubventionnee } from "./structure.util";
+import { isStructureSubventionnee } from "./structure.util";
 
 export const getCategoriesToDisplay = (
   structure: StructureApiType
@@ -18,7 +18,7 @@ export const getCategoriesToDisplay = (
       return false;
     }
 
-    if (category === "CPOM" && !isStructureInCpom(structure)) {
+    if (category === "CPOM") {
       return false;
     }
 

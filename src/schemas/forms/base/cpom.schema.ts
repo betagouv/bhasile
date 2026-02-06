@@ -8,6 +8,7 @@ import {
   zSafeYear,
 } from "@/app/utils/zodCustomFields";
 
+import { acteAdministratifCpomSchema } from "./acteAdministratif.schema";
 import { operateurSchema } from "./operateur.schema";
 
 const cpomMillesimeSchema = z.object({
@@ -34,12 +35,13 @@ const baseCpomSchema = z.object({
   name: z.string().nullish(),
   dateStart: optionalFrenchDateToISO(),
   dateEnd: optionalFrenchDateToISO(),
-  operateur: operateurSchema.optional(),
+  operateur: operateurSchema,
   operateurId: zId(),
-  region: z.string().nullish(),
-  departements: z.array(z.string()).optional(),
+  region: z.string(),
+  departements: z.array(z.string()),
   granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
   cpomMillesimes: z.array(cpomMillesimeSchema).optional(),
+  actesAdministratifs: z.array(acteAdministratifCpomSchema),
 });
 
 export const cpomStructureSchema = z.object({
@@ -73,8 +75,13 @@ export const cpomSchema = baseCpomSchema
       const cpomStart = data.dateStart;
       const cpomEnd = data.dateEnd;
       for (const structure of data.structures) {
-        if (structure.dateStart && structure.dateEnd) {
-          if (structure.dateStart < cpomStart || structure.dateEnd > cpomEnd) {
+        if (structure.dateStart) {
+          if (structure.dateStart < cpomStart) {
+            return false;
+          }
+        }
+        if (structure.dateEnd) {
+          if (structure.dateEnd > cpomEnd) {
             return false;
           }
         }

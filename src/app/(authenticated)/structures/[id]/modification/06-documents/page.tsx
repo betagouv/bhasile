@@ -37,7 +37,9 @@ export default function ModificationQualiteForm() {
 
   const categoriesToDisplay = getCategoriesToDisplay(structure).filter(
     (category) =>
-      category !== "INSPECTION_CONTROLE" && category !== "EVALUATION"
+      category !== "INSPECTION_CONTROLE" &&
+      category !== "EVALUATION" &&
+      category !== "CPOM"
   );
 
   const categoriesDisplayRules = getCategoriesDisplayRules(structure);

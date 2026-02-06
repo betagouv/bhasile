@@ -22,6 +22,7 @@ import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
 import { sortKeysByValue } from "./common.util";
+import { computeCpomDates } from "./cpom.util";
 import { getYearFromDate } from "./date.util";
 
 export const getPlacesByCommunes = (
@@ -143,8 +144,10 @@ export const isStructureInCpom = (
   return (
     structure.cpomStructures?.some((cpomStructure) => {
       const dateStart =
-        cpomStructure.dateStart ?? cpomStructure.cpom?.dateStart;
-      const dateEnd = cpomStructure.dateEnd ?? cpomStructure.cpom?.dateEnd;
+        cpomStructure.dateStart ??
+        computeCpomDates(cpomStructure.cpom).dateStart;
+      const dateEnd =
+        cpomStructure.dateEnd ?? computeCpomDates(cpomStructure.cpom).dateEnd;
 
       if (!dateStart || !dateEnd) {
         return false;
@@ -164,8 +167,10 @@ export const getCurrentCpomStructureDates = (
   const currentCpomStructure = structure.cpomStructures?.find(
     (cpomStructure) => {
       const dateStart =
-        cpomStructure.dateStart ?? cpomStructure.cpom?.dateStart;
-      const dateEnd = cpomStructure.dateEnd ?? cpomStructure.cpom?.dateEnd;
+        cpomStructure.dateStart ??
+        computeCpomDates(cpomStructure.cpom).dateStart;
+      const dateEnd =
+        cpomStructure.dateEnd ?? computeCpomDates(cpomStructure.cpom).dateEnd;
 
       if (!dateStart || !dateEnd) {
         return false;
@@ -183,9 +188,11 @@ export const getCurrentCpomStructureDates = (
   }
 
   const currentCpomStructureDateStart =
-    currentCpomStructure.dateStart ?? currentCpomStructure.cpom?.dateStart;
+    currentCpomStructure.dateStart ??
+    computeCpomDates(currentCpomStructure.cpom).dateStart;
   const currentCpomStructureDateEnd =
-    currentCpomStructure.dateEnd ?? currentCpomStructure.cpom?.dateEnd;
+    currentCpomStructure.dateEnd ??
+    computeCpomDates(currentCpomStructure.cpom).dateEnd;
 
   return {
     dateStart: currentCpomStructureDateStart ?? undefined,

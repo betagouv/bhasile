@@ -380,13 +380,13 @@ const updateOne = async (
       await updateFileUploads(
         tx,
         actesAdministratifs,
-        structure.dnaCode,
+        { structureDnaCode: structure.dnaCode },
         "acteAdministratif"
       );
       await updateFileUploads(
         tx,
         documentsFinanciers,
-        structure.dnaCode,
+        { structureDnaCode: structure.dnaCode },
         "documentFinancier"
       );
       await createOrUpdateControles(tx, controles, structure.dnaCode);

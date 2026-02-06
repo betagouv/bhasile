@@ -31,11 +31,15 @@ export const LocationSelector = () => {
   };
 
   useEffect(() => {
-    setValue(
-      "departements",
-      departementsOfRegion.map((departement) => departement.numero),
-      { shouldValidate: true }
-    );
+    if (granularity === "DEPARTEMENTALE") {
+      setValue("departements", [], { shouldValidate: true });
+    } else {
+      setValue(
+        "departements",
+        departementsOfRegion.map((departement) => departement.numero),
+        { shouldValidate: true }
+      );
+    }
   }, [region, setValue, departementsOfRegion, granularity]);
 
   const handleDepartementToggle = (value: string) => {

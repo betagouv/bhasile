@@ -22,6 +22,7 @@ export default function UploadsByCategory({
   isOptional,
   canAddFile,
   canAddAvenant = false,
+  avenantCanExtendDateEnd = false,
   addFileButtonLabel,
   additionalFieldsType,
   documentLabel,
@@ -124,6 +125,7 @@ export default function UploadsByCategory({
                 documentLabel={documentLabel}
                 handleDeleteField={handleDeleteField}
                 canAddAvenant={canAddAvenant}
+                avenantCanExtendDateEnd={avenantCanExtendDateEnd}
               />
             </div>
           );
@@ -149,6 +151,7 @@ type UploadsByCategoryProps = {
   isOptional?: boolean;
   canAddFile?: boolean;
   canAddAvenant?: boolean;
+  avenantCanExtendDateEnd?: boolean;
   addFileButtonLabel?: string;
   additionalFieldsType?: AdditionalFieldsType;
   documentLabel: string;
