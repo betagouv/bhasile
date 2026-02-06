@@ -3,10 +3,8 @@
 import { ReactElement, useState } from "react";
 
 import { Table } from "@/app/components/common/Table";
-import { AffectationTooltip } from "@/app/components/forms/finance/budget-tables/AffectationTooltip";
 import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-tables/BudgetTableCommentLine";
 import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/BudgetTableLines";
-import { BudgetTableRepriseEtatTooltip } from "@/app/components/forms/finance/budget-tables/BudgetTableRepriseEtatTooltip";
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
 import { isNullOrUndefined } from "@/app/utils/common.util";
 import { getYearRange } from "@/app/utils/date.util";
@@ -14,6 +12,7 @@ import { isStructureAutorisee } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ButtonAffectations } from "../ButtonAffectations";
+import { getStructureStaticTableLines } from "./getStructureStaticTableLines";
 
 export const StructureStaticTable = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -55,7 +54,7 @@ export const StructureStaticTable = (): ReactElement => {
         enableBorders
       >
         <BudgetTableLines
-          lines={getLines(isAutorisee, isAffectationOpen)}
+          lines={getStructureStaticTableLines(isAutorisee, isAffectationOpen)}
           budgets={enhancedBudgets}
           canEdit={false}
         />
@@ -74,140 +73,6 @@ export const StructureStaticTable = (): ReactElement => {
       />
     </>
   );
-};
-
-const getLines = (isAutorisee: boolean, isAffectationOpen: boolean) => {
-  if (isAutorisee) {
-    const linesWithoutAffectation = [
-      {
-        title: "Budget",
-        lines: [
-          {
-            name: "dotationDemandee",
-            label: "Dotation demandée",
-          },
-          {
-            name: "dotationAccordee",
-            label: "Dotation accordée",
-          },
-        ],
-      },
-      {
-        title: "Résultat",
-        lines: [
-          {
-            name: "resultatNetProposeParOperateur",
-            label: "Résultat net proposé",
-            subLabel: "par l'opérateur",
-            colored: true,
-          },
-          {
-            name: "resultatNetRetenuParAutoriteTarifaire",
-            label: "Résultat net retenu",
-            subLabel: "par l'autorité tarifaire",
-            colored: true,
-          },
-          {
-            name: "repriseEtat",
-            label: <BudgetTableRepriseEtatTooltip />,
-          },
-          {
-            name: "affectationReservesFondsDedies",
-            label: <AffectationTooltip />,
-          },
-        ],
-      },
-    ];
-    if (isAffectationOpen) {
-      return [
-        ...linesWithoutAffectation,
-        {
-          title: "Détail affectation",
-          lines: [
-            {
-              name: "reserveInvestissement",
-              label: "Réserve",
-              subLabel: "dédiée à l'investissement",
-            },
-            {
-              name: "chargesNonReconductibles",
-              label: "Charges",
-              subLabel: "non reconductibles",
-            },
-            {
-              name: "reserveCompensationDeficits",
-              label: "Réserve de compensation",
-              subLabel: "des déficits",
-            },
-            {
-              name: "reserveCompensationBFR",
-              label: "Réserve de couverture",
-              subLabel: "de BFR",
-            },
-            {
-              name: "reserveCompensationAmortissements",
-              label: "Réserve de compensation",
-              subLabel: "des amortissements",
-            },
-            {
-              name: "reportANouveau",
-              label: "Report à nouveau",
-            },
-            {
-              name: "autre",
-              label: "Autre",
-            },
-          ],
-        },
-      ];
-    }
-    return linesWithoutAffectation;
-  }
-
-  return [
-    {
-      title: "Budget",
-      lines: [
-        {
-          name: "dotationDemandee",
-          label: "Dotation demandée",
-        },
-        {
-          name: "dotationAccordee",
-          label: "Dotation accordée",
-        },
-      ],
-    },
-    {
-      title: "Résultat",
-      lines: [
-        {
-          name: "resultatNet",
-          label: "Résultat net",
-          colored: true,
-        },
-        {
-          name: "repriseEtat",
-          label: "Déficit compensé",
-          subLabel: "par l'État",
-        },
-        {
-          name: "excedentRecupere",
-          subLabel: "en titre de recette",
-          label: "Excédent récupéré",
-        },
-        {
-          name: "excedentDeduit",
-          label: "Excédent réemployé",
-          subLabel: "dans la dotation à venir",
-        },
-        {
-          name: "fondsDedies",
-          label: "Restant fonds dédiés",
-        },
-      ],
-    },
-  ];
 };
 
 const computeResultatNet = (

@@ -3,15 +3,14 @@
 import { ReactElement, useState } from "react";
 
 import { Table } from "@/app/components/common/Table";
-import { AffectationTooltip } from "@/app/components/forms/finance/budget-tables/AffectationTooltip";
 import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-tables/BudgetTableCommentLine";
 import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/BudgetTableLines";
-import { BudgetTableRepriseEtatTooltip } from "@/app/components/forms/finance/budget-tables/BudgetTableRepriseEtatTooltip";
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
 import { getYearRange } from "@/app/utils/date.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ButtonAffectations } from "../ButtonAffectations";
+import { getCpomStaticTableLines } from "./getCpomStaticTableLines";
 
 export const CpomStaticTable = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -32,7 +31,7 @@ export const CpomStaticTable = (): ReactElement => {
         enableBorders
       >
         <BudgetTableLines
-          lines={getLines(isAffectationOpen)}
+          lines={getCpomStaticTableLines(isAffectationOpen)}
           cpomStructures={structure?.cpomStructures}
           canEdit={false}
         />
@@ -51,85 +50,4 @@ export const CpomStaticTable = (): ReactElement => {
       />
     </>
   );
-};
-
-const getLines = (isAffectationOpen: boolean) => {
-  const linesWithoutAffectation = [
-    {
-      title: "Budget",
-      lines: [
-        {
-          name: "dotationDemandee",
-          label: "Dotation demandée",
-        },
-        {
-          name: "dotationAccordee",
-          label: "Dotation accordée",
-        },
-      ],
-    },
-    {
-      title: "Résultat",
-      lines: [
-        {
-          name: "cumulResultatNet",
-          label: "Cumul des résultats",
-          subLabel: "des structures du CPOM",
-          colored: true,
-        },
-        {
-          name: "repriseEtat",
-          label: <BudgetTableRepriseEtatTooltip />,
-        },
-        {
-          name: "affectationReservesFondsDedies",
-          label: <AffectationTooltip />,
-        },
-      ],
-    },
-  ];
-  if (isAffectationOpen) {
-    return [
-      ...linesWithoutAffectation,
-      {
-        title: "Détail affectation",
-        lines: [
-          {
-            name: "reserveInvestissement",
-            label: "Réserve",
-            subLabel: "dédiée à l'investissement",
-          },
-          {
-            name: "chargesNonReconductibles",
-            label: "Charges",
-            subLabel: "non reconductibles",
-          },
-          {
-            name: "reserveCompensationDeficits",
-            label: "Réserve de compensation",
-            subLabel: "des déficits",
-          },
-          {
-            name: "reserveCompensationBFR",
-            label: "Réserve de couverture",
-            subLabel: "de BFR",
-          },
-          {
-            name: "reserveCompensationAmortissements",
-            label: "Réserve de compensation",
-            subLabel: "des amortissements",
-          },
-          {
-            name: "reportANouveau",
-            label: "Report à nouveau",
-          },
-          {
-            name: "autre",
-            label: "Autre",
-          },
-        ],
-      },
-    ];
-  }
-  return linesWithoutAffectation;
 };
