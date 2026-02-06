@@ -471,7 +471,6 @@ describe("structure util", () => {
       });
 
       // GIVEN - dateEnd is null (schema requires string but we need to test runtime)
-      // GIVEN - dateEnd is null (schema requires string but we need to test runtime)
       const structure2 = createStructure({
         id: 7,
         cpomStructures: [
