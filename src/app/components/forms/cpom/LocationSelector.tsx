@@ -1,5 +1,5 @@
 import Select from "@codegouvfr/react-dsfr/Select";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
