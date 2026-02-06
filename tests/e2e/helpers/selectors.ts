@@ -65,4 +65,7 @@ export const SELECTORS = {
   CPOM_ADD_AVENANT_LINK: 'a:has-text("+ Ajouter un avenant")',
   CPOM_AVENANT_EXTEND_END_DATE_CHECKBOX: (uuid: string) =>
     `input[value="showEndDateInput"]`, // one per avenant block; we click by label
+  /** Checkbox inputs in the INTERDEPARTEMENTALE departements panel */
+  CPOM_DEPARTEMENT_CHECKBOX: (numero: string) =>
+    `input[name="structure-departement"][value="${numero}"]`,
 } as const;

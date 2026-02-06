@@ -60,6 +60,43 @@ export class CpomAjoutIdentificationPage extends BasePage {
         SELECTORS.CPOM_DEPARTEMENTS_SELECT,
         dept
       );
+    } else if (data.granularity === "INTERDEPARTEMENTALE") {
+      const desired = new Set(
+        (Array.isArray(data.departements) ? data.departements : []).map(String)
+      );
+      if (desired.size > 0) {
+        const panelButton = this.page
+          .locator('label:has-text("Départements")')
+          .first()
+          .locator("..")
+          .getByRole("button");
+        await panelButton.waitFor({
+          state: "visible",
+          timeout: TIMEOUTS.NAVIGATION,
+        });
+        await panelButton.click();
+        await this.waitHelper.waitForUIUpdate(1);
+
+        const checkboxes = this.page.locator(
+          'input[name="structure-departement"]'
+        );
+        const count = await checkboxes.count();
+        for (let i = 0; i < count; i++) {
+          const cb = checkboxes.nth(i);
+          const value = await cb.getAttribute("value");
+          if (value && !desired.has(value) && (await cb.isChecked())) {
+            const id = await cb.getAttribute("id");
+            const label = id
+              ? this.page.locator(`label[for="${id}"]`)
+              : cb.locator("..").locator("label").first();
+            await label.click();
+            await this.waitHelper.waitForUIUpdate(1);
+          }
+        }
+
+        await panelButton.click();
+        await this.waitHelper.waitForUIUpdate(1);
+      }
     }
 
     await this.waitHelper.waitForUIUpdate(2);
