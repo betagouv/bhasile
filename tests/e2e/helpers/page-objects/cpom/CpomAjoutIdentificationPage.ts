@@ -169,8 +169,12 @@ export class CpomAjoutIdentificationPage extends BasePage {
         const cb = this.page.locator(
           `input[name="structures"][value="${structureId}"]`
         );
-        if ((await cb.count()) > 0) {
-          await cb.check();
+        if ((await cb.count()) > 0 && !(await cb.isChecked())) {
+          const id = await cb.getAttribute("id");
+          const label = id
+            ? this.page.locator(`label[for="${id}"]`)
+            : cb.locator("..").locator("label").first();
+          await label.click();
         }
       }
     }

@@ -8,6 +8,7 @@ import { URLS } from "./helpers/constants";
 import { CpomAjoutIdentificationPage } from "./helpers/page-objects/cpom/CpomAjoutIdentificationPage";
 import { CpomModificationFinancePage } from "./helpers/page-objects/cpom/CpomModificationFinancePage";
 import { CpomModificationIdentificationPage } from "./helpers/page-objects/cpom/CpomModificationIdentificationPage";
+import { getStructureId } from "./helpers/structure-creator";
 import { cada1 } from "./helpers/test-data/cada-1";
 import { cpomDepartementale } from "./helpers/test-data/cpom-departementale";
 import { cpomInterdepartementale } from "./helpers/test-data/cpom-interdepartementale";
@@ -25,6 +26,16 @@ async function runCpomAjoutTest(
 ) {
   await beforeFlow(cada1.formData as Parameters<typeof beforeFlow>[0], page);
 
+  const formData =
+    testCase.formData.structureIds === "seeded" && cada1.formData.dnaCode
+      ? {
+          ...testCase.formData,
+          structureIds: [
+            await getStructureId(cada1.formData.dnaCode as string),
+          ] as number[],
+        }
+      : testCase.formData;
+
   let cpomId: number | null = null;
 
   try {
@@ -33,7 +44,8 @@ async function runCpomAjoutTest(
     });
     const ajoutPage = new CpomAjoutIdentificationPage(page);
     await ajoutPage.waitForLoad();
-    await ajoutPage.fillForm(testCase.formData);
+    await ajoutPage.fillForm(formData);
+    await page.waitForTimeout(15000);
     cpomId = await ajoutPage.submit();
 
     if (cpomId === null) {
@@ -49,7 +61,8 @@ async function runCpomAjoutTest(
     });
 
     const modificationPage = new CpomModificationIdentificationPage(page);
-    await modificationPage.verifyForm(testCase.formData);
+    await modificationPage.verifyForm(formData);
+    await page.waitForTimeout(20000);
 
     await page.goto(URLS.cpomModificationFinance(cpomId), {
       waitUntil: "domcontentloaded",

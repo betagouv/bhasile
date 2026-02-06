@@ -21,8 +21,8 @@ export type TestCpomAjoutData = {
     endDate?: string;
     filePath: string;
   }>;
-  /** Structure IDs to select (from the list). If "all", select all. */
-  structureIds?: number[] | "all";
+  /** Structure IDs to select (from the list). "all" = select all, "seeded" = only the structure seeded by beforeFlow (e.g. cada1). */
+  structureIds?: number[] | "all" | "seeded";
 };
 
 /** Finance table values per year (cpomMillesimes) */

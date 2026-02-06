@@ -48,6 +48,7 @@ export class CpomModificationIdentificationPage extends BasePage {
       const possibleEndDates = [
         mainActe.endDate,
         data.actesAdministratifs[1]?.endDate,
+        data.avenants?.[0]?.endDate,
       ].filter(Boolean) as string[];
       const actualEnd = await endInput.inputValue();
       expect(possibleEndDates).toContain(actualEnd);

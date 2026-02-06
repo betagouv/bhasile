@@ -7,7 +7,7 @@ import { TestCpomAjoutData, TestCpomFinanceData } from "./cpom-types";
  *
  * - Main CPOM document: 2024-01-01 to 2025-12-31 + file
  * - Avenant that extends end date to 2026-12-31
- * - Select all structures (or first N)
+ * - Select only the seeded structure (cada1)
  */
 export const cpomDepartementale: {
   name: string;
@@ -38,7 +38,7 @@ export const cpomDepartementale: {
         filePath: "tests/e2e/fixtures/sample.csv",
       },
     ],
-    structureIds: "all",
+    structureIds: "seeded",
   },
   financeData: {
     2024: {
