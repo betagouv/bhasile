@@ -381,17 +381,18 @@ model Operateur {
 }
 
 model Cpom {
-  id             Int             @id @default(autoincrement())
-  name           String?
-  structures     CpomStructure[]
-  region         String?
-  departements   String[]
-  granularity    CpomGranularity @default(REGIONALE)
-  dateStart      DateTime?
-  dateEnd        DateTime?
-  cpomMillesimes CpomMillesime[]
-  operateur      Operateur       @relation(fields: [operateurId], references: [id])
-  operateurId    Int
+  id                    Int             @id @default(autoincrement())
+  name                  String?
+  structures            CpomStructure[]
+  region                String?
+  departements          String[]
+  granularity           CpomGranularity @default(REGIONALE)
+  dateStart             DateTime?
+  dateEnd               DateTime?
+  cpomMillesimes        CpomMillesime[]
+  operateur             Operateur       @relation(fields: [operateurId], references: [id])
+  operateurId           Int
+  actesAdministratifs   FileUpload[]
 
   createdAt DateTime    @default(now())
   updatedAt DateTime    @default(now()) @updatedAt
