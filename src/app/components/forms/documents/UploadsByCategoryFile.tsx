@@ -165,7 +165,7 @@ export const UploadsByCategoryFile = ({
                           {
                             label: `Cet avenant modifie la date de fin du ${categoryShortName}.`,
                             nativeInputProps: {
-                              name: ``,
+                              name: "",
                               value: "showEndDateInput",
                               checked: showEndDateInput.includes(
                                 typedAvenant.uuid
