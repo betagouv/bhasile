@@ -1,5 +1,5 @@
 import Select from "@codegouvfr/react-dsfr/Select";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
@@ -30,9 +30,18 @@ export const LocationSelector = () => {
     }
   };
 
+  const departementLength = useMemo(() => departements.length, [departements]);
+  const firstDepartement = useMemo(() => departements[0], [departements]);
   useEffect(() => {
     if (granularity === "DEPARTEMENTALE") {
-      setValue("departements", [], { shouldValidate: true });
+      if (
+        departementLength > 1 ||
+        DEPARTEMENTS.find(
+          (departement) => departement.numero === firstDepartement
+        )?.region !== region
+      ) {
+        setValue("departements", [], { shouldValidate: true });
+      }
     } else {
       setValue(
         "departements",
@@ -40,7 +49,14 @@ export const LocationSelector = () => {
         { shouldValidate: true }
       );
     }
-  }, [region, setValue, departementsOfRegion, granularity]);
+  }, [
+    departementLength,
+    firstDepartement,
+    region,
+    setValue,
+    departementsOfRegion,
+    granularity,
+  ]);
 
   const handleDepartementToggle = (value: string) => {
     if (departements.includes(value)) {
@@ -65,6 +81,8 @@ export const LocationSelector = () => {
       });
     }
   };
+
+  console.log("departements", departements);
 
   return (
     <div className="grid grid-cols-3 gap-6">
