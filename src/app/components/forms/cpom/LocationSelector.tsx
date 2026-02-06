@@ -30,9 +30,21 @@ export const LocationSelector = () => {
     }
   };
 
+  const departementLength = useMemo(() => departements.length, [departements]);
+  const firstDepartement = useMemo(() => departements[0], [departements]);
   useEffect(() => {
     if (granularity === "DEPARTEMENTALE") {
-      setValue("departements", [], { shouldValidate: true });
+      if (departementLength === 0) {
+        return;
+      }
+      if (
+        departementLength > 1 ||
+        DEPARTEMENTS.find(
+          (departement) => departement.numero === firstDepartement
+        )?.region !== region
+      ) {
+        setValue("departements", [], { shouldValidate: true });
+      }
     } else {
       setValue(
         "departements",
@@ -40,7 +52,14 @@ export const LocationSelector = () => {
         { shouldValidate: true }
       );
     }
-  }, [region, setValue, departementsOfRegion, granularity]);
+  }, [
+    departementLength,
+    firstDepartement,
+    region,
+    setValue,
+    departementsOfRegion,
+    granularity,
+  ]);
 
   const handleDepartementToggle = (value: string) => {
     if (departements.includes(value)) {
