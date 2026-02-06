@@ -1,20 +1,22 @@
 import { useRouter } from "next/navigation";
-import { ReactElement } from "react";
+import { ReactElement, useState } from "react";
 
 import { Block } from "@/app/components/common/Block";
+import { getYearRange } from "@/app/utils/date.util";
 import {
   isStructureAutorisee,
-  isStructureInCpom,
   isStructureSubventionnee,
+  wasStructureInCpom,
 } from "@/app/utils/structure.util";
-import { CURRENT_YEAR } from "@/constants";
+import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { BudgetExecutoire } from "./BudgetExecutoire";
-import { DetailAffectations } from "./DetailAffectations";
+import { CpomStaticTable } from "./CpomStaticTable";
 import { DocumentsAdministratifs } from "./DocumentsAdministratifs";
 import { DotationChart } from "./DotationChart";
 import { HistoriqueIndicateursGeneraux } from "./HistoriqueIndicateursGeneraux";
+import { StructureCpomSwitch } from "./StructureCpomSwitch";
 import { StructureStaticTable } from "./StructureStaticTable";
 
 export const FinancesBlock = (): ReactElement => {
@@ -22,14 +24,17 @@ export const FinancesBlock = (): ReactElement => {
 
   const router = useRouter();
 
+  const [shouldShowCpom, setShouldShowCpom] = useState(false);
+
+  const { years } = getYearRange({ order: "desc" });
+
   const isAutorisee = isStructureAutorisee(structure.type);
   const isConventionnee = isStructureSubventionnee(structure.type);
-  const isDetailAffectationsDisplayed =
-    isAutorisee || (isConventionnee && isStructureInCpom(structure));
+  const wasInCpom = wasStructureInCpom(structure, years);
 
   const budgetExecutoireYear = isAutorisee
-    ? CURRENT_YEAR - 1
-    : CURRENT_YEAR - 2;
+    ? AUTORISEE_OPEN_YEAR
+    : SUBVENTIONNEE_OPEN_YEAR;
 
   return (
     <Block
@@ -57,14 +62,17 @@ export const FinancesBlock = (): ReactElement => {
       <h4 className="text-title-blue-france fr-h6" id="gestionBudgetaireTitle">
         Gestion budgétaire
       </h4>
-      <div className="pb-5">
-        <StructureStaticTable />
-      </div>
-      {isDetailAffectationsDisplayed && (
-        <div className="pb-5">
-          <DetailAffectations />
-        </div>
+      {wasInCpom && (
+        <StructureCpomSwitch
+          handleChange={() =>
+            setShouldShowCpom((prevSetShouldShowCpom) => !prevSetShouldShowCpom)
+          }
+        />
       )}
+      <div className="pb-5">
+        {shouldShowCpom ? <CpomStaticTable /> : <StructureStaticTable />}
+      </div>
+      <hr className="mt-12 mb-12" />
       <h4 className="text-title-blue-france pb-2 fr-h6 mb-0">
         Documents administratifs et financiers transmis par l’opérateur
       </h4>

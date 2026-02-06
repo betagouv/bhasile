@@ -161,6 +161,13 @@ export const isStructureInCpom = (
   );
 };
 
+export const wasStructureInCpom = (
+  structure: StructureApiType,
+  years: number[]
+): boolean => {
+  return years.some((year) => isStructureInCpom(structure, year));
+};
+
 export const getCurrentCpomStructureDates = (
   structure: StructureApiType
 ): { dateStart?: string; dateEnd?: string } => {

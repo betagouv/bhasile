@@ -1,4 +1,3 @@
-import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { getYearRange } from "@/app/utils/date.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
@@ -7,6 +6,7 @@ import {
 } from "@/schemas/api/cpom.schema";
 
 import { BudgetTableCommentButtonAndModal } from "./BudgetTableCommentButtonAndModal";
+import { BudgetTableCommentStaticButtonAndModal } from "./BudgetTableCommentStaticButtonAndModal";
 
 export const BudgetTableCommentLine = ({
   label,
@@ -24,7 +24,9 @@ export const BudgetTableCommentLine = ({
   }
   return (
     <tr>
-      <td>{label}</td>
+      <td className="text-left!">
+        <strong className="whitespace-nowrap">{label}</strong>
+      </td>
       {years.map((year) => (
         <td key={year}>
           {canEdit ? (
@@ -37,7 +39,12 @@ export const BudgetTableCommentLine = ({
               budgets={budgets}
             />
           ) : (
-            <EmptyCell />
+            <BudgetTableCommentStaticButtonAndModal
+              year={year}
+              cpomStructures={cpomStructures}
+              cpomMillesimes={cpomMillesimes}
+              budgets={budgets}
+            />
           )}
         </td>
       ))}

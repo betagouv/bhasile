@@ -29,79 +29,48 @@ export const BudgetTableStaticValue = ({
     enabledYears,
     cpomStructures
   );
-  if (isDisabled) {
-    return <EmptyCell />;
-  }
+
+  let value: string | number | undefined | null;
 
   if (budgets) {
-    return (
-      <span className="text-center">
-        <NumberDisplay
-          value={
-            budgets[getMillesimeIndexForAYear(budgets, year)]?.[
-              name as keyof BudgetApiType
-            ]
-          }
-          type="currency"
-        />
-      </span>
-    );
+    value =
+      budgets[getMillesimeIndexForAYear(budgets, year)]?.[
+        name as keyof BudgetApiType
+      ];
   }
 
   if (cpomStructures) {
     const { cpomStructureIndex, cpomMillesimeIndex } =
       getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
 
-    if (cpomStructureIndex === -1 || cpomMillesimeIndex === -1) {
-      return <EmptyCell />;
-    }
-
-    const value =
+    value =
       cpomStructures[cpomStructureIndex]?.cpom?.cpomMillesimes?.[
         cpomMillesimeIndex
       ]?.[name as keyof CpomMillesimeApiType];
-
-    if (isNullOrUndefined(value)) {
-      return <EmptyCell />;
-    }
-
-    return (
-      <span className="text-center">
-        {colored ? (
-          <Badge type={Number(value) >= 0 ? "success" : "error"}>
-            <NumberDisplay value={value} type="currency" />
-          </Badge>
-        ) : (
-          <NumberDisplay value={value} type="currency" />
-        )}
-      </span>
-    );
   }
 
   if (cpomMillesimes) {
-    const value =
+    value =
       cpomMillesimes[getMillesimeIndexForAYear(cpomMillesimes, year)]?.[
         name as keyof CpomMillesimeApiType
       ];
-
-    if (isNullOrUndefined(value)) {
-      return <EmptyCell />;
-    }
-
-    return (
-      <span className="text-center">
-        {colored ? (
-          <Badge type={Number(value) >= 0 ? "success" : "error"}>
-            <NumberDisplay value={value} type="currency" />
-          </Badge>
-        ) : (
-          <NumberDisplay value={value} type="currency" />
-        )}
-      </span>
-    );
   }
 
-  return <EmptyCell />;
+  if (isDisabled || isNullOrUndefined(value)) {
+    return <EmptyCell />;
+  }
+
+  return (
+    <span className="text-center">
+      {colored ? (
+        <Badge type={Number(value) >= 0 ? "success" : "error"}>
+          <NumberDisplay value={value} type="currency" />
+        </Badge>
+      ) : (
+        <NumberDisplay value={value} type="currency" />
+      )}
+    </span>
+  );
 };
 
 type Props = {
