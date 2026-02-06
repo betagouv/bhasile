@@ -18,6 +18,7 @@ export default function UploadsByCategory({
   category,
   categoryShortName,
   title,
+  noTitleLegend = false,
   notice,
   isOptional,
   canAddFile,
@@ -96,9 +97,11 @@ export default function UploadsByCategory({
 
   return (
     <fieldset className="flex flex-col gap-6 w-full">
-      <legend className="text-xl font-bold mb-4 text-title-blue-france">
-        {title} {isOptional && "(optionnel)"}
-      </legend>
+      {!noTitleLegend && (
+        <legend className="text-xl font-bold mb-4 text-title-blue-france">
+          {title} {isOptional && "(optionnel)"}
+        </legend>
+      )}
       {notice && (
         <Notice
           severity="info"
@@ -147,6 +150,7 @@ type UploadsByCategoryProps = {
   category: ActeAdministratifCategoryType[number];
   categoryShortName: string;
   title: string;
+  noTitleLegend?: boolean;
   notice?: string | React.ReactElement;
   isOptional?: boolean;
   canAddFile?: boolean;

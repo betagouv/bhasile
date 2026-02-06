@@ -73,18 +73,36 @@ export const StructureLine = ({
             className="!mb-0 w-48"
           />
         </>
+      ) : index !== -1 ? (
+        <>
+          <span className="w-48 text-center">
+            {formatDate(cpomStructure[index].dateStart ?? cpomDateStart)}
+          </span>
+          <span className="w-4 text-center">–</span>
+          <span className="w-48 text-center">
+            {formatDate(cpomStructure[index].dateEnd ?? cpomDateEnd)}
+          </span>
+        </>
       ) : (
-        index !== -1 && (
-          <>
-            <span className="w-48 text-center">
-              {formatDate(cpomStructure[index].dateStart ?? cpomDateStart)}
-            </span>
-            <span className="w-4 text-center">–</span>
-            <span className="w-48 text-center">
-              {formatDate(cpomStructure[index].dateEnd ?? cpomDateEnd)}
-            </span>
-          </>
-        )
+        <>
+          <InputWithValidation
+            disabled={index === -1}
+            name={""}
+            control={control}
+            type="text"
+            label=""
+            className="!mb-0 w-48"
+          />
+          <span className="w-4 text-center">–</span>
+          <InputWithValidation
+            disabled={index === -1}
+            name={""}
+            control={control}
+            type="text"
+            label=""
+            className="!mb-0 w-48"
+          />
+        </>
       )}
       <div className="w-6">
         {index !== -1 && !isEditable && (

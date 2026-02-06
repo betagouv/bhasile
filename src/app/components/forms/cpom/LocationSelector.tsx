@@ -96,7 +96,7 @@ export const LocationSelector = () => {
           <option value="">Sélectionnez un département</option>
           {departementsOfRegion.map((departement) => (
             <option key={departement.numero} value={departement.numero}>
-              {departement.name}
+              {departement.numero} - {departement.name}
             </option>
           ))}
         </Select>

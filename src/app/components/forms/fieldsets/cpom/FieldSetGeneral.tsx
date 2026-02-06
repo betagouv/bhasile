@@ -9,6 +9,7 @@ export const FieldSetGeneral = () => {
       </legend>
       <GranularitySelector />
       <LocationSelector />
+      <hr />
     </fieldset>
   );
 };

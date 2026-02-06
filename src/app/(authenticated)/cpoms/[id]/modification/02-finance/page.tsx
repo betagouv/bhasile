@@ -101,7 +101,7 @@ export default function CpomModificationFinance() {
           Veuillez renseigner l’historique des données budgétaires{" "}
           <strong>à l’échelle de l’ensemble du CPOM</strong>. Concernant les
           affectations, ce tableau reflète le flux annuel et ne constitue en
-          aucun cas un calcul ou du stock.
+          aucun cas un calcul du stock.
         </p>
         <CpomTable />
         {saveState === FetchState.ERROR && (
