@@ -30,6 +30,7 @@ export const protectedApiRoutes: ApiRoute[] = [
   {
     pattern: /^\/api\/cpoms$/,
     routes: {
+      GET: "proconnect",
       PUT: "proconnect",
       POST: "proconnect",
     },

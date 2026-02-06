@@ -65,7 +65,7 @@ export default function CpomModificationIdentification() {
         currentStep={1}
         nextTitle="Analyse financière"
         stepCount={2}
-        title="Identification du cpom"
+        title="Identification du CPOM"
         className="w-1/2"
       />
       <FormWrapper

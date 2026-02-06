@@ -9,6 +9,7 @@ export const FieldSetDocuments = () => {
       </legend>
       <MaxSizeNotice />
       <DatesAndDocuments />
+      <hr />
     </fieldset>
   );
 };

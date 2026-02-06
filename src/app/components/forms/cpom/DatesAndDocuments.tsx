@@ -74,6 +74,7 @@ export const DatesAndDocuments = () => {
         category="CPOM"
         categoryShortName="CPOM"
         title="CPOM"
+        noTitleLegend={true}
         canAddFile={false}
         canAddAvenant={true}
         avenantCanExtendDateEnd={true}
