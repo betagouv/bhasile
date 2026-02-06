@@ -31,7 +31,6 @@ export const LocationSelector = () => {
   };
 
   useEffect(() => {
-    console.log("granularity", granularity);
     if (granularity === "DEPARTEMENTALE") {
       setValue("departements", [], { shouldValidate: true });
     } else {
