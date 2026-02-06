@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 
+import { DEPARTEMENTS } from "@/constants";
 import { CpomApiType, CpomMillesimeApiType } from "@/schemas/api/cpom.schema";
 import {
   CpomFormValues,
@@ -7,7 +8,7 @@ import {
 } from "@/schemas/forms/base/cpom.schema";
 import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
 
-import { getYearFromDate, getYearRange } from "./date.util";
+import { getYearRange } from "./date.util";
 
 export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
   return {
@@ -15,7 +16,7 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
     name: cpom?.name ?? "",
     region: cpom?.region ?? "",
     departements: cpom?.departements ?? [],
-    granularity: cpom?.granularity ?? "REGIONALE",
+    granularity: cpom?.granularity ?? "DEPARTEMENTALE",
     dateStart: computeCpomDates(cpom).dateStart ?? "",
     dateEnd: computeCpomDates(cpom).dateEnd ?? "",
     operateur: cpom?.operateur ?? { name: "", id: undefined },
@@ -88,10 +89,21 @@ const getCpomMillesimesDefaultValues = (
 };
 
 export const formatCpomName = (cpom: CpomApiType): string => {
-  return (
-    cpom.name ||
-    `${cpom.operateur?.name} - ${cpom.region} (${getYearFromDate(computeCpomDates(cpom).dateStart)} - ${getYearFromDate(computeCpomDates(cpom).dateEnd)})`
-  );
+  let zone = cpom.region;
+
+  if (cpom.granularity === "DEPARTEMENTALE") {
+    const departement = DEPARTEMENTS.find(
+      (departement) => departement.numero === cpom.departements?.[0]
+    );
+    if (departement) {
+      zone = departement.numero + " - " + departement.name;
+    }
+  }
+  if (cpom.granularity === "INTERDEPARTEMENTALE") {
+    zone = cpom.departements?.join(", ");
+  }
+
+  return cpom.name || `${cpom.operateur?.name} ${zone}`;
 };
 
 export const computeCpomDates = (

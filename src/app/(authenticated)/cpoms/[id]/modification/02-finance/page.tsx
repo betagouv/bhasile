@@ -75,6 +75,7 @@ export default function CpomModificationFinance() {
         nextTitle=""
         stepCount={2}
         title="Analyse financière"
+        className="w-1/2"
       />
 
       <FormWrapper
