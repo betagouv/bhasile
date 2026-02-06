@@ -311,6 +311,7 @@ describe("structure util", () => {
                 },
               ],
               granularity: "DEPARTEMENTALE",
+              granularity: "DEPARTEMENTALE",
             },
           },
         ],
@@ -442,6 +443,7 @@ describe("structure util", () => {
                 },
               ],
               granularity: "DEPARTEMENTALE",
+              granularity: "DEPARTEMENTALE",
             },
           },
         ],
@@ -470,6 +472,7 @@ describe("structure util", () => {
         ],
       });
 
+      // GIVEN - dateEnd is null (schema requires string but we need to test runtime)
       // GIVEN - dateEnd is null (schema requires string but we need to test runtime)
       const structure2 = createStructure({
         id: 7,
@@ -1058,6 +1061,7 @@ describe("structure util", () => {
               },
             ],
             cpomMillesimes: undefined,
+            granularity: "DEPARTEMENTALE",
             granularity: "DEPARTEMENTALE",
           },
         },

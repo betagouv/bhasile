@@ -55,4 +55,5 @@ export const cpomApiAjoutSchema = cpomApiSchema.extend({
 
 export type CpomMillesimeApiType = z.infer<typeof cpomMillesimeApiSchema>;
 export type CpomApiType = z.infer<typeof cpomApiSchema>;
+
 export type CpomStructureApiType = z.infer<typeof cpomStructureApiSchema>;
