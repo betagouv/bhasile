@@ -1,5 +1,7 @@
 import { expect, Page } from "@playwright/test";
 
+import { CURRENT_YEAR, START_YEAR } from "@/constants";
+
 import { TIMEOUTS, URLS } from "../../constants";
 import { safeExecute } from "../../error-handler";
 import { FormHelper } from "../../form-helper";
@@ -7,12 +9,9 @@ import { TestCpomFinanceData } from "../../test-data/cpom-types";
 import { WaitHelper } from "../../wait-helper";
 import { BasePage } from "../BasePage";
 
-const CPOM_FINANCE_YEAR_START = 2021;
-const CPOM_FINANCE_YEAR_END = 2025; // CURRENT_YEAR in app constants
-
-function getMillesimeIndexForYear(year: number): number {
-  return CPOM_FINANCE_YEAR_END - year;
-}
+const getMillesimeIndexForYear = (year: number): number => {
+  return CURRENT_YEAR - year;
+};
 
 const CPOM_FINANCE_LINE_NAMES = [
   "dotationDemandee",
@@ -100,8 +99,8 @@ export class CpomModificationFinancePage extends BasePage {
   ): Record<number, number> {
     const yearIndexMap: Record<number, number> = {};
     const sortedYears = Object.keys(financeData)
-      .map((y) => Number(y))
-      .filter((y) => y >= CPOM_FINANCE_YEAR_START && y <= CPOM_FINANCE_YEAR_END)
+      .map((year) => Number(year))
+      .filter((year) => year >= START_YEAR && year <= CURRENT_YEAR)
       .sort((a, b) => a - b);
     for (const year of sortedYears) {
       yearIndexMap[year] = getMillesimeIndexForYear(year);
@@ -119,7 +118,7 @@ export class CpomModificationFinancePage extends BasePage {
 
     for (const [yearStr, values] of Object.entries(financeData)) {
       const year = parseInt(yearStr, 10);
-      if (year < CPOM_FINANCE_YEAR_START || year > CPOM_FINANCE_YEAR_END) {
+      if (year < START_YEAR || year > CURRENT_YEAR) {
         continue;
       }
       const index = getMillesimeIndexForYear(year);
@@ -132,7 +131,9 @@ export class CpomModificationFinancePage extends BasePage {
         if (!(await input.isEnabled().catch(() => false))) continue;
         const actual = await input.inputValue();
         const actualNormalized = actual.replace(/\s/g, "").replace(",", ".");
-        const expectedStr = String(expected);
+        const expectedStr = String(expected)
+          .replace(/\s/g, "")
+          .replace(",", ".");
         expect(
           actualNormalized,
           `cpomMillesimes.${index}.${lineName} (year ${year})`

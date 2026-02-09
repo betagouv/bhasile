@@ -50,12 +50,12 @@ export const cpomDepartementale: {
       reportANouveau: 3000,
     },
     2025: {
-      dotationDemandee: 105000,
+      dotationDemandee: "105 000",
       dotationAccordee: 100000,
-      cumulResultatNet: 1500,
+      cumulResultatNet: 153,
       repriseEtat: 500,
       reserveInvestissement: 4000,
-      reportANouveau: 2500,
+      reportANouveau: "25,3",
     },
     2026: {
       dotationDemandee: 110000,

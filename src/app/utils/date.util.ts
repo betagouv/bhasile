@@ -2,7 +2,7 @@ import "dayjs/locale/fr.js";
 
 import dayjs from "dayjs";
 
-import { CURRENT_YEAR } from "@/constants";
+import { CURRENT_YEAR, START_YEAR } from "@/constants";
 
 dayjs.locale("fr");
 
@@ -140,7 +140,7 @@ export const getTypePlacesYearRange = (): { years: number[] } => {
 };
 
 export const getYearRange = ({
-  startYear = 2021,
+  startYear = START_YEAR,
   endYear = CURRENT_YEAR,
   order = "asc",
 }: {

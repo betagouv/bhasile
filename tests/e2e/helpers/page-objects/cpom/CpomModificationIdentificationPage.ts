@@ -26,14 +26,16 @@ export class CpomModificationIdentificationPage extends BasePage {
     await expect(regionSelect).toHaveValue(data.region);
 
     if (data.granularity === "DEPARTEMENTALE") {
-      const dept =
+      const departements =
         typeof data.departements === "string"
           ? data.departements
           : data.departements[0];
-      const deptSelect = this.page.locator(SELECTORS.CPOM_DEPARTEMENTS_SELECT);
-      const value = await deptSelect.inputValue().catch(() => "");
+      const departementsSelect = this.page.locator(
+        SELECTORS.CPOM_DEPARTEMENTS_SELECT
+      );
+      const value = await departementsSelect.inputValue().catch(() => "");
       if (value !== "") {
-        await expect(deptSelect).toHaveValue(dept);
+        await expect(departementsSelect).toHaveValue(departements);
       }
     }
 

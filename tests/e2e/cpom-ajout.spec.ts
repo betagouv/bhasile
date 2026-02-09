@@ -45,7 +45,6 @@ async function runCpomAjoutTest(
     const ajoutPage = new CpomAjoutIdentificationPage(page);
     await ajoutPage.waitForLoad();
     await ajoutPage.fillForm(formData);
-    await page.waitForTimeout(15000);
     cpomId = await ajoutPage.submit();
 
     if (cpomId === null) {
@@ -62,12 +61,12 @@ async function runCpomAjoutTest(
 
     const modificationPage = new CpomModificationIdentificationPage(page);
     await modificationPage.verifyForm(formData);
-    await page.waitForTimeout(20000);
 
     await page.goto(URLS.cpomModificationFinance(cpomId), {
       waitUntil: "domcontentloaded",
     });
     const financePageForVerification = new CpomModificationFinancePage(page);
+
     await financePageForVerification.verifyFinanceTable(testCase.financeData);
   } finally {
     if (cpomId !== null) {

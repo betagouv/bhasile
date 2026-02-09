@@ -52,13 +52,13 @@ export class CpomAjoutIdentificationPage extends BasePage {
     );
 
     if (data.granularity === "DEPARTEMENTALE") {
-      const dept =
+      const departements =
         typeof data.departements === "string"
           ? data.departements
           : data.departements[0];
       await this.formHelper.selectOption(
         SELECTORS.CPOM_DEPARTEMENTS_SELECT,
-        dept
+        departements
       );
     } else if (data.granularity === "INTERDEPARTEMENTALE") {
       const desired = new Set(

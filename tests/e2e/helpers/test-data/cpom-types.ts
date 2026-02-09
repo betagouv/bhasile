@@ -2,6 +2,8 @@
  * Test data types for CPOM e2e tests
  */
 
+import { FinanceValue } from "./types";
+
 export type TestCpomAjoutData = {
   granularity: "DEPARTEMENTALE" | "INTERDEPARTEMENTALE" | "REGIONALE";
   region: string;
@@ -29,19 +31,19 @@ export type TestCpomAjoutData = {
 export type TestCpomFinanceData = Record<
   number,
   {
-    dotationDemandee?: number;
-    dotationAccordee?: number;
-    cumulResultatNet?: number;
-    repriseEtat?: number;
-    affectationReservesFondsDedies?: number;
-    reserveInvestissement?: number;
-    chargesNonReconductibles?: number;
-    reserveCompensationDeficits?: number;
-    reserveCompensationBFR?: number;
-    reserveCompensationAmortissements?: number;
-    fondsDedies?: number;
-    reportANouveau?: number;
-    autre?: number;
+    dotationDemandee?: FinanceValue;
+    dotationAccordee?: FinanceValue;
+    cumulResultatNet?: FinanceValue;
+    repriseEtat?: FinanceValue;
+    affectationReservesFondsDedies?: FinanceValue;
+    reserveInvestissement?: FinanceValue;
+    chargesNonReconductibles?: FinanceValue;
+    reserveCompensationDeficits?: FinanceValue;
+    reserveCompensationBFR?: FinanceValue;
+    reserveCompensationAmortissements?: FinanceValue;
+    fondsDedies?: FinanceValue;
+    reportANouveau?: FinanceValue;
+    autre?: FinanceValue;
     commentaire?: string;
   }
 >;
