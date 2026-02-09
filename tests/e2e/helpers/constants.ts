@@ -31,4 +31,11 @@ export const URLS = {
   finalisationStep: (structureId: number, step: string) =>
     `${BASE_URL}/structures/${structureId}/finalisation/${step}`,
   structure: (structureId: number) => `${BASE_URL}/structures/${structureId}`,
+
+  // CPOM
+  CPOMS_AJOUT_IDENTIFICATION: `${BASE_URL}/cpoms/ajout/01-identification`,
+  cpomModificationIdentification: (cpomId: number) =>
+    `${BASE_URL}/cpoms/${cpomId}/modification/01-identification`,
+  cpomModificationFinance: (cpomId: number) =>
+    `${BASE_URL}/cpoms/${cpomId}/modification/02-finance`,
 } as const;

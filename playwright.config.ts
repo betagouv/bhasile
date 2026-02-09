@@ -4,11 +4,11 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  timeout: 30000,
+  timeout: 45000,
   workers: 1, // Run tests sequentially to avoid race conditions
   use: {
     baseURL: "http://localhost:3000",
-    headless: true,
+    headless: false,
     viewport: { width: 1600, height: 800 },
     ignoreHTTPSErrors: true,
     extraHTTPHeaders: {

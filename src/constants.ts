@@ -17,6 +17,8 @@ export const FILE_UPLOAD_EXPIRATION_DELAY = 60 * 60; // 1 hour
 export const CURRENT_YEAR = 2025;
 export const CURRENT_OPEN_YEAR = 2025;
 
+export const START_YEAR = 2021;
+
 export const AUTORISEE_OPEN_YEAR = 2024;
 export const SUBVENTIONNEE_OPEN_YEAR = 2023;
 

@@ -129,3 +129,11 @@ export const createOrUpdateCpomMillesimes = async (
     })
   );
 };
+
+export const deleteCpom = async (id: number): Promise<void> => {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("deleteCpom is only used in e2e tests");
+  }
+  await prisma.cpomMillesime.deleteMany({ where: { cpomId: id } });
+  await prisma.cpom.delete({ where: { id } });
+};
