@@ -1,8 +1,10 @@
 import z from "zod";
 
 import { zSafeYear } from "@/app/utils/zodCustomFields";
+import { StructureType } from "@/types/structure.type";
 
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
+import { formApiSchema } from "./form.schema";
 import { operateurApiSchema } from "./operateur.schema";
 
 export const cpomMillesimeApiSchema = z.object({
@@ -24,7 +26,7 @@ export const cpomMillesimeApiSchema = z.object({
   commentaire: z.string().nullish(),
 });
 
-const cpomApiBaseSchema = z.object({
+export const cpomApiSchema = z.object({
   id: z.number().optional(),
   name: z.string().nullish(),
   operateur: operateurApiSchema.optional(),
@@ -34,19 +36,34 @@ const cpomApiBaseSchema = z.object({
   granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
   actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
+  structures: z
+    .array(
+      z.object({
+        id: z.number().optional(),
+        cpomId: z.number().optional(),
+        structureId: z.number(),
+        dateStart: z.string().datetime().nullish(),
+        dateEnd: z.string().datetime().nullish(),
+        structure: z.object({
+          id: z.number().optional(),
+          dnaCode: z.string(),
+          type: z.nativeEnum(StructureType),
+          communeAdministrative: z.string(),
+          operateur: operateurApiSchema,
+          forms: z.array(formApiSchema),
+        }),
+      })
+    )
+    .optional(),
 });
 
 export const cpomStructureApiSchema = z.object({
   id: z.number().optional(),
   cpomId: z.number().optional(),
-  cpom: cpomApiBaseSchema.optional(),
+  cpom: cpomApiSchema.optional(),
   structureId: z.number(),
   dateStart: z.string().datetime().nullish(),
   dateEnd: z.string().datetime().nullish(),
-});
-
-export const cpomApiSchema = cpomApiBaseSchema.extend({
-  structures: z.array(cpomStructureApiSchema),
 });
 
 export const cpomApiAjoutSchema = cpomApiSchema.extend({
