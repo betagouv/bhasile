@@ -78,22 +78,25 @@ export const cpomSchema = baseCpomSchema
       if (!convention) {
         return true;
       }
-      for (const acteAdministratif of data.actesAdministratifs) {
-        if (acteAdministratif.endDate) {
-          console.log(acteAdministratif.endDate, convention.endDate);
-          if (
-            (formatDateToIsoString(acteAdministratif.endDate) || "") <
-            (formatDateToIsoString(convention.endDate) || "")
-          ) {
-            return false;
-          }
+      const avenants = data.actesAdministratifs.filter(
+        (acteAdministratif) => acteAdministratif.parentFileUploadId
+      );
+      for (const acteAdministratif of avenants) {
+        const avenantEndDate = formatDateToIsoString(acteAdministratif.endDate);
+
+        const conventionEndDate = formatDateToIsoString(convention.endDate);
+        if (!avenantEndDate || !conventionEndDate) {
+          continue;
+        }
+        if (avenantEndDate < conventionEndDate) {
+          return false;
         }
       }
       return true;
     },
     {
       message:
-        "La date de fin de l'avenant doit être antérieure à la date de fin du CPOM",
+        "La date de fin de l'avenant doit être posterieure à la date de fin du CPOM",
       path: ["actesAdministratifs"],
     }
   )

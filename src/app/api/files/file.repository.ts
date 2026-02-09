@@ -159,8 +159,6 @@ export const updateFileUploads = async (
         return;
       }
 
-      console.log(fileUpload);
-
       await tx.fileUpload.update({
         where: { key: fileUpload.key },
         data: {

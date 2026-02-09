@@ -76,11 +76,6 @@ export const LocationSelector = () => {
   ]);
 
   const handleDepartementToggle = (value: string) => {
-    console.log(
-      value,
-      departements,
-      departements.filter((departement) => departement !== value)
-    );
     if (departements.includes(value)) {
       if (departements.length === 1) {
         setValue(

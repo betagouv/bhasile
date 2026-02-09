@@ -41,7 +41,11 @@ export const UploadsByCategoryFile = ({
 
   const [showAvenantEndDateInput, setShowAvenantEndDateInput] = useState<
     string[]
-  >(avenants.filter((avenant) => avenant.endDate).map((avenant) => avenant.id));
+  >(
+    avenants
+      .filter((avenant) => avenant.endDate)
+      .map((avenant) => avenant.id ?? avenant.uuid)
+  );
 
   const getAvenantIndex = (id: string) => {
     const index = fields.findIndex(
