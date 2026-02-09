@@ -1,5 +1,6 @@
 import z from "zod";
 
+import { isNullOrUndefined } from "@/app/utils/common.util";
 import {
   zId,
   zSafeDecimalsNullish,
@@ -34,7 +35,7 @@ export const budgetAutoriseeOpenYear1Schema =
 export const budgetAutoriseeOpenSchemaWithoutRefinement =
   budgetAutoriseeOpenYear1Schema.extend({
     // Résultat
-    totalProduitsProposes: zSafeDecimals(),
+    totalProduitsProposes: zSafeDecimalsNullish(),
     totalProduits: zSafeDecimals(),
     totalChargesProposees: zSafeDecimals(),
     totalCharges: zSafeDecimals(),
@@ -52,9 +53,21 @@ export const budgetAutoriseeOpenSchemaWithoutRefinement =
   });
 
 export const budgetAutoriseeOpenSchema =
-  budgetAutoriseeOpenSchemaWithoutRefinement.superRefine(
-    validateAffectationReservesDetails
-  );
+  budgetAutoriseeOpenSchemaWithoutRefinement
+    .superRefine(validateAffectationReservesDetails)
+    .refine(
+      (data) => {
+        if (data.year > 2023 && isNullOrUndefined(data.totalProduitsProposes)) {
+          return false;
+        }
+        return true;
+      },
+      {
+        message:
+          "Total produits proposés est obligatoire pour les années après 2023",
+        path: ["totalProduitsProposes"],
+      }
+    );
 
 export const budgetSubventionneeNotOpenSchema = budgetBaseSchema; // Duplicated for comprehensibility
 
