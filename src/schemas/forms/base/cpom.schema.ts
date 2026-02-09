@@ -1,5 +1,6 @@
 import z from "zod";
 
+import { formatDateToIsoString } from "@/app/utils/date.util";
 import {
   nullishFrenchDateToISO,
   zId,
@@ -64,6 +65,36 @@ export const cpomSchema = baseCpomSchema
     {
       message: "La date de début du CPOM doit être antérieure à la date de fin",
       path: ["dateEnd"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.actesAdministratifs.length === 0) {
+        return true;
+      }
+      const convention = data.actesAdministratifs.find(
+        (acteAdministratif) => !acteAdministratif.parentFileUploadId
+      );
+      if (!convention) {
+        return true;
+      }
+      for (const acteAdministratif of data.actesAdministratifs) {
+        if (acteAdministratif.endDate) {
+          console.log(acteAdministratif.endDate, convention.endDate);
+          if (
+            (formatDateToIsoString(acteAdministratif.endDate) || "") <
+            (formatDateToIsoString(convention.endDate) || "")
+          ) {
+            return false;
+          }
+        }
+      }
+      return true;
+    },
+    {
+      message:
+        "La date de fin de l'avenant doit être antérieure à la date de fin du CPOM",
+      path: ["actesAdministratifs"],
     }
   )
   .refine(

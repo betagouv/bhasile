@@ -1,8 +1,9 @@
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { cn } from "@/app/utils/classname.util";
 import { formatDateToIsoString } from "@/app/utils/date.util";
 import { AdditionalFieldsType } from "@/types/categoryToDisplay.type";
 
@@ -14,7 +15,12 @@ import InputWithValidation from "../InputWithValidation";
 dayjs.extend(customParseFormat);
 
 export const DatesAndDocuments = () => {
-  const { watch, control, setValue } = useFormContext();
+  const { watch, control, setValue, formState } = useFormContext();
+
+  const hasErrors = useMemo(
+    () => !!formState.errors?.actesAdministratifs,
+    [formState.errors]
+  );
 
   const actesAdministratifs = watch(
     "actesAdministratifs"
@@ -55,34 +61,47 @@ export const DatesAndDocuments = () => {
   }, [actesAdministratifs, actesDatesKey, setValue]);
 
   return (
-    <div className="flex gap-2">
-      <InputWithValidation
-        id="dateStart"
-        name="dateStart"
-        control={control}
-        label=""
-        type="hidden"
-      />
-      <InputWithValidation
-        id="dateEnd"
-        name="dateEnd"
-        control={control}
-        label=""
-        type="hidden"
-      />
-      <UploadsByCategory
-        category="CPOM"
-        categoryShortName="CPOM"
-        title="CPOM"
-        noTitleLegend={true}
-        canAddFile={false}
-        canAddAvenant={true}
-        avenantCanExtendDateEnd={true}
-        isOptional={false}
-        additionalFieldsType={AdditionalFieldsType.DATE_START_END}
-        documentLabel="Document"
-        addFileButtonLabel="Ajouter un CPOM"
-      />
-    </div>
+    <>
+      <div
+        className={cn(
+          "flex gap-2",
+          hasErrors && "border border-solid border-action-high-error rounded-lg"
+        )}
+      >
+        <InputWithValidation
+          id="dateStart"
+          name="dateStart"
+          control={control}
+          label=""
+          type="hidden"
+        />
+        <InputWithValidation
+          id="dateEnd"
+          name="dateEnd"
+          control={control}
+          label=""
+          type="hidden"
+        />
+        <UploadsByCategory
+          category="CPOM"
+          categoryShortName="CPOM"
+          title="CPOM"
+          noTitleLegend={true}
+          canAddFile={false}
+          canAddAvenant={true}
+          avenantCanExtendDateEnd={true}
+          isOptional={false}
+          additionalFieldsType={AdditionalFieldsType.DATE_START_END}
+          documentLabel="Document"
+          addFileButtonLabel="Ajouter un CPOM"
+        />
+      </div>
+      {hasErrors && (
+        <p className="text-default-error m-0 p-0">
+          Les dates de fin des avenants doivent être antérieures à la date de
+          fin du CPOM
+        </p>
+      )}
+    </>
   );
 };

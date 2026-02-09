@@ -144,7 +144,7 @@ export const UploadsByCategoryFile = ({
           {avenants?.map((avenant) => {
             const avenantIndex = getAvenantIndex(avenant.id ?? avenant.uuid);
             return (
-              <span key={`${avenant.uuid}`}>
+              <span key={`${avenant.id ?? avenant.uuid}`}>
                 <div className="grid grid-cols-2 gap-6 my-6">
                   <div>
                     <div className="flex gap-6 items-start">
