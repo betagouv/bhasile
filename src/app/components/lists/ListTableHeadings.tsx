@@ -5,82 +5,27 @@ import { ReactElement, useEffect, useRef, useState } from "react";
 
 import { Table } from "@/app/components/common/Table";
 import { cn } from "@/app/utils/classname.util";
-import { StructureColumn } from "@/types/StructureColumn.type";
+import { ListColumn } from "@/types/ListColumn";
 
 import { OrderButton } from "./OrderButton";
 
-const COLUMNS: {
-  label: string;
-  column: StructureColumn;
-  orderBy: boolean;
-  centered: boolean;
-}[] = [
-  {
-    label: "DNA",
-    column: "dnaCode",
-    orderBy: true,
-    centered: false,
-  },
-  {
-    label: "Type",
-    column: "type",
-    orderBy: true,
-    centered: false,
-  },
-  {
-    label: "Opérateur",
-    column: "operateur",
-    orderBy: true,
-    centered: false,
-  },
-  {
-    label: "Dépt.",
-    column: "departementAdministratif",
-    orderBy: true,
-    centered: true,
-  },
-  {
-    label: "Bâti",
-    column: "bati",
-    orderBy: true,
-    centered: false,
-  },
-  {
-    label: "Communes",
-    column: "communes",
-    orderBy: false,
-    centered: false,
-  },
-  {
-    label: "Places aut.",
-    column: "placesAutorisees",
-    orderBy: true,
-    centered: true,
-  },
-  {
-    label: "Fin convention",
-    column: "finConvention",
-    orderBy: true,
-    centered: false,
-  },
-];
-
-export const StructuresTableHeadings = ({
+export const ListTableHeadings = ({
   ariaLabelledBy,
+  columns,
   children,
 }: Props): ReactElement => {
   const router = useRouter();
 
   const searchParams = useSearchParams();
 
-  const [column, setColumn] = useState<StructureColumn | null>(
-    searchParams.get("column") as StructureColumn | null
+  const [column, setColumn] = useState<ListColumn["column"] | null>(
+    searchParams.get("column") as ListColumn["column"] | null
   );
   const [direction, setDirection] = useState<"asc" | "desc" | null>(
     searchParams.get("direction") as "asc" | "desc" | null
   );
 
-  const handleOrdering = (newColumn: StructureColumn) => {
+  const handleOrdering = (newColumn: ListColumn["column"]) => {
     if (newColumn === column) {
       if (direction === "asc") {
         setDirection("desc");
@@ -94,7 +39,7 @@ export const StructuresTableHeadings = ({
     }
   };
 
-  const prevColumn = useRef<StructureColumn | null>(null);
+  const prevColumn = useRef<ListColumn["column"] | null>(null);
   const prevDirection = useRef<"asc" | "desc" | null>(null);
 
   useEffect(() => {
@@ -119,7 +64,7 @@ export const StructuresTableHeadings = ({
   return (
     <Table
       headings={[
-        ...COLUMNS.map((columnToDisplay) => (
+        ...columns.map((columnToDisplay) => (
           <th scope="col" key={columnToDisplay.column}>
             <span
               className={cn(
@@ -151,5 +96,6 @@ export const StructuresTableHeadings = ({
 
 type Props = {
   ariaLabelledBy: string;
+  columns: ListColumn[];
   children: ReactElement[];
 };

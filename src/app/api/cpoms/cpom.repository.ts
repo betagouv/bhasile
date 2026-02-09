@@ -15,6 +15,7 @@ export const findAll = async (): Promise<Cpom[]> => {
       structures: true,
       cpomMillesimes: true,
       operateur: true,
+      actesAdministratifs: true,
     },
   });
 };

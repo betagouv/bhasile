@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { OrderButton } from "@/app/(authenticated)/structures/_components/OrderButton";
-import { StructureColumn } from "@/types/StructureColumn.type";
+import { OrderButton } from "@/app/components/lists/OrderButton";
+import { StructureColumn } from "@/types/ListColumn";
 
 export const getOrderButton = (column: StructureColumn) => {
   const allButtons = screen.getAllByRole("button");

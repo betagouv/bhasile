@@ -3,7 +3,7 @@ import {
   ActeAdministratifCategory,
   DocumentFinancierCategory,
 } from "@/types/file-upload.type";
-import { StructureColumn } from "@/types/StructureColumn.type";
+import { StructureColumn } from "@/types/ListColumn";
 
 import { convertToRepartition } from "../adresses/adresse.util";
 import { getLatestPlacesAutoriseesPerStructure } from "./structure.repository";

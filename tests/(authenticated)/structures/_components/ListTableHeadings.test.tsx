@@ -2,7 +2,8 @@ import { render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { StructuresTableHeadings } from "@/app/(authenticated)/structures/_components/StructuresTableHeadings";
+import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
+import { ListColumn } from "@/types/ListColumn";
 
 import { getOrderButton } from "./OrderButton.test";
 
@@ -19,7 +20,46 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams(),
 }));
 
-describe("StructuresTableHeadings", () => {
+const COLUMNS: ListColumn[] = [
+  {
+    label: "Opérateur",
+    column: "operateur",
+    orderBy: true,
+    centered: false,
+  },
+  {
+    label: "Dépt.",
+    column: "departementAdministratif",
+    orderBy: true,
+    centered: true,
+  },
+  {
+    label: "Bâti",
+    column: "bati",
+    orderBy: true,
+    centered: false,
+  },
+  {
+    label: "Communes",
+    column: "communes",
+    orderBy: false,
+    centered: false,
+  },
+  {
+    label: "Places aut.",
+    column: "placesAutorisees",
+    orderBy: true,
+    centered: true,
+  },
+  {
+    label: "Fin convention",
+    column: "finConvention",
+    orderBy: true,
+    centered: false,
+  },
+];
+
+describe("ListTableHeadings", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -30,13 +70,13 @@ describe("StructuresTableHeadings", () => {
     );
 
     render(
-      <StructuresTableHeadings ariaLabelledBy="test">
+      <ListTableHeadings ariaLabelledBy="test" columns={COLUMNS}>
         {[
           <tr key="test">
             <td>Test</td>
           </tr>,
         ]}
-      </StructuresTableHeadings>
+      </ListTableHeadings>
     );
 
     const dnaButton = getOrderButton("dnaCode");
@@ -48,13 +88,13 @@ describe("StructuresTableHeadings", () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
 
     render(
-      <StructuresTableHeadings ariaLabelledBy="test">
+      <ListTableHeadings ariaLabelledBy="test" columns={COLUMNS}>
         {[
           <tr key="test">
             <td>Test</td>
           </tr>,
         ]}
-      </StructuresTableHeadings>
+      </ListTableHeadings>
     );
 
     const typeButton = getOrderButton("type");
@@ -74,13 +114,13 @@ describe("StructuresTableHeadings", () => {
     );
 
     render(
-      <StructuresTableHeadings ariaLabelledBy="test">
+      <ListTableHeadings ariaLabelledBy="test" columns={COLUMNS}>
         {[
           <tr key="test">
             <td>Test</td>
           </tr>,
         ]}
-      </StructuresTableHeadings>
+      </ListTableHeadings>
     );
 
     const dnaButton = getOrderButton("dnaCode");
@@ -103,13 +143,13 @@ describe("StructuresTableHeadings", () => {
     vi.clearAllMocks();
 
     render(
-      <StructuresTableHeadings ariaLabelledBy="test">
+      <ListTableHeadings ariaLabelledBy="test" columns={COLUMNS}>
         {[
           <tr key="test">
             <td>Test</td>
           </tr>,
         ]}
-      </StructuresTableHeadings>
+      </ListTableHeadings>
     );
 
     // Wait for initial render effects
@@ -139,13 +179,13 @@ describe("StructuresTableHeadings", () => {
     );
 
     render(
-      <StructuresTableHeadings ariaLabelledBy="test">
+      <ListTableHeadings ariaLabelledBy="test" columns={COLUMNS}>
         {[
           <tr key="test">
             <td>Test</td>
           </tr>,
         ]}
-      </StructuresTableHeadings>
+      </ListTableHeadings>
     );
 
     const typeButton = getOrderButton("type");
