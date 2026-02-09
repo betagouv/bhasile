@@ -9,6 +9,7 @@ import { PublicType } from "@/types/structure.type";
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { AdressesViewer } from "./AdressesViewer";
 import { ContactsViewer } from "./ContactsViewer";
+import { CpomViewer } from "./CpomViewer";
 
 export const DescriptionBlock = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -84,6 +85,10 @@ export const DescriptionBlock = (): ReactElement => {
           <strong className="pr-2">Vulnérabilité</strong>
           {getVulnerabiliteLabel()}
         </div>
+      </div>
+      <hr />
+      <div className="mb-2">
+        <CpomViewer />
       </div>
       <hr />
       <div className="mb-2">

@@ -239,6 +239,24 @@ export const findOne = async (id: number): Promise<Structure> => {
         include: {
           cpom: {
             include: {
+              structures: {
+                include: {
+                  structure: {
+                    select: {
+                      id: true,
+                      dnaCode: true,
+                      type: true,
+                      communeAdministrative: true,
+                      operateur: {
+                        select: {
+                          name: true,
+                        },
+                      },
+                      forms: true,
+                    },
+                  },
+                },
+              },
               operateur: true,
               actesAdministratifs: true,
               cpomMillesimes: {
