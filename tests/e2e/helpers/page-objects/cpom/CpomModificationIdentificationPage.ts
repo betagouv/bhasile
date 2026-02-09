@@ -45,6 +45,10 @@ export class CpomModificationIdentificationPage extends BasePage {
     const mainActe = data.actesAdministratifs[0];
     if (mainActe) {
       const startInput = this.page.locator(SELECTORS.CPOM_ACTE_START_DATE(0));
+      await startInput.waitFor({
+        state: "visible",
+        timeout: TIMEOUTS.NAVIGATION,
+      });
       await expect(startInput).toHaveValue(mainActe.startDate ?? "");
       const endInput = this.page.locator(SELECTORS.CPOM_ACTE_END_DATE(0));
       const possibleEndDates = [

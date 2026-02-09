@@ -70,7 +70,6 @@ export default function UploadsByCategory({
 
   const handleDeleteField = (index: number) => {
     const parent = actesAdministratifs[index];
-
     const avenantIndices = actesAdministratifs
       .map((field, index) => ({ field, index }))
       .filter(({ field }) => field.parentFileUploadId === parent?.id)
@@ -113,7 +112,7 @@ export default function UploadsByCategory({
       {filteredFields &&
         filteredFields.length > 0 &&
         filteredFields.map((field) => {
-          const fieldIndex = getItemIndex(field.id ?? field.uuid);
+          const fieldIndex = getItemIndex(field.id || field.uuid);
 
           return (
             <div key={fieldIndex} className="mb-4">

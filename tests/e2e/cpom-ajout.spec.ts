@@ -66,7 +66,6 @@ async function runCpomAjoutTest(
       waitUntil: "domcontentloaded",
     });
     const financePageForVerification = new CpomModificationFinancePage(page);
-
     await financePageForVerification.verifyFinanceTable(testCase.financeData);
   } finally {
     if (cpomId !== null) {
