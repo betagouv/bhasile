@@ -33,7 +33,7 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
           ...acteAdministratif,
           startDate: acteAdministratif.startDate ?? undefined,
           endDate: acteAdministratif.endDate ?? undefined,
-          date: acteAdministratif.endDate ?? undefined,
+          date: acteAdministratif.date ?? undefined,
         }))
       : [
           {

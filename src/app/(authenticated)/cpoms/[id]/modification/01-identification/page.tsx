@@ -53,6 +53,8 @@ export default function CpomModificationIdentification() {
     }
   };
 
+  console.log(cpom);
+
   if (!cpom) {
     return null;
   }

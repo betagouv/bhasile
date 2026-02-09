@@ -87,10 +87,10 @@ export default function UploadsByCategory({
     refreshFields();
   };
 
-  const getItemIndex = (uuid: string) => {
+  const getItemIndex = (id: string) => {
     const index = actesAdministratifs.findIndex(
       (acteAdministratif: ActeAdministratifField) =>
-        acteAdministratif.uuid === uuid
+        acteAdministratif.uuid === id || acteAdministratif.id === id
     );
     return index;
   };
@@ -113,7 +113,7 @@ export default function UploadsByCategory({
       {filteredFields &&
         filteredFields.length > 0 &&
         filteredFields.map((field) => {
-          const fieldIndex = getItemIndex(field.uuid);
+          const fieldIndex = getItemIndex(field.id ?? field.uuid);
 
           return (
             <div key={fieldIndex} className="mb-4">

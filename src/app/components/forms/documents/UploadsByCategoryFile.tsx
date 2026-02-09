@@ -33,17 +33,21 @@ export const UploadsByCategoryFile = ({
   const watchFieldName = `actesAdministratifs.${index}.id`;
   const mainFileId = watch(watchFieldName);
 
-  const [showEndDateInput, setShowEndDateInput] = useState<string[]>([]);
-
   let avenants = fields.filter(
     (field) =>
       (field as unknown as ActeAdministratifField).parentFileUploadId ===
       mainFileId
-  );
+  ) as ActeAdministratifField[];
 
-  const getAvenantIndex = (uuid: string) => {
+  const [showAvenantEndDateInput, setShowAvenantEndDateInput] = useState<
+    string[]
+  >(avenants.filter((avenant) => avenant.endDate).map((avenant) => avenant.id));
+
+  const getAvenantIndex = (id: string) => {
     const index = fields.findIndex(
-      (f) => (f as unknown as ActeAdministratifField).uuid === uuid
+      (f) =>
+        (f as unknown as ActeAdministratifField).uuid === id ||
+        (f as unknown as ActeAdministratifField).id === id
     );
     return index;
   };
@@ -54,7 +58,7 @@ export const UploadsByCategoryFile = ({
       (field) =>
         (field as unknown as ActeAdministratifField).parentFileUploadId ===
         mainFileId
-    );
+    ) as ActeAdministratifField[];
   };
 
   const handleAddNewAvenant = (
@@ -138,10 +142,9 @@ export const UploadsByCategoryFile = ({
       {canAddAvenant && (
         <div className="flex flex-col ml-8 pl-8 border-l-2 border-default-grey">
           {avenants?.map((avenant) => {
-            const typedAvenant = avenant as unknown as ActeAdministratifField;
-            const avenantIndex = getAvenantIndex(typedAvenant.uuid);
+            const avenantIndex = getAvenantIndex(avenant.id ?? avenant.uuid);
             return (
-              <span key={`${typedAvenant.uuid}`}>
+              <span key={`${avenant.uuid}`}>
                 <div className="grid grid-cols-2 gap-6 my-6">
                   <div>
                     <div className="flex gap-6 items-start">
@@ -152,7 +155,8 @@ export const UploadsByCategoryFile = ({
                         className="w-full mb-0"
                         type="date"
                       />
-                      {showEndDateInput.includes(typedAvenant.uuid) && (
+                      {(showAvenantEndDateInput.includes(avenant.uuid) ||
+                        showAvenantEndDateInput.includes(avenant.id)) && (
                         <InputWithValidation
                           name={`actesAdministratifs.${avenantIndex}.endDate`}
                           control={control}
@@ -169,17 +173,21 @@ export const UploadsByCategoryFile = ({
                             label: `Cet avenant modifie la date de fin du ${categoryShortName}.`,
                             nativeInputProps: {
                               name: "",
-                              value: "showEndDateInput",
-                              checked: showEndDateInput.includes(
-                                typedAvenant.uuid
+                              value: "showAvenantEndDateInput",
+                              checked: showAvenantEndDateInput.includes(
+                                avenant.id ?? avenant.uuid
                               ),
                               onChange: () => {
                                 if (
-                                  showEndDateInput.includes(typedAvenant.uuid)
+                                  showAvenantEndDateInput.includes(
+                                    avenant.id ?? avenant.uuid
+                                  ) ||
+                                  showAvenantEndDateInput.includes(avenant.id)
                                 ) {
-                                  setShowEndDateInput(
-                                    showEndDateInput.filter(
-                                      (uuid) => uuid !== typedAvenant.uuid
+                                  setShowAvenantEndDateInput(
+                                    showAvenantEndDateInput.filter(
+                                      (id) =>
+                                        id !== (avenant.id ?? avenant.uuid)
                                     )
                                   );
                                   setValue(
@@ -187,9 +195,9 @@ export const UploadsByCategoryFile = ({
                                     undefined
                                   );
                                 } else {
-                                  setShowEndDateInput([
-                                    ...showEndDateInput,
-                                    typedAvenant.uuid,
+                                  setShowAvenantEndDateInput([
+                                    ...showAvenantEndDateInput,
+                                    avenant.uuid,
                                   ]);
                                 }
                               },
@@ -213,7 +221,7 @@ export const UploadsByCategoryFile = ({
                         {...register(
                           `actesAdministratifs.${avenantIndex}.category`
                         )}
-                        defaultValue={typedAvenant.category}
+                        defaultValue={avenant.category}
                       />
                     </div>
                     <Button
