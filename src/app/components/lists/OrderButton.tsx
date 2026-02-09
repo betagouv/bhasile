@@ -2,7 +2,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { ReactElement } from "react";
 
 import { cn } from "@/app/utils/classname.util";
-import { StructureColumn } from "@/types/StructureColumn.type";
+import { CpomColumn, StructureColumn } from "@/types/ListColumn";
 
 export const OrderButton = ({
   column,
@@ -59,8 +59,8 @@ export const OrderButton = ({
 };
 
 type Props = {
-  column: StructureColumn;
-  currentColumn: StructureColumn | null;
+  column: StructureColumn | CpomColumn;
+  currentColumn: StructureColumn | CpomColumn | null;
   currentDirection: "asc" | "desc" | null;
-  handleOrdering: (column: StructureColumn) => void;
+  handleOrdering: (column: StructureColumn | CpomColumn) => void;
 };

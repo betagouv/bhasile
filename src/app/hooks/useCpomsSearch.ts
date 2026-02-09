@@ -15,21 +15,21 @@ export const useCpomsSearch = () => {
     cpoms: CpomApiType[];
     totalCpoms: number;
   }> => {
-    setFetchState(`cpom-search`, FetchState.LOADING);
+    setFetchState(`cpoms-search`, FetchState.LOADING);
     try {
       const baseUrl = process.env.NEXT_PUBLIC_URL || "";
 
       const result = await fetch(`${baseUrl}/api/cpoms`);
 
       if (!result.ok) {
-        setFetchState(`cpom-search`, FetchState.ERROR);
+        setFetchState(`cpoms-search`, FetchState.ERROR);
         throw new Error(`Failed to fetch structures: ${result.status}`);
       }
-      setFetchState(`cpom-search`, FetchState.IDLE);
+      setFetchState(`cpoms-search`, FetchState.IDLE);
       return await result.json();
     } catch (error) {
       console.error("Error fetching structures:", error);
-      setFetchState(`cpom-search`, FetchState.ERROR);
+      setFetchState(`cpoms-search`, FetchState.ERROR);
       return { cpoms: [], totalCpoms: 0 };
     }
   }, [setFetchState]);

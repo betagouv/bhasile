@@ -4,7 +4,7 @@ import {
   structureAgentUpdateApiSchema,
   structureOperateurUpdateApiSchema,
 } from "@/schemas/api/structure.schema";
-import { StructureColumn } from "@/types/StructureColumn.type";
+import { StructureColumn } from "@/types/ListColumn";
 
 import {
   countBySearch,

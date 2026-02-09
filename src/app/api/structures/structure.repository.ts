@@ -2,8 +2,8 @@ import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { Structure, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
+import { StructureColumn } from "@/types/ListColumn";
 import { PrismaTransaction } from "@/types/prisma.type";
-import { StructureColumn } from "@/types/StructureColumn.type";
 
 import { createOrUpdateAdresses } from "../adresses/adresse.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
