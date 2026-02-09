@@ -34,6 +34,10 @@ export const BudgetTableCommentButtonAndModal = ({
 
   const inputModalRef = useRef<HTMLTextAreaElement>(null);
 
+  const isAboutCpom = useMemo(() => {
+    return cpomStructures || cpomMillesimes;
+  }, [cpomStructures, cpomMillesimes]);
+
   const commentPath = useMemo(
     () => getName("commentaire", year, budgets, cpomStructures, cpomMillesimes),
     [year, budgets, cpomStructures, cpomMillesimes]
@@ -81,6 +85,7 @@ export const BudgetTableCommentButtonAndModal = ({
           enabledYears,
           cpomStructures
         )}
+        className="font-bold"
       >
         {currentComment ? "Modifier" : "Ajouter"}
       </Button>
@@ -104,9 +109,11 @@ export const BudgetTableCommentButtonAndModal = ({
             },
           },
         ]}
+        className="[&_h1]:!text-left [&_p]:!text-left"
       >
         <p className="font-bold text-xl">
-          Détail affectation réserves et provisions du CPOM — Année {year}
+          Détail affectation réserves et provisions{" "}
+          {isAboutCpom ? "du CPOM" : "de la structure"} — {year}
         </p>
 
         <Input
@@ -114,6 +121,7 @@ export const BudgetTableCommentButtonAndModal = ({
           textArea
           nativeTextAreaProps={{
             ref: inputModalRef,
+            rows: 10,
           }}
         />
       </modal.Component>
