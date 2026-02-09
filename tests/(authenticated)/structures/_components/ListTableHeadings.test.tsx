@@ -22,6 +22,18 @@ vi.mock("next/navigation", () => ({
 
 const COLUMNS: ListColumn[] = [
   {
+    label: "DNA",
+    column: "dnaCode",
+    orderBy: true,
+    centered: false,
+  },
+  {
+    label: "Type",
+    column: "type",
+    orderBy: true,
+    centered: false,
+  },
+  {
     label: "Opérateur",
     column: "operateur",
     orderBy: true,
