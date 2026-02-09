@@ -10,11 +10,12 @@ export const Logo = (): ReactElement => {
       title="Accueil - Bhasile"
     >
       <Image
-        src="/logo.webp"
+        src="/logo.svg"
         alt="Logo Bhasile"
-        width={93}
-        height={32}
+        width={0}
+        height={0}
         loading="eager"
+        style={{ width: "40%", height: "auto" }}
       />
     </Link>
   );
