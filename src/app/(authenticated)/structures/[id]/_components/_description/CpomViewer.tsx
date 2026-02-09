@@ -35,7 +35,7 @@ export const CpomViewer = (): ReactElement => {
       </div>
       {showCpom && (
         <div className="text-mention-grey">
-          {currentCpomStructure?.cpom?.structures.map((structure) => (
+          {currentCpomStructure?.cpom?.structures?.map((structure) => (
             <div key={structure.id} className="flex items-center">
               <span className="flex gap-2 my-2">
                 <strong className="pr-3">{structure.structure.dnaCode}</strong>
