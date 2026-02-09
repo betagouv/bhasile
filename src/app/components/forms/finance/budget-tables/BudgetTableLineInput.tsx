@@ -37,7 +37,7 @@ export const BudgetTableLineInput = ({
           cpomStructures
         )}
       />
-      &nbsp;€
+      €
     </>
   );
 };
