@@ -10,7 +10,7 @@ import { CpomItem } from "./CpomItem";
 
 const COLUMNS: ListColumn[] = [
   {
-    label: "Operateur",
+    label: "Opérateur",
     column: "operateur",
     orderBy: false,
     centered: false,
@@ -63,6 +63,5 @@ export const CpomsTable = ({ cpoms, ariaLabelledBy }: Props): ReactElement => {
 
 type Props = {
   cpoms: CpomApiType[];
-  totalCpoms: number;
   ariaLabelledBy: string;
 };
