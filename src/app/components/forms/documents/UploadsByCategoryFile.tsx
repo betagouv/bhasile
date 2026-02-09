@@ -75,9 +75,9 @@ export const UploadsByCategoryFile = ({
 
   return (
     <>
-      <div className="grid grid-cols-[1fr_1fr_auto] gap-6 items-start">
+      <div className="flex gap-6 items-center mb-4">
         {additionalFieldsType === AdditionalFieldsType.DATE_START_END && (
-          <div className="flex gap-6 items-start h-full">
+          <div className="flex gap-6 items-center h-full flex-1">
             <InputWithValidation
               name={`actesAdministratifs.${index}.startDate`}
               defaultValue={field.startDate}
@@ -121,15 +121,18 @@ export const UploadsByCategoryFile = ({
             defaultValue={field.category}
           />
         </div>
-        {index > 0 && (
+        {index > 0 ? (
           <Button
             iconId="fr-icon-delete-bin-line"
             priority="tertiary no outline"
-            className="mt-8"
+            className="mt-8 !rounded-full !bg-default-grey-hover"
             title="Supprimer"
             onClick={() => handleDeleteField(index)}
             type="button"
+            size="small"
           />
+        ) : (
+          <div className="w-12" />
         )}
       </div>
       {canAddAvenant && (
@@ -198,8 +201,8 @@ export const UploadsByCategoryFile = ({
                       />
                     )}
                   </div>
-                  <div className="flex">
-                    <div className="flex flex-col w-full">
+                  <div className="flex items-center gap-8">
+                    <div className="flex flex-col">
                       <label className="mb-2">{documentLabel}</label>
                       <UploadWithValidation
                         name={`actesAdministratifs.${avenantIndex}.key`}
@@ -218,8 +221,9 @@ export const UploadsByCategoryFile = ({
                       onClick={() => handleDeleteAvenant(avenantIndex)}
                       type="button"
                       priority="tertiary no outline"
-                      className="mt-8"
+                      className="!rounded-full !bg-default-grey-hover"
                       title="Supprimer"
+                      size="small"
                     />
                   </div>
                 </div>
