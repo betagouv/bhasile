@@ -1,5 +1,5 @@
 import Select from "@codegouvfr/react-dsfr/Select";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
@@ -32,7 +32,17 @@ export const LocationSelector = () => {
 
   const departementLength = useMemo(() => departements.length, [departements]);
   const firstDepartement = useMemo(() => departements[0], [departements]);
+  const prevRegion = useRef(region);
+  const prevGranularity = useRef(granularity);
   useEffect(() => {
+    if (
+      prevGranularity.current === granularity &&
+      prevRegion.current === region
+    ) {
+      return;
+    }
+    prevGranularity.current = granularity;
+    prevRegion.current = region;
     if (granularity === "DEPARTEMENTALE") {
       if (departementLength === 0) {
         return;
@@ -45,7 +55,11 @@ export const LocationSelector = () => {
       ) {
         setValue("departements", [], { shouldValidate: true });
       }
-    } else {
+    }
+    if (granularity === "INTERDEPARTEMENTALE") {
+      setValue("departements", [], { shouldValidate: true });
+    }
+    if (granularity === "REGIONALE") {
       setValue(
         "departements",
         departementsOfRegion.map((departement) => departement.numero),
@@ -62,6 +76,11 @@ export const LocationSelector = () => {
   ]);
 
   const handleDepartementToggle = (value: string) => {
+    console.log(
+      value,
+      departements,
+      departements.filter((departement) => departement !== value)
+    );
     if (departements.includes(value)) {
       if (departements.length === 1) {
         setValue(
