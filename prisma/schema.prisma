@@ -584,9 +584,6 @@ enum ActeAdministratifCategory {
   ARRETE_AUTORISATION
   CONVENTION
   ARRETE_TARIFICATION
-  CPOM
-  INSPECTION_CONTROLE
-  EVALUATION
   AUTRE
 
   @@schema("public")

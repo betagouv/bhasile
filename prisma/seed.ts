@@ -12,7 +12,6 @@ import {
   createFakeFormStepDefinition,
 } from "./seeders/form.seed";
 import { createFakeOperateur } from "./seeders/operateur.seed";
-import { seedParentChildFileUploads } from "./seeders/parent-child-file-upload.seed";
 import { convertToPrismaObject } from "./seeders/seed-util";
 import {
   createFakeStructure,
@@ -79,7 +78,6 @@ export async function seed(): Promise<void> {
             StructureType.CAES,
             StructureType.CPH,
           ]),
-          cpom: faker.datatype.boolean(),
           isFinalised: faker.datatype.boolean(),
           counter: counter++,
         });
@@ -103,7 +101,6 @@ export async function seed(): Promise<void> {
             StructureType.CAES,
             StructureType.CPH,
           ]),
-          cpom: faker.datatype.boolean(),
           isFinalised: faker.datatype.boolean(),
           counter: counter++,
         });
@@ -124,18 +121,6 @@ export async function seed(): Promise<void> {
       data: convertToPrismaObject(operateurWithStructures),
     });
   }
-
-  const structures = await prisma.structure.findMany({
-    take: faker.number.int({ min: 30, max: 50 }),
-  });
-  console.log(
-    `📎 Ajout des fichiers parent-enfant pour ${structures.length} structures`
-  );
-
-  for (const structure of structures) {
-    await seedParentChildFileUploads(prisma, structure.dnaCode);
-  }
-  console.log("✅ Fichiers parent-enfant ajoutés");
 
   await createFakeCpoms(prisma);
 }
