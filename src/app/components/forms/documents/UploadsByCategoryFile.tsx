@@ -82,7 +82,6 @@ export const UploadsByCategoryFile = ({
     append(newField);
   };
 
-  console.log("avenantCanExtendDateEnd", avenantCanExtendDateEnd);
   return (
     <>
       <div className="flex gap-6 items-center mb-4">
@@ -215,7 +214,7 @@ export const UploadsByCategoryFile = ({
                       />
                     )}
                   </div>
-                  <div className="flex items-center gap-8 col">
+                  <div className="flex items-center gap-8">
                     <div className="flex flex-col">
                       <label className="mb-2">{documentLabel}</label>
                       <UploadWithValidation

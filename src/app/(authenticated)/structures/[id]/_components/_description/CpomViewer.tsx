@@ -53,6 +53,7 @@ export const CpomViewer = (): ReactElement => {
                     <Link
                       className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-s-line"
                       title="Voir la structure"
+                      aria-label="Voir la structure"
                       href={`/structures/${structure.structure.id}`}
                     />
                   )}
