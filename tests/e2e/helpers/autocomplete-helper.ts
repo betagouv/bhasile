@@ -64,15 +64,17 @@ export class AutocompleteHelper {
     await this.page.click(inputSelector);
     await this.page.fill(inputSelector, searchTerm);
 
-    const suggestion = this.page
-      .locator(suggestionSelector)
-      .filter({ hasText: suggestionText })
-      .first();
-    await suggestion.waitFor({
+    const anySuggestion = this.page.locator(suggestionSelector).first();
+    await anySuggestion.waitFor({
       state: "visible",
       timeout: TIMEOUTS.AUTOCOMPLETE,
     });
 
+    const suggestion = this.page
+      .locator(suggestionSelector)
+      .filter({ hasText: suggestionText })
+      .first();
+    await suggestion.waitFor({ state: "visible", timeout: 5000 });
     await suggestion.click();
   }
 
