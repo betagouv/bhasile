@@ -185,6 +185,7 @@ export const createFakeStuctureWithRelations = ({
       createFakeStructureTypologie({ year: 2024, placesAutorisees }),
       createFakeStructureTypologie({ year: 2023, placesAutorisees }),
     ],
+    actesAdministratifs: {
     fileUploads: Array.from({ length: 5 }, () =>
       createFakeFileUpload({
         cpom,

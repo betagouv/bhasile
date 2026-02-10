@@ -9,7 +9,9 @@ CREATE TYPE "DocumentFinancierGranularity" AS ENUM ('STRUCTURE', 'CPOM', 'STRUCT
 
 -- AlterTable
 ALTER TABLE "FileUpload" ADD COLUMN     "acteAdministratifId" INTEGER,
-ADD COLUMN     "documentFinancierId" INTEGER;
+ADD COLUMN     "documentFinancierId" INTEGER,
+ALTER COLUMN "granularity" DROP NOT NULL,
+ALTER COLUMN "granularity" DROP DEFAULT;
 
 -- CreateTable
 CREATE TABLE "ActeAdministratif" (

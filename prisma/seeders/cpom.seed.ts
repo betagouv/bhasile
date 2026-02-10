@@ -2,10 +2,11 @@ import { fakerFR as faker } from "@faker-js/faker";
 
 import {
   type Departement,
-  DocumentFinancierGranularity,
   FileUploadCategory,
   type PrismaClient,
 } from "@/generated/prisma/client";
+
+import { createFakeFileUpload } from "./file-upload.seed";
 
 const buildStructureMillesimeYears = (start: number, end: number): number[] => {
   const years: number[] = [];
@@ -125,14 +126,12 @@ export const createFakeCpoms = async (
           .map((departement) => departement.numero),
         actesAdministratifs: {
           create: {
-            key: `cpom-acte-${operateurIdStr}-${region}-${yearStart}-${yearEnd}`,
-            mimeType: "application/pdf",
-            fileSize: faker.number.int({ min: 1000, max: 500000 }),
-            originalName: `convention-cpom-${yearStart}-${yearEnd}.pdf`,
             category: FileUploadCategory.CPOM,
             startDate: dateStart,
             endDate: dateEnd,
-            granularity: DocumentFinancierGranularity.CPOM,
+            fileUploads: {
+              create: createFakeFileUpload(),
+            },
           },
         },
         structures: {

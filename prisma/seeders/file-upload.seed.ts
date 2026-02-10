@@ -1,88 +1,15 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
-import {
-  isStructureAutorisee,
-  isStructureSubventionnee,
-} from "@/app/utils/structure.util";
-import {
-  DocumentFinancierGranularity,
-  FileUpload,
-  FileUploadCategory,
-} from "@/generated/prisma/client";
-import { StructureType } from "@/types/structure.type";
+import { FileUpload } from "@/generated/prisma/client";
 
-import { generateDatePair } from "./seed-util";
-
-export const createFakeFileUpload = ({
-  category,
-  cpom,
-  structureType,
-}: CreateFakeFileUploadOptions): Omit<
+export const createFakeFileUpload = (): Omit<
   FileUpload,
-  "id" | "structureDnaCode" | "controleId" | "evaluationId" | "cpomId"
+  | "id"
+  | "acteAdministratifId"
+  | "documentFinancierId"
+  | "controleId"
+  | "evaluationId"
 > => {
-  return buildFakeFileUpload({
-    category,
-    cpom,
-    structureType,
-  });
-};
-
-export const createFakeFileUploadWithParent = ({
-  parentFileUploadId,
-}: CreateFakeFileUploadWithParentOptions): Omit<
-  FileUpload,
-  "id" | "structureDnaCode" | "controleId" | "evaluationId" | "cpomId"
-> => {
-  return buildFakeFileUpload({
-    parentFileUploadId,
-  });
-};
-
-const getFakeFileUploadCategories = (
-  cpom?: boolean,
-  structureType?: StructureType
-): FileUploadCategory[] => {
-  const cpomValue = cpom ?? faker.datatype.boolean();
-  const structureTypeValue =
-    structureType ?? faker.helpers.enumValue(StructureType);
-  const categories = Object.values(FileUploadCategory).filter((category) => {
-    if (isStructureAutorisee(structureTypeValue) && cpomValue) {
-      return true;
-    }
-    if (isStructureAutorisee(structureTypeValue) && !cpomValue) {
-      return category !== FileUploadCategory.CPOM;
-    }
-    if (isStructureSubventionnee(structureTypeValue) && cpomValue) {
-      return (
-        category !== FileUploadCategory.ARRETE_AUTORISATION &&
-        category !== FileUploadCategory.ARRETE_TARIFICATION
-      );
-    }
-    if (isStructureSubventionnee(structureTypeValue) && !cpomValue) {
-      return (
-        category !== FileUploadCategory.ARRETE_AUTORISATION &&
-        category !== FileUploadCategory.ARRETE_TARIFICATION &&
-        category !== FileUploadCategory.CPOM
-      );
-    }
-    return true;
-  });
-
-  return categories as FileUploadCategory[];
-};
-
-const buildFakeFileUpload = ({
-  category,
-  cpom,
-  structureType,
-  parentFileUploadId,
-}: BuildFakeFileUploadOptions): Omit<
-  FileUpload,
-  "id" | "structureDnaCode" | "controleId" | "evaluationId" | "cpomId"
-> => {
-  const fakeCategories = getFakeFileUploadCategories(cpom, structureType);
-  const [startDate, endDate] = generateDatePair();
   const { mime, ext } = randomDocFile();
   const fileName = faker.system.commonFileName(ext);
 
@@ -91,14 +18,15 @@ const buildFakeFileUpload = ({
     mimeType: mime,
     fileSize: faker.number.int({ min: 1, max: 100000 }),
     originalName: fileName,
-    date: faker.date.past(),
-    category: category ?? faker.helpers.arrayElement(fakeCategories),
-    startDate,
-    endDate,
-    categoryName:
-      category === FileUploadCategory.AUTRE ? faker.lorem.word() : null,
-    parentFileUploadId: parentFileUploadId ?? null,
-    granularity: DocumentFinancierGranularity.STRUCTURE,
+    granularity: null,
+    structureDnaCode: null,
+    cpomId: null,
+    date: null,
+    category: null,
+    startDate: null,
+    endDate: null,
+    categoryName: null,
+    parentFileUploadId: null,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   };
@@ -118,22 +46,4 @@ const docMimeMap = [
 
 const randomDocFile = () => {
   return faker.helpers.arrayElement(docMimeMap);
-};
-
-type BuildFakeFileUploadOptions = {
-  category?: FileUploadCategory;
-  cpom?: boolean;
-  structureType?: StructureType;
-  parentFileUploadId?: number;
-};
-
-type CreateFakeFileUploadOptions = {
-  category?: FileUploadCategory;
-  cpom?: boolean;
-  structureType?: StructureType;
-  parentFileUploadId?: number;
-};
-
-type CreateFakeFileUploadWithParentOptions = {
-  parentFileUploadId: number;
 };

@@ -255,7 +255,7 @@ model FileUpload {
   parentFileUpload      FileUpload?           @relation("FileUploadToFileUpload", fields: [parentFileUploadId], references: [id], onDelete: Cascade) // TO DELETE AFTER MIGRATION
   parentFileUploadId    Int? // TO DELETE AFTER MIGRATION
   childFileUploads      FileUpload[]          @relation("FileUploadToFileUpload") // TO DELETE AFTER MIGRATION
-  granularity           FileUploadGranularity @default(STRUCTURE) // TO DELETE AFTER MIGRATION
+  granularity           FileUploadGranularity? // TO DELETE AFTER MIGRATION
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
