@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import UploadWithValidation from "@/app/components/forms/UploadWithValidation";
+import { cn } from "@/app/utils/classname.util";
 import { AdditionalFieldsType } from "@/types/categoryToDisplay.type";
 
 import { ActeAdministratifField } from "./UploadsByCategory";
@@ -81,6 +82,7 @@ export const UploadsByCategoryFile = ({
     append(newField);
   };
 
+  console.log("avenantCanExtendDateEnd", avenantCanExtendDateEnd);
   return (
     <>
       <div className="flex gap-6 items-center mb-4">
@@ -105,7 +107,7 @@ export const UploadsByCategoryFile = ({
           </div>
         )}
         {additionalFieldsType === AdditionalFieldsType.NAME && (
-          <div className="flex gap-6 items-start h-full">
+          <div className="flex gap-6 items-start h-full flex-1">
             <InputWithValidation
               name={`actesAdministratifs.${index}.categoryName`}
               control={control}
@@ -147,11 +149,19 @@ export const UploadsByCategoryFile = ({
         <div className="flex flex-col ml-8 pl-8 border-l-2 border-default-grey">
           {avenants?.map((avenant) => {
             const avenantIndex = getAvenantIndex(avenant.id ?? avenant.uuid);
+            const shouldShowEndDateInput =
+              showAvenantEndDateInput.includes(avenant.uuid) ||
+              showAvenantEndDateInput.includes(avenant.id);
             return (
               <span key={`${avenant.id ?? avenant.uuid}`}>
-                <div className="grid grid-cols-2 gap-6 my-6">
-                  <div>
-                    <div className="flex gap-6 items-start">
+                <div className="flex gap-6 my-6">
+                  <div className="flex-1">
+                    <div
+                      className={cn(
+                        "grid gap-6",
+                        shouldShowEndDateInput ? "grid-cols-2" : "grid-cols-1"
+                      )}
+                    >
                       <InputWithValidation
                         name={`actesAdministratifs.${avenantIndex}.date`}
                         control={control}
@@ -159,8 +169,7 @@ export const UploadsByCategoryFile = ({
                         className="w-full mb-0"
                         type="date"
                       />
-                      {(showAvenantEndDateInput.includes(avenant.uuid) ||
-                        showAvenantEndDateInput.includes(avenant.id)) && (
+                      {shouldShowEndDateInput && (
                         <InputWithValidation
                           name={`actesAdministratifs.${avenantIndex}.endDate`}
                           control={control}
@@ -178,16 +187,9 @@ export const UploadsByCategoryFile = ({
                             nativeInputProps: {
                               name: "",
                               value: "showAvenantEndDateInput",
-                              checked: showAvenantEndDateInput.includes(
-                                avenant.id ?? avenant.uuid
-                              ),
+                              checked: shouldShowEndDateInput,
                               onChange: () => {
-                                if (
-                                  showAvenantEndDateInput.includes(
-                                    avenant.id ?? avenant.uuid
-                                  ) ||
-                                  showAvenantEndDateInput.includes(avenant.id)
-                                ) {
+                                if (shouldShowEndDateInput) {
                                   setShowAvenantEndDateInput(
                                     showAvenantEndDateInput.filter(
                                       (id) =>
@@ -201,7 +203,7 @@ export const UploadsByCategoryFile = ({
                                 } else {
                                   setShowAvenantEndDateInput([
                                     ...showAvenantEndDateInput,
-                                    avenant.uuid,
+                                    avenant.id ?? avenant.uuid,
                                   ]);
                                 }
                               },
@@ -213,7 +215,7 @@ export const UploadsByCategoryFile = ({
                       />
                     )}
                   </div>
-                  <div className="flex items-center gap-8">
+                  <div className="flex items-center gap-8 col">
                     <div className="flex flex-col">
                       <label className="mb-2">{documentLabel}</label>
                       <UploadWithValidation
