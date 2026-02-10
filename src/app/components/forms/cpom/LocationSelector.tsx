@@ -75,6 +75,12 @@ export const LocationSelector = () => {
     granularity,
   ]);
 
+  useEffect(() => {
+    if (departementsOfRegion.length === 1) {
+      setValue("granularity", "REGIONALE");
+    }
+  }, [departementsOfRegion, setValue]);
+
   const handleDepartementToggle = (value: string) => {
     if (departements.includes(value)) {
       if (departements.length === 1) {
