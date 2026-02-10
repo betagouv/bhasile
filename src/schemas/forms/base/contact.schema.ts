@@ -71,6 +71,15 @@ export const optionalContactSchema = z
         }
       });
     }
+
+    // Additional check: if any field is filled, also verify telephone is 10 digits
+    if (filledFields.length > 0 && telephone?.length !== 10) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Le numéro de téléphone doit contenir 10 caractères",
+        path: ["telephone"],
+      });
+    }
   });
 
 export const contactSchema = Object.assign(requiredContactSchema, {
