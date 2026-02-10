@@ -98,7 +98,7 @@ export const DatesAndDocuments = () => {
       </div>
       {hasErrors && (
         <p className="text-default-error m-0 p-0">
-          Les dates de fin des avenants doivent être posterieures à la date de
+          Les dates de fin des avenants doivent être postérieures à la date de
           fin du CPOM
         </p>
       )}

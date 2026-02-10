@@ -96,7 +96,7 @@ export const cpomSchema = baseCpomSchema
     },
     {
       message:
-        "La date de fin de l'avenant doit être posterieure à la date de fin du CPOM",
+        "La date de fin de l'avenant doit être postérieure à la date de fin du CPOM",
       path: ["actesAdministratifs"],
     }
   )

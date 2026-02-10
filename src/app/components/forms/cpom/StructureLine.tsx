@@ -1,6 +1,6 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
@@ -13,7 +13,7 @@ export const StructureLine = ({
   index,
   handleStructureChange,
 }: Props) => {
-  const { watch, control } = useFormContext();
+  const { watch, control, setValue } = useFormContext();
 
   const [isEditable, setIsEditable] = useState(false);
 
@@ -21,6 +21,21 @@ export const StructureLine = ({
 
   const cpomDateStart = watch("dateStart");
   const cpomDateEnd = watch("dateEnd");
+
+  const prevIsEditable = useRef(isEditable);
+  useEffect(() => {
+    if (prevIsEditable.current === isEditable) {
+      return;
+    }
+    prevIsEditable.current = isEditable;
+    if (!isEditable) {
+      setValue(`structures.${index}.dateStart`, undefined);
+      setValue(`structures.${index}.dateEnd`, undefined);
+    } else {
+      setValue(`structures.${index}.dateStart`, cpomDateStart);
+      setValue(`structures.${index}.dateEnd`, cpomDateEnd);
+    }
+  }, [index, setValue, cpomDateStart, cpomDateEnd, isEditable]);
 
   return (
     <div className="flex items-center gap-4 border-b border-gray-200 py-2 px-4">
