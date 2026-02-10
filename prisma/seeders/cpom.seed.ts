@@ -1,8 +1,8 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
 import {
+  ActeAdministratifCategory,
   type Departement,
-  FileUploadCategory,
   type PrismaClient,
 } from "@/generated/prisma/client";
 
@@ -126,7 +126,7 @@ export const createFakeCpoms = async (
           .map((departement) => departement.numero),
         actesAdministratifs: {
           create: {
-            category: FileUploadCategory.CPOM,
+            category: ActeAdministratifCategory.CONVENTION,
             startDate: dateStart,
             endDate: dateEnd,
             fileUploads: {

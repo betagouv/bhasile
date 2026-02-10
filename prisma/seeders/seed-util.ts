@@ -25,6 +25,8 @@ export const convertToPrismaObject = (initialObject: unknown): any => {
     "activites",
     "evenementsIndesirablesGraves",
     "evaluations",
+    "actesAdministratifs",
+    "documentsFinanciers",
   ];
 
   if (
