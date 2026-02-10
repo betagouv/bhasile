@@ -1,6 +1,6 @@
 import { Repartition } from "@/types/adresse.type";
 import { ControleType } from "@/types/controle.type";
-import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
+import { ActeAdministratifCategoryType } from "@/types/acte-administratif.type";
 import { StructureType } from "@/types/structure.type";
 
 export type TestStructureData = {

@@ -11,7 +11,7 @@ import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
   DocumentFinancierCategory,
   DocumentFinancierCategoryType,
-} from "@/types/file-upload.type";
+} from "@/types/acte-administratif.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 

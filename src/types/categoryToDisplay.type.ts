@@ -1,4 +1,4 @@
-import { ActeAdministratifCategoryType } from "./file-upload.type";
+import { ActeAdministratifCategoryType } from "./acte-administratif.type";
 
 export type CategoryDisplayRulesType = Record<
   Exclude<

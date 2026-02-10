@@ -1,6 +1,6 @@
 import { expect, Page } from "@playwright/test";
 
-import { ActeAdministratifCategory } from "@/types/file-upload.type";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 import { TIMEOUTS, URLS } from "../../constants";
 import { SELECTORS } from "../../selectors";

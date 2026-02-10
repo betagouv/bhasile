@@ -2,7 +2,7 @@ import { Prisma, Repartition, StructureType } from "@/generated/prisma/client";
 import {
   ActeAdministratifCategory,
   DocumentFinancierCategory,
-} from "@/types/file-upload.type";
+} from "@/types/acte-administratif.type";
 import { StructureColumn } from "@/types/ListColumn";
 
 import { convertToRepartition } from "../adresses/adresse.util";

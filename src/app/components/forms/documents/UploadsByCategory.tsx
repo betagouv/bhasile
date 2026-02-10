@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { AdditionalFieldsType } from "@/types/categoryToDisplay.type";
-import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
+import { ActeAdministratifCategoryType } from "@/types/acte-administratif.type";
 
 import { UploadsByCategoryFile } from "./UploadsByCategoryFile";
 

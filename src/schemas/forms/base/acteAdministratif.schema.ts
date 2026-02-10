@@ -1,23 +1,28 @@
 import z from "zod";
 
-import { optionalFrenchDateToISO } from "@/app/utils/zodCustomFields";
-import { ActeAdministratifCategory } from "@/types/file-upload.type";
+import { optionalFrenchDateToISO, zId } from "@/app/utils/zodCustomFields";
+import { fileApiSchema } from "@/schemas/api/file.schema";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 export const acteAdministratifAutoSaveSchema = z.object({
-  key: z.string().optional(),
+  id: zId(),
+  category: z.enum(ActeAdministratifCategory).optional(),
   date: optionalFrenchDateToISO(),
-  category: z.enum(ActeAdministratifCategory),
   startDate: optionalFrenchDateToISO(),
   endDate: optionalFrenchDateToISO(),
-  categoryName: z.string().nullish(),
-  parentFileUploadId: z.any().optional(),
-  uuid: z.string().optional(),
+  name: z.string().nullish(),
+  parentId: zId(),
+  fileUploads: z.array(fileApiSchema).optional(),
 });
 
 const acteAdministratifSchema = acteAdministratifAutoSaveSchema
   .refine(
     (data) => {
-      if (data.category !== "AUTRE" && !data.parentFileUploadId && data.key) {
+      if (
+        data.category !== "AUTRE" &&
+        !data.parentId &&
+        data.fileUploads?.length
+      ) {
         return !!data.startDate && !!data.endDate;
       }
       return true;
@@ -29,7 +34,7 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
   )
   .refine(
     (data) => {
-      if (data.parentFileUploadId && data.key) {
+      if (data.parentId && data.fileUploads?.length) {
         return !!data.date;
       }
       return true;
@@ -45,15 +50,15 @@ const acteAdministratifAutoriseesSchema = acteAdministratifSchema.refine(
     if (
       (data.category === "ARRETE_AUTORISATION" ||
         data.category === "ARRETE_TARIFICATION") &&
-      !data.parentFileUploadId
+      !data.parentId
     ) {
-      return !!data.key && !!data.startDate && !!data.endDate;
+      return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
     }
     return true;
   },
   {
     message: "Ces documents sont obligatoires.",
-    path: ["key"],
+    path: ["fileUploads"],
   }
 );
 
@@ -63,28 +68,28 @@ const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
       (data.category === "ARRETE_AUTORISATION" ||
         data.category === "ARRETE_TARIFICATION" ||
         data.category === "CONVENTION") &&
-      !data.parentFileUploadId
+      !data.parentId
     ) {
-      return !!data.key && !!data.startDate && !!data.endDate;
+      return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
     }
     return true;
   },
   {
     message: "Ces documents sont obligatoires.",
-    path: ["key"],
+    path: ["fileUploads"],
   }
 );
 
 export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
   (data) => {
-    if (data.category === "CPOM" && !data.parentFileUploadId) {
-      return !!data.key && !!data.startDate && !!data.endDate;
+    if (data.category === "CONVENTION" && !data.parentId) {
+      return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
     }
     return true;
   },
   {
     message: "Ces documents sont obligatoires.",
-    path: ["key"],
+    path: ["fileUploads"],
   }
 );
 

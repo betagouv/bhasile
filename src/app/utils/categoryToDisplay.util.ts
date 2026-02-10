@@ -6,7 +6,7 @@ import {
 import {
   ActeAdministratifCategory,
   ActeAdministratifCategoryType,
-} from "@/types/file-upload.type";
+} from "@/types/acte-administratif.type";
 
 import { isStructureSubventionnee } from "./structure.util";
 

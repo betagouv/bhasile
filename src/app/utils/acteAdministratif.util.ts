@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { StructureApiType } from "@/schemas/api/structure.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
-import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
+import { ActeAdministratifCategoryType } from "@/types/acte-administratif.type";
 
 import { getCategoriesToDisplay } from "./categoryToDisplay.util";
 
@@ -51,16 +51,13 @@ const getDefaultValuesFromDb = (
   return filteredActesAdministratifs.map((acteAdministratif) => {
     const formattedFileUploads = {
       ...acteAdministratif,
-      //TODO: Remove the uuid system
-      uuid: uuidv4(),
-      key: acteAdministratif.key,
+      fileUploads: acteAdministratif.fileUploads,
       category: acteAdministratif.category,
       date: acteAdministratif.date || undefined,
       startDate: acteAdministratif.startDate || "",
       endDate: acteAdministratif.endDate || "",
-      categoryName: acteAdministratif.categoryName,
-      parentFileUploadId:
-        Number(acteAdministratif.parentFileUploadId) || undefined,
+      name: acteAdministratif.name,
+      parentId: acteAdministratif.parentId || undefined,
     };
     return formattedFileUploads;
   });

@@ -1,6 +1,6 @@
 import { CURRENT_OPEN_YEAR, CURRENT_YEAR } from "@/constants";
-import { Granularity } from "@/types/document-financier";
-import { DocumentFinancierCategoryType } from "@/types/file-upload.type";
+import { Granularity } from "@/types/document-financier.type";
+import { DocumentFinancierCategoryType } from "@/types/acte-administratif.type";
 
 const baseYearIndex = CURRENT_YEAR - CURRENT_OPEN_YEAR;
 

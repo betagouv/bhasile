@@ -6,7 +6,7 @@ import {
   CpomFormValues,
   CpomMillesimeFormValues,
 } from "@/schemas/forms/base/cpom.schema";
-import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
+import { ActeAdministratifCategoryType } from "@/types/acte-administratif.type";
 
 import { getYearRange } from "./date.util";
 

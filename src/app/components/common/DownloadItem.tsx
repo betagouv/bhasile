@@ -7,7 +7,7 @@ import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { DocumentFinancierGranularity } from "@/generated/prisma/enums";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
-import { FileUploadCategoryType } from "@/types/file-upload.type";
+import { FileUploadCategoryType } from "@/types/acte-administratif.type";
 
 import { DocumentGranularityBadge } from "./DocumentGranularityBadge";
 

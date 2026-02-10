@@ -1,7 +1,7 @@
 import z from "zod";
 
 import { optionalFrenchDateToISO, zId } from "@/app/utils/zodCustomFields";
-import { ActeAdministratifCategory } from "@/types/file-upload.type";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 import { fileApiSchema } from "./file.schema";
 

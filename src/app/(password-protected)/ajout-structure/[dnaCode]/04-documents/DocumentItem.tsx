@@ -4,7 +4,7 @@ import { Control, UseFormRegister } from "react-hook-form";
 import UploadWithValidation from "@/app/components/forms/UploadWithValidation";
 import { getYearDate } from "@/app/utils/date.util";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
-import { FileUploadCategoryType } from "@/types/file-upload.type";
+import { FileUploadCategoryType } from "@/types/acte-administratif.type";
 
 import { UploadItem } from "../../_components/UploadItem";
 
