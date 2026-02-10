@@ -27,7 +27,7 @@ export const FileUploadCategory = [
   ...DocumentFinancierCategory,
 ] as const;
 
-export const FileUploadGranularity = [
+export const DocumentFinancierGranularity = [
   "STRUCTURE",
   "CPOM",
   "STRUCTURE_ET_CPOM",
@@ -39,4 +39,5 @@ export type DocumentFinancierCategoryType = typeof DocumentFinancierCategory;
 
 export type FileUploadCategoryType = typeof FileUploadCategory;
 
-export type FileUploadGranularityType = typeof FileUploadGranularity;
+export type DocumentFinancierGranularityType =
+  typeof DocumentFinancierGranularity;

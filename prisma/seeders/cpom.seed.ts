@@ -2,8 +2,8 @@ import { fakerFR as faker } from "@faker-js/faker";
 
 import {
   type Departement,
+  DocumentFinancierGranularity,
   FileUploadCategory,
-  FileUploadGranularity,
   type PrismaClient,
 } from "@/generated/prisma/client";
 
@@ -132,7 +132,7 @@ export const createFakeCpoms = async (
             category: FileUploadCategory.CPOM,
             startDate: dateStart,
             endDate: dateEnd,
-            granularity: FileUploadGranularity.CPOM,
+            granularity: DocumentFinancierGranularity.CPOM,
           },
         },
         structures: {

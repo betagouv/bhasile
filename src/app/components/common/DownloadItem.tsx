@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
-import { FileUploadGranularity } from "@/generated/prisma/enums";
+import { DocumentFinancierGranularity } from "@/generated/prisma/enums";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 import { FileUploadCategoryType } from "@/types/file-upload.type";
@@ -58,7 +58,9 @@ export const DownloadItem = ({
         {displayGranularity && (
           <div className="pr-1 inline">
             <DocumentGranularityBadge
-              granularity={fileUpload.granularity as FileUploadGranularity}
+              granularity={
+                fileUpload.granularity as DocumentFinancierGranularity
+              }
             />
           </div>
         )}

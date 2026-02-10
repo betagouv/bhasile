@@ -1,13 +1,22 @@
 import z from "zod";
 
-import { frenchDateToISO } from "@/app/utils/zodCustomFields";
-import { DocumentFinancierCategory } from "@/types/file-upload.type";
+import { zId, zSafeYear } from "@/app/utils/zodCustomFields";
+import {
+  DocumentFinancierCategory,
+  DocumentFinancierGranularity,
+} from "@/types/file-upload.type";
 
 import { fileApiSchema } from "./file.schema";
 
-export const documentFinancierApiSchema = fileApiSchema.extend({
-  date: frenchDateToISO(),
+export const documentFinancierApiSchema = z.object({
+  id: z.number().optional(),
+  structureDnaCode: z.string().optional(),
+  cpomId: zId(),
+  year: zSafeYear(),
+  granularity: z.enum(DocumentFinancierGranularity),
   category: z.enum(DocumentFinancierCategory),
+  name: z.string().optional(),
+  fileUploads: z.array(fileApiSchema).optional(),
 });
 
 export type DocumentFinancierApiType = z.infer<

@@ -5,9 +5,9 @@ import {
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import {
+  DocumentFinancierGranularity,
   FileUpload,
   FileUploadCategory,
-  FileUploadGranularity,
 } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 
@@ -98,7 +98,7 @@ const buildFakeFileUpload = ({
     categoryName:
       category === FileUploadCategory.AUTRE ? faker.lorem.word() : null,
     parentFileUploadId: parentFileUploadId ?? null,
-    granularity: FileUploadGranularity.STRUCTURE,
+    granularity: DocumentFinancierGranularity.STRUCTURE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   };
