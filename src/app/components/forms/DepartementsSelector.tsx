@@ -49,7 +49,7 @@ export const DepartementsSelector = ({
         <Button
           onClick={handleTogglePanel}
           disabled={departements.length === 0}
-          className="relative bg-contrast-grey text-black font-normal border-b-2 border-b-black w-full rounded-t-md "
+          className="relative bg-contrast-grey text-black font-normal border-b-2 border-b-black w-full rounded-t-md h-10"
           aria-labelledby="departementsSelector-label"
           aria-expanded={isOpen}
           aria-haspopup="listbox"

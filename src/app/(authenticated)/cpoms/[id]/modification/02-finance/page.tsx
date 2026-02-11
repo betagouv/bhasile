@@ -1,6 +1,7 @@
 "use client";
 
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
@@ -72,6 +73,10 @@ export default function CpomModificationFinance() {
       window.removeEventListener("popstate", handlePopState);
     };
   }, [router, cpom?.id, isCreation]);
+
+  useIsModalOpen(confirmationModal, {
+    onConceal: () => router.push(`/structures`),
+  });
 
   if (!cpom) {
     return null;

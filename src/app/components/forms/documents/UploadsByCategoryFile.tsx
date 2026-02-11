@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import UploadWithValidation from "@/app/components/forms/UploadWithValidation";
+import { cn } from "@/app/utils/classname.util";
 import { AdditionalFieldsType } from "@/types/categoryToDisplay.type";
 
 import { ActeAdministratifField } from "./UploadsByCategory";
@@ -33,17 +34,25 @@ export const UploadsByCategoryFile = ({
   const watchFieldName = `actesAdministratifs.${index}.id`;
   const mainFileId = watch(watchFieldName);
 
-  const [showEndDateInput, setShowEndDateInput] = useState<string[]>([]);
-
   let avenants = fields.filter(
     (field) =>
       (field as unknown as ActeAdministratifField).parentFileUploadId ===
       mainFileId
+  ) as ActeAdministratifField[];
+
+  const [showAvenantEndDateInput, setShowAvenantEndDateInput] = useState<
+    string[]
+  >(
+    avenants
+      .filter((avenant) => avenant.endDate)
+      .map((avenant) => avenant.id ?? avenant.uuid)
   );
 
-  const getAvenantIndex = (uuid: string) => {
+  const getAvenantIndex = (id: string) => {
     const index = fields.findIndex(
-      (f) => (f as unknown as ActeAdministratifField).uuid === uuid
+      (f) =>
+        (f as unknown as ActeAdministratifField).uuid === id ||
+        (f as unknown as ActeAdministratifField).id === id
     );
     return index;
   };
@@ -54,7 +63,7 @@ export const UploadsByCategoryFile = ({
       (field) =>
         (field as unknown as ActeAdministratifField).parentFileUploadId ===
         mainFileId
-    );
+    ) as ActeAdministratifField[];
   };
 
   const handleAddNewAvenant = (
@@ -75,9 +84,9 @@ export const UploadsByCategoryFile = ({
 
   return (
     <>
-      <div className="grid grid-cols-[1fr_1fr_auto] gap-6 items-start">
+      <div className="flex gap-6 items-center mb-4">
         {additionalFieldsType === AdditionalFieldsType.DATE_START_END && (
-          <div className="flex gap-6 items-start h-full">
+          <div className="flex gap-6 items-center h-full flex-1">
             <InputWithValidation
               name={`actesAdministratifs.${index}.startDate`}
               defaultValue={field.startDate}
@@ -97,7 +106,7 @@ export const UploadsByCategoryFile = ({
           </div>
         )}
         {additionalFieldsType === AdditionalFieldsType.NAME && (
-          <div className="flex gap-6 items-start h-full">
+          <div className="flex gap-6 items-start h-full flex-1">
             <InputWithValidation
               name={`actesAdministratifs.${index}.categoryName`}
               control={control}
@@ -121,27 +130,37 @@ export const UploadsByCategoryFile = ({
             defaultValue={field.category}
           />
         </div>
-        {index > 0 && (
+        {index > 0 ? (
           <Button
             iconId="fr-icon-delete-bin-line"
             priority="tertiary no outline"
-            className="mt-8"
+            className="mt-8 !rounded-full !bg-default-grey-hover"
             title="Supprimer"
             onClick={() => handleDeleteField(index)}
             type="button"
+            size="small"
           />
+        ) : (
+          <div className="w-12" />
         )}
       </div>
       {canAddAvenant && (
         <div className="flex flex-col ml-8 pl-8 border-l-2 border-default-grey">
           {avenants?.map((avenant) => {
-            const typedAvenant = avenant as unknown as ActeAdministratifField;
-            const avenantIndex = getAvenantIndex(typedAvenant.uuid);
+            const avenantIndex = getAvenantIndex(avenant.id ?? avenant.uuid);
+            const shouldShowEndDateInput =
+              showAvenantEndDateInput.includes(avenant.uuid) ||
+              showAvenantEndDateInput.includes(avenant.id);
             return (
-              <span key={`${typedAvenant.uuid}`}>
-                <div className="grid grid-cols-2 gap-6 my-6">
-                  <div>
-                    <div className="flex gap-6 items-start">
+              <span key={`${avenant.id ?? avenant.uuid}`}>
+                <div className="flex gap-6 my-6">
+                  <div className="flex-1">
+                    <div
+                      className={cn(
+                        "grid gap-6",
+                        shouldShowEndDateInput ? "grid-cols-2" : "grid-cols-1"
+                      )}
+                    >
                       <InputWithValidation
                         name={`actesAdministratifs.${avenantIndex}.date`}
                         control={control}
@@ -149,7 +168,7 @@ export const UploadsByCategoryFile = ({
                         className="w-full mb-0"
                         type="date"
                       />
-                      {showEndDateInput.includes(typedAvenant.uuid) && (
+                      {shouldShowEndDateInput && (
                         <InputWithValidation
                           name={`actesAdministratifs.${avenantIndex}.endDate`}
                           control={control}
@@ -166,17 +185,14 @@ export const UploadsByCategoryFile = ({
                             label: `Cet avenant modifie la date de fin du ${categoryShortName}.`,
                             nativeInputProps: {
                               name: "",
-                              value: "showEndDateInput",
-                              checked: showEndDateInput.includes(
-                                typedAvenant.uuid
-                              ),
+                              value: "showAvenantEndDateInput",
+                              checked: shouldShowEndDateInput,
                               onChange: () => {
-                                if (
-                                  showEndDateInput.includes(typedAvenant.uuid)
-                                ) {
-                                  setShowEndDateInput(
-                                    showEndDateInput.filter(
-                                      (uuid) => uuid !== typedAvenant.uuid
+                                if (shouldShowEndDateInput) {
+                                  setShowAvenantEndDateInput(
+                                    showAvenantEndDateInput.filter(
+                                      (id) =>
+                                        id !== (avenant.id ?? avenant.uuid)
                                     )
                                   );
                                   setValue(
@@ -184,9 +200,9 @@ export const UploadsByCategoryFile = ({
                                     undefined
                                   );
                                 } else {
-                                  setShowEndDateInput([
-                                    ...showEndDateInput,
-                                    typedAvenant.uuid,
+                                  setShowAvenantEndDateInput([
+                                    ...showAvenantEndDateInput,
+                                    avenant.id ?? avenant.uuid,
                                   ]);
                                 }
                               },
@@ -198,8 +214,8 @@ export const UploadsByCategoryFile = ({
                       />
                     )}
                   </div>
-                  <div className="flex">
-                    <div className="flex flex-col w-full">
+                  <div className="flex items-center gap-8">
+                    <div className="flex flex-col">
                       <label className="mb-2">{documentLabel}</label>
                       <UploadWithValidation
                         name={`actesAdministratifs.${avenantIndex}.key`}
@@ -210,7 +226,7 @@ export const UploadsByCategoryFile = ({
                         {...register(
                           `actesAdministratifs.${avenantIndex}.category`
                         )}
-                        defaultValue={typedAvenant.category}
+                        defaultValue={avenant.category}
                       />
                     </div>
                     <Button
@@ -218,8 +234,9 @@ export const UploadsByCategoryFile = ({
                       onClick={() => handleDeleteAvenant(avenantIndex)}
                       type="button"
                       priority="tertiary no outline"
-                      className="mt-8"
+                      className="!rounded-full !bg-default-grey-hover"
                       title="Supprimer"
+                      size="small"
                     />
                   </div>
                 </div>

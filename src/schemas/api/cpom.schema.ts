@@ -44,14 +44,16 @@ export const cpomApiSchema = z.object({
         structureId: z.number(),
         dateStart: z.string().datetime().nullish(),
         dateEnd: z.string().datetime().nullish(),
-        structure: z.object({
-          id: z.number().optional(),
-          dnaCode: z.string(),
-          type: z.nativeEnum(StructureType),
-          communeAdministrative: z.string(),
-          operateur: operateurApiSchema,
-          forms: z.array(formApiSchema),
-        }),
+        structure: z
+          .object({
+            id: z.number().optional(),
+            dnaCode: z.string(),
+            type: z.nativeEnum(StructureType),
+            communeAdministrative: z.string(),
+            operateur: operateurApiSchema,
+            forms: z.array(formApiSchema),
+          })
+          .optional(),
       })
     )
     .optional(),
