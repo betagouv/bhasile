@@ -59,8 +59,8 @@ export const StructureLine = ({
             },
           ]}
           className={cn(
-            "!my-2",
-            "[&_legend]:!p-0",
+            "my-2!",
+            "[&_legend]:p-0!",
             "[&_label]:text-sm [&_label]:leading-6 [&_label]:pb-0 [&_label]:text-mention-grey [&_label]:font-bold"
           )}
           small
@@ -75,7 +75,7 @@ export const StructureLine = ({
             control={control}
             type="date"
             label=""
-            className="!mb-0 w-48"
+            className="mb-0! w-48"
           />
           <span className="w-4 text-center">–</span>
           <InputWithValidation
@@ -85,7 +85,7 @@ export const StructureLine = ({
             control={control}
             type="date"
             label=""
-            className="!mb-0 w-48"
+            className="mb-0! w-48"
           />
         </>
       ) : index !== -1 ? (
@@ -106,7 +106,7 @@ export const StructureLine = ({
             control={control}
             type="text"
             label=""
-            className="!mb-0 w-48"
+            className="mb-0! w-48"
           />
           <span className="w-4 text-center">–</span>
           <InputWithValidation
@@ -115,7 +115,7 @@ export const StructureLine = ({
             control={control}
             type="text"
             label=""
-            className="!mb-0 w-48"
+            className="mb-0! w-48"
           />
         </>
       )}
