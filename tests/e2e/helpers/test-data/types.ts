@@ -1,6 +1,6 @@
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { Repartition } from "@/types/adresse.type";
 import { ControleType } from "@/types/controle.type";
-import { ActeAdministratifCategoryType } from "@/types/acte-administratif.type";
 import { StructureType } from "@/types/structure.type";
 
 export type TestStructureData = {
@@ -127,7 +127,7 @@ export type OuvertureFermetureData = {
 };
 
 export type ActeAdministratifData = {
-  category: ActeAdministratifCategoryType[number];
+  category: ActeAdministratifCategory[number];
   filePath: string;
   startDate?: string;
   endDate?: string;

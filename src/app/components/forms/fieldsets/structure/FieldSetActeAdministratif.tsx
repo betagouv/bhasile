@@ -3,7 +3,7 @@ import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
-import { AdditionalFieldsType } from "@/app/utils/categoryToDisplay.util";
+import { AdditionalFieldsType } from "@/app/utils/acteAdministratif.util";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
@@ -107,7 +107,7 @@ export default function FieldSetActeAdministratif({
 }
 
 type FieldSetActeAdministratifProps = {
-  category: ActeAdministratifCategory[number];
+  category: ActeAdministratifCategory[number] | "CPOM";
   categoryShortName: string;
   title: string;
   noTitleLegend?: boolean;

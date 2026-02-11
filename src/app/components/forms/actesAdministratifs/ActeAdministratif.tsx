@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import UploadWithValidation from "@/app/components/forms/UploadWithValidation";
-import { AdditionalFieldsType } from "@/app/utils/categoryToDisplay.util";
+import { AdditionalFieldsType } from "@/app/utils/acteAdministratif.util";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 
 import { Avenant } from "./Avenant";
