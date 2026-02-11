@@ -72,7 +72,6 @@ export const optionalContactSchema = z
       });
     }
 
-    // Additional check: if any field is filled, also verify telephone is 10 digits
     if (filledFields.length > 0 && telephone && telephone.length < 10) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
