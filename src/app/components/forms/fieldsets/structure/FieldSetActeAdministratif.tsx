@@ -3,18 +3,18 @@ import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
+import { AdditionalFieldsType } from "@/app/utils/categoryToDisplay.util";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
-import { AdditionalFieldsType } from "@/types/categoryToDisplay.type";
-import { ActeAdministratifCategoryType } from "@/types/acte-administratif.type";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
-import { UploadsByCategoryFile } from "./UploadsByCategoryFile";
+import { UploadsByCategoryFile } from "../../documents/UploadsByCategoryFile";
 
 export type ActeAdministratifField = ActeAdministratifFormValues & {
   id: string;
   uuid: string;
 };
 
-export default function UploadsByCategory({
+export default function FieldSetActeAdministratif({
   category,
   categoryShortName,
   title,
@@ -27,7 +27,7 @@ export default function UploadsByCategory({
   addFileButtonLabel,
   additionalFieldsType,
   documentLabel,
-}: UploadsByCategoryProps) {
+}: FieldSetActeAdministratifProps) {
   const { control, watch } = useFormContext();
   const { append, remove } = useFieldArray({
     control,
@@ -122,9 +122,7 @@ export default function UploadsByCategory({
                 field={field}
                 index={fieldIndex}
                 key={field.key || null}
-                additionalFieldsType={
-                  additionalFieldsType || AdditionalFieldsType.DATE_START_END
-                }
+                additionalFieldsType={additionalFieldsType}
                 documentLabel={documentLabel}
                 handleDeleteField={handleDeleteField}
                 canAddAvenant={canAddAvenant}
@@ -146,8 +144,8 @@ export default function UploadsByCategory({
   );
 }
 
-type UploadsByCategoryProps = {
-  category: ActeAdministratifCategoryType[number];
+type FieldSetActeAdministratifProps = {
+  category: ActeAdministratifCategory[number];
   categoryShortName: string;
   title: string;
   noTitleLegend?: boolean;

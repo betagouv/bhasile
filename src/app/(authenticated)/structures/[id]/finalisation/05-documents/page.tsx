@@ -1,7 +1,7 @@
 "use client";
 
 import { AutoSave } from "@/app/components/forms/AutoSave";
-import UploadsByCategory from "@/app/components/forms/documents/UploadsByCategory";
+import UploadsByCategory from "@/app/components/forms/fieldsets/structure/FieldSetActeAdministratif";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";

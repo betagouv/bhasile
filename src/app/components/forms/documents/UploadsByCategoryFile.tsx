@@ -9,7 +9,7 @@ import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import UploadWithValidation from "@/app/components/forms/UploadWithValidation";
 import { AdditionalFieldsType } from "@/types/categoryToDisplay.type";
 
-import { ActeAdministratifField } from "./UploadsByCategory";
+import { ActeAdministratifField } from "../fieldsets/structure/FieldSetActeAdministratif";
 
 export const UploadsByCategoryFile = ({
   field,

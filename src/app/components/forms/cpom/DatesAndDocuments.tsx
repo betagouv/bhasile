@@ -8,7 +8,7 @@ import { AdditionalFieldsType } from "@/types/categoryToDisplay.type";
 
 import UploadsByCategory, {
   ActeAdministratifField,
-} from "../documents/UploadsByCategory";
+} from "../fieldsets/structure/FieldSetActeAdministratif";
 import InputWithValidation from "../InputWithValidation";
 
 dayjs.extend(customParseFormat);

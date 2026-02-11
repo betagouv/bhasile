@@ -1,36 +1,12 @@
 import { StructureApiType } from "@/schemas/api/structure.schema";
-import {
-  AdditionalFieldsType,
-  CategoryDisplayRulesType,
-} from "@/types/categoryToDisplay.type";
-import {
-  ActeAdministratifCategory,
-  ActeAdministratifCategoryType,
-} from "@/types/acte-administratif.type";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
-import { isStructureSubventionnee } from "./structure.util";
+import {
+  isStructureAutorisee,
+  isStructureSubventionnee,
+} from "./structure.util";
 
 export const getCategoriesToDisplay = (
-  structure: StructureApiType
-): ActeAdministratifCategoryType[number][] =>
-  ActeAdministratifCategory.filter((category) => {
-    if (category === "EVALUATION" || category === "INSPECTION_CONTROLE") {
-      return false;
-    }
-
-    if (category === "CPOM") {
-      return false;
-    }
-
-    if (isStructureSubventionnee(structure.type)) {
-      return (
-        category !== "ARRETE_AUTORISATION" && category !== "ARRETE_TARIFICATION"
-      );
-    }
-    return true;
-  });
-
-export const getCategoriesDisplayRules = (
   structure?: StructureApiType
 ): CategoryDisplayRulesType => ({
   ARRETE_AUTORISATION: {
@@ -39,6 +15,7 @@ export const getCategoriesDisplayRules = (
     canAddFile: true,
     canAddAvenant: true,
     isOptional: false,
+    shouldShow: isStructureAutorisee(structure?.type),
     additionalFieldsType: AdditionalFieldsType.DATE_START_END,
     documentLabel: "Document",
     addFileButtonLabel: "Ajouter un arrêté d'autorisation",
@@ -49,19 +26,10 @@ export const getCategoriesDisplayRules = (
     canAddFile: true,
     canAddAvenant: true,
     isOptional: false,
+    shouldShow: isStructureAutorisee(structure?.type),
     additionalFieldsType: AdditionalFieldsType.DATE_START_END,
     documentLabel: "Document",
     addFileButtonLabel: "Ajouter un arrêté de tarification",
-  },
-  CPOM: {
-    categoryShortName: "CPOM",
-    title: "CPOM",
-    canAddFile: false,
-    isOptional: false,
-    canAddAvenant: true,
-    additionalFieldsType: AdditionalFieldsType.DATE_START_END,
-    documentLabel: "Document",
-    addFileButtonLabel: "Ajouter un CPOM",
   },
   CONVENTION: {
     categoryShortName: "convention",
@@ -69,6 +37,7 @@ export const getCategoriesDisplayRules = (
     canAddFile: true,
     canAddAvenant: true,
     isOptional: !isStructureSubventionnee(structure?.type),
+    shouldShow: true,
     additionalFieldsType: AdditionalFieldsType.DATE_START_END,
     documentLabel: "Document",
     addFileButtonLabel: "Ajouter une convention",
@@ -79,6 +48,7 @@ export const getCategoriesDisplayRules = (
     canAddFile: true,
     canAddAvenant: false,
     isOptional: true,
+    shouldShow: true,
     additionalFieldsType: AdditionalFieldsType.NAME,
     documentLabel: "Document",
     addFileButtonLabel: "Ajouter un document",
@@ -87,3 +57,24 @@ export const getCategoriesDisplayRules = (
         Plans Pluriannuels d’Investissements)`,
   },
 });
+
+type CategoryDisplayRulesType = Record<
+  ActeAdministratifCategory[number],
+  {
+    categoryShortName: string;
+    title: string;
+    canAddFile: boolean;
+    canAddAvenant: boolean;
+    isOptional: boolean;
+    shouldShow: boolean;
+    additionalFieldsType: AdditionalFieldsType;
+    documentLabel: string;
+    addFileButtonLabel: string;
+    notice?: string | React.ReactElement;
+  }
+>;
+
+export enum AdditionalFieldsType {
+  DATE_START_END,
+  NAME,
+}
