@@ -7,12 +7,12 @@ import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { DocumentFinancierGranularity } from "@/generated/prisma/enums";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
-import { FileUploadCategoryType } from "@/types/acte-administratif.type";
+import { DocumentFinancierCategory } from "@/types/document-financier.type";
 
 import { DocumentGranularityBadge } from "./DocumentGranularityBadge";
 
 export const DownloadItem = ({
-  fileUpload,
+  item,
   displayGranularity = false,
 }: Props): ReactElement => {
   const { getDownloadLink } = useFileUpload();
@@ -23,23 +23,21 @@ export const DownloadItem = ({
   };
 
   const openLink = async () => {
-    const link = await getDownloadLink(fileUpload.key);
+    const link = await getDownloadLink(item.key);
     window.open(link);
   };
 
   const getFileLabel = (): string => {
     if (
-      "categoryName" in fileUpload &&
-      fileUpload.categoryName &&
-      fileUpload.categoryName !== "Document"
+      "categoryName" in item &&
+      item.categoryName &&
+      item.categoryName !== "Document"
     ) {
-      return fileUpload?.categoryName;
+      return item?.categoryName;
     } else {
-      const categoryLabel = getCategoryLabel(
-        fileUpload.category as unknown as FileUploadCategoryType[number]
-      );
-      const startYear = getYearFromDate(fileUpload.startDate);
-      const endYear = getYearFromDate(fileUpload.endDate);
+      const categoryLabel = getCategoryLabel(item.category);
+      const startYear = getYearFromDate(item.startDate);
+      const endYear = getYearFromDate(item.endDate);
       if (startYear === -1 || endYear === -1) {
         return categoryLabel;
       }
@@ -58,20 +56,18 @@ export const DownloadItem = ({
         {displayGranularity && (
           <div className="pr-1 inline">
             <DocumentGranularityBadge
-              granularity={
-                fileUpload.granularity as DocumentFinancierGranularity
-              }
+              granularity={item.granularity as DocumentFinancierGranularity}
             />
           </div>
         )}
-        {getFileType(fileUpload.originalName || "")} -{" "}
-        {prettyBytes(fileUpload.fileSize || 0)}
+        {getFileType(item.originalName || "")} -{" "}
+        {prettyBytes(item.fileSize || 0)}
       </div>
     </div>
   );
 };
 
 type Props = {
-  fileUpload: ActeAdministratifApiType | DocumentFinancierApiType;
+  item: ActeAdministratifApiType | DocumentFinancierApiType;
   displayGranularity?: boolean;
 };

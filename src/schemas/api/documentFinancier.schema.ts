@@ -4,7 +4,7 @@ import { zId, zSafeYear } from "@/app/utils/zodCustomFields";
 import {
   DocumentFinancierCategory,
   DocumentFinancierGranularity,
-} from "@/types/acte-administratif.type";
+} from "@/types/document-financier.type";
 
 import { fileApiSchema } from "./file.schema";
 

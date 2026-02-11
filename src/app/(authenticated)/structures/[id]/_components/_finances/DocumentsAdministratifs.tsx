@@ -8,10 +8,7 @@ import {
 } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import {
-  DocumentFinancierCategory,
-  DocumentFinancierCategoryType,
-} from "@/types/acte-administratif.type";
+import { DocumentFinancierCategory } from "@/types/document-financier.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
@@ -32,10 +29,9 @@ export const DocumentsAdministratifs = (): ReactElement => {
   const getDocumentsFinanciersToDisplay = (budget: BudgetApiType) => {
     return (structure.documentsFinanciers || [])?.filter(
       (documentFinancier) => {
-        const isSameYear =
-          getYearFromDate(documentFinancier.date) === budget.year;
+        const isSameYear = documentFinancier.year === budget.year;
         const isOperateurCategory = DocumentFinancierCategory.includes(
-          documentFinancier.category as DocumentFinancierCategoryType[number]
+          documentFinancier.category as DocumentFinancierCategory[number]
         );
         return isSameYear && isOperateurCategory;
       }
@@ -56,9 +52,9 @@ export const DocumentsAdministratifs = (): ReactElement => {
               ) : (
                 getDocumentsFinanciersToDisplay(budget).map(
                   (documentFinancier) => (
-                    <div key={documentFinancier.key} className="pb-5">
+                    <div key={documentFinancier.id} className="pb-5">
                       <DownloadItem
-                        fileUpload={documentFinancier}
+                        item={documentFinancier}
                         displayGranularity={true}
                       />
                     </div>
