@@ -63,16 +63,18 @@ export const BudgetTableCommentStaticButtonAndModal = ({
           }}
           priority="tertiary no outline"
           size="small"
+          className="font-bold"
         >
           Voir
         </Button>
       ) : (
         <EmptyCell />
       )}
-      <modal.Component title="Voir le commentaire">
-        <h2 className="text-sm">
-          Détail affectation du résultat - Année {year}
-        </h2>
+      <modal.Component
+        title="Voir le commentaire"
+        className="[&_h1]:!text-left [&_h2]:!text-left [&_p]:!text-left"
+      >
+        <h2 className="text-sm">Détail affectation du résultat - {year}</h2>
         <p>{currentComment}</p>
       </modal.Component>
     </>

@@ -10,7 +10,7 @@ export const getBudgetTableHeading = ({ years, structure }: Props) => {
     </th>,
     ...years.map((year) => (
       <th scope="col" key={year} className="bg-white">
-        <span className={cn("block", structure && "mb-2")}>{year}</span>
+        <span className={cn("block", structure && "mb-1 text-sm")}>{year}</span>
         {structure && (
           <>
             {isStructureInCpom(structure, year) ? (
