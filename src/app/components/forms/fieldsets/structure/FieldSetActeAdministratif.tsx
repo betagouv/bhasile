@@ -7,12 +7,7 @@ import { AdditionalFieldsType } from "@/app/utils/categoryToDisplay.util";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
-import { UploadsByCategoryFile } from "../../documents/UploadsByCategoryFile";
-
-export type ActeAdministratifField = ActeAdministratifFormValues & {
-  id: string;
-  uuid: string;
-};
+import { ActeAdministratif } from "../../actesAdministratifs/ActeAdministratif";
 
 export default function FieldSetActeAdministratif({
   category,
@@ -34,38 +29,23 @@ export default function FieldSetActeAdministratif({
     name: "actesAdministratifs",
   });
 
-  const actesAdministratifs: ActeAdministratifField[] =
+  const actesAdministratifs: ActeAdministratifFormValues[] =
     watch("actesAdministratifs") || [];
 
-  let filteredFields: ActeAdministratifField[] = [];
-
-  const refreshFields = () => {
-    filteredFields = actesAdministratifs.filter(
-      (field: ActeAdministratifField) => {
-        return (
-          field.category &&
-          (field.category as string) === category &&
-          !field.parentFileUploadId
-        );
-      }
-    );
-  };
-
-  refreshFields();
+  const actesOfCategory = actesAdministratifs.filter(
+    (acte) => acte?.category === category && !acte.parentId
+  );
 
   const handleAddNewField = (e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
 
     const newField = {
-      key: null,
-      category: category,
       uuid: uuidv4(),
+      category: category,
     };
 
     append(newField);
-
-    refreshFields();
   };
 
   const handleDeleteField = (index: number) => {
@@ -73,7 +53,7 @@ export default function FieldSetActeAdministratif({
 
     const avenantIndices = actesAdministratifs
       .map((field, index) => ({ field, index }))
-      .filter(({ field }) => field.parentFileUploadId === parent?.id)
+      .filter(({ field }) => field.parentId === parent?.id)
       .map(({ index }) => index);
 
     const indicesToRemove = [...avenantIndices, index];
@@ -83,13 +63,11 @@ export default function FieldSetActeAdministratif({
     indicesToRemove.forEach((index) => {
       remove(index);
     });
-
-    refreshFields();
   };
 
   const getItemIndex = (uuid: string) => {
     const index = actesAdministratifs.findIndex(
-      (acteAdministratif: ActeAdministratifField) =>
+      (acteAdministratif: ActeAdministratifFormValues) =>
         acteAdministratif.uuid === uuid
     );
     return index;
@@ -110,18 +88,17 @@ export default function FieldSetActeAdministratif({
           description={<>{notice}</>}
         />
       )}
-      {filteredFields &&
-        filteredFields.length > 0 &&
-        filteredFields.map((field) => {
-          const fieldIndex = getItemIndex(field.uuid);
+      {actesOfCategory &&
+        actesOfCategory.length > 0 &&
+        actesOfCategory.map((acte) => {
+          const acteIndex = getItemIndex(acte.uuid);
 
           return (
-            <div key={fieldIndex} className="mb-4">
-              <UploadsByCategoryFile
+            <div key={acteIndex} className="mb-4">
+              <ActeAdministratif
                 categoryShortName={categoryShortName}
-                field={field}
-                index={fieldIndex}
-                key={field.key || null}
+                acte={acte}
+                index={acteIndex}
                 additionalFieldsType={additionalFieldsType}
                 documentLabel={documentLabel}
                 handleDeleteField={handleDeleteField}

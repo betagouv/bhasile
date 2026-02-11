@@ -7,12 +7,11 @@ import { v4 as uuidv4 } from "uuid";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import UploadWithValidation from "@/app/components/forms/UploadWithValidation";
-import { AdditionalFieldsType } from "@/types/categoryToDisplay.type";
+import { AdditionalFieldsType } from "@/app/utils/categoryToDisplay.util";
+import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 
-import { ActeAdministratifField } from "../fieldsets/structure/FieldSetActeAdministratif";
-
-export const UploadsByCategoryFile = ({
-  field,
+export const ActeAdministratif = ({
+  acte,
   index,
   additionalFieldsType,
   documentLabel,
@@ -28,7 +27,7 @@ export const UploadsByCategoryFile = ({
   });
 
   register(`actesAdministratifs.${index}.id`);
-  register(`actesAdministratifs.${index}.parentFileUploadId`);
+  register(`actesAdministratifs.${index}.parentId`);
 
   const watchFieldName = `actesAdministratifs.${index}.id`;
   const mainFileId = watch(watchFieldName);
@@ -36,9 +35,7 @@ export const UploadsByCategoryFile = ({
   const [showEndDateInput, setShowEndDateInput] = useState<string[]>([]);
 
   let avenants = fields.filter(
-    (field) =>
-      (field as unknown as ActeAdministratifField).parentFileUploadId ===
-      mainFileId
+    (acte) => (acte as ActeAdministratifFormValues).parentId === mainFileId
   );
 
   const getAvenantIndex = (uuid: string) => {
@@ -51,23 +48,19 @@ export const UploadsByCategoryFile = ({
   const handleDeleteAvenant = (index: number) => {
     remove(index);
     avenants = fields.filter(
-      (field) =>
-        (field as unknown as ActeAdministratifField).parentFileUploadId ===
-        mainFileId
+      (acte) =>
+        (acte as unknown as ActeAdministratifField).parentId === mainFileId
     );
   };
 
-  const handleAddNewAvenant = (
-    e: React.MouseEvent,
-    parentFileUploadId?: string
-  ) => {
+  const handleAddNewAvenant = (e: React.MouseEvent, parentId?: string) => {
     e.preventDefault();
     e.stopPropagation();
     const newField = {
       key: null,
-      category: field.category,
+      category: acte.category,
       uuid: uuidv4(),
-      parentFileUploadId: parentFileUploadId || undefined,
+      parentId: parentId || undefined,
     };
 
     append(newField);
@@ -80,7 +73,7 @@ export const UploadsByCategoryFile = ({
           <div className="flex gap-6 items-start h-full">
             <InputWithValidation
               name={`actesAdministratifs.${index}.startDate`}
-              defaultValue={field.startDate}
+              defaultValue={acte.startDate}
               control={control}
               label={`Début ${categoryShortName}`}
               className="w-full mb-0"
@@ -118,7 +111,7 @@ export const UploadsByCategoryFile = ({
           <input
             type="hidden"
             {...register(`actesAdministratifs.${index}.category`)}
-            defaultValue={field.category}
+            defaultValue={acte.category}
           />
         </div>
         {index > 0 && (
@@ -135,10 +128,9 @@ export const UploadsByCategoryFile = ({
       {canAddAvenant && (
         <div className="flex flex-col ml-8 pl-8 border-l-2 border-default-grey">
           {avenants?.map((avenant) => {
-            const typedAvenant = avenant as unknown as ActeAdministratifField;
-            const avenantIndex = getAvenantIndex(typedAvenant.uuid);
+            const avenantIndex = getAvenantIndex(avenant.uuid);
             return (
-              <span key={`${typedAvenant.uuid}`}>
+              <span key={`${avenant.uuid}`}>
                 <div className="grid grid-cols-2 gap-6 my-6">
                   <div>
                     <div className="flex gap-6 items-start">
@@ -149,7 +141,7 @@ export const UploadsByCategoryFile = ({
                         className="w-full mb-0"
                         type="date"
                       />
-                      {showEndDateInput.includes(typedAvenant.uuid) && (
+                      {showEndDateInput.includes(avenant.uuid) && (
                         <InputWithValidation
                           name={`actesAdministratifs.${avenantIndex}.endDate`}
                           control={control}
@@ -167,16 +159,12 @@ export const UploadsByCategoryFile = ({
                             nativeInputProps: {
                               name: "",
                               value: "showEndDateInput",
-                              checked: showEndDateInput.includes(
-                                typedAvenant.uuid
-                              ),
+                              checked: showEndDateInput.includes(avenant.uuid),
                               onChange: () => {
-                                if (
-                                  showEndDateInput.includes(typedAvenant.uuid)
-                                ) {
+                                if (showEndDateInput.includes(avenant.uuid)) {
                                   setShowEndDateInput(
                                     showEndDateInput.filter(
-                                      (uuid) => uuid !== typedAvenant.uuid
+                                      (uuid) => uuid !== avenant.uuid
                                     )
                                   );
                                   setValue(
@@ -186,7 +174,7 @@ export const UploadsByCategoryFile = ({
                                 } else {
                                   setShowEndDateInput([
                                     ...showEndDateInput,
-                                    typedAvenant.uuid,
+                                    avenant.uuid,
                                   ]);
                                 }
                               },
@@ -210,7 +198,7 @@ export const UploadsByCategoryFile = ({
                         {...register(
                           `actesAdministratifs.${avenantIndex}.category`
                         )}
-                        defaultValue={typedAvenant.category}
+                        defaultValue={avenant.category}
                       />
                     </div>
                     <Button
@@ -242,7 +230,7 @@ export const UploadsByCategoryFile = ({
 };
 
 type UploadsByCategoryFileProps = {
-  field: ActeAdministratifField;
+  acte: ActeAdministratifFormValues;
   index: number;
   additionalFieldsType: AdditionalFieldsType;
   documentLabel: string;

@@ -6,6 +6,7 @@ import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 export const acteAdministratifAutoSaveSchema = z.object({
   id: zId(),
+  uuid: z.string(), // The uuid is used to identify the acte administratif when it is not saved in the database (and so do not have an id)
   category: z.enum(ActeAdministratifCategory).optional(),
   date: optionalFrenchDateToISO(),
   startDate: optionalFrenchDateToISO(),
