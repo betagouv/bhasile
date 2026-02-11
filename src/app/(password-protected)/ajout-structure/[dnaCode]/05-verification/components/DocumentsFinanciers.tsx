@@ -6,10 +6,7 @@ import {
   structureSubventionneesDocuments,
 } from "@/app/components/forms/finance/documents/documentsStructures";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
-import {
-  getDocumentsFinanciersYearRange,
-  getYearFromDate,
-} from "@/app/utils/date.util";
+import { getDocumentsFinanciersYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { CURRENT_OPEN_YEAR } from "@/constants";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
@@ -56,8 +53,8 @@ export const DocumentsFinanciers = (): ReactElement => {
           const findDocument = documentsFinanciers.find(
             (documentFinancier) =>
               documentFinancier.category === document.value &&
-              getYearFromDate(documentFinancier.date) === year &&
-              documentFinancier.key
+              documentFinancier.year === year &&
+              documentFinancier.fileUploads?.[0]?.key
           );
           return !findDocument ? 1 : 0;
         })

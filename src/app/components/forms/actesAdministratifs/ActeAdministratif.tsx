@@ -94,7 +94,7 @@ export const ActeAdministratif = ({
         {additionalFieldsType === AdditionalFieldsType.NAME && (
           <div className="flex gap-6 items-start h-full">
             <InputWithValidation
-              name={`actesAdministratifs.${index}.categoryName`}
+              name={`actesAdministratifs.${index}.name`}
               control={control}
               label="Nom du document"
               className="w-full mb-0"

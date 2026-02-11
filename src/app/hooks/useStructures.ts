@@ -144,9 +144,10 @@ const transformAjoutFormStructureToApiStructure = async (
       ),
     })),
     documentsFinanciers:
-      values.documentsFinanciers?.filter(
-        (documentFinancier) => documentFinancier.key
-      ) ?? [],
+      values.documentsFinanciers?.map((documentFinancier) => ({
+        ...documentFinancier,
+        name: documentFinancier.name ?? undefined,
+      })) ?? [],
   };
 };
 

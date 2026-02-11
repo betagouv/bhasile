@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
 import { Badge, BadgeType } from "@/app/components/common/Badge";
-import { DocumentFinancierGranularity } from "@/types/acte-administratif.type";
+import { DocumentFinancierGranularity } from "@/types/document-financier.type";
 
 type GranularityMap = Record<
   (typeof DocumentFinancierGranularity)[number],

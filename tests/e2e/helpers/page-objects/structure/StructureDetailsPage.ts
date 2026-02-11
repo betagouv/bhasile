@@ -4,7 +4,7 @@ import { formatDate, getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
 import { getOperateurLabel } from "@/app/utils/structure.util";
-import { ActeAdministratifCategoryType } from "@/types/acte-administratif.type";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { PublicType } from "@/types/structure.type";
 
 import { URLS } from "../../constants";
@@ -262,8 +262,8 @@ export class StructureDetailsPage extends BasePage {
         continue;
       }
       await accordionButton.click();
-      if (acte.category === "AUTRE" && acte.categoryName) {
-        await expect(actesBlock).toContainText(acte.categoryName);
+      if (acte.category === "AUTRE" && acte.name) {
+        await expect(actesBlock).toContainText(acte.name);
         continue;
       }
       if (acte.startDate && acte.endDate) {
@@ -291,8 +291,8 @@ type StructureDetailsOverrides = {
   contactEmail?: string;
   notes?: string;
   actesAdministratifs?: Array<{
-    category: ActeAdministratifCategoryType[number];
-    categoryName?: string;
+    category: ActeAdministratifCategory[number];
+    name?: string;
     startDate?: string;
     endDate?: string;
   }>;

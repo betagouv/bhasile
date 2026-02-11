@@ -6,7 +6,7 @@ import {
   CpomFormValues,
   CpomMillesimeFormValues,
 } from "@/schemas/forms/base/cpom.schema";
-import { ActeAdministratifCategoryType } from "@/types/acte-administratif.type";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 import { getYearRange } from "./date.util";
 
@@ -38,7 +38,7 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
       : [
           {
             uuid: uuidv4(),
-            category: "CPOM" as ActeAdministratifCategoryType[number],
+            category: "CONVENTION" as ActeAdministratifCategory[number],
           },
         ],
   };

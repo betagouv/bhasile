@@ -83,6 +83,7 @@ const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
 
 export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
   (data) => {
+    console.log("data", data);
     if (data.category === "CONVENTION" && !data.parentId) {
       return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
     }

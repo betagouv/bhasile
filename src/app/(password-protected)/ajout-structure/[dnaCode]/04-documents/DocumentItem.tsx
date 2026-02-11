@@ -2,9 +2,8 @@ import { ReactElement } from "react";
 import { Control, UseFormRegister } from "react-hook-form";
 
 import UploadWithValidation from "@/app/components/forms/UploadWithValidation";
-import { getYearDate } from "@/app/utils/date.util";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
-import { FileUploadCategoryType } from "@/types/acte-administratif.type";
+import { DocumentFinancierCategory } from "@/types/document-financier.type";
 
 import { UploadItem } from "../../_components/UploadItem";
 
@@ -23,8 +22,8 @@ export const DocumentItem = ({
       subTitle={categorySubLabel}
     >
       <UploadWithValidation
-        name={`documentsFinanciers.${index}.key`}
-        id={`documentsFinanciers.${index}.key`}
+        name={`documentsFinanciers.${index}.fileUploads.0.key`}
+        id={`documentsFinanciers.${index}.fileUploads.0.key`}
         control={control}
       />
       <input
@@ -36,8 +35,8 @@ export const DocumentItem = ({
       <input
         type="hidden"
         aria-hidden="true"
-        defaultValue={getYearDate(year)}
-        {...register(`documentsFinanciers.${index}.date`)}
+        defaultValue={year}
+        {...register(`documentsFinanciers.${index}.year`)}
       />
     </UploadItem>
   );
@@ -50,5 +49,5 @@ type Props = {
   register: UseFormRegister<DocumentsFinanciersFlexibleFormValues>;
   categoryLabel: string;
   categorySubLabel?: string;
-  categoryValue: FileUploadCategoryType[number];
+  categoryValue: DocumentFinancierCategory[number];
 };

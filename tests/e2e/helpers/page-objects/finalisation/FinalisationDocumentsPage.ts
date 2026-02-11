@@ -63,12 +63,12 @@ export class FinalisationDocumentsPage extends BasePage {
             acte.endDate
           );
         }
-        if (acte.categoryName) {
+        if (acte.name) {
           await this.fillIfExistsAtIndex(
             group,
-            'input[name^="actesAdministratifs."][name$=".categoryName"]',
+            'input[name^="actesAdministratifs."][name$=".name"]',
             i,
-            acte.categoryName
+            acte.name
           );
         }
         // Use i-th row in this group (works for both autorisee and subventionnée category order)

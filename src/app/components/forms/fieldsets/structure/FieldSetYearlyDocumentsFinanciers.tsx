@@ -66,14 +66,14 @@ export const FieldSetYearlyDocumentsFinanciers = ({
     const indicesToRemove: number[] = [];
 
     for (const [index, document] of documentsFinanciers.entries()) {
-      const documentYear = document.date?.substring(0, 4);
+      const documentYear = document.year;
       if (
-        documentYear === year.toString() &&
+        documentYear === year &&
         document.granularity &&
         document.granularity !== "STRUCTURE"
       ) {
-        if (document.key) {
-          await deleteFile(document.key);
+        if (document.fileUploads?.[0]?.key) {
+          await deleteFile(document.fileUploads?.[0]?.key);
         }
         indicesToRemove.push(index);
       }

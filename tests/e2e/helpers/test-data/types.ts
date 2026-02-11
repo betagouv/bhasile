@@ -131,7 +131,7 @@ export type ActeAdministratifData = {
   filePath: string;
   startDate?: string;
   endDate?: string;
-  categoryName?: string;
+  name?: string;
 };
 
 export type FailingStep =

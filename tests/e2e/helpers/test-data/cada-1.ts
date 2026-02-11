@@ -319,7 +319,7 @@ export const cada1: TestStructureScenario = {
       },
       {
         category: "AUTRE",
-        categoryName: "Document e2e",
+        name: "Document e2e",
         filePath: "tests/e2e/fixtures/sample.csv",
       },
     ],

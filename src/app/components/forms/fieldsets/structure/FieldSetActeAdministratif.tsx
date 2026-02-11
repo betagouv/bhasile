@@ -107,7 +107,7 @@ export default function FieldSetActeAdministratif({
 }
 
 type FieldSetActeAdministratifProps = {
-  category: ActeAdministratifCategory[number] | "CPOM";
+  category: ActeAdministratifCategory[number];
   categoryShortName: string;
   title: string;
   noTitleLegend?: boolean;

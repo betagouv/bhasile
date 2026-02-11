@@ -9,6 +9,7 @@ import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
+import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   actesAdministratifsAutoriseesSchema,
   ActesAdministratifsFormValues,
@@ -42,8 +43,9 @@ export default function ModificationQualiteForm() {
     const actesAdministratifs = data.actesAdministratifs?.filter(
       (acteAdministratif) =>
         acteAdministratif.fileUploads?.length &&
+        acteAdministratif.category &&
         acteAdministratif.fileUploads[0].key
-    );
+    ) as ActeAdministratifApiType[];
 
     await handleSubmit({
       actesAdministratifs,

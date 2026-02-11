@@ -8,11 +8,10 @@ import {
 } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { DocumentFinancierCategory } from "@/types/document-financier.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
-export const DocumentsAdministratifs = (): ReactElement => {
+export const DocumentsFinanciers = (): ReactElement => {
   const { structure } = useStructureContext();
 
   const isAutorisee = isStructureAutorisee(structure.type);
@@ -27,14 +26,8 @@ export const DocumentsAdministratifs = (): ReactElement => {
   const yearsToDisplay = years.filter((year) => year >= (startYear ?? 0));
 
   const getDocumentsFinanciersToDisplay = (budget: BudgetApiType) => {
-    return (structure.documentsFinanciers || [])?.filter(
-      (documentFinancier) => {
-        const isSameYear = documentFinancier.year === budget.year;
-        const isOperateurCategory = DocumentFinancierCategory.includes(
-          documentFinancier.category as DocumentFinancierCategory[number]
-        );
-        return isSameYear && isOperateurCategory;
-      }
+    return structure.documentsFinanciers?.filter(
+      (documentFinancier) => documentFinancier.year === budget.year
     );
   };
 

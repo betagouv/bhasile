@@ -1,5 +1,4 @@
 import prettyBytes from "pretty-bytes";
-import { ReactElement } from "react";
 
 import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { getYearFromDate } from "@/app/utils/date.util";
@@ -7,14 +6,10 @@ import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { DocumentFinancierGranularity } from "@/generated/prisma/enums";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
-import { DocumentFinancierCategory } from "@/types/document-financier.type";
 
 import { DocumentGranularityBadge } from "./DocumentGranularityBadge";
 
-export const DownloadItem = ({
-  item,
-  displayGranularity = false,
-}: Props): ReactElement => {
+export const DownloadItem = ({ item, displayGranularity = false }: Props) => {
   const { getDownloadLink } = useFileUpload();
 
   const getFileType = (filename: string): string => {
@@ -23,27 +18,34 @@ export const DownloadItem = ({
   };
 
   const openLink = async () => {
-    const link = await getDownloadLink(item.key);
+    const link = await getDownloadLink(item.fileUploads?.[0]?.key || "");
     window.open(link);
   };
 
   const getFileLabel = (): string => {
-    if (
-      "categoryName" in item &&
-      item.categoryName &&
-      item.categoryName !== "Document"
-    ) {
-      return item?.categoryName;
+    if (item.name && item.name !== "Document") {
+      return item?.name;
     } else {
       const categoryLabel = getCategoryLabel(item.category);
-      const startYear = getYearFromDate(item.startDate);
-      const endYear = getYearFromDate(item.endDate);
-      if (startYear === -1 || endYear === -1) {
-        return categoryLabel;
+      let years: string = "";
+      if ("year" in item && typeof item.year === "number") {
+        years = `${item.year}`;
       }
-      return `${categoryLabel} ${startYear} - ${endYear}`;
+      if (
+        "startDate" in item &&
+        "endDate" in item &&
+        item.startDate &&
+        item.endDate
+      ) {
+        years = `${getYearFromDate(item.startDate)} - ${getYearFromDate(item.endDate)}`;
+      }
+      return `${categoryLabel} ${years}`;
     }
   };
+
+  if (item.fileUploads?.[0]?.key) {
+    return null;
+  }
 
   return (
     <div className="inline">
@@ -56,12 +58,15 @@ export const DownloadItem = ({
         {displayGranularity && (
           <div className="pr-1 inline">
             <DocumentGranularityBadge
-              granularity={item.granularity as DocumentFinancierGranularity}
+              granularity={
+                (item as DocumentFinancierApiType)
+                  .granularity as DocumentFinancierGranularity
+              }
             />
           </div>
         )}
-        {getFileType(item.originalName || "")} -{" "}
-        {prettyBytes(item.fileSize || 0)}
+        {getFileType(item.fileUploads?.[0].originalName || "")} -{" "}
+        {prettyBytes(item.fileUploads?.[0].fileSize || 0)}
       </div>
     </div>
   );

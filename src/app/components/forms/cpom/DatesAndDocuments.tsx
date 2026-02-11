@@ -70,7 +70,7 @@ export const DatesAndDocuments = () => {
         type="hidden"
       />
       <FieldSetActeAdministratif
-        category="CPOM"
+        category="CONVENTION"
         categoryShortName="CPOM"
         title="CPOM"
         noTitleLegend={true}
@@ -80,7 +80,7 @@ export const DatesAndDocuments = () => {
         isOptional={false}
         additionalFieldsType={AdditionalFieldsType.DATE_START_END}
         documentLabel="Document"
-        addFileButtonLabel="Ajouter un CPOM"
+        addFileButtonLabel="Ajouter une convention"
       />
     </div>
   );

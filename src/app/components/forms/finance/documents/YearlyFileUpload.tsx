@@ -45,8 +45,7 @@ export const YearlyFileUpload = ({
     useState(false);
   const [shouldDisplayGranularitySelect, setShouldDisplayGranularitySelect] =
     useState(false);
-  const [shouldDisplayCategoryNameInput, setShouldDisplayCategoryNameInput] =
-    useState(false);
+  const [shouldDisplayNameInput, setShouldDisplayNameInput] = useState(false);
   const [shouldDisplayAddButton, setShouldDisplayAddButton] = useState(false);
   const [shouldEnableAddButton, setShouldEnableAddButton] = useState(false);
 
@@ -80,9 +79,9 @@ export const YearlyFileUpload = ({
   useEffect(() => {
     if (key) {
       if (category === "AUTRE_FINANCIER") {
-        setShouldDisplayCategoryNameInput(true);
+        setShouldDisplayNameInput(true);
       } else {
-        setShouldDisplayCategoryNameInput(false);
+        setShouldDisplayNameInput(false);
       }
       if (category && category !== "AUTRE_FINANCIER") {
         setShouldDisplayGranularitySelect(true);
@@ -90,7 +89,7 @@ export const YearlyFileUpload = ({
         setShouldDisplayGranularitySelect(false);
       }
     } else {
-      setShouldDisplayCategoryNameInput(false);
+      setShouldDisplayNameInput(false);
     }
   }, [key, category]);
 
@@ -203,7 +202,7 @@ export const YearlyFileUpload = ({
             ))}
           </Select>
         )}
-        {shouldDisplayCategoryNameInput && (
+        {shouldDisplayNameInput && (
           <Input
             label="Nom du document"
             className="w-80"

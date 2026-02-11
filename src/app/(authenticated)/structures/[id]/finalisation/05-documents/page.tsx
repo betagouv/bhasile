@@ -12,6 +12,7 @@ import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
+import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   actesAdministratifsAutoriseesSchema,
   ActesAdministratifsAutoSaveFormValues,
@@ -53,8 +54,9 @@ export default function FinalisationQualite() {
     const actesAdministratifs = data.actesAdministratifs?.filter(
       (acteAdministratif) =>
         acteAdministratif.fileUploads?.length &&
+        acteAdministratif.category &&
         acteAdministratif.fileUploads[0].key
-    );
+    ) as ActeAdministratifApiType[];
 
     await handleAutoSave({
       actesAdministratifs,
