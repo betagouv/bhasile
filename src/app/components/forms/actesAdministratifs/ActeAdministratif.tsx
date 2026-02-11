@@ -107,7 +107,7 @@ export const ActeAdministratif = ({
         <div className="flex flex-col">
           <label className="mb-2">{documentLabel}</label>
           <UploadWithValidation
-            name={`actesAdministratifs.${index}.key`}
+            name={`actesAdministratifs.${index}.fileUploads.0.key`}
             control={control}
           />
         </div>
