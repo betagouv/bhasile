@@ -40,12 +40,10 @@ export default function FieldSetActeAdministratif({
     e?.preventDefault();
     e?.stopPropagation();
 
-    const newField = {
+    append({
       uuid: uuidv4(),
       category: category,
-    };
-
-    append(newField);
+    });
   };
 
   const handleDeleteField = (index: number) => {
@@ -65,14 +63,6 @@ export default function FieldSetActeAdministratif({
     });
   };
 
-  const getItemIndex = (uuid: string) => {
-    const index = actesAdministratifs.findIndex(
-      (acteAdministratif: ActeAdministratifFormValues) =>
-        acteAdministratif.uuid === uuid
-    );
-    return index;
-  };
-
   return (
     <fieldset className="flex flex-col gap-6 w-full">
       {!noTitleLegend && (
@@ -90,24 +80,19 @@ export default function FieldSetActeAdministratif({
       )}
       {actesOfCategory &&
         actesOfCategory.length > 0 &&
-        actesOfCategory.map((acte) => {
-          const acteIndex = getItemIndex(acte.uuid);
-
-          return (
-            <div key={acteIndex} className="mb-4">
-              <ActeAdministratif
-                categoryShortName={categoryShortName}
-                acte={acte}
-                index={acteIndex}
-                additionalFieldsType={additionalFieldsType}
-                documentLabel={documentLabel}
-                handleDeleteField={handleDeleteField}
-                canAddAvenant={canAddAvenant}
-                avenantCanExtendDateEnd={avenantCanExtendDateEnd}
-              />
-            </div>
-          );
-        })}
+        actesOfCategory.map((acte) => (
+          <div key={acte.id || acte.uuid} className="mb-4">
+            <ActeAdministratif
+              categoryShortName={categoryShortName}
+              acte={acte}
+              additionalFieldsType={additionalFieldsType}
+              documentLabel={documentLabel}
+              handleDeleteField={handleDeleteField}
+              canAddAvenant={canAddAvenant}
+              avenantCanExtendDateEnd={avenantCanExtendDateEnd}
+            />
+          </div>
+        ))}
       {canAddFile && (
         <Button
           onClick={handleAddNewField}

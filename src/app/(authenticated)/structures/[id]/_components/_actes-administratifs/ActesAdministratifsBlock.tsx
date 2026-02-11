@@ -43,7 +43,7 @@ export const ActesAdministratifsBlock = (): ReactElement => {
     },
   ];
 
-  const getActesAdministratifsToDisplay = (categorie: {
+  const getActesAdministratifsCategoryToDisplay = (categorie: {
     category: string;
   }): ActeAdministratifApiType[] => {
     return (structure.actesAdministratifs || [])
@@ -58,7 +58,8 @@ export const ActesAdministratifsBlock = (): ReactElement => {
   const displayedCategories = categories
     .filter((categorie) => categorie.isDisplayed)
     .filter(
-      (categorie) => getActesAdministratifsToDisplay(categorie)?.length > 0
+      (categorie) =>
+        getActesAdministratifsCategoryToDisplay(categorie)?.length > 0
     );
 
   return (
@@ -75,7 +76,7 @@ export const ActesAdministratifsBlock = (): ReactElement => {
         displayedCategories.map((categorie) => (
           <Accordion label={categorie.label} key={categorie.category}>
             <div className="columns-3">
-              {getActesAdministratifsToDisplay(categorie).map(
+              {getActesAdministratifsCategoryToDisplay(categorie).map(
                 (acteAdministratif) => (
                   <div key={acteAdministratif.key} className="pb-5">
                     <DownloadItem fileUpload={acteAdministratif} />

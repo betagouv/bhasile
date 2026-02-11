@@ -1,19 +1,14 @@
 "use client";
 
+import { ActesAdministratifs } from "@/app/components/forms/actesAdministratifs/ActesAdministratifs";
 import { AutoSave } from "@/app/components/forms/AutoSave";
-import UploadsByCategory from "@/app/components/forms/fieldsets/structure/FieldSetActeAdministratif";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
 import { SubmitError } from "@/app/components/SubmitError";
 import { InformationBar } from "@/app/components/ui/InformationBar";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
-import {
-  getCategoriesDisplayRules,
-  getCategoriesToDisplay,
-} from "@/app/utils/categoryToDisplay.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
@@ -47,13 +42,6 @@ export default function FinalisationQualite() {
     schema = actesAdministratifsSubventionneesSchema;
   }
 
-  const categoriesToDisplay = getCategoriesToDisplay(structure).filter(
-    (category) =>
-      category !== "INSPECTION_CONTROLE" && category !== "EVALUATION"
-  );
-
-  const categoriesDisplayRules = getCategoriesDisplayRules(structure);
-
   const { handleValidation, handleAutoSave, backendError } =
     useAgentFormHandling({ currentStep });
 
@@ -63,7 +51,9 @@ export default function FinalisationQualite() {
 
   const onAutoSave = async (data: ActesAdministratifsAutoSaveFormValues) => {
     const actesAdministratifs = data.actesAdministratifs?.filter(
-      (acteAdministratif) => acteAdministratif.key
+      (acteAdministratif) =>
+        acteAdministratif.fileUploads?.length &&
+        acteAdministratif.fileUploads[0].key
     );
 
     await handleAutoSave({
@@ -103,35 +93,8 @@ export default function FinalisationQualite() {
           description="Veuillez importer l’ensemble des actes administratifs historiques afférents à la structure, que les dates d’effets soient actuelles ou révolues."
         />
 
-        <MaxSizeNotice />
+        <ActesAdministratifs />
 
-        {categoriesToDisplay.map((category, index) => {
-          return (
-            <div key={category}>
-              <UploadsByCategory
-                category={category}
-                categoryShortName={
-                  categoriesDisplayRules[category].categoryShortName
-                }
-                title={categoriesDisplayRules[category].title}
-                canAddFile={categoriesDisplayRules[category].canAddFile}
-                canAddAvenant={categoriesDisplayRules[category].canAddAvenant}
-                isOptional={categoriesDisplayRules[category].isOptional}
-                additionalFieldsType={
-                  categoriesDisplayRules[category].additionalFieldsType
-                }
-                documentLabel={categoriesDisplayRules[category].documentLabel}
-                addFileButtonLabel={
-                  categoriesDisplayRules[category].addFileButtonLabel
-                }
-                notice={categoriesDisplayRules[category].notice}
-              />
-              {index < categoriesToDisplay.length - 1 && (
-                <hr className="mt-13" />
-              )}
-            </div>
-          );
-        })}
         {saveState === FetchState.ERROR && (
           <SubmitError
             structureDnaCode={structure.dnaCode}

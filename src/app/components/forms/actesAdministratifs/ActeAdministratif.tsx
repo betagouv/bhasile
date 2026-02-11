@@ -1,7 +1,5 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import Link from "next/link";
-import { useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
@@ -10,65 +8,69 @@ import UploadWithValidation from "@/app/components/forms/UploadWithValidation";
 import { AdditionalFieldsType } from "@/app/utils/categoryToDisplay.util";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 
+import { Avenant } from "./Avenant";
+
 export const ActeAdministratif = ({
   acte,
-  index,
-  additionalFieldsType,
+  additionalFieldsType = AdditionalFieldsType.DATE_START_END,
   documentLabel,
   handleDeleteField,
   canAddAvenant = false,
   avenantCanExtendDateEnd = false,
   categoryShortName,
 }: UploadsByCategoryFileProps) => {
-  const { control, register, watch, setValue } = useFormContext();
-  const { fields, append, remove } = useFieldArray({
+  const { control, watch } = useFormContext();
+
+  const { append } = useFieldArray({
     control,
     name: "actesAdministratifs",
   });
 
-  register(`actesAdministratifs.${index}.id`);
-  register(`actesAdministratifs.${index}.parentId`);
+  const actesAdministratifs: ActeAdministratifFormValues[] =
+    watch("actesAdministratifs") || [];
 
-  const watchFieldName = `actesAdministratifs.${index}.id`;
-  const mainFileId = watch(watchFieldName);
-
-  const [showEndDateInput, setShowEndDateInput] = useState<string[]>([]);
-
-  let avenants = fields.filter(
-    (acte) => (acte as ActeAdministratifFormValues).parentId === mainFileId
+  const index = actesAdministratifs.findIndex(
+    (acteAdministratif: ActeAdministratifFormValues) =>
+      acteAdministratif.uuid === acte.uuid || acteAdministratif.id === acte.id
   );
 
-  const getAvenantIndex = (uuid: string) => {
-    const index = fields.findIndex(
-      (f) => (f as unknown as ActeAdministratifField).uuid === uuid
-    );
-    return index;
-  };
+  const avenants = actesAdministratifs.filter(
+    (avenant) => avenant.parentId === acte.id
+  );
 
-  const handleDeleteAvenant = (index: number) => {
-    remove(index);
-    avenants = fields.filter(
-      (acte) =>
-        (acte as unknown as ActeAdministratifField).parentId === mainFileId
-    );
-  };
-
-  const handleAddNewAvenant = (e: React.MouseEvent, parentId?: string) => {
+  const handleAddNewAvenant = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const newField = {
-      key: null,
-      category: acte.category,
-      uuid: uuidv4(),
-      parentId: parentId || undefined,
-    };
 
-    append(newField);
+    append({
+      uuid: uuidv4(),
+      category: acte.category,
+      parentId: acte.id,
+    });
   };
 
   return (
     <>
       <div className="grid grid-cols-[1fr_1fr_auto] gap-6 items-start">
+        <InputWithValidation
+          name="actesAdministratifs.${index}.id"
+          control={control}
+          label=""
+          type="hidden"
+        />
+        <InputWithValidation
+          name="actesAdministratifs.${index}.parentId"
+          control={control}
+          label=""
+          type="hidden"
+        />
+        <InputWithValidation
+          name="actesAdministratifs.${index}.category"
+          control={control}
+          label=""
+          type="hidden"
+        />
+
         {additionalFieldsType === AdditionalFieldsType.DATE_START_END && (
           <div className="flex gap-6 items-start h-full">
             <InputWithValidation
@@ -108,11 +110,6 @@ export const ActeAdministratif = ({
             name={`actesAdministratifs.${index}.key`}
             control={control}
           />
-          <input
-            type="hidden"
-            {...register(`actesAdministratifs.${index}.category`)}
-            defaultValue={acte.category}
-          />
         </div>
         {index > 0 && (
           <Button
@@ -127,98 +124,21 @@ export const ActeAdministratif = ({
       </div>
       {canAddAvenant && (
         <div className="flex flex-col ml-8 pl-8 border-l-2 border-default-grey">
-          {avenants?.map((avenant) => {
-            const avenantIndex = getAvenantIndex(avenant.uuid);
-            return (
-              <span key={`${avenant.uuid}`}>
-                <div className="grid grid-cols-2 gap-6 my-6">
-                  <div>
-                    <div className="flex gap-6 items-start">
-                      <InputWithValidation
-                        name={`actesAdministratifs.${avenantIndex}.date`}
-                        control={control}
-                        label="Date avenant"
-                        className="w-full mb-0"
-                        type="date"
-                      />
-                      {showEndDateInput.includes(avenant.uuid) && (
-                        <InputWithValidation
-                          name={`actesAdministratifs.${avenantIndex}.endDate`}
-                          control={control}
-                          label={`Fin ${categoryShortName} actualisée`}
-                          className="w-full mb-0"
-                          type="date"
-                        />
-                      )}
-                    </div>
-                    {avenantCanExtendDateEnd && (
-                      <Checkbox
-                        options={[
-                          {
-                            label: `Cet avenant modifie la date de fin du ${categoryShortName}.`,
-                            nativeInputProps: {
-                              name: "",
-                              value: "showEndDateInput",
-                              checked: showEndDateInput.includes(avenant.uuid),
-                              onChange: () => {
-                                if (showEndDateInput.includes(avenant.uuid)) {
-                                  setShowEndDateInput(
-                                    showEndDateInput.filter(
-                                      (uuid) => uuid !== avenant.uuid
-                                    )
-                                  );
-                                  setValue(
-                                    `actesAdministratifs.${avenantIndex}.endDate`,
-                                    undefined
-                                  );
-                                } else {
-                                  setShowEndDateInput([
-                                    ...showEndDateInput,
-                                    avenant.uuid,
-                                  ]);
-                                }
-                              },
-                            },
-                          },
-                        ]}
-                        className="mt-3"
-                        small
-                      />
-                    )}
-                  </div>
-                  <div className="flex">
-                    <div className="flex flex-col w-full">
-                      <label className="mb-2">{documentLabel}</label>
-                      <UploadWithValidation
-                        name={`actesAdministratifs.${avenantIndex}.key`}
-                        control={control}
-                      />
-                      <input
-                        type="hidden"
-                        {...register(
-                          `actesAdministratifs.${avenantIndex}.category`
-                        )}
-                        defaultValue={avenant.category}
-                      />
-                    </div>
-                    <Button
-                      iconId="fr-icon-delete-bin-line"
-                      onClick={() => handleDeleteAvenant(avenantIndex)}
-                      type="button"
-                      priority="tertiary no outline"
-                      className="mt-8"
-                      title="Supprimer"
-                    />
-                  </div>
-                </div>
-              </span>
-            );
-          })}
-          {canAddAvenant && mainFileId && (
+          {avenants?.map((avenant) => (
+            <Avenant
+              key={avenant.id || avenant.uuid}
+              avenant={avenant}
+              categoryShortName={categoryShortName}
+              avenantCanExtendDateEnd={avenantCanExtendDateEnd}
+              documentLabel={documentLabel}
+              handleDeleteField={handleDeleteField}
+            />
+          ))}
+          {canAddAvenant && (
             <Link
               href={"/"}
               className="text-action-high-blue-france underline underline-offset-4"
-              onClick={(e) => handleAddNewAvenant(e, mainFileId)}
+              onClick={handleAddNewAvenant}
             >
               + Ajouter un avenant
             </Link>
@@ -231,8 +151,7 @@ export const ActeAdministratif = ({
 
 type UploadsByCategoryFileProps = {
   acte: ActeAdministratifFormValues;
-  index: number;
-  additionalFieldsType: AdditionalFieldsType;
+  additionalFieldsType?: AdditionalFieldsType;
   documentLabel: string;
   categoryShortName: string;
   handleDeleteField: (index: number) => void;

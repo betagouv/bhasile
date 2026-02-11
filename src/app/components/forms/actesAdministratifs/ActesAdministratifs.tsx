@@ -1,19 +1,22 @@
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import FieldSetActeAdministratif from "@/app/components/forms/fieldsets/structure/FieldSetActeAdministratif";
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
-import { getCategoriesToDisplay } from "@/app/utils/categoryToDisplay.util";
+import { getActesAdministratifsCategoryToDisplay } from "@/app/utils/acteAdministratif.util";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 export const ActesAdministratifs = () => {
   const { structure } = useStructureContext();
 
-  const categoriesToDisplay = getCategoriesToDisplay(structure);
+  const actesAdministratifsCategory =
+    getActesAdministratifsCategoryToDisplay(structure);
 
   return (
     <>
       <MaxSizeNotice />
-      {Object.entries(categoriesToDisplay)
-        .filter((categoryToDisplay) => categoryToDisplay[1].shouldShow)
+      {Object.entries(actesAdministratifsCategory)
+        .filter(
+          (acteAdministratifCategory) => acteAdministratifCategory[1].shouldShow
+        )
         .map(([category, rules], index) => {
           return (
             <div key={category}>
@@ -29,7 +32,10 @@ export const ActesAdministratifs = () => {
                 addFileButtonLabel={rules.addFileButtonLabel}
                 notice={rules.notice}
               />
-              {index < Object.entries(categoriesToDisplay).length - 1 && <hr />}
+              {index <
+                Object.entries(actesAdministratifsCategory).length - 1 && (
+                <hr />
+              )}
             </div>
           );
         })}
