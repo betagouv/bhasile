@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
-import { PLACE_ASILE_CONTACT_EMAIL } from "@/constants";
+import { BHASILE_CONTACT_EMAIL } from "@/constants";
 
 import { ExternalLink } from "./common/ExternalLink";
 import { Logo } from "./Logo";
@@ -34,7 +34,7 @@ export const Menu = (): ReactElement => {
   const secondaryMenuItems = [
     {
       label: "Aide",
-      url: `mailto:${PLACE_ASILE_CONTACT_EMAIL}`,
+      url: `mailto:${BHASILE_CONTACT_EMAIL}`,
       isExternalLink: true,
     },
     {

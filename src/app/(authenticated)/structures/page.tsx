@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { ReactElement, useMemo, useState } from "react";
 
+// import { NameChangeNotice } from "@/app/components/NameChangeNotice";
 import Loader from "@/app/components/ui/Loader";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
@@ -58,6 +59,7 @@ export default function Structures(): ReactElement {
           </p>
         </div>
       </div>
+      {/* <NameChangeNotice /> */}
       {selectedVisualization === "tableau" && (
         <>
           {fetchState === FetchState.LOADING && (

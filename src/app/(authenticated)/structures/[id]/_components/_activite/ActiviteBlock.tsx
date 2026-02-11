@@ -21,7 +21,7 @@ export const ActiviteBlock = (): ReactElement => {
         </span>
         <div style={{ position: "relative", width: 40 }}>
           <Image
-            src={"/ofii.webp"}
+            src="/ofii.webp"
             alt="Logo de l'OFII"
             fill
             sizes="(min-width: 40px)"
