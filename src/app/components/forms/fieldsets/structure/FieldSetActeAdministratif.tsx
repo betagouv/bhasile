@@ -33,8 +33,7 @@ export default function FieldSetActeAdministratif({
     watch("actesAdministratifs") || [];
 
   const actesOfCategory = actesAdministratifs.filter(
-    (acte) =>
-      acte?.category === category && !acte.parentId && !acte.parentUuid
+    (acte) => acte?.category === category && !acte.parentId && !acte.parentUuid
   );
 
   const handleAddNewField = (e?: React.MouseEvent) => {
@@ -49,7 +48,6 @@ export default function FieldSetActeAdministratif({
 
   const handleDeleteField = (index: number) => {
     const parent = actesAdministratifs[index];
-
     const avenantIndices = actesAdministratifs
       .map((field, index) => ({ field, index }))
       .filter(

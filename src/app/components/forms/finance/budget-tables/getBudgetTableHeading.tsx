@@ -1,4 +1,5 @@
 import { Badge } from "@/app/components/common/Badge";
+import { cn } from "@/app/utils/classname.util";
 import { isStructureInCpom } from "@/app/utils/structure.util";
 import { StructureApiType } from "@/schemas/api/structure.schema";
 
@@ -8,8 +9,12 @@ export const getBudgetTableHeading = ({ years, structure }: Props) => {
       {" "}
     </th>,
     ...years.map((year) => (
-      <th scope="col" key={year} className="bg-white">
-        <span className="block mb-1 text-sm">{year}</span>
+      <th
+        scope="col"
+        key={year}
+        className={cn("bg-white", !structure && "h-12")}
+      >
+        <span className={cn("block", structure && "mb-1 text-sm")}>{year}</span>
         {structure && (
           <>
             {isStructureInCpom(structure, year) ? (

@@ -35,23 +35,31 @@ export const CpomViewer = (): ReactElement => {
       </div>
       {showCpom && (
         <div className="text-mention-grey">
-          {currentCpomStructure?.cpom?.structures?.map((structure) => (
-            <div key={structure.id} className="flex items-center">
-              <span className="flex gap-2 my-2">
-                <strong className="pr-3">{structure.structure.dnaCode}</strong>
-                <span>{structure.structure.type}</span>{" "}
-                <span>{structure.structure.operateur?.name}</span>{" "}
-                <span>{structure.structure.communeAdministrative}</span>{" "}
-              </span>
-              {structure.structure.forms?.some((form) => form.status) && (
-                <Link
-                  className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-s-line"
-                  title="Voir la structure"
-                  href={`/structures/${structure.structure.id}`}
-                />
-              )}
-            </div>
-          ))}
+          {currentCpomStructure?.cpom?.structures?.map(
+            (structure) =>
+              structure.structure && (
+                <div key={structure.id} className="flex items-center">
+                  <span className="flex gap-2 my-2">
+                    <strong className="pr-3">
+                      {structure.structure.dnaCode}
+                    </strong>
+                    <span>{structure.structure.type}</span>{" "}
+                    <span>{structure.structure.operateur?.name}</span>{" "}
+                    <span>
+                      {structure.structure.communeAdministrative}
+                    </span>{" "}
+                  </span>
+                  {structure.structure.forms?.some((form) => form.status) && (
+                    <Link
+                      className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-s-line"
+                      title="Voir la structure"
+                      aria-label="Voir la structure"
+                      href={`/structures/${structure.structure.id}`}
+                    />
+                  )}
+                </div>
+              )
+          )}
         </div>
       )}
     </>

@@ -84,7 +84,16 @@ export class CpomAjoutIdentificationPage extends BasePage {
         for (let i = 0; i < count; i++) {
           const cb = checkboxes.nth(i);
           const value = await cb.getAttribute("value");
-          if (value && !desired.has(value) && (await cb.isChecked())) {
+          if (!value) continue;
+          const isChecked = await cb.isChecked();
+          if (desired.has(value) && !isChecked) {
+            const id = await cb.getAttribute("id");
+            const label = id
+              ? this.page.locator(`label[for="${id}"]`)
+              : cb.locator("..").locator("label").first();
+            await label.click();
+            await this.waitHelper.waitForUIUpdate(1);
+          } else if (!desired.has(value) && isChecked) {
             const id = await cb.getAttribute("id");
             const label = id
               ? this.page.locator(`label[for="${id}"]`)
@@ -163,8 +172,24 @@ export class CpomAjoutIdentificationPage extends BasePage {
 
     await this.waitHelper.waitForUIUpdate(2);
     if (data.structureIds === "all") {
+      const compositionLegend = this.page.locator(
+        'legend:has-text("Composition")'
+      );
+      await compositionLegend.waitFor({
+        state: "visible",
+        timeout: TIMEOUTS.NAVIGATION,
+      });
+      await this.waitHelper.waitForUIUpdate(1);
       await this.checkboxHelper.clickByValue("isAllStructuresSelected");
     } else if (data.structureIds?.length) {
+      const compositionLegend = this.page.locator(
+        'legend:has-text("Composition")'
+      );
+      await compositionLegend.waitFor({
+        state: "visible",
+        timeout: TIMEOUTS.NAVIGATION,
+      });
+      await this.waitHelper.waitForUIUpdate(1);
       for (const structureId of data.structureIds) {
         const cb = this.page.locator(
           `input[name="structures"][value="${structureId}"]`

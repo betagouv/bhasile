@@ -11,6 +11,7 @@ export const SHORT_PAGE_SIZE = 6;
 
 // Cookie expiration times
 export const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7;
+export const THREE_MONTHS_IN_SECONDS = 60 * 60 * 24 * 31 * 3;
 
 export const FILE_UPLOAD_EXPIRATION_DELAY = 60 * 60; // 1 hour
 
@@ -39,9 +40,9 @@ export const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30 Mo
 export const MODELE_DIFFUS_LINK = "/adresses-diffus.xlsx";
 export const MODELE_MIXTE_LINK = "/adresses-mixte.xlsx";
 
-export const PLACE_ASILE_CONTACT_EMAIL = "contact@placedasile.beta.gouv.fr";
+export const BHASILE_CONTACT_EMAIL = "contact@bhasile.beta.gouv.fr";
 
-export const PLACE_ASILE_PHONE_NUMBERS = "07 86 38 96 85 ou au 06 86 44 20 93";
+export const BHASILE_PHONE_NUMBERS = "07 86 38 96 85 ou au 06 86 44 20 93";
 
 export const DEPARTEMENTS: Departement[] = [
   {

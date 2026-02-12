@@ -114,17 +114,21 @@ export const createFakeCpoms = async (
       nbStructures
     );
 
-    // Create the CPOM with one acte administratif carrying the date range
+    const isUiInitialized = faker.datatype.boolean({ probability: 0.5 });
+
     const cpom = await prisma.cpom.create({
       data: {
         name: cpomName,
         operateurId: Number(operateurIdStr),
         granularity: "REGIONALE",
-        region,
-        departements: departements
-          .filter((departement) => departement.region === region)
-          .map((departement) => departement.numero),
-        actesAdministratifs: {
+        region: isUiInitialized ? region : undefined,
+        departements: isUiInitialized
+          ? departements
+              .filter((departement) => departement.region === region)
+              .map((departement) => departement.numero)
+          : undefined,
+          ...(isUiInitialized
+            ? {actesAdministratifs: {
           create: {
             category: ActeAdministratifCategory.CONVENTION,
             startDate: dateStart,
@@ -133,7 +137,7 @@ export const createFakeCpoms = async (
               create: createFakeFileUpload(),
             },
           },
-        },
+        } : undefined),
         structures: {
           create: selectedStructures.map((structureId) => {
             // 10% chance that a structure joins or leaves the CPOM in the middle

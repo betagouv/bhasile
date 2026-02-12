@@ -1,5 +1,6 @@
 import z from "zod";
 
+import { formatDateToIsoString } from "@/app/utils/date.util";
 import {
   nullishFrenchDateToISO,
   zId,
@@ -36,9 +37,11 @@ const baseCpomSchema = z.object({
   dateEnd: nullishFrenchDateToISO(),
   operateur: operateurSchema,
   operateurId: zId(),
-  region: z.string(),
-  departements: z.array(z.string()),
-  granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
+  region: z.string().nullish(),
+  departements: z.array(z.string()).nullish(),
+  granularity: z
+    .enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"])
+    .optional(),
   cpomMillesimes: z.array(cpomMillesimeSchema).optional(),
   actesAdministratifs: z.array(acteAdministratifCpomSchema),
 });
@@ -52,7 +55,10 @@ export const cpomStructureSchema = z.object({
 
 export const cpomSchema = baseCpomSchema
   .extend({
+    region: z.string().min(1, "La région est obligatoire"),
+    departements: z.array(z.string()).min(1),
     structures: z.array(cpomStructureSchema),
+    granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
   })
   .refine(
     (data) => {
@@ -64,6 +70,39 @@ export const cpomSchema = baseCpomSchema
     {
       message: "La date de début du CPOM doit être antérieure à la date de fin",
       path: ["dateEnd"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.actesAdministratifs.length === 0) {
+        return true;
+      }
+      const convention = data.actesAdministratifs.find(
+        (acteAdministratif) => !acteAdministratif.parentFileUploadId
+      );
+      if (!convention) {
+        return true;
+      }
+      const avenants = data.actesAdministratifs.filter(
+        (acteAdministratif) => acteAdministratif.parentFileUploadId
+      );
+      for (const acteAdministratif of avenants) {
+        const avenantEndDate = formatDateToIsoString(acteAdministratif.endDate);
+
+        const conventionEndDate = formatDateToIsoString(convention.endDate);
+        if (!avenantEndDate || !conventionEndDate) {
+          continue;
+        }
+        if (avenantEndDate < conventionEndDate) {
+          return false;
+        }
+      }
+      return true;
+    },
+    {
+      message:
+        "La date de fin de l'avenant doit être postérieure à la date de fin du CPOM",
+      path: ["actesAdministratifs"],
     }
   )
   .refine(

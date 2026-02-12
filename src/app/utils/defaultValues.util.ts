@@ -16,6 +16,7 @@ import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
 import { transformApiAdressesToFormAdresses } from "./adresse.util";
 import { getBudgetsDefaultValues } from "./budget.util";
 import { getControlesDefaultValues } from "./controle.util";
+import { getStructureCpomDefaultValues } from "./cpom.util";
 import { getEvaluationsDefaultValues } from "./evaluation.util";
 import { isStructureAutorisee } from "./structure.util";
 import { getStructureMillesimeDefaultValues } from "./structureMillesime.util";
@@ -86,7 +87,7 @@ export const getDefaultValues = ({
     actesAdministratifs,
     controles,
     evaluations,
-    cpomStructures: structure.cpomStructures ?? [],
+    cpomStructures: getStructureCpomDefaultValues(structure.cpomStructures),
   };
 };
 

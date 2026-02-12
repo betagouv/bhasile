@@ -56,8 +56,9 @@ async function runCpomAjoutTest(
     await financePage.submitAndConfirmRedirectToStructures();
 
     await page.goto(URLS.cpomModificationIdentification(cpomId), {
-      waitUntil: "domcontentloaded",
+      waitUntil: "load",
     });
+    await page.waitForLoadState("networkidle").catch(() => {});
 
     const modificationPage = new CpomModificationIdentificationPage(page);
     await modificationPage.verifyForm(formData);
@@ -66,7 +67,6 @@ async function runCpomAjoutTest(
       waitUntil: "domcontentloaded",
     });
     const financePageForVerification = new CpomModificationFinancePage(page);
-
     await financePageForVerification.verifyFinanceTable(testCase.financeData);
   } finally {
     if (cpomId !== null) {

@@ -129,7 +129,7 @@ export const StructuresList = ({ structures }: Props) => {
                 "mb-0",
                 "[&_label]:text-sm [&_label]:leading-6 [&_label]:pb-0 [&_label]:text-title-blue-france [&_label]:font-bold",
                 checkedStatus === "incomplete" &&
-                  "[&>label:before]:bg-none [&:before]:content-[''] [&:before]:absolute [&:before]:z-10 [&:before]:top-1/2 [&:before]:-translate-y-1/2 [&:before]:left-1 [&:before]:w-2 [&:before]:h-[1px] [&:before]:bg-white"
+                  "[&>label:before]:bg-none [&:before]:content-[''] [&:before]:absolute [&:before]:z-10 [&:before]:top-1/2 [&:before]:-translate-y-1/2 [&:before]:left-1 [&:before]:w-2 [&:before]:h-px [&:before]:bg-white"
               )}
               small
             />
