@@ -1,9 +1,9 @@
 "use client";
 
+import { sendEvent } from "@socialgouv/matomo-next";
 import dynamic from "next/dynamic";
 import { ReactElement, useMemo, useState } from "react";
 
-// import { NameChangeNotice } from "@/app/components/NameChangeNotice";
 import Loader from "@/app/components/ui/Loader";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
@@ -41,7 +41,10 @@ export default function Structures(): ReactElement {
         <SegmentedControl
           name="Visualisation"
           options={options}
-          onChange={setSelectedVisualization}
+          onChange={(event) => {
+            setSelectedVisualization(event);
+            sendEvent({ category: "visualisation", action: event });
+          }}
         >
           <h2
             className="text-title-blue-france fr-h5 mr-4 mb-0"
@@ -59,7 +62,6 @@ export default function Structures(): ReactElement {
           </p>
         </div>
       </div>
-      {/* <NameChangeNotice /> */}
       {selectedVisualization === "tableau" && (
         <>
           {fetchState === FetchState.LOADING && (
