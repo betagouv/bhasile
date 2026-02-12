@@ -113,28 +113,37 @@ export const createFakeCpoms = async (
       nbStructures
     );
 
-    // Create the CPOM with one acte administratif carrying the date range
+    const isUiInitialized = faker.datatype.boolean({ probability: 0.5 });
+
     const cpom = await prisma.cpom.create({
       data: {
         name: cpomName,
         operateurId: Number(operateurIdStr),
         granularity: "REGIONALE",
-        region,
-        departements: departements
-          .filter((departement) => departement.region === region)
-          .map((departement) => departement.numero),
-        actesAdministratifs: {
-          create: {
-            key: `cpom-acte-${operateurIdStr}-${region}-${yearStart}-${yearEnd}`,
-            mimeType: "application/pdf",
-            fileSize: faker.number.int({ min: 1000, max: 500000 }),
-            originalName: `convention-cpom-${yearStart}-${yearEnd}.pdf`,
-            category: FileUploadCategory.CPOM,
-            startDate: dateStart,
-            endDate: dateEnd,
-            granularity: FileUploadGranularity.CPOM,
-          },
-        },
+        region: isUiInitialized ? region : undefined,
+        departements: isUiInitialized
+          ? departements
+              .filter((departement) => departement.region === region)
+              .map((departement) => departement.numero)
+          : undefined,
+        dateStart: !isUiInitialized ? dateStart : undefined,
+        dateEnd: !isUiInitialized ? dateEnd : undefined,
+        ...(isUiInitialized
+          ? {
+              actesAdministratifs: {
+                create: {
+                  key: `cpom-acte-${operateurIdStr}-${region}-${yearStart}-${yearEnd}`,
+                  mimeType: "application/pdf",
+                  fileSize: faker.number.int({ min: 1000, max: 500000 }),
+                  originalName: `convention-cpom-${yearStart}-${yearEnd}.pdf`,
+                  category: FileUploadCategory.CPOM,
+                  startDate: dateStart,
+                  endDate: dateEnd,
+                  granularity: FileUploadGranularity.CPOM,
+                },
+              },
+            }
+          : {}),
         structures: {
           create: selectedStructures.map((structureId) => {
             // 10% chance that a structure joins or leaves the CPOM in the middle
