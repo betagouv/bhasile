@@ -7,6 +7,7 @@ import { fileApiSchema } from "./file.schema";
 
 export const acteAdministratifApiSchema = z.object({
   id: z.number().optional(),
+  uuid: z.string().optional(),
   structureDnaCode: z.string().optional(),
   cpomId: zId(),
   date: optionalFrenchDateToISO(),
@@ -15,6 +16,7 @@ export const acteAdministratifApiSchema = z.object({
   category: z.enum(ActeAdministratifCategory),
   name: z.string().optional(),
   parentId: zId(),
+  parentUuid: z.string().optional(),
   fileUploads: z.array(fileApiSchema).optional(),
 });
 

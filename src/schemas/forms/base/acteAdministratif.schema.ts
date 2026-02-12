@@ -13,15 +13,17 @@ export const acteAdministratifAutoSaveSchema = z.object({
   endDate: optionalFrenchDateToISO(),
   name: z.string().nullish(),
   parentId: zId(),
+  parentUuid: z.string().optional(), // Used when parent is not saved yet (no id) - references parent.uuid
   fileUploads: z.array(fileApiSchema).optional(),
 });
 
 const acteAdministratifSchema = acteAdministratifAutoSaveSchema
   .refine(
     (data) => {
+      const isNotAvenant = !data.parentId && !data.parentUuid;
       if (
         data.category !== "AUTRE" &&
-        !data.parentId &&
+        isNotAvenant &&
         data.fileUploads?.length
       ) {
         return !!data.startDate && !!data.endDate;
@@ -35,7 +37,8 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
   )
   .refine(
     (data) => {
-      if (data.parentId && data.fileUploads?.length) {
+      const isAvenant = data.parentId || data.parentUuid;
+      if (isAvenant && data.fileUploads?.length) {
         return !!data.date;
       }
       return true;
@@ -48,10 +51,11 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
 
 const acteAdministratifAutoriseesSchema = acteAdministratifSchema.refine(
   (data) => {
+    const isNotAvenant = !data.parentId && !data.parentUuid;
     if (
       (data.category === "ARRETE_AUTORISATION" ||
         data.category === "ARRETE_TARIFICATION") &&
-      !data.parentId
+      isNotAvenant
     ) {
       return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
     }
@@ -65,11 +69,12 @@ const acteAdministratifAutoriseesSchema = acteAdministratifSchema.refine(
 
 const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
   (data) => {
+    const isNotAvenant = !data.parentId && !data.parentUuid;
     if (
       (data.category === "ARRETE_AUTORISATION" ||
         data.category === "ARRETE_TARIFICATION" ||
         data.category === "CONVENTION") &&
-      !data.parentId
+      isNotAvenant
     ) {
       return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
     }
@@ -83,8 +88,8 @@ const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
 
 export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
   (data) => {
-    console.log("data", data);
-    if (data.category === "CONVENTION" && !data.parentId) {
+    const isNotAvenant = !data.parentId && !data.parentUuid;
+    if (data.category === "CONVENTION" && isNotAvenant) {
       return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
     }
     return true;

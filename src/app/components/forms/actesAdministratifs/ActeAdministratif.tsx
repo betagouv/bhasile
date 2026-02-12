@@ -35,7 +35,8 @@ export const ActeAdministratif = ({
   );
 
   const avenants = actesAdministratifs.filter(
-    (avenant) => avenant.parentId === acte.id
+    (avenant) =>
+      avenant.parentId === acte.id || avenant.parentUuid === acte.uuid
   );
 
   const handleAddNewAvenant = (e: React.MouseEvent) => {
@@ -46,6 +47,7 @@ export const ActeAdministratif = ({
       uuid: uuidv4(),
       category: acte.category,
       parentId: acte.id,
+      parentUuid: acte.uuid,
     });
   };
 
