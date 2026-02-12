@@ -5,6 +5,7 @@ import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
 import { formatDateToIsoString } from "@/app/utils/date.util";
+import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { AdditionalFieldsType } from "@/types/categoryToDisplay.type";
 
 import UploadsByCategory, {
@@ -21,6 +22,8 @@ export const DatesAndDocuments = () => {
     () => !!formState.errors?.actesAdministratifs,
     [formState.errors]
   );
+
+  const errorMessages = getErrorMessages(formState, "actesAdministratifs");
 
   const actesAdministratifs = watch(
     "actesAdministratifs"
@@ -60,6 +63,7 @@ export const DatesAndDocuments = () => {
     setValue("dateStart", dateStart);
   }, [actesAdministratifs, actesDatesKey, setValue]);
 
+  console.log("formState", formState.errors);
   return (
     <>
       <div
@@ -98,8 +102,7 @@ export const DatesAndDocuments = () => {
       </div>
       {hasErrors && (
         <p className="text-default-error m-0 p-0">
-          Les dates de fin des avenants doivent être postérieures à la date de
-          fin du CPOM
+          {errorMessages?.length > 0 ? errorMessages[0] : ""}
         </p>
       )}
     </>
