@@ -1,6 +1,6 @@
 import { FieldError, FieldErrors } from "react-hook-form";
 
-function extractMessagesFromError(error: FieldError): string[] {
+const extractMessagesFromError = (error: FieldError): string[] => {
   const messages: string[] = [];
 
   if (typeof error.message === "string") {
@@ -12,23 +12,25 @@ function extractMessagesFromError(error: FieldError): string[] {
       if (typeof value === "string") {
         messages.push(value);
       } else if (Array.isArray(value)) {
-        messages.push(...value.filter((v): v is string => typeof v === "string"));
+        messages.push(
+          ...value.filter((v): v is string => typeof v === "string")
+        );
       }
     }
   }
 
   return messages;
-}
+};
 
-function isFieldError(value: unknown): value is FieldError {
+const isFieldError = (value: unknown): value is FieldError => {
   return (
     typeof value === "object" &&
     value !== null &&
     ("message" in value || "types" in value)
   );
-}
+};
 
-function collectMessages(errors: unknown): string[] {
+const collectMessages = (errors: unknown): string[] => {
   const messages: string[] = [];
 
   function traverse(obj: unknown): void {
@@ -45,14 +47,14 @@ function collectMessages(errors: unknown): string[] {
 
   traverse(errors);
   return messages;
-}
+};
 
-export function getErrorMessages(
+export const getErrorMessages = (
   formState: { errors: FieldErrors },
   fieldPath?: string
-): string[] {
+): string[] => {
   const errorsObject = formState.errors as Record<string, unknown>;
   const errors = fieldPath ? errorsObject[fieldPath] : errorsObject;
 
   return collectMessages(errors);
-}
+};
