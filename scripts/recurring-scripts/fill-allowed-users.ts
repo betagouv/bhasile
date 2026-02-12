@@ -53,7 +53,7 @@ const getTargetDepartementIds = (
   return [];
 };
 
-const upsertAllowedUsers = async (
+const createAllowedUsers = async (
   row: AllowedUserCsvRow,
   departementIds: number[]
 ) => {
@@ -62,16 +62,8 @@ const upsertAllowedUsers = async (
     granularity: row.granularity as AllowedUserGranularity,
   };
 
-  await prisma.allowedUser.upsert({
-    where: { emailPattern: row.emailPattern },
-    update: {
-      ...data,
-      departementAllowedUsers: {
-        deleteMany: {},
-        create: departementIds.map((id) => ({ departementId: id })),
-      },
-    },
-    create: {
+  await prisma.allowedUser.create({
+    data: {
       ...data,
       departementAllowedUsers: {
         create: departementIds.map((id) => ({ departementId: id })),
@@ -80,13 +72,30 @@ const upsertAllowedUsers = async (
   });
 };
 
-const [csvRows, allDepartements] = await Promise.all([
-  fetchAllowedUsers(),
-  prisma.departement.findMany(),
-]);
+const run = async () => {
+  try {
+    console.log("🧑 Création des utilisateurs autorisés");
+    const [csvRows, allDepartements] = await Promise.all([
+      fetchAllowedUsers(),
+      prisma.departement.findMany(),
+    ]);
 
-for (const row of csvRows) {
-  const targetIds = getTargetDepartementIds(row, allDepartements);
-  await upsertAllowedUsers(row, targetIds);
-  console.log(`Mis à jour : ${row.emailPattern} (${row.granularity})`);
-}
+    await prisma.allowedUser.deleteMany({});
+
+    for (const row of csvRows) {
+      const targetIds = getTargetDepartementIds(row, allDepartements);
+      await createAllowedUsers(row, targetIds);
+      console.log(`Ajout de ${row.emailPattern} (${row.granularity})`);
+    }
+  } catch (error) {
+    console.error(
+      "❌ Erreur lors de la création des utilisateurs autorisés :",
+      error
+    );
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+run();
