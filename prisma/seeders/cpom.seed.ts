@@ -127,17 +127,20 @@ export const createFakeCpoms = async (
               .filter((departement) => departement.region === region)
               .map((departement) => departement.numero)
           : undefined,
-          ...(isUiInitialized
-            ? {actesAdministratifs: {
-          create: {
-            category: ActeAdministratifCategory.CONVENTION,
-            startDate: dateStart,
-            endDate: dateEnd,
-            fileUploads: {
-              create: createFakeFileUpload(),
-            },
-          },
-        } : undefined),
+        ...(isUiInitialized
+          ? {
+              actesAdministratifs: {
+                create: {
+                  category: ActeAdministratifCategory.CONVENTION,
+                  startDate: dateStart,
+                  endDate: dateEnd,
+                  fileUploads: {
+                    create: createFakeFileUpload(),
+                  },
+                },
+              },
+            }
+          : undefined),
         structures: {
           create: selectedStructures.map((structureId) => {
             // 10% chance that a structure joins or leaves the CPOM in the middle

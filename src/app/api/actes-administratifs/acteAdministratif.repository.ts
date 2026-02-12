@@ -1,9 +1,10 @@
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-type ActeAdministratifOwnerId =
-  | { structureDnaCode: string; cpomId?: never }
-  | { structureDnaCode?: never; cpomId: number };
+type ActeAdministratifOwnerId = {
+  structureDnaCode?: string;
+  cpomId?: number;
+};
 
 const deleteActesAdministratifs = async (
   tx: PrismaTransaction,
@@ -43,11 +44,6 @@ export const createOrUpdateActesAdministratifs = async (
 
   await deleteActesAdministratifs(tx, actesAdministratifs, ownerId);
 
-  const ownerData =
-    "structureDnaCode" in ownerId
-      ? { structureDnaCode: ownerId.structureDnaCode, cpomId: null }
-      : { structureDnaCode: null, cpomId: ownerId.cpomId };
-
   const roots = actesAdministratifs.filter((a) => !a.parentId && !a.parentUuid);
   const children = actesAdministratifs.filter(
     (a) => a.parentId || a.parentUuid
@@ -56,7 +52,7 @@ export const createOrUpdateActesAdministratifs = async (
   const uuidToId = new Map<string, number>();
 
   for (const acte of roots) {
-    const result = await upsertActeAdministratif(tx, acte, ownerData);
+    const result = await upsertActeAdministratif(tx, acte, ownerId);
     if (acte.uuid && !acte.id) {
       uuidToId.set(acte.uuid, result.id);
     }
@@ -66,20 +62,20 @@ export const createOrUpdateActesAdministratifs = async (
     const resolvedParentId =
       acte.parentId ??
       (acte.parentUuid ? uuidToId.get(acte.parentUuid) : undefined);
-    await upsertActeAdministratif(tx, acte, ownerData, resolvedParentId);
+    await upsertActeAdministratif(tx, acte, ownerId, resolvedParentId);
   }
 };
 
 const upsertActeAdministratif = (
   tx: PrismaTransaction,
   acteAdministratif: ActeAdministratifApiType,
-  ownerData: { structureDnaCode: string | null; cpomId: number | null },
+  ownerId: { structureDnaCode?: string; cpomId?: number },
   parentId?: number
 ) => {
   return tx.acteAdministratif.upsert({
     where: { id: acteAdministratif.id || 0 },
     update: {
-      ...ownerData,
+      ...ownerId,
       category: acteAdministratif.category,
       date: acteAdministratif.date,
       startDate: acteAdministratif.startDate,
@@ -91,7 +87,7 @@ const upsertActeAdministratif = (
       },
     },
     create: {
-      ...ownerData,
+      ...ownerId,
       category: acteAdministratif.category,
       date: acteAdministratif.date,
       startDate: acteAdministratif.startDate,
