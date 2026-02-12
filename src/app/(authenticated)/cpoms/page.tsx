@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ReactElement } from "react";
 
 import Loader from "@/app/components/ui/Loader";
@@ -22,6 +23,12 @@ export default function Structures(): ReactElement {
           CPOM
         </h2>
         <div className="flex gap-2 items-center">
+          <Link
+            href="/cpoms/ajout/01-identification"
+            className="fr-btn fr-btn--secondary"
+          >
+            <span className="fr-icon-add-line fr-icon--sm" /> Créer un CPOM
+          </Link>
           <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
             {totalCpoms} entrée
             {totalCpoms > 1 ? "s" : ""}
