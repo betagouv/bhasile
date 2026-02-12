@@ -37,8 +37,8 @@ const baseCpomSchema = z.object({
   dateEnd: nullishFrenchDateToISO(),
   operateur: operateurSchema,
   operateurId: zId(),
-  region: z.string(),
-  departements: z.array(z.string()),
+  region: z.string().optional(),
+  departements: z.array(z.string()).optional(),
   granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
   cpomMillesimes: z.array(cpomMillesimeSchema).optional(),
   actesAdministratifs: z.array(acteAdministratifCpomSchema),
@@ -109,12 +109,12 @@ export const cpomSchema = baseCpomSchema
       const cpomEnd = data.dateEnd;
       for (const structure of data.structures) {
         if (structure.dateStart) {
-          if (structure.dateStart < cpomStart) {
+          if (structure.dateStart <= cpomStart) {
             return false;
           }
         }
         if (structure.dateEnd) {
-          if (structure.dateEnd > cpomEnd) {
+          if (structure.dateEnd >= cpomEnd) {
             return false;
           }
         }

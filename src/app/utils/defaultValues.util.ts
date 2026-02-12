@@ -86,8 +86,33 @@ export const getDefaultValues = ({
     actesAdministratifs,
     controles,
     evaluations,
-    cpomStructures: structure.cpomStructures ?? [],
+    cpomStructures: getDefaultValuesForCpom(structure.cpomStructures),
   };
+};
+
+// TODO: Temp function. Remove when all cpom are initialized via the CPOM form
+const getDefaultValuesForCpom = (
+  cpomStructures: CpomStructureApiType[] | undefined
+) => {
+  if (!cpomStructures) {
+    return [];
+  }
+  return cpomStructures.map((cpomStructure) => ({
+    ...cpomStructure,
+    cpom: {
+      ...cpomStructure.cpom,
+      granularity: cpomStructure.cpom?.granularity ?? "REGIONALE",
+      region: cpomStructure.cpom?.region ?? undefined,
+      departements: cpomStructure.cpom?.departements ?? undefined,
+      actesAdministratifs:
+        cpomStructure.cpom?.actesAdministratifs?.map((acteAdministratif) => ({
+          ...acteAdministratif,
+          startDate: acteAdministratif.startDate ?? undefined,
+          endDate: acteAdministratif.endDate ?? undefined,
+          date: acteAdministratif.date ?? undefined,
+        })) ?? [],
+    },
+  }));
 };
 
 type StructureDefaultValues = Omit<

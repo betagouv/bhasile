@@ -116,7 +116,7 @@ export const computeCpomDates = (
     };
   }
 
-  if (!cpom.actesAdministratifs) {
+  if (!cpom.actesAdministratifs?.length) {
     if (cpom.dateStart && cpom.dateEnd) {
       return {
         dateStart: cpom.dateStart,
