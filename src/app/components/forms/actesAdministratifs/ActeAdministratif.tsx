@@ -34,10 +34,12 @@ export const ActeAdministratif = ({
       acteAdministratif.uuid === acte.uuid || acteAdministratif.id === acte.id
   );
 
-  const avenants = actesAdministratifs.filter(
-    (avenant) =>
-      avenant.parentId === acte.id || avenant.parentUuid === acte.uuid
-  );
+  const avenants = actesAdministratifs.filter((avenant) => {
+    return (
+      (avenant.parentId && avenant.parentId === acte.id) ||
+      (avenant.parentUuid && avenant.parentUuid === acte.uuid)
+    );
+  });
 
   const handleAddNewAvenant = (e: React.MouseEvent) => {
     e.preventDefault();

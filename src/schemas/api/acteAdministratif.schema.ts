@@ -14,7 +14,7 @@ export const acteAdministratifApiSchema = z.object({
   startDate: optionalFrenchDateToISO(),
   endDate: optionalFrenchDateToISO(),
   category: z.enum(ActeAdministratifCategory),
-  name: z.string().optional(),
+  name: z.string().nullish(),
   parentId: zId(),
   parentUuid: z.string().optional(),
   fileUploads: z.array(fileApiSchema).optional(),
