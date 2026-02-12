@@ -9,14 +9,9 @@ export const Logo = (): ReactElement => {
       href="/"
       title="Accueil - Bhasile"
     >
-      <Image
-        src="/logo.svg"
-        alt="Logo Bhasile"
-        width={0}
-        height={0}
-        loading="eager"
-        style={{ width: "40%", height: "auto" }}
-      />
+      <div className="relative h-[48] w-[150]">
+        <Image src="/logo.svg" alt="Logo Bhasile" fill loading="eager" />
+      </div>
     </Link>
   );
 };
