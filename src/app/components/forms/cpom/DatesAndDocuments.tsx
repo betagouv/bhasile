@@ -63,7 +63,6 @@ export const DatesAndDocuments = () => {
     setValue("dateStart", dateStart);
   }, [actesAdministratifs, actesDatesKey, setValue]);
 
-  console.log("formState", formState.errors);
   return (
     <>
       <div
