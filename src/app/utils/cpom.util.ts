@@ -1,7 +1,11 @@
 import { v4 as uuidv4 } from "uuid";
 
 import { DEPARTEMENTS } from "@/constants";
-import { CpomApiType, CpomMillesimeApiType } from "@/schemas/api/cpom.schema";
+import {
+  CpomApiType,
+  CpomMillesimeApiType,
+  CpomStructureApiType,
+} from "@/schemas/api/cpom.schema";
 import {
   CpomFormValues,
   CpomMillesimeFormValues,
@@ -42,6 +46,30 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
           },
         ],
   };
+};
+
+export const getStructureCpomDefaultValues = (
+  cpomStructures: CpomStructureApiType[] | undefined
+) => {
+  if (!cpomStructures) {
+    return [];
+  }
+  return cpomStructures.map((cpomStructure) => ({
+    ...cpomStructure,
+    cpom: {
+      ...cpomStructure.cpom,
+      granularity: cpomStructure.cpom?.granularity ?? "REGIONALE",
+      region: cpomStructure.cpom?.region ?? undefined,
+      departements: cpomStructure.cpom?.departements ?? undefined,
+      actesAdministratifs:
+        cpomStructure.cpom?.actesAdministratifs?.map((acteAdministratif) => ({
+          ...acteAdministratif,
+          startDate: acteAdministratif.startDate ?? undefined,
+          endDate: acteAdministratif.endDate ?? undefined,
+          date: acteAdministratif.date ?? undefined,
+        })) ?? [],
+    },
+  }));
 };
 
 const getCpomMillesimesDefaultValues = (

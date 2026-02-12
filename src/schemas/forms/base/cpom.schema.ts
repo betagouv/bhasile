@@ -37,9 +37,11 @@ const baseCpomSchema = z.object({
   dateEnd: nullishFrenchDateToISO(),
   operateur: operateurSchema,
   operateurId: zId(),
-  region: z.string().optional(),
-  departements: z.array(z.string()).optional(),
-  granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
+  region: z.string().nullish(),
+  departements: z.array(z.string()).nullish(),
+  granularity: z
+    .enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"])
+    .optional(),
   cpomMillesimes: z.array(cpomMillesimeSchema).optional(),
   actesAdministratifs: z.array(acteAdministratifCpomSchema),
 });
@@ -53,7 +55,10 @@ export const cpomStructureSchema = z.object({
 
 export const cpomSchema = baseCpomSchema
   .extend({
+    region: z.string().min(1, "La région est obligatoire"),
+    departements: z.array(z.string()).min(1),
     structures: z.array(cpomStructureSchema),
+    granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
   })
   .refine(
     (data) => {
@@ -109,12 +114,12 @@ export const cpomSchema = baseCpomSchema
       const cpomEnd = data.dateEnd;
       for (const structure of data.structures) {
         if (structure.dateStart) {
-          if (structure.dateStart <= cpomStart) {
+          if (structure.dateStart < cpomStart) {
             return false;
           }
         }
         if (structure.dateEnd) {
-          if (structure.dateEnd >= cpomEnd) {
+          if (structure.dateEnd > cpomEnd) {
             return false;
           }
         }

@@ -113,10 +113,8 @@ export const createFakeCpoms = async (
       nbStructures
     );
 
-    // TODO: Temp feature. Remove when all cpom are initialized via the CPOM form
     const isUiInitialized = faker.datatype.boolean({ probability: 0.5 });
 
-    // Create the CPOM with one acte administratif carrying the date range
     const cpom = await prisma.cpom.create({
       data: {
         name: cpomName,
