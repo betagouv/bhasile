@@ -52,7 +52,8 @@ export default function FieldSetActeAdministratif({
       .map((field, index) => ({ field, index }))
       .filter(
         ({ field }) =>
-          field.parentId === parent?.id || field.parentUuid === parent?.uuid
+          (field.parentId && field.parentId === parent?.id) ||
+          (field.parentUuid && field.parentUuid === parent?.uuid)
       )
       .map(({ index }) => index);
 

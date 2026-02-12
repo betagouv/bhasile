@@ -24,9 +24,11 @@ export const Avenant = ({
 
   const index = actesAdministratifs.findIndex(
     (acteAdministratif) =>
-      acteAdministratif.uuid === avenant.uuid ||
-      acteAdministratif.id === avenant.id
+      (avenant.uuid !== undefined && acteAdministratif.uuid === avenant.uuid) ||
+      (avenant.id !== undefined && acteAdministratif.id === avenant.id)
   );
+
+  console.log(index, avenant, actesAdministratifs);
 
   return (
     <span key={`${avenant.uuid}`}>
@@ -76,7 +78,7 @@ export const Avenant = ({
           <div className="flex flex-col w-full">
             <label className="mb-2">{documentLabel}</label>
             <UploadWithValidation
-              name={`actesAdministratifs.${index}.key`}
+              name={`actesAdministratifs.${index}.fileUploads.0.key`}
               control={control}
             />
           </div>
