@@ -29,7 +29,6 @@ const getPlacesVacantes = (
 
 const mapToActivites = (sheet: (string | number | Date)[][], index: number) => {
   const metadata = activitesMetadata[index];
-  // TODO : identifier l'origine des NaN
   return sheet.map((line) => ({
     date: parseDate(metadata.date, "activites-extract"),
     structureDnaCode: String(line[metadata.dnaIndex]),
