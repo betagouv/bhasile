@@ -24,8 +24,8 @@ export const Avenant = ({
 
   const index = actesAdministratifs.findIndex(
     (acteAdministratif) =>
-      (avenant.uuid !== undefined && acteAdministratif.uuid === avenant.uuid) ||
-      (avenant.id !== undefined && acteAdministratif.id === avenant.id)
+      (avenant.uuid && acteAdministratif.uuid === avenant.uuid) ||
+      (avenant.id && acteAdministratif.id === avenant.id)
   );
 
   console.log(index, avenant, actesAdministratifs);

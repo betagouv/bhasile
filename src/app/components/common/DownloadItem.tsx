@@ -43,7 +43,7 @@ export const DownloadItem = ({ item, displayGranularity = false }: Props) => {
     }
   };
 
-  if (item.fileUploads?.[0]?.key) {
+  if (!item.fileUploads?.[0]?.key) {
     return null;
   }
 

@@ -1,10 +1,10 @@
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-type DocumentFinancierOwnerId =
-  | { structureDnaCode: string; cpomId?: never }
-  | { structureDnaCode?: never; cpomId: number };
-
+type DocumentFinancierOwnerId = {
+  structureDnaCode?: string;
+  cpomId?: number;
+};
 const deleteDocumentsFinanciers = async (
   tx: PrismaTransaction,
   documentsFinanciersToKeep: DocumentFinancierApiType[],
@@ -43,17 +43,12 @@ export const createOrUpdateDocumentsFinanciers = async (
 
   await deleteDocumentsFinanciers(tx, documentsFinanciers, ownerId);
 
-  const ownerData =
-    "structureDnaCode" in ownerId
-      ? { structureDnaCode: ownerId.structureDnaCode, cpomId: null }
-      : { structureDnaCode: null, cpomId: ownerId.cpomId };
-
   await Promise.all(
     (documentsFinanciers || []).map((documentFinancier) => {
       return tx.documentFinancier.upsert({
         where: { id: documentFinancier.id || 0 },
         update: {
-          ...ownerData,
+          ...ownerId,
           category: documentFinancier.category,
           year: documentFinancier.year,
           name: documentFinancier.name,
@@ -62,7 +57,7 @@ export const createOrUpdateDocumentsFinanciers = async (
           },
         },
         create: {
-          ...ownerData,
+          ...ownerId,
           category: documentFinancier.category,
           year: documentFinancier.year,
           name: documentFinancier.name,

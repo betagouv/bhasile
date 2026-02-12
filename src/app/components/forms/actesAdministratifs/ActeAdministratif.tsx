@@ -31,7 +31,8 @@ export const ActeAdministratif = ({
 
   const index = actesAdministratifs.findIndex(
     (acteAdministratif: ActeAdministratifFormValues) =>
-      acteAdministratif.uuid === acte.uuid || acteAdministratif.id === acte.id
+      (acteAdministratif.uuid && acteAdministratif.uuid === acte.uuid) ||
+      (acteAdministratif.id && acteAdministratif.id === acte.id)
   );
 
   const avenants = actesAdministratifs.filter((avenant) => {
@@ -77,6 +78,7 @@ export const ActeAdministratif = ({
 
         {additionalFieldsType === AdditionalFieldsType.DATE_START_END && (
           <div className="flex gap-6 items-start h-full">
+            {index}
             <InputWithValidation
               name={`actesAdministratifs.${index}.startDate`}
               defaultValue={acte.startDate}
