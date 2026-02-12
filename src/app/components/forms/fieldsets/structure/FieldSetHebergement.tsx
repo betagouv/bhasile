@@ -19,9 +19,12 @@ export const FieldSetHebergement = ({
   const { control, setValue, watch, getValues, setError } =
     parentFormContext || localForm;
 
+  const dnaCode = watch("dnaCode");
   const typeBati = watch("typeBati") || Repartition.DIFFUS;
   const adminAddress = watch("adresseAdministrativeComplete");
   const sameAddress = watch("sameAddress");
+
+  const adresses = (watch("adresses") || []) as FormAdresse[];
 
   const hebergementsContainerRef = useRef(null);
 
@@ -33,7 +36,7 @@ export const FieldSetHebergement = ({
 
   const handleAddAddress = () => {
     const newAddress: FormAdresse = {
-      structureDnaCode: getValues("dnaCode"),
+      structureDnaCode: dnaCode,
       adresseComplete: "",
       adresse: "",
       codePostal: "",
@@ -163,7 +166,7 @@ export const FieldSetHebergement = ({
             </div>
           )}
 
-        {((getValues("adresses") || []) as FormAdresse[]).map((_, index) => (
+        {adresses.map((_, index) => (
           <AdresseComponent
             key={index}
             index={index}
