@@ -259,7 +259,11 @@ export const findOne = async (id: number): Promise<Structure> => {
                 },
               },
               operateur: true,
-              actesAdministratifs: true,
+              actesAdministratifs: {
+                include: {
+                  fileUploads: true,
+                },
+              },
               cpomMillesimes: {
                 orderBy: {
                   year: "desc",
@@ -295,10 +299,14 @@ export const findOne = async (id: number): Promise<Structure> => {
           evenementDate: "desc",
         },
       },
-      fileUploads: {
+      actesAdministratifs: {
         include: {
-          parentFileUpload: true,
-          childFileUploads: true,
+          fileUploads: true,
+        },
+      },
+      documentsFinanciers: {
+        include: {
+          fileUploads: true,
         },
       },
       budgets: {

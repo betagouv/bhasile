@@ -31,7 +31,11 @@ export const findOne = async (id: number): Promise<Cpom> => {
       structures: true,
       cpomMillesimes: true,
       operateur: true,
-      actesAdministratifs: true,
+      actesAdministratifs: {
+        include: {
+          fileUploads: true,
+        },
+      },
     },
   });
   return cpom;
