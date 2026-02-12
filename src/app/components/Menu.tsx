@@ -18,6 +18,16 @@ export const Menu = (): ReactElement => {
       icon: "fr-icon-community-line",
       label: "Structures d’hébergement",
       url: "/structures",
+      subItems: [
+        {
+          label: "Voir les structures",
+          url: "/structures",
+        },
+        {
+          label: "Voir les CPOM",
+          url: "/cpoms",
+        },
+      ],
     },
     {
       icon: "fr-icon-user-setting-line",
@@ -56,12 +66,24 @@ export const Menu = (): ReactElement => {
     },
   ];
 
-  const getActiveClass = (url: string): string => {
-    return pathname?.includes(url) ? "fr-sidemenu__item--active" : "";
+  const getActiveClass = (
+    url: string,
+    subItems?: { url: string }[]
+  ): string => {
+    const isActive =
+      pathname?.includes(url) ||
+      subItems?.some((subItem) => pathname?.includes(subItem.url));
+    return isActive ? "fr-sidemenu__item--active" : "";
   };
 
-  const getAriaCurrent = (url: string): "page" | boolean => {
-    return pathname?.includes(url) ? "page" : false;
+  const getAriaCurrent = (
+    url: string,
+    subItems?: { url: string }[]
+  ): "page" | boolean => {
+    const isActive =
+      pathname?.includes(url) ||
+      subItems?.some((subItem) => pathname?.includes(subItem.url));
+    return isActive ? "page" : false;
   };
 
   return (
@@ -73,16 +95,34 @@ export const Menu = (): ReactElement => {
       <ul className="fr-sidemenu__list p-4">
         {menuItems.map((menuItem) => (
           <li
-            className={`fr-sidemenu__item ${getActiveClass(menuItem.url)}`}
+            className={`fr-sidemenu__item ${getActiveClass(menuItem.url, menuItem.subItems)}`}
             key={menuItem.label}
           >
             <Link
               className="fr-sidemenu__link"
               href={menuItem.url}
-              aria-current={getAriaCurrent(menuItem.url)}
+              aria-current={getAriaCurrent(menuItem.url, menuItem.subItems)}
             >
               <span className={menuItem.icon}>{menuItem.label}</span>
             </Link>
+            {menuItem.subItems && (
+              <ul className="fr-sidemenu__list">
+                {menuItem.subItems.map((subItem) => (
+                  <li
+                    className={`fr-sidemenu__item ${getActiveClass(subItem.url)}`}
+                    key={subItem.label}
+                  >
+                    <Link
+                      className="fr-sidemenu__link"
+                      href={subItem.url}
+                      aria-current={getAriaCurrent(subItem.url)}
+                    >
+                      {subItem.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>
