@@ -14,10 +14,13 @@ export const acteAdministratifAutoSaveSchema = z.object({
   name: z.string().nullish(),
   parentId: zId(),
   parentUuid: z.string().optional(), // Used when parent is not saved yet (no id) - references parent.uuid
-  fileUploads: z.array(fileApiSchema).optional(),
+  fileUploads: z.array(fileApiSchema.partial()).optional(),
 });
 
 const acteAdministratifSchema = acteAdministratifAutoSaveSchema
+  .extend({
+    fileUploads: z.array(fileApiSchema).optional(),
+  })
   .refine(
     (data) => {
       const isNotAvenant = !data.parentId && !data.parentUuid;
@@ -100,17 +103,32 @@ export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
   }
 );
 
+const filterActesWithKey = (val: unknown) =>
+  Array.isArray(val)
+    ? val.filter(
+        (acte: { fileUploads?: Array<{ key?: string }> }) =>
+          !!acte?.fileUploads?.[0]?.key
+      )
+    : val;
+
 export const actesAdministratifsAutoriseesSchema = z.object({
-  actesAdministratifs: z.array(acteAdministratifAutoriseesSchema).optional(),
+  actesAdministratifs: z.preprocess(
+    filterActesWithKey,
+    z.array(acteAdministratifAutoriseesSchema).optional()
+  ),
 });
 export const actesAdministratifsSubventionneesSchema = z.object({
-  actesAdministratifs: z
-    .array(acteAdministratifSubventionneesSchema)
-    .optional(),
+  actesAdministratifs: z.preprocess(
+    filterActesWithKey,
+    z.array(acteAdministratifSubventionneesSchema).optional()
+  ),
 });
 
 export const actesAdministratifsAutoSaveSchema = z.object({
-  actesAdministratifs: z.array(acteAdministratifAutoSaveSchema).optional(),
+  actesAdministratifs: z.preprocess(
+    filterActesWithKey,
+    z.array(acteAdministratifAutoSaveSchema).optional()
+  ),
 });
 
 export type ActeAdministratifFormValues = z.infer<
