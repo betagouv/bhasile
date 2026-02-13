@@ -13,7 +13,7 @@ import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { BudgetExecutoire } from "./BudgetExecutoire";
 import { CpomStaticTable } from "./CpomStaticTable";
-import { DocumentsAdministratifs } from "./DocumentsAdministratifs";
+import { DocumentsFinanciers } from "./DocumentsFinanciers";
 import { DotationChart } from "./DotationChart";
 import { HistoriqueIndicateursGeneraux } from "./HistoriqueIndicateursGeneraux";
 import { StructureCpomSwitch } from "./StructureCpomSwitch";
@@ -83,7 +83,7 @@ export const FinancesBlock = (): ReactElement => {
           importés.
         </h5>
       )}
-      <DocumentsAdministratifs />
+      <DocumentsFinanciers />
     </Block>
   );
 };

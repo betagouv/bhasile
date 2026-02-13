@@ -1,17 +1,17 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
-import {
-  Evaluation,
-  FileUpload,
-  FileUploadCategory,
-} from "@/generated/prisma/client";
+import { Evaluation, FileUpload } from "@/generated/prisma/client";
 
 import { createFakeFileUpload } from "./file-upload.seed";
 
 export type EvaluationWithFileUploads = Evaluation & {
   fileUploads: Omit<
     FileUpload,
-    "id" | "controleId" | "evaluationId" | "structureDnaCode" | "cpomId"
+    | "id"
+    | "acteAdministratifId"
+    | "documentFinancierId"
+    | "controleId"
+    | "evaluationId"
   >[];
 };
 
@@ -25,11 +25,7 @@ export const createFakeEvaluation = (): Omit<
     notePro: faker.number.float({ min: 0, max: 4, fractionDigits: 1 }),
     notePersonne: faker.number.float({ min: 0, max: 4, fractionDigits: 1 }),
     noteStructure: faker.number.float({ min: 0, max: 4, fractionDigits: 1 }),
-    fileUploads: [
-      createFakeFileUpload({
-        category: FileUploadCategory.EVALUATION,
-      }),
-    ],
+    fileUploads: [createFakeFileUpload()],
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   };

@@ -3,14 +3,13 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useEffect, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { AdditionalFieldsType } from "@/app/utils/acteAdministratif.util";
 import { cn } from "@/app/utils/classname.util";
 import { formatDateToIsoString } from "@/app/utils/date.util";
 import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
-import { AdditionalFieldsType } from "@/types/categoryToDisplay.type";
+import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 
-import UploadsByCategory, {
-  ActeAdministratifField,
-} from "../documents/UploadsByCategory";
+import FieldSetActeAdministratif from "../fieldsets/structure/FieldSetActeAdministratif";
 import InputWithValidation from "../InputWithValidation";
 
 dayjs.extend(customParseFormat);
@@ -27,7 +26,7 @@ export const DatesAndDocuments = () => {
 
   const actesAdministratifs = watch(
     "actesAdministratifs"
-  ) as ActeAdministratifField[];
+  ) as ActeAdministratifFormValues[];
 
   // We use a key to run the useEffect every time the dates change
   const actesDatesKey =
@@ -85,8 +84,8 @@ export const DatesAndDocuments = () => {
           label=""
           type="hidden"
         />
-        <UploadsByCategory
-          category="CPOM"
+        <FieldSetActeAdministratif
+          category="CONVENTION"
           categoryShortName="CPOM"
           title="CPOM"
           noTitleLegend={true}

@@ -5,12 +5,13 @@ import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { StructureColumn } from "@/types/ListColumn";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acteAdministratif.repository";
 import { createOrUpdateAdresses } from "../adresses/adresse.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
 import { createOrUpdateContacts } from "../contacts/contact.repository";
 import { createOrUpdateControles } from "../controles/controle.repository";
+import { createOrUpdateDocumentsFinanciers } from "../documents-financiers/documentFinancier.repository";
 import { createOrUpdateEvaluations } from "../evaluations/evaluation.repository";
-import { updateFileUploads } from "../files/file.repository";
 import {
   createOrUpdateForms,
   initializeDefaultForms,
@@ -258,7 +259,11 @@ export const findOne = async (id: number): Promise<Structure> => {
                 },
               },
               operateur: true,
-              actesAdministratifs: true,
+              actesAdministratifs: {
+                include: {
+                  fileUploads: true,
+                },
+              },
               cpomMillesimes: {
                 orderBy: {
                   year: "desc",
@@ -294,10 +299,14 @@ export const findOne = async (id: number): Promise<Structure> => {
           evenementDate: "desc",
         },
       },
-      fileUploads: {
+      actesAdministratifs: {
         include: {
-          parentFileUpload: true,
-          childFileUploads: true,
+          fileUploads: true,
+        },
+      },
+      documentsFinanciers: {
+        include: {
+          fileUploads: true,
         },
       },
       budgets: {
@@ -397,18 +406,12 @@ const updateOne = async (
         structure.dnaCode
       );
       await createOrUpdateAdresses(tx, adresses, structure.dnaCode);
-      await updateFileUploads(
-        tx,
-        actesAdministratifs,
-        { structureDnaCode: structure.dnaCode },
-        "acteAdministratif"
-      );
-      await updateFileUploads(
-        tx,
-        documentsFinanciers,
-        { structureDnaCode: structure.dnaCode },
-        "documentFinancier"
-      );
+      await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
+        structureDnaCode: structure.dnaCode,
+      });
+      await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
+        structureDnaCode: structure.dnaCode,
+      });
       await createOrUpdateControles(tx, controles, structure.dnaCode);
       await createOrUpdateForms(tx, forms, structure.dnaCode);
       await createOrUpdateEvaluations(tx, evaluations, structure.dnaCode);

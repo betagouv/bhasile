@@ -10,12 +10,13 @@ import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
+import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 import { getFinanceSchema } from "@/schemas/forms/base/budget/getFinanceSchema";
 import { anyModificationFinanceFormValues } from "@/schemas/forms/modification/modificationFinance.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
 
-import { ModificationTitle } from "../components/ModificationTitle";
+import { ModificationTitle } from "../_components/ModificationTitle";
 
 export default function ModificationFinanceForm() {
   const { structure } = useStructureContext();
@@ -29,10 +30,13 @@ export default function ModificationFinanceForm() {
   });
 
   const onSubmit = async (data: anyModificationFinanceFormValues) => {
-    const documentsFinanciers =
-      data.documentsFinanciers?.filter(
-        (documentFinancier) => documentFinancier.key
-      ) ?? [];
+    const documentsFinanciers = (data.documentsFinanciers?.filter(
+      (documentFinancier) =>
+        documentFinancier.fileUploads?.[0]?.key &&
+        documentFinancier.category &&
+        documentFinancier.granularity
+    ) ?? []) as DocumentFinancierApiType[];
+
     const structureMillesimes = data.structureMillesimes?.map((millesime) => ({
       ...millesime,
       operateurComment: millesime.operateurComment ?? undefined,

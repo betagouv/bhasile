@@ -1,20 +1,15 @@
 import prettyBytes from "pretty-bytes";
-import { ReactElement } from "react";
 
 import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
-import { FileUploadGranularity } from "@/generated/prisma/enums";
+import { DocumentFinancierGranularity } from "@/generated/prisma/enums";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
-import { FileUploadCategoryType } from "@/types/file-upload.type";
 
 import { DocumentGranularityBadge } from "./DocumentGranularityBadge";
 
-export const DownloadItem = ({
-  fileUpload,
-  displayGranularity = false,
-}: Props): ReactElement => {
+export const DownloadItem = ({ item, displayGranularity = false }: Props) => {
   const { getDownloadLink } = useFileUpload();
 
   const getFileType = (filename: string): string => {
@@ -23,29 +18,34 @@ export const DownloadItem = ({
   };
 
   const openLink = async () => {
-    const link = await getDownloadLink(fileUpload.key);
+    const link = await getDownloadLink(item.fileUploads?.[0]?.key || "");
     window.open(link);
   };
 
   const getFileLabel = (): string => {
-    if (
-      "categoryName" in fileUpload &&
-      fileUpload.categoryName &&
-      fileUpload.categoryName !== "Document"
-    ) {
-      return fileUpload?.categoryName;
+    if (item.name && item.name !== "Document") {
+      return item?.name;
     } else {
-      const categoryLabel = getCategoryLabel(
-        fileUpload.category as unknown as FileUploadCategoryType[number]
-      );
-      const startYear = getYearFromDate(fileUpload.startDate);
-      const endYear = getYearFromDate(fileUpload.endDate);
-      if (startYear === -1 || endYear === -1) {
-        return categoryLabel;
+      const categoryLabel = getCategoryLabel(item.category);
+      let years: string = "";
+      if ("year" in item && typeof item.year === "number") {
+        years = `${item.year}`;
       }
-      return `${categoryLabel} ${startYear} - ${endYear}`;
+      if (
+        "startDate" in item &&
+        "endDate" in item &&
+        item.startDate &&
+        item.endDate
+      ) {
+        years = `${getYearFromDate(item.startDate)} - ${getYearFromDate(item.endDate)}`;
+      }
+      return `${categoryLabel} ${years}`;
     }
   };
+
+  if (!item.fileUploads?.[0]?.key) {
+    return null;
+  }
 
   return (
     <div className="inline">
@@ -58,18 +58,21 @@ export const DownloadItem = ({
         {displayGranularity && (
           <div className="pr-1 inline">
             <DocumentGranularityBadge
-              granularity={fileUpload.granularity as FileUploadGranularity}
+              granularity={
+                (item as DocumentFinancierApiType)
+                  .granularity as DocumentFinancierGranularity
+              }
             />
           </div>
         )}
-        {getFileType(fileUpload.originalName || "")} -{" "}
-        {prettyBytes(fileUpload.fileSize || 0)}
+        {getFileType(item.fileUploads?.[0].originalName || "")} -{" "}
+        {prettyBytes(item.fileUploads?.[0].fileSize || 0)}
       </div>
     </div>
   );
 };
 
 type Props = {
-  fileUpload: ActeAdministratifApiType | DocumentFinancierApiType;
+  item: ActeAdministratifApiType | DocumentFinancierApiType;
   displayGranularity?: boolean;
 };

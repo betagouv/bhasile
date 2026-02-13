@@ -1,6 +1,6 @@
 import { expect, Page } from "@playwright/test";
 
-import { ActeAdministratifCategory } from "@/types/file-upload.type";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 import { TIMEOUTS, URLS } from "../../constants";
 import { SELECTORS } from "../../selectors";
@@ -63,12 +63,12 @@ export class FinalisationDocumentsPage extends BasePage {
             acte.endDate
           );
         }
-        if (acte.categoryName) {
+        if (acte.name) {
           await this.fillIfExistsAtIndex(
             group,
-            'input[name^="actesAdministratifs."][name$=".categoryName"]',
+            'input[name^="actesAdministratifs."][name$=".name"]',
             i,
-            acte.categoryName
+            acte.name
           );
         }
         // Use i-th row in this group (works for both autorisee and subventionnée category order)
@@ -87,6 +87,16 @@ export class FinalisationDocumentsPage extends BasePage {
         });
       }
     }
+
+    await this.page
+      .waitForResponse(
+        (res) =>
+          res.url().includes("/api/structures") &&
+          res.request().method() === "PUT" &&
+          res.status() < 400,
+        { timeout: 8000 }
+      )
+      .catch(() => null);
   }
 
   async submit(structureId: number, expectValidationFailure = false) {
@@ -106,7 +116,7 @@ export class FinalisationDocumentsPage extends BasePage {
       await submitButton.click({ force: true });
       await this.page.waitForURL(
         URLS.finalisationStep(structureId, "06-notes"),
-        { timeout: TIMEOUTS.SUBMIT, waitUntil: "commit" }
+        { timeout: TIMEOUTS.SUBMIT_DOCUMENTS, waitUntil: "commit" }
       );
     }
   }

@@ -1,13 +1,23 @@
 import z from "zod";
 
-import { optionalFrenchDateToISO } from "@/app/utils/zodCustomFields";
-import { ActeAdministratifCategory } from "@/types/file-upload.type";
+import { optionalFrenchDateToISO, zId } from "@/app/utils/zodCustomFields";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 import { fileApiSchema } from "./file.schema";
 
-export const acteAdministratifApiSchema = fileApiSchema.extend({
+export const acteAdministratifApiSchema = z.object({
+  id: z.number().optional(),
+  uuid: z.string().optional(),
+  structureDnaCode: z.string().optional(),
+  cpomId: zId(),
   date: optionalFrenchDateToISO(),
+  startDate: optionalFrenchDateToISO(),
+  endDate: optionalFrenchDateToISO(),
   category: z.enum(ActeAdministratifCategory),
+  name: z.string().nullish(),
+  parentId: zId(),
+  parentUuid: z.string().optional(),
+  fileUploads: z.array(fileApiSchema).optional(),
 });
 
 export type ActeAdministratifApiType = z.infer<
