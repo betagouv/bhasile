@@ -2,7 +2,6 @@ import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { ReactElement } from "react";
 
-import styles from "@/app/components/common/Accordion.module.css";
 import { formatCurrency, formatNumber } from "@/app/utils/number.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 
@@ -38,7 +37,7 @@ export const HistoriqueIndicateursGeneraux = (): ReactElement => {
           ? "Historique selon compte administratif"
           : "Historique selon compte-rendu financier"
       }
-      className={styles["custom-accordion"]}
+      className="custom-accordion"
     >
       <Table
         bordered={true}

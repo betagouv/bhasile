@@ -2,8 +2,6 @@ import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { ReactElement } from "react";
 
-import styles from "@/app/components/common/Accordion.module.css";
-
 import { useStructureContext } from "../../_context/StructureClientContext";
 
 export const ActiviteMotifsIndisponibilite = (): ReactElement => {
@@ -19,10 +17,7 @@ export const ActiviteMotifsIndisponibilite = (): ReactElement => {
     ];
   };
   return (
-    <Accordion
-      label="Motifs d'indisponibilité"
-      className={styles["custom-accordion"]}
-    >
+    <Accordion label="Motifs d'indisponibilité" className="custom-accordion">
       <Table
         bordered={true}
         className="full-width-table"

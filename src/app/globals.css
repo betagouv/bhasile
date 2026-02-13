@@ -75,3 +75,25 @@ hr {
 .full-width-table > table > thead > tr > th:last-child {
   width: 100%;
 }
+
+.custom-accordion > div {
+  background-color: var(--background-alt-blue-france);
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.custom-accordion > div > div > table > thead {
+  background-color: unset;
+}
+
+.custom-accordion > div > div > table > tbody {
+  background-color: unset;
+}
+
+.custom-accordion > div > div > table > thead::after {
+  background-image: none;
+}
+
+.custom-accordion > div > div > table > tbody::after {
+  background-image: none;
+}
