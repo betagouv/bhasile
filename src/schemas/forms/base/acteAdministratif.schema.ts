@@ -29,13 +29,30 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
         isNotAvenant &&
         data.fileUploads?.length
       ) {
-        return !!data.startDate && !!data.endDate;
+        return !!data.startDate;
       }
       return true;
     },
     {
       message: "Les dates de début et de fin sont obligatoires.",
-      path: ["endDate", "startDate"],
+      path: ["startDate"],
+    }
+  )
+  .refine(
+    (data) => {
+      const isNotAvenant = !data.parentId && !data.parentUuid;
+      if (
+        data.category !== "AUTRE" &&
+        isNotAvenant &&
+        data.fileUploads?.length
+      ) {
+        return !!data.endDate;
+      }
+      return true;
+    },
+    {
+      message: "Les dates de début et de fin sont obligatoires.",
+      path: ["endDate"],
     }
   )
   .refine(
