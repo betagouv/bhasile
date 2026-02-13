@@ -14,7 +14,7 @@ const Logout = async (props: Page) => {
   logOutUrl.searchParams.set("state", uuidv4());
   logOutUrl.searchParams.set(
     "post_logout_redirect_uri",
-    `${process.env.PRO_CONNECT_BASE_URL}/connexion`
+    `${process.env.NEXTAUTH_URL}/connexion`
   );
   redirect(logOutUrl.toString());
 };

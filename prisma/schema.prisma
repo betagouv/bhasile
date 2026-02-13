@@ -10,11 +10,12 @@ datasource db {
 }
 
 model Departement {
-  id         Int         @id @default(autoincrement())
-  numero     String      @unique
-  name       String
-  region     String
-  structures Structure[]
+  id                      Int                      @id @default(autoincrement())
+  numero                  String                   @unique
+  name                    String
+  region                  String
+  structures              Structure[]
+  departementAllowedUsers DepartementAllowedUser[]
 
   @@schema("public")
 }
@@ -439,8 +440,8 @@ model Cpom {
   actesAdministratifs   ActeAdministratif[]
   fileUploads           FileUpload[] // TO DELETE AFTER MIGRATION
 
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @default(now()) @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@schema("public")
 }
@@ -452,7 +453,6 @@ enum CpomGranularity {
 
   @@schema("public")
 }
-
 
 model CpomStructure {
   id          Int       @id @default(autoincrement())
@@ -494,6 +494,25 @@ model CpomMillesime {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([cpomId, year])
+  @@schema("public")
+}
+
+model AllowedUser {
+  id                      Int                      @id @default(autoincrement())
+  emailPattern            String
+  granularity             AllowedUserGranularity
+  departementAllowedUsers DepartementAllowedUser[]
+
+  @@schema("public")
+}
+
+model DepartementAllowedUser {
+  departement   Departement @relation(fields: [departementId], references: [id], onDelete: Cascade)
+  departementId Int
+  allowedUser   AllowedUser @relation(fields: [allowedUserId], references: [id], onDelete: Cascade)
+  allowedUserId Int
+
+  @@id([departementId, allowedUserId])
   @@schema("public")
 }
 
@@ -612,6 +631,14 @@ enum StepStatus {
   A_VERIFIER
   FINALISE
   VALIDE
+
+  @@schema("public")
+}
+
+enum AllowedUserGranularity {
+  DEPARTEMENT
+  REGION
+  NATIONAL
 
   @@schema("public")
 }

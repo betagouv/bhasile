@@ -20,6 +20,7 @@ import {
   ActeAdministratifWithFileUploads,
   createFakeActeAdministratif,
 } from "./acte-administratif.seed";
+import { generateDatePair } from "../utils/common.util";
 import { createFakeActivites } from "./activite.seed";
 import { AdresseWithTypologies, createFakeAdresses } from "./adresse.seed";
 import { createFakeBudget } from "./budget.seed";
@@ -35,7 +36,6 @@ import {
 } from "./evaluation.seed";
 import { createFakeEvenementIndesirableGrave } from "./evenement-indesirable-grave.seed";
 import { createFakeFormWithSteps } from "./form.seed";
-import { generateDatePair } from "./seed-util";
 import { createFakeStructureTypologie } from "./structure-typologie.seed";
 
 // TODO: re-add a way to name with the fact the structure is, or has been part of a CPOM
