@@ -1,36 +1,11 @@
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+import { getKeysFromIncomingDocumentsOrActes } from "../files/file.service";
+
 type ActeAdministratifOwnerId = {
   structureDnaCode?: string;
   cpomId?: number;
-};
-
-const deleteActesAdministratifs = async (
-  tx: PrismaTransaction,
-  actesAdministratifsToKeep: ActeAdministratifApiType[],
-  ownerId: ActeAdministratifOwnerId
-): Promise<void> => {
-  const where =
-    "structureDnaCode" in ownerId
-      ? { structureDnaCode: ownerId.structureDnaCode }
-      : { cpomId: ownerId.cpomId };
-
-  const allActesAdministratifs = await tx.acteAdministratif.findMany({
-    where,
-  });
-  const actesAdministratifsToDelete = allActesAdministratifs.filter(
-    (acteAdministratif) =>
-      !actesAdministratifsToKeep.some(
-        (acteAdministratifToKeep) =>
-          acteAdministratifToKeep.id === acteAdministratif.id
-      )
-  );
-  await Promise.all(
-    actesAdministratifsToDelete.map((acteAdministratif) =>
-      tx.acteAdministratif.delete({ where: { id: acteAdministratif.id } })
-    )
-  );
 };
 
 export const createOrUpdateActesAdministratifs = async (
@@ -52,8 +27,8 @@ export const createOrUpdateActesAdministratifs = async (
   const uuidToId = new Map<string, number>();
 
   for (const acte of roots) {
-    const result = await upsertActeAdministratif(tx, acte, ownerId);
-    if (acte.uuid && !acte.id) {
+    const result = await createOrUpdateActeAdministratif(tx, acte, ownerId);
+    if (acte.uuid) {
       uuidToId.set(acte.uuid, result.id);
     }
   }
@@ -62,31 +37,56 @@ export const createOrUpdateActesAdministratifs = async (
     const resolvedParentId =
       acte.parentId ??
       (acte.parentUuid ? uuidToId.get(acte.parentUuid) : undefined);
-    await upsertActeAdministratif(tx, acte, ownerId, resolvedParentId);
+    await createOrUpdateActeAdministratif(tx, acte, ownerId, resolvedParentId);
   }
 };
 
-const upsertActeAdministratif = (
+const createOrUpdateActeAdministratif = async (
   tx: PrismaTransaction,
   acteAdministratif: ActeAdministratifApiType,
   ownerId: { structureDnaCode?: string; cpomId?: number },
   parentId?: number
 ) => {
-  return tx.acteAdministratif.upsert({
-    where: { id: acteAdministratif.id || 0 },
-    update: {
-      ...ownerId,
-      category: acteAdministratif.category,
-      date: acteAdministratif.date,
-      startDate: acteAdministratif.startDate,
-      endDate: acteAdministratif.endDate,
-      name: acteAdministratif.name,
-      parentId: parentId ?? acteAdministratif.parentId,
-      fileUploads: {
-        connect: acteAdministratif.fileUploads,
+  const fileKey = acteAdministratif.fileUploads?.[0]?.key;
+  if (!fileKey) {
+    return tx.acteAdministratif.create({
+      data: {
+        ...ownerId,
+        category: acteAdministratif.category,
+        date: acteAdministratif.date,
+        startDate: acteAdministratif.startDate,
+        endDate: acteAdministratif.endDate,
+        name: acteAdministratif.name,
+        parentId: parentId ?? acteAdministratif.parentId,
       },
-    },
-    create: {
+    });
+  }
+
+  const existingFileUpload = await tx.fileUpload.findUnique({
+    where: { key: fileKey },
+    select: { acteAdministratifId: true },
+  });
+
+  if (existingFileUpload?.acteAdministratifId) {
+    return tx.acteAdministratif.update({
+      where: { id: existingFileUpload.acteAdministratifId },
+      data: {
+        ...ownerId,
+        category: acteAdministratif.category,
+        date: acteAdministratif.date,
+        startDate: acteAdministratif.startDate,
+        endDate: acteAdministratif.endDate,
+        name: acteAdministratif.name,
+        parentId: parentId ?? acteAdministratif.parentId,
+        fileUploads: {
+          connect: acteAdministratif.fileUploads ?? [],
+        },
+      },
+    });
+  }
+
+  return tx.acteAdministratif.create({
+    data: {
       ...ownerId,
       category: acteAdministratif.category,
       date: acteAdministratif.date,
@@ -95,8 +95,43 @@ const upsertActeAdministratif = (
       name: acteAdministratif.name,
       parentId: parentId ?? acteAdministratif.parentId,
       fileUploads: {
-        connect: acteAdministratif.fileUploads,
+        connect: acteAdministratif.fileUploads ?? [],
       },
     },
   });
+};
+
+const deleteActesAdministratifs = async (
+  tx: PrismaTransaction,
+  actesAdministratifsToKeep: ActeAdministratifApiType[],
+  ownerId: ActeAdministratifOwnerId
+): Promise<void> => {
+  const where =
+    "structureDnaCode" in ownerId
+      ? { structureDnaCode: ownerId.structureDnaCode }
+      : { cpomId: ownerId.cpomId };
+
+  const fileKeysToKeep = getKeysFromIncomingDocumentsOrActes(
+    actesAdministratifsToKeep
+  );
+
+  const allActesAdministratifs = await tx.acteAdministratif.findMany({
+    where,
+    include: { fileUploads: true },
+  });
+
+  const actesAdministratifsToDelete = allActesAdministratifs.filter(
+    (acteAdministratif) => {
+      const hasMatchingFile = acteAdministratif.fileUploads.some((file) =>
+        fileKeysToKeep.has(file.key)
+      );
+      return !hasMatchingFile;
+    }
+  );
+
+  await Promise.all(
+    actesAdministratifsToDelete.map((acteAdministratif) =>
+      tx.acteAdministratif.delete({ where: { id: acteAdministratif.id } })
+    )
+  );
 };

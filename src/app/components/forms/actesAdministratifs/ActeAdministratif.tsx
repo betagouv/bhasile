@@ -78,7 +78,6 @@ export const ActeAdministratif = ({
 
         {additionalFieldsType === AdditionalFieldsType.DATE_START_END && (
           <div className="flex gap-6 items-start h-full">
-            {index}
             <InputWithValidation
               name={`actesAdministratifs.${index}.startDate`}
               defaultValue={acte.startDate}
