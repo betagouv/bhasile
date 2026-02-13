@@ -4,7 +4,6 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { ReactElement, useState } from "react";
 
-import styles from "@/app/components/common/Accordion.module.css";
 import { formatCurrency } from "@/app/utils/number.util";
 import { isStructureInCpom } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
@@ -84,7 +83,7 @@ export const DetailAffectations = (): ReactElement => {
             ? "Détail affectations réserves, provisions et fonds dédiés du CPOM"
             : "Détail affectations réserves et provisions"
         }
-        className={styles["custom-accordion"]}
+        className="custom-accordion"
       >
         <Table
           bordered={true}
