@@ -11,7 +11,7 @@ import {
 } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 
-import { generateDatePair } from "./seed-util";
+import { generateDatePair } from "../utils/common.util";
 
 export const createFakeFileUpload = ({
   category,

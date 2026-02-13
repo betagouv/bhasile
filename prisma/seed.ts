@@ -13,11 +13,11 @@ import {
 } from "./seeders/form.seed";
 import { createFakeOperateur } from "./seeders/operateur.seed";
 import { seedParentChildFileUploads } from "./seeders/parent-child-file-upload.seed";
-import { convertToPrismaObject } from "./seeders/seed-util";
 import {
   createFakeStructure,
   createFakeStuctureWithRelations,
 } from "./seeders/structure.seed";
+import { convertToPrismaObject } from "./utils/common.util";
 import { wipeTables } from "./utils/wipe";
 
 const prisma = createPrismaClient();
