@@ -13,7 +13,7 @@ export const controleAutoSaveSchema = z.object({
   date: optionalFrenchDateToISO(),
   type: z.nativeEnum(ControleType).optional(),
   fileUploads: z.array(fileUploadSchema.optional()).optional(),
-  uuid: z.string().optional(), // Used to identify the controle when it is not saved in the database (and so do not have an id)
+  uuid: z.string().optional(), // Used to identify the controle when it is not saved in the database (and so does not have an id)
 });
 
 export const controleSchema = controleAutoSaveSchema.refine(
