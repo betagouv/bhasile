@@ -13,6 +13,7 @@ import {
 } from "@/app/utils/date.util";
 import { capitalizeFirstLetter } from "@/app/utils/string.util";
 import { ActiviteApiType } from "@/schemas/api/activite.schema";
+import { StructureType } from "@/types/structure.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ActiviteDurations } from "./ActiviteDurations";
@@ -35,8 +36,11 @@ export const ActiviteHistorique = (): ReactElement => {
   const [selectedMonths, setSelectedMonths] = useState<dayjs.Dayjs[]>(
     getLastMonths(6)
   );
-  const [typeActivite, setTypeActivite] =
-    useState<keyof ActiviteApiType>("presencesInduesBPI");
+  const [typeActivite, setTypeActivite] = useState<keyof ActiviteApiType>(
+    structure.type === StructureType.CPH
+      ? "placesVacantes"
+      : "presencesInduesBPI"
+  );
 
   const [activiteStats, setActiviteStats] = useState<ActiviteStats>();
 
