@@ -87,6 +87,16 @@ export class FinalisationDocumentsPage extends BasePage {
         });
       }
     }
+
+    await this.page
+      .waitForResponse(
+        (res) =>
+          res.url().includes("/api/structures") &&
+          res.request().method() === "PUT" &&
+          res.status() < 400,
+        { timeout: 8000 }
+      )
+      .catch(() => null);
   }
 
   async submit(structureId: number, expectValidationFailure = false) {
@@ -106,7 +116,7 @@ export class FinalisationDocumentsPage extends BasePage {
       await submitButton.click({ force: true });
       await this.page.waitForURL(
         URLS.finalisationStep(structureId, "06-notes"),
-        { timeout: TIMEOUTS.SUBMIT, waitUntil: "commit" }
+        { timeout: TIMEOUTS.SUBMIT_DOCUMENTS, waitUntil: "commit" }
       );
     }
   }

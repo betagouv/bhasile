@@ -13,9 +13,12 @@ import {
 export const getActesAdministratifsDefaultValues = (
   structure: StructureApiType
 ): ActeAdministratifFormValues[] => {
-  const categoriesToDisplay = Object.keys(
-    getActesAdministratifsCategoryToDisplay(structure)
-  ) as ActeAdministratifCategory[];
+  const categoryDisplayRules = getActesAdministratifsCategoryToDisplay(structure);
+  const categoriesToDisplay = (
+    Object.entries(categoryDisplayRules) as [ActeAdministratifCategory, (typeof categoryDisplayRules)[ActeAdministratifCategory]][]
+  )
+    .filter(([, rules]) => rules.shouldShow)
+    .map(([category]) => category);
 
   const missingCategories = categoriesToDisplay.filter(
     (category) =>
