@@ -103,30 +103,47 @@ export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
   }
 );
 
-const filterActesWithKey = (val: unknown) =>
-  Array.isArray(val)
-    ? val.filter(
-        (acte: { fileUploads?: Array<{ key?: string }> }) =>
-          !!acte?.fileUploads?.[0]?.key
-      )
-    : val;
+const filterActesWithKey =
+  (allowedCategories: ActeAdministratifCategory[] = []) =>
+  (val: unknown) =>
+    Array.isArray(val)
+      ? val.filter(
+          (acte: {
+            category?: string;
+            fileUploads?: Array<{ key?: string }>;
+          }) => {
+            if (
+              allowedCategories.includes(
+                acte?.category as ActeAdministratifCategory
+              )
+            ) {
+              return true;
+            }
+            return !!acte?.fileUploads?.[0]?.key;
+          }
+        )
+      : val;
 
 export const actesAdministratifsAutoriseesSchema = z.object({
   actesAdministratifs: z.preprocess(
-    filterActesWithKey,
+    filterActesWithKey(["ARRETE_AUTORISATION", "ARRETE_TARIFICATION"]),
     z.array(acteAdministratifAutoriseesSchema).optional()
   ),
 });
 export const actesAdministratifsSubventionneesSchema = z.object({
   actesAdministratifs: z.preprocess(
-    filterActesWithKey,
+    filterActesWithKey([
+      "ARRETE_AUTORISATION",
+      "ARRETE_TARIFICATION",
+      "CONVENTION",
+    ]),
     z.array(acteAdministratifSubventionneesSchema).optional()
   ),
 });
 
 export const actesAdministratifsAutoSaveSchema = z.object({
   actesAdministratifs: z.preprocess(
-    filterActesWithKey,
+    filterActesWithKey(),
     z.array(acteAdministratifAutoSaveSchema).optional()
   ),
 });
