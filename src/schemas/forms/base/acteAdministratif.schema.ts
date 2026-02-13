@@ -90,12 +90,7 @@ const acteAdministratifAutoriseesSchema = acteAdministratifSchema.refine(
 const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
   (data) => {
     const isNotAvenant = !data.parentId && !data.parentUuid;
-    if (
-      (data.category === "ARRETE_AUTORISATION" ||
-        data.category === "ARRETE_TARIFICATION" ||
-        data.category === "CONVENTION") &&
-      isNotAvenant
-    ) {
+    if (data.category === "CONVENTION" && isNotAvenant) {
       return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
     }
     return true;
@@ -149,11 +144,7 @@ export const actesAdministratifsAutoriseesSchema = z.object({
 });
 export const actesAdministratifsSubventionneesSchema = z.object({
   actesAdministratifs: z.preprocess(
-    filterActesWithKey([
-      "ARRETE_AUTORISATION",
-      "ARRETE_TARIFICATION",
-      "CONVENTION",
-    ]),
+    filterActesWithKey(["CONVENTION"]),
     z.array(acteAdministratifSubventionneesSchema).optional()
   ),
 });

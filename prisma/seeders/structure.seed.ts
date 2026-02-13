@@ -16,11 +16,11 @@ import {
 } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 
+import { generateDatePair } from "../utils/common.util";
 import {
   ActeAdministratifWithFileUploads,
   createFakeActeAdministratif,
 } from "./acte-administratif.seed";
-import { generateDatePair } from "../utils/common.util";
 import { createFakeActivites } from "./activite.seed";
 import { AdresseWithTypologies, createFakeAdresses } from "./adresse.seed";
 import { createFakeBudget } from "./budget.seed";
