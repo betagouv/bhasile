@@ -54,23 +54,27 @@ export const ActeAdministratif = ({
     });
   };
 
+  if (index === -1) {
+    return null;
+  }
+
   return (
     <>
       <div className="grid grid-cols-[1fr_1fr_auto] gap-6 items-start">
         <InputWithValidation
-          name="actesAdministratifs.${index}.id"
+          name={`actesAdministratifs.${index}.id`}
           control={control}
           label=""
           type="hidden"
         />
         <InputWithValidation
-          name="actesAdministratifs.${index}.parentId"
+          name={`actesAdministratifs.${index}.parentId`}
           control={control}
           label=""
           type="hidden"
         />
         <InputWithValidation
-          name="actesAdministratifs.${index}.category"
+          name={`actesAdministratifs.${index}.category`}
           control={control}
           label=""
           type="hidden"

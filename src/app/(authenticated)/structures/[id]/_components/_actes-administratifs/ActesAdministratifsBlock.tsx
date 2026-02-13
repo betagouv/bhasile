@@ -31,7 +31,7 @@ export const ActesAdministratifsBlock = (): ReactElement => {
         router.push(`/structures/${structure.id}/modification/06-documents`);
       }}
     >
-      {structure.actesAdministratifs?.length === 0 ? (
+      {!structure.actesAdministratifs?.length ? (
         <>Aucun document importé</>
       ) : (
         Object.entries(actesAdministratifsCategories).map(

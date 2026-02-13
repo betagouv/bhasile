@@ -73,7 +73,9 @@ export const DocumentsFinanciersCategory = ({
       <div>
         {documentsFinanciersOfCategory.map((documentFinancier) => (
           <DocumentsFinanciersItem
-            key={documentFinancier.fileUploads?.[0]?.key}
+            key={
+              documentFinancier.fileUploads?.[0]?.key ?? documentFinancier.id
+            }
             documentFinancier={documentFinancier}
           />
         ))}

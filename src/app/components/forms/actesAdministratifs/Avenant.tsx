@@ -15,7 +15,7 @@ export const Avenant = ({
   documentLabel,
   handleDeleteField,
 }: Props) => {
-  const { control, watch } = useFormContext();
+  const { control, watch, setValue } = useFormContext();
 
   const [showEndDateInput, setShowEndDateInput] = useState<boolean>(false);
 
@@ -28,7 +28,9 @@ export const Avenant = ({
       (avenant.id && acteAdministratif.id === avenant.id)
   );
 
-  console.log(index, avenant, actesAdministratifs);
+  if (index === -1) {
+    return null;
+  }
 
   return (
     <span key={`${avenant.uuid}`}>
@@ -62,9 +64,15 @@ export const Avenant = ({
                     value: "showEndDateInput",
                     checked: showEndDateInput,
                     onChange: () => {
-                      setShowEndDateInput(
-                        (prevShowEndDateInput) => !prevShowEndDateInput
-                      );
+                      setShowEndDateInput((prevShowEndDateInput) => {
+                        if (prevShowEndDateInput) {
+                          setValue(
+                            `actesAdministratifs.${index}.endDate`,
+                            null
+                          );
+                        }
+                        return !prevShowEndDateInput;
+                      });
                     },
                   },
                 },

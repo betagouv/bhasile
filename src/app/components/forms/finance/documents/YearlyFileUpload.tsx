@@ -134,7 +134,7 @@ export const YearlyFileUpload = ({
 
       setKey(undefined);
       setCategory(undefined);
-      setGranularity(undefined);
+      setGranularity(isInCpom ? undefined : "STRUCTURE");
       setName(undefined);
       setDropZoneKey(uuidv4());
     },
@@ -147,6 +147,7 @@ export const YearlyFileUpload = ({
       year,
       documentsFinanciers,
       remove,
+      isInCpom,
     ]
   );
 

@@ -37,6 +37,9 @@ export const createOrUpdateActesAdministratifs = async (
     const resolvedParentId =
       acte.parentId ??
       (acte.parentUuid ? uuidToId.get(acte.parentUuid) : undefined);
+    if (!resolvedParentId && acte.parentUuid) {
+      throw new Error(`Unable to resolve parentUuid: ${acte.parentUuid}`);
+    }
     await createOrUpdateActeAdministratif(tx, acte, ownerId, resolvedParentId);
   }
 };
@@ -107,7 +110,7 @@ const deleteActesAdministratifs = async (
   ownerId: ActeAdministratifOwnerId
 ): Promise<void> => {
   const where =
-    "structureDnaCode" in ownerId
+    ownerId.structureDnaCode !== undefined
       ? { structureDnaCode: ownerId.structureDnaCode }
       : { cpomId: ownerId.cpomId };
 

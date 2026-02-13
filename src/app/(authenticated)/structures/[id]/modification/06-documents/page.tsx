@@ -40,7 +40,7 @@ export default function ModificationQualiteForm() {
   });
 
   const onSubmit = async (data: ActesAdministratifsFormValues) => {
-    const actesAdministratifs = data.actesAdministratifs?.filter(
+    const actesAdministratifs = (data.actesAdministratifs ?? []).filter(
       (acteAdministratif) =>
         acteAdministratif.fileUploads?.length &&
         acteAdministratif.category &&

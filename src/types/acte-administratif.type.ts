@@ -5,4 +5,5 @@ export const ActeAdministratifCategory = [
   "AUTRE",
 ] as const;
 
-export type ActeAdministratifCategory = typeof ActeAdministratifCategory;
+export type ActeAdministratifCategory =
+  (typeof ActeAdministratifCategory)[number];

@@ -43,7 +43,7 @@ export const DocumentsFinanciers = (): ReactElement => {
               {getDocumentsFinanciersToDisplay(budget)?.length === 0 ? (
                 <span>Aucun document importé</span>
               ) : (
-                getDocumentsFinanciersToDisplay(budget).map(
+                getDocumentsFinanciersToDisplay(budget)?.map(
                   (documentFinancier) => (
                     <div key={documentFinancier.id} className="pb-5">
                       <DownloadItem

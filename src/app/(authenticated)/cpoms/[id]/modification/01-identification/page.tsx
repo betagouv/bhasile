@@ -33,7 +33,7 @@ export default function CpomModificationIdentification() {
   const [backendError, setBackendError] = useState<string | undefined>(
     undefined
   );
-  console.log("cpom", cpom);
+
   const handleSubmit = async (data: CpomFormValues) => {
     setFetchState("cpom-save", FetchState.LOADING);
     try {

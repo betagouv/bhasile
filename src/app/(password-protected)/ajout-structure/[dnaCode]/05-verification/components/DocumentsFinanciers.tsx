@@ -35,7 +35,7 @@ export const DocumentsFinanciers = (): ReactElement => {
     : Number(identificationValues?.creationDate?.split("/")?.[2]);
 
   const yearsToCheck = years.filter((year) => {
-    return Number(year) >= Number(startYear);
+    return year >= startYear;
   });
 
   const numberOfMissingDocuments = yearsToCheck

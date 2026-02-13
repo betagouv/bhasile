@@ -67,7 +67,7 @@ const deleteDocumentsFinanciers = async (
   ownerId: DocumentFinancierOwnerId
 ): Promise<void> => {
   const where =
-    "structureDnaCode" in ownerId
+    ownerId.structureDnaCode !== undefined
       ? { structureDnaCode: ownerId.structureDnaCode }
       : { cpomId: ownerId.cpomId };
 

@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { StructureApiType } from "@/schemas/api/structure.schema";
@@ -105,7 +106,7 @@ type CategoryDisplayRulesType = Record<
     additionalFieldsType: AdditionalFieldsType;
     documentLabel: string;
     addFileButtonLabel: string;
-    notice?: string | React.ReactElement;
+    notice?: string | ReactElement;
   }
 >;
 
