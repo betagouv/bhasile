@@ -2,16 +2,12 @@ import { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
 import { TIMEOUTS, URLS } from "../../constants";
-import { FormHelper } from "../../form-helper";
 import { SELECTORS } from "../../selectors";
 import { BasePage } from "../BasePage";
 
 export class StructuresListPage extends BasePage {
-  private formHelper: FormHelper;
-
   constructor(page: Page) {
     super(page);
-    this.formHelper = new FormHelper(page);
   }
 
   async navigate() {
