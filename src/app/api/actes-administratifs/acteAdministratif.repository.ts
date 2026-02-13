@@ -19,9 +19,13 @@ export const createOrUpdateActesAdministratifs = async (
 
   await deleteActesAdministratifs(tx, actesAdministratifs, ownerId);
 
-  const roots = actesAdministratifs.filter((a) => !a.parentId && !a.parentUuid);
+  const roots = actesAdministratifs.filter(
+    (acteAdministratif) =>
+      !acteAdministratif.parentId && !acteAdministratif.parentUuid
+  );
   const children = actesAdministratifs.filter(
-    (a) => a.parentId || a.parentUuid
+    (acteAdministratif) =>
+      acteAdministratif.parentId || acteAdministratif.parentUuid
   );
 
   const uuidToId = new Map<string, number>();

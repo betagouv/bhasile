@@ -102,7 +102,7 @@ export default function FieldSetActeAdministratif({
           priority="tertiary no outline"
           className="underline font-normal p-0"
         >
-          {addFileButtonLabel ?? "Ajouter un fichier"}
+          + {addFileButtonLabel ?? "Ajouter un fichier"}
         </Button>
       )}
     </fieldset>
