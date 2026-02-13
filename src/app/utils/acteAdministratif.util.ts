@@ -15,7 +15,7 @@ export const getActesAdministratifsDefaultValues = (
 ): ActeAdministratifFormValues[] => {
   const categoriesToDisplay = Object.keys(
     getActesAdministratifsCategoryToDisplay(structure)
-  ) as ActeAdministratifCategory[number][];
+  ) as ActeAdministratifCategory[];
 
   const missingCategories = categoriesToDisplay.filter(
     (category) =>
@@ -95,7 +95,7 @@ export const getActesAdministratifsCategoryToDisplay = (
 });
 
 type CategoryDisplayRulesType = Record<
-  ActeAdministratifCategory[number],
+  ActeAdministratifCategory,
   {
     categoryShortName: string;
     title: string;

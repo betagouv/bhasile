@@ -108,7 +108,7 @@ export const granularities: DocumentGranularity[] = [
 export type StructureDocument = {
   label: string;
   subLabel?: string;
-  value: DocumentFinancierCategory[number];
+  value: DocumentFinancierCategory;
   yearIndex: number;
   required: boolean;
 };

@@ -42,7 +42,7 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
       : [
           {
             uuid: uuidv4(),
-            category: "CONVENTION" as ActeAdministratifCategory[number],
+            category: "CONVENTION" as ActeAdministratifCategory,
           },
         ],
   };

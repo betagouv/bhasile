@@ -291,7 +291,7 @@ type StructureDetailsOverrides = {
   contactEmail?: string;
   notes?: string;
   actesAdministratifs?: Array<{
-    category: ActeAdministratifCategory[number];
+    category: ActeAdministratifCategory;
     name?: string;
     startDate?: string;
     endDate?: string;

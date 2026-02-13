@@ -110,7 +110,7 @@ export default function FieldSetActeAdministratif({
 }
 
 type FieldSetActeAdministratifProps = {
-  category: ActeAdministratifCategory[number];
+  category: ActeAdministratifCategory;
   categoryShortName: string;
   title: string;
   noTitleLegend?: boolean;

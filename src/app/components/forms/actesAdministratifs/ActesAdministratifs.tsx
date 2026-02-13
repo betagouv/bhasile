@@ -21,7 +21,7 @@ export const ActesAdministratifs = () => {
         return (
           <div key={category}>
             <FieldSetActeAdministratif
-              category={category as ActeAdministratifCategory[number]}
+              category={category as ActeAdministratifCategory}
               categoryShortName={rules.categoryShortName}
               title={rules.title}
               canAddFile={rules.canAddFile}

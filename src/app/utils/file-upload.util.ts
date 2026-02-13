@@ -2,16 +2,17 @@ import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { DocumentFinancierCategory } from "@/types/document-financier.type";
 
 export const getCategoryLabel = (
-  category:
-    | ActeAdministratifCategory[number]
-    | DocumentFinancierCategory[number]
-    | undefined
+  category: ActeAdministratifCategory | DocumentFinancierCategory | undefined
 ): string => {
   if (!category) {
     return "";
   }
   const labels: Record<
-    ActeAdministratifCategory[number] | DocumentFinancierCategory[number],
+    | ActeAdministratifCategory
+    | DocumentFinancierCategory
+    | "CPOM"
+    | "INSPECTION_CONTROLE"
+    | "EVALUATION",
     string
   > = {
     BUDGET_PREVISIONNEL_DEMANDE: "Budget prévisionnel demandé",

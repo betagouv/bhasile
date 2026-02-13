@@ -127,7 +127,7 @@ export type OuvertureFermetureData = {
 };
 
 export type ActeAdministratifData = {
-  category: ActeAdministratifCategory[number];
+  category: ActeAdministratifCategory;
   filePath: string;
   startDate?: string;
   endDate?: string;

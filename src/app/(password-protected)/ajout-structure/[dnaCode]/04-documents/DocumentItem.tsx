@@ -49,5 +49,5 @@ type Props = {
   register: UseFormRegister<DocumentsFinanciersFlexibleFormValues>;
   categoryLabel: string;
   categorySubLabel?: string;
-  categoryValue: DocumentFinancierCategory[number];
+  categoryValue: DocumentFinancierCategory;
 };
