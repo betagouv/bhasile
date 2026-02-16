@@ -5,7 +5,7 @@ import {
 export const convertToStepStatus = (
     stepStatus: string | null | undefined
 ): StepStatus => {
-    if (!stepStatus) return StepStatus.NON_COMMENCE;
+    if (!stepStatus) {return StepStatus.NON_COMMENCE;}
     const stepStatuses: Record<string, StepStatus> = {
         'non_commence': StepStatus.NON_COMMENCE,
         'commence': StepStatus.COMMENCE,

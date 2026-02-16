@@ -32,7 +32,7 @@ export const convertToPrismaObject = (initialObject: unknown): any => {
     initialObject === null ||
     Array.isArray(initialObject)
   )
-    return initialObject;
+    {return initialObject;}
 
   const prismaObject: Record<string, unknown> = { ...initialObject };
 

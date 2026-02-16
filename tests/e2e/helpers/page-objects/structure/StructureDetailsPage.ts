@@ -225,7 +225,7 @@ export class StructureDetailsPage extends BasePage {
       const yearButton = financesBlock.getByRole("button", {
         name: String(year),
       });
-      if ((await yearButton.count()) === 0) continue;
+      if ((await yearButton.count()) === 0) {continue;}
       await yearButton.scrollIntoViewIfNeeded({ timeout: 10000 }).catch(() => {});
       await yearButton.click({ timeout: 10000 });
       const financesText = (await financesBlock.textContent()) || "";

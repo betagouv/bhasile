@@ -92,9 +92,9 @@ function runPsqlOrExit(
 ): void {
   try {
     execFileSync(cmd, args, { stdio: "inherit" });
-    if (successMsg) console.log(successMsg);
+    if (successMsg) {console.log(successMsg);}
   } catch (error: unknown) {
-    if (failureMsg) console.error(failureMsg);
+    if (failureMsg) {console.error(failureMsg);}
     if (
       typeof error === "object" &&
       error !== null &&
@@ -108,7 +108,7 @@ function runPsqlOrExit(
       "stderr" in error
     ) {
       const stderr = (error as { stderr?: unknown }).stderr;
-      if (stderr) console.error(String(stderr));
+      if (stderr) {console.error(String(stderr));}
     }
     process.exit(1);
   }

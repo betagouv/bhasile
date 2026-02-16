@@ -40,15 +40,15 @@ export const DatesAndDocuments = () => {
 
   useEffect(() => {
     const dateEnd = actesAdministratifs.reduce((accumulator, current) => {
-      if (!current.endDate) return accumulator;
+      if (!current.endDate) {return accumulator;}
 
       const currentDate = formatDateToIsoString(current.endDate);
 
-      if (!currentDate) return accumulator;
+      if (!currentDate) {return accumulator;}
 
       const accDate = formatDateToIsoString(accumulator);
 
-      if (!accDate) return currentDate;
+      if (!accDate) {return currentDate;}
 
       return currentDate > accDate ? currentDate : accumulator;
     }, "");

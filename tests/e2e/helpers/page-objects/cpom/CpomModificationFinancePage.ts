@@ -124,11 +124,11 @@ export class CpomModificationFinancePage extends BasePage {
       const index = getMillesimeIndexForYear(year);
       for (const lineName of CPOM_FINANCE_LINE_NAMES) {
         const expected = values[lineName as keyof typeof values];
-        if (expected === undefined || expected === null) continue;
+        if (expected === undefined || expected === null) {continue;}
         const inputName = `cpomMillesimes.${index}.${lineName}`;
         const input = this.page.locator(`input[name="${inputName}"]`).first();
-        if ((await input.count()) === 0) continue;
-        if (!(await input.isEnabled().catch(() => false))) continue;
+        if ((await input.count()) === 0) {continue;}
+        if (!(await input.isEnabled().catch(() => false))) {continue;}
         const actual = await input.inputValue();
         const actualNormalized = actual.replace(/\s/g, "").replace(",", ".");
         const expectedStr = String(expected)

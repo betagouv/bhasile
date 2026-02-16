@@ -32,7 +32,7 @@ export const frenchDateToYear = () =>
       if (typeof val === "number") {
         return val;
       }
-      if (!val) return undefined;
+      if (!val) {return undefined;}
       // Expect "DD/MM/YYYY"
       const match = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
       if (match) {

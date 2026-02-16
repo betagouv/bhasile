@@ -44,7 +44,7 @@ export const Autocomplete = function Autocomplete<
   }, [suggestions]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!showSuggestions || suggestions.length === 0) return;
+    if (!showSuggestions || suggestions.length === 0) {return;}
 
     if (e.key === "Tab") {
       return;

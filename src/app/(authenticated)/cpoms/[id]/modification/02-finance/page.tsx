@@ -59,7 +59,7 @@ export default function CpomModificationFinance() {
   const defaultValues = getCpomDefaultValues(cpom);
 
   useEffect(() => {
-    if (!cpom?.id || !isCreation) return;
+    if (!cpom?.id || !isCreation) {return;}
 
     window.history.pushState(null, "", window.location.href);
 

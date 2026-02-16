@@ -10,10 +10,10 @@ export const getCollectiveAddress = (structure: StructureApiType | null) => {
       ? structure.adresses[0]
       : null;
 
-  if (!collectiveAddress) return null;
+  if (!collectiveAddress) {return null;}
 
   if (structure?.adresseAdministrative === collectiveAddress.adresse)
-    return null;
+    {return null;}
 
   return collectiveAddress;
 };
