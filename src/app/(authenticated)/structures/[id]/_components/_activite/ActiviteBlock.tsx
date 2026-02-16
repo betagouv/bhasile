@@ -30,7 +30,7 @@ export const ActiviteBlock = (): ReactElement => {
             <span className="text-title-blue-france">
               Données mensuelles de l’OFII
               <span className="italic block">
-                mises à jour le {formatDate(structure?.activites?.[0].date)}
+                mises à jour le {formatDate(structure?.activites?.[0]?.date)}
               </span>
             </span>
           )}
