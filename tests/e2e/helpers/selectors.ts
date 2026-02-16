@@ -45,7 +45,7 @@ export const SELECTORS = {
   },
 
   // Search
-  SEARCH_INPUT: 'input#search[type="text"]',
+  SEARCH_INPUT: 'input#structures-search[type="text"]',
 
   // Delete buttons
   DELETE_BUTTON: 'button[title="Supprimer"]',

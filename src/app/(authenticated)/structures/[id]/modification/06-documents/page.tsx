@@ -1,19 +1,15 @@
 "use client";
 
-import UploadsByCategory from "@/app/components/forms/documents/UploadsByCategory";
+import { ActesAdministratifs } from "@/app/components/forms/actesAdministratifs/ActesAdministratifs";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
-import {
-  getCategoriesDisplayRules,
-  getCategoriesToDisplay,
-} from "@/app/utils/categoryToDisplay.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
+import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   actesAdministratifsAutoriseesSchema,
   ActesAdministratifsFormValues,
@@ -22,7 +18,7 @@ import {
 import { FetchState } from "@/types/fetch-state.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
-import { ModificationTitle } from "../components/ModificationTitle";
+import { ModificationTitle } from "../_components/ModificationTitle";
 
 export default function ModificationQualiteForm() {
   const { structure } = useStructureContext();
@@ -35,15 +31,6 @@ export default function ModificationQualiteForm() {
     schema = actesAdministratifsSubventionneesSchema;
   }
 
-  const categoriesToDisplay = getCategoriesToDisplay(structure).filter(
-    (category) =>
-      category !== "INSPECTION_CONTROLE" &&
-      category !== "EVALUATION" &&
-      category !== "CPOM"
-  );
-
-  const categoriesDisplayRules = getCategoriesDisplayRules(structure);
-
   const { handleSubmit, backendError } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,
   });
@@ -53,9 +40,12 @@ export default function ModificationQualiteForm() {
   });
 
   const onSubmit = async (data: ActesAdministratifsFormValues) => {
-    const actesAdministratifs = data.actesAdministratifs?.filter(
-      (acteAdministratif) => acteAdministratif.key
-    );
+    const actesAdministratifs = (data.actesAdministratifs ?? []).filter(
+      (acteAdministratif) =>
+        acteAdministratif.fileUploads?.length &&
+        acteAdministratif.category &&
+        acteAdministratif.fileUploads[0].key
+    ) as ActeAdministratifApiType[];
 
     await handleSubmit({
       actesAdministratifs,
@@ -81,33 +71,7 @@ export default function ModificationQualiteForm() {
         defaultValues={defaultValues}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <MaxSizeNotice />
-
-        {categoriesToDisplay.map((category, index) => {
-          return (
-            <div key={category}>
-              <UploadsByCategory
-                category={category}
-                categoryShortName={
-                  categoriesDisplayRules[category].categoryShortName
-                }
-                title={categoriesDisplayRules[category].title}
-                canAddFile={categoriesDisplayRules[category].canAddFile}
-                canAddAvenant={categoriesDisplayRules[category].canAddAvenant}
-                isOptional={categoriesDisplayRules[category].isOptional}
-                additionalFieldsType={
-                  categoriesDisplayRules[category].additionalFieldsType
-                }
-                documentLabel={categoriesDisplayRules[category].documentLabel}
-                addFileButtonLabel={
-                  categoriesDisplayRules[category].addFileButtonLabel
-                }
-                notice={categoriesDisplayRules[category].notice}
-              />
-              {index < categoriesToDisplay.length - 1 && <hr />}
-            </div>
-          );
-        })}
+        <ActesAdministratifs />
         {saveState === FetchState.ERROR && (
           <SubmitError
             structureDnaCode={structure.dnaCode}

@@ -3,18 +3,13 @@ import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
+import { AdditionalFieldsType } from "@/app/utils/acteAdministratif.util";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
-import { AdditionalFieldsType } from "@/types/categoryToDisplay.type";
-import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
-import { UploadsByCategoryFile } from "./UploadsByCategoryFile";
+import { ActeAdministratif } from "../../actesAdministratifs/ActeAdministratif";
 
-export type ActeAdministratifField = ActeAdministratifFormValues & {
-  id: string;
-  uuid: string;
-};
-
-export default function UploadsByCategory({
+export default function FieldSetActeAdministratif({
   category,
   categoryShortName,
   title,
@@ -27,52 +22,39 @@ export default function UploadsByCategory({
   addFileButtonLabel,
   additionalFieldsType,
   documentLabel,
-}: UploadsByCategoryProps) {
+}: FieldSetActeAdministratifProps) {
   const { control, watch } = useFormContext();
   const { append, remove } = useFieldArray({
     control,
     name: "actesAdministratifs",
   });
 
-  const actesAdministratifs: ActeAdministratifField[] =
+  const actesAdministratifs: ActeAdministratifFormValues[] =
     watch("actesAdministratifs") || [];
 
-  let filteredFields: ActeAdministratifField[] = [];
-
-  const refreshFields = () => {
-    filteredFields = actesAdministratifs.filter(
-      (field: ActeAdministratifField) => {
-        return (
-          field.category &&
-          (field.category as string) === category &&
-          !field.parentFileUploadId
-        );
-      }
-    );
-  };
-
-  refreshFields();
+  const actesOfCategory = actesAdministratifs.filter(
+    (acte) => acte?.category === category && !acte.parentId && !acte.parentUuid
+  );
 
   const handleAddNewField = (e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
 
-    const newField = {
-      key: null,
-      category: category,
+    append({
       uuid: uuidv4(),
-    };
-
-    append(newField);
-
-    refreshFields();
+      category: category,
+    });
   };
 
   const handleDeleteField = (index: number) => {
     const parent = actesAdministratifs[index];
     const avenantIndices = actesAdministratifs
       .map((field, index) => ({ field, index }))
-      .filter(({ field }) => field.parentFileUploadId === parent?.id)
+      .filter(
+        ({ field }) =>
+          (field.parentId && field.parentId === parent?.id) ||
+          (field.parentUuid && field.parentUuid === parent?.uuid)
+      )
       .map(({ index }) => index);
 
     const indicesToRemove = [...avenantIndices, index];
@@ -82,16 +64,6 @@ export default function UploadsByCategory({
     indicesToRemove.forEach((index) => {
       remove(index);
     });
-
-    refreshFields();
-  };
-
-  const getItemIndex = (id: string) => {
-    const index = actesAdministratifs.findIndex(
-      (acteAdministratif: ActeAdministratifField) =>
-        acteAdministratif.uuid === id || acteAdministratif.id === id
-    );
-    return index;
   };
 
   return (
@@ -109,44 +81,36 @@ export default function UploadsByCategory({
           description={<>{notice}</>}
         />
       )}
-      {filteredFields &&
-        filteredFields.length > 0 &&
-        filteredFields.map((field) => {
-          const fieldIndex = getItemIndex(field.id || field.uuid);
-
-          return (
-            <div key={fieldIndex} className="mb-4">
-              <UploadsByCategoryFile
-                categoryShortName={categoryShortName}
-                field={field}
-                index={fieldIndex}
-                key={field.key || null}
-                additionalFieldsType={
-                  additionalFieldsType || AdditionalFieldsType.DATE_START_END
-                }
-                documentLabel={documentLabel}
-                handleDeleteField={handleDeleteField}
-                canAddAvenant={canAddAvenant}
-                avenantCanExtendDateEnd={avenantCanExtendDateEnd}
-              />
-            </div>
-          );
-        })}
+      {actesOfCategory &&
+        actesOfCategory.length > 0 &&
+        actesOfCategory.map((acte) => (
+          <div key={acte.id || acte.uuid} className="mb-4">
+            <ActeAdministratif
+              categoryShortName={categoryShortName}
+              acte={acte}
+              additionalFieldsType={additionalFieldsType}
+              documentLabel={documentLabel}
+              handleDeleteField={handleDeleteField}
+              canAddAvenant={canAddAvenant}
+              avenantCanExtendDateEnd={avenantCanExtendDateEnd}
+            />
+          </div>
+        ))}
       {canAddFile && (
         <Button
           onClick={handleAddNewField}
           priority="tertiary no outline"
           className="underline font-normal p-0"
         >
-          + {addFileButtonLabel}
+          + {addFileButtonLabel ?? "Ajouter un fichier"}
         </Button>
       )}
     </fieldset>
   );
 }
 
-type UploadsByCategoryProps = {
-  category: ActeAdministratifCategoryType[number];
+type FieldSetActeAdministratifProps = {
+  category: ActeAdministratifCategory;
   categoryShortName: string;
   title: string;
   noTitleLegend?: boolean;

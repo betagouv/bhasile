@@ -78,13 +78,13 @@ export const cpomSchema = baseCpomSchema
         return true;
       }
       const convention = data.actesAdministratifs.find(
-        (acteAdministratif) => !acteAdministratif.parentFileUploadId
+        (acteAdministratif) => !acteAdministratif.parentId
       );
       if (!convention) {
         return true;
       }
       const avenants = data.actesAdministratifs.filter(
-        (acteAdministratif) => acteAdministratif.parentFileUploadId
+        (acteAdministratif) => acteAdministratif.parentId
       );
       for (const acteAdministratif of avenants) {
         const avenantEndDate = formatDateToIsoString(acteAdministratif.endDate);

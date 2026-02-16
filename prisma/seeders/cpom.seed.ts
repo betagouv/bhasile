@@ -1,11 +1,12 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
 import {
+  ActeAdministratifCategory,
   type Departement,
-  FileUploadCategory,
-  FileUploadGranularity,
   type PrismaClient,
 } from "@/generated/prisma/client";
+
+import { createFakeFileUpload } from "./file-upload.seed";
 
 const buildStructureMillesimeYears = (start: number, end: number): number[] => {
   const years: number[] = [];
@@ -126,24 +127,20 @@ export const createFakeCpoms = async (
               .filter((departement) => departement.region === region)
               .map((departement) => departement.numero)
           : undefined,
-        dateStart: !isUiInitialized ? dateStart : undefined,
-        dateEnd: !isUiInitialized ? dateEnd : undefined,
         ...(isUiInitialized
           ? {
               actesAdministratifs: {
                 create: {
-                  key: `cpom-acte-${operateurIdStr}-${region}-${yearStart}-${yearEnd}`,
-                  mimeType: "application/pdf",
-                  fileSize: faker.number.int({ min: 1000, max: 500000 }),
-                  originalName: `convention-cpom-${yearStart}-${yearEnd}.pdf`,
-                  category: FileUploadCategory.CPOM,
+                  category: ActeAdministratifCategory.CONVENTION,
                   startDate: dateStart,
                   endDate: dateEnd,
-                  granularity: FileUploadGranularity.CPOM,
+                  fileUploads: {
+                    create: createFakeFileUpload(),
+                  },
                 },
               },
             }
-          : {}),
+          : undefined),
         structures: {
           create: selectedStructures.map((structureId) => {
             // 10% chance that a structure joins or leaves the CPOM in the middle

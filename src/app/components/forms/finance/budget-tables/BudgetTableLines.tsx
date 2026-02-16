@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { Fragment, ReactNode } from "react";
 
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
@@ -20,11 +20,14 @@ export const BudgetTableLines = ({
   return (
     <>
       {lines.map((block) => (
-        <>
-          <BudgetTableTitleLine key={block.title} label={block.title} />
+        <Fragment key={"block-" + block.title}>
+          <BudgetTableTitleLine
+            key={"title-" + block.title}
+            label={block.title}
+          />
           {block.lines.map((line) => (
             <BudgetTableLine
-              key={line.name}
+              key={"line-" + line.name}
               name={line.name}
               label={line.label}
               subLabel={line.subLabel}
@@ -37,7 +40,7 @@ export const BudgetTableLines = ({
               canEdit={canEdit}
             />
           ))}
-        </>
+        </Fragment>
       ))}
     </>
   );

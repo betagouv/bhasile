@@ -8,14 +8,10 @@ import {
 } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import {
-  DocumentFinancierCategory,
-  DocumentFinancierCategoryType,
-} from "@/types/file-upload.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
-export const DocumentsAdministratifs = (): ReactElement => {
+export const DocumentsFinanciers = (): ReactElement => {
   const { structure } = useStructureContext();
 
   const isAutorisee = isStructureAutorisee(structure.type);
@@ -30,15 +26,8 @@ export const DocumentsAdministratifs = (): ReactElement => {
   const yearsToDisplay = years.filter((year) => year >= (startYear ?? 0));
 
   const getDocumentsFinanciersToDisplay = (budget: BudgetApiType) => {
-    return (structure.documentsFinanciers || [])?.filter(
-      (documentFinancier) => {
-        const isSameYear =
-          getYearFromDate(documentFinancier.date) === budget.year;
-        const isOperateurCategory = DocumentFinancierCategory.includes(
-          documentFinancier.category as DocumentFinancierCategoryType[number]
-        );
-        return isSameYear && isOperateurCategory;
-      }
+    return structure.documentsFinanciers?.filter(
+      (documentFinancier) => documentFinancier.year === budget.year
     );
   };
 
@@ -54,11 +43,11 @@ export const DocumentsAdministratifs = (): ReactElement => {
               {getDocumentsFinanciersToDisplay(budget)?.length === 0 ? (
                 <span>Aucun document importé</span>
               ) : (
-                getDocumentsFinanciersToDisplay(budget).map(
+                getDocumentsFinanciersToDisplay(budget)?.map(
                   (documentFinancier) => (
-                    <div key={documentFinancier.key} className="pb-5">
+                    <div key={documentFinancier.id} className="pb-5">
                       <DownloadItem
-                        fileUpload={documentFinancier}
+                        item={documentFinancier}
                         displayGranularity={true}
                       />
                     </div>

@@ -1,8 +1,4 @@
 import { Prisma, Repartition, StructureType } from "@/generated/prisma/client";
-import {
-  ActeAdministratifCategory,
-  DocumentFinancierCategory,
-} from "@/types/file-upload.type";
 import { StructureColumn } from "@/types/ListColumn";
 
 import { convertToRepartition } from "../adresses/adresse.util";
@@ -28,25 +24,6 @@ export const addPresencesIndues = (
   return {
     ...structure,
     activites: activitesWithPresencesIndues,
-  };
-};
-
-export const divideFileUploads = (
-  structure: StructureWithFileUploadsAndActivites
-) => {
-  return {
-    ...structure,
-    actesAdministratifs: structure.fileUploads.filter((fileUpload) =>
-      ActeAdministratifCategory.includes(
-        fileUpload.category as (typeof ActeAdministratifCategory)[number]
-      )
-    ),
-    documentsFinanciers: structure.fileUploads.filter((fileUpload) =>
-      DocumentFinancierCategory.includes(
-        fileUpload.category as (typeof DocumentFinancierCategory)[number]
-      )
-    ),
-    fileUploads: undefined,
   };
 };
 

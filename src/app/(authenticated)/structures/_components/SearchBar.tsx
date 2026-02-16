@@ -39,7 +39,7 @@ export const SearchBar = (): ReactElement => {
       <input
         type="text"
         placeholder="DNA ou commune"
-        id="search"
+        id="structures-search"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />

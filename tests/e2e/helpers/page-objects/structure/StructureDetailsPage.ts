@@ -4,7 +4,7 @@ import { formatDate, getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
 import { getOperateurLabel } from "@/app/utils/structure.util";
-import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { PublicType } from "@/types/structure.type";
 
 import { URLS } from "../../constants";
@@ -226,7 +226,9 @@ export class StructureDetailsPage extends BasePage {
         name: String(year),
       });
       if ((await yearButton.count()) === 0) continue;
-      await yearButton.scrollIntoViewIfNeeded({ timeout: 10000 }).catch(() => {});
+      await yearButton
+        .scrollIntoViewIfNeeded({ timeout: 10000 })
+        .catch(() => {});
       await yearButton.click({ timeout: 10000 });
       const financesText = (await financesBlock.textContent()) || "";
       if (financesText.includes("Aucun document importé")) {
@@ -260,8 +262,8 @@ export class StructureDetailsPage extends BasePage {
         continue;
       }
       await accordionButton.click();
-      if (acte.category === "AUTRE" && acte.categoryName) {
-        await expect(actesBlock).toContainText(acte.categoryName);
+      if (acte.category === "AUTRE" && acte.name) {
+        await expect(actesBlock).toContainText(acte.name);
         continue;
       }
       if (acte.startDate && acte.endDate) {
@@ -289,8 +291,8 @@ type StructureDetailsOverrides = {
   contactEmail?: string;
   notes?: string;
   actesAdministratifs?: Array<{
-    category: ActeAdministratifCategoryType[number];
-    categoryName?: string;
+    category: ActeAdministratifCategory;
+    name?: string;
     startDate?: string;
     endDate?: string;
   }>;

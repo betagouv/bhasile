@@ -3,7 +3,6 @@ import { ReactElement } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
-import { getYearFromDate } from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 
@@ -24,7 +23,7 @@ export const DocumentsFinanciersCategory = ({
     documentsFinanciers?.filter(
       (documentFinancier) =>
         documentFinancier.category === documentType.value &&
-        getYearFromDate(documentFinancier.date) === year
+        documentFinancier.year === year
     ) || [];
 
   const isFilled = documentsFinanciersOfCategory.length > 0;
@@ -74,7 +73,9 @@ export const DocumentsFinanciersCategory = ({
       <div>
         {documentsFinanciersOfCategory.map((documentFinancier) => (
           <DocumentsFinanciersItem
-            key={documentFinancier.key}
+            key={
+              documentFinancier.fileUploads?.[0]?.key ?? documentFinancier.id
+            }
             documentFinancier={documentFinancier}
           />
         ))}

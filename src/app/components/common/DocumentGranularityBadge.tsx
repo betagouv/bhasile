@@ -1,15 +1,18 @@
 import { ReactElement } from "react";
 
 import { Badge, BadgeType } from "@/app/components/common/Badge";
-import { FileUploadGranularity } from "@/types/file-upload.type";
+import { DocumentFinancierGranularity } from "@/types/document-financier.type";
 
-type GranularityMap = Record<(typeof FileUploadGranularity)[number], string>;
+type GranularityMap = Record<
+  (typeof DocumentFinancierGranularity)[number],
+  string
+>;
 
 export const DocumentGranularityBadge = ({
   granularity,
 }: Props): ReactElement => {
   const getBadgeType = (
-    granularity: (typeof FileUploadGranularity)[number]
+    granularity: (typeof DocumentFinancierGranularity)[number]
   ): BadgeType => {
     const granularities: GranularityMap = {
       CPOM: "info",
@@ -20,7 +23,7 @@ export const DocumentGranularityBadge = ({
   };
 
   const getBadgeLabel = (
-    granularity: (typeof FileUploadGranularity)[number]
+    granularity: (typeof DocumentFinancierGranularity)[number]
   ): string => {
     const granularities: GranularityMap = {
       CPOM: "CPOM",
@@ -39,5 +42,5 @@ export const DocumentGranularityBadge = ({
 };
 
 type Props = {
-  granularity: (typeof FileUploadGranularity)[number];
+  granularity: (typeof DocumentFinancierGranularity)[number];
 };

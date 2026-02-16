@@ -55,6 +55,8 @@ model Structure {
   structureTypologies          StructureTypologie[]
   activites                    Activite[]
   fileUploads                  FileUpload[]
+  actesAdministratifs          ActeAdministratif[]
+  documentsFinanciers          DocumentFinancier[]
   cpomStructures               CpomStructure[]
   structureMillesimes          StructureMillesime[]
   budgets                      Budget[]
@@ -229,28 +231,70 @@ model Activite {
 }
 
 model FileUpload {
-  id                 Int                   @id @default(autoincrement())
-  structure          Structure?            @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode   String?
-  cpom               Cpom?                 @relation(fields: [cpomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  cpomId             Int?
-  key                String                @unique
-  mimeType           String
-  fileSize           Int
-  originalName       String
-  date               DateTime?
-  category           FileUploadCategory?
-  startDate          DateTime?
-  endDate            DateTime?
-  controle           Controle?             @relation(fields: [controleId], references: [id], onDelete: Cascade)
-  controleId         Int?
-  evaluation         Evaluation?           @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
-  evaluationId       Int?
-  categoryName       String?
-  parentFileUpload   FileUpload?           @relation("FileUploadToFileUpload", fields: [parentFileUploadId], references: [id], onDelete: Cascade)
-  parentFileUploadId Int?
-  childFileUploads   FileUpload[]          @relation("FileUploadToFileUpload")
-  granularity        FileUploadGranularity @default(STRUCTURE)
+  id                    Int                    @id @default(autoincrement())
+  structure             Structure?             @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade) // TO DELETE AFTER MIGRATION
+  structureDnaCode      String? // TO DELETE AFTER MIGRATION
+  cpom                  Cpom?                  @relation(fields: [cpomId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TO DELETE AFTER MIGRATION
+  cpomId                Int? // TO DELETE AFTER MIGRATION
+  key                   String                 @unique
+  mimeType              String
+  fileSize              Int
+  originalName          String
+  date                  DateTime? // TO DELETE AFTER MIGRATION
+  category              FileUploadCategory? // TO DELETE AFTER MIGRATION
+  startDate             DateTime? // TO DELETE AFTER MIGRATION
+  endDate               DateTime? // TO DELETE AFTER MIGRATION
+  acteAdministratif     ActeAdministratif?    @relation(fields: [acteAdministratifId], references: [id], onDelete: Cascade)
+  acteAdministratifId   Int?
+  documentFinancier     DocumentFinancier?    @relation(fields: [documentFinancierId], references: [id], onDelete: Cascade)
+  documentFinancierId   Int?
+  controle              Controle?             @relation(fields: [controleId], references: [id], onDelete: Cascade)
+  controleId            Int?
+  evaluation            Evaluation?           @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  evaluationId          Int?
+  categoryName          String? // TO DELETE AFTER MIGRATION
+  parentFileUpload      FileUpload?           @relation("FileUploadToFileUpload", fields: [parentFileUploadId], references: [id], onDelete: Cascade) // TO DELETE AFTER MIGRATION
+  parentFileUploadId    Int? // TO DELETE AFTER MIGRATION
+  childFileUploads      FileUpload[]          @relation("FileUploadToFileUpload") // TO DELETE AFTER MIGRATION
+  granularity           FileUploadGranularity? // TO DELETE AFTER MIGRATION
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model ActeAdministratif {
+  id                  Int                         @id @default(autoincrement())
+  structure           Structure?                  @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
+  structureDnaCode    String?
+  cpom                Cpom?                       @relation(fields: [cpomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cpomId              Int?
+  category            ActeAdministratifCategory?
+  date                DateTime?
+  startDate           DateTime?
+  endDate             DateTime?
+  name                String?
+  parent              ActeAdministratif?          @relation("ActeAdministratifToActeAdministratif", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId            Int?                        
+  children            ActeAdministratif[]         @relation("ActeAdministratifToActeAdministratif")
+  fileUploads         FileUpload[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model DocumentFinancier {
+  id                  Int                           @id @default(autoincrement())
+  structure           Structure?                    @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
+  structureDnaCode    String?
+  category            DocumentFinancierCategory?
+  year                Int
+  name                String?
+  granularity         DocumentFinancierGranularity  @default(STRUCTURE)
+  fileUploads         FileUpload[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -382,18 +426,19 @@ model Operateur {
 }
 
 model Cpom {
-  id                  Int             @id @default(autoincrement())
-  name                String?
-  structures          CpomStructure[]
-  region              String?
-  departements        String[]
-  granularity         CpomGranularity @default(REGIONALE)
-  dateStart           DateTime?
-  dateEnd             DateTime?
-  cpomMillesimes      CpomMillesime[]
-  operateur           Operateur       @relation(fields: [operateurId], references: [id])
-  operateurId         Int
-  actesAdministratifs FileUpload[]
+  id                    Int             @id @default(autoincrement())
+  name                  String?
+  structures            CpomStructure[]
+  region                String?
+  departements          String[]
+  granularity           CpomGranularity @default(REGIONALE)
+  dateStart             DateTime?
+  dateEnd               DateTime?
+  cpomMillesimes        CpomMillesime[]
+  operateur             Operateur       @relation(fields: [operateurId], references: [id])
+  operateurId           Int
+  actesAdministratifs   ActeAdministratif[]
+  fileUploads           FileUpload[] // TO DELETE AFTER MIGRATION
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -514,6 +559,7 @@ enum ContactType {
   @@schema("public")
 }
 
+// TO DELETE AFTER MIGRATION
 enum FileUploadCategory {
   BUDGET_PREVISIONNEL_DEMANDE
   RAPPORT_BUDGETAIRE
@@ -537,6 +583,40 @@ enum FileUploadCategory {
   @@schema("public")
 }
 
+enum DocumentFinancierCategory {
+  BUDGET_PREVISIONNEL_DEMANDE
+  RAPPORT_BUDGETAIRE
+  BUDGET_PREVISIONNEL_RETENU
+  BUDGET_RECTIFICATIF
+  COMPTE_ADMINISTRATIF_SOUMIS
+  RAPPORT_ACTIVITE
+  COMPTE_ADMINISTRATIF_RETENU
+  DEMANDE_SUBVENTION
+  COMPTE_RENDU_FINANCIER
+  RAPPORT_ACTIVITE_OPERATEUR
+  AUTRE_FINANCIER
+
+  @@schema("public")
+}
+
+enum ActeAdministratifCategory {
+  ARRETE_AUTORISATION
+  CONVENTION
+  ARRETE_TARIFICATION
+  AUTRE
+
+  @@schema("public")
+}
+
+enum DocumentFinancierGranularity {
+  STRUCTURE
+  CPOM
+  STRUCTURE_ET_CPOM
+
+  @@schema("public")
+}
+
+// TO DELETE AFTER MIGRATION
 enum FileUploadGranularity {
   STRUCTURE
   CPOM

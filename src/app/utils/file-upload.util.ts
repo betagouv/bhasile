@@ -1,12 +1,20 @@
-import { FileUploadCategoryType } from "@/types/file-upload.type";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
+import { DocumentFinancierCategory } from "@/types/document-financier.type";
 
 export const getCategoryLabel = (
-  category: FileUploadCategoryType[number] | undefined
+  category: ActeAdministratifCategory | DocumentFinancierCategory | undefined
 ): string => {
   if (!category) {
     return "";
   }
-  const labels: Record<FileUploadCategoryType[number], string> = {
+  const labels: Record<
+    | ActeAdministratifCategory
+    | DocumentFinancierCategory
+    | "CPOM"
+    | "INSPECTION_CONTROLE"
+    | "EVALUATION",
+    string
+  > = {
     BUDGET_PREVISIONNEL_DEMANDE: "Budget prévisionnel demandé",
     RAPPORT_BUDGETAIRE: "Rapport budgétaire",
     BUDGET_PREVISIONNEL_RETENU: "Budget prévisionnel retenu",

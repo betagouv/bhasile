@@ -6,6 +6,8 @@ import {
   MAX_FILE_SIZE,
 } from "@/constants";
 import { checkBucket, minioClient } from "@/lib/minio";
+import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
+import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 
 export const uploadFile = async (
   bucketName: string,
@@ -85,4 +87,19 @@ export const validateUpload = (
     return "Fichier trop volumineux.";
   }
   return null;
+};
+
+export const getKeysFromIncomingDocumentsOrActes = (
+  documentsFinanciersOrActes:
+    | DocumentFinancierApiType[]
+    | ActeAdministratifApiType[]
+): Set<string> => {
+  const keys = new Set<string>();
+  for (const doc of documentsFinanciersOrActes) {
+    const key = doc.fileUploads?.[0]?.key;
+    if (key) {
+      keys.add(key);
+    }
+  }
+  return keys;
 };
