@@ -42,7 +42,7 @@ export const Adresses = () => {
         )}
       {localStorageValues?.adresses?.map((hebergement, index) => {
         return (
-          <p
+          <div
             key={`${index}-${hebergement.codePostal}`}
             className="flex gap-1 mb-2"
           >
@@ -63,7 +63,7 @@ export const Adresses = () => {
             {hebergement?.adresseTypologies?.[0]?.logementSocial && (
               <Badge type="purple">Logement social</Badge>
             )}
-          </p>
+          </div>
         );
       })}
     </>

@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
-  // TODO : isoler la logique S3 dans un service
+
   const arrayBuffer = await file.arrayBuffer();
   const uploadResult = await uploadFile(
     process.env.S3_BUCKET_NAME!,
