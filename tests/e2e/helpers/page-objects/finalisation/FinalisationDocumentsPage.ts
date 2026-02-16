@@ -25,7 +25,9 @@ export class FinalisationDocumentsPage extends BasePage {
 
     for (const category of ActeAdministratifCategory) {
       const entries = actesByCategory[category];
-      if (!entries?.length) {continue;}
+      if (!entries?.length) {
+        continue;
+      }
       const groupLabel = getActesCategoryRegex(category);
       const group = this.page.getByRole("group", { name: groupLabel });
       const addButton = group.getByRole("button", { name: /Ajouter/i });

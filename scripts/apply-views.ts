@@ -41,13 +41,7 @@ function deleteViews() {
 function createSchema() {
   runPsqlOrExit(
     "psql",
-    [
-      psqlUrl,
-      "-v",
-      "ON_ERROR_STOP=1",
-      "-c",
-      `CREATE SCHEMA "${schema}";`,
-    ],
+    [psqlUrl, "-v", "ON_ERROR_STOP=1", "-c", `CREATE SCHEMA "${schema}";`],
     `✅ Schema "${schema}" created`,
     `❌ Failed to create schema "${schema}"`
   );
@@ -92,23 +86,21 @@ function runPsqlOrExit(
 ): void {
   try {
     execFileSync(cmd, args, { stdio: "inherit" });
-    if (successMsg) {console.log(successMsg);}
+    if (successMsg) {
+      console.log(successMsg);
+    }
   } catch (error: unknown) {
-    if (failureMsg) {console.error(failureMsg);}
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "status" in error
-    ) {
+    if (failureMsg) {
+      console.error(failureMsg);
+    }
+    if (typeof error === "object" && error !== null && "status" in error) {
       console.error(`Exit code: ${(error as { status?: number }).status}`);
     }
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "stderr" in error
-    ) {
+    if (typeof error === "object" && error !== null && "stderr" in error) {
       const stderr = (error as { stderr?: unknown }).stderr;
-      if (stderr) {console.error(String(stderr));}
+      if (stderr) {
+        console.error(String(stderr));
+      }
     }
     process.exit(1);
   }

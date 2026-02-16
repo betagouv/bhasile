@@ -47,7 +47,7 @@ const eslintConfig = [
       ],
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
-      "curly": ["warn", "all"],
+      curly: ["warn", "all"],
     },
   },
   {

@@ -40,7 +40,9 @@ export const FiltersRegion = ({
 
   useEffect(() => {
     const wrapper = checkboxWrapperRef.current;
-    if (!wrapper) {return;}
+    if (!wrapper) {
+      return;
+    }
 
     const handleClick = (e: MouseEvent) => {
       // We need to stop the propagation of the native event

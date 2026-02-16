@@ -35,8 +35,9 @@ export function FetchStateProvider({
 
 export const useFetchState = () => {
   const context = useContext(FetchStateContext);
-  if (!context)
-    {throw new Error("useFetchState must be used within FetchStateProvider");}
+  if (!context) {
+    throw new Error("useFetchState must be used within FetchStateProvider");
+  }
   return context;
 };
 

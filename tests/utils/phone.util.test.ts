@@ -47,7 +47,9 @@ describe("phone util", () => {
     });
 
     it("should handle very long number", () => {
-      expect(formatPhoneNumber("+331234567890123")).toBe(`01 23 45 67 89 01 23`);
+      expect(formatPhoneNumber("+331234567890123")).toBe(
+        `01 23 45 67 89 01 23`
+      );
     });
 
     it("should handle empty string", () => {

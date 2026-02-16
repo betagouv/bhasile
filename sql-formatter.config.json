@@ -1,11 +1,11 @@
 {
-    "language": "postgresql",
-    "keywordCase": "upper",
-    "functionCase": "upper",
-    "indent": "  ",
-    "linesBetweenQueries": 2,
-    "tabWidth": 2,
-    "useTabs": false,
-    "logicalOperatorNewline": "before",
-    "expressionWidth": 80
+  "language": "postgresql",
+  "keywordCase": "upper",
+  "functionCase": "upper",
+  "indent": "  ",
+  "linesBetweenQueries": 2,
+  "tabWidth": 2,
+  "useTabs": false,
+  "logicalOperatorNewline": "before",
+  "expressionWidth": 80
 }

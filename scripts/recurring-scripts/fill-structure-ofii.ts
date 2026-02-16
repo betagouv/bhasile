@@ -139,8 +139,11 @@ const loadDataToOfiiTable = async () => {
           },
         });
 
-        if (existing) {updatedCount += 1;}
-        else {createdCount += 1;}
+        if (existing) {
+          updatedCount += 1;
+        } else {
+          createdCount += 1;
+        }
       }
 
       // Deactivate structures that are not in the CSV
