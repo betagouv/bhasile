@@ -9,7 +9,11 @@ import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema
 
 import { DocumentGranularityBadge } from "./DocumentGranularityBadge";
 
-export const DownloadItem = ({ item, displayGranularity = false }: Props) => {
+export const DownloadItem = ({
+  item,
+  displayGranularity = false,
+  index,
+}: Props) => {
   const { getDownloadLink } = useFileUpload();
 
   const getFileType = (filename: string): string => {
@@ -26,10 +30,14 @@ export const DownloadItem = ({ item, displayGranularity = false }: Props) => {
     if (item.name && item.name !== "Document") {
       return item?.name;
     } else {
+      const avenant = index ? `Avenant ${index} ` : "";
       const categoryLabel = getCategoryLabel(item.category);
       let years: string = "";
       if ("year" in item && typeof item.year === "number") {
         years = `${item.year}`;
+      }
+      if ("date" in item && item.date) {
+        years = `${getYearFromDate(item.date)}`;
       }
       if (
         "startDate" in item &&
@@ -39,7 +47,7 @@ export const DownloadItem = ({ item, displayGranularity = false }: Props) => {
       ) {
         years = `${getYearFromDate(item.startDate)} - ${getYearFromDate(item.endDate)}`;
       }
-      return `${categoryLabel} ${years}`;
+      return `${avenant}${categoryLabel} ${years}`;
     }
   };
 
@@ -75,4 +83,5 @@ export const DownloadItem = ({ item, displayGranularity = false }: Props) => {
 type Props = {
   item: ActeAdministratifApiType | DocumentFinancierApiType;
   displayGranularity?: boolean;
+  index?: number;
 };
