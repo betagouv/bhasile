@@ -30,6 +30,15 @@ export const DocumentsFinanciersItem = ({
 
   const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+
+    const confirm = window.confirm(
+      "Attention, vous allez supprimer définitivement ce fichier. Êtes-vous bien sûr·e de vouloir continuer ?"
+    );
+
+    if (!confirm) {
+      return;
+    }
+
     try {
       if (documentFinancier.fileUploads?.[0]?.key) {
         await deleteFile(documentFinancier.fileUploads?.[0]?.key);
