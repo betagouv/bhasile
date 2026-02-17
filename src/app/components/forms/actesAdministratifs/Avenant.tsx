@@ -17,7 +17,7 @@ export const Avenant = ({
 }: Props) => {
   const { control, watch, setValue } = useFormContext();
 
-  const [showEndDateInput, setShowEndDateInput] = useState<boolean>(false);
+  const [showEndDateInput, setShowEndDateInput] = useState(false);
 
   const actesAdministratifs: ActeAdministratifFormValues[] =
     watch("actesAdministratifs") || [];
