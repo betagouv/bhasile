@@ -142,7 +142,7 @@ export const IndicateursGeneraux = () => {
       </Table>
       {hasBudgetErrors && (
         <p className="text-label-red-marianne">
-          Toutes les cases doivent être remplies
+          Toutes les cases doivent être remplies avec des nombres positifs
         </p>
       )}
     </fieldset>
