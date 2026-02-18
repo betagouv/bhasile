@@ -1,6 +1,5 @@
-import path from "path";
-
 import { expect, Page } from "@playwright/test";
+import path from "path";
 
 import { TIMEOUTS, URLS } from "../../constants";
 import { SELECTORS } from "../../selectors";
@@ -37,7 +36,9 @@ export class ModificationDocumentsPage extends BasePage {
         state: "attached",
         timeout: TIMEOUTS.FILE_UPLOAD,
       });
-      await lastFileInput.setInputFiles(path.join(process.cwd(), acte.filePath));
+      await lastFileInput.setInputFiles(
+        path.join(process.cwd(), acte.filePath)
+      );
 
       await this.page
         .waitForLoadState("networkidle", { timeout: TIMEOUTS.FILE_UPLOAD })
@@ -82,7 +83,10 @@ export class ModificationDocumentsPage extends BasePage {
       .waitForLoadState("networkidle", { timeout: TIMEOUTS.FILE_UPLOAD })
       .catch(() => {});
     const submitButton = this.page.locator(SELECTORS.SUBMIT_BUTTON);
-    await submitButton.waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION });
+    await submitButton.waitFor({
+      state: "visible",
+      timeout: TIMEOUTS.NAVIGATION,
+    });
     await submitButton.click({ force: true });
     await this.page.waitForURL(URLS.structure(structureId), {
       timeout: 60000,
