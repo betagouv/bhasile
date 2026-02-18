@@ -47,6 +47,13 @@ export default function FieldSetActeAdministratif({
   };
 
   const handleDeleteField = (index: number) => {
+    const confirm = window.confirm(
+      "Attention, vous allez supprimer définitivement cet acte administratif. Êtes-vous bien sûr·e de vouloir continuer ?"
+    );
+    if (!confirm) {
+      return;
+    }
+
     const parent = actesAdministratifs[index];
     const avenantIndices = actesAdministratifs
       .map((field, index) => ({ field, index }))
