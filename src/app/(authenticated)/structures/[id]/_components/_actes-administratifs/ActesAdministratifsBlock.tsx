@@ -1,12 +1,12 @@
-import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import { useRouter } from "next/navigation";
 import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
-import { DownloadItem } from "@/app/components/common/DownloadItem";
 import { getActesAdministratifsCategoryToDisplay } from "@/app/utils/acteAdministratif.util";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
+import { ActesAdministratifsCategory } from "./ActesAdministratifsCategory";
 
 export const ActesAdministratifsBlock = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -49,42 +49,19 @@ export const ActesAdministratifsBlock = (): ReactElement => {
       ) : (
         <>
           {Object.entries(actesAdministratifsCategories).map(
-            ([category, rules]) => {
-              const actesAdministratifsOfCategory =
-                filteredActesAdministratifs?.filter(
-                  (acteAdministratif) => acteAdministratif.category === category
-                );
-              if (actesAdministratifsOfCategory?.length) {
-                return (
-                  <Accordion label={rules.title} key={category}>
-                    <div className="columns-3">
-                      {actesAdministratifsOfCategory.map(
-                        (acteAdministratif) => (
-                          <div key={acteAdministratif.id} className="pb-5">
-                            <DownloadItem item={acteAdministratif} />
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </Accordion>
-                );
-              }
-              return null;
-            }
+            ([category, rules]) => (
+              <ActesAdministratifsCategory
+                category={category as ActeAdministratifCategory}
+                key={category}
+                title={rules.title}
+              />
+            )
           )}
           {cpomActesAdministratifs?.length ? (
-            <Accordion label="CPOM">
-              <div className="columns-3">
-                {cpomActesAdministratifs?.map(
-                  (acteAdministratif) =>
-                    acteAdministratif && (
-                      <div key={acteAdministratif.id} className="pb-5">
-                        <DownloadItem item={acteAdministratif} />
-                      </div>
-                    )
-                )}
-              </div>
-            </Accordion>
+            <ActesAdministratifsCategory
+              category={"CONVENTION" as ActeAdministratifCategory}
+              title="CPOM"
+            />
           ) : null}
         </>
       )}
