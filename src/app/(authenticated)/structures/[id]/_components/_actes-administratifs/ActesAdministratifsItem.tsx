@@ -11,18 +11,16 @@ export const ActesAdministratifsItem = ({
 
   const avenantsOfItem = (
     isCpom
-      ? structure.cpomStructures
-          ?.flatMap((cpomStructure) => cpomStructure.cpom?.actesAdministratifs)
-          .filter(
-            (avenant) => avenant && avenant.parentId === acteAdministratif.id
-          )
-      : structure.actesAdministratifs?.filter(
-          (avenant) => avenant.parentId === acteAdministratif.id
+      ? structure.cpomStructures?.flatMap(
+          (cpomStructure) => cpomStructure.cpom?.actesAdministratifs
         )
-  )?.map((avenant, index) => ({
-    ...avenant,
-    index: index + 1,
-  })) as (ActeAdministratifApiType & { index: number })[];
+      : structure.actesAdministratifs
+  )
+    ?.filter((avenant) => avenant && avenant.parentId === acteAdministratif.id)
+    .map((avenant, index) => ({
+      ...avenant,
+      index: index + 1,
+    })) as (ActeAdministratifApiType & { index: number })[];
 
   return (
     <>
