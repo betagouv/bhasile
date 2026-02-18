@@ -139,7 +139,7 @@ export const zSafeDecimalsNullish = () =>
   z.preprocess(numberPreprocess, z.number().nullish());
 
 export const zSafePositiveDecimalsNullish = () =>
-  z.preprocess(numberPreprocess, z.number().positive().nullish());
+  z.preprocess(numberPreprocess, z.number().min(0).nullish());
 
 export const zSafeYear = () =>
   z.preprocess(
