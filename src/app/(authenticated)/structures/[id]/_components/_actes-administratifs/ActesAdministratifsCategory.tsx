@@ -13,7 +13,6 @@ export const ActesAdministratifsCategory = ({ title, category }: Props) => {
       acteAdministratif.category === category && !acteAdministratif.parentId
   );
 
-  console.log("actesAdministratifsOfCategory", actesAdministratifsOfCategory);
   if (!actesAdministratifsOfCategory?.length) {
     return null;
   }
