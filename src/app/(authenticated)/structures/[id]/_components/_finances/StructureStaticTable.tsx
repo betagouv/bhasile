@@ -50,6 +50,7 @@ export const StructureStaticTable = (): ReactElement => {
         enableBorders
       >
         <BudgetTableLines
+          years={years}
           lines={getStructureStaticTableLines(isAutorisee, isAffectationOpen)}
           budgets={enhancedBudgets}
           canEdit={false}

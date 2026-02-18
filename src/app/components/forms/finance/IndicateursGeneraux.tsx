@@ -3,14 +3,21 @@
 import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useForm, useFormContext } from "react-hook-form";
 
+import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { Table } from "@/app/components/common/Table";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { cn } from "@/app/utils/classname.util";
 import { getYearRange } from "@/app/utils/date.util";
+import { getRealCreationYear } from "@/app/utils/structure.util";
 import { CURRENT_YEAR } from "@/constants";
 
 export const IndicateursGeneraux = () => {
+  const { structure } = useStructureContext();
+
   const { years } = getYearRange();
+  const startYear = getRealCreationYear(structure);
+  const yearsToDisplay = years.filter((year) => year >= startYear);
+
   const parentFormContext = useFormContext();
   const localForm = useForm();
   const { control, formState, register } = parentFormContext || localForm;
@@ -81,7 +88,7 @@ export const IndicateursGeneraux = () => {
         className={cn("scroll-margin-header w-fit [&_input]:max-w-28")}
         enableBorders
       >
-        {years.map((year, index) => (
+        {yearsToDisplay.map((year, index) => (
           <tr key={year} className="w-full border-t border-default-grey ">
             <td className="align-middle py-4 !border-r-1">
               {year}

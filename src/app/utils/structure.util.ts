@@ -237,3 +237,9 @@ export const getCpomStructureIndexAndCpomMillesimeIndexForAYear = (
 
   return { cpomStructureIndex, cpomMillesimeIndex };
 };
+
+export const getRealCreationYear = (structure: StructureApiType): number => {
+  return structure.date303
+    ? getYearFromDate(structure.date303)
+    : getYearFromDate(structure.creationDate);
+};

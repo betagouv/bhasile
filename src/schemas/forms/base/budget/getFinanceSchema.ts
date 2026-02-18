@@ -2,6 +2,7 @@ import z from "zod";
 
 import { getYearRange } from "@/app/utils/date.util";
 import {
+  getRealCreationYear,
   isStructureAutorisee,
   isStructureInCpom,
   isStructureSubventionnee,
@@ -34,7 +35,13 @@ export const getFinanceSchema = (
     isStructureInCpom(structure, year)
   );
 
+  const startYear = getRealCreationYear(structure);
+
   const schema = years.map((year, index) => {
+    if (year < startYear) {
+      return budgetAutoSaveSchema;
+    }
+
     if (isInCpomPerYear[index]) {
       return budgetInCpomSchema;
     }
