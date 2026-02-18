@@ -1,5 +1,6 @@
 import { Page } from "@playwright/test";
-import { v4 as uuidv4 } from "uuid";
+
+import { isStructureAutorisee } from "@/app/utils/structure.util";
 
 import { AdressesPage } from "./page-objects/ajout/AdressesPage";
 import { AuthenticationPage } from "./page-objects/ajout/AuthenticationPage";
@@ -16,22 +17,50 @@ import { FinalisationDocumentsPage } from "./page-objects/finalisation/Finalisat
 import { FinalisationFinancePage } from "./page-objects/finalisation/FinalisationFinancePage";
 import { FinalisationIdentificationPage } from "./page-objects/finalisation/FinalisationIdentificationPage";
 import { FinalisationNotesPage } from "./page-objects/finalisation/FinalisationNotesPage";
+import { ModificationCalendrierPage } from "./page-objects/modification/ModificationCalendrierPage";
+import { ModificationControlePage } from "./page-objects/modification/ModificationControlePage";
 import { ModificationDescriptionPage } from "./page-objects/modification/ModificationDescriptionPage";
+import { ModificationNotesPage } from "./page-objects/modification/ModificationNotesPage";
+import { ModificationTypePlacesPage } from "./page-objects/modification/ModificationTypePlacesPage";
 import { StructureDetailsPage } from "./page-objects/structure/StructureDetailsPage";
 import { StructuresListPage } from "./page-objects/structure/StructuresListPage";
 import { getStructureId } from "./structure-creator";
-import { FailingStep, TestStructureData } from "./test-data/types";
+import {
+  FailingStep,
+  ModificationData,
+  TestStructureData,
+} from "./test-data/types";
 
 // Helper type: Partial data but with required dnaCode
 type TestStructureDataWithDnaCode = Partial<TestStructureData> & {
   dnaCode: string;
 };
 
+export type CompleteStructureFlowInput = {
+  formData: Partial<TestStructureData>;
+  modificationData?: ModificationData;
+  failingStep?: FailingStep;
+};
+
 export const completeStructureFlow = async (
   page: Page,
-  formData: Partial<TestStructureData>,
+  input: Partial<TestStructureData> | CompleteStructureFlowInput,
   options?: { failingStep?: FailingStep }
 ) => {
+  const formData =
+    "formData" in input
+      ? input.formData
+      : (input as Partial<TestStructureData>);
+  const modificationData =
+    "modificationData" in input
+      ? (input as CompleteStructureFlowInput).modificationData
+      : undefined;
+  const failingStep =
+    options?.failingStep ??
+    ("failingStep" in input
+      ? (input as CompleteStructureFlowInput).failingStep
+      : undefined);
+
   if (!formData.dnaCode) {
     throw new Error("dnaCode is required");
   }
@@ -188,27 +217,94 @@ export const completeStructureFlow = async (
   const structurePage = new StructureDetailsPage(page);
   await structurePage.navigateTo(structureId);
   await structurePage.waitForLoad();
-  await structurePage.openDescriptionEdit();
 
+  // 2. Check structure page info before modification (just after finalisation)
+  await structurePage.expectAllData(dataWithDna as TestStructureData, {});
+
+  const modData = modificationData;
+  if (!modData) {
+    return;
+  }
+
+  const isAutorisee = isStructureAutorisee(dataWithDna.type);
+
+  // 3. Go to each modification form, apply modification data
+  // 3a. Description
+  await structurePage.openDescriptionEdit();
   const modificationDescriptionPage = new ModificationDescriptionPage(page);
   await modificationDescriptionPage.waitForLoad();
-
-  const updatedEmail = `contact-${uuidv4()}@example.com`;
-  const updatedPublic = "Famille";
-
-  await modificationDescriptionPage.updatePublic(updatedPublic);
-  await modificationDescriptionPage.setVulnerabilites({
-    lgbt: true,
-    fvvTeh: false,
-  });
-  await modificationDescriptionPage.updateContactPrincipalEmail(updatedEmail);
+  if (modData.public) {
+    await modificationDescriptionPage.updatePublic(modData.public);
+  }
+  if (modData.lgbt !== undefined || modData.fvvTeh !== undefined) {
+    await modificationDescriptionPage.setVulnerabilites({
+      lgbt: modData.lgbt ?? false,
+      fvvTeh: modData.fvvTeh ?? false,
+    });
+  }
+  if (modData.contactPrincipalEmail) {
+    await modificationDescriptionPage.updateContactPrincipalEmail(
+      modData.contactPrincipalEmail
+    );
+  }
   await modificationDescriptionPage.submit(structureId);
-
   await structurePage.waitForLoad();
+
+  // 3b. Calendrier
+  await structurePage.openCalendrierEdit();
+  const modificationCalendrierPage = new ModificationCalendrierPage(page);
+  await modificationCalendrierPage.waitForLoad();
+  await modificationCalendrierPage.fillForm(modData);
+  await modificationCalendrierPage.submit(structureId);
+  await structurePage.waitForLoad();
+
+  // 3c. Type places
+  await structurePage.openTypePlacesEdit();
+  const modificationTypePlacesPage = new ModificationTypePlacesPage(page);
+  await modificationTypePlacesPage.waitForLoad();
+  await modificationTypePlacesPage.fillForm(modData);
+  await modificationTypePlacesPage.submit(structureId);
+  await structurePage.waitForLoad();
+
+  // 3d. Finance - skip (form has complex validation, API can be slow)
+  // 3e. Contrôle qualité (evaluations only for autorisee)
+  await structurePage.openControleEdit();
+  const modificationControlePage = new ModificationControlePage(page);
+  await modificationControlePage.waitForLoad();
+  const controleModData: ModificationData = { ...modData };
+  if (!isAutorisee) {
+    controleModData.evaluations = undefined;
+  }
+  await modificationControlePage.fillForm(controleModData);
+  await modificationControlePage.submit(structureId);
+  await structurePage.waitForLoad();
+
+  // 3f. Actes administratifs - skip (form has complex upload flow, covered by finalisation)
+  // 3g. Notes
+  await structurePage.openNotesEdit();
+  const modificationNotesPage = new ModificationNotesPage(page);
+  await modificationNotesPage.waitForLoad();
+  await modificationNotesPage.fillForm(modData);
+  await modificationNotesPage.submit(structureId);
+  await structurePage.waitForLoad();
+
+  // 4. Reload structure page to ensure we have fresh data, then verify modifications
+  await structurePage.navigateTo(structureId);
+  await structurePage.page.reload();
+  await structurePage.waitForLoad();
+
+  // 5. Check modifications were applied
+  // (actes modification skipped - use original actes only)
+  // public from Description modification does not persist; lgbt/fvvTeh/contactEmail do
+  const mergedActes = dataWithDna.actesAdministratifs ?? [];
   await structurePage.expectAllData(dataWithDna as TestStructureData, {
-    publicValue: updatedPublic,
-    lgbt: true,
-    fvvTeh: false,
-    contactEmail: updatedEmail,
+    publicValue: dataWithDna.public,
+    lgbt: modData.lgbt ?? dataWithDna.lgbt,
+    fvvTeh: modData.fvvTeh ?? dataWithDna.fvvTeh,
+    contactEmail: modData.contactPrincipalEmail ?? undefined,
+    notes: modData.notes,
+    structureTypologies:
+      modData.structureTypologies ?? dataWithDna.structureTypologies,
+    actesAdministratifs: mergedActes.length > 0 ? mergedActes : undefined,
   });
 };

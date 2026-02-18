@@ -260,7 +260,7 @@ export const cph1: TestStructureScenario = {
         totalCharges: "42000",
         repriseEtat: "100",
         excedentRecupere: "10",
-        excedentDeduit: "-5",
+        excedentDeduit: "5",
         affectationReservesFondsDedies: "200",
         reserveInvestissement: "20",
         chargesNonReconductibles: "30",
@@ -325,5 +325,59 @@ export const cph1: TestStructureScenario = {
     ],
     finalisationNotes:
       "Notes de finalisation dynamiques (CPH) : contrôle OK, suivi actif.",
+  },
+  modificationData: {
+    public: "Personnes isolées",
+    lgbt: true,
+    fvvTeh: true,
+    contactPrincipalEmail: "modif-cph1@example.com",
+    notes: "Notes modification CPH 1 - filiale.",
+    debutPeriodeAutorisation: "2020-06-01",
+    finPeriodeAutorisation: "2026-05-31",
+    ouvertureFermeture: {
+      placesACreer: "3",
+      echeancePlacesACreer: "2026-02-01",
+      placesAFermer: "2",
+      echeancePlacesAFermer: "2026-04-15",
+    },
+    structureTypologies: [
+      { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
+    ],
+    finances: {
+      2025: {
+        ETP: "9",
+        tauxEncadrement: "13",
+        coutJournalier: "25",
+        dotationDemandee: "122000",
+        dotationAccordee: "112000",
+      },
+    },
+    evaluations: [
+      {
+        date: "2024-01-10",
+        notePersonne: "3.5",
+        notePro: "3",
+        noteStructure: "3.5",
+        note: "3.5",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
+    controles: [
+      {
+        date: "2023-09-15",
+        type: "Inopiné",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
+    actesAdministratifs: [
+      {
+        category: "ARRETE_AUTORISATION",
+        startDate: "2021-01-01",
+        endDate: "2026-12-31",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
   },
 };

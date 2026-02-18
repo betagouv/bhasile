@@ -315,7 +315,7 @@ export const cada3: TestStructureScenario = {
         totalCharges: "42000",
         repriseEtat: "100",
         excedentRecupere: "10",
-        excedentDeduit: "-5",
+        excedentDeduit: "5",
         affectationReservesFondsDedies: "200",
         reserveInvestissement: "20",
         chargesNonReconductibles: "30",
@@ -393,5 +393,59 @@ export const cada3: TestStructureScenario = {
     ],
     finalisationNotes:
       "Notes de finalisation dynamiques (CADA) : contrôle OK, suivi actif.",
+  },
+  modificationData: {
+    public: "Tout public",
+    lgbt: true,
+    fvvTeh: true,
+    contactPrincipalEmail: "modif-cada3@example.com",
+    notes: "Notes modification CADA 3 - 10 adresses.",
+    debutPeriodeAutorisation: "2020-09-01",
+    finPeriodeAutorisation: "2026-08-31",
+    ouvertureFermeture: {
+      placesACreer: "5",
+      echeancePlacesACreer: "2026-05-01",
+      placesAFermer: "3",
+      echeancePlacesAFermer: "2026-08-15",
+    },
+    structureTypologies: [
+      { placesAutorisees: 55, pmr: 7, lgbt: 13, fvvTeh: 11 },
+      { placesAutorisees: 62, pmr: 7, lgbt: 13, fvvTeh: 11 },
+      { placesAutorisees: 42, pmr: 5, lgbt: 9, fvvTeh: 7 },
+    ],
+    finances: {
+      2025: {
+        ETP: "11",
+        tauxEncadrement: "12",
+        coutJournalier: "26",
+        dotationDemandee: "135000",
+        dotationAccordee: "125000",
+      },
+    },
+    evaluations: [
+      {
+        date: "2024-06-10",
+        notePersonne: "3",
+        notePro: "3.5",
+        noteStructure: "3.5",
+        note: "3.5",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
+    controles: [
+      {
+        date: "2024-02-20",
+        type: "Inopiné",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
+    actesAdministratifs: [
+      {
+        category: "ARRETE_TARIFICATION",
+        startDate: "2024-01-01",
+        endDate: "2025-12-31",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
   },
 };

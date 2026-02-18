@@ -267,7 +267,7 @@ export const cada2: TestStructureScenario = {
         totalCharges: "42000",
         repriseEtat: "100",
         excedentRecupere: "10",
-        excedentDeduit: "-5",
+        excedentDeduit: "5",
         affectationReservesFondsDedies: "0",
       },
       2021: {
@@ -326,5 +326,49 @@ export const cada2: TestStructureScenario = {
     ],
     finalisationNotes:
       "Notes de finalisation dynamiques (CADA) : contrôle OK, suivi actif.",
+  },
+  modificationData: {
+    public: "Personnes isolées",
+    lgbt: false,
+    fvvTeh: true,
+    contactPrincipalEmail: "modif-cada2@example.com",
+    notes: "Notes modification CADA 2 - évolution structure.",
+    debutPeriodeAutorisation: "2020-03-01",
+    finPeriodeAutorisation: "2026-03-31",
+    ouvertureFermeture: {
+      placesACreer: "8",
+      echeancePlacesACreer: "2026-09-15",
+      placesAFermer: "0",
+      echeancePlacesAFermer: "2026-12-01",
+    },
+    structureTypologies: [
+      { placesAutorisees: 55, pmr: 7, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 48, pmr: 5, lgbt: 9, fvvTeh: 8 },
+    ],
+    finances: {
+      2025: {
+        ETP: "10",
+        tauxEncadrement: "11",
+        coutJournalier: "25",
+        dotationDemandee: "130000",
+        dotationAccordee: "120000",
+      },
+    },
+    controles: [
+      {
+        date: "2024-01-15",
+        type: "Programmé",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
+    actesAdministratifs: [
+      {
+        category: "CONVENTION",
+        startDate: "2024-01-01",
+        endDate: "2026-12-31",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
   },
 };

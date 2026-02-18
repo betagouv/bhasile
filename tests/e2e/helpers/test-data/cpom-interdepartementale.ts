@@ -33,7 +33,7 @@ export const cpomInterdepartementale: {
   },
   financeData: {
     2024: {
-      cumulResultatNet: -5000,
+      cumulResultatNet: 5000,
       repriseEtat: 2000,
       affectationReservesFondsDedies: 1000,
     },

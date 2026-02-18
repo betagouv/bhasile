@@ -29,7 +29,35 @@ export class StructureDetailsPage extends BasePage {
   }
 
   async openDescriptionEdit() {
-    const block = this.getBlockByTitle("Description");
+    await this.openBlockEdit("Description");
+  }
+
+  async openCalendrierEdit() {
+    await this.openBlockEdit("Calendrier");
+  }
+
+  async openTypePlacesEdit() {
+    await this.openBlockEdit("Type de places");
+  }
+
+  async openFinanceEdit() {
+    await this.openBlockEdit("Finances");
+  }
+
+  async openControleEdit() {
+    await this.openBlockEdit("Controle qualité");
+  }
+
+  async openDocumentsEdit() {
+    await this.openBlockEdit("Actes administratifs");
+  }
+
+  async openNotesEdit() {
+    await this.openBlockEdit("Notes");
+  }
+
+  private async openBlockEdit(blockTitle: string) {
+    const block = this.getBlockByTitle(blockTitle);
     await block.getByRole("button", { name: "Modifier" }).click();
   }
 
@@ -69,7 +97,9 @@ export class StructureDetailsPage extends BasePage {
     const descriptionBlock = this.getBlockByTitle("Description");
     await this.expectDescriptionData(descriptionBlock, data, overrides);
     await this.expectContactsData(descriptionBlock, data, overrides);
-    await this.expectTypePlaces(data);
+    await this.expectTypePlaces(
+      overrides.structureTypologies ?? data.structureTypologies ?? []
+    );
     await this.expectDocumentsFinanciers(data);
     await this.expectActesAdministratifs(
       overrides.actesAdministratifs ?? data.actesAdministratifs ?? []
@@ -191,7 +221,16 @@ export class StructureDetailsPage extends BasePage {
     }
   }
 
-  private async expectTypePlaces(data: TestStructureData) {
+  private async expectTypePlaces(
+    structureTypologies: Array<{
+      placesAutorisees: number;
+      pmr: number;
+      lgbt: number;
+      fvvTeh: number;
+    }>
+  ) {
+    if (structureTypologies.length === 0) return;
+
     const typePlacesBlock = this.getBlockByTitle("Type de places");
     const historyButton = typePlacesBlock.getByRole("button", {
       name: "Historique",
@@ -199,7 +238,7 @@ export class StructureDetailsPage extends BasePage {
     await historyButton.click();
 
     const historyTable = typePlacesBlock.getByRole("table").first();
-    for (const typologie of data.structureTypologies) {
+    for (const typologie of structureTypologies) {
       await expect(historyTable).toContainText(
         typologie.placesAutorisees.toString()
       );
@@ -288,6 +327,12 @@ type StructureDetailsOverrides = {
   fvvTeh?: boolean;
   contactEmail?: string;
   notes?: string;
+  structureTypologies?: Array<{
+    placesAutorisees: number;
+    pmr: number;
+    lgbt: number;
+    fvvTeh: number;
+  }>;
   actesAdministratifs?: Array<{
     category: ActeAdministratifCategoryType[number];
     categoryName?: string;

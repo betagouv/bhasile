@@ -41,6 +41,7 @@ export default function ModificationDescription() {
   const onSubmit = (data: ModificationDescriptionFormValues) => {
     handleSubmit({
       ...data,
+      dnaCode: structure.dnaCode,
       adresses: transformFormAdressesToApiAdresses(data.adresses),
       contacts: transformAgentFormContactsToApiContacts(data.contacts),
     });

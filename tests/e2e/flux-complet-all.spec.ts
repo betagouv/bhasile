@@ -26,15 +26,24 @@ const validTestCases = [
   caes2,
 ];
 
-for (const { name, formData } of validTestCases) {
+for (const {
+  name,
+  formData,
+  modificationData,
+  failingStep,
+} of validTestCases) {
   test(`${name} - Flux complet (création, finalisation, modification)`, async ({
     page,
   }) => {
-    test.setTimeout(120000); // The S3 upload can be sloooooow
+    test.setTimeout(180000); // The S3 upload and modification flow can be slow
     await beforeFlow(formData, page);
 
     try {
-      await completeStructureFlow(page, formData);
+      await completeStructureFlow(page, {
+        formData,
+        modificationData,
+        failingStep: failingStep,
+      });
     } finally {
       await deleteStructure(formData.dnaCode as string);
     }

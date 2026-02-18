@@ -147,8 +147,39 @@ export type FailingStep =
   | "finalisationDocuments"
   | "finalisationNotes";
 
+/** Data to apply in modification forms (values that differ from initial finalisation) */
+export type ModificationData = {
+  public?: string;
+  lgbt?: boolean;
+  fvvTeh?: boolean;
+  contactPrincipalEmail?: string;
+  notes?: string;
+  /** Calendrier - only for autorisee (CADA, CPH) */
+  debutPeriodeAutorisation?: string;
+  finPeriodeAutorisation?: string;
+  /** Calendrier - for subventionnee (CAES, HUDA) */
+  debutConvention?: string;
+  finConvention?: string;
+  /** Type places */
+  ouvertureFermeture?: OuvertureFermetureData;
+  structureTypologies?: Array<{
+    placesAutorisees: number;
+    pmr: number;
+    lgbt: number;
+    fvvTeh: number;
+  }>;
+  /** Finance - partial year data */
+  finances?: Record<number, Partial<FinanceYearData>>;
+  /** Controle qualité */
+  evaluations?: EvaluationData[];
+  controles?: ControleData[];
+  /** Actes administratifs to add */
+  actesAdministratifs?: ActeAdministratifData[];
+};
+
 export type TestStructureScenario = {
   name: string;
   formData: TestStructureData | Partial<TestStructureData>;
+  modificationData?: ModificationData;
   failingStep?: FailingStep;
 };

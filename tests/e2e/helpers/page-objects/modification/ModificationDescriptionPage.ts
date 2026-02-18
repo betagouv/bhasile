@@ -22,7 +22,9 @@ export class ModificationDescriptionPage extends BasePage {
   }
 
   async updatePublic(publicValue: string) {
-    await this.formHelper.selectOption(SELECTORS.PUBLIC_SELECT, publicValue);
+    await this.formHelper.selectOption(SELECTORS.PUBLIC_SELECT, {
+      label: publicValue,
+    });
   }
 
   async setVulnerabilites({
@@ -45,6 +47,17 @@ export class ModificationDescriptionPage extends BasePage {
   }
 
   async submit(structureId: number) {
-    await this.submitAndWaitForUrl(URLS.structure(structureId));
+    const structureUrl = URLS.structure(structureId);
+    const [response] = await Promise.all([
+      this.page.waitForResponse(
+        (r) =>
+          r.url().includes("/api/structures") &&
+          r.request().method() === "PUT" &&
+          r.status() < 400
+      ),
+      this.page.getByRole("button", { name: "Valider" }).click(),
+    ]);
+    await response.finished();
+    await this.page.waitForURL(structureUrl, { timeout: 15000 });
   }
 }

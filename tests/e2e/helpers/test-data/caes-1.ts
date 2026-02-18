@@ -183,7 +183,7 @@ export const caes1: TestStructureScenario = {
         totalCharges: "42000",
         repriseEtat: "100",
         excedentRecupere: "10",
-        excedentDeduit: "-5",
+        excedentDeduit: "5",
         affectationReservesFondsDedies: "200",
         fondsDedies: "15",
         reserveInvestissement: "20",
@@ -235,5 +235,42 @@ export const caes1: TestStructureScenario = {
     ],
     finalisationNotes:
       "Notes de finalisation dynamiques (CAES) : contrôle OK, suivi actif.",
+  },
+  modificationData: {
+    public: "Famille",
+    lgbt: false,
+    fvvTeh: true,
+    contactPrincipalEmail: "modif-caes1@example.com",
+    notes: "Notes modification CAES 1 - filiale.",
+    debutConvention: "2021-01-15",
+    finConvention: "2024-06-30",
+    ouvertureFermeture: {
+      placesACreer: "5",
+      echeancePlacesACreer: "2026-04-01",
+      placesAFermer: "2",
+      echeancePlacesAFermer: "2026-07-15",
+    },
+    structureTypologies: [
+      { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
+    ],
+    finances: {
+      2025: {
+        ETP: "9",
+        tauxEncadrement: "11",
+        coutJournalier: "24",
+        dotationDemandee: "125000",
+        dotationAccordee: "118000",
+      },
+    },
+    actesAdministratifs: [
+      {
+        category: "CONVENTION",
+        startDate: "2022-01-01",
+        endDate: "2025-12-31",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
   },
 };

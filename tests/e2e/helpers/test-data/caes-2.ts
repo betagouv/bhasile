@@ -182,7 +182,7 @@ export const caes2: TestStructureScenario = {
         totalCharges: "42000",
         repriseEtat: "100",
         excedentRecupere: "10",
-        excedentDeduit: "-5",
+        excedentDeduit: "5",
         affectationReservesFondsDedies: "200",
         fondsDedies: "15",
         reserveInvestissement: "20",
@@ -240,5 +240,48 @@ export const caes2: TestStructureScenario = {
     ],
     finalisationNotes:
       "Notes de finalisation dynamiques (CAES) : contrôle OK, suivi actif.",
+  },
+  modificationData: {
+    public: "Tout public",
+    lgbt: true,
+    fvvTeh: false,
+    contactPrincipalEmail: "modif-caes2@example.com",
+    notes: "Notes modification CAES 2 - mixte.",
+    debutConvention: "2020-06-01",
+    finConvention: "2024-12-31",
+    ouvertureFermeture: {
+      placesACreer: "7",
+      echeancePlacesACreer: "2026-06-01",
+      placesAFermer: "1",
+      echeancePlacesAFermer: "2026-09-01",
+    },
+    structureTypologies: [
+      { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 50, pmr: 6, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 47, pmr: 5, lgbt: 9, fvvTeh: 8 },
+    ],
+    finances: {
+      2025: {
+        ETP: "10",
+        tauxEncadrement: "10",
+        coutJournalier: "26",
+        dotationDemandee: "128000",
+        dotationAccordee: "120000",
+      },
+    },
+    controles: [
+      {
+        date: "2024-03-10",
+        type: "Programmé",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
+    actesAdministratifs: [
+      {
+        category: "AUTRE",
+        categoryName: "PPI modification e2e",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
   },
 };
