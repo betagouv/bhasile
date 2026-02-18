@@ -45,7 +45,11 @@ for (const {
         failingStep: failingStep,
       });
     } finally {
-      await deleteStructure(formData.dnaCode as string);
+      try {
+        await deleteStructure(formData.dnaCode as string);
+      } catch {
+        // Structure may not exist if test failed before creation
+      }
     }
   });
 }

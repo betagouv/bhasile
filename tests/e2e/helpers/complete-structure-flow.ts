@@ -77,7 +77,7 @@ export const completeStructureFlow = async (
 
   const identificationPage = new IdentificationPage(page);
   await identificationPage.fillForm(dataWithDna as TestStructureData);
-  const shouldFailAtIdentification = options?.failingStep === "identification";
+  const shouldFailAtIdentification = failingStep === "identification";
   await identificationPage.submit(
     dataWithDna.dnaCode,
     shouldFailAtIdentification
@@ -88,7 +88,7 @@ export const completeStructureFlow = async (
 
   const adressesPage = new AdressesPage(page);
   await adressesPage.fillForm(dataWithDna as TestStructureData);
-  const shouldFailAtAdresses = options?.failingStep === "adresses";
+  const shouldFailAtAdresses = failingStep === "adresses";
   await adressesPage.submit(dataWithDna.dnaCode, shouldFailAtAdresses);
   if (shouldFailAtAdresses) {
     return; // Test should pass - validation failure occurred as expected
@@ -96,7 +96,7 @@ export const completeStructureFlow = async (
 
   const typePlacesPage = new TypePlacesPage(page);
   await typePlacesPage.fillForm(dataWithDna as TestStructureData);
-  const shouldFailAtTypePlaces = options?.failingStep === "type-places";
+  const shouldFailAtTypePlaces = failingStep === "type-places";
   await typePlacesPage.submit(dataWithDna.dnaCode, shouldFailAtTypePlaces);
   if (shouldFailAtTypePlaces) {
     return; // Test should pass - validation failure occurred as expected
@@ -105,7 +105,7 @@ export const completeStructureFlow = async (
   const documentsFinanciersPage = new DocumentsFinanciersPage(page);
   await documentsFinanciersPage.waitForLoad();
   await documentsFinanciersPage.fillForm(dataWithDna as TestStructureData);
-  const shouldFailAtDocuments = options?.failingStep === "documents";
+  const shouldFailAtDocuments = failingStep === "documents";
   await documentsFinanciersPage.submit(
     dataWithDna.dnaCode,
     shouldFailAtDocuments
@@ -116,7 +116,7 @@ export const completeStructureFlow = async (
 
   const verificationPage = new VerificationPage(page);
   await verificationPage.verifyData(dataWithDna as TestStructureData);
-  const shouldFailAtVerification = options?.failingStep === "verification";
+  const shouldFailAtVerification = failingStep === "verification";
   await verificationPage.submit(dataWithDna.dnaCode, shouldFailAtVerification);
   if (shouldFailAtVerification) {
     return; // Test should pass - validation failure occurred as expected
@@ -136,7 +136,7 @@ export const completeStructureFlow = async (
   );
   await finalisationIdentificationPage.waitForLoad();
   const shouldFailAtFinalisationIdentification =
-    options?.failingStep === "finalisationIdentification";
+    failingStep === "finalisationIdentification";
   await finalisationIdentificationPage.submit(
     structureId,
     shouldFailAtFinalisationIdentification
@@ -152,7 +152,7 @@ export const completeStructureFlow = async (
     dataWithDna as TestStructureData
   );
   const shouldFailAtFinalisationDocumentsFinanciers =
-    options?.failingStep === "finalisationDocumentsFinanciers";
+    failingStep === "finalisationDocumentsFinanciers";
   await finalisationDocumentsFinanciersPage.submit(
     structureId,
     shouldFailAtFinalisationDocumentsFinanciers
@@ -165,7 +165,7 @@ export const completeStructureFlow = async (
   await finalisationFinancePage.waitForLoad();
   await finalisationFinancePage.fillForm(dataWithDna as TestStructureData);
   const shouldFailAtFinalisationFinance =
-    options?.failingStep === "finalisationFinance";
+    failingStep === "finalisationFinance";
   await finalisationFinancePage.submit(
     structureId,
     shouldFailAtFinalisationFinance
@@ -178,7 +178,7 @@ export const completeStructureFlow = async (
   await finalisationControlesPage.waitForLoad();
   await finalisationControlesPage.fillForm(dataWithDna as TestStructureData);
   const shouldFailAtFinalisationControles =
-    options?.failingStep === "finalisationControles";
+    failingStep === "finalisationControles";
   await finalisationControlesPage.submit(
     structureId,
     shouldFailAtFinalisationControles
@@ -191,7 +191,7 @@ export const completeStructureFlow = async (
   await finalisationDocumentsPage.waitForLoad();
   await finalisationDocumentsPage.fillForm(dataWithDna as TestStructureData);
   const shouldFailAtFinalisationDocuments =
-    options?.failingStep === "finalisationDocuments";
+    failingStep === "finalisationDocuments";
   await finalisationDocumentsPage.submit(
     structureId,
     shouldFailAtFinalisationDocuments
@@ -204,7 +204,7 @@ export const completeStructureFlow = async (
   await finalisationNotesPage.waitForLoad();
   await finalisationNotesPage.fillForm(dataWithDna as TestStructureData);
   const shouldFailAtFinalisationNotes =
-    options?.failingStep === "finalisationNotes";
+    failingStep === "finalisationNotes";
   await finalisationNotesPage.submit(
     structureId,
     shouldFailAtFinalisationNotes
