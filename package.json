@@ -30,7 +30,7 @@
     "delete-views:dev": "npx tsx -r dotenv/config scripts/apply-views.ts delete",
     "prisma:migrate": "prisma migrate dev && prisma generate",
     "prisma:deploy": "prisma migrate deploy",
-    "prisma:seed": "prisma db seed && yarn script fill-allowed-users fill-allowed-users.ts",
+    "prisma:seed": "prisma db seed",
     "prisma:studio": "prisma studio",
     "prisma:reset": "prisma migrate reset && prisma generate",
     "prisma:reset-and-seed": "yarn install --production=false && yarn prisma:reset && yarn prisma:seed && yarn apply-views",
