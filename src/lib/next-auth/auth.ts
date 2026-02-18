@@ -3,10 +3,10 @@ import {
   NextApiRequest,
   NextApiResponse,
 } from "next";
-import { getServerSession, NextAuthOptions, User } from "next-auth";
+import { getServerSession, NextAuthOptions } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 
-import prisma from "../prisma";
+import { getIsUserAuthorized, ProConnectUser, upsertUser } from "./auth-util";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -18,27 +18,24 @@ export const authOptions: NextAuthOptions = {
       if (!email) {
         return false;
       }
-
       try {
-        const allowedPatterns = await prisma.allowedUser.findMany({
-          select: { emailPattern: true },
-        });
-        return allowedPatterns.some(({ emailPattern }) => {
-          const regex = new RegExp(emailPattern, "i");
-          return regex.test(email);
-        });
+        const isUserAuthorized = await getIsUserAuthorized(email);
+        if (isUserAuthorized) {
+          await upsertUser(user as ProConnectUser);
+        }
+        return isUserAuthorized;
       } catch (error) {
-        console.error("Adresse mail non autorisée", error);
+        console.error("Erreur de connexion", error);
         return false;
       }
     },
     async jwt({ token, account, user }) {
       if (account) {
+        const { prenom, nom } = user as ProConnectUser;
         token.id_token = account.id_token;
         token.provider = account.provider;
         token.user_id = user.id;
-        token.name =
-          (user as UserWithInfo).prenom + " " + (user as UserWithInfo).nom;
+        token.name = `${prenom} ${nom}`;
       }
       return token;
     },
@@ -132,11 +129,3 @@ export function auth(
 ) {
   return getServerSession(...args, authOptions);
 }
-
-type UserWithInfo = User & {
-  id: string;
-  prenom: string;
-  nom: string;
-  email: string;
-  poste: string;
-};
