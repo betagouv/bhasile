@@ -15,7 +15,7 @@ export const ActesAdministratifsItem = ({ acteAdministratif }: Props) => {
 
   return (
     <>
-      <div key={acteAdministratif.id}>
+      <div>
         <DownloadItem item={acteAdministratif} />
       </div>
       {avenantsOfItem?.map((avenant) => (
