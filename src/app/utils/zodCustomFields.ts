@@ -100,28 +100,46 @@ export const nullishFrenchDateToISO = () =>
         return null;
       }
       if (val === undefined || val === "") {
-        return null; // We return null instead of undefined to send it to the backend (and erase previous value)
+        return null;
       }
       return transformFrenchDateToISO(val);
     })
     .pipe(z.string().datetime().nullish());
 
-export const zSafeDecimalsNullish = () =>
-  z.preprocess((val: unknown): number | null | undefined => {
-    if (val === "" || val === null) {
-      return null;
+const numberPreprocess = (val: unknown): number | null | undefined => {
+  if (val === "" || val === null) {
+    return null;
+  }
+  if (val === undefined) {
+    return undefined;
+  }
+  if (typeof val === "string") {
+    const normalizedValue = val.replace(",", ".").replaceAll(" ", "");
+    const parsed = Number(normalizedValue);
+
+    if (!isNaN(parsed)) {
+      return parsed;
     }
-    if (val === undefined) {
-      return undefined;
-    }
-    if (typeof val === "string") {
-      const normalizedValue = val.replace(",", ".").replaceAll(" ", "");
-      const parsed = Number(normalizedValue);
-      return isNaN(parsed) ? null : parsed;
-    }
+  } else {
     const parsed = Number(val);
-    return isNaN(parsed) ? null : parsed;
-  }, z.number().nullish());
+
+    if (!isNaN(parsed)) {
+      return parsed;
+    }
+  }
+
+  return undefined;
+};
+export const zSafeDecimals = () => z.preprocess(numberPreprocess, z.number());
+
+export const zSafePositiveDecimals = () =>
+  z.preprocess(numberPreprocess, z.number().min(0));
+
+export const zSafeDecimalsNullish = () =>
+  z.preprocess(numberPreprocess, z.number().nullish());
+
+export const zSafePositiveDecimalsNullish = () =>
+  z.preprocess(numberPreprocess, z.number().min(0).nullish());
 
 export const zSafeYear = () =>
   z.preprocess(
