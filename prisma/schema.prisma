@@ -471,6 +471,31 @@ model DepartementAllowedUser {
   @@schema("public")
 }
 
+model User {
+  id             Int          @id @default(autoincrement())
+  prenom         String
+  nom            String
+  email          String       @unique
+  lastConnection DateTime
+  userActions    UserAction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model UserAction {
+  id        Int                @id @default(autoincrement())
+  userId    Int
+  user      User               @relation(fields: [userId], references: [id])
+  action    UserActionCategory
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
 // Enums
 enum Repartition {
   DIFFUS
@@ -559,6 +584,15 @@ enum AllowedUserGranularity {
   DEPARTEMENT
   REGION
   NATIONAL
+
+  @@schema("public")
+}
+
+enum UserActionCategory {
+  CREATE
+  READ
+  UPDATE
+  DELETE
 
   @@schema("public")
 }
