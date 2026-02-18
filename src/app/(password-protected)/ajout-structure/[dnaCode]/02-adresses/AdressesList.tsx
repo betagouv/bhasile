@@ -167,11 +167,7 @@ export const AdressesList = ({
                   Taille maximale par fichier : 10 Mo. Formats supportés : xls,
                   xlsx, et csv.
                 </p>
-                <AdressImporter
-                  getValues={getValues}
-                  setValue={setValue}
-                  typeBati={typeBati}
-                />
+                <AdressImporter typeBati={typeBati} />
               </div>
             </>
           )}
