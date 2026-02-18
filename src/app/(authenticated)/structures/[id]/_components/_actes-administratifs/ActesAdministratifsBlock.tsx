@@ -1,9 +1,7 @@
-import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import { useRouter } from "next/navigation";
 import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
-import { DownloadItem } from "@/app/components/common/DownloadItem";
 import { getActesAdministratifsCategoryToDisplay } from "@/app/utils/acteAdministratif.util";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
@@ -60,18 +58,10 @@ export const ActesAdministratifsBlock = (): ReactElement => {
             )
           )}
           {cpomActesAdministratifs?.length ? (
-            <Accordion label="CPOM">
-              <div className="columns-3">
-                {cpomActesAdministratifs?.map(
-                  (acteAdministratif) =>
-                    acteAdministratif && (
-                      <div key={acteAdministratif.id} className="pb-5">
-                        <DownloadItem item={acteAdministratif} />
-                      </div>
-                    )
-                )}
-              </div>
-            </Accordion>
+            <ActesAdministratifsCategory
+              category={"CONVENTION" as ActeAdministratifCategory}
+              title="CPOM"
+            />
           ) : null}
         </>
       )}

@@ -3,15 +3,26 @@ import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
-export const ActesAdministratifsItem = ({ acteAdministratif }: Props) => {
+export const ActesAdministratifsItem = ({
+  acteAdministratif,
+  isCpom,
+}: Props) => {
   const { structure } = useStructureContext();
 
-  const avenantsOfItem = structure.actesAdministratifs
-    ?.filter((avenant) => avenant.parentId === acteAdministratif.id)
-    .map((avenant, index) => ({
-      ...avenant,
-      index: index + 1,
-    }));
+  const avenantsOfItem = (
+    isCpom
+      ? structure.cpomStructures
+          ?.flatMap((cpomStructure) => cpomStructure.cpom?.actesAdministratifs)
+          .filter(
+            (avenant) => avenant && avenant.parentId === acteAdministratif.id
+          )
+      : structure.actesAdministratifs?.filter(
+          (avenant) => avenant.parentId === acteAdministratif.id
+        )
+  )?.map((avenant, index) => ({
+    ...avenant,
+    index: index + 1,
+  })) as (ActeAdministratifApiType & { index: number })[];
 
   return (
     <>
@@ -29,4 +40,5 @@ export const ActesAdministratifsItem = ({ acteAdministratif }: Props) => {
 
 type Props = {
   acteAdministratif: ActeAdministratifApiType;
+  isCpom: boolean;
 };
