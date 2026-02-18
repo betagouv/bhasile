@@ -1,9 +1,9 @@
-import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { ReactElement, useState } from "react";
 
+import { CustomAccordion } from "@/app/components/common/CustomAccordion";
 import { formatCurrency } from "@/app/utils/number.util";
 import { isStructureInCpom } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
@@ -77,13 +77,12 @@ export const DetailAffectations = (): ReactElement => {
 
   return (
     <>
-      <Accordion
+      <CustomAccordion
         label={
           isStructureInCpom(structure)
             ? "Détail affectations réserves, provisions et fonds dédiés du CPOM"
             : "Détail affectations réserves et provisions"
         }
-        className="custom-accordion"
       >
         <Table
           bordered={true}
@@ -108,7 +107,7 @@ export const DetailAffectations = (): ReactElement => {
           Ce tableau reflète l’affectation de l’excédent pour chaque année
           (flux). Il ne constitue en aucun cas un calcul ou stock.
         </span>
-      </Accordion>
+      </CustomAccordion>
       <commentaireModal.Component title="Voir le commentaire">
         <h2 className="text-sm">
           {isStructureInCpom(structure)
