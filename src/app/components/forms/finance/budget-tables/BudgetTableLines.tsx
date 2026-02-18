@@ -14,6 +14,7 @@ export const BudgetTableLines = ({
   budgets,
   cpomStructures,
   cpomMillesimes,
+  years,
   enabledYears,
   canEdit = true,
 }: Props) => {
@@ -28,6 +29,7 @@ export const BudgetTableLines = ({
               name={line.name}
               label={line.label}
               subLabel={line.subLabel}
+              years={years}
               disabledYearsStart={line.disabledYearsStart}
               enabledYears={enabledYears ?? line.enabledYears}
               colored={line.colored}
@@ -58,6 +60,7 @@ type Props = {
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];
   cpomMillesimes?: CpomMillesimeApiType[];
+  years: number[];
   enabledYears?: number[];
   canEdit?: boolean;
 };

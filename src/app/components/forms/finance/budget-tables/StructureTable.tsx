@@ -4,6 +4,7 @@ import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_cont
 import { Table } from "@/app/components/common/Table";
 import { getYearRange } from "@/app/utils/date.util";
 import {
+  getRealCreationYear,
   isStructureAutorisee,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
@@ -20,10 +21,12 @@ export const StructureTable = ({ canEdit = true }: Props) => {
 
   const { structure } = useStructureContext();
 
-  const isAutorisee = isStructureAutorisee(structure?.type);
-  const isSubventionnee = isStructureSubventionnee(structure?.type);
+  const isAutorisee = isStructureAutorisee(structure.type);
+  const isSubventionnee = isStructureSubventionnee(structure.type);
 
   const { years } = getYearRange({ order: "desc" });
+  const startYear = getRealCreationYear(structure);
+  const yearsToDisplay = years.filter((year) => year >= startYear);
 
   const localForm = useForm();
   const { watch, formState } = parentFormContext || localForm;
@@ -46,7 +49,7 @@ export const StructureTable = ({ canEdit = true }: Props) => {
 
   const budgets = canEdit
     ? (watch("budgets") as BudgetApiType[])
-    : structure?.budgets;
+    : structure.budgets;
 
   if (!budgets || budgets.length === 0) {
     return null;
@@ -67,7 +70,7 @@ export const StructureTable = ({ canEdit = true }: Props) => {
     <Table
       ariaLabelledBy="gestionBudgetaire"
       hasErrors={hasErrors}
-      headings={getBudgetTableHeading({ years, structure })}
+      headings={getBudgetTableHeading({ years: yearsToDisplay, structure })}
       enableBorders
     >
       <BudgetTableLines
@@ -77,6 +80,7 @@ export const StructureTable = ({ canEdit = true }: Props) => {
         )}
         budgets={budgets}
         canEdit={canEdit}
+        years={yearsToDisplay}
       />
       <BudgetTableCommentLine
         label="Commentaire"
@@ -84,7 +88,7 @@ export const StructureTable = ({ canEdit = true }: Props) => {
         disabledYearsStart={
           isSubventionnee ? SUBVENTIONNEE_OPEN_YEAR + 1 : undefined
         }
-        enabledYears={years}
+        enabledYears={yearsToDisplay}
         canEdit={canEdit}
       />
     </Table>

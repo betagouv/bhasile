@@ -40,6 +40,7 @@ export const StructureCpomTable = ({ canEdit = true }: Props) => {
       enableBorders
     >
       <BudgetTableLines
+        years={years}
         lines={getCpomLines()}
         cpomStructures={cpomStructures}
         canEdit={canEdit}
