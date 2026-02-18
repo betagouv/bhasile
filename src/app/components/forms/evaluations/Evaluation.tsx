@@ -122,7 +122,14 @@ export const Evaluation = ({
             priority="tertiary no outline"
             className="ml-8"
             title="Supprimer"
-            onClick={() => deleteEvaluation(index)}
+            onClick={() => {
+              const confirm = window.confirm(
+                "Attention, vous allez supprimer définitivement cette évaluation. Êtes-vous bien sûr·e de vouloir continuer ?"
+              );
+              if (confirm) {
+                deleteEvaluation(index);
+              }
+            }}
             type="button"
           />
         )}

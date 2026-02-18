@@ -15,15 +15,28 @@ export const ActesAdministratifsBlock = (): ReactElement => {
 
   const router = useRouter();
 
-  const actesAdministratifsCategories =
+  const actesAdministratifsCategoriesRules =
     getActesAdministratifsCategoryToDisplay(structure);
+
+  const actesAdministratifsCategories = Object.entries(
+    actesAdministratifsCategoriesRules
+  )
+    .filter(([, rules]) => rules.shouldShow)
+    .map(([, rules]) => rules);
+
+  const filteredActesAdministratifs = structure.actesAdministratifs?.filter(
+    (acteAdministratif) =>
+      Object.keys(actesAdministratifsCategories).includes(
+        acteAdministratif.category
+      )
+  );
 
   const cpomActesAdministratifs = structure.cpomStructures
     ?.flatMap((cpomStructure) => cpomStructure.cpom?.actesAdministratifs)
     .filter((cpomActeAdministratif) => cpomActeAdministratif);
 
   const hasDocuments =
-    cpomActesAdministratifs?.length || structure.actesAdministratifs?.length;
+    cpomActesAdministratifs?.length || filteredActesAdministratifs?.length;
 
   return (
     <Block
