@@ -13,8 +13,14 @@ export const ActesAdministratifsBlock = (): ReactElement => {
 
   const router = useRouter();
 
-  const actesAdministratifsCategories =
+  const actesAdministratifsCategoriesRules =
     getActesAdministratifsCategoryToDisplay(structure);
+
+  const actesAdministratifsCategories = Object.entries(
+    actesAdministratifsCategoriesRules
+  )
+    .filter(([, rules]) => rules.shouldShow)
+    .map(([, rules]) => rules);
 
   const filteredActesAdministratifs = structure.actesAdministratifs?.filter(
     (acteAdministratif) =>
@@ -22,6 +28,13 @@ export const ActesAdministratifsBlock = (): ReactElement => {
         acteAdministratif.category
       )
   );
+
+  const cpomActesAdministratifs = structure.cpomStructures
+    ?.flatMap((cpomStructure) => cpomStructure.cpom?.actesAdministratifs)
+    .filter((cpomActeAdministratif) => cpomActeAdministratif);
+
+  const hasDocuments =
+    cpomActesAdministratifs?.length || filteredActesAdministratifs?.length;
 
   return (
     <Block
@@ -31,27 +44,49 @@ export const ActesAdministratifsBlock = (): ReactElement => {
         router.push(`/structures/${structure.id}/modification/06-documents`);
       }}
     >
-      {!structure.actesAdministratifs?.length ? (
+      {!hasDocuments ? (
         <>Aucun document importé</>
       ) : (
-        Object.entries(actesAdministratifsCategories).map(
-          ([category, rules]) => (
-            <Accordion label={rules.title} key={category}>
-              <div className="columns-3">
-                {filteredActesAdministratifs
-                  ?.filter(
-                    (acteAdministratif) =>
-                      acteAdministratif.category === category
-                  )
-                  .map((acteAdministratif) => (
-                    <div key={acteAdministratif.id} className="pb-5">
-                      <DownloadItem item={acteAdministratif} />
+        <>
+          {Object.entries(actesAdministratifsCategories).map(
+            ([category, rules]) => {
+              const actesAdministratifsOfCategory =
+                filteredActesAdministratifs?.filter(
+                  (acteAdministratif) => acteAdministratif.category === category
+                );
+              if (actesAdministratifsOfCategory?.length) {
+                return (
+                  <Accordion label={rules.title} key={category}>
+                    <div className="columns-3">
+                      {actesAdministratifsOfCategory.map(
+                        (acteAdministratif) => (
+                          <div key={acteAdministratif.id} className="pb-5">
+                            <DownloadItem item={acteAdministratif} />
+                          </div>
+                        )
+                      )}
                     </div>
-                  ))}
+                  </Accordion>
+                );
+              }
+              return null;
+            }
+          )}
+          {cpomActesAdministratifs?.length ? (
+            <Accordion label="CPOM">
+              <div className="columns-3">
+                {cpomActesAdministratifs?.map(
+                  (acteAdministratif) =>
+                    acteAdministratif && (
+                      <div key={acteAdministratif.id} className="pb-5">
+                        <DownloadItem item={acteAdministratif} />
+                      </div>
+                    )
+                )}
               </div>
             </Accordion>
-          )
-        )
+          ) : null}
+        </>
       )}
     </Block>
   );
