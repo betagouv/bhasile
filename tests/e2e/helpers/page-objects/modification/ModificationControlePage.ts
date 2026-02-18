@@ -32,7 +32,10 @@ export class ModificationControlePage extends BasePage {
       .waitForLoadState("networkidle", { timeout: TIMEOUTS.FILE_UPLOAD })
       .catch(() => {});
     const submitButton = this.page.locator(SELECTORS.SUBMIT_BUTTON);
-    await submitButton.waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION });
+    await submitButton.waitFor({
+      state: "visible",
+      timeout: TIMEOUTS.NAVIGATION,
+    });
     await submitButton.click({ force: true });
     await this.page.waitForURL(URLS.structure(structureId), { timeout: 30000 });
   }
@@ -40,7 +43,7 @@ export class ModificationControlePage extends BasePage {
   private async setFileInput(
     keySelector: string,
     filePath: string,
-    keyTimeout = TIMEOUTS.NAVIGATION
+    keyTimeout: number = TIMEOUTS.NAVIGATION
   ) {
     const keyInput = this.page.locator(keySelector);
     if ((await keyInput.count()) === 0) return;
@@ -69,7 +72,15 @@ export class ModificationControlePage extends BasePage {
 
   private async fillEvaluations(data: ModificationData) {
     const evaluations = data.evaluations ?? [];
-    if (evaluations.length === 0) return;
+    if (evaluations.length === 0) {
+      const noEvaluationCheckbox = this.page.getByRole("checkbox", {
+        name: /n.?a pas encore fait l.?objet d.?évaluation/i,
+      });
+      if ((await noEvaluationCheckbox.count()) > 0) {
+        await noEvaluationCheckbox.check({ force: true });
+      }
+      return;
+    }
 
     const evaluationsFieldset = this.page.getByRole("group", {
       name: /Évaluations/i,
