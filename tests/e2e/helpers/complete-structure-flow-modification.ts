@@ -4,6 +4,8 @@ import { runModificationStep } from "./flow-step-runner";
 import { ModificationCalendrierPage } from "./page-objects/modification/ModificationCalendrierPage";
 import { ModificationControlePage } from "./page-objects/modification/ModificationControlePage";
 import { ModificationDescriptionPage } from "./page-objects/modification/ModificationDescriptionPage";
+import { ModificationDocumentsPage } from "./page-objects/modification/ModificationDocumentsPage";
+import { ModificationFinancePage } from "./page-objects/modification/ModificationFinancePage";
 import { ModificationNotesPage } from "./page-objects/modification/ModificationNotesPage";
 import { ModificationTypePlacesPage } from "./page-objects/modification/ModificationTypePlacesPage";
 import { StructureDetailsPage } from "./page-objects/structure/StructureDetailsPage";
@@ -35,8 +37,16 @@ export async function completeModificationFlow(
       page: new ModificationTypePlacesPage(page),
     },
     {
+      openEdit: () => structurePage.openFinanceEdit(),
+      page: new ModificationFinancePage(page),
+    },
+    {
       openEdit: () => structurePage.openControleEdit(),
       page: new ModificationControlePage(page),
+    },
+    {
+      openEdit: () => structurePage.openDocumentsEdit(),
+      page: new ModificationDocumentsPage(page),
     },
     {
       openEdit: () => structurePage.openNotesEdit(),
