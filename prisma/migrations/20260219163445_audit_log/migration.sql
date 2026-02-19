@@ -19,6 +19,8 @@ CREATE TABLE "UserAction" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
     "action" "UserActionCategory" NOT NULL,
+    "entityName" TEXT NOT NULL,
+    "entityId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
