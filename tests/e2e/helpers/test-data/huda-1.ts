@@ -235,7 +235,7 @@ export const huda1: TestStructureScenario = {
     public: "Personnes isolées",
     lgbt: true,
     fvvTeh: false,
-    contactPrincipalEmail: "modif-huda1@example.com",
+    contactPrincipal: { email: "modif-huda1@example.com" },
     notes: "Notes modification HUDA 1 - convention.",
     debutConvention: "2021-03-01",
     finConvention: "2024-09-30",

@@ -19,18 +19,18 @@ export type TestStructureData = {
   lgbt: boolean;
   fvvTeh: boolean;
   contactPrincipal: {
-    prenom: string;
-    nom: string;
-    role: string;
-    email: string;
-    telephone: string;
+    prenom?: string;
+    nom?: string;
+    role?: string;
+    email?: string;
+    telephone?: string;
   };
   contactSecondaire?: {
-    prenom: string;
-    nom: string;
-    role: string;
-    email: string;
-    telephone: string;
+    prenom?: string;
+    nom?: string;
+    role?: string;
+    email?: string;
+    telephone?: string;
   };
   debutPeriodeAutorisation?: string;
   finPeriodeAutorisation?: string;
@@ -75,6 +75,7 @@ export type TestStructureData = {
   ouvertureFermeture?: OuvertureFermetureData;
   actesAdministratifs?: ActeAdministratifData[];
   finalisationNotes?: string;
+  notes?: string;
 };
 
 export type FinanceValue = number | string;
@@ -147,28 +148,7 @@ export type FailingStep =
   | "finalisationDocuments"
   | "finalisationNotes";
 
-export type ModificationData = {
-  public?: string;
-  lgbt?: boolean;
-  fvvTeh?: boolean;
-  contactPrincipalEmail?: string;
-  notes?: string;
-  debutPeriodeAutorisation?: string;
-  finPeriodeAutorisation?: string;
-  debutConvention?: string;
-  finConvention?: string;
-  ouvertureFermeture?: OuvertureFermetureData;
-  structureTypologies?: Array<{
-    placesAutorisees: number;
-    pmr: number;
-    lgbt: number;
-    fvvTeh: number;
-  }>;
-  finances?: Record<number, Partial<FinanceYearData>>;
-  evaluations?: EvaluationData[];
-  controles?: ControleData[];
-  actesAdministratifs?: ActeAdministratifData[];
-};
+export type ModificationData = Partial<TestStructureData>;
 
 export type TestStructureScenario = {
   name: string;

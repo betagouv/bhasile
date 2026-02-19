@@ -7,7 +7,7 @@ import { ModificationDescriptionPage } from "./page-objects/modification/Modific
 import { ModificationNotesPage } from "./page-objects/modification/ModificationNotesPage";
 import { ModificationTypePlacesPage } from "./page-objects/modification/ModificationTypePlacesPage";
 import { StructureDetailsPage } from "./page-objects/structure/StructureDetailsPage";
-import { ModificationData, TestStructureData } from "./test-data/types";
+import { ModificationData } from "./test-data/types";
 
 /**
  * Runs the modification flow: apply modification data for description,
@@ -17,7 +17,6 @@ import { ModificationData, TestStructureData } from "./test-data/types";
 export async function completeModificationFlow(
   page: Page,
   structureId: number,
-  formData: TestStructureData,
   modificationData: ModificationData
 ): Promise<void> {
   const structurePage = new StructureDetailsPage(page);

@@ -78,12 +78,7 @@ export const completeStructureFlow = async (
   }
 
   // 3. Modification
-  await completeModificationFlow(
-    page,
-    structureId,
-    dataWithDna as TestStructureData,
-    modificationData
-  );
+  await completeModificationFlow(page, structureId, modificationData);
 
   await structurePage.navigateTo(structureId);
   await structurePage.waitForLoad();

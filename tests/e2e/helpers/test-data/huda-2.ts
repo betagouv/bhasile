@@ -257,7 +257,7 @@ export const huda2: TestStructureScenario = {
     public: "Tout public",
     lgbt: false,
     fvvTeh: true,
-    contactPrincipalEmail: "modif-huda2@example.com",
+    contactPrincipal: { email: "modif-huda2@example.com" },
     notes: "Notes modification HUDA 2 - mixte.",
     debutConvention: "2020-09-01",
     finConvention: "2024-06-30",

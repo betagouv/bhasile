@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 
-import { TIMEOUTS, URLS } from "../../constants";
+import { URLS } from "../../constants";
 import { fillFinanceForm } from "../../finance-form-helper";
 import { ModificationData } from "../../test-data/types";
 import { BasePage } from "../BasePage";

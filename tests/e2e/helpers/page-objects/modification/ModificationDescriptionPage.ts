@@ -33,7 +33,7 @@ export class ModificationDescriptionPage extends BasePage {
       fvvTeh: data.fvvTeh,
     });
 
-    await this.updateContactPrincipalEmail(data.contactPrincipalEmail);
+    await this.updateContactPrincipalEmail(data.contactPrincipal?.email);
 
     await this.waitHelper.waitForUIUpdate();
   }

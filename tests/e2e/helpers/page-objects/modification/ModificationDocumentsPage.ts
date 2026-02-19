@@ -1,8 +1,7 @@
 import { Page } from "@playwright/test";
 
 import { fillActesForm } from "../../actes-form-helper";
-import { TIMEOUTS, URLS } from "../../constants";
-import { SELECTORS } from "../../selectors";
+import { URLS } from "../../constants";
 import { ModificationData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 

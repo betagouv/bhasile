@@ -6,7 +6,6 @@ import {
   fillEvaluationsForm,
 } from "../../controles-form-helper";
 import { FormHelper } from "../../form-helper";
-import { SELECTORS } from "../../selectors";
 import { ModificationData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 

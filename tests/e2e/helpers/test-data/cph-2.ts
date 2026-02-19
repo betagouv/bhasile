@@ -344,7 +344,7 @@ export const cph2: TestStructureScenario = {
     public: "Famille",
     lgbt: false,
     fvvTeh: true,
-    contactPrincipalEmail: "modif-cph2@example.com",
+    contactPrincipal: { email: "modif-cph2@example.com" },
     notes: "Notes modification CPH 2 - mixte.",
     debutPeriodeAutorisation: "2020-09-15",
     finPeriodeAutorisation: "2026-09-14",

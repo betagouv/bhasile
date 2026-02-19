@@ -4,7 +4,6 @@ import { formatDate, getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
 import { getOperateurLabel } from "@/app/utils/structure.util";
-import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
 import { PublicType } from "@/types/structure.type";
 
 import { URLS } from "../../constants";
@@ -92,7 +91,7 @@ export class StructureDetailsPage extends BasePage {
 
   async expectAllData(
     data: TestStructureData,
-    overrides: StructureDetailsOverrides
+    overrides: Partial<TestStructureData>
   ) {
     const descriptionBlock = this.getBlockByTitle("Description");
     await this.expectDescriptionData(descriptionBlock, data, overrides);
@@ -130,7 +129,6 @@ export class StructureDetailsPage extends BasePage {
       vulnerabilites.push("FVV", "TEH");
     }
     const vulnerabiliteLabel = vulnerabilites.join(", ") || "N/A";
-    console.log(data.creationDate, overrides.creationDate);
     await expect(
       block.getByText("Date de création", { exact: true }).locator("..")
     ).toContainText(formatDate(data.creationDate));
@@ -181,20 +179,17 @@ export class StructureDetailsPage extends BasePage {
   private async expectContactsData(
     block: Locator,
     data: TestStructureData,
-    overrides: StructureDetailsOverrides
+    overrides: Partial<TestStructureData>
   ) {
     await this.showContacts();
-    const contactPrincipal = data.contactPrincipal;
-    const contactSecondaire = data.contactSecondaire;
-    const principalEmail = overrides.contactEmail || contactPrincipal.email;
+    const contactPrincipal = {
+      ...data.contactPrincipal,
+      ...overrides.contactPrincipal,
+    };
+    const contactSecondaire =
+      overrides.contactSecondaire ?? data.contactSecondaire;
 
-    await this.expectContactLine(block, {
-      prenom: contactPrincipal.prenom,
-      nom: contactPrincipal.nom,
-      role: contactPrincipal.role,
-      email: principalEmail,
-      telephone: contactPrincipal.telephone,
-    });
+    await this.expectContactLine(block, contactPrincipal);
     if (contactSecondaire) {
       await this.expectContactLine(block, contactSecondaire);
     }
@@ -203,17 +198,19 @@ export class StructureDetailsPage extends BasePage {
   private async expectContactLine(
     block: Locator,
     contact: {
-      prenom: string;
-      nom: string;
-      role: string;
-      email: string;
-      telephone: string;
+      prenom?: string;
+      nom?: string;
+      role?: string;
+      email?: string;
+      telephone?: string;
     }
   ) {
     const contactLabel = `${contact.prenom} ${contact.nom} (${contact.role})`;
     const formattedPhone = formatPhoneNumber(contact.telephone);
     await expect(block.getByText(contactLabel, { exact: true })).toBeVisible();
-    await expect(block.getByText(contact.email, { exact: true })).toBeVisible();
+    await expect(
+      block.getByText(contact.email ?? "", { exact: true })
+    ).toBeVisible();
     if (formattedPhone) {
       await expect(
         block.getByText(new RegExp(escapeForRegex(formattedPhone)))
@@ -282,7 +279,7 @@ export class StructureDetailsPage extends BasePage {
   }
 
   private async expectActesAdministratifs(
-    actes: StructureDetailsOverrides["actesAdministratifs"]
+    actes: TestStructureData["actesAdministratifs"]
   ) {
     if (!actes || actes.length === 0) {
       return;

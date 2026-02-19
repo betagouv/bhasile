@@ -398,7 +398,7 @@ export const cada3: TestStructureScenario = {
     public: "Tout public",
     lgbt: true,
     fvvTeh: true,
-    contactPrincipalEmail: "modif-cada3@example.com",
+    contactPrincipal: { email: "modif-cada3@example.com" },
     notes: "Notes modification CADA 3 - 10 adresses.",
     debutPeriodeAutorisation: "2020-09-01",
     finPeriodeAutorisation: "2026-08-31",

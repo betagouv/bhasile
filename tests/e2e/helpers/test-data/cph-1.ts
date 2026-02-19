@@ -330,7 +330,7 @@ export const cph1: TestStructureScenario = {
     public: "Personnes isolées",
     lgbt: true,
     fvvTeh: true,
-    contactPrincipalEmail: "modif-cph1@example.com",
+    contactPrincipal: { email: "modif-cph1@example.com" },
     notes: "Notes modification CPH 1 - filiale.",
     debutPeriodeAutorisation: "2020-06-01",
     finPeriodeAutorisation: "2026-05-31",

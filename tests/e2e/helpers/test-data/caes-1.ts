@@ -240,7 +240,7 @@ export const caes1: TestStructureScenario = {
     public: "Famille",
     lgbt: false,
     fvvTeh: true,
-    contactPrincipalEmail: "modif-caes1@example.com",
+    contactPrincipal: { email: "modif-caes1@example.com" },
     notes: "Notes modification CAES 1 - filiale.",
     debutConvention: "2021-01-15",
     finConvention: "2024-06-30",
