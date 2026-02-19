@@ -23,10 +23,7 @@ export async function setControlesFileInput(
   if ((await keyInput.count()) === 0) return;
 
   await keyInput.waitFor({ state: "attached", timeout: TIMEOUTS.NAVIGATION });
-  let fileInput = keyInput
-    .locator("..")
-    .locator(SELECTORS.FILE_INPUT)
-    .first();
+  let fileInput = keyInput.locator("..").locator(SELECTORS.FILE_INPUT).first();
 
   if ((await fileInput.count()) === 0) {
     const match = keySelector.match(/evaluations\.(\d+)\.fileUploads\.(\d+)/);
@@ -65,12 +62,7 @@ export async function setControlesFileInput(
 }
 
 export type FillEvaluationsOptions = {
-  /** When evaluations are empty, fill default with creationDate and fallback file (finalisation) */
-  fillDefaultWhenEmpty?: {
-    creationDate: string;
-    fallbackFilePath: string;
-  };
-  /** Support planActionFilePath (fileUploads.1) - finalisation only */
+  /** Support planActionFilePath (fileUploads.1) */
   supportPlanAction?: boolean;
   /** Remove extra entries to match expected count - finalisation only */
   removeExtraEntries?: boolean;
@@ -82,35 +74,14 @@ export type FillEvaluationsOptions = {
 export async function fillEvaluationsForm(
   page: Page,
   formHelper: FormHelper,
-  evaluations: EvaluationData[],
-  options: FillEvaluationsOptions = {}
+  evaluations: EvaluationData[]
 ): Promise<void> {
-  const {
-    fillDefaultWhenEmpty,
-    supportPlanAction = false,
-    removeExtraEntries = false,
-  } = options;
-
   if (evaluations.length === 0) {
     const noEvaluationCheckbox = page.getByRole("checkbox", {
       name: /n.?a pas encore fait l.?objet d.?évaluation/i,
     });
     if ((await noEvaluationCheckbox.count()) > 0) {
       await noEvaluationCheckbox.check({ force: true });
-    }
-    if (fillDefaultWhenEmpty) {
-      const defaultDateInput = page.locator('input[name="evaluations.0.date"]');
-      if ((await defaultDateInput.count()) > 0) {
-        await formHelper.fillInput(
-          'input[name="evaluations.0.date"]',
-          fillDefaultWhenEmpty.creationDate
-        );
-        await setControlesFileInput(
-          page,
-          'input[name="evaluations.0.fileUploads.0.key"]',
-          fillDefaultWhenEmpty.fallbackFilePath
-        );
-      }
     }
     return;
   }
@@ -137,9 +108,16 @@ export async function fillEvaluationsForm(
     const dateSelector = `input[name="evaluations.${i}.date"]`;
 
     const dateInput = page.locator(dateSelector);
-    await dateInput.waitFor({ state: "attached", timeout: TIMEOUTS.NAVIGATION });
-    await dateInput.scrollIntoViewIfNeeded({ timeout: TIMEOUTS.NAVIGATION }).catch(() => {});
-    await dateInput.waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION }).catch(() => {});
+    await dateInput.waitFor({
+      state: "attached",
+      timeout: TIMEOUTS.NAVIGATION,
+    });
+    await dateInput
+      .scrollIntoViewIfNeeded({ timeout: TIMEOUTS.NAVIGATION })
+      .catch(() => {});
+    await dateInput
+      .waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION })
+      .catch(() => {});
 
     await formHelper.fillInput(dateSelector, evaluation.date);
     if (evaluation.notePersonne !== undefined) {
@@ -174,7 +152,7 @@ export async function fillEvaluationsForm(
         TIMEOUTS.FILE_UPLOAD
       );
     }
-    if (supportPlanAction && evaluation.planActionFilePath) {
+    if (evaluation.planActionFilePath) {
       await setControlesFileInput(
         page,
         `input[name="evaluations.${i}.fileUploads.1.key"]`,
@@ -183,25 +161,7 @@ export async function fillEvaluationsForm(
       );
     }
   }
-
-  if (removeExtraEntries) {
-    await removeExtraFormEntries(
-      evaluationsFieldset,
-      'button[title="Supprimer"]',
-      evaluations.length
-    );
-  }
 }
-
-export type FillControlesOptions = {
-  /** When controles are empty, fill default (finalisation) */
-  fillDefaultWhenEmpty?: {
-    creationDate: string;
-    fallbackFilePath: string;
-  };
-  /** Remove extra entries to match expected count - finalisation only */
-  removeExtraEntries?: boolean;
-};
 
 /**
  * Fills the controles (inspections) section of the form.
@@ -209,29 +169,9 @@ export type FillControlesOptions = {
 export async function fillControlesForm(
   page: Page,
   formHelper: FormHelper,
-  controles: ControleData[],
-  options: FillControlesOptions = {}
+  controles: ControleData[]
 ): Promise<void> {
-  const { fillDefaultWhenEmpty, removeExtraEntries = false } = options;
-
   if (controles.length === 0) {
-    if (fillDefaultWhenEmpty) {
-      const defaultDateInput = page.locator('input[name="controles.0.date"]');
-      if ((await defaultDateInput.count()) > 0) {
-        await formHelper.fillInput(
-          'input[name="controles.0.date"]',
-          fillDefaultWhenEmpty.creationDate
-        );
-        await formHelper.selectOption('select[name="controles.0.type"]', {
-          label: "Programmé",
-        });
-        await setControlesFileInput(
-          page,
-          'input[name="controles.0.fileUploads.0.key"]',
-          fillDefaultWhenEmpty.fallbackFilePath
-        );
-      }
-    }
     return;
   }
 
@@ -267,14 +207,6 @@ export async function fillControlesForm(
         controle.filePath
       );
     }
-  }
-
-  if (removeExtraEntries) {
-    await removeExtraFormEntries(
-      controlesFieldset,
-      SELECTORS.DELETE_BUTTON,
-      controles.length
-    );
   }
 }
 
@@ -313,22 +245,6 @@ export async function fillOuvertureFermetureForm(
     ouvertureFermeture.echeancePlacesAFermer &&
     (await echeancePlacesAFermer.count()) > 0
   ) {
-    await echeancePlacesAFermer.fill(
-      ouvertureFermeture.echeancePlacesAFermer
-    );
-  }
-}
-
-async function removeExtraFormEntries(
-  fieldset: ReturnType<Page["getByRole"]>,
-  deleteSelector: string,
-  expectedCount: number
-): Promise<void> {
-  let deleteButtons = fieldset.locator(deleteSelector);
-  let currentCount = (await deleteButtons.count()) + 1;
-  while (currentCount > expectedCount && (await deleteButtons.count()) > 0) {
-    await deleteButtons.last().click();
-    deleteButtons = fieldset.locator(deleteSelector);
-    currentCount = (await deleteButtons.count()) + 1;
+    await echeancePlacesAFermer.fill(ouvertureFermeture.echeancePlacesAFermer);
   }
 }

@@ -27,18 +27,12 @@ export class ModificationControlePage extends BasePage {
     await fillEvaluationsForm(
       this.page,
       this.formHelper,
-      data.evaluations ?? [],
-      {}
+      data.evaluations ?? []
     );
     await this.page
       .waitForLoadState("networkidle", { timeout: TIMEOUTS.FILE_UPLOAD })
       .catch(() => {});
-    await fillControlesForm(
-      this.page,
-      this.formHelper,
-      data.controles ?? [],
-      {}
-    );
+    await fillControlesForm(this.page, this.formHelper, data.controles ?? []);
   }
 
   async submit(structureId: number) {

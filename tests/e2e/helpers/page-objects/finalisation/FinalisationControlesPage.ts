@@ -20,38 +20,15 @@ export class FinalisationControlesPage extends BasePage {
   }
 
   async fillForm(data: TestStructureData) {
-    const fallbackFilePath =
-      data.documentsFinanciers.fileUploads[0]?.filePath ||
-      "tests/e2e/fixtures/sample.csv";
-
     await fillEvaluationsForm(
       this.page,
       this.formHelper,
-      data.evaluations ?? [],
-      {
-        fillDefaultWhenEmpty: {
-          creationDate: data.creationDate,
-          fallbackFilePath,
-        },
-        supportPlanAction: true,
-        removeExtraEntries: true,
-      }
+      data.evaluations ?? []
     );
     await this.page
       .waitForLoadState("networkidle", { timeout: TIMEOUTS.FILE_UPLOAD })
       .catch(() => {});
-    await fillControlesForm(
-      this.page,
-      this.formHelper,
-      data.controles ?? [],
-      {
-        fillDefaultWhenEmpty: {
-          creationDate: data.creationDate,
-          fallbackFilePath,
-        },
-        removeExtraEntries: true,
-      }
-    );
+    await fillControlesForm(this.page, this.formHelper, data.controles ?? []);
     await fillOuvertureFermetureForm(this.page, data.ouvertureFermeture);
   }
 
