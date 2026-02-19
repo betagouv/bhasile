@@ -1,7 +1,7 @@
 import { Page } from "@playwright/test";
 
-import { TIMEOUTS, URLS } from "../../constants";
 import { fillActesForm } from "../../actes-form-helper";
+import { TIMEOUTS, URLS } from "../../constants";
 import { SELECTORS } from "../../selectors";
 import { ModificationData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
@@ -17,7 +17,11 @@ export class ModificationDocumentsPage extends BasePage {
   }
 
   async fillForm(data: ModificationData) {
-    await fillActesForm(this.page, data.actesAdministratifs ?? [], "modification");
+    await fillActesForm(
+      this.page,
+      data.actesAdministratifs ?? [],
+      "modification"
+    );
   }
 
   async submit(structureId: number) {

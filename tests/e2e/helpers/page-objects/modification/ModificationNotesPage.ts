@@ -1,8 +1,8 @@
 import { Page } from "@playwright/test";
 
 import { URLS } from "../../constants";
-import { fillNotesForm } from "../../notes-form-helper";
 import { FormHelper } from "../../form-helper";
+import { fillNotesForm } from "../../notes-form-helper";
 import { ModificationData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
