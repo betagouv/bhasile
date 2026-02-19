@@ -1,6 +1,7 @@
 import { Page } from "@playwright/test";
 
 import { URLS } from "../../constants";
+import { fillNotesForm } from "../../notes-form-helper";
 import { FormHelper } from "../../form-helper";
 import { ModificationData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
@@ -20,7 +21,7 @@ export class ModificationNotesPage extends BasePage {
 
   async fillForm(data: ModificationData) {
     if (data.notes) {
-      await this.formHelper.fillInput('textarea[name="notes"]', data.notes);
+      await fillNotesForm(this.page, this.formHelper, data.notes);
     }
   }
 

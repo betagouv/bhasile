@@ -1,6 +1,10 @@
-import { expect, Page } from "@playwright/test";
+import { Page } from "@playwright/test";
 
 import { TIMEOUTS, URLS } from "../../constants";
+import {
+  fillControlesForm,
+  fillEvaluationsForm,
+} from "../../controles-form-helper";
 import { FormHelper } from "../../form-helper";
 import { SELECTORS } from "../../selectors";
 import { ModificationData } from "../../test-data/types";
@@ -20,11 +24,21 @@ export class ModificationControlePage extends BasePage {
   }
 
   async fillForm(data: ModificationData) {
-    await this.fillEvaluations(data);
+    await fillEvaluationsForm(
+      this.page,
+      this.formHelper,
+      data.evaluations ?? [],
+      {}
+    );
     await this.page
       .waitForLoadState("networkidle", { timeout: TIMEOUTS.FILE_UPLOAD })
       .catch(() => {});
-    await this.fillControles(data);
+    await fillControlesForm(
+      this.page,
+      this.formHelper,
+      data.controles ?? [],
+      {}
+    );
   }
 
   async submit(structureId: number) {
@@ -38,149 +52,5 @@ export class ModificationControlePage extends BasePage {
     });
     await submitButton.click({ force: true });
     await this.page.waitForURL(URLS.structure(structureId), { timeout: 30000 });
-  }
-
-  private async setFileInput(
-    keySelector: string,
-    filePath: string,
-    keyTimeout: number = TIMEOUTS.NAVIGATION
-  ) {
-    const keyInput = this.page.locator(keySelector);
-    if ((await keyInput.count()) === 0) return;
-    await keyInput.waitFor({ state: "attached", timeout: TIMEOUTS.NAVIGATION });
-    let fileInput = keyInput
-      .locator("..")
-      .locator(SELECTORS.FILE_INPUT)
-      .first();
-    if ((await fileInput.count()) === 0) {
-      const match = keySelector.match(/evaluations\.(\d+)\.fileUploads\.(\d+)/);
-      if (match) {
-        const evalIndex = match[1];
-        const row = this.page
-          .locator(`input[name="evaluations.${evalIndex}.date"]`)
-          .locator("../..");
-        fileInput = row.locator(SELECTORS.FILE_INPUT).first();
-      }
-    }
-    await fileInput.waitFor({
-      state: "attached",
-      timeout: TIMEOUTS.FILE_UPLOAD,
-    });
-    await fileInput.setInputFiles(filePath);
-    await expect(keyInput).toHaveValue(/.+/, { timeout: keyTimeout });
-  }
-
-  private async fillEvaluations(data: ModificationData) {
-    const evaluations = data.evaluations ?? [];
-    if (evaluations.length === 0) {
-      const noEvaluationCheckbox = this.page.getByRole("checkbox", {
-        name: /n.?a pas encore fait l.?objet d.?évaluation/i,
-      });
-      if ((await noEvaluationCheckbox.count()) > 0) {
-        await noEvaluationCheckbox.check({ force: true });
-      }
-      return;
-    }
-
-    const evaluationsFieldset = this.page.getByRole("group", {
-      name: /Évaluations/i,
-    });
-    if ((await evaluationsFieldset.count()) === 0) return;
-
-    const addButton = evaluationsFieldset.getByRole("button", {
-      name: /Ajouter une évaluation/i,
-    });
-    const existingCount = await this.page
-      .locator('input[name^="evaluations."][name$=".date"]')
-      .count();
-    for (let i = existingCount; i < evaluations.length; i++) {
-      await addButton.click();
-      await this.page
-        .locator(`input[name="evaluations.${i}.date"]`)
-        .waitFor({ state: "attached", timeout: TIMEOUTS.FILE_UPLOAD });
-    }
-
-    for (let i = 0; i < evaluations.length; i++) {
-      const evaluation = evaluations[i];
-      const dateSelector = `input[name="evaluations.${i}.date"]`;
-      await this.formHelper.fillInput(dateSelector, evaluation.date);
-      if (evaluation.notePersonne !== undefined) {
-        await this.formHelper.fillInputIfExists(
-          `input[name="evaluations.${i}.notePersonne"]`,
-          String(evaluation.notePersonne)
-        );
-      }
-      if (evaluation.notePro !== undefined) {
-        await this.formHelper.fillInputIfExists(
-          `input[name="evaluations.${i}.notePro"]`,
-          String(evaluation.notePro)
-        );
-      }
-      if (evaluation.noteStructure !== undefined) {
-        await this.formHelper.fillInputIfExists(
-          `input[name="evaluations.${i}.noteStructure"]`,
-          String(evaluation.noteStructure)
-        );
-      }
-      if (evaluation.note !== undefined) {
-        await this.formHelper.fillInputIfExists(
-          `input[name="evaluations.${i}.note"]`,
-          String(evaluation.note)
-        );
-      }
-      if (evaluation.filePath) {
-        await this.setFileInput(
-          `input[name="evaluations.${i}.fileUploads.0.key"]`,
-          evaluation.filePath,
-          TIMEOUTS.FILE_UPLOAD
-        );
-      }
-    }
-  }
-
-  private async fillControles(data: ModificationData) {
-    const controles = data.controles ?? [];
-    if (controles.length === 0) return;
-
-    const controlesFieldset = this.page.getByRole("group", {
-      name: /Inspections-contrôles/i,
-    });
-    if ((await controlesFieldset.count()) === 0) return;
-
-    const addButton = controlesFieldset.getByRole("button", {
-      name: /Ajouter une inspection-contrôle/i,
-    });
-    const existingCount = await controlesFieldset
-      .locator('input[name^="controles."][name$=".date"]')
-      .count();
-    for (let i = existingCount; i < controles.length; i++) {
-      await addButton.click();
-    }
-
-    for (let i = 0; i < controles.length; i++) {
-      const controle = controles[i];
-      await this.formHelper.fillInput(
-        `input[name="controles.${i}.date"]`,
-        controle.date
-      );
-      await this.formHelper.selectOption(`select[name="controles.${i}.type"]`, {
-        label: controle.type,
-      });
-      if (controle.filePath) {
-        const keyInput = this.page.locator(
-          `input[name="controles.${i}.fileUploads.0.key"]`
-        );
-        if ((await keyInput.count()) > 0) {
-          const fileInput = keyInput
-            .locator("..")
-            .locator(SELECTORS.FILE_INPUT)
-            .first();
-          await fileInput.setInputFiles(controle.filePath);
-          await expect(keyInput).toHaveValue(/.+/, {
-            timeout: TIMEOUTS.FILE_UPLOAD,
-          });
-        }
-      }
-    }
   }
 }

@@ -2,6 +2,7 @@ import { Page } from "@playwright/test";
 
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 
+import { runFinalisationStep, runModificationStep } from "./flow-step-runner";
 import { AdressesPage } from "./page-objects/ajout/AdressesPage";
 import { AuthenticationPage } from "./page-objects/ajout/AuthenticationPage";
 import { ConfirmationPage } from "./page-objects/ajout/ConfirmationPage";
@@ -131,87 +132,45 @@ export const completeStructureFlow = async (
   await structuresListPage.searchByDna(dataWithDna.dnaCode);
   await structuresListPage.startFinalisationForDna(dataWithDna.dnaCode);
 
-  const finalisationIdentificationPage = new FinalisationIdentificationPage(
-    page
-  );
-  await finalisationIdentificationPage.waitForLoad();
-  const shouldFailAtFinalisationIdentification =
-    failingStep === "finalisationIdentification";
-  await finalisationIdentificationPage.submit(
-    structureId,
-    shouldFailAtFinalisationIdentification
-  );
-  if (shouldFailAtFinalisationIdentification) {
-    return;
-  }
-
-  const finalisationDocumentsFinanciersPage =
-    new FinalisationDocumentsFinanciersPage(page);
-  await finalisationDocumentsFinanciersPage.waitForLoad();
-  await finalisationDocumentsFinanciersPage.fillForm(
-    dataWithDna as TestStructureData
-  );
-  const shouldFailAtFinalisationDocumentsFinanciers =
-    failingStep === "finalisationDocumentsFinanciers";
-  await finalisationDocumentsFinanciersPage.submit(
-    structureId,
-    shouldFailAtFinalisationDocumentsFinanciers
-  );
-  if (shouldFailAtFinalisationDocumentsFinanciers) {
-    return;
-  }
-
-  const finalisationFinancePage = new FinalisationFinancePage(page);
-  await finalisationFinancePage.waitForLoad();
-  await finalisationFinancePage.fillForm(dataWithDna as TestStructureData);
-  const shouldFailAtFinalisationFinance =
-    failingStep === "finalisationFinance";
-  await finalisationFinancePage.submit(
-    structureId,
-    shouldFailAtFinalisationFinance
-  );
-  if (shouldFailAtFinalisationFinance) {
-    return;
-  }
-
-  const finalisationControlesPage = new FinalisationControlesPage(page);
-  await finalisationControlesPage.waitForLoad();
-  await finalisationControlesPage.fillForm(dataWithDna as TestStructureData);
-  const shouldFailAtFinalisationControles =
-    failingStep === "finalisationControles";
-  await finalisationControlesPage.submit(
-    structureId,
-    shouldFailAtFinalisationControles
-  );
-  if (shouldFailAtFinalisationControles) {
-    return;
-  }
-
-  const finalisationDocumentsPage = new FinalisationDocumentsPage(page);
-  await finalisationDocumentsPage.waitForLoad();
-  await finalisationDocumentsPage.fillForm(dataWithDna as TestStructureData);
-  const shouldFailAtFinalisationDocuments =
-    failingStep === "finalisationDocuments";
-  await finalisationDocumentsPage.submit(
-    structureId,
-    shouldFailAtFinalisationDocuments
-  );
-  if (shouldFailAtFinalisationDocuments) {
-    return;
-  }
-
   const finalisationNotesPage = new FinalisationNotesPage(page);
-  await finalisationNotesPage.waitForLoad();
-  await finalisationNotesPage.fillForm(dataWithDna as TestStructureData);
-  const shouldFailAtFinalisationNotes =
-    failingStep === "finalisationNotes";
-  await finalisationNotesPage.submit(
-    structureId,
-    shouldFailAtFinalisationNotes
-  );
-  if (shouldFailAtFinalisationNotes) {
-    return;
+  const finalisationSteps = [
+    {
+      page: new FinalisationIdentificationPage(page),
+      stepKey: "finalisationIdentification" as const,
+    },
+    {
+      page: new FinalisationDocumentsFinanciersPage(page),
+      stepKey: "finalisationDocumentsFinanciers" as const,
+    },
+    {
+      page: new FinalisationFinancePage(page),
+      stepKey: "finalisationFinance" as const,
+    },
+    {
+      page: new FinalisationControlesPage(page),
+      stepKey: "finalisationControles" as const,
+    },
+    {
+      page: new FinalisationDocumentsPage(page),
+      stepKey: "finalisationDocuments" as const,
+    },
+    {
+      page: finalisationNotesPage,
+      stepKey: "finalisationNotes" as const,
+    },
+  ];
+
+  for (const { page: stepPage, stepKey } of finalisationSteps) {
+    const shouldContinue = await runFinalisationStep(
+      stepPage,
+      structureId,
+      dataWithDna as TestStructureData,
+      failingStep,
+      stepKey
+    );
+    if (!shouldContinue) return;
   }
+
   await finalisationNotesPage.finalizeAndGoToStructure(structureId);
 
   const structurePage = new StructureDetailsPage(page);
@@ -251,46 +210,50 @@ export const completeStructureFlow = async (
   await structurePage.waitForLoad();
 
   // 3b. Calendrier
-  await structurePage.openCalendrierEdit();
-  const modificationCalendrierPage = new ModificationCalendrierPage(page);
-  await modificationCalendrierPage.waitForLoad();
-  await modificationCalendrierPage.fillForm(modData);
-  await modificationCalendrierPage.submit(structureId);
-  await structurePage.waitForLoad();
+  await runModificationStep(
+    () => structurePage.openCalendrierEdit(),
+    new ModificationCalendrierPage(page),
+    structurePage,
+    structureId,
+    modData
+  );
 
   // 3c. Type places
-  await structurePage.openTypePlacesEdit();
-  const modificationTypePlacesPage = new ModificationTypePlacesPage(page);
-  await modificationTypePlacesPage.waitForLoad();
-  await modificationTypePlacesPage.fillForm(modData);
-  await modificationTypePlacesPage.submit(structureId);
-  await structurePage.waitForLoad();
+  await runModificationStep(
+    () => structurePage.openTypePlacesEdit(),
+    new ModificationTypePlacesPage(page),
+    structurePage,
+    structureId,
+    modData
+  );
 
   // 3d. Finance - skip (form has complex validation, API can be slow)
   // 3e. Contrôle qualité (evaluations only for autorisee)
-  await structurePage.openControleEdit();
-  const modificationControlePage = new ModificationControlePage(page);
-  await modificationControlePage.waitForLoad();
   const controleModData: ModificationData = { ...modData };
   if (!isAutorisee) {
     controleModData.evaluations = undefined;
   }
-  await modificationControlePage.fillForm(controleModData);
-  await modificationControlePage.submit(structureId);
-  await structurePage.waitForLoad();
+  await runModificationStep(
+    () => structurePage.openControleEdit(),
+    new ModificationControlePage(page),
+    structurePage,
+    structureId,
+    controleModData
+  );
 
   // 3f. Actes administratifs - skip (form has complex upload flow, covered by finalisation)
   // 3g. Notes
-  await structurePage.openNotesEdit();
-  const modificationNotesPage = new ModificationNotesPage(page);
-  await modificationNotesPage.waitForLoad();
-  await modificationNotesPage.fillForm(modData);
-  await modificationNotesPage.submit(structureId);
-  await structurePage.waitForLoad();
+  await runModificationStep(
+    () => structurePage.openNotesEdit(),
+    new ModificationNotesPage(page),
+    structurePage,
+    structureId,
+    modData
+  );
 
   // 4. Reload structure page to ensure we have fresh data, then verify modifications
   await structurePage.navigateTo(structureId);
-  await structurePage.page.reload();
+  await structurePage.getPage().reload();
   await structurePage.waitForLoad();
 
   // 5. Check modifications were applied
