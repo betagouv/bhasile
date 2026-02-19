@@ -4,6 +4,7 @@ import { URLS } from "../../constants";
 import { FormHelper } from "../../form-helper";
 import { fillNotesForm } from "../../notes-form-helper";
 import { TestStructureData } from "../../test-data/types";
+import { WaitHelper } from "../../wait-helper";
 import { BasePage } from "../BasePage";
 
 export class FinalisationNotesPage extends BasePage {
@@ -20,6 +21,8 @@ export class FinalisationNotesPage extends BasePage {
     await fillNotesForm(this.page, this.formHelper, notes, {
       waitForSave: true,
     });
+    const waitHelper = new WaitHelper(this.page);
+    await waitHelper.waitForAutosave();
   }
 
   async submit(structureId: number, expectValidationFailure = false) {

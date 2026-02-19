@@ -9,6 +9,7 @@ import {
 import { FormHelper } from "../../form-helper";
 import { SELECTORS } from "../../selectors";
 import { TestStructureData } from "../../test-data/types";
+import { WaitHelper } from "../../wait-helper";
 import { BasePage } from "../BasePage";
 
 export class FinalisationControlesPage extends BasePage {
@@ -30,6 +31,8 @@ export class FinalisationControlesPage extends BasePage {
       .catch(() => {});
     await fillControlesForm(this.page, this.formHelper, data.controles ?? []);
     await fillOuvertureFermetureForm(this.page, data.ouvertureFermeture);
+    const waitHelper = new WaitHelper(this.page);
+    await waitHelper.waitForAutosave();
   }
 
   async submit(structureId: number, expectValidationFailure = false) {

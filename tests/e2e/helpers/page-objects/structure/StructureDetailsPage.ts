@@ -287,7 +287,9 @@ export class StructureDetailsPage extends BasePage {
     const actesBlock = this.getBlockByTitle("Actes administratifs");
     const actesText = (await actesBlock.textContent()) || "";
     if (actesText.includes("Aucun document importé")) {
-      return;
+      throw new Error(
+        `Attendus actes administratifs, mais le texte indique "Aucun document importé". Données : ${JSON.stringify(actes)}`
+      );
     }
     for (const acte of actes) {
       const accordionLabel = getActesCategoryLabel(acte.category);

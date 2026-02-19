@@ -4,6 +4,7 @@ import { fillActesForm } from "../../actes-form-helper";
 import { TIMEOUTS, URLS } from "../../constants";
 import { SELECTORS } from "../../selectors";
 import { TestStructureData } from "../../test-data/types";
+import { WaitHelper } from "../../wait-helper";
 import { BasePage } from "../BasePage";
 
 export class FinalisationDocumentsPage extends BasePage {
@@ -17,17 +18,14 @@ export class FinalisationDocumentsPage extends BasePage {
       data.actesAdministratifs ?? [],
       "finalisation"
     );
+    const waitHelper = new WaitHelper(this.page);
+    await waitHelper.waitForAutosave();
   }
 
   async submit(structureId: number, expectValidationFailure = false) {
     if (expectValidationFailure) {
       await this.submitAndExpectNoNavigation();
     } else {
-      await this.page
-        .waitForLoadState("networkidle", {
-          timeout: TIMEOUTS.FILE_UPLOAD,
-        })
-        .catch(() => {});
       const submitButton = this.page.locator(SELECTORS.SUBMIT_BUTTON);
       await submitButton.waitFor({
         state: "visible",

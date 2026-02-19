@@ -13,7 +13,8 @@ import { ModificationData } from "./test-data/types";
 
 /**
  * Runs the modification flow: apply modification data for description,
- * calendrier, type places, controle, notes, then verify modifications were applied.
+ * calendrier, type places, finance, controle, actes administratifs, notes,
+ * then verify modifications were applied.
  * Expects the page to already be on the structure details page.
  */
 export async function completeModificationFlow(
@@ -39,27 +40,31 @@ export async function completeModificationFlow(
     {
       openEdit: () => structurePage.openFinanceEdit(),
       page: new ModificationFinancePage(page),
+      data: modificationData,
     },
     {
       openEdit: () => structurePage.openControleEdit(),
       page: new ModificationControlePage(page),
+      data: modificationData,
     },
     {
       openEdit: () => structurePage.openDocumentsEdit(),
       page: new ModificationDocumentsPage(page),
+      data: modificationData,
     },
     {
       openEdit: () => structurePage.openNotesEdit(),
       page: new ModificationNotesPage(page),
     },
   ];
-  for (const { openEdit, page } of modificationSteps) {
+  for (const step of modificationSteps) {
+    const stepData = "data" in step ? step.data : modificationData;
     await runModificationStep(
-      openEdit,
-      page,
+      step.openEdit,
+      step.page,
       structurePage,
       structureId,
-      modificationData
+      stepData
     );
   }
 }
