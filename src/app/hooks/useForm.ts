@@ -6,12 +6,10 @@ import { useFormContext } from "react-hook-form";
  */
 export function useForm() {
   const methods = useFormContext();
-  
+
   if (!methods) {
-    throw new Error(
-      "useForm must be used within a FormWrapper component"
-    );
+    throw new Error("useForm must be used within a FormWrapper component");
   }
-  
+
   return methods;
 }

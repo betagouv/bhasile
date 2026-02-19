@@ -33,4 +33,3 @@ export const parseYear = (value: string, context: string): number => {
 export const buildYearStartDate = (year: number, hour: number = 12): Date => {
   return new Date(Date.UTC(year, 0, 1, hour, 0, 0, 0));
 };
-

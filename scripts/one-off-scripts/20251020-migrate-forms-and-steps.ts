@@ -86,8 +86,10 @@ export async function migrateFormsAndSteps() {
 
       if (structure.state === "FINALISE") {
         status = StepStatus.VALIDE;
-      }
-      else if (stepDefinition.label === "01-identification" || stepDefinition.label === "02-documents-financiers") {
+      } else if (
+        stepDefinition.label === "01-identification" ||
+        stepDefinition.label === "02-documents-financiers"
+      ) {
         status = StepStatus.A_VERIFIER;
       }
 
