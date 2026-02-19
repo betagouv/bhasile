@@ -87,7 +87,6 @@ export const completeStructureFlow = async (
 
   await structurePage.navigateTo(structureId);
   await structurePage.waitForLoad();
-  await page.waitForTimeout(60000);
   await structurePage.expectAllData(
     dataWithDna as TestStructureData,
     modificationData
