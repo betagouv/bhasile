@@ -27,7 +27,5 @@ export class ModificationNotesPage extends BasePage {
 
   async submit(structureId: number) {
     await this.submitAndWaitForUrl(URLS.structure(structureId));
-    console.log("submit notes");
-    await this.page.waitForTimeout(10000);
   }
 }

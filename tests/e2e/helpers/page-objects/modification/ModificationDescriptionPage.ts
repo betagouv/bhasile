@@ -75,7 +75,5 @@ export class ModificationDescriptionPage extends BasePage {
 
   async submit(structureId: number) {
     await this.submitAndWaitForUrl(URLS.structure(structureId));
-    console.log("submit description");
-    await this.page.waitForTimeout(10000);
   }
 }

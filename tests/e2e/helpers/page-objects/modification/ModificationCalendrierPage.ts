@@ -47,7 +47,5 @@ export class ModificationCalendrierPage extends BasePage {
 
   async submit(structureId: number) {
     await this.submitAndWaitForUrl(URLS.structure(structureId));
-    console.log("submit calendrier");
-    await this.page.waitForTimeout(60000);
   }
 }

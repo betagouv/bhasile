@@ -26,6 +26,5 @@ export class ModificationDocumentsPage extends BasePage {
 
   async submit(structureId: number) {
     await this.submitAndWaitForUrl(URLS.structure(structureId));
-    await this.page.waitForTimeout(10000);
   }
 }
