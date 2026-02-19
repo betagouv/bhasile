@@ -1,7 +1,7 @@
 import { Page } from "@playwright/test";
 
 import { CheckboxHelper } from "../../checkbox-helper";
-import { URLS } from "../../constants";
+import { TIMEOUTS, URLS } from "../../constants";
 import { FormHelper } from "../../form-helper";
 import { SELECTORS } from "../../selectors";
 import { BasePage } from "../BasePage";
@@ -47,7 +47,6 @@ export class ModificationDescriptionPage extends BasePage {
   }
 
   async submit(structureId: number) {
-    const structureUrl = URLS.structure(structureId);
     const [response] = await Promise.all([
       this.page.waitForResponse(
         (r) =>
@@ -58,6 +57,8 @@ export class ModificationDescriptionPage extends BasePage {
       this.page.getByRole("button", { name: "Valider" }).click(),
     ]);
     await response.finished();
-    await this.page.waitForURL(structureUrl, { timeout: 15000 });
+    await this.page.waitForURL(URLS.structure(structureId), {
+      timeout: TIMEOUTS.NAVIGATION,
+    });
   }
 }

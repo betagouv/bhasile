@@ -15,9 +15,11 @@ export class StructuresListPage extends BasePage {
   }
 
   async searchByDna(dnaCode: string) {
-    // Use .first() - page can have duplicate search inputs (e.g. responsive layout)
     const searchInput = this.page.locator(SELECTORS.SEARCH_INPUT).first();
-    await searchInput.waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION });
+    await searchInput.waitFor({
+      state: "visible",
+      timeout: TIMEOUTS.NAVIGATION,
+    });
     await searchInput.fill(dnaCode);
   }
 

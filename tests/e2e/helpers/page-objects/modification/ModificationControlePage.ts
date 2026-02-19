@@ -45,6 +45,8 @@ export class ModificationControlePage extends BasePage {
       timeout: TIMEOUTS.NAVIGATION,
     });
     await submitButton.click({ force: true });
-    await this.page.waitForURL(URLS.structure(structureId), { timeout: 30000 });
+    await this.page.waitForURL(URLS.structure(structureId), {
+      timeout: TIMEOUTS.NAVIGATION,
+    });
   }
 }

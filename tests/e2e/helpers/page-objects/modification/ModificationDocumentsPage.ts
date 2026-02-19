@@ -35,7 +35,7 @@ export class ModificationDocumentsPage extends BasePage {
     });
     await submitButton.click({ force: true });
     await this.page.waitForURL(URLS.structure(structureId), {
-      timeout: 60000,
+      timeout: TIMEOUTS.NAVIGATION,
     });
   }
 }

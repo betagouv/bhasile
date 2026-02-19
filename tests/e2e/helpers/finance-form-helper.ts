@@ -48,15 +48,17 @@ async function getBudgetIndexByYear(
   page: Page,
   finances: Record<number, Partial<FinanceYearData>>
 ): Promise<Record<number, number>> {
-  const yearInputs = page.locator(
-    'input[name^="budgets."][name$=".year"]'
-  );
+  const yearInputs = page.locator('input[name^="budgets."][name$=".year"]');
   const count = await yearInputs.count();
   const yearIndexMap: Record<number, number> = {};
   for (let i = 0; i < count; i++) {
+    const nameAttr = await yearInputs.nth(i).getAttribute("name");
+    const match = nameAttr?.match(/^budgets\.(\d+)\.year$/);
+    if (!match) continue;
+    const budgetIndex = Number(match[1]);
     const value = await yearInputs.nth(i).inputValue();
     const year = Number(value);
-    if (!Number.isNaN(year)) yearIndexMap[year] = i;
+    if (!Number.isNaN(year)) yearIndexMap[year] = budgetIndex;
   }
   if (Object.keys(yearIndexMap).length > 0) return yearIndexMap;
   const sortedYears = Object.keys(finances)

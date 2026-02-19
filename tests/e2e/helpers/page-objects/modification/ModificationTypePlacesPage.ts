@@ -19,36 +19,48 @@ export class ModificationTypePlacesPage extends BasePage {
   }
 
   async fillForm(data: ModificationData) {
-    const of = data.ouvertureFermeture;
-    if (of) {
+    if (data.ouvertureFermeture) {
       const placesACreer = this.page.getByLabel("Nombre de places à créer");
-      if (of.placesACreer !== undefined && (await placesACreer.count()) > 0) {
-        await placesACreer.first().fill(String(of.placesACreer));
+      if (
+        data.ouvertureFermeture.placesACreer !== undefined &&
+        (await placesACreer.count()) > 0
+      ) {
+        await placesACreer
+          .first()
+          .fill(String(data.ouvertureFermeture.placesACreer));
       }
       const echeancePlacesACreer = this.page.getByLabel("Echéance").first();
       if (
-        of.echeancePlacesACreer &&
+        data.ouvertureFermeture.echeancePlacesACreer &&
         (await echeancePlacesACreer.count()) > 0
       ) {
-        await echeancePlacesACreer.fill(of.echeancePlacesACreer);
+        await echeancePlacesACreer.fill(
+          data.ouvertureFermeture.echeancePlacesACreer
+        );
       }
       const placesAFermer = this.page.getByLabel("Nombre de places à fermer");
-      if (of.placesAFermer !== undefined && (await placesAFermer.count()) > 0) {
-        await placesAFermer.first().fill(String(of.placesAFermer));
+      if (
+        data.ouvertureFermeture.placesAFermer !== undefined &&
+        (await placesAFermer.count()) > 0
+      ) {
+        await placesAFermer
+          .first()
+          .fill(String(data.ouvertureFermeture.placesAFermer));
       }
       const echeancePlacesAFermer = this.page.getByLabel("Echéance").nth(1);
       if (
-        of.echeancePlacesAFermer &&
+        data.ouvertureFermeture.echeancePlacesAFermer &&
         (await echeancePlacesAFermer.count()) > 0
       ) {
-        await echeancePlacesAFermer.fill(of.echeancePlacesAFermer);
+        await echeancePlacesAFermer.fill(
+          data.ouvertureFermeture.echeancePlacesAFermer
+        );
       }
     }
 
-    const typologies = data.structureTypologies;
-    if (typologies?.length) {
-      for (let i = 0; i < typologies.length; i++) {
-        const t = typologies[i];
+    if (data.structureTypologies?.length) {
+      for (let i = 0; i < data.structureTypologies.length; i++) {
+        const t = data.structureTypologies[i];
         await this.formHelper.fillInputIfExists(
           `input[name="structureTypologies.${i}.placesAutorisees"]`,
           String(t.placesAutorisees)

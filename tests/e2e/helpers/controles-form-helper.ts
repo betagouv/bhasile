@@ -189,6 +189,9 @@ export async function fillControlesForm(
 
   for (let i = existingCount; i < controles.length; i++) {
     await addButton.click();
+    await page
+      .locator(`input[name="controles.${i}.date"]`)
+      .waitFor({ state: "attached", timeout: TIMEOUTS.NAVIGATION });
   }
 
   for (let i = 0; i < controles.length; i++) {

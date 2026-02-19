@@ -163,6 +163,10 @@ async function fillActeFieldsAtGroupIndex(
   }
 
   const fileInput = group.locator(SELECTORS.FILE_INPUT).nth(index);
+  await fileInput.waitFor({
+    state: "attached",
+    timeout: TIMEOUTS.FILE_UPLOAD,
+  });
   await fileInput.setInputFiles(resolveActeFilePath(acte.filePath));
 
   await page
