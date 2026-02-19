@@ -1,4 +1,4 @@
-import { ApiRoute } from "./types/proxy.type";
+import { ApiRoute } from "../types/proxy.type";
 
 export const protectedApiRoutes: ApiRoute[] = [
   {
