@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { withAuth } from "next-auth/middleware";
 
-import { getApiRouteProtection } from "./app/utils/proxy.util";
 import { authOptions } from "./lib/next-auth/auth";
 import {
   noProtectionPage,
   passwordProtectedPages,
   proConnectProtectedPages,
-} from "./proxy-config";
+} from "./proxy/auth-config";
+import { getApiRouteProtection } from "./proxy/auth-util";
+import { auditLoggingProxy } from "./proxy/user-event.proxy";
 
 const proConnectPagesProxy = withAuth(() => NextResponse.next(), {
   callbacks: {
@@ -70,6 +71,9 @@ const protectApiWithAuth = async (
 };
 
 export async function proxy(request: NextRequest) {
+  // Pas de await pour ne pas bloquer le reste de la requête
+  auditLoggingProxy(request);
+
   const doBypass =
     process.env.DEV_AUTH_BYPASS ||
     (process.env.NODE_ENV !== "production" &&

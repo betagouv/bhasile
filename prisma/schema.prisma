@@ -486,12 +486,14 @@ model User {
 }
 
 model UserAction {
-  id        Int                @id @default(autoincrement())
-  userId    Int
-  user      User               @relation(fields: [userId], references: [id])
-  action    UserActionCategory
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @default(now()) @updatedAt
+  id         Int                @id @default(autoincrement())
+  userId     Int
+  user       User               @relation(fields: [userId], references: [id])
+  action     UserActionCategory
+  entityName String
+  entityId   Int
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @default(now()) @updatedAt
 
   @@schema("public")
 }
