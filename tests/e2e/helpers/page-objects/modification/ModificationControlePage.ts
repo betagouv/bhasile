@@ -36,17 +36,8 @@ export class ModificationControlePage extends BasePage {
   }
 
   async submit(structureId: number) {
-    await this.page
-      .waitForLoadState("networkidle", { timeout: TIMEOUTS.FILE_UPLOAD })
-      .catch(() => {});
-    const submitButton = this.page.locator(SELECTORS.SUBMIT_BUTTON);
-    await submitButton.waitFor({
-      state: "visible",
-      timeout: TIMEOUTS.NAVIGATION,
-    });
-    await submitButton.click({ force: true });
-    await this.page.waitForURL(URLS.structure(structureId), {
-      timeout: TIMEOUTS.NAVIGATION,
-    });
+    await this.submitAndWaitForUrl(URLS.structure(structureId));
+    console.log("submit controle");
+    await this.page.waitForTimeout(10000);
   }
 }

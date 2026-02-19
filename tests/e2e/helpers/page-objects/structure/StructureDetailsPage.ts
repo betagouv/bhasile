@@ -115,9 +115,9 @@ export class StructureDetailsPage extends BasePage {
   private async expectDescriptionData(
     block: Locator,
     data: TestStructureData,
-    overrides: StructureDetailsOverrides
+    overrides: Partial<TestStructureData>
   ) {
-    const publicValue = overrides.publicValue ?? data.public;
+    const publicValue = overrides.public ?? data.public;
     const publicLabel =
       PublicType[publicValue as keyof typeof PublicType] ?? publicValue;
     const lgbt = overrides.lgbt ?? data.lgbt;
@@ -130,7 +130,7 @@ export class StructureDetailsPage extends BasePage {
       vulnerabilites.push("FVV", "TEH");
     }
     const vulnerabiliteLabel = vulnerabilites.join(", ") || "N/A";
-
+    console.log(data.creationDate, overrides.creationDate);
     await expect(
       block.getByText("Date de création", { exact: true }).locator("..")
     ).toContainText(formatDate(data.creationDate));
@@ -265,7 +265,9 @@ export class StructureDetailsPage extends BasePage {
         name: String(year),
       });
       if ((await yearButton.count()) === 0) continue;
-      await yearButton.scrollIntoViewIfNeeded({ timeout: 10000 }).catch(() => {});
+      await yearButton
+        .scrollIntoViewIfNeeded({ timeout: 10000 })
+        .catch(() => {});
       await yearButton.click({ timeout: 10000 });
       const financesText = (await financesBlock.textContent()) || "";
       if (financesText.includes("Aucun document importé")) {
@@ -320,23 +322,3 @@ export class StructureDetailsPage extends BasePage {
     await expect(notesBlock).toContainText(notes);
   }
 }
-
-type StructureDetailsOverrides = {
-  publicValue?: string;
-  lgbt?: boolean;
-  fvvTeh?: boolean;
-  contactEmail?: string;
-  notes?: string;
-  structureTypologies?: Array<{
-    placesAutorisees: number;
-    pmr: number;
-    lgbt: number;
-    fvvTeh: number;
-  }>;
-  actesAdministratifs?: Array<{
-    category: ActeAdministratifCategoryType[number];
-    categoryName?: string;
-    startDate?: string;
-    endDate?: string;
-  }>;
-};

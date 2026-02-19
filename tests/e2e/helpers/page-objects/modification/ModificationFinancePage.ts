@@ -20,9 +20,8 @@ export class ModificationFinancePage extends BasePage {
   }
 
   async submit(structureId: number) {
-    await this.submitAndWaitForUrl(
-      URLS.structure(structureId),
-      TIMEOUTS.SUBMIT
-    );
+    await this.submitAndWaitForUrl(URLS.structure(structureId));
+    console.log("submit finance");
+    await this.page.waitForTimeout(10000);
   }
 }

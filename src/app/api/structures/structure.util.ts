@@ -2,7 +2,7 @@ import { PublicType, StructureType } from "@/generated/prisma/client";
 
 export const convertToPublicType = (
   typePublic: string | null | undefined
-): PublicType => {
+): PublicType | undefined => {
   if (!typePublic) return PublicType.TOUT_PUBLIC;
 
   const typesPublic: Record<string, PublicType> = {
