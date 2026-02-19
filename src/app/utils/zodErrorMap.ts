@@ -63,22 +63,26 @@ export const frenchErrorMap = (
       }
       break;
     case "too_small":
-      if (issue.type === "array")
+      if (issue.type === "array") {
         message = `Doit contenir au moins ${issue.minimum} élément(s)`;
-      else if (issue.type === "string")
+      } else if (issue.type === "string") {
         message = `Doit contenir au moins ${issue.minimum} caractère(s)`;
-      else if (issue.type === "number")
+      } else if (issue.type === "number") {
         message = `Doit être supérieur ou égal à ${issue.minimum}`;
-      else message = "Valeur trop petite";
+      } else {
+        message = "Valeur trop petite";
+      }
       break;
     case "too_big":
-      if (issue.type === "array")
+      if (issue.type === "array") {
         message = `Doit contenir au maximum ${issue.maximum} élément(s)`;
-      else if (issue.type === "string")
+      } else if (issue.type === "string") {
         message = `Doit contenir au maximum ${issue.maximum} caractère(s)`;
-      else if (issue.type === "number")
+      } else if (issue.type === "number") {
         message = `Doit être inférieur ou égal à ${issue.maximum}`;
-      else message = "Valeur trop grande";
+      } else {
+        message = "Valeur trop grande";
+      }
       break;
     case "custom":
       message = "Validation échouée";

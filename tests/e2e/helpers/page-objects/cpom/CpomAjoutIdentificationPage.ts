@@ -84,7 +84,9 @@ export class CpomAjoutIdentificationPage extends BasePage {
         for (let i = 0; i < count; i++) {
           const cb = checkboxes.nth(i);
           const value = await cb.getAttribute("value");
-          if (!value) continue;
+          if (!value) {
+            continue;
+          }
           const isChecked = await cb.isChecked();
           if (desired.has(value) && !isChecked) {
             const id = await cb.getAttribute("id");

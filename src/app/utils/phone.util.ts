@@ -6,33 +6,40 @@
  */
 export const formatPhoneNumber = (phone: string): string => {
   if (!phone) {
-    return '';
+    return "";
   }
 
-  const thinNbsp = '\u202F';
-  const cleaned = phone.replace(/\D/g, '');
-  
+  const thinNbsp = "\u202F";
+  const cleaned = phone.replace(/\D/g, "");
+
   if (!cleaned) {
-    return '';
+    return "";
   }
-  
+
   let nationalNumber = cleaned;
-  
-  if (cleaned.startsWith('33') && cleaned.length === 11) {
-    nationalNumber = '0' + cleaned.slice(2);
-  } else if (phone.startsWith('+') && cleaned.startsWith('33') && cleaned.length >= 11) {
-    nationalNumber = '0' + cleaned.slice(2);
+
+  if (cleaned.startsWith("33") && cleaned.length === 11) {
+    nationalNumber = "0" + cleaned.slice(2);
+  } else if (
+    phone.startsWith("+") &&
+    cleaned.startsWith("33") &&
+    cleaned.length >= 11
+  ) {
+    nationalNumber = "0" + cleaned.slice(2);
   } else if (cleaned.length === 9) {
-    nationalNumber = '0' + cleaned;
+    nationalNumber = "0" + cleaned;
   }
-  
+
   const formatNational = (num: string) => {
     if (num.length === 10) {
-      return num.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, `$1${thinNbsp}$2${thinNbsp}$3${thinNbsp}$4${thinNbsp}$5`);
+      return num.replace(
+        /(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/,
+        `$1${thinNbsp}$2${thinNbsp}$3${thinNbsp}$4${thinNbsp}$5`
+      );
     } else {
       return num.replace(/(\d{2})/g, `$1${thinNbsp}`).trim();
     }
   };
-  
+
   return formatNational(nationalNumber);
 };
