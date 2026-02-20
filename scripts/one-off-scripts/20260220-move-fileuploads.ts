@@ -146,7 +146,7 @@ const migrate = async () => {
             year,
             name: fileToMigrate.categoryName ?? undefined,
             granularity:
-              fileToMigrate.granularity as DocumentFinancierGranularity,
+              fileToMigrate.granularity as DocumentFinancierGranularity, // Do we want to keep it this way or have other relations to other tables?
           },
         });
         await prisma.fileUpload.update({
