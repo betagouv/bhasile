@@ -40,17 +40,14 @@ export async function completeModificationFlow(
     {
       openEdit: () => structurePage.openFinanceEdit(),
       page: new ModificationFinancePage(page),
-      data: modificationData,
     },
     {
       openEdit: () => structurePage.openControleEdit(),
       page: new ModificationControlePage(page),
-      data: modificationData,
     },
     {
       openEdit: () => structurePage.openDocumentsEdit(),
       page: new ModificationDocumentsPage(page),
-      data: modificationData,
     },
     {
       openEdit: () => structurePage.openNotesEdit(),
@@ -58,13 +55,12 @@ export async function completeModificationFlow(
     },
   ];
   for (const step of modificationSteps) {
-    const stepData = "data" in step ? step.data : modificationData;
     await runModificationStep(
       step.openEdit,
       step.page,
       structurePage,
       structureId,
-      stepData
+      modificationData
     );
   }
 }
