@@ -1,7 +1,7 @@
 import { Page } from "@playwright/test";
 
 import { fillActesForm } from "../../actes-form-helper";
-import { TIMEOUTS, URLS } from "../../constants";
+import { URLS } from "../../constants";
 import { ModificationData } from "../../test-data/types";
 import { BasePage } from "../BasePage";
 
@@ -21,14 +21,12 @@ export class ModificationDocumentsPage extends BasePage {
       data.actesAdministratifs ?? [],
       "modification"
     );
-    await this.page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+    await this.page
+      .waitForLoadState("networkidle", { timeout: 15000 })
+      .catch(() => {});
   }
 
   async submit(structureId: number) {
-    await this.submitByButtonText(
-      /Valider/i,
-      URLS.structure(structureId),
-      TIMEOUTS.SUBMIT
-    );
+    await this.submitAndWaitForUrl(URLS.structure(structureId));
   }
 }

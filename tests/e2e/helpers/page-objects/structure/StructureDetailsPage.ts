@@ -99,11 +99,13 @@ export class StructureDetailsPage extends BasePage {
     await this.expectTypePlaces(
       overrides.structureTypologies ?? data.structureTypologies ?? []
     );
-    await this.expectDocumentsFinanciers(data);
+    await this.expectDocumentsFinanciers(
+      overrides.documentsFinanciers ?? data.documentsFinanciers
+    );
     await this.expectActesAdministratifs(
       overrides.actesAdministratifs ?? data.actesAdministratifs ?? []
     );
-    await this.expectNotes(overrides.notes);
+    await this.expectNotes(overrides.notes ?? data.notes);
   }
 
   private getBlockByTitle(title: string): Locator {
@@ -245,9 +247,11 @@ export class StructureDetailsPage extends BasePage {
     }
   }
 
-  private async expectDocumentsFinanciers(data: TestStructureData) {
+  private async expectDocumentsFinanciers(
+    documentsFinanciers: TestStructureData["documentsFinanciers"]
+  ) {
     const financesBlock = this.getBlockByTitle("Finances");
-    const documentsByYear = data.documentsFinanciers.fileUploads.reduce(
+    const documentsByYear = documentsFinanciers.fileUploads.reduce(
       (acc, file) => {
         const year = Number(file.year);
         acc[year] = acc[year] || [];
