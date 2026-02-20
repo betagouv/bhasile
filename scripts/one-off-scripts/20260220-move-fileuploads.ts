@@ -1,10 +1,9 @@
-// @ts-nocheck
-// One-off script: move file uploads from the old structure to the new structure.
-// Old: FileUpload carries category, startDate, endDate, structureDnaCode, cpomId, parentFileUploadId, etc.
-// New: FileUpload is frugal (key, mimeType, fileSize, originalName) and links to ActeAdministratif or DocumentFinancier
-//      which hold category, dates, structure, cpom, parent/children.
-//
+// One-off script: move file uploads from the old tables to the new ones.
 // Usage: yarn one-off 20260220-move-fileuploads
+
+// IMPORTANT: remains to be checked:
+// - year for DocumentFinancier
+// - granularity for DocumentFinancier
 
 import "dotenv/config";
 
@@ -17,13 +16,8 @@ import {
 
 const prisma = createPrismaClient();
 
-const ACTE_ADMINISTRATIF_CATEGORIES = new Set<string>(
-  ActeAdministratifCategory
-);
-const DOCUMENT_FINANCIER_CATEGORIES = new Set<string>(
-  DocumentFinancierCategory
-);
-const GRANULARITY_CATEGORIES = new Set<string>(DocumentFinancierGranularity);
+const ACTE_ADMINISTRATIF_CATEGORIES = new Set(ActeAdministratifCategory);
+const DOCUMENT_FINANCIER_CATEGORIES = new Set(DocumentFinancierCategory);
 
 /** Map old FileUpload.id -> new ActeAdministratif.id for parent resolution */
 const fileUploadIdToActeId = new Map<number, number>();
@@ -118,12 +112,14 @@ const migrate = async () => {
         continue;
       }
 
-      if (ACTE_ADMINISTRATIF_CATEGORIES.has(category)) {
+      if (
+        ACTE_ADMINISTRATIF_CATEGORIES.has(category as ActeAdministratifCategory)
+      ) {
         const acte = await prisma.acteAdministratif.create({
           data: {
             structureDnaCode: fileToMigrate.structureDnaCode ?? undefined,
             cpomId: fileToMigrate.cpomId ?? undefined,
-            category: category,
+            category: category as ActeAdministratifCategory,
             date: fileToMigrate.date ?? undefined,
             startDate: fileToMigrate.startDate ?? undefined,
             endDate: fileToMigrate.endDate ?? undefined,
@@ -139,16 +135,18 @@ const migrate = async () => {
         });
         fileUploadIdToActeId.set(fileToMigrate.id, acte.id);
         acteCount++;
-      } else if (DOCUMENT_FINANCIER_CATEGORIES.has(category)) {
-        const year = "how do we get year???";
+      } else if (
+        DOCUMENT_FINANCIER_CATEGORIES.has(category as DocumentFinancierCategory)
+      ) {
+        const year = 0; // TO FIX: how do we get year?
         const doc = await prisma.documentFinancier.create({
           data: {
             structureDnaCode: fileToMigrate.structureDnaCode ?? undefined,
-            category: category as typeof DocumentFinancierCategory,
+            category: category as DocumentFinancierCategory,
             year,
             name: fileToMigrate.categoryName ?? undefined,
             granularity:
-              fileToMigrate.granularity as typeof DocumentFinancierGranularity,
+              fileToMigrate.granularity as DocumentFinancierGranularity,
           },
         });
         await prisma.fileUpload.update({
