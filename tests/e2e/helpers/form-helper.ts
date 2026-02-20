@@ -27,7 +27,9 @@ export class FormHelper {
    */
   async fillInputIfExists(selector: string, value: string): Promise<boolean> {
     const input = this.page.locator(selector);
-    if ((await input.count()) === 0) return false;
+    if ((await input.count()) === 0) {
+      return false;
+    }
     const enabled = await input
       .isEnabled({ timeout: TIMEOUTS.NAVIGATION })
       .catch(() => false);

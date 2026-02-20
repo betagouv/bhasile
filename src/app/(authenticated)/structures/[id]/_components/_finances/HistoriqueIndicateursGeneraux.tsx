@@ -1,8 +1,7 @@
-import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import Table from "@codegouvfr/react-dsfr/Table";
 import { ReactElement } from "react";
 
-import styles from "@/app/components/common/Accordion.module.css";
+import { CustomAccordion } from "@/app/components/common/CustomAccordion";
 import { formatCurrency, formatNumber } from "@/app/utils/number.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 
@@ -32,13 +31,12 @@ export const HistoriqueIndicateursGeneraux = (): ReactElement => {
   };
 
   return (
-    <Accordion
+    <CustomAccordion
       label={
         isStructureAutorisee(structure.type)
           ? "Historique selon compte administratif"
           : "Historique selon compte-rendu financier"
       }
-      className={styles["custom-accordion"]}
     >
       <Table
         bordered={true}
@@ -47,6 +45,6 @@ export const HistoriqueIndicateursGeneraux = (): ReactElement => {
         data={getBudgets()}
         headers={["ANNÉE", "ETP", "TAUX D'ENCADREMENT", "COÛT JOURNALIER"]}
       />
-    </Accordion>
+    </CustomAccordion>
   );
 };

@@ -8,7 +8,7 @@ const FormContext = createContext<UseFormReturn<
 > | null>(null);
 
 export function FormProvider<
-  TFormValues extends Record<string, unknown> = Record<string, unknown>
+  TFormValues extends Record<string, unknown> = Record<string, unknown>,
 >({
   children,
   formMethods,
@@ -26,7 +26,7 @@ export function FormProvider<
 }
 
 export function useFormContext<
-  TFormValues extends Record<string, unknown> = Record<string, unknown>
+  TFormValues extends Record<string, unknown> = Record<string, unknown>,
 >() {
   const context = useContext(FormContext);
 

@@ -2,10 +2,9 @@ import { fakerFR as faker } from "@faker-js/faker";
 
 import { Contact, ContactType } from "@/generated/prisma/client";
 
-export const createFakeContact = (type: ContactType): Omit<
-  Contact,
-  "id" | "structureDnaCode"
-> => {
+export const createFakeContact = (
+  type: ContactType
+): Omit<Contact, "id" | "structureDnaCode"> => {
   const prenom = faker.person.firstName();
   const nom = faker.person.lastName();
 

@@ -4,7 +4,11 @@ import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
-import { getLastVisitInMonths } from "@/app/utils/structure.util";
+import { NoDataAccordion } from "@/app/components/NoDataAccordion";
+import {
+  getLastVisitInMonths,
+  isStructureAutorisee,
+} from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ControleAccordion } from "./ControleAccordion";
@@ -39,7 +43,7 @@ export const ControlesBlock = (): ReactElement => {
           {evaluations.length === 0 && controles.length === 0 ? (
             <InformationCard
               primaryInformation="Aucune visite"
-              secondaryInformation="renseignée pour cette structure"
+              secondaryInformation="renseignée"
             />
           ) : (
             <InformationCard
@@ -65,29 +69,48 @@ export const ControlesBlock = (): ReactElement => {
         />
       </div>
       <div className="pt-3">
-        {evaluations.length > 0 && (
-          <ControleAccordion
-            title="Évaluations"
-            lastVisit={evaluations[0]?.date}
-          >
-            <EvaluationTable evaluations={evaluations} />
-          </ControleAccordion>
+        {isStructureAutorisee(structure.type) && (
+          <>
+            {evaluations.length > 0 ? (
+              <ControleAccordion
+                title="Évaluations"
+                lastVisit={evaluations[0]?.date}
+              >
+                <EvaluationTable evaluations={evaluations} />
+              </ControleAccordion>
+            ) : (
+              <NoDataAccordion
+                title="Evaluations"
+                description="Aucune évaluation renseignée"
+              />
+            )}
+          </>
         )}
-        {controles.length > 0 && (
+        {controles.length > 0 ? (
           <ControleAccordion
             title="Inspections-contrôles"
             lastVisit={controles?.[0]?.date}
           >
             <ControleTable />
           </ControleAccordion>
+        ) : (
+          <NoDataAccordion
+            title="Inspections-contrôles"
+            description="Aucune inspection-contrôle renseignée"
+          />
         )}
-        {evenementsIndesirablesGraves.length > 0 && (
+        {evenementsIndesirablesGraves.length > 0 ? (
           <ControleAccordion
             title="Événements indésirables graves"
             lastVisit={evenementsIndesirablesGraves[0]?.evenementDate}
           >
             <EIGTable />
           </ControleAccordion>
+        ) : (
+          <NoDataAccordion
+            title="Inspections-contrôles"
+            description="Aucun EIG trouvé sur Démarches Numériques"
+          />
         )}
       </div>
     </Block>

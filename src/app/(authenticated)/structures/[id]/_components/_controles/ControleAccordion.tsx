@@ -1,8 +1,7 @@
-import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import { ReactElement } from "react";
 
 import { AccordionTitle } from "@/app/components/AccordionTitle";
-import styles from "@/app/components/common/Accordion.module.css";
+import { CustomAccordion } from "@/app/components/common/CustomAccordion";
 
 export const ControleAccordion = ({
   title,
@@ -10,12 +9,11 @@ export const ControleAccordion = ({
   children,
 }: Props): ReactElement => {
   return (
-    <Accordion
+    <CustomAccordion
       label={<AccordionTitle title={title} lastVisit={lastVisit} />}
-      className={styles["custom-accordion"]}
     >
       {children}
-    </Accordion>
+    </CustomAccordion>
   );
 };
 

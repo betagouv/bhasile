@@ -1,4 +1,8 @@
-import { Adresse, AdresseTypologie, Repartition } from "@/generated/prisma/client";
+import {
+  Adresse,
+  AdresseTypologie,
+  Repartition,
+} from "@/generated/prisma/client";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 
 export const convertToRepartition = (

@@ -1,8 +1,7 @@
-import { Accordion } from "@codegouvfr/react-dsfr/Accordion";
 import { Table } from "@codegouvfr/react-dsfr/Table";
 import { ReactElement } from "react";
 
-import styles from "@/app/components/common/Accordion.module.css";
+import { CustomAccordion } from "@/app/components/common/CustomAccordion";
 import {
   AdresseApiType,
   AdresseTypologieApiType,
@@ -109,7 +108,7 @@ export const TypePlaceHistory = ({
   };
 
   return (
-    <Accordion label="Historique" className={styles["custom-accordion"]}>
+    <CustomAccordion label="Historique">
       <Table
         bordered={true}
         className={`m-0 [&>table]:w-[unset]
@@ -131,7 +130,7 @@ export const TypePlaceHistory = ({
         Les places correspondent aux nombres de places au 1er janvier de chaque
         année
       </span>
-    </Accordion>
+    </CustomAccordion>
   );
 };
 
