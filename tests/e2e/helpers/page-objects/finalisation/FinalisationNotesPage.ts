@@ -16,11 +16,7 @@ export class FinalisationNotesPage extends BasePage {
   }
 
   async fillForm(data: TestStructureData) {
-    const notes =
-      data.finalisationNotes || "Notes de test pour la finalisation";
-    await fillNotesForm(this.page, this.formHelper, notes, {
-      waitForSave: true,
-    });
+    await fillNotesForm(this.formHelper, data.finalisationNotes);
     const waitHelper = new WaitHelper(this.page);
     await waitHelper.waitForAutosave();
   }

@@ -20,9 +20,7 @@ export class ModificationNotesPage extends BasePage {
   }
 
   async fillForm(data: ModificationData) {
-    if (data.notes) {
-      await fillNotesForm(this.page, this.formHelper, data.notes);
-    }
+    await fillNotesForm(this.formHelper, data.notes);
   }
 
   async submit(structureId: number) {
