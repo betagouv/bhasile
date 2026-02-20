@@ -199,13 +199,7 @@ export class StructureDetailsPage extends BasePage {
 
   private async expectContactLine(
     block: Locator,
-    contact: {
-      prenom?: string;
-      nom?: string;
-      role?: string;
-      email?: string;
-      telephone?: string;
-    }
+    contact: TestStructureData["contactPrincipal"]
   ) {
     if (
       !contact.prenom ||
