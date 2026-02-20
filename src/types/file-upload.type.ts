@@ -33,10 +33,12 @@ export const FileUploadGranularity = [
   "STRUCTURE_ET_CPOM",
 ] as const;
 
-export type ActeAdministratifCategoryType = typeof ActeAdministratifCategory;
+export type ActeAdministratifCategoryType =
+  (typeof ActeAdministratifCategory)[number];
 
-export type DocumentFinancierCategoryType = typeof DocumentFinancierCategory;
+export type DocumentFinancierCategoryType =
+  (typeof DocumentFinancierCategory)[number];
 
-export type FileUploadCategoryType = typeof FileUploadCategory;
+export type FileUploadCategoryType = (typeof FileUploadCategory)[number];
 
 export type FileUploadGranularityType = typeof FileUploadGranularity;

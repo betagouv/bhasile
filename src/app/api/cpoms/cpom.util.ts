@@ -1,19 +1,76 @@
 import { formatDateToIsoString } from "@/app/utils/date.util";
 import { Cpom } from "@/types/cpom.type";
+import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
 
 import { CpomWithRelations } from "./cpom.type";
 
 export const computeCpom = (cpom: CpomWithRelations): Cpom => {
   const { dateStart, dateEnd } = computeCpomDates(cpom);
+  const cpomMillesimes = transformCpomMillesimes(cpom);
+  const actesAdministratifs = transformActesAdministratifs(cpom);
+  const structures = transformStructures(cpom);
+
   return {
     ...cpom,
     name: cpom.name ?? undefined,
     region: cpom.region ?? "",
     departements: cpom.departements ?? [],
-    granularity: cpom.granularity ?? "DEPARTEMENTALE",
+    granularity: cpom.granularity ?? undefined,
     dateStart,
     dateEnd,
+    cpomMillesimes,
+    actesAdministratifs,
+    structures,
   };
+};
+
+const transformStructures = (cpom: CpomWithRelations): Cpom["structures"] => {
+  return cpom.structures.map((structure) => ({
+    ...structure,
+    dateStart: formatDateToIsoString(structure.dateStart),
+    dateEnd: formatDateToIsoString(structure.dateEnd),
+  }));
+};
+// TODO: Fix this after file uploads refactoring
+const transformActesAdministratifs = (
+  cpom: CpomWithRelations
+): Cpom["actesAdministratifs"] => {
+  return cpom.actesAdministratifs.map((acteAdministratif) => ({
+    ...acteAdministratif,
+    structureDnaCode: acteAdministratif.structureDnaCode ?? undefined,
+    category: acteAdministratif.category as ActeAdministratifCategoryType,
+    date: formatDateToIsoString(acteAdministratif.date),
+    startDate: formatDateToIsoString(acteAdministratif.startDate),
+    endDate: formatDateToIsoString(acteAdministratif.endDate),
+  }));
+};
+
+const transformCpomMillesimes = (
+  cpom: CpomWithRelations
+): Cpom["cpomMillesimes"] => {
+  return (
+    cpom.cpomMillesimes.map((cpomMillesime) => ({
+      ...cpomMillesime,
+      dotationDemandee: cpomMillesime.dotationDemandee ?? undefined,
+      dotationAccordee: cpomMillesime.dotationAccordee ?? undefined,
+      cumulResultatNet: cpomMillesime.cumulResultatNet ?? undefined,
+      repriseEtat: cpomMillesime.repriseEtat ?? undefined,
+      affectationReservesFondsDedies:
+        cpomMillesime.affectationReservesFondsDedies ?? undefined,
+      reserveInvestissement: cpomMillesime.reserveInvestissement ?? undefined,
+      chargesNonReconductibles:
+        cpomMillesime.chargesNonReconductibles ?? undefined,
+      reserveCompensationDeficits:
+        cpomMillesime.reserveCompensationDeficits ?? undefined,
+      reserveCompensationBFR: cpomMillesime.reserveCompensationBFR ?? undefined,
+      reserveCompensationAmortissements:
+        cpomMillesime.reserveCompensationAmortissements ?? undefined,
+      fondsDedies: cpomMillesime.fondsDedies ?? undefined,
+      reportANouveau: cpomMillesime.reportANouveau ?? undefined,
+      autre: cpomMillesime.autre ?? undefined,
+      commentaire: cpomMillesime.commentaire ?? undefined,
+    })) ?? []
+  );
 };
 
 const computeCpomDates = (
@@ -41,24 +98,27 @@ const computeCpomDates = (
 
   const dateEnd = cpom.actesAdministratifs.reduce(
     (accumulator, current) => {
-      if (!current.endDate) {
+      const currentEndDate = formatDateToIsoString(current.endDate);
+
+      if (!currentEndDate) {
         return accumulator;
       }
       if (!accumulator) {
-        return current.endDate;
+        return currentEndDate;
       }
-      if (current.endDate > accumulator) {
-        return current.endDate;
+      if (currentEndDate > accumulator) {
+        return currentEndDate;
       }
       return accumulator;
     },
     undefined as string | undefined
   );
 
-  const dateStart =
+  const dateStart = formatDateToIsoString(
     cpom.actesAdministratifs.find(
       (acteAdministratif) => acteAdministratif.startDate
-    )?.startDate ?? undefined;
+    )?.startDate
+  );
 
   return {
     dateStart,
