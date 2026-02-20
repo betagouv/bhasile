@@ -15,8 +15,7 @@ import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useCpom } from "@/app/hooks/useCpom";
-import { getCpomDefaultValues } from "@/app/utils/cpom.util";
-import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
+import { CpomFormType, cpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
@@ -43,7 +42,7 @@ export default function CpomModificationFinance() {
     undefined
   );
 
-  const handleSubmit = async (data: CpomFormValues) => {
+  const handleSubmit = async (data: CpomFormType) => {
     setFetchState("cpom-save", FetchState.LOADING);
     const result = await updateCpom(data, setCpom);
     if (typeof result === "object" && "cpomId" in result) {
@@ -55,8 +54,6 @@ export default function CpomModificationFinance() {
       console.error(result);
     }
   };
-
-  const defaultValues = getCpomDefaultValues(cpom);
 
   useEffect(() => {
     if (!cpom?.id || !isCreation) {
@@ -96,7 +93,7 @@ export default function CpomModificationFinance() {
 
       <FormWrapper
         schema={cpomSchema}
-        defaultValues={defaultValues}
+        defaultValues={cpom}
         submitButtonText="Terminer"
         onSubmit={handleSubmit}
         availableFooterButtons={[FooterButtonType.SUBMIT]}

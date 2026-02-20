@@ -14,8 +14,7 @@ import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useCpom } from "@/app/hooks/useCpom";
-import { getCpomDefaultValues } from "@/app/utils/cpom.util";
-import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
+import { CpomFormType, cpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
@@ -34,7 +33,7 @@ export default function CpomModificationIdentification() {
     undefined
   );
 
-  const handleSubmit = async (data: CpomFormValues) => {
+  const handleSubmit = async (data: CpomFormType) => {
     setFetchState("cpom-save", FetchState.LOADING);
     try {
       const result = await updateCpom(data, setCpom);
@@ -57,8 +56,6 @@ export default function CpomModificationIdentification() {
     return null;
   }
 
-  const defaultValues = getCpomDefaultValues(cpom);
-
   return (
     <>
       <Stepper
@@ -70,7 +67,7 @@ export default function CpomModificationIdentification() {
       />
       <FormWrapper
         schema={cpomSchema}
-        defaultValues={defaultValues}
+        defaultValues={cpom}
         submitButtonText="Étape suivante"
         onSubmit={handleSubmit}
         availableFooterButtons={[FooterButtonType.SUBMIT]}

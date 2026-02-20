@@ -18,7 +18,7 @@ const cpomMillesimeSchema = z.object({
   year: zSafeYear(),
   dotationDemandee: zSafePositiveDecimalsNullish(),
   dotationAccordee: zSafePositiveDecimalsNullish(),
-  cumulResultatNet: zSafePositiveDecimalsNullish(),
+  cumulResultatNet: zSafeDecimalsNullish(),
   repriseEtat: zSafePositiveDecimalsNullish(),
   affectationReservesFondsDedies: zSafeDecimalsNullish(),
   reserveInvestissement: zSafeDecimalsNullish(),
@@ -136,7 +136,3 @@ export const cpomSchema = baseCpomSchema
   );
 
 export type CpomFormType = z.infer<typeof cpomSchema>;
-
-export type CpomMillesimeFormType = z.infer<typeof cpomMillesimeSchema>;
-
-export type CpomStructureFormType = z.infer<typeof cpomStructureSchema>;

@@ -3,13 +3,13 @@ import { z } from "zod";
 import { zId } from "@/app/utils/zodCustomFields";
 import { PublicType, StructureType } from "@/types/structure.type";
 
+import { cpomStructureSchema } from "../forms/base/cpom.schema";
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
 import { activiteApiSchema } from "./activite.schema";
 import { adresseApiSchema } from "./adresse.schema";
 import { budgetApiSchema } from "./budget.schema";
 import { contactApiSchema } from "./contact.schema";
 import { controleApiSchema } from "./controle.schema";
-import { cpomStructureApiSchema } from "./cpom.schema";
 import { documentFinancierApiSchema } from "./documentFinancier.schema";
 import { evaluationApiSchema } from "./evaluation.schema";
 import { evenementIndesirableGraveApiSchema } from "./evenement-indesirable-grave.schema";
@@ -25,7 +25,7 @@ export const structureMinimalApiSchema = z.object({
   type: z.nativeEnum(StructureType),
   nom: z.string().optional(),
   structureMillesimes: z.array(structureMillesimeApiSchema).optional(),
-  cpomStructures: z.array(cpomStructureApiSchema).optional(),
+  cpomStructures: z.array(cpomStructureSchema).optional(),
   nomOfii: z.string().optional(),
   directionTerritoriale: z.string().optional(),
   activeInOfiiFileSince: z.string().datetime().nullish(),

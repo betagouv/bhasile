@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { findOne } from "../cpom.repository";
+import { computeCpom } from "../cpom.util";
 
 export async function GET(
   _request: NextRequest,
@@ -8,14 +9,16 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const cpom = await findOne(Number(id));
+    const dbCpom = await findOne(Number(id));
 
-    if (!cpom) {
+    if (!dbCpom) {
       return NextResponse.json(
         { error: "Structure not found" },
         { status: 404 }
       );
     }
+
+    const cpom = computeCpom(dbCpom);
 
     return NextResponse.json(cpom);
   } catch (error) {

@@ -3,6 +3,7 @@
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import { FieldSetDocuments } from "@/app/components/forms/fieldsets/cpom/FieldSetDocuments";
 import { FieldSetGeneral } from "@/app/components/forms/fieldsets/cpom/FieldSetGeneral";
@@ -14,16 +15,33 @@ import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useCpom } from "@/app/hooks/useCpom";
-import { getCpomDefaultValues } from "@/app/utils/cpom.util";
-import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
+import { CpomFormType, cpomSchema } from "@/schemas/forms/base/cpom.schema";
+import { CpomGranularity } from "@/types/cpom.type";
 import { FetchState } from "@/types/fetch-state.type";
+import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
 
 export default function CpomAjoutIdentification() {
   const router = useRouter();
 
   const { addCpom } = useCpom();
 
-  const defaultValues = getCpomDefaultValues();
+  const defaultValues = {
+    name: "",
+    region: "",
+    departements: [],
+    granularity: "DEPARTEMENTALE" as CpomGranularity,
+    dateStart: "",
+    dateEnd: "",
+    operateur: { name: "", id: undefined },
+    structures: [],
+    cpomMillesimes: [],
+    actesAdministratifs: [
+      {
+        uuid: uuidv4(),
+        category: "CPOM" as ActeAdministratifCategoryType,
+      },
+    ],
+  };
 
   const { getFetchState, setFetchState } = useFetchState();
   const saveState = getFetchState("cpom-save");
@@ -32,7 +50,7 @@ export default function CpomAjoutIdentification() {
     undefined
   );
 
-  const handleSubmit = async (data: CpomFormValues) => {
+  const handleSubmit = async (data: CpomFormType) => {
     setFetchState("cpom-save", FetchState.LOADING);
 
     const result = await addCpom(data);

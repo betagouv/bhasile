@@ -1,9 +1,5 @@
 import prisma from "@/lib/prisma";
-import {
-  CpomFormType,
-  CpomMillesimeFormType,
-  CpomStructureFormType,
-} from "@/schemas/forms/base/cpom.schema";
+import { CpomFormType } from "@/schemas/forms/base/cpom.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { updateFileUploads } from "../files/file.repository";
@@ -81,7 +77,7 @@ export const createOrUpdateCpom = async (
 
 const createOrUpdateCpomStructures = async (
   tx: PrismaTransaction,
-  structures: CpomStructureFormType[] | undefined,
+  structures: CpomFormType["structures"] | undefined,
   cpomId: number
 ): Promise<void> => {
   if (!structures || structures.length === 0) {
@@ -104,7 +100,7 @@ const createOrUpdateCpomStructures = async (
 
 export const createOrUpdateCpomMillesimes = async (
   tx: PrismaTransaction,
-  millesimes: CpomMillesimeFormType[] | undefined,
+  millesimes: CpomFormType["cpomMillesimes"] | undefined,
   cpomId: number
 ): Promise<void> => {
   if (!millesimes || millesimes.length === 0) {
