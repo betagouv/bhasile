@@ -349,8 +349,8 @@ export const cada1: TestStructureScenario = {
       2025: {
         ETP: "9",
         tauxEncadrement: "13",
-        coutJournalier: "24,5",
-        dotationDemandee: "125000",
+        coutJournalier: "24.5",
+        dotationDemandee: 125000,
         dotationAccordee: "115000",
       },
     },

@@ -350,7 +350,7 @@ export const cada2: TestStructureScenario = {
       2025: {
         ETP: "10",
         tauxEncadrement: "11",
-        coutJournalier: "25",
+        coutJournalier: 25.5,
         dotationDemandee: "130000",
         dotationAccordee: "120000",
       },
