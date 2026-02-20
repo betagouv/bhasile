@@ -17,3 +17,5 @@ export const fileApiSchema = z.object({
   evaluationId: z.number().nullish(),
   granularity: z.string().optional(),
 });
+
+export type FileUploadApiType = z.infer<typeof fileApiSchema>;

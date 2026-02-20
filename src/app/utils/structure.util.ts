@@ -75,7 +75,7 @@ const getCurrentPlacesByProperty = (
   accessor: keyof AdresseTypologieApiType
 ) => {
   const mostRecentYearTypologies = structure.adresses?.map(
-    (adresse) => adresse.adresseTypologies?.[0]
+    (adresse) => adresse.adresseTypologies.sort((a, b) => b.year - a.year)[0]
   );
   const placesByAccessor = mostRecentYearTypologies?.reduce(
     (totalCount, currentTypologie) =>
