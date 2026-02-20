@@ -44,7 +44,7 @@ export const cpomDepartementale: {
     2024: {
       dotationDemandee: 100000,
       dotationAccordee: 95000,
-      cumulResultatNet: -2000,
+      cumulResultatNet: 2000,
       repriseEtat: 1000,
       reserveInvestissement: 5000,
       reportANouveau: 3000,

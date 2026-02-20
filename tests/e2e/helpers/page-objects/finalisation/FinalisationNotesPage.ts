@@ -1,8 +1,10 @@
 import { Page } from "@playwright/test";
 
-import { TIMEOUTS, URLS } from "../../constants";
+import { URLS } from "../../constants";
 import { FormHelper } from "../../form-helper";
+import { fillNotesForm } from "../../notes-form-helper";
 import { TestStructureData } from "../../test-data/types";
+import { WaitHelper } from "../../wait-helper";
 import { BasePage } from "../BasePage";
 
 export class FinalisationNotesPage extends BasePage {
@@ -14,17 +16,9 @@ export class FinalisationNotesPage extends BasePage {
   }
 
   async fillForm(data: TestStructureData) {
-    const notes =
-      data.finalisationNotes || "Notes de test pour la finalisation";
-    const saveResponse = this.page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/structures") &&
-        response.request().method() === "PUT" &&
-        response.status() < 400,
-      { timeout: TIMEOUTS.NAVIGATION }
-    );
-    await this.formHelper.fillInput('textarea[name="notes"]', notes);
-    await saveResponse;
+    await fillNotesForm(this.formHelper, data.finalisationNotes);
+    const waitHelper = new WaitHelper(this.page);
+    await waitHelper.waitForAutosave();
   }
 
   async submit(structureId: number, expectValidationFailure = false) {

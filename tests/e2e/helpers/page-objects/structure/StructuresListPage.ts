@@ -1,17 +1,13 @@
 import { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
-import { URLS } from "../../constants";
-import { FormHelper } from "../../form-helper";
+import { TIMEOUTS, URLS } from "../../constants";
 import { SELECTORS } from "../../selectors";
 import { BasePage } from "../BasePage";
 
 export class StructuresListPage extends BasePage {
-  private formHelper: FormHelper;
-
   constructor(page: Page) {
     super(page);
-    this.formHelper = new FormHelper(page);
   }
 
   async navigate() {
@@ -19,7 +15,12 @@ export class StructuresListPage extends BasePage {
   }
 
   async searchByDna(dnaCode: string) {
-    await this.formHelper.fillInput(SELECTORS.SEARCH_INPUT, dnaCode);
+    const searchInput = this.page.locator(SELECTORS.SEARCH_INPUT).first();
+    await searchInput.waitFor({
+      state: "visible",
+      timeout: TIMEOUTS.NAVIGATION,
+    });
+    await searchInput.fill(dnaCode);
   }
 
   async startFinalisationForDna(dnaCode: string) {

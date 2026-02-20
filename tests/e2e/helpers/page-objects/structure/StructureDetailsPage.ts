@@ -4,7 +4,6 @@ import { formatDate, getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
 import { getOperateurLabel } from "@/app/utils/structure.util";
-import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
 import { PublicType } from "@/types/structure.type";
 
 import { URLS } from "../../constants";
@@ -29,7 +28,35 @@ export class StructureDetailsPage extends BasePage {
   }
 
   async openDescriptionEdit() {
-    const block = this.getBlockByTitle("Description");
+    await this.openBlockEdit("Description");
+  }
+
+  async openCalendrierEdit() {
+    await this.openBlockEdit("Calendrier");
+  }
+
+  async openTypePlacesEdit() {
+    await this.openBlockEdit("Type de places");
+  }
+
+  async openFinanceEdit() {
+    await this.openBlockEdit("Finances");
+  }
+
+  async openControleEdit() {
+    await this.openBlockEdit("Controle qualité");
+  }
+
+  async openDocumentsEdit() {
+    await this.openBlockEdit("Actes administratifs");
+  }
+
+  async openNotesEdit() {
+    await this.openBlockEdit("Notes");
+  }
+
+  private async openBlockEdit(blockTitle: string) {
+    const block = this.getBlockByTitle(blockTitle);
     await block.getByRole("button", { name: "Modifier" }).click();
   }
 
@@ -64,17 +91,21 @@ export class StructureDetailsPage extends BasePage {
 
   async expectAllData(
     data: TestStructureData,
-    overrides: StructureDetailsOverrides
+    overrides: Partial<TestStructureData>
   ) {
     const descriptionBlock = this.getBlockByTitle("Description");
     await this.expectDescriptionData(descriptionBlock, data, overrides);
     await this.expectContactsData(descriptionBlock, data, overrides);
-    await this.expectTypePlaces(data);
-    await this.expectDocumentsFinanciers(data);
+    await this.expectTypePlaces(
+      overrides.structureTypologies ?? data.structureTypologies ?? []
+    );
+    await this.expectDocumentsFinanciers(
+      overrides.documentsFinanciers ?? data.documentsFinanciers
+    );
     await this.expectActesAdministratifs(
       overrides.actesAdministratifs ?? data.actesAdministratifs ?? []
     );
-    await this.expectNotes(overrides.notes);
+    await this.expectNotes(overrides.notes ?? data.notes);
   }
 
   private getBlockByTitle(title: string): Locator {
@@ -85,9 +116,9 @@ export class StructureDetailsPage extends BasePage {
   private async expectDescriptionData(
     block: Locator,
     data: TestStructureData,
-    overrides: StructureDetailsOverrides
+    overrides: Partial<TestStructureData>
   ) {
-    const publicValue = overrides.publicValue ?? data.public;
+    const publicValue = overrides.public ?? data.public;
     const publicLabel =
       PublicType[publicValue as keyof typeof PublicType] ?? publicValue;
     const lgbt = overrides.lgbt ?? data.lgbt;
@@ -100,7 +131,6 @@ export class StructureDetailsPage extends BasePage {
       vulnerabilites.push("FVV", "TEH");
     }
     const vulnerabiliteLabel = vulnerabilites.join(", ") || "N/A";
-
     await expect(
       block.getByText("Date de création", { exact: true }).locator("..")
     ).toContainText(formatDate(data.creationDate));
@@ -151,39 +181,41 @@ export class StructureDetailsPage extends BasePage {
   private async expectContactsData(
     block: Locator,
     data: TestStructureData,
-    overrides: StructureDetailsOverrides
+    overrides: Partial<TestStructureData>
   ) {
     await this.showContacts();
-    const contactPrincipal = data.contactPrincipal;
-    const contactSecondaire = data.contactSecondaire;
-    const principalEmail = overrides.contactEmail || contactPrincipal.email;
+    const contactPrincipal = {
+      ...data.contactPrincipal,
+      ...overrides.contactPrincipal,
+    };
+    const contactSecondaire = {
+      ...data.contactSecondaire,
+      ...overrides.contactSecondaire,
+    };
 
-    await this.expectContactLine(block, {
-      prenom: contactPrincipal.prenom,
-      nom: contactPrincipal.nom,
-      role: contactPrincipal.role,
-      email: principalEmail,
-      telephone: contactPrincipal.telephone,
-    });
-    if (contactSecondaire) {
-      await this.expectContactLine(block, contactSecondaire);
-    }
+    await this.expectContactLine(block, contactPrincipal);
+    await this.expectContactLine(block, contactSecondaire);
   }
 
   private async expectContactLine(
     block: Locator,
-    contact: {
-      prenom: string;
-      nom: string;
-      role: string;
-      email: string;
-      telephone: string;
-    }
+    contact: TestStructureData["contactPrincipal"]
   ) {
+    if (
+      !contact.prenom ||
+      !contact.nom ||
+      !contact.role ||
+      !contact.email ||
+      !contact.telephone
+    ) {
+      return;
+    }
     const contactLabel = `${contact.prenom} ${contact.nom} (${contact.role})`;
     const formattedPhone = formatPhoneNumber(contact.telephone);
     await expect(block.getByText(contactLabel, { exact: true })).toBeVisible();
-    await expect(block.getByText(contact.email, { exact: true })).toBeVisible();
+    await expect(
+      block.getByText(contact.email ?? "", { exact: true })
+    ).toBeVisible();
     if (formattedPhone) {
       await expect(
         block.getByText(new RegExp(escapeForRegex(formattedPhone)))
@@ -191,7 +223,11 @@ export class StructureDetailsPage extends BasePage {
     }
   }
 
-  private async expectTypePlaces(data: TestStructureData) {
+  private async expectTypePlaces(
+    structureTypologies: TestStructureData["structureTypologies"]
+  ) {
+    if (structureTypologies.length === 0) return;
+
     const typePlacesBlock = this.getBlockByTitle("Type de places");
     const historyButton = typePlacesBlock.getByRole("button", {
       name: "Historique",
@@ -199,7 +235,7 @@ export class StructureDetailsPage extends BasePage {
     await historyButton.click();
 
     const historyTable = typePlacesBlock.getByRole("table").first();
-    for (const typologie of data.structureTypologies) {
+    for (const typologie of structureTypologies) {
       await expect(historyTable).toContainText(
         typologie.placesAutorisees.toString()
       );
@@ -209,9 +245,11 @@ export class StructureDetailsPage extends BasePage {
     }
   }
 
-  private async expectDocumentsFinanciers(data: TestStructureData) {
+  private async expectDocumentsFinanciers(
+    documentsFinanciers: TestStructureData["documentsFinanciers"]
+  ) {
     const financesBlock = this.getBlockByTitle("Finances");
-    const documentsByYear = data.documentsFinanciers.fileUploads.reduce(
+    const documentsByYear = documentsFinanciers.fileUploads.reduce(
       (acc, file) => {
         const year = Number(file.year);
         acc[year] = acc[year] || [];
@@ -245,16 +283,14 @@ export class StructureDetailsPage extends BasePage {
   }
 
   private async expectActesAdministratifs(
-    actes: StructureDetailsOverrides["actesAdministratifs"]
+    actes: TestStructureData["actesAdministratifs"]
   ) {
     if (!actes || actes.length === 0) {
       return;
     }
     const actesBlock = this.getBlockByTitle("Actes administratifs");
-    const actesText = (await actesBlock.textContent()) || "";
-    if (actesText.includes("Aucun document importé")) {
-      return;
-    }
+    await expect(actesBlock).not.toContainText("Aucun document importé");
+
     for (const acte of actes) {
       const accordionLabel = getActesCategoryLabel(acte.category);
       const accordionButton = actesBlock.getByRole("button", {
@@ -285,17 +321,3 @@ export class StructureDetailsPage extends BasePage {
     await expect(notesBlock).toContainText(notes);
   }
 }
-
-type StructureDetailsOverrides = {
-  publicValue?: string;
-  lgbt?: boolean;
-  fvvTeh?: boolean;
-  contactEmail?: string;
-  notes?: string;
-  actesAdministratifs?: Array<{
-    category: ActeAdministratifCategoryType[number];
-    categoryName?: string;
-    startDate?: string;
-    endDate?: string;
-  }>;
-};

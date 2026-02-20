@@ -85,21 +85,31 @@ export class FormHelper {
   async fillContact(
     prefix: string,
     contact: {
-      prenom: string;
-      nom: string;
-      role: string;
-      email: string;
-      telephone: string;
+      prenom?: string;
+      nom?: string;
+      role?: string;
+      email?: string;
+      telephone?: string;
     }
   ): Promise<void> {
-    await this.fillInput(`input[name="${prefix}.prenom"]`, contact.prenom);
-    await this.fillInput(`input[name="${prefix}.nom"]`, contact.nom);
-    await this.fillInput(`input[name="${prefix}.role"]`, contact.role);
-    await this.fillInput(`input[name="${prefix}.email"]`, contact.email);
-    await this.fillInput(
-      `input[name="${prefix}.telephone"]`,
-      contact.telephone
-    );
+    if (contact.prenom) {
+      await this.fillInput(`input[name="${prefix}.prenom"]`, contact.prenom);
+    }
+    if (contact.nom) {
+      await this.fillInput(`input[name="${prefix}.nom"]`, contact.nom);
+    }
+    if (contact.role) {
+      await this.fillInput(`input[name="${prefix}.role"]`, contact.role);
+    }
+    if (contact.email) {
+      await this.fillInput(`input[name="${prefix}.email"]`, contact.email);
+    }
+    if (contact.telephone) {
+      await this.fillInput(
+        `input[name="${prefix}.telephone"]`,
+        contact.telephone
+      );
+    }
   }
 
   /**

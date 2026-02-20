@@ -273,7 +273,7 @@ export const cph2: TestStructureScenario = {
         totalCharges: "42000",
         repriseEtat: "100",
         excedentRecupere: "10",
-        excedentDeduit: "-5",
+        excedentDeduit: "5",
         affectationReservesFondsDedies: "200",
         reserveInvestissement: "20",
         chargesNonReconductibles: "30",
@@ -339,5 +339,52 @@ export const cph2: TestStructureScenario = {
     ],
     finalisationNotes:
       "Notes de finalisation dynamiques (CPH) : contrôle OK, suivi actif.",
+  },
+  modificationData: {
+    public: "Famille",
+    lgbt: false,
+    fvvTeh: true,
+    contactPrincipal: { email: "modif-cph2@example.com" },
+    notes: "Notes modification CPH 2 - mixte.",
+    debutPeriodeAutorisation: "2020-09-15",
+    finPeriodeAutorisation: "2026-09-14",
+    ouvertureFermeture: {
+      placesACreer: "4",
+      echeancePlacesACreer: "2026-05-15",
+      placesAFermer: "0",
+      echeancePlacesAFermer: "2026-08-01",
+    },
+    structureTypologies: [
+      { placesAutorisees: 54, pmr: 7, lgbt: 12, fvvTeh: 10 },
+      { placesAutorisees: 50, pmr: 6, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 47, pmr: 5, lgbt: 9, fvvTeh: 8 },
+    ],
+    finances: {
+      2025: {
+        ETP: "10",
+        tauxEncadrement: "12",
+        coutJournalier: "24,5",
+        dotationDemandee: "128000",
+        dotationAccordee: "118000",
+      },
+    },
+    evaluations: [
+      {
+        date: "2024-04-20",
+        notePersonne: "3",
+        notePro: "3.5",
+        noteStructure: "3.5",
+        note: "3.5",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
+    actesAdministratifs: [
+      {
+        category: "CONVENTION",
+        startDate: "2023-01-01",
+        endDate: "2026-12-31",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
   },
 };

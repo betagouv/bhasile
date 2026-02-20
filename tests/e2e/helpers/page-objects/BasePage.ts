@@ -45,7 +45,7 @@ export abstract class BasePage {
 
   protected async submitAndWaitForUrl(
     expectedUrl: string | RegExp,
-    timeout = TIMEOUTS.NAVIGATION
+    timeout: number = TIMEOUTS.NAVIGATION
   ): Promise<void> {
     await this.page.click(SELECTORS.SUBMIT_BUTTON);
     await this.page.waitForURL(expectedUrl, { timeout });
@@ -54,7 +54,7 @@ export abstract class BasePage {
   protected async submitByButtonText(
     buttonText: string | RegExp,
     expectedUrl: string | RegExp,
-    timeout = TIMEOUTS.NAVIGATION
+    timeout: number = TIMEOUTS.NAVIGATION
   ): Promise<void> {
     const submitButton = this.page.getByRole("button", { name: buttonText });
     await submitButton.click();

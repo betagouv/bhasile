@@ -4,7 +4,7 @@
  * @param phone - The input phone number as a string.
  * @returns The formatted phone number or an empty string if invalid.
  */
-export const formatPhoneNumber = (phone: string): string => {
+export const formatPhoneNumber = (phone?: string): string => {
   if (!phone) {
     return "";
   }

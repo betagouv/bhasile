@@ -138,6 +138,9 @@ export const huda1: TestStructureScenario = {
         totalChargesProposees: "1100000",
         totalCharges: "1099999,5",
         repriseEtat: "0",
+        excedentRecupere: "0",
+        excedentDeduit: "0",
+        fondsDedies: "2500",
         affectationReservesFondsDedies: "2500",
         reserveInvestissement: "1000",
         chargesNonReconductibles: "150,5",
@@ -175,7 +178,7 @@ export const huda1: TestStructureScenario = {
         totalCharges: "42000",
         repriseEtat: "100",
         excedentRecupere: "10",
-        excedentDeduit: "-5",
+        excedentDeduit: "5",
         affectationReservesFondsDedies: "200",
         fondsDedies: "15",
         reserveInvestissement: "20",
@@ -227,5 +230,41 @@ export const huda1: TestStructureScenario = {
     ],
     finalisationNotes:
       "Notes de finalisation dynamiques (HUDA) : contrôle OK, suivi actif.",
+  },
+  modificationData: {
+    public: "Personnes isolées",
+    lgbt: true,
+    fvvTeh: false,
+    contactPrincipal: { email: "modif-huda1@example.com" },
+    notes: "Notes modification HUDA 1 - convention.",
+    debutConvention: "2021-03-01",
+    finConvention: "2024-09-30",
+    ouvertureFermeture: {
+      placesACreer: "6",
+      echeancePlacesACreer: "2026-03-15",
+      placesAFermer: "1",
+      echeancePlacesAFermer: "2026-06-01",
+    },
+    structureTypologies: [
+      { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
+    ],
+    finances: {
+      2025: {
+        ETP: "9",
+        tauxEncadrement: "11",
+        coutJournalier: "25",
+        dotationDemandee: "124000",
+        dotationAccordee: "116000",
+      },
+    },
+    actesAdministratifs: [
+      {
+        category: "AUTRE",
+        categoryName: "Document modification e2e",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
   },
 };
