@@ -133,3 +133,53 @@ export const formatCpomName = (cpom: CpomApiType): string => {
 
   return cpom.name || `${cpom.operateur?.name} ${zone}`;
 };
+
+export const computeCpomDates = (
+  cpom?: Partial<CpomApiType> & { dateStart?: string; dateEnd?: string }
+): { dateStart?: string; dateEnd?: string } => {
+  if (!cpom) {
+    return {
+      dateStart: undefined,
+      dateEnd: undefined,
+    };
+  }
+
+  if (!cpom.actesAdministratifs?.length) {
+    if (cpom.dateStart && cpom.dateEnd) {
+      return {
+        dateStart: cpom.dateStart,
+        dateEnd: cpom.dateEnd,
+      };
+    }
+    return {
+      dateStart: undefined,
+      dateEnd: undefined,
+    };
+  }
+
+  const dateEnd = cpom.actesAdministratifs.reduce(
+    (accumulator, current) => {
+      if (!current.endDate) {
+        return accumulator;
+      }
+      if (!accumulator) {
+        return current.endDate;
+      }
+      if (current.endDate > accumulator) {
+        return current.endDate;
+      }
+      return accumulator;
+    },
+    undefined as string | undefined
+  );
+
+  const dateStart =
+    cpom.actesAdministratifs.find(
+      (acteAdministratif) => acteAdministratif.startDate
+    )?.startDate ?? undefined;
+
+  return {
+    dateStart,
+    dateEnd,
+  };
+};

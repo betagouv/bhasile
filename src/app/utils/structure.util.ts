@@ -21,8 +21,8 @@ import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.sch
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
+import { computeCpomDates } from "../api/cpoms/cpom.util";
 import { sortKeysByValue } from "./common.util";
-import { computeCpomDates } from "./cpom.util";
 import { getYearFromDate } from "./date.util";
 
 export const getPlacesByCommunes = (
@@ -145,9 +145,10 @@ export const isStructureInCpom = (
     structure.cpomStructures?.some((cpomStructure) => {
       const dateStart =
         cpomStructure.dateStart ??
-        computeCpomDates(cpomStructure.cpom).dateStart;
+        computeCpomDates(cpomStructure.cpom as any).dateStart;
       const dateEnd =
-        cpomStructure.dateEnd ?? computeCpomDates(cpomStructure.cpom).dateEnd;
+        cpomStructure.dateEnd ??
+        computeCpomDates(cpomStructure.cpom as any).dateEnd;
 
       if (!dateStart || !dateEnd) {
         return false;

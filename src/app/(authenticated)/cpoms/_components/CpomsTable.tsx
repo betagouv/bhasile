@@ -3,7 +3,7 @@
 import { ReactElement } from "react";
 
 import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
-import { CpomApiType } from "@/schemas/api/cpom.schema";
+import { Cpom } from "@/types/cpom.type";
 import { ListColumn } from "@/types/ListColumn";
 
 import { CpomItem } from "./CpomItem";
@@ -62,6 +62,6 @@ export const CpomsTable = ({ cpoms, ariaLabelledBy }: Props): ReactElement => {
 };
 
 type Props = {
-  cpoms: CpomApiType[];
+  cpoms: Cpom[];
   ariaLabelledBy: string;
 };

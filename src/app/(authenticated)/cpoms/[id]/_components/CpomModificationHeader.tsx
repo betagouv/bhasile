@@ -3,7 +3,6 @@
 import { useSearchParams } from "next/navigation";
 import { ReactElement } from "react";
 
-import { computeCpomDates, formatCpomName } from "@/app/utils/cpom.util";
 import { getYearFromDate } from "@/app/utils/date.util";
 
 import { useCpomContext } from "../_context/CpomClientContext";
@@ -14,7 +13,7 @@ export const CpomModificationHeader = (): ReactElement | null => {
 
   const { cpom } = useCpomContext();
 
-  const years = `${getYearFromDate(computeCpomDates(cpom).dateStart)} - ${getYearFromDate(computeCpomDates(cpom).dateEnd)}`;
+  const years = `${getYearFromDate(cpom.dateStart)} - ${getYearFromDate(cpom.dateEnd)}`;
 
   return cpom ? (
     <div className="sticky top-0 z-2 bg-lifted-grey">
@@ -26,7 +25,7 @@ export const CpomModificationHeader = (): ReactElement | null => {
             </strong>
           </h2>
           <h3 className="text-title-blue-france fr-h6 mb-0">
-            <strong className="pr-2">{formatCpomName(cpom)}</strong>{" "}
+            <strong className="pr-2">{cpom.formattedName}</strong>{" "}
             <span className="text-title-grey font-normal text-lg italic">
               {years}
             </span>

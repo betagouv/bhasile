@@ -1,4 +1,5 @@
 import { formatDateToIsoString } from "@/app/utils/date.util";
+import { DEPARTEMENTS } from "@/constants";
 import { Cpom } from "@/types/cpom.type";
 import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
 
@@ -9,10 +10,11 @@ export const computeCpom = (cpom: CpomWithRelations): Cpom => {
   const cpomMillesimes = transformCpomMillesimes(cpom);
   const actesAdministratifs = transformActesAdministratifs(cpom);
   const structures = transformStructures(cpom);
-
+  const formattedName = formatCpomName(cpom);
   return {
     ...cpom,
     name: cpom.name ?? undefined,
+    formattedName,
     region: cpom.region ?? "",
     departements: cpom.departements ?? [],
     granularity: cpom.granularity ?? undefined,
@@ -73,7 +75,7 @@ const transformCpomMillesimes = (
   );
 };
 
-const computeCpomDates = (
+export const computeCpomDates = (
   cpom?: Partial<CpomWithRelations>
 ): { dateStart?: string; dateEnd?: string } => {
   if (!cpom) {
@@ -124,4 +126,22 @@ const computeCpomDates = (
     dateStart,
     dateEnd,
   };
+};
+
+const formatCpomName = (cpom: CpomWithRelations): string => {
+  let zone = cpom.region;
+
+  if (cpom.granularity === "DEPARTEMENTALE") {
+    const departement = DEPARTEMENTS.find(
+      (departement) => departement.numero === cpom.departements?.[0]
+    );
+    if (departement) {
+      zone = departement.numero + " - " + departement.name;
+    }
+  }
+  if (cpom.granularity === "INTERDEPARTEMENTALE") {
+    zone = cpom.departements?.join(", ");
+  }
+
+  return cpom.name || `${cpom.operateur?.name} ${zone}`;
 };

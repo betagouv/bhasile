@@ -41,6 +41,7 @@ export type CpomStructure = {
 export type Cpom = {
   id?: number;
   name?: string;
+  formattedName: string;
   operateur?: Operateur;
   operateurId?: number;
   region?: string;

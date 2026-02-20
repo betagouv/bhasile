@@ -2,13 +2,10 @@ import Link from "next/link";
 import { ReactElement } from "react";
 
 import { EmptyCell } from "@/app/components/common/EmptyCell";
-import { computeCpomDates } from "@/app/utils/cpom.util";
 import { getYearFromDate } from "@/app/utils/date.util";
-import { CpomApiType } from "@/schemas/api/cpom.schema";
+import { Cpom } from "@/types/cpom.type";
 
 export const CpomItem = ({ cpom, index }: Props) => {
-  const { dateStart, dateEnd } = computeCpomDates(cpom);
-
   return (
     <tr
       id={`table-row-key-${index}`}
@@ -19,8 +16,8 @@ export const CpomItem = ({ cpom, index }: Props) => {
       <td className="text-left!">{getGranularityLabel(cpom)}</td>
       <td className="text-left!">{cpom.region}</td>
       <td className="text-left!">{getDepartementsLabel(cpom)}</td>
-      <td className="">{getYearFromDate(dateStart)}</td>
-      <td className="">{getYearFromDate(dateEnd)}</td>
+      <td className="">{getYearFromDate(cpom.dateStart)}</td>
+      <td className="">{getYearFromDate(cpom.dateEnd)}</td>
       <td>
         <Link
           className="fr-btn--tertiary-no-outline fr-icon-edit-line"
@@ -32,7 +29,7 @@ export const CpomItem = ({ cpom, index }: Props) => {
   );
 };
 
-const getDepartementsLabel = (cpom: CpomApiType): string | ReactElement => {
+const getDepartementsLabel = (cpom: Cpom): string | ReactElement => {
   let departements: string | ReactElement = (
     <span>{cpom.departements?.join(", ")}</span>
   );
@@ -46,7 +43,7 @@ const getDepartementsLabel = (cpom: CpomApiType): string | ReactElement => {
   return departements;
 };
 
-const getGranularityLabel = (cpom: CpomApiType): string => {
+const getGranularityLabel = (cpom: Cpom): string => {
   switch (cpom.granularity) {
     case "REGIONALE":
       return "Régionale";
@@ -54,10 +51,12 @@ const getGranularityLabel = (cpom: CpomApiType): string => {
       return "Interdépartementale";
     case "DEPARTEMENTALE":
       return "Départementale";
+    default:
+      return "";
   }
 };
 
 type Props = {
-  cpom: CpomApiType;
+  cpom: Cpom;
   index: number;
 };
