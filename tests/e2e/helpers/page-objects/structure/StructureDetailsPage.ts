@@ -188,13 +188,13 @@ export class StructureDetailsPage extends BasePage {
       ...data.contactPrincipal,
       ...overrides.contactPrincipal,
     };
-    const contactSecondaire =
-      overrides.contactSecondaire ?? data.contactSecondaire;
+    const contactSecondaire = {
+      ...data.contactSecondaire,
+      ...overrides.contactSecondaire,
+    };
 
     await this.expectContactLine(block, contactPrincipal);
-    if (contactSecondaire) {
-      await this.expectContactLine(block, contactSecondaire);
-    }
+    await this.expectContactLine(block, contactSecondaire);
   }
 
   private async expectContactLine(
@@ -207,6 +207,15 @@ export class StructureDetailsPage extends BasePage {
       telephone?: string;
     }
   ) {
+    if (
+      !contact.prenom ||
+      !contact.nom ||
+      !contact.role ||
+      !contact.email ||
+      !contact.telephone
+    ) {
+      return;
+    }
     const contactLabel = `${contact.prenom} ${contact.nom} (${contact.role})`;
     const formattedPhone = formatPhoneNumber(contact.telephone);
     await expect(block.getByText(contactLabel, { exact: true })).toBeVisible();
@@ -221,12 +230,7 @@ export class StructureDetailsPage extends BasePage {
   }
 
   private async expectTypePlaces(
-    structureTypologies: Array<{
-      placesAutorisees: number;
-      pmr: number;
-      lgbt: number;
-      fvvTeh: number;
-    }>
+    structureTypologies: TestStructureData["structureTypologies"]
   ) {
     if (structureTypologies.length === 0) return;
 
@@ -289,12 +293,8 @@ export class StructureDetailsPage extends BasePage {
       return;
     }
     const actesBlock = this.getBlockByTitle("Actes administratifs");
-    const actesText = (await actesBlock.textContent()) || "";
-    if (actesText.includes("Aucun document importé")) {
-      throw new Error(
-        `Attendus actes administratifs, mais le texte indique "Aucun document importé". Données : ${JSON.stringify(actes)}`
-      );
-    }
+    await expect(actesBlock).not.toContainText("Aucun document importé");
+
     for (const acte of actes) {
       const accordionLabel = getActesCategoryLabel(acte.category);
       const accordionButton = actesBlock.getByRole("button", {
