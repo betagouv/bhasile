@@ -22,10 +22,13 @@ export const formatDate = (
 };
 
 export const formatDateToIsoString = (
-  date: string | undefined | null,
+  date: string | Date | undefined | null,
   defaultToToday: boolean = false
-): string | null => {
+): string | undefined => {
   if (date) {
+    if (date instanceof Date) {
+      return date.toISOString();
+    }
     if (/^\d{4}-\d{2}-\d{2}(T[\d:.]+(Z|([\+\-]\d{2}:\d{2}))?)?$/.test(date)) {
       return date;
     }
@@ -34,7 +37,7 @@ export const formatDateToIsoString = (
   if (defaultToToday) {
     return dayjs().toISOString();
   }
-  return null;
+  return undefined;
 };
 
 export const getMonthsBetween = (

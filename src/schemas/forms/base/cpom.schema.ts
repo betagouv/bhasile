@@ -3,6 +3,7 @@ import z from "zod";
 import { formatDateToIsoString } from "@/app/utils/date.util";
 import {
   nullishFrenchDateToISO,
+  optionalFrenchDateToISO,
   zId,
   zSafeDecimalsNullish,
   zSafePositiveDecimalsNullish,
@@ -33,13 +34,13 @@ const cpomMillesimeSchema = z.object({
 
 const baseCpomSchema = z.object({
   id: zId(),
-  name: z.string().nullish(),
-  dateStart: nullishFrenchDateToISO(),
-  dateEnd: nullishFrenchDateToISO(),
+  name: z.string().optional(),
+  dateStart: optionalFrenchDateToISO(),
+  dateEnd: optionalFrenchDateToISO(),
   operateur: operateurSchema,
   operateurId: zId(),
-  region: z.string().nullish(),
-  departements: z.array(z.string()).nullish(),
+  region: z.string().optional(),
+  departements: z.array(z.string()).optional(),
   granularity: z
     .enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"])
     .optional(),
@@ -50,7 +51,7 @@ const baseCpomSchema = z.object({
 export const cpomStructureSchema = z.object({
   dateStart: nullishFrenchDateToISO(),
   dateEnd: nullishFrenchDateToISO(),
-  structureId: zId(),
+  structureId: z.number(),
   cpom: baseCpomSchema.optional(),
 });
 
@@ -134,8 +135,8 @@ export const cpomSchema = baseCpomSchema
     }
   );
 
-export type CpomMillesimeFormValues = z.infer<typeof cpomMillesimeSchema>;
+export type CpomFormType = z.infer<typeof cpomSchema>;
 
-export type CpomStructureFormValues = z.infer<typeof cpomStructureSchema>;
+export type CpomMillesimeFormType = z.infer<typeof cpomMillesimeSchema>;
 
-export type CpomFormValues = z.infer<typeof cpomSchema>;
+export type CpomStructureFormType = z.infer<typeof cpomStructureSchema>;

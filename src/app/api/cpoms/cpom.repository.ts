@@ -1,15 +1,15 @@
-import { Cpom } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
-  CpomApiType,
-  CpomMillesimeApiType,
-  CpomStructureApiType,
-} from "@/schemas/api/cpom.schema";
+  CpomFormType,
+  CpomMillesimeFormType,
+  CpomStructureFormType,
+} from "@/schemas/forms/base/cpom.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { updateFileUploads } from "../files/file.repository";
+import { CpomWithRelations } from "./cpom.type";
 
-export const findAll = async (): Promise<Cpom[]> => {
+export const findAll = async (): Promise<CpomWithRelations[]> => {
   return prisma.cpom.findMany({
     include: {
       structures: true,
@@ -24,7 +24,7 @@ export const countAll = async (): Promise<number> => {
   return prisma.cpom.count();
 };
 
-export const findOne = async (id: number): Promise<Cpom> => {
+export const findOne = async (id: number): Promise<CpomWithRelations> => {
   const cpom = await prisma.cpom.findFirstOrThrow({
     where: { id },
     include: {
@@ -38,7 +38,7 @@ export const findOne = async (id: number): Promise<Cpom> => {
 };
 
 export const createOrUpdateCpom = async (
-  cpom: CpomApiType
+  cpom: CpomFormType
 ): Promise<number> => {
   const operateurId = cpom.operateur?.id ?? cpom.operateurId;
   const cpomId = await prisma.$transaction(async (tx) => {
@@ -81,7 +81,7 @@ export const createOrUpdateCpom = async (
 
 const createOrUpdateCpomStructures = async (
   tx: PrismaTransaction,
-  structures: CpomStructureApiType[] | undefined,
+  structures: CpomStructureFormType[] | undefined,
   cpomId: number
 ): Promise<void> => {
   if (!structures || structures.length === 0) {
@@ -104,7 +104,7 @@ const createOrUpdateCpomStructures = async (
 
 export const createOrUpdateCpomMillesimes = async (
   tx: PrismaTransaction,
-  millesimes: CpomMillesimeApiType[] | undefined,
+  millesimes: CpomMillesimeFormType[] | undefined,
   cpomId: number
 ): Promise<void> => {
   if (!millesimes || millesimes.length === 0) {

@@ -1,5 +1,7 @@
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 
+import { Operateur } from "./operateur.type";
+
 export const CpomGranularity = [
   "DEPARTEMENTALE",
   "INTERDEPARTEMENTALE",
@@ -9,7 +11,7 @@ export const CpomGranularity = [
 export type CpomGranularity = (typeof CpomGranularity)[number];
 
 export type CpomMillesime = {
-  id: number;
+  id?: number;
   year: number;
   dotationDemandee?: number;
   dotationAccordee?: number;
@@ -28,7 +30,7 @@ export type CpomMillesime = {
 };
 
 export type CpomStructure = {
-  id: number;
+  id?: number;
   cpomId: number;
   cpom?: Cpom;
   structureId: number;
@@ -37,7 +39,7 @@ export type CpomStructure = {
 };
 
 export type Cpom = {
-  id: number;
+  id?: number;
   name?: string;
   operateur?: Operateur;
   operateurId?: number;

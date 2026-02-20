@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { cpomApiAjoutSchema, cpomApiSchema } from "@/schemas/api/cpom.schema";
+import { cpomSchema } from "@/schemas/forms/base/cpom.schema";
 
 import { countAll, createOrUpdateCpom, findAll } from "./cpom.repository";
+import { computeCpom } from "./cpom.util";
 
 export async function GET() {
   try {
-    const [cpoms, totalCpoms] = await Promise.all([findAll(), countAll()]);
+    const [dbCpoms, totalCpoms] = await Promise.all([findAll(), countAll()]);
+    const cpoms = dbCpoms.map((cpom) => computeCpom(cpom));
     return NextResponse.json({ cpoms, totalCpoms });
   } catch (error) {
     console.error(error);
@@ -20,7 +22,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const result = cpomApiAjoutSchema.parse(body);
+    const result = cpomSchema.parse(body);
     const cpomId = await createOrUpdateCpom(result);
     return NextResponse.json({ cpomId }, { status: 201 });
   } catch (error) {
@@ -32,7 +34,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const result = cpomApiSchema.parse(body);
+    const result = cpomSchema.parse(body);
     const cpomId = await createOrUpdateCpom(result);
     return NextResponse.json({ cpomId }, { status: 201 });
   } catch (error) {
