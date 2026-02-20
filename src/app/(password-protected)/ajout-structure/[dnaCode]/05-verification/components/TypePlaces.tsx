@@ -2,7 +2,8 @@ import { useParams } from "next/navigation";
 
 import { Table } from "@/app/components/common/Table";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
-import { getTypePlacesYearRange } from "@/app/utils/date.util";
+import { getTypePlacesYearRange, getYearFromDate } from "@/app/utils/date.util";
+import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { AjoutTypePlacesFormValues } from "@/schemas/forms/ajout/ajoutTypePlaces.schema";
 
 export const TypePlaces = () => {
@@ -12,6 +13,18 @@ export const TypePlaces = () => {
   >(`ajout-structure-${params.dnaCode}-type-places`, {});
 
   const { years } = getTypePlacesYearRange();
+  const { currentValue: localStorageIdentificationValues } = useLocalStorage(
+    `ajout-structure-${params.dnaCode}-identification`,
+    {}
+  );
+  const yearsToDisplay = years.filter(
+    (year) =>
+      year >=
+      getYearFromDate(
+        (localStorageIdentificationValues as AjoutIdentificationFormValues)
+          ?.creationDate
+      )
+  );
 
   return (
     <Table
@@ -19,7 +32,7 @@ export const TypePlaces = () => {
       ariaLabelledBy=""
       className="[&_th]:px-0 text-center w-1/3"
     >
-      {years.map((year, index) => (
+      {yearsToDisplay.map((year, index) => (
         <tr
           key={year}
           className="w-full [&_input]:max-w-16 border-t border-default-grey "

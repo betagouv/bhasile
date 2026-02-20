@@ -2,9 +2,11 @@ import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useEffect, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { Table } from "@/app/components/common/Table";
 import { cn } from "@/app/utils/classname.util";
 import { getTypePlacesYearRange } from "@/app/utils/date.util";
+import { getRealCreationYear } from "@/app/utils/structure.util";
 import { FormKind } from "@/types/global";
 
 import { YearlyTypePlace } from "./FieldSetTypePlace.tsx/YearlyTypePlace";
@@ -14,6 +16,8 @@ export const FieldSetTypePlaces = ({
 }: {
   formKind?: FormKind;
 }) => {
+  const { structure } = useStructureContext();
+
   const fieldsetRef = useRef<HTMLFieldSetElement>(null);
   const { formState } = useFormContext();
 
@@ -26,6 +30,9 @@ export const FieldSetTypePlaces = ({
   }, [formState]);
 
   const { years } = getTypePlacesYearRange();
+
+  const startYear = getRealCreationYear(structure);
+  const yearsToDisplay = years.filter((year) => year >= startYear);
 
   return (
     <fieldset className="flex flex-col" ref={fieldsetRef}>
@@ -53,7 +60,7 @@ export const FieldSetTypePlaces = ({
           hasErrors && "border-action-high-error"
         )}
       >
-        {years.map((year) => (
+        {yearsToDisplay.map((year) => (
           <YearlyTypePlace key={year} year={year} />
         ))}
       </Table>
