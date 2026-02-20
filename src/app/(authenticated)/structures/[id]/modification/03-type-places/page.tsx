@@ -53,7 +53,10 @@ export default function ModificationTypePlaces() {
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
         <FieldSetOuvertureFermeture formKind={FormKind.MODIFICATION} />
-        <FieldSetTypePlaces />
+        <FieldSetTypePlaces
+          structure={structure}
+          formKind={FormKind.MODIFICATION}
+        />
       </FormWrapper>
       {saveState === FetchState.ERROR && (
         <SubmitError
