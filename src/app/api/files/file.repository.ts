@@ -27,9 +27,7 @@ export const findOneByKey = async (key: string): Promise<FileUpload | null> => {
   });
 };
 
-export const deleteOneByKey = async (
-  key: string
-): Promise<FileUpload | null> => {
+export const deleteOneByKey = async (key: string): Promise<void> => {
   const file = await prisma.fileUpload.findFirst({
     where: {
       key,
@@ -37,10 +35,10 @@ export const deleteOneByKey = async (
   });
 
   if (!file) {
-    return null;
+    throw new Error("File not found");
   }
 
-  return prisma.fileUpload.delete({
+  prisma.fileUpload.delete({
     where: {
       id: Number(file.id),
     },

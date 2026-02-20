@@ -8,6 +8,7 @@ import {
 import { checkBucket, minioClient } from "@/lib/minio";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { deleteOneByKey } from "./file.repository";
 
 export const uploadFile = async (
   bucketName: string,
@@ -40,6 +41,14 @@ export const deleteFile = async (
     console.error(error);
     throw new Error("Erreur lors de la suppression du fichier");
   }
+};
+
+export const deleteFileAndRecord = async (
+  bucketName: string,
+  key: string
+): Promise<Awaited<ReturnType<typeof deleteOneByKey>>> => {
+  await deleteFile(bucketName, key);
+  return deleteOneByKey(key);
 };
 
 export const getDownloadLink = async (

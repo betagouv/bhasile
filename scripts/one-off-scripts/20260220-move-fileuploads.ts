@@ -7,14 +7,21 @@
 
 import "dotenv/config";
 
+import { deleteFileAndRecord } from "@/app/api/files/file.service";
 import { createPrismaClient } from "@/prisma-client";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import {
   DocumentFinancierCategory,
   DocumentFinancierGranularity,
 } from "@/types/document-financier.type";
+import { getYearFromDate } from "@/app/utils/date.util";
 
 const prisma = createPrismaClient();
+const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME;
+
+if (!S3_BUCKET_NAME) {
+  throw new Error("S3_BUCKET_NAME is not set");
+}
 
 const ACTE_ADMINISTRATIF_CATEGORIES = new Set(ActeAdministratifCategory);
 const DOCUMENT_FINANCIER_CATEGORIES = new Set(DocumentFinancierCategory);
@@ -25,28 +32,7 @@ const fileUploadIdToActeId = new Map<number, number>();
 const migrate = async () => {
   console.log("📥 Récupération des FileUpload...");
 
-  const fileUploads = await prisma.fileUpload.findMany({
-    select: {
-      id: true,
-      key: true,
-      mimeType: true,
-      fileSize: true,
-      originalName: true,
-      structureDnaCode: true,
-      cpomId: true,
-      date: true,
-      category: true,
-      startDate: true,
-      endDate: true,
-      categoryName: true,
-      parentFileUploadId: true,
-      granularity: true,
-      controleId: true,
-      evaluationId: true,
-      acteAdministratifId: true,
-      documentFinancierId: true,
-    },
-  });
+  const fileUploads = await prisma.fileUpload.findMany();
 
   // Parents only first, avenants after
   const filesToMigrate = fileUploads
@@ -105,9 +91,17 @@ const migrate = async () => {
 
       // Allez on en profite pour faire le ménage
       if (!isLinkedToSomething) {
-        await prisma.fileUpload.delete({
-          where: { id: fileToMigrate.id },
-        });
+        try {
+          await deleteFileAndRecord(S3_BUCKET_NAME, fileToMigrate.key);
+        } catch (error) {
+          console.warn(
+            `⚠️ FileUpload id=${fileToMigrate.id} (key=${fileToMigrate.key}): suppression échouée:`,
+            error
+          );
+          errors++;
+          continue;
+        }
+
         deletedFiles++;
         continue;
       }
@@ -115,11 +109,15 @@ const migrate = async () => {
       if (
         ACTE_ADMINISTRATIF_CATEGORIES.has(category as ActeAdministratifCategory)
       ) {
+        const categoryModified =
+          category == "CPOM"
+            ? "CONVENTION"
+            : (category as ActeAdministratifCategory);
         const acte = await prisma.acteAdministratif.create({
           data: {
             structureDnaCode: fileToMigrate.structureDnaCode ?? undefined,
             cpomId: fileToMigrate.cpomId ?? undefined,
-            category: category as ActeAdministratifCategory,
+            category: categoryModified,
             date: fileToMigrate.date ?? undefined,
             startDate: fileToMigrate.startDate ?? undefined,
             endDate: fileToMigrate.endDate ?? undefined,
@@ -138,7 +136,7 @@ const migrate = async () => {
       } else if (
         DOCUMENT_FINANCIER_CATEGORIES.has(category as DocumentFinancierCategory)
       ) {
-        const year = 0; // TO FIX: how do we get year?
+        const year = getYearFromDate(fileToMigrate.date ?? undefined);
         const doc = await prisma.documentFinancier.create({
           data: {
             structureDnaCode: fileToMigrate.structureDnaCode ?? undefined,

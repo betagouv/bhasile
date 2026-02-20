@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { deleteOneByKey, findOneByKey } from "../file.repository";
-import { deleteFile, getDownloadLink } from "../file.service";
+import { findOneByKey } from "../file.repository";
+import { deleteFileAndRecord, getDownloadLink } from "../file.service";
 
 export async function GET(request: NextRequest) {
   const encodedKey = request.nextUrl.pathname.split("/").pop();
@@ -62,10 +62,10 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    await deleteFile(process.env.S3_BUCKET_NAME!, key);
-
-    const deletedFile = await deleteOneByKey(key);
-
+    const deletedFile = await deleteFileAndRecord(
+      process.env.S3_BUCKET_NAME!,
+      key
+    );
     return NextResponse.json(deletedFile);
   } catch (error) {
     console.error(error);
