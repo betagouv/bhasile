@@ -7,7 +7,6 @@
 
 import "dotenv/config";
 
-import { deleteFileAndRecord } from "@/app/api/files/file.service";
 import { createPrismaClient } from "@/prisma-client";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import {
@@ -64,7 +63,7 @@ const migrate = async () => {
   let acteCount = 0;
   let docCount = 0;
   let errors = 0;
-  let deletedFiles = 0;
+  let filesThatShouldBeDeleted = 0;
 
   for (const fileToMigrate of filesToMigrate) {
     try {
@@ -89,20 +88,20 @@ const migrate = async () => {
         continue;
       }
 
-      // Allez on en profite pour faire le ménage
+      // Allez on en profite pour faire le ménage - Finalement non
       if (!isLinkedToSomething) {
-        try {
-          await deleteFileAndRecord(S3_BUCKET_NAME, fileToMigrate.key);
-        } catch (error) {
-          console.warn(
-            `⚠️ FileUpload id=${fileToMigrate.id} (key=${fileToMigrate.key}): suppression échouée:`,
-            error
-          );
-          errors++;
-          continue;
-        }
+        // try {
+        //   await deleteFileAndRecord(S3_BUCKET_NAME, fileToMigrate.key);
+        // } catch (error) {
+        //   console.warn(
+        //     `⚠️ FileUpload id=${fileToMigrate.id} (key=${fileToMigrate.key}): suppression échouée:`,
+        //     error
+        //   );
+        //   errors++;
+        //   continue;
+        // }
 
-        deletedFiles++;
+        filesThatShouldBeDeleted++;
         continue;
       }
 
@@ -166,9 +165,9 @@ const migrate = async () => {
     }
   }
 
-  console.log(`✓ ActeAdministratif créés: ${acteCount}`);
-  console.log(`✓ DocumentFinancier créés: ${docCount}`);
-  console.log(`✓ Fichiers supprimés: ${deletedFiles}`);
+  console.log(`✓ ActeAdministratif créés : ${acteCount}`);
+  console.log(`✓ DocumentFinancier créés : ${docCount}`);
+  console.log(`✓ Fichiers à supprimer : ${filesThatShouldBeDeleted}`);
   if (errors > 0) console.log(`❌ Erreurs: ${errors}`);
 };
 
