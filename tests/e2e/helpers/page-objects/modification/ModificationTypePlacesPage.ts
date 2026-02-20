@@ -60,22 +60,22 @@ export class ModificationTypePlacesPage extends BasePage {
 
     if (data.structureTypologies?.length) {
       for (let i = 0; i < data.structureTypologies.length; i++) {
-        const t = data.structureTypologies[i];
+        const structureTypology = data.structureTypologies[i];
         await this.formHelper.fillInputIfExists(
           `input[name="structureTypologies.${i}.placesAutorisees"]`,
-          String(t.placesAutorisees)
+          String(structureTypology.placesAutorisees)
         );
         await this.formHelper.fillInputIfExists(
           `input[name="structureTypologies.${i}.pmr"]`,
-          String(t.pmr)
+          String(structureTypology.pmr)
         );
         await this.formHelper.fillInputIfExists(
           `input[name="structureTypologies.${i}.lgbt"]`,
-          String(t.lgbt)
+          String(structureTypology.lgbt)
         );
         await this.formHelper.fillInputIfExists(
           `input[name="structureTypologies.${i}.fvvTeh"]`,
-          String(t.fvvTeh)
+          String(structureTypology.fvvTeh)
         );
       }
     }
