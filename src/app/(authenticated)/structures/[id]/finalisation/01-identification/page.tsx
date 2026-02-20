@@ -95,7 +95,10 @@ export default function FinalisationIdentification(): ReactElement {
         <FieldSetAdresseAdministrative formKind={FormKind.FINALISATION} />
         <hr />
 
-        <FieldSetTypePlaces formKind={FormKind.FINALISATION} />
+        <FieldSetTypePlaces
+          structure={structure}
+          formKind={FormKind.FINALISATION}
+        />
 
         {saveState === FetchState.ERROR && (
           <SubmitError

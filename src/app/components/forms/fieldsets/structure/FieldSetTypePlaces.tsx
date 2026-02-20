@@ -5,13 +5,17 @@ import { useFormContext } from "react-hook-form";
 import { Table } from "@/app/components/common/Table";
 import { cn } from "@/app/utils/classname.util";
 import { getTypePlacesYearRange } from "@/app/utils/date.util";
+import { getRealCreationYear } from "@/app/utils/structure.util";
+import { StructureApiType } from "@/schemas/api/structure.schema";
 import { FormKind } from "@/types/global";
 
 import { YearlyTypePlace } from "./FieldSetTypePlace.tsx/YearlyTypePlace";
 
 export const FieldSetTypePlaces = ({
   formKind = FormKind.FINALISATION,
+  structure,
 }: {
+  structure: StructureApiType;
   formKind?: FormKind;
 }) => {
   const fieldsetRef = useRef<HTMLFieldSetElement>(null);
@@ -26,6 +30,9 @@ export const FieldSetTypePlaces = ({
   }, [formState]);
 
   const { years } = getTypePlacesYearRange();
+
+  const startYear = getRealCreationYear(structure);
+  const yearsToDisplay = years.filter((year) => year >= startYear);
 
   return (
     <fieldset className="flex flex-col" ref={fieldsetRef}>
@@ -53,7 +60,7 @@ export const FieldSetTypePlaces = ({
           hasErrors && "border-action-high-error"
         )}
       >
-        {years.map((year) => (
+        {yearsToDisplay.map((year) => (
           <YearlyTypePlace key={year} year={year} />
         ))}
       </Table>
