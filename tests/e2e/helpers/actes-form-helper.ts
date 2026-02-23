@@ -1,7 +1,7 @@
 import { expect, Page } from "@playwright/test";
 import path from "path";
 
-import { ActeAdministratifCategory } from "@/types/file-upload.type";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 import { TIMEOUTS } from "./constants";
 import { SELECTORS } from "./selectors";
@@ -12,7 +12,9 @@ import { ActeAdministratifData } from "./test-data/types";
  * Resolves file path to absolute (handles relative paths from project root).
  */
 function resolveActeFilePath(filePath: string): string {
-  if (path.isAbsolute(filePath)) return filePath;
+  if (path.isAbsolute(filePath)) {
+    return filePath;
+  }
   return path.join(process.cwd(), filePath);
 }
 
@@ -29,7 +31,9 @@ export async function fillActesForm(
   actes: ActeAdministratifData[],
   mode: "modification" | "finalisation"
 ): Promise<void> {
-  if (actes.length === 0) return;
+  if (actes.length === 0) {
+    return;
+  }
 
   if (mode === "modification") {
     for (const acte of actes) {
@@ -47,7 +51,9 @@ export async function fillActesForm(
 
     for (const category of ActeAdministratifCategory) {
       const entries = actesByCategory[category];
-      if (!entries?.length) continue;
+      if (!entries?.length) {
+        continue;
+      }
 
       const groupLabel = getActesCategoryRegex(category);
       const group = page.getByRole("group", { name: groupLabel });
@@ -61,7 +67,9 @@ export async function fillActesForm(
       rowCount = await group.locator(SELECTORS.FILE_INPUT).count();
       while (rowCount > entries.length) {
         const deleteButtons = group.locator(SELECTORS.DELETE_BUTTON);
-        if ((await deleteButtons.count()) === 0) break;
+        if ((await deleteButtons.count()) === 0) {
+          break;
+        }
         await deleteButtons.last().click();
         rowCount = await group.locator(SELECTORS.FILE_INPUT).count();
       }
@@ -80,7 +88,9 @@ async function addAndFillActe(
 ): Promise<void> {
   const groupLabel = getActesCategoryRegex(acte.category);
   const group = page.getByRole("group", { name: groupLabel });
-  if ((await group.count()) === 0) return;
+  if ((await group.count()) === 0) {
+    return;
+  }
 
   const addButton = group.getByRole("button", { name: /Ajouter/i });
   await addButton.click();
@@ -114,12 +124,12 @@ async function addAndFillActe(
       await endInputs.last().fill(acte.endDate);
     }
   }
-  if (acte.categoryName) {
+  if (acte.name) {
     const nameInputs = group.locator(
-      'input[name^="actesAdministratifs."][name$=".categoryName"]'
+      'input[name^="actesAdministratifs."][name$=".name"]'
     );
     if ((await nameInputs.count()) > 0) {
-      await nameInputs.last().fill(acte.categoryName);
+      await nameInputs.last().fill(acte.name);
     }
   }
 
@@ -153,12 +163,12 @@ async function fillActeFieldsAtGroupIndex(
       acte.endDate
     );
   }
-  if (acte.categoryName) {
+  if (acte.name) {
     await fillIfExistsAtIndex(
       group,
-      'input[name^="actesAdministratifs."][name$=".categoryName"]',
+      'input[name^="actesAdministratifs."][name$=".name"]',
       index,
-      acte.categoryName
+      acte.name
     );
   }
 

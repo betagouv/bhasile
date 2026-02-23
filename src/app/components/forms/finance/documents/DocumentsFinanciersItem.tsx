@@ -19,8 +19,8 @@ export const DocumentsFinanciersItem = ({
   const [fileData, setFileData] = useState<FileUploadWithLink | null>(null);
   useEffect(() => {
     const getFileData = async () => {
-      if (documentFinancier.key) {
-        const fileData = await getFile(documentFinancier.key);
+      if (documentFinancier.fileUploads?.[0]?.key) {
+        const fileData = await getFile(documentFinancier.fileUploads?.[0]?.key);
         setFileData(fileData);
       }
     };
@@ -30,9 +30,18 @@ export const DocumentsFinanciersItem = ({
 
   const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+
+    const confirm = window.confirm(
+      "Attention, vous allez supprimer définitivement ce fichier. Êtes-vous bien sûr·e de vouloir continuer ?"
+    );
+
+    if (!confirm) {
+      return;
+    }
+
     try {
-      if (documentFinancier.key) {
-        await deleteFile(documentFinancier.key);
+      if (documentFinancier.fileUploads?.[0]?.key) {
+        await deleteFile(documentFinancier.fileUploads?.[0]?.key);
       }
 
       const documentsFinanciers = watch(
@@ -40,7 +49,9 @@ export const DocumentsFinanciersItem = ({
       ) as DocumentFinancierFlexibleFormValues[];
 
       const indexToRemove = documentsFinanciers.findIndex(
-        (field) => field.key === documentFinancier.key
+        (field) =>
+          field.fileUploads?.[0]?.key ===
+          documentFinancier.fileUploads?.[0]?.key
       );
 
       setValue(
@@ -71,7 +82,7 @@ export const DocumentsFinanciersItem = ({
       </span>
       {" - "}
       <span>
-        {documentFinancier.categoryName ||
+        {documentFinancier.name ||
           getShortDisplayedName(fileData?.originalName)}
       </span>
       <span>

@@ -262,7 +262,7 @@ export const huda1: TestStructureScenario = {
     actesAdministratifs: [
       {
         category: "AUTRE",
-        categoryName: "Document modification e2e",
+        name: "Document modification e2e",
         filePath: "tests/e2e/fixtures/sample.csv",
       },
     ],

@@ -7,7 +7,7 @@ import {
 } from "@/schemas/api/cpom.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { updateFileUploads } from "../files/file.repository";
+import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acteAdministratif.repository";
 
 export const findAll = async (): Promise<Cpom[]> => {
   return prisma.cpom.findMany({
@@ -31,7 +31,11 @@ export const findOne = async (id: number): Promise<Cpom> => {
       structures: true,
       cpomMillesimes: true,
       operateur: true,
-      actesAdministratifs: true,
+      actesAdministratifs: {
+        include: {
+          fileUploads: true,
+        },
+      },
     },
   });
   return cpom;
@@ -66,12 +70,9 @@ export const createOrUpdateCpom = async (
 
     await createOrUpdateCpomMillesimes(tx, cpom.cpomMillesimes, cpomId);
 
-    await updateFileUploads(
-      tx,
-      cpom.actesAdministratifs,
-      { cpomId },
-      "acteAdministratif"
-    );
+    await createOrUpdateActesAdministratifs(tx, cpom.actesAdministratifs, {
+      cpomId,
+    });
 
     return cpomId;
   });

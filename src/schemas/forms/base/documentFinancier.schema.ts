@@ -12,17 +12,23 @@ import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
   nullishFrenchDateToISO,
   optionalFrenchDateToISO,
+  zId,
   zSafeYear,
 } from "@/app/utils/zodCustomFields";
-import { DocumentFinancierCategory } from "@/types/file-upload.type";
+import { fileApiSchema } from "@/schemas/api/file.schema";
+import {
+  DocumentFinancierCategory,
+  DocumentFinancierGranularity,
+} from "@/types/document-financier.type";
 import { StructureType } from "@/types/structure.type";
 
 const DocumentFinancierSchema = z.object({
-  key: z.string().optional(),
-  date: optionalFrenchDateToISO(),
+  id: zId(),
+  year: zSafeYear(),
   category: z.enum(DocumentFinancierCategory).optional(),
-  granularity: z.string().optional(),
-  categoryName: z.string().nullish(),
+  granularity: z.enum(DocumentFinancierGranularity).optional(),
+  name: z.string().nullish(),
+  fileUploads: z.array(fileApiSchema).optional(),
 });
 
 export const DocumentsFinanciersSchema = z.object({
@@ -97,7 +103,7 @@ export const DocumentsFinanciersStrictSchema = DocumentsFinanciersSchema.extend(
             const requiredDocument = data.documentsFinanciers?.find(
               (documentFinancier) =>
                 documentFinancier.category === document.value &&
-                getYearFromDate(documentFinancier.date) === year
+                documentFinancier.year === year
             );
             if (!requiredDocument) {
               ctx.addIssue({

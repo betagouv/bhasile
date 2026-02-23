@@ -60,7 +60,14 @@ export const Controle = ({
           priority="tertiary no outline"
           className="mt-8"
           title="Supprimer"
-          onClick={() => handleDeleteField(index)}
+          onClick={() => {
+            const confirm = window.confirm(
+              "Attention, vous allez supprimer définitivement cette inspection-contrôle. Êtes-vous bien sûr·e de vouloir continuer ?"
+            );
+            if (confirm) {
+              handleDeleteField(index);
+            }
+          }}
           type="button"
         />
       )}

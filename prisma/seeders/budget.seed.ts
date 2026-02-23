@@ -11,7 +11,6 @@ import { StructureType } from "@/types/structure.type";
 export const createFakeBudget = ({
   year,
   type,
-  cpom,
 }: CreateFakeBudgetOptions): Omit<Budget, "id" | "structureDnaCode"> => {
   const isAutorisee = isStructureAutorisee(type);
   const isSubventionnee = isStructureSubventionnee(type);
@@ -68,10 +67,9 @@ export const createFakeBudget = ({
     reserveCompensationBFR: faker.number.int({ min: 1, max: 10000 }),
     reserveCompensationAmortissements: faker.number.int({ min: 1, max: 10000 }),
     fondsDedies: faker.number.int({ min: 1, max: 10000 }),
-    reportANouveau:
-      isAutorisee || (isSubventionnee && cpom)
-        ? faker.number.int({ min: 1, max: 10000 })
-        : null,
+    reportANouveau: isAutorisee
+      ? faker.number.int({ min: 1, max: 10000 })
+      : null,
     autre: faker.number.int({ min: 1, max: 10000 }),
     commentaire: faker.lorem.lines(2),
     structureMillesimeId: null,
@@ -83,5 +81,4 @@ export const createFakeBudget = ({
 type CreateFakeBudgetOptions = {
   year: number;
   type: StructureType;
-  cpom: boolean;
 };
