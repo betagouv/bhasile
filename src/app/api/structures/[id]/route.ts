@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { createStructureEvent } from "../../user-action/user-action.service";
 import { findOne } from "../structure.repository";
 import {
   addPresencesIndues,
@@ -10,6 +11,7 @@ export async function GET(request: NextRequest) {
   try {
     const id = request.nextUrl.pathname.split("/").pop();
     const structure = await findOne(Number(id));
+    createStructureEvent(request.method, structure.id);
 
     if (!structure) {
       return NextResponse.json(

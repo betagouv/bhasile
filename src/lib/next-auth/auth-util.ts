@@ -20,17 +20,27 @@ export const getIsUserAuthorized = async (email: string): Promise<boolean> => {
   });
 };
 
-export const upsertUser = async (user: ProConnectUser): Promise<void> => {
+export const upsertUser = async ({
+  prenom,
+  nom,
+  email,
+}: UpsertUserArgs): Promise<void> => {
   await prisma.user.upsert({
-    where: { email: user.email },
+    where: { email: email },
     create: {
-      prenom: user.prenom,
-      nom: user.nom,
-      email: user.email,
+      prenom: prenom,
+      nom: nom,
+      email: email,
       lastConnection: new Date(),
     },
     update: {
       lastConnection: new Date(),
     },
   });
+};
+
+type UpsertUserArgs = {
+  prenom: string;
+  nom: string;
+  email: string;
 };

@@ -21,7 +21,11 @@ export const authOptions: NextAuthOptions = {
       try {
         const isUserAuthorized = await getIsUserAuthorized(email);
         if (isUserAuthorized) {
-          await upsertUser(user as ProConnectUser);
+          await upsertUser({
+            prenom: (user as ProConnectUser).prenom,
+            nom: (user as ProConnectUser).nom,
+            email: user.email as string,
+          });
         }
         return isUserAuthorized;
       } catch (error) {
@@ -35,11 +39,18 @@ export const authOptions: NextAuthOptions = {
         token.id_token = account.id_token;
         token.provider = account.provider;
         token.user_id = user.id;
+        token.prenom = prenom;
+        token.nom = nom;
         token.name = `${prenom} ${nom}`;
       }
       return token;
     },
     async session({ token, session }) {
+      await upsertUser({
+        prenom: token.prenom as string,
+        nom: token.nom as string,
+        email: token.email as string,
+      });
       return {
         ...session,
         id_token: token.id_token,

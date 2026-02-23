@@ -19,8 +19,8 @@ CREATE TABLE "UserAction" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
     "action" "UserActionCategory" NOT NULL,
-    "entityName" TEXT NOT NULL,
-    "entityId" INTEGER NOT NULL,
+    "structureId" INTEGER,
+    "cpomId" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -32,3 +32,9 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- AddForeignKey
 ALTER TABLE "UserAction" ADD CONSTRAINT "UserAction_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserAction" ADD CONSTRAINT "UserAction_structureId_fkey" FOREIGN KEY ("structureId") REFERENCES "Structure"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserAction" ADD CONSTRAINT "UserAction_cpomId_fkey" FOREIGN KEY ("cpomId") REFERENCES "Cpom"("id") ON DELETE SET NULL ON UPDATE CASCADE;
