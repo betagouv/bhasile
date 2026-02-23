@@ -12,7 +12,7 @@ import { OperateurApiType } from "@/schemas/api/operateur.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 import { Repartition } from "@/types/adresse.type";
-import { CpomStructure } from "@/types/cpom.type";
+import { Cpom, CpomStructure } from "@/types/cpom.type";
 import { Departement } from "@/types/departement.type";
 import { PublicType } from "@/types/structure-public.type";
 import { StructureType } from "@/types/structure-type.type";
@@ -75,5 +75,9 @@ export type Structure = {
   isSubventionnee: boolean;
   isInCpom: boolean;
   wasInCpom: boolean;
-  currentCpomStructure?: CpomStructure;
+  currentComputedCpom?: {
+    cpom: Cpom;
+    dateStart: string;
+    dateEnd: string;
+  };
 };

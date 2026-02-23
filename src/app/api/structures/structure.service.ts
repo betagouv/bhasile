@@ -1,3 +1,4 @@
+import { convertEveryNullAndDates } from "@/app/utils/convertEveryNullAndDates";
 import { getYearRange } from "@/app/utils/date.util";
 import { Prisma, Repartition, StructureType } from "@/generated/prisma/client";
 import { StructureColumn } from "@/types/ListColumn";
@@ -38,7 +39,8 @@ export const computeStructure = (
   const isInCpom = isStructureInCpom(structure);
   const wasInCpom = wasStructureInCpom(structure, years);
   const currentCpomStructure = getCurrentCpomStructures(structure);
-  return {
+
+  return convertEveryNullAndDates({
     ...structure,
     activites,
     repartition,
@@ -52,7 +54,7 @@ export const computeStructure = (
     isInCpom,
     wasInCpom,
     currentCpomStructure,
-  };
+  }) as unknown as Structure; // Typescript doesn't understand that every date is converted to ISO string
 };
 
 export const getStructureOrderBy = (

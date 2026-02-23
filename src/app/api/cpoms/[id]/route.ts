@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { findOne } from "../cpom.repository";
-import { computeCpom } from "../cpom.util";
+import { computeCpom } from "../cpom.service";
 
 export async function GET(
   _request: NextRequest,

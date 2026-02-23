@@ -3,7 +3,7 @@ import z from "zod";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { frenchDateToISO } from "@/app/utils/zodCustomFields";
 import { contactSchema } from "@/schemas/forms/base/contact.schema";
-import { PublicType } from "@/types/structure-type.type";
+import { PublicType } from "@/types/structure-public.type";
 
 import { operateurSchema } from "./operateur.schema";
 import { structureBaseSchema } from "./structure.base.schema";

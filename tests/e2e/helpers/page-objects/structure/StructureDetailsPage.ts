@@ -5,7 +5,7 @@ import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
 import { getOperateurLabel } from "@/app/utils/structure.util";
 import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
-import { PublicType } from "@/types/structure-type.type";
+import { PublicType } from "@/types/structure-public.type";
 
 import { URLS } from "../../constants";
 import {
