@@ -109,7 +109,7 @@ const migrate = async () => {
         ACTE_ADMINISTRATIF_CATEGORIES.has(category as ActeAdministratifCategory)
       ) {
         const categoryModified =
-          category == "CPOM"
+          category == "CPOM" && fileToMigrate.cpomId
             ? "CONVENTION"
             : (category as ActeAdministratifCategory);
         const acte = await prisma.acteAdministratif.create({

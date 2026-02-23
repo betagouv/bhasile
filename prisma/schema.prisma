@@ -604,6 +604,7 @@ enum ActeAdministratifCategory {
   CONVENTION
   ARRETE_TARIFICATION
   AUTRE
+  CPOM // Legacy category (for CPOM documents added before the CPOM form)
 
   @@schema("public")
 }
