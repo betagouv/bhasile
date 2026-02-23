@@ -25,7 +25,7 @@ export const BudgetTableLines = ({
           <BudgetTableTitleLine label={block.title} />
           {block.lines.map((line) => (
             <BudgetTableLine
-              key={line.name}
+              key={"line-" + line.name}
               name={line.name}
               label={line.label}
               subLabel={line.subLabel}

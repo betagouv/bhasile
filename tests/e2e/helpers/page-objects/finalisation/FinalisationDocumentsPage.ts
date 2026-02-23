@@ -34,7 +34,7 @@ export class FinalisationDocumentsPage extends BasePage {
       await submitButton.click({ force: true });
       await this.page.waitForURL(
         URLS.finalisationStep(structureId, "06-notes"),
-        { timeout: TIMEOUTS.SUBMIT, waitUntil: "commit" }
+        { timeout: TIMEOUTS.SUBMIT_DOCUMENTS, waitUntil: "commit" }
       );
     }
   }

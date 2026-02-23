@@ -1,65 +1,34 @@
-import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import { useRouter } from "next/navigation";
 import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
-import { DownloadItem } from "@/app/components/common/DownloadItem";
-import { isStructureInCpom } from "@/app/utils/structure.util";
-import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
+import { getActesAdministratifsCategoryToDisplay } from "@/app/utils/acteAdministratif.util";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
+import { ActesAdministratifsCategory } from "./ActesAdministratifsCategory";
 
 export const ActesAdministratifsBlock = (): ReactElement => {
   const { structure } = useStructureContext();
 
   const router = useRouter();
 
-  const categories = [
-    {
-      label: "Arrêtés d'autorisation",
-      // TODO : utiliser l'enum plutôt qu'une string hardcodée
-      category: "ARRETE_AUTORISATION",
-      isDisplayed: true,
-    },
-    {
-      label: "CPOM",
-      category: "CPOM",
-      isDisplayed: isStructureInCpom(structure),
-    },
-    {
-      label: "Conventions",
-      category: "CONVENTION",
-      isDisplayed: true,
-    },
-    {
-      label: "Arrêtés de tarification",
-      category: "ARRETE_TARIFICATION",
-      isDisplayed: true,
-    },
-    {
-      label: "Autres documents",
-      category: "AUTRE",
-      isDisplayed: true,
-    },
-  ];
+  const actesAdministratifsCategoriesRules =
+    getActesAdministratifsCategoryToDisplay(structure);
 
-  const getActesAdministratifsToDisplay = (categorie: {
-    category: string;
-  }): ActeAdministratifApiType[] => {
-    return (structure.actesAdministratifs || [])
-      ?.filter(
-        (acteAdministratif) => acteAdministratif.category === categorie.category
+  const filteredActesAdministratifs = structure.actesAdministratifs?.filter(
+    (acteAdministratif) =>
+      Object.keys(actesAdministratifsCategoriesRules).includes(
+        acteAdministratif.category
       )
-      .filter(
-        (acteAdministratif) => acteAdministratif.key
-      ) as ActeAdministratifApiType[];
-  };
+  );
 
-  const displayedCategories = categories
-    .filter((categorie) => categorie.isDisplayed)
-    .filter(
-      (categorie) => getActesAdministratifsToDisplay(categorie)?.length > 0
-    );
+  const cpomActesAdministratifs = structure.cpomStructures
+    ?.flatMap((cpomStructure) => cpomStructure.cpom?.actesAdministratifs)
+    .filter((cpomActeAdministratif) => cpomActeAdministratif);
+
+  const hasDocuments =
+    cpomActesAdministratifs?.length || filteredActesAdministratifs?.length;
 
   return (
     <Block
@@ -69,22 +38,27 @@ export const ActesAdministratifsBlock = (): ReactElement => {
         router.push(`/structures/${structure.id}/modification/06-documents`);
       }}
     >
-      {displayedCategories.length === 0 ? (
+      {!hasDocuments ? (
         <>Aucun document importé</>
       ) : (
-        displayedCategories.map((categorie) => (
-          <Accordion label={categorie.label} key={categorie.category}>
-            <div className="columns-3">
-              {getActesAdministratifsToDisplay(categorie).map(
-                (acteAdministratif) => (
-                  <div key={acteAdministratif.key} className="pb-5">
-                    <DownloadItem fileUpload={acteAdministratif} />
-                  </div>
-                )
-              )}
-            </div>
-          </Accordion>
-        ))
+        <>
+          {Object.entries(actesAdministratifsCategoriesRules).map(
+            ([category, rules]) =>
+              rules.shouldShow && (
+                <ActesAdministratifsCategory
+                  category={category as ActeAdministratifCategory}
+                  key={category}
+                  title={rules.title}
+                />
+              )
+          )}
+          {cpomActesAdministratifs?.length ? (
+            <ActesAdministratifsCategory
+              category={"CONVENTION" as ActeAdministratifCategory}
+              title="CPOM"
+            />
+          ) : null}
+        </>
       )}
     </Block>
   );

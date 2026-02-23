@@ -29,7 +29,7 @@
     "delete-views": "npx tsx scripts/apply-views.ts delete",
     "delete-views:dev": "npx tsx -r dotenv/config scripts/apply-views.ts delete",
     "prisma:migrate": "prisma migrate dev && prisma generate",
-    "prisma:deploy": "prisma migrate deploy",
+    "prisma:deploy": "prisma migrate deploy && prisma generate",
     "prisma:seed": "prisma db seed",
     "prisma:studio": "prisma studio",
     "prisma:reset": "prisma migrate reset && prisma generate",

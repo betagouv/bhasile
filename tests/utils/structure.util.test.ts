@@ -298,10 +298,14 @@ describe("structure util", () => {
               name: "CPOM Test",
               actesAdministratifs: [
                 {
-                  key: "test-key",
+                  fileUploads: [
+                    {
+                      key: "test-key",
+                    },
+                  ],
                   startDate: "2024-01-01T00:00:00.000Z",
                   endDate: "2026-12-31T23:59:59.999Z",
-                  category: "CPOM",
+                  category: "CONVENTION",
                 },
               ],
               cpomMillesimes: [
@@ -339,10 +343,14 @@ describe("structure util", () => {
               name: "CPOM Test",
               actesAdministratifs: [
                 {
-                  key: "test-key",
+                  fileUploads: [
+                    {
+                      key: "test-key",
+                    },
+                  ],
                   startDate: "2024-01-01T00:00:00.000Z",
                   endDate: "2024-12-31T23:59:59.999Z",
-                  category: "CPOM",
+                  category: "CONVENTION",
                 },
               ],
               granularity: "DEPARTEMENTALE",
@@ -403,10 +411,14 @@ describe("structure util", () => {
               name: "CPOM Test 1",
               actesAdministratifs: [
                 {
-                  key: "test-key",
+                  fileUploads: [
+                    {
+                      key: "test-key",
+                    },
+                  ],
                   startDate: "2024-01-01T00:00:00.000Z",
                   endDate: "2024-12-31T23:59:59.999Z",
-                  category: "CPOM",
+                  category: "CONVENTION",
                 },
               ],
               cpomMillesimes: [
@@ -429,10 +441,14 @@ describe("structure util", () => {
               name: "CPOM Test 2",
               actesAdministratifs: [
                 {
-                  key: "test-key",
+                  fileUploads: [
+                    {
+                      key: "test-key",
+                    },
+                  ],
                   startDate: "2025-01-01T00:00:00.000Z",
                   endDate: "2026-12-31T23:59:59.999Z",
-                  category: "CPOM",
+                  category: "CONVENTION",
                 },
               ],
               cpomMillesimes: [
@@ -485,10 +501,14 @@ describe("structure util", () => {
               name: "CPOM Test",
               actesAdministratifs: [
                 {
-                  key: "test-key",
+                  fileUploads: [
+                    {
+                      key: "test-key",
+                    },
+                  ],
                   startDate: "2025-01-01T00:00:00.000Z",
                   endDate: undefined,
-                  category: "CPOM",
+                  category: "CONVENTION",
                 },
               ],
               granularity: "DEPARTEMENTALE",
@@ -527,10 +547,14 @@ describe("structure util", () => {
               id: 1,
               actesAdministratifs: [
                 {
-                  key: "test-key",
+                  fileUploads: [
+                    {
+                      key: "test-key",
+                    },
+                  ],
                   startDate: "2024-01-01T00:00:00.000Z",
                   endDate: "2026-12-31T23:59:59.999Z",
-                  category: "CPOM",
+                  category: "CONVENTION",
                 },
               ],
               granularity: "DEPARTEMENTALE",
@@ -568,10 +592,14 @@ describe("structure util", () => {
               id: 1,
               actesAdministratifs: [
                 {
-                  key: "test-key",
+                  fileUploads: [
+                    {
+                      key: "test-key",
+                    },
+                  ],
                   startDate: "2025-01-01T00:00:00.000Z",
                   endDate: "2025-12-31T23:59:59.999Z",
-                  category: "CPOM",
+                  category: "CONVENTION",
                 },
               ],
               granularity: "DEPARTEMENTALE",
@@ -605,10 +633,14 @@ describe("structure util", () => {
               id: 1,
               actesAdministratifs: [
                 {
-                  key: "test-key",
+                  fileUploads: [
+                    {
+                      key: "test-key",
+                    },
+                  ],
                   startDate: "2024-01-01T00:00:00.000Z",
                   endDate: "2024-12-31T23:59:59.999Z",
-                  category: "CPOM",
+                  category: "CONVENTION",
                 },
               ],
               granularity: "DEPARTEMENTALE",
@@ -655,10 +687,14 @@ describe("structure util", () => {
               id: 1,
               actesAdministratifs: [
                 {
-                  key: "test-key",
+                  fileUploads: [
+                    {
+                      key: "test-key",
+                    },
+                  ],
                   startDate: "2025-01-01T00:00:00.000Z",
                   endDate: "2025-12-31T23:59:59.999Z",
-                  category: "CPOM",
+                  category: "CONVENTION",
                 },
               ],
               granularity: "DEPARTEMENTALE",
@@ -811,10 +847,14 @@ describe("structure util", () => {
             name: "CPOM Test",
             actesAdministratifs: [
               {
-                key: "test-key",
+                fileUploads: [
+                  {
+                    key: "test-key",
+                  },
+                ],
                 startDate: "2024-01-01T00:00:00.000Z",
                 endDate: "2026-12-31T23:59:59.999Z",
-                category: "CPOM",
+                category: "CONVENTION",
               },
             ],
             granularity: "DEPARTEMENTALE",
@@ -869,10 +909,14 @@ describe("structure util", () => {
             name: "CPOM Test",
             actesAdministratifs: [
               {
-                key: "test-key",
+                fileUploads: [
+                  {
+                    key: "test-key",
+                  },
+                ],
                 startDate: "2024-01-01T00:00:00.000Z",
                 endDate: "2026-12-31T23:59:59.999Z",
-                category: "CPOM",
+                category: "CONVENTION",
               },
             ],
             granularity: "DEPARTEMENTALE",
@@ -917,10 +961,14 @@ describe("structure util", () => {
             name: "CPOM Test 1",
             actesAdministratifs: [
               {
-                key: "test-key",
+                fileUploads: [
+                  {
+                    key: "test-key",
+                  },
+                ],
                 startDate: "2024-01-01T00:00:00.000Z",
                 endDate: "2026-12-31T23:59:59.999Z",
-                category: "CPOM",
+                category: "CONVENTION",
               },
             ],
             granularity: "DEPARTEMENTALE",
@@ -943,10 +991,14 @@ describe("structure util", () => {
             name: "CPOM Test 2",
             actesAdministratifs: [
               {
-                key: "test-key",
+                fileUploads: [
+                  {
+                    key: "test-key",
+                  },
+                ],
                 startDate: "2024-01-01T00:00:00.000Z",
                 endDate: "2026-12-31T23:59:59.999Z",
-                category: "CPOM",
+                category: "CONVENTION",
               },
             ],
             granularity: "DEPARTEMENTALE",
@@ -984,10 +1036,14 @@ describe("structure util", () => {
             name: "CPOM Test 1",
             actesAdministratifs: [
               {
-                key: "test-key",
+                fileUploads: [
+                  {
+                    key: "test-key",
+                  },
+                ],
                 startDate: "2024-01-01T00:00:00.000Z",
                 endDate: "2024-12-31T23:59:59.999Z",
-                category: "CPOM",
+                category: "CONVENTION",
               },
             ],
             granularity: "DEPARTEMENTALE",
@@ -1010,10 +1066,14 @@ describe("structure util", () => {
             name: "CPOM Test 2",
             actesAdministratifs: [
               {
-                key: "test-key",
+                fileUploads: [
+                  {
+                    key: "test-key",
+                  },
+                ],
                 startDate: "2025-01-01T00:00:00.000Z",
                 endDate: "2026-12-31T23:59:59.999Z",
-                category: "CPOM",
+                category: "CONVENTION",
               },
             ],
             granularity: "DEPARTEMENTALE",
@@ -1051,10 +1111,14 @@ describe("structure util", () => {
             name: "CPOM Test 1",
             actesAdministratifs: [
               {
-                key: "test-key",
+                fileUploads: [
+                  {
+                    key: "test-key",
+                  },
+                ],
                 startDate: "2024-01-01T00:00:00.000Z",
                 endDate: "2024-12-31T23:59:59.999Z",
-                category: "CPOM",
+                category: "CONVENTION",
               },
             ],
             cpomMillesimes: undefined,
@@ -1072,10 +1136,14 @@ describe("structure util", () => {
             name: "CPOM Test 2",
             actesAdministratifs: [
               {
-                key: "test-key",
+                fileUploads: [
+                  {
+                    key: "test-key",
+                  },
+                ],
                 startDate: "2025-01-01T00:00:00.000Z",
                 endDate: "2026-12-31T23:59:59.999Z",
-                category: "CPOM",
+                category: "CONVENTION",
               },
             ],
             granularity: "DEPARTEMENTALE",
@@ -1113,10 +1181,14 @@ describe("structure util", () => {
             name: "CPOM Test",
             actesAdministratifs: [
               {
-                key: "test-key",
+                fileUploads: [
+                  {
+                    key: "test-key",
+                  },
+                ],
                 startDate: "2024-01-01T00:00:00.000Z",
                 endDate: "2026-12-31T23:59:59.999Z",
-                category: "CPOM",
+                category: "CONVENTION",
               },
             ],
             granularity: "DEPARTEMENTALE",
@@ -1162,10 +1234,14 @@ describe("structure util", () => {
             name: "CPOM Test",
             actesAdministratifs: [
               {
-                key: "test-key",
+                fileUploads: [
+                  {
+                    key: "test-key",
+                  },
+                ],
                 startDate: "2024-01-01T00:00:00.000Z",
                 endDate: "2026-12-31T23:59:59.999Z",
-                category: "CPOM",
+                category: "CONVENTION",
               },
             ],
             granularity: "DEPARTEMENTALE",

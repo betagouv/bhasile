@@ -9,6 +9,8 @@ export const TIMEOUTS = {
   NAVIGATION: 10000,
   /** Timeout for form submissions (finalisation steps with file uploads can be slow) */
   SUBMIT: 30000,
+  /** Extra long timeout for actes administratifs step (multiple S3 uploads) */
+  SUBMIT_DOCUMENTS: 60000,
   /** Timeout for autocomplete suggestions (debounce + API under load) */
   AUTOCOMPLETE: 25000,
   /** Short wait for UI updates */

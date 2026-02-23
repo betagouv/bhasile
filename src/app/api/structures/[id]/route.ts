@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { findOne } from "../structure.repository";
 import {
   addPresencesIndues,
-  divideFileUploads,
   StructureWithFileUploadsAndActivites,
 } from "../structure.service";
 
@@ -22,10 +21,8 @@ export async function GET(request: NextRequest) {
     const structureWithPresencesIndues = addPresencesIndues(
       structure as StructureWithFileUploadsAndActivites
     );
-    const structureWithDividedFileUploads = divideFileUploads(
-      structureWithPresencesIndues
-    );
-    return NextResponse.json(structureWithDividedFileUploads);
+
+    return NextResponse.json(structureWithPresencesIndues);
   } catch (error) {
     console.error("Error in GET /api/structures/[id]", error);
     return NextResponse.json(

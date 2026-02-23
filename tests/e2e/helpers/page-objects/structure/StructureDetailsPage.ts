@@ -300,8 +300,8 @@ export class StructureDetailsPage extends BasePage {
         continue;
       }
       await accordionButton.click();
-      if (acte.category === "AUTRE" && acte.categoryName) {
-        await expect(actesBlock).toContainText(acte.categoryName);
+      if (acte.category === "AUTRE" && acte.name) {
+        await expect(actesBlock).toContainText(acte.name);
         continue;
       }
       if (acte.startDate && acte.endDate) {
