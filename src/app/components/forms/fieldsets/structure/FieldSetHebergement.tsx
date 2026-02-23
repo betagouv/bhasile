@@ -145,8 +145,6 @@ export const FieldSetHebergement = ({
 
         <Notices
           typeBati={typeBati}
-          getValues={getValues}
-          setValue={setValue}
           hebergementsContainerRef={hebergementsContainerRef}
         />
 

@@ -31,6 +31,7 @@ export const CpomTable = () => {
       enableBorders
     >
       <BudgetTableLines
+        years={years}
         lines={getCpomLines()}
         cpomMillesimes={cpomMillesimes}
         enabledYears={yearsInCpom}

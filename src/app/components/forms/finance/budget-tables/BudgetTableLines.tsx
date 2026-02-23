@@ -14,23 +14,22 @@ export const BudgetTableLines = ({
   budgets,
   cpomStructures,
   cpomMillesimes,
+  years,
   enabledYears,
   canEdit = true,
 }: Props) => {
   return (
     <>
       {lines.map((block) => (
-        <Fragment key={"block-" + block.title}>
-          <BudgetTableTitleLine
-            key={"title-" + block.title}
-            label={block.title}
-          />
+        <Fragment key={block.title}>
+          <BudgetTableTitleLine label={block.title} />
           {block.lines.map((line) => (
             <BudgetTableLine
               key={"line-" + line.name}
               name={line.name}
               label={line.label}
               subLabel={line.subLabel}
+              years={years}
               disabledYearsStart={line.disabledYearsStart}
               enabledYears={enabledYears ?? line.enabledYears}
               colored={line.colored}
@@ -61,6 +60,7 @@ type Props = {
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];
   cpomMillesimes?: CpomMillesimeApiType[];
+  years: number[];
   enabledYears?: number[];
   canEdit?: boolean;
 };

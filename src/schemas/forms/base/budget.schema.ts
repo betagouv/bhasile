@@ -3,10 +3,12 @@ import z from "zod";
 import { isNullOrUndefined } from "@/app/utils/common.util";
 import {
   zId,
+  zSafeDecimals,
   zSafeDecimalsNullish,
+  zSafePositiveDecimals,
+  zSafePositiveDecimalsNullish,
   zSafeYear,
 } from "@/app/utils/zodCustomFields";
-import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
 
 import { validateAffectationReservesDetails } from "./budget/validateAffectationReservesDetails";
 import { cpomStructureSchema } from "./cpom.schema";
@@ -16,29 +18,29 @@ export const budgetBaseSchema = z.object({
   year: zSafeYear(),
 
   // Indicateurs généraux
-  ETP: zSafeDecimals(),
-  tauxEncadrement: zSafeDecimals(),
-  coutJournalier: zSafeDecimals(),
+  ETP: zSafePositiveDecimals(),
+  tauxEncadrement: zSafePositiveDecimals(),
+  coutJournalier: zSafePositiveDecimals(),
 
   commentaire: z.string().nullish(),
 });
 
 export const budgetAutoriseeNotOpenSchema = budgetBaseSchema.extend({
-  dotationDemandee: zSafeDecimals(),
+  dotationDemandee: zSafePositiveDecimals(),
 });
 
 export const budgetAutoriseeOpenYear1Schema =
   budgetAutoriseeNotOpenSchema.extend({
-    dotationAccordee: zSafeDecimals(),
+    dotationAccordee: zSafePositiveDecimals(),
   });
 
 export const budgetAutoriseeOpenSchemaWithoutRefinement =
   budgetAutoriseeOpenYear1Schema.extend({
     // Résultat
-    totalProduitsProposes: zSafeDecimalsNullish(),
-    totalProduits: zSafeDecimals(),
-    totalChargesProposees: zSafeDecimals(),
-    totalCharges: zSafeDecimals(),
+    totalProduitsProposes: zSafePositiveDecimalsNullish(),
+    totalProduits: zSafePositiveDecimals(),
+    totalChargesProposees: zSafePositiveDecimals(),
+    totalCharges: zSafePositiveDecimals(),
     repriseEtat: zSafeDecimals(),
     affectationReservesFondsDedies: zSafeDecimals(),
 
@@ -72,33 +74,33 @@ export const budgetAutoriseeOpenSchema =
 export const budgetSubventionneeNotOpenSchema = budgetBaseSchema; // Duplicated for comprehensibility
 
 export const budgetSubventionneeOpenSchema = budgetBaseSchema.extend({
-  dotationDemandee: zSafeDecimals(),
-  dotationAccordee: zSafeDecimals(),
-  totalProduits: zSafeDecimals(),
-  totalCharges: zSafeDecimals(),
+  dotationDemandee: zSafePositiveDecimals(),
+  dotationAccordee: zSafePositiveDecimals(),
+  totalProduits: zSafePositiveDecimals(),
+  totalCharges: zSafePositiveDecimals(),
   repriseEtat: zSafeDecimals(),
-  excedentRecupere: zSafeDecimals(),
-  excedentDeduit: zSafeDecimals(),
-  fondsDedies: zSafeDecimals(),
+  excedentRecupere: zSafePositiveDecimals(),
+  excedentDeduit: zSafePositiveDecimals(),
+  fondsDedies: zSafePositiveDecimals(),
 });
 
 // TODO: cannot find a way to avoid duplication
 export const budgetAutoSaveSchema = z.object({
   id: zId(),
   year: zSafeYear(),
-  ETP: zSafeDecimalsNullish(),
-  tauxEncadrement: zSafeDecimalsNullish(),
-  coutJournalier: zSafeDecimalsNullish(),
-  dotationDemandee: zSafeDecimalsNullish(),
-  dotationAccordee: zSafeDecimalsNullish(),
-  totalProduitsProposes: zSafeDecimalsNullish(),
-  totalProduits: zSafeDecimalsNullish(),
-  totalChargesProposees: zSafeDecimalsNullish(),
-  totalCharges: zSafeDecimalsNullish(),
+  ETP: zSafePositiveDecimalsNullish(),
+  tauxEncadrement: zSafePositiveDecimalsNullish(),
+  coutJournalier: zSafePositiveDecimalsNullish(),
+  dotationDemandee: zSafePositiveDecimalsNullish(),
+  dotationAccordee: zSafePositiveDecimalsNullish(),
+  totalProduitsProposes: zSafePositiveDecimalsNullish(),
+  totalProduits: zSafePositiveDecimalsNullish(),
+  totalChargesProposees: zSafePositiveDecimalsNullish(),
+  totalCharges: zSafePositiveDecimalsNullish(),
   repriseEtat: zSafeDecimalsNullish(),
-  excedentRecupere: zSafeDecimalsNullish(),
-  excedentDeduit: zSafeDecimalsNullish(),
-  fondsDedies: zSafeDecimalsNullish(),
+  excedentRecupere: zSafePositiveDecimalsNullish(),
+  excedentDeduit: zSafePositiveDecimalsNullish(),
+  fondsDedies: zSafePositiveDecimalsNullish(),
   affectationReservesFondsDedies: zSafeDecimalsNullish(),
   reserveInvestissement: zSafeDecimalsNullish(),
   chargesNonReconductibles: zSafeDecimalsNullish(),
@@ -116,9 +118,9 @@ export const budgetInCpomSchema = budgetAutoriseeOpenSchemaWithoutRefinement
   .and(
     z.object({
       year: zSafeYear(),
-      ETP: zSafeDecimals(),
-      tauxEncadrement: zSafeDecimals(),
-      coutJournalier: zSafeDecimals(),
+      ETP: zSafePositiveDecimals(),
+      tauxEncadrement: zSafePositiveDecimals(),
+      coutJournalier: zSafePositiveDecimals(),
     })
   );
 

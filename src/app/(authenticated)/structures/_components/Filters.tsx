@@ -57,7 +57,9 @@ export const Filters = () => {
   const locationPanelRef = useRef<HTMLDivElement | null>(null);
   const locationButtonRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
-    if (!openPanel) return;
+    if (!openPanel) {
+      return;
+    }
 
     const handleClickOutside = (event: MouseEvent) => {
       let clickedInsidePanel = false;

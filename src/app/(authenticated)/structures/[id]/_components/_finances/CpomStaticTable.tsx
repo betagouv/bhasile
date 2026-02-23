@@ -31,6 +31,7 @@ export const CpomStaticTable = (): ReactElement => {
         enableBorders
       >
         <BudgetTableLines
+          years={years}
           lines={getCpomStaticTableLines(isAffectationOpen)}
           cpomStructures={structure?.cpomStructures}
           canEdit={false}

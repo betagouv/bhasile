@@ -87,10 +87,7 @@ export const createFakeFormWithSteps = (
 ): Omit<FormWithSteps, "id" | "structureCodeDna"> => {
   const fakeForm = createFakeForm(formDefinitionId);
   const isFinalised = options?.isFinalised ?? false;
-  const verificationSlugs = [
-    "01-identification",
-    "02-documents-financiers",
-  ];
+  const verificationSlugs = ["01-identification", "02-documents-financiers"];
 
   return {
     ...fakeForm,

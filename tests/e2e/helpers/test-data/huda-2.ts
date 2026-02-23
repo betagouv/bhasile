@@ -189,7 +189,7 @@ export const huda2: TestStructureScenario = {
         totalCharges: "42000",
         repriseEtat: "100",
         excedentRecupere: "10",
-        excedentDeduit: "-5",
+        excedentDeduit: "5",
         affectationReservesFondsDedies: "200",
         fondsDedies: "15",
         reserveInvestissement: "20",
@@ -252,5 +252,49 @@ export const huda2: TestStructureScenario = {
     ],
     finalisationNotes:
       "Notes de finalisation dynamiques (HUDA) : contrôle OK, suivi actif.",
+  },
+  modificationData: {
+    public: "Tout public",
+    lgbt: false,
+    fvvTeh: true,
+    contactPrincipal: { email: "modif-huda2@example.com" },
+    notes: "Notes modification HUDA 2 - mixte.",
+    debutConvention: "2020-09-01",
+    finConvention: "2024-06-30",
+    ouvertureFermeture: {
+      placesACreer: "4",
+      echeancePlacesACreer: "2026-04-01",
+      placesAFermer: "3",
+      echeancePlacesAFermer: "2026-07-15",
+    },
+    structureTypologies: [
+      { placesAutorisees: 54, pmr: 7, lgbt: 12, fvvTeh: 10 },
+      { placesAutorisees: 50, pmr: 6, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 47, pmr: 5, lgbt: 9, fvvTeh: 8 },
+    ],
+    finances: {
+      2025: {
+        ETP: "10",
+        tauxEncadrement: "10",
+        coutJournalier: "26",
+        dotationDemandee: "130000",
+        dotationAccordee: "122000",
+      },
+    },
+    controles: [
+      {
+        date: "2024-02-25",
+        type: "Inopiné",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
+    actesAdministratifs: [
+      {
+        category: "CONVENTION",
+        startDate: "2023-06-01",
+        endDate: "2026-05-31",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
   },
 };

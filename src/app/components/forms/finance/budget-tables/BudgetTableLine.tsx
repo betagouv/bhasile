@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 
-import { getYearRange } from "@/app/utils/date.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
   CpomMillesimeApiType,
@@ -19,6 +18,7 @@ export const BudgetTableLine = ({
   budgets,
   cpomStructures,
   cpomMillesimes,
+  years,
   disabledYearsStart,
   enabledYears,
   canEdit = true,
@@ -28,8 +28,6 @@ export const BudgetTableLine = ({
   const localForm = useForm();
 
   const { control } = parentFormContext || localForm;
-
-  const { years } = getYearRange({ order: "desc" });
 
   if (!budgets && !cpomStructures && !cpomMillesimes) {
     return null;
@@ -83,6 +81,7 @@ type Props = {
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];
   cpomMillesimes?: CpomMillesimeApiType[];
+  years: number[];
   disabledYearsStart?: number;
   enabledYears?: number[];
   canEdit?: boolean;

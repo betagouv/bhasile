@@ -249,7 +249,7 @@ export const cada1: TestStructureScenario = {
         totalCharges: "42000",
         repriseEtat: "100",
         excedentRecupere: "10",
-        excedentDeduit: "-5",
+        excedentDeduit: "5",
         affectationReservesFondsDedies: "200",
         reserveInvestissement: "20",
         chargesNonReconductibles: "30",
@@ -325,5 +325,58 @@ export const cada1: TestStructureScenario = {
     ],
     finalisationNotes:
       "Notes de finalisation dynamiques (CADA) : contrôle OK, suivi actif.",
+  },
+  modificationData: {
+    public: "Famille",
+    lgbt: true,
+    fvvTeh: false,
+    contactPrincipal: { email: "modif-cada1@example.com" },
+    notes: "Notes modification CADA 1 - suivi renforcé.",
+    debutPeriodeAutorisation: "2020-06-15",
+    finPeriodeAutorisation: "2026-06-30",
+    ouvertureFermeture: {
+      placesACreer: "6",
+      echeancePlacesACreer: "2026-03-01",
+      placesAFermer: "2",
+      echeancePlacesAFermer: "2026-06-15",
+    },
+    structureTypologies: [
+      { placesAutorisees: 52, pmr: 6, lgbt: 12, fvvTeh: 9 },
+      { placesAutorisees: 50, pmr: 6, lgbt: 11, fvvTeh: 8 },
+      { placesAutorisees: 47, pmr: 5, lgbt: 9, fvvTeh: 8 },
+    ],
+    finances: {
+      2025: {
+        ETP: "9",
+        tauxEncadrement: "13",
+        coutJournalier: "24.5",
+        dotationDemandee: 125000,
+        dotationAccordee: "115000",
+      },
+    },
+    evaluations: [
+      {
+        date: "2024-03-20",
+        notePersonne: "3.5",
+        notePro: "3",
+        noteStructure: "3.5",
+        note: "3.5",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
+    controles: [
+      {
+        date: "2023-05-10",
+        type: "Inopiné",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
+    actesAdministratifs: [
+      {
+        category: "AUTRE",
+        categoryName: "Avenant modification e2e",
+        filePath: "tests/e2e/fixtures/sample.csv",
+      },
+    ],
   },
 };

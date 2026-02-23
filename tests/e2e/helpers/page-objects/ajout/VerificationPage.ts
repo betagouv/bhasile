@@ -64,8 +64,8 @@ export class VerificationPage extends BasePage {
 
     const principalLabel = `${data.contactPrincipal.prenom} ${data.contactPrincipal.nom}`;
     await expect(section).toContainText(principalLabel);
-    await expect(section).toContainText(data.contactPrincipal.role);
-    await expect(section).toContainText(data.contactPrincipal.email);
+    await expect(section).toContainText(data.contactPrincipal.role ?? "");
+    await expect(section).toContainText(data.contactPrincipal.email ?? "");
     const principalPhone = formatPhoneNumber(data.contactPrincipal.telephone);
     if (principalPhone) {
       await expect(section).toContainText(principalPhone);
@@ -74,8 +74,8 @@ export class VerificationPage extends BasePage {
     if (data.contactSecondaire) {
       const secondaryLabel = `${data.contactSecondaire.prenom} ${data.contactSecondaire.nom}`;
       await expect(section).toContainText(secondaryLabel);
-      await expect(section).toContainText(data.contactSecondaire.role);
-      await expect(section).toContainText(data.contactSecondaire.email);
+      await expect(section).toContainText(data.contactSecondaire.role ?? "");
+      await expect(section).toContainText(data.contactSecondaire.email ?? "");
       const secondaryPhone = formatPhoneNumber(
         data.contactSecondaire.telephone
       );

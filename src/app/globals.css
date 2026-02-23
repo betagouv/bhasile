@@ -69,7 +69,7 @@ hr {
 .full-width-table > table > thead > tr > th {
   font-size: 0.75rem;
   white-space: nowrap;
-  border-bottom: 1px solid var(--grey-300, #D1D5DB);
+  border-bottom: 1px solid var(--grey-300, #d1d5db);
 }
 
 .full-width-table > table > thead > tr > th:last-child {

@@ -5,6 +5,7 @@ import {
   nullishFrenchDateToISO,
   zId,
   zSafeDecimalsNullish,
+  zSafePositiveDecimalsNullish,
   zSafeYear,
 } from "@/app/utils/zodCustomFields";
 
@@ -14,10 +15,10 @@ import { operateurSchema } from "./operateur.schema";
 const cpomMillesimeSchema = z.object({
   id: zId(),
   year: zSafeYear(),
-  dotationDemandee: zSafeDecimalsNullish(),
-  dotationAccordee: zSafeDecimalsNullish(),
+  dotationDemandee: zSafePositiveDecimalsNullish(),
+  dotationAccordee: zSafePositiveDecimalsNullish(),
   cumulResultatNet: zSafeDecimalsNullish(),
-  repriseEtat: zSafeDecimalsNullish(),
+  repriseEtat: zSafePositiveDecimalsNullish(),
   affectationReservesFondsDedies: zSafeDecimalsNullish(),
   reserveInvestissement: zSafeDecimalsNullish(),
   chargesNonReconductibles: zSafeDecimalsNullish(),

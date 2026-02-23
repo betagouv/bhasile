@@ -19,7 +19,9 @@ export const DepartementsSelector = ({
   };
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
 
     const handleClickOutside = (event: MouseEvent) => {
       let clickedInsidePanel = false;

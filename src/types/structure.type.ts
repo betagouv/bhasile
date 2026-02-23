@@ -11,4 +11,3 @@ export enum StructureType {
   CAES = "CAES",
   PRAHDA = "PRAHDA",
 }
-

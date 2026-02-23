@@ -1,21 +1,11 @@
 import Notice from "@codegouvfr/react-dsfr/Notice";
 import Link from "next/link";
-import {
-  FieldValues,
-  UseFormGetValues,
-  UseFormSetValue,
-} from "react-hook-form";
 
 import { AdressImporter } from "@/app/components/forms/address/AdressImporter";
 import { MODELE_DIFFUS_LINK, MODELE_MIXTE_LINK } from "@/constants";
 import { Repartition } from "@/types/adresse.type";
 
-export const Notices = ({
-  typeBati,
-  getValues,
-  setValue,
-  hebergementsContainerRef,
-}: Props) => {
+export const Notices = ({ typeBati, hebergementsContainerRef }: Props) => {
   return (
     <>
       <div className="flex flex-col gap-2" ref={hebergementsContainerRef}>
@@ -53,11 +43,7 @@ export const Notices = ({
                 Taille maximale par fichier : 10 Mo. Formats supportés : xls,
                 xlsx, et csv.
               </p>
-              <AdressImporter
-                getValues={getValues}
-                setValue={setValue}
-                typeBati={typeBati}
-              />
+              <AdressImporter typeBati={typeBati} />
             </div>
           </>
         )}
@@ -96,6 +82,4 @@ export const Notices = ({
 type Props = {
   typeBati: Repartition;
   hebergementsContainerRef: React.RefObject<null>;
-  getValues: UseFormGetValues<FieldValues>;
-  setValue: UseFormSetValue<FieldValues>;
 };
