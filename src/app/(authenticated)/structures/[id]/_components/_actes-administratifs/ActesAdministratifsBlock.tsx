@@ -16,15 +16,9 @@ export const ActesAdministratifsBlock = (): ReactElement => {
   const actesAdministratifsCategoriesRules =
     getActesAdministratifsCategoryToDisplay(structure);
 
-  const actesAdministratifsCategories = Object.entries(
-    actesAdministratifsCategoriesRules
-  )
-    .filter(([, rules]) => rules.shouldShow)
-    .map(([, rules]) => rules);
-
   const filteredActesAdministratifs = structure.actesAdministratifs?.filter(
     (acteAdministratif) =>
-      Object.keys(actesAdministratifsCategories).includes(
+      Object.keys(actesAdministratifsCategoriesRules).includes(
         acteAdministratif.category
       )
   );
@@ -48,14 +42,15 @@ export const ActesAdministratifsBlock = (): ReactElement => {
         <>Aucun document importé</>
       ) : (
         <>
-          {Object.entries(actesAdministratifsCategories).map(
-            ([category, rules]) => (
-              <ActesAdministratifsCategory
-                category={category as ActeAdministratifCategory}
-                key={category}
-                title={rules.title}
-              />
-            )
+          {Object.entries(actesAdministratifsCategoriesRules).map(
+            ([category, rules]) =>
+              rules.shouldShow && (
+                <ActesAdministratifsCategory
+                  category={category as ActeAdministratifCategory}
+                  key={category}
+                  title={rules.title}
+                />
+              )
           )}
           {cpomActesAdministratifs?.length ? (
             <ActesAdministratifsCategory
