@@ -29,7 +29,7 @@ const fileUploadIdToActeId = new Map<number, number>();
 let dnaCodeToStructureId: Map<string, number>;
 
 const migrate = async () => {
-  console.log("📥 Récupération des structures (dnaCode → id)...");
+  console.log("📥 Récupération des structures (dnaCode vers id)...");
   const structures = await prisma.structure.findMany({
     select: { id: true, dnaCode: true },
   });
@@ -112,6 +112,10 @@ const migrate = async () => {
         continue;
       }
 
+      const structureId = dnaCodeToStructureId.get(
+        fileToMigrate.structureDnaCode!
+      );
+
       if (OTHER_CATEGORIES.has(category as FileUploadCategory)) {
         otherCount++;
         continue;
@@ -125,9 +129,6 @@ const migrate = async () => {
           category == "CPOM" && fileToMigrate.cpomId
             ? "CONVENTION"
             : (category as ActeAdministratifCategory);
-        const structureId = dnaCodeToStructureId.get(
-          fileToMigrate.structureDnaCode!
-        );
         const acte = await prisma.acteAdministratif.create({
           data: {
             structureId,
@@ -152,9 +153,6 @@ const migrate = async () => {
         DOCUMENT_FINANCIER_CATEGORIES.has(category as DocumentFinancierCategory)
       ) {
         const year = getYearFromDate(fileToMigrate.date ?? undefined);
-        const structureId = dnaCodeToStructureId.get(
-          fileToMigrate.structureDnaCode!
-        );
         const doc = await prisma.documentFinancier.create({
           data: {
             structureId,
