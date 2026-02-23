@@ -7,10 +7,6 @@ import {
 } from "@/schemas/api/adresse.schema";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
-import {
-  CpomMillesimeApiType,
-  CpomStructureApiType,
-} from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import {
   StructureAgentUpdateApiType,
