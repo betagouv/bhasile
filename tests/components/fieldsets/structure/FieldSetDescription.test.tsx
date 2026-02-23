@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { FieldSetDescription } from "@/app/components/forms/fieldsets/structure/FieldSetDescription";
 import { FormKind } from "@/types/global";
-import { PublicType, StructureType } from "@/types/structure.type";
+import { PublicType, StructureType } from "@/types/structure-type.type";
 
 import { FormTestWrapper } from "../../../test-utils/form-test-wrapper";
 

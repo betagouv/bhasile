@@ -13,7 +13,7 @@ import {
 } from "@/app/utils/date.util";
 import { capitalizeFirstLetter } from "@/app/utils/string.util";
 import { ActiviteApiType } from "@/schemas/api/activite.schema";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ActiviteDurations } from "./ActiviteDurations";

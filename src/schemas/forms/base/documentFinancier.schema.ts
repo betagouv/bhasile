@@ -15,7 +15,7 @@ import {
   zSafeYear,
 } from "@/app/utils/zodCustomFields";
 import { DocumentFinancierCategory } from "@/types/file-upload.type";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 const DocumentFinancierSchema = z.object({
   key: z.string().optional(),

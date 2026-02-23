@@ -19,7 +19,7 @@ import {
   ajoutIdentificationSchema,
 } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { ContactType } from "@/types/contact.type";
-import { PublicType, StructureType } from "@/types/structure.type";
+import { PublicType, StructureType } from "@/types/structure-type.type";
 
 export default function FormIdentification() {
   const params = useParams();

@@ -1,52 +1,57 @@
+import { getYearRange } from "@/app/utils/date.util";
 import { Prisma, Repartition, StructureType } from "@/generated/prisma/client";
-import {
-  ActeAdministratifCategory,
-  DocumentFinancierCategory,
-} from "@/types/file-upload.type";
 import { StructureColumn } from "@/types/ListColumn";
+import { Structure } from "@/types/structure.type";
 
 import { convertToRepartition } from "../adresses/adresse.util";
 import { getLatestPlacesAutoriseesPerStructure } from "./structure.repository";
+import { StructureWithRelations } from "./structure.type";
+import {
+  addPresencesIndues,
+  getCurrentCpomStructures,
+  getCurrentPlacesAutorisees,
+  getCurrentPlacesLogementsSociaux,
+  getCurrentPlacesQpv,
+  getRepartition,
+  isStructureAutorisee,
+  isStructureInCpom,
+  isStructureSubventionnee,
+  wasStructureInCpom,
+} from "./structure.util";
 
 export type StructureWithFileUploadsAndActivites = Prisma.StructureGetPayload<{
   include: { fileUploads: true; activites: true };
 }>;
 
-export const addPresencesIndues = (
-  structure: StructureWithFileUploadsAndActivites
-) => {
-  const activitesWithPresencesIndues = structure.activites.map((activite) => {
-    const presencesIndues =
-      (activite?.presencesInduesBPI || 0) +
-      (activite?.presencesInduesDeboutees || 0);
-    return {
-      ...activite,
-      presencesIndues,
-    };
-  });
-
+export const computeStructure = (
+  structure: StructureWithRelations
+): Structure => {
+  const { years } = getYearRange();
+  const type = structure.type ?? undefined;
+  const activites = addPresencesIndues(structure);
+  const repartition = getRepartition(structure);
+  const placesAutorisees = getCurrentPlacesAutorisees(structure);
+  const placesQpv = getCurrentPlacesQpv(structure);
+  const placesLogementSocial = getCurrentPlacesLogementsSociaux(structure);
+  const isAutorisee = isStructureAutorisee(type);
+  const isSubventionnee = isStructureSubventionnee(type);
+  const isInCpom = isStructureInCpom(structure);
+  const wasInCpom = wasStructureInCpom(structure, years);
+  const currentCpomStructure = getCurrentCpomStructures(structure);
   return {
     ...structure,
-    activites: activitesWithPresencesIndues,
-  };
-};
-
-export const divideFileUploads = (
-  structure: StructureWithFileUploadsAndActivites
-) => {
-  return {
-    ...structure,
-    actesAdministratifs: structure.fileUploads.filter((fileUpload) =>
-      ActeAdministratifCategory.includes(
-        fileUpload.category as (typeof ActeAdministratifCategory)[number]
-      )
-    ),
-    documentsFinanciers: structure.fileUploads.filter((fileUpload) =>
-      DocumentFinancierCategory.includes(
-        fileUpload.category as (typeof DocumentFinancierCategory)[number]
-      )
-    ),
-    fileUploads: undefined,
+    activites,
+    repartition,
+    currentTotalPlaces: {
+      placesAutorisees,
+      placesQpv,
+      placesLogementSocial,
+    },
+    isAutorisee,
+    isSubventionnee,
+    isInCpom,
+    wasInCpom,
+    currentCpomStructure,
   };
 };
 

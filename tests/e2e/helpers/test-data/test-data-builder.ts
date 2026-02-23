@@ -1,5 +1,5 @@
 import { Repartition } from "@/types/adresse.type";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 import { TestStructureData, TestStructureScenario } from "./types";
 

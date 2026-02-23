@@ -1,7 +1,7 @@
 import { Repartition } from "@/types/adresse.type";
 import { ControleType } from "@/types/controle.type";
 import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 export type TestStructureData = {
   dnaCode: string;

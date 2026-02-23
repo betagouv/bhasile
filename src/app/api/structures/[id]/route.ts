@@ -6,6 +6,7 @@ import {
   divideFileUploads,
   StructureWithFileUploadsAndActivites,
 } from "../structure.service";
+import { computeStructure } from "../structure.util";
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,13 +20,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const structureWithPresencesIndues = addPresencesIndues(
-      structure as StructureWithFileUploadsAndActivites
-    );
-    const structureWithDividedFileUploads = divideFileUploads(
-      structureWithPresencesIndues
-    );
-    return NextResponse.json(structureWithDividedFileUploads);
+    const computedStructure = computeStructure(structure);
+
+    return NextResponse.json(computedStructure);
   } catch (error) {
     console.error("Error in GET /api/structures/[id]", error);
     return NextResponse.json(

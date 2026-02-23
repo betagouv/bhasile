@@ -1,6 +1,6 @@
 import { createMinimalStructure } from "@/app/api/structures/structure.repository";
 import { StructureApiType } from "@/schemas/api/structure.schema";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 import { BASE_URL } from "./constants";
 import {

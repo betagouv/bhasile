@@ -14,7 +14,7 @@ import {
   Structure,
   StructureTypologie,
 } from "@/generated/prisma/client";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 import { generateDatePair } from "../utils/common.util";
 import { createFakeActivites } from "./activite.seed";

@@ -1,13 +1,79 @@
-export enum PublicType {
-  TOUT_PUBLIC = "Tout public",
-  FAMILLE = "Famille",
-  PERSONNES_ISOLEES = "Personnes isolées",
-}
+import { ActiviteApiType } from "@/schemas/api/activite.schema";
+import { AdresseApiType } from "@/schemas/api/adresse.schema";
+import { BudgetApiType } from "@/schemas/api/budget.schema";
+import { CampaignApiType } from "@/schemas/api/campaign.schema";
+import { ContactApiType } from "@/schemas/api/contact.schema";
+import { ControleApiType } from "@/schemas/api/controle.schema";
+import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
+import { EvenementIndesirableGraveApiType } from "@/schemas/api/evenement-indesirable-grave.schema";
+import { FileUploadApiType } from "@/schemas/api/file.schema";
+import { FormApiType } from "@/schemas/api/form.schema";
+import { OperateurApiType } from "@/schemas/api/operateur.schema";
+import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
+import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
+import { Repartition } from "@/types/adresse.type";
+import { CpomStructure } from "@/types/cpom.type";
+import { Departement } from "@/types/departement.type";
+import { PublicType } from "@/types/structure-public.type";
+import { StructureType } from "@/types/structure-type.type";
 
-export enum StructureType {
-  CADA = "CADA",
-  HUDA = "HUDA",
-  CPH = "CPH",
-  CAES = "CAES",
-  PRAHDA = "PRAHDA",
-}
+export type Structure = {
+  id: number;
+  dnaCode: string;
+  createdAt: string;
+  updatedAt: string;
+
+  filiale?: string;
+  type?: StructureType;
+  adresseAdministrative?: string;
+  codePostalAdministratif?: string;
+  communeAdministrative?: string;
+  departementAdministratif?: string;
+  latitude?: number;
+  longitude?: number;
+  nom?: string;
+  debutPeriodeAutorisation?: string;
+  finPeriodeAutorisation?: string;
+  debutConvention?: string;
+  finConvention?: string;
+  creationDate?: string;
+  date303?: string;
+  finessCode?: string;
+  lgbt?: boolean;
+  fvvTeh?: boolean;
+  public?: PublicType;
+  notes?: string;
+  nomOfii?: string;
+  directionTerritoriale?: string;
+  activeInOfiiFileSince?: string;
+  inactiveInOfiiFileSince?: string;
+  operateurId?: number;
+
+  operateur?: OperateurApiType;
+  departement?: Departement;
+  controles?: ControleApiType[];
+  evaluations?: EvaluationApiType[];
+  evenementsIndesirablesGraves?: EvenementIndesirableGraveApiType[];
+  adresses?: AdresseApiType[];
+  contacts?: ContactApiType[];
+  structureTypologies?: StructureTypologieApiType[];
+  activites?: ActiviteApiType[];
+  fileUploads?: FileUploadApiType[];
+  cpomStructures?: CpomStructure[];
+  structureMillesimes?: StructureMillesimeApiType[];
+  budgets?: BudgetApiType[];
+  forms?: FormApiType[];
+  campaigns?: CampaignApiType[];
+
+  repartition: Repartition;
+  currentTotalPlaces: {
+    placesAutorisees: number;
+    placesQpv: number;
+    placesLogementSocial: number;
+  };
+  isAutorisee: boolean;
+  isSubventionnee: boolean;
+  isInCpom: boolean;
+  wasInCpom: boolean;
+  currentCpomStructure?: CpomStructure;
+};

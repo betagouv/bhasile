@@ -1,76 +1,28 @@
-import { ActiviteApiType } from "@/schemas/api/activite.schema";
-import { AdresseApiType } from "@/schemas/api/adresse.schema";
-import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CampaignApiType } from "@/schemas/api/campaign.schema";
-import { ContactApiType } from "@/schemas/api/contact.schema";
-import { ControleApiType } from "@/schemas/api/controle.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
-import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
-import { EvenementIndesirableGraveApiType } from "@/schemas/api/evenement-indesirable-grave.schema";
-import { FileUploadApiType } from "@/schemas/api/file.schema";
-import { FormApiType } from "@/schemas/api/form.schema";
-import { OperateurApiType } from "@/schemas/api/operateur.schema";
-import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
-import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
-import { Repartition } from "@/types/adresse.type";
-import { Departement } from "@/types/departement.type";
-import { PublicType, StructureType } from "@/types/structure.type";
+import { Prisma } from "@/generated/prisma/client";
 
-export type StructureApiType = {
-  id: number;
-  dnaCode: string;
-  createdAt: string;
-  updatedAt: string;
-
-  filiale?: string;
-  type?: StructureType;
-  adresseAdministrative?: string;
-  codePostalAdministratif?: string;
-  communeAdministrative?: string;
-  departementAdministratif?: string;
-  latitude?: number;
-  longitude?: number;
-  nom?: string;
-  debutPeriodeAutorisation?: string;
-  finPeriodeAutorisation?: string;
-  debutConvention?: string;
-  finConvention?: string;
-  creationDate?: string;
-  date303?: string;
-  finessCode?: string;
-  lgbt?: boolean;
-  fvvTeh?: boolean;
-  public?: PublicType;
-  notes?: string;
-  nomOfii?: string;
-  directionTerritoriale?: string;
-  activeInOfiiFileSince?: string;
-  inactiveInOfiiFileSince?: string;
-  operateurId?: number;
-
-  operateur?: OperateurApiType;
-  departement?: Departement;
-  controles?: ControleApiType[];
-  evaluations?: EvaluationApiType[];
-  evenementsIndesirablesGraves?: EvenementIndesirableGraveApiType[];
-  adresses?: AdresseApiType[];
-  contacts?: ContactApiType[];
-  structureTypologies?: StructureTypologieApiType[];
-  activites?: ActiviteApiType[];
-  fileUploads?: FileUploadApiType[];
-  cpomStructures?: CpomStructureApiType[];
-  structureMillesimes?: StructureMillesimeApiType[];
-  budgets?: BudgetApiType[];
-  forms?: FormApiType[];
-  campaigns?: CampaignApiType[];
-
-  repartition: Repartition;
-  placesAutorisees: number;
-  placesQpv: number;
-  placesLogementSocial: number;
-  isAutorisee: boolean;
-  isSubventionnee: boolean;
-  isInCpom: boolean;
-  wasInCpom: boolean;
-  currentCpomStructure?: CpomStructureApiType;
-};
+export type StructureWithRelations = Prisma.StructureGetPayload<{
+  include: {
+    controles: true;
+    evaluations: true;
+    evenementsIndesirablesGraves: true;
+    adresses: {
+      include: {
+        adresseTypologies: true;
+      };
+    };
+    contacts: true;
+    structureTypologies: true;
+    activites: true;
+    fileUploads: true;
+    cpomStructures: {
+      include: {
+        cpom: true;
+      };
+    };
+    structureMillesimes: true;
+    budgets: true;
+    operateur: true;
+    forms: true;
+    campaigns: true;
+  };
+}>;

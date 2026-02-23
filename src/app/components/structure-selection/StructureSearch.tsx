@@ -5,7 +5,7 @@ import { DepartementAutocomplete } from "@/app/components/forms/DepartementAutoc
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { useStructuresSelection } from "@/app/hooks/useStructuresSelection";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 import { StructuresList } from "./StructuresList";
 

@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 import { Block } from "@/app/components/common/Block";
 import { formatDate } from "@/app/utils/date.util";
 import { getOperateurLabel, getRepartition } from "@/app/utils/structure.util";
-import { PublicType } from "@/types/structure.type";
+import { PublicType } from "@/types/structure-type.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ContactsViewer } from "./ContactsViewer";

@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 import { createPrismaClient } from "./client";
 import { createFakeCpoms } from "./seeders/cpom.seed";

@@ -2,7 +2,7 @@ import z from "zod";
 
 import { zId } from "@/app/utils/zodCustomFields";
 import { structureMinimalApiSchema } from "@/schemas/api/structure.schema";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 const departementSchema = z.object({
   numero: z.string(),

@@ -2,7 +2,7 @@ import Image from "next/image";
 import { ReactElement } from "react";
 
 import { formatDate } from "@/app/utils/date.util";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ActiviteHistorique } from "./ActiviteHistorique";

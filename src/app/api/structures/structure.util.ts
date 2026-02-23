@@ -1,11 +1,13 @@
-import { computeCpomDates } from "@/app/utils/cpom.util";
-import { getYearFromDate } from "@/app/utils/date.util";
+import { computeCpomDates } from "@/app/api/cpoms/cpom.util";
+import { formatDateToIsoString, getYearFromDate } from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
 import { PublicType, StructureType } from "@/generated/prisma/client";
+import { ActiviteApiType } from "@/schemas/api/activite.schema";
 import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
-import { StructureApiType } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
+import { CpomStructure } from "@/types/cpom.type";
+
+import { StructureWithRelations } from "./structure.type";
 
 const typesPublic: Record<string, PublicType> = {
   "tout public": PublicType.TOUT_PUBLIC,
@@ -22,6 +24,21 @@ export const convertToPublicType = (
   return typesPublic[typePublic.trim().toLowerCase()];
 };
 
+export const addPresencesIndues = (
+  structure: StructureWithRelations
+): ActiviteApiType[] => {
+  return structure.activites.map((activite) => {
+    const presencesIndues =
+      (activite?.presencesInduesBPI || 0) +
+      (activite?.presencesInduesDeboutees || 0);
+    return {
+      ...activite,
+      date: formatDateToIsoString(activite.date),
+      presencesIndues,
+    };
+  });
+};
+
 export const convertToStructureType = (
   structureType: string
 ): StructureType => {
@@ -35,7 +52,9 @@ export const convertToStructureType = (
   return typesStructures[structureType.trim()];
 };
 
-export const getRepartition = (structure: StructureApiType): Repartition => {
+export const getRepartition = (
+  structure: StructureWithRelations
+): Repartition => {
   const repartitions = structure.adresses?.map(
     (adresse) => adresse.repartition
   );
@@ -58,7 +77,7 @@ export const getRepartition = (structure: StructureApiType): Repartition => {
 };
 
 const getCurrentPlacesByProperty = (
-  structure: StructureApiType,
+  structure: StructureWithRelations,
   accessor: keyof AdresseTypologieApiType
 ) => {
   const mostRecentYearTypologies = structure.adresses?.map(
@@ -73,17 +92,19 @@ const getCurrentPlacesByProperty = (
 };
 
 export const getCurrentPlacesAutorisees = (
-  structure: StructureApiType
+  structure: StructureWithRelations
 ): number => {
   return getCurrentPlacesByProperty(structure, "placesAutorisees");
 };
 
-export const getCurrentPlacesQpv = (structure: StructureApiType): number => {
+export const getCurrentPlacesQpv = (
+  structure: StructureWithRelations
+): number => {
   return getCurrentPlacesByProperty(structure, "qpv");
 };
 
 export const getCurrentPlacesLogementsSociaux = (
-  structure: StructureApiType
+  structure: StructureWithRelations
 ): number => {
   return getCurrentPlacesByProperty(structure, "logementSocial");
 };
@@ -97,7 +118,7 @@ export const isStructureSubventionnee = (type: string | undefined): boolean => {
 };
 
 export const isStructureInCpom = (
-  structure: StructureApiType,
+  structure: StructureWithRelations,
   year: number = CURRENT_YEAR
 ): boolean => {
   return (
@@ -121,16 +142,16 @@ export const isStructureInCpom = (
 };
 
 export const wasStructureInCpom = (
-  structure: StructureApiType,
+  structure: StructureWithRelations,
   years: number[]
 ): boolean => {
   return years.some((year) => isStructureInCpom(structure, year));
 };
 
 export const getCurrentCpomStructures = (
-  structure: StructureApiType
-): CpomStructureApiType | undefined => {
-  return structure.cpomStructures?.find((cpomStructure) => {
+  structure: StructureWithRelations
+): CpomStructure | undefined => {
+  const dbCpomStructure = structure.cpomStructures?.find((cpomStructure) => {
     const dateStart =
       cpomStructure.dateStart ?? computeCpomDates(cpomStructure.cpom).dateStart;
     const dateEnd =
@@ -145,10 +166,22 @@ export const getCurrentCpomStructures = (
 
     return yearDebut <= CURRENT_YEAR && yearFin >= CURRENT_YEAR;
   });
+  if (!dbCpomStructure) {
+    return undefined;
+  }
+  return {
+    ...dbCpomStructure,
+    dateStart: dbCpomStructure.dateStart
+      ? formatDateToIsoString(dbCpomStructure.dateStart)
+      : undefined,
+    dateEnd: dbCpomStructure.dateEnd
+      ? formatDateToIsoString(dbCpomStructure.dateEnd)
+      : undefined,
+  };
 };
 
 export const getCurrentCpomStructureDates = (
-  structure: StructureApiType
+  structure: StructureWithRelations
 ): { dateStart?: string; dateEnd?: string } => {
   const currentCpomStructure = getCurrentCpomStructures(structure);
 

@@ -5,7 +5,7 @@ import { StructureApiType } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { FetchState } from "@/types/fetch-state.type";
 import { StructureColumn } from "@/types/ListColumn";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 import { useFetchState } from "../context/FetchStateContext";
 

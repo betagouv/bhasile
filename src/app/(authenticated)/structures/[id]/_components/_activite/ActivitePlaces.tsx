@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 
 import PieChart from "@/app/components/common/PieChart";
 import { getPercentage } from "@/app/utils/common.util";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 

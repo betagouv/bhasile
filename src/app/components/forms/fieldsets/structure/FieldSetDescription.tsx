@@ -7,7 +7,7 @@ import { useForm, useFormContext } from "react-hook-form";
 
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { FormKind } from "@/types/global";
-import { PublicType, StructureType } from "@/types/structure.type";
+import { PublicType, StructureType } from "@/types/structure-type.type";
 
 import InputWithValidation from "../../InputWithValidation";
 import { OperateurAutocomplete } from "../../OperateurAutocomplete";

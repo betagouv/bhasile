@@ -10,7 +10,7 @@ import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/docume
 import { EvaluationFormValues } from "@/schemas/forms/base/evaluation.schema";
 import { structureTypologieSchemaTypeFormValues } from "@/schemas/forms/base/structureTypologie.schema";
 import { Repartition } from "@/types/adresse.type";
-import { PublicType } from "@/types/structure.type";
+import { PublicType } from "@/types/structure-type.type";
 
 import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
 import { transformApiAdressesToFormAdresses } from "./adresse.util";

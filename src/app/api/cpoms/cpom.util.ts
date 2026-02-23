@@ -5,28 +5,9 @@ import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
 
 import { CpomWithRelations } from "./cpom.type";
 
-export const computeCpom = (cpom: CpomWithRelations): Cpom => {
-  const { dateStart, dateEnd } = computeCpomDates(cpom);
-  const cpomMillesimes = transformCpomMillesimes(cpom);
-  const actesAdministratifs = transformActesAdministratifs(cpom);
-  const structures = transformStructures(cpom);
-  const formattedName = formatCpomName(cpom);
-  return {
-    ...cpom,
-    name: cpom.name ?? undefined,
-    formattedName,
-    region: cpom.region ?? "",
-    departements: cpom.departements ?? [],
-    granularity: cpom.granularity ?? undefined,
-    dateStart,
-    dateEnd,
-    cpomMillesimes,
-    actesAdministratifs,
-    structures,
-  };
-};
-
-const transformStructures = (cpom: CpomWithRelations): Cpom["structures"] => {
+export const transformStructures = (
+  cpom: CpomWithRelations
+): Cpom["structures"] => {
   return cpom.structures.map((structure) => ({
     ...structure,
     dateStart: formatDateToIsoString(structure.dateStart),
@@ -34,7 +15,7 @@ const transformStructures = (cpom: CpomWithRelations): Cpom["structures"] => {
   }));
 };
 // TODO: Fix this after file uploads refactoring
-const transformActesAdministratifs = (
+export const transformActesAdministratifs = (
   cpom: CpomWithRelations
 ): Cpom["actesAdministratifs"] => {
   return cpom.actesAdministratifs.map((acteAdministratif) => ({
@@ -47,7 +28,7 @@ const transformActesAdministratifs = (
   }));
 };
 
-const transformCpomMillesimes = (
+export const transformCpomMillesimes = (
   cpom: CpomWithRelations
 ): Cpom["cpomMillesimes"] => {
   return (
@@ -76,7 +57,7 @@ const transformCpomMillesimes = (
 };
 
 export const computeCpomDates = (
-  cpom?: Partial<CpomWithRelations>
+  cpom?: Partial<CpomWithRelations | Cpom>
 ): { dateStart?: string; dateEnd?: string } => {
   if (!cpom) {
     return {
@@ -128,7 +109,7 @@ export const computeCpomDates = (
   };
 };
 
-const formatCpomName = (cpom: CpomWithRelations): string => {
+export const formatCpomName = (cpom: CpomWithRelations): string => {
   let zone = cpom.region;
 
   if (cpom.granularity === "DEPARTEMENTALE") {

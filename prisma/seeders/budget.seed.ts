@@ -6,7 +6,7 @@ import {
 } from "@/app/utils/structure.util";
 import { CURRENT_YEAR } from "@/constants";
 import { Budget } from "@/generated/prisma/client";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 export const createFakeBudget = ({
   year,

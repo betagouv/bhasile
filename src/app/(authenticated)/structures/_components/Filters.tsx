@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/app/utils/classname.util";
 import { Repartition } from "@/types/adresse.type";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 import { FiltersPanel } from "./FiltersPanel";
 import { LocationFiltersPanel } from "./LocationFiltersPanel";

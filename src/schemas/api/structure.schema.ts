@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { zId } from "@/app/utils/zodCustomFields";
-import { PublicType, StructureType } from "@/types/structure.type";
+import { PublicType, StructureType } from "@/types/structure-type.type";
 
 import { cpomStructureSchema } from "../forms/base/cpom.schema";
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";

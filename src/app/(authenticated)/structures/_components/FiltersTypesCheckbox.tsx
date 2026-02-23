@@ -1,6 +1,6 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 export const FiltersTypesCheckbox = ({
   label,

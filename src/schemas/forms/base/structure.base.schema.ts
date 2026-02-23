@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 export const structureBaseSchema = z.object({
   dnaCode: z.string().min(1),

@@ -1,7 +1,7 @@
 import { useFormContext } from "react-hook-form";
 
 import { useStructuresSelection } from "@/app/hooks/useStructuresSelection";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 import { StructuresList } from "../../cpom/StructuresList";
 

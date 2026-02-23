@@ -7,7 +7,7 @@ import {
   isStructureAutorisee,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
-import { StructureType } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 import { FormTestWrapper } from "../../../test-utils/form-test-wrapper";
 

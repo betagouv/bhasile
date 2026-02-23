@@ -3,7 +3,7 @@ import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { StructureApiType } from "@/schemas/api/structure.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
-import { PublicType, StructureType } from "@/types/structure.type";
+import { PublicType, StructureType } from "@/types/structure-type.type";
 
 export const createStructure = ({
   id,
