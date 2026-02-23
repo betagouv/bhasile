@@ -14,6 +14,7 @@ import {
   DocumentFinancierGranularity,
 } from "@/types/document-financier.type";
 import { getYearFromDate } from "@/app/utils/date.util";
+import { FileUploadCategory } from "@/generated/prisma/client";
 
 const prisma = createPrismaClient();
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME;
@@ -24,6 +25,7 @@ if (!S3_BUCKET_NAME) {
 
 const ACTE_ADMINISTRATIF_CATEGORIES = new Set(ActeAdministratifCategory);
 const DOCUMENT_FINANCIER_CATEGORIES = new Set(DocumentFinancierCategory);
+const OTHER_CATEGORIES = new Set(["EVALUATION", "INSPECTION_CONTROLE"]);
 
 /** Map old FileUpload.id -> new ActeAdministratif.id for parent resolution */
 const fileUploadIdToActeId = new Map<number, number>();
@@ -61,6 +63,7 @@ const migrate = async () => {
   }
 
   let acteCount = 0;
+  let otherCount = 0;
   let docCount = 0;
   let errors = 0;
   let filesThatShouldBeDeleted = 0;
@@ -105,8 +108,13 @@ const migrate = async () => {
         continue;
       }
 
-      if (
-        ACTE_ADMINISTRATIF_CATEGORIES.has(category as ActeAdministratifCategory)
+      if (OTHER_CATEGORIES.has(category as FileUploadCategory)) {
+        otherCount++;
+        continue;
+      } else if (
+        ACTE_ADMINISTRATIF_CATEGORIES.has(
+          (category as ActeAdministratifCategory) || category == "CPOM"
+        )
       ) {
         const categoryModified =
           category == "CPOM" && fileToMigrate.cpomId
@@ -168,6 +176,9 @@ const migrate = async () => {
   console.log(`✓ ActeAdministratif créés : ${acteCount}`);
   console.log(`✓ DocumentFinancier créés : ${docCount}`);
   console.log(`✓ Fichiers à supprimer : ${filesThatShouldBeDeleted}`);
+  console.log(
+    `✓ Autres catégories (inspections et évaluations) : ${otherCount}`
+  );
   if (errors > 0) console.log(`❌ Erreurs: ${errors}`);
 };
 
