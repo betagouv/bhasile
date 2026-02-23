@@ -374,7 +374,7 @@ export const cada1: TestStructureScenario = {
     actesAdministratifs: [
       {
         category: "AUTRE",
-        categoryName: "Avenant modification e2e",
+        name: "Avenant modification e2e",
         filePath: "tests/e2e/fixtures/sample.csv",
       },
     ],

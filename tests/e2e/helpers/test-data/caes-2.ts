@@ -279,7 +279,7 @@ export const caes2: TestStructureScenario = {
     actesAdministratifs: [
       {
         category: "AUTRE",
-        categoryName: "PPI modification e2e",
+        name: "PPI modification e2e",
         filePath: "tests/e2e/fixtures/sample.csv",
       },
     ],
