@@ -17,11 +17,6 @@ import { getYearFromDate } from "@/app/utils/date.util";
 import { FileUploadCategory } from "@/generated/prisma/client";
 
 const prisma = createPrismaClient();
-const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME;
-
-if (!S3_BUCKET_NAME) {
-  throw new Error("S3_BUCKET_NAME is not set");
-}
 
 const ACTE_ADMINISTRATIF_CATEGORIES = new Set(ActeAdministratifCategory);
 const DOCUMENT_FINANCIER_CATEGORIES = new Set(DocumentFinancierCategory);
@@ -30,9 +25,18 @@ const OTHER_CATEGORIES = new Set(["EVALUATION", "INSPECTION_CONTROLE"]);
 /** Map old FileUpload.id -> new ActeAdministratif.id for parent resolution */
 const fileUploadIdToActeId = new Map<number, number>();
 
-const migrate = async () => {
-  console.log("📥 Récupération des FileUpload...");
+/** Map structureDnaCode -> structureId (chargé une fois au début) */
+let dnaCodeToStructureId: Map<string, number>;
 
+const migrate = async () => {
+  console.log("📥 Récupération des structures (dnaCode → id)...");
+  const structures = await prisma.structure.findMany({
+    select: { id: true, dnaCode: true },
+  });
+  dnaCodeToStructureId = new Map(structures.map((s) => [s.dnaCode, s.id]));
+  console.log(`✓ ${dnaCodeToStructureId.size} structures chargées`);
+
+  console.log("📥 Récupération des FileUpload...");
   const fileUploads = await prisma.fileUpload.findMany();
 
   // Parents only first, avenants after
@@ -121,9 +125,12 @@ const migrate = async () => {
           category == "CPOM" && fileToMigrate.cpomId
             ? "CONVENTION"
             : (category as ActeAdministratifCategory);
+        const structureId = dnaCodeToStructureId.get(
+          fileToMigrate.structureDnaCode!
+        );
         const acte = await prisma.acteAdministratif.create({
           data: {
-            // structureDnaCode: fileToMigrate.structureDnaCode ?? undefined,
+            structureId,
             cpomId: fileToMigrate.cpomId ?? undefined,
             category: categoryModified,
             date: fileToMigrate.date ?? undefined,
@@ -145,9 +152,12 @@ const migrate = async () => {
         DOCUMENT_FINANCIER_CATEGORIES.has(category as DocumentFinancierCategory)
       ) {
         const year = getYearFromDate(fileToMigrate.date ?? undefined);
+        const structureId = dnaCodeToStructureId.get(
+          fileToMigrate.structureDnaCode!
+        );
         const doc = await prisma.documentFinancier.create({
           data: {
-            // structureDnaCode: fileToMigrate.structureDnaCode ?? undefined,
+            structureId,
             category: category as DocumentFinancierCategory,
             year,
             name: fileToMigrate.categoryName ?? undefined,
