@@ -1,16 +1,16 @@
-import { CpomApiType } from "@/schemas/api/cpom.schema";
-import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
+import { CpomFormType } from "@/schemas/forms/base/cpom.schema";
+import { Cpom } from "@/types/cpom.type";
 
 export const useCpom = () => {
   const addCpom = async (
-    data: CpomFormValues
+    data: CpomFormType
   ): Promise<{ cpomId: number } | string> => {
     return createOrUpdateCpom(data, "POST");
   };
 
   const updateCpom = async (
-    data: CpomFormValues,
-    setCpom: (cpom: CpomApiType) => void
+    data: CpomFormType,
+    setCpom: (cpom: Cpom) => void
   ): Promise<{ cpomId: number } | string> => {
     const result = await createOrUpdateCpom(data, "PUT");
     if (typeof result === "object" && "cpomId" in result) {
@@ -24,7 +24,7 @@ export const useCpom = () => {
   };
 
   const createOrUpdateCpom = async (
-    data: CpomFormValues,
+    data: CpomFormType,
     method: "POST" | "PUT"
   ): Promise<{ cpomId: number } | string> => {
     try {

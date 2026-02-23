@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { CpomApiType } from "@/schemas/api/cpom.schema";
+import { Cpom } from "@/types/cpom.type";
 import { FetchState } from "@/types/fetch-state.type";
 
 import { useFetchState } from "../context/FetchStateContext";
 
 export const useCpomsSearch = () => {
-  const [cpoms, setCpoms] = useState<CpomApiType[] | undefined>(undefined);
+  const [cpoms, setCpoms] = useState<Cpom[] | undefined>(undefined);
   const [totalCpoms, setTotalCpoms] = useState<number>(0);
 
   const { setFetchState } = useFetchState();
 
   const getCpoms = useCallback(async (): Promise<{
-    cpoms: CpomApiType[];
+    cpoms: Cpom[];
     totalCpoms: number;
   }> => {
     setFetchState(`cpoms-search`, FetchState.LOADING);
