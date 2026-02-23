@@ -113,8 +113,9 @@ const migrate = async () => {
         continue;
       } else if (
         ACTE_ADMINISTRATIF_CATEGORIES.has(
-          (category as ActeAdministratifCategory) || category == "CPOM"
-        )
+          category as ActeAdministratifCategory
+        ) ||
+        category == "CPOM"
       ) {
         const categoryModified =
           category == "CPOM" && fileToMigrate.cpomId
