@@ -123,7 +123,7 @@ const migrate = async () => {
             : (category as ActeAdministratifCategory);
         const acte = await prisma.acteAdministratif.create({
           data: {
-            structureDnaCode: fileToMigrate.structureDnaCode ?? undefined,
+            // structureDnaCode: fileToMigrate.structureDnaCode ?? undefined,
             cpomId: fileToMigrate.cpomId ?? undefined,
             category: categoryModified,
             date: fileToMigrate.date ?? undefined,
@@ -147,7 +147,7 @@ const migrate = async () => {
         const year = getYearFromDate(fileToMigrate.date ?? undefined);
         const doc = await prisma.documentFinancier.create({
           data: {
-            structureDnaCode: fileToMigrate.structureDnaCode ?? undefined,
+            // structureDnaCode: fileToMigrate.structureDnaCode ?? undefined,
             category: category as DocumentFinancierCategory,
             year,
             name: fileToMigrate.categoryName ?? undefined,

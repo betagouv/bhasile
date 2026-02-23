@@ -4,7 +4,7 @@ import { PrismaTransaction } from "@/types/prisma.type";
 import { getKeysFromIncomingDocumentsOrActes } from "../files/file.service";
 
 type ActeAdministratifOwnerId = {
-  structureDnaCode?: string;
+  structureId?: number;
   cpomId?: number;
 };
 
@@ -51,7 +51,7 @@ export const createOrUpdateActesAdministratifs = async (
 const createOrUpdateActeAdministratif = async (
   tx: PrismaTransaction,
   acteAdministratif: ActeAdministratifApiType,
-  ownerId: { structureDnaCode?: string; cpomId?: number },
+  ownerId: { structureId?: number; cpomId?: number },
   parentId?: number
 ) => {
   const fileKey = acteAdministratif.fileUploads?.[0]?.key;
@@ -114,8 +114,8 @@ const deleteActesAdministratifs = async (
   ownerId: ActeAdministratifOwnerId
 ): Promise<void> => {
   const where =
-    ownerId.structureDnaCode !== undefined
-      ? { structureDnaCode: ownerId.structureDnaCode }
+    ownerId.structureId !== undefined
+      ? { structureId: ownerId.structureId }
       : { cpomId: ownerId.cpomId };
 
   const fileKeysToKeep = getKeysFromIncomingDocumentsOrActes(
