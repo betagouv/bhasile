@@ -16,13 +16,19 @@ export type StructureWithRelations = Prisma.StructureGetPayload<{
     fileUploads: true;
     cpomStructures: {
       include: {
-        cpom: true;
+        cpom: {
+          include: {
+            structures: true;
+            cpomMillesimes: true;
+            operateur: true;
+            actesAdministratifs: true;
+          };
+        };
       };
     };
     structureMillesimes: true;
     budgets: true;
     operateur: true;
     forms: true;
-    campaigns: true;
   };
 }>;

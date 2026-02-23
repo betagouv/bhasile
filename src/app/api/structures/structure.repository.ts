@@ -21,6 +21,7 @@ import {
   getStructureOrderBy,
   getStructureSearchWhere,
 } from "./structure.service";
+import { StructureWithRelations } from "./structure.type";
 import { convertToPublicType } from "./structure.util";
 
 export const findAll = async (): Promise<Structure[]> => {
@@ -209,7 +210,7 @@ export const getLatestPlacesAutoriseesPerStructure = async (): Promise<
     .map((typology) => typology.placesAutorisees as number);
 };
 
-export const findOne = async (id: number): Promise<Structure> => {
+export const findOne = async (id: number): Promise<StructureWithRelations> => {
   const structure = await prisma.structure.findFirstOrThrow({
     where: {
       id,
@@ -369,7 +370,7 @@ export const updateOneOperateur = async (
 const updateOne = async (
   structure: StructureAgentUpdateApiType,
   isOperateurUpdate: boolean = false
-): Promise<Structure> => {
+): Promise<StructureWithRelations> => {
   try {
     const {
       contacts,
@@ -430,7 +431,7 @@ const updateOne = async (
 const updateStructure = async (
   tx: PrismaTransaction,
   structure: StructureAgentUpdateApiType
-): Promise<Structure> => {
+): Promise<StructureWithRelations> => {
   const {
     public: publicType,
     departementAdministratif,

@@ -3,11 +3,6 @@
 import Link from "next/link";
 import { ReactElement, useState } from "react";
 
-import {
-  getCurrentCpomStructures,
-  isStructureInCpom,
-} from "@/app/utils/structure.util";
-
 import { useStructureContext } from "../../_context/StructureClientContext";
 
 export const CpomViewer = (): ReactElement => {
@@ -15,9 +10,7 @@ export const CpomViewer = (): ReactElement => {
 
   const { structure } = useStructureContext();
 
-  const isInCpom = isStructureInCpom(structure);
-
-  const currentCpomStructure = getCurrentCpomStructures(structure);
+  const { isInCpom, currentComputedCpomStructure } = structure;
 
   return (
     <>
@@ -35,7 +28,7 @@ export const CpomViewer = (): ReactElement => {
       </div>
       {showCpom && (
         <div className="text-mention-grey">
-          {currentCpomStructure?.cpom?.structures?.map(
+          {currentComputedCpomStructure?.cpom?.structures?.map(
             (structure) =>
               structure.structure && (
                 <div key={structure.id} className="flex items-center">

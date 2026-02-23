@@ -9,7 +9,7 @@ import { getLatestPlacesAutoriseesPerStructure } from "./structure.repository";
 import { StructureWithRelations } from "./structure.type";
 import {
   addPresencesIndues,
-  getCurrentCpomStructures,
+  getCurrentComputedCpomStructure,
   getCurrentPlacesAutorisees,
   getCurrentPlacesLogementsSociaux,
   getCurrentPlacesQpv,
@@ -38,7 +38,8 @@ export const computeStructure = (
   const isSubventionnee = isStructureSubventionnee(type);
   const isInCpom = isStructureInCpom(structure);
   const wasInCpom = wasStructureInCpom(structure, years);
-  const currentCpomStructure = getCurrentCpomStructures(structure);
+  const currentComputedCpomStructure =
+    getCurrentComputedCpomStructure(structure);
 
   return convertEveryNullAndDates({
     ...structure,
@@ -53,7 +54,7 @@ export const computeStructure = (
     isSubventionnee,
     isInCpom,
     wasInCpom,
-    currentCpomStructure,
+    currentComputedCpomStructure,
   }) as unknown as Structure; // Typescript doesn't understand that every date is converted to ISO string
 };
 

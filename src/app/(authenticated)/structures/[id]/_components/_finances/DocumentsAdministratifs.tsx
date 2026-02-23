@@ -6,7 +6,6 @@ import {
   getDocumentsFinanciersYearRange,
   getYearFromDate,
 } from "@/app/utils/date.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
   DocumentFinancierCategory,
@@ -18,7 +17,7 @@ import { useStructureContext } from "../../_context/StructureClientContext";
 export const DocumentsAdministratifs = (): ReactElement => {
   const { structure } = useStructureContext();
 
-  const isAutorisee = isStructureAutorisee(structure.type);
+  const isAutorisee = structure.isAutorisee;
   const { years } = getDocumentsFinanciersYearRange({ isAutorisee });
 
   const startYear = structure.date303

@@ -5,7 +5,6 @@ import { ReactElement, useState } from "react";
 
 import { Badge } from "@/app/components/common/Badge";
 import { formatCityName } from "@/app/utils/adresse.util";
-import { getRepartition } from "@/app/utils/structure.util";
 import { Repartition } from "@/types/adresse.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -14,8 +13,7 @@ export const AdressesViewer = (): ReactElement => {
   const [showAdresses, setShowAdresses] = useState(false);
 
   const { structure } = useStructureContext();
-  const repartition = getRepartition(structure);
-  const { adresses } = structure || {};
+  const { repartition, adresses } = structure;
 
   return (
     <>

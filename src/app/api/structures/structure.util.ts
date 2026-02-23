@@ -7,6 +7,7 @@ import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
 import { Repartition } from "@/types/adresse.type";
 import { CpomStructure } from "@/types/cpom.type";
 
+import { computeCpom } from "../cpoms/cpom.service";
 import { StructureWithRelations } from "./structure.type";
 
 const typesPublic: Record<string, PublicType> = {
@@ -148,7 +149,7 @@ export const wasStructureInCpom = (
   return years.some((year) => isStructureInCpom(structure, year));
 };
 
-export const getCurrentCpomStructures = (
+export const getCurrentComputedCpomStructure = (
   structure: StructureWithRelations
 ): CpomStructure | undefined => {
   const dbCpomStructure = structure.cpomStructures?.find((cpomStructure) => {
@@ -169,35 +170,21 @@ export const getCurrentCpomStructures = (
   if (!dbCpomStructure) {
     return undefined;
   }
+
+  const cpom = computeCpom(dbCpomStructure.cpom);
+
   return {
     ...dbCpomStructure,
+    cpom,
     dateStart: dbCpomStructure.dateStart
       ? formatDateToIsoString(dbCpomStructure.dateStart)
-      : undefined,
+      : dbCpomStructure.cpom?.dateStart
+        ? formatDateToIsoString(dbCpomStructure.cpom.dateStart)
+        : undefined,
     dateEnd: dbCpomStructure.dateEnd
       ? formatDateToIsoString(dbCpomStructure.dateEnd)
-      : undefined,
-  };
-};
-
-export const getCurrentCpomStructureDates = (
-  structure: StructureWithRelations
-): { dateStart?: string; dateEnd?: string } => {
-  const currentCpomStructure = getCurrentCpomStructures(structure);
-
-  if (!currentCpomStructure) {
-    return {};
-  }
-
-  const currentCpomStructureDateStart =
-    currentCpomStructure.dateStart ??
-    computeCpomDates(currentCpomStructure.cpom).dateStart;
-  const currentCpomStructureDateEnd =
-    currentCpomStructure.dateEnd ??
-    computeCpomDates(currentCpomStructure.cpom).dateEnd;
-
-  return {
-    dateStart: currentCpomStructureDateStart ?? undefined,
-    dateEnd: currentCpomStructureDateEnd ?? undefined,
+      : dbCpomStructure.cpom?.dateEnd
+        ? formatDateToIsoString(dbCpomStructure.cpom.dateEnd)
+        : undefined,
   };
 };

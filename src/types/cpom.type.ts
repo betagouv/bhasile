@@ -1,6 +1,7 @@
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 
 import { Operateur } from "./operateur.type";
+import { Structure } from "./structure.type";
 
 export const CpomGranularity = [
   "DEPARTEMENTALE",
@@ -34,6 +35,7 @@ export type CpomStructure = {
   cpomId: number;
   cpom?: Cpom;
   structureId: number;
+  structure?: Structure;
   dateStart?: string;
   dateEnd?: string;
 };
