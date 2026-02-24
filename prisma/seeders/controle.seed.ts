@@ -1,18 +1,18 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
-import {
-  Controle,
-  ControleType,
-  FileUpload,
-  FileUploadCategory,
-} from "@/generated/prisma/client";
+import { Controle, ControleType, FileUpload } from "@/generated/prisma/client";
 
 import { createFakeFileUpload } from "./file-upload.seed";
 
 export type ControleWithFileUploads = Controle & {
   fileUploads: Omit<
     FileUpload,
-    "id" | "controleId" | "evaluationId" | "structureDnaCode" | "structureId"
+    | "id"
+    | "acteAdministratifId"
+    | "documentFinancierId"
+    | "controleId"
+    | "evaluationId"
+    | "structureId"
   >[];
 };
 
@@ -23,11 +23,7 @@ export const createFakeControle = (): Omit<
   return {
     date: faker.date.past(),
     type: faker.helpers.enumValue(ControleType),
-    fileUploads: [
-      createFakeFileUpload({
-        category: FileUploadCategory.INSPECTION_CONTROLE,
-      }),
-    ],
+    fileUploads: [createFakeFileUpload()],
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   };

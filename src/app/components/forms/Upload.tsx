@@ -161,9 +161,9 @@ const Upload = ({
     <>
       <div
         className={cn(
-          "grid items-center justify-center bg-alt-blue-france p-4 rounded min-h-[4rem] h-full w-full",
+          "grid items-center justify-center bg-alt-blue-france p-4 rounded min-h-[4rem] h-full w-md",
           state === "error" &&
-          "border-plain-error !border-l-2  border-0 rounded-l-none",
+            "border-plain-error !border-l-2  border-0 rounded-l-none",
           className
         )}
         ref={fileInputContainerRef}

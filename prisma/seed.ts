@@ -20,13 +20,12 @@ import {
   createFakeFormStepDefinition,
 } from "./seeders/form.seed";
 import { createFakeOperateur } from "./seeders/operateur.seed";
-import { seedParentChildFileUploads } from "./seeders/parent-child-file-upload.seed";
 import { getRegionFromDepartement } from "./seeders/region.seed";
 import {
   createFakeStructure,
   createFakeStuctureWithRelations,
 } from "./seeders/structure.seed";
-import { convertToPrismaObject } from "./utils/convertToObject";
+import { convertToPrismaObject } from "./utils/common.util";
 import { wipeTables } from "./utils/wipe";
 
 const prisma = createPrismaClient();
@@ -103,7 +102,6 @@ export async function seed(): Promise<void> {
             StructureType.CAES,
             StructureType.CPH,
           ]),
-          cpom: faker.datatype.boolean(),
           isFinalised: faker.datatype.boolean(),
           counter: counter++,
         });
@@ -134,7 +132,6 @@ export async function seed(): Promise<void> {
             StructureType.CAES,
             StructureType.CPH,
           ]),
-          cpom: faker.datatype.boolean(),
           isFinalised: faker.datatype.boolean(),
           counter: counter++,
         });
@@ -156,9 +153,19 @@ export async function seed(): Promise<void> {
     });
   }
 
-  const structures = await prisma.structure.findMany({
-    take: faker.number.int({ min: 30, max: 50 }),
+  await createFakeCpoms(prisma);
+
+  console.log("📊 Récupération des structures créées...");
+  const allStructures = await prisma.structure.findMany({
+    select: {
+      id: true,
+      codeBhasile: true,
+      type: true,
+    },
   });
+  const structuresWithBhasile = allStructures.filter(
+    (s) => s.codeBhasile !== null
+  );
   console.log(
     `📎 Ajout des fichiers parent-enfant pour ${structures.length} structures`
   );

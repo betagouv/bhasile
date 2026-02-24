@@ -4,6 +4,7 @@ import "./globals.css"; // IMPORTANT cet import doit rester en premier pour que 
 import type { Metadata } from "next";
 import { PropsWithChildren, Suspense } from "react";
 
+import { NameChangeNotice } from "./components/NameChangeNotice";
 import { DsfrProvider, StartDsfrOnHydration } from "./dsfr-bootstrap";
 import {
   DsfrHead,
@@ -12,7 +13,7 @@ import {
 import { Providers } from "./Providers";
 
 export const metadata: Metadata = {
-  title: "Place d'asile",
+  title: "Bhasile",
   description: "Piloter le parc de logements pour demandeurs d’asile",
 };
 
@@ -34,7 +35,10 @@ export default function RootLayout({ children }: PropsWithChildren) {
           <StartDsfrOnHydration />
 
           <Providers>
-            <Suspense>{children}</Suspense>
+            <Suspense>
+              <NameChangeNotice />
+              {children}
+            </Suspense>
           </Providers>
         </DsfrProvider>
       </body>

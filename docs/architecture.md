@@ -21,7 +21,12 @@ Le projet est basé sur :
     - `(authenticated)` : contient toutes les pages et composants associés des pages nécessitant une authentification avec ProConnect
     - `(not-authenticated)` : contient toutes les pages et composants associés des pages nécessitant ne nécessitant aucune authentification
     - `(password-protected)` : contient toutes les pages et composants associés des pages nécessitant une authentification par mot de passe (aujourd'hui uniquement le formulaire opérateur)
-    - `api` : chaque dossier désigne une entité. Chaque entité a une `route` pour l'API, un `repository` pour intéragir avec la base de données, un `schema` pour la validation des données, des `types` si nécessaire, et des méthodes utilitaires dans un fichier `util`
+    - `api` : chaque dossier désigne une entité. Chaque entité peut posséder :
+      - Une `route` qui permet les interactions avec l'API : appel du schéma de validation de données, utilisation des query params, gestion des erreurs HTTP. Il peut appeler un `service` qui gère de la logique métier
+      - Un `service` qui gère de la logique métier et peut appeler un `repository` en cas de besoin d'interaction avec la base de données
+      - Un `repository` pour intéragir avec la base de données. Il ne doit pas contenir de logique métier
+      - Un `schema` pour la validation des données (appelé dans `route`)
+      - Un fichier `util` qui contient des méthodes utilitaires. Peut-être appelé de préférence dans le service
     - `components` : les composants réutilisables de l'application, souvent basés sur le DSFR
     - `hooks` : les hooks React de l'application. Ils contiennent principalement la logique métier et les appels réseau
     - `utils` : les méthodes utilitaires

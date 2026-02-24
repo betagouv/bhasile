@@ -10,7 +10,7 @@ import {
 } from "react-hook-form";
 
 export default function SelectWithValidation<
-  TFieldValues extends FieldValues = FieldValues
+  TFieldValues extends FieldValues = FieldValues,
 >({
   name,
   id,

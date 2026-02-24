@@ -3,6 +3,7 @@ import { ReactElement } from "react";
 
 import { useFetchStructure } from "@/app/hooks/useFetchStructure";
 import { formatDate } from "@/app/utils/date.util";
+import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 import {
   getCurrentPlacesAutorisees,
   getOperateurLabel,
@@ -36,6 +37,8 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
   const departementLabel = DEPARTEMENTS.find(
     (departement) => departement.numero === departementAdministratif
   )?.name;
+  const isStructureFinalisee = getFinalisationFormStatus(structure);
+
   const getCommunesLabel = (): ReactElement => {
     const placesByCommunes = getPlacesByCommunes(adresses);
     return (
@@ -82,9 +85,13 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
       </div>
       <div className="flex justify-end mt-2">
         <Link
-          className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-line"
+          className={`fr-btn fr-btn--tertiary-no-outline ${isStructureFinalisee ? "fr-icon-arrow-right-line" : "fr-icon-edit-line"} `}
           title={`Détails de ${nom}`}
-          href={`structures/${id}`}
+          href={
+            isStructureFinalisee
+              ? `structures/${id}`
+              : `structures/${id}/finalisation/01-identification`
+          }
         >
           Détails de {nom}
         </Link>

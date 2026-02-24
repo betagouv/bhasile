@@ -1,5 +1,6 @@
 "use client";
 
+import { sendEvent } from "@socialgouv/matomo-next";
 import dynamic from "next/dynamic";
 import { ReactElement, useMemo, useState } from "react";
 
@@ -40,7 +41,10 @@ export default function Structures(): ReactElement {
         <SegmentedControl
           name="Visualisation"
           options={options}
-          onChange={setSelectedVisualization}
+          onChange={(event) => {
+            setSelectedVisualization(event);
+            sendEvent({ category: "visualisation", action: event });
+          }}
         >
           <h2
             className="text-title-blue-france fr-h5 mr-4 mb-0"

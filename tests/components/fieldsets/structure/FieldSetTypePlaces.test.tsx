@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { createStructure } from "tests/test-utils/structure.factory";
 import { describe, expect, it } from "vitest";
 
 import { FieldSetTypePlaces } from "@/app/components/forms/fieldsets/structure/FieldSetTypePlaces";
@@ -17,7 +18,9 @@ vi.mock("@/constants", async () => {
 
 describe("FieldSetTypePlaces", () => {
   const years = [2026, 2025, 2024, 2023];
-
+  const structure = createStructure({
+    id: 1,
+  });
   describe("Rendering finalisation form", () => {
     it("should render with Types de place legend", () => {
       render(
@@ -32,7 +35,10 @@ describe("FieldSetTypePlaces", () => {
             })),
           }}
         >
-          <FieldSetTypePlaces formKind={FormKind.FINALISATION} />
+          <FieldSetTypePlaces
+            structure={structure}
+            formKind={FormKind.FINALISATION}
+          />
         </FormTestWrapper>
       );
 
@@ -52,7 +58,10 @@ describe("FieldSetTypePlaces", () => {
             })),
           }}
         >
-          <FieldSetTypePlaces formKind={FormKind.FINALISATION} />
+          <FieldSetTypePlaces
+            structure={structure}
+            formKind={FormKind.FINALISATION}
+          />
         </FormTestWrapper>
       );
 
@@ -76,7 +85,10 @@ describe("FieldSetTypePlaces", () => {
             })),
           }}
         >
-          <FieldSetTypePlaces formKind={FormKind.FINALISATION} />
+          <FieldSetTypePlaces
+            structure={structure}
+            formKind={FormKind.FINALISATION}
+          />
         </FormTestWrapper>
       );
 
@@ -92,7 +104,10 @@ describe("FieldSetTypePlaces", () => {
             structureTypologies: [],
           }}
         >
-          <FieldSetTypePlaces formKind={FormKind.FINALISATION} />
+          <FieldSetTypePlaces
+            structure={structure}
+            formKind={FormKind.FINALISATION}
+          />
         </FormTestWrapper>
       );
 
@@ -110,7 +125,10 @@ describe("FieldSetTypePlaces", () => {
             structureTypologies: [],
           }}
         >
-          <FieldSetTypePlaces formKind={FormKind.FINALISATION} />
+          <FieldSetTypePlaces
+            structure={structure}
+            formKind={FormKind.FINALISATION}
+          />
         </FormTestWrapper>
       );
 
@@ -140,7 +158,10 @@ describe("FieldSetTypePlaces", () => {
             })),
           }}
         >
-          <FieldSetTypePlaces formKind={FormKind.MODIFICATION} />
+          <FieldSetTypePlaces
+            structure={structure}
+            formKind={FormKind.MODIFICATION}
+          />
         </FormTestWrapper>
       );
 
@@ -163,7 +184,10 @@ describe("FieldSetTypePlaces", () => {
             })),
           }}
         >
-          <FieldSetTypePlaces formKind={FormKind.FINALISATION} />
+          <FieldSetTypePlaces
+            structure={structure}
+            formKind={FormKind.FINALISATION}
+          />
         </FormTestWrapper>
       );
 
@@ -200,7 +224,10 @@ describe("FieldSetTypePlaces", () => {
             })),
           }}
         >
-          <FieldSetTypePlaces formKind={FormKind.FINALISATION} />
+          <FieldSetTypePlaces
+            structure={structure}
+            formKind={FormKind.FINALISATION}
+          />
         </FormTestWrapper>
       );
 
@@ -230,7 +257,10 @@ describe("FieldSetTypePlaces", () => {
             })),
           }}
         >
-          <FieldSetTypePlaces formKind={FormKind.FINALISATION} />
+          <FieldSetTypePlaces
+            structure={structure}
+            formKind={FormKind.FINALISATION}
+          />
         </FormTestWrapper>
       );
 
@@ -268,7 +298,10 @@ describe("FieldSetTypePlaces", () => {
             ],
           }}
         >
-          <FieldSetTypePlaces formKind={FormKind.FINALISATION} />
+          <FieldSetTypePlaces
+            structure={structure}
+            formKind={FormKind.FINALISATION}
+          />
         </FormTestWrapper>
       );
 
@@ -309,7 +342,10 @@ describe("FieldSetTypePlaces", () => {
             })),
           }}
         >
-          <FieldSetTypePlaces formKind={FormKind.FINALISATION} />
+          <FieldSetTypePlaces
+            structure={structure}
+            formKind={FormKind.FINALISATION}
+          />
         </FormTestWrapper>
       );
 

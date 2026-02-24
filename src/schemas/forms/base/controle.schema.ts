@@ -1,21 +1,19 @@
 import z from "zod";
 
-import { optionalFrenchDateToISO } from "@/app/utils/zodCustomFields";
+import { optionalFrenchDateToISO, zId } from "@/app/utils/zodCustomFields";
 import { ControleType } from "@/types/controle.type";
-
-const idPreprocess = (val: unknown) => (val === "" ? undefined : val);
 
 const fileUploadSchema = z.object({
   key: z.string().optional(),
-  id: z.preprocess(idPreprocess, z.number().optional()),
+  id: zId(),
 });
 
 export const controleAutoSaveSchema = z.object({
-  id: z.preprocess(idPreprocess, z.number().optional()),
+  id: zId(),
   date: optionalFrenchDateToISO(),
   type: z.nativeEnum(ControleType).optional(),
   fileUploads: z.array(fileUploadSchema.optional()).optional(),
-  uuid: z.string().optional(), // Used to identify the controle when it is not saved in the database (and so do not have an id)
+  uuid: z.string().optional(), // Used to identify the controle when it is not saved in the database (and so does not have an id)
 });
 
 export const controleSchema = controleAutoSaveSchema.refine(

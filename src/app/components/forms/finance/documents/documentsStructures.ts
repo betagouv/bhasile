@@ -1,6 +1,8 @@
 import { CURRENT_OPEN_YEAR, CURRENT_YEAR } from "@/constants";
-import { Granularity } from "@/types/document-financier";
-import { DocumentFinancierCategoryType } from "@/types/file-upload.type";
+import {
+  DocumentFinancierCategory,
+  DocumentFinancierGranularity,
+} from "@/types/document-financier.type";
 
 const baseYearIndex = CURRENT_YEAR - CURRENT_OPEN_YEAR;
 
@@ -91,27 +93,27 @@ export const structureSubventionneesDocuments: StructureDocument[] = [
 export const granularities: DocumentGranularity[] = [
   {
     label: "Structure",
-    value: Granularity.STRUCTURE,
+    value: "STRUCTURE",
   },
   {
     label: "CPOM",
-    value: Granularity.CPOM,
+    value: "CPOM",
   },
   {
     label: "Structure et CPOM",
-    value: Granularity.STRUCTURECPOM,
+    value: "STRUCTURE_ET_CPOM",
   },
 ];
 
 export type StructureDocument = {
   label: string;
   subLabel?: string;
-  value: DocumentFinancierCategoryType[number];
+  value: DocumentFinancierCategory;
   yearIndex: number;
   required: boolean;
 };
 
 type DocumentGranularity = {
   label: string;
-  value: Granularity;
+  value: DocumentFinancierGranularity[number];
 };

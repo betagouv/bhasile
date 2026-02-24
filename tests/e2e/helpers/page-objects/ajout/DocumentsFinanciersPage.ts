@@ -12,7 +12,9 @@ export class DocumentsFinanciersPage extends BasePage {
     if (expectValidationFailure) {
       await this.submitAndExpectNoNavigation();
     } else {
-      await this.submitAndWaitForUrl(URLS.ajoutStep(dnaCode, "05-verification"));
+      await this.submitAndWaitForUrl(
+        URLS.ajoutStep(dnaCode, "05-verification")
+      );
     }
   }
 }

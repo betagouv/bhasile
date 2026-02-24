@@ -5,13 +5,11 @@ import { frenchDateToISO } from "@/app/utils/zodCustomFields";
 import { contactSchema } from "@/schemas/forms/base/contact.schema";
 import { PublicType } from "@/types/structure.type";
 
+import { operateurSchema } from "./operateur.schema";
 import { structureBaseSchema } from "./structure.base.schema";
 
 const baseIdentificationSchema = structureBaseSchema.extend({
-  operateur: z.object({
-    id: z.number().optional(),
-    name: z.string(),
-  }),
+  operateur: operateurSchema,
   creationDate: frenchDateToISO(),
   finessCode: z.string().optional().or(z.literal("")),
   public: z.nativeEnum(PublicType),

@@ -21,7 +21,7 @@ describe("Menu", () => {
 
     // THEN
     const logo = screen.getByRole("link", {
-      name: "Placed’asile",
+      name: "Logo Bhasile",
     });
     expect(logo).toHaveAttribute("href", "/");
     const structures = screen.getByRole("link", {
@@ -35,10 +35,7 @@ describe("Menu", () => {
     const aide = screen.getByRole("link", {
       name: "Aide",
     });
-    expect(aide).toHaveAttribute(
-      "href",
-      "mailto:contact@placedasile.beta.gouv.fr"
-    );
+    expect(aide).toHaveAttribute("href", "mailto:contact@bhasile.beta.gouv.fr");
     expect(aide).toHaveAttribute("target", "_blank");
     expect(aide).toHaveAttribute("rel", "noopener external");
     const confidentialite = screen.getByRole("link", {

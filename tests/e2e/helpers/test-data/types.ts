@@ -1,6 +1,6 @@
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { Repartition } from "@/types/adresse.type";
 import { ControleType } from "@/types/controle.type";
-import { ActeAdministratifCategoryType } from "@/types/file-upload.type";
 import { StructureType } from "@/types/structure.type";
 
 export type TestStructureData = {
@@ -19,18 +19,18 @@ export type TestStructureData = {
   lgbt: boolean;
   fvvTeh: boolean;
   contactPrincipal: {
-    prenom: string;
-    nom: string;
-    role: string;
-    email: string;
-    telephone: string;
+    prenom?: string;
+    nom?: string;
+    role?: string;
+    email?: string;
+    telephone?: string;
   };
   contactSecondaire?: {
-    prenom: string;
-    nom: string;
-    role: string;
-    email: string;
-    telephone: string;
+    prenom?: string;
+    nom?: string;
+    role?: string;
+    email?: string;
+    telephone?: string;
   };
   debutPeriodeAutorisation?: string;
   finPeriodeAutorisation?: string;
@@ -75,6 +75,7 @@ export type TestStructureData = {
   ouvertureFermeture?: OuvertureFermetureData;
   actesAdministratifs?: ActeAdministratifData[];
   finalisationNotes?: string;
+  notes?: string;
 };
 
 export type FinanceValue = number | string;
@@ -127,11 +128,11 @@ export type OuvertureFermetureData = {
 };
 
 export type ActeAdministratifData = {
-  category: ActeAdministratifCategoryType[number];
+  category: ActeAdministratifCategory;
   filePath: string;
   startDate?: string;
   endDate?: string;
-  categoryName?: string;
+  name?: string;
 };
 
 export type FailingStep =
@@ -147,8 +148,11 @@ export type FailingStep =
   | "finalisationDocuments"
   | "finalisationNotes";
 
+export type ModificationData = Partial<TestStructureData>;
+
 export type TestStructureScenario = {
   name: string;
   formData: TestStructureData | Partial<TestStructureData>;
+  modificationData?: ModificationData;
   failingStep?: FailingStep;
 };

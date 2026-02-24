@@ -9,7 +9,8 @@ import FormWrapper from "@/app/components/forms/FormWrapper";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { cn } from "@/app/utils/classname.util";
-import { getTypePlacesYearRange } from "@/app/utils/date.util";
+import { getTypePlacesYearRange, getYearFromDate } from "@/app/utils/date.util";
+import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { ajoutTypePlacesSchema } from "@/schemas/forms/ajout/ajoutTypePlaces.schema";
 
 export default function FormTypePlaces() {
@@ -24,6 +25,18 @@ export default function FormTypePlaces() {
     : `/ajout-structure/${params.dnaCode}/04-documents`;
 
   const { years } = getTypePlacesYearRange();
+  const { currentValue: localStorageIdentificationValues } = useLocalStorage(
+    `ajout-structure-${params.dnaCode}-identification`,
+    {}
+  );
+  const yearsToDisplay = years.filter(
+    (year) =>
+      year >=
+      getYearFromDate(
+        (localStorageIdentificationValues as AjoutIdentificationFormValues)
+          ?.creationDate
+      )
+  );
 
   const { currentValue: localStorageValues } = useLocalStorage(
     `ajout-structure-${params.dnaCode}-type-places`,
@@ -79,7 +92,7 @@ export default function FormTypePlaces() {
                 hasErrors && "border-action-high-error"
               )}
             >
-              {years.map((year, index) => (
+              {yearsToDisplay.map((year, index) => (
                 <tr
                   key={year}
                   className="w-full [&_input]:max-w-[4rem] border-t border-default-grey "

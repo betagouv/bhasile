@@ -1,9 +1,6 @@
-// TODO: Remove every any
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import Link from "next/link";
 import { ReactElement, useState } from "react";
-import { UseFormGetValues, UseFormSetValue } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
 import { useSpreadsheetParse } from "@/app/hooks/useSpreadsheetParse";
 import {
@@ -13,19 +10,12 @@ import {
 } from "@/constants";
 import { Repartition } from "@/types/adresse.type";
 
-export const AdressImporter = ({
-  getValues,
-  setValue,
-  typeBati,
-}: Props): ReactElement => {
+export const AdressImporter = ({ typeBati }: Props): ReactElement => {
+  const { setValue, getValues } = useFormContext();
   const [parsingError, setParsingError] = useState("");
   const { parseAdressesDiffuses, parseAdressesMixtes } = useSpreadsheetParse();
 
-  const onAdressesUpload = async (
-    getValues: UseFormGetValues<any>,
-    setValue: UseFormSetValue<any>,
-    typeBati: Repartition
-  ): Promise<void> => {
+  const onAdressesUpload = async (typeBati: Repartition): Promise<void> => {
     const input = document.getElementById("adresses-upload");
     const file = (input as HTMLInputElement).files?.[0];
     if (file) {
@@ -67,7 +57,7 @@ export const AdressImporter = ({
         id="adresses-upload"
         accept={SPREADSHEET_MIME_TYPES.join(",")}
         className="file:bg-white file:p-2 file:rounded file:mr-2 file:cursor-pointer"
-        onChange={() => onAdressesUpload(getValues, setValue, typeBati)}
+        onChange={() => onAdressesUpload(typeBati)}
       />
       {parsingError && (
         <div className="text-red-500 pt-2">
@@ -125,7 +115,5 @@ export const AdressImporter = ({
 };
 
 type Props = {
-  getValues: UseFormGetValues<any>;
-  setValue: UseFormSetValue<any>;
   typeBati: Repartition;
 };

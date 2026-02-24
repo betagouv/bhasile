@@ -1,9 +1,9 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { DEPARTEMENTS } from "@/constants";
+import { DEPARTEMENTS, REGIONS_WITHOUT_CORSE } from "@/constants";
 
 import { FiltersRegion } from "./FiltersRegion";
 
@@ -15,12 +15,6 @@ export const FiltersDepartement = () => {
   const [departements, setDepartements] = useState<string[]>(
     searchParams.get("departements")?.split(",") || []
   );
-
-  const regionsWithoutCorse = useMemo(() => {
-    return [...new Set(DEPARTEMENTS.map((departement) => departement.region))]
-      .filter((region) => region !== "Corse")
-      .sort((a, b) => a.localeCompare(b));
-  }, []);
 
   const handleDepartementToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -46,7 +40,7 @@ export const FiltersDepartement = () => {
   return (
     <div className="max-h-[40.5rem] overflow-y-scroll overflow-x-hidden py-4">
       <div className={fr.cx("fr-accordions-group")}>
-        {regionsWithoutCorse.map((region) => (
+        {REGIONS_WITHOUT_CORSE.map((region) => (
           <FiltersRegion
             region={region}
             key={region}

@@ -22,6 +22,7 @@ import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
 import { sortKeysByValue } from "./common.util";
+import { computeCpomDates } from "./cpom.util";
 import { getYearFromDate } from "./date.util";
 
 export const getPlacesByCommunes = (
@@ -142,49 +143,75 @@ export const isStructureInCpom = (
 ): boolean => {
   return (
     structure.cpomStructures?.some((cpomStructure) => {
-      return cpomStructure.cpom.cpomMillesimes?.some(
-        (cpomMillesime) => cpomMillesime.year === year
-      );
+      const dateStart =
+        cpomStructure.dateStart ??
+        computeCpomDates(cpomStructure.cpom).dateStart;
+      const dateEnd =
+        cpomStructure.dateEnd ?? computeCpomDates(cpomStructure.cpom).dateEnd;
+
+      if (!dateStart || !dateEnd) {
+        return false;
+      }
+
+      const yearStart = getYearFromDate(dateStart);
+      const yearEnd = getYearFromDate(dateEnd);
+
+      return yearStart <= year && yearEnd >= year;
     }) ?? false
   );
 };
 
+export const wasStructureInCpom = (
+  structure: StructureApiType,
+  years: number[]
+): boolean => {
+  return years.some((year) => isStructureInCpom(structure, year));
+};
+
+export const getCurrentCpomStructures = (
+  structure: StructureApiType
+): CpomStructureApiType | undefined => {
+  return structure.cpomStructures?.find((cpomStructure) => {
+    const dateStart =
+      cpomStructure.dateStart ?? computeCpomDates(cpomStructure.cpom).dateStart;
+    const dateEnd =
+      cpomStructure.dateEnd ?? computeCpomDates(cpomStructure.cpom).dateEnd;
+
+    if (!dateStart || !dateEnd) {
+      return false;
+    }
+
+    const yearDebut = getYearFromDate(dateStart);
+    const yearFin = getYearFromDate(dateEnd);
+
+    return yearDebut <= CURRENT_YEAR && yearFin >= CURRENT_YEAR;
+  });
+};
+
 export const getCurrentCpomStructureDates = (
   structure: StructureApiType
-): { debutCpom?: string; finCpom?: string } => {
-  const currentCpomStructure = structure.cpomStructures?.find(
-    (cpomStructure) => {
-      const dateDebut = cpomStructure.dateDebut ?? cpomStructure.cpom.debutCpom;
-      const dateFin = cpomStructure.dateFin ?? cpomStructure.cpom.finCpom;
-
-      if (!dateDebut || !dateFin) {
-        return false;
-      }
-
-      const yearDebut = getYearFromDate(dateDebut);
-      const yearFin = getYearFromDate(dateFin);
-
-      return yearDebut <= CURRENT_YEAR && yearFin >= CURRENT_YEAR;
-    }
-  );
+): { dateStart?: string; dateEnd?: string } => {
+  const currentCpomStructure = getCurrentCpomStructures(structure);
 
   if (!currentCpomStructure) {
     return {};
   }
 
-  const currentCpomStructureDateDebut =
-    currentCpomStructure.dateDebut ?? currentCpomStructure.cpom.debutCpom;
-  const currentCpomStructureDateFin =
-    currentCpomStructure.dateFin ?? currentCpomStructure.cpom.finCpom;
+  const currentCpomStructureDateStart =
+    currentCpomStructure.dateStart ??
+    computeCpomDates(currentCpomStructure.cpom).dateStart;
+  const currentCpomStructureDateEnd =
+    currentCpomStructure.dateEnd ??
+    computeCpomDates(currentCpomStructure.cpom).dateEnd;
 
   return {
-    debutCpom: currentCpomStructureDateDebut ?? undefined,
-    finCpom: currentCpomStructureDateFin ?? undefined,
+    dateStart: currentCpomStructureDateStart ?? undefined,
+    dateEnd: currentCpomStructureDateEnd ?? undefined,
   };
 };
 
 export const getMillesimeIndexForAYear = (
-  typologies:
+  typologies?:
     | StructureTypologieApiType[]
     | StructureMillesimeApiType[]
     | BudgetApiType[]
@@ -199,7 +226,7 @@ export const getCpomStructureIndexAndCpomMillesimeIndexForAYear = (
   let cpomMillesimeIndex = -1;
   const cpomStructureIndex = cpomStructures.findIndex((cpomStructure) => {
     cpomMillesimeIndex =
-      cpomStructure.cpom.cpomMillesimes?.findIndex(
+      cpomStructure.cpom?.cpomMillesimes?.findIndex(
         (cpomMillesime) => cpomMillesime.year === year
       ) ?? -1;
     if (cpomMillesimeIndex !== -1) {
@@ -209,4 +236,10 @@ export const getCpomStructureIndexAndCpomMillesimeIndexForAYear = (
   });
 
   return { cpomStructureIndex, cpomMillesimeIndex };
+};
+
+export const getRealCreationYear = (structure: StructureApiType): number => {
+  return structure.date303
+    ? getYearFromDate(structure.date303)
+    : getYearFromDate(structure.creationDate);
 };

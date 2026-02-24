@@ -18,10 +18,7 @@ import { z } from "zod";
 import { FormProvider } from "@/app/context/FormContext";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { cn } from "@/app/utils/classname.util";
-import {
-  PLACE_ASILE_CONTACT_EMAIL,
-  PLACE_ASILE_PHONE_NUMBERS,
-} from "@/constants";
+import { BHASILE_CONTACT_EMAIL, BHASILE_PHONE_NUMBERS } from "@/constants";
 import { DeepPartial } from "@/types/global";
 
 // Define enum for footer buttons
@@ -200,14 +197,14 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
                   <p className="cta_message text-mention-grey text-sm mt-2 text-right">
                     Si vous ne parvenez pas à remplir certains champs,{" "}
                     <a
-                      href={`mailto:${PLACE_ASILE_CONTACT_EMAIL}`}
+                      href={`mailto:${BHASILE_CONTACT_EMAIL}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="underline"
                     >
                       contactez-nous par mail
                     </a>
-                    ou par téléphone ({PLACE_ASILE_PHONE_NUMBERS})
+                    ou par téléphone ({BHASILE_PHONE_NUMBERS})
                   </p>
                 )}
               </div>

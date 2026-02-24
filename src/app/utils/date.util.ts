@@ -2,7 +2,7 @@ import "dayjs/locale/fr.js";
 
 import dayjs from "dayjs";
 
-import { CURRENT_YEAR } from "@/constants";
+import { CURRENT_YEAR, START_YEAR } from "@/constants";
 
 dayjs.locale("fr");
 
@@ -11,6 +11,11 @@ export const formatDate = (
 ): string => {
   if (!date) {
     return "N/D";
+  }
+  if (typeof date === "string") {
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+      return date;
+    }
   }
   const dateObject = date instanceof Date ? date : new Date(date);
   return dateObject.toLocaleDateString("fr-FR");
@@ -21,6 +26,9 @@ export const formatDateToIsoString = (
   defaultToToday: boolean = false
 ): string | null => {
   if (date) {
+    if (/^\d{4}-\d{2}-\d{2}(T[\d:.]+(Z|([\+\-]\d{2}:\d{2}))?)?$/.test(date)) {
+      return date;
+    }
     return dayjs(date, "DD/MM/YYYY").toISOString();
   }
   if (defaultToToday) {
@@ -132,7 +140,7 @@ export const getTypePlacesYearRange = (): { years: number[] } => {
 };
 
 export const getYearRange = ({
-  startYear = 2021,
+  startYear = START_YEAR,
   endYear = CURRENT_YEAR,
   order = "asc",
 }: {
@@ -151,15 +159,15 @@ export const getYearRange = ({
 };
 
 export const getElapsedPercentage = ({
-  startDate,
-  endDate,
+  dateStart,
+  dateEnd,
 }: {
-  startDate: string;
-  endDate: string;
+  dateStart: string;
+  dateEnd: string;
 }): number => {
   const now = dayjs();
-  const start = dayjs(startDate);
-  const end = dayjs(endDate);
+  const start = dayjs(dateStart);
+  const end = dayjs(dateEnd);
 
   if (now.isBefore(start)) {
     return 0;

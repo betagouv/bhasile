@@ -1,18 +1,18 @@
 export const getFinanceFormTutorialLink = ({
   isAutorisee,
   isSubventionnee,
-  isInCpom,
+  wasInCpom,
 }: Props): string => {
-  if (isAutorisee && isInCpom) {
+  if (isAutorisee && wasInCpom) {
     return "https://www.loom.com/share/e10b99446da747f9881c84e8c80cae4e";
   }
-  if (isAutorisee && !isInCpom) {
+  if (isAutorisee && !wasInCpom) {
     return "https://www.loom.com/share/32683d9948084be9a24351a6b712f8d0";
   }
-  if (isSubventionnee && isInCpom) {
+  if (isSubventionnee && wasInCpom) {
     return "https://www.loom.com/share/dcf47a9164304db0a972a75cd5cf23f1";
   }
-  if (isSubventionnee && !isInCpom) {
+  if (isSubventionnee && !wasInCpom) {
     return "https://www.loom.com/share/c7f7b6b974f44d728790d9486b663010";
   }
   return "";
@@ -21,5 +21,5 @@ export const getFinanceFormTutorialLink = ({
 type Props = {
   isAutorisee: boolean;
   isSubventionnee: boolean;
-  isInCpom: boolean;
+  wasInCpom: boolean;
 };

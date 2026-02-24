@@ -51,7 +51,7 @@ export default function Usage(): ReactElement {
           <iframe
             src={iframeUrl}
             className="border-0 w-full h-full"
-            title="Statistiques Place d'Asile"
+            title="Statistiques Bhasile"
             onLoad={() => setIframeLoaded(true)}
           />
         </div>

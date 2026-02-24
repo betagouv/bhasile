@@ -12,7 +12,7 @@ import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { calendrierSchema } from "@/schemas/forms/base/calendrier.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
-import { ModificationTitle } from "../components/ModificationTitle";
+import { ModificationTitle } from "../_components/ModificationTitle";
 
 export default function ModificationCalendrier() {
   const { structure } = useStructureContext();

@@ -45,8 +45,25 @@ export const SELECTORS = {
   },
 
   // Search
-  SEARCH_INPUT: 'input#search[type="text"]',
+  SEARCH_INPUT: 'input#structures-search[type="text"]',
 
   // Delete buttons
   DELETE_BUTTON: 'button[title="Supprimer"]',
+
+  // CPOM
+  CPOM_GRANULARITY_RADIO: (value: string) =>
+    `input[name="granularity"][value="${value}"]`,
+  CPOM_REGION_SELECT: 'select[name="region"]',
+  CPOM_DEPARTEMENTS_SELECT: 'select[name="departements"]',
+  CPOM_OPERATEUR_INPUT: "#operateur",
+  CPOM_ACTE_START_DATE: (index: number) =>
+    `input[name="actesAdministratifs.${index}.startDate"]`,
+  CPOM_ACTE_END_DATE: (index: number) =>
+    `input[name="actesAdministratifs.${index}.endDate"]`,
+  CPOM_ACTE_DATE: (index: number) =>
+    `input[name="actesAdministratifs.${index}.date"]`,
+  CPOM_ADD_AVENANT_LINK: 'a:has-text("+ Ajouter un avenant")',
+  /** Checkbox inputs in the INTERDEPARTEMENTALE departements panel */
+  CPOM_DEPARTEMENT_CHECKBOX: (numero: string) =>
+    `input[name="structure-departement"][value="${numero}"]`,
 } as const;

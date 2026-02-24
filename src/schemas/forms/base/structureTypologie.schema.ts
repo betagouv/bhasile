@@ -1,22 +1,27 @@
 import z from "zod";
 
 import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
-import { nullishFrenchDateToISO, zSafeYear } from "@/app/utils/zodCustomFields";
-import { zSafeDecimals } from "@/app/utils/zodSafeDecimals";
+import {
+  nullishFrenchDateToISO,
+  zId,
+  zSafePositiveDecimals,
+  zSafePositiveDecimalsNullish,
+  zSafeYear,
+} from "@/app/utils/zodCustomFields";
 import { CURRENT_YEAR } from "@/constants";
 
 export const structureTypologieWithoutEvolutionSchema = z.object({
-  id: z.number().optional(),
-  placesAutorisees: zSafeDecimals(),
-  pmr: zSafeDecimals(),
-  lgbt: zSafeDecimals(),
-  fvvTeh: zSafeDecimals(),
+  id: zId(),
+  placesAutorisees: zSafePositiveDecimals(),
+  pmr: zSafePositiveDecimals(),
+  lgbt: zSafePositiveDecimals(),
+  fvvTeh: zSafePositiveDecimals(),
   year: zSafeYear(),
 });
 
 export const placesEvolutionSchema = z.object({
-  placesACreer: zSafeDecimals().nullish(),
-  placesAFermer: zSafeDecimals().nullish(),
+  placesACreer: zSafePositiveDecimalsNullish(),
+  placesAFermer: zSafePositiveDecimalsNullish(),
   echeancePlacesACreer: nullishFrenchDateToISO(),
   echeancePlacesAFermer: nullishFrenchDateToISO(),
 });

@@ -7,7 +7,7 @@ export default async function AjoutStructurePage(): Promise<ReactElement> {
       <h2 className="flex flex-col items-center gap-4 text-center text-xl font-bold mb-2 text-title-blue-france">
         <i className="fr-icon-draft-line text-action-high-blue-france text-4xl [&::before]:[--icon-size:5rem]"></i>
         Vous allez créer la page dédiée
-        <br />à votre structure sur Place d’Asile.
+        <br />à votre structure sur Bhasile.
       </h2>
       <p className="text-center mb-10">
         Nous vous remercions pour cette contribution à l’outil !<br />

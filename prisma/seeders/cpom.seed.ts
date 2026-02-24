@@ -1,6 +1,12 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
-import type { Departement, PrismaClient } from "@/generated/prisma/client";
+import {
+  ActeAdministratifCategory,
+  type Departement,
+  type PrismaClient,
+} from "@/generated/prisma/client";
+
+import { createFakeFileUpload } from "./file-upload.seed";
 
 const buildStructureMillesimeYears = (start: number, end: number): number[] => {
   const years: number[] = [];
@@ -49,11 +55,12 @@ export const createFakeCpoms = async (
       const region = departementToRegion.get(
         structure.departementAdministratif ?? ""
       );
+
       if (!region) {
         continue;
       }
       structureIdToDnaCode.set(structure.id, structure.dnaCode);
-      const key = `${operateur.id}-${region}`;
+      const key = `${operateur.id}_${region}`;
       const existingStructures = structuresByOperateurAndRegion.get(key) || [];
       structuresByOperateurAndRegion.set(key, [
         ...existingStructures,
@@ -80,7 +87,7 @@ export const createFakeCpoms = async (
 
   // Create CPOMs for valid groups
   for (const [key, structures] of validGroups) {
-    const [operateurIdStr, region] = key.split("-");
+    const [operateurIdStr, region] = key.split("_");
 
     const dureeAnnees = faker.number.int({ min: 3, max: 5 });
     const timeShift = faker.number.int({ min: -2, max: 2 });
@@ -107,13 +114,33 @@ export const createFakeCpoms = async (
       nbStructures
     );
 
-    // Create the CPOM
+    const isUiInitialized = faker.datatype.boolean({ probability: 0.5 });
+
     const cpom = await prisma.cpom.create({
       data: {
         name: cpomName,
         operateurId: Number(operateurIdStr),
-        dateStart,
-        dateEnd,
+        granularity: "REGIONALE",
+        region: isUiInitialized ? region : undefined,
+        departements: isUiInitialized
+          ? departements
+              .filter((departement) => departement.region === region)
+              .map((departement) => departement.numero)
+          : undefined,
+        ...(isUiInitialized
+          ? {
+              actesAdministratifs: {
+                create: {
+                  category: ActeAdministratifCategory.CONVENTION,
+                  startDate: dateStart,
+                  endDate: dateEnd,
+                  fileUploads: {
+                    create: createFakeFileUpload(),
+                  },
+                },
+              },
+            }
+          : undefined),
         structures: {
           create: selectedStructures.map((structureId) => {
             // 10% chance that a structure joins or leaves the CPOM in the middle

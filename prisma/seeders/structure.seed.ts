@@ -16,18 +16,25 @@ import {
 } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 
-import { generateDatePair } from "../utils/date";
+import { generateDatePair } from "../utils/common.util";
+import {
+  ActeAdministratifWithFileUploads,
+  createFakeActeAdministratif,
+} from "./acte-administratif.seed";
 import { createFakeActivites } from "./activite.seed";
 import { AdresseWithTypologies, createFakeAdresses } from "./adresse.seed";
 import { createFakeBudget } from "./budget.seed";
 import { createFakeContact } from "./contact.seed";
 import { ControleWithFileUploads, createFakeControle } from "./controle.seed";
 import {
+  createFakeDocumentFinancier,
+  DocumentFinancierWithFileUploads,
+} from "./document-financier";
+import {
   createFakeEvaluation,
   EvaluationWithFileUploads,
 } from "./evaluation.seed";
 import { createFakeEvenementIndesirableGrave } from "./evenement-indesirable-grave.seed";
-import { createFakeFileUpload } from "./file-upload.seed";
 import { createFakeFormWithSteps } from "./form.seed";
 import { createFakeStructureTypologie } from "./structure-typologie.seed";
 
@@ -129,15 +136,39 @@ export const createFakeStructure = ({
 
 type StructureWithRelations = Structure & {
   contacts: Omit<Contact, "id" | "structureDnaCode" | "structureId">[];
-  adresses: Omit<AdresseWithTypologies, "id" | "structureDnaCode" | "structureId">[];
-  controles: Omit<ControleWithFileUploads, "id" | "structureDnaCode" | "structureId">[];
-  evaluations: Omit<EvaluationWithFileUploads, "id" | "structureDnaCode" | "structureId">[];
-  structureTypologies: Omit<StructureTypologie, "id" | "structureDnaCode" | "structureId">[];
+  adresses: Omit<
+    AdresseWithTypologies,
+    "id" | "structureDnaCode" | "structureId"
+  >[];
+  actesAdministratifs: Omit<
+    ActeAdministratifWithFileUploads,
+    "id" | "structureDnaCode"
+  >[];
+  documentsFinanciers: Omit<
+    DocumentFinancierWithFileUploads,
+    "id" | "structureDnaCode"
+  >[];
+  controles: Omit<
+    ControleWithFileUploads,
+    "id" | "structureDnaCode" | "structureId"
+  >[];
+  evaluations: Omit<
+    EvaluationWithFileUploads,
+    "id" | "structureDnaCode" | "structureId"
+  >[];
+  structureTypologies: Omit<
+    StructureTypologie,
+    "id" | "structureDnaCode" | "structureId"
+  >[];
   budgets: Omit<Budget, "id" | "structureDnaCode" | "structureId">[];
   activites: Omit<Activite, "id" | "structureDnaCode" | "structureId">[];
   fileUploads: Omit<
     FileUpload,
-    "id" | "structureDnaCode" | "structureId" | "controleId" | "parentFileUploadId"
+    | "id"
+    | "structureDnaCode"
+    | "structureId"
+    | "controleId"
+    | "parentFileUploadId"
   >[];
   evenementsIndesirablesGraves: Omit<
     EvenementIndesirableGrave,
@@ -150,7 +181,6 @@ type StructureWithRelations = Structure & {
 
 export const createFakeStuctureWithRelations = ({
   codeBhasile,
-  cpom,
   type,
   isFinalised,
   formDefinitionId,
@@ -162,7 +192,6 @@ export const createFakeStuctureWithRelations = ({
 }: FakeStructureWithRelationsOptions): Omit<StructureWithRelations, "id"> => {
   const fakeStructure = createFakeStructure({
     codeBhasile,
-    cpom,
     type,
     isFinalised,
     ofii,
@@ -191,11 +220,11 @@ export const createFakeStuctureWithRelations = ({
       createFakeStructureTypologie({ year: 2024, placesAutorisees }),
       createFakeStructureTypologie({ year: 2023, placesAutorisees }),
     ],
-    fileUploads: Array.from({ length: 5 }, () =>
-      createFakeFileUpload({
-        cpom,
-        structureType: type,
-      })
+    actesAdministratifs: Array.from({ length: 5 }, () =>
+      createFakeActeAdministratif()
+    ),
+    documentsFinanciers: Array.from({ length: 5 }, () =>
+      createFakeDocumentFinancier()
     ),
     activites: createFakeActivites(),
     evenementsIndesirablesGraves: Array.from(
@@ -209,11 +238,11 @@ export const createFakeStuctureWithRelations = ({
     structureWithRelations = {
       ...structureWithRelations,
       budgets: [
-        createFakeBudget({ year: 2025, type, cpom }),
-        createFakeBudget({ year: 2024, type, cpom }),
-        createFakeBudget({ year: 2023, type, cpom }),
-        createFakeBudget({ year: 2022, type, cpom }),
-        createFakeBudget({ year: 2021, type, cpom }),
+        createFakeBudget({ year: 2025, type }),
+        createFakeBudget({ year: 2024, type }),
+        createFakeBudget({ year: 2023, type }),
+        createFakeBudget({ year: 2022, type }),
+        createFakeBudget({ year: 2021, type }),
       ],
       controles: [
         createFakeControle(),
@@ -233,7 +262,6 @@ export const createFakeStuctureWithRelations = ({
 
 export type FakeStructureOptions = {
   codeBhasile?: string | null;
-  cpom: boolean;
   type: StructureType;
   isFinalised: boolean;
   ofii: boolean;

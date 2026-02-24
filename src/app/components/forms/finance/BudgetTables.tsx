@@ -1,20 +1,23 @@
 import Notice from "@codegouvfr/react-dsfr/Notice";
 import Link from "next/link";
 
+import { getYearRange } from "@/app/utils/date.util";
 import {
   isStructureAutorisee,
-  isStructureInCpom,
   isStructureSubventionnee,
+  wasStructureInCpom,
 } from "@/app/utils/structure.util";
 import { getFinanceFormTutorialLink } from "@/app/utils/tutorials.util";
+import { BHASILE_CONTACT_EMAIL } from "@/constants";
 
 import { useStructureContext } from "../../../(authenticated)/structures/[id]/_context/StructureClientContext";
-// import { CpomTable } from "./budget-tables/CpomTable";
+import { StructureCpomTable } from "./budget-tables/StructureCpomTable";
 import { StructureTable } from "./budget-tables/StructureTable";
 
 export const BudgetTables = () => {
   const { structure } = useStructureContext();
-  const isInCpom = isStructureInCpom(structure);
+  const { years } = getYearRange({ order: "desc" });
+  const wasInCpom = wasStructureInCpom(structure, years);
   const isAutorisee = isStructureAutorisee(structure?.type);
   const isSubventionnee = isStructureSubventionnee(structure?.type);
 
@@ -31,7 +34,7 @@ export const BudgetTables = () => {
               href={getFinanceFormTutorialLink({
                 isAutorisee,
                 isSubventionnee,
-                isInCpom,
+                wasInCpom,
               })}
               target="_blank"
               className="underline"
@@ -50,24 +53,24 @@ export const BudgetTables = () => {
           Veuillez renseigner l’historique du ces données budgétaires{" "}
           <strong>à l’échelle de votre structure.</strong> Concernant les
           affectations, ce tableau reflète le flux annuel et ne constitue en
-          aucun cas un calcul ou du stock.
+          aucun cas un calcul du stock.
         </p>
         <StructureTable />
       </fieldset>
-      {/* {isInCpom && (
+      {wasInCpom && (
         <fieldset className="flex flex-col gap-6 min-w-0 w-full">
           <legend className="text-xl font-bold mb-8 text-title-blue-france">
             Gestion budgétaire du CPOM
           </legend>
-          <p className="mb-0">
-            Veuillez renseigner l’historique du ces données budgétaires{" "}
-            <strong>à l’échelle de l’ensemble du CPOM.</strong> Concernant les
-            affectations, ce tableau reflète le flux annuel et ne constitue en
-            aucun cas un calcul ou du stock.
-          </p>
-          <CpomTable />
+          <Notice
+            severity="info"
+            title=""
+            className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey"
+            description={`L’historique des données budgétaires à l’échelle du CPOM ont déjà été renseignées lors de la saisie du CPOM. Si vous constatez une erreur et voulez apporter une modification, contactez-nous : ${BHASILE_CONTACT_EMAIL}`}
+          />
+          <StructureCpomTable canEdit={false} />
         </fieldset>
-      )} */}
+      )}
     </>
   );
 };

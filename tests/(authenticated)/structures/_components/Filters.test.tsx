@@ -57,7 +57,9 @@ describe("Filters", () => {
 
     render(<Filters />);
 
-    const filterButton = screen.getByRole("button", { name: "Filtres inactifs" });
+    const filterButton = screen.getByRole("button", {
+      name: "Filtres inactifs",
+    });
     expect(filterButton).toHaveAttribute("aria-pressed", "false");
     expect(filterButton).toHaveAttribute("aria-label", "Filtres inactifs");
 

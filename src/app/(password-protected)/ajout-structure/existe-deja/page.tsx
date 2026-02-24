@@ -4,7 +4,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useSearchParams } from "next/navigation";
 
 import { Badge } from "@/app/components/common/Badge";
-import { PLACE_ASILE_CONTACT_EMAIL } from "@/constants";
+import { BHASILE_CONTACT_EMAIL } from "@/constants";
 
 export default function ExisteDeja() {
   const searchParams = useSearchParams();
@@ -23,12 +23,12 @@ export default function ExisteDeja() {
       </p>
       <Button
         linkProps={{
-          href: `mailto:${PLACE_ASILE_CONTACT_EMAIL}?subject=Structure%20existante%20-%20${dnaCode}`,
+          href: `mailto:${BHASILE_CONTACT_EMAIL}?subject=Structure%20existante%20-%20${dnaCode}`,
           target: "_blank",
           rel: "noopener noreferrer",
         }}
       >
-        {PLACE_ASILE_CONTACT_EMAIL}
+        {BHASILE_CONTACT_EMAIL}
       </Button>
     </div>
   );

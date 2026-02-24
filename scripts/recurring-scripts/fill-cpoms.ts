@@ -2,6 +2,9 @@
 // Usage: yarn script fill-cpoms my_cpom_file.csv
 // An example of the csv file is available at /public/cpom_example.csv
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import "dotenv/config";
 
 import { createPrismaClient } from "@/prisma-client";

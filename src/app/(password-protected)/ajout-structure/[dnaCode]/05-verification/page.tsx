@@ -10,7 +10,7 @@ import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { useRedirectStructureCreation } from "@/app/hooks/useRedirectStructureCreation";
 import { useStructures } from "@/app/hooks/useStructures";
 import { getErrorEmail } from "@/app/utils/errorMail.util";
-import { PLACE_ASILE_CONTACT_EMAIL } from "@/constants";
+import { BHASILE_CONTACT_EMAIL } from "@/constants";
 import { AjoutAdressesFormValues } from "@/schemas/forms/ajout/ajoutAdresses.schema";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { AjoutTypePlacesFormValues } from "@/schemas/forms/ajout/ajoutTypePlaces.schema";
@@ -194,7 +194,7 @@ export default function StepVerification() {
           <p className="cta_message text-mention-grey text-sm text-right mt-2">
             Si vous ne parvenez pas à remplir certains champs,{" "}
             <a
-              href={`mailto:${PLACE_ASILE_CONTACT_EMAIL}`}
+              href={`mailto:${BHASILE_CONTACT_EMAIL}`}
               target="_blank"
               rel="noopener noreferrer"
               className="underline"

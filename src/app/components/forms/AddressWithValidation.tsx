@@ -19,7 +19,7 @@ import {
 import { Autocomplete } from "./Autocomplete";
 
 export default function AddressWithValidation<
-  TFieldValues extends FieldValues = FieldValues
+  TFieldValues extends FieldValues = FieldValues,
 >({
   id,
   control,
@@ -309,7 +309,7 @@ type AddressSuggestion = AutocompleteSuggestion & {
 };
 
 type AddressWithValidationProps<
-  TFieldValues extends FieldValues = FieldValues
+  TFieldValues extends FieldValues = FieldValues,
 > = Partial<UseControllerProps<TFieldValues>> & {
   id?: string;
   fullAddress: string;

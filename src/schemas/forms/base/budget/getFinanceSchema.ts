@@ -2,6 +2,7 @@ import z from "zod";
 
 import { getYearRange } from "@/app/utils/date.util";
 import {
+  getRealCreationYear,
   isStructureAutorisee,
   isStructureInCpom,
   isStructureSubventionnee,
@@ -19,7 +20,7 @@ import {
   budgetSubventionneeNotOpenSchema,
   budgetSubventionneeOpenSchema,
 } from "../budget.schema";
-import { cpomStructureSchema } from "../cpomStructure.schema";
+import { cpomStructureSchema } from "../cpom.schema";
 import { DocumentsFinanciersFlexibleSchema } from "../documentFinancier.schema";
 
 export const getFinanceSchema = (
@@ -34,7 +35,13 @@ export const getFinanceSchema = (
     isStructureInCpom(structure, year)
   );
 
+  const startYear = getRealCreationYear(structure);
+
   const schema = years.map((year, index) => {
+    if (year < startYear) {
+      return budgetAutoSaveSchema;
+    }
+
     if (isInCpomPerYear[index]) {
       return budgetInCpomSchema;
     }
@@ -65,14 +72,14 @@ export const getFinanceSchema = (
       .object({
         budgets: z.tuple(schema),
       })
-      .and(cpomStructureSchema);
+      .and(z.object({ cpomStructures: z.array(cpomStructureSchema) }));
   }
 
   return z
     .object({
       budgets: z.tuple(schema),
+      cpomStructures: z.array(cpomStructureSchema),
     })
-    .and(cpomStructureSchema)
     .and(DocumentsFinanciersFlexibleSchema);
 };
 

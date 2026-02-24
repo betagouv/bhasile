@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { zId } from "@/app/utils/zodCustomFields";
 import { PublicType, StructureType } from "@/types/structure.type";
 
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
@@ -18,6 +19,7 @@ import { structureMillesimeApiSchema } from "./structure-millesime.schema";
 import { structureTypologieApiSchema } from "./structure-typologie.schema";
 
 export const structureMinimalApiSchema = z.object({
+  id: zId(),
   dnaCode: z.string(),
   operateur: operateurApiSchema,
   type: z.nativeEnum(StructureType),
@@ -79,9 +81,7 @@ const partialStructureOperateurUpdateApiSchema =
     adresses: z.array(adresseApiSchema.partial()).optional(),
     forms: z.array(formApiSchema.partial()).optional(),
     contacts: z.array(contactApiSchema.partial()).optional(),
-    documentsFinanciers: z
-      .array(documentFinancierApiSchema.partial())
-      .optional(),
+    documentsFinanciers: z.array(documentFinancierApiSchema).optional(),
     structureTypologies: z
       .array(structureTypologieApiSchema.partial().required({ year: true }))
       .optional(),
@@ -100,7 +100,7 @@ const remainingStructureAgentUpdateApiSchema = z.object({
   activites: z.array(activiteApiSchema).optional(),
   budgets: z.array(budgetApiSchema).optional(),
   forms: z.array(formApiSchema).optional(),
-  actesAdministratifs: z.array(acteAdministratifApiSchema.partial()).optional(),
+  actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
 });
 
 export const structureAgentUpdateApiSchema =

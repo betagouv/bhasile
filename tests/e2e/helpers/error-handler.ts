@@ -54,7 +54,9 @@ export async function ensureResponseOk(
   context: string
 ): Promise<void> {
   if (!response.ok) {
-    const errorText = await response.text().catch(() => "Unable to read error response");
+    const errorText = await response
+      .text()
+      .catch(() => "Unable to read error response");
     throw new ApiError(
       `API request failed in ${context}`,
       response.status,

@@ -14,7 +14,7 @@ import { structureTypologiesWithMandatoryEvolutionSchema } from "@/schemas/forms
 import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
 
-import { ModificationTitle } from "../components/ModificationTitle";
+import { ModificationTitle } from "../_components/ModificationTitle";
 
 export default function ModificationTypePlaces() {
   const { structure } = useStructureContext();
@@ -53,7 +53,10 @@ export default function ModificationTypePlaces() {
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
         <FieldSetOuvertureFermeture formKind={FormKind.MODIFICATION} />
-        <FieldSetTypePlaces />
+        <FieldSetTypePlaces
+          structure={structure}
+          formKind={FormKind.MODIFICATION}
+        />
       </FormWrapper>
       {saveState === FetchState.ERROR && (
         <SubmitError

@@ -6,10 +6,7 @@ import { ReactElement } from "react";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import { BackButton } from "@/app/components/structure-selection/BackButton";
 import { StructureSearch } from "@/app/components/structure-selection/StructureSearch";
-import {
-  PLACE_ASILE_CONTACT_EMAIL,
-  PLACE_ASILE_PHONE_NUMBERS,
-} from "@/constants";
+import { BHASILE_CONTACT_EMAIL, BHASILE_PHONE_NUMBERS } from "@/constants";
 import { ajoutStructureSchema } from "@/schemas/forms/ajout/ajoutStructure.schema";
 
 import { ValidationButton } from "./_components/ValidationButton";
@@ -39,12 +36,12 @@ export default function AjoutStructurePage(): ReactElement {
               merci de nous contacter directement par email via{" "}
               {
                 <a
-                  href={`mailto:${PLACE_ASILE_CONTACT_EMAIL}`}
+                  href={`mailto:${BHASILE_CONTACT_EMAIL}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline"
                 >
-                  {PLACE_ASILE_CONTACT_EMAIL}
+                  {BHASILE_CONTACT_EMAIL}
                 </a>
               }
               .
@@ -55,14 +52,14 @@ export default function AjoutStructurePage(): ReactElement {
         <p className="text-mention-grey text-sm text-center mb-10">
           Si vous ne trouvez pas votre structure,{" "}
           <a
-            href={`mailto:${PLACE_ASILE_CONTACT_EMAIL}`}
+            href={`mailto:${BHASILE_CONTACT_EMAIL}`}
             target="_blank"
             rel="noopener noreferrer"
             className="underline"
           >
             contactez-nous par mail
           </a>{" "}
-          ou par téléphone ({PLACE_ASILE_PHONE_NUMBERS})
+          ou par téléphone ({BHASILE_PHONE_NUMBERS})
         </p>
         <ValidationButton />
       </div>

@@ -4,6 +4,7 @@ import { ReactElement } from "react";
 
 import PieChart from "@/app/components/common/PieChart";
 import { getPercentage } from "@/app/utils/common.util";
+import { StructureType } from "@/types/structure.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
@@ -88,45 +89,52 @@ export const ActivitePlaces = (): ReactElement => {
           </div>
         </div>
       </div>
-      <span className="fr-icon-arrow-right-s-line text-title-blue-france fr-icon--lg" />
-      <div>
-        <PieChart
-          size={160}
-          data={{
-            labels: [
-              "Places indues BPI",
-              "Places indues déboutées",
-              "Places non indues et non deboutées",
-            ],
-            series: [
-              presencesInduesBPI,
-              presencesInduesDeboutees,
-              placesOccupees - presencesInduesBPI - presencesInduesDeboutees,
-            ],
-          }}
-          options={pieChartOptions}
-          colors={[
-            "var(--blue-cumulus-main-526)",
-            "var(--blue-cumulus-925-125)",
-            "var(--blue-cumulus-850-200)",
-          ]}
-          isDonut={true}
-        >
-          <div className="absolute w-22 top-15 left-26 text-sm text-center">
-            <strong>{placesOccupees}</strong> places occupées
-          </div>
-        </PieChart>
-        <div className="pt-2 text-center">
+      {structure.type !== StructureType.CPH && (
+        <>
+          <span className="fr-icon-arrow-right-s-line text-title-blue-france fr-icon--lg" />
           <div>
-            <strong>{presencesInduesBPI}</strong> en présence indue BPI (
-            {getPercentage(presencesInduesBPI, placesOccupees)})
+            <PieChart
+              size={160}
+              data={{
+                labels: [
+                  "Places indues BPI",
+                  "Places indues déboutées",
+                  "Places non indues et non deboutées",
+                ],
+                series: [
+                  presencesInduesBPI,
+                  presencesInduesDeboutees,
+                  placesOccupees -
+                    presencesInduesBPI -
+                    presencesInduesDeboutees,
+                ],
+              }}
+              options={pieChartOptions}
+              colors={[
+                "var(--blue-cumulus-main-526)",
+                "var(--blue-cumulus-925-125)",
+                "var(--blue-cumulus-850-200)",
+              ]}
+              isDonut={true}
+            >
+              <div className="absolute w-22 top-15 left-26 text-sm text-center">
+                <strong>{placesOccupees}</strong> places occupées
+              </div>
+            </PieChart>
+            <div className="pt-2 text-center">
+              <div>
+                <strong>{presencesInduesBPI}</strong> en présence indue BPI (
+                {getPercentage(presencesInduesBPI, placesOccupees)})
+              </div>
+              <div>
+                <strong>{presencesInduesDeboutees}</strong> en présence indue
+                deboutée (
+                {getPercentage(presencesInduesDeboutees, placesOccupees)})
+              </div>
+            </div>
           </div>
-          <div>
-            <strong>{presencesInduesDeboutees}</strong> en présence indue
-            deboutée ({getPercentage(presencesInduesDeboutees, placesOccupees)})
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 };

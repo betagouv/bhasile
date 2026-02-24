@@ -4,7 +4,7 @@ import { Footer } from "@/app/components/common/Footer";
 import { Header } from "@/app/components/common/Header";
 
 export const metadata: Metadata = {
-  title: "Place d'asile - Connexion",
+  title: "Bhasile - Connexion",
   description: "Piloter le parc de logements pour demandeurs d’asile",
 };
 

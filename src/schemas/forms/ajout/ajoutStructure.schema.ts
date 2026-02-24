@@ -1,5 +1,6 @@
 import z from "zod";
 
+import { zId } from "@/app/utils/zodCustomFields";
 import { structureMinimalApiSchema } from "@/schemas/api/structure.schema";
 import { StructureType } from "@/types/structure.type";
 
@@ -9,7 +10,7 @@ const departementSchema = z.object({
 });
 
 const operateurSchema = z.object({
-  id: z.number().optional(),
+  id: zId(),
   name: z.string(),
 });
 

@@ -1,9 +1,13 @@
 import { z } from "zod";
 
-import { zSafeDecimalsNullish, zSafeYear } from "@/app/utils/zodCustomFields";
+import {
+  zId,
+  zSafeDecimalsNullish,
+  zSafeYear,
+} from "@/app/utils/zodCustomFields";
 
 const cpomMillesimeApiSchema = z.object({
-  id: z.number().optional(),
+  id: zId(),
   year: zSafeYear(),
   dotationDemandee: zSafeDecimalsNullish(),
   dotationAccordee: zSafeDecimalsNullish(),
@@ -24,7 +28,7 @@ const cpomMillesimeApiSchema = z.object({
 export const cpomStructureSchema = z.object({
   cpomStructures: z.array(
     z.object({
-      id: z.number().optional(),
+      id: zId(),
       cpomId: z.number(),
       structureId: z.number(),
       cpom: z.object({

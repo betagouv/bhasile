@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Menu } from "../components/Menu";
 
 export const metadata: Metadata = {
-  title: "Place d'asile",
+  title: "Bhasile",
   description: "Piloter le parc de logements pour demandeurs d’asile",
 };
 

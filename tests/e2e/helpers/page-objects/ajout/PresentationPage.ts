@@ -3,7 +3,6 @@ import { expect } from "@playwright/test";
 import { BasePage } from "../BasePage";
 
 export class PresentationPage extends BasePage {
-
   private async verifyPageContent(): Promise<void> {
     await expect(
       this.page

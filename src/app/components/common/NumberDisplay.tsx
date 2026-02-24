@@ -19,13 +19,15 @@ export const NumberDisplay = ({
   }
 
   const valueToDisplay =
-    type === "number" ? formatNumber(value) : formatCurrency(value);
+    type === "number"
+      ? formatNumber(Number(value))
+      : formatCurrency(Number(value));
 
   return <span className={className}>{valueToDisplay}</span>;
 };
 
 type CurrencyDisplayProps = {
-  value: number | null | undefined;
+  value: number | string | null | undefined;
   type?: "number" | "currency";
   className?: string;
   showZero?: boolean;

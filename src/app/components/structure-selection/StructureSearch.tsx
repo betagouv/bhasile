@@ -19,8 +19,8 @@ export const StructureSearch = (): ReactElement => {
 
   const { structures } = useStructuresSelection({
     operateurName,
-    departementNumero,
-    type,
+    departements: departementNumero,
+    types: type,
   });
 
   useEffect(() => {

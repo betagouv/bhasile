@@ -1,8 +1,11 @@
 import z from "zod";
 
 import { zSafeYear } from "@/app/utils/zodCustomFields";
+import { StructureType } from "@/types/structure.type";
 
-import { fileApiSchema } from "./file.schema";
+import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
+import { formApiSchema } from "./form.schema";
+import { operateurApiSchema } from "./operateur.schema";
 
 export const cpomMillesimeApiSchema = z.object({
   id: z.number().optional(),
@@ -23,27 +26,53 @@ export const cpomMillesimeApiSchema = z.object({
   commentaire: z.string().nullish(),
 });
 
-export type CpomMillesimeApiType = z.infer<typeof cpomMillesimeApiSchema>;
-
 export const cpomApiSchema = z.object({
   id: z.number().optional(),
   name: z.string().nullish(),
-  debutCpom: z.string().datetime().nullish(),
-  finCpom: z.string().datetime().nullish(),
-  structureIds: z.array(z.number()).optional(),
-  fileUploads: z.array(fileApiSchema).optional(),
+  operateur: operateurApiSchema.optional(),
+  operateurId: z.number().optional(),
+  region: z.string().optional(),
+  departements: z.array(z.string()).optional(),
+  granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
+  actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
+  structures: z
+    .array(
+      z.object({
+        id: z.number().optional(),
+        cpomId: z.number().optional(),
+        structureId: z.number(),
+        dateStart: z.string().datetime().nullish(),
+        dateEnd: z.string().datetime().nullish(),
+        structure: z
+          .object({
+            id: z.number().optional(),
+            dnaCode: z.string(),
+            type: z.nativeEnum(StructureType),
+            communeAdministrative: z.string(),
+            operateur: operateurApiSchema,
+            forms: z.array(formApiSchema),
+          })
+          .optional(),
+      })
+    )
+    .optional(),
 });
-
-export type CpomApiType = z.infer<typeof cpomApiSchema>;
 
 export const cpomStructureApiSchema = z.object({
   id: z.number().optional(),
-  cpomId: z.number(),
+  cpomId: z.number().optional(),
+  cpom: cpomApiSchema.optional(),
   structureId: z.number(),
-  dateDebut: z.string().datetime().nullish(),
-  dateFin: z.string().datetime().nullish(),
-  cpom: cpomApiSchema,
+  dateStart: z.string().datetime().nullish(),
+  dateEnd: z.string().datetime().nullish(),
 });
+
+export const cpomApiAjoutSchema = cpomApiSchema.extend({
+  operateur: operateurApiSchema,
+});
+
+export type CpomMillesimeApiType = z.infer<typeof cpomMillesimeApiSchema>;
+export type CpomApiType = z.infer<typeof cpomApiSchema>;
 
 export type CpomStructureApiType = z.infer<typeof cpomStructureApiSchema>;

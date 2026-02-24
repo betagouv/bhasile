@@ -12,6 +12,7 @@ import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
+import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 import {
   DocumentsFinanciersFlexibleFormValues,
   DocumentsFinanciersFlexibleSchema,
@@ -39,14 +40,18 @@ export default function FinalisationDocumentsFinanciers() {
     useAgentFormHandling({ currentStep });
 
   const onAutoSave = async (data: DocumentsFinanciersFlexibleFormValues) => {
-    const documentsFinanciers =
-      data.documentsFinanciers?.filter(
-        (documentFinancier) => documentFinancier.key
-      ) ?? [];
+    const documentsFinanciers = (data.documentsFinanciers?.filter(
+      (documentFinancier) =>
+        documentFinancier.fileUploads?.[0]?.key &&
+        documentFinancier.category &&
+        documentFinancier.granularity
+    ) ?? []) as DocumentFinancierApiType[];
+
     const structureMillesimes = data.structureMillesimes?.map((millesime) => ({
       ...millesime,
       operateurComment: millesime.operateurComment ?? undefined,
     }));
+
     await handleAutoSave({
       ...data,
       documentsFinanciers,

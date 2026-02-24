@@ -6,13 +6,17 @@ import { useFormContext } from "react-hook-form";
 
 import { getName, isInputDisabled } from "@/app/utils/budget.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import {
+  CpomMillesimeApiType,
+  CpomStructureApiType,
+} from "@/schemas/api/cpom.schema";
 
 export const BudgetTableCommentButtonAndModal = ({
   year,
   disabledYearsStart,
   enabledYears,
   cpomStructures,
+  cpomMillesimes,
   budgets,
 }: Props) => {
   const modal = useMemo(
@@ -30,15 +34,25 @@ export const BudgetTableCommentButtonAndModal = ({
 
   const inputModalRef = useRef<HTMLTextAreaElement>(null);
 
+  const isAboutCpom = useMemo(() => {
+    return cpomStructures || cpomMillesimes;
+  }, [cpomStructures, cpomMillesimes]);
+
   const commentPath = useMemo(
-    () => getName("commentaire", year, budgets, cpomStructures),
-    [year, budgets, cpomStructures]
+    () => getName("commentaire", year, budgets, cpomStructures, cpomMillesimes),
+    [year, budgets, cpomStructures, cpomMillesimes]
   );
 
   const currentComment = watch(commentPath);
 
   const handleOpenModal = (year: number) => {
-    const commentPath = getName("commentaire", year, budgets, cpomStructures);
+    const commentPath = getName(
+      "commentaire",
+      year,
+      budgets,
+      cpomStructures,
+      cpomMillesimes
+    );
     if (inputModalRef.current) {
       inputModalRef.current.value = watch(commentPath) || "";
     }
@@ -71,6 +85,7 @@ export const BudgetTableCommentButtonAndModal = ({
           enabledYears,
           cpomStructures
         )}
+        className="font-bold"
       >
         {currentComment ? "Modifier" : "Ajouter"}
       </Button>
@@ -94,9 +109,11 @@ export const BudgetTableCommentButtonAndModal = ({
             },
           },
         ]}
+        className="[&_h1]:!text-left [&_p]:!text-left"
       >
         <p className="font-bold text-xl">
-          Détail affectation réserves et provisions du CPOM — Année {year}
+          Détail affectation réserves et provisions{" "}
+          {isAboutCpom ? "du CPOM" : "de la structure"} — {year}
         </p>
 
         <Input
@@ -104,6 +121,7 @@ export const BudgetTableCommentButtonAndModal = ({
           textArea
           nativeTextAreaProps={{
             ref: inputModalRef,
+            rows: 10,
           }}
         />
       </modal.Component>
@@ -116,5 +134,6 @@ type Props = {
   disabledYearsStart?: number;
   enabledYears?: number[];
   cpomStructures?: CpomStructureApiType[];
+  cpomMillesimes?: CpomMillesimeApiType[];
   budgets?: BudgetApiType[];
 };

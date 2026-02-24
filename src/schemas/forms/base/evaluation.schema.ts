@@ -3,25 +3,24 @@ import z from "zod";
 import { getYearFromDate } from "@/app/utils/date.util";
 import {
   optionalFrenchDateToISO,
+  zId,
   zSafeDecimalsNullish,
 } from "@/app/utils/zodCustomFields";
 
-const idPreprocess = (val: unknown) => (val === "" ? undefined : val);
-
 const fileUploadSchema = z.object({
   key: z.string().optional(),
-  id: z.preprocess(idPreprocess, z.number().optional()),
+  id: zId(),
 });
 
 const evaluationAutoSaveSchema = z.object({
-  id: z.preprocess(idPreprocess, z.number().optional()),
+  id: zId(),
   date: optionalFrenchDateToISO(),
   notePersonne: zSafeDecimalsNullish(),
   notePro: zSafeDecimalsNullish(),
   noteStructure: zSafeDecimalsNullish(),
   note: zSafeDecimalsNullish(),
   fileUploads: z.array(fileUploadSchema.optional()).optional(),
-  uuid: z.string().optional(), // Used to identify the evaluation when it is not saved in the database (and so do not have an id)
+  uuid: z.string().optional(), // Used to identify the evaluation when it is not saved in the database (and so does not have an id)
 });
 
 export const evaluationSchema = evaluationAutoSaveSchema

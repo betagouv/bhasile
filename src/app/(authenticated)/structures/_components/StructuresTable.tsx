@@ -5,15 +5,67 @@ import { useRouter } from "next/navigation";
 import { ReactElement, useState } from "react";
 
 import { Pagination } from "@/app/components/common/Pagination";
+import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
 import { StructureApiType } from "@/schemas/api/structure.schema";
+import { ListColumn } from "@/types/ListColumn";
 
 import { StructureItem } from "./StructureItem";
-import { StructuresTableHeadings } from "./StructuresTableHeadings";
 
 const finalisationModal = createModal({
   id: "finalisation-modal",
   isOpenedByDefault: false,
 });
+
+const COLUMNS: ListColumn[] = [
+  {
+    label: "DNA",
+    column: "dnaCode",
+    orderBy: true,
+    centered: false,
+  },
+  {
+    label: "Type",
+    column: "type",
+    orderBy: true,
+    centered: false,
+  },
+  {
+    label: "Opérateur",
+    column: "operateur",
+    orderBy: true,
+    centered: false,
+  },
+  {
+    label: "Dépt.",
+    column: "departementAdministratif",
+    orderBy: true,
+    centered: true,
+  },
+  {
+    label: "Bâti",
+    column: "bati",
+    orderBy: true,
+    centered: false,
+  },
+  {
+    label: "Communes",
+    column: "communes",
+    orderBy: false,
+    centered: false,
+  },
+  {
+    label: "Places aut.",
+    column: "placesAutorisees",
+    orderBy: true,
+    centered: true,
+  },
+  {
+    label: "Fin convention",
+    column: "finConvention",
+    orderBy: true,
+    centered: false,
+  },
+];
 
 export const StructuresTable = ({
   structures,
@@ -32,7 +84,7 @@ export const StructuresTable = ({
   return (
     <>
       <div className="p-4 bg-alt-grey h-full">
-        <StructuresTableHeadings ariaLabelledBy={ariaLabelledBy}>
+        <ListTableHeadings ariaLabelledBy={ariaLabelledBy} columns={COLUMNS}>
           {structures.map((structure, index) => (
             <StructureItem
               key={structure.id}
@@ -41,7 +93,7 @@ export const StructuresTable = ({
               handleOpenModal={handleOpenModal}
             />
           ))}
-        </StructuresTableHeadings>
+        </ListTableHeadings>
         <div className="pt-4 flex justify-center items-center">
           <Pagination totalElements={totalStructures} />
         </div>

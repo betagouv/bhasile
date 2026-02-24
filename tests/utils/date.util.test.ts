@@ -41,18 +41,18 @@ describe("date util", () => {
   describe("getMonthsBetween", () => {
     it("should return an empty array for invalid start or end date", () => {
       // GIVEN
-      const invalidStartDateNull = null;
-      const invalidEndDateNull = null;
-      const invalidStartDateString = "invalid date";
-      const invalidEndDateString = "not a date";
-      const validEndDate = "2025-03-01";
-      const validStartDate = "2025-01-01";
+      const invalidDateStartNull = null;
+      const invalidDateEndNull = null;
+      const invalidDateStartString = "invalid date";
+      const invalidDateEndString = "not a date";
+      const validdateEnd = "2025-03-01";
+      const validdateStart = "2025-01-01";
 
       // WHEN
-      const result1 = getMonthsBetween(invalidStartDateNull, validEndDate);
-      const result2 = getMonthsBetween(validStartDate, invalidEndDateNull);
-      const result3 = getMonthsBetween(invalidStartDateString, validEndDate);
-      const result4 = getMonthsBetween(validStartDate, invalidEndDateString);
+      const result1 = getMonthsBetween(invalidDateStartNull, validdateEnd);
+      const result2 = getMonthsBetween(validdateStart, invalidDateEndNull);
+      const result3 = getMonthsBetween(invalidDateStartString, validdateEnd);
+      const result4 = getMonthsBetween(validdateStart, invalidDateEndString);
 
       // THEN
       expect(result1).toEqual([]);
@@ -63,11 +63,11 @@ describe("date util", () => {
 
     it("should return an empty array if start date is after end date", () => {
       // GIVEN
-      const startDate = "2025-03-01";
-      const endDate = "2025-01-01";
+      const dateStart = "2025-03-01";
+      const dateEnd = "2025-01-01";
 
       // WHEN
-      const result = getMonthsBetween(startDate, endDate);
+      const result = getMonthsBetween(dateStart, dateEnd);
 
       // THEN
       expect(result).toEqual([]);
@@ -75,11 +75,11 @@ describe("date util", () => {
 
     it("should return a single month if start and end dates are in the same month", () => {
       // GIVEN
-      const startDate = "2025-02-10";
-      const endDate = "2025-02-20";
+      const dateStart = "2025-02-10";
+      const dateEnd = "2025-02-20";
 
       // WHEN
-      const result = getMonthsBetween(startDate, endDate);
+      const result = getMonthsBetween(dateStart, dateEnd);
 
       // THEN
       expect(result).toEqual([dayjs("2025-02-01")]);
@@ -87,17 +87,17 @@ describe("date util", () => {
 
     it("should return the correct months between two dates", () => {
       // GIVEN
-      const startDate1 = "2024-12-15";
-      const endDate1 = "2025-03-01";
-      const startDate2 = "2025-01-01";
-      const endDate2 = "2025-02-28";
-      const startDate3 = "2025-03-31";
-      const endDate3 = "2025-05-01";
+      const dateStart1 = "2024-12-15";
+      const dateEnd1 = "2025-03-01";
+      const dateStart2 = "2025-01-01";
+      const dateEnd2 = "2025-02-28";
+      const dateStart3 = "2025-03-31";
+      const dateEnd3 = "2025-05-01";
 
       // WHEN
-      const result1 = getMonthsBetween(startDate1, endDate1);
-      const result2 = getMonthsBetween(startDate2, endDate2);
-      const result3 = getMonthsBetween(startDate3, endDate3);
+      const result1 = getMonthsBetween(dateStart1, dateEnd1);
+      const result2 = getMonthsBetween(dateStart2, dateEnd2);
+      const result3 = getMonthsBetween(dateStart3, dateEnd3);
 
       // THEN
       expect(result1).toEqual([
@@ -116,13 +116,13 @@ describe("date util", () => {
 
     it("should handle Date objects as input", () => {
       // GIVEN
-      const startDate = new Date("2025-01-15");
-      const endDate = new Date("2025-03-10");
+      const dateStart = new Date("2025-01-15");
+      const dateEnd = new Date("2025-03-10");
 
       // WHEN
       const result = getMonthsBetween(
-        startDate.toISOString(),
-        endDate.toISOString()
+        dateStart.toISOString(),
+        dateEnd.toISOString()
       );
 
       // THEN
@@ -393,11 +393,11 @@ describe("date util", () => {
       vi.useFakeTimers();
       vi.setSystemTime(mockedNow.toDate());
 
-      const startDate = "2025-02-01T00:00:00Z";
-      const endDate = "2025-03-01T00:00:00Z";
+      const dateStart = "2025-02-01T00:00:00Z";
+      const dateEnd = "2025-03-01T00:00:00Z";
 
       // WHEN
-      const result = getElapsedPercentage({ startDate, endDate });
+      const result = getElapsedPercentage({ dateStart, dateEnd });
 
       // THEN
       expect(result).toBe(0);
@@ -409,11 +409,11 @@ describe("date util", () => {
       vi.useFakeTimers();
       vi.setSystemTime(mockedNow.toDate());
 
-      const startDate = "2025-02-01T00:00:00Z";
-      const endDate = "2025-03-01T00:00:00Z";
+      const dateStart = "2025-02-01T00:00:00Z";
+      const dateEnd = "2025-03-01T00:00:00Z";
 
       // WHEN
-      const result = getElapsedPercentage({ startDate, endDate });
+      const result = getElapsedPercentage({ dateStart, dateEnd });
 
       // THEN
       expect(result).toBe(100);
@@ -425,15 +425,15 @@ describe("date util", () => {
       vi.useFakeTimers();
       vi.setSystemTime(mockedNow.toDate());
 
-      const startDate = "2025-02-01T00:00:00Z";
-      const endDate = "2025-03-01T00:00:00Z";
+      const dateStart = "2025-02-01T00:00:00Z";
+      const dateEnd = "2025-03-01T00:00:00Z";
 
       // WHEN
-      const result = getElapsedPercentage({ startDate, endDate });
+      const result = getElapsedPercentage({ dateStart, dateEnd });
 
       // THEN
-      const start = dayjs(startDate);
-      const end = dayjs(endDate);
+      const start = dayjs(dateStart);
+      const end = dayjs(dateEnd);
       const total = end.diff(start, "millisecond");
       const elapsed = mockedNow.diff(start, "millisecond");
       const expected = Math.min(100, Math.max(0, (elapsed / total) * 100));
@@ -447,11 +447,11 @@ describe("date util", () => {
       vi.useFakeTimers();
       vi.setSystemTime(mockedNow.toDate());
 
-      const startDate = "2025-02-01T00:00:00Z";
-      const endDate = "2025-03-01T00:00:00Z";
+      const dateStart = "2025-02-01T00:00:00Z";
+      const dateEnd = "2025-03-01T00:00:00Z";
 
       // WHEN
-      const result = getElapsedPercentage({ startDate, endDate });
+      const result = getElapsedPercentage({ dateStart, dateEnd });
 
       // THEN
       expect(result).toBe(0);
@@ -463,11 +463,11 @@ describe("date util", () => {
       vi.useFakeTimers();
       vi.setSystemTime(mockedNow.toDate());
 
-      const startDate = "2025-02-01T00:00:00Z";
-      const endDate = "2025-03-01T00:00:00Z";
+      const dateStart = "2025-02-01T00:00:00Z";
+      const dateEnd = "2025-03-01T00:00:00Z";
 
       // WHEN
-      const result = getElapsedPercentage({ startDate, endDate });
+      const result = getElapsedPercentage({ dateStart, dateEnd });
 
       // THEN
       expect(result).toBe(100);

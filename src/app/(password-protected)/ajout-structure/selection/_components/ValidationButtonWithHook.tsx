@@ -55,7 +55,6 @@ export const ValidationButtonWithHook = (): ReactElement => {
     {} as Partial<DocumentsFinanciersFlexibleFormValues>
   );
 
-  // TODO: remove every date to year conversion on 19/01/2026
   const handleValidation = () => {
     updateIdentification({
       ...localIdentificationValue,

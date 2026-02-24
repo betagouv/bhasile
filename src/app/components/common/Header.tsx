@@ -18,8 +18,8 @@ export const Header = (): ReactElement => {
                 </div>
               </div>
               <div className="fr-header__service">
-                <Link href="/" title="Connexion - Place d’asile">
-                  <p className="fr-header__service-title">Place d’asile</p>
+                <Link href="/" title="Connexion - Bhasile">
+                  <p className="fr-header__service-title">Bhasile</p>
                 </Link>
                 <p className="fr-header__service-tagline">
                   Faciliter le pilotage du parc d’hébergement des demandeurs

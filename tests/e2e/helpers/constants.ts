@@ -9,8 +9,10 @@ export const TIMEOUTS = {
   NAVIGATION: 10000,
   /** Timeout for form submissions (finalisation steps with file uploads can be slow) */
   SUBMIT: 30000,
-  /** Timeout for autocomplete suggestions */
-  AUTOCOMPLETE: 5000,
+  /** Extra long timeout for actes administratifs step (multiple S3 uploads) */
+  SUBMIT_DOCUMENTS: 60000,
+  /** Timeout for autocomplete suggestions (debounce + API under load) */
+  AUTOCOMPLETE: 25000,
   /** Short wait for UI updates */
   UI_UPDATE: 500,
   /** Very short wait for quick UI updates (e.g., panel animations) */
@@ -31,4 +33,13 @@ export const URLS = {
   finalisationStep: (structureId: number, step: string) =>
     `${BASE_URL}/structures/${structureId}/finalisation/${step}`,
   structure: (structureId: number) => `${BASE_URL}/structures/${structureId}`,
+  modificationStep: (structureId: number, step: string) =>
+    `${BASE_URL}/structures/${structureId}/modification/${step}`,
+
+  // CPOM
+  CPOMS_AJOUT_IDENTIFICATION: `${BASE_URL}/cpoms/ajout/01-identification`,
+  cpomModificationIdentification: (cpomId: number) =>
+    `${BASE_URL}/cpoms/${cpomId}/modification/01-identification`,
+  cpomModificationFinance: (cpomId: number) =>
+    `${BASE_URL}/cpoms/${cpomId}/modification/02-finance`,
 } as const;

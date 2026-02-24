@@ -50,6 +50,17 @@ export class WaitHelper {
   }
 
   /**
+   * Wait for autosave to launch (debounce) and for network to be idle.
+   * Use at the end of fillForm on pages with AutoSave to ensure data is persisted before submit.
+   */
+  async waitForAutosave(): Promise<void> {
+    await this.page.waitForTimeout(TIMEOUTS.UI_UPDATE);
+    await this.page.waitForLoadState("networkidle", {
+      timeout: TIMEOUTS.FILE_UPLOAD,
+    });
+  }
+
+  /**
    * Wait for an element to be visible and enabled
    */
   async waitForElementReady(selector: string): Promise<void> {

@@ -143,10 +143,7 @@ const transformAjoutFormStructureToApiStructure = async (
         String(typologie.fvvTeh).replace(",", ".").replaceAll(" ", "")
       ),
     })),
-    documentsFinanciers:
-      values.documentsFinanciers?.filter(
-        (documentFinancier) => documentFinancier.key
-      ) ?? [],
+    documentsFinanciers: values.documentsFinanciers,
   };
 };
 
