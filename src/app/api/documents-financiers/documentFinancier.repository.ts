@@ -13,7 +13,6 @@ export const createOrUpdateDocumentsFinanciers = async (
   documentsFinanciers: DocumentFinancierApiType[] | undefined,
   ownerId: DocumentFinancierOwnerId
 ): Promise<void> => {
-  console.log("documentsFinanciers", documentsFinanciers, ownerId);
   if (!documentsFinanciers || documentsFinanciers.length === 0) {
     return;
   }
@@ -71,6 +70,10 @@ const deleteDocumentsFinanciers = async (
     ownerId.structureDnaCode !== undefined
       ? { structureDnaCode: ownerId.structureDnaCode }
       : { cpomId: ownerId.cpomId };
+
+  if (ownerId.structureDnaCode === undefined && ownerId.cpomId === undefined) {
+    return;
+  }
 
   const KeysToKeep = getKeysFromIncomingDocumentsOrActes(
     documentsFinanciersToKeep

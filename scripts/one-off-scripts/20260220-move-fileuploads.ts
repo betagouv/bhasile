@@ -25,17 +25,7 @@ const OTHER_CATEGORIES = new Set(["EVALUATION", "INSPECTION_CONTROLE"]);
 /** Map old FileUpload.id -> new ActeAdministratif.id for parent resolution */
 const fileUploadIdToActeId = new Map<number, number>();
 
-/** Map structureDnaCode -> structureId (chargé une fois au début) */
-let dnaCodeToStructureId: Map<string, number>;
-
 const migrate = async () => {
-  console.log("📥 Récupération des structures (dnaCode vers id)...");
-  const structures = await prisma.structure.findMany({
-    select: { id: true, dnaCode: true },
-  });
-  dnaCodeToStructureId = new Map(structures.map((s) => [s.dnaCode, s.id]));
-  console.log(`✓ ${dnaCodeToStructureId.size} structures chargées`);
-
   console.log("📥 Récupération des FileUpload...");
   const fileUploads = await prisma.fileUpload.findMany();
 

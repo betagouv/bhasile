@@ -17,7 +17,7 @@ export const getActesAdministratifsDefaultValues = (
     getActesAdministratifsCategoryToDisplay(structure);
   const categoriesToDisplay = (
     Object.entries(categoryDisplayRules) as [
-      ActeAdministratifCategory,
+      Exclude<ActeAdministratifCategory, "CPOM">,
       (typeof categoryDisplayRules)[Exclude<ActeAdministratifCategory, "CPOM">],
     ][]
   )

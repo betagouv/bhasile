@@ -54,7 +54,6 @@ const createOrUpdateActeAdministratif = async (
   ownerId: { structureDnaCode?: string; cpomId?: number },
   parentId?: number
 ) => {
-  console.log("acteAdministratif", acteAdministratif);
   const fileKey = acteAdministratif.fileUploads?.[0]?.key;
   if (!fileKey) {
     return tx.acteAdministratif.create({
@@ -118,6 +117,10 @@ const deleteActesAdministratifs = async (
     ownerId.structureDnaCode !== undefined
       ? { structureDnaCode: ownerId.structureDnaCode }
       : { cpomId: ownerId.cpomId };
+
+  if (ownerId.structureDnaCode === undefined && ownerId.cpomId === undefined) {
+    return;
+  }
 
   const fileKeysToKeep = getKeysFromIncomingDocumentsOrActes(
     actesAdministratifsToKeep
