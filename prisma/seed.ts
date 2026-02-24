@@ -167,28 +167,6 @@ export async function seed(): Promise<void> {
     (s) => s.codeBhasile !== null
   );
   console.log(
-    `📎 Ajout des fichiers parent-enfant pour ${structures.length} structures`
-  );
-
-  for (const structure of structures) {
-    await seedParentChildFileUploads(prisma, structure.dnaCode);
-  }
-  console.log("✅ Fichiers parent-enfant ajoutés");
-
-  await createFakeCpoms(prisma);
-
-  console.log("📊 Récupération des structures créées...");
-  const allStructures = await prisma.structure.findMany({
-    select: {
-      id: true,
-      codeBhasile: true,
-      type: true,
-    },
-  });
-  const structuresWithBhasile = allStructures.filter(
-    (s) => s.codeBhasile !== null
-  );
-  console.log(
     `✅ ${allStructures.length} structures récupérées (${structuresWithBhasile.length} avec codeBhasile)`
   );
 
@@ -239,7 +217,9 @@ export async function seed(): Promise<void> {
       for (let i = 0; i < count; i++) {
         const dna = dnaList[cursor++];
         const dnaId = dnaByCode.get(dna.code);
-        if (!dnaId) continue;
+        if (!dnaId) {
+          continue;
+        }
 
         dnaStructures.push({
           dnaId,

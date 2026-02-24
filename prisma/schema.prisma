@@ -56,7 +56,6 @@ model Structure {
   contacts                     Contact[]
   structureTypologies          StructureTypologie[]
   activites                    Activite[]
-  fileUploads                  FileUpload[]
   actesAdministratifs          ActeAdministratif[]
   documentsFinanciers          DocumentFinancier[]
   cpomStructures               CpomStructure[]
@@ -271,19 +270,10 @@ model Activite {
 
 model FileUpload {
   id                    Int                    @id @default(autoincrement())
-  structure             Structure?             @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade) // TO DELETE AFTER MIGRATION
-  structureDnaCode      String? // TO DELETE AFTER MIGRATION
-  cpom                  Cpom?                  @relation(fields: [cpomId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TO DELETE AFTER MIGRATION
-  cpomId                Int? // TO DELETE AFTER MIGRATION
-  structureId        Int?
   key                   String                 @unique
   mimeType              String
   fileSize              Int
   originalName          String
-  date                  DateTime? // TO DELETE AFTER MIGRATION
-  category              FileUploadCategory? // TO DELETE AFTER MIGRATION
-  startDate             DateTime? // TO DELETE AFTER MIGRATION
-  endDate               DateTime? // TO DELETE AFTER MIGRATION
   acteAdministratif     ActeAdministratif?    @relation(fields: [acteAdministratifId], references: [id], onDelete: Cascade)
   acteAdministratifId   Int?
   documentFinancier     DocumentFinancier?    @relation(fields: [documentFinancierId], references: [id], onDelete: Cascade)
@@ -292,11 +282,6 @@ model FileUpload {
   controleId            Int?
   evaluation            Evaluation?           @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
   evaluationId          Int?
-  categoryName          String? // TO DELETE AFTER MIGRATION
-  parentFileUpload      FileUpload?           @relation("FileUploadToFileUpload", fields: [parentFileUploadId], references: [id], onDelete: Cascade) // TO DELETE AFTER MIGRATION
-  parentFileUploadId    Int? // TO DELETE AFTER MIGRATION
-  childFileUploads      FileUpload[]          @relation("FileUploadToFileUpload") // TO DELETE AFTER MIGRATION
-  granularity           FileUploadGranularity? // TO DELETE AFTER MIGRATION
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -308,6 +293,7 @@ model ActeAdministratif {
   id                  Int                         @id @default(autoincrement())
   structure           Structure?                  @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
   structureDnaCode    String?
+  structureId         Int?
   cpom                Cpom?                       @relation(fields: [cpomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   cpomId              Int?
   category            ActeAdministratifCategory?
@@ -330,6 +316,7 @@ model DocumentFinancier {
   id                  Int                           @id @default(autoincrement())
   structure           Structure?                    @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
   structureDnaCode    String?
+  structureId         Int?
   category            DocumentFinancierCategory?
   year                Int
   name                String?
@@ -481,7 +468,6 @@ model Cpom {
   operateur             Operateur       @relation(fields: [operateurId], references: [id])
   operateurId           Int
   actesAdministratifs   ActeAdministratif[]
-  fileUploads           FileUpload[] // TO DELETE AFTER MIGRATION
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

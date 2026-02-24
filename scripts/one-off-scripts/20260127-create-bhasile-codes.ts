@@ -109,7 +109,12 @@ async function main() {
         data: { structureId: structure.id },
       });
 
-      await tx.fileUpload.updateMany({
+      await tx.acteAdministratif.updateMany({
+        where: { structureDnaCode: structure.dnaCode },
+        data: { structureId: structure.id },
+      });
+
+      await tx.documentFinancier.updateMany({
         where: { structureDnaCode: structure.dnaCode },
         data: { structureId: structure.id },
       });

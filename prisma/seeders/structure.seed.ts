@@ -1,4 +1,5 @@
 import { fakerFR as faker } from "@faker-js/faker";
+import { generateDatePair } from "prisma/utils/date";
 
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
@@ -16,7 +17,6 @@ import {
 } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure.type";
 
-import { generateDatePair } from "../utils/common.util";
 import {
   ActeAdministratifWithFileUploads,
   createFakeActeAdministratif,
