@@ -73,7 +73,6 @@ const createOrUpdateActeAdministratif = async (
     where: { key: fileKey },
     select: { acteAdministratifId: true },
   });
-  console.log("existingFileUpload", existingFileUpload);
   if (existingFileUpload?.acteAdministratifId) {
     return tx.acteAdministratif.update({
       where: { id: existingFileUpload.acteAdministratifId },
