@@ -5,10 +5,8 @@ import { useFetchStructure } from "@/app/hooks/useFetchStructure";
 import { formatDate } from "@/app/utils/date.util";
 import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 import {
-  getCurrentPlacesAutorisees,
   getOperateurLabel,
   getPlacesByCommunes,
-  getRepartition,
 } from "@/app/utils/structure.util";
 import { DEPARTEMENTS } from "@/constants";
 
@@ -32,8 +30,8 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
     adresses,
   } = structure;
 
-  const placesAutorisees = getCurrentPlacesAutorisees(structure);
-  const repartition = getRepartition(structure);
+  const placesAutorisees = structure.currentTotalPlaces.placesAutorisees;
+  const repartition = structure.repartition;
   const departementLabel = DEPARTEMENTS.find(
     (departement) => departement.numero === departementAdministratif
   )?.name;

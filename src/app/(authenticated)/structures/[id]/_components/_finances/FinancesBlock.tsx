@@ -2,12 +2,6 @@ import { useRouter } from "next/navigation";
 import { ReactElement, useState } from "react";
 
 import { Block } from "@/app/components/common/Block";
-import { getYearRange } from "@/app/utils/date.util";
-import {
-  isStructureAutorisee,
-  isStructureSubventionnee,
-  wasStructureInCpom,
-} from "@/app/utils/structure.util";
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -26,13 +20,7 @@ export const FinancesBlock = (): ReactElement => {
 
   const [shouldShowCpom, setShouldShowCpom] = useState(false);
 
-  const { years } = getYearRange({ order: "desc" });
-
-  const isAutorisee = isStructureAutorisee(structure.type);
-  const isConventionnee = isStructureSubventionnee(structure.type);
-  const wasInCpom = wasStructureInCpom(structure, years);
-
-  const budgetExecutoireYear = isAutorisee
+  const budgetExecutoireYear = structure.isAutorisee
     ? AUTORISEE_OPEN_YEAR
     : SUBVENTIONNEE_OPEN_YEAR;
 
@@ -62,7 +50,7 @@ export const FinancesBlock = (): ReactElement => {
       <h4 className="text-title-blue-france fr-h6" id="gestionBudgetaireTitle">
         Gestion budgétaire
       </h4>
-      {wasInCpom && (
+      {structure.wasInCpom && (
         <StructureCpomSwitch
           handleChange={() =>
             setShouldShowCpom((prevSetShouldShowCpom) => !prevSetShouldShowCpom)
@@ -76,7 +64,7 @@ export const FinancesBlock = (): ReactElement => {
       <h4 className="text-title-blue-france pb-2 fr-h6 mb-0">
         Documents administratifs et financiers transmis par l’opérateur
       </h4>
-      {isConventionnee && (
+      {structure.isSubventionnee && (
         <h5 className="text-sm text-gray-500 font-normal italic">
           Retrouvez les Plans Pluriannuels d’Investissements (PPI) dans la
           section “Actes administratifs” s’ils existent et qu’ils ont été

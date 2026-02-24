@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react";
 
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { Structure } from "@/types/structure.type";
 
 export const useFetchStructure = (id: number) => {
-  const [structure, setStructure] = useState<StructureApiType | undefined>(
-    undefined
-  );
+  const [structure, setStructure] = useState<Structure | undefined>(undefined);
 
-  const getStructure = async (
-    id: number
-  ): Promise<StructureApiType | undefined> => {
+  const getStructure = async (id: number): Promise<Structure | undefined> => {
     try {
       const baseUrl = process.env.NEXT_URL || "";
       const result = await fetch(`${baseUrl}/api/structures/${id}`);

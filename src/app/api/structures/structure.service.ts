@@ -43,6 +43,8 @@ export const computeStructure = (
 
   return convertEveryNullAndDates({
     ...structure,
+    departementAdministratif: structure.departementAdministratif ?? "",
+
     activites,
     repartition,
     currentTotalPlaces: {

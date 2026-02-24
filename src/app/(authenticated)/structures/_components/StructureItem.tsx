@@ -9,9 +9,8 @@ import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 import {
   getOperateurLabel,
   getPlacesByCommunes,
-  getRepartition,
 } from "@/app/utils/structure.util";
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { Structure } from "@/types/structure.type";
 
 import { RepartitionBadge } from "./RepartitionBadge";
 
@@ -31,7 +30,7 @@ export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
       </td>
       <td>{structure.departementAdministratif}</td>
       <td className="text-left!">
-        <RepartitionBadge repartition={getRepartition(structure)} />
+        <RepartitionBadge repartition={structure.repartition} />
       </td>
       <td className="text-left!">{getCommuneLabel(structure)}</td>
       <td>{structure.structureTypologies?.[0]?.placesAutorisees}</td>
@@ -65,7 +64,7 @@ export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
   );
 };
 
-const getCommuneLabel = (structure: StructureApiType) => {
+const getCommuneLabel = (structure: Structure) => {
   const placesByCommune = getPlacesByCommunes(structure.adresses || []);
   const mainCommune = Object.keys(placesByCommune)[0];
   const formattedMainCommune = formatCityName(mainCommune);
@@ -90,7 +89,7 @@ const getCommuneLabel = (structure: StructureApiType) => {
 };
 
 type Props = {
-  structure: StructureApiType;
+  structure: Structure;
   index: number;
-  handleOpenModal: (structure: StructureApiType) => void;
+  handleOpenModal: (structure: Structure) => void;
 };

@@ -2,7 +2,6 @@ import { ReactElement } from "react";
 
 import BarChart from "@/app/components/common/BarChart";
 import { getYearRange } from "@/app/utils/date.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -57,7 +56,7 @@ export const DotationChart = (): ReactElement => {
       </div>
       <div>
         <h5 className="text-title-blue-france text-sm font-medium mb-1">
-          {isStructureAutorisee(structure.type)
+          {structure.isAutorisee
             ? "Fixation de la dotation (dans budget)"
             : "Fixation de la dotation (dans demande subventions)"}
         </h5>
@@ -70,7 +69,7 @@ export const DotationChart = (): ReactElement => {
           <p className="pl-2 mb-0">Dotation totale accordée par l’État</p>
         </div>
         <h5 className="text-title-blue-france text-sm font-medium mb-1">
-          {isStructureAutorisee(structure.type)
+          {structure.isAutorisee
             ? "Équilibre économique (dans compte administratif)"
             : "Équilibre économique (dans compte-rendu financier)"}
         </h5>

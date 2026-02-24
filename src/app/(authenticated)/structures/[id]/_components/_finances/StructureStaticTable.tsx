@@ -8,7 +8,6 @@ import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/B
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
 import { isNullOrUndefined } from "@/app/utils/common.util";
 import { getYearRange } from "@/app/utils/date.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ButtonAffectations } from "../ButtonAffectations";
@@ -16,8 +15,6 @@ import { getStructureStaticTableLines } from "./getStructureStaticTableLines";
 
 export const StructureStaticTable = (): ReactElement => {
   const { structure } = useStructureContext();
-
-  const isAutorisee = isStructureAutorisee(structure?.type);
 
   const { years } = getYearRange({ order: "desc" });
 
@@ -51,7 +48,10 @@ export const StructureStaticTable = (): ReactElement => {
       >
         <BudgetTableLines
           years={years}
-          lines={getStructureStaticTableLines(isAutorisee, isAffectationOpen)}
+          lines={getStructureStaticTableLines(
+            structure.isAutorisee,
+            isAffectationOpen
+          )}
           budgets={enhancedBudgets}
           canEdit={false}
         />

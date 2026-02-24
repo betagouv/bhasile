@@ -5,7 +5,6 @@ import { ReactElement, useState } from "react";
 
 import { CustomAccordion } from "@/app/components/common/CustomAccordion";
 import { formatCurrency } from "@/app/utils/number.util";
-import { isStructureInCpom } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -50,7 +49,7 @@ export const DetailAffectations = (): ReactElement => {
       <span key={budget.id}>
         {formatCurrency(budget.reserveCompensationAmortissements)}
       </span>,
-      isStructureInCpom(structure) && (
+      structure.isInCpom && (
         <span key={budget.id}>{formatCurrency(budget.fondsDedies)}</span>
       ),
       <span key={budget.id}>{formatCurrency(budget.reportANouveau)}</span>,
@@ -79,7 +78,7 @@ export const DetailAffectations = (): ReactElement => {
     <>
       <CustomAccordion
         label={
-          isStructureInCpom(structure)
+          structure.isInCpom
             ? "Détail affectations réserves, provisions et fonds dédiés du CPOM"
             : "Détail affectations réserves et provisions"
         }
@@ -97,7 +96,7 @@ export const DetailAffectations = (): ReactElement => {
             "RÉSERVE DE COMPENSATION DES DÉFICITS",
             "RÉSERVE DE COUVERTURE DE BFR",
             "RÉSERVE DE COMPENSATION DES AMORTIS.",
-            isStructureInCpom(structure) && "FONDS DÉDIÉS",
+            structure.isInCpom && "FONDS DÉDIÉS",
             "REPORT A NOUVEAU",
             "AUTRE",
             "COMMENTAIRE",
@@ -110,7 +109,7 @@ export const DetailAffectations = (): ReactElement => {
       </CustomAccordion>
       <commentaireModal.Component title="Voir le commentaire">
         <h2 className="text-sm">
-          {isStructureInCpom(structure)
+          {structure.isInCpom
             ? `Détail affectation du résultat du CPOM - Année ${selectedYear}`
             : `Détail affectation du résultat - Année ${selectedYear}`}
         </h2>

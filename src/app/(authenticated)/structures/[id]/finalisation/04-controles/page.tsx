@@ -15,7 +15,6 @@ import { transformFormControlesToApiControles } from "@/app/utils/controle.util"
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { transformFormEvaluationsToApiEvaluations } from "@/app/utils/evaluation.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
   FinalisationQualiteAutoSaveFormValues,
   finalisationQualiteAutoSaveSchema,
@@ -102,12 +101,12 @@ export default function ModificationControleForm() {
               : "À compléter"
           }
           description={
-            isStructureAutorisee(structure.type)
+            structure.isAutorisee
               ? "Veuillez renseigner les informations et documents concernant l’ensemble des évaluations et inspections-contrôles auxquelles la structure a été soumise, et remplir les autres champs obligatoires ci-dessous."
               : "Veuillez renseigner les informations et documents concernant l’ensemble des inspections-contrôles auxquelles la structure a été soumise, et remplir les autres champs obligatoires ci-dessous."
           }
         />
-        {isStructureAutorisee(structure.type) && (
+        {structure.isAutorisee && (
           <>
             <Evaluations />
             <hr />

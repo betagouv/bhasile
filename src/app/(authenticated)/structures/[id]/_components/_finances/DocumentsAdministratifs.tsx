@@ -29,16 +29,14 @@ export const DocumentsAdministratifs = (): ReactElement => {
   const yearsToDisplay = years.filter((year) => year >= (startYear ?? 0));
 
   const getDocumentsFinanciersToDisplay = (budget: BudgetApiType) => {
-    return (structure.documentsFinanciers || [])?.filter(
-      (documentFinancier) => {
-        const isSameYear =
-          getYearFromDate(documentFinancier.date) === budget.year;
-        const isOperateurCategory = DocumentFinancierCategory.includes(
-          documentFinancier.category as DocumentFinancierCategoryType[number]
-        );
-        return isSameYear && isOperateurCategory;
-      }
-    );
+    return (structure.fileUploads || [])?.filter((documentFinancier) => {
+      const isSameYear =
+        getYearFromDate(documentFinancier.date) === budget.year;
+      const isOperateurCategory = DocumentFinancierCategory.includes(
+        documentFinancier.category as DocumentFinancierCategoryType[number]
+      );
+      return isSameYear && isOperateurCategory;
+    });
   };
 
   return (

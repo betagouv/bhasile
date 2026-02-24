@@ -16,7 +16,6 @@ import {
 } from "@/app/utils/categoryToDisplay.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
   actesAdministratifsAutoriseesSchema,
   ActesAdministratifsAutoSaveFormValues,
@@ -39,9 +38,8 @@ export default function FinalisationQualite() {
     structure
   );
 
-  const isAutorisee = isStructureAutorisee(structure.type);
   let schema;
-  if (isAutorisee) {
+  if (structure.isAutorisee) {
     schema = actesAdministratifsAutoriseesSchema;
   } else {
     schema = actesAdministratifsSubventionneesSchema;

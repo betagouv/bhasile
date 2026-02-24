@@ -26,9 +26,9 @@ export type Structure = {
   filiale?: string;
   type?: StructureType;
   adresseAdministrative?: string;
-  codePostalAdministratif?: string;
+  codePostalAdministratif: string;
   communeAdministrative?: string;
-  departementAdministratif?: string;
+  departementAdministratif: string;
   latitude?: number;
   longitude?: number;
   nom?: string;
@@ -54,7 +54,7 @@ export type Structure = {
   controles?: ControleApiType[];
   evaluations?: EvaluationApiType[];
   evenementsIndesirablesGraves?: EvenementIndesirableGraveApiType[];
-  adresses?: AdresseApiType[];
+  adresses: AdresseApiType[];
   contacts?: ContactApiType[];
   structureTypologies?: StructureTypologieApiType[];
   activites?: ActiviteApiType[];

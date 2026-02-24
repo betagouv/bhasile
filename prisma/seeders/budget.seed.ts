@@ -3,7 +3,7 @@ import { fakerFR as faker } from "@faker-js/faker";
 import {
   isStructureAutorisee,
   isStructureSubventionnee,
-} from "@/app/utils/structure.util";
+} from "@/app/api/structures/structure.util";
 import { CURRENT_YEAR } from "@/constants";
 import { Budget } from "@/generated/prisma/client";
 import { StructureType } from "@/types/structure-type.type";

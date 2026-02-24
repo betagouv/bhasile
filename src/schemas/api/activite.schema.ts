@@ -2,8 +2,8 @@ import z from "zod";
 
 export const activiteApiSchema = z.object({
   id: z.number(),
-  date: z.string().datetime().optional(),
-  placesAutorisees: z.number().nullish(),
+  date: z.string().datetime(),
+  placesAutorisees: z.number(),
   desinsectisation: z.number().nullish(),
   remiseEnEtat: z.number().nullish(),
   sousOccupation: z.number().nullish(),

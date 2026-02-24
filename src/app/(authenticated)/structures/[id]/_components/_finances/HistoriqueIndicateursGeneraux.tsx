@@ -3,7 +3,6 @@ import { ReactElement } from "react";
 
 import { CustomAccordion } from "@/app/components/common/CustomAccordion";
 import { formatCurrency, formatNumber } from "@/app/utils/number.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
@@ -33,7 +32,7 @@ export const HistoriqueIndicateursGeneraux = (): ReactElement => {
   return (
     <CustomAccordion
       label={
-        isStructureAutorisee(structure.type)
+        structure.isAutorisee
           ? "Historique selon compte administratif"
           : "Historique selon compte-rendu financier"
       }
