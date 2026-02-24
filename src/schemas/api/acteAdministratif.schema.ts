@@ -8,7 +8,7 @@ import { fileApiSchema } from "./file.schema";
 export const acteAdministratifApiSchema = z.object({
   id: z.number().optional(),
   uuid: z.string().optional(),
-  structureId: zId(),
+  structureDnaCode: z.string().optional(),
   cpomId: zId(),
   date: optionalFrenchDateToISO(),
   startDate: optionalFrenchDateToISO(),

@@ -3,6 +3,7 @@ export const ActeAdministratifCategory = [
   "CONVENTION",
   "ARRETE_TARIFICATION",
   "AUTRE",
+  "CPOM",
 ] as const;
 
 export type ActeAdministratifCategory =
