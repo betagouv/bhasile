@@ -2,10 +2,7 @@ import { ReactNode } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import {
-  CpomMillesimeApiType,
-  CpomStructureApiType,
-} from "@/schemas/api/cpom.schema";
+import { CpomMillesime, CpomStructure } from "@/types/cpom.type";
 
 import { BudgetTableLineInput } from "./BudgetTableLineInput";
 import { BudgetTableStaticValue } from "./BudgetTableStaticValue";
@@ -79,8 +76,8 @@ type Props = {
   subLabel?: string;
   colored?: boolean;
   budgets?: BudgetApiType[];
-  cpomStructures?: CpomStructureApiType[];
-  cpomMillesimes?: CpomMillesimeApiType[];
+  cpomStructures?: CpomStructure[];
+  cpomMillesimes?: CpomMillesime[];
   years: number[];
   disabledYearsStart?: number;
   enabledYears?: number[];

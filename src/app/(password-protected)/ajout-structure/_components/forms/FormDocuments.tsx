@@ -3,12 +3,12 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
+import { isStructureAutorisee } from "@/app/api/structures/structure.util";
 import { FieldSetYearlyDocumentsFinanciers } from "@/app/components/forms/fieldsets/structure/FieldSetYearlyDocumentsFinanciers";
 import { Date303 } from "@/app/components/forms/finance/documents/Date303";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { getDocumentsFinanciersYearRange } from "@/app/utils/date.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { DocumentsFinanciersFlexibleSchema } from "@/schemas/forms/base/documentFinancier.schema";
 import { FormKind } from "@/types/global";

@@ -1,13 +1,13 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { Structure } from "@/types/structure.type";
 
 import { StructureHeader } from "./_components/_header/StructureHeader";
 import { AutoSaveErrorToast } from "./_components/AutoSaveErrorToast";
 import { StructureProvider } from "./_context/StructureContext";
 
-async function getStructure(id: string): Promise<StructureApiType> {
+async function getStructure(id: string): Promise<Structure> {
   try {
     const baseUrl = process.env.NEXT_URL || "";
     const result = await fetch(`${baseUrl}/api/structures/${id}`, {

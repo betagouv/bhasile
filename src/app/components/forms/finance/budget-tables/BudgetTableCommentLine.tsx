@@ -1,9 +1,6 @@
 import { getYearRange } from "@/app/utils/date.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import {
-  CpomMillesimeApiType,
-  CpomStructureApiType,
-} from "@/schemas/api/cpom.schema";
+import { CpomMillesime, CpomStructure } from "@/types/cpom.type";
 
 import { BudgetTableCommentButtonAndModal } from "./BudgetTableCommentButtonAndModal";
 import { BudgetTableCommentStaticButtonAndModal } from "./BudgetTableCommentStaticButtonAndModal";
@@ -55,8 +52,8 @@ export const BudgetTableCommentLine = ({
 type Props = {
   label: string;
   budgets?: BudgetApiType[];
-  cpomStructures?: CpomStructureApiType[];
-  cpomMillesimes?: CpomMillesimeApiType[];
+  cpomStructures?: CpomStructure[];
+  cpomMillesimes?: CpomMillesime[];
   disabledYearsStart?: number;
   enabledYears?: number[];
   canEdit?: boolean;

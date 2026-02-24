@@ -8,10 +8,7 @@ import {
   getMillesimeIndexForAYear,
 } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import {
-  CpomMillesimeApiType,
-  CpomStructureApiType,
-} from "@/schemas/api/cpom.schema";
+import { CpomMillesime, CpomStructure } from "@/types/cpom.type";
 
 export const BudgetTableStaticValue = ({
   name,
@@ -46,13 +43,13 @@ export const BudgetTableStaticValue = ({
     value =
       cpomStructures[cpomStructureIndex]?.cpom?.cpomMillesimes?.[
         cpomMillesimeIndex
-      ]?.[name as keyof CpomMillesimeApiType];
+      ]?.[name as keyof CpomMillesime];
   }
 
   if (cpomMillesimes) {
     value =
       cpomMillesimes[getMillesimeIndexForAYear(cpomMillesimes, year)]?.[
-        name as keyof CpomMillesimeApiType
+        name as keyof CpomMillesime
       ];
   }
 
@@ -78,8 +75,8 @@ type Props = {
   year: number;
   colored?: boolean;
   budgets?: BudgetApiType[];
-  cpomStructures?: CpomStructureApiType[];
-  cpomMillesimes?: CpomMillesimeApiType[];
+  cpomStructures?: CpomStructure[];
+  cpomMillesimes?: CpomMillesime[];
   disabledYearsStart?: number;
   enabledYears?: number[];
 };

@@ -8,18 +8,19 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { isStructureAutorisee } from "@/app/api/structures/structure.util";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
   AjoutIdentificationFormValues,
   ajoutIdentificationSchema,
 } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { ContactType } from "@/types/contact.type";
-import { PublicType, StructureType } from "@/types/structure-type.type";
+import { PublicType } from "@/types/structure-public.type";
+import { StructureType } from "@/types/structure-type.type";
 
 export default function FormIdentification() {
   const params = useParams();

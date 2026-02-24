@@ -34,7 +34,8 @@ export const addPresencesIndues = (
       (activite?.presencesInduesDeboutees || 0);
     return {
       ...activite,
-      date: formatDateToIsoString(activite.date),
+      date: formatDateToIsoString(activite.date) ?? "",
+      placesAutorisees: activite.placesAutorisees ?? 0,
       presencesIndues,
     };
   });

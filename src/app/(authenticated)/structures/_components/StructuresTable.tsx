@@ -6,8 +6,8 @@ import { ReactElement, useState } from "react";
 
 import { Pagination } from "@/app/components/common/Pagination";
 import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
-import { StructureApiType } from "@/schemas/api/structure.schema";
 import { ListColumn } from "@/types/ListColumn";
+import { Structure } from "@/types/structure.type";
 
 import { StructureItem } from "./StructureItem";
 
@@ -74,9 +74,10 @@ export const StructuresTable = ({
 }: Props): ReactElement => {
   const router = useRouter();
 
-  const [selectedStructure, setSelectedStructure] =
-    useState<StructureApiType | null>(null);
-  const handleOpenModal = (structure: StructureApiType) => {
+  const [selectedStructure, setSelectedStructure] = useState<Structure | null>(
+    null
+  );
+  const handleOpenModal = (structure: Structure) => {
     setSelectedStructure(structure);
     finalisationModal.open();
   };
@@ -128,7 +129,7 @@ export const StructuresTable = ({
 };
 
 type Props = {
-  structures: StructureApiType[];
+  structures: Structure[];
   totalStructures: number;
   ariaLabelledBy: string;
 };

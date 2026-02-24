@@ -4,7 +4,7 @@ import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
 import { StructureMinimalApiType } from "@/schemas/api/structure.schema";
-import { CpomStructureFormValues } from "@/schemas/forms/base/cpom.schema";
+import { CpomFormType } from "@/schemas/forms/base/cpom.schema";
 
 import { StructureLine } from "./StructureLine";
 
@@ -18,7 +18,7 @@ export const StructuresList = ({ structures }: Props) => {
 
   const selectedCpomStructures = watch(
     "structures"
-  ) as CpomStructureFormValues[];
+  ) as CpomFormType["structures"];
 
   const departements = watch("departements");
 

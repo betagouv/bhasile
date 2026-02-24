@@ -1,14 +1,21 @@
 import dayjs from "dayjs";
 
+import { computeCpomDates } from "@/app/api/cpoms/cpom.util";
 import { CURRENT_YEAR } from "@/constants";
-import { AdresseApiType } from "@/schemas/api/adresse.schema";
+import {
+  AdresseApiType,
+  AdresseTypologieApiType,
+} from "@/schemas/api/adresse.schema";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
+import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
+import { Repartition } from "@/types/adresse.type";
 import { CpomMillesime, CpomStructure } from "@/types/cpom.type";
 import { Structure } from "@/types/structure.type";
+import { StructureType } from "@/types/structure-type.type";
 
 import { sortKeysByValue } from "./common.util";
 import { getYearFromDate } from "./date.util";
@@ -34,6 +41,59 @@ export const getPlacesByCommunes = (
   return sortKeysByValue(placesByCommune);
 };
 
+export const getRepartition = (
+  structure: StructureAgentUpdateApiType | Structure
+): Repartition => {
+  const repartitions = structure.adresses?.map(
+    (adresse) => adresse.repartition
+  );
+
+  const isDiffus = repartitions?.some(
+    (repartition) =>
+      repartition?.toUpperCase() === Repartition.DIFFUS.toUpperCase()
+  );
+  const isCollectif = repartitions?.some(
+    (repartition) =>
+      repartition?.toUpperCase() === Repartition.COLLECTIF.toUpperCase()
+  );
+  if (isDiffus && isCollectif) {
+    return Repartition.MIXTE;
+  } else if (isDiffus) {
+    return Repartition.DIFFUS;
+  } else {
+    return Repartition.COLLECTIF;
+  }
+};
+
+const getCurrentPlacesByProperty = (
+  structure: Structure,
+  accessor: keyof AdresseTypologieApiType
+) => {
+  const mostRecentYearTypologies = structure.adresses?.map(
+    (adresse) => adresse.adresseTypologies?.[0]
+  );
+  const placesByAccessor = mostRecentYearTypologies?.reduce(
+    (totalCount, currentTypologie) =>
+      totalCount + ((currentTypologie?.[accessor] as number) || 0),
+    0
+  );
+  return placesByAccessor || 0;
+};
+
+export const getCurrentPlacesAutorisees = (structure: Structure): number => {
+  return getCurrentPlacesByProperty(structure, "placesAutorisees");
+};
+
+export const getCurrentPlacesQpv = (structure: Structure): number => {
+  return getCurrentPlacesByProperty(structure, "qpv");
+};
+
+export const getCurrentPlacesLogementsSociaux = (
+  structure: Structure
+): number => {
+  return getCurrentPlacesByProperty(structure, "logementSocial");
+};
+
 export const getLastVisitInMonths = (
   evaluations: EvaluationApiType[],
   controles: ControleApiType[]
@@ -55,11 +115,92 @@ export const getLastVisitInMonths = (
   return dayjs().diff(mostRecentVisit, "month");
 };
 
+export const isStructureAutorisee = (type: string | undefined): boolean => {
+  return type === StructureType.CADA || type === StructureType.CPH;
+};
+
+export const isStructureSubventionnee = (type: string | undefined): boolean => {
+  return type === StructureType.HUDA || type === StructureType.CAES;
+};
+
 export const getOperateurLabel = (
   filiale: string | null | undefined,
   operateur: string | null | undefined
 ): string | null | undefined => {
   return filiale ? `${filiale} (${operateur})` : operateur;
+};
+
+export const isStructureInCpom = (
+  structure: Structure,
+  year: number = CURRENT_YEAR
+): boolean => {
+  return (
+    structure.cpomStructures?.some((cpomStructure) => {
+      const dateStart =
+        cpomStructure.dateStart ??
+        computeCpomDates(cpomStructure.cpom).dateStart;
+      const dateEnd =
+        cpomStructure.dateEnd ?? computeCpomDates(cpomStructure.cpom).dateEnd;
+
+      if (!dateStart || !dateEnd) {
+        return false;
+      }
+
+      const yearStart = getYearFromDate(dateStart);
+      const yearEnd = getYearFromDate(dateEnd);
+
+      return yearStart <= year && yearEnd >= year;
+    }) ?? false
+  );
+};
+
+export const wasStructureInCpom = (
+  structure: Structure,
+  years: number[]
+): boolean => {
+  return years.some((year) => isStructureInCpom(structure, year));
+};
+
+export const getCurrentCpomStructures = (
+  structure: Structure
+): CpomStructure | undefined => {
+  return structure.cpomStructures?.find((cpomStructure) => {
+    const dateStart =
+      cpomStructure.dateStart ?? computeCpomDates(cpomStructure.cpom).dateStart;
+    const dateEnd =
+      cpomStructure.dateEnd ?? computeCpomDates(cpomStructure.cpom).dateEnd;
+
+    if (!dateStart || !dateEnd) {
+      return false;
+    }
+
+    const yearDebut = getYearFromDate(dateStart);
+    const yearFin = getYearFromDate(dateEnd);
+
+    return yearDebut <= CURRENT_YEAR && yearFin >= CURRENT_YEAR;
+  });
+};
+
+export const getCurrentCpomStructureDates = (
+  structure: Structure
+): { dateStart?: string; dateEnd?: string } => {
+  const currentCpomStructure = getCurrentCpomStructures(structure);
+
+  if (!currentCpomStructure) {
+    return {};
+  }
+
+  const currentCpomStructureDateStart =
+    currentCpomStructure.dateStart ??
+    computeCpomDates(currentCpomStructure.cpom).dateStart;
+  const currentCpomStructureDateEnd =
+    currentCpomStructure.dateEnd ??
+    computeCpomDates(currentCpomStructure.cpom).dateEnd;
+
+  return {
+    dateStart: currentCpomStructureDateStart ?? undefined,
+    dateEnd: currentCpomStructureDateEnd ?? undefined,
+  };
 };
 
 export const getMillesimeIndexForAYear = (

@@ -1,6 +1,7 @@
 import { useParams } from "next/navigation";
 import { ReactElement } from "react";
 
+import { isStructureAutorisee } from "@/app/api/structures/structure.util";
 import {
   structureAutoriseesDocuments,
   structureSubventionneesDocuments,
@@ -10,7 +11,6 @@ import {
   getDocumentsFinanciersYearRange,
   getYearFromDate,
 } from "@/app/utils/date.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { CURRENT_OPEN_YEAR } from "@/constants";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";

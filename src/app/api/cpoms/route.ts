@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cpomSchema } from "@/schemas/forms/base/cpom.schema";
 
 import { countAll, createOrUpdateCpom, findAll } from "./cpom.repository";
-import { computeCpom } from "./cpom.util";
+import { computeCpom } from "./cpom.service";
 
 export async function GET() {
   try {
