@@ -32,6 +32,7 @@ const mapToActivites = (sheet: (string | number | Date)[][], index: number) => {
   return sheet.map((line) => ({
     date: parseDate(metadata.date, "activites-extract"),
     structureDnaCode: String(line[metadata.dnaIndex]),
+    dnaCode: String(line[metadata.dnaIndex]),
     placesAutorisees: Number(line[metadata.placesAutoriseesIndex]) || 0,
     desinsectisation: metadata.desinsectisationIndex
       ? Number(line[metadata.desinsectisationIndex]) || 0

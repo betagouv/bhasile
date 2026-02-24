@@ -12,12 +12,13 @@ export type EvaluationWithFileUploads = Evaluation & {
     | "documentFinancierId"
     | "controleId"
     | "evaluationId"
+    | "structureId"
   >[];
 };
 
 export const createFakeEvaluation = (): Omit<
   EvaluationWithFileUploads,
-  "id" | "structureDnaCode"
+  "id" | "structureDnaCode" | "structureId"
 > => {
   return {
     date: faker.date.past(),

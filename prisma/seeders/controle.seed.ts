@@ -12,12 +12,13 @@ export type ControleWithFileUploads = Controle & {
     | "documentFinancierId"
     | "controleId"
     | "evaluationId"
+    | "structureId"
   >[];
 };
 
 export const createFakeControle = (): Omit<
   ControleWithFileUploads,
-  "id" | "structureDnaCode"
+  "id" | "structureDnaCode" | "structureId"
 > => {
   return {
     date: faker.date.past(),

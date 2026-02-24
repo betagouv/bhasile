@@ -359,7 +359,16 @@ export const findByDnaCode = async (
           formDefinition: true,
         },
       },
-      fileUploads: true,
+      actesAdministratifs: {
+        include: {
+          fileUploads: true,
+        },
+      },
+      documentsFinanciers: {
+        include: {
+          fileUploads: true,
+        },
+      },
     },
   });
 };
