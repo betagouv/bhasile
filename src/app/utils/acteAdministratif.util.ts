@@ -13,9 +13,13 @@ import {
 export const getActesAdministratifsDefaultValues = (
   structure: StructureApiType
 ): ActeAdministratifFormValues[] => {
-  const categoryDisplayRules = getActesAdministratifsCategoryToDisplay(structure);
+  const categoryDisplayRules =
+    getActesAdministratifsCategoryToDisplay(structure);
   const categoriesToDisplay = (
-    Object.entries(categoryDisplayRules) as [ActeAdministratifCategory, (typeof categoryDisplayRules)[ActeAdministratifCategory]][]
+    Object.entries(categoryDisplayRules) as [
+      ActeAdministratifCategory,
+      (typeof categoryDisplayRules)[Exclude<ActeAdministratifCategory, "CPOM">],
+    ][]
   )
     .filter(([, rules]) => rules.shouldShow)
     .map(([category]) => category);
@@ -98,7 +102,7 @@ export const getActesAdministratifsCategoryToDisplay = (
 });
 
 type CategoryDisplayRulesType = Record<
-  ActeAdministratifCategory,
+  Exclude<ActeAdministratifCategory, "CPOM">,
   {
     categoryShortName: string;
     title: string;

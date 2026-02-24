@@ -137,11 +137,11 @@ type StructureWithRelations = Structure & {
   adresses: Omit<AdresseWithTypologies, "id" | "structureDnaCode">[];
   actesAdministratifs: Omit<
     ActeAdministratifWithFileUploads,
-    "id" | "structureId"
+    "id" | "structureDnaCode"
   >[];
   documentsFinanciers: Omit<
     DocumentFinancierWithFileUploads,
-    "id" | "structureId"
+    "id" | "structureDnaCode"
   >[];
   controles: Omit<ControleWithFileUploads, "id" | "structureDnaCode">[];
   evaluations: Omit<EvaluationWithFileUploads, "id" | "structureDnaCode">[];
