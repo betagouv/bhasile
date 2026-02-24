@@ -90,6 +90,7 @@ export const StructureTable = ({ canEdit = true }: Props) => {
         }
         enabledYears={yearsToDisplay}
         canEdit={canEdit}
+        years={yearsToDisplay}
       />
     </Table>
   );
