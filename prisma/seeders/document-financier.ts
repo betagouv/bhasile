@@ -22,7 +22,7 @@ export type DocumentFinancierWithFileUploads = DocumentFinancier & {
 
 export const createFakeDocumentFinancier = (): Omit<
   DocumentFinancierWithFileUploads,
-  "id" | "structureId" | "cpomId"
+  "id" | "structureDnaCode" | "cpomId"
 > => {
   return {
     year: faker.number.int({ min: 2021, max: 2025 }),

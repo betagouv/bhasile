@@ -16,7 +16,7 @@ ALTER COLUMN "granularity" DROP DEFAULT;
 -- CreateTable
 CREATE TABLE "ActeAdministratif" (
     "id" SERIAL NOT NULL,
-    "structureId" INTEGER,
+    "structureDnaCode" TEXT,
     "cpomId" INTEGER,
     "category" "ActeAdministratifCategory",
     "date" TIMESTAMP(3),
@@ -33,7 +33,7 @@ CREATE TABLE "ActeAdministratif" (
 -- CreateTable
 CREATE TABLE "DocumentFinancier" (
     "id" SERIAL NOT NULL,
-    "structureId" INTEGER,
+    "structureDnaCode" TEXT,
     "category" "DocumentFinancierCategory",
     "year" INTEGER NOT NULL,
     "name" TEXT,
@@ -51,7 +51,7 @@ ALTER TABLE "FileUpload" ADD CONSTRAINT "FileUpload_acteAdministratifId_fkey" FO
 ALTER TABLE "FileUpload" ADD CONSTRAINT "FileUpload_documentFinancierId_fkey" FOREIGN KEY ("documentFinancierId") REFERENCES "DocumentFinancier"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ActeAdministratif" ADD CONSTRAINT "ActeAdministratif_structureId_fkey" FOREIGN KEY ("structureId") REFERENCES "Structure"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ActeAdministratif" ADD CONSTRAINT "ActeAdministratif_structureDnaCode_fkey" FOREIGN KEY ("structureDnaCode") REFERENCES "Structure"("dnaCode") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ActeAdministratif" ADD CONSTRAINT "ActeAdministratif_cpomId_fkey" FOREIGN KEY ("cpomId") REFERENCES "Cpom"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -60,4 +60,4 @@ ALTER TABLE "ActeAdministratif" ADD CONSTRAINT "ActeAdministratif_cpomId_fkey" F
 ALTER TABLE "ActeAdministratif" ADD CONSTRAINT "ActeAdministratif_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "ActeAdministratif"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DocumentFinancier" ADD CONSTRAINT "DocumentFinancier_structureId_fkey" FOREIGN KEY ("structureId") REFERENCES "Structure"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "DocumentFinancier" ADD CONSTRAINT "DocumentFinancier_structureDnaCode_fkey" FOREIGN KEY ("structureDnaCode") REFERENCES "Structure"("dnaCode") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -407,10 +407,10 @@ const updateOne = async (
       );
       await createOrUpdateAdresses(tx, adresses, structure.dnaCode);
       await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
-        structureId: structure.id,
+        structureDnaCode: structure.dnaCode,
       });
       await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
-        structureId: structure.id,
+        structureDnaCode: structure.dnaCode,
       });
       await createOrUpdateControles(tx, controles, structure.dnaCode);
       await createOrUpdateForms(tx, forms, structure.dnaCode);

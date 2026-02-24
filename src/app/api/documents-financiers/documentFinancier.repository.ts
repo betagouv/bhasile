@@ -4,7 +4,7 @@ import { PrismaTransaction } from "@/types/prisma.type";
 import { getKeysFromIncomingDocumentsOrActes } from "../files/file.service";
 
 type DocumentFinancierOwnerId = {
-  structureId?: number;
+  structureDnaCode?: string;
   cpomId?: number;
 };
 
@@ -67,9 +67,13 @@ const deleteDocumentsFinanciers = async (
   ownerId: DocumentFinancierOwnerId
 ): Promise<void> => {
   const where =
-    ownerId.structureId !== undefined
-      ? { structureId: ownerId.structureId }
+    ownerId.structureDnaCode !== undefined
+      ? { structureDnaCode: ownerId.structureDnaCode }
       : { cpomId: ownerId.cpomId };
+
+  if (ownerId.structureDnaCode === undefined && ownerId.cpomId === undefined) {
+    return;
+  }
 
   const KeysToKeep = getKeysFromIncomingDocumentsOrActes(
     documentsFinanciersToKeep
