@@ -13,6 +13,8 @@ export const getStructureMillesimeDefaultValues = (
     .fill({})
     .map((_, index) => ({
       year: yearsToDisplay[index],
+      cpom: false,
+      operateurComment: undefined,
     }))
     .map((emptyStructureMillesime) => {
       const structureMillesime = structureMillesimes.find(
