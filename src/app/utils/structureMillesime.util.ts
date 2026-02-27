@@ -1,13 +1,34 @@
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 
+import { getYearRange } from "./date.util";
+
 export const getStructureMillesimeDefaultValues = (
-  structureMillesimes: StructureMillesimeApiType[]
+  structureMillesimes: StructureMillesimeApiType[],
+  structureCreationYear: number
 ): StructureMillesimeApiType[] => {
-  return structureMillesimes.map((structureMillesime) => ({
-    ...structureMillesime,
-    id: structureMillesime?.id ?? undefined,
-    year: structureMillesime?.year,
-    cpom: structureMillesime?.cpom ?? false,
-    operateurComment: structureMillesime?.operateurComment ?? undefined,
-  })) as StructureMillesimeApiType[];
+  const { years } = getYearRange();
+  const yearsToDisplay = years.filter((year) => year >= structureCreationYear);
+
+  return Array(yearsToDisplay.length)
+    .fill({})
+    .map((_, index) => ({
+      year: yearsToDisplay[index],
+      cpom: false,
+      operateurComment: undefined,
+    }))
+    .map((emptyStructureMillesime) => {
+      const structureMillesime = structureMillesimes.find(
+        (structureMillesime) =>
+          structureMillesime.year === emptyStructureMillesime.year
+      );
+      if (structureMillesime) {
+        return {
+          ...structureMillesime,
+          year: structureMillesime.year,
+          cpom: structureMillesime.cpom ?? false,
+          operateurComment: structureMillesime.operateurComment ?? undefined,
+        };
+      }
+      return emptyStructureMillesime;
+    }) as StructureMillesimeApiType[];
 };

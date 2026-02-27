@@ -25,20 +25,6 @@ export const budgetBaseSchema = z.object({
   commentaire: z.string().nullish(),
 });
 
-export const budgetAutoriseeNotOpenSchema = budgetBaseSchema.extend({
-  id: zId(),
-  year: zSafeYear(),
-
-  // Indicateurs généraux
-  ETP: zSafePositiveDecimalsNullish(),
-  tauxEncadrement: zSafePositiveDecimalsNullish(),
-  coutJournalier: zSafePositiveDecimalsNullish(),
-
-  dotationDemandee: zSafePositiveDecimalsNullish(),
-
-  commentaire: z.string().nullish(),
-});
-
 export const budgetAutoriseeOpenYear1Schema = budgetBaseSchema.extend({
   dotationDemandee: zSafePositiveDecimals(),
   dotationAccordee: zSafePositiveDecimalsNullish(),
@@ -107,6 +93,7 @@ export const budgetAutoriseeOpenSchema =
     );
 
 export const budgetSubventionneeNotOpenSchema = budgetBaseSchema; // Duplicated for comprehensibility
+export const budgetAutoriseeNotOpenSchema = budgetBaseSchema; // Duplicated for comprehensibility
 
 export const budgetSubventionneeOpenYear1Schema = budgetBaseSchema.extend({
   dotationDemandee: zSafePositiveDecimalsNullish(),
@@ -189,11 +176,11 @@ export const budgetsAutoSaveSchema = z
 export type BudgetsAutoSaveFormValues = z.infer<typeof budgetsAutoSaveSchema>;
 
 export type anyBudgetFormValues = Array<
-  | z.infer<typeof budgetAutoriseeNotOpenSchema>
   | z.infer<typeof budgetAutoriseeOpenYear1Schema>
   | z.infer<typeof budgetAutoriseeOpenYear2Schema>
   | z.infer<typeof budgetAutoriseeOpenSchema>
   | z.infer<typeof budgetSubventionneeNotOpenSchema>
+  | z.infer<typeof budgetAutoriseeNotOpenSchema>
   | z.infer<typeof budgetSubventionneeOpenYear1Schema>
   | z.infer<typeof budgetSubventionneeOpenSchema>
   | z.infer<typeof budgetAutoSaveSchema>
