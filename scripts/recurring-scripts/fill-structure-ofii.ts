@@ -1,73 +1,64 @@
-// Fill Structure table with csv from s3 bucket
+// Fill Structure table with CSV from S3 bucket (référentiel OFII)
+// Par défaut utilisé par le script fill-referential-and-activity-ofii, peut aussi être utilisé en standalone.
 // Usage: yarn script fill-structure-ofii my_structure_ofii_file.csv
-// An example of the csv file is available at /public/ofii_example.csv
 
 import "dotenv/config";
 
+import type { PrismaClient } from "@/generated/prisma/client";
 import { StructureType } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
+import { checkBucket, getObject } from "@/lib/minio";
 
-import { loadCsvFromS3 } from "../utils/csv-loader";
 import { ensureOperateursExist } from "../utils/ensure-operateurs-exist";
+import { loadXlsxBufferFromS3 } from "../utils/xlsx-loader";
+import { loadOfiiFile, type OfiiReferentialRow } from "../utils/ofii-xlsx";
 
-const prisma = createPrismaClient();
-const bucketName = process.env.DOCS_BUCKET_NAME!;
-const args = process.argv.slice(2);
-const csvFilename = args[0];
+type OperateurMapping = Record<string, string>;
 
-if (!csvFilename) {
-  throw new Error(
-    "Merci de fournir le nom du fichier CSV en argument du script."
+async function loadOperateurMappingFromS3(
+  bucketName: string,
+  objectName: string
+): Promise<OperateurMapping> {
+  console.log(
+    `Chargement du mapping opérateurs depuis S3: bucket=${bucketName}, key=${objectName}`
   );
+  await checkBucket(bucketName);
+  const stream = await getObject(bucketName, objectName);
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(chunk as Buffer);
+  }
+  const json = Buffer.concat(chunks).toString("utf-8");
+  return JSON.parse(json) as OperateurMapping;
 }
 
-type OfiiCsvRow = {
-  dnaCode: string;
-  nom: string;
-  type: string;
-  operateur_nom?: string;
-  departement: string;
-  direction_territoriale?: string;
-  nom_ofii?: string;
-};
-
-// Open csv and load data into Structure table (OFII-related fields only)
-const loadDataToOfiiTable = async () => {
+/**
+ * Remplit/actualise les structures OFII à partir de lignes déjà normalisées
+ */
+export const fillOfiiStructureFromRows = async (
+  prisma: PrismaClient,
+  records: OfiiReferentialRow[]
+) => {
   try {
-    const records = await loadCsvFromS3<OfiiCsvRow>(bucketName, csvFilename);
-
     if (records.length === 0) {
       return;
     }
-
-    console.log("Résolution des IDs des opérateurs...");
-    const operateurMap = await ensureOperateursExist(
-      prisma,
-      records,
-      "operateur_nom"
-    );
 
     console.log("Résolution des IDs des départements...");
     const departements = await prisma.departement.findMany({
       select: { numero: true },
     });
-    const departementSet = new Set(
-      departements.map((departement) => departement.numero)
-    );
+    const departementSet = new Set(departements.map((d) => d.numero));
 
-    // Validate data
     console.log("Validation des données...");
-
-    const validRecords: OfiiCsvRow[] = [];
+    const validRecords: OfiiReferentialRow[] = [];
     const errors: { dnaCode: string; issues: string[] }[] = [];
 
-    for (const row of records as OfiiCsvRow[]) {
-      const issues = [];
-
+    for (const row of records) {
+      const issues: string[] = [];
       if (!row.departement || !departementSet.has(row.departement)) {
         issues.push(`département invalide: ${row.departement}`);
       }
-
       if (issues.length > 0) {
         errors.push({ dnaCode: row.dnaCode, issues });
       } else {
@@ -94,13 +85,37 @@ const loadDataToOfiiTable = async () => {
       `✓ ${validRecords.length} lignes valides sur ${records.length}`
     );
 
-    console.log("Mise à jour des données ofii...");
-    let createdCount = 0;
-    let updatedCount = 0;
+    // Normalisation des noms d'opérateur
+    const bucketName = process.env.DOCS_BUCKET_NAME;
+    const operateurMappingKey =
+      process.env.OFII_OPERATEUR_MAPPING_KEY ?? "ofii-operateurs-mapping.json";
+    let operateurMapping: OperateurMapping | null = null;
+    if (bucketName) {
+      try {
+        operateurMapping = await loadOperateurMappingFromS3(
+          bucketName,
+          operateurMappingKey
+        );
+      } catch (error) {
+        console.warn(
+          "⚠️ Impossible de charger le mapping opérateurs depuis S3, utilisation des noms bruts.",
+          error
+        );
+      }
+    }
+
+    if (operateurMapping) {
+      for (const row of validRecords) {
+        if (row.operateur) {
+          const mapped = operateurMapping[row.operateur] ?? row.operateur;
+          row.operateur = mapped;
+        }
+      }
+    }
 
     const existingStructures = await prisma.structure.findMany({
       where: {
-        dnaCode: { in: validRecords.map((structure) => structure.dnaCode) },
+        dnaCode: { in: validRecords.map((r) => r.dnaCode) },
       },
       select: {
         dnaCode: true,
@@ -109,8 +124,40 @@ const loadDataToOfiiTable = async () => {
       },
     });
     const existingByDnaCode = new Map(
-      existingStructures.map((structure) => [structure.dnaCode, structure])
+      existingStructures.map((s) => [s.dnaCode, s])
     );
+
+    const recordsToCreate = validRecords.filter(
+      (record) => !existingByDnaCode.has(record.dnaCode)
+    );
+
+    let operateurMap = new Map<string, number>();
+    if (recordsToCreate.length > 0) {
+      console.log(
+        `Résolution des opérateurs pour ${recordsToCreate.length} nouvelles structures...`
+      );
+      try {
+        operateurMap = await ensureOperateursExist(
+          prisma,
+          recordsToCreate,
+          "operateur"
+        );
+      } catch (error) {
+        console.error(
+          "❌ Arrêt du script : des opérateurs présents dans le fichier OFII sont inconnus en base."
+        );
+        if (error instanceof Error) {
+          console.error(error.message);
+        } else {
+          console.error(error);
+        }
+        process.exit(1);
+      }
+    }
+
+    console.log("Mise à jour des données OFII...");
+    let createdCount = 0;
+    let updatedCount = 0;
 
     await prisma.$transaction(async (tx) => {
       for (const row of validRecords) {
@@ -121,7 +168,6 @@ const loadDataToOfiiTable = async () => {
           where: { dnaCode: row.dnaCode },
           update: {
             nomOfii: row.nom ?? undefined,
-            directionTerritoriale: row.direction_territoriale ?? undefined,
             inactiveInOfiiFileSince: null,
           },
           create: {
@@ -130,11 +176,11 @@ const loadDataToOfiiTable = async () => {
             type: row.type as StructureType,
             departementAdministratif: row.departement ?? undefined,
             nomOfii: row.nom ?? undefined,
-            directionTerritoriale: row.direction_territoriale ?? undefined,
+            directionTerritoriale: row.directionTerritoriale ?? undefined,
             activeInOfiiFileSince: now,
             inactiveInOfiiFileSince: null,
-            operateurId: row.operateur_nom
-              ? (operateurMap.get(row.operateur_nom) ?? null)
+            operateurId: row.operateur
+              ? (operateurMap.get(row.operateur) ?? null)
               : null,
           },
         });
@@ -146,16 +192,11 @@ const loadDataToOfiiTable = async () => {
         }
       }
 
-      // Deactivate structures that are not in the CSV
-      const csvDnaCodes = new Set(records.map((row) => row.dnaCode));
-
+      const csvDnaCodes = new Set(validRecords.map((r) => r.dnaCode));
       const allActiveOfiiStructures = await tx.structure.findMany({
-        where: {
-          inactiveInOfiiFileSince: null,
-        },
+        where: { inactiveInOfiiFileSince: null },
         select: { dnaCode: true },
       });
-
       const dnaCodesToDeactivate = allActiveOfiiStructures
         .map((s) => s.dnaCode)
         .filter((dnaCode) => !csvDnaCodes.has(dnaCode));
@@ -183,9 +224,40 @@ const loadDataToOfiiTable = async () => {
   } catch (error) {
     console.error("❌ Erreur lors du chargement des données:", error);
     throw error;
+  }
+};
+
+// Standalone part
+
+const args = process.argv.slice(2);
+const xlsxKey = args[0];
+
+if (!xlsxKey) {
+  throw new Error("Merci de fournir la clef S3 du fichier XLSX en argument.");
+}
+
+const prisma = createPrismaClient();
+
+const fillReferential = async () => {
+  try {
+    const bucketName = process.env.DOCS_BUCKET_NAME;
+    if (!bucketName) {
+      throw new Error(
+        "DOCS_BUCKET_NAME doit être défini pour charger le fichier XLSX depuis S3."
+      );
+    }
+
+    console.log("Chargement du fichier XLSX depuis S3 (référentiel OFII)...");
+    const { buffer, fileName } = await loadXlsxBufferFromS3(
+      bucketName,
+      xlsxKey
+    );
+    const { rows } = loadOfiiFile(buffer, fileName);
+
+    await fillOfiiStructureFromRows(prisma, rows);
   } finally {
     await prisma.$disconnect();
   }
 };
 
-loadDataToOfiiTable();
+fillReferential();

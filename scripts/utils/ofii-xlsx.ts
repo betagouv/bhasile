@@ -1,0 +1,309 @@
+/**
+ * Charge un fichier XLSX OFII (activité), prend l'onglet le plus récent (par date dans le nom),
+ * trouve la ligne d'en-tête et normalise les colonnes selon POSSIBLE_COLUMNS.
+ * Dépendance : npm install xlsx
+ */
+
+import type { WorkSheet } from "xlsx";
+import * as XLSX from "xlsx";
+
+const POSSIBLE_ACTIVITE_COLUMNS: Record<keyof ActiviteRow, string[]> = {
+  structureDnaCode: ["Code"],
+  placesAutorisees: ["Capacité"],
+  desinsectisation: ["Désinsectisation"],
+  remiseEnEtat: ["Remise en état de l'unité"],
+  sousOccupation: ["Sous-occupation"],
+  travaux: ["Travaux"],
+  placesIndisponibles: ["Total de places indisponibles"],
+  presencesInduesBPI: ["Nb de BPI en PI"],
+  presencesInduesDeboutees: ["Nb de DEB en PI"],
+};
+
+const MONTHS: Record<string, number> = {
+  janvier: 1,
+  février: 2,
+  mars: 3,
+  avril: 4,
+  mai: 5,
+  juin: 6,
+  juillet: 7,
+  août: 8,
+  septembre: 9,
+  octobre: 10,
+  novembre: 11,
+  décembre: 12,
+};
+
+const possibleValuesSet = new Set(
+  Object.values(POSSIBLE_ACTIVITE_COLUMNS).flat()
+);
+
+function parseYear(year: string): string {
+  if (year.length === 2) return "20" + year;
+  if (year.length === 4) return year;
+  throw new Error(`Année invalide: ${year}`);
+}
+
+/** Extrait (year, month) du nom d'onglet (ex. "10 25", "octobre 2025", "Liste") ou null. */
+function parseSheetDate(
+  sheetName: string
+): { year: number; month: number } | null {
+  const clean = sheetName.trim().toLowerCase();
+  const parts = clean.split(/\s+/);
+
+  let monthNb: number | null = null;
+  let yearNb: string | null = null;
+
+  for (const word of parts) {
+    if (MONTHS[word] != null) monthNb = MONTHS[word];
+    if (/^\d{2,4}$/.test(word)) yearNb = parseYear(word);
+  }
+
+  const numMatch = clean.match(/(\d{1,2})[\s\-_/](\d{2,4})/);
+  if ((monthNb == null || yearNb == null) && numMatch) {
+    const mInt = parseInt(numMatch[1], 10);
+    if (mInt >= 1 && mInt <= 12) {
+      monthNb = monthNb ?? mInt;
+      yearNb = yearNb ?? parseYear(numMatch[2]);
+    }
+  }
+
+  if (monthNb != null && yearNb != null) {
+    return { year: parseInt(yearNb, 10), month: monthNb };
+  }
+  return null;
+}
+
+/** Extrait (year, month) du nom de fichier "Liste données par centre MM.AA VF.XLSX". */
+function parseFilenameDate(
+  fileName: string
+): { year: number; month: number } | null {
+  const match = fileName.match(/Liste données par centre (\d{2})\.(\d{2})/i);
+  if (match) {
+    return {
+      year: parseInt("20" + match[2], 10),
+      month: parseInt(match[1], 10),
+    };
+  }
+  return null;
+}
+
+function findHeaderRow(sheet: WorkSheet): number {
+  const range = XLSX.utils.decode_range(sheet["!ref"] ?? "A1");
+  for (let myRow = range.s.r; myRow <= range.e.r; myRow++) {
+    const row: string[] = [];
+    for (let myCol = range.s.c; myCol <= range.e.c; myCol++) {
+      const cell = sheet[XLSX.utils.encode_cell({ r: myRow, c: myCol })];
+      const val = cell && cell.v != null ? String(cell.v).trim() : "";
+      row.push(val);
+    }
+    if (row.some((val) => possibleValuesSet.has(val))) return myRow;
+  }
+  return -1;
+}
+
+function normalizeCellValue(val: unknown): string {
+  if (val == null) return "";
+  if (typeof val === "number") return String(val);
+  return String(val).trim();
+}
+
+export type ActiviteRow = {
+  structureDnaCode: string;
+  placesAutorisees: number | null;
+  desinsectisation: number | null;
+  remiseEnEtat: number | null;
+  sousOccupation: number | null;
+  travaux: number | null;
+  placesIndisponibles: number | null;
+  presencesInduesBPI: number | null;
+  presencesInduesDeboutees: number | null;
+};
+
+export type OfiiActiviteSheet = {
+  date: Date; // 1er du mois à midi UTC
+  rows: ActiviteRow[];
+};
+
+// Lignes de référentiel (structures) extraites du même XLSX OFII.
+export type OfiiReferentialRow = {
+  dnaCode: string;
+  nom: string;
+  type: string;
+  operateur: string;
+  departement: string;
+  directionTerritoriale: string;
+};
+
+// Mapping minimal basé sur le fichier OFII actuel.
+const POSSIBLE_REF_COLUMNS: Record<keyof OfiiReferentialRow, string[]> = {
+  dnaCode: ["Code"],
+  nom: ["Nom du centre", "Nom"],
+  type: ["Type", "Catégorie de centre"],
+  operateur: ["Opérateur"],
+  departement: ["Département"],
+  directionTerritoriale: ["Direction territoriale"],
+};
+
+// Ligne complète (référentiel + activité) issue d'une seule feuille OFII.
+export type OfiiFullRow = OfiiReferentialRow & ActiviteRow;
+
+export type OfiiFullSheet = {
+  date: Date;
+  rows: OfiiFullRow[];
+};
+
+/**
+ * Charge les données référentiel + activité (onglet le plus récent ou "Liste" si présent).
+ */
+export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
+  const wb = XLSX.read(buffer, { type: "buffer", raw: true });
+  const sheetNames = wb.SheetNames;
+
+  let chosenSheetName: string;
+  let sheetDate: { year: number; month: number } | null;
+
+  const listeIndex = sheetNames.findIndex(
+    (n) => n.trim().toLowerCase() === "liste"
+  );
+  if (listeIndex >= 0 && sheetNames.length >= 1) {
+    chosenSheetName = sheetNames[listeIndex];
+    sheetDate = parseFilenameDate(fileName) ?? parseSheetDate(chosenSheetName);
+  } else {
+    const withDates = sheetNames
+      .map((name) => ({ name, date: parseSheetDate(name) }))
+      .filter(
+        (x): x is { name: string; date: { year: number; month: number } } =>
+          x.date != null
+      )
+      .sort((a, b) => {
+        if (a.date.year !== b.date.year) return b.date.year - a.date.year;
+        return b.date.month - a.date.month;
+      });
+    if (withDates.length === 0) {
+      chosenSheetName = sheetNames[sheetNames.length - 1];
+      sheetDate = parseFilenameDate(fileName);
+    } else {
+      chosenSheetName = withDates[0].name;
+      sheetDate = withDates[0].date;
+    }
+  }
+
+  if (!sheetDate) {
+    throw new Error(
+      "Impossible d'extraire la date du nom d'onglet ou du fichier: " + fileName
+    );
+  }
+
+  const sheet = wb.Sheets[chosenSheetName];
+  if (!sheet || !sheet["!ref"]) {
+    throw new Error("Onglet vide ou invalide: " + chosenSheetName);
+  }
+
+  const headerRowIdx = findHeaderRow(sheet);
+  if (headerRowIdx < 0) {
+    throw new Error(
+      "Aucune ligne d'en-tête trouvée (colonnes OFII attendues)."
+    );
+  }
+
+  const range = XLSX.utils.decode_range(sheet["!ref"]);
+  const headerRow: string[] = [];
+  for (let c = range.s.c; c <= range.e.c; c++) {
+    const cell = sheet[XLSX.utils.encode_cell({ r: headerRowIdx, c })];
+    headerRow.push(normalizeCellValue(cell?.v));
+  }
+
+  const activiteKeyByIndex: (keyof ActiviteRow | "")[] = [];
+  const refKeyByIndex: (keyof OfiiReferentialRow | "")[] = [];
+
+  for (const header of headerRow) {
+    const normalizedHeader = header.trim().toLowerCase();
+
+    // Colonnes d'activité
+    let matchedActiviteKey: keyof ActiviteRow | "" = "";
+    (
+      Object.entries(POSSIBLE_ACTIVITE_COLUMNS) as [
+        keyof ActiviteRow,
+        string[],
+      ][]
+    ).forEach(([key, labels]) => {
+      if (
+        labels.some(
+          (label) => label.trim().toLowerCase() === normalizedHeader
+        )
+      ) {
+        matchedActiviteKey = key;
+      }
+    });
+    activiteKeyByIndex.push(matchedActiviteKey);
+
+    // Colonnes de référentiel
+    let matchedRefKey: keyof OfiiReferentialRow | "" = "";
+    (
+      Object.entries(POSSIBLE_REF_COLUMNS) as [
+        keyof OfiiReferentialRow,
+        string[],
+      ][]
+    ).forEach(([key, labels]) => {
+      if (
+        labels.some(
+          (label) => label.trim().toLowerCase() === normalizedHeader
+        )
+      ) {
+        matchedRefKey = key;
+      }
+    });
+    refKeyByIndex.push(matchedRefKey);
+  }
+
+  const rows: OfiiFullRow[] = [];
+  for (let r = headerRowIdx + 1; r <= range.e.r; r++) {
+    const row: Partial<OfiiFullRow> = {};
+    let allEmpty = true;
+
+    for (let c = 0; c < headerRow.length; c++) {
+      const activiteKey = activiteKeyByIndex[c];
+      const refKey = refKeyByIndex[c];
+      const colIdx = range.s.c + c;
+      const cell = sheet[XLSX.utils.encode_cell({ r, c: colIdx })];
+      const raw = cell?.v;
+
+      if (activiteKey === "structureDnaCode") {
+        const value = normalizeCellValue(raw);
+        if (value) {
+          row.structureDnaCode = value;
+          // On considère aussi que dnaCode (référentiel) vient de la même colonne.
+          row.dnaCode = row.dnaCode ?? value;
+          allEmpty = false;
+        }
+      } else if (activiteKey) {
+        const num =
+          raw !== "" && raw != null && !Number.isNaN(Number(raw))
+            ? Number(raw)
+            : null;
+        (row as any)[activiteKey] = num;
+        if (num !== null) allEmpty = false;
+      }
+
+      if (refKey) {
+        const value = normalizeCellValue(raw);
+        if (value) {
+          (row as any)[refKey] = value;
+          allEmpty = false;
+        }
+      }
+    }
+
+    if (allEmpty) break;
+    if (row.dnaCode) {
+      rows.push(row as OfiiFullRow);
+    }
+  }
+
+  const date = new Date(
+    Date.UTC(sheetDate.year, sheetDate.month - 1, 1, 12, 0, 0, 0)
+  );
+
+  return { date, rows };
+}
