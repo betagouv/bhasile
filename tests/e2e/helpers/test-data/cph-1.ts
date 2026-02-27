@@ -52,10 +52,25 @@ export const cph1: TestStructureScenario = {
       { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
       { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
       { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
+      { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
     ],
     documentsFinanciers: {
       allAddedViaAjout: true,
       fileUploads: [
+        {
+          year: "2026",
+          category: "Budget prévisionnel demandé",
+          fileName: "sample.csv",
+          filePath: "tests/e2e/fixtures/sample.csv",
+          formKind: "ajout",
+        },
+        {
+          year: "2026",
+          category: "Budget prévisionnel retenu (ou exécutoire)",
+          fileName: "sample.csv",
+          filePath: "tests/e2e/fixtures/sample.csv",
+          formKind: "ajout",
+        },
         {
           year: "2025",
           category: "Budget prévisionnel demandé",
@@ -206,6 +221,13 @@ export const cph1: TestStructureScenario = {
       ],
     },
     finances: {
+      2026: {
+        ETP: "8",
+        tauxEncadrement: "12,5",
+        coutJournalier: "23,75",
+        dotationDemandee: "120000",
+        dotationAccordee: "110000",
+      },
       2025: {
         ETP: "8",
         tauxEncadrement: "12,5",
@@ -344,8 +366,16 @@ export const cph1: TestStructureScenario = {
       { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
       { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
       { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
     ],
     finances: {
+      2026: {
+        ETP: "9",
+        tauxEncadrement: "13",
+        coutJournalier: "25",
+        dotationDemandee: "122000",
+        dotationAccordee: "112000",
+      },
       2025: {
         ETP: "9",
         tauxEncadrement: "13",

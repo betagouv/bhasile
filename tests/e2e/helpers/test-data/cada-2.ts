@@ -57,6 +57,7 @@ export const cada2: TestStructureScenario = {
     ],
     structureTypologies: [
       { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
+      { placesAutorisees: 48, pmr: 5, lgbt: 10, fvvTeh: 8 },
     ],
     documentsFinanciers: {
       allAddedViaAjout: false,
@@ -136,8 +137,16 @@ export const cada2: TestStructureScenario = {
     },
     structureTypologies: [
       { placesAutorisees: 55, pmr: 7, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 53, pmr: 7, lgbt: 11, fvvTeh: 9 },
     ],
     finances: {
+      2026: {
+        ETP: "10",
+        tauxEncadrement: "11",
+        coutJournalier: 25.5,
+        dotationDemandee: "130000",
+        dotationAccordee: "120000",
+      },
       2025: {
         ETP: "10",
         tauxEncadrement: "11",
