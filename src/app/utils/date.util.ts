@@ -121,16 +121,6 @@ export const parseFrDate = (value: unknown): Date | unknown => {
   return value;
 };
 
-export const getDocumentsFinanciersYearRange = ({
-  isAutorisee,
-}: {
-  isAutorisee: boolean;
-}): { years: number[]; startIndex: number } => {
-  const startIndex = isAutorisee ? 0 : 2;
-  const { years } = getYearRange();
-  return { years: years.slice(startIndex), startIndex };
-};
-
 export const getTypePlacesYearRange = (): { years: number[] } => {
   const { years } = getYearRange({
     startYear: 2023,

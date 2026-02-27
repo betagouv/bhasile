@@ -56,6 +56,9 @@ export const getFinanceSchema = (
     }
 
     if (isAutorisee) {
+      if (year === CURRENT_YEAR) {
+        return budgetAutoSaveSchema;
+      }
       if (year === AUTORISEE_OPEN_YEAR) {
         return budgetAutoriseeOpenYear1Schema;
       }
