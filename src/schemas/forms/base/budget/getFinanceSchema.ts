@@ -15,6 +15,7 @@ import {
   budgetAutoriseeNotOpenSchema,
   budgetAutoriseeOpenSchema,
   budgetAutoriseeOpenYear1Schema,
+  budgetAutoriseeOpenYear2Schema,
   budgetAutoSaveSchema,
   budgetInCpomSchema,
   budgetSubventionneeNotOpenSchema,
@@ -50,6 +51,9 @@ export const getFinanceSchema = (
     if (isAutorisee) {
       if (year === AUTORISEE_OPEN_YEAR) {
         return budgetAutoriseeOpenYear1Schema;
+      }
+      if (year === AUTORISEE_OPEN_YEAR - 1) {
+        return budgetAutoriseeOpenYear2Schema;
       }
       if (year < AUTORISEE_OPEN_YEAR) {
         return budgetAutoriseeOpenSchema;

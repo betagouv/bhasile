@@ -26,12 +26,44 @@ export const budgetBaseSchema = z.object({
 });
 
 export const budgetAutoriseeNotOpenSchema = budgetBaseSchema.extend({
+  id: zId(),
+  year: zSafeYear(),
+
+  // Indicateurs généraux
+  ETP: zSafePositiveDecimalsNullish(),
+  tauxEncadrement: zSafePositiveDecimalsNullish(),
+  coutJournalier: zSafePositiveDecimalsNullish(),
+
   dotationDemandee: zSafePositiveDecimalsNullish(),
+
+  commentaire: z.string().nullish(),
 });
 
 export const budgetAutoriseeOpenYear1Schema = budgetBaseSchema.extend({
   dotationDemandee: zSafePositiveDecimals(),
   dotationAccordee: zSafePositiveDecimalsNullish(),
+});
+
+export const budgetAutoriseeOpenYear2Schema = budgetBaseSchema.extend({
+  dotationDemandee: zSafePositiveDecimals(),
+  dotationAccordee: zSafePositiveDecimals(),
+
+  // Résultat
+  totalProduitsProposes: zSafePositiveDecimalsNullish(),
+  totalProduits: zSafePositiveDecimalsNullish(),
+  totalChargesProposees: zSafePositiveDecimalsNullish(),
+  totalCharges: zSafePositiveDecimalsNullish(),
+  repriseEtat: zSafeDecimalsNullish(),
+  affectationReservesFondsDedies: zSafeDecimalsNullish(),
+
+  // Détail affectation
+  reserveInvestissement: zSafeDecimalsNullish(),
+  chargesNonReconductibles: zSafeDecimalsNullish(),
+  reserveCompensationDeficits: zSafeDecimalsNullish(),
+  reserveCompensationBFR: zSafeDecimalsNullish(),
+  reserveCompensationAmortissements: zSafeDecimalsNullish(),
+  reportANouveau: zSafeDecimalsNullish(),
+  autre: zSafeDecimalsNullish(),
 });
 
 export const budgetAutoriseeOpenSchemaWithoutRefinement =
@@ -159,8 +191,10 @@ export type BudgetsAutoSaveFormValues = z.infer<typeof budgetsAutoSaveSchema>;
 export type anyBudgetFormValues = Array<
   | z.infer<typeof budgetAutoriseeNotOpenSchema>
   | z.infer<typeof budgetAutoriseeOpenYear1Schema>
+  | z.infer<typeof budgetAutoriseeOpenYear2Schema>
   | z.infer<typeof budgetAutoriseeOpenSchema>
   | z.infer<typeof budgetSubventionneeNotOpenSchema>
+  | z.infer<typeof budgetSubventionneeOpenYear1Schema>
   | z.infer<typeof budgetSubventionneeOpenSchema>
   | z.infer<typeof budgetAutoSaveSchema>
 >;
