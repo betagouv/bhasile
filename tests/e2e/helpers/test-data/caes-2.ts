@@ -63,21 +63,21 @@ export const caes2: TestStructureScenario = {
       allAddedViaAjout: false,
       fileUploads: [
         {
-          year: "2026",
+          year: "2024",
           category: "Demande de subvention",
           fileName: "sample.csv",
           filePath: "tests/e2e/fixtures/sample.csv",
           formKind: "ajout",
         },
         {
-          year: "2026",
+          year: "2024",
           category: "Compte-rendu financier",
           fileName: "sample.csv",
           filePath: "tests/e2e/fixtures/sample.csv",
           formKind: "ajout",
         },
         {
-          year: "2026",
+          year: "2024",
           category: "Rapport d'activité de l'opérateur",
           fileName: "sample.csv",
           filePath: "tests/e2e/fixtures/sample.csv",
