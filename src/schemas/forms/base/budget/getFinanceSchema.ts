@@ -7,7 +7,11 @@ import {
   isStructureInCpom,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
-import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
+import {
+  AUTORISEE_OPEN_YEAR,
+  CURRENT_YEAR,
+  SUBVENTIONNEE_OPEN_YEAR,
+} from "@/constants";
 import { StructureApiType } from "@/schemas/api/structure.schema";
 import { FormKind } from "@/types/global";
 
@@ -45,6 +49,9 @@ export const getFinanceSchema = (
     }
 
     if (isInCpomPerYear[index]) {
+      if (year === CURRENT_YEAR) {
+        return budgetAutoSaveSchema;
+      }
       return budgetInCpomSchema;
     }
 
@@ -62,14 +69,16 @@ export const getFinanceSchema = (
     }
 
     if (isSubventionnee) {
+      if (year === CURRENT_YEAR) {
+        return budgetAutoSaveSchema;
+      }
       if (year === AUTORISEE_OPEN_YEAR) {
         return budgetSubventionneeOpenYear1Schema;
       }
       if (year < SUBVENTIONNEE_OPEN_YEAR) {
         return budgetSubventionneeOpenSchema;
-      } else {
-        return budgetSubventionneeNotOpenSchema;
       }
+      return budgetSubventionneeNotOpenSchema;
     }
 
     return budgetAutoSaveSchema;
