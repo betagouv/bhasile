@@ -1,7 +1,10 @@
 {
   "jobs": [
     {
-      "command": "0 10 * * * yarn script eig-fetch eig-fetch.ts"
+      "command": "0 10 * * 1-5 yarn script eig-fetch"
+    },
+    {
+      "command": "30 10 * * 1 yarn script clean-old-user-actions"
     }
   ]
 }

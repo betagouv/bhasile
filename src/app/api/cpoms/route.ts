@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { cpomApiAjoutSchema, cpomApiSchema } from "@/schemas/api/cpom.schema";
 
+import { createCpomEvent } from "../user-action/user-action.service";
 import { countAll, createOrUpdateCpom, findAll } from "./cpom.repository";
 
 export async function GET() {
@@ -22,6 +23,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const result = cpomApiAjoutSchema.parse(body);
     const cpomId = await createOrUpdateCpom(result);
+    createCpomEvent(request.method, cpomId);
     return NextResponse.json({ cpomId }, { status: 201 });
   } catch (error) {
     console.error(error);
@@ -34,6 +36,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const result = cpomApiSchema.parse(body);
     const cpomId = await createOrUpdateCpom(result);
+    createCpomEvent(request.method, cpomId);
     return NextResponse.json({ cpomId }, { status: 201 });
   } catch (error) {
     console.error(error);

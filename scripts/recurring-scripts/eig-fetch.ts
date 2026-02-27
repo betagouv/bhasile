@@ -1,5 +1,5 @@
 // Remplir la table EvenementIndesirableGrave avec les EIG venant de l'API de Démarches Numériques
-// Usage: yarn script eig-fetch eig-fetch.ts
+// Usage: yarn script eig-fetch
 
 import "dotenv/config";
 

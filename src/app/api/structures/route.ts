@@ -6,6 +6,7 @@ import {
 } from "@/schemas/api/structure.schema";
 import { StructureColumn } from "@/types/ListColumn";
 
+import { createStructureEvent } from "../user-action/user-action.service";
 import {
   countBySearch,
   findBySearch,
@@ -62,7 +63,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const result = structureOperateurUpdateApiSchema.parse(body);
-    await updateOneOperateur(result);
+    const createdStructure = await updateOneOperateur(result);
+    createStructureEvent(request.method, createdStructure.id);
     return NextResponse.json("Structure créée avec succès", { status: 201 });
   } catch (error) {
     console.error(error);
@@ -74,7 +76,8 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
     const result = structureAgentUpdateApiSchema.parse(body);
-    await updateOneAgent(result);
+    const updatedStructure = await updateOneAgent(result);
+    createStructureEvent(request.method, updatedStructure.id);
     return NextResponse.json("Structure mise à jour avec succès", {
       status: 201,
     });
