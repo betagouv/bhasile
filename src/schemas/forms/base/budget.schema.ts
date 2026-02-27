@@ -26,16 +26,19 @@ export const budgetBaseSchema = z.object({
 });
 
 export const budgetAutoriseeNotOpenSchema = budgetBaseSchema.extend({
-  dotationDemandee: zSafePositiveDecimals(),
+  dotationDemandee: zSafePositiveDecimalsNullish(),
 });
 
-export const budgetAutoriseeOpenYear1Schema =
-  budgetAutoriseeNotOpenSchema.extend({
-    dotationAccordee: zSafePositiveDecimals(),
-  });
+export const budgetAutoriseeOpenYear1Schema = budgetBaseSchema.extend({
+  dotationDemandee: zSafePositiveDecimals(),
+  dotationAccordee: zSafePositiveDecimalsNullish(),
+});
 
 export const budgetAutoriseeOpenSchemaWithoutRefinement =
-  budgetAutoriseeOpenYear1Schema.extend({
+  budgetBaseSchema.extend({
+    dotationDemandee: zSafePositiveDecimals(),
+    dotationAccordee: zSafePositiveDecimals(),
+
     // Résultat
     totalProduitsProposes: zSafePositiveDecimalsNullish(),
     totalProduits: zSafePositiveDecimals(),
@@ -72,6 +75,27 @@ export const budgetAutoriseeOpenSchema =
     );
 
 export const budgetSubventionneeNotOpenSchema = budgetBaseSchema; // Duplicated for comprehensibility
+
+export const budgetSubventionneeOpenYear1Schema = budgetBaseSchema.extend({
+  dotationDemandee: zSafePositiveDecimalsNullish(),
+  dotationAccordee: zSafePositiveDecimalsNullish(),
+  totalProduitsProposes: zSafePositiveDecimalsNullish(),
+  totalProduits: zSafePositiveDecimalsNullish(),
+  totalChargesProposees: zSafePositiveDecimalsNullish(),
+  totalCharges: zSafePositiveDecimalsNullish(),
+  repriseEtat: zSafeDecimalsNullish(),
+  excedentRecupere: zSafePositiveDecimalsNullish(),
+  excedentDeduit: zSafePositiveDecimalsNullish(),
+  fondsDedies: zSafePositiveDecimalsNullish(),
+  affectationReservesFondsDedies: zSafeDecimalsNullish(),
+  reserveInvestissement: zSafeDecimalsNullish(),
+  chargesNonReconductibles: zSafeDecimalsNullish(),
+  reserveCompensationDeficits: zSafeDecimalsNullish(),
+  reserveCompensationBFR: zSafeDecimalsNullish(),
+  reserveCompensationAmortissements: zSafeDecimalsNullish(),
+  reportANouveau: zSafeDecimalsNullish(),
+  autre: zSafeDecimalsNullish(),
+});
 
 export const budgetSubventionneeOpenSchema = budgetBaseSchema.extend({
   dotationDemandee: zSafePositiveDecimals(),

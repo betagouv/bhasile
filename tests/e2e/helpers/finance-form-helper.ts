@@ -13,7 +13,9 @@ export async function fillFinanceForm(
   page: Page,
   finances: Record<number, Partial<FinanceYearData>> | undefined
 ): Promise<void> {
-  if (!finances) return;
+  if (!finances) {
+    return;
+  }
 
   const waitHelper = new WaitHelper(page);
   const formHelper = new FormHelper(page);
@@ -24,14 +26,20 @@ export async function fillFinanceForm(
   for (const [yearKey, fields] of Object.entries(finances)) {
     const year = Number(yearKey);
     const budgetIndex = yearIndexMap[year];
-    if (budgetIndex === undefined) continue;
+    if (budgetIndex === undefined) {
+      continue;
+    }
 
     for (const [field, value] of Object.entries(fields)) {
-      if (value === undefined || value === null) continue;
+      if (value === undefined || value === null) {
+        continue;
+      }
       const selector = `input[name="budgets.${budgetIndex}.${field}"]`;
       const input = page.locator(selector);
       const count = await input.count();
-      if (count === 0) continue;
+      if (count === 0) {
+        continue;
+      }
       const isEnabled = await safeExecute(
         () => input.isEnabled(),
         false,
@@ -54,13 +62,19 @@ async function getBudgetIndexByYear(
   for (let i = 0; i < count; i++) {
     const nameAttr = await yearInputs.nth(i).getAttribute("name");
     const match = nameAttr?.match(/^budgets\.(\d+)\.year$/);
-    if (!match) continue;
+    if (!match) {
+      continue;
+    }
     const budgetIndex = Number(match[1]);
     const value = await yearInputs.nth(i).inputValue();
     const year = Number(value);
-    if (!Number.isNaN(year)) yearIndexMap[year] = budgetIndex;
+    if (!Number.isNaN(year)) {
+      yearIndexMap[year] = budgetIndex;
+    }
   }
-  if (Object.keys(yearIndexMap).length > 0) return yearIndexMap;
+  if (Object.keys(yearIndexMap).length > 0) {
+    return yearIndexMap;
+  }
   const sortedYears = Object.keys(finances)
     .map((y) => Number(y))
     .sort((a, b) => b - a);

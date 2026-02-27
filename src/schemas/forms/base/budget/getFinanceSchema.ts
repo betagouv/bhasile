@@ -19,6 +19,7 @@ import {
   budgetInCpomSchema,
   budgetSubventionneeNotOpenSchema,
   budgetSubventionneeOpenSchema,
+  budgetSubventionneeOpenYear1Schema,
 } from "../budget.schema";
 import { cpomStructureSchema } from "../cpom.schema";
 import { DocumentsFinanciersFlexibleSchema } from "../documentFinancier.schema";
@@ -57,7 +58,10 @@ export const getFinanceSchema = (
     }
 
     if (isSubventionnee) {
-      if (year <= SUBVENTIONNEE_OPEN_YEAR) {
+      if (year === AUTORISEE_OPEN_YEAR) {
+        return budgetSubventionneeOpenYear1Schema;
+      }
+      if (year < SUBVENTIONNEE_OPEN_YEAR) {
         return budgetSubventionneeOpenSchema;
       } else {
         return budgetSubventionneeNotOpenSchema;

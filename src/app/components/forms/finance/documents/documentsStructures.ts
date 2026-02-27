@@ -1,10 +1,10 @@
-import { CURRENT_OPEN_YEAR, CURRENT_YEAR } from "@/constants";
+import { CURRENT_YEAR, DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
 import {
   DocumentFinancierCategory,
   DocumentFinancierGranularity,
 } from "@/types/document-financier.type";
 
-const baseYearIndex = CURRENT_YEAR - CURRENT_OPEN_YEAR;
+const baseYearIndex = CURRENT_YEAR - DOCUMENTS_FINANCIERS_OPEN_YEAR;
 
 export const structureAutoriseesDocuments: StructureDocument[] = [
   {
