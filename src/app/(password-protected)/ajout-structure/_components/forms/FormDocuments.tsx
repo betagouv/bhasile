@@ -7,7 +7,7 @@ import { FieldSetYearlyDocumentsFinanciers } from "@/app/components/forms/fields
 import { Date303 } from "@/app/components/forms/finance/documents/Date303";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
-import { getDocumentsFinanciersYearRange } from "@/app/utils/date.util";
+import { getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { DocumentsFinanciersFlexibleSchema } from "@/schemas/forms/base/documentFinancier.schema";
@@ -46,7 +46,7 @@ export default function FormDocuments() {
 
   const isAutorisee = isStructureAutorisee(currentValue?.type);
 
-  const { years } = getDocumentsFinanciersYearRange({ isAutorisee });
+  const { years } = getYearRange();
 
   return (
     <FormWrapper

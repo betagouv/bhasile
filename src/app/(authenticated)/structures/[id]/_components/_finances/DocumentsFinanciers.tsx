@@ -2,11 +2,7 @@ import Accordion from "@codegouvfr/react-dsfr/Accordion";
 import { ReactElement } from "react";
 
 import { DownloadItem } from "@/app/components/common/DownloadItem";
-import {
-  getDocumentsFinanciersYearRange,
-  getYearFromDate,
-} from "@/app/utils/date.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
+import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -14,8 +10,7 @@ import { useStructureContext } from "../../_context/StructureClientContext";
 export const DocumentsFinanciers = (): ReactElement => {
   const { structure } = useStructureContext();
 
-  const isAutorisee = isStructureAutorisee(structure.type);
-  const { years } = getDocumentsFinanciersYearRange({ isAutorisee });
+  const { years } = getYearRange();
 
   const startYear = structure.date303
     ? getYearFromDate(structure.date303)
