@@ -37,6 +37,7 @@ export const CpomTable = () => {
         enabledYears={yearsInCpom}
       />
       <BudgetTableCommentLine
+        years={years}
         label="Commentaire"
         cpomMillesimes={cpomMillesimes}
         enabledYears={yearsInCpom}

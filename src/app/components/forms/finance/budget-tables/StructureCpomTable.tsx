@@ -50,6 +50,7 @@ export const StructureCpomTable = ({ canEdit = true }: Props) => {
         cpomStructures={cpomStructures}
         enabledYears={yearsInCpom}
         canEdit={canEdit}
+        years={years}
       />
     </Table>
   );
