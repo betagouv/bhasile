@@ -41,5 +41,10 @@ export const cpomRegionale: {
       dotationAccordee: 200000,
       commentaire: "Régionale 2025",
     },
+    2026: {
+      dotationDemandee: 220000,
+      dotationAccordee: 210000,
+      commentaire: "Régionale 2026",
+    },
   },
 };

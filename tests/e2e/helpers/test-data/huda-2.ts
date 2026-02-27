@@ -64,10 +64,32 @@ export const huda2: TestStructureScenario = {
       { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
       { placesAutorisees: 48, pmr: 5, lgbt: 10, fvvTeh: 8 },
       { placesAutorisees: 45, pmr: 4, lgbt: 8, fvvTeh: 7 },
+      { placesAutorisees: 43, pmr: 4, lgbt: 8, fvvTeh: 7 },
     ],
     documentsFinanciers: {
       allAddedViaAjout: false,
       fileUploads: [
+        {
+          year: "2024",
+          category: "Demande de subvention",
+          fileName: "sample.csv",
+          filePath: "tests/e2e/fixtures/sample.csv",
+          formKind: "finalisation",
+        },
+        {
+          year: "2024",
+          category: "Compte-rendu financier",
+          fileName: "sample.csv",
+          filePath: "tests/e2e/fixtures/sample.csv",
+          formKind: "finalisation",
+        },
+        {
+          year: "2024",
+          category: "Rapport d'activité de l'opérateur",
+          fileName: "sample.csv",
+          filePath: "tests/e2e/fixtures/sample.csv",
+          formKind: "finalisation",
+        },
         {
           year: "2023",
           category: "Demande de subvention",
@@ -134,6 +156,13 @@ export const huda2: TestStructureScenario = {
       ],
     },
     finances: {
+      2026: {
+        ETP: "8",
+        tauxEncadrement: "12,5",
+        coutJournalier: "23,75",
+        dotationDemandee: "120000",
+        dotationAccordee: "110000",
+      },
       2025: {
         ETP: "8",
         tauxEncadrement: "12,5",
@@ -271,8 +300,16 @@ export const huda2: TestStructureScenario = {
       { placesAutorisees: 54, pmr: 7, lgbt: 12, fvvTeh: 10 },
       { placesAutorisees: 50, pmr: 6, lgbt: 11, fvvTeh: 9 },
       { placesAutorisees: 47, pmr: 5, lgbt: 9, fvvTeh: 8 },
+      { placesAutorisees: 45, pmr: 5, lgbt: 9, fvvTeh: 8 },
     ],
     finances: {
+      2026: {
+        ETP: "10",
+        tauxEncadrement: "10",
+        coutJournalier: "26",
+        dotationDemandee: "130000",
+        dotationAccordee: "122000",
+      },
       2025: {
         ETP: "10",
         tauxEncadrement: "10",
