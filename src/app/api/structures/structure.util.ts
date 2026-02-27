@@ -9,7 +9,9 @@ const typesPublic: Record<string, PublicType> = {
 export const convertToPublicType = (
   typePublic: string | null | undefined
 ): PublicType | undefined => {
-  if (!typePublic) return undefined;
+  if (!typePublic) {
+    return undefined;
+  }
 
   return typesPublic[typePublic.trim().toLowerCase()];
 };

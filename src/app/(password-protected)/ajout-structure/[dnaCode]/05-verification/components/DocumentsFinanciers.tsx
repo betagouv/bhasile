@@ -8,7 +8,7 @@ import {
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { getDocumentsFinanciersYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
-import { CURRENT_OPEN_YEAR } from "@/constants";
+import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 
@@ -42,7 +42,7 @@ export const DocumentsFinanciers = (): ReactElement => {
     .map((year) =>
       documents
         .filter((document) => {
-          const yearIndex = CURRENT_OPEN_YEAR - year;
+          const yearIndex = DOCUMENTS_FINANCIERS_OPEN_YEAR - year;
 
           if (!document.required || document.yearIndex > yearIndex) {
             return false;

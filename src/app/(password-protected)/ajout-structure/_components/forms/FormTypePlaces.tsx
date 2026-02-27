@@ -74,7 +74,7 @@ export default function FormTypePlaces() {
 
             <p>
               Veuillez renseigner l’historique du nombre de places pour chaque
-              typologie au 1er janvier de ces trois dernières années.
+              typologie au 1er janvier de ces dernières années.
             </p>
 
             <Notice
