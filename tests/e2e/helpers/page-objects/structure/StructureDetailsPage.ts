@@ -226,7 +226,9 @@ export class StructureDetailsPage extends BasePage {
   private async expectTypePlaces(
     structureTypologies: TestStructureData["structureTypologies"]
   ) {
-    if (structureTypologies.length === 0) return;
+    if (structureTypologies.length === 0) {
+      return;
+    }
 
     const typePlacesBlock = this.getBlockByTitle("Type de places");
     const historyButton = typePlacesBlock.getByRole("button", {

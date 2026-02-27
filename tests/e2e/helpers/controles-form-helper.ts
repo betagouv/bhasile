@@ -20,7 +20,9 @@ export async function setControlesFileInput(
   keyTimeout: number = TIMEOUTS.NAVIGATION
 ): Promise<void> {
   const keyInput = page.locator(keySelector);
-  if ((await keyInput.count()) === 0) return;
+  if ((await keyInput.count()) === 0) {
+    return;
+  }
 
   await keyInput.waitFor({ state: "attached", timeout: TIMEOUTS.NAVIGATION });
   let fileInput = keyInput.locator("..").locator(SELECTORS.FILE_INPUT).first();
@@ -87,7 +89,9 @@ export async function fillEvaluationsForm(
   }
 
   const evaluationsFieldset = page.getByRole("group", { name: /Évaluations/i });
-  if ((await evaluationsFieldset.count()) === 0) return;
+  if ((await evaluationsFieldset.count()) === 0) {
+    return;
+  }
 
   const addButton = evaluationsFieldset.getByRole("button", {
     name: /Ajouter une évaluation/i,
@@ -178,7 +182,9 @@ export async function fillControlesForm(
   const controlesFieldset = page.getByRole("group", {
     name: /Inspections-contrôles/i,
   });
-  if ((await controlesFieldset.count()) === 0) return;
+  if ((await controlesFieldset.count()) === 0) {
+    return;
+  }
 
   const addButton = controlesFieldset.getByRole("button", {
     name: /Ajouter une inspection-contrôle/i,
@@ -220,7 +226,9 @@ export async function fillOuvertureFermetureForm(
   page: Page,
   ouvertureFermeture: OuvertureFermetureData | undefined
 ): Promise<void> {
-  if (!ouvertureFermeture) return;
+  if (!ouvertureFermeture) {
+    return;
+  }
 
   const placesACreer = page.getByLabel("Nombre de places à créer");
   if (
