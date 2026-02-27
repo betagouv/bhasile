@@ -7,5 +7,5 @@ export const getActionFromMethod = (method: string): UserActionCategory => {
     PUT: UserActionCategory.UPDATE,
     DELETE: UserActionCategory.DELETE,
   };
-  return methods[method];
+  return methods[method] || UserActionCategory.READ;
 };

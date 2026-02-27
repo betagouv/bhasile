@@ -1,6 +1,6 @@
 import { createUserAction } from "./user-action.repository";
 
-// Les fonctions de ce fichier sont asyncrhones mais il faut les appeler sans
+// Les fonctions de ce fichier sont asynchrones mais il faut les appeler sans
 //  await pour ne pas bloquer l'exécution de la requête principale
 
 export const createStructureEvent = async (

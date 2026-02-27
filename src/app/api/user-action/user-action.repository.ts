@@ -26,6 +26,7 @@ export const createUserAction = async ({
 
     if (!user) {
       console.error("Pas d'utilisateur enregistré avec cet email");
+      return;
     }
 
     await prisma.userAction.create({
