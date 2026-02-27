@@ -31,7 +31,7 @@ export const createUserAction = async ({
 
     await prisma.userAction.create({
       data: {
-        userId: user?.id || 0,
+        userId: user!.id,
         action: getActionFromMethod(method),
         structureId,
         cpomId,

@@ -19,15 +19,7 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
       try {
-        const isUserAuthorized = await getIsUserAuthorized(email);
-        if (isUserAuthorized) {
-          await upsertUser({
-            prenom: (user as ProConnectUser).prenom,
-            nom: (user as ProConnectUser).nom,
-            email: user.email as string,
-          });
-        }
-        return isUserAuthorized;
+        return getIsUserAuthorized(email);
       } catch (error) {
         console.error("Erreur de connexion", error);
         return false;
