@@ -1,13 +1,13 @@
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 import { structureTypologieSchemaTypeFormValues } from "@/schemas/forms/base/structureTypologie.schema";
 
-import { getYearRange } from "./date.util";
+import { getTypePlacesYearRange } from "./date.util";
 
 export const getStructureTypologyDefaultValues = (
   structureTypologies: StructureTypologieApiType[],
   structureCreationYear: number
 ): structureTypologieSchemaTypeFormValues[] => {
-  const { years } = getYearRange();
+  const { years } = getTypePlacesYearRange();
   const yearsToDisplay = years.filter((year) => year >= structureCreationYear);
 
   return Array(yearsToDisplay.length)
