@@ -7,6 +7,15 @@
 import type { WorkSheet } from "xlsx";
 import * as XLSX from "xlsx";
 
+const POSSIBLE_REF_COLUMNS: Record<keyof OfiiReferentialRow, string[]> = {
+  dnaCode: ["Code"],
+  nom: ["Nom du centre", "Nom"],
+  type: ["Type", "Catégorie de centre"],
+  operateur: ["Opérateur"],
+  departement: ["Département"],
+  directionTerritoriale: ["Direction territoriale"],
+};
+
 const POSSIBLE_ACTIVITE_COLUMNS: Record<keyof ActiviteRow, string[]> = {
   structureDnaCode: ["Code"],
   placesAutorisees: ["Capacité"],
@@ -17,6 +26,39 @@ const POSSIBLE_ACTIVITE_COLUMNS: Record<keyof ActiviteRow, string[]> = {
   placesIndisponibles: ["Total de places indisponibles"],
   presencesInduesBPI: ["Nb de BPI en PI"],
   presencesInduesDeboutees: ["Nb de DEB en PI"],
+};
+
+export type OfiiReferentialRow = {
+  dnaCode: string;
+  nom: string;
+  type: string;
+  operateur: string;
+  departement: string;
+  directionTerritoriale: string;
+};
+
+export type ActiviteRow = {
+  structureDnaCode: string;
+  placesAutorisees: number | null;
+  desinsectisation: number | null;
+  remiseEnEtat: number | null;
+  sousOccupation: number | null;
+  travaux: number | null;
+  placesIndisponibles: number | null;
+  presencesInduesBPI: number | null;
+  presencesInduesDeboutees: number | null;
+};
+
+export type OfiiActiviteSheet = {
+  date: Date; // 1er du mois à midi UTC
+  rows: ActiviteRow[];
+};
+
+export type OfiiFullRow = OfiiReferentialRow & ActiviteRow;
+
+export type OfiiFullSheet = {
+  date: Date;
+  rows: OfiiFullRow[];
 };
 
 const MONTHS: Record<string, number> = {
@@ -108,51 +150,6 @@ function normalizeCellValue(val: unknown): string {
   return String(val).trim();
 }
 
-export type ActiviteRow = {
-  structureDnaCode: string;
-  placesAutorisees: number | null;
-  desinsectisation: number | null;
-  remiseEnEtat: number | null;
-  sousOccupation: number | null;
-  travaux: number | null;
-  placesIndisponibles: number | null;
-  presencesInduesBPI: number | null;
-  presencesInduesDeboutees: number | null;
-};
-
-export type OfiiActiviteSheet = {
-  date: Date; // 1er du mois à midi UTC
-  rows: ActiviteRow[];
-};
-
-// Lignes de référentiel (structures) extraites du même XLSX OFII.
-export type OfiiReferentialRow = {
-  dnaCode: string;
-  nom: string;
-  type: string;
-  operateur: string;
-  departement: string;
-  directionTerritoriale: string;
-};
-
-// Mapping minimal basé sur le fichier OFII actuel.
-const POSSIBLE_REF_COLUMNS: Record<keyof OfiiReferentialRow, string[]> = {
-  dnaCode: ["Code"],
-  nom: ["Nom du centre", "Nom"],
-  type: ["Type", "Catégorie de centre"],
-  operateur: ["Opérateur"],
-  departement: ["Département"],
-  directionTerritoriale: ["Direction territoriale"],
-};
-
-// Ligne complète (référentiel + activité) issue d'une seule feuille OFII.
-export type OfiiFullRow = OfiiReferentialRow & ActiviteRow;
-
-export type OfiiFullSheet = {
-  date: Date;
-  rows: OfiiFullRow[];
-};
-
 /**
  * Charge les données référentiel + activité (onglet le plus récent ou "Liste" si présent).
  */
@@ -164,9 +161,9 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
   let sheetDate: { year: number; month: number } | null;
 
   const listeIndex = sheetNames.findIndex(
-    (n) => n.trim().toLowerCase() === "liste"
+    (name) => name.trim().toLowerCase() === "liste"
   );
-  if (listeIndex >= 0 && sheetNames.length >= 1) {
+  if (listeIndex) {
     chosenSheetName = sheetNames[listeIndex];
     sheetDate = parseFilenameDate(fileName) ?? parseSheetDate(chosenSheetName);
   } else {
@@ -180,9 +177,8 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
         if (a.date.year !== b.date.year) return b.date.year - a.date.year;
         return b.date.month - a.date.month;
       });
-    if (withDates.length === 0) {
-      chosenSheetName = sheetNames[sheetNames.length - 1];
-      sheetDate = parseFilenameDate(fileName);
+    if (withDates.length == 0) {
+      throw new Error("Aucune date trouvée dans le nom d'onglet ou du fichier");
     } else {
       chosenSheetName = withDates[0].name;
       sheetDate = withDates[0].date;
@@ -229,9 +225,7 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
       ][]
     ).forEach(([key, labels]) => {
       if (
-        labels.some(
-          (label) => label.trim().toLowerCase() === normalizedHeader
-        )
+        labels.some((label) => label.trim().toLowerCase() === normalizedHeader)
       ) {
         matchedActiviteKey = key;
       }
@@ -247,9 +241,7 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
       ][]
     ).forEach(([key, labels]) => {
       if (
-        labels.some(
-          (label) => label.trim().toLowerCase() === normalizedHeader
-        )
+        labels.some((label) => label.trim().toLowerCase() === normalizedHeader)
       ) {
         matchedRefKey = key;
       }
