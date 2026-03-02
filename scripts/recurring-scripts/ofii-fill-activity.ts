@@ -1,6 +1,6 @@
 // Remplit la table Activite à partir du fichier XLSX OFII (onglet le plus récent).
 // Par défaut utilisé par le script fill-referential-and-activity-ofii, peut aussi être utilisé en standalone.
-// Usage: yarn script fill-activite-ofii <chemin_vers_fichier.xlsx>
+// Usage: yarn script ofii-fill-activity <chemin_vers_fichier.xlsx>
 
 import "dotenv/config";
 
@@ -18,7 +18,7 @@ export async function fillOfiiActiviteFromRows(
   rows: ActiviteRow[]
 ) {
   if (rows.length === 0) {
-    console.log("Aucune ligne à insérer.");
+    console.log("❌ Aucune ligne à insérer.");
     return;
   }
 
@@ -44,7 +44,7 @@ export async function fillOfiiActiviteFromRows(
   }
 
   if (validRows.length === 0) {
-    console.log("Aucune ligne avec structure valide à insérer.");
+    console.log("❌ Aucune ligne avec structure valide à insérer.");
     return;
   }
 
@@ -106,41 +106,46 @@ export async function fillOfiiActiviteFromRows(
 
 // Standalone part
 
-const args = process.argv.slice(2);
-const xlsxKey = args[0];
+const isMainScript = process.argv[1] && process.argv[1] == "ofii-fill-activity";
 
-if (!xlsxKey) {
-  throw new Error("Merci de fournir la clef S3 du fichier XLSX en argument.");
-}
+if (isMainScript) {
+  console.log("Running standalone part of ofii-fill-activity");
+  const args = process.argv.slice(2);
+  const xlsxKey = args[0];
 
-const prisma = createPrismaClient();
-
-async function fillActivite() {
-  try {
-    const bucketName = process.env.DOCS_BUCKET_NAME;
-    if (!bucketName) {
-      throw new Error(
-        "DOCS_BUCKET_NAME doit être défini pour charger le fichier XLSX depuis S3."
-      );
-    }
-
-    console.log("Chargement du fichier XLSX depuis S3...");
-    const { buffer, fileName } = await loadXlsxBufferFromS3(
-      bucketName,
-      xlsxKey
-    );
-    const { date, rows } = loadOfiiFile(buffer, fileName);
-    console.log(
-      `Onglet traité: date ${date.toISOString().slice(0, 7)}, ${rows.length} lignes`
-    );
-
-    await fillOfiiActiviteFromRows(prisma, date, rows);
-  } catch (error) {
-    console.error("❌ Erreur:", error);
-    throw error;
-  } finally {
-    await prisma.$disconnect();
+  if (!xlsxKey) {
+    throw new Error("Merci de fournir la clef S3 du fichier XLSX en argument.");
   }
-}
 
-fillActivite();
+  const prisma = createPrismaClient();
+
+  async function fillActivite() {
+    try {
+      const bucketName = process.env.DOCS_BUCKET_NAME;
+      if (!bucketName) {
+        throw new Error(
+          "DOCS_BUCKET_NAME doit être défini pour charger le fichier XLSX depuis S3."
+        );
+      }
+
+      console.log("Chargement du fichier XLSX depuis S3...");
+      const { buffer, fileName } = await loadXlsxBufferFromS3(
+        bucketName,
+        xlsxKey
+      );
+      const { date, rows } = loadOfiiFile(buffer, fileName);
+      console.log(
+        `Onglet traité: date ${date.toISOString().slice(0, 7)}, ${rows.length} lignes`
+      );
+
+      await fillOfiiActiviteFromRows(prisma, date, rows);
+    } catch (error) {
+      console.error("❌ Erreur:", error);
+      throw error;
+    } finally {
+      await prisma.$disconnect();
+    }
+  }
+
+  fillActivite();
+}

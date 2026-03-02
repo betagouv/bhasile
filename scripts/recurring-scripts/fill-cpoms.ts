@@ -241,8 +241,7 @@ const loadCpomsFromCsv = async () => {
       }
     }
   } catch (error) {
-    console.error("❌ Erreur lors du chargement des données:", error);
-    throw error;
+    throw new Error("❌ Erreur lors du chargement des données: " + error);
   } finally {
     await prisma.$disconnect();
   }
