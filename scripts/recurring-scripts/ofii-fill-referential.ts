@@ -96,7 +96,7 @@ async function loadOperateurMappingFromS3(
   objectName: string
 ): Promise<OperateurMapping> {
   console.log(
-    `Chargement du mapping opérateurs depuis S3: bucket=${bucketName}, key=${objectName}`
+    `- Chargement du mapping opérateurs depuis S3: bucket=${bucketName}, key=${objectName}`
   );
   await checkBucket(bucketName);
   const stream = await getObject(bucketName, objectName);
@@ -121,8 +121,6 @@ export const fillOfiiStructureFromRows = async (
       return;
     }
 
-    // Fichier OFII = nom de département (ex. Allier). En base on stocke le numéro (ex. 03).
-    console.log("Résolution départements (nom → numéro)...");
     const departements = await prisma.departement.findMany({
       select: { numero: true, name: true },
     });
@@ -130,7 +128,7 @@ export const fillOfiiStructureFromRows = async (
       departements.map((d) => [d.name.trim().toLowerCase(), d.numero])
     );
 
-    console.log("Validation des données...");
+    console.log("- Validation des données...");
     const validRecords: OfiiReferentialRow[] = [];
     const errors: { dnaCode: string; issues: string[] }[] = [];
 
@@ -236,7 +234,7 @@ export const fillOfiiStructureFromRows = async (
       }
     }
 
-    console.log("Mise à jour des données OFII...");
+    console.log("- Mise à jour des données de référentiel");
     let createdCount = 0;
     let updatedCount = 0;
 
@@ -300,10 +298,10 @@ export const fillOfiiStructureFromRows = async (
           data: { inactiveInOfiiFileSince: date },
         });
         console.log(
-          `⚠️ ${deactivated.count} structures marquées comme inactives dans le fichier OFII (absentes du CSV).`
+          `- ⚠️ ${deactivated.count} structures marquées comme inactives dans le fichier OFII (absentes du CSV).`
         );
       } else {
-        console.log("Aucune structure à désactiver.");
+        console.log("- Aucune structure à désactiver.");
       }
     });
 
