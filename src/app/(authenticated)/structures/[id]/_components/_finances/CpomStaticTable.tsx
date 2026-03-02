@@ -38,6 +38,7 @@ export const CpomStaticTable = (): ReactElement => {
         />
         {isAffectationOpen && (
           <BudgetTableCommentLine
+            years={years}
             label="Commentaire"
             cpomStructures={structure?.cpomStructures}
             enabledYears={years}

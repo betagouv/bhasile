@@ -7,7 +7,11 @@ import {
   isStructureInCpom,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
-import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
+import {
+  AUTORISEE_OPEN_YEAR,
+  CURRENT_YEAR,
+  SUBVENTIONNEE_OPEN_YEAR,
+} from "@/constants";
 import { StructureApiType } from "@/schemas/api/structure.schema";
 import { FormKind } from "@/types/global";
 
@@ -15,10 +19,12 @@ import {
   budgetAutoriseeNotOpenSchema,
   budgetAutoriseeOpenSchema,
   budgetAutoriseeOpenYear1Schema,
+  budgetAutoriseeOpenYear2Schema,
   budgetAutoSaveSchema,
   budgetInCpomSchema,
   budgetSubventionneeNotOpenSchema,
   budgetSubventionneeOpenSchema,
+  budgetSubventionneeOpenYear1Schema,
 } from "../budget.schema";
 import { cpomStructureSchema } from "../cpom.schema";
 import { DocumentsFinanciersFlexibleSchema } from "../documentFinancier.schema";
@@ -43,12 +49,18 @@ export const getFinanceSchema = (
     }
 
     if (isInCpomPerYear[index]) {
+      if (year === CURRENT_YEAR) {
+        return budgetAutoSaveSchema;
+      }
       return budgetInCpomSchema;
     }
 
     if (isAutorisee) {
       if (year === AUTORISEE_OPEN_YEAR) {
         return budgetAutoriseeOpenYear1Schema;
+      }
+      if (year === AUTORISEE_OPEN_YEAR - 1) {
+        return budgetAutoriseeOpenYear2Schema;
       }
       if (year < AUTORISEE_OPEN_YEAR) {
         return budgetAutoriseeOpenSchema;
@@ -57,11 +69,16 @@ export const getFinanceSchema = (
     }
 
     if (isSubventionnee) {
-      if (year <= SUBVENTIONNEE_OPEN_YEAR) {
-        return budgetSubventionneeOpenSchema;
-      } else {
-        return budgetSubventionneeNotOpenSchema;
+      if (year === CURRENT_YEAR) {
+        return budgetAutoSaveSchema;
       }
+      if (year === AUTORISEE_OPEN_YEAR) {
+        return budgetSubventionneeOpenYear1Schema;
+      }
+      if (year < SUBVENTIONNEE_OPEN_YEAR) {
+        return budgetSubventionneeOpenSchema;
+      }
+      return budgetSubventionneeNotOpenSchema;
     }
 
     return budgetAutoSaveSchema;

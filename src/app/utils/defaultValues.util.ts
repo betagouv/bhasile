@@ -1,4 +1,7 @@
-import { getRepartition } from "@/app/utils/structure.util";
+import {
+  getRealCreationYear,
+  getRepartition,
+} from "@/app/utils/structure.util";
 import { ContactApiType } from "@/schemas/api/contact.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { StructureApiType } from "@/schemas/api/structure.schema";
@@ -27,16 +30,20 @@ export const getDefaultValues = ({
 }: {
   structure: StructureApiType;
 }): Partial<StructureDefaultValues> => {
+  const structureCreationYear = getRealCreationYear(structure);
+
   const isAutorisee = isStructureAutorisee(structure.type);
   const repartition = getRepartition(structure);
 
   const budgets = getBudgetsDefaultValues(structure?.budgets || []);
 
   const structureTypologies = getStructureTypologyDefaultValues(
-    structure?.structureTypologies || []
+    structure?.structureTypologies || [],
+    structureCreationYear
   );
   const structureMillesimes = getStructureMillesimeDefaultValues(
-    structure?.structureMillesimes || []
+    structure?.structureMillesimes || [],
+    structureCreationYear
   );
   const actesAdministratifs = getActesAdministratifsDefaultValues(structure);
 

@@ -57,6 +57,7 @@ export const StructureStaticTable = (): ReactElement => {
         />
         {isAffectationOpen && (
           <BudgetTableCommentLine
+            years={years}
             label="Commentaire"
             budgets={enhancedBudgets}
             enabledYears={years}

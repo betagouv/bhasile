@@ -58,10 +58,32 @@ export const caes1: TestStructureScenario = {
       { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
       { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
       { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
+      { placesAutorisees: 50, pmr: 5, lgbt: 10, fvvTeh: 8 },
     ],
     documentsFinanciers: {
       allAddedViaAjout: true,
       fileUploads: [
+        {
+          year: "2024",
+          category: "Demande de subvention",
+          fileName: "sample.csv",
+          filePath: "tests/e2e/fixtures/sample.csv",
+          formKind: "ajout",
+        },
+        {
+          year: "2024",
+          category: "Compte-rendu financier",
+          fileName: "sample.csv",
+          filePath: "tests/e2e/fixtures/sample.csv",
+          formKind: "ajout",
+        },
+        {
+          year: "2024",
+          category: "Rapport d'activité de l'opérateur",
+          fileName: "sample.csv",
+          filePath: "tests/e2e/fixtures/sample.csv",
+          formKind: "ajout",
+        },
         {
           year: "2023",
           category: "Demande de subvention",
@@ -128,6 +150,13 @@ export const caes1: TestStructureScenario = {
       ],
     },
     finances: {
+      2026: {
+        ETP: "8",
+        tauxEncadrement: "12,5",
+        coutJournalier: "23,75",
+        dotationDemandee: "120000",
+        dotationAccordee: "110000",
+      },
       2025: {
         ETP: "8",
         tauxEncadrement: "12,5",
@@ -254,8 +283,16 @@ export const caes1: TestStructureScenario = {
       { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
       { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
       { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
+      { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
     ],
     finances: {
+      2026: {
+        ETP: "9",
+        tauxEncadrement: "11",
+        coutJournalier: "24",
+        dotationDemandee: "125000",
+        dotationAccordee: "118000",
+      },
       2025: {
         ETP: "9",
         tauxEncadrement: "11",

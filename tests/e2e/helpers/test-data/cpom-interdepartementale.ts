@@ -42,5 +42,10 @@ export const cpomInterdepartementale: {
       repriseEtat: 1500,
       affectationReservesFondsDedies: 500,
     },
+    2026: {
+      cumulResultatNet: 2500,
+      repriseEtat: 1000,
+      affectationReservesFondsDedies: 300,
+    },
   },
 };
