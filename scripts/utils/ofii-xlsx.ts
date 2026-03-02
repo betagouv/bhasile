@@ -146,7 +146,6 @@ function findHeaderRow(sheet: WorkSheet): number {
 
 function normalizeCellValue(val: unknown): string {
   if (val == null) return "";
-  if (typeof val === "number") return String(val);
   return String(val).trim();
 }
 
@@ -209,7 +208,7 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
   }
 
   const activiteKeyByIndex: (keyof ActiviteRow | "")[] = [];
-  const refKeyByIndex: (keyof OfiiReferentialRow | "")[] = [];
+  const referentialKeyByIndex: (keyof OfiiReferentialRow | "")[] = [];
 
   for (const header of headerRow) {
     const normalizedHeader = header.trim().toLowerCase();
@@ -244,51 +243,46 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
         matchedRefKey = key;
       }
     });
-    refKeyByIndex.push(matchedRefKey);
+    referentialKeyByIndex.push(matchedRefKey);
   }
 
   const rows: OfiiFullRow[] = [];
-  for (let r = headerRowIdx + 1; r <= range.e.r; r++) {
+  for (let rowIndex = headerRowIdx + 1; rowIndex <= range.e.r; rowIndex++) {
     const row: Partial<OfiiFullRow> = {};
-    let allEmpty = true;
+    let isEmptyRow = true;
 
-    for (let c = 0; c < headerRow.length; c++) {
-      const activiteKey = activiteKeyByIndex[c];
-      const refKey = refKeyByIndex[c];
-      const colIdx = range.s.c + c;
-      const cell = sheet[XLSX.utils.encode_cell({ r, c: colIdx })];
-      const raw = cell?.v;
+    for (let columnIndex = 0; columnIndex < headerRow.length; columnIndex++) {
+      const activiteKey = activiteKeyByIndex[columnIndex];
+      const referentialKey = referentialKeyByIndex[columnIndex];
+      const cell =
+        sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })];
+      const rawCellValue = cell?.v;
 
       if (activiteKey === "structureDnaCode") {
-        const value = normalizeCellValue(raw);
+        const value = normalizeCellValue(rawCellValue);
         if (value) {
           row.structureDnaCode = value;
-          // On considère aussi que dnaCode (référentiel) vient de la même colonne.
-          row.dnaCode = row.dnaCode ?? value;
-          allEmpty = false;
+          row.dnaCode = value;
+          isEmptyRow = false;
         }
       } else if (activiteKey) {
         const num =
-          raw !== "" && raw != null && !Number.isNaN(Number(raw))
-            ? Number(raw)
+          rawCellValue !== "" &&
+          rawCellValue != null &&
+          !Number.isNaN(Number(rawCellValue))
+            ? Number(rawCellValue)
             : null;
         (row as any)[activiteKey] = num;
-        if (num !== null) allEmpty = false;
-      }
-
-      if (refKey) {
-        const value = normalizeCellValue(raw);
+      } else if (referentialKey) {
+        const value = normalizeCellValue(rawCellValue);
         if (value) {
-          (row as any)[refKey] = value;
-          allEmpty = false;
+          (row as any)[referentialKey] = value;
         }
       }
     }
 
-    if (allEmpty) break;
-    if (row.dnaCode) {
-      rows.push(row as OfiiFullRow);
-    }
+    if (isEmptyRow) break;
+    rows.push(row as OfiiFullRow);
   }
 
   const date = new Date(

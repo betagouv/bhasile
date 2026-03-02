@@ -1,17 +1,15 @@
 // Fill Structure table with CSV from S3 bucket (référentiel OFII)
-// Par défaut utilisé par le script fill-referential-and-activity-ofii, peut aussi être utilisé en standalone.
+// Utilisé par le script fill-referential-and-activity-ofii.
 // Usage: yarn script ofii-fill-referential my_structure_ofii_file.csv
 
 import "dotenv/config";
 
 import type { PrismaClient } from "@/generated/prisma/client";
 import { StructureType } from "@/generated/prisma/client";
-import { createPrismaClient } from "@/prisma-client";
 import { checkBucket, getObject } from "@/lib/minio";
 
-import { ensureOperateursExist } from "../utils/ensure-operateurs-exist";
-import { loadXlsxBufferFromS3 } from "../utils/xlsx-loader";
-import { loadOfiiFile, type OfiiReferentialRow } from "../utils/ofii-xlsx";
+import { ensureOperateursExist } from "./ensure-operateurs-exist";
+import { type OfiiReferentialRow } from "./ofii-xlsx";
 
 type OperateurMapping = Record<string, string>;
 
@@ -314,48 +312,3 @@ export const fillOfiiStructureFromRows = async (
     );
   }
 };
-
-// Standalone part
-
-const isMainScript =
-  process.argv[1] && process.argv[1] == "ofii-fill-referential";
-
-if (isMainScript) {
-  console.log("Running standalone part of ofii-fill-referential");
-  const args = process.argv.slice(2);
-  const xlsxKey = args[0];
-
-  if (!xlsxKey) {
-    throw new Error("Merci de fournir la clef S3 du fichier XLSX en argument.");
-  }
-
-  const prisma = createPrismaClient();
-
-  (async () => {
-    try {
-      const bucketName = process.env.DOCS_BUCKET_NAME;
-      if (!bucketName) {
-        throw new Error(
-          "DOCS_BUCKET_NAME doit être défini pour charger le fichier XLSX depuis S3."
-        );
-      }
-
-      console.log("Chargement du fichier XLSX depuis S3 (référentiel OFII)...");
-      const { buffer, fileName } = await loadXlsxBufferFromS3(
-        bucketName,
-        xlsxKey
-      );
-      const { date, rows } = loadOfiiFile(buffer, fileName);
-
-      await fillOfiiStructureFromRows(prisma, date, rows);
-    } catch (error) {
-      console.error(
-        "❌ Erreur lors de l'exécution du script référentiel OFII",
-        error
-      );
-      process.exitCode = 1;
-    } finally {
-      await prisma.$disconnect();
-    }
-  })();
-}
