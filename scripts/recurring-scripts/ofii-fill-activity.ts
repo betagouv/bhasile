@@ -17,7 +17,7 @@ export async function fillOfiiActiviteFromRows(
   date: Date,
   rows: ActiviteRow[]
 ) {
-  if (rows.length === 0) {
+  if (rows.length == 0) {
     console.log("❌ Aucune ligne à insérer.");
     return;
   }
@@ -43,7 +43,7 @@ export async function fillOfiiActiviteFromRows(
     );
   }
 
-  if (validRows.length === 0) {
+  if (validRows.length == 0) {
     console.log("❌ Aucune ligne avec structure valide à insérer.");
     return;
   }
