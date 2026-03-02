@@ -39,12 +39,12 @@ async function main() {
     const { date, rows } = loadOfiiFile(buffer, fileName);
     console.log(`✓ ${rows.length} lignes trouvées dans l'onglet sélectionné`);
 
-    console.log("- Mise à jour du référentiel (structures)...");
+    console.log("1️⃣ Mise à jour du référentiel (structures)...");
     await fillOfiiStructureFromRows(prisma, date, rows);
 
-    console.log("- Mise à jour de l'activité OFII.");
+    console.log("2️⃣ Mise à jour de l'activité OFII.");
     console.log(
-      `  (Onglet d'activité traité: ${date.toISOString().slice(0, 7)}, ${rows.length} lignes)`
+      `- (Onglet d'activité traité: ${date.toISOString().slice(0, 7)}, ${rows.length} lignes)`
     );
 
     await fillOfiiActiviteFromRows(prisma, date, rows);
