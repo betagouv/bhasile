@@ -97,19 +97,16 @@ export const fillOfiiStructureFromRows = async (
           operateurMappingKey
         );
       } catch (error) {
-        console.warn(
-          "⚠️ Impossible de charger le mapping opérateurs depuis S3, utilisation des noms bruts.",
-          error
+        throw new Error(
+          "❌ Impossible de charger le mapping opérateurs depuis S3"
         );
       }
     }
 
-    if (operateurMapping) {
-      for (const row of validRecords) {
-        if (row.operateur) {
-          const mapped = operateurMapping[row.operateur] ?? row.operateur;
-          row.operateur = mapped;
-        }
+    for (const row of validRecords) {
+      if (row.operateur) {
+        const mapped = operateurMapping![row.operateur];
+        row.operateur = mapped;
       }
     }
 
@@ -143,15 +140,9 @@ export const fillOfiiStructureFromRows = async (
           "operateur"
         );
       } catch (error) {
-        console.error(
-          "❌ Arrêt du script : des opérateurs présents dans le fichier OFII sont inconnus en base."
+        throw new Error(
+          "❌ Des opérateurs présents dans le fichier OFII sont inconnus en base."
         );
-        if (error instanceof Error) {
-          console.error(error.message);
-        } else {
-          console.error(error);
-        }
-        process.exit(1);
       }
     }
 
