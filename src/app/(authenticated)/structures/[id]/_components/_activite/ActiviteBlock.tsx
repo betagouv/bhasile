@@ -13,13 +13,11 @@ export const ActiviteBlock = (): ReactElement => {
   const { structure } = useStructureContext();
 
   return (
-    <div className="bg-white p-8 border border-default-grey rounded-[10px] border-solid">
+    <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
       <div className="flex justify-between items-start">
         <div className="flex">
-          <span
-            className={`text-title-blue-france fr-mr-1w fr-icon-team-line`}
-          />
-          <h3 className="text-title-blue-france fr-h5">Activité</h3>
+          <span className={`text-title-blue-france mr-3 fr-icon-team-line`} />
+          <h3 className="text-title-blue-france fr-h6 mb-12">Activité</h3>
         </div>
         <div className="flex items-center">
           {structure.type === StructureType.CAES ? (

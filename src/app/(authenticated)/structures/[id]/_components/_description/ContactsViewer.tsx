@@ -32,7 +32,7 @@ export const ContactsViewer = (): ReactElement => {
           {formatCityName(communeAdministrative ?? "")}
         </span>
         <button
-          className={`fr-btn fr-btn--sm fr-btn--icon-left fr-btn--tertiary-no-outline ${
+          className={`fr-btn fr-btn--sm fr-btn--icon-left fr-btn--tertiary-no-outline py-0 ${
             showContacts ? "fr-icon-eye-off-line" : "fr-icon-eye-line"
           }`}
           onClick={() => setShowContacts(!showContacts)}

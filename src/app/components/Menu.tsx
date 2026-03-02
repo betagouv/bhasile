@@ -99,7 +99,7 @@ export const Menu = (): ReactElement => {
             key={menuItem.label}
           >
             <Link
-              className="fr-sidemenu__link"
+              className="fr-sidemenu__link before:content-none"
               href={menuItem.url}
               aria-current={getAriaCurrent(menuItem.url, menuItem.subItems)}
             >
