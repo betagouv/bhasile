@@ -74,6 +74,10 @@ yarn lint:css
 
 Tout le processus de création et migration de la base de données est décrit dans [ce document](docs/database.md)
 
+## 📥 Référentiel OFII
+
+La procédure pour mettre à jour le référentiel OFII (et l’activité associée) tous les mois est décrite dans [ce document](docs/ofii_referential.md).
+
 ## 🏗️ Architecture
 
 Pour en savoir plus sur l'architecture du projet, allez sur [le document d'architecture](docs/architecture.md)
