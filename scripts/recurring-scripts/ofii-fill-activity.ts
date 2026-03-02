@@ -49,7 +49,6 @@ export async function fillOfiiActiviteFromRows(
   }
 
   let created = 0;
-  let skipped = 0;
 
   for (const row of validRows) {
     const r = row as ActiviteRow;
@@ -85,23 +84,13 @@ export async function fillOfiiActiviteFromRows(
         },
       });
       created += 1;
-    } catch (e: unknown) {
-      if (
-        e &&
-        typeof e === "object" &&
-        "code" in e &&
-        (e as { code: string }).code === "P2002"
-      ) {
-        skipped += 1;
-      } else {
-        throw e;
-      }
+    } catch (error) {
+      throw new Error(
+        "❌ Erreur lors du chargement des données d'activité : " + error
+      );
     }
   }
-
-  console.log(
-    `✅ Activité mise à jour: ${created} lignes traitées (${skipped} déjà existantes ignorées)`
-  );
+  console.log(`✅ Activité mise à jour: ${created} lignes traitées`);
 }
 
 // Standalone part
@@ -119,7 +108,7 @@ if (isMainScript) {
 
   const prisma = createPrismaClient();
 
-  async function fillActivite() {
+  (async () => {
     try {
       const bucketName = process.env.DOCS_BUCKET_NAME;
       if (!bucketName) {
@@ -140,12 +129,13 @@ if (isMainScript) {
 
       await fillOfiiActiviteFromRows(prisma, date, rows);
     } catch (error) {
-      console.error("❌ Erreur:", error);
-      throw error;
+      console.error(
+        "❌ Erreur lors de l'exécution du script activité OFII",
+        error
+      );
+      process.exitCode = 1;
     } finally {
       await prisma.$disconnect();
     }
-  }
-
-  fillActivite();
+  })();
 }

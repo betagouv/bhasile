@@ -143,6 +143,12 @@ export const fillOfiiStructureFromRows = async (
       if (!departementName || departementNumero === undefined) {
         issues.push(`département invalide (nom attendu) : ${row.departement}`);
       }
+
+      const allowedTypes = new Set<string>(Object.values(StructureType));
+      if (!row.type || !allowedTypes.has(row.type)) {
+        issues.push(`type de structure invalide : ${row.type}`);
+      }
+
       if (issues.length > 0) {
         errors.push({ dnaCode: row.dnaCode, issues });
       } else {
@@ -305,7 +311,9 @@ export const fillOfiiStructureFromRows = async (
       `✅ ${createdCount} structures créées, ${updatedCount} structures mises à jour`
     );
   } catch (error) {
-    throw new Error("❌ Erreur lors du chargement des données: " + error);
+    throw new Error(
+      "❌ Erreur lors du chargement des données référentiel : " + error
+    );
   }
 };
 
@@ -325,7 +333,7 @@ if (isMainScript) {
 
   const prisma = createPrismaClient();
 
-  const fillReferential = async () => {
+  (async () => {
     try {
       const bucketName = process.env.DOCS_BUCKET_NAME;
       if (!bucketName) {
@@ -342,10 +350,14 @@ if (isMainScript) {
       const { date, rows } = loadOfiiFile(buffer, fileName);
 
       await fillOfiiStructureFromRows(prisma, date, rows);
+    } catch (error) {
+      console.error(
+        "❌ Erreur lors de l'exécution du script référentiel OFII",
+        error
+      );
+      process.exitCode = 1;
     } finally {
       await prisma.$disconnect();
     }
-  };
-
-  fillReferential();
+  })();
 }
