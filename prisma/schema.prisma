@@ -531,8 +531,10 @@ model Antenne {
   id          Int       @id @default(autoincrement())
   structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   structureId Int
-  name        String
-  adresse     String
+  name        String?
+  codePostal  String?
+  commune     String?
+  departement String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now()) @updatedAt
 

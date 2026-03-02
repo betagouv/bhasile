@@ -9,6 +9,7 @@ import { FormKind } from "@/types/global";
 import AddressWithValidation from "../../AddressWithValidation";
 import InputWithValidation from "../../InputWithValidation";
 import SelectWithValidation from "../../SelectWithValidation";
+import { FieldSetAntennes } from "./FieldSetAntennes";
 
 export const FieldSetAdresseAdministrative = ({
   formKind = FormKind.FINALISATION,
@@ -16,6 +17,8 @@ export const FieldSetAdresseAdministrative = ({
   formKind?: FormKind;
 }) => {
   const { control, watch, setValue, getValues } = useFormContext();
+
+  const isMultiAntenne = watch("isMultiAntenne");
 
   const handleAddressAdministrativeChange = () => {
     if (watch("typeBati") === Repartition.COLLECTIF && watch("sameAddress")) {
@@ -60,7 +63,7 @@ export const FieldSetAdresseAdministrative = ({
               "La structure est répartie sur plusieurs antennes administratives géographiquement distantes. ",
             nativeInputProps: {
               name: "isMultiAntenne",
-              checked: watch("isMultiAntenne"),
+              checked: isMultiAntenne,
               onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
                 setValue("isMultiAntenne", e.target.checked);
               },
@@ -124,6 +127,7 @@ export const FieldSetAdresseAdministrative = ({
           )}
         </div>
       </fieldset>
+      <FieldSetAntennes />
     </>
   );
 };

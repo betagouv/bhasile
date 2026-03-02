@@ -1,0 +1,87 @@
+import Button from "@codegouvfr/react-dsfr/Button";
+import { useEffect } from "react";
+import { useFormContext } from "react-hook-form";
+
+import { AntenneApiType } from "@/schemas/api/antenne.schema";
+
+import AddressWithValidation from "../../AddressWithValidation";
+import InputWithValidation from "../../InputWithValidation";
+
+const emptyAntenne: AntenneApiType = {
+  name: "",
+  adresseComplete: "",
+  adresse: "",
+  codePostal: "",
+  commune: "",
+  departement: "",
+};
+
+export const FieldSetAntennes = () => {
+  const { control, watch, setValue } = useFormContext();
+
+  const antennes = (watch("antennes") || []) as AntenneApiType[];
+
+  const isMultiAntenne = watch("isMultiAntenne");
+
+  const antennesLength = antennes.length;
+  useEffect(() => {
+    if (isMultiAntenne && antennesLength === 0) {
+      setValue("antennes", [emptyAntenne, emptyAntenne]);
+    }
+    if (!isMultiAntenne) {
+      setValue("antennes", []);
+    }
+  }, [isMultiAntenne, antennesLength, setValue]);
+
+  const handleAddNewAntenne = () => {
+    setValue("antennes", [...antennes, emptyAntenne]);
+  };
+
+  if (!isMultiAntenne) {
+    return null;
+  }
+
+  return (
+    <fieldset className="flex flex-col gap-6">
+      <legend className="text-lg font-bold mb-2 text-title-blue-france">
+        Sites administratifs
+      </legend>
+
+      {antennes.map((_, index) => (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3" key={index}>
+          <div className="flex flex-col gap-1">
+            <InputWithValidation
+              name={`antennes.${index}.name`}
+              control={control}
+              type="text"
+              label="Nom de l'antenne'"
+              className="mb-0"
+            />
+            <span className="text-[#666666] text-sm">ex. Avranches Nord</span>
+          </div>
+          <div className="flex flex-col gap-1 md:col-span-2">
+            <AddressWithValidation
+              control={control}
+              fullAddress={`antennes.${index}.adresseComplete`}
+              id="adresseAdministrativeComplete"
+              zipCode={`antennes.${index}.codePostal`}
+              street={`antennes.${index}.adresse`}
+              city={`antennes.${index}.commune`}
+              department={`antennes.${index}.departement`}
+              label="Adresse principale de la structure"
+            />
+          </div>
+        </div>
+      ))}
+      <Button
+        type="button"
+        iconId="fr-icon-add-line"
+        priority="tertiary no outline"
+        className="underline font-normal p-0"
+        onClick={handleAddNewAntenne}
+      >
+        Ajouter un site administratif
+      </Button>
+    </fieldset>
+  );
+};
