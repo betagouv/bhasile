@@ -26,16 +26,13 @@ export const ValidationButtonWithHook = (): ReactElement => {
   const {
     updateLocalStorageValue: updateIdentification,
     currentValue: localIdentificationValue,
-  } = useLocalStorage(
-    `ajout-structure-${structure?.dnaCode}-identification`,
-    {}
-  );
+  } = useLocalStorage(`ajout-structure-${structure?.id}-identification`, {});
 
   const {
     updateLocalStorageValue: updateAdresses,
     currentValue: localAdressesValue,
   } = useLocalStorage(
-    `ajout-structure-${structure?.dnaCode}-adresses`,
+    `ajout-structure-${structure?.id}-adresses`,
     {} as Partial<AjoutAdressesFormValues>
   );
 
@@ -43,7 +40,7 @@ export const ValidationButtonWithHook = (): ReactElement => {
     updateLocalStorageValue: updateTypePlaces,
     currentValue: localTypePlacesValue,
   } = useLocalStorage(
-    `ajout-structure-${structure?.dnaCode}-type-places`,
+    `ajout-structure-${structure?.id}-type-places`,
     {} as Partial<AjoutTypePlacesFormValues>
   );
 
@@ -51,14 +48,15 @@ export const ValidationButtonWithHook = (): ReactElement => {
     updateLocalStorageValue: updateDocuments,
     currentValue: localDocumentsValue,
   } = useLocalStorage(
-    `ajout-structure-${structure?.dnaCode}-documents`,
+    `ajout-structure-${structure?.id}-documents`,
     {} as Partial<DocumentsFinanciersFlexibleFormValues>
   );
 
   const handleValidation = () => {
     updateIdentification({
       ...localIdentificationValue,
-      dnaCode: structure?.dnaCode,
+      id: structure?.id,
+      codeBhasile: structure?.codeBhasile,
       operateur: structure?.operateur,
       type: structure?.type,
     });
@@ -132,7 +130,7 @@ export const ValidationButtonWithHook = (): ReactElement => {
       ...localDocumentsValue,
       structureMillesimes: structureMillesimes,
     });
-    router.push(`/ajout-structure/${structure?.dnaCode}/01-identification`);
+    router.push(`/ajout-structure/${structure?.id}/01-identification`);
   };
 
   return (

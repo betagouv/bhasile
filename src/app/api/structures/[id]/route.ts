@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 
-import { findOne } from "../structure.repository";
+import { authOptions } from "@/lib/next-auth/auth";
+
+import { findOne, findOneOperateur } from "../structure.repository";
 import {
   addPresencesIndues,
   StructureWithFileUploadsAndActivites,
@@ -8,8 +11,13 @@ import {
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    const isAuthenticated = !!session?.user;
+    console.log("session", session);
     const id = request.nextUrl.pathname.split("/").pop();
-    const structure = await findOne(Number(id));
+    const structure = isAuthenticated
+      ? await findOne(Number(id))
+      : await findOneOperateur(Number(id));
 
     if (!structure) {
       return NextResponse.json(
@@ -17,10 +25,10 @@ export async function GET(request: NextRequest) {
         { status: 404 }
       );
     }
-
-    const structureWithPresencesIndues = addPresencesIndues(
-      structure as StructureWithFileUploadsAndActivites
-    );
+    console.log("structure", structure);
+    const structureWithPresencesIndues = isAuthenticated
+      ? addPresencesIndues(structure as StructureWithFileUploadsAndActivites)
+      : structure;
 
     return NextResponse.json(structureWithPresencesIndues);
   } catch (error) {

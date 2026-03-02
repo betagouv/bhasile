@@ -29,7 +29,7 @@ import { convertToPrismaObject } from "./utils/common.util";
 import { wipeTables } from "./utils/wipe";
 
 const prisma = createPrismaClient();
-const GENERATE_BHASILE_CODES = false; // Set to false to try migration one off script
+const GENERATE_BHASILE_CODES = true; // Set to false to try migration one off script
 
 export async function seed(): Promise<void> {
   console.log("🗑️ Suppression des données existantes...");

@@ -13,7 +13,7 @@ export const ValidationButton = (): ReactElement => {
   return (
     <div className="flex justify-center">
       {structure ? (
-        <ValidationButtonWithHook key={structure.dnaCode} />
+        <ValidationButtonWithHook key={structure.id} />
       ) : (
         <Button
           type="button"

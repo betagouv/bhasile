@@ -8,13 +8,12 @@ export default async function RootLayout({
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: Promise<{ dnaCode: string }>;
+  params: Promise<{ id: string }>;
 }>) {
-  const { dnaCode } = await params;
-
+  const { id } = await params;
   try {
     const result = await fetch(
-      `${process.env.NEXT_URL}/api/structures/dna/${dnaCode}`,
+      `${process.env.NEXT_URL}/api/structures/${id}`,
       // Requête côté serveur donc il faut appeler les headers manuellement
       { next: { revalidate: 0 }, headers: await headers() }
     );
@@ -26,7 +25,9 @@ export default async function RootLayout({
 
     const structure: StructureApiType | null = await result.json();
     if (structure?.forms && structure?.forms?.length > 0) {
-      redirect(`/ajout-structure/existe-deja?dnaCode=${dnaCode}`);
+      redirect(
+        `/ajout-structure/existe-deja?codeBhasile=${structure.codeBhasile}`
+      );
     }
 
     return children;

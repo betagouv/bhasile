@@ -12,7 +12,7 @@ export const createDnaList = (count: number): Omit<Dna, "id">[] => {
 
     dnaList.push({
       code,
-      granularity: "STRUCTURE",
+      description: "STRUCTURE",
       createdAt: new Date(),
       updatedAt: new Date(),
     });

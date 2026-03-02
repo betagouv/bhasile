@@ -19,7 +19,7 @@ export const createFinessList = (
       list.push({
         code,
         structureId: structure.id,
-        granularity: faker.word.noun(),
+        description: faker.word.noun(),
         createdAt: faker.date.past(),
         updatedAt: faker.date.past(),
       });

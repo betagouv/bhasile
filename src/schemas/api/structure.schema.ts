@@ -21,6 +21,7 @@ import { structureTypologieApiSchema } from "./structure-typologie.schema";
 export const structureMinimalApiSchema = z.object({
   id: zId(),
   dnaCode: z.string(),
+  codeBhasile: z.string(),
   operateur: operateurApiSchema,
   type: z.nativeEnum(StructureType),
   nom: z.string().optional(),

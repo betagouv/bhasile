@@ -210,12 +210,42 @@ export const getLatestPlacesAutoriseesPerStructure = async (): Promise<
     .map((typology) => typology.placesAutorisees as number);
 };
 
+export const findOneOperateur = async (
+  id: number
+): Promise<{
+  id: number;
+  codeBhasile: string | null;
+  forms: {
+    id: number;
+    createdAt: Date;
+    updatedAt: Date;
+    structureId: number | null;
+    structureCodeDna: string;
+    formDefinitionId: number;
+    status: boolean;
+  }[];
+}> => {
+  return await prisma.structure.findUniqueOrThrow({
+    where: { id },
+    select: {
+      id: true,
+      codeBhasile: true,
+      forms: true,
+    },
+  });
+};
+
 export const findOne = async (id: number): Promise<Structure> => {
   const structure = await prisma.structure.findFirstOrThrow({
     where: {
       id,
     },
     include: {
+      dnasStructures: {
+        include: {
+          dna: true,
+        },
+      },
       adresses: {
         include: {
           adresseTypologies: {
@@ -328,49 +358,6 @@ export const findOne = async (id: number): Promise<Structure> => {
     },
   });
   return structure;
-};
-
-export const findByDnaCode = async (
-  dnaCode: string
-): Promise<Structure | null> => {
-  return prisma.structure.findUnique({
-    where: {
-      dnaCode,
-    },
-    include: {
-      adresses: {
-        include: {
-          adresseTypologies: {
-            orderBy: {
-              year: "desc",
-            },
-          },
-        },
-      },
-      contacts: true,
-      operateur: true,
-      structureTypologies: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      forms: {
-        include: {
-          formDefinition: true,
-        },
-      },
-      actesAdministratifs: {
-        include: {
-          fileUploads: true,
-        },
-      },
-      documentsFinanciers: {
-        include: {
-          fileUploads: true,
-        },
-      },
-    },
-  });
 };
 
 export const updateOneAgent = async (

@@ -13,7 +13,7 @@ import { CURRENT_YEAR } from "@/constants";
 import { ajoutAdressesSchema } from "@/schemas/forms/ajout/ajoutAdresses.schema";
 import { Repartition } from "@/types/adresse.type";
 
-import { AdressesList } from "../../[dnaCode]/02-adresses/AdressesList";
+import { AdressesList } from "../../[id]/02-adresses/AdressesList";
 
 export default function FormAdresses() {
   const params = useParams();

@@ -22,7 +22,7 @@ model Departement {
 
 model Structure {
   id                           Int                         @id @default(autoincrement())
-  dnaCode                      String                      @unique
+  dnaCode                      String                      @unique                 
   codeBhasile                  String?                     @unique
   filiale                      String?
   type                         StructureType?
@@ -78,7 +78,7 @@ model Structure {
 model Dna {
   id                           Int                         @id @default(autoincrement())
   code                         String                      @unique
-  granularity                  String?
+  description                  String?
   createdAt                    DateTime                    @default(now())
   updatedAt                    DateTime                    @default(now()) @updatedAt
   dnasStructures               DnaStructure[]
@@ -195,6 +195,7 @@ model Contact {
   telephone        String?
   email            String?
   role             String?
+  perimetre        String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -543,7 +544,7 @@ model Finess {
   structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   structureId Int
   code        String    @unique
-  granularity String?
+  description String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now()) @updatedAt
 
@@ -761,7 +762,6 @@ view StructuresFilling {
 
 view StructuresOrder {
   id                       Int
-  dnaCode                  String
   type                     String
   operateur                String?
   finessCode               String?
