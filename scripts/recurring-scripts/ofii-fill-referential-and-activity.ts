@@ -7,8 +7,8 @@ import { createPrismaClient } from "@/prisma-client";
 
 import { loadOfiiFile } from "../utils/ofii-xlsx";
 import { loadXlsxBufferFromS3 } from "../utils/xlsx-loader";
-import { fillOfiiStructureFromRows } from "./ofii-fill-referential";
-import { fillOfiiActiviteFromRows } from "./ofii-fill-activity";
+import { fillOfiiStructureFromRows } from "../utils/ofii-fill-referential";
+import { fillOfiiActiviteFromRows } from "../utils/ofii-fill-activity";
 
 const args = process.argv.slice(2);
 const xlsxLocation = args[0];
