@@ -40,7 +40,7 @@ async function main() {
     console.log(`✓ ${rows.length} lignes trouvées dans l'onglet sélectionné`);
 
     console.log("- Mise à jour du référentiel (structures)...");
-    await fillOfiiStructureFromRows(prisma, rows);
+    await fillOfiiStructureFromRows(prisma, date, rows);
 
     console.log("- Mise à jour de l'activité OFII.");
     console.log(
