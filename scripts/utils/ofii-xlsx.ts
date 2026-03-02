@@ -120,7 +120,7 @@ function parseSheetDate(
 function parseFilenameDate(
   fileName: string
 ): { year: number; month: number } | null {
-  const match = fileName.match(/Liste données par centre (\d{2})\.(\d{2})/i);
+  const match = fileName.match(/(\d{2})[^\d]{1}(\d{2})/);
   if (match) {
     return {
       year: parseInt("20" + match[2], 10),
@@ -161,11 +161,12 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
   let sheetDate: { year: number; month: number } | null;
 
   const listeIndex = sheetNames.findIndex(
-    (name) => name.trim().toLowerCase() === "liste"
+    (name) => name.trim().toLowerCase() == "liste"
   );
-  if (listeIndex) {
+
+  if (listeIndex >= 0) {
     chosenSheetName = sheetNames[listeIndex];
-    sheetDate = parseFilenameDate(fileName) ?? parseSheetDate(chosenSheetName);
+    sheetDate = parseFilenameDate(fileName);
   } else {
     const withDates = sheetNames
       .map((name) => ({ name, date: parseSheetDate(name) }))
@@ -187,14 +188,11 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
 
   if (!sheetDate) {
     throw new Error(
-      "Impossible d'extraire la date du nom d'onglet ou du fichier: " + fileName
+      `Impossible d'extraire la date du nom d'onglet ou du fichier : ${fileName}`
     );
   }
 
   const sheet = wb.Sheets[chosenSheetName];
-  if (!sheet || !sheet["!ref"]) {
-    throw new Error("Onglet vide ou invalide: " + chosenSheetName);
-  }
 
   const headerRowIdx = findHeaderRow(sheet);
   if (headerRowIdx < 0) {
@@ -203,10 +201,10 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
     );
   }
 
-  const range = XLSX.utils.decode_range(sheet["!ref"]);
+  const range = XLSX.utils.decode_range(sheet["!ref"]!);
   const headerRow: string[] = [];
-  for (let c = range.s.c; c <= range.e.c; c++) {
-    const cell = sheet[XLSX.utils.encode_cell({ r: headerRowIdx, c })];
+  for (let col = range.s.c; col <= range.e.c; col++) {
+    const cell = sheet[XLSX.utils.encode_cell({ r: headerRowIdx, c: col })];
     headerRow.push(normalizeCellValue(cell?.v));
   }
 

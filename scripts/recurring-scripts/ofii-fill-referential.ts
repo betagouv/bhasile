@@ -1,6 +1,6 @@
 // Fill Structure table with CSV from S3 bucket (référentiel OFII)
 // Par défaut utilisé par le script fill-referential-and-activity-ofii, peut aussi être utilisé en standalone.
-// Usage: yarn script fill-structure-ofii my_structure_ofii_file.csv
+// Usage: yarn script ofii-fill-referential my_structure_ofii_file.csv
 
 import "dotenv/config";
 
@@ -14,6 +14,82 @@ import { loadXlsxBufferFromS3 } from "../utils/xlsx-loader";
 import { loadOfiiFile, type OfiiReferentialRow } from "../utils/ofii-xlsx";
 
 type OperateurMapping = Record<string, string>;
+
+const PREFIXES_TO_REMOVE = [
+  "CADA",
+  "PRAHDA",
+  "HUDA",
+  "CPH",
+  "CAES",
+  "NUITEE HOTELIERE",
+  "CENTRE D'ACCUEIL DEMANDEURS D'ASILE",
+  "CENTRE D'ACCUEIL POUR DEMANDEURS D'ASILE",
+  "ACCUEIL D'URGENCE DES DEMANDEURS D'ASILE",
+  "HEBERGEMENT D'URGENCE",
+] as const;
+
+function stripAndUpper(value: unknown): string {
+  return String(value ?? "")
+    .trim()
+    .toUpperCase();
+}
+
+function collapseSpaces(str: string): string {
+  return str.trim().replace(/\s+/g, " ");
+}
+
+function deptCodeFromCode(code: string | null | undefined): string {
+  if (!code || code.length < 3) return "";
+  const two = code.slice(1, 3);
+  const three = code.slice(1, 4);
+  const n = parseInt(two, 10);
+  return n > 96 ? three : two;
+}
+
+type CleanNameOptions = {
+  departementNumero?: string | null;
+  operateurClean?: string | null;
+};
+
+function getCleanName(
+  row: OfiiReferentialRow,
+  options: CleanNameOptions = {}
+): string {
+  const { departementNumero, operateurClean } = options;
+
+  const nom = stripAndUpper(row.nom);
+  const operateurUpper = stripAndUpper(row.operateur);
+  const code = row.dnaCode ?? "";
+  const categorieDeCentre = stripAndUpper(row.type);
+
+  let cleanName = nom;
+
+  for (const prefix of PREFIXES_TO_REMOVE) {
+    cleanName = cleanName.replace(prefix, "");
+  }
+
+  const deptCode = deptCodeFromCode(code);
+  const deptCodeFromDepartment = departementNumero ?? null;
+
+  if (deptCodeFromDepartment) {
+    cleanName = cleanName.replace(deptCodeFromDepartment, "");
+  }
+
+  const finalOperateurClean = stripAndUpper(operateurClean ?? operateurUpper);
+
+  const operatorsToRemove = Array.from(
+    new Set([finalOperateurClean, operateurUpper].filter(Boolean))
+  );
+  for (const op of operatorsToRemove) {
+    cleanName = cleanName.replace(op, "");
+  }
+
+  let categorie = categorieDeCentre.replace("NUITEE HOTELIERE", "NH");
+
+  let fullName = `${categorie} ${cleanName} ${finalOperateurClean} - ${deptCode}`;
+
+  return collapseSpaces(fullName).trim();
+}
 
 async function loadOperateurMappingFromS3(
   bucketName: string,
@@ -44,11 +120,14 @@ export const fillOfiiStructureFromRows = async (
       return;
     }
 
-    console.log("Résolution des IDs des départements...");
+    // Fichier OFII = nom de département (ex. Allier). En base on stocke le numéro (ex. 03).
+    console.log("Résolution départements (nom → numéro)...");
     const departements = await prisma.departement.findMany({
-      select: { numero: true },
+      select: { numero: true, name: true },
     });
-    const departementSet = new Set(departements.map((d) => d.numero));
+    const nameToNumero = new Map<string, string>(
+      departements.map((d) => [d.name.trim().toLowerCase(), d.numero])
+    );
 
     console.log("Validation des données...");
     const validRecords: OfiiReferentialRow[] = [];
@@ -56,8 +135,12 @@ export const fillOfiiStructureFromRows = async (
 
     for (const row of records) {
       const issues: string[] = [];
-      if (!row.departement || !departementSet.has(row.departement)) {
-        issues.push(`département invalide: ${row.departement}`);
+      const departementName = row.departement?.trim();
+      const departementNumero = departementName
+        ? nameToNumero.get(departementName.toLowerCase())
+        : undefined;
+      if (!departementName || departementNumero === undefined) {
+        issues.push(`département invalide (nom attendu) : ${row.departement}`);
       }
       if (issues.length > 0) {
         errors.push({ dnaCode: row.dnaCode, issues });
@@ -88,7 +171,7 @@ export const fillOfiiStructureFromRows = async (
     // Normalisation des noms d'opérateur
     const bucketName = process.env.DOCS_BUCKET_NAME;
     const operateurMappingKey =
-      process.env.OFII_OPERATEUR_MAPPING_KEY ?? "ofii-operateurs-mapping.json";
+      process.env.OFII_OPERATEUR_MAPPING_KEY ?? "operateurs_to_match.json";
     let operateurMapping: OperateurMapping | null = null;
     if (bucketName) {
       try {
@@ -155,17 +238,26 @@ export const fillOfiiStructureFromRows = async (
         const existing = existingByDnaCode.get(row.dnaCode);
         const now = new Date();
 
+        const depKey = row.departement
+          ? row.departement.trim().toLowerCase()
+          : "";
+        const depNumero = depKey ? (nameToNumero.get(depKey) ?? null) : null;
+        const cleanName = getCleanName(row, {
+          departementNumero: depNumero,
+          operateurClean: row.operateur,
+        });
         await tx.structure.upsert({
           where: { dnaCode: row.dnaCode },
           update: {
+            nom: cleanName,
             nomOfii: row.nom ?? undefined,
             inactiveInOfiiFileSince: null,
           },
           create: {
             dnaCode: row.dnaCode,
-            nom: row.nom,
+            nom: cleanName,
             type: row.type as StructureType,
-            departementAdministratif: row.departement ?? undefined,
+            departementAdministratif: depNumero ?? undefined,
             nomOfii: row.nom ?? undefined,
             directionTerritoriale: row.directionTerritoriale ?? undefined,
             activeInOfiiFileSince: now,
@@ -213,42 +305,47 @@ export const fillOfiiStructureFromRows = async (
       `✅ ${createdCount} structures créées, ${updatedCount} structures mises à jour`
     );
   } catch (error) {
-    console.error("❌ Erreur lors du chargement des données:", error);
-    throw error;
+    throw new Error("❌ Erreur lors du chargement des données: " + error);
   }
 };
 
 // Standalone part
 
-const args = process.argv.slice(2);
-const xlsxKey = args[0];
+const isMainScript =
+  process.argv[1] && process.argv[1] == "ofii-fill-referential";
 
-if (!xlsxKey) {
-  throw new Error("Merci de fournir la clef S3 du fichier XLSX en argument.");
-}
+if (isMainScript) {
+  console.log("Running standalone part of ofii-fill-referential");
+  const args = process.argv.slice(2);
+  const xlsxKey = args[0];
 
-const prisma = createPrismaClient();
-
-const fillReferential = async () => {
-  try {
-    const bucketName = process.env.DOCS_BUCKET_NAME;
-    if (!bucketName) {
-      throw new Error(
-        "DOCS_BUCKET_NAME doit être défini pour charger le fichier XLSX depuis S3."
-      );
-    }
-
-    console.log("Chargement du fichier XLSX depuis S3 (référentiel OFII)...");
-    const { buffer, fileName } = await loadXlsxBufferFromS3(
-      bucketName,
-      xlsxKey
-    );
-    const { rows } = loadOfiiFile(buffer, fileName);
-
-    await fillOfiiStructureFromRows(prisma, rows);
-  } finally {
-    await prisma.$disconnect();
+  if (!xlsxKey) {
+    throw new Error("Merci de fournir la clef S3 du fichier XLSX en argument.");
   }
-};
 
-fillReferential();
+  const prisma = createPrismaClient();
+
+  const fillReferential = async () => {
+    try {
+      const bucketName = process.env.DOCS_BUCKET_NAME;
+      if (!bucketName) {
+        throw new Error(
+          "DOCS_BUCKET_NAME doit être défini pour charger le fichier XLSX depuis S3."
+        );
+      }
+
+      console.log("Chargement du fichier XLSX depuis S3 (référentiel OFII)...");
+      const { buffer, fileName } = await loadXlsxBufferFromS3(
+        bucketName,
+        xlsxKey
+      );
+      const { rows } = loadOfiiFile(buffer, fileName);
+
+      await fillOfiiStructureFromRows(prisma, rows);
+    } finally {
+      await prisma.$disconnect();
+    }
+  };
+
+  fillReferential();
+}
