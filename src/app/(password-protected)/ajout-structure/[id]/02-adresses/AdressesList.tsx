@@ -13,8 +13,8 @@ import {
   UseFormWatch,
 } from "react-hook-form";
 
-import { AdressImporter } from "@/app/components/forms/hebergement/AdressImporter";
 import AddressWithValidation from "@/app/components/forms/AddressWithValidation";
+import { AdressImporter } from "@/app/components/forms/hebergement/AdressImporter";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import {
@@ -24,6 +24,7 @@ import {
 } from "@/constants";
 import { AjoutAdressesFormValues } from "@/schemas/forms/ajout/ajoutAdresses.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
+import { AdresseAdministrativeFormValues } from "@/schemas/forms/base/adresseAdministrative.schema";
 import { Repartition } from "@/types/adresse.type";
 
 interface AdressesListProps {
@@ -32,9 +33,11 @@ interface AdressesListProps {
   setValue: UseFormSetValue<AjoutAdressesFormValues>;
   getValues: UseFormGetValues<AjoutAdressesFormValues>;
   setError: UseFormSetError<AjoutAdressesFormValues>;
+  adminAddress: Partial<AdresseAdministrativeFormValues>;
 }
 
 export const AdressesList = ({
+  adminAddress,
   watch,
   control,
   setValue,
@@ -42,7 +45,7 @@ export const AdressesList = ({
   setError,
 }: AdressesListProps) => {
   const typeBati = watch("typeBati") || Repartition.DIFFUS;
-  const adminAddress = watch("adresseAdministrativeComplete");
+
   const sameAddress = watch("sameAddress");
 
   const hebergementsContainerRef = useRef(null);
@@ -88,24 +91,13 @@ export const AdressesList = ({
   };
 
   const handleSameAddressChange = () => {
-    if (!sameAddress && (adminAddress === "" || adminAddress === undefined)) {
-      const adminAddressElement = document.getElementById(
-        "adresseAdministrativeComplete"
-      );
-      if (adminAddressElement) {
-        adminAddressElement.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-        setTimeout(() => {
-          adminAddressElement.focus();
-
-          setError("adresseAdministrativeComplete", {
-            type: "manual",
-            message: "Veuillez renseigner l'adresse administrative.",
-          });
-        }, 100);
-      }
+    if (
+      !adminAddress.adresseAdministrativeComplete ||
+      !adminAddress.adresseAdministrative ||
+      !adminAddress.codePostalAdministratif ||
+      !adminAddress.communeAdministrative
+    ) {
+      return;
     }
 
     setValue("sameAddress", !sameAddress);
@@ -114,10 +106,10 @@ export const AdressesList = ({
     setValue("adresses", [
       {
         ...firstAddress,
-        adresseComplete: adminAddress,
-        adresse: watch("adresseAdministrative"),
-        codePostal: watch("codePostalAdministratif"),
-        commune: watch("communeAdministrative"),
+        adresseComplete: adminAddress.adresseAdministrativeComplete,
+        adresse: adminAddress.adresseAdministrative,
+        codePostal: adminAddress.codePostalAdministratif,
+        commune: adminAddress.communeAdministrative,
         repartition: watch("typeBati") || Repartition.DIFFUS,
       },
     ]);
@@ -125,11 +117,7 @@ export const AdressesList = ({
 
   return (
     <div>
-      <hr />
       <fieldset className="flex flex-col gap-6">
-        <legend className="text-xl font-bold mb-4 text-title-blue-france">
-          Hébergements
-        </legend>
         <div className="flex flex-col gap-2" ref={hebergementsContainerRef}>
           {typeBati === Repartition.COLLECTIF ? (
             <p className="mb-6">

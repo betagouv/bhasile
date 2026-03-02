@@ -11,11 +11,12 @@ export const adresseAdministrativeSchema = z.object({
   departementAdministratif: z.string().nonempty(),
 });
 
+export const typeBatiSchema = z.object({
+  typeBati: z.nativeEnum(Repartition),
+  sameAddress: z.boolean().optional(),
+});
 export const adresseAdministrativeWithTypeBatiSchema =
-  adresseAdministrativeSchema.extend({
-    typeBati: z.nativeEnum(Repartition),
-    sameAddress: z.boolean().optional(),
-  });
+  adresseAdministrativeSchema.and(typeBatiSchema);
 
 export const adresseAdministrativeAutoSaveSchema =
   adresseAdministrativeSchema.partial();

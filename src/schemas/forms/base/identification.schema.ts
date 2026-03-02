@@ -11,30 +11,15 @@ import { structureBaseSchema } from "./structure.base.schema";
 const baseIdentificationSchema = structureBaseSchema.extend({
   operateur: operateurSchema,
   creationDate: frenchDateToISO(),
-  finessCode: z.string().optional().or(z.literal("")),
   public: z.nativeEnum(PublicType),
   filiale: z.string().optional(),
   lgbt: z.boolean(),
   fvvTeh: z.boolean(),
 });
 
-export const identificationSchema = structureBaseSchema
-  .and(baseIdentificationSchema)
-  .refine(
-    (data) => {
-      if (
-        isStructureAutorisee(data.type) &&
-        (!data.finessCode || data.finessCode === "")
-      ) {
-        return false;
-      }
-      return true;
-    },
-    {
-      message: "Le code FINESS est obligatoire pour les structures autorisées",
-      path: ["finessCode"],
-    }
-  );
+export const identificationSchema = structureBaseSchema.and(
+  baseIdentificationSchema
+);
 
 export const identificationSchemaWithContacts = identificationSchema.and(
   z.object({

@@ -1,10 +1,10 @@
 import z from "zod";
 
 import { adresseWithPlacesRequired } from "@/schemas/forms/base/adresse.schema";
-import { adresseAdministrativeWithTypeBatiSchema } from "@/schemas/forms/base/adresseAdministrative.schema";
+import { typeBatiSchema } from "@/schemas/forms/base/adresseAdministrative.schema";
 import { Repartition } from "@/types/adresse.type";
 
-export const ajoutAdressesSchema = adresseAdministrativeWithTypeBatiSchema
+export const ajoutAdressesSchema = typeBatiSchema
   .and(
     z.object({
       adresses: z.array(adresseWithPlacesRequired),

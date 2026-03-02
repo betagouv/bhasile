@@ -5,7 +5,7 @@ import { identificationSchema } from "@/schemas/forms/base/identification.schema
 
 import { adresseAdministrativeSchema } from "../base/adresseAdministrative.schema";
 import { antennesSchema } from "../base/antenne.schema";
-import { contactSchema } from "../base/contact.schema";
+import { contactsSchema } from "../base/contact.schema";
 import { dnaStructuresSchema } from "../base/dna.schema";
 import { finessesSchema } from "../base/finess.schema";
 
@@ -15,12 +15,7 @@ export const ajoutIdentificationSchema = identificationSchema
   .and(dnaStructuresSchema)
   .and(finessesSchema)
   .and(calendrierSchema)
-  .and(
-    z.object({
-      contactPrincipal: contactSchema,
-      contactSecondaire: contactSchema.optional(),
-    })
-  );
+  .and(contactsSchema);
 
 export type AjoutIdentificationFormValues = z.infer<
   typeof ajoutIdentificationSchema
