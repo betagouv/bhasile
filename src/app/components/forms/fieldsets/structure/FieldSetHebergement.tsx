@@ -8,8 +8,8 @@ import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { Repartition } from "@/types/adresse.type";
 import { FormKind } from "@/types/global";
 
-import { AdresseComponent } from "./fieldSetHebergement/Adresse";
-import { Notices } from "./fieldSetHebergement/Notices";
+import { AdresseComponent } from "../../hebergement/Adresse";
+import { Notices } from "../../hebergement/Notices";
 
 export const FieldSetHebergement = ({
   formKind = FormKind.FINALISATION,

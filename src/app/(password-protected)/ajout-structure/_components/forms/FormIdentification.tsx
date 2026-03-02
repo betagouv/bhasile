@@ -219,6 +219,11 @@ export default function FormIdentification() {
 
             <hr />
 
+            <FieldSetDnasAndFinesses />
+
+            <hr />
+            <hr />
+
             <FieldSetContacts />
 
             <hr />

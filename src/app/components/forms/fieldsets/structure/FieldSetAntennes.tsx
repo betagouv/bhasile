@@ -2,12 +2,12 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { AntenneApiType } from "@/schemas/api/antenne.schema";
+import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 
 import AddressWithValidation from "../../AddressWithValidation";
 import InputWithValidation from "../../InputWithValidation";
 
-const emptyAntenne: AntenneApiType = {
+const emptyAntenne: AntenneFormValues = {
   name: "",
   adresseComplete: "",
   adresse: "",
@@ -19,7 +19,7 @@ const emptyAntenne: AntenneApiType = {
 export const FieldSetAntennes = () => {
   const { control, watch, setValue } = useFormContext();
 
-  const antennes = (watch("antennes") || []) as AntenneApiType[];
+  const antennes = (watch("antennes") || []) as AntenneFormValues[];
 
   const isMultiAntenne = watch("isMultiAntenne");
 
@@ -37,6 +37,13 @@ export const FieldSetAntennes = () => {
     setValue("antennes", [...antennes, emptyAntenne]);
   };
 
+  const handleDeleteAntenne = (index: number) => {
+    setValue(
+      "antennes",
+      antennes.filter((_, i) => i !== index)
+    );
+  };
+
   if (!isMultiAntenne) {
     return null;
   }
@@ -48,29 +55,41 @@ export const FieldSetAntennes = () => {
       </legend>
 
       {antennes.map((_, index) => (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3" key={index}>
-          <div className="flex flex-col gap-1">
-            <InputWithValidation
-              name={`antennes.${index}.name`}
-              control={control}
-              type="text"
-              label="Nom de l'antenne'"
-              className="mb-0"
-            />
-            <span className="text-[#666666] text-sm">ex. Avranches Nord</span>
+        <div key={index} className="flex gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1">
+            <div className="flex flex-col gap-1">
+              <InputWithValidation
+                name={`antennes.${index}.name`}
+                control={control}
+                type="text"
+                label="Nom de l'antenne"
+                className="mb-0"
+              />
+              <span className="text-[#666666] text-sm">ex. Avranches Nord</span>
+            </div>
+            <div className="flex flex-col gap-1 md:col-span-2">
+              <AddressWithValidation
+                control={control}
+                fullAddress={`antennes.${index}.adresseComplete`}
+                id="adresseAdministrativeComplete"
+                zipCode={`antennes.${index}.codePostal`}
+                street={`antennes.${index}.adresse`}
+                city={`antennes.${index}.commune`}
+                department={`antennes.${index}.departement`}
+                label="Adresse principale de la structure"
+              />
+            </div>
           </div>
-          <div className="flex flex-col gap-1 md:col-span-2">
-            <AddressWithValidation
-              control={control}
-              fullAddress={`antennes.${index}.adresseComplete`}
-              id="adresseAdministrativeComplete"
-              zipCode={`antennes.${index}.codePostal`}
-              street={`antennes.${index}.adresse`}
-              city={`antennes.${index}.commune`}
-              department={`antennes.${index}.departement`}
-              label="Adresse principale de la structure"
+          {index >= 2 && (
+            <Button
+              iconId="fr-icon-delete-bin-line"
+              priority="tertiary no outline"
+              className="mt-8"
+              title="Supprimer"
+              onClick={() => handleDeleteAntenne(index)}
+              type="button"
             />
-          </div>
+          )}
         </div>
       ))}
       <Button
