@@ -5,9 +5,7 @@
 import "dotenv/config";
 
 import type { PrismaClient } from "@/generated/prisma/client";
-import { createPrismaClient } from "@/prisma-client";
-import { loadOfiiFile, type ActiviteRow } from "../utils/ofii-xlsx";
-import { loadXlsxBufferFromS3 } from "../utils/xlsx-loader";
+import { type ActiviteRow } from "./ofii-xlsx";
 
 /**
  * Remplit la table Activite pour une date donnée à partir de lignes déjà parsées.
@@ -91,51 +89,4 @@ export async function fillOfiiActiviteFromRows(
     }
   }
   console.log(`✅ Activité mise à jour: ${created} lignes traitées`);
-}
-
-// Standalone part
-
-const isMainScript = process.argv[1] && process.argv[1] == "ofii-fill-activity";
-
-if (isMainScript) {
-  console.log("Running standalone part of ofii-fill-activity");
-  const args = process.argv.slice(2);
-  const xlsxKey = args[0];
-
-  if (!xlsxKey) {
-    throw new Error("Merci de fournir la clef S3 du fichier XLSX en argument.");
-  }
-
-  const prisma = createPrismaClient();
-
-  (async () => {
-    try {
-      const bucketName = process.env.DOCS_BUCKET_NAME;
-      if (!bucketName) {
-        throw new Error(
-          "DOCS_BUCKET_NAME doit être défini pour charger le fichier XLSX depuis S3."
-        );
-      }
-
-      console.log("Chargement du fichier XLSX depuis S3...");
-      const { buffer, fileName } = await loadXlsxBufferFromS3(
-        bucketName,
-        xlsxKey
-      );
-      const { date, rows } = loadOfiiFile(buffer, fileName);
-      console.log(
-        `Onglet traité: date ${date.toISOString().slice(0, 7)}, ${rows.length} lignes`
-      );
-
-      await fillOfiiActiviteFromRows(prisma, date, rows);
-    } catch (error) {
-      console.error(
-        "❌ Erreur lors de l'exécution du script activité OFII",
-        error
-      );
-      process.exitCode = 1;
-    } finally {
-      await prisma.$disconnect();
-    }
-  })();
 }
