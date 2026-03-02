@@ -113,6 +113,7 @@ async function loadOperateurMappingFromS3(
  */
 export const fillOfiiStructureFromRows = async (
   prisma: PrismaClient,
+  date: Date,
   records: OfiiReferentialRow[]
 ) => {
   try {
@@ -285,13 +286,12 @@ export const fillOfiiStructureFromRows = async (
         .filter((dnaCode) => !csvDnaCodes.has(dnaCode));
 
       if (dnaCodesToDeactivate.length > 0) {
-        const now = new Date();
         const deactivated = await tx.structure.updateMany({
           where: {
             dnaCode: { in: dnaCodesToDeactivate },
             inactiveInOfiiFileSince: null,
           },
-          data: { inactiveInOfiiFileSince: now },
+          data: { inactiveInOfiiFileSince: date },
         });
         console.log(
           `⚠️ ${deactivated.count} structures marquées comme inactives dans le fichier OFII (absentes du CSV).`
@@ -339,9 +339,9 @@ if (isMainScript) {
         bucketName,
         xlsxKey
       );
-      const { rows } = loadOfiiFile(buffer, fileName);
+      const { date, rows } = loadOfiiFile(buffer, fileName);
 
-      await fillOfiiStructureFromRows(prisma, rows);
+      await fillOfiiStructureFromRows(prisma, date, rows);
     } finally {
       await prisma.$disconnect();
     }
