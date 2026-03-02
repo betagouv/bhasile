@@ -7,8 +7,8 @@ import { createPrismaClient } from "@/prisma-client";
 
 import { loadOfiiFile } from "../utils/ofii-xlsx";
 import { loadXlsxBufferFromS3 } from "../utils/xlsx-loader";
-import { fillOfiiStructureFromRows } from "./fill-structure-ofii";
-import { fillOfiiActiviteFromRows } from "./fill-activite-ofii";
+import { fillOfiiStructureFromRows } from "./ofii-fill-referential";
+import { fillOfiiActiviteFromRows } from "./ofii-fill-activity";
 
 const args = process.argv.slice(2);
 const xlsxLocation = args[0];
@@ -51,10 +51,7 @@ async function main() {
 
     console.log("✅ Référentiel et activité OFII mis à jour avec succès.");
   } catch (error) {
-    console.error(
-      "❌ Erreur lors de l'exécution du script OFII combiné:",
-      error
-    );
+    console.error("❌ Erreur lors de l'exécution du script OFII", error);
     process.exitCode = 1;
   } finally {
     await prisma.$disconnect();
