@@ -89,7 +89,7 @@ export default function FormAdresses() {
         isEditMode ? "Modifier et revenir à la vérification" : "Étape suivante"
       }
     >
-      {({ control, setValue, getValues, watch, setError }) => {
+      {({ control, setValue, getValues, watch }) => {
         const handleTypeBatiChange = (value: string) => {
           const currentAdresses = getValues("adresses") || [];
 
@@ -179,7 +179,6 @@ export default function FormAdresses() {
                 control={control}
                 setValue={setValue}
                 getValues={getValues}
-                setError={setError}
                 adminAddress={{
                   adresseAdministrativeComplete:
                     localStorageIdentificationValues?.adresseAdministrativeComplete,

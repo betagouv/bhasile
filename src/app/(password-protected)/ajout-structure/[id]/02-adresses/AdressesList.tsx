@@ -5,7 +5,7 @@ import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import autoAnimate from "@formkit/auto-animate";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { Controller, UseFormSetError } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import {
   Control,
   UseFormGetValues,
@@ -32,7 +32,6 @@ interface AdressesListProps {
   control: Control<AjoutAdressesFormValues>;
   setValue: UseFormSetValue<AjoutAdressesFormValues>;
   getValues: UseFormGetValues<AjoutAdressesFormValues>;
-  setError: UseFormSetError<AjoutAdressesFormValues>;
   adminAddress: Partial<AdresseAdministrativeFormValues>;
 }
 
@@ -42,7 +41,6 @@ export const AdressesList = ({
   control,
   setValue,
   getValues,
-  setError,
 }: AdressesListProps) => {
   const typeBati = watch("typeBati") || Repartition.DIFFUS;
 
