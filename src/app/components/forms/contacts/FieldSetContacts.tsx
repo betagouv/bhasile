@@ -4,7 +4,7 @@ import { useFormContext } from "react-hook-form";
 
 import { ContactApiType } from "@/schemas/api/contact.schema";
 
-import { Contact } from "../../contacts/Contact";
+import { Contact } from "./Contact";
 
 export const FieldSetContacts = () => {
   const { control, watch } = useFormContext();

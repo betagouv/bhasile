@@ -6,7 +6,7 @@ import { CURRENT_YEAR } from "@/constants";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 import { FormKind } from "@/types/global";
 
-import InputWithValidation from "../../InputWithValidation";
+import InputWithValidation from "../InputWithValidation";
 
 export const FieldSetOuvertureFermeture = ({
   formKind = FormKind.FINALISATION,

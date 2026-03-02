@@ -1,7 +1,7 @@
 "use client";
 import { ReactElement } from "react";
 
-import { FieldSetNotes } from "@/app/components/forms/fieldsets/structure/FieldSetNotes";
+import { FieldSetNotes } from "@/app/components/forms/notes/FieldSetNotes";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";

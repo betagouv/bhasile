@@ -10,7 +10,7 @@ import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { FormKind } from "@/types/global";
 
-import { FieldSetYearlyDocumentsFinanciers } from "../../fieldsets/structure/FieldSetYearlyDocumentsFinanciers";
+import { FieldSetYearlyDocumentsFinanciers } from "./FieldSetYearlyDocumentsFinanciers";
 import { DocumentsFinanciersAccordion } from "./DocumentsFinanciersAccordion";
 
 export const DocumentsFinanciers = ({

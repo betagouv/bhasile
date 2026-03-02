@@ -4,8 +4,8 @@ import { useFormContext } from "react-hook-form";
 
 import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 
-import AddressWithValidation from "../../AddressWithValidation";
-import InputWithValidation from "../../InputWithValidation";
+import AddressWithValidation from "../AddressWithValidation";
+import InputWithValidation from "../InputWithValidation";
 
 const emptyAntenne: AntenneFormValues = {
   name: "",

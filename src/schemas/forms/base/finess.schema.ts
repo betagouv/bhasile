@@ -11,3 +11,5 @@ const finessSchema = z.object({
 export const finessesSchema = z.object({
   finesses: z.array(finessSchema),
 });
+
+export type FinessFormValues = z.infer<typeof finessSchema>;

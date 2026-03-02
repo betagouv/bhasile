@@ -1,5 +1,5 @@
-import { GranularitySelector } from "../../cpom/GranularitySelector";
-import { LocationSelector } from "../../cpom/LocationSelector";
+import { GranularitySelector } from "./GranularitySelector";
+import { LocationSelector } from "./LocationSelector";
 
 export const FieldSetGeneral = () => {
   return (

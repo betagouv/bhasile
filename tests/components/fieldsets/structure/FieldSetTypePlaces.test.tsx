@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { createStructure } from "tests/test-utils/structure.factory";
 import { describe, expect, it } from "vitest";
 
-import { FieldSetTypePlaces } from "@/app/components/forms/fieldsets/structure/FieldSetTypePlaces";
+import { FieldSetTypePlaces } from "@/app/components/forms/typePlace/FieldSetTypePlaces";
 import { FormKind } from "@/types/global";
 
 import { FormTestWrapper } from "../../../test-utils/form-test-wrapper";

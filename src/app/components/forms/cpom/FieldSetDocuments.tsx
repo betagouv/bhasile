@@ -1,5 +1,5 @@
-import { DatesAndDocuments } from "../../cpom/DatesAndDocuments";
-import { MaxSizeNotice } from "../../MaxSizeNotice";
+import { MaxSizeNotice } from "../MaxSizeNotice";
+import { DatesAndDocuments } from "./DatesAndDocuments";
 
 export const FieldSetDocuments = () => {
   return (

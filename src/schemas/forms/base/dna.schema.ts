@@ -19,3 +19,5 @@ const dnaStructureSchema = z.object({
 export const dnaStructuresSchema = z.object({
   dnaStructures: z.array(dnaStructureSchema),
 });
+
+export type DnaStructureFormValues = z.infer<typeof dnaStructureSchema>;

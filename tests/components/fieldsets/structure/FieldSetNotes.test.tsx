@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { FieldSetNotes } from "@/app/components/forms/fieldsets/structure/FieldSetNotes";
+import { FieldSetNotes } from "@/app/components/forms/notes/FieldSetNotes";
 
 import { FormTestWrapper } from "../../../test-utils/form-test-wrapper";
 

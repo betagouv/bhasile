@@ -1,15 +1,15 @@
 "use client";
 import { ReactElement } from "react";
 
+import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
 import { AutoSave } from "@/app/components/forms/AutoSave";
-import { FieldSetAdresseAdministrative } from "@/app/components/forms/fieldsets/structure/FieldSetAdresseAdministrative";
-import { FieldSetCalendrier } from "@/app/components/forms/fieldsets/structure/FieldSetCalendrier";
-import { FieldSetContacts } from "@/app/components/forms/fieldsets/structure/FieldSetContacts";
-import { FieldSetDescription } from "@/app/components/forms/fieldsets/structure/FieldSetDescription";
-import { FieldSetTypePlaces } from "@/app/components/forms/fieldsets/structure/FieldSetTypePlaces";
+import { FieldSetCalendrier } from "@/app/components/forms/calendrier/FieldSetCalendrier";
+import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
+import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { FieldSetTypePlaces } from "@/app/components/forms/typePlace/FieldSetTypePlaces";
 import { SubmitError } from "@/app/components/SubmitError";
 import { InformationBar } from "@/app/components/ui/InformationBar";
 import { useFetchState } from "@/app/context/FetchStateContext";
@@ -92,7 +92,7 @@ export default function FinalisationIdentification(): ReactElement {
         <FieldSetCalendrier />
         <hr />
 
-        <FieldSetAdresseAdministrative formKind={FormKind.FINALISATION} />
+        <AdresseAdministrativeAndAntennes formKind={FormKind.FINALISATION} />
         <hr />
 
         <FieldSetTypePlaces

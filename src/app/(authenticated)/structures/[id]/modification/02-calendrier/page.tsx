@@ -1,7 +1,7 @@
 "use client";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
-import { FieldSetCalendrier } from "@/app/components/forms/fieldsets/structure/FieldSetCalendrier";
+import { FieldSetCalendrier } from "@/app/components/forms/calendrier/FieldSetCalendrier";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";

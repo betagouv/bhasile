@@ -9,7 +9,7 @@ import { getRealCreationYear } from "@/app/utils/structure.util";
 import { StructureApiType } from "@/schemas/api/structure.schema";
 import { FormKind } from "@/types/global";
 
-import { YearlyTypePlace } from "../../typePlace/YearlyTypePlace";
+import { YearlyTypePlace } from "./YearlyTypePlace";
 
 export const FieldSetTypePlaces = ({
   formKind = FormKind.FINALISATION,

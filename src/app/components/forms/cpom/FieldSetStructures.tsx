@@ -3,7 +3,7 @@ import { useFormContext } from "react-hook-form";
 import { useStructuresSelection } from "@/app/hooks/useStructuresSelection";
 import { StructureType } from "@/types/structure.type";
 
-import { StructuresList } from "../../cpom/StructuresList";
+import { StructuresList } from "./StructuresList";
 
 export const FieldSetStructures = () => {
   const { watch } = useFormContext();

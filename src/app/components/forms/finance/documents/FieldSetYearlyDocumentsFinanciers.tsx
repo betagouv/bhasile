@@ -11,11 +11,11 @@ import {
 } from "@/schemas/forms/base/documentFinancier.schema";
 import { FormKind } from "@/types/global";
 
-import { DocumentsFinanciersCheckboxIsInCpom } from "../../finance/documents/DocumentsFinanciersCheckboxIsInCpom";
-import { DocumentsFinanciersCommentaire } from "../../finance/documents/DocumentsFinanciersCommentaire";
-import { DocumentsFinanciersCpomDisclaimer } from "../../finance/documents/DocumentsFinanciersCpomDisclaimer";
-import { DocumentsFinanciersList } from "../../finance/documents/DocumentsFinanciersList";
-import { YearlyFileUpload } from "../../finance/documents/YearlyFileUpload";
+import { DocumentsFinanciersCheckboxIsInCpom } from "./DocumentsFinanciersCheckboxIsInCpom";
+import { DocumentsFinanciersCommentaire } from "./DocumentsFinanciersCommentaire";
+import { DocumentsFinanciersCpomDisclaimer } from "./DocumentsFinanciersCpomDisclaimer";
+import { DocumentsFinanciersList } from "./DocumentsFinanciersList";
+import { YearlyFileUpload } from "./YearlyFileUpload";
 
 export const FieldSetYearlyDocumentsFinanciers = ({
   year,

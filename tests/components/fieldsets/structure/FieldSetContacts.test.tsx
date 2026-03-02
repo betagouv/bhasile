@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
-import { FieldSetContacts } from "@/app/components/forms/fieldsets/structure/FieldSetContacts";
+import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
 
 import { createContact } from "../../../test-utils/contact.factory";
 import { FormTestWrapper } from "../../../test-utils/form-test-wrapper";

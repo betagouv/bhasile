@@ -1,7 +1,7 @@
 import Notice from "@codegouvfr/react-dsfr/Notice";
 import Link from "next/link";
 
-import { AdressImporter } from "@/app/components/forms/address/AdressImporter";
+import { AdressImporter } from "@/app/components/forms/hebergement/AdressImporter";
 import { MODELE_DIFFUS_LINK, MODELE_MIXTE_LINK } from "@/constants";
 import { Repartition } from "@/types/adresse.type";
 

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
-import { FieldSetYearlyDocumentsFinanciers } from "@/app/components/forms/fieldsets/structure/FieldSetYearlyDocumentsFinanciers";
+import { FieldSetYearlyDocumentsFinanciers } from "@/app/components/forms/finance/documents/FieldSetYearlyDocumentsFinanciers";
 import { Date303 } from "@/app/components/forms/finance/documents/Date303";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";

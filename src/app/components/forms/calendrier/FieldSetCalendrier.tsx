@@ -4,8 +4,8 @@ import { useFormContext } from "react-hook-form";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { StructureType } from "@/types/structure.type";
 
-import { ContractualisationHuda } from "../../ContractualisationHuda";
-import InputWithValidation from "../../InputWithValidation";
+import { ContractualisationHuda } from "../ContractualisationHuda";
+import InputWithValidation from "../InputWithValidation";
 
 export const FieldSetCalendrier = () => {
   const { control, watch } = useFormContext();

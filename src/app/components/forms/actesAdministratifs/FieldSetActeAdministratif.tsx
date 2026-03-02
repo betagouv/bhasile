@@ -7,7 +7,7 @@ import { AdditionalFieldsType } from "@/app/utils/acteAdministratif.util";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
-import { ActeAdministratif } from "../../actesAdministratifs/ActeAdministratif";
+import { ActeAdministratif } from "./ActeAdministratif";
 
 export default function FieldSetActeAdministratif({
   category,

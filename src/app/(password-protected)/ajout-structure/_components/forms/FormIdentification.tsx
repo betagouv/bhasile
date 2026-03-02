@@ -8,8 +8,9 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { FieldSetAdresseAdministrative } from "@/app/components/forms/fieldsets/structure/FieldSetAdresseAdministrative";
-import { FieldSetContacts } from "@/app/components/forms/fieldsets/structure/FieldSetContacts";
+import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
+import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
+import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
@@ -215,11 +216,11 @@ export default function FormIdentification() {
 
             <hr />
 
-            <FieldSetAdresseAdministrative formKind={FormKind.AJOUT} />
+            <AdresseAdministrativeAndAntennes formKind={FormKind.AJOUT} />
 
             <hr />
 
-            <FieldSetDnasAndFinesses />
+            <DnaAndFiness />
 
             <hr />
             <hr />

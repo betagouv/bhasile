@@ -3,13 +3,13 @@
 import Notice from "@codegouvfr/react-dsfr/Notice";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
-import { FieldSetAdresseAdministrative } from "@/app/components/forms/fieldsets/structure/FieldSetAdresseAdministrative";
-import { FieldSetContacts } from "@/app/components/forms/fieldsets/structure/FieldSetContacts";
-import { FieldSetDescription } from "@/app/components/forms/fieldsets/structure/FieldSetDescription";
-import { FieldSetHebergement } from "@/app/components/forms/fieldsets/structure/FieldSetHebergement";
+import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
+import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
+import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSetHebergement";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
@@ -84,7 +84,7 @@ export default function ModificationDescription() {
           title=""
           description="L'ensemble des adresses sont des données sensibles qui sont protégées selon les normes du gouvernement. Elles ne seront communiquées qu'aux agents et agentes de DDETS."
         />
-        <FieldSetAdresseAdministrative formKind={FormKind.MODIFICATION} />
+        <AdresseAdministrativeAndAntennes formKind={FormKind.MODIFICATION} />
         <hr />
         <FieldSetHebergement />
       </FormWrapper>

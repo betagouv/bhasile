@@ -13,7 +13,7 @@ import {
   UseFormWatch,
 } from "react-hook-form";
 
-import { AdressImporter } from "@/app/components/forms/address/AdressImporter";
+import { AdressImporter } from "@/app/components/forms/hebergement/AdressImporter";
 import AddressWithValidation from "@/app/components/forms/AddressWithValidation";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";

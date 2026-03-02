@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
-import { FieldSetCalendrier } from "@/app/components/forms/fieldsets/structure/FieldSetCalendrier";
+import { FieldSetCalendrier } from "@/app/components/forms/calendrier/FieldSetCalendrier";
 import {
   isStructureAutorisee,
   isStructureSubventionnee,

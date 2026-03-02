@@ -9,9 +9,9 @@ import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { FormKind } from "@/types/global";
 import { PublicType, StructureType } from "@/types/structure.type";
 
-import InputWithValidation from "../../InputWithValidation";
-import { OperateurAutocomplete } from "../../OperateurAutocomplete";
-import SelectWithValidation from "../../SelectWithValidation";
+import InputWithValidation from "../InputWithValidation";
+import { OperateurAutocomplete } from "../OperateurAutocomplete";
+import SelectWithValidation from "../SelectWithValidation";
 
 export const FieldSetDescription = ({
   dnaCode,

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { FieldSetHebergement } from "@/app/components/forms/fieldsets/structure/FieldSetHebergement";
+import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSetHebergement";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
