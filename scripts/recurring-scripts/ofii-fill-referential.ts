@@ -117,7 +117,7 @@ export const fillOfiiStructureFromRows = async (
   records: OfiiReferentialRow[]
 ) => {
   try {
-    if (records.length === 0) {
+    if (records.length == 0) {
       return;
     }
 
@@ -140,7 +140,7 @@ export const fillOfiiStructureFromRows = async (
       const departementNumero = departementName
         ? nameToNumero.get(departementName.toLowerCase())
         : undefined;
-      if (!departementName || departementNumero === undefined) {
+      if (!departementName || departementNumero == undefined) {
         issues.push(`département invalide (nom attendu) : ${row.departement}`);
       }
 
@@ -166,7 +166,7 @@ export const fillOfiiStructureFromRows = async (
       }
     }
 
-    if (validRecords.length === 0) {
+    if (validRecords.length == 0) {
       console.log("❌ Aucune donnée valide à insérer");
       return;
     }
