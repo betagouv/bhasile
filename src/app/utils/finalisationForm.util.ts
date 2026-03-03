@@ -34,6 +34,7 @@ export const FINALISATION_STEPS: FinalisationStep[] = [
 export const getFinalisationForm = (
   structure: StructureApiType
 ): FormApiType | undefined => {
+  console.log(structure);
   return structure.forms?.find(
     (form) =>
       form.formDefinition.name === FINALISATION_FORM_LABEL &&

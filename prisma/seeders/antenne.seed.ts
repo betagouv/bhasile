@@ -18,6 +18,9 @@ export const createAntenneList = (
         structureId: structure.id,
         name: faker.lorem.words(2),
         adresse: faker.location.streetAddress(),
+        codePostal: faker.location.zipCode(),
+        commune: faker.location.city(),
+        departement: faker.location.state(),
         createdAt: faker.date.past(),
         updatedAt: faker.date.past(),
       });

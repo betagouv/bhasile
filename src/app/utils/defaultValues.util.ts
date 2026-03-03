@@ -17,6 +17,7 @@ import { PublicType } from "@/types/structure.type";
 
 import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
 import { transformApiAdressesToFormAdresses } from "./adresse.util";
+import { transformApiAntennesToFormAntennes } from "./antenne.util";
 import { getBudgetsDefaultValues } from "./budget.util";
 import { getControlesDefaultValues } from "./controle.util";
 import { getStructureCpomDefaultValues } from "./cpom.util";
@@ -30,10 +31,15 @@ export const getDefaultValues = ({
 }: {
   structure: StructureApiType;
 }): Partial<StructureDefaultValues> => {
+  console.log("structure", structure);
   const structureCreationYear = getRealCreationYear(structure);
 
   const isAutorisee = isStructureAutorisee(structure.type);
   const repartition = getRepartition(structure);
+
+  const adresses = transformApiAdressesToFormAdresses(structure.adresses);
+
+  const antennes = transformApiAntennesToFormAntennes(structure.antennes);
 
   const budgets = getBudgetsDefaultValues(structure?.budgets || []);
 
@@ -85,7 +91,8 @@ export const getDefaultValues = ({
     communeAdministrative: structure.communeAdministrative || "",
     departementAdministratif: structure.departementAdministratif || "",
     typeBati: repartition,
-    adresses: transformApiAdressesToFormAdresses(structure.adresses),
+    adresses,
+    antennes,
     date303: structure.date303 ?? undefined,
     budgets,
     structureTypologies,

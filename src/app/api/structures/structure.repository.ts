@@ -7,6 +7,7 @@ import { PrismaTransaction } from "@/types/prisma.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acteAdministratif.repository";
 import { createOrUpdateAdresses } from "../adresses/adresse.repository";
+import { createOrUpdateAntennes } from "../antennes/antenne.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
 import { createOrUpdateContacts } from "../contacts/contact.repository";
 import { createOrUpdateControles } from "../controles/controle.repository";
@@ -255,6 +256,7 @@ export const findOne = async (id: number): Promise<Structure> => {
           },
         },
       },
+      antennes: true,
       contacts: true,
       structureTypologies: {
         orderBy: {
@@ -381,6 +383,7 @@ const updateOne = async (
       budgets,
       structureTypologies,
       adresses,
+      antennes,
       actesAdministratifs,
       documentsFinanciers,
       controles,
@@ -394,6 +397,8 @@ const updateOne = async (
 
       await initializeDefaultForms(tx, isOperateurUpdate, structure.id);
 
+      await createOrUpdateDnaStructures(tx, dnaStructures, structure.id);
+      await createOrUpdateFinesses(tx, finesses, structure.id);
       await createOrUpdateContacts(tx, contacts, structure.id);
       await createOrUpdateBudgets(tx, budgets, structure.id);
       await createOrUpdateStructureTypologies(
@@ -402,6 +407,7 @@ const updateOne = async (
         structure.id
       );
       await createOrUpdateAdresses(tx, adresses, structure.id);
+      await createOrUpdateAntennes(tx, antennes, structure.id);
       await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
         structureId: structure.id,
       });

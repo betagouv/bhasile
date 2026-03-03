@@ -5,6 +5,7 @@ import { PublicType, StructureType } from "@/types/structure.type";
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
 import { activiteApiSchema } from "./activite.schema";
 import { adresseApiSchema } from "./adresse.schema";
+import { antenneApiSchema } from "./antenne.schema";
 import { budgetApiSchema } from "./budget.schema";
 import { contactApiSchema } from "./contact.schema";
 import { controleApiSchema } from "./controle.schema";
@@ -68,6 +69,7 @@ export const structureOperateurUpdateApiSchema =
     debutPeriodeAutorisation: z.string().datetime().nullish(),
     finPeriodeAutorisation: z.string().datetime().nullish(),
     adresses: z.array(adresseApiSchema),
+    antennes: z.array(antenneApiSchema),
     structureTypologies: z.array(structureTypologieApiSchema),
     forms: z.array(formApiSchema).optional(),
     contacts: z.array(contactApiSchema),
