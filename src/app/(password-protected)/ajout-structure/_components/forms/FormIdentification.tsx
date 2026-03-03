@@ -223,7 +223,6 @@ export default function FormIdentification() {
             <DnaAndFiness />
 
             <hr />
-            <hr />
 
             <FieldSetContacts />
 

@@ -53,7 +53,7 @@ export const FieldSetDna = () => {
                 control={control}
                 type="text"
                 label="Code"
-              />{" "}
+              />
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
               <InputWithValidation

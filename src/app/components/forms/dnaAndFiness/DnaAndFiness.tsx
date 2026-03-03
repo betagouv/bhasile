@@ -1,13 +1,17 @@
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { useFormContext } from "react-hook-form";
 
+import { isStructureAutorisee } from "@/app/utils/structure.util";
+
+import InputWithValidation from "../InputWithValidation";
 import { FieldSetDna } from "./FieldSetDna";
 import { FieldSetFiness } from "./FieldSetFiness";
 
 export const DnaAndFiness = () => {
-  const { watch, setValue } = useFormContext();
+  const { watch, control, setValue } = useFormContext();
 
   const isMultiDna = watch("isMultiDna");
+  const isAutorisee = isStructureAutorisee(watch("type"));
 
   return (
     <>
@@ -29,8 +33,31 @@ export const DnaAndFiness = () => {
           },
         ]}
       />
-      <FieldSetDna />
-      <FieldSetFiness />
+      {isMultiDna ? (
+        <>
+          <FieldSetDna />
+          {isAutorisee && <FieldSetFiness />}
+        </>
+      ) : (
+        <div className="grid grid-cols-3 gap-6 flex-1">
+          <InputWithValidation
+            name="dnaStructures.0.dna.code"
+            id="dnaStructures.0.dna.code"
+            control={control}
+            type="text"
+            label="Code DNA"
+          />
+          {isAutorisee && (
+            <InputWithValidation
+              name="finesses.0.code"
+              id="finesses.0.code"
+              control={control}
+              type="text"
+              label="Code FINESS"
+            />
+          )}
+        </div>
+      )}
     </>
   );
 };
