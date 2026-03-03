@@ -30,6 +30,7 @@ export const createOrUpdateContacts = async (
       telephone: contact.telephone ?? "",
       email: contact.email ?? "",
       role: contact.role ?? "",
+      perimetre: contact.perimetre ?? "",
     })),
   });
 };

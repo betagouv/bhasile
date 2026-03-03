@@ -5,7 +5,6 @@ import autoAnimate from "@formkit/auto-animate";
 import { useEffect, useRef, useState } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { FormKind } from "@/types/global";
 import { PublicType, StructureType } from "@/types/structure.type";
 
@@ -15,7 +14,6 @@ import SelectWithValidation from "../SelectWithValidation";
 
 export const FieldSetDescription = ({
   dnaCode,
-  disableTypes = true,
   formKind = FormKind.FINALISATION,
 }: Props) => {
   const filialesContainerRef = useRef(null);
@@ -23,27 +21,12 @@ export const FieldSetDescription = ({
   const localForm = useForm();
   const { register, control, setValue, watch } = parentFormContext || localForm;
   const [isManagedByAFiliale, setIsManagedByAFiliale] = useState(false);
-  const [type, setType] = useState<string | undefined>(
-    parentFormContext ? watch("type") : undefined
-  );
 
   useEffect(() => {
     if (filialesContainerRef.current) {
       autoAnimate(filialesContainerRef.current);
     }
   }, [filialesContainerRef]);
-
-  useEffect(() => {
-    if (parentFormContext) {
-      const subscription = parentFormContext.watch((value, { name }) => {
-        if (name === "type") {
-          setType(value.type);
-        }
-      });
-      return () => subscription.unsubscribe();
-    }
-    return undefined;
-  }, [parentFormContext]);
 
   const filiale = watch("filiale");
 
@@ -87,9 +70,8 @@ export const FieldSetDescription = ({
               name="type"
               control={control}
               label="Type"
-              disabled={disableTypes}
+              disabled={true}
               required
-              onChange={setType}
               id="type"
             >
               <option value="">Sélectionnez un type</option>
@@ -129,15 +111,6 @@ export const FieldSetDescription = ({
             type="date"
             label="Date de création de la structure"
             id="creationDate"
-          />
-        )}
-        {isStructureAutorisee(type) && formKind !== FormKind.MODIFICATION && (
-          <InputWithValidation
-            name="finessCode"
-            control={control}
-            type="text"
-            label="Code FINESS"
-            id="finessCode"
           />
         )}
         <SelectWithValidation
@@ -190,6 +163,5 @@ export const FieldSetDescription = ({
 
 type Props = {
   dnaCode: string;
-  disableTypes?: boolean;
   formKind?: FormKind;
 };

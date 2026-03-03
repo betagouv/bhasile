@@ -342,26 +342,6 @@ describe("FieldSetDescription", () => {
       expect(options).not.toContain(StructureType.PRAHDA);
     });
 
-    it("should be disabled when disableTypes is true", () => {
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            type: StructureType.CADA,
-            operateur: { id: 1, name: "Adoma" },
-          }}
-        >
-          <FieldSetDescription
-            dnaCode={defaultDnaCode}
-            disableTypes={true}
-            formKind={FormKind.FINALISATION}
-          />
-        </FormTestWrapper>
-      );
-
-      const typeSelect = screen.getByLabelText("Type") as HTMLSelectElement;
-      expect(typeSelect.disabled).toBe(true);
-    });
-
     it("should update FINESS field visibility when type changes", async () => {
       const user = userEvent.setup();
 
@@ -374,7 +354,6 @@ describe("FieldSetDescription", () => {
         >
           <FieldSetDescription
             dnaCode={defaultDnaCode}
-            disableTypes={false}
             formKind={FormKind.FINALISATION}
           />
         </FormTestWrapper>

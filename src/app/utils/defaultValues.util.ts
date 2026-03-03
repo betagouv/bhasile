@@ -38,6 +38,13 @@ export const getDefaultValues = ({
   const isAutorisee = isStructureAutorisee(structure.type);
   const repartition = getRepartition(structure);
 
+  const isMultiAntenne =
+    structure.antennes?.length > 1 || structure.contacts?.length > 2;
+
+  const isMultiDna =
+    (structure.dnaStructures?.length ?? 0) > 1 ||
+    (structure.finesses?.length ?? 0) > 1;
+
   const adresses = transformApiAdressesToFormAdresses(structure.adresses);
 
   const antennes = transformApiAntennesToFormAntennes(structure.antennes);
@@ -65,6 +72,8 @@ export const getDefaultValues = ({
     nom: structure.nom ?? "",
     operateur: structure.operateur ?? undefined,
     creationDate: structure.creationDate ?? "",
+    isMultiAntenne,
+    isMultiDna,
     debutPeriodeAutorisation: isAutorisee
       ? (structure.debutPeriodeAutorisation ?? undefined)
       : undefined,
@@ -135,6 +144,8 @@ type StructureDefaultValues = Omit<
 > & {
   creationDate: string;
   nom: string;
+  isMultiAntenne: boolean;
+  isMultiDna: boolean;
   debutPeriodeAutorisation?: string;
   finPeriodeAutorisation?: string;
   debutConvention?: string;
