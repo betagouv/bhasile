@@ -3,10 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSetHebergement";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSetHebergement";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { useStructures } from "@/app/hooks/useStructures";
 import { transformFormAdressesToApiAdresses } from "@/app/utils/adresse.util";

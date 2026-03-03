@@ -1,11 +1,11 @@
 "use client";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
-import { FieldSetOuvertureFermeture } from "@/app/components/forms/ouvertureFermeture/FieldSetOuvertureFermeture";
-import { FieldSetTypePlaces } from "@/app/components/forms/typePlace/FieldSetTypePlaces";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { FieldSetOuvertureFermeture } from "@/app/components/forms/ouvertureFermeture/FieldSetOuvertureFermeture";
+import { FieldSetTypePlaces } from "@/app/components/forms/typePlace/FieldSetTypePlaces";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
