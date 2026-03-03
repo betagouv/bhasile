@@ -3,8 +3,8 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
-import { FieldSetYearlyDocumentsFinanciers } from "@/app/components/forms/finance/documents/FieldSetYearlyDocumentsFinanciers";
 import { Date303 } from "@/app/components/forms/finance/documents/Date303";
+import { FieldSetYearlyDocumentsFinanciers } from "@/app/components/forms/finance/documents/FieldSetYearlyDocumentsFinanciers";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { getDocumentsFinanciersYearRange } from "@/app/utils/date.util";
@@ -18,16 +18,16 @@ export default function FormDocuments() {
   const searchParams = useSearchParams();
   const isEditMode = searchParams.get("mode") === "edit";
 
-  const previousRoute = `/ajout-structure/${params.dnaCode}/03-type-places`;
-  const resetRoute = `/ajout-structure/${params.dnaCode}/01-identification`;
-  const nextRoute = `/ajout-structure/${params.dnaCode}/05-verification`;
+  const previousRoute = `/ajout-structure/${params.id}/03-type-places`;
+  const resetRoute = `/ajout-structure/${params.id}/01-identification`;
+  const nextRoute = `/ajout-structure/${params.id}/05-verification`;
 
   const { currentValue: localStorageIdentificationValues } = useLocalStorage(
-    `ajout-structure-${params.dnaCode}-identification`,
+    `ajout-structure-${params.id}-identification`,
     {}
   );
   const { currentValue: localStorageValues } = useLocalStorage(
-    `ajout-structure-${params.dnaCode}-documents`,
+    `ajout-structure-${params.id}-documents`,
     {}
   );
 
@@ -42,7 +42,7 @@ export default function FormDocuments() {
 
   const { currentValue } = useLocalStorage<
     Partial<AjoutIdentificationFormValues>
-  >(`ajout-structure-${params.dnaCode}-identification`, {});
+  >(`ajout-structure-${params.id}-identification`, {});
 
   const isAutorisee = isStructureAutorisee(currentValue?.type);
 
@@ -51,7 +51,7 @@ export default function FormDocuments() {
   return (
     <FormWrapper
       schema={DocumentsFinanciersFlexibleSchema}
-      localStorageKey={`ajout-structure-${params.dnaCode}-documents`}
+      localStorageKey={`ajout-structure-${params.id}-documents`}
       nextRoute={nextRoute}
       resetRoute={resetRoute}
       mode="onChange"

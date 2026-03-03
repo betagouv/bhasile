@@ -5,7 +5,7 @@ import {
   getCoordinates,
   transformFormAdressesToApiAdresses,
 } from "@/app/utils/adresse.util";
-import { transformAjoutFormContactsToApiContacts } from "@/app/utils/contacts.util";
+import { transformAgentFormContactsToApiContacts } from "@/app/utils/contacts.util";
 import { formatDateToIsoString } from "@/app/utils/date.util";
 import { StructureApiType } from "@/schemas/api/structure.schema";
 import { AjoutAdressesFormValues } from "@/schemas/forms/ajout/ajoutAdresses.schema";
@@ -92,7 +92,8 @@ const transformAjoutFormStructureToApiStructure = async (
   const coordinates = await getCoordinates(fullAdress);
 
   return {
-    dnaCode: values.dnaCode,
+    id: values.id,
+    codeBhasile: values.codeBhasile,
     operateur: values.operateur,
     filiale: values.filiale,
     type: values.type,
@@ -107,7 +108,6 @@ const transformAjoutFormStructureToApiStructure = async (
     finConvention: formatDateToIsoString(values.finConvention),
     creationDate: formatDateToIsoString(values.creationDate, true) as string,
     date303: values.date303 ? formatDateToIsoString(values.date303) : undefined,
-    finessCode: values.finessCode,
     lgbt: values.lgbt,
     fvvTeh: values.fvvTeh,
     public: values.public,
@@ -117,14 +117,8 @@ const transformAjoutFormStructureToApiStructure = async (
     finPeriodeAutorisation: formatDateToIsoString(
       values.finPeriodeAutorisation
     ),
-    adresses: transformFormAdressesToApiAdresses(
-      values.adresses,
-      values.dnaCode
-    ),
-    contacts: transformAjoutFormContactsToApiContacts(
-      values.contactPrincipal,
-      values.contactSecondaire
-    ),
+    adresses: transformFormAdressesToApiAdresses(values.adresses, values.id),
+    contacts: transformAgentFormContactsToApiContacts(values.contacts),
     structureMillesimes:
       values.structureMillesimes?.map((millesime) => ({
         ...millesime,

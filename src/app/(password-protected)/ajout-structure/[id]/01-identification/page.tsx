@@ -12,7 +12,7 @@ export default function StepInfo() {
     <>
       <Stepper
         currentStep={1}
-        nextTitle="Adresses"
+        nextTitle="Adresses d'hébergement"
         stepCount={4}
         title="Identification de la structure"
       />

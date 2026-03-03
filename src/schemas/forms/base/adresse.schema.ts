@@ -17,7 +17,7 @@ export const adresseTypologieSchema = z.object({
 
 export const adresseSchema = z.object({
   id: zId(),
-  structureDnaCode: z.string().optional(),
+  structureId: zId(),
   adresseComplete: z.string().optional(),
   adresse: z.string().min(1),
   codePostal: z.string().min(1),

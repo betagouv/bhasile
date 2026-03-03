@@ -16,11 +16,11 @@ export const DocumentsFinanciers = (): ReactElement => {
   const params = useParams();
   const { currentValue: localStorageValues } = useLocalStorage<
     Partial<DocumentsFinanciersFlexibleFormValues>
-  >(`ajout-structure-${params.dnaCode}-documents`, {});
+  >(`ajout-structure-${params.id}-documents`, {});
 
   const { currentValue: identificationValues } = useLocalStorage<
     Partial<AjoutIdentificationFormValues>
-  >(`ajout-structure-${params.dnaCode}-identification`, {});
+  >(`ajout-structure-${params.id}-identification`, {});
 
   const isAutorisee = isStructureAutorisee(identificationValues?.type);
 

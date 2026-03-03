@@ -14,7 +14,7 @@ export default function StepAdresses() {
         currentStep={2}
         nextTitle="Types de places"
         stepCount={4}
-        title="Adresses"
+        title="Adresses d'hébergement"
       />
 
       <FormAdresses />

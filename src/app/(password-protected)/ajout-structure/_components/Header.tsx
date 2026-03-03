@@ -9,7 +9,7 @@ import { StructureName } from "./StructureName";
 export const Header = () => {
   const params = useParams();
   const searchParams = useSearchParams();
-  const dnaCode = params.dnaCode || searchParams.get("dnaCode");
+  const dnaCode = params.id || searchParams.get("dnaCode");
 
   return (
     <header className="bg-white shadow-md">

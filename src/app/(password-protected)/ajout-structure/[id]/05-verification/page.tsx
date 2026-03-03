@@ -28,7 +28,7 @@ export default function StepVerification() {
   const { addStructure } = useStructures();
   const router = useRouter();
   const params = useParams();
-  const previousRoute = `/ajout-structure/${params.dnaCode}/04-documents`;
+  const previousRoute = `/ajout-structure/${params.id}/04-documents`;
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const [backendError, setBackendError] = useState("");
 
@@ -36,7 +36,7 @@ export default function StepVerification() {
     currentValue: identificationValues,
     resetLocalStorageValues: resetIdentification,
   } = useLocalStorage<Partial<AjoutIdentificationFormValues>>(
-    `ajout-structure-${params.dnaCode}-identification`,
+    `ajout-structure-${params.id}-identification`,
     {}
   );
 
@@ -44,7 +44,7 @@ export default function StepVerification() {
     currentValue: adressesValues,
     resetLocalStorageValues: resetAdresses,
   } = useLocalStorage<Partial<AjoutAdressesFormValues>>(
-    `ajout-structure-${params.dnaCode}-adresses`,
+    `ajout-structure-${params.id}-adresses`,
     {}
   );
 
@@ -52,7 +52,7 @@ export default function StepVerification() {
     currentValue: typePlacesValues,
     resetLocalStorageValues: resetTypePlaces,
   } = useLocalStorage<Partial<AjoutTypePlacesFormValues>>(
-    `ajout-structure-${params.dnaCode}-type-places`,
+    `ajout-structure-${params.id}-type-places`,
     {}
   );
 
@@ -60,7 +60,7 @@ export default function StepVerification() {
     currentValue: documentsFinanciersValues,
     resetLocalStorageValues: resetDocuments,
   } = useLocalStorage<Partial<DocumentsFinanciersFlexibleFormValues>>(
-    `ajout-structure-${params.dnaCode}-documents`,
+    `ajout-structure-${params.id}-documents`,
     {}
   );
 
@@ -76,7 +76,7 @@ export default function StepVerification() {
     const result = await addStructure(allValues);
 
     if (result === "OK") {
-      router.push(`/ajout-structure/${params.dnaCode}/06-confirmation`);
+      router.push(`/ajout-structure/${params.id}/06-confirmation`);
     } else {
       setBackendError(result);
       setState("error");
@@ -94,7 +94,7 @@ export default function StepVerification() {
       resetTypePlaces();
       resetDocuments();
 
-      router.push(`/ajout-structure/${params.dnaCode}/01-identification`);
+      router.push(`/ajout-structure/${params.id}/01-identification`);
       window.location.reload();
     }
   };
@@ -136,25 +136,25 @@ export default function StepVerification() {
         <StepResume
           className="mt-10"
           title="Identification de la structure"
-          link={`/ajout-structure/${params.dnaCode}/01-identification?mode=edit`}
+          link={`/ajout-structure/${params.id}/01-identification?mode=edit`}
         >
           <Identification />
         </StepResume>
         <StepResume
           title="Adresses"
-          link={`/ajout-structure/${params.dnaCode}/02-adresses?mode=edit`}
+          link={`/ajout-structure/${params.id}/02-adresses?mode=edit`}
         >
           <Adresses />
         </StepResume>
         <StepResume
           title="Types de places"
-          link={`/ajout-structure/${params.dnaCode}/03-type-places?mode=edit`}
+          link={`/ajout-structure/${params.id}/03-type-places?mode=edit`}
         >
           <TypePlaces />
         </StepResume>
         <StepResume
           title="Documents financiers"
-          link={`/ajout-structure/${params.dnaCode}/04-documents?mode=edit`}
+          link={`/ajout-structure/${params.id}/04-documents?mode=edit`}
           canEdit={false}
         >
           <DocumentsFinanciers />
@@ -167,7 +167,7 @@ export default function StepVerification() {
             </p>
             <p className="text-default-error">
               <a
-                href={getErrorEmail(backendError, params.dnaCode as string)}
+                href={getErrorEmail(backendError, params.id as string)}
                 className="underline"
                 target="_blank"
               >

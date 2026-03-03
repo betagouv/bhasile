@@ -17,32 +17,3 @@ export const transformAgentFormContactsToApiContacts = (
         contact.role
     );
 };
-
-export const transformAjoutFormContactsToApiContacts = (
-  contactPrincipal: Partial<ContactApiType> | undefined,
-  contactSecondaire: Partial<ContactApiType> | undefined
-): Partial<ContactApiType>[] => {
-  const contacts: Partial<ContactApiType>[] = [];
-
-  if (contactPrincipal) {
-    contacts.push(contactPrincipal);
-  }
-
-  if (
-    contactSecondaire &&
-    contactSecondaire.prenom &&
-    contactSecondaire.prenom.trim() !== "" &&
-    contactSecondaire.nom &&
-    contactSecondaire.nom.trim() !== "" &&
-    contactSecondaire.email &&
-    contactSecondaire.email.trim() !== "" &&
-    contactSecondaire.telephone &&
-    contactSecondaire.telephone.trim() !== "" &&
-    contactSecondaire.role &&
-    contactSecondaire.role.trim() !== ""
-  ) {
-    contacts.push(contactSecondaire);
-  }
-
-  return contacts;
-};

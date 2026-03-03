@@ -10,11 +10,11 @@ export const TypePlaces = () => {
   const params = useParams();
   const { currentValue: localStorageValues } = useLocalStorage<
     Partial<AjoutTypePlacesFormValues>
-  >(`ajout-structure-${params.dnaCode}-type-places`, {});
+  >(`ajout-structure-${params.id}-type-places`, {});
 
   const { years } = getTypePlacesYearRange();
   const { currentValue: localStorageIdentificationValues } = useLocalStorage(
-    `ajout-structure-${params.dnaCode}-identification`,
+    `ajout-structure-${params.id}-identification`,
     {}
   );
   const yearsToDisplay = years.filter(
