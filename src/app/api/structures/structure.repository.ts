@@ -11,8 +11,10 @@ import { createOrUpdateAntennes } from "../antennes/antenne.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
 import { createOrUpdateContacts } from "../contacts/contact.repository";
 import { createOrUpdateControles } from "../controles/controle.repository";
+import { createOrUpdateDnaStructures } from "../dna-structures/dna-structure.repository";
 import { createOrUpdateDocumentsFinanciers } from "../documents-financiers/documentFinancier.repository";
 import { createOrUpdateEvaluations } from "../evaluations/evaluation.repository";
+import { createOrUpdateFinesses } from "../finesses/finess.repository";
 import {
   createOrUpdateForms,
   initializeDefaultForms,
@@ -384,6 +386,8 @@ const updateOne = async (
       structureTypologies,
       adresses,
       antennes,
+      dnaStructures,
+      finesses,
       actesAdministratifs,
       documentsFinanciers,
       controles,

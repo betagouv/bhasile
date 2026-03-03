@@ -10,9 +10,11 @@ import { budgetApiSchema } from "./budget.schema";
 import { contactApiSchema } from "./contact.schema";
 import { controleApiSchema } from "./controle.schema";
 import { cpomStructureApiSchema } from "./cpom.schema";
+import { dnaStructureApiSchema } from "./dna-structure.schema";
 import { documentFinancierApiSchema } from "./documentFinancier.schema";
 import { evaluationApiSchema } from "./evaluation.schema";
 import { evenementIndesirableGraveApiSchema } from "./evenement-indesirable-grave.schema";
+import { finessApiSchema } from "./finess.schema";
 import { formApiSchema } from "./form.schema";
 import { operateurApiSchema } from "./operateur.schema";
 import { structureMillesimeApiSchema } from "./structure-millesime.schema";
@@ -70,6 +72,8 @@ export const structureOperateurUpdateApiSchema =
     finPeriodeAutorisation: z.string().datetime().nullish(),
     adresses: z.array(adresseApiSchema),
     antennes: z.array(antenneApiSchema),
+    dnaStructures: z.array(dnaStructureApiSchema).optional(),
+    finesses: z.array(finessApiSchema).optional(),
     structureTypologies: z.array(structureTypologieApiSchema),
     forms: z.array(formApiSchema).optional(),
     contacts: z.array(contactApiSchema),
@@ -80,6 +84,8 @@ const partialStructureOperateurUpdateApiSchema =
   structureOperateurUpdateApiSchema.partial().extend({
     dnaCode: z.string().min(1, "Le code DNA est requis"),
     adresses: z.array(adresseApiSchema.partial()).optional(),
+    dnaStructures: z.array(dnaStructureApiSchema.partial()).optional(),
+    finesses: z.array(finessApiSchema.partial()).optional(),
     forms: z.array(formApiSchema.partial()).optional(),
     contacts: z.array(contactApiSchema.partial()).optional(),
     documentsFinanciers: z.array(documentFinancierApiSchema).optional(),
