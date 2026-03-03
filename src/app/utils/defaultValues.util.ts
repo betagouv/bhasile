@@ -7,6 +7,7 @@ import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { StructureApiType } from "@/schemas/api/structure.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
+import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 import { anyBudgetFormValues } from "@/schemas/forms/base/budget.schema";
 import { ControleFormValues } from "@/schemas/forms/base/controle.schema";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
@@ -123,6 +124,7 @@ type StructureDefaultValues = Omit<
   | "communeAdministrative"
   | "departementAdministratif"
   | "adresses"
+  | "antennes"
   | "actesAdministratifs"
   | "documentsFinanciers"
   | "controles"
@@ -148,6 +150,7 @@ type StructureDefaultValues = Omit<
   departementAdministratif: string;
   typeBati: Repartition;
   adresses: FormAdresse[];
+  antennes: AntenneFormValues[];
   documentsFinanciers: DocumentFinancierFlexibleFormValues[];
   actesAdministratifs: ActeAdministratifFormValues[];
   controles: ControleFormValues[];
