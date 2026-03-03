@@ -4,7 +4,7 @@ import { PrismaTransaction } from "@/types/prisma.type";
 export const createOrUpdateStructureMillesimes = async (
   tx: PrismaTransaction,
   structureMillesimes: StructureMillesimeApiType[] | undefined,
-  structureDnaCode: string
+  structureId: number
 ): Promise<void> => {
   if (!structureMillesimes || structureMillesimes.length === 0) {
     return;
@@ -14,14 +14,14 @@ export const createOrUpdateStructureMillesimes = async (
     structureMillesimes.map((millesime) =>
       tx.structureMillesime.upsert({
         where: {
-          structureDnaCode_year: {
-            structureDnaCode,
+          structureId_year: {
+            structureId,
             year: millesime.year,
           },
         },
         update: millesime,
         create: {
-          structureDnaCode,
+          structureId,
           ...millesime,
         },
       })

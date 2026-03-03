@@ -4,7 +4,7 @@ import { PrismaTransaction } from "@/types/prisma.type";
 export const createOrUpdateBudgets = async (
   tx: PrismaTransaction,
   budgets: BudgetApiType[] | undefined,
-  structureDnaCode: string
+  structureId: number
 ): Promise<void> => {
   if (!budgets || budgets?.length === 0) {
     return;
@@ -14,14 +14,14 @@ export const createOrUpdateBudgets = async (
     (budgets || []).map((budget) => {
       return tx.budget.upsert({
         where: {
-          structureDnaCode_year: {
-            structureDnaCode: structureDnaCode,
+          structureId_year: {
+            structureId: structureId,
             year: budget.year,
           },
         },
         update: budget,
         create: {
-          structureDnaCode,
+          structureId,
           ...budget,
         },
       });

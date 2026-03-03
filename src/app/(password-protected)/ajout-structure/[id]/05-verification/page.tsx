@@ -32,39 +32,24 @@ export default function StepVerification() {
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const [backendError, setBackendError] = useState("");
 
-  const {
-    currentValue: identificationValues,
-    resetLocalStorageValues: resetIdentification,
-  } = useLocalStorage<Partial<AjoutIdentificationFormValues>>(
-    `ajout-structure-${params.id}-identification`,
-    {}
-  );
+  const { currentValue: identificationValues } = useLocalStorage<
+    Partial<AjoutIdentificationFormValues>
+  >(`ajout-structure-${params.id}-identification`, {});
 
-  const {
-    currentValue: adressesValues,
-    resetLocalStorageValues: resetAdresses,
-  } = useLocalStorage<Partial<AjoutAdressesFormValues>>(
-    `ajout-structure-${params.id}-adresses`,
-    {}
-  );
+  const { currentValue: adressesValues } = useLocalStorage<
+    Partial<AjoutAdressesFormValues>
+  >(`ajout-structure-${params.id}-adresses`, {});
 
-  const {
-    currentValue: typePlacesValues,
-    resetLocalStorageValues: resetTypePlaces,
-  } = useLocalStorage<Partial<AjoutTypePlacesFormValues>>(
-    `ajout-structure-${params.id}-type-places`,
-    {}
-  );
+  const { currentValue: typePlacesValues } = useLocalStorage<
+    Partial<AjoutTypePlacesFormValues>
+  >(`ajout-structure-${params.id}-type-places`, {});
 
-  const {
-    currentValue: documentsFinanciersValues,
-    resetLocalStorageValues: resetDocuments,
-  } = useLocalStorage<Partial<DocumentsFinanciersFlexibleFormValues>>(
-    `ajout-structure-${params.id}-documents`,
-    {}
-  );
+  const { currentValue: documentsFinanciersValues } = useLocalStorage<
+    Partial<DocumentsFinanciersFlexibleFormValues>
+  >(`ajout-structure-${params.id}-documents`, {});
 
   const handleSubmit = async () => {
+    console.log("identificationValues", identificationValues);
     setState("loading");
     const allValues = {
       ...identificationValues,
@@ -80,22 +65,6 @@ export default function StepVerification() {
     } else {
       setBackendError(result);
       setState("error");
-    }
-  };
-
-  const handleCancel = () => {
-    const confirmReset = window.confirm(
-      "Attention : Toutes les données saisies vont être effacées. Êtes-vous sûr·e de vouloir continuer ?"
-    );
-
-    if (confirmReset) {
-      resetIdentification();
-      resetAdresses();
-      resetTypePlaces();
-      resetDocuments();
-
-      router.push(`/ajout-structure/${params.id}/01-identification`);
-      window.location.reload();
     }
   };
 
@@ -178,9 +147,6 @@ export default function StepVerification() {
         )}
         <div>
           <div className="flex justify-end gap-4 mt-6">
-            <Button priority="secondary" onClick={handleCancel}>
-              Annuler
-            </Button>
             <Button
               type="submit"
               onClick={handleSubmit}

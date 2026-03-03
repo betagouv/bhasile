@@ -8,14 +8,14 @@ import { PrismaTransaction } from "@/types/prisma.type";
 export const createOrUpdateContacts = async (
   tx: PrismaTransaction,
   contacts: Partial<ContactApiType>[] | undefined,
-  structureDnaCode: string
+  structureId: number
 ): Promise<void> => {
   if (!contacts) {
     return;
   }
 
   await tx.contact.deleteMany({
-    where: { structureDnaCode },
+    where: { structureId },
   });
 
   if (contacts.length === 0) {
@@ -24,7 +24,7 @@ export const createOrUpdateContacts = async (
 
   await tx.contact.createMany({
     data: contacts.map((contact) => ({
-      structureDnaCode,
+      structureId,
       prenom: contact.prenom ?? "",
       nom: contact.nom ?? "",
       telephone: contact.telephone ?? "",

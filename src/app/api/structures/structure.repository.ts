@@ -189,7 +189,7 @@ export const getLatestPlacesAutoriseesPerStructure = async (): Promise<
       year: "desc",
     },
     select: {
-      structureDnaCode: true,
+      structureId: true,
       placesAutorisees: true,
     },
   });
@@ -197,14 +197,15 @@ export const getLatestPlacesAutoriseesPerStructure = async (): Promise<
   const seenStructures = new Set<string>();
 
   return allTypologies
+    .filter((typology) => typology.structureId !== null)
     .filter((typology) => {
       if (
-        seenStructures.has(typology.structureDnaCode) ||
+        seenStructures.has(typology.structureId as unknown as string) ||
         typology.placesAutorisees === null
       ) {
         return false;
       }
-      seenStructures.add(typology.structureDnaCode);
+      seenStructures.add(typology.structureId as unknown as string);
       return true;
     })
     .map((typology) => typology.placesAutorisees as number);
@@ -220,7 +221,6 @@ export const findOneOperateur = async (
     createdAt: Date;
     updatedAt: Date;
     structureId: number | null;
-    structureCodeDna: string;
     formDefinitionId: number;
     status: boolean;
   }[];
@@ -275,7 +275,7 @@ export const findOne = async (id: number): Promise<Structure> => {
                   structure: {
                     select: {
                       id: true,
-                      dnaCode: true,
+                      codeBhasile: true,
                       type: true,
                       communeAdministrative: true,
                       operateur: {
@@ -392,36 +392,36 @@ const updateOne = async (
     return await prisma.$transaction(async (tx) => {
       const updatedStructure = await updateStructure(tx, structure);
 
-      await initializeDefaultForms(tx, isOperateurUpdate, structure.dnaCode);
+      await initializeDefaultForms(tx, isOperateurUpdate, structure.id);
 
-      await createOrUpdateContacts(tx, contacts, structure.dnaCode);
-      await createOrUpdateBudgets(tx, budgets, structure.dnaCode);
+      await createOrUpdateContacts(tx, contacts, structure.id);
+      await createOrUpdateBudgets(tx, budgets, structure.id);
       await createOrUpdateStructureTypologies(
         tx,
         structureTypologies,
-        structure.dnaCode
+        structure.id
       );
-      await createOrUpdateAdresses(tx, adresses, structure.dnaCode);
+      await createOrUpdateAdresses(tx, adresses, structure.id);
       await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
-        structureDnaCode: structure.dnaCode,
+        structureId: structure.id,
       });
       await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
-        structureDnaCode: structure.dnaCode,
+        structureId: structure.id,
       });
-      await createOrUpdateControles(tx, controles, structure.dnaCode);
-      await createOrUpdateForms(tx, forms, structure.dnaCode);
-      await createOrUpdateEvaluations(tx, evaluations, structure.dnaCode);
+      await createOrUpdateControles(tx, controles, structure.id);
+      await createOrUpdateForms(tx, forms, structure.id);
+      await createOrUpdateEvaluations(tx, evaluations, structure.id);
       await createOrUpdateStructureMillesimes(
         tx,
         structureMillesimes,
-        structure.dnaCode
+        structure.id
       );
 
       return updatedStructure;
     });
   } catch (error) {
     throw new Error(
-      `Impossible de mettre à jour la structure avec le code DNA ${structure.dnaCode}: ${error}`
+      `Impossible de mettre à jour la structure avec l'id ${structure.id}: ${error}`
     );
   }
 };
@@ -460,7 +460,7 @@ const updateStructure = async (
 
   const updatedStructure = await tx.structure.update({
     where: {
-      dnaCode: structure.dnaCode,
+      id: structure.id,
     },
     data: {
       public: convertToPublicType(publicType!),
@@ -507,7 +507,7 @@ const updateStructure = async (
 
 // Only used in e2e tests
 export const createMinimalStructure = async (structure: {
-  dnaCode: string;
+  id: number;
   type: StructureType;
   operateurId: number;
   departementAdministratif?: string;
@@ -520,16 +520,16 @@ export const createMinimalStructure = async (structure: {
     throw new Error("This function is only used in e2e tests");
   }
   await prisma.structure.upsert({
-    where: { dnaCode: structure.dnaCode },
+    where: { id: structure.id },
     update: structure,
     create: structure,
   });
 };
 
 // Only used in e2e tests
-export const deleteStructure = async (dnaCode: string): Promise<void> => {
+export const deleteStructure = async (id: number): Promise<void> => {
   if (process.env.NODE_ENV === "production") {
     throw new Error("This function is only used in e2e tests");
   }
-  await prisma.structure.delete({ where: { dnaCode } });
+  await prisma.structure.delete({ where: { id } });
 };

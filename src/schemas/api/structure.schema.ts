@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { zId } from "@/app/utils/zodCustomFields";
 import { PublicType, StructureType } from "@/types/structure.type";
 
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
@@ -19,9 +18,8 @@ import { structureMillesimeApiSchema } from "./structure-millesime.schema";
 import { structureTypologieApiSchema } from "./structure-typologie.schema";
 
 export const structureMinimalApiSchema = z.object({
-  id: zId(),
-  dnaCode: z.string(),
-  codeBhasile: z.string(),
+  id: z.number(),
+  codeBhasile: z.string().optional(),
   operateur: operateurApiSchema,
   type: z.nativeEnum(StructureType),
   nom: z.string().optional(),
@@ -90,7 +88,7 @@ const partialStructureOperateurUpdateApiSchema =
   });
 
 const remainingStructureAgentUpdateApiSchema = z.object({
-  id: z.number().optional(),
+  id: z.number(),
   noEvaluationStructure: z.boolean().optional(),
   notes: z.string().nullish(),
   controles: z.array(controleApiSchema).optional(),

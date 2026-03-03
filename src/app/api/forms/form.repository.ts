@@ -7,7 +7,7 @@ import { convertToStepStatus } from "./form.util";
 export const createOrUpdateForms = async (
   tx: PrismaTransaction,
   forms: FormApiType[] | undefined,
-  structureCodeDna: string
+  structureId: number
 ): Promise<void> => {
   if (!forms || forms.length === 0) {
     return;
@@ -15,14 +15,14 @@ export const createOrUpdateForms = async (
 
   await Promise.all(
     forms.map(async (form) => {
-      await createCompleteFormWithSteps(tx, structureCodeDna, form);
+      await createCompleteFormWithSteps(tx, structureId, form);
     })
   );
 };
 
 const createCompleteFormWithSteps = async (
   tx: PrismaTransaction,
-  structureCodeDna: string,
+  structureId: number,
   form: FormApiType
 ): Promise<void> => {
   // 1. Récupérer la FormDefinition par slug
@@ -40,8 +40,8 @@ const createCompleteFormWithSteps = async (
   // 2. Créer ou mettre à jour le Form
   const formEntity = await tx.form.upsert({
     where: {
-      structureCodeDna_formDefinitionId: {
-        structureCodeDna: structureCodeDna,
+      structureId_formDefinitionId: {
+        structureId,
         formDefinitionId: formDefinition.id,
       },
     },
@@ -50,7 +50,7 @@ const createCompleteFormWithSteps = async (
     },
     create: {
       formDefinitionId: formDefinition.id,
-      structureCodeDna: structureCodeDna,
+      structureId,
       status: form.status,
     },
   });
@@ -94,7 +94,7 @@ const createCompleteFormWithSteps = async (
 export const initializeDefaultForms = async (
   tx: PrismaTransaction,
   isOperateurUpdate: boolean,
-  structureCodeDna: string
+  structureId: number
 ): Promise<void> => {
   if (!isOperateurUpdate) {
     return;
@@ -112,7 +112,7 @@ export const initializeDefaultForms = async (
   const formEntity = await tx.form.create({
     data: {
       formDefinitionId: formDefinition.id,
-      structureCodeDna: structureCodeDna,
+      structureId,
       status: false,
     },
   });

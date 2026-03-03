@@ -4,10 +4,10 @@ import { PrismaTransaction } from "@/types/prisma.type";
 const deleteEvaluations = async (
   tx: PrismaTransaction,
   evaluationsToKeep: EvaluationApiType[],
-  structureDnaCode: string
+  structureId: number
 ): Promise<void> => {
   const allEvaluations = await tx.evaluation.findMany({
-    where: { structureDnaCode: structureDnaCode },
+    where: { structureId },
   });
   const evaluationsToDelete = allEvaluations.filter(
     (evaluation) =>
@@ -25,13 +25,13 @@ const deleteEvaluations = async (
 export const createOrUpdateEvaluations = async (
   tx: PrismaTransaction,
   evaluations: EvaluationApiType[] | undefined,
-  structureDnaCode: string
+  structureId: number
 ): Promise<void> => {
   if (!evaluations || evaluations.length === 0) {
     return;
   }
 
-  await deleteEvaluations(tx, evaluations, structureDnaCode);
+  await deleteEvaluations(tx, evaluations, structureId);
 
   await Promise.all(
     (evaluations || []).map((evaluation) => {
@@ -48,7 +48,7 @@ export const createOrUpdateEvaluations = async (
           },
         },
         create: {
-          structureDnaCode,
+          structureId,
           date: evaluation.date ?? "",
           notePersonne: evaluation.notePersonne,
           notePro: evaluation.notePro,

@@ -6,10 +6,10 @@ import { convertToControleType } from "./controle.util";
 const deleteControles = async (
   tx: PrismaTransaction,
   controlesToKeep: ControleApiType[],
-  structureDnaCode: string
+  structureId: number
 ): Promise<void> => {
   const allControles = await tx.controle.findMany({
-    where: { structureDnaCode: structureDnaCode },
+    where: { structureId },
   });
   const controlesToDelete = allControles.filter(
     (controle) =>
@@ -27,13 +27,13 @@ const deleteControles = async (
 export const createOrUpdateControles = async (
   tx: PrismaTransaction,
   controles: ControleApiType[] | undefined,
-  structureDnaCode: string
+  structureId: number
 ): Promise<void> => {
   if (!controles || controles.length === 0) {
     return;
   }
 
-  await deleteControles(tx, controles, structureDnaCode);
+  await deleteControles(tx, controles, structureId);
 
   await Promise.all(
     (controles || []).map((controle) => {
@@ -47,7 +47,7 @@ export const createOrUpdateControles = async (
           },
         },
         create: {
-          structureDnaCode,
+          structureId,
           type: convertToControleType(controle.type),
           date: controle.date!,
           fileUploads: {

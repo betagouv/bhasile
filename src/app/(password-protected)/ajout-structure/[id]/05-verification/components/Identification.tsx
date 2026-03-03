@@ -83,7 +83,12 @@ export const Identification = () => {
             </span>
           )}
 
-          {contact?.role && <span>({contact?.role})</span>}
+          {contact?.role && (
+            <span>
+              {contact?.role}{" "}
+              {contact?.perimetre && <span>({contact?.perimetre})</span>}
+            </span>
+          )}
           {contact?.email && <span>{contact?.email}</span>}
           {contact?.telephone && (
             <span>{formatPhoneNumber(contact?.telephone)}</span>

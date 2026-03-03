@@ -11,7 +11,7 @@ export const Contact = ({
 }: Props) => {
   return (
     <div className="flex gap-6">
-      <fieldset className="flex flex-col gap-6 border rounded p-4 flex-1">
+      <fieldset className="flex flex-col gap-6 border border-default-grey rounded-xl p-8 flex-1">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <InputWithValidation
             name={`contacts.${index}.prenom`}

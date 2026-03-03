@@ -7,6 +7,7 @@ export const requiredContactSchema = z.object({
   prenom: z.string().nonempty("Le prénom est requis"),
   nom: z.string().nonempty("Le nom est requis"),
   role: z.string().nonempty("Le rôle est requis"),
+  perimetre: z.string().optional(),
   email: z
     .string()
     .nonempty("Veuillez saisir une adresse email valide")
@@ -23,6 +24,7 @@ export const optionalContactSchema = z
     prenom: z.string().optional(),
     nom: z.string().optional(),
     role: z.string().optional(),
+    perimetre: z.string().optional(),
     email: z.string().optional(),
     telephone: z.string().optional(),
   })
@@ -31,12 +33,17 @@ export const optionalContactSchema = z
       return;
     }
 
-    const { prenom, nom, role, email, telephone } = data;
+    const { prenom, nom, role, perimetre, email, telephone } = data;
 
     const fields = [
       { name: "prenom", value: prenom, message: "Le prénom est requis" },
       { name: "nom", value: nom, message: "Le nom est requis" },
       { name: "role", value: role, message: "Le rôle est requis" },
+      {
+        name: "perimetre",
+        value: perimetre,
+        message: "Le périmètre est requis",
+      },
       {
         name: "email",
         value: email,
