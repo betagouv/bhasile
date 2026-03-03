@@ -37,23 +37,45 @@ export const Identification = () => {
       </div>
       <div className="grid grid-cols-2 border-b border-default-grey pb-2 mb-3">
         <p className="flex gap-4 mb-0">
-          <b>Adresse administrative principale</b> {localStorageValues?.nom},{" "}
-          {localStorageValues?.adresseAdministrative}{" "}
-          {localStorageValues?.codePostalAdministratif}{" "}
-          {formatCityName(localStorageValues?.communeAdministrative ?? "")}
+          <b>Adresse administrative principale</b>{" "}
+          <span>
+            {localStorageValues?.nom},{" "}
+            {localStorageValues?.adresseAdministrative}{" "}
+            {localStorageValues?.codePostalAdministratif}{" "}
+            {formatCityName(localStorageValues?.communeAdministrative ?? "")}
+          </span>
         </p>
       </div>
+      {localStorageValues?.antennes &&
+        localStorageValues?.antennes.length > 0 && (
+          <>
+            <h3 className="text-title-blue-france w-full flex justify-between text-lg mt-10">
+              Antennes
+            </h3>
+            {localStorageValues?.antennes.map((antenne) => (
+              <div
+                className="flex gap-4 border-b border-default-grey pb-2 mb-3"
+                key={antenne.id}
+              >
+                <span className="italic">{antenne.name}</span>
+                <span>
+                  {antenne.adresse} {antenne.codePostal}{" "}
+                  {formatCityName(antenne.commune)}
+                </span>
+              </div>
+            ))}
+          </>
+        )}
       <h3 className="text-title-blue-france w-full flex justify-between text-lg mt-10">
         Codes DNA
       </h3>
       {localStorageValues?.dnaStructures?.map((dnaStructure) => (
         <div
-          className="border-b border-default-grey pb-2 mb-3"
+          className="border-b border-default-grey flex gap-4  pb-2 mb-3"
           key={dnaStructure.dna.code}
         >
-          <p className="flex gap-4 mb-0">
-            {dnaStructure.dna.code} {dnaStructure.dna.description}
-          </p>
+          <span className="italic">{dnaStructure.dna.code}</span>{" "}
+          <span>{dnaStructure.dna.description}</span>
         </div>
       ))}
       <h3 className="text-title-blue-france w-full flex justify-between text-lg mt-10">
@@ -61,12 +83,11 @@ export const Identification = () => {
       </h3>
       {localStorageValues?.finesses?.map((finess) => (
         <div
-          className="border-b border-default-grey pb-2 mb-3"
+          className="border-b border-default-grey flex gap-4 pb-2 mb-3"
           key={finess.code}
         >
-          <p className="flex gap-4 mb-0">
-            {finess.code} {finess.description}
-          </p>
+          <span className="italic">{finess.code}</span>{" "}
+          <span>{finess.description}</span>
         </div>
       ))}
       <h3 className="text-title-blue-france w-full flex justify-between text-lg mt-10">
@@ -78,7 +99,7 @@ export const Identification = () => {
           key={contact?.email}
         >
           {(contact?.nom || contact?.prenom) && (
-            <span>
+            <span className="italic">
               {contact?.prenom} {contact?.nom}
             </span>
           )}

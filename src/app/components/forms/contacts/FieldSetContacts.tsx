@@ -1,28 +1,50 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import Notice from "@codegouvfr/react-dsfr/Notice";
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { ContactApiType } from "@/schemas/api/contact.schema";
+import { ContactFormValues } from "@/schemas/forms/base/contact.schema";
 
 import { Contact } from "./Contact";
 
+const emptyContact: ContactFormValues = {
+  prenom: "",
+  nom: "",
+  telephone: "",
+  email: "",
+  role: "",
+  perimetre: "",
+};
+
 export const FieldSetContacts = () => {
-  const { control, watch } = useFormContext();
+  const { control, watch, setValue } = useFormContext();
 
   const isMultiAntenne = watch("isMultiAntenne");
 
-  const contacts = (watch("contacts") || [{}, {}]) as ContactApiType[];
+  const contacts = (watch("contacts") || [
+    emptyContact,
+    emptyContact,
+  ]) as ContactFormValues[];
 
   const notice = isMultiAntenne
     ? "Veuillez renseigner le contact de la personne responsable de la structure et celui de la personne responsable de l’opérationnel et/ou du financier."
     : "Veuillez renseigner les contacts d’au moins deux personnes dont celle responsable de la structure et celle responsable de l’opérationnel et/ou du financier. Indiquez également un responsable de chaque antenne.";
 
+  useEffect(() => {
+    if (!isMultiAntenne) {
+      setValue("contacts", [watch("contacts")?.[0], watch("contacts")?.[1]]);
+    }
+  }, [isMultiAntenne, setValue, watch]);
+
   const handleDelete = (index: number) => {
-    console.log(index);
+    setValue(
+      "contacts",
+      contacts.filter((_, i) => i !== index)
+    );
   };
 
   const handleAddNewContact = () => {
-    console.log("add new contact");
+    setValue("contacts", [...contacts, emptyContact]);
   };
 
   return (
@@ -50,12 +72,13 @@ export const FieldSetContacts = () => {
 
       {isMultiAntenne && (
         <Button
+          type="button"
           iconId="fr-icon-add-line"
           priority="tertiary no outline"
           className="underline font-normal p-0"
           onClick={handleAddNewContact}
         >
-          + Ajouter un contact
+          Ajouter un contact
         </Button>
       )}
     </>

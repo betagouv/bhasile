@@ -94,3 +94,5 @@ export const contactsSchema = z.object({
     .tuple([requiredContactSchema, requiredContactSchema])
     .rest(optionalContactSchema),
 });
+
+export type ContactFormValues = z.infer<typeof contactSchema>;
