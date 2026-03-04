@@ -66,7 +66,7 @@ export const BudgetTables = () => {
             severity="info"
             title=""
             className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey"
-            description={`L’historique des données budgétaires à l’échelle du CPOM a déjà été renseignées lors de la saisie du CPOM. Si vous constatez une erreur et voulez apporter une modification, contactez-nous : ${BHASILE_CONTACT_EMAIL}`}
+            description={`L’historique des données budgétaires à l’échelle du CPOM a déjà été renseigné lors de la saisie du CPOM. Si vous constatez une erreur et voulez apporter une modification, contactez-nous : ${BHASILE_CONTACT_EMAIL}`}
           />
           <StructureCpomTable canEdit={false} />
         </fieldset>
