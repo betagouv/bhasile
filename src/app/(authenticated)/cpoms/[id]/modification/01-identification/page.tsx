@@ -81,10 +81,7 @@ export default function CpomModificationIdentification() {
         <FieldSetDocuments />
         <FieldSetStructures />
         {saveState === FetchState.ERROR && (
-          <SubmitError
-            structureDnaCode={String(cpom.id)}
-            backendError={backendError}
-          />
+          <SubmitError cpomId={cpom.id} backendError={backendError} />
         )}
       </FormWrapper>
     </>

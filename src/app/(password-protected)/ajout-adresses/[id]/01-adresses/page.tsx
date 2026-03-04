@@ -3,14 +3,14 @@ import { AdressesRecovery } from "./_components/AdressesRecovery";
 export default async function AjoutAdressesPage({
   params,
 }: {
-  params: Promise<{ dnaCode: string }>;
+  params: Promise<{ id: number }>;
 }) {
-  const { dnaCode } = await params;
+  const { id } = await params;
 
   return (
     <div>
       <h2>Adresses</h2>
-      <AdressesRecovery dnaCode={dnaCode} />
+      <AdressesRecovery id={id} />
     </div>
   );
 }

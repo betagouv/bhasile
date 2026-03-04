@@ -103,7 +103,7 @@ export const getStructureSearchWhere = ({
   if (search) {
     where.OR = [
       {
-        dnaCode: {
+        codeBhasile: {
           contains: search,
           mode: "insensitive",
         },

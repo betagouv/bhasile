@@ -10,13 +10,7 @@ import { ContactsViewer } from "./ContactsViewer";
 
 export const PrahdaDescriptionBlock = (): ReactElement => {
   const { structure } = useStructureContext();
-  const {
-    creationDate,
-    dnaCode,
-    operateur,
-    filiale,
-    public: publicType,
-  } = structure;
+  const { creationDate, operateur, filiale, public: publicType } = structure;
 
   return (
     <Block title="Description" iconClass="fr-icon-menu-2-fill">
@@ -32,10 +26,6 @@ export const PrahdaDescriptionBlock = (): ReactElement => {
       </div>
       <hr />
       <div className="flex mb-2">
-        <div className="flex-1">
-          <strong className="pr-2">Code DNA (OFII)</strong>
-          {dnaCode}
-        </div>
         <div className="flex-1">
           <strong className="pr-2">Opérateur</strong>
           {getOperateurLabel(filiale, operateur?.name)}

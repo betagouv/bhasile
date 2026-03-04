@@ -40,7 +40,7 @@ export default function ModificationNotesForm(): ReactElement {
         onSubmit={(data) =>
           handleSubmit({
             ...data,
-            dnaCode: structure.dnaCode,
+            id: structure.id,
           })
         }
         defaultValues={defaultValues}
@@ -55,7 +55,7 @@ export default function ModificationNotesForm(): ReactElement {
         <FieldSetNotes />
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureDnaCode={structure.dnaCode}
+            structureCodeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}

@@ -42,9 +42,9 @@ export default function ModificationControleForm() {
     );
 
     await handleSubmit({
+      id: structure.id,
       controles,
       evaluations,
-      dnaCode: structure.dnaCode,
     });
   };
 
@@ -80,7 +80,7 @@ export default function ModificationControleForm() {
         <Controles />
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureDnaCode={structure.dnaCode}
+            structureCodeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}

@@ -16,12 +16,10 @@ export const DescriptionBlock = (): ReactElement => {
   const router = useRouter();
   const {
     creationDate,
-    dnaCode,
     filiale,
     operateur,
     public: publicValue,
     type,
-    finessCode,
     lgbt,
     fvvTeh,
   } = structure;
@@ -54,19 +52,6 @@ export const DescriptionBlock = (): ReactElement => {
           <strong className="pr-2">Type de structure</strong>
           {type}
         </div>
-      </div>
-      <hr />
-      <div className="flex mb-2">
-        <div className="flex-1">
-          <strong className="pr-2">Code DNA (OFII)</strong>
-          {dnaCode}
-        </div>
-        {finessCode && (
-          <div className="flex-1">
-            <strong className="pr-2">Code FINESS</strong>
-            {finessCode.replaceAll(" ", "")}
-          </div>
-        )}
       </div>
       <hr />
       <div className="flex mb-2">

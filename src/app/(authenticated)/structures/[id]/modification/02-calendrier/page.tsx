@@ -35,7 +35,12 @@ export default function ModificationCalendrier() {
       <FormWrapper
         schema={calendrierSchema}
         defaultValues={defaultValues}
-        onSubmit={handleSubmit}
+        onSubmit={(data) =>
+          handleSubmit({
+            ...data,
+            id: structure.id,
+          })
+        }
         mode="onChange"
         resetRoute={`/structures/${structure.id}`}
         submitButtonText="Valider"
@@ -49,7 +54,7 @@ export default function ModificationCalendrier() {
       </FormWrapper>
       {saveState === FetchState.ERROR && (
         <SubmitError
-          structureDnaCode={structure.dnaCode}
+          structureCodeBhasile={structure.codeBhasile}
           backendError={backendError}
         />
       )}

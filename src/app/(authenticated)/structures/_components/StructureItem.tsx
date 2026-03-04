@@ -24,7 +24,7 @@ export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
       data-row-key={index}
       className={`border-t border-default-grey ${isStructureFinalisee ? "bg-transparent" : "bg-alt-blue-france"}`}
     >
-      <td className="text-left!">{structure.dnaCode}</td>
+      <td className="text-left!">{structure.codeBhasile}</td>
       <td className="text-left!">{structure.type}</td>
       <td className="text-left!">
         {getOperateurLabel(structure.filiale, structure.operateur?.name)}
@@ -46,18 +46,18 @@ export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
         {isStructureFinalisee ? (
           <Link
             className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-line"
-            title={`Détails de la structure ${structure.dnaCode}`}
+            title={`Détails de la structure ${structure.codeBhasile}`}
             href={`structures/${structure.id}`}
           >
-            Détails de la structure {structure.dnaCode}
+            Détails de la structure {structure.codeBhasile}
           </Link>
         ) : (
           <Button
             onClick={() => handleOpenModal(structure)}
             className="fr-btn--tertiary-no-outline fr-icon-edit-line"
-            title={`Finaliser la création de la structure ${structure.dnaCode}`}
+            title={`Finaliser la création de la structure ${structure.codeBhasile}`}
           >
-            Finaliser la création de la structure {structure.dnaCode}
+            Finaliser la création de la structure {structure.codeBhasile}
           </Button>
         )}
       </td>

@@ -69,7 +69,7 @@ export default function CpomAjoutIdentification() {
         <FieldSetDocuments />
         <FieldSetStructures />
         {saveState === FetchState.ERROR && (
-          <SubmitError structureDnaCode={""} backendError={backendError} />
+          <SubmitError backendError={backendError} />
         )}
       </FormWrapper>
     </>

@@ -42,9 +42,9 @@ export default function ModificationFinanceForm() {
       operateurComment: millesime.operateurComment ?? undefined,
     }));
     await handleSubmit({
+      id: structure.id,
       budgets: data.budgets,
       documentsFinanciers,
-      dnaCode: structure.dnaCode,
       structureMillesimes,
     });
   };
@@ -81,7 +81,7 @@ export default function ModificationFinanceForm() {
         <BudgetTables />
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureDnaCode={structure.dnaCode}
+            structureCodeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}

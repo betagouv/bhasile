@@ -6,7 +6,7 @@ const usedNumeroDossiers = new Set<string>();
 
 export const createFakeEvenementIndesirableGrave = (): Omit<
   EvenementIndesirableGrave,
-  "id" | "structureDnaCode"
+  "id" | "structureDnaCode" | "structureId"
 > => {
   let numeroDossier = faker.number
     .int({ min: 1000000, max: 10000000 })

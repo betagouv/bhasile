@@ -27,14 +27,14 @@ import { FormKind } from "@/types/global";
 import { AdressesRecoveryModal } from "./AdressesRecoveryModal";
 import { AdressesRecoveryTypeBati } from "./AdressesRecoveryTypeBati";
 
-export const AdressesRecovery = ({ dnaCode }: { dnaCode: string }) => {
+export const AdressesRecovery = ({ id }: { id: number }) => {
   const [state, setState] = useState<"idle" | "error">("idle");
   const [backendError, setBackendError] = useState("");
 
   const router = useRouter();
   const { updateStructure } = useStructures();
   const { currentValue: localStorageValues } = useLocalStorage(
-    `ajout-structure-${dnaCode}-adresses`,
+    `ajout-structure-${id}-adresses`,
     {} as RecoveryAdressesFormValues
   );
 
@@ -90,13 +90,13 @@ export const AdressesRecovery = ({ dnaCode }: { dnaCode: string }) => {
 
   const handleSubmit = async (data: RecoveryAdressesFormValues) => {
     const result = await updateStructure({
-      dnaCode,
-      adresses: transformFormAdressesToApiAdresses(data.adresses, dnaCode),
+      id,
+      adresses: transformFormAdressesToApiAdresses(data.adresses, id),
       typeBati: data.typeBati,
     });
 
     if (result === "OK") {
-      router.push(`/ajout-adresses/${dnaCode}/02-confirmation`);
+      router.push(`/ajout-adresses/${id}/02-confirmation`);
     } else {
       setBackendError(result);
       setState("error");
@@ -119,7 +119,7 @@ export const AdressesRecovery = ({ dnaCode }: { dnaCode: string }) => {
         defaultValues={formattedLocalStorageValues}
         onSubmit={handleSubmit}
         mode="onChange"
-        resetRoute={`/ajout-adresses/${dnaCode}/01-adresses`}
+        resetRoute={`/ajout-adresses/${id}/01-adresses`}
         submitButtonText="Valider"
         availableFooterButtons={[FooterButtonType.SUBMIT]}
       >
@@ -130,10 +130,7 @@ export const AdressesRecovery = ({ dnaCode }: { dnaCode: string }) => {
         <div className="flex items-end flex-col">
           <p className="text-default-error m-0">
             Une erreur s’est produite.{" "}
-            <a
-              href={getErrorEmail(backendError, dnaCode)}
-              className="underline"
-            >
+            <a href={getErrorEmail(backendError, id)} className="underline">
               Nous prévenir
             </a>
           </p>

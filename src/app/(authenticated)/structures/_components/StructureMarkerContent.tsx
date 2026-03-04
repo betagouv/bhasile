@@ -20,7 +20,7 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
     return null;
   }
   const {
-    dnaCode,
+    codeBhasile,
     type,
     filiale,
     operateur,
@@ -75,7 +75,7 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
         </div>
       )}
       <div className="text-sm mt-1 mb-0">
-        <strong>Code DNA</strong> {dnaCode}
+        <strong>Code Bhasile</strong> {codeBhasile}
       </div>
       <div className="text-sm mt-1 mb-0">
         <span className="pr-1">

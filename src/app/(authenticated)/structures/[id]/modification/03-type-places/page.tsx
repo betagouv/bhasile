@@ -40,7 +40,7 @@ export default function ModificationTypePlaces() {
         onSubmit={(data) =>
           handleSubmit({
             ...data,
-            dnaCode: structure.dnaCode,
+            id: structure.id,
           })
         }
         mode="onChange"
@@ -60,7 +60,7 @@ export default function ModificationTypePlaces() {
       </FormWrapper>
       {saveState === FetchState.ERROR && (
         <SubmitError
-          structureDnaCode={structure.dnaCode}
+          structureCodeBhasile={structure.codeBhasile}
           backendError={backendError}
         />
       )}

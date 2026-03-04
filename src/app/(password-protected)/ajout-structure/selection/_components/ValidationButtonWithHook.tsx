@@ -56,6 +56,7 @@ export const ValidationButtonWithHook = (): ReactElement => {
     updateIdentification({
       ...localIdentificationValue,
       id: structure?.id,
+      nom: structure?.nom,
       codeBhasile: structure?.codeBhasile,
       operateur: structure?.operateur,
       type: structure?.type,
@@ -63,7 +64,6 @@ export const ValidationButtonWithHook = (): ReactElement => {
 
     updateAdresses({
       ...localAdressesValue,
-      nom: structure?.nom,
       adresses: localAdressesValue?.adresses?.map((adresse: FormAdresse) => ({
         ...adresse,
         adresseTypologies: adresse.adresseTypologies?.map(

@@ -767,6 +767,7 @@ view StructuresFilling {
 
 view StructuresOrder {
   id                       Int
+  codeBhasile              String
   type                     String
   operateur                String?
   finessCode               String?

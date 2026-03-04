@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { AdressesRecovery } from "@/app/(password-protected)/ajout-adresses/[dnaCode]/01-adresses/_components/AdressesRecovery";
+import { AdressesRecovery } from "@/app/(password-protected)/ajout-adresses/[id]/01-adresses/_components/AdressesRecovery";
 import { CURRENT_YEAR } from "@/constants";
 import { RecoveryAdressesFormValues } from "@/schemas/forms/recovery-adresses/recoveryAdresses.schema";
 import { Repartition } from "@/types/adresse.type";

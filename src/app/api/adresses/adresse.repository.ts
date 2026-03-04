@@ -106,10 +106,10 @@ export const createOrUpdateAdresses = async (
 };
 
 export const checkAdressesExistence = async (
-  structureDnaCode: string
+  structureId: number
 ): Promise<boolean> => {
   const adresses = await prisma.adresse.findMany({
-    where: { structureDnaCode: structureDnaCode },
+    where: { structureId: structureId },
   });
   return adresses.length > 0;
 };

@@ -56,7 +56,7 @@ export const AdressesList = ({
 
   const handleAddAddress = () => {
     const newAddress: FormAdresse = {
-      structureDnaCode: undefined,
+      structureId: undefined,
       adresseComplete: "",
       adresse: "",
       codePostal: "",

@@ -4,7 +4,7 @@ import { Activite } from "@/generated/prisma/client";
 
 export const createFakeActivites = (): Omit<
   Activite,
-  "id" | "structureDnaCode"
+  "id" | "structureDnaCode" | "structureId"
 >[] => {
   return Array.from(Array(12).keys()).map((month) =>
     createFakeActivite({
@@ -15,7 +15,10 @@ export const createFakeActivites = (): Omit<
 
 export const createFakeActivite = ({
   date,
-}: CreateFakeActiviteArgs): Omit<Activite, "id" | "structureDnaCode"> => {
+}: CreateFakeActiviteArgs): Omit<
+  Activite,
+  "id" | "structureDnaCode" | "structureId"
+> => {
   const placesAutorisees = faker.number.int({ min: 10, max: 200 });
   const desinsectisation = faker.number.int({
     min: 1,

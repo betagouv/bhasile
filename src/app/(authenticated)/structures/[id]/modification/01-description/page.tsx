@@ -41,6 +41,7 @@ export default function ModificationDescription() {
   const onSubmit = (data: ModificationDescriptionFormValues) => {
     handleSubmit({
       ...data,
+      id: structure.id,
       adresses: transformFormAdressesToApiAdresses(data.adresses),
       contacts: transformAgentFormContactsToApiContacts(data.contacts),
     });
@@ -69,10 +70,7 @@ export default function ModificationDescription() {
           title=""
           description={`Certaines données (date de création, code DNA, type de structure, opérateur) ne sont pas modifiables. Il y a une erreur ? Contactez-nous : ${BHASILE_CONTACT_EMAIL}`}
         />
-        <FieldSetDescription
-          dnaCode={structure.dnaCode}
-          formKind={FormKind.MODIFICATION}
-        />
+        <FieldSetDescription formKind={FormKind.MODIFICATION} />
         <hr />
         <FieldSetContacts />
         <hr />
