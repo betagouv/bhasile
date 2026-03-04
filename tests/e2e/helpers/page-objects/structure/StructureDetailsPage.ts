@@ -138,8 +138,8 @@ export class StructureDetailsPage extends BasePage {
       block.getByText("Type de structure", { exact: true }).locator("..")
     ).toContainText(data.type);
     await expect(
-      block.getByText("Code DNA (OFII)", { exact: true }).locator("..")
-    ).toContainText(data.dnaCode);
+      block.getByText("Code Bhasile", { exact: true }).locator("..")
+    ).toContainText(data.codeBhasile);
     if (data.finessCode) {
       await expect(
         block.getByText("Code FINESS", { exact: true }).locator("..")

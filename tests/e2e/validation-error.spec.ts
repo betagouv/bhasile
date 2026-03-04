@@ -103,8 +103,8 @@ for (const { name, formData, failingStep } of invalidTestCases) {
         failingStep,
       });
     } finally {
-      if (formData.dnaCode) {
-        await deleteStructure(formData.dnaCode);
+      if (formData.codeBhasile) {
+        await deleteStructure(formData.codeBhasile);
       }
     }
   });

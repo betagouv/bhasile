@@ -269,7 +269,7 @@ export class TestStructureDataBuilder {
 
   static createMinimal(): TestStructureDataBuilder {
     return new TestStructureDataBuilder()
-      .withDnaCode("TEST-MINIMAL")
+      .withCodeBhasile("BHA-MINIMAL")
       .withType(StructureType.CADA);
   }
 

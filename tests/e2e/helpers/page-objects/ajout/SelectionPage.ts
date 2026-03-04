@@ -33,7 +33,9 @@ export class SelectionPage extends BasePage {
     const departement = data.departementAdministratif;
     await this.selectDepartement(departement);
 
-    const structureLabel = this.page.locator(`label[for="${data.dnaCode}"]`);
+    const structureLabel = this.page.locator(
+      `label[for="${data.codeBhasile}"]`
+    );
     await expect(structureLabel).toBeVisible({ timeout: TIMEOUTS.NAVIGATION });
     await structureLabel.click();
 
@@ -45,7 +47,7 @@ export class SelectionPage extends BasePage {
     });
     await continueButton.click();
     await expect(this.page).toHaveURL(
-      new RegExp(`/ajout-structure/${data.dnaCode}/01-identification`)
+      new RegExp(`/ajout-structure/${data.id}/01-identification`)
     );
   }
 

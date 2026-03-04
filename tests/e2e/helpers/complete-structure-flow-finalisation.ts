@@ -69,7 +69,7 @@ export async function completeFinalisationFlow(
     const shouldContinue = await runFinalisationStep(
       stepPage,
       formData.id,
-      formData,
+      formData as TestStructureData,
       failingStep,
       stepKey
     );
