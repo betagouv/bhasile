@@ -10,7 +10,7 @@ import { TestStructureScenario } from "./types";
 export const huda2: TestStructureScenario = {
   name: "HUDA 2 - Mixte, multiple addresses with repartition, two contacts, all docs, controls",
   formData: {
-    dnaCode: "C1234",
+    codeBhasile: "BHA-TST-001",
     type: StructureType.HUDA,
     cpom: false,
     operateur: {

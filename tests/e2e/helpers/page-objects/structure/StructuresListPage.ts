@@ -14,21 +14,21 @@ export class StructuresListPage extends BasePage {
     await this.page.goto(URLS.STRUCTURES);
   }
 
-  async searchByDna(dnaCode: string) {
+  async searchByCodeBhasile(codeBhasile: string) {
     const searchInput = this.page.locator(SELECTORS.SEARCH_INPUT).first();
     await searchInput.waitFor({
       state: "visible",
       timeout: TIMEOUTS.NAVIGATION,
     });
-    await searchInput.fill(dnaCode);
+    await searchInput.fill(codeBhasile);
   }
 
-  async startFinalisationForDna(dnaCode: string) {
-    const row = this.page.getByRole("row", { name: new RegExp(dnaCode) });
+  async startFinalisationForCodeBhasile(codeBhasile: string) {
+    const row = this.page.getByRole("row", { name: new RegExp(codeBhasile) });
     await expect(row).toBeVisible();
 
     const finaliseButton = row.getByRole("button", {
-      name: new RegExp(`Finaliser la création de la structure ${dnaCode}`),
+      name: new RegExp(`Finaliser la création de la structure ${codeBhasile}`),
     });
     await finaliseButton.click();
 

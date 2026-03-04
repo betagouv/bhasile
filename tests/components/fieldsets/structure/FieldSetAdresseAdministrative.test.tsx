@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { FieldSetAdresseAdministrative } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
+import { FieldSetAdresseAdministrative } from "@/app/components/forms/adresseAdministrativeAndAntenne/FieldSetAdresseAdministrative";
 import { Repartition } from "@/types/adresse.type";
 import { FormKind } from "@/types/global";
 

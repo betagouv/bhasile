@@ -88,7 +88,7 @@ export default function ModificationDescription() {
       </FormWrapper>
       {saveState === FetchState.ERROR && (
         <SubmitError
-          structureDnaCode={structure.dnaCode}
+          structureCodeBhasile={structure.codeBhasile}
           backendError={backendError}
         />
       )}

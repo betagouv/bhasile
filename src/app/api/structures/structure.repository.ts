@@ -518,7 +518,7 @@ const updateStructure = async (
 
 // Only used in e2e tests
 export const createMinimalStructure = async (structure: {
-  id: number;
+  codeBhasile: string;
   type: StructureType;
   operateurId: number;
   departementAdministratif?: string;
@@ -526,21 +526,23 @@ export const createMinimalStructure = async (structure: {
   adresseAdministrative: string;
   codePostalAdministratif: string;
   communeAdministrative: string;
-}): Promise<void> => {
+}): Promise<Structure> => {
   if (process.env.NODE_ENV === "production") {
     throw new Error("This function is only used in e2e tests");
   }
-  await prisma.structure.upsert({
-    where: { id: structure.id },
+  const upsertedStructure = await prisma.structure.upsert({
+    where: { codeBhasile: structure.codeBhasile },
     update: structure,
     create: structure,
   });
+
+  return upsertedStructure;
 };
 
 // Only used in e2e tests
-export const deleteStructure = async (id: number): Promise<void> => {
+export const deleteStructure = async (codeBhasile: string): Promise<void> => {
   if (process.env.NODE_ENV === "production") {
     throw new Error("This function is only used in e2e tests");
   }
-  await prisma.structure.delete({ where: { id } });
+  await prisma.structure.delete({ where: { codeBhasile } });
 };

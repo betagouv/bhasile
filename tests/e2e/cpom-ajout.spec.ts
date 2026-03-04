@@ -27,11 +27,11 @@ async function runCpomAjoutTest(
   await beforeFlow(cada1.formData as Parameters<typeof beforeFlow>[0], page);
 
   const formData =
-    testCase.formData.structureIds === "seeded" && cada1.formData.dnaCode
+    testCase.formData.structureIds === "seeded" && cada1.formData.codeBhasile
       ? {
           ...testCase.formData,
           structureIds: [
-            await getStructureId(cada1.formData.dnaCode as string),
+            await getStructureId(cada1.formData.codeBhasile),
           ] as number[],
         }
       : testCase.formData;
@@ -72,8 +72,8 @@ async function runCpomAjoutTest(
     if (cpomId !== null) {
       await deleteCpom(cpomId);
     }
-    if (cada1.formData.dnaCode) {
-      await deleteStructure(cada1.formData.dnaCode as string);
+    if (cada1.formData.codeBhasile) {
+      await deleteStructure(cada1.formData.codeBhasile);
     }
   }
 }

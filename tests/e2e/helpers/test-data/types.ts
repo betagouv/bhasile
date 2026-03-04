@@ -4,7 +4,8 @@ import { ControleType } from "@/types/controle.type";
 import { StructureType } from "@/types/structure.type";
 
 export type TestStructureData = {
-  dnaCode: string;
+  id?: number;
+  codeBhasile: string;
   type: StructureType;
   cpom: boolean;
   filiale?: string;

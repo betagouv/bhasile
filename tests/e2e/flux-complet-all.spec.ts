@@ -36,17 +36,17 @@ for (const {
     page,
   }) => {
     test.setTimeout(180000); // The S3 upload can be sloooooow
-    await beforeFlow(formData, page);
+    const id = await beforeFlow(formData, page);
 
     try {
       await completeStructureFlow(page, {
-        formData,
+        formData: { ...formData, id },
         modificationData,
         failingStep: failingStep,
       });
     } finally {
       try {
-        await deleteStructure(formData.dnaCode as string);
+        await deleteStructure(formData.codeBhasile as string);
       } catch {
         // Structure may not exist if test failed before creation
       }

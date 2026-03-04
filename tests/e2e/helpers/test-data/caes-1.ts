@@ -10,7 +10,7 @@ import { TestStructureScenario } from "./types";
 export const caes1: TestStructureScenario = {
   name: "CAES 1 - Collectif, single address, two contacts, all docs, old eval, no controls, filiale",
   formData: {
-    dnaCode: "C1234",
+    codeBhasile: "BHA-TST-001",
     type: StructureType.CAES,
     cpom: false,
     filiale: "Filiale Test",

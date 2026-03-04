@@ -10,7 +10,7 @@ import { TestStructureScenario } from "./types";
 export const cph1: TestStructureScenario = {
   name: "CPH 1 - Collectif, single address, one contact, all docs, old eval, controls, filiale",
   formData: {
-    dnaCode: "C1234",
+    codeBhasile: "BHA-TST-001",
     type: StructureType.CPH,
     cpom: false,
     filiale: "Filiale Test",

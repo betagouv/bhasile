@@ -10,7 +10,7 @@ import { TestStructureScenario } from "./types";
 export const huda1: TestStructureScenario = {
   name: "HUDA 1 - Collectif, single address, one contact, all docs, old eval, no controls",
   formData: {
-    dnaCode: "C1234",
+    codeBhasile: "BHA-TST-001",
     type: StructureType.HUDA,
     cpom: false,
     operateur: {

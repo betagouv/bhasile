@@ -6,7 +6,7 @@ import { TestStructureScenario } from "./types";
 export const cada2: TestStructureScenario = {
   name: "CADA 2 - Recent, Diffus, multiple addresses, most documents at finalisation, two contacts, recent eval, no optional actes administratifs",
   formData: {
-    dnaCode: "C1234",
+    codeBhasile: "BHA-TST-001",
     type: StructureType.CADA,
     cpom: false,
     operateur: {

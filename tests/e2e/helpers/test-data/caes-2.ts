@@ -10,7 +10,7 @@ import { TestStructureScenario } from "./types";
 export const caes2: TestStructureScenario = {
   name: "CAES 2 - Mixte, multiple addresses with repartition, one contact, mixed docs, controls",
   formData: {
-    dnaCode: "C1234",
+    codeBhasile: "BHA-TST-001",
     type: StructureType.CAES,
     cpom: false,
     operateur: {

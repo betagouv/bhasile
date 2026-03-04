@@ -9,7 +9,7 @@ export class TestStructureDataBuilder {
   constructor() {
     // Start with valid defaults
     this.data = {
-      dnaCode: `TEST-${Date.now()}`,
+      codeBhasile: `TEST-${Date.now()}`,
       type: StructureType.CADA,
       cpom: false,
       operateur: {
@@ -57,8 +57,8 @@ export class TestStructureDataBuilder {
   }
 
   // Fluent API methods for building
-  withDnaCode(dnaCode: string): this {
-    this.data.dnaCode = dnaCode;
+  withCodeBhasile(codeBhasile: string): this {
+    this.data.codeBhasile = codeBhasile;
     return this;
   }
 

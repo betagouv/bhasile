@@ -9,16 +9,20 @@ import { TestStructureData } from "./test-data/types";
 export async function beforeFlow(
   data: TestStructureData | Partial<TestStructureData>,
   page: Page
-): Promise<void> {
+): Promise<number> {
   await mockAddressApi(page, data.adresseAdministrative?.complete ?? "");
 
-  if (data.dnaCode) {
-    // Sometimes the cleanup doesn't happen
-    try {
-      await deleteStructure(data.dnaCode as string);
-    } catch {}
-    await seedStructureForSelection(
-      data as Partial<TestStructureData> & { dnaCode: string }
-    );
+  if (!data.codeBhasile) {
+    throw new Error("codeBhasile is required");
   }
+
+  // Sometimes the cleanup doesn't happen
+  try {
+    await deleteStructure(data.codeBhasile as string);
+  } catch {}
+  const id = await seedStructureForSelection(
+    data as Partial<TestStructureData> & { codeBhasile: string }
+  );
+
+  return id;
 }

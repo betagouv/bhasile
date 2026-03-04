@@ -18,14 +18,12 @@ vi.mock("@formkit/auto-animate", () => ({
 }));
 
 describe("FieldSetDescription", () => {
-  const defaultDnaCode = "C0001";
-
   describe("Rendering finalisation form", () => {
     it("should render all fields correctly", () => {
       const { container } = render(
         <FormTestWrapper
           defaultValues={{
-            dnaCode: defaultDnaCode,
+            dnaCode: "C0001",
             type: StructureType.CADA,
             operateur: { id: 1, name: "Adoma" },
             filiale: "",
@@ -37,10 +35,7 @@ describe("FieldSetDescription", () => {
             cpom: false,
           }}
         >
-          <FieldSetDescription
-            dnaCode={defaultDnaCode}
-            formKind={FormKind.FINALISATION}
-          />
+          <FieldSetDescription formKind={FormKind.FINALISATION} />
         </FormTestWrapper>
       );
 
@@ -73,7 +68,7 @@ describe("FieldSetDescription", () => {
         'input[type="hidden"][id="dnaCode"]'
       );
       expect(hiddenInput).toBeInTheDocument();
-      expect(hiddenInput).toHaveValue(defaultDnaCode);
+      expect(hiddenInput).toHaveValue("C0001");
     });
 
     it("should render FINESS field for autorisée structure types", () => {
@@ -87,10 +82,7 @@ describe("FieldSetDescription", () => {
               operateur: { id: 1, name: "Adoma" },
             }}
           >
-            <FieldSetDescription
-              dnaCode={defaultDnaCode}
-              formKind={FormKind.FINALISATION}
-            />
+            <FieldSetDescription formKind={FormKind.FINALISATION} />
           </FormTestWrapper>
         );
 
@@ -109,10 +101,7 @@ describe("FieldSetDescription", () => {
               operateur: { id: 1, name: "Adoma" },
             }}
           >
-            <FieldSetDescription
-              dnaCode={defaultDnaCode}
-              formKind={FormKind.FINALISATION}
-            />
+            <FieldSetDescription formKind={FormKind.FINALISATION} />
           </FormTestWrapper>
         );
 
@@ -128,10 +117,7 @@ describe("FieldSetDescription", () => {
             operateur: { id: 1, name: "Adoma" },
           }}
         >
-          <FieldSetDescription
-            dnaCode={defaultDnaCode}
-            formKind={FormKind.FINALISATION}
-          />
+          <FieldSetDescription formKind={FormKind.FINALISATION} />
         </FormTestWrapper>
       );
 
@@ -153,10 +139,7 @@ describe("FieldSetDescription", () => {
             operateur: { id: 1, name: "Adoma" },
           }}
         >
-          <FieldSetDescription
-            dnaCode={defaultDnaCode}
-            formKind={FormKind.MODIFICATION}
-          />
+          <FieldSetDescription formKind={FormKind.MODIFICATION} />
         </FormTestWrapper>
       );
 
@@ -171,10 +154,7 @@ describe("FieldSetDescription", () => {
             operateur: { id: 1, name: "Adoma" },
           }}
         >
-          <FieldSetDescription
-            dnaCode={defaultDnaCode}
-            formKind={FormKind.MODIFICATION}
-          />
+          <FieldSetDescription formKind={FormKind.MODIFICATION} />
         </FormTestWrapper>
       );
 
@@ -199,10 +179,7 @@ describe("FieldSetDescription", () => {
             filiale: "",
           }}
         >
-          <FieldSetDescription
-            dnaCode={defaultDnaCode}
-            formKind={FormKind.FINALISATION}
-          />
+          <FieldSetDescription formKind={FormKind.FINALISATION} />
         </FormTestWrapper>
       );
 
@@ -229,10 +206,7 @@ describe("FieldSetDescription", () => {
             filiale: "",
           }}
         >
-          <FieldSetDescription
-            dnaCode={defaultDnaCode}
-            formKind={FormKind.FINALISATION}
-          />
+          <FieldSetDescription formKind={FormKind.FINALISATION} />
         </FormTestWrapper>
       );
 
@@ -268,10 +242,7 @@ describe("FieldSetDescription", () => {
             lgbt: false,
           }}
         >
-          <FieldSetDescription
-            dnaCode={defaultDnaCode}
-            formKind={FormKind.FINALISATION}
-          />
+          <FieldSetDescription formKind={FormKind.FINALISATION} />
         </FormTestWrapper>
       );
 
@@ -296,10 +267,7 @@ describe("FieldSetDescription", () => {
             fvvTeh: false,
           }}
         >
-          <FieldSetDescription
-            dnaCode={defaultDnaCode}
-            formKind={FormKind.FINALISATION}
-          />
+          <FieldSetDescription formKind={FormKind.FINALISATION} />
         </FormTestWrapper>
       );
 
@@ -325,10 +293,7 @@ describe("FieldSetDescription", () => {
             operateur: { id: 1, name: "Adoma" },
           }}
         >
-          <FieldSetDescription
-            dnaCode={defaultDnaCode}
-            formKind={FormKind.FINALISATION}
-          />
+          <FieldSetDescription formKind={FormKind.FINALISATION} />
         </FormTestWrapper>
       );
 
@@ -352,10 +317,7 @@ describe("FieldSetDescription", () => {
             operateur: { id: 1, name: "Adoma" },
           }}
         >
-          <FieldSetDescription
-            dnaCode={defaultDnaCode}
-            formKind={FormKind.FINALISATION}
-          />
+          <FieldSetDescription formKind={FormKind.FINALISATION} />
         </FormTestWrapper>
       );
 
@@ -379,10 +341,7 @@ describe("FieldSetDescription", () => {
             operateur: { id: 1, name: "Adoma" },
           }}
         >
-          <FieldSetDescription
-            dnaCode={defaultDnaCode}
-            formKind={FormKind.FINALISATION}
-          />
+          <FieldSetDescription formKind={FormKind.FINALISATION} />
         </FormTestWrapper>
       );
 
