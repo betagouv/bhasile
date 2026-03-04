@@ -28,7 +28,7 @@ export default function ConditionsGeneralesUtilisation(): ReactElement {
           Toute question relative au fonctionnement du service peut être posée à
           l’adresse suivante :{" "}
           <Link
-            className="fr-btn--tertiary-no-outline"
+            className="text-title-blue-france"
             href={`mailto:${BHASILE_CONTACT_EMAIL}`}
           >
             {BHASILE_CONTACT_EMAIL}

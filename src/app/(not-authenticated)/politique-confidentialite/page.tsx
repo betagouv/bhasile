@@ -16,7 +16,7 @@ export default function PolitiqueConfidentialite(): ReactElement {
           la Direction des étrangers en France du Ministère de l’Intérieur.
           (email :{" "}
           <Link
-            className="fr-btn--tertiary-no-outline"
+            className="text-title-blue-france"
             href="mailto:bhasile-da-dgef@intereieur.gouv.fr"
           >
             bhasile-da-dge​f@intereieur.gouv.fr
@@ -58,7 +58,7 @@ export default function PolitiqueConfidentialite(): ReactElement {
             Cette mission d’intérêt public se traduit en pratique par
             l’article&nbsp;
             <Link
-              className="fr-btn--tertiary-no-outline"
+              className="text-title-blue-france"
               href="https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000050505712"
             >
               8 du décret n° 2013-728 du 12 août 2013
@@ -149,7 +149,7 @@ export default function PolitiqueConfidentialite(): ReactElement {
           <li>
             OVH :{" "}
             <Link
-              className="fr-btn--tertiary-no-outline"
+              className="text-title-blue-france"
               href="https://us.ovhcloud.com/legal/data-processing-agreement/"
             >
               https://us.ovhcloud.com/legal/data-processing-agreement/
@@ -158,7 +158,7 @@ export default function PolitiqueConfidentialite(): ReactElement {
           <li>
             Scalingo :{" "}
             <Link
-              className="fr-btn--tertiary-no-outline"
+              className="text-title-blue-france"
               href="https://scalingo.com/fr/contrat-gestion-traitements-donnees-personnelles"
             >
               https://scalingo.com/fr/contrat-gestion-traitements-donnees-personnelles
@@ -228,7 +228,7 @@ export default function PolitiqueConfidentialite(): ReactElement {
           <li>
             Par courriel :{" "}
             <Link
-              className="fr-btn--tertiary-no-outline"
+              className="text-title-blue-france"
               href="mailto:delegue-protection-donnees@interieur.gouv.fr"
             >
               delegue-protection-donnees@interieur.gouv.fr

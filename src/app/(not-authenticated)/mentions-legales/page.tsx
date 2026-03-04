@@ -28,7 +28,7 @@ export default function MentionsLegales(): ReactElement {
           La directrice de la publication est madame Elise ADEVAH-POEUF, en sa
           qualité de directrice de l’asile (Email :{" "}
           <Link
-            className="fr-btn--tertiary-no-outline"
+            className="text-title-blue-france"
             href="mailto:bhasile-da-dgef@intereieur.gouv.fr"
           >
             bhasile-da-dge​f@intereieur.gouv.fr
