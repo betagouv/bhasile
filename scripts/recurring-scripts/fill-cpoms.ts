@@ -224,8 +224,8 @@ const loadCpomsFromCsv = async () => {
       for (const millesimeYear of millesimeYears) {
         await prisma.structureMillesime.upsert({
           where: {
-            structureDnaCode_year: {
-              structureDnaCode: row.code_dna,
+            structureId_year: {
+              structureId: structureId,
               year: millesimeYear,
             },
           },
@@ -233,7 +233,7 @@ const loadCpomsFromCsv = async () => {
             cpom: true,
           },
           create: {
-            structureDnaCode: row.code_dna,
+            structureId: structureId,
             year: millesimeYear,
             cpom: true,
           },

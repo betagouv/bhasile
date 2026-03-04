@@ -49,7 +49,7 @@ export default function FinalisationIdentification(): ReactElement {
     data: FinalisationIdentificationAutoSaveFormValues
   ) => {
     const contacts = transformAgentFormContactsToApiContacts(data.contacts);
-    await handleAutoSave({ ...data, contacts, dnaCode: structure.dnaCode });
+    await handleAutoSave({ ...data, contacts, id: structure.id });
   };
 
   const { getFetchState } = useFetchState();
@@ -87,6 +87,9 @@ export default function FinalisationIdentification(): ReactElement {
         <FieldSetDescription />
         <hr />
 
+        <AdresseAdministrativeAndAntennes formKind={FormKind.FINALISATION} />
+        <hr />
+
         <DnaAndFiness />
         <hr />
 
@@ -96,9 +99,6 @@ export default function FinalisationIdentification(): ReactElement {
         <FieldSetCalendrier />
         <hr />
 
-        <AdresseAdministrativeAndAntennes formKind={FormKind.FINALISATION} />
-        <hr />
-
         <FieldSetTypePlaces
           structure={structure}
           formKind={FormKind.FINALISATION}
@@ -106,7 +106,7 @@ export default function FinalisationIdentification(): ReactElement {
 
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureDnaCode={structure.dnaCode}
+            structureCodeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}

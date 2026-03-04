@@ -43,7 +43,7 @@ export default function FinalisationFinance(): ReactElement {
     useAgentFormHandling({ currentStep });
 
   const onAutoSave = async (data: BudgetsAutoSaveFormValues) => {
-    await handleAutoSave({ budgets: data.budgets, dnaCode: structure.dnaCode });
+    await handleAutoSave({ budgets: data.budgets, id: structure.id });
   };
 
   const { getFetchState } = useFetchState();
@@ -81,7 +81,7 @@ export default function FinalisationFinance(): ReactElement {
         <BudgetTables />
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureDnaCode={structure.dnaCode}
+            structureCodeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}

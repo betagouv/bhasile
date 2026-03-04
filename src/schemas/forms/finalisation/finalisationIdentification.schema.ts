@@ -17,6 +17,7 @@ import {
   structureTypologiesSchema,
 } from "@/schemas/forms/base/structureTypologie.schema";
 
+import { antennesSchema } from "../base/antenne.schema";
 import { dnaStructuresSchema } from "../base/dna.schema";
 import { finessesSchema } from "../base/finess.schema";
 
@@ -33,6 +34,7 @@ export const finalisationIdentificationAutoSaveSchema =
     .and(finessesSchema)
     .and(calendrierAutoSaveSchema)
     .and(adresseAdministrativeAutoSaveSchema)
+    .and(antennesSchema)
     .and(structureTypologiesAutoSaveSchema);
 
 export type FinalisationIdentificationFormValues = z.infer<

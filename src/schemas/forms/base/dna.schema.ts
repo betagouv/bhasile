@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { zId } from "@/app/utils/zodCustomFields";
+import { nullishFrenchDateToISO, zId } from "@/app/utils/zodCustomFields";
 
 const dnaSchema = z.object({
   id: zId(),
@@ -12,8 +12,8 @@ const dnaStructureSchema = z.object({
   id: zId(),
   dna: dnaSchema,
   structureId: zId(),
-  startDate: z.date().optional(),
-  endDate: z.date().optional(),
+  startDate: nullishFrenchDateToISO(),
+  endDate: nullishFrenchDateToISO(),
 });
 
 export const dnaStructuresSchema = z.object({

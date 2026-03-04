@@ -58,7 +58,7 @@ export default function ModificationControleForm() {
       ...data,
       controles,
       evaluations,
-      dnaCode: structure.dnaCode,
+      id: structure.id,
     });
   };
   const { getFetchState } = useFetchState();
@@ -118,7 +118,7 @@ export default function ModificationControleForm() {
         <FieldSetOuvertureFermeture formKind={FormKind.FINALISATION} />
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureDnaCode={structure.dnaCode}
+            structureCodeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}

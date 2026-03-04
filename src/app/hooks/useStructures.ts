@@ -91,6 +91,11 @@ const transformAjoutFormStructureToApiStructure = async (
   const fullAdress = `${values.adresseAdministrative}, ${values.codePostalAdministratif} ${values.communeAdministrative}`;
   const coordinates = await getCoordinates(fullAdress);
 
+  const adresses = transformFormAdressesToApiAdresses(
+    values.adresses,
+    values.id
+  );
+
   return {
     id: values.id,
     codeBhasile: values.codeBhasile,
@@ -117,7 +122,10 @@ const transformAjoutFormStructureToApiStructure = async (
     finPeriodeAutorisation: formatDateToIsoString(
       values.finPeriodeAutorisation
     ),
-    adresses: transformFormAdressesToApiAdresses(values.adresses, values.id),
+    adresses,
+    antennes: values.antennes,
+    dnaStructures: values.dnaStructures,
+    finesses: values.finesses,
     contacts: transformAgentFormContactsToApiContacts(values.contacts),
     structureMillesimes:
       values.structureMillesimes?.map((millesime) => ({

@@ -40,7 +40,7 @@ export default function FinalisationNotes() {
     useAgentFormHandling({ currentStep });
 
   const onAutoSave = async (data: NotesAutoSaveFormValues) => {
-    await handleAutoSave({ ...data, dnaCode: structure.dnaCode });
+    await handleAutoSave({ ...data, id: structure.id });
   };
 
   const { getFetchState } = useFetchState();
@@ -76,7 +76,7 @@ export default function FinalisationNotes() {
         <FieldSetNotes />
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureDnaCode={structure.dnaCode}
+            structureCodeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}

@@ -11,8 +11,8 @@ const dnaApiSchema = z.object({
 export const dnaStructureApiSchema = z.object({
   id: zId(),
   dna: dnaApiSchema,
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
+  startDate: z.string().datetime().nullish(),
+  endDate: z.string().datetime().nullish(),
 });
 
 export type DnaStructureApiType = z.infer<typeof dnaStructureApiSchema>;

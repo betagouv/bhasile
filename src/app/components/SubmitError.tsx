@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 import { getErrorEmail } from "@/app/utils/errorMail.util";
 
 export const SubmitError = ({
-  structureDnaCode,
+  structureCodeBhasile,
   backendError,
 }: Props): ReactElement => {
   return (
@@ -11,7 +11,7 @@ export const SubmitError = ({
       <p className="text-default-error m-0 p-0">
         Une erreur s’est produite.{" "}
         <a
-          href={getErrorEmail(backendError, structureDnaCode)}
+          href={getErrorEmail(backendError, structureCodeBhasile)}
           className="underline"
           target="_blank"
         >
@@ -23,6 +23,6 @@ export const SubmitError = ({
 };
 
 type Props = {
-  structureDnaCode: string;
+  structureCodeBhasile?: string;
   backendError?: string;
 };

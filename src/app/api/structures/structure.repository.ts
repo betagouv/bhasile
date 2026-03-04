@@ -244,11 +244,12 @@ export const findOne = async (id: number): Promise<Structure> => {
       id,
     },
     include: {
-      dnasStructures: {
+      dnaStructures: {
         include: {
           dna: true,
         },
       },
+      finesses: true,
       adresses: {
         include: {
           adresseTypologies: {

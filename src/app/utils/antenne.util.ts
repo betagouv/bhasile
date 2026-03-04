@@ -2,8 +2,8 @@ import { AntenneApiType } from "@/schemas/api/antenne.schema";
 import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 
 export const transformApiAntennesToFormAntennes = (
-  antennes: AntenneApiType[]
-): AntenneFormValues[] => {
+  antennes?: AntenneApiType[]
+): AntenneFormValues[] | undefined => {
   return antennes?.map((antenne) => ({
     ...antenne,
     name: antenne.name ?? "",

@@ -48,7 +48,7 @@ model Structure {
   directionTerritoriale        String?
   activeInOfiiFileSince        DateTime? // date d'entrée dans le document Ofii
   inactiveInOfiiFileSince      DateTime? // date de sortie du document Ofii
-  dnasStructures               DnaStructure[]
+  dnaStructures               DnaStructure[]
   controles                    Controle[]
   evaluations                  Evaluation[]
   evenementsIndesirablesGraves EvenementIndesirableGrave[]
@@ -81,7 +81,7 @@ model Dna {
   description                  String?
   createdAt                    DateTime                    @default(now())
   updatedAt                    DateTime                    @default(now()) @updatedAt
-  dnasStructures               DnaStructure[]
+  dnaStructures               DnaStructure[]
   activites                    Activite[]
   evenementsIndesirablesGraves EvenementIndesirableGrave[]
 

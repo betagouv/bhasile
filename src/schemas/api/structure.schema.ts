@@ -71,7 +71,7 @@ export const structureOperateurUpdateApiSchema =
     debutPeriodeAutorisation: z.string().datetime().nullish(),
     finPeriodeAutorisation: z.string().datetime().nullish(),
     adresses: z.array(adresseApiSchema),
-    antennes: z.array(antenneApiSchema),
+    antennes: z.array(antenneApiSchema).optional(),
     dnaStructures: z.array(dnaStructureApiSchema).optional(),
     finesses: z.array(finessApiSchema).optional(),
     structureTypologies: z.array(structureTypologieApiSchema),
@@ -82,7 +82,8 @@ export const structureOperateurUpdateApiSchema =
 
 const partialStructureOperateurUpdateApiSchema =
   structureOperateurUpdateApiSchema.partial().extend({
-    dnaCode: z.string().min(1, "Le code DNA est requis"),
+    id: z.number(),
+    codeBhasile: z.string().optional(),
     adresses: z.array(adresseApiSchema.partial()).optional(),
     dnaStructures: z.array(dnaStructureApiSchema.partial()).optional(),
     finesses: z.array(finessApiSchema.partial()).optional(),
@@ -96,7 +97,6 @@ const partialStructureOperateurUpdateApiSchema =
   });
 
 const remainingStructureAgentUpdateApiSchema = z.object({
-  id: z.number(),
   noEvaluationStructure: z.boolean().optional(),
   notes: z.string().nullish(),
   controles: z.array(controleApiSchema).optional(),

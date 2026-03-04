@@ -22,6 +22,7 @@ import { transformApiAntennesToFormAntennes } from "./antenne.util";
 import { getBudgetsDefaultValues } from "./budget.util";
 import { getControlesDefaultValues } from "./controle.util";
 import { getStructureCpomDefaultValues } from "./cpom.util";
+import { transformApiDnaStructuresToFormDnaStructures } from "./dna.util";
 import { getEvaluationsDefaultValues } from "./evaluation.util";
 import { isStructureAutorisee } from "./structure.util";
 import { getStructureMillesimeDefaultValues } from "./structureMillesime.util";
@@ -39,7 +40,8 @@ export const getDefaultValues = ({
   const repartition = getRepartition(structure);
 
   const isMultiAntenne =
-    structure.antennes?.length > 1 || structure.contacts?.length > 2;
+    (structure.antennes?.length ?? 0) > 1 ||
+    (structure.contacts?.length ?? 0) > 2;
 
   const isMultiDna =
     (structure.dnaStructures?.length ?? 0) > 1 ||
@@ -50,6 +52,10 @@ export const getDefaultValues = ({
   const antennes = transformApiAntennesToFormAntennes(structure.antennes);
 
   const budgets = getBudgetsDefaultValues(structure?.budgets || []);
+
+  const dnaStructures = transformApiDnaStructuresToFormDnaStructures(
+    structure.dnaStructures
+  );
 
   const structureTypologies = getStructureTypologyDefaultValues(
     structure?.structureTypologies || [],
@@ -74,6 +80,7 @@ export const getDefaultValues = ({
     creationDate: structure.creationDate ?? "",
     isMultiAntenne,
     isMultiDna,
+    dnaStructures,
     debutPeriodeAutorisation: isAutorisee
       ? (structure.debutPeriodeAutorisation ?? undefined)
       : undefined,
