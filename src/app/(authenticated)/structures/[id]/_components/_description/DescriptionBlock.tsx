@@ -40,12 +40,12 @@ export const DescriptionBlock = (): ReactElement => {
   return (
     <Block
       title="Description"
-      iconClass="fr-icon-menu-2-fill"
+      iconClass="fr-icon-align-left"
       onEdit={() => {
         router.push(`/structures/${structure.id}/modification/01-description`);
       }}
     >
-      <div className="flex mb-2">
+      <div className="flex mb-2.5">
         <div className="flex-1">
           <strong className="pr-2">Date de création</strong>
           {formatDate(creationDate)}
@@ -55,8 +55,8 @@ export const DescriptionBlock = (): ReactElement => {
           {type}
         </div>
       </div>
-      <hr />
-      <div className="flex mb-2">
+      <hr className="pb-2.5!" />
+      <div className="flex mb-2.5">
         <div className="flex-1">
           <strong className="pr-2">Code DNA (OFII)</strong>
           {dnaCode}
@@ -68,15 +68,15 @@ export const DescriptionBlock = (): ReactElement => {
           </div>
         )}
       </div>
-      <hr />
-      <div className="flex mb-2">
+      <hr className="pb-2.5!" />
+      <div className="flex mb-2.5">
         <div className="flex-1">
           <strong className="pr-2">Opérateur</strong>
           {getOperateurLabel(filiale, operateur?.name)}
         </div>
       </div>
-      <hr />
-      <div className="flex mb-2">
+      <hr className="pb-2.5!" />
+      <div className="flex mb-2.5">
         <div className="flex-1">
           <strong className="pr-2">Public</strong>
           {PublicType[String(publicValue) as keyof typeof PublicType]}
@@ -86,16 +86,16 @@ export const DescriptionBlock = (): ReactElement => {
           {getVulnerabiliteLabel()}
         </div>
       </div>
-      <hr />
-      <div className="mb-2">
+      <hr className="pb-1.5!" />
+      <div className="mb-1.5">
         <CpomViewer />
       </div>
-      <hr />
-      <div className="mb-2">
+      <hr className="pb-1.5!" />
+      <div className="mb-1.5">
         <ContactsViewer />
       </div>
-      <hr />
-      <div>
+      <hr className="pb-1.5!" />
+      <div className="mb-1.5">
         <AdressesViewer />
       </div>
     </Block>

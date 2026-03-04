@@ -32,7 +32,7 @@ export const AdressesViewer = (): ReactElement => {
         ({ adresseTypologies }) => adresseTypologies?.[0]?.logementSocial
       ) && <Badge type="purple">Logement social</Badge>}
       <button
-        className={`fr-btn fr-btn--sm fr-btn--icon-left fr-btn--tertiary-no-outline ${
+        className={`fr-btn fr-btn--sm fr-btn--icon-left fr-btn--tertiary-no-outline py-0 ${
           showAdresses ? "fr-icon-eye-off-line" : "fr-icon-eye-line"
         }`}
         onClick={() => setShowAdresses(!showAdresses)}
