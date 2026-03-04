@@ -12,11 +12,13 @@ import {
 } from "./structure.util";
 
 export const getBudgetsDefaultValues = (
-  structureBudgets: BudgetApiType[]
+  structureBudgets: BudgetApiType[],
+  structureCreationYear: number
 ): anyBudgetFormValues => {
   const { years } = getYearRange();
+  const yearsToDisplay = years.filter((year) => year >= structureCreationYear);
 
-  const budgets = Array(years.length)
+  const budgets = Array(yearsToDisplay.length)
     .fill({})
     .map((_, index) => ({
       year: years[index],
