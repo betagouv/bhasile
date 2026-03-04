@@ -42,7 +42,7 @@ export const DocumentsFinanciers = (): ReactElement => {
     .map((year) =>
       documents
         .filter((document) => {
-          const yearIndex = DOCUMENTS_FINANCIERS_OPEN_YEAR - year;
+          const yearIndex = DOCUMENTS_FINANCIERS_OPEN_YEAR - year + 1;
 
           if (!document.required || document.yearIndex > yearIndex) {
             return false;
