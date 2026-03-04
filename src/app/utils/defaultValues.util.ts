@@ -35,7 +35,10 @@ export const getDefaultValues = ({
   const isAutorisee = isStructureAutorisee(structure.type);
   const repartition = getRepartition(structure);
 
-  const budgets = getBudgetsDefaultValues(structure?.budgets || []);
+  const budgets = getBudgetsDefaultValues(
+    structure?.budgets || [],
+    structureCreationYear
+  );
 
   const structureTypologies = getStructureTypologyDefaultValues(
     structure?.structureTypologies || [],

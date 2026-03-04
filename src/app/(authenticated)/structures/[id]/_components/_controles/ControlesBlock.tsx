@@ -108,7 +108,7 @@ export const ControlesBlock = (): ReactElement => {
           </ControleAccordion>
         ) : (
           <NoDataAccordion
-            title="Inspections-contrôles"
+            title="Événements indésirables graves"
             description="Aucun EIG trouvé sur Démarches Numériques"
           />
         )}

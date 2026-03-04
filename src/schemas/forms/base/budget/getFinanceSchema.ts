@@ -43,56 +43,57 @@ export const getFinanceSchema = (
 
   const startYear = getRealCreationYear(structure);
 
-  const schema = years.map((year, index) => {
-    if (year < startYear) {
+  const schema = years
+    .map((year, index) => {
+      if (year < startYear) {
+        return null;
+      }
+
+      if (isInCpomPerYear[index]) {
+        if (year === CURRENT_YEAR) {
+          return budgetAutoSaveSchema;
+        }
+        return budgetInCpomSchema;
+      }
+
+      if (isAutorisee) {
+        if (year === CURRENT_YEAR) {
+          return budgetAutoSaveSchema;
+        }
+        if (year === AUTORISEE_OPEN_YEAR) {
+          return budgetAutoriseeOpenYear1Schema;
+        }
+        if (year === AUTORISEE_OPEN_YEAR - 1) {
+          return budgetAutoriseeOpenYear2Schema;
+        }
+        if (year < AUTORISEE_OPEN_YEAR) {
+          return budgetAutoriseeOpenSchema;
+        }
+        return budgetAutoriseeNotOpenSchema;
+      }
+
+      if (isSubventionnee) {
+        if (year === CURRENT_YEAR) {
+          return budgetAutoSaveSchema;
+        }
+        if (year === AUTORISEE_OPEN_YEAR) {
+          return budgetSubventionneeOpenYear1Schema;
+        }
+        if (year < SUBVENTIONNEE_OPEN_YEAR) {
+          return budgetSubventionneeOpenSchema;
+        }
+        return budgetSubventionneeNotOpenSchema;
+      }
+
       return budgetAutoSaveSchema;
-    }
-
-    if (isInCpomPerYear[index]) {
-      if (year === CURRENT_YEAR) {
-        return budgetAutoSaveSchema;
-      }
-      return budgetInCpomSchema;
-    }
-
-    if (isAutorisee) {
-      if (year === CURRENT_YEAR) {
-        return budgetAutoSaveSchema;
-      }
-      if (year === AUTORISEE_OPEN_YEAR) {
-        return budgetAutoriseeOpenYear1Schema;
-      }
-      if (year === AUTORISEE_OPEN_YEAR - 1) {
-        return budgetAutoriseeOpenYear2Schema;
-      }
-      if (year < AUTORISEE_OPEN_YEAR) {
-        return budgetAutoriseeOpenSchema;
-      }
-      return budgetAutoriseeNotOpenSchema;
-    }
-
-    if (isSubventionnee) {
-      if (year === CURRENT_YEAR) {
-        return budgetAutoSaveSchema;
-      }
-      if (year === AUTORISEE_OPEN_YEAR) {
-        return budgetSubventionneeOpenYear1Schema;
-      }
-      if (year < SUBVENTIONNEE_OPEN_YEAR) {
-        return budgetSubventionneeOpenSchema;
-      }
-      return budgetSubventionneeNotOpenSchema;
-    }
-
-    return budgetAutoSaveSchema;
-  }) as [BudgetSchema, ...BudgetSchema[]];
+    })
+    .filter(Boolean) as [BudgetSchema, ...BudgetSchema[]];
 
   if (formKind === FormKind.FINALISATION) {
-    return z
-      .object({
-        budgets: z.tuple(schema),
-      })
-      .and(z.object({ cpomStructures: z.array(cpomStructureSchema) }));
+    return z.object({
+      budgets: z.tuple(schema),
+      cpomStructures: z.array(cpomStructureSchema),
+    });
   }
 
   return z
