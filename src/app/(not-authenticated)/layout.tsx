@@ -16,7 +16,7 @@ export default function RootLayout({
   return (
     <main className="min-h-screen flex flex-col w-full" id="content">
       <Header />
-      <div className="flex-1 flex justify-center items-stretch">{children}</div>
+      <div className="fr-container mx-auto my-10">{children}</div>
       <Footer />
     </main>
   );
