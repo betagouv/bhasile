@@ -49,7 +49,15 @@ export const Menu = (): ReactElement => {
     },
     {
       label: "Politique de confidentialité",
-      url: "/confidentialite",
+      url: "/politique-confidentialite",
+    },
+    {
+      label: "Conditions générales d'utilisation",
+      url: "/cgu",
+    },
+    {
+      label: "Mentions légales",
+      url: "/mentions-legales",
     },
     {
       label: "Accessibilité : partiellement conforme",

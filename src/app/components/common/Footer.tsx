@@ -72,8 +72,21 @@ export const Footer = (): ReactElement => {
               </a>
             </li>
             <li className="fr-footer__bottom-item">
-              <a className="fr-footer__bottom-link" href="/confidentialite">
-                Données personnelles
+              <a
+                className="fr-footer__bottom-link"
+                href="/politique-confidentialite"
+              >
+                Politique de confidentialité
+              </a>
+            </li>
+            <li className="fr-footer__bottom-item">
+              <a className="fr-footer__bottom-link" href="/cgu">
+                Conditions générales d’utilisation
+              </a>
+            </li>
+            <li className="fr-footer__bottom-item">
+              <a className="fr-footer__bottom-link" href="/mentions-legales">
+                Mentions légales
               </a>
             </li>
             <li className="fr-footer__bottom-item">
