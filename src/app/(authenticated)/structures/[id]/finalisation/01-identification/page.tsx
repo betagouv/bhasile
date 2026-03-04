@@ -6,6 +6,7 @@ import { AutoSave } from "@/app/components/forms/AutoSave";
 import { FieldSetCalendrier } from "@/app/components/forms/calendrier/FieldSetCalendrier";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
 import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
+import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
@@ -83,7 +84,10 @@ export default function FinalisationIdentification(): ReactElement {
           description="Veuillez vérifier les informations suivantes transmises par l’opérateur."
         />
 
-        <FieldSetDescription dnaCode={structure.dnaCode} />
+        <FieldSetDescription />
+        <hr />
+
+        <DnaAndFiness />
         <hr />
 
         <FieldSetContacts />

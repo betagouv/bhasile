@@ -13,7 +13,6 @@ import { OperateurAutocomplete } from "../OperateurAutocomplete";
 import SelectWithValidation from "../SelectWithValidation";
 
 export const FieldSetDescription = ({
-  dnaCode,
   formKind = FormKind.FINALISATION,
 }: Props) => {
   const filialesContainerRef = useRef(null);
@@ -40,12 +39,6 @@ export const FieldSetDescription = ({
         {formKind === FormKind.MODIFICATION ? "Général" : "Description"}
       </legend>
 
-      <input
-        type="hidden"
-        id="dnaCode"
-        {...register("dnaCode")}
-        defaultValue={dnaCode}
-      />
       {formKind !== FormKind.MODIFICATION && (
         <>
           <div className="flex">
@@ -162,6 +155,5 @@ export const FieldSetDescription = ({
 };
 
 type Props = {
-  dnaCode: string;
   formKind?: FormKind;
 };
