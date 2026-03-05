@@ -189,7 +189,6 @@ const getAllEIGs = async (): Promise<
   })
     .filter((appEIG) => appEIG !== undefined)
     .filter((appEIG) => appEIG?.structureDnaCode?.length === 5);
-  console.log(appEIGs);
   console.log("📝", appEIGs.length, "EIGs récupérés");
   return appEIGs;
 };
