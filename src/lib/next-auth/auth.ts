@@ -40,10 +40,11 @@ export const authOptions: NextAuthOptions = {
     async session({ token, session }) {
       console.log("=======", { session }, { token });
       try {
+        console.log("=======", { token }, { session });
         await upsertUser({
-          prenom: token.prenom as string,
-          nom: token.nom as string,
-          email: token.email as string,
+          prenom: session.user?.name?.split(" ")?.[0] as string,
+          nom: session.user?.name?.split(" ")?.[1] as string,
+          email: session.user?.email as string,
         });
       } catch (error) {
         console.error(
@@ -56,8 +57,6 @@ export const authOptions: NextAuthOptions = {
           id_token: token.id_token,
           provider: token.provider,
           user_id: token.user_id,
-          prenom: token.prenom,
-          nom: token.nom,
           name: token.name,
         };
       }
