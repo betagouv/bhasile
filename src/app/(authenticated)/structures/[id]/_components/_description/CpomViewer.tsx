@@ -21,24 +21,26 @@ export const CpomViewer = (): ReactElement => {
 
   return (
     <>
-      <div className="flex items-center">
-        <strong className="pr-3">CPOM</strong>
-        <span className="pr-2">{isInCpom ? "Oui" : "Non"}</span>
-        <button
-          className={`fr-btn fr-btn--sm fr-btn--icon-left fr-btn--tertiary-no-outline ${
-            showCpom ? "fr-icon-eye-off-line" : "fr-icon-eye-line"
-          }`}
-          onClick={() => setShowCpom(!showCpom)}
-        >
-          {showCpom ? "Masquer le détail" : "Voir le détail"}
-        </button>
+      <div className="col-span-2 flex gap-2 mb-3 items-center">
+        <strong>CPOM</strong>
+        <span>{isInCpom ? "Oui" : "Non"}</span>
+        {isInCpom && (
+          <button
+            className={`fr-btn fr-btn--sm fr-btn--icon-left fr-btn--tertiary-no-outline ${
+              showCpom ? "fr-icon-eye-off-line" : "fr-icon-eye-line"
+            }`}
+            onClick={() => setShowCpom(!showCpom)}
+          >
+            {showCpom ? "Masquer le détail" : "Voir le détail"}
+          </button>
+        )}
       </div>
       {showCpom && (
-        <div className="text-mention-grey">
+        <div className="col-span-2 text-mention-grey">
           {currentCpomStructure?.cpom?.structures?.map(
             (structure) =>
               structure.structure && (
-                <div key={structure.id} className="flex items-center">
+                <div key={structure.id} className="flex gap-2 items-center">
                   <span className="flex gap-2 my-2">
                     <strong className="pr-3">
                       {structure.structure.dnaCode}

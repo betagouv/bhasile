@@ -87,7 +87,7 @@ export const transformApiAdressesToFormAdresses = (
  * Formate un nom de ville selon les règles de typographie françaises :
  * https://www.amf.asso.fr/documents-noms-communes-nouvelles-les-regles-respecter/24266
  */
-export const formatCityName = (city: string): string | null => {
+export const formatCityName = (city?: string): string | undefined | null => {
   if (typeof city !== "string") {
     return city;
   }
