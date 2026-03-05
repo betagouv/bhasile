@@ -1,5 +1,6 @@
+import Tabs from "@codegouvfr/react-dsfr/Tabs";
 import { useRouter } from "next/navigation";
-import { ReactElement } from "react";
+import { ReactElement, useState } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { formatDate } from "@/app/utils/date.util";
@@ -10,6 +11,25 @@ import { useStructureContext } from "../../_context/StructureClientContext";
 import { AdressesViewer } from "./AdressesViewer";
 import { ContactsViewer } from "./ContactsViewer";
 import { CpomViewer } from "./CpomViewer";
+
+const TABS = [
+  {
+    id: "general",
+    label: "Général",
+  },
+  {
+    id: "sites",
+    label: "Sites et contacts",
+  },
+  {
+    id: "codes",
+    label: "Codes DNA & FINESS",
+  },
+  {
+    id: "adresses",
+    label: "Adresses d'hébergement",
+  },
+] as const;
 
 export const DescriptionBlock = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -23,6 +43,10 @@ export const DescriptionBlock = (): ReactElement => {
     lgbt,
     fvvTeh,
   } = structure;
+
+  const [selectedTabId, setSelectedTabId] = useState<
+    (typeof TABS)[number]["id"]
+  >(TABS[0].id);
 
   const getVulnerabiliteLabel = () => {
     const vulnerabilites: string[] = [];
@@ -43,46 +67,57 @@ export const DescriptionBlock = (): ReactElement => {
         router.push(`/structures/${structure.id}/modification/01-description`);
       }}
     >
-      <div className="flex mb-2">
-        <div className="flex-1">
-          <strong className="pr-2">Date de création</strong>
-          {formatDate(creationDate)}
+      <Tabs
+        selectedTabId={selectedTabId}
+        tabs={TABS.map((tab) => ({
+          tabId: tab.id,
+          label: tab.label,
+        }))}
+        onTabChange={(params) =>
+          setSelectedTabId(params as (typeof TABS)[number]["id"])
+        }
+      >
+        <div className="flex mb-2">
+          <div className="flex-1">
+            <strong className="pr-2">Date de création</strong>
+            {formatDate(creationDate)}
+          </div>
+          <div className="flex-1">
+            <strong className="pr-2">Type de structure</strong>
+            {type}
+          </div>
         </div>
-        <div className="flex-1">
-          <strong className="pr-2">Type de structure</strong>
-          {type}
+        <hr />
+        <div className="flex mb-2">
+          <div className="flex-1">
+            <strong className="pr-2">Opérateur</strong>
+            {getOperateurLabel(filiale, operateur?.name)}
+          </div>
         </div>
-      </div>
-      <hr />
-      <div className="flex mb-2">
-        <div className="flex-1">
-          <strong className="pr-2">Opérateur</strong>
-          {getOperateurLabel(filiale, operateur?.name)}
+        <hr />
+        <div className="flex mb-2">
+          <div className="flex-1">
+            <strong className="pr-2">Public</strong>
+            {PublicType[String(publicValue) as keyof typeof PublicType]}
+          </div>
+          <div className="flex-1">
+            <strong className="pr-2">Vulnérabilité</strong>
+            {getVulnerabiliteLabel()}
+          </div>
         </div>
-      </div>
-      <hr />
-      <div className="flex mb-2">
-        <div className="flex-1">
-          <strong className="pr-2">Public</strong>
-          {PublicType[String(publicValue) as keyof typeof PublicType]}
+        <hr />
+        <div className="mb-2">
+          <CpomViewer />
         </div>
-        <div className="flex-1">
-          <strong className="pr-2">Vulnérabilité</strong>
-          {getVulnerabiliteLabel()}
+        <hr />
+        <div className="mb-2">
+          <ContactsViewer />
         </div>
-      </div>
-      <hr />
-      <div className="mb-2">
-        <CpomViewer />
-      </div>
-      <hr />
-      <div className="mb-2">
-        <ContactsViewer />
-      </div>
-      <hr />
-      <div>
-        <AdressesViewer />
-      </div>
+        <hr />
+        <div>
+          <AdressesViewer />
+        </div>
+      </Tabs>
     </Block>
   );
 };
