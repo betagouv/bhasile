@@ -39,6 +39,11 @@ async function main() {
       continue;
     }
 
+    if (!structure.dnaCode) {
+      //TODO: should throw an error no?
+      continue;
+    }
+
     const regionName = structure.departement?.region;
     const regionKey = regionName as keyof typeof REGION_CODES;
     const codeBhasile = await generateBhasileCode(regionKey);
@@ -52,11 +57,11 @@ async function main() {
 
       // 2. Link Structure with Dna table
       const dna =
-        (await tx.dna.findUnique({ where: { code: structure.dnaCode } })) ??
+        (await tx.dna.findUnique({ where: { code: structure.dnaCode! } })) ??
         (await tx.dna.create({
           data: {
-            code: structure.dnaCode,
-            granularity: null,
+            code: structure.dnaCode!,
+            description: null,
           },
         }));
 
