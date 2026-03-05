@@ -1,18 +1,11 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { Evaluation, FileUpload } from "@/generated/prisma/client";
+import { Evaluation } from "@/generated/prisma/client";
 
 import { createFakeFileUpload } from "./file-upload.seed";
 
 export type EvaluationWithFileUploads = Evaluation & {
-  fileUploads: Omit<
-    FileUpload,
-    | "id"
-    | "acteAdministratifId"
-    | "documentFinancierId"
-    | "controleId"
-    | "evaluationId"
-  >[];
+  fileUploads: ReturnType<typeof createFakeFileUpload>[];
 };
 
 export const createFakeEvaluation = (): Omit<
