@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ReactElement } from "react";
 
+import { Logo } from "../Logo";
+
 export const Header = (): ReactElement => {
   return (
     <header role="banner" className="fr-header">
@@ -17,6 +19,7 @@ export const Header = (): ReactElement => {
                   </p>
                 </div>
               </div>
+              <Logo />
               <div className="fr-header__service">
                 <Link href="/" title="Connexion - Bhasile">
                   <p className="fr-header__service-title">Bhasile</p>

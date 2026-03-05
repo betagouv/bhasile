@@ -38,6 +38,7 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ token, session }) {
+      console.log("=======", { session }, { token });
       try {
         await upsertUser({
           prenom: token.prenom as string,
@@ -49,15 +50,17 @@ export const authOptions: NextAuthOptions = {
           "Erreur dans l'ajout ou la mise à jour de l'utilisateur",
           error
         );
-        return session;
+      } finally {
+        return {
+          ...session,
+          id_token: token.id_token,
+          provider: token.provider,
+          user_id: token.user_id,
+          prenom: token.prenom,
+          nom: token.nom,
+          name: token.name,
+        };
       }
-      return {
-        ...session,
-        id_token: token.id_token,
-        provider: token.provider,
-        user_id: token.user_id,
-        name: token.name,
-      };
     },
   },
   secret: process.env.AUTH_SECRET,
