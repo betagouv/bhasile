@@ -393,36 +393,42 @@ const updateOne = async (
       structureMillesimes,
     } = structure;
 
-    return await prisma.$transaction(async (tx) => {
-      const updatedStructure = await updateStructure(tx, structure);
+    return await prisma.$transaction(
+      async (tx) => {
+        const updatedStructure = await updateStructure(tx, structure);
 
-      await initializeDefaultForms(tx, isOperateurUpdate, structure.dnaCode);
+        await initializeDefaultForms(tx, isOperateurUpdate, structure.dnaCode);
 
-      await createOrUpdateContacts(tx, contacts, structure.dnaCode);
-      await createOrUpdateBudgets(tx, budgets, structure.dnaCode);
-      await createOrUpdateStructureTypologies(
-        tx,
-        structureTypologies,
-        structure.dnaCode
-      );
-      await createOrUpdateAdresses(tx, adresses, structure.dnaCode);
-      await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
-        structureDnaCode: structure.dnaCode,
-      });
-      await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
-        structureDnaCode: structure.dnaCode,
-      });
-      await createOrUpdateControles(tx, controles, structure.dnaCode);
-      await createOrUpdateForms(tx, forms, structure.dnaCode);
-      await createOrUpdateEvaluations(tx, evaluations, structure.dnaCode);
-      await createOrUpdateStructureMillesimes(
-        tx,
-        structureMillesimes,
-        structure.dnaCode
-      );
+        await createOrUpdateContacts(tx, contacts, structure.dnaCode);
+        await createOrUpdateBudgets(tx, budgets, structure.dnaCode);
+        await createOrUpdateStructureTypologies(
+          tx,
+          structureTypologies,
+          structure.dnaCode
+        );
+        await createOrUpdateAdresses(tx, adresses, structure.dnaCode);
+        await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
+          structureDnaCode: structure.dnaCode,
+        });
+        await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
+          structureDnaCode: structure.dnaCode,
+        });
+        await createOrUpdateControles(tx, controles, structure.dnaCode);
+        await createOrUpdateForms(tx, forms, structure.dnaCode);
+        await createOrUpdateEvaluations(tx, evaluations, structure.dnaCode);
+        await createOrUpdateStructureMillesimes(
+          tx,
+          structureMillesimes,
+          structure.dnaCode
+        );
 
-      return updatedStructure;
-    });
+        return updatedStructure;
+      },
+      {
+        maxWait: 5000,
+        timeout: 10000,
+      }
+    );
   } catch (error) {
     throw new Error(
       `Impossible de mettre à jour la structure avec le code DNA ${structure.dnaCode}: ${error}`
