@@ -9,6 +9,9 @@ export const createFakeFileUpload = (): Omit<
   | "documentFinancierId"
   | "controleId"
   | "evaluationId"
+  | "parentFileUploadId"
+  | "structureId"
+  | "cpomId"
 > => {
   const { mime, ext } = randomDocFile();
   const fileName = faker.system.commonFileName(ext);
@@ -18,15 +21,6 @@ export const createFakeFileUpload = (): Omit<
     mimeType: mime,
     fileSize: faker.number.int({ min: 1, max: 100000 }),
     originalName: fileName,
-    granularity: null,
-    structureDnaCode: null,
-    cpomId: null,
-    date: null,
-    category: null,
-    startDate: null,
-    endDate: null,
-    categoryName: null,
-    parentFileUploadId: null,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   };
