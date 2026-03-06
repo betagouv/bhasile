@@ -24,16 +24,18 @@ export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
       data-row-key={index}
       className={`border-t border-default-grey ${isStructureFinalisee ? "bg-transparent" : "bg-alt-blue-france"}`}
     >
-      <td className="text-left!">{structure.codeBhasile}</td>
-      <td className="text-left!">{structure.type}</td>
+      <td className="text-left! whitespace-nowrap">{structure.codeBhasile}</td>
+      <td className="text-left! whitespace-nowrap">{structure.type}</td>
       <td className="text-left!">
         {getOperateurLabel(structure.filiale, structure.operateur?.name)}
       </td>
       <td>{structure.departementAdministratif}</td>
-      <td className="text-left!">
+      <td className="text-left! whitespace-nowrap">
         <RepartitionBadge repartition={getRepartition(structure)} />
       </td>
-      <td className="text-left!">{getCommuneLabel(structure)}</td>
+      <td className="text-left! whitespace-nowrap">
+        {getCommuneLabel(structure)}
+      </td>
       <td>{structure.structureTypologies?.[0]?.placesAutorisees}</td>
       <td className="text-left!">
         {structure.finConvention ? (

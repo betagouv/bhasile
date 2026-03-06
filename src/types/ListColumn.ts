@@ -1,5 +1,5 @@
 export type StructureColumn =
-  | "dnaCode"
+  | "codeBhasile"
   | "type"
   | "operateur"
   | "departementAdministratif"
