@@ -100,10 +100,10 @@ export const StructureHeader = (): ReactElement | null => {
         <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
           <Button
             className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
-            title="Retour aux structures d’hébergement"
+            title="Retour"
             onClick={handleBackClick}
           >
-            Retour aux structures d’hébergement
+            Retour
           </Button>
           <div>
             <h2 className="text-title-blue-france text-xs uppercase mb-0">
