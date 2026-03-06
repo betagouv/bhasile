@@ -2,7 +2,6 @@
 
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactElement, useEffect, useRef } from "react";
 
