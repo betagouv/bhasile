@@ -33,7 +33,7 @@ export const AdresseAdministrativeAndAntennes = ({
         options={[
           {
             label:
-              "La structure est répartie sur plusieurs antennes administratives géographiquement distantes. ",
+              "La structure est répartie sur plusieurs antennes administratives géographiquement distantes.",
             nativeInputProps: {
               name: "isMultiAntenne",
               checked: isMultiAntenne,

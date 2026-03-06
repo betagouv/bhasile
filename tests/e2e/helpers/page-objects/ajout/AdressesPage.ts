@@ -5,7 +5,6 @@ import { Repartition } from "@/types/adresse.type";
 import { AutocompleteHelper } from "../../autocomplete-helper";
 import { URLS } from "../../constants";
 import { FormHelper } from "../../form-helper";
-import { SELECTORS } from "../../selectors";
 import { getRepartitionLabel } from "../../shared-utils";
 import { TestStructureData } from "../../test-data/types";
 import { WaitHelper } from "../../wait-helper";
@@ -24,15 +23,6 @@ export class AdressesPage extends BasePage {
   }
 
   async fillForm(data: Partial<TestStructureData>) {
-    if (data.adresseAdministrative) {
-      await this.autocompleteHelper.fillAndSelectFirst(
-        SELECTORS.ADRESSE_ADMINISTRATIVE_COMPLETE,
-        data.adresseAdministrative.searchTerm
-      );
-
-      await this.waitHelper.waitForUIUpdate();
-    }
-
     if (data.typeBati) {
       await this.formHelper.selectOption(
         'select[name="typeBati"]',
@@ -68,7 +58,7 @@ export class AdressesPage extends BasePage {
         }
 
         await this.autocompleteHelper.fillAndSelectFirst(
-          SELECTORS.ADRESSE_COMPLETE(i),
+          `input[name="adresses.${i}.adresseComplete"]`,
           adresse.searchTerm
         );
 

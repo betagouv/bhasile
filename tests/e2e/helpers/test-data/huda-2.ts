@@ -20,6 +20,12 @@ export const huda2: TestStructureScenario = {
     },
     creationDate: "2015-06-01",
     public: "Tout public",
+    dnas: [
+      {
+        code: "C1234",
+        description: "DNA 1",
+      },
+    ],
     lgbt: true,
     fvvTeh: true,
     contactPrincipal: {

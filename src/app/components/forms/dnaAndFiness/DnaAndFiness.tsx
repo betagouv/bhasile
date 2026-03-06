@@ -21,8 +21,7 @@ export const DnaAndFiness = () => {
       <Checkbox
         options={[
           {
-            label:
-              "La structure est répartie sur plusieurs antennes administratives géographiquement distantes. ",
+            label: "La structure dispose de plusieurs codes DNA et/ou FINESS.",
             nativeInputProps: {
               name: "isMultiDna",
               checked: isMultiDna,

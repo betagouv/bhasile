@@ -9,7 +9,7 @@ import { TestStructureScenario } from "./types";
  * Kept minimal eval/controles like cada-1/cada-2 for stable e2e; addresses and actes remain full.
  */
 export const cada3: TestStructureScenario = {
-  name: "CADA 3 - Mixte, 10 addresses, one contact, mixed docs, 1 eval, controles, actes",
+  name: "CADA 3 - Multi finesses, mixte, 10 addresses, one contact, mixed docs, 1 eval, controles, actes",
   formData: {
     codeBhasile: "BHA-TST-001",
     type: StructureType.CADA,
@@ -20,7 +20,22 @@ export const cada3: TestStructureScenario = {
       id: 1,
     },
     creationDate: "2015-06-01",
-    finessCode: "123456789",
+    finesses: [
+      {
+        code: "123456789",
+        description: "Finess 1",
+      },
+      {
+        code: "987654321",
+        description: "Finess 2",
+      },
+    ],
+    dnas: [
+      {
+        code: "C1234",
+        description: "DNA 1",
+      },
+    ],
     public: "Tout public",
     lgbt: true,
     fvvTeh: true,

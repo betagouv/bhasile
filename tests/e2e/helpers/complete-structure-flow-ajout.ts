@@ -11,9 +11,10 @@ import { TypePlacesPage } from "./page-objects/ajout/TypePlacesPage";
 import { VerificationPage } from "./page-objects/ajout/VerificationPage";
 import { FailingStep, TestStructureData } from "./test-data/types";
 
-// Helper type: Partial data but with required dnaCode
+// Helper type: Partial data but with required codeBhasile and structure id (for step URLs)
 type TestStructureDataWithCodeBhasile = Partial<TestStructureData> & {
   codeBhasile: string;
+  id: number;
 };
 
 export type CompleteAjoutFlowResult =
@@ -38,11 +39,13 @@ export async function completeAjoutFlow(
   const selectionPage = new SelectionPage(page);
   await selectionPage.selectStructure(formData as TestStructureData);
 
+  const structureId = String(formData.id);
+
   const identificationPage = new IdentificationPage(page);
   await identificationPage.fillForm(formData as TestStructureData);
   const shouldFailAtIdentification = failingStep === "identification";
   await identificationPage.submit(
-    formData.codeBhasile,
+    structureId,
     shouldFailAtIdentification
   );
   if (shouldFailAtIdentification) {
@@ -52,7 +55,7 @@ export async function completeAjoutFlow(
   const adressesPage = new AdressesPage(page);
   await adressesPage.fillForm(formData as TestStructureData);
   const shouldFailAtAdresses = failingStep === "adresses";
-  await adressesPage.submit(formData.codeBhasile, shouldFailAtAdresses);
+  await adressesPage.submit(structureId, shouldFailAtAdresses);
   if (shouldFailAtAdresses) {
     return { stoppedAtFailingStep: true };
   }
@@ -60,7 +63,7 @@ export async function completeAjoutFlow(
   const typePlacesPage = new TypePlacesPage(page);
   await typePlacesPage.fillForm(formData as TestStructureData);
   const shouldFailAtTypePlaces = failingStep === "type-places";
-  await typePlacesPage.submit(formData.codeBhasile, shouldFailAtTypePlaces);
+  await typePlacesPage.submit(structureId, shouldFailAtTypePlaces);
   if (shouldFailAtTypePlaces) {
     return { stoppedAtFailingStep: true };
   }
@@ -69,10 +72,7 @@ export async function completeAjoutFlow(
   await documentsFinanciersPage.waitForLoad();
   await documentsFinanciersPage.fillForm(formData as TestStructureData);
   const shouldFailAtDocuments = failingStep === "documents";
-  await documentsFinanciersPage.submit(
-    formData.codeBhasile,
-    shouldFailAtDocuments
-  );
+  await documentsFinanciersPage.submit(structureId, shouldFailAtDocuments);
   if (shouldFailAtDocuments) {
     return { stoppedAtFailingStep: true };
   }
@@ -80,7 +80,7 @@ export async function completeAjoutFlow(
   const verificationPage = new VerificationPage(page);
   await verificationPage.verifyData(formData as TestStructureData);
   const shouldFailAtVerification = failingStep === "verification";
-  await verificationPage.submit(formData.codeBhasile, shouldFailAtVerification);
+  await verificationPage.submit(structureId, shouldFailAtVerification);
   if (shouldFailAtVerification) {
     return { stoppedAtFailingStep: true };
   }

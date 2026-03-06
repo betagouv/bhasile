@@ -18,6 +18,8 @@ export class TestStructureDataBuilder {
         id: 1,
       },
       creationDate: "2015-06-01",
+      finesses: [{ code: "123456789", description: "Finess 1" }],
+      dnas: [{ code: "C1234", description: "DNA 1" }],
       public: "Tout public",
       lgbt: false,
       fvvTeh: false,
@@ -114,7 +116,17 @@ export class TestStructureDataBuilder {
   }
 
   withFinessCode(finessCode: string): this {
-    this.data.finessCode = finessCode;
+    this.data.finesses = [{ code: finessCode, description: "" }];
+    return this;
+  }
+
+  withFinesses(finesses: NonNullable<TestStructureData["finesses"]>): this {
+    this.data.finesses = finesses;
+    return this;
+  }
+
+  withDnas(dnas: NonNullable<TestStructureData["dnas"]>): this {
+    this.data.dnas = dnas;
     return this;
   }
 
@@ -281,7 +293,8 @@ export class TestStructureDataBuilder {
   static forCADA(): TestStructureDataBuilder {
     return new TestStructureDataBuilder()
       .withType(StructureType.CADA)
-      .withFinessCode("123456789")
+      .withFinesses([{ code: "123456789", description: "Finess 1" }])
+      .withDnas([{ code: "C1234", description: "DNA 1" }])
       .withPeriodeAutorisation("2020-01-01", "2025-12-31");
   }
 
@@ -292,10 +305,16 @@ export class TestStructureDataBuilder {
   }
 
   static forCPH(): TestStructureDataBuilder {
-    return new TestStructureDataBuilder().withType(StructureType.CPH);
+    return new TestStructureDataBuilder()
+      .withType(StructureType.CPH)
+      .withFinesses([{ code: "123456789", description: "Finess 1" }])
+      .withDnas([{ code: "C1234", description: "DNA 1" }]);
   }
 
   static forHUDA(): TestStructureDataBuilder {
-    return new TestStructureDataBuilder().withType(StructureType.HUDA);
+    return new TestStructureDataBuilder()
+      .withType(StructureType.HUDA)
+      .withField("finesses", undefined)
+      .withDnas([{ code: "C1234", description: "DNA 1" }]);
   }
 }

@@ -19,7 +19,18 @@ export const cph2: TestStructureScenario = {
       id: 1,
     },
     creationDate: "2015-06-01",
-    finessCode: "123456789",
+    finesses: [
+      {
+        code: "123456789",
+        description: "Finess 1",
+      },
+    ],
+    dnas: [
+      {
+        code: "C1234",
+        description: "DNA 1",
+      },
+    ],
     public: "Tout public",
     lgbt: true,
     fvvTeh: true,

@@ -27,6 +27,8 @@ export const SELECTORS = {
     'input[name="adresseAdministrativeComplete"]',
   ADRESSE_COMPLETE: (index: number) =>
     `input[name="adresses.${index}.adresseComplete"]`,
+  ANTENNE_ADRESSE_COMPLETE: (index: number) =>
+    `input[name="antennes.${index}.adresseComplete"]`,
 
   // Contact fields
   CONTACT_PRINCIPAL: {

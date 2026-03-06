@@ -8,7 +8,7 @@ import { TestStructureScenario } from "./types";
  * old evaluation, no controls, with convention dates, minimal finances
  */
 export const huda1: TestStructureScenario = {
-  name: "HUDA 1 - Collectif, single address, one contact, all docs, old eval, no controls",
+  name: "HUDA 1 - Multi dna, collectif, single address, one contact, all docs, old eval, no controls",
   formData: {
     codeBhasile: "BHA-TST-001",
     type: StructureType.HUDA,
@@ -20,6 +20,16 @@ export const huda1: TestStructureScenario = {
     },
     creationDate: "2015-06-01",
     public: "Tout public",
+    dnas: [
+      {
+        code: "C1234",
+        description: "DNA 1",
+      },
+      {
+        code: "C5678",
+        description: "DNA 2",
+      },
+    ],
     lgbt: true,
     fvvTeh: true,
     contactPrincipal: {

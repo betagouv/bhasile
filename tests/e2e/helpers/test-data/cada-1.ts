@@ -4,7 +4,7 @@ import { StructureType } from "@/types/structure.type";
 import { TestStructureScenario } from "./types";
 
 export const cada1: TestStructureScenario = {
-  name: "CADA 1 - Collectif, same address, one contact, all docs, old eval, controls, every actes administratifs",
+  name: "CADA 1 - Multi dna, collectif, same address, one contact, all docs, old eval, controls, every actes administratifs",
   formData: {
     codeBhasile: "BHA-TST-001",
     type: StructureType.CADA,
@@ -15,7 +15,22 @@ export const cada1: TestStructureScenario = {
       id: 1,
     },
     creationDate: "2015-06-01",
-    finessCode: "123456789",
+    finesses: [
+      {
+        code: "123456789",
+        description: "Finess 1",
+      },
+    ],
+    dnas: [
+      {
+        code: "C1234",
+        description: "DNA 1",
+      },
+      {
+        code: "C5678",
+        description: "DNA 2",
+      },
+    ],
     public: "Tout public",
     lgbt: true,
     fvvTeh: true,

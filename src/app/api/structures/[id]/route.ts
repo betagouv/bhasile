@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
         { status: 404 }
       );
     }
-    console.log("structure", structure);
+
     const structureWithPresencesIndues = isAuthenticated
       ? addPresencesIndues(structure as StructureWithFileUploadsAndActivites)
       : structure;

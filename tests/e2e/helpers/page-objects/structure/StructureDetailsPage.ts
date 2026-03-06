@@ -3,7 +3,10 @@ import { expect, Locator } from "@playwright/test";
 import { formatDate, getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
-import { getOperateurLabel } from "@/app/utils/structure.util";
+import {
+  getOperateurLabel,
+  isStructureAutorisee,
+} from "@/app/utils/structure.util";
 import { PublicType } from "@/types/structure.type";
 
 import { URLS } from "../../constants";
@@ -62,12 +65,7 @@ export class StructureDetailsPage extends BasePage {
 
   async showContacts() {
     const block = this.getBlockByTitle("Description");
-    const hiddenToggle = block.getByRole("button", {
-      name: "Masquer les contacts",
-    });
-    if (!(await hiddenToggle.isVisible())) {
-      await block.getByRole("button", { name: "Voir les contacts" }).click();
-    }
+    await block.getByRole("tab", { name: "Sites et contacts" }).click();
   }
 
   async expectPublic(publicValue: string) {
@@ -140,11 +138,6 @@ export class StructureDetailsPage extends BasePage {
     await expect(
       block.getByText("Code Bhasile", { exact: true }).locator("..")
     ).toContainText(data.codeBhasile);
-    if (data.finessCode) {
-      await expect(
-        block.getByText("Code FINESS", { exact: true }).locator("..")
-      ).toContainText(data.finessCode.replaceAll(" ", ""));
-    }
     const operateurLabel = getOperateurLabel(data.filiale, data.operateur.name);
     if (operateurLabel) {
       await expect(
@@ -175,6 +168,43 @@ export class StructureDetailsPage extends BasePage {
     }
     if (city) {
       await expect(addressRow.locator("..")).toContainText(city);
+    }
+
+    const codesTabLabel = isStructureAutorisee(data.type)
+      ? "Codes DNA & FINESS"
+      : "Codes DNA";
+    const hasDnasOrFinesses =
+      (data.dnas?.length ?? 0) > 0 || (data.finesses?.length ?? 0) > 0;
+    if (hasDnasOrFinesses) {
+      await block.getByRole("tab", { name: codesTabLabel }).click();
+      for (const dna of data.dnas ?? []) {
+        if (!dna.code) continue;
+        await expect(block).toContainText(dna.code);
+        if ((data.dnas?.length ?? 0) > 1 && dna.description) {
+          await expect(block).toContainText(dna.description);
+        }
+      }
+      for (const finess of data.finesses ?? []) {
+        if (!finess.code) continue;
+        await expect(block).toContainText(finess.code.replaceAll(" ", ""));
+        if ((data.finesses?.length ?? 0) > 1 && finess.description) {
+          await expect(block).toContainText(finess.description);
+        }
+      }
+    }
+
+    const hasAntennes = (data.antennes?.length ?? 0) > 0;
+    if (hasAntennes) {
+      await block.getByRole("tab", { name: "Sites et contacts" }).click();
+      for (const antenne of data.antennes ?? []) {
+        if (antenne.name) {
+          await expect(block).toContainText(antenne.name);
+        }
+        const antenneAddress = antenne.adresseComplete || antenne.searchTerm;
+        if (antenneAddress) {
+          await expect(block).toContainText(antenneAddress);
+        }
+      }
     }
   }
 
@@ -210,12 +240,11 @@ export class StructureDetailsPage extends BasePage {
     ) {
       return;
     }
-    const contactLabel = `${contact.prenom} ${contact.nom} (${contact.role})`;
+    await expect(block).toContainText(contact.prenom);
+    await expect(block).toContainText(contact.nom);
+    await expect(block).toContainText(contact.role ?? "");
+    await expect(block).toContainText(contact.email ?? "");
     const formattedPhone = formatPhoneNumber(contact.telephone);
-    await expect(block.getByText(contactLabel, { exact: true })).toBeVisible();
-    await expect(
-      block.getByText(contact.email ?? "", { exact: true })
-    ).toBeVisible();
     if (formattedPhone) {
       await expect(
         block.getByText(new RegExp(escapeForRegex(formattedPhone)))

@@ -4,7 +4,7 @@ import { StructureType } from "@/types/structure.type";
 import { TestStructureScenario } from "./types";
 
 export const cada2: TestStructureScenario = {
-  name: "CADA 2 - Recent, Diffus, multiple addresses, most documents at finalisation, two contacts, recent eval, no optional actes administratifs",
+  name: "CADA 2 - Single dna, recent, diffus, multiple addresses, multiple antennes, most documents at finalisation, two contacts, recent eval, no optional actes administratifs",
   formData: {
     codeBhasile: "BHA-TST-001",
     type: StructureType.CADA,
@@ -15,7 +15,18 @@ export const cada2: TestStructureScenario = {
       id: 1,
     },
     creationDate: "2025-01-02",
-    finessCode: "123456789",
+    finesses: [
+      {
+        code: "123456789",
+        description: "Finess 1",
+      },
+    ],
+    dnas: [
+      {
+        code: "C1234",
+        description: "DNA 1",
+      },
+    ],
     public: "Tout public",
     lgbt: true,
     fvvTeh: true,
@@ -53,6 +64,18 @@ export const cada2: TestStructureScenario = {
         adresseComplete: "2 Rue de la Paix 75001 Paris",
         searchTerm: "2 Rue de la Paix 75001 Paris",
         placesAutorisees: 150,
+      },
+    ],
+    antennes: [
+      {
+        adresseComplete: "3 Rue de la Paix 75001 Paris",
+        searchTerm: "3 Rue de la Paix 75001 Paris",
+        name: "Antenne 1",
+      },
+      {
+        adresseComplete: "4 Rue de la Paix 75001 Paris",
+        searchTerm: "4 Rue de la Paix 75001 Paris",
+        name: "Antenne 2",
       },
     ],
     structureTypologies: [

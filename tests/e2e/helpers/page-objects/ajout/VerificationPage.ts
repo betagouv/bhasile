@@ -52,14 +52,55 @@ export class VerificationPage extends BasePage {
     await expect(section).toContainText(data.operateur.name);
     await expect(section).toContainText(formatDate(data.creationDate));
     await expect(section).toContainText(data.public);
-    if (data.finessCode) {
-      await expect(section).toContainText(data.finessCode);
-    }
     if (data.lgbt) {
       await expect(section).toContainText("LGBT");
     }
     if (data.fvvTeh) {
       await expect(section).toContainText("FVV-TEH");
+    }
+
+    if (data.nom) {
+      await expect(section).toContainText(data.nom);
+    }
+    const { addressLine, postalCode, city } = parseAddressParts(
+      data.adresseAdministrative.complete
+    );
+    if (addressLine) {
+      await expect(section).toContainText(addressLine);
+    }
+    if (postalCode) {
+      await expect(section).toContainText(postalCode);
+    }
+    if (city) {
+      const formattedCity = formatCityName(city);
+      if (formattedCity) {
+        await expect(section).toContainText(formattedCity);
+      }
+    }
+
+    for (const dna of data.dnas ?? []) {
+      if (!dna.code) continue;
+      await expect(section).toContainText(dna.code);
+      if ((data.dnas?.length ?? 0) > 1 && dna.description) {
+        await expect(section).toContainText(dna.description);
+      }
+    }
+    for (const finess of data.finesses ?? []) {
+      if (!finess.code) continue;
+      await expect(section).toContainText(finess.code);
+      if ((data.finesses?.length ?? 0) > 1 && finess.description) {
+        await expect(section).toContainText(finess.description);
+      }
+    }
+
+    for (const antenne of data.antennes ?? []) {
+      if (antenne.name) {
+        await expect(section).toContainText(antenne.name);
+      }
+      const antenneAddress = antenne.adresseComplete || antenne.searchTerm;
+      if (antenneAddress) {
+        await expect(section).toContainText(antenneAddress);
+      }
     }
 
     const principalLabel = `${data.contactPrincipal.prenom} ${data.contactPrincipal.nom}`;
@@ -105,25 +146,6 @@ export class VerificationPage extends BasePage {
   private async expectAdresses(data: TestStructureData) {
     const section = this.getSection("Adresses");
 
-    if (data.nom) {
-      await expect(section).toContainText(data.nom);
-    }
-
-    const { addressLine, postalCode, city } = parseAddressParts(
-      data.adresseAdministrative.complete
-    );
-    if (addressLine) {
-      await expect(section).toContainText(addressLine);
-    }
-    if (postalCode) {
-      await expect(section).toContainText(postalCode);
-    }
-    if (city) {
-      const formattedCity = formatCityName(city);
-      if (formattedCity) {
-        await expect(section).toContainText(formattedCity);
-      }
-    }
     await expect(section).toContainText(data.typeBati);
 
     if (data.adresses && data.adresses.length > 0) {

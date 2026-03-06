@@ -8,7 +8,7 @@ import { TestStructureScenario } from "./types";
  * with controls, full finances
  */
 export const caes2: TestStructureScenario = {
-  name: "CAES 2 - Mixte, multiple addresses with repartition, one contact, mixed docs, controls",
+  name: "CAES 2 - Multiple antennes, mixte, multiple addresses with repartition, one contact, mixed docs, controls",
   formData: {
     codeBhasile: "BHA-TST-001",
     type: StructureType.CAES,
@@ -20,6 +20,39 @@ export const caes2: TestStructureScenario = {
     },
     creationDate: "2015-06-01",
     public: "Tout public",
+    dnas: [
+      {
+        code: "C1234",
+        description: "DNA 1",
+      },
+    ],
+    antennes: [
+      {
+        adresseComplete: "1 Rue de la Paix 75001 Paris",
+        searchTerm: "1 Rue de la Paix 75001 Paris",
+        name: "Antenne 1",
+      },
+      {
+        adresseComplete: "2 Rue de la Paix 75001 Paris",
+        searchTerm: "2 Rue de la Paix 75001 Paris",
+        name: "Antenne 2",
+      },
+      {
+        adresseComplete: "3 Rue de la Paix 75001 Paris",
+        searchTerm: "3 Rue de la Paix 75001 Paris",
+        name: "Antenne 3",
+      },
+      {
+        adresseComplete: "4 Rue de la Paix 75001 Paris",
+        searchTerm: "4 Rue de la Paix 75001 Paris",
+        name: "Antenne 4",
+      },
+      {
+        adresseComplete: "5 Rue de la Paix 75001 Paris",
+        searchTerm: "5 Rue de la Paix 75001 Paris",
+        name: "Antenne 5",
+      },
+    ],
     lgbt: true,
     fvvTeh: true,
     contactPrincipal: {

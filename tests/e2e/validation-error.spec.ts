@@ -11,9 +11,9 @@ import { TestStructureScenario } from "./helpers/test-data/types";
 const invalidTestCases: TestStructureScenario[] = [
   // Identification failures
   {
-    name: "should fail validation at identification page when finessCode is missing",
+    name: "should fail validation at identification page when finess code is missing",
     formData: TestStructureDataBuilder.basedOn(cada1)
-      .withoutField("finessCode")
+      .withField("finesses", [{ code: "", description: "Finess 1" }])
       .build(),
     failingStep: "identification",
   },
@@ -54,11 +54,11 @@ const invalidTestCases: TestStructureScenario[] = [
   },
   // Adresses failures
   {
-    name: "should fail validation at adresses page when adresseAdministrative is missing",
+    name: "should fail validation at identification page when adresseAdministrative is missing",
     formData: TestStructureDataBuilder.basedOn(cada1)
       .withoutField("adresseAdministrative")
       .build(),
-    failingStep: "adresses",
+    failingStep: "identification",
   },
   {
     name: "should fail validation at adresses page when typeBati is missing",
@@ -96,10 +96,10 @@ const invalidTestCases: TestStructureScenario[] = [
 
 for (const { name, formData, failingStep } of invalidTestCases) {
   test(name, async ({ page }) => {
-    await beforeFlow(formData, page);
+    const id = await beforeFlow(formData, page);
 
     try {
-      await completeStructureFlow(page, formData, {
+      await completeStructureFlow(page, { ...formData, id }, {
         failingStep,
       });
     } finally {

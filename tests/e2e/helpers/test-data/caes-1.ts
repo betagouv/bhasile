@@ -20,6 +20,12 @@ export const caes1: TestStructureScenario = {
       id: 1,
     },
     creationDate: "2015-06-01",
+    dnas: [
+      {
+        code: "C1234",
+        description: "DNA 1",
+      },
+    ],
     public: "Tout public",
     lgbt: true,
     fvvTeh: true,

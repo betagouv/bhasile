@@ -15,7 +15,14 @@ export type TestStructureData = {
     id: number;
   };
   creationDate: string;
-  finessCode?: string;
+  finesses?: Array<{
+    code: string;
+    description: string;
+  }>;
+  dnas?: Array<{
+    code: string;
+    description: string;
+  }>;
   public: string;
   lgbt: boolean;
   fvvTeh: boolean;
@@ -53,6 +60,11 @@ export type TestStructureData = {
     searchTerm: string;
     placesAutorisees: number;
     repartition?: Repartition;
+  }>;
+  antennes?: Array<{
+    adresseComplete: string;
+    searchTerm: string;
+    name: string;
   }>;
   structureTypologies: Array<{
     placesAutorisees: number;
