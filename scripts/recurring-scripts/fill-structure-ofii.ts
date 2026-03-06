@@ -98,79 +98,117 @@ const loadDataToOfiiTable = async () => {
     let createdCount = 0;
     let updatedCount = 0;
 
-    const existingStructures = await prisma.structure.findMany({
-      where: {
-        dnaCode: { in: validRecords.map((structure) => structure.dnaCode) },
-      },
-      select: {
-        dnaCode: true,
-        activeInOfiiFileSince: true,
-        inactiveInOfiiFileSince: true,
-      },
+    const csvDnaCodes = new Set(validRecords.map((record) => record.dnaCode));
+
+    const dnas = await prisma.dna.findMany({
+      where: { code: { in: [...csvDnaCodes] } },
+      select: { id: true, code: true },
     });
-    const existingByDnaCode = new Map(
-      existingStructures.map((structure) => [structure.dnaCode, structure])
-    );
+
+    const dnaStructuresForCsvCodes = await prisma.dnaStructure.findMany({
+      where: { dnaId: { in: dnas.map((dna) => dna.id) } },
+      select: { dnaId: true, structureId: true },
+    });
+    const dnaIdToCode = new Map(dnas.map((dna) => [dna.id, dna.code]));
+    const structureIdByDnaCode = new Map<string, number>();
+    for (const dnaStructure of dnaStructuresForCsvCodes) {
+      const code = dnaIdToCode.get(dnaStructure.dnaId);
+      if (code) {
+        structureIdByDnaCode.set(code, dnaStructure.structureId);
+      }
+    }
 
     await prisma.$transaction(async (tx) => {
       for (const row of validRecords) {
-        const existing = existingByDnaCode.get(row.dnaCode);
         const now = new Date();
+        let dna = await tx.dna.findUnique({ where: { code: row.dnaCode } });
+        if (!dna) {
+          dna = await tx.dna.create({
+            data: { code: row.dnaCode, description: null },
+          });
+        }
 
-        await tx.structure.upsert({
-          where: { dnaCode: row.dnaCode },
-          update: {
-            nomOfii: row.nom ?? undefined,
-            directionTerritoriale: row.direction_territoriale ?? undefined,
-            inactiveInOfiiFileSince: null,
-          },
-          create: {
-            dnaCode: row.dnaCode,
-            nom: row.nom,
-            type: row.type as StructureType,
-            departementAdministratif: row.departement ?? undefined,
-            nomOfii: row.nom ?? undefined,
-            directionTerritoriale: row.direction_territoriale ?? undefined,
-            activeInOfiiFileSince: now,
-            inactiveInOfiiFileSince: null,
-            operateurId: row.operateur_nom
-              ? (operateurMap.get(row.operateur_nom) ?? null)
-              : null,
-          },
-        });
+        const existingStructureId = structureIdByDnaCode.get(row.dnaCode);
 
-        if (existing) {
+        if (existingStructureId != null) {
+          await tx.structure.update({
+            where: { id: existingStructureId },
+            data: {
+              nomOfii: row.nom ?? undefined,
+              directionTerritoriale: row.direction_territoriale ?? undefined,
+              inactiveInOfiiFileSince: null,
+            },
+          });
           updatedCount += 1;
         } else {
+          const structure = await tx.structure.create({
+            data: {
+              dnaCode: row.dnaCode,
+              nom: row.nom,
+              type: row.type as StructureType,
+              departementAdministratif: row.departement ?? undefined,
+              nomOfii: row.nom ?? undefined,
+              directionTerritoriale: row.direction_territoriale ?? undefined,
+              activeInOfiiFileSince: now,
+              inactiveInOfiiFileSince: null,
+              operateurId: row.operateur_nom
+                ? (operateurMap.get(row.operateur_nom) ?? null)
+                : null,
+            },
+          });
+          await tx.dnaStructure.create({
+            data: {
+              dnaId: dna.id,
+              structureId: structure.id,
+              startDate: null,
+              endDate: null,
+            },
+          });
+          structureIdByDnaCode.set(row.dnaCode, structure.id);
           createdCount += 1;
         }
       }
 
-      // Deactivate structures that are not in the CSV
-      const csvDnaCodes = new Set(records.map((row) => row.dnaCode));
+      const csvDnaCodesSet = new Set(
+        records.map((row: OfiiCsvRow) => row.dnaCode)
+      );
+      const dnasInCsv = await tx.dna.findMany({
+        where: { code: { in: [...csvDnaCodesSet] } },
+        select: { id: true },
+      });
+      const dnaIdsInCsv = new Set(dnasInCsv.map((dna) => dna.id));
 
-      const allActiveOfiiStructures = await tx.structure.findMany({
-        where: {
-          inactiveInOfiiFileSince: null,
+      const activeStructuresWithDnas = await tx.structure.findMany({
+        where: { inactiveInOfiiFileSince: null },
+        select: {
+          id: true,
+          dnaStructures: {
+            select: { dnaId: true },
+          },
         },
-        select: { dnaCode: true },
       });
 
-      const dnaCodesToDeactivate = allActiveOfiiStructures
-        .map((s) => s.dnaCode)
-        .filter((dnaCode) => !csvDnaCodes.has(dnaCode));
+      const structureIdsToDeactivate = activeStructuresWithDnas
+        .filter(
+          (structure) =>
+            structure.dnaStructures.length > 0 &&
+            structure.dnaStructures.every(
+              (dnaStructure) => !dnaIdsInCsv.has(dnaStructure.dnaId)
+            )
+        )
+        .map((structure) => structure.id);
 
-      if (dnaCodesToDeactivate.length > 0) {
+      if (structureIdsToDeactivate.length > 0) {
         const now = new Date();
         const deactivated = await tx.structure.updateMany({
           where: {
-            dnaCode: { in: dnaCodesToDeactivate },
+            id: { in: structureIdsToDeactivate },
             inactiveInOfiiFileSince: null,
           },
           data: { inactiveInOfiiFileSince: now },
         });
         console.log(
-          `⚠️ ${deactivated.count} structures marquées comme inactives dans le fichier OFII (absentes du CSV).`
+          `⚠️ ${deactivated.count} structures marquées comme inactives dans le fichier OFII (aucun de leurs codes DNA dans le CSV).`
         );
       } else {
         console.log("Aucune structure à désactiver.");
