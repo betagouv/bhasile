@@ -49,10 +49,11 @@ export const getFinanceSchema = (
     }
 
     if (isInCpomPerYear[index]) {
-      if (year === CURRENT_YEAR) {
-        return budgetAutoSaveSchema;
-      }
       return budgetInCpomSchema;
+    }
+
+    if (year === CURRENT_YEAR) {
+      return budgetAutoSaveSchema;
     }
 
     if (isAutorisee) {
@@ -69,9 +70,6 @@ export const getFinanceSchema = (
     }
 
     if (isSubventionnee) {
-      if (year === CURRENT_YEAR) {
-        return budgetAutoSaveSchema;
-      }
       if (year === AUTORISEE_OPEN_YEAR) {
         return budgetSubventionneeOpenYear1Schema;
       }

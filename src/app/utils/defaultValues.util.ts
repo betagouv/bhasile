@@ -10,8 +10,10 @@ import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 import { anyBudgetFormValues } from "@/schemas/forms/base/budget.schema";
 import { ControleFormValues } from "@/schemas/forms/base/controle.schema";
+import { DnaStructureFormValues } from "@/schemas/forms/base/dna.schema";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { EvaluationFormValues } from "@/schemas/forms/base/evaluation.schema";
+import { FinessFormValues } from "@/schemas/forms/base/finess.schema";
 import { structureTypologieSchemaTypeFormValues } from "@/schemas/forms/base/structureTypologie.schema";
 import { Repartition } from "@/types/adresse.type";
 import { PublicType } from "@/types/structure.type";
@@ -24,6 +26,7 @@ import { getControlesDefaultValues } from "./controle.util";
 import { getStructureCpomDefaultValues } from "./cpom.util";
 import { transformApiDnaStructuresToFormDnaStructures } from "./dna.util";
 import { getEvaluationsDefaultValues } from "./evaluation.util";
+import { transformApiFinessesToFormFinesses } from "./finess.util";
 import { isStructureAutorisee } from "./structure.util";
 import { getStructureMillesimeDefaultValues } from "./structureMillesime.util";
 import { getStructureTypologyDefaultValues } from "./structureTypology.util";
@@ -33,7 +36,6 @@ export const getDefaultValues = ({
 }: {
   structure: StructureApiType;
 }): Partial<StructureDefaultValues> => {
-  console.log("structure", structure);
   const structureCreationYear = getRealCreationYear(structure);
 
   const isAutorisee = isStructureAutorisee(structure.type);
@@ -56,6 +58,8 @@ export const getDefaultValues = ({
   const dnaStructures = transformApiDnaStructuresToFormDnaStructures(
     structure.dnaStructures
   );
+
+  const finesses = transformApiFinessesToFormFinesses(structure.finesses);
 
   const structureTypologies = getStructureTypologyDefaultValues(
     structure?.structureTypologies || [],
@@ -81,6 +85,7 @@ export const getDefaultValues = ({
     isMultiAntenne,
     isMultiDna,
     dnaStructures,
+    finesses,
     debutPeriodeAutorisation: isAutorisee
       ? (structure.debutPeriodeAutorisation ?? undefined)
       : undefined,
@@ -130,7 +135,8 @@ type StructureDefaultValues = Omit<
   | "finPeriodeAutorisation"
   | "debutConvention"
   | "finConvention"
-  | "finessCode"
+  | "finesses"
+  | "dnaStructures"
   | "public"
   | "filiale"
   | "contacts"
@@ -157,7 +163,8 @@ type StructureDefaultValues = Omit<
   finPeriodeAutorisation?: string;
   debutConvention?: string;
   finConvention?: string;
-  finessCode?: string;
+  finesses: FinessFormValues[];
+  dnaStructures: DnaStructureFormValues[];
   public?: PublicType;
   filiale?: string;
   contacts: ContactApiType[];

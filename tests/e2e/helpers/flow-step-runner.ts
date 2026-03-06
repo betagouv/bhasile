@@ -34,7 +34,6 @@ export async function runFinalisationStep<TData>(
   if (stepPage.fillForm) {
     await stepPage.fillForm(formData);
   }
-  await new Promise((resolve) => setTimeout(resolve, 60000));
   const expectValidationFailure = failingStep === stepKey;
   await stepPage.submit(structureId, expectValidationFailure);
   return !expectValidationFailure;
