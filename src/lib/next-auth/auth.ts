@@ -6,7 +6,13 @@ import {
 import { getServerSession, NextAuthOptions } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 
-import { getIsUserAuthorized, ProConnectUser, upsertUser } from "./auth-util";
+import { upsertUser } from "@/app/api/user/user.repository";
+
+import {
+  getIsUserAuthorized,
+  getRoleFromSession,
+  ProConnectUser,
+} from "./auth-util";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -27,24 +33,24 @@ export const authOptions: NextAuthOptions = {
     },
     async jwt({ token, account, user }) {
       if (account) {
-        const { prenom, nom } = user as ProConnectUser;
+        const { prenom, nom, role } = user as ProConnectUser;
         token.id_token = account.id_token;
         token.provider = account.provider;
         token.user_id = user.id;
         token.prenom = prenom;
         token.nom = nom;
         token.name = `${prenom} ${nom}`;
+        token.role = role;
       }
       return token;
     },
     async session({ token, session }) {
-      console.log("=======", { session }, { token });
       try {
-        console.log("=======", { token }, { session });
         await upsertUser({
           prenom: session.user?.name?.split(" ")?.[0] as string,
           nom: session.user?.name?.split(" ")?.[1] as string,
           email: session.user?.email as string,
+          role: await getRoleFromSession(session),
         });
       } catch (error) {
         console.error(
@@ -58,6 +64,7 @@ export const authOptions: NextAuthOptions = {
           provider: token.provider,
           user_id: token.user_id,
           name: token.name,
+          role: token.role,
         };
       }
     },
@@ -128,6 +135,7 @@ export const authOptions: NextAuthOptions = {
           email: profile.email,
           poste: profile.belonging_population,
           proconnect_info: profile,
+          role: profile.role,
         };
       },
     },

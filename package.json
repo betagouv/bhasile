@@ -44,6 +44,9 @@
     "sql:format:fix": "for f in scripts/views/*.sql; do sql-formatter \"$f\" --config sql-formatter.config.json --fix; done"
   },
   "dependencies": {
+    "@casl/ability": "^6.8.0",
+    "@casl/prisma": "^1.6.1",
+    "@casl/react": "^5.0.1",
     "@codegouvfr/react-dsfr": "^1.31.1",
     "@faker-js/faker": "^10.3.0",
     "@formkit/auto-animate": "^0.9.0",
