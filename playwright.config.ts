@@ -8,7 +8,7 @@ export default defineConfig({
   workers: 1, // Run tests sequentially to avoid race conditions
   use: {
     baseURL: "http://localhost:3000",
-    headless: false,
+    headless: true,
     viewport: { width: 1600, height: 800 },
     ignoreHTTPSErrors: true,
     extraHTTPHeaders: {

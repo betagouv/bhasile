@@ -4,7 +4,7 @@ import { nullishFrenchDateToISO, zId } from "@/app/utils/zodCustomFields";
 
 const dnaSchema = z.object({
   id: zId(),
-  code: z.string(),
+  code: z.string().min(1, "Le code DNA est obligatoire"),
   description: z.string().optional(),
 });
 

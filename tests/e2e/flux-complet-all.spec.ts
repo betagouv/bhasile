@@ -15,7 +15,7 @@ import { huda1 } from "./helpers/test-data/huda-1";
 import { huda2 } from "./helpers/test-data/huda-2";
 
 const validTestCases = [
-  //cada1,
+  cada1,
   cada2,
   cada3,
   cph1,
