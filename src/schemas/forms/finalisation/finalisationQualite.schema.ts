@@ -7,12 +7,12 @@ import {
 } from "../base/evaluation.schema";
 import {
   structureTypologiesAutoSaveSchema,
-  structureTypologiesWithMandatoryEvolutionSchema,
+  structureTypologiesWithoutTypePlacesSchemaWithMandatoryEvolution,
 } from "../base/structureTypologie.schema";
 
 export const finalisationQualiteSchema = controlesAutoSaveSchema
   .and(evaluationsSchemaWithConditionalValidation)
-  .and(structureTypologiesWithMandatoryEvolutionSchema);
+  .and(structureTypologiesWithoutTypePlacesSchemaWithMandatoryEvolution);
 
 export const finalisationQualiteAutoSaveSchema = controlesAutoSaveSchema
   .and(evaluationsAutoSaveSchema)
