@@ -596,6 +596,7 @@ model User {
   email          String       @unique
   lastConnection DateTime
   userActions    UserAction[]
+  role           UserRole     @default(ANONYMOUS)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -744,6 +745,16 @@ enum UserActionCategory {
   READ
   UPDATE
   DELETE
+
+  @@schema("public")
+}
+
+enum UserRole {
+  ADMIN
+  AGENT_NATIONAL
+  AGENT_REGIONAL
+  AGENT_DEPARTEMENTAL
+  ANONYMOUS
 
   @@schema("public")
 }
