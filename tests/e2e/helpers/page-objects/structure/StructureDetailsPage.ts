@@ -132,9 +132,10 @@ export class StructureDetailsPage extends BasePage {
     await expect(
       block.getByText("Date de création", { exact: true }).locator("..")
     ).toContainText(formatDate(data.creationDate));
+    const typeValue = overrides.type ?? data.type;
     await expect(
       block.getByText("Type de structure", { exact: true }).locator("..")
-    ).toContainText(data.type);
+    ).toContainText(typeValue);
     await expect(
       block.getByText("Code Bhasile", { exact: true }).locator("..")
     ).toContainText(data.codeBhasile);
@@ -151,14 +152,17 @@ export class StructureDetailsPage extends BasePage {
       block.getByText("Vulnérabilité", { exact: true }).locator("..")
     ).toContainText(vulnerabiliteLabel);
 
+    const adresseAdmin =
+      overrides.adresseAdministrative ?? data.adresseAdministrative;
+    const nomValue = overrides.nom ?? data.nom;
     const { addressLine, postalCode, city } = parseAddressParts(
-      data.adresseAdministrative.complete
+      adresseAdmin.complete
     );
     const addressRow = block.getByText("Adresse administrative", {
       exact: true,
     });
-    if (data.nom) {
-      await expect(addressRow.locator("..")).toContainText(data.nom);
+    if (nomValue) {
+      await expect(addressRow.locator("..")).toContainText(nomValue);
     }
     if (addressLine) {
       await expect(addressRow.locator("..")).toContainText(addressLine);
@@ -170,33 +174,39 @@ export class StructureDetailsPage extends BasePage {
       await expect(addressRow.locator("..")).toContainText(city);
     }
 
-    const codesTabLabel = isStructureAutorisee(data.type)
+    const dnas = overrides.dnas ?? data.dnas ?? [];
+    const finesses = overrides.finesses ?? data.finesses ?? [];
+    const codesTabLabel = isStructureAutorisee(typeValue)
       ? "Codes DNA & FINESS"
       : "Codes DNA";
-    const hasDnasOrFinesses =
-      (data.dnas?.length ?? 0) > 0 || (data.finesses?.length ?? 0) > 0;
+    const hasDnasOrFinesses = dnas.length > 0 || finesses.length > 0;
     if (hasDnasOrFinesses) {
       await block.getByRole("tab", { name: codesTabLabel }).click();
-      for (const dna of data.dnas ?? []) {
-        if (!dna.code) continue;
+      for (const dna of dnas) {
+        if (!dna.code) {
+          continue;
+        }
         await expect(block).toContainText(dna.code);
-        if ((data.dnas?.length ?? 0) > 1 && dna.description) {
+        if (dnas.length > 1 && dna.description) {
           await expect(block).toContainText(dna.description);
         }
       }
-      for (const finess of data.finesses ?? []) {
-        if (!finess.code) continue;
+      for (const finess of finesses) {
+        if (!finess.code) {
+          continue;
+        }
         await expect(block).toContainText(finess.code.replaceAll(" ", ""));
-        if ((data.finesses?.length ?? 0) > 1 && finess.description) {
+        if (finesses.length > 1 && finess.description) {
           await expect(block).toContainText(finess.description);
         }
       }
     }
 
-    const hasAntennes = (data.antennes?.length ?? 0) > 0;
+    const antennes = overrides.antennes ?? data.antennes ?? [];
+    const hasAntennes = antennes.length > 0;
     if (hasAntennes) {
       await block.getByRole("tab", { name: "Sites et contacts" }).click();
-      for (const antenne of data.antennes ?? []) {
+      for (const antenne of antennes) {
         if (antenne.name) {
           await expect(block).toContainText(antenne.name);
         }

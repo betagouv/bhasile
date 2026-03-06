@@ -79,14 +79,18 @@ export class VerificationPage extends BasePage {
     }
 
     for (const dna of data.dnas ?? []) {
-      if (!dna.code) continue;
+      if (!dna.code) {
+        continue;
+      }
       await expect(section).toContainText(dna.code);
       if ((data.dnas?.length ?? 0) > 1 && dna.description) {
         await expect(section).toContainText(dna.description);
       }
     }
     for (const finess of data.finesses ?? []) {
-      if (!finess.code) continue;
+      if (!finess.code) {
+        continue;
+      }
       await expect(section).toContainText(finess.code);
       if ((data.finesses?.length ?? 0) > 1 && finess.description) {
         await expect(section).toContainText(finess.description);
