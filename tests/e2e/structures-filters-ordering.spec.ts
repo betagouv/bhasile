@@ -38,26 +38,32 @@ test.describe("Structures filters and ordering", () => {
     await expect(cadaCells).toHaveCount(0);
   });
 
-  test("should order structures by DNA code ascending", async ({ page }) => {
-    // Click the DNA column ordering button
-    const dnaHeader = page.getByRole("columnheader", { name: /DNA/i });
+  test("should order structures by code Bhasile ascending", async ({
+    page,
+  }) => {
+    // Click the code Bhasile column ordering button
+    const codeBhasileHeader = page.getByRole("columnheader", {
+      name: /Bhasile/i,
+    });
     // Find the ordering button by aria-label (starts with "Trier par")
-    const orderButton = dnaHeader.getByRole("button", { name: /Trier par/i });
+    const orderButton = codeBhasileHeader.getByRole("button", {
+      name: /Trier par/i,
+    });
     await orderButton.click();
 
     // Wait for URL to update with ordering params
-    await page.waitForURL(/.*column=dnaCode.*direction=asc.*/);
+    await page.waitForURL(/.*column=codeBhasile.*direction=asc.*/);
 
     // Verify URL contains ordering params
-    expect(page.url()).toContain("column=dnaCode");
+    expect(page.url()).toContain("column=codeBhasile");
     expect(page.url()).toContain("direction=asc");
 
     // Verify structures are ordered correctly
-    const dnaCodes = await page
+    const codeBhasiles = await page
       .locator("tbody tr td:first-child")
       .allTextContents();
-    const sortedDnaCodes = [...dnaCodes].sort();
-    expect(dnaCodes).toEqual(sortedDnaCodes);
+    const sortedCodeBhasiles = [...codeBhasiles].sort();
+    expect(codeBhasiles).toEqual(sortedCodeBhasiles);
   });
 
   test("should toggle ordering direction", async ({ page }) => {
@@ -138,10 +144,14 @@ test.describe("Structures filters and ordering", () => {
     // Wait for filters panel to close
     const waitHelper = new WaitHelper(page);
     await waitHelper.waitForUIUpdate();
-    const dnaHeader = page.getByRole("columnheader", { name: /DNA/i });
-    const orderButton = dnaHeader.getByRole("button", { name: /Trier par/i });
+    const codeBhasileHeader = page.getByRole("columnheader", {
+      name: /Bhasile/i,
+    });
+    const orderButton = codeBhasileHeader.getByRole("button", {
+      name: /Trier par/i,
+    });
     await orderButton.click();
-    await page.waitForURL(/.*column=dnaCode.*direction=asc.*/);
+    await page.waitForURL(/.*column=codeBhasile.*direction=asc.*/);
 
     const url = page.url();
 
