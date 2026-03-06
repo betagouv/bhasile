@@ -22,8 +22,8 @@ vi.mock("next/navigation", () => ({
 
 const COLUMNS: ListColumn[] = [
   {
-    label: "DNA",
-    column: "dnaCode",
+    label: "Code Bhasile",
+    column: "codeBhasile",
     orderBy: true,
     centered: false,
   },
@@ -78,7 +78,7 @@ describe("ListTableHeadings", () => {
 
   it("should initialize column and direction from URL params", () => {
     mockUseSearchParams.mockReturnValue(
-      new URLSearchParams("column=dnaCode&direction=asc")
+      new URLSearchParams("column=codeBhasile&direction=asc")
     );
 
     render(
@@ -91,8 +91,8 @@ describe("ListTableHeadings", () => {
       </ListTableHeadings>
     );
 
-    const dnaButton = getOrderButton("dnaCode");
-    expect(dnaButton).toBeInTheDocument();
+    const codeBhasileButton = getOrderButton("codeBhasile");
+    expect(codeBhasileButton).toBeInTheDocument();
   });
 
   it("should update URL when ordering is clicked", async () => {
@@ -135,12 +135,12 @@ describe("ListTableHeadings", () => {
       </ListTableHeadings>
     );
 
-    const dnaButton = getOrderButton("dnaCode");
-    await user.click(dnaButton);
+    const codeBhasileButton = getOrderButton("codeBhasile");
+    await user.click(codeBhasileButton);
 
     await waitFor(() => {
       expect(mockReplace).toHaveBeenCalledWith(
-        expect.stringContaining("column=dnaCode&direction=desc")
+        expect.stringContaining("column=codeBhasile&direction=desc")
       );
     });
   });
@@ -148,7 +148,7 @@ describe("ListTableHeadings", () => {
   it("should clear ordering when clicking same column in desc direction", async () => {
     const user = userEvent.setup();
     mockUseSearchParams.mockReturnValue(
-      new URLSearchParams("column=dnaCode&direction=desc")
+      new URLSearchParams("column=codeBhasile&direction=desc")
     );
 
     // Clear any initial calls from render
@@ -172,14 +172,14 @@ describe("ListTableHeadings", () => {
     // Clear calls from initial render
     mockReplace.mockClear();
 
-    const dnaButton = getOrderButton("dnaCode");
-    await user.click(dnaButton);
+    const codeBhasileButton = getOrderButton("codeBhasile");
+    await user.click(codeBhasileButton);
 
     await waitFor(() => {
       expect(mockReplace).toHaveBeenCalled();
       const callArgs =
         mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0];
-      expect(callArgs).not.toContain("column=dnaCode");
+      expect(callArgs).not.toContain("column=codeBhasile");
       expect(callArgs).not.toContain("direction=");
     });
   });
@@ -187,7 +187,7 @@ describe("ListTableHeadings", () => {
   it("should set new column to asc when clicking different column", async () => {
     const user = userEvent.setup();
     mockUseSearchParams.mockReturnValue(
-      new URLSearchParams("column=dnaCode&direction=asc")
+      new URLSearchParams("column=codeBhasile&direction=asc")
     );
 
     render(
