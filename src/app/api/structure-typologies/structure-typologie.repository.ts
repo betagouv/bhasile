@@ -18,15 +18,25 @@ export const createOrUpdateStructureTypologies = async (
       return tx.structureTypologie.upsert({
         where: { id: typologie.id || 0 },
         update: {
-          year: typologie.year,
-          placesAutorisees: typologie.placesAutorisees,
-          pmr: typologie.pmr,
-          lgbt: typologie.lgbt,
-          fvvTeh: typologie.fvvTeh,
-          placesACreer: typologie.placesACreer,
-          placesAFermer: typologie.placesAFermer,
-          echeancePlacesACreer: typologie.echeancePlacesACreer,
-          echeancePlacesAFermer: typologie.echeancePlacesAFermer,
+          ...(typologie.year !== undefined && { year: typologie.year }),
+          ...(typologie.placesAutorisees !== undefined && {
+            placesAutorisees: typologie.placesAutorisees,
+          }),
+          ...(typologie.pmr !== undefined && { pmr: typologie.pmr }),
+          ...(typologie.lgbt !== undefined && { lgbt: typologie.lgbt }),
+          ...(typologie.fvvTeh !== undefined && { fvvTeh: typologie.fvvTeh }),
+          ...(typologie.placesACreer !== undefined && {
+            placesACreer: typologie.placesACreer,
+          }),
+          ...(typologie.placesAFermer !== undefined && {
+            placesAFermer: typologie.placesAFermer,
+          }),
+          ...(typologie.echeancePlacesACreer !== undefined && {
+            echeancePlacesACreer: typologie.echeancePlacesACreer,
+          }),
+          ...(typologie.echeancePlacesAFermer !== undefined && {
+            echeancePlacesAFermer: typologie.echeancePlacesAFermer,
+          }),
         },
         create: {
           structureDnaCode,
