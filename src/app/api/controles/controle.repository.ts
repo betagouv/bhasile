@@ -43,7 +43,9 @@ export const createOrUpdateControles = async (
           type: convertToControleType(controle.type),
           date: controle.date,
           fileUploads: {
-            connect: controle.fileUploads,
+            connect: (controle.fileUploads ?? []).map((fileUpload) => ({
+              key: fileUpload.key,
+            })),
           },
         },
         create: {
@@ -51,7 +53,9 @@ export const createOrUpdateControles = async (
           type: convertToControleType(controle.type),
           date: controle.date!,
           fileUploads: {
-            connect: controle.fileUploads,
+            connect: (controle.fileUploads ?? []).map((fileUpload) => ({
+              key: fileUpload.key,
+            })),
           },
         },
       });

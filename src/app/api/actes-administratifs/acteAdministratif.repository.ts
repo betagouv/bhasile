@@ -85,7 +85,9 @@ const createOrUpdateActeAdministratif = async (
         name: acteAdministratif.name,
         parentId: parentId ?? acteAdministratif.parentId,
         fileUploads: {
-          connect: acteAdministratif.fileUploads ?? [],
+          connect: (acteAdministratif.fileUploads ?? []).map((fileUpload) => ({
+            key: fileUpload.key,
+          })),
         },
       },
     });
@@ -101,7 +103,9 @@ const createOrUpdateActeAdministratif = async (
       name: acteAdministratif.name,
       parentId: parentId ?? acteAdministratif.parentId,
       fileUploads: {
-        connect: acteAdministratif.fileUploads ?? [],
+        connect: (acteAdministratif.fileUploads ?? []).map((fileUpload) => ({
+          key: fileUpload.key,
+        })),
       },
     },
   });
