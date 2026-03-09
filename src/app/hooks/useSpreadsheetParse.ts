@@ -1,4 +1,4 @@
-import readXlsxFile, { Schema } from "read-excel-file";
+import readXlsxFile, { Schema } from "read-excel-file/browser";
 
 import { CURRENT_YEAR } from "@/constants";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
