@@ -29,7 +29,7 @@ export const useSpreadsheetParse = (): UseExcelParseResult => {
         codePostal: row.codePostal,
         commune: row.ville,
         adresseComplete: `${row.adresse} ${row.codePostal} ${row.ville}`,
-        departement: String(row.codePostal).substring(0, 2),
+        departement: getDepartementFromCodePostal(row.codePostal),
         repartition:
           repartitionColumnIndex === -1 ? Repartition.DIFFUS : row.repartition,
         adresseTypologies: [
@@ -55,6 +55,19 @@ export const useSpreadsheetParse = (): UseExcelParseResult => {
   };
 
   return { parseAdressesDiffuses, parseAdressesMixtes };
+};
+
+const getDepartementFromCodePostal = (codePostal: string | number): string => {
+  const cp = String(codePostal);
+  if (cp.length === 0) {
+    return "";
+  }
+  const prefix = cp.substring(0, 2);
+  // Overseas departments (DOM-TOM) use 3-digit department codes starting with 97 or 98
+  if ((prefix === "97" || prefix === "98") && cp.length >= 3) {
+    return cp.substring(0, 3);
+  }
+  return cp.substring(0, Math.min(2, cp.length));
 };
 
 const getSchema = (isMixte: boolean): Schema => ({
