@@ -17,9 +17,9 @@ export default function PolitiqueConfidentialite(): ReactElement {
           (email :{" "}
           <Link
             className="text-title-blue-france"
-            href="mailto:bhasile-da-dgef@intereieur.gouv.fr"
+            href="mailto:bhasile-da-dgef@interieur.gouv.fr"
           >
-            bhasile-da-dge​f@intereieur.gouv.fr
+            bhasile-da-dge​f@interieur.gouv.fr
           </Link>
           )
         </p>
