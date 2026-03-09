@@ -97,6 +97,17 @@ export const Footer = (): ReactElement => {
             <li className="fr-footer__bottom-item">
               <a
                 className="fr-footer__bottom-link"
+                href="https://beta.gouv.fr/startups/gestion-et-pilotage-du-parc-d-hebergement-du-dispositif-national-d-acceuil.html"
+                target="_blank"
+                rel="noopener external"
+                title="Fiche produit beta.gouv"
+              >
+                Fiche produit
+              </a>
+            </li>
+            <li className="fr-footer__bottom-item">
+              <a
+                className="fr-footer__bottom-link"
                 href="https://github.com/betagouv/bhasile"
                 target="_blank"
                 rel="noopener external"

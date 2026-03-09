@@ -38,9 +38,7 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ token, session }) {
-      console.log("=======", { session }, { token });
       try {
-        console.log("=======", { token }, { session });
         await upsertUser({
           prenom: session.user?.name?.split(" ")?.[0] as string,
           nom: session.user?.name?.split(" ")?.[1] as string,
