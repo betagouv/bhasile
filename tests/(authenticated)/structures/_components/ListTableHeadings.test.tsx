@@ -122,7 +122,7 @@ describe("ListTableHeadings", () => {
   it("should toggle direction from asc to desc when clicking same column", async () => {
     const user = userEvent.setup();
     mockUseSearchParams.mockReturnValue(
-      new URLSearchParams("column=dnaCode&direction=asc")
+      new URLSearchParams("column=codeBhasile&direction=asc")
     );
 
     render(

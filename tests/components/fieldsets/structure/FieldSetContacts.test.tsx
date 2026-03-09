@@ -9,27 +9,15 @@ import { FormTestWrapper } from "../../../test-utils/form-test-wrapper";
 
 describe("FieldSetContacts", () => {
   describe("Rendering", () => {
-    it("should render both contact fieldsets (principal and secondary)", () => {
+    it("should render all contact fields for each contact", () => {
       render(
         <FormTestWrapper
           defaultValues={{
-            contacts: [createContact({ id: 1 }), createContact({ id: 2 })],
-          }}
-        >
-          <FieldSetContacts />
-        </FormTestWrapper>
-      );
-
-      expect(screen.getByText("Contacts")).toBeInTheDocument();
-      expect(screen.getByText("Contact principal")).toBeInTheDocument();
-      expect(screen.getByText("Contact secondaire")).toBeInTheDocument();
-    });
-
-    it("should render all contact fields for principal contact", () => {
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            contacts: [createContact({ id: 1 }), createContact({ id: 2 })],
+            contacts: [
+              createContact({ id: 1 }),
+              createContact({ id: 2 }),
+              createContact({ id: 3 }),
+            ],
           }}
         >
           <FieldSetContacts />
@@ -41,24 +29,18 @@ describe("FieldSetContacts", () => {
       expect(screen.getAllByLabelText("Fonction")[0]).toBeInTheDocument();
       expect(screen.getAllByLabelText("Email")[0]).toBeInTheDocument();
       expect(screen.getAllByLabelText("Téléphone")[0]).toBeInTheDocument();
-    });
-
-    it("should render all contact fields for secondary contact", () => {
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            contacts: [createContact({ id: 1 }), createContact({ id: 2 })],
-          }}
-        >
-          <FieldSetContacts />
-        </FormTestWrapper>
-      );
 
       expect(screen.getAllByLabelText("Prénom")[1]).toBeInTheDocument();
       expect(screen.getAllByLabelText("Nom")[1]).toBeInTheDocument();
       expect(screen.getAllByLabelText("Fonction")[1]).toBeInTheDocument();
       expect(screen.getAllByLabelText("Email")[1]).toBeInTheDocument();
       expect(screen.getAllByLabelText("Téléphone")[1]).toBeInTheDocument();
+
+      expect(screen.getAllByLabelText("Prénom")[2]).toBeInTheDocument();
+      expect(screen.getAllByLabelText("Nom")[2]).toBeInTheDocument();
+      expect(screen.getAllByLabelText("Fonction")[2]).toBeInTheDocument();
+      expect(screen.getAllByLabelText("Email")[2]).toBeInTheDocument();
+      expect(screen.getAllByLabelText("Téléphone")[2]).toBeInTheDocument();
     });
 
     it("should display guidance notice", () => {
@@ -73,15 +55,15 @@ describe("FieldSetContacts", () => {
       );
 
       expect(
-        screen.getByText(/Veuillez renseigner en contact principal/i)
+        screen.getByText(/Veuillez renseigner les contacts/i)
       ).toBeInTheDocument();
       expect(
-        screen.getByText(/personne responsable de la structure/i)
+        screen.getByText(/responsable de la structure/i)
       ).toBeInTheDocument();
     });
   });
 
-  describe("Form interactions - Principal contact", () => {
+  describe("Form interactions", () => {
     it("should update prenom field value", async () => {
       const user = userEvent.setup();
 
@@ -188,7 +170,7 @@ describe("FieldSetContacts", () => {
     });
   });
 
-  describe("Form interactions - Secondary contact", () => {
+  describe("Form interactions - another contact", () => {
     it("should update all fields independently from principal contact", async () => {
       const user = userEvent.setup();
 
@@ -240,7 +222,7 @@ describe("FieldSetContacts", () => {
   });
 
   describe("Hidden ID fields", () => {
-    it("should have hidden id field for principal contact", () => {
+    it("should have hidden id field for each contact", () => {
       const { container } = render(
         <FormTestWrapper
           defaultValues={{
@@ -253,23 +235,6 @@ describe("FieldSetContacts", () => {
 
       const hiddenIdInput = container.querySelector(
         'input[name="contacts.0.id"]'
-      );
-      expect(hiddenIdInput).toBeInTheDocument();
-    });
-
-    it("should have hidden id field for secondary contact", () => {
-      const { container } = render(
-        <FormTestWrapper
-          defaultValues={{
-            contacts: [{ id: 123 }, { id: 456 }],
-          }}
-        >
-          <FieldSetContacts />
-        </FormTestWrapper>
-      );
-
-      const hiddenIdInput = container.querySelector(
-        'input[name="contacts.1.id"]'
       );
       expect(hiddenIdInput).toBeInTheDocument();
     });
@@ -301,7 +266,7 @@ describe("FieldSetContacts", () => {
   });
 
   describe("Form field names", () => {
-    it("should have correct name attributes for principal contact", () => {
+    it("should have correct name attributes for each contact", () => {
       const { container } = render(
         <FormTestWrapper
           defaultValues={{

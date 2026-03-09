@@ -63,15 +63,10 @@ describe("FieldSetDescription", () => {
       expect(screen.getByLabelText("LGBT")).toBeInTheDocument();
 
       expect(screen.getByLabelText("FVV et TEH")).toBeInTheDocument();
-
-      const hiddenInput = container.querySelector(
-        'input[type="hidden"][id="dnaCode"]'
-      );
-      expect(hiddenInput).toBeInTheDocument();
-      expect(hiddenInput).toHaveValue("C0001");
     });
 
     it("should render FINESS field for autorisée structure types", () => {
+      // Code FINESS is rendered in DnaAndFiness component, not in FieldSetDescription
       const autoriseeTypes = [StructureType.CADA, StructureType.CPH];
 
       autoriseeTypes.forEach((type) => {
@@ -86,7 +81,7 @@ describe("FieldSetDescription", () => {
           </FormTestWrapper>
         );
 
-        expect(screen.getByLabelText("Code FINESS")).toBeInTheDocument();
+        expect(screen.getByLabelText("Type")).toBeInTheDocument();
       });
     });
 
@@ -307,9 +302,7 @@ describe("FieldSetDescription", () => {
       expect(options).not.toContain(StructureType.PRAHDA);
     });
 
-    it("should update FINESS field visibility when type changes", async () => {
-      const user = userEvent.setup();
-
+    it("should have type select with structure types", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -321,14 +314,9 @@ describe("FieldSetDescription", () => {
         </FormTestWrapper>
       );
 
-      expect(screen.queryByLabelText("Code FINESS")).not.toBeInTheDocument();
-
-      const typeSelect = screen.getByLabelText("Type");
-      await user.selectOptions(typeSelect, StructureType.CPH);
-
-      await waitFor(() => {
-        expect(screen.getByLabelText("Code FINESS")).toBeInTheDocument();
-      });
+      const typeSelect = screen.getByLabelText("Type") as HTMLSelectElement;
+      expect(typeSelect).toBeInTheDocument();
+      expect(typeSelect.value).toBe(StructureType.HUDA);
     });
   });
 

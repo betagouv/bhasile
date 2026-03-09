@@ -65,7 +65,7 @@ describe("FieldSetAdresseAdministrative", () => {
         </FormTestWrapper>
       );
 
-      expect(screen.getByText("Adresse administrative")).toBeInTheDocument();
+      expect(screen.getByText("Structure")).toBeInTheDocument();
       expect(
         screen.getByLabelText("Nom de la structure (optionnel)")
       ).toBeInTheDocument();
@@ -82,9 +82,7 @@ describe("FieldSetAdresseAdministrative", () => {
       );
 
       expect(
-        screen.getByText(
-          "L’ensemble des adresses ne seront communiquées qu’aux agentes et agents en charge de cette politique publique."
-        )
+        screen.getByText(/indiquée dans les documents de contractualisation/)
       ).toBeInTheDocument();
     });
 

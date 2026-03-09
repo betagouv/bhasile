@@ -53,7 +53,7 @@ describe("StructuresTable", () => {
     // THEN
     const rows = screen.getAllByRole("rowgroup");
     const columnHeaders = within(rows[0]).getAllByRole("columnheader");
-    expect(columnHeaders[0]).toHaveAccessibleName("DNA");
+    expect(columnHeaders[0]).toHaveAccessibleName("Code Bhasile");
     expect(columnHeaders[1]).toHaveAccessibleName("Type");
     expect(columnHeaders[2]).toHaveAccessibleName("Opérateur");
     expect(columnHeaders[3]).toHaveAccessibleName("Dépt.");
@@ -64,7 +64,7 @@ describe("StructuresTable", () => {
     expect(columnHeaders[8]).toHaveAccessibleName("");
     const structureRows = screen.getAllByRole("row");
     const firstStructureCells = within(structureRows[1]).getAllByRole("cell");
-    expect(firstStructureCells[0]).toHaveAccessibleName("C0001");
+    expect(firstStructureCells[0]).toHaveAccessibleName("BHA-1");
     expect(firstStructureCells[1]).toHaveAccessibleName("CADA");
     expect(firstStructureCells[2]).toHaveAccessibleName("Adoma");
     expect(firstStructureCells[3]).toHaveAccessibleName("75");
@@ -73,10 +73,10 @@ describe("StructuresTable", () => {
     expect(firstStructureCells[6]).toHaveAccessibleName("10");
     expect(firstStructureCells[7]).toHaveAccessibleName("02/01/2027");
     expect(firstStructureCells[8]).toHaveAccessibleName(
-      "Finaliser la création de la structure C0001"
+      "Finaliser la création de la structure BHA-1"
     );
     const secondStructureCells = within(structureRows[2]).getAllByRole("cell");
-    expect(secondStructureCells[0]).toHaveAccessibleName("C0002");
+    expect(secondStructureCells[0]).toHaveAccessibleName("BHA-2");
     expect(secondStructureCells[1]).toHaveAccessibleName("CADA");
     expect(secondStructureCells[2]).toHaveAccessibleName("Adoma");
     expect(secondStructureCells[3]).toHaveAccessibleName("75");
@@ -85,10 +85,10 @@ describe("StructuresTable", () => {
     expect(secondStructureCells[6]).toHaveAccessibleName("10");
     expect(firstStructureCells[7]).toHaveAccessibleName("02/01/2027");
     expect(secondStructureCells[8]).toHaveAccessibleName(
-      "Finaliser la création de la structure C0002"
+      "Finaliser la création de la structure BHA-2"
     );
     const thirdStructureCells = within(structureRows[3]).getAllByRole("cell");
-    expect(thirdStructureCells[0]).toHaveAccessibleName("C0003");
+    expect(thirdStructureCells[0]).toHaveAccessibleName("BHA-3");
     expect(thirdStructureCells[1]).toHaveAccessibleName("CADA");
     expect(thirdStructureCells[2]).toHaveAccessibleName("Adoma");
     expect(thirdStructureCells[3]).toHaveAccessibleName("75");
@@ -97,7 +97,7 @@ describe("StructuresTable", () => {
     expect(thirdStructureCells[6]).toHaveAccessibleName("10");
     expect(firstStructureCells[7]).toHaveAccessibleName("02/01/2027");
     expect(thirdStructureCells[8]).toHaveAccessibleName(
-      "Finaliser la création de la structure C0003"
+      "Finaliser la création de la structure BHA-3"
     );
     const pagination = screen.getByRole("navigation");
     const pages = within(pagination).getAllByRole("link");
