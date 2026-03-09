@@ -69,6 +69,7 @@ export default function ModificationControleForm() {
         <Notice
           severity="info"
           title=""
+          className="[&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
           description={`Actuellement, seuls les EIG renseignés sur Démarches Numériques sont affichés, l’ancienneté de cet historique dépend donc de la date à laquelle votre région a été articulée avec l’outil. Les EIG sont récupérés automatiquement. Il y a une erreur ? Contactez-nous : ${BHASILE_CONTACT_EMAIL}`}
         />
         {isStructureAutorisee(structure.type) && (

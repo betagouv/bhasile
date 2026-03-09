@@ -157,7 +157,7 @@ export const FieldSetDescription = ({
       <Notice
         severity="info"
         title=""
-        className="rounded [&_p]:flex [&_p]:items-center"
+        className="rounded [&_p]:flex [&_p]:items-center [&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
         description="LGBT : Lesbiennes, Gays, Bisexuels et Transgenres – FVV : Femmes Victimes de Violences–TEH : Traîte des Êtres Humains"
       />
       <label className="flex gap-6">

@@ -65,7 +65,7 @@ export const TypePlaceBlock = (): ReactElement => {
           />
         )}
       </div>
-      <div className="pt-3 flex">
+      <div className="pt-12 flex">
         <TypePlaceCharts
           placesAutorisees={structureTypologies?.[0]?.placesAutorisees || 0}
           placesPmr={structureTypologies?.[0]?.pmr || 0}
@@ -75,7 +75,7 @@ export const TypePlaceBlock = (): ReactElement => {
           placesLogementsSociaux={getCurrentPlacesLogementsSociaux(structure)}
         />
       </div>
-      <div className="pt-3">
+      <div className="pt-6">
         <TypePlaceHistory
           adresses={adresses || []}
           structureTypologies={structureTypologies || []}

@@ -84,7 +84,7 @@ export default function FieldSetActeAdministratif({
         <Notice
           severity="info"
           title=""
-          className="rounded [&_p]:flex [&_p]:items-center w-fit [&_.fr-notice\_\_desc]:text-text-default-grey"
+          className="rounded [&_p]:flex [&_p]:items-center w-fit [&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
           description={<>{notice}</>}
         />
       )}

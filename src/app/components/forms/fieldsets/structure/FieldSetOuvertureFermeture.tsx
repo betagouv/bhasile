@@ -33,7 +33,7 @@ export const FieldSetOuvertureFermeture = ({
         <Notice
           severity="info"
           title=""
-          className="rounded [&_p]:flex  [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey"
+          className="rounded [&_p]:flex  [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
           description="Le nombre de places “QPV” et “Logement social” se modifient dans le bloc “Description”."
         />
       )}

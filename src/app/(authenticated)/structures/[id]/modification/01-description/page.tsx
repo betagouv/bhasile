@@ -67,6 +67,7 @@ export default function ModificationDescription() {
         <Notice
           severity="warning"
           title=""
+          className="[&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
           description={`Certaines données (date de création, code DNA, type de structure, opérateur) ne sont pas modifiables. Il y a une erreur ? Contactez-nous : ${BHASILE_CONTACT_EMAIL}`}
         />
         <FieldSetDescription
@@ -82,6 +83,7 @@ export default function ModificationDescription() {
         <Notice
           severity="info"
           title=""
+          className="[&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
           description="L'ensemble des adresses sont des données sensibles qui sont protégées selon les normes du gouvernement. Elles ne seront communiquées qu'aux agents et agentes de DDETS."
         />
         <FieldSetAdresseAdministrative formKind={FormKind.MODIFICATION} />

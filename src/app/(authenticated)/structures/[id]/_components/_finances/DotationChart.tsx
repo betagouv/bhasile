@@ -51,30 +51,30 @@ export const DotationChart = (): ReactElement => {
   };
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-3 gap-10">
       <div className="col-span-2">
         <BarChart data={getChartData()} options={options} />
       </div>
       <div>
-        <h5 className="text-title-blue-france text-sm font-medium mb-1">
+        <h5 className="text-title-blue-france text-sm font-medium mb-2">
           {isStructureAutorisee(structure.type)
             ? "Fixation de la dotation (dans budget)"
             : "Fixation de la dotation (dans demande subventions)"}
         </h5>
-        <div className="flex items-center">
+        <div className="flex items-center mb-2">
           <div className="h-3 w-3 bg-(--yellow-moutarde-850-200)" />
           <p className="pl-2 mb-0">Dotation demandée par l’opérateur</p>
         </div>
-        <div className="flex items-center pb-5">
+        <div className="flex items-center pb-6">
           <div className="h-3 w-3 bg-(--yellow-moutarde-main-679)" />
           <p className="pl-2 mb-0">Dotation totale accordée par l’État</p>
         </div>
-        <h5 className="text-title-blue-france text-sm font-medium mb-1">
+        <h5 className="text-title-blue-france text-sm font-medium  mb-2">
           {isStructureAutorisee(structure.type)
             ? "Équilibre économique (dans compte administratif)"
             : "Équilibre économique (dans compte-rendu financier)"}
         </h5>
-        <div className="flex items-center">
+        <div className="flex items-center mb-2">
           <div className="h-3 w-3 bg-(--purple-glycine-850-200)" />
           <p className="pl-2 mb-0">Total des produits (dont dotation État)</p>
         </div>

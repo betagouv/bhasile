@@ -47,7 +47,7 @@ export const AdressesViewer = (): ReactElement => {
             <Notice
               severity="alert"
               title=""
-              className="rounded [&_p]:flex  [&_p]:items-center"
+              className="rounded [&_p]:flex [&_p]:items-center [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
               description="Un problème technique a empêché l’enregistrement des hébergements liés à cette structure. La situation est en cours de correction, merci pour votre compréhension."
             />
           )}

@@ -51,11 +51,13 @@ export const Notices = ({ typeBati, hebergementsContainerRef }: Props) => {
       <Notice
         severity="info"
         title="Pour le champ “places”,"
+        className="[&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
         description="veuillez renseigner le nombre total de places autorisées pour l’adresse correspondante."
       />
       <Notice
         severity="info"
         title=""
+        className="[&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
         description={
           <>
             Concernant les particularités, les logements sociaux correspondent

@@ -26,7 +26,7 @@ export const BudgetTables = () => {
       <Notice
         severity="warning"
         title=""
-        className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey"
+        className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
         description={
           <>
             La complétion de cette partie étant complexe, veuillez vous référer{" "}
@@ -65,7 +65,7 @@ export const BudgetTables = () => {
           <Notice
             severity="info"
             title=""
-            className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey"
+            className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
             description={`L’historique des données budgétaires à l’échelle du CPOM a déjà été renseigné lors de la saisie du CPOM. Si vous constatez une erreur et voulez apporter une modification, contactez-nous : ${BHASILE_CONTACT_EMAIL}`}
           />
           <StructureCpomTable canEdit={false} />

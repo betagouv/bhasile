@@ -48,7 +48,7 @@ export const FieldSetAdresseAdministrative = ({
         <Notice
           severity="info"
           title=""
-          className="rounded [&_p]:flex  [&_p]:items-center"
+          className="rounded [&_p]:flex [&_p]:items-center [&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
           description="L’ensemble des adresses ne seront communiquées qu’aux agentes et agents en charge de cette politique publique."
         />
       )}
