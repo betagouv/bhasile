@@ -150,7 +150,7 @@ const deleteActesAdministratifs = async (
     }
   );
 
-  const deletedIds = actesAdministratifsToDelete.map((a) => a.id);
+  const deletedIds: number[] = [];
 
   await Promise.all(
     actesAdministratifsToDelete.map(async (acteAdministratif) => {
@@ -163,6 +163,8 @@ const deleteActesAdministratifs = async (
           `Error deleting acteAdministratif ${acteAdministratif.id}:`,
           error
         );
+      } finally {
+        deletedIds.push(acteAdministratif.id);
       }
     })
   );
