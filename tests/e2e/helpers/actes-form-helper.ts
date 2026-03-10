@@ -94,7 +94,9 @@ async function addAndFillActe(
     return;
   }
 
-  const addButton = group.getByRole("button", { name: /Ajouter/i });
+  const addButton = group
+    .getByRole("button", { name: /Ajouter/i })
+    .filter({ hasNotText: "+ Ajouter un avenant" });
   await addButton.click();
 
   const fileInputs = group.locator(SELECTORS.FILE_INPUT);
