@@ -49,7 +49,6 @@ export default function StepVerification() {
   >(`ajout-structure-${params.id}-documents`, {});
 
   const handleSubmit = async () => {
-    console.log("identificationValues", identificationValues);
     setState("loading");
     const allValues = {
       ...identificationValues,

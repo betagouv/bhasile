@@ -108,6 +108,7 @@ export const AdressesList = ({
         adresse: adminAddress.adresseAdministrative,
         codePostal: adminAddress.codePostalAdministratif,
         commune: adminAddress.communeAdministrative,
+        departement: adminAddress.departementAdministratif,
         repartition: watch("typeBati") || Repartition.DIFFUS,
       },
     ]);
