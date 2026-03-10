@@ -57,7 +57,9 @@ export async function fillActesForm(
 
       const groupLabel = getActesCategoryRegex(category);
       const group = page.getByRole("group", { name: groupLabel });
-      const addButton = group.getByRole("button", { name: /Ajouter/i });
+      const addButton = group
+        .getByRole("button", { name: /Ajouter/i })
+        .filter({ hasNotText: "+ Ajouter un avenant" });
 
       let rowCount = await group.locator(SELECTORS.FILE_INPUT).count();
       for (let i = rowCount; i < entries.length; i++) {

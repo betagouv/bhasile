@@ -46,12 +46,14 @@ export default function FieldSetActeAdministratif({
     });
   };
 
-  const handleDeleteField = (index: number) => {
-    const confirm = window.confirm(
-      "Attention, vous allez supprimer définitivement cet acte administratif. Êtes-vous bien sûr·e de vouloir continuer ?"
-    );
-    if (!confirm) {
-      return;
+  const handleDeleteField = (index: number, shouldConfirm = true) => {
+    if (shouldConfirm) {
+      const confirm = window.confirm(
+        "Attention, vous allez supprimer définitivement cet acte administratif. Êtes-vous bien sûr·e de vouloir continuer ?"
+      );
+      if (!confirm) {
+        return;
+      }
     }
 
     const parent = actesAdministratifs[index];
