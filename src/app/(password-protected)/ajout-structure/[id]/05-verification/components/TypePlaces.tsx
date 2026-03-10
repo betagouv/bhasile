@@ -29,15 +29,17 @@ export const TypePlaces = () => {
   return (
     <Table
       headings={["Année", "Autorisées", "PMR", "LGBT", "FVV/TEH"]}
-      ariaLabelledBy=""
       className="[&_th]:px-0 text-center w-1/3"
+      ariaLabelledBy=""
     >
       {yearsToDisplay.map((year, index) => (
         <tr
           key={year}
           className="w-full [&_input]:max-w-16 border-t border-default-grey "
         >
-          <td className="align-middle py-4">{year}</td>
+          <td className="align-middle py-4">
+            {localStorageValues?.typologies?.[index].year}
+          </td>
           <td className="py-4!">
             {localStorageValues?.typologies?.[index]?.placesAutorisees}
           </td>

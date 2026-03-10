@@ -96,7 +96,7 @@ export const Identification = () => {
       {localStorageValues?.contacts?.map((contact) => (
         <div
           className="flex gap-4  border-b border-default-grey pb-2 mb-3"
-          key={contact?.email}
+          key={`${contact?.nom ?? ""}${contact?.prenom ?? ""}${contact?.email ?? ""}`}
         >
           {(contact?.nom || contact?.prenom) && (
             <span className="italic">

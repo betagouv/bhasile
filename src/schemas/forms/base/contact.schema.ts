@@ -33,17 +33,12 @@ export const optionalContactSchema = z
       return;
     }
 
-    const { prenom, nom, role, perimetre, email, telephone } = data;
+    const { prenom, nom, role, email, telephone } = data;
 
     const fields = [
       { name: "prenom", value: prenom, message: "Le prénom est requis" },
       { name: "nom", value: nom, message: "Le nom est requis" },
       { name: "role", value: role, message: "Le rôle est requis" },
-      {
-        name: "perimetre",
-        value: perimetre,
-        message: "Le périmètre est requis",
-      },
       {
         name: "email",
         value: email,

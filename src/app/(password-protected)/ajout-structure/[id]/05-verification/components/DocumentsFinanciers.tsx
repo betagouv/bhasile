@@ -38,29 +38,24 @@ export const DocumentsFinanciers = (): ReactElement => {
     return year >= startYear;
   });
 
-  const numberOfMissingDocuments = yearsToCheck
-    .map((year) =>
-      documents
-        .filter((document) => {
-          const yearIndex = DOCUMENTS_FINANCIERS_OPEN_YEAR - year;
+  const numberOfMissingDocuments = yearsToCheck.flatMap((year) => {
+    const yearIndex = DOCUMENTS_FINANCIERS_OPEN_YEAR - year + 1;
+    const documentsFinanciers = localStorageValues?.documentsFinanciers ?? [];
 
-          if (!document.required || document.yearIndex > yearIndex) {
-            return false;
-          }
+    return documents.filter((document) => {
+      if (!document.required || document.yearIndex > yearIndex) {
+        return false;
+      }
 
-          const documentsFinanciers =
-            localStorageValues?.documentsFinanciers ?? [];
-          const findDocument = documentsFinanciers.find(
-            (documentFinancier) =>
-              documentFinancier.category === document.value &&
-              documentFinancier.year === year &&
-              documentFinancier.fileUploads?.[0]?.key
-          );
-          return !findDocument ? 1 : 0;
-        })
-        .reduce((accumulator: number) => accumulator + 1, 0)
-    )
-    .reduce((accumulator: number, current: number) => accumulator + current, 0);
+      const hasDocument = documentsFinanciers.some(
+        (documentFinancier) =>
+          documentFinancier.category === document.value &&
+          documentFinancier.year === year &&
+          documentFinancier.fileUploads?.[0]?.key
+      );
+      return !hasDocument;
+    });
+  }).length;
 
   if (numberOfMissingDocuments > 0) {
     return (

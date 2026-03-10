@@ -13,7 +13,7 @@ export const Adresses = (): ReactElement => {
   const { structure } = useStructureContext();
   const { adresses } = structure;
 
-  if (adresses?.length === 0) {
+  if (!adresses?.length) {
     return (
       <Notice
         severity="alert"
@@ -47,12 +47,12 @@ export const Adresses = (): ReactElement => {
               }
             </td>
             <td className="py-3 w-full">
-              {adresse.adresseTypologies?.[0]?.qpv !== 0 && (
+              {adresse.adresseTypologies?.[0]?.qpv && (
                 <span className="pr-1">
                   <Badge type="purple">QPV</Badge>
                 </span>
               )}
-              {adresse.adresseTypologies?.[0]?.logementSocial !== 0 && (
+              {adresse.adresseTypologies?.[0]?.logementSocial && (
                 <Badge type="purple">Logement social</Badge>
               )}
             </td>

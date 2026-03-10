@@ -52,7 +52,7 @@ export const DescriptionBlock = (): ReactElement => {
           tabId: tab.id,
           label: tab.label,
         }))}
-        onTabChange={(params) => setSelectedTabId(params)}
+        onTabChange={(tabId) => setSelectedTabId(tabId)}
       >
         {selectedTabId === "general" && <General />}
         {selectedTabId === "sites" && <AntennesAndContacts />}

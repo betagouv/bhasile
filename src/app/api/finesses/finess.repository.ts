@@ -31,6 +31,9 @@ export const createOrUpdateFinesses = async (
   await deleteFinesses(tx, finesses, structureId);
 
   for (const finess of finesses) {
+    if (!finess.code || !finess.description) {
+      continue;
+    }
     await tx.finess.upsert({
       where: { id: finess.id || 0 },
       update: {

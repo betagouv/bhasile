@@ -71,12 +71,12 @@ export const FieldSetAntennes = () => {
               <AddressWithValidation
                 control={control}
                 fullAddress={`antennes.${index}.adresseComplete`}
-                id="adresseAdministrativeComplete"
+                id={`antennes.${index}.adresseComplete`}
                 zipCode={`antennes.${index}.codePostal`}
                 street={`antennes.${index}.adresse`}
                 city={`antennes.${index}.commune`}
                 department={`antennes.${index}.departement`}
-                label="Adresse principale de la structure"
+                label="Adresse"
               />
             </div>
           </div>

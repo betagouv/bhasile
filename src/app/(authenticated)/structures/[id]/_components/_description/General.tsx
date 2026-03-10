@@ -61,7 +61,9 @@ export const General = (): ReactElement => {
       <hr className="col-span-2" />
       <div className="flex gap-2 mb-3">
         <strong>Public</strong>
-        {PublicType[String(publicValue) as keyof typeof PublicType]}
+        {publicValue
+          ? PublicType[String(publicValue) as keyof typeof PublicType]
+          : "N/A"}
       </div>
       <div className="flex gap-2 mb-3">
         <strong>Vulnérabilité</strong>

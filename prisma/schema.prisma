@@ -93,7 +93,7 @@ model DnaStructure {
   dnaId       Int
   dna         Dna       @relation(fields: [dnaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   structureId Int
-  structure   Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   startDate   DateTime? // Empty by default, set when a DNA changes its structure
   endDate     DateTime? // Empty by default, set when a DNA changes its structure
   createdAt   DateTime  @default(now())

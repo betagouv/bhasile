@@ -12,7 +12,7 @@ export const AntennesAndContacts = (): ReactElement => {
 
   return (
     <>
-      {antennes && (
+      {antennes && antennes.length > 0 && (
         <>
           <h4 className="text-title-blue-france text-lg mb-3">
             Sites administratifs
@@ -35,7 +35,7 @@ export const AntennesAndContacts = (): ReactElement => {
           </table>
         </>
       )}
-      {contacts && (
+      {contacts && contacts.length > 0 && (
         <>
           <h4 className="text-title-blue-france text-lg mb-3">Contacts</h4>
           <table className="whitespace-nowrap">

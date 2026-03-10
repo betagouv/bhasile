@@ -9,7 +9,7 @@ export const Codes = (): ReactElement => {
 
   return (
     <>
-      {dnaStructures && (
+      {dnaStructures && dnaStructures.length > 0 && (
         <>
           <h4 className="text-title-blue-france text-lg mb-3">Codes DNA</h4>
           <table className="mb-8 whitespace-nowrap">
@@ -29,7 +29,7 @@ export const Codes = (): ReactElement => {
           </table>
         </>
       )}
-      {finesses && (
+      {finesses && finesses.length > 0 && (
         <>
           <h4 className="text-title-blue-france text-lg mb-3">Codes FINESS</h4>
           <table className="whitespace-nowrap">
