@@ -47,18 +47,21 @@ export const ActeAdministratif = ({
   const fileKey = watch(`actesAdministratifs.${index}.fileUploads.0.key`);
 
   const avenantIndices = useMemo(() => {
-    return avenants.map((avenant) =>
-      actesAdministratifs.findIndex(
-        (acteAdministratif) =>
-          (acteAdministratif.uuid && acteAdministratif.uuid === avenant.uuid) ||
-          (acteAdministratif.id && acteAdministratif.id === avenant.id)
+    return avenants
+      .map((avenant) =>
+        actesAdministratifs.findIndex(
+          (acteAdministratif) =>
+            (acteAdministratif.uuid &&
+              acteAdministratif.uuid === avenant.uuid) ||
+            (acteAdministratif.id && acteAdministratif.id === avenant.id)
+        )
       )
-    );
+      .sort((a, b) => b - a);
   }, [avenants, actesAdministratifs]);
 
   useEffect(() => {
     if (!fileKey) {
-      avenantIndices.forEach((avenantIndex) => {
+      [...avenantIndices].forEach((avenantIndex) => {
         if (avenantIndex !== -1) {
           handleDeleteField(avenantIndex, false);
         }
