@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { FieldSetNotes } from "@/app/components/forms/notes/FieldSetNotes";
 
-import { FormTestWrapper } from "../../../test-utils/form-test-wrapper";
+import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
 
 describe("FieldSetNotes", () => {
   describe("Rendering", () => {

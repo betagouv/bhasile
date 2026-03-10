@@ -6,7 +6,7 @@ import { FieldSetDescription } from "@/app/components/forms/description/FieldSet
 import { FormKind } from "@/types/global";
 import { PublicType, StructureType } from "@/types/structure.type";
 
-import { FormTestWrapper } from "../../../test-utils/form-test-wrapper";
+import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
 
 vi.mock("@/app/components/forms/OperateurAutocomplete", () => ({
   OperateurAutocomplete: () => <div data-testid="operateur-autocomplete" />,
@@ -20,7 +20,7 @@ vi.mock("@formkit/auto-animate", () => ({
 describe("FieldSetDescription", () => {
   describe("Rendering finalisation form", () => {
     it("should render all fields correctly", () => {
-      const { container } = render(
+      render(
         <FormTestWrapper
           defaultValues={{
             dnaCode: "C0001",
@@ -28,7 +28,6 @@ describe("FieldSetDescription", () => {
             operateur: { id: 1, name: "Adoma" },
             filiale: "",
             creationDate: "01/01/2020",
-            finessCode: "123456789",
             public: PublicType.TOUT_PUBLIC,
             lgbt: false,
             fvvTeh: false,
@@ -63,45 +62,6 @@ describe("FieldSetDescription", () => {
       expect(screen.getByLabelText("LGBT")).toBeInTheDocument();
 
       expect(screen.getByLabelText("FVV et TEH")).toBeInTheDocument();
-    });
-
-    it("should render FINESS field for autorisée structure types", () => {
-      // Code FINESS is rendered in DnaAndFiness component, not in FieldSetDescription
-      const autoriseeTypes = [StructureType.CADA, StructureType.CPH];
-
-      autoriseeTypes.forEach((type) => {
-        render(
-          <FormTestWrapper
-            defaultValues={{
-              type,
-              operateur: { id: 1, name: "Adoma" },
-            }}
-          >
-            <FieldSetDescription formKind={FormKind.FINALISATION} />
-          </FormTestWrapper>
-        );
-
-        expect(screen.getByLabelText("Type")).toBeInTheDocument();
-      });
-    });
-
-    it("should not render FINESS field for subventionnée structure types", () => {
-      const subventionneeTypes = [StructureType.HUDA, StructureType.CAES];
-
-      subventionneeTypes.forEach((type) => {
-        render(
-          <FormTestWrapper
-            defaultValues={{
-              type,
-              operateur: { id: 1, name: "Adoma" },
-            }}
-          >
-            <FieldSetDescription formKind={FormKind.FINALISATION} />
-          </FormTestWrapper>
-        );
-
-        expect(screen.queryByLabelText("Code FINESS")).not.toBeInTheDocument();
-      });
     });
 
     it("should have all public type options", () => {

@@ -6,7 +6,7 @@ import { FieldSetAdresseAdministrative } from "@/app/components/forms/adresseAdm
 import { Repartition } from "@/types/adresse.type";
 import { FormKind } from "@/types/global";
 
-import { FormTestWrapper } from "../../../test-utils/form-test-wrapper";
+import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
 
 const mockAddressSuggestions = [
   {

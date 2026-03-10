@@ -9,7 +9,7 @@ import {
 } from "@/app/utils/structure.util";
 import { StructureType } from "@/types/structure.type";
 
-import { FormTestWrapper } from "../../../test-utils/form-test-wrapper";
+import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
 
 describe("FieldSetCalendrier", () => {
   describe("Rendering with autorisée structure (CADA)", () => {

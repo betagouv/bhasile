@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { FieldSetTypePlaces } from "@/app/components/forms/typePlace/FieldSetTypePlaces";
 import { FormKind } from "@/types/global";
 
-import { FormTestWrapper } from "../../../test-utils/form-test-wrapper";
+import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
 
 vi.mock("@/constants", async () => {
   const actual = await vi.importActual("@/constants");

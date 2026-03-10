@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
 
-import { createContact } from "../../../test-utils/contact.factory";
-import { FormTestWrapper } from "../../../test-utils/form-test-wrapper";
+import { createContact } from "../../test-utils/contact.factory";
+import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
 
 describe("FieldSetContacts", () => {
   describe("Rendering", () => {
@@ -13,6 +13,7 @@ describe("FieldSetContacts", () => {
       render(
         <FormTestWrapper
           defaultValues={{
+            isMultiAntenne: true,
             contacts: [
               createContact({ id: 1 }),
               createContact({ id: 2 }),
