@@ -472,7 +472,6 @@ model Cpom {
   operateur           Operateur           @relation(fields: [operateurId], references: [id])
   operateurId         Int
   actesAdministratifs ActeAdministratif[]
-  fileUploads         FileUpload[] // TO DELETE AFTER MIGRATION
   userActions         UserAction[]
 
   createdAt DateTime @default(now())
