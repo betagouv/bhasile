@@ -61,7 +61,7 @@ export const ActeAdministratif = ({
 
   useEffect(() => {
     if (!fileKey) {
-      [...avenantIndices].forEach((avenantIndex) => {
+      avenantIndices.forEach((avenantIndex) => {
         if (avenantIndex !== -1) {
           handleDeleteField(avenantIndex, false);
         }
