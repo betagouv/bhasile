@@ -54,7 +54,6 @@ model Structure {
   contacts                     Contact[]
   structureTypologies          StructureTypologie[]
   activites                    Activite[]
-  fileUploads                  FileUpload[]
   actesAdministratifs          ActeAdministratif[]
   documentsFinanciers          DocumentFinancier[]
   cpomStructures               CpomStructure[]
@@ -240,12 +239,8 @@ model FileUpload {
   evaluation          Evaluation?        @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
   evaluationId        Int?
 
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @default(now()) @updatedAt
-  structure   Structure? @relation(fields: [structureId], references: [id])
-  structureId Int?
-  cpom        Cpom?      @relation(fields: [cpomId], references: [id])
-  cpomId      Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@schema("public")
 }
@@ -422,7 +417,6 @@ model Cpom {
   operateur           Operateur           @relation(fields: [operateurId], references: [id])
   operateurId         Int
   actesAdministratifs ActeAdministratif[]
-  fileUploads         FileUpload[] // TO DELETE AFTER MIGRATION
   userActions         UserAction[]
 
   createdAt DateTime @default(now())
