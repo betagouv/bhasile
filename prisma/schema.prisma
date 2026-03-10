@@ -170,16 +170,12 @@ model Contact {
 }
 
 model StructureMillesime {
-  id                   Int                 @id @default(autoincrement())
-  structure            Structure           @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode     String
-  year                 Int
-  cpom                 Boolean             @default(false) // temporary field, while we are not sure of existing cpoms
-  operateurComment     String?
-  structureTypologieId Int?
-  structureTypologie   StructureTypologie?
-  budgetId             Int?
-  budget               Budget?
+  id               Int       @id @default(autoincrement())
+  structure        Structure @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
+  structureDnaCode String
+  year             Int
+  cpom             Boolean   @default(false) // temporary field, while we are not sure of existing cpoms
+  operateurComment String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -189,8 +185,8 @@ model StructureMillesime {
 }
 
 model StructureTypologie {
-  id                    Int                 @id @default(autoincrement())
-  structure             Structure           @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
+  id                    Int       @id @default(autoincrement())
+  structure             Structure @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
   structureDnaCode      String
   year                  Int
   placesAutorisees      Int?
@@ -201,8 +197,6 @@ model StructureTypologie {
   placesAFermer         Int?
   echeancePlacesACreer  DateTime?
   echeancePlacesAFermer DateTime?
-  structureMillesimeId  Int?                @unique
-  structureMillesime    StructureMillesime? @relation(fields: [structureMillesimeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -245,9 +239,6 @@ model FileUpload {
   controleId          Int?
   evaluation          Evaluation?        @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
   evaluationId        Int?
-  parentFileUpload    FileUpload?        @relation("FileUploadToFileUpload", fields: [parentFileUploadId], references: [id], onDelete: Cascade) // TO DELETE AFTER MIGRATION
-  parentFileUploadId  Int? // TO DELETE AFTER MIGRATION
-  childFileUploads    FileUpload[]       @relation("FileUploadToFileUpload") // TO DELETE AFTER MIGRATION
 
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @default(now()) @updatedAt
@@ -298,10 +289,10 @@ model DocumentFinancier {
 }
 
 model Budget {
-  id                                Int                 @id @default(autoincrement())
-  structure                         Structure?          @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
+  id                                Int        @id @default(autoincrement())
+  structure                         Structure? @relation(fields: [structureDnaCode], references: [dnaCode], onDelete: Cascade, onUpdate: Cascade)
   structureDnaCode                  String
-  year                              Int                 @default(0)
+  year                              Int        @default(0)
   ETP                               Float?
   tauxEncadrement                   Float?
   coutJournalier                    Float?
@@ -324,8 +315,6 @@ model Budget {
   reportANouveau                    Float?
   autre                             Float?
   commentaire                       String?
-  structureMillesimeId              Int?                @unique
-  structureMillesime                StructureMillesime? @relation(fields: [structureMillesimeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
