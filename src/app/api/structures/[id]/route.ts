@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/next-auth/auth";
 
+import { createStructureEvent } from "../../user-action/user-action.service";
 import { findOne, findOneOperateur } from "../structure.repository";
 import {
   addPresencesIndues,
@@ -24,6 +25,8 @@ export async function GET(request: NextRequest) {
     const structure = isAuthenticated
       ? await findOne(Number(id))
       : await findOneOperateur(Number(id));
+
+    createStructureEvent(request.method, structure.id);
 
     if (!structure) {
       return NextResponse.json(

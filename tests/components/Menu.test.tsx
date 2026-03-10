@@ -41,7 +41,18 @@ describe("Menu", () => {
     const confidentialite = screen.getByRole("link", {
       name: "Politique de confidentialité",
     });
-    expect(confidentialite).toHaveAttribute("href", "/confidentialite");
+    expect(confidentialite).toHaveAttribute(
+      "href",
+      "/politique-confidentialite"
+    );
+    const cgu = screen.getByRole("link", {
+      name: "Conditions générales d'utilisation",
+    });
+    expect(cgu).toHaveAttribute("href", "/cgu");
+    const mentionsLegales = screen.getByRole("link", {
+      name: "Mentions légales",
+    });
+    expect(mentionsLegales).toHaveAttribute("href", "/mentions-legales");
     const accessibilite = screen.getByRole("link", {
       name: "Accessibilité : partiellement conforme",
     });

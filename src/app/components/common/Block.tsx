@@ -7,11 +7,11 @@ export const Block = ({
   children,
 }: Props): ReactElement => {
   return (
-    <div className="bg-white p-8 border border-default-grey rounded-[10px] border-solid">
+    <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
       <div className="flex justify-between items-start">
         <div className="flex">
-          <span className={`text-title-blue-france fr-mr-1w ${iconClass}`} />
-          <h3 className="text-title-blue-france fr-h5">{title}</h3>
+          <span className={`text-title-blue-france mr-3 ${iconClass}`} />
+          <h3 className="text-title-blue-france fr-h6 mb-12">{title}</h3>
         </div>
         {onEdit && (
           <button className="fr-btn fr-btn--tertiary" onClick={onEdit}>

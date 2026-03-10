@@ -36,7 +36,7 @@ export default async function AjoutStructurePage(): Promise<ReactElement> {
             <i className="fr-icon-check-line text-action-high-blue-france text-sm [&::before]:[--icon-size:1.5rem]"></i>
             <span>
               Informations générales (date de création, code FINESS, types de
-              publics, dates des différents conventions...) ;
+              publics, dates des différentes conventions...) ;
             </span>
           </li>
           <li className="flex items-start gap-2 mb-3">

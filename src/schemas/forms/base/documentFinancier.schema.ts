@@ -4,10 +4,7 @@ import {
   structureAutoriseesDocuments,
   structureSubventionneesDocuments,
 } from "@/app/components/forms/finance/documents/documentsStructures";
-import {
-  getDocumentsFinanciersYearRange,
-  getYearFromDate,
-} from "@/app/utils/date.util";
+import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
   nullishFrenchDateToISO,
@@ -88,7 +85,7 @@ export const DocumentsFinanciersStrictSchema = DocumentsFinanciersSchema.extend(
       ? structureAutoriseesDocuments
       : structureSubventionneesDocuments;
 
-    const { years } = getDocumentsFinanciersYearRange({ isAutorisee });
+    const { years } = getYearRange();
 
     const referenceYear = Number(
       getYearFromDate(data.date303 ?? data.creationDate)

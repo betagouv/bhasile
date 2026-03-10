@@ -3,10 +3,10 @@ import {
   NextApiRequest,
   NextApiResponse,
 } from "next";
-import { getServerSession, NextAuthOptions, User } from "next-auth";
+import { getServerSession, NextAuthOptions } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 
-import prisma from "../prisma";
+import { getIsUserAuthorized, ProConnectUser, upsertUser } from "./auth-util";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -18,38 +18,46 @@ export const authOptions: NextAuthOptions = {
       if (!email) {
         return false;
       }
-
       try {
-        const allowedPatterns = await prisma.allowedUser.findMany({
-          select: { emailPattern: true },
-        });
-        return allowedPatterns.some(({ emailPattern }) => {
-          const regex = new RegExp(emailPattern, "i");
-          return regex.test(email);
-        });
+        return getIsUserAuthorized(email);
       } catch (error) {
-        console.error("Adresse mail non autorisée", error);
+        console.error("Erreur de connexion", error);
         return false;
       }
     },
     async jwt({ token, account, user }) {
       if (account) {
+        const { prenom, nom } = user as ProConnectUser;
         token.id_token = account.id_token;
         token.provider = account.provider;
         token.user_id = user.id;
-        token.name =
-          (user as UserWithInfo).prenom + " " + (user as UserWithInfo).nom;
+        token.prenom = prenom;
+        token.nom = nom;
+        token.name = `${prenom} ${nom}`;
       }
       return token;
     },
     async session({ token, session }) {
-      return {
-        ...session,
-        id_token: token.id_token,
-        provider: token.provider,
-        user_id: token.user_id,
-        name: token.name,
-      };
+      try {
+        await upsertUser({
+          prenom: session.user?.name?.split(" ")?.[0] as string,
+          nom: session.user?.name?.split(" ")?.[1] as string,
+          email: session.user?.email as string,
+        });
+      } catch (error) {
+        console.error(
+          "Erreur dans l'ajout ou la mise à jour de l'utilisateur",
+          error
+        );
+      } finally {
+        return {
+          ...session,
+          id_token: token.id_token,
+          provider: token.provider,
+          user_id: token.user_id,
+          name: token.name,
+        };
+      }
     },
   },
   secret: process.env.AUTH_SECRET,
@@ -132,11 +140,3 @@ export function auth(
 ) {
   return getServerSession(...args, authOptions);
 }
-
-type UserWithInfo = User & {
-  id: string;
-  prenom: string;
-  nom: string;
-  email: string;
-  poste: string;
-};

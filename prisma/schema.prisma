@@ -68,6 +68,7 @@ model Structure {
   antennes                     Antenne[]
   finesses                     Finess[]
   departement                  Departement?                @relation(fields: [departementAdministratif], references: [numero])
+  userActions                  UserAction[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -459,18 +460,20 @@ model Operateur {
 }
 
 model Cpom {
-  id                    Int             @id @default(autoincrement())
-  name                  String?
-  structures            CpomStructure[]
-  region                String?
-  departements          String[]
-  granularity           CpomGranularity @default(REGIONALE)
-  dateStart             DateTime?
-  dateEnd               DateTime?
-  cpomMillesimes        CpomMillesime[]
-  operateur             Operateur       @relation(fields: [operateurId], references: [id])
-  operateurId           Int
-  actesAdministratifs   ActeAdministratif[]
+  id                  Int                 @id @default(autoincrement())
+  name                String?
+  structures          CpomStructure[]
+  region              String?
+  departements        String[]
+  granularity         CpomGranularity     @default(REGIONALE)
+  dateStart           DateTime?
+  dateEnd             DateTime?
+  cpomMillesimes      CpomMillesime[]
+  operateur           Operateur           @relation(fields: [operateurId], references: [id])
+  operateurId         Int
+  actesAdministratifs ActeAdministratif[]
+  fileUploads         FileUpload[] // TO DELETE AFTER MIGRATION
+  userActions         UserAction[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -572,6 +575,36 @@ model DepartementAllowedUser {
   allowedUserId Int
 
   @@id([departementId, allowedUserId])
+  @@schema("public")
+}
+
+model User {
+  id             Int          @id @default(autoincrement())
+  prenom         String
+  nom            String
+  email          String       @unique
+  lastConnection DateTime
+  userActions    UserAction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model UserAction {
+  id          Int                @id @default(autoincrement())
+  userId      Int
+  user        User               @relation(fields: [userId], references: [id])
+  action      UserActionCategory
+  structure   Structure?         @relation(fields: [structureId], references: [id])
+  structureId Int?
+  cpom        Cpom?              @relation(fields: [cpomId], references: [id])
+  cpomId      Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@schema("public")
 }
 
@@ -691,6 +724,15 @@ enum AllowedUserGranularity {
   DEPARTEMENT
   REGION
   NATIONAL
+
+  @@schema("public")
+}
+
+enum UserActionCategory {
+  CREATE
+  READ
+  UPDATE
+  DELETE
 
   @@schema("public")
 }

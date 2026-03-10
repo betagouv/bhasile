@@ -1,5 +1,5 @@
 // Remplir la table AllowedUsers avec les patterns d'email autorisés pour l'authentification
-// Usage: yarn script fill-allowed-users fill-allowed-users.ts
+// Usage: yarn script fill-allowed-users
 
 import "dotenv/config";
 

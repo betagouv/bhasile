@@ -2,7 +2,6 @@
 
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactElement, useEffect, useRef } from "react";
 
@@ -38,6 +37,16 @@ export const StructureHeader = (): ReactElement | null => {
   const structureHeaderHeight = useRef(0);
 
   const pathname = usePathname();
+  const previousPath = useRef<string | null>(null);
+  const currentPath = useRef(pathname);
+
+  useEffect(() => {
+    if (currentPath.current !== pathname) {
+      previousPath.current = currentPath.current;
+      currentPath.current = pathname;
+    }
+  }, [pathname]);
+
   const isRootPath = pathname === `/structures/${structure?.id}`;
   const isFinalisationPath = pathname.startsWith(
     `/structures/${structure?.id}/finalisation`
@@ -73,17 +82,29 @@ export const StructureHeader = (): ReactElement | null => {
     departementAdministratif,
   } = structure || {};
 
+  const handleBackClick = () => {
+    if (isRootPath || isFinalisationPath) {
+      if (previousPath.current?.includes("modification")) {
+        router.push("/structures");
+      } else {
+        router.back();
+      }
+    } else {
+      router.push(`/structures/${structure?.id}`);
+    }
+  };
+
   return structure ? (
     <>
       <div className="sticky top-0 z-2 bg-lifted-grey" ref={structureHeaderRef}>
         <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
-          <Link
+          <Button
             className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
-            title="Retour aux structures d’hébergement"
-            href="/structures"
+            title="Retour"
+            onClick={handleBackClick}
           >
-            Retour aux structures d’hébergement
-          </Link>
+            Retour
+          </Button>
           <div>
             <h2 className="text-title-blue-france text-xs uppercase mb-0">
               <strong className="pr-3">Structure hébergement</strong>

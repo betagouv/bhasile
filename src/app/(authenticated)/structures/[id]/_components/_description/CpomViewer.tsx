@@ -26,7 +26,7 @@ export const CpomViewer = (): ReactElement => {
         <span>{isInCpom ? "Oui" : "Non"}</span>
         {isInCpom && (
           <button
-            className={`fr-btn fr-btn--sm fr-btn--icon-left fr-btn--tertiary-no-outline ${
+            className={`fr-btn fr-btn--sm fr-btn--icon-left fr-btn--tertiary-no-outline py-0 ${
               showCpom ? "fr-icon-eye-off-line" : "fr-icon-eye-line"
             }`}
             onClick={() => setShowCpom(!showCpom)}

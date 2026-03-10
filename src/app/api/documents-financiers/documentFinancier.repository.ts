@@ -40,7 +40,11 @@ export const createOrUpdateDocumentsFinanciers = async (
           name: documentFinancier.name,
           granularity: documentFinancier.granularity,
           fileUploads: {
-            connect: documentFinancier.fileUploads ?? [],
+            connect: (documentFinancier.fileUploads ?? []).map(
+              (fileUpload) => ({
+                key: fileUpload.key,
+              })
+            ),
           },
         },
       });
@@ -53,7 +57,11 @@ export const createOrUpdateDocumentsFinanciers = async (
           name: documentFinancier.name,
           granularity: documentFinancier.granularity,
           fileUploads: {
-            connect: documentFinancier.fileUploads ?? [],
+            connect: (documentFinancier.fileUploads ?? []).map(
+              (fileUpload) => ({
+                key: fileUpload.key,
+              })
+            ),
           },
         },
       });

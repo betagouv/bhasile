@@ -2,10 +2,7 @@ import { useFormContext } from "react-hook-form";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
-import {
-  getDocumentsFinanciersYearRange,
-  getYearFromDate,
-} from "@/app/utils/date.util";
+import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { FormKind } from "@/types/global";
@@ -25,9 +22,7 @@ export const DocumentsFinanciers = ({
   const startYear = getYearFromDate(
     structure?.date303 || structure?.creationDate
   );
-  const { years } = getDocumentsFinanciersYearRange({
-    isAutorisee,
-  });
+  const { years } = getYearRange();
 
   const noYear = years.filter((year) => Number(year) >= startYear).length === 0;
 

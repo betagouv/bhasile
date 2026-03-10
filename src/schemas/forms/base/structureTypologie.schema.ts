@@ -10,6 +10,97 @@ import {
 } from "@/app/utils/zodCustomFields";
 import { CURRENT_YEAR } from "@/constants";
 
+const mandatoryEvolutionRefine = (
+  data:
+    | StructureTypologiesSchemaTypeFormValues
+    | StructureTypologiesWithoutTypePlacesSchemaTypeFormValues,
+  ctx: z.RefinementCtx
+) => {
+  const currentStructureTypologyIndex = getMillesimeIndexForAYear(
+    data.structureTypologies,
+    CURRENT_YEAR
+  );
+
+  if (currentStructureTypologyIndex === -1) {
+    return;
+  }
+
+  if (
+    !(
+      !!data.structureTypologies[currentStructureTypologyIndex]?.placesACreer ||
+      data.structureTypologies[currentStructureTypologyIndex]?.placesACreer ===
+        0
+    )
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Le nombre de place à créer est obligatoire",
+      path: [
+        "structureTypologies",
+        currentStructureTypologyIndex,
+        "placesACreer",
+      ],
+    });
+  }
+
+  if (
+    !(
+      !!data.structureTypologies[currentStructureTypologyIndex]
+        ?.placesAFermer ||
+      data.structureTypologies[currentStructureTypologyIndex]?.placesAFermer ===
+        0
+    )
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Le nombre de place à fermer est obligatoire",
+      path: [
+        "structureTypologies",
+        currentStructureTypologyIndex,
+        "placesAFermer",
+      ],
+    });
+  }
+
+  if (
+    !(
+      data.structureTypologies[currentStructureTypologyIndex]?.placesACreer ===
+        0 ||
+      !!data.structureTypologies[currentStructureTypologyIndex]
+        ?.echeancePlacesACreer
+    )
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Ce champ est obligatoire s'il y a au moins une place à créer",
+      path: [
+        "structureTypologies",
+        currentStructureTypologyIndex,
+        "echeancePlacesACreer",
+      ],
+    });
+  }
+
+  if (
+    !(
+      data.structureTypologies[currentStructureTypologyIndex]?.placesAFermer ===
+        0 ||
+      !!data.structureTypologies[currentStructureTypologyIndex]
+        ?.echeancePlacesAFermer
+    )
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Ce champ est obligatoire s'il y a au moins une place à fermer",
+      path: [
+        "structureTypologies",
+        currentStructureTypologyIndex,
+        "echeancePlacesAFermer",
+      ],
+    });
+  }
+};
+
 export const structureTypologieWithoutEvolutionSchema = z.object({
   id: zId(),
   placesAutorisees: zSafePositiveDecimals(),
@@ -20,11 +111,20 @@ export const structureTypologieWithoutEvolutionSchema = z.object({
 });
 
 export const placesEvolutionSchema = z.object({
+  year: zSafeYear(),
   placesACreer: zSafePositiveDecimalsNullish(),
   placesAFermer: zSafePositiveDecimalsNullish(),
   echeancePlacesACreer: nullishFrenchDateToISO(),
   echeancePlacesAFermer: nullishFrenchDateToISO(),
 });
+
+const structureTypologiesWithoutTypePlacesSchema = z.object({
+  structureTypologies: z.array(placesEvolutionSchema),
+});
+export const structureTypologiesWithoutTypePlacesSchemaWithMandatoryEvolution =
+  structureTypologiesWithoutTypePlacesSchema.superRefine(
+    mandatoryEvolutionRefine
+  );
 
 export const structureTypologieSchema =
   structureTypologieWithoutEvolutionSchema.and(placesEvolutionSchema);
@@ -43,97 +143,17 @@ export const structureTypologiesAutoSaveSchema = z.object({
 });
 
 export const structureTypologiesWithMandatoryEvolutionSchema =
-  structureTypologiesSchema.superRefine((data, ctx) => {
-    const currentStructureTypologyIndex = getMillesimeIndexForAYear(
-      data.structureTypologies,
-      CURRENT_YEAR
-    );
-
-    if (currentStructureTypologyIndex === -1) {
-      return;
-    }
-
-    if (
-      !(
-        !!data.structureTypologies[currentStructureTypologyIndex]
-          ?.placesACreer ||
-        data.structureTypologies[currentStructureTypologyIndex]
-          ?.placesACreer === 0
-      )
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Le nombre de place à créer est obligatoire",
-        path: [
-          "structureTypologies",
-          currentStructureTypologyIndex,
-          "placesACreer",
-        ],
-      });
-    }
-
-    if (
-      !(
-        !!data.structureTypologies[currentStructureTypologyIndex]
-          ?.placesAFermer ||
-        data.structureTypologies[currentStructureTypologyIndex]
-          ?.placesAFermer === 0
-      )
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Le nombre de place à fermer est obligatoire",
-        path: [
-          "structureTypologies",
-          currentStructureTypologyIndex,
-          "placesAFermer",
-        ],
-      });
-    }
-
-    if (
-      !(
-        data.structureTypologies[currentStructureTypologyIndex]
-          ?.placesACreer === 0 ||
-        !!data.structureTypologies[currentStructureTypologyIndex]
-          ?.echeancePlacesACreer
-      )
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Ce champ est obligatoire s'il y a au moins une place à créer",
-        path: [
-          "structureTypologies",
-          currentStructureTypologyIndex,
-          "echeancePlacesACreer",
-        ],
-      });
-    }
-
-    if (
-      !(
-        data.structureTypologies[currentStructureTypologyIndex]
-          ?.placesAFermer === 0 ||
-        !!data.structureTypologies[currentStructureTypologyIndex]
-          ?.echeancePlacesAFermer
-      )
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message:
-          "Ce champ est obligatoire s'il y a au moins une place à fermer",
-        path: [
-          "structureTypologies",
-          currentStructureTypologyIndex,
-          "echeancePlacesAFermer",
-        ],
-      });
-    }
-  });
+  structureTypologiesSchema.superRefine(mandatoryEvolutionRefine);
 
 export type StructureTypologieWithoutEvolutionSchemaTypeFormValues = z.infer<
   typeof structureTypologieWithoutEvolutionSchema
 >;
 export type structureTypologieSchemaTypeFormValues = z.infer<
   typeof structureTypologieSchema
+>;
+export type StructureTypologiesSchemaTypeFormValues = z.infer<
+  typeof structureTypologiesSchema
+>;
+export type StructureTypologiesWithoutTypePlacesSchemaTypeFormValues = z.infer<
+  typeof structureTypologiesWithoutTypePlacesSchema
 >;

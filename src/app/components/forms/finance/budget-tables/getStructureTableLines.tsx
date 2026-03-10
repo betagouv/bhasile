@@ -20,7 +20,7 @@ export const getStructureTableLines = (
           {
             name: "dotationAccordee",
             label: "Dotation accordée",
-            disabledYearsStart: AUTORISEE_OPEN_YEAR + 1,
+            disabledYearsStart: AUTORISEE_OPEN_YEAR + 2,
           },
         ],
       },
@@ -132,12 +132,10 @@ export const getStructureTableLines = (
         {
           name: "dotationDemandee",
           label: "Dotation demandée",
-          disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
         },
         {
           name: "dotationAccordee",
           label: "Dotation accordée",
-          disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
         },
       ],
     },

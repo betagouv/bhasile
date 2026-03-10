@@ -397,39 +397,45 @@ const updateOne = async (
       structureMillesimes,
     } = structure;
 
-    return await prisma.$transaction(async (tx) => {
-      const updatedStructure = await updateStructure(tx, structure);
+    return await prisma.$transaction(
+      async (tx) => {
+        const updatedStructure = await updateStructure(tx, structure);
 
-      await initializeDefaultForms(tx, isOperateurUpdate, structure.id);
+        await initializeDefaultForms(tx, isOperateurUpdate, structure.id);
 
-      await createOrUpdateDnaStructures(tx, dnaStructures, structure.id);
-      await createOrUpdateFinesses(tx, finesses, structure.id);
-      await createOrUpdateContacts(tx, contacts, structure.id);
-      await createOrUpdateBudgets(tx, budgets, structure.id);
-      await createOrUpdateStructureTypologies(
-        tx,
-        structureTypologies,
-        structure.id
-      );
-      await createOrUpdateAdresses(tx, adresses, structure.id);
-      await createOrUpdateAntennes(tx, antennes, structure.id);
-      await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
-        structureId: structure.id,
-      });
-      await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
-        structureId: structure.id,
-      });
-      await createOrUpdateControles(tx, controles, structure.id);
-      await createOrUpdateForms(tx, forms, structure.id);
-      await createOrUpdateEvaluations(tx, evaluations, structure.id);
-      await createOrUpdateStructureMillesimes(
-        tx,
-        structureMillesimes,
-        structure.id
-      );
+        await createOrUpdateDnaStructures(tx, dnaStructures, structure.id);
+        await createOrUpdateFinesses(tx, finesses, structure.id);
+        await createOrUpdateContacts(tx, contacts, structure.id);
+        await createOrUpdateBudgets(tx, budgets, structure.id);
+        await createOrUpdateStructureTypologies(
+          tx,
+          structureTypologies,
+          structure.id
+        );
+        await createOrUpdateAdresses(tx, adresses, structure.id);
+        await createOrUpdateAntennes(tx, antennes, structure.id);
+        await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
+          structureId: structure.id,
+        });
+        await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
+          structureId: structure.id,
+        });
+        await createOrUpdateControles(tx, controles, structure.id);
+        await createOrUpdateForms(tx, forms, structure.id);
+        await createOrUpdateEvaluations(tx, evaluations, structure.id);
+        await createOrUpdateStructureMillesimes(
+          tx,
+          structureMillesimes,
+          structure.id
+        );
 
-      return updatedStructure;
-    });
+        return updatedStructure;
+      },
+      {
+        maxWait: 5000,
+        timeout: 10000,
+      }
+    );
   } catch (error) {
     throw new Error(
       `Impossible de mettre à jour la structure avec l'id ${structure.id}: ${error}`

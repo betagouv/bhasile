@@ -6,7 +6,7 @@ import {
   structureSubventionneesDocuments,
 } from "@/app/components/forms/finance/documents/documentsStructures";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
-import { getDocumentsFinanciersYearRange } from "@/app/utils/date.util";
+import { getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
@@ -28,7 +28,7 @@ export const DocumentsFinanciers = (): ReactElement => {
     ? structureAutoriseesDocuments
     : structureSubventionneesDocuments;
 
-  const { years } = getDocumentsFinanciersYearRange({ isAutorisee });
+  const { years } = getYearRange();
 
   const startYear = localStorageValues?.date303
     ? Number(localStorageValues?.date303?.split("/")?.[2])

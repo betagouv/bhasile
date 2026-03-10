@@ -52,7 +52,7 @@ export const CalendrierBlock = (): ReactElement => {
   return (
     <Block
       title="Calendrier"
-      iconClass="fr-icon-calendar-2-line"
+      iconClass="fr-icon-calendar-todo-line"
       onEdit={() => {
         router.push(`/structures/${structure.id}/modification/02-calendrier`);
       }}

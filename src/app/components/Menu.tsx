@@ -49,7 +49,15 @@ export const Menu = (): ReactElement => {
     },
     {
       label: "Politique de confidentialité",
-      url: "/confidentialite",
+      url: "/politique-confidentialite",
+    },
+    {
+      label: "Conditions générales d'utilisation",
+      url: "/cgu",
+    },
+    {
+      label: "Mentions légales",
+      url: "/mentions-legales",
     },
     {
       label: "Accessibilité : partiellement conforme",
@@ -99,7 +107,7 @@ export const Menu = (): ReactElement => {
             key={menuItem.label}
           >
             <Link
-              className="fr-sidemenu__link"
+              className="fr-sidemenu__link before:content-none"
               href={menuItem.url}
               aria-current={getAriaCurrent(menuItem.url, menuItem.subItems)}
             >

@@ -41,7 +41,7 @@ export const DescriptionBlock = (): ReactElement => {
   return (
     <Block
       title="Description"
-      iconClass="fr-icon-menu-2-fill"
+      iconClass="fr-icon-align-left"
       onEdit={() => {
         router.push(`/structures/${structure.id}/modification/01-description`);
       }}

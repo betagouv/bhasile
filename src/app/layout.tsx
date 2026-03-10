@@ -18,8 +18,6 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: PropsWithChildren) {
-  console.log("Environnement :", process.env.NODE_ENV);
-
   const lang = "fr";
   return (
     <html
@@ -33,7 +31,6 @@ export default function RootLayout({ children }: PropsWithChildren) {
       <body className="overscroll-none bg-default-grey-hover h-full">
         <DsfrProvider lang={lang}>
           <StartDsfrOnHydration />
-
           <Providers>
             <Suspense>
               <NameChangeNotice />

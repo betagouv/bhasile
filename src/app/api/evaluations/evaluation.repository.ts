@@ -44,7 +44,9 @@ export const createOrUpdateEvaluations = async (
           noteStructure: evaluation.noteStructure,
           note: evaluation.note,
           fileUploads: {
-            connect: evaluation.fileUploads,
+            connect: (evaluation.fileUploads ?? []).map((fileUpload) => ({
+              key: fileUpload.key,
+            })),
           },
         },
         create: {
@@ -55,7 +57,9 @@ export const createOrUpdateEvaluations = async (
           noteStructure: evaluation.noteStructure,
           note: evaluation.note,
           fileUploads: {
-            connect: evaluation.fileUploads,
+            connect: (evaluation.fileUploads ?? []).map((fileUpload) => ({
+              key: fileUpload.key,
+            })),
           },
         },
       });

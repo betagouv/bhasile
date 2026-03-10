@@ -53,7 +53,10 @@ export const getDefaultValues = ({
 
   const antennes = transformApiAntennesToFormAntennes(structure.antennes);
 
-  const budgets = getBudgetsDefaultValues(structure?.budgets || []);
+  const budgets = getBudgetsDefaultValues(
+    structure?.budgets || [],
+    structureCreationYear
+  );
 
   const dnaStructures = transformApiDnaStructuresToFormDnaStructures(
     structure.dnaStructures

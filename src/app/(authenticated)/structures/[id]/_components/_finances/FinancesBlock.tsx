@@ -44,22 +44,26 @@ export const FinancesBlock = (): ReactElement => {
         router.push(`/structures/${structure.id}/modification/04-finance`);
       }}
     >
-      <div className="pb-2">
-        <h4 className="text-title-blue-france pb-2 fr-h6">
-          Budget exécutoire pour {budgetExecutoireYear}
-        </h4>
+      <h4 className="text-title-blue-france text-lg">
+        Budget exécutoire pour {budgetExecutoireYear}
+      </h4>
+      <div className="pb-6">
         <BudgetExecutoire year={budgetExecutoireYear} />
       </div>
-      <div className="pb-5">
+      <div className="pb-12">
         <HistoriqueIndicateursGeneraux />
       </div>
-      <h4 className="text-title-blue-france pb-2 fr-h6">
+      <h4 className="text-title-blue-france text-lg">
         Dotation et équilibre économique
       </h4>
-      <div className="pb-5">
+      <div className="pb-12">
         <DotationChart />
       </div>
-      <h4 className="text-title-blue-france fr-h6" id="gestionBudgetaireTitle">
+      <hr className="mb-10" />
+      <h4
+        className="text-title-blue-france text-lg"
+        id="gestionBudgetaireTitle"
+      >
         Gestion budgétaire
       </h4>
       {wasInCpom && (
@@ -69,11 +73,11 @@ export const FinancesBlock = (): ReactElement => {
           }
         />
       )}
-      <div className="pb-5">
+      <div className="pb-12">
         {shouldShowCpom ? <CpomStaticTable /> : <StructureStaticTable />}
       </div>
-      <hr className="mt-12 mb-12" />
-      <h4 className="text-title-blue-france pb-2 fr-h6 mb-0">
+      <hr className="mb-10" />
+      <h4 className="text-title-blue-france pb-2 text-lg mb-0">
         Documents administratifs et financiers transmis par l’opérateur
       </h4>
       {isConventionnee && (

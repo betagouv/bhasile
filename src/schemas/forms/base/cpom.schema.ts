@@ -18,7 +18,7 @@ const cpomMillesimeSchema = z.object({
   dotationDemandee: zSafePositiveDecimalsNullish(),
   dotationAccordee: zSafePositiveDecimalsNullish(),
   cumulResultatNet: zSafeDecimalsNullish(),
-  repriseEtat: zSafePositiveDecimalsNullish(),
+  repriseEtat: zSafeDecimalsNullish(),
   affectationReservesFondsDedies: zSafeDecimalsNullish(),
   reserveInvestissement: zSafeDecimalsNullish(),
   chargesNonReconductibles: zSafeDecimalsNullish(),
