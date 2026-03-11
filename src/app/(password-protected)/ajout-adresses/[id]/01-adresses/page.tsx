@@ -10,7 +10,7 @@ export default async function AjoutAdressesPage({
   return (
     <div>
       <h2>Adresses</h2>
-      <AdressesRecovery id={id} />
+      <AdressesRecovery id={Number(id)} />
     </div>
   );
 }

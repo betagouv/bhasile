@@ -28,7 +28,7 @@ export const ValidationButton = (): ReactElement => {
       if (hasAdresses) {
         checkAdressesModal.open();
       } else {
-        router.push(`/ajout-adresses/${structure.dnaCode}/01-adresses`);
+        router.push(`/ajout-adresses/${structure.id}/01-adresses`);
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
