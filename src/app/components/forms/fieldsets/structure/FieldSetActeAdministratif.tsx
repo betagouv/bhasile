@@ -1,8 +1,8 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { AdditionalFieldsType } from "@/app/utils/acteAdministratif.util";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
@@ -83,10 +83,10 @@ export default function FieldSetActeAdministratif({
         </legend>
       )}
       {notice && (
-        <Notice
+        <CustomNotice
           severity="info"
           title=""
-          className="rounded [&_p]:flex [&_p]:items-center w-fit [&_.fr-notice\_\_desc]:text-text-default-grey"
+          className="rounded [&_p]:flex [&_p]:items-center w-fit"
           description={<>{notice}</>}
         />
       )}

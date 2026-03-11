@@ -1,8 +1,7 @@
 "use client";
 
-import Notice from "@codegouvfr/react-dsfr/Notice";
-
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { FieldSetAdresseAdministrative } from "@/app/components/forms/fieldsets/structure/FieldSetAdresseAdministrative";
 import { FieldSetContacts } from "@/app/components/forms/fieldsets/structure/FieldSetContacts";
 import { FieldSetDescription } from "@/app/components/forms/fieldsets/structure/FieldSetDescription";
@@ -64,7 +63,7 @@ export default function ModificationDescription() {
         ]}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <Notice
+        <CustomNotice
           severity="warning"
           title=""
           description={`Certaines données (date de création, code DNA, type de structure, opérateur) ne sont pas modifiables. Il y a une erreur ? Contactez-nous : ${BHASILE_CONTACT_EMAIL}`}
@@ -79,7 +78,7 @@ export default function ModificationDescription() {
         <h2 className="text-xl font-bold mb-0 text-title-blue-france">
           Adresses
         </h2>
-        <Notice
+        <CustomNotice
           severity="info"
           title=""
           description="L'ensemble des adresses sont des données sensibles qui sont protégées selon les normes du gouvernement. Elles ne seront communiquées qu'aux agents et agentes de DDETS."

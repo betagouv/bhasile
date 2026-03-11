@@ -1,6 +1,6 @@
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import Link from "next/link";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { AdressImporter } from "@/app/components/forms/address/AdressImporter";
 import { MODELE_DIFFUS_LINK, MODELE_MIXTE_LINK } from "@/constants";
 import { Repartition } from "@/types/adresse.type";
@@ -48,12 +48,12 @@ export const Notices = ({ typeBati, hebergementsContainerRef }: Props) => {
           </>
         )}
       </div>
-      <Notice
+      <CustomNotice
         severity="info"
         title="Pour le champ “places”,"
         description="veuillez renseigner le nombre total de places autorisées pour l’adresse correspondante."
       />
-      <Notice
+      <CustomNotice
         severity="info"
         title=""
         description={

@@ -1,4 +1,3 @@
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import Link from "next/link";
 
 import { getYearRange } from "@/app/utils/date.util";
@@ -11,6 +10,7 @@ import { getFinanceFormTutorialLink } from "@/app/utils/tutorials.util";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
 
 import { useStructureContext } from "../../../(authenticated)/structures/[id]/_context/StructureClientContext";
+import { CustomNotice } from "../../common/CustomNotice";
 import { StructureCpomTable } from "./budget-tables/StructureCpomTable";
 import { StructureTable } from "./budget-tables/StructureTable";
 
@@ -23,10 +23,10 @@ export const BudgetTables = () => {
 
   return (
     <>
-      <Notice
+      <CustomNotice
         severity="warning"
         title=""
-        className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey"
+        className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
         description={
           <>
             La complétion de cette partie étant complexe, veuillez vous référer{" "}
@@ -62,10 +62,10 @@ export const BudgetTables = () => {
           <legend className="text-xl font-bold mb-8 text-title-blue-france">
             Gestion budgétaire du CPOM
           </legend>
-          <Notice
+          <CustomNotice
             severity="info"
             title=""
-            className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey"
+            className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
             description={`L’historique des données budgétaires à l’échelle du CPOM a déjà été renseigné lors de la saisie du CPOM. Si vous constatez une erreur et voulez apporter une modification, contactez-nous : ${BHASILE_CONTACT_EMAIL}`}
           />
           <StructureCpomTable canEdit={false} />

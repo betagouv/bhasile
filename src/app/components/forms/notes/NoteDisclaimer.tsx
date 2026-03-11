@@ -1,10 +1,10 @@
-import Notice from "@codegouvfr/react-dsfr/Notice";
-
 import { FormKind } from "@/types/global";
+
+import { CustomNotice } from "../../common/CustomNotice";
 
 export const NoteDisclaimer = ({ formKind }: Props) => {
   return (
-    <Notice
+    <CustomNotice
       severity="info"
       title=""
       className="rounded [&_p]:flex [&_p]:items-center"

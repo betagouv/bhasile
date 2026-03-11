@@ -29,7 +29,7 @@ export const FinancesBlock = (): ReactElement => {
   const { years } = getYearRange({ order: "desc" });
 
   const isAutorisee = isStructureAutorisee(structure.type);
-  const isConventionnee = isStructureSubventionnee(structure.type);
+  const isSubventionnee = isStructureSubventionnee(structure.type);
   const wasInCpom = wasStructureInCpom(structure, years);
 
   const budgetExecutoireYear = isAutorisee
@@ -77,17 +77,19 @@ export const FinancesBlock = (): ReactElement => {
         {shouldShowCpom ? <CpomStaticTable /> : <StructureStaticTable />}
       </div>
       <hr className="mb-10" />
-      <h4 className="text-title-blue-france pb-2 text-lg mb-0">
+      <h4 className="text-title-blue-france pb-0.5 text-lg mb-0">
         Documents administratifs et financiers transmis par l’opérateur
       </h4>
-      {isConventionnee && (
-        <h5 className="text-sm text-gray-500 font-normal italic">
+      {isSubventionnee && (
+        <h5 className="text-sm text-gray-500 font-normal italic mb-0">
           Retrouvez les Plans Pluriannuels d’Investissements (PPI) dans la
           section “Actes administratifs” s’ils existent et qu’ils ont été
           importés.
         </h5>
       )}
-      <DocumentsFinanciers />
+      <div className="pt-6">
+        <DocumentsFinanciers />
+      </div>
     </Block>
   );
 };

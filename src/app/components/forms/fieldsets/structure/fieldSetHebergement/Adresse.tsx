@@ -27,7 +27,7 @@ export const AdresseComponent = ({
         latitude={`adresses.${index}.latitude`}
         longitude={`adresses.${index}.longitude`}
         label="Adresse"
-        className="w-1/3"
+        className="w-1/2"
         disabled={sameAddress}
       />
       <InputWithValidation
@@ -108,6 +108,7 @@ export const AdresseComponent = ({
               }}
               priority="tertiary no outline"
               title="Supprimer l'hébergement"
+              size="small"
             />
           )}
         </div>

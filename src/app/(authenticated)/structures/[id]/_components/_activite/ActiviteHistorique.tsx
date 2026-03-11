@@ -117,13 +117,13 @@ export const ActiviteHistorique = (): ReactElement => {
   return (
     <div>
       <h4 className="text-lg text-title-blue-france">Historique</h4>
-      <div className="flex pb-5">
+      <div className="flex pb-6">
         <ActiviteTypes
           typeActivite={typeActivite}
           setTypeActivite={setTypeActivite}
         />
       </div>
-      <div className="pb-5">
+      <div className="pb-6">
         <ActiviteDurations
           setSelectedMonths={setSelectedMonths}
           debutConvention={debutConvention}
@@ -161,20 +161,20 @@ export const ActiviteHistorique = (): ReactElement => {
           />
         </div>
         <div className="pl-5">
-          <div className="pb-1 flex items-center text-sm">
+          <div className="pb-2 flex items-center text-sm">
             <div className="w-[40px] border-b-2 border-b-background-flat-blue-france mr-2 shrink-0 grow-0" />
             {typesActivite[typeActivite]?.label}
           </div>
-          <div className="pb-1 flex items-center text-sm">
+          <div className="pb-2 flex items-center text-sm">
             <div className="w-[40px] border-b-2 border-default-blue-france border-dashed mr-2 shrink-0 grow-0" />
             Seuil cahier des charges
           </div>
-          <div className="pb-1 flex items-center text-sm">
-            <div className="w-[40px] border-b-2 border-default-green-archipel border-dashed mr-2 shrink-0 grow-0" />
+          <div className="pb-2 flex items-center text-sm">
+            <div className="w-[40px] border-b-2 border-default-green-archipel border-dotted mr-2 shrink-0 grow-0" />
             Moyenne de la structure sur la période
           </div>
-          <div className="pb-1 flex items-center text-sm">
-            <div className="w-[40px] border-b-2 border-default-purple-glycine border-dashed mr-2 shrink-0 grow-0" />
+          <div className="pb-2 flex items-center text-sm">
+            <div className="w-[40px] border-b-2 border-default-purple-glycine border-dotted mr-2 shrink-0 grow-0" />
             Moyenne départementale sur la période
           </div>
         </div>

@@ -19,13 +19,13 @@ export const ActiviteBlock = (): ReactElement => {
           <span className={`text-title-blue-france mr-3 fr-icon-team-line`} />
           <h3 className="text-title-blue-france fr-h6 mb-12">Activité</h3>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center text-right">
           {structure.type === StructureType.CAES ? (
-            <span className="text-title-blue-france">
+            <span className="text-title-blue-france text-xs">
               Pas de données OFII disponibles
             </span>
           ) : (
-            <span className="text-title-blue-france">
+            <span className="text-title-blue-france text-xs ">
               Données mensuelles de l’OFII
               <span className="italic block">
                 mises à jour le {formatDate(structure?.activites?.[0]?.date)}
@@ -53,7 +53,7 @@ export const ActiviteBlock = (): ReactElement => {
             <ActiviteMotifsIndisponibilite />
           </div>
           <ActiviteHistorique />
-          <div className="italic pt-6">
+          <div className="italic pt-4 text-sm">
             La méthode de calcul ayant changé au 01/01/2025, l’outil donne accès
             aux données seulement à partir de cette date.
           </div>

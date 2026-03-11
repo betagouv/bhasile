@@ -1,6 +1,6 @@
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useFormContext } from "react-hook-form";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { ContactType } from "@/types/contact.type";
 
 import InputWithValidation from "../../InputWithValidation";
@@ -14,7 +14,7 @@ export const FieldSetContacts = () => {
         Contacts
       </h2>
 
-      <Notice
+      <CustomNotice
         severity="info"
         title=""
         className="rounded [&_p]:flex [&_p]:items-center"

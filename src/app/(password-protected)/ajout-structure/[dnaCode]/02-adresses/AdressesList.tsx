@@ -1,6 +1,5 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
-import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import autoAnimate from "@formkit/auto-animate";
 import Link from "next/link";
@@ -13,6 +12,7 @@ import {
   UseFormWatch,
 } from "react-hook-form";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { AdressImporter } from "@/app/components/forms/address/AdressImporter";
 import AddressWithValidation from "@/app/components/forms/AddressWithValidation";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
@@ -172,12 +172,12 @@ export const AdressesList = ({
             </>
           )}
         </div>
-        <Notice
+        <CustomNotice
           severity="info"
           title="Pour le champ “places”,"
           description="veuillez renseigner le nombre total de places autorisées pour l’adresse correspondante."
         />
-        <Notice
+        <CustomNotice
           severity="info"
           title=""
           description={

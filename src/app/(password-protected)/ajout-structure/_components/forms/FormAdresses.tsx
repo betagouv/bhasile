@@ -1,9 +1,10 @@
 "use client";
-import { Notice } from "@codegouvfr/react-dsfr/Notice";
+
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import AddressWithValidation from "@/app/components/forms/AddressWithValidation";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
@@ -175,10 +176,10 @@ export default function FormAdresses() {
               Étape précédente
             </Link>
 
-            <Notice
+            <CustomNotice
               severity="info"
               title=""
-              className="rounded [&_p]:flex  [&_p]:items-center"
+              className="rounded [&_p]:flex [&_p]:items-center"
               description="L’ensemble des adresses ne seront communiquées qu’aux agentes et agents en charge de cette politique publique."
             />
             <fieldset className="flex flex-col gap-6">

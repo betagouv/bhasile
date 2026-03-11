@@ -1,6 +1,6 @@
 "use client";
-import Notice from "@codegouvfr/react-dsfr/Notice";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { Controles } from "@/app/components/forms/documents/Controles";
 import { Evaluations } from "@/app/components/forms/evaluations/Evaluations";
 import FormWrapper, {
@@ -66,7 +66,7 @@ export default function ModificationControleForm() {
         defaultValues={defaultValues}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <Notice
+        <CustomNotice
           severity="info"
           title=""
           description={`Actuellement, seuls les EIG renseignés sur Démarches Numériques sont affichés, l’ancienneté de cet historique dépend donc de la date à laquelle votre région a été articulée avec l’outil. Les EIG sont récupérés automatiquement. Il y a une erreur ? Contactez-nous : ${BHASILE_CONTACT_EMAIL}`}

@@ -1,9 +1,9 @@
 "use client";
 
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import { ReactElement, useState } from "react";
 
 import { Badge } from "@/app/components/common/Badge";
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { formatCityName } from "@/app/utils/adresse.util";
 import { getRepartition } from "@/app/utils/structure.util";
 import { Repartition } from "@/types/adresse.type";
@@ -44,10 +44,10 @@ export const AdressesViewer = (): ReactElement => {
       {showAdresses && (
         <div className="text-mention-grey">
           {adresses?.length === 0 && (
-            <Notice
+            <CustomNotice
               severity="alert"
               title=""
-              className="rounded [&_p]:flex  [&_p]:items-center"
+              className="rounded [&_p]:flex [&_p]:items-center"
               description="Un problème technique a empêché l’enregistrement des hébergements liés à cette structure. La situation est en cours de correction, merci pour votre compréhension."
             />
           )}
