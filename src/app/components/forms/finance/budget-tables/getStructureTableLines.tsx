@@ -89,7 +89,7 @@ export const getStructureTableLines = (
           {
             name: "chargesNonReconductibles",
             label: "Charges",
-            subLabel: "non reductibles",
+            subLabel: "non reconductibles",
             enabledYears: detailAffectationEnabledYears,
           },
           {
