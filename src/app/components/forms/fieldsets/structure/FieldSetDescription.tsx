@@ -1,10 +1,10 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import autoAnimate from "@formkit/auto-animate";
 import { useEffect, useRef, useState } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { FormKind } from "@/types/global";
 import { PublicType, StructureType } from "@/types/structure.type";
@@ -154,10 +154,10 @@ export const FieldSetDescription = ({
           ))}
         </SelectWithValidation>
       </div>
-      <Notice
+      <CustomNotice
         severity="info"
         title=""
-        className="rounded [&_p]:flex [&_p]:items-center [&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
+        className="rounded [&_p]:flex [&_p]:items-center"
         description="LGBT : Lesbiennes, Gays, Bisexuels et Transgenres – FVV : Femmes Victimes de Violences–TEH : Traîte des Êtres Humains"
       />
       <label className="flex gap-6">

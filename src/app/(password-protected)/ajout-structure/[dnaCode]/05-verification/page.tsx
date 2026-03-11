@@ -1,11 +1,11 @@
 "use client";
 import Button from "@codegouvfr/react-dsfr/Button";
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { useRedirectStructureCreation } from "@/app/hooks/useRedirectStructureCreation";
 import { useStructures } from "@/app/hooks/useStructures";
@@ -127,10 +127,10 @@ export default function StepVerification() {
           <i className="fr-icon-arrow-left-s-line before:w-4"></i>
           Revenir au formulaire
         </Link>
-        <Notice
+        <CustomNotice
           severity="info"
           title=""
-          className="rounded [&_p]:flex [&_p]:items-center [&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
+          className="rounded [&_p]:flex [&_p]:items-center"
           description="Veuillez vérifier les informations saisies méticuleusement : une fois validées, il ne sera plus possible de les modifier."
         />
         <StepResume

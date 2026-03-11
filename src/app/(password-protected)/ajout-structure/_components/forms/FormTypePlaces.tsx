@@ -1,9 +1,9 @@
 "use client";
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { Table } from "@/app/components/common/Table";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
@@ -77,10 +77,10 @@ export default function FormTypePlaces() {
               typologie au 1er janvier de ces dernières années.
             </p>
 
-            <Notice
+            <CustomNotice
               severity="info"
               title=""
-              className="rounded [&_p]:flex  [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
+              className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
               description="PMR : Personnes à Mobilité Réduite – LGBT : Lesbiennes, Gays, Bisexuels et Transgenres (ici places définies comme spécialisées) – FVV : Femmes Victimes de Violences, TEH : Traîte des Êtres Humains (ici places définies comme labellisées)"
             />
 

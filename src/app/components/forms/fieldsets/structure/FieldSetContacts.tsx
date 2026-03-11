@@ -1,6 +1,6 @@
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useFormContext } from "react-hook-form";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { ContactType } from "@/types/contact.type";
 
 import InputWithValidation from "../../InputWithValidation";
@@ -14,10 +14,10 @@ export const FieldSetContacts = () => {
         Contacts
       </h2>
 
-      <Notice
+      <CustomNotice
         severity="info"
         title=""
-        className="rounded [&_p]:flex [&_p]:items-center [&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
+        className="rounded [&_p]:flex [&_p]:items-center"
         description="Veuillez renseigner en contact principal la personne responsable de la structure et en contact secondaire la personne en charge du suivi opérationnel et/ou de la gestion budgétaire et financière."
       />
 

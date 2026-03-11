@@ -1,6 +1,6 @@
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useFormContext } from "react-hook-form";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { StructureType } from "@/types/structure.type";
 
@@ -47,10 +47,10 @@ export const FieldSetCalendrier = () => {
           {isStructureAutorisee(type) ? " (optionnel)" : ""}
         </legend>
         {isStructureAutorisee(type) && (
-          <Notice
+          <CustomNotice
             severity="info"
             title=""
-            className="rounded [&_p]:flex [&_p]:items-center max-w-lg [&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
+            className="rounded [&_p]:flex [&_p]:items-center max-w-lg"
             description="Uniquement si votre structure est sous convention."
           />
         )}

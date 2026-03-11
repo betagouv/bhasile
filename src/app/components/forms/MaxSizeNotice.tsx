@@ -1,11 +1,11 @@
-import { Notice } from "@codegouvfr/react-dsfr/Notice";
+import { CustomNotice } from "../common/CustomNotice";
 
 export const MaxSizeNotice = () => {
   return (
-    <Notice
+    <CustomNotice
       severity="info"
       title=""
-      className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
+      className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
       description={
         <>
           Taille maximale par fichier : 10 Mo. Formats supportés : pdf, xls,

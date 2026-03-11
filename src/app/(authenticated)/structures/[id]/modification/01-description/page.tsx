@@ -1,8 +1,7 @@
 "use client";
 
-import Notice from "@codegouvfr/react-dsfr/Notice";
-
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { FieldSetAdresseAdministrative } from "@/app/components/forms/fieldsets/structure/FieldSetAdresseAdministrative";
 import { FieldSetContacts } from "@/app/components/forms/fieldsets/structure/FieldSetContacts";
 import { FieldSetDescription } from "@/app/components/forms/fieldsets/structure/FieldSetDescription";
@@ -64,10 +63,9 @@ export default function ModificationDescription() {
         ]}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <Notice
+        <CustomNotice
           severity="warning"
           title=""
-          className="[&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
           description={`Certaines données (date de création, code DNA, type de structure, opérateur) ne sont pas modifiables. Il y a une erreur ? Contactez-nous : ${BHASILE_CONTACT_EMAIL}`}
         />
         <FieldSetDescription
@@ -80,10 +78,9 @@ export default function ModificationDescription() {
         <h2 className="text-xl font-bold mb-0 text-title-blue-france">
           Adresses
         </h2>
-        <Notice
+        <CustomNotice
           severity="info"
           title=""
-          className="[&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
           description="L'ensemble des adresses sont des données sensibles qui sont protégées selon les normes du gouvernement. Elles ne seront communiquées qu'aux agents et agentes de DDETS."
         />
         <FieldSetAdresseAdministrative formKind={FormKind.MODIFICATION} />

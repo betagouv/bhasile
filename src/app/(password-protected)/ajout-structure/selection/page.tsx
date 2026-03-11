@@ -1,8 +1,8 @@
 "use client";
 
-import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import { ReactElement } from "react";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import { BackButton } from "@/app/components/structure-selection/BackButton";
 import { StructureSearch } from "@/app/components/structure-selection/StructureSearch";
@@ -25,10 +25,10 @@ export default function AjoutStructurePage(): ReactElement {
           <span className="fr-icon-search-line fr-icon--md" />
           Quelle structure voulez-vous ajouter ?
         </h2>
-        <Notice
+        <CustomNotice
           severity="warning"
           title=""
-          className="rounded [&_p]:flex [&_p]:items-center mb-4 [&_.fr-notice\_\_desc]:text-text-default-grey [&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0"
+          className="rounded [&_p]:flex [&_p]:items-center mb-4"
           description={
             <span className="text-default-grey">
               Si vous n’établissez qu’un seul document budgétaire et/ou
