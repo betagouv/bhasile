@@ -1,28 +1,30 @@
 import { ReactElement } from "react";
 
+import { Section } from "@/app/components/common/Section";
+
 import { ActesAdministratifsBlock } from "./_actes-administratifs/ActesAdministratifsBlock";
 import { ActiviteBlock } from "./_activite/ActiviteBlock";
 import { CalendrierBlock } from "./_calendrier/CalendrierBlock";
-import { HudaPrahdaControlesBlock } from "./_controles/HudaPrahdaControlesBlock";
-import { PrahdaDescriptionBlock } from "./_description/PrahdaDescriptionBlock";
+import { ControlesBlock } from "./_controles/ControlesBlock";
+import { DescriptionBlock } from "./_description/DescriptionBlock";
+import { FinancesBlock } from "./_finances/FinancesBlock";
 import { NotesBlock } from "./_notes/NotesBlock";
-import { PrahdaTypePlaceBlock } from "./_type-places/PrahdaTypePlaceBlock";
-import { Section } from "../../../../components/common/Section";
+import { TypePlaceBlock } from "./_type-places/TypePlaceBlock";
 
-export const PrahdaStructure = (): ReactElement => {
+export const Structure = (): ReactElement => {
   return (
     <>
       <Section id="description">
-        <PrahdaDescriptionBlock />
+        <DescriptionBlock />
       </Section>
-      <Section id="calendrier">
-        <CalendrierBlock />
+      <Section id="composition">
+        <CompositionBlock />
       </Section>
-      <Section id="places">
-        <PrahdaTypePlaceBlock />
+      <Section id="finances">
+        <FinancesBlock />
       </Section>
       <Section id="controle">
-        <HudaPrahdaControlesBlock />
+        <ControlesBlock />
       </Section>
       <Section id="activites">
         <ActiviteBlock />
