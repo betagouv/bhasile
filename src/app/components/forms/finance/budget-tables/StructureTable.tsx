@@ -6,9 +6,7 @@ import { getYearRange } from "@/app/utils/date.util";
 import {
   getRealCreationYear,
   isStructureAutorisee,
-  isStructureSubventionnee,
 } from "@/app/utils/structure.util";
-import { SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
@@ -22,7 +20,6 @@ export const StructureTable = ({ canEdit = true }: Props) => {
   const { structure } = useStructureContext();
 
   const isAutorisee = isStructureAutorisee(structure.type);
-  const isSubventionnee = isStructureSubventionnee(structure.type);
 
   const { years } = getYearRange({ order: "desc" });
   const startYear = getRealCreationYear(structure);
@@ -85,9 +82,6 @@ export const StructureTable = ({ canEdit = true }: Props) => {
       <BudgetTableCommentLine
         label="Commentaire"
         budgets={budgets}
-        disabledYearsStart={
-          isSubventionnee ? SUBVENTIONNEE_OPEN_YEAR + 1 : undefined
-        }
         enabledYears={yearsToDisplay}
         canEdit={canEdit}
         years={yearsToDisplay}
