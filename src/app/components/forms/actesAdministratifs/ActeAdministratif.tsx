@@ -75,7 +75,7 @@ export const ActeAdministratif = ({
 
     if (!fileKey) {
       alert(
-        "Impossible d'ajouter un avenant sans document principal. Si vous ne retrouvez pas le document principal, merci de joindre un court document résumant en une ligne pourquoi il est indisponible"
+        "Impossible d'ajouter un avenant sans document principal. Si vous ne retrouvez pas le document original, merci de joindre un court document résumant en une ligne pourquoi il est indisponible."
       );
       return;
     }
