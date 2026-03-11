@@ -3,13 +3,8 @@ import { StructureType } from "@/types/structure.type";
 
 import { TestStructureScenario } from "./types";
 
-/**
- * CADA 3: Mixte, large structure with 10 addresses, one contact, mixed docs (some ajout/some finalisation),
- * 1 evaluation (new type with notes), with controls, with actes administratifs.
- * Kept minimal eval/controles like cada-1/cada-2 for stable e2e; addresses and actes remain full.
- */
 export const cada3: TestStructureScenario = {
-  name: "CADA 3 - Multi finesses, mixte, 10 addresses, one contact, mixed docs, 1 eval, controles, actes",
+  name: "CADA 3 - Multi finesses, mixte, 10 addresses,mixed docs, 1 eval, controles, actes",
   formData: {
     codeBhasile: "BHA-TST-001",
     type: StructureType.CADA,
@@ -39,13 +34,22 @@ export const cada3: TestStructureScenario = {
     public: "Tout public",
     lgbt: true,
     fvvTeh: true,
-    contactPrincipal: {
-      prenom: "John",
-      nom: "Doe",
-      role: "Directeur·rice",
-      email: "john.doe@example.com",
-      telephone: "+33123456789",
-    },
+    contacts: [
+      {
+        prenom: "John",
+        nom: "Doe",
+        role: "Directeur·rice",
+        email: "john.doe@example.com",
+        telephone: "+33123456789",
+      },
+      {
+        prenom: "Jane",
+        nom: "Deo",
+        role: "Responsable administratif",
+        email: "jane.deo@example.com",
+        telephone: "+33623456789",
+      },
+    ],
     debutPeriodeAutorisation: "2020-01-01",
     finPeriodeAutorisation: "2025-12-31",
     nom: "Structure Test",
@@ -435,7 +439,7 @@ export const cada3: TestStructureScenario = {
     public: "Tout public",
     lgbt: true,
     fvvTeh: true,
-    contactPrincipal: { email: "modif-cada3@example.com" },
+    contacts: [{ email: "modif-cada3@example.com" }],
     notes: "Notes modification CADA 3 - 10 adresses.",
     debutPeriodeAutorisation: "2020-09-01",
     finPeriodeAutorisation: "2026-08-31",

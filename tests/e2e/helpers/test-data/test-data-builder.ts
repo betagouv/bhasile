@@ -23,13 +23,15 @@ export class TestStructureDataBuilder {
       public: "Tout public",
       lgbt: false,
       fvvTeh: false,
-      contactPrincipal: {
-        prenom: "John",
-        nom: "Doe",
-        role: "Directeur·rice",
-        email: "john.doe@example.com",
-        telephone: "+33123456789",
-      },
+      contacts: [
+        {
+          prenom: "John",
+          nom: "Doe",
+          role: "Directeur·rice",
+          email: "john.doe@example.com",
+          telephone: "+33123456789",
+        },
+      ],
       adresseAdministrative: {
         complete: "1 Rue de la Paix 75001 Paris",
         searchTerm: "1 Rue de la Paix 75001 Paris",
@@ -79,32 +81,32 @@ export class TestStructureDataBuilder {
     return this;
   }
 
-  withContactPrincipal(contact: TestStructureData["contactPrincipal"]): this {
-    this.data.contactPrincipal = contact;
+  withContacts(contacts: TestStructureData["contacts"]): this {
+    this.data.contacts = contacts;
     return this;
   }
 
-  withContactPrincipalEmail(email: string): this {
-    if (!this.data.contactPrincipal) {
+  withFirstContactEmail(email: string): this {
+    if (!this.data.contacts) {
       throw new Error(
-        "Cannot set email: contactPrincipal must exist. Use withContactPrincipal() first."
+        "Cannot set email: contacts must exist. Use withContacts() first."
       );
     }
-    this.data.contactPrincipal = {
-      ...this.data.contactPrincipal,
+    this.data.contacts[0] = {
+      ...this.data.contacts[0],
       email,
     };
     return this;
   }
 
-  withContactPrincipalPhone(telephone: string): this {
-    if (!this.data.contactPrincipal) {
+  withFirstContactPhone(telephone: string): this {
+    if (!this.data.contacts) {
       throw new Error(
-        "Cannot set phone: contactPrincipal must exist. Use withContactPrincipal() first."
+        "Cannot set phone: contacts must exist. Use withContacts() first."
       );
     }
-    this.data.contactPrincipal = {
-      ...this.data.contactPrincipal,
+    this.data.contacts[0] = {
+      ...this.data.contacts[0],
       telephone,
     };
     return this;
@@ -232,29 +234,6 @@ export class TestStructureDataBuilder {
   withOperateur(operateur: TestStructureData["operateur"]): this {
     this.data.operateur = operateur;
     return this;
-  }
-
-  /**
-   * Quick invalid value setters
-   */
-  withInvalidEmail(): this {
-    return this.withContactPrincipalEmail("invalid-email");
-  }
-
-  withInvalidDate(): this {
-    return this.withCreationDate("invalid-date");
-  }
-
-  withInvalidPhone(): this {
-    return this.withContactPrincipalPhone("123");
-  }
-
-  withEmptyEmail(): this {
-    return this.withContactPrincipalEmail("");
-  }
-
-  withEmptyPhone(): this {
-    return this.withContactPrincipalPhone("");
   }
 
   /**

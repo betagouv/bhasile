@@ -33,7 +33,7 @@ export const Adresses = (): ReactElement => {
             className="border-b border-default-grey last:border-b-0"
           >
             <td className="py-3 pr-8">
-              {adresse.adresse}, {adresse.codePostal}{" "}
+              {adresse.adresse} {adresse.codePostal}{" "}
               {formatCityName(adresse.commune ?? "")}
             </td>
             <td className="py-3 pr-8">

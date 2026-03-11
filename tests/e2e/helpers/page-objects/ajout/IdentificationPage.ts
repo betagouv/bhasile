@@ -57,22 +57,6 @@ export class IdentificationPage extends BasePage {
       });
     }
 
-    const defaultSecondaryContact = {
-      prenom: "Jane",
-      nom: "Doe",
-      role: "Responsable administratif",
-      email: "jane.doe@example.com",
-      telephone: "+33623456789",
-    };
-    await this.formHelper.fillContact(
-      "contacts.0",
-      data.contactPrincipal ?? {}
-    );
-    await this.formHelper.fillContact(
-      "contacts.1",
-      data.contactSecondaire ?? defaultSecondaryContact
-    );
-
     if (data.debutPeriodeAutorisation) {
       await this.formHelper.fillDate(
         'input[name="debutPeriodeAutorisation"]',
@@ -212,6 +196,10 @@ export class IdentificationPage extends BasePage {
           await this.waitHelper.waitForUIUpdate();
         }
       }
+    }
+
+    for (const [index, contact] of data.contacts?.entries() ?? []) {
+      await this.formHelper.fillContact(index, contact);
     }
   }
 

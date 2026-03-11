@@ -4,7 +4,7 @@ import { StructureType } from "@/types/structure.type";
 import { TestStructureScenario } from "./types";
 
 export const cada1: TestStructureScenario = {
-  name: "CADA 1 - Multi dna, collectif, same address, one contact, all docs, old eval, controls, every actes administratifs",
+  name: "CADA 1 - Multi dna, collectif, same address, all docs, old eval, controls, every actes administratifs",
   formData: {
     codeBhasile: "BHA-TST-001",
     type: StructureType.CADA,
@@ -34,13 +34,22 @@ export const cada1: TestStructureScenario = {
     public: "Tout public",
     lgbt: true,
     fvvTeh: true,
-    contactPrincipal: {
-      prenom: "John",
-      nom: "Doe",
-      role: "Directeur·rice",
-      email: "john.doe@example.com",
-      telephone: "+33123456789",
-    },
+    contacts: [
+      {
+        prenom: "John",
+        nom: "Doe",
+        role: "Directeur·rice",
+        email: "john.doe@example.com",
+        telephone: "+33123456789",
+      },
+      {
+        prenom: "Jane",
+        nom: "Deo",
+        role: "Responsable administratif",
+        email: "jane.deo@example.com",
+        telephone: "+33623456789",
+      },
+    ],
     debutPeriodeAutorisation: "2020-01-01",
     finPeriodeAutorisation: "2025-12-31",
     nom: "Structure Test",
@@ -367,7 +376,7 @@ export const cada1: TestStructureScenario = {
     public: "Famille",
     lgbt: true,
     fvvTeh: false,
-    contactPrincipal: { email: "modif-cada1@example.com" },
+    contacts: [{ email: "modif-cada1@example.com" }],
     notes: "Notes modification CADA 1 - suivi renforcé.",
     debutPeriodeAutorisation: "2020-06-15",
     finPeriodeAutorisation: "2026-06-30",

@@ -3,12 +3,8 @@ import { StructureType } from "@/types/structure.type";
 
 import { TestStructureScenario } from "./types";
 
-/**
- * HUDA 2: Mixte, multiple addresses with repartition, two contacts, all docs at ajout,
- * with controls, full finances, with actes administratifs
- */
 export const huda2: TestStructureScenario = {
-  name: "HUDA 2 - Mixte, multiple addresses with repartition, two contacts, all docs, controls",
+  name: "HUDA 2 - Mixte, multiple addresses with repartition, all docs, controls",
   formData: {
     codeBhasile: "BHA-TST-001",
     type: StructureType.HUDA,
@@ -28,20 +24,22 @@ export const huda2: TestStructureScenario = {
     ],
     lgbt: true,
     fvvTeh: true,
-    contactPrincipal: {
-      prenom: "John",
-      nom: "Doe",
-      role: "Directeur·rice",
-      email: "john.doe@example.com",
-      telephone: "+33123456789",
-    },
-    contactSecondaire: {
-      prenom: "Jane",
-      nom: "Deo",
-      role: "Responsable administratif",
-      email: "jane.deo@example.com",
-      telephone: "+33623456789",
-    },
+    contacts: [
+      {
+        prenom: "John",
+        nom: "Doe",
+        role: "Directeur·rice",
+        email: "john.doe@example.com",
+        telephone: "+33123456789",
+      },
+      {
+        prenom: "Jane",
+        nom: "Deo",
+        role: "Responsable administratif",
+        email: "jane.deo@example.com",
+        telephone: "+33623456789",
+      },
+    ],
     debutConvention: "2020-01-01",
     finConvention: "2023-12-31",
     nom: "Structure Test",
@@ -292,7 +290,7 @@ export const huda2: TestStructureScenario = {
     public: "Tout public",
     lgbt: false,
     fvvTeh: true,
-    contactPrincipal: { email: "modif-huda2@example.com" },
+    contacts: [{ email: "modif-huda2@example.com" }],
     notes: "Notes modification HUDA 2 - mixte.",
     debutConvention: "2020-09-01",
     finConvention: "2024-06-30",

@@ -33,7 +33,7 @@ export class ModificationDescriptionPage extends BasePage {
       fvvTeh: data.fvvTeh,
     });
 
-    await this.updateContactPrincipalEmail(data.contactPrincipal?.email);
+    await this.updateFirstContactEmail(data.contacts?.[0]?.email);
 
     await this.waitHelper.waitForUIUpdate();
   }
@@ -67,7 +67,7 @@ export class ModificationDescriptionPage extends BasePage {
     }
   }
 
-  async updateContactPrincipalEmail(email?: string) {
+  async updateFirstContactEmail(email?: string) {
     if (email) {
       await this.formHelper.fillInput('input[name="contacts.0.email"]', email);
     }

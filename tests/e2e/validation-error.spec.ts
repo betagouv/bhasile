@@ -32,23 +32,23 @@ const invalidTestCases: TestStructureScenario[] = [
     failingStep: "identification",
   },
   {
-    name: "should fail validation at identification page when contactPrincipal is missing",
+    name: "should fail validation at identification page when contacts are missing",
     formData: TestStructureDataBuilder.basedOn(cada1)
-      .withoutField("contactPrincipal")
+      .withoutField("contacts")
       .build(),
     failingStep: "identification",
   },
   {
-    name: "should fail validation at identification page when contactPrincipal email is invalid",
+    name: "should fail validation at identification page when first contact email is invalid",
     formData: TestStructureDataBuilder.basedOn(cada1)
-      .withContactPrincipalEmail("invalid-email-format")
+      .withFirstContactEmail("invalid-email-format")
       .build(),
     failingStep: "identification",
   },
   {
-    name: "should fail validation at identification page when contactPrincipal telephone is invalid",
+    name: "should fail validation at identification page when first contact telephone is invalid",
     formData: TestStructureDataBuilder.basedOn(cada1)
-      .withContactPrincipalPhone("123")
+      .withFirstContactPhone("123")
       .build(),
     failingStep: "identification",
   },
@@ -99,9 +99,13 @@ for (const { name, formData, failingStep } of invalidTestCases) {
     const id = await beforeFlow(formData, page);
 
     try {
-      await completeStructureFlow(page, { ...formData, id }, {
-        failingStep,
-      });
+      await completeStructureFlow(
+        page,
+        { ...formData, id },
+        {
+          failingStep,
+        }
+      );
     } finally {
       if (formData.codeBhasile) {
         await deleteStructure(formData.codeBhasile);

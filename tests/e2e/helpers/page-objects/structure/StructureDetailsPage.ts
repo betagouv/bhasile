@@ -32,7 +32,11 @@ export class StructureDetailsPage extends BasePage {
   }
 
   async openDescriptionEdit() {
-    await this.openBlockEdit("Description");
+    const block = this.getBlockByTitle("Description");
+    await block.getByRole("button", { name: "Modifier" }).click();
+    await block
+      .getByRole("button", { name: "Modifier Général, contacts et codes" })
+      .click();
   }
 
   async openCalendrierEdit() {
@@ -226,17 +230,12 @@ export class StructureDetailsPage extends BasePage {
     overrides: Partial<TestStructureData>
   ) {
     await this.showContacts();
-    const contactPrincipal = {
-      ...data.contactPrincipal,
-      ...overrides.contactPrincipal,
-    };
-    const contactSecondaire = {
-      ...data.contactSecondaire,
-      ...overrides.contactSecondaire,
-    };
-
-    await this.expectContactLine(block, contactPrincipal);
-    await this.expectContactLine(block, contactSecondaire);
+    for (const [index, contact] of (data.contacts ?? []).entries()) {
+      await this.expectContactLine(block, {
+        ...contact,
+        ...overrides.contacts?.[index],
+      });
+    }
   }
 
   private async expectAdressesHebergement(
@@ -267,7 +266,7 @@ export class StructureDetailsPage extends BasePage {
 
   private async expectContactLine(
     block: Locator,
-    contact: TestStructureData["contactPrincipal"]
+    contact: NonNullable<TestStructureData["contacts"]>[number]
   ) {
     if (
       !contact.prenom ||

@@ -4,7 +4,7 @@ import { StructureType } from "@/types/structure.type";
 import { TestStructureScenario } from "./types";
 
 export const cada2: TestStructureScenario = {
-  name: "CADA 2 - Single dna, recent, diffus, multiple addresses, multiple antennes, most documents at finalisation, two contacts, recent eval, no optional actes administratifs",
+  name: "CADA 2 - Single dna, recent, diffus, multiple addresses, multiple antennes, most documents at finalisation, three contacts, recent eval, no optional actes administratifs",
   formData: {
     codeBhasile: "BHA-TST-001",
     type: StructureType.CADA,
@@ -30,20 +30,29 @@ export const cada2: TestStructureScenario = {
     public: "Tout public",
     lgbt: true,
     fvvTeh: true,
-    contactPrincipal: {
-      prenom: "John",
-      nom: "Doe",
-      role: "Directeur·rice",
-      email: "john.doe@example.com",
-      telephone: "+33123456789",
-    },
-    contactSecondaire: {
-      prenom: "Jane",
-      nom: "Deo",
-      role: "Responsable administratif",
-      email: "jane.deo@example.com",
-      telephone: "+33623456789",
-    },
+    contacts: [
+      {
+        prenom: "John",
+        nom: "Doe",
+        role: "Directeur·rice",
+        email: "john.doe@example.com",
+        telephone: "+33123456789",
+      },
+      {
+        prenom: "Jane",
+        nom: "Deo",
+        role: "Responsable administratif",
+        email: "jane.deo@example.com",
+        telephone: "+33623456789",
+      },
+      {
+        prenom: "Jean",
+        nom: "Michel",
+        role: "Responsable financier",
+        email: "jean.michel@example.com",
+        telephone: "+33923456789",
+      },
+    ],
     debutPeriodeAutorisation: "2020-01-01",
     finPeriodeAutorisation: "2025-12-31",
     nom: "Structure Test",
@@ -148,7 +157,7 @@ export const cada2: TestStructureScenario = {
     public: "Personnes isolées",
     lgbt: false,
     fvvTeh: true,
-    contactPrincipal: { email: "modif-cada2@example.com" },
+    contacts: [{ email: "modif-cada2@example.com" }],
     notes: "Notes modification CADA 2 - évolution structure.",
     debutPeriodeAutorisation: "2025-03-01",
     finPeriodeAutorisation: "2026-03-31",

@@ -26,20 +26,14 @@ export type TestStructureData = {
   public: string;
   lgbt: boolean;
   fvvTeh: boolean;
-  contactPrincipal: {
+  contacts?: Array<{
     prenom?: string;
     nom?: string;
     role?: string;
+    perimetre?: string;
     email?: string;
     telephone?: string;
-  };
-  contactSecondaire?: {
-    prenom?: string;
-    nom?: string;
-    role?: string;
-    email?: string;
-    telephone?: string;
-  };
+  }>;
   debutPeriodeAutorisation?: string;
   finPeriodeAutorisation?: string;
   debutConvention?: string;
