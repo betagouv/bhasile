@@ -56,6 +56,10 @@ export default function ModificationQualiteForm() {
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("structure-save");
 
+  const key = structure?.actesAdministratifs
+    ?.map((acteAdministratif) => acteAdministratif.id ?? acteAdministratif.uuid)
+    ?.join(",");
+
   return (
     <>
       <ModificationTitle
@@ -70,6 +74,7 @@ export default function ModificationQualiteForm() {
         availableFooterButtons={[FooterButtonType.SUBMIT]}
         defaultValues={defaultValues}
         className="border-2 border-solid border-(--text-title-blue-france)"
+        key={key}
       >
         <ActesAdministratifs />
         {saveState === FetchState.ERROR && (

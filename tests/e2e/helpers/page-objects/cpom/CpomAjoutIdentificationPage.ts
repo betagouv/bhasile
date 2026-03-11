@@ -136,10 +136,10 @@ export class CpomAjoutIdentificationPage extends BasePage {
     const avenant = data.avenants[0];
     if (avenant) {
       await this.page
-        .getByRole("link", { name: "+ Ajouter un avenant" })
+        .getByRole("button", { name: "+ Ajouter un avenant" })
         .waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION });
       await this.page
-        .getByRole("link", { name: "+ Ajouter un avenant" })
+        .getByRole("button", { name: "+ Ajouter un avenant" })
         .click();
 
       await this.waitHelper.waitForUIUpdate(2);

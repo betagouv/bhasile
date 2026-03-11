@@ -62,7 +62,7 @@ export const SELECTORS = {
     `input[name="actesAdministratifs.${index}.endDate"]`,
   CPOM_ACTE_DATE: (index: number) =>
     `input[name="actesAdministratifs.${index}.date"]`,
-  CPOM_ADD_AVENANT_LINK: 'a:has-text("+ Ajouter un avenant")',
+  CPOM_ADD_AVENANT_BUTTON: 'button:has-text("+ Ajouter un avenant")',
   /** Checkbox inputs in the INTERDEPARTEMENTALE departements panel */
   CPOM_DEPARTEMENT_CHECKBOX: (numero: string) =>
     `input[name="structure-departement"][value="${numero}"]`,

@@ -52,10 +52,7 @@ export default function FinalisationQualite() {
 
   const onAutoSave = async (data: ActesAdministratifsAutoSaveFormValues) => {
     const actesAdministratifs = data.actesAdministratifs?.filter(
-      (acteAdministratif) =>
-        acteAdministratif.fileUploads?.length &&
-        acteAdministratif.category &&
-        acteAdministratif.fileUploads[0].key
+      (acteAdministratif) => acteAdministratif.category
     ) as ActeAdministratifApiType[];
 
     await handleAutoSave({
@@ -67,8 +64,12 @@ export default function FinalisationQualite() {
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("structure-save");
 
+  const key = structure?.actesAdministratifs
+    ?.map((acteAdministratif) => acteAdministratif.id ?? acteAdministratif.uuid)
+    ?.join(",");
+
   return (
-    <div>
+    <>
       <Tabs currentStep={currentStep} />
       <FormWrapper
         schema={schema}
@@ -78,6 +79,7 @@ export default function FinalisationQualite() {
         defaultValues={defaultValues}
         className="rounded-t-none"
         showAutoSaveMention
+        key={key}
       >
         <AutoSave
           schema={actesAdministratifsAutoSaveSchema}
@@ -104,6 +106,6 @@ export default function FinalisationQualite() {
           />
         )}
       </FormWrapper>
-    </div>
+    </>
   );
 }
