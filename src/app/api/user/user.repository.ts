@@ -1,4 +1,4 @@
-import { UserRole } from "@/generated/prisma/client";
+import { Role } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 
 export const upsertUser = async ({
@@ -14,10 +14,10 @@ export const upsertUser = async ({
       nom,
       email,
       lastConnection: new Date(),
-      role,
+      role: { connect: { id: role.id } },
     },
     update: {
-      role,
+      role: { connect: { id: role.id } },
       lastConnection: new Date(),
     },
   });
@@ -27,5 +27,5 @@ type UpsertUserArgs = {
   prenom: string;
   nom: string;
   email: string;
-  role: UserRole;
+  role: Role;
 };

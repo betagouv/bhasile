@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 
+import { canUpdateStructure } from "@/lib/casl/abilities";
+import { authOptions } from "@/lib/next-auth/auth";
 import {
   structureAgentUpdateApiSchema,
   structureOperateurUpdateApiSchema,
@@ -10,6 +13,7 @@ import { createStructureEvent } from "../user-action/user-action.service";
 import {
   countBySearch,
   findBySearch,
+  findOne,
   updateOneAgent,
   updateOneOperateur,
 } from "./structure.repository";
@@ -74,8 +78,26 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+    }
+
     const body = await request.json();
     const result = structureAgentUpdateApiSchema.parse(body);
+
+    // TODO : renvoyer l'id depuis le front
+    const existingStructure = await findOne(result.id);
+
+    console.log(">>>>>>>><", session.user);
+
+    if (!canUpdateStructure(session.user, existingStructure)) {
+      return NextResponse.json(
+        { error: "Droits insuffisants" },
+        { status: 403 } // 403 est plus approprié que 401 ici
+      );
+    }
+
     const updatedStructure = await updateOneAgent(result);
     createStructureEvent(request.method, updatedStructure.id);
     return NextResponse.json("Structure mise à jour avec succès", {
