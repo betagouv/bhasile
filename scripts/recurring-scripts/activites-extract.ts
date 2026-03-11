@@ -1,3 +1,7 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+// To be deleted in other PR
+
 import "dotenv/config";
 
 import xlsx from "node-xlsx";
