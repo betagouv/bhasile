@@ -1,37 +1,33 @@
-// Remplir la table AllowedUsers avec les patterns d'email autorisés pour l'authentification
-// Usage: yarn script fill-allowed-users
+// Remplir la table Roles avec les patterns d'email autorisés pour l'authentification et les groupes de permissions
+// Usage: yarn script fill-roles
 
 import "dotenv/config";
 
 import { loadCsvFromS3 } from "scripts/utils/csv-loader";
 
-import { AllowedUserGranularity, Departement } from "@/generated/prisma/client";
+import { Departement, RoleGroup } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
 
-type AllowedUserCsvRow = {
+type RoleCsvRow = {
   emailPattern: string;
-  granularity: string;
+  group: string;
   department: string;
 };
 
 const prisma = createPrismaClient();
 
-const fetchAllowedUsers = async (): Promise<AllowedUserCsvRow[]> => {
-  const allowedUsers = await loadCsvFromS3<AllowedUserCsvRow>(
-    process.env.DOCS_BUCKET_NAME!,
-    "allowed-users.csv"
-  );
-  return allowedUsers;
+const fetchRoles = async (): Promise<RoleCsvRow[]> => {
+  return loadCsvFromS3<RoleCsvRow>(process.env.DOCS_BUCKET_NAME!, "roles.csv");
 };
 
 const getTargetDepartementIds = (
-  row: AllowedUserCsvRow,
+  row: RoleCsvRow,
   allDepartements: Departement[]
 ): number[] => {
-  if (row.granularity === AllowedUserGranularity.NATIONAL) {
+  if (row.group === RoleGroup.NATIONAL) {
     return allDepartements.map((departement) => departement.id);
   }
-  if (row.granularity === AllowedUserGranularity.REGION) {
+  if (row.group === RoleGroup.REGION) {
     const referenceDepartement = allDepartements.find(
       (departement) => departement.numero === row.department
     );
@@ -44,7 +40,7 @@ const getTargetDepartementIds = (
       )
       .map((departement) => departement.id);
   }
-  if (row.granularity === AllowedUserGranularity.DEPARTEMENT) {
+  if (row.group === RoleGroup.DEPARTEMENT) {
     const departement = allDepartements.find(
       (departement) => departement.numero === row.department
     );
@@ -53,19 +49,16 @@ const getTargetDepartementIds = (
   return [];
 };
 
-const createAllowedUsers = async (
-  row: AllowedUserCsvRow,
-  departementIds: number[]
-) => {
+const createRoles = async (row: RoleCsvRow, departementIds: number[]) => {
   const data = {
     emailPattern: row.emailPattern,
-    granularity: row.granularity as AllowedUserGranularity,
+    granularity: row.group as RoleGroup,
   };
 
-  await prisma.allowedUser.create({
+  await prisma.role.create({
     data: {
       ...data,
-      departementAllowedUsers: {
+      roleDepartements: {
         create: departementIds.map((id) => ({ departementId: id })),
       },
     },
@@ -74,24 +67,22 @@ const createAllowedUsers = async (
 
 const run = async () => {
   try {
-    console.log("🧑 Création des utilisateurs autorisés");
+    console.log("🧑 Création des roles");
     const [csvRows, allDepartements] = await Promise.all([
-      fetchAllowedUsers(),
+      fetchRoles(),
       prisma.departement.findMany(),
     ]);
 
-    await prisma.allowedUser.deleteMany({});
+    await prisma.role.deleteMany({});
+    await prisma.role.deleteMany({});
 
     for (const row of csvRows) {
       const targetIds = getTargetDepartementIds(row, allDepartements);
-      await createAllowedUsers(row, targetIds);
-      console.log(`Ajout de ${row.emailPattern} (${row.granularity})`);
+      await createRoles(row, targetIds);
+      console.log(`Ajout de ${row.emailPattern} (${row.group})`);
     }
   } catch (error) {
-    console.error(
-      "❌ Erreur lors de la création des utilisateurs autorisés :",
-      error
-    );
+    console.error("❌ Erreur lors de la création des roles :", error);
     throw error;
   } finally {
     await prisma.$disconnect();
