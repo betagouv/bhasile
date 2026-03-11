@@ -18,7 +18,7 @@ const finalisationModal = createModal({
 
 const COLUMNS: ListColumn[] = [
   {
-    label: "Code Bhasile",
+    label: "Code",
     column: "codeBhasile",
     orderBy: true,
     centered: false,

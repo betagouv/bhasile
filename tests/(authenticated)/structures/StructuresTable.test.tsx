@@ -53,7 +53,7 @@ describe("StructuresTable", () => {
     // THEN
     const rows = screen.getAllByRole("rowgroup");
     const columnHeaders = within(rows[0]).getAllByRole("columnheader");
-    expect(columnHeaders[0]).toHaveAccessibleName("Code Bhasile");
+    expect(columnHeaders[0]).toHaveAccessibleName("Code");
     expect(columnHeaders[1]).toHaveAccessibleName("Type");
     expect(columnHeaders[2]).toHaveAccessibleName("Opérateur");
     expect(columnHeaders[3]).toHaveAccessibleName("Dépt.");

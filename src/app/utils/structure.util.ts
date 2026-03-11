@@ -46,6 +46,66 @@ export const getPlacesByCommunes = (
   return sortKeysByValue(placesByCommune);
 };
 
+export function getCommunesGroupedByDepartement(structure: {
+  communeAdministrative?: string | null;
+  departementAdministratif?: string | null;
+  adresses?: { commune?: string | null; codePostal?: string | null }[];
+}): { departement: string; communes: string[] }[] {
+  const getDepartementFromCodePostal = (codePostal: string) =>
+    (codePostal?.trim().match(/^(97|98)\d/)
+      ? (codePostal?.trim().slice(0, 3) ?? "")
+      : (codePostal?.trim().slice(0, 2) ?? "")) || "";
+  const communesByDepartement = new Map<string, string[]>();
+
+  const {
+    communeAdministrative,
+    departementAdministratif,
+    adresses = [],
+  } = structure;
+  if (departementAdministratif && communeAdministrative?.trim()) {
+    communesByDepartement.set(departementAdministratif, [
+      communeAdministrative.trim(),
+    ]);
+  }
+  for (const adresse of adresses) {
+    const departement = getDepartementFromCodePostal(adresse.codePostal ?? "");
+    const commune = adresse.commune?.trim();
+    if (!departement || !commune) {
+      continue;
+    }
+    const communesList = communesByDepartement.get(departement) ?? [];
+    if (!communesList.includes(commune)) {
+      communesList.push(commune);
+    }
+    communesByDepartement.set(departement, communesList);
+  }
+  if (
+    departementAdministratif &&
+    communesByDepartement.has(departementAdministratif)
+  ) {
+    const communesList = communesByDepartement.get(departementAdministratif)!;
+    const administrativeCommune = communeAdministrative?.trim();
+    if (administrativeCommune && communesList[0] !== administrativeCommune) {
+      communesByDepartement.set(departementAdministratif, [
+        administrativeCommune,
+        ...communesList.filter((commune) => commune !== administrativeCommune),
+      ]);
+    }
+  }
+  const administrativeDepartement = departementAdministratif ?? "";
+  const otherDepartements = [...communesByDepartement.keys()]
+    .filter((departement) => departement !== administrativeDepartement)
+    .sort();
+  return (
+    administrativeDepartement
+      ? [administrativeDepartement, ...otherDepartements]
+      : otherDepartements
+  ).map((departement) => ({
+    departement,
+    communes: communesByDepartement.get(departement)!,
+  }));
+}
+
 export const getRepartition = (
   structure: StructureAgentUpdateApiType | StructureApiType
 ): Repartition => {
