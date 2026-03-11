@@ -7,6 +7,7 @@ import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
 import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSetHebergement";
+import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTypeBati";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { useStructures } from "@/app/hooks/useStructures";
 import { transformFormAdressesToApiAdresses } from "@/app/utils/adresse.util";
@@ -25,7 +26,6 @@ import { Repartition } from "@/types/adresse.type";
 import { FormKind } from "@/types/global";
 
 import { AdressesRecoveryModal } from "./AdressesRecoveryModal";
-import { AdressesRecoveryTypeBati } from "./AdressesRecoveryTypeBati";
 
 export const AdressesRecovery = ({ id }: { id: number }) => {
   const [state, setState] = useState<"idle" | "error">("idle");
@@ -123,7 +123,7 @@ export const AdressesRecovery = ({ id }: { id: number }) => {
         submitButtonText="Valider"
         availableFooterButtons={[FooterButtonType.SUBMIT]}
       >
-        <AdressesRecoveryTypeBati />
+        <FieldSetTypeBati />
         <FieldSetHebergement formKind={FormKind.ADRESSES_RECOVERY} />
       </FormWrapper>
       {state === "error" && (

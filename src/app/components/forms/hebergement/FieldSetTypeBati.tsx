@@ -3,17 +3,14 @@ import { useFormContext } from "react-hook-form";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { Repartition } from "@/types/adresse.type";
 
-export const AdressesRecoveryTypeBati = () => {
+export const FieldSetTypeBati = () => {
   const { control } = useFormContext();
   return (
     <fieldset className="flex flex-col gap-6">
-      <legend className="text-xl font-bold mb-4 text-title-blue-france">
-        Type de bâti
-      </legend>
       <SelectWithValidation
         name="typeBati"
         control={control}
-        label=""
+        label="Type de bâti"
         id="typeBati"
         className="max-w-xs"
       >

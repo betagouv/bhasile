@@ -4,50 +4,57 @@ import Link from "next/link";
 import { AdressImporter } from "@/app/components/forms/hebergement/AdressImporter";
 import { MODELE_DIFFUS_LINK, MODELE_MIXTE_LINK } from "@/constants";
 import { Repartition } from "@/types/adresse.type";
+import { FormKind } from "@/types/global";
 
-export const Notices = ({ typeBati, hebergementsContainerRef }: Props) => {
+export const Notices = ({
+  typeBati,
+  hebergementsContainerRef,
+  formKind,
+}: Props) => {
   return (
     <>
-      <div className="flex flex-col gap-2" ref={hebergementsContainerRef}>
-        {typeBati === Repartition.COLLECTIF ? (
-          <p className="mb-6">
-            Veuillez renseigner l’ensemble des adresses d’hébergement de la
-            structure.
-          </p>
-        ) : (
-          <>
-            <p className="mb-1">
+      {formKind !== FormKind.MODIFICATION && (
+        <div className="flex flex-col gap-2" ref={hebergementsContainerRef}>
+          {typeBati === Repartition.COLLECTIF ? (
+            <p className="mb-6">
               Veuillez renseigner l’ensemble des adresses d’hébergement de la
-              structure. <br />
-              Vous pouvez le faire directement en remplissant les champs
-              ci-dessous ou vous pouvez compléter{" "}
-              <Link
-                href={
-                  typeBati === Repartition.DIFFUS
-                    ? MODELE_DIFFUS_LINK
-                    : MODELE_MIXTE_LINK
-                }
-                className="underline text-title-blue-france"
-              >
-                notre modèle à télécharger
-              </Link>{" "}
-              depuis un logiciel tableur, l’importer puis vérifier le
-              remplissage automatique des champs qui s’opérera.
+              structure.
             </p>
-            <div className="flex flex-col gap-2">
-              <p className="text-action-high-blue-france font-bold mb-0">
-                Liste des hébergements (d’après notre modèle à télécharger
-                uniquement)
+          ) : (
+            <>
+              <p className="mb-1">
+                Veuillez renseigner l’ensemble des adresses d’hébergement de la
+                structure. <br />
+                Vous pouvez le faire directement en remplissant les champs
+                ci-dessous ou vous pouvez compléter{" "}
+                <Link
+                  href={
+                    typeBati === Repartition.DIFFUS
+                      ? MODELE_DIFFUS_LINK
+                      : MODELE_MIXTE_LINK
+                  }
+                  className="underline text-title-blue-france"
+                >
+                  notre modèle à télécharger
+                </Link>{" "}
+                depuis un logiciel tableur, l’importer puis vérifier le
+                remplissage automatique des champs qui s’opérera.
               </p>
-              <p className="text-disabled-grey mb-0 text-xs col-span-3">
-                Taille maximale par fichier : 10 Mo. Formats supportés : xls,
-                xlsx, et csv.
-              </p>
-              <AdressImporter typeBati={typeBati} />
-            </div>
-          </>
-        )}
-      </div>
+              <div className="flex flex-col gap-2">
+                <p className="text-action-high-blue-france font-bold mb-0">
+                  Liste des hébergements (d’après notre modèle à télécharger
+                  uniquement)
+                </p>
+                <p className="text-disabled-grey mb-0 text-xs col-span-3">
+                  Taille maximale par fichier : 10 Mo. Formats supportés : xls,
+                  xlsx, et csv.
+                </p>
+                <AdressImporter typeBati={typeBati} />
+              </div>
+            </>
+          )}
+        </div>
+      )}
       <Notice
         severity="info"
         title="Pour le champ “places”,"
@@ -82,4 +89,5 @@ export const Notices = ({ typeBati, hebergementsContainerRef }: Props) => {
 type Props = {
   typeBati: Repartition;
   hebergementsContainerRef: React.RefObject<null>;
+  formKind?: FormKind;
 };
