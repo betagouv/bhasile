@@ -73,6 +73,13 @@ export const ActeAdministratif = ({
     e.preventDefault();
     e.stopPropagation();
 
+    if (!fileKey) {
+      alert(
+        "Impossible d'ajouter un avenant sans document principal. Si vous ne retrouvez pas le document original, merci de joindre un court document résumant en une ligne pourquoi il est indisponible."
+      );
+      return;
+    }
+
     append({
       uuid: uuidv4(),
       category: acte.category,
@@ -174,7 +181,6 @@ export const ActeAdministratif = ({
             <Button
               type="button"
               priority="tertiary no outline"
-              disabled={!fileKey}
               className="text-action-high-blue-france underline underline-offset-4"
               onClick={handleAddNewAvenant}
             >
