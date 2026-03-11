@@ -1,9 +1,11 @@
+import Button from "@codegouvfr/react-dsfr/Button";
 import { PropsWithChildren, ReactElement } from "react";
 
 export const Block = ({
   title,
   iconClass,
   onEdit,
+  multipleEdit,
   children,
 }: Props): ReactElement => {
   return (
@@ -14,10 +16,27 @@ export const Block = ({
           <h3 className="text-title-blue-france fr-h6 mb-12">{title}</h3>
         </div>
         {onEdit && (
-          <button className="fr-btn fr-btn--tertiary" onClick={onEdit}>
-            <span className="fr-icon-edit-line fr-icon--sm pr-2" />
+          <Button
+            priority="tertiary"
+            iconId="fr-icon-edit-line"
+            onClick={onEdit}
+          >
             Modifier
-          </button>
+          </Button>
+        )}
+        {multipleEdit && (
+          <div className="flex">
+            {multipleEdit.map((edit) => (
+              <Button
+                key={edit.label.toString()}
+                priority="tertiary"
+                iconId="fr-icon-edit-line"
+                onClick={edit.onClick}
+              >
+                {edit.label}
+              </Button>
+            ))}
+          </div>
         )}
       </div>
       {children}
@@ -29,4 +48,8 @@ type Props = PropsWithChildren<{
   title: string;
   iconClass: string;
   onEdit?: () => void;
+  multipleEdit?: {
+    label: ReactElement;
+    onClick: () => void;
+  }[];
 }>;

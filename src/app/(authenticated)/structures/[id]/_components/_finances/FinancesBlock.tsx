@@ -41,7 +41,7 @@ export const FinancesBlock = (): ReactElement => {
       title="Finances"
       iconClass="fr-icon-money-euro-box-line"
       onEdit={() => {
-        router.push(`/structures/${structure.id}/modification/04-finance`);
+        router.push(`/structures/${structure.id}/modification/finances`);
       }}
     >
       <h4 className="text-title-blue-france text-lg">

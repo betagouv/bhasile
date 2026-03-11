@@ -15,7 +15,7 @@ export const NotesBlock = (): ReactElement => {
       iconClass="fr-icon-message-2-line"
       title="Notes"
       onEdit={() => {
-        router.push(`/structures/${structure.id}/modification/07-notes`);
+        router.push(`/structures/${structure.id}/modification/notes`);
       }}
     >
       <span className="whitespace-pre-wrap">

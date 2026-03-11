@@ -34,7 +34,7 @@ export const TypePlaceBlock = (): ReactElement => {
       title="Type de places"
       iconClass="fr-icon-map-pin-2-line"
       onEdit={() => {
-        router.push(`/structures/${structure.id}/modification/03-type-places`);
+        router.push(`/structures/${structure.id}/modification/type-places`);
       }}
     >
       <div className="flex">

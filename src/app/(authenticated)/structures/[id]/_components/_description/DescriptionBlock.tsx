@@ -42,9 +42,29 @@ export const DescriptionBlock = (): ReactElement => {
     <Block
       title="Description"
       iconClass="fr-icon-align-left"
-      onEdit={() => {
-        router.push(`/structures/${structure.id}/modification/01-description`);
-      }}
+      multipleEdit={[
+        {
+          label: (
+            <span>
+              Modifier{" "}
+              <span className="italic">Général, contacts et codes</span>
+            </span>
+          ),
+          onClick: () => {
+            router.push(`/structures/${structure.id}/modification/description`);
+          },
+        },
+        {
+          label: (
+            <span>
+              Modifier <span className="italic">Adresses d’hébergement</span>
+            </span>
+          ),
+          onClick: () => {
+            router.push(`/structures/${structure.id}/modification/adresses`);
+          },
+        },
+      ]}
     >
       <Tabs
         selectedTabId={selectedTabId}
