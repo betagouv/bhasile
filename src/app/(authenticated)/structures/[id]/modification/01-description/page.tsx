@@ -6,14 +6,13 @@ import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_cont
 import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
 import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
+import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSetHebergement";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
-import { transformFormAdressesToApiAdresses } from "@/app/utils/adresse.util";
 import { transformAgentFormContactsToApiContacts } from "@/app/utils/contacts.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
@@ -42,7 +41,6 @@ export default function ModificationDescription() {
     handleSubmit({
       ...data,
       id: structure.id,
-      adresses: transformFormAdressesToApiAdresses(data.adresses),
       contacts: transformAgentFormContactsToApiContacts(data.contacts),
     });
   };
@@ -72,19 +70,11 @@ export default function ModificationDescription() {
         />
         <FieldSetDescription formKind={FormKind.MODIFICATION} />
         <hr />
+        <AdresseAdministrativeAndAntennes />
+        <hr />
+        <DnaAndFiness formKind={FormKind.MODIFICATION} />
+        <hr />
         <FieldSetContacts />
-        <hr />
-        <h2 className="text-xl font-bold mb-0 text-title-blue-france">
-          Adresses
-        </h2>
-        <Notice
-          severity="info"
-          title=""
-          description="L'ensemble des adresses sont des données sensibles qui sont protégées selon les normes du gouvernement. Elles ne seront communiquées qu'aux agents et agentes de DDETS."
-        />
-        <AdresseAdministrativeAndAntennes formKind={FormKind.MODIFICATION} />
-        <hr />
-        <FieldSetHebergement />
       </FormWrapper>
       {saveState === FetchState.ERROR && (
         <SubmitError

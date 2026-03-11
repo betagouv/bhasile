@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { DnaStructureFormValues } from "@/schemas/forms/base/dna.schema";
+import { FormKind } from "@/types/global";
 
 import InputWithValidation from "../InputWithValidation";
 
@@ -13,7 +14,7 @@ const emptyDnaStructure: DnaStructureFormValues = {
   },
 };
 
-export const FieldSetDna = () => {
+export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
   const { control, watch, setValue } = useFormContext();
 
   const dnaStructures = (watch("dnaStructures") || [
@@ -53,6 +54,7 @@ export const FieldSetDna = () => {
                 control={control}
                 type="text"
                 label="Code"
+                disabled={formKind === FormKind.MODIFICATION}
               />
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
@@ -65,7 +67,7 @@ export const FieldSetDna = () => {
               />
             </div>
           </div>
-          {index >= 1 && (
+          {index >= 1 && formKind !== FormKind.MODIFICATION && (
             <Button
               iconId="fr-icon-delete-bin-line"
               priority="tertiary no outline"
@@ -77,7 +79,7 @@ export const FieldSetDna = () => {
           )}
         </div>
       ))}
-      {isMultiDna && (
+      {isMultiDna && formKind !== FormKind.MODIFICATION && (
         <Button
           type="button"
           iconId="fr-icon-add-line"
@@ -90,4 +92,8 @@ export const FieldSetDna = () => {
       )}
     </fieldset>
   );
+};
+
+type Props = {
+  formKind?: FormKind;
 };

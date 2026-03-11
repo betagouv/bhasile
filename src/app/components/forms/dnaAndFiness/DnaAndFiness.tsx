@@ -2,12 +2,13 @@ import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { useFormContext } from "react-hook-form";
 
 import { isStructureAutorisee } from "@/app/utils/structure.util";
+import { FormKind } from "@/types/global";
 
 import InputWithValidation from "../InputWithValidation";
 import { FieldSetDna } from "./FieldSetDna";
 import { FieldSetFiness } from "./FieldSetFiness";
 
-export const DnaAndFiness = () => {
+export const DnaAndFiness = ({ formKind = FormKind.FINALISATION }: Props) => {
   const { watch, control, setValue } = useFormContext();
 
   const isMultiDna = watch("isMultiDna");
@@ -34,7 +35,7 @@ export const DnaAndFiness = () => {
       />
       {isMultiDna ? (
         <>
-          <FieldSetDna />
+          <FieldSetDna formKind={formKind} />
           {isAutorisee && <FieldSetFiness />}
         </>
       ) : (
@@ -45,6 +46,7 @@ export const DnaAndFiness = () => {
             control={control}
             type="text"
             label="Code DNA"
+            disabled={formKind === FormKind.MODIFICATION}
           />
           {isAutorisee && (
             <InputWithValidation
@@ -59,4 +61,8 @@ export const DnaAndFiness = () => {
       )}
     </>
   );
+};
+
+type Props = {
+  formKind?: FormKind;
 };

@@ -21,7 +21,6 @@ import {
   AjoutIdentificationFormValues,
   ajoutIdentificationSchema,
 } from "@/schemas/forms/ajout/ajoutIdentification.schema";
-import { FormKind } from "@/types/global";
 import { PublicType, StructureType } from "@/types/structure.type";
 
 export default function FormIdentification() {
@@ -216,7 +215,7 @@ export default function FormIdentification() {
 
             <hr />
 
-            <AdresseAdministrativeAndAntennes formKind={FormKind.AJOUT} />
+            <AdresseAdministrativeAndAntennes />
 
             <hr />
 

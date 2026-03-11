@@ -32,7 +32,7 @@ import { Tabs } from "../_components/Tabs";
 
 export default function FinalisationIdentification(): ReactElement {
   const { structure } = useStructureContext();
-
+  console.log("structure", structure);
   const currentStep = "01-identification";
 
   const currentFormStepStatus = getFinalisationFormStepStatus(
@@ -87,7 +87,7 @@ export default function FinalisationIdentification(): ReactElement {
         <FieldSetDescription />
         <hr />
 
-        <AdresseAdministrativeAndAntennes formKind={FormKind.FINALISATION} />
+        <AdresseAdministrativeAndAntennes />
         <hr />
 
         <DnaAndFiness />

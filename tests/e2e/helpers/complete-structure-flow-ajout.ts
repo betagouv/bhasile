@@ -44,10 +44,7 @@ export async function completeAjoutFlow(
   const identificationPage = new IdentificationPage(page);
   await identificationPage.fillForm(formData as TestStructureData);
   const shouldFailAtIdentification = failingStep === "identification";
-  await identificationPage.submit(
-    structureId,
-    shouldFailAtIdentification
-  );
+  await identificationPage.submit(structureId, shouldFailAtIdentification);
   if (shouldFailAtIdentification) {
     return { stoppedAtFailingStep: true };
   }
