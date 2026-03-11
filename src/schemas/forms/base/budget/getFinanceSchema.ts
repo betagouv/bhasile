@@ -76,7 +76,7 @@ export const getFinanceSchema = (
         if (year === CURRENT_YEAR) {
           return budgetAutoSaveSchema;
         }
-        if (year === AUTORISEE_OPEN_YEAR) {
+        if (year === SUBVENTIONNEE_OPEN_YEAR) {
           return budgetSubventionneeOpenYear1Schema;
         }
         if (year < SUBVENTIONNEE_OPEN_YEAR) {
