@@ -7,8 +7,8 @@ import FormWrapper from "@/app/components/forms/FormWrapper";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { CURRENT_YEAR } from "@/constants";
-import { ajoutAdressesSchema } from "@/schemas/forms/ajout/ajoutAdresses.schema";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
+import { typeBatiAndAdressesSchema } from "@/schemas/forms/base/adresse.schema";
 import { Repartition } from "@/types/adresse.type";
 
 import { AdressesList } from "../../[id]/02-adresses/AdressesList";
@@ -79,7 +79,7 @@ export default function FormAdresses() {
 
   return (
     <FormWrapper
-      schema={ajoutAdressesSchema}
+      schema={typeBatiAndAdressesSchema}
       localStorageKey={`ajout-structure-${params.id}-adresses`}
       nextRoute={nextRoute}
       resetRoute={resetRoute}

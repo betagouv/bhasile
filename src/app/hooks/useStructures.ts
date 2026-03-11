@@ -8,9 +8,9 @@ import {
 import { transformAgentFormContactsToApiContacts } from "@/app/utils/contacts.util";
 import { formatDateToIsoString } from "@/app/utils/date.util";
 import { StructureApiType } from "@/schemas/api/structure.schema";
-import { AjoutAdressesFormValues } from "@/schemas/forms/ajout/ajoutAdresses.schema";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { AjoutTypePlacesFormValues } from "@/schemas/forms/ajout/ajoutTypePlaces.schema";
+import { TypeBatiAndAdressesFormValues } from "@/schemas/forms/base/adresse.schema";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { DeepPartial } from "@/types/global";
 
@@ -151,7 +151,7 @@ const transformAjoutFormStructureToApiStructure = async (
 
 export type AjoutFormValues = Partial<
   AjoutIdentificationFormValues &
-    AjoutAdressesFormValues &
+    TypeBatiAndAdressesFormValues &
     AjoutTypePlacesFormValues &
     DocumentsFinanciersFlexibleFormValues
 >;

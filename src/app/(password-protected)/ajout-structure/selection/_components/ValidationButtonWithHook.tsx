@@ -6,8 +6,8 @@ import { useFormContext } from "react-hook-form";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
-import { AjoutAdressesFormValues } from "@/schemas/forms/ajout/ajoutAdresses.schema";
 import { AjoutTypePlacesFormValues } from "@/schemas/forms/ajout/ajoutTypePlaces.schema";
+import { TypeBatiAndAdressesFormValues } from "@/schemas/forms/base/adresse.schema";
 import {
   FormAdresse,
   FormAdresseTypologie,
@@ -33,7 +33,7 @@ export const ValidationButtonWithHook = (): ReactElement => {
     currentValue: localAdressesValue,
   } = useLocalStorage(
     `ajout-structure-${structure?.id}-adresses`,
-    {} as Partial<AjoutAdressesFormValues>
+    {} as Partial<TypeBatiAndAdressesFormValues>
   );
 
   const {

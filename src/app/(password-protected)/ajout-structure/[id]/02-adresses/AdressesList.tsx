@@ -22,16 +22,16 @@ import {
   MODELE_DIFFUS_LINK,
   MODELE_MIXTE_LINK,
 } from "@/constants";
-import { AjoutAdressesFormValues } from "@/schemas/forms/ajout/ajoutAdresses.schema";
+import { TypeBatiAndAdressesFormValues } from "@/schemas/forms/base/adresse.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { AdresseAdministrativeFormValues } from "@/schemas/forms/base/adresseAdministrative.schema";
 import { Repartition } from "@/types/adresse.type";
 
 interface AdressesListProps {
-  watch: UseFormWatch<AjoutAdressesFormValues>;
-  control: Control<AjoutAdressesFormValues>;
-  setValue: UseFormSetValue<AjoutAdressesFormValues>;
-  getValues: UseFormGetValues<AjoutAdressesFormValues>;
+  watch: UseFormWatch<TypeBatiAndAdressesFormValues>;
+  control: Control<TypeBatiAndAdressesFormValues>;
+  setValue: UseFormSetValue<TypeBatiAndAdressesFormValues>;
+  getValues: UseFormGetValues<TypeBatiAndAdressesFormValues>;
   adminAddress: Partial<AdresseAdministrativeFormValues>;
 }
 

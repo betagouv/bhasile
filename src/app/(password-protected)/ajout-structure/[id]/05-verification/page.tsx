@@ -11,9 +11,9 @@ import { useRedirectStructureCreation } from "@/app/hooks/useRedirectStructureCr
 import { useStructures } from "@/app/hooks/useStructures";
 import { getErrorEmail } from "@/app/utils/errorMail.util";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
-import { AjoutAdressesFormValues } from "@/schemas/forms/ajout/ajoutAdresses.schema";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { AjoutTypePlacesFormValues } from "@/schemas/forms/ajout/ajoutTypePlaces.schema";
+import { TypeBatiAndAdressesFormValues } from "@/schemas/forms/base/adresse.schema";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 
 import { Adresses } from "./components/Adresses";
@@ -37,7 +37,7 @@ export default function StepVerification() {
   >(`ajout-structure-${params.id}-identification`, {});
 
   const { currentValue: adressesValues } = useLocalStorage<
-    Partial<AjoutAdressesFormValues>
+    Partial<TypeBatiAndAdressesFormValues>
   >(`ajout-structure-${params.id}-adresses`, {});
 
   const { currentValue: typePlacesValues } = useLocalStorage<

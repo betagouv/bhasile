@@ -18,9 +18,9 @@ import {
   FormAdresseTypologie,
 } from "@/schemas/forms/base/adresse.schema";
 import {
-  RecoveryAdressesFormValues,
-  recoveryAdressesSchema,
-} from "@/schemas/forms/recovery-adresses/recoveryAdresses.schema";
+  TypeBatiAndAdressesFormValues,
+  typeBatiAndAdressesSchema,
+} from "@/schemas/forms/base/adresse.schema";
 import { Repartition } from "@/types/adresse.type";
 import { FormKind } from "@/types/global";
 
@@ -35,7 +35,7 @@ export const AdressesRecovery = ({ id }: { id: number }) => {
   const { updateStructure } = useStructures();
   const { currentValue: localStorageValues } = useLocalStorage(
     `ajout-structure-${id}-adresses`,
-    {} as RecoveryAdressesFormValues
+    {} as TypeBatiAndAdressesFormValues
   );
 
   const formattedLocalStorageValues = useMemo(() => {
@@ -88,7 +88,7 @@ export const AdressesRecovery = ({ id }: { id: number }) => {
     return localStorageValues?.adresses?.length ?? 0;
   }, [localStorageValues]);
 
-  const handleSubmit = async (data: RecoveryAdressesFormValues) => {
+  const handleSubmit = async (data: TypeBatiAndAdressesFormValues) => {
     const result = await updateStructure({
       id,
       adresses: transformFormAdressesToApiAdresses(data.adresses, id),
@@ -115,7 +115,7 @@ export const AdressesRecovery = ({ id }: { id: number }) => {
   return (
     <>
       <FormWrapper
-        schema={recoveryAdressesSchema}
+        schema={typeBatiAndAdressesSchema}
         defaultValues={formattedLocalStorageValues}
         onSubmit={handleSubmit}
         mode="onChange"

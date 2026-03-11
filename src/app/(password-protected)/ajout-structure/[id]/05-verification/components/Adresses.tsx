@@ -2,12 +2,12 @@ import { useParams } from "next/navigation";
 
 import { Badge } from "@/app/components/common/Badge";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
-import { AjoutAdressesFormValues } from "@/schemas/forms/ajout/ajoutAdresses.schema";
+import { TypeBatiAndAdressesFormValues } from "@/schemas/forms/base/adresse.schema";
 
 export const Adresses = () => {
   const params = useParams();
   const { currentValue: localStorageValues } = useLocalStorage<
-    Partial<AjoutAdressesFormValues>
+    Partial<TypeBatiAndAdressesFormValues>
   >(`ajout-structure-${params.id}-adresses`, {});
 
   return (
