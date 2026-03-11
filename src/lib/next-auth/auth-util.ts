@@ -1,10 +1,11 @@
 import { Session, User } from "next-auth";
 
 import {
-  getAllAllowedUsers,
-  getAllowedUserPatterns,
-} from "@/app/api/allowed-user/allowed-user.repository";
-import { AllowedUserGranularity, UserRole } from "@/generated/prisma/client";
+  getAllRoles,
+  getAnonymousRole,
+  getRolePatterns,
+} from "@/app/api/role/role.repository";
+import { Role } from "@/generated/prisma/client";
 
 export type ProConnectUser = User & {
   id: string;
@@ -16,43 +17,33 @@ export type ProConnectUser = User & {
 };
 
 export const getIsUserAuthorized = async (email: string): Promise<boolean> => {
-  const allowedPatterns = await getAllowedUserPatterns();
+  const allowedPatterns = await getRolePatterns();
   return allowedPatterns.some(({ emailPattern }) => {
+    if (!emailPattern) {
+      return false;
+    }
     const regex = new RegExp(emailPattern, "i");
     return regex.test(email);
   });
 };
 
-export const getRoleFromSession = async (
-  session: Session
-): Promise<UserRole> => {
-  const allowedUsers = await getAllAllowedUsers();
+export const getRoleFromSession = async (session: Session): Promise<Role> => {
+  const roles = await getAllRoles();
   const userEmail = session.user?.email;
+  const anonymousRole = getAnonymousRole();
   if (!userEmail) {
-    return UserRole.ANONYMOUS;
+    return anonymousRole;
   }
-  const allowedUser = allowedUsers.find((allowedUser) => {
-    const regex = new RegExp(allowedUser.emailPattern, "i");
+  const role = roles.find((role) => {
+    if (!role.emailPattern) {
+      return;
+    }
+    const regex = new RegExp(role.emailPattern, "i");
     if (regex.test(userEmail)) {
-      return allowedUser;
+      return role;
     }
     return;
   });
 
-  return convertAllowedUserGranularityToUserRole(allowedUser?.granularity);
-};
-
-const convertAllowedUserGranularityToUserRole = (
-  granularity?: AllowedUserGranularity
-): UserRole => {
-  if (!granularity) {
-    return UserRole.ANONYMOUS;
-  }
-
-  const roles: Record<AllowedUserGranularity, UserRole> = {
-    [AllowedUserGranularity.DEPARTEMENT]: UserRole.AGENT_DEPARTEMENTAL,
-    [AllowedUserGranularity.REGION]: UserRole.AGENT_REGIONAL,
-    [AllowedUserGranularity.NATIONAL]: UserRole.AGENT_NATIONAL,
-  };
-  return roles[granularity];
+  return role || anonymousRole;
 };
