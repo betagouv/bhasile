@@ -13,6 +13,7 @@ import { URLS } from "../../constants";
 import {
   escapeForRegex,
   getActesCategoryLabel,
+  getRepartitionLabel,
   normalizeDocumentCategory,
   parseAddressParts,
 } from "../../shared-utils";
@@ -94,6 +95,7 @@ export class StructureDetailsPage extends BasePage {
     const descriptionBlock = this.getBlockByTitle("Description");
     await this.expectDescriptionData(descriptionBlock, data, overrides);
     await this.expectContactsData(descriptionBlock, data, overrides);
+    await this.expectAdressesHebergement(descriptionBlock, data, overrides);
     await this.expectTypePlaces(
       overrides.structureTypologies ?? data.structureTypologies ?? []
     );
@@ -235,6 +237,32 @@ export class StructureDetailsPage extends BasePage {
 
     await this.expectContactLine(block, contactPrincipal);
     await this.expectContactLine(block, contactSecondaire);
+  }
+
+  private async expectAdressesHebergement(
+    block: Locator,
+    data: TestStructureData,
+    overrides: Partial<TestStructureData>
+  ) {
+    const adresses = overrides.adresses ?? data.adresses ?? [];
+    await block.getByRole("tab", { name: "Adresses d'hébergement" }).click();
+
+    const rows = block.locator("table tbody tr");
+    await expect(rows.first()).toBeVisible();
+
+    for (const adresse of adresses) {
+      const expectedAddress =
+        adresse.adresseComplete || adresse.searchTerm || "";
+      if (expectedAddress) {
+        await expect(block).toContainText(expectedAddress);
+      }
+      await expect(block).toContainText(adresse.placesAutorisees.toString());
+      if (adresse.repartition) {
+        await expect(block).toContainText(
+          getRepartitionLabel(adresse.repartition)
+        );
+      }
+    }
   }
 
   private async expectContactLine(
