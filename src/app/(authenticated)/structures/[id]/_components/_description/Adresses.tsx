@@ -47,14 +47,14 @@ export const Adresses = (): ReactElement => {
               }
             </td>
             <td className="py-3 w-full">
-              {adresse.adresseTypologies?.[0]?.qpv && (
+              {adresse.adresseTypologies?.[0]?.qpv ? (
                 <span className="pr-1">
                   <Badge type="purple">QPV</Badge>
                 </span>
-              )}
-              {adresse.adresseTypologies?.[0]?.logementSocial && (
+              ) : null}
+              {adresse.adresseTypologies?.[0]?.logementSocial ? (
                 <Badge type="purple">Logement social</Badge>
-              )}
+              ) : null}
             </td>
           </tr>
         ))}
