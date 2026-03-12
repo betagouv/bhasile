@@ -16,8 +16,7 @@ export const seedRegionsAndDepartements = async (
   prisma: PrismaClient
 ): Promise<void> => {
   await prisma.region.createMany({
-    data: REGIONS.map((region) => ({ name: region.name })),
-    skipDuplicates: true,
+    data: REGIONS.map((region) => ({ name: region.name, code: region.code })),
   });
 
   const regions = await prisma.region.findMany();
@@ -25,7 +24,6 @@ export const seedRegionsAndDepartements = async (
   const departementsToInsert = createDepartements();
   await prisma.departement.createMany({
     data: departementsToInsert,
-    skipDuplicates: true,
   });
 
   for (const region of regions) {
