@@ -6,7 +6,7 @@ import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
 import { createFakeCpoms } from "./seeders/cpom.seed";
-import { createDepartements } from "./seeders/departements-seed";
+import { seedRegionsAndDepartements } from "./seeders/departements-seed";
 import {
   createFakeFormDefinition,
   createFakeFormStepDefinition,
@@ -43,12 +43,7 @@ export async function seed(): Promise<void> {
 
   console.log(`✅ ${formStepDefinitions.count} FormStepDefinitions créées`);
 
-  const departementsToInsert = createDepartements();
-  await prisma.departement.createMany({
-    data: departementsToInsert,
-  });
-
-  console.log(`🌍 Départements créés : ${departementsToInsert.length}`);
+  await seedRegionsAndDepartements(prisma);
 
   const operateursToInsert = Array.from({ length: 5 }, (_, index) =>
     createFakeOperateur(index)
