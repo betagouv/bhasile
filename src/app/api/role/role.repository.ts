@@ -1,5 +1,9 @@
-import { Role, RoleGroup } from "@/generated/prisma/client";
+import { Prisma, RoleGroup } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
+
+type RoleWithDepartements = Prisma.RoleGetPayload<{
+  include: { roleDepartements: { include: { departement: true } } };
+}>;
 
 export const getRolePatterns = async (): Promise<
   { emailPattern: string | null }[]
@@ -9,14 +13,29 @@ export const getRolePatterns = async (): Promise<
   });
 };
 
-export const getAllRoles = async (): Promise<Role[]> => {
-  return prisma.role.findMany();
+export const getAllRoles = async (): Promise<RoleWithDepartements[]> => {
+  return prisma.role.findMany({
+    include: {
+      roleDepartements: {
+        include: {
+          departement: true,
+        },
+      },
+    },
+  });
 };
 
-export const getAnonymousRole = async (): Promise<Role> => {
+export const getAnonymousRole = async (): Promise<RoleWithDepartements> => {
   return prisma.role.findFirstOrThrow({
     where: {
       group: RoleGroup.ANONYMOUS,
+    },
+    include: {
+      roleDepartements: {
+        include: {
+          departement: true,
+        },
+      },
     },
   });
 };
