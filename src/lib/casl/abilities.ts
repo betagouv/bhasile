@@ -2,6 +2,7 @@ import { AbilityBuilder, PureAbility, subject } from "@casl/ability";
 import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
 
 import { RoleGroup, Structure, User } from "@/generated/prisma/client";
+import { SessionUser } from "@/types/global";
 
 export type AppAbility = PureAbility<
   [
@@ -17,62 +18,47 @@ export type AppAbility = PureAbility<
   PrismaQuery
 >;
 
-type SessionUser = {
-  role: string;
-};
-
-export const defineAbilityFor = (user: User) => {
+export const defineAbilityFor = (user: SessionUser) => {
   return createPrismaAbility(defineRulesFor(user));
 };
 
-export const defineRulesFor = (user: User) => {
+export const defineRulesFor = (user: SessionUser) => {
   const builder = new AbilityBuilder<AppAbility>(createPrismaAbility);
 
-  const roles: Record<RoleGroup, () => void> = {
-    NATIONAL: () => defineAgentNationalRules(builder),
-    REGION_ARA: () => defineAgentRegionalRules(builder, user, "ARA"),
-    REGION_BFC: () => defineAgentRegionalRules(builder, user, "BFC"),
-    REGION_BRE: () => defineAgentRegionalRules(builder, user, "BRE"),
-    REGION_CVL: () => defineAgentRegionalRules(builder, user, "CVL"),
-    REGION_GES: () => defineAgentRegionalRules(builder, user, "GES"),
-    REGION_HDF: () => defineAgentRegionalRules(builder, user, "HDF"),
-    REGION_IDF: () => defineAgentRegionalRules(builder, user, "IDF"),
-    REGION_NOR: () => defineAgentRegionalRules(builder, user, "NOR"),
-    REGION_NAQ: () => defineAgentRegionalRules(builder, user, "NAQ"),
-    REGION_OCC: () => defineAgentRegionalRules(builder, user, "OCC"),
-    REGION_PDL: () => defineAgentRegionalRules(builder, user, "PDL"),
-    REGION_PAC: () => defineAgentRegionalRules(builder, user, "PAC"),
-    DEPARTEMENT: () => defineAgentDepartementalRules(builder, user),
-    ANONYMOUS: () => defineAnonymousRules(builder),
-  };
-  roles[user?.role]();
+  if (user.role === RoleGroup.NATIONAL) {
+    defineAgentNationalRules(builder);
+  } else if (user.role === RoleGroup.DEPARTEMENT) {
+    defineAgentDepartementalRules(builder, user);
+  } else if (user.role.startsWith("REGION")) {
+    defineAgentRegionalRules(builder, user);
+  } else {
+    defineAnonymousRules(builder);
+  }
 
   return builder.rules;
 };
 
 const defineAgentNationalRules = ({ can }: AbilityBuilder<AppAbility>) => {
-  can(["update"], "Structure", {});
+  can("update", "Structure", {});
 };
 
 const defineAgentRegionalRules = (
   { can }: AbilityBuilder<AppAbility>,
-  user: User,
-  regionName: string
+  user: SessionUser
 ) => {
-  // TODO: handle regions
-  console.log(regionName);
-  can(["update"], "Structure", {
-    userId: user.id,
+  // TODO: handle regions (maybe not useful because already in data (roledepartement table) ?)
+  // console.log("================", user.role, user.allowedDepartements);
+  can("update", "Structure", {
+    departementAdministratif: { in: user.allowedDepartements },
   });
 };
 
 const defineAgentDepartementalRules = (
   { can }: AbilityBuilder<AppAbility>,
-  user: User
+  user: SessionUser
 ) => {
   can("update", "Structure", {
-    // TODO : update this code
-    departmentCode: user.roleId,
+    departementAdministratif: { in: user.allowedDepartements },
   });
 };
 
@@ -80,7 +66,7 @@ const defineAnonymousRules = ({ can }: AbilityBuilder<AppAbility>) => {
   can("read", ["Structure"]);
 };
 
-export const canUpdateStructure = (user: User, structure: Structure) => {
+export const canUpdateStructure = (user: SessionUser, structure: Structure) => {
   const ability = defineAbilityFor(user);
   return ability.can("update", subject("Structure", structure));
 };
