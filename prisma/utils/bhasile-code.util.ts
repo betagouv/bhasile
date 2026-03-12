@@ -30,7 +30,9 @@ export const getNextBhasileCode = (
   region: keyof typeof REGION_CODES
 ): string | null => {
   const codes = codesMap.get(region);
-  if (!codes || codes.length === 0) {return null;}
+  if (!codes || codes.length === 0) {
+    return null;
+  }
   return codes.shift() || null;
 };
 

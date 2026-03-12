@@ -1,6 +1,6 @@
 import { Dna } from "@/generated/prisma/client";
 
-const DNA_TYPES = ["C", "H", "K", "A"] as const;
+const DNA_TYPES = ["C", "H", "K", "R"] as const;
 
 export const createDnaList = (count: number): Omit<Dna, "id">[] => {
   const dnaList: Omit<Dna, "id">[] = [];

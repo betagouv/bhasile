@@ -216,14 +216,14 @@ const buildStructureIdByDnaCode = async (
     select: { dnaId: true, structureId: true },
   });
   const dnaIdToCode = new Map(dnas.map((d) => [d.id, d.code]));
-  const map = new Map<string, number>();
-  for (const ds of dnaStructures) {
-    const code = dnaIdToCode.get(ds.dnaId);
+  const structureIds = new Map<string, number>();
+  for (const dnaStructure of dnaStructures) {
+    const code = dnaIdToCode.get(dnaStructure.dnaId);
     if (code) {
-      map.set(code, ds.structureId);
+      structureIds.set(code, dnaStructure.structureId);
     }
   }
-  return map;
+  return structureIds;
 };
 
 const eigs = await getAllEIGs();

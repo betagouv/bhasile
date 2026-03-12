@@ -98,12 +98,6 @@ export const createFakeStructure = ({
 
   return {
     ...baseData,
-    dnaCode: generateDnaCode({
-      type,
-      operateurName,
-      departementAdministratif,
-      counter,
-    }),
     filiale:
       faker.helpers.maybe(() => faker.word.noun(), { probability: 0.5 }) || "",
     adresseAdministrative: faker.location.streetAddress(),

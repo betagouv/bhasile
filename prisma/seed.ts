@@ -7,10 +7,6 @@ import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
 import { createAntenneList } from "./seeders/antenne.seed";
-import {
-  generateAllBhasileCodes,
-  getNextBhasileCode,
-} from "./seeders/bhasile-codes.seed";
 import { createFakeCpoms } from "./seeders/cpom.seed";
 import { createDepartements } from "./seeders/departements-seed";
 import { createDnaList } from "./seeders/dna.seed";
@@ -20,12 +16,16 @@ import {
   createFakeFormStepDefinition,
 } from "./seeders/form.seed";
 import { createFakeOperateur } from "./seeders/operateur.seed";
-import { getRegionFromDepartement } from "./seeders/region.seed";
 import {
   createFakeStructure,
   createFakeStuctureWithRelations,
 } from "./seeders/structure.seed";
+import {
+  generateAllBhasileCodes,
+  getNextBhasileCode,
+} from "./utils/bhasile-code.util";
 import { convertToPrismaObject } from "./utils/common.util";
+import { getRegionFromDepartement } from "./utils/region.util";
 import { wipeTables } from "./utils/wipe";
 
 const prisma = createPrismaClient();
@@ -167,7 +167,7 @@ export async function seed(): Promise<void> {
     (s) => s.codeBhasile !== null
   );
   console.log(
-    `✅ ${allStructures.length} structures récupérées (${structuresWithBhasile.length} avec codeBhasile)`
+    `✅ ${allStructures.length} structures récupérées (${structuresWithBhasile.length} avec code Bhasile)`
   );
 
   console.log("🏥 Création et liaison des codes FINESS...");
