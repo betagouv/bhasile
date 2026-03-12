@@ -128,17 +128,6 @@ ADD COLUMN     "structureId" INTEGER,
 ALTER COLUMN "structureDnaCode" DROP NOT NULL;
 
 -- AlterTable
-ALTER TABLE "FileUpload" DROP COLUMN "category",
-DROP COLUMN "categoryName",
-DROP COLUMN "cpomId",
-DROP COLUMN "date",
-DROP COLUMN "endDate",
-DROP COLUMN "granularity",
-DROP COLUMN "parentFileUploadId",
-DROP COLUMN "startDate",
-DROP COLUMN "structureDnaCode";
-
--- AlterTable
 ALTER TABLE "Form" ADD COLUMN     "structureId" INTEGER,
 ALTER COLUMN "structureCodeDna" DROP NOT NULL;
 

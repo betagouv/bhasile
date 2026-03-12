@@ -80,11 +80,12 @@ model Dna {
   id                           Int                         @id @default(autoincrement())
   code                         String                      @unique
   description                  String?
-  createdAt                    DateTime                    @default(now())
-  updatedAt                    DateTime                    @default(now()) @updatedAt
-  dnaStructures               DnaStructure[]
+  dnaStructures                DnaStructure[]
   activites                    Activite[]
   evenementsIndesirablesGraves EvenementIndesirableGrave[]
+
+  createdAt                    DateTime                    @default(now())
+  updatedAt                    DateTime                    @default(now()) @updatedAt
 
   @@schema("public")
 }
@@ -97,6 +98,7 @@ model DnaStructure {
   structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   startDate   DateTime? // Empty by default, set when a DNA changes its structure
   endDate     DateTime? // Empty by default, set when a DNA changes its structure
+
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now()) @updatedAt
 
@@ -105,8 +107,8 @@ model DnaStructure {
 
 model Controle {
   id               Int          @id @default(autoincrement())
-  structure        Structure?    @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode String?
+  structure        Structure?   @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureDnaCode String?      // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId      Int?
   date             DateTime
   type             ControleType
@@ -120,8 +122,8 @@ model Controle {
 
 model Evaluation {
   id               Int          @id @default(autoincrement())
-  structure        Structure?    @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode String?
+  structure        Structure?   @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureDnaCode String?      // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId      Int?
   date             DateTime?
   notePersonne     Float?
@@ -139,7 +141,7 @@ model Evaluation {
 model EvenementIndesirableGrave {
   id               Int        @id @default(autoincrement())
   structure        Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode String?
+  structureDnaCode String?    // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId      Int?
   dnaCode          String?
   dna              Dna?       @relation(fields: [dnaCode], references: [code], onDelete: Cascade, onUpdate: Cascade)
@@ -157,7 +159,7 @@ model EvenementIndesirableGrave {
 model Adresse {
   id                Int                @id @default(autoincrement())
   structure         Structure?         @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode  String?
+  structureDnaCode  String?            // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId       Int?
   adresse           String?
   codePostal        String?
@@ -188,9 +190,9 @@ model AdresseTypologie {
 }
 
 model Contact {
-  id               Int       @id @default(autoincrement())
+  id               Int        @id @default(autoincrement())
   structure        Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode String?
+  structureDnaCode String?    // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId      Int?
   prenom           String?
   nom              String?
@@ -207,8 +209,8 @@ model Contact {
 
 model StructureMillesime {
   id                   Int                 @id @default(autoincrement())
-  structure            Structure?           @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode     String?
+  structure            Structure?          @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureDnaCode     String?             // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId          Int?
   year                 Int
   cpom                 Boolean             @default(false) // temporary field, while we are not sure of existing cpoms
@@ -227,8 +229,8 @@ model StructureMillesime {
 
 model StructureTypologie {
   id                    Int                 @id @default(autoincrement())
-  structure             Structure?           @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode      String?
+  structure             Structure?          @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureDnaCode      String?             // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId           Int?
   year                  Int
   placesAutorisees      Int?
@@ -252,7 +254,7 @@ model StructureTypologie {
 model Activite {
   id                       Int        @id @default(autoincrement())
   structure                Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode         String?
+  structureDnaCode         String?    // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId              Int?
   dnaCode                  String?
   dna                      Dna?       @relation(fields: [dnaCode], references: [code], onDelete: Cascade, onUpdate: Cascade)
@@ -296,7 +298,7 @@ model FileUpload {
 model ActeAdministratif {
   id                  Int                         @id @default(autoincrement())
   structure           Structure?                  @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode    String?
+  structureDnaCode    String?                     // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId         Int?
   cpom                Cpom?                       @relation(fields: [cpomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   cpomId              Int?
@@ -319,7 +321,7 @@ model ActeAdministratif {
 model DocumentFinancier {
   id                  Int                           @id @default(autoincrement())
   structure           Structure?                    @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode    String?
+  structureDnaCode    String?                       // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId         Int?
   category            DocumentFinancierCategory?
   year                Int
@@ -336,7 +338,7 @@ model DocumentFinancier {
 model Budget {
   id                                Int                 @id @default(autoincrement())
   structure                         Structure?          @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode                  String?
+  structureDnaCode                  String?             // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId                       Int?
   year                              Int                 @default(0)
   ETP                               Float?
@@ -399,7 +401,7 @@ model FormStepDefinition {
 
 model Form {
   id               Int     @id @default(autoincrement())
-  structureCodeDna String?
+  structureCodeDna String?     // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId      Int?
   formDefinitionId Int
   status           Boolean @default(false) // Lié au bouton "Finaliser"
