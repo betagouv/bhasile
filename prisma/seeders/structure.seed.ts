@@ -33,7 +33,6 @@ import {
   createFakeEvaluation,
   EvaluationWithFileUploads,
 } from "./evaluation.seed";
-import { createFakeEvenementIndesirableGrave } from "./evenement-indesirable-grave.seed";
 import { createFakeFormWithSteps } from "./form.seed";
 import { createFakeStructureTypologie } from "./structure-typologie.seed";
 
