@@ -16,6 +16,16 @@ model Departement {
   region                  String
   structures              Structure[]
   departementAllowedUsers DepartementAllowedUser[]
+  regionAdministrative    Region?                  @relation(fields: [regionId], references: [id])
+  regionId                Int?
+
+  @@schema("public")
+}
+
+model Region {
+  id           Int           @id @default(autoincrement())
+  name         String
+  departements Departement[]
 
   @@schema("public")
 }
@@ -411,8 +421,6 @@ model Cpom {
   region              String?
   departements        String[]
   granularity         CpomGranularity     @default(REGIONALE)
-  dateStart           DateTime?
-  dateEnd             DateTime?
   cpomMillesimes      CpomMillesime[]
   operateur           Operateur           @relation(fields: [operateurId], references: [id])
   operateurId         Int
