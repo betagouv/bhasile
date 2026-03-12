@@ -13,18 +13,12 @@ export const useSpreadsheetParse = (): UseExcelParseResult => {
     const adresses: FormAdresse[] = [];
     const schema = getSchema(isMixte);
     const { rows, errors } = await readXlsxFile(file, { schema });
-    const typedErrors = errors as (Error & {
-      row?: number;
-      column?: string;
-    })[];
-    const filteredErrors = typedErrors.filter((error) => error.row !== 2);
+    const filteredErrors = errors.filter((error) => error.row !== 2);
     if (filteredErrors.length > 0) {
       const errorMessage = filteredErrors
-        .map((error) => {
-          const column = error.column ?? "colonne inconnue";
-          const row = error.row ?? "?";
-          return `Valeur invalide (${column} : ligne ${row})`;
-        })
+        .map(
+          (error) => `Valeur invalide (${error.column} : ligne ${error.row})`
+        )
         .join(", ");
       throw new Error(errorMessage);
     }
