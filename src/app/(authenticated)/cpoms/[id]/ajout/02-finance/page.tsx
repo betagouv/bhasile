@@ -4,7 +4,6 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { CpomTable } from "@/app/components/forms/finance/budget-tables/CpomTable";
@@ -28,9 +27,6 @@ const confirmationModal = createModal({
 
 export default function CpomModificationFinance() {
   const router = useRouter();
-
-  const searchParams = useSearchParams();
-  const isCreation = searchParams.get("isCreation") === "true";
 
   const { cpom, setCpom } = useCpomContext();
 
@@ -59,14 +55,14 @@ export default function CpomModificationFinance() {
   const defaultValues = getCpomDefaultValues(cpom);
 
   useEffect(() => {
-    if (!cpom?.id || !isCreation) {
+    if (!cpom?.id) {
       return;
     }
 
     window.history.pushState(null, "", window.location.href);
 
     const handlePopState = () => {
-      router.push(`/cpoms/${cpom?.id}/modification/01-identification`);
+      router.push(`/cpoms/${cpom?.id}/ajout/01-identification`);
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -74,7 +70,7 @@ export default function CpomModificationFinance() {
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [router, cpom?.id, isCreation]);
+  }, [router, cpom?.id]);
 
   useIsModalOpen(confirmationModal, {
     onConceal: () => router.push(`/structures`),
@@ -119,11 +115,7 @@ export default function CpomModificationFinance() {
         )}
       </FormWrapper>
       <confirmationModal.Component
-        title={
-          isCreation
-            ? "Vous avez créé un CPOM !"
-            : "Vous avez modifié un CPOM !"
-        }
+        title="Vous avez créé un CPOM !"
         buttons={[
           {
             doClosesModal: true,

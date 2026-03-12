@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
 import { computeCpomDates, formatCpomName } from "@/app/utils/cpom.util";
@@ -8,9 +8,10 @@ import { getYearFromDate } from "@/app/utils/date.util";
 
 import { useCpomContext } from "../_context/CpomClientContext";
 
-export const CpomModificationHeader = (): ReactElement | null => {
-  const searchParams = useSearchParams();
-  const isCreation = searchParams.get("isCreation") === "true";
+export const CpomHeader = (): ReactElement | null => {
+  const pathname = usePathname();
+
+  const isModificationPath = pathname.includes("modification");
 
   const { cpom } = useCpomContext();
 
@@ -22,7 +23,7 @@ export const CpomModificationHeader = (): ReactElement | null => {
         <div>
           <h2 className="text-title-blue-france text-xs uppercase mb-0">
             <strong className="pr-3">
-              {isCreation ? "Ajouter" : "Modifier"} un cpom
+              {isModificationPath ? "Modifier" : "TEST"} un cpom
             </strong>
           </h2>
           <h3 className="text-title-blue-france fr-h6 mb-0">
