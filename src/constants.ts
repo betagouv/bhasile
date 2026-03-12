@@ -557,6 +557,35 @@ export const DEPARTEMENTS: Departement[] = [
   },
 ];
 
+export type Region = {
+  code: string;
+  name: string;
+};
+
+export const REGIONS: Region[] = [
+  { code: "FR-ARA", name: "Auvergne-Rhône-Alpes" },
+  { code: "FR-BFC", name: "Bourgogne-Franche-Comté" },
+  { code: "FR-BRE", name: "Bretagne" },
+  { code: "FR-CVL", name: "Centre-Val de Loire" },
+  { code: "FR-20R", name: "Corse" },
+  { code: "FR-GES", name: "Grand Est" },
+  { code: "FR-HDF", name: "Hauts-de-France" },
+  { code: "FR-IDF", name: "Île-de-France" },
+  { code: "FR-NOR", name: "Normandie" },
+  { code: "FR-NAQ", name: "Nouvelle-Aquitaine" },
+  { code: "FR-OCC", name: "Occitanie" },
+  { code: "FR-PDL", name: "Pays de la Loire" },
+  {
+    code: "FR-PAC",
+    name: "Provence-Alpes-Côte d'Azur",
+  },
+  { code: "FR-971", name: "Guadeloupe" },
+  { code: "FR-972", name: "Martinique" },
+  { code: "FR-973", name: "Guyane" },
+  { code: "FR-974", name: "La Réunion" },
+  { code: "FR-976", name: "Mayotte" },
+];
+
 export const REGIONS_WITHOUT_CORSE = [
   ...new Set(DEPARTEMENTS.map((departement) => departement.region)),
 ]
