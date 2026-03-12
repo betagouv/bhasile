@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ReactElement } from "react";
 
 import { EmptyCell } from "@/app/components/common/EmptyCell";
-import { computeCpomDates } from "@/app/utils/cpom.util";
+import { computeCpomDates, getGranularityLabel } from "@/app/utils/cpom.util";
 import { getYearFromDate } from "@/app/utils/date.util";
 import { CpomApiType } from "@/schemas/api/cpom.schema";
 
@@ -44,17 +44,6 @@ const getDepartementsLabel = (cpom: CpomApiType): string | ReactElement => {
     );
   }
   return departements;
-};
-
-const getGranularityLabel = (cpom: CpomApiType): string => {
-  switch (cpom.granularity) {
-    case "REGIONALE":
-      return "Régionale";
-    case "INTERDEPARTEMENTALE":
-      return "Interdépartementale";
-    case "DEPARTEMENTALE":
-      return "Départementale";
-  }
 };
 
 type Props = {

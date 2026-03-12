@@ -28,7 +28,17 @@ export const findOne = async (id: number): Promise<Cpom> => {
   const cpom = await prisma.cpom.findFirstOrThrow({
     where: { id },
     include: {
-      structures: true,
+      structures: {
+        include: {
+          structure: {
+            select: {
+              id: true,
+              dnaCode: true,
+              forms: true,
+            },
+          },
+        },
+      },
       cpomMillesimes: true,
       operateur: true,
       actesAdministratifs: {

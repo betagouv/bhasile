@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 
 import { Block } from "@/app/components/common/Block";
-import { computeCpomDates } from "@/app/utils/cpom.util";
+import { computeCpomDates, getGranularityLabel } from "@/app/utils/cpom.util";
+import { formatDate } from "@/app/utils/date.util";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
 
@@ -18,7 +19,7 @@ export const DescriptionBlock = () => {
       title="Description"
       iconClass="fr-icon-align-left"
       onEdit={() => {
-        router.push(`/cpoms/${cpom.id}/modification/01-description`);
+        router.push(`/cpoms/${cpom.id}/modification/description`);
       }}
     >
       <div className="grid grid-cols-2">
@@ -28,7 +29,7 @@ export const DescriptionBlock = () => {
         </div>
         <div className="flex gap-2 mb-3">
           <strong>Échelle</strong>
-          {cpom.granularity}
+          {getGranularityLabel(cpom)}
         </div>
         <hr className="col-span-2" />
         <div className="flex gap-2 mb-3">
@@ -42,11 +43,11 @@ export const DescriptionBlock = () => {
         <hr className="col-span-2" />
         <div className="flex gap-2 mb-3">
           <strong>Date début</strong>
-          {dateStart}
+          {formatDate(dateStart)}
         </div>
         <div className="flex gap-2 mb-3">
           <strong>Date fin</strong>
-          {dateEnd}
+          {formatDate(dateEnd)}
         </div>
       </div>
     </Block>

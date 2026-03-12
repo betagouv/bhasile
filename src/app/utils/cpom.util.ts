@@ -183,3 +183,14 @@ export const computeCpomDates = (
     dateEnd,
   };
 };
+
+export const getGranularityLabel = (cpom: CpomApiType): string => {
+  switch (cpom.granularity) {
+    case "REGIONALE":
+      return "Régionale";
+    case "INTERDEPARTEMENTALE":
+      return "Interdépartementale";
+    case "DEPARTEMENTALE":
+      return "Départementale";
+  }
+};
