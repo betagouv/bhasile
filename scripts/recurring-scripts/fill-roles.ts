@@ -11,13 +11,34 @@ import { createPrismaClient } from "@/prisma-client";
 type RoleCsvRow = {
   emailPattern: string;
   group: string;
-  department: string;
+  departement: string;
 };
 
 const prisma = createPrismaClient();
 
+const getRegionNameFromGroup = (group: RoleGroup): string | undefined => {
+  const regions = {
+    REGION_ARA: "Auvergne-Rhône-Alpes",
+    REGION_BFC: "Bourgogne-Franche-Comté",
+    REGION_BRE: "Bretagne",
+    REGION_CVL: "Centre-Val de Loire",
+    REGION_GES: "Grand Est",
+    REGION_HDF: "Hauts-de-France",
+    REGION_IDF: "Île-de-France",
+    REGION_NOR: "Normandie",
+    REGION_NAQ: "Nouvelle-Aquitaine",
+    REGION_OCC: "Occitanie",
+    REGION_PDL: "Pays de la Loire",
+    REGION_PAC: "Provence-Alpes-Côte d'Azur",
+  } as Record<RoleGroup, string>;
+  return regions[group];
+};
+
 const fetchRoles = async (): Promise<RoleCsvRow[]> => {
-  return loadCsvFromS3<RoleCsvRow>(process.env.DOCS_BUCKET_NAME!, "roles.csv");
+  return loadCsvFromS3<RoleCsvRow>(
+    process.env.DOCS_BUCKET_NAME!,
+    "roles_test.csv"
+  );
 };
 
 const getTargetDepartementIds = (
@@ -27,22 +48,18 @@ const getTargetDepartementIds = (
   if (row.group === RoleGroup.NATIONAL) {
     return allDepartements.map((departement) => departement.id);
   }
-  if (row.group === RoleGroup.REGION) {
-    const referenceDepartement = allDepartements.find(
-      (departement) => departement.numero === row.department
-    );
-    if (!referenceDepartement) {
+  if (row.group.startsWith("REGION")) {
+    const region = getRegionNameFromGroup(row.group as RoleGroup);
+    if (!region) {
       return [];
     }
     return allDepartements
-      .filter(
-        (departement) => departement.region === referenceDepartement.region
-      )
+      .filter((departement) => departement.region === region)
       .map((departement) => departement.id);
   }
   if (row.group === RoleGroup.DEPARTEMENT) {
     const departement = allDepartements.find(
-      (departement) => departement.numero === row.department
+      (departement) => departement.numero === row.departement
     );
     return departement ? [departement.id] : [];
   }
@@ -50,16 +67,23 @@ const getTargetDepartementIds = (
 };
 
 const createRoles = async (row: RoleCsvRow, departementIds: number[]) => {
-  const data = {
-    emailPattern: row.emailPattern,
-    granularity: row.group as RoleGroup,
-  };
-
   await prisma.role.create({
     data: {
-      ...data,
+      emailPattern: row.emailPattern,
+      group: row.group as RoleGroup,
       roleDepartements: {
         create: departementIds.map((id) => ({ departementId: id })),
+      },
+    },
+  });
+};
+
+const createAnonymousRole = async () => {
+  await prisma.role.create({
+    data: {
+      group: "ANONYMOUS",
+      roleDepartements: {
+        create: [],
       },
     },
   });
@@ -73,9 +97,10 @@ const run = async () => {
       prisma.departement.findMany(),
     ]);
 
-    await prisma.role.deleteMany({});
+    await prisma.roleDepartement.deleteMany({});
     await prisma.role.deleteMany({});
 
+    await createAnonymousRole();
     for (const row of csvRows) {
       const targetIds = getTargetDepartementIds(row, allDepartements);
       await createRoles(row, targetIds);

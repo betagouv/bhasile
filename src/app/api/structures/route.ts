@@ -7,6 +7,7 @@ import {
   structureAgentUpdateApiSchema,
   structureOperateurUpdateApiSchema,
 } from "@/schemas/api/structure.schema";
+import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 
 import { createStructureEvent } from "../user-action/user-action.service";
@@ -86,15 +87,14 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const result = structureAgentUpdateApiSchema.parse(body);
 
-    // TODO : renvoyer l'id depuis le front
-    const existingStructure = await findOne(result.id);
+    const existingStructure = await findOne(result.id!);
 
-    console.log(">>>>>>>><", session.user);
+    // console.log(">>>>>>>><", session.user);
 
-    if (!canUpdateStructure(session.user, existingStructure)) {
+    if (!canUpdateStructure(session.user as SessionUser, existingStructure)) {
       return NextResponse.json(
         { error: "Droits insuffisants" },
-        { status: 403 } // 403 est plus approprié que 401 ici
+        { status: 403 }
       );
     }
 

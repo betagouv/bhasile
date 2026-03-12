@@ -5,7 +5,7 @@ import {
   getAnonymousRole,
   getRolePatterns,
 } from "@/app/api/role/role.repository";
-import { Role } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 
 export type ProConnectUser = User & {
   id: string;
@@ -13,8 +13,11 @@ export type ProConnectUser = User & {
   nom: string;
   email: string;
   poste: string;
-  role: string;
 };
+
+type RoleWithDepartements = Prisma.RoleGetPayload<{
+  include: { roleDepartements: { include: { departement: true } } };
+}> & { allowedDepartements: string[] };
 
 export const getIsUserAuthorized = async (email: string): Promise<boolean> => {
   const allowedPatterns = await getRolePatterns();
@@ -27,12 +30,18 @@ export const getIsUserAuthorized = async (email: string): Promise<boolean> => {
   });
 };
 
-export const getRoleFromSession = async (session: Session): Promise<Role> => {
-  const roles = await getAllRoles();
+export const getRoleFromSession = async (
+  session: Session
+): Promise<RoleWithDepartements> => {
   const userEmail = session.user?.email;
-  const anonymousRole = getAnonymousRole();
+  const roles = await getAllRoles();
+  const anonymousRole = await getAnonymousRole();
+  const anonymousRoleWithDepartements = {
+    ...anonymousRole,
+    allowedDepartements: [],
+  };
   if (!userEmail) {
-    return anonymousRole;
+    return anonymousRoleWithDepartements;
   }
   const role = roles.find((role) => {
     if (!role.emailPattern) {
@@ -44,6 +53,14 @@ export const getRoleFromSession = async (session: Session): Promise<Role> => {
     }
     return;
   });
-
-  return role || anonymousRole;
+  if (!role) {
+    return anonymousRoleWithDepartements;
+  }
+  const roleWithDepartements = {
+    ...role,
+    allowedDepartements: role?.roleDepartements.map(
+      (roleDepartement) => roleDepartement.departement.numero
+    ),
+  };
+  return roleWithDepartements || anonymousRole;
 };
