@@ -40,7 +40,7 @@ async function main() {
     }
 
     if (!structure.dnaCode) {
-      //TODO: should throw an error no?
+      console.error(`❌ Structure ${structure.id} sans code DNA`);
       continue;
     }
 

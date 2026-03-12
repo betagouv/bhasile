@@ -17,7 +17,7 @@ const emptyContact: ContactFormValues = {
 };
 
 export const FieldSetContacts = () => {
-  const { control, watch, setValue } = useFormContext();
+  const { control, watch, setValue, getValues } = useFormContext();
 
   const isMultiAntenne = watch("isMultiAntenne");
 
@@ -32,9 +32,12 @@ export const FieldSetContacts = () => {
 
   useEffect(() => {
     if (!isMultiAntenne) {
-      setValue("contacts", [watch("contacts")?.[0], watch("contacts")?.[1]]);
+      setValue("contacts", [
+        getValues("contacts")?.[0],
+        getValues("contacts")?.[1],
+      ]);
     }
-  }, [isMultiAntenne, setValue, watch]);
+  }, [isMultiAntenne, setValue, getValues]);
 
   const handleDelete = (index: number) => {
     setValue(

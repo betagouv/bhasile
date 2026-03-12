@@ -4,9 +4,12 @@ import { EvenementIndesirableGrave } from "@/generated/prisma/client";
 
 const usedNumeroDossiers = new Set<string>();
 
-export const createFakeEvenementIndesirableGrave = (): Omit<
+export const createFakeEvenementIndesirableGrave = ({
+  structureId,
+  dnaCode,
+}: CreateFakeEvenementIndesirableGraveArgs): Omit<
   EvenementIndesirableGrave,
-  "id" | "structureDnaCode" | "structureId"
+  "id" | "structureDnaCode"
 > => {
   let numeroDossier = faker.number
     .int({ min: 1000000, max: 10000000 })
@@ -21,7 +24,8 @@ export const createFakeEvenementIndesirableGrave = (): Omit<
   usedNumeroDossiers.add(numeroDossier);
 
   return {
-    dnaCode: null,
+    structureId,
+    dnaCode,
     declarationDate: faker.date.past({ years: 3 }),
     evenementDate: faker.date.past({ years: 3 }),
     numeroDossier,
@@ -33,4 +37,9 @@ export const createFakeEvenementIndesirableGrave = (): Omit<
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   };
+};
+
+type CreateFakeEvenementIndesirableGraveArgs = {
+  structureId: number;
+  dnaCode: string;
 };

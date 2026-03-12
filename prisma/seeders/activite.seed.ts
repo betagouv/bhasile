@@ -5,10 +5,7 @@ import { Activite } from "@/generated/prisma/client";
 export const createFakeActivites = ({
   structureId,
   dnaCode,
-}: CreateFakeActivitesArgs): Omit<
-  Activite,
-  "id" | "structureDnaCode" | "structureId"
->[] => {
+}: CreateFakeActivitesArgs): Omit<Activite, "id" | "structureDnaCode">[] => {
   return Array.from(Array(12).keys()).map((month) =>
     createFakeActivite({
       structureId,

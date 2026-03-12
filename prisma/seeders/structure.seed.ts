@@ -219,10 +219,6 @@ export const createFakeStuctureWithRelations = ({
     documentsFinanciers: Array.from({ length: 5 }, () =>
       createFakeDocumentFinancier()
     ),
-    evenementsIndesirablesGraves: Array.from(
-      { length: faker.number.int({ min: 0, max: 15 }) },
-      () => createFakeEvenementIndesirableGrave()
-    ),
     forms,
   } as StructureWithRelations;
 
