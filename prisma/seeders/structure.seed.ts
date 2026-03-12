@@ -21,7 +21,6 @@ import {
   ActeAdministratifWithFileUploads,
   createFakeActeAdministratif,
 } from "./acte-administratif.seed";
-import { createFakeActivites } from "./activite.seed";
 import { AdresseWithTypologies, createFakeAdresses } from "./adresse.seed";
 import { createFakeBudget } from "./budget.seed";
 import { createFakeContact } from "./contact.seed";
@@ -220,7 +219,6 @@ export const createFakeStuctureWithRelations = ({
     documentsFinanciers: Array.from({ length: 5 }, () =>
       createFakeDocumentFinancier()
     ),
-    activites: createFakeActivites(),
     evenementsIndesirablesGraves: Array.from(
       { length: faker.number.int({ min: 0, max: 15 }) },
       () => createFakeEvenementIndesirableGrave()

@@ -6,10 +6,11 @@ import { REGION_CODES } from "@/app/utils/bhasileCode.util";
 import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
+import { createFakeActivites } from "./seeders/activite.seed";
 import { createAntenneList } from "./seeders/antenne.seed";
 import { createFakeCpoms } from "./seeders/cpom.seed";
 import { createDepartements } from "./seeders/departements-seed";
-import { createDnaList } from "./seeders/dna.seed";
+import { createDnaList, createDnaStructures } from "./seeders/dna.seed";
 import { createFinessList } from "./seeders/finess.seed";
 import {
   createFakeFormDefinition,
@@ -201,44 +202,41 @@ export async function seed(): Promise<void> {
       select: { id: true, code: true },
     });
     const dnaByCode = new Map<string, number>();
-    for (const d of createdDnas) {
-      dnaByCode.set(d.code, d.id);
+    for (const dna of createdDnas) {
+      dnaByCode.set(dna.code, dna.id);
     }
 
-    const dnaStructures: Array<{
-      dnaId: number;
-      structureId: number;
-      startDate: Date | null;
-      endDate: Date | null;
-    }> = [];
-
-    let cursor = 0;
-    for (const { structureId, count } of perStructureCounts) {
-      for (let i = 0; i < count; i++) {
-        const dna = dnaList[cursor++];
-        const dnaId = dnaByCode.get(dna.code);
-        if (!dnaId) {
-          continue;
-        }
-
-        dnaStructures.push({
-          dnaId,
-          structureId,
-          startDate:
-            faker.helpers.maybe(() => faker.date.past({ years: 2 }), {
-              probability: 0.1,
-            }) ?? null,
-          endDate:
-            faker.helpers.maybe(() => faker.date.past({ years: 2 }), {
-              probability: 0.1,
-            }) ?? null,
-        });
-      }
-    }
+    const dnaStructures = createDnaStructures({
+      dnaList,
+      dnaByCode,
+      perStructureCounts,
+    });
 
     await prisma.dnaStructure.createMany({ data: dnaStructures });
     console.log(`✅ ${dnaStructures.length} liens DnaStructure créés`);
   }
+
+  console.log("📊 Création des activités...");
+  const allStructuresWithDna = await prisma.structure.findMany({
+    select: {
+      id: true,
+      dnaStructures: {
+        select: {
+          dna: true,
+        },
+      },
+    },
+  });
+  const activites = allStructuresWithDna.flatMap((structure) => {
+    const dnaCode = structure.dnaStructures[0]?.dna?.code;
+    if (!dnaCode) {
+      return [];
+    }
+    return createFakeActivites({ structureId: structure.id, dnaCode });
+  });
+  console.log(activites);
+  await prisma.activite.createMany({ data: activites });
+  console.log(`✅ ${activites.length} activités créées`);
 
   console.log("📡 Création des antennes...");
   const antennes = createAntenneList(allStructures);
