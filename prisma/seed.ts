@@ -6,7 +6,7 @@ import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
 import { createFakeCpoms } from "./seeders/cpom.seed";
-import { seedRegionsAndDepartements } from "./seeders/departements-seed";
+import { seedRegionsAndDepartements } from "./seeders/departements.seed";
 import {
   createFakeFormDefinition,
   createFakeFormStepDefinition,

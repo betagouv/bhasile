@@ -17,6 +17,7 @@ export const useSpreadsheetParse = (): UseExcelParseResult => {
     const schema = getSchema(isMixte);
     const { rows, errors } = await readXlsxFile(file, { schema });
 <<<<<<< HEAD
+<<<<<<< HEAD
     const filteredErrors = errors.filter(
       (error) => (error as unknown as SchemaParseCellValueError).row !== 2
     ) as unknown as SchemaParseCellValueError[];
@@ -27,13 +28,14 @@ export const useSpreadsheetParse = (): UseExcelParseResult => {
     })[];
     const filteredErrors = typedErrors.filter((error) => error.row !== 2);
 >>>>>>> 765f9c3e (seeder ok)
+=======
+    const filteredErrors = errors.filter((error) => error.row !== 2);
+>>>>>>> 31d1d750 (restore file)
     if (filteredErrors.length > 0) {
       const errorMessage = filteredErrors
-        .map((error) => {
-          const column = error.column ?? "colonne inconnue";
-          const row = error.row ?? "?";
-          return `Valeur invalide (${column} : ligne ${row})`;
-        })
+        .map(
+          (error) => `Valeur invalide (${error.column} : ligne ${error.row})`
+        )
         .join(", ");
       throw new Error(errorMessage);
     }
