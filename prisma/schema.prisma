@@ -25,6 +25,7 @@ model Departement {
 model Region {
   id           Int           @id @default(autoincrement())
   name         String
+  code         String
   departements Departement[]
 
   @@schema("public")
