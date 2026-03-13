@@ -54,13 +54,34 @@ export const cpomStructureSchema = z.object({
   cpom: baseCpomSchema.optional(),
 });
 
-export const cpomSchema = baseCpomSchema
-  .extend({
-    region: z.string().min(1, "La région est obligatoire"),
-    departements: z.array(z.string()).min(1),
-    structures: z.array(cpomStructureSchema),
-    granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
-  })
+export const descriptionCpomSchema = z.object({
+  id: zId(),
+  name: z.string().nullish(),
+  dateStart: nullishFrenchDateToISO(),
+  dateEnd: nullishFrenchDateToISO(),
+  operateur: operateurSchema,
+  operateurId: zId(),
+  region: z.string().min(1, "La région est obligatoire"),
+  departements: z.array(z.string()).min(1),
+  granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
+});
+
+export const financesCpomSchema = z.object({
+  cpomMillesimes: z.array(cpomMillesimeSchema),
+});
+
+export const actesAdministratifsCpomSchema = z.object({
+  actesAdministratifs: z.array(acteAdministratifCpomSchema),
+});
+
+export const compositionCpomSchema = z.object({
+  structures: z.array(cpomStructureSchema),
+});
+
+export const cpomSchema = descriptionCpomSchema
+  .and(financesCpomSchema)
+  .and(actesAdministratifsCpomSchema)
+  .and(compositionCpomSchema)
   .refine(
     (data) => {
       if (data.dateStart && data.dateEnd) {

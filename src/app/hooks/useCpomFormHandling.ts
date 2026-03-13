@@ -8,7 +8,7 @@ import { useCpomContext } from "../(authenticated)/cpoms/[id]/_context/CpomClien
 import { useFetchState } from "../context/FetchStateContext";
 import { useCpom } from "./useCpom";
 
-export const useCpomFormHandling = ({ nextRoute, callBack }: Props = {}) => {
+export const useCpomFormHandling = ({ cpomId, nextRoute, callBack }: Props) => {
   const router = useRouter();
 
   const { setCpom } = useCpomContext();
@@ -21,10 +21,10 @@ export const useCpomFormHandling = ({ nextRoute, callBack }: Props = {}) => {
     undefined
   );
 
-  const handleSubmit = async (data: CpomFormValues) => {
+  const handleSubmit = async (data: Partial<CpomFormValues>) => {
     setFetchState("cpom-save", FetchState.LOADING);
     try {
-      const result = await updateCpom(data, setCpom);
+      const result = await updateCpom({ id: cpomId, ...data }, setCpom);
       if (typeof result === "object" && "cpomId" in result) {
         setFetchState("cpom-save", FetchState.IDLE);
         if (nextRoute) {
@@ -52,6 +52,7 @@ export const useCpomFormHandling = ({ nextRoute, callBack }: Props = {}) => {
 };
 
 export type Props = {
+  cpomId?: number;
   nextRoute?: string;
   callBack?: () => void;
 };

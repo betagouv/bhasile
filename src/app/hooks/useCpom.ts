@@ -9,7 +9,7 @@ export const useCpom = () => {
   };
 
   const updateCpom = async (
-    data: CpomFormValues,
+    data: Partial<CpomFormValues>,
     setCpom: (cpom: CpomApiType) => void
   ): Promise<{ cpomId: number } | string> => {
     const result = await createOrUpdateCpom(data, "PUT");
@@ -24,7 +24,7 @@ export const useCpom = () => {
   };
 
   const createOrUpdateCpom = async (
-    data: CpomFormValues,
+    data: Partial<CpomFormValues>,
     method: "POST" | "PUT"
   ): Promise<{ cpomId: number } | string> => {
     try {

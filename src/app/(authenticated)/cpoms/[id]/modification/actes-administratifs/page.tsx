@@ -1,6 +1,5 @@
 "use client";
 
-import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { FieldSetDocuments } from "@/app/components/forms/fieldsets/cpom/FieldSetDocuments";
 import FormWrapper, {
   FooterButtonType,
@@ -10,7 +9,7 @@ import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
 import { getCpomDefaultValues } from "@/app/utils/cpom.util";
-import { cpomSchema } from "@/schemas/forms/base/cpom.schema";
+import { actesAdministratifsCpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
 
@@ -23,6 +22,7 @@ export default function CpomModificationActesAdministratifs() {
   const saveState = getFetchState("cpom-save");
 
   const { handleSubmit, backendError } = useCpomFormHandling({
+    cpomId: cpom.id,
     nextRoute: `/cpoms/${cpom.id}`,
   });
 
@@ -39,7 +39,7 @@ export default function CpomModificationActesAdministratifs() {
         closeLink={`/cpoms/${cpom.id}`}
       />{" "}
       <FormWrapper
-        schema={cpomSchema}
+        schema={actesAdministratifsCpomSchema}
         defaultValues={defaultValues}
         onSubmit={handleSubmit}
         resetRoute={`/cpoms/${cpom.id}`}

@@ -9,7 +9,7 @@ import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
 import { getCpomDefaultValues } from "@/app/utils/cpom.util";
-import { cpomSchema } from "@/schemas/forms/base/cpom.schema";
+import { compositionCpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
 
@@ -22,6 +22,7 @@ export default function CpomModificationComposition() {
   const saveState = getFetchState("cpom-save");
 
   const { handleSubmit, backendError } = useCpomFormHandling({
+    cpomId: cpom.id,
     nextRoute: `/cpoms/${cpom.id}`,
   });
 
@@ -35,7 +36,7 @@ export default function CpomModificationComposition() {
     <>
       <ModificationTitle step="Composition" closeLink={`/cpoms/${cpom.id}`} />{" "}
       <FormWrapper
-        schema={cpomSchema}
+        schema={compositionCpomSchema}
         defaultValues={defaultValues}
         onSubmit={handleSubmit}
         resetRoute={`/cpoms/${cpom.id}`}

@@ -15,7 +15,11 @@ export const findAll = async (): Promise<Cpom[]> => {
       structures: true,
       cpomMillesimes: true,
       operateur: true,
-      actesAdministratifs: true,
+      actesAdministratifs: {
+        include: {
+          fileUploads: true,
+        },
+      },
     },
   });
 };
@@ -54,23 +58,23 @@ export const findOne = async (id: number): Promise<Cpom> => {
 export const createOrUpdateCpom = async (
   cpom: CpomApiType
 ): Promise<number> => {
-  const operateurId = cpom.operateur?.id ?? cpom.operateurId;
+  const operateurId = (cpom.operateur?.id ?? cpom.operateurId) as number;
   const cpomId = await prisma.$transaction(async (tx) => {
     const upsertedCpom = await tx.cpom.upsert({
       where: { id: cpom.id ?? 0 },
       update: {
         name: cpom.name,
-        operateurId,
         region: cpom.region,
         departements: cpom.departements ?? [],
         granularity: cpom.granularity,
+        operateurId,
       },
       create: {
         name: cpom.name,
-        operateurId: operateurId as number,
         region: cpom.region,
         departements: cpom.departements ?? [],
         granularity: cpom.granularity,
+        operateurId,
       },
     });
 

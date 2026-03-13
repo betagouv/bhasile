@@ -15,7 +15,7 @@ import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
 import { getCpomDefaultValues } from "@/app/utils/cpom.util";
-import { cpomSchema } from "@/schemas/forms/base/cpom.schema";
+import { financesCpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
@@ -34,6 +34,7 @@ export default function CpomModificationFinance() {
   const saveState = getFetchState("cpom-save");
 
   const { handleSubmit, backendError } = useCpomFormHandling({
+    cpomId: cpom.id,
     callBack: () => {
       confirmationModal.open();
     },
@@ -78,7 +79,7 @@ export default function CpomModificationFinance() {
       />
 
       <FormWrapper
-        schema={cpomSchema}
+        schema={financesCpomSchema}
         defaultValues={defaultValues}
         submitButtonText="Terminer"
         onSubmit={handleSubmit}

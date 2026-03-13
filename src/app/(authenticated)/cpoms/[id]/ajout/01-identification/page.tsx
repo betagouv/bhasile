@@ -25,6 +25,7 @@ export default function CpomAjoutIdentification() {
   const saveState = getFetchState("cpom-save");
 
   const { handleSubmit, backendError } = useCpomFormHandling({
+    cpomId: cpom.id,
     nextRoute: `/cpoms/${cpom.id}/ajout/02-finances`,
   });
 

@@ -9,6 +9,12 @@ import { CpomApiType } from "@/schemas/api/cpom.schema";
 export const CpomItem = ({ cpom, index }: Props) => {
   const { dateStart, dateEnd } = computeCpomDates(cpom);
 
+  const isCpomFinalized =
+    cpom.actesAdministratifs?.length &&
+    cpom.actesAdministratifs?.[0]?.fileUploads?.[0]?.key &&
+    dateStart &&
+    dateEnd;
+
   return (
     <tr
       id={`table-row-key-${index}`}
@@ -19,14 +25,26 @@ export const CpomItem = ({ cpom, index }: Props) => {
       <td className="text-left!">{getGranularityLabel(cpom)}</td>
       <td className="text-left!">{cpom.region}</td>
       <td className="text-left!">{getDepartementsLabel(cpom)}</td>
-      <td className="">{getYearFromDate(dateStart)}</td>
-      <td className="">{getYearFromDate(dateEnd)}</td>
+      <td className="">
+        {getYearFromDate(dateStart) || <EmptyCell className="[&>div]:mx-0.5" />}
+      </td>
+      <td className="">
+        {getYearFromDate(dateEnd) || <EmptyCell className="[&>div]:mx-0.5" />}
+      </td>
       <td>
-        <Link
-          className="fr-btn--tertiary-no-outline fr-icon-arrow-right-line"
-          title={`Voir le CPOM ${cpom.id}`}
-          href={`cpoms/${cpom.id}`}
-        />
+        {isCpomFinalized ? (
+          <Link
+            className="fr-btn--tertiary-no-outline fr-icon-arrow-right-line"
+            title={`Voir le CPOM ${cpom.id}`}
+            href={`cpoms/${cpom.id}`}
+          />
+        ) : (
+          <Link
+            className="fr-btn--tertiary-no-outline fr-icon-edit-line"
+            title={`Ajouter le CPOM ${cpom.id}`}
+            href={`cpoms/${cpom.id}/ajout/01-identification`}
+          />
+        )}
       </td>
     </tr>
   );

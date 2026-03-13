@@ -33,7 +33,9 @@ export const cpomApiSchema = z.object({
   operateurId: z.number().optional(),
   region: z.string().optional(),
   departements: z.array(z.string()).optional(),
-  granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
+  granularity: z
+    .enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"])
+    .optional(),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
   actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
   structures: z
