@@ -105,7 +105,7 @@ export const DetailAffectations = (): ReactElement => {
         />
         <span className="text-sm m-3">
           Ce tableau reflète l’affectation de l’excédent pour chaque année
-          (flux). Il ne constitue en aucun cas un calcul ou stock.
+          (flux). Il ne constitue en aucun cas un calcul ou du stock.
         </span>
       </CustomAccordion>
       <commentaireModal.Component title="Voir le commentaire">

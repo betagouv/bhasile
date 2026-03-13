@@ -4,10 +4,10 @@ import { ReactNode } from "react";
 
 import { Section } from "@/app/components/common/Section";
 
-//import { ActesAdministratifsBlock } from "./_actes-administratifs/ActesAdministratifsBlock";
-import { CompositionBlock } from "./_components/composition/CompositionBlock";
-import { DescriptionBlock } from "./_components/description/DescriptionBlock";
-// import { FinancesBlock } from "./_finances/FinancesBlock";
+import { ActesAdministratifsBlock } from "./_components/ActesAdministratifsBlock";
+import { CompositionBlock } from "./_components/CompositionBlock";
+import { DescriptionBlock } from "./_components/DescriptionBlock";
+import { FinancesBlock } from "./_components/FinancesBlock";
 
 export default function CpomPage(): ReactNode {
   return (
@@ -18,12 +18,12 @@ export default function CpomPage(): ReactNode {
       <Section id="composition">
         <CompositionBlock />
       </Section>
-      {/* <Section id="finances">
+      <Section id="finances">
         <FinancesBlock />
       </Section>
       <Section id="actes-administratifs">
         <ActesAdministratifsBlock />
-      </Section> */}
+      </Section>
     </>
   );
 }

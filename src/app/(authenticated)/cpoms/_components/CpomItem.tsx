@@ -23,9 +23,9 @@ export const CpomItem = ({ cpom, index }: Props) => {
       <td className="">{getYearFromDate(dateEnd)}</td>
       <td>
         <Link
-          className="fr-btn--tertiary-no-outline fr-icon-edit-line"
-          title={`Modifier le CPOM ${cpom.id}`}
-          href={`cpoms/${cpom.id}/modification/01-identification`}
+          className="fr-btn--tertiary-no-outline fr-icon-arrow-right-line"
+          title={`Voir le CPOM ${cpom.id}`}
+          href={`cpoms/${cpom.id}`}
         />
       </td>
     </tr>

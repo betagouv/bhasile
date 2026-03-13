@@ -7,7 +7,7 @@ import { Block } from "@/app/components/common/Block";
 import { Table } from "@/app/components/common/Table";
 import { formatDate } from "@/app/utils/date.util";
 
-import { useCpomContext } from "../../_context/CpomClientContext";
+import { useCpomContext } from "../_context/CpomClientContext";
 
 export const CompositionBlock = () => {
   const { cpom } = useCpomContext();

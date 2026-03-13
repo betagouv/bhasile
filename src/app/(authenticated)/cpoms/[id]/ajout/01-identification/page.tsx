@@ -20,7 +20,7 @@ import { FetchState } from "@/types/fetch-state.type";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
 
-export default function CpomModificationIdentification() {
+export default function CpomAjoutIdentification() {
   const router = useRouter();
 
   const { cpom, setCpom } = useCpomContext();
@@ -40,7 +40,7 @@ export default function CpomModificationIdentification() {
       const result = await updateCpom(data, setCpom);
       if (typeof result === "object" && "cpomId" in result) {
         setFetchState("cpom-save", FetchState.IDLE);
-        router.push(`/cpoms/${result.cpomId}/modification/02-finance`);
+        router.push(`/cpoms/${result.cpomId}/ajout/02-finance`);
       } else {
         setFetchState("cpom-save", FetchState.ERROR);
         setBackendError(result);

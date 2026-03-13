@@ -6,7 +6,7 @@ import { Block } from "@/app/components/common/Block";
 import { computeCpomDates, getGranularityLabel } from "@/app/utils/cpom.util";
 import { formatDate } from "@/app/utils/date.util";
 
-import { useCpomContext } from "../../_context/CpomClientContext";
+import { useCpomContext } from "../_context/CpomClientContext";
 
 export const DescriptionBlock = () => {
   const { cpom } = useCpomContext();
