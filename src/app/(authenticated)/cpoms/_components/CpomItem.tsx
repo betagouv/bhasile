@@ -22,7 +22,7 @@ export const CpomItem = ({ cpom, index }: Props) => {
       className="border-t border-default-grey"
     >
       <td className="text-left!">{cpom.operateur?.name}</td>
-      <td className="text-left!">{getGranularityLabel(cpom)}</td>
+      <td className="text-left!">{getGranularityLabel(cpom.granularity)}</td>
       <td className="text-left!">{cpom.region}</td>
       <td className="text-left!">{getDepartementsLabel(cpom)}</td>
       <td className="">

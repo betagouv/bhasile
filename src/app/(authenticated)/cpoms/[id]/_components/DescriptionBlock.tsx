@@ -29,7 +29,7 @@ export const DescriptionBlock = () => {
         </div>
         <div className="flex gap-2 mb-3">
           <strong>Échelle</strong>
-          {getGranularityLabel(cpom)}
+          {getGranularityLabel(cpom.granularity)}
         </div>
         <hr className="col-span-2" />
         <div className="flex gap-2 mb-3">
