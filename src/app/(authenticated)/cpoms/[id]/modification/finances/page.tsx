@@ -25,10 +25,6 @@ export default function CpomModificationFinance() {
     nextRoute: `/cpoms/${cpom.id}`,
   });
 
-  if (!cpom) {
-    return null;
-  }
-
   const defaultValues = getCpomDefaultValues(cpom);
 
   return (

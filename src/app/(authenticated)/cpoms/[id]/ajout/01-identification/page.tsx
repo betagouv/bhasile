@@ -29,10 +29,6 @@ export default function CpomAjoutIdentification() {
     nextRoute: `/cpoms/${cpom.id}/ajout/02-finances`,
   });
 
-  if (!cpom) {
-    return null;
-  }
-
   const defaultValues = getCpomDefaultValues(cpom);
 
   return (

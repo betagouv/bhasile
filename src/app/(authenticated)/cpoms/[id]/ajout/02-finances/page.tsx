@@ -64,10 +64,6 @@ export default function CpomModificationFinance() {
     onConceal: () => router.push(`/structures`),
   });
 
-  if (!cpom) {
-    return null;
-  }
-
   return (
     <>
       <Stepper

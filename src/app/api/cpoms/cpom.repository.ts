@@ -58,7 +58,7 @@ export const findOne = async (id: number): Promise<Cpom> => {
 export const createOrUpdateCpom = async (
   cpom: CpomApiType
 ): Promise<number> => {
-  const operateurId = (cpom.operateur?.id ?? cpom.operateurId) as number;
+  const operateurId = cpom.operateur?.id ?? cpom.operateurId;
   const cpomId = await prisma.$transaction(async (tx) => {
     let cpomId = cpom.id;
     if (cpomId) {
@@ -73,6 +73,9 @@ export const createOrUpdateCpom = async (
         },
       });
     } else {
+      if (!operateurId) {
+        throw new Error("Operateur ID is required when creating a new CPOM");
+      }
       const upsertedCpom = await tx.cpom.create({
         data: {
           name: cpom.name,
