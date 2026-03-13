@@ -28,11 +28,7 @@ export const CpomHeader = (): ReactElement | null => {
         <div>
           <h2 className="text-title-blue-france text-xs uppercase mb-0">
             <strong className="pr-3">
-              {isModificationPath
-                ? "Modifier un CPOM"
-                : isAjoutPath
-                  ? "Ajouter un CPOM"
-                  : "CPOM"}
+              {getCpomTitle(isModificationPath, isAjoutPath)}
             </strong>
           </h2>
           <h3 className="text-title-blue-france fr-h6 mb-0">
@@ -46,4 +42,17 @@ export const CpomHeader = (): ReactElement | null => {
       {isRootPath && <CpomNavigationMenu />}
     </div>
   ) : null;
+};
+
+const getCpomTitle = (
+  isModificationPath: boolean,
+  isAjoutPath: boolean
+): string => {
+  if (isModificationPath) {
+    return "Modifier un CPOM";
+  }
+  if (isAjoutPath) {
+    return "Ajouter un CPOM";
+  }
+  return "CPOM";
 };
