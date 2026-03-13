@@ -10,12 +10,12 @@ datasource db {
 }
 
 model Departement {
-  id                      Int                      @id @default(autoincrement())
-  numero                  String                   @unique
-  name                    String
-  region                  String
-  structures              Structure[]
-  departementAllowedUsers DepartementAllowedUser[]
+  id               Int               @id @default(autoincrement())
+  numero           String            @unique
+  name             String
+  region           String
+  structures       Structure[]
+  roleDepartements RoleDepartement[]
 
   @@schema("public")
 }
@@ -476,22 +476,23 @@ model CpomMillesime {
   @@schema("public")
 }
 
-model AllowedUser {
-  id                      Int                      @id @default(autoincrement())
-  emailPattern            String
-  granularity             AllowedUserGranularity
-  departementAllowedUsers DepartementAllowedUser[]
+model Role {
+  id               Int               @id @default(autoincrement())
+  emailPattern     String?
+  group            RoleGroup?        @default(ANONYMOUS)
+  roleDepartements RoleDepartement[]
+  users            User[]
 
   @@schema("public")
 }
 
-model DepartementAllowedUser {
+model RoleDepartement {
   departement   Departement @relation(fields: [departementId], references: [id], onDelete: Cascade)
   departementId Int
-  allowedUser   AllowedUser @relation(fields: [allowedUserId], references: [id], onDelete: Cascade)
-  allowedUserId Int
+  role          Role        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId        Int
 
-  @@id([departementId, allowedUserId])
+  @@id([departementId, roleId])
   @@schema("public")
 }
 
@@ -502,6 +503,8 @@ model User {
   email          String       @unique
   lastConnection DateTime
   userActions    UserAction[]
+  role           Role         @relation(fields: [roleId], references: [id])
+  roleId         Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -645,10 +648,22 @@ enum StepStatus {
   @@schema("public")
 }
 
-enum AllowedUserGranularity {
-  DEPARTEMENT
-  REGION
+enum RoleGroup {
   NATIONAL
+  REGION_ARA
+  REGION_BFC
+  REGION_BRE
+  REGION_CVL
+  REGION_GES
+  REGION_HDF
+  REGION_IDF
+  REGION_NOR
+  REGION_NAQ
+  REGION_OCC
+  REGION_PDL
+  REGION_PAC
+  DEPARTEMENT
+  ANONYMOUS
 
   @@schema("public")
 }

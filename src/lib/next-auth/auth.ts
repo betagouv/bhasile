@@ -6,7 +6,13 @@ import {
 import { getServerSession, NextAuthOptions } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 
-import { getIsUserAuthorized, ProConnectUser, upsertUser } from "./auth-util";
+import { upsertUser } from "@/app/api/user/user.repository";
+
+import {
+  getIsUserAuthorized,
+  getRoleFromSession,
+  ProConnectUser,
+} from "./auth-util";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -38,11 +44,13 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ token, session }) {
+      const role = await getRoleFromSession(session);
       try {
         await upsertUser({
           prenom: session.user?.name?.split(" ")?.[0] as string,
           nom: session.user?.name?.split(" ")?.[1] as string,
           email: session.user?.email as string,
+          role,
         });
       } catch (error) {
         console.error(
@@ -52,6 +60,11 @@ export const authOptions: NextAuthOptions = {
       } finally {
         return {
           ...session,
+          user: {
+            ...session.user,
+            role: role.group,
+            allowedDepartements: role.allowedDepartements,
+          },
           id_token: token.id_token,
           provider: token.provider,
           user_id: token.user_id,
