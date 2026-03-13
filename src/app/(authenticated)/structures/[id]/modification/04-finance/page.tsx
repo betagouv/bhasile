@@ -6,6 +6,7 @@ import { IndicateursGeneraux } from "@/app/components/forms/finance/IndicateursG
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
@@ -15,8 +16,6 @@ import { getFinanceSchema } from "@/schemas/forms/base/budget/getFinanceSchema";
 import { anyModificationFinanceFormValues } from "@/schemas/forms/modification/modificationFinance.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
-
-import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 
 export default function ModificationFinanceForm() {
   const { structure } = useStructureContext();
