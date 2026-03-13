@@ -1,6 +1,8 @@
 import { expect, Page } from "@playwright/test";
 
 import { getGranularityLabel } from "@/app/utils/cpom.util";
+import { formatDate } from "@/app/utils/date.util";
+import { formatCurrency } from "@/app/utils/number.util";
 import { CURRENT_YEAR, START_YEAR } from "@/constants";
 
 import { TIMEOUTS } from "../../constants";
@@ -9,24 +11,6 @@ import {
   TestCpomFinanceData,
 } from "../../test-data/cpom-types";
 import { BasePage } from "../BasePage";
-
-function formatDateFr(dateStr: string | undefined): string {
-  if (!dateStr) {
-    return "N/D";
-  }
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("fr-FR");
-}
-
-function formatCurrencyFr(value: number | string | null | undefined): string {
-  if (value === null || value === undefined || isNaN(Number(value))) {
-    return "0 €";
-  }
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-  }).format(Number(value));
-}
 
 export class CpomDetailPage extends BasePage {
   constructor(page: Page) {
@@ -62,13 +46,13 @@ export class CpomDetailPage extends BasePage {
 
     const mainActe = formData.actesAdministratifs[0];
     const dateStart = mainActe?.startDate
-      ? formatDateFr(mainActe.startDate)
+      ? formatDate(mainActe.startDate)
       : null;
     const dateEnd = [mainActe?.endDate, formData.avenants?.[0]?.endDate]
       .filter(Boolean)
       .sort()
       .pop() as string | undefined;
-    const dateEndFormatted = dateEnd ? formatDateFr(dateEnd) : null;
+    const dateEndFormatted = dateEnd ? formatDate(dateEnd) : null;
 
     if (dateStart) {
       await expect(descriptionSection).toContainText(dateStart);
@@ -114,7 +98,7 @@ export class CpomDetailPage extends BasePage {
           continue;
         }
 
-        const expectedText = formatCurrencyFr(value as number | string);
+        const expectedText = formatCurrency(value as number | string);
         expect(
           normalizeForCompare(blockText),
           `Finances should contain "${expectedText}" (${key} ${year})`
