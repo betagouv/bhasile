@@ -4,7 +4,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { CpomTable } from "@/app/components/forms/finance/budget-tables/CpomTable";
 import FormWrapper, {
@@ -13,9 +13,9 @@ import FormWrapper, {
 import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
-import { useCpom } from "@/app/hooks/useCpom";
+import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
 import { getCpomDefaultValues } from "@/app/utils/cpom.util";
-import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
+import { cpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
@@ -28,29 +28,16 @@ const confirmationModal = createModal({
 export default function CpomModificationFinance() {
   const router = useRouter();
 
-  const { cpom, setCpom } = useCpomContext();
+  const { cpom } = useCpomContext();
 
-  const { updateCpom } = useCpom();
-
-  const { getFetchState, setFetchState } = useFetchState();
+  const { getFetchState } = useFetchState();
   const saveState = getFetchState("cpom-save");
 
-  const [backendError, setBackendError] = useState<string | undefined>(
-    undefined
-  );
-
-  const handleSubmit = async (data: CpomFormValues) => {
-    setFetchState("cpom-save", FetchState.LOADING);
-    const result = await updateCpom(data, setCpom);
-    if (typeof result === "object" && "cpomId" in result) {
-      setFetchState("cpom-save", FetchState.IDLE);
+  const { handleSubmit, backendError } = useCpomFormHandling({
+    callBack: () => {
       confirmationModal.open();
-    } else {
-      setFetchState("cpom-save", FetchState.ERROR);
-      setBackendError(result);
-      console.error(result);
-    }
-  };
+    },
+  });
 
   const defaultValues = getCpomDefaultValues(cpom);
 

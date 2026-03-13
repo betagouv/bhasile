@@ -21,7 +21,7 @@ import {
 import { FetchState } from "@/types/fetch-state.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
-import { ModificationTitle } from "../_components/ModificationTitle";
+import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 
 export default function ModificationControleForm() {
   const { structure } = useStructureContext();

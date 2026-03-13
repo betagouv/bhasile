@@ -1,14 +1,11 @@
 "use client";
 
-import Stepper from "@codegouvfr/react-dsfr/Stepper";
-
-import { FieldSetDocuments } from "@/app/components/forms/fieldsets/cpom/FieldSetDocuments";
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { FieldSetGeneral } from "@/app/components/forms/fieldsets/cpom/FieldSetGeneral";
-import { FieldSetStructures } from "@/app/components/forms/fieldsets/cpom/FieldSetStructures";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
+import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
@@ -18,14 +15,14 @@ import { FetchState } from "@/types/fetch-state.type";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
 
-export default function CpomAjoutIdentification() {
+export default function CpomModificationDescription() {
   const { cpom } = useCpomContext();
 
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("cpom-save");
 
   const { handleSubmit, backendError } = useCpomFormHandling({
-    nextRoute: `/cpoms/${cpom.id}/ajout/02-finances`,
+    nextRoute: `/cpoms/${cpom.id}`,
   });
 
   if (!cpom) {
@@ -36,25 +33,25 @@ export default function CpomAjoutIdentification() {
 
   return (
     <>
-      <Stepper
-        currentStep={1}
-        nextTitle="Analyse financière"
-        stepCount={2}
-        title="Identification du CPOM"
-        className="w-1/2"
-      />
+      <ModificationTitle step="Description" closeLink={`/cpoms/${cpom.id}`} />{" "}
       <FormWrapper
         schema={cpomSchema}
         defaultValues={defaultValues}
-        submitButtonText="Étape suivante"
         onSubmit={handleSubmit}
-        availableFooterButtons={[FooterButtonType.SUBMIT]}
+        resetRoute={`/cpoms/${cpom.id}`}
+        submitButtonText="Valider"
+        availableFooterButtons={[
+          FooterButtonType.CANCEL,
+          FooterButtonType.SUBMIT,
+        ]}
+        className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <PreviousPageLink previousRoute="" />
-
+        <CustomNotice
+          severity="info"
+          title=""
+          description="Les dates de début et de fin du CPOM se modifient dans le bloc “Documents”."
+        />
         <FieldSetGeneral />
-        <FieldSetDocuments />
-        <FieldSetStructures />
         {saveState === FetchState.ERROR && (
           <SubmitError
             structureDnaCode={String(cpom.id)}

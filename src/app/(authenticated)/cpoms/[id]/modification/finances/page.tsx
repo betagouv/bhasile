@@ -1,14 +1,10 @@
 "use client";
 
-import Stepper from "@codegouvfr/react-dsfr/Stepper";
-
-import { FieldSetDocuments } from "@/app/components/forms/fieldsets/cpom/FieldSetDocuments";
-import { FieldSetGeneral } from "@/app/components/forms/fieldsets/cpom/FieldSetGeneral";
-import { FieldSetStructures } from "@/app/components/forms/fieldsets/cpom/FieldSetStructures";
+import { CpomTable } from "@/app/components/forms/finance/budget-tables/CpomTable";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
+import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
@@ -18,14 +14,14 @@ import { FetchState } from "@/types/fetch-state.type";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
 
-export default function CpomAjoutIdentification() {
+export default function CpomModificationFinance() {
   const { cpom } = useCpomContext();
 
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("cpom-save");
 
   const { handleSubmit, backendError } = useCpomFormHandling({
-    nextRoute: `/cpoms/${cpom.id}/ajout/02-finances`,
+    nextRoute: `/cpoms/${cpom.id}`,
   });
 
   if (!cpom) {
@@ -36,25 +32,26 @@ export default function CpomAjoutIdentification() {
 
   return (
     <>
-      <Stepper
-        currentStep={1}
-        nextTitle="Analyse financière"
-        stepCount={2}
-        title="Identification du CPOM"
-        className="w-1/2"
-      />
+      <ModificationTitle step="Finances" closeLink={`/cpoms/${cpom.id}`} />{" "}
       <FormWrapper
         schema={cpomSchema}
         defaultValues={defaultValues}
-        submitButtonText="Étape suivante"
         onSubmit={handleSubmit}
-        availableFooterButtons={[FooterButtonType.SUBMIT]}
+        resetRoute={`/cpoms/${cpom.id}`}
+        submitButtonText="Valider"
+        availableFooterButtons={[
+          FooterButtonType.CANCEL,
+          FooterButtonType.SUBMIT,
+        ]}
+        className="border-2 border-solid border-(--text-title-blue-france) gap-4"
       >
-        <PreviousPageLink previousRoute="" />
-
-        <FieldSetGeneral />
-        <FieldSetDocuments />
-        <FieldSetStructures />
+        <p className="mb-0 max-w-4xl">
+          Veuillez renseigner l’historique des données budgétaires{" "}
+          <strong>à l’échelle de l’ensemble du CPOM</strong>. Concernant les
+          affectations, ce tableau reflète le flux annuel et ne constitue en
+          aucun cas un calcul ou du stock.
+        </p>
+        <CpomTable />
         {saveState === FetchState.ERROR && (
           <SubmitError
             structureDnaCode={String(cpom.id)}

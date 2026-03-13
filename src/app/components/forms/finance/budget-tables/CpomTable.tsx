@@ -10,17 +10,19 @@ import { BudgetTableLines } from "./BudgetTableLines";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
 import { getCpomLines } from "./getCpomLines";
 
-export const CpomTable = ({ canEdit = true }: Props) => {
+export const CpomTable = () => {
   const { watch } = useFormContext();
   const cpomMillesimes = watch("cpomMillesimes");
 
   const { cpom } = useCpomContext();
 
-  const { years } = getYearRange({
-    startYear: getYearFromDate(computeCpomDates(cpom).dateStart),
-    endYear: getYearFromDate(computeCpomDates(cpom).dateEnd),
-    order: "desc",
-  });
+  const { years } = getYearRange({ order: "desc" });
+
+  const yearsInCpom = years.filter(
+    (year) =>
+      year >= getYearFromDate(computeCpomDates(cpom).dateStart) &&
+      year <= getYearFromDate(computeCpomDates(cpom).dateEnd)
+  );
 
   return (
     <Table
@@ -32,18 +34,14 @@ export const CpomTable = ({ canEdit = true }: Props) => {
         years={years}
         lines={getCpomLines()}
         cpomMillesimes={cpomMillesimes}
-        canEdit={canEdit}
+        enabledYears={yearsInCpom}
       />
       <BudgetTableCommentLine
         years={years}
         label="Commentaire"
         cpomMillesimes={cpomMillesimes}
-        canEdit={canEdit}
+        enabledYears={yearsInCpom}
       />
     </Table>
   );
-};
-
-type Props = {
-  canEdit?: boolean;
 };

@@ -8,8 +8,7 @@ import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-ta
 import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/BudgetTableLines";
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
 import { getCpomLines } from "@/app/components/forms/finance/budget-tables/getCpomLines";
-import { computeCpomDates } from "@/app/utils/cpom.util";
-import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
+import { getYearRange } from "@/app/utils/date.util";
 
 import { useCpomContext } from "../_context/CpomClientContext";
 
@@ -17,11 +16,7 @@ export const FinancesBlock = () => {
   const { cpom } = useCpomContext();
   const router = useRouter();
 
-  const { years } = getYearRange({
-    startYear: getYearFromDate(computeCpomDates(cpom).dateStart),
-    endYear: getYearFromDate(computeCpomDates(cpom).dateEnd),
-    order: "desc",
-  });
+  const { years } = getYearRange({ order: "desc" });
 
   return (
     <Block

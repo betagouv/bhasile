@@ -16,7 +16,7 @@ import { anyModificationFinanceFormValues } from "@/schemas/forms/modification/m
 import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
 
-import { ModificationTitle } from "../_components/ModificationTitle";
+import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 
 export default function ModificationFinanceForm() {
   const { structure } = useStructureContext();

@@ -1,11 +1,12 @@
 import { useFormContext } from "react-hook-form";
 
 import { useStructuresSelection } from "@/app/hooks/useStructuresSelection";
+import { FormKind } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 
 import { StructuresList } from "../../cpom/StructuresList";
 
-export const FieldSetStructures = () => {
+export const FieldSetStructures = ({ formKind }: Props) => {
   const { watch } = useFormContext();
 
   const departements = watch("departements");
@@ -33,10 +34,16 @@ export const FieldSetStructures = () => {
 
   return (
     <fieldset className="flex flex-col gap-6">
-      <legend className="text-xl font-bold mb-4 text-title-blue-france">
-        Composition
-      </legend>
+      {formKind !== "modification" && (
+        <legend className="text-xl font-bold mb-4 text-title-blue-france">
+          Composition
+        </legend>
+      )}
       <StructuresList structures={structures} />
     </fieldset>
   );
+};
+
+type Props = {
+  formKind?: FormKind;
 };

@@ -14,7 +14,7 @@ import { structureTypologiesWithMandatoryEvolutionSchema } from "@/schemas/forms
 import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
 
-import { ModificationTitle } from "../_components/ModificationTitle";
+import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 
 export default function ModificationTypePlaces() {
   const { structure } = useStructureContext();
