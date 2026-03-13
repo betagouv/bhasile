@@ -33,7 +33,7 @@ export default function CpomModificationActesAdministratifs() {
       <ModificationTitle
         step="Actes administratifs"
         closeLink={`/cpoms/${cpom.id}`}
-      />{" "}
+      />
       <FormWrapper
         schema={actesAdministratifsCpomSchema}
         defaultValues={defaultValues}
