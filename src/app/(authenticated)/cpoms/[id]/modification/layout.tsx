@@ -1,4 +1,4 @@
-export default function FinalisationLayout({
+export default function ModificationLayout({
   children,
 }: {
   children: React.ReactNode;
