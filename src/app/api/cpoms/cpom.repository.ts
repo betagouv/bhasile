@@ -60,25 +60,30 @@ export const createOrUpdateCpom = async (
 ): Promise<number> => {
   const operateurId = (cpom.operateur?.id ?? cpom.operateurId) as number;
   const cpomId = await prisma.$transaction(async (tx) => {
-    const upsertedCpom = await tx.cpom.upsert({
-      where: { id: cpom.id ?? 0 },
-      update: {
-        name: cpom.name,
-        region: cpom.region,
-        departements: cpom.departements ?? [],
-        granularity: cpom.granularity,
-        operateurId,
-      },
-      create: {
-        name: cpom.name,
-        region: cpom.region,
-        departements: cpom.departements ?? [],
-        granularity: cpom.granularity,
-        operateurId,
-      },
-    });
-
-    const cpomId = upsertedCpom.id;
+    let cpomId = cpom.id;
+    if (cpomId) {
+      await tx.cpom.update({
+        where: { id: cpom.id },
+        data: {
+          name: cpom.name,
+          region: cpom.region,
+          departements: cpom.departements,
+          granularity: cpom.granularity,
+          operateurId,
+        },
+      });
+    } else {
+      const upsertedCpom = await tx.cpom.create({
+        data: {
+          name: cpom.name,
+          region: cpom.region,
+          departements: cpom.departements,
+          granularity: cpom.granularity,
+          operateurId,
+        },
+      });
+      cpomId = upsertedCpom.id;
+    }
 
     await createOrUpdateCpomStructures(tx, cpom.structures, cpomId);
 
