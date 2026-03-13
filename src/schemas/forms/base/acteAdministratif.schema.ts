@@ -1,6 +1,10 @@
 import z from "zod";
 
-import { optionalFrenchDateToISO, zId } from "@/app/utils/zodCustomFields";
+import {
+  nullishFrenchDateToISO,
+  optionalFrenchDateToISO,
+  zId,
+} from "@/app/utils/zodCustomFields";
 import { fileApiSchema } from "@/schemas/api/file.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
@@ -10,7 +14,7 @@ export const acteAdministratifAutoSaveSchema = z.object({
   category: z.enum(ActeAdministratifCategory).optional(),
   date: optionalFrenchDateToISO(),
   startDate: optionalFrenchDateToISO(),
-  endDate: optionalFrenchDateToISO(),
+  endDate: nullishFrenchDateToISO(),
   name: z.string().nullish(),
   parentId: zId(),
   parentUuid: z.string().optional(), // Used when parent is not saved yet (no id) - references parent.uuid

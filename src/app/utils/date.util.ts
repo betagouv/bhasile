@@ -103,7 +103,7 @@ export const getYearFromDate = (
   if (typeof date === "number") {
     return date;
   }
-  return -1;
+  return 0;
 };
 export const parseFrDate = (value: unknown): Date | unknown => {
   if (typeof value === "string") {

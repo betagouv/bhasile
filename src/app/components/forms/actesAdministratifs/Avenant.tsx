@@ -1,6 +1,6 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
@@ -17,7 +17,7 @@ export const Avenant = ({
 }: Props) => {
   const { control, watch, setValue } = useFormContext();
 
-  const [showEndDateInput, setShowEndDateInput] = useState(false);
+  const [showEndDateInput, setShowEndDateInput] = useState(!!avenant.endDate);
 
   const actesAdministratifs: ActeAdministratifFormValues[] =
     watch("actesAdministratifs") || [];
@@ -27,6 +27,12 @@ export const Avenant = ({
       (avenant.uuid && acteAdministratif.uuid === avenant.uuid) ||
       (avenant.id && acteAdministratif.id === avenant.id)
   );
+
+  useEffect(() => {
+    if (!showEndDateInput) {
+      setValue(`actesAdministratifs.${index}.endDate`, null);
+    }
+  }, [showEndDateInput, index, setValue]);
 
   if (index === -1) {
     return null;

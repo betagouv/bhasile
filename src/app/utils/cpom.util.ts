@@ -160,15 +160,14 @@ export const computeCpomDates = (
 
   const dateEnd = cpom.actesAdministratifs.reduce(
     (accumulator, current) => {
-      const dateToCompare = current.endDate ?? current.date;
-      if (!dateToCompare) {
+      if (!current.endDate) {
         return accumulator;
       }
       if (!accumulator) {
-        return dateToCompare;
+        return current.endDate;
       }
-      if (dateToCompare > accumulator) {
-        return dateToCompare;
+      if (current.endDate > accumulator) {
+        return current.endDate;
       }
       return accumulator;
     },
