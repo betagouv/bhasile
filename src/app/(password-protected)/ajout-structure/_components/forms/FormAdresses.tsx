@@ -175,10 +175,6 @@ export default function FormAdresses() {
             </fieldset>
             {watch("typeBati") && (
               <AdressesList
-                watch={watch}
-                control={control}
-                setValue={setValue}
-                getValues={getValues}
                 adminAddress={{
                   adresseAdministrativeComplete:
                     localStorageIdentificationValues?.adresseAdministrativeComplete,

@@ -5,13 +5,7 @@ import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import autoAnimate from "@formkit/auto-animate";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { Controller } from "react-hook-form";
-import {
-  Control,
-  UseFormGetValues,
-  UseFormSetValue,
-  UseFormWatch,
-} from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 
 import AddressWithValidation from "@/app/components/forms/AddressWithValidation";
 import { AdressImporter } from "@/app/components/forms/hebergement/AdressImporter";
@@ -22,26 +16,16 @@ import {
   MODELE_DIFFUS_LINK,
   MODELE_MIXTE_LINK,
 } from "@/constants";
-import { TypeBatiAndAdressesFormValues } from "@/schemas/forms/base/adresse.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { AdresseAdministrativeFormValues } from "@/schemas/forms/base/adresseAdministrative.schema";
 import { Repartition } from "@/types/adresse.type";
 
 interface AdressesListProps {
-  watch: UseFormWatch<TypeBatiAndAdressesFormValues>;
-  control: Control<TypeBatiAndAdressesFormValues>;
-  setValue: UseFormSetValue<TypeBatiAndAdressesFormValues>;
-  getValues: UseFormGetValues<TypeBatiAndAdressesFormValues>;
   adminAddress: Partial<AdresseAdministrativeFormValues>;
 }
 
-export const AdressesList = ({
-  adminAddress,
-  watch,
-  control,
-  setValue,
-  getValues,
-}: AdressesListProps) => {
+export const AdressesList = ({ adminAddress }: AdressesListProps) => {
+  const { watch, control, setValue, getValues } = useFormContext();
   const typeBati = watch("typeBati") || Repartition.DIFFUS;
 
   const sameAddress = watch("sameAddress");

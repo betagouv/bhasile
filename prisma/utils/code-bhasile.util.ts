@@ -1,4 +1,4 @@
-import { REGION_CODES } from "@/app/utils/bhasileCode.util";
+import { REGION_CODES } from "@/app/utils/codeBhasile.util";
 
 const PREFIX = "BHA";
 

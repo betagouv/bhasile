@@ -18,7 +18,7 @@ export const Adresses = (): ReactElement => {
       <Notice
         severity="alert"
         title=""
-        className="rounded [&_p]:flex  [&_p]:items-center"
+        className="rounded [&_p]:flex [&_p]:items-center"
         description="Un problème technique a empêché l’enregistrement des hébergements liés à cette structure. La situation est en cours de correction, merci pour votre compréhension."
       />
     );

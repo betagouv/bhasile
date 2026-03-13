@@ -80,7 +80,7 @@ export default function ModificationControleForm() {
         <Controles />
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureCodeBhasile={structure.codeBhasile}
+            codeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}

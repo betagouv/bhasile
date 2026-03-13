@@ -9,7 +9,7 @@ import { createPrismaClient } from "@/prisma-client";
 import {
   generateBhasileCode,
   REGION_CODES,
-} from "@/app/utils/bhasileCode.util";
+} from "@/app/utils/codeBhasile.util";
 
 const prisma = createPrismaClient();
 

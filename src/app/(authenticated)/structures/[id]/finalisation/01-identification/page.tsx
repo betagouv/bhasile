@@ -32,7 +32,7 @@ import { Tabs } from "../_components/Tabs";
 
 export default function FinalisationIdentification(): ReactElement {
   const { structure } = useStructureContext();
-  console.log("structure", structure);
+
   const currentStep = "01-identification";
 
   const currentFormStepStatus = getFinalisationFormStepStatus(
@@ -106,7 +106,7 @@ export default function FinalisationIdentification(): ReactElement {
 
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureCodeBhasile={structure.codeBhasile}
+            codeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}

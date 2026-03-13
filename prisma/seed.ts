@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { REGION_CODES } from "@/app/utils/bhasileCode.util";
+import { REGION_CODES } from "@/app/utils/codeBhasile.util";
 import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
@@ -25,7 +25,7 @@ import {
 import {
   generateAllBhasileCodes,
   getNextBhasileCode,
-} from "./utils/bhasile-code.util";
+} from "./utils/code-bhasile.util";
 import { convertToPrismaObject } from "./utils/common.util";
 import { getRegionFromDepartement } from "./utils/region.util";
 import { wipeTables } from "./utils/wipe";

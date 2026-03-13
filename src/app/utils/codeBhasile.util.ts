@@ -1,22 +1,23 @@
 import prisma from "@/lib/prisma";
 
+// TODO FLORIAN: USE NEW REGION CONSTANTS
 export const REGION_CODES = {
   "Auvergne-Rhône-Alpes": "ARA",
   "Bourgogne-Franche-Comté": "BFC",
-  "Bretagne": "BRE",
+  Bretagne: "BRE",
   "Centre-Val de Loire": "CVL",
-  "Corse": "20R",
+  Corse: "20R",
   "Grand Est": "GES",
-  "Guadeloupe": "971",
-  "Guyane": "973",
+  Guadeloupe: "971",
+  Guyane: "973",
   "Hauts-de-France": "HDF",
   "Île-de-France": "IDF",
   "La Réunion": "974",
-  "Martinique": "972",
-  "Mayotte": "976",
-  "Normandie": "NOR",
+  Martinique: "972",
+  Mayotte: "976",
+  Normandie: "NOR",
   "Nouvelle-Aquitaine": "NAQ",
-  "Occitanie": "OCC",
+  Occitanie: "OCC",
   "Pays de la Loire": "PDL",
   "Provence-Alpes-Côte d'Azur": "PAC",
 } as const;
@@ -55,11 +56,9 @@ const getLastBhasileCodeForRegion = async (
   return lastStructure?.codeBhasile ?? null;
 };
 
-
 export const generateBhasileCode = async (
   region: keyof typeof REGION_CODES
 ): Promise<string> => {
-
   const regionCode = REGION_CODES[region];
   const lastCode = await getLastBhasileCodeForRegion(regionCode);
 

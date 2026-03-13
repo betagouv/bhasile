@@ -74,7 +74,7 @@ export default function ModificationQualiteForm() {
         <ActesAdministratifs />
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureCodeBhasile={structure.codeBhasile}
+            codeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}

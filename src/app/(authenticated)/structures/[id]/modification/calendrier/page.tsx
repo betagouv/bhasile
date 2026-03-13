@@ -54,7 +54,7 @@ export default function ModificationCalendrier() {
       </FormWrapper>
       {saveState === FetchState.ERROR && (
         <SubmitError
-          structureCodeBhasile={structure.codeBhasile}
+          codeBhasile={structure.codeBhasile}
           backendError={backendError}
         />
       )}

@@ -98,7 +98,7 @@ export default function FinalisationDocumentsFinanciers() {
 
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureCodeBhasile={structure.codeBhasile}
+            codeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}

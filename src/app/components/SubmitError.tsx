@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 import { getErrorEmail } from "@/app/utils/errorMail.util";
 
 export const SubmitError = ({
-  structureCodeBhasile,
+  codeBhasile,
   cpomId,
   backendError,
 }: Props): ReactElement => {
@@ -12,7 +12,7 @@ export const SubmitError = ({
       <p className="text-default-error m-0 p-0">
         Une erreur s’est produite.{" "}
         <a
-          href={getErrorEmail(backendError, structureCodeBhasile, cpomId)}
+          href={getErrorEmail(backendError, codeBhasile, cpomId)}
           className="underline"
           target="_blank"
         >
@@ -24,7 +24,7 @@ export const SubmitError = ({
 };
 
 type Props = {
-  structureCodeBhasile?: string;
+  codeBhasile?: string;
   cpomId?: number;
   backendError?: string;
 };

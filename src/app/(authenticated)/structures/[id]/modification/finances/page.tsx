@@ -81,7 +81,7 @@ export default function ModificationFinanceForm() {
         <BudgetTables />
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureCodeBhasile={structure.codeBhasile}
+            codeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}
