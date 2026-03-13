@@ -36,10 +36,17 @@ export const DescriptionBlock = () => {
           <strong>Région</strong>
           {cpom.region}
         </div>
-        <div className="flex gap-2 mb-3">
-          <strong>Département</strong>
-          {cpom.departements?.join(", ")}
-        </div>
+        {cpom.granularity !== "REGIONALE" && (
+          <div className="flex gap-2 mb-3">
+            <strong>
+              Département
+              {cpom.departements?.length && cpom.departements?.length > 1
+                ? "s"
+                : ""}
+            </strong>
+            {cpom.departements?.join(", ")}
+          </div>
+        )}
         <hr className="col-span-2" />
         <div className="flex gap-2 mb-3">
           <strong>Date début</strong>
