@@ -48,7 +48,10 @@ export class CpomDetailPage extends BasePage {
     const dateStart = mainActe?.startDate
       ? formatDate(mainActe.startDate)
       : null;
-    const dateEnd = [mainActe?.endDate, formData.avenants?.[0]?.endDate]
+    const dateEnd = [
+      mainActe?.endDate,
+      ...(formData.avenants?.map((a) => a.endDate).filter(Boolean) ?? []),
+    ]
       .filter(Boolean)
       .sort()
       .pop() as string | undefined;

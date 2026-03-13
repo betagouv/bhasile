@@ -29,7 +29,7 @@ export const Avenant = ({
   );
 
   useEffect(() => {
-    if (!showEndDateInput) {
+    if (index !== -1 && !showEndDateInput) {
       setValue(`actesAdministratifs.${index}.endDate`, null);
     }
   }, [showEndDateInput, index, setValue]);
