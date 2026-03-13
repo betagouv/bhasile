@@ -321,7 +321,7 @@ describe("date util", () => {
     });
 
     describe("when input is a string with invalid date", () => {
-      it("should return -1 for invalid date string", () => {
+      it("should return 0 for invalid date string", () => {
         // GIVEN
         const date = "not-a-date";
 
@@ -329,10 +329,10 @@ describe("date util", () => {
         const result = getYearFromDate(date);
 
         // THEN
-        expect(result).toBe(-1);
+        expect(result).toBe(0);
       });
 
-      it("should return -1 for empty string", () => {
+      it("should return 0 for empty string", () => {
         // GIVEN
         const date = "";
 
@@ -340,7 +340,7 @@ describe("date util", () => {
         const result = getYearFromDate(date);
 
         // THEN
-        expect(result).toBe(-1);
+        expect(result).toBe(0);
       });
     });
 

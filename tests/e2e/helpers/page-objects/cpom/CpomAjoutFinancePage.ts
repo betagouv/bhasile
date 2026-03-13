@@ -29,7 +29,7 @@ const CPOM_FINANCE_LINE_NAMES = [
   "autre",
 ] as const;
 
-export class CpomModificationFinancePage extends BasePage {
+export class CpomAjoutFinancePage extends BasePage {
   private waitHelper: WaitHelper;
   private formHelper: FormHelper;
 

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { CpomApiType } from "@/schemas/api/cpom.schema";
 
-import { CpomModificationHeader } from "./_components/CpomModificationHeader";
+import { CpomHeader } from "./_components/CpomHeader";
 import { CpomProvider } from "./_context/CpomContext";
 
 async function getCpom(id: string): Promise<CpomApiType> {
@@ -43,8 +43,8 @@ export default async function CpomLayout({
   return (
     <CpomProvider cpom={cpom}>
       <div className="flex flex-col h-full bg-alt-grey gap-3 pb-4">
-        <CpomModificationHeader />
-        <div className="mx-4">{children}</div>
+        <CpomHeader />
+        {children}
       </div>
     </CpomProvider>
   );

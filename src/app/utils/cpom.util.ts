@@ -11,6 +11,7 @@ import {
   CpomMillesimeFormValues,
 } from "@/schemas/forms/base/cpom.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
+import { CpomGranularity } from "@/types/cpom.type";
 
 import { getYearRange } from "./date.util";
 
@@ -182,4 +183,19 @@ export const computeCpomDates = (
     dateStart,
     dateEnd,
   };
+};
+
+export const getGranularityLabel = (
+  granularity: CpomGranularity | undefined
+): string => {
+  switch (granularity) {
+    case "INTERDEPARTEMENTALE":
+      return "Interdépartementale";
+    case "DEPARTEMENTALE":
+      return "Départementale";
+    case "REGIONALE":
+      return "Régionale";
+    default:
+      return "";
+  }
 };

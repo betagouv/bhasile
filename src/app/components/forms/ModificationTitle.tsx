@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export const ModificationTitle = ({ step, closeLink }: Props) => {
   return (
     <div className="flex justify-between items-center mx-6 my-3">
@@ -8,12 +10,12 @@ export const ModificationTitle = ({ step, closeLink }: Props) => {
         />
         <span className="italic font-normal"> Modification</span> - {step}
       </h1>
-      <a href={closeLink} aria-label="Fermer la modification">
+      <Link href={closeLink} aria-label="Fermer la modification">
         <span
           className="fr-icon-close-line fr-icon--md text-title-blue-france"
           aria-hidden="true"
         />
-      </a>
+      </Link>
     </div>
   );
 };

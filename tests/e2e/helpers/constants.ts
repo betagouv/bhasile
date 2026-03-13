@@ -38,6 +38,7 @@ export const URLS = {
 
   // CPOM
   CPOMS_AJOUT_IDENTIFICATION: `${BASE_URL}/cpoms/ajout/01-identification`,
+  cpomPage: (cpomId: number) => `${BASE_URL}/cpoms/${cpomId}`,
   cpomModificationIdentification: (cpomId: number) =>
     `${BASE_URL}/cpoms/${cpomId}/modification/01-identification`,
   cpomModificationFinance: (cpomId: number) =>

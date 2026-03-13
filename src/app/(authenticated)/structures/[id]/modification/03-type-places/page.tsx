@@ -6,6 +6,7 @@ import { FieldSetTypePlaces } from "@/app/components/forms/fieldsets/structure/F
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
@@ -13,8 +14,6 @@ import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { structureTypologiesWithMandatoryEvolutionSchema } from "@/schemas/forms/base/structureTypologie.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
-
-import { ModificationTitle } from "../_components/ModificationTitle";
 
 export default function ModificationTypePlaces() {
   const { structure } = useStructureContext();
