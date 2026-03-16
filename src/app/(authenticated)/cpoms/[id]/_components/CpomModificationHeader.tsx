@@ -13,8 +13,15 @@ export const CpomModificationHeader = (): ReactElement | null => {
   const isCreation = searchParams.get("isCreation") === "true";
 
   const { cpom } = useCpomContext();
+  const { dateStart, dateEnd } = computeCpomDates(cpom);
+  const yearStart = getYearFromDate(dateStart);
+  const yearEnd = getYearFromDate(dateEnd);
 
-  const years = `${getYearFromDate(computeCpomDates(cpom).dateStart)} - ${getYearFromDate(computeCpomDates(cpom).dateEnd)}`;
+  let years: string | undefined = `${yearStart} - ${yearEnd}`;
+
+  if (yearStart === -1 || yearEnd === -1) {
+    years = undefined;
+  }
 
   return cpom ? (
     <div className="sticky top-0 z-2 bg-lifted-grey">
@@ -26,7 +33,7 @@ export const CpomModificationHeader = (): ReactElement | null => {
             </strong>
           </h2>
           <h3 className="text-title-blue-france fr-h6 mb-0">
-            <strong className="pr-2">{formatCpomName(cpom)}</strong>{" "}
+            <strong className="pr-2">{formatCpomName(cpom)}</strong>
             <span className="text-title-grey font-normal text-lg italic">
               {years}
             </span>
