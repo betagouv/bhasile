@@ -186,8 +186,7 @@ export const fillOfiiStructureFromRows = async (
         );
       } catch (error) {
         throw new Error(
-          "❌ Impossible de charger le mapping opérateurs depuis S3",
-          { cause: error }
+          "❌ Impossible de charger le mapping opérateurs depuis S3" + error
         );
       }
     }
@@ -231,8 +230,8 @@ export const fillOfiiStructureFromRows = async (
       } catch (error) {
         console.error(error);
         throw new Error(
-          "❌ Des opérateurs présents dans le fichier OFII sont inconnus en base.",
-          { cause: error }
+          "❌ Des opérateurs présents dans le fichier OFII sont inconnus en base." +
+            error
         );
       }
     }
