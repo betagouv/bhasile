@@ -37,7 +37,9 @@ function collapseSpaces(str: string): string {
 }
 
 function deptCodeFromCode(code: string | null | undefined): string {
-  if (!code || code.length < 3) return "";
+  if (!code || code.length < 3) {
+    return "";
+  }
   const two = code.slice(1, 3);
   const three = code.slice(1, 4);
   const n = parseInt(two, 10);
@@ -82,9 +84,9 @@ function getCleanName(
     cleanName = cleanName.replace(op, "");
   }
 
-  let categorie = categorieDeCentre.replace("NUITEE HOTELIERE", "NH");
+  const categorie = categorieDeCentre.replace("NUITEE HOTELIERE", "NH");
 
-  let fullName = `${categorie} ${cleanName} ${finalOperateurClean} - ${deptCode}`;
+  const fullName = `${categorie} ${cleanName} ${finalOperateurClean} - ${deptCode}`;
 
   return collapseSpaces(fullName).trim();
 }
@@ -184,7 +186,8 @@ export const fillOfiiStructureFromRows = async (
         );
       } catch (error) {
         throw new Error(
-          "❌ Impossible de charger le mapping opérateurs depuis S3"
+          "❌ Impossible de charger le mapping opérateurs depuis S3",
+          { cause: error }
         );
       }
     }
@@ -226,8 +229,10 @@ export const fillOfiiStructureFromRows = async (
           "operateur"
         );
       } catch (error) {
+        console.error(error);
         throw new Error(
-          "❌ Des opérateurs présents dans le fichier OFII sont inconnus en base."
+          "❌ Des opérateurs présents dans le fichier OFII sont inconnus en base.",
+          { cause: error }
         );
       }
     }
