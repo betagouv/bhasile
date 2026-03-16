@@ -18,6 +18,7 @@ model Departement {
   departementAllowedUsers DepartementAllowedUser[]
   regionAdministrative    Region?                  @relation(fields: [regionId], references: [id])
   regionId                Int?
+  cpoms                   CpomDepartement[]
 
   @@schema("public")
 }
@@ -27,6 +28,7 @@ model Region {
   name         String
   code         String
   departements Departement[]
+  cpoms        Cpom[]
 
   @@schema("public")
 }
@@ -419,8 +421,9 @@ model Cpom {
   id                  Int                 @id @default(autoincrement())
   name                String?
   structures          CpomStructure[]
-  region              String?
-  departements        String[]
+  region              Region?             @relation(fields: [regionId], references: [id])
+  regionId            Int?
+  departements        CpomDepartement[]
   granularity         CpomGranularity     @default(REGIONALE)
   cpomMillesimes      CpomMillesime[]
   operateur           Operateur           @relation(fields: [operateurId], references: [id])
@@ -431,6 +434,16 @@ model Cpom {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@schema("public")
+}
+
+model CpomDepartement {
+  cpom          Cpom        @relation(fields: [cpomId], references: [id], onDelete: Cascade)
+  cpomId        Int
+  departement   Departement @relation(fields: [departementId], references: [id], onDelete: Cascade)
+  departementId Int
+
+  @@id([cpomId, departementId])
   @@schema("public")
 }
 

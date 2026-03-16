@@ -39,6 +39,11 @@ export const createFakeCpoms = async (
   });
 
   const departements = await prisma.departement.findMany();
+  const regions = await prisma.region.findMany();
+
+  const regionNameToId = new Map<string, number>(
+    regions.map((region) => [region.name, region.id])
+  );
 
   const departementToRegion = new Map<string, string>(
     departements.map((departement: Departement) => [
@@ -87,7 +92,7 @@ export const createFakeCpoms = async (
 
   // Create CPOMs for valid groups
   for (const [key, structures] of validGroups) {
-    const [operateurIdStr, region] = key.split("_");
+    const [operateurIdStr, regionName] = key.split("_");
 
     const dureeAnnees = faker.number.int({ min: 3, max: 5 });
     const timeShift = faker.number.int({ min: -2, max: 2 });
@@ -102,7 +107,7 @@ export const createFakeCpoms = async (
       to: new Date(yearEnd, 11, 31),
     });
 
-    const cpomName = `CPOM ${operateurIdStr} ${region} ${yearStart}-${yearEnd}`;
+    const cpomName = `CPOM ${operateurIdStr} ${regionName} ${yearStart}-${yearEnd}`;
 
     // Select between 60% and 100% of structures for this CPOM
     const nbStructures = Math.max(
@@ -116,16 +121,25 @@ export const createFakeCpoms = async (
 
     const isUiInitialized = faker.datatype.boolean({ probability: 0.5 });
 
+    const regionId = regionNameToId.get(regionName);
+
     const cpom = await prisma.cpom.create({
       data: {
         name: cpomName,
-        operateurId: Number(operateurIdStr),
+        operateur: { connect: { id: Number(operateurIdStr) } },
         granularity: "REGIONALE",
-        region: isUiInitialized ? region : undefined,
+        region:
+          isUiInitialized && regionId
+            ? { connect: { id: regionId } }
+            : undefined,
         departements: isUiInitialized
-          ? departements
-              .filter((departement) => departement.region === region)
-              .map((departement) => departement.numero)
+          ? {
+              create: departements
+                .filter((departement) => departement.region === regionName)
+                .map((departement) => ({
+                  departementId: departement.id,
+                })),
+            }
           : undefined,
         ...(isUiInitialized
           ? {

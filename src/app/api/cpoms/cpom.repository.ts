@@ -46,25 +46,34 @@ export const createOrUpdateCpom = async (
 ): Promise<number> => {
   const operateurId = cpom.operateur?.id ?? cpom.operateurId;
   const cpomId = await prisma.$transaction(async (tx) => {
+    let regionId: number | undefined;
+
+    if (cpom.region) {
+      const region = await tx.region.findFirst({
+        where: { name: cpom.region },
+      });
+      regionId = region?.id;
+    }
+
     const upsertedCpom = await tx.cpom.upsert({
       where: { id: cpom.id ?? 0 },
       update: {
         name: cpom.name,
         operateurId,
-        region: cpom.region,
-        departements: cpom.departements ?? [],
+        regionId,
         granularity: cpom.granularity,
       },
       create: {
         name: cpom.name,
         operateurId: operateurId as number,
-        region: cpom.region,
-        departements: cpom.departements ?? [],
+        regionId,
         granularity: cpom.granularity,
       },
     });
 
     const cpomId = upsertedCpom.id;
+
+    await syncCpomDepartements(tx, cpom.departements, cpomId);
 
     await createOrUpdateCpomStructures(tx, cpom.structures, cpomId);
 
@@ -78,6 +87,36 @@ export const createOrUpdateCpom = async (
   });
 
   return cpomId;
+};
+
+const syncCpomDepartements = async (
+  tx: PrismaTransaction,
+  departementNumeros: string[] | undefined,
+  cpomId: number
+): Promise<void> => {
+  await tx.cpomDepartement.deleteMany({
+    where: { cpomId },
+  });
+
+  if (!departementNumeros?.length) {
+    return;
+  }
+
+  const departements = await tx.departement.findMany({
+    where: { numero: { in: departementNumeros } },
+    select: { id: true },
+  });
+
+  if (!departements.length) {
+    return;
+  }
+
+  await tx.cpomDepartement.createMany({
+    data: departements.map((departement) => ({
+      cpomId,
+      departementId: departement.id,
+    })),
+  });
 };
 
 const createOrUpdateCpomStructures = async (
