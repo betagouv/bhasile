@@ -1,4 +1,7 @@
-import readXlsxFile, { Schema } from "read-excel-file/browser";
+import readXlsxFile, {
+  Schema,
+  SchemaParseCellValueError,
+} from "read-excel-file/browser";
 
 import { CURRENT_YEAR } from "@/constants";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
@@ -13,7 +16,9 @@ export const useSpreadsheetParse = (): UseExcelParseResult => {
     const adresses: FormAdresse[] = [];
     const schema = getSchema(isMixte);
     const { rows, errors } = await readXlsxFile(file, { schema });
-    const filteredErrors = errors.filter((error) => error.row !== 2);
+    const filteredErrors = errors.filter(
+      (error) => (error as unknown as SchemaParseCellValueError).row !== 2
+    ) as unknown as SchemaParseCellValueError[];
     if (filteredErrors.length > 0) {
       const errorMessage = filteredErrors
         .map(
