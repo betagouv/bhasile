@@ -259,11 +259,7 @@
   resolved "https://registry.yarnpkg.com/@chevrotain/utils/-/utils-10.5.0.tgz#0ee36f65b49b447fbac71b9e5af5c5c6c98ac057"
   integrity sha512-hBzuU5+JjB2cqNZyszkDHZgOSrUUT8V3dhgRl8Q9Gp6dAj/H5+KILGjbhDpc3Iy9qmqlm/akuOI2ut9VUtzJxQ==
 
-<<<<<<< HEAD
 "@codegouvfr/react-dsfr@^1.32.0":
-=======
-"@codegouvfr/react-dsfr@^1.31.1":
->>>>>>> d36f268c (post rebase)
   version "1.32.0"
   resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-1.32.0.tgz#82e0a8c7a20906a9623ce28161c2cc6b8a0ba49a"
   integrity sha512-f7J66o6Wx8Cwy+AEkxA3gNmNvZhLyWL+/IhiNeHFifrNBUd+9nyWrdaecttBhASzmOUp9nAqCVVRb5mrlRcFGQ==
@@ -531,11 +527,7 @@
   dependencies:
     "@types/json-schema" "^7.0.15"
 
-<<<<<<< HEAD
-"@eslint/eslintrc@^3", "@eslint/eslintrc@^3.3.1":
-=======
 "@eslint/eslintrc@^3", "@eslint/eslintrc@^3.3.5":
->>>>>>> d36f268c (post rebase)
   version "3.3.5"
   resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-3.3.5.tgz#c131793cfc1a7b96f24a83e0a8bbd4b881558c60"
   integrity sha512-4IlJx0X0qftVsN5E+/vGujTRIFtwuLbNsVUe7TO6zYPDR1O6nFwvwhIKEKSrl6dZchmYBITazxKoUYOjdtjlRg==
@@ -1617,37 +1609,6 @@
   resolved "https://registry.yarnpkg.com/@rushstack/eslint-patch/-/eslint-patch-1.16.1.tgz#4f97581e114fc79f246cee3723a5c4edd3b62415"
   integrity sha512-TvZbIpeKqGQQ7X0zSCvPH9riMSFQFSggnfBjFZ1mEoILW+UuXCKwOoPcgjMwiUtRqFZ8jWhPJc4um14vC6I4ag==
 
-<<<<<<< HEAD
-"@sentry-internal/browser-utils@10.42.0":
-  version "10.42.0"
-  resolved "https://registry.yarnpkg.com/@sentry-internal/browser-utils/-/browser-utils-10.42.0.tgz#97b7f8652e66e2ad4b3f14e12c47e5f827d8d763"
-  integrity sha512-HCEICKvepxN4/6NYfnMMMlppcSwIEwtS66X6d1/mwaHdi2ivw0uGl52p7Nfhda/lIJArbrkWprxl0WcjZajhQA==
-  dependencies:
-    "@sentry/core" "10.42.0"
-
-"@sentry-internal/feedback@10.42.0":
-  version "10.42.0"
-  resolved "https://registry.yarnpkg.com/@sentry-internal/feedback/-/feedback-10.42.0.tgz#5c965367ff839da8289a27b308f14eab152eb8d7"
-  integrity sha512-lpPcHsog10MVYFTWE0Pf8vQRqQWwZHJpkVl2FEb9/HDdHFyTBUhCVoWo1KyKaG7GJl9AVKMAg7bp9SSNArhFNQ==
-  dependencies:
-    "@sentry/core" "10.42.0"
-
-"@sentry-internal/replay-canvas@10.42.0":
-  version "10.42.0"
-  resolved "https://registry.yarnpkg.com/@sentry-internal/replay-canvas/-/replay-canvas-10.42.0.tgz#091ca5a4d314aa599bd9f3988f57ed744f828249"
-  integrity sha512-am3m1Fj8ihoPfoYo41Qq4KeCAAICn4bySso8Oepu9dMNe9Lcnsf+reMRS2qxTPg3pZDc4JEMOcLyNCcgnAfrHw==
-  dependencies:
-    "@sentry-internal/replay" "10.42.0"
-    "@sentry/core" "10.42.0"
-
-"@sentry-internal/replay@10.42.0":
-  version "10.42.0"
-  resolved "https://registry.yarnpkg.com/@sentry-internal/replay/-/replay-10.42.0.tgz#bcc9e5d9468389c0fb4de557432a6fbba739fdeb"
-  integrity sha512-Zh3EoaH39x2lqVY1YyVB2vJEyCIrT+YLUQxYl1yvP0MJgLxaR6akVjkgxbSUJahan4cX5DxpZiEHfzdlWnYPyQ==
-  dependencies:
-    "@sentry-internal/browser-utils" "10.42.0"
-    "@sentry/core" "10.42.0"
-=======
 "@sentry-internal/browser-utils@10.43.0":
   version "10.43.0"
   resolved "https://registry.yarnpkg.com/@sentry-internal/browser-utils/-/browser-utils-10.43.0.tgz#afced399ac5707b59f1a174aecd5bd5e1edd9d8f"
@@ -1677,25 +1638,12 @@
   dependencies:
     "@sentry-internal/browser-utils" "10.43.0"
     "@sentry/core" "10.43.0"
->>>>>>> d36f268c (post rebase)
 
 "@sentry/babel-plugin-component-annotate@5.1.1":
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/@sentry/babel-plugin-component-annotate/-/babel-plugin-component-annotate-5.1.1.tgz#9eeef63099011155691a5ee59b0f796c141e8f85"
   integrity sha512-x2wEpBHwsTyTF2rWsLKJlzrRF1TTIGOfX+ngdE+Yd5DBkoS58HwQv824QOviPGQRla4/ypISqAXzjdDPL/zalg==
 
-<<<<<<< HEAD
-"@sentry/browser@10.42.0":
-  version "10.42.0"
-  resolved "https://registry.yarnpkg.com/@sentry/browser/-/browser-10.42.0.tgz#918af1109d7fd93720d75b80ae33b347883caacd"
-  integrity sha512-iXxYjXNEBwY1MH4lDSDZZUNjzPJDK7/YLwVIJq/3iBYpIQVIhaJsoJnf3clx9+NfJ8QFKyKfcvgae61zm+hgTA==
-  dependencies:
-    "@sentry-internal/browser-utils" "10.42.0"
-    "@sentry-internal/feedback" "10.42.0"
-    "@sentry-internal/replay" "10.42.0"
-    "@sentry-internal/replay-canvas" "10.42.0"
-    "@sentry/core" "10.42.0"
-=======
 "@sentry/browser@10.43.0":
   version "10.43.0"
   resolved "https://registry.yarnpkg.com/@sentry/browser/-/browser-10.43.0.tgz#744e1593d8578e4ea37579230041c8bdd64520c6"
@@ -1706,7 +1654,6 @@
     "@sentry-internal/replay" "10.43.0"
     "@sentry-internal/replay-canvas" "10.43.0"
     "@sentry/core" "10.43.0"
->>>>>>> d36f268c (post rebase)
 
 "@sentry/bundler-plugin-core@5.1.1", "@sentry/bundler-plugin-core@^5.1.0":
   version "5.1.1"
@@ -1781,17 +1728,6 @@
     "@sentry/cli-win32-i686" "2.58.5"
     "@sentry/cli-win32-x64" "2.58.5"
 
-<<<<<<< HEAD
-"@sentry/core@10.42.0":
-  version "10.42.0"
-  resolved "https://registry.yarnpkg.com/@sentry/core/-/core-10.42.0.tgz#5b6e38d4fde9276588f507d082c9b46debd3d666"
-  integrity sha512-L4rMrXMqUKBanpjpMT+TuAVk6xAijz6AWM6RiEYpohAr7SGcCEc1/T0+Ep1eLV8+pwWacfU27OvELIyNeOnGzA==
-
-"@sentry/nextjs@^10":
-  version "10.42.0"
-  resolved "https://registry.yarnpkg.com/@sentry/nextjs/-/nextjs-10.42.0.tgz#acc0e46b20665f908c15a1d6ff33885a850f790a"
-  integrity sha512-4YcVwicZLQWCNXMRSmtg0q68cqhttwhUqcvTe0aYg4YkQIDQKzVOYVU7/js9kSK1PFe9gFdaUxgboBYBp2evDg==
-=======
 "@sentry/core@10.43.0":
   version "10.43.0"
   resolved "https://registry.yarnpkg.com/@sentry/core/-/core-10.43.0.tgz#48b7b2295f36097775b529c59712688c9087c7bc"
@@ -1801,20 +1737,10 @@
   version "10.43.0"
   resolved "https://registry.yarnpkg.com/@sentry/nextjs/-/nextjs-10.43.0.tgz#7a652d28ed03e9888f9e97f85943566739a2edd1"
   integrity sha512-SmybDiZdI4c7GQYvi+HNBKbnKOmIaiqsLj67vVVV0tN6A1iX9OrP5jldxawzrd9wn5oXDhHSyzJmyKwdOu7/MQ==
->>>>>>> d36f268c (post rebase)
   dependencies:
     "@opentelemetry/api" "^1.9.0"
     "@opentelemetry/semantic-conventions" "^1.37.0"
     "@rollup/plugin-commonjs" "28.0.1"
-<<<<<<< HEAD
-    "@sentry-internal/browser-utils" "10.42.0"
-    "@sentry/bundler-plugin-core" "^5.1.0"
-    "@sentry/core" "10.42.0"
-    "@sentry/node" "10.42.0"
-    "@sentry/opentelemetry" "10.42.0"
-    "@sentry/react" "10.42.0"
-    "@sentry/vercel-edge" "10.42.0"
-=======
     "@sentry-internal/browser-utils" "10.43.0"
     "@sentry/bundler-plugin-core" "^5.1.0"
     "@sentry/core" "10.43.0"
@@ -1822,26 +1748,10 @@
     "@sentry/opentelemetry" "10.43.0"
     "@sentry/react" "10.43.0"
     "@sentry/vercel-edge" "10.43.0"
->>>>>>> d36f268c (post rebase)
     "@sentry/webpack-plugin" "^5.1.0"
     rollup "^4.35.0"
     stacktrace-parser "^0.1.10"
 
-<<<<<<< HEAD
-"@sentry/node-core@10.42.0":
-  version "10.42.0"
-  resolved "https://registry.yarnpkg.com/@sentry/node-core/-/node-core-10.42.0.tgz#84b527d4f4df35484d790e877a87ecba91187fe1"
-  integrity sha512-9tf3fPV6M071aps72D+PEtdQPTuj+SuqO2+PpTfdPP5ZL4TTKYo3VK0li76SL+5wGdTFGV5qmsokHq9IRBA0iA==
-  dependencies:
-    "@sentry/core" "10.42.0"
-    "@sentry/opentelemetry" "10.42.0"
-    import-in-the-middle "^2.0.6"
-
-"@sentry/node@10.42.0":
-  version "10.42.0"
-  resolved "https://registry.yarnpkg.com/@sentry/node/-/node-10.42.0.tgz#303b19538b3ff430845e46ab5e3b752e0d926691"
-  integrity sha512-ZZfU3Fnni7Aj0lTX4e3QpY3UxK4FGuzfM20316UAJycBGnripm+sDHwcekPMGfLnk/FrN9wa1atspVlHvOI0WQ==
-=======
 "@sentry/node-core@10.43.0":
   version "10.43.0"
   resolved "https://registry.yarnpkg.com/@sentry/node-core/-/node-core-10.43.0.tgz#f8575be3ad09e86e8e18e54074f3bcafea344234"
@@ -1855,7 +1765,6 @@
   version "10.43.0"
   resolved "https://registry.yarnpkg.com/@sentry/node/-/node-10.43.0.tgz#466acf853565d92d972b7e012fab6558a32a739e"
   integrity sha512-oNwXcuZUc4uTTr0WbHZBBIKsKwAKvNMTgbXwxfB37CfzV18wbTirbQABZ/Ir3WNxSgi6ZcnC6UE013jF5XWPqw==
->>>>>>> d36f268c (post rebase)
   dependencies:
     "@fastify/otel" "0.16.0"
     "@opentelemetry/api" "^1.9.0"
@@ -1888,36 +1797,6 @@
     "@opentelemetry/sdk-trace-base" "^2.5.1"
     "@opentelemetry/semantic-conventions" "^1.39.0"
     "@prisma/instrumentation" "7.2.0"
-<<<<<<< HEAD
-    "@sentry/core" "10.42.0"
-    "@sentry/node-core" "10.42.0"
-    "@sentry/opentelemetry" "10.42.0"
-    import-in-the-middle "^2.0.6"
-
-"@sentry/opentelemetry@10.42.0":
-  version "10.42.0"
-  resolved "https://registry.yarnpkg.com/@sentry/opentelemetry/-/opentelemetry-10.42.0.tgz#c53de1f7d1da4646994c2775d688f9cce6297d21"
-  integrity sha512-5vsYz683iihzlIj3sT1+tEixf0awwXK86a+aYsnMHrTXJDrkBDq4U0ZT+yxdPfJlkaxRtYycFR08SXr2pSm7Eg==
-  dependencies:
-    "@sentry/core" "10.42.0"
-
-"@sentry/react@10.42.0":
-  version "10.42.0"
-  resolved "https://registry.yarnpkg.com/@sentry/react/-/react-10.42.0.tgz#d30cce78fd8b93de4ae1f360c7c1344bed00b75e"
-  integrity sha512-uigyz6E3yPjjqIZpkGzRChww6gzMmqdCpK30M5aBYoaen29DDmSECHYA16sfgXeSwzQhnXyX7GxgOB+eKIr9dw==
-  dependencies:
-    "@sentry/browser" "10.42.0"
-    "@sentry/core" "10.42.0"
-
-"@sentry/vercel-edge@10.42.0":
-  version "10.42.0"
-  resolved "https://registry.yarnpkg.com/@sentry/vercel-edge/-/vercel-edge-10.42.0.tgz#435b6d3dca2c279bc66b1b3feed1be69f67df47a"
-  integrity sha512-BjK5P5qBBC1biAErKlDICiXaer7FnqAL7NcBCD0pHK7aLO5IAzyegfA0zcu4fIo8TIqipLJiCOGmkYaiSALq8g==
-  dependencies:
-    "@opentelemetry/api" "^1.9.0"
-    "@opentelemetry/resources" "^2.5.1"
-    "@sentry/core" "10.42.0"
-=======
     "@sentry/core" "10.43.0"
     "@sentry/node-core" "10.43.0"
     "@sentry/opentelemetry" "10.43.0"
@@ -1946,7 +1825,6 @@
     "@opentelemetry/api" "^1.9.0"
     "@opentelemetry/resources" "^2.5.1"
     "@sentry/core" "10.43.0"
->>>>>>> d36f268c (post rebase)
 
 "@sentry/webpack-plugin@^5.1.0":
   version "5.1.1"
@@ -2238,15 +2116,9 @@
     "@types/node" "*"
 
 "@types/node@*", "@types/node@^25":
-<<<<<<< HEAD
-  version "25.3.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.3.5.tgz#beccb5915561f7a9970ace547ad44d6cdbf39b46"
-  integrity sha512-oX8xrhvpiyRCQkG1MFchB09f+cXftgIXb3a7UUa4Y3wpmZPw5tyZGTLWhlESOLq1Rq6oDlc8npVU2/9xiCuXMA==
-=======
   version "25.4.0"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-25.4.0.tgz#f25d8467984d6667cc4c1be1e2f79593834aaedb"
   integrity sha512-9wLpoeWuBlcbBpOY3XmzSTG3oscB6xjBEEtn+pYXTfhyXhIxC5FsBer2KTopBlvKEiW9l13po9fq+SJY/5lkhw==
->>>>>>> d36f268c (post rebase)
   dependencies:
     undici-types "~7.18.0"
 
@@ -5742,11 +5614,7 @@ postcss@8.4.31:
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
-<<<<<<< HEAD
 postcss@^8.5.6, postcss@^8.5.8:
-=======
-postcss@^8.5.6:
->>>>>>> d36f268c (post rebase)
   version "8.5.8"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.5.8.tgz#6230ecc8fb02e7a0f6982e53990937857e13f399"
   integrity sha512-OW/rX8O/jXnm82Ey1k44pObPtdblfiuWnrd8X7GJ7emImCOstunGbXUpp7HdBrFQX6rJzn3sPT397Wp5aCwCHg==
@@ -5980,11 +5848,7 @@ react@^19.2.4:
   resolved "https://registry.yarnpkg.com/react/-/react-19.2.4.tgz#438e57baa19b77cb23aab516cf635cd0579ee09a"
   integrity sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==
 
-<<<<<<< HEAD
 read-excel-file@^7.0.2:
-=======
-read-excel-file@^7.0.0:
->>>>>>> d36f268c (post rebase)
   version "7.0.2"
   resolved "https://registry.yarnpkg.com/read-excel-file/-/read-excel-file-7.0.2.tgz#bfa750f86997fcec744a489439573ab8a6830b97"
   integrity sha512-EfEmV3MwKspbRSBtLPS5UMz64YC+4oNjATrKZFGGZQD7MaU7NgO2UWN942o4oPg0F56pKECSvP48nY+Wmiofug==
