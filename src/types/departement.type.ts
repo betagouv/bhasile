@@ -3,3 +3,9 @@ export type Departement = {
   name: string;
   region: string;
 };
+
+export type Region = {
+  code: string;
+  name: string;
+  show: boolean;
+};
