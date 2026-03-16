@@ -16,21 +16,9 @@ export const useSpreadsheetParse = (): UseExcelParseResult => {
     const adresses: FormAdresse[] = [];
     const schema = getSchema(isMixte);
     const { rows, errors } = await readXlsxFile(file, { schema });
-<<<<<<< HEAD
-<<<<<<< HEAD
     const filteredErrors = errors.filter(
       (error) => (error as unknown as SchemaParseCellValueError).row !== 2
     ) as unknown as SchemaParseCellValueError[];
-=======
-    const typedErrors = errors as (Error & {
-      row?: number;
-      column?: string;
-    })[];
-    const filteredErrors = typedErrors.filter((error) => error.row !== 2);
->>>>>>> 765f9c3e (seeder ok)
-=======
-    const filteredErrors = errors.filter((error) => error.row !== 2);
->>>>>>> 31d1d750 (restore file)
     if (filteredErrors.length > 0) {
       const errorMessage = filteredErrors
         .map(
