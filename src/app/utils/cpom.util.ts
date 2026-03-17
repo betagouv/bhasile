@@ -136,7 +136,7 @@ export const formatCpomName = (cpom: CpomApiType): string => {
 };
 
 export const computeCpomDates = (
-  cpom?: Partial<CpomApiType> & { dateStart?: string; dateEnd?: string }
+  cpom?: Partial<CpomApiType>
 ): { dateStart?: string; dateEnd?: string } => {
   if (!cpom) {
     return {
@@ -146,12 +146,6 @@ export const computeCpomDates = (
   }
 
   if (!cpom.actesAdministratifs?.length) {
-    if (cpom.dateStart && cpom.dateEnd) {
-      return {
-        dateStart: cpom.dateStart,
-        dateEnd: cpom.dateEnd,
-      };
-    }
     return {
       dateStart: undefined,
       dateEnd: undefined,

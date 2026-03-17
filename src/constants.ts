@@ -1,6 +1,6 @@
 import { LatLngTuple } from "leaflet";
 
-import { Departement } from "./types/departement.type";
+import { Departement, Region } from "./types/departement.type";
 
 // Center of France https://fr.wikipedia.org/wiki/Centre_de_la_France
 export const FRANCE_CENTER: LatLngTuple = [46.6055983, 1.8750922];
@@ -557,8 +557,27 @@ export const DEPARTEMENTS: Departement[] = [
   },
 ];
 
-export const REGIONS_WITHOUT_CORSE = [
-  ...new Set(DEPARTEMENTS.map((departement) => departement.region)),
-]
-  .filter((region) => region !== "Corse")
-  .sort((a, b) => a.localeCompare(b));
+export const REGIONS: Region[] = [
+  { code: "FR-ARA", name: "Auvergne-Rhône-Alpes", show: true },
+  { code: "FR-BFC", name: "Bourgogne-Franche-Comté", show: true },
+  { code: "FR-BRE", name: "Bretagne", show: true },
+  { code: "FR-CVL", name: "Centre-Val de Loire", show: true },
+  { code: "FR-20R", name: "Corse", show: false },
+  { code: "FR-GES", name: "Grand Est", show: true },
+  { code: "FR-HDF", name: "Hauts-de-France", show: true },
+  { code: "FR-IDF", name: "Île-de-France", show: true },
+  { code: "FR-NOR", name: "Normandie", show: true },
+  { code: "FR-NAQ", name: "Nouvelle-Aquitaine", show: true },
+  { code: "FR-OCC", name: "Occitanie", show: true },
+  { code: "FR-PDL", name: "Pays de la Loire", show: true },
+  { code: "FR-PAC", name: "Provence-Alpes-Côte d'Azur", show: true },
+  { code: "FR-971", name: "Guadeloupe", show: false },
+  { code: "FR-972", name: "Martinique", show: false },
+  { code: "FR-973", name: "Guyane", show: false },
+  { code: "FR-974", name: "La Réunion", show: false },
+  { code: "FR-976", name: "Mayotte", show: false },
+];
+
+export const REGIONS_WITHOUT_CORSE = REGIONS.filter(
+  (region) => region.show
+).map((region) => region.name);

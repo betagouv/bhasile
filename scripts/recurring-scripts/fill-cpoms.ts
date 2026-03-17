@@ -115,23 +115,34 @@ const loadCpomsFromCsv = async () => {
       let cpom = await prisma.cpom.findFirst({
         where: {
           name: cpomData.name,
-          dateStart: cpomData.dateStart,
-          dateEnd: cpomData.dateEnd,
           operateurId: cpomData.operateurId,
+          actesAdministratifs: {
+            some: {
+              startDate: cpomData.dateStart,
+              endDate: cpomData.dateEnd,
+            },
+          },
         },
         select: { id: true },
       });
 
       if (!cpom) {
-        cpom = await prisma.cpom.create({
+        const createdCpom = await prisma.cpom.create({
           data: {
             name: cpomData.name,
-            dateStart: cpomData.dateStart,
-            dateEnd: cpomData.dateEnd,
             operateurId: cpomData.operateurId,
           },
-          select: { id: true },
         });
+
+        await prisma.acteAdministratif.create({
+          data: {
+            cpomId: createdCpom.id,
+            startDate: cpomData.dateStart,
+            endDate: cpomData.dateEnd,
+          },
+        });
+
+        cpom = { id: createdCpom.id };
         console.log(`✅ CPOM créé "${cpomData.name}"`);
       }
 
@@ -241,8 +252,7 @@ const loadCpomsFromCsv = async () => {
       }
     }
   } catch (error) {
-    console.error("❌ Erreur lors du chargement des données:", error);
-    throw error;
+    throw new Error("❌ Erreur lors du chargement des données: " + error);
   } finally {
     await prisma.$disconnect();
   }

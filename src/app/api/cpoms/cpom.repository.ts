@@ -60,33 +60,34 @@ export const createOrUpdateCpom = async (
 ): Promise<number> => {
   const operateurId = cpom.operateur?.id ?? cpom.operateurId;
   const cpomId = await prisma.$transaction(async (tx) => {
-    let cpomId = cpom.id;
-    if (cpomId) {
-      await tx.cpom.update({
-        where: { id: cpom.id },
-        data: {
-          name: cpom.name,
-          region: cpom.region,
-          departements: cpom.departements,
-          granularity: cpom.granularity,
-          operateurId,
-        },
+    let regionId: number | undefined;
+
+    if (cpom.region) {
+      const region = await tx.region.findFirst({
+        where: { name: cpom.region },
       });
-    } else {
-      if (!operateurId) {
-        throw new Error("Operateur ID is required when creating a new CPOM");
-      }
-      const upsertedCpom = await tx.cpom.create({
-        data: {
-          name: cpom.name,
-          region: cpom.region,
-          departements: cpom.departements,
-          granularity: cpom.granularity,
-          operateurId,
-        },
-      });
-      cpomId = upsertedCpom.id;
+      regionId = region?.id;
     }
+
+    const upsertedCpom = await tx.cpom.upsert({
+      where: { id: cpom.id ?? 0 },
+      update: {
+        name: cpom.name,
+        operateurId,
+        regionId,
+        granularity: cpom.granularity,
+      },
+      create: {
+        name: cpom.name,
+        operateurId: operateurId as number,
+        regionId,
+        granularity: cpom.granularity,
+      },
+    });
+
+    const cpomId = upsertedCpom.id;
+
+    await syncCpomDepartements(tx, cpom.departements, cpomId);
 
     await createOrUpdateCpomStructures(tx, cpom.structures, cpomId);
 
@@ -100,6 +101,36 @@ export const createOrUpdateCpom = async (
   });
 
   return cpomId;
+};
+
+const syncCpomDepartements = async (
+  tx: PrismaTransaction,
+  departementNumeros: string[] | undefined,
+  cpomId: number
+): Promise<void> => {
+  await tx.cpomDepartement.deleteMany({
+    where: { cpomId },
+  });
+
+  if (!departementNumeros?.length) {
+    return;
+  }
+
+  const departements = await tx.departement.findMany({
+    where: { numero: { in: departementNumeros } },
+    select: { id: true },
+  });
+
+  if (!departements.length) {
+    return;
+  }
+
+  await tx.cpomDepartement.createMany({
+    data: departements.map((departement) => ({
+      cpomId,
+      departementId: departement.id,
+    })),
+  });
 };
 
 const createOrUpdateCpomStructures = async (
