@@ -1,6 +1,6 @@
 "use client";
 
-import { FieldSetDocuments } from "@/app/components/forms/fieldsets/cpom/FieldSetDocuments";
+import { FieldSetActesAdministratifs } from "@/app/components/forms/fieldsets/cpom/FieldSetActesAdministratifs";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
@@ -46,7 +46,7 @@ export default function CpomModificationActesAdministratifs() {
         ]}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <FieldSetDocuments formKind={FormKind.MODIFICATION} />
+        <FieldSetActesAdministratifs formKind={FormKind.MODIFICATION} />
         {saveState === FetchState.ERROR && (
           <SubmitError
             structureDnaCode={String(cpom.id)}

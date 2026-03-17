@@ -20,7 +20,7 @@ export const ActesAdministratifsBlock = () => {
   return (
     <Block
       title="Actes administratifs"
-      iconClass="fr-icon-align-left"
+      iconClass="fr-icon-file-text-line"
       onEdit={() => {
         router.push(`/cpoms/${cpom.id}/modification/actes-administratifs`);
       }}

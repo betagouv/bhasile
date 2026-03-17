@@ -3,12 +3,12 @@ import { FormKind } from "@/types/global";
 import { DatesAndDocuments } from "../../cpom/DatesAndDocuments";
 import { MaxSizeNotice } from "../../MaxSizeNotice";
 
-export const FieldSetDocuments = ({ formKind }: Props) => {
+export const FieldSetActesAdministratifs = ({ formKind }: Props) => {
   return (
     <fieldset className="flex flex-col gap-6">
       {formKind !== "modification" && (
         <legend className="text-xl font-bold mb-4 text-title-blue-france">
-          Documents
+          Actes administratifs
         </legend>
       )}
       <MaxSizeNotice />

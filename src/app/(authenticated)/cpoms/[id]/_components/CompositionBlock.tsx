@@ -18,7 +18,7 @@ export const CompositionBlock = () => {
   return (
     <Block
       title="Composition"
-      iconClass="fr-icon-align-left"
+      iconClass="fr-icon-shape-line"
       onEdit={() => {
         router.push(`/cpoms/${cpom.id}/modification/composition`);
       }}

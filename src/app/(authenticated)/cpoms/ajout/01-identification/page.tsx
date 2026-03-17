@@ -4,7 +4,7 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { FieldSetDocuments } from "@/app/components/forms/fieldsets/cpom/FieldSetDocuments";
+import { FieldSetActesAdministratifs } from "@/app/components/forms/fieldsets/cpom/FieldSetActesAdministratifs";
 import { FieldSetGeneral } from "@/app/components/forms/fieldsets/cpom/FieldSetGeneral";
 import { FieldSetStructures } from "@/app/components/forms/fieldsets/cpom/FieldSetStructures";
 import FormWrapper, {
@@ -64,7 +64,7 @@ export default function CpomAjoutIdentification() {
       >
         <PreviousPageLink />
         <FieldSetGeneral />
-        <FieldSetDocuments />
+        <FieldSetActesAdministratifs />
         <FieldSetStructures />
         {saveState === FetchState.ERROR && (
           <SubmitError structureDnaCode={""} backendError={backendError} />
