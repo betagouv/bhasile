@@ -190,6 +190,22 @@ export const isStructureSubventionnee = (type: string | undefined): boolean => {
   return type === StructureType.HUDA || type === StructureType.CAES;
 };
 
+export const isStructureMultiAntenne = (
+  structure: StructureApiType
+): boolean => {
+  return (
+    (structure.antennes?.length ?? 0) > 1 ||
+    (structure.contacts?.length ?? 0) > 2
+  );
+};
+
+export const isStructureMultiDna = (structure: StructureApiType): boolean => {
+  return (
+    (structure.dnaStructures?.length ?? 0) > 1 ||
+    (structure.finesses?.length ?? 0) > 1
+  );
+};
+
 export const getOperateurLabel = (
   filiale: string | null | undefined,
   operateur: string | null | undefined

@@ -59,7 +59,9 @@ export const typeBatiAndAdressesSchema = typeBatiSchema
   .refine((data) => {
     return data.adresses.some(
       (adresse) =>
-        adresse.adresseTypologies?.[0]?.placesAutorisees !== undefined
+        adresse.adresseTypologies?.[0]?.placesAutorisees !== undefined &&
+        adresse.adresseTypologies?.[0]?.placesAutorisees !== null &&
+        adresse.adresseTypologies?.[0]?.placesAutorisees !== 0
     );
   }, "Au moins une adresse doit avoir des places")
   .superRefine((data, ctx) => {

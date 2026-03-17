@@ -20,10 +20,6 @@ import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { AdresseAdministrativeFormValues } from "@/schemas/forms/base/adresseAdministrative.schema";
 import { Repartition } from "@/types/adresse.type";
 
-interface AdressesListProps {
-  adminAddress: Partial<AdresseAdministrativeFormValues>;
-}
-
 export const AdressesList = ({ adminAddress }: AdressesListProps) => {
   const { watch, control, setValue, getValues } = useFormContext();
   const typeBati = watch("typeBati") || Repartition.DIFFUS;
@@ -300,4 +296,8 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
       </fieldset>
     </div>
   );
+};
+
+type AdressesListProps = {
+  adminAddress: Partial<AdresseAdministrativeFormValues>;
 };

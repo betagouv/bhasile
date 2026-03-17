@@ -1,6 +1,8 @@
 import {
   getRealCreationYear,
   getRepartition,
+  isStructureMultiAntenne,
+  isStructureMultiDna,
 } from "@/app/utils/structure.util";
 import { ContactApiType } from "@/schemas/api/contact.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
@@ -39,15 +41,9 @@ export const getDefaultValues = ({
   const structureCreationYear = getRealCreationYear(structure);
 
   const isAutorisee = isStructureAutorisee(structure.type);
+  const isMultiAntenne = isStructureMultiAntenne(structure);
+  const isMultiDna = isStructureMultiDna(structure);
   const repartition = getRepartition(structure);
-
-  const isMultiAntenne =
-    (structure.antennes?.length ?? 0) > 1 ||
-    (structure.contacts?.length ?? 0) > 2;
-
-  const isMultiDna =
-    (structure.dnaStructures?.length ?? 0) > 1 ||
-    (structure.finesses?.length ?? 0) > 1;
 
   const adresses = transformApiAdressesToFormAdresses(structure.adresses);
 
