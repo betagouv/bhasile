@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
+import { CpomDepartementApiType } from "@/schemas/api/cpom.schema";
 import { StructureMinimalApiType } from "@/schemas/api/structure.schema";
 import { CpomStructureFormValues } from "@/schemas/forms/base/cpom.schema";
 
@@ -20,7 +21,7 @@ export const StructuresList = ({ structures }: Props) => {
     "structures"
   ) as CpomStructureFormValues[];
 
-  const departements = watch("departements");
+  const departements = watch("departements") as CpomDepartementApiType[];
 
   const handleStructureChange = (structureId?: number) => {
     if (!structureId) {
@@ -50,13 +51,13 @@ export const StructuresList = ({ structures }: Props) => {
   };
 
   const checkedStatus = useMemo(() => {
-    const numOfDepartementsChecked = selectedCpomStructures.length;
+    const numOfStructuresChecked = selectedCpomStructures.length;
     const totalStructures = structures?.length;
 
-    if (numOfDepartementsChecked === totalStructures) {
+    if (numOfStructuresChecked === totalStructures) {
       return "checked";
     }
-    if (numOfDepartementsChecked > 0) {
+    if (numOfStructuresChecked > 0) {
       return "incomplete";
     }
     return "unchecked";
@@ -77,9 +78,12 @@ export const StructuresList = ({ structures }: Props) => {
     }
   };
 
-  const previousDepartements = useRef<string[]>([]);
+  const previousDepartements = useRef<CpomDepartementApiType[]>([]);
   useEffect(() => {
-    if (previousDepartements.current === departements) {
+    if (
+      JSON.stringify(previousDepartements.current) ===
+      JSON.stringify(departements)
+    ) {
       return;
     }
     const structuresToSelect = selectedCpomStructures.filter(
@@ -87,7 +91,11 @@ export const StructuresList = ({ structures }: Props) => {
         const currentStructure = structures.find(
           (structure) => structure.id === selectedCpomStructure.structureId
         );
-        if (departements.includes(currentStructure?.departementAdministratif)) {
+        if (
+          departements
+            .map((departement) => departement.departement?.numero)
+            .includes(currentStructure?.departementAdministratif)
+        ) {
           return true;
         }
         return false;

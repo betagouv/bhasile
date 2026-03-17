@@ -20,7 +20,7 @@ export const CpomHeader = (): ReactElement | null => {
   const isModificationPath = pathname.includes("modification");
   const isAjoutPath = pathname.includes("ajout");
 
-  const years = `${getYearFromDate(computeCpomDates(cpom).dateStart)} - ${getYearFromDate(computeCpomDates(cpom).dateEnd)}`;
+  const { dateStart, dateEnd } = computeCpomDates(cpom);
 
   return cpom ? (
     <div className="sticky top-0 z-2 bg-lifted-grey" ref={headerRef}>
@@ -33,9 +33,11 @@ export const CpomHeader = (): ReactElement | null => {
           </h2>
           <h3 className="text-title-blue-france fr-h6 mb-0">
             <strong className="pr-2">{formatCpomName(cpom)}</strong>{" "}
-            <span className="text-title-grey font-normal text-lg italic">
-              {years}
-            </span>
+            {dateStart && dateEnd && (
+              <span className="text-title-grey font-normal text-lg italic">
+                {getYearFromDate(dateStart)} - {getYearFromDate(dateEnd)}
+              </span>
+            )}
           </h3>
         </div>
       </div>

@@ -3,7 +3,11 @@
 import { useRouter } from "next/navigation";
 
 import { Block } from "@/app/components/common/Block";
-import { computeCpomDates, getGranularityLabel } from "@/app/utils/cpom.util";
+import {
+  computeCpomDates,
+  getDepartementsList,
+  getGranularityLabel,
+} from "@/app/utils/cpom.util";
 import { formatDate } from "@/app/utils/date.util";
 
 import { useCpomContext } from "../_context/CpomClientContext";
@@ -34,7 +38,7 @@ export const DescriptionBlock = () => {
         <hr className="col-span-2" />
         <div className="flex gap-2 mb-3">
           <strong>Région</strong>
-          {cpom.region}
+          {cpom.region?.name}
         </div>
         {cpom.granularity !== "REGIONALE" && (
           <div className="flex gap-2 mb-3">
@@ -44,7 +48,7 @@ export const DescriptionBlock = () => {
                 ? "s"
                 : ""}
             </strong>
-            {cpom.departements?.join(", ")}
+            {getDepartementsList(cpom.departements)}
           </div>
         )}
         <hr className="col-span-2" />

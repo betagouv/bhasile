@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export const ModificationTitle = ({ step, closeLink }: Props) => {
   return (
-    <div className="flex justify-between items-center mx-6 my-3">
+    <div className="flex justify-between items-center mx-6 mt-3">
       <h1 className="text-xl font-bold mb-0 text-title-blue-france flex items-center gap-2">
         <span
           className="fr-icon-edit-line fr-icon--md before:h-5 before:w-5 mb-1"

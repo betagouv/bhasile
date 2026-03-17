@@ -1,6 +1,7 @@
 import { useFormContext } from "react-hook-form";
 
 import { useStructuresSelection } from "@/app/hooks/useStructuresSelection";
+import { CpomDepartementApiType } from "@/schemas/api/cpom.schema";
 import { FormKind } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 
@@ -9,7 +10,7 @@ import { StructuresList } from "../../cpom/StructuresList";
 export const FieldSetStructures = ({ formKind }: Props) => {
   const { watch } = useFormContext();
 
-  const departements = watch("departements");
+  const departements = watch("departements") as CpomDepartementApiType[];
   const operateur = watch("operateur");
 
   const dateStart = watch("dateStart");
@@ -18,7 +19,9 @@ export const FieldSetStructures = ({ formKind }: Props) => {
   const { structures } = useStructuresSelection({
     // We only fetch the structures if dateStart and dateEnd are defined
     operateurName: dateStart && dateEnd ? operateur.name : undefined,
-    departements: departements?.join(","),
+    departements: departements
+      .map((departement) => departement.departement?.numero)
+      .join(","),
     types: [
       StructureType.HUDA,
       StructureType.CADA,

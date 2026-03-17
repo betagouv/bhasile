@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { DEPARTEMENTS } from "@/constants";
 import {
   CpomApiType,
+  CpomDepartementApiType,
   CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
@@ -19,7 +20,11 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
   return {
     ...cpom,
     name: cpom?.name ?? "",
-    region: cpom?.region ?? "",
+    region: {
+      name: cpom?.region?.name ?? "",
+      id: cpom?.region?.id ?? undefined,
+      code: cpom?.region?.code ?? undefined,
+    },
     departements: cpom?.departements ?? [],
     granularity: cpom?.granularity ?? "DEPARTEMENTALE",
     dateStart: computeCpomDates(cpom).dateStart ?? "",
@@ -118,11 +123,12 @@ const getCpomMillesimesDefaultValues = (
 };
 
 export const formatCpomName = (cpom: CpomApiType): string => {
-  let zone = cpom.region;
+  let zone = cpom.region?.name;
 
   if (cpom.granularity === "DEPARTEMENTALE") {
     const departement = DEPARTEMENTS.find(
-      (departement) => departement.numero === cpom.departements?.[0]
+      (departement) =>
+        departement.numero === cpom.departements?.[0]?.departement?.numero
     );
     if (departement) {
       zone = departement.numero + " - " + departement.name;
@@ -188,4 +194,15 @@ export const getGranularityLabel = (
     REGIONALE: "Régionale",
   };
   return granularity ? granularityLabels[granularity] || "" : "";
+};
+
+export const getDepartementsList = (
+  departements?: CpomDepartementApiType[]
+): string => {
+  if (!departements) {
+    return "";
+  }
+  return departements
+    .map((departement) => departement.departement?.numero)
+    .join(", ");
 };

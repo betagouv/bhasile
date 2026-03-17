@@ -1,8 +1,11 @@
 import Link from "next/link";
-import { ReactElement } from "react";
 
 import { EmptyCell } from "@/app/components/common/EmptyCell";
-import { computeCpomDates, getGranularityLabel } from "@/app/utils/cpom.util";
+import {
+  computeCpomDates,
+  getDepartementsList,
+  getGranularityLabel,
+} from "@/app/utils/cpom.util";
 import { getYearFromDate } from "@/app/utils/date.util";
 import { CpomApiType } from "@/schemas/api/cpom.schema";
 
@@ -23,8 +26,16 @@ export const CpomItem = ({ cpom, index }: Props) => {
     >
       <td className="text-left!">{cpom.operateur?.name}</td>
       <td className="text-left!">{getGranularityLabel(cpom.granularity)}</td>
-      <td className="text-left!">{cpom.region}</td>
-      <td className="text-left!">{getDepartementsLabel(cpom)}</td>
+      <td className="text-left!">{cpom.region?.name}</td>
+      <td className="text-left!">
+        {cpom.granularity === "REGIONALE" ? (
+          <span className="flex">
+            <EmptyCell className="[&>div]:mx-0.5" />
+          </span>
+        ) : (
+          getDepartementsList(cpom.departements)
+        )}
+      </td>
       <td className="">
         {getYearFromDate(dateStart) || <EmptyCell className="[&>div]:mx-0.5" />}
       </td>
@@ -48,20 +59,6 @@ export const CpomItem = ({ cpom, index }: Props) => {
       </td>
     </tr>
   );
-};
-
-const getDepartementsLabel = (cpom: CpomApiType): string | ReactElement => {
-  let departements: string | ReactElement = (
-    <span>{cpom.departements?.join(", ")}</span>
-  );
-  if (cpom.granularity === "REGIONALE") {
-    departements = (
-      <span className="flex">
-        <EmptyCell className="[&>div]:mx-0.5" />
-      </span>
-    );
-  }
-  return departements;
 };
 
 type Props = {

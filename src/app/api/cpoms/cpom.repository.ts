@@ -2,6 +2,7 @@ import { Cpom } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
   CpomApiType,
+  CpomDepartementApiType,
   CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
@@ -15,6 +16,12 @@ export const findAll = async (): Promise<Cpom[]> => {
       structures: true,
       cpomMillesimes: true,
       operateur: true,
+      region: true,
+      departements: {
+        include: {
+          departement: true,
+        },
+      },
       actesAdministratifs: {
         include: {
           fileUploads: true,
@@ -45,6 +52,12 @@ export const findOne = async (id: number): Promise<Cpom> => {
       },
       cpomMillesimes: true,
       operateur: true,
+      region: true,
+      departements: {
+        include: {
+          departement: true,
+        },
+      },
       actesAdministratifs: {
         include: {
           fileUploads: true,
@@ -64,28 +77,36 @@ export const createOrUpdateCpom = async (
 
     if (cpom.region) {
       const region = await tx.region.findFirst({
-        where: { name: cpom.region },
+        where: { name: cpom.region?.name },
       });
       regionId = region?.id;
     }
 
-    const upsertedCpom = await tx.cpom.upsert({
-      where: { id: cpom.id ?? 0 },
-      update: {
-        name: cpom.name,
-        operateurId,
-        regionId,
-        granularity: cpom.granularity,
-      },
-      create: {
-        name: cpom.name,
-        operateurId: operateurId as number,
-        regionId,
-        granularity: cpom.granularity,
-      },
-    });
-
-    const cpomId = upsertedCpom.id;
+    let cpomId = cpom.id;
+    if (cpomId) {
+      await tx.cpom.update({
+        where: { id: cpom.id },
+        data: {
+          name: cpom.name,
+          regionId,
+          granularity: cpom.granularity,
+          operateurId,
+        },
+      });
+    } else {
+      if (!operateurId) {
+        throw new Error("Operateur ID is required when creating a new CPOM");
+      }
+      const upsertedCpom = await tx.cpom.create({
+        data: {
+          name: cpom.name,
+          regionId,
+          granularity: cpom.granularity,
+          operateurId,
+        },
+      });
+      cpomId = upsertedCpom.id;
+    }
 
     await syncCpomDepartements(tx, cpom.departements, cpomId);
 
@@ -105,12 +126,20 @@ export const createOrUpdateCpom = async (
 
 const syncCpomDepartements = async (
   tx: PrismaTransaction,
-  departementNumeros: string[] | undefined,
+  cpomDepartements: CpomDepartementApiType[] | undefined,
   cpomId: number
 ): Promise<void> => {
+  if (!cpomDepartements) {
+    return;
+  }
+
   await tx.cpomDepartement.deleteMany({
     where: { cpomId },
   });
+
+  const departementNumeros = cpomDepartements
+    .map((departement) => departement.departement?.numero)
+    .filter((numero): numero is string => numero !== undefined);
 
   if (!departementNumeros?.length) {
     return;

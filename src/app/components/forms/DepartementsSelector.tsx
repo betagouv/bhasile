@@ -2,6 +2,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { useEffect, useRef, useState } from "react";
 
+import { CpomDepartementApiType } from "@/schemas/api/cpom.schema";
 import { Departement } from "@/types/departement.type";
 
 export const DepartementsSelector = ({
@@ -57,7 +58,9 @@ export const DepartementsSelector = ({
           aria-haspopup="listbox"
         >
           {selectedDepartements.length > 0
-            ? selectedDepartements.join(", ")
+            ? selectedDepartements
+                .map((departement) => departement.departement?.numero)
+                .join(", ")
             : "Sélectionner des départements"}
           <span className="absolute right-2 top-1/2 -translate-y-1/2 fr-icon-arrow-down-s-line fr-icon--sm" />
         </Button>
@@ -76,9 +79,13 @@ export const DepartementsSelector = ({
                       nativeInputProps: {
                         name: "structure-departement",
                         value: departement.numero,
-                        checked: selectedDepartements.includes(
-                          departement.numero
-                        ),
+                        checked: selectedDepartements.find(
+                          (selectedDepartement) =>
+                            selectedDepartement.departement?.numero ===
+                            departement.numero
+                        )
+                          ? true
+                          : false,
                         onChange: () =>
                           handleDepartementToggle(departement.numero),
                       },
@@ -100,6 +107,6 @@ export const DepartementsSelector = ({
 
 type Props = {
   departements: Departement[];
-  selectedDepartements: string[];
+  selectedDepartements: CpomDepartementApiType[];
   handleDepartementToggle: (value: string) => void;
 };

@@ -44,7 +44,7 @@ export default async function CpomLayout({
     <CpomProvider cpom={cpom}>
       <div className="flex flex-col h-full bg-alt-grey gap-3 pb-4">
         <CpomHeader />
-        {children}
+        <div className="flex flex-col gap-3 px-3">{children}</div>
       </div>
     </CpomProvider>
   );

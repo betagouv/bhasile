@@ -8,6 +8,8 @@ import {
   zSafePositiveDecimalsNullish,
   zSafeYear,
 } from "@/app/utils/zodCustomFields";
+import { cpomDepartementApiSchema } from "@/schemas/api/cpom.schema";
+import { regionApiSchema } from "@/schemas/api/region.schema";
 
 import { acteAdministratifCpomSchema } from "./acteAdministratif.schema";
 import { operateurSchema } from "./operateur.schema";
@@ -38,8 +40,8 @@ const baseCpomSchema = z.object({
   dateEnd: nullishFrenchDateToISO(),
   operateur: operateurSchema,
   operateurId: zId(),
-  region: z.string().nullish(),
-  departements: z.array(z.string()).nullish(),
+  region: regionApiSchema.nullish(),
+  departements: z.array(cpomDepartementApiSchema).nullish(),
   granularity: z
     .enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"])
     .optional(),
@@ -61,8 +63,8 @@ export const descriptionCpomSchema = z.object({
   dateEnd: nullishFrenchDateToISO(),
   operateur: operateurSchema,
   operateurId: zId(),
-  region: z.string().min(1, "La région est obligatoire"),
-  departements: z.array(z.string()).min(1),
+  region: regionApiSchema,
+  departements: z.array(cpomDepartementApiSchema),
   granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
 });
 
