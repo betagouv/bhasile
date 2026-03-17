@@ -1,11 +1,7 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import {
-  PropsWithChildren,
-  ReactElement,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { PropsWithChildren, ReactElement } from "react";
+
+import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
 
 export const Block = ({
   title,
@@ -14,28 +10,7 @@ export const Block = ({
   multipleEdit,
   children,
 }: Props): ReactElement => {
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const panelRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      let clickedInsidePanel = false;
-
-      if (panelRef.current && panelRef.current.contains(event.target as Node)) {
-        clickedInsidePanel = true;
-      }
-
-      if (!clickedInsidePanel) {
-        setIsPanelOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
 
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
