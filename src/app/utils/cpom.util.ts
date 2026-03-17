@@ -188,14 +188,10 @@ export const computeCpomDates = (
 export const getGranularityLabel = (
   granularity: CpomGranularity | undefined
 ): string => {
-  switch (granularity) {
-    case "INTERDEPARTEMENTALE":
-      return "Interdépartementale";
-    case "DEPARTEMENTALE":
-      return "Départementale";
-    case "REGIONALE":
-      return "Régionale";
-    default:
-      return "";
-  }
+  const granularityLabels: Record<CpomGranularity, string> = {
+    INTERDEPARTEMENTALE: "Interdépartementale",
+    DEPARTEMENTALE: "Départementale",
+    REGIONALE: "Régionale",
+  };
+  return granularity ? granularityLabels[granularity] || "" : "";
 };
