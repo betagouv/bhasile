@@ -3,12 +3,12 @@
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
+import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { computeCpomDates, formatCpomName } from "@/app/utils/cpom.util";
 import { getYearFromDate } from "@/app/utils/date.util";
 
 import { useCpomContext } from "../_context/CpomClientContext";
-import { CpomNavigationMenu } from "./CpomNavigationMenu";
 
 export const CpomHeader = (): ReactElement | null => {
   const { cpom } = useCpomContext();
@@ -39,7 +39,28 @@ export const CpomHeader = (): ReactElement | null => {
           </h3>
         </div>
       </div>
-      {isRootPath && <CpomNavigationMenu />}
+      {isRootPath && (
+        <NavigationMenu
+          menuElements={[
+            {
+              label: "Description",
+              section: "#description",
+              isDisplayed: true,
+            },
+            {
+              label: "Composition",
+              section: "#composition",
+              isDisplayed: true,
+            },
+            { label: "Finances", section: "#finances", isDisplayed: true },
+            {
+              label: "Actes administratifs",
+              section: "#actes-administratifs",
+              isDisplayed: true,
+            },
+          ]}
+        />
+      )}
     </div>
   ) : null;
 };
