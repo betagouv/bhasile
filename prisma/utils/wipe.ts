@@ -29,4 +29,5 @@ export const wipeTables = async (prisma: PrismaClient) => {
   await prisma.antenne.deleteMany({});
   await prisma.finess.deleteMany({});
   await prisma.dnaStructure.deleteMany({});
+  await prisma.region.deleteMany({});
 };

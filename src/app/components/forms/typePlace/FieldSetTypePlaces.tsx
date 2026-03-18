@@ -1,7 +1,7 @@
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useEffect, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { Table } from "@/app/components/common/Table";
 import { cn } from "@/app/utils/classname.util";
 import { getTypePlacesYearRange } from "@/app/utils/date.util";
@@ -45,10 +45,10 @@ export const FieldSetTypePlaces = ({
         Veuillez renseigner l’historique du nombre de places pour chaque
         typologie au 1er janvier de ces dernières années.
       </p>
-      <Notice
+      <CustomNotice
         severity="info"
         title=""
-        className="rounded [&_p]:flex  [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey"
+        className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
         description="PMR : Personnes à Mobilité Réduite – LGBT : Lesbiennes, Gays, Bisexuels et Transgenres (ici places définies comme spécialisées) – FVV : Femmes Victimes de Violences, TEH : Traîte des Êtres Humains (ici places définies comme labellisées)"
       />
 

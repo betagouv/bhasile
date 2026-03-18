@@ -1,8 +1,7 @@
 "use client";
 
-import Notice from "@codegouvfr/react-dsfr/Notice";
-
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
 import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
@@ -63,7 +62,7 @@ export default function ModificationDescription() {
         ]}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <Notice
+        <CustomNotice
           severity="warning"
           title=""
           description={`Certaines données (date de création, code DNA, type de structure, opérateur) ne sont pas modifiables. Il y a une erreur ? Contactez-nous : ${BHASILE_CONTACT_EMAIL}`}

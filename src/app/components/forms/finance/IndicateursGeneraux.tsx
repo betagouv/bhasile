@@ -1,6 +1,5 @@
 "use client";
 
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
@@ -10,6 +9,8 @@ import { cn } from "@/app/utils/classname.util";
 import { getYearRange } from "@/app/utils/date.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
 import { CURRENT_YEAR } from "@/constants";
+
+import { CustomNotice } from "../../common/CustomNotice";
 
 export const IndicateursGeneraux = () => {
   const { structure } = useStructureContext();
@@ -37,10 +38,10 @@ export const IndicateursGeneraux = () => {
       <legend className="text-xl font-bold mb-8 text-title-blue-france">
         Indicateurs généraux
       </legend>
-      <Notice
+      <CustomNotice
         severity="info"
         title=""
-        className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey"
+        className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
         description="Le nombre d’ETP correspond à l’ensemble des employés de la structure (ex : “8 ETP”). Le taux d’encadrement est le nombre de places gérées par un ETP, obtenu en divisant le nombre de places autorisées par le nombre d’ETP total (ex: “12 places gérées par un ETP” dans une structure de 96 places avec 8 ETP). Le coût journalier est le coût de la structure pour une journée et pour une place, défini dans les documents contractuels (ex: “23,50€ par jour par place”)."
       />
       <p className="mb-0">
@@ -50,7 +51,7 @@ export const IndicateursGeneraux = () => {
       <Table
         hasErrors={hasBudgetErrors}
         headings={[
-          <th scope="col" key="annee" className="!border-r-1">
+          <th scope="col" key="annee" className="border-r!">
             Année
           </th>,
           <th
@@ -66,7 +67,7 @@ export const IndicateursGeneraux = () => {
           <th
             scope="col"
             key="encadrement"
-            className="uppercase text-mention-grey py-4 px-5 text-center text-xs !border-r-1"
+            className="uppercase text-mention-grey py-4 px-5 text-center text-xs border-r!"
           >
             <span className="flex flex-col">
               Taux
@@ -90,7 +91,7 @@ export const IndicateursGeneraux = () => {
       >
         {yearsToDisplay.map((year, index) => (
           <tr key={year} className="w-full border-t border-default-grey ">
-            <td className="align-middle py-4 !border-r-1">
+            <td className="align-middle py-4 border-r!">
               {year}
               {CURRENT_YEAR - year < 2 && (
                 <>
@@ -105,7 +106,7 @@ export const IndicateursGeneraux = () => {
                 {...register(`budgets.${index}.year`)}
               />
             </td>
-            <td className="!py-4">
+            <td className="py-4!">
               <InputWithValidation
                 name={`budgets.${index}.ETP`}
                 id={`budgets.${index}.ETP`}
@@ -117,7 +118,7 @@ export const IndicateursGeneraux = () => {
                 variant="simple"
               />
             </td>
-            <td className="!py-1 !border-r-1">
+            <td className="py-1! border-r!">
               <InputWithValidation
                 name={`budgets.${index}.tauxEncadrement`}
                 id={`budgets.${index}.tauxEncadrement`}
@@ -129,7 +130,7 @@ export const IndicateursGeneraux = () => {
                 variant="simple"
               />
             </td>
-            <td className="!py-1">
+            <td className="py-1!">
               <span className="flex items-center gap-2">
                 <InputWithValidation
                   name={`budgets.${index}.coutJournalier`}

@@ -17,7 +17,9 @@ export const createOrUpdateActesAdministratifs = async (
     return;
   }
 
-  await deleteActesAdministratifs(tx, actesAdministratifs, ownerId);
+  const deletedIds = new Set(
+    await deleteActesAdministratifs(tx, actesAdministratifs, ownerId)
+  );
 
   const roots = actesAdministratifs.filter(
     (acteAdministratif) =>
@@ -42,7 +44,10 @@ export const createOrUpdateActesAdministratifs = async (
       acte.parentId ??
       (acte.parentUuid ? uuidToId.get(acte.parentUuid) : undefined);
     if (!resolvedParentId && acte.parentUuid) {
-      throw new Error(`Unable to resolve parentUuid: ${acte.parentUuid}`);
+      continue;
+    }
+    if (resolvedParentId !== undefined && deletedIds.has(resolvedParentId)) {
+      continue;
     }
     await createOrUpdateActeAdministratif(tx, acte, ownerId, resolvedParentId);
   }
@@ -54,6 +59,8 @@ const createOrUpdateActeAdministratif = async (
   ownerId: { structureDnaCode?: string; cpomId?: number },
   parentId?: number
 ) => {
+  const realParentId = (parentId ?? acteAdministratif.parentId) || undefined;
+
   const fileKey = acteAdministratif.fileUploads?.[0]?.key;
   if (!fileKey) {
     return tx.acteAdministratif.create({
@@ -64,7 +71,7 @@ const createOrUpdateActeAdministratif = async (
         startDate: acteAdministratif.startDate,
         endDate: acteAdministratif.endDate,
         name: acteAdministratif.name,
-        parentId: parentId ?? acteAdministratif.parentId,
+        parentId: realParentId,
       },
     });
   }
@@ -83,10 +90,10 @@ const createOrUpdateActeAdministratif = async (
         startDate: acteAdministratif.startDate,
         endDate: acteAdministratif.endDate,
         name: acteAdministratif.name,
-        parentId: parentId ?? acteAdministratif.parentId,
+        parentId: realParentId,
         fileUploads: {
           connect: (acteAdministratif.fileUploads ?? []).map((fileUpload) => ({
-            key: fileUpload.key,
+            key: fileUpload?.key,
           })),
         },
       },
@@ -101,10 +108,10 @@ const createOrUpdateActeAdministratif = async (
       startDate: acteAdministratif.startDate,
       endDate: acteAdministratif.endDate,
       name: acteAdministratif.name,
-      parentId: parentId ?? acteAdministratif.parentId,
+      parentId: realParentId,
       fileUploads: {
         connect: (acteAdministratif.fileUploads ?? []).map((fileUpload) => ({
-          key: fileUpload.key,
+          key: fileUpload?.key,
         })),
       },
     },
@@ -115,7 +122,7 @@ const deleteActesAdministratifs = async (
   tx: PrismaTransaction,
   actesAdministratifsToKeep: ActeAdministratifApiType[],
   ownerId: ActeAdministratifOwnerId
-): Promise<void> => {
+): Promise<number[]> => {
   const where =
     ownerId.structureId !== undefined
       ? { structureId: ownerId.structureId }
@@ -143,9 +150,24 @@ const deleteActesAdministratifs = async (
     }
   );
 
+  const deletedIds: number[] = [];
+
   await Promise.all(
-    actesAdministratifsToDelete.map((acteAdministratif) =>
-      tx.acteAdministratif.delete({ where: { id: acteAdministratif.id } })
-    )
+    actesAdministratifsToDelete.map(async (acteAdministratif) => {
+      try {
+        await tx.acteAdministratif.delete({
+          where: { id: acteAdministratif.id },
+        });
+      } catch (error) {
+        console.error(
+          `Error deleting acteAdministratif ${acteAdministratif.id}:`,
+          error
+        );
+      } finally {
+        deletedIds.push(acteAdministratif.id);
+      }
+    })
   );
+
+  return deletedIds;
 };

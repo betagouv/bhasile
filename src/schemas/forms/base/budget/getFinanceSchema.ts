@@ -74,7 +74,7 @@ export const getFinanceSchema = (
       }
 
       if (isSubventionnee) {
-        if (year === AUTORISEE_OPEN_YEAR) {
+        if (year === SUBVENTIONNEE_OPEN_YEAR) {
           return budgetSubventionneeOpenYear1Schema;
         }
         if (year < SUBVENTIONNEE_OPEN_YEAR) {

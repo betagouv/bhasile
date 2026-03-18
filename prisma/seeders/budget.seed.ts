@@ -75,7 +75,6 @@ export const createFakeBudget = ({
       : null,
     autre: faker.number.int({ min: 1, max: 10000 }),
     commentaire: faker.lorem.lines(2),
-    structureMillesimeId: null,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   } as Budget;

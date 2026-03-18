@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off script: move file uploads from the old tables to the new ones.
 // Usage: yarn one-off 20260220-move-fileuploads
 

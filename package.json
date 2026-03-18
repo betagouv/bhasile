@@ -44,7 +44,7 @@
     "sql:format:fix": "for f in scripts/views/*.sql; do sql-formatter \"$f\" --config sql-formatter.config.json --fix; done"
   },
   "dependencies": {
-    "@codegouvfr/react-dsfr": "^1.31.1",
+    "@codegouvfr/react-dsfr": "^1.32.0",
     "@faker-js/faker": "^10.3.0",
     "@formkit/auto-animate": "^0.9.0",
     "@hookform/resolvers": "^5.2.2",
@@ -64,7 +64,7 @@
     "next": "16.1.6",
     "next-auth": "^4.24.13",
     "next-leaflet-cluster": "^1.0.0",
-    "postcss": "^8.5.6",
+    "postcss": "^8.5.8",
     "pretty-bytes": "^7.1.0",
     "prisma": "^7.4.2",
     "react": "^19.2.4",
@@ -72,7 +72,7 @@
     "react-hook-form": "^7.71.2",
     "react-leaflet": "^5.0.0",
     "react-number-format": "^5.4.4",
-    "read-excel-file": "^7.0.0",
+    "read-excel-file": "^7.0.2",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.1.3",
     "uuid": "^13.0.0",
@@ -98,7 +98,6 @@
     "husky": "^9.1.7",
     "jsdom": "^28.1.0",
     "node-mocks-http": "^1.17.2",
-    "node-xlsx": "^0.24.0",
     "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
     "prettier": "^3.8.1",
@@ -109,6 +108,7 @@
     "tsx": "^4.21.0",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "xlsx": "^0.18.5"
   }
 }

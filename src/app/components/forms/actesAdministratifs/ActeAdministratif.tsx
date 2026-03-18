@@ -1,5 +1,5 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import Link from "next/link";
+import { useEffect, useMemo } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
@@ -26,11 +26,13 @@ export const ActeAdministratif = ({
     name: "actesAdministratifs",
   });
 
+  // Watch is already memoized by react-hook-form
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const actesAdministratifs: ActeAdministratifFormValues[] =
     watch("actesAdministratifs") || [];
 
   const index = actesAdministratifs.findIndex(
-    (acteAdministratif: ActeAdministratifFormValues) =>
+    (acteAdministratif) =>
       (acteAdministratif.uuid && acteAdministratif.uuid === acte.uuid) ||
       (acteAdministratif.id && acteAdministratif.id === acte.id)
   );
@@ -42,9 +44,41 @@ export const ActeAdministratif = ({
     );
   });
 
+  const fileKey = watch(`actesAdministratifs.${index}.fileUploads.0.key`);
+
+  const avenantIndices = useMemo(() => {
+    return avenants
+      .map((avenant) =>
+        actesAdministratifs.findIndex(
+          (acteAdministratif) =>
+            (acteAdministratif.uuid &&
+              acteAdministratif.uuid === avenant.uuid) ||
+            (acteAdministratif.id && acteAdministratif.id === avenant.id)
+        )
+      )
+      .sort((a, b) => b - a);
+  }, [avenants, actesAdministratifs]);
+
+  useEffect(() => {
+    if (!fileKey) {
+      avenantIndices.forEach((avenantIndex) => {
+        if (avenantIndex !== -1) {
+          handleDeleteField(avenantIndex, false);
+        }
+      });
+    }
+  }, [fileKey, handleDeleteField, index, avenantIndices]);
+
   const handleAddNewAvenant = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!fileKey) {
+      alert(
+        "Impossible d'ajouter un avenant sans document principal. Si vous ne retrouvez pas le document original, merci de joindre un court document résumant en une ligne pourquoi il est indisponible."
+      );
+      return;
+    }
 
     append({
       uuid: uuidv4(),
@@ -144,13 +178,14 @@ export const ActeAdministratif = ({
             />
           ))}
           {canAddAvenant && (
-            <Link
-              href={"/"}
+            <Button
+              type="button"
+              priority="tertiary no outline"
               className="text-action-high-blue-france underline underline-offset-4"
               onClick={handleAddNewAvenant}
             >
               + Ajouter un avenant
-            </Link>
+            </Button>
           )}
         </div>
       )}
@@ -163,7 +198,7 @@ type UploadsByCategoryFileProps = {
   additionalFieldsType?: AdditionalFieldsType;
   documentLabel: string;
   categoryShortName: string;
-  handleDeleteField: (index: number) => void;
+  handleDeleteField: (index: number, shouldConfirm?: boolean) => void;
   canAddAvenant: boolean;
   avenantCanExtendDateEnd?: boolean;
 };

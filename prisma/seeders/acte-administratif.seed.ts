@@ -3,21 +3,12 @@ import { fakerFR as faker } from "@faker-js/faker";
 import {
   ActeAdministratif,
   ActeAdministratifCategory,
-  FileUpload,
 } from "@/generated/prisma/client";
 
 import { createFakeFileUpload } from "./file-upload.seed";
 
 export type ActeAdministratifWithFileUploads = ActeAdministratif & {
-  fileUploads: Omit<
-    FileUpload,
-    | "id"
-    | "acteAdministratifId"
-    | "documentFinancierId"
-    | "controleId"
-    | "evaluationId"
-    | "structureId"
-  >[];
+  fileUploads: ReturnType<typeof createFakeFileUpload>[];
 };
 
 export const createFakeActeAdministratif = (): Omit<

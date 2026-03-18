@@ -8,6 +8,15 @@ import { CpomApiType } from "@/schemas/api/cpom.schema";
 
 export const CpomItem = ({ cpom, index }: Props) => {
   const { dateStart, dateEnd } = computeCpomDates(cpom);
+  let yearStart: number | undefined = getYearFromDate(dateStart);
+  let yearEnd: number | undefined = getYearFromDate(dateEnd);
+
+  if (yearStart === -1) {
+    yearStart = undefined;
+  }
+  if (yearEnd === -1) {
+    yearEnd = undefined;
+  }
 
   return (
     <tr
@@ -19,8 +28,8 @@ export const CpomItem = ({ cpom, index }: Props) => {
       <td className="text-left!">{getGranularityLabel(cpom)}</td>
       <td className="text-left!">{cpom.region}</td>
       <td className="text-left!">{getDepartementsLabel(cpom)}</td>
-      <td className="">{getYearFromDate(dateStart)}</td>
-      <td className="">{getYearFromDate(dateEnd)}</td>
+      <td className="">{yearStart}</td>
+      <td className="">{yearEnd}</td>
       <td>
         <Link
           className="fr-btn--tertiary-no-outline fr-icon-edit-line"

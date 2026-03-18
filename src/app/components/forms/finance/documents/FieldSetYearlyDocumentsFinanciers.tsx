@@ -1,7 +1,7 @@
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import { ReactElement, useCallback, useEffect, useRef } from "react";
 import { Control, useFieldArray, useFormContext } from "react-hook-form";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
@@ -123,7 +123,7 @@ export const FieldSetYearlyDocumentsFinanciers = ({
       )}
 
       {isInCpom && (
-        <Notice
+        <CustomNotice
           severity="info"
           title=""
           className="rounded [&_p]:flex [&_p]:items-center mb-10"

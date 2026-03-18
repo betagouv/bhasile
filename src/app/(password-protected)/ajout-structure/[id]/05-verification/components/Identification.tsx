@@ -121,28 +121,32 @@ export const Identification = () => {
         Calendrier
       </h3>
 
-      <div className="border-b border-default-grey pb-2 mb-3">
-        <p className="mb-0">
-          <b className="pr-4">Période d’autorisation en cours</b>
-          {localStorageValues?.debutPeriodeAutorisation && (
-            <span>{localStorageValues?.debutPeriodeAutorisation}</span>
-          )}
-          {localStorageValues?.finPeriodeAutorisation && (
-            <span> - {localStorageValues?.finPeriodeAutorisation}</span>
-          )}
-        </p>
-      </div>
-      <div className="border-b border-default-grey pb-2 mb-3">
-        <p className="mb-0">
-          <b className="pr-4">Convention en cours</b>
-          {localStorageValues?.debutConvention && (
-            <span>{localStorageValues?.debutConvention}</span>
-          )}
-          {localStorageValues?.finConvention && (
-            <span> - {localStorageValues?.finConvention}</span>
-          )}
-        </p>
-      </div>
+      {localStorageValues?.debutPeriodeAutorisation ? (
+        <div className="border-b border-default-grey pb-2 mb-3">
+          <p className="mb-0">
+            <b className="pr-4">Période d’autorisation en cours</b>
+            {localStorageValues?.debutPeriodeAutorisation && (
+              <span>{localStorageValues?.debutPeriodeAutorisation}</span>
+            )}
+            {localStorageValues?.finPeriodeAutorisation && (
+              <span> - {localStorageValues?.finPeriodeAutorisation}</span>
+            )}
+          </p>
+        </div>
+      ) : null}
+      {localStorageValues?.debutConvention ? (
+        <div className="border-b border-default-grey pb-2 mb-3">
+          <p className="mb-0">
+            <b className="pr-4">Convention en cours</b>
+            {localStorageValues?.debutConvention && (
+              <span>{localStorageValues?.debutConvention}</span>
+            )}
+            {localStorageValues?.finConvention && (
+              <span> - {localStorageValues?.finConvention}</span>
+            )}
+          </p>
+        </div>
+      ) : null}
     </>
   );
 };

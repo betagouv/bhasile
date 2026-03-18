@@ -1,5 +1,6 @@
 import { useFormContext } from "react-hook-form";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { cn } from "@/app/utils/classname.util";
 import { Repartition } from "@/types/adresse.type";
 import { FormKind } from "@/types/global";

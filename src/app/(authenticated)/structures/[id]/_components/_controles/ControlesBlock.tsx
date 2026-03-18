@@ -70,7 +70,7 @@ export const ControlesBlock = (): ReactElement => {
           secondaryInformation="sur ces 12 derniers mois"
         />
       </div>
-      <div className="pt-3">
+      <div className="pt-12">
         {isStructureAutorisee(structure.type) && (
           <>
             {evaluations.length > 0 ? (

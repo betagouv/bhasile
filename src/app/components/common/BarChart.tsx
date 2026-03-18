@@ -34,7 +34,7 @@ export default function BarChart({ data, options }: Props) {
 
   return (
     <div className={chartClass}>
-      <div ref={chartRef} style={{ height: 300 }} />
+      <div ref={chartRef} style={{ height: 340 }} />
       <style>
         {`
           .${chartClass} .ct-series-a .ct-bar { stroke: var(--yellow-moutarde-850-200) !important; }

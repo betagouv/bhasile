@@ -4,21 +4,12 @@ import {
   DocumentFinancier,
   DocumentFinancierCategory,
   DocumentFinancierGranularity,
-  FileUpload,
 } from "@/generated/prisma/client";
 
 import { createFakeFileUpload } from "./file-upload.seed";
 
 export type DocumentFinancierWithFileUploads = DocumentFinancier & {
-  fileUploads: Omit<
-    FileUpload,
-    | "id"
-    | "acteAdministratifId"
-    | "documentFinancierId"
-    | "controleId"
-    | "evaluationId"
-    | "structureId"
-  >[];
+  fileUploads: ReturnType<typeof createFakeFileUpload>[];
 };
 
 export const createFakeDocumentFinancier = (): Omit<

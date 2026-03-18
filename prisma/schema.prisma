@@ -16,6 +16,19 @@ model Departement {
   region                  String
   structures              Structure[]
   departementAllowedUsers DepartementAllowedUser[]
+  regionAdministrative    Region?                  @relation(fields: [regionId], references: [id])
+  regionId                Int?
+  cpoms                   CpomDepartement[]
+
+  @@schema("public")
+}
+
+model Region {
+  id           Int           @id @default(autoincrement())
+  name         String
+  code         String
+  departements Departement[]
+  cpoms        Cpom[]
 
   @@schema("public")
 }
@@ -208,17 +221,13 @@ model Contact {
 }
 
 model StructureMillesime {
-  id                   Int                 @id @default(autoincrement())
-  structure            Structure?          @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode     String?             // TODO : à supprimer une fois la migration vers le multi-DNA terminée
+  id               Int       @id @default(autoincrement())
+  structure        Structure?@relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureDnaCode String?             // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId          Int?
-  year                 Int
-  cpom                 Boolean             @default(false) // temporary field, while we are not sure of existing cpoms
-  operateurComment     String?
-  structureTypologieId Int?
-  structureTypologie   StructureTypologie?
-  budgetId             Int?
-  budget               Budget?
+  year             Int
+  cpom             Boolean   @default(false) // temporary field, while we are not sure of existing cpoms
+  operateurComment String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -241,8 +250,6 @@ model StructureTypologie {
   placesAFermer         Int?
   echeancePlacesACreer  DateTime?
   echeancePlacesAFermer DateTime?
-  structureMillesimeId  Int?                @unique
-  structureMillesime    StructureMillesime? @relation(fields: [structureMillesimeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -363,8 +370,6 @@ model Budget {
   reportANouveau                    Float?
   autre                             Float?
   commentaire                       String?
-  structureMillesimeId              Int?                @unique
-  structureMillesime                StructureMillesime? @relation(fields: [structureMillesimeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -465,11 +470,10 @@ model Cpom {
   id                  Int                 @id @default(autoincrement())
   name                String?
   structures          CpomStructure[]
-  region              String?
-  departements        String[]
+  region              Region?             @relation(fields: [regionId], references: [id])
+  regionId            Int?
+  departements        CpomDepartement[]
   granularity         CpomGranularity     @default(REGIONALE)
-  dateStart           DateTime?
-  dateEnd             DateTime?
   cpomMillesimes      CpomMillesime[]
   operateur           Operateur           @relation(fields: [operateurId], references: [id])
   operateurId         Int
@@ -479,6 +483,16 @@ model Cpom {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@schema("public")
+}
+
+model CpomDepartement {
+  cpom          Cpom        @relation(fields: [cpomId], references: [id], onDelete: Cascade)
+  cpomId        Int
+  departement   Departement @relation(fields: [departementId], references: [id], onDelete: Cascade)
+  departementId Int
+
+  @@id([cpomId, departementId])
   @@schema("public")
 }
 

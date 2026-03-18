@@ -1,7 +1,6 @@
 "use client";
 
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import autoAnimate from "@formkit/auto-animate";
 import Link from "next/link";
@@ -11,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
 import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
@@ -181,7 +181,7 @@ export default function FormIdentification() {
                   ))}
                 </SelectWithValidation>
               </div>
-              <Notice
+              <CustomNotice
                 severity="info"
                 title=""
                 className="rounded [&_p]:flex [&_p]:items-center"
@@ -261,10 +261,10 @@ export default function FormIdentification() {
                   {isStructureAutorisee(type) ? " (optionnel)" : ""}
                 </legend>
                 {isStructureAutorisee(type) && (
-                  <Notice
+                  <CustomNotice
                     severity="info"
                     title=""
-                    className="rounded [&_p]:flex  [&_p]:items-center"
+                    className="rounded [&_p]:flex [&_p]:items-center"
                     description="Uniquement si votre structure est sous convention."
                   />
                 )}

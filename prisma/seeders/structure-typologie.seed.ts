@@ -17,7 +17,6 @@ export const createFakeStructureTypologie = ({
     lgbt,
     fvvTeh: faker.number.int({ min: 0, max: placesAutorisees - lgbt }),
     placesAutorisees,
-    structureMillesimeId: null,
     placesACreer: faker.number.int({ min: 0, max: placesAutorisees }),
     placesAFermer: faker.number.int({ min: 0, max: placesAutorisees }),
     echeancePlacesACreer: faker.date.future({ years: 1 }),

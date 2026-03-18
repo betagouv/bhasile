@@ -9,7 +9,7 @@ import { createPrismaClient } from "./client";
 import { createFakeActivites } from "./seeders/activite.seed";
 import { createAntenneList } from "./seeders/antenne.seed";
 import { createFakeCpoms } from "./seeders/cpom.seed";
-import { createDepartements } from "./seeders/departements-seed";
+import { seedRegionsAndDepartements } from "./seeders/departements.seed";
 import { createDnaList, createDnaStructures } from "./seeders/dna.seed";
 import { createFakeEvenementIndesirableGrave } from "./seeders/evenement-indesirable-grave.seed";
 import { createFinessList } from "./seeders/finess.seed";
@@ -55,12 +55,7 @@ export async function seed(): Promise<void> {
 
   console.log(`✅ ${formStepDefinitions.count} FormStepDefinitions créées`);
 
-  const departementsToInsert = createDepartements();
-  await prisma.departement.createMany({
-    data: departementsToInsert,
-  });
-
-  console.log(`🌍 Départements créés : ${departementsToInsert.length}`);
+  await seedRegionsAndDepartements(prisma);
 
   let bhasileCodesMap: Map<keyof typeof REGION_CODES, string[]> | undefined;
   if (GENERATE_BHASILE_CODES) {

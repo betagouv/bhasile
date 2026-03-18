@@ -1,6 +1,6 @@
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useFormContext } from "react-hook-form";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
 import { CURRENT_YEAR } from "@/constants";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
@@ -30,10 +30,10 @@ export const FieldSetOuvertureFermeture = ({
   return (
     <fieldset className="flex flex-col">
       {formKind === FormKind.MODIFICATION && (
-        <Notice
+        <CustomNotice
           severity="info"
           title=""
-          className="rounded [&_p]:flex  [&_p]:items-center mb-8 w-fit [&_.fr-notice\_\_desc]:text-text-default-grey"
+          className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
           description="Le nombre de places “QPV” et “Logement social” se modifient dans le bloc “Description”."
         />
       )}
