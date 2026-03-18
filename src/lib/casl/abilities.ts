@@ -1,7 +1,7 @@
 import { AbilityBuilder, PureAbility, subject } from "@casl/ability";
 import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
 
-import { RoleGroup, Structure, User } from "@/generated/prisma/client";
+import { Structure, User } from "@/generated/prisma/client";
 import { SessionUser } from "@/types/global";
 
 export type AppAbility = PureAbility<
@@ -46,8 +46,6 @@ const defineAgentRegionalRules = (
   { can }: AbilityBuilder<AppAbility>,
   user: SessionUser
 ) => {
-  // TODO: handle regions (maybe not useful because already in data (roledepartement table) ?)
-  // console.log("================", user.role, user.allowedDepartements);
   can("update", "Structure", {
     departementAdministratif: { in: user.allowedDepartements },
   });
