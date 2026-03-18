@@ -25,6 +25,7 @@ export const CpomItem = ({ cpom, index }: Props) => {
       className="border-t border-default-grey"
     >
       <td className="text-left!">{cpom.operateur?.name}</td>
+      <td className="text-left!">{cpom.structures?.length}</td>
       <td className="text-left!">{getGranularityLabel(cpom.granularity)}</td>
       <td className="text-left!">{cpom.region?.name}</td>
       <td className="text-left!">
@@ -33,7 +34,7 @@ export const CpomItem = ({ cpom, index }: Props) => {
             <EmptyCell className="[&>div]:mx-0.5" />
           </span>
         ) : (
-          getDepartementsList(cpom.departements)
+          getDepartementsList(cpom.departements, 17)
         )}
       </td>
       <td className="">
