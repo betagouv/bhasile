@@ -576,10 +576,10 @@ model Finess {
 
 model Role {
   id               Int               @id @default(autoincrement())
-  emailPattern     String?
-  group            RoleGroup?        @default(ANONYMOUS)
+  name             String
   roleDepartements RoleDepartement[]
   users            User[]
+  emailPatterns    EmailPattern[]
 
   @@schema("public")
 }
@@ -594,6 +594,16 @@ model RoleDepartement {
   @@schema("public")
 }
 
+model EmailPattern {
+  id      Int    @id @default(autoincrement())
+  pattern String @unique
+  role    Role   @relation(fields: [roleId], references: [id])
+  roleId  Int
+  users   User[]
+
+  @@schema("public")
+}
+
 model User {
   id             Int          @id @default(autoincrement())
   prenom         String
@@ -603,6 +613,8 @@ model User {
   userActions    UserAction[]
   role           Role         @relation(fields: [roleId], references: [id])
   roleId         Int
+  emailPattern   EmailPattern @relation(fields: [emailPatternId], references: [id])
+  emailPatternId Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -734,26 +746,6 @@ enum StepStatus {
   A_VERIFIER
   FINALISE
   VALIDE
-
-  @@schema("public")
-}
-
-enum RoleGroup {
-  NATIONAL
-  REGION_ARA
-  REGION_BFC
-  REGION_BRE
-  REGION_CVL
-  REGION_GES
-  REGION_HDF
-  REGION_IDF
-  REGION_NOR
-  REGION_NAQ
-  REGION_OCC
-  REGION_PDL
-  REGION_PAC
-  DEPARTEMENT
-  ANONYMOUS
 
   @@schema("public")
 }

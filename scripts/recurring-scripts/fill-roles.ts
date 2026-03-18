@@ -5,19 +5,19 @@ import "dotenv/config";
 
 import { loadCsvFromS3 } from "scripts/utils/csv-loader";
 
-import { Departement, RoleGroup } from "@/generated/prisma/client";
+import { Departement } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
 
 type RoleCsvRow = {
-  emailPattern: string;
-  group: string;
+  name: string;
   departement: string;
+  emailPattern: string;
 };
 
 const prisma = createPrismaClient();
 
-const getRegionNameFromGroup = (group: RoleGroup): string | undefined => {
-  const regions = {
+const getRegionNameRoleName = (name: string): string | undefined => {
+  const regions: Record<string, string> = {
     REGION_ARA: "Auvergne-Rhône-Alpes",
     REGION_BFC: "Bourgogne-Franche-Comté",
     REGION_BRE: "Bretagne",
@@ -30,13 +30,14 @@ const getRegionNameFromGroup = (group: RoleGroup): string | undefined => {
     REGION_OCC: "Occitanie",
     REGION_PDL: "Pays de la Loire",
     REGION_PAC: "Provence-Alpes-Côte d'Azur",
-  } as Record<RoleGroup, string>;
-  return regions[group];
+  };
+  return regions[name];
 };
 
 const fetchRoles = async (): Promise<RoleCsvRow[]> => {
   return loadCsvFromS3<RoleCsvRow>(
     process.env.DOCS_BUCKET_NAME!,
+    // TODO : remettre roles.csv ici
     "roles_test.csv"
   );
 };
@@ -45,11 +46,11 @@ const getTargetDepartementIds = (
   row: RoleCsvRow,
   allDepartements: Departement[]
 ): number[] => {
-  if (row.group === RoleGroup.NATIONAL) {
+  if (row.name === "NATIONAL") {
     return allDepartements.map((departement) => departement.id);
   }
-  if (row.group.startsWith("REGION")) {
-    const region = getRegionNameFromGroup(row.group as RoleGroup);
+  if (row.name.startsWith("REGION")) {
+    const region = getRegionNameRoleName(row.name);
     if (!region) {
       return [];
     }
@@ -57,7 +58,7 @@ const getTargetDepartementIds = (
       .filter((departement) => departement.region === region)
       .map((departement) => departement.id);
   }
-  if (row.group === RoleGroup.DEPARTEMENT) {
+  if (row.name.startsWith("DEPARTEMENT")) {
     const departement = allDepartements.find(
       (departement) => departement.numero === row.departement
     );
@@ -67,21 +68,46 @@ const getTargetDepartementIds = (
 };
 
 const createRoles = async (row: RoleCsvRow, departementIds: number[]) => {
-  await prisma.role.create({
-    data: {
-      emailPattern: row.emailPattern,
-      group: row.group as RoleGroup,
-      roleDepartements: {
-        create: departementIds.map((id) => ({ departementId: id })),
+  await prisma.emailPattern.upsert({
+    where: { pattern: row.emailPattern },
+    update: {
+      role: {
+        upsert: {
+          where: { name: row.name },
+          update: {
+            roleDepartements: {
+              create: departementIds.map((id) => ({ departementId: id })),
+            },
+          },
+          create: {
+            name: row.name,
+            roleDepartements: {
+              create: departementIds.map((id) => ({ departementId: id })),
+            },
+          },
+        },
+      },
+    },
+    create: {
+      pattern: row.emailPattern,
+      role: {
+        create: {
+          name: row.name,
+          roleDepartements: {
+            create: departementIds.map((id) => ({ departementId: id })),
+          },
+        },
       },
     },
   });
 };
 
 const createAnonymousRole = async () => {
-  await prisma.role.create({
-    data: {
-      group: "ANONYMOUS",
+  await prisma.role.upsert({
+    where: { name: "ANONYMOUS" },
+    update: {},
+    create: {
+      name: "ANONYMOUS",
       roleDepartements: {
         create: [],
       },
@@ -91,20 +117,17 @@ const createAnonymousRole = async () => {
 
 const run = async () => {
   try {
-    console.log("🧑 Création des roles");
+    console.log("🧑 Création des rôles");
     const [csvRows, allDepartements] = await Promise.all([
       fetchRoles(),
       prisma.departement.findMany(),
     ]);
 
-    await prisma.roleDepartement.deleteMany({});
-    await prisma.role.deleteMany({});
-
     await createAnonymousRole();
     for (const row of csvRows) {
       const targetIds = getTargetDepartementIds(row, allDepartements);
       await createRoles(row, targetIds);
-      console.log(`Ajout de ${row.emailPattern} (${row.group})`);
+      console.log(`Ajout de ${row.emailPattern} (${row.name})`);
     }
   } catch (error) {
     console.error("❌ Erreur lors de la création des roles :", error);
