@@ -4,8 +4,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { CpomTable } from "@/app/components/forms/finance/budget-tables/CpomTable";
 import FormWrapper, {
@@ -14,9 +13,9 @@ import FormWrapper, {
 import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
-import { useCpom } from "@/app/hooks/useCpom";
+import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
 import { getCpomDefaultValues } from "@/app/utils/cpom.util";
-import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
+import { financesCpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
@@ -29,44 +28,29 @@ const confirmationModal = createModal({
 export default function CpomModificationFinance() {
   const router = useRouter();
 
-  const searchParams = useSearchParams();
-  const isCreation = searchParams.get("isCreation") === "true";
+  const { cpom } = useCpomContext();
 
-  const { cpom, setCpom } = useCpomContext();
-
-  const { updateCpom } = useCpom();
-
-  const { getFetchState, setFetchState } = useFetchState();
+  const { getFetchState } = useFetchState();
   const saveState = getFetchState("cpom-save");
 
-  const [backendError, setBackendError] = useState<string | undefined>(
-    undefined
-  );
-
-  const handleSubmit = async (data: CpomFormValues) => {
-    setFetchState("cpom-save", FetchState.LOADING);
-    const result = await updateCpom(data, setCpom);
-    if (typeof result === "object" && "cpomId" in result) {
-      setFetchState("cpom-save", FetchState.IDLE);
+  const { handleSubmit, backendError } = useCpomFormHandling({
+    cpomId: cpom.id,
+    callBack: () => {
       confirmationModal.open();
-    } else {
-      setFetchState("cpom-save", FetchState.ERROR);
-      setBackendError(result);
-      console.error(result);
-    }
-  };
+    },
+  });
 
   const defaultValues = getCpomDefaultValues(cpom);
 
   useEffect(() => {
-    if (!cpom?.id || !isCreation) {
+    if (!cpom?.id) {
       return;
     }
 
     window.history.pushState(null, "", window.location.href);
 
     const handlePopState = () => {
-      router.push(`/cpoms/${cpom?.id}/modification/01-identification`);
+      router.push(`/cpoms/${cpom?.id}/ajout/01-identification`);
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -74,15 +58,11 @@ export default function CpomModificationFinance() {
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [router, cpom?.id, isCreation]);
+  }, [router, cpom?.id]);
 
   useIsModalOpen(confirmationModal, {
     onConceal: () => router.push(`/structures`),
   });
-
-  if (!cpom) {
-    return null;
-  }
 
   return (
     <>
@@ -95,20 +75,20 @@ export default function CpomModificationFinance() {
       />
 
       <FormWrapper
-        schema={cpomSchema}
+        schema={financesCpomSchema}
         defaultValues={defaultValues}
         submitButtonText="Terminer"
         onSubmit={handleSubmit}
         availableFooterButtons={[FooterButtonType.SUBMIT]}
       >
         <PreviousPageLink
-          previousRoute={`/cpoms/${cpom.id}/modification/01-identification`}
+          previousRoute={`/cpoms/${cpom.id}/ajout/01-identification`}
         />
         <p>
           Veuillez renseigner l’historique des données budgétaires{" "}
           <strong>à l’échelle de l’ensemble du CPOM</strong>. Concernant les
           affectations, ce tableau reflète le flux annuel et ne constitue en
-          aucun cas un calcul du stock.
+          aucun cas un calcul ou du stock.
         </p>
         <CpomTable />
         {saveState === FetchState.ERROR && (
@@ -116,11 +96,7 @@ export default function CpomModificationFinance() {
         )}
       </FormWrapper>
       <confirmationModal.Component
-        title={
-          isCreation
-            ? "Vous avez créé un CPOM !"
-            : "Vous avez modifié un CPOM !"
-        }
+        title="Vous avez créé un CPOM !"
         buttons={[
           {
             doClosesModal: true,

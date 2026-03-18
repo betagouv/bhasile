@@ -1,6 +1,10 @@
 import z from "zod";
 
-import { optionalFrenchDateToISO, zId } from "@/app/utils/zodCustomFields";
+import {
+  nullishFrenchDateToISO,
+  optionalFrenchDateToISO,
+  zId,
+} from "@/app/utils/zodCustomFields";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 import { fileApiSchema } from "./file.schema";
@@ -12,7 +16,7 @@ export const acteAdministratifApiSchema = z.object({
   cpomId: zId(),
   date: optionalFrenchDateToISO(),
   startDate: optionalFrenchDateToISO(),
-  endDate: optionalFrenchDateToISO(),
+  endDate: nullishFrenchDateToISO(),
   category: z.enum(ActeAdministratifCategory),
   name: z.string().nullish(),
   parentId: zId(),

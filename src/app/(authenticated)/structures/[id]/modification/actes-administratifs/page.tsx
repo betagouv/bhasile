@@ -4,6 +4,7 @@ import { ActesAdministratifs } from "@/app/components/forms/actesAdministratifs/
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
@@ -18,7 +19,6 @@ import {
 import { FetchState } from "@/types/fetch-state.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
-import { ModificationTitle } from "../_components/ModificationTitle";
 
 export default function ModificationQualiteForm() {
   const { structure } = useStructureContext();

@@ -1,61 +1,39 @@
 "use client";
 
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 
+<<<<<<< HEAD:src/app/(authenticated)/cpoms/[id]/modification/01-identification/page.tsx
 import { FieldSetDocuments } from "@/app/components/forms/cpom/FieldSetDocuments";
 import { FieldSetGeneral } from "@/app/components/forms/cpom/FieldSetGeneral";
 import { FieldSetStructures } from "@/app/components/forms/cpom/FieldSetStructures";
+=======
+import { FieldSetActesAdministratifs } from "@/app/components/forms/fieldsets/cpom/FieldSetActesAdministratifs";
+import { FieldSetGeneral } from "@/app/components/forms/fieldsets/cpom/FieldSetGeneral";
+import { FieldSetStructures } from "@/app/components/forms/fieldsets/cpom/FieldSetStructures";
+>>>>>>> origin/dev:src/app/(authenticated)/cpoms/[id]/ajout/01-identification/page.tsx
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
 import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
-import { useCpom } from "@/app/hooks/useCpom";
+import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
 import { getCpomDefaultValues } from "@/app/utils/cpom.util";
-import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
+import { cpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
 
-export default function CpomModificationIdentification() {
-  const router = useRouter();
+export default function CpomAjoutIdentification() {
+  const { cpom } = useCpomContext();
 
-  const { cpom, setCpom } = useCpomContext();
-
-  const { updateCpom } = useCpom();
-
-  const { getFetchState, setFetchState } = useFetchState();
+  const { getFetchState } = useFetchState();
   const saveState = getFetchState("cpom-save");
 
-  const [backendError, setBackendError] = useState<string | undefined>(
-    undefined
-  );
-
-  const handleSubmit = async (data: CpomFormValues) => {
-    setFetchState("cpom-save", FetchState.LOADING);
-    try {
-      const result = await updateCpom(data, setCpom);
-      if (typeof result === "object" && "cpomId" in result) {
-        setFetchState("cpom-save", FetchState.IDLE);
-        router.push(`/cpoms/${result.cpomId}/modification/02-finance`);
-      } else {
-        setFetchState("cpom-save", FetchState.ERROR);
-        setBackendError(result);
-        console.error(result);
-      }
-    } catch (error) {
-      setFetchState("cpom-save", FetchState.ERROR);
-      setBackendError(String(error));
-      console.error(error);
-    }
-  };
-
-  if (!cpom) {
-    return null;
-  }
+  const { handleSubmit, backendError } = useCpomFormHandling({
+    cpomId: cpom.id,
+    nextRoute: `/cpoms/${cpom.id}/ajout/02-finances`,
+  });
 
   const defaultValues = getCpomDefaultValues(cpom);
 
@@ -78,7 +56,7 @@ export default function CpomModificationIdentification() {
         <PreviousPageLink previousRoute="" />
 
         <FieldSetGeneral />
-        <FieldSetDocuments />
+        <FieldSetActesAdministratifs />
         <FieldSetStructures />
         {saveState === FetchState.ERROR && (
           <SubmitError cpomId={cpom.id} backendError={backendError} />

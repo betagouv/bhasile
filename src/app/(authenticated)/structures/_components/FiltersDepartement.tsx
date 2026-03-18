@@ -3,7 +3,7 @@ import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { DEPARTEMENTS, REGIONS_WITHOUT_CORSE } from "@/constants";
+import { DEPARTEMENTS, REGIONS } from "@/constants";
 
 import { FiltersRegion } from "./FiltersRegion";
 
@@ -40,16 +40,16 @@ export const FiltersDepartement = () => {
   return (
     <div className="max-h-162 overflow-y-scroll overflow-x-hidden py-4">
       <div className={fr.cx("fr-accordions-group")}>
-        {REGIONS_WITHOUT_CORSE.map((region) => (
+        {REGIONS.filter((region) => region.show).map((region) => (
           <FiltersRegion
-            region={region}
-            key={region}
+            region={region.name}
+            key={region.name}
             departements={departements}
             setDepartements={setDepartements}
           >
             <>
               {DEPARTEMENTS.filter(
-                (departement) => departement.region === region
+                (departement) => departement.region === region.name
               )
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .map((departement) => (

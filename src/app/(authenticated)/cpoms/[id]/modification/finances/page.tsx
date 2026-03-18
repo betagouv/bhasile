@@ -1,0 +1,61 @@
+"use client";
+
+import { CpomTable } from "@/app/components/forms/finance/budget-tables/CpomTable";
+import FormWrapper, {
+  FooterButtonType,
+} from "@/app/components/forms/FormWrapper";
+import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
+import { SubmitError } from "@/app/components/SubmitError";
+import { useFetchState } from "@/app/context/FetchStateContext";
+import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
+import { getCpomDefaultValues } from "@/app/utils/cpom.util";
+import { financesCpomSchema } from "@/schemas/forms/base/cpom.schema";
+import { FetchState } from "@/types/fetch-state.type";
+
+import { useCpomContext } from "../../_context/CpomClientContext";
+
+export default function CpomModificationFinance() {
+  const { cpom } = useCpomContext();
+
+  const { getFetchState } = useFetchState();
+  const saveState = getFetchState("cpom-save");
+
+  const { handleSubmit, backendError } = useCpomFormHandling({
+    cpomId: cpom.id,
+    nextRoute: `/cpoms/${cpom.id}`,
+  });
+
+  const defaultValues = getCpomDefaultValues(cpom);
+
+  return (
+    <>
+      <ModificationTitle step="Finances" closeLink={`/cpoms/${cpom.id}`} />{" "}
+      <FormWrapper
+        schema={financesCpomSchema}
+        defaultValues={defaultValues}
+        onSubmit={handleSubmit}
+        resetRoute={`/cpoms/${cpom.id}`}
+        submitButtonText="Valider"
+        availableFooterButtons={[
+          FooterButtonType.CANCEL,
+          FooterButtonType.SUBMIT,
+        ]}
+        className="border-2 border-solid border-(--text-title-blue-france) gap-4"
+      >
+        <p className="mb-0 max-w-4xl">
+          Veuillez renseigner l’historique des données budgétaires{" "}
+          <strong>à l’échelle de l’ensemble du CPOM</strong>. Concernant les
+          affectations, ce tableau reflète le flux annuel et ne constitue en
+          aucun cas un calcul ou du stock.
+        </p>
+        <CpomTable />
+        {saveState === FetchState.ERROR && (
+          <SubmitError
+            structureDnaCode={String(cpom.id)}
+            backendError={backendError}
+          />
+        )}
+      </FormWrapper>
+    </>
+  );
+}

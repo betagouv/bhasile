@@ -4,9 +4,9 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { FieldSetDocuments } from "@/app/components/forms/cpom/FieldSetDocuments";
-import { FieldSetGeneral } from "@/app/components/forms/cpom/FieldSetGeneral";
-import { FieldSetStructures } from "@/app/components/forms/cpom/FieldSetStructures";
+import { FieldSetActesAdministratifs } from "@/app/components/forms/fieldsets/cpom/FieldSetActesAdministratifs";
+import { FieldSetGeneral } from "@/app/components/forms/fieldsets/cpom/FieldSetGeneral";
+import { FieldSetStructures } from "@/app/components/forms/fieldsets/cpom/FieldSetStructures";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
@@ -38,9 +38,7 @@ export default function CpomAjoutIdentification() {
     const result = await addCpom(data);
     if (typeof result === "object" && "cpomId" in result) {
       setFetchState("cpom-save", FetchState.IDLE);
-      router.push(
-        `/cpoms/${result.cpomId}/modification/02-finance?isCreation=true`
-      );
+      router.push(`/cpoms/${result.cpomId}/ajout/02-finances`);
     } else {
       setFetchState("cpom-save", FetchState.ERROR);
       setBackendError(result);
@@ -66,7 +64,7 @@ export default function CpomAjoutIdentification() {
       >
         <PreviousPageLink />
         <FieldSetGeneral />
-        <FieldSetDocuments />
+        <FieldSetActesAdministratifs />
         <FieldSetStructures />
         {saveState === FetchState.ERROR && (
           <SubmitError backendError={backendError} />

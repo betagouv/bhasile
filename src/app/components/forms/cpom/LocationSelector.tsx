@@ -4,7 +4,8 @@ import { useFormContext } from "react-hook-form";
 
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
-import { DEPARTEMENTS, REGIONS_WITHOUT_CORSE } from "@/constants";
+import { DEPARTEMENTS, REGIONS } from "@/constants";
+import { CpomDepartementApiType } from "@/schemas/api/cpom.schema";
 
 import { DepartementsSelector } from "../DepartementsSelector";
 
@@ -13,8 +14,8 @@ export const LocationSelector = () => {
 
   const granularity = watch("granularity");
 
-  const region = watch("region");
-  const departements = watch("departements") as string[];
+  const region = watch("region.name");
+  const departements = watch("departements") as CpomDepartementApiType[];
 
   const departementsOfRegion = useMemo(
     () => DEPARTEMENTS.filter((departement) => departement.region === region),
@@ -24,9 +25,13 @@ export const LocationSelector = () => {
 
   const handleDepartementChange = (value: string) => {
     if (value) {
-      setValue("departements", [value], { shouldValidate: true });
+      setValue("departements.0.departement.numero", value, {
+        shouldValidate: true,
+      });
     } else {
-      setValue("departements", [], { shouldValidate: true });
+      setValue("departements.0.departement.numero", undefined, {
+        shouldValidate: true,
+      });
     }
   };
 
@@ -62,7 +67,9 @@ export const LocationSelector = () => {
     if (granularity === "REGIONALE") {
       setValue(
         "departements",
-        departementsOfRegion.map((departement) => departement.numero),
+        departementsOfRegion.map((departement) => ({
+          departement: { numero: departement.numero },
+        })),
         { shouldValidate: true }
       );
     }
@@ -82,11 +89,17 @@ export const LocationSelector = () => {
   }, [departementsOfRegion, setValue]);
 
   const handleDepartementToggle = (value: string) => {
-    if (departements.includes(value)) {
+    if (
+      departements.find(
+        (departement) => departement.departement?.numero === value
+      )
+    ) {
       if (departements.length === 1) {
         setValue(
           "departements",
-          departementsOfRegion.map((departement) => departement.numero),
+          departementsOfRegion.map((departement) => ({
+            departement: { numero: departement.numero },
+          })),
           {
             shouldValidate: true,
           }
@@ -94,14 +107,20 @@ export const LocationSelector = () => {
       } else {
         setValue(
           "departements",
-          departements.filter((departement) => departement !== value),
+          departements.filter(
+            (departement) => departement.departement?.numero !== value
+          ),
           { shouldValidate: true }
         );
       }
     } else {
-      setValue("departements", [...departements, value], {
-        shouldValidate: true,
-      });
+      setValue(
+        "departements",
+        [...departements, { departement: { numero: value } }],
+        {
+          shouldValidate: true,
+        }
+      );
     }
   };
 
@@ -109,15 +128,16 @@ export const LocationSelector = () => {
     <div className="grid grid-cols-3 gap-6">
       <OperateurAutocomplete />
       <SelectWithValidation
-        name="region"
+        name="region.name"
+        id="region"
         control={control}
         label="Région"
         required
       >
         <option value="">Sélectionnez une région</option>
-        {REGIONS_WITHOUT_CORSE.map((region) => (
-          <option key={region} value={region}>
-            {region}
+        {REGIONS.filter((region) => region.show).map((region) => (
+          <option key={region.name} value={region.name}>
+            {region.name}
           </option>
         ))}
       </SelectWithValidation>
@@ -125,9 +145,12 @@ export const LocationSelector = () => {
         <Select
           label="Département"
           nativeSelectProps={{
-            name: "departements",
+            name: "departements.0.departement.numero",
+            id: "departements",
             value:
-              departements && departements.length === 1 ? departements[0] : "",
+              departements && departements.length === 1
+                ? departements[0].departement?.numero
+                : "",
             onChange: (e) => handleDepartementChange(e.target.value),
           }}
           disabled={!departementsOfRegion.length}

@@ -39,8 +39,8 @@ export const SELECTORS = {
   // CPOM
   CPOM_GRANULARITY_RADIO: (value: string) =>
     `input[name="granularity"][value="${value}"]`,
-  CPOM_REGION_SELECT: 'select[name="region"]',
-  CPOM_DEPARTEMENTS_SELECT: 'select[name="departements"]',
+  CPOM_REGION_SELECT: 'select[id="region"]',
+  CPOM_DEPARTEMENTS_SELECT: 'select[id="departements"]',
   CPOM_OPERATEUR_INPUT: "#operateur",
   CPOM_ACTE_START_DATE: (index: number) =>
     `input[name="actesAdministratifs.${index}.startDate"]`,

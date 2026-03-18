@@ -5,9 +5,9 @@ import { deleteStructure } from "@/app/api/structures/structure.repository";
 
 import { beforeFlow } from "./helpers/before-flow";
 import { URLS } from "./helpers/constants";
+import { CpomAjoutFinancePage } from "./helpers/page-objects/cpom/CpomAjoutFinancePage";
 import { CpomAjoutIdentificationPage } from "./helpers/page-objects/cpom/CpomAjoutIdentificationPage";
-import { CpomModificationFinancePage } from "./helpers/page-objects/cpom/CpomModificationFinancePage";
-import { CpomModificationIdentificationPage } from "./helpers/page-objects/cpom/CpomModificationIdentificationPage";
+import { CpomDetailPage } from "./helpers/page-objects/cpom/CpomDetailPage";
 import { cada1 } from "./helpers/test-data/cada-1";
 import { cpomDepartementale } from "./helpers/test-data/cpom-departementale";
 import { cpomInterdepartementale } from "./helpers/test-data/cpom-interdepartementale";
@@ -16,7 +16,7 @@ import { cpomRegionale } from "./helpers/test-data/cpom-regionale";
 type CpomTestCase = {
   name: string;
   formData: Parameters<CpomAjoutIdentificationPage["fillForm"]>[0];
-  financeData: Parameters<CpomModificationFinancePage["fillForm"]>[0];
+  financeData: Parameters<CpomAjoutFinancePage["fillForm"]>[0];
 };
 
 async function runCpomAjoutTest(
@@ -51,23 +51,18 @@ async function runCpomAjoutTest(
       throw new Error("Expected cpomId after submit");
     }
 
-    const financePage = new CpomModificationFinancePage(page);
+    const financePage = new CpomAjoutFinancePage(page);
     await financePage.fillForm(testCase.financeData);
     await financePage.submitAndConfirmRedirectToStructures();
 
-    await page.goto(URLS.cpomModificationIdentification(cpomId), {
+    await page.goto(URLS.cpomPage(cpomId), {
       waitUntil: "load",
     });
     await page.waitForLoadState("networkidle").catch(() => {});
 
-    const modificationPage = new CpomModificationIdentificationPage(page);
-    await modificationPage.verifyForm(formData);
-
-    await page.goto(URLS.cpomModificationFinance(cpomId), {
-      waitUntil: "domcontentloaded",
-    });
-    const financePageForVerification = new CpomModificationFinancePage(page);
-    await financePageForVerification.verifyFinanceTable(testCase.financeData);
+    const cpomDetailPage = new CpomDetailPage(page);
+    await cpomDetailPage.verifyDescription(formData);
+    await cpomDetailPage.verifyFinances(testCase.financeData, formData);
   } finally {
     if (cpomId !== null) {
       await deleteCpom(cpomId);
