@@ -198,51 +198,114 @@ export const fillOfiiStructureFromRows = async (
       }
     }
 
-    const existingStructures = await prisma.structure.findMany({
+    await prisma.$transaction(
+      validRecords.map((row) =>
+        prisma.dna.upsert({
+          where: { code: row.dnaCode },
+          create: { code: row.dnaCode },
+          update: {},
+        })
+      )
+    );
+
+    const dnaCodes = [...new Set(validRecords.map((r) => r.dnaCode))];
+    const dnaMappings = await prisma.dnaStructure.findMany({
       where: {
-        dnaCode: { in: validRecords.map((r) => r.dnaCode) },
+        dna: { code: { in: dnaCodes } },
+        AND: [
+          { OR: [{ startDate: null }, { startDate: { lte: date } }] },
+          { OR: [{ endDate: null }, { endDate: { gte: date } }] },
+        ],
       },
+      select: { structureId: true, dna: { select: { code: true } } },
+    });
+
+    const dnaToStructureId = new Map(
+      dnaMappings.map(
+        (mapping) => [mapping.dna.code, mapping.structureId] as const
+      )
+    );
+
+    const validRecordsWithStructure = validRecords.filter((row) =>
+      dnaToStructureId.has(row.dnaCode)
+    );
+
+    const unmappedDnaCodes = [
+      ...new Set(
+        validRecords
+          .map((row) => row.dnaCode)
+          .filter((code) => !dnaToStructureId.has(code))
+      ),
+    ];
+    if (unmappedDnaCodes.length > 0) {
+      console.log(
+        `⚠️ ${unmappedDnaCodes.length} DNA du fichier OFII sans rattachement à une structure (ignorés pour la mise à jour Structure): ${unmappedDnaCodes
+          .slice(0, 10)
+          .join(", ")}${unmappedDnaCodes.length > 10 ? "..." : ""}`
+      );
+    }
+
+    const structureIds = [
+      ...new Set(
+        validRecordsWithStructure.map((r) => dnaToStructureId.get(r.dnaCode)!)
+      ),
+    ];
+
+    const existingStructures = await prisma.structure.findMany({
+      where: { id: { in: structureIds } },
       select: {
+        id: true,
         dnaCode: true,
         activeInOfiiFileSince: true,
         inactiveInOfiiFileSince: true,
       },
     });
-    const existingByDnaCode = new Map(
-      existingStructures.map((s) => [s.dnaCode, s])
-    );
+    const structureById = new Map(existingStructures.map((s) => [s.id, s]));
 
-    const recordsToCreate = validRecords.filter(
-      (record) => !existingByDnaCode.has(record.dnaCode)
-    );
+    // Pour chaque structure, choisit une ligne OFII "référence" déterministe.
+    const recordsByStructureId = new Map<number, OfiiReferentialRow[]>();
+    for (const row of validRecordsWithStructure) {
+      const sid = dnaToStructureId.get(row.dnaCode)!;
+      const list = recordsByStructureId.get(sid) ?? [];
+      list.push(row);
+      recordsByStructureId.set(sid, list);
+    }
 
+    const representativeRows: {
+      structureId: number;
+      row: OfiiReferentialRow;
+    }[] = [];
+    for (const [structureId, rows] of recordsByStructureId.entries()) {
+      const existing = structureById.get(structureId);
+      const preferred =
+        (existing?.dnaCode
+          ? rows.find((row) => row.dnaCode === existing.dnaCode)
+          : undefined) ?? rows[0];
+      representativeRows.push({ structureId, row: preferred });
+    }
+
+    // Résolution des opérateurs pour les structures à mettre à jour
     let operateurMap = new Map<string, number>();
-    if (recordsToCreate.length > 0) {
-      console.log(
-        `Résolution des opérateurs pour ${recordsToCreate.length} nouvelles structures...`
+    try {
+      operateurMap = await ensureOperateursExist(
+        prisma,
+        representativeRows.map((row) => row.row),
+        "operateur"
       );
-      try {
-        operateurMap = await ensureOperateursExist(
-          prisma,
-          recordsToCreate,
-          "operateur"
-        );
-      } catch (error) {
-        console.error(error);
-        throw new Error(
-          "❌ Des opérateurs présents dans le fichier OFII sont inconnus en base." +
-            error
-        );
-      }
+    } catch (error) {
+      console.error(error);
+      throw new Error(
+        "❌ Des opérateurs présents dans le fichier OFII sont inconnus en base." +
+          error
+      );
     }
 
     console.log("- Mise à jour des données de référentiel");
-    let createdCount = 0;
     let updatedCount = 0;
 
     await prisma.$transaction(async (tx) => {
-      for (const row of validRecords) {
-        const existing = existingByDnaCode.get(row.dnaCode);
+      for (const { structureId, row } of representativeRows) {
+        const existing = structureById.get(structureId);
         const now = new Date();
 
         const depKey = row.departement
@@ -253,22 +316,16 @@ export const fillOfiiStructureFromRows = async (
           departementNumero: depNumero,
           operateurClean: row.operateur,
         });
-        await tx.structure.upsert({
-          where: { dnaCode: row.dnaCode },
-          update: {
+        await tx.structure.update({
+          where: { id: structureId },
+          data: {
             nom: cleanName,
             nomOfii: row.nom ?? undefined,
-            inactiveInOfiiFileSince: null,
-          },
-          create: {
-            dnaCode: row.dnaCode,
-            nom: cleanName,
             type: row.type as StructureType,
             departementAdministratif: depNumero ?? undefined,
-            nomOfii: row.nom ?? undefined,
             directionTerritoriale: row.directionTerritoriale ?? undefined,
-            activeInOfiiFileSince: now,
             inactiveInOfiiFileSince: null,
+            activeInOfiiFileSince: existing?.activeInOfiiFileSince ?? now,
             operateurId: row.operateur
               ? (operateurMap.get(row.operateur) ?? null)
               : null,
@@ -277,39 +334,37 @@ export const fillOfiiStructureFromRows = async (
 
         if (existing) {
           updatedCount += 1;
-        } else {
-          createdCount += 1;
         }
       }
 
-      const csvDnaCodes = new Set(validRecords.map((r) => r.dnaCode));
+      // Désactivation : une structure devient inactive seulement si aucun de ses DNA (as-of date)
+      // n'est présent dans le fichier.
+      const presentStructureIds = new Set(structureIds);
       const allActiveOfiiStructures = await tx.structure.findMany({
         where: { inactiveInOfiiFileSince: null },
-        select: { dnaCode: true },
+        select: { id: true },
       });
-      const dnaCodesToDeactivate = allActiveOfiiStructures
-        .map((s) => s.dnaCode)
-        .filter((dnaCode) => !csvDnaCodes.has(dnaCode));
+      const structureIdsToDeactivate = allActiveOfiiStructures
+        .map((s) => s.id)
+        .filter((id) => !presentStructureIds.has(id));
 
-      if (dnaCodesToDeactivate.length > 0) {
+      if (structureIdsToDeactivate.length > 0) {
         const deactivated = await tx.structure.updateMany({
           where: {
-            dnaCode: { in: dnaCodesToDeactivate },
+            id: { in: structureIdsToDeactivate },
             inactiveInOfiiFileSince: null,
           },
           data: { inactiveInOfiiFileSince: date },
         });
         console.log(
-          `- ⚠️ ${deactivated.count} structures marquées comme inactives dans le fichier OFII (absentes du CSV).`
+          `- ⚠️ ${deactivated.count} structures marquées comme inactives dans le fichier OFII (aucun DNA présent dans le XLSX).`
         );
       } else {
         console.log("- Aucune structure à désactiver.");
       }
     });
 
-    console.log(
-      `✅ ${createdCount} structures créées, ${updatedCount} structures mises à jour`
-    );
+    console.log(`✅ ${updatedCount} structures mises à jour`);
   } catch (error) {
     throw new Error(
       "❌ Erreur lors du chargement des données référentiel : " + error

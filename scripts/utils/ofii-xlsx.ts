@@ -17,7 +17,7 @@ const POSSIBLE_REF_COLUMNS: Record<keyof OfiiReferentialRow, string[]> = {
 };
 
 const POSSIBLE_ACTIVITE_COLUMNS: Record<keyof ActiviteRow, string[]> = {
-  structureDnaCode: ["Code"],
+  dnaCode: ["Code"],
   placesAutorisees: ["Capacité"],
   desinsectisation: ["Désinsectisation"],
   remiseEnEtat: ["Remise en état de l'unité"],
@@ -38,7 +38,6 @@ export type OfiiReferentialRow = {
 };
 
 export type ActiviteRow = {
-  structureId: number;
   dnaCode: string;
   placesAutorisees: number | null;
   desinsectisation: number | null;
@@ -273,10 +272,9 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
         sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })];
       const rawCellValue = cell?.v;
 
-      if (activiteKey === "structureDnaCode") {
+      if (activiteKey === "dnaCode") {
         const value = normalizeCellValue(rawCellValue);
         if (value) {
-          row.structureDnaCode = value;
           row.dnaCode = value;
           isEmptyRow = false;
         }
