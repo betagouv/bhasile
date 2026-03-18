@@ -1,4 +1,4 @@
-import { REGION_CODES } from "@/app/utils/codeBhasile.util";
+import { REGIONS } from "@/constants";
 
 const PREFIX = "BHA";
 
@@ -14,20 +14,20 @@ export const generateBhasileCodesForRegion = (
 
 export const generateAllBhasileCodes = (
   codesPerRegion: number = 200
-): Map<keyof typeof REGION_CODES, string[]> => {
-  const codesMap = new Map<keyof typeof REGION_CODES, string[]>();
+): Map<string, string[]> => {
+  const codesMap = new Map<string, string[]>();
 
-  for (const [regionName, regionCode] of Object.entries(REGION_CODES)) {
-    const codes = generateBhasileCodesForRegion(regionCode, codesPerRegion);
-    codesMap.set(regionName as keyof typeof REGION_CODES, codes);
+  for (const region of REGIONS) {
+    const codes = generateBhasileCodesForRegion(region.code, codesPerRegion);
+    codesMap.set(region.name, codes);
   }
 
   return codesMap;
 };
 
 export const getNextBhasileCode = (
-  codesMap: Map<keyof typeof REGION_CODES, string[]>,
-  region: keyof typeof REGION_CODES
+  codesMap: Map<string, string[]>,
+  region: string
 ): string | null => {
   const codes = codesMap.get(region);
   if (!codes || codes.length === 0) {
@@ -35,7 +35,3 @@ export const getNextBhasileCode = (
   }
   return codes.shift() || null;
 };
-
-export const REGION_CODES_ARRAY = Object.keys(
-  REGION_CODES
-) as (keyof typeof REGION_CODES)[];

@@ -6,10 +6,7 @@
 import "dotenv/config";
 
 import { createPrismaClient } from "@/prisma-client";
-import {
-  generateBhasileCode,
-  REGION_CODES,
-} from "@/app/utils/codeBhasile.util";
+import { generateBhasileCode } from "@/app/utils/codeBhasile.util";
 
 const prisma = createPrismaClient();
 
@@ -45,8 +42,7 @@ async function main() {
     }
 
     const regionName = structure.departement?.region;
-    const regionKey = regionName as keyof typeof REGION_CODES;
-    const codeBhasile = await generateBhasileCode(regionKey);
+    const codeBhasile = await generateBhasileCode(regionName);
 
     await prisma.$transaction(async (tx) => {
       // 1. Create Bhasile code for structure

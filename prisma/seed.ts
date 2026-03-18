@@ -2,7 +2,6 @@ import "dotenv/config";
 
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { REGION_CODES } from "@/app/utils/codeBhasile.util";
 import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
@@ -57,7 +56,7 @@ export async function seed(): Promise<void> {
 
   await seedRegionsAndDepartements(prisma);
 
-  let bhasileCodesMap: Map<keyof typeof REGION_CODES, string[]> | undefined;
+  let bhasileCodesMap: Map<string, string[]> | undefined;
   if (GENERATE_BHASILE_CODES) {
     console.log("🔢 Génération des codes Bhasile par région...");
     bhasileCodesMap = generateAllBhasileCodes(500); // Not all codes will be used
