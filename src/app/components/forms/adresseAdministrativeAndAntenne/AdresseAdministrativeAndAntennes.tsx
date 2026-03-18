@@ -1,6 +1,7 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useFormContext } from "react-hook-form";
+
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 
 import { FieldSetAdresseAdministrative } from "./FieldSetAdresseAdministrative";
 import { FieldSetAntennes } from "./FieldSetAntennes";
@@ -15,7 +16,7 @@ export const AdresseAdministrativeAndAntennes = () => {
       <h2 className="text-xl font-bold mb-4 text-title-blue-france">
         Adresses administratives
       </h2>
-      <Notice
+      <CustomNotice
         severity="info"
         title=""
         className="rounded [&_p]:flex  [&_p]:items-center"

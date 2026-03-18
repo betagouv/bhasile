@@ -1,8 +1,8 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { ContactFormValues } from "@/schemas/forms/base/contact.schema";
 
 import { Contact } from "./Contact";
@@ -56,12 +56,7 @@ export const FieldSetContacts = () => {
         Contacts
       </h2>
 
-      <Notice
-        severity="info"
-        title=""
-        className="rounded [&_p]:flex [&_p]:items-center"
-        description={notice}
-      />
+      <CustomNotice severity="info" title="" description={notice} />
 
       {contacts.map((_, index) => (
         <Contact

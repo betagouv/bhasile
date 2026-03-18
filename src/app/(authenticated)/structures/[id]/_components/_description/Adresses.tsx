@@ -1,9 +1,9 @@
 "use client";
 
-import Notice from "@codegouvfr/react-dsfr/Notice";
 import { ReactElement } from "react";
 
 import { Badge } from "@/app/components/common/Badge";
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { formatCityName } from "@/app/utils/adresse.util";
 import { Repartition } from "@/types/adresse.type";
 
@@ -15,10 +15,9 @@ export const Adresses = (): ReactElement => {
 
   if (!adresses?.length) {
     return (
-      <Notice
+      <CustomNotice
         severity="alert"
         title=""
-        className="rounded [&_p]:flex [&_p]:items-center"
         description="Un problème technique a empêché l’enregistrement des hébergements liés à cette structure. La situation est en cours de correction, merci pour votre compréhension."
       />
     );
