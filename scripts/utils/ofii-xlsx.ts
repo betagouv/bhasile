@@ -38,7 +38,8 @@ export type OfiiReferentialRow = {
 };
 
 export type ActiviteRow = {
-  structureDnaCode: string;
+  structureId: number;
+  dnaCode: string;
   placesAutorisees: number | null;
   desinsectisation: number | null;
   remiseEnEtat: number | null;
@@ -81,8 +82,12 @@ const possibleValuesSet = new Set(
 );
 
 function parseYear(year: string): string {
-  if (year.length === 2) {return "20" + year;}
-  if (year.length === 4) {return year;}
+  if (year.length === 2) {
+    return "20" + year;
+  }
+  if (year.length === 4) {
+    return year;
+  }
   throw new Error(`Année invalide: ${year}`);
 }
 
@@ -97,8 +102,12 @@ function parseSheetDate(
   let yearNb: string | null = null;
 
   for (const word of parts) {
-    if (MONTHS[word] != null) {monthNb = MONTHS[word];}
-    if (/^\d{2,4}$/.test(word)) {yearNb = parseYear(word);}
+    if (MONTHS[word] != null) {
+      monthNb = MONTHS[word];
+    }
+    if (/^\d{2,4}$/.test(word)) {
+      yearNb = parseYear(word);
+    }
   }
 
   const numMatch = clean.match(/(\d{1,2})[\s\-_/](\d{2,4})/);
@@ -139,13 +148,17 @@ function findHeaderRow(sheet: WorkSheet): number {
       const val = cell && cell.v != null ? String(cell.v).trim() : "";
       row.push(val);
     }
-    if (row.some((val) => possibleValuesSet.has(val))) {return myRow;}
+    if (row.some((val) => possibleValuesSet.has(val))) {
+      return myRow;
+    }
   }
   return -1;
 }
 
 function normalizeCellValue(val: unknown): string {
-  if (val == null) {return "";}
+  if (val == null) {
+    return "";
+  }
   return String(val).trim();
 }
 
@@ -174,7 +187,9 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
           x.date != null
       )
       .sort((a, b) => {
-        if (a.date.year !== b.date.year) {return b.date.year - a.date.year;}
+        if (a.date.year !== b.date.year) {
+          return b.date.year - a.date.year;
+        }
         return b.date.month - a.date.month;
       });
     if (withDates.length == 0) {
@@ -281,7 +296,9 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
       }
     }
 
-    if (isEmptyRow) {break;}
+    if (isEmptyRow) {
+      break;
+    }
     rows.push(row as OfiiFullRow);
   }
 

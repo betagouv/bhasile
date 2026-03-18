@@ -5,8 +5,8 @@ import autoAnimate from "@formkit/auto-animate";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { CustomNotice } from "@/app/components/common/CustomNotice";
 
+import { CustomNotice } from "@/app/components/common/CustomNotice";
 import AddressWithValidation from "@/app/components/forms/AddressWithValidation";
 import { AdressImporter } from "@/app/components/forms/hebergement/AdressImporter";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";

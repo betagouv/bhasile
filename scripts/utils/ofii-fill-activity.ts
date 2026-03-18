@@ -21,7 +21,7 @@ export async function fillOfiiActiviteFromRows(
     return;
   }
 
-  const dnaCodes = [...new Set(rows.map((r) => r.structureDnaCode))];
+  const dnaCodes = [...new Set(rows.map((r) => r.dnaCode))];
   const existingStructures = await prisma.structure.findMany({
     where: { dnaCode: { in: dnaCodes } },
     select: { dnaCode: true },
@@ -54,13 +54,14 @@ export async function fillOfiiActiviteFromRows(
     try {
       await prisma.activite.upsert({
         where: {
-          structureDnaCode_date: {
-            structureDnaCode: r.structureDnaCode,
+          structureId_date: {
+            structureId: r.structureId,
             date,
           },
         },
         create: {
-          structureDnaCode: r.structureDnaCode,
+          structureId: r.structureId,
+          dnaCode: r.dnaCode,
           date,
           placesAutorisees: r.placesAutorisees ?? undefined,
           desinsectisation: r.desinsectisation ?? undefined,

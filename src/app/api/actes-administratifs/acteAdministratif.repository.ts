@@ -129,7 +129,7 @@ const deleteActesAdministratifs = async (
       : { cpomId: ownerId.cpomId };
 
   if (ownerId.structureId === undefined && ownerId.cpomId === undefined) {
-    return;
+    return [];
   }
 
   const fileKeysToKeep = getKeysFromIncomingDocumentsOrActes(

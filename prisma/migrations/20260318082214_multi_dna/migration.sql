@@ -2,15 +2,6 @@
   Warnings:
 
   - You are about to drop the column `type` on the `Contact` table. All the data in the column will be lost.
-  - You are about to drop the column `category` on the `FileUpload` table. All the data in the column will be lost.
-  - You are about to drop the column `categoryName` on the `FileUpload` table. All the data in the column will be lost.
-  - You are about to drop the column `cpomId` on the `FileUpload` table. All the data in the column will be lost.
-  - You are about to drop the column `date` on the `FileUpload` table. All the data in the column will be lost.
-  - You are about to drop the column `endDate` on the `FileUpload` table. All the data in the column will be lost.
-  - You are about to drop the column `granularity` on the `FileUpload` table. All the data in the column will be lost.
-  - You are about to drop the column `parentFileUploadId` on the `FileUpload` table. All the data in the column will be lost.
-  - You are about to drop the column `startDate` on the `FileUpload` table. All the data in the column will be lost.
-  - You are about to drop the column `structureDnaCode` on the `FileUpload` table. All the data in the column will be lost.
   - A unique constraint covering the columns `[structureId,date]` on the table `Activite` will be added. If there are existing duplicate values, this will fail.
   - A unique constraint covering the columns `[structureId,year]` on the table `Budget` will be added. If there are existing duplicate values, this will fail.
   - A unique constraint covering the columns `[structureId,formDefinitionId]` on the table `Form` will be added. If there are existing duplicate values, this will fail.
@@ -48,15 +39,6 @@ ALTER TABLE "Evaluation" DROP CONSTRAINT "Evaluation_structureDnaCode_fkey";
 
 -- DropForeignKey
 ALTER TABLE "EvenementIndesirableGrave" DROP CONSTRAINT "EvenementIndesirableGrave_structureDnaCode_fkey";
-
--- DropForeignKey
-ALTER TABLE "FileUpload" DROP CONSTRAINT "FileUpload_cpomId_fkey";
-
--- DropForeignKey
-ALTER TABLE "FileUpload" DROP CONSTRAINT "FileUpload_parentFileUploadId_fkey";
-
--- DropForeignKey
-ALTER TABLE "FileUpload" DROP CONSTRAINT "FileUpload_structureDnaCode_fkey";
 
 -- DropForeignKey
 ALTER TABLE "Form" DROP CONSTRAINT "Form_structureCodeDna_fkey";
