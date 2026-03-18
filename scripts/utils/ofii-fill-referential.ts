@@ -264,10 +264,10 @@ export const fillOfiiStructureFromRows = async (
 
     const recordsByStructureId = new Map<number, OfiiReferentialRow[]>();
     for (const row of validRecordsWithStructure) {
-      const sid = dnaToStructureId.get(row.dnaCode)!;
-      const list = recordsByStructureId.get(sid) ?? [];
+      const structureId = dnaToStructureId.get(row.dnaCode)!;
+      const list = recordsByStructureId.get(structureId) ?? [];
       list.push(row);
-      recordsByStructureId.set(sid, list);
+      recordsByStructureId.set(structureId, list);
     }
 
     const representativeRows: {

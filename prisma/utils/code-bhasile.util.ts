@@ -2,7 +2,7 @@ import { REGIONS } from "@/constants";
 
 const PREFIX = "BHA";
 
-export const generateBhasileCodesForRegion = (
+const generateBhasileCodesForRegion = (
   regionCode: string,
   count: number
 ): string[] => {
