@@ -83,7 +83,6 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
       reset(defaultValues as z.infer<TSchema>);
       if (resetRoute) {
         router.push(resetRoute);
-        window.location.reload();
       }
     }
   };

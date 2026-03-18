@@ -1,5 +1,7 @@
 import { ReactElement } from "react";
 
+import { Section } from "@/app/components/common/Section";
+
 import { ActesAdministratifsBlock } from "./_actes-administratifs/ActesAdministratifsBlock";
 import { ActiviteBlock } from "./_activite/ActiviteBlock";
 import { CalendrierBlock } from "./_calendrier/CalendrierBlock";
@@ -8,7 +10,6 @@ import { DescriptionBlock } from "./_description/DescriptionBlock";
 import { FinancesBlock } from "./_finances/FinancesBlock";
 import { NotesBlock } from "./_notes/NotesBlock";
 import { TypePlaceBlock } from "./_type-places/TypePlaceBlock";
-import { Section } from "./Section";
 
 export const Structure = (): ReactElement => {
   return (

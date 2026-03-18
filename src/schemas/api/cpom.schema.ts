@@ -1,14 +1,16 @@
 import z from "zod";
 
-import { zSafeYear } from "@/app/utils/zodCustomFields";
+import { zId, zSafeYear } from "@/app/utils/zodCustomFields";
 import { StructureType } from "@/types/structure.type";
 
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
+import { departementApiSchema } from "./departement.schema";
 import { formApiSchema } from "./form.schema";
 import { operateurApiSchema } from "./operateur.schema";
+import { regionApiSchema } from "./region.schema";
 
 export const cpomMillesimeApiSchema = z.object({
-  id: z.number().optional(),
+  id: zId(),
   year: zSafeYear(),
   dotationDemandee: z.number().nullish(),
   dotationAccordee: z.number().nullish(),
@@ -26,14 +28,23 @@ export const cpomMillesimeApiSchema = z.object({
   commentaire: z.string().nullish(),
 });
 
+export const cpomDepartementApiSchema = z.object({
+  id: zId(),
+  cpomId: zId(),
+  departementId: zId(),
+  departement: departementApiSchema.optional(),
+});
+
 export const cpomApiSchema = z.object({
-  id: z.number().optional(),
+  id: zId(),
   name: z.string().nullish(),
   operateur: operateurApiSchema.optional(),
   operateurId: z.number().optional(),
-  region: z.string().optional(),
-  departements: z.array(z.string()).optional(),
-  granularity: z.enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"]),
+  region: regionApiSchema.optional(),
+  departements: z.array(cpomDepartementApiSchema).optional(),
+  granularity: z
+    .enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"])
+    .optional(),
   cpomMillesimes: z.array(cpomMillesimeApiSchema).optional(),
   actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
   structures: z
@@ -73,6 +84,6 @@ export const cpomApiAjoutSchema = cpomApiSchema.extend({
 });
 
 export type CpomMillesimeApiType = z.infer<typeof cpomMillesimeApiSchema>;
-export type CpomApiType = z.infer<typeof cpomApiSchema>;
-
+export type CpomDepartementApiType = z.infer<typeof cpomDepartementApiSchema>;
 export type CpomStructureApiType = z.infer<typeof cpomStructureApiSchema>;
+export type CpomApiType = z.infer<typeof cpomApiSchema>;

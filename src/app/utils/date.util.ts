@@ -76,7 +76,7 @@ export const getYearFromDate = (
   date: string | number | Date | undefined | null
 ): number => {
   if (!date) {
-    return -1;
+    return 0;
   }
   if (typeof date === "string") {
     const match = date.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
@@ -95,7 +95,7 @@ export const getYearFromDate = (
         return parsed.year();
       }
     }
-    return -1;
+    return 0;
   }
   if (date instanceof Date) {
     return date.getFullYear();
@@ -103,7 +103,7 @@ export const getYearFromDate = (
   if (typeof date === "number") {
     return date;
   }
-  return -1;
+  return 0;
 };
 export const parseFrDate = (value: unknown): Date | unknown => {
   if (typeof value === "string") {

@@ -5,14 +5,15 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactElement, useEffect, useRef } from "react";
 
+import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
+import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 import { getOperateurLabel } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { AutoSaveStatus } from "./AutoSaveStatus";
 import { FinalisationHeader } from "./FinalisationHeader";
-import { NavigationMenu } from "./NavigationMenu";
 
 const autoSaveModal = createModal({
   id: "autosave-modal",
@@ -33,8 +34,7 @@ export const StructureHeader = (): ReactElement | null => {
   const { handleFinalisation, isStructureReadyToFinalise } =
     useAgentFormHandling();
 
-  const structureHeaderRef = useRef<HTMLDivElement>(null);
-  const structureHeaderHeight = useRef(0);
+  const { headerRef } = useHeaderHeight();
 
   const pathname = usePathname();
   const previousPath = useRef<string | null>(null);
@@ -51,26 +51,6 @@ export const StructureHeader = (): ReactElement | null => {
   const isFinalisationPath = pathname.startsWith(
     `/structures/${structure?.id}/finalisation`
   );
-
-  useEffect(() => {
-    const updateHeaderHeight = () => {
-      if (structureHeaderRef.current) {
-        const height = structureHeaderRef.current.offsetHeight;
-        structureHeaderHeight.current = height;
-        document.documentElement.style.setProperty(
-          "--structure-header-height",
-          `${height}px`
-        );
-      }
-    };
-
-    updateHeaderHeight();
-
-    window.addEventListener("resize", updateHeaderHeight);
-    return () => {
-      window.removeEventListener("resize", updateHeaderHeight);
-    };
-  }, []);
 
   const {
     type,
@@ -96,7 +76,7 @@ export const StructureHeader = (): ReactElement | null => {
 
   return structure ? (
     <>
-      <div className="sticky top-0 z-2 bg-lifted-grey" ref={structureHeaderRef}>
+      <div className="sticky top-0 z-2 bg-lifted-grey" ref={headerRef}>
         <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
           <Button
             className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
@@ -138,7 +118,45 @@ export const StructureHeader = (): ReactElement | null => {
             </div>
           )}
         </div>
-        {isRootPath && <NavigationMenu />}
+        {isRootPath && (
+          <NavigationMenu
+            menuElements={[
+              {
+                label: "Description",
+                section: "#description",
+                isDisplayed: true,
+              },
+              {
+                label: "Calendrier",
+                section: "#calendrier",
+                isDisplayed: true,
+              },
+              {
+                label: "Type de places",
+                section: "#places",
+                isDisplayed: true,
+              },
+              {
+                label: "Finances",
+                section: "#finances",
+                isDisplayed:
+                  !!structure.budgets && structure.budgets?.length > 0,
+              },
+              {
+                label: "Contrôle qualité",
+                section: "#controle",
+                isDisplayed: true,
+              },
+              { label: "Activité", section: "#activite", isDisplayed: false },
+              {
+                label: "Actes administratifs",
+                section: "#actes-administratifs",
+                isDisplayed: true,
+              },
+              { label: "Notes", section: "#notes", isDisplayed: true },
+            ]}
+          />
+        )}
         {isRootPath && !isStructureFinalisee && <FinalisationHeader />}
       </div>
       <autoSaveModal.Component

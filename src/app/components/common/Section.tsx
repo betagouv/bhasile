@@ -10,7 +10,7 @@ type SectionProps = {
 
 export const Section = ({ id, children, className }: SectionProps) => {
   return (
-    <section className={cn("scroll-margin-header px-3", className)} id={id}>
+    <section className={cn("scroll-margin-header", className)} id={id}>
       {children}
     </section>
   );

@@ -9,6 +9,7 @@ import { FieldSetHebergement } from "@/app/components/forms/fieldsets/structure/
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
@@ -22,8 +23,6 @@ import {
 } from "@/schemas/forms/modification/modificationDescription.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
-
-import { ModificationTitle } from "../_components/ModificationTitle";
 
 export default function ModificationDescription() {
   const { structure } = useStructureContext();

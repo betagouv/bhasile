@@ -571,13 +571,9 @@ export const REGIONS: Region[] = [
   { code: "FR-OCC", name: "Occitanie", show: true },
   { code: "FR-PDL", name: "Pays de la Loire", show: true },
   { code: "FR-PAC", name: "Provence-Alpes-Côte d'Azur", show: true },
-  { code: "FR-971", name: "Guadeloupe", show: false },
-  { code: "FR-972", name: "Martinique", show: false },
-  { code: "FR-973", name: "Guyane", show: false },
-  { code: "FR-974", name: "La Réunion", show: false },
-  { code: "FR-976", name: "Mayotte", show: false },
+  { code: "FR-971", name: "Guadeloupe", show: true },
+  { code: "FR-972", name: "Martinique", show: true },
+  { code: "FR-973", name: "Guyane", show: true },
+  { code: "FR-974", name: "La Réunion", show: true },
+  { code: "FR-976", name: "Mayotte", show: true },
 ];
-
-export const REGIONS_WITHOUT_CORSE = REGIONS.filter(
-  (region) => region.show
-).map((region) => region.name);

@@ -213,11 +213,11 @@ export class CpomAjoutIdentificationPage extends BasePage {
       return null;
     }
     await this.page.click(SELECTORS.SUBMIT_BUTTON);
-    await this.page.waitForURL(/\/cpoms\/\d+\/modification\/02-finance/, {
+    await this.page.waitForURL(/\/cpoms\/\d+\/ajout\/02-finances/, {
       timeout: TIMEOUTS.SUBMIT,
     });
     const url = this.page.url();
-    const match = url.match(/\/cpoms\/(\d+)\/modification\/02-finance/);
+    const match = url.match(/\/cpoms\/(\d+)\/ajout\/02-finances/);
     return match ? parseInt(match[1], 10) : null;
   }
 }
