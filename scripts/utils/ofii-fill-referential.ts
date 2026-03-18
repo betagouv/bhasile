@@ -262,7 +262,6 @@ export const fillOfiiStructureFromRows = async (
     });
     const structureById = new Map(existingStructures.map((s) => [s.id, s]));
 
-    // Pour chaque structure, choisit une ligne OFII "référence" déterministe.
     const recordsByStructureId = new Map<number, OfiiReferentialRow[]>();
     for (const row of validRecordsWithStructure) {
       const sid = dnaToStructureId.get(row.dnaCode)!;
@@ -284,7 +283,6 @@ export const fillOfiiStructureFromRows = async (
       representativeRows.push({ structureId, row: preferred });
     }
 
-    // Résolution des opérateurs pour les structures à mettre à jour
     let operateurMap = new Map<string, number>();
     try {
       operateurMap = await ensureOperateursExist(
@@ -337,8 +335,6 @@ export const fillOfiiStructureFromRows = async (
         }
       }
 
-      // Désactivation : une structure devient inactive seulement si aucun de ses DNA (as-of date)
-      // n'est présent dans le fichier.
       const presentStructureIds = new Set(structureIds);
       const allActiveOfiiStructures = await tx.structure.findMany({
         where: { inactiveInOfiiFileSince: null },
