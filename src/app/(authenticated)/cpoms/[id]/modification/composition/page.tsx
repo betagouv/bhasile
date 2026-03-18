@@ -1,6 +1,6 @@
 "use client";
 
-import { FieldSetStructures } from "@/app/components/forms/fieldsets/cpom/FieldSetStructures";
+import { FieldSetStructures } from "@/app/components/forms/cpom/FieldSetStructures";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
@@ -45,10 +45,7 @@ export default function CpomModificationComposition() {
       >
         <FieldSetStructures formKind={FormKind.MODIFICATION} />
         {saveState === FetchState.ERROR && (
-          <SubmitError
-            structureDnaCode={String(cpom.id)}
-            backendError={backendError}
-          />
+          <SubmitError cpomId={cpom.id} backendError={backendError} />
         )}
       </FormWrapper>
     </>

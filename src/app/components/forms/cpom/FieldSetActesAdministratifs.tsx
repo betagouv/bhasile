@@ -1,7 +1,7 @@
 import { FormKind } from "@/types/global";
 
-import { DatesAndDocuments } from "../../cpom/DatesAndDocuments";
-import { MaxSizeNotice } from "../../MaxSizeNotice";
+import { MaxSizeNotice } from "../MaxSizeNotice";
+import { DatesAndDocuments } from "./DatesAndDocuments";
 
 export const FieldSetActesAdministratifs = ({ formKind }: Props) => {
   return (

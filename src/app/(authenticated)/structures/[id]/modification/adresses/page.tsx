@@ -6,6 +6,7 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSetHebergement";
 import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTypeBati";
+import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
@@ -17,8 +18,6 @@ import {
 } from "@/schemas/forms/base/adresse.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
-
-import { ModificationTitle } from "../_components/ModificationTitle";
 
 export default function ModificationAdresses() {
   const { structure } = useStructureContext();

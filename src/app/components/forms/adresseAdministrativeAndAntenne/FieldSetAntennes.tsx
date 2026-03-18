@@ -62,7 +62,7 @@ export const FieldSetAntennes = () => {
                 name={`antennes.${index}.name`}
                 control={control}
                 type="text"
-                label="Nom de l'antenne"
+                label="Nom du site"
                 className="mb-0"
               />
               <span className="text-[#666666] text-sm">ex. Avranches Nord</span>

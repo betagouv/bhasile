@@ -4,9 +4,9 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { FieldSetActesAdministratifs } from "@/app/components/forms/fieldsets/cpom/FieldSetActesAdministratifs";
-import { FieldSetGeneral } from "@/app/components/forms/fieldsets/cpom/FieldSetGeneral";
-import { FieldSetStructures } from "@/app/components/forms/fieldsets/cpom/FieldSetStructures";
+import { FieldSetActesAdministratifs } from "@/app/components/forms/cpom/FieldSetActesAdministratifs";
+import { FieldSetGeneral } from "@/app/components/forms/cpom/FieldSetGeneral";
+import { FieldSetStructures } from "@/app/components/forms/cpom/FieldSetStructures";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";

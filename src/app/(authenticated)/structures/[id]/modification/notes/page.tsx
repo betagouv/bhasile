@@ -4,8 +4,8 @@ import { ReactElement } from "react";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { FieldSetNotes } from "@/app/components/forms/notes/FieldSetNotes";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
+import { FieldSetNotes } from "@/app/components/forms/notes/FieldSetNotes";
 import { NoteDisclaimer } from "@/app/components/forms/notes/NoteDisclaimer";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";

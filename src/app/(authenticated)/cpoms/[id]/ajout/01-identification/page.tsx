@@ -2,15 +2,9 @@
 
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 
-<<<<<<< HEAD:src/app/(authenticated)/cpoms/[id]/modification/01-identification/page.tsx
-import { FieldSetDocuments } from "@/app/components/forms/cpom/FieldSetDocuments";
+import { FieldSetActesAdministratifs } from "@/app/components/forms/cpom/FieldSetActesAdministratifs";
 import { FieldSetGeneral } from "@/app/components/forms/cpom/FieldSetGeneral";
 import { FieldSetStructures } from "@/app/components/forms/cpom/FieldSetStructures";
-=======
-import { FieldSetActesAdministratifs } from "@/app/components/forms/fieldsets/cpom/FieldSetActesAdministratifs";
-import { FieldSetGeneral } from "@/app/components/forms/fieldsets/cpom/FieldSetGeneral";
-import { FieldSetStructures } from "@/app/components/forms/fieldsets/cpom/FieldSetStructures";
->>>>>>> origin/dev:src/app/(authenticated)/cpoms/[id]/ajout/01-identification/page.tsx
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
