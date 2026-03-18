@@ -39,9 +39,9 @@ export const Block = ({
             </Button>
             {isPanelOpen && (
               <div className="absolute top-full right-0 flex flex-col items-end bg-white shadow-md z-50">
-                {multipleEdit.map((edit) => (
+                {multipleEdit.map((edit, index) => (
                   <Button
-                    key={edit.label.toString()}
+                    key={index}
                     priority="tertiary no outline"
                     onClick={edit.onClick}
                     className="whitespace-nowrap"

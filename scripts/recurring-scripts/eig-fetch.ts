@@ -194,8 +194,9 @@ const getAllEIGs = async (): Promise<EIGFromAPI[]> => {
   })
     .filter((eig): eig is EIGFromAPI => eig !== undefined)
     .filter((eig) => eig.dnaCode.length === 5);
-  console.log(appEIGs);
+
   console.log("📝", appEIGs.length, "EIGs récupérés");
+
   return appEIGs;
 };
 

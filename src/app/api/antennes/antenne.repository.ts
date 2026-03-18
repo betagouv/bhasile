@@ -24,7 +24,13 @@ export const createOrUpdateAntennes = async (
   antennes: Partial<AntenneApiType>[] = [],
   structureId: number
 ): Promise<void> => {
-  if (!antennes || antennes.length === 0) {
+  if (!antennes) {
+    return;
+  }
+
+  await deleteAntennes(tx, antennes, structureId);
+
+  if (antennes.length === 0) {
     return;
   }
 
