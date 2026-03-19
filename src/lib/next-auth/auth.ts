@@ -45,7 +45,6 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ token, session }) {
       const role = await getRoleFromSession(session);
-      console.log("STEP 1, getRoleFromSession", role);
       try {
         await createOrUpdateUser({
           prenom: session.user?.name?.split(" ")?.[0] as string,
@@ -53,7 +52,6 @@ export const authOptions: NextAuthOptions = {
           email: session.user?.email as string,
           role,
         });
-        console.log("STEP 2, createOrUpdateUser", role);
       } catch (error) {
         console.error(
           "Erreur dans l'ajout ou la mise à jour de l'utilisateur",

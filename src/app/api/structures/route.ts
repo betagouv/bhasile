@@ -89,8 +89,6 @@ export async function PUT(request: NextRequest) {
 
     const existingStructure = await findOne(result.id!);
 
-    // console.log(">>>>>>>><", session.user);
-
     if (!canUpdateStructure(session.user as SessionUser, existingStructure)) {
       return NextResponse.json(
         { error: "Droits insuffisants" },
