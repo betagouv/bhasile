@@ -40,13 +40,13 @@ const COLUMNS: ListColumn[] = [
     centered: false,
   },
   {
-    label: "Année de début",
+    label: "Date début",
     column: "dateStart",
     orderBy: false,
     centered: true,
   },
   {
-    label: "Année de fin",
+    label: "Date fin",
     column: "dateEnd",
     orderBy: false,
     centered: true,
