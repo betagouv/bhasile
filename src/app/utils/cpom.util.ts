@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
 
-import { DEPARTEMENTS } from "@/constants";
 import {
   CpomApiType,
   CpomDepartementApiType,
@@ -123,22 +122,14 @@ const getCpomMillesimesDefaultValues = (
 };
 
 export const formatCpomName = (cpom: CpomApiType): string => {
-  let zone = cpom.region?.name;
+  const zone =
+    cpom.granularity === "REGIONALE"
+      ? cpom.region?.code
+      : cpom.departements
+          ?.map((departement) => departement.departement?.numero)
+          .join(", ");
 
-  if (cpom.granularity === "DEPARTEMENTALE") {
-    const departement = DEPARTEMENTS.find(
-      (departement) =>
-        departement.numero === cpom.departements?.[0]?.departement?.numero
-    );
-    if (departement) {
-      zone = departement.numero + " - " + departement.name;
-    }
-  }
-  if (cpom.granularity === "INTERDEPARTEMENTALE") {
-    zone = cpom.departements?.join(", ");
-  }
-
-  return cpom.name || `${cpom.operateur?.name} ${zone}`;
+  return `${cpom.operateur?.name} ${zone}`;
 };
 
 export const computeCpomDates = (
