@@ -27,20 +27,18 @@ export const CpomTable = () => {
   return (
     <Table
       ariaLabelledBy="gestionBudgetaire"
-      headings={getBudgetTableHeading({ years })}
+      headings={getBudgetTableHeading({ years: yearsInCpom })}
       enableBorders
     >
       <BudgetTableLines
-        years={years}
+        years={yearsInCpom}
         lines={getCpomLines()}
         cpomMillesimes={cpomMillesimes}
-        enabledYears={yearsInCpom}
       />
       <BudgetTableCommentLine
-        years={years}
+        years={yearsInCpom}
         label="Commentaire"
         cpomMillesimes={cpomMillesimes}
-        enabledYears={yearsInCpom}
       />
     </Table>
   );
