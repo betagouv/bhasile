@@ -21,7 +21,7 @@ const deleteAntennes = async (
 
 export const createOrUpdateAntennes = async (
   tx: PrismaTransaction,
-  antennes: Partial<AntenneApiType>[] = [],
+  antennes: Partial<AntenneApiType>[] | undefined,
   structureId: number
 ): Promise<void> => {
   if (!antennes) {
@@ -34,7 +34,6 @@ export const createOrUpdateAntennes = async (
     return;
   }
 
-  // Delete antennes that are not in the provided array
   await deleteAntennes(tx, antennes, structureId);
 
   for (const antenne of antennes) {
