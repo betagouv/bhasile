@@ -54,6 +54,20 @@ function deptCodeFromCode(code: string | null | undefined): string {
   return n > 96 ? three : two;
 }
 
+function normalizeDepartementName(value: string | null | undefined): string {
+  const trimmed = value?.trim() ?? "";
+  if (!trimmed) {
+    return "";
+  }
+
+  // Typo courante dans certains fichiers OFII
+  if (trimmed.toLowerCase() === "alpes-de-hautes-provence") {
+    return "Alpes-de-Haute-Provence";
+  }
+
+  return trimmed;
+}
+
 function resolveDepartementNumero(
   departementName: string | null | undefined,
   nameToNumero: Map<string, string>
@@ -126,7 +140,9 @@ function resolveOperateurName(
   operateurRaw: string | null | undefined,
   operateurMapping: OperateurMapping | null
 ): string | null {
-  if (!operateurRaw) {return null;}
+  if (!operateurRaw) {
+    return null;
+  }
   return operateurMapping?.[operateurRaw] ?? operateurRaw;
 }
 
@@ -202,12 +218,15 @@ export const fillOfiiStructureFromRows = async (
 
     for (const row of records) {
       const issues: string[] = [];
+
+      const departementName = normalizeDepartementName(row.departement);
+      row.departement = departementName;
       const departementNumero = resolveDepartementNumero(
-        row.departement,
+        departementName,
         nameToNumero
       );
 
-      if (!departementNumero) {
+      if (!departementName || departementNumero == null) {
         issues.push(`département invalide (nom attendu) : ${row.departement}`);
       } else if (!numeroToRegionCode.get(departementNumero)) {
         issues.push(
@@ -269,12 +288,14 @@ export const fillOfiiStructureFromRows = async (
 
       // 1. For each DNA: create DNA if missing, then ensure it is linked to a structure.
       for (const row of validRecords) {
-        const depNumero = resolveDepartementNumero(
-          row.departement,
-          nameToNumero
-        );
+        const departementName = normalizeDepartementName(row.departement);
+        row.departement = departementName;
+        const depNumero = resolveDepartementNumero(departementName, nameToNumero);
+
         if (!depNumero) {
-          continue;
+          throw new Error(
+            `Département invalide (devrait être validé en amont): ${row.departement}`
+          );
         }
 
         const dna = await tx.dna.upsert({
@@ -319,7 +340,10 @@ export const fillOfiiStructureFromRows = async (
           continue;
         }
 
-        const regionCode = numeroToRegionCode.get(depNumero)!;
+        const regionCode = numeroToRegionCode.get(depNumero);
+        if (!regionCode) {
+          throw new Error(`Région introuvable pour le département : ${depNumero}`);
+        }
         const codeBhasile = await getNextBhasileCode(
           tx,
           regionCode,
