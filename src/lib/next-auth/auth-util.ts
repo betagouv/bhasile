@@ -1,10 +1,8 @@
 import { Session, User } from "next-auth";
 
-import {
-  getAllRoles,
-  getAnonymousRole,
-  getRolePatterns,
-} from "@/app/api/role/role.repository";
+import { getEmailPatterns } from "@/app/api/email-patterns/email-pattern.repository";
+import { getAnonymousRole } from "@/app/api/role/role.repository";
+import { getUserByEmail } from "@/app/api/user/user.repository";
 import { Prisma } from "@/generated/prisma/client";
 
 export type ProConnectUser = User & {
@@ -20,12 +18,12 @@ type RoleWithDepartements = Prisma.RoleGetPayload<{
 }> & { allowedDepartements: string[] };
 
 export const getIsUserAuthorized = async (email: string): Promise<boolean> => {
-  const allowedPatterns = await getRolePatterns();
-  return allowedPatterns.some(({ emailPattern }) => {
-    if (!emailPattern) {
+  const allowedPatterns = await getEmailPatterns();
+  return allowedPatterns.some(({ pattern }) => {
+    if (!pattern) {
       return false;
     }
-    const regex = new RegExp(emailPattern, "i");
+    const regex = new RegExp(pattern, "i");
     return regex.test(email);
   });
 };
@@ -34,33 +32,33 @@ export const getRoleFromSession = async (
   session: Session
 ): Promise<RoleWithDepartements> => {
   const userEmail = session.user?.email;
-  const roles = await getAllRoles();
+  const databaseUser = await getUserByEmail({ email: userEmail });
+  // console.log("??????????", databaseUser);
   const anonymousRole = await getAnonymousRole();
   const anonymousRoleWithDepartements = {
     ...anonymousRole,
     allowedDepartements: [],
   };
-  if (!userEmail) {
+  if (!userEmail || !databaseUser) {
     return anonymousRoleWithDepartements;
   }
-  const role = roles.find((role) => {
-    if (!role.emailPattern) {
-      return;
-    }
-    const regex = new RegExp(role.emailPattern, "i");
-    if (regex.test(userEmail)) {
-      return role;
-    }
-    return;
-  });
-  if (!role) {
+  if (databaseUser.role) {
+    // console.log("IF 2", databaseUser);
+    return {
+      ...databaseUser.role,
+      allowedDepartements: databaseUser.role?.roleDepartements.map(
+        (roleDepartement) => roleDepartement.departement.numero
+      ),
+    };
+  } else if (databaseUser.emailPattern?.roleId) {
+    // console.log("IF 3", databaseUser);
+    return {
+      ...databaseUser.emailPattern.role,
+      allowedDepartements: databaseUser.emailPattern.role?.roleDepartements.map(
+        (roleDepartement) => roleDepartement.departement.numero
+      ),
+    };
+  } else {
     return anonymousRoleWithDepartements;
   }
-  const roleWithDepartements = {
-    ...role,
-    allowedDepartements: role?.roleDepartements.map(
-      (roleDepartement) => roleDepartement.departement.numero
-    ),
-  };
-  return roleWithDepartements || anonymousRole;
 };

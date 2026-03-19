@@ -25,9 +25,9 @@ export const defineAbilityFor = (user: SessionUser) => {
 export const defineRulesFor = (user: SessionUser) => {
   const builder = new AbilityBuilder<AppAbility>(createPrismaAbility);
 
-  if (user.role === RoleGroup.NATIONAL) {
+  if (user.role === "NATIONAL") {
     defineAgentNationalRules(builder);
-  } else if (user.role === RoleGroup.DEPARTEMENT) {
+  } else if (user.role.startsWith("DEPARTEMENT")) {
     defineAgentDepartementalRules(builder, user);
   } else if (user.role.startsWith("REGION")) {
     defineAgentRegionalRules(builder, user);
