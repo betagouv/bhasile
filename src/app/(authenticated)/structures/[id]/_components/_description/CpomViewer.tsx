@@ -43,7 +43,7 @@ export const CpomViewer = (): ReactElement => {
                 <div key={structure.id} className="flex gap-2 items-center">
                   <span className="flex gap-2 my-2">
                     <strong className="pr-3">
-                      {structure.structure.dnaCode}
+                      {structure.structure.codeBhasile}
                     </strong>
                     <span>{structure.structure.type}</span>{" "}
                     <span>{structure.structure.operateur?.name}</span>{" "}
