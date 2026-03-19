@@ -18,7 +18,7 @@ export const CompositionBlock = () => {
   return (
     <Block
       title="Composition"
-      iconClass="fr-icon-shape-line"
+      iconClass="ri-exchange-2-line"
       onEdit={() => {
         router.push(`/cpoms/${cpom.id}/modification/composition`);
       }}
@@ -26,7 +26,7 @@ export const CompositionBlock = () => {
       <Table
         headings={["", "Entrée", "Sortie", ""]}
         ariaLabelledBy="composition"
-        className="max-w-3xl"
+        className="max-w-3xl [&_thead_tr]:!bg-transparent [&_thead_tr]:!h-12"
         enableBorders
       >
         {cpom.structures?.map((structure) => (
