@@ -33,7 +33,6 @@ export const getRoleFromSession = async (
 ): Promise<RoleWithDepartements> => {
   const userEmail = session.user?.email;
   const databaseUser = await getUserByEmail({ email: userEmail });
-  // console.log("??????????", databaseUser);
   const anonymousRole = await getAnonymousRole();
   const anonymousRoleWithDepartements = {
     ...anonymousRole,
@@ -43,7 +42,6 @@ export const getRoleFromSession = async (
     return anonymousRoleWithDepartements;
   }
   if (databaseUser.role) {
-    // console.log("IF 2", databaseUser);
     return {
       ...databaseUser.role,
       allowedDepartements: databaseUser.role?.roleDepartements.map(
@@ -51,7 +49,6 @@ export const getRoleFromSession = async (
       ),
     };
   } else if (databaseUser.emailPattern?.roleId) {
-    // console.log("IF 3", databaseUser);
     return {
       ...databaseUser.emailPattern.role,
       allowedDepartements: databaseUser.emailPattern.role?.roleDepartements.map(
