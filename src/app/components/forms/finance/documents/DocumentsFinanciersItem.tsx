@@ -3,6 +3,7 @@ import prettyBytes from "pretty-bytes";
 import { ReactElement, useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { DeleteButton } from "@/app/components/common/DeleteButton";
 import { FileUploadWithLink, useFileUpload } from "@/app/hooks/useFileUpload";
 import { getShortDisplayedName } from "@/app/utils/file-upload.util";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
@@ -28,9 +29,7 @@ export const DocumentsFinanciersItem = ({
     getFileData();
   }, [documentFinancier, getFile]);
 
-  const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-
+  const handleDelete = async () => {
     const confirm = window.confirm(
       "Attention, vous allez supprimer définitivement ce fichier. Êtes-vous bien sûr·e de vouloir continuer ?"
     );
@@ -100,12 +99,10 @@ export const DocumentsFinanciersItem = ({
         title="Télécharger le fichier"
         onClick={handleView}
       />
-      <Button
+      <DeleteButton
         onClick={handleDelete}
-        iconId="fr-icon-delete-bin-line"
-        priority="tertiary no outline"
+        backgroundColor="grey"
         size="small"
-        title="Supprimer"
       />
     </div>
   );

@@ -1,4 +1,3 @@
-import { Button } from "@codegouvfr/react-dsfr/Button";
 import prettyBytes from "pretty-bytes";
 import { useRef, useState } from "react";
 
@@ -6,6 +5,7 @@ import { FileUploadWithLink, useFileUpload } from "@/app/hooks/useFileUpload";
 import { cn } from "@/app/utils/classname.util";
 import { getShortDisplayedName } from "@/app/utils/file-upload.util";
 
+import { DeleteButton } from "../common/DeleteButton";
 import Loader from "../ui/Loader";
 
 export const DropZone = ({ className, onChange, children }: Props) => {
@@ -115,13 +115,10 @@ export const DropZone = ({ className, onChange, children }: Props) => {
             </span>
           </p>
 
-          <Button
-            iconId="fr-icon-delete-bin-line"
-            priority="tertiary no outline"
-            size="small"
-            className="!rounded-full !bg-white"
-            title="Supprimer le fichier"
+          <DeleteButton
             onClick={handleDelete}
+            size="small"
+            backgroundColor="white"
           />
         </div>
         {children}
