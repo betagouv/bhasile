@@ -14,7 +14,7 @@
     "check:ts": "npx tsc --noEmit",
     "lint": "yarn lint:css && yarn lint:ts",
     "lint:ts": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint:fix": "eslint . --fix && yarn sql:format:fix",
     "lint:css": "npx stylelint \"**/*.css\"",
     "test": "vitest --run",
     "test:watch": "vitest --watch",
