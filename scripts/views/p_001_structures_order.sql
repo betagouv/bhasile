@@ -1,6 +1,9 @@
 -- Objective: enable structure ordering in front-end
 -- This view is in public to prevent interruption in the application if the reporting schema is not created yet
-CREATE OR REPLACE VIEW "public"."structures_order" AS
+DROP VIEW IF EXISTS "public"."structures_order";
+
+
+CREATE VIEW "public"."structures_order" AS
 WITH
   dernier_millesime_structure_typologie AS (
     SELECT DISTINCT
@@ -56,4 +59,4 @@ FROM
   LEFT JOIN public."Operateur" o ON o.id = s."operateurId"
   LEFT JOIN dernier_millesime_structure_typologie st ON st."structureId" = s."id"
   LEFT JOIN structure_repartition sr ON sr."structureId" = s."id"
-  LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
+  LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif";
