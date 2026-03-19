@@ -16,6 +16,12 @@ const COLUMNS: ListColumn[] = [
     centered: false,
   },
   {
+    label: "Structures",
+    column: "structures",
+    orderBy: false,
+    centered: false,
+  },
+  {
     label: "Échelle",
     column: "granularity",
     orderBy: false,

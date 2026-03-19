@@ -188,12 +188,17 @@ export const getGranularityLabel = (
 };
 
 export const getDepartementsList = (
-  departements?: CpomDepartementApiType[]
+  departements?: CpomDepartementApiType[],
+  maxLength?: number
 ): string => {
   if (!departements) {
     return "";
   }
-  return departements
+  const list = departements
     .map((departement) => departement.departement?.numero)
     .join(", ");
+  if (maxLength && list.length > maxLength) {
+    return list.slice(0, maxLength) + "...";
+  }
+  return list;
 };

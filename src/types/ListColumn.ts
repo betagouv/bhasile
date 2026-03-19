@@ -10,6 +10,7 @@ export type StructureColumn =
 
 export type CpomColumn =
   | "operateur"
+  | "structures"
   | "granularity"
   | "region"
   | "departements"
