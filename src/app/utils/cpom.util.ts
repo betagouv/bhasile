@@ -124,7 +124,7 @@ const getCpomMillesimesDefaultValues = (
 export const formatCpomName = (cpom: CpomApiType): string => {
   const zone =
     cpom.granularity === "REGIONALE"
-      ? cpom.region?.code
+      ? cpom.region?.name
       : cpom.departements
           ?.map((departement) => departement.departement?.numero)
           .join(", ");
