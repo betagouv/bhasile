@@ -35,7 +35,9 @@ export const ActesAdministratifsBlock = (): ReactElement => {
       title="Actes administratifs"
       iconClass="fr-icon-file-text-line"
       onEdit={() => {
-        router.push(`/structures/${structure.id}/modification/06-documents`);
+        router.push(
+          `/structures/${structure.id}/modification/actes-administratifs`
+        );
       }}
     >
       {!hasDocuments ? (

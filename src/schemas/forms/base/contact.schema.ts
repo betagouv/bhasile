@@ -1,13 +1,13 @@
 import z from "zod";
 
 import { zId } from "@/app/utils/zodCustomFields";
-import { ContactType } from "@/types/contact.type";
 
 export const requiredContactSchema = z.object({
   id: zId(),
   prenom: z.string().nonempty("Le prénom est requis"),
   nom: z.string().nonempty("Le nom est requis"),
   role: z.string().nonempty("Le rôle est requis"),
+  perimetre: z.string().optional(),
   email: z
     .string()
     .nonempty("Veuillez saisir une adresse email valide")
@@ -16,7 +16,6 @@ export const requiredContactSchema = z.object({
     .string()
     .nonempty("Le téléphone est requis")
     .min(10, "Le numéro de téléphone doit contenir au moins 10 caractères"),
-  type: z.nativeEnum(ContactType),
 });
 
 export const optionalContactSchema = z
@@ -25,9 +24,9 @@ export const optionalContactSchema = z
     prenom: z.string().optional(),
     nom: z.string().optional(),
     role: z.string().optional(),
+    perimetre: z.string().optional(),
     email: z.string().optional(),
     telephone: z.string().optional(),
-    type: z.nativeEnum(ContactType).optional(),
   })
   .superRefine((data, ctx) => {
     if (!data) {
@@ -84,3 +83,11 @@ export const optionalContactSchema = z
 export const contactSchema = Object.assign(requiredContactSchema, {
   optional: () => optionalContactSchema,
 });
+
+export const contactsSchema = z.object({
+  contacts: z
+    .tuple([requiredContactSchema, requiredContactSchema])
+    .rest(optionalContactSchema),
+});
+
+export type ContactFormValues = z.infer<typeof contactSchema>;

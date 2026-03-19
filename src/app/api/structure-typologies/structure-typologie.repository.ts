@@ -7,7 +7,7 @@ export const createOrUpdateStructureTypologies = async (
   structureTypologies:
     | PartialExcept<StructureTypologieApiType, "year">[]
     | undefined,
-  structureDnaCode: string
+  structureId: number
 ): Promise<void> => {
   if (!structureTypologies || structureTypologies.length === 0) {
     return;
@@ -39,7 +39,7 @@ export const createOrUpdateStructureTypologies = async (
           }),
         },
         create: {
-          structureDnaCode,
+          structureId,
           year: typologie.year!,
           placesAutorisees: typologie.placesAutorisees,
           pmr: typologie.pmr,

@@ -18,15 +18,15 @@ export default function FormTypePlaces() {
   const searchParams = useSearchParams();
   const isEditMode = searchParams.get("mode") === "edit";
 
-  const previousRoute = `/ajout-structure/${params.dnaCode}/02-adresses`;
-  const resetRoute = `/ajout-structure/${params.dnaCode}/01-identification`;
+  const previousRoute = `/ajout-structure/${params.id}/02-adresses`;
+  const resetRoute = `/ajout-structure/${params.id}/01-identification`;
   const nextRoute = isEditMode
-    ? `/ajout-structure/${params.dnaCode}/05-verification`
-    : `/ajout-structure/${params.dnaCode}/04-documents`;
+    ? `/ajout-structure/${params.id}/05-verification`
+    : `/ajout-structure/${params.id}/04-documents`;
 
   const { years } = getTypePlacesYearRange();
   const { currentValue: localStorageIdentificationValues } = useLocalStorage(
-    `ajout-structure-${params.dnaCode}-identification`,
+    `ajout-structure-${params.id}-identification`,
     {}
   );
   const yearsToDisplay = years.filter(
@@ -39,7 +39,7 @@ export default function FormTypePlaces() {
   );
 
   const { currentValue: localStorageValues } = useLocalStorage(
-    `ajout-structure-${params.dnaCode}-type-places`,
+    `ajout-structure-${params.id}-type-places`,
     {}
   );
 
@@ -50,7 +50,7 @@ export default function FormTypePlaces() {
   return (
     <FormWrapper
       schema={ajoutTypePlacesSchema}
-      localStorageKey={`ajout-structure-${params.dnaCode}-type-places`}
+      localStorageKey={`ajout-structure-${params.id}-type-places`}
       nextRoute={nextRoute}
       resetRoute={resetRoute}
       mode="onBlur"

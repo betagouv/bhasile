@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+
+import { authOptions } from "@/lib/next-auth/auth";
 
 import { createStructureEvent } from "../../user-action/user-action.service";
-import { findOne } from "../structure.repository";
+import { findOne, findOneOperateur } from "../structure.repository";
 import {
   addPresencesIndues,
   StructureWithFileUploadsAndActivites,
@@ -9,8 +12,20 @@ import {
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+
+    const doBypass =
+      process.env.NODE_ENV !== "production" &&
+      (process.env.DEV_AUTH_BYPASS ||
+        request.headers.get("x-dev-auth-bypass") === "1");
+
+    const isAuthenticated = !!session?.user || doBypass;
+
     const id = request.nextUrl.pathname.split("/").pop();
-    const structure = await findOne(Number(id));
+    const structure = isAuthenticated
+      ? await findOne(Number(id))
+      : await findOneOperateur(Number(id));
+
     createStructureEvent(request.method, structure.id);
 
     if (!structure) {
@@ -20,9 +35,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const structureWithPresencesIndues = addPresencesIndues(
-      structure as StructureWithFileUploadsAndActivites
-    );
+    const structureWithPresencesIndues = isAuthenticated
+      ? addPresencesIndues(structure as StructureWithFileUploadsAndActivites)
+      : structure;
 
     return NextResponse.json(structureWithPresencesIndues);
   } catch (error) {

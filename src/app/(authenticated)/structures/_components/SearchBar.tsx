@@ -38,7 +38,7 @@ export const SearchBar = (): ReactElement => {
       <span className="fr-icon-search-line fr-icon--sm text-label-blue-france px-2" />
       <input
         type="text"
-        placeholder="DNA ou commune"
+        placeholder="Code ou commune"
         id="structures-search"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}

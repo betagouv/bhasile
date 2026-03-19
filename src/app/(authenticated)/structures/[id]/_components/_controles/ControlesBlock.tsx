@@ -35,7 +35,9 @@ export const ControlesBlock = (): ReactElement => {
       title="Controle qualité"
       iconClass="fr-icon-search-line"
       onEdit={() => {
-        router.push(`/structures/${structure.id}/modification/05-controle`);
+        router.push(
+          `/structures/${structure.id}/modification/controle-qualite`
+        );
       }}
     >
       <div className="flex">

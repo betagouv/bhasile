@@ -3,7 +3,6 @@
 
 import "dotenv/config";
 
-import { EvenementIndesirableGrave } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
 
 const prisma = createPrismaClient();
@@ -168,44 +167,87 @@ const cleanDate = (dateValue: string): Date | null => {
   return date;
 };
 
-const getAllEIGs = async (): Promise<
-  Omit<EvenementIndesirableGrave, "id" | "createdAt" | "updatedAt">[]
-> => {
+type EIGFromAPI = {
+  dnaCode: string;
+  numeroDossier: string;
+  evenementDate: Date;
+  declarationDate: Date;
+  type: string;
+};
+
+const getAllEIGs = async (): Promise<EIGFromAPI[]> => {
   const DNEIGs = await getEIGsFromDN();
   const appEIGs = DNEIGs.map((DNEIG) => {
-    const structureDnaCode = getValueByLabel(DNEIG, DNA_CODE_LABEL);
+    const dnaCode = getValueByLabel(DNEIG, DNA_CODE_LABEL);
     const evenementDate = getValueByLabel(DNEIG, EVENEMENT_DATE_LABEL);
     const declarationDate = getValueByLabel(DNEIG, DECLARATION_DATE_LABEL);
-    if (!structureDnaCode || !evenementDate || !declarationDate) {
+    if (!dnaCode || !evenementDate || !declarationDate) {
       return;
     }
     return {
-      structureDnaCode,
+      dnaCode,
       numeroDossier: getValueByLabel(DNEIG, NUMERO_DOSSIER_LABEL).toString(),
       evenementDate: new Date(cleanDate(evenementDate)!),
       declarationDate: new Date(cleanDate(declarationDate)!),
       type: getValueByLabel(DNEIG, TYPE_LABEL).toString(),
     };
   })
-    .filter((appEIG) => appEIG !== undefined)
-    .filter((appEIG) => appEIG?.structureDnaCode?.length === 5);
+    .filter((eig): eig is EIGFromAPI => eig !== undefined)
+    .filter((eig) => eig.dnaCode.length === 5);
+
   console.log("📝", appEIGs.length, "EIGs récupérés");
+
   return appEIGs;
 };
 
-const structureDnaCodes = await prisma.structure.findMany({
-  select: { dnaCode: true },
-});
-const dnaCodes = structureDnaCodes.map(
-  (structureDnaCode) => structureDnaCode.dnaCode
+const buildStructureIdByDnaCode = async (
+  dnaCodes: string[]
+): Promise<Map<string, number>> => {
+  const uniqueCodes = [...new Set(dnaCodes.filter(Boolean))];
+  if (uniqueCodes.length === 0) {
+    return new Map();
+  }
+
+  const dnas = await prisma.dna.findMany({
+    where: { code: { in: uniqueCodes } },
+    select: { id: true, code: true },
+  });
+  const dnaStructures = await prisma.dnaStructure.findMany({
+    where: { dnaId: { in: dnas.map((d) => d.id) } },
+    select: { dnaId: true, structureId: true },
+  });
+  const dnaIdToCode = new Map(dnas.map((d) => [d.id, d.code]));
+  const structureIds = new Map<string, number>();
+  for (const dnaStructure of dnaStructures) {
+    const code = dnaIdToCode.get(dnaStructure.dnaId);
+    if (code) {
+      structureIds.set(code, dnaStructure.structureId);
+    }
+  }
+  return structureIds;
+};
+
+const eigs = await getAllEIGs();
+const structureIdByDnaCode = await buildStructureIdByDnaCode(
+  eigs.map((e) => e.dnaCode)
 );
 
-for (const EIG of await getAllEIGs()) {
-  if (dnaCodes.includes(EIG.structureDnaCode)) {
-    await prisma.evenementIndesirableGrave.upsert({
-      where: { numeroDossier: EIG.numeroDossier || "" },
-      update: {},
-      create: EIG,
-    });
+for (const eig of eigs) {
+  const structureId = structureIdByDnaCode.get(eig.dnaCode);
+  if (structureId == null) {
+    continue;
   }
+  await prisma.evenementIndesirableGrave.upsert({
+    where: { numeroDossier: eig.numeroDossier },
+    update: {},
+    create: {
+      structureId,
+      structureDnaCode: null,
+      dnaCode: eig.dnaCode,
+      numeroDossier: eig.numeroDossier,
+      evenementDate: eig.evenementDate,
+      declarationDate: eig.declarationDate,
+      type: eig.type,
+    },
+  });
 }

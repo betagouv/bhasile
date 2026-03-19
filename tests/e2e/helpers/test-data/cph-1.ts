@@ -3,14 +3,10 @@ import { StructureType } from "@/types/structure.type";
 
 import { TestStructureScenario } from "./types";
 
-/**
- * CPH 1: Collectif, single address, one contact, all docs at ajout,
- * old evaluation, with controls, with filiale
- */
 export const cph1: TestStructureScenario = {
-  name: "CPH 1 - Collectif, single address, one contact, all docs, old eval, controls, filiale",
+  name: "CPH 1 - Collectif, single address, all docs, old eval, controls, filiale",
   formData: {
-    dnaCode: "C1234",
+    codeBhasile: "BHA-TST-001",
     type: StructureType.CPH,
     cpom: false,
     filiale: "Filiale Test",
@@ -20,17 +16,37 @@ export const cph1: TestStructureScenario = {
       id: 1,
     },
     creationDate: "2015-06-01",
-    finessCode: "123456789",
+    finesses: [
+      {
+        code: "123456789",
+        description: "Finess 1",
+      },
+    ],
+    dnas: [
+      {
+        code: "C1234",
+        description: "DNA 1",
+      },
+    ],
     public: "Tout public",
     lgbt: true,
     fvvTeh: true,
-    contactPrincipal: {
-      prenom: "John",
-      nom: "Doe",
-      role: "Directeur·rice",
-      email: "john.doe@example.com",
-      telephone: "+33123456789",
-    },
+    contacts: [
+      {
+        prenom: "John",
+        nom: "Doe",
+        role: "Directeur·rice",
+        email: "john.doe@example.com",
+        telephone: "+33123456789",
+      },
+      {
+        prenom: "Jane",
+        nom: "Deo",
+        role: "Responsable administratif",
+        email: "jane.deo@example.com",
+        telephone: "+33623456789",
+      },
+    ],
     debutPeriodeAutorisation: "2020-01-01",
     finPeriodeAutorisation: "2025-12-31",
     nom: "Structure Test",
@@ -352,7 +368,7 @@ export const cph1: TestStructureScenario = {
     public: "Personnes isolées",
     lgbt: true,
     fvvTeh: true,
-    contactPrincipal: { email: "modif-cph1@example.com" },
+    contacts: [{ email: "modif-cph1@example.com" }],
     notes: "Notes modification CPH 1 - filiale.",
     debutPeriodeAutorisation: "2020-06-01",
     finPeriodeAutorisation: "2026-05-31",

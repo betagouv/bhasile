@@ -8,7 +8,6 @@ import { URLS } from "./helpers/constants";
 import { CpomAjoutFinancePage } from "./helpers/page-objects/cpom/CpomAjoutFinancePage";
 import { CpomAjoutIdentificationPage } from "./helpers/page-objects/cpom/CpomAjoutIdentificationPage";
 import { CpomDetailPage } from "./helpers/page-objects/cpom/CpomDetailPage";
-import { getStructureId } from "./helpers/structure-creator";
 import { cada1 } from "./helpers/test-data/cada-1";
 import { cpomDepartementale } from "./helpers/test-data/cpom-departementale";
 import { cpomInterdepartementale } from "./helpers/test-data/cpom-interdepartementale";
@@ -24,15 +23,16 @@ async function runCpomAjoutTest(
   page: import("@playwright/test").Page,
   testCase: CpomTestCase
 ) {
-  await beforeFlow(cada1.formData as Parameters<typeof beforeFlow>[0], page);
+  const id = await beforeFlow(
+    cada1.formData as Parameters<typeof beforeFlow>[0],
+    page
+  );
 
   const formData =
-    testCase.formData.structureIds === "seeded" && cada1.formData.dnaCode
+    testCase.formData.structureIds === "seeded" && cada1.formData.codeBhasile
       ? {
           ...testCase.formData,
-          structureIds: [
-            await getStructureId(cada1.formData.dnaCode as string),
-          ] as number[],
+          structureIds: [id] as number[],
         }
       : testCase.formData;
 
@@ -67,8 +67,8 @@ async function runCpomAjoutTest(
     if (cpomId !== null) {
       await deleteCpom(cpomId);
     }
-    if (cada1.formData.dnaCode) {
-      await deleteStructure(cada1.formData.dnaCode as string);
+    if (cada1.formData.codeBhasile) {
+      await deleteStructure(cada1.formData.codeBhasile);
     }
   }
 }

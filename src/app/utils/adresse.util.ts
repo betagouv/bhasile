@@ -16,7 +16,7 @@ export const getCoordinates = async (address: string): Promise<Coordinates> => {
 
 export const transformFormAdressesToApiAdresses = (
   adresses: FormAdresse[] = [],
-  dnaCode?: string
+  id?: number
 ): AdresseApiType[] => {
   if (!adresses) {
     return [];
@@ -28,11 +28,11 @@ export const transformFormAdressesToApiAdresses = (
         adresse.codePostal !== "" &&
         adresse.commune !== ""
     )
-    .filter((adresse) => adresse.structureDnaCode || dnaCode)
+    .filter((adresse) => adresse.structureId || id)
     .map((adresse) => {
       return {
         id: adresse.id,
-        structureDnaCode: adresse.structureDnaCode || (dnaCode as string),
+        structureId: adresse.structureId || id,
         adresse: adresse.adresse,
         codePostal: adresse.codePostal,
         commune: adresse.commune,
@@ -87,7 +87,7 @@ export const transformApiAdressesToFormAdresses = (
  * Formate un nom de ville selon les règles de typographie françaises :
  * https://www.amf.asso.fr/documents-noms-communes-nouvelles-les-regles-respecter/24266
  */
-export const formatCityName = (city: string): string | null => {
+export const formatCityName = (city?: string): string | undefined | null => {
   if (typeof city !== "string") {
     return city;
   }

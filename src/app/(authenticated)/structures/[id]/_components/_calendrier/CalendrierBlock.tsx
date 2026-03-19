@@ -54,7 +54,7 @@ export const CalendrierBlock = (): ReactElement => {
       title="Calendrier"
       iconClass="fr-icon-calendar-todo-line"
       onEdit={() => {
-        router.push(`/structures/${structure.id}/modification/02-calendrier`);
+        router.push(`/structures/${structure.id}/modification/calendrier`);
       }}
     >
       <DateBars datePairs={datePairs} />

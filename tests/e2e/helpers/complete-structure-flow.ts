@@ -11,8 +11,9 @@ import {
 } from "./test-data/types";
 
 // Helper type: Partial data but with required dnaCode
-type TestStructureDataWithDnaCode = Partial<TestStructureData> & {
-  dnaCode: string;
+type TestStructureDataWithCodeBhasile = Partial<TestStructureData> & {
+  codeBhasile: string;
+  id: number;
 };
 
 export type CompleteStructureFlowInput = {
@@ -40,26 +41,26 @@ export const completeStructureFlow = async (
       ? (input as CompleteStructureFlowInput).failingStep
       : undefined);
 
-  if (!formData.dnaCode) {
-    throw new Error("dnaCode is required");
+  if (!formData.codeBhasile) {
+    throw new Error("codeBhasile is required");
   }
-  const dataWithDna = formData as TestStructureDataWithDnaCode;
+  const dataWithCodeBhasile = formData as TestStructureDataWithCodeBhasile;
 
   // 1. Ajout
-  const ajoutResult = await completeAjoutFlow(page, dataWithDna, failingStep);
+  const ajoutResult = await completeAjoutFlow(
+    page,
+    dataWithCodeBhasile,
+    failingStep
+  );
 
   if ("stoppedAtFailingStep" in ajoutResult) {
     return;
   }
 
-  const { structureId } = ajoutResult;
-
   // 2. Finalisation
   const finalisationResult = await completeFinalisationFlow(
     page,
-    structureId,
-    dataWithDna as TestStructureData,
-    dataWithDna.dnaCode,
+    dataWithCodeBhasile,
     failingStep
   );
 
@@ -68,22 +69,29 @@ export const completeStructureFlow = async (
   }
 
   const structurePage = new StructureDetailsPage(page);
-  await structurePage.navigateTo(structureId);
+  await structurePage.navigateTo(dataWithCodeBhasile.id);
   await structurePage.waitForLoad();
 
-  await structurePage.expectAllData(dataWithDna as TestStructureData, {});
+  await structurePage.expectAllData(
+    dataWithCodeBhasile as TestStructureData,
+    {}
+  );
 
   if (!modificationData) {
     return;
   }
 
   // 3. Modification
-  await completeModificationFlow(page, structureId, modificationData);
+  await completeModificationFlow(
+    page,
+    dataWithCodeBhasile.id,
+    modificationData
+  );
 
-  await structurePage.navigateTo(structureId);
+  await structurePage.navigateTo(dataWithCodeBhasile.id);
   await structurePage.waitForLoad();
   await structurePage.expectAllData(
-    dataWithDna as TestStructureData,
+    dataWithCodeBhasile as TestStructureData,
     modificationData
   );
 };

@@ -9,7 +9,7 @@ import { StructureName } from "./StructureName";
 export const Header = () => {
   const params = useParams();
   const searchParams = useSearchParams();
-  const dnaCode = params.dnaCode || searchParams.get("dnaCode");
+  const id = params.id || searchParams.get("id");
 
   return (
     <header className="bg-white shadow-md">
@@ -28,10 +28,9 @@ export const Header = () => {
             Ajouter une structure
           </span>
 
-          {dnaCode ? (
+          {id ? (
             <span className="text-xl leading-none">
-              {dnaCode ? <StructureName dnaCode={dnaCode} /> : ""}
-              {dnaCode}
+              <StructureName id={id} />
             </span>
           ) : (
             ""

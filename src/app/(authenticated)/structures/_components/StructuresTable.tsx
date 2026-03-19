@@ -18,8 +18,8 @@ const finalisationModal = createModal({
 
 const COLUMNS: ListColumn[] = [
   {
-    label: "DNA",
-    column: "dnaCode",
+    label: "Code",
+    column: "codeBhasile",
     orderBy: true,
     centered: false,
   },

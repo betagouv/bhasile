@@ -53,7 +53,6 @@ export const createFakeCpoms = async (
   );
 
   const structuresByOperateurAndRegion = new Map<string, number[]>();
-  const structureIdToDnaCode = new Map<number, string>();
 
   for (const operateur of operateurs) {
     for (const structure of operateur.structures) {
@@ -64,7 +63,6 @@ export const createFakeCpoms = async (
       if (!region) {
         continue;
       }
-      structureIdToDnaCode.set(structure.id, structure.dnaCode);
       const key = `${operateur.id}_${region}`;
       const existingStructures = structuresByOperateurAndRegion.get(key) || [];
       structuresByOperateurAndRegion.set(key, [
@@ -229,17 +227,6 @@ export const createFakeCpoms = async (
     });
 
     for (const cpomStructure of cpomStructures) {
-      const structureDnaCode = structureIdToDnaCode.get(
-        cpomStructure.structureId
-      );
-
-      if (!structureDnaCode) {
-        console.warn(
-          `⚠️ Impossible de trouver le dnaCode pour la structure ${cpomStructure.structureId}, millésimes ignorés`
-        );
-        continue;
-      }
-
       const millesimeYears = buildStructureMillesimeYears(
         cpomStructure.dateStart?.getFullYear() ?? yearStart,
         cpomStructure.dateEnd?.getFullYear() ?? yearEnd
@@ -248,8 +235,8 @@ export const createFakeCpoms = async (
       for (const millesimeYear of millesimeYears) {
         await prisma.structureMillesime.upsert({
           where: {
-            structureDnaCode_year: {
-              structureDnaCode,
+            structureId_year: {
+              structureId: cpomStructure.structureId,
               year: millesimeYear,
             },
           },
@@ -257,7 +244,7 @@ export const createFakeCpoms = async (
             cpom: true,
           },
           create: {
-            structureDnaCode,
+            structureId: cpomStructure.structureId,
             year: millesimeYear,
             cpom: true,
           },

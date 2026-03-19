@@ -3,14 +3,10 @@ import { StructureType } from "@/types/structure.type";
 
 import { TestStructureScenario } from "./types";
 
-/**
- * CAES 1: Collectif, single address, two contacts, all docs at ajout,
- * with convention dates, minimal finances, with filiale
- */
 export const caes1: TestStructureScenario = {
   name: "CAES 1 - Collectif, single address, two contacts, all docs, old eval, no controls, filiale",
   formData: {
-    dnaCode: "C1234",
+    codeBhasile: "BHA-TST-001",
     type: StructureType.CAES,
     cpom: false,
     filiale: "Filiale Test",
@@ -20,23 +16,31 @@ export const caes1: TestStructureScenario = {
       id: 1,
     },
     creationDate: "2015-06-01",
+    dnas: [
+      {
+        code: "C1234",
+        description: "DNA 1",
+      },
+    ],
     public: "Tout public",
     lgbt: true,
     fvvTeh: true,
-    contactPrincipal: {
-      prenom: "John",
-      nom: "Doe",
-      role: "Directeur·rice",
-      email: "john.doe@example.com",
-      telephone: "+33123456789",
-    },
-    contactSecondaire: {
-      prenom: "Jane",
-      nom: "Deo",
-      role: "Responsable administratif",
-      email: "jane.deo@example.com",
-      telephone: "+33623456789",
-    },
+    contacts: [
+      {
+        prenom: "John",
+        nom: "Doe",
+        role: "Directeur·rice",
+        email: "john.doe@example.com",
+        telephone: "+33123456789",
+      },
+      {
+        prenom: "Jane",
+        nom: "Deo",
+        role: "Responsable administratif",
+        email: "jane.deo@example.com",
+        telephone: "+33623456789",
+      },
+    ],
     debutConvention: "2020-01-01",
     finConvention: "2023-12-31",
     nom: "Structure Test",
@@ -269,7 +273,7 @@ export const caes1: TestStructureScenario = {
     public: "Famille",
     lgbt: false,
     fvvTeh: true,
-    contactPrincipal: { email: "modif-caes1@example.com" },
+    contacts: [{ email: "modif-caes1@example.com" }],
     notes: "Notes modification CAES 1 - filiale.",
     debutConvention: "2021-01-15",
     finConvention: "2024-06-30",

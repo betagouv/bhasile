@@ -11,7 +11,10 @@ import { StructureType } from "@/types/structure.type";
 export const createFakeBudget = ({
   year,
   type,
-}: CreateFakeBudgetOptions): Omit<Budget, "id" | "structureDnaCode"> => {
+}: CreateFakeBudgetOptions): Omit<
+  Budget,
+  "id" | "structureDnaCode" | "structureId"
+> => {
   const isAutorisee = isStructureAutorisee(type);
   const isSubventionnee = isStructureSubventionnee(type);
 

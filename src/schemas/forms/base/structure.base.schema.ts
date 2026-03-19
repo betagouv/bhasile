@@ -1,9 +1,11 @@
 import z from "zod";
 
+import { zId } from "@/app/utils/zodCustomFields";
 import { StructureType } from "@/types/structure.type";
 
 export const structureBaseSchema = z.object({
-  dnaCode: z.string().min(1),
+  id: zId(),
+  codeBhasile: z.string().optional(),
   type: z.preprocess(
     (val) => (val === "" ? undefined : val),
     z.nativeEnum(StructureType)

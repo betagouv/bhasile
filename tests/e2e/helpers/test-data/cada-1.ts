@@ -4,9 +4,9 @@ import { StructureType } from "@/types/structure.type";
 import { TestStructureScenario } from "./types";
 
 export const cada1: TestStructureScenario = {
-  name: "CADA 1 - Collectif, same address, one contact, all docs, old eval, controls, every actes administratifs",
+  name: "CADA 1 - Multi dna, collectif, same address, all docs, old eval, controls, every actes administratifs",
   formData: {
-    dnaCode: "C1234",
+    codeBhasile: "BHA-TST-001",
     type: StructureType.CADA,
     cpom: false,
     operateur: {
@@ -15,17 +15,41 @@ export const cada1: TestStructureScenario = {
       id: 1,
     },
     creationDate: "2015-06-01",
-    finessCode: "123456789",
+    finesses: [
+      {
+        code: "123456789",
+        description: "Finess 1",
+      },
+    ],
+    dnas: [
+      {
+        code: "C1234",
+        description: "DNA 1",
+      },
+      {
+        code: "C5678",
+        description: "DNA 2",
+      },
+    ],
     public: "Tout public",
     lgbt: true,
     fvvTeh: true,
-    contactPrincipal: {
-      prenom: "John",
-      nom: "Doe",
-      role: "Directeur·rice",
-      email: "john.doe@example.com",
-      telephone: "+33123456789",
-    },
+    contacts: [
+      {
+        prenom: "John",
+        nom: "Doe",
+        role: "Directeur·rice",
+        email: "john.doe@example.com",
+        telephone: "+33123456789",
+      },
+      {
+        prenom: "Jane",
+        nom: "Deo",
+        role: "Responsable administratif",
+        email: "jane.deo@example.com",
+        telephone: "+33623456789",
+      },
+    ],
     debutPeriodeAutorisation: "2020-01-01",
     finPeriodeAutorisation: "2025-12-31",
     nom: "Structure Test",
@@ -352,7 +376,7 @@ export const cada1: TestStructureScenario = {
     public: "Famille",
     lgbt: true,
     fvvTeh: false,
-    contactPrincipal: { email: "modif-cada1@example.com" },
+    contacts: [{ email: "modif-cada1@example.com" }],
     notes: "Notes modification CADA 1 - suivi renforcé.",
     debutPeriodeAutorisation: "2020-06-15",
     finPeriodeAutorisation: "2026-06-30",

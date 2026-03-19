@@ -11,6 +11,7 @@ import { fileApiSchema } from "./file.schema";
 export const documentFinancierApiSchema = z.object({
   id: z.number().optional(),
   structureDnaCode: z.string().optional(),
+  structureId: z.number().optional(),
   cpomId: zId(),
   year: zSafeYear(),
   granularity: z.enum(DocumentFinancierGranularity),

@@ -52,9 +52,6 @@ export class VerificationPage extends BasePage {
     await expect(section).toContainText(data.operateur.name);
     await expect(section).toContainText(formatDate(data.creationDate));
     await expect(section).toContainText(data.public);
-    if (data.finessCode) {
-      await expect(section).toContainText(data.finessCode);
-    }
     if (data.lgbt) {
       await expect(section).toContainText("LGBT");
     }
@@ -62,25 +59,62 @@ export class VerificationPage extends BasePage {
       await expect(section).toContainText("FVV-TEH");
     }
 
-    const principalLabel = `${data.contactPrincipal.prenom} ${data.contactPrincipal.nom}`;
-    await expect(section).toContainText(principalLabel);
-    await expect(section).toContainText(data.contactPrincipal.role ?? "");
-    await expect(section).toContainText(data.contactPrincipal.email ?? "");
-    const principalPhone = formatPhoneNumber(data.contactPrincipal.telephone);
-    if (principalPhone) {
-      await expect(section).toContainText(principalPhone);
+    if (data.nom) {
+      await expect(section).toContainText(data.nom);
+    }
+    const { addressLine, postalCode, city } = parseAddressParts(
+      data.adresseAdministrative.complete
+    );
+    if (addressLine) {
+      await expect(section).toContainText(addressLine);
+    }
+    if (postalCode) {
+      await expect(section).toContainText(postalCode);
+    }
+    if (city) {
+      const formattedCity = formatCityName(city);
+      if (formattedCity) {
+        await expect(section).toContainText(formattedCity);
+      }
     }
 
-    if (data.contactSecondaire) {
-      const secondaryLabel = `${data.contactSecondaire.prenom} ${data.contactSecondaire.nom}`;
-      await expect(section).toContainText(secondaryLabel);
-      await expect(section).toContainText(data.contactSecondaire.role ?? "");
-      await expect(section).toContainText(data.contactSecondaire.email ?? "");
-      const secondaryPhone = formatPhoneNumber(
-        data.contactSecondaire.telephone
-      );
-      if (secondaryPhone) {
-        await expect(section).toContainText(secondaryPhone);
+    for (const dna of data.dnas ?? []) {
+      if (!dna.code) {
+        continue;
+      }
+      await expect(section).toContainText(dna.code);
+      if ((data.dnas?.length ?? 0) > 1 && dna.description) {
+        await expect(section).toContainText(dna.description);
+      }
+    }
+    for (const finess of data.finesses ?? []) {
+      if (!finess.code) {
+        continue;
+      }
+      await expect(section).toContainText(finess.code);
+      if ((data.finesses?.length ?? 0) > 1 && finess.description) {
+        await expect(section).toContainText(finess.description);
+      }
+    }
+
+    for (const antenne of data.antennes ?? []) {
+      if (antenne.name) {
+        await expect(section).toContainText(antenne.name);
+      }
+      const antenneAddress = antenne.adresseComplete || antenne.searchTerm;
+      if (antenneAddress) {
+        await expect(section).toContainText(antenneAddress);
+      }
+    }
+
+    for (const contact of data.contacts ?? []) {
+      const label = `${contact?.prenom} ${contact?.nom}`;
+      await expect(section).toContainText(label);
+      await expect(section).toContainText(contact.role ?? "");
+      await expect(section).toContainText(contact.email ?? "");
+      const phone = formatPhoneNumber(contact.telephone);
+      if (phone) {
+        await expect(section).toContainText(phone);
       }
     }
 
@@ -105,25 +139,6 @@ export class VerificationPage extends BasePage {
   private async expectAdresses(data: TestStructureData) {
     const section = this.getSection("Adresses");
 
-    if (data.nom) {
-      await expect(section).toContainText(data.nom);
-    }
-
-    const { addressLine, postalCode, city } = parseAddressParts(
-      data.adresseAdministrative.complete
-    );
-    if (addressLine) {
-      await expect(section).toContainText(addressLine);
-    }
-    if (postalCode) {
-      await expect(section).toContainText(postalCode);
-    }
-    if (city) {
-      const formattedCity = formatCityName(city);
-      if (formattedCity) {
-        await expect(section).toContainText(formattedCity);
-      }
-    }
     await expect(section).toContainText(data.typeBati);
 
     if (data.adresses && data.adresses.length > 0) {

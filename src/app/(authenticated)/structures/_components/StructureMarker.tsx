@@ -41,6 +41,5 @@ export const StructureMarker = ({ id, coordinates }: Props): ReactElement => {
 
 type Props = {
   id: number;
-  dnaCode: string;
   coordinates: LatLngTuple;
 };

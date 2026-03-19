@@ -9,7 +9,7 @@ export class TestStructureDataBuilder {
   constructor() {
     // Start with valid defaults
     this.data = {
-      dnaCode: `TEST-${Date.now()}`,
+      codeBhasile: `TEST-${Date.now()}`,
       type: StructureType.CADA,
       cpom: false,
       operateur: {
@@ -18,16 +18,20 @@ export class TestStructureDataBuilder {
         id: 1,
       },
       creationDate: "2015-06-01",
+      finesses: [{ code: "123456789", description: "Finess 1" }],
+      dnas: [{ code: "C1234", description: "DNA 1" }],
       public: "Tout public",
       lgbt: false,
       fvvTeh: false,
-      contactPrincipal: {
-        prenom: "John",
-        nom: "Doe",
-        role: "Directeur·rice",
-        email: "john.doe@example.com",
-        telephone: "+33123456789",
-      },
+      contacts: [
+        {
+          prenom: "John",
+          nom: "Doe",
+          role: "Directeur·rice",
+          email: "john.doe@example.com",
+          telephone: "+33123456789",
+        },
+      ],
       adresseAdministrative: {
         complete: "1 Rue de la Paix 75001 Paris",
         searchTerm: "1 Rue de la Paix 75001 Paris",
@@ -57,8 +61,8 @@ export class TestStructureDataBuilder {
   }
 
   // Fluent API methods for building
-  withDnaCode(dnaCode: string): this {
-    this.data.dnaCode = dnaCode;
+  withCodeBhasile(codeBhasile: string): this {
+    this.data.codeBhasile = codeBhasile;
     return this;
   }
 
@@ -77,32 +81,32 @@ export class TestStructureDataBuilder {
     return this;
   }
 
-  withContactPrincipal(contact: TestStructureData["contactPrincipal"]): this {
-    this.data.contactPrincipal = contact;
+  withContacts(contacts: TestStructureData["contacts"]): this {
+    this.data.contacts = contacts;
     return this;
   }
 
-  withContactPrincipalEmail(email: string): this {
-    if (!this.data.contactPrincipal) {
+  withFirstContactEmail(email: string): this {
+    if (!this.data.contacts) {
       throw new Error(
-        "Cannot set email: contactPrincipal must exist. Use withContactPrincipal() first."
+        "Cannot set email: contacts must exist. Use withContacts() first."
       );
     }
-    this.data.contactPrincipal = {
-      ...this.data.contactPrincipal,
+    this.data.contacts[0] = {
+      ...this.data.contacts[0],
       email,
     };
     return this;
   }
 
-  withContactPrincipalPhone(telephone: string): this {
-    if (!this.data.contactPrincipal) {
+  withFirstContactPhone(telephone: string): this {
+    if (!this.data.contacts) {
       throw new Error(
-        "Cannot set phone: contactPrincipal must exist. Use withContactPrincipal() first."
+        "Cannot set phone: contacts must exist. Use withContacts() first."
       );
     }
-    this.data.contactPrincipal = {
-      ...this.data.contactPrincipal,
+    this.data.contacts[0] = {
+      ...this.data.contacts[0],
       telephone,
     };
     return this;
@@ -114,7 +118,17 @@ export class TestStructureDataBuilder {
   }
 
   withFinessCode(finessCode: string): this {
-    this.data.finessCode = finessCode;
+    this.data.finesses = [{ code: finessCode, description: "" }];
+    return this;
+  }
+
+  withFinesses(finesses: NonNullable<TestStructureData["finesses"]>): this {
+    this.data.finesses = finesses;
+    return this;
+  }
+
+  withDnas(dnas: NonNullable<TestStructureData["dnas"]>): this {
+    this.data.dnas = dnas;
     return this;
   }
 
@@ -223,29 +237,6 @@ export class TestStructureDataBuilder {
   }
 
   /**
-   * Quick invalid value setters
-   */
-  withInvalidEmail(): this {
-    return this.withContactPrincipalEmail("invalid-email");
-  }
-
-  withInvalidDate(): this {
-    return this.withCreationDate("invalid-date");
-  }
-
-  withInvalidPhone(): this {
-    return this.withContactPrincipalPhone("123");
-  }
-
-  withEmptyEmail(): this {
-    return this.withContactPrincipalEmail("");
-  }
-
-  withEmptyPhone(): this {
-    return this.withContactPrincipalPhone("");
-  }
-
-  /**
    * Clone builder for variations
    */
   clone(): TestStructureDataBuilder {
@@ -269,7 +260,7 @@ export class TestStructureDataBuilder {
 
   static createMinimal(): TestStructureDataBuilder {
     return new TestStructureDataBuilder()
-      .withDnaCode("TEST-MINIMAL")
+      .withCodeBhasile("BHA-MINIMAL")
       .withType(StructureType.CADA);
   }
 
@@ -281,7 +272,8 @@ export class TestStructureDataBuilder {
   static forCADA(): TestStructureDataBuilder {
     return new TestStructureDataBuilder()
       .withType(StructureType.CADA)
-      .withFinessCode("123456789")
+      .withFinesses([{ code: "123456789", description: "Finess 1" }])
+      .withDnas([{ code: "C1234", description: "DNA 1" }])
       .withPeriodeAutorisation("2020-01-01", "2025-12-31");
   }
 
@@ -292,10 +284,16 @@ export class TestStructureDataBuilder {
   }
 
   static forCPH(): TestStructureDataBuilder {
-    return new TestStructureDataBuilder().withType(StructureType.CPH);
+    return new TestStructureDataBuilder()
+      .withType(StructureType.CPH)
+      .withFinesses([{ code: "123456789", description: "Finess 1" }])
+      .withDnas([{ code: "C1234", description: "DNA 1" }]);
   }
 
   static forHUDA(): TestStructureDataBuilder {
-    return new TestStructureDataBuilder().withType(StructureType.HUDA);
+    return new TestStructureDataBuilder()
+      .withType(StructureType.HUDA)
+      .withField("finesses", undefined)
+      .withDnas([{ code: "C1234", description: "DNA 1" }]);
   }
 }

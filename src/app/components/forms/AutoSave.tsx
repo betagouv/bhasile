@@ -17,7 +17,6 @@ export const AutoSave = <TSchema extends z.ZodTypeAny>({
 
   const debouncedSave = useDebounceCallback(async () => {
     const allValues = getValues();
-
     const result = schema.safeParse(allValues);
 
     if (result.success) {

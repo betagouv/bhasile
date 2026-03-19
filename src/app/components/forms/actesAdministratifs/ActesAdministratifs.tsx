@@ -1,5 +1,5 @@
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
-import FieldSetActeAdministratif from "@/app/components/forms/fieldsets/structure/FieldSetActeAdministratif";
+import FieldSetActeAdministratif from "@/app/components/forms/actesAdministratifs/FieldSetActeAdministratif";
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
 import { getActesAdministratifsCategoryToDisplay } from "@/app/utils/acteAdministratif.util";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";

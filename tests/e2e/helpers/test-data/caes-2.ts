@@ -3,14 +3,10 @@ import { StructureType } from "@/types/structure.type";
 
 import { TestStructureScenario } from "./types";
 
-/**
- * CAES 2: Mixte, multiple addresses with repartition, one contact, mixed docs (one at finalisation),
- * with controls, full finances
- */
 export const caes2: TestStructureScenario = {
-  name: "CAES 2 - Mixte, multiple addresses with repartition, one contact, mixed docs, controls",
+  name: "CAES 2 - Multiple antennes, mixte, multiple addresses with repartition, four contacts, mixed docs, controls",
   formData: {
-    dnaCode: "C1234",
+    codeBhasile: "BHA-TST-001",
     type: StructureType.CAES,
     cpom: false,
     operateur: {
@@ -20,15 +16,75 @@ export const caes2: TestStructureScenario = {
     },
     creationDate: "2015-06-01",
     public: "Tout public",
+    dnas: [
+      {
+        code: "C1234",
+        description: "DNA 1",
+      },
+    ],
+    antennes: [
+      {
+        adresseComplete: "1 Rue de la Paix 75001 Paris",
+        searchTerm: "1 Rue de la Paix 75001 Paris",
+        name: "Antenne 1",
+      },
+      {
+        adresseComplete: "2 Rue de la Paix 75001 Paris",
+        searchTerm: "2 Rue de la Paix 75001 Paris",
+        name: "Antenne 2",
+      },
+      {
+        adresseComplete: "3 Rue de la Paix 75001 Paris",
+        searchTerm: "3 Rue de la Paix 75001 Paris",
+        name: "Antenne 3",
+      },
+      {
+        adresseComplete: "4 Rue de la Paix 75001 Paris",
+        searchTerm: "4 Rue de la Paix 75001 Paris",
+        name: "Antenne 4",
+      },
+      {
+        adresseComplete: "5 Rue de la Paix 75001 Paris",
+        searchTerm: "5 Rue de la Paix 75001 Paris",
+        name: "Antenne 5",
+      },
+    ],
     lgbt: true,
     fvvTeh: true,
-    contactPrincipal: {
-      prenom: "John",
-      nom: "Doe",
-      role: "Directeur·rice",
-      email: "john.doe@example.com",
-      telephone: "+33123456789",
-    },
+    contacts: [
+      {
+        prenom: "John",
+        nom: "Doe",
+        role: "Directeur·rice",
+        perimetre: "Personnes isolées",
+        email: "john.doe@example.com",
+        telephone: "+33123456789",
+      },
+      {
+        prenom: "Jane",
+        nom: "Deo",
+        role: "Responsable administratif",
+        perimetre: "Personnes isolées",
+        email: "jane.deo@example.com",
+        telephone: "+33623456789",
+      },
+      {
+        prenom: "Jean",
+        nom: "Michel",
+        role: "Responsable financier",
+        perimetre: "Personnes isolées",
+        email: "jean.michel@example.com",
+        telephone: "+33923456789",
+      },
+      {
+        prenom: "Pierre",
+        nom: "Dupont",
+        role: "Responsable administratif",
+        perimetre: "Personnes isolées",
+        email: "pierre.dupont@example.com",
+        telephone: "+33823456789",
+      },
+    ],
     debutConvention: "2020-01-01",
     finConvention: "2023-12-31",
     nom: "Structure Test",
@@ -274,7 +330,7 @@ export const caes2: TestStructureScenario = {
     public: "Tout public",
     lgbt: true,
     fvvTeh: false,
-    contactPrincipal: { email: "modif-caes2@example.com" },
+    contacts: [{ email: "modif-caes2@example.com" }],
     notes: "Notes modification CAES 2 - mixte.",
     debutConvention: "2020-06-01",
     finConvention: "2024-12-31",

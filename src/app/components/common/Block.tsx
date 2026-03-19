@@ -1,11 +1,17 @@
+import Button from "@codegouvfr/react-dsfr/Button";
 import { PropsWithChildren, ReactElement } from "react";
+
+import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
 
 export const Block = ({
   title,
   iconClass,
   onEdit,
+  multipleEdit,
   children,
 }: Props): ReactElement => {
+  const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
+
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
       <div className="flex justify-between items-start">
@@ -14,10 +20,38 @@ export const Block = ({
           <h3 className="text-title-blue-france fr-h6 mb-12">{title}</h3>
         </div>
         {onEdit && (
-          <button className="fr-btn fr-btn--tertiary" onClick={onEdit}>
-            <span className="fr-icon-edit-line fr-icon--sm pr-2" />
+          <Button
+            priority="tertiary"
+            iconId="fr-icon-edit-line"
+            onClick={onEdit}
+          >
             Modifier
-          </button>
+          </Button>
+        )}
+        {multipleEdit && (
+          <div className="relative" ref={panelRef}>
+            <Button
+              priority="tertiary"
+              iconId="fr-icon-edit-line"
+              onClick={() => setIsPanelOpen(!isPanelOpen)}
+            >
+              Modifier
+            </Button>
+            {isPanelOpen && (
+              <div className="absolute top-full right-0 flex flex-col items-end bg-white shadow-md z-50">
+                {multipleEdit.map((edit, index) => (
+                  <Button
+                    key={index}
+                    priority="tertiary no outline"
+                    onClick={edit.onClick}
+                    className="whitespace-nowrap"
+                  >
+                    {edit.label}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
       {children}
@@ -29,4 +63,8 @@ type Props = PropsWithChildren<{
   title: string;
   iconClass: string;
   onEdit?: () => void;
+  multipleEdit?: {
+    label: ReactElement;
+    onClick: () => void;
+  }[];
 }>;

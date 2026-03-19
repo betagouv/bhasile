@@ -31,30 +31,30 @@ describe("OrderButton", () => {
 
     render(
       <OrderButton
-        column="dnaCode"
+        column="codeBhasile"
         currentColumn={null}
         currentDirection={null}
         handleOrdering={handleOrdering}
       />
     );
 
-    const button = getOrderButton("dnaCode");
+    const button = getOrderButton("codeBhasile");
     await user.click(button);
 
-    expect(handleOrdering).toHaveBeenCalledWith("dnaCode");
+    expect(handleOrdering).toHaveBeenCalledWith("codeBhasile");
   });
 
   it("should highlight ascending arrow when column is active and direction is asc", () => {
     render(
       <OrderButton
-        column="dnaCode"
-        currentColumn="dnaCode"
+        column="codeBhasile"
+        currentColumn="codeBhasile"
         currentDirection="asc"
         handleOrdering={vi.fn()}
       />
     );
 
-    const button = getOrderButton("dnaCode");
+    const button = getOrderButton("codeBhasile");
     expect(button).toHaveAttribute("aria-sort", "ascending");
     // Verify icons are hidden from screen readers
     const ascendingArrow = button.querySelector(".fr-icon-arrow-up-s-line");
@@ -84,7 +84,7 @@ describe("OrderButton", () => {
     render(
       <OrderButton
         column="type"
-        currentColumn="dnaCode"
+        currentColumn="codeBhasile"
         currentDirection="asc"
         handleOrdering={vi.fn()}
       />

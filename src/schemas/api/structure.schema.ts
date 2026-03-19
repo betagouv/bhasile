@@ -1,26 +1,28 @@
 import { z } from "zod";
 
-import { zId } from "@/app/utils/zodCustomFields";
 import { PublicType, StructureType } from "@/types/structure.type";
 
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
 import { activiteApiSchema } from "./activite.schema";
 import { adresseApiSchema } from "./adresse.schema";
+import { antenneApiSchema } from "./antenne.schema";
 import { budgetApiSchema } from "./budget.schema";
 import { contactApiSchema } from "./contact.schema";
 import { controleApiSchema } from "./controle.schema";
 import { cpomStructureApiSchema } from "./cpom.schema";
+import { dnaStructureApiSchema } from "./dna-structure.schema";
 import { documentFinancierApiSchema } from "./documentFinancier.schema";
 import { evaluationApiSchema } from "./evaluation.schema";
 import { evenementIndesirableGraveApiSchema } from "./evenement-indesirable-grave.schema";
+import { finessApiSchema } from "./finess.schema";
 import { formApiSchema } from "./form.schema";
 import { operateurApiSchema } from "./operateur.schema";
 import { structureMillesimeApiSchema } from "./structure-millesime.schema";
 import { structureTypologieApiSchema } from "./structure-typologie.schema";
 
 export const structureMinimalApiSchema = z.object({
-  id: zId(),
-  dnaCode: z.string(),
+  id: z.number(),
+  codeBhasile: z.string().optional(),
   operateur: operateurApiSchema,
   type: z.nativeEnum(StructureType),
   nom: z.string().optional(),
@@ -69,6 +71,9 @@ export const structureOperateurUpdateApiSchema =
     debutPeriodeAutorisation: z.string().datetime().nullish(),
     finPeriodeAutorisation: z.string().datetime().nullish(),
     adresses: z.array(adresseApiSchema),
+    antennes: z.array(antenneApiSchema).optional(),
+    dnaStructures: z.array(dnaStructureApiSchema).optional(),
+    finesses: z.array(finessApiSchema).optional(),
     structureTypologies: z.array(structureTypologieApiSchema),
     forms: z.array(formApiSchema).optional(),
     contacts: z.array(contactApiSchema),
@@ -77,8 +82,11 @@ export const structureOperateurUpdateApiSchema =
 
 const partialStructureOperateurUpdateApiSchema =
   structureOperateurUpdateApiSchema.partial().extend({
-    dnaCode: z.string().min(1, "Le code DNA est requis"),
+    id: z.number(),
+    codeBhasile: z.string().optional(),
     adresses: z.array(adresseApiSchema.partial()).optional(),
+    dnaStructures: z.array(dnaStructureApiSchema.partial()).optional(),
+    finesses: z.array(finessApiSchema.partial()).optional(),
     forms: z.array(formApiSchema.partial()).optional(),
     contacts: z.array(contactApiSchema.partial()).optional(),
     documentsFinanciers: z.array(documentFinancierApiSchema).optional(),
@@ -89,7 +97,6 @@ const partialStructureOperateurUpdateApiSchema =
   });
 
 const remainingStructureAgentUpdateApiSchema = z.object({
-  id: z.number().optional(),
   noEvaluationStructure: z.boolean().optional(),
   notes: z.string().nullish(),
   controles: z.array(controleApiSchema).optional(),

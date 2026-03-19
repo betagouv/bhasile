@@ -6,8 +6,8 @@ import { useFormContext } from "react-hook-form";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
-import { AjoutAdressesFormValues } from "@/schemas/forms/ajout/ajoutAdresses.schema";
 import { AjoutTypePlacesFormValues } from "@/schemas/forms/ajout/ajoutTypePlaces.schema";
+import { TypeBatiAndAdressesFormValues } from "@/schemas/forms/base/adresse.schema";
 import {
   FormAdresse,
   FormAdresseTypologie,
@@ -26,24 +26,21 @@ export const ValidationButtonWithHook = (): ReactElement => {
   const {
     updateLocalStorageValue: updateIdentification,
     currentValue: localIdentificationValue,
-  } = useLocalStorage(
-    `ajout-structure-${structure?.dnaCode}-identification`,
-    {}
-  );
+  } = useLocalStorage(`ajout-structure-${structure?.id}-identification`, {});
 
   const {
     updateLocalStorageValue: updateAdresses,
     currentValue: localAdressesValue,
   } = useLocalStorage(
-    `ajout-structure-${structure?.dnaCode}-adresses`,
-    {} as Partial<AjoutAdressesFormValues>
+    `ajout-structure-${structure?.id}-adresses`,
+    {} as Partial<TypeBatiAndAdressesFormValues>
   );
 
   const {
     updateLocalStorageValue: updateTypePlaces,
     currentValue: localTypePlacesValue,
   } = useLocalStorage(
-    `ajout-structure-${structure?.dnaCode}-type-places`,
+    `ajout-structure-${structure?.id}-type-places`,
     {} as Partial<AjoutTypePlacesFormValues>
   );
 
@@ -51,21 +48,22 @@ export const ValidationButtonWithHook = (): ReactElement => {
     updateLocalStorageValue: updateDocuments,
     currentValue: localDocumentsValue,
   } = useLocalStorage(
-    `ajout-structure-${structure?.dnaCode}-documents`,
+    `ajout-structure-${structure?.id}-documents`,
     {} as Partial<DocumentsFinanciersFlexibleFormValues>
   );
 
   const handleValidation = () => {
     updateIdentification({
       ...localIdentificationValue,
-      dnaCode: structure?.dnaCode,
+      id: structure?.id,
+      nom: structure?.nom,
+      codeBhasile: structure?.codeBhasile,
       operateur: structure?.operateur,
       type: structure?.type,
     });
 
     updateAdresses({
       ...localAdressesValue,
-      nom: structure?.nom,
       adresses: localAdressesValue?.adresses?.map((adresse: FormAdresse) => ({
         ...adresse,
         adresseTypologies: adresse.adresseTypologies?.map(
@@ -132,7 +130,7 @@ export const ValidationButtonWithHook = (): ReactElement => {
       ...localDocumentsValue,
       structureMillesimes: structureMillesimes,
     });
-    router.push(`/ajout-structure/${structure?.dnaCode}/01-identification`);
+    router.push(`/ajout-structure/${structure?.id}/01-identification`);
   };
 
   return (

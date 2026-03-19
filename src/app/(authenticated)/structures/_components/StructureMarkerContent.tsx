@@ -1,13 +1,12 @@
 import Link from "next/link";
-import { ReactElement } from "react";
 
 import { useFetchStructure } from "@/app/hooks/useFetchStructure";
 import { formatDate } from "@/app/utils/date.util";
 import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 import {
+  getCommunesGroupedByDepartement,
   getCurrentPlacesAutorisees,
   getOperateurLabel,
-  getPlacesByCommunes,
   getRepartition,
 } from "@/app/utils/structure.util";
 import { DEPARTEMENTS } from "@/constants";
@@ -19,71 +18,51 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
   if (!structure) {
     return null;
   }
-  const {
-    dnaCode,
-    type,
-    filiale,
-    operateur,
-    nom,
-    communeAdministrative,
-    departementAdministratif,
-    codePostalAdministratif,
-    finConvention,
-    adresses,
-  } = structure;
+  const { codeBhasile, type, filiale, operateur, nom, finConvention } =
+    structure;
 
   const placesAutorisees = getCurrentPlacesAutorisees(structure);
   const repartition = getRepartition(structure);
-  const departementLabel = DEPARTEMENTS.find(
-    (departement) => departement.numero === departementAdministratif
-  )?.name;
-  const isStructureFinalisee = getFinalisationFormStatus(structure);
 
-  const getCommunesLabel = (): ReactElement => {
-    const placesByCommunes = getPlacesByCommunes(adresses);
-    return (
-      <>
-        {Object.entries(placesByCommunes).map(
-          (placeByCommune, index, communes) => (
-            <span key={placeByCommune[0]}>
-              {placeByCommune[0]}{" "}
-              <span className="italic">({placeByCommune[1]} places)</span>
-              {index < communes.length - 1 ? ", " : ""}
-            </span>
-          )
-        )}
-      </>
-    );
-  };
+  const isStructureFinalisee = getFinalisationFormStatus(structure);
 
   return (
     <div>
+      <div className="text-xs font-bold text-title-blue-france">
+        {codeBhasile}
+      </div>
       <div className="text-xl text-title-blue-france m-0 flex gap-x-4 flex-wrap">
         <strong className="">
           {type}, {getOperateurLabel(filiale, operateur?.name)}
         </strong>
-        <span>{placesAutorisees}&nbsp;places</span>
       </div>
-      <div className="text-base text-title-blue-france">
-        {communeAdministrative}, {departementLabel} (
-        {codePostalAdministratif.substring(0, 2)})
+      <div className="text-sm mb-1 text-title-blue-france">
+        <span>
+          {getCommunesGroupedByDepartement(structure).map(
+            ({ departement, communes }) => (
+              <span key={departement} className="block">
+                {communes.join(", ")} –{" "}
+                {DEPARTEMENTS.find((d) => d.numero === departement)?.name ??
+                  departement}
+              </span>
+            )
+          )}
+        </span>
+      </div>
+      <div className="text-sm mb-1">
+        <strong>Places autorisées : </strong>
+        <span>{placesAutorisees}</span>
       </div>
       {finConvention && (
-        <div className="text-sm mt-1 mb-0">
+        <div className="text-sm mb-2">
           <strong>Fin convention : </strong>
           <span>{formatDate(finConvention)}</span>
         </div>
       )}
-      <div className="text-sm mt-1 mb-0">
-        <strong>Code DNA</strong> {dnaCode}
+      <div className="text-sm mb-2">
+        <RepartitionBadge repartition={repartition} className="m-0!" />
       </div>
-      <div className="text-sm mt-1 mb-0">
-        <span className="pr-1">
-          <RepartitionBadge repartition={repartition} className="mb-0!" />
-        </span>
-        <span>{getCommunesLabel()}</span>
-      </div>
-      <div className="flex justify-end mt-2">
+      <div className="flex justify-end">
         <Link
           className={`fr-btn fr-btn--tertiary-no-outline ${isStructureFinalisee ? "fr-icon-arrow-right-line" : "fr-icon-edit-line"} `}
           title={`Détails de ${nom}`}

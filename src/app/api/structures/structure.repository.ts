@@ -7,11 +7,14 @@ import { PrismaTransaction } from "@/types/prisma.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acteAdministratif.repository";
 import { createOrUpdateAdresses } from "../adresses/adresse.repository";
+import { createOrUpdateAntennes } from "../antennes/antenne.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
 import { createOrUpdateContacts } from "../contacts/contact.repository";
 import { createOrUpdateControles } from "../controles/controle.repository";
+import { createOrUpdateDnaStructures } from "../dna-structures/dna-structure.repository";
 import { createOrUpdateDocumentsFinanciers } from "../documents-financiers/documentFinancier.repository";
 import { createOrUpdateEvaluations } from "../evaluations/evaluation.repository";
+import { createOrUpdateFinesses } from "../finesses/finess.repository";
 import {
   createOrUpdateForms,
   initializeDefaultForms,
@@ -189,7 +192,7 @@ export const getLatestPlacesAutoriseesPerStructure = async (): Promise<
       year: "desc",
     },
     select: {
-      structureDnaCode: true,
+      structureId: true,
       placesAutorisees: true,
     },
   });
@@ -197,17 +200,42 @@ export const getLatestPlacesAutoriseesPerStructure = async (): Promise<
   const seenStructures = new Set<string>();
 
   return allTypologies
+    .filter((typology) => typology.structureId !== null)
     .filter((typology) => {
       if (
-        seenStructures.has(typology.structureDnaCode) ||
+        seenStructures.has(typology.structureId as unknown as string) ||
         typology.placesAutorisees === null
       ) {
         return false;
       }
-      seenStructures.add(typology.structureDnaCode);
+      seenStructures.add(typology.structureId as unknown as string);
       return true;
     })
     .map((typology) => typology.placesAutorisees as number);
+};
+
+export const findOneOperateur = async (
+  id: number
+): Promise<{
+  id: number;
+  codeBhasile: string | null;
+  forms: {
+    id: number;
+    createdAt: Date;
+    updatedAt: Date;
+    structureId: number | null;
+    formDefinitionId: number;
+    status: boolean;
+  }[];
+}> => {
+  return await prisma.structure.findUniqueOrThrow({
+    where: { id },
+    select: {
+      id: true,
+      codeBhasile: true,
+      forms: true,
+    },
+  });
 };
 
 export const findOne = async (id: number): Promise<Structure> => {
@@ -216,6 +244,12 @@ export const findOne = async (id: number): Promise<Structure> => {
       id,
     },
     include: {
+      dnaStructures: {
+        include: {
+          dna: true,
+        },
+      },
+      finesses: true,
       adresses: {
         include: {
           adresseTypologies: {
@@ -225,6 +259,7 @@ export const findOne = async (id: number): Promise<Structure> => {
           },
         },
       },
+      antennes: true,
       contacts: true,
       structureTypologies: {
         orderBy: {
@@ -245,7 +280,7 @@ export const findOne = async (id: number): Promise<Structure> => {
                   structure: {
                     select: {
                       id: true,
-                      dnaCode: true,
+                      codeBhasile: true,
                       type: true,
                       communeAdministrative: true,
                       operateur: {
@@ -330,39 +365,6 @@ export const findOne = async (id: number): Promise<Structure> => {
   return structure;
 };
 
-export const findByDnaCode = async (
-  dnaCode: string
-): Promise<Structure | null> => {
-  return prisma.structure.findUnique({
-    where: {
-      dnaCode,
-    },
-    include: {
-      adresses: {
-        include: {
-          adresseTypologies: {
-            orderBy: {
-              year: "desc",
-            },
-          },
-        },
-      },
-      contacts: true,
-      operateur: true,
-      structureTypologies: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      forms: {
-        include: {
-          formDefinition: true,
-        },
-      },
-    },
-  });
-};
-
 export const updateOneAgent = async (
   structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
@@ -384,6 +386,9 @@ const updateOne = async (
       budgets,
       structureTypologies,
       adresses,
+      antennes,
+      dnaStructures,
+      finesses,
       actesAdministratifs,
       documentsFinanciers,
       controles,
@@ -396,29 +401,32 @@ const updateOne = async (
       async (tx) => {
         const updatedStructure = await updateStructure(tx, structure);
 
-        await initializeDefaultForms(tx, isOperateurUpdate, structure.dnaCode);
+        await initializeDefaultForms(tx, isOperateurUpdate, structure.id);
 
-        await createOrUpdateContacts(tx, contacts, structure.dnaCode);
-        await createOrUpdateBudgets(tx, budgets, structure.dnaCode);
+        await createOrUpdateDnaStructures(tx, dnaStructures, structure.id);
+        await createOrUpdateFinesses(tx, finesses, structure.id);
+        await createOrUpdateContacts(tx, contacts, structure.id);
+        await createOrUpdateBudgets(tx, budgets, structure.id);
         await createOrUpdateStructureTypologies(
           tx,
           structureTypologies,
-          structure.dnaCode
+          structure.id
         );
-        await createOrUpdateAdresses(tx, adresses, structure.dnaCode);
+        await createOrUpdateAdresses(tx, adresses, structure.id);
+        await createOrUpdateAntennes(tx, antennes, structure.id);
         await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
-          structureDnaCode: structure.dnaCode,
+          structureId: structure.id,
         });
         await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
-          structureDnaCode: structure.dnaCode,
+          structureId: structure.id,
         });
-        await createOrUpdateControles(tx, controles, structure.dnaCode);
-        await createOrUpdateForms(tx, forms, structure.dnaCode);
-        await createOrUpdateEvaluations(tx, evaluations, structure.dnaCode);
+        await createOrUpdateControles(tx, controles, structure.id);
+        await createOrUpdateForms(tx, forms, structure.id);
+        await createOrUpdateEvaluations(tx, evaluations, structure.id);
         await createOrUpdateStructureMillesimes(
           tx,
           structureMillesimes,
-          structure.dnaCode
+          structure.id
         );
 
         return updatedStructure;
@@ -430,7 +438,7 @@ const updateOne = async (
     );
   } catch (error) {
     throw new Error(
-      `Impossible de mettre à jour la structure avec le code DNA ${structure.dnaCode}: ${error}`
+      `Impossible de mettre à jour la structure avec l'id ${structure.id}: ${error}`
     );
   }
 };
@@ -469,7 +477,7 @@ const updateStructure = async (
 
   const updatedStructure = await tx.structure.update({
     where: {
-      dnaCode: structure.dnaCode,
+      id: structure.id,
     },
     data: {
       public: convertToPublicType(publicType!),
@@ -516,7 +524,7 @@ const updateStructure = async (
 
 // Only used in e2e tests
 export const createMinimalStructure = async (structure: {
-  dnaCode: string;
+  codeBhasile: string;
   type: StructureType;
   operateurId: number;
   departementAdministratif?: string;
@@ -524,21 +532,23 @@ export const createMinimalStructure = async (structure: {
   adresseAdministrative: string;
   codePostalAdministratif: string;
   communeAdministrative: string;
-}): Promise<void> => {
+}): Promise<Structure> => {
   if (process.env.NODE_ENV === "production") {
     throw new Error("This function is only used in e2e tests");
   }
-  await prisma.structure.upsert({
-    where: { dnaCode: structure.dnaCode },
+  const upsertedStructure = await prisma.structure.upsert({
+    where: { codeBhasile: structure.codeBhasile },
     update: structure,
     create: structure,
   });
+
+  return upsertedStructure;
 };
 
 // Only used in e2e tests
-export const deleteStructure = async (dnaCode: string): Promise<void> => {
+export const deleteStructure = async (codeBhasile: string): Promise<void> => {
   if (process.env.NODE_ENV === "production") {
     throw new Error("This function is only used in e2e tests");
   }
-  await prisma.structure.delete({ where: { dnaCode } });
+  await prisma.structure.delete({ where: { codeBhasile } });
 };

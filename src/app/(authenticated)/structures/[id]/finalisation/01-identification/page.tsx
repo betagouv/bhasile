@@ -1,15 +1,16 @@
 "use client";
 import { ReactElement } from "react";
 
+import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
 import { AutoSave } from "@/app/components/forms/AutoSave";
-import { FieldSetAdresseAdministrative } from "@/app/components/forms/fieldsets/structure/FieldSetAdresseAdministrative";
-import { FieldSetCalendrier } from "@/app/components/forms/fieldsets/structure/FieldSetCalendrier";
-import { FieldSetContacts } from "@/app/components/forms/fieldsets/structure/FieldSetContacts";
-import { FieldSetDescription } from "@/app/components/forms/fieldsets/structure/FieldSetDescription";
-import { FieldSetTypePlaces } from "@/app/components/forms/fieldsets/structure/FieldSetTypePlaces";
+import { FieldSetCalendrier } from "@/app/components/forms/calendrier/FieldSetCalendrier";
+import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
+import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
+import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { FieldSetTypePlaces } from "@/app/components/forms/typePlace/FieldSetTypePlaces";
 import { SubmitError } from "@/app/components/SubmitError";
 import { InformationBar } from "@/app/components/ui/InformationBar";
 import { useFetchState } from "@/app/context/FetchStateContext";
@@ -48,7 +49,7 @@ export default function FinalisationIdentification(): ReactElement {
     data: FinalisationIdentificationAutoSaveFormValues
   ) => {
     const contacts = transformAgentFormContactsToApiContacts(data.contacts);
-    await handleAutoSave({ ...data, contacts, dnaCode: structure.dnaCode });
+    await handleAutoSave({ ...data, contacts, id: structure.id });
   };
 
   const { getFetchState } = useFetchState();
@@ -83,16 +84,19 @@ export default function FinalisationIdentification(): ReactElement {
           description="Veuillez vérifier les informations suivantes transmises par l’opérateur."
         />
 
-        <FieldSetDescription dnaCode={structure.dnaCode} />
+        <FieldSetDescription />
+        <hr />
+
+        <AdresseAdministrativeAndAntennes />
+        <hr />
+
+        <DnaAndFiness />
         <hr />
 
         <FieldSetContacts />
         <hr />
 
         <FieldSetCalendrier />
-        <hr />
-
-        <FieldSetAdresseAdministrative formKind={FormKind.FINALISATION} />
         <hr />
 
         <FieldSetTypePlaces
@@ -102,7 +106,7 @@ export default function FinalisationIdentification(): ReactElement {
 
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureDnaCode={structure.dnaCode}
+            codeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}

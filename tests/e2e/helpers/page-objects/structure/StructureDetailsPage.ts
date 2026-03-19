@@ -3,13 +3,17 @@ import { expect, Locator } from "@playwright/test";
 import { formatDate, getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
-import { getOperateurLabel } from "@/app/utils/structure.util";
+import {
+  getOperateurLabel,
+  isStructureAutorisee,
+} from "@/app/utils/structure.util";
 import { PublicType } from "@/types/structure.type";
 
 import { URLS } from "../../constants";
 import {
   escapeForRegex,
   getActesCategoryLabel,
+  getRepartitionLabel,
   normalizeDocumentCategory,
   parseAddressParts,
 } from "../../shared-utils";
@@ -28,7 +32,11 @@ export class StructureDetailsPage extends BasePage {
   }
 
   async openDescriptionEdit() {
-    await this.openBlockEdit("Description");
+    const block = this.getBlockByTitle("Description");
+    await block.getByRole("button", { name: "Modifier" }).click();
+    await block
+      .getByRole("button", { name: "Modifier Général, contacts et codes" })
+      .click();
   }
 
   async openCalendrierEdit() {
@@ -62,12 +70,7 @@ export class StructureDetailsPage extends BasePage {
 
   async showContacts() {
     const block = this.getBlockByTitle("Description");
-    const hiddenToggle = block.getByRole("button", {
-      name: "Masquer les contacts",
-    });
-    if (!(await hiddenToggle.isVisible())) {
-      await block.getByRole("button", { name: "Voir les contacts" }).click();
-    }
+    await block.getByRole("tab", { name: "Sites et contacts" }).click();
   }
 
   async expectPublic(publicValue: string) {
@@ -96,6 +99,7 @@ export class StructureDetailsPage extends BasePage {
     const descriptionBlock = this.getBlockByTitle("Description");
     await this.expectDescriptionData(descriptionBlock, data, overrides);
     await this.expectContactsData(descriptionBlock, data, overrides);
+    await this.expectAdressesHebergement(descriptionBlock, data, overrides);
     await this.expectTypePlaces(
       overrides.structureTypologies ?? data.structureTypologies ?? []
     );
@@ -134,17 +138,13 @@ export class StructureDetailsPage extends BasePage {
     await expect(
       block.getByText("Date de création", { exact: true }).locator("..")
     ).toContainText(formatDate(data.creationDate));
+    const typeValue = overrides.type ?? data.type;
     await expect(
       block.getByText("Type de structure", { exact: true }).locator("..")
-    ).toContainText(data.type);
+    ).toContainText(typeValue);
     await expect(
-      block.getByText("Code DNA (OFII)", { exact: true }).locator("..")
-    ).toContainText(data.dnaCode);
-    if (data.finessCode) {
-      await expect(
-        block.getByText("Code FINESS", { exact: true }).locator("..")
-      ).toContainText(data.finessCode.replaceAll(" ", ""));
-    }
+      block.getByText("Code Bhasile", { exact: true }).locator("..")
+    ).toContainText(data.codeBhasile);
     const operateurLabel = getOperateurLabel(data.filiale, data.operateur.name);
     if (operateurLabel) {
       await expect(
@@ -158,14 +158,17 @@ export class StructureDetailsPage extends BasePage {
       block.getByText("Vulnérabilité", { exact: true }).locator("..")
     ).toContainText(vulnerabiliteLabel);
 
+    const adresseAdmin =
+      overrides.adresseAdministrative ?? data.adresseAdministrative;
+    const nomValue = overrides.nom ?? data.nom;
     const { addressLine, postalCode, city } = parseAddressParts(
-      data.adresseAdministrative.complete
+      adresseAdmin.complete
     );
     const addressRow = block.getByText("Adresse administrative", {
       exact: true,
     });
-    if (data.nom) {
-      await expect(addressRow.locator("..")).toContainText(data.nom);
+    if (nomValue) {
+      await expect(addressRow.locator("..")).toContainText(nomValue);
     }
     if (addressLine) {
       await expect(addressRow.locator("..")).toContainText(addressLine);
@@ -176,6 +179,49 @@ export class StructureDetailsPage extends BasePage {
     if (city) {
       await expect(addressRow.locator("..")).toContainText(city);
     }
+
+    const dnas = overrides.dnas ?? data.dnas ?? [];
+    const finesses = overrides.finesses ?? data.finesses ?? [];
+    const codesTabLabel = isStructureAutorisee(typeValue)
+      ? "Codes DNA & FINESS"
+      : "Codes DNA";
+    const hasDnasOrFinesses = dnas.length > 0 || finesses.length > 0;
+    if (hasDnasOrFinesses) {
+      await block.getByRole("tab", { name: codesTabLabel }).click();
+      for (const dna of dnas) {
+        if (!dna.code) {
+          continue;
+        }
+        await expect(block).toContainText(dna.code);
+        if (dnas.length > 1 && dna.description) {
+          await expect(block).toContainText(dna.description);
+        }
+      }
+      for (const finess of finesses) {
+        if (!finess.code) {
+          continue;
+        }
+        await expect(block).toContainText(finess.code.replaceAll(" ", ""));
+        if (finesses.length > 1 && finess.description) {
+          await expect(block).toContainText(finess.description);
+        }
+      }
+    }
+
+    const antennes = overrides.antennes ?? data.antennes ?? [];
+    const hasAntennes = antennes.length > 0;
+    if (hasAntennes) {
+      await block.getByRole("tab", { name: "Sites et contacts" }).click();
+      for (const antenne of antennes) {
+        if (antenne.name) {
+          await expect(block).toContainText(antenne.name);
+        }
+        const antenneAddress = antenne.adresseComplete || antenne.searchTerm;
+        if (antenneAddress) {
+          await expect(block).toContainText(antenneAddress);
+        }
+      }
+    }
   }
 
   private async expectContactsData(
@@ -184,22 +230,43 @@ export class StructureDetailsPage extends BasePage {
     overrides: Partial<TestStructureData>
   ) {
     await this.showContacts();
-    const contactPrincipal = {
-      ...data.contactPrincipal,
-      ...overrides.contactPrincipal,
-    };
-    const contactSecondaire = {
-      ...data.contactSecondaire,
-      ...overrides.contactSecondaire,
-    };
+    for (const [index, contact] of (data.contacts ?? []).entries()) {
+      await this.expectContactLine(block, {
+        ...contact,
+        ...overrides.contacts?.[index],
+      });
+    }
+  }
 
-    await this.expectContactLine(block, contactPrincipal);
-    await this.expectContactLine(block, contactSecondaire);
+  private async expectAdressesHebergement(
+    block: Locator,
+    data: TestStructureData,
+    overrides: Partial<TestStructureData>
+  ) {
+    const adresses = overrides.adresses ?? data.adresses ?? [];
+    await block.getByRole("tab", { name: "Adresses d'hébergement" }).click();
+
+    const rows = block.locator("table tbody tr");
+    await expect(rows.first()).toBeVisible();
+
+    for (const adresse of adresses) {
+      const expectedAddress =
+        adresse.adresseComplete || adresse.searchTerm || "";
+      if (expectedAddress) {
+        await expect(block).toContainText(expectedAddress);
+      }
+      await expect(block).toContainText(adresse.placesAutorisees.toString());
+      if (adresse.repartition) {
+        await expect(block).toContainText(
+          getRepartitionLabel(adresse.repartition)
+        );
+      }
+    }
   }
 
   private async expectContactLine(
     block: Locator,
-    contact: TestStructureData["contactPrincipal"]
+    contact: NonNullable<TestStructureData["contacts"]>[number]
   ) {
     if (
       !contact.prenom ||
@@ -210,12 +277,11 @@ export class StructureDetailsPage extends BasePage {
     ) {
       return;
     }
-    const contactLabel = `${contact.prenom} ${contact.nom} (${contact.role})`;
+    await expect(block).toContainText(contact.prenom);
+    await expect(block).toContainText(contact.nom);
+    await expect(block).toContainText(contact.role ?? "");
+    await expect(block).toContainText(contact.email ?? "");
     const formattedPhone = formatPhoneNumber(contact.telephone);
-    await expect(block.getByText(contactLabel, { exact: true })).toBeVisible();
-    await expect(
-      block.getByText(contact.email ?? "", { exact: true })
-    ).toBeVisible();
     if (formattedPhone) {
       await expect(
         block.getByText(new RegExp(escapeForRegex(formattedPhone)))

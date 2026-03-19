@@ -9,7 +9,7 @@ import { formatDateToIsoString } from "@/app/utils/date.util";
 import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 
-import FieldSetActeAdministratif from "../fieldsets/structure/FieldSetActeAdministratif";
+import FieldSetActeAdministratif from "../actesAdministratifs/FieldSetActeAdministratif";
 import InputWithValidation from "../InputWithValidation";
 
 dayjs.extend(customParseFormat);

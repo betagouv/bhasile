@@ -6,6 +6,8 @@
 // - year for DocumentFinancier
 // - granularity for DocumentFinancier
 
+// @ts-nocheck
+
 import "dotenv/config";
 
 import { createPrismaClient } from "@/prisma-client";

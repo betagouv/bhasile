@@ -27,22 +27,8 @@ export const SELECTORS = {
     'input[name="adresseAdministrativeComplete"]',
   ADRESSE_COMPLETE: (index: number) =>
     `input[name="adresses.${index}.adresseComplete"]`,
-
-  // Contact fields
-  CONTACT_PRINCIPAL: {
-    PRENOM: 'input[name="contactPrincipal.prenom"]',
-    NOM: 'input[name="contactPrincipal.nom"]',
-    ROLE: 'input[name="contactPrincipal.role"]',
-    EMAIL: 'input[name="contactPrincipal.email"]',
-    TELEPHONE: 'input[name="contactPrincipal.telephone"]',
-  },
-  CONTACT_SECONDAIRE: {
-    PRENOM: 'input[name="contactSecondaire.prenom"]',
-    NOM: 'input[name="contactSecondaire.nom"]',
-    ROLE: 'input[name="contactSecondaire.role"]',
-    EMAIL: 'input[name="contactSecondaire.email"]',
-    TELEPHONE: 'input[name="contactSecondaire.telephone"]',
-  },
+  ANTENNE_ADRESSE_COMPLETE: (index: number) =>
+    `input[name="antennes.${index}.adresseComplete"]`,
 
   // Search
   SEARCH_INPUT: 'input#structures-search[type="text"]',

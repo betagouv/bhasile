@@ -3,14 +3,10 @@ import { StructureType } from "@/types/structure.type";
 
 import { TestStructureScenario } from "./types";
 
-/**
- * CPH 2: Mixte, multiple addresses, two contacts, mixed docs,
- * recent evaluation, no controls
- */
 export const cph2: TestStructureScenario = {
-  name: "CPH 2 - Mixte, multiple addresses, two contacts, mixed docs, recent eval, no controls",
+  name: "CPH 2 - Mixte, multiple addresses, mixed docs, recent eval, no controls",
   formData: {
-    dnaCode: "C1234",
+    codeBhasile: "BHA-TST-001",
     type: StructureType.CPH,
     cpom: false,
     operateur: {
@@ -19,24 +15,37 @@ export const cph2: TestStructureScenario = {
       id: 1,
     },
     creationDate: "2015-06-01",
-    finessCode: "123456789",
+    finesses: [
+      {
+        code: "123456789",
+        description: "Finess 1",
+      },
+    ],
+    dnas: [
+      {
+        code: "C1234",
+        description: "DNA 1",
+      },
+    ],
     public: "Tout public",
     lgbt: true,
     fvvTeh: true,
-    contactPrincipal: {
-      prenom: "John",
-      nom: "Doe",
-      role: "Directeur·rice",
-      email: "john.doe@example.com",
-      telephone: "+33123456789",
-    },
-    contactSecondaire: {
-      prenom: "Jane",
-      nom: "Deo",
-      role: "Responsable administratif",
-      email: "jane.deo@example.com",
-      telephone: "+33623456789",
-    },
+    contacts: [
+      {
+        prenom: "John",
+        nom: "Doe",
+        role: "Directeur·rice",
+        email: "john.doe@example.com",
+        telephone: "+33123456789",
+      },
+      {
+        prenom: "Jane",
+        nom: "Deo",
+        role: "Responsable administratif",
+        email: "jane.deo@example.com",
+        telephone: "+33623456789",
+      },
+    ],
     debutPeriodeAutorisation: "2020-01-01",
     finPeriodeAutorisation: "2025-12-31",
     nom: "Structure Test",
@@ -366,7 +375,7 @@ export const cph2: TestStructureScenario = {
     public: "Famille",
     lgbt: false,
     fvvTeh: true,
-    contactPrincipal: { email: "modif-cph2@example.com" },
+    contacts: [{ email: "modif-cph2@example.com" }],
     notes: "Notes modification CPH 2 - mixte.",
     debutPeriodeAutorisation: "2020-09-15",
     finPeriodeAutorisation: "2026-09-14",

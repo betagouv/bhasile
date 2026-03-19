@@ -48,7 +48,10 @@ export abstract class BasePage {
     timeout: number = TIMEOUTS.NAVIGATION
   ): Promise<void> {
     await this.page.click(SELECTORS.SUBMIT_BUTTON);
-    await this.page.waitForURL(expectedUrl, { timeout });
+    await this.page.waitForURL(expectedUrl, {
+      timeout,
+      waitUntil: "commit",
+    });
   }
 
   protected async submitByButtonText(
@@ -58,7 +61,10 @@ export abstract class BasePage {
   ): Promise<void> {
     const submitButton = this.page.getByRole("button", { name: buttonText });
     await submitButton.click();
-    await this.page.waitForURL(expectedUrl, { timeout });
+    await this.page.waitForURL(expectedUrl, {
+      timeout,
+      waitUntil: "commit",
+    });
   }
 
   protected async submitAndWaitForNavigation(

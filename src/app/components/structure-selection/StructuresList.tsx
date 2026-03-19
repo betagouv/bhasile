@@ -21,18 +21,18 @@ export const StructuresList = ({ structures, control }: Props) => {
           </div>
         )}
         {structures?.map((structure) => (
-          <div key={structure.dnaCode}>
+          <div key={structure.codeBhasile}>
             <input
               type="radio"
-              id={structure.dnaCode}
+              id={structure.codeBhasile}
               name="structure"
-              value={structure.dnaCode}
-              checked={field.value?.dnaCode === structure.dnaCode}
+              value={structure.codeBhasile}
+              checked={field.value?.codeBhasile === structure.codeBhasile}
               onChange={() => {
                 field.onChange(structure);
               }}
               onClick={() => {
-                if (structure.dnaCode === field.value?.dnaCode) {
+                if (structure.codeBhasile === field.value?.codeBhasile) {
                   field.onChange(undefined);
                 }
               }}
@@ -43,11 +43,11 @@ export const StructuresList = ({ structures, control }: Props) => {
             <label
               className={cn(
                 "p-4 rounded-sm border-2 flex gap-4 relative bg-default-grey-hover",
-                field.value?.dnaCode === structure.dnaCode
+                field.value?.codeBhasile === structure.codeBhasile
                   ? "border-action-high-blue-france"
                   : "border-white"
               )}
-              htmlFor={structure.dnaCode}
+              htmlFor={structure.codeBhasile}
             >
               <span className="fr-icon-community-line fr-icon--md text-title-blue-france" />
               <div>
@@ -55,12 +55,12 @@ export const StructuresList = ({ structures, control }: Props) => {
                   {structure.nom}
                 </strong>
                 <div className="text-sm ">
-                  {structure.dnaCode} - {structure.type},{" "}
+                  {structure.codeBhasile} - {structure.type},{" "}
                   {structure.operateur.name},{" "}
                   {structure.departementAdministratif}
                 </div>
               </div>
-              {field.value?.dnaCode === structure.dnaCode && (
+              {field.value?.codeBhasile === structure.codeBhasile && (
                 <span className="absolute right-6 top-1/2 -translate-y-1/2 fr-icon-check-line fr-icon--md text-title-blue-france" />
               )}
             </label>

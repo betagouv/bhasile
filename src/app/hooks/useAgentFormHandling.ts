@@ -87,7 +87,7 @@ export const useAgentFormHandling = ({
     });
 
     await updateStructure({
-      dnaCode: structure.dnaCode,
+      id: structure.id,
       forms,
     });
 
@@ -121,7 +121,7 @@ export const useAgentFormHandling = ({
     });
 
     await updateStructure({
-      dnaCode: structure.dnaCode,
+      id: structure.id,
       forms,
     });
   };

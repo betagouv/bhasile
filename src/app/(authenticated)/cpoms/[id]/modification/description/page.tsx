@@ -1,7 +1,7 @@
 "use client";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
-import { FieldSetGeneral } from "@/app/components/forms/fieldsets/cpom/FieldSetGeneral";
+import { FieldSetGeneral } from "@/app/components/forms/cpom/FieldSetGeneral";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
@@ -46,14 +46,11 @@ export default function CpomModificationDescription() {
         <CustomNotice
           severity="info"
           title=""
-          description="Les dates de début et de fin du CPOM se modifient dans le bloc “Documents”."
+          description="Les dates de début et de fin du CPOM se modifient dans le bloc “Actes administratifs”."
         />
         <FieldSetGeneral />
         {saveState === FetchState.ERROR && (
-          <SubmitError
-            structureDnaCode={String(cpom.id)}
-            backendError={backendError}
-          />
+          <SubmitError cpomId={cpom.id} backendError={backendError} />
         )}
       </FormWrapper>
     </>

@@ -44,7 +44,7 @@ export const StructureLine = ({
           legend=""
           options={[
             {
-              label: structure.dnaCode,
+              label: structure.codeBhasile,
               nativeInputProps: {
                 name: "structures",
                 value: structure.id,

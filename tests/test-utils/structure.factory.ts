@@ -18,7 +18,7 @@ export const createStructure = ({
 }: CreateStructuresArgs): StructureApiType => {
   return {
     id,
-    dnaCode: `C000${id}`,
+    codeBhasile: `BHA-${id}`,
     operateur: { structureDnaCode: `C000${id}`, id: 1, name: "Adoma" },
     filiale: undefined,
     type: type ?? StructureType.CADA,

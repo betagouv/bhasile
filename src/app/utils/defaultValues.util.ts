@@ -1,26 +1,34 @@
 import {
   getRealCreationYear,
   getRepartition,
+  isStructureMultiAntenne,
+  isStructureMultiDna,
 } from "@/app/utils/structure.util";
 import { ContactApiType } from "@/schemas/api/contact.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { StructureApiType } from "@/schemas/api/structure.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
+import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 import { anyBudgetFormValues } from "@/schemas/forms/base/budget.schema";
 import { ControleFormValues } from "@/schemas/forms/base/controle.schema";
+import { DnaStructureFormValues } from "@/schemas/forms/base/dna.schema";
 import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { EvaluationFormValues } from "@/schemas/forms/base/evaluation.schema";
+import { FinessFormValues } from "@/schemas/forms/base/finess.schema";
 import { structureTypologieSchemaTypeFormValues } from "@/schemas/forms/base/structureTypologie.schema";
 import { Repartition } from "@/types/adresse.type";
 import { PublicType } from "@/types/structure.type";
 
 import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
 import { transformApiAdressesToFormAdresses } from "./adresse.util";
+import { transformApiAntennesToFormAntennes } from "./antenne.util";
 import { getBudgetsDefaultValues } from "./budget.util";
 import { getControlesDefaultValues } from "./controle.util";
 import { getStructureCpomDefaultValues } from "./cpom.util";
+import { transformApiDnaStructuresToFormDnaStructures } from "./dna.util";
 import { getEvaluationsDefaultValues } from "./evaluation.util";
+import { transformApiFinessesToFormFinesses } from "./finess.util";
 import { isStructureAutorisee } from "./structure.util";
 import { getStructureMillesimeDefaultValues } from "./structureMillesime.util";
 import { getStructureTypologyDefaultValues } from "./structureTypology.util";
@@ -33,12 +41,24 @@ export const getDefaultValues = ({
   const structureCreationYear = getRealCreationYear(structure);
 
   const isAutorisee = isStructureAutorisee(structure.type);
+  const isMultiAntenne = isStructureMultiAntenne(structure);
+  const isMultiDna = isStructureMultiDna(structure);
   const repartition = getRepartition(structure);
+
+  const adresses = transformApiAdressesToFormAdresses(structure.adresses);
+
+  const antennes = transformApiAntennesToFormAntennes(structure.antennes);
 
   const budgets = getBudgetsDefaultValues(
     structure?.budgets || [],
     structureCreationYear
   );
+
+  const dnaStructures = transformApiDnaStructuresToFormDnaStructures(
+    structure.dnaStructures
+  );
+
+  const finesses = transformApiFinessesToFormFinesses(structure.finesses);
 
   const structureTypologies = getStructureTypologyDefaultValues(
     structure?.structureTypologies || [],
@@ -61,6 +81,10 @@ export const getDefaultValues = ({
     nom: structure.nom ?? "",
     operateur: structure.operateur ?? undefined,
     creationDate: structure.creationDate ?? "",
+    isMultiAntenne,
+    isMultiDna,
+    dnaStructures,
+    finesses,
     debutPeriodeAutorisation: isAutorisee
       ? (structure.debutPeriodeAutorisation ?? undefined)
       : undefined,
@@ -88,7 +112,8 @@ export const getDefaultValues = ({
     communeAdministrative: structure.communeAdministrative || "",
     departementAdministratif: structure.departementAdministratif || "",
     typeBati: repartition,
-    adresses: transformApiAdressesToFormAdresses(structure.adresses),
+    adresses,
+    antennes,
     date303: structure.date303 ?? undefined,
     budgets,
     structureTypologies,
@@ -109,7 +134,8 @@ type StructureDefaultValues = Omit<
   | "finPeriodeAutorisation"
   | "debutConvention"
   | "finConvention"
-  | "finessCode"
+  | "finesses"
+  | "dnaStructures"
   | "public"
   | "filiale"
   | "contacts"
@@ -119,6 +145,7 @@ type StructureDefaultValues = Omit<
   | "communeAdministrative"
   | "departementAdministratif"
   | "adresses"
+  | "antennes"
   | "actesAdministratifs"
   | "documentsFinanciers"
   | "controles"
@@ -129,11 +156,14 @@ type StructureDefaultValues = Omit<
 > & {
   creationDate: string;
   nom: string;
+  isMultiAntenne: boolean;
+  isMultiDna: boolean;
   debutPeriodeAutorisation?: string;
   finPeriodeAutorisation?: string;
   debutConvention?: string;
   finConvention?: string;
-  finessCode?: string;
+  finesses: FinessFormValues[];
+  dnaStructures: DnaStructureFormValues[];
   public?: PublicType;
   filiale?: string;
   contacts: ContactApiType[];
@@ -144,6 +174,7 @@ type StructureDefaultValues = Omit<
   departementAdministratif: string;
   typeBati: Repartition;
   adresses: FormAdresse[];
+  antennes: AntenneFormValues[];
   documentsFinanciers: DocumentFinancierFlexibleFormValues[];
   actesAdministratifs: ActeAdministratifFormValues[];
   controles: ControleFormValues[];

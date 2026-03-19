@@ -57,7 +57,7 @@ export default function FinalisationQualite() {
 
     await handleAutoSave({
       actesAdministratifs,
-      dnaCode: structure.dnaCode,
+      id: structure.id,
     });
   };
 
@@ -101,7 +101,7 @@ export default function FinalisationQualite() {
 
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureDnaCode={structure.dnaCode}
+            codeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}

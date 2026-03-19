@@ -31,12 +31,7 @@ export const getStructureOrderBy = (
   column: StructureColumn,
   direction: "asc" | "desc"
 ): Prisma.StructuresOrderOrderByWithRelationInput[] => {
-  return [
-    { [column as StructureColumn]: direction },
-    { departementAdministratif: "asc" },
-    { operateur: "asc" },
-    { type: "asc" },
-  ];
+  return [{ [column as StructureColumn]: direction }, { codeBhasile: "asc" }];
 };
 
 export const getStructureSearchWhere = ({
@@ -103,7 +98,7 @@ export const getStructureSearchWhere = ({
   if (search) {
     where.OR = [
       {
-        dnaCode: {
+        codeBhasile: {
           contains: search,
           mode: "insensitive",
         },

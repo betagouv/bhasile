@@ -13,15 +13,15 @@ export function useRedirectStructureCreation() {
   const params = useParams();
   const pathname = usePathname();
   const router = useRouter();
-  const dnaCode = params.dnaCode as string;
+  const id = params.id as string;
 
   const { currentValue: localStorageIdentificationValues } = useLocalStorage<
     Partial<AjoutIdentificationFormValues>
-  >(`ajout-structure-${dnaCode}-identification`, {});
+  >(`ajout-structure-${id}-identification`, {});
 
   const { currentValue: localStorageDocumentsValues } = useLocalStorage<
     Partial<DocumentsFinanciersFlexibleFormValues>
-  >(`ajout-structure-${dnaCode}-documents`, {});
+  >(`ajout-structure-${id}-documents`, {});
 
   // Redirect if we did not go through the selection page
   useEffect(() => {
@@ -35,18 +35,18 @@ export function useRedirectStructureCreation() {
     localStorageDocumentsValues,
     localStorageIdentificationValues,
     router,
-    dnaCode,
+    id,
   ]);
 
   // Redirect if the structure already exists
   useEffect(() => {
     async function checkExistence() {
-      if (!dnaCode) {
+      if (!id) {
         return;
       }
 
       try {
-        const result = await fetch(`/api/structures/dna/${dnaCode}`, {
+        const result = await fetch(`/api/structures/${id}`, {
           cache: "no-store",
         });
 
@@ -58,7 +58,9 @@ export function useRedirectStructureCreation() {
         const structure: StructureApiType | null = await result.json();
 
         if (structure?.forms && structure?.forms?.length > 0) {
-          router.replace(`/ajout-structure/existe-deja?dnaCode=${dnaCode}`);
+          router.replace(
+            `/ajout-structure/existe-deja?codeBhasile=${structure.codeBhasile}`
+          );
         }
       } catch (error) {
         console.error("Error checking for existing structure:", error);
@@ -66,5 +68,5 @@ export function useRedirectStructureCreation() {
     }
 
     checkExistence();
-  }, [dnaCode, pathname, router]);
+  }, [id, pathname, router]);
 }

@@ -1,6 +1,9 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { ActeAdministratif, ActeAdministratifCategory } from "@/generated/prisma/client";
+import {
+  ActeAdministratif,
+  ActeAdministratifCategory,
+} from "@/generated/prisma/client";
 
 import { createFakeFileUpload } from "./file-upload.seed";
 
@@ -10,7 +13,7 @@ export type ActeAdministratifWithFileUploads = ActeAdministratif & {
 
 export const createFakeActeAdministratif = (): Omit<
   ActeAdministratifWithFileUploads,
-  "id" | "structureDnaCode" | "cpomId"
+  "id" | "structureDnaCode" | "cpomId" | "structureId"
 > => {
   return {
     date: faker.date.past(),

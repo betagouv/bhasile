@@ -3,14 +3,10 @@ import { StructureType } from "@/types/structure.type";
 
 import { TestStructureScenario } from "./types";
 
-/**
- * HUDA 1: Collectif, single address, one contact, all docs at ajout,
- * old evaluation, no controls, with convention dates, minimal finances
- */
 export const huda1: TestStructureScenario = {
-  name: "HUDA 1 - Collectif, single address, one contact, all docs, old eval, no controls",
+  name: "HUDA 1 - Multi dna, collectif, single address, all docs, old eval, no controls",
   formData: {
-    dnaCode: "C1234",
+    codeBhasile: "BHA-TST-001",
     type: StructureType.HUDA,
     cpom: false,
     operateur: {
@@ -20,15 +16,34 @@ export const huda1: TestStructureScenario = {
     },
     creationDate: "2015-06-01",
     public: "Tout public",
+    dnas: [
+      {
+        code: "C1234",
+        description: "DNA 1",
+      },
+      {
+        code: "C5678",
+        description: "DNA 2",
+      },
+    ],
     lgbt: true,
     fvvTeh: true,
-    contactPrincipal: {
-      prenom: "John",
-      nom: "Doe",
-      role: "Directeur·rice",
-      email: "john.doe@example.com",
-      telephone: "+33123456789",
-    },
+    contacts: [
+      {
+        prenom: "John",
+        nom: "Doe",
+        role: "Directeur·rice",
+        email: "john.doe@example.com",
+        telephone: "+33123456789",
+      },
+      {
+        prenom: "Jane",
+        nom: "Deo",
+        role: "Responsable administratif",
+        email: "jane.deo@example.com",
+        telephone: "+33623456789",
+      },
+    ],
     debutConvention: "2020-01-01",
     finConvention: "2023-12-31",
     nom: "Structure Test",
@@ -264,7 +279,7 @@ export const huda1: TestStructureScenario = {
     public: "Personnes isolées",
     lgbt: true,
     fvvTeh: false,
-    contactPrincipal: { email: "modif-huda1@example.com" },
+    contacts: [{ email: "modif-huda1@example.com" }],
     notes: "Notes modification HUDA 1 - convention.",
     debutConvention: "2021-03-01",
     finConvention: "2024-09-30",

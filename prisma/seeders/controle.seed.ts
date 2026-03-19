@@ -10,7 +10,7 @@ export type ControleWithFileUploads = Controle & {
 
 export const createFakeControle = (): Omit<
   ControleWithFileUploads,
-  "id" | "structureDnaCode"
+  "id" | "structureDnaCode" | "structureId"
 > => {
   return {
     date: faker.date.past(),

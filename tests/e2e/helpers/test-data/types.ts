@@ -4,7 +4,8 @@ import { ControleType } from "@/types/controle.type";
 import { StructureType } from "@/types/structure.type";
 
 export type TestStructureData = {
-  dnaCode: string;
+  id?: number;
+  codeBhasile: string;
   type: StructureType;
   cpom: boolean;
   filiale?: string;
@@ -14,24 +15,25 @@ export type TestStructureData = {
     id: number;
   };
   creationDate: string;
-  finessCode?: string;
+  finesses?: Array<{
+    code: string;
+    description: string;
+  }>;
+  dnas?: Array<{
+    code: string;
+    description: string;
+  }>;
   public: string;
   lgbt: boolean;
   fvvTeh: boolean;
-  contactPrincipal: {
+  contacts?: Array<{
     prenom?: string;
     nom?: string;
     role?: string;
+    perimetre?: string;
     email?: string;
     telephone?: string;
-  };
-  contactSecondaire?: {
-    prenom?: string;
-    nom?: string;
-    role?: string;
-    email?: string;
-    telephone?: string;
-  };
+  }>;
   debutPeriodeAutorisation?: string;
   finPeriodeAutorisation?: string;
   debutConvention?: string;
@@ -52,6 +54,11 @@ export type TestStructureData = {
     searchTerm: string;
     placesAutorisees: number;
     repartition?: Repartition;
+  }>;
+  antennes?: Array<{
+    adresseComplete: string;
+    searchTerm: string;
+    name: string;
   }>;
   structureTypologies: Array<{
     placesAutorisees: number;

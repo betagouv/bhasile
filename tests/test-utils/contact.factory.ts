@@ -1,5 +1,5 @@
 import { ContactApiType } from "@/schemas/api/contact.schema";
-import { ContactType } from "@/types/contact.type";
+
 export const createContact = ({
   id,
   prenom,
@@ -7,7 +7,6 @@ export const createContact = ({
   telephone,
   email,
   role,
-  type,
 }: CreateContactArgs): ContactApiType => {
   return {
     id: id ?? 1,
@@ -16,7 +15,6 @@ export const createContact = ({
     telephone: telephone ?? "0123456789",
     email: email ?? "john.doe@example.com",
     role: role ?? "Directeur",
-    type: type ?? ContactType.PRINCIPAL,
   };
 };
 
@@ -27,5 +25,4 @@ type CreateContactArgs = {
   telephone?: string;
   email?: string;
   role?: string;
-  type?: ContactType;
 };

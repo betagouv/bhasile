@@ -83,7 +83,7 @@ export class FormHelper {
    * Fill contact information
    */
   async fillContact(
-    prefix: string,
+    index: number,
     contact: {
       prenom?: string;
       nom?: string;
@@ -92,21 +92,36 @@ export class FormHelper {
       telephone?: string;
     }
   ): Promise<void> {
+    if (index >= 2) {
+      await this.page
+        .getByRole("button", { name: /Ajouter un contact/i })
+        .click();
+    }
+
     if (contact.prenom) {
-      await this.fillInput(`input[name="${prefix}.prenom"]`, contact.prenom);
+      await this.fillInput(
+        `input[name="contacts.${index}.prenom"]`,
+        contact.prenom
+      );
     }
     if (contact.nom) {
-      await this.fillInput(`input[name="${prefix}.nom"]`, contact.nom);
+      await this.fillInput(`input[name="contacts.${index}.nom"]`, contact.nom);
     }
     if (contact.role) {
-      await this.fillInput(`input[name="${prefix}.role"]`, contact.role);
+      await this.fillInput(
+        `input[name="contacts.${index}.role"]`,
+        contact.role
+      );
     }
     if (contact.email) {
-      await this.fillInput(`input[name="${prefix}.email"]`, contact.email);
+      await this.fillInput(
+        `input[name="contacts.${index}.email"]`,
+        contact.email
+      );
     }
     if (contact.telephone) {
       await this.fillInput(
-        `input[name="${prefix}.telephone"]`,
+        `input[name="contacts.${index}.telephone"]`,
         contact.telephone
       );
     }

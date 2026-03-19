@@ -10,6 +10,11 @@ import { FinalisationNotesPage } from "./page-objects/finalisation/FinalisationN
 import { StructuresListPage } from "./page-objects/structure/StructuresListPage";
 import { FailingStep, TestStructureData } from "./test-data/types";
 
+type TestStructureDataWithCodeBhasile = Partial<TestStructureData> & {
+  codeBhasile: string;
+  id: number;
+};
+
 export type CompleteFinalisationFlowResult =
   | { completed: true }
   | { stoppedAtFailingStep: true };
@@ -22,15 +27,15 @@ export type CompleteFinalisationFlowResult =
  */
 export async function completeFinalisationFlow(
   page: Page,
-  structureId: number,
-  formData: TestStructureData,
-  dnaCode: string,
+  formData: TestStructureDataWithCodeBhasile,
   failingStep?: FailingStep
 ): Promise<CompleteFinalisationFlowResult> {
   const structuresListPage = new StructuresListPage(page);
   await structuresListPage.navigate();
-  await structuresListPage.searchByDna(dnaCode);
-  await structuresListPage.startFinalisationForDna(dnaCode);
+  await structuresListPage.searchByCodeBhasile(formData.codeBhasile);
+  await structuresListPage.startFinalisationForCodeBhasile(
+    formData.codeBhasile
+  );
 
   const finalisationNotesPage = new FinalisationNotesPage(page);
   const finalisationSteps = [
@@ -63,8 +68,8 @@ export async function completeFinalisationFlow(
   for (const { page: stepPage, stepKey } of finalisationSteps) {
     const shouldContinue = await runFinalisationStep(
       stepPage,
-      structureId,
-      formData,
+      formData.id,
+      formData as TestStructureData,
       failingStep,
       stepKey
     );
@@ -73,6 +78,6 @@ export async function completeFinalisationFlow(
     }
   }
 
-  await finalisationNotesPage.finalizeAndGoToStructure(structureId);
+  await finalisationNotesPage.finalizeAndGoToStructure(formData.id);
   return { completed: true };
 }

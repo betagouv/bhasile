@@ -2,18 +2,22 @@ import { fakerFR as faker } from "@faker-js/faker";
 
 import { Activite } from "@/generated/prisma/client";
 
-export const createFakeActivites = (): Omit<
-  Activite,
-  "id" | "structureDnaCode"
->[] => {
+export const createFakeActivites = ({
+  structureId,
+  dnaCode,
+}: CreateFakeActivitesArgs): Omit<Activite, "id" | "structureDnaCode">[] => {
   return Array.from(Array(12).keys()).map((month) =>
     createFakeActivite({
+      structureId,
+      dnaCode,
       date: new Date(2025, month, 1, 13),
     })
   );
 };
 
 export const createFakeActivite = ({
+  structureId,
+  dnaCode,
   date,
 }: CreateFakeActiviteArgs): Omit<Activite, "id" | "structureDnaCode"> => {
   const placesAutorisees = faker.number.int({ min: 10, max: 200 });
@@ -31,6 +35,8 @@ export const createFakeActivite = ({
     desinsectisation + remiseEnEtat + sousOccupation + travaux;
 
   return {
+    structureId,
+    dnaCode,
     date,
     desinsectisation,
     placesAutorisees,
@@ -48,4 +54,13 @@ export const createFakeActivite = ({
   };
 };
 
-type CreateFakeActiviteArgs = { date: Date };
+type CreateFakeActiviteArgs = {
+  date: Date;
+  structureId: number;
+  dnaCode: string;
+};
+
+type CreateFakeActivitesArgs = {
+  structureId: number;
+  dnaCode: string;
+};

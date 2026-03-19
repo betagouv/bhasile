@@ -1,10 +1,10 @@
 "use client";
 
 import { AutoSave } from "@/app/components/forms/AutoSave";
-import { FieldSetNotes } from "@/app/components/forms/fieldsets/structure/FieldSetNotes";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { FieldSetNotes } from "@/app/components/forms/notes/FieldSetNotes";
 import { NoteDisclaimer } from "@/app/components/forms/notes/NoteDisclaimer";
 import { SubmitError } from "@/app/components/SubmitError";
 import { InformationBar } from "@/app/components/ui/InformationBar";
@@ -40,7 +40,7 @@ export default function FinalisationNotes() {
     useAgentFormHandling({ currentStep });
 
   const onAutoSave = async (data: NotesAutoSaveFormValues) => {
-    await handleAutoSave({ ...data, dnaCode: structure.dnaCode });
+    await handleAutoSave({ ...data, id: structure.id });
   };
 
   const { getFetchState } = useFetchState();
@@ -76,7 +76,7 @@ export default function FinalisationNotes() {
         <FieldSetNotes />
         {saveState === FetchState.ERROR && (
           <SubmitError
-            structureDnaCode={structure.dnaCode}
+            codeBhasile={structure.codeBhasile}
             backendError={backendError}
           />
         )}

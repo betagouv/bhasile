@@ -5,9 +5,12 @@ import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import autoAnimate from "@formkit/auto-animate";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
+import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
+import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
+import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
@@ -18,7 +21,6 @@ import {
   AjoutIdentificationFormValues,
   ajoutIdentificationSchema,
 } from "@/schemas/forms/ajout/ajoutIdentification.schema";
-import { ContactType } from "@/types/contact.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 
 export default function FormIdentification() {
@@ -27,10 +29,10 @@ export default function FormIdentification() {
   const isEditMode = searchParams.get("mode") === "edit";
 
   const previousRoute = "/ajout-structure/selection";
-  const resetRoute = `/ajout-structure/${params.dnaCode}/01-identification`;
+  const resetRoute = `/ajout-structure/${params.id}/01-identification`;
   const nextRoute = isEditMode
-    ? `/ajout-structure/${params.dnaCode}/05-verification`
-    : `/ajout-structure/${params.dnaCode}/02-adresses`;
+    ? `/ajout-structure/${params.id}/05-verification`
+    : `/ajout-structure/${params.id}/02-adresses`;
   const filialesContainerRef = useRef(null);
 
   useEffect(() => {
@@ -39,48 +41,14 @@ export default function FormIdentification() {
     }
   }, [filialesContainerRef]);
 
-  const defaultType = useMemo(() => {
-    if (!params.dnaCode) {
-      return undefined;
-    }
-    const dnaCode = params.dnaCode as string;
-
-    if (dnaCode.startsWith("C")) {
-      return StructureType.CADA;
-    }
-    if (dnaCode.startsWith("H")) {
-      return StructureType.HUDA;
-    }
-    if (dnaCode.startsWith("K")) {
-      return StructureType.CAES;
-    }
-    if (dnaCode.startsWith("R")) {
-      return StructureType.CPH;
-    }
-    return undefined;
-  }, [params.dnaCode]);
-
-  const defaultValues = useMemo(() => {
-    return {
-      type: defaultType,
-    };
-  }, [defaultType]);
-
   const { currentValue: localStorageValues } = useLocalStorage<
     Partial<AjoutIdentificationFormValues>
-  >(`ajout-structure-${params.dnaCode}-identification`, {});
-
-  const mergedDefaultValues = useMemo(() => {
-    return {
-      ...defaultValues,
-      ...localStorageValues,
-    };
-  }, [defaultValues, localStorageValues]);
+  >(`ajout-structure-${params.id}-identification`, {});
 
   const [isManagedByAFiliale, setIsManagedByAFiliale] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [type, setType] = useState<string | undefined>(
-    localStorageValues?.type ?? defaultType
+    localStorageValues?.type
   );
 
   useEffect(() => {
@@ -89,12 +57,6 @@ export default function FormIdentification() {
       setIsInitialized(true);
     }
   }, [localStorageValues, isInitialized]);
-
-  // Synchronise type avec localStorage OU defaultType, à chaque changement de dnaCode
-  useEffect(() => {
-    // Quand le dnaCode ou le localStorage change, on recalcule type
-    setType(localStorageValues?.type ?? defaultType);
-  }, [localStorageValues?.type, defaultType]);
 
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
@@ -108,11 +70,11 @@ export default function FormIdentification() {
   return (
     <FormWrapper
       schema={ajoutIdentificationSchema}
-      localStorageKey={`ajout-structure-${params.dnaCode}-identification`}
+      localStorageKey={`ajout-structure-${params.id}-identification`}
       nextRoute={nextRoute}
       resetRoute={resetRoute}
       mode="onBlur"
-      defaultValues={mergedDefaultValues}
+      defaultValues={localStorageValues}
       submitButtonText={
         isEditMode ? "Modifier et revenir à la vérification" : "Étape suivante"
       }
@@ -132,11 +94,19 @@ export default function FormIdentification() {
                 Description
               </legend>
 
-              <input
+              <InputWithValidation
+                name="id"
+                id="id"
+                label=""
+                control={control}
                 type="hidden"
-                id="dnaCode"
-                {...register("dnaCode")}
-                defaultValue={params.dnaCode}
+              />
+              <InputWithValidation
+                name="codeBhasile"
+                id="codeBhasile"
+                label=""
+                control={control}
+                type="hidden"
               />
 
               <div className="flex">
@@ -197,15 +167,6 @@ export default function FormIdentification() {
                   label="Date de création de la structure"
                   id="creationDate"
                 />
-                {isStructureAutorisee(type) && (
-                  <InputWithValidation
-                    name="finessCode"
-                    control={control}
-                    type="text"
-                    label="Code FINESS"
-                    id="finessCode"
-                  />
-                )}
                 <SelectWithValidation
                   name="public"
                   control={control}
@@ -254,122 +215,15 @@ export default function FormIdentification() {
 
             <hr />
 
-            <h2 className="text-xl font-bold mb-0 text-title-blue-france">
-              Contacts
-            </h2>
+            <AdresseAdministrativeAndAntennes />
 
-            <CustomNotice
-              severity="info"
-              title=""
-              className="rounded [&_p]:flex [&_p]:items-center"
-              description="Veuillez renseigner en contact principal la personne responsable de la structure et en contact secondaire la personne en charge du suivi opérationnel et/ou de la gestion budgétaire et financière."
-            />
+            <hr />
 
-            <fieldset className="flex flex-col gap-6">
-              <legend className="text-lg font-bold mb-4 text-title-blue-france">
-                Contact principal
-              </legend>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <InputWithValidation
-                  name="contactPrincipal.type"
-                  id="contactPrincipal.type"
-                  control={control}
-                  type="hidden"
-                  label="type"
-                  defaultValue={ContactType.PRINCIPAL}
-                />
-                <InputWithValidation
-                  name="contactPrincipal.prenom"
-                  id="contactPrincipal.prenom"
-                  control={control}
-                  type="text"
-                  label="Prénom"
-                />
-                <InputWithValidation
-                  name="contactPrincipal.nom"
-                  id="contactPrincipal.nom"
-                  control={control}
-                  type="text"
-                  label="Nom"
-                />
-                <InputWithValidation
-                  name="contactPrincipal.role"
-                  id="contactPrincipal.role"
-                  control={control}
-                  type="text"
-                  label="Fonction"
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputWithValidation
-                  name="contactPrincipal.email"
-                  id="contactPrincipal.email"
-                  control={control}
-                  type="email"
-                  label="Email"
-                />
-                <InputWithValidation
-                  name="contactPrincipal.telephone"
-                  id="contactPrincipal.telephone"
-                  control={control}
-                  type="tel"
-                  label="Téléphone"
-                />
-              </div>
-            </fieldset>
+            <DnaAndFiness />
 
-            <fieldset className="flex flex-col gap-6">
-              <legend className="text-lg font-bold mb-4 text-title-blue-france">
-                Contact secondaire
-              </legend>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <InputWithValidation
-                  name="contactSecondaire.type"
-                  id="contactSecondaire.type"
-                  control={control}
-                  type="hidden"
-                  label="type"
-                  defaultValue={ContactType.SECONDAIRE}
-                />
-                <InputWithValidation
-                  name="contactSecondaire.prenom"
-                  id="contactSecondaire.prenom"
-                  control={control}
-                  type="text"
-                  label="Prénom"
-                />
-                <InputWithValidation
-                  name="contactSecondaire.nom"
-                  id="contactSecondaire.nom"
-                  control={control}
-                  type="text"
-                  label="Nom"
-                />
-                <InputWithValidation
-                  name="contactSecondaire.role"
-                  id="contactSecondaire.role"
-                  control={control}
-                  type="text"
-                  label="Fonction"
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputWithValidation
-                  name="contactSecondaire.email"
-                  id="contactSecondaire.email"
-                  control={control}
-                  type="email"
-                  label="Email"
-                />
-                <InputWithValidation
-                  name="contactSecondaire.telephone"
-                  id="contactSecondaire.telephone"
-                  control={control}
-                  type="tel"
-                  label="Téléphone"
-                />
-              </div>
-            </fieldset>
+            <hr />
+
+            <FieldSetContacts />
 
             <hr />
             <div className="flex flex-col gap-2">

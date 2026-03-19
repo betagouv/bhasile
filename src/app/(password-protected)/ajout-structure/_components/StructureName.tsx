@@ -1,15 +1,20 @@
 "use client";
 
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
-import { AjoutAdressesFormValues } from "@/schemas/forms/ajout/ajoutAdresses.schema";
+import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 
-export const StructureName = ({ dnaCode }: Props) => {
+export const StructureName = ({ id }: Props) => {
   const { currentValue } = useLocalStorage(
-    `ajout-structure-${dnaCode}-adresses`,
-    {} as Partial<AjoutAdressesFormValues>
+    `ajout-structure-${id}-identification`,
+    {} as Partial<AjoutIdentificationFormValues>
   );
 
-  return currentValue?.nom ? <strong>{currentValue.nom} - </strong> : "";
+  return (
+    <>
+      {currentValue?.nom ? <strong>{currentValue.nom} - </strong> : ""}
+      {currentValue?.codeBhasile}
+    </>
+  );
 };
 
-type Props = { dnaCode: string | string[] };
+type Props = { id: string | string[] };
