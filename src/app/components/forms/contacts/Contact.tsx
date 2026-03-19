@@ -1,6 +1,6 @@
-import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Control, FieldValues } from "react-hook-form";
 
+import { DeleteButton } from "../../common/DeleteButton";
 import InputWithValidation from "../InputWithValidation";
 
 export const Contact = ({
@@ -10,7 +10,7 @@ export const Contact = ({
   index,
 }: Props) => {
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-6 items-center">
       <fieldset className="flex flex-col gap-6 border border-default-grey rounded-xl p-8 flex-1">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <InputWithValidation
@@ -70,16 +70,15 @@ export const Contact = ({
           />
         </div>
       </fieldset>
-      {handleDelete && (
-        <Button
-          iconId="fr-icon-delete-bin-line"
-          priority="tertiary no outline"
-          size="small"
-          className="!rounded-full !bg-white"
-          title="Supprimer le contact"
-          onClick={() => handleDelete(index)}
-        />
-      )}
+      <div className="w-8">
+        {handleDelete && (
+          <DeleteButton
+            onClick={() => handleDelete(index)}
+            size="small"
+            backgroundColor="grey"
+          />
+        )}
+      </div>
     </div>
   );
 };

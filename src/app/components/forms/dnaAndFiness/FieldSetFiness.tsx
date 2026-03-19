@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 
 import { FinessFormValues } from "@/schemas/forms/base/finess.schema";
 
+import { DeleteButton } from "../../common/DeleteButton";
 import InputWithValidation from "../InputWithValidation";
 
 const emptyFiness: FinessFormValues = {
@@ -41,7 +42,7 @@ export const FieldSetFiness = () => {
         Codes FINESS
       </legend>
       {finesses.map((_, index) => (
-        <div key={index} className="flex gap-6">
+        <div key={index} className="flex gap-6 items-end">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1">
             <div className="flex flex-col gap-1">
               <InputWithValidation
@@ -62,16 +63,15 @@ export const FieldSetFiness = () => {
               />
             </div>
           </div>
-          {index >= 1 && (
-            <Button
-              iconId="fr-icon-delete-bin-line"
-              priority="tertiary no outline"
-              className="mt-8"
-              title="Supprimer"
-              onClick={() => handleDeleteFiness(index)}
-              type="button"
-            />
-          )}
+          <div className="w-8 mb-1">
+            {index >= 1 && (
+              <DeleteButton
+                onClick={() => handleDeleteFiness(index)}
+                size="small"
+                backgroundColor="grey"
+              />
+            )}
+          </div>
         </div>
       ))}
       {isMultiDna && (

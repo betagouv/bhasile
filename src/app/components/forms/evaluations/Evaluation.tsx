@@ -1,10 +1,10 @@
-import Button from "@codegouvfr/react-dsfr/Button";
 import { ReactElement, useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { formatDate, getYearFromDate } from "@/app/utils/date.util";
 import { EvaluationFormValues } from "@/schemas/forms/base/evaluation.schema";
 
+import { DeleteButton } from "../../common/DeleteButton";
 import InputWithValidation from "../InputWithValidation";
 import UploadWithValidation from "../UploadWithValidation";
 import { Notes } from "./Notes";
@@ -117,11 +117,9 @@ export const Evaluation = ({
           )}
         </div>
         {index > 0 && (
-          <Button
-            iconId="fr-icon-delete-bin-line"
-            priority="tertiary no outline"
+          <DeleteButton
+            backgroundColor="grey"
             className="ml-8"
-            title="Supprimer"
             onClick={() => {
               const confirm = window.confirm(
                 "Attention, vous allez supprimer définitivement cette évaluation. Êtes-vous bien sûr·e de vouloir continuer ?"
@@ -130,7 +128,6 @@ export const Evaluation = ({
                 deleteEvaluation(index);
               }
             }}
-            type="button"
           />
         )}
       </div>

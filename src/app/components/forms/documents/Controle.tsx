@@ -1,4 +1,3 @@
-import Button from "@codegouvfr/react-dsfr/Button";
 import { useFormContext } from "react-hook-form";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
@@ -6,6 +5,8 @@ import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import UploadWithValidation from "@/app/components/forms/UploadWithValidation";
 import { ControleFormValues } from "@/schemas/forms/base/controle.schema";
 import { ControleType } from "@/types/controle.type";
+
+import { DeleteButton } from "../../common/DeleteButton";
 
 export const Controle = ({
   field,
@@ -55,11 +56,9 @@ export const Controle = ({
         />
       </div>
       {index > 0 && (
-        <Button
-          iconId="fr-icon-delete-bin-line"
-          priority="tertiary no outline"
+        <DeleteButton
+          backgroundColor="grey"
           className="mt-8"
-          title="Supprimer"
           onClick={() => {
             const confirm = window.confirm(
               "Attention, vous allez supprimer définitivement cette inspection-contrôle. Êtes-vous bien sûr·e de vouloir continuer ?"
@@ -68,7 +67,6 @@ export const Controle = ({
               handleDeleteField(index);
             }
           }}
-          type="button"
         />
       )}
     </div>
