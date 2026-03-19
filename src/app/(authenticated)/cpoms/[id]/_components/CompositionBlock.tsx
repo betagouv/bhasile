@@ -16,7 +16,6 @@ export const CompositionBlock = () => {
 
   const { dateStart, dateEnd } = computeCpomDates(cpom);
 
-  console.log(cpom.structures);
   return (
     <Block
       title="Composition"
