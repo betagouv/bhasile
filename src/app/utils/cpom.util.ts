@@ -129,7 +129,7 @@ export const formatCpomName = (cpom: CpomApiType): string => {
           ?.map((departement) => departement.departement?.numero)
           .join(", ");
 
-  return `${cpom.operateur?.name} ${zone}`;
+  return `${cpom.operateur?.name || ""} ${zone || ""}`;
 };
 
 export const computeCpomDates = (

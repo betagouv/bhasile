@@ -68,7 +68,7 @@ export const ListTableHeadings = ({
           <th scope="col" key={columnToDisplay.column}>
             <span
               className={cn(
-                "flex items-center",
+                "flex items-center whitespace-nowrap",
                 columnToDisplay.centered && "justify-center"
               )}
             >

@@ -58,7 +58,7 @@ export const cpomApiSchema = z.object({
         structure: z
           .object({
             id: z.number().optional(),
-            dnaCode: z.string(),
+            codeBhasile: z.string(),
             type: z.nativeEnum(StructureType),
             communeAdministrative: z.string(),
             operateur: operateurApiSchema,

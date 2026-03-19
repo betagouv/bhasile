@@ -14,7 +14,7 @@ export const getBudgetTableHeading = ({ years, structure }: Props) => {
         key={year}
         className={cn("bg-white", !structure && "h-12")}
       >
-        <span className={cn("block", structure && "mb-1 text-sm")}>{year}</span>
+        <span className={cn("block text-sm", structure && "mb-1")}>{year}</span>
         {structure && (
           <>
             {isStructureInCpom(structure, year) ? (

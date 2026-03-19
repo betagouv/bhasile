@@ -15,26 +15,32 @@ export const CompositionBlock = () => {
   const router = useRouter();
 
   const { dateStart, dateEnd } = computeCpomDates(cpom);
+
   return (
     <Block
       title="Composition"
-      iconClass="fr-icon-shape-line"
+      iconClass="ri-exchange-2-line"
       onEdit={() => {
         router.push(`/cpoms/${cpom.id}/modification/composition`);
       }}
     >
       <Table
-        headings={["", "Entrée", "Sortie", ""]}
+        headings={["", "Entrée", "", "Sortie", ""]}
         ariaLabelledBy="composition"
-        className="max-w-3xl"
+        className="max-w-3xl [&_thead_tr]:!bg-transparent [&_thead_tr]:!h-12"
         enableBorders
       >
         {cpom.structures?.map((structure) => (
           <tr key={structure.id}>
             <td className="text-left! h-11!">
-              <strong>{structure.structure?.dnaCode}</strong>
+              <strong>
+                {structure.structure?.codeBhasile} - {structure.structure?.type}{" "}
+                {structure.structure?.operateur?.name}{" "}
+                {structure.structure?.communeAdministrative}
+              </strong>
             </td>
             <td>{formatDate(structure.dateStart ?? dateStart)}</td>
+            <td className="text-center!">–</td>
             <td>{formatDate(structure.dateEnd ?? dateEnd)}</td>
             <td className="p-0!">
               {structure.structure?.forms?.some((form) => form.status) && (
