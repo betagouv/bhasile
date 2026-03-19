@@ -186,7 +186,9 @@ const getLastBhasileCodeForRegion = async (
 };
 
 const generateBhasileCode = async (regionName?: string): Promise<string> => {
-  const regionCode = REGIONS.find((region) => region.name === regionName)?.code;
+  const regionCode = REGIONS.find(
+    (region) => region.name === regionName
+  )?.code?.replace("FR-", "");
   if (!regionCode) {
     throw new Error(`Region ${regionName} not found`);
   }
