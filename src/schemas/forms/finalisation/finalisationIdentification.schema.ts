@@ -26,6 +26,7 @@ export const finalisationIdentificationSchema = identificationSchemaWithContacts
   .and(finessesSchema)
   .and(calendrierSchema)
   .and(adresseAdministrativeSchema)
+  .and(antennesSchema)
   .and(structureTypologiesSchema);
 
 export const finalisationIdentificationAutoSaveSchema =
