@@ -55,7 +55,7 @@ export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
                 control={control}
                 type="text"
                 label="Code"
-                disabled={formKind === FormKind.MODIFICATION}
+                disabled={formKind === FormKind.MODIFICATION || index === 0}
               />
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">

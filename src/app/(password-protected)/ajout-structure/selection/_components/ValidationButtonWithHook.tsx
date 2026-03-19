@@ -60,6 +60,8 @@ export const ValidationButtonWithHook = (): ReactElement => {
       codeBhasile: structure?.codeBhasile,
       operateur: structure?.operateur,
       type: structure?.type,
+      dnaStructures: structure?.dnaStructures,
+      isMultiDna: structure?.dnaStructures?.length > 1,
     });
 
     updateAdresses({
