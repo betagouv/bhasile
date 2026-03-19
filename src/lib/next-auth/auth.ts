@@ -6,7 +6,7 @@ import {
 import { getServerSession, NextAuthOptions } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 
-import { upsertUser } from "@/app/api/user/user.repository";
+import { createOrUpdateUser } from "@/app/api/user/user.service";
 
 import {
   getIsUserAuthorized,
@@ -45,13 +45,15 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ token, session }) {
       const role = await getRoleFromSession(session);
+      console.log("STEP 1, getRoleFromSession", role);
       try {
-        await upsertUser({
+        await createOrUpdateUser({
           prenom: session.user?.name?.split(" ")?.[0] as string,
           nom: session.user?.name?.split(" ")?.[1] as string,
           email: session.user?.email as string,
           role,
         });
+        console.log("STEP 2, createOrUpdateUser", role);
       } catch (error) {
         console.error(
           "Erreur dans l'ajout ou la mise à jour de l'utilisateur",
@@ -62,7 +64,7 @@ export const authOptions: NextAuthOptions = {
           ...session,
           user: {
             ...session.user,
-            role: role.group,
+            role: role.name,
             allowedDepartements: role.allowedDepartements,
           },
           id_token: token.id_token,

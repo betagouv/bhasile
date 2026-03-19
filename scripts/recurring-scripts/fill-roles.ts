@@ -72,13 +72,8 @@ const createRoles = async (row: RoleCsvRow, departementIds: number[]) => {
     where: { pattern: row.emailPattern },
     update: {
       role: {
-        upsert: {
+        connectOrCreate: {
           where: { name: row.name },
-          update: {
-            roleDepartements: {
-              create: departementIds.map((id) => ({ departementId: id })),
-            },
-          },
           create: {
             name: row.name,
             roleDepartements: {
@@ -91,10 +86,13 @@ const createRoles = async (row: RoleCsvRow, departementIds: number[]) => {
     create: {
       pattern: row.emailPattern,
       role: {
-        create: {
-          name: row.name,
-          roleDepartements: {
-            create: departementIds.map((id) => ({ departementId: id })),
+        connectOrCreate: {
+          where: { name: row.name },
+          create: {
+            name: row.name,
+            roleDepartements: {
+              create: departementIds.map((id) => ({ departementId: id })),
+            },
           },
         },
       },

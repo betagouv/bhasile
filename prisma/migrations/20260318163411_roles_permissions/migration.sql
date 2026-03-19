@@ -3,8 +3,6 @@
 
   - You are about to drop the `AllowedUser` table. If the table is not empty, all the data it contains will be lost.
   - You are about to drop the `DepartementAllowedUser` table. If the table is not empty, all the data it contains will be lost.
-  - Added the required column `emailPatternId` to the `User` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `roleId` to the `User` table without a default value. This is not possible if the table is not empty.
 
 */
 -- DropForeignKey
@@ -14,8 +12,8 @@ ALTER TABLE "DepartementAllowedUser" DROP CONSTRAINT "DepartementAllowedUser_all
 ALTER TABLE "DepartementAllowedUser" DROP CONSTRAINT "DepartementAllowedUser_departementId_fkey";
 
 -- AlterTable
-ALTER TABLE "User" ADD COLUMN     "emailPatternId" INTEGER NOT NULL,
-ADD COLUMN     "roleId" INTEGER NOT NULL;
+ALTER TABLE "User" ADD COLUMN     "emailPatternId" INTEGER,
+ADD COLUMN     "roleId" INTEGER;
 
 -- DropTable
 DROP TABLE "AllowedUser";
@@ -52,6 +50,9 @@ CREATE TABLE "EmailPattern" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Role_name_key" ON "Role"("name");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "EmailPattern_pattern_key" ON "EmailPattern"("pattern");
 
 -- AddForeignKey
@@ -64,7 +65,7 @@ ALTER TABLE "RoleDepartement" ADD CONSTRAINT "RoleDepartement_roleId_fkey" FOREI
 ALTER TABLE "EmailPattern" ADD CONSTRAINT "EmailPattern_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "User" ADD CONSTRAINT "User_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_emailPatternId_fkey" FOREIGN KEY ("emailPatternId") REFERENCES "EmailPattern"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "User" ADD CONSTRAINT "User_emailPatternId_fkey" FOREIGN KEY ("emailPatternId") REFERENCES "EmailPattern"("id") ON DELETE SET NULL ON UPDATE CASCADE;

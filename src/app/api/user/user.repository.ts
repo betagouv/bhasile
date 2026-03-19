@@ -6,19 +6,57 @@ export const upsertUser = async ({
   nom,
   email,
   role,
+  emailPattern,
 }: UpsertUserArgs): Promise<void> => {
   await prisma.user.upsert({
-    where: { email: email },
+    where: { email },
     create: {
       prenom,
       nom,
       email,
       lastConnection: new Date(),
-      role: { connect: { id: role.id } },
+      emailPattern: {
+        connect: {
+          pattern: emailPattern,
+        },
+      },
     },
     update: {
       role: { connect: { id: role.id } },
       lastConnection: new Date(),
+    },
+  });
+};
+
+export const getUserByEmail = async ({ email }: { email?: string | null }) => {
+  if (!email) {
+    return null;
+  }
+  return prisma.user.findFirst({
+    where: { email },
+    include: {
+      emailPattern: {
+        include: {
+          role: {
+            include: {
+              roleDepartements: {
+                include: {
+                  departement: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      role: {
+        include: {
+          roleDepartements: {
+            include: {
+              departement: true,
+            },
+          },
+        },
+      },
     },
   });
 };
@@ -28,4 +66,5 @@ type UpsertUserArgs = {
   nom: string;
   email: string;
   role: Role;
+  emailPattern?: string;
 };

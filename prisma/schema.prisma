@@ -576,7 +576,7 @@ model Finess {
 
 model Role {
   id               Int               @id @default(autoincrement())
-  name             String
+  name             String            @unique
   roleDepartements RoleDepartement[]
   users            User[]
   emailPatterns    EmailPattern[]
@@ -605,16 +605,16 @@ model EmailPattern {
 }
 
 model User {
-  id             Int          @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   prenom         String
   nom            String
-  email          String       @unique
+  email          String        @unique
   lastConnection DateTime
   userActions    UserAction[]
-  role           Role         @relation(fields: [roleId], references: [id])
-  roleId         Int
-  emailPattern   EmailPattern @relation(fields: [emailPatternId], references: [id])
-  emailPatternId Int
+  role           Role?         @relation(fields: [roleId], references: [id])
+  roleId         Int?
+  emailPattern   EmailPattern? @relation(fields: [emailPatternId], references: [id])
+  emailPatternId Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
