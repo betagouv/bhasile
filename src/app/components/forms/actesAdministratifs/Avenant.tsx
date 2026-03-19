@@ -1,10 +1,10 @@
-import Button from "@codegouvfr/react-dsfr/Button";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 
+import { DeleteButton } from "../../common/DeleteButton";
 import InputWithValidation from "../InputWithValidation";
 import UploadWithValidation from "../UploadWithValidation";
 
@@ -92,13 +92,10 @@ export const Avenant = ({
             control={control}
           />
         </div>
-        <Button
-          iconId="fr-icon-delete-bin-line"
+        <DeleteButton
           onClick={() => handleDeleteField(index)}
-          type="button"
-          priority="tertiary no outline"
+          backgroundColor="grey"
           className="mt-8"
-          title="Supprimer"
         />
       </div>
     </div>

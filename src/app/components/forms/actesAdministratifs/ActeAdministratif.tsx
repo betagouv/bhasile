@@ -8,6 +8,7 @@ import UploadWithValidation from "@/app/components/forms/UploadWithValidation";
 import { AdditionalFieldsType } from "@/app/utils/acteAdministratif.util";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 
+import { DeleteButton } from "../../common/DeleteButton";
 import { Avenant } from "./Avenant";
 
 export const ActeAdministratif = ({
@@ -155,13 +156,10 @@ export const ActeAdministratif = ({
           />
         </div>
         {index > 0 && (
-          <Button
-            iconId="fr-icon-delete-bin-line"
-            priority="tertiary no outline"
-            className="mt-8"
-            title="Supprimer"
+          <DeleteButton
             onClick={() => handleDeleteField(index)}
-            type="button"
+            backgroundColor="grey"
+            className="mt-8"
           />
         )}
       </div>

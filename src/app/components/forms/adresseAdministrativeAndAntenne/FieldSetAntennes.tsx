@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 
 import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 
+import { DeleteButton } from "../../common/DeleteButton";
 import AddressWithValidation from "../AddressWithValidation";
 import InputWithValidation from "../InputWithValidation";
 
@@ -55,8 +56,8 @@ export const FieldSetAntennes = () => {
       </legend>
 
       {antennes.map((_, index) => (
-        <div key={index} className="flex gap-6">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1">
+        <div key={index} className="flex gap-6 items-end">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1 ">
             <div className="flex flex-col gap-1">
               <InputWithValidation
                 name={`antennes.${index}.name`}
@@ -80,16 +81,15 @@ export const FieldSetAntennes = () => {
               />
             </div>
           </div>
-          {index >= 2 && (
-            <Button
-              iconId="fr-icon-delete-bin-line"
-              priority="tertiary no outline"
-              className="mt-8"
-              title="Supprimer"
-              onClick={() => handleDeleteAntenne(index)}
-              type="button"
-            />
-          )}
+          <div className="w-8 mb-7">
+            {index >= 2 && (
+              <DeleteButton
+                onClick={() => handleDeleteAntenne(index)}
+                size="small"
+                backgroundColor="grey"
+              />
+            )}
+          </div>
         </div>
       ))}
       <Button

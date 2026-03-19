@@ -11,6 +11,8 @@ import Loader from "@/app/components/ui/Loader";
 import { FileUploadResponse, useFileUpload } from "@/app/hooks/useFileUpload";
 import { cn } from "@/app/utils/classname.util";
 
+import { DeleteButton } from "../common/DeleteButton";
+
 const Upload = ({
   className,
   id,
@@ -215,13 +217,10 @@ const Upload = ({
                 window.open(file?.fileUrl, "_blank", "noopener,noreferrer")
               }
             />
-            <Button
-              iconId="fr-icon-delete-bin-line"
-              priority="tertiary no outline"
-              size="small"
-              className="!rounded-full !bg-white"
-              title="Supprimer le fichier"
+            <DeleteButton
               onClick={handleDelete}
+              size="small"
+              backgroundColor="white"
             />
           </div>
         ) : null}
