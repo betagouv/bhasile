@@ -35,8 +35,8 @@ model Region {
 
 model Structure {
   id                           Int                         @id @default(autoincrement())
-  dnaCode                      String?                      @unique                 
-  codeBhasile                  String?                     @unique
+  dnaCode                      String?                     @unique                 
+  codeBhasile                  String?                     @unique //TODO make mandatory after migration
   filiale                      String?
   type                         StructureType?
   adresseAdministrative        String?
