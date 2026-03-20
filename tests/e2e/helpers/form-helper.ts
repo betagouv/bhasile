@@ -92,7 +92,7 @@ export class FormHelper {
       telephone?: string;
     }
   ): Promise<void> {
-    if (index >= 2) {
+    if (index >= 1) {
       await this.page
         .getByRole("button", { name: /Ajouter un contact/i })
         .click();
