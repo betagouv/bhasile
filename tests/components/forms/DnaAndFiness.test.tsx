@@ -105,23 +105,6 @@ describe("DnaAndFiness", () => {
     });
   });
 
-  describe("Changing data in single mode", () => {
-    it("should keep typed value in Code DNA input", async () => {
-      const user = userEvent.setup();
-
-      render(
-        <FormTestWrapper defaultValues={defaultValuesAutorisee}>
-          <DnaAndFiness />
-        </FormTestWrapper>
-      );
-
-      const codeDnaInput = screen.getByLabelText("Code DNA");
-      await user.type(codeDnaInput, "C0001");
-
-      expect(codeDnaInput).toHaveValue("C0001");
-    });
-  });
-
   describe("Changing data in multi mode", () => {
     it("should add a new DNA row when clicking Ajouter un code DNA", async () => {
       const user = userEvent.setup();

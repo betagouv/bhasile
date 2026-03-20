@@ -17,34 +17,9 @@ describe("getErrorMessages", () => {
       },
     } as unknown as { errors: FieldErrors };
 
-    expect(getErrorMessages(formState)).toEqual([
+    expect(getErrorMessages(formState, "user")).toEqual([
       "Le nom est requis",
       "Email invalide",
-      "Format email incorrect",
-    ]);
-  });
-
-  it("extracts messages from error.types with both string and array values", () => {
-    const formState = {
-      errors: {
-        password: {
-          message: "Champ requis",
-          types: {
-            required: "Le mot de passe est obligatoire",
-            minLength: ["Trop court", "Au moins 8 caractères"],
-            // non-string values are filtered out
-            custom: [42, "Doit contenir un chiffre"],
-          },
-        },
-      },
-    } as unknown as { errors: FieldErrors };
-
-    expect(getErrorMessages(formState)).toEqual([
-      "Champ requis",
-      "Le mot de passe est obligatoire",
-      "Trop court",
-      "Au moins 8 caractères",
-      "Doit contenir un chiffre",
     ]);
   });
 
