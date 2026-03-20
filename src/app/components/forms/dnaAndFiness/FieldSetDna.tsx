@@ -49,7 +49,7 @@ export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
         Codes DNA
       </legend>
       {dnaStructures.map((_, index) => (
-        <div key={index} className="flex gap-6 items-end">
+        <div key={index} className="flex gap-6 items-start">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1">
             <div className="flex flex-col gap-1">
               <InputWithValidation
@@ -77,7 +77,7 @@ export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
               />
             </div>
           </div>
-          <div className="w-8 mb-1">
+          <div className="w-8 mt-9">
             {index >= 1 && formKind !== FormKind.MODIFICATION && (
               <DeleteButton
                 onClick={() => handleDeleteDna(index)}

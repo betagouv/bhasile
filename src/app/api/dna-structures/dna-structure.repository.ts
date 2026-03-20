@@ -20,6 +20,30 @@ const deleteDnaStructures = async (
   );
 };
 
+const checkForDuplicateDnaCodes = async (
+  tx: PrismaTransaction,
+  dnaStructures: Partial<DnaStructureApiType>[] = [],
+  structureId: number
+): Promise<void> => {
+  const dnaLinkedToOtherStructures = await tx.dnaStructure.findMany({
+    where: {
+      structureId: {
+        not: structureId,
+      },
+      dna: {
+        code: {
+          in: dnaStructures.map((dnaStructure) => dnaStructure.dna?.code ?? ""),
+        },
+      },
+      endDate: null,
+    },
+  });
+
+  if (dnaLinkedToOtherStructures.length > 0) {
+    throw new Error("Ce ou ces codes DNA sont déjà liés à d'autres structures");
+  }
+};
+
 export const createOrUpdateDnaStructures = async (
   tx: PrismaTransaction,
   dnaStructures: Partial<DnaStructureApiType>[] = [],
@@ -30,6 +54,8 @@ export const createOrUpdateDnaStructures = async (
   }
 
   await deleteDnaStructures(tx, dnaStructures, structureId);
+
+  await checkForDuplicateDnaCodes(tx, dnaStructures, structureId);
 
   for (const dnaStructure of dnaStructures) {
     const dna = dnaStructure.dna;
