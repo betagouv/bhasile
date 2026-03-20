@@ -27,8 +27,8 @@ export const FinancesBlock = () => {
       }}
     >
       <p>
-        Concernant les affectations, ce tableau reflète le flux annuel et ne
-        constitue en aucun cas un calcul ou du stock.
+        Le tableau des affectations reflète uniquement des flux annuels. Les
+        chiffres ne sont en aucun cas une estimation du stock.
       </p>
       <Table
         ariaLabelledBy="gestionBudgetaire"
