@@ -22,7 +22,7 @@ export const defineAbilityFor = (user?: SessionUser) => {
   return createPrismaAbility(defineRulesFor(user));
 };
 
-export const defineRulesFor = (user?: SessionUser) => {
+const defineRulesFor = (user?: SessionUser) => {
   const builder = new AbilityBuilder<AppAbility>(createPrismaAbility);
   if (!user) {
     defineAnonymousRules(builder);
