@@ -22,8 +22,17 @@ export const dnaStructuresSchema = z
   })
   .refine(
     (data) => {
+      return data.dnaStructures && data.dnaStructures.length > 0;
+    },
+    {
+      message: "Au moins un code DNA est requis",
+      path: ["dnaStructures"],
+    }
+  )
+  .refine(
+    (data) => {
       if (!data.dnaStructures || data.dnaStructures.length === 0) {
-        return false;
+        return true;
       }
       const codes = data.dnaStructures.map((dnaStructure) =>
         dnaStructure.dna?.code?.trim()

@@ -25,6 +25,18 @@ const checkForDuplicateDnaCodes = async (
   dnaStructures: Partial<DnaStructureApiType>[] = [],
   structureId: number
 ): Promise<void> => {
+  const dnaCodes = [
+    ...new Set(
+      dnaStructures
+        .map((dnaStructure) => dnaStructure.dna?.code?.trim())
+        .filter((code): code is string => Boolean(code))
+    ),
+  ];
+
+  if (dnaCodes.length === 0) {
+    return;
+  }
+
   const dnaLinkedToOtherStructures = await tx.dnaStructure.findMany({
     where: {
       structureId: {
@@ -32,7 +44,7 @@ const checkForDuplicateDnaCodes = async (
       },
       dna: {
         code: {
-          in: dnaStructures.map((dnaStructure) => dnaStructure.dna?.code ?? ""),
+          in: dnaCodes,
         },
       },
       endDate: null,
@@ -63,11 +75,12 @@ export const createOrUpdateDnaStructures = async (
       continue;
     }
 
+    const normalizedCode = dna.code.trim();
     const upsertedDna = await tx.dna.upsert({
-      where: { code: dna.code },
+      where: { code: normalizedCode },
       update: { description: dna.description },
       create: {
-        code: dna.code,
+        code: normalizedCode,
         description: dna.description,
       },
     });
