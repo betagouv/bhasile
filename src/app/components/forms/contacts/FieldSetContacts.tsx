@@ -1,5 +1,4 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
@@ -17,27 +16,15 @@ const emptyContact: ContactFormValues = {
 };
 
 export const FieldSetContacts = () => {
-  const { watch, setValue, getValues } = useFormContext();
+  const { watch, setValue } = useFormContext();
 
   const isMultiAntenne = watch("isMultiAntenne");
 
-  const contacts = (watch("contacts") || [
-    emptyContact,
-    emptyContact,
-  ]) as ContactFormValues[];
+  const contacts = (watch("contacts") || [emptyContact]) as ContactFormValues[];
 
   const notice = isMultiAntenne
     ? "Veuillez renseigner le contact de la personne responsable de la structure et celui de la personne responsable de l’opérationnel et/ou du financier."
     : "Veuillez renseigner les contacts d’au moins deux personnes dont celle responsable de la structure et celle responsable de l’opérationnel et/ou du financier. Indiquez également un responsable de chaque antenne.";
-
-  useEffect(() => {
-    if (!isMultiAntenne) {
-      setValue("contacts", [
-        getValues("contacts")?.[0],
-        getValues("contacts")?.[1],
-      ]);
-    }
-  }, [isMultiAntenne, setValue, getValues]);
 
   const handleDelete = (index: number) => {
     setValue(
@@ -62,22 +49,20 @@ export const FieldSetContacts = () => {
         <Contact
           key={index}
           isMultiAntenne={isMultiAntenne}
-          handleDelete={index < 2 ? undefined : handleDelete}
+          handleDelete={index < 1 ? undefined : handleDelete}
           index={index}
         />
       ))}
 
-      {isMultiAntenne && (
-        <Button
-          type="button"
-          iconId="fr-icon-add-line"
-          priority="tertiary no outline"
-          className="underline font-normal p-0"
-          onClick={handleAddNewContact}
-        >
-          Ajouter un contact
-        </Button>
-      )}
+      <Button
+        type="button"
+        iconId="fr-icon-add-line"
+        priority="tertiary no outline"
+        className="underline font-normal p-0"
+        onClick={handleAddNewContact}
+      >
+        Ajouter un contact
+      </Button>
     </>
   );
 };
