@@ -49,12 +49,19 @@ export const BudgetTables = () => {
         <legend className="text-xl font-bold mb-8 text-title-blue-france">
           Gestion budgétaire de la structure
         </legend>
-        <p className="mb-0">
-          Veuillez renseigner l’historique du ces données budgétaires{" "}
-          <strong>à l’échelle de votre structure.</strong> Concernant les
-          affectations, ce tableau reflète le flux annuel et ne constitue en
-          aucun cas un calcul ou du stock.
-        </p>
+        {isAutorisee ? (
+          <p className="mb-0">
+            Veuillez renseigner l’historique du ces données budgétaires{" "}
+            <strong>à l’échelle de votre structure.</strong> Aussi, le tableau
+            des affectations reflète uniquement des flux annuels. Les montants
+            saisis ne doivent en aucun cas être une estimation du stock.
+          </p>
+        ) : (
+          <p className="mb-0">
+            Veuillez renseigner l’historique du ces données budgétaires{" "}
+            <strong>à l’échelle de votre structure.</strong>
+          </p>
+        )}
         <StructureTable />
       </fieldset>
       {wasInCpom && (

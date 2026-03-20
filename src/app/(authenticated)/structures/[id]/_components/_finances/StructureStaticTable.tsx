@@ -39,11 +39,21 @@ export const StructureStaticTable = (): ReactElement => {
 
   return (
     <>
-      <p>
-        Dans cette vue, l’ensemble des montants correspondent à la gestion
-        budgétaire <strong>à l’échelle de la structure</strong>,<br />
-        que celle-ci fasse partie d’un CPOM ou non.
-      </p>
+      {isAutorisee ? (
+        <p>
+          Dans cette vue, l’ensemble des montants correspondent à la gestion
+          budgétaire <strong>à l’échelle de la structure</strong>, que celle-ci
+          fasse partie d’un CPOM ou non. Aussi, le tableau des affectations
+          reflète uniquement des flux annuels. Les chiffres ne sont en aucun cas
+          une estimation du stock.
+        </p>
+      ) : (
+        <p>
+          Dans cette vue, l’ensemble des montants correspondent à la gestion
+          budgétaire <strong>à l’échelle de la structure</strong>, que celle-ci
+          fasse partie d’un CPOM ou non.
+        </p>
+      )}
       <Table
         ariaLabelledBy="gestionBudgetaire"
         headings={getBudgetTableHeading({ years, structure })}

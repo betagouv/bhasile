@@ -44,9 +44,9 @@ export default function CpomModificationFinance() {
       >
         <p className="mb-0 max-w-4xl">
           Veuillez renseigner l’historique des données budgétaires{" "}
-          <strong>à l’échelle de l’ensemble du CPOM</strong>. Concernant les
-          affectations, ce tableau reflète le flux annuel et ne constitue en
-          aucun cas un calcul ou du stock.
+          <strong>à l’échelle de l’ensemble du CPOM</strong>. Aussi, le tableau
+          des affectations reflète uniquement des flux annuels. Les montants
+          saisis ne doivent en aucun cas être une estimation du stock.
         </p>
         <CpomTable />
         {saveState === FetchState.ERROR && (
