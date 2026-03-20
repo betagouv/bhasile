@@ -20,7 +20,6 @@ export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
   const { control, watch, setValue, formState } = useFormContext();
 
   const dnaStructuresErrors = getErrorMessages(formState, "dnaStructures");
-  console.log("dnaStructuresErrors", dnaStructuresErrors);
 
   const dnaStructures = (watch("dnaStructures") || [
     emptyDnaStructure,

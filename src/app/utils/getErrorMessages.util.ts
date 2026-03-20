@@ -7,18 +7,6 @@ const extractMessagesFromError = (error: FieldError): string[] => {
     messages.push(error.message);
   }
 
-  if (error.types && typeof error.types === "object") {
-    for (const value of Object.values(error.types)) {
-      if (typeof value === "string") {
-        messages.push(value);
-      } else if (Array.isArray(value)) {
-        messages.push(
-          ...value.filter((v): v is string => typeof v === "string")
-        );
-      }
-    }
-  }
-
   return messages;
 };
 
@@ -51,10 +39,21 @@ const collectMessages = (errors: unknown): string[] => {
 
 export const getErrorMessages = (
   formState: { errors: FieldErrors },
-  fieldPath?: string
+  fieldPath: string,
+  index?: number
 ): string[] => {
   const errorsObject = formState.errors as Record<string, unknown>;
-  const errors = fieldPath ? errorsObject[fieldPath] : errorsObject;
+  let errors = errorsObject[fieldPath] as Record<string, unknown>;
 
+  if (!errors) {
+    return [];
+  }
+
+  if (index !== undefined) {
+    errors = errors[index as unknown as keyof typeof errors] as Record<
+      string,
+      unknown
+    >;
+  }
   return collectMessages(errors);
 };
