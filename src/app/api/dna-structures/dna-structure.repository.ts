@@ -1,6 +1,8 @@
 import { DnaStructureApiType } from "@/schemas/api/dna-structure.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+import { getUniqueDnaCodesFromDnaStructures } from "./dna-structure.service";
+
 const deleteDnaStructures = async (
   tx: PrismaTransaction,
   dnaStructuresToKeep: Partial<DnaStructureApiType>[],
@@ -25,13 +27,7 @@ const checkForDuplicateDnaCodes = async (
   dnaStructures: Partial<DnaStructureApiType>[] = [],
   structureId: number
 ): Promise<void> => {
-  const dnaCodes = [
-    ...new Set(
-      dnaStructures
-        .map((dnaStructure) => dnaStructure.dna?.code?.trim())
-        .filter((code): code is string => Boolean(code))
-    ),
-  ];
+  const dnaCodes = getUniqueDnaCodesFromDnaStructures(dnaStructures);
 
   if (dnaCodes.length === 0) {
     return;
