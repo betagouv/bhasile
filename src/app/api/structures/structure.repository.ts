@@ -503,6 +503,7 @@ const updateStructure = async (
 // Only used in e2e tests
 export const createMinimalStructure = async (structure: {
   codeBhasile: string;
+  dnaCode: string;
   type: StructureType;
   operateurId: number;
   departementAdministratif?: string;
@@ -516,8 +517,36 @@ export const createMinimalStructure = async (structure: {
   }
   const upsertedStructure = await prisma.structure.upsert({
     where: { codeBhasile: structure.codeBhasile },
-    update: structure,
-    create: structure,
+    update: {
+      ...structure,
+      dnaStructures: {
+        create: [
+          {
+            dna: {
+              connectOrCreate: {
+                where: { code: structure.dnaCode },
+                create: { code: structure.dnaCode },
+              },
+            },
+          },
+        ],
+      },
+    },
+    create: {
+      ...structure,
+      dnaStructures: {
+        create: [
+          {
+            dna: {
+              connectOrCreate: {
+                where: { code: structure.dnaCode },
+                create: { code: structure.dnaCode },
+              },
+            },
+          },
+        ],
+      },
+    },
   });
 
   return upsertedStructure;
