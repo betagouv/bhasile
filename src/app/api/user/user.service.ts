@@ -4,8 +4,7 @@ import { getEmailPatterns } from "../email-patterns/email-pattern.repository";
 import { upsertUser } from "./user.repository";
 
 export const createOrUpdateUser = async ({
-  prenom,
-  nom,
+  name,
   email,
   role,
 }: CreateOrUpdateUserArgs): Promise<void> => {
@@ -22,20 +21,18 @@ export const createOrUpdateUser = async ({
   });
   if (emailPattern) {
     await upsertUser({
-      prenom,
-      nom,
+      name,
       email,
       role,
       emailPattern: emailPattern.pattern,
     });
   } else {
-    await upsertUser({ prenom, nom, email, role });
+    await upsertUser({ name, email, role });
   }
 };
 
 type CreateOrUpdateUserArgs = {
-  prenom: string;
-  nom: string;
+  name: string;
   email: string;
   role: Role;
 };

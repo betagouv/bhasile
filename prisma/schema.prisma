@@ -602,8 +602,7 @@ model EmailPattern {
 
 model User {
   id             Int           @id @default(autoincrement())
-  prenom         String
-  nom            String
+  name           String
   email          String        @unique
   lastConnection DateTime
   userActions    UserAction[]

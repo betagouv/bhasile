@@ -5,8 +5,12 @@ import "dotenv/config";
 
 import { loadCsvFromS3 } from "scripts/utils/csv-loader";
 
-import { Departement } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
+
+type DepartementWithRegion = Prisma.DepartementGetPayload<{
+  include: { regionAdministrative: true };
+}>;
 
 type RoleCsvRow = {
   name: string;
@@ -16,46 +20,23 @@ type RoleCsvRow = {
 
 const prisma = createPrismaClient();
 
-const getRegionNameRoleName = (name: string): string | undefined => {
-  const regions: Record<string, string> = {
-    REGION_ARA: "Auvergne-Rhône-Alpes",
-    REGION_BFC: "Bourgogne-Franche-Comté",
-    REGION_BRE: "Bretagne",
-    REGION_CVL: "Centre-Val de Loire",
-    REGION_GES: "Grand Est",
-    REGION_HDF: "Hauts-de-France",
-    REGION_IDF: "Île-de-France",
-    REGION_NOR: "Normandie",
-    REGION_NAQ: "Nouvelle-Aquitaine",
-    REGION_OCC: "Occitanie",
-    REGION_PDL: "Pays de la Loire",
-    REGION_PAC: "Provence-Alpes-Côte d'Azur",
-  };
-  return regions[name];
-};
-
 const fetchRoles = async (): Promise<RoleCsvRow[]> => {
-  return loadCsvFromS3<RoleCsvRow>(
-    process.env.DOCS_BUCKET_NAME!,
-    // TODO : remettre roles.csv ici
-    "roles_test.csv"
-  );
+  return loadCsvFromS3<RoleCsvRow>(process.env.DOCS_BUCKET_NAME!, "roles.csv");
 };
 
 const getTargetDepartementIds = (
   row: RoleCsvRow,
-  allDepartements: Departement[]
+  allDepartements: DepartementWithRegion[]
 ): number[] => {
   if (row.name === "NATIONAL") {
     return allDepartements.map((departement) => departement.id);
   }
   if (row.name.startsWith("REGION")) {
-    const region = getRegionNameRoleName(row.name);
-    if (!region) {
-      return [];
-    }
+    const region = `FR_${row.name.split("_")[1]}`;
     return allDepartements
-      .filter((departement) => departement.region === region)
+      .filter(
+        (departement) => departement.regionAdministrative?.code === region
+      )
       .map((departement) => departement.id);
   }
   if (row.name.startsWith("DEPARTEMENT")) {
@@ -118,7 +99,7 @@ const run = async () => {
     console.log("🧑 Création des rôles");
     const [csvRows, allDepartements] = await Promise.all([
       fetchRoles(),
-      prisma.departement.findMany(),
+      prisma.departement.findMany({ include: { regionAdministrative: true } }),
     ]);
 
     await createAnonymousRole();
