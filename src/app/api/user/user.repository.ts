@@ -32,7 +32,7 @@ export const getUserByEmail = async ({ email }: { email?: string | null }) => {
   if (!email) {
     return null;
   }
-  return prisma.user.findFirst({
+  return prisma.user.findUnique({
     where: { email },
     include: {
       emailPattern: {
