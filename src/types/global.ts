@@ -24,8 +24,7 @@ export type FormKind = (typeof FormKind)[keyof typeof FormKind];
 
 export type SessionUser = {
   id: string;
-  prenom: string;
-  nom: string;
+  name: string;
   email: string;
   role: string;
   allowedDepartements: string[];
