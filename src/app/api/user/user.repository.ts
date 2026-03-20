@@ -2,8 +2,7 @@ import { Role } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 
 export const upsertUser = async ({
-  prenom,
-  nom,
+  name,
   email,
   role,
   emailPattern,
@@ -11,8 +10,7 @@ export const upsertUser = async ({
   await prisma.user.upsert({
     where: { email },
     create: {
-      prenom,
-      nom,
+      name,
       email,
       lastConnection: new Date(),
       emailPattern: {
@@ -62,8 +60,7 @@ export const getUserByEmail = async ({ email }: { email?: string | null }) => {
 };
 
 type UpsertUserArgs = {
-  prenom: string;
-  nom: string;
+  name: string;
   email: string;
   role: Role;
   emailPattern?: string;

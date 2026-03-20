@@ -47,8 +47,7 @@ export const authOptions: NextAuthOptions = {
       const role = await getRoleFromSession(session);
       try {
         await createOrUpdateUser({
-          prenom: session.user?.name?.split(" ")?.[0] as string,
-          nom: session.user?.name?.split(" ")?.[1] as string,
+          name: session.user?.name as string,
           email: session.user?.email as string,
           role,
         });

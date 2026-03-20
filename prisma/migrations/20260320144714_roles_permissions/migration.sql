@@ -1,8 +1,11 @@
 /*
   Warnings:
 
+  - You are about to drop the column `nom` on the `User` table. All the data in the column will be lost.
+  - You are about to drop the column `prenom` on the `User` table. All the data in the column will be lost.
   - You are about to drop the `AllowedUser` table. If the table is not empty, all the data it contains will be lost.
   - You are about to drop the `DepartementAllowedUser` table. If the table is not empty, all the data it contains will be lost.
+  - Added the required column `name` to the `User` table without a default value. This is not possible if the table is not empty.
 
 */
 -- DropForeignKey
@@ -12,7 +15,10 @@ ALTER TABLE "DepartementAllowedUser" DROP CONSTRAINT "DepartementAllowedUser_all
 ALTER TABLE "DepartementAllowedUser" DROP CONSTRAINT "DepartementAllowedUser_departementId_fkey";
 
 -- AlterTable
-ALTER TABLE "User" ADD COLUMN     "emailPatternId" INTEGER,
+ALTER TABLE "User" DROP COLUMN "nom",
+DROP COLUMN "prenom",
+ADD COLUMN     "emailPatternId" INTEGER,
+ADD COLUMN     "name" TEXT NOT NULL,
 ADD COLUMN     "roleId" INTEGER;
 
 -- DropTable
