@@ -6,7 +6,7 @@ type RoleWithDepartements = Prisma.RoleGetPayload<{
 }>;
 
 export const getAnonymousRole = async (): Promise<RoleWithDepartements> => {
-  return prisma.role.findFirstOrThrow({
+  return prisma.role.findUniqueOrThrow({
     where: {
       name: "ANONYMOUS",
     },
