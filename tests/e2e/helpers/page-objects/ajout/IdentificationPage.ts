@@ -116,7 +116,7 @@ export class IdentificationPage extends BasePage {
             .click();
           await this.waitHelper.waitForUIUpdate();
         }
-        if (dna.code) {
+        if (dna.code && i > 0) {
           await this.formHelper.fillInput(
             `input[name="dnaStructures.${i}.dna.code"]`,
             dna.code
@@ -153,12 +153,6 @@ export class IdentificationPage extends BasePage {
         }
       }
     } else {
-      if (dnas[0]?.code) {
-        await this.formHelper.fillInput(
-          'input[name="dnaStructures.0.dna.code"]',
-          dnas[0].code
-        );
-      }
       if (isAutorisee && finesses[0]?.code) {
         await this.formHelper.fillInput(
           'input[name="finesses.0.code"]',

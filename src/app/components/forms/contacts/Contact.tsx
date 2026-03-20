@@ -1,17 +1,22 @@
-import { Control, FieldValues } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
+
+import { cn } from "@/app/utils/classname.util";
+import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 
 import { DeleteButton } from "../../common/DeleteButton";
 import InputWithValidation from "../InputWithValidation";
 
-export const Contact = ({
-  control,
-  isMultiAntenne,
-  handleDelete,
-  index,
-}: Props) => {
+export const Contact = ({ isMultiAntenne, handleDelete, index }: Props) => {
+  const { control, formState } = useFormContext();
+  const contactsErrors = getErrorMessages(formState, "contacts", index);
   return (
     <div className="flex gap-6 items-center">
-      <fieldset className="flex flex-col gap-6 border border-default-grey rounded-xl p-8 flex-1">
+      <fieldset
+        className={cn(
+          "flex flex-col gap-6 border border-default-grey rounded-xl p-8 flex-1",
+          contactsErrors.length > 0 && "border-action-high-error"
+        )}
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <InputWithValidation
             name={`contacts.${index}.prenom`}
@@ -84,7 +89,6 @@ export const Contact = ({
 };
 
 type Props = {
-  control: Control<FieldValues>;
   isMultiAntenne: boolean;
   handleDelete?: (index: number) => void;
   index: number;

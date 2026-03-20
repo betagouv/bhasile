@@ -16,6 +16,7 @@ export async function seedStructureForSelection(
 
   const { id } = await createMinimalStructure({
     codeBhasile: testData.codeBhasile,
+    dnaCode: testData.dnas?.[0]?.code ?? "",
     type: testData.type ?? StructureType.CADA,
     operateurId: testData.operateur?.id ?? 1,
     departementAdministratif: testData.departementAdministratif,

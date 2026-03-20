@@ -103,14 +103,15 @@ export default function CpomModificationFinance() {
             children: "J’ai compris",
             type: "button",
             onClick: () => {
-              router.push(`/structures`);
+              router.push(`/cpoms`);
             },
           },
         ]}
       >
         <p>
-          Les données ont bien été enregistrées. Vous pourrez les retrouver au
-          sein des pages structures concernées par ce CPOM.
+          Les données ont bien été enregistrées. Vous pourrez les retrouver sur
+          la page dédiée à ce CPOM mais aussi au sein des pages structures
+          concernées par celui-ci.
         </p>
       </confirmationModal.Component>
     </>

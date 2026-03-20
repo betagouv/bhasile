@@ -46,7 +46,7 @@ export const DnaAndFiness = ({ formKind = FormKind.FINALISATION }: Props) => {
             control={control}
             type="text"
             label="Code DNA"
-            disabled={formKind === FormKind.MODIFICATION}
+            disabled
           />
           {isAutorisee && (
             <InputWithValidation

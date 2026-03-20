@@ -27,33 +27,6 @@ import {
 } from "./structure.service";
 import { convertToPublicType } from "./structure.util";
 
-export const findAll = async (): Promise<Structure[]> => {
-  return prisma.structure.findMany({
-    include: {
-      adresses: {
-        include: {
-          adresseTypologies: {
-            orderBy: {
-              year: "desc",
-            },
-          },
-        },
-      },
-      operateur: true,
-      structureTypologies: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      forms: {
-        include: {
-          formDefinition: true,
-        },
-      },
-    },
-  });
-};
-
 type SearchProps = {
   search: string | null;
   page: number | null;
@@ -148,6 +121,11 @@ export const findBySearch = async ({
       forms: {
         include: {
           formDefinition: true,
+        },
+      },
+      dnaStructures: {
+        include: {
+          dna: true,
         },
       },
     },
@@ -525,6 +503,7 @@ const updateStructure = async (
 // Only used in e2e tests
 export const createMinimalStructure = async (structure: {
   codeBhasile: string;
+  dnaCode: string;
   type: StructureType;
   operateurId: number;
   departementAdministratif?: string;
@@ -538,8 +517,36 @@ export const createMinimalStructure = async (structure: {
   }
   const upsertedStructure = await prisma.structure.upsert({
     where: { codeBhasile: structure.codeBhasile },
-    update: structure,
-    create: structure,
+    update: {
+      ...structure,
+      dnaStructures: {
+        create: [
+          {
+            dna: {
+              connectOrCreate: {
+                where: { code: structure.dnaCode },
+                create: { code: structure.dnaCode },
+              },
+            },
+          },
+        ],
+      },
+    },
+    create: {
+      ...structure,
+      dnaStructures: {
+        create: [
+          {
+            dna: {
+              connectOrCreate: {
+                where: { code: structure.dnaCode },
+                create: { code: structure.dnaCode },
+              },
+            },
+          },
+        ],
+      },
+    },
   });
 
   return upsertedStructure;

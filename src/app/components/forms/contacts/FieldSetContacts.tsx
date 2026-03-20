@@ -17,7 +17,7 @@ const emptyContact: ContactFormValues = {
 };
 
 export const FieldSetContacts = () => {
-  const { control, watch, setValue, getValues } = useFormContext();
+  const { watch, setValue, getValues } = useFormContext();
 
   const isMultiAntenne = watch("isMultiAntenne");
 
@@ -61,7 +61,6 @@ export const FieldSetContacts = () => {
       {contacts.map((_, index) => (
         <Contact
           key={index}
-          control={control}
           isMultiAntenne={isMultiAntenne}
           handleDelete={index < 2 ? undefined : handleDelete}
           index={index}

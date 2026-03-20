@@ -16,8 +16,34 @@ const dnaStructureSchema = z.object({
   endDate: nullishFrenchDateToISO(),
 });
 
-export const dnaStructuresSchema = z.object({
-  dnaStructures: z.array(dnaStructureSchema),
-});
+export const dnaStructuresSchema = z
+  .object({
+    dnaStructures: z.array(dnaStructureSchema),
+  })
+  .refine(
+    (data) => {
+      return data.dnaStructures && data.dnaStructures.length > 0;
+    },
+    {
+      message: "Au moins un code DNA est requis",
+      path: ["dnaStructures"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (!data.dnaStructures || data.dnaStructures.length === 0) {
+        return true;
+      }
+      const codes = data.dnaStructures.map((dnaStructure) =>
+        dnaStructure.dna?.code?.trim()
+      );
+      const uniqueCodes = new Set(codes);
+      return codes.length === uniqueCodes.size;
+    },
+    {
+      message: "Les codes DNA doivent être uniques",
+      path: ["dnaStructures"],
+    }
+  );
 
 export type DnaStructureFormValues = z.infer<typeof dnaStructureSchema>;

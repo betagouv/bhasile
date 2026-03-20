@@ -42,7 +42,7 @@ export const FieldSetFiness = () => {
         Codes FINESS
       </legend>
       {finesses.map((_, index) => (
-        <div key={index} className="flex gap-6 items-end">
+        <div key={index} className="flex gap-6 items-start">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1">
             <div className="flex flex-col gap-1">
               <InputWithValidation
@@ -63,7 +63,7 @@ export const FieldSetFiness = () => {
               />
             </div>
           </div>
-          <div className="w-8 mb-1">
+          <div className="w-8 mt-9">
             {index >= 1 && (
               <DeleteButton
                 onClick={() => handleDeleteFiness(index)}

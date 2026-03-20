@@ -2,6 +2,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { DnaStructureFormValues } from "@/schemas/forms/base/dna.schema";
 import { FormKind } from "@/types/global";
 
@@ -16,7 +17,9 @@ const emptyDnaStructure: DnaStructureFormValues = {
 };
 
 export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
-  const { control, watch, setValue } = useFormContext();
+  const { control, watch, setValue, formState } = useFormContext();
+
+  const dnaStructuresErrors = getErrorMessages(formState, "dnaStructures");
 
   const dnaStructures = (watch("dnaStructures") || [
     emptyDnaStructure,
@@ -46,7 +49,7 @@ export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
         Codes DNA
       </legend>
       {dnaStructures.map((_, index) => (
-        <div key={index} className="flex gap-6 items-end">
+        <div key={index} className="flex gap-6 items-start">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1">
             <div className="flex flex-col gap-1">
               <InputWithValidation
@@ -55,7 +58,13 @@ export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
                 control={control}
                 type="text"
                 label="Code"
-                disabled={formKind === FormKind.MODIFICATION}
+                state={dnaStructuresErrors.length > 0 ? "error" : undefined}
+                stateRelatedMessage={
+                  dnaStructuresErrors.length > 0
+                    ? dnaStructuresErrors[0]
+                    : undefined
+                }
+                disabled={formKind === FormKind.MODIFICATION || index === 0}
               />
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
@@ -68,7 +77,7 @@ export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
               />
             </div>
           </div>
-          <div className="w-8 mb-1">
+          <div className="w-8 mt-9">
             {index >= 1 && formKind !== FormKind.MODIFICATION && (
               <DeleteButton
                 onClick={() => handleDeleteDna(index)}

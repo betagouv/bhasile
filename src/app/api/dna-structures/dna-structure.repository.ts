@@ -1,6 +1,8 @@
 import { DnaStructureApiType } from "@/schemas/api/dna-structure.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+import { getUniqueDnaCodesFromDnaStructures } from "./dna-structure.service";
+
 const deleteDnaStructures = async (
   tx: PrismaTransaction,
   dnaStructuresToKeep: Partial<DnaStructureApiType>[],
@@ -20,6 +22,36 @@ const deleteDnaStructures = async (
   );
 };
 
+const checkForDuplicateDnaCodes = async (
+  tx: PrismaTransaction,
+  dnaStructures: Partial<DnaStructureApiType>[] = [],
+  structureId: number
+): Promise<void> => {
+  const dnaCodes = getUniqueDnaCodesFromDnaStructures(dnaStructures);
+
+  if (dnaCodes.length === 0) {
+    return;
+  }
+
+  const dnaLinkedToOtherStructures = await tx.dnaStructure.findMany({
+    where: {
+      structureId: {
+        not: structureId,
+      },
+      dna: {
+        code: {
+          in: dnaCodes,
+        },
+      },
+      endDate: null,
+    },
+  });
+
+  if (dnaLinkedToOtherStructures.length > 0) {
+    throw new Error("Ce ou ces codes DNA sont déjà liés à d'autres structures");
+  }
+};
+
 export const createOrUpdateDnaStructures = async (
   tx: PrismaTransaction,
   dnaStructures: Partial<DnaStructureApiType>[] = [],
@@ -31,17 +63,20 @@ export const createOrUpdateDnaStructures = async (
 
   await deleteDnaStructures(tx, dnaStructures, structureId);
 
+  await checkForDuplicateDnaCodes(tx, dnaStructures, structureId);
+
   for (const dnaStructure of dnaStructures) {
     const dna = dnaStructure.dna;
     if (!dna?.code) {
       continue;
     }
 
+    const normalizedCode = dna.code.trim();
     const upsertedDna = await tx.dna.upsert({
-      where: { code: dna.code },
+      where: { code: normalizedCode },
       update: { description: dna.description },
       create: {
-        code: dna.code,
+        code: normalizedCode,
         description: dna.description,
       },
     });
