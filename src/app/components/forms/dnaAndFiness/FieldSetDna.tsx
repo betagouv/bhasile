@@ -2,6 +2,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { DnaStructureFormValues } from "@/schemas/forms/base/dna.schema";
 import { FormKind } from "@/types/global";
 
@@ -16,7 +17,10 @@ const emptyDnaStructure: DnaStructureFormValues = {
 };
 
 export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
-  const { control, watch, setValue } = useFormContext();
+  const { control, watch, setValue, formState } = useFormContext();
+
+  const dnaStructuresErrors = getErrorMessages(formState, "dnaStructures");
+  console.log("dnaStructuresErrors", dnaStructuresErrors);
 
   const dnaStructures = (watch("dnaStructures") || [
     emptyDnaStructure,
@@ -55,6 +59,12 @@ export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
                 control={control}
                 type="text"
                 label="Code"
+                state={dnaStructuresErrors.length > 0 ? "error" : undefined}
+                stateRelatedMessage={
+                  dnaStructuresErrors.length > 0
+                    ? dnaStructuresErrors[0]
+                    : undefined
+                }
                 disabled={formKind === FormKind.MODIFICATION || index === 0}
               />
             </div>
