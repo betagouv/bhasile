@@ -12,25 +12,25 @@ const COLUMNS: ListColumn[] = [
   {
     label: "Opérateur",
     column: "operateur",
-    orderBy: false,
+    orderBy: true,
     centered: false,
   },
   {
     label: "Structures",
     column: "structures",
-    orderBy: false,
+    orderBy: true,
     centered: false,
   },
   {
     label: "Échelle",
     column: "granularity",
-    orderBy: false,
+    orderBy: true,
     centered: false,
   },
   {
     label: "Région",
     column: "region",
-    orderBy: false,
+    orderBy: true,
     centered: false,
   },
   {
@@ -42,13 +42,13 @@ const COLUMNS: ListColumn[] = [
   {
     label: "Date début",
     column: "dateStart",
-    orderBy: false,
+    orderBy: true,
     centered: true,
   },
   {
     label: "Date fin",
     column: "dateEnd",
-    orderBy: false,
+    orderBy: true,
     centered: true,
   },
 ];
