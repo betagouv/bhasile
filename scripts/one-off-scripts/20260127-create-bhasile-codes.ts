@@ -9,7 +9,7 @@ import { createPrismaClient } from "@/prisma-client";
 import {
   getNormalizedRegionCodeFromName,
   getNextBhasileCode,
-} from "scripts/utils/bhasile";
+} from "@/app/utils/bhasile.util";
 
 const prisma = createPrismaClient();
 
