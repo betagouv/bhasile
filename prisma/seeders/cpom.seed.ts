@@ -2,7 +2,6 @@ import { fakerFR as faker } from "@faker-js/faker";
 
 import {
   ActeAdministratifCategory,
-  type Departement,
   type PrismaClient,
 } from "@/generated/prisma/client";
 
@@ -38,7 +37,13 @@ export const createFakeCpoms = async (
     },
   });
 
-  const departements = await prisma.departement.findMany();
+  const departements = await prisma.departement.findMany({
+    include: {
+      regionAdministrative: {
+        select: { name: true },
+      },
+    },
+  });
   const regions = await prisma.region.findMany();
 
   const regionNameToId = new Map<string, number>(
@@ -46,10 +51,11 @@ export const createFakeCpoms = async (
   );
 
   const departementToRegion = new Map<string, string>(
-    departements.map((departement: Departement) => [
-      departement.numero,
-      departement.region,
-    ])
+    departements.flatMap((departement) =>
+      departement.regionAdministrative?.name
+        ? [[departement.numero, departement.regionAdministrative.name] as const]
+        : []
+    )
   );
 
   const structuresByOperateurAndRegion = new Map<string, number[]>();
@@ -133,7 +139,10 @@ export const createFakeCpoms = async (
         departements: isUiInitialized
           ? {
               create: departements
-                .filter((departement) => departement.region === regionName)
+                .filter(
+                  (departement) =>
+                    departement.regionAdministrative?.name === regionName
+                )
                 .map((departement) => ({
                   departementId: departement.id,
                 })),
