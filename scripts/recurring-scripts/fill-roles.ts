@@ -21,7 +21,10 @@ type RoleCsvRow = {
 const prisma = createPrismaClient();
 
 const fetchRoles = async (): Promise<RoleCsvRow[]> => {
-  return loadCsvFromS3<RoleCsvRow>(process.env.DOCS_BUCKET_NAME!, "roles.csv");
+  return loadCsvFromS3<RoleCsvRow>(
+    process.env.DOCS_BUCKET_NAME!,
+    "roles_test.csv"
+  );
 };
 
 const getTargetDepartementIds = (
