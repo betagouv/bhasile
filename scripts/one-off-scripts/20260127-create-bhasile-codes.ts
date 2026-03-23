@@ -6,8 +6,10 @@
 import "dotenv/config";
 
 import { createPrismaClient } from "@/prisma-client";
-import { REGIONS } from "@/constants";
-import { generateBhasileCodeForRegion } from "scripts/utils/bhasile";
+import {
+  generateBhasileCodeForRegion,
+  getNormalizedRegionCodeFromName,
+} from "scripts/utils/bhasile";
 
 const prisma = createPrismaClient();
 
@@ -155,9 +157,7 @@ main()
   });
 
 const generateBhasileCode = async (regionName?: string): Promise<string> => {
-  const regionCode = REGIONS.find(
-    (region) => region.name === regionName
-  )?.code?.replace("FR-", "");
+  const regionCode = getNormalizedRegionCodeFromName(regionName);
   if (!regionCode) {
     throw new Error(`Region ${regionName} not found`);
   }

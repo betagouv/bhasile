@@ -1,3 +1,7 @@
+// Utils pour générer les codes Bhasile
+
+import { REGIONS } from "@/constants";
+
 const BHASILE_PREFIX = "BHA";
 
 type BhasileDbClient = {
@@ -7,12 +11,16 @@ type BhasileDbClient = {
   };
 };
 
-const escapeRegExp = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
 export function normalizeRegionCode(regionCode?: string | null): string | null {
   if (!regionCode) return null;
   return regionCode.replace(/^FR-/, "");
+}
+
+export function getNormalizedRegionCodeFromName(
+  regionName?: string | null
+): string | null {
+  const regionCode = REGIONS.find((region) => region.name === regionName)?.code;
+  return normalizeRegionCode(regionCode);
 }
 
 export function formatBhasileCode(regionCode: string, counter: number): string {
@@ -23,10 +31,9 @@ export function extractCounterFromCode(
   regionCode: string,
   codeBhasile: string
 ): number | null {
+  const normalizedRegionCode = normalizeRegionCode(regionCode) ?? regionCode;
   const match = codeBhasile.match(
-    new RegExp(
-      `^${BHASILE_PREFIX}-${escapeRegExp(normalizeRegionCode(regionCode) ?? regionCode)}-(\\d{3})$`
-    )
+    new RegExp(`^${BHASILE_PREFIX}-${normalizedRegionCode}-(\\d{3})$`)
   );
   if (!match) return null;
   return parseInt(match[1], 10);
