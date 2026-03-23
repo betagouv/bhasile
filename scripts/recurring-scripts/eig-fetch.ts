@@ -200,48 +200,24 @@ const getAllEIGs = async (): Promise<EIGFromAPI[]> => {
   return appEIGs;
 };
 
-const buildStructureIdByDnaCode = async (
-  dnaCodes: string[]
-): Promise<Map<string, number>> => {
-  const uniqueCodes = [...new Set(dnaCodes.filter(Boolean))];
-  if (uniqueCodes.length === 0) {
-    return new Map();
-  }
-
-  const dnas = await prisma.dna.findMany({
-    where: { code: { in: uniqueCodes } },
-    select: { id: true, code: true },
-  });
-  const dnaStructures = await prisma.dnaStructure.findMany({
-    where: { dnaId: { in: dnas.map((d) => d.id) } },
-    select: { dnaId: true, structureId: true },
-  });
-  const dnaIdToCode = new Map(dnas.map((d) => [d.id, d.code]));
-  const structureIds = new Map<string, number>();
-  for (const dnaStructure of dnaStructures) {
-    const code = dnaIdToCode.get(dnaStructure.dnaId);
-    if (code) {
-      structureIds.set(code, dnaStructure.structureId);
-    }
-  }
-  return structureIds;
-};
-
 const eigs = await getAllEIGs();
-const structureIdByDnaCode = await buildStructureIdByDnaCode(
-  eigs.map((e) => e.dnaCode)
+const existingDnaCodes = new Set(
+  (
+    await prisma.dna.findMany({
+      where: { code: { in: [...new Set(eigs.map((e) => e.dnaCode))] } },
+      select: { code: true },
+    })
+  ).map((dna) => dna.code)
 );
 
 for (const eig of eigs) {
-  const structureId = structureIdByDnaCode.get(eig.dnaCode);
-  if (structureId == null) {
+  if (!existingDnaCodes.has(eig.dnaCode)) {
     continue;
   }
   await prisma.evenementIndesirableGrave.upsert({
     where: { numeroDossier: eig.numeroDossier },
     update: {},
     create: {
-      structureId,
       structureDnaCode: null,
       dnaCode: eig.dnaCode,
       numeroDossier: eig.numeroDossier,
