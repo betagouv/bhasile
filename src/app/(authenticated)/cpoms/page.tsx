@@ -18,7 +18,7 @@ export default function Structures(): ReactElement {
 
   return (
     <div className="h-full w-full flex flex-col">
-      <div className="flex gap-2 fr-p-2w border-b border-b-border-default-grey min-h-[4.35rem] justify-between items-center sticky top-0 z-2 bg-lifted-grey">
+      <div className="flex gap-2 px-6 py-4 border-b border-b-border-default-grey min-h-[4.35rem] justify-between items-center sticky top-0 z-2 bg-lifted-grey">
         <h2 className="text-title-blue-france fr-h5 mr-4 mb-0" id="cpoms-titre">
           CPOM
         </h2>

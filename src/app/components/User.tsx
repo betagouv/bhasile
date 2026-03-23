@@ -15,7 +15,7 @@ export const User = (): ReactElement => {
             : "Chargement..."}
         </p>
         <button
-          className="fr-text--xs p-0 fr-icon-logout-box-r-line fr-btn--icon-right"
+          className="fr-text--xs p-0 fr-icon-logout-box-r-line fr-btn--icon-right after:w-[12]"
           onClick={() => redirect("/deconnexion")}
         >
           Déconnexion
