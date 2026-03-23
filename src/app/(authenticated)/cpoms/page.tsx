@@ -33,8 +33,8 @@ export default function Structures(): ReactElement {
       <div className="flex gap-2 justify-end items-center py-3.5 px-6 z-2">
         <Filters showFilters={false} showLocation={true} />
         <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
-          {totalCpoms} entrée
-          {totalCpoms > 1 ? "s" : ""}
+          {totalCpoms ?? 0} entrée
+          {(totalCpoms ?? 0) > 1 ? "s" : ""}
         </p>
       </div>
       {fetchState === FetchState.LOADING && (

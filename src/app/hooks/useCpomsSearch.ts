@@ -56,12 +56,12 @@ export const useCpomsSearch = () => {
 
         if (!result.ok) {
           setFetchState(`cpoms-search`, FetchState.ERROR);
-          throw new Error(`Failed to fetch structures: ${result.status}`);
+          throw new Error(`Failed to fetch cpoms: ${result.status}`);
         }
         setFetchState(`cpoms-search`, FetchState.IDLE);
         return await result.json();
       } catch (error) {
-        console.error("Error fetching structures:", error);
+        console.error("Error fetching cpoms:", error);
         setFetchState(`cpoms-search`, FetchState.ERROR);
         return { cpoms: [], totalCpoms: 0 };
       }
