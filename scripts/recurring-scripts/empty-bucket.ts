@@ -1,5 +1,5 @@
 // Vider le bucket S3 de dev
-// Usage: yarn script empty-bucket BUCKET_NAME
+// Usage: yarn script empty-bucket
 
 import "dotenv/config";
 
@@ -12,7 +12,8 @@ export const minioClient = new Client({
   useSSL: true,
 });
 
-const emptyBucket = async (bucketName: string | undefined): Promise<void> => {
+const emptyBucket = async (): Promise<void> => {
+  const bucketName = process.env.S3_BUCKET_NAME;
   if (!bucketName) {
     console.log("Merci de préciser un nom de bucket S3");
     return;
@@ -28,7 +29,6 @@ const emptyBucket = async (bucketName: string | undefined): Promise<void> => {
 
     for await (const file of stream) {
       allFiles.push(file.name);
-      console.log(`${file.name} trouvé`);
     }
 
     if (allFiles.length === 0) {
@@ -46,7 +46,4 @@ const emptyBucket = async (bucketName: string | undefined): Promise<void> => {
   }
 };
 
-const args = process.argv.slice(2);
-const bucketName = args[0];
-
-emptyBucket(bucketName);
+emptyBucket();
