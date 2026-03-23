@@ -6,7 +6,9 @@ import "dotenv/config";
 
 import type { PrismaClient } from "@/generated/prisma/client";
 import { StructureType } from "@/generated/prisma/client";
+import { REGIONS } from "@/constants";
 import { checkBucket, getObject } from "@/lib/minio";
+import { generateNextBhasileCode, normalizeRegionCode } from "scripts/utils/bhasile";
 
 import { ensureOperateursExist } from "./ensure-operateurs-exist";
 import { type OfiiReferentialRow } from "./ofii-xlsx";
@@ -122,10 +124,27 @@ export const fillOfiiStructureFromRows = async (
     }
 
     const departements = await prisma.departement.findMany({
-      select: { numero: true, name: true },
+      select: {
+        numero: true,
+        name: true,
+        regionAdministrative: {
+          select: { name: true, code: true },
+        },
+      },
     });
     const nameToNumero = new Map<string, string>(
       departements.map((d) => [d.name.trim().toLowerCase(), d.numero])
+    );
+    const numeroToRegionCode = new Map<string, string>(
+      departements
+        .map((d) => [
+          d.numero,
+          normalizeRegionCode(d.regionAdministrative?.code) ??
+            normalizeRegionCode(
+              REGIONS.find((r) => r.name === d.regionAdministrative?.name)?.code
+            ),
+        ] as const)
+        .filter((entry): entry is [string, string] => !!entry[1])
     );
 
     console.log("- Validation des données...");
@@ -198,24 +217,10 @@ export const fillOfiiStructureFromRows = async (
       }
     }
 
-    await prisma.$transaction(
-      validRecords.map((row) =>
-        prisma.dna.upsert({
-          where: { code: row.dnaCode },
-          create: { code: row.dnaCode },
-          update: {},
-        })
-      )
-    );
-
     const dnaCodes = [...new Set(validRecords.map((r) => r.dnaCode))];
     const dnaMappings = await prisma.dnaStructure.findMany({
       where: {
         dna: { code: { in: dnaCodes } },
-        AND: [
-          { OR: [{ startDate: null }, { startDate: { lte: date } }] },
-          { OR: [{ endDate: null }, { endDate: { gte: date } }] },
-        ],
       },
       select: { structureId: true, dna: { select: { code: true } } },
     });
@@ -287,7 +292,7 @@ export const fillOfiiStructureFromRows = async (
     try {
       operateurMap = await ensureOperateursExist(
         prisma,
-        representativeRows.map((row) => row.row),
+        validRecords,
         "operateur"
       );
     } catch (error) {
@@ -300,8 +305,99 @@ export const fillOfiiStructureFromRows = async (
 
     console.log("- Mise à jour des données de référentiel");
     let updatedCount = 0;
+    let createdCount = 0;
 
     await prisma.$transaction(async (tx) => {
+      const regionCounterCache = new Map<string, number>();
+
+      // For each DNA: create DNA if missing, then ensure it is linked to a structure.
+      for (const row of validRecords) {
+        const existingDna = await tx.dna.findUnique({
+          where: { code: row.dnaCode },
+          select: {
+            id: true,
+            dnaStructures: {
+              select: { structureId: true },
+              take: 1,
+            },
+          },
+        });
+
+        if (existingDna?.dnaStructures.length) {
+          if (!dnaToStructureId.has(row.dnaCode)) {
+            dnaToStructureId.set(row.dnaCode, existingDna.dnaStructures[0].structureId);
+          }
+          continue;
+        }
+
+        const depKey = row.departement ? row.departement.trim().toLowerCase() : "";
+        const depNumero = depKey ? (nameToNumero.get(depKey) ?? null) : null;
+        if (!depNumero) {
+          continue;
+        }
+
+        const regionCode = numeroToRegionCode.get(depNumero);
+        if (!regionCode) {
+          console.log(
+            `⚠️ DNA ${row.dnaCode} ignoré: région introuvable pour département ${depNumero}`
+          );
+          continue;
+        }
+
+        const codeBhasile = await generateNextBhasileCode(
+          tx,
+          regionCode,
+          regionCounterCache
+        );
+        const cleanName = getCleanName(row, {
+          departementNumero: depNumero,
+          operateurClean: row.operateur,
+        });
+        const now = new Date();
+
+        const createdStructure = await tx.structure.create({
+          data: {
+            codeBhasile,
+            nom: cleanName,
+            nomOfii: row.nom ?? undefined,
+            type: row.type as StructureType,
+            departementAdministratif: depNumero,
+            directionTerritoriale: row.directionTerritoriale ?? undefined,
+            activeInOfiiFileSince: now,
+            inactiveInOfiiFileSince: null,
+            operateurId: row.operateur
+              ? (operateurMap.get(row.operateur) ?? null)
+              : null,
+          },
+          select: { id: true },
+        });
+
+        const dna = existingDna
+          ? existingDna
+          : await tx.dna.create({
+              data: {
+                code: row.dnaCode,
+                description: null,
+              },
+              select: { id: true },
+            });
+
+        await tx.dnaStructure.create({
+          data: {
+            dna: { connect: { id: dna.id } },
+            structure: { connect: { id: createdStructure.id } },
+            startDate: null,
+            endDate: null,
+          },
+        });
+
+        dnaToStructureId.set(row.dnaCode, createdStructure.id);
+        structureIds.push(createdStructure.id);
+        recordsByStructureId.set(createdStructure.id, [row]);
+        representativeRows.push({ structureId: createdStructure.id, row });
+        createdCount += 1;
+      }
+
       for (const { structureId, row } of representativeRows) {
         const existing = structureById.get(structureId);
         const now = new Date();
@@ -361,6 +457,7 @@ export const fillOfiiStructureFromRows = async (
     });
 
     console.log(`✅ ${updatedCount} structures mises à jour`);
+    console.log(`✅ ${createdCount} structures créées`);
   } catch (error) {
     throw new Error(
       "❌ Erreur lors du chargement des données référentiel : " + error
