@@ -15,6 +15,8 @@ export const createDnaList = (count: number): Omit<Dna, "id">[] => {
     dnaList.push({
       code,
       description: "STRUCTURE",
+      activeInOfiiFileSince: null,
+      inactiveInOfiiFileSince: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
