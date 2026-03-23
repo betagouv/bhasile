@@ -62,8 +62,8 @@ export default function Structures(): ReactElement {
         <SearchBar />
         <Filters />
         <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
-          {totalStructures} entrée
-          {totalStructures > 1 ? "s" : ""}
+          {totalStructures ?? 0} entrée
+          {(totalStructures ?? 0) > 1 ? "s" : ""}
         </p>
       </div>
       {selectedVisualization === "tableau" && (
