@@ -1,13 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { cpomApiAjoutSchema, cpomApiSchema } from "@/schemas/api/cpom.schema";
+import { CpomColumn } from "@/types/ListColumn";
 
 import { createCpomEvent } from "../user-action/user-action.service";
-import { countAll, createOrUpdateCpom, findAll } from "./cpom.repository";
+import {
+  countBySearch,
+  createOrUpdateCpom,
+  findBySearch,
+} from "./cpom.repository";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const page = request.nextUrl.searchParams.get("page") as number | null;
+  const departements = request.nextUrl.searchParams.get("departements");
+  const column = request.nextUrl.searchParams.get(
+    "column"
+  ) as CpomColumn | null;
+  const direction = request.nextUrl.searchParams.get("direction") as
+    | "asc"
+    | "desc"
+    | null;
+
   try {
-    const [cpoms, totalCpoms] = await Promise.all([findAll(), countAll()]);
+    const [cpoms, totalCpoms] = await Promise.all([
+      findBySearch({
+        page,
+        departements,
+        column,
+        direction,
+      }),
+      countBySearch({
+        departements,
+      }),
+    ]);
     return NextResponse.json({ cpoms, totalCpoms });
   } catch (error) {
     console.error(error);

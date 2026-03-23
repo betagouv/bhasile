@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@codegouvfr/react-dsfr/Button";
 import { sendEvent } from "@socialgouv/matomo-next";
 import dynamic from "next/dynamic";
 import { ReactElement, useMemo, useState } from "react";
@@ -37,7 +38,7 @@ export default function Structures(): ReactElement {
 
   return (
     <div className="h-full w-full flex flex-col">
-      <div className="flex gap-2 fr-p-2w border-b border-b-border-default-grey min-h-[4.35rem] justify-between items-center sticky top-0 z-2 bg-lifted-grey">
+      <div className="flex gap-2 px-6 border-b border-b-border-default-grey min-h-[4.35rem] justify-between items-center sticky top-0 z-2 bg-lifted-grey">
         <SegmentedControl
           name="Visualisation"
           options={options}
@@ -53,14 +54,17 @@ export default function Structures(): ReactElement {
             Structures d’hébergement
           </h2>
         </SegmentedControl>
-        <div className="flex gap-2 items-center">
-          <SearchBar />
-          <Filters />
-          <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
-            {totalStructures} entrée
-            {totalStructures > 1 ? "s" : ""}
-          </p>
-        </div>
+        <Button type="button" priority="secondary" disabled>
+          <span className="fr-icon-add-line fr-icon--sm" /> Créer une structure
+        </Button>
+      </div>
+      <div className="flex gap-2 justify-end items-center py-3.5 px-6 z-2">
+        <SearchBar />
+        <Filters />
+        <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
+          {totalStructures} entrée
+          {totalStructures > 1 ? "s" : ""}
+        </p>
       </div>
       {selectedVisualization === "tableau" && (
         <>

@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { Cpom } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
@@ -6,12 +7,51 @@ import {
   CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
+import { CpomColumn } from "@/types/ListColumn";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acteAdministratif.repository";
+import { getCpomOrderBy, getCpomSearchWhere } from "./cpom.service";
 
-export const findAll = async (): Promise<Cpom[]> => {
-  return prisma.cpom.findMany({
+type SearchProps = {
+  page?: number | null;
+  departements: string | null;
+  column?: CpomColumn | null;
+  direction?: "asc" | "desc" | null;
+};
+
+export const findBySearch = async ({
+  page,
+  departements,
+  column,
+  direction,
+}: SearchProps): Promise<Cpom[]> => {
+  const where = getCpomSearchWhere({
+    departements,
+  });
+
+  const orderBy = getCpomOrderBy(column ?? "region", direction ?? "asc");
+
+  const cpomOrderIds = await prisma.cpomOrder.findMany({
+    where,
+    skip: page ? page * DEFAULT_PAGE_SIZE : 0,
+    take: DEFAULT_PAGE_SIZE,
+    orderBy,
+    select: {
+      id: true,
+    },
+  });
+
+  if (cpomOrderIds.length === 0) {
+    return [];
+  }
+
+  const cpoms = await prisma.cpom.findMany({
+    where: {
+      id: {
+        in: cpomOrderIds.map((cpomOrder) => cpomOrder.id),
+      },
+    },
     include: {
       structures: true,
       cpomMillesimes: true,
@@ -29,10 +69,24 @@ export const findAll = async (): Promise<Cpom[]> => {
       },
     },
   });
+
+  const orderedCpoms = cpomOrderIds
+    .map((cpomOrder) => cpoms.find((cpom) => cpom.id === cpomOrder.id))
+    .filter((cpom) => cpom !== undefined);
+
+  return orderedCpoms;
 };
 
-export const countAll = async (): Promise<number> => {
-  return prisma.cpom.count();
+export const countBySearch = async ({
+  departements,
+}: SearchProps): Promise<number> => {
+  const where = getCpomSearchWhere({
+    departements,
+  });
+
+  return prisma.cpomOrder.count({
+    where,
+  });
 };
 
 export const findOne = async (id: number): Promise<Cpom> => {

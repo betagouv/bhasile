@@ -2,6 +2,7 @@
 
 import { ReactElement } from "react";
 
+import { Pagination } from "@/app/components/common/Pagination";
 import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
 import { CpomApiType } from "@/schemas/api/cpom.schema";
 import { ListColumn } from "@/types/ListColumn";
@@ -43,25 +44,32 @@ const COLUMNS: ListColumn[] = [
     label: "Date début",
     column: "dateStart",
     orderBy: true,
-    centered: true,
+    centered: false,
   },
   {
     label: "Date fin",
     column: "dateEnd",
     orderBy: true,
-    centered: true,
+    centered: false,
   },
 ];
 
-export const CpomsTable = ({ cpoms, ariaLabelledBy }: Props): ReactElement => {
+export const CpomsTable = ({
+  cpoms,
+  totalCpoms,
+  ariaLabelledBy,
+}: Props): ReactElement => {
   return (
     <>
-      <div className="p-4 bg-alt-grey h-full">
+      <div className="px-4 bg-alt-grey h-full">
         <ListTableHeadings ariaLabelledBy={ariaLabelledBy} columns={COLUMNS}>
           {cpoms.map((cpom, index) => (
             <CpomItem key={cpom.id} cpom={cpom} index={index} />
           ))}
         </ListTableHeadings>
+        <div className="pt-4 flex justify-center items-center">
+          <Pagination totalElements={totalCpoms} />
+        </div>
       </div>
     </>
   );
@@ -69,5 +77,6 @@ export const CpomsTable = ({ cpoms, ariaLabelledBy }: Props): ReactElement => {
 
 type Props = {
   cpoms: CpomApiType[];
+  totalCpoms: number;
   ariaLabelledBy: string;
 };
