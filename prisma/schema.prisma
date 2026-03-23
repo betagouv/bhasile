@@ -823,4 +823,3 @@ view StructuresFilling {
 
   @@schema("reporting")
 }
-
