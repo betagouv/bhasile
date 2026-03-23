@@ -6,9 +6,9 @@ import "dotenv/config";
 
 import type { PrismaClient } from "@/generated/prisma/client";
 import { StructureType } from "@/generated/prisma/client";
+import { getNextBhasileCode, normalizeRegionCode } from "@/app/utils/bhasile.util";
 import { REGIONS } from "@/constants";
 import { checkBucket, getObject } from "@/lib/minio";
-import { getNextBhasileCode, normalizeRegionCode } from "scripts/utils/bhasile";
 
 import { ensureOperateursExist } from "./ensure-operateurs-exist";
 import { type OfiiReferentialRow } from "./ofii-xlsx";
