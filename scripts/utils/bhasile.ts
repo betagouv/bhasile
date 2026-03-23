@@ -29,10 +29,10 @@ function extractCounterFromCode(
     new RegExp(`^${BHASILE_PREFIX}-${normalizedRegionCode}-(\\d{3})$`)
   );
   if (!match) return null;
-  return parseInt(match[1], 10);
+  return parseInt(match[1]);
 }
 
-async function getLastBhasileCodeForRegion(
+async function getLastBhasileCode(
   db: any,
   regionCode: string
 ): Promise<string | null> {
@@ -45,62 +45,24 @@ async function getLastBhasileCodeForRegion(
   return lastStructure?.codeBhasile ?? null;
 }
 
-export async function generateBhasileCodeForRegion(
+export async function getNextBhasileCode(
   db: any,
-  regionCode: string
+  regionCode: string,
+  counterCache?: Map<string, number>
 ): Promise<string> {
   const normalizedRegionCode = normalizeRegionCode(regionCode) ?? regionCode;
-  const lastCode = await getLastBhasileCodeForRegion(db, normalizedRegionCode);
+  const cachedCounter = counterCache?.get(normalizedRegionCode);
+  if (cachedCounter != undefined) {
+    const next = cachedCounter + 1;
+    counterCache?.set(normalizedRegionCode, next);
+    return formatBhasileCode(normalizedRegionCode, next);
+  }
+
+  const lastCode = await getLastBhasileCode(db, normalizedRegionCode);
   const lastCounter = lastCode
     ? extractCounterFromCode(normalizedRegionCode, lastCode)
     : null;
   const nextCounter = (lastCounter ?? 0) + 1;
+  counterCache?.set(normalizedRegionCode, nextCounter);
   return formatBhasileCode(normalizedRegionCode, nextCounter);
-}
-
-async function getMaxBhasileCounterForRegion(
-  db: any,
-  regionCode: string
-): Promise<number> {
-  const normalizedRegionCode = normalizeRegionCode(regionCode) ?? regionCode;
-  const prefix = `${BHASILE_PREFIX}-${normalizedRegionCode}-`;
-  const structures = await db.structure.findMany({
-    where: { codeBhasile: { startsWith: prefix } },
-    select: { codeBhasile: true },
-  });
-
-  let maxCounter = 0;
-  for (const structure of structures) {
-    const counter = structure.codeBhasile
-      ? extractCounterFromCode(normalizedRegionCode, structure.codeBhasile)
-      : null;
-    if ((counter ?? 0) > maxCounter) {
-      maxCounter = counter ?? 0;
-    }
-  }
-
-  return maxCounter;
-}
-
-export async function generateNextBhasileCode(
-  db: any,
-  regionCode: string,
-  regionCounterCache: Map<string, number>
-): Promise<string> {
-  const normalizedRegionCode = normalizeRegionCode(regionCode) ?? regionCode;
-  const cachedCounter = regionCounterCache.get(normalizedRegionCode);
-
-  if (cachedCounter == undefined) {
-    const maxCounter = await getMaxBhasileCounterForRegion(
-      db,
-      normalizedRegionCode
-    );
-    const next = maxCounter + 1;
-    regionCounterCache.set(normalizedRegionCode, next);
-    return formatBhasileCode(normalizedRegionCode, next);
-  }
-
-  const next = cachedCounter + 1;
-  regionCounterCache.set(normalizedRegionCode, next);
-  return formatBhasileCode(normalizedRegionCode, next);
 }
