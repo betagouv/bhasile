@@ -34,52 +34,54 @@ model Region {
 }
 
 model Structure {
-  id                       Int                  @id @default(autoincrement())
-  dnaCode                  String?              @unique
-  codeBhasile              String?              @unique //TODO make mandatory after migration
-  filiale                  String?
-  type                     StructureType?
-  adresseAdministrative    String?
-  codePostalAdministratif  String?
-  communeAdministrative    String?
-  departementAdministratif String?
-  latitude                 Decimal?
-  longitude                Decimal?
-  nom                      String?
-  debutConvention          DateTime?
-  finConvention            DateTime?
-  creationDate             DateTime?
-  date303                  DateTime?
-  finessCode               String? // TODO remove after migration to own table
-  lgbt                     Boolean?
-  fvvTeh                   Boolean?
-  public                   PublicType?
-  debutPeriodeAutorisation DateTime?
-  finPeriodeAutorisation   DateTime?
-  notes                    String?
-  nomOfii                  String?
-  directionTerritoriale    String?
-  activeInOfiiFileSince    DateTime? // date d'entrée dans le document Ofii
-  inactiveInOfiiFileSince  DateTime? // date de sortie du document Ofii
-  dnaStructures            DnaStructure[]
-  controles                Controle[]
-  evaluations              Evaluation[]
-  adresses                 Adresse[]
-  contacts                 Contact[]
-  structureTypologies      StructureTypologie[]
-  actesAdministratifs      ActeAdministratif[]
-  documentsFinanciers      DocumentFinancier[]
-  cpomStructures           CpomStructure[]
-  structureMillesimes      StructureMillesime[]
-  budgets                  Budget[]
-  operateur                Operateur?           @relation(fields: [operateurId], references: [id])
-  operateurId              Int?
-  forms                    Form[]
-  campaigns                Campaign[]
-  antennes                 Antenne[]
-  finesses                 Finess[]
-  departement              Departement?         @relation(fields: [departementAdministratif], references: [numero])
-  userActions              UserAction[]
+  id                           Int                         @id @default(autoincrement())
+  dnaCode                      String?                     @unique
+  codeBhasile                  String?                     @unique //TODO make mandatory after migration
+  filiale                      String?
+  type                         StructureType?
+  adresseAdministrative        String?
+  codePostalAdministratif      String?
+  communeAdministrative        String?
+  departementAdministratif     String?
+  latitude                     Decimal?
+  longitude                    Decimal?
+  nom                          String?
+  debutConvention              DateTime?
+  finConvention                DateTime?
+  creationDate                 DateTime?
+  date303                      DateTime?
+  finessCode                   String? // TODO remove after migration to own table
+  lgbt                         Boolean?
+  fvvTeh                       Boolean?
+  public                       PublicType?
+  debutPeriodeAutorisation     DateTime?
+  finPeriodeAutorisation       DateTime?
+  notes                        String?
+  nomOfii                      String?
+  directionTerritoriale        String?
+  activeInOfiiFileSince        DateTime? // TODO: remove after migation to DNA- date d'entrée dans le document Ofii
+  inactiveInOfiiFileSince      DateTime? // TODO: remove after migation to DNA- date de sortie du document Ofii
+  dnaStructures                DnaStructure[]
+  controles                    Controle[]
+  evaluations                  Evaluation[]
+  evenementsIndesirablesGraves EvenementIndesirableGrave[]
+  adresses                     Adresse[]
+  contacts                     Contact[]
+  structureTypologies          StructureTypologie[]
+  activites                    Activite[]
+  actesAdministratifs          ActeAdministratif[]
+  documentsFinanciers          DocumentFinancier[]
+  cpomStructures               CpomStructure[]
+  structureMillesimes          StructureMillesime[]
+  budgets                      Budget[]
+  operateur                    Operateur?                  @relation(fields: [operateurId], references: [id])
+  operateurId                  Int?
+  forms                        Form[]
+  campaigns                    Campaign[]
+  antennes                     Antenne[]
+  finesses                     Finess[]
+  departement                  Departement?                @relation(fields: [departementAdministratif], references: [numero])
+  userActions                  UserAction[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -91,6 +93,8 @@ model Dna {
   id                           Int                         @id @default(autoincrement())
   code                         String                      @unique
   description                  String?
+  activeInOfiiFileSince        DateTime? // date d'entrée dans le document Ofii
+  inactiveInOfiiFileSince      DateTime? // date de sortie du document Ofii
   dnaStructures                DnaStructure[]
   activites                    Activite[]
   evenementsIndesirablesGraves EvenementIndesirableGrave[]
@@ -150,11 +154,13 @@ model Evaluation {
 }
 
 model EvenementIndesirableGrave {
-  id               Int      @id @default(autoincrement())
+  id               Int        @id @default(autoincrement())
+  structure        Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   structureDnaCode String? // TODO : à supprimer une fois la migration vers le multi-DNA terminée
+  structureId      Int?
   dnaCode          String?
-  dna              Dna?     @relation(fields: [dnaCode], references: [code], onDelete: Cascade, onUpdate: Cascade)
-  numeroDossier    String   @unique
+  dna              Dna?       @relation(fields: [dnaCode], references: [code], onDelete: Cascade, onUpdate: Cascade)
+  numeroDossier    String     @unique
   evenementDate    DateTime
   declarationDate  DateTime
   type             String
@@ -255,10 +261,12 @@ model StructureTypologie {
 }
 
 model Activite {
-  id                       Int      @id @default(autoincrement())
+  id                       Int        @id @default(autoincrement())
+  structure                Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   structureDnaCode         String? // TODO : à supprimer une fois la migration vers le multi-DNA terminée
+  structureId              Int?
   dnaCode                  String?
-  dna                      Dna?     @relation(fields: [dnaCode], references: [code], onDelete: Cascade, onUpdate: Cascade)
+  dna                      Dna?       @relation(fields: [dnaCode], references: [code], onDelete: Cascade, onUpdate: Cascade)
   date                     DateTime
   placesAutorisees         Int?
   desinsectisation         Int?
