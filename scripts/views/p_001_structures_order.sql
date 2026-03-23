@@ -1,28 +1,38 @@
 -- Objective: enable structure ordering in front-end
 -- This view is in public to prevent interruption in the application if the reporting schema is not created yet
 DROP VIEW IF EXISTS "public"."structures_order";
-CREATE VIEW "public"."structures_order" AS WITH dernier_millesime_structure_typologie AS (
-  SELECT DISTINCT ON (st."structureDnaCode") st."structureDnaCode",
-    st."placesAutorisees",
-    st."year"
-  FROM public."StructureTypologie" st
-  ORDER BY st."structureDnaCode",
-    st."year" DESC
-),
-structure_repartition AS (
-  SELECT a."structureDnaCode",
-    CASE
-      WHEN BOOL_AND(
-        a.repartition = 'COLLECTIF'::public."Repartition"
-      ) THEN 'COLLECTIF'
-      WHEN BOOL_AND(a.repartition = 'DIFFUS'::public."Repartition") THEN 'DIFFUS'
-      ELSE 'MIXTE'
-    END AS bati
-  FROM public."Adresse" a
-  WHERE a.repartition IS NOT NULL
-  GROUP BY a."structureDnaCode"
-)
-SELECT s.id,
+
+
+CREATE VIEW "public"."structures_order" AS
+WITH
+  dernier_millesime_structure_typologie AS (
+    SELECT DISTINCT
+      ON (st."structureDnaCode") st."structureDnaCode",
+      st."placesAutorisees",
+      st."year"
+    FROM
+      public."StructureTypologie" st
+    ORDER BY
+      st."structureDnaCode",
+      st."year" DESC
+  ),
+  structure_repartition AS (
+    SELECT
+      a."structureDnaCode",
+      CASE
+        WHEN BOOL_AND(a.repartition = 'COLLECTIF'::public."Repartition") THEN 'COLLECTIF'
+        WHEN BOOL_AND(a.repartition = 'DIFFUS'::public."Repartition") THEN 'DIFFUS'
+        ELSE 'MIXTE'
+      END AS bati
+    FROM
+      public."Adresse" a
+    WHERE
+      a.repartition IS NOT NULL
+    GROUP BY
+      a."structureDnaCode"
+  )
+SELECT
+  s.id,
   s."dnaCode",
   s."finessCode",
   s."nom",
@@ -37,11 +47,15 @@ SELECT s.id,
   st."placesAutorisees",
   s."finConvention",
   EXISTS (
-    SELECT 1
-    FROM public."Form" f
-    WHERE f."structureCodeDna" = s."dnaCode"
+    SELECT
+      1
+    FROM
+      public."Form" f
+    WHERE
+      f."structureCodeDna" = s."dnaCode"
   ) AS "hasForms"
-FROM public."Structure" s
+FROM
+  public."Structure" s
   LEFT JOIN public."Operateur" o ON o.id = s."operateurId"
   LEFT JOIN dernier_millesime_structure_typologie st ON st."structureDnaCode" = s."dnaCode"
   LEFT JOIN structure_repartition sr ON sr."structureDnaCode" = s."dnaCode"
