@@ -59,7 +59,7 @@ function resolveDepartementNumero(
   departementName: string | null | undefined,
   nameToNumero: Map<string, string>
 ): string | null {
-  if (!departementName) return null;
+  if (!departementName) {return null;}
   return nameToNumero.get(departementName.trim().toLowerCase()) ?? null;
 }
 
@@ -73,7 +73,7 @@ function buildDepartementMaps(departements: DepartementRecord[]) {
     const regionCode = normalizeRegionCode(
       departement.regionAdministrative?.code
     );
-    if (!regionCode) continue;
+    if (!regionCode) {continue;}
     numeroToRegionCode.set(departement.numero, regionCode);
   }
 
@@ -253,7 +253,7 @@ export const fillOfiiStructureFromRows = async (
     }
 
     console.log("- Mise à jour des données de référentiel");
-    let updatedCount = 0;
+    const updatedCount = 0;
     let createdCount = 0;
 
     await prisma.$transaction(async (tx) => {
