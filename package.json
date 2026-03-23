@@ -96,7 +96,7 @@
     "eslint-config-next": "15.1.6",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "husky": "^9.1.7",
-    "jsdom": "^28.1.0",
+    "jsdom": "^29.0.0",
     "node-mocks-http": "^1.17.2",
     "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
