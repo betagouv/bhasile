@@ -60,4 +60,4 @@ FROM
   LEFT JOIN dernier_millesime_structure_typologie st ON st."structureDnaCode" = s."dnaCode"
   LEFT JOIN structure_repartition sr ON sr."structureDnaCode" = s."dnaCode"
   LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
-  LEFT JOIN public."Region" r ON r.code = d."region";
+  LEFT JOIN public."Region" r ON r.code = d."regionId";
