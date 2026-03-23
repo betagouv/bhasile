@@ -7,18 +7,18 @@ CREATE VIEW "public"."structures_order" AS
 WITH
   dernier_millesime_structure_typologie AS (
     SELECT DISTINCT
-      ON (st."structureDnaCode") st."structureDnaCode",
+      ON (st."structureId") st."structureId",
       st."placesAutorisees",
       st."year"
     FROM
       public."StructureTypologie" st
     ORDER BY
-      st."structureDnaCode",
+      st."structureId",
       st."year" DESC
   ),
   structure_repartition AS (
     SELECT
-      a."structureDnaCode",
+      a."structureId",
       CASE
         WHEN BOOL_AND(a.repartition = 'COLLECTIF'::public."Repartition") THEN 'COLLECTIF'
         WHEN BOOL_AND(a.repartition = 'DIFFUS'::public."Repartition") THEN 'DIFFUS'
@@ -29,11 +29,11 @@ WITH
     WHERE
       a.repartition IS NOT NULL
     GROUP BY
-      a."structureDnaCode"
+      a."structureId"
   )
 SELECT
   s.id,
-  s."dnaCode",
+  s."codeBhasile",
   s."finessCode",
   s."nom",
   s."adresseAdministrative",
@@ -52,12 +52,12 @@ SELECT
     FROM
       public."Form" f
     WHERE
-      f."structureCodeDna" = s."dnaCode"
+      f."structureId" = s."id"
   ) AS "hasForms"
 FROM
   public."Structure" s
   LEFT JOIN public."Operateur" o ON o.id = s."operateurId"
-  LEFT JOIN dernier_millesime_structure_typologie st ON st."structureDnaCode" = s."dnaCode"
-  LEFT JOIN structure_repartition sr ON sr."structureDnaCode" = s."dnaCode"
+  LEFT JOIN dernier_millesime_structure_typologie st ON st."structureId" = s."id"
+  LEFT JOIN structure_repartition sr ON sr."structureId" = s."id"
   LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
   LEFT JOIN public."Region" r ON r.id = d."regionId";
