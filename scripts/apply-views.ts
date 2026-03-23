@@ -26,6 +26,13 @@ applyViews();
 function deleteViews() {
   runPsqlOrExit(
     "psql",
+    [psqlUrl, "-v", "ON_ERROR_STOP=1", "-c", 'DROP VIEW IF EXISTS "public"."structures_order";'],
+    '✅ View "public"."structures_order" deleted',
+    '❌ Failed to delete view "public"."structures_order"'
+  );
+
+  runPsqlOrExit(
+    "psql",
     [
       psqlUrl,
       "-v",
