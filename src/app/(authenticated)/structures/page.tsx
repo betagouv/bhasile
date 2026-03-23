@@ -5,12 +5,12 @@ import { sendEvent } from "@socialgouv/matomo-next";
 import dynamic from "next/dynamic";
 import { ReactElement, useMemo, useState } from "react";
 
+import { SegmentedControl } from "@/app/components/common/SegmentedControl";
 import Loader from "@/app/components/ui/Loader";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
 import { FetchState } from "@/types/fetch-state.type";
 
-import { SegmentedControl } from "../../components/common/SegmentedControl";
 import { Filters } from "../../components/filters/Filters";
 import { SearchBar } from "./_components/SearchBar";
 import { StructuresTable } from "./_components/StructuresTable";
