@@ -87,7 +87,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const result = structureAgentUpdateApiSchema.parse(body);
 
-    const existingStructure = await findOne(result.id!);
+    const existingStructure = await findOne(result.id);
 
     if (!canUpdateStructure(session.user as SessionUser, existingStructure)) {
       return NextResponse.json(
