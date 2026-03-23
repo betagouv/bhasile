@@ -4,13 +4,6 @@ import { REGIONS } from "@/constants";
 
 const BHASILE_PREFIX = "BHA";
 
-type BhasileDbClient = {
-  structure: {
-    findFirst: (...args: any[]) => Promise<any>;
-    findMany: (...args: any[]) => Promise<any>;
-  };
-};
-
 export function normalizeRegionCode(regionCode?: string | null): string | null {
   if (!regionCode) return null;
   return regionCode.replace(/^FR-/, "");
@@ -23,11 +16,11 @@ export function getNormalizedRegionCodeFromName(
   return normalizeRegionCode(regionCode);
 }
 
-export function formatBhasileCode(regionCode: string, counter: number): string {
+function formatBhasileCode(regionCode: string, counter: number): string {
   return `${BHASILE_PREFIX}-${regionCode}-${String(counter).padStart(3, "0")}`;
 }
 
-export function extractCounterFromCode(
+function extractCounterFromCode(
   regionCode: string,
   codeBhasile: string
 ): number | null {
@@ -39,8 +32,8 @@ export function extractCounterFromCode(
   return parseInt(match[1], 10);
 }
 
-export async function getLastBhasileCodeForRegion(
-  db: BhasileDbClient,
+async function getLastBhasileCodeForRegion(
+  db: any,
   regionCode: string
 ): Promise<string | null> {
   const prefix = `${BHASILE_PREFIX}-${regionCode}-`;
@@ -53,7 +46,7 @@ export async function getLastBhasileCodeForRegion(
 }
 
 export async function generateBhasileCodeForRegion(
-  db: BhasileDbClient,
+  db: any,
   regionCode: string
 ): Promise<string> {
   const normalizedRegionCode = normalizeRegionCode(regionCode) ?? regionCode;
@@ -65,8 +58,8 @@ export async function generateBhasileCodeForRegion(
   return formatBhasileCode(normalizedRegionCode, nextCounter);
 }
 
-export async function getMaxBhasileCounterForRegion(
-  db: BhasileDbClient,
+async function getMaxBhasileCounterForRegion(
+  db: any,
   regionCode: string
 ): Promise<number> {
   const normalizedRegionCode = normalizeRegionCode(regionCode) ?? regionCode;
@@ -90,7 +83,7 @@ export async function getMaxBhasileCounterForRegion(
 }
 
 export async function generateNextBhasileCode(
-  db: BhasileDbClient,
+  db: any,
   regionCode: string,
   regionCounterCache: Map<string, number>
 ): Promise<string> {
