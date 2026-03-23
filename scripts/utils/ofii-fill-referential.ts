@@ -8,7 +8,7 @@ import type { PrismaClient } from "@/generated/prisma/client";
 import { StructureType } from "@/generated/prisma/client";
 import { REGIONS } from "@/constants";
 import { checkBucket, getObject } from "@/lib/minio";
-import { generateNextBhasileCode, normalizeRegionCode } from "scripts/utils/bhasile";
+import { getNextBhasileCode, normalizeRegionCode } from "scripts/utils/bhasile";
 
 import { ensureOperateursExist } from "./ensure-operateurs-exist";
 import { type OfiiReferentialRow } from "./ofii-xlsx";
@@ -344,7 +344,7 @@ export const fillOfiiStructureFromRows = async (
           continue;
         }
 
-        const codeBhasile = await generateNextBhasileCode(
+        const codeBhasile = await getNextBhasileCode(
           tx,
           regionCode,
           regionCounterCache
