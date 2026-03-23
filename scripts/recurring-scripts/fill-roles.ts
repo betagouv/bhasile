@@ -15,6 +15,7 @@ type DepartementWithRegion = Prisma.DepartementGetPayload<{
 type RoleCsvRow = {
   name: string;
   departement: string;
+  region: string;
   emailPattern: string;
 };
 
@@ -35,12 +36,13 @@ const getTargetDepartementIds = (
     return allDepartements.map((departement) => departement.id);
   }
   if (row.name.startsWith("REGION")) {
-    const region = `FR_${row.name.split("_")[1]}`;
     return allDepartements
-      .filter(
-        (departement) => departement.regionAdministrative?.code === region
-      )
-      .map((departement) => departement.id);
+      .filter((departement) => {
+        return departement.regionAdministrative?.code === row.region;
+      })
+      .map((departement) => {
+        return departement.id;
+      });
   }
   if (row.name.startsWith("DEPARTEMENT")) {
     const departement = allDepartements.find(
