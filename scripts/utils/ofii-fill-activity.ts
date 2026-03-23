@@ -21,11 +21,9 @@ export async function fillOfiiActiviteFromRows(
     return;
   }
 
-  const dnaCodes = [...new Set(rows.map((r) => r.dnaCode).filter(Boolean))];
   const existingDnaCodes = new Set(
     (
       await prisma.dna.findMany({
-        where: { code: { in: dnaCodes } },
         select: { code: true },
       })
     ).map((dna) => dna.code)
