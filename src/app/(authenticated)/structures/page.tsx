@@ -10,7 +10,7 @@ import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
 import { FetchState } from "@/types/fetch-state.type";
 
 import { SegmentedControl } from "../../components/common/SegmentedControl";
-import { Filters } from "./_components/Filters";
+import { Filters } from "../../components/filters/Filters";
 import { SearchBar } from "./_components/SearchBar";
 import { StructuresTable } from "./_components/StructuresTable";
 

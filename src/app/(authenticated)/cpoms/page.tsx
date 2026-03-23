@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ReactElement } from "react";
 
+import { Filters } from "@/app/components/filters/Filters";
 import Loader from "@/app/components/ui/Loader";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useCpomsSearch } from "@/app/hooks/useCpomsSearch";
@@ -23,6 +24,7 @@ export default function Structures(): ReactElement {
           CPOM
         </h2>
         <div className="flex gap-2 items-center">
+          <Filters showFilters={false} showLocation={true} />
           <Link
             href="/cpoms/ajout/01-identification"
             className="fr-btn fr-btn--secondary"

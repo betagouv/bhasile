@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { Filters } from "@/app/(authenticated)/structures/_components/Filters";
+import { Filters } from "@/app/components/filters/Filters";
 
 const mockUseSearchParams = vi.fn();
 
