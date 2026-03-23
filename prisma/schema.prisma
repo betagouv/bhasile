@@ -842,3 +842,17 @@ view StructuresOrder {
   @@map("structures_order")
   @@schema("public")
 }
+
+view CpomOrder {
+  id           Int
+  operateur    String?
+  structures   Int?
+  granularity  String?
+  region       String?
+  departements String?
+  dateStart    DateTime?
+  dateEnd      DateTime?
+  
+  @@map("cpoms_order")
+  @@schema("public")
+}

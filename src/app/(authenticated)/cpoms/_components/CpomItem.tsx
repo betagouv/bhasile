@@ -39,12 +39,8 @@ export const CpomItem = ({ cpom, index }: Props) => {
           getDepartementsList(cpom.departements, 17)
         )}
       </td>
-      <td className="!py-0">
-        {formatDate(dateStart) || <EmptyCell className="[&>div]:mx-0.5" />}
-      </td>
-      <td className="!py-0">
-        {formatDate(dateEnd) || <EmptyCell className="[&>div]:mx-0.5" />}
-      </td>
+      <td className="text-left! !py-0"> {formatDate(dateStart)}</td>
+      <td className="text-left! !py-0"> {formatDate(dateEnd)}</td>
       <td className="!py-0">
         {isCpomFinalized ? (
           <Link
