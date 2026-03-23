@@ -204,7 +204,6 @@ const eigs = await getAllEIGs();
 const existingDnaCodes = new Set(
   (
     await prisma.dna.findMany({
-      where: { code: { in: [...new Set(eigs.map((e) => e.dnaCode))] } },
       select: { code: true },
     })
   ).map((dna) => dna.code)
