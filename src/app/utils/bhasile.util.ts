@@ -1,11 +1,13 @@
 // Utils pour générer les codes Bhasile
 
 import { REGIONS } from "@/constants";
+import { PrismaTransaction } from "@/types/prisma.type";
 
 const BHASILE_PREFIX = "BHA";
+type BhasileDbClient = PrismaTransaction;
 
 export function normalizeRegionCode(regionCode?: string | null): string | null {
-  if (!regionCode) return null;
+  if (!regionCode) {return null;}
   return regionCode.replace(/^FR-/, "");
 }
 
@@ -28,12 +30,12 @@ function extractCounterFromCode(
   const match = codeBhasile.match(
     new RegExp(`^${BHASILE_PREFIX}-${normalizedRegionCode}-(\\d{3})$`)
   );
-  if (!match) return null;
+  if (!match) {return null;}
   return parseInt(match[1]);
 }
 
 async function getLastBhasileCode(
-  db: any,
+  db: BhasileDbClient,
   regionCode: string
 ): Promise<string | null> {
   const prefix = `${BHASILE_PREFIX}-${regionCode}-`;
@@ -46,7 +48,7 @@ async function getLastBhasileCode(
 }
 
 export async function getNextBhasileCode(
-  db: any,
+  db: BhasileDbClient,
   regionCode: string,
   counterCache?: Map<string, number>
 ): Promise<string> {
