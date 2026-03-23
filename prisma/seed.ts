@@ -25,7 +25,6 @@ export async function seed(): Promise<void> {
   console.log("🗑️ Suppression des données existantes...");
   await wipeTables(prisma);
 
-  // Créer d'abord les FormDefinitions et FormStepDefinitions
   console.log("📋 Création des FormDefinitions...");
   const formDefinition = await prisma.formDefinition.create({
     data: createFakeFormDefinition(),
@@ -58,7 +57,7 @@ export async function seed(): Promise<void> {
       operateurName: operateurToInsert.name,
     };
     const structuresToInsert = Array.from(
-      { length: faker.number.int({ min: 50, max: 100 }) },
+      { length: faker.number.int({ min: 20, max: 30 }) },
       () => {
         const departementAdministratif = String(
           faker.number.int({ min: 1, max: 95 })
@@ -81,7 +80,7 @@ export async function seed(): Promise<void> {
     );
 
     const structuresOfiiToInsert = Array.from(
-      { length: faker.number.int({ min: 500, max: 600 }) },
+      { length: faker.number.int({ min: 100, max: 200 }) },
       () => {
         const departementAdministratif = String(
           faker.number.int({ min: 1, max: 95 })

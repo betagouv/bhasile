@@ -6,7 +6,7 @@ export const createFakeActivites = (): Omit<
   Activite,
   "id" | "structureDnaCode"
 >[] => {
-  return Array.from(Array(12).keys()).map((month) =>
+  return Array.from(Array(10).keys()).map((month) =>
     createFakeActivite({
       date: new Date(2025, month, 1, 13),
     })

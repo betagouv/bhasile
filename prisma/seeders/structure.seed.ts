@@ -38,7 +38,6 @@ import { createFakeEvenementIndesirableGrave } from "./evenement-indesirable-gra
 import { createFakeFormWithSteps } from "./form.seed";
 import { createFakeStructureTypologie } from "./structure-typologie.seed";
 
-// TODO: re-add a way to name with the fact the structure is, or has been part of a CPOM
 const generateDnaCode = ({
   type,
   operateurName,
