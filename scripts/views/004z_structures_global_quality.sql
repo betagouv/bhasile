@@ -49,7 +49,7 @@ FROM
   LEFT JOIN:"SCHEMA"."structures_finance_quality" fin ON fin."dnaCode" = s."dnaCode"
   LEFT JOIN public."Operateur" o ON o."id" = s."operateurId"
   LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
-  LEFT JOIN public."Region" r ON r.code = d."region"
+  LEFT JOIN public."Region" r ON r.code = d."regionId"
   LEFT JOIN public."Form" f ON f."structureCodeDna" = s."dnaCode"
   LEFT JOIN public."FormDefinition" fd ON fd."id" = f."formDefinitionId"
 WHERE

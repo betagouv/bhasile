@@ -160,5 +160,5 @@ FROM
   LEFT JOIN budgets_agreges ba ON ba."structureDnaCode" = s."dnaCode"
   LEFT JOIN budget_dernier_millesime bdm ON bdm."structureDnaCode" = s."dnaCode"
   LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
-  LEFT JOIN public."Region" r ON r.code = d."region"
+  LEFT JOIN public."Region" r ON r.code = d."regionId"
   LEFT JOIN public."Operateur" o ON o."id" = s."operateurId";
