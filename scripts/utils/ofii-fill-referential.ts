@@ -4,10 +4,10 @@
 
 import "dotenv/config";
 
-import type { PrismaClient } from "@/generated/prisma/client";
-import { StructureType } from "@/generated/prisma/client";
 import { getNextBhasileCode, normalizeRegionCode } from "@/app/utils/bhasile.util";
 import { REGIONS } from "@/constants";
+import type { PrismaClient } from "@/generated/prisma/client";
+import { StructureType } from "@/generated/prisma/client";
 import { checkBucket, getObject } from "@/lib/minio";
 
 import { ensureOperateursExist } from "./ensure-operateurs-exist";
