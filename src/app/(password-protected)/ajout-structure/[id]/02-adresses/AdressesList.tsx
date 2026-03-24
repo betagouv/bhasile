@@ -98,18 +98,9 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
     <div>
       <fieldset className="flex flex-col gap-6">
         <div className="flex flex-col gap-2" ref={hebergementsContainerRef}>
-          {typeBati === Repartition.COLLECTIF ? (
-            <p className="mb-6">
-              Veuillez renseigner l’ensemble des adresses d’hébergement de la
-              structure, et les informations associées, au 1er janvier de
-              l’année en cours.
-            </p>
-          ) : (
+          {typeBati !== Repartition.COLLECTIF && (
             <>
               <p className="mb-1">
-                Veuillez renseigner l’ensemble des adresses d’hébergement de la
-                structure, et les informations associées, au 1er janvier de
-                l’année en cours. <br />
                 Vous pouvez le faire directement en remplissant les champs
                 ci-dessous ou vous pouvez compléter{" "}
                 <Link
