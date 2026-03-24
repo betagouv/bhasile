@@ -21,25 +21,22 @@ export async function fillOfiiActiviteFromRows(
     return;
   }
 
-  const existingDnaCodes = new Set(
-    (
-      await prisma.dna.findMany({
-        select: { code: true },
-      })
-    ).map((dna) => dna.code)
-  );
-
-  const validRows = rows.filter((row) => existingDnaCodes.has(row.dnaCode));
+  const existingDnaCodes = await prisma.dna.findMany({
+    select: { code: true },
+  });
+  const existingDnaCodeSet = new Set(existingDnaCodes.map((d) => d.code));
+  const validRows = rows.filter((row) => existingDnaCodeSet.has(row.dnaCode));
   const invalidCodes = [
     ...new Set(
       rows
         .map((row) => row.dnaCode)
-        .filter((code) => !existingDnaCodes.has(code))
+        .filter((code) => !existingDnaCodeSet.has(code))
     ),
   ];
+
   if (invalidCodes.length > 0) {
     console.log(
-      `⚠️ ${rows.length - validRows.length} lignes ignorées (DNA non rattaché à une structure pour ${date
+      `⚠️ ${rows.length - validRows.length} lignes ignorées (DNA inconnu pour ${date
         .toISOString()
         .slice(0, 10)}): ${invalidCodes
         .slice(0, 10)
@@ -48,7 +45,7 @@ export async function fillOfiiActiviteFromRows(
   }
 
   if (validRows.length == 0) {
-    console.log("❌ Aucune ligne avec DNA rattaché à une structure à insérer.");
+    console.log("❌ Aucune ligne avec DNA valide à insérer.");
     return;
   }
 
@@ -57,13 +54,14 @@ export async function fillOfiiActiviteFromRows(
   for (const row of validRows) {
     const r = row as ActiviteRow;
     try {
+      // TODO : quand on aura repassé le unique sur dna + date, simplifier ici (post rebase)
+      const existingActivite = await prisma.activite.findFirst({
+        where: { dnaCode: r.dnaCode, date },
+        select: { id: true },
+      });
+
       await prisma.activite.upsert({
-        where: {
-          dnaCode_date: {
-            dnaCode: r.dnaCode,
-            date,
-          },
-        },
+        where: { id: existingActivite?.id ?? -1 },
         create: {
           dnaCode: r.dnaCode,
           date,
@@ -77,7 +75,6 @@ export async function fillOfiiActiviteFromRows(
           presencesInduesDeboutees: r.presencesInduesDeboutees ?? undefined,
         },
         update: {
-          dnaCode: r.dnaCode,
           placesAutorisees: r.placesAutorisees ?? undefined,
           desinsectisation: r.desinsectisation ?? undefined,
           remiseEnEtat: r.remiseEnEtat ?? undefined,
@@ -88,6 +85,7 @@ export async function fillOfiiActiviteFromRows(
           presencesInduesDeboutees: r.presencesInduesDeboutees ?? undefined,
         },
       });
+
       created += 1;
     } catch (error) {
       throw new Error(
