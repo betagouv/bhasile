@@ -2,11 +2,11 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { DnaStructureFormValues } from "@/schemas/forms/base/dna.schema";
 import { FormKind } from "@/types/global";
 
 import { DeleteButton } from "../../common/DeleteButton";
+import { DnaInput } from "../adresseAdministrativeAndAntenne/DnaInput";
 import InputWithValidation from "../InputWithValidation";
 
 const emptyDnaStructure: DnaStructureFormValues = {
@@ -17,9 +17,7 @@ const emptyDnaStructure: DnaStructureFormValues = {
 };
 
 export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
-  const { control, watch, setValue, formState } = useFormContext();
-
-  const dnaStructuresErrors = getErrorMessages(formState, "dnaStructures");
+  const { control, watch, setValue } = useFormContext();
 
   const dnaStructures = (watch("dnaStructures") || [
     emptyDnaStructure,
@@ -52,19 +50,10 @@ export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
         <div key={index} className="flex gap-6 items-start">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1">
             <div className="flex flex-col gap-1">
-              <InputWithValidation
-                name={`dnaStructures.${index}.dna.code`}
-                id={`dnaStructures.${index}.dna.code`}
-                control={control}
-                type="text"
-                label="Code"
-                state={dnaStructuresErrors.length > 0 ? "error" : undefined}
-                stateRelatedMessage={
-                  dnaStructuresErrors.length > 0
-                    ? dnaStructuresErrors[0]
-                    : undefined
-                }
+              <DnaInput
+                index={index}
                 disabled={formKind === FormKind.MODIFICATION || index === 0}
+                label="Code"
               />
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
@@ -74,7 +63,11 @@ export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
                 control={control}
                 type="text"
                 label="Description"
+                className="mb-0"
               />
+              <span className="text-[#666666] text-sm">
+                ex : Site d’Avranches Nord et Sud ou Extension 2022
+              </span>
             </div>
           </div>
           <div className="w-8 mt-9">

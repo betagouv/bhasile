@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { FormKind } from "@/types/global";
 
+import { DnaInput } from "../adresseAdministrativeAndAntenne/DnaInput";
 import InputWithValidation from "../InputWithValidation";
 import { FieldSetDna } from "./FieldSetDna";
 import { FieldSetFiness } from "./FieldSetFiness";
@@ -40,14 +41,7 @@ export const DnaAndFiness = ({ formKind = FormKind.FINALISATION }: Props) => {
         </>
       ) : (
         <div className="grid grid-cols-3 gap-6 flex-1">
-          <InputWithValidation
-            name="dnaStructures.0.dna.code"
-            id="dnaStructures.0.dna.code"
-            control={control}
-            type="text"
-            label="Code DNA"
-            disabled
-          />
+          <DnaInput index={0} disabled label="Code DNA" />
           {isAutorisee && (
             <InputWithValidation
               name="finesses.0.code"
