@@ -1,5 +1,5 @@
 import { DEFAULT_PAGE_SIZE } from "@/constants";
-import { Structure, StructureType } from "@/generated/prisma/client";
+import { Prisma, Structure, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { StructureColumn } from "@/types/ListColumn";
@@ -21,10 +21,6 @@ import {
 } from "../forms/form.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
 import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
-import {
-  getStructureOrderBy,
-  getStructureSearchWhere,
-} from "./structure.service";
 import { convertToPublicType } from "./structure.util";
 
 type SearchProps = {
@@ -40,6 +36,172 @@ type SearchProps = {
   map?: boolean;
   selection?: boolean;
 };
+
+const STRUCTURES_ORDER_WITH_PART = Prisma.sql`
+  WITH dernier_millesime_structure_typologie AS (
+    SELECT DISTINCT ON (st."structureId")
+      st."structureId",
+      st."placesAutorisees"
+    FROM public."StructureTypologie" st
+    ORDER BY st."structureId", st."year" DESC
+  ),
+  structure_repartition AS (
+    SELECT
+      a."structureId",
+      CASE
+        WHEN BOOL_AND(a.repartition = 'COLLECTIF'::public."Repartition") THEN 'COLLECTIF'
+        WHEN BOOL_AND(a.repartition = 'DIFFUS'::public."Repartition") THEN 'DIFFUS'
+        ELSE 'MIXTE'
+      END AS bati
+    FROM public."Adresse" a
+    WHERE a.repartition IS NOT NULL
+    GROUP BY a."structureId"
+  )
+`;
+
+const STRUCTURES_ORDER_JOINS_PART = Prisma.sql`
+  FROM public."Structure" s
+  LEFT JOIN public."Operateur" o ON o.id = s."operateurId"
+  LEFT JOIN dernier_millesime_structure_typologie st ON st."structureId" = s.id
+  LEFT JOIN structure_repartition sr ON sr."structureId" = s.id
+`;
+
+function buildOrder(
+  column: StructureColumn,
+  direction: "asc" | "desc"
+): Prisma.Sql {
+  const dir = direction === "desc" ? Prisma.sql`DESC` : Prisma.sql`ASC`;
+  const byColumn: Record<StructureColumn, Prisma.Sql> = {
+    codeBhasile: Prisma.sql`s."codeBhasile"`,
+    type: Prisma.sql`s."type"`,
+    operateur: Prisma.sql`o."name"`,
+    departementAdministratif: Prisma.sql`s."departementAdministratif"`,
+    bati: Prisma.sql`sr.bati`,
+    communes: Prisma.sql`s."communeAdministrative"`,
+    placesAutorisees: Prisma.sql`st."placesAutorisees"`,
+    finConvention: Prisma.sql`s."finConvention"`,
+  };
+  return Prisma.sql`${byColumn[column]} ${dir}, s."codeBhasile" ASC`;
+}
+
+function buildWhereConditions({
+  search,
+  type,
+  bati,
+  departements,
+  placesAutorisees,
+  operateurs,
+  selection,
+}: SearchProps): Prisma.Sql {
+  const conditions: Prisma.Sql[] = [];
+  const typeList = type?.split(",").filter(Boolean) ?? [];
+  const depList = departements?.split(",").filter(Boolean) ?? [];
+  const opList = operateurs?.split(",").filter(Boolean) ?? [];
+
+  if (!selection) {
+    conditions.push(
+      Prisma.sql`EXISTS (SELECT 1 FROM public."Form" f WHERE f."structureId" = s.id)`
+    );
+  }
+  if (typeList.length > 0) {
+    conditions.push(Prisma.sql`s."type"::text IN (${Prisma.join(typeList)})`);
+  }
+  if (depList.length > 0) {
+    conditions.push(
+      Prisma.sql`s."departementAdministratif" IN (${Prisma.join(depList)})`
+    );
+  }
+  if (opList.length > 0) {
+    conditions.push(Prisma.sql`o."name" IN (${Prisma.join(opList)})`);
+  }
+  if (placesAutorisees) {
+    const [minStr, maxStr] = placesAutorisees.split(",");
+    const min = minStr ? parseInt(minStr, 10) : null;
+    const max = maxStr ? parseInt(maxStr, 10) : null;
+    if (min !== null && max !== null) {
+      conditions.push(
+        Prisma.sql`st."placesAutorisees" >= ${min} AND st."placesAutorisees" <= ${max}`
+      );
+    }
+  }
+  if (search) {
+    const like = `%${search}%`;
+    conditions.push(Prisma.sql`(
+      s."codeBhasile" ILIKE ${like}
+      OR COALESCE(s."finessCode", '') ILIKE ${like}
+      OR COALESCE(s."nom", '') ILIKE ${like}
+      OR s."departementAdministratif" ILIKE ${like}
+      OR s."communeAdministrative" ILIKE ${like}
+      OR s."codePostalAdministratif" ILIKE ${like}
+      OR COALESCE(o."name", '') ILIKE ${like}
+    )`);
+  }
+  if (bati) {
+    if (bati === "none") {
+      conditions.push(Prisma.sql`sr.bati IS NULL`);
+    } else {
+      const batiList = bati.split(",").filter(Boolean);
+      if (batiList.length > 0) {
+        conditions.push(Prisma.sql`sr.bati IN (${Prisma.join(batiList)})`);
+      }
+    }
+  }
+
+  if (conditions.length === 0) {
+    return Prisma.sql``;
+  }
+  let combined = conditions[0];
+  for (let i = 1; i < conditions.length; i += 1) {
+    combined = Prisma.sql`${combined} AND ${conditions[i]}`;
+  }
+  return Prisma.sql`WHERE ${combined}`;
+}
+
+async function getOrderedStructures({
+  search,
+  page,
+  type,
+  bati,
+  placesAutorisees,
+  departements,
+  operateurs,
+  column,
+  direction,
+  selection,
+  map,
+}: SearchProps): Promise<{ id: number }[]> {
+  const whereSql = buildWhereConditions({
+    search,
+    page,
+    type,
+    bati,
+    placesAutorisees,
+    departements,
+    operateurs,
+    column,
+    direction,
+    selection,
+    map,
+  });
+  const orderSql = buildOrder(
+    column ?? "departementAdministratif",
+    direction ?? "asc"
+  );
+  const paginationSql =
+    selection || map
+      ? Prisma.sql``
+      : Prisma.sql`LIMIT ${DEFAULT_PAGE_SIZE} OFFSET ${(page ?? 0) * DEFAULT_PAGE_SIZE}`;
+
+  return prisma.$queryRaw<{ id: number }[]>(Prisma.sql`
+    ${STRUCTURES_ORDER_WITH_PART}
+    SELECT s.id
+    ${STRUCTURES_ORDER_JOINS_PART}
+    ${whereSql}
+    ORDER BY ${orderSql}
+    ${paginationSql}
+  `);
+}
+
 export const findBySearch = async ({
   search,
   page,
@@ -53,27 +215,24 @@ export const findBySearch = async ({
   map,
   selection,
 }: SearchProps): Promise<Partial<Structure>[]> => {
-  const where = getStructureSearchWhere({
+  const structuresIds = await getOrderedStructures({
     search,
+    page,
     type,
     bati,
-    departements,
     placesAutorisees,
+    departements,
     operateurs,
+    column,
+    direction,
+    map,
     selection,
   });
-
   if (map) {
-    const mapStructuresIds = await prisma.structuresOrder.findMany({
-      where,
-      select: {
-        id: true,
-      },
-    });
     return prisma.structure.findMany({
       where: {
         id: {
-          in: mapStructuresIds.map((structure) => structure.id),
+          in: structuresIds.map((structure) => structure.id),
         },
       },
       select: {
@@ -83,21 +242,6 @@ export const findBySearch = async ({
       },
     });
   }
-
-  const orderBy = getStructureOrderBy(
-    column ?? "departementAdministratif",
-    direction ?? "asc"
-  );
-
-  const structuresIds = await prisma.structuresOrder.findMany({
-    where,
-    skip: selection ? 0 : page ? page * DEFAULT_PAGE_SIZE : 0,
-    take: selection ? undefined : DEFAULT_PAGE_SIZE,
-    orderBy,
-    select: {
-      id: true,
-    },
-  });
 
   const structures = await prisma.structure.findMany({
     where: {
@@ -148,18 +292,26 @@ export const countBySearch = async ({
   departements,
   operateurs,
 }: SearchProps): Promise<number> => {
-  const where = getStructureSearchWhere({
+  const whereSql = buildWhereConditions({
     search,
+    page: null,
     type,
     bati,
     departements,
     placesAutorisees,
     operateurs,
+    column: null,
+    direction: null,
+    map: false,
+    selection: false,
   });
-
-  return prisma.structuresOrder.count({
-    where,
-  });
+  const result = await prisma.$queryRaw<{ count: bigint }[]>(Prisma.sql`
+    ${STRUCTURES_ORDER_WITH_PART}
+    SELECT COUNT(*)::bigint AS count
+    ${STRUCTURES_ORDER_JOINS_PART}
+    ${whereSql}
+  `);
+  return Number(result[0]?.count ?? 0);
 };
 
 export const getLatestPlacesAutoriseesPerStructure = async (): Promise<

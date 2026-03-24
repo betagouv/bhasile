@@ -31,6 +31,19 @@ function deleteViews() {
       "-v",
       "ON_ERROR_STOP=1",
       "-c",
+      'DROP VIEW IF EXISTS "public"."structures_order"; DROP VIEW IF EXISTS "public"."cpoms_order";',
+    ],
+    '✅ Views "public"."structures_order" et "public"."cpoms_order" deleted',
+    '❌ Failed to delete public order views'
+  );
+
+  runPsqlOrExit(
+    "psql",
+    [
+      psqlUrl,
+      "-v",
+      "ON_ERROR_STOP=1",
+      "-c",
       `DROP SCHEMA IF EXISTS "${schema}" CASCADE;`,
     ],
     `✅ Schema "${schema}" deleted`,

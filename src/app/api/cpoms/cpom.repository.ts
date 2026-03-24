@@ -1,5 +1,5 @@
 import { DEFAULT_PAGE_SIZE } from "@/constants";
-import { Cpom } from "@/generated/prisma/client";
+import { Cpom, Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
   CpomApiType,
@@ -11,7 +11,6 @@ import { CpomColumn } from "@/types/ListColumn";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acteAdministratif.repository";
-import { getCpomOrderBy, getCpomSearchWhere } from "./cpom.service";
 
 type SearchProps = {
   page?: number | null;
@@ -20,26 +19,104 @@ type SearchProps = {
   direction?: "asc" | "desc" | null;
 };
 
+const CPOM_ORDER_WITH_SQL = Prisma.sql`
+  WITH
+    cpom_start_dates AS (
+      SELECT DISTINCT ON (aa."cpomId")
+        aa."cpomId",
+        aa."startDate" AS "dateStart"
+      FROM public."ActeAdministratif" aa
+      WHERE aa."cpomId" IS NOT NULL AND aa."startDate" IS NOT NULL
+      ORDER BY aa."cpomId", aa.id ASC
+    ),
+    cpom_end_dates AS (
+      SELECT
+        aa."cpomId",
+        MAX(aa."endDate") AS "dateEnd"
+      FROM public."ActeAdministratif" aa
+      WHERE aa."cpomId" IS NOT NULL AND aa."endDate" IS NOT NULL
+      GROUP BY aa."cpomId"
+    ),
+    cpom_departements AS (
+      SELECT
+        cd."cpomId",
+        STRING_AGG(d.numero, ', ' ORDER BY d.numero) AS departements
+      FROM public."CpomDepartement" cd
+      JOIN public."Departement" d ON d.id = cd."departementId"
+      GROUP BY cd."cpomId"
+    ),
+    cpom_structures AS (
+      SELECT
+        cs."cpomId",
+        COUNT(*)::int AS structures
+      FROM public."CpomStructure" cs
+      GROUP BY cs."cpomId"
+    )
+`;
+
+const CPOM_ORDER_FROM_SQL = Prisma.sql`
+  FROM public."Cpom" c
+  LEFT JOIN public."Operateur" o ON o.id = c."operateurId"
+  LEFT JOIN public."Region" r ON r.id = c."regionId"
+  LEFT JOIN cpom_start_dates sd ON sd."cpomId" = c.id
+  LEFT JOIN cpom_end_dates ed ON ed."cpomId" = c.id
+  LEFT JOIN cpom_departements cd ON cd."cpomId" = c.id
+  LEFT JOIN cpom_structures cs ON cs."cpomId" = c.id
+`;
+
+function buildOrder(column: CpomColumn, direction: "asc" | "desc"): Prisma.Sql {
+  const dir = direction === "desc" ? Prisma.sql`DESC` : Prisma.sql`ASC`;
+  const byColumn: Record<CpomColumn, Prisma.Sql> = {
+    operateur: Prisma.sql`o.name`,
+    structures: Prisma.sql`COALESCE(cs.structures, 0)`,
+    granularity: Prisma.sql`c.granularity`,
+    region: Prisma.sql`r.name`,
+    departements: Prisma.sql`COALESCE(cd.departements, '')`,
+    dateStart: Prisma.sql`sd."dateStart"`,
+    dateEnd: Prisma.sql`ed."dateEnd"`,
+  };
+  return Prisma.sql`${byColumn[column]} ${dir}, c.id ASC`;
+}
+
+function buildWhereConditions({ departements }: SearchProps): Prisma.Sql {
+  const departementList = departements?.split(",").filter(Boolean) ?? [];
+  if (departementList.length === 0) {
+    return Prisma.sql``;
+  }
+  const patterns = departementList.map((departement) => `%${departement}%`);
+  return Prisma.sql`WHERE COALESCE(cd.departements, '') ILIKE ANY (ARRAY[${Prisma.join(patterns)}])`;
+}
+
+async function getCpomOrderIdsRaw({
+  page,
+  departements,
+  column,
+  direction,
+}: SearchProps): Promise<{ id: number }[]> {
+  const whereSql = buildWhereConditions({ page, departements, column, direction });
+  const orderSql = buildOrder(column ?? "region", direction ?? "asc");
+  return prisma.$queryRaw<{ id: number }[]>(Prisma.sql`
+    ${CPOM_ORDER_WITH_SQL}
+    SELECT c.id
+    ${CPOM_ORDER_FROM_SQL}
+    ${whereSql}
+    ORDER BY ${orderSql}
+    LIMIT ${DEFAULT_PAGE_SIZE}
+    OFFSET ${(page ?? 0) * DEFAULT_PAGE_SIZE}
+  `);
+}
+
 export const findBySearch = async ({
   page,
   departements,
   column,
   direction,
 }: SearchProps): Promise<Cpom[]> => {
-  const where = getCpomSearchWhere({
+  const cpomOrderIds = await getCpomOrderIdsRaw({
+    page,
     departements,
-  });
-
-  const orderBy = getCpomOrderBy(column ?? "region", direction ?? "asc");
-
-  const cpomOrderIds = await prisma.cpomOrder.findMany({
-    where,
-    skip: page ? page * DEFAULT_PAGE_SIZE : 0,
-    take: DEFAULT_PAGE_SIZE,
-    orderBy,
-    select: {
-      id: true,
-    },
+    column,
+    direction,
   });
 
   if (cpomOrderIds.length === 0) {
@@ -80,13 +157,19 @@ export const findBySearch = async ({
 export const countBySearch = async ({
   departements,
 }: SearchProps): Promise<number> => {
-  const where = getCpomSearchWhere({
+  const whereSql = buildWhereConditions({
+    page: null,
     departements,
+    column: null,
+    direction: null,
   });
-
-  return prisma.cpomOrder.count({
-    where,
-  });
+  const result = await prisma.$queryRaw<{ count: bigint }[]>(Prisma.sql`
+    ${CPOM_ORDER_WITH_SQL}
+    SELECT COUNT(*)::bigint AS count
+    ${CPOM_ORDER_FROM_SQL}
+    ${whereSql}
+  `);
+  return Number(result[0]?.count ?? 0);
 };
 
 export const findOne = async (id: number): Promise<Cpom> => {
