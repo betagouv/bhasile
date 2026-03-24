@@ -126,7 +126,7 @@ function resolveOperateurName(
   operateurRaw: string | null | undefined,
   operateurMapping: OperateurMapping | null
 ): string | null {
-  if (!operateurRaw) return null;
+  if (!operateurRaw) {return null;}
   return operateurMapping?.[operateurRaw] ?? operateurRaw;
 }
 
@@ -300,7 +300,7 @@ export const fillOfiiStructureFromRows = async (
         });
         presentDnaCodes.add(dna.code);
 
-        let structureId = dna.dnaStructures[0]?.structureId;
+        const structureId = dna.dnaStructures[0]?.structureId;
         if (!dna.activeInOfiiFileSince) {
           await tx.dna.update({
             where: { id: dna.id },
