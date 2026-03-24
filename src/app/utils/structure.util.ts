@@ -193,10 +193,7 @@ export const isStructureSubventionnee = (type: string | undefined): boolean => {
 export const isStructureMultiAntenne = (
   structure: StructureApiType
 ): boolean => {
-  return (
-    (structure.antennes?.length ?? 0) > 1 ||
-    (structure.contacts?.length ?? 0) > 2
-  );
+  return (structure.antennes?.length ?? 0) > 0;
 };
 
 export const isStructureMultiDna = (structure: StructureApiType): boolean => {
