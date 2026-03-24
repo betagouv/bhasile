@@ -4,13 +4,16 @@ import { useFormContext } from "react-hook-form";
 
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
+import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { DEPARTEMENTS, REGIONS } from "@/constants";
 import { CpomDepartementApiType } from "@/schemas/api/cpom.schema";
 
 import { DepartementsSelector } from "../DepartementsSelector";
 
 export const LocationSelector = () => {
-  const { watch, control, setValue } = useFormContext();
+  const { watch, control, setValue, formState } = useFormContext();
+
+  const errorMessages = getErrorMessages(formState, "departements");
 
   const granularity = watch("granularity");
 
@@ -125,51 +128,58 @@ export const LocationSelector = () => {
   };
 
   return (
-    <div className="grid grid-cols-3 gap-6">
-      <OperateurAutocomplete />
-      <SelectWithValidation
-        name="region.name"
-        id="region"
-        control={control}
-        label="Région"
-        required
-      >
-        <option value="">Sélectionnez une région</option>
-        {REGIONS.filter((region) => region.show).map((region) => (
-          <option key={region.name} value={region.name}>
-            {region.name}
-          </option>
-        ))}
-      </SelectWithValidation>
-      {granularity === "DEPARTEMENTALE" && (
-        <Select
-          label="Département"
-          nativeSelectProps={{
-            name: "departements.0.departement.numero",
-            id: "departements",
-            value:
-              departements && departements.length === 1
-                ? departements[0].departement?.numero
-                : "",
-            onChange: (e) => handleDepartementChange(e.target.value),
-          }}
-          disabled={!departementsOfRegion.length}
+    <>
+      <div className="grid grid-cols-3 gap-6">
+        <OperateurAutocomplete />
+        <SelectWithValidation
+          name="region.name"
+          id="region"
+          control={control}
+          label="Région"
+          required
         >
-          <option value="">Sélectionnez un département</option>
-          {departementsOfRegion.map((departement) => (
-            <option key={departement.numero} value={departement.numero}>
-              {departement.numero} - {departement.name}
+          <option value="">Sélectionnez une région</option>
+          {REGIONS.filter((region) => region.show).map((region) => (
+            <option key={region.name} value={region.name}>
+              {region.name}
             </option>
           ))}
-        </Select>
+        </SelectWithValidation>
+        {granularity === "DEPARTEMENTALE" && (
+          <Select
+            label="Département"
+            nativeSelectProps={{
+              name: "departements.0.departement.numero",
+              id: "departements",
+              value:
+                departements && departements.length === 1
+                  ? departements[0].departement?.numero
+                  : "",
+              onChange: (e) => handleDepartementChange(e.target.value),
+            }}
+            disabled={!departementsOfRegion.length}
+          >
+            <option value="">Sélectionnez un département</option>
+            {departementsOfRegion.map((departement) => (
+              <option key={departement.numero} value={departement.numero}>
+                {departement.numero} - {departement.name}
+              </option>
+            ))}
+          </Select>
+        )}
+        {granularity === "INTERDEPARTEMENTALE" && (
+          <DepartementsSelector
+            departements={departementsOfRegion}
+            selectedDepartements={departements}
+            handleDepartementToggle={handleDepartementToggle}
+          />
+        )}
+      </div>
+      {errorMessages?.length > 0 && (
+        <p className="text-default-error m-0 p-0 text-right">
+          {errorMessages[0]}
+        </p>
       )}
-      {granularity === "INTERDEPARTEMENTALE" && (
-        <DepartementsSelector
-          departements={departementsOfRegion}
-          selectedDepartements={departements}
-          handleDepartementToggle={handleDepartementToggle}
-        />
-      )}
-    </div>
+    </>
   );
 };
