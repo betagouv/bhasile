@@ -90,7 +90,7 @@ function parseYear(year: string): string {
   throw new Error(`Année invalide: ${year}`);
 }
 
-/** Extrait (year, month) du nom d'onglet (ex. "10 25", "octobre 2025", "Liste") ou null. */
+/* Extrait (year, month) du nom d'onglet (ex. "10 25", "octobre 2025", "Liste") ou null. */
 function parseSheetDate(
   sheetName: string
 ): { year: number; month: number } | null {
@@ -124,7 +124,7 @@ function parseSheetDate(
   return null;
 }
 
-/** Extrait (year, month) du nom de fichier "Liste données par centre MM.AA VF.XLSX". */
+/* Extrait (year, month) du nom de fichier "Liste données par centre MM.AA VF.XLSX". */
 function parseFilenameDate(
   fileName: string
 ): { year: number; month: number } | null {
@@ -161,9 +161,7 @@ function normalizeCellValue(val: unknown): string {
   return String(val).trim();
 }
 
-/**
- * Charge les données référentiel + activité (onglet le plus récent ou "Liste" si présent).
- */
+/* Charge les données référentiel + activité (onglet le plus récent ou "Liste" si présent) */
 export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
   const wb = XLSX.read(buffer, { type: "buffer", raw: true });
   const sheetNames = wb.SheetNames;
