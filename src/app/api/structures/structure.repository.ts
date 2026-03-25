@@ -216,7 +216,7 @@ export const findOneOperateur = async (
   });
 };
 
-export const findOne = async (id: number): Promise<Structure> => {
+export const findOne = async (id: number) => {
   const structure = await prisma.structure.findFirstOrThrow({
     where: {
       id,
@@ -224,7 +224,20 @@ export const findOne = async (id: number): Promise<Structure> => {
     include: {
       dnaStructures: {
         include: {
-          dna: true,
+          dna: {
+            include: {
+              activites: {
+                orderBy: {
+                  date: "desc",
+                },
+              },
+              evenementsIndesirablesGraves: {
+                orderBy: {
+                  evenementDate: "desc",
+                },
+              },
+            },
+          },
         },
       },
       finesses: true,
@@ -300,16 +313,6 @@ export const findOne = async (id: number): Promise<Structure> => {
         },
         orderBy: {
           date: "desc",
-        },
-      },
-      activites: {
-        orderBy: {
-          date: "desc",
-        },
-      },
-      evenementsIndesirablesGraves: {
-        orderBy: {
-          evenementDate: "desc",
         },
       },
       actesAdministratifs: {

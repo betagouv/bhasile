@@ -222,11 +222,13 @@ export async function seed(): Promise<void> {
     },
   });
   const activites = allStructuresWithDna.flatMap((structure) => {
-    const dnaCode = structure.dnaStructures[0]?.dna?.code;
-    if (!dnaCode) {
-      return [];
-    }
-    return createFakeActivites({ dnaCode });
+    return structure.dnaStructures.flatMap((dnaStructure) => {
+      const dnaCode = dnaStructure?.dna?.code;
+      if (!dnaCode) {
+        return [];
+      }
+      return createFakeActivites({ dnaCode });
+    });
   });
   await prisma.activite.createMany({ data: activites });
   console.log(`✅ ${activites.length} activités créées`);
@@ -234,16 +236,20 @@ export async function seed(): Promise<void> {
   console.log("📊 Création des événements indésirables graves...");
   const evenementsIndesirablesGraves = allStructuresWithDna.flatMap(
     (structure) => {
-      const dnaCode = structure.dnaStructures[0]?.dna?.code;
-      if (!dnaCode) {
-        return [];
-      }
+      return structure.dnaStructures.flatMap((dnaStructure) => {
+        const dnaCode = dnaStructure?.dna?.code;
+        if (!dnaCode) {
+          return [];
+        }
 
-      return Array.from({ length: faker.number.int({ min: 0, max: 15 }) }, () =>
-        createFakeEvenementIndesirableGrave({
-          dnaCode,
-        })
-      );
+        return Array.from(
+          { length: faker.number.int({ min: 0, max: 15 }) },
+          () =>
+            createFakeEvenementIndesirableGrave({
+              dnaCode,
+            })
+        );
+      });
     }
   );
   await prisma.evenementIndesirableGrave.createMany({

@@ -4,11 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/next-auth/auth";
 
 import { createStructureEvent } from "../../user-action/user-action.service";
-import { findOne, findOneOperateur } from "../structure.repository";
-import {
-  addPresencesIndues,
-  StructureWithFileUploadsAndActivites,
-} from "../structure.service";
+import { findOneOperateur } from "../structure.repository";
+import { getFullStructure } from "../structure.service";
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     const id = request.nextUrl.pathname.split("/").pop();
     const structure = isAuthenticated
-      ? await findOne(Number(id))
+      ? await getFullStructure(Number(id))
       : await findOneOperateur(Number(id));
 
     createStructureEvent(request.method, structure.id);
@@ -35,11 +32,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const structureWithPresencesIndues = isAuthenticated
-      ? addPresencesIndues(structure as StructureWithFileUploadsAndActivites)
+    const fullStructure = isAuthenticated
+      ? await getFullStructure(Number(id))
       : structure;
 
-    return NextResponse.json(structureWithPresencesIndues);
+    return NextResponse.json(fullStructure);
   } catch (error) {
     console.error("Error in GET /api/structures/[id]", error);
     return NextResponse.json(
