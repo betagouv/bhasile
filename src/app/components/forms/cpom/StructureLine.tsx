@@ -37,9 +37,7 @@ export const StructureLine = ({
     }
   }, [index, setValue, cpomDateStart, cpomDateEnd, isEditable]);
 
-  const structureLabel = `
-    ${structure.codeBhasile} - ${structure.type} ${structure.operateur?.name} ${structure.communeAdministrative ?? structure.departementAdministratif}
-  `;
+  const structureLabel = `${structure.codeBhasile} - ${structure.type} ${structure.operateur?.name} ${structure.communeAdministrative ?? structure.departementAdministratif}`;
 
   return (
     <div className="flex items-center gap-4 border-b border-gray-200 py-2 px-4">
