@@ -1,29 +1,70 @@
-import { Prisma, Repartition, StructureType } from "@/generated/prisma/client";
+import {
+  Activite,
+  Prisma,
+  Repartition,
+  StructureType,
+} from "@/generated/prisma/client";
 import { StructureColumn } from "@/types/ListColumn";
 
 import { convertToRepartition } from "../adresses/adresse.util";
-import { getLatestPlacesAutoriseesPerStructure } from "./structure.repository";
+import {
+  findOne,
+  getLatestPlacesAutoriseesPerStructure,
+} from "./structure.repository";
 
-export type StructureWithFileUploadsAndActivites = Prisma.StructureGetPayload<{
-  include: { fileUploads: true; activites: true };
-}>;
+export const getFullStructure = async (id: number) => {
+  const structure = await findOne(id);
+  const aggregatedActivites = structure.dnaStructures
+    .flatMap((dnaStructure) => dnaStructure.dna.activites)
+    .reduce<Record<string, Partial<Activite>>>((accumulator, current) => {
+      const dateKey = new Date(current.date).toISOString().split("T")[0];
 
-export const addPresencesIndues = (
-  structure: StructureWithFileUploadsAndActivites
-) => {
-  const activitesWithPresencesIndues = structure.activites.map((activite) => {
-    const presencesIndues =
+      if (!accumulator[dateKey]) {
+        accumulator[dateKey] = {
+          id: current.id,
+          date: current.date,
+          placesAutorisees: current.placesAutorisees,
+          desinsectisation: current.desinsectisation,
+          remiseEnEtat: current.remiseEnEtat,
+          sousOccupation: current.sousOccupation,
+          placesIndisponibles: current.placesIndisponibles,
+          placesOccupees: current.placesOccupees,
+          travaux: current.travaux,
+          placesVacantes: current.placesVacantes,
+          presencesInduesBPI: current.presencesInduesBPI,
+          presencesInduesDeboutees: current.presencesInduesDeboutees,
+        };
+      } else {
+        const currentActivite = Object.keys(current) as Array<keyof Activite>;
+        currentActivite.forEach((key) => {
+          if (
+            typeof current[key] === "number" &&
+            key in accumulator[dateKey] &&
+            key !== "id"
+          ) {
+            (accumulator[dateKey][key as keyof Partial<Activite>] as number) +=
+              current[key];
+          }
+        });
+      }
+      return accumulator;
+    }, {});
+
+  const activitesArray = Object.values(aggregatedActivites).map((activite) => ({
+    ...activite,
+    presencesIndues:
       (activite?.presencesInduesBPI || 0) +
-      (activite?.presencesInduesDeboutees || 0);
-    return {
-      ...activite,
-      presencesIndues,
-    };
-  });
+      (activite?.presencesInduesDeboutees || 0),
+  }));
+
+  const aggregatedEIGs = structure.dnaStructures.flatMap(
+    (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
+  );
 
   return {
     ...structure,
-    activites: activitesWithPresencesIndues,
+    activites: activitesArray,
+    evenementsIndesirablesGraves: aggregatedEIGs,
   };
 };
 
