@@ -27,9 +27,12 @@ export const formatDateToIsoString = (
   if (val === undefined || val === "" || val === null) {
     return undefined;
   }
-  // If it's already ISO datetime, return as-is
+  // If it's already ISO datetime, change the hour to 13
   if (/^\d{4}-\d{2}-\d{2}T/.test(val)) {
-    return val;
+    return val.replace(
+      /^(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+      "$1T13:00:00.000Z"
+    );
   }
   // If it's already ISO date, convert to datetime
   if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {

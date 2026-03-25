@@ -83,6 +83,16 @@ describe("date util", () => {
       // THEN
       expect(result).toBe("2023-01-01T13:00:00.000Z");
     });
+    it("should return correct value for iso datetime", () => {
+      // GIVEN
+      const date = "2023-01-01T00:00:00.000Z";
+
+      // WHEN
+      const result = formatDateToIsoString(date);
+
+      // THEN
+      expect(result).toBe("2023-01-01T13:00:00.000Z");
+    });
   });
   describe("getMonthsBetween", () => {
     it("should return an empty array for invalid start or end date", () => {
