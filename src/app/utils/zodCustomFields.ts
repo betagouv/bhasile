@@ -1,29 +1,9 @@
 import { z } from "zod";
 
-const transformFrenchDateToISO = (
-  val: string | undefined
-): string | undefined => {
-  if (val === undefined || val === "") {
-    return undefined;
-  }
-  // If it's already ISO datetime, return as-is
-  if (/^\d{4}-\d{2}-\d{2}T/.test(val)) {
-    return val;
-  }
-  // If it's already ISO date, convert to datetime
-  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
-    return `${val}T00:00:00.000Z`;
-  }
-  // If it's French format, convert to datetime
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
-    const [day, month, year] = val.split("/");
-    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T00:00:00.000Z`;
-  }
-  return val;
-};
+import { formatDateToIsoString } from "./date.util";
 
 export const frenchDateToISO = () =>
-  z.string().transform(transformFrenchDateToISO).pipe(z.string().datetime());
+  z.string().transform(formatDateToIsoString).pipe(z.string().datetime());
 
 export const frenchDateToYear = () =>
   z
@@ -89,7 +69,7 @@ export const optionalFrenchDateToISO = () =>
       if (val === null || val === undefined || val === "") {
         return undefined;
       }
-      return transformFrenchDateToISO(val);
+      return formatDateToIsoString(val);
     })
     .pipe(z.string().datetime().optional());
 
@@ -104,7 +84,7 @@ export const nullishFrenchDateToISO = () =>
       if (val === undefined || val === "") {
         return null;
       }
-      return transformFrenchDateToISO(val);
+      return formatDateToIsoString(val);
     })
     .pipe(z.string().datetime().nullish());
 
