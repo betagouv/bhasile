@@ -60,7 +60,11 @@ export const FieldSetFiness = () => {
                 control={control}
                 type="text"
                 label="Description"
+                className="mb-0"
               />
+              <span className="text-[#666666] text-sm">
+                ex : Toute la structure
+              </span>
             </div>
           </div>
           <div className="w-8 mt-9">

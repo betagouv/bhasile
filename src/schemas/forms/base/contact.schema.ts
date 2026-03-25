@@ -85,9 +85,7 @@ export const contactSchema = Object.assign(requiredContactSchema, {
 });
 
 export const contactsSchema = z.object({
-  contacts: z
-    .tuple([requiredContactSchema, requiredContactSchema])
-    .rest(optionalContactSchema),
+  contacts: z.tuple([requiredContactSchema]).rest(optionalContactSchema),
 });
 
 export type ContactFormValues = z.infer<typeof contactSchema>;

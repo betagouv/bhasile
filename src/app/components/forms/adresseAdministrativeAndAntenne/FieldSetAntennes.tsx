@@ -66,7 +66,9 @@ export const FieldSetAntennes = () => {
                 label="Nom du site"
                 className="mb-0"
               />
-              <span className="text-[#666666] text-sm">ex. Avranches Nord</span>
+              <span className="text-[#666666] text-sm">
+                ex : Avranches Nord
+              </span>
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
               <AddressWithValidation
