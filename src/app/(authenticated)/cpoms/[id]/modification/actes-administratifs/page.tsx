@@ -31,7 +31,7 @@ export default function CpomModificationActesAdministratifs() {
   return (
     <>
       <ModificationTitle
-        step="Actes administratifs"
+        step="Document de convention du CPOM"
         closeLink={`/cpoms/${cpom.id}`}
       />
       <FormWrapper
