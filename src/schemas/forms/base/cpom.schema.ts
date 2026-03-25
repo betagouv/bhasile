@@ -86,6 +86,30 @@ export const cpomSchema = descriptionCpomSchema
   .and(compositionCpomSchema)
   .refine(
     (data) => {
+      if (!data.region.name) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "La région est obligatoire",
+      path: ["region.name"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.departements.length === 0) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Au moins un département est obligatoire",
+      path: ["departements"],
+    }
+  )
+  .refine(
+    (data) => {
       if (data.dateStart && data.dateEnd) {
         return data.dateStart <= data.dateEnd;
       }
@@ -93,7 +117,7 @@ export const cpomSchema = descriptionCpomSchema
     },
     {
       message: "La date de début du CPOM doit être antérieure à la date de fin",
-      path: ["dateEnd"],
+      path: ["actesAdministratifs.0.startDate"],
     }
   )
   .refine(
@@ -131,7 +155,10 @@ export const cpomSchema = descriptionCpomSchema
   )
   .refine(
     (data) => {
-      if (!data.dateStart || !data.dateEnd || !Array.isArray(data.structures)) {
+      if (!data.dateStart || !data.dateEnd) {
+        return true;
+      }
+      if (!data.structures.length) {
         return true;
       }
       const cpomStart = data.dateStart;

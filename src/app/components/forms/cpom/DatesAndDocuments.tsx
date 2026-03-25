@@ -1,10 +1,9 @@
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { AdditionalFieldsType } from "@/app/utils/acteAdministratif.util";
-import { cn } from "@/app/utils/classname.util";
 import { formatDateToIsoString } from "@/app/utils/date.util";
 import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
@@ -16,11 +15,6 @@ dayjs.extend(customParseFormat);
 
 export const DatesAndDocuments = () => {
   const { watch, control, setValue, formState } = useFormContext();
-
-  const hasErrors = useMemo(
-    () => !!formState.errors?.actesAdministratifs,
-    [formState.errors]
-  );
 
   const errorMessages = getErrorMessages(formState, "actesAdministratifs");
 
@@ -70,12 +64,7 @@ export const DatesAndDocuments = () => {
 
   return (
     <>
-      <div
-        className={cn(
-          "flex gap-2",
-          hasErrors && "border border-solid border-action-high-error rounded-lg"
-        )}
-      >
+      <div className="flex gap-2">
         <InputWithValidation
           id="dateStart"
           name="dateStart"
@@ -104,9 +93,9 @@ export const DatesAndDocuments = () => {
           addFileButtonLabel="Ajouter un CPOM"
         />
       </div>
-      {hasErrors && (
+      {errorMessages?.length > 0 && (
         <p className="text-default-error m-0 p-0">
-          {errorMessages?.length > 0 ? errorMessages[0] : ""}
+          {errorMessages?.length ? errorMessages[0] : ""}
         </p>
       )}
     </>

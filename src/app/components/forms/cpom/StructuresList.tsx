@@ -110,7 +110,7 @@ export const StructuresList = ({ structures }: Props) => {
     <>
       <div
         className={cn(
-          "max-w-3xl border border-solid rounded-lg border-default-grey",
+          "max-w-4xl border border-solid rounded-lg border-default-grey",
           hasErrors && "border border-solid border-action-high-error rounded-lg"
         )}
       >

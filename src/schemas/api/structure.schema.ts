@@ -35,6 +35,7 @@ export const structureMinimalApiSchema = z.object({
   departementAdministratif: z
     .string()
     .min(1, "Le département de l'adresse administrative est requis"),
+  communeAdministrative: z.string().optional(),
 });
 
 export const structureOperateurUpdateApiSchema =
