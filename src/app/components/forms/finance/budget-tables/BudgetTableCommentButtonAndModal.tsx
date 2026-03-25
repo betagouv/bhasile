@@ -73,7 +73,7 @@ export const BudgetTableCommentButtonAndModal = ({
     <>
       <Button
         type="button"
-        iconId="fr-icon-edit-box-line"
+        iconId="fr-icon-eye-line"
         onClick={() => {
           handleOpenModal(year);
         }}
@@ -109,7 +109,7 @@ export const BudgetTableCommentButtonAndModal = ({
             },
           },
         ]}
-        className="[&_h1]:!text-left [&_p]:!text-left"
+        className="[&_h1]:text-left! [&_p]:text-left!"
       >
         <p className="font-bold text-xl">
           Détail affectation réserves et provisions{" "}

@@ -35,7 +35,7 @@ export const BudgetTableLine = ({
 
   return (
     <tr>
-      <td className="text-left!">
+      <td className="text-left! w-[220]">
         <strong className="whitespace-nowrap">{label}</strong>
         <br />
         <span className="text-xs">{subLabel}</span>
