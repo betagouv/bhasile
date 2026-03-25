@@ -42,17 +42,18 @@ const COLUMNS: ListColumn[] = [
     centered: true,
   },
   {
-    label: "Bâti",
-    column: "bati",
-    orderBy: true,
-    centered: false,
-  },
-  {
     label: "Communes",
     column: "communes",
     orderBy: false,
     centered: false,
   },
+  {
+    label: "Bâti",
+    column: "bati",
+    orderBy: true,
+    centered: false,
+  },
+
   {
     label: "Places aut.",
     column: "placesAutorisees",
