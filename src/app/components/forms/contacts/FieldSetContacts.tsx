@@ -23,8 +23,8 @@ export const FieldSetContacts = () => {
   const contacts = (watch("contacts") || [emptyContact]) as ContactFormValues[];
 
   const notice = isMultiAntenne
-    ? "Veuillez renseigner le contact de la personne responsable de la structure et celui de la personne responsable de l’opérationnel et/ou du financier."
-    : "Veuillez renseigner les contacts d’au moins deux personnes dont celle responsable de la structure et celle responsable de l’opérationnel et/ou du financier. Indiquez également un responsable de chaque antenne.";
+    ? "Veuillez renseigner le contact d’au moins une personne responsable de la structure, de l’opérationnel et/ou du financier. Indiquez également un responsable de chaque site."
+    : "Veuillez renseigner le contact d’au moins une personne responsable de la structure, de l’opérationnel et/ou du financier.";
 
   const handleDelete = (index: number) => {
     setValue(
