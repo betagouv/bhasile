@@ -18,9 +18,13 @@ export const getBudgetTableHeading = ({ years, structure }: Props) => {
         {structure && (
           <>
             {isStructureInCpom(structure, year) ? (
-              <Badge type="new">En CPOM</Badge>
+              <Badge type="new" className="text-[10px]">
+                En CPOM
+              </Badge>
             ) : (
-              <Badge type="disabled">Hors CPOM</Badge>
+              <Badge type="disabled" className="text-[10px]">
+                Hors CPOM
+              </Badge>
             )}
           </>
         )}
