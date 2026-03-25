@@ -22,19 +22,28 @@ export const formatDate = (
 };
 
 export const formatDateToIsoString = (
-  date: string | undefined | null,
-  defaultToToday: boolean = false
-): string | null => {
-  if (date) {
-    if (/^\d{4}-\d{2}-\d{2}(T[\d:.]+(Z|([\+\-]\d{2}:\d{2}))?)?$/.test(date)) {
-      return date;
-    }
-    return dayjs(date, "DD/MM/YYYY").toISOString();
+  val: string | undefined | null
+): string | undefined => {
+  if (val === undefined || val === "" || val === null) {
+    return undefined;
   }
-  if (defaultToToday) {
-    return dayjs().toISOString();
+  // If it's already ISO datetime, change the hour to 13
+  if (/^\d{4}-\d{2}-\d{2}T/.test(val)) {
+    return val.replace(
+      /^(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+      "$1T13:00:00.000Z"
+    );
   }
-  return null;
+  // If it's already ISO date, convert to datetime
+  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+    return `${val}T13:00:00.000Z`;
+  }
+  // If it's French format, convert to datetime
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
+    const [day, month, year] = val.split("/");
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T13:00:00.000Z`;
+  }
+  return undefined;
 };
 
 export const getMonthsBetween = (
