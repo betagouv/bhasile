@@ -8,6 +8,7 @@ export const ExternalLink = ({ title, url }: Props): ReactElement => {
       href={url}
       target="_blank"
       rel="noopener external"
+      className="after:w-[12]"
     >
       {title}
     </Link>

@@ -64,7 +64,7 @@ export const BudgetTableStaticValue = ({
     <span className="text-center">
       {colored ? (
         <Badge type={Number(value) >= 0 ? "success" : "error"}>
-          <NumberDisplay value={value} type="currency" />
+          <NumberDisplay value={value} type="currency" className="text-sm" />
         </Badge>
       ) : (
         <NumberDisplay value={value} type="currency" />

@@ -110,11 +110,11 @@ export const StructuresList = ({ structures }: Props) => {
     <>
       <div
         className={cn(
-          "max-w-4xl",
+          "max-w-4xl border border-solid rounded-lg border-default-grey",
           hasErrors && "border border-solid border-action-high-error rounded-lg"
         )}
       >
-        <div className="flex items-center gap-4 border-b border-gray-200 py-2 px-4">
+        <div className="flex items-center gap-4 border-b border-gray-200 py-4 px-6">
           <div className="flex-1">
             <Checkbox
               options={[

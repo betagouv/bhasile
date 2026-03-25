@@ -43,11 +43,6 @@ export const Menu = (): ReactElement => {
 
   const secondaryMenuItems = [
     {
-      label: "Aide",
-      url: `mailto:${BHASILE_CONTACT_EMAIL}`,
-      isExternalLink: true,
-    },
-    {
       label: "Politique de confidentialité",
       url: "/politique-confidentialite",
     },
@@ -62,15 +57,6 @@ export const Menu = (): ReactElement => {
     {
       label: "Accessibilité : partiellement conforme",
       url: "/accessibilite",
-    },
-    {
-      label: "Usage",
-      url: "/usage",
-    },
-    {
-      label: "Code source",
-      url: "https://github.com/betagouv/bhasile",
-      isExternalLink: true,
     },
   ];
 
@@ -95,7 +81,7 @@ export const Menu = (): ReactElement => {
   };
 
   return (
-    <nav className="fr-sidemenu pb-6 pe-0 h-screen sticky flex flex-col top-0 w-72 border-r border-default-grey ">
+    <nav className="fr-sidemenu pe-0 h-screen sticky flex flex-col top-0 w-72 border-r border-default-grey ">
       <div className="border-b border-default-grey min-h-[4.35rem] grid">
         <Logo />
       </div>
@@ -111,7 +97,8 @@ export const Menu = (): ReactElement => {
               href={menuItem.url}
               aria-current={getAriaCurrent(menuItem.url, menuItem.subItems)}
             >
-              <span className={menuItem.icon}>{menuItem.label}</span>
+              <div className={`${menuItem.icon} pr-2`} />
+              <div>{menuItem.label}</div>
             </Link>
             {menuItem.subItems && (
               <ul className="fr-sidemenu__list">
@@ -134,21 +121,31 @@ export const Menu = (): ReactElement => {
           </li>
         ))}
       </ul>
-      <div className="p-4 mt-auto">
+      <div className="p-6 mt-auto border-b border-b-border-default-grey border-t border-t-border-default-grey">
         <User />
       </div>
-      <ul className="p-4">
+      <ul className="p-6">
         {secondaryMenuItems.map((menuItem) => (
           <li className="text-mention-grey fr-text--xs" key={menuItem.label}>
-            {menuItem.isExternalLink ? (
-              <ExternalLink title={menuItem.label} url={menuItem.url} />
-            ) : (
-              <Link href={menuItem.url}>
-                <span>{menuItem.label}</span>
-              </Link>
-            )}
+            <Link href={menuItem.url}>
+              <span>{menuItem.label}</span>
+            </Link>
           </li>
         ))}
+        <li className="text-mention-grey fr-text--xs inline">
+          <ExternalLink title="Aide" url={`mailto:${BHASILE_CONTACT_EMAIL}`} />
+        </li>
+        {" • "}
+        <li className="text-mention-grey fr-text--xs inline">
+          <Link href="/usage">Usage</Link>
+        </li>
+        {" • "}
+        <li className="text-mention-grey fr-text--xs inline">
+          <ExternalLink
+            title="Code source"
+            url="https://github.com/betagouv/bhasile"
+          />
+        </li>
       </ul>
     </nav>
   );

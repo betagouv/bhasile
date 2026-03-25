@@ -143,6 +143,9 @@ export const zSafeDecimalsNullish = () =>
 export const zSafePositiveDecimalsNullish = () =>
   z.preprocess(numberPreprocess, z.number().min(0).nullish());
 
+export const zSafePositiveInteger = () =>
+  z.preprocess(numberPreprocess, z.number().int().min(0));
+
 export const zSafeYear = () =>
   z.preprocess(
     (val) => (typeof val === "string" ? Number(val) : val),

@@ -40,7 +40,7 @@ export const StructureLine = ({
   const structureLabel = `${structure.codeBhasile} - ${structure.type} ${structure.operateur?.name} ${structure.communeAdministrative ?? structure.departementAdministratif}`;
 
   return (
-    <div className="flex items-center gap-4 border-b border-gray-200 py-2 px-4">
+    <div className="flex items-center gap-4 border-b border-gray-200 py-2 px-6">
       <div className="flex-1">
         <Checkbox
           legend=""

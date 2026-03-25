@@ -129,6 +129,7 @@ export class CpomAjoutIdentificationPage extends BasePage {
 
         await this.page
           .waitForLoadState("networkidle", { timeout: TIMEOUTS.FILE_UPLOAD })
+          .then(async () => await this.waitHelper.waitForUIUpdate(2))
           .catch(() => {});
       }
     }

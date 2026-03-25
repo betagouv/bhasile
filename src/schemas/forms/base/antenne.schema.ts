@@ -5,7 +5,7 @@ import { zId } from "@/app/utils/zodCustomFields";
 const antenneSchema = z.object({
   id: zId(),
   structureId: zId(),
-  name: z.string().optional(),
+  name: z.string().min(1),
   adresseComplete: z.string().optional(),
   adresse: z.string().min(1),
   codePostal: z.string().min(1),
