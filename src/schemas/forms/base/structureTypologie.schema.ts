@@ -4,8 +4,8 @@ import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
 import {
   nullishFrenchDateToISO,
   zId,
-  zSafePositiveDecimals,
   zSafePositiveDecimalsNullish,
+  zSafePositiveInteger,
   zSafeYear,
 } from "@/app/utils/zodCustomFields";
 import { CURRENT_YEAR } from "@/constants";
@@ -103,10 +103,10 @@ const mandatoryEvolutionRefine = (
 
 export const structureTypologieWithoutEvolutionSchema = z.object({
   id: zId(),
-  placesAutorisees: zSafePositiveDecimals(),
-  pmr: zSafePositiveDecimals(),
-  lgbt: zSafePositiveDecimals(),
-  fvvTeh: zSafePositiveDecimals(),
+  placesAutorisees: zSafePositiveInteger(),
+  pmr: zSafePositiveInteger(),
+  lgbt: zSafePositiveInteger(),
+  fvvTeh: zSafePositiveInteger(),
   year: zSafeYear(),
 });
 
