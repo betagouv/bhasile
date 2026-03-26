@@ -32,11 +32,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const fullStructure = isAuthenticated
-      ? await getFullStructure(Number(id))
-      : structure;
-
-    return NextResponse.json(fullStructure);
+    return NextResponse.json(structure);
   } catch (error) {
     console.error("Error in GET /api/structures/[id]", error);
     return NextResponse.json(
