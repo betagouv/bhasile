@@ -107,7 +107,6 @@
     "stylelint-config-standard": "^39.0.1",
     "tsx": "^4.21.0",
     "typescript": "^5",
-    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.0",
     "xlsx": "^0.18.5"
   }
