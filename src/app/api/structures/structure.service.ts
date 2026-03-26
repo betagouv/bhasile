@@ -14,9 +14,33 @@ import {
 
 export const getFullStructure = async (id: number) => {
   const structure = await findOne(id);
+  const aggregatedActivites = getAggregatedActivites(structure);
+
+  const aggregatedEIGs = structure.dnaStructures.flatMap(
+    (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
+  );
+
+  return {
+    ...structure,
+    activites: aggregatedActivites,
+    evenementsIndesirablesGraves: aggregatedEIGs,
+  };
+};
+
+type StructureWithActivites = Prisma.StructureGetPayload<{
+  include: {
+    dnaStructures: { include: { dna: { include: { activites: true } } } };
+  };
+}>;
+
+type AggregatedActivite = Omit<Activite, "dnaCode" | "structureDnaCode">;
+
+const getAggregatedActivites = (
+  structure: StructureWithActivites
+): AggregatedActivite[] => {
   const aggregatedActivites = structure.dnaStructures
     .flatMap((dnaStructure) => dnaStructure.dna.activites)
-    .reduce<Record<string, Partial<Activite>>>((accumulator, current) => {
+    .reduce<Record<string, AggregatedActivite>>((accumulator, current) => {
       const dateKey = new Date(current.date).toISOString().split("T")[0];
 
       if (!accumulator[dateKey]) {
@@ -42,7 +66,7 @@ export const getFullStructure = async (id: number) => {
             key in accumulator[dateKey] &&
             key !== "id"
           ) {
-            (accumulator[dateKey][key as keyof Partial<Activite>] as number) +=
+            (accumulator[dateKey][key as keyof AggregatedActivite] as number) +=
               current[key];
           }
         });
@@ -50,22 +74,12 @@ export const getFullStructure = async (id: number) => {
       return accumulator;
     }, {});
 
-  const activitesArray = Object.values(aggregatedActivites).map((activite) => ({
+  return Object.values(aggregatedActivites).map((activite) => ({
     ...activite,
     presencesIndues:
       (activite?.presencesInduesBPI || 0) +
       (activite?.presencesInduesDeboutees || 0),
   }));
-
-  const aggregatedEIGs = structure.dnaStructures.flatMap(
-    (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
-  );
-
-  return {
-    ...structure,
-    activites: activitesArray,
-    evenementsIndesirablesGraves: aggregatedEIGs,
-  };
 };
 
 export const getStructureOrderBy = (
