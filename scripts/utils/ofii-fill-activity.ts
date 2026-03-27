@@ -21,29 +21,20 @@ export async function fillOfiiActiviteFromRows(
     return;
   }
 
-  const dnaCodes = [...new Set(rows.map((r) => r.dnaCode).filter(Boolean))];
-  const dnaMappings = await prisma.dnaStructure.findMany({
-    where: {
-      dna: { code: { in: dnaCodes } },
-      AND: [
-        { OR: [{ startDate: null }, { startDate: { lte: date } }] },
-        { OR: [{ endDate: null }, { endDate: { gte: date } }] },
-      ],
-    },
-    select: { structureId: true, dna: { select: { code: true } } },
-  });
-  const dnaToStructureId = new Map(
-    dnaMappings.map(
-      (mapping) => [mapping.dna.code, mapping.structureId] as const
-    )
+  const existingDnaCodes = new Set(
+    (
+      await prisma.dna.findMany({
+        select: { code: true },
+      })
+    ).map((dna) => dna.code)
   );
 
-  const validRows = rows.filter((row) => dnaToStructureId.has(row.dnaCode));
+  const validRows = rows.filter((row) => existingDnaCodes.has(row.dnaCode));
   const invalidCodes = [
     ...new Set(
       rows
         .map((row) => row.dnaCode)
-        .filter((code) => !dnaToStructureId.has(code))
+        .filter((code) => !existingDnaCodes.has(code))
     ),
   ];
   if (invalidCodes.length > 0) {
@@ -66,19 +57,14 @@ export async function fillOfiiActiviteFromRows(
   for (const row of validRows) {
     const r = row as ActiviteRow;
     try {
-      const structureId = dnaToStructureId.get(r.dnaCode);
-      if (!structureId) {
-        continue;
-      }
       await prisma.activite.upsert({
         where: {
-          structureId_date: {
-            structureId,
+          dnaCode_date: {
+            dnaCode: r.dnaCode,
             date,
           },
         },
         create: {
-          structureId,
           dnaCode: r.dnaCode,
           date,
           placesAutorisees: r.placesAutorisees ?? undefined,
