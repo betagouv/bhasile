@@ -89,21 +89,20 @@ export const buildStructuresWhereSql = ({
     conditions.push(Prisma.sql`o."name" IN (${Prisma.join(opList)})`);
   }
   if (placesAutorisees) {
-    if (placesAutorisees) {
-      const [minStr, maxStr] = placesAutorisees.split(",");
-      const min = minStr ? parseInt(minStr, 10) : null;
-      const max = maxStr ? parseInt(maxStr, 10) : null;
-      if (
-        min !== null &&
-        max !== null &&
-        !Number.isNaN(min) &&
-        !Number.isNaN(max)
-      ) {
-        conditions.push(
-          Prisma.sql`st."placesAutorisees" >= ${min} AND st."placesAutorisees" <= ${max}`
-        );
-      }
+    const [minStr, maxStr] = placesAutorisees.split(",");
+    const min = minStr ? parseInt(minStr, 10) : null;
+    const max = maxStr ? parseInt(maxStr, 10) : null;
+    if (
+      min !== null &&
+      max !== null &&
+      !Number.isNaN(min) &&
+      !Number.isNaN(max)
+    ) {
+      conditions.push(
+        Prisma.sql`st."placesAutorisees" >= ${min} AND st."placesAutorisees" <= ${max}`
+      );
     }
+
     const like = `%${search}%`;
     conditions.push(Prisma.sql`(
       s."codeBhasile" ILIKE ${like}
