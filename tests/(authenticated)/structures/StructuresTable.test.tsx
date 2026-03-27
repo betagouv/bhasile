@@ -57,8 +57,8 @@ describe("StructuresTable", () => {
     expect(columnHeaders[1]).toHaveAccessibleName("Type");
     expect(columnHeaders[2]).toHaveAccessibleName("Opérateur");
     expect(columnHeaders[3]).toHaveAccessibleName("Dépt.");
-    expect(columnHeaders[4]).toHaveAccessibleName("Bâti");
-    expect(columnHeaders[5]).toHaveAccessibleName("Communes");
+    expect(columnHeaders[4]).toHaveAccessibleName("Communes");
+    expect(columnHeaders[5]).toHaveAccessibleName("Bâti");
     expect(columnHeaders[6]).toHaveAccessibleName("Places aut.");
     expect(columnHeaders[7]).toHaveAccessibleName("Fin convention");
     expect(columnHeaders[8]).toHaveAccessibleName("");
@@ -68,8 +68,8 @@ describe("StructuresTable", () => {
     expect(firstStructureCells[1]).toHaveAccessibleName("CADA");
     expect(firstStructureCells[2]).toHaveAccessibleName("Adoma");
     expect(firstStructureCells[3]).toHaveAccessibleName("75");
-    expect(firstStructureCells[4]).toHaveAccessibleName("Diffus");
-    expect(firstStructureCells[5]).toHaveAccessibleName("Paris");
+    expect(firstStructureCells[4]).toHaveAccessibleName("Paris");
+    expect(firstStructureCells[5]).toHaveAccessibleName("Diffus");
     expect(firstStructureCells[6]).toHaveAccessibleName("10");
     expect(firstStructureCells[7]).toHaveAccessibleName("02/01/2027");
     expect(firstStructureCells[8]).toHaveAccessibleName(
@@ -80,8 +80,8 @@ describe("StructuresTable", () => {
     expect(secondStructureCells[1]).toHaveAccessibleName("CADA");
     expect(secondStructureCells[2]).toHaveAccessibleName("Adoma");
     expect(secondStructureCells[3]).toHaveAccessibleName("75");
-    expect(secondStructureCells[4]).toHaveAccessibleName("Diffus");
-    expect(secondStructureCells[5]).toHaveAccessibleName("Paris");
+    expect(secondStructureCells[4]).toHaveAccessibleName("Paris");
+    expect(secondStructureCells[5]).toHaveAccessibleName("Diffus");
     expect(secondStructureCells[6]).toHaveAccessibleName("10");
     expect(firstStructureCells[7]).toHaveAccessibleName("02/01/2027");
     expect(secondStructureCells[8]).toHaveAccessibleName(
@@ -92,8 +92,8 @@ describe("StructuresTable", () => {
     expect(thirdStructureCells[1]).toHaveAccessibleName("CADA");
     expect(thirdStructureCells[2]).toHaveAccessibleName("Adoma");
     expect(thirdStructureCells[3]).toHaveAccessibleName("75");
-    expect(thirdStructureCells[4]).toHaveAccessibleName("Diffus");
-    expect(thirdStructureCells[5]).toHaveAccessibleName("Paris");
+    expect(thirdStructureCells[4]).toHaveAccessibleName("Paris");
+    expect(thirdStructureCells[5]).toHaveAccessibleName("Diffus");
     expect(thirdStructureCells[6]).toHaveAccessibleName("10");
     expect(firstStructureCells[7]).toHaveAccessibleName("02/01/2027");
     expect(thirdStructureCells[8]).toHaveAccessibleName(
