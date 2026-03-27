@@ -1,6 +1,8 @@
-import { Structure, StructureType } from "@/generated/prisma/client";
+import { DEFAULT_PAGE_SIZE } from "@/constants";
+import { Prisma, Structure, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
+import { StructureColumn } from "@/types/ListColumn";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acteAdministratif.repository";
@@ -20,13 +22,68 @@ import {
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
 import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import {
+  STRUCTURES_ORDER_CTE_SQL,
+  STRUCTURES_ORDER_JOINS_SQL,
+} from "./structure.constants";
+import {
+  buildStructuresOrderSql,
+  buildStructuresWhereSql,
   convertToPublicType,
-  countStructuresBySearch,
-  getOrderedStructures,
-  StructureOrderSearchProps,
 } from "./structure.util";
 
-type SearchProps = StructureOrderSearchProps;
+type SearchProps = {
+  search: string | null;
+  page: number | null;
+  type: string | null;
+  bati: string | null;
+  placesAutorisees: string | null;
+  departements: string | null;
+  operateurs: string | null;
+  column?: StructureColumn | null;
+  direction?: "asc" | "desc" | null;
+  map?: boolean;
+  selection?: boolean;
+};
+const getOrderedStructures = async ({
+  search,
+  page,
+  type,
+  bati,
+  placesAutorisees,
+  departements,
+  operateurs,
+  column,
+  direction,
+  selection,
+  map,
+}: SearchProps): Promise<{ id: number }[]> => {
+  const whereSql = buildStructuresWhereSql({
+    search,
+    type,
+    bati,
+    placesAutorisees,
+    departements,
+    operateurs,
+    selection,
+  });
+  const orderSql = buildStructuresOrderSql(
+    column ?? "departementAdministratif",
+    direction ?? "asc"
+  );
+  const paginationSql =
+    selection || map
+      ? Prisma.sql``
+      : Prisma.sql`LIMIT ${DEFAULT_PAGE_SIZE} OFFSET ${(page ?? 0) * DEFAULT_PAGE_SIZE}`;
+
+  return prisma.$queryRaw<{ id: number }[]>(Prisma.sql`
+    ${STRUCTURES_ORDER_CTE_SQL}
+    SELECT s.id
+    ${STRUCTURES_ORDER_JOINS_SQL}
+    ${whereSql}
+    ORDER BY ${orderSql}
+    ${paginationSql}
+  `);
+};
 
 export const findBySearch = async ({
   search,
@@ -117,15 +174,31 @@ export const countBySearch = async ({
   placesAutorisees,
   departements,
   operateurs,
-}: SearchProps): Promise<number> => {
-  return countStructuresBySearch({
+}: Pick<
+  SearchProps,
+  | "search"
+  | "type"
+  | "bati"
+  | "placesAutorisees"
+  | "departements"
+  | "operateurs"
+>): Promise<number> => {
+  const whereSql = buildStructuresWhereSql({
     search,
     type,
     bati,
     departements,
     placesAutorisees,
     operateurs,
+    selection: false,
   });
+  const result = await prisma.$queryRaw<{ count: bigint }[]>(Prisma.sql`
+    ${STRUCTURES_ORDER_CTE_SQL}
+    SELECT COUNT(*)::bigint AS count
+    ${STRUCTURES_ORDER_JOINS_SQL}
+    ${whereSql}
+  `);
+  return Number(result[0]?.count ?? 0);
 };
 
 export const getLatestPlacesAutoriseesPerStructure = async (): Promise<

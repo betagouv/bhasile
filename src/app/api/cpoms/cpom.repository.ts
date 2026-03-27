@@ -1,4 +1,6 @@
+import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { Cpom } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
   CpomApiType,
@@ -6,16 +8,38 @@ import {
   CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
+import { CpomColumn } from "@/types/ListColumn";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acteAdministratif.repository";
-import {
-  countCpomsBySearch,
-  CpomOrderSearchProps,
-  getOrderedCpoms,
-} from "./cpom.util";
+import { CPOM_ORDER_CTE_SQL, CPOM_ORDER_JOINS_SQL } from "./cpom.constants";
+import { buildCpomsOrderSql, buildCpomsWhereSql } from "./cpom.util";
 
-type SearchProps = CpomOrderSearchProps;
+type SearchProps = {
+  page?: number | null;
+  departements: string | null;
+  column?: CpomColumn | null;
+  direction?: "asc" | "desc" | null;
+};
+
+async function getOrderedCpoms({
+  page,
+  departements,
+  column,
+  direction,
+}: SearchProps): Promise<{ id: number }[]> {
+  const whereSql = buildCpomsWhereSql({ departements });
+  const orderSql = buildCpomsOrderSql(column ?? "region", direction ?? "asc");
+  return prisma.$queryRaw<{ id: number }[]>(Prisma.sql`
+    ${CPOM_ORDER_CTE_SQL}
+    SELECT c.id
+    ${CPOM_ORDER_JOINS_SQL}
+    ${whereSql}
+    ORDER BY ${orderSql}
+    LIMIT ${DEFAULT_PAGE_SIZE}
+    OFFSET ${(page ?? 0) * DEFAULT_PAGE_SIZE}
+  `);
+}
 
 export const findBySearch = async ({
   page,
@@ -65,11 +89,18 @@ export const findBySearch = async ({
   return orderedCpoms;
 };
 
-export const countBySearch = async ({
+export async function countBySearch({
   departements,
-}: SearchProps): Promise<number> => {
-  return countCpomsBySearch({ departements });
-};
+}: Pick<SearchProps, "departements">): Promise<number> {
+  const whereSql = buildCpomsWhereSql({ departements });
+  const result = await prisma.$queryRaw<{ count: bigint }[]>(Prisma.sql`
+    ${CPOM_ORDER_CTE_SQL}
+    SELECT COUNT(*)::bigint AS count
+    ${CPOM_ORDER_JOINS_SQL}
+    ${whereSql}
+  `);
+  return Number(result[0]?.count ?? 0);
+}
 
 export const findOne = async (id: number): Promise<Cpom> => {
   const cpom = await prisma.cpom.findFirstOrThrow({
