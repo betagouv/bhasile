@@ -63,7 +63,7 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.AUTH_SECRET,
   pages: {
     signIn: "/connexion",
-    error: "/acces-refuse",
+    error: "/connexion?accesRefuse=true",
   },
   providers: [
     {
