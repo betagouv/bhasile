@@ -92,7 +92,7 @@ export const StructureHeader = (): ReactElement | null => {
             <h3 className="text-title-blue-france fr-h6 mb-0">
               <strong className="pr-2">
                 {type}, {getOperateurLabel(filiale, operateur?.name)},{" "}
-                {structureTypologies?.[0].placesAutorisees} places
+                {structureTypologies?.[0]?.placesAutorisees} places
               </strong>
               <span className="pr-2">{" – "}</span>
               <span className="mb-0 text-title-grey fr-text--lg italic font-normal">

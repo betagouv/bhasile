@@ -59,7 +59,10 @@ export const useStructures = (): UseStructureResult => {
     structure: unknown,
     setStructure: (structure: StructureApiType) => void
   ): Promise<string> => {
-    const result = await updateStructure(structure);
+    const result = await updateStructure({
+      ...(structure as object),
+      id: structureId,
+    });
     if (result === "OK") {
       const res = await fetch(`/api/structures/${structureId}`);
       const updatedStructure = await res.json();
