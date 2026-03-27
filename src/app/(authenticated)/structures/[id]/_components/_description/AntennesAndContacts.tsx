@@ -2,6 +2,7 @@ import { ReactElement } from "react";
 
 import { formatCityName } from "@/app/utils/adresse.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
+import { isStructureMultiAntenne } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
@@ -9,6 +10,8 @@ export const AntennesAndContacts = (): ReactElement => {
   const { structure } = useStructureContext();
 
   const { antennes, contacts } = structure;
+
+  const isMultiAntennes = isStructureMultiAntenne(structure);
 
   return (
     <>
@@ -35,9 +38,11 @@ export const AntennesAndContacts = (): ReactElement => {
       )}
       {contacts && contacts.length > 0 && (
         <table className="whitespace-nowrap">
-          <caption className="text-title-blue-france text-lg mb-3 text-left font-bold">
-            Contacts
-          </caption>
+          {isMultiAntennes && (
+            <caption className="text-title-blue-france text-lg mb-3 text-left font-bold">
+              Contacts
+            </caption>
+          )}
           <tbody>
             {contacts.map((contact) => (
               <tr
