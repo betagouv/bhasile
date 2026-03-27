@@ -1,6 +1,5 @@
 "use client";
 
-import Button from "@codegouvfr/react-dsfr/Button";
 import { sendEvent } from "@socialgouv/matomo-next";
 import dynamic from "next/dynamic";
 import { ReactElement, useMemo, useState } from "react";
@@ -54,9 +53,6 @@ export default function Structures(): ReactElement {
             Structures d’hébergement
           </h2>
         </SegmentedControl>
-        <Button type="button" priority="secondary" disabled>
-          <span className="fr-icon-add-line fr-icon--sm" /> Créer une structure
-        </Button>
       </div>
       <div className="flex gap-2 justify-end items-center py-3.5 px-6 z-2">
         <SearchBar />
