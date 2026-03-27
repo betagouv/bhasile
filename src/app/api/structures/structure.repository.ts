@@ -174,15 +174,7 @@ export const countBySearch = async ({
   placesAutorisees,
   departements,
   operateurs,
-}: Pick<
-  SearchProps,
-  | "search"
-  | "type"
-  | "bati"
-  | "placesAutorisees"
-  | "departements"
-  | "operateurs"
->): Promise<number> => {
+}: SearchProps): Promise<number> => {
   const whereSql = buildStructuresWhereSql({
     search,
     type,

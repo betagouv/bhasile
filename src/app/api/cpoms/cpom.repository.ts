@@ -91,7 +91,7 @@ export const findBySearch = async ({
 
 export async function countBySearch({
   departements,
-}: Pick<SearchProps, "departements">): Promise<number> {
+}: SearchProps): Promise<number> {
   const whereSql = buildCpomsWhereSql({ departements });
   const result = await prisma.$queryRaw<{ count: bigint }[]>(Prisma.sql`
     ${CPOM_ORDER_CTE_SQL}
