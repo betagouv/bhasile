@@ -226,7 +226,7 @@ export async function seed(): Promise<void> {
     if (!dnaCode) {
       return [];
     }
-    return createFakeActivites({ structureId: structure.id, dnaCode });
+    return createFakeActivites({ dnaCode });
   });
   await prisma.activite.createMany({ data: activites });
   console.log(`✅ ${activites.length} activités créées`);
@@ -241,7 +241,6 @@ export async function seed(): Promise<void> {
 
       return Array.from({ length: faker.number.int({ min: 0, max: 15 }) }, () =>
         createFakeEvenementIndesirableGrave({
-          structureId: structure.id,
           dnaCode,
         })
       );
