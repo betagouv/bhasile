@@ -1,5 +1,4 @@
 import { Prisma, PublicType, StructureType } from "@/generated/prisma/client";
-import prisma from "@/lib/prisma";
 import { StructureColumn } from "@/types/ListColumn";
 
 const typesPublic: Record<string, PublicType> = {
@@ -90,16 +89,21 @@ export const buildStructuresWhereSql = ({
     conditions.push(Prisma.sql`o."name" IN (${Prisma.join(opList)})`);
   }
   if (placesAutorisees) {
-    const [minStr, maxStr] = placesAutorisees.split(",");
-    const min = minStr ? parseInt(minStr, 10) : null;
-    const max = maxStr ? parseInt(maxStr, 10) : null;
-    if (min !== null && max !== null) {
-      conditions.push(
-        Prisma.sql`st."placesAutorisees" >= ${min} AND st."placesAutorisees" <= ${max}`
-      );
+    if (placesAutorisees) {
+      const [minStr, maxStr] = placesAutorisees.split(",");
+      const min = minStr ? parseInt(minStr, 10) : null;
+      const max = maxStr ? parseInt(maxStr, 10) : null;
+      if (
+        min !== null &&
+        max !== null &&
+        !Number.isNaN(min) &&
+        !Number.isNaN(max)
+      ) {
+        conditions.push(
+          Prisma.sql`st."placesAutorisees" >= ${min} AND st."placesAutorisees" <= ${max}`
+        );
+      }
     }
-  }
-  if (search) {
     const like = `%${search}%`;
     conditions.push(Prisma.sql`(
       s."codeBhasile" ILIKE ${like}

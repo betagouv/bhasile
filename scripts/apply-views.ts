@@ -33,8 +33,8 @@ function deleteViews() {
       "-c",
       'DROP VIEW IF EXISTS "public"."structures_order"; DROP VIEW IF EXISTS "public"."cpoms_order";',
     ],
-    '✅ Views "public"."structures_order" et "public"."cpoms_order" deleted',
-    '❌ Failed to delete public order views'
+    '✅ Views "public"."structures_order" and "public"."cpoms_order" deleted',
+    "❌ Failed to delete public order views"
   );
 
   runPsqlOrExit(
