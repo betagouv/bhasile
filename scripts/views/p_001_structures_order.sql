@@ -40,7 +40,7 @@ SELECT
   s."codePostalAdministratif",
   s."communeAdministrative",
   s."departementAdministratif",
-  d."region",
+  r."name" AS "region",
   s."type"::text,
   o."name" AS "operateur",
   sr."bati",
@@ -59,4 +59,5 @@ FROM
   LEFT JOIN public."Operateur" o ON o.id = s."operateurId"
   LEFT JOIN dernier_millesime_structure_typologie st ON st."structureId" = s."id"
   LEFT JOIN structure_repartition sr ON sr."structureId" = s."id"
-  LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif";
+  LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
+  LEFT JOIN public."Region" r ON r.id = d."regionId";

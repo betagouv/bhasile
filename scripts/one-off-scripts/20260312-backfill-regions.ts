@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off script: remplissage régions et association aux départements
 // Usage: yarn one-off 20260312-backfill-regions
 

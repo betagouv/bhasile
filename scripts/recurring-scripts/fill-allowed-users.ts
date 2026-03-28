@@ -38,9 +38,12 @@ const getTargetDepartementIds = (
     if (!referenceDepartement) {
       return [];
     }
+    if (referenceDepartement.regionId == null) {
+      return [];
+    }
     return allDepartements
       .filter(
-        (departement) => departement.region === referenceDepartement.region
+        (departement) => departement.regionId === referenceDepartement.regionId
       )
       .map((departement) => departement.id);
   }
