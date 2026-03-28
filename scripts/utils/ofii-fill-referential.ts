@@ -46,6 +46,20 @@ function deptCodeFromCode(code: string | null | undefined): string {
   return n > 96 ? three : two;
 }
 
+function normalizeDepartementName(value: string | null | undefined): string {
+  const trimmed = value?.trim() ?? "";
+  if (!trimmed) {
+    return "";
+  }
+
+  // Typo courante dans certains fichiers OFII
+  if (trimmed.toLowerCase() === "alpes-de-hautes-provence") {
+    return "Alpes-de-Haute-Provence";
+  }
+
+  return trimmed;
+}
+
 type CleanNameOptions = {
   departementNumero?: string | null;
   operateurClean?: string | null;
@@ -134,7 +148,8 @@ export const fillOfiiStructureFromRows = async (
 
     for (const row of records) {
       const issues: string[] = [];
-      const departementName = row.departement?.trim();
+      const departementName = normalizeDepartementName(row.departement);
+      row.departement = departementName;
       const departementNumero = departementName
         ? nameToNumero.get(departementName.toLowerCase())
         : undefined;
@@ -306,9 +321,9 @@ export const fillOfiiStructureFromRows = async (
         const existing = structureById.get(structureId);
         const now = new Date();
 
-        const depKey = row.departement
-          ? row.departement.trim().toLowerCase()
-          : "";
+        const departementName = normalizeDepartementName(row.departement);
+        row.departement = departementName;
+        const depKey = departementName ? departementName.toLowerCase() : "";
         const depNumero = depKey ? (nameToNumero.get(depKey) ?? null) : null;
         const cleanName = getCleanName(row, {
           departementNumero: depNumero,
