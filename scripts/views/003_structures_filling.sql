@@ -3,7 +3,7 @@ CREATE OR REPLACE VIEW:"SCHEMA"."structures_filling" AS
 WITH -- Forms de finalisation par structure
   finalisation_forms AS (
     SELECT
-      f."structureCodeDna" AS "dnaCode",
+      f."structureId" AS "structureId",
       f."id" AS "formId",
       f."status" AS "formStatus",
       CASE
@@ -25,7 +25,8 @@ WITH -- Forms de finalisation par structure
       fd."name" = 'finalisation'
   )
 SELECT
-  s."dnaCode",
+  s."id",
+  s."codeBhasile",
   CASE
     WHEN ff."formId" IS NOT NULL
     AND ff."formStatus" = TRUE THEN 'Finalisé agent' -- Finalisé agent : form existe et status = true
@@ -50,4 +51,4 @@ SELECT
   s."updated_at" AS "updated_at"
 FROM
 :"SCHEMA"."structures_aggregates" s
-  LEFT JOIN finalisation_forms ff ON ff."dnaCode" = s."dnaCode";
+  LEFT JOIN finalisation_forms ff ON ff."structureId" = s."id";

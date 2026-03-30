@@ -8,14 +8,14 @@ CREATE OR REPLACE VIEW:"SCHEMA"."structures_finance_quality" AS
 WITH
   structures AS (
     SELECT
-      s."dnaCode",
+      s."id",
       s."type" AS "structureType"
     FROM
       public."Structure" s
   ),
   budgets_enriched AS (
     SELECT
-      b."structureDnaCode" AS "dnaCode",
+      b."structureId" AS "structureId",
       b."year" AS "year",
       b."totalProduits" AS "totalProduits",
       b."totalCharges" AS "totalCharges",
@@ -45,11 +45,11 @@ WITH
     FROM
       public."Budget" b
     WHERE
-      b."structureDnaCode" IS NOT NULL
+      b."structureId" IS NOT NULL
   ),
   budgets_rates AS (
     SELECT
-      b."structureDnaCode" AS "dnaCode",
+      b."structureId" AS "structureId",
       MAX(b."tauxEncadrement") AS taux_encadrement_max,
       MIN(b."tauxEncadrement") AS taux_encadrement_min,
       MAX(b."coutJournalier") AS cout_journalier_max,
@@ -57,13 +57,13 @@ WITH
     FROM
       public."Budget" b
     WHERE
-      b."structureDnaCode" IS NOT NULL
+      b."structureId" IS NOT NULL
     GROUP BY
-      b."structureDnaCode"
+      b."structureId"
   ),
   budget_indicators AS (
     SELECT
-      s."dnaCode",
+      s."id",
       -- Résultat net = 0 is considered an issue (exclut les NULL)
       BOOL_OR(be."resultat_net" = 0) AS "has_issue_resultat_net_eq_0",
       -- Authorized structures: if excedent, then (resultat_net - repriseEtat) should equal sum of affectations
@@ -112,12 +112,12 @@ WITH
       ) AS "has_issue_subsidized_excedent_rules"
     FROM
       structures s
-      LEFT JOIN budgets_enriched be ON be."dnaCode" = s."dnaCode"
+      LEFT JOIN budgets_enriched be ON be."structureId" = s."id"
     GROUP BY
-      s."dnaCode"
+      s."id"
   )
 SELECT
-  s."dnaCode" AS "dnaCode",
+  s."id" AS "id",
   -- Budget rates: taux d'encadrement and coût journalier should be between 15 and 25
   COALESCE(br."taux_encadrement_max" > 25, FALSE) AS "has_issue_taux_encadrement_max_gt_25",
   COALESCE(br."taux_encadrement_min" < 15, FALSE) AS "has_issue_taux_encadrement_min_lt_15",
@@ -131,5 +131,5 @@ SELECT
   COALESCE(bi."has_issue_subsidized_excedent_rules", FALSE) AS "has_issue_subsidized_excedent_rules"
 FROM
   structures s
-  LEFT JOIN budget_indicators bi ON bi."dnaCode" = s."dnaCode"
-  LEFT JOIN budgets_rates br ON br."dnaCode" = s."dnaCode";
+  LEFT JOIN budget_indicators bi ON bi."id" = s."id"
+  LEFT JOIN budgets_rates br ON br."structureId" = s."id";

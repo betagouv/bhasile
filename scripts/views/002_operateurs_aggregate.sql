@@ -8,7 +8,7 @@ SELECT
   o."siret",
   o."createdAt",
   o."updatedAt",
-  COUNT(DISTINCT s."dnaCode") AS "nb_structures",
+  COUNT(DISTINCT s."id") AS "nb_structures",
   SUM(sa."places_autorisees_structure") AS "places_autorisees_structure",
   SUM(sa."pmr_structure") AS "pmr_structure",
   SUM(sa."lgbt_structure") AS "lgbt_structure",
@@ -19,7 +19,7 @@ SELECT
 FROM
   public."Operateur" o
   LEFT JOIN public."Structure" s ON s."operateurId" = o."id"
-  LEFT JOIN:"SCHEMA"."structures_aggregates" sa ON sa."dnaCode" = s."dnaCode"
+  LEFT JOIN:"SCHEMA"."structures_aggregates" sa ON sa."id" = s."id"
 GROUP BY
   o."id",
   o."name",
