@@ -4,14 +4,22 @@
 
 import "dotenv/config";
 
+import {
+  getNextBhasileCode,
+  normalizeRegionCode,
+} from "@/app/utils/bhasile.util";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { StructureType } from "@/generated/prisma/client";
 import { checkBucket, getObject } from "@/lib/minio";
 
-import { ensureOperateursExist } from "./ensure-operateurs-exist";
 import { type OfiiReferentialRow } from "./ofii-xlsx";
 
 type OperateurMapping = Record<string, string>;
+type DepartementRecord = {
+  numero: string;
+  name: string;
+  regionAdministrative: { name: string; code: string } | null;
+};
 
 const PREFIXES_TO_REMOVE = [
   "CADA",
@@ -46,17 +54,40 @@ function deptCodeFromCode(code: string | null | undefined): string {
   return n > 96 ? three : two;
 }
 
-type CleanNameOptions = {
-  departementNumero?: string | null;
-  operateurClean?: string | null;
-};
+function resolveDepartementNumero(
+  departementName: string | null | undefined,
+  nameToNumero: Map<string, string>
+): string | null {
+  if (!departementName) {
+    return null;
+  }
+  return nameToNumero.get(departementName.trim().toLowerCase()) ?? null;
+}
+
+function buildDepartementMaps(departements: DepartementRecord[]) {
+  const nameToNumero = new Map<string, string>(
+    departements.map((d) => [d.name.trim().toLowerCase(), d.numero])
+  );
+
+  const numeroToRegionCode = new Map<string, string>();
+  for (const departement of departements) {
+    const regionCode = normalizeRegionCode(
+      departement.regionAdministrative?.code
+    );
+    if (!regionCode) {
+      continue;
+    }
+    numeroToRegionCode.set(departement.numero, regionCode);
+  }
+
+  return { nameToNumero, numeroToRegionCode };
+}
 
 function getCleanName(
   row: OfiiReferentialRow,
-  options: CleanNameOptions = {}
+  departementNumero?: string | null,
+  operateurClean?: string | null
 ): string {
-  const { departementNumero, operateurClean } = options;
-
   const nom = stripAndUpper(row.nom);
   const operateurUpper = stripAndUpper(row.operateur);
   const code = row.dnaCode ?? "";
@@ -88,7 +119,15 @@ function getCleanName(
 
   const fullName = `${categorie} ${cleanName} ${finalOperateurClean} - ${deptCode}`;
 
-  return collapseSpaces(fullName).trim();
+  return collapseSpaces(fullName);
+}
+
+function resolveOperateurName(
+  operateurRaw: string | null | undefined,
+  operateurMapping: OperateurMapping | null
+): string | null {
+  if (!operateurRaw) {return null;}
+  return operateurMapping?.[operateurRaw] ?? operateurRaw;
 }
 
 async function loadOperateurMappingFromS3(
@@ -121,25 +160,59 @@ export const fillOfiiStructureFromRows = async (
       return;
     }
 
-    const departements = await prisma.departement.findMany({
-      select: { numero: true, name: true },
+    const departements: DepartementRecord[] = await prisma.departement.findMany(
+      {
+        select: {
+          numero: true,
+          name: true,
+          regionAdministrative: {
+            select: { name: true, code: true },
+          },
+        },
+      }
+    );
+    const { nameToNumero, numeroToRegionCode } =
+      buildDepartementMaps(departements);
+
+    const bucketName = process.env.DOCS_BUCKET_NAME;
+
+    if (!bucketName) {
+      throw new Error(
+        "DOCS_BUCKET_NAME doit être défini pour charger le mapping opérateurs depuis S3."
+      );
+    }
+
+    const operateurMapping = await loadOperateurMappingFromS3(
+      bucketName,
+      process.env.OFII_OPERATEUR_MAPPING_KEY ?? "operateurs_to_match.json"
+    );
+
+    const existingOperateurs = await prisma.operateur.findMany({
+      select: { id: true, name: true },
     });
-    const nameToNumero = new Map<string, string>(
-      departements.map((d) => [d.name.trim().toLowerCase(), d.numero])
+
+    const operateurMap = new Map(
+      existingOperateurs.map((op) => [op.name, op.id])
     );
 
     console.log("- Validation des données...");
+
     const validRecords: OfiiReferentialRow[] = [];
     const errors: { dnaCode: string; issues: string[] }[] = [];
 
     for (const row of records) {
       const issues: string[] = [];
-      const departementName = row.departement?.trim();
-      const departementNumero = departementName
-        ? nameToNumero.get(departementName.toLowerCase())
-        : undefined;
-      if (!departementName || departementNumero == undefined) {
+      const departementNumero = resolveDepartementNumero(
+        row.departement,
+        nameToNumero
+      );
+
+      if (!departementNumero) {
         issues.push(`département invalide (nom attendu) : ${row.departement}`);
+      } else if (!numeroToRegionCode.get(departementNumero)) {
+        issues.push(
+          `région introuvable pour le département : ${departementNumero}`
+        );
       }
 
       const allowedTypes = new Set<string>(Object.values(StructureType));
@@ -147,21 +220,34 @@ export const fillOfiiStructureFromRows = async (
         issues.push(`type de structure invalide : ${row.type}`);
       }
 
+      const operateurResolved = resolveOperateurName(
+        row.operateur,
+        operateurMapping
+      );
+      if (row.operateur && !operateurResolved) {
+        issues.push(`opérateur invalide : ${row.operateur}`);
+      } else if (operateurResolved && !operateurMap.has(operateurResolved)) {
+        issues.push(
+          `opérateur inconnu en base (mapping/fallback) : ${operateurResolved}`
+        );
+      }
+
       if (issues.length > 0) {
         errors.push({ dnaCode: row.dnaCode, issues });
       } else {
+        row.operateur = operateurResolved ?? row.operateur;
         validRecords.push(row);
       }
     }
 
     if (errors.length > 0) {
       console.log(`⚠️ ${errors.length} lignes avec erreurs :`);
-      errors.slice(0, 10).forEach((err) => {
+      errors.forEach((err) => {
         console.log(`  - ${err.dnaCode}: ${err.issues.join(", ")}`);
       });
-      if (errors.length > 10) {
-        console.log(`  ... et ${errors.length - 10} autres erreurs`);
-      }
+      throw new Error(
+        `Validation OFII échouée: ${errors.length} ligne(s) invalide(s). Corriger le fichier puis relancer.`
+      );
     }
 
     if (validRecords.length == 0) {
@@ -173,194 +259,129 @@ export const fillOfiiStructureFromRows = async (
       `✓ ${validRecords.length} lignes valides sur ${records.length}`
     );
 
-    // Normalisation des noms d'opérateur
-    const bucketName = process.env.DOCS_BUCKET_NAME;
-    const operateurMappingKey =
-      process.env.OFII_OPERATEUR_MAPPING_KEY ?? "operateurs_to_match.json";
-    let operateurMapping: OperateurMapping | null = null;
-    if (bucketName) {
-      try {
-        operateurMapping = await loadOperateurMappingFromS3(
-          bucketName,
-          operateurMappingKey
-        );
-      } catch (error) {
-        throw new Error(
-          "❌ Impossible de charger le mapping opérateurs depuis S3" + error
-        );
-      }
-    }
-
-    for (const row of validRecords) {
-      if (row.operateur) {
-        const mapped = operateurMapping![row.operateur];
-        row.operateur = mapped;
-      }
-    }
-
-    await prisma.$transaction(
-      validRecords.map((row) =>
-        prisma.dna.upsert({
-          where: { code: row.dnaCode },
-          create: { code: row.dnaCode },
-          update: {},
-        })
-      )
-    );
-
-    const dnaCodes = [...new Set(validRecords.map((r) => r.dnaCode))];
-    const dnaMappings = await prisma.dnaStructure.findMany({
-      where: {
-        dna: { code: { in: dnaCodes } },
-        AND: [
-          { OR: [{ startDate: null }, { startDate: { lte: date } }] },
-          { OR: [{ endDate: null }, { endDate: { gte: date } }] },
-        ],
-      },
-      select: { structureId: true, dna: { select: { code: true } } },
-    });
-
-    const dnaToStructureId = new Map(
-      dnaMappings.map(
-        (mapping) => [mapping.dna.code, mapping.structureId] as const
-      )
-    );
-
-    const validRecordsWithStructure = validRecords.filter((row) =>
-      dnaToStructureId.has(row.dnaCode)
-    );
-
-    const unmappedDnaCodes = [
-      ...new Set(
-        validRecords
-          .map((row) => row.dnaCode)
-          .filter((code) => !dnaToStructureId.has(code))
-      ),
-    ];
-    if (unmappedDnaCodes.length > 0) {
-      console.log(
-        `⚠️ ${unmappedDnaCodes.length} DNA du fichier OFII sans rattachement à une structure (ignorés pour la mise à jour Structure): ${unmappedDnaCodes
-          .slice(0, 10)
-          .join(", ")}${unmappedDnaCodes.length > 10 ? "..." : ""}`
-      );
-    }
-
-    const structureIds = [
-      ...new Set(
-        validRecordsWithStructure.map((r) => dnaToStructureId.get(r.dnaCode)!)
-      ),
-    ];
-
-    const existingStructures = await prisma.structure.findMany({
-      where: { id: { in: structureIds } },
-      select: {
-        id: true,
-        dnaCode: true,
-        activeInOfiiFileSince: true,
-        inactiveInOfiiFileSince: true,
-      },
-    });
-    const structureById = new Map(existingStructures.map((s) => [s.id, s]));
-
-    const recordsByStructureId = new Map<number, OfiiReferentialRow[]>();
-    for (const row of validRecordsWithStructure) {
-      const structureId = dnaToStructureId.get(row.dnaCode)!;
-      const list = recordsByStructureId.get(structureId) ?? [];
-      list.push(row);
-      recordsByStructureId.set(structureId, list);
-    }
-
-    const representativeRows: {
-      structureId: number;
-      row: OfiiReferentialRow;
-    }[] = [];
-    for (const [structureId, rows] of recordsByStructureId.entries()) {
-      const existing = structureById.get(structureId);
-      const preferred =
-        (existing?.dnaCode
-          ? rows.find((row) => row.dnaCode === existing.dnaCode)
-          : undefined) ?? rows[0];
-      representativeRows.push({ structureId, row: preferred });
-    }
-
-    let operateurMap = new Map<string, number>();
-    try {
-      operateurMap = await ensureOperateursExist(
-        prisma,
-        representativeRows.map((row) => row.row),
-        "operateur"
-      );
-    } catch (error) {
-      console.error(error);
-      throw new Error(
-        "❌ Des opérateurs présents dans le fichier OFII sont inconnus en base." +
-          error
-      );
-    }
-
     console.log("- Mise à jour des données de référentiel");
     let updatedCount = 0;
+    let createdCount = 0;
 
     await prisma.$transaction(async (tx) => {
-      for (const { structureId, row } of representativeRows) {
-        const existing = structureById.get(structureId);
-        const now = new Date();
+      const regionCounter = new Map<string, number>();
+      const presentDnaCodes = new Set<string>();
 
-        const depKey = row.departement
-          ? row.departement.trim().toLowerCase()
-          : "";
-        const depNumero = depKey ? (nameToNumero.get(depKey) ?? null) : null;
-        const cleanName = getCleanName(row, {
-          departementNumero: depNumero,
-          operateurClean: row.operateur,
+      // 1. For each DNA: create DNA if missing, then ensure it is linked to a structure.
+      for (const row of validRecords) {
+        const depNumero = resolveDepartementNumero(
+          row.departement,
+          nameToNumero
+        );
+        if (!depNumero) {
+          continue;
+        }
+
+        const dna = await tx.dna.upsert({
+          where: { code: row.dnaCode },
+          create: {
+            code: row.dnaCode,
+            description: null,
+            activeInOfiiFileSince: date,
+            inactiveInOfiiFileSince: null,
+          },
+          update: {
+            inactiveInOfiiFileSince: null,
+          },
+          select: {
+            id: true,
+            code: true,
+            activeInOfiiFileSince: true,
+            dnaStructures: {
+              select: { structureId: true },
+              take: 1,
+            },
+          },
         });
-        await tx.structure.update({
-          where: { id: structureId },
+        presentDnaCodes.add(dna.code);
+
+        const structureId = dna.dnaStructures[0]?.structureId;
+        if (!dna.activeInOfiiFileSince) {
+          await tx.dna.update({
+            where: { id: dna.id },
+            data: { activeInOfiiFileSince: date },
+          });
+        }
+
+        if (structureId) {
+          await tx.structure.update({
+            where: { id: structureId },
+            data: {
+              nomOfii: row.nom ?? undefined,
+            },
+          });
+          updatedCount += 1;
+          continue;
+        }
+
+        const regionCode = numeroToRegionCode.get(depNumero)!;
+        const codeBhasile = await getNextBhasileCode(
+          tx,
+          regionCode,
+          regionCounter
+        );
+        const cleanName = getCleanName(row, depNumero, row.operateur);
+        const createdStructure = await tx.structure.create({
           data: {
+            codeBhasile,
             nom: cleanName,
             nomOfii: row.nom ?? undefined,
             type: row.type as StructureType,
-            departementAdministratif: depNumero ?? undefined,
+            departementAdministratif: depNumero,
             directionTerritoriale: row.directionTerritoriale ?? undefined,
-            inactiveInOfiiFileSince: null,
-            activeInOfiiFileSince: existing?.activeInOfiiFileSince ?? now,
             operateurId: row.operateur
               ? (operateurMap.get(row.operateur) ?? null)
               : null,
           },
+          select: { id: true },
         });
 
-        if (existing) {
-          updatedCount += 1;
-        }
+        await tx.dnaStructure.create({
+          data: {
+            dna: { connect: { id: dna.id } },
+            structure: { connect: { id: createdStructure.id } },
+            startDate: null,
+            endDate: null,
+          },
+        });
+
+        createdCount += 1;
       }
 
-      const presentStructureIds = new Set(structureIds);
-      const allActiveOfiiStructures = await tx.structure.findMany({
-        where: { inactiveInOfiiFileSince: null },
-        select: { id: true },
-      });
-      const structureIdsToDeactivate = allActiveOfiiStructures
-        .map((s) => s.id)
-        .filter((id) => !presentStructureIds.has(id));
+      // 2. Deactivate DNAs that are absent from current OFII file.
 
-      if (structureIdsToDeactivate.length > 0) {
-        const deactivated = await tx.structure.updateMany({
+      const allActiveOfiiDnas = await tx.dna.findMany({
+        where: { inactiveInOfiiFileSince: null },
+        select: { id: true, code: true },
+      });
+
+      const dnaIdsToDeactivate = allActiveOfiiDnas
+        .filter((dna) => !presentDnaCodes.has(dna.code))
+        .map((dna) => dna.id);
+
+      if (dnaIdsToDeactivate.length > 0) {
+        const deactivated = await tx.dna.updateMany({
           where: {
-            id: { in: structureIdsToDeactivate },
+            id: { in: dnaIdsToDeactivate },
             inactiveInOfiiFileSince: null,
           },
           data: { inactiveInOfiiFileSince: date },
         });
         console.log(
-          `- ⚠️ ${deactivated.count} structures marquées comme inactives dans le fichier OFII (aucun DNA présent dans le XLSX).`
+          `- ⚠️ ${deactivated.count} DNA marqués comme inactifs dans le fichier OFII.`
         );
       } else {
-        console.log("- Aucune structure à désactiver.");
+        console.log("- Aucun DNA à désactiver.");
       }
     });
 
     console.log(`✅ ${updatedCount} structures mises à jour`);
+    console.log(`✅ ${createdCount} structures créées`);
   } catch (error) {
     throw new Error(
       "❌ Erreur lors du chargement des données référentiel : " + error

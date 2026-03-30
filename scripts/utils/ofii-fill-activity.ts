@@ -8,6 +8,28 @@ import type { PrismaClient } from "@/generated/prisma/client";
 
 import { type ActiviteRow } from "./ofii-xlsx";
 
+/*
+ * TODO: check later coherence with the way the file is established at OFII
+ * Based on discussion we take the percentage into account but it might as well be the original (and incoherent) field
+ */
+const computePlacesVacantesAndPlacesOccupees = (
+  placesAutorisees: number | null,
+  placesIndisponibles: number | null,
+  tauxOccupation: number | null
+): { placesVacantes: number | null; placesOccupees: number | null } => {
+  if (
+    placesAutorisees == null ||
+    placesIndisponibles == null ||
+    tauxOccupation == null
+  ) {
+    return { placesVacantes: null, placesOccupees: null };
+  }
+  const placesDisponibles = placesAutorisees - placesIndisponibles;
+  const placesOccupees = placesDisponibles * tauxOccupation;
+  const placesVacantes = placesDisponibles - placesOccupees;
+  return { placesVacantes, placesOccupees };
+};
+
 /**
  * Remplit la table Activite pour une date donnée à partir de lignes déjà parsées.
  */
@@ -21,25 +43,22 @@ export async function fillOfiiActiviteFromRows(
     return;
   }
 
-  const existingDnaCodes = new Set(
-    (
-      await prisma.dna.findMany({
-        select: { code: true },
-      })
-    ).map((dna) => dna.code)
-  );
-
-  const validRows = rows.filter((row) => existingDnaCodes.has(row.dnaCode));
+  const existingDnaCodes = await prisma.dna.findMany({
+    select: { code: true },
+  });
+  const existingDnaCodeSet = new Set(existingDnaCodes.map((d) => d.code));
+  const validRows = rows.filter((row) => existingDnaCodeSet.has(row.dnaCode));
   const invalidCodes = [
     ...new Set(
       rows
         .map((row) => row.dnaCode)
-        .filter((code) => !existingDnaCodes.has(code))
+        .filter((code) => !existingDnaCodeSet.has(code))
     ),
   ];
+
   if (invalidCodes.length > 0) {
     console.log(
-      `⚠️ ${rows.length - validRows.length} lignes ignorées (DNA non rattaché à une structure pour ${date
+      `⚠️ ${rows.length - validRows.length} lignes ignorées (DNA inconnu pour ${date
         .toISOString()
         .slice(0, 10)}): ${invalidCodes
         .slice(0, 10)
@@ -48,7 +67,7 @@ export async function fillOfiiActiviteFromRows(
   }
 
   if (validRows.length == 0) {
-    console.log("❌ Aucune ligne avec DNA rattaché à une structure à insérer.");
+    console.log("❌ Aucune ligne avec DNA valide à insérer.");
     return;
   }
 
@@ -57,6 +76,13 @@ export async function fillOfiiActiviteFromRows(
   for (const row of validRows) {
     const r = row as ActiviteRow;
     try {
+      const { placesVacantes, placesOccupees } =
+        computePlacesVacantesAndPlacesOccupees(
+          r.placesAutorisees,
+          r.placesIndisponibles,
+          r.tauxOccupation
+        );
+
       await prisma.activite.upsert({
         where: {
           dnaCode_date: {
@@ -73,6 +99,8 @@ export async function fillOfiiActiviteFromRows(
           sousOccupation: r.sousOccupation ?? undefined,
           travaux: r.travaux ?? undefined,
           placesIndisponibles: r.placesIndisponibles ?? undefined,
+          placesOccupees: placesOccupees ?? undefined,
+          placesVacantes: placesVacantes ?? undefined,
           presencesInduesBPI: r.presencesInduesBPI ?? undefined,
           presencesInduesDeboutees: r.presencesInduesDeboutees ?? undefined,
         },
@@ -84,10 +112,13 @@ export async function fillOfiiActiviteFromRows(
           sousOccupation: r.sousOccupation ?? undefined,
           travaux: r.travaux ?? undefined,
           placesIndisponibles: r.placesIndisponibles ?? undefined,
+          placesOccupees: placesOccupees ?? undefined,
+          placesVacantes: placesVacantes ?? undefined,
           presencesInduesBPI: r.presencesInduesBPI ?? undefined,
           presencesInduesDeboutees: r.presencesInduesDeboutees ?? undefined,
         },
       });
+
       created += 1;
     } catch (error) {
       throw new Error(
