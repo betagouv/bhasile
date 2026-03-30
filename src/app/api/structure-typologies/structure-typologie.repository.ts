@@ -16,7 +16,12 @@ export const createOrUpdateStructureTypologies = async (
   await Promise.all(
     (structureTypologies || []).map((typologie) => {
       return tx.structureTypologie.upsert({
-        where: { id: typologie.id || 0 },
+        where: {
+          structureId_year: {
+            structureId,
+            year: typologie.year!,
+          },
+        },
         update: {
           ...(typologie.year !== undefined && { year: typologie.year }),
           ...(typologie.placesAutorisees !== undefined && {
