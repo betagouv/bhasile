@@ -22,7 +22,9 @@ export const getDepartementActivitesAverage = async (
       ROUND(AVG(a."presencesInduesDeboutees"), 2) as "averagePresencesInduesDeboutees",
       ROUND(AVG(a."presencesInduesBPI" + a."presencesInduesDeboutees"), 2) as "averagePresencesIndues"
     FROM "Activite" a
-    INNER JOIN "Structure" s ON a."structureDnaCode" = s."dnaCode"
+    INNER JOIN "Dna" dna ON dna."code" = a."dnaCode"
+    INNER JOIN "DnaStructure" ds ON ds."dnaId" = dna."id"
+    INNER JOIN "Structure" s ON s."id" = ds."structureId"
     INNER JOIN "Departement" d ON s."departementAdministratif" = d."numero"
     WHERE a.date BETWEEN ${startDate} AND ${endDate}
       AND d."numero" = ${departementNumero}
