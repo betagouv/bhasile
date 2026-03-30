@@ -72,9 +72,14 @@ describe("StructuresTable", () => {
     expect(firstStructureCells[5]).toHaveAccessibleName("Diffus");
     expect(firstStructureCells[6]).toHaveAccessibleName("10");
     expect(firstStructureCells[7]).toHaveAccessibleName("02/01/2027");
-    expect(firstStructureCells[8]).toHaveAccessibleName(
-      "Finaliser la création de la structure BHA-1"
+    const firstStructureButtonCell = firstStructureCells[8];
+    const firstStructureButton = within(firstStructureButtonCell).getByRole(
+      "button",
+      {
+        name: "Finaliser la création de la structure BHA-1",
+      }
     );
+    expect(firstStructureButton).toBeInTheDocument();
     const secondStructureCells = within(structureRows[2]).getAllByRole("cell");
     expect(secondStructureCells[0]).toHaveAccessibleName("BHA-2");
     expect(secondStructureCells[1]).toHaveAccessibleName("CADA");
@@ -83,10 +88,15 @@ describe("StructuresTable", () => {
     expect(secondStructureCells[4]).toHaveAccessibleName("Paris");
     expect(secondStructureCells[5]).toHaveAccessibleName("Diffus");
     expect(secondStructureCells[6]).toHaveAccessibleName("10");
-    expect(firstStructureCells[7]).toHaveAccessibleName("02/01/2027");
-    expect(secondStructureCells[8]).toHaveAccessibleName(
-      "Finaliser la création de la structure BHA-2"
+    expect(secondStructureCells[7]).toHaveAccessibleName("02/01/2027");
+    const secondStructureButtonCell = secondStructureCells[8];
+    const secondStructureButton = within(secondStructureButtonCell).getByRole(
+      "button",
+      {
+        name: "Finaliser la création de la structure BHA-2",
+      }
     );
+    expect(secondStructureButton).toBeInTheDocument();
     const thirdStructureCells = within(structureRows[3]).getAllByRole("cell");
     expect(thirdStructureCells[0]).toHaveAccessibleName("BHA-3");
     expect(thirdStructureCells[1]).toHaveAccessibleName("CADA");
@@ -95,10 +105,15 @@ describe("StructuresTable", () => {
     expect(thirdStructureCells[4]).toHaveAccessibleName("Paris");
     expect(thirdStructureCells[5]).toHaveAccessibleName("Diffus");
     expect(thirdStructureCells[6]).toHaveAccessibleName("10");
-    expect(firstStructureCells[7]).toHaveAccessibleName("02/01/2027");
-    expect(thirdStructureCells[8]).toHaveAccessibleName(
-      "Finaliser la création de la structure BHA-3"
+    expect(thirdStructureCells[7]).toHaveAccessibleName("02/01/2027");
+    const thirdStructureButtonCell = thirdStructureCells[8];
+    const thirdStructureButton = within(thirdStructureButtonCell).getByRole(
+      "button",
+      {
+        name: "Finaliser la création de la structure BHA-3",
+      }
     );
+    expect(thirdStructureButton).toBeInTheDocument();
     const pagination = screen.getByRole("navigation");
     const pages = within(pagination).getAllByRole("link");
     expect(pages[0]).toHaveAccessibleName("Première page");

@@ -39,19 +39,19 @@ export const OrderButton = ({
       <span
         aria-hidden="true"
         className={cn(
-          "absolute top-0 left-1/2 -translate-x-1/2 fr-icon-arrow-up-s-line text-disabled-grey",
+          "absolute top-0 left-1/2 -translate-x-1/2 fr-icon-arrow-up-s-line text-disabled-grey fr-icon--sm",
           ariaSort === "ascending"
             ? "text-title-blue-france"
-            : "text-disabled-grey fr-icon--sm"
+            : "text-disabled-grey"
         )}
       />
       <span
         aria-hidden="true"
         className={cn(
-          "absolute bottom-0 left-1/2 -translate-x-1/2 fr-icon-arrow-down-s-line text-disabled-grey",
+          "absolute bottom-0 left-1/2 -translate-x-1/2 fr-icon-arrow-down-s-line text-disabled-grey fr-icon--sm",
           ariaSort === "descending"
             ? "text-title-blue-france"
-            : "text-disabled-grey fr-icon--sm"
+            : "text-disabled-grey"
         )}
       />
     </Button>

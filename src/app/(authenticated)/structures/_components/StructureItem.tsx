@@ -29,14 +29,16 @@ export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
       <td className="text-left!">
         {getOperateurLabel(structure.filiale, structure.operateur?.name)}
       </td>
-      <td>{structure.departementAdministratif}</td>
+      <td className="text-left!">{structure.departementAdministratif}</td>
       <td className="text-left! whitespace-nowrap">
         {getCommuneLabel(structure)}
       </td>
       <td className="text-left! whitespace-nowrap">
         <RepartitionBadge repartition={getRepartition(structure)} />
       </td>
-      <td>{structure.structureTypologies?.[0]?.placesAutorisees}</td>
+      <td className="text-left!">
+        {structure.structureTypologies?.[0]?.placesAutorisees}
+      </td>
       <td className="text-left!">
         {structure.finConvention ? (
           formatDate(structure.finConvention)
@@ -47,20 +49,19 @@ export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
       <td>
         {isStructureFinalisee ? (
           <Link
-            className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-line"
+            className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-line before:w-[20] before:h-[20]"
             title={`Détails de la structure ${structure.codeBhasile}`}
             href={`structures/${structure.id}`}
-          >
-            Détails de la structure {structure.codeBhasile}
-          </Link>
+            aria-label={`Détails de la structure ${structure.codeBhasile}`}
+          />
         ) : (
           <Button
             onClick={() => handleOpenModal(structure)}
-            className="fr-btn--tertiary-no-outline fr-icon-edit-line"
+            priority="tertiary no outline"
+            iconId="fr-icon-edit-line"
+            className="before:w-[20] before:h-[20]"
             title={`Finaliser la création de la structure ${structure.codeBhasile}`}
-          >
-            Finaliser la création de la structure {structure.codeBhasile}
-          </Button>
+          />
         )}
       </td>
     </tr>
