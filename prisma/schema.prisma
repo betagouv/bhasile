@@ -34,8 +34,7 @@ model Region {
 
 model Structure {
   id                       Int                  @id @default(autoincrement())
-  dnaCode                  String?              @unique
-  codeBhasile              String?              @unique //TODO make mandatory after migration
+  codeBhasile              String               @unique
   filiale                  String?
   type                     StructureType?
   adresseAdministrative    String?
@@ -49,7 +48,6 @@ model Structure {
   finConvention            DateTime?
   creationDate             DateTime?
   date303                  DateTime?
-  finessCode               String? // TODO remove after migration to own table
   lgbt                     Boolean?
   fvvTeh                   Boolean?
   public                   PublicType?
@@ -58,8 +56,6 @@ model Structure {
   notes                    String?
   nomOfii                  String?
   directionTerritoriale    String?
-  activeInOfiiFileSince    DateTime? // TODO: remove after migation to DNA- date d'entrée dans le document Ofii
-  inactiveInOfiiFileSince  DateTime? // TODO: remove after migation to DNA- date de sortie du document Ofii
   dnaStructures            DnaStructure[]
   controles                Controle[]
   evaluations              Evaluation[]
@@ -118,13 +114,12 @@ model DnaStructure {
 }
 
 model Controle {
-  id               Int          @id @default(autoincrement())
-  structure        Structure?   @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode String? // TODO : à supprimer une fois la migration vers le multi-DNA terminée
-  structureId      Int?
-  date             DateTime
-  type             ControleType
-  fileUploads      FileUpload[]
+  id          Int          @id @default(autoincrement())
+  structure   Structure?   @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId Int?
+  date        DateTime
+  type        ControleType
+  fileUploads FileUpload[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -133,16 +128,15 @@ model Controle {
 }
 
 model Evaluation {
-  id               Int          @id @default(autoincrement())
-  structure        Structure?   @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode String? // TODO : à supprimer une fois la migration vers le multi-DNA terminée
-  structureId      Int?
-  date             DateTime?
-  notePersonne     Float?
-  notePro          Float?
-  noteStructure    Float?
-  note             Float?
-  fileUploads      FileUpload[]
+  id            Int          @id @default(autoincrement())
+  structure     Structure?   @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId   Int?
+  date          DateTime?
+  notePersonne  Float?
+  notePro       Float?
+  noteStructure Float?
+  note          Float?
+  fileUploads   FileUpload[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -151,14 +145,13 @@ model Evaluation {
 }
 
 model EvenementIndesirableGrave {
-  id               Int      @id @default(autoincrement())
-  structureDnaCode String? // TODO : à supprimer une fois la migration vers le multi-DNA terminée
-  dnaCode          String?
-  dna              Dna?     @relation(fields: [dnaCode], references: [code], onDelete: Cascade, onUpdate: Cascade)
-  numeroDossier    String   @unique
-  evenementDate    DateTime
-  declarationDate  DateTime
-  type             String
+  id              Int      @id @default(autoincrement())
+  dnaCode         String?
+  dna             Dna?     @relation(fields: [dnaCode], references: [code], onDelete: Cascade, onUpdate: Cascade)
+  numeroDossier   String   @unique
+  evenementDate   DateTime
+  declarationDate DateTime
+  type            String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -169,7 +162,6 @@ model EvenementIndesirableGrave {
 model Adresse {
   id                Int                @id @default(autoincrement())
   structure         Structure?         @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode  String? // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId       Int?
   adresse           String?
   codePostal        String?
@@ -200,16 +192,15 @@ model AdresseTypologie {
 }
 
 model Contact {
-  id               Int        @id @default(autoincrement())
-  structure        Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode String? // TODO : à supprimer une fois la migration vers le multi-DNA terminée
-  structureId      Int?
-  prenom           String?
-  nom              String?
-  telephone        String?
-  email            String?
-  role             String?
-  perimetre        String?
+  id          Int        @id @default(autoincrement())
+  structure   Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId Int?
+  prenom      String?
+  nom         String?
+  telephone   String?
+  email       String?
+  role        String?
+  perimetre   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -220,7 +211,6 @@ model Contact {
 model StructureMillesime {
   id               Int        @id @default(autoincrement())
   structure        Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode String? // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId      Int?
   year             Int
   cpom             Boolean    @default(false) // temporary field, while we are not sure of existing cpoms
@@ -236,7 +226,6 @@ model StructureMillesime {
 model StructureTypologie {
   id                    Int        @id @default(autoincrement())
   structure             Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode      String? // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId           Int?
   year                  Int
   placesAutorisees      Int?
@@ -257,7 +246,6 @@ model StructureTypologie {
 
 model Activite {
   id                       Int      @id @default(autoincrement())
-  structureDnaCode         String? // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   dnaCode                  String?
   dna                      Dna?     @relation(fields: [dnaCode], references: [code], onDelete: Cascade, onUpdate: Cascade)
   date                     DateTime
@@ -298,21 +286,20 @@ model FileUpload {
 }
 
 model ActeAdministratif {
-  id               Int                        @id @default(autoincrement())
-  structure        Structure?                 @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode String? // TODO : à supprimer une fois la migration vers le multi-DNA terminée
-  structureId      Int?
-  cpom             Cpom?                      @relation(fields: [cpomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  cpomId           Int?
-  category         ActeAdministratifCategory?
-  date             DateTime?
-  startDate        DateTime?
-  endDate          DateTime?
-  name             String?
-  parent           ActeAdministratif?         @relation("ActeAdministratifToActeAdministratif", fields: [parentId], references: [id], onDelete: Cascade)
-  parentId         Int?
-  children         ActeAdministratif[]        @relation("ActeAdministratifToActeAdministratif")
-  fileUploads      FileUpload[]
+  id          Int                        @id @default(autoincrement())
+  structure   Structure?                 @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId Int?
+  cpom        Cpom?                      @relation(fields: [cpomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cpomId      Int?
+  category    ActeAdministratifCategory?
+  date        DateTime?
+  startDate   DateTime?
+  endDate     DateTime?
+  name        String?
+  parent      ActeAdministratif?         @relation("ActeAdministratifToActeAdministratif", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId    Int?
+  children    ActeAdministratif[]        @relation("ActeAdministratifToActeAdministratif")
+  fileUploads FileUpload[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -321,15 +308,14 @@ model ActeAdministratif {
 }
 
 model DocumentFinancier {
-  id               Int                          @id @default(autoincrement())
-  structure        Structure?                   @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode String? // TODO : à supprimer une fois la migration vers le multi-DNA terminée
-  structureId      Int?
-  category         DocumentFinancierCategory?
-  year             Int
-  name             String?
-  granularity      DocumentFinancierGranularity @default(STRUCTURE)
-  fileUploads      FileUpload[]
+  id          Int                          @id @default(autoincrement())
+  structure   Structure?                   @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId Int?
+  category    DocumentFinancierCategory?
+  year        Int
+  name        String?
+  granularity DocumentFinancierGranularity @default(STRUCTURE)
+  fileUploads FileUpload[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -340,7 +326,6 @@ model DocumentFinancier {
 model Budget {
   id                                Int        @id @default(autoincrement())
   structure                         Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureDnaCode                  String? // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId                       Int?
   year                              Int        @default(0)
   ETP                               Float?
@@ -401,7 +386,6 @@ model FormStepDefinition {
 
 model Form {
   id               Int     @id @default(autoincrement())
-  structureCodeDna String? // TODO : à supprimer une fois la migration vers le multi-DNA terminée
   structureId      Int?
   formDefinitionId Int
   status           Boolean @default(false) // Lié au bouton "Finaliser"
@@ -435,11 +419,10 @@ model FormStep {
 }
 
 model Campaign {
-  id               Int     @id @default(autoincrement())
-  structureCodeDna String?
-  structureId      Int?
-  name             String
-  launched         Boolean @default(false)
+  id          Int     @id @default(autoincrement())
+  structureId Int?
+  name        String
+  launched    Boolean @default(false)
 
   structure Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
