@@ -76,12 +76,6 @@ export async function fillOfiiActiviteFromRows(
   for (const row of validRows) {
     const r = row as ActiviteRow;
     try {
-      // TODO : quand on aura repassé le unique sur dna + date, simplifier ici (post rebase)
-      const existingActivite = await prisma.activite.findFirst({
-        where: { dnaCode: r.dnaCode, date },
-        select: { id: true },
-      });
-
       const { placesVacantes, placesOccupees } =
         calculatePlacesVacantesAndPlacesOccupees(
           r.placesAutorisees,
@@ -90,7 +84,12 @@ export async function fillOfiiActiviteFromRows(
         );
 
       await prisma.activite.upsert({
-        where: { id: existingActivite?.id ?? -1 },
+        where: {
+          dnaCode_date: {
+            dnaCode: r.dnaCode,
+            date,
+          },
+        },
         create: {
           dnaCode: r.dnaCode,
           date,
@@ -106,6 +105,7 @@ export async function fillOfiiActiviteFromRows(
           presencesInduesDeboutees: r.presencesInduesDeboutees ?? undefined,
         },
         update: {
+          dnaCode: r.dnaCode,
           placesAutorisees: r.placesAutorisees ?? undefined,
           desinsectisation: r.desinsectisation ?? undefined,
           remiseEnEtat: r.remiseEnEtat ?? undefined,
