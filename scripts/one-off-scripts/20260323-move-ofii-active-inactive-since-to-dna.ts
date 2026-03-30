@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off script: copy active/inactive OFII dates from Structure to linked Dna.
 // Assumption: one Structure is linked to at most one Dna.
 // Usage: yarn one-off 20260323-move-ofii-active-inactive-since-to-dna
@@ -9,7 +10,9 @@ import { createPrismaClient } from "@/prisma-client";
 const prisma = createPrismaClient();
 
 async function main() {
-  console.log("🚀 Début de la migration active/inactive OFII depuis Structure vers Dna...");
+  console.log(
+    "🚀 Début de la migration active/inactive OFII depuis Structure vers Dna..."
+  );
 
   const structures = await prisma.structure.findMany({
     select: {
@@ -63,7 +66,10 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error("❌ Erreur pendant la migration OFII Structure -> Dna:", error);
+    console.error(
+      "❌ Erreur pendant la migration OFII Structure -> Dna:",
+      error
+    );
     process.exit(1);
   })
   .finally(async () => {

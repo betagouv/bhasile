@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off script: migrate Structure.finessCode to Finess table.
 // Usage: yarn one-off 20260323-fill-finess
 
