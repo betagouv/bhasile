@@ -12,11 +12,11 @@ import { type ActiviteRow } from "./ofii-xlsx";
  * TODO: check later coherence with the way the file is established at OFII
  * Based on discussion we take the percentage into account but it might as well be the original (and incoherent) field
  */
-const computePlacesVacantesAndPlacesOccupees(
+const computePlacesVacantesAndPlacesOccupees = (
   placesAutorisees: number | null,
   placesIndisponibles: number | null,
   tauxOccupation: number | null
-) {
+): { placesVacantes: number | null; placesOccupees: number | null } => {
   if (
     placesAutorisees == null ||
     placesIndisponibles == null ||
@@ -28,7 +28,7 @@ const computePlacesVacantesAndPlacesOccupees(
   const placesOccupees = placesDisponibles * tauxOccupation;
   const placesVacantes = placesDisponibles - placesOccupees;
   return { placesVacantes, placesOccupees };
-}
+};
 
 /**
  * Remplit la table Activite pour une date donnée à partir de lignes déjà parsées.
@@ -77,7 +77,7 @@ export async function fillOfiiActiviteFromRows(
     const r = row as ActiviteRow;
     try {
       const { placesVacantes, placesOccupees } =
-      computePlacesVacantesAndPlacesOccupees(
+        computePlacesVacantesAndPlacesOccupees(
           r.placesAutorisees,
           r.placesIndisponibles,
           r.tauxOccupation
