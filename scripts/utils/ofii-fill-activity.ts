@@ -12,7 +12,7 @@ import { type ActiviteRow } from "./ofii-xlsx";
  * TODO: check later coherence with the way the file is established at OFII
  * Based on discussion we take the percentage into account but it might as well be the original (and incoherent) field
  */
-function calculatePlacesVacantesAndPlacesOccupees(
+const computePlacesVacantesAndPlacesOccupees(
   placesAutorisees: number | null,
   placesIndisponibles: number | null,
   tauxOccupation: number | null
@@ -77,7 +77,7 @@ export async function fillOfiiActiviteFromRows(
     const r = row as ActiviteRow;
     try {
       const { placesVacantes, placesOccupees } =
-        calculatePlacesVacantesAndPlacesOccupees(
+      computePlacesVacantesAndPlacesOccupees(
           r.placesAutorisees,
           r.placesIndisponibles,
           r.tauxOccupation
