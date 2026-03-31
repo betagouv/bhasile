@@ -7,7 +7,7 @@ export const requiredContactSchema = z.object({
   prenom: z.string().nonempty("Le prénom est requis"),
   nom: z.string().nonempty("Le nom est requis"),
   role: z.string().nonempty("Le rôle est requis"),
-  perimetre: z.string().optional(),
+  perimetre: z.string().nullish(),
   email: z
     .string()
     .nonempty("Veuillez saisir une adresse email valide")
@@ -24,7 +24,7 @@ export const optionalContactSchema = z
     prenom: z.string().optional(),
     nom: z.string().optional(),
     role: z.string().optional(),
-    perimetre: z.string().optional(),
+    perimetre: z.string().nullish(),
     email: z.string().optional(),
     telephone: z.string().optional(),
   })
