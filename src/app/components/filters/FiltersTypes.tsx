@@ -10,7 +10,7 @@ export const FiltersTypes = () => {
   const searchParams = useSearchParams();
 
   const [types, setTypes] = useState(
-    searchParams.get("type")?.split(",") || []
+    searchParams.get("type")?.split(",").filter(Boolean) || []
   );
 
   const noFilterOnType = types.length === 0;
@@ -43,7 +43,11 @@ export const FiltersTypes = () => {
   useEffect(() => {
     if (previousType.current !== types) {
       const params = new URLSearchParams(Array.from(searchParams.entries()));
-      params.set("type", types.join(","));
+      if (types.length > 0) {
+        params.set("type", types.join(","));
+      } else {
+        params.delete("type");
+      }
       router.replace(`?${params.toString()}`);
       previousType.current = types;
     }
