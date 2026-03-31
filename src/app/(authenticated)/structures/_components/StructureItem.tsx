@@ -31,10 +31,10 @@ export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
       </td>
       <td>{structure.departementAdministratif}</td>
       <td className="text-left! whitespace-nowrap">
-        <RepartitionBadge repartition={getRepartition(structure)} />
+        {getCommuneLabel(structure)}
       </td>
       <td className="text-left! whitespace-nowrap">
-        {getCommuneLabel(structure)}
+        <RepartitionBadge repartition={getRepartition(structure)} />
       </td>
       <td>{structure.structureTypologies?.[0]?.placesAutorisees}</td>
       <td className="text-left!">

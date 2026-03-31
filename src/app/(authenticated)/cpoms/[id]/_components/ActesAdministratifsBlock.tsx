@@ -19,7 +19,7 @@ export const ActesAdministratifsBlock = () => {
   );
   return (
     <Block
-      title="Actes administratifs"
+      title="Document de convention du CPOM"
       iconClass="fr-icon-file-text-line"
       onEdit={() => {
         router.push(`/cpoms/${cpom.id}/modification/actes-administratifs`);

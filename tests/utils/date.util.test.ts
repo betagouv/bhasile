@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 
 import {
   formatDate,
+  formatDateToIsoString,
   formatForCharts,
   getElapsedPercentage,
   getLastMonths,
@@ -36,6 +37,61 @@ describe("date util", () => {
 
       // THEN
       expect(formattedDate).toBe("12/12/2012");
+    });
+  });
+  describe("formatDateToIsoString", () => {
+    it("should return undefined for null date", () => {
+      // GIVEN
+      const date = null;
+
+      // WHEN
+      const result = formatDateToIsoString(date);
+
+      // THEN
+      expect(result).toBeUndefined();
+    });
+
+    it("should return undefined for invalid date", () => {
+      // GIVEN
+      const date = "invalid date";
+
+      // WHEN
+      const result = formatDateToIsoString(date);
+
+      // THEN
+      expect(result).toBeUndefined();
+    });
+
+    it("should return correct value for 01/01/2023", () => {
+      // GIVEN
+      const date = "01/01/2023";
+
+      // WHEN
+      const result = formatDateToIsoString(date);
+
+      // THEN
+      expect(result).toBe("2023-01-01T13:00:00.000Z");
+    });
+
+    it("should return correct value for iso date", () => {
+      // GIVEN
+      const date = "2023-01-01";
+
+      // WHEN
+      const result = formatDateToIsoString(date);
+
+      // THEN
+      expect(result).toBe("2023-01-01T13:00:00.000Z");
+    });
+    it("should return correct value for iso datetime", () => {
+      // GIVEN
+      const date = "2023-01-01T00:00:00.000Z";
+
+      // WHEN
+      const result = formatDateToIsoString(date);
+
+      // THEN
+      expect(result).toBe("2023-01-01T13:00:00.000Z");
     });
   });
   describe("getMonthsBetween", () => {

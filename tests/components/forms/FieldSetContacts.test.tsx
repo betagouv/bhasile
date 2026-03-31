@@ -56,7 +56,7 @@ describe("FieldSetContacts", () => {
       );
 
       expect(
-        screen.getByText(/Veuillez renseigner les contacts/i)
+        screen.getByText(/Veuillez renseigner le contact/i)
       ).toBeInTheDocument();
       expect(
         screen.getByText(/responsable de la structure/i)

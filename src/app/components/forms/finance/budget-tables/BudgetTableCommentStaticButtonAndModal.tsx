@@ -57,7 +57,7 @@ export const BudgetTableCommentStaticButtonAndModal = ({
       {currentComment ? (
         <Button
           type="button"
-          iconId="fr-icon-edit-box-line"
+          iconId="fr-icon-eye-line"
           onClick={() => {
             handleOpenModal();
           }}
@@ -72,7 +72,7 @@ export const BudgetTableCommentStaticButtonAndModal = ({
       )}
       <modal.Component
         title="Voir le commentaire"
-        className="[&_h1]:!text-left [&_h2]:!text-left [&_p]:!text-left"
+        className="[&_h1]:text-left! [&_h2]:text-left! [&_p]:text-left!"
       >
         <h2 className="text-sm">Détail affectation du résultat - {year}</h2>
         <p>{currentComment}</p>

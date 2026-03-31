@@ -8,7 +8,7 @@ export const FieldSetActesAdministratifs = ({ formKind }: Props) => {
     <fieldset className="flex flex-col gap-6">
       {formKind !== "modification" && (
         <legend className="text-xl font-bold mb-4 text-title-blue-france">
-          Actes administratifs
+          Document de convention du CPOM
         </legend>
       )}
       <MaxSizeNotice />

@@ -37,14 +37,16 @@ export const StructureLine = ({
     }
   }, [index, setValue, cpomDateStart, cpomDateEnd, isEditable]);
 
+  const structureLabel = `${structure.codeBhasile} - ${structure.type} ${structure.operateur?.name} ${structure.communeAdministrative ?? structure.departementAdministratif}`;
+
   return (
-    <div className="flex items-center gap-4 border-b border-gray-200 py-2 px-4">
+    <div className="flex items-center gap-4 border-b border-gray-200 py-2 px-6">
       <div className="flex-1">
         <Checkbox
           legend=""
           options={[
             {
-              label: structure.codeBhasile,
+              label: structureLabel,
               nativeInputProps: {
                 name: "structures",
                 value: structure.id,
@@ -61,7 +63,7 @@ export const StructureLine = ({
           className={cn(
             "my-2!",
             "[&_legend]:p-0!",
-            "[&_label]:text-sm [&_label]:leading-6 [&_label]:pb-0 [&_label]:text-mention-grey [&_label]:font-bold"
+            "[&_label]:text-sm [&_label]:whitespace-nowrap [&_label]:leading-6 [&_label]:pb-0 [&_label]:text-mention-grey [&_label]:font-bold"
           )}
           small
         />
