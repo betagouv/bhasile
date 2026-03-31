@@ -102,7 +102,9 @@ export const buildStructuresWhereSql = ({
         Prisma.sql`st."placesAutorisees" >= ${min} AND st."placesAutorisees" <= ${max}`
       );
     }
+  }
 
+  if (search) {
     const like = `%${search}%`;
     conditions.push(Prisma.sql`(
       s."codeBhasile" ILIKE ${like}
@@ -115,13 +117,14 @@ export const buildStructuresWhereSql = ({
     )`);
   }
   if (bati) {
-    if (bati === "none") {
-      conditions.push(Prisma.sql`sr.bati IS NULL`);
-    } else {
-      const batiList = bati.split(",").filter(Boolean);
-      if (batiList.length > 0) {
-        conditions.push(Prisma.sql`sr.bati IN (${Prisma.join(batiList)})`);
-      }
+    const batiList = bati
+      .split(",")
+      .filter(Boolean)
+      .map((value) => value.toUpperCase());
+    if (batiList.length > 0) {
+      conditions.push(
+        Prisma.sql`UPPER(COALESCE(sr.bati, '')) IN (${Prisma.join(batiList)})`
+      );
     }
   }
 
