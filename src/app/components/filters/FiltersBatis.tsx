@@ -12,7 +12,7 @@ export const FiltersBatis = () => {
     searchParams.get("bati")?.split(",") || []
   );
 
-  const noFilterOnBati = !searchParams.has("bati");
+  const noFilterOnBati = batis.length === 0;
 
   const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -40,11 +40,7 @@ export const FiltersBatis = () => {
   useEffect(() => {
     if (previousBati.current !== batis) {
       const params = new URLSearchParams(Array.from(searchParams.entries()));
-      if (batis.length === 0) {
-        params.set("bati", "none");
-      } else {
-        params.set("bati", batis.join(","));
-      }
+      params.set("bati", batis.join(","));
       router.replace(`?${params.toString()}`);
       previousBati.current = batis;
     }

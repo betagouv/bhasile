@@ -13,7 +13,7 @@ export const FiltersTypes = () => {
     searchParams.get("type")?.split(",") || []
   );
 
-  const noFilterOnType = !searchParams.has("type");
+  const noFilterOnType = types.length === 0;
 
   const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -43,11 +43,7 @@ export const FiltersTypes = () => {
   useEffect(() => {
     if (previousType.current !== types) {
       const params = new URLSearchParams(Array.from(searchParams.entries()));
-      if (types.length === 0) {
-        params.set("type", "none");
-      } else {
-        params.set("type", types.join(","));
-      }
+      params.set("type", types.join(","));
       router.replace(`?${params.toString()}`);
       previousType.current = types;
     }
