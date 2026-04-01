@@ -21,3 +21,11 @@ export const FormKind = {
 } as const;
 
 export type FormKind = (typeof FormKind)[keyof typeof FormKind];
+
+export type SessionUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  allowedDepartements: string[];
+};

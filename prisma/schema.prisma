@@ -10,15 +10,15 @@ datasource db {
 }
 
 model Departement {
-  id                      Int                      @id @default(autoincrement())
-  numero                  String                   @unique
-  name                    String
-  region                  String
-  structures              Structure[]
-  departementAllowedUsers DepartementAllowedUser[]
-  regionAdministrative    Region?                  @relation(fields: [regionId], references: [id])
-  regionId                Int?
-  cpoms                   CpomDepartement[]
+  id                   Int               @id @default(autoincrement())
+  numero               String            @unique
+  name                 String
+  region               String
+  structures           Structure[]
+  roleDepartements     RoleDepartement[]
+  regionAdministrative Region?           @relation(fields: [regionId], references: [id])
+  regionId             Int?
+  cpoms                CpomDepartement[]
 
   @@schema("public")
 }
@@ -570,32 +570,46 @@ model Finess {
   @@schema("public")
 }
 
-model AllowedUser {
-  id                      Int                      @id @default(autoincrement())
-  emailPattern            String
-  granularity             AllowedUserGranularity
-  departementAllowedUsers DepartementAllowedUser[]
+model Role {
+  id               Int               @id @default(autoincrement())
+  name             String            @unique
+  roleDepartements RoleDepartement[]
+  users            User[]
+  emailPatterns    EmailPattern[]
 
   @@schema("public")
 }
 
-model DepartementAllowedUser {
+model RoleDepartement {
   departement   Departement @relation(fields: [departementId], references: [id], onDelete: Cascade)
   departementId Int
-  allowedUser   AllowedUser @relation(fields: [allowedUserId], references: [id], onDelete: Cascade)
-  allowedUserId Int
+  role          Role        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId        Int
 
-  @@id([departementId, allowedUserId])
+  @@id([departementId, roleId])
+  @@schema("public")
+}
+
+model EmailPattern {
+  id      Int    @id @default(autoincrement())
+  pattern String @unique
+  role    Role   @relation(fields: [roleId], references: [id])
+  roleId  Int
+  users   User[]
+
   @@schema("public")
 }
 
 model User {
-  id             Int          @id @default(autoincrement())
-  prenom         String
-  nom            String
-  email          String       @unique
+  id             Int           @id @default(autoincrement())
+  name           String
+  email          String        @unique
   lastConnection DateTime
   userActions    UserAction[]
+  role           Role?         @relation(fields: [roleId], references: [id])
+  roleId         Int?
+  emailPattern   EmailPattern? @relation(fields: [emailPatternId], references: [id])
+  emailPatternId Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -727,14 +741,6 @@ enum StepStatus {
   A_VERIFIER
   FINALISE
   VALIDE
-
-  @@schema("public")
-}
-
-enum AllowedUserGranularity {
-  DEPARTEMENT
-  REGION
-  NATIONAL
 
   @@schema("public")
 }

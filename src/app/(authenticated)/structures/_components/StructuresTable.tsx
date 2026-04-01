@@ -1,11 +1,13 @@
 "use client";
 
+import { subject } from "@casl/ability";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useRouter } from "next/navigation";
-import { ReactElement, useState } from "react";
+import { ReactElement, useContext, useState } from "react";
 
 import { Pagination } from "@/app/components/common/Pagination";
 import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
+import { AbilityContext } from "@/app/context/AbilityContext";
 import { StructureApiType } from "@/schemas/api/structure.schema";
 import { ListColumn } from "@/types/ListColumn";
 
@@ -13,6 +15,11 @@ import { StructureItem } from "./StructureItem";
 
 const finalisationModal = createModal({
   id: "finalisation-modal",
+  isOpenedByDefault: false,
+});
+
+const noPermissionsModal = createModal({
+  id: "no-permissions-modal",
   isOpenedByDefault: false,
 });
 
@@ -74,12 +81,17 @@ export const StructuresTable = ({
   ariaLabelledBy,
 }: Props): ReactElement => {
   const router = useRouter();
+  const ability = useContext(AbilityContext);
 
   const [selectedStructure, setSelectedStructure] =
     useState<StructureApiType | null>(null);
   const handleOpenModal = (structure: StructureApiType) => {
     setSelectedStructure(structure);
-    finalisationModal.open();
+    if (ability.can("update", subject("Structure", structure))) {
+      finalisationModal.open();
+    } else {
+      noPermissionsModal.open();
+    }
   };
 
   return (
@@ -124,6 +136,22 @@ export const StructuresTable = ({
           et complétées par un agent ou une agente.
         </p>
       </finalisationModal.Component>
+      <noPermissionsModal.Component
+        title="La page de cette structure n’est pas encore finalisée."
+        buttons={[
+          {
+            doClosesModal: true,
+            children: "J'ai compris",
+            type: "button",
+          },
+        ]}
+      >
+        <p>
+          Toutes les informations concernant cette structure n’ont pas encore
+          été saisies. Veuillez attendre qu’une personne disposant des droits
+          nécessaires finalise sa création afin de pouvoir consulter cette page.
+        </p>
+      </noPermissionsModal.Component>
     </>
   );
 };
