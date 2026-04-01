@@ -13,7 +13,7 @@ model Departement {
   id                   Int               @id @default(autoincrement())
   numero               String            @unique
   name                 String
-  region               String
+  region               String?           @ignore
   structures           Structure[]
   roleDepartements     RoleDepartement[]
   regionAdministrative Region?           @relation(fields: [regionId], references: [id])

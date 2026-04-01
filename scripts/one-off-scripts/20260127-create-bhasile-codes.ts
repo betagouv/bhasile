@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Script de one-off pour remplir les codes Bhasile dans la table Structure
 // et propager le codeBhasile dans toutes les tables qui référencent la structure via dnaCode.
 // En premier remplissage, 1 code DNA -> 1 code Bhasile.

@@ -125,7 +125,7 @@ SELECT
   s.longitude AS "longitude",
   s.public AS "public",
   s.type AS "type",
-  d."region" AS "region",
+  r."name" AS "region",
   pa.places_autorisees_structure AS "places_autorisees_structure",
   sdm."pmr" AS "pmr_structure",
   sdm."lgbt" AS "lgbt_structure",
@@ -160,4 +160,5 @@ FROM
   LEFT JOIN budgets_agreges ba ON ba."structureDnaCode" = s."dnaCode"
   LEFT JOIN budget_dernier_millesime bdm ON bdm."structureDnaCode" = s."dnaCode"
   LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
+  LEFT JOIN public."Region" r ON r.id = d."regionId"
   LEFT JOIN public."Operateur" o ON o."id" = s."operateurId";

@@ -3,12 +3,11 @@ import { type Departement, type PrismaClient } from "@/generated/prisma/client";
 
 const createDepartements = (): Pick<
   Departement,
-  "numero" | "name" | "region"
+  "numero" | "name"
 >[] => {
   return DEPARTEMENTS.map((department) => ({
     numero: department.numero,
     name: department.name,
-    region: department.region,
   }));
 };
 
@@ -20,18 +19,17 @@ export const seedRegionsAndDepartements = async (
   });
 
   const regions = await prisma.region.findMany();
+  const regionNameToId = new Map(regions.map((region) => [region.name, region.id]));
 
-  const departementsToInsert = createDepartements();
+  const departementsToInsert = createDepartements().map((departement) => ({
+    ...departement,
+    regionId: regionNameToId.get(
+      DEPARTEMENTS.find((d) => d.numero === departement.numero)?.region ?? ""
+    ),
+  }));
   await prisma.departement.createMany({
     data: departementsToInsert,
   });
-
-  for (const region of regions) {
-    await prisma.departement.updateMany({
-      where: { region: region.name },
-      data: { regionId: region.id },
-    });
-  }
 
   console.log(`🌍 Départements et régions créés`);
 };

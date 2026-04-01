@@ -11,7 +11,7 @@ SELECT
   s."dnaCode" AS "dnaCode",
   s.id AS "id",
   o."name" AS "operateur",
-  d."region" AS "region",
+  r."name" AS "region",
   s."updatedAt" AS "updatedAt",
   -- Calendar indicators
   COALESCE(cal."has_authorisation_dates_undefined", FALSE) AS "has_authorisation_dates_undefined",
@@ -49,6 +49,7 @@ FROM
   LEFT JOIN:"SCHEMA"."structures_finance_quality" fin ON fin."dnaCode" = s."dnaCode"
   LEFT JOIN public."Operateur" o ON o."id" = s."operateurId"
   LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
+  LEFT JOIN public."Region" r ON r.id = d."regionId"
   LEFT JOIN public."Form" f ON f."structureCodeDna" = s."dnaCode"
   LEFT JOIN public."FormDefinition" fd ON fd."id" = f."formDefinitionId"
 WHERE
