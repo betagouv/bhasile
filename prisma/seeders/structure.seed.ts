@@ -61,12 +61,6 @@ export const createFakeStructure = ({
   const createdAt = faker.date.past();
   const creationDate = faker.date.past();
   const baseData = {
-    dnaCode: generateDnaCode({
-      type,
-      operateurName,
-      departementAdministratif,
-      counter,
-    }),
     codeBhasile: codeBhasile ?? undefined,
     type,
     nom: faker.lorem.words(2),
@@ -77,16 +71,6 @@ export const createFakeStructure = ({
     directionTerritoriale: "DT " + faker.location.city(),
     createdAt,
     updatedAt: createdAt,
-    activeInOfiiFileSince: createdAt,
-    inactiveInOfiiFileSince:
-      faker.helpers.maybe(
-        () =>
-          faker.date.between({
-            from: createdAt,
-            to: new Date(),
-          }),
-        { probability: 0.1 }
-      ) ?? null,
   };
 
   if (ofii) {
