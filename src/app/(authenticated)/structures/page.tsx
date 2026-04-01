@@ -7,6 +7,7 @@ import { ReactElement, useMemo, useState } from "react";
 import { SegmentedControl } from "@/app/components/common/SegmentedControl";
 import Loader from "@/app/components/ui/Loader";
 import { useFetchState } from "@/app/context/FetchStateContext";
+import { usePersistStructuresSearchQuery } from "@/app/hooks/usePersistStructuresSearchQuery";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
 import { FetchState } from "@/types/fetch-state.type";
 
@@ -16,6 +17,8 @@ import { StructuresTable } from "./_components/StructuresTable";
 
 export default function Structures(): ReactElement {
   const [selectedVisualization, setSelectedVisualization] = useState("tableau");
+
+  usePersistStructuresSearchQuery();
 
   const { structures, totalStructures } = useStructuresSearch({ map: false });
 
