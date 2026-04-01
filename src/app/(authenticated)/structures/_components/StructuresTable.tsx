@@ -96,7 +96,7 @@ export const StructuresTable = ({
 
   return (
     <>
-      <div className="px-4 bg-alt-grey h-full">
+      <div className="px-4 h-full">
         <ListTableHeadings ariaLabelledBy={ariaLabelledBy} columns={COLUMNS}>
           {structures.map((structure, index) => (
             <StructureItem
