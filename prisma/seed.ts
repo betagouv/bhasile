@@ -10,7 +10,7 @@ import { createAntenneList } from "./seeders/antenne.seed";
 import { createFakeCpoms } from "./seeders/cpom.seed";
 import { seedRegionsAndDepartements } from "./seeders/departements.seed";
 import { createDnaList, createDnaStructures } from "./seeders/dna.seed";
-import { createFakeEvenementIndesirableGrave } from "./seeders/evenement-indesirable-grave.seed";
+import { createEvenementsIndesirablesGraves } from "./seeders/evenement-indesirable-grave.seed";
 import { createFinessList } from "./seeders/finess.seed";
 import {
   createFakeFormDefinition,
@@ -234,24 +234,8 @@ export async function seed(): Promise<void> {
   console.log(`✅ ${activites.length} activités créées`);
 
   console.log("📊 Création des événements indésirables graves...");
-  const evenementsIndesirablesGraves = allStructuresWithDna.flatMap(
-    (structure) => {
-      return structure.dnaStructures.flatMap((dnaStructure) => {
-        const dnaCode = dnaStructure?.dna?.code;
-        if (!dnaCode) {
-          return [];
-        }
-
-        return Array.from(
-          { length: faker.number.int({ min: 0, max: 15 }) },
-          () =>
-            createFakeEvenementIndesirableGrave({
-              dnaCode,
-            })
-        );
-      });
-    }
-  );
+  const evenementsIndesirablesGraves =
+    createEvenementsIndesirablesGraves(allStructuresWithDna);
   await prisma.evenementIndesirableGrave.createMany({
     data: evenementsIndesirablesGraves,
   });

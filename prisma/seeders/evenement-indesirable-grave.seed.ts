@@ -4,6 +4,11 @@ import { EvenementIndesirableGrave } from "@/generated/prisma/client";
 
 const usedNumeroDossiers = new Set<string>();
 
+export type StructureWithDnasForSeed = {
+  id: number;
+  dnaStructures: { dna: { code: string } | null }[];
+};
+
 export const createFakeEvenementIndesirableGrave = ({
   dnaCode,
 }: CreateFakeEvenementIndesirableGraveArgs): Omit<
@@ -39,4 +44,25 @@ export const createFakeEvenementIndesirableGrave = ({
 
 type CreateFakeEvenementIndesirableGraveArgs = {
   dnaCode: string;
+};
+
+export const createEvenementsIndesirablesGraves = (
+  structuresWithDna: StructureWithDnasForSeed[]
+): Omit<EvenementIndesirableGrave, "id" | "structureDnaCode">[] => {
+  return structuresWithDna.flatMap((structure) => {
+    if (!faker.helpers.maybe(() => true, { probability: 0.5 })) {
+      return [];
+    }
+
+    return structure.dnaStructures.flatMap((dnaStructure) => {
+      const dnaCode = dnaStructure?.dna?.code;
+      if (!dnaCode) {
+        return [];
+      }
+
+      return Array.from({ length: faker.number.int({ min: 0, max: 15 }) }, () =>
+        createFakeEvenementIndesirableGrave({ dnaCode })
+      );
+    });
+  });
 };

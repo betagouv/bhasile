@@ -5,11 +5,16 @@ import { Activite } from "@/generated/prisma/client";
 export const createFakeActivites = ({
   dnaCode,
 }: CreateFakeActivitesArgs): Omit<Activite, "id" | "structureDnaCode">[] => {
-  return Array.from(Array(12).keys()).map((month) =>
-    createFakeActivite({
-      dnaCode,
-      date: new Date(2025, month, 1, 13),
-    })
+  if (!faker.helpers.maybe(() => true, { probability: 0.3 })) {
+    return [];
+  }
+
+  const count = faker.number.int({ min: 1, max: 12 });
+  const startMonth = 12 - count; // 0..11
+  const months = Array.from({ length: count }, (_, i) => startMonth + i);
+
+  return months.map((month) =>
+    createFakeActivite({ dnaCode, date: new Date(2025, month, 1, 13) })
   );
 };
 
