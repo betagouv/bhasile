@@ -125,7 +125,7 @@ export const StructureLine = ({
         {index !== -1 && !isEditable && (
           <Button
             iconId="fr-icon-edit-box-line"
-            className="ml-auto rounded-4xl"
+            className="ml-auto rounded-4xl before:w-[20] before:h-[20]"
             onClick={() => {
               setIsEditable(!isEditable);
             }}

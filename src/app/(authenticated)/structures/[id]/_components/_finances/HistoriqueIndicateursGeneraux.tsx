@@ -29,7 +29,7 @@ export const HistoriqueIndicateursGeneraux = (): ReactElement => {
       </span>,
     ]);
   };
-
+  // TODO : vérifier le contraste du texte
   return (
     <CustomAccordion
       label={

@@ -24,13 +24,13 @@ export const CpomItem = ({ cpom, index }: Props) => {
       data-row-key={index}
       className="border-t border-default-grey h-12"
     >
-      <td className="text-left! min-h-9 !py-0">{cpom.operateur?.name}</td>
-      <td className="text-left! !py-0">{cpom.structures?.length}</td>
-      <td className="text-left! !py-0">
+      <td className="text-left! min-h-9 py-0!">{cpom.operateur?.name}</td>
+      <td className="text-left! py-0!">{cpom.structures?.length}</td>
+      <td className="text-left! py-0!">
         {getGranularityLabel(cpom.granularity)}
       </td>
-      <td className="text-left! !py-0">{cpom.region?.name}</td>
-      <td className="text-left! !py-0">
+      <td className="text-left! py-0!">{cpom.region?.name}</td>
+      <td className="text-left! py-0!">
         {cpom.granularity === "REGIONALE" ? (
           <span className="flex">
             <EmptyCell className="[&>div]:mx-0.5" />
@@ -39,18 +39,18 @@ export const CpomItem = ({ cpom, index }: Props) => {
           getDepartementsList(cpom.departements, 17)
         )}
       </td>
-      <td className="text-left! !py-0"> {formatDate(dateStart)}</td>
-      <td className="text-left! !py-0"> {formatDate(dateEnd)}</td>
-      <td className="!py-0">
+      <td className="text-left! py-0!"> {formatDate(dateStart)}</td>
+      <td className="text-left! py-0!"> {formatDate(dateEnd)}</td>
+      <td className="py-0!">
         {isCpomFinalized ? (
           <Link
-            className="fr-btn--tertiary-no-outline fr-icon-arrow-right-line"
+            className="fr-btn--tertiary-no-outline fr-icon-arrow-right-line before:w-[20] before:h-[20]"
             title={`Voir le CPOM ${cpom.id}`}
             href={`cpoms/${cpom.id}`}
           />
         ) : (
           <Link
-            className="fr-btn--tertiary-no-outline fr-icon-edit-line"
+            className="fr-btn--tertiary-no-outline fr-icon-edit-line before:w-[20] before:h-[20]"
             title={`Ajouter le CPOM ${cpom.id}`}
             href={`cpoms/${cpom.id}/ajout/01-identification`}
           />

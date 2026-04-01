@@ -10,7 +10,7 @@ export const contactApiSchema = z.object({
   telephone: z.string().min(1, "Le numéro de téléphone du contact est requis"),
   email: z.string().email().min(1, "L'email du contact est requis"),
   role: z.string().min(1, "Le rôle du contact est requis"),
-  perimetre: z.string().optional(),
+  perimetre: z.string().nullish(),
 });
 
 export type ContactApiType = z.infer<typeof contactApiSchema>;

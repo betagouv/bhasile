@@ -54,7 +54,7 @@ export const StructuresList = ({ structures, control }: Props) => {
                 <strong className="uppercase font-bold text-title-blue-france">
                   {structure.nom}
                 </strong>
-                <div className="text-sm ">
+                <div className="text-sm">
                   {structure.codeBhasile} - {structure.type},{" "}
                   {structure.operateur.name},{" "}
                   {structure.departementAdministratif}
