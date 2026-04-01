@@ -602,7 +602,7 @@ model EmailPattern {
 
 model User {
   id             Int           @id @default(autoincrement())
-  name           String
+  name           String?
   email          String        @unique
   lastConnection DateTime
   userActions    UserAction[]
@@ -823,4 +823,3 @@ view StructuresFilling {
 
   @@schema("reporting")
 }
-
