@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off script: backfill dnaCode from structureDnaCode for Activite and EIG.
 // Usage: yarn one-off 20260323-link-dna-for-activite-and-eig
 
@@ -97,7 +98,10 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error("❌ Erreur pendant le backfill dnaCode Activite/EIG :", error);
+    console.error(
+      "❌ Erreur pendant le backfill dnaCode Activite/EIG :",
+      error
+    );
     process.exit(1);
   })
   .finally(async () => {

@@ -8,7 +8,7 @@ CREATE OR REPLACE VIEW:"SCHEMA"."structures_calendar_quality" AS
 WITH
   structures AS (
     SELECT
-      s."dnaCode",
+      s."id",
       s."type" AS "structureType",
       s."debutPeriodeAutorisation",
       s."finPeriodeAutorisation",
@@ -18,7 +18,7 @@ WITH
       public."Structure" s
   )
 SELECT
-  s."dnaCode" AS "dnaCode",
+  s."id" AS "id",
   -- Base data presence flags
   CASE
     WHEN s."structureType" IN ('CADA', 'CPH') THEN (

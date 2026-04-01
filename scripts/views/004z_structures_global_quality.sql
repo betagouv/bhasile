@@ -8,8 +8,8 @@
 -- - structures_characteristics_quality: characteristics (e.g. DNA vs departement)
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_global_quality" AS
 SELECT
-  s."dnaCode" AS "dnaCode",
   s.id AS "id",
+  s."codeBhasile" AS "codeBhasile",
   o."name" AS "operateur",
   r."name" AS "region",
   s."updatedAt" AS "updatedAt",
@@ -43,10 +43,10 @@ SELECT
   ) AS "issues_count"
 FROM
   public."Structure" s
-  LEFT JOIN:"SCHEMA"."structures_calendar_quality" cal ON cal."dnaCode" = s."dnaCode"
-  LEFT JOIN:"SCHEMA"."structures_places_quality" pl ON pl."dnaCode" = s."dnaCode"
-  LEFT JOIN:"SCHEMA"."structures_characteristics_quality" ch ON ch."dnaCode" = s."dnaCode"
-  LEFT JOIN:"SCHEMA"."structures_finance_quality" fin ON fin."dnaCode" = s."dnaCode"
+  LEFT JOIN:"SCHEMA"."structures_calendar_quality" cal ON cal."id" = s."id"
+  LEFT JOIN:"SCHEMA"."structures_places_quality" pl ON pl."id" = s."id"
+  LEFT JOIN:"SCHEMA"."structures_characteristics_quality" ch ON ch."id" = s."id"
+  LEFT JOIN:"SCHEMA"."structures_finance_quality" fin ON fin."id" = s."id"
   LEFT JOIN public."Operateur" o ON o."id" = s."operateurId"
   LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
   LEFT JOIN public."Region" r ON r.id = d."regionId"

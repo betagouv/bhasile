@@ -475,7 +475,6 @@ const updateStructure = async (
     debutConvention,
     finConvention,
     creationDate,
-    finessCode,
     lgbt,
     fvvTeh,
     debutPeriodeAutorisation,
@@ -483,8 +482,6 @@ const updateStructure = async (
     notes,
     nomOfii,
     directionTerritoriale,
-    activeInOfiiFileSince,
-    inactiveInOfiiFileSince,
   } = structure;
 
   const updatedStructure = await tx.structure.update({
@@ -505,7 +502,6 @@ const updateStructure = async (
       debutConvention,
       finConvention,
       creationDate,
-      finessCode,
       lgbt,
       fvvTeh,
       debutPeriodeAutorisation,
@@ -513,8 +509,6 @@ const updateStructure = async (
       notes,
       nomOfii,
       directionTerritoriale,
-      activeInOfiiFileSince,
-      inactiveInOfiiFileSince,
       departement: departementAdministratif
         ? {
             connect: {

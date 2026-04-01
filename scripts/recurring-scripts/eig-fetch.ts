@@ -217,7 +217,6 @@ for (const eig of eigs) {
     where: { numeroDossier: eig.numeroDossier },
     update: {},
     create: {
-      structureDnaCode: null,
       dnaCode: eig.dnaCode,
       numeroDossier: eig.numeroDossier,
       evenementDate: eig.evenementDate,

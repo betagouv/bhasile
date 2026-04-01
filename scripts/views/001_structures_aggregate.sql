@@ -3,7 +3,7 @@ CREATE OR REPLACE VIEW:"SCHEMA"."structures_aggregates" AS
 WITH -- Last typology by structure
   structure_typologie_dernier_millesime AS (
     SELECT DISTINCT
-      ON (st."structureDnaCode") st."structureDnaCode",
+      ON (st."structureId") st."structureId",
       st."placesAutorisees",
       st."pmr",
       st."lgbt",
@@ -12,13 +12,13 @@ WITH -- Last typology by structure
     FROM
       public."StructureTypologie" st
     ORDER BY
-      st."structureDnaCode",
+      st."structureId",
       st."year" DESC
   ),
   -- Last typology by address
   adresse_typologie_dernier_millesime AS (
     SELECT DISTINCT
-      ON (aty."adresseId") a."structureDnaCode",
+      ON (aty."adresseId") a."structureId",
       a."id" AS "adresse_id",
       aty."placesAutorisees",
       aty."qpv",
@@ -31,22 +31,37 @@ WITH -- Last typology by structure
       aty."adresseId",
       aty."year" DESC
   ),
-  -- Last activite by structure
-  activite_dernier_millesime AS (
+  -- Last activite by dnaCode (Activite is linked to Dna via dnaCode)
+  activite_dernier_millesime_par_dna AS (
     SELECT DISTINCT
-      ON (sa."structureDnaCode") sa."structureDnaCode",
-      sa."date",
-      sa."placesAutorisees"
+      ON (a."dnaCode") a."dnaCode",
+      a."date",
+      a."placesAutorisees"
     FROM
-      public."Activite" sa
+      public."Activite" a
+    WHERE
+      a."dnaCode" IS NOT NULL
     ORDER BY
-      sa."structureDnaCode",
-      sa."date" DESC
+      a."dnaCode",
+      a."date" DESC
+  ),
+  -- Aggregate last activites per structure across all linked DNAs
+  activite_dernier_millesime_par_structure AS (
+    SELECT
+      ds."structureId" AS "structureId",
+      MAX(ad."date") AS "date",
+      SUM(ad."placesAutorisees") AS "placesAutorisees"
+    FROM
+      activite_dernier_millesime_par_dna ad
+      JOIN public."Dna" d ON d."code" = ad."dnaCode"
+      JOIN public."DnaStructure" ds ON ds."dnaId" = d."id"
+    GROUP BY
+      ds."structureId"
   ),
   -- Aggregate by structure on the last typologies of addresses
   adresses_agregees AS (
     SELECT
-      adm."structureDnaCode",
+      adm."structureId",
       COUNT(DISTINCT adm."adresse_id") AS nb_adresses,
       SUM(adm."placesAutorisees") AS places_autorisees_adresse,
       SUM(adm."qpv") AS qpv_adresse,
@@ -55,23 +70,23 @@ WITH -- Last typology by structure
     FROM
       adresse_typologie_dernier_millesime adm
     GROUP BY
-      adm."structureDnaCode"
+      adm."structureId"
   ),
   -- Last dotationAccordee by structure (most recent budget)
   budget_dernier_millesime AS (
     SELECT DISTINCT
-      ON (b."structureDnaCode") b."structureDnaCode",
+      ON (b."structureId") b."structureId",
       b."dotationAccordee"
     FROM
       public."Budget" b
     ORDER BY
-      b."structureDnaCode",
+      b."structureId",
       b."year" DESC
   ),
   -- Aggregate budgets by structure
   budgets_agreges AS (
     SELECT
-      b."structureDnaCode",
+      b."structureId",
       MAX(b."tauxEncadrement") AS taux_encadrement_max,
       MIN(b."tauxEncadrement") AS taux_encadrement_min,
       MAX(b."coutJournalier") AS cout_journalier_max,
@@ -83,12 +98,12 @@ WITH -- Last typology by structure
     FROM
       public."Budget" b
     GROUP BY
-      b."structureDnaCode"
+      b."structureId"
   ),
   -- Calculs agrégés avec différences et pourcentages
   places_agregees AS (
     SELECT
-      s."dnaCode",
+      s."id",
       sdm."placesAutorisees" AS places_autorisees_structure,
       aa."places_autorisees_adresse",
       adm."placesAutorisees" AS nb_places_activite,
@@ -107,19 +122,20 @@ WITH -- Last typology by structure
       ) AS pct_diff_places_activite
     FROM
       public."Structure" s
-      LEFT JOIN structure_typologie_dernier_millesime sdm ON sdm."structureDnaCode" = s."dnaCode"
-      LEFT JOIN adresses_agregees aa ON aa."structureDnaCode" = s."dnaCode"
-      LEFT JOIN activite_dernier_millesime adm ON adm."structureDnaCode" = s."dnaCode"
+      LEFT JOIN structure_typologie_dernier_millesime sdm ON sdm."structureId" = s."id"
+      LEFT JOIN adresses_agregees aa ON aa."structureId" = s."id"
+      LEFT JOIN activite_dernier_millesime_par_structure adm ON adm."structureId" = s."id"
   ),
   places_agregees_indicateurs AS (
     SELECT
-      p."dnaCode",
+      p."id",
       COALESCE((pct_diff_places_adresse > 10)::int, 0) + COALESCE((pct_diff_places_activite > 10)::int, 0) AS indicateurs_places_agregees
     FROM
       places_agregees p
   )
 SELECT
-  s."dnaCode" AS "dnaCode",
+  s."id" AS "id",
+  s."codeBhasile" AS "codeBhasile",
   o."name" AS "operateur",
   s.latitude AS "latitude",
   s.longitude AS "longitude",
@@ -153,12 +169,12 @@ SELECT
   s."updatedAt" AS "updated_at"
 FROM
   public."Structure" s
-  LEFT JOIN places_agregees pa ON pa."dnaCode" = s."dnaCode"
-  LEFT JOIN structure_typologie_dernier_millesime sdm ON sdm."structureDnaCode" = s."dnaCode"
-  LEFT JOIN adresses_agregees aa ON aa."structureDnaCode" = s."dnaCode"
-  LEFT JOIN places_agregees_indicateurs pai ON pai."dnaCode" = s."dnaCode"
-  LEFT JOIN budgets_agreges ba ON ba."structureDnaCode" = s."dnaCode"
-  LEFT JOIN budget_dernier_millesime bdm ON bdm."structureDnaCode" = s."dnaCode"
+  LEFT JOIN places_agregees pa ON pa."id" = s."id"
+  LEFT JOIN structure_typologie_dernier_millesime sdm ON sdm."structureId" = s."id"
+  LEFT JOIN adresses_agregees aa ON aa."structureId" = s."id"
+  LEFT JOIN places_agregees_indicateurs pai ON pai."id" = s."id"
+  LEFT JOIN budgets_agreges ba ON ba."structureId" = s."id"
+  LEFT JOIN budget_dernier_millesime bdm ON bdm."structureId" = s."id"
   LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
   LEFT JOIN public."Region" r ON r.id = d."regionId"
   LEFT JOIN public."Operateur" o ON o."id" = s."operateurId";

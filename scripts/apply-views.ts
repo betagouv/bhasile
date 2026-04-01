@@ -24,13 +24,7 @@ applyViews();
 
 // Utils
 function deleteViews() {
-  runPsqlOrExit(
-    "psql",
-    [psqlUrl, "-v", "ON_ERROR_STOP=1", "-c", 'DROP VIEW IF EXISTS "public"."structures_order";'],
-    '✅ View "public"."structures_order" deleted',
-    '❌ Failed to delete view "public"."structures_order"'
-  );
-
+  // TODO: supprimer ce code après déploiement qui supprime définitivement ces deux vues
   runPsqlOrExit(
     "psql",
     [
@@ -40,7 +34,7 @@ function deleteViews() {
       "-c",
       'DROP VIEW IF EXISTS "public"."structures_order"; DROP VIEW IF EXISTS "public"."cpoms_order";',
     ],
-    '✅ Views "public"."structures_order" and "public"."cpoms_order" deleted',
+    '✅ Views "public"."structures_order" et "public"."cpoms_order" supprimées',
     "❌ Failed to delete public order views"
   );
 

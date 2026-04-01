@@ -67,7 +67,7 @@ export const createFakeStructure = ({
       departementAdministratif,
       counter,
     }),
-    codeBhasile,
+    codeBhasile: codeBhasile ?? undefined,
     type,
     nom: faker.lorem.words(2),
     nomOfii: faker.lorem.words(2),
@@ -110,18 +110,12 @@ export const createFakeStructure = ({
     debutConvention,
     finConvention,
     creationDate,
-    finessCode: isAutorisee ? faker.number.int(1000000000).toString() : null,
     lgbt: faker.datatype.boolean(),
     fvvTeh: faker.datatype.boolean(),
     public: faker.helpers.enumValue(PublicType),
     debutPeriodeAutorisation: isAutorisee ? debutPeriodeAutorisation : null,
     finPeriodeAutorisation: isAutorisee ? finPeriodeAutorisation : null,
     notes: faker.lorem.lines(2),
-    activeInOfiiFileSince:
-      faker.helpers.maybe(
-        () => faker.date.between({ from: creationDate, to: new Date() }),
-        { probability: 0.01 }
-      ) ?? null,
   };
 };
 
