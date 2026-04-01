@@ -9,7 +9,7 @@ import { StructureType } from "@/types/structure.type";
 import { FiltersPanel } from "./FiltersPanel";
 import { LocationFiltersPanel } from "./LocationFiltersPanel";
 
-export const Filters = () => {
+export const Filters = ({ showFilters = true, showLocation = true }: Props) => {
   const [openPanel, setOpenPanel] = useState<
     "filters" | "location" | undefined
   >(undefined);
@@ -91,62 +91,71 @@ export const Filters = () => {
 
   return (
     <>
-      <div className="relative">
-        <Button
-          ref={filterButtonRef}
-          priority="tertiary"
-          size="small"
-          onClick={() => handleTogglePanel("filters")}
-          className={cn(
-            "flex gap-1",
-            isFiltersActive && "bg-[var(--blue-france-975-sun-113)]"
-          )}
-          aria-label={`Filtres ${isFiltersActive ? "actifs" : "inactifs"}`}
-          aria-pressed={isFiltersActive}
-        >
-          <span className="fr-icon-filter-line fr-icon--sm relative">
-            {isFiltersActive && (
-              <span className="absolute block rounded-full w-1.5 h-1.5 bg-border-action-high-warning top-0 right-0" />
+      {showFilters && (
+        <div className="relative">
+          <Button
+            ref={filterButtonRef}
+            priority="tertiary"
+            size="small"
+            onClick={() => handleTogglePanel("filters")}
+            className={cn(
+              "flex gap-1",
+              isFiltersActive && "bg-[var(--blue-france-975-sun-113)]"
             )}
-          </span>{" "}
-          Filtres
-        </Button>
-        {openPanel === "filters" && (
-          <FiltersPanel
-            ref={filterPanelRef}
-            closePanel={() => handleTogglePanel(undefined)}
-            isActive={isFiltersActive}
-          />
-        )}
-      </div>
-      <div className="relative">
-        <Button
-          ref={locationButtonRef}
-          priority="tertiary"
-          size="small"
-          onClick={() => handleTogglePanel("location")}
-          className={cn(
-            "flex gap-1 whitespace-nowrap",
-            isLocationActive && "bg-[var(--blue-france-975-sun-113)]"
+            aria-label={`Filtres ${isFiltersActive ? "actifs" : "inactifs"}`}
+            aria-pressed={isFiltersActive}
+          >
+            <span className="fr-icon-filter-line fr-icon--sm relative">
+              {isFiltersActive && (
+                <span className="absolute block rounded-full w-1.5 h-1.5 bg-border-action-high-warning top-0 right-0" />
+              )}
+            </span>{" "}
+            Filtres
+          </Button>
+          {openPanel === "filters" && (
+            <FiltersPanel
+              ref={filterPanelRef}
+              closePanel={() => handleTogglePanel(undefined)}
+              isActive={isFiltersActive}
+            />
           )}
-          aria-label={`Filtres par région / département ${isLocationActive ? "actifs" : "inactifs"}`}
-          aria-pressed={isLocationActive}
-        >
-          <span className="fr-icon-focus-3-line fr-icon--sm relative">
-            {isLocationActive && (
-              <span className="absolute block rounded-full w-1.5 h-1.5 bg-border-action-high-warning top-0 right-0" />
+        </div>
+      )}
+      {showLocation && (
+        <div className="relative">
+          <Button
+            ref={locationButtonRef}
+            priority="tertiary"
+            size="small"
+            onClick={() => handleTogglePanel("location")}
+            className={cn(
+              "flex gap-1 whitespace-nowrap",
+              isLocationActive && "bg-[var(--blue-france-975-sun-113)]"
             )}
-          </span>{" "}
-          Région / Département
-        </Button>
-        {openPanel === "location" && (
-          <LocationFiltersPanel
-            ref={locationPanelRef}
-            closePanel={() => handleTogglePanel(undefined)}
-            isActive={isLocationActive}
-          />
-        )}
-      </div>
+            aria-label={`Filtres par région / département ${isLocationActive ? "actifs" : "inactifs"}`}
+            aria-pressed={isLocationActive}
+          >
+            <span className="fr-icon-focus-3-line fr-icon--sm relative">
+              {isLocationActive && (
+                <span className="absolute block rounded-full w-1.5 h-1.5 bg-border-action-high-warning top-0 right-0" />
+              )}
+            </span>{" "}
+            Région / Département
+          </Button>
+          {openPanel === "location" && (
+            <LocationFiltersPanel
+              ref={locationPanelRef}
+              closePanel={() => handleTogglePanel(undefined)}
+              isActive={isLocationActive}
+            />
+          )}
+        </div>
+      )}
     </>
   );
+};
+
+type Props = {
+  showFilters?: boolean;
+  showLocation?: boolean;
 };

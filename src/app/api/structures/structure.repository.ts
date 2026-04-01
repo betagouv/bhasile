@@ -1,5 +1,5 @@
 import { DEFAULT_PAGE_SIZE } from "@/constants";
-import { Structure, StructureType } from "@/generated/prisma/client";
+import { Prisma, Structure, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { StructureColumn } from "@/types/ListColumn";
@@ -22,10 +22,14 @@ import {
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
 import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import {
-  getStructureOrderBy,
-  getStructureSearchWhere,
-} from "./structure.service";
-import { convertToPublicType } from "./structure.util";
+  STRUCTURES_ORDER_CTE_SQL,
+  STRUCTURES_ORDER_JOINS_SQL,
+} from "./structure.constants";
+import {
+  buildStructuresOrderSql,
+  buildStructuresWhereSql,
+  convertToPublicType,
+} from "./structure.util";
 
 type SearchProps = {
   search: string | null;
@@ -40,6 +44,47 @@ type SearchProps = {
   map?: boolean;
   selection?: boolean;
 };
+const getOrderedStructures = async ({
+  search,
+  page,
+  type,
+  bati,
+  placesAutorisees,
+  departements,
+  operateurs,
+  column,
+  direction,
+  selection,
+  map,
+}: SearchProps): Promise<{ id: number }[]> => {
+  const whereSql = buildStructuresWhereSql({
+    search,
+    type,
+    bati,
+    placesAutorisees,
+    departements,
+    operateurs,
+    selection,
+  });
+  const orderSql = buildStructuresOrderSql(
+    column ?? "departementAdministratif",
+    direction ?? "asc"
+  );
+  const paginationSql =
+    selection || map
+      ? Prisma.sql``
+      : Prisma.sql`LIMIT ${DEFAULT_PAGE_SIZE} OFFSET ${(page ?? 0) * DEFAULT_PAGE_SIZE}`;
+
+  return prisma.$queryRaw<{ id: number }[]>(Prisma.sql`
+    ${STRUCTURES_ORDER_CTE_SQL}
+    SELECT s.id
+    ${STRUCTURES_ORDER_JOINS_SQL}
+    ${whereSql}
+    ORDER BY ${orderSql}
+    ${paginationSql}
+  `);
+};
+
 export const findBySearch = async ({
   search,
   page,
@@ -53,27 +98,24 @@ export const findBySearch = async ({
   map,
   selection,
 }: SearchProps): Promise<Partial<Structure>[]> => {
-  const where = getStructureSearchWhere({
+  const structuresIds = await getOrderedStructures({
     search,
+    page,
     type,
     bati,
-    departements,
     placesAutorisees,
+    departements,
     operateurs,
+    column,
+    direction,
+    map,
     selection,
   });
-
   if (map) {
-    const mapStructuresIds = await prisma.structuresOrder.findMany({
-      where,
-      select: {
-        id: true,
-      },
-    });
     return prisma.structure.findMany({
       where: {
         id: {
-          in: mapStructuresIds.map((structure) => structure.id),
+          in: structuresIds.map((structure) => structure.id),
         },
       },
       select: {
@@ -83,21 +125,6 @@ export const findBySearch = async ({
       },
     });
   }
-
-  const orderBy = getStructureOrderBy(
-    column ?? "departementAdministratif",
-    direction ?? "asc"
-  );
-
-  const structuresIds = await prisma.structuresOrder.findMany({
-    where,
-    skip: selection ? 0 : page ? page * DEFAULT_PAGE_SIZE : 0,
-    take: selection ? undefined : DEFAULT_PAGE_SIZE,
-    orderBy,
-    select: {
-      id: true,
-    },
-  });
 
   const structures = await prisma.structure.findMany({
     where: {
@@ -148,18 +175,22 @@ export const countBySearch = async ({
   departements,
   operateurs,
 }: SearchProps): Promise<number> => {
-  const where = getStructureSearchWhere({
+  const whereSql = buildStructuresWhereSql({
     search,
     type,
     bati,
     departements,
     placesAutorisees,
     operateurs,
+    selection: false,
   });
-
-  return prisma.structuresOrder.count({
-    where,
-  });
+  const result = await prisma.$queryRaw<{ count: bigint }[]>(Prisma.sql`
+    ${STRUCTURES_ORDER_CTE_SQL}
+    SELECT COUNT(*)::bigint AS count
+    ${STRUCTURES_ORDER_JOINS_SQL}
+    ${whereSql}
+  `);
+  return Number(result[0]?.count ?? 0);
 };
 
 export const getLatestPlacesAutoriseesPerStructure = async (): Promise<

@@ -818,23 +818,3 @@ view StructuresFilling {
   @@schema("reporting")
 }
 
-view StructuresOrder {
-  id                       Int
-  codeBhasile              String
-  type                     String
-  operateur                String?
-  finessCode               String?
-  nom                      String?
-  adresseAdministrative    String
-  codePostalAdministratif  String
-  communeAdministrative    String
-  departementAdministratif String
-  region                   String?
-  bati                     String?
-  placesAutorisees         Int?
-  finConvention            DateTime?
-  hasForms                 Boolean?
-
-  @@map("structures_order")
-  @@schema("public")
-}

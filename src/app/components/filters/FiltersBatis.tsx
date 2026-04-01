@@ -9,10 +9,10 @@ export const FiltersBatis = () => {
   const searchParams = useSearchParams();
 
   const [batis, setBatis] = useState(
-    searchParams.get("bati")?.split(",") || []
+    searchParams.get("bati")?.split(",").filter(Boolean) || []
   );
 
-  const noFilterOnBati = !searchParams.has("bati");
+  const noFilterOnBati = batis.length === 0;
 
   const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -40,10 +40,10 @@ export const FiltersBatis = () => {
   useEffect(() => {
     if (previousBati.current !== batis) {
       const params = new URLSearchParams(Array.from(searchParams.entries()));
-      if (batis.length === 0) {
-        params.set("bati", "none");
-      } else {
+      if (batis.length > 0) {
         params.set("bati", batis.join(","));
+      } else {
+        params.delete("bati");
       }
       router.replace(`?${params.toString()}`);
       previousBati.current = batis;
@@ -63,7 +63,7 @@ export const FiltersBatis = () => {
                 label: "Collectif",
                 nativeInputProps: {
                   name: "structure-bati",
-                  value: "Collectif",
+                  value: Repartition.COLLECTIF,
                   checked: batis.includes("Collectif") || noFilterOnBati,
                   onChange: handleTypeChange,
                 },
@@ -78,7 +78,7 @@ export const FiltersBatis = () => {
                 label: "Diffus",
                 nativeInputProps: {
                   name: "structure-bati",
-                  value: "Diffus",
+                  value: Repartition.DIFFUS,
                   checked: batis.includes("Diffus") || noFilterOnBati,
                   onChange: handleTypeChange,
                 },
@@ -93,7 +93,7 @@ export const FiltersBatis = () => {
                 label: "Mixte",
                 nativeInputProps: {
                   name: "structure-bati",
-                  value: "Mixte",
+                  value: Repartition.MIXTE,
                   checked: batis.includes("Mixte") || noFilterOnBati,
                   onChange: handleTypeChange,
                 },

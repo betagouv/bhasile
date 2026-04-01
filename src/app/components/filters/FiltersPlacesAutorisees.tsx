@@ -14,7 +14,7 @@ export const FiltersPlacesAutorisees = () => {
   const { maxPlacesAutorisees, minPlacesAutorisees } = useStructureStats();
 
   const [placesAutorisees, setPlacesAutorisees] = useState(
-    searchParams.get("places")?.split(",").map(Number) || []
+    searchParams.get("places")?.split(",").filter(Boolean).map(Number) || []
   );
 
   const noPlacesAutoriseesSelected = placesAutorisees.length === 0;
@@ -40,7 +40,11 @@ export const FiltersPlacesAutorisees = () => {
 
   const handlePlacesAutoriseesUpdate = useDebounceCallback((): void => {
     const params = new URLSearchParams(Array.from(searchParams.entries()));
-    params.set("places", placesAutorisees.join(","));
+    if (placesAutorisees.length > 0) {
+      params.set("places", placesAutorisees.join(","));
+    } else {
+      params.delete("places");
+    }
     router.replace(`?${params.toString()}`);
   }, DEBOUNCE_TIME);
 
