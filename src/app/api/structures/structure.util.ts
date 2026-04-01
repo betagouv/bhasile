@@ -108,6 +108,13 @@ export const buildStructuresWhereSql = ({
     const like = `%${search}%`;
     conditions.push(Prisma.sql`(
       s."codeBhasile" ILIKE ${like}
+      OR EXISTS (
+        SELECT 1
+        FROM public."DnaStructure" ds
+        JOIN public."Dna" d ON d.id = ds."dnaId"
+        WHERE ds."structureId" = s.id
+          AND d.code ILIKE ${like}
+      )
       OR COALESCE(s."finessCode", '') ILIKE ${like}
       OR COALESCE(s."nom", '') ILIKE ${like}
       OR s."departementAdministratif" ILIKE ${like}
