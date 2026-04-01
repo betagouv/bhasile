@@ -103,7 +103,7 @@ export const Table = ({
               </tr>
             )}
           </thead>
-          <tbody className="[&>tr>td]:py-2 [&>tr>td]:px-4 [&>tr>td]:text-center [&>tr>td]:text-sm">
+          <tbody className="[&>tr>td]:py-1 [&>tr>td]:px-4 [&>tr>td]:text-center [&>tr>td]:text-sm">
             {children}
           </tbody>
         </table>
