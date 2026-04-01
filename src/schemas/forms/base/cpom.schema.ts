@@ -10,6 +10,7 @@ import {
 } from "@/app/utils/zodCustomFields";
 import { cpomDepartementApiSchema } from "@/schemas/api/cpom.schema";
 import { regionApiSchema } from "@/schemas/api/region.schema";
+import { StructureType } from "@/types/structure.type";
 
 import { acteAdministratifCpomSchema } from "./acteAdministratif.schema";
 import { operateurSchema } from "./operateur.schema";
@@ -17,6 +18,7 @@ import { operateurSchema } from "./operateur.schema";
 const cpomMillesimeSchema = z.object({
   id: zId(),
   year: zSafeYear(),
+  type: z.nativeEnum(StructureType),
   dotationDemandee: zSafePositiveDecimalsNullish(),
   dotationAccordee: zSafePositiveDecimalsNullish(),
   cumulResultatNet: zSafeDecimalsNullish(),

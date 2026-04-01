@@ -503,6 +503,7 @@ model CpomMillesime {
   cpomId                            Int
   cpom                              Cpom    @relation(fields: [cpomId], references: [id])
   year                              Int     @default(0)
+  type                              StructureType?
   dotationDemandee                  Float?
   dotationAccordee                  Float?
   cumulResultatNet                  Float?
@@ -521,7 +522,7 @@ model CpomMillesime {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@unique([cpomId, year])
+  @@unique([cpomId, year, type])
   @@schema("public")
 }
 

@@ -272,9 +272,10 @@ export const createOrUpdateCpomMillesimes = async (
     millesimes.map(async (millesime) => {
       return tx.cpomMillesime.upsert({
         where: {
-          cpomId_year: {
+          cpomId_year_type: {
             cpomId,
             year: millesime.year,
+            type: millesime.type,
           },
         },
         update: millesime,

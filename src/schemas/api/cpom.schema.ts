@@ -12,6 +12,7 @@ import { regionApiSchema } from "./region.schema";
 export const cpomMillesimeApiSchema = z.object({
   id: zId(),
   year: zSafeYear(),
+  type: z.nativeEnum(StructureType),
   dotationDemandee: z.number().nullish(),
   dotationAccordee: z.number().nullish(),
   cumulResultatNet: z.number().nullish(),

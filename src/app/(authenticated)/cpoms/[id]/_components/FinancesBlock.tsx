@@ -18,6 +18,10 @@ export const FinancesBlock = () => {
 
   const { years } = getYearRange({ order: "desc" });
 
+  const yearsInCpom = years.filter((year) =>
+    isStructureInCpom(cpom.structure, year)
+  );
+
   return (
     <Block
       title="Finances"
