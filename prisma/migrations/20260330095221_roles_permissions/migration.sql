@@ -6,6 +6,7 @@
  - You are about to drop the `AllowedUser` table. If the table is not empty, all the data it contains will be lost.
  - You are about to drop the `DepartementAllowedUser` table. If the table is not empty, all the data it contains will be lost.
  - Added the required column `name` to the `User` table without a default value. This is not possible if the table is not empty.
+ - User.name hand modified to be nullable
  
  */
 -- DropForeignKey
@@ -17,8 +18,7 @@ ALTER TABLE "User" DROP COLUMN "nom",
     DROP COLUMN "prenom",
     ADD COLUMN "emailPatternId" INTEGER,
     ADD COLUMN "name" TEXT,
-    -- hand modified to be nullable
-ADD COLUMN "roleId" INTEGER;
+    ADD COLUMN "roleId" INTEGER;
 -- DropTable
 DROP TABLE "AllowedUser";
 -- DropTable
