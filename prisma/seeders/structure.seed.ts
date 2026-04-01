@@ -36,22 +36,10 @@ import {
 import { createFakeFormWithSteps } from "./form.seed";
 import { createFakeStructureTypologie } from "./structure-typologie.seed";
 
-const generateDnaCode = ({
-  type,
-  operateurName,
-  departementAdministratif,
-  counter,
-}: Partial<FakeStructureOptions> & { counter: number }): string => {
-  const operateurNum = operateurName?.replace(/\D/g, "") ?? "";
-  return `${type}-${operateurNum}-${departementAdministratif}-${counter}`;
-};
-
 export const createFakeStructure = ({
   type,
   ofii,
-  operateurName,
   departementAdministratif,
-  counter,
   codeBhasile,
 }: FakeStructureOptions): Partial<Structure> => {
   const [debutConvention, finConvention] = generateDatePair();
@@ -155,18 +143,14 @@ export const createFakeStuctureWithRelations = ({
   formDefinitionId,
   stepDefinitions,
   ofii,
-  operateurName,
   departementAdministratif,
-  counter,
 }: FakeStructureWithRelationsOptions): Omit<StructureWithRelations, "id"> => {
   const fakeStructure = createFakeStructure({
     codeBhasile,
     type,
     isFinalised,
     ofii,
-    operateurName,
     departementAdministratif,
-    counter,
   });
   const placesAutorisees = faker.number.int({ min: 1, max: 100 });
 
@@ -229,9 +213,7 @@ export type FakeStructureOptions = {
   type: StructureType;
   isFinalised: boolean;
   ofii: boolean;
-  operateurName: string;
   departementAdministratif: string;
-  counter: number;
 };
 
 export type FakeStructureWithRelationsOptions = FakeStructureOptions & {
