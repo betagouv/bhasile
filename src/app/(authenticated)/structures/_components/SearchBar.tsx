@@ -34,7 +34,7 @@ export const SearchBar = (): ReactElement => {
   }, [searchTerm, handleSearchUpdate]);
 
   return (
-    <div className="border border-disabled-grey h-8 flex items-center">
+    <div className="border border-disabled-grey h-8 flex items-center bg-white">
       <span className="fr-icon-search-line fr-icon--sm text-label-blue-france px-2" />
       <input
         type="text"
