@@ -61,6 +61,12 @@ export const createFakeStructure = ({
   const createdAt = faker.date.past();
   const creationDate = faker.date.past();
   const baseData = {
+    dnaCode: generateDnaCode({
+      type,
+      operateurName,
+      departementAdministratif,
+      counter,
+    }),
     codeBhasile: codeBhasile ?? undefined,
     type,
     nom: faker.lorem.words(2),
