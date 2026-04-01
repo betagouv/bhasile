@@ -8,7 +8,10 @@ import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/B
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
 import { isNullOrUndefined } from "@/app/utils/common.util";
 import { getYearRange } from "@/app/utils/date.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
+import {
+  isStructureAutorisee,
+  isStructureSubventionnee,
+} from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ButtonAffectations } from "../ButtonAffectations";
@@ -18,6 +21,7 @@ export const StructureStaticTable = (): ReactElement => {
   const { structure } = useStructureContext();
 
   const isAutorisee = isStructureAutorisee(structure?.type);
+  const isSubventionnee = isStructureSubventionnee(structure?.type);
 
   const { years } = getYearRange({ order: "desc" });
 
@@ -65,7 +69,7 @@ export const StructureStaticTable = (): ReactElement => {
           budgets={enhancedBudgets}
           canEdit={false}
         />
-        {isAffectationOpen && (
+        {(isAffectationOpen || isSubventionnee) && (
           <BudgetTableCommentLine
             years={years}
             label="Commentaire"
@@ -75,10 +79,12 @@ export const StructureStaticTable = (): ReactElement => {
           />
         )}
       </Table>
-      <ButtonAffectations
-        isAffectationOpen={isAffectationOpen}
-        setIsAffectationOpen={setIsAffectationOpen}
-      />
+      {isAutorisee && (
+        <ButtonAffectations
+          isAffectationOpen={isAffectationOpen}
+          setIsAffectationOpen={setIsAffectationOpen}
+        />
+      )}
     </>
   );
 };
