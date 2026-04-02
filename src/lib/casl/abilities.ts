@@ -55,7 +55,7 @@ const defineAgentRules = (
 
 const defineAnonymousRules = ({ can }: AbilityBuilder<AppAbility>) => {
   can("read", ["Structure"]);
-  can("read", "Cpom");
+  can("read", ["Cpom"]);
 };
 
 export const canUpdateStructure = (user: SessionUser, structure: Structure) => {
