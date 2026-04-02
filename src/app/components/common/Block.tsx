@@ -3,9 +3,10 @@ import { Can } from "@casl/react";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { PropsWithChildren, ReactElement, useContext } from "react";
 
-import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { AbilityContext } from "@/app/context/AbilityContext";
 import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
+import { CpomApiType } from "@/schemas/api/cpom.schema";
+import { StructureApiType } from "@/schemas/api/structure.schema";
 
 export const Block = ({
   title,
@@ -13,10 +14,11 @@ export const Block = ({
   onEdit,
   multipleEdit,
   children,
+  entity,
+  entityType,
 }: Props): ReactElement => {
   const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
   const ability = useContext(AbilityContext);
-  const { structure } = useStructureContext();
 
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
@@ -25,11 +27,7 @@ export const Block = ({
           <span className={`text-title-blue-france mr-3 ${iconClass}`} />
           <h3 className="text-title-blue-france fr-h6 mb-12">{title}</h3>
         </div>
-        <Can
-          I="update"
-          this={subject("Structure", structure)}
-          ability={ability}
-        >
+        <Can I="update" this={subject(entityType, entity)} ability={ability}>
           {onEdit && (
             <Button
               priority="tertiary"
@@ -79,4 +77,6 @@ type Props = PropsWithChildren<{
     label: ReactElement;
     onClick: () => void;
   }[];
+  entity: StructureApiType | CpomApiType;
+  entityType: "Structure" | "Cpom";
 }>;

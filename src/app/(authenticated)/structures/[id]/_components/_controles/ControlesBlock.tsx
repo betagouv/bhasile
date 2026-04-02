@@ -39,6 +39,8 @@ export const ControlesBlock = (): ReactElement => {
           `/structures/${structure.id}/modification/controle-qualite`
         );
       }}
+      entity={structure}
+      entityType="Structure"
     >
       <div className="flex">
         <div className="pr-4">

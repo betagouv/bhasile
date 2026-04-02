@@ -25,8 +25,8 @@ WITH -- Forms de finalisation par structure
       fd."name" = 'finalisation'
   )
 SELECT
-  s."id",
-  s."codeBhasile",
+  sc."id",
+  sc."codeBhasile",
   CASE
     WHEN ff."formId" IS NOT NULL
     AND ff."formStatus" = TRUE THEN 'Finalisé agent' -- Finalisé agent : form existe et status = true
@@ -43,12 +43,13 @@ SELECT
     WHEN ff."formId" IS NOT NULL THEN 'En cours' -- Non finalisé : form existe mais aucun step VALIDE
     ELSE 'Non commencé' -- Non commencé : pas de form
   END AS "finalisation_simplifiee",
-  s."operateur" AS "operateur",
-  s."type" AS "type",
+  sc."operateur" AS "operateur",
+  sc."structureType" AS "type",
   s."public" AS "public",
-  s."region" AS "region",
-  s."created_at" AS "created_at",
-  s."updated_at" AS "updated_at"
+  sc."region" AS "region",
+  sc."createdAt" AS "created_at",
+  sc."updatedAt" AS "updated_at"
 FROM
-:"SCHEMA"."structures_aggregates" s
+:"SCHEMA"."structures_core" sc
+  JOIN public."Structure" s ON s."id" = sc."id"
   LEFT JOIN finalisation_forms ff ON ff."structureId" = s."id";

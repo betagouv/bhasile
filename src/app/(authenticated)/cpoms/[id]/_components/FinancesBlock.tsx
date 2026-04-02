@@ -29,6 +29,8 @@ export const FinancesBlock = () => {
       onEdit={() => {
         router.push(`/cpoms/${cpom.id}/modification/finances`);
       }}
+      entity={cpom}
+      entityType="Cpom"
     >
       <p>
         Le tableau des affectations reflète uniquement des flux annuels. Les

@@ -25,6 +25,8 @@ export const DescriptionBlock = () => {
       onEdit={() => {
         router.push(`/cpoms/${cpom.id}/modification/description`);
       }}
+      entity={cpom}
+      entityType="Cpom"
     >
       <div className="grid grid-cols-2">
         <div className="flex gap-2 mb-3">

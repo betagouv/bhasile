@@ -18,7 +18,12 @@ export const HudaPrahdaControlesBlock = (): ReactElement => {
     structure.evenementsIndesirablesGraves || [];
 
   return (
-    <Block title="Controle qualité" iconClass="fr-icon-search-line">
+    <Block
+      title="Controle qualité"
+      iconClass="fr-icon-search-line"
+      entity={structure}
+      entityType="Structure"
+    >
       <div className="flex">
         <div className="pr-4">
           <InformationCard

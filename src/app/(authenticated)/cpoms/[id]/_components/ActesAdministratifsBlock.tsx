@@ -24,6 +24,8 @@ export const ActesAdministratifsBlock = () => {
       onEdit={() => {
         router.push(`/cpoms/${cpom.id}/modification/actes-administratifs`);
       }}
+      entity={cpom}
+      entityType="Cpom"
     >
       <div className="grid grid-cols-3 gap-5">
         {conventions?.map((convention) => (

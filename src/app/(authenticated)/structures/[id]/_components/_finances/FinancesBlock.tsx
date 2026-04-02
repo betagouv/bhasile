@@ -43,6 +43,8 @@ export const FinancesBlock = (): ReactElement => {
       onEdit={() => {
         router.push(`/structures/${structure.id}/modification/finances`);
       }}
+      entity={structure}
+      entityType="Structure"
     >
       <h4 className="text-title-blue-france text-lg">
         Budget exécutoire pour {budgetExecutoireYear}

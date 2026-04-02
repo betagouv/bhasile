@@ -12,6 +12,8 @@ export const NotesBlock = (): ReactElement => {
 
   return (
     <Block
+      entity={structure}
+      entityType="Structure"
       iconClass="fr-icon-message-2-line"
       title="Notes"
       onEdit={() => {

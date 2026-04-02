@@ -6,7 +6,8 @@
 -- - Checks are done year by year on `public."StructureTypologie"`
 -- - Compares places between structure and addresses (difference > 10%)
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_places_quality" AS
-WITH -- Last typology by structure
+WITH
+  -- Last typology by structure
   structure_typologie_dernier_millesime AS (
     SELECT DISTINCT
       ON (st."structureId") st."structureId",
