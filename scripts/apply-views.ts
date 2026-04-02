@@ -11,7 +11,7 @@ const psqlUrl = getDbUrl(process.env.DATABASE_URL ?? "");
 const schema = process.env.REPORTING_SCHEMA ?? "reporting";
 const baseArgs = [psqlUrl, "-v", "ON_ERROR_STOP=1"];
 
-console.log("Creating views...");
+console.log("Deleting views...");
 
 psql([
   ...baseArgs,
@@ -28,7 +28,9 @@ psql([
 ]);
 console.log(`✅ Views in schema "${schema}" deleted`);
 
-if (process.argv[2] === "delete") process.exit(0);
+if (process.argv[2] === "delete") {
+  process.exit(0);
+}
 
 psql([...baseArgs, "-c", `CREATE SCHEMA IF NOT EXISTS "${schema}";`]);
 console.log(`✅ Schema "${schema}" created`);
@@ -48,9 +50,15 @@ function psql(args: string[], exitOnError = true): boolean {
   try {
     execFileSync("psql", args, { stdio: "inherit" });
     return true;
-  } catch (err: any) {
-    console.error(`psql failed (exit code ${err?.status}): ${err?.message}`);
-    if (exitOnError) process.exit(1);
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(`psql failed: ${err.message}`);
+    } else {
+      console.error(`psql failed: unknown error`);
+    }
+    if (exitOnError) {
+      process.exit(1);
+    }
     return false;
   }
 }
