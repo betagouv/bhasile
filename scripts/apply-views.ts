@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const viewsDir = path.join(__dirname, "views");
-const viewFiles = fs.readdirSync(viewsDir);
+const viewFiles = fs.readdirSync(viewsDir).sort();
 
 const psqlUrl = getDbUrl(process.env.DATABASE_URL ?? "");
 const schema = process.env.REPORTING_SCHEMA ?? "reporting";

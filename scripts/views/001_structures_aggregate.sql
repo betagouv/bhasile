@@ -134,14 +134,17 @@ WITH -- Last typology by structure
       places_agregees p
   )
 SELECT
-  s."id" AS "id",
-  s."codeBhasile" AS "codeBhasile",
-  o."name" AS "operateur",
+  sc."id" AS "id",
+  sc."codeBhasile" AS "codeBhasile",
+  sc."operateur" AS "operateur",
   s.latitude AS "latitude",
   s.longitude AS "longitude",
   s.public AS "public",
   s.type AS "type",
-  r."name" AS "region",
+  sc."region" AS "region",
+  sc."departement" AS "departement",
+  sc."departementAdministratif" AS "departementAdministratif",
+  sc."dna_codes" AS "dna_codes",
   pa.places_autorisees_structure AS "places_autorisees_structure",
   sdm."pmr" AS "pmr_structure",
   sdm."lgbt" AS "lgbt_structure",
@@ -168,13 +171,11 @@ SELECT
   s."createdAt" AS "created_at",
   s."updatedAt" AS "updated_at"
 FROM
-  public."Structure" s
+:"SCHEMA"."structures_core" sc
+  JOIN public."Structure" s ON s."id" = sc."id"
   LEFT JOIN places_agregees pa ON pa."id" = s."id"
   LEFT JOIN structure_typologie_dernier_millesime sdm ON sdm."structureId" = s."id"
   LEFT JOIN adresses_agregees aa ON aa."structureId" = s."id"
   LEFT JOIN places_agregees_indicateurs pai ON pai."id" = s."id"
   LEFT JOIN budgets_agreges ba ON ba."structureId" = s."id"
-  LEFT JOIN budget_dernier_millesime bdm ON bdm."structureId" = s."id"
-  LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
-  LEFT JOIN public."Region" r ON r.id = d."regionId"
-  LEFT JOIN public."Operateur" o ON o."id" = s."operateurId";
+  LEFT JOIN budget_dernier_millesime bdm ON bdm."structureId" = s."id";
