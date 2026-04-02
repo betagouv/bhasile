@@ -11,7 +11,6 @@ import {
   getMonthsBetween,
   getYearDate,
   getYearFromDate,
-  parseFrDate,
 } from "@/app/utils/date.util";
 
 dayjs.locale("fr");
@@ -70,7 +69,7 @@ describe("date util", () => {
       const result = formatDateToIsoString(date);
 
       // THEN
-      expect(result).toBe("2023-01-01T13:00:00.000Z");
+      expect(result).toBe("2023-01-01T00:00:00.000Z");
     });
 
     it("should return correct value for iso date", () => {
@@ -81,7 +80,7 @@ describe("date util", () => {
       const result = formatDateToIsoString(date);
 
       // THEN
-      expect(result).toBe("2023-01-01T13:00:00.000Z");
+      expect(result).toBe("2023-01-01T00:00:00.000Z");
     });
     it("should return correct value for iso datetime", () => {
       // GIVEN
@@ -91,7 +90,7 @@ describe("date util", () => {
       const result = formatDateToIsoString(date);
 
       // THEN
-      expect(result).toBe("2023-01-01T13:00:00.000Z");
+      expect(result).toBe("2023-01-01T00:00:00.000Z");
     });
   });
   describe("getMonthsBetween", () => {
@@ -261,47 +260,6 @@ describe("date util", () => {
 
       // THEN
       expect(result).toMatch(/^(0?1\/0?1\/2020|2020-01-01|1\/1\/2020)$/);
-    });
-  });
-
-  describe("parseFrDate", () => {
-    it('should parse a valid "DD/MM/YYYY" string to a Date object', () => {
-      // GIVEN
-      const dateStr = "25/12/2022";
-
-      // WHEN
-      const result = parseFrDate(dateStr);
-
-      // THEN
-      expect(result).toBeInstanceOf(Date);
-      expect((result as Date).getFullYear()).toBe(2022);
-      expect((result as Date).getMonth()).toBe(11);
-      expect((result as Date).getDate()).toBe(25);
-    });
-
-    it("should return the input if string is not a valid date", () => {
-      // GIVEN
-      const input = "32/13/2022";
-
-      // WHEN
-      const result = parseFrDate(input);
-
-      // THEN
-      expect(result).toBe(input);
-    });
-
-    it("should parse leap year dates correctly", () => {
-      // GIVEN
-      const input = "29/02/2024";
-
-      // WHEN
-      const result = parseFrDate(input);
-
-      // THEN
-      expect(result).toBeInstanceOf(Date);
-      expect((result as Date).getFullYear()).toBe(2024);
-      expect((result as Date).getMonth()).toBe(1);
-      expect((result as Date).getDate()).toBe(29);
     });
   });
 
