@@ -1,46 +1,24 @@
 import { useFormContext } from "react-hook-form";
 
-import { useCpomContext } from "@/app/(authenticated)/cpoms/[id]/_context/CpomClientContext";
-import { Table } from "@/app/components/common/Table";
-import { computeCpomDates } from "@/app/utils/cpom.util";
-import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
+import { CpomMillesimeFormValues } from "@/schemas/forms/base/cpom.schema";
 
-import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
-import { BudgetTableLines } from "./BudgetTableLines";
-import { getBudgetTableHeading } from "./getBudgetTableHeading";
-import { getCpomLines } from "./getCpomLines";
+import { CpomTable } from "./CpomTable";
 
 export const CpomTables = () => {
   const { watch } = useFormContext();
-  const cpomMillesimes = watch("cpomMillesimes");
+  const cpomMillesimes = watch("cpomMillesimes") as CpomMillesimeFormValues[];
 
-  const
-  const { cpom } = useCpomContext();
+  const structureTypes = [
+    ...new Set(
+      cpomMillesimes?.map((cpomMillesime) => cpomMillesime?.type) ?? []
+    ),
+  ];
 
-  const { years } = getYearRange({ order: "desc" });
-
-  const yearsInCpom = years.filter(
-    (year) =>
-      year >= getYearFromDate(computeCpomDates(cpom).dateStart) &&
-      year <= getYearFromDate(computeCpomDates(cpom).dateEnd)
-  );
-
-  return (
-    <Table
-      ariaLabelledBy="gestionBudgetaire"
-      headings={getBudgetTableHeading({ years: yearsInCpom })}
-      enableBorders
-    >
-      <BudgetTableLines
-        years={yearsInCpom}
-        lines={getCpomLines()}
-        cpomMillesimes={cpomMillesimes}
-      />
-      <BudgetTableCommentLine
-        years={yearsInCpom}
-        label="Commentaire"
-        cpomMillesimes={cpomMillesimes}
-      />
-    </Table>
-  );
+  return structureTypes.map((structureType) => (
+    <CpomTable
+      key={structureType}
+      type={structureType}
+      showTitle={structureTypes.length > 1}
+    />
+  ));
 };

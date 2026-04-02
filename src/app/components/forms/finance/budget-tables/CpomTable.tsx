@@ -12,7 +12,7 @@ import { BudgetTableLines } from "./BudgetTableLines";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
 import { getCpomLines } from "./getCpomLines";
 
-export const CpomTable = ({ type }: Props) => {
+export const CpomTable = ({ type, showTitle }: Props) => {
   const { watch } = useFormContext();
   const cpomMillesimes = watch("cpomMillesimes") as CpomMillesimeApiType[];
 
@@ -36,6 +36,11 @@ export const CpomTable = ({ type }: Props) => {
       headings={getBudgetTableHeading({ years: yearsInCpom })}
       enableBorders
     >
+      {showTitle && (
+        <caption className="text-title-blue-france text-lg mb-3 text-left font-bold">
+          {type}
+        </caption>
+      )}
       <BudgetTableLines
         years={yearsInCpom}
         lines={getCpomLines()}
@@ -52,4 +57,5 @@ export const CpomTable = ({ type }: Props) => {
 
 type Props = {
   type: StructureType;
+  showTitle: boolean;
 };

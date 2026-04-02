@@ -6,13 +6,13 @@ import {
   CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
-import { StructureApiType } from "@/schemas/api/structure.schema";
 import {
   CpomFormValues,
   CpomMillesimeFormValues,
 } from "@/schemas/forms/base/cpom.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { CpomGranularity } from "@/types/cpom.type";
+import { StructureType } from "@/types/structure.type";
 
 import { getYearRange } from "./date.util";
 
@@ -21,7 +21,7 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
     ...new Set(
       cpom?.structures?.map((structure) => structure.structure?.type) ?? []
     ),
-  ];
+  ].filter((type) => type !== undefined) as StructureType[];
 
   return {
     ...cpom,
@@ -45,7 +45,7 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
       })) ?? [],
     cpomMillesimes: getCpomMillesimesDefaultValues(
       cpom?.cpomMillesimes || [],
-      cpom?.structures || []
+      structureTypes
     ),
     actesAdministratifs: cpom?.actesAdministratifs?.length
       ? cpom?.actesAdministratifs.map((acteAdministratif) => ({
@@ -89,9 +89,13 @@ export const getStructureCpomDefaultValues = (
 
 const getCpomMillesimesDefaultValues = (
   cpomMillesimes: CpomMillesimeApiType[],
-  structures: StructureApiType[]
+  structureTypes: StructureType[]
 ): CpomMillesimeFormValues[] => {
   const { years } = getYearRange();
+
+  if (!structureTypes.length) {
+    return [];
+  }
 
   return structureTypes.flatMap((structureType) =>
     Array(years.length)
