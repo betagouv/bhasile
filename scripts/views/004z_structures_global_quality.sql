@@ -17,26 +17,44 @@ SELECT
   sc."dna_codes" AS "dna_codes",
   sc."updatedAt" AS "updatedAt",
   -- Calendar indicators
+  -- Calendar: missing authorization dates for authorized structures
   COALESCE(cal."has_authorisation_dates_undefined", FALSE) AS "has_authorisation_dates_undefined",
+  -- Calendar: authorization period is not 15 years (authorized structures)
   COALESCE(cal."has_issue_authorisation_period_not_15y", FALSE) AS "has_issue_authorisation_period_not_15y",
+  -- Calendar: missing convention dates
   COALESCE(cal."has_convention_dates_undefined", FALSE) AS "has_convention_dates_undefined",
+  -- Calendar: convention duration not 5 years (authorized structures)
   COALESCE(cal."has_issue_authorized_convention_not_5y", FALSE) AS "has_issue_authorized_convention_not_5y",
+  -- Calendar: convention outside authorization period (authorized structures)
   COALESCE(cal."has_issue_authorized_convention_outside_authorisation_period", FALSE) AS "has_issue_authorized_convention_outside_authorisation_period",
+  -- Calendar: convention duration > 3 years (subsidized structures)
   COALESCE(cal."has_issue_subsidized_convention_gt_3y", FALSE) AS "has_issue_subsidized_convention_gt_3y",
   -- Places indicators
+  -- Places: specific places (LGBT/FVV TEH/PMR) exceed authorized places
   COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE) AS "has_issue_specific_places_gt_places_autorisees",
+  -- Places: structure places differ from sum of address places by > 10%
   COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE) AS "has_issue_places_structure_vs_address_diff_gt_10pct",
   -- Characteristics indicators
+  -- Characteristics: DNA code departement prefix mismatch with structure departement
   COALESCE(ch."has_issue_dept_code", FALSE) AS "has_issue_dept_code",
   -- Finance indicators
+  -- Finance: taux d'encadrement max > 25
   COALESCE(fin."has_issue_taux_encadrement_max_gt_25", FALSE) AS "has_issue_taux_encadrement_max_gt_25",
+  -- Finance: taux d'encadrement min equals 0 (NULL does not count)
   COALESCE(fin."has_issue_taux_encadrement_min_eq_0", FALSE) AS "has_issue_taux_encadrement_min_eq_0",
+  -- Finance: coût journalier max > 25
   COALESCE(fin."has_issue_cout_journalier_max_gt_25", FALSE) AS "has_issue_cout_journalier_max_gt_25",
+  -- Finance: coût journalier min < 15
   COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE) AS "has_issue_cout_journalier_min_lt_15",
+  -- Finance: résultat net equals 0 (excludes NULL) for at least one filtered year
   COALESCE(fin."has_issue_resultat_net_eq_0", FALSE) AS "has_issue_resultat_net_eq_0",
+  -- Finance (authorized): excedent but affectations breakdown missing (all NULL/0)
   COALESCE(fin."has_issue_authorized_affectations_breakdown_missing", FALSE) AS "has_issue_authorized_affectations_breakdown_missing",
+  -- Finance (authorized): repriseEtat + affectations does not match résultat net
   COALESCE(fin."has_issue_authorized_reprise_plus_affectations_mismatch", FALSE) AS "has_issue_authorized_reprise_plus_affectations_mismatch",
+  -- Finance (subsidized): deficit but nonzero values in forbidden buckets
   COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE) AS "has_issue_subsidized_deficit_nonzero_boxes",
+  -- Finance (subsidized): excedent rules not respected
   COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE) AS "has_issue_subsidized_excedent_rules",
   -- Count total number of issues (true values)
   (
