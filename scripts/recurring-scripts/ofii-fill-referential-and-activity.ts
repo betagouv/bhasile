@@ -1,5 +1,5 @@
 // Orchestrateur : lit un fichier OFII, actualise d'abord le référentiel puis remplit l'activité
-// Usage: yarn script ofii-referential-and-activity <chemin_ou_clef_s3_du_xlsx>
+// Usage: yarn script ofii-fill-referential-and-activity <chemin_ou_clef_s3_du_xlsx>
 
 import "dotenv/config";
 
