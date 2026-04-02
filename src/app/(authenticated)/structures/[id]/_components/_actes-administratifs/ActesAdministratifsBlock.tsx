@@ -39,6 +39,8 @@ export const ActesAdministratifsBlock = (): ReactElement => {
           `/structures/${structure.id}/modification/actes-administratifs`
         );
       }}
+      entity={structure}
+      entityType="Structure"
     >
       {!hasDocuments ? (
         <>Aucun document importé</>

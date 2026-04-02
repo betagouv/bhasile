@@ -543,10 +543,20 @@ export const createMinimalStructure = async (structure: {
   if (process.env.NODE_ENV === "production") {
     throw new Error("This function is only used in e2e tests");
   }
+  const structureToCreate = {
+    codeBhasile: structure.codeBhasile,
+    type: structure.type,
+    operateurId: structure.operateurId,
+    departementAdministratif: structure.departementAdministratif,
+    nom: structure.nom,
+    adresseAdministrative: structure.adresseAdministrative,
+    codePostalAdministratif: structure.codePostalAdministratif,
+    communeAdministrative: structure.communeAdministrative,
+  };
   const upsertedStructure = await prisma.structure.upsert({
     where: { codeBhasile: structure.codeBhasile },
     update: {
-      ...structure,
+      ...structureToCreate,
       dnaStructures: {
         create: [
           {
@@ -561,7 +571,7 @@ export const createMinimalStructure = async (structure: {
       },
     },
     create: {
-      ...structure,
+      ...structureToCreate,
       dnaStructures: {
         create: [
           {

@@ -23,6 +23,8 @@ export const CompositionBlock = () => {
       onEdit={() => {
         router.push(`/cpoms/${cpom.id}/modification/composition`);
       }}
+      entity={cpom}
+      entityType="Cpom"
     >
       <Table
         headings={["", "Entrée", "", "Sortie", ""]}

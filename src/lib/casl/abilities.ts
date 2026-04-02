@@ -1,7 +1,7 @@
 import { AbilityBuilder, PureAbility, subject } from "@casl/ability";
 import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
 
-import { Structure, User } from "@/generated/prisma/client";
+import { Cpom, Structure, User } from "@/generated/prisma/client";
 import { SessionUser } from "@/types/global";
 
 export type AppAbility = PureAbility<
@@ -12,6 +12,7 @@ export type AppAbility = PureAbility<
       | Subjects<{
           User: User;
           Structure: Structure;
+          Cpom: Cpom;
         }>
     ),
   ],
@@ -49,10 +50,12 @@ const defineAgentRules = (
   can("update", "Structure", {
     departementAdministratif: { in: user.allowedDepartements },
   });
+  can("update", "Cpom");
 };
 
 const defineAnonymousRules = ({ can }: AbilityBuilder<AppAbility>) => {
   can("read", ["Structure"]);
+  can("read", "Cpom");
 };
 
 export const canUpdateStructure = (user: SessionUser, structure: Structure) => {

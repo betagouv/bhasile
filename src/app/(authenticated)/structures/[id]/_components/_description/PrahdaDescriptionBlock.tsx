@@ -12,7 +12,12 @@ export const PrahdaDescriptionBlock = (): ReactElement => {
   const { creationDate, operateur, filiale, public: publicType } = structure;
 
   return (
-    <Block title="Description" iconClass="fr-icon-menu-2-fill">
+    <Block
+      title="Description"
+      iconClass="fr-icon-menu-2-fill"
+      entity={structure}
+      entityType="Structure"
+    >
       <div className="flex mb-2">
         <div className="flex-1">
           <strong className="pr-2">Date de création</strong>

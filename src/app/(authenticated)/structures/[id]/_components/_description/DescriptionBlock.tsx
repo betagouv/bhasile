@@ -45,6 +45,8 @@ export const DescriptionBlock = (): ReactElement => {
     <Block
       title="Description"
       iconClass="fr-icon-align-left"
+      entity={structure}
+      entityType="Structure"
       multipleEdit={[
         {
           label: (
