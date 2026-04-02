@@ -115,6 +115,12 @@ export const buildStructuresWhereSql = ({
         WHERE ds."structureId" = s.id
           AND d.code ILIKE ${like}
       )
+      OR EXISTS (
+        SELECT 1
+        FROM public."Finess" f
+        WHERE f."structureId" = s.id
+          AND COALESCE(f."code", '') ILIKE ${like}
+      )
       OR COALESCE(s."nom", '') ILIKE ${like}
       OR s."departementAdministratif" ILIKE ${like}
       OR s."communeAdministrative" ILIKE ${like}
