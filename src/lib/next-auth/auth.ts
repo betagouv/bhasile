@@ -49,7 +49,6 @@ export const authOptions: NextAuthOptions = {
         await createOrUpdateUser({
           name: session.user?.name as string,
           email: session.user?.email as string,
-          role,
         });
       } catch (error) {
         console.error(
