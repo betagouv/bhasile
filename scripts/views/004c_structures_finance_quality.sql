@@ -82,13 +82,19 @@ WITH
       s."id",
       -- Résultat net = 0 is considered an issue (exclut les NULL)
       BOOL_OR(be."resultat_net" = 0) AS "has_issue_resultat_net_eq_0",
-      -- Authorized structures: if excedent, then (resultat_net - repriseEtat) should equal sum of affectations
+      -- Authorized structures: if excedent, affectations breakdown must be present (not all NULL/0)
       BOOL_OR(
         s."structureType" IN ('CADA', 'CPH')
         AND be."resultat_net" > 0
-        AND be."sum_affectations" IS NOT NULL -- Ignore si affectations sont toutes NULL
-        AND ABS((be."resultat_net" - COALESCE(be."repriseEtat", 0)) - be."sum_affectations") > 0.01
-      ) AS "has_issue_authorized_excedent_affectations_mismatch",
+        AND be."sum_affectations" IS NULL
+      ) AS "has_issue_authorized_affectations_breakdown_missing",
+      -- Authorized structures: repriseEtat + affectations must equal resultat_net (within epsilon)
+      BOOL_OR(
+        s."structureType" IN ('CADA', 'CPH')
+        AND be."resultat_net" > 0
+        AND be."sum_affectations" IS NOT NULL
+        AND ABS((COALESCE(be."repriseEtat", 0) + be."sum_affectations") - be."resultat_net") > 0.01
+      ) AS "has_issue_authorized_reprise_plus_affectations_mismatch",
       -- Subsidized structures: deficit => all affectation buckets should be 0 or NULL except deficit compensation
       BOOL_OR(
         s."structureType" IN ('HUDA', 'CAES')
@@ -135,7 +141,8 @@ SELECT
   COALESCE(br."cout_journalier_min" < 15, FALSE) AS "has_issue_cout_journalier_min_lt_15",
   -- Budget indicators (aggregated from multiple years)
   COALESCE(bi."has_issue_resultat_net_eq_0", FALSE) AS "has_issue_resultat_net_eq_0",
-  COALESCE(bi."has_issue_authorized_excedent_affectations_mismatch", FALSE) AS "has_issue_authorized_excedent_affectations_mismatch",
+  COALESCE(bi."has_issue_authorized_affectations_breakdown_missing", FALSE) AS "has_issue_authorized_affectations_breakdown_missing",
+  COALESCE(bi."has_issue_authorized_reprise_plus_affectations_mismatch", FALSE) AS "has_issue_authorized_reprise_plus_affectations_mismatch",
   COALESCE(bi."has_issue_subsidized_deficit_nonzero_boxes", FALSE) AS "has_issue_subsidized_deficit_nonzero_boxes",
   COALESCE(bi."has_issue_subsidized_excedent_rules", FALSE) AS "has_issue_subsidized_excedent_rules"
 FROM
