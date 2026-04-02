@@ -35,6 +35,7 @@ if (process.argv[2] === "delete") {
 psql([...baseArgs, "-c", `CREATE SCHEMA IF NOT EXISTS "${schema}";`]);
 console.log(`✅ Schema "${schema}" created`);
 
+let failedViewsCount = 0;
 for (const file of viewFiles) {
   console.log(`➡️  Applying ${file}`);
   const ok = psql(
@@ -42,9 +43,16 @@ for (const file of viewFiles) {
     false
   );
   console.log(ok ? `✅ Applied ${file}` : `⚠️  Skipping ${file}`);
+  if (!ok) {
+    failedViewsCount++;
+  }
 }
 
-console.log("Views created successfully");
+if (failedViewsCount > 0) {
+  console.log(`⚠️ ${failedViewsCount} views failed to apply`);
+} else {
+  console.log("Views created successfully");
+}
 
 function psql(args: string[], exitOnError = true): boolean {
   try {

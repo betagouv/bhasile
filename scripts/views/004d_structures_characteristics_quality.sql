@@ -4,7 +4,7 @@
 -- Issue: DNA code incoherent with departement
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_characteristics_quality" AS
 SELECT
-  s."id" AS "id",
+  s."idd" AS "id",
   COALESCE(
     BOOL_OR(
       SUBSTRING(
