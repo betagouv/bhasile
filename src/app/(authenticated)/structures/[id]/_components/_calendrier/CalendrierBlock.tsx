@@ -56,6 +56,8 @@ export const CalendrierBlock = (): ReactElement => {
       onEdit={() => {
         router.push(`/structures/${structure.id}/modification/calendrier`);
       }}
+      entity={structure}
+      entityType="Structure"
     >
       <DateBars datePairs={datePairs} />
     </Block>

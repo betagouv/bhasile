@@ -529,20 +529,23 @@ const updateStructure = async (
 };
 
 // Only used in e2e tests
-export const createMinimalStructure = async (structure: {
-  codeBhasile: string;
-  dnaCode: string;
-  type: StructureType;
-  operateurId: number;
-  departementAdministratif?: string;
-  nom: string;
-  adresseAdministrative: string;
-  codePostalAdministratif: string;
-  communeAdministrative: string;
-}): Promise<Structure> => {
+export const createMinimalStructure = async (
+  dnaCode: string,
+  structure: {
+    codeBhasile: string;
+    type: StructureType;
+    operateurId: number;
+    departementAdministratif?: string;
+    nom: string;
+    adresseAdministrative: string;
+    codePostalAdministratif: string;
+    communeAdministrative: string;
+  }
+): Promise<Structure> => {
   if (process.env.NODE_ENV === "production") {
     throw new Error("This function is only used in e2e tests");
   }
+
   const upsertedStructure = await prisma.structure.upsert({
     where: { codeBhasile: structure.codeBhasile },
     update: {
@@ -552,8 +555,8 @@ export const createMinimalStructure = async (structure: {
           {
             dna: {
               connectOrCreate: {
-                where: { code: structure.dnaCode },
-                create: { code: structure.dnaCode },
+                where: { code: dnaCode },
+                create: { code: dnaCode },
               },
             },
           },
@@ -567,8 +570,8 @@ export const createMinimalStructure = async (structure: {
           {
             dna: {
               connectOrCreate: {
-                where: { code: structure.dnaCode },
-                create: { code: structure.dnaCode },
+                where: { code: dnaCode },
+                create: { code: dnaCode },
               },
             },
           },

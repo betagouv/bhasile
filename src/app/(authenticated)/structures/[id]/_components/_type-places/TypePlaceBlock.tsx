@@ -36,6 +36,8 @@ export const TypePlaceBlock = (): ReactElement => {
       onEdit={() => {
         router.push(`/structures/${structure.id}/modification/type-places`);
       }}
+      entity={structure}
+      entityType="Structure"
     >
       <div className="flex">
         <div className="pr-4">
