@@ -136,7 +136,7 @@ SELECT
   s."id" AS "id",
   -- Budget rates: taux d'encadrement and coût journalier should be between 15 and 25
   COALESCE(br."taux_encadrement_max" > 25, FALSE) AS "has_issue_taux_encadrement_max_gt_25",
-  (COALESCE(br."taux_encadrement_min", 0) < 15) AS "has_issue_taux_encadrement_min_lt_15",
+  COALESCE(br."taux_encadrement_min" = 0, FALSE) AS "has_issue_taux_encadrement_min_eq_0",
   COALESCE(br."cout_journalier_max" > 25, FALSE) AS "has_issue_cout_journalier_max_gt_25",
   COALESCE(br."cout_journalier_min" < 15, FALSE) AS "has_issue_cout_journalier_min_lt_15",
   -- Budget indicators (aggregated from multiple years)
