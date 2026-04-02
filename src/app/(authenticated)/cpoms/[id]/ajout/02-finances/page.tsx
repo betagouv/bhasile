@@ -6,7 +6,7 @@ import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { CpomTable } from "@/app/components/forms/finance/budget-tables/CpomTable";
+import { CpomTables } from "@/app/components/forms/finance/budget-tables/CpomTables";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
@@ -90,7 +90,7 @@ export default function CpomModificationFinance() {
           des affectations reflète uniquement des flux annuels. Les montants
           saisis ne doivent en aucun cas être une estimation du stock.
         </p>
-        <CpomTable />
+        <CpomTables />
         {saveState === FetchState.ERROR && (
           <SubmitError cpomId={cpom.id} backendError={backendError} />
         )}

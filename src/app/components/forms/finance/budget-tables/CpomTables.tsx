@@ -4,18 +4,17 @@ import { useCpomContext } from "@/app/(authenticated)/cpoms/[id]/_context/CpomCl
 import { Table } from "@/app/components/common/Table";
 import { computeCpomDates } from "@/app/utils/cpom.util";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
-import { CpomMillesimeApiType } from "@/schemas/api/cpom.schema";
-import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLines } from "./BudgetTableLines";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
 import { getCpomLines } from "./getCpomLines";
 
-export const CpomTable = ({ type }: Props) => {
+export const CpomTables = () => {
   const { watch } = useFormContext();
-  const cpomMillesimes = watch("cpomMillesimes") as CpomMillesimeApiType[];
+  const cpomMillesimes = watch("cpomMillesimes");
 
+  const
   const { cpom } = useCpomContext();
 
   const { years } = getYearRange({ order: "desc" });
@@ -24,10 +23,6 @@ export const CpomTable = ({ type }: Props) => {
     (year) =>
       year >= getYearFromDate(computeCpomDates(cpom).dateStart) &&
       year <= getYearFromDate(computeCpomDates(cpom).dateEnd)
-  );
-
-  const cpomMillesimesOfType = cpomMillesimes?.filter(
-    (cpomMillesime) => cpomMillesime.type === type
   );
 
   return (
@@ -39,17 +34,13 @@ export const CpomTable = ({ type }: Props) => {
       <BudgetTableLines
         years={yearsInCpom}
         lines={getCpomLines()}
-        cpomMillesimes={cpomMillesimesOfType}
+        cpomMillesimes={cpomMillesimes}
       />
       <BudgetTableCommentLine
         years={yearsInCpom}
         label="Commentaire"
-        cpomMillesimes={cpomMillesimesOfType}
+        cpomMillesimes={cpomMillesimes}
       />
     </Table>
   );
-};
-
-type Props = {
-  type: StructureType;
 };
