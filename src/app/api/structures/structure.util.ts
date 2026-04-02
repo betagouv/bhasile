@@ -115,7 +115,6 @@ export const buildStructuresWhereSql = ({
         WHERE ds."structureId" = s.id
           AND d.code ILIKE ${like}
       )
-      OR COALESCE(s."finessCode", '') ILIKE ${like}
       OR COALESCE(s."nom", '') ILIKE ${like}
       OR s."departementAdministratif" ILIKE ${like}
       OR s."communeAdministrative" ILIKE ${like}
