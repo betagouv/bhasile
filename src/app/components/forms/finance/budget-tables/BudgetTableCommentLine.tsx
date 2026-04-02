@@ -3,11 +3,13 @@ import {
   CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
+import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableCommentButtonAndModal } from "./BudgetTableCommentButtonAndModal";
 import { BudgetTableCommentStaticButtonAndModal } from "./BudgetTableCommentStaticButtonAndModal";
 
 export const BudgetTableCommentLine = ({
+  type,
   label,
   budgets,
   cpomStructures,
@@ -35,6 +37,7 @@ export const BudgetTableCommentLine = ({
               cpomStructures={cpomStructures}
               cpomMillesimes={cpomMillesimes}
               budgets={budgets}
+              type={type}
             />
           ) : (
             <BudgetTableCommentStaticButtonAndModal
@@ -42,6 +45,7 @@ export const BudgetTableCommentLine = ({
               cpomStructures={cpomStructures}
               cpomMillesimes={cpomMillesimes}
               budgets={budgets}
+              type={type}
             />
           )}
         </td>
@@ -51,6 +55,7 @@ export const BudgetTableCommentLine = ({
 };
 
 type Props = {
+  type?: StructureType;
   label: string;
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];

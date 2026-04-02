@@ -289,8 +289,18 @@ export const getMillesimeIndexForAYear = (
     | StructureMillesimeApiType[]
     | BudgetApiType[]
     | CpomMillesimeApiType[],
-  year: number = CURRENT_YEAR
-): number => typologies?.findIndex((typology) => typology.year === year) ?? -1;
+  year: number = CURRENT_YEAR,
+  type?: StructureType
+): number =>
+  typologies?.findIndex((typology) => {
+    if (type) {
+      return (
+        typology.year === year &&
+        (typology as CpomMillesimeApiType).type === type
+      );
+    }
+    return typology.year === year;
+  }) ?? -1;
 
 export const getCpomStructureIndexAndCpomMillesimeIndexForAYear = (
   cpomStructures: CpomStructureApiType[],

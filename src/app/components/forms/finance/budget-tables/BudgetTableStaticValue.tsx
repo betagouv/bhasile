@@ -12,8 +12,10 @@ import {
   CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
+import { StructureType } from "@/types/structure.type";
 
 export const BudgetTableStaticValue = ({
+  type,
   name,
   year,
   colored,
@@ -51,7 +53,7 @@ export const BudgetTableStaticValue = ({
 
   if (cpomMillesimes) {
     value =
-      cpomMillesimes[getMillesimeIndexForAYear(cpomMillesimes, year)]?.[
+      cpomMillesimes[getMillesimeIndexForAYear(cpomMillesimes, year, type)]?.[
         name as keyof CpomMillesimeApiType
       ];
   }
@@ -74,6 +76,7 @@ export const BudgetTableStaticValue = ({
 };
 
 type Props = {
+  type?: StructureType;
   name: string;
   year: number;
   colored?: boolean;

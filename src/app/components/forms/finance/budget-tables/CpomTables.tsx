@@ -14,11 +14,14 @@ export const CpomTables = () => {
     ),
   ];
 
-  return structureTypes.map((structureType) => (
-    <CpomTable
-      key={structureType}
-      type={structureType}
-      showTitle={structureTypes.length > 1}
-    />
+  return structureTypes.map((structureType, index) => (
+    <>
+      <CpomTable
+        key={structureType}
+        type={structureType}
+        showTitle={structureTypes.length > 1}
+      />
+      {index < structureTypes.length - 1 && <hr className="my-6" />}
+    </>
   ));
 };

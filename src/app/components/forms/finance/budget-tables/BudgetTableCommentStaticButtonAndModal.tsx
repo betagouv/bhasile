@@ -12,8 +12,10 @@ import {
   CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
+import { StructureType } from "@/types/structure.type";
 
 export const BudgetTableCommentStaticButtonAndModal = ({
+  type,
   year,
   budgets,
   cpomStructures,
@@ -44,7 +46,7 @@ export const BudgetTableCommentStaticButtonAndModal = ({
   }
   if (cpomMillesimes) {
     currentComment =
-      cpomMillesimes?.[getMillesimeIndexForAYear(cpomMillesimes, year)]
+      cpomMillesimes?.[getMillesimeIndexForAYear(cpomMillesimes, year, type)]
         ?.commentaire;
   }
 
@@ -82,6 +84,7 @@ export const BudgetTableCommentStaticButtonAndModal = ({
 };
 
 type Props = {
+  type?: StructureType;
   year: number;
   cpomStructures?: CpomStructureApiType[];
   cpomMillesimes?: CpomMillesimeApiType[];

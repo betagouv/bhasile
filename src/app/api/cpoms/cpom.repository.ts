@@ -268,20 +268,30 @@ export const createOrUpdateCpomMillesimes = async (
     return;
   }
 
+  // TODO: use upsert when type becomes mandatory
   await Promise.all(
     millesimes.map(async (millesime) => {
-      return tx.cpomMillesime.upsert({
+      const existing = await tx.cpomMillesime.findFirst({
         where: {
-          cpomId_year_type: {
-            cpomId,
-            year: millesime.year,
-            type: millesime.type,
-          },
-        },
-        update: millesime,
-        create: {
           cpomId,
-          ...millesime,
+          year: millesime.year,
+          type: millesime.type,
+        },
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, ...fields } = millesime;
+
+      if (existing) {
+        return tx.cpomMillesime.update({
+          where: { id: existing.id },
+          data: fields,
+        });
+      }
+      return tx.cpomMillesime.create({
+        data: {
+          cpomId,
+          ...fields,
         },
       });
     })

@@ -4,7 +4,6 @@ import { useCpomContext } from "@/app/(authenticated)/cpoms/[id]/_context/CpomCl
 import { Table } from "@/app/components/common/Table";
 import { computeCpomDates } from "@/app/utils/cpom.util";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
-import { CpomMillesimeApiType } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
@@ -14,7 +13,7 @@ import { getCpomLines } from "./getCpomLines";
 
 export const CpomTable = ({ type, showTitle }: Props) => {
   const { watch } = useFormContext();
-  const cpomMillesimes = watch("cpomMillesimes") as CpomMillesimeApiType[];
+  const cpomMillesimes = watch("cpomMillesimes");
 
   const { cpom } = useCpomContext();
 
@@ -26,32 +25,32 @@ export const CpomTable = ({ type, showTitle }: Props) => {
       year <= getYearFromDate(computeCpomDates(cpom).dateEnd)
   );
 
-  const cpomMillesimesOfType = cpomMillesimes?.filter(
-    (cpomMillesime) => cpomMillesime.type === type
-  );
-
   return (
-    <Table
-      ariaLabelledBy="gestionBudgetaire"
-      headings={getBudgetTableHeading({ years: yearsInCpom })}
-      enableBorders
-    >
+    <>
       {showTitle && (
-        <caption className="text-title-blue-france text-lg mb-3 text-left font-bold">
+        <h2 className="text-title-blue-france text-lg mb-3 text-left font-bold">
           {type}
-        </caption>
+        </h2>
       )}
-      <BudgetTableLines
-        years={yearsInCpom}
-        lines={getCpomLines()}
-        cpomMillesimes={cpomMillesimesOfType}
-      />
-      <BudgetTableCommentLine
-        years={yearsInCpom}
-        label="Commentaire"
-        cpomMillesimes={cpomMillesimesOfType}
-      />
-    </Table>
+      <Table
+        ariaLabelledBy="gestionBudgetaire"
+        headings={getBudgetTableHeading({ years: yearsInCpom })}
+        enableBorders
+      >
+        <BudgetTableLines
+          years={yearsInCpom}
+          type={type}
+          lines={getCpomLines()}
+          cpomMillesimes={cpomMillesimes}
+        />
+        <BudgetTableCommentLine
+          years={yearsInCpom}
+          type={type}
+          label="Commentaire"
+          cpomMillesimes={cpomMillesimes}
+        />
+      </Table>
+    </>
   );
 };
 

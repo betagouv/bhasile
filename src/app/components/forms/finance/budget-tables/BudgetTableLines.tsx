@@ -5,11 +5,13 @@ import {
   CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
+import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableLine } from "./BudgetTableLine";
 import { BudgetTableTitleLine } from "./BudgetTableTitleLine";
 
 export const BudgetTableLines = ({
+  type,
   lines,
   budgets,
   cpomStructures,
@@ -36,6 +38,7 @@ export const BudgetTableLines = ({
               budgets={budgets}
               cpomStructures={cpomStructures}
               cpomMillesimes={cpomMillesimes}
+              type={type}
               canEdit={canEdit}
             />
           ))}
@@ -46,6 +49,7 @@ export const BudgetTableLines = ({
 };
 
 type Props = {
+  type?: StructureType;
   lines: {
     title: string;
     lines: {

@@ -6,11 +6,13 @@ import {
   CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
+import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableLineInput } from "./BudgetTableLineInput";
 import { BudgetTableStaticValue } from "./BudgetTableStaticValue";
 
 export const BudgetTableLine = ({
+  type,
   name,
   label,
   subLabel,
@@ -53,6 +55,7 @@ export const BudgetTableLine = ({
                 cpomMillesimes={cpomMillesimes}
                 disabledYearsStart={disabledYearsStart}
                 enabledYears={enabledYears}
+                type={type}
               />
             ) : (
               <BudgetTableStaticValue
@@ -64,6 +67,7 @@ export const BudgetTableLine = ({
                 cpomMillesimes={cpomMillesimes}
                 disabledYearsStart={disabledYearsStart}
                 enabledYears={enabledYears}
+                type={type}
               />
             )}
           </span>
@@ -74,6 +78,7 @@ export const BudgetTableLine = ({
 };
 
 type Props = {
+  type?: StructureType;
   name: string;
   label: string | ReactNode;
   subLabel?: string;

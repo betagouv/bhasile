@@ -10,8 +10,10 @@ import {
   CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
+import { StructureType } from "@/types/structure.type";
 
 export const BudgetTableCommentButtonAndModal = ({
+  type,
   year,
   disabledYearsStart,
   enabledYears,
@@ -39,8 +41,16 @@ export const BudgetTableCommentButtonAndModal = ({
   }, [cpomStructures, cpomMillesimes]);
 
   const commentPath = useMemo(
-    () => getName("commentaire", year, budgets, cpomStructures, cpomMillesimes),
-    [year, budgets, cpomStructures, cpomMillesimes]
+    () =>
+      getName(
+        "commentaire",
+        year,
+        type,
+        budgets,
+        cpomStructures,
+        cpomMillesimes
+      ),
+    [year, type, budgets, cpomStructures, cpomMillesimes]
   );
 
   const currentComment = watch(commentPath);
@@ -49,6 +59,7 @@ export const BudgetTableCommentButtonAndModal = ({
     const commentPath = getName(
       "commentaire",
       year,
+      type,
       budgets,
       cpomStructures,
       cpomMillesimes
@@ -130,6 +141,7 @@ export const BudgetTableCommentButtonAndModal = ({
 };
 
 type Props = {
+  type?: StructureType;
   year: number;
   disabledYearsStart?: number;
   enabledYears?: number[];

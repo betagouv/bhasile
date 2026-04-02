@@ -6,10 +6,12 @@ import {
   CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
+import { StructureType } from "@/types/structure.type";
 
 import InputWithValidation from "../../InputWithValidation";
 
 export const BudgetTableLineInput = ({
+  type,
   name,
   year,
   control,
@@ -22,8 +24,15 @@ export const BudgetTableLineInput = ({
   return (
     <>
       <InputWithValidation
-        name={getName(name, year, budgets, cpomStructures, cpomMillesimes)}
-        id={getName(name, year, budgets, cpomStructures, cpomMillesimes)}
+        name={getName(
+          name,
+          year,
+          type,
+          budgets,
+          cpomStructures,
+          cpomMillesimes
+        )}
+        id={getName(name, year, type, budgets, cpomStructures, cpomMillesimes)}
         control={control}
         type="number"
         min={0}
@@ -43,6 +52,7 @@ export const BudgetTableLineInput = ({
 };
 
 type Props = {
+  type?: StructureType;
   name: string;
   year: number;
   control: Control<FieldValues>;

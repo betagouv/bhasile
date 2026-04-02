@@ -4,6 +4,7 @@ import {
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
 import { anyBudgetFormValues } from "@/schemas/forms/base/budget.schema";
+import { StructureType } from "@/types/structure.type";
 
 import { getYearRange } from "./date.util";
 import {
@@ -91,12 +92,13 @@ export const isInputDisabled = (
 export const getName = (
   name: string,
   year: number,
+  type?: StructureType,
   budgets?: BudgetApiType[],
   cpomStructures?: CpomStructureApiType[],
   cpomMillesimes?: CpomMillesimeApiType[]
 ): string => {
   if (cpomMillesimes) {
-    return `cpomMillesimes.${getMillesimeIndexForAYear(cpomMillesimes, year)}.${name}`;
+    return `cpomMillesimes.${getMillesimeIndexForAYear(cpomMillesimes, year, type)}.${name}`;
   }
   if (cpomStructures) {
     const { cpomStructureIndex, cpomMillesimeIndex } =
