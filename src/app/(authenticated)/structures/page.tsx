@@ -39,8 +39,8 @@ export default function Structures(): ReactElement {
   );
 
   return (
-    <div className="h-full w-full flex flex-col bg-alt-grey ">
-      <div className="flex gap-2 px-6 border-b border-b-border-default-grey min-h-[4.35rem] justify-between items-center sticky top-0 z-2 bg-lifted-grey">
+    <div className="h-full w-full flex flex-col bg-alt-grey z-2">
+      <div className="flex gap-2 px-6 border-b border-b-border-default-grey min-h-[4.35rem] justify-between items-center sticky top-0 bg-lifted-grey z-2">
         <SegmentedControl
           name="Visualisation"
           options={options}
@@ -57,7 +57,7 @@ export default function Structures(): ReactElement {
           </h2>
         </SegmentedControl>
       </div>
-      <div className="flex gap-2 justify-end items-center py-3.5 px-6 z-2">
+      <div className="flex gap-2 justify-end items-center py-3.5 px-6">
         <SearchBar />
         <Filters />
         <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
