@@ -9,7 +9,8 @@ WITH
   structures AS (
     SELECT
       s."id",
-      s."type" AS "structureType"
+      s."type" AS "structureType",
+      s."createdAt" AS "createdAt"
     FROM
       public."Structure" s
   ),
@@ -65,7 +66,19 @@ WITH
     SELECT
       s."id",
       -- Résultat net = 0 is considered an issue (exclut les NULL)
-      BOOL_OR(be."resultat_net" = 0) AS "has_issue_resultat_net_eq_0",
+      BOOL_OR(
+        be."resultat_net" = 0
+        AND be."year" >= EXTRACT(
+          YEAR
+          FROM
+            s."createdAt"
+        )::int
+        AND be."year" < EXTRACT(
+          YEAR
+          FROM
+            CURRENT_DATE
+        )::int
+      ) AS "has_issue_resultat_net_eq_0",
       -- Authorized structures: if excedent, then (resultat_net - repriseEtat) should equal sum of affectations
       BOOL_OR(
         s."structureType" IN ('CADA', 'CPH')
@@ -120,7 +133,7 @@ SELECT
   s."id" AS "id",
   -- Budget rates: taux d'encadrement and coût journalier should be between 15 and 25
   COALESCE(br."taux_encadrement_max" > 25, FALSE) AS "has_issue_taux_encadrement_max_gt_25",
-  COALESCE(br."taux_encadrement_min" < 15, FALSE) AS "has_issue_taux_encadrement_min_lt_15",
+  (COALESCE(br."taux_encadrement_min", 0) < 15) AS "has_issue_taux_encadrement_min_lt_15",
   COALESCE(br."cout_journalier_max" > 25, FALSE) AS "has_issue_cout_journalier_max_gt_25",
   COALESCE(br."cout_journalier_min" < 15, FALSE) AS "has_issue_cout_journalier_min_lt_15",
   -- Budget indicators (aggregated from multiple years)

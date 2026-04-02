@@ -8,11 +8,14 @@
 -- - structures_characteristics_quality: characteristics (e.g. DNA vs departement)
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_global_quality" AS
 SELECT
-  s.id AS "id",
-  s."codeBhasile" AS "codeBhasile",
-  o."name" AS "operateur",
-  r."name" AS "region",
-  s."updatedAt" AS "updatedAt",
+  sc."id" AS "id",
+  sc."codeBhasile" AS "codeBhasile",
+  sc."operateur" AS "operateur",
+  sc."departementAdministratif" AS "departementAdministratif",
+  sc."departement" AS "departement",
+  sc."region" AS "region",
+  sc."dna_codes" AS "dna_codes",
+  sc."updatedAt" AS "updatedAt",
   -- Calendar indicators
   COALESCE(cal."has_authorisation_dates_undefined", FALSE) AS "has_authorisation_dates_undefined",
   COALESCE(cal."has_issue_authorisation_period_not_15y", FALSE) AS "has_issue_authorisation_period_not_15y",
@@ -42,15 +45,12 @@ SELECT
     ) + (COALESCE(cal."has_issue_subsidized_convention_gt_3y", FALSE)::int) + (COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE)::int) + (COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE)::int) + (COALESCE(ch."has_issue_dept_code", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_max_gt_25", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_max_gt_25", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_resultat_net_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_authorized_excedent_affectations_mismatch", FALSE)::int) + (COALESCE(fin."has_issue_authorized_negative_affectations", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE)::int)
   ) AS "issues_count"
 FROM
-  public."Structure" s
-  LEFT JOIN:"SCHEMA"."structures_calendar_quality" cal ON cal."id" = s."id"
-  LEFT JOIN:"SCHEMA"."structures_places_quality" pl ON pl."id" = s."id"
-  LEFT JOIN:"SCHEMA"."structures_characteristics_quality" ch ON ch."id" = s."id"
-  LEFT JOIN:"SCHEMA"."structures_finance_quality" fin ON fin."id" = s."id"
-  LEFT JOIN public."Operateur" o ON o."id" = s."operateurId"
-  LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
-  LEFT JOIN public."Region" r ON r.id = d."regionId"
-  LEFT JOIN public."Form" f ON f."structureId" = s."id"
+:"SCHEMA"."structures_core" sc
+  LEFT JOIN:"SCHEMA"."structures_calendar_quality" cal ON cal."id" = sc."id"
+  LEFT JOIN:"SCHEMA"."structures_places_quality" pl ON pl."id" = sc."id"
+  LEFT JOIN:"SCHEMA"."structures_characteristics_quality" ch ON ch."id" = sc."id"
+  LEFT JOIN:"SCHEMA"."structures_finance_quality" fin ON fin."id" = sc."id"
+  LEFT JOIN public."Form" f ON f."structureId" = sc."id"
   LEFT JOIN public."FormDefinition" fd ON fd."id" = f."formDefinitionId"
 WHERE
   fd."slug" = 'finalisation-v1'
