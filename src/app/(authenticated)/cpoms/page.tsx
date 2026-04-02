@@ -18,8 +18,8 @@ export default function Structures(): ReactElement {
   const fetchState = getFetchState("cpoms-search");
 
   return (
-    <div className="h-full w-full flex flex-col bg-alt-grey z-2">
-      <div className="flex gap-2 px-6 border-b border-b-border-default-grey min-h-[4.35rem] justify-between items-center sticky top-0 bg-lifted-grey z-2">
+    <div className="h-full w-full flex flex-col bg-alt-grey">
+      <div className="flex gap-2 px-6 border-b border-b-border-default-grey min-h-[4.35rem] justify-between items-center sticky top-0 bg-lifted-grey z-10">
         <h2 className="text-title-blue-france fr-h5 mr-4 mb-0" id="cpoms-titre">
           CPOM
         </h2>
@@ -30,7 +30,7 @@ export default function Structures(): ReactElement {
           <span className="fr-icon-add-line fr-icon--sm" /> Créer un CPOM
         </Link>
       </div>
-      <div className="flex gap-2 justify-end items-center py-3.5 px-6 ">
+      <div className="flex gap-2 justify-end items-center py-3.5 px-6 z-2">
         <Filters showFilters={false} showLocation={true} />
         <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
           {totalCpoms ?? 0} entrée
