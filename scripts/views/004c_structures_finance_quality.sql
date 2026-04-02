@@ -14,6 +14,25 @@ WITH
     FROM
       public."Structure" s
   ),
+  budgets_filtered AS (
+    SELECT
+      b.*
+    FROM
+      public."Budget" b
+      JOIN structures s ON s."id" = b."structureId"
+    WHERE
+      b."structureId" IS NOT NULL
+      AND b."year" >= EXTRACT(
+        YEAR
+        FROM
+          s."createdAt"
+      )::int
+      AND b."year" < EXTRACT(
+        YEAR
+        FROM
+          CURRENT_DATE
+      )::int
+  ),
   budgets_enriched AS (
     SELECT
       b."structureId" AS "structureId",
@@ -44,9 +63,7 @@ WITH
         0
       ) AS "sum_affectations"
     FROM
-      public."Budget" b
-    WHERE
-      b."structureId" IS NOT NULL
+      budgets_filtered b
   ),
   budgets_rates AS (
     SELECT
@@ -56,9 +73,7 @@ WITH
       MAX(b."coutJournalier") AS cout_journalier_max,
       MIN(b."coutJournalier") AS cout_journalier_min
     FROM
-      public."Budget" b
-    WHERE
-      b."structureId" IS NOT NULL
+      budgets_filtered b
     GROUP BY
       b."structureId"
   ),
@@ -66,19 +81,7 @@ WITH
     SELECT
       s."id",
       -- Résultat net = 0 is considered an issue (exclut les NULL)
-      BOOL_OR(
-        be."resultat_net" = 0
-        AND be."year" >= EXTRACT(
-          YEAR
-          FROM
-            s."createdAt"
-        )::int
-        AND be."year" < EXTRACT(
-          YEAR
-          FROM
-            CURRENT_DATE
-        )::int
-      ) AS "has_issue_resultat_net_eq_0",
+      BOOL_OR(be."resultat_net" = 0) AS "has_issue_resultat_net_eq_0",
       -- Authorized structures: if excedent, then (resultat_net - repriseEtat) should equal sum of affectations
       BOOL_OR(
         s."structureType" IN ('CADA', 'CPH')
