@@ -66,8 +66,6 @@ export async function seed(): Promise<void> {
     createFakeOperateur(index)
   );
 
-  let counter = 1;
-
   for (const operateurToInsert of operateursToInsert) {
     const baseParams = {
       formDefinitionId: formDefinition.id,
@@ -98,7 +96,6 @@ export async function seed(): Promise<void> {
             StructureType.CPH,
           ]),
           isFinalised: faker.datatype.boolean(),
-          counter: counter++,
         });
         return fakeStructure;
       }
@@ -128,7 +125,6 @@ export async function seed(): Promise<void> {
             StructureType.CPH,
           ]),
           isFinalised: faker.datatype.boolean(),
-          counter: counter++,
         });
         return fakeStructure;
       }

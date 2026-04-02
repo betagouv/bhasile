@@ -50,7 +50,7 @@ FROM
   LEFT JOIN public."Operateur" o ON o."id" = s."operateurId"
   LEFT JOIN public."Departement" d ON d."numero" = s."departementAdministratif"
   LEFT JOIN public."Region" r ON r.id = d."regionId"
-  LEFT JOIN public."Form" f ON f."structureCodeDna" = s."dnaCode"
+  LEFT JOIN public."Form" f ON f."structureId" = s."id"
   LEFT JOIN public."FormDefinition" fd ON fd."id" = f."formDefinitionId"
 WHERE
   fd."slug" = 'finalisation-v1'

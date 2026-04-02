@@ -2,8 +2,9 @@
 
 import Button from "@codegouvfr/react-dsfr/Button";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ReactElement, useEffect, useRef } from "react";
+import { ReactElement } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
@@ -37,15 +38,6 @@ export const StructureHeader = (): ReactElement | null => {
   const { headerRef } = useHeaderHeight();
 
   const pathname = usePathname();
-  const previousPath = useRef<string | null>(null);
-  const currentPath = useRef(pathname);
-
-  useEffect(() => {
-    if (currentPath.current !== pathname) {
-      previousPath.current = currentPath.current;
-      currentPath.current = pathname;
-    }
-  }, [pathname]);
 
   const isRootPath = pathname === `/structures/${structure?.id}`;
   const isFinalisationPath = pathname.startsWith(
@@ -60,31 +52,19 @@ export const StructureHeader = (): ReactElement | null => {
     nom,
     communeAdministrative,
     departementAdministratif,
-  } = structure || {};
-
-  const handleBackClick = () => {
-    if (isRootPath || isFinalisationPath) {
-      if (previousPath.current?.includes("modification")) {
-        router.push("/structures");
-      } else {
-        router.back();
-      }
-    } else {
-      router.push(`/structures/${structure?.id}`);
-    }
-  };
+  } = structure;
 
   return structure ? (
     <>
       <div className="sticky top-0 z-2 bg-lifted-grey" ref={headerRef}>
         <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
-          <Button
+          <Link
+            href="/structures"
             className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
             title="Retour"
-            onClick={handleBackClick}
           >
             Retour
-          </Button>
+          </Link>
           <div>
             <h2 className="text-title-blue-france text-xs uppercase mb-0">
               <strong className="pr-3">Structure hébergement</strong>

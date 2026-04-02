@@ -14,11 +14,17 @@ export const createDnaList = (count: number): Omit<Dna, "id">[] => {
 
     dnaList.push({
       code,
-      description: "STRUCTURE",
-      activeInOfiiFileSince: null,
-      inactiveInOfiiFileSince: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      description: faker.lorem.words(2),
+      activeInOfiiFileSince:
+        faker.helpers.maybe(() => faker.date.past({ years: 4 }), {
+          probability: 0.1,
+        }) ?? null,
+      inactiveInOfiiFileSince:
+        faker.helpers.maybe(() => faker.date.past({ years: 2 }), {
+          probability: 0.05,
+        }) ?? null,
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.past(),
     });
   }
 
