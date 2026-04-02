@@ -89,12 +89,6 @@ WITH
         AND be."sum_affectations" IS NOT NULL -- Ignore si affectations sont toutes NULL
         AND ABS((be."resultat_net" - COALESCE(be."repriseEtat", 0)) - be."sum_affectations") > 0.01
       ) AS "has_issue_authorized_excedent_affectations_mismatch",
-      -- Authorized structures: sum of affectations should be consistent (not negative)
-      BOOL_OR(
-        s."structureType" IN ('CADA', 'CPH')
-        AND be."sum_affectations" IS NOT NULL -- Ignore si toutes NULL
-        AND be."sum_affectations" < 0
-      ) AS "has_issue_authorized_negative_affectations",
       -- Subsidized structures: deficit => all affectation buckets should be 0 or NULL except deficit compensation
       BOOL_OR(
         s."structureType" IN ('HUDA', 'CAES')
@@ -142,7 +136,6 @@ SELECT
   -- Budget indicators (aggregated from multiple years)
   COALESCE(bi."has_issue_resultat_net_eq_0", FALSE) AS "has_issue_resultat_net_eq_0",
   COALESCE(bi."has_issue_authorized_excedent_affectations_mismatch", FALSE) AS "has_issue_authorized_excedent_affectations_mismatch",
-  COALESCE(bi."has_issue_authorized_negative_affectations", FALSE) AS "has_issue_authorized_negative_affectations",
   COALESCE(bi."has_issue_subsidized_deficit_nonzero_boxes", FALSE) AS "has_issue_subsidized_deficit_nonzero_boxes",
   COALESCE(bi."has_issue_subsidized_excedent_rules", FALSE) AS "has_issue_subsidized_excedent_rules"
 FROM

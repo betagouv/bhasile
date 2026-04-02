@@ -35,7 +35,6 @@ SELECT
   COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE) AS "has_issue_cout_journalier_min_lt_15",
   COALESCE(fin."has_issue_resultat_net_eq_0", FALSE) AS "has_issue_resultat_net_eq_0",
   COALESCE(fin."has_issue_authorized_excedent_affectations_mismatch", FALSE) AS "has_issue_authorized_excedent_affectations_mismatch",
-  COALESCE(fin."has_issue_authorized_negative_affectations", FALSE) AS "has_issue_authorized_negative_affectations",
   COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE) AS "has_issue_subsidized_deficit_nonzero_boxes",
   COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE) AS "has_issue_subsidized_excedent_rules",
   -- Count total number of issues (true values)
