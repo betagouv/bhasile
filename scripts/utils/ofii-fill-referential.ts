@@ -56,9 +56,6 @@ function deptCodeFromCode(code: string | null | undefined): string {
 
 function normalizeDepartementName(value: string | null | undefined): string {
   const trimmed = value?.trim() ?? "";
-  if (!trimmed) {
-    return "";
-  }
 
   // Typo courante dans certains fichiers OFII
   if (trimmed.toLowerCase() === "alpes-de-hautes-provence") {
@@ -290,7 +287,10 @@ export const fillOfiiStructureFromRows = async (
       for (const row of validRecords) {
         const departementName = normalizeDepartementName(row.departement);
         row.departement = departementName;
-        const depNumero = resolveDepartementNumero(departementName, nameToNumero);
+        const depNumero = resolveDepartementNumero(
+          departementName,
+          nameToNumero
+        );
 
         if (!depNumero) {
           throw new Error(
@@ -342,7 +342,9 @@ export const fillOfiiStructureFromRows = async (
 
         const regionCode = numeroToRegionCode.get(depNumero);
         if (!regionCode) {
-          throw new Error(`Région introuvable pour le département : ${depNumero}`);
+          throw new Error(
+            `Région introuvable pour le département : ${depNumero}`
+          );
         }
         const codeBhasile = await getNextBhasileCode(
           tx,
