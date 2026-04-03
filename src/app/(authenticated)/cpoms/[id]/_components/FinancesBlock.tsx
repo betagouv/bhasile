@@ -29,6 +29,10 @@ export const FinancesBlock = () => {
     cpomStructureTypes[0]
   );
 
+  if (!cpomStructureTypes.length) {
+    return null;
+  }
+
   return (
     <Block
       title="Finances"

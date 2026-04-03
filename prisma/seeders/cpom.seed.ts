@@ -242,7 +242,7 @@ export const createFakeCpoms = async (
 
     const structureTypes = [
       ...new Set(
-        cpomStructures.map((cpomStructure) => cpomStructure.structure?.type)
+        cpomStructures.map((cpomStructure) => cpomStructure.structure.type)
       ),
     ];
 

@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
@@ -27,18 +28,17 @@ export const CpomTables = () => {
         <CustomNotice
           severity="info"
           title=""
-          description="Nous avons détecté dans la composition de votre CPOM différents types de structures. Veuillez donc remplir le tableau pour chacun d’eux, en prenant en compte toutes le structures du type correspondant à chaque fois."
+          description="Nous avons détecté dans la composition de votre CPOM différents types de structures. Veuillez donc remplir le tableau pour chacun d’eux, en prenant en compte toutes les structures du type correspondant à chaque fois."
         />
       )}
       {structureTypes.map((structureType, index) => (
-        <>
+        <Fragment key={structureType}>
           <CpomTable
-            key={structureType}
             type={structureType}
             showTitle={structureTypes.length > 1}
           />
           {index < structureTypes.length - 1 && <hr />}
-        </>
+        </Fragment>
       ))}
     </>
   );
