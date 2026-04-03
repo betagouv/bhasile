@@ -44,7 +44,6 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ token, session }) {
-      const role = await getRoleFromSession(session);
       try {
         await createOrUpdateUser({
           name: session.user?.name as string,
@@ -55,20 +54,20 @@ export const authOptions: NextAuthOptions = {
           "Erreur dans l'ajout ou la mise à jour de l'utilisateur",
           error
         );
-      } finally {
-        return {
-          ...session,
-          user: {
-            ...session.user,
-            role: role.name,
-            allowedDepartements: role.allowedDepartements,
-          },
-          id_token: token.id_token,
-          provider: token.provider,
-          user_id: token.user_id,
-          name: token.name,
-        };
       }
+      const role = await getRoleFromSession(session);
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          role: role.name,
+          allowedDepartements: role.allowedDepartements,
+        },
+        id_token: token.id_token,
+        provider: token.provider,
+        user_id: token.user_id,
+        name: token.name,
+      };
     },
   },
   secret: process.env.AUTH_SECRET,

@@ -2,15 +2,11 @@ import { Page } from "@playwright/test";
 
 import { TIMEOUTS, URLS } from "../../constants";
 import { formatErrorMessage } from "../../error-handler";
-import { FormHelper } from "../../form-helper";
 import { BasePage } from "../BasePage";
 
 export class AuthenticationPage extends BasePage {
-  private formHelper: FormHelper;
-
   constructor(page: Page) {
     super(page);
-    this.formHelper = new FormHelper(page);
   }
 
   async authenticate() {
@@ -18,28 +14,30 @@ export class AuthenticationPage extends BasePage {
       waitUntil: "domcontentloaded",
     });
 
-    const passwordInput = await this.page
-      .locator('input[type="password"]')
-      .count();
-
     const password = process.env.OPERATEUR_PASSWORDS?.split(",")[0];
 
-    if (passwordInput > 0) {
-      if (!password) {
-        throw new Error(
-          formatErrorMessage(
-            "OPERATEUR_PASSWORDS must be set for e2e authentication",
-            "AuthenticationPage.authenticate"
-          )
-        );
-      }
-      await this.formHelper.fillInput('input[type="password"]', password);
-      await this.page.click("button.fr-btn");
-
-      await this.page.waitForURL(URLS.AJOUT_STRUCTURE, {
-        timeout: TIMEOUTS.SUBMIT,
-      });
+    if (!password) {
+      throw new Error(
+        formatErrorMessage(
+          "OPERATEUR_PASSWORDS must be set for e2e authentication",
+          "AuthenticationPage.authenticate"
+        )
+      );
     }
+
+    const passwordField = this.page.getByRole("textbox", {
+      name: "Mot de passe",
+    });
+    await passwordField.waitFor({
+      state: "visible",
+      timeout: TIMEOUTS.NAVIGATION,
+    });
+    await passwordField.fill(password);
+    await this.page.getByRole("button", { name: "Valider" }).click();
+
+    await this.page.waitForURL(URLS.AJOUT_STRUCTURE, {
+      timeout: TIMEOUTS.SUBMIT,
+    });
 
     await this.page.waitForSelector('a[href="/ajout-structure/selection"]', {
       state: "visible",
