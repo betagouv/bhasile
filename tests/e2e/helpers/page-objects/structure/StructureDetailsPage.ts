@@ -73,7 +73,6 @@ export class StructureDetailsPage extends BasePage {
     await this.clickContactsTab(block);
   }
 
-  /** "Contacts" (single site) or "Sites et contacts" (multi-antennes). */
   private async clickContactsTab(block: Locator) {
     await block
       .getByRole("tab", { name: /^(Sites et contacts|Contacts)$/ })
