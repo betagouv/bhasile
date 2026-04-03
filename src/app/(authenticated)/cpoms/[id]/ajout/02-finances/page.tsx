@@ -84,12 +84,6 @@ export default function CpomModificationFinance() {
         <PreviousPageLink
           previousRoute={`/cpoms/${cpom.id}/ajout/01-identification`}
         />
-        <p>
-          Veuillez renseigner l’historique des données budgétaires{" "}
-          <strong>à l’échelle de l’ensemble du CPOM</strong>. Aussi, le tableau
-          des affectations reflète uniquement des flux annuels. Les montants
-          saisis ne doivent en aucun cas être une estimation du stock.
-        </p>
         <CpomTables />
         {saveState === FetchState.ERROR && (
           <SubmitError cpomId={cpom.id} backendError={backendError} />

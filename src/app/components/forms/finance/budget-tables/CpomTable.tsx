@@ -26,9 +26,9 @@ export const CpomTable = ({ type, showTitle }: Props) => {
   );
 
   return (
-    <>
+    <div>
       {showTitle && (
-        <h2 className="text-title-blue-france text-lg mb-3 text-left font-bold">
+        <h2 className="text-title-blue-france text-lg mb-8 text-left font-bold">
           {type}
         </h2>
       )}
@@ -50,7 +50,7 @@ export const CpomTable = ({ type, showTitle }: Props) => {
           cpomMillesimes={cpomMillesimes}
         />
       </Table>
-    </>
+    </div>
   );
 };
 

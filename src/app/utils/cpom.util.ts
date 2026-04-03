@@ -17,12 +17,7 @@ import { StructureType } from "@/types/structure.type";
 import { getYearRange } from "./date.util";
 
 export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
-  const structureTypes = [
-    ...new Set(
-      cpom?.structures?.map((structure) => structure.structure?.type) ?? []
-    ),
-  ].filter((type) => type !== undefined) as StructureType[];
-
+  const structureTypes = getCpomStructureTypes(cpom);
   return {
     ...cpom,
     name: cpom?.name ?? "",
@@ -216,4 +211,13 @@ export const getDepartementsList = (
     return list.slice(0, maxLength) + "...";
   }
   return list;
+};
+
+export const getCpomStructureTypes = (cpom: CpomApiType): StructureType[] => {
+  const structureTypes = [
+    ...new Set(
+      cpom?.structures?.map((structure) => structure.structure?.type) ?? []
+    ),
+  ].filter((type) => type !== undefined) as StructureType[];
+  return structureTypes;
 };
