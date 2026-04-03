@@ -4,7 +4,7 @@ import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { isInputDisabled } from "@/app/utils/budget.util";
 import { isNullOrUndefined } from "@/app/utils/common.util";
 import {
-  getCpomStructureIndexAndCpomMillesimeIndexForAYear,
+  getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType,
   getMillesimeIndexForAYear,
 } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
@@ -27,6 +27,7 @@ export const BudgetTableStaticValue = ({
 }: Props) => {
   const isDisabled = isInputDisabled(
     year,
+    type,
     disabledYearsStart,
     enabledYears,
     cpomStructures
@@ -43,7 +44,11 @@ export const BudgetTableStaticValue = ({
 
   if (cpomStructures) {
     const { cpomStructureIndex, cpomMillesimeIndex } =
-      getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
+      getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType(
+        cpomStructures,
+        year,
+        type
+      );
 
     value =
       cpomStructures[cpomStructureIndex]?.cpom?.cpomMillesimes?.[

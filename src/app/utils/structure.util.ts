@@ -302,15 +302,17 @@ export const getMillesimeIndexForAYear = (
     return typology.year === year;
   }) ?? -1;
 
-export const getCpomStructureIndexAndCpomMillesimeIndexForAYear = (
+export const getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType = (
   cpomStructures: CpomStructureApiType[],
-  year: number = CURRENT_YEAR
+  year: number = CURRENT_YEAR,
+  type?: StructureType
 ): { cpomStructureIndex: number; cpomMillesimeIndex: number } => {
   let cpomMillesimeIndex = -1;
   const cpomStructureIndex = cpomStructures.findIndex((cpomStructure) => {
     cpomMillesimeIndex =
       cpomStructure.cpom?.cpomMillesimes?.findIndex(
-        (cpomMillesime) => cpomMillesime.year === year
+        (cpomMillesime) =>
+          cpomMillesime.year === year && cpomMillesime.type === type
       ) ?? -1;
     if (cpomMillesimeIndex !== -1) {
       return true;

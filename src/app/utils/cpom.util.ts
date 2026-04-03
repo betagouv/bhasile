@@ -213,7 +213,7 @@ export const getDepartementsList = (
   return list;
 };
 
-export const getCpomStructureTypes = (cpom: CpomApiType): StructureType[] => {
+export const getCpomStructureTypes = (cpom?: CpomApiType): StructureType[] => {
   const structureTypes = [
     ...new Set(
       cpom?.structures?.map((structure) => structure.structure?.type) ?? []

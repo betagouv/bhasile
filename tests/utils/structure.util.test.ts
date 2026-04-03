@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 
 import {
-  getCpomStructureIndexAndCpomMillesimeIndexForAYear,
+  getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType,
   getCurrentCpomStructureDates,
   getLastVisitInMonths,
   getMillesimeIndexForAYear,
@@ -312,6 +312,7 @@ describe("structure util", () => {
                 {
                   id: 1,
                   year: 2025,
+                  type: StructureType.CADA,
                 },
               ],
               granularity: "DEPARTEMENTALE",
@@ -425,6 +426,7 @@ describe("structure util", () => {
                 {
                   id: 1,
                   year: 2024,
+                  type: StructureType.CADA,
                 },
               ],
               granularity: "DEPARTEMENTALE",
@@ -455,6 +457,7 @@ describe("structure util", () => {
                 {
                   id: 2,
                   year: 2025,
+                  type: StructureType.CADA,
                 },
               ],
               granularity: "DEPARTEMENTALE",
@@ -862,6 +865,7 @@ describe("structure util", () => {
               {
                 id: 1,
                 year: 2025,
+                type: StructureType.CADA,
               },
             ],
           },
@@ -869,9 +873,10 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType(
         cpomStructures,
-        2025
+        2025,
+        StructureType.CADA
       );
 
       // THEN
@@ -883,9 +888,10 @@ describe("structure util", () => {
       const cpomStructures: CpomStructureApiType[] = [];
 
       // WHEN
-      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType(
         cpomStructures,
-        2025
+        2025,
+        StructureType.CADA
       );
 
       // THEN
@@ -924,10 +930,12 @@ describe("structure util", () => {
               {
                 id: 1,
                 year: 2024,
+                type: StructureType.CADA,
               },
               {
                 id: 2,
                 year: 2026,
+                type: StructureType.CADA,
               },
             ],
           },
@@ -935,9 +943,10 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType(
         cpomStructures,
-        2025
+        2025,
+        StructureType.CADA
       );
 
       // THEN
@@ -976,6 +985,7 @@ describe("structure util", () => {
               {
                 id: 1,
                 year: 2025,
+                type: StructureType.CADA,
               },
             ],
           },
@@ -1006,6 +1016,7 @@ describe("structure util", () => {
               {
                 id: 2,
                 year: 2025,
+                type: StructureType.CADA,
               },
             ],
           },
@@ -1013,9 +1024,10 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType(
         cpomStructures,
-        2025
+        2025,
+        StructureType.CADA
       );
 
       // THEN
@@ -1051,6 +1063,7 @@ describe("structure util", () => {
               {
                 id: 1,
                 year: 2024,
+                type: StructureType.CADA,
               },
             ],
           },
@@ -1081,6 +1094,7 @@ describe("structure util", () => {
               {
                 id: 2,
                 year: 2025,
+                type: StructureType.CADA,
               },
             ],
           },
@@ -1088,9 +1102,10 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType(
         cpomStructures,
-        2025
+        2025,
+        StructureType.CADA
       );
 
       // THEN
@@ -1151,6 +1166,7 @@ describe("structure util", () => {
               {
                 id: 2,
                 year: 2025,
+                type: StructureType.CADA,
               },
             ],
           },
@@ -1158,9 +1174,10 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType(
         cpomStructures,
-        2025
+        2025,
+        StructureType.CADA
       );
 
       // THEN
@@ -1196,14 +1213,17 @@ describe("structure util", () => {
               {
                 id: 1,
                 year: 2024,
+                type: StructureType.CADA,
               },
               {
                 id: 2,
                 year: 2025,
+                type: StructureType.CADA,
               },
               {
                 id: 3,
                 year: 2026,
+                type: StructureType.CADA,
               },
             ],
           },
@@ -1211,9 +1231,10 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType(
         cpomStructures,
-        2025
+        2025,
+        StructureType.CADA
       );
 
       // THEN
@@ -1249,6 +1270,7 @@ describe("structure util", () => {
               {
                 id: 1,
                 year: 2025,
+                type: StructureType.CADA,
               },
             ],
           },
@@ -1256,8 +1278,11 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result =
-        getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures);
+      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType(
+        cpomStructures,
+        2025,
+        StructureType.CADA
+      );
 
       // THEN
       expect(result).toEqual({ cpomStructureIndex: 0, cpomMillesimeIndex: 0 });

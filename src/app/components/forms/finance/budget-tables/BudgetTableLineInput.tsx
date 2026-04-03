@@ -41,6 +41,7 @@ export const BudgetTableLineInput = ({
         variant="simple"
         disabled={isInputDisabled(
           year,
+          type,
           disabledYearsStart,
           enabledYears,
           cpomStructures

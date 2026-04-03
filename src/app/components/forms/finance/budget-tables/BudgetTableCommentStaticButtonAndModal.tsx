@@ -4,7 +4,7 @@ import { useMemo } from "react";
 
 import { EmptyCell } from "@/app/components/common/EmptyCell";
 import {
-  getCpomStructureIndexAndCpomMillesimeIndexForAYear,
+  getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType,
   getMillesimeIndexForAYear,
 } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
@@ -38,7 +38,11 @@ export const BudgetTableCommentStaticButtonAndModal = ({
   }
   if (cpomStructures) {
     const { cpomStructureIndex, cpomMillesimeIndex } =
-      getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
+      getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType(
+        cpomStructures,
+        year,
+        type
+      );
     currentComment =
       cpomStructures[cpomStructureIndex]?.cpom?.cpomMillesimes?.[
         cpomMillesimeIndex

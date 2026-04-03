@@ -8,7 +8,7 @@ import { StructureType } from "@/types/structure.type";
 
 import { getYearRange } from "./date.util";
 import {
-  getCpomStructureIndexAndCpomMillesimeIndexForAYear,
+  getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType,
   getMillesimeIndexForAYear,
 } from "./structure.util";
 
@@ -69,13 +69,18 @@ export const getBudgetsDefaultValues = (
 
 export const isInputDisabled = (
   year: number,
+  type?: StructureType,
   disabledYearsStart?: number,
   enabledYears?: number[],
   cpomStructures?: CpomStructureApiType[]
 ): boolean => {
   if (cpomStructures) {
     const { cpomStructureIndex, cpomMillesimeIndex } =
-      getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
+      getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType(
+        cpomStructures,
+        year,
+        type
+      );
     if (cpomStructureIndex === -1 || cpomMillesimeIndex === -1) {
       return true;
     }
@@ -102,7 +107,11 @@ export const getName = (
   }
   if (cpomStructures) {
     const { cpomStructureIndex, cpomMillesimeIndex } =
-      getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
+      getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType(
+        cpomStructures,
+        year,
+        type
+      );
     return `cpomStructures.${cpomStructureIndex}.cpom.cpomMillesimes.${cpomMillesimeIndex}.${name}`;
   }
   if (budgets) {

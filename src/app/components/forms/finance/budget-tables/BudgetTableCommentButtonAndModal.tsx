@@ -92,6 +92,7 @@ export const BudgetTableCommentButtonAndModal = ({
         size="small"
         disabled={isInputDisabled(
           year,
+          type,
           disabledYearsStart,
           enabledYears,
           cpomStructures
