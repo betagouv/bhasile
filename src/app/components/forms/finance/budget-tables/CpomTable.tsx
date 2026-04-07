@@ -4,16 +4,18 @@ import { useCpomContext } from "@/app/(authenticated)/cpoms/[id]/_context/CpomCl
 import { Table } from "@/app/components/common/Table";
 import { computeCpomDates } from "@/app/utils/cpom.util";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
+import { isStructureAutorisee } from "@/app/utils/structure.util";
+import { CpomMillesimeFormValues } from "@/schemas/forms/base/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLines } from "./BudgetTableLines";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
-import { getCpomLines } from "./getCpomLines";
+import { getStructureTableLines } from "./getStructureTableLines";
 
 export const CpomTable = ({ type, showTitle }: Props) => {
   const { watch } = useFormContext();
-  const cpomMillesimes = watch("cpomMillesimes");
+  const cpomMillesimes = watch("cpomMillesimes") as CpomMillesimeFormValues[];
 
   const { cpom } = useCpomContext();
 
@@ -24,6 +26,20 @@ export const CpomTable = ({ type, showTitle }: Props) => {
       year >= getYearFromDate(computeCpomDates(cpom).dateStart) &&
       year <= getYearFromDate(computeCpomDates(cpom).dateEnd)
   );
+
+  const isAutorisee = isStructureAutorisee(type);
+
+  const detailAffectationEnabledYears = cpomMillesimes
+    .filter((cpomMillesime) => cpomMillesime.type === type)
+    .filter((cpomMillesime) => {
+      const totalValue = Number(
+        String(cpomMillesime?.affectationReservesFondsDedies)
+          .replaceAll(" ", "")
+          .replace(",", ".") || 0
+      );
+      return totalValue !== 0 && !isNaN(totalValue);
+    })
+    .map((cpomMillesime) => cpomMillesime.year);
 
   return (
     <div>
@@ -40,7 +56,10 @@ export const CpomTable = ({ type, showTitle }: Props) => {
         <BudgetTableLines
           years={yearsInCpom}
           type={type}
-          lines={getCpomLines()}
+          lines={getStructureTableLines(
+            isAutorisee,
+            detailAffectationEnabledYears
+          )}
           cpomMillesimes={cpomMillesimes}
         />
         <BudgetTableCommentLine
