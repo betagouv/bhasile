@@ -74,13 +74,6 @@ export const formatForCharts = (date: dayjs.Dayjs): string => {
   return date.format("MMM YYYY").toUpperCase();
 };
 
-export const getYearDate = (year: string | number): string => {
-  return new Date(Number(year), 0, 1, 13).toLocaleDateString("fr-FR");
-};
-
-export const getDateFromYear = (year: string | number): Date => {
-  return new Date(Number(year), 0, 1, 13);
-};
 export const getYearFromDate = (
   date: string | number | Date | undefined | null
 ): number => {
