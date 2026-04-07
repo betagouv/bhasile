@@ -4,10 +4,9 @@
 -- Notes:
 -- - "Conventions" are stored on `public."Structure"`: `debutConvention`, `finConvention`.
 -- - "Période d'autorisation" is stored on `public."Structure"`: `debutPeriodeAutorisation`, `finPeriodeAutorisation`.
-CREATE OR REPLACE VIEW:"SCHEMA"."structures_calendar_quality" AS
-SELECT
-  s."id" AS "id",
-  -- Base data presence flags
+CREATE OR REPLACE VIEW :"SCHEMA"."structures_calendar_quality" AS
+SELECT s."id" AS "id",
+  -- Authorization dates presence flags
   CASE
     WHEN s."type" IN ('CADA', 'CPH') THEN (
       s."debutPeriodeAutorisation" IS NULL
@@ -15,8 +14,9 @@ SELECT
     )
     ELSE FALSE
   END AS "has_authorisation_dates_undefined",
+  -- Subsidized structures: convention dates presence flags
   CASE
-    WHEN s."type" IN ('CADA', 'CPH', 'HUDA', 'CAES') THEN (
+    WHEN s."type" IN ('HUDA', 'CAES') THEN (
       s."debutConvention" IS NULL
       OR s."finConvention" IS NULL
     )
@@ -30,12 +30,10 @@ SELECT
       AND (
         EXTRACT(
           YEAR
-          FROM
-            s."finPeriodeAutorisation"
+          FROM s."finPeriodeAutorisation"
         )::int - EXTRACT(
           YEAR
-          FROM
-            s."debutPeriodeAutorisation"
+          FROM s."debutPeriodeAutorisation"
         )::int
       ) <> 15
     )
@@ -49,12 +47,10 @@ SELECT
       AND (
         EXTRACT(
           YEAR
-          FROM
-            s."finConvention"
+          FROM s."finConvention"
         )::int - EXTRACT(
           YEAR
-          FROM
-            s."debutConvention"
+          FROM s."debutConvention"
         )::int
       ) <> 5
     )
@@ -70,21 +66,17 @@ SELECT
       AND (
         EXTRACT(
           YEAR
-          FROM
-            s."debutConvention"
+          FROM s."debutConvention"
         )::int < EXTRACT(
           YEAR
-          FROM
-            s."debutPeriodeAutorisation"
+          FROM s."debutPeriodeAutorisation"
         )::int
         OR EXTRACT(
           YEAR
-          FROM
-            s."finConvention"
+          FROM s."finConvention"
         )::int > EXTRACT(
           YEAR
-          FROM
-            s."finPeriodeAutorisation"
+          FROM s."finPeriodeAutorisation"
         )::int
       )
     )
@@ -98,16 +90,13 @@ SELECT
       AND (
         EXTRACT(
           YEAR
-          FROM
-            s."finConvention"
+          FROM s."finConvention"
         )::int - EXTRACT(
           YEAR
-          FROM
-            s."debutConvention"
+          FROM s."debutConvention"
         )::int
       ) > 3
     )
     ELSE FALSE
   END AS "has_issue_subsidized_convention_gt_3y"
-FROM
-  public."Structure" s;
+FROM public."Structure" s;
