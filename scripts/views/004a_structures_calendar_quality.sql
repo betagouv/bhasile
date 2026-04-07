@@ -7,7 +7,7 @@
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_calendar_quality" AS
 SELECT
   s."id" AS "id",
-  -- Base data presence flags
+  -- Authorization dates presence flags
   CASE
     WHEN s."type" IN ('CADA', 'CPH') THEN (
       s."debutPeriodeAutorisation" IS NULL
@@ -15,8 +15,9 @@ SELECT
     )
     ELSE FALSE
   END AS "has_authorisation_dates_undefined",
+  -- Subsidized structures: convention dates presence flags
   CASE
-    WHEN s."type" IN ('CADA', 'CPH', 'HUDA', 'CAES') THEN (
+    WHEN s."type" IN ('HUDA', 'CAES') THEN (
       s."debutConvention" IS NULL
       OR s."finConvention" IS NULL
     )

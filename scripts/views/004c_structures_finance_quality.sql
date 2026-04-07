@@ -10,11 +10,12 @@ WITH
     SELECT
       s."id",
       s."type" AS "structureType",
-      s."createdAt" AS "createdAt"
+      s."creationDate" AS "creationDate",
+      s."date303" AS "date303"
     FROM
       public."Structure" s
   ),
-  -- filter budgets from the structure creation year to the current year
+  -- filter budgets from the structure date 303 joining year, or creation year to the current year
   budgets_filtered AS (
     SELECT
       b.*
@@ -26,7 +27,7 @@ WITH
       AND b."year" >= EXTRACT(
         YEAR
         FROM
-          s."createdAt"
+          COALESCE(s."date303", s."creationDate")
       )::int
       AND b."year" < EXTRACT(
         YEAR
@@ -140,8 +141,8 @@ SELECT
   COALESCE(br."taux_encadrement_max" > 25, FALSE) AS "has_issue_taux_encadrement_max_gt_25",
   -- Budget rates: taux d'encadrement min equals 0 (NULL does not count as issue)
   COALESCE(br."taux_encadrement_min" = 0, FALSE) AS "has_issue_taux_encadrement_min_eq_0",
-  -- Budget rates: coût journalier max > 25 (across filtered years)
-  COALESCE(br."cout_journalier_max" > 25, FALSE) AS "has_issue_cout_journalier_max_gt_25",
+  -- Budget rates: coût journalier max > 35 (across filtered years)
+  COALESCE(br."cout_journalier_max" > 35, FALSE) AS "has_issue_cout_journalier_max_gt_35",
   -- Budget rates: coût journalier min < 15 (across filtered years)
   COALESCE(br."cout_journalier_min" < 15, FALSE) AS "has_issue_cout_journalier_min_lt_15",
   -- Budget indicators (aggregated from multiple years)
