@@ -12,7 +12,7 @@ import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLines } from "./BudgetTableLines";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
-import { getStructureTableLines } from "./getStructureTableLines";
+import { getBudgetTableLines } from "./getBudgetTableLines";
 
 export const StructureTable = ({ canEdit = true }: Props) => {
   const parentFormContext = useFormContext();
@@ -71,10 +71,7 @@ export const StructureTable = ({ canEdit = true }: Props) => {
       enableBorders
     >
       <BudgetTableLines
-        lines={getStructureTableLines(
-          isAutorisee,
-          detailAffectationEnabledYears
-        )}
+        lines={getBudgetTableLines(isAutorisee, detailAffectationEnabledYears)}
         budgets={budgets}
         canEdit={canEdit}
         years={yearsToDisplay}

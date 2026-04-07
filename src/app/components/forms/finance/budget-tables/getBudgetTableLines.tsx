@@ -4,9 +4,9 @@ import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 
 import { BudgetTableRepriseEtatTooltip } from "./BudgetTableRepriseEtatTooltip";
 
-export const getStructureTableLines = (
+export const getBudgetTableLines = (
   isAutorisee: boolean,
-  detailAffectationEnabledYears: number[]
+  detailAffectationEnabledYears?: number[]
 ) => {
   if (isAutorisee) {
     return [

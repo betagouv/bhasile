@@ -11,7 +11,7 @@ import { StructureType } from "@/types/structure.type";
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLines } from "./BudgetTableLines";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
-import { getStructureTableLines } from "./getStructureTableLines";
+import { getBudgetTableLines } from "./getBudgetTableLines";
 
 export const CpomTable = ({ type, showTitle }: Props) => {
   const { watch } = useFormContext();
@@ -56,7 +56,7 @@ export const CpomTable = ({ type, showTitle }: Props) => {
         <BudgetTableLines
           years={yearsInCpom}
           type={type}
-          lines={getStructureTableLines(
+          lines={getBudgetTableLines(
             isAutorisee,
             detailAffectationEnabledYears
           )}

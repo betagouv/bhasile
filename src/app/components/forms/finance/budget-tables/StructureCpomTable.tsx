@@ -3,14 +3,17 @@ import { useForm, useFormContext } from "react-hook-form";
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { Table } from "@/app/components/common/Table";
 import { getYearRange } from "@/app/utils/date.util";
-import { isStructureInCpom } from "@/app/utils/structure.util";
+import {
+  isStructureAutorisee,
+  isStructureInCpom,
+} from "@/app/utils/structure.util";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLines } from "./BudgetTableLines";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
-import { getCpomLines } from "./getCpomLines";
+import { getBudgetTableLines } from "./getBudgetTableLines";
 
 export const StructureCpomTable = ({ canEdit = true, type }: Props) => {
   const parentFormContext = useFormContext();
@@ -34,6 +37,8 @@ export const StructureCpomTable = ({ canEdit = true, type }: Props) => {
     return null;
   }
 
+  const isAutorisee = isStructureAutorisee(type);
+
   return (
     <Table
       ariaLabelledBy="gestionBudgetaire"
@@ -42,7 +47,7 @@ export const StructureCpomTable = ({ canEdit = true, type }: Props) => {
     >
       <BudgetTableLines
         years={years}
-        lines={getCpomLines()}
+        lines={getBudgetTableLines(isAutorisee)}
         cpomStructures={cpomStructures}
         canEdit={canEdit}
         type={type}

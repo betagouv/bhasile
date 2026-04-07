@@ -8,10 +8,11 @@ import { Table } from "@/app/components/common/Table";
 import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-tables/BudgetTableCommentLine";
 import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/BudgetTableLines";
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
-import { getCpomLines } from "@/app/components/forms/finance/budget-tables/getCpomLines";
+import { getBudgetTableLines } from "@/app/components/forms/finance/budget-tables/getBudgetTableLines";
 import { cn } from "@/app/utils/classname.util";
 import { getCpomStructureTypes } from "@/app/utils/cpom.util";
 import { getYearRange } from "@/app/utils/date.util";
+import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { StructureType } from "@/types/structure.type";
 
 import { useCpomContext } from "../_context/CpomClientContext";
@@ -32,6 +33,8 @@ export const FinancesBlock = () => {
   if (!cpomStructureTypes.length) {
     return null;
   }
+
+  const isAutorisee = isStructureAutorisee(currentType);
 
   return (
     <Block
@@ -73,7 +76,7 @@ export const FinancesBlock = () => {
       >
         <BudgetTableLines
           years={years}
-          lines={getCpomLines()}
+          lines={getBudgetTableLines(isAutorisee)}
           cpomMillesimes={cpom.cpomMillesimes}
           canEdit={false}
           type={currentType}
