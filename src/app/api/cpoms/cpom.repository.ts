@@ -275,7 +275,7 @@ export const createOrUpdateCpomMillesimes = async (
         where: {
           cpomId,
           year: millesime.year,
-          type: millesime.type,
+          type: millesime.type ?? null,
         },
       });
 
