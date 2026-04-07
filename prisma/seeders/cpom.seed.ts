@@ -294,7 +294,7 @@ export const createFakeCpoms = async (
               max: 1000000,
               fractionDigits: 2,
             }),
-            cumulResultatNet: faker.number.float({
+            totalProduitsProposes: faker.number.float({
               min: -100000,
               max: 500000,
               fractionDigits: 2,

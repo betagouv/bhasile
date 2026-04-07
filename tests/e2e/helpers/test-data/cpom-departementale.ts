@@ -44,7 +44,6 @@ export const cpomDepartementale: {
     2024: {
       dotationDemandee: 100000,
       dotationAccordee: 95000,
-      cumulResultatNet: 2000,
       repriseEtat: 1000,
       reserveInvestissement: 5000,
       reportANouveau: 3000,
@@ -52,7 +51,6 @@ export const cpomDepartementale: {
     2025: {
       dotationDemandee: "105 000",
       dotationAccordee: 100000,
-      cumulResultatNet: 153,
       repriseEtat: 500,
       reserveInvestissement: 4000,
       reportANouveau: "25,3",
@@ -60,7 +58,6 @@ export const cpomDepartementale: {
     2026: {
       dotationDemandee: 110000,
       dotationAccordee: 105000,
-      cumulResultatNet: 0,
       repriseEtat: 0,
       reserveInvestissement: 3000,
       reportANouveau: 2000,

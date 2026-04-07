@@ -15,7 +15,6 @@ import {
   budgetSubventionneeNotOpenSchema,
   budgetSubventionneeOpenSchema,
 } from "@/schemas/forms/base/budget.schema";
-import { cpomStructureSchema } from "@/schemas/forms/base/cpomStructure.schema";
 
 vi.mock("@/constants", async () => {
   const actual = await vi.importActual("@/constants");
@@ -26,65 +25,55 @@ vi.mock("@/constants", async () => {
 });
 
 // Test schemas that match the old test structure
-const basicSchema = z
-  .object({
-    budgets: z.tuple([
-      budgetAutoriseeOpenSchema,
-      budgetAutoriseeOpenSchema,
-      budgetAutoriseeOpenSchema,
-      budgetAutoriseeOpenSchema,
-      budgetAutoriseeOpenSchema,
-    ]),
-  })
-  .and(cpomStructureSchema);
+const basicSchema = z.object({
+  budgets: z.tuple([
+    budgetAutoriseeOpenSchema,
+    budgetAutoriseeOpenSchema,
+    budgetAutoriseeOpenSchema,
+    budgetAutoriseeOpenSchema,
+    budgetAutoriseeOpenSchema,
+  ]),
+});
 
-const autoriseeSchema = z
-  .object({
-    budgets: z.tuple([
-      budgetAutoriseeNotOpenSchema, // Year 2025 (current year)
-      budgetAutoriseeOpenYear1Schema, // Year 2024 (current year - 1)
-      budgetAutoriseeOpenSchema, // Year 2023 (sans CPOM)
-      budgetAutoriseeOpenSchema, // Year 2022 (sans CPOM)
-      budgetAutoriseeOpenSchema, // Year 2021 (sans CPOM)
-    ]),
-  })
-  .and(cpomStructureSchema);
+const autoriseeSchema = z.object({
+  budgets: z.tuple([
+    budgetAutoriseeNotOpenSchema, // Year 2025 (current year)
+    budgetAutoriseeOpenYear1Schema, // Year 2024 (current year - 1)
+    budgetAutoriseeOpenSchema, // Year 2023 (sans CPOM)
+    budgetAutoriseeOpenSchema, // Year 2022 (sans CPOM)
+    budgetAutoriseeOpenSchema, // Year 2021 (sans CPOM)
+  ]),
+});
 
-const autoriseeAvecCpomSchema = z
-  .object({
-    budgets: z.tuple([
-      budgetAutoriseeNotOpenSchema, // Year 2025 (current year)
-      budgetAutoriseeOpenYear1Schema, // Year 2024 (current year - 1)
-      budgetAutoriseeOpenSchema, // Year 2023 (avec CPOM)
-      budgetAutoriseeOpenSchema, // Year 2022 (avec CPOM)
-      budgetAutoriseeOpenSchema, // Year 2021 (avec CPOM)
-    ]),
-  })
-  .and(cpomStructureSchema);
+const autoriseeAvecCpomSchema = z.object({
+  budgets: z.tuple([
+    budgetAutoriseeNotOpenSchema, // Year 2025 (current year)
+    budgetAutoriseeOpenYear1Schema, // Year 2024 (current year - 1)
+    budgetAutoriseeOpenSchema, // Year 2023 (avec CPOM)
+    budgetAutoriseeOpenSchema, // Year 2022 (avec CPOM)
+    budgetAutoriseeOpenSchema, // Year 2021 (avec CPOM)
+  ]),
+});
 
-const subventionneeSchema = z
-  .object({
-    budgets: z.tuple([
-      budgetSubventionneeNotOpenSchema, // Year 2025
-      budgetSubventionneeNotOpenSchema, // Year 2024
-      budgetSubventionneeOpenSchema, // Year 2023
-      budgetSubventionneeOpenSchema, // Year 2022
-      budgetSubventionneeOpenSchema, // Year 2021
-    ]),
-  })
-  .and(cpomStructureSchema);
+const subventionneeSchema = z.object({
+  budgets: z.tuple([
+    budgetSubventionneeNotOpenSchema, // Year 2025
+    budgetSubventionneeNotOpenSchema, // Year 2024
+    budgetSubventionneeOpenSchema, // Year 2023
+    budgetSubventionneeOpenSchema, // Year 2022
+    budgetSubventionneeOpenSchema, // Year 2021
+  ]),
+});
 
-const subventionneeAvecCpomSchema = z
-  .object({
-    budgets: z.tuple([
-      budgetSubventionneeNotOpenSchema, // Year 2025
-      budgetSubventionneeNotOpenSchema, // Year 2024
-      budgetSubventionneeOpenSchema, // Year 2023
-      budgetSubventionneeOpenSchema, // Year 2022
-      budgetSubventionneeOpenSchema, // Year 2021
-    ]),
-  })
-  .and(cpomStructureSchema);
+const subventionneeAvecCpomSchema = z.object({
+  budgets: z.tuple([
+    budgetSubventionneeNotOpenSchema, // Year 2025
+    budgetSubventionneeNotOpenSchema, // Year 2024
+    budgetSubventionneeOpenSchema, // Year 2023
+    budgetSubventionneeOpenSchema, // Year 2022
+    budgetSubventionneeOpenSchema, // Year 2021
+  ]),
+});
 
 describe("finalisationFinanceSchema", () => {
   describe("validateAffectationReservesDetails", () => {

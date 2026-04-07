@@ -16,7 +16,10 @@ const getMillesimeIndexForYear = (year: number): number => {
 const CPOM_FINANCE_LINE_NAMES = [
   "dotationDemandee",
   "dotationAccordee",
-  "cumulResultatNet",
+  "totalProduitsProposes",
+  "totalProduits",
+  "totalChargesProposees",
+  "totalCharges",
   "repriseEtat",
   "affectationReservesFondsDedies",
   "reserveInvestissement",
@@ -27,6 +30,8 @@ const CPOM_FINANCE_LINE_NAMES = [
   "fondsDedies",
   "reportANouveau",
   "autre",
+  "excedentRecupere",
+  "excedentDeduit",
 ] as const;
 
 export class CpomAjoutFinancePage extends BasePage {

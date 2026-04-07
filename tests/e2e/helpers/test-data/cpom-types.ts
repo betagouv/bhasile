@@ -33,8 +33,13 @@ export type TestCpomFinanceData = Record<
   {
     dotationDemandee?: FinanceValue;
     dotationAccordee?: FinanceValue;
-    cumulResultatNet?: FinanceValue;
+    totalProduitsProposes?: FinanceValue;
+    totalProduits?: FinanceValue;
+    totalChargesProposees?: FinanceValue;
+    totalCharges?: FinanceValue;
     repriseEtat?: FinanceValue;
+    excedentRecupere?: FinanceValue;
+    excedentDeduit?: FinanceValue;
     affectationReservesFondsDedies?: FinanceValue;
     reserveInvestissement?: FinanceValue;
     chargesNonReconductibles?: FinanceValue;

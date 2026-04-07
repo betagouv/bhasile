@@ -7,10 +7,14 @@ import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-ta
 import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/BudgetTableLines";
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
 import { getYearRange } from "@/app/utils/date.util";
+import {
+  isStructureAutorisee,
+  isStructureSubventionnee,
+} from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ButtonAffectations } from "../ButtonAffectations";
-import { getCpomStaticTableLines } from "./getCpomStaticTableLines";
+import { getStructureStaticTableLines } from "./getStructureStaticTableLines";
 
 export const CpomStaticTable = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -18,6 +22,9 @@ export const CpomStaticTable = (): ReactElement => {
   const { years } = getYearRange({ order: "desc" });
 
   const [isAffectationOpen, setIsAffectationOpen] = useState(false);
+
+  const isAutorisee = isStructureAutorisee(structure?.type);
+  const isSubventionnee = isStructureSubventionnee(structure?.type);
 
   return (
     <>
@@ -34,11 +41,11 @@ export const CpomStaticTable = (): ReactElement => {
       >
         <BudgetTableLines
           years={years}
-          lines={getCpomStaticTableLines(isAffectationOpen)}
+          lines={getStructureStaticTableLines(isAutorisee, isAffectationOpen)}
           cpomStructures={structure?.cpomStructures}
           canEdit={false}
         />
-        {isAffectationOpen && (
+        {(isAffectationOpen || isSubventionnee) && (
           <BudgetTableCommentLine
             years={years}
             label="Commentaire"
@@ -48,10 +55,12 @@ export const CpomStaticTable = (): ReactElement => {
           />
         )}
       </Table>
-      <ButtonAffectations
-        isAffectationOpen={isAffectationOpen}
-        setIsAffectationOpen={setIsAffectationOpen}
-      />
+      {isAutorisee && (
+        <ButtonAffectations
+          isAffectationOpen={isAffectationOpen}
+          setIsAffectationOpen={setIsAffectationOpen}
+        />
+      )}
     </>
   );
 };
