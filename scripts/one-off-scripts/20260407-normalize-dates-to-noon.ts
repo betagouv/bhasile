@@ -1,4 +1,3 @@
-// @ts-nocheck
 // One-off script: normalize various DateTime columns to 12:00:00. Shift +2h first so 22h/23h becomes J+1 at 12:00:00.
 // Usage: yarn one-off 20260407-normalize-dates-to-noon
 
@@ -8,9 +7,8 @@ import { createPrismaClient } from "@/prisma-client";
 
 const prisma = createPrismaClient();
 
-function normalizeDate(date: Date | null | undefined): Date | null {
-  if (date == null) return null;
-  const shiftedDate = new Date(date.getTime() + 2 * 60 * 60 * 1000 + 1); // +1ms to avoid limit issues
+function normalizeDateRequired(date: Date): Date {
+  const shiftedDate = new Date(date.getTime() + 2 * 60 * 60 * 1000 + 1); // d 22:00+ -> d+1 ; +1ms to avoid limit issue
   return new Date(
     Date.UTC(
       shiftedDate.getUTCFullYear(),
@@ -22,6 +20,13 @@ function normalizeDate(date: Date | null | undefined): Date | null {
       0
     )
   );
+}
+
+function normalizeDateOptional(
+  date: Date | null | undefined
+): Date | undefined {
+  if (date == null) return undefined;
+  return normalizeDateRequired(date);
 }
 
 async function main() {
@@ -46,9 +51,9 @@ async function main() {
       await prisma.acteAdministratif.update({
         where: { id: acte.id },
         data: {
-          date: normalizeDate(acte.date) ?? undefined,
-          startDate: normalizeDate(acte.startDate) ?? undefined,
-          endDate: normalizeDate(acte.endDate) ?? undefined,
+          date: normalizeDateOptional(acte.date),
+          startDate: normalizeDateOptional(acte.startDate),
+          endDate: normalizeDateOptional(acte.endDate),
         },
       });
       updatedActe += 1;
@@ -72,7 +77,7 @@ async function main() {
     try {
       await prisma.activite.update({
         where: { id: activite.id },
-        data: { date: normalizeDate(activite.date) },
+        data: { date: normalizeDateRequired(activite.date) },
       });
       updatedActivite += 1;
     } catch (error) {
@@ -95,7 +100,7 @@ async function main() {
     try {
       await prisma.controle.update({
         where: { id: controle.id },
-        data: { date: normalizeDate(controle.date) },
+        data: { date: normalizeDateRequired(controle.date) },
       });
       updatedControle += 1;
     } catch (error) {
@@ -120,8 +125,8 @@ async function main() {
       await prisma.cpomStructure.update({
         where: { id: cs.id },
         data: {
-          dateStart: normalizeDate(cs.dateStart) ?? undefined,
-          dateEnd: normalizeDate(cs.dateEnd) ?? undefined,
+          dateStart: normalizeDateOptional(cs.dateStart),
+          dateEnd: normalizeDateOptional(cs.dateEnd),
         },
       });
       updatedCpomStructure += 1;
@@ -156,10 +161,12 @@ async function main() {
       await prisma.dna.update({
         where: { id: dna.id },
         data: {
-          activeInOfiiFileSince:
-            normalizeDate(dna.activeInOfiiFileSince) ?? undefined,
-          inactiveInOfiiFileSince:
-            normalizeDate(dna.inactiveInOfiiFileSince) ?? undefined,
+          activeInOfiiFileSince: normalizeDateOptional(
+            dna.activeInOfiiFileSince
+          ),
+          inactiveInOfiiFileSince: normalizeDateOptional(
+            dna.inactiveInOfiiFileSince
+          ),
         },
       });
       updatedDna += 1;
@@ -184,7 +191,7 @@ async function main() {
     try {
       await prisma.evaluation.update({
         where: { id: evaluation.id },
-        data: { date: normalizeDate(evaluation.date) ?? undefined },
+        data: { date: normalizeDateOptional(evaluation.date) },
       });
       updatedEvaluation += 1;
     } catch (error) {
@@ -208,8 +215,8 @@ async function main() {
       await prisma.evenementIndesirableGrave.update({
         where: { id: eig.id },
         data: {
-          evenementDate: normalizeDate(eig.evenementDate),
-          declarationDate: normalizeDate(eig.declarationDate),
+          evenementDate: normalizeDateRequired(eig.evenementDate),
+          declarationDate: normalizeDateRequired(eig.declarationDate),
         },
       });
       updatedEig += 1;
@@ -252,15 +259,16 @@ async function main() {
       await prisma.structure.update({
         where: { id: structure.id },
         data: {
-          debutConvention:
-            normalizeDate(structure.debutConvention) ?? undefined,
-          finConvention: normalizeDate(structure.finConvention) ?? undefined,
-          creationDate: normalizeDate(structure.creationDate) ?? undefined,
-          debutPeriodeAutorisation:
-            normalizeDate(structure.debutPeriodeAutorisation) ?? undefined,
-          finPeriodeAutorisation:
-            normalizeDate(structure.finPeriodeAutorisation) ?? undefined,
-          date303: normalizeDate(structure.date303) ?? undefined,
+          debutConvention: normalizeDateOptional(structure.debutConvention),
+          finConvention: normalizeDateOptional(structure.finConvention),
+          creationDate: normalizeDateOptional(structure.creationDate),
+          debutPeriodeAutorisation: normalizeDateOptional(
+            structure.debutPeriodeAutorisation
+          ),
+          finPeriodeAutorisation: normalizeDateOptional(
+            structure.finPeriodeAutorisation
+          ),
+          date303: normalizeDateOptional(structure.date303),
         },
       });
       updatedStructure += 1;
@@ -295,10 +303,12 @@ async function main() {
       await prisma.structureTypologie.update({
         where: { id: typologie.id },
         data: {
-          echeancePlacesACreer:
-            normalizeDate(typologie.echeancePlacesACreer) ?? undefined,
-          echeancePlacesAFermer:
-            normalizeDate(typologie.echeancePlacesAFermer) ?? undefined,
+          echeancePlacesACreer: normalizeDateOptional(
+            typologie.echeancePlacesACreer
+          ),
+          echeancePlacesAFermer: normalizeDateOptional(
+            typologie.echeancePlacesAFermer
+          ),
         },
       });
       updatedTypologie += 1;
@@ -311,7 +321,7 @@ async function main() {
     `✅ StructureTypologie: ${updatedTypologie}/${typologies.length} lignes mises à jour${errorsTypologie ? `, ${errorsTypologie} erreurs` : ""}.`
   );
 
-  console.log("\nTerminé.");
+  console.log("Terminé.");
 }
 
 main()
