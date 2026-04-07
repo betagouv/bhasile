@@ -27,21 +27,21 @@ export const formatDateToIsoString = (
   if (val === undefined || val === "" || val === null) {
     return undefined;
   }
-  // If it's already ISO datetime, change the hour to 00
+  // If it's already ISO datetime, change the hour to 12
   if (/^\d{4}-\d{2}-\d{2}T/.test(val)) {
     return val.replace(
       /^(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
-      "$1T00:00:00.000Z"
+      "$1T12:00:00.000Z"
     );
   }
   // If it's already ISO date, convert to datetime
   if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
-    return `${val}T00:00:00.000Z`;
+    return `${val}T12:00:00.000Z`;
   }
   // If it's French format, convert to datetime
   if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
     const [day, month, year] = val.split("/");
-    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T00:00:00.000Z`;
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T12:00:00.000Z`;
   }
   return undefined;
 };
@@ -74,13 +74,6 @@ export const formatForCharts = (date: dayjs.Dayjs): string => {
   return date.format("MMM YYYY").toUpperCase();
 };
 
-export const getYearDate = (year: string | number): string => {
-  return new Date(Number(year), 0, 1, 13).toLocaleDateString("fr-FR");
-};
-
-export const getDateFromYear = (year: string | number): Date => {
-  return new Date(Number(year), 0, 1, 13);
-};
 export const getYearFromDate = (
   date: string | number | Date | undefined | null
 ): number => {
