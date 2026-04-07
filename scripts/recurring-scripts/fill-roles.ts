@@ -1,6 +1,5 @@
 // Remplir la table Roles avec les patterns d'email autorisés pour l'authentification et les groupes de permissions
-// Usage:
-// - yarn script fill-roles roles.csv
+// Usage: yarn script fill-roles roles.csv
 
 import "dotenv/config";
 
