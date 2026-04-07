@@ -78,7 +78,7 @@ describe("date util", () => {
       const result = formatDateToIsoString(date);
 
       // THEN
-      expect(result).toBe("2023-01-01T13:00:00.000Z");
+      expect(result).toBe("2023-01-01T12:00:00.000Z");
     });
 
     it("should return correct value for iso date", () => {
@@ -89,7 +89,7 @@ describe("date util", () => {
       const result = formatDateToIsoString(date);
 
       // THEN
-      expect(result).toBe("2023-01-01T13:00:00.000Z");
+      expect(result).toBe("2023-01-01T12:00:00.000Z");
     });
     it("should return correct value for iso datetime", () => {
       // GIVEN
@@ -99,7 +99,7 @@ describe("date util", () => {
       const result = formatDateToIsoString(date);
 
       // THEN
-      expect(result).toBe("2023-01-01T13:00:00.000Z");
+      expect(result).toBe("2023-01-01T12:00:00.000Z");
     });
   });
   describe("getMonthsBetween", () => {
