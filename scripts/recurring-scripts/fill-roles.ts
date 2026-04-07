@@ -1,5 +1,6 @@
 // Remplir la table Roles avec les patterns d'email autorisés pour l'authentification et les groupes de permissions
-// Usage: yarn script fill-roles
+// Usage:
+// - yarn script fill-roles roles.csv
 
 import "dotenv/config";
 
@@ -21,11 +22,11 @@ type RoleCsvRow = {
 
 const prisma = createPrismaClient();
 
+const args = process.argv.slice(2);
+const csvFilename = args[0] ?? "roles.csv";
+
 const fetchRoles = async (): Promise<RoleCsvRow[]> => {
-  return loadCsvFromS3<RoleCsvRow>(
-    process.env.DOCS_BUCKET_NAME!,
-    "roles_test.csv"
-  );
+  return loadCsvFromS3<RoleCsvRow>(process.env.DOCS_BUCKET_NAME!, csvFilename);
 };
 
 const getTargetDepartementIds = (
@@ -54,8 +55,35 @@ const getTargetDepartementIds = (
 };
 
 const createRoles = async (row: RoleCsvRow, departementIds: number[]) => {
+  const pattern = row.emailPattern?.trim();
+
+  // Si pas de emailPattern, on crée juste le rôle et ses départements.
+  if (!pattern) {
+    await prisma.role.upsert({
+      where: { name: row.name },
+      update: {
+        roleDepartements: {
+          createMany: {
+            data: departementIds.map((departementId) => ({ departementId })),
+            skipDuplicates: true,
+          },
+        },
+      },
+      create: {
+        name: row.name,
+        roleDepartements: {
+          createMany: {
+            data: departementIds.map((departementId) => ({ departementId })),
+            skipDuplicates: true,
+          },
+        },
+      },
+    });
+  }
+
+  // Si emailPattern, on connecte/ crée le rôle.
   await prisma.emailPattern.upsert({
-    where: { pattern: row.emailPattern },
+    where: { pattern },
     update: {
       role: {
         connectOrCreate: {
@@ -70,7 +98,7 @@ const createRoles = async (row: RoleCsvRow, departementIds: number[]) => {
       },
     },
     create: {
-      pattern: row.emailPattern,
+      pattern,
       role: {
         connectOrCreate: {
           where: { name: row.name },
@@ -111,8 +139,8 @@ const run = async () => {
     for (const row of csvRows) {
       const targetIds = getTargetDepartementIds(row, allDepartements);
       await createRoles(row, targetIds);
-      console.log(`Ajout de ${row.emailPattern} (${row.name})`);
     }
+    console.log("✅ Rôles créés");
   } catch (error) {
     console.error("❌ Erreur lors de la création des roles :", error);
     throw error;
