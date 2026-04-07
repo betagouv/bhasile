@@ -524,6 +524,8 @@ model CpomMillesime {
   autre                             Float?
   commentaire                       String?
 
+  cumulResultatNet                  Float? // TO DELETE AFTER CPOM MILLESIME MIGRATION
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
