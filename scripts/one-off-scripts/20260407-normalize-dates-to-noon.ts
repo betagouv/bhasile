@@ -179,6 +179,33 @@ async function main() {
     `✅ Dna: ${updatedDna}/${dnas.length} lignes mises à jour${errorsDna ? `, ${errorsDna} erreurs` : ""}.`
   );
 
+  console.log("📥 DnaStructure...");
+  const dnaStructures = await prisma.dnaStructure.findMany({
+    where: { OR: [{ startDate: { not: null } }, { endDate: { not: null } }] },
+    select: { id: true, startDate: true, endDate: true },
+    orderBy: { id: "asc" },
+  });
+  let updatedDnaStructure = 0;
+  let errorsDnaStructure = 0;
+  for (const ds of dnaStructures) {
+    try {
+      await prisma.dnaStructure.update({
+        where: { id: ds.id },
+        data: {
+          startDate: normalizeDateOptional(ds.startDate),
+          endDate: normalizeDateOptional(ds.endDate),
+        },
+      });
+      updatedDnaStructure += 1;
+    } catch (error) {
+      errorsDnaStructure += 1;
+      console.error(`❌ DnaStructure id=${ds.id}:`, error);
+    }
+  }
+  console.log(
+    `✅ DnaStructure: ${updatedDnaStructure}/${dnaStructures.length} lignes mises à jour${errorsDnaStructure ? `, ${errorsDnaStructure} erreurs` : ""}.`
+  );
+
   console.log("📥 Evaluation...");
   const evaluations = await prisma.evaluation.findMany({
     where: { date: { not: null } },
