@@ -22,7 +22,7 @@ type RoleCsvRow = {
 const prisma = createPrismaClient();
 
 const args = process.argv.slice(2);
-const csvFilename = args[0] ?? "roles.csv";
+const csvFilename = args[0] ?? "roles_v2.csv";
 
 const fetchRoles = async (): Promise<RoleCsvRow[]> => {
   return loadCsvFromS3<RoleCsvRow>(process.env.DOCS_BUCKET_NAME!, csvFilename);
