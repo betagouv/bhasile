@@ -44,6 +44,7 @@ export const CpomStaticTable = (): ReactElement => {
           lines={getStructureStaticTableLines(isAutorisee, isAffectationOpen)}
           cpomStructures={structure?.cpomStructures}
           canEdit={false}
+          type={structure?.type}
         />
         {(isAffectationOpen || isSubventionnee) && (
           <BudgetTableCommentLine
@@ -52,6 +53,7 @@ export const CpomStaticTable = (): ReactElement => {
             cpomStructures={structure?.cpomStructures}
             enabledYears={years}
             canEdit={false}
+            type={structure?.type}
           />
         )}
       </Table>
