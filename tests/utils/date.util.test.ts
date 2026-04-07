@@ -38,6 +38,17 @@ describe("date util", () => {
     });
     it("should return the string of a formatted date with an iso string input", () => {
       // GIVEN
+      const date = "2023-01-01T12:00:00.000Z";
+
+      // WHEN
+      const formattedDate = formatDate(date);
+
+      // THEN
+      expect(formattedDate).toBe("01/01/2023");
+    });
+
+    it("should return the string of a formatted date with an iso string input at 00:00:00", () => {
+      // GIVEN
       const date = "2023-01-01T00:00:00.000Z";
 
       // WHEN
@@ -275,6 +286,17 @@ describe("date util", () => {
 
     describe("when input is a string with other valid date formats", () => {
       it("should parse ISO date string and return the correct year", () => {
+        // GIVEN
+        const date = "2024-01-01T12:00:00.000Z";
+
+        // WHEN
+        const result = getYearFromDate(date);
+
+        // THEN
+        expect(result).toBe(2024);
+      });
+
+      it("should parse ISO date string at 00:00:00 and return the correct year", () => {
         // GIVEN
         const date = "2024-01-01T00:00:00.000Z";
 
