@@ -15,7 +15,7 @@ import {
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ButtonAffectations } from "../ButtonAffectations";
-import { getStructureStaticTableLines } from "./getStructureStaticTableLines";
+import { getBudgetStaticTableLines } from "./getBudgetStaticTableLines";
 
 export const StructureStaticTable = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -65,7 +65,7 @@ export const StructureStaticTable = (): ReactElement => {
       >
         <BudgetTableLines
           years={years}
-          lines={getStructureStaticTableLines(isAutorisee, isAffectationOpen)}
+          lines={getBudgetStaticTableLines(isAutorisee, isAffectationOpen)}
           budgets={enhancedBudgets}
           canEdit={false}
         />

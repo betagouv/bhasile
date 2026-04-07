@@ -3,6 +3,7 @@
  */
 
 import { FinanceValue } from "./types";
+import { StructureType } from "@/types/structure.type";
 
 export type TestCpomAjoutData = {
   granularity: "DEPARTEMENTALE" | "INTERDEPARTEMENTALE" | "REGIONALE";
@@ -27,28 +28,29 @@ export type TestCpomAjoutData = {
   structureIds?: number[] | "all" | "seeded";
 };
 
-/** Finance table values per year (cpomMillesimes) */
-export type TestCpomFinanceData = Record<
-  number,
-  {
-    dotationDemandee?: FinanceValue;
-    dotationAccordee?: FinanceValue;
-    totalProduitsProposes?: FinanceValue;
-    totalProduits?: FinanceValue;
-    totalChargesProposees?: FinanceValue;
-    totalCharges?: FinanceValue;
-    repriseEtat?: FinanceValue;
-    excedentRecupere?: FinanceValue;
-    excedentDeduit?: FinanceValue;
-    affectationReservesFondsDedies?: FinanceValue;
-    reserveInvestissement?: FinanceValue;
-    chargesNonReconductibles?: FinanceValue;
-    reserveCompensationDeficits?: FinanceValue;
-    reserveCompensationBFR?: FinanceValue;
-    reserveCompensationAmortissements?: FinanceValue;
-    fondsDedies?: FinanceValue;
-    reportANouveau?: FinanceValue;
-    autre?: FinanceValue;
-    commentaire?: string;
-  }
+export type TestCpomFinanceLineData = {
+  dotationDemandee?: FinanceValue;
+  dotationAccordee?: FinanceValue;
+  totalProduitsProposes?: FinanceValue;
+  totalProduits?: FinanceValue;
+  totalChargesProposees?: FinanceValue;
+  totalCharges?: FinanceValue;
+  repriseEtat?: FinanceValue;
+  excedentRecupere?: FinanceValue;
+  excedentDeduit?: FinanceValue;
+  affectationReservesFondsDedies?: FinanceValue;
+  reserveInvestissement?: FinanceValue;
+  chargesNonReconductibles?: FinanceValue;
+  reserveCompensationDeficits?: FinanceValue;
+  reserveCompensationBFR?: FinanceValue;
+  reserveCompensationAmortissements?: FinanceValue;
+  fondsDedies?: FinanceValue;
+  reportANouveau?: FinanceValue;
+  autre?: FinanceValue;
+  commentaire?: string;
+};
+
+/** Finance table values by structure type and year (cpomMillesimes) */
+export type TestCpomFinanceData = Partial<
+  Record<StructureType, Record<number, TestCpomFinanceLineData>>
 >;

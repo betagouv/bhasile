@@ -1,4 +1,5 @@
 import { TestCpomAjoutData, TestCpomFinanceData } from "./cpom-types";
+import { StructureType } from "@/types/structure.type";
 
 /**
  * Valid départementale CPOM test case.
@@ -41,26 +42,20 @@ export const cpomDepartementale: {
     structureIds: "seeded",
   },
   financeData: {
-    2024: {
-      dotationDemandee: 100000,
-      dotationAccordee: 95000,
-      repriseEtat: 1000,
-      reserveInvestissement: 5000,
-      reportANouveau: 3000,
-    },
-    2025: {
-      dotationDemandee: "105 000",
-      dotationAccordee: 100000,
-      repriseEtat: 500,
-      reserveInvestissement: 4000,
-      reportANouveau: "25,3",
-    },
-    2026: {
-      dotationDemandee: 110000,
-      dotationAccordee: 105000,
-      repriseEtat: 0,
-      reserveInvestissement: 3000,
-      reportANouveau: 2000,
+    [StructureType.CADA]: {
+      2024: {
+        dotationDemandee: 100000,
+        dotationAccordee: 95000,
+        repriseEtat: 1000,
+      },
+      2025: {
+        dotationDemandee: "105 000",
+        dotationAccordee: 100000,
+      },
+      2026: {
+        dotationDemandee: 110000,
+        dotationAccordee: 105000,
+      },
     },
   },
 };

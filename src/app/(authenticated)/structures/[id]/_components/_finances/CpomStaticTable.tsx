@@ -14,7 +14,7 @@ import {
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ButtonAffectations } from "../ButtonAffectations";
-import { getStructureStaticTableLines } from "./getStructureStaticTableLines";
+import { getBudgetStaticTableLines } from "./getBudgetStaticTableLines";
 
 export const CpomStaticTable = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -41,7 +41,7 @@ export const CpomStaticTable = (): ReactElement => {
       >
         <BudgetTableLines
           years={years}
-          lines={getStructureStaticTableLines(isAutorisee, isAffectationOpen)}
+          lines={getBudgetStaticTableLines(isAutorisee, isAffectationOpen)}
           cpomStructures={structure?.cpomStructures}
           canEdit={false}
           type={structure?.type}

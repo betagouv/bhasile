@@ -166,7 +166,12 @@ export class CpomAjoutIdentificationPage extends BasePage {
 
       if (avenant.filePath) {
         const fileInputs = this.page.locator('input[type="file"]');
-        await fileInputs.nth(1).setInputFiles(avenant.filePath);
+        const fileInputsCount = await fileInputs.count();
+        if (fileInputsCount >= 2) {
+          await fileInputs.nth(1).setInputFiles(avenant.filePath);
+        } else if (fileInputsCount === 1) {
+          await fileInputs.first().setInputFiles(avenant.filePath);
+        }
         await this.page
           .waitForLoadState("networkidle", { timeout: TIMEOUTS.FILE_UPLOAD })
           .catch(() => {});

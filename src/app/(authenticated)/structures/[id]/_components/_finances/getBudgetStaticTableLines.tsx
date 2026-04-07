@@ -1,7 +1,7 @@
 import { AffectationTooltip } from "@/app/components/forms/finance/budget-tables/AffectationTooltip";
 import { BudgetTableRepriseEtatTooltip } from "@/app/components/forms/finance/budget-tables/BudgetTableRepriseEtatTooltip";
 
-export const getStructureStaticTableLines = (
+export const getBudgetStaticTableLines = (
   isAutorisee: boolean,
   isAffectationOpen: boolean
 ) => {

@@ -1,4 +1,5 @@
 import { TestCpomAjoutData, TestCpomFinanceData } from "./cpom-types";
+import { StructureType } from "@/types/structure.type";
 
 /**
  * Valid interdépartementale CPOM test case.
@@ -32,17 +33,16 @@ export const cpomInterdepartementale: {
     structureIds: "all",
   },
   financeData: {
-    2024: {
-      repriseEtat: 2000,
-      affectationReservesFondsDedies: 1000,
+    [StructureType.CADA]: {
+      2024: {
+        repriseEtat: 2000,
+        affectationReservesFondsDedies: 1000,
+      },
     },
-    2025: {
-      repriseEtat: 1500,
-      affectationReservesFondsDedies: 500,
-    },
-    2026: {
-      repriseEtat: 1000,
-      affectationReservesFondsDedies: 300,
+    [StructureType.CAES]: {
+      2024: {
+        repriseEtat: 2000,
+      },
     },
   },
 };
