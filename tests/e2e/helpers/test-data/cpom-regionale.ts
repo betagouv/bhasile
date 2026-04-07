@@ -1,5 +1,6 @@
-import { TestCpomAjoutData, TestCpomFinanceData } from "./cpom-types";
 import { StructureType } from "@/types/structure.type";
+
+import { TestCpomAjoutData, TestCpomFinanceData } from "./cpom-types";
 
 /**
  * Valid régionale CPOM test case.

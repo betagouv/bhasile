@@ -2,8 +2,9 @@
  * Test data types for CPOM e2e tests
  */
 
-import { FinanceValue } from "./types";
 import { StructureType } from "@/types/structure.type";
+
+import { FinanceValue } from "./types";
 
 export type TestCpomAjoutData = {
   granularity: "DEPARTEMENTALE" | "INTERDEPARTEMENTALE" | "REGIONALE";
