@@ -22,7 +22,6 @@ export const createFakeFileUpload = (): Omit<
     fileSize: faker.number.int({ min: 1, max: 100000 }),
     originalName: fileName,
     createdAt: faker.date.past(),
-    updatedAt: faker.date.past(),
   };
 };
 
