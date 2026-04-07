@@ -57,58 +57,41 @@ const getTargetDepartementIds = (
 const createRoles = async (row: RoleCsvRow, departementIds: number[]) => {
   const pattern = row.emailPattern?.trim();
 
-  // Si pas de emailPattern, on crée juste le rôle et ses départements.
-  if (!pattern) {
-    await prisma.role.upsert({
-      where: { name: row.name },
-      update: {
-        roleDepartements: {
-          createMany: {
-            data: departementIds.map((departementId) => ({ departementId })),
-            skipDuplicates: true,
-          },
-        },
-      },
-      create: {
-        name: row.name,
-        roleDepartements: {
-          createMany: {
-            data: departementIds.map((departementId) => ({ departementId })),
-            skipDuplicates: true,
-          },
-        },
-      },
-    });
-  }
-
-  // Si emailPattern, on connecte/ crée le rôle.
-  await prisma.emailPattern.upsert({
-    where: { pattern },
+  // Role et departements.
+  const role = await prisma.role.upsert({
+    where: { name: row.name },
     update: {
-      role: {
-        connectOrCreate: {
-          where: { name: row.name },
-          create: {
-            name: row.name,
-            roleDepartements: {
-              create: departementIds.map((id) => ({ departementId: id })),
-            },
-          },
+      roleDepartements: {
+        createMany: {
+          data: departementIds.map((departementId) => ({ departementId })),
+          skipDuplicates: true,
         },
       },
     },
     create: {
+      name: row.name,
+      roleDepartements: {
+        createMany: {
+          data: departementIds.map((departementId) => ({ departementId })),
+          skipDuplicates: true,
+        },
+      },
+    },
+    select: { id: true },
+  });
+
+  if (!pattern) return;
+
+  // Si emailPattern, on connecte le pattern au rôle.
+  await prisma.emailPattern.upsert({
+    where: { pattern },
+    update: {
+      role: { connect: { id: role.id } },
+    },
+    create: {
       pattern,
       role: {
-        connectOrCreate: {
-          where: { name: row.name },
-          create: {
-            name: row.name,
-            roleDepartements: {
-              create: departementIds.map((id) => ({ departementId: id })),
-            },
-          },
-        },
+        connect: { id: role.id },
       },
     },
   });
