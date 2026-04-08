@@ -77,14 +77,14 @@ export const FinancesBlock = () => {
         <BudgetTableLines
           years={years}
           lines={getBudgetTableLines(isAutorisee)}
-          cpomMillesimes={cpom.cpomMillesimes}
+          budgets={cpom.budgets}
           canEdit={false}
           type={currentType}
         />
         <BudgetTableCommentLine
           years={years}
           label="Commentaire"
-          cpomMillesimes={cpom.cpomMillesimes}
+          budgets={cpom.budgets}
           canEdit={false}
           type={currentType}
         />

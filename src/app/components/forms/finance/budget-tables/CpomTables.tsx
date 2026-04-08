@@ -2,19 +2,21 @@ import { Fragment } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
-import { CpomMillesimeFormValues } from "@/schemas/forms/base/cpom.schema";
+import { BudgetApiType } from "@/schemas/api/budget.schema";
 
 import { CpomTable } from "./CpomTable";
 
 export const CpomTables = () => {
   const { watch } = useFormContext();
-  const cpomMillesimes = watch("cpomMillesimes") as CpomMillesimeFormValues[];
+  const budgets = watch("budgets") as BudgetApiType[];
 
   const structureTypes = [
-    ...new Set(
-      cpomMillesimes?.map((cpomMillesime) => cpomMillesime?.type) ?? []
-    ),
-  ];
+    ...new Set(budgets?.map((budget) => budget.cpomStructureType) ?? []),
+  ].filter((structureType) => structureType !== undefined);
+
+  if (structureTypes.length === 0) {
+    return null;
+  }
 
   return (
     <>

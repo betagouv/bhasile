@@ -327,7 +327,10 @@ model Budget {
   id                                Int        @id @default(autoincrement())
   structure                         Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   structureId                       Int?
+  cpom                              Cpom? @relation(fields: [cpomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cpomId                            Int?
   year                              Int        @default(0)
+  cpomStructureType                 StructureType?
   ETP                               Float?
   tauxEncadrement                   Float?
   coutJournalier                    Float?
@@ -355,6 +358,8 @@ model Budget {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([structureId, year])
+  @@unique([cpomId, year, cpomStructureType])
+
   @@schema("public")
 }
 
@@ -452,7 +457,7 @@ model Cpom {
   regionId            Int?
   departements        CpomDepartement[]
   granularity         CpomGranularity     @default(REGIONALE)
-  cpomMillesimes      CpomMillesime[]
+  budgets             Budget[]
   operateur           Operateur           @relation(fields: [operateurId], references: [id])
   operateurId         Int
   actesAdministratifs ActeAdministratif[]
@@ -501,35 +506,26 @@ model CpomStructure {
 model CpomMillesime {
   id                                Int     @id @default(autoincrement())
   cpomId                            Int
-  cpom                              Cpom    @relation(fields: [cpomId], references: [id])
   year                              Int     @default(0)
-  type                              StructureType?
   dotationDemandee                  Float?
   dotationAccordee                  Float?
-  totalProduitsProposes             Float?
-  totalProduits                     Float?
-  totalCharges                      Float?
-  totalChargesProposees             Float?
+  cumulResultatNet                  Float?
   repriseEtat                       Float?
-  excedentRecupere                  Float?
-  excedentDeduit                    Float?
+  affectationReservesFondsDedies    Float?
   reserveInvestissement             Float?
   chargesNonReconductibles          Float?
   reserveCompensationDeficits       Float?
   reserveCompensationBFR            Float?
   reserveCompensationAmortissements Float?
   fondsDedies                       Float?
-  affectationReservesFondsDedies    Float?
   reportANouveau                    Float?
   autre                             Float?
   commentaire                       String?
 
-  cumulResultatNet                  Float? // TO DELETE AFTER CPOM MILLESIME MIGRATION
-
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@unique([cpomId, year, type])
+  @@unique([cpomId, year])
   @@schema("public")
 }
 

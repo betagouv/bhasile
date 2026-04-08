@@ -76,14 +76,15 @@ export class CpomAjoutFinancePage extends BasePage {
         if (year < START_YEAR || year > CURRENT_YEAR) {
           continue;
         }
-        const millesimeIndex = getMillesimeIndexForYear(year) + typePosition * yearSpan;
+        const millesimeIndex =
+          getMillesimeIndexForYear(year) + typePosition * yearSpan;
 
         for (const field of CPOM_FINANCE_LINE_NAMES) {
           const value = (fields as TestCpomFinanceLineData)[field];
           if (value === undefined || value === null) {
             continue;
           }
-          const selector = `input[name="cpomMillesimes.${millesimeIndex}.${field}"]`;
+          const selector = `input[name="budgets.${millesimeIndex}.${field}"]`;
           const input = this.page.locator(selector);
           const count = await input.count();
           if (count === 0) {
@@ -100,7 +101,7 @@ export class CpomAjoutFinancePage extends BasePage {
         }
 
         if (fields.commentaire) {
-          const commentSelector = `input[name="cpomMillesimes.${millesimeIndex}.commentaire"], textarea[name="cpomMillesimes.${millesimeIndex}.commentaire"]`;
+          const commentSelector = `input[name="budgets.${millesimeIndex}.commentaire"], textarea[name="budgets.${millesimeIndex}.commentaire"]`;
           const commentInput = this.page.locator(commentSelector);
           if ((await commentInput.count()) === 0) {
             continue;
@@ -111,7 +112,10 @@ export class CpomAjoutFinancePage extends BasePage {
             `Failed to check if comment input is enabled: ${commentSelector}`
           );
           if (isEnabled) {
-            await this.formHelper.fillInput(commentSelector, fields.commentaire);
+            await this.formHelper.fillInput(
+              commentSelector,
+              fields.commentaire
+            );
           }
         }
       }

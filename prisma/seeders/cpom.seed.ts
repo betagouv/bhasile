@@ -279,11 +279,11 @@ export const createFakeCpoms = async (
 
     for (const millesimeYear of millesimeYears) {
       for (const structureType of structureTypes) {
-        await prisma.cpomMillesime.create({
+        await prisma.budget.create({
           data: {
             cpomId: cpom.id,
             year: millesimeYear,
-            type: structureType,
+            cpomStructureType: structureType,
             dotationDemandee: faker.number.float({
               min: 0,
               max: 1000000,

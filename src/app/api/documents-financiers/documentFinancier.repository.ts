@@ -1,17 +1,13 @@
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { OwnerId } from "@/types/Owner.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { getKeysFromIncomingDocumentsOrActes } from "../files/file.service";
 
-type DocumentFinancierOwnerId = {
-  structureId?: number;
-  cpomId?: number;
-};
-
 export const createOrUpdateDocumentsFinanciers = async (
   tx: PrismaTransaction,
   documentsFinanciers: DocumentFinancierApiType[] | undefined,
-  ownerId: DocumentFinancierOwnerId
+  ownerId: OwnerId
 ): Promise<void> => {
   if (!documentsFinanciers || documentsFinanciers.length === 0) {
     return;
@@ -72,7 +68,7 @@ export const createOrUpdateDocumentsFinanciers = async (
 const deleteDocumentsFinanciers = async (
   tx: PrismaTransaction,
   documentsFinanciersToKeep: DocumentFinancierApiType[],
-  ownerId: DocumentFinancierOwnerId
+  ownerId: OwnerId
 ): Promise<void> => {
   const where =
     ownerId.structureId !== undefined

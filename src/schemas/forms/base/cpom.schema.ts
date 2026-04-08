@@ -15,10 +15,10 @@ import { StructureType } from "@/types/structure.type";
 import { acteAdministratifCpomSchema } from "./acteAdministratif.schema";
 import { operateurSchema } from "./operateur.schema";
 
-const cpomMillesimeSchema = z.object({
+const budgetCpomSchema = z.object({
   id: zId(),
   year: zSafeYear(),
-  type: z.nativeEnum(StructureType),
+  cpomStructureType: z.nativeEnum(StructureType),
   dotationDemandee: zSafePositiveDecimalsNullish(),
   dotationAccordee: zSafePositiveDecimalsNullish(),
   totalProduitsProposes: zSafePositiveDecimalsNullish(),
@@ -52,7 +52,7 @@ const baseCpomSchema = z.object({
   granularity: z
     .enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"])
     .optional(),
-  cpomMillesimes: z.array(cpomMillesimeSchema).optional(),
+  budgets: z.array(budgetCpomSchema).optional(),
   actesAdministratifs: z.array(acteAdministratifCpomSchema),
 });
 
@@ -76,7 +76,7 @@ export const descriptionCpomSchema = z.object({
 });
 
 export const financesCpomSchema = z.object({
-  cpomMillesimes: z.array(cpomMillesimeSchema),
+  budgets: z.array(budgetCpomSchema),
 });
 
 export const actesAdministratifsCpomSchema = z.object({
@@ -191,7 +191,7 @@ export const cpomSchema = descriptionCpomSchema
     }
   );
 
-export type CpomMillesimeFormValues = z.infer<typeof cpomMillesimeSchema>;
+export type BudgetCpomFormValues = z.infer<typeof budgetCpomSchema>;
 
 export type CpomStructureFormValues = z.infer<typeof cpomStructureSchema>;
 

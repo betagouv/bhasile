@@ -5,13 +5,13 @@ import prisma from "@/lib/prisma";
 import {
   CpomApiType,
   CpomDepartementApiType,
-  CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
 import { CpomColumn } from "@/types/ListColumn";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acteAdministratif.repository";
+import { createOrUpdateBudgets } from "../budgets/budget.repository";
 import { CPOM_ORDER_CTE_SQL, CPOM_ORDER_JOINS_SQL } from "./cpom.constants";
 import { buildCpomsOrderSql, buildCpomsWhereSql } from "./cpom.util";
 
@@ -66,7 +66,7 @@ export const findBySearch = async ({
     },
     include: {
       structures: true,
-      cpomMillesimes: true,
+      budgets: true,
       operateur: true,
       region: true,
       departements: {
@@ -124,7 +124,7 @@ export const findOne = async (id: number): Promise<Cpom> => {
           },
         },
       },
-      cpomMillesimes: true,
+      budgets: true,
       operateur: true,
       region: true,
       departements: {
@@ -186,7 +186,7 @@ export const createOrUpdateCpom = async (
 
     await createOrUpdateCpomStructures(tx, cpom.structures, cpomId);
 
-    await createOrUpdateCpomMillesimes(tx, cpom.cpomMillesimes, cpomId);
+    await createOrUpdateBudgets(tx, cpom.budgets, { cpomId });
 
     await createOrUpdateActesAdministratifs(tx, cpom.actesAdministratifs, {
       cpomId,
@@ -257,45 +257,6 @@ const createOrUpdateCpomStructures = async (
       dateEnd: structure.dateEnd,
     })),
   });
-};
-
-export const createOrUpdateCpomMillesimes = async (
-  tx: PrismaTransaction,
-  millesimes: CpomMillesimeApiType[] | undefined,
-  cpomId: number
-): Promise<void> => {
-  if (!millesimes || millesimes.length === 0) {
-    return;
-  }
-
-  // TODO: use upsert when type becomes mandatory
-  await Promise.all(
-    millesimes.map(async (millesime) => {
-      const existing = await tx.cpomMillesime.findFirst({
-        where: {
-          cpomId,
-          year: millesime.year,
-          type: millesime.type ?? null,
-        },
-      });
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, ...fields } = millesime;
-
-      if (existing) {
-        return tx.cpomMillesime.update({
-          where: { id: existing.id },
-          data: fields,
-        });
-      }
-      return tx.cpomMillesime.create({
-        data: {
-          cpomId,
-          ...fields,
-        },
-      });
-    })
-  );
 };
 
 export const deleteCpom = async (id: number): Promise<void> => {

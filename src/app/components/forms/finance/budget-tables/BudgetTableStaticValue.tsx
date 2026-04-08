@@ -4,14 +4,11 @@ import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { isInputDisabled } from "@/app/utils/budget.util";
 import { isNullOrUndefined } from "@/app/utils/common.util";
 import {
-  getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType,
+  getCpomStructureIndexAndBudgetIndexForAYearAndAType,
   getMillesimeIndexForAYear,
 } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import {
-  CpomMillesimeApiType,
-  CpomStructureApiType,
-} from "@/schemas/api/cpom.schema";
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
 export const BudgetTableStaticValue = ({
@@ -21,7 +18,6 @@ export const BudgetTableStaticValue = ({
   colored,
   budgets,
   cpomStructures,
-  cpomMillesimes,
   disabledYearsStart,
   enabledYears,
 }: Props) => {
@@ -37,29 +33,22 @@ export const BudgetTableStaticValue = ({
 
   if (budgets) {
     value =
-      budgets[getMillesimeIndexForAYear(budgets, year)]?.[
+      budgets[getMillesimeIndexForAYear(budgets, year, type)]?.[
         name as keyof BudgetApiType
       ];
   }
 
   if (cpomStructures) {
-    const { cpomStructureIndex, cpomMillesimeIndex } =
-      getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType(
+    const { cpomStructureIndex, budgetIndex } =
+      getCpomStructureIndexAndBudgetIndexForAYearAndAType(
         cpomStructures,
         year,
         type
       );
 
     value =
-      cpomStructures[cpomStructureIndex]?.cpom?.cpomMillesimes?.[
-        cpomMillesimeIndex
-      ]?.[name as keyof CpomMillesimeApiType];
-  }
-
-  if (cpomMillesimes) {
-    value =
-      cpomMillesimes[getMillesimeIndexForAYear(cpomMillesimes, year, type)]?.[
-        name as keyof CpomMillesimeApiType
+      cpomStructures[cpomStructureIndex]?.cpom?.budgets?.[budgetIndex]?.[
+        name as keyof BudgetApiType
       ];
   }
 
@@ -87,7 +76,6 @@ type Props = {
   colored?: boolean;
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];
-  cpomMillesimes?: CpomMillesimeApiType[];
   disabledYearsStart?: number;
   enabledYears?: number[];
 };

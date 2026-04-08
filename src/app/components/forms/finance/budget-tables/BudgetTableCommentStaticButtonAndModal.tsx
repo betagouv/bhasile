@@ -4,14 +4,11 @@ import { useMemo } from "react";
 
 import { EmptyCell } from "@/app/components/common/EmptyCell";
 import {
-  getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType,
+  getCpomStructureIndexAndBudgetIndexForAYearAndAType,
   getMillesimeIndexForAYear,
 } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import {
-  CpomMillesimeApiType,
-  CpomStructureApiType,
-} from "@/schemas/api/cpom.schema";
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
 export const BudgetTableCommentStaticButtonAndModal = ({
@@ -19,7 +16,6 @@ export const BudgetTableCommentStaticButtonAndModal = ({
   year,
   budgets,
   cpomStructures,
-  cpomMillesimes,
 }: Props) => {
   const modal = useMemo(
     () =>
@@ -34,23 +30,17 @@ export const BudgetTableCommentStaticButtonAndModal = ({
 
   if (budgets) {
     currentComment =
-      budgets?.[getMillesimeIndexForAYear(budgets, year)]?.commentaire;
+      budgets?.[getMillesimeIndexForAYear(budgets, year, type)]?.commentaire;
   }
   if (cpomStructures) {
-    const { cpomStructureIndex, cpomMillesimeIndex } =
-      getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType(
+    const { cpomStructureIndex, budgetIndex } =
+      getCpomStructureIndexAndBudgetIndexForAYearAndAType(
         cpomStructures,
         year,
         type
       );
     currentComment =
-      cpomStructures[cpomStructureIndex]?.cpom?.cpomMillesimes?.[
-        cpomMillesimeIndex
-      ]?.commentaire;
-  }
-  if (cpomMillesimes) {
-    currentComment =
-      cpomMillesimes?.[getMillesimeIndexForAYear(cpomMillesimes, year, type)]
+      cpomStructures[cpomStructureIndex]?.cpom?.budgets?.[budgetIndex]
         ?.commentaire;
   }
 
@@ -91,6 +81,5 @@ type Props = {
   type?: StructureType;
   year: number;
   cpomStructures?: CpomStructureApiType[];
-  cpomMillesimes?: CpomMillesimeApiType[];
   budgets?: BudgetApiType[];
 };

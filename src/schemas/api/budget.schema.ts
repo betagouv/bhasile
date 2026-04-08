@@ -1,10 +1,12 @@
 import z from "zod";
 
 import { zSafeYear } from "@/app/utils/zodCustomFields";
+import { StructureType } from "@/types/structure.type";
 
 export const budgetApiSchema = z.object({
   id: z.number().optional(),
   year: zSafeYear(),
+  cpomStructureType: z.nativeEnum(StructureType).optional(),
   ETP: z.number().nullish(),
   tauxEncadrement: z.number().nullish(),
   coutJournalier: z.number().nullish(),

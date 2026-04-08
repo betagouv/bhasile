@@ -7,10 +7,7 @@ import {
 } from "@/schemas/api/adresse.schema";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
-import {
-  CpomMillesimeApiType,
-  CpomStructureApiType,
-} from "@/schemas/api/cpom.schema";
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import {
   StructureAgentUpdateApiType,
@@ -287,8 +284,7 @@ export const getMillesimeIndexForAYear = (
   typologies?:
     | StructureTypologieApiType[]
     | StructureMillesimeApiType[]
-    | BudgetApiType[]
-    | CpomMillesimeApiType[],
+    | BudgetApiType[],
   year: number = CURRENT_YEAR,
   type?: StructureType
 ): number =>
@@ -296,31 +292,30 @@ export const getMillesimeIndexForAYear = (
     if (type) {
       return (
         typology.year === year &&
-        (typology as CpomMillesimeApiType).type === type
+        (typology as BudgetApiType).cpomStructureType === type
       );
     }
     return typology.year === year;
   }) ?? -1;
 
-export const getCpomStructureIndexAndCpomMillesimeIndexForAYearAndAType = (
+export const getCpomStructureIndexAndBudgetIndexForAYearAndAType = (
   cpomStructures: CpomStructureApiType[],
   year: number = CURRENT_YEAR,
   type?: StructureType
-): { cpomStructureIndex: number; cpomMillesimeIndex: number } => {
-  let cpomMillesimeIndex = -1;
+): { cpomStructureIndex: number; budgetIndex: number } => {
+  let budgetIndex = -1;
   const cpomStructureIndex = cpomStructures.findIndex((cpomStructure) => {
-    cpomMillesimeIndex =
-      cpomStructure.cpom?.cpomMillesimes?.findIndex(
-        (cpomMillesime) =>
-          cpomMillesime.year === year && cpomMillesime.type === type
+    budgetIndex =
+      cpomStructure.cpom?.budgets?.findIndex(
+        (budget) => budget.year === year && budget.cpomStructureType === type
       ) ?? -1;
-    if (cpomMillesimeIndex !== -1) {
+    if (budgetIndex !== -1) {
       return true;
     }
     return false;
   });
 
-  return { cpomStructureIndex, cpomMillesimeIndex };
+  return { cpomStructureIndex, budgetIndex };
 };
 
 export const getRealCreationYear = (structure: StructureApiType): number => {

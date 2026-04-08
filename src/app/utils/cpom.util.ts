@@ -1,20 +1,18 @@
 import { v4 as uuidv4 } from "uuid";
 
+import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
   CpomApiType,
   CpomDepartementApiType,
-  CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
-import {
-  CpomFormValues,
-  CpomMillesimeFormValues,
-} from "@/schemas/forms/base/cpom.schema";
+import { BudgetCpomFormValues } from "@/schemas/forms/base/cpom.schema";
+import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { CpomGranularity } from "@/types/cpom.type";
 import { StructureType } from "@/types/structure.type";
 
-import { getYearRange } from "./date.util";
+import { getBudgetsDefaultValues } from "./budget.util";
 
 export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
   const structureTypes = getCpomStructureTypes(cpom);
@@ -38,10 +36,7 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
         dateStart: structure.dateStart ?? undefined,
         dateEnd: structure.dateEnd ?? undefined,
       })) ?? [],
-    cpomMillesimes: getCpomMillesimesDefaultValues(
-      cpom?.cpomMillesimes || [],
-      structureTypes
-    ),
+    budgets: getCpomBudgetsDefaultValues(cpom?.budgets || [], structureTypes),
     actesAdministratifs: cpom?.actesAdministratifs?.length
       ? cpom?.actesAdministratifs.map((acteAdministratif) => ({
           ...acteAdministratif,
@@ -82,53 +77,17 @@ export const getStructureCpomDefaultValues = (
   }));
 };
 
-const getCpomMillesimesDefaultValues = (
-  cpomMillesimes: CpomMillesimeApiType[],
+const getCpomBudgetsDefaultValues = (
+  budgets: BudgetApiType[],
   structureTypes: StructureType[]
-): CpomMillesimeFormValues[] => {
-  const { years } = getYearRange();
-
+): BudgetCpomFormValues[] => {
   if (!structureTypes.length) {
     return [];
   }
 
   return structureTypes.flatMap((structureType) =>
-    Array(years.length)
-      .fill({})
-      .map((_, index) => ({
-        year: years[index],
-        type: structureType,
-      }))
-      .map((emptyCpomMillesime) => {
-        const cpomMillesime = cpomMillesimes.find(
-          (cpomMillesime) =>
-            cpomMillesime.year === emptyCpomMillesime.year &&
-            cpomMillesime.type === structureType
-        );
-        if (cpomMillesime) {
-          return {
-            ...cpomMillesime,
-            affectationReservesFondsDedies:
-              cpomMillesime.affectationReservesFondsDedies ?? undefined,
-            reserveInvestissement:
-              cpomMillesime.reserveInvestissement ?? undefined,
-            chargesNonReconductibles:
-              cpomMillesime.chargesNonReconductibles ?? undefined,
-            reserveCompensationDeficits:
-              cpomMillesime.reserveCompensationDeficits ?? undefined,
-            reserveCompensationBFR:
-              cpomMillesime.reserveCompensationBFR ?? undefined,
-            reserveCompensationAmortissements:
-              cpomMillesime.reserveCompensationAmortissements ?? undefined,
-            fondsDedies: cpomMillesime.fondsDedies ?? undefined,
-            reportANouveau: cpomMillesime.reportANouveau ?? undefined,
-            autre: cpomMillesime.autre ?? undefined,
-            commentaire: cpomMillesime.commentaire ?? undefined,
-          };
-        }
-        return emptyCpomMillesime;
-      })
-  );
+    getBudgetsDefaultValues(budgets, undefined, structureType)
+  ) as BudgetCpomFormValues[];
 };
 
 export const formatCpomName = (cpom: CpomApiType): string => {

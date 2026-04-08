@@ -5,7 +5,7 @@ import { Table } from "@/app/components/common/Table";
 import { computeCpomDates } from "@/app/utils/cpom.util";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
-import { CpomMillesimeFormValues } from "@/schemas/forms/base/cpom.schema";
+import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
@@ -15,7 +15,7 @@ import { getBudgetTableLines } from "./getBudgetTableLines";
 
 export const CpomTable = ({ type, showTitle }: Props) => {
   const { watch } = useFormContext();
-  const cpomMillesimes = watch("cpomMillesimes") as CpomMillesimeFormValues[];
+  const budgets = watch("budgets") as BudgetApiType[];
 
   const { cpom } = useCpomContext();
 
@@ -29,17 +29,17 @@ export const CpomTable = ({ type, showTitle }: Props) => {
 
   const isAutorisee = isStructureAutorisee(type);
 
-  const detailAffectationEnabledYears = cpomMillesimes
-    .filter((cpomMillesime) => cpomMillesime.type === type)
-    .filter((cpomMillesime) => {
+  const detailAffectationEnabledYears = budgets
+    .filter((budget) => budget.cpomStructureType === type)
+    .filter((budget) => {
       const totalValue = Number(
-        String(cpomMillesime?.affectationReservesFondsDedies)
+        String(budget?.affectationReservesFondsDedies)
           .replaceAll(" ", "")
           .replace(",", ".") || 0
       );
       return totalValue !== 0 && !isNaN(totalValue);
     })
-    .map((cpomMillesime) => cpomMillesime.year);
+    .map((budget) => budget.year);
 
   return (
     <div>
@@ -60,13 +60,13 @@ export const CpomTable = ({ type, showTitle }: Props) => {
             isAutorisee,
             detailAffectationEnabledYears
           )}
-          cpomMillesimes={cpomMillesimes}
+          budgets={budgets}
         />
         <BudgetTableCommentLine
           years={yearsInCpom}
           type={type}
           label="Commentaire"
-          cpomMillesimes={cpomMillesimes}
+          budgets={budgets}
         />
       </Table>
     </div>
