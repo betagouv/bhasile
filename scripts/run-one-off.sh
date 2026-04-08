@@ -29,7 +29,9 @@ if [ ! -f "${SCRIPT_PATH}" ]; then
 fi
 
 echo "🚀 Installation des dépendances"
-rm -f .yarnrc && yarn install --production=false
+if [ ! -d "node_modules" ]; then
+  yarn install --silent
+fi
 
 echo "🏃 Exécution du script ${SCRIPT_PATH}"
-npx tsx "${SCRIPT_PATH}" "$@"
+tsx "${SCRIPT_PATH}" "$@"
