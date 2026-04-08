@@ -70,7 +70,13 @@ export class StructureDetailsPage extends BasePage {
 
   async showContacts() {
     const block = this.getBlockByTitle("Description");
-    await block.getByRole("tab", { name: "Sites et contacts" }).click();
+    await this.clickContactsTab(block);
+  }
+
+  private async clickContactsTab(block: Locator) {
+    await block
+      .getByRole("tab", { name: /^(Sites et contacts|Contacts)$/ })
+      .click();
   }
 
   async expectPublic(publicValue: string) {
@@ -211,7 +217,7 @@ export class StructureDetailsPage extends BasePage {
     const antennes = overrides.antennes ?? data.antennes ?? [];
     const hasAntennes = antennes.length > 0;
     if (hasAntennes) {
-      await block.getByRole("tab", { name: "Sites et contacts" }).click();
+      await this.clickContactsTab(block);
       for (const antenne of antennes) {
         if (antenne.name) {
           await expect(block).toContainText(antenne.name);

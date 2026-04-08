@@ -9,9 +9,7 @@ import {
   getElapsedPercentage,
   getLastMonths,
   getMonthsBetween,
-  getYearDate,
   getYearFromDate,
-  parseFrDate,
 } from "@/app/utils/date.util";
 
 dayjs.locale("fr");
@@ -20,23 +18,44 @@ describe("date util", () => {
   describe("formatDate", () => {
     it("should return the string of a formatted date with a string input", () => {
       // GIVEN
-      const date = "12/12/2012";
+      const date = "01/01/2023";
 
       // WHEN
       const formattedDate = formatDate(date);
 
       // THEN
-      expect(formattedDate).toBe("12/12/2012");
+      expect(formattedDate).toBe("01/01/2023");
     });
     it("should return the string of a formatted date with a date input", () => {
       // GIVEN
-      const date = new Date("12/12/2012");
+      const date = new Date("01/01/2023");
 
       // WHEN
       const formattedDate = formatDate(date);
 
       // THEN
-      expect(formattedDate).toBe("12/12/2012");
+      expect(formattedDate).toBe("01/01/2023");
+    });
+    it("should return the string of a formatted date with an iso string input", () => {
+      // GIVEN
+      const date = "2023-01-01T12:00:00.000Z";
+
+      // WHEN
+      const formattedDate = formatDate(date);
+
+      // THEN
+      expect(formattedDate).toBe("01/01/2023");
+    });
+
+    it("should return the string of a formatted date with an iso string input at 00:00:00", () => {
+      // GIVEN
+      const date = "2023-01-01T00:00:00.000Z";
+
+      // WHEN
+      const formattedDate = formatDate(date);
+
+      // THEN
+      expect(formattedDate).toBe("01/01/2023");
     });
   });
   describe("formatDateToIsoString", () => {
@@ -70,7 +89,7 @@ describe("date util", () => {
       const result = formatDateToIsoString(date);
 
       // THEN
-      expect(result).toBe("2023-01-01T13:00:00.000Z");
+      expect(result).toBe("2023-01-01T12:00:00.000Z");
     });
 
     it("should return correct value for iso date", () => {
@@ -81,7 +100,7 @@ describe("date util", () => {
       const result = formatDateToIsoString(date);
 
       // THEN
-      expect(result).toBe("2023-01-01T13:00:00.000Z");
+      expect(result).toBe("2023-01-01T12:00:00.000Z");
     });
     it("should return correct value for iso datetime", () => {
       // GIVEN
@@ -91,7 +110,7 @@ describe("date util", () => {
       const result = formatDateToIsoString(date);
 
       // THEN
-      expect(result).toBe("2023-01-01T13:00:00.000Z");
+      expect(result).toBe("2023-01-01T12:00:00.000Z");
     });
   });
   describe("getMonthsBetween", () => {
@@ -251,60 +270,6 @@ describe("date util", () => {
     });
   });
 
-  describe("getYearDate", () => {
-    it("should return the date for January 1st at 13:00 for a given year as a string", () => {
-      // GIVEN
-      const year = "2020";
-
-      // WHEN
-      const result = getYearDate(year);
-
-      // THEN
-      expect(result).toMatch(/^(0?1\/0?1\/2020|2020-01-01|1\/1\/2020)$/);
-    });
-  });
-
-  describe("parseFrDate", () => {
-    it('should parse a valid "DD/MM/YYYY" string to a Date object', () => {
-      // GIVEN
-      const dateStr = "25/12/2022";
-
-      // WHEN
-      const result = parseFrDate(dateStr);
-
-      // THEN
-      expect(result).toBeInstanceOf(Date);
-      expect((result as Date).getFullYear()).toBe(2022);
-      expect((result as Date).getMonth()).toBe(11);
-      expect((result as Date).getDate()).toBe(25);
-    });
-
-    it("should return the input if string is not a valid date", () => {
-      // GIVEN
-      const input = "32/13/2022";
-
-      // WHEN
-      const result = parseFrDate(input);
-
-      // THEN
-      expect(result).toBe(input);
-    });
-
-    it("should parse leap year dates correctly", () => {
-      // GIVEN
-      const input = "29/02/2024";
-
-      // WHEN
-      const result = parseFrDate(input);
-
-      // THEN
-      expect(result).toBeInstanceOf(Date);
-      expect((result as Date).getFullYear()).toBe(2024);
-      expect((result as Date).getMonth()).toBe(1);
-      expect((result as Date).getDate()).toBe(29);
-    });
-  });
-
   describe("getYearFromDate", () => {
     describe("when input is a string with DD/MM/YYYY format", () => {
       it("should extract the year from a valid DD/MM/YYYY string", () => {
@@ -320,9 +285,20 @@ describe("date util", () => {
     });
 
     describe("when input is a string with other valid date formats", () => {
-      it("should parse ISO date string and return the year", () => {
+      it("should parse ISO date string and return the correct year", () => {
         // GIVEN
-        const date = "2024-03-15T10:30:00.000Z";
+        const date = "2024-01-01T12:00:00.000Z";
+
+        // WHEN
+        const result = getYearFromDate(date);
+
+        // THEN
+        expect(result).toBe(2024);
+      });
+
+      it("should parse ISO date string at 00:00:00 and return the correct year", () => {
+        // GIVEN
+        const date = "2024-01-01T00:00:00.000Z";
 
         // WHEN
         const result = getYearFromDate(date);

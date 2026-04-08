@@ -280,7 +280,6 @@ model FileUpload {
   evaluationId        Int?
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
 
   @@schema("public")
 }
