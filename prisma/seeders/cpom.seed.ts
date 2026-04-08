@@ -4,7 +4,9 @@ import {
   ActeAdministratifCategory,
   type PrismaClient,
 } from "@/generated/prisma/client";
+import { StructureType } from "@/types/structure.type";
 
+import { createFakeBudget } from "./budget.seed";
 import { createFakeFileUpload } from "./file-upload.seed";
 
 const buildStructureMillesimeYears = (start: number, end: number): number[] => {
@@ -242,9 +244,11 @@ export const createFakeCpoms = async (
 
     const structureTypes = [
       ...new Set(
-        cpomStructures.map((cpomStructure) => cpomStructure.structure.type)
+        cpomStructures.map(
+          (cpomStructure) => cpomStructure.structure.type as StructureType
+        )
       ),
-    ];
+    ].filter((type) => type !== null);
 
     for (const cpomStructure of cpomStructures) {
       const millesimeYears = buildStructureMillesimeYears(
@@ -272,87 +276,15 @@ export const createFakeCpoms = async (
       }
     }
 
-    // Create CPOM millesimes for each year of the CPOM and each structure type
-    const millesimeYears = [...Array(dureeAnnees)].map(
+    // Create budgets for each year of the CPOM and each structure type
+    const budgetYears = [...Array(dureeAnnees)].map(
       (_, index) => yearStart + index
     );
 
-    for (const millesimeYear of millesimeYears) {
+    for (const budgetYear of budgetYears) {
       for (const structureType of structureTypes) {
         await prisma.budget.create({
-          data: {
-            cpomId: cpom.id,
-            year: millesimeYear,
-            cpomStructureType: structureType,
-            dotationDemandee: faker.number.float({
-              min: 0,
-              max: 1000000,
-              fractionDigits: 2,
-            }),
-            dotationAccordee: faker.number.float({
-              min: 0,
-              max: 1000000,
-              fractionDigits: 2,
-            }),
-            totalProduitsProposes: faker.number.float({
-              min: -100000,
-              max: 500000,
-              fractionDigits: 2,
-            }),
-            repriseEtat: faker.number.float({
-              min: 0,
-              max: 50000,
-              fractionDigits: 2,
-            }),
-            affectationReservesFondsDedies: faker.number.float({
-              min: 0,
-              max: 300000,
-              fractionDigits: 2,
-            }),
-            reserveInvestissement: faker.number.float({
-              min: 0,
-              max: 200000,
-              fractionDigits: 2,
-            }),
-            chargesNonReconductibles: faker.number.float({
-              min: 0,
-              max: 100000,
-              fractionDigits: 2,
-            }),
-            reserveCompensationDeficits: faker.number.float({
-              min: 0,
-              max: 150000,
-              fractionDigits: 2,
-            }),
-            reserveCompensationBFR: faker.number.float({
-              min: 0,
-              max: 100000,
-              fractionDigits: 2,
-            }),
-            reserveCompensationAmortissements: faker.number.float({
-              min: 0,
-              max: 200000,
-              fractionDigits: 2,
-            }),
-            fondsDedies: faker.number.float({
-              min: 0,
-              max: 300000,
-              fractionDigits: 2,
-            }),
-            reportANouveau: faker.number.float({
-              min: 0,
-              max: 50000,
-              fractionDigits: 2,
-            }),
-            autre: faker.number.float({
-              min: 0,
-              max: 100000,
-              fractionDigits: 2,
-            }),
-            commentaire: faker.datatype.boolean({ probability: 0.3 })
-              ? faker.lorem.sentence()
-              : null,
-          },
+          data: createFakeBudget({ year: budgetYear, type: structureType }),
         });
       }
     }
