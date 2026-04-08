@@ -40,12 +40,12 @@ export default function Structures(): ReactElement {
       {fetchState === FetchState.LOADING && (
         <div className="flex items-center px-4">
           <Loader />
-          <span className="pl-2">Chargement des cpoms...</span>
+          <span className="pl-2">Chargement des CPOMs...</span>
         </div>
       )}
       {fetchState === FetchState.ERROR && (
         <div className="flex items-center px-4">
-          <span className="pl-2">Erreur lors de la récupération des cpoms</span>
+          <span className="pl-2">Erreur lors de la récupération des CPOMs</span>
         </div>
       )}
       {fetchState === FetchState.IDLE &&
