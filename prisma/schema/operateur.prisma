@@ -1,0 +1,34 @@
+model Operateur {
+  id                Int         @id @default(autoincrement())
+  name              String      @unique
+  structures        Structure[]
+  directionGenerale String?
+  siret             String?
+  siegeSocial       String?
+  cpoms             Cpom[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+view OperateursAggregates {
+  id                          Int
+  name                        String
+  directionGenerale           String?
+  siret                       String?
+  siegeSocial                 String?
+  nb_structures               Int
+  places_autorisees_structure Int?
+  pmr_structure               Int?
+  lgbt_structure              Int?
+  fvv_teh_structure           Int?
+  places_autorisees_adresse   Int?
+  qpv_adresse                 Int?
+  logement_social_adresse     Int?
+  created_at                  DateTime?
+  updated_at                  DateTime?
+
+  @@schema("reporting")
+}

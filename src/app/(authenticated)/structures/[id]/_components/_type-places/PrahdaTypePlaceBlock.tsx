@@ -19,7 +19,7 @@ export const PrahdaTypePlaceBlock = (): ReactElement => {
     >
       <InformationCard
         primaryInformation={
-          structure.structureTypologies?.[0].placesAutorisees || "N/A"
+          structure.structureTypologies?.[0]?.placesAutorisees || "N/A"
         }
         secondaryInformation="places autorisées"
       />

@@ -1,0 +1,79 @@
+model FormDefinition {
+  id              Int                  @id @default(autoincrement())
+  name            String
+  version         Int
+  slug            String               @unique
+  stepsDefinition FormStepDefinition[]
+
+  forms Form[]
+
+  @@schema("public")
+}
+
+model FormStepDefinition {
+  id               Int    @id @default(autoincrement())
+  formDefinitionId Int
+  label            String
+  slug             String
+
+  formDefinition FormDefinition @relation(fields: [formDefinitionId], references: [id])
+  formSteps      FormStep[]
+
+  @@unique([formDefinitionId, slug])
+  @@schema("public")
+}
+
+model Form {
+  id               Int     @id @default(autoincrement())
+  structureId      Int?
+  formDefinitionId Int
+  status           Boolean @default(false) // Lié au bouton "Finaliser"
+
+  structure      Structure?     @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  formDefinition FormDefinition @relation(fields: [formDefinitionId], references: [id])
+  formSteps      FormStep[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([structureId, formDefinitionId])
+  @@schema("public")
+}
+
+model FormStep {
+  id               Int        @id @default(autoincrement())
+  formId           Int
+  stepDefinitionId Int
+  status           StepStatus @default(NON_COMMENCE)
+  // TODO : ajouter le champ authorId en lien avec une table Auteur plus tard
+
+  form           Form               @relation(fields: [formId], references: [id], onDelete: Cascade)
+  stepDefinition FormStepDefinition @relation(fields: [stepDefinitionId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([formId, stepDefinitionId])
+  @@schema("public")
+}
+
+enum StepStatus {
+  NON_COMMENCE
+  COMMENCE
+  A_VERIFIER
+  FINALISE
+  VALIDE
+
+  @@schema("public")
+}
+
+model Campaign {
+  id          Int     @id @default(autoincrement())
+  structureId Int?
+  name        String
+  launched    Boolean @default(false)
+
+  structure Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@schema("public")
+}

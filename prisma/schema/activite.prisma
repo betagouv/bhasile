@@ -1,0 +1,19 @@
+model Activite {
+  id                       Int      @id @default(autoincrement())
+  dnaCode                  String?
+  dna                      Dna?     @relation(fields: [dnaCode], references: [code], onDelete: Cascade, onUpdate: Cascade)
+  date                     DateTime
+  placesAutorisees         Int?
+  desinsectisation         Int?
+  remiseEnEtat             Int?
+  sousOccupation           Int?
+  placesIndisponibles      Int?
+  placesOccupees           Int?
+  travaux                  Int?
+  placesVacantes           Int?
+  presencesInduesBPI       Int?
+  presencesInduesDeboutees Int?
+
+  @@unique([dnaCode, date])
+  @@schema("public")
+}
