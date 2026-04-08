@@ -4,6 +4,7 @@ import { useCpomContext } from "@/app/(authenticated)/cpoms/[id]/_context/CpomCl
 import { Table } from "@/app/components/common/Table";
 import { computeCpomDates } from "@/app/utils/cpom.util";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
+import { parseFrenchNumber } from "@/app/utils/number.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { StructureType } from "@/types/structure.type";
@@ -32,12 +33,10 @@ export const CpomTable = ({ type, showTitle }: Props) => {
   const detailAffectationEnabledYears = budgets
     .filter((budget) => budget.cpomStructureType === type)
     .filter((budget) => {
-      const totalValue = Number(
-        String(budget?.affectationReservesFondsDedies)
-          .replaceAll(" ", "")
-          .replace(",", ".") || 0
+      const totalValue = parseFrenchNumber(
+        budget?.affectationReservesFondsDedies
       );
-      return totalValue !== 0 && !isNaN(totalValue);
+      return totalValue !== 0 && totalValue !== null;
     })
     .map((budget) => budget.year);
 

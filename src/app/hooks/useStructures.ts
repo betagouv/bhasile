@@ -14,6 +14,8 @@ import { TypeBatiAndAdressesFormValues } from "@/schemas/forms/base/adresse.sche
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { DeepPartial } from "@/types/global";
 
+import { parseFrenchNumber } from "../utils/number.util";
+
 dayjs.extend(customParseFormat);
 
 export const useStructures = (): UseStructureResult => {
@@ -137,16 +139,10 @@ const transformAjoutFormStructureToApiStructure = async (
       })) || undefined,
     structureTypologies: values.typologies?.map((typologie) => ({
       ...typologie,
-      placesAutorisees: Number(
-        String(typologie.placesAutorisees).replace(",", ".").replaceAll(" ", "")
-      ),
-      pmr: Number(String(typologie.pmr).replace(",", ".").replaceAll(" ", "")),
-      lgbt: Number(
-        String(typologie.lgbt).replace(",", ".").replaceAll(" ", "")
-      ),
-      fvvTeh: Number(
-        String(typologie.fvvTeh).replace(",", ".").replaceAll(" ", "")
-      ),
+      placesAutorisees: parseFrenchNumber(typologie.placesAutorisees) ?? 0,
+      pmr: parseFrenchNumber(typologie.pmr) ?? 0,
+      lgbt: parseFrenchNumber(typologie.lgbt) ?? 0,
+      fvvTeh: parseFrenchNumber(typologie.fvvTeh) ?? 0,
     })),
     documentsFinanciers: values.documentsFinanciers,
   };
