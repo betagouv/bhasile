@@ -52,7 +52,7 @@ export const FinancesBlock = () => {
           cpomStructureTypes.length > 1 ? "mb-2" : "mb-6"
         )}
       >
-        Dans cette vue, l’ensemble des montants correspondent à la gestion
+        Dans cette vue, l’ensemble des montants correspond à la gestion
         budgétaire{" "}
         <strong>
           à l’échelle du CPOM en prenant en compte toutes les structures d’un

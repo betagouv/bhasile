@@ -29,7 +29,7 @@ export const CpomStaticTable = (): ReactElement => {
   return (
     <>
       <p>
-        Dans cette vue, l’ensemble des montants correspondent à la gestion
+        Dans cette vue, l’ensemble des montants correspond à la gestion
         budgétaire <strong>à l’échelle du CPOM</strong>. Aussi, le tableau des
         affectations reflète uniquement des flux annuels. Les chiffres ne sont
         en aucun cas une estimation du stock.
