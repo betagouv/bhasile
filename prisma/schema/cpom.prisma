@@ -1,0 +1,80 @@
+model Cpom {
+  id                  Int                 @id @default(autoincrement())
+  name                String?
+  structures          CpomStructure[]
+  region              Region?             @relation(fields: [regionId], references: [id])
+  regionId            Int?
+  departements        CpomDepartement[]
+  granularity         CpomGranularity     @default(REGIONALE)
+  cpomMillesimes      CpomMillesime[]
+  operateur           Operateur           @relation(fields: [operateurId], references: [id])
+  operateurId         Int
+  actesAdministratifs ActeAdministratif[]
+  userActions         UserAction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model CpomDepartement {
+  cpom          Cpom        @relation(fields: [cpomId], references: [id], onDelete: Cascade)
+  cpomId        Int
+  departement   Departement @relation(fields: [departementId], references: [id], onDelete: Cascade)
+  departementId Int
+
+  @@id([cpomId, departementId])
+  @@schema("public")
+}
+
+enum CpomGranularity {
+  DEPARTEMENTALE
+  INTERDEPARTEMENTALE
+  REGIONALE
+
+  @@schema("public")
+}
+
+model CpomStructure {
+  id          Int       @id @default(autoincrement())
+  cpomId      Int
+  structureId Int
+  dateStart   DateTime? // Date when the structure joined the CPOM (null = from the beginning of the CPOM)
+  dateEnd     DateTime? // Date when the structure left the CPOM (null = until the end of the CPOM)
+  cpom        Cpom      @relation(fields: [cpomId], references: [id], onDelete: Cascade)
+  structure   Structure @relation(fields: [structureId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([cpomId, structureId])
+  @@schema("public")
+}
+
+model CpomMillesime {
+  id                                Int     @id @default(autoincrement())
+  cpomId                            Int
+  cpom                              Cpom    @relation(fields: [cpomId], references: [id])
+  year                              Int     @default(0)
+  dotationDemandee                  Float?
+  dotationAccordee                  Float?
+  cumulResultatNet                  Float?
+  repriseEtat                       Float?
+  affectationReservesFondsDedies    Float?
+  reserveInvestissement             Float?
+  chargesNonReconductibles          Float?
+  reserveCompensationDeficits       Float?
+  reserveCompensationBFR            Float?
+  reserveCompensationAmortissements Float?
+  fondsDedies                       Float?
+  reportANouveau                    Float?
+  autre                             Float?
+  commentaire                       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([cpomId, year])
+  @@schema("public")
+}

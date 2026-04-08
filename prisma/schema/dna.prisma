@@ -1,0 +1,57 @@
+model Dna {
+  id                           Int                         @id @default(autoincrement())
+  code                         String                      @unique
+  description                  String?
+  activeInOfiiFileSince        DateTime? // date d'entrée dans le document Ofii
+  inactiveInOfiiFileSince      DateTime? // date de sortie du document Ofii
+  dnaStructures                DnaStructure[]
+  activites                    Activite[]
+  evenementsIndesirablesGraves EvenementIndesirableGrave[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model DnaStructure {
+  id          Int       @id @default(autoincrement())
+  dnaId       Int
+  dna         Dna       @relation(fields: [dnaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId Int
+  structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  startDate   DateTime? // Empty by default, set when a DNA changes its structure
+  endDate     DateTime? // Empty by default, set when a DNA changes its structure
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model Antenne {
+  id          Int       @id @default(autoincrement())
+  structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId Int
+  name        String?
+  adresse     String?
+  codePostal  String?
+  commune     String?
+  departement String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model Finess {
+  id          Int       @id @default(autoincrement())
+  structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId Int
+  code        String?   @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+
+  @@schema("public")
+}

@@ -43,7 +43,7 @@ export const TypePlaceBlock = (): ReactElement => {
         <div className="pr-4">
           <InformationCard
             primaryInformation={
-              structureTypologies?.[0].placesAutorisees || "N/A"
+              structureTypologies?.[0]?.placesAutorisees || "N/A"
             }
             secondaryInformation="places autorisées"
           />

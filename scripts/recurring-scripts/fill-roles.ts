@@ -79,7 +79,9 @@ const createRoles = async (row: RoleCsvRow, departementIds: number[]) => {
     select: { id: true },
   });
 
-  if (!pattern) return;
+  if (!pattern) {
+    return;
+  }
 
   // Si emailPattern, on connecte le pattern au rôle.
   await prisma.emailPattern.upsert({
