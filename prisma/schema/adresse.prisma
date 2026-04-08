@@ -1,0 +1,39 @@
+model Adresse {
+  id                Int                @id @default(autoincrement())
+  structure         Structure?         @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId       Int?
+  adresse           String?
+  codePostal        String?
+  commune           String?
+  repartition       Repartition?
+  adresseTypologies AdresseTypologie[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model AdresseTypologie {
+  id               Int     @id @default(autoincrement())
+  adresse          Adresse @relation(fields: [adresseId], references: [id], onDelete: Cascade)
+  adresseId        Int
+  placesAutorisees Int
+  year             Int
+  qpv              Int
+  logementSocial   Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([adresseId, year])
+  @@schema("public")
+}
+
+enum Repartition {
+  DIFFUS
+  COLLECTIF
+  MIXTE
+
+  @@schema("public")
+}

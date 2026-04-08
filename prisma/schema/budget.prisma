@@ -1,0 +1,34 @@
+model Budget {
+  id                                Int        @id @default(autoincrement())
+  structure                         Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId                       Int?
+  year                              Int        @default(0)
+  ETP                               Float?
+  tauxEncadrement                   Float?
+  coutJournalier                    Float?
+  dotationDemandee                  Float?
+  dotationAccordee                  Float?
+  totalProduitsProposes             Float?
+  totalProduits                     Float?
+  totalCharges                      Float?
+  totalChargesProposees             Float?
+  repriseEtat                       Float?
+  excedentRecupere                  Float?
+  excedentDeduit                    Float?
+  reserveInvestissement             Float?
+  chargesNonReconductibles          Float?
+  reserveCompensationDeficits       Float?
+  reserveCompensationBFR            Float?
+  reserveCompensationAmortissements Float?
+  fondsDedies                       Float?
+  affectationReservesFondsDedies    Float?
+  reportANouveau                    Float?
+  autre                             Float?
+  commentaire                       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([structureId, year])
+  @@schema("public")
+}

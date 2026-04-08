@@ -1,0 +1,23 @@
+
+model Departement {
+  id                   Int               @id @default(autoincrement())
+  numero               String            @unique
+  name                 String
+  structures           Structure[]
+  roleDepartements     RoleDepartement[]
+  regionAdministrative Region?           @relation(fields: [regionId], references: [id])
+  regionId             Int?
+  cpoms                CpomDepartement[]
+
+  @@schema("public")
+}
+
+model Region {
+  id           Int           @id @default(autoincrement())
+  name         String
+  code         String
+  departements Departement[]
+  cpoms        Cpom[]
+
+  @@schema("public")
+}

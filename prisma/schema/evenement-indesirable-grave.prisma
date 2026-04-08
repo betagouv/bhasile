@@ -1,0 +1,14 @@
+model EvenementIndesirableGrave {
+  id              Int      @id @default(autoincrement())
+  dnaCode         String?
+  dna             Dna?     @relation(fields: [dnaCode], references: [code], onDelete: Cascade, onUpdate: Cascade)
+  numeroDossier   String   @unique
+  evenementDate   DateTime
+  declarationDate DateTime
+  type            String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}

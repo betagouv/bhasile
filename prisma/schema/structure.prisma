@@ -1,0 +1,153 @@
+model Structure {
+  id                       Int                  @id @default(autoincrement())
+  codeBhasile              String               @unique
+  filiale                  String?
+  type                     StructureType?
+  adresseAdministrative    String?
+  codePostalAdministratif  String?
+  communeAdministrative    String?
+  departementAdministratif String?
+  latitude                 Decimal?
+  longitude                Decimal?
+  nom                      String?
+  debutConvention          DateTime?
+  finConvention            DateTime?
+  creationDate             DateTime?
+  date303                  DateTime?
+  lgbt                     Boolean?
+  fvvTeh                   Boolean?
+  public                   PublicType?
+  debutPeriodeAutorisation DateTime?
+  finPeriodeAutorisation   DateTime?
+  notes                    String?
+  nomOfii                  String?
+  directionTerritoriale    String?
+  dnaStructures            DnaStructure[]
+  controles                Controle[]
+  evaluations              Evaluation[]
+  adresses                 Adresse[]
+  contacts                 Contact[]
+  structureTypologies      StructureTypologie[]
+  actesAdministratifs      ActeAdministratif[]
+  documentsFinanciers      DocumentFinancier[]
+  cpomStructures           CpomStructure[]
+  structureMillesimes      StructureMillesime[]
+  budgets                  Budget[]
+  operateur                Operateur?           @relation(fields: [operateurId], references: [id])
+  operateurId              Int?
+  forms                    Form[]
+  campaigns                Campaign[]
+  antennes                 Antenne[]
+  finesses                 Finess[]
+  departement              Departement?         @relation(fields: [departementAdministratif], references: [numero])
+  userActions              UserAction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model StructureMillesime {
+  id               Int        @id @default(autoincrement())
+  structure        Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId      Int?
+  year             Int
+  cpom             Boolean    @default(false) // temporary field, while we are not sure of existing cpoms
+  operateurComment String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([structureId, year])
+  @@schema("public")
+}
+
+model StructureTypologie {
+  id                    Int        @id @default(autoincrement())
+  structure             Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId           Int?
+  year                  Int
+  placesAutorisees      Int?
+  pmr                   Int?
+  lgbt                  Int?
+  fvvTeh                Int?
+  placesACreer          Int?
+  placesAFermer         Int?
+  echeancePlacesACreer  DateTime?
+  echeancePlacesAFermer DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([structureId, year])
+  @@schema("public")
+}
+
+enum PublicType {
+  TOUT_PUBLIC
+  FAMILLE
+  PERSONNES_ISOLEES
+
+  @@schema("public")
+}
+
+enum StructureType {
+  CADA
+  HUDA
+  CPH
+  CAES
+  PRAHDA
+  NH
+
+  @@schema("public")
+}
+
+view ComparaisonPlaces {
+  dnaCode                  String?
+  total_places_autorisees  Int?
+  places_autorisees        Int?
+  total_places_activite    Int?
+  diff_places              Int?
+  diff_places_activite     Int?
+  pct_diff_places          Float?
+  pct_diff_places_activite Float?
+
+  @@schema("reporting")
+}
+
+view StructuresAggregates {
+  dnaCode                     String?
+  places_autorisees_structure Int?
+  pmr_structure               Int?
+  lgbt_structure              Int?
+  fvv_teh_structure           Int?
+  places_autorisees_adresse   Int?
+  qpv_adresse                 Int?
+  logement_social_adresse     Int?
+  date_adresse                DateTime?
+  nb_adresses                 Int?
+  date_structure              DateTime?
+  nb_places_activite          Int?
+  diff_places_adresse         Int?
+  pct_diff_places_adresse     Float?
+  diff_places_activite        Int?
+  pct_diff_places_activite    Float?
+  created_at                  DateTime?
+  updated_at                  DateTime?
+
+  @@schema("reporting")
+}
+
+view StructuresFilling {
+  dnaCode             String?
+  finalisation_status String?
+  operateur           String?
+  type                String?
+  public              String?
+  region              String?
+  created_at          DateTime?
+  updated_at          DateTime?
+
+  @@schema("reporting")
+}
