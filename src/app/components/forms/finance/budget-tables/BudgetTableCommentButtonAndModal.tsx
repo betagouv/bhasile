@@ -20,7 +20,7 @@ export const BudgetTableCommentButtonAndModal = ({
   const modal = useMemo(
     () =>
       createModal({
-        id: `${budgets ? "budgets" : "cpomStructures"}-${year}-${type}-commentaire-modal`,
+        id: `${budgets ? "budgets" : "cpomStructures"}-${year}-${type ?? ""}-commentaire-modal`,
         isOpenedByDefault: false,
       }),
     [budgets, year, type]

@@ -41,6 +41,6 @@ const getWhere = (ownerId: OwnerId, budget: BudgetApiType) => {
     };
   }
   throw new Error(
-    "Either structure ID or CPOM ID is required when creating a new budget"
+    "Either structure ID or CPOM ID + structure type is required when creating a new budget"
   );
 };

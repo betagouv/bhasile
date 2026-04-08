@@ -26,7 +26,7 @@ export default function CpomModificationFinance() {
   });
 
   const defaultValues = getCpomDefaultValues(cpom);
-  console.log(defaultValues);
+
   return (
     <>
       <ModificationTitle step="Finances" closeLink={`/cpoms/${cpom.id}`} />{" "}

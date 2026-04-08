@@ -120,8 +120,5 @@ export const getName = (
       );
     return `cpomStructures.${cpomStructureIndex}.cpom.budgets.${budgetIndex}.${name}`;
   }
-  if (budgets) {
-    return `budgets.${getMillesimeIndexForAYear(budgets, year, type)}.${name}`;
-  }
   return "";
 };

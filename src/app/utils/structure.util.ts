@@ -303,6 +303,9 @@ export const getCpomStructureIndexAndBudgetIndexForAYearAndAType = (
   year: number = CURRENT_YEAR,
   type?: StructureType
 ): { cpomStructureIndex: number; budgetIndex: number } => {
+  if (!type) {
+    return { cpomStructureIndex: -1, budgetIndex: -1 };
+  }
   let budgetIndex = -1;
   const cpomStructureIndex = cpomStructures.findIndex((cpomStructure) => {
     budgetIndex =
