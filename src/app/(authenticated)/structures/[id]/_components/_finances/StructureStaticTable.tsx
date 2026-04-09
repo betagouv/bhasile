@@ -7,7 +7,6 @@ import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-ta
 import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/BudgetTableLines";
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
 import { computeResultatNet } from "@/app/utils/budget.util";
-import { isNullOrUndefined } from "@/app/utils/common.util";
 import { getYearRange } from "@/app/utils/date.util";
 import {
   isStructureAutorisee,
