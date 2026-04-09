@@ -5,7 +5,7 @@ import { PrismaTransaction } from "@/types/prisma.type";
 export const createOrUpdateBudgets = async (
   tx: PrismaTransaction,
   budgets: BudgetApiType[] | undefined,
-  ownerId: EntityId
+  entityId: EntityId
 ): Promise<void> => {
   if (!budgets || budgets?.length === 0) {
     return;
@@ -14,10 +14,10 @@ export const createOrUpdateBudgets = async (
   await Promise.all(
     (budgets || []).map((budget) => {
       return tx.budget.upsert({
-        where: getWhere(ownerId, budget),
+        where: getWhere(entityId, budget),
         update: budget,
         create: {
-          ...ownerId,
+          ...entityId,
           ...budget,
         },
       });
@@ -25,16 +25,19 @@ export const createOrUpdateBudgets = async (
   );
 };
 
-const getWhere = (ownerId: EntityId, budget: BudgetApiType) => {
-  if (ownerId.structureId !== undefined) {
+const getWhere = (entityId: EntityId, budget: BudgetApiType) => {
+  if (entityId.structureId !== undefined) {
     return {
-      structureId_year: { structureId: ownerId.structureId, year: budget.year },
+      structureId_year: {
+        structureId: entityId.structureId,
+        year: budget.year,
+      },
     };
   }
-  if (ownerId.cpomId !== undefined && budget.cpomStructureType !== undefined) {
+  if (entityId.cpomId !== undefined && budget.cpomStructureType !== undefined) {
     return {
       cpomId_year_cpomStructureType: {
-        cpomId: ownerId.cpomId,
+        cpomId: entityId.cpomId,
         year: budget.year,
         cpomStructureType: budget.cpomStructureType,
       },
