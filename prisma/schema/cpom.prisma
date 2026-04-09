@@ -52,6 +52,7 @@ model CpomStructure {
   @@schema("public")
 }
 
+// TODO: to delete once the migration is done
 model CpomMillesime {
   id                                Int     @id @default(autoincrement())
   cpomId                            Int

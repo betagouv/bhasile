@@ -1,11 +1,11 @@
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { OwnerId } from "@/types/Owner.type";
+import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 export const createOrUpdateBudgets = async (
   tx: PrismaTransaction,
   budgets: BudgetApiType[] | undefined,
-  ownerId: OwnerId
+  ownerId: EntityId
 ): Promise<void> => {
   if (!budgets || budgets?.length === 0) {
     return;
@@ -25,7 +25,7 @@ export const createOrUpdateBudgets = async (
   );
 };
 
-const getWhere = (ownerId: OwnerId, budget: BudgetApiType) => {
+const getWhere = (ownerId: EntityId, budget: BudgetApiType) => {
   if (ownerId.structureId !== undefined) {
     return {
       structureId_year: { structureId: ownerId.structureId, year: budget.year },
@@ -41,6 +41,6 @@ const getWhere = (ownerId: OwnerId, budget: BudgetApiType) => {
     };
   }
   throw new Error(
-    "Either structure ID or CPOM ID + structure type is required when creating a new budget"
+    "Soit structureID, soit cpomId + cpomStructureType sont requis lors de la création d'un budget"
   );
 };

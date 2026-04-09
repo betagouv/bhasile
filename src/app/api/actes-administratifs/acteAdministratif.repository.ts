@@ -1,5 +1,5 @@
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
-import { OwnerId } from "@/types/Owner.type";
+import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { getKeysFromIncomingDocumentsOrActes } from "../files/file.service";
@@ -7,7 +7,7 @@ import { getKeysFromIncomingDocumentsOrActes } from "../files/file.service";
 export const createOrUpdateActesAdministratifs = async (
   tx: PrismaTransaction,
   actesAdministratifs: ActeAdministratifApiType[] | undefined,
-  ownerId: OwnerId
+  ownerId: EntityId
 ): Promise<void> => {
   if (!actesAdministratifs || actesAdministratifs.length === 0) {
     return;
@@ -117,7 +117,7 @@ const createOrUpdateActeAdministratif = async (
 const deleteActesAdministratifs = async (
   tx: PrismaTransaction,
   actesAdministratifsToKeep: ActeAdministratifApiType[],
-  ownerId: OwnerId
+  ownerId: EntityId
 ): Promise<number[]> => {
   const where =
     ownerId.structureId !== undefined
