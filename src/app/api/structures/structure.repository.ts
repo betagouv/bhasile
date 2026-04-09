@@ -530,7 +530,7 @@ const updateStructure = async (
 
 // Only used in e2e tests
 export const createMinimalStructure = async (
-  dnaCodes: { code: string; description: string }[],
+  dnaCodes: { code: string }[],
   structure: {
     codeBhasile: string;
     type: StructureType;
