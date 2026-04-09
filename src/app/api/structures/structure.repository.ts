@@ -321,7 +321,7 @@ export const findOne = async (id: number) => {
                   fileUploads: true,
                 },
               },
-              cpomMillesimes: {
+              budgets: {
                 orderBy: {
                   year: "desc",
                 },
@@ -418,7 +418,7 @@ const updateOne = async (
         await createOrUpdateDnaStructures(tx, dnaStructures, structure.id);
         await createOrUpdateFinesses(tx, finesses, structure.id);
         await createOrUpdateContacts(tx, contacts, structure.id);
-        await createOrUpdateBudgets(tx, budgets, structure.id);
+        await createOrUpdateBudgets(tx, budgets, { structureId: structure.id });
         await createOrUpdateStructureTypologies(
           tx,
           structureTypologies,

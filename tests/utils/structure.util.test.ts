@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 
 import {
-  getCpomStructureIndexAndCpomMillesimeIndexForAYear,
+  getCpomStructureIndexAndBudgetIndexForAYearAndAType,
   getCurrentCpomStructureDates,
   getLastVisitInMonths,
   getMillesimeIndexForAYear,
@@ -308,10 +308,11 @@ describe("structure util", () => {
                   category: "CONVENTION",
                 },
               ],
-              cpomMillesimes: [
+              budgets: [
                 {
                   id: 1,
                   year: 2025,
+                  cpomStructureType: StructureType.CADA,
                 },
               ],
               granularity: "DEPARTEMENTALE",
@@ -421,10 +422,11 @@ describe("structure util", () => {
                   category: "CONVENTION",
                 },
               ],
-              cpomMillesimes: [
+              budgets: [
                 {
                   id: 1,
                   year: 2024,
+                  cpomStructureType: StructureType.CADA,
                 },
               ],
               granularity: "DEPARTEMENTALE",
@@ -451,10 +453,11 @@ describe("structure util", () => {
                   category: "CONVENTION",
                 },
               ],
-              cpomMillesimes: [
+              budgets: [
                 {
                   id: 2,
                   year: 2025,
+                  cpomStructureType: StructureType.CADA,
                 },
               ],
               granularity: "DEPARTEMENTALE",
@@ -832,7 +835,7 @@ describe("structure util", () => {
     });
   });
 
-  describe("getCpomStructureIndexAndCpomMillesimeIndexForAYear", () => {
+  describe("getCpomStructureIndexAndBudgetIndexForAYearAndAType", () => {
     it("should return correct indices when finding matching structure and millesime", () => {
       // GIVEN
       const cpomStructures: CpomStructureApiType[] = [
@@ -858,10 +861,11 @@ describe("structure util", () => {
               },
             ],
             granularity: "DEPARTEMENTALE",
-            cpomMillesimes: [
+            budgets: [
               {
                 id: 1,
                 year: 2025,
+                cpomStructureType: StructureType.CADA,
               },
             ],
           },
@@ -869,13 +873,14 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+      const result = getCpomStructureIndexAndBudgetIndexForAYearAndAType(
         cpomStructures,
-        2025
+        2025,
+        StructureType.CADA
       );
 
       // THEN
-      expect(result).toEqual({ cpomStructureIndex: 0, cpomMillesimeIndex: 0 });
+      expect(result).toEqual({ cpomStructureIndex: 0, budgetIndex: 0 });
     });
 
     it("should return -1 for both indices when given empty array", () => {
@@ -883,15 +888,16 @@ describe("structure util", () => {
       const cpomStructures: CpomStructureApiType[] = [];
 
       // WHEN
-      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+      const result = getCpomStructureIndexAndBudgetIndexForAYearAndAType(
         cpomStructures,
-        2025
+        2025,
+        StructureType.CADA
       );
 
       // THEN
       expect(result).toEqual({
         cpomStructureIndex: -1,
-        cpomMillesimeIndex: -1,
+        budgetIndex: -1,
       });
     });
 
@@ -920,14 +926,16 @@ describe("structure util", () => {
               },
             ],
             granularity: "DEPARTEMENTALE",
-            cpomMillesimes: [
+            budgets: [
               {
                 id: 1,
                 year: 2024,
+                cpomStructureType: StructureType.CADA,
               },
               {
                 id: 2,
                 year: 2026,
+                cpomStructureType: StructureType.CADA,
               },
             ],
           },
@@ -935,15 +943,16 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+      const result = getCpomStructureIndexAndBudgetIndexForAYearAndAType(
         cpomStructures,
-        2025
+        2025,
+        StructureType.CADA
       );
 
       // THEN
       expect(result).toEqual({
         cpomStructureIndex: -1,
-        cpomMillesimeIndex: -1,
+        budgetIndex: -1,
       });
     });
 
@@ -972,10 +981,11 @@ describe("structure util", () => {
               },
             ],
             granularity: "DEPARTEMENTALE",
-            cpomMillesimes: [
+            budgets: [
               {
                 id: 1,
                 year: 2025,
+                cpomStructureType: StructureType.CADA,
               },
             ],
           },
@@ -1002,10 +1012,11 @@ describe("structure util", () => {
               },
             ],
             granularity: "DEPARTEMENTALE",
-            cpomMillesimes: [
+            budgets: [
               {
                 id: 2,
                 year: 2025,
+                cpomStructureType: StructureType.CADA,
               },
             ],
           },
@@ -1013,13 +1024,14 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+      const result = getCpomStructureIndexAndBudgetIndexForAYearAndAType(
         cpomStructures,
-        2025
+        2025,
+        StructureType.CADA
       );
 
       // THEN
-      expect(result).toEqual({ cpomStructureIndex: 0, cpomMillesimeIndex: 0 });
+      expect(result).toEqual({ cpomStructureIndex: 0, budgetIndex: 0 });
     });
 
     it("should return indices for later structure when first does not match", () => {
@@ -1047,10 +1059,11 @@ describe("structure util", () => {
               },
             ],
             granularity: "DEPARTEMENTALE",
-            cpomMillesimes: [
+            budgets: [
               {
                 id: 1,
                 year: 2024,
+                cpomStructureType: StructureType.CADA,
               },
             ],
           },
@@ -1077,10 +1090,11 @@ describe("structure util", () => {
               },
             ],
             granularity: "DEPARTEMENTALE",
-            cpomMillesimes: [
+            budgets: [
               {
                 id: 2,
                 year: 2025,
+                cpomStructureType: StructureType.CADA,
               },
             ],
           },
@@ -1088,16 +1102,17 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+      const result = getCpomStructureIndexAndBudgetIndexForAYearAndAType(
         cpomStructures,
-        2025
+        2025,
+        StructureType.CADA
       );
 
       // THEN
-      expect(result).toEqual({ cpomStructureIndex: 1, cpomMillesimeIndex: 0 });
+      expect(result).toEqual({ cpomStructureIndex: 1, budgetIndex: 0 });
     });
 
-    it("should skip structure undefined cpomMillesimes", () => {
+    it("should skip structure undefined budgets", () => {
       // GIVEN
       const cpomStructures: CpomStructureApiType[] = [
         {
@@ -1121,7 +1136,7 @@ describe("structure util", () => {
                 category: "CONVENTION",
               },
             ],
-            cpomMillesimes: undefined,
+            budgets: undefined,
             granularity: "DEPARTEMENTALE",
           },
         },
@@ -1147,10 +1162,11 @@ describe("structure util", () => {
               },
             ],
             granularity: "DEPARTEMENTALE",
-            cpomMillesimes: [
+            budgets: [
               {
                 id: 2,
                 year: 2025,
+                cpomStructureType: StructureType.CADA,
               },
             ],
           },
@@ -1158,13 +1174,14 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+      const result = getCpomStructureIndexAndBudgetIndexForAYearAndAType(
         cpomStructures,
-        2025
+        2025,
+        StructureType.CADA
       );
 
       // THEN
-      expect(result).toEqual({ cpomStructureIndex: 1, cpomMillesimeIndex: 0 });
+      expect(result).toEqual({ cpomStructureIndex: 1, budgetIndex: 0 });
     });
 
     it("should return correct millesime index when structure has multiple millesimes", () => {
@@ -1192,18 +1209,21 @@ describe("structure util", () => {
               },
             ],
             granularity: "DEPARTEMENTALE",
-            cpomMillesimes: [
+            budgets: [
               {
                 id: 1,
                 year: 2024,
+                cpomStructureType: StructureType.CADA,
               },
               {
                 id: 2,
                 year: 2025,
+                cpomStructureType: StructureType.CADA,
               },
               {
                 id: 3,
                 year: 2026,
+                cpomStructureType: StructureType.CADA,
               },
             ],
           },
@@ -1211,13 +1231,14 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result = getCpomStructureIndexAndCpomMillesimeIndexForAYear(
+      const result = getCpomStructureIndexAndBudgetIndexForAYearAndAType(
         cpomStructures,
-        2025
+        2025,
+        StructureType.CADA
       );
 
       // THEN
-      expect(result).toEqual({ cpomStructureIndex: 0, cpomMillesimeIndex: 1 });
+      expect(result).toEqual({ cpomStructureIndex: 0, budgetIndex: 1 });
     });
 
     it("should use CURRENT_YEAR as default when no year is provided", () => {
@@ -1245,10 +1266,11 @@ describe("structure util", () => {
               },
             ],
             granularity: "DEPARTEMENTALE",
-            cpomMillesimes: [
+            budgets: [
               {
                 id: 1,
                 year: 2025,
+                cpomStructureType: StructureType.CADA,
               },
             ],
           },
@@ -1256,11 +1278,14 @@ describe("structure util", () => {
       ];
 
       // WHEN
-      const result =
-        getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures);
+      const result = getCpomStructureIndexAndBudgetIndexForAYearAndAType(
+        cpomStructures,
+        2025,
+        StructureType.CADA
+      );
 
       // THEN
-      expect(result).toEqual({ cpomStructureIndex: 0, cpomMillesimeIndex: 0 });
+      expect(result).toEqual({ cpomStructureIndex: 0, budgetIndex: 0 });
     });
   });
 });

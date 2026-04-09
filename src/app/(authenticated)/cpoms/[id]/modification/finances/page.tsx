@@ -1,6 +1,6 @@
 "use client";
 
-import { CpomTable } from "@/app/components/forms/finance/budget-tables/CpomTable";
+import { CpomTables } from "@/app/components/forms/finance/budget-tables/CpomTables";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
@@ -40,15 +40,9 @@ export default function CpomModificationFinance() {
           FooterButtonType.CANCEL,
           FooterButtonType.SUBMIT,
         ]}
-        className="border-2 border-solid border-(--text-title-blue-france) gap-4"
+        className="border-2 border-solid border-(--text-title-blue-france) gap-10"
       >
-        <p className="mb-0 max-w-4xl">
-          Veuillez renseigner l’historique des données budgétaires{" "}
-          <strong>à l’échelle de l’ensemble du CPOM</strong>. Aussi, le tableau
-          des affectations reflète uniquement des flux annuels. Les montants
-          saisis ne doivent en aucun cas être une estimation du stock.
-        </p>
-        <CpomTable />
+        <CpomTables />
         {saveState === FetchState.ERROR && (
           <SubmitError cpomId={cpom.id} backendError={backendError} />
         )}

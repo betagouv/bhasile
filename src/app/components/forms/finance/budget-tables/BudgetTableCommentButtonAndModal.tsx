@@ -6,26 +6,24 @@ import { useFormContext } from "react-hook-form";
 
 import { getName, isInputDisabled } from "@/app/utils/budget.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import {
-  CpomMillesimeApiType,
-  CpomStructureApiType,
-} from "@/schemas/api/cpom.schema";
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { StructureType } from "@/types/structure.type";
 
 export const BudgetTableCommentButtonAndModal = ({
+  type,
   year,
   disabledYearsStart,
   enabledYears,
   cpomStructures,
-  cpomMillesimes,
   budgets,
 }: Props) => {
   const modal = useMemo(
     () =>
       createModal({
-        id: `${budgets ? "budgets" : "cpomStructures"}-${year}-commentaire-modal`,
+        id: `${budgets ? "budgets" : "cpomStructures"}-${year}-${type ?? "default"}-commentaire-modal`,
         isOpenedByDefault: false,
       }),
-    [budgets, year]
+    [budgets, year, type]
   );
 
   const parentFormContext = useFormContext();
@@ -35,12 +33,14 @@ export const BudgetTableCommentButtonAndModal = ({
   const inputModalRef = useRef<HTMLTextAreaElement>(null);
 
   const isAboutCpom = useMemo(() => {
-    return cpomStructures || cpomMillesimes;
-  }, [cpomStructures, cpomMillesimes]);
+    return (
+      cpomStructures || budgets?.some((budget) => budget.cpomStructureType)
+    );
+  }, [cpomStructures, budgets]);
 
   const commentPath = useMemo(
-    () => getName("commentaire", year, budgets, cpomStructures, cpomMillesimes),
-    [year, budgets, cpomStructures, cpomMillesimes]
+    () => getName("commentaire", year, type, budgets, cpomStructures),
+    [year, type, budgets, cpomStructures]
   );
 
   const currentComment = watch(commentPath);
@@ -49,9 +49,9 @@ export const BudgetTableCommentButtonAndModal = ({
     const commentPath = getName(
       "commentaire",
       year,
+      type,
       budgets,
-      cpomStructures,
-      cpomMillesimes
+      cpomStructures
     );
     if (inputModalRef.current) {
       inputModalRef.current.value = watch(commentPath) || "";
@@ -81,6 +81,7 @@ export const BudgetTableCommentButtonAndModal = ({
         size="small"
         disabled={isInputDisabled(
           year,
+          type,
           disabledYearsStart,
           enabledYears,
           cpomStructures
@@ -130,10 +131,10 @@ export const BudgetTableCommentButtonAndModal = ({
 };
 
 type Props = {
+  type?: StructureType;
   year: number;
   disabledYearsStart?: number;
   enabledYears?: number[];
   cpomStructures?: CpomStructureApiType[];
-  cpomMillesimes?: CpomMillesimeApiType[];
   budgets?: BudgetApiType[];
 };

@@ -3,6 +3,7 @@ import { useForm, useFormContext } from "react-hook-form";
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { Table } from "@/app/components/common/Table";
 import { getYearRange } from "@/app/utils/date.util";
+import { parseFrenchNumber } from "@/app/utils/number.util";
 import {
   getRealCreationYear,
   isStructureAutorisee,
@@ -12,7 +13,7 @@ import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
 import { BudgetTableLines } from "./BudgetTableLines";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
-import { getStructureTableLines } from "./getStructureTableLines";
+import { getBudgetTableLines } from "./getBudgetTableLines";
 
 export const StructureTable = ({ canEdit = true }: Props) => {
   const parentFormContext = useFormContext();
@@ -54,12 +55,10 @@ export const StructureTable = ({ canEdit = true }: Props) => {
 
   const detailAffectationEnabledYears = budgets
     .filter((budget) => {
-      const totalValue = Number(
-        String(budget?.affectationReservesFondsDedies)
-          .replaceAll(" ", "")
-          .replace(",", ".") || 0
+      const totalValue = parseFrenchNumber(
+        budget?.affectationReservesFondsDedies
       );
-      return totalValue !== 0 && !isNaN(totalValue);
+      return totalValue !== 0 && totalValue !== null;
     })
     .map((budget) => budget.year);
 
@@ -71,10 +70,7 @@ export const StructureTable = ({ canEdit = true }: Props) => {
       enableBorders
     >
       <BudgetTableLines
-        lines={getStructureTableLines(
-          isAutorisee,
-          detailAffectationEnabledYears
-        )}
+        lines={getBudgetTableLines(isAutorisee, detailAffectationEnabledYears)}
         budgets={budgets}
         canEdit={canEdit}
         years={yearsToDisplay}

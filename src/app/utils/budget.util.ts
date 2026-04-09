@@ -1,32 +1,41 @@
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import {
-  CpomMillesimeApiType,
-  CpomStructureApiType,
-} from "@/schemas/api/cpom.schema";
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { anyBudgetFormValues } from "@/schemas/forms/base/budget.schema";
+import { StructureType } from "@/types/structure.type";
 
+import { isNullOrUndefined } from "./common.util";
 import { getYearRange } from "./date.util";
 import {
-  getCpomStructureIndexAndCpomMillesimeIndexForAYear,
+  getCpomStructureIndexAndBudgetIndexForAYearAndAType,
   getMillesimeIndexForAYear,
 } from "./structure.util";
 
 export const getBudgetsDefaultValues = (
   structureBudgets: BudgetApiType[],
-  structureCreationYear: number
+  structureCreationYear?: number,
+  type?: StructureType
 ): anyBudgetFormValues => {
   const { years } = getYearRange();
-  const yearsToDisplay = years.filter((year) => year >= structureCreationYear);
+  const yearsToDisplay = structureCreationYear
+    ? years.filter((year) => year >= structureCreationYear)
+    : years;
 
   const budgets = Array(yearsToDisplay.length)
     .fill({})
     .map((_, index) => ({
-      year: years[index],
+      year: yearsToDisplay[index],
+      cpomStructureType: type,
     }))
     .map((emptyBudget) => {
-      const budget = structureBudgets.find(
-        (budget) => budget.year === emptyBudget.year
-      );
+      const budget = structureBudgets.find((budget) => {
+        if (type) {
+          return (
+            budget.year === emptyBudget.year &&
+            budget.cpomStructureType === type
+          );
+        }
+        return budget.year === emptyBudget.year;
+      });
       if (budget) {
         return {
           ...budget,
@@ -68,14 +77,19 @@ export const getBudgetsDefaultValues = (
 
 export const isInputDisabled = (
   year: number,
+  type?: StructureType,
   disabledYearsStart?: number,
   enabledYears?: number[],
   cpomStructures?: CpomStructureApiType[]
 ): boolean => {
   if (cpomStructures) {
-    const { cpomStructureIndex, cpomMillesimeIndex } =
-      getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
-    if (cpomStructureIndex === -1 || cpomMillesimeIndex === -1) {
+    const { cpomStructureIndex, budgetIndex } =
+      getCpomStructureIndexAndBudgetIndexForAYearAndAType(
+        cpomStructures,
+        year,
+        type
+      );
+    if (cpomStructureIndex === -1 || budgetIndex === -1) {
       return true;
     }
   }
@@ -91,20 +105,31 @@ export const isInputDisabled = (
 export const getName = (
   name: string,
   year: number,
+  type?: StructureType,
   budgets?: BudgetApiType[],
-  cpomStructures?: CpomStructureApiType[],
-  cpomMillesimes?: CpomMillesimeApiType[]
+  cpomStructures?: CpomStructureApiType[]
 ): string => {
-  if (cpomMillesimes) {
-    return `cpomMillesimes.${getMillesimeIndexForAYear(cpomMillesimes, year)}.${name}`;
+  if (budgets) {
+    return `budgets.${getMillesimeIndexForAYear(budgets, year, type)}.${name}`;
   }
   if (cpomStructures) {
-    const { cpomStructureIndex, cpomMillesimeIndex } =
-      getCpomStructureIndexAndCpomMillesimeIndexForAYear(cpomStructures, year);
-    return `cpomStructures.${cpomStructureIndex}.cpom.cpomMillesimes.${cpomMillesimeIndex}.${name}`;
-  }
-  if (budgets) {
-    return `budgets.${getMillesimeIndexForAYear(budgets, year)}.${name}`;
+    const { cpomStructureIndex, budgetIndex } =
+      getCpomStructureIndexAndBudgetIndexForAYearAndAType(
+        cpomStructures,
+        year,
+        type
+      );
+    return `cpomStructures.${cpomStructureIndex}.cpom.budgets.${budgetIndex}.${name}`;
   }
   return "";
+};
+
+export const computeResultatNet = (
+  totalProduits: number | null | undefined,
+  totalCharges: number | null | undefined
+): number | undefined => {
+  if (isNullOrUndefined(totalCharges) || isNullOrUndefined(totalProduits)) {
+    return undefined;
+  }
+  return Number(totalProduits) - Number(totalCharges);
 };

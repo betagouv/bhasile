@@ -10,16 +10,21 @@ import {
 } from "@/app/utils/zodCustomFields";
 import { cpomDepartementApiSchema } from "@/schemas/api/cpom.schema";
 import { regionApiSchema } from "@/schemas/api/region.schema";
+import { StructureType } from "@/types/structure.type";
 
 import { acteAdministratifCpomSchema } from "./acteAdministratif.schema";
 import { operateurSchema } from "./operateur.schema";
 
-const cpomMillesimeSchema = z.object({
+const budgetCpomSchema = z.object({
   id: zId(),
   year: zSafeYear(),
+  cpomStructureType: z.nativeEnum(StructureType),
   dotationDemandee: zSafePositiveDecimalsNullish(),
   dotationAccordee: zSafePositiveDecimalsNullish(),
-  cumulResultatNet: zSafeDecimalsNullish(),
+  totalProduitsProposes: zSafePositiveDecimalsNullish(),
+  totalProduits: zSafePositiveDecimalsNullish(),
+  totalChargesProposees: zSafePositiveDecimalsNullish(),
+  totalCharges: zSafePositiveDecimalsNullish(),
   repriseEtat: zSafeDecimalsNullish(),
   affectationReservesFondsDedies: zSafeDecimalsNullish(),
   reserveInvestissement: zSafeDecimalsNullish(),
@@ -27,9 +32,11 @@ const cpomMillesimeSchema = z.object({
   reserveCompensationDeficits: zSafeDecimalsNullish(),
   reserveCompensationBFR: zSafeDecimalsNullish(),
   reserveCompensationAmortissements: zSafeDecimalsNullish(),
-  fondsDedies: zSafeDecimalsNullish(),
   reportANouveau: zSafeDecimalsNullish(),
   autre: zSafeDecimalsNullish(),
+  excedentRecupere: zSafePositiveDecimalsNullish(),
+  excedentDeduit: zSafePositiveDecimalsNullish(),
+  fondsDedies: zSafePositiveDecimalsNullish(),
   commentaire: z.string().nullish(),
 });
 
@@ -45,7 +52,7 @@ const baseCpomSchema = z.object({
   granularity: z
     .enum(["DEPARTEMENTALE", "INTERDEPARTEMENTALE", "REGIONALE"])
     .optional(),
-  cpomMillesimes: z.array(cpomMillesimeSchema).optional(),
+  budgets: z.array(budgetCpomSchema).optional(),
   actesAdministratifs: z.array(acteAdministratifCpomSchema),
 });
 
@@ -69,7 +76,7 @@ export const descriptionCpomSchema = z.object({
 });
 
 export const financesCpomSchema = z.object({
-  cpomMillesimes: z.array(cpomMillesimeSchema),
+  budgets: z.array(budgetCpomSchema),
 });
 
 export const actesAdministratifsCpomSchema = z.object({
@@ -184,7 +191,7 @@ export const cpomSchema = descriptionCpomSchema
     }
   );
 
-export type CpomMillesimeFormValues = z.infer<typeof cpomMillesimeSchema>;
+export type BudgetCpomFormValues = z.infer<typeof budgetCpomSchema>;
 
 export type CpomStructureFormValues = z.infer<typeof cpomStructureSchema>;
 

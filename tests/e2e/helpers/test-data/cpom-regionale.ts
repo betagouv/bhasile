@@ -1,3 +1,5 @@
+import { StructureType } from "@/types/structure.type";
+
 import { TestCpomAjoutData, TestCpomFinanceData } from "./cpom-types";
 
 /**
@@ -31,20 +33,25 @@ export const cpomRegionale: {
     structureIds: "all",
   },
   financeData: {
-    2024: {
-      dotationDemandee: 200000,
-      dotationAccordee: 190000,
-      commentaire: "Régionale 2024",
+    [StructureType.CADA]: {
+      2024: {
+        dotationDemandee: 200000,
+        dotationAccordee: 190000,
+      },
+      2025: {
+        dotationDemandee: 210000,
+        dotationAccordee: 200000,
+      },
     },
-    2025: {
-      dotationDemandee: 210000,
-      dotationAccordee: 200000,
-      commentaire: "Régionale 2025",
-    },
-    2026: {
-      dotationDemandee: 220000,
-      dotationAccordee: 210000,
-      commentaire: "Régionale 2026",
+    [StructureType.CAES]: {
+      2024: {
+        dotationDemandee: 200000,
+        dotationAccordee: 190000,
+      },
+      2025: {
+        dotationDemandee: 210000,
+        dotationAccordee: 200000,
+      },
     },
   },
 };

@@ -176,12 +176,6 @@ describe("number util", () => {
       expect(parseFrenchNumber(undefined as unknown as string)).toBe(null);
     });
 
-    it("should return null for non-string types", () => {
-      expect(parseFrenchNumber(123 as unknown as string)).toBe(null);
-      expect(parseFrenchNumber({} as unknown as string)).toBe(null);
-      expect(parseFrenchNumber([] as unknown as string)).toBe(null);
-    });
-
     it("should handle edge cases", () => {
       expect(parseFrenchNumber("0")).toBe(0);
       expect(parseFrenchNumber("0,0")).toBe(0);

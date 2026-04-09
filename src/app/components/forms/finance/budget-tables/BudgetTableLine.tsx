@@ -2,22 +2,20 @@ import { ReactNode } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import {
-  CpomMillesimeApiType,
-  CpomStructureApiType,
-} from "@/schemas/api/cpom.schema";
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableLineInput } from "./BudgetTableLineInput";
 import { BudgetTableStaticValue } from "./BudgetTableStaticValue";
 
 export const BudgetTableLine = ({
+  type,
   name,
   label,
   subLabel,
   colored,
   budgets,
   cpomStructures,
-  cpomMillesimes,
   years,
   disabledYearsStart,
   enabledYears,
@@ -29,7 +27,7 @@ export const BudgetTableLine = ({
 
   const { control } = parentFormContext || localForm;
 
-  if (!budgets && !cpomStructures && !cpomMillesimes) {
+  if (!budgets && !cpomStructures) {
     return null;
   }
 
@@ -50,9 +48,9 @@ export const BudgetTableLine = ({
                 control={control}
                 budgets={budgets}
                 cpomStructures={cpomStructures}
-                cpomMillesimes={cpomMillesimes}
                 disabledYearsStart={disabledYearsStart}
                 enabledYears={enabledYears}
+                type={type}
               />
             ) : (
               <BudgetTableStaticValue
@@ -61,9 +59,9 @@ export const BudgetTableLine = ({
                 colored={colored}
                 budgets={budgets}
                 cpomStructures={cpomStructures}
-                cpomMillesimes={cpomMillesimes}
                 disabledYearsStart={disabledYearsStart}
                 enabledYears={enabledYears}
+                type={type}
               />
             )}
           </span>
@@ -74,13 +72,13 @@ export const BudgetTableLine = ({
 };
 
 type Props = {
+  type?: StructureType;
   name: string;
   label: string | ReactNode;
   subLabel?: string;
   colored?: boolean;
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];
-  cpomMillesimes?: CpomMillesimeApiType[];
   years: number[];
   disabledYearsStart?: number;
   enabledYears?: number[];

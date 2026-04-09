@@ -1,8 +1,10 @@
+import { StructureType } from "@/types/structure.type";
+
 import { TestCpomAjoutData, TestCpomFinanceData } from "./cpom-types";
 
 /**
  * Valid interdépartementale CPOM test case.
- * No avenant. Different finance fields (cumulResultatNet, repriseEtat, affectationReservesFondsDedies).
+ * No avenant. Different finance fields (repriseEtat, affectationReservesFondsDedies).
  * Requires at least one structure (e.g. C1234 from cada1) to be seeded.
  * Departements: left to form default (all departements of region) or we could select 75, 92.
  */
@@ -32,20 +34,16 @@ export const cpomInterdepartementale: {
     structureIds: "all",
   },
   financeData: {
-    2024: {
-      cumulResultatNet: 5000,
-      repriseEtat: 2000,
-      affectationReservesFondsDedies: 1000,
+    [StructureType.CADA]: {
+      2024: {
+        repriseEtat: 2000,
+        affectationReservesFondsDedies: 1000,
+      },
     },
-    2025: {
-      cumulResultatNet: 3000,
-      repriseEtat: 1500,
-      affectationReservesFondsDedies: 500,
-    },
-    2026: {
-      cumulResultatNet: 2500,
-      repriseEtat: 1000,
-      affectationReservesFondsDedies: 300,
+    [StructureType.CAES]: {
+      2024: {
+        repriseEtat: 2000,
+      },
     },
   },
 };

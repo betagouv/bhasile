@@ -15,7 +15,7 @@ import {
   budgetSubventionneeNotOpenSchema,
   budgetSubventionneeOpenSchema,
 } from "@/schemas/forms/base/budget.schema";
-import { cpomStructureSchema } from "@/schemas/forms/base/cpomStructure.schema";
+import { cpomStructureSchema } from "@/schemas/forms/base/cpom.schema";
 
 vi.mock("@/constants", async () => {
   const actual = await vi.importActual("@/constants");

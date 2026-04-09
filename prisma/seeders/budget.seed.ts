@@ -33,6 +33,7 @@ export const createFakeBudget = ({
 
   return {
     year,
+    cpomStructureType: type,
     ETP: faker.number.int({ min: 1, max: 30 }),
     tauxEncadrement: faker.number.float({ min: 1, max: 10, fractionDigits: 2 }),
     coutJournalier: faker.number.int({ min: 1, max: 30 }),

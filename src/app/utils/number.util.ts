@@ -34,13 +34,15 @@ export const formatCurrency = (
  * @param value - The formatted string to parse
  * @returns The parsed number or null if invalid
  */
-export const parseFrenchNumber = (value: string): number | null => {
-  if (!value || typeof value !== "string") {
+export const parseFrenchNumber = (
+  value: string | number | null | undefined
+): number | null => {
+  if (value === null || value === undefined) {
     return null;
   }
 
   // Remove currency symbols and all types of spaces (including narrow non-breaking space \u202f)
-  let cleaned = value.replace(/[€\s\u202f\u00a0]/g, "");
+  let cleaned = String(value).replace(/[€\s\u202f\u00a0]/g, "");
 
   // Handle French format (comma as decimal separator, space as thousands separator)
   if (cleaned.includes(",")) {

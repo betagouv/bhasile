@@ -1,23 +1,19 @@
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { getKeysFromIncomingDocumentsOrActes } from "../files/file.service";
 
-type DocumentFinancierOwnerId = {
-  structureId?: number;
-  cpomId?: number;
-};
-
 export const createOrUpdateDocumentsFinanciers = async (
   tx: PrismaTransaction,
   documentsFinanciers: DocumentFinancierApiType[] | undefined,
-  ownerId: DocumentFinancierOwnerId
+  entityId: EntityId
 ): Promise<void> => {
   if (!documentsFinanciers || documentsFinanciers.length === 0) {
     return;
   }
 
-  await deleteDocumentsFinanciers(tx, documentsFinanciers, ownerId);
+  await deleteDocumentsFinanciers(tx, documentsFinanciers, entityId);
 
   for (const documentFinancier of documentsFinanciers) {
     const key = documentFinancier.fileUploads?.[0]?.key;
@@ -34,7 +30,7 @@ export const createOrUpdateDocumentsFinanciers = async (
       await tx.documentFinancier.update({
         where: { id: existingFileUpload.documentFinancierId },
         data: {
-          ...ownerId,
+          ...entityId,
           category: documentFinancier.category,
           year: documentFinancier.year,
           name: documentFinancier.name,
@@ -51,7 +47,7 @@ export const createOrUpdateDocumentsFinanciers = async (
     } else {
       await tx.documentFinancier.create({
         data: {
-          ...ownerId,
+          ...entityId,
           category: documentFinancier.category,
           year: documentFinancier.year,
           name: documentFinancier.name,
@@ -72,14 +68,14 @@ export const createOrUpdateDocumentsFinanciers = async (
 const deleteDocumentsFinanciers = async (
   tx: PrismaTransaction,
   documentsFinanciersToKeep: DocumentFinancierApiType[],
-  ownerId: DocumentFinancierOwnerId
+  entityId: EntityId
 ): Promise<void> => {
   const where =
-    ownerId.structureId !== undefined
-      ? { structureId: ownerId.structureId }
-      : { cpomId: ownerId.cpomId };
+    entityId.structureId !== undefined
+      ? { structureId: entityId.structureId }
+      : { cpomId: entityId.cpomId };
 
-  if (ownerId.structureId === undefined && ownerId.cpomId === undefined) {
+  if (entityId.structureId === undefined && entityId.cpomId === undefined) {
     return;
   }
 

@@ -2,28 +2,26 @@ import { Control, FieldValues } from "react-hook-form";
 
 import { getName, isInputDisabled } from "@/app/utils/budget.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import {
-  CpomMillesimeApiType,
-  CpomStructureApiType,
-} from "@/schemas/api/cpom.schema";
+import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { StructureType } from "@/types/structure.type";
 
 import InputWithValidation from "../../InputWithValidation";
 
 export const BudgetTableLineInput = ({
+  type,
   name,
   year,
   control,
   budgets,
   cpomStructures,
-  cpomMillesimes,
   disabledYearsStart,
   enabledYears,
 }: Props) => {
   return (
     <>
       <InputWithValidation
-        name={getName(name, year, budgets, cpomStructures, cpomMillesimes)}
-        id={getName(name, year, budgets, cpomStructures, cpomMillesimes)}
+        name={getName(name, year, type, budgets, cpomStructures)}
+        id={getName(name, year, type, budgets, cpomStructures)}
         control={control}
         type="number"
         min={0}
@@ -32,6 +30,7 @@ export const BudgetTableLineInput = ({
         variant="simple"
         disabled={isInputDisabled(
           year,
+          type,
           disabledYearsStart,
           enabledYears,
           cpomStructures
@@ -43,12 +42,12 @@ export const BudgetTableLineInput = ({
 };
 
 type Props = {
+  type?: StructureType;
   name: string;
   year: number;
   control: Control<FieldValues>;
   budgets?: BudgetApiType[];
   cpomStructures?: CpomStructureApiType[];
-  cpomMillesimes?: CpomMillesimeApiType[];
   disabledYearsStart?: number;
   enabledYears?: number[];
 };

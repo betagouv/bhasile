@@ -1,0 +1,47 @@
+import { Fragment } from "react";
+import { useFormContext } from "react-hook-form";
+
+import { CustomNotice } from "@/app/components/common/CustomNotice";
+import { BudgetApiType } from "@/schemas/api/budget.schema";
+
+import { CpomTable } from "./CpomTable";
+
+export const CpomTables = () => {
+  const { watch } = useFormContext();
+  const budgets = watch("budgets") as BudgetApiType[];
+
+  const structureTypes = [
+    ...new Set(budgets?.map((budget) => budget.cpomStructureType) ?? []),
+  ].filter((structureType) => structureType !== undefined);
+
+  if (structureTypes.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <p className="mb-0 max-w-3xl">
+        Veuillez renseigner l’historique des données budgétaires{" "}
+        <strong>à l’échelle de l’ensemble du CPOM</strong>. Aussi, le tableau
+        des affectations reflète uniquement des flux annuels. Les montants
+        saisis ne doivent en aucun cas être une estimation du stock.
+      </p>
+      {structureTypes.length > 1 && (
+        <CustomNotice
+          severity="info"
+          title=""
+          description="Nous avons détecté dans la composition de votre CPOM différents types de structures. Veuillez donc remplir le tableau pour chacun d’eux, en prenant en compte toutes les structures du type correspondant à chaque fois."
+        />
+      )}
+      {structureTypes.map((structureType, index) => (
+        <Fragment key={structureType}>
+          <CpomTable
+            type={structureType}
+            showTitle={structureTypes.length > 1}
+          />
+          {index < structureTypes.length - 1 && <hr />}
+        </Fragment>
+      ))}
+    </>
+  );
+};

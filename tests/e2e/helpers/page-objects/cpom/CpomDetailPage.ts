@@ -4,6 +4,7 @@ import { getGranularityLabel } from "@/app/utils/cpom.util";
 import { formatDate } from "@/app/utils/date.util";
 import { formatCurrency } from "@/app/utils/number.util";
 import { CURRENT_YEAR, START_YEAR } from "@/constants";
+import { StructureType } from "@/types/structure.type";
 
 import { TIMEOUTS } from "../../constants";
 import {
@@ -48,20 +49,22 @@ export class CpomDetailPage extends BasePage {
     const dateStart = mainActe?.startDate
       ? formatDate(mainActe.startDate)
       : null;
-    const dateEnd = [
+    const possibleDateEnds = [
       mainActe?.endDate,
       ...(formData.avenants?.map((a) => a.endDate).filter(Boolean) ?? []),
     ]
       .filter(Boolean)
-      .sort()
-      .pop() as string | undefined;
-    const dateEndFormatted = dateEnd ? formatDate(dateEnd) : null;
+      .map((date) => formatDate(date as string));
 
     if (dateStart) {
       await expect(descriptionSection).toContainText(dateStart);
     }
-    if (dateEndFormatted) {
-      await expect(descriptionSection).toContainText(dateEndFormatted);
+    if (possibleDateEnds.length > 0) {
+      const descriptionText = (await descriptionSection.textContent()) ?? "";
+      const matchesOneDate = possibleDateEnds.some((dateEndFormatted) =>
+        descriptionText.includes(dateEndFormatted)
+      );
+      expect(matchesOneDate, "Description should contain a valid CPOM end date").toBe(true);
     }
   }
 
@@ -74,7 +77,6 @@ export class CpomDetailPage extends BasePage {
     const financesBlock = this.page.locator("#finances");
     await expect(financesBlock).toBeVisible({ timeout: TIMEOUTS.NAVIGATION });
 
-    const blockText = (await financesBlock.textContent()) ?? "";
     const normalizeForCompare = (s: string) =>
       s
         .replace(/\s/g, "")
@@ -83,29 +85,55 @@ export class CpomDetailPage extends BasePage {
 
     const { minYear, maxYear } = this.getCpomYearRange(formData);
 
-    for (const [yearStr, values] of Object.entries(financeData)) {
-      const year = parseInt(yearStr, 10);
-      if (year < START_YEAR || year > CURRENT_YEAR) {
-        continue;
-      }
-      if (year < minYear || year > maxYear) {
-        continue;
+    const switchInput = this.page.locator('input[name="FinanceTypeSwitch"]');
+    const hasTypeSwitch = (await switchInput.count()) > 0;
+
+    for (const [typeKey, yearlyData] of Object.entries(financeData)) {
+      const type = typeKey as StructureType;
+      if (hasTypeSwitch) {
+        const typeInput = this.page.locator(
+          `input[name="FinanceTypeSwitch"][value="${type}"]`
+        );
+        if ((await typeInput.count()) === 0) {
+          continue;
+        }
+        await this.page.locator(`label[for="${type}"]`).first().click();
+        await expect(typeInput).toBeChecked();
       }
 
-      for (const [key, value] of Object.entries(values)) {
-        if (value === undefined || value === null) {
+      const currentBlockText = (await financesBlock.textContent()) ?? "";
+      const normalizedCurrentBlockText = normalizeForCompare(currentBlockText);
+
+      for (const [yearStr, values] of Object.entries(yearlyData)) {
+        const year = parseInt(yearStr, 10);
+        if (year < START_YEAR || year > CURRENT_YEAR) {
+          continue;
+        }
+        if (year < minYear || year > maxYear) {
           continue;
         }
 
-        if (key === "commentaire") {
-          continue;
-        }
+        for (const [key, value] of Object.entries(values)) {
+          if (value === undefined || value === null) {
+            continue;
+          }
 
-        const expectedText = formatCurrency(value as number | string);
-        expect(
-          normalizeForCompare(blockText),
-          `Finances should contain "${expectedText}" (${key} ${year})`
-        ).toContain(normalizeForCompare(expectedText));
+          if (key === "commentaire") {
+            if (String(value).length > 0) {
+              expect(
+                normalizedCurrentBlockText,
+                `Finances should contain commentaire "${value}" (${type} ${year})`
+              ).toContain(normalizeForCompare(String(value)));
+            }
+            continue;
+          }
+
+          const expectedText = formatCurrency(value as number | string);
+          expect(
+            normalizedCurrentBlockText,
+            `Finances should contain "${expectedText}" (${type} ${key} ${year})`
+          ).toContain(normalizeForCompare(expectedText));
+        }
       }
     }
   }

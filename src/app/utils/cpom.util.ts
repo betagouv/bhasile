@@ -1,21 +1,21 @@
 import { v4 as uuidv4 } from "uuid";
 
+import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
   CpomApiType,
   CpomDepartementApiType,
-  CpomMillesimeApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
-import {
-  CpomFormValues,
-  CpomMillesimeFormValues,
-} from "@/schemas/forms/base/cpom.schema";
+import { BudgetCpomFormValues } from "@/schemas/forms/base/cpom.schema";
+import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { CpomGranularity } from "@/types/cpom.type";
+import { StructureType } from "@/types/structure.type";
 
-import { getYearRange } from "./date.util";
+import { getBudgetsDefaultValues } from "./budget.util";
 
 export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
+  const structureTypes = getCpomStructureTypes(cpom);
   return {
     ...cpom,
     name: cpom?.name ?? "",
@@ -36,7 +36,7 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
         dateStart: structure.dateStart ?? undefined,
         dateEnd: structure.dateEnd ?? undefined,
       })) ?? [],
-    cpomMillesimes: getCpomMillesimesDefaultValues(cpom?.cpomMillesimes || []),
+    budgets: getCpomBudgetsDefaultValues(cpom?.budgets || [], structureTypes),
     actesAdministratifs: cpom?.actesAdministratifs?.length
       ? cpom?.actesAdministratifs.map((acteAdministratif) => ({
           ...acteAdministratif,
@@ -77,48 +77,17 @@ export const getStructureCpomDefaultValues = (
   }));
 };
 
-const getCpomMillesimesDefaultValues = (
-  cpomMillesimes: CpomMillesimeApiType[]
-): CpomMillesimeFormValues[] => {
-  const { years } = getYearRange();
+const getCpomBudgetsDefaultValues = (
+  budgets: BudgetApiType[],
+  structureTypes: StructureType[]
+): BudgetCpomFormValues[] => {
+  if (!structureTypes.length) {
+    return [];
+  }
 
-  return Array(years.length)
-    .fill({})
-    .map((_, index) => ({
-      year: years[index],
-    }))
-    .map((emptyCpomMillesime) => {
-      const cpomMillesime = cpomMillesimes.find(
-        (cpomMillesime) => cpomMillesime.year === emptyCpomMillesime.year
-      );
-      if (cpomMillesime) {
-        return {
-          ...cpomMillesime,
-          year: cpomMillesime.year,
-          dotationDemandee: cpomMillesime.dotationDemandee ?? undefined,
-          dotationAccordee: cpomMillesime.dotationAccordee ?? undefined,
-          cumulResultatNet: cpomMillesime.cumulResultatNet ?? undefined,
-          repriseEtat: cpomMillesime.repriseEtat ?? undefined,
-          affectationReservesFondsDedies:
-            cpomMillesime.affectationReservesFondsDedies ?? undefined,
-          reserveInvestissement:
-            cpomMillesime.reserveInvestissement ?? undefined,
-          chargesNonReconductibles:
-            cpomMillesime.chargesNonReconductibles ?? undefined,
-          reserveCompensationDeficits:
-            cpomMillesime.reserveCompensationDeficits ?? undefined,
-          reserveCompensationBFR:
-            cpomMillesime.reserveCompensationBFR ?? undefined,
-          reserveCompensationAmortissements:
-            cpomMillesime.reserveCompensationAmortissements ?? undefined,
-          fondsDedies: cpomMillesime.fondsDedies ?? undefined,
-          reportANouveau: cpomMillesime.reportANouveau ?? undefined,
-          autre: cpomMillesime.autre ?? undefined,
-          commentaire: cpomMillesime.commentaire ?? undefined,
-        };
-      }
-      return emptyCpomMillesime;
-    });
+  return structureTypes.flatMap((structureType) =>
+    getBudgetsDefaultValues(budgets, undefined, structureType)
+  ) as BudgetCpomFormValues[];
 };
 
 export const formatCpomName = (cpom: CpomApiType): string => {
@@ -201,4 +170,13 @@ export const getDepartementsList = (
     return list.slice(0, maxLength) + "...";
   }
   return list;
+};
+
+export const getCpomStructureTypes = (cpom?: CpomApiType): StructureType[] => {
+  const structureTypes = [
+    ...new Set(
+      cpom?.structures?.map((structure) => structure.structure?.type) ?? []
+    ),
+  ].filter((type) => type !== undefined) as StructureType[];
+  return structureTypes;
 };

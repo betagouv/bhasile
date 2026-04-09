@@ -6,7 +6,7 @@ import { Table } from "@/app/components/common/Table";
 import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-tables/BudgetTableCommentLine";
 import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/BudgetTableLines";
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
-import { isNullOrUndefined } from "@/app/utils/common.util";
+import { computeResultatNet } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
 import {
   isStructureAutorisee,
@@ -15,7 +15,7 @@ import {
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ButtonAffectations } from "../ButtonAffectations";
-import { getStructureStaticTableLines } from "./getStructureStaticTableLines";
+import { getBudgetStaticTableLines } from "./getBudgetStaticTableLines";
 
 export const StructureStaticTable = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -45,7 +45,7 @@ export const StructureStaticTable = (): ReactElement => {
     <>
       {isAutorisee ? (
         <p>
-          Dans cette vue, l’ensemble des montants correspondent à la gestion
+          Dans cette vue, l’ensemble des montants correspond à la gestion
           budgétaire <strong>à l’échelle de la structure</strong>, que celle-ci
           fasse partie d’un CPOM ou non. Aussi, le tableau des affectations
           reflète uniquement des flux annuels. Les chiffres ne sont en aucun cas
@@ -53,7 +53,7 @@ export const StructureStaticTable = (): ReactElement => {
         </p>
       ) : (
         <p>
-          Dans cette vue, l’ensemble des montants correspondent à la gestion
+          Dans cette vue, l’ensemble des montants correspond à la gestion
           budgétaire <strong>à l’échelle de la structure</strong>, que celle-ci
           fasse partie d’un CPOM ou non.
         </p>
@@ -65,7 +65,7 @@ export const StructureStaticTable = (): ReactElement => {
       >
         <BudgetTableLines
           years={years}
-          lines={getStructureStaticTableLines(isAutorisee, isAffectationOpen)}
+          lines={getBudgetStaticTableLines(isAutorisee, isAffectationOpen)}
           budgets={enhancedBudgets}
           canEdit={false}
         />
@@ -87,14 +87,4 @@ export const StructureStaticTable = (): ReactElement => {
       )}
     </>
   );
-};
-
-const computeResultatNet = (
-  totalProduits: number | null | undefined,
-  totalCharges: number | null | undefined
-): number | undefined => {
-  if (isNullOrUndefined(totalCharges) || isNullOrUndefined(totalProduits)) {
-    return undefined;
-  }
-  return Number(totalProduits) - Number(totalCharges);
 };
