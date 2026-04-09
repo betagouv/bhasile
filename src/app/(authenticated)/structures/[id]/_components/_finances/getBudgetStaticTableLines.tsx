@@ -3,7 +3,8 @@ import { BudgetTableRepriseEtatTooltip } from "@/app/components/forms/finance/bu
 
 export const getBudgetStaticTableLines = (
   isAutorisee: boolean,
-  isAffectationOpen: boolean
+  isAffectationOpen: boolean,
+  isCpom: boolean = false
 ) => {
   if (isAutorisee) {
     const linesWithoutAffectation = [
@@ -23,16 +24,22 @@ export const getBudgetStaticTableLines = (
       {
         title: "Résultat",
         lines: [
-          {
-            name: "resultatNetProposeParOperateur",
-            label: "Résultat net proposé",
-            subLabel: "par l'opérateur",
-            colored: true,
-          },
+          ...(isCpom
+            ? []
+            : [
+                {
+                  name: "resultatNetProposeParOperateur",
+                  label: "Résultat net proposé",
+                  subLabel: "par l'opérateur",
+                  colored: true,
+                },
+              ]),
           {
             name: "resultatNet",
-            label: "Résultat net retenu",
-            subLabel: "par l'autorité tarifaire",
+            label: isCpom ? "Cumul des résultats" : "Résultat net",
+            subLabel: isCpom
+              ? "des structures du CPOM"
+              : "par l'autorité tarifaire",
             colored: true,
           },
           {
@@ -43,7 +50,7 @@ export const getBudgetStaticTableLines = (
             name: "affectationReservesFondsDedies",
             label: <AffectationTooltip />,
           },
-        ],
+        ].filter(Boolean),
       },
     ];
     if (isAffectationOpen) {
@@ -111,7 +118,8 @@ export const getBudgetStaticTableLines = (
       lines: [
         {
           name: "resultatNet",
-          label: "Résultat net",
+          label: isCpom ? "Cumul des résultats" : "Résultat net",
+          subLabel: isCpom ? "des structures du CPOM" : undefined,
           colored: true,
         },
         {

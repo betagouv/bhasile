@@ -3,6 +3,7 @@ import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { anyBudgetFormValues } from "@/schemas/forms/base/budget.schema";
 import { StructureType } from "@/types/structure.type";
 
+import { isNullOrUndefined } from "./common.util";
 import { getYearRange } from "./date.util";
 import {
   getCpomStructureIndexAndBudgetIndexForAYearAndAType,
@@ -121,4 +122,14 @@ export const getName = (
     return `cpomStructures.${cpomStructureIndex}.cpom.budgets.${budgetIndex}.${name}`;
   }
   return "";
+};
+
+export const computeResultatNet = (
+  totalProduits: number | null | undefined,
+  totalCharges: number | null | undefined
+): number | undefined => {
+  if (isNullOrUndefined(totalCharges) || isNullOrUndefined(totalProduits)) {
+    return undefined;
+  }
+  return Number(totalProduits) - Number(totalCharges);
 };

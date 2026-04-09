@@ -6,6 +6,7 @@ import { Table } from "@/app/components/common/Table";
 import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-tables/BudgetTableCommentLine";
 import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/BudgetTableLines";
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
+import { computeResultatNet } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
 import {
   isStructureAutorisee,
@@ -26,6 +27,30 @@ export const CpomStaticTable = (): ReactElement => {
   const isAutorisee = isStructureAutorisee(structure?.type);
   const isSubventionnee = isStructureSubventionnee(structure?.type);
 
+  const enhancedCpomStructures = structure?.cpomStructures?.map(
+    (cpomStructure) => {
+      return {
+        ...cpomStructure,
+        cpom: {
+          ...cpomStructure?.cpom,
+          budgets: cpomStructure?.cpom?.budgets?.map((budget) => {
+            return {
+              ...budget,
+              resultatNet: computeResultatNet(
+                budget.totalProduits,
+                budget.totalCharges
+              ),
+              resultatNetProposeParOperateur: computeResultatNet(
+                budget.totalProduitsProposes,
+                budget.totalChargesProposees
+              ),
+            };
+          }),
+        },
+      };
+    }
+  );
+
   return (
     <>
       <p>
@@ -41,8 +66,12 @@ export const CpomStaticTable = (): ReactElement => {
       >
         <BudgetTableLines
           years={years}
-          lines={getBudgetStaticTableLines(isAutorisee, isAffectationOpen)}
-          cpomStructures={structure?.cpomStructures}
+          lines={getBudgetStaticTableLines(
+            isAutorisee,
+            isAffectationOpen,
+            true
+          )}
+          cpomStructures={enhancedCpomStructures}
           canEdit={false}
           type={structure?.type}
         />
@@ -50,7 +79,7 @@ export const CpomStaticTable = (): ReactElement => {
           <BudgetTableCommentLine
             years={years}
             label="Commentaire"
-            cpomStructures={structure?.cpomStructures}
+            cpomStructures={enhancedCpomStructures}
             enabledYears={years}
             canEdit={false}
             type={structure?.type}

@@ -6,6 +6,7 @@ import { Table } from "@/app/components/common/Table";
 import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-tables/BudgetTableCommentLine";
 import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/BudgetTableLines";
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
+import { computeResultatNet } from "@/app/utils/budget.util";
 import { isNullOrUndefined } from "@/app/utils/common.util";
 import { getYearRange } from "@/app/utils/date.util";
 import {
@@ -87,14 +88,4 @@ export const StructureStaticTable = (): ReactElement => {
       )}
     </>
   );
-};
-
-const computeResultatNet = (
-  totalProduits: number | null | undefined,
-  totalCharges: number | null | undefined
-): number | undefined => {
-  if (isNullOrUndefined(totalCharges) || isNullOrUndefined(totalProduits)) {
-    return undefined;
-  }
-  return Number(totalProduits) - Number(totalCharges);
 };
