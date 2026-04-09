@@ -129,6 +129,22 @@ export const createFakeCpoms = async (
 
     const regionId = regionNameToId.get(regionName);
 
+    const structuresOfCpom = await prisma.structure.findMany({
+      where: {
+        id: { in: selectedStructures },
+      },
+    });
+    const structureTypes = [
+      ...new Set(
+        structuresOfCpom.map((structure) => structure.type as StructureType)
+      ),
+    ].filter((type) => type !== null);
+
+    // Create budgets for each year of the CPOM and each structure type
+    const budgetYears = [...Array(dureeAnnees)].map(
+      (_, index) => yearStart + index
+    );
+
     const cpom = await prisma.cpom.create({
       data: {
         name: cpomName,
@@ -164,6 +180,16 @@ export const createFakeCpoms = async (
               },
             }
           : undefined),
+        budgets: {
+          create: budgetYears.flatMap((budgetYear) => {
+            return structureTypes.map((structureType) => {
+              return createFakeBudget({
+                year: budgetYear,
+                type: structureType,
+              });
+            });
+          }),
+        },
         structures: {
           create: selectedStructures.map((structureId) => {
             // 10% chance that a structure joins or leaves the CPOM in the middle
@@ -242,14 +268,6 @@ export const createFakeCpoms = async (
       },
     });
 
-    const structureTypes = [
-      ...new Set(
-        cpomStructures.map(
-          (cpomStructure) => cpomStructure.structure.type as StructureType
-        )
-      ),
-    ].filter((type) => type !== null);
-
     for (const cpomStructure of cpomStructures) {
       const millesimeYears = buildStructureMillesimeYears(
         cpomStructure.dateStart?.getFullYear() ?? yearStart,
@@ -272,19 +290,6 @@ export const createFakeCpoms = async (
             year: millesimeYear,
             cpom: true,
           },
-        });
-      }
-    }
-
-    // Create budgets for each year of the CPOM and each structure type
-    const budgetYears = [...Array(dureeAnnees)].map(
-      (_, index) => yearStart + index
-    );
-
-    for (const budgetYear of budgetYears) {
-      for (const structureType of structureTypes) {
-        await prisma.budget.create({
-          data: createFakeBudget({ year: budgetYear, type: structureType }),
         });
       }
     }
