@@ -179,7 +179,9 @@ export async function seed(): Promise<void> {
       0
     );
 
-    const dnaList = createDnaList(totalDnasNeeded);
+    const numberOfUnusedDnas = 50;
+
+    const dnaList = createDnaList(totalDnasNeeded + numberOfUnusedDnas);
     await prisma.dna.createMany({ data: dnaList });
     console.log(`✅ ${dnaList.length} codes DNA créés`);
 
