@@ -1,0 +1,22 @@
+model Note {
+  id          Int       @id @default(autoincrement())
+  text        String
+  structureId Int
+  structure   Structure @relation(fields: [structureId], references: [id])
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  noteType    NoteType
+  isArchived  Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+enum NoteType {
+  GENERAL
+  ACTIVITE
+
+  @@schema("public")
+}

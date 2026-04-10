@@ -41,6 +41,7 @@ model Structure {
   finesses                 Finess[]
   departement              Departement?         @relation(fields: [departementAdministratif], references: [numero])
   userActions              UserAction[]
+  userNotes                Note[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

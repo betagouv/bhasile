@@ -16,6 +16,7 @@ import {
   createFakeFormDefinition,
   createFakeFormStepDefinition,
 } from "./seeders/form.seed";
+import { createNotesList } from "./seeders/note.seed";
 import {
   createFakeFiliale,
   createFakeOperateur,
@@ -24,6 +25,7 @@ import {
   createFakeStructure,
   createFakeStuctureWithRelations,
 } from "./seeders/structure.seed";
+import { upsertBhasileUser } from "./seeders/user.seed";
 import {
   generateAllBhasileCodes,
   getNextBhasileCode,
@@ -197,6 +199,17 @@ export async function seed(): Promise<void> {
   console.log(
     `✅ ${allStructures.length} structures récupérées (${structuresWithBhasile.length} avec code Bhasile)`
   );
+
+  console.log("🗒️ Seed des notes");
+  const notesUser = await upsertBhasileUser(prisma);
+
+  const notesToCreate = createNotesList({
+    structures: allStructures,
+    userId: notesUser.id,
+  });
+
+  await prisma.note.createMany({ data: notesToCreate });
+  console.log(`✅ ${notesToCreate.length} notes créées`);
 
   console.log("🏥 Création et liaison des codes FINESS...");
   const finessList = createFinessList(allStructures);
