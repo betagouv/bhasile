@@ -253,6 +253,10 @@ export const findOne = async (id: number) => {
       id,
     },
     include: {
+      userNotes: {
+        orderBy: { createdAt: "desc" },
+        select: { note: true },
+      },
       dnaStructures: {
         include: {
           dna: {
@@ -374,7 +378,6 @@ export const findOne = async (id: number) => {
       },
     },
   });
-
   return structure;
 };
 
