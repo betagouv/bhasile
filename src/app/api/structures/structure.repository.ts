@@ -374,6 +374,7 @@ export const findOne = async (id: number) => {
       },
     },
   });
+
   return structure;
 };
 
