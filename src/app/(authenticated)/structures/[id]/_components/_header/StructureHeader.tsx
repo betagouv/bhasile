@@ -75,7 +75,7 @@ export const StructureHeader = (): ReactElement | null => {
                 {structureTypologies?.[0]?.placesAutorisees} places
               </strong>
               <span className="pr-2">{" – "}</span>
-              <span className="mb-0 text-title-grey fr-text--lg italic font-normal">
+              <span className="mb-0 text-title-grey text-lg italic font-normal">
                 {nom ? `${nom}, ` : ""} {communeAdministrative},{" "}
                 {departementAdministratif}
               </span>

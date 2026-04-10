@@ -21,15 +21,15 @@ export default function Login(): ReactElement {
       <div className="flex-col">
         {searchParams.get("accesRefuse") && <AccesRefuse />}
         <div className="max-w-[600px] px-25.5 py-14 bg-alt-grey">
-          <h2 className="fr-h4">Connexion à Bhasile</h2>
-          <p className="fr-text--lg">
+          <h2 className="text-2xl">Connexion à Bhasile</h2>
+          <p className="text-lg">
             <strong>
               Agent·es de département, de région ou de la Direction de l’Asile ?
               Connectez-vous à Bhasile pour piloter les structures et opérateurs
               de votre parc d’hébergement.
             </strong>
           </p>
-          <p className="fr-text--sm">
+          <p className="text-sm">
             ProConnect est la solution proposée par l’État pour sécuriser et
             simplifier la connexion aux services en ligne en tant que
             professionnel.
