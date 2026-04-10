@@ -375,21 +375,7 @@ export const findOne = async (id: number) => {
     },
   });
 
-  // TODO: remove after migration of legacy filiales
-  const isFiliale = structure.operateur?.parentId != null;
-  const parentOperateur = isFiliale
-    ? await prisma.operateur.findUnique({
-        where: { id: structure.operateur!.parentId! },
-      })
-    : null;
-
-  return isFiliale
-    ? {
-        ...structure,
-        filiale: structure.operateur?.name ?? structure.filiale,
-        operateur: parentOperateur ?? structure.operateur,
-      }
-    : structure;
+  return structure;
 };
 
 export const updateOneAgent = async (
