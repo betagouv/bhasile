@@ -10,6 +10,7 @@ export const createFakeOperateur = (index: number): Omit<Operateur, "id"> => {
     directionGenerale: faker.lorem.words(2),
     siret: faker.number.int(10000000000000).toString(),
     siegeSocial: faker.lorem.words(2),
+    parentId: null,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   };
