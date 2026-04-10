@@ -67,7 +67,7 @@ export async function seed(): Promise<void> {
     console.log("✅ Codes Bhasile générés");
   }
 
-  const operateursToInsert = Array.from({ length: 5 }, (_, index) =>
+  const operateursToInsert = Array.from({ length: 20 }, (_, index) =>
     createFakeOperateur(index)
   );
 
