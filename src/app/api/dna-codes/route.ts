@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { findAll } from "./dna-codes.repository";
 
 export async function GET(request: NextRequest) {
-  const free = request.nextUrl.searchParams.get("free") === "true";
   const structureId = Number(request.nextUrl.searchParams.get("structureId"));
 
   if (!structureId || isNaN(structureId)) {
@@ -16,7 +15,6 @@ export async function GET(request: NextRequest) {
   try {
     const [dnaCodes] = await Promise.all([
       findAll({
-        free,
         structureId,
       }),
     ]);
@@ -24,7 +22,8 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to fetch dna codes" },
+      { error: "Échec de la récupération des codes DNA" },
+
       { status: 500 }
     );
   }
