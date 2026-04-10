@@ -17,11 +17,6 @@ export const budgetBaseSchema = z.object({
   id: zId(),
   year: zSafeYear(),
 
-  // Indicateurs généraux
-  ETP: zSafePositiveDecimals(),
-  tauxEncadrement: zSafePositiveDecimals(),
-  coutJournalier: zSafePositiveDecimals(),
-
   commentaire: z.string().nullish(),
 });
 
@@ -130,9 +125,6 @@ export const budgetSubventionneeOpenSchema = budgetBaseSchema.extend({
 export const budgetAutoSaveSchema = z.object({
   id: zId(),
   year: zSafeYear(),
-  ETP: zSafeDecimalsNullish(),
-  tauxEncadrement: zSafeDecimalsNullish(),
-  coutJournalier: zSafeDecimalsNullish(),
   dotationDemandee: zSafeDecimalsNullish(),
   dotationAccordee: zSafeDecimalsNullish(),
   totalProduitsProposes: zSafeDecimalsNullish(),
@@ -160,9 +152,6 @@ export const budgetInCpomSchema = budgetAutoriseeOpenSchemaWithoutRefinement
   .and(
     z.object({
       year: zSafeYear(),
-      ETP: zSafePositiveDecimals(),
-      tauxEncadrement: zSafePositiveDecimals(),
-      coutJournalier: zSafePositiveDecimals(),
     })
   );
 

@@ -19,6 +19,7 @@ import {
   createOrUpdateForms,
   initializeDefaultForms,
 } from "../forms/form.repository";
+import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
 import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import {
@@ -361,6 +362,11 @@ export const findOne = async (id: number) => {
           year: "desc",
         },
       },
+      indicateursFinanciers: {
+        orderBy: {
+          year: "desc",
+        },
+      },
       operateur: true,
       forms: {
         include: {
@@ -396,6 +402,7 @@ const updateOne = async (
     const {
       contacts,
       budgets,
+      indicateursFinanciers,
       structureTypologies,
       adresses,
       antennes,
@@ -419,6 +426,9 @@ const updateOne = async (
         await createOrUpdateFinesses(tx, finesses, structure.id);
         await createOrUpdateContacts(tx, contacts, structure.id);
         await createOrUpdateBudgets(tx, budgets, { structureId: structure.id });
+        await createOrUpdateIndicateursFinanciers(tx, indicateursFinanciers, {
+          structureId: structure.id,
+        });
         await createOrUpdateStructureTypologies(
           tx,
           structureTypologies,

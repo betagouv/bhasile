@@ -7,8 +7,11 @@ model Budget {
   year                              Int        @default(0)
   cpomStructureType                 StructureType?
   ETP                               Float?
+  ETP_previsionnel                  Float?
   tauxEncadrement                   Float?
+  tauxEncadrement_previsionnel      Float?
   coutJournalier                    Float?
+  coutJournalier_previsionnel       Float?
   dotationDemandee                  Float?
   dotationAccordee                  Float?
   totalProduitsProposes             Float?
