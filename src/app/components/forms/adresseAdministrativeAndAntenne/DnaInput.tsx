@@ -1,41 +1,38 @@
 import { useFormContext } from "react-hook-form";
 
-import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
+import { useFetchFreeDnaCodes } from "@/app/hooks/useFetchFreeDnaCodes";
 
-import InputWithValidation from "../InputWithValidation";
+import SelectWithValidation from "../SelectWithValidation";
 
-export const DnaInput = ({ index, disabled, label }: Props) => {
-  const { control, formState } = useFormContext();
-  const dnaStructuresErrors = getErrorMessages(
-    formState,
-    "dnaStructures",
-    index
-  );
+export const DnaInput = ({ index, label, disabled }: Props) => {
+  const { watch, control } = useFormContext();
+
+  const structureId = watch("id");
+  const { freeDnaCodes } = useFetchFreeDnaCodes({ structureId });
 
   return (
-    <div className="relative">
-      <InputWithValidation
-        name={`dnaStructures.${index}.dna.code`}
-        id={`dnaStructures.${index}.dna.code`}
-        control={control}
-        type="text"
-        label={label}
-        state={dnaStructuresErrors.length > 0 ? "error" : undefined}
-        stateRelatedMessage={
-          dnaStructuresErrors.length > 0 ? dnaStructuresErrors[0] : undefined
-        }
-        disabled={disabled}
-        className="mb-0 [&_label]:text-black! [&_input]:text-black!"
-      />
-      {disabled && (
-        <span className="absolute right-4 top-10 fr-icon-lock-line fr-icon--sm pointer-events-none" />
-      )}
-    </div>
+    <SelectWithValidation
+      name={`dnaStructures.${index}.dna.code`}
+      id={`dnaStructures.${index}.dna.code`}
+      control={control}
+      label={label}
+      className="mb-0 [&_label]:text-black! [&_input]:text-black!"
+      disabled={disabled}
+    >
+      <option value="" disabled>
+        Sélectionnez un code DNA
+      </option>
+      {freeDnaCodes.map((dna) => (
+        <option key={dna.code} value={dna.code}>
+          {dna.code}
+        </option>
+      ))}
+    </SelectWithValidation>
   );
 };
 
 type Props = {
   index: number;
-  disabled?: boolean;
   label: string;
+  disabled?: boolean;
 };

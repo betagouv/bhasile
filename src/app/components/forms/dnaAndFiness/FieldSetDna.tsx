@@ -52,8 +52,8 @@ export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
             <div className="flex flex-col gap-1">
               <DnaInput
                 index={index}
-                disabled={formKind === FormKind.MODIFICATION || index === 0}
                 label="Code"
+                disabled={formKind === FormKind.MODIFICATION}
               />
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">

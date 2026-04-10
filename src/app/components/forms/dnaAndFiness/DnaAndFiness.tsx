@@ -41,7 +41,11 @@ export const DnaAndFiness = ({ formKind = FormKind.FINALISATION }: Props) => {
         </>
       ) : (
         <div className="grid grid-cols-3 gap-6 flex-1">
-          <DnaInput index={0} disabled label="Code DNA" />
+          <DnaInput
+            index={0}
+            label="Code DNA"
+            disabled={formKind === FormKind.MODIFICATION}
+          />
           {isAutorisee && (
             <InputWithValidation
               name="finesses.0.code"

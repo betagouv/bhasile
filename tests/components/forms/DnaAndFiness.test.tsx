@@ -1,11 +1,16 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
+import { useFetchFreeDnaCodes } from "@/app/hooks/useFetchFreeDnaCodes";
 import { StructureType } from "@/types/structure.type";
 
 import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
+
+vi.mock("@/app/hooks/useFetchFreeDnaCodes", () => ({
+  useFetchFreeDnaCodes: vi.fn(),
+}));
 
 const defaultValuesAutorisee = {
   type: StructureType.CADA,
@@ -21,16 +26,26 @@ const defaultValuesSubventionnee = {
   finesses: [],
 };
 
+const mockedUseFetchFreeDnaCodes = vi.mocked(useFetchFreeDnaCodes);
+
 describe("DnaAndFiness", () => {
+  beforeEach(() => {
+    mockedUseFetchFreeDnaCodes.mockReturnValue({
+      freeDnaCodes: [{ code: "C0001" }, { code: "C0002" }],
+    });
+  });
+
   describe("Single mode (autorisée)", () => {
-    it("should show one Code DNA and one Code FINESS input", () => {
+    it("should show one Code DNA select and one Code FINESS input", () => {
       render(
         <FormTestWrapper defaultValues={defaultValuesAutorisee}>
           <DnaAndFiness />
         </FormTestWrapper>
       );
 
-      expect(screen.getByLabelText("Code DNA")).toBeInTheDocument();
+      const dnaSelect = screen.getByRole("combobox", { name: "Code DNA" });
+      expect(dnaSelect).toBeInTheDocument();
+      expect(within(dnaSelect).getByRole("option", { name: "C0001" })).toBeInTheDocument();
       expect(screen.getByLabelText("Code FINESS")).toBeInTheDocument();
     });
   });
@@ -43,7 +58,7 @@ describe("DnaAndFiness", () => {
         </FormTestWrapper>
       );
 
-      expect(screen.getByLabelText("Code DNA")).toBeInTheDocument();
+      expect(screen.getByRole("combobox", { name: "Code DNA" })).toBeInTheDocument();
       expect(screen.queryByLabelText("Code FINESS")).not.toBeInTheDocument();
     });
   });
@@ -90,7 +105,7 @@ describe("DnaAndFiness", () => {
         </FormTestWrapper>
       );
 
-      expect(screen.getByLabelText("Code DNA")).toBeInTheDocument();
+      expect(screen.getByRole("combobox", { name: "Code DNA" })).toBeInTheDocument();
       expect(screen.getByLabelText("Code FINESS")).toBeInTheDocument();
       expect(screen.queryByText("Codes DNA")).not.toBeInTheDocument();
 
@@ -101,7 +116,9 @@ describe("DnaAndFiness", () => {
 
       expect(screen.getByText("Codes DNA")).toBeInTheDocument();
       expect(screen.getByText("Codes FINESS")).toBeInTheDocument();
-      expect(screen.queryByLabelText("Code DNA")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("combobox", { name: "Code DNA" })
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -123,15 +140,19 @@ describe("DnaAndFiness", () => {
       );
 
       const dnaFieldset = screen.getByRole("group", { name: /Codes DNA/i });
-      const codeInputsBefore = within(dnaFieldset).getAllByLabelText("Code");
-      expect(codeInputsBefore).toHaveLength(1);
+      const codeSelectsBefore = within(dnaFieldset).getAllByRole("combobox", {
+        name: "Code",
+      });
+      expect(codeSelectsBefore).toHaveLength(1);
 
       await user.click(
         screen.getByRole("button", { name: /Ajouter un code DNA/i })
       );
 
-      const codeInputsAfter = within(dnaFieldset).getAllByLabelText("Code");
-      expect(codeInputsAfter).toHaveLength(2);
+      const codeSelectsAfter = within(dnaFieldset).getAllByRole("combobox", {
+        name: "Code",
+      });
+      expect(codeSelectsAfter).toHaveLength(2);
     });
   });
 });

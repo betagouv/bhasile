@@ -110,18 +110,6 @@ export class IdentificationPage extends BasePage {
       await this.waitHelper.waitForUIUpdate();
 
       for (const [i, dna] of dnas.entries()) {
-        if (i > 0) {
-          await this.page
-            .getByRole("button", { name: /Ajouter un code DNA/i })
-            .click();
-          await this.waitHelper.waitForUIUpdate();
-        }
-        if (dna.code && i > 0) {
-          await this.formHelper.fillInput(
-            `input[name="dnaStructures.${i}.dna.code"]`,
-            dna.code
-          );
-        }
         if (dna.description) {
           await this.formHelper.fillInput(
             `input[name="dnaStructures.${i}.dna.description"]`,
