@@ -70,7 +70,7 @@ export const useCpomsSearch = () => {
   );
 
   useEffect(() => {
-    const fetchStructures = async () => {
+    const fetchCpoms = async () => {
       const { cpoms, totalCpoms } = await getCpoms(
         page,
         departements,
@@ -81,7 +81,7 @@ export const useCpomsSearch = () => {
       setTotalCpoms(totalCpoms);
     };
 
-    fetchStructures();
+    fetchCpoms();
   }, [getCpoms, page, departements, column, direction]);
 
   return {
