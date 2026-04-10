@@ -16,7 +16,10 @@ import {
   createFakeFormDefinition,
   createFakeFormStepDefinition,
 } from "./seeders/form.seed";
-import { createFakeOperateur } from "./seeders/operateur.seed";
+import {
+  createFakeFiliale,
+  createFakeOperateur,
+} from "./seeders/operateur.seed";
 import {
   createFakeStructure,
   createFakeStuctureWithRelations,
@@ -66,14 +69,12 @@ export async function seed(): Promise<void> {
     createFakeOperateur(index)
   );
 
-  for (const operateurToInsert of operateursToInsert) {
-    const baseParams = {
-      formDefinitionId: formDefinition.id,
-      stepDefinitions,
-      operateurName: operateurToInsert.name,
-    };
+  const createStructuresForOperateur = (params: {
+    nonOfiiCount: number;
+    ofiiCount: number;
+  }) => {
     const structuresToInsert = Array.from(
-      { length: faker.number.int({ min: 20, max: 30 }) },
+      { length: params.nonOfiiCount },
       () => {
         const departementAdministratif = String(
           faker.number.int({ min: 1, max: 95 })
@@ -84,9 +85,10 @@ export async function seed(): Promise<void> {
             ? getNextBhasileCode(bhasileCodesMap, region)
             : null;
 
-        const fakeStructure = createFakeStuctureWithRelations({
+        return createFakeStuctureWithRelations({
           codeBhasile,
-          ...baseParams,
+          formDefinitionId: formDefinition.id,
+          stepDefinitions,
           departementAdministratif,
           ofii: false,
           type: faker.helpers.arrayElement([
@@ -97,12 +99,11 @@ export async function seed(): Promise<void> {
           ]),
           isFinalised: faker.datatype.boolean(),
         });
-        return fakeStructure;
       }
     );
 
     const structuresOfiiToInsert = Array.from(
-      { length: faker.number.int({ min: 100, max: 200 }) },
+      { length: params.ofiiCount },
       () => {
         const departementAdministratif = String(
           faker.number.int({ min: 1, max: 95 })
@@ -113,9 +114,8 @@ export async function seed(): Promise<void> {
             ? getNextBhasileCode(bhasileCodesMap, region)
             : null;
 
-        const fakeStructure = createFakeStructure({
+        return createFakeStructure({
           codeBhasile,
-          ...baseParams,
           departementAdministratif,
           ofii: true,
           type: faker.helpers.arrayElement([
@@ -126,22 +126,57 @@ export async function seed(): Promise<void> {
           ]),
           isFinalised: faker.datatype.boolean(),
         });
-        return fakeStructure;
       }
     );
 
-    const operateurWithStructures = {
-      ...operateurToInsert,
-      structures: [...structuresToInsert, ...structuresOfiiToInsert],
-    };
+    return [...structuresToInsert, ...structuresOfiiToInsert];
+  };
+
+  for (const operateurToInsert of operateursToInsert) {
+    const nonOfiiCount = faker.number.int({ min: 20, max: 30 });
+    const ofiiCount = faker.number.int({ min: 100, max: 200 });
 
     console.log(
-      `🏠 Ajout de ${structuresToInsert.length} structures et ${structuresOfiiToInsert.length} structures OFII pour ${operateurToInsert.name}`
+      `🏠 Ajout de ${nonOfiiCount} structures et ${ofiiCount} structures OFII pour ${operateurToInsert.name}`
     );
-
-    await prisma.operateur.create({
-      data: convertToPrismaObject(operateurWithStructures),
+    const createdOperateur = await prisma.operateur.create({
+      data: convertToPrismaObject({
+        ...operateurToInsert,
+        structures: createStructuresForOperateur({
+          nonOfiiCount,
+          ofiiCount,
+        }),
+      }),
     });
+
+    const hasFiliale = faker.datatype.boolean({ probability: 0.2 });
+    if (!hasFiliale) continue;
+
+    const filiale = await prisma.operateur.create({
+      data: convertToPrismaObject(
+        createFakeFiliale(createdOperateur.id, createdOperateur.name, 0)
+      ),
+      select: { id: true, name: true },
+    });
+
+    const structuresOfOperateur = await prisma.structure.findMany({
+      where: { operateurId: createdOperateur.id },
+      select: { id: true },
+    });
+
+    // Move 20% of the structures to the filiale
+    const structureIdsToMove = structuresOfOperateur
+      .filter(() => faker.datatype.boolean({ probability: 0.2 }))
+      .map((s) => s.id);
+
+    if (structureIdsToMove.length > 0) {
+      await prisma.structure.updateMany({
+        where: { id: { in: structureIdsToMove } },
+        data: { operateurId: filiale.id },
+      });
+    }
+
+    console.log(`🏢 Filiale créée : ${filiale.name}`);
   }
 
   await createFakeCpoms(prisma);
