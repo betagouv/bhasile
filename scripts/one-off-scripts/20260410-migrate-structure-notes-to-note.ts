@@ -5,23 +5,21 @@ import "dotenv/config";
 
 import { NoteType } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
+import { BHASILE_CONTACT_EMAIL, BHASILE_USER_NAME } from "@/constants";
 
 const prisma = createPrismaClient();
-
-const BHASILE_EMAIL = "bhasile@bhasile.fr";
-const BHASILE_NAME = "Bhasile";
 
 async function main() {
   console.log(":robot: Upsert fake user...");
   const bhasile = await prisma.user.upsert({
-    where: { email: BHASILE_EMAIL },
+    where: { email: BHASILE_CONTACT_EMAIL },
     update: {
-      name: BHASILE_NAME,
+      name: BHASILE_USER_NAME,
       lastConnection: new Date(),
     },
     create: {
-      name: BHASILE_NAME,
-      email: BHASILE_EMAIL,
+      name: BHASILE_USER_NAME,
+      email: BHASILE_CONTACT_EMAIL,
       lastConnection: new Date(),
     },
     select: { id: true, email: true },
@@ -33,7 +31,7 @@ async function main() {
     where: {
       notes: { not: null },
     },
-    select: { id: true, codeBhasile: true, notes: true },
+    select: { id: true, codeBhasile: true, notes: true, createdAt: true },
   });
 
   const targets = structures
@@ -51,13 +49,13 @@ async function main() {
   let skipped = 0;
   let errors = 0;
 
-  for (const s of targets) {
+  for (const structure of targets) {
     try {
       const existing = await prisma.note.findFirst({
         where: {
-          structureId: s.id,
+          structureId: structure.id,
           userId: bhasile.id,
-          note: s.note,
+          text: structure.note,
         },
         select: { id: true },
       });
@@ -69,11 +67,13 @@ async function main() {
 
       await prisma.note.create({
         data: {
-          structure: { connect: { id: s.id } },
+          structure: { connect: { id: structure.id } },
           user: { connect: { id: bhasile.id } },
           noteType: NoteType.GENERAL,
-          note: s.note,
+          text: structure.note,
           isArchived: false,
+          createdAt: structure.createdAt,
+          updatedAt: structure.createdAt,
         },
         select: { id: true },
       });
@@ -82,7 +82,7 @@ async function main() {
     } catch (error) {
       errors += 1;
       console.error(
-        `❌ Structure id=${s.id} codeBhasile=${s.codeBhasile ?? "?"}:`,
+        `❌ Structure id=${structure.id} codeBhasile=${structure.codeBhasile ?? "?"}:`,
         error
       );
     }

@@ -1,6 +1,6 @@
 model Note {
   id          Int       @id @default(autoincrement())
-  note        String
+  text        String
   structureId Int
   structure   Structure @relation(fields: [structureId], references: [id])
   userId      Int

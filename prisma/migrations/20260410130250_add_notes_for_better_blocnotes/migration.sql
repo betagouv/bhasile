@@ -4,7 +4,7 @@ CREATE TYPE "NoteType" AS ENUM ('GENERAL', 'ACTIVITE');
 -- CreateTable
 CREATE TABLE "Note" (
     "id" SERIAL NOT NULL,
-    "note" TEXT NOT NULL,
+    "text" TEXT NOT NULL,
     "structureId" INTEGER NOT NULL,
     "userId" INTEGER NOT NULL,
     "noteType" "NoteType" NOT NULL,

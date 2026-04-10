@@ -255,7 +255,7 @@ export const findOne = async (id: number) => {
     include: {
       userNotes: {
         orderBy: { createdAt: "desc" },
-        select: { note: true },
+        select: { text: true },
       },
       dnaStructures: {
         include: {

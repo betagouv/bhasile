@@ -20,7 +20,7 @@ export const createNotesList = ({
         structureId: structure.id,
         userId,
         noteType: faker.helpers.enumValue(NoteType),
-        note: faker.lorem.paragraphs({ min: 1, max: 2 }),
+        text: faker.lorem.paragraphs({ min: 1, max: 2 }),
         createdAt: faker.date.past(),
         updatedAt: faker.date.past(),
         isArchived:
