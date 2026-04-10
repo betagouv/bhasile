@@ -4,34 +4,27 @@ import { useForm, useFormContext } from "react-hook-form";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { Table } from "@/app/components/common/Table";
-import InputWithValidation from "@/app/components/forms/InputWithValidation";
-import { cn } from "@/app/utils/classname.util";
 import { getYearRange } from "@/app/utils/date.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
-import { CURRENT_YEAR } from "@/constants";
 
 import { CustomNotice } from "../../common/CustomNotice";
+import { getIndicateurFinancierTableHeading } from "./budget-tables/getIndicateurFinancierTableHeading";
+import { getIndicateurFinancierTablePreHeading } from "./budget-tables/getIndicateurFinancierTablePreHeading";
+
+const CUTOFF_YEAR = 2024;
 
 export const IndicateursGeneraux = () => {
   const { structure } = useStructureContext();
 
-  const { years } = getYearRange();
+  const { years } = getYearRange({ order: "desc" });
   const startYear = getRealCreationYear(structure);
   const yearsToDisplay = years.filter((year) => year >= startYear);
 
   const parentFormContext = useFormContext();
   const localForm = useForm();
-  const { control, formState, register } = parentFormContext || localForm;
-  const errors = formState.errors;
+  const { watch } = parentFormContext || localForm;
 
-  const hasBudgetErrors =
-    Array.isArray(errors.budgets) &&
-    errors.budgets.some(
-      (budgetItemErrors: Record<string, unknown>) =>
-        budgetItemErrors?.ETP ||
-        budgetItemErrors?.tauxEncadrement ||
-        budgetItemErrors?.coutJournalier
-    );
+  const indicateursFinanciers = watch("indicateursFinanciers");
 
   return (
     <fieldset className="flex flex-col gap-6">
@@ -49,110 +42,22 @@ export const IndicateursGeneraux = () => {
         janvier de chaque année.
       </p>
       <Table
-        hasErrors={hasBudgetErrors}
-        headings={[
-          <th scope="col" key="annee" className="border-r!">
-            Année
-          </th>,
-          <th
-            scope="col"
-            key="etp"
-            className="uppercase text-mention-grey py-4 px-5 text-center text-xs"
-          >
-            <span className="flex flex-col">
-              Nombre
-              <span className="text-sm">ETP</span>
-            </span>
-          </th>,
-          <th
-            scope="col"
-            key="encadrement"
-            className="uppercase text-mention-grey py-4 px-5 text-center text-xs border-r!"
-          >
-            <span className="flex flex-col">
-              Taux
-              <span className="text-sm">encadrement</span>
-            </span>
-          </th>,
-          <th
-            scope="col"
-            key="cout"
-            className="uppercase text-mention-grey py-4 px-5 text-center text-xs"
-          >
-            <span className="flex flex-col">
-              Coût
-              <span className="text-sm">journalier</span>
-            </span>
-          </th>,
-        ]}
-        ariaLabelledBy=""
-        className={cn("scroll-margin-header w-fit [&_input]:max-w-28")}
+        ariaLabelledBy="gestionBudgetaire"
+        preHeadings={getIndicateurFinancierTablePreHeading({
+          years: yearsToDisplay,
+          cutOffYear: CUTOFF_YEAR,
+        })}
+        headings={getIndicateurFinancierTableHeading({
+          years: yearsToDisplay,
+          cutOffYear: CUTOFF_YEAR,
+        })}
         enableBorders
       >
-        {yearsToDisplay.map((year, index) => (
-          <tr key={year} className="w-full border-t border-default-grey ">
-            <td className="align-middle py-4 border-r!">
-              {year}
-              {CURRENT_YEAR - year < 2 && (
-                <>
-                  <br />
-                  <span className="text-xs">(prévisionnel)</span>
-                </>
-              )}
-              <input type="hidden" {...register(`budgets.${index}.id`)} />
-              <input
-                type="hidden"
-                value={year}
-                {...register(`budgets.${index}.year`)}
-              />
-            </td>
-            <td className="py-4!">
-              <InputWithValidation
-                name={`budgets.${index}.ETP`}
-                id={`budgets.${index}.ETP`}
-                control={control}
-                type="number"
-                min={0}
-                label=""
-                className="mb-0 mx-auto items-center [&_p]:hidden [&_input]:max-w-16"
-                variant="simple"
-              />
-            </td>
-            <td className="py-1! border-r!">
-              <InputWithValidation
-                name={`budgets.${index}.tauxEncadrement`}
-                id={`budgets.${index}.tauxEncadrement`}
-                control={control}
-                type="number"
-                min={0}
-                label=""
-                className="mb-0 mx-auto items-center [&_p]:hidden [&_input]:max-w-32"
-                variant="simple"
-              />
-            </td>
-            <td className="py-1!">
-              <span className="flex items-center gap-2">
-                <InputWithValidation
-                  name={`budgets.${index}.coutJournalier`}
-                  id={`budgets.${index}.coutJournalier`}
-                  control={control}
-                  type="number"
-                  min={0}
-                  label=""
-                  className="mb-0 mx-auto items-center [&_p]:hidden [&_input]:max-w-16"
-                  variant="simple"
-                />
-                €
-              </span>
-            </td>
-          </tr>
-        ))}
+        <IndicateurFinancierTableLines
+          years={yearsToDisplay}
+          indicateursFinanciers={indicateursFinanciers}
+        />
       </Table>
-      {hasBudgetErrors && (
-        <p className="text-label-red-marianne">
-          Toutes les cases doivent être remplies avec des nombres positifs
-        </p>
-      )}
     </fieldset>
   );
 };

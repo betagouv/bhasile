@@ -6,6 +6,7 @@ export const convertToPrismaObject = (initialObject: unknown): any => {
     "adresses",
     "adresseTypologies",
     "budgets",
+    "indicateursFinanciers",
     "fileUploads",
     "controles",
     "structureTypologies",

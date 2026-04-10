@@ -10,6 +10,7 @@ import {
   FileUpload,
   Form,
   FormStep,
+  IndicateurFinancier,
   Prisma,
   PublicType,
   Structure,
@@ -34,6 +35,7 @@ import {
   EvaluationWithFileUploads,
 } from "./evaluation.seed";
 import { createFakeFormWithSteps } from "./form.seed";
+import { createFakeIndicateurFinancier } from "./indicateur-financier";
 import { createFakeStructureTypologie } from "./structure-typologie.seed";
 
 export const createFakeStructure = ({
@@ -118,6 +120,10 @@ type StructureWithRelations = Structure & {
     "id" | "structureDnaCode" | "structureId"
   >[];
   budgets: Omit<Budget, "id" | "structureDnaCode" | "structureId">[];
+  indicateursFinanciers: Omit<
+    IndicateurFinancier,
+    "id" | "structureDnaCode" | "structureId"
+  >[];
   activites: Omit<Activite, "id" | "structureDnaCode" | "structureId">[];
   fileUploads: Omit<
     FileUpload,
@@ -186,11 +192,20 @@ export const createFakeStuctureWithRelations = ({
     structureWithRelations = {
       ...structureWithRelations,
       budgets: [
+        createFakeBudget({ year: 2026, type }),
         createFakeBudget({ year: 2025, type }),
         createFakeBudget({ year: 2024, type }),
         createFakeBudget({ year: 2023, type }),
         createFakeBudget({ year: 2022, type }),
         createFakeBudget({ year: 2021, type }),
+      ],
+      indicateursFinanciers: [
+        createFakeIndicateurFinancier({ year: 2026, type: "PREVISIONNEL" }),
+        createFakeIndicateurFinancier({ year: 2025, type: "PREVISIONNEL" }),
+        createFakeIndicateurFinancier({ year: 2024, type: "PREVISIONNEL" }),
+        createFakeIndicateurFinancier({ year: 2023, type: "REALISE" }),
+        createFakeIndicateurFinancier({ year: 2022, type: "REALISE" }),
+        createFakeIndicateurFinancier({ year: 2021, type: "REALISE" }),
       ],
       controles: [
         createFakeControle(),
