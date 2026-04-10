@@ -12,7 +12,7 @@ export const AccesRefuse = (): ReactElement => {
         description={
           <span>
             L’accès à Bhasile n’est pas autorisé pour le compte ProConnect
-            associé à l’adresse que vous avez utilisé.{" "}
+            associé à l’adresse que vous avez utilisée.{" "}
             <ExternalLink
               url={`mailto:${BHASILE_CONTACT_EMAIL}`}
               title="Contacter le support"
