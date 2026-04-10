@@ -8,6 +8,7 @@ model User {
   roleId         Int?
   emailPattern   EmailPattern? @relation(fields: [emailPatternId], references: [id])
   emailPatternId Int?
+  notes          Note[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
