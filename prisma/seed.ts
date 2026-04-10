@@ -150,7 +150,9 @@ export async function seed(): Promise<void> {
     });
 
     const hasFiliale = faker.datatype.boolean({ probability: 0.2 });
-    if (!hasFiliale) continue;
+    if (!hasFiliale) {
+      continue;
+    }
 
     const filiale = await prisma.operateur.create({
       data: convertToPrismaObject(
@@ -159,13 +161,13 @@ export async function seed(): Promise<void> {
       select: { id: true, name: true },
     });
 
-    const structuresOfOperateur = await prisma.structure.findMany({
+    const operateurStructures = await prisma.structure.findMany({
       where: { operateurId: createdOperateur.id },
       select: { id: true },
     });
 
     // Move 20% of the structures to the filiale
-    const structureIdsToMove = structuresOfOperateur
+    const structureIdsToMove = operateurStructures
       .filter(() => faker.datatype.boolean({ probability: 0.2 }))
       .map((s) => s.id);
 
