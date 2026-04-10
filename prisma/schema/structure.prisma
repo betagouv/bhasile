@@ -1,7 +1,7 @@
 model Structure {
   id                       Int                  @id @default(autoincrement())
   codeBhasile              String               @unique
-  filiale                  String?
+  filiale                  String? // TODO: remove after first filling is complete, filiales via Operateur are connected in app and DB is backfilled
   type                     StructureType?
   adresseAdministrative    String?
   codePostalAdministratif  String?
