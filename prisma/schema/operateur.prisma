@@ -5,7 +5,10 @@ model Operateur {
   directionGenerale String?
   siret             String?
   siegeSocial       String?
+  parent            Operateur?  @relation("OperateurToOperateur", fields: [parentId], references: [id])
+  parentId          Int?
   cpoms             Cpom[]
+  filiales          Operateur[] @relation("OperateurToOperateur")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
