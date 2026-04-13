@@ -6,6 +6,7 @@ import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableLineInput } from "./BudgetTableLineInput";
+import { BudgetTableLineLabel } from "./BudgetTableLineLabel";
 import { BudgetTableStaticValue } from "./BudgetTableStaticValue";
 
 export const BudgetTableLine = ({
@@ -33,11 +34,8 @@ export const BudgetTableLine = ({
 
   return (
     <tr>
-      <td className="text-left! w-[220]">
-        <strong className="whitespace-nowrap">{label}</strong>
-        <br />
-        <span className="text-xs">{subLabel}</span>
-      </td>
+      <BudgetTableLineLabel label={label} subLabel={subLabel} />
+
       {years.map((year) => (
         <td key={year}>
           <span className="flex items-center justify-center gap-2">

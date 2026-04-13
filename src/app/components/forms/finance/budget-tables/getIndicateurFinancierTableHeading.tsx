@@ -1,12 +1,11 @@
-export const getIndicateurFinancierTableHeading = ({
-  years,
-  cutOffYear,
-}: Props) => {
+import { INDICATEUR_FINANCIER_CUTOFF_YEAR } from "@/constants";
+
+export const getIndicateurFinancierTableHeading = ({ years }: Props) => {
   return [
     <th key="empty"></th>,
     ...years.map((year) => (
       <>
-        {year >= cutOffYear && <th>Prévisionnel</th>}
+        {year >= INDICATEUR_FINANCIER_CUTOFF_YEAR && <th>Prévisionnel</th>}
         <th>Réalisé</th>
       </>
     )),
@@ -15,5 +14,4 @@ export const getIndicateurFinancierTableHeading = ({
 
 type Props = {
   years: number[];
-  cutOffYear: number;
 };

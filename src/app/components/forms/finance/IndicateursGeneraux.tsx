@@ -9,9 +9,9 @@ import { getRealCreationYear } from "@/app/utils/structure.util";
 
 import { CustomNotice } from "../../common/CustomNotice";
 import { getIndicateurFinancierTableHeading } from "./budget-tables/getIndicateurFinancierTableHeading";
+import { getIndicateurFinancierTableLines } from "./budget-tables/getIndicateurFinancierTableLines";
 import { getIndicateurFinancierTablePreHeading } from "./budget-tables/getIndicateurFinancierTablePreHeading";
-
-const CUTOFF_YEAR = 2024;
+import { IndicateurFinancierTableLines } from "./budget-tables/IndicateurFinancierTableLines";
 
 export const IndicateursGeneraux = () => {
   const { structure } = useStructureContext();
@@ -45,15 +45,14 @@ export const IndicateursGeneraux = () => {
         ariaLabelledBy="gestionBudgetaire"
         preHeadings={getIndicateurFinancierTablePreHeading({
           years: yearsToDisplay,
-          cutOffYear: CUTOFF_YEAR,
         })}
         headings={getIndicateurFinancierTableHeading({
           years: yearsToDisplay,
-          cutOffYear: CUTOFF_YEAR,
         })}
         enableBorders
       >
         <IndicateurFinancierTableLines
+          lines={getIndicateurFinancierTableLines()}
           years={yearsToDisplay}
           indicateursFinanciers={indicateursFinanciers}
         />

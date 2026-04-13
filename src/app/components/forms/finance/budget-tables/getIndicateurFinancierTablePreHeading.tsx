@@ -1,9 +1,7 @@
 import { cn } from "@/app/utils/classname.util";
+import { INDICATEUR_FINANCIER_CUTOFF_YEAR } from "@/constants";
 
-export const getIndicateurFinancierTablePreHeading = ({
-  years,
-  cutOffYear,
-}: Props) => {
+export const getIndicateurFinancierTablePreHeading = ({ years }: Props) => {
   return [
     <th className="bg-white" key="empty" colSpan={1}>
       {" "}
@@ -13,7 +11,7 @@ export const getIndicateurFinancierTablePreHeading = ({
         scope="col"
         key={year}
         className="bg-white"
-        colSpan={year >= cutOffYear ? 2 : 1}
+        colSpan={year >= INDICATEUR_FINANCIER_CUTOFF_YEAR ? 2 : 1}
       >
         <span className={cn("block text-sm")}>{year}</span>
       </th>
@@ -23,5 +21,4 @@ export const getIndicateurFinancierTablePreHeading = ({
 
 type Props = {
   years: number[];
-  cutOffYear: number;
 };

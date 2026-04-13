@@ -1,43 +1,30 @@
-import { Fragment, ReactNode } from "react";
+import { ReactNode } from "react";
 
-import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { StructureType } from "@/types/structure.type";
 
-import { BudgetTableLine } from "./BudgetTableLine";
-import { BudgetTableTitleLine } from "./BudgetTableTitleLine";
+import { IndicateurFinancierTableLine } from "./IndicateurFinancierTableLine";
 
-export const BudgetTableLines = ({
-  type,
+export const IndicateurFinancierTableLines = ({
   lines,
-  budgets,
-  cpomStructures,
+  indicateursFinanciers,
   years,
-  enabledYears,
   canEdit = true,
 }: Props) => {
   return (
     <>
-      {lines.map((block) => (
-        <Fragment key={block.title}>
-          <BudgetTableTitleLine label={block.title} />
-          {block.lines.map((line) => (
-            <BudgetTableLine
-              key={"line-" + line.name}
-              name={line.name}
-              label={line.label}
-              subLabel={line.subLabel}
-              years={years}
-              disabledYearsStart={line.disabledYearsStart}
-              enabledYears={enabledYears ?? line.enabledYears}
-              colored={line.colored}
-              budgets={budgets}
-              cpomStructures={cpomStructures}
-              type={type}
-              canEdit={canEdit}
-            />
-          ))}
-        </Fragment>
+      {lines.map((line) => (
+        <IndicateurFinancierTableLine
+          key={line.name}
+          name={line.name}
+          label={line.label}
+          subLabel={line.subLabel}
+          years={years}
+          indicateursFinanciers={indicateursFinanciers}
+          canEdit={canEdit}
+          isCurrency={line.isCurrency}
+        />
       ))}
     </>
   );
@@ -46,17 +33,12 @@ export const BudgetTableLines = ({
 type Props = {
   type?: StructureType;
   lines: {
-    title: string;
-    lines: {
-      name: string;
-      label: string | ReactNode;
-      subLabel?: string;
-      colored?: boolean;
-      disabledYearsStart?: number;
-      enabledYears?: number[];
-    }[];
+    name: string;
+    label: string | ReactNode;
+    subLabel?: string;
+    isCurrency?: boolean;
   }[];
-  budgets?: BudgetApiType[];
+  indicateursFinanciers?: IndicateurFinancierApiType[];
   cpomStructures?: CpomStructureApiType[];
   years: number[];
   enabledYears?: number[];
