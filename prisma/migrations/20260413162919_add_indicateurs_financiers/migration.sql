@@ -1,11 +1,6 @@
 -- CreateEnum
 CREATE TYPE "IndicateurFinancierType" AS ENUM ('PREVISIONNEL', 'REALISE');
 
--- AlterTable
-ALTER TABLE "Budget" ADD COLUMN     "ETP_previsionnel" DOUBLE PRECISION,
-ADD COLUMN     "coutJournalier_previsionnel" DOUBLE PRECISION,
-ADD COLUMN     "tauxEncadrement_previsionnel" DOUBLE PRECISION;
-
 -- CreateTable
 CREATE TABLE "IndicateurFinancier" (
     "id" SERIAL NOT NULL,
