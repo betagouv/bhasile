@@ -5,6 +5,7 @@ import { useForm, useFormContext } from "react-hook-form";
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { Table } from "@/app/components/common/Table";
 import { getYearRange } from "@/app/utils/date.util";
+import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
 
 import { CustomNotice } from "../../common/CustomNotice";
@@ -13,7 +14,7 @@ import { getIndicateurFinancierTableLines } from "./budget-tables/getIndicateurF
 import { getIndicateurFinancierTablePreHeading } from "./budget-tables/getIndicateurFinancierTablePreHeading";
 import { IndicateurFinancierTableLines } from "./budget-tables/IndicateurFinancierTableLines";
 
-export const IndicateursGeneraux = () => {
+export const IndicateursFinanciers = () => {
   const { structure } = useStructureContext();
 
   const { years } = getYearRange({ order: "desc" });
@@ -22,9 +23,11 @@ export const IndicateursGeneraux = () => {
 
   const parentFormContext = useFormContext();
   const localForm = useForm();
-  const { watch } = parentFormContext || localForm;
+  const { watch, formState } = parentFormContext || localForm;
 
   const indicateursFinanciers = watch("indicateursFinanciers");
+
+  const errorMessages = getErrorMessages(formState, "indicateursFinanciers");
 
   return (
     <fieldset className="flex flex-col gap-6">
@@ -49,6 +52,7 @@ export const IndicateursGeneraux = () => {
         headings={getIndicateurFinancierTableHeading({
           years: yearsToDisplay,
         })}
+        hasErrors={errorMessages.length > 0}
         enableBorders
       >
         <IndicateurFinancierTableLines
@@ -57,6 +61,12 @@ export const IndicateursGeneraux = () => {
           indicateursFinanciers={indicateursFinanciers}
         />
       </Table>
+      {errorMessages.length > 0 &&
+        errorMessages.map((errorMessage) => (
+          <p className="text-label-red-marianne" key={errorMessage}>
+            {errorMessage}
+          </p>
+        ))}
     </fieldset>
   );
 };
