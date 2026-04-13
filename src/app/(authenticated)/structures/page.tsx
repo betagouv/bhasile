@@ -5,11 +5,9 @@ import dynamic from "next/dynamic";
 import { ReactElement, useMemo, useState } from "react";
 
 import { SegmentedControl } from "@/app/components/common/SegmentedControl";
-import Loader from "@/app/components/ui/Loader";
-import { useFetchState } from "@/app/context/FetchStateContext";
+import { ListLoader } from "@/app/components/lists/ListLoader";
 import { usePersistStructuresSearchQuery } from "@/app/hooks/usePersistStructuresSearchQuery";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
-import { FetchState } from "@/types/fetch-state.type";
 
 import { Filters } from "../../components/filters/Filters";
 import { SearchBar } from "./_components/SearchBar";
@@ -21,9 +19,6 @@ export default function Structures(): ReactElement {
   usePersistStructuresSearchQuery();
 
   const { structures, totalStructures } = useStructuresSearch({ map: false });
-
-  const { getFetchState } = useFetchState();
-  const fetchState = getFetchState("structure-search");
 
   const StructuresMap = useMemo(
     () =>
@@ -66,34 +61,19 @@ export default function Structures(): ReactElement {
         </p>
       </div>
       {selectedVisualization === "tableau" && (
-        <>
-          {fetchState === FetchState.LOADING && (
-            <div className="flex items-center p-4">
-              <Loader />
-              <span className="pl-2">Chargement des structures...</span>
-            </div>
+        <ListLoader
+          fetchStateName={"structure-search"}
+          items={structures}
+          entityName={"structure"}
+        >
+          {structures && (
+            <StructuresTable
+              structures={structures}
+              totalStructures={totalStructures}
+              ariaLabelledBy="structures-titre"
+            />
           )}
-          {fetchState === FetchState.ERROR && (
-            <div className="flex items-center p-4">
-              <span className="pl-2">
-                Erreur lors de la récupération des structures
-              </span>
-            </div>
-          )}
-          {fetchState === FetchState.IDLE &&
-            structures &&
-            (structures?.length > 0 ? (
-              <StructuresTable
-                structures={structures}
-                totalStructures={totalStructures}
-                ariaLabelledBy="structures-titre"
-              />
-            ) : (
-              <p className="p-2">
-                Aucun résultat ne correspond à votre recherche
-              </p>
-            ))}
-        </>
+        </ListLoader>
       )}
       {selectedVisualization === "carte" && <StructuresMap />}
     </div>

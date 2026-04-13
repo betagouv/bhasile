@@ -2,18 +2,13 @@
 
 import { ReactElement } from "react";
 
-import Loader from "@/app/components/ui/Loader";
-import { useFetchState } from "@/app/context/FetchStateContext";
+import { ListLoader } from "@/app/components/lists/ListLoader";
 import { useOperateurSearch } from "@/app/hooks/useOperateurSearch";
-import { FetchState } from "@/types/fetch-state.type";
 
 import { OperateurList } from "./OperateursList";
 
 export default function Operateurs(): ReactElement {
   const { operateurs, totalOperateurs } = useOperateurSearch();
-
-  const { getFetchState } = useFetchState();
-  const fetchState = getFetchState("operateurs-search");
 
   return (
     <div className="h-full w-full flex flex-col bg-alt-grey">
@@ -29,30 +24,18 @@ export default function Operateurs(): ReactElement {
           {(totalOperateurs ?? 0) > 1 ? "s" : ""}
         </p>
       </div>
-
-      {fetchState === FetchState.LOADING && (
-        <div className="flex items-center px-4">
-          <Loader />
-          <span className="pl-2">Chargement des opérateurs...</span>
-        </div>
-      )}
-      {fetchState === FetchState.ERROR && (
-        <div className="flex items-center px-4">
-          <span className="pl-2">
-            Erreur lors de la récupération des opérateurs
-          </span>
-        </div>
-      )}
-      {fetchState === FetchState.IDLE &&
-        operateurs &&
-        (operateurs?.length > 0 ? (
+      <ListLoader
+        fetchStateName={"operateurs-search"}
+        items={operateurs}
+        entityName={"opérateur"}
+      >
+        {operateurs && (
           <OperateurList
             operateurs={operateurs}
             totalOperateurs={totalOperateurs}
           />
-        ) : (
-          <p className="p-2">Aucun opérateur trouvé</p>
-        ))}
+        )}
+      </ListLoader>
     </div>
   );
 }

@@ -43,6 +43,7 @@ export const OperateurItem = ({
                 </Badge>
               ))}
             </div>
+            {/* TODO : en attente de la migration des données de filiales en prod */}
             {/* <div className="flex items-center">
               <span className="pr-4">X filiales</span>
               <Button
