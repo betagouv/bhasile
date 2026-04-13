@@ -19,7 +19,7 @@ export const BudgetTableLineInput = ({
   cpomStructures,
   disabledYearsStart,
   enabledYears,
-  isCurrrency = true,
+  isCurrency = true,
 }: Props) => {
   return (
     <>
@@ -54,7 +54,7 @@ export const BudgetTableLineInput = ({
           cpomStructures
         )}
       />
-      {isCurrrency ? "€" : ""}
+      {isCurrency ? "€" : ""}
     </>
   );
 };
@@ -69,5 +69,5 @@ type Props = {
   cpomStructures?: CpomStructureApiType[];
   disabledYearsStart?: number;
   enabledYears?: number[];
-  isCurrrency?: boolean;
+  isCurrency?: boolean;
 };

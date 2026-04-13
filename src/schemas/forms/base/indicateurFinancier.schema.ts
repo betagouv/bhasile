@@ -77,3 +77,11 @@ export const indicateursFinanciersSchema = z
       path: ["indicateursFinanciers"],
     }
   );
+
+export type IndicateursFinanciersFormValues = z.infer<
+  typeof indicateursFinanciersSchema
+>;
+
+export type IndicateurFinancierFormValues = z.infer<
+  typeof indicateurFinancierSchema
+>;

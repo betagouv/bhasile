@@ -28,6 +28,7 @@ import {
 } from "../budget.schema";
 import { cpomStructureSchema } from "../cpom.schema";
 import { DocumentsFinanciersFlexibleSchema } from "../documentFinancier.schema";
+import { indicateursFinanciersSchema } from "../indicateurFinancier.schema";
 
 export const getFinanceSchema = (
   structure: StructureApiType,
@@ -88,10 +89,12 @@ export const getFinanceSchema = (
     .filter(Boolean) as [BudgetSchema, ...BudgetSchema[]];
 
   if (formKind === FormKind.FINALISATION) {
-    return z.object({
-      budgets: z.tuple(schema),
-      cpomStructures: z.array(cpomStructureSchema),
-    });
+    return z
+      .object({
+        budgets: z.tuple(schema),
+        cpomStructures: z.array(cpomStructureSchema),
+      })
+      .and(indicateursFinanciersSchema);
   }
 
   return z
@@ -99,6 +102,7 @@ export const getFinanceSchema = (
       budgets: z.tuple(schema),
       cpomStructures: z.array(cpomStructureSchema),
     })
+    .and(indicateursFinanciersSchema)
     .and(DocumentsFinanciersFlexibleSchema);
 };
 

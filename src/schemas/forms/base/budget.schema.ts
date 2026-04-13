@@ -12,6 +12,7 @@ import {
 
 import { validateAffectationReservesDetails } from "./budget/validateAffectationReservesDetails";
 import { cpomStructureSchema } from "./cpom.schema";
+import { indicateurFinancierSchema } from "./indicateurFinancier.schema";
 
 export const budgetBaseSchema = z.object({
   id: zId(),
@@ -158,6 +159,7 @@ export const budgetInCpomSchema = budgetAutoriseeOpenSchemaWithoutRefinement
 export const budgetsAutoSaveSchema = z
   .object({
     budgets: z.array(budgetAutoSaveSchema),
+    indicateursFinanciers: z.array(indicateurFinancierSchema),
   })
   .and(z.object({ cpomStructures: z.array(cpomStructureSchema) }));
 

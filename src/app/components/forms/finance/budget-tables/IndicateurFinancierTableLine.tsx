@@ -39,7 +39,7 @@ export const IndicateurFinancierTableLine = ({
       <BudgetTableLineLabel label={label} subLabel={subLabel} />
       {years.map((year, index) =>
         everyColumns[index].map((type) => (
-          <td key={year}>
+          <td key={year + type}>
             <span className="flex items-center justify-center gap-2">
               {canEdit ? (
                 <BudgetTableLineInput
@@ -48,7 +48,7 @@ export const IndicateurFinancierTableLine = ({
                   type={type}
                   control={control}
                   indicateursFinanciers={indicateursFinanciers}
-                  isCurrrency={isCurrency}
+                  isCurrency={isCurrency}
                 />
               ) : (
                 <BudgetTableStaticValue
@@ -56,7 +56,7 @@ export const IndicateurFinancierTableLine = ({
                   year={year}
                   type={type}
                   indicateursFinanciers={indicateursFinanciers}
-                  isCurrrency={isCurrency}
+                  isCurrency={isCurrency}
                 />
               )}
             </span>
