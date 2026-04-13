@@ -1,7 +1,27 @@
 import prisma from "@/lib/prisma";
 
-import { Prisma } from "@/generated/prisma/client";
 import { ActiviteStats } from "./activite.type";
+
+// TODO check on first import that tauxoccupations are numbers
+const computePlacesVacantesAndPlacesOccupees = (
+  placesAutorisees: number | null | undefined,
+  placesIndisponibles: number | null | undefined,
+  tauxOccupation: number | null | undefined
+): { placesVacantes: number | null; placesOccupees: number | null } => {
+  if (
+    placesAutorisees == null ||
+    placesIndisponibles == null ||
+    tauxOccupation == null
+  ) {
+    return { placesVacantes: null, placesOccupees: null };
+  }
+
+  const placesDisponibles = placesAutorisees - placesIndisponibles;
+  const placesOccupees = placesDisponibles * tauxOccupation;
+  const placesVacantes = placesDisponibles - placesOccupees;
+
+  return { placesVacantes, placesOccupees };
+};
 
 export type StructureActiviteRow = {
   id: number;
@@ -20,58 +40,68 @@ export type StructureActiviteRow = {
   presencesIndues: number | null;
 };
 
-const col = (alias: string, column: string) =>
-  Prisma.raw(`${alias}."${column}"`);
-
-const computedPlacesOccupeesSql = (alias: string) =>
-  Prisma.sql`CASE
-    WHEN ${col(alias, "placesAutorisees")} IS NULL
-      OR ${col(alias, "placesIndisponibles")} IS NULL
-      OR ${col(alias, "tauxOccupation")} IS NULL
-      THEN NULL
-    ELSE ((${col(alias, "placesAutorisees")} - ${col(alias, "placesIndisponibles")})::float8 * ${col(alias, "tauxOccupation")}::float8)
-  END`;
-
-const computedPlacesVacantesSql = (alias: string) =>
-  Prisma.sql`CASE
-    WHEN ${col(alias, "placesAutorisees")} IS NULL
-      OR ${col(alias, "placesIndisponibles")} IS NULL
-      OR ${col(alias, "tauxOccupation")} IS NULL
-      THEN NULL
-    ELSE (
-      ((${col(alias, "placesAutorisees")} - ${col(alias, "placesIndisponibles")})::float8) -
-      ((${col(alias, "placesAutorisees")} - ${col(alias, "placesIndisponibles")})::float8 * ${col(alias, "tauxOccupation")}::float8)
-    )
-  END`;
-
 export const getActivitesForStructure = async (
   structureId: number
 ): Promise<StructureActiviteRow[]> => {
-  // Agrégation par mois (date) sur l'ensemble des DNA liés à la structure.
-  // `SUM(...)` ignore les NULL, ce qui colle avec l'ancienne agrégation JS (on n'ajoute que les valeurs présentes).
-  return prisma.$queryRaw<StructureActiviteRow[]>(Prisma.sql`
-    SELECT
-      MIN(a.id)::int as "id",
-      a.date as "date",
-      SUM(a."placesAutorisees")::int as "placesAutorisees",
-      SUM(a."desinsectisation")::int as "desinsectisation",
-      SUM(a."remiseEnEtat")::int as "remiseEnEtat",
-      SUM(a."sousOccupation")::int as "sousOccupation",
-      SUM(a."placesIndisponibles")::int as "placesIndisponibles",
-      AVG(a."tauxOccupation"::float8) as "tauxOccupation",
-      SUM((${computedPlacesOccupeesSql("a")})) as "placesOccupees",
-      SUM(a."travaux")::int as "travaux",
-      SUM((${computedPlacesVacantesSql("a")})) as "placesVacantes",
-      SUM(a."presencesInduesBPI")::int as "presencesInduesBPI",
-      SUM(a."presencesInduesDeboutees")::int as "presencesInduesDeboutees",
-      SUM(a."presencesInduesBPI" + a."presencesInduesDeboutees")::int as "presencesIndues"
-    FROM "Activite" a
-    INNER JOIN "Dna" dna ON dna."code" = a."dnaCode"
-    INNER JOIN "DnaStructure" ds ON ds."dnaId" = dna."id"
-    WHERE ds."structureId" = ${structureId}
-    GROUP BY a.date
-    ORDER BY a.date DESC
-  `);
+  const rows = await prisma.activite.findMany({
+    where: {
+      dna: {
+        dnaStructures: {
+          some: {
+            structureId,
+          },
+        },
+      },
+    },
+    orderBy: {
+      date: "desc",
+    },
+    select: {
+      id: true,
+      date: true,
+      placesAutorisees: true,
+      desinsectisation: true,
+      remiseEnEtat: true,
+      sousOccupation: true,
+      placesIndisponibles: true,
+      tauxOccupation: true,
+      travaux: true,
+      presencesInduesBPI: true,
+      presencesInduesDeboutees: true,
+    },
+  });
+
+  return rows.map((r) => {
+    const { placesVacantes, placesOccupees } =
+      computePlacesVacantesAndPlacesOccupees(
+        r.placesAutorisees,
+        r.placesIndisponibles,
+        r.tauxOccupation
+      );
+
+    const presencesIndues =
+      r.presencesInduesBPI == null && r.presencesInduesDeboutees == null
+        ? null
+        : (r.presencesInduesBPI ?? 0) + (r.presencesInduesDeboutees ?? 0);
+
+    return {
+      id: r.id,
+      date: r.date,
+      placesAutorisees: r.placesAutorisees,
+      desinsectisation: r.desinsectisation,
+      remiseEnEtat: r.remiseEnEtat,
+      sousOccupation: r.sousOccupation,
+      placesIndisponibles: r.placesIndisponibles,
+      tauxOccupation:
+        r.tauxOccupation == null ? null : Number(r.tauxOccupation),
+      placesOccupees,
+      travaux: r.travaux,
+      placesVacantes,
+      presencesInduesBPI: r.presencesInduesBPI,
+      presencesInduesDeboutees: r.presencesInduesDeboutees,
+      presencesIndues,
+    };
+  });
 };
 
 export const getDepartementActivitesAverage = async (
@@ -83,16 +113,16 @@ export const getDepartementActivitesAverage = async (
     return null;
   }
 
-  const result = await prisma.$queryRaw<ActiviteStats[]>(Prisma.sql`
-    SELECT
+  const result = (await prisma.$queryRaw`
+    SELECT 
       d.numero,
-      ROUND(AVG(a."placesAutorisees"::float8), 2) as "averagePlacesAutorisees",
-      ROUND(AVG(a."placesIndisponibles"::float8), 2) as "averagePlacesIndisponibles",
-      ROUND(AVG((${computedPlacesOccupeesSql("a")})), 2) as "averagePlacesOccupees",
-      ROUND(AVG((${computedPlacesVacantesSql("a")})), 2) as "averagePlacesVacantes",
-      ROUND(AVG(a."presencesInduesBPI"::float8), 2) as "averagePresencesInduesBPI",
-      ROUND(AVG(a."presencesInduesDeboutees"::float8), 2) as "averagePresencesInduesDeboutees",
-      ROUND(AVG((a."presencesInduesBPI" + a."presencesInduesDeboutees")::float8), 2) as "averagePresencesIndues"
+      ROUND(AVG(a."placesAutorisees"), 2) as "averagePlacesAutorisees",
+      ROUND(AVG(a."placesIndisponibles"), 2) as "averagePlacesIndisponibles",
+      ROUND(AVG(a."placesOccupees"), 2) as "averagePlacesOccupees",
+      ROUND(AVG(a."placesVacantes"), 2) as "averagePlacesVacantes",
+      ROUND(AVG(a."presencesInduesBPI"), 2) as "averagePresencesInduesBPI",
+      ROUND(AVG(a."presencesInduesDeboutees"), 2) as "averagePresencesInduesDeboutees",
+      ROUND(AVG(a."presencesInduesBPI" + a."presencesInduesDeboutees"), 2) as "averagePresencesIndues"
     FROM "Activite" a
     INNER JOIN "Dna" dna ON dna."code" = a."dnaCode"
     INNER JOIN "DnaStructure" ds ON ds."dnaId" = dna."id"
@@ -101,7 +131,7 @@ export const getDepartementActivitesAverage = async (
     WHERE a.date BETWEEN ${startDate} AND ${endDate}
       AND d."numero" = ${departementNumero}
     GROUP BY d.id, d.numero
-  `);
+  `) as ActiviteStats[];
 
   return result[0] || null;
 };
