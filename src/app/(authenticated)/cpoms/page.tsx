@@ -4,18 +4,13 @@ import Link from "next/link";
 import { ReactElement } from "react";
 
 import { Filters } from "@/app/components/filters/Filters";
-import Loader from "@/app/components/ui/Loader";
-import { useFetchState } from "@/app/context/FetchStateContext";
+import { ListLoader } from "@/app/components/lists/ListLoader";
 import { useCpomsSearch } from "@/app/hooks/useCpomsSearch";
-import { FetchState } from "@/types/fetch-state.type";
 
 import { CpomsTable } from "./_components/CpomsTable";
 
 export default function Structures(): ReactElement {
   const { cpoms, totalCpoms } = useCpomsSearch();
-
-  const { getFetchState } = useFetchState();
-  const fetchState = getFetchState("cpoms-search");
 
   return (
     <div className="h-full w-full flex flex-col bg-alt-grey">
@@ -37,28 +32,19 @@ export default function Structures(): ReactElement {
           {(totalCpoms ?? 0) > 1 ? "s" : ""}
         </p>
       </div>
-      {fetchState === FetchState.LOADING && (
-        <div className="flex items-center px-4">
-          <Loader />
-          <span className="pl-2">Chargement des CPOMs...</span>
-        </div>
-      )}
-      {fetchState === FetchState.ERROR && (
-        <div className="flex items-center px-4">
-          <span className="pl-2">Erreur lors de la récupération des CPOMs</span>
-        </div>
-      )}
-      {fetchState === FetchState.IDLE &&
-        cpoms &&
-        (cpoms?.length > 0 ? (
+      <ListLoader
+        fetchStateName={"cpoms-search"}
+        items={cpoms}
+        entityName={"CPOM"}
+      >
+        {cpoms && (
           <CpomsTable
             cpoms={cpoms}
             totalCpoms={totalCpoms}
             ariaLabelledBy="cpoms-titre"
           />
-        ) : (
-          <p className="p-2">Aucun CPOM trouvé</p>
-        ))}
+        )}
+      </ListLoader>
     </div>
   );
 }

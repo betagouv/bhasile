@@ -7,11 +7,14 @@ export function useOperateurSuggestion() {
     }
 
     try {
-      const response = await fetch(`/api/operateurs?search=${query}`);
+      const response = await fetch(
+        `/api/operateurs/suggestions?search=${query}`
+      );
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
       const data = await response.json();
+
       return data.map((operateur: OperateurApiType) => ({
         id: operateur.id,
         label: operateur.name,
