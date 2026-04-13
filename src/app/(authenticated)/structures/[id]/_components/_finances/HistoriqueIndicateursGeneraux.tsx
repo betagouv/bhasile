@@ -10,26 +10,38 @@ import { useStructureContext } from "../../_context/StructureClientContext";
 export const HistoriqueIndicateursGeneraux = (): ReactElement => {
   const { structure } = useStructureContext();
 
-  const getBudgets = () => {
-    if (!structure?.budgets) {
+  const getIndicateursFinanciers = () => {
+    if (!structure?.indicateursFinanciers) {
       return [];
     }
-    return structure.budgets.map((budget) => [
-      <span className="inline-block text-center w-full" key={budget.id}>
-        {budget.year}
+    return structure.indicateursFinanciers.map((indicateurFinancier) => [
+      <span
+        className="inline-block text-center w-full"
+        key={indicateurFinancier.id}
+      >
+        {indicateurFinancier.year} {indicateurFinancier.type}
       </span>,
-      <span className="inline-block text-center w-full" key={budget.id}>
-        {formatNumber(budget.ETP)}
+      <span
+        className="inline-block text-center w-full"
+        key={indicateurFinancier.id}
+      >
+        {formatNumber(indicateurFinancier.ETP)}
       </span>,
-      <span className="inline-block text-center w-full" key={budget.id}>
-        {formatNumber(budget.tauxEncadrement)}
+      <span
+        className="inline-block text-center w-full"
+        key={indicateurFinancier.id}
+      >
+        {formatNumber(indicateurFinancier.tauxEncadrement)}
       </span>,
-      <span className="inline-block w-20 text-center" key={budget.id}>
-        {formatCurrency(budget.coutJournalier)}
+      <span
+        className="inline-block w-20 text-center"
+        key={indicateurFinancier.id}
+      >
+        {formatCurrency(indicateurFinancier.coutJournalier)}
       </span>,
     ]);
   };
-  // TODO : vérifier le contraste du texte
+
   return (
     <CustomAccordion
       label={
@@ -42,7 +54,7 @@ export const HistoriqueIndicateursGeneraux = (): ReactElement => {
         bordered={true}
         className="full-width-table"
         caption=""
-        data={getBudgets()}
+        data={getIndicateursFinanciers()}
         headers={["ANNÉE", "ETP", "TAUX D'ENCADREMENT", "COÛT JOURNALIER"]}
       />
     </CustomAccordion>
