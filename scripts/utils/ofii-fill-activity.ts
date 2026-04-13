@@ -8,28 +8,6 @@ import type { PrismaClient } from "@/generated/prisma/client";
 
 import { type ActiviteRow } from "./ofii-xlsx";
 
-/*
- * TODO: check later coherence with the way the file is established at OFII
- * Based on discussion we take the percentage into account but it might as well be the original (and incoherent) field
- */
-const computePlacesVacantesAndPlacesOccupees = (
-  placesAutorisees: number | null,
-  placesIndisponibles: number | null,
-  tauxOccupation: number | null
-): { placesVacantes: number | null; placesOccupees: number | null } => {
-  if (
-    placesAutorisees == null ||
-    placesIndisponibles == null ||
-    tauxOccupation == null
-  ) {
-    return { placesVacantes: null, placesOccupees: null };
-  }
-  const placesDisponibles = placesAutorisees - placesIndisponibles;
-  const placesOccupees = placesDisponibles * tauxOccupation;
-  const placesVacantes = placesDisponibles - placesOccupees;
-  return { placesVacantes, placesOccupees };
-};
-
 /**
  * Remplit la table Activite pour une date donnée à partir de lignes déjà parsées.
  */
@@ -76,13 +54,6 @@ export async function fillOfiiActiviteFromRows(
   for (const row of validRows) {
     const r = row as ActiviteRow;
     try {
-      const { placesVacantes, placesOccupees } =
-        computePlacesVacantesAndPlacesOccupees(
-          r.placesAutorisees,
-          r.placesIndisponibles,
-          r.tauxOccupation
-        );
-
       await prisma.activite.upsert({
         where: {
           dnaCode_date: {
@@ -99,8 +70,8 @@ export async function fillOfiiActiviteFromRows(
           sousOccupation: r.sousOccupation ?? undefined,
           travaux: r.travaux ?? undefined,
           placesIndisponibles: r.placesIndisponibles ?? undefined,
-          placesOccupees: placesOccupees ?? undefined,
-          placesVacantes: placesVacantes ?? undefined,
+          tauxOccupation: r.tauxOccupation ?? undefined,
+          placesOccupees: r.placesOccupees ?? undefined,
           presencesInduesBPI: r.presencesInduesBPI ?? undefined,
           presencesInduesDeboutees: r.presencesInduesDeboutees ?? undefined,
         },
@@ -112,8 +83,8 @@ export async function fillOfiiActiviteFromRows(
           sousOccupation: r.sousOccupation ?? undefined,
           travaux: r.travaux ?? undefined,
           placesIndisponibles: r.placesIndisponibles ?? undefined,
-          placesOccupees: placesOccupees ?? undefined,
-          placesVacantes: placesVacantes ?? undefined,
+          tauxOccupation: r.tauxOccupation ?? undefined,
+          placesOccupees: r.placesOccupees ?? undefined,
           presencesInduesBPI: r.presencesInduesBPI ?? undefined,
           presencesInduesDeboutees: r.presencesInduesDeboutees ?? undefined,
         },

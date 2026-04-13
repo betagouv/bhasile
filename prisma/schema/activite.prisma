@@ -8,9 +8,9 @@ model Activite {
   remiseEnEtat             Int?
   sousOccupation           Int?
   placesIndisponibles      Int?
+  tauxOccupation           Decimal?
   placesOccupees           Int?
   travaux                  Int?
-  placesVacantes           Int?
   presencesInduesBPI       Int?
   presencesInduesDeboutees Int?
 
