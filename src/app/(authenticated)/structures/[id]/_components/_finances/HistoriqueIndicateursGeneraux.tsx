@@ -33,7 +33,7 @@ export const HistoriqueIndicateursGeneraux = () => {
       }
     >
       <Table
-        ariaLabelledBy=""
+        ariaLabelledBy="Indicateurs financiers"
         headings={getIndicateurFinancierStaticTableHeading({
           years: yearsToDisplay,
           indicateursFinanciers: indicateursFinanciers,
