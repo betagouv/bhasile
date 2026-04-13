@@ -28,6 +28,8 @@ export const IndicateurFinancierTableLine = ({
     return null;
   }
 
+  // If we can edit, we display both PREVISIONNEL and REALISE (until INDICATEUR_FINANCIER_CUTOFF_YEAR
+  // If we can't edit, we display the REALISE column if it is filled, otherwise we display the PREVISIONNEL column
   const everyColumns = canEdit
     ? years.map((year) =>
         year >= INDICATEUR_FINANCIER_CUTOFF_YEAR
