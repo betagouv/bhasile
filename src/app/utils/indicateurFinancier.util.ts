@@ -59,3 +59,20 @@ export const getIndicateursFinanciersDefaultValues = (
 
   return indicateursFinanciers;
 };
+
+export const isYearRealisee = (
+  indicateursFinanciers: IndicateurFinancierApiType[],
+  year: number
+) => {
+  const indicateurFinancierRealise = indicateursFinanciers.find(
+    (indicateurFinancier) =>
+      indicateurFinancier.year === year &&
+      indicateurFinancier.type === "REALISE"
+  );
+
+  return (
+    indicateurFinancierRealise?.ETP !== undefined &&
+    indicateurFinancierRealise?.tauxEncadrement !== undefined &&
+    indicateurFinancierRealise?.coutJournalier !== undefined
+  );
+};

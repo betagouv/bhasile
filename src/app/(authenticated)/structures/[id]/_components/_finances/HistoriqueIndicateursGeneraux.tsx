@@ -1,46 +1,28 @@
-import Table from "@codegouvfr/react-dsfr/Table";
-import { ReactElement } from "react";
-
 import { CustomAccordion } from "@/app/components/common/CustomAccordion";
-import { formatCurrency, formatNumber } from "@/app/utils/number.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
+import { Table } from "@/app/components/common/Table";
+import { getIndicateurFinancierTableLines } from "@/app/components/forms/finance/budget-tables/getIndicateurFinancierTableLines";
+import { IndicateurFinancierTableLines } from "@/app/components/forms/finance/budget-tables/IndicateurFinancierTableLines";
+import { getYearRange } from "@/app/utils/date.util";
+import {
+  getRealCreationYear,
+  isStructureAutorisee,
+} from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
+import { getIndicateurFinancierStaticTableHeading } from "./getIndicateurFinancierStaticTableHeading";
 
-export const HistoriqueIndicateursGeneraux = (): ReactElement => {
+export const HistoriqueIndicateursGeneraux = () => {
   const { structure } = useStructureContext();
 
-  const getIndicateursFinanciers = () => {
-    if (!structure?.indicateursFinanciers) {
-      return [];
-    }
-    return structure.indicateursFinanciers.map((indicateurFinancier) => [
-      <span
-        className="inline-block text-center w-full"
-        key={indicateurFinancier.id}
-      >
-        {indicateurFinancier.year} {indicateurFinancier.type}
-      </span>,
-      <span
-        className="inline-block text-center w-full"
-        key={indicateurFinancier.id}
-      >
-        {formatNumber(indicateurFinancier.ETP)}
-      </span>,
-      <span
-        className="inline-block text-center w-full"
-        key={indicateurFinancier.id}
-      >
-        {formatNumber(indicateurFinancier.tauxEncadrement)}
-      </span>,
-      <span
-        className="inline-block w-20 text-center"
-        key={indicateurFinancier.id}
-      >
-        {formatCurrency(indicateurFinancier.coutJournalier)}
-      </span>,
-    ]);
-  };
+  const indicateursFinanciers = structure?.indicateursFinanciers;
+
+  const { years } = getYearRange({ order: "desc" });
+  const startYear = getRealCreationYear(structure);
+  const yearsToDisplay = years.filter((year) => year >= startYear);
+
+  if (!indicateursFinanciers) {
+    return null;
+  }
 
   return (
     <CustomAccordion
@@ -51,12 +33,20 @@ export const HistoriqueIndicateursGeneraux = (): ReactElement => {
       }
     >
       <Table
-        bordered={true}
-        className="full-width-table"
-        caption=""
-        data={getIndicateursFinanciers()}
-        headers={["ANNÉE", "ETP", "TAUX D'ENCADREMENT", "COÛT JOURNALIER"]}
-      />
+        ariaLabelledBy=""
+        headings={getIndicateurFinancierStaticTableHeading({
+          years: yearsToDisplay,
+          indicateursFinanciers: indicateursFinanciers,
+        })}
+        enableBorders
+      >
+        <IndicateurFinancierTableLines
+          lines={getIndicateurFinancierTableLines()}
+          years={yearsToDisplay}
+          indicateursFinanciers={indicateursFinanciers}
+          canEdit={false}
+        />
+      </Table>
     </CustomAccordion>
   );
 };

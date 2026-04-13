@@ -28,11 +28,26 @@ export const IndicateurFinancierTableLine = ({
     return null;
   }
 
-  const everyColumns = years.map((year) =>
-    year >= INDICATEUR_FINANCIER_CUTOFF_YEAR
-      ? (["PREVISIONNEL", "REALISE"] as IndicateurFinancierType[])
-      : (["REALISE"] as IndicateurFinancierType[])
-  );
+  const everyColumns = canEdit
+    ? years.map((year) =>
+        year >= INDICATEUR_FINANCIER_CUTOFF_YEAR
+          ? (["PREVISIONNEL", "REALISE"] as IndicateurFinancierType[])
+          : (["REALISE"] as IndicateurFinancierType[])
+      )
+    : years.map((year) => {
+        const indicateurFinancierRealise = indicateursFinanciers?.find(
+          (indicateurFinancier) =>
+            indicateurFinancier.type === "REALISE" &&
+            indicateurFinancier.year === year
+        );
+        const isIndicateurFinancierRealiseFilled =
+          indicateurFinancierRealise?.ETP !== undefined &&
+          indicateurFinancierRealise?.tauxEncadrement !== undefined &&
+          indicateurFinancierRealise?.coutJournalier !== undefined;
+        return [
+          isIndicateurFinancierRealiseFilled ? "REALISE" : "PREVISIONNEL",
+        ] as IndicateurFinancierType[];
+      });
 
   return (
     <tr>
