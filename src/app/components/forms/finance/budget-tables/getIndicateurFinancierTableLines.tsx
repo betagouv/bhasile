@@ -15,6 +15,7 @@ export const getIndicateurFinancierTableLines = () => {
     {
       name: "coutJournalier",
       label: "Coût journalier",
+      isCurrency: true,
     },
   ];
 };

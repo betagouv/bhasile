@@ -21,6 +21,11 @@ export const indicateursFinanciersSchema = z
   })
   .refine(
     ({ indicateursFinanciers }) => {
+      if (indicateursFinanciers.length === 0) {
+        return false;
+      }
+
+      
       const byYear: Record<
         number,
         { [key: string]: { REALISE?: boolean; PREVISIONNEL?: boolean } }
@@ -83,5 +88,3 @@ export type IndicateursFinanciersFormValues = z.infer<
 >;
 
 export type IndicateurFinancierFormValues = z.infer<
-  typeof indicateurFinancierSchema
->;
