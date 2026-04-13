@@ -126,24 +126,21 @@ export const Menu = (): ReactElement => {
       </div>
       <ul className="p-6">
         {secondaryMenuItems.map((menuItem) => (
-          <li
-            className="text-mention-grey fr-text--xs py-0.5"
-            key={menuItem.label}
-          >
+          <li className="text-mention-grey text-xs py-0.5" key={menuItem.label}>
             <Link href={menuItem.url}>
               <span>{menuItem.label}</span>
             </Link>
           </li>
         ))}
-        <li className="text-mention-grey fr-text--xs inline pr-1">
+        <li className="text-mention-grey text-xs inline pr-1">
           <ExternalLink title="Aide" url={`mailto:${BHASILE_CONTACT_EMAIL}`} />
         </li>
         {" • "}
-        <li className="text-mention-grey fr-text--xs inline px-1">
+        <li className="text-mention-grey text-xs inline px-1">
           <Link href="/usage">Usage</Link>
         </li>
         {" • "}
-        <li className="text-mention-grey fr-text--xs inline pl-1">
+        <li className="text-mention-grey text-xs inline pl-1">
           <ExternalLink
             title="Code source"
             url="https://github.com/betagouv/bhasile"
