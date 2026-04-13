@@ -14,7 +14,7 @@ export async function seedStructureForSelection(
     ? parseAddress(testData.adresseAdministrative.searchTerm)
     : { street: "", postalCode: "", city: "", department: "" };
 
-  const { id } = await createMinimalStructure(testData.dnas?.[0]?.code ?? "", {
+  const { id } = await createMinimalStructure(testData.dnas ?? [], {
     codeBhasile: testData.codeBhasile,
     type: testData.type ?? StructureType.CADA,
     operateurId: testData.operateur?.id ?? 1,

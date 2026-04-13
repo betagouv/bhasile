@@ -42,6 +42,12 @@ export const protectedApiRoutes: ApiRoute[] = [
     },
   },
   {
+    pattern: /^\/api\/dna-codes$/,
+    routes: {
+      GET: "either",
+    },
+  },
+  {
     pattern: /^\/api\/files\/[^/]+$/,
     routes: {
       GET: "either",

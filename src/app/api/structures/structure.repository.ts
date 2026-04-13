@@ -534,7 +534,7 @@ const updateStructure = async (
 
 // Only used in e2e tests
 export const createMinimalStructure = async (
-  dnaCode: string,
+  dnaCodes: { code: string }[],
   structure: {
     codeBhasile: string;
     type: StructureType;
@@ -555,31 +555,27 @@ export const createMinimalStructure = async (
     update: {
       ...structure,
       dnaStructures: {
-        create: [
-          {
-            dna: {
-              connectOrCreate: {
-                where: { code: dnaCode },
-                create: { code: dnaCode },
-              },
+        create: dnaCodes.map(({ code }) => ({
+          dna: {
+            connectOrCreate: {
+              where: { code },
+              create: { code },
             },
           },
-        ],
+        })),
       },
     },
     create: {
       ...structure,
       dnaStructures: {
-        create: [
-          {
-            dna: {
-              connectOrCreate: {
-                where: { code: dnaCode },
-                create: { code: dnaCode },
-              },
+        create: dnaCodes.map(({ code }) => ({
+          dna: {
+            connectOrCreate: {
+              where: { code },
+              create: { code },
             },
           },
-        ],
+        })),
       },
     },
   });
