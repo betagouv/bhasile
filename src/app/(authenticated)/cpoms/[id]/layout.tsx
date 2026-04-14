@@ -1,12 +1,12 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
-import { CpomApiType } from "@/schemas/api/cpom.schema";
+import { CpomViewType } from "@/types/cpom.type";
 
 import { CpomHeader } from "./_components/CpomHeader";
 import { CpomProvider } from "./_context/CpomContext";
 
-async function getCpom(id: string): Promise<CpomApiType> {
+async function getCpom(id: string): Promise<CpomViewType> {
   try {
     const baseUrl = process.env.NEXT_URL || "";
     const result = await fetch(`${baseUrl}/api/cpoms/${id}`, {

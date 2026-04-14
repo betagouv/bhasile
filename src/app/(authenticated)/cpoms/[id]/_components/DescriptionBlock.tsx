@@ -3,11 +3,7 @@
 import { useRouter } from "next/navigation";
 
 import { Block } from "@/app/components/common/Block";
-import {
-  computeCpomDates,
-  getDepartementsList,
-  getGranularityLabel,
-} from "@/app/utils/cpom.util";
+import { getDepartementsList, getGranularityLabel } from "@/app/utils/cpom.util";
 import { formatDate } from "@/app/utils/date.util";
 
 import { useCpomContext } from "../_context/CpomClientContext";
@@ -15,8 +11,6 @@ import { useCpomContext } from "../_context/CpomClientContext";
 export const DescriptionBlock = () => {
   const { cpom } = useCpomContext();
   const router = useRouter();
-
-  const { dateStart, dateEnd } = computeCpomDates(cpom);
 
   return (
     <Block
@@ -56,11 +50,11 @@ export const DescriptionBlock = () => {
         <hr className="col-span-2" />
         <div className="flex gap-2 mb-3">
           <strong>Date début</strong>
-          {formatDate(dateStart)}
+          {formatDate(cpom.dateStart)}
         </div>
         <div className="flex gap-2 mb-3">
           <strong>Date fin</strong>
-          {formatDate(dateEnd)}
+          {formatDate(cpom.dateEnd)}
         </div>
       </div>
     </Block>

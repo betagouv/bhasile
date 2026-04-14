@@ -1,11 +1,11 @@
 import { ReactNode } from "react";
 
-import { CpomApiType } from "@/schemas/api/cpom.schema";
+import { CpomViewType } from "@/types/cpom.type";
 
 import { CpomClientProvider } from "./CpomClientContext";
 
 export type CpomContextType = {
-  cpom: CpomApiType;
+  cpom: CpomViewType;
 };
 
 export function CpomProvider({
@@ -13,7 +13,7 @@ export function CpomProvider({
   cpom,
 }: {
   children: ReactNode;
-  cpom: CpomApiType | null;
+  cpom: CpomViewType | null;
 }) {
   return <CpomClientProvider cpom={cpom}>{children}</CpomClientProvider>;
 }

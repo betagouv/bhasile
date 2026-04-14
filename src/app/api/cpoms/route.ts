@@ -9,6 +9,7 @@ import {
   createOrUpdateCpom,
   findBySearch,
 } from "./cpom.repository";
+import { transformToCpomsView } from "./cpom.service";
 
 export async function GET(request: NextRequest) {
   const page = request.nextUrl.searchParams.get("page") as number | null;
@@ -33,7 +34,10 @@ export async function GET(request: NextRequest) {
         departements,
       }),
     ]);
-    return NextResponse.json({ cpoms, totalCpoms });
+    return NextResponse.json({
+      cpoms: transformToCpomsView(cpoms),
+      totalCpoms,
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json(

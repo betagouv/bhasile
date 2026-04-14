@@ -2,13 +2,13 @@
 
 import { createContext, ReactNode, useContext, useState } from "react";
 
-import { CpomApiType } from "@/schemas/api/cpom.schema";
+import { CpomViewType } from "@/types/cpom.type";
 
 import { CpomContextType } from "./CpomContext";
 
 type CpomContextInternalType = {
-  cpom: CpomApiType | null;
-  setCpom: (c: CpomApiType | null) => void;
+  cpom: CpomViewType | null;
+  setCpom: (c: CpomViewType | null) => void;
 };
 
 const CpomContextInternal = createContext<CpomContextInternalType>({
@@ -21,7 +21,7 @@ export function CpomClientProvider({
   cpom: initialCpom,
 }: {
   children: ReactNode;
-  cpom: CpomApiType | null;
+  cpom: CpomViewType | null;
 }) {
   const [cpom, setCpom] = useState(initialCpom);
 
@@ -33,7 +33,7 @@ export function CpomClientProvider({
 }
 
 export function useCpomContext(): CpomContextType & {
-  setCpom: (c: CpomApiType | null) => void;
+  setCpom: (c: CpomViewType | null) => void;
 } {
   const context = useContext(CpomContextInternal);
 

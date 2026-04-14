@@ -1,3 +1,5 @@
+import { CpomApiType } from "@/schemas/api/cpom.schema";
+
 export const CpomGranularity = [
   "DEPARTEMENTALE",
   "INTERDEPARTEMENTALE",
@@ -5,3 +7,8 @@ export const CpomGranularity = [
 ] as const;
 
 export type CpomGranularity = (typeof CpomGranularity)[number];
+
+export type CpomViewType = CpomApiType & {
+  dateStart?: string;
+  dateEnd?: string;
+};
