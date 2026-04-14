@@ -15,7 +15,7 @@ async function main() {
   let updatedBudget = 0;
   let errorsBudget = 0;
   for (const budget of budgets) {
-    const isRealisee = budget.year >= INDICATEUR_FINANCIER_CUTOFF_YEAR;
+    const isRealisee = budget.year < INDICATEUR_FINANCIER_CUTOFF_YEAR;
     try {
       await prisma.indicateurFinancier.create({
         data: {
