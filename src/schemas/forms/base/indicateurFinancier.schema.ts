@@ -25,52 +25,34 @@ export const indicateursFinanciersSchema = z
         return false;
       }
 
-      const byYear: Record<
-        number,
-        { [key: string]: { REALISE?: boolean; PREVISIONNEL?: boolean } }
-      > = {};
+      const everyYears = [
+        ...new Set(indicateursFinanciers.map((ind) => ind.year)),
+      ];
 
-      for (const ind of indicateursFinanciers) {
-        const year = Number(ind.year);
-        if (!byYear[year]) {
-          byYear[year] = {
-            ETP: {},
-            tauxEncadrement: {},
-            coutJournalier: {},
-          };
+      for (const year of everyYears) {
+        const indicateurFinancierRealise = indicateursFinanciers.find(
+          (ind) => ind.year === year && ind.type === "REALISE"
+        );
+        const isIndicateurFinancierRealiseFilled =
+          indicateurFinancierRealise?.ETP !== undefined &&
+          indicateurFinancierRealise?.tauxEncadrement !== undefined &&
+          indicateurFinancierRealise?.coutJournalier !== undefined;
+
+        if (isIndicateurFinancierRealiseFilled) {
+          continue;
         }
 
-        if (
-          ind.ETP != null &&
-          (ind.type === "REALISE" || ind.type === "PREVISIONNEL")
-        ) {
-          byYear[year].ETP[ind.type] = true;
+        const indicateurFinancierPrevisionnel = indicateursFinanciers.find(
+          (ind) => ind.year === year && ind.type === "PREVISIONNEL"
+        );
+        const isIndicateurFinancierPrevisionnelFilled =
+          indicateurFinancierPrevisionnel?.ETP !== undefined &&
+          indicateurFinancierPrevisionnel?.tauxEncadrement !== undefined &&
+          indicateurFinancierPrevisionnel?.coutJournalier !== undefined;
+        if (isIndicateurFinancierPrevisionnelFilled) {
+          continue;
         }
-        if (
-          ind.tauxEncadrement != null &&
-          (ind.type === "REALISE" || ind.type === "PREVISIONNEL")
-        ) {
-          byYear[year].tauxEncadrement[ind.type] = true;
-        }
-        if (
-          ind.coutJournalier != null &&
-          (ind.type === "REALISE" || ind.type === "PREVISIONNEL")
-        ) {
-          byYear[year].coutJournalier[ind.type] = true;
-        }
-      }
-
-      for (const yearData of Object.values(byYear)) {
-        for (const key of ["ETP", "tauxEncadrement", "coutJournalier"]) {
-          if (
-            !(
-              yearData[key].REALISE === true ||
-              yearData[key].PREVISIONNEL === true
-            )
-          ) {
-            return false;
-          }
-        }
+        return false;
       }
 
       return true;

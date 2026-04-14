@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
+import { isYearRealisee } from "@/app/utils/indicateurFinancier.util";
 import { INDICATEUR_FINANCIER_CUTOFF_YEAR } from "@/constants";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
@@ -29,8 +30,6 @@ export const IndicateurFinancierTableLine = ({
     return null;
   }
 
-  // If we can edit, we display both PREVISIONNEL and REALISE (until INDICATEUR_FINANCIER_CUTOFF_YEAR
-  // If we can't edit, we display the REALISE column if it is filled, otherwise we display the PREVISIONNEL column
   const everyColumns = canEdit
     ? years.map((year) =>
         year >= INDICATEUR_FINANCIER_CUTOFF_YEAR
@@ -38,17 +37,10 @@ export const IndicateurFinancierTableLine = ({
           : (["REALISE"] as IndicateurFinancierType[])
       )
     : years.map((year) => {
-        const indicateurFinancierRealise = indicateursFinanciers?.find(
-          (indicateurFinancier) =>
-            indicateurFinancier.type === "REALISE" &&
-            indicateurFinancier.year === year
-        );
-        const isIndicateurFinancierRealiseFilled =
-          indicateurFinancierRealise?.ETP !== undefined &&
-          indicateurFinancierRealise?.tauxEncadrement !== undefined &&
-          indicateurFinancierRealise?.coutJournalier !== undefined;
         return [
-          isIndicateurFinancierRealiseFilled ? "REALISE" : "PREVISIONNEL",
+          isYearRealisee(indicateursFinanciers, year)
+            ? "REALISE"
+            : "PREVISIONNEL",
         ] as IndicateurFinancierType[];
       });
 
@@ -61,7 +53,8 @@ export const IndicateurFinancierTableLine = ({
             key={year + type}
             className={cn(
               "border-default-grey",
-              type === "REALISE" ? "border-r" : "border-l"
+              type === "REALISE" ? "border-r" : "border-l",
+              index === 0 && "border-l"
             )}
           >
             <span className="flex items-center justify-center gap-2">

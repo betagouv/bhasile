@@ -2,6 +2,7 @@ import { INDICATEUR_FINANCIER_CUTOFF_YEAR } from "@/constants";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { IndicateurFinancierFormValues } from "@/schemas/forms/base/indicateurFinancier.schema";
 
+import { isNullOrUndefined } from "./common.util";
 import { getYearRange } from "./date.util";
 
 export const getIndicateursFinanciersDefaultValues = (
@@ -71,8 +72,8 @@ export const isYearRealisee = (
   );
 
   return (
-    indicateurFinancierRealise?.ETP !== undefined &&
-    indicateurFinancierRealise?.tauxEncadrement !== undefined &&
-    indicateurFinancierRealise?.coutJournalier !== undefined
+    !isNullOrUndefined(indicateurFinancierRealise?.ETP) &&
+    !isNullOrUndefined(indicateurFinancierRealise?.tauxEncadrement) &&
+    !isNullOrUndefined(indicateurFinancierRealise?.coutJournalier)
   );
 };
