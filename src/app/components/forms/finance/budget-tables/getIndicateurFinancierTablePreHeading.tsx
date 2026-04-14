@@ -10,7 +10,7 @@ export const getIndicateurFinancierTablePreHeading = ({ years }: Props) => {
       <th
         scope="col"
         key={year}
-        className="bg-white"
+        className="bg-white border-x border-default-grey"
         colSpan={year >= INDICATEUR_FINANCIER_CUTOFF_YEAR ? 2 : 1}
       >
         <span className={cn("block text-sm")}>{year}</span>

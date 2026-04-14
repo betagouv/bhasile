@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 
+import { cn } from "@/app/utils/classname.util";
 import { INDICATEUR_FINANCIER_CUTOFF_YEAR } from "@/constants";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
@@ -56,7 +57,13 @@ export const IndicateurFinancierTableLine = ({
       <BudgetTableLineLabel label={label} subLabel={subLabel} />
       {years.map((year, index) =>
         everyColumns[index].map((type) => (
-          <td key={year + type}>
+          <td
+            key={year + type}
+            className={cn(
+              "border-default-grey",
+              type === "REALISE" ? "border-r" : "border-l"
+            )}
+          >
             <span className="flex items-center justify-center gap-2">
               {canEdit ? (
                 <BudgetTableLineInput
