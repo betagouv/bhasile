@@ -4,7 +4,7 @@ export const activiteApiSchema = z.object({
   id: z.number(),
   adresseId: z.number(),
   date: z.string().datetime(),
-  placesAutorisees: z.number().nullable(),
+  placesAutorisees: z.number(),
   desinsectisation: z.number().nullable(),
   remiseEnEtat: z.number().nullable(),
   sousOccupation: z.number().nullable(),

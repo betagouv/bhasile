@@ -26,7 +26,7 @@ const computePlacesVacantesAndPlacesOccupees = (
 export type StructureActiviteRow = {
   id: number;
   date: Date;
-  placesAutorisees: number | null;
+  placesAutorisees: number;
   desinsectisation: number | null;
   remiseEnEtat: number | null;
   sousOccupation: number | null;
@@ -52,6 +52,8 @@ export const getActivitesForStructure = async (
           },
         },
       },
+      // The front calculates percentages by dividing by placesAutorisees: we filter here to avoid handling the case in the components.
+      placesAutorisees: { not: null },
     },
     orderBy: {
       date: "desc",
@@ -72,11 +74,14 @@ export const getActivitesForStructure = async (
   });
 
   return rows.map((r) => {
+    const tauxOccupation =
+      r.tauxOccupation == null ? null : r.tauxOccupation.toNumber();
+
     const { placesVacantes, placesOccupees } =
       computePlacesVacantesAndPlacesOccupees(
         r.placesAutorisees,
         r.placesIndisponibles,
-        r.tauxOccupation
+        tauxOccupation
       );
 
     const presencesIndues =
@@ -87,13 +92,12 @@ export const getActivitesForStructure = async (
     return {
       id: r.id,
       date: r.date,
-      placesAutorisees: r.placesAutorisees,
+      placesAutorisees: r.placesAutorisees!,
       desinsectisation: r.desinsectisation,
       remiseEnEtat: r.remiseEnEtat,
       sousOccupation: r.sousOccupation,
       placesIndisponibles: r.placesIndisponibles,
-      tauxOccupation:
-        r.tauxOccupation == null ? null : Number(r.tauxOccupation),
+      tauxOccupation,
       placesOccupees,
       travaux: r.travaux,
       placesVacantes,

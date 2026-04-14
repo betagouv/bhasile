@@ -23,6 +23,12 @@ export const createDnaList = (count: number): Omit<Dna, "id">[] => {
         faker.helpers.maybe(() => faker.date.past({ years: 2 }), {
           probability: 0.05,
         }) ?? null,
+      departementAdministratif: null,
+      directionTerritoriale: null,
+      nom: null,
+      nomOfii: null,
+      operateurId: null,
+      type: null,
       createdAt: faker.date.past(),
       updatedAt: faker.date.past(),
     });
