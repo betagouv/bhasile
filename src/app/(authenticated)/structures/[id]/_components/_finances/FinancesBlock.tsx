@@ -80,7 +80,7 @@ export const FinancesBlock = (): ReactElement => {
       </div>
       <hr className="mb-10" />
       <h4 className="text-title-blue-france pb-0.5 text-lg mb-0">
-        Documents administratifs et financiers transmis par l’opérateur
+        Documents financiers
       </h4>
       {isSubventionnee && (
         <h5 className="text-sm text-gray-500 font-normal italic mb-0">
