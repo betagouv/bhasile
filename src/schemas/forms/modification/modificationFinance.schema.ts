@@ -11,6 +11,7 @@ import {
   budgetSubventionneeOpenSchema,
 } from "../base/budget.schema";
 import { cpomStructureSchema } from "../base/cpom.schema";
+import { indicateursFinanciersSchema } from "../base/indicateurFinancier.schema";
 
 type BudgetSchema =
   | z.infer<typeof budgetAutoriseeNotOpenSchema>
@@ -23,4 +24,5 @@ type BudgetSchema =
 export type anyModificationFinanceFormValues = {
   budgets: BudgetSchema[];
   cpomStructures: z.infer<typeof cpomStructureSchema>[];
-} & z.infer<typeof DocumentsFinanciersFlexibleSchema>;
+} & z.infer<typeof DocumentsFinanciersFlexibleSchema> &
+  z.infer<typeof indicateursFinanciersSchema>;
