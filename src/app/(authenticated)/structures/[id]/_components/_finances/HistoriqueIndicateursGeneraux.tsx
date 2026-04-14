@@ -14,7 +14,7 @@ import { getIndicateurFinancierStaticTableHeading } from "./getIndicateurFinanci
 export const HistoriqueIndicateursGeneraux = () => {
   const { structure } = useStructureContext();
 
-  const indicateursFinanciers = structure?.indicateursFinanciers;
+  const indicateursFinanciers = structure.indicateursFinanciers;
 
   const { years } = getYearRange({ order: "desc" });
   const startYear = getRealCreationYear(structure);
@@ -33,7 +33,7 @@ export const HistoriqueIndicateursGeneraux = () => {
       }
     >
       <Table
-        ariaLabelledBy="Indicateurs financiers"
+        ariaLabelledBy=""
         headings={getIndicateurFinancierStaticTableHeading({
           years: yearsToDisplay,
           indicateursFinanciers: indicateursFinanciers,

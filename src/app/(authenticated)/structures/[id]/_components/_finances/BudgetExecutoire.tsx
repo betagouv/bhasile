@@ -8,8 +8,8 @@ import { useStructureContext } from "../../_context/StructureClientContext";
 
 export const BudgetExecutoire = ({ year }: Props): ReactElement => {
   const { structure } = useStructureContext();
-  const budget = structure?.budgets?.find((budget) => budget.year === year);
-  const indicateursFinanciersOfYear = structure?.indicateursFinanciers?.filter(
+  const budget = structure.budgets?.find((budget) => budget.year === year);
+  const indicateursFinanciersOfYear = structure.indicateursFinanciers?.filter(
     (indicateurFinancier) => indicateurFinancier.year === year
   );
 

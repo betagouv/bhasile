@@ -1,5 +1,7 @@
 import z from "zod";
 
+import { isNullOrUndefined } from "@/app/utils/common.util";
+import { isYearRealisee } from "@/app/utils/indicateurFinancier.util";
 import {
   zSafePositiveDecimalsNullish,
   zSafeYear,
@@ -30,25 +32,26 @@ export const indicateursFinanciersSchema = z
       ];
 
       for (const year of everyYears) {
-        const indicateurFinancierRealise = indicateursFinanciers.find(
-          (ind) => ind.year === year && ind.type === "REALISE"
+        const isIndicateurFinancierRealiseFilled = isYearRealisee(
+          indicateursFinanciers,
+          year
         );
-        const isIndicateurFinancierRealiseFilled =
-          indicateurFinancierRealise?.ETP !== undefined &&
-          indicateurFinancierRealise?.tauxEncadrement !== undefined &&
-          indicateurFinancierRealise?.coutJournalier !== undefined;
 
         if (isIndicateurFinancierRealiseFilled) {
           continue;
         }
 
         const indicateurFinancierPrevisionnel = indicateursFinanciers.find(
-          (ind) => ind.year === year && ind.type === "PREVISIONNEL"
+          (indicateurFinancier) =>
+            indicateurFinancier.year === year &&
+            indicateurFinancier.type === "PREVISIONNEL"
         );
         const isIndicateurFinancierPrevisionnelFilled =
-          indicateurFinancierPrevisionnel?.ETP !== undefined &&
-          indicateurFinancierPrevisionnel?.tauxEncadrement !== undefined &&
-          indicateurFinancierPrevisionnel?.coutJournalier !== undefined;
+          !isNullOrUndefined(indicateurFinancierPrevisionnel?.ETP) &&
+          !isNullOrUndefined(
+            indicateurFinancierPrevisionnel?.tauxEncadrement
+          ) &&
+          !isNullOrUndefined(indicateurFinancierPrevisionnel?.coutJournalier);
         if (isIndicateurFinancierPrevisionnelFilled) {
           continue;
         }

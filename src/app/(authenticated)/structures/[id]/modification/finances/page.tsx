@@ -43,6 +43,7 @@ export default function ModificationFinanceForm() {
     await handleSubmit({
       id: structure.id,
       budgets: data.budgets,
+      indicateursFinanciers: data.indicateursFinanciers,
       documentsFinanciers,
       structureMillesimes,
     });

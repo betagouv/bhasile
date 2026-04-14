@@ -1,8 +1,6 @@
 import { ReactNode } from "react";
 
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
-import { StructureType } from "@/types/structure.type";
 
 import { IndicateurFinancierTableLine } from "./IndicateurFinancierTableLine";
 
@@ -31,7 +29,6 @@ export const IndicateurFinancierTableLines = ({
 };
 
 type Props = {
-  type?: StructureType;
   lines: {
     name: string;
     label: string | ReactNode;
@@ -39,8 +36,6 @@ type Props = {
     isCurrency?: boolean;
   }[];
   indicateursFinanciers?: IndicateurFinancierApiType[];
-  cpomStructures?: CpomStructureApiType[];
   years: number[];
-  enabledYears?: number[];
   canEdit?: boolean;
 };

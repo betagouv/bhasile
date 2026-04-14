@@ -17,8 +17,20 @@ async function main() {
   for (const budget of budgets) {
     const isRealisee = budget.year < INDICATEUR_FINANCIER_CUTOFF_YEAR;
     try {
-      await prisma.indicateurFinancier.create({
-        data: {
+      await prisma.indicateurFinancier.upsert({
+        where: {
+          structureId_year_type: {
+            structureId: budget.structureId ?? 0,
+            year: budget.year,
+            type: isRealisee ? "REALISE" : "PREVISIONNEL",
+          },
+        },
+        update: {
+          ETP: budget.ETP,
+          tauxEncadrement: budget.tauxEncadrement,
+          coutJournalier: budget.coutJournalier,
+        },
+        create: {
           structureId: budget.structureId,
           year: budget.year,
           type: isRealisee ? "REALISE" : "PREVISIONNEL",
