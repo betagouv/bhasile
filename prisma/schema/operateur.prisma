@@ -10,6 +10,7 @@ model Operateur {
   cpoms             Cpom[]
   filiales          Operateur[]  @relation("OperateurToOperateur")
   userActions       UserAction[]
+  dnas              Dna[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

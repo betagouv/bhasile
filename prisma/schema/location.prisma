@@ -1,4 +1,3 @@
-
 model Departement {
   id                   Int               @id @default(autoincrement())
   numero               String            @unique
@@ -8,6 +7,7 @@ model Departement {
   regionAdministrative Region?           @relation(fields: [regionId], references: [id])
   regionId             Int?
   cpoms                CpomDepartement[]
+  dnas                 Dna[]
 
   @@schema("public")
 }

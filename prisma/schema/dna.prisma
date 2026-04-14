@@ -8,6 +8,16 @@ model Dna {
   activites                    Activite[]
   evenementsIndesirablesGraves EvenementIndesirableGrave[]
 
+  // All fields below are directly coming from OFII file and not used after DNA is linked to a structure
+  departement              Departement?   @relation(fields: [departementAdministratif], references: [numero])
+  departementAdministratif String? // TODO: remove nullable after first filling is complete
+  operateur                Operateur?     @relation(fields: [operateurId], references: [id])
+  operateurId              Int? // TODO: remove nullable after first filling is complete
+  type                     StructureType? // TODO: remove nullable after first filling is complete
+  nom                      String? // TODO: remove nullable after first filling is complete
+  nomOfii                  String? // TODO: remove nullable after first filling is complete
+  directionTerritoriale    String? // TODO: remove nullable after first filling is complete
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
