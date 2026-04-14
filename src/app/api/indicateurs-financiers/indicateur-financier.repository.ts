@@ -12,7 +12,7 @@ export const createOrUpdateIndicateursFinanciers = async (
   }
 
   await Promise.all(
-    (indicateursFinanciers || []).map((indicateurFinancier) => {
+    indicateursFinanciers.map((indicateurFinancier) => {
       return tx.indicateurFinancier.upsert({
         where: getWhere(entityId, indicateurFinancier),
         update: indicateurFinancier,
