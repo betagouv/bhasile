@@ -7,7 +7,7 @@ import { ReactElement, useEffect, useRef } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
-import { computeCpomDates, formatCpomName } from "@/app/utils/cpom.util";
+import { formatCpomName } from "@/app/utils/cpom.util";
 import { getYearFromDate } from "@/app/utils/date.util";
 
 import { useCpomContext } from "../_context/CpomClientContext";
@@ -32,8 +32,6 @@ export const CpomHeader = (): ReactElement | null => {
   const isRootPath = pathname === `/cpoms/${cpom?.id}`;
   const isModificationPath = pathname.includes("modification");
   const isAjoutPath = pathname.includes("ajout");
-
-  const { dateStart, dateEnd } = computeCpomDates(cpom);
 
   const handleBackClick = () => {
     if (isRootPath || isAjoutPath) {
@@ -65,9 +63,9 @@ export const CpomHeader = (): ReactElement | null => {
           </h2>
           <h3 className="text-title-blue-france fr-h6 mb-0">
             <strong className="pr-2">{formatCpomName(cpom)}</strong>{" "}
-            {dateStart && dateEnd && (
+            {cpom.dateStart && cpom.dateEnd && (
               <span className="text-title-grey font-normal text-lg italic">
-                {getYearFromDate(dateStart)} - {getYearFromDate(dateEnd)}
+                {getYearFromDate(cpom.dateStart)} - {getYearFromDate(cpom.dateEnd)}
               </span>
             )}
           </h3>

@@ -2,7 +2,8 @@ import { v4 as uuidv4 } from "uuid";
 
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
-  CpomApiType,
+  CpomApiRead,
+  CpomApiWrite,
   CpomDepartementApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
@@ -14,7 +15,7 @@ import { StructureType } from "@/types/structure.type";
 
 import { getBudgetsDefaultValues } from "./budget.util";
 
-export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
+export const getCpomDefaultValues = (cpom?: CpomApiRead): CpomFormValues => {
   const structureTypes = getCpomStructureTypes(cpom);
   return {
     ...cpom,
@@ -26,8 +27,8 @@ export const getCpomDefaultValues = (cpom?: CpomApiType): CpomFormValues => {
     },
     departements: cpom?.departements ?? [],
     granularity: cpom?.granularity ?? "DEPARTEMENTALE",
-    dateStart: computeCpomDates(cpom).dateStart ?? "",
-    dateEnd: computeCpomDates(cpom).dateEnd ?? "",
+    dateStart: cpom?.dateStart ?? "",
+    dateEnd: cpom?.dateEnd ?? "",
     operateur: cpom?.operateur ?? { name: "", id: undefined },
     structures:
       cpom?.structures?.map((structure) => ({
@@ -90,7 +91,7 @@ const getCpomBudgetsDefaultValues = (
   ) as BudgetCpomFormValues[];
 };
 
-export const formatCpomName = (cpom: CpomApiType): string => {
+export const formatCpomName = (cpom: CpomApiRead): string => {
   const zone =
     cpom.granularity === "REGIONALE"
       ? cpom.region?.name
@@ -102,7 +103,7 @@ export const formatCpomName = (cpom: CpomApiType): string => {
 };
 
 export const computeCpomDates = (
-  cpom?: Partial<CpomApiType>
+  cpom?: CpomApiWrite
 ): { dateStart?: string; dateEnd?: string } => {
   if (!cpom) {
     return {
@@ -172,7 +173,7 @@ export const getDepartementsList = (
   return list;
 };
 
-export const getCpomStructureTypes = (cpom?: CpomApiType): StructureType[] => {
+export const getCpomStructureTypes = (cpom?: CpomApiRead): StructureType[] => {
   const structureTypes = [
     ...new Set(
       cpom?.structures?.map((structure) => structure.structure?.type) ?? []

@@ -2,21 +2,18 @@ import Link from "next/link";
 
 import { EmptyCell } from "@/app/components/common/EmptyCell";
 import {
-  computeCpomDates,
   getDepartementsList,
   getGranularityLabel,
 } from "@/app/utils/cpom.util";
 import { formatDate } from "@/app/utils/date.util";
-import { CpomApiType } from "@/schemas/api/cpom.schema";
+import { CpomApiRead } from "@/schemas/api/cpom.schema";
 
 export const CpomItem = ({ cpom, index }: Props) => {
-  const { dateStart, dateEnd } = computeCpomDates(cpom);
-
   const isCpomFinalized =
     cpom.actesAdministratifs?.length &&
     cpom.actesAdministratifs?.[0]?.fileUploads?.[0]?.key &&
-    dateStart &&
-    dateEnd;
+    cpom.dateStart &&
+    cpom.dateEnd;
 
   return (
     <tr
@@ -39,8 +36,8 @@ export const CpomItem = ({ cpom, index }: Props) => {
           getDepartementsList(cpom.departements, 17)
         )}
       </td>
-      <td className="text-left! py-0!"> {formatDate(dateStart)}</td>
-      <td className="text-left! py-0!"> {formatDate(dateEnd)}</td>
+      <td className="text-left! py-0!"> {formatDate(cpom.dateStart)}</td>
+      <td className="text-left! py-0!"> {formatDate(cpom.dateEnd)}</td>
       <td className="py-0!">
         {isCpomFinalized ? (
           <Link
@@ -61,6 +58,6 @@ export const CpomItem = ({ cpom, index }: Props) => {
 };
 
 type Props = {
-  cpom: CpomApiType;
+  cpom: CpomApiRead;
   index: number;
 };

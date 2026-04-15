@@ -25,49 +25,41 @@ const COLUMNS: ListColumn[] = [
     label: "Code Bhasile",
     column: "codeBhasile",
     orderBy: true,
-    centered: false,
   },
   {
     label: "Type",
     column: "type",
     orderBy: true,
-    centered: false,
   },
   {
     label: "Opérateur",
     column: "operateur",
     orderBy: true,
-    centered: false,
   },
   {
     label: "Dépt.",
     column: "departementAdministratif",
     orderBy: true,
-    centered: true,
   },
   {
     label: "Bâti",
     column: "bati",
     orderBy: true,
-    centered: false,
   },
   {
     label: "Communes",
     column: "communes",
     orderBy: false,
-    centered: false,
   },
   {
     label: "Places aut.",
     column: "placesAutorisees",
     orderBy: true,
-    centered: true,
   },
   {
     label: "Fin convention",
     column: "finConvention",
     orderBy: true,
-    centered: false,
   },
 ];
 

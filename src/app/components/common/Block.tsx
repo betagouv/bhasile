@@ -5,7 +5,7 @@ import { PropsWithChildren, ReactElement, useContext } from "react";
 
 import { AbilityContext } from "@/app/context/AbilityContext";
 import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
-import { CpomApiType } from "@/schemas/api/cpom.schema";
+import { CpomApiRead } from "@/schemas/api/cpom.schema";
 import { StructureApiType } from "@/schemas/api/structure.schema";
 
 export const Block = ({
@@ -77,6 +77,6 @@ type Props = PropsWithChildren<{
     label: ReactElement;
     onClick: () => void;
   }[];
-  entity: StructureApiType | CpomApiType;
+  entity: StructureApiType | CpomApiRead;
   entityType: "Structure" | "Cpom";
 }>;

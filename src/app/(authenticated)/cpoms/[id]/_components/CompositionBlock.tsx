@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 
 import { Block } from "@/app/components/common/Block";
 import { Table } from "@/app/components/common/Table";
-import { computeCpomDates } from "@/app/utils/cpom.util";
 import { formatDate } from "@/app/utils/date.util";
 
 import { useCpomContext } from "../_context/CpomClientContext";
@@ -13,8 +12,6 @@ import { useCpomContext } from "../_context/CpomClientContext";
 export const CompositionBlock = () => {
   const { cpom } = useCpomContext();
   const router = useRouter();
-
-  const { dateStart, dateEnd } = computeCpomDates(cpom);
 
   return (
     <Block
@@ -41,9 +38,9 @@ export const CompositionBlock = () => {
                 {structure.structure?.communeAdministrative}
               </strong>
             </td>
-            <td>{formatDate(structure.dateStart ?? dateStart)}</td>
+            <td>{formatDate(structure.dateStart ?? cpom.dateStart)}</td>
             <td className="text-center!">–</td>
-            <td>{formatDate(structure.dateEnd ?? dateEnd)}</td>
+            <td>{formatDate(structure.dateEnd ?? cpom.dateEnd)}</td>
             <td className="py-0! pl-0! pr-2!">
               {structure.structure?.forms?.some((form) => form.status) && (
                 <Link

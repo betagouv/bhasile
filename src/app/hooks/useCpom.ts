@@ -1,4 +1,4 @@
-import { CpomApiType } from "@/schemas/api/cpom.schema";
+import { CpomApiRead } from "@/schemas/api/cpom.schema";
 import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
 
 export const useCpom = () => {
@@ -10,7 +10,7 @@ export const useCpom = () => {
 
   const updateCpom = async (
     data: Partial<CpomFormValues>,
-    setCpom: (cpom: CpomApiType) => void
+    setCpom: (cpom: CpomApiRead) => void
   ): Promise<{ cpomId: number } | string> => {
     const result = await createOrUpdateCpom(data, "PUT");
     if (typeof result === "object" && "cpomId" in result) {

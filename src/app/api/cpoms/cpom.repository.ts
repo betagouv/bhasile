@@ -3,7 +3,7 @@ import { Cpom } from "@/generated/prisma/client";
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
-  CpomApiType,
+  CpomApiWrite,
   CpomDepartementApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
@@ -143,7 +143,7 @@ export const findOne = async (id: number): Promise<Cpom> => {
 };
 
 export const createOrUpdateCpom = async (
-  cpom: CpomApiType
+  cpom: CpomApiWrite
 ): Promise<number> => {
   const operateurId = cpom.operateur?.id ?? cpom.operateurId;
   const cpomId = await prisma.$transaction(async (tx) => {
