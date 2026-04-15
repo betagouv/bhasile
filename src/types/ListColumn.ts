@@ -21,5 +21,4 @@ export type ListColumn = {
   label: string;
   column: StructureColumn | CpomColumn;
   orderBy: boolean;
-  centered: boolean;
 };
