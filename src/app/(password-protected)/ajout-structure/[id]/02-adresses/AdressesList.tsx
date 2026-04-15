@@ -42,7 +42,8 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
       codePostal: "",
       commune: "",
       departement: "",
-      repartition: Repartition.DIFFUS,
+      repartition:
+        typeBati === Repartition.MIXTE ? Repartition.DIFFUS : typeBati,
       adresseTypologies: [
         {
           placesAutorisees: undefined as unknown as number,
@@ -257,7 +258,7 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
                   )}
                 />
 
-                {index !== 0 && typeBati !== Repartition.COLLECTIF && (
+                {index !== 0 && (
                   <Button
                     iconId="fr-icon-delete-line"
                     className="ml-auto rounded-4xl"
@@ -273,7 +274,7 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
             </div>
           </div>
         ))}
-        {typeBati !== Repartition.COLLECTIF && (
+        {!sameAddress && (
           <button
             onClick={(e) => {
               e.preventDefault();

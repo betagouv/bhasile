@@ -42,7 +42,8 @@ export const FieldSetHebergement = ({
       codePostal: "",
       commune: "",
       departement: "",
-      repartition: Repartition.DIFFUS,
+      repartition:
+        typeBati === Repartition.MIXTE ? Repartition.DIFFUS : typeBati,
       adresseTypologies: [
         {
           placesAutorisees: undefined as number | undefined,
@@ -125,17 +126,6 @@ export const FieldSetHebergement = ({
     }
   }, [typeBati, getValues, setValue]);
 
-  // Listen to typeBati and keep only one adresse if typeBati is COLLECTIF
-  useEffect(() => {
-    if (typeBati === Repartition.COLLECTIF) {
-      const currentAdresses: FormAdresse[] = getValues("adresses") || [];
-      const updatedAdresses = currentAdresses.slice(0, 1);
-      setValue("adresses", updatedAdresses, {
-        shouldValidate: false,
-      });
-    }
-  }, [typeBati, getValues, setValue]);
-
   return (
     <div>
       <fieldset className="flex flex-col gap-6">
@@ -171,8 +161,7 @@ export const FieldSetHebergement = ({
             typeBati={typeBati}
           />
         ))}
-
-        {typeBati !== Repartition.COLLECTIF && (
+        {!sameAddress && (
           <button
             onClick={(e) => {
               e.preventDefault();
