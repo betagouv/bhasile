@@ -30,19 +30,7 @@ export const IndicateurFinancierTableLine = ({
     return null;
   }
 
-  const everyColumns = canEdit
-    ? years.map((year) =>
-        year >= INDICATEUR_FINANCIER_CUTOFF_YEAR
-          ? (["PREVISIONNEL", "REALISE"] as IndicateurFinancierType[])
-          : (["REALISE"] as IndicateurFinancierType[])
-      )
-    : years.map((year) => {
-        return [
-          isYearRealisee(indicateursFinanciers, year)
-            ? "REALISE"
-            : "PREVISIONNEL",
-        ] as IndicateurFinancierType[];
-      });
+  const everyColumns = getEveryColumns(canEdit, indicateursFinanciers, years);
 
   return (
     <tr>
@@ -92,4 +80,23 @@ type Props = {
   years: number[];
   canEdit?: boolean;
   isCurrency?: boolean;
+};
+
+const getEveryColumns = (
+  canEdit: boolean,
+  indicateursFinanciers: IndicateurFinancierApiType[],
+  years: number[]
+) => {
+  if (canEdit) {
+    return years.map((year) =>
+      year >= INDICATEUR_FINANCIER_CUTOFF_YEAR
+        ? (["PREVISIONNEL", "REALISE"] as IndicateurFinancierType[])
+        : (["REALISE"] as IndicateurFinancierType[])
+    );
+  }
+  return years.map((year) => {
+    return [
+      isYearRealisee(indicateursFinanciers, year) ? "REALISE" : "PREVISIONNEL",
+    ] as IndicateurFinancierType[];
+  });
 };

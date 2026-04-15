@@ -3,9 +3,7 @@ import { INDICATEUR_FINANCIER_CUTOFF_YEAR } from "@/constants";
 
 export const getIndicateurFinancierTablePreHeading = ({ years }: Props) => {
   return [
-    <th className="bg-white" key="empty" colSpan={1}>
-      {" "}
-    </th>,
+    <td className="bg-white" key="empty" colSpan={1} />,
     ...years.map((year) => (
       <th
         scope="col"

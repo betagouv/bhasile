@@ -5,7 +5,7 @@ import { INDICATEUR_FINANCIER_CUTOFF_YEAR } from "@/constants";
 
 export const getIndicateurFinancierTableHeading = ({ years }: Props) => {
   return [
-    <th key="empty" className="bg-default-grey-hover"></th>,
+    <td key="empty" className="bg-default-grey-hover" />,
     ...years.map((year) => (
       <Fragment key={year}>
         {year >= INDICATEUR_FINANCIER_CUTOFF_YEAR && (

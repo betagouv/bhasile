@@ -8,9 +8,7 @@ export const getIndicateurFinancierStaticTableHeading = ({
   indicateursFinanciers,
 }: Props) => {
   return [
-    <th className="bg-white" key="empty">
-      {" "}
-    </th>,
+    <td className="bg-white" key="empty" />,
     ...years.map((year) => (
       <th scope="col" key={year} className="bg-white">
         <span className={cn("block text-sm")}>{year}</span>
