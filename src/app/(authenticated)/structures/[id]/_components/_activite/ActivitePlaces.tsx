@@ -20,11 +20,10 @@ export const ActivitePlaces = (): ReactElement => {
   const placesAutorisees = activite?.placesAutorisees || 0;
   const placesIndisponibles = activite?.placesIndisponibles || 0;
   const placesVacantes = activite?.placesVacantes || 0;
+  const placesDisponibles = activite?.placesDisponibles || 0;
+  const placesOccupees = activite?.placesOccupees || 0;
   const presencesInduesBPI = activite?.presencesInduesBPI || 0;
   const presencesInduesDeboutees = activite?.presencesInduesDeboutees || 0;
-
-  const placesDisponibles = placesAutorisees - placesIndisponibles;
-  const placesOccupees = placesDisponibles - placesVacantes;
 
   return (
     <div className="flex items-center pt-3">
@@ -33,10 +32,7 @@ export const ActivitePlaces = (): ReactElement => {
           size={160}
           data={{
             labels: ["Places indisponibles", "Places disponibles"],
-            series: [
-              placesIndisponibles,
-              placesAutorisees - placesIndisponibles,
-            ],
+            series: [placesIndisponibles, placesDisponibles],
           }}
           options={pieChartOptions}
           colors={["var(--grey-925-125)", "", "var(--yellow-moutarde-850-200)"]}
@@ -52,13 +48,8 @@ export const ActivitePlaces = (): ReactElement => {
             {getPercentage(placesIndisponibles, placesAutorisees)})
           </div>
           <div>
-            <strong>{placesAutorisees - placesIndisponibles}</strong>{" "}
-            disponibles (
-            {getPercentage(
-              placesAutorisees - placesIndisponibles,
-              placesAutorisees
-            )}
-            )
+            <strong>{placesDisponibles}</strong> disponibles (
+            {getPercentage(placesDisponibles, placesAutorisees)})
           </div>
         </div>
       </div>
@@ -68,7 +59,7 @@ export const ActivitePlaces = (): ReactElement => {
           size={160}
           data={{
             labels: ["Places vacantes", "Places non vacantes"],
-            series: [placesVacantes, placesDisponibles - placesVacantes],
+            series: [placesVacantes, placesOccupees],
           }}
           options={pieChartOptions}
           colors={["var(--grey-925-125)", "", "var(--purple-glycine-850-200)"]}
@@ -104,7 +95,7 @@ export const ActivitePlaces = (): ReactElement => {
                 series: [
                   presencesInduesBPI,
                   presencesInduesDeboutees,
-                  placesOccupees -
+                  placesDisponibles -
                     presencesInduesBPI -
                     presencesInduesDeboutees,
                 ],

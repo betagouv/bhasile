@@ -11,6 +11,8 @@ export const activiteApiSchema = z.object({
   travaux: z.number().nullable(),
   placesIndisponibles: z.number().nullable(),
   placesVacantes: z.number().nullable(),
+  placesDisponibles: z.number().nullable(),
+  placesOccupees: z.number().nullable(),
   presencesInduesBPI: z.number().nullable(),
   presencesInduesDeboutees: z.number().nullable(),
   presencesIndues: z.number().nullable(),

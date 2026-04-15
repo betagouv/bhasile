@@ -7,20 +7,24 @@ const computePlacesVacantesAndPlacesOccupees = (
   placesAutorisees: number | null | undefined,
   placesIndisponibles: number | null | undefined,
   tauxOccupation: number | null | undefined
-): { placesVacantes: number | null; placesOccupees: number | null } => {
+): {
+  placesDisponibles: number | null;
+  placesVacantes: number | null;
+  placesOccupees: number | null;
+} => {
   if (
     placesAutorisees == null ||
     placesIndisponibles == null ||
     tauxOccupation == null
   ) {
-    return { placesVacantes: null, placesOccupees: null };
+    return { placesDisponibles: null, placesVacantes: null, placesOccupees: null };
   }
 
   const placesDisponibles = placesAutorisees - placesIndisponibles;
-  const placesOccupees = placesDisponibles * tauxOccupation;
-  const placesVacantes = placesDisponibles - placesOccupees;
+  const placesOccupees = Math.round(placesDisponibles * tauxOccupation);
+  const placesVacantes = Math.round(placesDisponibles - placesOccupees);
 
-  return { placesVacantes, placesOccupees };
+  return { placesDisponibles, placesVacantes, placesOccupees };
 };
 
 export type StructureActiviteRow = {
@@ -33,6 +37,7 @@ export type StructureActiviteRow = {
   placesIndisponibles: number | null;
   tauxOccupation: number | null;
   placesOccupees: number | null;
+  placesDisponibles: number | null;
   travaux: number | null;
   placesVacantes: number | null;
   presencesInduesBPI: number | null;
@@ -77,7 +82,7 @@ export const getActivitesForStructure = async (
     const tauxOccupation =
       r.tauxOccupation == null ? null : r.tauxOccupation.toNumber();
 
-    const { placesVacantes, placesOccupees } =
+    const { placesDisponibles, placesVacantes, placesOccupees } =
       computePlacesVacantesAndPlacesOccupees(
         r.placesAutorisees,
         r.placesIndisponibles,
@@ -94,6 +99,7 @@ export const getActivitesForStructure = async (
       placesIndisponibles: r.placesIndisponibles,
       tauxOccupation,
       placesOccupees,
+      placesDisponibles,
       travaux: r.travaux,
       placesVacantes,
       presencesInduesBPI: r.presencesInduesBPI,
