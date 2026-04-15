@@ -257,7 +257,7 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
                   )}
                 />
 
-                {index !== 0 && typeBati !== Repartition.COLLECTIF && (
+                {index !== 0 && (
                   <Button
                     iconId="fr-icon-delete-line"
                     className="ml-auto rounded-4xl"
@@ -273,17 +273,16 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
             </div>
           </div>
         ))}
-        {typeBati !== Repartition.COLLECTIF && (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              handleAddAddress();
-            }}
-            className="fr-link fr-icon border-b w-fit pb-px hover:pb-0 hover:border-b-2"
-          >
-            + Ajouter un hébergement
-          </button>
-        )}
+
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            handleAddAddress();
+          }}
+          className="fr-link fr-icon border-b w-fit pb-px hover:pb-0 hover:border-b-2"
+        >
+          + Ajouter un hébergement
+        </button>
       </fieldset>
     </div>
   );

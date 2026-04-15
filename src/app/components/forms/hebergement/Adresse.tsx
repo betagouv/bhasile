@@ -98,7 +98,7 @@ export const AdresseComponent = ({
             )}
           />
 
-          {index !== 0 && typeBati !== Repartition.COLLECTIF && (
+          {index !== 0 && (
             <Button
               iconId="fr-icon-delete-line"
               className="ml-auto rounded-4xl"
