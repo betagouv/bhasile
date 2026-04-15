@@ -66,12 +66,7 @@ export const ListTableHeadings = ({
       headings={[
         ...columns.map((columnToDisplay) => (
           <th scope="col" key={columnToDisplay.column}>
-            <span
-              className={cn(
-                "flex items-center whitespace-nowrap",
-                columnToDisplay.centered && "justify-center"
-              )}
-            >
+            <span className={cn("flex items-center whitespace-nowrap")}>
               {columnToDisplay.label}
               {columnToDisplay.orderBy && (
                 <OrderButton
