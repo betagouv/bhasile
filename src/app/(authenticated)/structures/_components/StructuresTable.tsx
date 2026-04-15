@@ -46,7 +46,7 @@ const COLUMNS: ListColumn[] = [
     label: "Dépt.",
     column: "departementAdministratif",
     orderBy: true,
-    centered: true,
+    centered: false,
   },
   {
     label: "Communes",
@@ -65,7 +65,7 @@ const COLUMNS: ListColumn[] = [
     label: "Places aut.",
     column: "placesAutorisees",
     orderBy: true,
-    centered: true,
+    centered: false,
   },
   {
     label: "Fin convention",
