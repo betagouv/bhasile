@@ -42,7 +42,8 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
       codePostal: "",
       commune: "",
       departement: "",
-      repartition: Repartition.DIFFUS,
+      repartition:
+        typeBati === Repartition.MIXTE ? Repartition.DIFFUS : typeBati,
       adresseTypologies: [
         {
           placesAutorisees: undefined as unknown as number,
@@ -273,16 +274,17 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
             </div>
           </div>
         ))}
-
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            handleAddAddress();
-          }}
-          className="fr-link fr-icon border-b w-fit pb-px hover:pb-0 hover:border-b-2"
-        >
-          + Ajouter un hébergement
-        </button>
+        {!sameAddress && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              handleAddAddress();
+            }}
+            className="fr-link fr-icon border-b w-fit pb-px hover:pb-0 hover:border-b-2"
+          >
+            + Ajouter un hébergement
+          </button>
+        )}
       </fieldset>
     </div>
   );

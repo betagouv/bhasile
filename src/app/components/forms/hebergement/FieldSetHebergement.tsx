@@ -161,16 +161,17 @@ export const FieldSetHebergement = ({
             typeBati={typeBati}
           />
         ))}
-
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            handleAddAddress();
-          }}
-          className="fr-link fr-icon border-b w-fit pb-px hover:pb-0 hover:border-b-2"
-        >
-          + Ajouter un hébergement
-        </button>
+        {!sameAddress && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              handleAddAddress();
+            }}
+            className="fr-link fr-icon border-b w-fit pb-px hover:pb-0 hover:border-b-2"
+          >
+            + Ajouter un hébergement
+          </button>
+        )}
       </fieldset>
     </div>
   );
