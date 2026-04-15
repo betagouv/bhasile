@@ -95,7 +95,7 @@ export const ActivitePlaces = (): ReactElement => {
                 series: [
                   presencesInduesBPI,
                   presencesInduesDeboutees,
-                  placesDisponibles -
+                  placesOccupees -
                     presencesInduesBPI -
                     presencesInduesDeboutees,
                 ],
