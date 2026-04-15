@@ -81,10 +81,8 @@ export const cpomInterdepartementale: {
     [StructureType.CAES]: {
       2024: {
         repriseEtat: 2100,
-        affectationReservesFondsDedies: 900,
-        totalProduitsProposes: 90000,
+        fondsDedies: 900,
         totalProduits: 87000,
-        totalChargesProposees: 82000,
         totalCharges: 81000,
       },
     },
