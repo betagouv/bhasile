@@ -4,7 +4,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ReactElement, useEffect, useRef, useState } from "react";
 
 import { Table } from "@/app/components/common/Table";
-import { cn } from "@/app/utils/classname.util";
 import { ListColumn } from "@/types/ListColumn";
 
 import { OrderButton } from "./OrderButton";
@@ -66,7 +65,7 @@ export const ListTableHeadings = ({
       headings={[
         ...columns.map((columnToDisplay) => (
           <th scope="col" key={columnToDisplay.column}>
-            <span className={cn("flex items-center whitespace-nowrap")}>
+            <span className="flex items-center whitespace-nowrap">
               {columnToDisplay.label}
               {columnToDisplay.orderBy && (
                 <OrderButton
