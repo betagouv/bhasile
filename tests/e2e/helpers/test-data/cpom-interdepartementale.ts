@@ -12,6 +12,8 @@ export const cpomInterdepartementale: {
   name: string;
   formData: TestCpomAjoutData;
   financeData: TestCpomFinanceData;
+  modificationFormData: TestCpomAjoutData;
+  modificationFinanceData: TestCpomFinanceData;
 } = {
   name: "CPOM interdépartemental - Île-de-France, pas d'avenant, finance",
   formData: {
@@ -43,6 +45,47 @@ export const cpomInterdepartementale: {
     [StructureType.CAES]: {
       2024: {
         repriseEtat: 2000,
+      },
+    },
+  },
+  modificationFormData: {
+    granularity: "INTERDEPARTEMENTALE",
+    region: "Île-de-France",
+    departements: ["75", "92"],
+    operateur: {
+      name: "Opérateur 1",
+      searchTerm: "Opér",
+      id: 1,
+    },
+    actesAdministratifs: [
+      {
+        startDate: "2024-07-01",
+        endDate: "2026-12-31",
+        filePath: "tests/e2e/fixtures/sample.pdf",
+      },
+    ],
+    avenants: [],
+    structureIds: "seeded",
+  },
+  modificationFinanceData: {
+    [StructureType.CADA]: {
+      2024: {
+        repriseEtat: 2500,
+        affectationReservesFondsDedies: 1100,
+        totalProduitsProposes: 120000,
+        totalProduits: 118000,
+        totalChargesProposees: 100000,
+        totalCharges: 98500,
+      },
+    },
+    [StructureType.CAES]: {
+      2024: {
+        repriseEtat: 2100,
+        affectationReservesFondsDedies: 900,
+        totalProduitsProposes: 90000,
+        totalProduits: 87000,
+        totalChargesProposees: 82000,
+        totalCharges: 81000,
       },
     },
   },

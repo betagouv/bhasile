@@ -15,6 +15,8 @@ export const cpomDepartementale: {
   name: string;
   formData: TestCpomAjoutData;
   financeData: TestCpomFinanceData;
+  modificationFormData: TestCpomAjoutData;
+  modificationFinanceData: TestCpomFinanceData;
 } = {
   name: "CPOM départemental - Île-de-France 75, avenant, structures, finance",
   formData: {
@@ -53,9 +55,49 @@ export const cpomDepartementale: {
         dotationDemandee: "105 000",
         dotationAccordee: 100000,
       },
-      2026: {
-        dotationDemandee: 110000,
-        dotationAccordee: 105000,
+    },
+  },
+  modificationFormData: {
+    granularity: "DEPARTEMENTALE",
+    region: "Île-de-France",
+    departements: "92",
+    operateur: {
+      name: "Opérateur 1",
+      searchTerm: "Opér",
+      id: 1,
+    },
+    actesAdministratifs: [
+      {
+        startDate: "2024-02-01",
+        endDate: "2026-12-31",
+        filePath: "tests/e2e/fixtures/sample.pdf",
+      },
+    ],
+    avenants: [],
+    structureIds: "seeded",
+  },
+  modificationFinanceData: {
+    [StructureType.CADA]: {
+      2024: {
+        dotationDemandee: 111111,
+        dotationAccordee: 109999,
+        totalProduitsProposes: 200000,
+        totalProduits: 198500,
+        totalChargesProposees: 170000,
+        totalCharges: 169000,
+        repriseEtat: 1200,
+        affectationReservesFondsDedies: 750,
+        reserveInvestissement: 200,
+        chargesNonReconductibles: 100,
+        reserveCompensationDeficits: 90,
+        reserveCompensationBFR: 80,
+        reserveCompensationAmortissements: 70,
+        reportANouveau: 60,
+        autre: 50,
+      },
+      2025: {
+        dotationDemandee: 122222,
+        dotationAccordee: 120000,
       },
     },
   },
