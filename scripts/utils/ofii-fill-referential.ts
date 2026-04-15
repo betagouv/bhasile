@@ -4,9 +4,7 @@
 
 import "dotenv/config";
 
-import {
-  normalizeRegionCode,
-} from "@/app/utils/bhasile.util";
+import { normalizeRegionCode } from "@/app/utils/bhasile.util";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { StructureType } from "@/generated/prisma/client";
 import { checkBucket, getObject } from "@/lib/minio";
@@ -54,14 +52,14 @@ function deptCodeFromCode(code: string | null | undefined): string {
 }
 
 function normalizeDepartementName(value: string | null | undefined): string {
-  const trimmed = value?.trim() ?? "";
+  let departementName = value?.trim() ?? "";
 
   // Typo courante dans certains fichiers OFII
-  if (trimmed.toLowerCase() === "alpes-de-hautes-provence") {
-    return "Alpes-de-Haute-Provence";
+  if (departementName.toLowerCase() === "alpes-de-hautes-provence") {
+    departementName = "Alpes-de-Haute-Provence";
   }
 
-  return trimmed;
+  return departementName;
 }
 
 function resolveDepartementNumero(
@@ -270,10 +268,6 @@ export const fillOfiiStructureFromRows = async (
       return;
     }
 
-    console.log(
-      `✓ ${validRecords.length} lignes valides sur ${records.length}`
-    );
-
     console.log("- Mise à jour des données de référentiel");
     let updatedCount = 0;
 
@@ -289,15 +283,7 @@ export const fillOfiiStructureFromRows = async (
           nameToNumero
         );
 
-        if (!depNumero) {
-          throw new Error(
-            `Département invalide (devrait être validé en amont): ${row.departement}`
-          );
-        }
-
-        const operateurId = row.operateur
-          ? (operateurMap.get(row.operateur) ?? null)
-          : null;
+        const operateurId = operateurMap.get(row.operateur);
 
         const cleanName = getCleanName(row, depNumero, row.operateur);
 
@@ -368,7 +354,7 @@ export const fillOfiiStructureFromRows = async (
       }
     });
 
-    console.log(`✅ ${updatedCount} DNA upsertés`);
+    console.log(`✅ ${updatedCount} DNAs traités`);
   } catch (error) {
     throw new Error(
       "❌ Erreur lors du chargement des données référentiel : " + error

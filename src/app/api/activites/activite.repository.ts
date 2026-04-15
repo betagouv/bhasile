@@ -84,11 +84,6 @@ export const getActivitesForStructure = async (
         tauxOccupation
       );
 
-    const presencesIndues =
-      r.presencesInduesBPI == null && r.presencesInduesDeboutees == null
-        ? null
-        : (r.presencesInduesBPI ?? 0) + (r.presencesInduesDeboutees ?? 0);
-
     return {
       id: r.id,
       date: r.date,
@@ -103,7 +98,8 @@ export const getActivitesForStructure = async (
       placesVacantes,
       presencesInduesBPI: r.presencesInduesBPI,
       presencesInduesDeboutees: r.presencesInduesDeboutees,
-      presencesIndues,
+      presencesIndues:
+        (r.presencesInduesBPI ?? 0) + (r.presencesInduesDeboutees ?? 0),
     };
   });
 };

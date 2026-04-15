@@ -85,7 +85,7 @@ export const ActiviteHistorique = (): ReactElement => {
         }
         return (
           ((currentActivite?.[typeActivite] as number) /
-            currentActivite.placesAutorisees) *
+            currentActivite?.placesAutorisees) *
           100
         );
       }
