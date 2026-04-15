@@ -1,4 +1,4 @@
-import { OperateurApiType } from "@/schemas/api/operateur.schema";
+import { OperateurApiWrite } from "@/schemas/api/operateur.schema";
 
 export function useOperateurSuggestion() {
   return async (query: string): Promise<OperateurSuggestion[]> => {
@@ -15,7 +15,7 @@ export function useOperateurSuggestion() {
       }
       const data = await response.json();
 
-      return data.map((operateur: OperateurApiType) => ({
+      return data.map((operateur: OperateurApiWrite) => ({
         id: operateur.id,
         label: operateur.name,
         value: operateur.id,
@@ -27,7 +27,7 @@ export function useOperateurSuggestion() {
   };
 }
 
-type OperateurSuggestion = OperateurApiType & {
+type OperateurSuggestion = OperateurApiWrite & {
   id: string;
   label: string;
   key: string;

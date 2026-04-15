@@ -13,3 +13,10 @@ export const createStructureEvent = async (
 export const createCpomEvent = async (method: string, cpomId: number) => {
   await createUserAction({ method, cpomId });
 };
+
+export const createOperateurEvent = async (
+  method: string,
+  operateurId: number
+) => {
+  await createUserAction({ method, operateurId });
+};

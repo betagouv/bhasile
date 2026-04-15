@@ -25,6 +25,8 @@ model UserAction {
   structureId Int?
   cpom        Cpom?              @relation(fields: [cpomId], references: [id])
   cpomId      Int?
+  operateur   Operateur?         @relation(fields: [operateurId], references: [id])
+  operateurId Int?
 
   createdAt DateTime @default(now())
 

@@ -9,6 +9,7 @@ export const createUserAction = async ({
   method,
   structureId,
   cpomId,
+  operateurId,
 }: CreateUserActionArgs): Promise<void> => {
   try {
     const session = await getServerSession(authOptions);
@@ -35,6 +36,7 @@ export const createUserAction = async ({
         action: getActionFromMethod(method),
         structureId,
         cpomId,
+        operateurId,
       },
     });
   } catch (error) {
@@ -49,4 +51,5 @@ type CreateUserActionArgs = {
   method: string;
   structureId?: number;
   cpomId?: number;
+  operateurId?: number;
 };
