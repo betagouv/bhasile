@@ -118,8 +118,20 @@ export const getDepartementActivitesAverage = async (
       d.numero,
       ROUND(AVG(a."placesAutorisees"), 2) as "averagePlacesAutorisees",
       ROUND(AVG(a."placesIndisponibles"), 2) as "averagePlacesIndisponibles",
-      ROUND(AVG(a."placesOccupees"), 2) as "averagePlacesOccupees",
-      ROUND(AVG(a."placesVacantes"), 2) as "averagePlacesVacantes",
+      ROUND(AVG(
+        CASE
+          WHEN a."placesAutorisees" IS NULL OR a."placesIndisponibles" IS NULL OR a."tauxOccupation" IS NULL
+            THEN NULL
+          ELSE (a."placesAutorisees" - a."placesIndisponibles") * a."tauxOccupation"
+        END
+      ), 2) as "averagePlacesOccupees",
+      ROUND(AVG(
+        CASE
+          WHEN a."placesAutorisees" IS NULL OR a."placesIndisponibles" IS NULL OR a."tauxOccupation" IS NULL
+            THEN NULL
+          ELSE (a."placesAutorisees" - a."placesIndisponibles") - ((a."placesAutorisees" - a."placesIndisponibles") * a."tauxOccupation")
+        END
+      ), 2) as "averagePlacesVacantes",
       ROUND(AVG(a."presencesInduesBPI"), 2) as "averagePresencesInduesBPI",
       ROUND(AVG(a."presencesInduesDeboutees"), 2) as "averagePresencesInduesDeboutees",
       ROUND(AVG(a."presencesInduesBPI" + a."presencesInduesDeboutees"), 2) as "averagePresencesIndues"
