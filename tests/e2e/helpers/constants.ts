@@ -39,8 +39,12 @@ export const URLS = {
   // CPOM
   CPOMS_AJOUT_IDENTIFICATION: `${BASE_URL}/cpoms/ajout/01-identification`,
   cpomPage: (cpomId: number) => `${BASE_URL}/cpoms/${cpomId}`,
-  cpomModificationIdentification: (cpomId: number) =>
-    `${BASE_URL}/cpoms/${cpomId}/modification/01-identification`,
+  cpomModificationDescription: (cpomId: number) =>
+    `${BASE_URL}/cpoms/${cpomId}/modification/description`,
+  cpomModificationActesAdministratifs: (cpomId: number) =>
+    `${BASE_URL}/cpoms/${cpomId}/modification/actes-administratifs`,
+  cpomModificationComposition: (cpomId: number) =>
+    `${BASE_URL}/cpoms/${cpomId}/modification/composition`,
   cpomModificationFinance: (cpomId: number) =>
-    `${BASE_URL}/cpoms/${cpomId}/modification/02-finance`,
+    `${BASE_URL}/cpoms/${cpomId}/modification/finances`,
 } as const;

@@ -14,43 +14,36 @@ const COLUMNS: ListColumn[] = [
     label: "Opérateur",
     column: "operateur",
     orderBy: true,
-    centered: false,
   },
   {
     label: "Structures",
     column: "structures",
     orderBy: true,
-    centered: false,
   },
   {
     label: "Échelle",
     column: "granularity",
     orderBy: true,
-    centered: false,
   },
   {
     label: "Région",
     column: "region",
     orderBy: true,
-    centered: false,
   },
   {
     label: "Départements",
     column: "departements",
     orderBy: false,
-    centered: false,
   },
   {
     label: "Date début",
     column: "dateStart",
     orderBy: true,
-    centered: false,
   },
   {
     label: "Date fin",
     column: "dateEnd",
     orderBy: true,
-    centered: false,
   },
 ];
 

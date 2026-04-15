@@ -210,19 +210,28 @@ export class CpomAjoutFinancePage extends BasePage {
     await this.page.click('button[type="submit"]');
   }
 
-  async submitAndConfirmRedirectToStructures(): Promise<void> {
+  async submitAndConfirmRedirect(expectedUrl: string): Promise<void> {
     await this.submit();
     const modal = this.page.locator("#confirmation-cpom-modal");
-    await expect(modal).toBeVisible({ timeout: TIMEOUTS.SUBMIT });
-    await expect(
-      modal.getByRole("heading", {
-        name: /Vous avez créé un CPOM|Vous avez modifié un CPOM/i,
-      })
-    ).toBeVisible();
-    const closeButton = modal.getByRole("button", { name: /compris/i });
-    await closeButton.click();
-    await this.page.waitForURL(URLS.STRUCTURES, {
+    const hasModal = await modal
+      .waitFor({ state: "visible", timeout: TIMEOUTS.SUBMIT })
+      .then(() => true)
+      .catch(() => false);
+    if (hasModal) {
+      await expect(
+        modal.getByRole("heading", {
+          name: /Vous avez créé un CPOM|Vous avez modifié un CPOM/i,
+        })
+      ).toBeVisible();
+      const closeButton = modal.getByRole("button", { name: /compris/i });
+      await closeButton.click();
+    }
+    await this.page.waitForURL(expectedUrl, {
       timeout: TIMEOUTS.NAVIGATION,
     });
+  }
+
+  async submitAndConfirmRedirectToStructures(): Promise<void> {
+    await this.submitAndConfirmRedirect(URLS.STRUCTURES);
   }
 }

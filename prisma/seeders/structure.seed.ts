@@ -53,9 +53,7 @@ export const createFakeStructure = ({
     type,
     nom: faker.lorem.words(2),
     nomOfii: faker.lorem.words(2),
-    departement: {
-      connect: { numero: departementAdministratif },
-    },
+    departementAdministratif,
     directionTerritoriale: "DT " + faker.location.city(),
     createdAt,
     updatedAt: createdAt,
