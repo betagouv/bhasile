@@ -2,7 +2,7 @@
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { BudgetTables } from "@/app/components/forms/finance/BudgetTables";
 import { DocumentsFinanciers } from "@/app/components/forms/finance/documents/DocumentsFinanciers";
-import { IndicateursGeneraux } from "@/app/components/forms/finance/IndicateursGeneraux";
+import { IndicateursFinanciers } from "@/app/components/forms/finance/IndicateursFinanciers";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
@@ -43,6 +43,7 @@ export default function ModificationFinanceForm() {
     await handleSubmit({
       id: structure.id,
       budgets: data.budgets,
+      indicateursFinanciers: data.indicateursFinanciers,
       documentsFinanciers,
       structureMillesimes,
     });
@@ -74,7 +75,7 @@ export default function ModificationFinanceForm() {
           hasAccordion
           formKind={FormKind.MODIFICATION}
         />
-        <IndicateursGeneraux />
+        <IndicateursFinanciers />
         <hr />
 
         <BudgetTables />

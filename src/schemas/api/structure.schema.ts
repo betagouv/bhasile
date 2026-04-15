@@ -16,6 +16,7 @@ import { evaluationApiSchema } from "./evaluation.schema";
 import { evenementIndesirableGraveApiSchema } from "./evenement-indesirable-grave.schema";
 import { finessApiSchema } from "./finess.schema";
 import { formApiSchema } from "./form.schema";
+import { indicateurFinancierApiSchema } from "./indicateurFinancier.schema";
 import { operateurApiSchema } from "./operateur.schema";
 import { structureMillesimeApiSchema } from "./structure-millesime.schema";
 import { structureTypologieApiSchema } from "./structure-typologie.schema";
@@ -107,6 +108,7 @@ const remainingStructureAgentUpdateApiSchema = z.object({
     .optional(),
   activites: z.array(activiteApiSchema).optional(),
   budgets: z.array(budgetApiSchema).optional(),
+  indicateursFinanciers: z.array(indicateurFinancierApiSchema).optional(),
   forms: z.array(formApiSchema).optional(),
   actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
 });

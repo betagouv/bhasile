@@ -9,6 +9,8 @@ import {
 } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
+import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
 import { StructureType } from "@/types/structure.type";
 
 export const BudgetTableStaticValue = ({
@@ -17,9 +19,11 @@ export const BudgetTableStaticValue = ({
   year,
   colored,
   budgets,
+  indicateursFinanciers,
   cpomStructures,
   disabledYearsStart,
   enabledYears,
+  isCurrency = true,
 }: Props) => {
   const isDisabled = isInputDisabled(
     year,
@@ -38,12 +42,19 @@ export const BudgetTableStaticValue = ({
       ];
   }
 
+  if (indicateursFinanciers) {
+    value =
+      indicateursFinanciers[
+        getMillesimeIndexForAYear(indicateursFinanciers, year, type)
+      ]?.[name as keyof IndicateurFinancierApiType];
+  }
+
   if (cpomStructures) {
     const { cpomStructureIndex, budgetIndex } =
       getCpomStructureIndexAndBudgetIndexForAYearAndAType(
         cpomStructures,
         year,
-        type
+        type as StructureType
       );
 
     value =
@@ -60,22 +71,31 @@ export const BudgetTableStaticValue = ({
     <span className="text-center">
       {colored ? (
         <Badge type={Number(value) >= 0 ? "success" : "error"}>
-          <NumberDisplay value={value} type="currency" className="text-sm" />
+          <NumberDisplay
+            value={value}
+            type={isCurrency ? "currency" : "number"}
+            className="text-sm"
+          />
         </Badge>
       ) : (
-        <NumberDisplay value={value} type="currency" />
+        <NumberDisplay
+          value={value}
+          type={isCurrency ? "currency" : "number"}
+        />
       )}
     </span>
   );
 };
 
 type Props = {
-  type?: StructureType;
+  type?: StructureType | IndicateurFinancierType;
   name: string;
   year: number;
   colored?: boolean;
   budgets?: BudgetApiType[];
+  indicateursFinanciers?: IndicateurFinancierApiType[];
   cpomStructures?: CpomStructureApiType[];
   disabledYearsStart?: number;
   enabledYears?: number[];
+  isCurrency?: boolean;
 };

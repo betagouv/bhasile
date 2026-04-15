@@ -5,7 +5,7 @@ import { ReactElement } from "react";
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { AutoSave } from "@/app/components/forms/AutoSave";
 import { BudgetTables } from "@/app/components/forms/finance/BudgetTables";
-import { IndicateursGeneraux } from "@/app/components/forms/finance/IndicateursGeneraux";
+import { IndicateursFinanciers } from "@/app/components/forms/finance/IndicateursFinanciers";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
@@ -43,7 +43,11 @@ export default function FinalisationFinance(): ReactElement {
     useAgentFormHandling({ currentStep });
 
   const onAutoSave = async (data: BudgetsAutoSaveFormValues) => {
-    await handleAutoSave({ budgets: data.budgets, id: structure.id });
+    await handleAutoSave({
+      budgets: data.budgets,
+      indicateursFinanciers: data.indicateursFinanciers,
+      id: structure.id,
+    });
   };
 
   const { getFetchState } = useFetchState();
@@ -75,7 +79,7 @@ export default function FinalisationFinance(): ReactElement {
           description="Veuillez remplir les champs obligatoires ci-dessous. Si une donnée vous est inconnue, contactez-nous."
         />
 
-        <IndicateursGeneraux />
+        <IndicateursFinanciers />
         <hr />
 
         <BudgetTables />

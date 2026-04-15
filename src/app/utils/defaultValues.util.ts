@@ -29,6 +29,7 @@ import { getStructureCpomDefaultValues } from "./cpom.util";
 import { transformApiDnaStructuresToFormDnaStructures } from "./dna.util";
 import { getEvaluationsDefaultValues } from "./evaluation.util";
 import { transformApiFinessesToFormFinesses } from "./finess.util";
+import { getIndicateursFinanciersDefaultValues } from "./indicateurFinancier.util";
 import { isStructureAutorisee } from "./structure.util";
 import { getStructureMillesimeDefaultValues } from "./structureMillesime.util";
 import { getStructureTypologyDefaultValues } from "./structureTypology.util";
@@ -51,6 +52,11 @@ export const getDefaultValues = ({
 
   const budgets = getBudgetsDefaultValues(
     structure?.budgets || [],
+    structureCreationYear
+  );
+
+  const indicateursFinanciers = getIndicateursFinanciersDefaultValues(
+    structure?.indicateursFinanciers || [],
     structureCreationYear
   );
 
@@ -116,6 +122,7 @@ export const getDefaultValues = ({
     antennes,
     date303: structure.date303 ?? undefined,
     budgets,
+    indicateursFinanciers,
     structureTypologies,
     structureMillesimes,
     documentsFinanciers: structure.documentsFinanciers ?? [],

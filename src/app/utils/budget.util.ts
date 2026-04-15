@@ -1,6 +1,8 @@
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { anyBudgetFormValues } from "@/schemas/forms/base/budget.schema";
+import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
 import { StructureType } from "@/types/structure.type";
 
 import { isNullOrUndefined } from "./common.util";
@@ -40,9 +42,6 @@ export const getBudgetsDefaultValues = (
         return {
           ...budget,
           year: budget.year,
-          ETP: budget.ETP ?? undefined,
-          tauxEncadrement: budget.tauxEncadrement ?? undefined,
-          coutJournalier: budget.coutJournalier ?? undefined,
           dotationDemandee: budget.dotationDemandee ?? undefined,
           dotationAccordee: budget.dotationAccordee ?? undefined,
           totalProduitsProposes: budget.totalProduitsProposes ?? undefined,
@@ -77,7 +76,7 @@ export const getBudgetsDefaultValues = (
 
 export const isInputDisabled = (
   year: number,
-  type?: StructureType,
+  type?: StructureType | IndicateurFinancierType,
   disabledYearsStart?: number,
   enabledYears?: number[],
   cpomStructures?: CpomStructureApiType[]
@@ -87,7 +86,7 @@ export const isInputDisabled = (
       getCpomStructureIndexAndBudgetIndexForAYearAndAType(
         cpomStructures,
         year,
-        type
+        type as StructureType
       );
     if (cpomStructureIndex === -1 || budgetIndex === -1) {
       return true;
@@ -105,9 +104,10 @@ export const isInputDisabled = (
 export const getName = (
   name: string,
   year: number,
-  type?: StructureType,
+  type?: StructureType | IndicateurFinancierType,
   budgets?: BudgetApiType[],
-  cpomStructures?: CpomStructureApiType[]
+  cpomStructures?: CpomStructureApiType[],
+  indicateursFinanciers?: IndicateurFinancierApiType[]
 ): string => {
   if (budgets) {
     return `budgets.${getMillesimeIndexForAYear(budgets, year, type)}.${name}`;
@@ -117,9 +117,12 @@ export const getName = (
       getCpomStructureIndexAndBudgetIndexForAYearAndAType(
         cpomStructures,
         year,
-        type
+        type as StructureType
       );
     return `cpomStructures.${cpomStructureIndex}.cpom.budgets.${budgetIndex}.${name}`;
+  }
+  if (indicateursFinanciers) {
+    return `indicateursFinanciers.${getMillesimeIndexForAYear(indicateursFinanciers, year, type)}.${name}`;
   }
   return "";
 };

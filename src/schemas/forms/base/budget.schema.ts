@@ -12,15 +12,11 @@ import {
 
 import { validateAffectationReservesDetails } from "./budget/validateAffectationReservesDetails";
 import { cpomStructureSchema } from "./cpom.schema";
+import { indicateurFinancierSchema } from "./indicateurFinancier.schema";
 
 export const budgetBaseSchema = z.object({
   id: zId(),
   year: zSafeYear(),
-
-  // Indicateurs généraux
-  ETP: zSafePositiveDecimals(),
-  tauxEncadrement: zSafePositiveDecimals(),
-  coutJournalier: zSafePositiveDecimals(),
 
   commentaire: z.string().nullish(),
 });
@@ -130,9 +126,6 @@ export const budgetSubventionneeOpenSchema = budgetBaseSchema.extend({
 export const budgetAutoSaveSchema = z.object({
   id: zId(),
   year: zSafeYear(),
-  ETP: zSafeDecimalsNullish(),
-  tauxEncadrement: zSafeDecimalsNullish(),
-  coutJournalier: zSafeDecimalsNullish(),
   dotationDemandee: zSafeDecimalsNullish(),
   dotationAccordee: zSafeDecimalsNullish(),
   totalProduitsProposes: zSafeDecimalsNullish(),
@@ -160,15 +153,13 @@ export const budgetInCpomSchema = budgetAutoriseeOpenSchemaWithoutRefinement
   .and(
     z.object({
       year: zSafeYear(),
-      ETP: zSafePositiveDecimals(),
-      tauxEncadrement: zSafePositiveDecimals(),
-      coutJournalier: zSafePositiveDecimals(),
     })
   );
 
 export const budgetsAutoSaveSchema = z
   .object({
     budgets: z.array(budgetAutoSaveSchema),
+    indicateursFinanciers: z.array(indicateurFinancierSchema),
   })
   .and(z.object({ cpomStructures: z.array(cpomStructureSchema) }));
 

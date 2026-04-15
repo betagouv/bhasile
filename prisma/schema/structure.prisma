@@ -33,6 +33,7 @@ model Structure {
   cpomStructures           CpomStructure[]
   structureMillesimes      StructureMillesime[]
   budgets                  Budget[]
+  indicateursFinanciers    IndicateurFinancier[]
   operateur                Operateur?           @relation(fields: [operateurId], references: [id])
   operateurId              Int?
   forms                    Form[]

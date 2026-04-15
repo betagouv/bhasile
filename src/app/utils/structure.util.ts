@@ -9,6 +9,7 @@ import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
+import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import {
   StructureAgentUpdateApiType,
   StructureApiType,
@@ -16,6 +17,7 @@ import {
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 import { Repartition } from "@/types/adresse.type";
+import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
 import { StructureType } from "@/types/structure.type";
 
 import { sortKeysByValue } from "./common.util";
@@ -286,13 +288,14 @@ export const getMillesimeIndexForAYear = (
     | StructureMillesimeApiType[]
     | BudgetApiType[],
   year: number = CURRENT_YEAR,
-  type?: StructureType
+  type?: StructureType | IndicateurFinancierType
 ): number =>
   typologies?.findIndex((typology) => {
     if (type) {
       return (
         typology.year === year &&
-        (typology as BudgetApiType).cpomStructureType === type
+        ((typology as BudgetApiType).cpomStructureType === type ||
+          (typology as IndicateurFinancierApiType).type === type)
       );
     }
     return typology.year === year;
