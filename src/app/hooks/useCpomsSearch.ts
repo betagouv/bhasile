@@ -1,14 +1,14 @@
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
-import { CpomViewType } from "@/types/cpom.type";
+import { CpomApiRead } from "@/schemas/api/cpom.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import { CpomColumn } from "@/types/ListColumn";
 
 import { useFetchState } from "../context/FetchStateContext";
 
 export const useCpomsSearch = () => {
-  const [cpoms, setCpoms] = useState<CpomViewType[] | undefined>(undefined);
+  const [cpoms, setCpoms] = useState<CpomApiRead[] | undefined>(undefined);
   const [totalCpoms, setTotalCpoms] = useState<number>(0);
 
   const { setFetchState } = useFetchState();
@@ -31,7 +31,7 @@ export const useCpomsSearch = () => {
       column: CpomColumn | null,
       direction: "asc" | "desc" | null
     ): Promise<{
-      cpoms: CpomViewType[];
+      cpoms: CpomApiRead[];
       totalCpoms: number;
     }> => {
       setFetchState(`cpoms-search`, FetchState.LOADING);

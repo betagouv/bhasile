@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 
 import { Pagination } from "@/app/components/common/Pagination";
 import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
-import { CpomViewType } from "@/types/cpom.type";
+import { CpomApiRead } from "@/schemas/api/cpom.schema";
 import { ListColumn } from "@/types/ListColumn";
 
 import { CpomItem } from "./CpomItem";
@@ -69,7 +69,7 @@ export const CpomsTable = ({
 };
 
 type Props = {
-  cpoms: CpomViewType[];
+  cpoms: CpomApiRead[];
   totalCpoms: number;
   ariaLabelledBy: string;
 };

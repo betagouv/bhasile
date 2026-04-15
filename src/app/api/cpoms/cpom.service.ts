@@ -1,8 +1,7 @@
 import { computeCpomDates } from "@/app/utils/cpom.util";
-import { CpomApiType } from "@/schemas/api/cpom.schema";
-import { CpomViewType } from "@/types/cpom.type";
+import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 
-export const transformToCpomView = (cpom: CpomApiType): CpomViewType => {
+export const getFullCpom = (cpom: CpomApiWrite): CpomApiRead => {
   const { dateStart, dateEnd } = computeCpomDates(cpom);
 
   return {
@@ -12,6 +11,6 @@ export const transformToCpomView = (cpom: CpomApiType): CpomViewType => {
   };
 };
 
-export const transformToCpomsView = (cpoms: CpomApiType[]): CpomViewType[] => {
-  return cpoms.map(transformToCpomView);
+export const getFullCpoms = (cpoms: CpomApiWrite[]): CpomApiRead[] => {
+  return cpoms.map(getFullCpom);
 };

@@ -2,19 +2,20 @@ import { v4 as uuidv4 } from "uuid";
 
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
-  CpomApiType,
+  CpomApiRead,
+  CpomApiWrite,
   CpomDepartementApiType,
   CpomStructureApiType,
 } from "@/schemas/api/cpom.schema";
 import { BudgetCpomFormValues } from "@/schemas/forms/base/cpom.schema";
 import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
-import { CpomGranularity, CpomViewType } from "@/types/cpom.type";
+import { CpomGranularity } from "@/types/cpom.type";
 import { StructureType } from "@/types/structure.type";
 
 import { getBudgetsDefaultValues } from "./budget.util";
 
-export const getCpomDefaultValues = (cpom?: CpomViewType): CpomFormValues => {
+export const getCpomDefaultValues = (cpom?: CpomApiRead): CpomFormValues => {
   const structureTypes = getCpomStructureTypes(cpom);
   return {
     ...cpom,
@@ -90,7 +91,7 @@ const getCpomBudgetsDefaultValues = (
   ) as BudgetCpomFormValues[];
 };
 
-export const formatCpomName = (cpom: CpomViewType): string => {
+export const formatCpomName = (cpom: CpomApiRead): string => {
   const zone =
     cpom.granularity === "REGIONALE"
       ? cpom.region?.name
@@ -102,7 +103,7 @@ export const formatCpomName = (cpom: CpomViewType): string => {
 };
 
 export const computeCpomDates = (
-  cpom?: CpomApiType
+  cpom?: CpomApiWrite
 ): { dateStart?: string; dateEnd?: string } => {
   if (!cpom) {
     return {
@@ -172,7 +173,7 @@ export const getDepartementsList = (
   return list;
 };
 
-export const getCpomStructureTypes = (cpom?: CpomViewType): StructureType[] => {
+export const getCpomStructureTypes = (cpom?: CpomApiRead): StructureType[] => {
   const structureTypes = [
     ...new Set(
       cpom?.structures?.map((structure) => structure.structure?.type) ?? []

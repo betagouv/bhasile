@@ -1,9 +1,12 @@
 import Link from "next/link";
 
 import { EmptyCell } from "@/app/components/common/EmptyCell";
-import { getDepartementsList, getGranularityLabel } from "@/app/utils/cpom.util";
+import {
+  getDepartementsList,
+  getGranularityLabel,
+} from "@/app/utils/cpom.util";
 import { formatDate } from "@/app/utils/date.util";
-import { CpomViewType } from "@/types/cpom.type";
+import { CpomApiRead } from "@/schemas/api/cpom.schema";
 
 export const CpomItem = ({ cpom, index }: Props) => {
   const isCpomFinalized =
@@ -55,6 +58,6 @@ export const CpomItem = ({ cpom, index }: Props) => {
 };
 
 type Props = {
-  cpom: CpomViewType;
+  cpom: CpomApiRead;
   index: number;
 };

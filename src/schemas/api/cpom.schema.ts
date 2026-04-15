@@ -65,6 +65,13 @@ export const cpomApiAjoutSchema = cpomApiSchema.extend({
   operateur: operateurApiSchema,
 });
 
+// This schema is never used. It is only for infering CpomApiRead type.
+export const cpomApiReadSchema = cpomApiSchema.extend({
+  dateStart: z.string().optional(),
+  dateEnd: z.string().optional(),
+});
+
 export type CpomDepartementApiType = z.infer<typeof cpomDepartementApiSchema>;
 export type CpomStructureApiType = z.infer<typeof cpomStructureApiSchema>;
-export type CpomApiType = z.infer<typeof cpomApiSchema>;
+export type CpomApiWrite = z.infer<typeof cpomApiSchema>;
+export type CpomApiRead = z.infer<typeof cpomApiReadSchema>;

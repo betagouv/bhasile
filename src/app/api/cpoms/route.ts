@@ -9,7 +9,7 @@ import {
   createOrUpdateCpom,
   findBySearch,
 } from "./cpom.repository";
-import { transformToCpomsView } from "./cpom.service";
+import { getFullCpoms } from "./cpom.service";
 
 export async function GET(request: NextRequest) {
   const page = request.nextUrl.searchParams.get("page") as number | null;
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       }),
     ]);
     return NextResponse.json({
-      cpoms: transformToCpomsView(cpoms),
+      cpoms: getFullCpoms(cpoms),
       totalCpoms,
     });
   } catch (error) {

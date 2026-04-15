@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { findOne } from "../cpom.repository";
-import { transformToCpomView } from "../cpom.service";
+import { getFullCpom } from "../cpom.service";
 
 export async function GET(
   _request: NextRequest,
@@ -18,7 +18,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(transformToCpomView(cpom));
+    return NextResponse.json(getFullCpom(cpom));
   } catch (error) {
     console.error("Error in GET /api/cpoms/[id]", error);
     return NextResponse.json(
