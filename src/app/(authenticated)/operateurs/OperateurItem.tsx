@@ -1,5 +1,6 @@
 // import Button from "@codegouvfr/react-dsfr/Button";
 import Image from "next/image";
+import Link from "next/link";
 import { ReactElement } from "react";
 
 import { Badge, BadgeType } from "@/app/components/common/Badge";
@@ -17,6 +18,7 @@ const getBadgeColor = (structureType: string): BadgeType => {
 };
 
 export const OperateurItem = ({
+  id,
   name,
   nbStructures,
   totalPlaces,
@@ -75,6 +77,12 @@ export const OperateurItem = ({
               du parc en nombre de places
             </span>
           </div>
+          <Link
+            className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-line before:w-[20] before:h-[20]"
+            title={`Détails de la structure ${name}`}
+            href={`operateurs/${id}`}
+            aria-label={`Détails de la structure ${name}`}
+          />
         </div>
       </div>
     </div>
@@ -82,6 +90,7 @@ export const OperateurItem = ({
 };
 
 type Props = {
+  id: number;
   name: string;
   nbStructures: number;
   totalPlaces: number;

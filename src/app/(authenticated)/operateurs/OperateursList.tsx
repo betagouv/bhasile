@@ -15,6 +15,7 @@ export const OperateurList = ({
       {operateurs.map((operateur) => (
         <div className="px-3 pt-3" key={operateur.id}>
           <OperateurItem
+            id={operateur.id}
             name={operateur.name}
             nbStructures={operateur.nbStructures}
             totalPlaces={operateur.totalPlaces}

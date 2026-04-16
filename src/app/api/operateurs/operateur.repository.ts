@@ -64,6 +64,31 @@ export const countOperateurs = async (): Promise<number> => {
   return prisma.operateur.count();
 };
 
+export const findOne = async (id: number): Promise<OperateurWithStructures> => {
+  return prisma.operateur.findFirstOrThrow({
+    where: { id },
+    include: {
+      structures: {
+        select: {
+          lgbt: true,
+          fvvTeh: true,
+        },
+      },
+    },
+  });
+};
+
+type OperateurWithStructures = Prisma.OperateurGetPayload<{
+  include: {
+    structures: {
+      select: {
+        lgbt: true;
+        fvvTeh: true;
+      };
+    };
+  };
+}>;
+
 type OperateurStat = {
   id: number;
   name: string;
