@@ -1,4 +1,4 @@
-import { getActivitesForStructure } from "../activites/activite.repository";
+import { getActivitesForStructure } from "../activites/activite.service";
 import {
   findOne,
   getLatestPlacesAutoriseesPerStructure,

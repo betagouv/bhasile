@@ -1,4 +1,10 @@
-import { getDepartementActivitesAverage } from "./activite.repository";
+import { Prisma } from "@/generated/prisma/client";
+
+import {
+  getActivitesForStructureRaw,
+  getDepartementActivitesAverage,
+  StructureActiviteRow,
+} from "./activite.repository";
 import { ActiviteStats } from "./activite.type";
 
 export const getAverageDepartementPlaces = async (
@@ -7,6 +13,47 @@ export const getAverageDepartementPlaces = async (
   endDate: string | null
 ): Promise<ActiviteStats | null> => {
   return getDepartementActivitesAverage(departement, startDate, endDate);
+};
+
+export const getActivitesForStructure = async (
+  structureId: number
+): Promise<StructureActiviteRow[]> => {
+  const rows = await getActivitesForStructureRaw(structureId);
+
+  return rows
+    .filter((r) => r.placesAutorisees != null)
+    .map((r) => {
+      const tauxOccupation =
+        r.tauxOccupation == null
+          ? null
+          : (r.tauxOccupation as Prisma.Decimal).toNumber();
+
+      const { placesDisponibles, placesVacantes, placesOccupees } =
+        computePlacesVacantesAndPlacesOccupees(
+          r.placesAutorisees,
+          r.placesIndisponibles,
+          tauxOccupation
+        );
+
+      return {
+        id: r.id,
+        date: r.date,
+        placesAutorisees: r.placesAutorisees!,
+        desinsectisation: r.desinsectisation,
+        remiseEnEtat: r.remiseEnEtat,
+        sousOccupation: r.sousOccupation,
+        placesIndisponibles: r.placesIndisponibles,
+        tauxOccupation,
+        placesOccupees,
+        placesDisponibles,
+        travaux: r.travaux,
+        placesVacantes,
+        presencesInduesBPI: r.presencesInduesBPI,
+        presencesInduesDeboutees: r.presencesInduesDeboutees,
+        presencesIndues:
+          (r.presencesInduesBPI ?? 0) + (r.presencesInduesDeboutees ?? 0),
+      };
+    });
 };
 
 export const computePlacesVacantesAndPlacesOccupees = (
