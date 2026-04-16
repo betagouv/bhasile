@@ -30,6 +30,7 @@ function InputSimple({
         thousandSeparator=" "
         decimalSeparator=","
         className={inputClassName}
+        decimalScale={2}
       />
     ) : (
       <input name={name} className={inputClassName} {...nativeInputProps} />
