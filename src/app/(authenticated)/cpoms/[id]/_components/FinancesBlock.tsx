@@ -73,6 +73,7 @@ export const FinancesBlock = () => {
         headings={getBudgetTableHeading({ years })}
         enableBorders
         className="[&_thead_tr_th]:!text-sm"
+        stickFirstColumn
       >
         <BudgetTableLines
           years={years}

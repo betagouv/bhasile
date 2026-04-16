@@ -68,6 +68,7 @@ export const StructureTable = ({ canEdit = true }: Props) => {
       hasErrors={hasErrors}
       headings={getBudgetTableHeading({ years: yearsToDisplay, structure })}
       enableBorders
+      stickFirstColumn
     >
       <BudgetTableLines
         lines={getBudgetTableLines(isAutorisee, detailAffectationEnabledYears)}

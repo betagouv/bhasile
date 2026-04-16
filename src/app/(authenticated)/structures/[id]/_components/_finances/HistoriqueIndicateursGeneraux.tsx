@@ -39,6 +39,7 @@ export const HistoriqueIndicateursGeneraux = () => {
           indicateursFinanciers: indicateursFinanciers,
         })}
         enableBorders
+        stickFirstColumn
       >
         <IndicateurFinancierTableLines
           lines={getIndicateurFinancierTableLines()}

@@ -63,6 +63,7 @@ export const CpomStaticTable = (): ReactElement => {
         ariaLabelledBy="gestionBudgetaire"
         headings={getBudgetTableHeading({ years, structure })}
         enableBorders
+        stickFirstColumn
       >
         <BudgetTableLines
           years={years}
