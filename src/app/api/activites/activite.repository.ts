@@ -17,7 +17,11 @@ const computePlacesVacantesAndPlacesOccupees = (
     placesIndisponibles == null ||
     tauxOccupation == null
   ) {
-    return { placesDisponibles: null, placesVacantes: null, placesOccupees: null };
+    return {
+      placesDisponibles: null,
+      placesVacantes: null,
+      placesOccupees: null,
+    };
   }
 
   const placesDisponibles = placesAutorisees - placesIndisponibles;
@@ -70,9 +74,9 @@ export const getActivitesForStructure = async (
       desinsectisation: true,
       remiseEnEtat: true,
       sousOccupation: true,
+      travaux: true,
       placesIndisponibles: true,
       tauxOccupation: true,
-      travaux: true,
       presencesInduesBPI: true,
       presencesInduesDeboutees: true,
     },

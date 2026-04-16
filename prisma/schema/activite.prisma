@@ -8,7 +8,7 @@ model Activite {
   remiseEnEtat             Int?
   sousOccupation           Int?
   travaux                  Int?
-  totalPlacesIndisponibles Int?
+  placesIndisponibles      Int?
   tauxIndisponibilite      Decimal?
   tauxOccupation           Decimal?
   placesOccupees           Int?
