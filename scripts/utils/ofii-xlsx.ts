@@ -23,7 +23,7 @@ const POSSIBLE_ACTIVITE_COLUMNS: Record<keyof ActiviteRow, string[]> = {
   remiseEnEtat: ["Remise en état de l'unité"],
   sousOccupation: ["Sous-occupation"],
   travaux: ["Travaux"],
-  totalPlacesIndisponibles: ["Total de places indisponibles"],
+  placesIndisponibles: ["Total de places indisponibles"],
   tauxIndisponibilite: ["Taux d'indisponibilité"],
   tauxOccupation: ["Taux d'occupation"],
   placesOccupees: ["Places occupées"],
@@ -49,7 +49,7 @@ export type ActiviteRow = {
   remiseEnEtat: number | null;
   sousOccupation: number | null;
   travaux: number | null;
-  totalPlacesIndisponibles: number | null;
+  placesIndisponibles: number | null;
   tauxIndisponibilite: number | null;
   tauxOccupation: number | null;
   placesOccupees: number | null;
