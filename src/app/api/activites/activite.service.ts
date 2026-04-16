@@ -3,9 +3,26 @@ import { Prisma } from "@/generated/prisma/client";
 import {
   getActivitesForStructureRaw,
   getDepartementActivitesAverage,
-  StructureActiviteRow,
 } from "./activite.repository";
 import { ActiviteStats } from "./activite.type";
+
+type StructureActiviteRow = {
+  id: number;
+  date: Date;
+  placesAutorisees: number;
+  desinsectisation: number | null;
+  remiseEnEtat: number | null;
+  sousOccupation: number | null;
+  placesIndisponibles: number | null;
+  tauxOccupation: number | null;
+  placesOccupees: number | null;
+  placesDisponibles: number | null;
+  travaux: number | null;
+  placesVacantes: number | null;
+  presencesInduesBPI: number | null;
+  presencesInduesDeboutees: number | null;
+  presencesIndues: number | null;
+};
 
 export const getAverageDepartementPlaces = async (
   departement: string | null,
