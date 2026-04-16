@@ -54,6 +54,7 @@ export const IndicateursFinanciers = () => {
         })}
         hasErrors={errorMessages.length > 0}
         enableBorders
+        stickLastColumn
       >
         <IndicateurFinancierTableLines
           lines={getIndicateurFinancierTableLines()}
