@@ -35,7 +35,7 @@ export const getBudgetTableLines = (
           },
           {
             name: "totalProduits",
-            label: "Total produits retenus",
+            label: "Total produits retenu",
             subLabel: "dont dotation État",
             disabledYearsStart: AUTORISEE_OPEN_YEAR,
           },
@@ -144,7 +144,7 @@ export const getBudgetTableLines = (
       lines: [
         {
           name: "totalProduits",
-          label: "Total produits",
+          label: "Total produits retenu",
           subLabel: "dont dotation État",
           disabledYearsStart: SUBVENTIONNEE_OPEN_YEAR + 1,
         },
