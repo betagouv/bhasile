@@ -5,7 +5,7 @@ import { zId } from "@/app/utils/zodCustomFields";
 const dnaApiSchema = z.object({
   id: zId(),
   code: z.string(),
-  description: z.string().optional(),
+  description: z.string().nullish(),
 });
 
 export const dnaStructureApiSchema = z.object({
