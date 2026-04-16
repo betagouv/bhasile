@@ -1,6 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { Activite } from "@/generated/prisma/client";
+import { Activite, Prisma } from "@/generated/prisma/client";
 
 export const createFakeActivites = ({
   dnaCode,
@@ -46,7 +46,18 @@ export const createFakeActivite = ({
     travaux,
     placesIndisponibles,
     placesOccupees: faker.number.int({ min: 1, max: 5 }),
-    placesVacantes: faker.number.int({ min: 1, max: 5 }),
+    tauxOccupation: new Prisma.Decimal(
+      faker.number.float({ min: 0.8, max: 1, fractionDigits: 2 })
+    ),
+    tauxIndisponibilite: new Prisma.Decimal(
+      faker.number.float({ min: 0.1, max: 0.3, fractionDigits: 2 })
+    ),
+    tauxBPI: new Prisma.Decimal(
+      faker.number.float({ min: 0, max: 0.1, fractionDigits: 2 })
+    ),
+    tauxDeboutes: new Prisma.Decimal(
+      faker.number.float({ min: 0, max: 0.1, fractionDigits: 2 })
+    ),
     presencesInduesBPI: faker.number.int({ min: 1, max: 5 }),
     presencesInduesDeboutees: faker.number.int({
       min: 1,

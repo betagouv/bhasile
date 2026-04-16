@@ -7,11 +7,14 @@ model Activite {
   desinsectisation         Int?
   remiseEnEtat             Int?
   sousOccupation           Int?
-  placesIndisponibles      Int?
-  placesOccupees           Int?
   travaux                  Int?
-  placesVacantes           Int?
+  placesIndisponibles      Int?
+  tauxIndisponibilite      Decimal?
+  tauxOccupation           Decimal?
+  placesOccupees           Int?
+  tauxBPI                  Decimal?
   presencesInduesBPI       Int?
+  tauxDeboutes             Decimal?
   presencesInduesDeboutees Int?
 
   @@unique([dnaCode, date])

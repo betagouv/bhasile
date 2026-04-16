@@ -24,9 +24,13 @@ const POSSIBLE_ACTIVITE_COLUMNS: Record<keyof ActiviteRow, string[]> = {
   sousOccupation: ["Sous-occupation"],
   travaux: ["Travaux"],
   placesIndisponibles: ["Total de places indisponibles"],
-  presencesInduesBPI: ["Nb de BPI en PI"],
-  presencesInduesDeboutees: ["Nb de DEB en PI"],
+  tauxIndisponibilite: ["Taux d'indisponibilité"],
   tauxOccupation: ["Taux d'occupation"],
+  placesOccupees: ["Places occupées"],
+  tauxBPI: ["% de BPI en PI"],
+  presencesInduesBPI: ["Nb de BPI en PI"],
+  tauxDeboutes: ["% de DEB en PI"],
+  presencesInduesDeboutees: ["Nb de DEB en PI"],
 };
 
 export type OfiiReferentialRow = {
@@ -46,9 +50,13 @@ export type ActiviteRow = {
   sousOccupation: number | null;
   travaux: number | null;
   placesIndisponibles: number | null;
-  presencesInduesBPI: number | null;
-  presencesInduesDeboutees: number | null;
+  tauxIndisponibilite: number | null;
   tauxOccupation: number | null;
+  placesOccupees: number | null;
+  tauxBPI: number | null;
+  presencesInduesBPI: number | null;
+  tauxDeboutes: number | null;
+  presencesInduesDeboutees: number | null;
 };
 
 export type OfiiActiviteSheet = {
