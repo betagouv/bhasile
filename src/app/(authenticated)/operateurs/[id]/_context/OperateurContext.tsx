@@ -10,7 +10,7 @@ export type OperateurContextType = {
 
 export function OperateurProvider({
   children,
-  operateur: operateur,
+  operateur,
 }: {
   children: ReactNode;
   operateur: OperateurApiRead | null;

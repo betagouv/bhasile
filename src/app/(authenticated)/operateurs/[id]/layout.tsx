@@ -2,12 +2,12 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { ReactNode } from "react";
 
-import { OperateurApiWrite } from "@/schemas/api/operateur.schema";
+import { OperateurApiRead } from "@/schemas/api/operateur.schema";
 
 import { OperateurHeader } from "./_components/OperateurHeader";
 import { OperateurProvider } from "./_context/OperateurContext";
 
-async function getOperateur(id: string): Promise<OperateurApiWrite> {
+async function getOperateur(id: string): Promise<OperateurApiRead> {
   try {
     const baseUrl = process.env.NEXT_URL || "";
     const result = await fetch(`${baseUrl}/api/operateurs/${id}`, {
@@ -35,14 +35,14 @@ export default async function OperateurLayout({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const cpom = await getOperateur(id);
+  const operateur = await getOperateur(id);
 
-  if (!cpom) {
+  if (!operateur) {
     notFound();
   }
 
   return (
-    <OperateurProvider operateur={cpom}>
+    <OperateurProvider operateur={operateur}>
       <div className="flex flex-col h-full bg-alt-grey gap-3 pb-4">
         <OperateurHeader />
         <div className="flex flex-col gap-3 px-3">{children}</div>
