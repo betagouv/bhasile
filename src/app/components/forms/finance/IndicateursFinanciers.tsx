@@ -30,7 +30,7 @@ export const IndicateursFinanciers = () => {
   const errorMessages = getErrorMessages(formState, "indicateursFinanciers");
 
   return (
-    <fieldset className="flex flex-col gap-6">
+    <fieldset className="flex flex-col gap-6 min-w-0 w-full">
       <legend className="text-xl font-bold mb-8 text-title-blue-france">
         Indicateurs généraux
       </legend>
@@ -54,6 +54,7 @@ export const IndicateursFinanciers = () => {
         })}
         hasErrors={errorMessages.length > 0}
         enableBorders
+        stickFirstColumn
       >
         <IndicateurFinancierTableLines
           lines={getIndicateurFinancierTableLines()}

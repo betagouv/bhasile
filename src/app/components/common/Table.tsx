@@ -18,7 +18,7 @@ export const Table = ({
   className,
   enableBorders,
   hasErrors,
-  stickLastColumn,
+  stickFirstColumn,
 }: Props) => {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const scrollableAreaRef = useRef<HTMLDivElement>(null);
@@ -34,8 +34,7 @@ export const Table = ({
     }
 
     const handleScroll = () => {
-      const maxScrollLeft = container.scrollWidth - container.clientWidth;
-      const hasReachedEnd = Math.abs(container.scrollLeft - maxScrollLeft) < 1;
+      const hasReachedEnd = container.scrollLeft < 10;
       setScrollReachedEnd(hasReachedEnd);
     };
 
@@ -48,7 +47,7 @@ export const Table = ({
     <div
       ref={tableContainerRef}
       className={cn(
-        "w-full bg-lifted-grey overflow-hidden",
+        "bg-lifted-grey",
         "rounded-lg border border-default-grey",
         "[&_th]:uppercase [&_th_small]:block [&_th_tr]:text-mention-grey [&_th]:py-2 [&_th]:px-4 [&_th]:text-center [&_th]:text-xs",
         "[&_td]:py-2 [&_td]:px-4 [&_td]:text-center [&_td]:text-sm ",
@@ -58,19 +57,23 @@ export const Table = ({
         className
       )}
     >
-      <div ref={scrollableAreaRef} className={cn("overflow-x-auto")}>
+      <div
+        ref={scrollableAreaRef}
+        className="w-full max-w-full min-w-0 overflow-x-auto"
+        style={{ contain: "inline-size" }}
+      >
         <table
           aria-labelledby={ariaLabelledBy}
           className={cn(
-            "w-full",
-            stickLastColumn &&
-              " [&_tr>*:last-child]:sticky [&_tr>*:last-child]:right-0 [&_tr>*:last-child]:bg-white [&_tr>*:last-child]:z-20",
-            "[&_tr>*:last-child]:before:content-[''] [&_tr>*:last-child]:before:absolute [&_tr>*:last-child]:before:-left-[6em] [&_tr>*:last-child]:before:top-0 [&_tr>*:last-child]:before:bottom-0 [&_tr>*:last-child]:before:w-[6em]",
-            "[&_tr>*:last-child]:before:bg-linear-to-l [&_tr>*:last-child]:before:from-white [&_tr>*:last-child]:before:to-transparent",
-            "[&_tr>*:last-child]:before:opacity-100 [&_tr>*:last-child]:before:transition-opacity [&_tr>*:last-child]:before:duration-30",
-            stickLastColumn &&
+            "min-w-full",
+            stickFirstColumn &&
+              " [&_tr>*:first-child]:sticky [&_tr>*:first-child]:left-0 [&_tr>*:first-child]:bg-white [&_tr>*:first-child]:z-20",
+            "[&_tr>*:first-child]:before:content-[''] [&_tr>*:first-child]:before:absolute [&_tr>*:first-child]:before:-right-[6em] [&_tr>*:first-child]:before:top-0 [&_tr>*:first-child]:before:bottom-0 [&_tr>*:first-child]:before:w-[6em]",
+            "[&_tr>*:first-child]:before:bg-linear-to-l [&_tr>*:first-child]:before:from-transparent [&_tr>*:first-child]:before:to-white",
+            "[&_tr>*:first-child]:before:opacity-100 [&_tr>*:first-child]:before:transition-opacity [&_tr>*:first-child]:before:duration-30",
+            stickFirstColumn &&
               scrollReachedEnd &&
-              "[&_tr>*:last-child]:before:opacity-0"
+              "[&_tr>*:first-child]:before:opacity-0"
           )}
         >
           {title && <caption>{title}</caption>}
@@ -122,5 +125,5 @@ type Props = PropsWithChildren<{
   className?: string;
   enableBorders?: boolean;
   hasErrors?: boolean;
-  stickLastColumn?: boolean;
+  stickFirstColumn?: boolean;
 }>;

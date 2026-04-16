@@ -28,6 +28,7 @@ export const CompositionBlock = () => {
         ariaLabelledBy="composition"
         className="max-w-3xl [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12!"
         enableBorders
+        stickFirstColumn
       >
         {cpom.structures?.map((structure) => (
           <tr key={structure.id}>

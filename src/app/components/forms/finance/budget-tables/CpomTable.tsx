@@ -50,6 +50,7 @@ export const CpomTable = ({ type, showTitle }: Props) => {
         ariaLabelledBy="gestionBudgetaire"
         headings={getBudgetTableHeading({ years: yearsInCpom })}
         enableBorders
+        stickFirstColumn
       >
         <BudgetTableLines
           years={yearsInCpom}
