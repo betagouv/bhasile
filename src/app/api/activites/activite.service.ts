@@ -1,12 +1,11 @@
-import { Prisma } from "@/generated/prisma/client";
+import { Activite } from "@/generated/prisma/client";
 
-import {
-  getActivitesForStructureRaw,
-  getDepartementActivitesAverage,
-} from "./activite.repository";
+import { decimalToNumber } from "@/app/utils/decimal.util";
+import { getDepartementActivitesAverage } from "./activite.repository";
 import { ActiviteStats } from "./activite.type";
+import { sum, weightedAverage } from "@/app/utils/math.util";
 
-type StructureActiviteRow = {
+export type StructureActiviteRow = {
   id: number;
   date: Date;
   placesAutorisees: number;
@@ -32,45 +31,82 @@ export const getAverageDepartementPlaces = async (
   return getDepartementActivitesAverage(departement, startDate, endDate);
 };
 
-export const getActivitesForStructure = async (
-  structureId: number
-): Promise<StructureActiviteRow[]> => {
-  const rows = await getActivitesForStructureRaw(structureId);
+export const processActivitesForStructure = (
+  activites: Activite[] | null | undefined
+): StructureActiviteRow[] => {
+  if (!activites?.length) return [];
 
-  return rows
-    .filter((r) => r.placesAutorisees != null)
-    .map((r) => {
-      const tauxOccupation =
-        r.tauxOccupation == null
-          ? null
-          : (r.tauxOccupation as Prisma.Decimal).toNumber();
+  const groups = new Map<number, Activite[]>();
+  for (const a of activites) {
+    const key = a.date.getTime();
+    const list = groups.get(key);
+    if (list) list.push(a);
+    else groups.set(key, [a]);
+  }
 
-      const { placesDisponibles, placesVacantes, placesOccupees } =
-        computePlacesVacantesAndPlacesOccupees(
+  return [...groups.entries()]
+    .sort(([a], [b]) => b - a)
+    .map(([, rows]) => {
+      const date = rows[0].date;
+      const id = rows[0].id;
+
+      const placesAutorisees = sum(rows.map((r) => r.placesAutorisees));
+      const desinsectisation = sum(rows.map((r) => r.desinsectisation));
+      const remiseEnEtat = sum(rows.map((r) => r.remiseEnEtat));
+      const sousOccupation = sum(rows.map((r) => r.sousOccupation));
+      const travaux = sum(rows.map((r) => r.travaux));
+      const placesIndisponibles = sum(rows.map((r) => r.placesIndisponibles));
+      const presencesInduesBPI = sum(rows.map((r) => r.presencesInduesBPI));
+      const presencesInduesDeboutees = sum(
+        rows.map((r) => r.presencesInduesDeboutees)
+      );
+
+      const computedPlaces = rows.map((r) => {
+        return computePlacesVacantesAndPlacesOccupees(
           r.placesAutorisees,
           r.placesIndisponibles,
-          tauxOccupation
+          decimalToNumber(r.tauxOccupation)
         );
+      });
+
+      const placesDisponibles = sum(
+        computedPlaces.map((c) => c.placesDisponibles)
+      );
+      const placesOccupees = sum(computedPlaces.map((c) => c.placesOccupees));
+      const placesVacantes = sum(computedPlaces.map((c) => c.placesVacantes));
+
+      // TODO: confirm weighting with PlacesAutorisees is correct for OFII model
+      const tauxOccupation = weightedAverage(
+        rows.map((r) => ({
+          weight: r.placesAutorisees,
+          value: decimalToNumber(r.tauxOccupation),
+        }))
+      );
+
+      if (placesAutorisees == null) return null;
 
       return {
-        id: r.id,
-        date: r.date,
-        placesAutorisees: r.placesAutorisees!,
-        desinsectisation: r.desinsectisation,
-        remiseEnEtat: r.remiseEnEtat,
-        sousOccupation: r.sousOccupation,
-        placesIndisponibles: r.placesIndisponibles,
+        id,
+        date,
+        placesAutorisees,
+        desinsectisation,
+        remiseEnEtat,
+        sousOccupation,
+        placesIndisponibles,
         tauxOccupation,
         placesOccupees,
         placesDisponibles,
-        travaux: r.travaux,
+        travaux,
         placesVacantes,
-        presencesInduesBPI: r.presencesInduesBPI,
-        presencesInduesDeboutees: r.presencesInduesDeboutees,
+        presencesInduesBPI,
+        presencesInduesDeboutees,
         presencesIndues:
-          (r.presencesInduesBPI ?? 0) + (r.presencesInduesDeboutees ?? 0),
+          presencesInduesBPI == null && presencesInduesDeboutees == null
+            ? null
+            : (presencesInduesBPI ?? 0) + (presencesInduesDeboutees ?? 0),
       };
-    });
+    })
+    .filter((r): r is StructureActiviteRow => r !== null);
 };
 
 export const computePlacesVacantesAndPlacesOccupees = (

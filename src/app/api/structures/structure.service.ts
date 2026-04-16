@@ -1,4 +1,4 @@
-import { getActivitesForStructure } from "../activites/activite.service";
+import { processActivitesForStructure } from "../activites/activite.service";
 import {
   findOne,
   getLatestPlacesAutoriseesPerStructure,
@@ -6,7 +6,10 @@ import {
 
 export const getFullStructure = async (id: number) => {
   const structure = await findOne(id);
-  const activites = await getActivitesForStructure(structure.id);
+  const allActivites = structure.dnaStructures.flatMap(
+    (dnaStructure) => dnaStructure.dna.activites
+  );
+  const activites = processActivitesForStructure(allActivites);
 
   const aggregatedEIGs = structure.dnaStructures.flatMap(
     (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
