@@ -1,9 +1,9 @@
+import { decimalToNumber } from "@/app/utils/decimal.util";
+import { sumValues, weightedAverage } from "@/app/utils/math.util";
 import { Activite } from "@/generated/prisma/client";
 
-import { decimalToNumber } from "@/app/utils/decimal.util";
 import { getDepartementActivitesAverage } from "./activite.repository";
 import { ActiviteStats } from "./activite.type";
-import { sum, weightedAverage } from "@/app/utils/math.util";
 
 export type StructureActiviteRow = {
   id: number;
@@ -34,14 +34,14 @@ export const getAverageDepartementPlaces = async (
 export const processActivitesForStructure = (
   activites: Activite[] | null | undefined
 ): StructureActiviteRow[] => {
-  if (!activites?.length) return [];
+  if (!activites?.length) {return [];}
 
   const groups = new Map<number, Activite[]>();
   for (const a of activites) {
     const key = a.date.getTime();
     const list = groups.get(key);
-    if (list) list.push(a);
-    else groups.set(key, [a]);
+    if (list) {list.push(a);}
+    else {groups.set(key, [a]);}
   }
 
   return [...groups.entries()]
@@ -50,14 +50,18 @@ export const processActivitesForStructure = (
       const date = rows[0].date;
       const id = rows[0].id;
 
-      const placesAutorisees = sum(rows.map((r) => r.placesAutorisees));
-      const desinsectisation = sum(rows.map((r) => r.desinsectisation));
-      const remiseEnEtat = sum(rows.map((r) => r.remiseEnEtat));
-      const sousOccupation = sum(rows.map((r) => r.sousOccupation));
-      const travaux = sum(rows.map((r) => r.travaux));
-      const placesIndisponibles = sum(rows.map((r) => r.placesIndisponibles));
-      const presencesInduesBPI = sum(rows.map((r) => r.presencesInduesBPI));
-      const presencesInduesDeboutees = sum(
+      const placesAutorisees = sumValues(rows.map((r) => r.placesAutorisees));
+      const desinsectisation = sumValues(rows.map((r) => r.desinsectisation));
+      const remiseEnEtat = sumValues(rows.map((r) => r.remiseEnEtat));
+      const sousOccupation = sumValues(rows.map((r) => r.sousOccupation));
+      const travaux = sumValues(rows.map((r) => r.travaux));
+      const placesIndisponibles = sumValues(
+        rows.map((r) => r.placesIndisponibles)
+      );
+      const presencesInduesBPI = sumValues(
+        rows.map((r) => r.presencesInduesBPI)
+      );
+      const presencesInduesDeboutees = sumValues(
         rows.map((r) => r.presencesInduesDeboutees)
       );
 
@@ -69,11 +73,15 @@ export const processActivitesForStructure = (
         );
       });
 
-      const placesDisponibles = sum(
+      const placesDisponibles = sumValues(
         computedPlaces.map((c) => c.placesDisponibles)
       );
-      const placesOccupees = sum(computedPlaces.map((c) => c.placesOccupees));
-      const placesVacantes = sum(computedPlaces.map((c) => c.placesVacantes));
+      const placesOccupees = sumValues(
+        computedPlaces.map((c) => c.placesOccupees)
+      );
+      const placesVacantes = sumValues(
+        computedPlaces.map((c) => c.placesVacantes)
+      );
 
       // TODO: confirm weighting with PlacesAutorisees is correct for OFII model
       const tauxOccupation = weightedAverage(
@@ -83,7 +91,7 @@ export const processActivitesForStructure = (
         }))
       );
 
-      if (placesAutorisees == null) return null;
+      if (placesAutorisees == null) {return null;}
 
       return {
         id,

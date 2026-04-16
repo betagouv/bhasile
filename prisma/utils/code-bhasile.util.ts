@@ -8,7 +8,8 @@ const generateBhasileCodesForRegion = (
 ): string[] => {
   return Array.from({ length: count }, (_, index) => {
     const counter = (index + 1).toString().padStart(3, "0");
-    return `${PREFIX}-${regionCode}-${counter}`;
+    const cleanedRegionCode = regionCode.replace("-FR", "");
+    return `${PREFIX}-${cleanedRegionCode}-${counter}`;
   });
 };
 
