@@ -11,6 +11,8 @@ import { ActivitePlaces } from "./ActivitePlaces";
 
 export const ActiviteBlock = (): ReactElement => {
   const { structure } = useStructureContext();
+  const hasActivites = (structure.activites?.length ?? 0) > 0;
+  const showOfiiData = structure.type !== StructureType.CAES && hasActivites;
 
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
@@ -20,15 +22,15 @@ export const ActiviteBlock = (): ReactElement => {
           <h3 className="text-title-blue-france fr-h6 mb-12">Activité</h3>
         </div>
         <div className="flex items-center text-right">
-          {structure.type === StructureType.CAES ? (
+          {!showOfiiData ? (
             <span className="text-title-blue-france text-xs">
               Pas de données OFII disponibles
             </span>
           ) : (
             <span className="text-title-blue-france text-xs ">
-              Données mensuelles de l’OFII
+              Données mensuelles de l'OFII
               <span className="italic block">
-                mises à jour le {formatDate(structure?.activites?.[0]?.date)}
+                mises à jour le {formatDate(structure.activites![0].date)}
               </span>
             </span>
           )}
@@ -44,7 +46,7 @@ export const ActiviteBlock = (): ReactElement => {
           </div>
         </div>
       </div>
-      {structure.type !== StructureType.CAES && (
+      {showOfiiData && (
         <>
           <div className="pt-10 pb-6">
             <ActivitePlaces />
