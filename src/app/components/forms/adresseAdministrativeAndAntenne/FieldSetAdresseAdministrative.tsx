@@ -116,7 +116,7 @@ export const FieldSetAdresseAdministrative = ({
       >
         {isManualAddress
           ? "Revenir à la saisie simplifiée de l’adresse"
-          : "Saisir l'adresse manuellement"}
+          : "Saisir l’adresse manuellement"}
       </Button>
       {isManualAddress && <ManualAddressInputs />}
     </fieldset>
