@@ -7,7 +7,7 @@ import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
 import { budgetApiSchema } from "./budget.schema";
 import { departementApiSchema } from "./departement.schema";
 import { formApiSchema } from "./form.schema";
-import { operateurApiSchema } from "./operateur.schema";
+import { operateurSuggestionApiSchema } from "./operateur.schema";
 import { regionApiSchema } from "./region.schema";
 
 export const cpomDepartementApiSchema = z.object({
@@ -20,7 +20,7 @@ export const cpomDepartementApiSchema = z.object({
 export const cpomApiSchema = z.object({
   id: zId(),
   name: z.string().nullish(),
-  operateur: operateurApiSchema.optional(),
+  operateur: operateurSuggestionApiSchema.optional(),
   operateurId: z.number().optional(),
   region: regionApiSchema.optional(),
   departements: z.array(cpomDepartementApiSchema).optional(),
@@ -43,7 +43,7 @@ export const cpomApiSchema = z.object({
             codeBhasile: z.string(),
             type: z.nativeEnum(StructureType),
             communeAdministrative: z.string(),
-            operateur: operateurApiSchema,
+            operateur: operateurSuggestionApiSchema,
             forms: z.array(formApiSchema),
           })
           .optional(),
@@ -62,7 +62,7 @@ export const cpomStructureApiSchema = z.object({
 });
 
 export const cpomApiAjoutSchema = cpomApiSchema.extend({
-  operateur: operateurApiSchema,
+  operateur: operateurSuggestionApiSchema,
 });
 
 // This schema is never used. It is only for infering CpomApiRead type.

@@ -1,16 +1,22 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { Block } from "@/app/components/common/Block";
 
 import { useOperateurContext } from "../_context/OperateurClientContext";
 
 export const DescriptionBlock = () => {
+  const router = useRouter();
   const { operateur } = useOperateurContext();
 
   return (
     <Block
       title="Description"
       iconClass="fr-icon-align-left"
+      onEdit={() => {
+        router.push(`/operateurs/${operateur.id}/modification/description`);
+      }}
       entity={operateur}
       entityType="Operateur"
     >

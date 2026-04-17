@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
@@ -10,8 +11,11 @@ import { useOperateurContext } from "../_context/OperateurClientContext";
 
 export const OperateurHeader = (): ReactElement | null => {
   const { operateur } = useOperateurContext();
+  const pathname = usePathname();
 
   const { headerRef } = useHeaderHeight();
+
+  const isRootPath = pathname === `/operateurs/${operateur?.id}`;
 
   return operateur ? (
     <div className="sticky top-0 z-2 bg-lifted-grey" ref={headerRef}>
@@ -32,20 +36,22 @@ export const OperateurHeader = (): ReactElement | null => {
           </h3>
         </div>
       </div>
-      <NavigationMenu
-        menuElements={[
-          {
-            label: "Description",
-            section: "#description",
-            isDisplayed: true,
-          },
-          {
-            label: "Documents",
-            section: "#documents",
-            isDisplayed: true,
-          },
-        ]}
-      />
+      {isRootPath && (
+        <NavigationMenu
+          menuElements={[
+            {
+              label: "Description",
+              section: "#description",
+              isDisplayed: true,
+            },
+            {
+              label: "Documents",
+              section: "#documents",
+              isDisplayed: true,
+            },
+          ]}
+        />
+      )}
     </div>
   ) : null;
 };

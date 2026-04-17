@@ -2,6 +2,7 @@ import { normalizeAccents } from "@/app/utils/string.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { Operateur, Prisma, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
+import { OperateurApiWrite } from "@/schemas/api/operateur.schema";
 
 export const findBySearchTerm = async (
   searchTerm: string | null
@@ -75,6 +76,15 @@ export const findOne = async (id: number): Promise<OperateurWithStructures> => {
         },
       },
     },
+  });
+};
+
+export const updateOne = async (
+  operateur: OperateurApiWrite
+): Promise<Operateur> => {
+  return prisma.operateur.update({
+    where: { id: operateur.id },
+    data: operateur,
   });
 };
 

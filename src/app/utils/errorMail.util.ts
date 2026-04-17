@@ -3,7 +3,8 @@ import { BHASILE_CONTACT_EMAIL } from "@/constants";
 export const getErrorEmail = (
   error?: string,
   structureCodeBhasile?: string | number,
-  cpomId?: number
+  cpomId?: number,
+  operateurId?: number
 ): string => {
   let subject = "Problème avec le formulaire de Bhasile";
   if (structureCodeBhasile) {
@@ -11,6 +12,9 @@ export const getErrorEmail = (
   }
   if (cpomId) {
     subject = `Problème avec le formulaire de CPOM (ID ${cpomId})`;
+  }
+  if (operateurId) {
+    subject = `Problème avec le formulaire d'opérateur (ID ${operateurId})`;
   }
 
   const body = `Bonjour,\r\n\r\nAjoutez ici des informations supplémentaires...\r\n\r\nRapport d'erreur: ${error ?? "N/A"}`;

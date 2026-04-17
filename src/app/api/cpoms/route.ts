@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// TODO : déplacer dans cpoms/[id] pour respecter les principes REST
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();

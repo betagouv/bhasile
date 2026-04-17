@@ -5,6 +5,7 @@ import { getErrorEmail } from "@/app/utils/errorMail.util";
 export const SubmitError = ({
   codeBhasile,
   cpomId,
+  operateurId,
   backendError,
 }: Props): ReactElement => {
   return (
@@ -12,7 +13,7 @@ export const SubmitError = ({
       <p className="text-default-error m-0 p-0">
         Une erreur s’est produite.{" "}
         <a
-          href={getErrorEmail(backendError, codeBhasile, cpomId)}
+          href={getErrorEmail(backendError, codeBhasile, cpomId, operateurId)}
           className="underline"
           target="_blank"
         >
@@ -26,5 +27,6 @@ export const SubmitError = ({
 type Props = {
   codeBhasile?: string;
   cpomId?: number;
+  operateurId?: number;
   backendError?: string;
 };

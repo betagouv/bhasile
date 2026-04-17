@@ -17,14 +17,14 @@ import { evenementIndesirableGraveApiSchema } from "./evenement-indesirable-grav
 import { finessApiSchema } from "./finess.schema";
 import { formApiSchema } from "./form.schema";
 import { indicateurFinancierApiSchema } from "./indicateurFinancier.schema";
-import { operateurApiSchema } from "./operateur.schema";
+import { operateurSuggestionApiSchema } from "./operateur.schema";
 import { structureMillesimeApiSchema } from "./structure-millesime.schema";
 import { structureTypologieApiSchema } from "./structure-typologie.schema";
 
 export const structureMinimalApiSchema = z.object({
   id: z.number(),
   codeBhasile: z.string().optional(),
-  operateur: operateurApiSchema,
+  operateur: operateurSuggestionApiSchema,
   type: z.nativeEnum(StructureType),
   nom: z.string().optional(),
   structureMillesimes: z.array(structureMillesimeApiSchema).optional(),
