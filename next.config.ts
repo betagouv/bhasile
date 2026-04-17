@@ -19,17 +19,24 @@ const nextConfig: NextConfig = {
     proxyClientMaxBodySize: "30mb",
   },
   output: "standalone",
+  compress: true,
+  productionBrowserSourceMaps: false,
 };
 
-export default withSentryConfig(nextConfig, {
-  org: "betagouv",
-  project: "bhasile",
-  sentryUrl: "https://sentry.incubateur.net/",
-  silent: !process.env.CI,
-  tunnelRoute: "/monitoring",
-  webpack: {
-    treeshake: {
-      removeDebugLogging: true,
-    },
-  },
-});
+const shouldConfigureSentry =
+  process.env.SENTRY_AUTH_TOKEN && process.env.NODE_ENV === "production";
+
+export default shouldConfigureSentry
+  ? withSentryConfig(nextConfig, {
+      org: "betagouv",
+      project: "bhasile",
+      sentryUrl: "https://sentry.incubateur.net/",
+      silent: !process.env.CI,
+      tunnelRoute: "/monitoring",
+      webpack: {
+        treeshake: {
+          removeDebugLogging: true,
+        },
+      },
+    })
+  : nextConfig;
