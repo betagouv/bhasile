@@ -19,7 +19,11 @@ export const useOperateur = () => {
         result = JSON.stringify(operateur);
       }
 
-      if (typeof result === "object" && "operateurId" in result) {
+      if (
+        typeof result === "object" &&
+        "operateurId" in result &&
+        result !== null
+      ) {
         const res = await fetch(`/api/operateur/${result.operateurId}`);
         if (res.ok) {
           const updatedOperateur = await res.json();

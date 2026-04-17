@@ -10,7 +10,6 @@ export const FieldSetDescription = () => {
       <legend className="text-xl font-bold mb-4 text-title-blue-france">
         Description
       </legend>
-      <hr />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <InputWithValidation
           name="name"
@@ -32,19 +31,6 @@ export const FieldSetDescription = () => {
           type="text"
           label="Adresse du siège social"
           id="siegeSocial"
-        />
-      </div>
-      <hr />
-      <legend className="text-xl font-bold mb-4 text-title-blue-france">
-        Direction générale
-      </legend>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <InputWithValidation
-          name="directionGenerale"
-          control={control}
-          type="text"
-          label="Nom"
-          id="directionGenerale"
         />
       </div>
     </fieldset>

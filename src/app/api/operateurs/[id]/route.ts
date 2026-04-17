@@ -35,15 +35,25 @@ export async function GET(
   }
 }
 
-export async function PUT(request: NextRequest) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
   try {
     const body = await request.json();
     const result = operateurWriteApiSchema.parse(body);
     const operateur = await updateOne(result);
-    createOperateurEvent(request.method, operateur.id);
+    createOperateurEvent(request.method, Number(id));
     return NextResponse.json({ operateurId: operateur.id }, { status: 201 });
   } catch (error) {
     console.error(error);
-    return NextResponse.json(error, { status: 400 });
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 400 }
+    );
   }
 }

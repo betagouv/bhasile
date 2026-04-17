@@ -5,6 +5,7 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { FieldSetDescription } from "@/app/components/forms/operateur/FieldSetDescription";
+import { FieldSetDirectionGenerale } from "@/app/components/forms/operateur/FieldSetDirectionGenerale";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useOperateurFormHandling } from "@/app/hooks/useOperateurFormHandling";
@@ -46,6 +47,8 @@ export default function OperateurModificationDescription() {
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
         <FieldSetDescription />
+        <hr />
+        <FieldSetDirectionGenerale />
         {saveState === FetchState.ERROR && (
           <SubmitError operateurId={operateur.id} backendError={backendError} />
         )}
