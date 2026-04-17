@@ -60,17 +60,18 @@ export const Table = ({
       <div
         ref={scrollableAreaRef}
         className="w-full max-w-full min-w-0 overflow-x-auto"
-        style={{ contain: "inline-size" }}
+        style={stickFirstColumn ? { contain: "inline-size" } : undefined}
       >
         <table
           aria-labelledby={ariaLabelledBy}
           className={cn(
             "min-w-full",
-            stickFirstColumn &&
+            stickFirstColumn && [
               " [&_tr>*:first-child]:sticky [&_tr>*:first-child]:left-0 [&_tr>*:first-child]:bg-white [&_tr>*:first-child]:z-20",
-            "[&_tr>*:first-child]:before:content-[''] [&_tr>*:first-child]:before:absolute [&_tr>*:first-child]:before:-right-[6em] [&_tr>*:first-child]:before:top-0 [&_tr>*:first-child]:before:bottom-0 [&_tr>*:first-child]:before:w-[6em]",
-            "[&_tr>*:first-child]:before:bg-linear-to-l [&_tr>*:first-child]:before:from-transparent [&_tr>*:first-child]:before:to-white",
-            "[&_tr>*:first-child]:before:opacity-100 [&_tr>*:first-child]:before:transition-opacity [&_tr>*:first-child]:before:duration-30",
+              "[&_tr>*:first-child]:before:content-[''] [&_tr>*:first-child]:before:absolute [&_tr>*:first-child]:before:-right-[6em] [&_tr>*:first-child]:before:top-0 [&_tr>*:first-child]:before:bottom-0 [&_tr>*:first-child]:before:w-[6em]",
+              "[&_tr>*:first-child]:before:bg-linear-to-l [&_tr>*:first-child]:before:from-transparent [&_tr>*:first-child]:before:to-white",
+              "[&_tr>*:first-child]:before:opacity-100 [&_tr>*:first-child]:before:transition-opacity [&_tr>*:first-child]:before:duration-30",
+            ],
             stickFirstColumn &&
               scrollReachedEnd &&
               "[&_tr>*:first-child]:before:opacity-0"
