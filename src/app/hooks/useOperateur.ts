@@ -13,7 +13,7 @@ export const useOperateur = () => {
         body: JSON.stringify(data),
       });
       if (response.status < 400) {
-        result = response.json();
+        result = await response.json();
       } else {
         const operateur = await response.json();
         result = JSON.stringify(operateur);

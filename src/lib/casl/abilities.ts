@@ -51,14 +51,11 @@ const defineAgentRules = (
   can("update", "Structure", {
     departementAdministratif: { in: user.allowedDepartements },
   });
-  can("update", "Cpom");
-  can("update", "Operateur");
+  can("update", ["Cpom", "Operateur"]);
 };
 
 const defineAnonymousRules = ({ can }: AbilityBuilder<AppAbility>) => {
-  can("read", ["Structure"]);
-  can("read", ["Cpom"]);
-  can("read", ["Operateur"]);
+  can("read", ["Structure", "Cpom", "Operateur"]);
 };
 
 export const canUpdateStructure = (user: SessionUser, structure: Structure) => {
