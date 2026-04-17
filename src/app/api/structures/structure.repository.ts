@@ -387,18 +387,7 @@ export const findOne = async (id: number) => {
   return structure;
 };
 
-export const updateOneAgent = async (
-  structure: StructureAgentUpdateApiType
-): Promise<Structure> => {
-  return await updateOne(structure, false);
-};
-export const updateOneOperateur = async (
-  structure: StructureAgentUpdateApiType
-): Promise<Structure> => {
-  return await updateOne(structure, true);
-};
-
-const updateOne = async (
+export const updateOne = async (
   structure: StructureAgentUpdateApiType,
   isOperateurUpdate: boolean = false
 ): Promise<Structure> => {

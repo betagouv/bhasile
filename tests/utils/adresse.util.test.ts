@@ -1,8 +1,26 @@
 import { describe, expect, it } from "vitest";
 
-import { formatCityName } from "@/app/utils/adresse.util";
+import {
+  formatCityName,
+  getDepartementFromCodePostal,
+} from "@/app/utils/adresse.util";
 
 describe("adresse util", () => {
+  describe("getDepartementFromCodePostal", () => {
+    it("returns first two digits for mainland postal codes", () => {
+      expect(getDepartementFromCodePostal("75011")).toBe("75");
+    });
+
+    it("returns first three digits for overseas postal codes", () => {
+      expect(getDepartementFromCodePostal("97100")).toBe("971");
+      expect(getDepartementFromCodePostal("98630")).toBe("986");
+    });
+
+    it("trims spaces before extracting department code", () => {
+      expect(getDepartementFromCodePostal("  13008  ")).toBe("13");
+    });
+  });
+
   describe("formatCityName", () => {
     it("formats names correctly with hyphens", () => {
       expect(formatCityName("Gamaches en Vexin")).toBe("Gamaches-en-Vexin");

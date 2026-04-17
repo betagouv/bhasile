@@ -1,4 +1,6 @@
+import { getCoordinates } from "@/app/utils/adresse.util";
 import { Prisma, PublicType, StructureType } from "@/generated/prisma/client";
+import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { StructureColumn } from "@/types/ListColumn";
 
 const typesPublic: Record<string, PublicType> = {
@@ -15,6 +17,29 @@ export const convertToPublicType = (
   }
 
   return typesPublic[typePublic.trim().toLowerCase()];
+};
+
+export const getAdresseAdministrativeCoordinates = async (
+  structure: StructureAgentUpdateApiType
+): Promise<{ latitude: string | undefined; longitude: string | undefined }> => {
+  const {
+    adresseAdministrative,
+    codePostalAdministratif,
+    communeAdministrative,
+  } = structure;
+  if (
+    !adresseAdministrative ||
+    !codePostalAdministratif ||
+    !communeAdministrative
+  ) {
+    return { latitude: undefined, longitude: undefined };
+  }
+  const fullAddress = `${adresseAdministrative}, ${codePostalAdministratif} ${communeAdministrative}`;
+  const coordinates = await getCoordinates(fullAddress);
+  return {
+    latitude: coordinates.latitude?.toString(),
+    longitude: coordinates.longitude?.toString(),
+  };
 };
 
 export const convertToStructureType = (

@@ -1,3 +1,5 @@
+import Button from "@codegouvfr/react-dsfr/Button";
+import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
@@ -7,6 +9,7 @@ import { FormKind } from "@/types/global";
 import AddressWithValidation from "../AddressWithValidation";
 import InputWithValidation from "../InputWithValidation";
 import SelectWithValidation from "../SelectWithValidation";
+import { ManualAddressInputs } from "./ManualAddressInputs";
 
 export const FieldSetAdresseAdministrative = ({
   formKind = FormKind.FINALISATION,
@@ -14,6 +17,8 @@ export const FieldSetAdresseAdministrative = ({
   formKind?: FormKind;
 }) => {
   const { control, watch, setValue, getValues } = useFormContext();
+
+  const [isManualAddress, setIsManualAddress] = useState(false);
 
   const handleAddressAdministrativeChange = () => {
     if (watch("typeBati") === Repartition.COLLECTIF && watch("sameAddress")) {
@@ -38,8 +43,13 @@ export const FieldSetAdresseAdministrative = ({
     }
   };
 
+  const handleManualAddressChange = () => {
+    setIsManualAddress((prevIsManualAddress) => !prevIsManualAddress);
+    setValue("adresseAdministrativeComplete", "");
+  };
+
   return (
-    <fieldset className="flex flex-col gap-6">
+    <fieldset className="flex flex-col gap-3">
       <legend className="text-lg font-bold mb-2 text-title-blue-france">
         Structure
       </legend>
@@ -72,6 +82,7 @@ export const FieldSetAdresseAdministrative = ({
             department="departementAdministratif"
             label="Adresse principale de la structure"
             onSelectSuggestion={handleAddressAdministrativeChange}
+            disabled={isManualAddress}
           />
           <span className="text-[#666666] text-sm">
             indiquée dans les documents de contractualisation
@@ -94,6 +105,20 @@ export const FieldSetAdresseAdministrative = ({
           </SelectWithValidation>
         )}
       </div>
+      <Button
+        priority="tertiary no outline"
+        type="button"
+        iconId={
+          isManualAddress ? "fr-icon-arrow-go-back-line" : "fr-icon-add-line"
+        }
+        className="underline font-normal p-0"
+        onClick={handleManualAddressChange}
+      >
+        {isManualAddress
+          ? "Revenir à la saisie simplifiée de l’adresse"
+          : "Saisir l’adresse manuellement"}
+      </Button>
+      {isManualAddress && <ManualAddressInputs />}
     </fieldset>
   );
 };
