@@ -11,13 +11,11 @@ import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 
 import { createStructureEvent } from "../user-action/user-action.service";
+import { countBySearch, findBySearch, findOne } from "./structure.repository";
 import {
-  countBySearch,
-  findBySearch,
-  findOne,
-  updateOneAgent,
-  updateOneOperateur,
-} from "./structure.repository";
+  updateStructureAgent,
+  updateStructureOperateur,
+} from "./structure.service";
 
 export async function GET(request: NextRequest) {
   const search = request.nextUrl.searchParams.get("search");
@@ -68,7 +66,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const result = structureOperateurUpdateApiSchema.parse(body);
-    const createdStructure = await updateOneOperateur(result);
+    const createdStructure = await updateStructureOperateur(result);
     createStructureEvent(request.method, createdStructure.id);
     return NextResponse.json("Structure créée avec succès", { status: 201 });
   } catch (error) {
@@ -96,7 +94,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const updatedStructure = await updateOneAgent(result);
+    const updatedStructure = await updateStructureAgent(result);
     createStructureEvent(request.method, updatedStructure.id);
     return NextResponse.json("Structure mise à jour avec succès", {
       status: 201,

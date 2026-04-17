@@ -20,6 +20,7 @@ import { Repartition } from "@/types/adresse.type";
 import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
 import { StructureType } from "@/types/structure.type";
 
+import { getDepartementFromCodePostal } from "./adresse.util";
 import { sortKeysByValue } from "./common.util";
 import { computeCpomDates } from "./cpom.util";
 import { getYearFromDate } from "./date.util";
@@ -50,10 +51,6 @@ export function getCommunesGroupedByDepartement(structure: {
   departementAdministratif?: string | null;
   adresses?: { commune?: string | null; codePostal?: string | null }[];
 }): { departement: string; communes: string[] }[] {
-  const getDepartementFromCodePostal = (codePostal: string) =>
-    (codePostal?.trim().match(/^(97|98)\d/)
-      ? (codePostal?.trim().slice(0, 3) ?? "")
-      : (codePostal?.trim().slice(0, 2) ?? "")) || "";
   const communesByDepartement = new Map<string, string[]>();
 
   const {

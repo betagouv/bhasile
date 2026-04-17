@@ -14,6 +14,11 @@ export const getCoordinates = async (address: string): Promise<Coordinates> => {
   };
 };
 
+export const getDepartementFromCodePostal = (codePostal: string) =>
+  (codePostal?.trim().match(/^(97|98)\d/)
+    ? (codePostal?.trim().slice(0, 3) ?? "")
+    : (codePostal?.trim().slice(0, 2) ?? "")) || "";
+
 export const transformFormAdressesToApiAdresses = (
   adresses: FormAdresse[] = [],
   id?: number
