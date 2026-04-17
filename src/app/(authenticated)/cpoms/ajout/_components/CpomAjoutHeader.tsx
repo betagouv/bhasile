@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 
 export const CpomAjoutHeader = (): ReactElement | null => {
   return (
-    <div className="sticky top-0 z-2 bg-lifted-grey">
+    <div className="sticky top-0 z-50 bg-lifted-grey">
       <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
         <div>
           <h2 className="text-title-blue-france text-xs uppercase mb-0">

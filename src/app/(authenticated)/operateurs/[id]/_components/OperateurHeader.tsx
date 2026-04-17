@@ -14,7 +14,7 @@ export const OperateurHeader = (): ReactElement | null => {
   const { headerRef } = useHeaderHeight();
 
   return operateur ? (
-    <div className="sticky top-0 z-2 bg-lifted-grey" ref={headerRef}>
+    <div className="sticky top-0 z-50 bg-lifted-grey" ref={headerRef}>
       <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
         <Link
           className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"

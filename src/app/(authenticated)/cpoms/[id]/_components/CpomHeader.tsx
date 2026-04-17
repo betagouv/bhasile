@@ -46,7 +46,7 @@ export const CpomHeader = (): ReactElement | null => {
   };
 
   return cpom ? (
-    <div className="sticky top-0 z-2 bg-lifted-grey" ref={headerRef}>
+    <div className="sticky top-0 z-50 bg-lifted-grey" ref={headerRef}>
       <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
         <Button
           className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
@@ -65,7 +65,8 @@ export const CpomHeader = (): ReactElement | null => {
             <strong className="pr-2">{formatCpomName(cpom)}</strong>{" "}
             {cpom.dateStart && cpom.dateEnd && (
               <span className="text-title-grey font-normal text-lg italic">
-                {getYearFromDate(cpom.dateStart)} - {getYearFromDate(cpom.dateEnd)}
+                {getYearFromDate(cpom.dateStart)} -{" "}
+                {getYearFromDate(cpom.dateEnd)}
               </span>
             )}
           </h3>
