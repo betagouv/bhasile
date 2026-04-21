@@ -3,6 +3,7 @@
 
 import "dotenv/config";
 
+import type { Prisma } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
 
 const prisma = createPrismaClient();
@@ -29,6 +30,79 @@ async function main() {
   console.log(`📊 Remplissage reporting mensuel: ${month.toISOString()}`);
 
   try {
+    // Snapshot de la qualité
+    const structuresCount = await prisma.structuresGlobalQuality.count();
+    const issuesAgg = await prisma.structuresGlobalQuality.aggregate({
+      _sum: { issuesCount: true },
+    });
+    const issuesCountSum = issuesAgg._sum.issuesCount ?? 0;
+
+    const indicatorFields = [
+      "has_authorisation_dates_undefined",
+      "has_issue_authorisation_period_not_15y",
+      "has_convention_dates_undefined",
+      "has_issue_authorized_convention_not_5y",
+      "has_issue_authorized_convention_outside_authorisation_period",
+      "has_issue_authorized_convention_missing_or_expired",
+      "has_issue_evaluation_not_done_in_time",
+      "has_issue_subsidized_convention_gt_3y",
+      "has_issue_specific_places_gt_places_autorisees",
+      "has_issue_places_structure_vs_address_diff_gt_10pct",
+      "has_issue_dept_code",
+      "has_issue_multi_dna",
+      "has_issue_cpom_mono_structure",
+      "has_issue_taux_encadrement_max_gt_25",
+      "has_issue_taux_encadrement_min_eq_0",
+      "has_issue_cout_journalier_max_gt_35",
+      "has_issue_cout_journalier_min_lt_15",
+      "has_issue_resultat_net_eq_0",
+      "has_issue_authorized_affectations_breakdown_missing",
+      "has_issue_authorized_reprise_plus_affectations_mismatch",
+      "has_issue_subsidized_deficit_nonzero_boxes",
+      "has_issue_subsidized_excedent_rules",
+      "has_issue_excedent_left_in_report_a_nouveau",
+    ] as const;
+
+    type IndicatorField = (typeof indicatorFields)[number];
+
+    const whereTrue = (
+      field: IndicatorField
+    ): Prisma.StructuresGlobalQualityWhereInput =>
+      ({
+        [field]: true,
+      }) as unknown as Prisma.StructuresGlobalQualityWhereInput;
+
+    const indicatorCountsEntries = await Promise.all(
+      indicatorFields.map(async (field) => {
+        const count = await prisma.structuresGlobalQuality.count({
+          where: whereTrue(field),
+        });
+        return [field, count] as const;
+      })
+    );
+
+    const indicatorCounts = Object.fromEntries(
+      indicatorCountsEntries
+    ) as Record<IndicatorField, number>;
+
+    await prisma.monthlyStructuresGlobalQualityCount.upsert({
+      where: { month },
+      create: {
+        month,
+        computedAt: new Date(),
+        structuresCount,
+        issuesCountSum,
+        ...indicatorCounts,
+      },
+      update: {
+        computedAt: new Date(),
+        structuresCount,
+        issuesCountSum,
+        ...indicatorCounts,
+      },
+    });
+
+    // Snapshot de l'usage
     const actions = await prisma.userAction.findMany({
       where: {
         createdAt: { gte: start, lt: end },
@@ -71,70 +145,6 @@ async function main() {
       where: { updatedAt: { gte: start, lt: end } },
     });
 
-    // Snapshot de la qualité
-    const structuresCount = await prisma.structuresGlobalQuality.count();
-    const issuesAgg = await prisma.structuresGlobalQuality.aggregate({
-      _sum: { issuesCount: true },
-    });
-    const issuesCountSum = issuesAgg._sum.issuesCount ?? 0;
-
-    const indicatorFields = [
-      "has_authorisation_dates_undefined",
-      "has_issue_authorisation_period_not_15y",
-      "has_convention_dates_undefined",
-      "has_issue_authorized_convention_not_5y",
-      "has_issue_authorized_convention_outside_authorisation_period",
-      "has_issue_authorized_convention_missing_or_expired",
-      "has_issue_evaluation_not_done_in_time",
-      "has_issue_subsidized_convention_gt_3y",
-      "has_issue_specific_places_gt_places_autorisees",
-      "has_issue_places_structure_vs_address_diff_gt_10pct",
-      "has_issue_dept_code",
-      "has_issue_multi_dna",
-      "has_issue_cpom_mono_structure",
-      "has_issue_taux_encadrement_max_gt_25",
-      "has_issue_taux_encadrement_min_eq_0",
-      "has_issue_cout_journalier_max_gt_35",
-      "has_issue_cout_journalier_min_lt_15",
-      "has_issue_resultat_net_eq_0",
-      "has_issue_authorized_affectations_breakdown_missing",
-      "has_issue_authorized_reprise_plus_affectations_mismatch",
-      "has_issue_subsidized_deficit_nonzero_boxes",
-      "has_issue_subsidized_excedent_rules",
-      "has_issue_excedent_left_in_report_a_nouveau",
-    ] as const;
-
-    const indicatorCountsEntries = await Promise.all(
-      indicatorFields.map(async (field) => {
-        const count = await prisma.structuresGlobalQuality.count({
-          where: { [field]: true },
-        } as any);
-        return [field, count] as const;
-      })
-    );
-
-    const indicatorCounts = Object.fromEntries(
-      indicatorCountsEntries
-    ) as Record<(typeof indicatorFields)[number], number>;
-
-    await prisma.monthlyStructuresGlobalQualityCount.upsert({
-      where: { month },
-      create: {
-        month,
-        computedAt: new Date(),
-        structuresCount,
-        issuesCountSum,
-        ...indicatorCounts,
-      } as any,
-      update: {
-        computedAt: new Date(),
-        structuresCount,
-        issuesCountSum,
-        ...indicatorCounts,
-      } as any,
-    });
-
-    // Snapshot de l'usage
     await prisma.monthlyReportingMetric.upsert({
       where: { month },
       create: {
@@ -143,13 +153,13 @@ async function main() {
         readsCount,
         updatesCount,
         structuresUpdatedCount,
-      } as any,
+      },
       update: {
         visitsCount,
         readsCount,
         updatesCount,
         structuresUpdatedCount,
-      } as any,
+      },
     });
 
     console.log("✅ Reporting mensuel mis à jour.");
