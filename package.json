@@ -19,6 +19,7 @@
     "test": "vitest --run",
     "test:watch": "vitest --watch",
     "test:e2e": "playwright test",
+    "test:db": "dotenv -e .env.test -- vitest --run tests/api/repositories/",
     "test:e2e:ui": "playwright test --ui --grep @manual",
     "one-off": "scripts/run-one-off.sh",
     "script": "SCRIPT_KIND=recurring scripts/run-one-off.sh",
@@ -44,10 +45,10 @@
     "sql:format:fix": "for f in scripts/views/*.sql; do sql-formatter \"$f\" --config sql-formatter.config.json --fix; done"
   },
   "dependencies": {
-    "@codegouvfr/react-dsfr": "^1.32.0",
     "@casl/ability": "^6.8.0",
     "@casl/prisma": "^1.6.2",
     "@casl/react": "^5.0.1",
+    "@codegouvfr/react-dsfr": "^1.32.0",
     "@formkit/auto-animate": "^0.9.0",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/adapter-pg": "^7.7.0",
@@ -93,6 +94,7 @@
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.1",
     "csv-parse": "^6.2.1",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
     "eslint-plugin-simple-import-sort": "^12.1.1",
