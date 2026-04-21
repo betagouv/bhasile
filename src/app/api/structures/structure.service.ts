@@ -1,4 +1,7 @@
+import { serializeDates } from "@/app/utils/date.util";
 import { Structure } from "@/generated/prisma/client";
+import { ActiviteApiType } from "@/schemas/api/activite.schema";
+import { EvenementIndesirableGraveApiType } from "@/schemas/api/evenement-indesirable-grave.schema";
 import {
   StructureAgentUpdateApiType,
   StructureApiRead,
@@ -46,25 +49,23 @@ export const updateStructureOperateur = async (
   );
 };
 
-export const getFullStructure = async (id: number): Promise<StructureApiRead> => {
+export const getFullStructure = async (
+  id: number
+): Promise<StructureApiRead> => {
   const dbStructure = await findOne(id);
   const structure = dbStructureToApiWrite(dbStructure);
-  const currentYear = new Date().getFullYear();
-  const creationYear = new Date(
-    structure.creationDate ?? new Date().toISOString()
-  ).getFullYear();
-  const yearsSinceCreation = Array.from(
-    { length: currentYear - creationYear + 1 },
-    (_, index) => creationYear + index
-  );
   const allActivites = dbStructure.dnaStructures.flatMap(
     (dnaStructure) => dnaStructure.dna.activites
   );
-  const activites = processActivitesForStructure(allActivites);
+  const activites = serializeDates(
+    processActivitesForStructure(allActivites)
+  ) as ActiviteApiType[];
 
-  const aggregatedEIGs = dbStructure.dnaStructures.flatMap(
-    (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
-  );
+  const aggregatedEIGs = serializeDates(
+    dbStructure.dnaStructures.flatMap(
+      (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
+    )
+  ) as EvenementIndesirableGraveApiType[];
 
   return {
     ...structure,
@@ -77,8 +78,8 @@ export const getFullStructure = async (id: number): Promise<StructureApiRead> =>
       logementsSociaux: getCurrentPlacesLogementsSociaux(structure),
     },
     isInCpom: isStructureInCpom(structure),
-    wasInCpom: wasStructureInCpom(structure, yearsSinceCreation),
-  } as unknown as StructureApiRead;
+    wasInCpom: wasStructureInCpom(structure),
+  };
 };
 
 export const getMaxPlacesAutorisees = async (): Promise<number> => {

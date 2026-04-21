@@ -26,7 +26,6 @@ export const FinancesBlock = (): ReactElement => {
 
   const isAutorisee = isStructureAutorisee(structure.type);
   const isSubventionnee = isStructureSubventionnee(structure.type);
-  const wasInCpom = structure.wasInCpom;
 
   const budgetExecutoireYear = isAutorisee
     ? AUTORISEE_OPEN_YEAR
@@ -64,7 +63,7 @@ export const FinancesBlock = (): ReactElement => {
       >
         Gestion budgétaire
       </h4>
-      {wasInCpom && (
+      {structure.wasInCpom && (
         <StructureCpomSwitch
           handleChange={() =>
             setShouldShowCpom((prevSetShouldShowCpom) => !prevSetShouldShowCpom)

@@ -1,17 +1,13 @@
 import dayjs from "dayjs";
 
 import { CURRENT_YEAR } from "@/constants";
-import {
-  AdresseApiType,
-} from "@/schemas/api/adresse.schema";
+import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
-import {
-  StructureApiRead,
-} from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
@@ -98,7 +94,6 @@ export function getCommunesGroupedByDepartement(structure: {
     communes: communesByDepartement.get(departement)!,
   }));
 }
-
 
 export const getLastVisitInMonths = (
   evaluations: EvaluationApiType[],

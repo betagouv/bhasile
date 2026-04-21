@@ -10,21 +10,11 @@ export type StructureContextType = {
 
 export function StructureProvider({
   children,
-  structure: backendStructure,
+  structure,
 }: {
   children: ReactNode;
   structure: StructureApiRead | null;
 }) {
-  const structure = backendStructure
-    ? ({
-        ...backendStructure,
-        coordinates: [
-          Number(backendStructure.latitude),
-          Number(backendStructure.longitude),
-        ],
-      } as unknown as StructureApiRead)
-    : null;
-
   return (
     <StructureClientProvider structure={structure}>
       {children}

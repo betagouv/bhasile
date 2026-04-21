@@ -1,6 +1,10 @@
 import { getCoordinates } from "@/app/utils/adresse.util";
 import { computeCpomDates } from "@/app/utils/cpom.util";
-import { getYearFromDate } from "@/app/utils/date.util";
+import {
+  getYearFromDate,
+  getYearRange,
+  serializeDates,
+} from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
 import { Prisma, PublicType, StructureType } from "@/generated/prisma/client";
 import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
@@ -15,28 +19,9 @@ const typesPublic: Record<string, PublicType> = {
   "personnes isolées": PublicType.PERSONNES_ISOLEES,
 };
 
-const serializeDates = (value: unknown): unknown => {
-  if (value instanceof Date) {
-    return value.toISOString();
-  }
-
-  if (Array.isArray(value)) {
-    return value.map((item) => serializeDates(item));
-  }
-
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, nestedValue]) => [
-        key,
-        serializeDates(nestedValue),
-      ])
-    );
-  }
-
-  return value;
-};
-
-export const dbStructureToApiWrite = (structure: unknown): StructureApiWrite => {
+export const dbStructureToApiWrite = (
+  structure: unknown
+): StructureApiWrite => {
   return serializeDates(structure) as StructureApiWrite;
 };
 
@@ -273,7 +258,11 @@ export const isStructureInCpom = (
     return yearStart <= year && yearEnd >= year;
   }) ?? false;
 
-export const wasStructureInCpom = (
-  structure: StructureApiWrite,
-  years: number[]
-): boolean => years.some((year) => isStructureInCpom(structure, year));
+export const wasStructureInCpom = (structure: StructureApiWrite): boolean => {
+  const { years } = getYearRange({ order: "desc" });
+  const realCreationYear = structure.date303
+    ? getYearFromDate(structure.date303)
+    : getYearFromDate(structure.creationDate);
+  const yearsSinceCreation = years.filter((year) => year >= realCreationYear);
+  return yearsSinceCreation.some((year) => isStructureInCpom(structure, year));
+};
