@@ -22,7 +22,6 @@ export const CpomItem = ({ cpom, index }: Props) => {
       className="border-t border-default-grey h-12"
     >
       <td className="text-left! min-h-9 py-0!">{cpom.operateur?.name}</td>
-      <td className="text-left! py-0!">{cpom.structures?.length}</td>
       <td className="text-left! py-0!">
         {getGranularityLabel(cpom.granularity)}
       </td>
@@ -38,6 +37,7 @@ export const CpomItem = ({ cpom, index }: Props) => {
       </td>
       <td className="text-left! py-0!"> {formatDate(cpom.dateStart)}</td>
       <td className="text-left! py-0!"> {formatDate(cpom.dateEnd)}</td>
+      <td className="text-left! py-0!">{cpom.structures?.length}</td>
       <td className="py-0!">
         {isCpomFinalized ? (
           <Link
