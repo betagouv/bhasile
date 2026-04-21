@@ -1,0 +1,33 @@
+view StructuresGlobalQuality {
+  id Int
+
+  has_authorisation_dates_undefined                            Boolean?
+  has_issue_authorisation_period_not_15y                       Boolean?
+  has_convention_dates_undefined                               Boolean?
+  has_issue_authorized_convention_not_5y                       Boolean?
+  has_issue_authorized_convention_outside_authorisation_period Boolean?
+  has_issue_authorized_convention_missing_or_expired           Boolean?
+  has_issue_evaluation_not_done_in_time                        Boolean?
+  has_issue_subsidized_convention_gt_3y                        Boolean?
+  has_issue_specific_places_gt_places_autorisees               Boolean?
+  has_issue_places_structure_vs_address_diff_gt_10pct          Boolean?
+  has_issue_dept_code                                          Boolean?
+  has_issue_multi_dna                                          Boolean?
+  has_issue_cpom_mono_structure                                Boolean?
+  has_issue_taux_encadrement_max_gt_25                         Boolean?
+  has_issue_taux_encadrement_min_eq_0                          Boolean?
+  has_issue_cout_journalier_max_gt_35                          Boolean?
+  has_issue_cout_journalier_min_lt_15                          Boolean?
+  has_issue_resultat_net_eq_0                                  Boolean?
+  has_issue_authorized_affectations_breakdown_missing          Boolean?
+  has_issue_authorized_reprise_plus_affectations_mismatch      Boolean?
+  has_issue_subsidized_deficit_nonzero_boxes                   Boolean?
+  has_issue_subsidized_excedent_rules                          Boolean?
+  has_issue_excedent_left_in_report_a_nouveau                  Boolean?
+
+  issuesCount Int @map("issues_count")
+
+  @@unique([id])
+  @@map("structures_global_quality")
+  @@schema("reporting")
+}

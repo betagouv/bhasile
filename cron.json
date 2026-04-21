@@ -7,6 +7,10 @@
     {
       "command": "30 10 * * 1 yarn script clean-old-user-actions",
       "size": "S"
+    },
+    {
+      "command": "0 0 * * * yarn script fill-monthly-reporting",
+      "size": "S"
     }
   ]
 }
