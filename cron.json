@@ -9,7 +9,7 @@
       "size": "S"
     },
     {
-      "command": "0 0 * * * yarn script fill-monthly-reporting",
+      "command": "0 6 * * * yarn script fill-monthly-reporting",
       "size": "S"
     }
   ]
