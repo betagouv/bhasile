@@ -21,7 +21,7 @@ import {
   getCurrentPlacesQpv,
   getRepartition,
   isStructureInCpom,
-  wasStructureInCpom,
+  isStructureInCpomPerYear,
 } from "./structure.util";
 
 export const updateStructureAgent = async (
@@ -78,7 +78,7 @@ export const getFullStructure = async (
       logementsSociaux: getCurrentPlacesLogementsSociaux(structure),
     },
     isInCpom: isStructureInCpom(structure),
-    wasInCpom: wasStructureInCpom(structure),
+    isInCpomPerYear: isStructureInCpomPerYear(structure),
   };
 };
 

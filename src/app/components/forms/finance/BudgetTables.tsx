@@ -16,7 +16,9 @@ export const BudgetTables = () => {
   const { structure } = useStructureContext();
   const isAutorisee = isStructureAutorisee(structure?.type);
   const isSubventionnee = isStructureSubventionnee(structure?.type);
-
+  const wasInCpom = structure.isInCpomPerYear.some(
+    (year) => Object.values(year)[0] === true
+  );
   return (
     <>
       <CustomNotice
@@ -30,7 +32,7 @@ export const BudgetTables = () => {
               href={getFinanceFormTutorialLink({
                 isAutorisee,
                 isSubventionnee,
-                wasInCpom: structure.wasInCpom,
+                wasInCpom,
               })}
               target="_blank"
               className="underline"
@@ -60,7 +62,7 @@ export const BudgetTables = () => {
         )}
         <StructureTable />
       </fieldset>
-      {structure.wasInCpom && (
+      {wasInCpom && (
         <fieldset className="flex flex-col gap-6 min-w-0 w-full">
           <legend className="text-xl font-bold mb-8 text-title-blue-france">
             Gestion budgétaire du CPOM

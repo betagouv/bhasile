@@ -8,7 +8,10 @@ import {
 import { CURRENT_YEAR } from "@/constants";
 import { Prisma, PublicType, StructureType } from "@/generated/prisma/client";
 import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
-import { StructureApiWrite } from "@/schemas/api/structure.schema";
+import {
+  StructureApiRead,
+  StructureApiWrite,
+} from "@/schemas/api/structure.schema";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { StructureColumn } from "@/types/ListColumn";
@@ -240,7 +243,7 @@ export const getCurrentPlacesLogementsSociaux = (
 ) => getCurrentPlacesByProperty(structure, "logementSocial");
 
 export const isStructureInCpom = (
-  structure: StructureApiWrite,
+  structure: StructureApiWrite | StructureApiRead,
   year: number = CURRENT_YEAR
 ): boolean =>
   structure.cpomStructures?.some((cpomStructure) => {
@@ -258,11 +261,15 @@ export const isStructureInCpom = (
     return yearStart <= year && yearEnd >= year;
   }) ?? false;
 
-export const wasStructureInCpom = (structure: StructureApiWrite): boolean => {
+export const isStructureInCpomPerYear = (
+  structure: StructureApiWrite
+): Record<number, boolean>[] => {
   const { years } = getYearRange({ order: "desc" });
   const realCreationYear = structure.date303
     ? getYearFromDate(structure.date303)
     : getYearFromDate(structure.creationDate);
   const yearsSinceCreation = years.filter((year) => year >= realCreationYear);
-  return yearsSinceCreation.some((year) => isStructureInCpom(structure, year));
+  return yearsSinceCreation.map((year) => ({
+    [year]: isStructureInCpom(structure, year),
+  }));
 };

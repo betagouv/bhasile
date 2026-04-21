@@ -1,6 +1,5 @@
 import z from "zod";
 
-import { computeCpomDates } from "@/app/utils/cpom.util";
 import { getYearRange } from "@/app/utils/date.util";
 import {
   getRealCreationYear,
@@ -38,37 +37,15 @@ export const getFinanceSchema = (
   const isAutorisee = isStructureAutorisee(structure.type);
   const isSubventionnee = isStructureSubventionnee(structure.type);
 
-  const isInCpomPerYear = years.map(
-    (year) =>
-      structure.cpomStructures?.some((cpomStructure) => {
-        const startYear = cpomStructure.dateStart
-          ? new Date(cpomStructure.dateStart).getFullYear()
-          : computeCpomDates(cpomStructure.cpom).dateStart
-            ? new Date(computeCpomDates(cpomStructure.cpom).dateStart!).getFullYear()
-            : undefined;
-        const endYear = cpomStructure.dateEnd
-          ? new Date(cpomStructure.dateEnd).getFullYear()
-          : computeCpomDates(cpomStructure.cpom).dateEnd
-            ? new Date(computeCpomDates(cpomStructure.cpom).dateEnd!).getFullYear()
-            : undefined;
-        return (
-          startYear !== undefined &&
-          endYear !== undefined &&
-          startYear <= year &&
-          endYear >= year
-        );
-      }) ?? false
-  );
-
   const startYear = getRealCreationYear(structure);
 
   const schema = years
-    .map((year, index) => {
+    .map((year) => {
       if (year < startYear) {
         return null;
       }
 
-      if (isInCpomPerYear[index]) {
+      if (structure.isInCpomPerYear[year]) {
         return budgetInCpomSchema;
       }
 

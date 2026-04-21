@@ -55,7 +55,7 @@ export const createStructure = ({
       logementsSociaux: 0,
     },
     isInCpom: false,
-    wasInCpom: false,
+    isInCpomPerYear: [],
   };
 };
 
