@@ -16,11 +16,6 @@ const COLUMNS: ListColumn[] = [
     orderBy: true,
   },
   {
-    label: "Structures",
-    column: "structures",
-    orderBy: true,
-  },
-  {
     label: "Échelle",
     column: "granularity",
     orderBy: true,
@@ -43,6 +38,11 @@ const COLUMNS: ListColumn[] = [
   {
     label: "Date fin",
     column: "dateEnd",
+    orderBy: true,
+  },
+  {
+    label: "Structures",
+    column: "structures",
     orderBy: true,
   },
 ];
