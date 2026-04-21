@@ -77,7 +77,7 @@ describeIfDb("structure.repository db integration", () => {
       {
         id: structure.id,
         contacts: [newContact],
-      } as never,
+      },
       false
     );
 
