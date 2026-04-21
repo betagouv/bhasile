@@ -81,6 +81,8 @@ async function main() {
       })
     );
 
+    const indicatorsCount = indicatorFields.length;
+
     const indicatorCounts = Object.fromEntries(
       indicatorCountsEntries
     ) as Record<IndicatorField, number>;
@@ -89,14 +91,14 @@ async function main() {
       where: { month },
       create: {
         month,
-        computedAt: new Date(),
         structuresCount,
+        indicatorsCount,
         issuesCountSum,
         ...indicatorCounts,
       },
       update: {
-        computedAt: new Date(),
         structuresCount,
+        indicatorsCount,
         issuesCountSum,
         ...indicatorCounts,
       },
@@ -160,6 +162,18 @@ async function main() {
         updatesCount,
         structuresUpdatedCount,
       },
+    });
+
+    // Snapshot du support
+    await prisma.monthlySupportContact.upsert({
+      where: { month },
+      create: {
+        month,
+        phoneCallsCount: null,
+        emailsCount: null,
+        notes: null,
+      },
+      update: {},
     });
 
     console.log("✅ Reporting mensuel mis à jour.");
