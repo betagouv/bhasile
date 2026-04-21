@@ -6,7 +6,12 @@ import {
   serializeDates,
 } from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
-import { Prisma, PublicType, StructureType } from "@/generated/prisma/client";
+import {
+  Prisma,
+  PublicType,
+  Structure,
+  StructureType,
+} from "@/generated/prisma/client";
 import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
 import {
   StructureApiRead,
@@ -23,7 +28,7 @@ const typesPublic: Record<string, PublicType> = {
 };
 
 export const dbStructureToApiWrite = (
-  structure: unknown
+  structure: Structure
 ): StructureApiWrite => {
   return serializeDates(structure) as StructureApiWrite;
 };
