@@ -3,7 +3,6 @@ import dayjs from "dayjs";
 import { CURRENT_YEAR } from "@/constants";
 import {
   AdresseApiType,
-  AdresseTypologieApiType,
 } from "@/schemas/api/adresse.schema";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
@@ -11,12 +10,10 @@ import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import {
-  StructureAgentUpdateApiType,
-  StructureApiType,
+  StructureApiRead,
 } from "@/schemas/api/structure.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
-import { Repartition } from "@/types/adresse.type";
 import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
 import { StructureType } from "@/types/structure.type";
 
@@ -102,60 +99,6 @@ export function getCommunesGroupedByDepartement(structure: {
   }));
 }
 
-export const getRepartition = (
-  structure: StructureAgentUpdateApiType | StructureApiType
-): Repartition => {
-  const repartitions = structure.adresses?.map(
-    (adresse) => adresse.repartition
-  );
-
-  const isDiffus = repartitions?.some(
-    (repartition) =>
-      repartition?.toUpperCase() === Repartition.DIFFUS.toUpperCase()
-  );
-  const isCollectif = repartitions?.some(
-    (repartition) =>
-      repartition?.toUpperCase() === Repartition.COLLECTIF.toUpperCase()
-  );
-  if (isDiffus && isCollectif) {
-    return Repartition.MIXTE;
-  } else if (isDiffus) {
-    return Repartition.DIFFUS;
-  } else {
-    return Repartition.COLLECTIF;
-  }
-};
-
-const getCurrentPlacesByProperty = (
-  structure: StructureApiType,
-  accessor: keyof AdresseTypologieApiType
-) => {
-  const mostRecentYearTypologies = structure.adresses?.map(
-    (adresse) => adresse.adresseTypologies?.[0]
-  );
-  const placesByAccessor = mostRecentYearTypologies?.reduce(
-    (totalCount, currentTypologie) =>
-      totalCount + ((currentTypologie?.[accessor] as number) || 0),
-    0
-  );
-  return placesByAccessor || 0;
-};
-
-export const getCurrentPlacesAutorisees = (
-  structure: StructureApiType
-): number => {
-  return getCurrentPlacesByProperty(structure, "placesAutorisees");
-};
-
-export const getCurrentPlacesQpv = (structure: StructureApiType): number => {
-  return getCurrentPlacesByProperty(structure, "qpv");
-};
-
-export const getCurrentPlacesLogementsSociaux = (
-  structure: StructureApiType
-): number => {
-  return getCurrentPlacesByProperty(structure, "logementSocial");
-};
 
 export const getLastVisitInMonths = (
   evaluations: EvaluationApiType[],
@@ -187,12 +130,12 @@ export const isStructureSubventionnee = (type: string | undefined): boolean => {
 };
 
 export const isStructureMultiAntenne = (
-  structure: StructureApiType
+  structure: StructureApiRead
 ): boolean => {
   return (structure.antennes?.length ?? 0) > 0;
 };
 
-export const isStructureMultiDna = (structure: StructureApiType): boolean => {
+export const isStructureMultiDna = (structure: StructureApiRead): boolean => {
   return (
     (structure.dnaStructures?.length ?? 0) > 1 ||
     (structure.finesses?.length ?? 0) > 1
@@ -206,39 +149,8 @@ export const getOperateurLabel = (
   return filiale ? `${filiale} (${operateur})` : operateur;
 };
 
-export const isStructureInCpom = (
-  structure: StructureApiType,
-  year: number = CURRENT_YEAR
-): boolean => {
-  return (
-    structure.cpomStructures?.some((cpomStructure) => {
-      const dateStart =
-        cpomStructure.dateStart ??
-        computeCpomDates(cpomStructure.cpom).dateStart;
-      const dateEnd =
-        cpomStructure.dateEnd ?? computeCpomDates(cpomStructure.cpom).dateEnd;
-
-      if (!dateStart || !dateEnd) {
-        return false;
-      }
-
-      const yearStart = getYearFromDate(dateStart);
-      const yearEnd = getYearFromDate(dateEnd);
-
-      return yearStart <= year && yearEnd >= year;
-    }) ?? false
-  );
-};
-
-export const wasStructureInCpom = (
-  structure: StructureApiType,
-  years: number[]
-): boolean => {
-  return years.some((year) => isStructureInCpom(structure, year));
-};
-
 export const getCurrentCpomStructures = (
-  structure: StructureApiType
+  structure: StructureApiRead
 ): CpomStructureApiType | undefined => {
   return structure.cpomStructures?.find((cpomStructure) => {
     const dateStart =
@@ -258,7 +170,7 @@ export const getCurrentCpomStructures = (
 };
 
 export const getCurrentCpomStructureDates = (
-  structure: StructureApiType
+  structure: StructureApiRead
 ): { dateStart?: string; dateEnd?: string } => {
   const currentCpomStructure = getCurrentCpomStructures(structure);
 
@@ -321,7 +233,7 @@ export const getCpomStructureIndexAndBudgetIndexForAYearAndAType = (
   return { cpomStructureIndex, budgetIndex };
 };
 
-export const getRealCreationYear = (structure: StructureApiType): number => {
+export const getRealCreationYear = (structure: StructureApiRead): number => {
   return structure.date303
     ? getYearFromDate(structure.date303)
     : getYearFromDate(structure.creationDate);

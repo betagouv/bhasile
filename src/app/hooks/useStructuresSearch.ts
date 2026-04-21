@@ -1,7 +1,7 @@
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { FetchState } from "@/types/fetch-state.type";
 import { StructureColumn } from "@/types/ListColumn";
@@ -10,7 +10,7 @@ import { StructureType } from "@/types/structure.type";
 import { useFetchState } from "../context/FetchStateContext";
 
 export const useStructuresSearch = ({ map }: { map?: boolean }) => {
-  const [structures, setStructures] = useState<StructureApiType[] | undefined>(
+  const [structures, setStructures] = useState<StructureApiRead[] | undefined>(
     undefined
   );
   const [totalStructures, setTotalStructures] = useState<number>(0);
@@ -46,7 +46,7 @@ export const useStructuresSearch = ({ map }: { map?: boolean }) => {
       departements: string | null,
       column: StructureColumn | null,
       direction: "asc" | "desc" | null
-    ): Promise<{ structures: StructureApiType[]; totalStructures: number }> => {
+    ): Promise<{ structures: StructureApiRead[]; totalStructures: number }> => {
       setFetchState(`structure-${map ? "map" : "search"}`, FetchState.LOADING);
       try {
         const baseUrl = process.env.NEXT_URL || "";

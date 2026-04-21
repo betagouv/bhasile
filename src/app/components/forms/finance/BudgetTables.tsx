@@ -1,10 +1,8 @@
 import Link from "next/link";
 
-import { getYearRange } from "@/app/utils/date.util";
 import {
   isStructureAutorisee,
   isStructureSubventionnee,
-  wasStructureInCpom,
 } from "@/app/utils/structure.util";
 import { getFinanceFormTutorialLink } from "@/app/utils/tutorials.util";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
@@ -16,8 +14,7 @@ import { StructureTable } from "./budget-tables/StructureTable";
 
 export const BudgetTables = () => {
   const { structure } = useStructureContext();
-  const { years } = getYearRange({ order: "desc" });
-  const wasInCpom = wasStructureInCpom(structure, years);
+  const wasInCpom = structure.wasInCpom;
   const isAutorisee = isStructureAutorisee(structure?.type);
   const isSubventionnee = isStructureSubventionnee(structure?.type);
 

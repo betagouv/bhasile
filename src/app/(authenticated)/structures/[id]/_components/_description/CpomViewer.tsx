@@ -5,7 +5,6 @@ import { ReactElement, useState } from "react";
 
 import {
   getCurrentCpomStructures,
-  isStructureInCpom,
 } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -15,7 +14,7 @@ export const CpomViewer = (): ReactElement => {
 
   const { structure } = useStructureContext();
 
-  const isInCpom = isStructureInCpom(structure);
+  const isInCpom = structure.isInCpom;
 
   const currentCpomStructure = getCurrentCpomStructures(structure);
 

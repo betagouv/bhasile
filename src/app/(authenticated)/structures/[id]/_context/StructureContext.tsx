@@ -1,11 +1,11 @@
 import { ReactNode } from "react";
 
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { StructureClientProvider } from "./StructureClientContext";
 
 export type StructureContextType = {
-  structure: StructureApiType;
+  structure: StructureApiRead;
 };
 
 export function StructureProvider({
@@ -13,7 +13,7 @@ export function StructureProvider({
   structure: backendStructure,
 }: {
   children: ReactNode;
-  structure: StructureApiType | null;
+  structure: StructureApiRead | null;
 }) {
   const structure = backendStructure
     ? ({
@@ -22,7 +22,7 @@ export function StructureProvider({
           Number(backendStructure.latitude),
           Number(backendStructure.longitude),
         ],
-      } as unknown as StructureApiType)
+      } as unknown as StructureApiRead)
     : null;
 
   return (

@@ -1,12 +1,43 @@
 import { getCoordinates } from "@/app/utils/adresse.util";
+import { computeCpomDates } from "@/app/utils/cpom.util";
+import { getYearFromDate } from "@/app/utils/date.util";
+import { CURRENT_YEAR } from "@/constants";
 import { Prisma, PublicType, StructureType } from "@/generated/prisma/client";
+import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
+import { StructureApiWrite } from "@/schemas/api/structure.schema";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
+import { Repartition } from "@/types/adresse.type";
 import { StructureColumn } from "@/types/ListColumn";
 
 const typesPublic: Record<string, PublicType> = {
   "tout public": PublicType.TOUT_PUBLIC,
   famille: PublicType.FAMILLE,
   "personnes isolées": PublicType.PERSONNES_ISOLEES,
+};
+
+const serializeDates = (value: unknown): unknown => {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => serializeDates(item));
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nestedValue]) => [
+        key,
+        serializeDates(nestedValue),
+      ])
+    );
+  }
+
+  return value;
+};
+
+export const dbStructureToApiWrite = (structure: unknown): StructureApiWrite => {
+  return serializeDates(structure) as StructureApiWrite;
 };
 
 export const convertToPublicType = (
@@ -174,3 +205,75 @@ export const buildStructuresWhereSql = ({
   }
   return Prisma.sql`WHERE ${combined}`;
 };
+
+export const getRepartition = (structure: StructureApiWrite): Repartition => {
+  const repartitions = structure.adresses?.map(
+    (adresse) => adresse.repartition
+  );
+  const isDiffus = repartitions?.some(
+    (repartition) =>
+      repartition?.toUpperCase() === Repartition.DIFFUS.toUpperCase()
+  );
+  const isCollectif = repartitions?.some(
+    (repartition) =>
+      repartition?.toUpperCase() === Repartition.COLLECTIF.toUpperCase()
+  );
+
+  if (isDiffus && isCollectif) {
+    return Repartition.MIXTE;
+  }
+  if (isDiffus) {
+    return Repartition.DIFFUS;
+  }
+  return Repartition.COLLECTIF;
+};
+
+const getCurrentPlacesByProperty = (
+  structure: StructureApiWrite,
+  accessor: keyof AdresseTypologieApiType
+): number => {
+  const mostRecentYearTypologies = structure.adresses?.map(
+    (adresse) => adresse.adresseTypologies?.[0]
+  );
+  const placesByAccessor = mostRecentYearTypologies?.reduce(
+    (totalCount, currentTypologie) =>
+      totalCount + ((currentTypologie?.[accessor] as number) || 0),
+    0
+  );
+
+  return placesByAccessor || 0;
+};
+
+export const getCurrentPlacesAutorisees = (structure: StructureApiWrite) =>
+  getCurrentPlacesByProperty(structure, "placesAutorisees");
+
+export const getCurrentPlacesQpv = (structure: StructureApiWrite) =>
+  getCurrentPlacesByProperty(structure, "qpv");
+
+export const getCurrentPlacesLogementsSociaux = (
+  structure: StructureApiWrite
+) => getCurrentPlacesByProperty(structure, "logementSocial");
+
+export const isStructureInCpom = (
+  structure: StructureApiWrite,
+  year: number = CURRENT_YEAR
+): boolean =>
+  structure.cpomStructures?.some((cpomStructure) => {
+    const dateStart =
+      cpomStructure.dateStart ?? computeCpomDates(cpomStructure.cpom).dateStart;
+    const dateEnd =
+      cpomStructure.dateEnd ?? computeCpomDates(cpomStructure.cpom).dateEnd;
+
+    if (!dateStart || !dateEnd) {
+      return false;
+    }
+
+    const yearStart = getYearFromDate(dateStart);
+    const yearEnd = getYearFromDate(dateEnd);
+    return yearStart <= year && yearEnd >= year;
+  }) ?? false;
+
+export const wasStructureInCpom = (
+  structure: StructureApiWrite,
+  years: number[]
+): boolean => years.some((year) => isStructureInCpom(structure, year));

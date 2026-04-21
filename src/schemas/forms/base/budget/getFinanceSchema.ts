@@ -1,10 +1,10 @@
 import z from "zod";
 
+import { computeCpomDates } from "@/app/utils/cpom.util";
 import { getYearRange } from "@/app/utils/date.util";
 import {
   getRealCreationYear,
   isStructureAutorisee,
-  isStructureInCpom,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import {
@@ -12,7 +12,7 @@ import {
   CURRENT_YEAR,
   SUBVENTIONNEE_OPEN_YEAR,
 } from "@/constants";
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { FormKind } from "@/types/global";
 
 import {
@@ -31,15 +31,33 @@ import { DocumentsFinanciersFlexibleSchema } from "../documentFinancier.schema";
 import { indicateursFinanciersSchema } from "../indicateurFinancier.schema";
 
 export const getFinanceSchema = (
-  structure: StructureApiType,
+  structure: StructureApiRead,
   formKind: FormKind = FormKind.FINALISATION
 ) => {
   const { years } = getYearRange();
   const isAutorisee = isStructureAutorisee(structure.type);
   const isSubventionnee = isStructureSubventionnee(structure.type);
 
-  const isInCpomPerYear = years.map((year) =>
-    isStructureInCpom(structure, year)
+  const isInCpomPerYear = years.map(
+    (year) =>
+      structure.cpomStructures?.some((cpomStructure) => {
+        const startYear = cpomStructure.dateStart
+          ? new Date(cpomStructure.dateStart).getFullYear()
+          : computeCpomDates(cpomStructure.cpom).dateStart
+            ? new Date(computeCpomDates(cpomStructure.cpom).dateStart!).getFullYear()
+            : undefined;
+        const endYear = cpomStructure.dateEnd
+          ? new Date(cpomStructure.dateEnd).getFullYear()
+          : computeCpomDates(cpomStructure.cpom).dateEnd
+            ? new Date(computeCpomDates(cpomStructure.cpom).dateEnd!).getFullYear()
+            : undefined;
+        return (
+          startYear !== undefined &&
+          endYear !== undefined &&
+          startYear <= year &&
+          endYear >= year
+        );
+      }) ?? false
   );
 
   const startYear = getRealCreationYear(structure);

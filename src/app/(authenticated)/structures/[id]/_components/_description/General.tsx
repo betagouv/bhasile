@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 
 import { formatCityName } from "@/app/utils/adresse.util";
 import { formatDate } from "@/app/utils/date.util";
-import { getOperateurLabel, getRepartition } from "@/app/utils/structure.util";
+import { getOperateurLabel } from "@/app/utils/structure.util";
 import { PublicType } from "@/types/structure.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -25,8 +25,6 @@ export const General = (): ReactElement => {
     codePostalAdministratif,
     communeAdministrative,
   } = structure;
-
-  const repartition = getRepartition(structure);
 
   const getVulnerabiliteLabel = () => {
     const vulnerabilites: string[] = [];
@@ -56,7 +54,7 @@ export const General = (): ReactElement => {
       </div>
       <div className="flex gap-2 mb-3">
         <strong>Type de bâti</strong>
-        {repartition}
+        {structure.repartition}
       </div>
       <hr className="col-span-2" />
       <div className="flex gap-2 mb-3">

@@ -1,5 +1,8 @@
 import { Structure } from "@/generated/prisma/client";
-import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
+import {
+  StructureAgentUpdateApiType,
+  StructureApiRead,
+} from "@/schemas/api/structure.schema";
 
 import { processActivitesForStructure } from "../activites/activite.service";
 import {
@@ -7,7 +10,16 @@ import {
   getLatestPlacesAutoriseesPerStructure,
   updateOne,
 } from "./structure.repository";
-import { getAdresseAdministrativeCoordinates } from "./structure.util";
+import {
+  dbStructureToApiWrite,
+  getAdresseAdministrativeCoordinates,
+  getCurrentPlacesAutorisees,
+  getCurrentPlacesLogementsSociaux,
+  getCurrentPlacesQpv,
+  getRepartition,
+  isStructureInCpom,
+  wasStructureInCpom,
+} from "./structure.util";
 
 export const updateStructureAgent = async (
   structure: StructureAgentUpdateApiType
@@ -34,14 +46,23 @@ export const updateStructureOperateur = async (
   );
 };
 
-export const getFullStructure = async (id: number) => {
-  const structure = await findOne(id);
-  const allActivites = structure.dnaStructures.flatMap(
+export const getFullStructure = async (id: number): Promise<StructureApiRead> => {
+  const dbStructure = await findOne(id);
+  const structure = dbStructureToApiWrite(dbStructure);
+  const currentYear = new Date().getFullYear();
+  const creationYear = new Date(
+    structure.creationDate ?? new Date().toISOString()
+  ).getFullYear();
+  const yearsSinceCreation = Array.from(
+    { length: currentYear - creationYear + 1 },
+    (_, index) => creationYear + index
+  );
+  const allActivites = dbStructure.dnaStructures.flatMap(
     (dnaStructure) => dnaStructure.dna.activites
   );
   const activites = processActivitesForStructure(allActivites);
 
-  const aggregatedEIGs = structure.dnaStructures.flatMap(
+  const aggregatedEIGs = dbStructure.dnaStructures.flatMap(
     (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
   );
 
@@ -49,7 +70,15 @@ export const getFullStructure = async (id: number) => {
     ...structure,
     activites,
     evenementsIndesirablesGraves: aggregatedEIGs,
-  };
+    repartition: getRepartition(structure),
+    currentPlaces: {
+      placesAutorisees: getCurrentPlacesAutorisees(structure),
+      qpv: getCurrentPlacesQpv(structure),
+      logementsSociaux: getCurrentPlacesLogementsSociaux(structure),
+    },
+    isInCpom: isStructureInCpom(structure),
+    wasInCpom: wasStructureInCpom(structure, yearsSinceCreation),
+  } as unknown as StructureApiRead;
 };
 
 export const getMaxPlacesAutorisees = async (): Promise<number> => {

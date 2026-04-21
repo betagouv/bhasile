@@ -5,9 +5,7 @@ import { formatDate } from "@/app/utils/date.util";
 import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 import {
   getCommunesGroupedByDepartement,
-  getCurrentPlacesAutorisees,
   getOperateurLabel,
-  getRepartition,
 } from "@/app/utils/structure.util";
 import { DEPARTEMENTS } from "@/constants";
 
@@ -20,9 +18,6 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
   }
   const { codeBhasile, type, filiale, operateur, nom, finConvention } =
     structure;
-
-  const placesAutorisees = getCurrentPlacesAutorisees(structure);
-  const repartition = getRepartition(structure);
 
   const isStructureFinalisee = getFinalisationFormStatus(structure);
 
@@ -51,7 +46,7 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
       </div>
       <div className="text-sm mb-1">
         <strong>Places autorisées : </strong>
-        <span>{placesAutorisees}</span>
+        <span>{structure.currentPlaces.placesAutorisees}</span>
       </div>
       {finConvention && (
         <div className="text-sm mb-2">
@@ -60,7 +55,7 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
         </div>
       )}
       <div className="text-sm mb-2">
-        <RepartitionBadge repartition={repartition} className="m-0!" />
+        <RepartitionBadge repartition={structure.repartition} className="m-0!" />
       </div>
       <div className="flex justify-end">
         <Link

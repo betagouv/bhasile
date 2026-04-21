@@ -6,7 +6,7 @@ import { Table } from "@/app/components/common/Table";
 import { cn } from "@/app/utils/classname.util";
 import { getTypePlacesYearRange } from "@/app/utils/date.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { FormKind } from "@/types/global";
 
 import { YearlyTypePlace } from "./YearlyTypePlace";
@@ -15,7 +15,7 @@ export const FieldSetTypePlaces = ({
   formKind = FormKind.FINALISATION,
   structure,
 }: {
-  structure: StructureApiType;
+  structure: StructureApiRead;
   formKind?: FormKind;
 }) => {
   const fieldsetRef = useRef<HTMLFieldSetElement>(null);

@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { formatDate } from "@/app/utils/date.util";
-import { getOperateurLabel, getRepartition } from "@/app/utils/structure.util";
+import { getOperateurLabel } from "@/app/utils/structure.util";
 import { PublicType } from "@/types/structure.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -49,7 +49,7 @@ export const PrahdaDescriptionBlock = (): ReactElement => {
       <hr />
       <div className="flex mb-2">
         <strong className="pr-2">Type de bâti</strong>
-        <span className="pr-1">{getRepartition(structure)}</span>
+        <span className="pr-1">{structure.repartition}</span>
       </div>
     </Block>
   );

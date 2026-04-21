@@ -2,11 +2,9 @@ import { useForm, useFormContext } from "react-hook-form";
 
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { Table } from "@/app/components/common/Table";
+import { computeCpomDates } from "@/app/utils/cpom.util";
 import { getYearRange } from "@/app/utils/date.util";
-import {
-  isStructureAutorisee,
-  isStructureInCpom,
-} from "@/app/utils/structure.util";
+import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
@@ -26,7 +24,24 @@ export const StructureCpomTable = ({ canEdit = true, type }: Props) => {
   const { watch } = parentFormContext || localForm;
 
   const yearsInCpom = years.filter((year) =>
-    isStructureInCpom(structure, year)
+    structure.cpomStructures?.some((cpomStructure) => {
+      const startYear = cpomStructure.dateStart
+        ? new Date(cpomStructure.dateStart).getFullYear()
+        : computeCpomDates(cpomStructure.cpom).dateStart
+          ? new Date(computeCpomDates(cpomStructure.cpom).dateStart!).getFullYear()
+          : undefined;
+      const endYear = cpomStructure.dateEnd
+        ? new Date(cpomStructure.dateEnd).getFullYear()
+        : computeCpomDates(cpomStructure.cpom).dateEnd
+          ? new Date(computeCpomDates(cpomStructure.cpom).dateEnd!).getFullYear()
+          : undefined;
+      return (
+        startYear !== undefined &&
+        endYear !== undefined &&
+        startYear <= year &&
+        endYear >= year
+      );
+    })
   );
 
   const cpomStructures = canEdit

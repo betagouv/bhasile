@@ -1,12 +1,11 @@
 import {
   getRealCreationYear,
-  getRepartition,
   isStructureMultiAntenne,
   isStructureMultiDna,
 } from "@/app/utils/structure.util";
 import { ContactApiType } from "@/schemas/api/contact.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
@@ -37,14 +36,14 @@ import { getStructureTypologyDefaultValues } from "./structureTypology.util";
 export const getDefaultValues = ({
   structure,
 }: {
-  structure: StructureApiType;
+  structure: StructureApiRead;
 }): Partial<StructureDefaultValues> => {
   const structureCreationYear = getRealCreationYear(structure);
 
   const isAutorisee = isStructureAutorisee(structure.type);
   const isMultiAntenne = isStructureMultiAntenne(structure);
   const isMultiDna = isStructureMultiDna(structure);
-  const repartition = getRepartition(structure);
+  const repartition = structure.repartition;
 
   const adresses = transformApiAdressesToFormAdresses(structure.adresses);
 
@@ -134,7 +133,7 @@ export const getDefaultValues = ({
 };
 
 type StructureDefaultValues = Omit<
-  StructureApiType,
+  StructureApiRead,
   | "creationDate"
   | "nom"
   | "debutPeriodeAutorisation"

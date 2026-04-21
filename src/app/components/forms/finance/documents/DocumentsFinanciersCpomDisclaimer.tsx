@@ -1,10 +1,28 @@
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
-import { isStructureInCpom } from "@/app/utils/structure.util";
+import { computeCpomDates } from "@/app/utils/cpom.util";
 
 export const DocumentsFinanciersCpomDisclaimer = ({ year }: Props) => {
   const { structure } = useStructureContext();
 
-  const isInCpom = isStructureInCpom(structure, year);
+  const isInCpom =
+    structure.cpomStructures?.some((cpomStructure) => {
+      const startYear = cpomStructure.dateStart
+        ? new Date(cpomStructure.dateStart).getFullYear()
+        : computeCpomDates(cpomStructure.cpom).dateStart
+          ? new Date(computeCpomDates(cpomStructure.cpom).dateStart!).getFullYear()
+          : undefined;
+      const endYear = cpomStructure.dateEnd
+        ? new Date(cpomStructure.dateEnd).getFullYear()
+        : computeCpomDates(cpomStructure.cpom).dateEnd
+          ? new Date(computeCpomDates(cpomStructure.cpom).dateEnd!).getFullYear()
+          : undefined;
+      return (
+        startYear !== undefined &&
+        endYear !== undefined &&
+        startYear <= year &&
+        endYear >= year
+      );
+    }) ?? false;
 
   return isInCpom ? (
     <p>

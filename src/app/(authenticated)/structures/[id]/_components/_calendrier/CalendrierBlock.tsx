@@ -5,7 +5,6 @@ import { DateBars } from "@/app/(authenticated)/structures/[id]/_components/_cal
 import { Block } from "@/app/components/common/Block";
 import {
   getCurrentCpomStructureDates,
-  isStructureInCpom,
 } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -22,7 +21,7 @@ export const CalendrierBlock = (): ReactElement => {
     finConvention,
   } = structure;
 
-  const isInCpom = isStructureInCpom(structure);
+  const isInCpom = structure.isInCpom;
   const { dateStart, dateEnd } = getCurrentCpomStructureDates(structure);
 
   const datePairs = [];

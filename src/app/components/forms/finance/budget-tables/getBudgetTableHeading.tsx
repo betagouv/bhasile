@@ -1,7 +1,31 @@
 import { Badge } from "@/app/components/common/Badge";
 import { cn } from "@/app/utils/classname.util";
-import { isStructureInCpom } from "@/app/utils/structure.util";
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { computeCpomDates } from "@/app/utils/cpom.util";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
+
+const isStructureInCpomForYear = (
+  structure: StructureApiRead,
+  year: number
+): boolean =>
+  structure.cpomStructures?.some((cpomStructure) => {
+    const startYear = cpomStructure.dateStart
+      ? new Date(cpomStructure.dateStart).getFullYear()
+      : computeCpomDates(cpomStructure.cpom).dateStart
+        ? new Date(computeCpomDates(cpomStructure.cpom).dateStart!).getFullYear()
+        : undefined;
+    const endYear = cpomStructure.dateEnd
+      ? new Date(cpomStructure.dateEnd).getFullYear()
+      : computeCpomDates(cpomStructure.cpom).dateEnd
+        ? new Date(computeCpomDates(cpomStructure.cpom).dateEnd!).getFullYear()
+        : undefined;
+
+    return (
+      startYear !== undefined &&
+      endYear !== undefined &&
+      startYear <= year &&
+      endYear >= year
+    );
+  }) ?? false;
 
 export const getBudgetTableHeading = ({ years, structure }: Props) => {
   return [
@@ -17,7 +41,7 @@ export const getBudgetTableHeading = ({ years, structure }: Props) => {
         <span className={cn("block text-sm", structure && "mb-1")}>{year}</span>
         {structure && (
           <>
-            {isStructureInCpom(structure, year) ? (
+            {isStructureInCpomForYear(structure, year) ? (
               <Badge type="new" className="text-[10px]">
                 En CPOM
               </Badge>
@@ -35,5 +59,5 @@ export const getBudgetTableHeading = ({ years, structure }: Props) => {
 
 type Props = {
   years: number[];
-  structure?: StructureApiType;
+  structure?: StructureApiRead;
 };

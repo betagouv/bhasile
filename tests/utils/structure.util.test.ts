@@ -1,14 +1,16 @@
 import dayjs from "dayjs";
 
 import {
+  getRepartition,
+  isStructureInCpom,
+} from "@/app/api/structures/structure.util";
+import {
   getCpomStructureIndexAndBudgetIndexForAYearAndAType,
   getCurrentCpomStructureDates,
   getLastVisitInMonths,
   getMillesimeIndexForAYear,
   getPlacesByCommunes,
-  getRepartition,
   isStructureAutorisee,
-  isStructureInCpom,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
