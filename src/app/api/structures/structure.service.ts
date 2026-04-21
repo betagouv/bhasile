@@ -53,6 +53,9 @@ export const getFullStructure = async (
   id: number
 ): Promise<StructureApiRead> => {
   const dbStructure = await findOne(id);
+  if (!dbStructure) {
+    throw new Error(`Structure avec l'identifiant ${id} non trouvée`);
+  }
   const structure = dbStructureToApiWrite(dbStructure);
   const allActivites = dbStructure.dnaStructures.flatMap(
     (dnaStructure) => dnaStructure.dna.activites

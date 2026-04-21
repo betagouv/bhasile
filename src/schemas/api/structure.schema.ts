@@ -140,5 +140,5 @@ export type StructureApiRead = StructureApiWrite & {
     logementsSociaux: number;
   };
   isInCpom: boolean;
-  isInCpomPerYear: Record<number, boolean>[];
+  isInCpomPerYear: Record<number, boolean>;
 };

@@ -31,9 +31,8 @@ export const FinancesBlock = (): ReactElement => {
     ? AUTORISEE_OPEN_YEAR
     : SUBVENTIONNEE_OPEN_YEAR;
 
-  const wasInCpom = structure.isInCpomPerYear.some(
-    (year) => Object.values(year)[0] === true
-  );
+  const wasInCpom = Object.values(structure.isInCpomPerYear).some(Boolean);
+
   return (
     <Block
       title="Finances"

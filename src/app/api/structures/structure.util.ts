@@ -263,13 +263,14 @@ export const isStructureInCpom = (
 
 export const isStructureInCpomPerYear = (
   structure: StructureApiWrite
-): Record<number, boolean>[] => {
+): Record<number, boolean> => {
   const { years } = getYearRange({ order: "desc" });
   const realCreationYear = structure.date303
     ? getYearFromDate(structure.date303)
     : getYearFromDate(structure.creationDate);
   const yearsSinceCreation = years.filter((year) => year >= realCreationYear);
-  return yearsSinceCreation.map((year) => ({
-    [year]: isStructureInCpom(structure, year),
-  }));
+  return yearsSinceCreation.reduce(
+    (acc, year) => ({ ...acc, [year]: isStructureInCpom(structure, year) }),
+    {} as Record<number, boolean>
+  );
 };
