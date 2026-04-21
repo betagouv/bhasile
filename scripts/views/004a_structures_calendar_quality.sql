@@ -100,7 +100,6 @@ SELECT
     ELSE FALSE
   END AS "has_issue_authorized_convention_missing_or_expired",
   -- Evaluation should be performed at least every 5 years, before the end of the convention.
-  -- Rule: if we have a convention end date, the last evaluation date must be >= finConvention - 5 years.
   CASE
     WHEN s."finConvention" IS NULL THEN FALSE
     WHEN MAX(e."date") IS NULL THEN TRUE
