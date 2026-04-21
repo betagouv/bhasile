@@ -19,12 +19,7 @@ SELECT
   -- Structure linked to more than one DNA
   (COUNT(DISTINCT ds."dnaId") > 1) AS "has_issue_multi_dna",
   -- Structure associated to a CPOM that has only one structure (mono-structure CPOM)
-  COALESCE(
-    BOOL_OR(
-      cpom_counts."structuresCount" <= 1
-    ),
-    FALSE
-  ) AS "has_issue_cpom_mono_structure"
+  COALESCE(BOOL_OR(cpom_counts."structuresCount" <= 1), FALSE) AS "has_issue_cpom_mono_structure"
 FROM
   public."Structure" s
   LEFT JOIN public."DnaStructure" ds ON ds."structureId" = s."id"
