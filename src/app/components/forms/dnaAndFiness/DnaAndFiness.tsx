@@ -35,7 +35,7 @@ export const DnaAndFiness = ({ formKind = FormKind.FINALISATION }: Props) => {
   return (
     <>
       <h2 className="text-xl font-bold mb-4 text-title-blue-france">
-        Code DNA{isAutorisee && " et FINESS"}
+        Code{isMultiDna ? "s" : ""} DNA{isAutorisee && " et FINESS"}
       </h2>
       {!isAutorisee || formKind !== FormKind.MODIFICATION ? (
         <Checkbox
