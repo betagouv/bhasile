@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
+
 import { FieldSetActesAdministratifs } from "@/app/components/forms/cpom/FieldSetActesAdministratifs";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
@@ -25,6 +28,7 @@ export default function CpomModificationActesAdministratifs() {
     cpomId: cpom.id,
     nextRoute: `/cpoms/${cpom.id}`,
   });
+  const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const defaultValues = getCpomDefaultValues(cpom);
 
@@ -32,14 +36,14 @@ export default function CpomModificationActesAdministratifs() {
     <>
       <ModificationTitle
         step="Document de convention du CPOM"
-        closeLink={`/cpoms/${cpom.id}`}
+        handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
         schema={actesAdministratifsCpomSchema}
         defaultValues={defaultValues}
         onSubmit={handleSubmit}
-        resetRoute={`/cpoms/${cpom.id}`}
         submitButtonText="Valider"
+        handleCancel={() => setShouldOpenModal(true)}
         availableFooterButtons={[
           FooterButtonType.CANCEL,
           FooterButtonType.SUBMIT,
@@ -51,6 +55,11 @@ export default function CpomModificationActesAdministratifs() {
           <SubmitError cpomId={cpom.id} backendError={backendError} />
         )}
       </FormWrapper>
+      <LeaveModificationModal
+        resetRoute={`/cpoms/${cpom.id}`}
+        shouldOpen={shouldOpenModal}
+        setShouldOpen={setShouldOpenModal}
+      />
     </>
   );
 }

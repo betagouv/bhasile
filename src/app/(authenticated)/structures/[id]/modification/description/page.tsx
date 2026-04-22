@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
@@ -9,6 +11,7 @@ import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
@@ -29,6 +32,7 @@ export default function ModificationDescription() {
   const { handleSubmit, backendError } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,
   });
+  const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const defaultValues = getDefaultValues({ structure });
 
@@ -46,15 +50,15 @@ export default function ModificationDescription() {
     <>
       <ModificationTitle
         step="Description"
-        closeLink={`/structures/${structure.id}`}
+        handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
         schema={modificationDescriptionSchema}
         defaultValues={defaultValues}
         onSubmit={onSubmit}
         mode="onChange"
-        resetRoute={`/structures/${structure.id}`}
         submitButtonText="Valider"
+        handleCancel={() => setShouldOpenModal(true)}
         availableFooterButtons={[
           FooterButtonType.CANCEL,
           FooterButtonType.SUBMIT,
@@ -74,6 +78,11 @@ export default function ModificationDescription() {
         <hr />
         <FieldSetContacts />
       </FormWrapper>
+      <LeaveModificationModal
+        resetRoute={`/structures/${structure.id}`}
+        shouldOpen={shouldOpenModal}
+        setShouldOpen={setShouldOpenModal}
+      />
       {saveState === FetchState.ERROR && (
         <SubmitError
           codeBhasile={structure.codeBhasile}

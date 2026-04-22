@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
+
 import { ActesAdministratifs } from "@/app/components/forms/actesAdministratifs/ActesAdministratifs";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
@@ -35,6 +38,8 @@ export default function ModificationQualiteForm() {
     nextRoute: `/structures/${structure.id}`,
   });
 
+  const [shouldOpenModal, setShouldOpenModal] = useState(false);
+
   const defaultValues = getDefaultValues({
     structure,
   });
@@ -64,14 +69,17 @@ export default function ModificationQualiteForm() {
     <>
       <ModificationTitle
         step="Actes administratifs"
-        closeLink={`/structures/${structure.id}`}
+        handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
         schema={schema}
         onSubmit={onSubmit}
         submitButtonText="Valider"
-        resetRoute={`/structures/${structure.id}`}
-        availableFooterButtons={[FooterButtonType.SUBMIT]}
+        handleCancel={() => setShouldOpenModal(true)}
+        availableFooterButtons={[
+          FooterButtonType.SUBMIT,
+          FooterButtonType.CANCEL,
+        ]}
         defaultValues={defaultValues}
         className="border-2 border-solid border-(--text-title-blue-france)"
         key={key}
@@ -84,6 +92,11 @@ export default function ModificationQualiteForm() {
           />
         )}
       </FormWrapper>
+      <LeaveModificationModal
+        resetRoute={`/structures/${structure.id}`}
+        shouldOpen={shouldOpenModal}
+        setShouldOpen={setShouldOpenModal}
+      />
     </>
   );
 }

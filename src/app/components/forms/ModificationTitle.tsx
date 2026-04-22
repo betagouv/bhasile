@@ -1,6 +1,6 @@
-import Link from "next/link";
+import Button from "@codegouvfr/react-dsfr/Button";
 
-export const ModificationTitle = ({ step, closeLink }: Props) => {
+export const ModificationTitle = ({ step, handleCancel }: Props) => {
   return (
     <div className="flex justify-between items-center mx-6 mt-3">
       <h1 className="text-xl font-bold mb-0 text-title-blue-france flex items-center gap-2">
@@ -10,17 +10,21 @@ export const ModificationTitle = ({ step, closeLink }: Props) => {
         />
         <span className="italic font-normal"> Modification</span> - {step}
       </h1>
-      <Link href={closeLink} aria-label="Fermer la modification">
+      <Button
+        onClick={handleCancel}
+        aria-label="Fermer la modification"
+        priority="tertiary no outline"
+      >
         <span
           className="fr-icon-close-line fr-icon--md text-title-blue-france"
           aria-hidden="true"
         />
-      </Link>
+      </Button>
     </div>
   );
 };
 
 type Props = {
   step: string;
-  closeLink: string;
+  handleCancel: () => void;
 };

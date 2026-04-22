@@ -1,9 +1,10 @@
 "use client";
-import { ReactElement } from "react";
+import { ReactElement, useState } from "react";
 
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { FieldSetNotes } from "@/app/components/forms/notes/FieldSetNotes";
 import { NoteDisclaimer } from "@/app/components/forms/notes/NoteDisclaimer";
@@ -25,6 +26,7 @@ export default function ModificationNotesForm(): ReactElement {
   const { handleSubmit, backendError } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,
   });
+  const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("structure-save");
@@ -33,7 +35,7 @@ export default function ModificationNotesForm(): ReactElement {
     <>
       <ModificationTitle
         step="Notes"
-        closeLink={`/structures/${structure.id}`}
+        handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
         schema={notesSchema}
@@ -45,6 +47,7 @@ export default function ModificationNotesForm(): ReactElement {
         }
         defaultValues={defaultValues}
         submitButtonText="Valider"
+        handleCancel={() => setShouldOpenModal(true)}
         availableFooterButtons={[
           FooterButtonType.CANCEL,
           FooterButtonType.SUBMIT,
@@ -60,6 +63,11 @@ export default function ModificationNotesForm(): ReactElement {
           />
         )}
       </FormWrapper>
+      <LeaveModificationModal
+        resetRoute={`/structures/${structure.id}`}
+        shouldOpen={shouldOpenModal}
+        setShouldOpen={setShouldOpenModal}
+      />
     </>
   );
 }

@@ -41,6 +41,7 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
   submitButtonText = "Continuer",
   nextRoute,
   resetRoute,
+  handleCancel,
   showSubmitButton = true,
   previousStep,
   availableFooterButtons = [
@@ -74,15 +75,19 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
   const { handleSubmit, control, reset } = methods;
 
   const handleReset = () => {
-    if (
-      window.confirm(
-        "Attention : Toutes les données saisies sur cette étape vont être effacées. Êtes-vous sûr·e de vouloir continuer ?"
-      )
-    ) {
-      resetLocalStorageValues();
-      reset(defaultValues as z.infer<TSchema>);
-      if (resetRoute) {
-        router.push(resetRoute);
+    if (handleCancel) {
+      handleCancel();
+    } else {
+      if (
+        window.confirm(
+          "Attention : Toutes les données saisies sur cette étape vont être effacées. Êtes-vous sûr·e de vouloir continuer ?"
+        )
+      ) {
+        resetLocalStorageValues();
+        reset(defaultValues as z.infer<TSchema>);
+        if (resetRoute) {
+          router.push(resetRoute);
+        }
       }
     }
   };
@@ -231,6 +236,7 @@ type FormWrapperProps<TSchema extends z.ZodTypeAny> = {
   submitButtonText?: string;
   nextRoute?: string;
   resetRoute?: string;
+  handleCancel?: () => void;
   showSubmitButton?: boolean;
   previousStep?: string;
   availableFooterButtons?: Array<FooterButtonType>;
