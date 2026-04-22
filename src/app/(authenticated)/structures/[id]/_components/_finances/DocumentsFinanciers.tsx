@@ -34,7 +34,7 @@ export const DocumentsFinanciers = (): ReactElement => {
         );
         return budget ? (
           <Accordion label={budget.year} key={budget.id}>
-            <div className="columns-3">
+            <div className="grid grid-cols-3 gap-4">
               {getDocumentsFinanciersToDisplay(budget)?.length === 0 ? (
                 <span>Aucun document importé</span>
               ) : (
