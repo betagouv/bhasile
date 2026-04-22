@@ -5,6 +5,7 @@ import { ReactElement } from "react";
 import { ListLoader } from "@/app/components/lists/ListLoader";
 import { useOperateurSearch } from "@/app/hooks/useOperateurSearch";
 
+import { SearchBar } from "../structures/_components/SearchBar";
 import { OperateurList } from "./OperateursList";
 
 export default function Operateurs(): ReactElement {
@@ -19,10 +20,16 @@ export default function Operateurs(): ReactElement {
         >
           Opérateurs
         </h2>
-        <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
-          {totalOperateurs ?? 0} entrée
-          {(totalOperateurs ?? 0) > 1 ? "s" : ""}
-        </p>
+        <div className="flex items-center">
+          <SearchBar
+            placeholder="Nom d'opérateur"
+            inputId="operateurs-search"
+          />
+          <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
+            {totalOperateurs ?? 0} entrée
+            {(totalOperateurs ?? 0) > 1 ? "s" : ""}
+          </p>
+        </div>
       </div>
       <ListLoader
         fetchStateName={"operateurs-search"}

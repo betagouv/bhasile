@@ -5,10 +5,12 @@ import { findOne, getPaginatedOperateurs } from "./operateur.repository";
 
 export const getOperateurs = async ({
   page,
+  search,
 }: {
   page: number | null;
+  search: string | null;
 }): Promise<Partial<Operateur>[]> => {
-  const operateurs = await getPaginatedOperateurs({ page });
+  const operateurs = await getPaginatedOperateurs({ page, search });
 
   return operateurs.map((row) => ({
     id: row.id,

@@ -5,7 +5,8 @@ import { getOperateurs } from "./operateur.service";
 
 export async function GET(request: NextRequest) {
   const page = request.nextUrl.searchParams.get("page") as number | null;
-  const operateurs = await getOperateurs({ page });
-  const totalOperateurs = await countOperateurs();
+  const search = request.nextUrl.searchParams.get("search");
+  const operateurs = await getOperateurs({ page, search });
+  const totalOperateurs = await countOperateurs({ search });
   return NextResponse.json({ operateurs, totalOperateurs });
 }
