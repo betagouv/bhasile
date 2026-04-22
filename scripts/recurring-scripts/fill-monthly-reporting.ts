@@ -3,26 +3,34 @@
 
 import "dotenv/config";
 
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc.js";
+
 import type { Prisma } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
 
 const prisma = createPrismaClient();
 
+dayjs.extend(utc);
+
+// Retourne les dates de début, fin et mois pour le reporting mensuel.
+// Attention on met un threshold de 1j pour s'accorder avec le cron lancé j1 de m+1.
 function getReportingWindow(now = new Date()): {
   start: Date;
   end: Date;
   month: Date;
 } {
-  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-  const start = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1)
-  );
+  const referenceDay = dayjs(now).utc().subtract(1, "day");
+  const start = referenceDay.startOf("month");
+  const end = start.add(1, "month");
+  const month = start
+    .endOf("month")
+    .hour(12)
+    .minute(0)
+    .second(0)
+    .millisecond(0);
 
-  const lastDayPrevMonth = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 12, 0, 0, 0)
-  );
-
-  return { start, end, month: lastDayPrevMonth };
+  return { start: start.toDate(), end: end.toDate(), month: month.toDate() };
 }
 
 async function main() {
@@ -123,7 +131,7 @@ async function main() {
         continue;
       }
 
-      if (action.createdAt.getTime() - prev.getTime() > 30 * 60 * 1000) {
+      if (dayjs(action.createdAt).diff(dayjs(prev), "minute") > 30) {
         visitsCount++;
       }
       lastSeenAtByUser.set(action.userId, action.createdAt);
