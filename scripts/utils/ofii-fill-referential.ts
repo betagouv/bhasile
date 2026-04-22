@@ -41,6 +41,14 @@ function collapseSpaces(str: string): string {
   return str.trim().replace(/\s+/g, " ");
 }
 
+function normalizeStructureType(value: unknown): string {
+  const type = collapseSpaces(stripAndUpper(value));
+  if (type === "NUITEE HOTELIERE") {
+    return "NH";
+  }
+  return type;
+}
+
 function deptCodeFromCode(code: string | null | undefined): string {
   if (!code || code.length < 3) {
     return "";
@@ -215,6 +223,10 @@ export const fillOfiiStructureFromRows = async (
 
       const departementName = normalizeDepartementName(row.departement);
       row.departement = departementName;
+
+      row.type = normalizeStructureType(row.type);
+      row.operateur = stripAndUpper(row.operateur);
+
       const departementNumero = resolveDepartementNumero(
         departementName,
         nameToNumero
