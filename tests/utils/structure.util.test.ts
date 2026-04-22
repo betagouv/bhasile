@@ -1,14 +1,17 @@
 import dayjs from "dayjs";
 
+import { StructureDbDetails } from "@/app/api/structures/structure.db.type";
+import {
+  getRepartition,
+  isStructureInCpom,
+} from "@/app/api/structures/structure.util";
 import {
   getCpomStructureIndexAndBudgetIndexForAYearAndAType,
   getCurrentCpomStructureDates,
   getLastVisitInMonths,
   getMillesimeIndexForAYear,
   getPlacesByCommunes,
-  getRepartition,
   isStructureAutorisee,
-  isStructureInCpom,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
@@ -83,7 +86,9 @@ describe("structure util", () => {
       const structure = createStructure({ id: 1, adresses: [] });
 
       // WHEN
-      const repartition = getRepartition(structure);
+      const repartition = getRepartition(
+        structure as unknown as StructureDbDetails
+      );
 
       // THEN
       expect(repartition).toBe(Repartition.COLLECTIF);
@@ -97,7 +102,9 @@ describe("structure util", () => {
       const structure = createStructure({ id: 2, adresses });
 
       // WHEN
-      const repartition = getRepartition(structure);
+      const repartition = getRepartition(
+        structure as unknown as StructureDbDetails
+      );
 
       // THEN
       expect(repartition).toBe(Repartition.COLLECTIF);
@@ -111,7 +118,9 @@ describe("structure util", () => {
       const structure = createStructure({ id: 3, adresses });
 
       // WHEN
-      const repartition = getRepartition(structure);
+      const repartition = getRepartition(
+        structure as unknown as StructureDbDetails
+      );
 
       // THEN
       expect(repartition).toBe(Repartition.DIFFUS);
@@ -124,7 +133,9 @@ describe("structure util", () => {
       const structure = createStructure({ id: 4, adresses });
 
       // WHEN
-      const repartition = getRepartition(structure);
+      const repartition = getRepartition(
+        structure as unknown as StructureDbDetails
+      );
 
       // THEN
       expect(repartition).toBe(Repartition.MIXTE);
@@ -322,7 +333,9 @@ describe("structure util", () => {
       });
 
       // WHEN
-      const result = isStructureInCpom(structure);
+      const result = isStructureInCpom(
+        structure as unknown as StructureDbDetails
+      );
 
       // THEN
       expect(result).toBe(true);
@@ -361,7 +374,9 @@ describe("structure util", () => {
       });
 
       // WHEN
-      const result = isStructureInCpom(structure);
+      const result = isStructureInCpom(
+        structure as unknown as StructureDbDetails
+      );
 
       // THEN
       expect(result).toBe(false);
@@ -376,7 +391,9 @@ describe("structure util", () => {
       structure.cpomStructures = undefined;
 
       // WHEN
-      const result = isStructureInCpom(structure);
+      const result = isStructureInCpom(
+        structure as unknown as StructureDbDetails
+      );
 
       // THEN
       expect(result).toBe(false);
@@ -390,7 +407,9 @@ describe("structure util", () => {
       });
 
       // WHEN
-      const result = isStructureInCpom(structure);
+      const result = isStructureInCpom(
+        structure as unknown as StructureDbDetails
+      );
 
       // THEN
       expect(result).toBe(false);
@@ -467,7 +486,9 @@ describe("structure util", () => {
       });
 
       // WHEN
-      const result = isStructureInCpom(structure);
+      const result = isStructureInCpom(
+        structure as unknown as StructureDbDetails
+      );
 
       // THEN
       expect(result).toBe(true);
@@ -521,8 +542,12 @@ describe("structure util", () => {
       });
 
       // WHEN
-      const result1 = isStructureInCpom(structure1);
-      const result2 = isStructureInCpom(structure2);
+      const result1 = isStructureInCpom(
+        structure1 as unknown as StructureDbDetails
+      );
+      const result2 = isStructureInCpom(
+        structure2 as unknown as StructureDbDetails
+      );
 
       // THEN
       expect(result1).toBe(false);

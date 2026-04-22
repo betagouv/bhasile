@@ -1,7 +1,14 @@
 import { getCoordinates } from "@/app/utils/adresse.util";
+import { computeCpomDates } from "@/app/utils/cpom.util";
+import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
+import { CURRENT_YEAR } from "@/constants";
 import { Prisma, PublicType, StructureType } from "@/generated/prisma/client";
+import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
+import { Repartition } from "@/types/adresse.type";
 import { StructureColumn } from "@/types/ListColumn";
+
+import { StructureDbDetails, StructureDbList } from "./structure.db.type";
 
 const typesPublic: Record<string, PublicType> = {
   "tout public": PublicType.TOUT_PUBLIC,
@@ -17,6 +24,16 @@ export const convertToPublicType = (
   }
 
   return typesPublic[typePublic.trim().toLowerCase()];
+};
+
+export const getOperateurLabel = (
+  structure: StructureDbDetails | StructureDbList
+): string => {
+  const { filiale, operateur } = structure;
+  if (filiale) {
+    return `${filiale} (${operateur?.name ?? ""})`;
+  }
+  return operateur?.name ?? "";
 };
 
 export const getAdresseAdministrativeCoordinates = async (
@@ -173,4 +190,89 @@ export const buildStructuresWhereSql = ({
     combined = Prisma.sql`${combined} AND ${conditions[i]}`;
   }
   return Prisma.sql`WHERE ${combined}`;
+};
+
+export const getRepartition = (
+  structure: StructureDbDetails | StructureDbList
+): Repartition => {
+  const repartitions = structure.adresses?.map(
+    (adresse) => adresse.repartition
+  );
+  const isDiffus = repartitions?.some(
+    (repartition) =>
+      repartition?.toUpperCase() === Repartition.DIFFUS.toUpperCase()
+  );
+  const isCollectif = repartitions?.some(
+    (repartition) =>
+      repartition?.toUpperCase() === Repartition.COLLECTIF.toUpperCase()
+  );
+
+  if (isDiffus && isCollectif) {
+    return Repartition.MIXTE;
+  }
+  if (isDiffus) {
+    return Repartition.DIFFUS;
+  }
+  return Repartition.COLLECTIF;
+};
+
+const getCurrentPlacesByProperty = (
+  structure: StructureDbDetails | StructureDbList,
+  accessor: keyof AdresseTypologieApiType
+): number => {
+  const mostRecentYearTypologies = structure.adresses?.map(
+    (adresse) => adresse.adresseTypologies?.[0]
+  );
+  const placesByAccessor = mostRecentYearTypologies?.reduce(
+    (totalCount, currentTypologie) =>
+      totalCount + ((currentTypologie?.[accessor] as number) || 0),
+    0
+  );
+
+  return placesByAccessor || 0;
+};
+
+export const getCurrentPlacesAutorisees = (
+  structure: StructureDbDetails | StructureDbList
+) => getCurrentPlacesByProperty(structure, "placesAutorisees");
+
+export const getCurrentPlacesQpv = (
+  structure: StructureDbDetails | StructureDbList
+) => getCurrentPlacesByProperty(structure, "qpv");
+
+export const getCurrentPlacesLogementsSociaux = (
+  structure: StructureDbDetails | StructureDbList
+) => getCurrentPlacesByProperty(structure, "logementSocial");
+
+export const isStructureInCpom = (
+  structure: StructureDbDetails | StructureDbList,
+  year: number = CURRENT_YEAR
+): boolean =>
+  structure.cpomStructures?.some((cpomStructure) => {
+    const dateStart =
+      cpomStructure.dateStart ?? computeCpomDates(cpomStructure.cpom).dateStart;
+    const dateEnd =
+      cpomStructure.dateEnd ?? computeCpomDates(cpomStructure.cpom).dateEnd;
+
+    if (!dateStart || !dateEnd) {
+      return false;
+    }
+
+    const yearStart = getYearFromDate(dateStart);
+    const yearEnd = getYearFromDate(dateEnd);
+    return yearStart <= year && yearEnd >= year;
+  }) ?? false;
+
+export const isStructureInCpomPerYear = (
+  structure: StructureDbDetails | StructureDbList
+): Record<number, boolean> => {
+  const { years } = getYearRange({ order: "desc" });
+  const realCreationYear = structure.date303
+    ? getYearFromDate(structure.date303)
+    : getYearFromDate(structure.creationDate);
+  const yearsSinceCreation = years.filter((year) => year >= realCreationYear);
+  return yearsSinceCreation.reduce(
+    (acc, year) => ({ ...acc, [year]: isStructureInCpom(structure, year) }),
+    {} as Record<number, boolean>
+  );
 };

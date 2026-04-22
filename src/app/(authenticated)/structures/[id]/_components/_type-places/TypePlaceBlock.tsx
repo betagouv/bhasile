@@ -6,10 +6,6 @@ import { ReactElement } from "react";
 import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
 import { formatDate } from "@/app/utils/date.util";
-import {
-  getCurrentPlacesLogementsSociaux,
-  getCurrentPlacesQpv,
-} from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { TypePlaceCharts } from "./TypePlaceCharts";
@@ -73,8 +69,8 @@ export const TypePlaceBlock = (): ReactElement => {
           placesPmr={structureTypologies?.[0]?.pmr || 0}
           placesLgbt={structureTypologies?.[0]?.lgbt || 0}
           placesFvvTeh={structureTypologies?.[0]?.fvvTeh || 0}
-          placesQPV={getCurrentPlacesQpv(structure)}
-          placesLogementsSociaux={getCurrentPlacesLogementsSociaux(structure)}
+          placesQPV={structure.currentPlaces.qpv}
+          placesLogementsSociaux={structure.currentPlaces.logementsSociaux}
         />
       </div>
       <div className="pt-6">

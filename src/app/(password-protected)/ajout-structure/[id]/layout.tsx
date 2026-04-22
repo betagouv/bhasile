@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 export default async function RootLayout({
   children,
@@ -23,7 +23,7 @@ export default async function RootLayout({
       return children;
     }
 
-    const structure: StructureApiType | null = await result.json();
+    const structure: StructureApiRead | null = await result.json();
     if (structure?.forms && structure?.forms?.length > 0) {
       redirect(
         `/ajout-structure/existe-deja?codeBhasile=${structure.codeBhasile}`

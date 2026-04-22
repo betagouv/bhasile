@@ -3,12 +3,7 @@ import Link from "next/link";
 import { useFetchStructure } from "@/app/hooks/useFetchStructure";
 import { formatDate } from "@/app/utils/date.util";
 import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
-import {
-  getCommunesGroupedByDepartement,
-  getCurrentPlacesAutorisees,
-  getOperateurLabel,
-  getRepartition,
-} from "@/app/utils/structure.util";
+import { getCommunesGroupedByDepartement } from "@/app/utils/structure.util";
 import { DEPARTEMENTS } from "@/constants";
 
 import { RepartitionBadge } from "./RepartitionBadge";
@@ -18,11 +13,7 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
   if (!structure) {
     return null;
   }
-  const { codeBhasile, type, filiale, operateur, nom, finConvention } =
-    structure;
-
-  const placesAutorisees = getCurrentPlacesAutorisees(structure);
-  const repartition = getRepartition(structure);
+  const { codeBhasile, type, operateurLabel, nom, finConvention } = structure;
 
   const isStructureFinalisee = getFinalisationFormStatus(structure);
 
@@ -33,7 +24,7 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
       </div>
       <div className="text-xl text-title-blue-france m-0 flex gap-x-4 flex-wrap">
         <strong className="">
-          {type}, {getOperateurLabel(filiale, operateur?.name)}
+          {type}, {operateurLabel}
         </strong>
       </div>
       <div className="text-sm mb-1 text-title-blue-france">
@@ -51,7 +42,7 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
       </div>
       <div className="text-sm mb-1">
         <strong>Places autorisées : </strong>
-        <span>{placesAutorisees}</span>
+        <span>{structure.currentPlaces.placesAutorisees}</span>
       </div>
       {finConvention && (
         <div className="text-sm mb-2">
@@ -60,7 +51,10 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
         </div>
       )}
       <div className="text-sm mb-2">
-        <RepartitionBadge repartition={repartition} className="m-0!" />
+        <RepartitionBadge
+          repartition={structure.repartition}
+          className="m-0!"
+        />
       </div>
       <div className="flex justify-end">
         <Link

@@ -8,7 +8,7 @@ import { ReactElement, useContext, useState } from "react";
 import { Pagination } from "@/app/components/common/Pagination";
 import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
 import { AbilityContext } from "@/app/context/AbilityContext";
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { ListColumn } from "@/types/ListColumn";
 
 import { StructureItem } from "./StructureItem";
@@ -76,8 +76,8 @@ export const StructuresTable = ({
   const ability = useContext(AbilityContext);
 
   const [selectedStructure, setSelectedStructure] =
-    useState<StructureApiType | null>(null);
-  const handleOpenModal = (structure: StructureApiType) => {
+    useState<StructureApiRead | null>(null);
+  const handleOpenModal = (structure: StructureApiRead) => {
     setSelectedStructure(structure);
     if (ability.can("update", subject("Structure", structure))) {
       finalisationModal.open();
@@ -149,7 +149,7 @@ export const StructuresTable = ({
 };
 
 type Props = {
-  structures: StructureApiType[];
+  structures: StructureApiRead[];
   totalStructures: number;
   ariaLabelledBy: string;
 };

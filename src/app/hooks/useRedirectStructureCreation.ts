@@ -3,7 +3,7 @@
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 
@@ -55,7 +55,7 @@ export function useRedirectStructureCreation() {
           return;
         }
 
-        const structure: StructureApiType | null = await result.json();
+        const structure: StructureApiRead | null = await result.json();
 
         if (structure?.forms && structure?.forms?.length > 0) {
           router.replace(

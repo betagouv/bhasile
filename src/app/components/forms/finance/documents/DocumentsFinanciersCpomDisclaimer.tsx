@@ -1,12 +1,9 @@
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
-import { isStructureInCpom } from "@/app/utils/structure.util";
 
 export const DocumentsFinanciersCpomDisclaimer = ({ year }: Props) => {
   const { structure } = useStructureContext();
 
-  const isInCpom = isStructureInCpom(structure, year);
-
-  return isInCpom ? (
+  return structure.isInCpomPerYear[year] ? (
     <p>
       En {year}, nous avons identifié que vous faisiez partie d’un CPOM. Selon
       vos pratiques, les documents financiers de votre structure peuvent être à

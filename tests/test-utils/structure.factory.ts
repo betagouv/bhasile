@@ -1,8 +1,9 @@
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
+import { Repartition } from "@/types/adresse.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 
 export const createStructure = ({
@@ -15,12 +16,13 @@ export const createStructure = ({
   structureTypologies,
   structureMillesimes = [],
   cpomStructures = [],
-}: CreateStructuresArgs): StructureApiType => {
+}: CreateStructuresArgs): StructureApiRead => {
   return {
     id,
     codeBhasile: `BHA-${id}`,
     operateur: { structureDnaCode: `C000${id}`, id: 1, name: "Adoma" },
     filiale: undefined,
+    operateurLabel: "Adoma",
     type: type ?? StructureType.CADA,
     adresseAdministrative:
       adresseAdministrative ?? "1, avenue de la République",
@@ -47,6 +49,14 @@ export const createStructure = ({
     forms: [],
     contacts: [],
     documentsFinanciers: [],
+    repartition: Repartition.DIFFUS,
+    currentPlaces: {
+      placesAutorisees: structureTypologies?.[0]?.placesAutorisees ?? 0,
+      qpv: 0,
+      logementsSociaux: 0,
+    },
+    isInCpom: false,
+    isInCpomPerYear: {},
   };
 };
 

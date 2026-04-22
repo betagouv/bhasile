@@ -4,7 +4,10 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import { transformFormAdressesToApiAdresses } from "@/app/utils/adresse.util";
 import { transformAgentFormContactsToApiContacts } from "@/app/utils/contacts.util";
 import { formatDateToIsoString } from "@/app/utils/date.util";
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import {
+  StructureApiRead,
+  StructureApiWrite,
+} from "@/schemas/api/structure.schema";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { AjoutTypePlacesFormValues } from "@/schemas/forms/ajout/ajoutTypePlaces.schema";
 import { TypeBatiAndAdressesFormValues } from "@/schemas/forms/base/adresse.schema";
@@ -56,7 +59,7 @@ export const useStructures = (): UseStructureResult => {
   const updateAndRefreshStructure = async (
     structureId: number,
     structure: unknown,
-    setStructure: (structure: StructureApiType) => void
+    setStructure: (structure: StructureApiRead) => void
   ): Promise<string> => {
     const result = await updateStructure({
       ...(structure as object),
@@ -83,13 +86,13 @@ type UseStructureResult = {
   updateAndRefreshStructure: (
     structureId: number,
     values: unknown,
-    setStructure: (structure: StructureApiType) => void
+    setStructure: (structure: StructureApiRead) => void
   ) => Promise<string>;
 };
 
 const transformAjoutFormStructureToApiStructure = async (
   values: AjoutFormValues
-): Promise<DeepPartial<StructureApiType>> => {
+): Promise<DeepPartial<StructureApiWrite>> => {
   const adresses = transformFormAdressesToApiAdresses(
     values.adresses,
     values.id

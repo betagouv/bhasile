@@ -4,7 +4,6 @@ import { getYearRange } from "@/app/utils/date.util";
 import {
   getRealCreationYear,
   isStructureAutorisee,
-  isStructureInCpom,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import {
@@ -12,7 +11,7 @@ import {
   CURRENT_YEAR,
   SUBVENTIONNEE_OPEN_YEAR,
 } from "@/constants";
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { FormKind } from "@/types/global";
 
 import {
@@ -31,26 +30,22 @@ import { DocumentsFinanciersFlexibleSchema } from "../documentFinancier.schema";
 import { indicateursFinanciersSchema } from "../indicateurFinancier.schema";
 
 export const getFinanceSchema = (
-  structure: StructureApiType,
+  structure: StructureApiRead,
   formKind: FormKind = FormKind.FINALISATION
 ) => {
   const { years } = getYearRange();
   const isAutorisee = isStructureAutorisee(structure.type);
   const isSubventionnee = isStructureSubventionnee(structure.type);
 
-  const isInCpomPerYear = years.map((year) =>
-    isStructureInCpom(structure, year)
-  );
-
   const startYear = getRealCreationYear(structure);
 
   const schema = years
-    .map((year, index) => {
+    .map((year) => {
       if (year < startYear) {
         return null;
       }
 
-      if (isInCpomPerYear[index]) {
+      if (structure.isInCpomPerYear[year]) {
         return budgetInCpomSchema;
       }
 

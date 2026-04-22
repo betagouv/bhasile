@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
@@ -11,7 +11,7 @@ import {
 } from "./structure.util";
 
 export const getActesAdministratifsDefaultValues = (
-  structure: StructureApiType
+  structure: StructureApiRead
 ): ActeAdministratifFormValues[] => {
   const categoryDisplayRules =
     getActesAdministratifsCategoryToDisplay(structure);
@@ -50,7 +50,7 @@ export const getActesAdministratifsDefaultValues = (
 };
 
 export const getActesAdministratifsCategoryToDisplay = (
-  structure?: StructureApiType
+  structure?: StructureApiRead
 ): CategoryDisplayRulesType => ({
   ARRETE_AUTORISATION: {
     categoryShortName: "arrêté",
