@@ -1,4 +1,4 @@
-import { serializeDates } from "@/app/utils/date.util";
+import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { Structure } from "@/generated/prisma/client";
 import {
   StructureAgentUpdateApiType,
@@ -141,7 +141,7 @@ const dbStructureToApiRead = (
         (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
       );
 
-  return serializeDates({
+  return recursivelySerializeDates({
     ...dbStructure,
     activites,
     evenementsIndesirablesGraves: aggregatedEIGs,
