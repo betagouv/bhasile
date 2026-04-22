@@ -34,7 +34,6 @@ export const LeaveModificationModal = ({
       title={
         "Vous êtes sur le point de quitter un formulaire en cours de modification."
       }
-      size="large"
       buttons={[
         {
           doClosesModal: true,
