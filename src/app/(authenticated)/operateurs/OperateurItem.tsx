@@ -62,7 +62,7 @@ export const OperateurItem = ({
           <div className="border-r border-default-grey pr-4 flex flex-col items-center max-w-[130px]">
             <h3 className="text-xl mb-0.5">{nbStructures}</h3>
             <span className="text-xs text-mention-grey text-center">
-              structure{nbStructures > 0 ? "s" : ""} en France
+              structure{nbStructures > 1 ? "s" : ""} en France
             </span>
           </div>
           <div className="border-r border-default-grey px-4 flex flex-col items-center max-w-[140px]">
