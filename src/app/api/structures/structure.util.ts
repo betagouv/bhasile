@@ -1,36 +1,19 @@
 import { getCoordinates } from "@/app/utils/adresse.util";
 import { computeCpomDates } from "@/app/utils/cpom.util";
-import {
-  getYearFromDate,
-  getYearRange,
-  serializeDates,
-} from "@/app/utils/date.util";
+import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
-import {
-  Prisma,
-  PublicType,
-  Structure,
-  StructureType,
-} from "@/generated/prisma/client";
+import { Prisma, PublicType, StructureType } from "@/generated/prisma/client";
 import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
-import {
-  StructureApiRead,
-  StructureApiWrite,
-} from "@/schemas/api/structure.schema";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { StructureColumn } from "@/types/ListColumn";
+
+import { StructureDbDetails, StructureDbList } from "./structure.db.type";
 
 const typesPublic: Record<string, PublicType> = {
   "tout public": PublicType.TOUT_PUBLIC,
   famille: PublicType.FAMILLE,
   "personnes isolées": PublicType.PERSONNES_ISOLEES,
-};
-
-export const dbStructureToApiWrite = (
-  structure: Structure
-): StructureApiWrite => {
-  return serializeDates(structure) as StructureApiWrite;
 };
 
 export const convertToPublicType = (
@@ -43,9 +26,14 @@ export const convertToPublicType = (
   return typesPublic[typePublic.trim().toLowerCase()];
 };
 
-export const getOperateurLabel = (structure: StructureApiWrite): string => {
+export const getOperateurLabel = (
+  structure: StructureDbDetails | StructureDbList
+): string => {
   const { filiale, operateur } = structure;
-  return filiale ? `${filiale} (${operateur?.name})` : operateur?.name;
+  if (filiale) {
+    return `${filiale} (${operateur?.name ?? ""})`;
+  }
+  return operateur?.name ?? "";
 };
 
 export const getAdresseAdministrativeCoordinates = async (
@@ -204,7 +192,9 @@ export const buildStructuresWhereSql = ({
   return Prisma.sql`WHERE ${combined}`;
 };
 
-export const getRepartition = (structure: StructureApiWrite): Repartition => {
+export const getRepartition = (
+  structure: StructureDbDetails | StructureDbList
+): Repartition => {
   const repartitions = structure.adresses?.map(
     (adresse) => adresse.repartition
   );
@@ -227,7 +217,7 @@ export const getRepartition = (structure: StructureApiWrite): Repartition => {
 };
 
 const getCurrentPlacesByProperty = (
-  structure: StructureApiWrite,
+  structure: StructureDbDetails | StructureDbList,
   accessor: keyof AdresseTypologieApiType
 ): number => {
   const mostRecentYearTypologies = structure.adresses?.map(
@@ -242,18 +232,20 @@ const getCurrentPlacesByProperty = (
   return placesByAccessor || 0;
 };
 
-export const getCurrentPlacesAutorisees = (structure: StructureApiWrite) =>
-  getCurrentPlacesByProperty(structure, "placesAutorisees");
+export const getCurrentPlacesAutorisees = (
+  structure: StructureDbDetails | StructureDbList
+) => getCurrentPlacesByProperty(structure, "placesAutorisees");
 
-export const getCurrentPlacesQpv = (structure: StructureApiWrite) =>
-  getCurrentPlacesByProperty(structure, "qpv");
+export const getCurrentPlacesQpv = (
+  structure: StructureDbDetails | StructureDbList
+) => getCurrentPlacesByProperty(structure, "qpv");
 
 export const getCurrentPlacesLogementsSociaux = (
-  structure: StructureApiWrite
+  structure: StructureDbDetails | StructureDbList
 ) => getCurrentPlacesByProperty(structure, "logementSocial");
 
 export const isStructureInCpom = (
-  structure: StructureApiWrite | StructureApiRead,
+  structure: StructureDbDetails | StructureDbList,
   year: number = CURRENT_YEAR
 ): boolean =>
   structure.cpomStructures?.some((cpomStructure) => {
@@ -272,7 +264,7 @@ export const isStructureInCpom = (
   }) ?? false;
 
 export const isStructureInCpomPerYear = (
-  structure: StructureApiWrite
+  structure: StructureDbDetails | StructureDbList
 ): Record<number, boolean> => {
   const { years } = getYearRange({ order: "desc" });
   const realCreationYear = structure.date303

@@ -122,7 +122,20 @@ export const findBySearch = async ({
       },
     },
     include: {
-      adresses: true,
+      adresses: {
+        include: {
+          adresseTypologies: {
+            orderBy: {
+              year: "desc",
+            },
+          },
+        },
+      },
+      cpomStructures: {
+        include: {
+          cpom: true,
+        },
+      },
       operateur: true,
       structureMillesimes: {
         orderBy: {

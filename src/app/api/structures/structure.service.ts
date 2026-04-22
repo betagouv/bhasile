@@ -1,7 +1,5 @@
 import { serializeDates } from "@/app/utils/date.util";
 import { Structure } from "@/generated/prisma/client";
-import { ActiviteApiType } from "@/schemas/api/activite.schema";
-import { EvenementIndesirableGraveApiType } from "@/schemas/api/evenement-indesirable-grave.schema";
 import {
   StructureAgentUpdateApiType,
   StructureApiRead,
@@ -18,7 +16,6 @@ import {
   updateOne,
 } from "./structure.repository";
 import {
-  dbStructureToApiWrite,
   getAdresseAdministrativeCoordinates,
   getCurrentPlacesAutorisees,
   getCurrentPlacesLogementsSociaux,
@@ -131,38 +128,33 @@ const dbStructureToApiRead = (
   dbStructure: StructureDbDetails | StructureDbList,
   simple: boolean = false
 ): StructureApiRead => {
-  const structure = dbStructureToApiWrite(dbStructure);
   const allActivites = simple
     ? []
     : (dbStructure as StructureDbDetails).dnaStructures.flatMap(
         (dnaStructure) => dnaStructure.dna.activites
       );
-  const activites = serializeDates(
-    processActivitesForStructure(allActivites)
-  ) as ActiviteApiType[];
+  const activites = processActivitesForStructure(allActivites);
 
-  const aggregatedEIGs = serializeDates(
-    simple
-      ? []
-      : (dbStructure as StructureDbDetails).dnaStructures.flatMap(
-          (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
-        )
-  ) as EvenementIndesirableGraveApiType[];
+  const aggregatedEIGs = simple
+    ? []
+    : (dbStructure as StructureDbDetails).dnaStructures.flatMap(
+        (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
+      );
 
-  return {
-    ...structure,
+  return serializeDates({
+    ...dbStructure,
     activites,
     evenementsIndesirablesGraves: aggregatedEIGs,
-    repartition: getRepartition(structure),
-    operateurLabel: getOperateurLabel(structure),
+    repartition: getRepartition(dbStructure),
+    operateurLabel: getOperateurLabel(dbStructure),
     currentPlaces: {
-      placesAutorisees: getCurrentPlacesAutorisees(structure),
-      qpv: getCurrentPlacesQpv(structure),
-      logementsSociaux: getCurrentPlacesLogementsSociaux(structure),
+      placesAutorisees: getCurrentPlacesAutorisees(dbStructure),
+      qpv: getCurrentPlacesQpv(dbStructure),
+      logementsSociaux: getCurrentPlacesLogementsSociaux(dbStructure),
     },
-    isInCpom: isStructureInCpom(structure),
-    isInCpomPerYear: isStructureInCpomPerYear(structure),
-  };
+    isInCpom: isStructureInCpom(dbStructure),
+    isInCpomPerYear: isStructureInCpomPerYear(dbStructure),
+  }) as StructureApiRead;
 };
 
 export const getMaxPlacesAutorisees = async (): Promise<number> => {

@@ -10,7 +10,20 @@ export type StructureDbMap = Prisma.StructureGetPayload<{
 
 export type StructureDbList = Prisma.StructureGetPayload<{
   include: {
-    adresses: true;
+    adresses: {
+      include: {
+        adresseTypologies: {
+          orderBy: {
+            year: "desc";
+          };
+        };
+      };
+    };
+    cpomStructures: {
+      include: {
+        cpom: true;
+      };
+    };
     operateur: true;
     structureMillesimes: {
       orderBy: {
