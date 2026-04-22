@@ -1,4 +1,6 @@
 "use client";
+import { useState } from "react";
+
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { BudgetTables } from "@/app/components/forms/finance/BudgetTables";
 import { DocumentsFinanciers } from "@/app/components/forms/finance/documents/DocumentsFinanciers";
@@ -6,6 +8,7 @@ import { IndicateursFinanciers } from "@/app/components/forms/finance/Indicateur
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
@@ -27,6 +30,7 @@ export default function ModificationFinanceForm() {
   const { handleSubmit, backendError } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,
   });
+  const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const onSubmit = async (data: anyModificationFinanceFormValues) => {
     const documentsFinanciers = (data.documentsFinanciers?.filter(
@@ -56,13 +60,13 @@ export default function ModificationFinanceForm() {
     <>
       <ModificationTitle
         step="Finances"
-        closeLink={`/structures/${structure.id}`}
+        handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
         schema={financeSchema}
         defaultValues={defaultValues}
-        resetRoute={`/structures/${structure.id}`}
         submitButtonText="Valider"
+        handleCancel={() => setShouldOpenModal(true)}
         availableFooterButtons={[
           FooterButtonType.CANCEL,
           FooterButtonType.SUBMIT,
@@ -86,6 +90,11 @@ export default function ModificationFinanceForm() {
           />
         )}
       </FormWrapper>
+      <LeaveModificationModal
+        resetRoute={`/structures/${structure.id}`}
+        shouldOpen={shouldOpenModal}
+        setShouldOpen={setShouldOpenModal}
+      />
     </>
   );
 }

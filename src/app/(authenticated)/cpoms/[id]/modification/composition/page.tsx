@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
+
 import { FieldSetStructures } from "@/app/components/forms/cpom/FieldSetStructures";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
@@ -25,18 +28,22 @@ export default function CpomModificationComposition() {
     cpomId: cpom.id,
     nextRoute: `/cpoms/${cpom.id}`,
   });
+  const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const defaultValues = getCpomDefaultValues(cpom);
 
   return (
     <>
-      <ModificationTitle step="Composition" closeLink={`/cpoms/${cpom.id}`} />{" "}
+      <ModificationTitle
+        step="Composition"
+        handleCancel={() => setShouldOpenModal(true)}
+      />
       <FormWrapper
         schema={compositionCpomSchema}
         defaultValues={defaultValues}
         onSubmit={handleSubmit}
-        resetRoute={`/cpoms/${cpom.id}`}
         submitButtonText="Valider"
+        handleCancel={() => setShouldOpenModal(true)}
         availableFooterButtons={[
           FooterButtonType.CANCEL,
           FooterButtonType.SUBMIT,
@@ -48,6 +55,11 @@ export default function CpomModificationComposition() {
           <SubmitError cpomId={cpom.id} backendError={backendError} />
         )}
       </FormWrapper>
+      <LeaveModificationModal
+        resetRoute={`/cpoms/${cpom.id}`}
+        shouldOpen={shouldOpenModal}
+        setShouldOpen={setShouldOpenModal}
+      />
     </>
   );
 }

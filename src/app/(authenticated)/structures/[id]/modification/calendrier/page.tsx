@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
+
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { FieldSetCalendrier } from "@/app/components/forms/calendrier/FieldSetCalendrier";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
@@ -19,6 +22,7 @@ export default function ModificationCalendrier() {
   const { handleSubmit, backendError } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,
   });
+  const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const defaultValues = getDefaultValues({ structure });
 
@@ -29,7 +33,7 @@ export default function ModificationCalendrier() {
     <>
       <ModificationTitle
         step="Calendrier"
-        closeLink={`/structures/${structure.id}`}
+        handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
         schema={calendrierSchema}
@@ -41,8 +45,8 @@ export default function ModificationCalendrier() {
           })
         }
         mode="onChange"
-        resetRoute={`/structures/${structure.id}`}
         submitButtonText="Valider"
+        handleCancel={() => setShouldOpenModal(true)}
         availableFooterButtons={[
           FooterButtonType.CANCEL,
           FooterButtonType.SUBMIT,
@@ -51,6 +55,11 @@ export default function ModificationCalendrier() {
       >
         <FieldSetCalendrier />
       </FormWrapper>
+      <LeaveModificationModal
+        resetRoute={`/structures/${structure.id}`}
+        shouldOpen={shouldOpenModal}
+        setShouldOpen={setShouldOpenModal}
+      />
       {saveState === FetchState.ERROR && (
         <SubmitError
           codeBhasile={structure.codeBhasile}
