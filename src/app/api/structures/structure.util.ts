@@ -43,6 +43,11 @@ export const convertToPublicType = (
   return typesPublic[typePublic.trim().toLowerCase()];
 };
 
+export const getOperateurLabel = (structure: StructureApiWrite): string => {
+  const { filiale, operateur } = structure;
+  return filiale ? `${filiale} (${operateur?.name})` : operateur?.name;
+};
+
 export const getAdresseAdministrativeCoordinates = async (
   structure: StructureAgentUpdateApiType
 ): Promise<{ latitude: string | undefined; longitude: string | undefined }> => {

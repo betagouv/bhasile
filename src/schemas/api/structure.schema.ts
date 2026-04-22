@@ -134,6 +134,7 @@ export type StructureAgentUpdateApiType = z.infer<
 export type StructureApiWrite = z.infer<typeof structureApiSchema>;
 export type StructureApiRead = StructureApiWrite & {
   repartition: Repartition;
+  operateurLabel: string;
   currentPlaces: {
     placesAutorisees: number;
     qpv: number;

@@ -137,13 +137,6 @@ export const isStructureMultiDna = (structure: StructureApiRead): boolean => {
   );
 };
 
-export const getOperateurLabel = (
-  filiale: string | null | undefined,
-  operateur: string | null | undefined
-): string | null | undefined => {
-  return filiale ? `${filiale} (${operateur})` : operateur;
-};
-
 export const getCurrentCpomStructures = (
   structure: StructureApiRead
 ): CpomStructureApiType | undefined => {

@@ -22,6 +22,7 @@ export const createStructure = ({
     codeBhasile: `BHA-${id}`,
     operateur: { structureDnaCode: `C000${id}`, id: 1, name: "Adoma" },
     filiale: undefined,
+    operateurLabel: "Adoma",
     type: type ?? StructureType.CADA,
     adresseAdministrative:
       adresseAdministrative ?? "1, avenue de la République",

@@ -11,8 +11,9 @@ import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 
 import { createStructureEvent } from "../user-action/user-action.service";
-import { countBySearch, findBySearch, findOne } from "./structure.repository";
+import { findOne } from "./structure.repository";
 import {
+  getFullStructures,
   updateStructureAgent,
   updateStructureOperateur,
 } from "./structure.service";
@@ -36,7 +37,8 @@ export async function GET(request: NextRequest) {
     | null;
   const map = request.nextUrl.searchParams.get("map") === "true";
   const selection = request.nextUrl.searchParams.get("selection") === "true";
-  const structures = await findBySearch({
+
+  const { structures, totalStructures } = await getFullStructures({
     search,
     page,
     type,
@@ -48,15 +50,6 @@ export async function GET(request: NextRequest) {
     direction,
     operateurs,
     selection,
-  });
-  const totalStructures = await countBySearch({
-    search,
-    page,
-    type,
-    bati,
-    placesAutorisees,
-    departements,
-    operateurs,
   });
 
   return NextResponse.json({ structures, totalStructures });
@@ -75,7 +68,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// TODO : déplacer dans cpoms/[id] pour respecter les principes REST
+// TODO : déplacer dans structures/[id] pour respecter les principes REST
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

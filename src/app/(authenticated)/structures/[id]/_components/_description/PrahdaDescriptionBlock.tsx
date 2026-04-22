@@ -2,14 +2,13 @@ import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { formatDate } from "@/app/utils/date.util";
-import { getOperateurLabel } from "@/app/utils/structure.util";
 import { PublicType } from "@/types/structure.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
 export const PrahdaDescriptionBlock = (): ReactElement => {
   const { structure } = useStructureContext();
-  const { creationDate, operateur, filiale, public: publicType } = structure;
+  const { creationDate, operateurLabel, public: publicType } = structure;
 
   return (
     <Block
@@ -32,7 +31,7 @@ export const PrahdaDescriptionBlock = (): ReactElement => {
       <div className="flex mb-2">
         <div className="flex-1">
           <strong className="pr-2">Opérateur</strong>
-          {getOperateurLabel(filiale, operateur?.name)}
+          {operateurLabel}
         </div>
       </div>
       <hr />

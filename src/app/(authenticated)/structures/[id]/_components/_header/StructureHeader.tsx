@@ -10,7 +10,6 @@ import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
-import { getOperateurLabel } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { AutoSaveStatus } from "./AutoSaveStatus";
@@ -46,8 +45,7 @@ export const StructureHeader = (): ReactElement | null => {
 
   const {
     type,
-    filiale,
-    operateur,
+    operateurLabel,
     structureTypologies,
     nom,
     communeAdministrative,
@@ -71,7 +69,7 @@ export const StructureHeader = (): ReactElement | null => {
             </h2>
             <h3 className="text-title-blue-france fr-h6 mb-0">
               <strong className="pr-2">
-                {type}, {getOperateurLabel(filiale, operateur?.name)},{" "}
+                {type}, {operateurLabel},{" "}
                 {structureTypologies?.[0]?.placesAutorisees} places
               </strong>
               <span className="pr-2">{" – "}</span>
