@@ -46,9 +46,9 @@ async function main() {
     const issuesCountSum = issuesAgg._sum.issuesCount ?? 0;
 
     const indicatorFields = [
-      "has_authorisation_dates_undefined",
+      "has_issue_authorisation_dates_undefined",
       "has_issue_authorisation_period_not_15y",
-      "has_convention_dates_undefined",
+      "has_issue_convention_dates_undefined",
       "has_issue_authorized_convention_not_5y",
       "has_issue_authorized_convention_outside_authorisation_period",
       "has_issue_authorized_convention_missing_or_expired",
