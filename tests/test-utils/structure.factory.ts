@@ -4,11 +4,11 @@ import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { DnaStructureApiType } from "@/schemas/api/dna-structure.schema";
 import { FinessApiType } from "@/schemas/api/finess.schema";
 import { FormApiType } from "@/schemas/api/form.schema";
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
-import { StepStatus } from "@/types/form.type";
 import { Repartition } from "@/types/adresse.type";
+import { StepStatus } from "@/types/form.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 
 export const createStructure = ({
@@ -24,7 +24,7 @@ export const createStructure = ({
   dnaStructures,
   finesses,
   forms,
-}: CreateStructuresArgs): StructureApiType => {
+}: CreateStructuresArgs): StructureApiRead => {
   return {
     id,
     codeBhasile: `BHA-${id}`,
