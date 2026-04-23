@@ -143,6 +143,8 @@ const dbStructureToApiRead = (
 
   return recursivelySerializeDates({
     ...dbStructure,
+    latitude: dbStructure.latitude?.toString(),
+    longitude: dbStructure.longitude?.toString(),
     activites,
     evenementsIndesirablesGraves: aggregatedEIGs,
     repartition: getRepartition(dbStructure),
