@@ -19,8 +19,10 @@ export const findBySearchTerm = async (
 
 export const getPaginatedOperateurs = async ({
   page,
+  search,
 }: {
   page: number | null;
+  search: string | null;
 }): Promise<OperateurStat[]> => {
   return prisma.$queryRaw(Prisma.sql`
     WITH dernier_millesime_structure_typologie AS (
@@ -40,7 +42,10 @@ export const getPaginatedOperateurs = async ({
       FROM public."Operateur" o
       LEFT JOIN public."Structure" s ON s."operateurId" = o.id
       LEFT JOIN dernier_millesime_structure_typologie st ON st."structureId" = s.id
+      WHERE o."parentId" IS NULL
+        ${search ? Prisma.sql`AND o.name ILIKE ${`%${search}%`}` : Prisma.empty}
       GROUP BY o.id, o.name
+      HAVING COUNT(DISTINCT s.id) > 0
     ),
     total_places AS (
       SELECT COALESCE(SUM(st."placesAutorisees"), 0)::int as total
@@ -61,8 +66,21 @@ export const getPaginatedOperateurs = async ({
   `);
 };
 
-export const countOperateurs = async (): Promise<number> => {
-  return prisma.operateur.count();
+export const countOperateurs = async ({
+  search,
+}: {
+  search: string | null;
+}): Promise<number> => {
+  return prisma.operateur.count({
+    where: search
+      ? {
+          name: {
+            contains: search,
+            mode: "insensitive",
+          },
+        }
+      : undefined,
+  });
 };
 
 export const findOne = async (id: number): Promise<OperateurWithStructures> => {

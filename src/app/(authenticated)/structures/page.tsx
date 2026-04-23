@@ -53,7 +53,7 @@ export default function Structures(): ReactElement {
         </SegmentedControl>
       </div>
       <div className="flex gap-2 justify-end items-center py-3.5 px-6 z-2">
-        <SearchBar />
+        <SearchBar placeholder="Code ou commune" inputId="structures-search" />
         <Filters />
         <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
           {totalStructures ?? 0} entrée

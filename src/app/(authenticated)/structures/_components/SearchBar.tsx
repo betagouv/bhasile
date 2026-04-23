@@ -7,7 +7,7 @@ import { useDebounceCallback } from "@/app/hooks/useDebounceCallback";
 
 const DEBOUNCE_TIME = 300;
 
-export const SearchBar = (): ReactElement => {
+export const SearchBar = ({ placeholder, inputId }: Props): ReactElement => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -38,11 +38,16 @@ export const SearchBar = (): ReactElement => {
       <span className="fr-icon-search-line fr-icon--sm text-label-blue-france px-2" />
       <input
         type="text"
-        placeholder="Code ou commune"
-        id="structures-search"
+        placeholder={placeholder}
+        id={inputId}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
     </div>
   );
+};
+
+type Props = {
+  placeholder: string;
+  inputId: string;
 };

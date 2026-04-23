@@ -16,10 +16,12 @@ export const useOperateurSearch = () => {
 
   const searchParams = useSearchParams();
   const page: string | null = searchParams.get("page");
+  const search: string | null = searchParams.get("search");
 
   const getOperateurs = useCallback(
     async (
-      page: string | null
+      page: string | null,
+      search: string | null
     ): Promise<{
       operateurs: OperateurStatsApiType[];
       totalOperateurs: number;
@@ -31,6 +33,9 @@ export const useOperateurSearch = () => {
         const params = new URLSearchParams();
         if (page) {
           params.append("page", String(page));
+        }
+        if (search) {
+          params.append("search", search);
         }
 
         const result = await fetch(
@@ -51,18 +56,18 @@ export const useOperateurSearch = () => {
         return { operateurs: [], totalOperateurs: 0 };
       }
     },
-    [setFetchState]
+    [setFetchState, search]
   );
 
   useEffect(() => {
     const fetchStructures = async () => {
-      const { operateurs, totalOperateurs } = await getOperateurs(page);
+      const { operateurs, totalOperateurs } = await getOperateurs(page, search);
       setOperateurs(operateurs);
       setTotalOperateurs(totalOperateurs);
     };
 
     fetchStructures();
-  }, [getOperateurs, page]);
+  }, [getOperateurs, page, search]);
 
   return {
     operateurs,
