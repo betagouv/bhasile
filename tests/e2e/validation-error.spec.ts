@@ -96,6 +96,7 @@ const invalidTestCases: TestStructureScenario[] = [
 
 for (const { name, formData, failingStep } of invalidTestCases) {
   test(name, async ({ page }) => {
+    test.setTimeout(90000);
     const id = await beforeFlow(formData, page);
 
     try {

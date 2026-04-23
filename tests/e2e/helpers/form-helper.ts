@@ -88,6 +88,7 @@ export class FormHelper {
       prenom?: string;
       nom?: string;
       role?: string;
+      perimetre?: string;
       email?: string;
       telephone?: string;
     }
@@ -111,6 +112,12 @@ export class FormHelper {
       await this.fillInput(
         `input[name="contacts.${index}.role"]`,
         contact.role
+      );
+    }
+    if (contact.perimetre) {
+      await this.fillInput(
+        `input[name="contacts.${index}.perimetre"]`,
+        contact.perimetre
       );
     }
     if (contact.email) {

@@ -29,7 +29,7 @@ export async function fillFinanceForm(
   const yearIndexMap = await getBudgetIndexByYear(page, finances);
   const sortedYears = Object.keys(finances)
     .map((year) => Number(year))
-    .sort((a, b) => a - b);
+    .sort((a, b) => b - a);
   const indicateurCutoffYear = 2024;
 
   for (const indicateurField of indicateurFields) {

@@ -111,6 +111,13 @@ export const cada2: TestStructureScenario = {
       ],
     },
     finances: {
+      2026: {
+        ETP: "8",
+        tauxEncadrement: "12,5",
+        coutJournalier: "23,75",
+        dotationDemandee: "120000",
+        dotationAccordee: "110000",
+      },
       2025: {
         ETP: "8",
         tauxEncadrement: "12,5",
