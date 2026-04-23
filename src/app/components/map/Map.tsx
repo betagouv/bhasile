@@ -5,11 +5,26 @@ import "carte-facile/carte-facile.css";
 
 import { addOverlay, mapStyles, Overlay } from "carte-facile";
 import maplibregl from "maplibre-gl";
-import { PropsWithChildren, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  PropsWithChildren,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createRoot, Root } from "react-dom/client";
 
-import { DEFAULT_MAP_ZOOM, FRANCE_CENTER, LatLngTuple } from "../../../constants";
+import { DEFAULT_MAP_ZOOM, FRANCE_CENTER, LatLngTuple } from "@/constants";
 import { MapLibreProvider, MapRegisteredPoint } from "./MapLibreContext";
+import {
+  addStructuresLayers,
+  addStructuresSource,
+  STRUCTURES_LAYER_CLUSTERS_ID,
+  STRUCTURES_LAYER_UNCLUSTERED_ID,
+  STRUCTURES_SOURCE_ID,
+} from "./structuresStyle";
 
 type LngLatTuple = [number, number];
 type FeatureId = string;
@@ -39,7 +54,7 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
   const popupRef = useRef<maplibregl.Popup | null>(null);
   const popupRootRef = useRef<Root | null>(null);
   const pointsRef = useRef<globalThis.Map<FeatureId, MapRegisteredPoint>>(
-    new globalThis.Map(),
+    new globalThis.Map()
   );
 
   const maxBounds = useMemo(() => {
@@ -48,12 +63,17 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
     return [toLngLat(sw), toLngLat(ne)] as [[number, number], [number, number]];
   }, []);
 
-  const center = useMemo(() => toLngLat(FRANCE_CENTER as unknown as LatLngTuple), []);
+  const center = useMemo(
+    () => toLngLat(FRANCE_CENTER as unknown as LatLngTuple),
+    []
+  );
 
   const syncGeoJsonSource = useCallback((m: maplibregl.Map) => {
     let source: maplibregl.GeoJSONSource | undefined;
     try {
-      source = m.getSource("structures") as maplibregl.GeoJSONSource | undefined;
+      source = m.getSource(STRUCTURES_SOURCE_ID) as
+        | maplibregl.GeoJSONSource
+        | undefined;
     } catch {
       return;
     }
@@ -86,7 +106,7 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
         }
       };
     },
-    [readyMap, syncGeoJsonSource],
+    [readyMap, syncGeoJsonSource]
   );
 
   useEffect(() => {
@@ -117,57 +137,12 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
     createdMap.on("load", () => {
       addOverlay(createdMap, Overlay.administrativeBoundaries);
 
-      createdMap.addSource("structures", {
-        type: "geojson",
-        data: { type: "FeatureCollection", features: [] },
-        cluster: true,
-        clusterMaxZoom: 14,
-        clusterRadius: 50,
-      });
+      addStructuresSource(createdMap);
+      addStructuresLayers(createdMap);
 
-      createdMap.addLayer({
-        id: "structure-clusters",
-        type: "circle",
-        source: "structures",
-        filter: ["has", "point_count"],
-        paint: {
-          "circle-color": "#000091",
-          "circle-radius": ["step", ["get", "point_count"], 18, 50, 24, 200, 30],
-          "circle-stroke-width": 2,
-          "circle-stroke-color": "#DDDDDD",
-        },
-      });
-
-      createdMap.addLayer({
-        id: "structure-cluster-count",
-        type: "symbol",
-        source: "structures",
-        filter: ["has", "point_count"],
-        layout: {
-          "text-field": "{point_count_abbreviated}",
-          "text-size": 12,
-        },
-        paint: {
-          "text-color": "#FFFFFF",
-        },
-      });
-
-      createdMap.addLayer({
-        id: "structure-unclustered-point",
-        type: "circle",
-        source: "structures",
-        filter: ["!", ["has", "point_count"]],
-        paint: {
-          "circle-color": "#000091",
-          "circle-radius": 10,
-          "circle-stroke-width": 2,
-          "circle-stroke-color": "#FFFFFF",
-        },
-      });
-
-      createdMap.on("click", "structure-clusters", async (e) => {
+      createdMap.on("click", STRUCTURES_LAYER_CLUSTERS_ID, async (e) => {
         const features = createdMap.queryRenderedFeatures(e.point, {
-          layers: ["structure-clusters"],
+          layers: [STRUCTURES_LAYER_CLUSTERS_ID],
         });
         const first = features[0];
         if (!first) {
@@ -175,12 +150,13 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
         }
 
         const clusterIdRaw = first.properties?.cluster_id;
-        const clusterId = typeof clusterIdRaw === "number" ? clusterIdRaw : undefined;
+        const clusterId =
+          typeof clusterIdRaw === "number" ? clusterIdRaw : undefined;
         if (clusterId == null) {
           return;
         }
 
-        const src = createdMap.getSource("structures") as
+        const src = createdMap.getSource(STRUCTURES_SOURCE_ID) as
           | (maplibregl.GeoJSONSource & {
               getClusterExpansionZoom: (clusterId: number) => Promise<number>;
             })
@@ -190,7 +166,8 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
         }
 
         const zoom = await src.getClusterExpansionZoom(clusterId);
-        const coordsUnknown = (first.geometry as { coordinates?: unknown }).coordinates;
+        const coordsUnknown = (first.geometry as { coordinates?: unknown })
+          .coordinates;
         if (!isLngLatTuple(coordsUnknown)) {
           return;
         }
@@ -198,13 +175,14 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
         createdMap.easeTo({ center: coords, zoom });
       });
 
-      createdMap.on("click", "structure-unclustered-point", (e) => {
+      createdMap.on("click", STRUCTURES_LAYER_UNCLUSTERED_ID, (e) => {
         const feature = e.features?.[0];
         if (!feature) {
           return;
         }
 
-        const coordsUnknown = (feature.geometry as { coordinates?: unknown }).coordinates;
+        const coordsUnknown = (feature.geometry as { coordinates?: unknown })
+          .coordinates;
         if (!isLngLatTuple(coordsUnknown)) {
           return;
         }
@@ -233,26 +211,26 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
         }
 
         popupRootRef.current.render(
-          <>
+          <div className="bhasile-maplibre-popup-content">
             {registered.renderPopup()}
             <div className="w-xl!" />
-          </>,
+          </div>
         );
 
         popupRef.current.setLngLat(coords).addTo(createdMap);
       });
 
-      createdMap.on("mouseenter", "structure-clusters", () => {
+      createdMap.on("mouseenter", STRUCTURES_LAYER_CLUSTERS_ID, () => {
         createdMap.getCanvas().style.cursor = "pointer";
       });
-      createdMap.on("mouseleave", "structure-clusters", () => {
+      createdMap.on("mouseleave", STRUCTURES_LAYER_CLUSTERS_ID, () => {
         createdMap.getCanvas().style.cursor = "";
       });
 
-      createdMap.on("mouseenter", "structure-unclustered-point", () => {
+      createdMap.on("mouseenter", STRUCTURES_LAYER_UNCLUSTERED_ID, () => {
         createdMap.getCanvas().style.cursor = "pointer";
       });
-      createdMap.on("mouseleave", "structure-unclustered-point", () => {
+      createdMap.on("mouseleave", STRUCTURES_LAYER_UNCLUSTERED_ID, () => {
         createdMap.getCanvas().style.cursor = "";
       });
 
