@@ -10,7 +10,7 @@ import { StructureTable } from "./budget-tables/StructureTable";
 
 export const BudgetTables = () => {
   const { structure } = useStructureContext();
-  const { isAutorisee, isSubventionnee } = structure;
+  const { isAutorisee, isSubventionnee, type } = structure;
   const wasInCpom = Object.values(structure.isInCpomPerYear).some(Boolean);
 
   return (
@@ -67,7 +67,11 @@ export const BudgetTables = () => {
             className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
             description={`L’historique des données budgétaires à l’échelle du CPOM a déjà été renseigné lors de la saisie du CPOM. Si vous constatez une erreur et voulez apporter une modification, contactez-nous : ${BHASILE_CONTACT_EMAIL}`}
           />
-          <StructureCpomTable canEdit={false} type={structure.type} />
+          <StructureCpomTable
+            canEdit={false}
+            type={type}
+            isAutorisee={isAutorisee}
+          />
         </fieldset>
       )}
     </>
