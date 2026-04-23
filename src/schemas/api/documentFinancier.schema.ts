@@ -14,7 +14,7 @@ export const documentFinancierApiSchema = z.object({
   structureId: z.number().optional(),
   cpomId: zId(),
   year: zSafeYear(),
-  granularity: z.enum(DocumentFinancierGranularity),
+  granularity: z.enum(DocumentFinancierGranularity).optional(),
   category: z.enum(DocumentFinancierCategory),
   name: z.string().nullish(),
   fileUploads: z.array(fileApiSchema).optional(),
