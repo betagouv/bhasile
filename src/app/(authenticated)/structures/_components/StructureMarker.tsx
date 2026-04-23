@@ -1,45 +1,43 @@
-import { LatLngTuple } from "leaflet";
-import { ReactElement, useEffect, useRef, useState } from "react";
-import { useMap } from "react-leaflet/hooks";
-import { Marker } from "react-leaflet/Marker";
-import { Popup } from "react-leaflet/Popup";
+import { ReactElement, useEffect, useMemo } from "react";
 
-import { singleMarkerIcon } from "../../../components/map/SingleMarker";
+import { useRegisterMapPoint } from "../../../components/map/MapLibreContext";
 import { StructureMarkerContent } from "./StructureMarkerContent";
 
 export const StructureMarker = ({ id, coordinates }: Props): ReactElement => {
-  const [isOpen, setIsOpen] = useState(false);
-  const popupRef = useRef<L.Popup | null>(null);
-  const map = useMap();
+  const registerPoint = useRegisterMapPoint();
+
+  const isValid = useMemo(() => {
+    const [lat, lng] = coordinates;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return false;
+    }
+    // Skip “0,0” placeholders
+    if (lat === 0 && lng === 0) {
+      return false;
+    }
+    return true;
+  }, [coordinates]);
+
+  const lngLat = useMemo<[number, number]>(() => {
+    const [lat, lng] = coordinates;
+    return [lng, lat];
+  }, [coordinates]);
 
   useEffect(() => {
-    const handlePopupOpen = (e: L.PopupEvent) => {
-      if (e.popup === popupRef.current) {
-        setIsOpen(true);
-      }
-    };
+    if (!isValid) {
+      return;
+    }
+    return registerPoint({
+      id: String(id),
+      lngLat,
+      renderPopup: () => <StructureMarkerContent id={id} />,
+    });
+  }, [id, isValid, lngLat, registerPoint]);
 
-    map.on("popupopen", handlePopupOpen);
-    return () => {
-      map.off("popupopen", handlePopupOpen);
-    };
-  }, [map]);
-
-  return (
-    <Marker position={coordinates} icon={singleMarkerIcon}>
-      <Popup
-        ref={popupRef}
-        className="[&>div]:rounded-none! [&>div>div]:m-6!"
-        closeButton={false}
-      >
-        {isOpen && <StructureMarkerContent id={id} />}
-        <div className="w-xl!" />
-      </Popup>
-    </Marker>
-  );
+  return <></>;
 };
 
 type Props = {
   id: number;
-  coordinates: LatLngTuple;
+  coordinates: [number, number]; // (lat, lng)
 };
