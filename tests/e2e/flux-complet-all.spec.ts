@@ -20,10 +20,10 @@ const validTestCases = [
   cada3,
   cph1,
   cph2,
-  huda1,
-  huda2,
   caes1,
   caes2,
+  huda1,
+  huda2,
 ];
 
 for (const {

@@ -34,11 +34,12 @@ export class CpomIdentificationFormHelper {
     data: TestCpomAjoutData,
     options: FillGeneralOptions = {}
   ): Promise<void> {
-    const granularityLabels: Record<TestCpomAjoutData["granularity"], string> = {
-      DEPARTEMENTALE: "Départementale",
-      INTERDEPARTEMENTALE: "Interdépartementale",
-      REGIONALE: "Régionale",
-    };
+    const granularityLabels: Record<TestCpomAjoutData["granularity"], string> =
+      {
+        DEPARTEMENTALE: "Départementale",
+        INTERDEPARTEMENTALE: "Interdépartementale",
+        REGIONALE: "Régionale",
+      };
     const radio = this.page.getByRole("radio", {
       name: granularityLabels[data.granularity],
       exact: true,
@@ -52,7 +53,9 @@ export class CpomIdentificationFormHelper {
 
     if (options.skipOperatorIfAlreadyMatching) {
       const operateurInput = this.page.locator(SELECTORS.CPOM_OPERATEUR_INPUT);
-      const currentOperateur = await operateurInput.inputValue().catch(() => "");
+      const currentOperateur = await operateurInput
+        .inputValue()
+        .catch(() => "");
       if (currentOperateur !== data.operateur.name) {
         await this.autocompleteHelper.fillAndSelectFirst(
           SELECTORS.CPOM_OPERATEUR_INPUT,
@@ -66,7 +69,10 @@ export class CpomIdentificationFormHelper {
       );
     }
 
-    await this.formHelper.selectOption(SELECTORS.CPOM_REGION_SELECT, data.region);
+    await this.formHelper.selectOption(
+      SELECTORS.CPOM_REGION_SELECT,
+      data.region
+    );
 
     if (data.granularity === "DEPARTEMENTALE") {
       const departements =
@@ -94,7 +100,9 @@ export class CpomIdentificationFormHelper {
         await panelButton.click();
         await this.waitHelper.waitForUIUpdate(1);
 
-        const checkboxes = this.page.locator('input[name="structure-departement"]');
+        const checkboxes = this.page.locator(
+          'input[name="structure-departement"]'
+        );
         const count = await checkboxes.count();
         for (let i = 0; i < count; i++) {
           const cb = checkboxes.nth(i);
@@ -103,7 +111,10 @@ export class CpomIdentificationFormHelper {
             continue;
           }
           const isChecked = await cb.isChecked();
-          if ((desired.has(value) && !isChecked) || (!desired.has(value) && isChecked)) {
+          if (
+            (desired.has(value) && !isChecked) ||
+            (!desired.has(value) && isChecked)
+          ) {
             const id = await cb.getAttribute("id");
             const label = id
               ? this.page.locator(`label[for="${id}"]`)
@@ -161,12 +172,18 @@ export class CpomIdentificationFormHelper {
       const avenantDateInput = this.page.locator(
         'input[name="actesAdministratifs.1.date"]'
       );
-      if ((await addButton.count()) > 0 && (await avenantDateInput.count()) === 0) {
+      if (
+        (await addButton.count()) > 0 &&
+        (await avenantDateInput.count()) === 0
+      ) {
         await addButton.click();
         await this.waitHelper.waitForUIUpdate(2);
       }
     } else {
-      await addButton.waitFor({ state: "visible", timeout: TIMEOUTS.NAVIGATION });
+      await addButton.waitFor({
+        state: "visible",
+        timeout: TIMEOUTS.NAVIGATION,
+      });
       await addButton.click();
       await this.waitHelper.waitForUIUpdate(2);
     }
@@ -226,7 +243,9 @@ export class CpomIdentificationFormHelper {
     options: FillCompositionOptions = {}
   ): Promise<void> {
     if (options.waitForCompositionLegend) {
-      const compositionLegend = this.page.locator('legend:has-text("Composition")');
+      const compositionLegend = this.page.locator(
+        'legend:has-text("Composition")'
+      );
       await compositionLegend.waitFor({
         state: "visible",
         timeout: TIMEOUTS.NAVIGATION,

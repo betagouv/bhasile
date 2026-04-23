@@ -9,10 +9,12 @@ import { BasePage } from "../BasePage";
 
 export class FinalisationNotesPage extends BasePage {
   private formHelper: FormHelper;
+  private waitHelper: WaitHelper;
 
   constructor(page: Page) {
     super(page);
     this.formHelper = new FormHelper(page);
+    this.waitHelper = new WaitHelper(page);
   }
 
   async fillForm(data: TestStructureData) {
@@ -32,6 +34,7 @@ export class FinalisationNotesPage extends BasePage {
   }
 
   async finalizeAndGoToStructure(structureId: number) {
+    await this.waitHelper.waitForUIUpdate();
     await this.page
       .getByRole("button", { name: "Finaliser la création" })
       .click();

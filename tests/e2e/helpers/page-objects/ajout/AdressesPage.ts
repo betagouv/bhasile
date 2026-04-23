@@ -24,10 +24,10 @@ export class AdressesPage extends BasePage {
 
   async fillForm(data: Partial<TestStructureData>) {
     if (data.typeBati) {
-      await this.formHelper.selectOption(
-        'select[name="typeBati"]',
-        getRepartitionLabel(data.typeBati)
-      );
+      await this.page
+        .locator('select[name="typeBati"]')
+        .last()
+        .selectOption({ label: getRepartitionLabel(data.typeBati) });
     }
 
     if (data.typeBati) {

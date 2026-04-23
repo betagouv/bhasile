@@ -133,7 +133,7 @@ export class IdentificationPage extends BasePage {
             );
           }
           if (finess.description) {
-            await this.formHelper.fillInput(
+            await this.formHelper.fillInputIfExists(
               `input[name="finesses.${i}.description"]`,
               finess.description
             );

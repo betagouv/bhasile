@@ -58,12 +58,23 @@ test.describe("Structures filters and ordering", () => {
     expect(page.url()).toContain("column=codeBhasile");
     expect(page.url()).toContain("direction=asc");
 
-    // Verify structures are ordered correctly
-    const codeBhasiles = await page
-      .locator("tbody tr td:first-child")
-      .allTextContents();
-    const sortedCodeBhasiles = [...codeBhasiles].sort();
-    expect(codeBhasiles).toEqual(sortedCodeBhasiles);
+    await page.waitForLoadState("networkidle");
+    const codeCells = page.locator("tbody tr td:first-child");
+    await expect(codeCells.first()).toBeVisible();
+    await expect
+      .poll(async () => {
+        const codeBhasiles = (await codeCells.allTextContents())
+          .map((value) => value.trim())
+          .filter(Boolean);
+        if (codeBhasiles.length < 2) {
+          return false;
+        }
+        const sortedCodeBhasiles = [...codeBhasiles].sort((a, b) =>
+          a.localeCompare(b)
+        );
+        return JSON.stringify(codeBhasiles) === JSON.stringify(sortedCodeBhasiles);
+      })
+      .toBe(true);
   });
 
   test("should toggle ordering direction", async ({ page }) => {

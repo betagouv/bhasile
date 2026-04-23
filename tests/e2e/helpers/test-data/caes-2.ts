@@ -22,6 +22,12 @@ export const caes2: TestStructureScenario = {
         description: "DNA 1",
       },
     ],
+    finesses: [
+      {
+        code: "123456789",
+        description: "Finess 1",
+      },
+    ],
     antennes: [
       {
         adresseComplete: "1 Rue de la Paix 75001 Paris",
