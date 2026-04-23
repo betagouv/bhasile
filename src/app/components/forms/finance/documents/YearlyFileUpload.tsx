@@ -127,7 +127,7 @@ export const YearlyFileUpload = ({
       append({
         fileUploads: key ? [{ key }] : undefined,
         category,
-        granularity,
+        granularity: granularity ?? "STRUCTURE",
         name,
         year,
       });
