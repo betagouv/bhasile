@@ -17,7 +17,7 @@ export const documentFinancierApiSchema = z.object({
   granularity: z.enum(DocumentFinancierGranularity).optional(),
   category: z.enum(DocumentFinancierCategory),
   name: z.string().nullish(),
-  fileUploads: z.array(fileApiSchema).optional(),
+  fileUploads: z.array(fileApiSchema),
 });
 
 export type DocumentFinancierApiType = z.infer<
