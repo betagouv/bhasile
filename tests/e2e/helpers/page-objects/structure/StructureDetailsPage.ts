@@ -3,10 +3,7 @@ import { expect, Locator } from "@playwright/test";
 import { formatDate, getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
-import {
-  getOperateurLabel,
-  isStructureAutorisee,
-} from "@/app/utils/structure.util";
+import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { PublicType } from "@/types/structure.type";
 
 import { URLS } from "../../constants";
@@ -151,7 +148,9 @@ export class StructureDetailsPage extends BasePage {
     await expect(
       block.getByText("Code Bhasile", { exact: true }).locator("..")
     ).toContainText(data.codeBhasile);
-    const operateurLabel = getOperateurLabel(data.filiale, data.operateur.name);
+    const operateurLabel = data.filiale
+      ? `${data.filiale} (${data.operateur.name})`
+      : data.operateur.name;
     if (operateurLabel) {
       await expect(
         block.getByText("Opérateur", { exact: true }).locator("..")

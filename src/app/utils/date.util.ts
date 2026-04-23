@@ -162,3 +162,24 @@ export const getElapsedPercentage = ({
 
   return Math.min(100, Math.max(0, (elapsed / total) * 100));
 };
+
+export const recursivelySerializeDates = (value: unknown): unknown => {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => recursivelySerializeDates(item));
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nestedValue]) => [
+        key,
+        recursivelySerializeDates(nestedValue),
+      ])
+    );
+  }
+
+  return value;
+};

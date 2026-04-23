@@ -127,7 +127,12 @@ WITH
             ) - be."resultat_net"
           ) > 0.01
         )
-      ) AS "has_issue_subsidized_excedent_rules"
+      ) AS "has_issue_subsidized_excedent_rules",
+      -- Excedent left as "report à nouveau" (i.e. not really affected)
+      BOOL_OR(
+        be."resultat_net" > 0
+        AND COALESCE(be."reportANouveau", 0) > 0
+      ) AS "has_issue_excedent_left_in_report_a_nouveau"
     FROM
       structures s
       LEFT JOIN budgets_enriched be ON be."structureId" = s."id"
@@ -150,7 +155,8 @@ SELECT
   COALESCE(bi."has_issue_authorized_affectations_breakdown_missing", FALSE) AS "has_issue_authorized_affectations_breakdown_missing",
   COALESCE(bi."has_issue_authorized_reprise_plus_affectations_mismatch", FALSE) AS "has_issue_authorized_reprise_plus_affectations_mismatch",
   COALESCE(bi."has_issue_subsidized_deficit_nonzero_boxes", FALSE) AS "has_issue_subsidized_deficit_nonzero_boxes",
-  COALESCE(bi."has_issue_subsidized_excedent_rules", FALSE) AS "has_issue_subsidized_excedent_rules"
+  COALESCE(bi."has_issue_subsidized_excedent_rules", FALSE) AS "has_issue_subsidized_excedent_rules",
+  COALESCE(bi."has_issue_excedent_left_in_report_a_nouveau", FALSE) AS "has_issue_excedent_left_in_report_a_nouveau"
 FROM
   structures s
   LEFT JOIN budget_indicators bi ON bi."id" = s."id"

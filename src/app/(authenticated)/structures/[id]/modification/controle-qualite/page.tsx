@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
+
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { Controles } from "@/app/components/forms/documents/Controles";
 import { Evaluations } from "@/app/components/forms/evaluations/Evaluations";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
@@ -29,6 +32,7 @@ export default function ModificationControleForm() {
   const { handleSubmit, backendError } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,
   });
+  const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const defaultValues = getDefaultValues({
     structure,
@@ -55,13 +59,13 @@ export default function ModificationControleForm() {
     <>
       <ModificationTitle
         step="Contrôle qualité"
-        closeLink={`/structures/${structure.id}`}
+        handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
         schema={modificationQualiteSchema}
         onSubmit={onSubmit}
         submitButtonText="Valider"
-        resetRoute={`/structures/${structure.id}`}
+        handleCancel={() => setShouldOpenModal(true)}
         availableFooterButtons={[FooterButtonType.SUBMIT]}
         defaultValues={defaultValues}
         className="border-2 border-solid border-(--text-title-blue-france)"
@@ -85,6 +89,11 @@ export default function ModificationControleForm() {
           />
         )}
       </FormWrapper>
+      <LeaveModificationModal
+        resetRoute={`/structures/${structure.id}`}
+        shouldOpen={shouldOpenModal}
+        setShouldOpen={setShouldOpenModal}
+      />
     </>
   );
 }

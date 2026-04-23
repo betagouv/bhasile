@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
+
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { FieldSetDescription } from "@/app/components/forms/operateur/FieldSetDescription";
 import { FieldSetDirectionGenerale } from "@/app/components/forms/operateur/FieldSetDirectionGenerale";
@@ -28,17 +31,19 @@ export default function OperateurModificationDescription() {
 
   const defaultValues = getOperateurDefaultValues(operateur);
 
+  const [shouldOpenModal, setShouldOpenModal] = useState(false);
+
   return (
     <>
       <ModificationTitle
         step="Description"
-        closeLink={`/operateurs/${operateur.id}`}
+        handleCancel={() => setShouldOpenModal(true)}
       />{" "}
       <FormWrapper
         schema={operateurUpdateSchema}
         defaultValues={defaultValues}
         onSubmit={handleSubmit}
-        resetRoute={`/operateurs/${operateur.id}`}
+        handleCancel={() => setShouldOpenModal(true)}
         submitButtonText="Valider"
         availableFooterButtons={[
           FooterButtonType.CANCEL,
@@ -53,6 +58,11 @@ export default function OperateurModificationDescription() {
           <SubmitError operateurId={operateur.id} backendError={backendError} />
         )}
       </FormWrapper>
+      <LeaveModificationModal
+        resetRoute={`/operateurs/${operateur.id}`}
+        shouldOpen={shouldOpenModal}
+        setShouldOpen={setShouldOpenModal}
+      />
     </>
   );
 }

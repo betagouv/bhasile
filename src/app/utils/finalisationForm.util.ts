@@ -1,5 +1,5 @@
 import { FormApiType, FormStepApiType } from "@/schemas/api/form.schema";
-import { StructureApiType } from "@/schemas/api/structure.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
 
 export const FINALISATION_FORM_LABEL = "finalisation";
@@ -32,7 +32,7 @@ export const FINALISATION_STEPS: FinalisationStep[] = [
 ];
 
 export const getFinalisationForm = (
-  structure: StructureApiType
+  structure: StructureApiRead
 ): FormApiType | undefined => {
   return structure.forms?.find(
     (form) =>
@@ -42,7 +42,7 @@ export const getFinalisationForm = (
 };
 
 export const getFinalisationFormStatus = (
-  structure: StructureApiType
+  structure: StructureApiRead
 ): boolean => {
   const finalisationForm = getFinalisationForm(structure);
 
@@ -55,7 +55,7 @@ export const getFinalisationFormStatus = (
 
 export const getFinalisationFormStepStatus = (
   route: string,
-  structure: StructureApiType
+  structure: StructureApiRead
 ) => {
   const finalisationForm = getFinalisationForm(structure);
 
@@ -75,7 +75,7 @@ export const getFinalisationFormStepStatus = (
 };
 
 export const getFinalisationFormNextStepToValidate = (
-  structure: StructureApiType,
+  structure: StructureApiRead,
   route?: string
 ): FormStepApiType | undefined => {
   if (!route) {

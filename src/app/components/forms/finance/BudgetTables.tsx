@@ -1,10 +1,8 @@
 import Link from "next/link";
 
-import { getYearRange } from "@/app/utils/date.util";
 import {
   isStructureAutorisee,
   isStructureSubventionnee,
-  wasStructureInCpom,
 } from "@/app/utils/structure.util";
 import { getFinanceFormTutorialLink } from "@/app/utils/tutorials.util";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
@@ -16,10 +14,9 @@ import { StructureTable } from "./budget-tables/StructureTable";
 
 export const BudgetTables = () => {
   const { structure } = useStructureContext();
-  const { years } = getYearRange({ order: "desc" });
-  const wasInCpom = wasStructureInCpom(structure, years);
-  const isAutorisee = isStructureAutorisee(structure?.type);
-  const isSubventionnee = isStructureSubventionnee(structure?.type);
+  const isAutorisee = isStructureAutorisee(structure.type);
+  const isSubventionnee = isStructureSubventionnee(structure.type);
+  const wasInCpom = Object.values(structure.isInCpomPerYear).some(Boolean);
 
   return (
     <>
@@ -75,7 +72,7 @@ export const BudgetTables = () => {
             className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
             description={`L’historique des données budgétaires à l’échelle du CPOM a déjà été renseigné lors de la saisie du CPOM. Si vous constatez une erreur et voulez apporter une modification, contactez-nous : ${BHASILE_CONTACT_EMAIL}`}
           />
-          <StructureCpomTable canEdit={false} type={structure?.type} />
+          <StructureCpomTable canEdit={false} type={structure.type} />
         </fieldset>
       )}
     </>

@@ -1,7 +1,11 @@
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { isStructureAutorisee } from "@/app/utils/structure.util";
+import {
+  isStructureAutorisee,
+  isStructureSubventionnee,
+} from "@/app/utils/structure.util";
 import { FormKind } from "@/types/global";
 
 import { DnaInput } from "../adresseAdministrativeAndAntenne/DnaInput";
@@ -14,26 +18,41 @@ export const DnaAndFiness = ({ formKind = FormKind.FINALISATION }: Props) => {
 
   const isMultiDna = watch("isMultiDna");
   const isAutorisee = isStructureAutorisee(watch("type"));
+  const isSubventionnee = isStructureSubventionnee(watch("type"));
+
+  let checkboxLabel = `La structure dispose de plusieurs codes DNA${isAutorisee ? " et/ou FINESS" : ""}.`;
+  if (isSubventionnee && formKind === FormKind.MODIFICATION) {
+    checkboxLabel = "La structure dispose de plusieurs codes FINESS";
+  }
+
+  useEffect(() => {
+    if (!isMultiDna) {
+      setValue("dnaStructures", [watch("dnaStructures")?.[0]]);
+      setValue("finesses", [watch("finesses")?.[0]]);
+    }
+  }, [isMultiDna, setValue, watch]);
 
   return (
     <>
       <h2 className="text-xl font-bold mb-4 text-title-blue-france">
-        Code DNA et FINESS
+        Code{isMultiDna ? "s" : ""} DNA{isAutorisee && " et FINESS"}
       </h2>
-      <Checkbox
-        options={[
-          {
-            label: "La structure dispose de plusieurs codes DNA et/ou FINESS.",
-            nativeInputProps: {
-              name: "isMultiDna",
-              checked: isMultiDna,
-              onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-                setValue("isMultiDna", e.target.checked);
+      {!isAutorisee || formKind !== FormKind.MODIFICATION ? (
+        <Checkbox
+          options={[
+            {
+              label: checkboxLabel,
+              nativeInputProps: {
+                name: "isMultiDna",
+                checked: isMultiDna,
+                onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                  setValue("isMultiDna", e.target.checked);
+                },
               },
             },
-          },
-        ]}
-      />
+          ]}
+        />
+      ) : null}
       {isMultiDna ? (
         <>
           <FieldSetDna formKind={formKind} />

@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
+
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { FieldSetOuvertureFermeture } from "@/app/components/forms/ouvertureFermeture/FieldSetOuvertureFermeture";
 import { FieldSetTypePlaces } from "@/app/components/forms/typePlace/FieldSetTypePlaces";
@@ -21,6 +24,7 @@ export default function ModificationTypePlaces() {
   const { handleSubmit, backendError } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,
   });
+  const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const defaultValues = getDefaultValues({ structure });
 
@@ -31,7 +35,7 @@ export default function ModificationTypePlaces() {
     <>
       <ModificationTitle
         step="Types de places"
-        closeLink={`/structures/${structure.id}`}
+        handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
         schema={structureTypologiesWithMandatoryEvolutionSchema}
@@ -43,8 +47,8 @@ export default function ModificationTypePlaces() {
           })
         }
         mode="onChange"
-        resetRoute={`/structures/${structure.id}`}
         submitButtonText="Valider"
+        handleCancel={() => setShouldOpenModal(true)}
         availableFooterButtons={[
           FooterButtonType.CANCEL,
           FooterButtonType.SUBMIT,
@@ -57,6 +61,11 @@ export default function ModificationTypePlaces() {
           formKind={FormKind.MODIFICATION}
         />
       </FormWrapper>
+      <LeaveModificationModal
+        resetRoute={`/structures/${structure.id}`}
+        shouldOpen={shouldOpenModal}
+        setShouldOpen={setShouldOpenModal}
+      />
       {saveState === FetchState.ERROR && (
         <SubmitError
           codeBhasile={structure.codeBhasile}

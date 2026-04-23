@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { Repartition } from "@/types/adresse.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
@@ -130,4 +131,15 @@ export type StructureAgentUpdateApiType = z.infer<
   typeof structureAgentUpdateApiSchema
 >;
 
-export type StructureApiType = z.infer<typeof structureApiSchema>;
+export type StructureApiWrite = z.infer<typeof structureApiSchema>;
+export type StructureApiRead = StructureApiWrite & {
+  repartition: Repartition;
+  operateurLabel: string;
+  currentPlaces: {
+    placesAutorisees: number;
+    qpv: number;
+    logementsSociaux: number;
+  };
+  isInCpom: boolean;
+  isInCpomPerYear: Record<number, boolean>;
+};

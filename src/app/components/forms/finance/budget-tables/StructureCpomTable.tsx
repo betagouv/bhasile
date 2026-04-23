@@ -3,10 +3,7 @@ import { useForm, useFormContext } from "react-hook-form";
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { Table } from "@/app/components/common/Table";
 import { getYearRange } from "@/app/utils/date.util";
-import {
-  isStructureAutorisee,
-  isStructureInCpom,
-} from "@/app/utils/structure.util";
+import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
@@ -25,9 +22,7 @@ export const StructureCpomTable = ({ canEdit = true, type }: Props) => {
   const localForm = useForm();
   const { watch } = parentFormContext || localForm;
 
-  const yearsInCpom = years.filter((year) =>
-    isStructureInCpom(structure, year)
-  );
+  const yearsInCpom = years.filter((year) => structure.isInCpomPerYear[year]);
 
   const cpomStructures = canEdit
     ? (watch("cpomStructures") as CpomStructureApiType[])

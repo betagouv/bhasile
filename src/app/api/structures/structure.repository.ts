@@ -2,7 +2,6 @@ import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { Prisma, Structure, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
-import { StructureColumn } from "@/types/ListColumn";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acteAdministratif.repository";
@@ -26,25 +25,14 @@ import {
   STRUCTURES_ORDER_CTE_SQL,
   STRUCTURES_ORDER_JOINS_SQL,
 } from "./structure.constants";
+import { StructureDbList, StructureDbMap } from "./structure.db.type";
+import { SearchProps } from "./structure.service";
 import {
   buildStructuresOrderSql,
   buildStructuresWhereSql,
   convertToPublicType,
 } from "./structure.util";
 
-type SearchProps = {
-  search: string | null;
-  page: number | null;
-  type: string | null;
-  bati: string | null;
-  placesAutorisees: string | null;
-  departements: string | null;
-  operateurs: string | null;
-  column?: StructureColumn | null;
-  direction?: "asc" | "desc" | null;
-  map?: boolean;
-  selection?: boolean;
-};
 const getOrderedStructures = async ({
   search,
   page,
@@ -98,7 +86,7 @@ export const findBySearch = async ({
   direction,
   map,
   selection,
-}: SearchProps): Promise<Partial<Structure>[]> => {
+}: SearchProps): Promise<StructureDbList[] | StructureDbMap[]> => {
   const structuresIds = await getOrderedStructures({
     search,
     page,
@@ -134,7 +122,20 @@ export const findBySearch = async ({
       },
     },
     include: {
-      adresses: true,
+      adresses: {
+        include: {
+          adresseTypologies: {
+            orderBy: {
+              year: "desc",
+            },
+          },
+        },
+      },
+      cpomStructures: {
+        include: {
+          cpom: true,
+        },
+      },
       operateur: true,
       structureMillesimes: {
         orderBy: {

@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
+
 import { CpomTables } from "@/app/components/forms/finance/budget-tables/CpomTables";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
@@ -24,18 +27,22 @@ export default function CpomModificationFinance() {
     cpomId: cpom.id,
     nextRoute: `/cpoms/${cpom.id}`,
   });
+  const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const defaultValues = getCpomDefaultValues(cpom);
 
   return (
     <>
-      <ModificationTitle step="Finances" closeLink={`/cpoms/${cpom.id}`} />{" "}
+      <ModificationTitle
+        step="Finances"
+        handleCancel={() => setShouldOpenModal(true)}
+      />
       <FormWrapper
         schema={financesCpomSchema}
         defaultValues={defaultValues}
         onSubmit={handleSubmit}
-        resetRoute={`/cpoms/${cpom.id}`}
         submitButtonText="Valider"
+        handleCancel={() => setShouldOpenModal(true)}
         availableFooterButtons={[
           FooterButtonType.CANCEL,
           FooterButtonType.SUBMIT,
@@ -47,6 +54,11 @@ export default function CpomModificationFinance() {
           <SubmitError cpomId={cpom.id} backendError={backendError} />
         )}
       </FormWrapper>
+      <LeaveModificationModal
+        resetRoute={`/cpoms/${cpom.id}`}
+        shouldOpen={shouldOpenModal}
+        setShouldOpen={setShouldOpenModal}
+      />
     </>
   );
 }
