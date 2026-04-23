@@ -116,11 +116,15 @@ export const getLastVisitInMonths = (
   return dayjs().diff(mostRecentVisit, "month");
 };
 
-export const isStructureAutorisee = (type: string | undefined): boolean => {
+export const isStructureAutorisee = (
+  type: StructureType | string | undefined | null
+): boolean => {
   return type === StructureType.CADA || type === StructureType.CPH;
 };
 
-export const isStructureSubventionnee = (type: string | undefined): boolean => {
+export const isStructureSubventionnee = (
+  type: StructureType | string | undefined | null
+): boolean => {
   return type === StructureType.HUDA || type === StructureType.CAES;
 };
 

@@ -1,4 +1,8 @@
 import { recursivelySerializeDates } from "@/app/utils/date.util";
+import {
+  isStructureAutorisee,
+  isStructureSubventionnee,
+} from "@/app/utils/structure.util";
 import { Structure } from "@/generated/prisma/client";
 import {
   StructureAgentUpdateApiType,
@@ -22,10 +26,8 @@ import {
   getCurrentPlacesQpv,
   getOperateurLabel,
   getRepartition,
-  isStructureAutorisee,
   isStructureInCpom,
   isStructureInCpomPerYear,
-  isStructureSubventionnee,
 } from "./structure.util";
 
 export type SearchProps = {

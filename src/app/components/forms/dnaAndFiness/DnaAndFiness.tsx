@@ -2,6 +2,10 @@ import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
+import {
+  isStructureAutorisee,
+  isStructureSubventionnee,
+} from "@/app/utils/structure.util";
 import { FormKind } from "@/types/global";
 
 import { DnaInput } from "../adresseAdministrativeAndAntenne/DnaInput";
@@ -9,14 +13,15 @@ import InputWithValidation from "../InputWithValidation";
 import { FieldSetDna } from "./FieldSetDna";
 import { FieldSetFiness } from "./FieldSetFiness";
 
-export const DnaAndFiness = ({
-  formKind = FormKind.FINALISATION,
-  isAutorisee,
-  isSubventionnee,
-}: Props) => {
+export const DnaAndFiness = ({ formKind = FormKind.FINALISATION }: Props) => {
   const { watch, control, setValue } = useFormContext();
 
   const isMultiDna = watch("isMultiDna");
+
+  const type = watch("type");
+
+  const isAutorisee = isStructureAutorisee(type);
+  const isSubventionnee = isStructureSubventionnee(type);
 
   let checkboxLabel = `La structure dispose de plusieurs codes DNA${isAutorisee ? " et/ou FINESS" : ""}.`;
   if (isSubventionnee && formKind === FormKind.MODIFICATION) {
@@ -80,6 +85,4 @@ export const DnaAndFiness = ({
 
 type Props = {
   formKind?: FormKind;
-  isAutorisee: boolean;
-  isSubventionnee: boolean;
 };

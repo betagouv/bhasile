@@ -16,10 +16,7 @@ import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
-import {
-  isStructureAutorisee,
-  isStructureSubventionnee,
-} from "@/app/utils/structure.util";
+import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
   AjoutIdentificationFormValues,
   ajoutIdentificationSchema,
@@ -222,10 +219,7 @@ export default function FormIdentification() {
 
             <hr />
 
-            <DnaAndFiness
-              isAutorisee={isStructureAutorisee(type)}
-              isSubventionnee={isStructureSubventionnee(type)}
-            />
+            <DnaAndFiness />
 
             <hr />
 
