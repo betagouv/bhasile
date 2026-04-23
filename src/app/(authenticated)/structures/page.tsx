@@ -64,7 +64,7 @@ export default function Structures(): ReactElement {
         <ListLoader
           fetchStateName={"structure-search"}
           items={structures}
-          entityName={"structure"}
+          entityName="structure"
         >
           {structures && (
             <StructuresTable
