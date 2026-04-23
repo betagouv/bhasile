@@ -8,7 +8,7 @@ import {
   formatEmptyList,
   LIST_ENTITIES,
   ListEntityKey,
-} from "./EntitiesConstants";
+} from "./entitiesConstants";
 
 export const ListLoader = ({
   fetchStateName,
