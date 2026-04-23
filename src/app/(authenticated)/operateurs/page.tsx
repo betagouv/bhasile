@@ -34,7 +34,7 @@ export default function Operateurs(): ReactElement {
       <ListLoader
         fetchStateName={"operateurs-search"}
         items={operateurs}
-        entityName={"opérateur"}
+        entity="operateur"
       >
         {operateurs && (
           <OperateurList

@@ -35,7 +35,7 @@ export default function Structures(): ReactElement {
       <ListLoader
         fetchStateName={"cpoms-search"}
         items={cpoms}
-        entityName={"CPOM"}
+        entity="cpom"
       >
         {cpoms && (
           <CpomsTable
