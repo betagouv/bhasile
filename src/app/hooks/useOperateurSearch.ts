@@ -56,7 +56,7 @@ export const useOperateurSearch = () => {
         return { operateurs: [], totalOperateurs: 0 };
       }
     },
-    [setFetchState, search]
+    [setFetchState]
   );
 
   useEffect(() => {
