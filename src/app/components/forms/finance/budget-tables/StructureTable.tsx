@@ -17,8 +17,6 @@ export const StructureTable = ({ canEdit = true }: Props) => {
 
   const { structure } = useStructureContext();
 
-  const { isAutorisee } = structure;
-
   const { years } = getYearRange({ order: "desc" });
   const startYear = getRealCreationYear(structure);
   const yearsToDisplay = years.filter((year) => year >= startYear);
@@ -68,7 +66,10 @@ export const StructureTable = ({ canEdit = true }: Props) => {
       stickFirstColumn
     >
       <BudgetTableLines
-        lines={getBudgetTableLines(isAutorisee, detailAffectationEnabledYears)}
+        lines={getBudgetTableLines(
+          structure.isAutorisee,
+          detailAffectationEnabledYears
+        )}
         budgets={budgets}
         canEdit={canEdit}
         years={yearsToDisplay}

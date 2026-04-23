@@ -39,7 +39,6 @@ export const getDefaultValues = ({
 }): Partial<StructureDefaultValues> => {
   const structureCreationYear = getRealCreationYear(structure);
 
-  const { isAutorisee } = structure;
   const isMultiAntenne = isStructureMultiAntenne(structure);
   const isMultiDna = isStructureMultiDna(structure);
   const repartition = structure.repartition;
@@ -77,7 +76,7 @@ export const getDefaultValues = ({
   const controles = getControlesDefaultValues(structure.controles);
   const evaluations = getEvaluationsDefaultValues(
     structure.evaluations,
-    isAutorisee
+    structure.isAutorisee
   );
 
   return {
@@ -89,10 +88,10 @@ export const getDefaultValues = ({
     isMultiDna,
     dnaStructures,
     finesses,
-    debutPeriodeAutorisation: isAutorisee
+    debutPeriodeAutorisation: structure.isAutorisee
       ? (structure.debutPeriodeAutorisation ?? undefined)
       : undefined,
-    finPeriodeAutorisation: isAutorisee
+    finPeriodeAutorisation: structure.isAutorisee
       ? (structure.finPeriodeAutorisation ?? undefined)
       : undefined,
     debutConvention: structure.debutConvention ?? undefined,

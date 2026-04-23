@@ -25,9 +25,8 @@ import { useStructureContext } from "../../_context/StructureClientContext";
 export default function ModificationQualiteForm() {
   const { structure } = useStructureContext();
 
-  const { isAutorisee } = structure;
   let schema;
-  if (isAutorisee) {
+  if (structure.isAutorisee) {
     schema = actesAdministratifsAutoriseesSchema;
   } else {
     schema = actesAdministratifsSubventionneesSchema;

@@ -34,9 +34,8 @@ export default function FinalisationQualite() {
     structure
   );
 
-  const { isAutorisee } = structure;
   let schema;
-  if (isAutorisee) {
+  if (structure.isAutorisee) {
     schema = actesAdministratifsAutoriseesSchema;
   } else {
     schema = actesAdministratifsSubventionneesSchema;

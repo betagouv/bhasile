@@ -15,7 +15,6 @@ export const DescriptionBlock = (): ReactElement => {
   const { structure } = useStructureContext();
   const router = useRouter();
 
-  const { isAutorisee } = structure;
   const isMultiAntennes = isStructureMultiAntenne(structure);
   const tabs = [
     {
@@ -28,7 +27,7 @@ export const DescriptionBlock = (): ReactElement => {
     },
     {
       id: "codes",
-      label: isAutorisee ? "Codes DNA & FINESS" : "Codes DNA",
+      label: structure.isAutorisee ? "Codes DNA & FINESS" : "Codes DNA",
     },
     {
       id: "adresses",
