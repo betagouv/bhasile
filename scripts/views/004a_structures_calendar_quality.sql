@@ -14,7 +14,7 @@ SELECT
       OR s."finPeriodeAutorisation" IS NULL
     )
     ELSE FALSE
-  END AS "has_authorisation_dates_undefined",
+  END AS "has_issue_authorisation_dates_undefined",
   -- Subsidized structures: convention dates presence flags
   CASE
     WHEN s."type" IN ('HUDA', 'CAES') THEN (
@@ -22,7 +22,7 @@ SELECT
       OR s."finConvention" IS NULL
     )
     ELSE FALSE
-  END AS "has_convention_dates_undefined",
+  END AS "has_issue_convention_dates_undefined",
   -- Authorized structures: authorization period must be 15 years
   CASE
     WHEN s."type" IN ('CADA', 'CPH') THEN (

@@ -18,11 +18,11 @@ SELECT
   sc."updatedAt" AS "updatedAt",
   -- Calendar indicators
   -- Calendar: missing authorization dates for authorized structures
-  COALESCE(cal."has_authorisation_dates_undefined", FALSE) AS "has_authorisation_dates_undefined",
+  COALESCE(cal."has_issue_authorisation_dates_undefined", FALSE) AS "has_issue_authorisation_dates_undefined",
   -- Calendar: authorization period is not 15 years (authorized structures)
   COALESCE(cal."has_issue_authorisation_period_not_15y", FALSE) AS "has_issue_authorisation_period_not_15y",
   -- Calendar: missing convention dates
-  COALESCE(cal."has_convention_dates_undefined", FALSE) AS "has_convention_dates_undefined",
+  COALESCE(cal."has_issue_convention_dates_undefined", FALSE) AS "has_issue_convention_dates_undefined",
   -- Calendar: convention duration not 5 years (authorized structures)
   COALESCE(cal."has_issue_authorized_convention_not_5y", FALSE) AS "has_issue_authorized_convention_not_5y",
   -- Calendar: convention outside authorization period (authorized structures)
@@ -68,7 +68,7 @@ SELECT
   COALESCE(fin."has_issue_excedent_left_in_report_a_nouveau", FALSE) AS "has_issue_excedent_left_in_report_a_nouveau",
   -- Count total number of issues (true values)
   (
-    (COALESCE(cal."has_authorisation_dates_undefined", FALSE)::int) + (COALESCE(cal."has_issue_authorisation_period_not_15y", FALSE)::int) + (COALESCE(cal."has_convention_dates_undefined", FALSE)::int) + (COALESCE(cal."has_issue_authorized_convention_not_5y", FALSE)::int) + (
+    (COALESCE(cal."has_issue_authorisation_dates_undefined", FALSE)::int) + (COALESCE(cal."has_issue_authorisation_period_not_15y", FALSE)::int) + (COALESCE(cal."has_issue_convention_dates_undefined", FALSE)::int) + (COALESCE(cal."has_issue_authorized_convention_not_5y", FALSE)::int) + (
       COALESCE(cal."has_issue_authorized_convention_outside_authorisation_period", FALSE)::int
     ) + (COALESCE(cal."has_issue_authorized_convention_missing_or_expired", FALSE)::int) + (COALESCE(cal."has_issue_evaluation_not_done_in_time", FALSE)::int) + (COALESCE(cal."has_issue_subsidized_convention_gt_3y", FALSE)::int) + (COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE)::int) + (COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE)::int) + (COALESCE(ch."has_issue_dept_code", FALSE)::int) + (COALESCE(ch."has_issue_multi_dna", FALSE)::int) + (COALESCE(ch."has_issue_cpom_mono_structure", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_max_gt_25", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_min_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_max_gt_35", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_resultat_net_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_authorized_affectations_breakdown_missing", FALSE)::int) + (
       COALESCE(fin."has_issue_authorized_reprise_plus_affectations_mismatch", FALSE)::int
