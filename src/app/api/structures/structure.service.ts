@@ -22,8 +22,10 @@ import {
   getCurrentPlacesQpv,
   getOperateurLabel,
   getRepartition,
+  isStructureAutorisee,
   isStructureInCpom,
   isStructureInCpomPerYear,
+  isStructureSubventionnee,
 } from "./structure.util";
 
 export type SearchProps = {
@@ -147,6 +149,8 @@ const dbStructureToApiRead = (
     evenementsIndesirablesGraves: aggregatedEIGs,
     repartition: getRepartition(dbStructure),
     operateurLabel: getOperateurLabel(dbStructure),
+    isAutorisee: isStructureAutorisee(dbStructure.type),
+    isSubventionnee: isStructureSubventionnee(dbStructure.type),
     currentPlaces: {
       placesAutorisees: getCurrentPlacesAutorisees(dbStructure),
       qpv: getCurrentPlacesQpv(dbStructure),

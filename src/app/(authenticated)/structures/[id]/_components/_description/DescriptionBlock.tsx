@@ -3,10 +3,7 @@ import { useRouter } from "next/navigation";
 import { ReactElement, useState } from "react";
 
 import { Block } from "@/app/components/common/Block";
-import {
-  isStructureAutorisee,
-  isStructureMultiAntenne,
-} from "@/app/utils/structure.util";
+import { isStructureMultiAntenne } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { Adresses } from "./Adresses";
@@ -18,7 +15,7 @@ export const DescriptionBlock = (): ReactElement => {
   const { structure } = useStructureContext();
   const router = useRouter();
 
-  const isAutorisee = isStructureAutorisee(structure.type);
+  const { isAutorisee } = structure;
   const isMultiAntennes = isStructureMultiAntenne(structure);
   const tabs = [
     {

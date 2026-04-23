@@ -16,7 +16,6 @@ import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { transformFormControlesToApiControles } from "@/app/utils/controle.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { transformFormEvaluationsToApiEvaluations } from "@/app/utils/evaluation.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
 import {
   ModificationQualiteFormValues,
@@ -75,7 +74,7 @@ export default function ModificationControleForm() {
           title=""
           description={`Actuellement, seuls les EIG renseignés sur Démarches Numériques sont affichés, l’ancienneté de cet historique dépend donc de la date à laquelle votre région a été articulée avec l’outil. Les EIG sont récupérés automatiquement. Il y a une erreur ? Contactez-nous : ${BHASILE_CONTACT_EMAIL}`}
         />
-        {isStructureAutorisee(structure.type) && (
+        {structure.isAutorisee && (
           <>
             <Evaluations />
             <hr />

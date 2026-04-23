@@ -219,7 +219,10 @@ export default function FormIdentification() {
 
             <hr />
 
-            <DnaAndFiness />
+            <DnaAndFiness
+              isAutorisee={isStructureAutorisee(type)}
+              isSubventionnee={isStructureSubventionnee(type)}
+            />
 
             <hr />
 

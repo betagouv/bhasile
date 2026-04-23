@@ -11,7 +11,6 @@ import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   actesAdministratifsAutoriseesSchema,
@@ -35,7 +34,7 @@ export default function FinalisationQualite() {
     structure
   );
 
-  const isAutorisee = isStructureAutorisee(structure.type);
+  const { isAutorisee } = structure;
   let schema;
   if (isAutorisee) {
     schema = actesAdministratifsAutoriseesSchema;

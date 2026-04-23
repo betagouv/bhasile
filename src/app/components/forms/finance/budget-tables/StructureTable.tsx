@@ -4,10 +4,7 @@ import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_cont
 import { Table } from "@/app/components/common/Table";
 import { getYearRange } from "@/app/utils/date.util";
 import { parseFrenchNumber } from "@/app/utils/number.util";
-import {
-  getRealCreationYear,
-  isStructureAutorisee,
-} from "@/app/utils/structure.util";
+import { getRealCreationYear } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
@@ -20,7 +17,7 @@ export const StructureTable = ({ canEdit = true }: Props) => {
 
   const { structure } = useStructureContext();
 
-  const isAutorisee = isStructureAutorisee(structure.type);
+  const { isAutorisee } = structure;
 
   const { years } = getYearRange({ order: "desc" });
   const startYear = getRealCreationYear(structure);

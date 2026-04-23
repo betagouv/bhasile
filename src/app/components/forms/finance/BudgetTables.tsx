@@ -1,9 +1,5 @@
 import Link from "next/link";
 
-import {
-  isStructureAutorisee,
-  isStructureSubventionnee,
-} from "@/app/utils/structure.util";
 import { getFinanceFormTutorialLink } from "@/app/utils/tutorials.util";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
 
@@ -14,8 +10,7 @@ import { StructureTable } from "./budget-tables/StructureTable";
 
 export const BudgetTables = () => {
   const { structure } = useStructureContext();
-  const isAutorisee = isStructureAutorisee(structure.type);
-  const isSubventionnee = isStructureSubventionnee(structure.type);
+  const { isAutorisee, isSubventionnee } = structure;
   const wasInCpom = Object.values(structure.isInCpomPerYear).some(Boolean);
 
   return (

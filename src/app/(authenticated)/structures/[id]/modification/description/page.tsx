@@ -74,7 +74,11 @@ export default function ModificationDescription() {
         <hr />
         <AdresseAdministrativeAndAntennes />
         <hr />
-        <DnaAndFiness formKind={FormKind.MODIFICATION} />
+        <DnaAndFiness
+          formKind={FormKind.MODIFICATION}
+          isAutorisee={structure.isAutorisee}
+          isSubventionnee={structure.isSubventionnee}
+        />
         <hr />
         <FieldSetContacts />
       </FormWrapper>

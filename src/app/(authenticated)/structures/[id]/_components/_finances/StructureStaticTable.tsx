@@ -8,10 +8,6 @@ import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/B
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
 import { computeResultatNet } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
-import {
-  isStructureAutorisee,
-  isStructureSubventionnee,
-} from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ButtonAffectations } from "../ButtonAffectations";
@@ -20,8 +16,8 @@ import { getBudgetStaticTableLines } from "./getBudgetStaticTableLines";
 export const StructureStaticTable = (): ReactElement => {
   const { structure } = useStructureContext();
 
-  const isAutorisee = isStructureAutorisee(structure?.type);
-  const isSubventionnee = isStructureSubventionnee(structure?.type);
+  const isAutorisee = structure?.isAutorisee ?? false;
+  const isSubventionnee = structure?.isSubventionnee ?? false;
 
   const { years } = getYearRange({ order: "desc" });
 

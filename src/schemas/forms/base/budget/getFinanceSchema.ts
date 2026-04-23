@@ -1,11 +1,7 @@
 import z from "zod";
 
 import { getYearRange } from "@/app/utils/date.util";
-import {
-  getRealCreationYear,
-  isStructureAutorisee,
-  isStructureSubventionnee,
-} from "@/app/utils/structure.util";
+import { getRealCreationYear } from "@/app/utils/structure.util";
 import {
   AUTORISEE_OPEN_YEAR,
   CURRENT_YEAR,
@@ -34,8 +30,7 @@ export const getFinanceSchema = (
   formKind: FormKind = FormKind.FINALISATION
 ) => {
   const { years } = getYearRange();
-  const isAutorisee = isStructureAutorisee(structure.type);
-  const isSubventionnee = isStructureSubventionnee(structure.type);
+  const { isAutorisee, isSubventionnee } = structure;
 
   const startYear = getRealCreationYear(structure);
 

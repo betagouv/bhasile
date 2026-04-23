@@ -72,6 +72,18 @@ export const convertToStructureType = (
   return typesStructures[structureType.trim()];
 };
 
+export const isStructureAutorisee = (
+  type: string | null | undefined
+): boolean => {
+  return type === StructureType.CADA || type === StructureType.CPH;
+};
+
+export const isStructureSubventionnee = (
+  type: string | null | undefined
+): boolean => {
+  return type === StructureType.HUDA || type === StructureType.CAES;
+};
+
 type StructureQueryFilters = {
   search: string | null;
   type: string | null;

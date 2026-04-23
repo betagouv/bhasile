@@ -29,7 +29,6 @@ import { transformApiDnaStructuresToFormDnaStructures } from "./dna.util";
 import { getEvaluationsDefaultValues } from "./evaluation.util";
 import { transformApiFinessesToFormFinesses } from "./finess.util";
 import { getIndicateursFinanciersDefaultValues } from "./indicateurFinancier.util";
-import { isStructureAutorisee } from "./structure.util";
 import { getStructureMillesimeDefaultValues } from "./structureMillesime.util";
 import { getStructureTypologyDefaultValues } from "./structureTypology.util";
 
@@ -40,7 +39,7 @@ export const getDefaultValues = ({
 }): Partial<StructureDefaultValues> => {
   const structureCreationYear = getRealCreationYear(structure);
 
-  const isAutorisee = isStructureAutorisee(structure.type);
+  const { isAutorisee } = structure;
   const isMultiAntenne = isStructureMultiAntenne(structure);
   const isMultiDna = isStructureMultiDna(structure);
   const repartition = structure.repartition;

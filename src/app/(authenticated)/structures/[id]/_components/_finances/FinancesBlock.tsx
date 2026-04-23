@@ -2,10 +2,6 @@ import { useRouter } from "next/navigation";
 import { ReactElement, useState } from "react";
 
 import { Block } from "@/app/components/common/Block";
-import {
-  isStructureAutorisee,
-  isStructureSubventionnee,
-} from "@/app/utils/structure.util";
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -24,8 +20,7 @@ export const FinancesBlock = (): ReactElement => {
 
   const [shouldShowCpom, setShouldShowCpom] = useState(false);
 
-  const isAutorisee = isStructureAutorisee(structure.type);
-  const isSubventionnee = isStructureSubventionnee(structure.type);
+  const { isAutorisee, isSubventionnee } = structure;
 
   const budgetExecutoireYear = isAutorisee
     ? AUTORISEE_OPEN_YEAR

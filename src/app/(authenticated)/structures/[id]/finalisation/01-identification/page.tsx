@@ -90,7 +90,10 @@ export default function FinalisationIdentification(): ReactElement {
         <AdresseAdministrativeAndAntennes />
         <hr />
 
-        <DnaAndFiness />
+        <DnaAndFiness
+          isAutorisee={structure.isAutorisee}
+          isSubventionnee={structure.isSubventionnee}
+        />
         <hr />
 
         <FieldSetContacts />
