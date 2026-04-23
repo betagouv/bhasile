@@ -16,7 +16,13 @@ import {
 } from "react";
 import { createRoot, Root } from "react-dom/client";
 
-import { DEFAULT_MAP_ZOOM, FRANCE_CENTER, LatLngTuple } from "@/constants";
+import {
+  DEFAULT_MAP_ZOOM,
+  FRANCE_CENTER,
+  FRANCE_MAX_BOUNDS,
+  LatLngTuple,
+} from "@/constants";
+
 import { MapLibreProvider, MapRegisteredPoint } from "./MapLibreContext";
 import {
   addStructuresLayers,
@@ -28,11 +34,6 @@ import {
 
 type LngLatTuple = [number, number];
 type FeatureId = string;
-
-const MAX_BOUNDS: [LatLngTuple, LatLngTuple] = [
-  [38.976492485539424, -5.9326171875], // SW (lat, lng)
-  [53.291489065300226, 9.667968750000002], // NE (lat, lng)
-];
 
 function toLngLat([lat, lng]: LatLngTuple): [number, number] {
   return [lng, lat];
@@ -58,8 +59,8 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
   );
 
   const maxBounds = useMemo(() => {
-    const sw = MAX_BOUNDS[0];
-    const ne = MAX_BOUNDS[1];
+    const sw = FRANCE_MAX_BOUNDS[0];
+    const ne = FRANCE_MAX_BOUNDS[1];
     return [toLngLat(sw), toLngLat(ne)] as [[number, number], [number, number]];
   }, []);
 
