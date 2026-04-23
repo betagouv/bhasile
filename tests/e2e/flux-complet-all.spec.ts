@@ -35,7 +35,7 @@ for (const {
   test(`${name} - Flux complet (création, finalisation, modification)`, async ({
     page,
   }) => {
-    test.setTimeout(180000);
+    test.setTimeout(180000); // The S3 upload can be sloooooow
     const id = await beforeFlow(formData, page);
 
     try {
