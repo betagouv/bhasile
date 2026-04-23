@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -196,9 +196,11 @@ describe("FinalisationIdentification page integration", () => {
     fireEvent.change(screen.getByLabelText("Téléphone"), {
       target: { value: newContact.telephone },
     });
-    await vi.advanceTimersByTimeAsync(500);
-    await vi.runOnlyPendingTimersAsync();
-    await Promise.resolve();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+      await vi.runOnlyPendingTimersAsync();
+      await Promise.resolve();
+    });
 
     // THEN
     const putCall = mockedFetch.mock.calls.find(
