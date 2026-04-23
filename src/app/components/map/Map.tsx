@@ -8,10 +8,9 @@ import maplibregl from "maplibre-gl";
 import { PropsWithChildren, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot, Root } from "react-dom/client";
 
-import { DEFAULT_MAP_ZOOM, FRANCE_CENTER } from "../../../constants";
+import { DEFAULT_MAP_ZOOM, FRANCE_CENTER, LatLngTuple } from "../../../constants";
 import { MapLibreProvider, MapRegisteredPoint } from "./MapLibreContext";
 
-type LatLngTuple = [number, number];
 type LngLatTuple = [number, number];
 type FeatureId = string;
 
@@ -52,10 +51,12 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
   const center = useMemo(() => toLngLat(FRANCE_CENTER as unknown as LatLngTuple), []);
 
   const syncGeoJsonSource = useCallback((m: maplibregl.Map) => {
-    if (!m.isStyleLoaded()) {
+    let source: maplibregl.GeoJSONSource | undefined;
+    try {
+      source = m.getSource("structures") as maplibregl.GeoJSONSource | undefined;
+    } catch {
       return;
     }
-    const source = m.getSource("structures") as maplibregl.GeoJSONSource | undefined;
     if (!source) {
       return;
     }
@@ -75,18 +76,25 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
   const registerPoint = useCallback(
     (point: MapRegisteredPoint) => {
       pointsRef.current.set(point.id, point);
-      if (readyMap?.isStyleLoaded()) {
+      if (readyMap) {
         syncGeoJsonSource(readyMap);
       }
       return () => {
         pointsRef.current.delete(point.id);
-        if (readyMap?.isStyleLoaded()) {
+        if (readyMap) {
           syncGeoJsonSource(readyMap);
         }
       };
     },
     [readyMap, syncGeoJsonSource],
   );
+
+  useEffect(() => {
+    if (!readyMap) {
+      return;
+    }
+    syncGeoJsonSource(readyMap);
+  }, [readyMap, syncGeoJsonSource]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) {
