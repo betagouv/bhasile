@@ -13,25 +13,25 @@ import {
 export const ListLoader = ({
   fetchStateName,
   items,
-  entity,
+  entityName,
   children,
 }: Props): ReactElement => {
   const { getFetchState } = useFetchState();
   const fetchState = getFetchState(fetchStateName);
-  const entityDef = LIST_ENTITIES[entity];
+  const entity = LIST_ENTITIES[entityName];
 
   return (
     <>
       {fetchState === FetchState.LOADING && (
         <div className="flex items-center px-4">
           <Loader />
-          <span className="pl-2">Chargement des {entityDef.plural}...</span>
+          <span className="pl-2">Chargement des {entity.plural}...</span>
         </div>
       )}
       {fetchState === FetchState.ERROR && (
         <div className="flex items-center px-4">
           <span className="pl-2">
-            Erreur lors de la récupération des {entityDef.plural}
+            Erreur lors de la récupération des {entity.plural}
           </span>
         </div>
       )}
@@ -40,7 +40,7 @@ export const ListLoader = ({
         (items?.length > 0 ? (
           children
         ) : (
-          <p className="p-16">{formatEmptyList(entityDef)}</p>
+          <p className="p-16">{formatEmptyList(entity)}</p>
         ))}
     </>
   );
@@ -49,5 +49,5 @@ export const ListLoader = ({
 type Props = PropsWithChildren<{
   fetchStateName: string;
   items: unknown[] | undefined;
-  entity: ListEntityKey;
+  entityName: ListEntityKey;
 }>;
