@@ -4,16 +4,6 @@
 @import "tailwindcss";
 @import "./css/dsfr-tailwind.css";
 
-/* Overrides */
-.leaflet-marker-pane > div {
-  background-color: unset;
-  border: 0;
-}
-
-.leaflet-container a {
-  color: var(--text-title-blue-france) !important;
-}
-
 [href] {
   background-image: none;
 }
