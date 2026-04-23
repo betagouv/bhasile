@@ -20,6 +20,10 @@ const validTestCases = [
   cada3,
   cph1,
   cph2,
+  caes1,
+  caes2,
+  huda1,
+  huda2,
 ];
 
 for (const {
@@ -31,7 +35,7 @@ for (const {
   test(`${name} - Flux complet (création, finalisation, modification)`, async ({
     page,
   }) => {
-    test.setTimeout(300000); // End-to-end flow includes multiple uploads and retries
+    test.setTimeout(180000);
     const id = await beforeFlow(formData, page);
 
     try {
