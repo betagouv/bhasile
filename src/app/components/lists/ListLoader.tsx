@@ -1,4 +1,4 @@
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, ReactElement } from "react";
 
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { FetchState } from "@/types/fetch-state.type";
@@ -15,7 +15,7 @@ export const ListLoader = ({
   items,
   entityName,
   children,
-}: Props) => {
+}: Props): ReactElement => {
   const { getFetchState } = useFetchState();
   const fetchState = getFetchState(fetchStateName);
   const entity = LIST_ENTITIES[entityName];
