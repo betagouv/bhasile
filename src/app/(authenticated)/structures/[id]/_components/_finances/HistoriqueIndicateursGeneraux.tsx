@@ -3,10 +3,7 @@ import { Table } from "@/app/components/common/Table";
 import { getIndicateurFinancierTableLines } from "@/app/components/forms/finance/budget-tables/getIndicateurFinancierTableLines";
 import { IndicateurFinancierTableLines } from "@/app/components/forms/finance/budget-tables/IndicateurFinancierTableLines";
 import { getYearRange } from "@/app/utils/date.util";
-import {
-  getRealCreationYear,
-  isStructureAutorisee,
-} from "@/app/utils/structure.util";
+import { getRealCreationYear } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { getIndicateurFinancierStaticTableHeading } from "./getIndicateurFinancierStaticTableHeading";
@@ -27,7 +24,7 @@ export const HistoriqueIndicateursGeneraux = () => {
   return (
     <CustomAccordion
       label={
-        isStructureAutorisee(structure.type)
+        structure.isAutorisee
           ? "Historique selon compte administratif"
           : "Historique selon compte-rendu financier"
       }

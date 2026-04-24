@@ -5,11 +5,6 @@ import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
-import {
-  isStructureAutorisee,
-  isStructureSubventionnee,
-} from "./structure.util";
-
 export const getActesAdministratifsDefaultValues = (
   structure: StructureApiRead
 ): ActeAdministratifFormValues[] => {
@@ -58,7 +53,7 @@ export const getActesAdministratifsCategoryToDisplay = (
     canAddFile: true,
     canAddAvenant: true,
     isOptional: false,
-    shouldShow: isStructureAutorisee(structure?.type),
+    shouldShow: structure?.isAutorisee ?? false,
     additionalFieldsType: AdditionalFieldsType.DATE_START_END,
     documentLabel: "Document",
     addFileButtonLabel: "Ajouter un arrêté d'autorisation",
@@ -69,7 +64,7 @@ export const getActesAdministratifsCategoryToDisplay = (
     canAddFile: true,
     canAddAvenant: true,
     isOptional: false,
-    shouldShow: isStructureAutorisee(structure?.type),
+    shouldShow: structure?.isAutorisee ?? false,
     additionalFieldsType: AdditionalFieldsType.DATE_START_END,
     documentLabel: "Document",
     addFileButtonLabel: "Ajouter un arrêté de tarification",
@@ -79,7 +74,7 @@ export const getActesAdministratifsCategoryToDisplay = (
     title: "Conventions",
     canAddFile: true,
     canAddAvenant: true,
-    isOptional: !isStructureSubventionnee(structure?.type),
+    isOptional: !(structure?.isSubventionnee ?? false),
     shouldShow: true,
     additionalFieldsType: AdditionalFieldsType.DATE_START_END,
     documentLabel: "Document",

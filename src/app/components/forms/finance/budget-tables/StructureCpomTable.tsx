@@ -3,7 +3,6 @@ import { useForm, useFormContext } from "react-hook-form";
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { Table } from "@/app/components/common/Table";
 import { getYearRange } from "@/app/utils/date.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
@@ -12,7 +11,11 @@ import { BudgetTableLines } from "./BudgetTableLines";
 import { getBudgetTableHeading } from "./getBudgetTableHeading";
 import { getBudgetTableLines } from "./getBudgetTableLines";
 
-export const StructureCpomTable = ({ canEdit = true, type }: Props) => {
+export const StructureCpomTable = ({
+  canEdit = true,
+  type,
+  isAutorisee,
+}: Props) => {
   const parentFormContext = useFormContext();
 
   const { structure } = useStructureContext();
@@ -31,8 +34,6 @@ export const StructureCpomTable = ({ canEdit = true, type }: Props) => {
   if (!cpomStructures) {
     return null;
   }
-
-  const isAutorisee = isStructureAutorisee(type);
 
   return (
     <Table
@@ -63,4 +64,5 @@ export const StructureCpomTable = ({ canEdit = true, type }: Props) => {
 type Props = {
   canEdit?: boolean;
   type?: StructureType;
+  isAutorisee: boolean;
 };

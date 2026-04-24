@@ -135,6 +135,8 @@ export type StructureApiWrite = z.infer<typeof structureApiSchema>;
 export type StructureApiRead = StructureApiWrite & {
   repartition: Repartition;
   operateurLabel: string;
+  isAutorisee: boolean;
+  isSubventionnee: boolean;
   currentPlaces: {
     placesAutorisees: number;
     qpv: number;

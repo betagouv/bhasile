@@ -3,7 +3,6 @@ import { useFormContext } from "react-hook-form";
 import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { FormKind } from "@/types/global";
 
@@ -17,7 +16,7 @@ export const DocumentsFinanciers = ({
 }: Props) => {
   const { structure } = useStructureContext();
   const { control } = useFormContext<DocumentsFinanciersFlexibleFormValues>();
-  const isAutorisee = isStructureAutorisee(structure?.type);
+  const isAutorisee = structure?.isAutorisee ?? false;
 
   const startYear = getYearFromDate(
     structure?.date303 || structure?.creationDate

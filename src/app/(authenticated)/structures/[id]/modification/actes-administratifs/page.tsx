@@ -12,7 +12,6 @@ import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   actesAdministratifsAutoriseesSchema,
@@ -26,9 +25,8 @@ import { useStructureContext } from "../../_context/StructureClientContext";
 export default function ModificationQualiteForm() {
   const { structure } = useStructureContext();
 
-  const isAutorisee = isStructureAutorisee(structure.type);
   let schema;
-  if (isAutorisee) {
+  if (structure.isAutorisee) {
     schema = actesAdministratifsAutoriseesSchema;
   } else {
     schema = actesAdministratifsSubventionneesSchema;

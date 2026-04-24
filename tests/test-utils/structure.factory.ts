@@ -50,6 +50,8 @@ export const createStructure = ({
     contacts: [],
     documentsFinanciers: [],
     repartition: Repartition.DIFFUS,
+    isAutorisee: type === StructureType.CADA || type === StructureType.CPH,
+    isSubventionnee: type === StructureType.HUDA || type === StructureType.CAES,
     currentPlaces: {
       placesAutorisees: structureTypologies?.[0]?.placesAutorisees ?? 0,
       qpv: 0,

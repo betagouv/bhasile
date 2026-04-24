@@ -17,8 +17,11 @@ export const DnaAndFiness = ({ formKind = FormKind.FINALISATION }: Props) => {
   const { watch, control, setValue } = useFormContext();
 
   const isMultiDna = watch("isMultiDna");
-  const isAutorisee = isStructureAutorisee(watch("type"));
-  const isSubventionnee = isStructureSubventionnee(watch("type"));
+
+  const type = watch("type");
+
+  const isAutorisee = isStructureAutorisee(type);
+  const isSubventionnee = isStructureSubventionnee(type);
 
   let checkboxLabel = `La structure dispose de plusieurs codes DNA${isAutorisee ? " et/ou FINESS" : ""}.`;
   if (isSubventionnee && formKind === FormKind.MODIFICATION) {

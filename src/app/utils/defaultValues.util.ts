@@ -29,7 +29,6 @@ import { transformApiDnaStructuresToFormDnaStructures } from "./dna.util";
 import { getEvaluationsDefaultValues } from "./evaluation.util";
 import { transformApiFinessesToFormFinesses } from "./finess.util";
 import { getIndicateursFinanciersDefaultValues } from "./indicateurFinancier.util";
-import { isStructureAutorisee } from "./structure.util";
 import { getStructureMillesimeDefaultValues } from "./structureMillesime.util";
 import { getStructureTypologyDefaultValues } from "./structureTypology.util";
 
@@ -40,7 +39,6 @@ export const getDefaultValues = ({
 }): Partial<StructureDefaultValues> => {
   const structureCreationYear = getRealCreationYear(structure);
 
-  const isAutorisee = isStructureAutorisee(structure.type);
   const isMultiAntenne = isStructureMultiAntenne(structure);
   const isMultiDna = isStructureMultiDna(structure);
   const repartition = structure.repartition;
@@ -78,7 +76,7 @@ export const getDefaultValues = ({
   const controles = getControlesDefaultValues(structure.controles);
   const evaluations = getEvaluationsDefaultValues(
     structure.evaluations,
-    isAutorisee
+    structure.isAutorisee
   );
 
   return {
@@ -90,10 +88,10 @@ export const getDefaultValues = ({
     isMultiDna,
     dnaStructures,
     finesses,
-    debutPeriodeAutorisation: isAutorisee
+    debutPeriodeAutorisation: structure.isAutorisee
       ? (structure.debutPeriodeAutorisation ?? undefined)
       : undefined,
-    finPeriodeAutorisation: isAutorisee
+    finPeriodeAutorisation: structure.isAutorisee
       ? (structure.finPeriodeAutorisation ?? undefined)
       : undefined,
     debutConvention: structure.debutConvention ?? undefined,
