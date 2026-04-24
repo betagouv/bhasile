@@ -40,5 +40,17 @@ export const getOperateur = async (id: number): Promise<OperateurApiRead> => {
   return {
     ...operateur,
     vulnerabilites,
+    documents: operateur.documents.map((document) => ({
+      ...document,
+      date: document.date ? new Date(document.date).toISOString() : undefined,
+      fileUploads: document.fileUploads?.map((file) => ({
+        ...file,
+        acteAdministratifId: file.acteAdministratifId ?? undefined,
+        documentFinancierId: file.documentFinancierId ?? undefined,
+        controleId: file.controleId ?? undefined,
+        evaluationId: file.evaluationId ?? undefined,
+        documentOperateurId: file.documentOperateurId ?? undefined,
+      })),
+    })),
   };
 };

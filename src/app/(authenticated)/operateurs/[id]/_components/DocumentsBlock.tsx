@@ -4,6 +4,7 @@ import { Block } from "@/app/components/common/Block";
 import { CustomAccordion } from "@/app/components/common/CustomAccordion";
 
 import { useOperateurContext } from "../_context/OperateurClientContext";
+import { DocumentCategory } from "./DocumentCategory";
 
 export const DocumentsBlock = (): ReactElement => {
   const { operateur } = useOperateurContext();
@@ -16,16 +17,16 @@ export const DocumentsBlock = (): ReactElement => {
       entityType="Operateur"
     >
       <CustomAccordion label="Rapports d'activité">
-        <div className="m-4">Aucun document importé</div>
+        <DocumentCategory categoryName="RAPPORT_ACTIVITE" />
       </CustomAccordion>
       <CustomAccordion label="Frais de siège">
-        <div className="m-4">Aucun document importé</div>
+        <DocumentCategory categoryName="FRAIS_DE_SIEGE" />
       </CustomAccordion>
       <CustomAccordion label="Statuts">
-        <div className="m-4">Aucun document importé</div>
+        <DocumentCategory categoryName="STATUTS" />
       </CustomAccordion>
       <CustomAccordion label="Autres documents">
-        <div className="m-4">Aucun document importé</div>
+        <DocumentCategory categoryName="AUTRE" />
       </CustomAccordion>
     </Block>
   );

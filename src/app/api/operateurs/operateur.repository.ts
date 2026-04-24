@@ -91,7 +91,9 @@ export const countOperateurs = async ({
   });
 };
 
-export const findOne = async (id: number): Promise<OperateurWithStructures> => {
+export const findOne = async (
+  id: number
+): Promise<OperateurWithStructuresAndDocuments> => {
   return prisma.operateur.findFirstOrThrow({
     where: { id },
     include: {
@@ -119,12 +121,17 @@ export const updateOne = async (
   });
 };
 
-type OperateurWithStructures = Prisma.OperateurGetPayload<{
+type OperateurWithStructuresAndDocuments = Prisma.OperateurGetPayload<{
   include: {
     structures: {
       select: {
         lgbt: true;
         fvvTeh: true;
+      };
+    };
+    documents: {
+      include: {
+        fileUploads: true;
       };
     };
   };
