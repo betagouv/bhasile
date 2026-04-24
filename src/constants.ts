@@ -1,10 +1,16 @@
-import { LatLngTuple } from "leaflet";
-
 import { Departement, Region } from "./types/departement.type";
+
+export type LatLngTuple = [number, number];
 
 // Center of France https://fr.wikipedia.org/wiki/Centre_de_la_France
 export const FRANCE_CENTER: LatLngTuple = [46.6055983, 1.8750922];
 export const DEFAULT_MAP_ZOOM = 6;
+
+// Map bounds (France métropolitaine) (SW/NW are (lat, lng))
+export const FRANCE_MAX_BOUNDS: [LatLngTuple, LatLngTuple] = [
+  [38.976492485539424, -5.9326171875],
+  [53.291489065300226, 9.667968750000002],
+];
 
 export const DEFAULT_PAGE_SIZE = 20;
 export const MIDDLE_PAGE_SIZE = 12;

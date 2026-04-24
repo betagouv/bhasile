@@ -4,16 +4,6 @@
 @import "tailwindcss";
 @import "./css/dsfr-tailwind.css";
 
-/* Overrides */
-.leaflet-marker-pane > div {
-  background-color: unset;
-  border: 0;
-}
-
-.leaflet-container a {
-  color: var(--text-title-blue-france) !important;
-}
-
 [href] {
   background-image: none;
 }
@@ -74,4 +64,13 @@ hr {
 
 .full-width-table > table > thead > tr > th:last-child {
   width: 100%;
+}
+
+.maplibregl-popup-content {
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+.bhasile-maplibre-popup-content {
+  margin: 1.5rem;
 }
