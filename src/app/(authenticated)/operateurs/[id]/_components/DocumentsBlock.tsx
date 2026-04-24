@@ -18,6 +18,9 @@ export const DocumentsBlock = (): ReactElement => {
       <CustomAccordion label="Rapports d'activité">
         <div className="m-4">Aucun document importé</div>
       </CustomAccordion>
+      <CustomAccordion label="Frais de siège">
+        <div className="m-4">Aucun document importé</div>
+      </CustomAccordion>
       <CustomAccordion label="Statuts">
         <div className="m-4">Aucun document importé</div>
       </CustomAccordion>
