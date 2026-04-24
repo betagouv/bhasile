@@ -13,6 +13,7 @@ import FinalisationIdentificationPage from "@/app/(authenticated)/structures/[id
 import { FetchStateProvider } from "@/app/context/FetchStateContext";
 import { CURRENT_YEAR } from "@/constants";
 import { StepStatus } from "@/types/form.type";
+import { StructureType } from "@/types/structure.type";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createStructure } from "../../../../../test-utils/structure.factory";
@@ -53,7 +54,7 @@ describe("FinalisationIdentification page integration", () => {
 
   it("should submit and send updated finalisation step in PUT payload", async () => {
     // GIVEN
-    const structure = createStructure({ id: 77 });
+    const structure = createStructure({ id: 77, type: StructureType.CADA });
     const mockedFetch = mockStructurePageFetch(structure);
 
     render(
@@ -63,6 +64,9 @@ describe("FinalisationIdentification page integration", () => {
         </StructureClientProvider>
       </FetchStateProvider>
     );
+    await waitFor(() => {
+      expect(mockedFetch).toHaveBeenCalledWith("/api/dna-codes?structureId=77");
+    });
 
     // WHEN
     await userEvent.click(
@@ -70,8 +74,6 @@ describe("FinalisationIdentification page integration", () => {
     );
 
     // THEN
-    expect(mockedFetch).toHaveBeenCalledWith("/api/structures/77");
-
     const putCall = mockedFetch.mock.calls.find(
       (call) =>
         call[0] === "/api/structures" &&
@@ -99,7 +101,7 @@ describe("FinalisationIdentification page integration", () => {
 
   it("should autosave form data and send full expected payload", async () => {
     // GIVEN
-    const structure = createStructure({ id: 78 });
+    const structure = createStructure({ id: 78, type: StructureType.CADA });
     const mockedFetch = mockStructurePageFetch(structure);
 
     render(
