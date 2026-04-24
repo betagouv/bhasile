@@ -1,8 +1,13 @@
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { DocumentFinancierCategory } from "@/types/document-financier.type";
+import { DocumentOperateurCategory } from "@/types/document-operateur.type";
 
 export const getCategoryLabel = (
-  category: ActeAdministratifCategory | DocumentFinancierCategory | undefined
+  category:
+    | ActeAdministratifCategory
+    | DocumentFinancierCategory
+    | DocumentOperateurCategory
+    | undefined
 ): string => {
   if (!category) {
     return "";
@@ -10,6 +15,7 @@ export const getCategoryLabel = (
   const labels: Record<
     | ActeAdministratifCategory
     | DocumentFinancierCategory
+    | DocumentOperateurCategory
     | "CPOM"
     | "INSPECTION_CONTROLE"
     | "EVALUATION",
@@ -33,6 +39,8 @@ export const getCategoryLabel = (
     EVALUATION: "Évaluation",
     AUTRE: "Autre",
     AUTRE_FINANCIER: "Autre",
+    FRAIS_DE_SIEGE: "Frais de siège",
+    STATUTS: "Statuts",
   };
   return labels[category] || "";
 };

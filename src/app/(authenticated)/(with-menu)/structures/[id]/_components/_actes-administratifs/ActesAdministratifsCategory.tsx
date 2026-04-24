@@ -1,6 +1,6 @@
 import Accordion from "@codegouvfr/react-dsfr/Accordion";
 
-import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
+import { ActeAdministratifApiType } from "@/schemas/api/acte-administratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";

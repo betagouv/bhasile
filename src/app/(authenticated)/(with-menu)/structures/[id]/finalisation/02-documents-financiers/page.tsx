@@ -12,7 +12,7 @@ import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
-import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { DocumentFinancierApiType } from "@/schemas/api/document-financier.schema";
 import {
   DocumentsFinanciersFlexibleFormValues,
   DocumentsFinanciersFlexibleSchema,

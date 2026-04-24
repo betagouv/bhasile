@@ -12,7 +12,7 @@ import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
-import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
+import { ActeAdministratifApiType } from "@/schemas/api/acte-administratif.schema";
 import {
   actesAdministratifsAutoriseesSchema,
   ActesAdministratifsFormValues,

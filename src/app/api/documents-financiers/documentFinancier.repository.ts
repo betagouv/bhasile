@@ -1,4 +1,4 @@
-import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { DocumentFinancierApiType } from "@/schemas/api/document-financier.schema";
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 

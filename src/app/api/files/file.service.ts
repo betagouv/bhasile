@@ -7,8 +7,8 @@ import {
 } from "@/constants";
 import { FileUpload } from "@/generated/prisma/client";
 import { checkBucket, minioClient } from "@/lib/minio";
-import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
-import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { ActeAdministratifApiType } from "@/schemas/api/acte-administratif.schema";
+import { DocumentFinancierApiType } from "@/schemas/api/document-financier.schema";
 
 import { createOne, deleteOneByKey, findOneByKey } from "./file.repository";
 

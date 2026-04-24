@@ -1,4 +1,4 @@
-import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
+import { ActeAdministratifApiType } from "@/schemas/api/acte-administratif.schema";
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 

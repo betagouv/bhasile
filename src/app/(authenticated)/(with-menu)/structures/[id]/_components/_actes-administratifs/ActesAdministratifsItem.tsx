@@ -1,5 +1,5 @@
 import { DownloadItem } from "@/app/components/common/DownloadItem";
-import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
+import { ActeAdministratifApiType } from "@/schemas/api/acte-administratif.schema";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
