@@ -4,6 +4,7 @@ import { ReactElement } from "react";
 
 import { Badge } from "@/app/components/common/Badge";
 import { CustomNotice } from "@/app/components/common/CustomNotice";
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { formatCityName } from "@/app/utils/adresse.util";
 import { Repartition } from "@/types/adresse.type";
 
@@ -36,7 +37,10 @@ export const Adresses = (): ReactElement => {
               {formatCityName(adresse.commune ?? "")}
             </td>
             <td className="py-3 pr-8">
-              {adresse.adresseTypologies?.[0]?.placesAutorisees} places
+              <NumberDisplay
+                value={adresse.adresseTypologies?.[0]?.placesAutorisees}
+              />{" "}
+              places
             </td>
             <td className="py-3 pr-8">
               {

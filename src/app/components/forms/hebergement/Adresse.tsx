@@ -38,6 +38,7 @@ export const AdresseComponent = ({
         min={0}
         label="Places"
         className="w-1/12 mb-0"
+        variant="simple"
       />
       <SelectWithValidation
         name={`adresses.${index}.repartition`}
