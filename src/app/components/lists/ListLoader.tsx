@@ -20,29 +20,31 @@ export const ListLoader = ({
   const fetchState = getFetchState(fetchStateName);
   const entity = LIST_ENTITIES[entityName];
 
+  if (fetchState === FetchState.ERROR) {
+    return (
+      <p className="p-16">Erreur lors de la récupération des {entity.plural}</p>
+    );
+  }
+
+  if (!items) {
+    return (
+      <div className="flex items-center p-16 gap-4">
+        <Loader />
+        <span>Chargement des {entity.plural}...</span>
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return <p className="p-16">{formatEmptyList(entity)}</p>;
+  }
+
   return (
-    <>
-      {fetchState === FetchState.LOADING && (
-        <div className="flex items-center px-4">
-          <Loader />
-          <span className="pl-2">Chargement des {entity.plural}...</span>
-        </div>
-      )}
-      {fetchState === FetchState.ERROR && (
-        <div className="flex items-center px-4">
-          <span className="pl-2">
-            Erreur lors de la récupération des {entity.plural}
-          </span>
-        </div>
-      )}
-      {fetchState === FetchState.IDLE &&
-        items &&
-        (items?.length > 0 ? (
-          children
-        ) : (
-          <p className="p-16">{formatEmptyList(entity)}</p>
-        ))}
-    </>
+    <div
+      className={`${fetchState === FetchState.LOADING ? "opacity-20 pointer-events-none" : ""}`}
+    >
+      {children}
+    </div>
   );
 };
 
