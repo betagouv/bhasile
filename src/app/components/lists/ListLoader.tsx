@@ -22,12 +22,6 @@ export const ListLoader = ({
 
   return (
     <>
-      {fetchState === FetchState.LOADING && (
-        <div className="flex items-center px-4">
-          <Loader />
-          <span className="pl-2">Chargement des {entity.plural}...</span>
-        </div>
-      )}
       {fetchState === FetchState.ERROR && (
         <div className="flex items-center px-4">
           <span className="pl-2">
@@ -35,10 +29,14 @@ export const ListLoader = ({
           </span>
         </div>
       )}
-      {fetchState === FetchState.IDLE &&
+      {fetchState !== FetchState.ERROR &&
         items &&
         (items?.length > 0 ? (
-          children
+          <div
+            className={`${fetchState === FetchState.LOADING ? "opacity-20 pointer-events-none" : ""}`}
+          >
+            {children}
+          </div>
         ) : (
           <p className="p-16">{formatEmptyList(entity)}</p>
         ))}
