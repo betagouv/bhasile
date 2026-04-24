@@ -3,7 +3,7 @@ import { z } from "zod";
 import { Repartition } from "@/types/adresse.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 
-import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
+import { acteAdministratifApiSchema } from "./acte-administratif.schema";
 import { activiteApiSchema } from "./activite.schema";
 import { adresseApiSchema } from "./adresse.schema";
 import { antenneApiSchema } from "./antenne.schema";
@@ -13,7 +13,7 @@ import { controleApiSchema } from "./controle.schema";
 import { cpomStructureApiSchema } from "./cpom.schema";
 import { CpomStructureApiRead } from "./cpom.schema";
 import { dnaStructureApiSchema } from "./dna-structure.schema";
-import { documentFinancierApiSchema } from "./documentFinancier.schema";
+import { documentFinancierApiSchema } from "./document-financier.schema";
 import { evaluationApiSchema } from "./evaluation.schema";
 import { evenementIndesirableGraveApiSchema } from "./evenement-indesirable-grave.schema";
 import { finessApiSchema } from "./finess.schema";

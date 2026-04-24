@@ -12,7 +12,7 @@ model FileUpload {
   controleId          Int?
   evaluation          Evaluation?        @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
   evaluationId        Int?
-  documentOperateur   DocumentOperateur? @relation(fields: [documentOperateurId], references: [id])
+  documentOperateur   DocumentOperateur? @relation(fields: [documentOperateurId], references: [id], onDelete: Cascade)
   documentOperateurId Int?
 
   createdAt DateTime @default(now())

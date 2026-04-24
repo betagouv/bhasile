@@ -2,6 +2,8 @@ import z from "zod";
 
 import { zId } from "@/app/utils/zodCustomFields";
 
+import { DocumentOperateurApiRead } from "./document-operateur.schema";
+
 export const operateurSuggestionApiSchema = z.object({
   id: z.number().optional(),
   structureDnaCode: z.string().optional(),
@@ -19,6 +21,7 @@ export type OperateurApiRead = {
   siret?: string | null;
   siegeSocial?: string | null;
   vulnerabilites: string[];
+  documents: DocumentOperateurApiRead[];
 };
 
 export const operateurWriteApiSchema = z.object({
