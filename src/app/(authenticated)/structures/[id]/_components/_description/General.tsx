@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ReactElement } from "react";
 
 import { formatCityName } from "@/app/utils/adresse.util";
@@ -49,6 +50,12 @@ export const General = (): ReactElement => {
       <div className="flex gap-2 mb-3">
         <strong>Opérateur</strong>
         {operateurLabel}
+        <Link
+          className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-line before:w-[20] before:h-[20] min-h-0 p-0"
+          title={`Détails de l'opérateur ${operateurLabel}`}
+          href={`/operateurs/${structure.operateur.id}`}
+          aria-label={`Détails de l'opérateur ${operateurLabel}`}
+        />
       </div>
       <div className="flex gap-2 mb-3">
         <strong>Type de bâti</strong>
