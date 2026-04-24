@@ -15,32 +15,40 @@ export const ListLoader = ({
   items,
   entityName,
   children,
-}: Props): ReactElement => {
+}: Props) => {
   const { getFetchState } = useFetchState();
   const fetchState = getFetchState(fetchStateName);
   const entity = LIST_ENTITIES[entityName];
 
-  return (
-    <>
-      {fetchState === FetchState.ERROR && (
-        <div className="flex items-center px-4">
-          <span className="pl-2">
-            Erreur lors de la récupération des {entity.plural}
-          </span>
+  if (fetchState === FetchState.ERROR) {
+    return (
+      <p className="p-16">Erreur lors de la récupération des {entity.plural}</p>
+    );
+  }
+
+  if (!items && fetchState !== FetchState.LOADING) {
+    return null;
+  }
+
+  if (!items || items.length === 0) {
+    if (fetchState === FetchState.LOADING) {
+      return (
+        <div className="flex items-center p-16 gap-4">
+          <Loader />
+          <span>Chargement des {entity.plural}...</span>
         </div>
-      )}
-      {fetchState !== FetchState.ERROR &&
-        items &&
-        (items?.length > 0 ? (
-          <div
-            className={`${fetchState === FetchState.LOADING ? "opacity-20 pointer-events-none" : ""}`}
-          >
-            {children}
-          </div>
-        ) : (
-          <p className="p-16">{formatEmptyList(entity)}</p>
-        ))}
-    </>
+      );
+    } else {
+      return <p className="p-16">{formatEmptyList(entity)}</p>;
+    }
+  }
+
+  return (
+    <div
+      className={`${fetchState === FetchState.LOADING ? "opacity-20 pointer-events-none" : ""}`}
+    >
+      {children}
+    </div>
   );
 };
 
