@@ -1,3 +1,4 @@
+import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PUT } from "@/app/api/structures/route";
@@ -56,7 +57,7 @@ describe("PUT /api/structures", () => {
     });
 
     // WHEN
-    const response = await PUT(request as never);
+    const response = await PUT(request as NextRequest);
 
     // THEN
     expect(response.status).toBe(401);
@@ -67,7 +68,7 @@ describe("PUT /api/structures", () => {
   it("should return 403 when user has insufficient rights", async () => {
     // GIVEN
     const parsedBody = { id: 2 };
-    const session = { user: { id: "agent-1" } };
+    const session = { user: { id: 1 } };
     const existingStructure = { id: 2 };
 
     mockGetServerSession.mockResolvedValueOnce(session);
@@ -80,7 +81,7 @@ describe("PUT /api/structures", () => {
     });
 
     // WHEN
-    const response = await PUT(request as never);
+    const response = await PUT(request as NextRequest);
 
     // THEN
     expect(response.status).toBe(403);
@@ -91,7 +92,7 @@ describe("PUT /api/structures", () => {
   it("should return 201 and call repository with enriched payload", async () => {
     // GIVEN
     const parsedBody = { id: 3 };
-    const session = { user: { id: "agent-2" } };
+    const session = { user: { id: 1 } };
     const coordinates = { latitude: 48.86, longitude: 2.34 };
     const updatedStructure = { id: 3 };
 
@@ -107,7 +108,7 @@ describe("PUT /api/structures", () => {
     });
 
     // WHEN
-    const response = await PUT(request as never);
+    const response = await PUT(request as NextRequest);
 
     // THEN
     expect(response.status).toBe(201);
@@ -127,7 +128,7 @@ describe("PUT /api/structures", () => {
 
   it("should return 400 when payload does not match schema", async () => {
     // GIVEN
-    mockGetServerSession.mockResolvedValueOnce({ user: { id: "agent-3" } });
+    mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
 
     const request = new Request("http://localhost/api/structures", {
       method: "PUT",
@@ -135,7 +136,7 @@ describe("PUT /api/structures", () => {
     });
 
     // WHEN
-    const response = await PUT(request as never);
+    const response = await PUT(request as NextRequest);
 
     // THEN
     expect(response.status).toBe(400);
