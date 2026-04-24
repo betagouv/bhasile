@@ -40,10 +40,6 @@ describe("structure.repository db integration", () => {
   };
 
   afterAll(async () => {
-    if (!prisma) {
-      return;
-    }
-
     if (createdStructureIds.length > 0) {
       await prisma.structure.deleteMany({
         where: {
@@ -65,17 +61,17 @@ describe("structure.repository db integration", () => {
     }
   });
 
-  it("should update all simple structure fields in one call", async () => {
+  it("should update all structure scalar fields in one call", async () => {
     // GIVEN: an empty structure
     const structure = await createStructure();
-    const creationDate = new Date("2020-02-02T00:00:00.000Z");
-    const date303 = new Date("2021-03-03T00:00:00.000Z");
-    const debutConvention = new Date("2022-04-04T00:00:00.000Z");
-    const finConvention = new Date("2023-05-05T00:00:00.000Z");
-    const debutPeriodeAutorisation = new Date("2024-06-06T00:00:00.000Z");
-    const finPeriodeAutorisation = new Date("2025-07-07T00:00:00.000Z");
+    const creationDate = "2020-02-02T00:00:00.000Z";
+    const date303 = "2021-03-03T00:00:00.000Z";
+    const debutConvention = "2022-04-04T00:00:00.000Z";
+    const finConvention = "2023-05-05T00:00:00.000Z";
+    const debutPeriodeAutorisation = "2024-06-06T00:00:00.000Z";
+    const finPeriodeAutorisation = "2025-07-07T00:00:00.000Z";
 
-    // WHEN: all simple fields are sent in a single update
+    // WHEN: all scalar fields are sent in a single update
     await updateOne({
       id: structure.id,
       public: PublicType.FAMILLE,
@@ -87,14 +83,14 @@ describe("structure.repository db integration", () => {
       latitude: "48.8566",
       longitude: "2.3522",
       nom: "Structure test complete",
-      date303: date303.toISOString(),
-      debutConvention: debutConvention.toISOString(),
-      finConvention: finConvention.toISOString(),
-      creationDate: creationDate.toISOString(),
+      date303,
+      debutConvention,
+      finConvention,
+      creationDate,
       lgbt: true,
       fvvTeh: false,
-      debutPeriodeAutorisation: debutPeriodeAutorisation.toISOString(),
-      finPeriodeAutorisation: finPeriodeAutorisation.toISOString(),
+      debutPeriodeAutorisation,
+      finPeriodeAutorisation,
       notes: "Notes de test",
       nomOfii: "Nom OFII",
       directionTerritoriale: "DT75",
@@ -113,19 +109,17 @@ describe("structure.repository db integration", () => {
     expect(updated.latitude?.toString()).toBe("48.8566");
     expect(updated.longitude?.toString()).toBe("2.3522");
     expect(updated.nom).toBe("Structure test complete");
-    expect(updated.date303?.toISOString()).toBe(date303.toISOString());
-    expect(updated.debutConvention?.toISOString()).toBe(
-      debutConvention.toISOString()
-    );
-    expect(updated.finConvention?.toISOString()).toBe(finConvention.toISOString());
-    expect(updated.creationDate?.toISOString()).toBe(creationDate.toISOString());
+    expect(updated.date303?.toISOString()).toBe(date303);
+    expect(updated.debutConvention?.toISOString()).toBe(debutConvention);
+    expect(updated.finConvention?.toISOString()).toBe(finConvention);
+    expect(updated.creationDate?.toISOString()).toBe(creationDate);
     expect(updated.lgbt).toBe(true);
     expect(updated.fvvTeh).toBe(false);
     expect(updated.debutPeriodeAutorisation?.toISOString()).toBe(
-      debutPeriodeAutorisation.toISOString()
+      debutPeriodeAutorisation
     );
     expect(updated.finPeriodeAutorisation?.toISOString()).toBe(
-      finPeriodeAutorisation.toISOString()
+      finPeriodeAutorisation
     );
     expect(updated.notes).toBe("Notes de test");
     expect(updated.nomOfii).toBe("Nom OFII");
@@ -355,7 +349,7 @@ describe("structure.repository db integration", () => {
       adresse: "Nouvelle adresse",
       codePostal: "31000",
       commune: "Toulouse",
-      repartition: Repartition.DIFFUS,
+      repartition: "DIFFUS",
     });
     expect(adresses[0].adresseTypologies).toHaveLength(1);
     expect(adresses[0].adresseTypologies[0]).toMatchObject({
@@ -477,7 +471,9 @@ describe("structure.repository db integration", () => {
     });
     expect(actes).toHaveLength(1);
     expect(actes[0].name).toBe("Nouveau acte");
-    expect(actes[0].fileUploads.map((file) => file.key)).toContain(keptFile.key);
+    expect(actes[0].fileUploads.map((file) => file.key)).toContain(
+      keptFile.key
+    );
   });
 
   it("should upsert documentsFinanciers and delete missing ones", async () => {
@@ -550,9 +546,9 @@ describe("structure.repository db integration", () => {
     });
     expect(controles).toHaveLength(1);
     expect(controles[0].type).toBe("PROGRAMME");
-    expect(controles[0].fileUploads.map((fileUpload) => fileUpload.key)).toContain(
-      file.key
-    );
+    expect(
+      controles[0].fileUploads.map((fileUpload) => fileUpload.key)
+    ).toContain(file.key);
   });
 
   it("should replace evaluations list", async () => {
@@ -594,9 +590,9 @@ describe("structure.repository db integration", () => {
       notePro: 2,
       noteStructure: 5,
     });
-    expect(evaluations[0].fileUploads.map((fileUpload) => fileUpload.key)).toContain(
-      file.key
-    );
+    expect(
+      evaluations[0].fileUploads.map((fileUpload) => fileUpload.key)
+    ).toContain(file.key);
   });
 
   it("should upsert forms and formSteps by definition/step slugs", async () => {
