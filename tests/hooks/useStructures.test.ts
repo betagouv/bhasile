@@ -218,8 +218,7 @@ describe("useStructures integration", () => {
       });
       expect(mockFetch).toHaveBeenNthCalledWith(
         2,
-        `/api/structures/${structureId}`,
-        { method: "GET" }
+        `/api/structures/${structureId}`
       );
       expect(setStructure).toHaveBeenCalledWith(updatedStructure);
       expect(response).toBe("OK");
