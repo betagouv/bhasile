@@ -1,16 +1,15 @@
 import z from "zod";
 
-import { zId, zSafeYear } from "@/app/utils/zodCustomFields";
+import {
+  zId,
+  zSafePositiveIntegerNullish,
+  zSafeYear,
+} from "@/app/utils/zodCustomFields";
 import { Repartition } from "@/types/adresse.type";
 
 export const adresseTypologieSchema = z.object({
   year: zSafeYear(),
-  placesAutorisees: z
-    .preprocess(
-      (val) => (val === "" ? undefined : Number(val)),
-      z.number().min(0)
-    )
-    .optional(),
+  placesAutorisees: zSafePositiveIntegerNullish(),
   qpv: z.boolean().optional(),
   logementSocial: z.boolean().optional(),
 });
