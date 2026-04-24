@@ -35,7 +35,7 @@ export const ListLoader = ({
     );
   }
 
-  if (items && items.length === 0) {
+  if (items.length === 0) {
     return <p className="p-16">{formatEmptyList(entity)}</p>;
   }
 
