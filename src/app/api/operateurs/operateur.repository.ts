@@ -72,14 +72,20 @@ export const countOperateurs = async ({
   search: string | null;
 }): Promise<number> => {
   return prisma.operateur.count({
-    where: search
-      ? {
-          name: {
-            contains: search,
-            mode: "insensitive",
-          },
-        }
-      : undefined,
+    where: {
+      parentId: null,
+      structures: {
+        some: {},
+      },
+      ...(search
+        ? {
+            name: {
+              contains: search,
+              mode: "insensitive",
+            },
+          }
+        : undefined),
+    },
   });
 };
 
