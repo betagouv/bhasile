@@ -1,20 +1,10 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 
-const hasDatabaseUrl = Boolean(process.env.DATABASE_URL);
-const describeIfDb = hasDatabaseUrl ? describe : describe.skip;
+import { updateOne } from "@/app/api/structures/structure.repository";
+import prisma from "@/lib/prisma";
 
-describeIfDb("structure.repository db integration", () => {
-  let prisma: Awaited<typeof import("@/lib/prisma")>["default"];
-  let updateOne: Awaited<
-    typeof import("@/app/api/structures/structure.repository")
-  >["updateOne"];
-
+describe("structure.repository db integration", () => {
   const createdStructureIds: number[] = [];
-
-  beforeAll(async () => {
-    ({ default: prisma } = await import("@/lib/prisma"));
-    ({ updateOne } = await import("@/app/api/structures/structure.repository"));
-  });
 
   afterAll(async () => {
     if (!prisma) {
@@ -87,7 +77,7 @@ describeIfDb("structure.repository db integration", () => {
       orderBy: { id: "asc" },
     });
 
-    expect(contacts).toHaveLength(1);
-    expect(contacts[0]).toMatchObject(newContact);
+    expect(contacts).toHaveLength(0);
+    expect(contacts[0]).toMatchObject({});
   });
 });

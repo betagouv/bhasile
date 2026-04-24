@@ -1,4 +1,10 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -8,6 +14,7 @@ import { FetchStateProvider } from "@/app/context/FetchStateContext";
 import { CURRENT_YEAR } from "@/constants";
 import { StepStatus } from "@/types/form.type";
 
+import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createStructure } from "../../../../../test-utils/structure.factory";
 
 const mockRouterPush = vi.fn();
@@ -47,37 +54,7 @@ describe("FinalisationIdentification page integration", () => {
   it("should submit and send updated finalisation step in PUT payload", async () => {
     // GIVEN
     const structure = createStructure({ id: 77 });
-
-    const mockedFetch = vi.mocked(global.fetch);
-    mockedFetch.mockImplementation((input, init) => {
-      if (input === "/api/dna-codes?structureId=77") {
-        return Promise.resolve({
-          status: 200,
-          ok: true,
-          json: async () => [{ code: "C0001" }],
-        } as Response);
-      }
-
-      if (input === "/api/structures" && init?.method === "PUT") {
-        return Promise.resolve({
-          status: 201,
-          ok: true,
-          json: async () => "OK",
-        } as Response);
-      }
-
-      if (input === "/api/structures/77") {
-        return Promise.resolve({
-          status: 200,
-          ok: true,
-          json: async () => structure,
-        } as Response);
-      }
-
-      return Promise.reject(
-        new Error(`Unexpected fetch call: ${String(input)}`)
-      );
-    });
+    const mockedFetch = mockStructurePageFetch(structure);
 
     render(
       <FetchStateProvider>
@@ -93,10 +70,6 @@ describe("FinalisationIdentification page integration", () => {
     );
 
     // THEN
-    await waitFor(() => {
-      expect(mockedFetch).toHaveBeenCalled();
-    });
-
     expect(mockedFetch).toHaveBeenCalledWith("/api/structures/77");
 
     const putCall = mockedFetch.mock.calls.find(
@@ -127,37 +100,7 @@ describe("FinalisationIdentification page integration", () => {
   it("should autosave form data and send full expected payload", async () => {
     // GIVEN
     const structure = createStructure({ id: 78 });
-
-    const mockedFetch = vi.mocked(global.fetch);
-    mockedFetch.mockImplementation((input, init) => {
-      if (input === "/api/dna-codes?structureId=78") {
-        return Promise.resolve({
-          status: 200,
-          ok: true,
-          json: async () => [{ code: "C0001" }],
-        } as Response);
-      }
-
-      if (input === "/api/structures" && init?.method === "PUT") {
-        return Promise.resolve({
-          status: 201,
-          ok: true,
-          json: async () => "OK",
-        } as Response);
-      }
-
-      if (input === "/api/structures/78") {
-        return Promise.resolve({
-          status: 200,
-          ok: true,
-          json: async () => structure,
-        } as Response);
-      }
-
-      return Promise.reject(
-        new Error(`Unexpected fetch call: ${String(input)}`)
-      );
-    });
+    const mockedFetch = mockStructurePageFetch(structure);
 
     render(
       <FetchStateProvider>
