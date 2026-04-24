@@ -24,6 +24,7 @@ export const getPaginatedOperateurs = async ({
   page: number | null;
   search: string | null;
 }): Promise<OperateurStat[]> => {
+  // TODO : transformer en Prisma classique et ajouter la logique restante dans operateur.service.ts
   return prisma.$queryRaw(Prisma.sql`
     WITH dernier_millesime_structure_typologie AS (
       SELECT DISTINCT ON (st."structureId")
@@ -71,6 +72,7 @@ export const countOperateurs = async ({
 }: {
   search: string | null;
 }): Promise<number> => {
+  // TODO : ajouter le filtre sur parentId null et nbStructures 0
   return prisma.operateur.count({
     where: {
       parentId: null,
@@ -89,7 +91,9 @@ export const countOperateurs = async ({
   });
 };
 
-export const findOne = async (id: number): Promise<OperateurWithStructures> => {
+export const findOne = async (
+  id: number
+): Promise<OperateurWithStructuresAndDocuments> => {
   return prisma.operateur.findFirstOrThrow({
     where: { id },
     include: {
@@ -97,6 +101,11 @@ export const findOne = async (id: number): Promise<OperateurWithStructures> => {
         select: {
           lgbt: true,
           fvvTeh: true,
+        },
+      },
+      documents: {
+        include: {
+          fileUploads: true,
         },
       },
     },
@@ -112,12 +121,17 @@ export const updateOne = async (
   });
 };
 
-type OperateurWithStructures = Prisma.OperateurGetPayload<{
+type OperateurWithStructuresAndDocuments = Prisma.OperateurGetPayload<{
   include: {
     structures: {
       select: {
         lgbt: true;
         fvvTeh: true;
+      };
+    };
+    documents: {
+      include: {
+        fileUploads: true;
       };
     };
   };

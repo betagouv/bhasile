@@ -3,7 +3,7 @@ import z from "zod";
 import { zId } from "@/app/utils/zodCustomFields";
 import { StructureType } from "@/types/structure.type";
 
-import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
+import { acteAdministratifApiSchema } from "./acte-administratif.schema";
 import { budgetApiSchema } from "./budget.schema";
 import { departementApiSchema } from "./departement.schema";
 import { formApiSchema } from "./form.schema";

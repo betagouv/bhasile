@@ -6,8 +6,8 @@ import {
   MAX_FILE_SIZE,
 } from "@/constants";
 import { checkBucket, minioClient } from "@/lib/minio";
-import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
-import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { ActeAdministratifApiType } from "@/schemas/api/acte-administratif.schema";
+import { DocumentFinancierApiType } from "@/schemas/api/document-financier.schema";
 
 export const uploadFile = async (
   bucketName: string,
