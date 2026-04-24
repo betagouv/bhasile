@@ -26,21 +26,17 @@ export const ListLoader = ({
     );
   }
 
-  if (!items && fetchState !== FetchState.LOADING) {
-    return null;
+  if (!items) {
+    return (
+      <div className="flex items-center p-16 gap-4">
+        <Loader />
+        <span>Chargement des {entity.plural}...</span>
+      </div>
+    );
   }
 
-  if (!items || items.length === 0) {
-    if (fetchState === FetchState.LOADING) {
-      return (
-        <div className="flex items-center p-16 gap-4">
-          <Loader />
-          <span>Chargement des {entity.plural}...</span>
-        </div>
-      );
-    } else {
-      return <p className="p-16">{formatEmptyList(entity)}</p>;
-    }
+  if (items && items.length === 0) {
+    return <p className="p-16">{formatEmptyList(entity)}</p>;
   }
 
   return (
