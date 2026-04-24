@@ -90,7 +90,7 @@ type UseStructureResult = {
   ) => Promise<string>;
 };
 
-const transformAjoutFormStructureToApiStructure = async (
+export const transformAjoutFormStructureToApiStructure = async (
   values: AjoutFormValues
 ): Promise<DeepPartial<StructureApiWrite>> => {
   const adresses = transformFormAdressesToApiAdresses(

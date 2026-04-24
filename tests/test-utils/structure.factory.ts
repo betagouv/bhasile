@@ -1,9 +1,14 @@
+import { CURRENT_YEAR } from "@/constants";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { DnaStructureApiType } from "@/schemas/api/dna-structure.schema";
+import { FinessApiType } from "@/schemas/api/finess.schema";
+import { FormApiType } from "@/schemas/api/form.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 import { Repartition } from "@/types/adresse.type";
+import { StepStatus } from "@/types/form.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 
 export const createStructure = ({
@@ -16,6 +21,9 @@ export const createStructure = ({
   structureTypologies,
   structureMillesimes = [],
   cpomStructures = [],
+  dnaStructures,
+  finesses,
+  forms,
 }: CreateStructuresArgs): StructureApiRead => {
   return {
     id,
@@ -43,10 +51,73 @@ export const createStructure = ({
     finPeriodeAutorisation: new Date("01/02/2025").toISOString(),
     adresses: adresses ?? [],
     notes: "Note 1",
-    structureTypologies: structureTypologies ?? [],
+    structureTypologies:
+      structureTypologies ??
+      [0, 1, 2, 3].map((delta) => ({
+        id: delta + 1,
+        year: CURRENT_YEAR - delta,
+        placesAutorisees: 10,
+        pmr: 0,
+        lgbt: 0,
+        fvvTeh: 0,
+        placesACreer: 0,
+        placesAFermer: 0,
+        echeancePlacesACreer: undefined,
+        echeancePlacesAFermer: undefined,
+      })),
     structureMillesimes: structureMillesimes ?? [],
     cpomStructures: cpomStructures ?? [],
-    forms: [],
+    forms: forms ?? [
+      {
+        id: 1,
+        status: false,
+        formDefinition: {
+          id: 1,
+          slug: "finalisation",
+          name: "finalisation",
+          version: 1,
+        },
+        formSteps: [
+          {
+            id: 11,
+            status: StepStatus.NON_COMMENCE,
+            stepDefinition: {
+              id: 1,
+              label: "01-identification",
+              slug: "01-identification",
+            },
+          },
+          {
+            id: 12,
+            status: StepStatus.NON_COMMENCE,
+            stepDefinition: {
+              id: 2,
+              label: "02-documents-financiers",
+              slug: "02-documents-financiers",
+            },
+          },
+        ],
+      },
+    ],
+    dnaStructures: dnaStructures ?? [
+      {
+        id: 1,
+        dna: {
+          id: 1,
+          code: "C0001",
+          description: "",
+        },
+        startDate: undefined,
+        endDate: undefined,
+      },
+    ],
+    finesses: finesses ?? [
+      {
+        id: 1,
+        code: "123456789",
+        description: "",
+      },
+    ],
     contacts: [],
     documentsFinanciers: [],
     repartition: Repartition.DIFFUS,
@@ -72,4 +143,7 @@ type CreateStructuresArgs = {
   finessCode?: string;
   publicType?: PublicType;
   cpomStructures?: CpomStructureApiType[];
+  dnaStructures?: DnaStructureApiType[];
+  finesses?: FinessApiType[];
+  forms?: FormApiType[];
 };
