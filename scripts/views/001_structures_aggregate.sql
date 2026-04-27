@@ -81,7 +81,9 @@ WITH -- Last typology by structure
         SELECT
           i.*,
           ROW_NUMBER() OVER (
-            PARTITION BY i."structureId", i."year"
+            PARTITION BY
+              i."structureId",
+              i."year"
             ORDER BY
               CASE
                 WHEN i."type" = 'REALISE' THEN 0
