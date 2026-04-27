@@ -72,6 +72,30 @@ WITH -- Last typology by structure
     GROUP BY
       adm."structureId"
   ),
+  -- Keep one financial indicator row per structure/year: REALISE first, PREVISIONNEL fallback
+  indicateurs_financiers_filtered AS (
+    SELECT
+      filtered.*
+    FROM
+      (
+        SELECT
+          i.*,
+          ROW_NUMBER() OVER (
+            PARTITION BY i."structureId", i."year"
+            ORDER BY
+              CASE
+                WHEN i."type" = 'REALISE' THEN 0
+                ELSE 1
+              END
+          ) AS rn
+        FROM
+          public."IndicateurFinancier" i
+        WHERE
+          i."structureId" IS NOT NULL
+      ) filtered
+    WHERE
+      filtered.rn = 1
+  ),
   -- Last dotationAccordee by structure (most recent budget)
   budget_dernier_millesime AS (
     SELECT DISTINCT
@@ -86,19 +110,19 @@ WITH -- Last typology by structure
   -- Aggregate budgets by structure
   budgets_agreges AS (
     SELECT
-      b."structureId",
-      MAX(b."tauxEncadrement") AS taux_encadrement_max,
-      MIN(b."tauxEncadrement") AS taux_encadrement_min,
-      MAX(b."coutJournalier") AS cout_journalier_max,
-      MIN(b."coutJournalier") AS cout_journalier_min,
+      i."structureId",
+      MAX(i."tauxEncadrement") AS taux_encadrement_max,
+      MIN(i."tauxEncadrement") AS taux_encadrement_min,
+      MAX(i."coutJournalier") AS cout_journalier_max,
+      MIN(i."coutJournalier") AS cout_journalier_min,
       COALESCE(
-        COALESCE((MAX(b."tauxEncadrement") > 25)::int, 1) + COALESCE((MIN(b."tauxEncadrement") < 15)::int, 1) + COALESCE((MAX(b."coutJournalier") > 25)::int, 1) + COALESCE((MIN(b."coutJournalier") < 15)::int, 1),
+        COALESCE((MAX(i."tauxEncadrement") > 25)::int, 1) + COALESCE((MIN(i."tauxEncadrement") < 15)::int, 1) + COALESCE((MAX(i."coutJournalier") > 25)::int, 1) + COALESCE((MIN(i."coutJournalier") < 15)::int, 1),
         0
       ) AS "indicateurs_budgetaires"
     FROM
-      public."Budget" b
+      indicateurs_financiers_filtered i
     GROUP BY
-      b."structureId"
+      i."structureId"
   ),
   -- Calculs agrégés avec différences et pourcentages
   places_agregees AS (

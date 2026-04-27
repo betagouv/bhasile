@@ -35,6 +35,42 @@ WITH
           CURRENT_DATE
       )::int
   ),
+  -- filter financial indicators on the same year range as budgets
+  -- and keep one row per structure/year: REALISE first, PREVISIONNEL fallback
+  indicateurs_financiers_filtered AS (
+    SELECT
+      filtered.*
+    FROM
+      (
+        SELECT
+          i.*,
+          ROW_NUMBER() OVER (
+            PARTITION BY i."structureId", i."year"
+            ORDER BY
+              CASE
+                WHEN i."type" = 'REALISE' THEN 0
+                ELSE 1
+              END
+          ) AS rn
+        FROM
+          public."IndicateurFinancier" i
+          JOIN structures s ON s."id" = i."structureId"
+        WHERE
+          i."structureId" IS NOT NULL
+          AND i."year" >= EXTRACT(
+            YEAR
+            FROM
+              COALESCE(s."date303", s."creationDate")
+          )::int
+          AND i."year" < EXTRACT(
+            YEAR
+            FROM
+              CURRENT_DATE
+          )::int
+      ) filtered
+    WHERE
+      filtered.rn = 1
+  ),
   budgets_enriched AS (
     SELECT
       b."structureId" AS "structureId",
@@ -69,15 +105,15 @@ WITH
   ),
   budgets_rates AS (
     SELECT
-      b."structureId" AS "structureId",
-      MAX(b."tauxEncadrement") AS taux_encadrement_max,
-      MIN(b."tauxEncadrement") AS taux_encadrement_min,
-      MAX(b."coutJournalier") AS cout_journalier_max,
-      MIN(b."coutJournalier") AS cout_journalier_min
+      i."structureId" AS "structureId",
+      MAX(i."tauxEncadrement") AS taux_encadrement_max,
+      MIN(i."tauxEncadrement") AS taux_encadrement_min,
+      MAX(i."coutJournalier") AS cout_journalier_max,
+      MIN(i."coutJournalier") AS cout_journalier_min
     FROM
-      budgets_filtered b
+      indicateurs_financiers_filtered i
     GROUP BY
-      b."structureId"
+      i."structureId"
   ),
   budget_indicators AS (
     SELECT
