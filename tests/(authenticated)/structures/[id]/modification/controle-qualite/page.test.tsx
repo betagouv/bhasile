@@ -16,10 +16,6 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
 }));
 
-vi.mock("@/app/components/common/CustomNotice", () => ({
-  CustomNotice: () => <div>Custom notice</div>,
-}));
-
 describe("ModificationControleQualite page integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();

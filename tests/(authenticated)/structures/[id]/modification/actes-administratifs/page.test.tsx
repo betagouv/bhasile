@@ -16,11 +16,6 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
 }));
 
-vi.mock(
-  "@/app/components/forms/actesAdministratifs/ActesAdministratifs",
-  () => ({ ActesAdministratifs: () => <div>Actes administratifs</div> })
-);
-
 describe("ModificationActesAdministratifs page integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();

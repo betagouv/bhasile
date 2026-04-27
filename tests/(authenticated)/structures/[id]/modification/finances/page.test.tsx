@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ModificationFinancesPage from "@/app/(authenticated)/structures/[id]/modification/finances/page";
-import { CURRENT_YEAR } from "@/constants";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createModificationFinancesValidStructure } from "../../../../../test-utils/structure.factory";
@@ -16,22 +15,6 @@ import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mo
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
 }));
-
-vi.mock("@/app/utils/date.util", async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import("@/app/utils/date.util")>();
-  return {
-    ...original,
-    getYearRange: () => ({
-      years: [
-        CURRENT_YEAR,
-        CURRENT_YEAR - 1,
-        CURRENT_YEAR - 2,
-        CURRENT_YEAR - 3,
-      ],
-    }),
-  };
-});
 
 describe("ModificationFinances page integration", () => {
   beforeEach(() => {

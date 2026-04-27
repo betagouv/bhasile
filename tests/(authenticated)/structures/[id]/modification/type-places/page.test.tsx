@@ -17,15 +17,6 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
 }));
 
-vi.mock(
-  "@/app/components/forms/ouvertureFermeture/FieldSetOuvertureFermeture",
-  () => ({ FieldSetOuvertureFermeture: () => <div>Ouverture fermeture</div> })
-);
-
-vi.mock("@/app/components/forms/typePlace/FieldSetTypePlaces", () => ({
-  FieldSetTypePlaces: () => <div>Type places</div>,
-}));
-
 describe("ModificationTypePlaces page integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();

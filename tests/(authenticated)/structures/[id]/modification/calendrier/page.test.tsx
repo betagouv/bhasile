@@ -17,10 +17,6 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
 }));
 
-vi.mock("@/app/components/forms/calendrier/FieldSetCalendrier", () => ({
-  FieldSetCalendrier: () => <div>Calendrier</div>,
-}));
-
 describe("ModificationCalendrier page integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();

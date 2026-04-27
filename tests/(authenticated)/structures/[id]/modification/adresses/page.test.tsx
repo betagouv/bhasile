@@ -16,14 +16,6 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
 }));
 
-vi.mock("@/app/components/forms/hebergement/FieldSetHebergement", () => ({
-  FieldSetHebergement: () => <div>Hebergement</div>,
-}));
-
-vi.mock("@/app/components/forms/hebergement/FieldSetTypeBati", () => ({
-  FieldSetTypeBati: () => <div>Type bati</div>,
-}));
-
 describe("ModificationAdresses page integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();

@@ -17,10 +17,6 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
 }));
 
-vi.mock("@/app/components/forms/notes/NoteDisclaimer", () => ({
-  NoteDisclaimer: () => <div>Note disclaimer</div>,
-}));
-
 describe("ModificationNotes page integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
