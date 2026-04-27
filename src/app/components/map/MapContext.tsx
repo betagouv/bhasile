@@ -35,11 +35,11 @@ export function MapLibreProvider({
 }
 
 export function useMapLibreMap(): maplibregl.Map | null {
-  const ctx = useContext(MapLibreContext);
-  return ctx!.map;
+  const context = useContext(MapLibreContext);
+  return context!.map;
 }
 
 export function useRegisterMapPoint(): RegisterMapPoint {
-  const ctx = useContext(MapLibreContext);
-  return ctx!.registerPoint;
+  const context = useContext(MapLibreContext);
+  return context!.registerPoint;
 }

@@ -1,6 +1,9 @@
+"use client";
+
 import { ReactElement, useEffect, useMemo } from "react";
 
-import { useRegisterMapPoint } from "../../../components/map/MapContext";
+import { useRegisterMapPoint } from "@/app/components/map/MapContext";
+
 import { StructureMarkerContent } from "./StructureMarkerContent";
 
 export const StructureMarker = ({
