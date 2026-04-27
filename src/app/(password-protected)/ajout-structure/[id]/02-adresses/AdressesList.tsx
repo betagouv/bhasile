@@ -2,20 +2,15 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import autoAnimate from "@formkit/auto-animate";
-import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
-import { CustomNotice } from "@/app/components/common/CustomNotice";
 import AddressWithValidation from "@/app/components/forms/AddressWithValidation";
-import { AdressImporter } from "@/app/components/forms/hebergement/AdressImporter";
+import { Option1Notices } from "@/app/components/forms/hebergement/Option1Notices";
+import { Option2Notices } from "@/app/components/forms/hebergement/Option2Notices";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
-import {
-  CURRENT_YEAR,
-  MODELE_DIFFUS_LINK,
-  MODELE_MIXTE_LINK,
-} from "@/constants";
+import { CURRENT_YEAR } from "@/constants";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { AdresseAdministrativeFormValues } from "@/schemas/forms/base/adresseAdministrative.schema";
 import { Repartition } from "@/types/adresse.type";
@@ -96,68 +91,32 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
   };
 
   return (
-    <div>
-      <fieldset className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2" ref={hebergementsContainerRef}>
-          {typeBati !== Repartition.COLLECTIF && (
-            <>
-              <p className="mb-1">
-                Vous pouvez le faire directement en remplissant les champs
-                ci-dessous ou vous pouvez compléter{" "}
-                <Link
-                  href={
-                    typeBati === Repartition.DIFFUS
-                      ? MODELE_DIFFUS_LINK
-                      : MODELE_MIXTE_LINK
-                  }
-                  className="underline text-title-blue-france"
-                >
-                  notre modèle à télécharger
-                </Link>{" "}
-                depuis un logiciel tableur, l’importer puis vérifier le
-                remplissage automatique des champs qui s’opérera.
-              </p>
-              <div className="flex flex-col gap-2">
-                <p className="text-action-high-blue-france font-bold mb-0">
-                  Liste des hébergements (d’après notre modèle à télécharger
-                  uniquement)
+    <div className="w-full">
+      <fieldset className="flex flex-col gap-8">
+        <div className="flex flex-col gap-6" ref={hebergementsContainerRef}>
+          {typeBati === Repartition.COLLECTIF ? (
+            <Option2Notices />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Option1Notices typeBati={typeBati} />
+
+              <div className="rounded-lg bg-default-grey-hover p-6 flex flex-col gap-5">
+                <div>
+                  <h3 className="text-lg text-title-blue-france mb-0">
+                    Option 2 - Remplissage manuel
+                  </h3>
+                  <p className="text-sm text-mention-grey mb-0">
+                    (recommandé si moins de 12 adresses à saisir)
+                  </p>
+                </div>
+                <p className="mb-0">
+                  Veuillez remplir directement les champs ci-dessous.
                 </p>
-                <p className="text-disabled-grey mb-0 text-xs col-span-3">
-                  Taille maximale par fichier : 10 Mo. Formats supportés : xls,
-                  xlsx, et csv.
-                </p>
-                <AdressImporter typeBati={typeBati} />
+                <Option2Notices />
               </div>
-            </>
+            </div>
           )}
         </div>
-        <CustomNotice
-          severity="info"
-          title="Pour le champ “places”,"
-          description="veuillez renseigner le nombre total de places autorisées pour l’adresse correspondante."
-        />
-        <CustomNotice
-          severity="info"
-          title=""
-          description={
-            <>
-              Concernant les particularités, les logements sociaux correspondent
-              aux logement loués à un bailleur social. Vous pouvez vérifier si
-              une adresse est dans un Quartier Prioritaire de la politique de la
-              Ville (QPV){" "}
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://sig.ville.gouv.fr/"
-                className="fr-link fr-icon border-b w-fit pb-px hover:pb-0 hover:border-b-2"
-              >
-                sur ce lien
-              </a>
-              . Si une adresse ne donne pas de résultat, veuillez laisser la
-              case décochée.
-            </>
-          }
-        />
 
         {typeBati === Repartition.COLLECTIF && (
           <div className="flex mt-6 -mb-4">
