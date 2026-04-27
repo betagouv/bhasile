@@ -285,6 +285,37 @@ describe("structure.repository db integration", () => {
     expect(budgets[0]).toMatchObject(newBudget);
   });
 
+  it("should keep existing budget and add a new one for another year", async () => {
+    // GIVEN: an existing budget for year 2024
+    const structure = await createStructure();
+    const existingBudget = { year: 2024, commentaire: "budget-2024" };
+    await prisma.budget.create({
+      data: {
+        structureId: structure.id,
+        ...existingBudget,
+      },
+    });
+
+    // WHEN: update contains a budget for another year
+    const newBudget = { year: 2025, commentaire: "budget-2025" };
+    const budgets = await updateStructureAndFetch(
+      structure.id,
+      {
+        budgets: [newBudget],
+      },
+      () =>
+        prisma.budget.findMany({
+          where: { structureId: structure.id },
+          orderBy: { year: "asc" },
+        })
+    );
+
+    // THEN: existing year is kept and new year is added
+    expect(budgets).toHaveLength(2);
+    expect(budgets[0]).toMatchObject(existingBudget);
+    expect(budgets[1]).toMatchObject(newBudget);
+  });
+
   it("should upsert indicateursFinanciers by year and type", async () => {
     // GIVEN: one existing indicateur
     const structure = await createStructure();
