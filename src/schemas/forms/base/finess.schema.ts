@@ -9,10 +9,7 @@ const finessSchema = z.object({
 });
 
 export const finessesSchema = z.object({
-  finesses: z
-    .array(finessSchema.nullish())
-    .optional()
-    .transform((array) => array?.filter((item) => item !== null) ?? []),
+  finesses: z.array(finessSchema).optional(),
 });
 
 export type FinessFormValues = z.infer<typeof finessSchema>;
