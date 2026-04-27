@@ -1,4 +1,4 @@
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -12,6 +12,7 @@ import { createStructure } from "../../../../../test-utils/structure.factory";
 import {
   expectFinalisationStepValidation,
   findPutStructuresCall,
+  flushAutoSaveDebounce,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
 } from "../../../../../test-utils/structure-page-test.helpers";
@@ -108,11 +109,7 @@ describe("FinalisationIdentification page integration", () => {
     fireEvent.change(screen.getByLabelText("Téléphone"), {
       target: { value: newContact.telephone },
     });
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(500);
-      await vi.runOnlyPendingTimersAsync();
-      await Promise.resolve();
-    });
+    await flushAutoSaveDebounce();
 
     // THEN
     const putCall = findPutStructuresCall(mockedFetch);

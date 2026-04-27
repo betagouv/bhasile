@@ -1,4 +1,4 @@
-import { act, fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationControlesPage from "@/app/(authenticated)/structures/[id]/finalisation/04-controles/page";
@@ -10,6 +10,7 @@ import {
   clickButtonByName,
   expectFinalisationStepValidation,
   findPutStructuresCall,
+  flushAutoSaveDebounce,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
 } from "../../../../../test-utils/structure-page-test.helpers";
@@ -92,11 +93,7 @@ describe("FinalisationControles page integration", () => {
     // WHEN
     const input = screen.getAllByRole("spinbutton")[0];
     fireEvent.change(input, { target: { value: "4" } });
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(500);
-      await vi.runOnlyPendingTimersAsync();
-      await Promise.resolve();
-    });
+    await flushAutoSaveDebounce();
 
     // THEN
     expect(findPutStructuresCall(mockedFetch)).toBeDefined();

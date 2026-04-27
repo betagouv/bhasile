@@ -1,4 +1,4 @@
-import { act, fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationDocumentsPage from "@/app/(authenticated)/structures/[id]/finalisation/05-documents/page";
@@ -10,6 +10,7 @@ import {
   clickButtonByName,
   expectFinalisationStepValidation,
   findPutStructuresCall,
+  flushAutoSaveDebounce,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
 } from "../../../../../test-utils/structure-page-test.helpers";
@@ -99,11 +100,7 @@ describe("FinalisationDocuments page integration", () => {
     // WHEN
     const input = screen.getAllByRole("textbox")[0];
     fireEvent.change(input, { target: { value: "2023-01-01" } });
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(500);
-      await vi.runOnlyPendingTimersAsync();
-      await Promise.resolve();
-    });
+    await flushAutoSaveDebounce();
 
     // THEN
     expect(findPutStructuresCall(mockedFetch)).toBeDefined();

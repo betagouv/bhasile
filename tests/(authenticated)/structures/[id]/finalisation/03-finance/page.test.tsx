@@ -1,4 +1,4 @@
-import { act, fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationFinancePage from "@/app/(authenticated)/structures/[id]/finalisation/03-finance/page";
@@ -10,6 +10,7 @@ import {
   clickButtonByName,
   expectFinalisationStepValidation,
   findPutStructuresCall,
+  flushAutoSaveDebounce,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
 } from "../../../../../test-utils/structure-page-test.helpers";
@@ -84,11 +85,7 @@ describe("FinalisationFinance page integration", () => {
     // WHEN
     const input = screen.getAllByRole("textbox")[0];
     fireEvent.change(input, { target: { value: "12" } });
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(500);
-      await vi.runOnlyPendingTimersAsync();
-      await Promise.resolve();
-    });
+    await flushAutoSaveDebounce();
 
     // THEN
     expect(findPutStructuresCall(mockedFetch)).toBeDefined();

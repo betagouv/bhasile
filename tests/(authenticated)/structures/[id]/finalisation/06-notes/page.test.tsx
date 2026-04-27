@@ -1,4 +1,4 @@
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationNotesPage from "@/app/(authenticated)/structures/[id]/finalisation/06-notes/page";
@@ -10,6 +10,7 @@ import {
   clickButtonByName,
   expectFinalisationStepValidation,
   findPutStructuresCall,
+  flushAutoSaveDebounce,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
 } from "../../../../../test-utils/structure-page-test.helpers";
@@ -75,11 +76,7 @@ describe("FinalisationNotes page integration", () => {
     fireEvent.change(screen.getByRole("textbox"), {
       target: { value: "Note de suivi" },
     });
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(500);
-      await vi.runOnlyPendingTimersAsync();
-      await Promise.resolve();
-    });
+    await flushAutoSaveDebounce();
 
     // THEN
     const putCall = findPutStructuresCall(mockedFetch);

@@ -1,6 +1,7 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ReactElement } from "react";
+import { vi } from "vitest";
 
 import { StructureClientProvider } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import { FetchStateProvider } from "@/app/context/FetchStateContext";
@@ -72,6 +73,14 @@ export const clickButtonByName = async (name: string) => {
     screen.getByRole("button", { name });
   });
   await userEvent.click(screen.getByRole("button", { name }));
+};
+
+export const flushAutoSaveDebounce = async (delayMs = 500) => {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(delayMs);
+    await vi.runOnlyPendingTimersAsync();
+    await Promise.resolve();
+  });
 };
 
 export const expectFinalisationStepValidation = (
