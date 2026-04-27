@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationNotesPage from "@/app/(authenticated)/structures/[id]/finalisation/06-notes/page";
