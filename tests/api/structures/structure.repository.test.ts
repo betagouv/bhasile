@@ -231,9 +231,10 @@ describe("structure.repository db integration", () => {
     });
 
     // WHEN: same year is sent with new values
+    const newBudget = { year: 2024, commentaire: "new" };
     await updateOne({
       id: structure.id,
-      budgets: [{ year: 2024, commentaire: "new" }],
+      budgets: [newBudget],
     });
 
     // THEN: budget row is updated in place
@@ -241,10 +242,7 @@ describe("structure.repository db integration", () => {
       where: { structureId: structure.id },
     });
     expect(budgets).toHaveLength(1);
-    expect(budgets[0]).toMatchObject({
-      year: 2024,
-      commentaire: "new",
-    });
+    expect(budgets[0]).toMatchObject(newBudget);
   });
 
   it("should upsert indicateursFinanciers by year and type", async () => {
@@ -260,16 +258,15 @@ describe("structure.repository db integration", () => {
     });
 
     // WHEN: same key is updated
+    const newIndicateurFinancier = {
+      year: 2024,
+      type: "PREVISIONNEL" as const,
+      ETP: 3,
+      coutJournalier: 15,
+    };
     await updateOne({
       id: structure.id,
-      indicateursFinanciers: [
-        {
-          year: 2024,
-          type: "PREVISIONNEL",
-          ETP: 3,
-          coutJournalier: 15,
-        },
-      ],
+      indicateursFinanciers: [newIndicateurFinancier],
     });
 
     // THEN: row is updated
@@ -277,12 +274,7 @@ describe("structure.repository db integration", () => {
       where: { structureId: structure.id },
     });
     expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject({
-      year: 2024,
-      type: "PREVISIONNEL",
-      ETP: 3,
-      coutJournalier: 15,
-    });
+    expect(rows[0]).toMatchObject(newIndicateurFinancier);
   });
 
   it("should upsert structureTypologies by year", async () => {
@@ -297,9 +289,10 @@ describe("structure.repository db integration", () => {
     });
 
     // WHEN: same year receives new values
+    const newStructureTypologie = { year: 2024, placesAutorisees: 25, pmr: 2 };
     await updateOne({
       id: structure.id,
-      structureTypologies: [{ year: 2024, placesAutorisees: 25, pmr: 2 }],
+      structureTypologies: [newStructureTypologie],
     });
 
     // THEN: typology is updated
@@ -307,7 +300,7 @@ describe("structure.repository db integration", () => {
       where: { structureId: structure.id },
     });
     expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject({ year: 2024, placesAutorisees: 25, pmr: 2 });
+    expect(rows[0]).toMatchObject(newStructureTypologie);
   });
 
   it("should replace adresses list and typologies", async () => {
@@ -323,19 +316,18 @@ describe("structure.repository db integration", () => {
     });
 
     // WHEN: update receives a new address list
+    const newAdresse = {
+      adresse: "Nouvelle adresse",
+      codePostal: "31000",
+      commune: "Toulouse",
+      repartition: Repartition.DIFFUS,
+      adresseTypologies: [
+        { year: 2026, placesAutorisees: 11, qpv: 2, logementSocial: 3 },
+      ],
+    };
     await updateOne({
       id: structure.id,
-      adresses: [
-        {
-          adresse: "Nouvelle adresse",
-          codePostal: "31000",
-          commune: "Toulouse",
-          repartition: Repartition.DIFFUS,
-          adresseTypologies: [
-            { year: 2026, placesAutorisees: 11, qpv: 2, logementSocial: 3 },
-          ],
-        },
-      ],
+      adresses: [newAdresse],
     });
 
     // THEN: old address is removed and new one created with typology
@@ -346,18 +338,15 @@ describe("structure.repository db integration", () => {
     expect(adresses).toHaveLength(1);
     expect(adresses[0].id).not.toBe(oldAdresse.id);
     expect(adresses[0]).toMatchObject({
-      adresse: "Nouvelle adresse",
-      codePostal: "31000",
-      commune: "Toulouse",
+      adresse: newAdresse.adresse,
+      codePostal: newAdresse.codePostal,
+      commune: newAdresse.commune,
       repartition: "DIFFUS",
     });
     expect(adresses[0].adresseTypologies).toHaveLength(1);
-    expect(adresses[0].adresseTypologies[0]).toMatchObject({
-      year: 2026,
-      placesAutorisees: 11,
-      qpv: 2,
-      logementSocial: 3,
-    });
+    expect(adresses[0].adresseTypologies[0]).toMatchObject(
+      newAdresse.adresseTypologies[0]
+    );
   });
 
   it("should replace antennes list", async () => {
@@ -368,9 +357,14 @@ describe("structure.repository db integration", () => {
     });
 
     // WHEN: one different antenne is sent
+    const newAntenne = {
+      name: "new-antenne",
+      commune: "Lyon",
+      departement: "69",
+    };
     await updateOne({
       id: structure.id,
-      antennes: [{ name: "new-antenne", commune: "Lyon", departement: "69" }],
+      antennes: [newAntenne],
     });
 
     // THEN: only the new antenne remains
@@ -378,11 +372,7 @@ describe("structure.repository db integration", () => {
       where: { structureId: structure.id },
     });
     expect(antennes).toHaveLength(1);
-    expect(antennes[0]).toMatchObject({
-      name: "new-antenne",
-      commune: "Lyon",
-      departement: "69",
-    });
+    expect(antennes[0]).toMatchObject(newAntenne);
   });
 
   it("should replace dnaStructures list", async () => {
@@ -423,9 +413,10 @@ describe("structure.repository db integration", () => {
 
     // WHEN: a new FINESS list is sent
     const newCode = `FIN-NEW-${Date.now()}-${randomUUID()}`;
+    const newFiness = { code: newCode, description: "new finess" };
     await updateOne({
       id: structure.id,
-      finesses: [{ code: newCode, description: "new finess" }],
+      finesses: [newFiness],
     });
 
     // THEN: only the new FINESS remains
@@ -433,10 +424,7 @@ describe("structure.repository db integration", () => {
       where: { structureId: structure.id },
     });
     expect(finesses).toHaveLength(1);
-    expect(finesses[0]).toMatchObject({
-      code: newCode,
-      description: "new finess",
-    });
+    expect(finesses[0]).toMatchObject(newFiness);
   });
 
   it("should upsert actesAdministratifs and delete missing ones", async () => {
@@ -453,15 +441,14 @@ describe("structure.repository db integration", () => {
     const keptFile = await createFileUpload("new-acte");
 
     // WHEN: update contains only one acte bound to another file key
+    const newActeAdministratif = {
+      name: "Nouveau acte",
+      category: ActeAdministratifCategory[3],
+      fileUploads: [{ key: keptFile.key }],
+    };
     await updateOne({
       id: structure.id,
-      actesAdministratifs: [
-        {
-          name: "Nouveau acte",
-          category: ActeAdministratifCategory[3],
-          fileUploads: [{ key: keptFile.key }],
-        },
-      ],
+      actesAdministratifs: [newActeAdministratif],
     });
 
     // THEN: old acte is deleted and new one remains
@@ -470,7 +457,7 @@ describe("structure.repository db integration", () => {
       include: { fileUploads: true },
     });
     expect(actes).toHaveLength(1);
-    expect(actes[0].name).toBe("Nouveau acte");
+    expect(actes[0].name).toBe(newActeAdministratif.name);
     expect(actes[0].fileUploads.map((file) => file.key)).toContain(
       keptFile.key
     );
@@ -490,18 +477,17 @@ describe("structure.repository db integration", () => {
     });
     const newFile = await createFileUpload("new-doc");
 
-    // WHEN: update contains only the new file key
+    // WHEN: update contains only the new file
+    const newDocumentFinancier = {
+      year: 2025,
+      name: "Document financier test",
+      category: DocumentFinancierCategory[10],
+      granularity: DocumentFinancierGranularity[0],
+      fileUploads: [{ key: newFile.key }],
+    };
     await updateOne({
       id: structure.id,
-      documentsFinanciers: [
-        {
-          year: 2025,
-          name: "Document financier test",
-          category: DocumentFinancierCategory[10],
-          granularity: DocumentFinancierGranularity[0],
-          fileUploads: [{ key: newFile.key }],
-        },
-      ],
+      documentsFinanciers: [newDocumentFinancier],
     });
 
     // THEN: old document is deleted and new one is present
@@ -510,8 +496,8 @@ describe("structure.repository db integration", () => {
       include: { fileUploads: true },
     });
     expect(docs).toHaveLength(1);
-    expect(docs[0].year).toBe(2025);
-    expect(docs[0].name).toBe("Document financier test");
+    expect(docs[0].year).toBe(newDocumentFinancier.year);
+    expect(docs[0].name).toBe(newDocumentFinancier.name);
     expect(docs[0].fileUploads.map((file) => file.key)).toContain(newFile.key);
   });
 
@@ -528,15 +514,14 @@ describe("structure.repository db integration", () => {
     const file = await createFileUpload("controle");
 
     // WHEN: sending a new controle list
+    const newControle = {
+      date: "2025-01-01T00:00:00.000Z",
+      type: ControleType.PROGRAMME,
+      fileUploads: [{ key: file.key, id: file.id }],
+    };
     await updateOne({
       id: structure.id,
-      controles: [
-        {
-          date: "2025-01-01T00:00:00.000Z",
-          type: ControleType.PROGRAMME,
-          fileUploads: [{ key: file.key, id: file.id }],
-        },
-      ],
+      controles: [newControle],
     });
 
     // THEN: only the new controle remains
@@ -564,18 +549,17 @@ describe("structure.repository db integration", () => {
     const file = await createFileUpload("evaluation");
 
     // WHEN: sending a new evaluations list
+    const newEvaluation = {
+      date: "2025-02-01T00:00:00.000Z",
+      note: 4,
+      notePersonne: 3,
+      notePro: 2,
+      noteStructure: 5,
+      fileUploads: [{ key: file.key }],
+    };
     await updateOne({
       id: structure.id,
-      evaluations: [
-        {
-          date: "2025-02-01T00:00:00.000Z",
-          note: 4,
-          notePersonne: 3,
-          notePro: 2,
-          noteStructure: 5,
-          fileUploads: [{ key: file.key }],
-        },
-      ],
+      evaluations: [newEvaluation],
     });
 
     // THEN: only the new evaluation remains
@@ -585,10 +569,10 @@ describe("structure.repository db integration", () => {
     });
     expect(evaluations).toHaveLength(1);
     expect(evaluations[0]).toMatchObject({
-      note: 4,
-      notePersonne: 3,
-      notePro: 2,
-      noteStructure: 5,
+      note: newEvaluation.note,
+      notePersonne: newEvaluation.notePersonne,
+      notePro: newEvaluation.notePro,
+      noteStructure: newEvaluation.noteStructure,
     });
     expect(
       evaluations[0].fileUploads.map((fileUpload) => fileUpload.key)
@@ -607,31 +591,30 @@ describe("structure.repository db integration", () => {
     }
 
     // WHEN: form status and first step are updated by slug
-    await updateOne({
-      id: structure.id,
-      forms: [
+    const newForm = {
+      id: 0,
+      status: true,
+      formDefinition: {
+        id: formDefinition.id,
+        slug: formDefinition.slug,
+        name: formDefinition.name,
+        version: formDefinition.version,
+      },
+      formSteps: [
         {
           id: 0,
-          status: true,
-          formDefinition: {
-            id: formDefinition.id,
-            slug: formDefinition.slug,
-            name: formDefinition.name,
-            version: formDefinition.version,
+          status: StepStatus.FINALISE,
+          stepDefinition: {
+            id: firstStep.id,
+            slug: firstStep.slug,
+            label: firstStep.label,
           },
-          formSteps: [
-            {
-              id: 0,
-              status: StepStatus.FINALISE,
-              stepDefinition: {
-                id: firstStep.id,
-                slug: firstStep.slug,
-                label: firstStep.label,
-              },
-            },
-          ],
         },
       ],
+    };
+    await updateOne({
+      id: structure.id,
+      forms: [newForm],
     });
 
     // THEN: the structure form and step are upserted
@@ -644,9 +627,9 @@ describe("structure.repository db integration", () => {
       },
       include: { formSteps: true },
     });
-    expect(form.status).toBe(true);
+    expect(form.status).toBe(newForm.status);
     expect(form.formSteps).toHaveLength(1);
-    expect(form.formSteps[0].status).toBe("FINALISE");
+    expect(form.formSteps[0].status).toBe(newForm.formSteps[0].status);
   });
 
   it("should upsert structureMillesimes by year", async () => {
@@ -661,15 +644,14 @@ describe("structure.repository db integration", () => {
     });
 
     // WHEN: same year is updated
+    const newStructureMillesime = {
+      year: 2024,
+      cpom: true,
+      operateurComment: "Updated comment",
+    };
     await updateOne({
       id: structure.id,
-      structureMillesimes: [
-        {
-          year: 2024,
-          cpom: true,
-          operateurComment: "Updated comment",
-        },
-      ],
+      structureMillesimes: [newStructureMillesime],
     });
 
     // THEN: millesime is updated
@@ -677,10 +659,6 @@ describe("structure.repository db integration", () => {
       where: { structureId: structure.id },
     });
     expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject({
-      year: 2024,
-      cpom: true,
-      operateurComment: "Updated comment",
-    });
+    expect(rows[0]).toMatchObject(newStructureMillesime);
   });
 });
