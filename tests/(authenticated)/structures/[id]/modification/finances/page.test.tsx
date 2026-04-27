@@ -14,6 +14,10 @@ import {
 } from "../../../../../test-utils/structure-page-test.helpers";
 import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockRouterPush }),
+}));
+
 vi.mock("@/app/utils/date.util", async (importOriginal) => {
   const original =
     await importOriginal<typeof import("@/app/utils/date.util")>();

@@ -2,10 +2,6 @@ import { vi } from "vitest";
 
 export const mockRouterPush = vi.fn();
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockRouterPush }),
-}));
-
 vi.mock(
   "@/app/(authenticated)/structures/[id]/finalisation/_components/Tabs",
   () => ({ Tabs: () => <div>Tabs</div> })

@@ -14,6 +14,14 @@ import {
 } from "../../../../../test-utils/structure-page-test.helpers";
 import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockRouterPush }),
+}));
+
+vi.mock("@/app/components/forms/AutoSave", () => ({
+  AutoSave: () => null,
+}));
+
 describe("FinalisationDocumentsFinanciers page integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();

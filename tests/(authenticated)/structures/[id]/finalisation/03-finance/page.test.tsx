@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationFinancePage from "@/app/(authenticated)/structures/[id]/finalisation/03-finance/page";
-import { CURRENT_YEAR } from "@/constants";
 import { StepStatus } from "@/types/form.type";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
@@ -15,21 +14,9 @@ import {
 } from "../../../../../test-utils/structure-page-test.helpers";
 import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
 
-vi.mock("@/app/utils/date.util", async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import("@/app/utils/date.util")>();
-  return {
-    ...original,
-    getYearRange: () => ({
-      years: [
-        CURRENT_YEAR,
-        CURRENT_YEAR - 1,
-        CURRENT_YEAR - 2,
-        CURRENT_YEAR - 3,
-      ],
-    }),
-  };
-});
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockRouterPush }),
+}));
 
 describe("FinalisationFinance page integration", () => {
   beforeEach(() => {

@@ -16,6 +16,10 @@ import {
 } from "../../../../../test-utils/structure-page-test.helpers";
 import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockRouterPush }),
+}));
+
 describe("FinalisationIdentification page integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();

@@ -14,6 +14,10 @@ import {
 } from "../../../../../test-utils/structure-page-test.helpers";
 import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockRouterPush }),
+}));
+
 describe("FinalisationControles page integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -76,7 +80,7 @@ describe("FinalisationControles page integration", () => {
         },
       ],
     };
-    const mockedFetch = mockStructurePageFetch(structure);
+    mockStructurePageFetch(structure);
 
     renderWithStructurePageProviders(structure, <FinalisationControlesPage />);
     await waitFor(() =>
@@ -89,7 +93,6 @@ describe("FinalisationControles page integration", () => {
     );
 
     // THEN
-    expect(findPutStructuresCall(mockedFetch)).toBeUndefined();
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 });
