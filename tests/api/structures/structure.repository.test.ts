@@ -245,7 +245,7 @@ describe("structure.repository db integration", () => {
     const contacts = await updateStructureAndFetch(
       structure.id,
       {
-        nom: "Nom mis a jour sans contacts",
+        nom: "Nom mis à jour sans contacts",
       },
       () =>
         prisma.contact.findMany({
@@ -521,7 +521,7 @@ describe("structure.repository db integration", () => {
 
     // WHEN: update contains only one acte bound to another file key
     const newActeAdministratif = {
-      name: "Nouveau acte",
+      name: "Nouvel acte",
       category: "AUTRE" as const,
       fileUploads: [{ key: keptFile.key }],
     };
