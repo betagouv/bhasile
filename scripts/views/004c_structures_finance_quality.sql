@@ -15,63 +15,53 @@ WITH
     FROM
       public."Structure" s
   ),
+  bound_dates AS (
+    SELECT
+      s."id" AS "structureId",
+      EXTRACT(
+        YEAR
+        FROM
+          COALESCE(s."date303", s."creationDate")
+      )::int AS "startYear",
+      EXTRACT(
+        YEAR
+        FROM
+          CURRENT_DATE
+      )::int AS "endYearExclusive"
+    FROM
+      structures s
+  ),
   -- filter budgets from the structure date 303 joining year, or creation year to the current year
   budgets_filtered AS (
     SELECT
       b.*
     FROM
       public."Budget" b
-      JOIN structures s ON s."id" = b."structureId"
+      JOIN bound_dates bd ON bd."structureId" = b."structureId"
     WHERE
       b."structureId" IS NOT NULL
-      AND b."year" >= EXTRACT(
-        YEAR
-        FROM
-          COALESCE(s."date303", s."creationDate")
-      )::int
-      AND b."year" < EXTRACT(
-        YEAR
-        FROM
-          CURRENT_DATE
-      )::int
+      AND b."year" >= bd."startYear"
+      AND b."year" < bd."endYearExclusive"
   ),
   -- filter financial indicators on the same year range as budgets
   -- and keep one row per structure/year: REALISE first, PREVISIONNEL fallback
   indicateurs_financiers_filtered AS (
-    SELECT
-      filtered.*
+    SELECT DISTINCT
+      ON (i."structureId", i."year") i.*
     FROM
-      (
-        SELECT
-          i.*,
-          ROW_NUMBER() OVER (
-            PARTITION BY
-              i."structureId",
-              i."year"
-            ORDER BY
-              CASE
-                WHEN i."type" = 'REALISE' THEN 0
-                ELSE 1
-              END
-          ) AS rn
-        FROM
-          public."IndicateurFinancier" i
-          JOIN structures s ON s."id" = i."structureId"
-        WHERE
-          i."structureId" IS NOT NULL
-          AND i."year" >= EXTRACT(
-            YEAR
-            FROM
-              COALESCE(s."date303", s."creationDate")
-          )::int
-          AND i."year" < EXTRACT(
-            YEAR
-            FROM
-              CURRENT_DATE
-          )::int
-      ) filtered
+      public."IndicateurFinancier" i
+      JOIN bound_dates bd ON bd."structureId" = i."structureId"
     WHERE
-      filtered.rn = 1
+      i."structureId" IS NOT NULL
+      AND i."year" >= bd."startYear"
+      AND i."year" < bd."endYearExclusive"
+    ORDER BY
+      i."structureId",
+      i."year",
+      CASE
+        WHEN i."type" = 'REALISE' THEN 0
+        ELSE 1
+      END
   ),
   budgets_enriched AS (
     SELECT

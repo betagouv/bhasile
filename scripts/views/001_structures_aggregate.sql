@@ -74,29 +74,19 @@ WITH -- Last typology by structure
   ),
   -- Keep one financial indicator row per structure/year: REALISE first, PREVISIONNEL fallback
   indicateurs_financiers_filtered AS (
-    SELECT
-      filtered.*
+    SELECT DISTINCT
+      ON (i."structureId", i."year") i.*
     FROM
-      (
-        SELECT
-          i.*,
-          ROW_NUMBER() OVER (
-            PARTITION BY
-              i."structureId",
-              i."year"
-            ORDER BY
-              CASE
-                WHEN i."type" = 'REALISE' THEN 0
-                ELSE 1
-              END
-          ) AS rn
-        FROM
-          public."IndicateurFinancier" i
-        WHERE
-          i."structureId" IS NOT NULL
-      ) filtered
+      public."IndicateurFinancier" i
     WHERE
-      filtered.rn = 1
+      i."structureId" IS NOT NULL
+    ORDER BY
+      i."structureId",
+      i."year",
+      CASE
+        WHEN i."type" = 'REALISE' THEN 0
+        ELSE 1
+      END
   ),
   -- Last dotationAccordee by structure (most recent budget)
   budget_dernier_millesime AS (
