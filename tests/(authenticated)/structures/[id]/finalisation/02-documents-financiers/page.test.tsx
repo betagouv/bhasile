@@ -2,13 +2,13 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationDocumentsFinanciersPage from "@/app/(authenticated)/structures/[id]/finalisation/02-documents-financiers/page";
-import { StepStatus } from "@/types/form.type";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationDocumentsFinanciersValidStructure } from "../../../../../test-utils/structure.factory";
 import {
   clickButtonByName,
   expectFinalisationStepValidation,
+  FinalisationStepValidationPayload,
   findPutStructuresCall,
   getLatestPutStructuresPayloadMatching,
   getPutStructuresPayload,
@@ -43,21 +43,14 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
     const putCall = findPutStructuresCall(mockedFetch);
     expect(putCall).toBeDefined();
 
-    const body = getLatestPutStructuresPayloadMatching<{
-      id: number;
-      forms: Array<{
-        formSteps: Array<{
-          stepDefinition: { label: string };
-          status: StepStatus;
-        }>;
-      }>;
-    }>(
-      mockedFetch,
-      (payload) =>
-        payload.forms?.[0]?.formSteps?.some(
-          (step) => step.stepDefinition.label === "02-documents-financiers"
-        ) ?? false
-    );
+    const body =
+      getLatestPutStructuresPayloadMatching<FinalisationStepValidationPayload>(
+        mockedFetch,
+        (payload) =>
+          payload.forms?.[0]?.formSteps?.some(
+            (step) => step.stepDefinition.label === "02-documents-financiers"
+          ) ?? false
+      );
     expectFinalisationStepValidation(body, {
       structureId: 77,
       stepLabel: "02-documents-financiers",

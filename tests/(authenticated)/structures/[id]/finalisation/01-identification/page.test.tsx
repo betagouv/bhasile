@@ -4,13 +4,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationIdentificationPage from "@/app/(authenticated)/structures/[id]/finalisation/01-identification/page";
 import { CURRENT_YEAR } from "@/constants";
-import { StepStatus } from "@/types/form.type";
 import { StructureType } from "@/types/structure.type";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createStructure } from "../../../../../test-utils/structure.factory";
 import {
   expectFinalisationStepValidation,
+  FinalisationStepValidationPayload,
   findPutStructuresCall,
   flushAutoSaveDebounce,
   getPutStructuresPayload,
@@ -51,15 +51,8 @@ describe("FinalisationIdentification page integration", () => {
     const putCall = findPutStructuresCall(mockedFetch);
     expect(putCall).toBeDefined();
 
-    const firstCallBody = getPutStructuresPayload<{
-      id: number;
-      forms: Array<{
-        formSteps: Array<{
-          stepDefinition: { label: string };
-          status: StepStatus;
-        }>;
-      }>;
-    }>(mockedFetch);
+    const firstCallBody =
+      getPutStructuresPayload<FinalisationStepValidationPayload>(mockedFetch);
 
     expectFinalisationStepValidation(firstCallBody, {
       structureId: 77,

@@ -8,6 +8,16 @@ import { FetchStateProvider } from "@/app/context/FetchStateContext";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
 
+export type FinalisationStepValidationPayload = {
+  id: number;
+  forms: Array<{
+    formSteps: Array<{
+      stepDefinition: { label: string };
+      status: StepStatus;
+    }>;
+  }>;
+};
+
 if (!HTMLElement.prototype.scrollIntoView) {
   HTMLElement.prototype.scrollIntoView = () => {};
 }
@@ -84,15 +94,7 @@ export const flushAutoSaveDebounce = async (delayMs = 500) => {
 };
 
 export const expectFinalisationStepValidation = (
-  payload: {
-    id: number;
-    forms: Array<{
-      formSteps: Array<{
-        stepDefinition: { label: string };
-        status: StepStatus;
-      }>;
-    }>;
-  },
+  payload: FinalisationStepValidationPayload,
   expected: {
     structureId: number;
     stepLabel: string;

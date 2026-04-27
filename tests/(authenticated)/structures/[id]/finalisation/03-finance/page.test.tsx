@@ -2,13 +2,13 @@ import { fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationFinancePage from "@/app/(authenticated)/structures/[id]/finalisation/03-finance/page";
-import { StepStatus } from "@/types/form.type";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationFinanceValidStructure } from "../../../../../test-utils/structure.factory";
 import {
   clickButtonByName,
   expectFinalisationStepValidation,
+  FinalisationStepValidationPayload,
   findPutStructuresCall,
   flushAutoSaveDebounce,
   getPutStructuresPayload,
@@ -40,15 +40,8 @@ describe("FinalisationFinance page integration", () => {
     const putCall = findPutStructuresCall(mockedFetch);
     expect(putCall).toBeDefined();
 
-    const body = getPutStructuresPayload<{
-      id: number;
-      forms: Array<{
-        formSteps: Array<{
-          stepDefinition: { label: string };
-          status: StepStatus;
-        }>;
-      }>;
-    }>(mockedFetch);
+    const body =
+      getPutStructuresPayload<FinalisationStepValidationPayload>(mockedFetch);
     expectFinalisationStepValidation(body, {
       structureId: 77,
       stepLabel: "03-finance",
