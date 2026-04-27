@@ -30,10 +30,26 @@ export const DnaAndFiness = ({ formKind = FormKind.FINALISATION }: Props) => {
 
   useEffect(() => {
     if (!isMultiDna) {
-      setValue("dnaStructures", [watch("dnaStructures")?.[0]]);
-      setValue("finesses", [watch("finesses")?.[0]]);
+      const dnaStructures = watch("dnaStructures");
+      const finesses = watch("finesses");
+
+      if (dnaStructures && dnaStructures[0]) {
+        setValue("dnaStructures", [dnaStructures?.[0]]);
+      }
+
+      if (finesses && finesses[0]) {
+        setValue("finesses", [finesses?.[0]]);
+      }
     }
   }, [isMultiDna, setValue, watch]);
+
+  // We had a bug that set finess to [null], so we have to clean it up
+  const finesses = watch("finesses");
+  useEffect(() => {
+    if (finesses && finesses[0] === null) {
+      setValue("finesses", undefined);
+    }
+  }, [finesses, setValue]);
 
   return (
     <>
