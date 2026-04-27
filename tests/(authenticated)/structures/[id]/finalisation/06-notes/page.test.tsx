@@ -1,5 +1,4 @@
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationNotesPage from "@/app/(authenticated)/structures/[id]/finalisation/06-notes/page";
@@ -8,6 +7,8 @@ import { StepStatus } from "@/types/form.type";
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationValidStructure } from "../../../../../test-utils/structure.factory";
 import {
+  clickButtonByName,
+  expectFinalisationStepValidation,
   findPutStructuresCall,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
@@ -35,14 +36,8 @@ describe("FinalisationNotes page integration", () => {
     const mockedFetch = mockStructurePageFetch(structure);
 
     renderWithStructurePageProviders(structure, <FinalisationNotesPage />);
-    await waitFor(() =>
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
-
     // WHEN
-    await userEvent.click(
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
+    await clickButtonByName("Je valide la saisie de cette page");
 
     // THEN
     const putCall = findPutStructuresCall(mockedFetch);
@@ -57,15 +52,11 @@ describe("FinalisationNotes page integration", () => {
         }>;
       }>;
     }>(mockedFetch);
-    expect(body.id).toBe(77);
-    expect(body.forms[0].formSteps).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          stepDefinition: expect.objectContaining({ label: "06-notes" }),
-          status: StepStatus.VALIDE,
-        }),
-      ])
-    );
+    expectFinalisationStepValidation(body, {
+      structureId: 77,
+      stepLabel: "06-notes",
+      mockRouterPush,
+    });
     // 06-notes is the last step — no navigation, scroll to top instead
     expect(mockRouterPush).not.toHaveBeenCalled();
   });

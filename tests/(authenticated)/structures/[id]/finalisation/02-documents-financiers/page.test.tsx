@@ -1,5 +1,3 @@
-import { screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationDocumentsFinanciersPage from "@/app/(authenticated)/structures/[id]/finalisation/02-documents-financiers/page";
@@ -8,6 +6,8 @@ import { StepStatus } from "@/types/form.type";
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationDocumentsFinanciersValidStructure } from "../../../../../test-utils/structure.factory";
 import {
+  clickButtonByName,
+  expectFinalisationStepValidation,
   findPutStructuresCall,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
@@ -38,14 +38,8 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
       structure,
       <FinalisationDocumentsFinanciersPage />
     );
-    await waitFor(() =>
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
-
     // WHEN
-    await userEvent.click(
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
+    await clickButtonByName("Je valide la saisie de cette page");
 
     // THEN
     const putCall = findPutStructuresCall(mockedFetch);
@@ -60,18 +54,12 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
         }>;
       }>;
     }>(mockedFetch);
-    expect(body.id).toBe(77);
-    expect(body.forms[0].formSteps).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          stepDefinition: expect.objectContaining({
-            label: "02-documents-financiers",
-          }),
-          status: StepStatus.VALIDE,
-        }),
-      ])
-    );
-    expect(mockRouterPush).toHaveBeenCalledWith("03-finance");
+    expectFinalisationStepValidation(body, {
+      structureId: 77,
+      stepLabel: "02-documents-financiers",
+      nextRoute: "03-finance",
+      mockRouterPush,
+    });
   });
 
   it("should block submit when required financial documents are missing", async () => {
@@ -85,14 +73,8 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
       structure,
       <FinalisationDocumentsFinanciersPage />
     );
-    await waitFor(() =>
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
-
     // WHEN
-    await userEvent.click(
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
+    await clickButtonByName("Je valide la saisie de cette page");
 
     // THEN
     expect(mockRouterPush).not.toHaveBeenCalled();

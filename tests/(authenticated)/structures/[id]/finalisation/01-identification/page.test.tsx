@@ -10,6 +10,7 @@ import { StructureType } from "@/types/structure.type";
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createStructure } from "../../../../../test-utils/structure.factory";
 import {
+  expectFinalisationStepValidation,
   findPutStructuresCall,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
@@ -59,18 +60,12 @@ describe("FinalisationIdentification page integration", () => {
       }>;
     }>(mockedFetch);
 
-    expect(firstCallBody.id).toBe(77);
-    expect(firstCallBody.forms[0].formSteps).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          stepDefinition: expect.objectContaining({
-            label: "01-identification",
-          }),
-          status: StepStatus.VALIDE,
-        }),
-      ])
-    );
-    expect(mockRouterPush).toHaveBeenCalledWith("02-documents-financiers");
+    expectFinalisationStepValidation(firstCallBody, {
+      structureId: 77,
+      stepLabel: "01-identification",
+      nextRoute: "02-documents-financiers",
+      mockRouterPush,
+    });
   });
 
   it("should autosave form data and send full expected payload", async () => {

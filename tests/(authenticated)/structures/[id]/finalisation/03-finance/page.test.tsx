@@ -1,5 +1,3 @@
-import { screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationFinancePage from "@/app/(authenticated)/structures/[id]/finalisation/03-finance/page";
@@ -8,6 +6,8 @@ import { StepStatus } from "@/types/form.type";
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationFinanceValidStructure } from "../../../../../test-utils/structure.factory";
 import {
+  clickButtonByName,
+  expectFinalisationStepValidation,
   findPutStructuresCall,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
@@ -31,14 +31,8 @@ describe("FinalisationFinance page integration", () => {
     const mockedFetch = mockStructurePageFetch(structure);
 
     renderWithStructurePageProviders(structure, <FinalisationFinancePage />);
-    await waitFor(() =>
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
-
     // WHEN
-    await userEvent.click(
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
+    await clickButtonByName("Je valide la saisie de cette page");
 
     // THEN
     const putCall = findPutStructuresCall(mockedFetch);
@@ -53,16 +47,12 @@ describe("FinalisationFinance page integration", () => {
         }>;
       }>;
     }>(mockedFetch);
-    expect(body.id).toBe(77);
-    expect(body.forms[0].formSteps).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          stepDefinition: expect.objectContaining({ label: "03-finance" }),
-          status: StepStatus.VALIDE,
-        }),
-      ])
-    );
-    expect(mockRouterPush).toHaveBeenCalledWith("04-controles");
+    expectFinalisationStepValidation(body, {
+      structureId: 77,
+      stepLabel: "03-finance",
+      nextRoute: "04-controles",
+      mockRouterPush,
+    });
   });
 
   it("should block submit when financial indicators are missing", async () => {
@@ -74,14 +64,8 @@ describe("FinalisationFinance page integration", () => {
     const mockedFetch = mockStructurePageFetch(structure);
 
     renderWithStructurePageProviders(structure, <FinalisationFinancePage />);
-    await waitFor(() =>
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
-
     // WHEN
-    await userEvent.click(
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
+    await clickButtonByName("Je valide la saisie de cette page");
 
     // THEN
     expect(findPutStructuresCall(mockedFetch)).toBeUndefined();

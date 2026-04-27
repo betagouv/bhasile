@@ -1,5 +1,3 @@
-import { screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ModificationControleQualitePage from "@/app/(authenticated)/structures/[id]/modification/controle-qualite/page";
@@ -7,6 +5,7 @@ import ModificationControleQualitePage from "@/app/(authenticated)/structures/[i
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationControlesValidStructure } from "../../../../../test-utils/structure.factory";
 import {
+  clickButtonByName,
   findPutStructuresCall,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
@@ -37,10 +36,8 @@ describe("ModificationControleQualite page integration", () => {
       structure,
       <ModificationControleQualitePage />
     );
-    await waitFor(() => screen.getByRole("button", { name: "Valider" }));
-
     // WHEN
-    await userEvent.click(screen.getByRole("button", { name: "Valider" }));
+    await clickButtonByName("Valider");
 
     // THEN
     const putCall = findPutStructuresCall(mockedFetch);

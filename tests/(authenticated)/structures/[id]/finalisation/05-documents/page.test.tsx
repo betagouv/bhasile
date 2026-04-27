@@ -1,5 +1,3 @@
-import { screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationDocumentsPage from "@/app/(authenticated)/structures/[id]/finalisation/05-documents/page";
@@ -8,6 +6,8 @@ import { StepStatus } from "@/types/form.type";
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationValidStructure } from "../../../../../test-utils/structure.factory";
 import {
+  clickButtonByName,
+  expectFinalisationStepValidation,
   findPutStructuresCall,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
@@ -56,14 +56,8 @@ describe("FinalisationDocuments page integration", () => {
     const mockedFetch = mockStructurePageFetch(structure);
 
     renderWithStructurePageProviders(structure, <FinalisationDocumentsPage />);
-    await waitFor(() =>
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
-
     // WHEN
-    await userEvent.click(
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
+    await clickButtonByName("Je valide la saisie de cette page");
 
     // THEN
     const putCall = findPutStructuresCall(mockedFetch);
@@ -78,15 +72,11 @@ describe("FinalisationDocuments page integration", () => {
         }>;
       }>;
     }>(mockedFetch);
-    expect(body.id).toBe(77);
-    expect(body.forms[0].formSteps).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          stepDefinition: expect.objectContaining({ label: "05-documents" }),
-          status: StepStatus.VALIDE,
-        }),
-      ])
-    );
-    expect(mockRouterPush).toHaveBeenCalledWith("06-notes");
+    expectFinalisationStepValidation(body, {
+      structureId: 77,
+      stepLabel: "05-documents",
+      nextRoute: "06-notes",
+      mockRouterPush,
+    });
   });
 });

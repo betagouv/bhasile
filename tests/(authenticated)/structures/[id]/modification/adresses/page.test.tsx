@@ -1,5 +1,3 @@
-import { screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ModificationAdressesPage from "@/app/(authenticated)/structures/[id]/modification/adresses/page";
@@ -7,6 +5,7 @@ import ModificationAdressesPage from "@/app/(authenticated)/structures/[id]/modi
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createModificationAdressesValidStructure } from "../../../../../test-utils/structure.factory";
 import {
+  clickButtonByName,
   findPutStructuresCall,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
@@ -38,10 +37,8 @@ describe("ModificationAdresses page integration", () => {
     const mockedFetch = mockStructurePageFetch(structure);
 
     renderWithStructurePageProviders(structure, <ModificationAdressesPage />);
-    await waitFor(() => screen.getByRole("button", { name: "Valider" }));
-
     // WHEN
-    await userEvent.click(screen.getByRole("button", { name: "Valider" }));
+    await clickButtonByName("Valider");
 
     // THEN
     const putCall = findPutStructuresCall(mockedFetch);
@@ -80,10 +77,8 @@ describe("ModificationAdresses page integration", () => {
     const mockedFetch = mockStructurePageFetch(structure);
 
     renderWithStructurePageProviders(structure, <ModificationAdressesPage />);
-    await waitFor(() => screen.getByRole("button", { name: "Valider" }));
-
     // WHEN
-    await userEvent.click(screen.getByRole("button", { name: "Valider" }));
+    await clickButtonByName("Valider");
 
     // THEN
     expect(findPutStructuresCall(mockedFetch)).toBeUndefined();

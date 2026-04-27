@@ -1,5 +1,3 @@
-import { screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ModificationNotesPage from "@/app/(authenticated)/structures/[id]/modification/notes/page";
@@ -8,6 +6,7 @@ import { StructureType } from "@/types/structure.type";
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createStructure } from "../../../../../test-utils/structure.factory";
 import {
+  clickButtonByName,
   findPutStructuresCall,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
@@ -35,10 +34,8 @@ describe("ModificationNotes page integration", () => {
     const mockedFetch = mockStructurePageFetch(structure);
 
     renderWithStructurePageProviders(structure, <ModificationNotesPage />);
-    await waitFor(() => screen.getByRole("button", { name: "Valider" }));
-
     // WHEN
-    await userEvent.click(screen.getByRole("button", { name: "Valider" }));
+    await clickButtonByName("Valider");
 
     // THEN
     const putCall = findPutStructuresCall(mockedFetch);

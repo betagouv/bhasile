@@ -1,5 +1,3 @@
-import { screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationControlesPage from "@/app/(authenticated)/structures/[id]/finalisation/04-controles/page";
@@ -8,6 +6,8 @@ import { StepStatus } from "@/types/form.type";
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationControlesValidStructure } from "../../../../../test-utils/structure.factory";
 import {
+  clickButtonByName,
+  expectFinalisationStepValidation,
   findPutStructuresCall,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
@@ -31,14 +31,8 @@ describe("FinalisationControles page integration", () => {
     const mockedFetch = mockStructurePageFetch(structure);
 
     renderWithStructurePageProviders(structure, <FinalisationControlesPage />);
-    await waitFor(() =>
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
-
     // WHEN
-    await userEvent.click(
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
+    await clickButtonByName("Je valide la saisie de cette page");
 
     // THEN
     const putCall = findPutStructuresCall(mockedFetch);
@@ -53,16 +47,12 @@ describe("FinalisationControles page integration", () => {
         }>;
       }>;
     }>(mockedFetch);
-    expect(body.id).toBe(77);
-    expect(body.forms[0].formSteps).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          stepDefinition: expect.objectContaining({ label: "04-controles" }),
-          status: StepStatus.VALIDE,
-        }),
-      ])
-    );
-    expect(mockRouterPush).toHaveBeenCalledWith("05-documents");
+    expectFinalisationStepValidation(body, {
+      structureId: 77,
+      stepLabel: "04-controles",
+      nextRoute: "05-documents",
+      mockRouterPush,
+    });
   });
 
   it("should block submit when evaluation is missing its required date", async () => {
@@ -83,14 +73,8 @@ describe("FinalisationControles page integration", () => {
     mockStructurePageFetch(structure);
 
     renderWithStructurePageProviders(structure, <FinalisationControlesPage />);
-    await waitFor(() =>
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
-
     // WHEN
-    await userEvent.click(
-      screen.getByRole("button", { name: "Je valide la saisie de cette page" })
-    );
+    await clickButtonByName("Je valide la saisie de cette page");
 
     // THEN
     expect(mockRouterPush).not.toHaveBeenCalled();
