@@ -34,6 +34,18 @@ describe("structure.repository db integration", () => {
     });
   };
 
+  const updateStructureAndFetch = async <T>(
+    structureId: number,
+    payload: Record<string, unknown>,
+    fetchData: () => Promise<T>
+  ): Promise<T> => {
+    await updateOne({
+      id: structureId,
+      ...payload,
+    });
+    return fetchData();
+  };
+
   afterAll(async () => {
     if (createdStructureIds.length > 0) {
       await prisma.structure.deleteMany({
@@ -196,19 +208,17 @@ describe("structure.repository db integration", () => {
       role: "Direction",
       perimetre: "National",
     };
-    await updateOne(
+    const contacts = await updateStructureAndFetch(
+      structure.id,
       {
-        id: structure.id,
         contacts: [newContact],
       },
-      false
+      () =>
+        prisma.contact.findMany({
+          where: { structureId: structure.id },
+          orderBy: { id: "asc" },
+        })
     );
-
-    // THEN: old contacts are removed and replaced by the new list
-    const contacts = await prisma.contact.findMany({
-      where: { structureId: structure.id },
-      orderBy: { id: "asc" },
-    });
 
     expect(contacts).toHaveLength(1);
     expect(contacts[0]).toMatchObject(newContact);
@@ -227,15 +237,17 @@ describe("structure.repository db integration", () => {
 
     // WHEN: same year is sent with new values
     const newBudget = { year: 2024, commentaire: "new" };
-    await updateOne({
-      id: structure.id,
-      budgets: [newBudget],
-    });
+    const budgets = await updateStructureAndFetch(
+      structure.id,
+      {
+        budgets: [newBudget],
+      },
+      () =>
+        prisma.budget.findMany({
+          where: { structureId: structure.id },
+        })
+    );
 
-    // THEN: budget row is updated in place
-    const budgets = await prisma.budget.findMany({
-      where: { structureId: structure.id },
-    });
     expect(budgets).toHaveLength(1);
     expect(budgets[0]).toMatchObject(newBudget);
   });
@@ -259,15 +271,17 @@ describe("structure.repository db integration", () => {
       ETP: 3,
       coutJournalier: 15,
     };
-    await updateOne({
-      id: structure.id,
-      indicateursFinanciers: [newIndicateurFinancier],
-    });
+    const rows = await updateStructureAndFetch(
+      structure.id,
+      {
+        indicateursFinanciers: [newIndicateurFinancier],
+      },
+      () =>
+        prisma.indicateurFinancier.findMany({
+          where: { structureId: structure.id },
+        })
+    );
 
-    // THEN: row is updated
-    const rows = await prisma.indicateurFinancier.findMany({
-      where: { structureId: structure.id },
-    });
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject(newIndicateurFinancier);
   });
@@ -285,15 +299,17 @@ describe("structure.repository db integration", () => {
 
     // WHEN: same year receives new values
     const newStructureTypologie = { year: 2024, placesAutorisees: 25, pmr: 2 };
-    await updateOne({
-      id: structure.id,
-      structureTypologies: [newStructureTypologie],
-    });
+    const rows = await updateStructureAndFetch(
+      structure.id,
+      {
+        structureTypologies: [newStructureTypologie],
+      },
+      () =>
+        prisma.structureTypologie.findMany({
+          where: { structureId: structure.id },
+        })
+    );
 
-    // THEN: typology is updated
-    const rows = await prisma.structureTypologie.findMany({
-      where: { structureId: structure.id },
-    });
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject(newStructureTypologie);
   });
@@ -357,15 +373,17 @@ describe("structure.repository db integration", () => {
       commune: "Lyon",
       departement: "69",
     };
-    await updateOne({
-      id: structure.id,
-      antennes: [newAntenne],
-    });
+    const antennes = await updateStructureAndFetch(
+      structure.id,
+      {
+        antennes: [newAntenne],
+      },
+      () =>
+        prisma.antenne.findMany({
+          where: { structureId: structure.id },
+        })
+    );
 
-    // THEN: only the new antenne remains
-    const antennes = await prisma.antenne.findMany({
-      where: { structureId: structure.id },
-    });
     expect(antennes).toHaveLength(1);
     expect(antennes[0]).toMatchObject(newAntenne);
   });
@@ -409,15 +427,17 @@ describe("structure.repository db integration", () => {
     // WHEN: a new FINESS list is sent
     const newCode = `FIN-NEW-${Date.now()}-${randomUUID()}`;
     const newFiness = { code: newCode, description: "new finess" };
-    await updateOne({
-      id: structure.id,
-      finesses: [newFiness],
-    });
+    const finesses = await updateStructureAndFetch(
+      structure.id,
+      {
+        finesses: [newFiness],
+      },
+      () =>
+        prisma.finess.findMany({
+          where: { structureId: structure.id },
+        })
+    );
 
-    // THEN: only the new FINESS remains
-    const finesses = await prisma.finess.findMany({
-      where: { structureId: structure.id },
-    });
     expect(finesses).toHaveLength(1);
     expect(finesses[0]).toMatchObject(newFiness);
   });
@@ -441,16 +461,18 @@ describe("structure.repository db integration", () => {
       category: "AUTRE" as const,
       fileUploads: [{ key: keptFile.key }],
     };
-    await updateOne({
-      id: structure.id,
-      actesAdministratifs: [newActeAdministratif],
-    });
+    const actes = await updateStructureAndFetch(
+      structure.id,
+      {
+        actesAdministratifs: [newActeAdministratif],
+      },
+      () =>
+        prisma.acteAdministratif.findMany({
+          where: { structureId: structure.id },
+          include: { fileUploads: true },
+        })
+    );
 
-    // THEN: old acte is deleted and new one remains
-    const actes = await prisma.acteAdministratif.findMany({
-      where: { structureId: structure.id },
-      include: { fileUploads: true },
-    });
     expect(actes).toHaveLength(1);
     expect(actes[0].name).toBe(newActeAdministratif.name);
     expect(actes[0].category).toBe(newActeAdministratif.category);
@@ -481,16 +503,18 @@ describe("structure.repository db integration", () => {
       granularity: "STRUCTURE" as const,
       fileUploads: [{ key: newFile.key }],
     };
-    await updateOne({
-      id: structure.id,
-      documentsFinanciers: [newDocumentFinancier],
-    });
+    const docs = await updateStructureAndFetch(
+      structure.id,
+      {
+        documentsFinanciers: [newDocumentFinancier],
+      },
+      () =>
+        prisma.documentFinancier.findMany({
+          where: { structureId: structure.id },
+          include: { fileUploads: true },
+        })
+    );
 
-    // THEN: old document is deleted and new one is present
-    const docs = await prisma.documentFinancier.findMany({
-      where: { structureId: structure.id },
-      include: { fileUploads: true },
-    });
     expect(docs).toHaveLength(1);
     expect(docs[0].year).toBe(newDocumentFinancier.year);
     expect(docs[0].name).toBe(newDocumentFinancier.name);
@@ -519,16 +543,18 @@ describe("structure.repository db integration", () => {
       type: ControleType.PROGRAMME,
       fileUploads: [{ key: file.key, id: file.id }],
     };
-    await updateOne({
-      id: structure.id,
-      controles: [newControle],
-    });
+    const controles = await updateStructureAndFetch(
+      structure.id,
+      {
+        controles: [newControle],
+      },
+      () =>
+        prisma.controle.findMany({
+          where: { structureId: structure.id },
+          include: { fileUploads: true },
+        })
+    );
 
-    // THEN: only the new controle remains
-    const controles = await prisma.controle.findMany({
-      where: { structureId: structure.id },
-      include: { fileUploads: true },
-    });
     expect(controles).toHaveLength(1);
     expect(controles[0].type).toBe("PROGRAMME");
     expect(
@@ -557,16 +583,18 @@ describe("structure.repository db integration", () => {
       noteStructure: 5,
       fileUploads: [{ key: file.key }],
     };
-    await updateOne({
-      id: structure.id,
-      evaluations: [newEvaluation],
-    });
+    const evaluations = await updateStructureAndFetch(
+      structure.id,
+      {
+        evaluations: [newEvaluation],
+      },
+      () =>
+        prisma.evaluation.findMany({
+          where: { structureId: structure.id },
+          include: { fileUploads: true },
+        })
+    );
 
-    // THEN: only the new evaluation remains
-    const evaluations = await prisma.evaluation.findMany({
-      where: { structureId: structure.id },
-      include: { fileUploads: true },
-    });
     expect(evaluations).toHaveLength(1);
     expect(evaluations[0]).toMatchObject({
       note: newEvaluation.note,
@@ -651,15 +679,17 @@ describe("structure.repository db integration", () => {
       cpom: true,
       operateurComment: "Updated comment",
     };
-    await updateOne({
-      id: structure.id,
-      structureMillesimes: [newStructureMillesime],
-    });
+    const rows = await updateStructureAndFetch(
+      structure.id,
+      {
+        structureMillesimes: [newStructureMillesime],
+      },
+      () =>
+        prisma.structureMillesime.findMany({
+          where: { structureId: structure.id },
+        })
+    );
 
-    // THEN: millesime is updated
-    const rows = await prisma.structureMillesime.findMany({
-      where: { structureId: structure.id },
-    });
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject(newStructureMillesime);
   });
