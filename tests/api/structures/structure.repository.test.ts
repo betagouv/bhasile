@@ -4,13 +4,8 @@ import { afterAll, describe, expect, it } from "vitest";
 
 import { updateOne } from "@/app/api/structures/structure.repository";
 import prisma from "@/lib/prisma";
-import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { Repartition } from "@/types/adresse.type";
 import { ControleType } from "@/types/controle.type";
-import {
-  DocumentFinancierCategory,
-  DocumentFinancierGranularity,
-} from "@/types/document-financier.type";
 import { StepStatus } from "@/types/form.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 
@@ -443,7 +438,7 @@ describe("structure.repository db integration", () => {
     // WHEN: update contains only one acte bound to another file key
     const newActeAdministratif = {
       name: "Nouveau acte",
-      category: ActeAdministratifCategory[3],
+      category: "AUTRE" as const,
       fileUploads: [{ key: keptFile.key }],
     };
     await updateOne({
@@ -458,8 +453,9 @@ describe("structure.repository db integration", () => {
     });
     expect(actes).toHaveLength(1);
     expect(actes[0].name).toBe(newActeAdministratif.name);
-    expect(actes[0].fileUploads.map((file) => file.key)).toContain(
-      keptFile.key
+    expect(actes[0].category).toBe(newActeAdministratif.category);
+    expect(actes[0].fileUploads.map((file) => file.key).sort()).toEqual(
+      newActeAdministratif.fileUploads.map((file) => file.key).sort()
     );
   });
 
@@ -481,8 +477,8 @@ describe("structure.repository db integration", () => {
     const newDocumentFinancier = {
       year: 2025,
       name: "Document financier test",
-      category: DocumentFinancierCategory[10],
-      granularity: DocumentFinancierGranularity[0],
+      category: "AUTRE_FINANCIER" as const,
+      granularity: "STRUCTURE" as const,
       fileUploads: [{ key: newFile.key }],
     };
     await updateOne({
@@ -498,7 +494,11 @@ describe("structure.repository db integration", () => {
     expect(docs).toHaveLength(1);
     expect(docs[0].year).toBe(newDocumentFinancier.year);
     expect(docs[0].name).toBe(newDocumentFinancier.name);
-    expect(docs[0].fileUploads.map((file) => file.key)).toContain(newFile.key);
+    expect(docs[0].category).toBe(newDocumentFinancier.category);
+    expect(docs[0].granularity).toBe(newDocumentFinancier.granularity);
+    expect(docs[0].fileUploads.map((file) => file.key).sort()).toEqual(
+      newDocumentFinancier.fileUploads.map((file) => file.key).sort()
+    );
   });
 
   it("should replace controles list", async () => {
@@ -628,7 +628,9 @@ describe("structure.repository db integration", () => {
       include: { formSteps: true },
     });
     expect(form.status).toBe(newForm.status);
+    expect(form.formDefinitionId).toBe(formDefinition.id);
     expect(form.formSteps).toHaveLength(1);
+    expect(form.formSteps[0].stepDefinitionId).toBe(firstStep.id);
     expect(form.formSteps[0].status).toBe(newForm.formSteps[0].status);
   });
 
