@@ -224,6 +224,39 @@ describe("structure.repository db integration", () => {
     expect(contacts[0]).toMatchObject(newContact);
   });
 
+  it("should not modify contacts when updating only scalar fields", async () => {
+    // GIVEN: a structure with existing contacts
+    const structure = await createStructure();
+    const existingContact = {
+      prenom: "Contact",
+      nom: "Stable",
+      email: "contact.stable@example.test",
+      telephone: "0100000999",
+      role: "Coordination",
+      perimetre: "Regional",
+    };
+    await prisma.contact.create({
+      data: {
+        structureId: structure.id,
+        ...existingContact,
+      },
+    });
+
+    const contacts = await updateStructureAndFetch(
+      structure.id,
+      {
+        nom: "Nom mis a jour sans contacts",
+      },
+      () =>
+        prisma.contact.findMany({
+          where: { structureId: structure.id },
+        })
+    );
+
+    expect(contacts).toHaveLength(1);
+    expect(contacts[0]).toMatchObject(existingContact);
+  });
+
   it("should upsert structure budgets by year", async () => {
     // GIVEN: an existing budget
     const structure = await createStructure();
@@ -264,7 +297,7 @@ describe("structure.repository db integration", () => {
       },
     });
 
-    // WHEN: same key is updated
+    // WHEN: same year and type is updated
     const newIndicateurFinancier = {
       year: 2024,
       type: "PREVISIONNEL" as const,
