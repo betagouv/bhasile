@@ -1,3 +1,4 @@
+import { act, fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationFinancePage from "@/app/(authenticated)/structures/[id]/finalisation/03-finance/page";
@@ -69,6 +70,35 @@ describe("FinalisationFinance page integration", () => {
 
     // THEN
     expect(findPutStructuresCall(mockedFetch)).toBeUndefined();
+    expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
+  it("should autosave finance data after debounce", async () => {
+    // GIVEN
+    const structure = createFinalisationFinanceValidStructure(79);
+    const mockedFetch = mockStructurePageFetch(structure);
+
+    renderWithStructurePageProviders(structure, <FinalisationFinancePage />);
+    vi.useFakeTimers();
+
+    // WHEN
+    const input = screen.getAllByRole("textbox")[0];
+    fireEvent.change(input, { target: { value: "12" } });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+      await vi.runOnlyPendingTimersAsync();
+      await Promise.resolve();
+    });
+
+    // THEN
+    expect(findPutStructuresCall(mockedFetch)).toBeDefined();
+    const payload = getPutStructuresPayload<{
+      id: number;
+      budgets?: Array<{ year: number }>;
+      indicateursFinanciers?: Array<{ year: number }>;
+    }>(mockedFetch);
+    expect(payload.id).toBe(79);
+    expect(payload.budgets ?? payload.indicateursFinanciers).toBeTruthy();
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 });

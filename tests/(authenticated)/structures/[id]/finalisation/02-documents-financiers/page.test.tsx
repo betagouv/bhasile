@@ -1,3 +1,4 @@
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationDocumentsFinanciersPage from "@/app/(authenticated)/structures/[id]/finalisation/02-documents-financiers/page";
@@ -9,6 +10,7 @@ import {
   clickButtonByName,
   expectFinalisationStepValidation,
   findPutStructuresCall,
+  getLatestPutStructuresPayloadMatching,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
 } from "../../../../../test-utils/structure-page-test.helpers";
@@ -16,10 +18,6 @@ import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mo
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
-}));
-
-vi.mock("@/app/components/forms/AutoSave", () => ({
-  AutoSave: () => null,
 }));
 
 describe("FinalisationDocumentsFinanciers page integration", () => {
@@ -45,7 +43,7 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
     const putCall = findPutStructuresCall(mockedFetch);
     expect(putCall).toBeDefined();
 
-    const body = getPutStructuresPayload<{
+    const body = getLatestPutStructuresPayloadMatching<{
       id: number;
       forms: Array<{
         formSteps: Array<{
@@ -53,7 +51,13 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
           status: StepStatus;
         }>;
       }>;
-    }>(mockedFetch);
+    }>(
+      mockedFetch,
+      (payload) =>
+        payload.forms?.[0]?.formSteps?.some(
+          (step) => step.stepDefinition.label === "02-documents-financiers"
+        ) ?? false
+    );
     expectFinalisationStepValidation(body, {
       structureId: 77,
       stepLabel: "02-documents-financiers",
@@ -68,6 +72,7 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
       ...createFinalisationDocumentsFinanciersValidStructure(78),
       documentsFinanciers: [],
     };
+    mockStructurePageFetch(structure);
 
     renderWithStructurePageProviders(
       structure,
@@ -78,5 +83,41 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
 
     // THEN
     expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
+  it("should autosave and keep only upload-ready financial documents", async () => {
+    // GIVEN
+    const structure = createFinalisationDocumentsFinanciersValidStructure(79);
+    const mockedFetch = mockStructurePageFetch(structure);
+
+    renderWithStructurePageProviders(
+      structure,
+      <FinalisationDocumentsFinanciersPage />
+    );
+    // WHEN
+    fireEvent.click(screen.getByRole("checkbox", { name: /programme 303/i }));
+    await waitFor(() => {
+      expect(findPutStructuresCall(mockedFetch)).toBeDefined();
+    });
+
+    // THEN
+    const payload = getPutStructuresPayload<{
+      id: number;
+      creationDate: string;
+      date303: string | null;
+      structureMillesimes: Array<{ year: number; cpom: boolean }>;
+    }>(mockedFetch);
+
+    expect(payload.id).toBe(79);
+    expect(payload.date303).toBeNull();
+    expect(payload.creationDate).toBeTruthy();
+    expect(payload.structureMillesimes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          year: expect.any(Number),
+          cpom: expect.any(Boolean),
+        }),
+      ])
+    );
   });
 });

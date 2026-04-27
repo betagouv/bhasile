@@ -1,3 +1,4 @@
+import { act, fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationControlesPage from "@/app/(authenticated)/structures/[id]/finalisation/04-controles/page";
@@ -77,6 +78,35 @@ describe("FinalisationControles page integration", () => {
     await clickButtonByName("Je valide la saisie de cette page");
 
     // THEN
+    expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
+  it("should autosave controles data after debounce", async () => {
+    // GIVEN
+    const structure = createFinalisationControlesValidStructure(79);
+    const mockedFetch = mockStructurePageFetch(structure);
+
+    renderWithStructurePageProviders(structure, <FinalisationControlesPage />);
+    vi.useFakeTimers();
+
+    // WHEN
+    const input = screen.getAllByRole("spinbutton")[0];
+    fireEvent.change(input, { target: { value: "4" } });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+      await vi.runOnlyPendingTimersAsync();
+      await Promise.resolve();
+    });
+
+    // THEN
+    expect(findPutStructuresCall(mockedFetch)).toBeDefined();
+    const payload = getPutStructuresPayload<{
+      id: number;
+      controles?: unknown[];
+      evaluations?: unknown[];
+    }>(mockedFetch);
+    expect(payload.id).toBe(79);
+    expect(payload.controles ?? payload.evaluations).toBeTruthy();
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 });

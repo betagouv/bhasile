@@ -1,3 +1,4 @@
+import { act, fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationDocumentsPage from "@/app/(authenticated)/structures/[id]/finalisation/05-documents/page";
@@ -17,11 +18,6 @@ import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mo
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
 }));
-
-vi.mock(
-  "@/app/components/forms/actesAdministratifs/ActesAdministratifs",
-  () => ({ ActesAdministratifs: () => <div>Actes administratifs</div> })
-);
 
 describe("FinalisationDocuments page integration", () => {
   beforeEach(() => {
@@ -78,5 +74,45 @@ describe("FinalisationDocuments page integration", () => {
       nextRoute: "06-notes",
       mockRouterPush,
     });
+  });
+
+  it("should autosave documents data after debounce", async () => {
+    // GIVEN
+    const base = createFinalisationValidStructure(79);
+    const structure = {
+      ...base,
+      actesAdministratifs: [
+        {
+          id: 1,
+          category: "ARRETE_AUTORISATION" as const,
+          startDate: "2022-01-01T12:00:00.000Z",
+          endDate: "2025-01-01T12:00:00.000Z",
+          fileUploads: [{ id: 1, key: "arrete-autorisation" }],
+        },
+      ],
+    };
+    const mockedFetch = mockStructurePageFetch(structure);
+
+    renderWithStructurePageProviders(structure, <FinalisationDocumentsPage />);
+    vi.useFakeTimers();
+
+    // WHEN
+    const input = screen.getAllByRole("textbox")[0];
+    fireEvent.change(input, { target: { value: "2023-01-01" } });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+      await vi.runOnlyPendingTimersAsync();
+      await Promise.resolve();
+    });
+
+    // THEN
+    expect(findPutStructuresCall(mockedFetch)).toBeDefined();
+    const payload = getPutStructuresPayload<{
+      id: number;
+      actesAdministratifs?: Array<{ id: number; category: string }>;
+    }>(mockedFetch);
+    expect(payload.id).toBe(79);
+    expect(payload.actesAdministratifs?.length).toBeGreaterThan(0);
+    expect(mockRouterPush).not.toHaveBeenCalled();
   });
 });

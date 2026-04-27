@@ -45,6 +45,28 @@ export const getPutStructuresPayload = <T,>(mockedFetch: {
   return JSON.parse((putCall[1] as RequestInit).body as string) as T;
 };
 
+export const getLatestPutStructuresPayloadMatching = <T,>(
+  mockedFetch: { mock: { calls: unknown[][] } },
+  predicate: (payload: T) => boolean
+) => {
+  const putCalls = [...mockedFetch.mock.calls]
+    .reverse()
+    .filter(
+      (call) =>
+        call[0] === "/api/structures" &&
+        (call[1] as RequestInit | undefined)?.method === "PUT"
+    );
+
+  for (const call of putCalls) {
+    const payload = JSON.parse((call[1] as RequestInit).body as string) as T;
+    if (predicate(payload)) {
+      return payload;
+    }
+  }
+
+  throw new Error("Expected one matching PUT call to /api/structures");
+};
+
 export const clickButtonByName = async (name: string) => {
   await waitFor(() => {
     screen.getByRole("button", { name });
