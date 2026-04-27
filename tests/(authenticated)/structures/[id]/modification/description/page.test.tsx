@@ -34,7 +34,6 @@ describe("ModificationDescription page integration", () => {
       structure,
       <ModificationDescriptionPage />
     );
-    // DnaAndFiness fetches codes on mount — wait before interacting
     await waitFor(() => {
       expect(mockedFetch).toHaveBeenCalledWith("/api/dna-codes?structureId=77");
     });
