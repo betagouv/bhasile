@@ -153,6 +153,11 @@ export const findBySearch = async ({
         },
       },
       dnaStructures: {
+        orderBy: {
+          dna: {
+            code: "asc",
+          },
+        },
         include: {
           dna: true,
         },
@@ -260,6 +265,11 @@ export const findOne = async (id: number) => {
         select: { text: true },
       },
       dnaStructures: {
+        orderBy: {
+          dna: {
+            code: "asc",
+          },
+        },
         include: {
           dna: {
             include: {
