@@ -556,9 +556,8 @@ describe("structure.repository db integration", () => {
     expect(actes).toHaveLength(1);
     expect(actes[0].name).toBe(newActeAdministratif.name);
     expect(actes[0].category).toBe(newActeAdministratif.category);
-    expect(actes[0].fileUploads.map((file) => file.key).sort()).toEqual(
-      newActeAdministratif.fileUploads.map((file) => file.key).sort()
-    );
+    expect(actes[0].fileUploads).toHaveLength(1);
+    expect(actes[0].fileUploads).toMatchObject([{ key: keptFile.key }]);
   });
 
   it("should upsert documentsFinanciers and delete missing ones", async () => {
@@ -600,9 +599,8 @@ describe("structure.repository db integration", () => {
     expect(docs[0].name).toBe(newDocumentFinancier.name);
     expect(docs[0].category).toBe(newDocumentFinancier.category);
     expect(docs[0].granularity).toBe(newDocumentFinancier.granularity);
-    expect(docs[0].fileUploads.map((file) => file.key).sort()).toEqual(
-      newDocumentFinancier.fileUploads.map((file) => file.key).sort()
-    );
+    expect(docs[0].fileUploads).toHaveLength(1);
+    expect(docs[0].fileUploads).toMatchObject([{ key: newFile.key }]);
   });
 
   it("should replace controles list", async () => {
