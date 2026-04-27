@@ -285,19 +285,28 @@ describe("structure.repository db integration", () => {
     expect(budgets[0]).toMatchObject(newBudget);
   });
 
-  it("should keep existing budget and add a new one for another year", async () => {
-    // GIVEN: an existing budget for year 2024
+  it("should keep existing budgets and add a new one for another year", async () => {
+    // GIVEN: existing budgets for multiple years
     const structure = await createStructure();
-    const existingBudget = { year: 2024, commentaire: "budget-2024" };
-    await prisma.budget.create({
-      data: {
+    const existingBudgets = [
+      { year: 2021, commentaire: "budget-2021", dotationDemandee: 100000 },
+      { year: 2022, commentaire: "budget-2022", dotationDemandee: 200000 },
+      { year: 2023, commentaire: "budget-2023", dotationDemandee: 300000 },
+      { year: 2024, commentaire: "budget-2024", dotationDemandee: 400000 },
+    ];
+    await prisma.budget.createMany({
+      data: existingBudgets.map((budget) => ({
         structureId: structure.id,
-        ...existingBudget,
-      },
+        ...budget,
+      })),
     });
 
     // WHEN: update contains a budget for another year
-    const newBudget = { year: 2025, commentaire: "budget-2025" };
+    const newBudget = {
+      year: 2025,
+      commentaire: "budget-2025",
+      dotationDemandee: 500000,
+    };
     const budgets = await updateStructureAndFetch(
       structure.id,
       {
@@ -310,10 +319,17 @@ describe("structure.repository db integration", () => {
         })
     );
 
-    // THEN: existing year is kept and new year is added
-    expect(budgets).toHaveLength(2);
-    expect(budgets[0]).toMatchObject(existingBudget);
-    expect(budgets[1]).toMatchObject(newBudget);
+    // THEN: existing years are kept and new year is added
+    expect(budgets).toHaveLength(5);
+    expect(budgets).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining(existingBudgets[0]),
+        expect.objectContaining(existingBudgets[1]),
+        expect.objectContaining(existingBudgets[2]),
+        expect.objectContaining(existingBudgets[3]),
+        expect.objectContaining(newBudget),
+      ])
+    );
   });
 
   it("should upsert indicateursFinanciers by year and type", async () => {
