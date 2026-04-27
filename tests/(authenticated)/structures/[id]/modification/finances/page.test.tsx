@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import ModificationFinancesPage from "@/app/(authenticated)/structures/[id]/modification/finances/page";
 import { CURRENT_YEAR } from "@/constants";
 
@@ -12,6 +12,7 @@ import {
   getPutStructuresPayload,
   renderWithStructurePageProviders,
 } from "../../../../../test-utils/structure-page-test.helpers";
+import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
 
 vi.mock("@/app/utils/date.util", async (importOriginal) => {
   const original =

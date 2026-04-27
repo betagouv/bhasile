@@ -1,6 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinalisationDocumentsFinanciersPage from "@/app/(authenticated)/structures/[id]/finalisation/02-documents-financiers/page";
 import { StepStatus } from "@/types/form.type";
@@ -72,7 +72,6 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
       ...createFinalisationDocumentsFinanciersValidStructure(78),
       documentsFinanciers: [],
     };
-    const mockedFetch = mockStructurePageFetch(structure);
 
     renderWithStructurePageProviders(
       structure,

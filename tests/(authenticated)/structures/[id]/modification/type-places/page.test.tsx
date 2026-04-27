@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import ModificationTypePlacesPage from "@/app/(authenticated)/structures/[id]/modification/type-places/page";
 import { StructureType } from "@/types/structure.type";
 
@@ -12,6 +12,7 @@ import {
   getPutStructuresPayload,
   renderWithStructurePageProviders,
 } from "../../../../../test-utils/structure-page-test.helpers";
+import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
 
 vi.mock(
   "@/app/components/forms/ouvertureFermeture/FieldSetOuvertureFermeture",

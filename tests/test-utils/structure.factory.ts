@@ -309,8 +309,8 @@ export const createModificationAdressesValidStructure = (id: number) => {
           {
             year: CURRENT_YEAR,
             placesAutorisees: 10,
-            qpv: false,
-            logementSocial: false,
+            qpv: 0,
+            logementSocial: 0,
           },
         ],
       },

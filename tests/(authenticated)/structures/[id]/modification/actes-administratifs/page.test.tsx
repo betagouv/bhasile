@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import ModificationActesAdministratifsPage from "@/app/(authenticated)/structures/[id]/modification/actes-administratifs/page";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
@@ -11,6 +11,7 @@ import {
   getPutStructuresPayload,
   renderWithStructurePageProviders,
 } from "../../../../../test-utils/structure-page-test.helpers";
+import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
 
 vi.mock(
   "@/app/components/forms/actesAdministratifs/ActesAdministratifs",

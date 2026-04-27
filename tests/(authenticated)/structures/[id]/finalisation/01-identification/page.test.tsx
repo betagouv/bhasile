@@ -1,16 +1,8 @@
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { StructureClientProvider } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
 import FinalisationIdentificationPage from "@/app/(authenticated)/structures/[id]/finalisation/01-identification/page";
-import { FetchStateProvider } from "@/app/context/FetchStateContext";
 import { CURRENT_YEAR } from "@/constants";
 import { StepStatus } from "@/types/form.type";
 import { StructureType } from "@/types/structure.type";

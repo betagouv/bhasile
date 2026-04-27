@@ -1,6 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ModificationAdressesPage from "@/app/(authenticated)/structures/[id]/modification/adresses/page";
 
@@ -66,8 +66,8 @@ describe("ModificationAdresses page integration", () => {
             {
               year: new Date().getFullYear(),
               placesAutorisees: 0,
-              qpv: false,
-              logementSocial: false,
+              qpv: 0,
+              logementSocial: 0,
             },
           ],
         },
