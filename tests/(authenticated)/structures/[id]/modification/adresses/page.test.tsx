@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ModificationAdressesPage from "@/app/(authenticated)/structures/[id]/modification/adresses/page";
+import { CURRENT_YEAR } from "@/constants";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createModificationAdressesValidStructure } from "../../../../../test-utils/structure.factory";
@@ -38,12 +39,40 @@ describe("ModificationAdresses page integration", () => {
 
     const body = getPutStructuresPayload<{
       id: number;
+      typeBati: string;
       adresses: Array<{
+        id: number;
         adresse: string;
-        adresseTypologies?: Array<{ placesAutorisees: number }>;
+        commune: string;
+        codePostal: string;
+        repartition: string;
+        adresseTypologies?: Array<{
+          year: number;
+          placesAutorisees: number;
+          qpv: number;
+          logementSocial: number;
+        }>;
       }>;
     }>(mockedFetch);
     expect(body.id).toBe(77);
+    expect(body.typeBati).toBe("Collectif");
+    expect(body.adresses).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          adresse: "1 rue de Paris",
+          commune: "Paris",
+          codePostal: "75011",
+          repartition: "Collectif",
+          adresseTypologies: expect.arrayContaining([
+            expect.objectContaining({
+              placesAutorisees: 10,
+              qpv: 0,
+              logementSocial: 0,
+            }),
+          ]),
+        }),
+      ])
+    );
     expect(body.adresses[0]?.adresseTypologies?.[0]?.placesAutorisees).toBe(10);
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
   });
@@ -57,7 +86,7 @@ describe("ModificationAdresses page integration", () => {
           ...createModificationAdressesValidStructure(78).adresses[0],
           adresseTypologies: [
             {
-              year: new Date().getFullYear(),
+              year: CURRENT_YEAR,
               placesAutorisees: 0,
               qpv: 0,
               logementSocial: 0,

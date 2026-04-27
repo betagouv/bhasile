@@ -37,8 +37,22 @@ describe("ModificationCalendrier page integration", () => {
     const putCall = findPutStructuresCall(mockedFetch);
     expect(putCall).toBeDefined();
 
-    const body = getPutStructuresPayload<{ id: number }>(mockedFetch);
+    const body = getPutStructuresPayload<{
+      id: number;
+      codeBhasile: string;
+      type: string;
+      debutPeriodeAutorisation: string;
+      finPeriodeAutorisation: string;
+      debutConvention: string;
+      finConvention: string;
+    }>(mockedFetch);
     expect(body.id).toBe(77);
+    expect(body.codeBhasile).toBe(structure.codeBhasile);
+    expect(body.type).toBe(structure.type);
+    expect(body.debutPeriodeAutorisation).toContain("2022-01-01");
+    expect(body.finPeriodeAutorisation).toContain("2025-01-01");
+    expect(body.debutConvention).toContain("2024-01-01");
+    expect(body.finConvention).toContain("2027-01-01");
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
   });
 });

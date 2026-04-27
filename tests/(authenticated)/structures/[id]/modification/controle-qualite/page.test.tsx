@@ -41,10 +41,22 @@ describe("ModificationControleQualite page integration", () => {
 
     const body = getPutStructuresPayload<{
       id: number;
+      controles: unknown[];
       evaluations: Array<{ date: string }>;
     }>(mockedFetch);
     expect(body.id).toBe(77);
-    expect(body.evaluations.length).toBeGreaterThan(0);
+    expect(body.controles).toEqual([]);
+    expect(body.evaluations).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 1,
+          notePersonne: 1,
+          notePro: 1,
+          noteStructure: 1,
+          note: 1,
+        }),
+      ])
+    );
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
   });
 });

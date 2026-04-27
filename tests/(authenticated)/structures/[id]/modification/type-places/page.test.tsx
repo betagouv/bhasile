@@ -39,9 +39,27 @@ describe("ModificationTypePlaces page integration", () => {
 
     const body = getPutStructuresPayload<{
       id: number;
-      structureTypologies: Array<{ placesAutorisees: number }>;
+      structureTypologies: Array<{
+        id: number;
+        year: number;
+        placesAutorisees: number;
+        lgbt: number;
+        pmr: number;
+        fvvTeh: number;
+      }>;
     }>(mockedFetch);
     expect(body.id).toBe(77);
+    expect(body.structureTypologies).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          year: expect.any(Number),
+          placesAutorisees: 10,
+          lgbt: 0,
+          pmr: 0,
+          fvvTeh: 0,
+        }),
+      ])
+    );
     expect(body.structureTypologies[0]?.placesAutorisees).toBe(10);
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
   });

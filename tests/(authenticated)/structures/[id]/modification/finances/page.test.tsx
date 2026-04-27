@@ -38,12 +38,33 @@ describe("ModificationFinances page integration", () => {
 
     const body = getPutStructuresPayload<{
       id: number;
-      budgets: Array<{ year: number }>;
-      indicateursFinanciers: Array<{ year: number }>;
+      budgets: Array<{ id: number; year: number }>;
+      indicateursFinanciers: Array<{ id: number; year: number; type: string }>;
+      documentsFinanciers: unknown[];
+      structureMillesimes: Array<{ year: number; cpom: boolean }>;
     }>(mockedFetch);
     expect(body.id).toBe(77);
-    expect(body.budgets.length).toBeGreaterThan(0);
-    expect(body.indicateursFinanciers.length).toBeGreaterThan(0);
+    expect(body.budgets).toEqual(structure.budgets);
+    expect(body.indicateursFinanciers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ year: 2026, type: "PREVISIONNEL" }),
+        expect.objectContaining({ year: 2026, type: "REALISE" }),
+        expect.objectContaining({ year: 2025, type: "PREVISIONNEL" }),
+        expect.objectContaining({ year: 2025, type: "REALISE" }),
+      ])
+    );
+    expect(body.indicateursFinanciers.every((item) => item.year >= 2021)).toBe(
+      true
+    );
+    expect(body.documentsFinanciers).toEqual([]);
+    expect(body.structureMillesimes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          year: expect.any(Number),
+          cpom: expect.any(Boolean),
+        }),
+      ])
+    );
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
   });
 

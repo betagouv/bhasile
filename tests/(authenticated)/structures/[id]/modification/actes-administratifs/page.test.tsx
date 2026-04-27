@@ -61,10 +61,16 @@ describe("ModificationActesAdministratifs page integration", () => {
 
     const body = getPutStructuresPayload<{
       id: number;
-      actesAdministratifs: Array<{ category: string }>;
+      actesAdministratifs: Array<{
+        id: number;
+        category: string;
+        startDate: string;
+        endDate: string;
+        fileUploads: Array<{ id: number; key: string }>;
+      }>;
     }>(mockedFetch);
     expect(body.id).toBe(77);
-    expect(body.actesAdministratifs.length).toBeGreaterThan(0);
+    expect(body.actesAdministratifs).toEqual(structure.actesAdministratifs);
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
   });
 });

@@ -37,11 +37,12 @@ describe("ModificationNotes page integration", () => {
     const putCall = findPutStructuresCall(mockedFetch);
     expect(putCall).toBeDefined();
 
-    const body = getPutStructuresPayload<{ id: number; notes: string }>(
-      mockedFetch
-    );
+    const body = getPutStructuresPayload<{
+      id: number;
+      notes: string;
+    }>(mockedFetch);
     expect(body.id).toBe(77);
-    expect(body.notes).toBeTruthy();
+    expect(body.notes).toBe(structure.notes);
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
   });
 });
