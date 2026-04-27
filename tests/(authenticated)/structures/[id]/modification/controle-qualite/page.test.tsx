@@ -1,0 +1,52 @@
+import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
+import ModificationControleQualitePage from "@/app/(authenticated)/structures/[id]/modification/controle-qualite/page";
+
+import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
+import { createFinalisationControlesValidStructure } from "../../../../../test-utils/structure.factory";
+import {
+  findPutStructuresCall,
+  getPutStructuresPayload,
+  renderWithStructurePageProviders,
+} from "../../../../../test-utils/structure-page-test.helpers";
+
+vi.mock("@/app/components/common/CustomNotice", () => ({
+  CustomNotice: () => <div>Custom notice</div>,
+}));
+
+describe("ModificationControleQualite page integration", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useRealTimers();
+    global.fetch = vi.fn();
+  });
+
+  it("should submit and navigate back to the structure page", async () => {
+    // GIVEN
+    const structure = createFinalisationControlesValidStructure(77);
+    const mockedFetch = mockStructurePageFetch(structure);
+
+    renderWithStructurePageProviders(
+      structure,
+      <ModificationControleQualitePage />
+    );
+    await waitFor(() => screen.getByRole("button", { name: "Valider" }));
+
+    // WHEN
+    await userEvent.click(screen.getByRole("button", { name: "Valider" }));
+
+    // THEN
+    const putCall = findPutStructuresCall(mockedFetch);
+    expect(putCall).toBeDefined();
+
+    const body = getPutStructuresPayload<{
+      id: number;
+      evaluations: Array<{ date: string }>;
+    }>(mockedFetch);
+    expect(body.id).toBe(77);
+    expect(body.evaluations.length).toBeGreaterThan(0);
+    expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
+  });
+});

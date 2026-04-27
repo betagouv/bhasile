@@ -17,29 +17,12 @@ import { StructureType } from "@/types/structure.type";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createStructure } from "../../../../../test-utils/structure.factory";
-
-const mockRouterPush = vi.fn();
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockRouterPush,
-  }),
-}));
-
-vi.mock(
-  "@/app/(authenticated)/structures/[id]/finalisation/_components/Tabs",
-  () => ({
-    Tabs: () => <div>Tabs</div>,
-  })
-);
-
-vi.mock("@/app/components/SubmitError", () => ({
-  SubmitError: () => <div>Submit error</div>,
-}));
-
-vi.mock("@/app/components/ui/InformationBar", () => ({
-  InformationBar: () => <div>Information bar</div>,
-}));
+import {
+  findPutStructuresCall,
+  getPutStructuresPayload,
+  renderWithStructurePageProviders,
+} from "../../../../../test-utils/structure-page-test.helpers";
+import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
 
 describe("FinalisationIdentification page integration", () => {
   beforeEach(() => {
@@ -48,21 +31,14 @@ describe("FinalisationIdentification page integration", () => {
     global.fetch = vi.fn();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it("should submit and send updated finalisation step in PUT payload", async () => {
     // GIVEN
     const structure = createStructure({ id: 77, type: StructureType.CADA });
     const mockedFetch = mockStructurePageFetch(structure);
 
-    render(
-      <FetchStateProvider>
-        <StructureClientProvider structure={structure}>
-          <FinalisationIdentificationPage />
-        </StructureClientProvider>
-      </FetchStateProvider>
+    renderWithStructurePageProviders(
+      structure,
+      <FinalisationIdentificationPage />
     );
     await waitFor(() => {
       expect(mockedFetch).toHaveBeenCalledWith("/api/dna-codes?structureId=77");
@@ -74,16 +50,18 @@ describe("FinalisationIdentification page integration", () => {
     );
 
     // THEN
-    const putCall = mockedFetch.mock.calls.find(
-      (call) =>
-        call[0] === "/api/structures" &&
-        (call[1] as RequestInit | undefined)?.method === "PUT"
-    );
+    const putCall = findPutStructuresCall(mockedFetch);
     expect(putCall).toBeDefined();
 
-    const firstCallBody = JSON.parse(
-      (putCall?.[1] as RequestInit).body as string
-    );
+    const firstCallBody = getPutStructuresPayload<{
+      id: number;
+      forms: Array<{
+        formSteps: Array<{
+          stepDefinition: { label: string };
+          status: StepStatus;
+        }>;
+      }>;
+    }>(mockedFetch);
 
     expect(firstCallBody.id).toBe(77);
     expect(firstCallBody.forms[0].formSteps).toEqual(
@@ -104,16 +82,14 @@ describe("FinalisationIdentification page integration", () => {
     const structure = createStructure({ id: 78, type: StructureType.CADA });
     const mockedFetch = mockStructurePageFetch(structure);
 
-    render(
-      <FetchStateProvider>
-        <StructureClientProvider structure={structure}>
-          <FinalisationIdentificationPage />
-        </StructureClientProvider>
-      </FetchStateProvider>
+    renderWithStructurePageProviders(
+      structure,
+      <FinalisationIdentificationPage />
     );
     await waitFor(() => {
       expect(mockedFetch).toHaveBeenCalledWith("/api/dna-codes?structureId=78");
     });
+    // Switch to fake timers after the initial fetch to control the debounce
     vi.useFakeTimers();
 
     // WHEN
@@ -148,16 +124,10 @@ describe("FinalisationIdentification page integration", () => {
     });
 
     // THEN
-    const putCall = mockedFetch.mock.calls.find(
-      (call) =>
-        call[0] === "/api/structures" &&
-        (call[1] as RequestInit | undefined)?.method === "PUT"
-    );
+    const putCall = findPutStructuresCall(mockedFetch);
     expect(putCall).toBeDefined();
 
-    const actualPayload = JSON.parse(
-      (putCall?.[1] as RequestInit).body as string
-    );
+    const actualPayload = getPutStructuresPayload(mockedFetch);
 
     const expectedPayload = {
       id: 78,
