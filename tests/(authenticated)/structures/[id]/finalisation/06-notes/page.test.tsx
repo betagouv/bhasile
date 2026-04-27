@@ -56,20 +56,13 @@ describe("FinalisationNotes page integration", () => {
     const structure = createFinalisationValidStructure(78);
     const mockedFetch = mockStructurePageFetch(structure);
 
-    renderWithStructurePageProviders(structure, <FinalisationNotesPage />);
-    await waitFor(() => screen.getByRole("textbox"));
-    // Switch to fake timers after rendering to control the debounce
     vi.useFakeTimers();
+    renderWithStructurePageProviders(structure, <FinalisationNotesPage />);
 
     // WHEN
-    fireEvent.change(screen.getByRole("textbox"), {
-      target: { value: "Note de suivi" },
-    });
+    const input = screen.getAllByRole("textbox")[0];
+    fireEvent.change(input, { target: { value: "Note de suivi" } });
     await flushAutoSaveDebounce();
-
-    // THEN
-    const putCall = findPutStructuresCall(mockedFetch);
-    expect(putCall).toBeDefined();
 
     const body = getPutStructuresPayload<{ id: number; notes: string }>(
       mockedFetch

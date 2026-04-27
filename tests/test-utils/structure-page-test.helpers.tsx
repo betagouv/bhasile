@@ -37,7 +37,7 @@ export const renderWithStructurePageProviders = (
 export const findPutStructuresCall = (mockedFetch: {
   mock: { calls: unknown[][] };
 }) =>
-  [...mockedFetch.mock.calls]
+  mockedFetch.mock.calls
     .reverse()
     .find(
       (call) =>
@@ -60,7 +60,7 @@ export const getLatestPutStructuresPayloadMatching = <T,>(
   mockedFetch: { mock: { calls: unknown[][] } },
   predicate: (payload: T) => boolean
 ) => {
-  const putCalls = [...mockedFetch.mock.calls]
+  const putCalls = mockedFetch.mock.calls
     .reverse()
     .filter(
       (call) =>

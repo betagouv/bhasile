@@ -72,8 +72,8 @@ describe("FinalisationFinance page integration", () => {
     const structure = createFinalisationFinanceValidStructure(79);
     const mockedFetch = mockStructurePageFetch(structure);
 
-    renderWithStructurePageProviders(structure, <FinalisationFinancePage />);
     vi.useFakeTimers();
+    renderWithStructurePageProviders(structure, <FinalisationFinancePage />);
 
     // WHEN
     const input = screen.getAllByRole("textbox")[0];

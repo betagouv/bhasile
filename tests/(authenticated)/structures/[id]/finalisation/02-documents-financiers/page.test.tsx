@@ -88,7 +88,10 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
       <FinalisationDocumentsFinanciersPage />
     );
     // WHEN
-    fireEvent.click(screen.getByRole("checkbox", { name: /programme 303/i }));
+    const checkbox = await screen.findByRole("checkbox", {
+      name: /programme 303/i,
+    });
+    fireEvent.click(checkbox);
     await waitFor(() => {
       expect(findPutStructuresCall(mockedFetch)).toBeDefined();
     });

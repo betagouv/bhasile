@@ -87,8 +87,8 @@ describe("FinalisationDocuments page integration", () => {
     };
     const mockedFetch = mockStructurePageFetch(structure);
 
-    renderWithStructurePageProviders(structure, <FinalisationDocumentsPage />);
     vi.useFakeTimers();
+    renderWithStructurePageProviders(structure, <FinalisationDocumentsPage />);
 
     // WHEN
     const input = screen.getAllByRole("textbox")[0];

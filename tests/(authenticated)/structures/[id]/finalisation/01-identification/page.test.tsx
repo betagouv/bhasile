@@ -74,7 +74,7 @@ describe("FinalisationIdentification page integration", () => {
     await waitFor(() => {
       expect(mockedFetch).toHaveBeenCalledWith("/api/dna-codes?structureId=78");
     });
-    // Switch to fake timers after the initial fetch to control the debounce
+
     vi.useFakeTimers();
 
     // WHEN

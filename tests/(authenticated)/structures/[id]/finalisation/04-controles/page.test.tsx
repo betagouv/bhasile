@@ -80,8 +80,8 @@ describe("FinalisationControles page integration", () => {
     const structure = createFinalisationControlesValidStructure(79);
     const mockedFetch = mockStructurePageFetch(structure);
 
-    renderWithStructurePageProviders(structure, <FinalisationControlesPage />);
     vi.useFakeTimers();
+    renderWithStructurePageProviders(structure, <FinalisationControlesPage />);
 
     // WHEN
     const input = screen.getAllByRole("spinbutton")[0];
