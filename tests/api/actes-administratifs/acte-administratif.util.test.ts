@@ -29,23 +29,26 @@ describe("acte-administratif util", () => {
     ).toEqual([null, null]);
   });
 
-  it("ignores non-current actes and keeps the current one", () => {
+  it("ignores non-current actes and returns the current one", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-15T00:00:00.000Z"));
     const actesAdministratifs: ActeAdministratifStub[] = [
       {
+        id: 101,
         category: "CONVENTION",
         startDate: new Date("2026-03-01T00:00:00.000Z"),
         endDate: new Date("2026-12-31T00:00:00.000Z"),
       },
       {
+        id: 102,
         category: "CONVENTION",
-        startDate: new Date("2025-01-01T00:00:00.000Z"),
-        endDate: new Date("2025-12-31T00:00:00.000Z"),
+        startDate: new Date("2024-01-01T00:00:00.000Z"),
+        endDate: new Date("2024-12-31T00:00:00.000Z"),
       },
       {
+        id: 103,
         category: "CONVENTION",
-        startDate: new Date("2025-06-01T00:00:00.000Z"),
+        startDate: new Date("2025-01-01T00:00:00.000Z"),
         endDate: new Date("2026-06-01T00:00:00.000Z"),
       },
     ];
@@ -56,7 +59,7 @@ describe("acte-administratif util", () => {
         "CONVENTION"
       )
     ).toEqual([
-      new Date("2025-06-01T00:00:00.000Z"),
+      new Date("2025-01-01T00:00:00.000Z"),
       new Date("2026-06-01T00:00:00.000Z"),
     ]);
   });
@@ -124,7 +127,7 @@ describe("acte-administratif util", () => {
     ]);
   });
 
-  it("treats equality with now as non-current boundary", () => {
+  it("treats equality with now as current boundary", () => {
     const now = new Date("2026-01-15T00:00:00.000Z");
     vi.useFakeTimers();
     vi.setSystemTime(now);
@@ -148,7 +151,7 @@ describe("acte-administratif util", () => {
         actesAdministratifs as unknown as ActesAdministratifsInput,
         "CONVENTION"
       )
-    ).toEqual([null, null]);
+    ).toEqual([now, new Date("2026-02-01T00:00:00.000Z")]);
   });
 
   it("ignores orphan avenants with unknown parentId", () => {

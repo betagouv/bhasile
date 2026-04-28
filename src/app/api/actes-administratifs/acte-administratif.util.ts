@@ -6,18 +6,6 @@ import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 export type ActeDateTuple = [Date | null, Date | null];
 
-type ActeAdministratifWithParent = {
-  id: number;
-  startDate: Date | null;
-  parentId: number | null;
-  endDate: Date | null;
-};
-
-type ActeAdministratifWithCorrectEndDate = {
-  startDate: Date | null;
-  endDate: Date | null;
-};
-
 const getMostFutureDate = (dates: (Date | null | undefined)[]): Date | null => {
   const validDates = dates.filter((date): date is Date => !!date);
   if (validDates.length === 0) {
@@ -28,21 +16,6 @@ const getMostFutureDate = (dates: (Date | null | undefined)[]): Date | null => {
   );
 };
 
-const getEffectiveEndDate = (
-  acteAdministratif: ActeAdministratifWithParent,
-  endDatesByParentId: Map<number, Date[]>
-): Date | null => {
-  if (!acteAdministratif.endDate) {
-    return null;
-  }
-
-  const lastAvenantEndDate = getMostFutureDate(
-    endDatesByParentId.get(acteAdministratif.id) ?? []
-  );
-
-  return lastAvenantEndDate ?? acteAdministratif.endDate;
-};
-
 export const getDatesOfCurrentActeAdministratif = (
   actesAdministratifs: (
     | StructureDbDetails
@@ -51,62 +24,43 @@ export const getDatesOfCurrentActeAdministratif = (
   type: ActeAdministratifCategory
 ): ActeDateTuple => {
   const now = new Date();
-  const actesAdministratifsWithCorrectType = (actesAdministratifs ?? []).filter(
-    (acteAdministratif) => acteAdministratif.category === type
-  );
-  const parentActesAdministratifs = actesAdministratifsWithCorrectType.filter(
-    (acteAdministratif) => !acteAdministratif.parentId
-  );
 
-  const endDatesByParentId = actesAdministratifsWithCorrectType.reduce(
-    (accumulator, acteAdministratif) => {
-      if (!acteAdministratif.parentId || !acteAdministratif.endDate) {
-        return accumulator;
-      }
-      const existingEndDates =
-        accumulator.get(acteAdministratif.parentId) ?? [];
-      existingEndDates.push(acteAdministratif.endDate);
-      accumulator.set(acteAdministratif.parentId, existingEndDates);
-      return accumulator;
-    },
-    new Map<number, Date[]>()
-  );
+  const actesAdministratifsWithCorrectType =
+    (actesAdministratifs ?? []).filter(
+      (acteAdministratif) => acteAdministratif.category === type
+    ) ?? [];
 
-  const actesAdministratifsWithCorrectTypeAndCorrectEndDate =
-    parentActesAdministratifs
-      .map<ActeAdministratifWithCorrectEndDate>((acteAdministratif) => ({
+  const parentActesAdministratifsWithCorrectType =
+    actesAdministratifsWithCorrectType.filter(
+      (acteAdministratif) => !acteAdministratif.parentId
+    ) || [];
+
+  const actesAdministratifsWithCorrectEndDate =
+    parentActesAdministratifsWithCorrectType.map((acteAdministratif) => {
+      const children =
+        actesAdministratifs.filter(
+          (acte) => acte.parentId === acteAdministratif.id
+        ) ?? [];
+      const effectiveEndDate = getMostFutureDate(
+        children.map((child) => child.endDate)
+      );
+      return {
         startDate: acteAdministratif.startDate,
-        endDate: getEffectiveEndDate(acteAdministratif, endDatesByParentId),
-      }))
-      .filter(
-        (
-          acteAdministratif
-        ): acteAdministratif is { startDate: Date; endDate: Date } =>
-          !!acteAdministratif.startDate && !!acteAdministratif.endDate
-      )
-      .sort((firstActeAdministratif, secondActeAdministratif) => {
-        const startDateDiff =
-          secondActeAdministratif.startDate.getTime() -
-          firstActeAdministratif.startDate.getTime();
-        if (startDateDiff !== 0) {
-          return startDateDiff;
-        }
-        return (
-          secondActeAdministratif.endDate.getTime() -
-          firstActeAdministratif.endDate.getTime()
-        );
-      });
+        endDate: effectiveEndDate ?? acteAdministratif.endDate,
+      };
+    });
+  const currentActeAdministratif = actesAdministratifsWithCorrectEndDate.find(
+    (acteAdministratif) => {
+      if (!acteAdministratif.startDate || !acteAdministratif.endDate) {
+        return false;
+      }
+      return (
+        acteAdministratif.startDate <= now && acteAdministratif.endDate >= now
+      );
+    }
+  );
 
-  const currentActeAdministratif =
-    actesAdministratifsWithCorrectTypeAndCorrectEndDate.find(
-      (acteAdministratif) =>
-        acteAdministratif.startDate < now && acteAdministratif.endDate > now
-    );
-
-  if (
-    !currentActeAdministratif?.startDate ||
-    !currentActeAdministratif.endDate
-  ) {
+  if (!currentActeAdministratif) {
     return [null, null];
   }
 

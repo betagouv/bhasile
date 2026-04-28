@@ -31,11 +31,13 @@ describe("structure dates from actes administratifs", () => {
     vi.setSystemTime(new Date("2026-01-15T00:00:00.000Z"));
     const structure = createStructure([
       {
+        id: 201,
         category: "CONVENTION",
         startDate: new Date("2025-01-01T00:00:00.000Z"),
         endDate: new Date("2026-02-01T00:00:00.000Z"),
       },
       {
+        id: 202,
         category: "ARRETE_AUTORISATION",
         startDate: new Date("2024-01-01T00:00:00.000Z"),
         endDate: new Date("2027-01-01T00:00:00.000Z"),
