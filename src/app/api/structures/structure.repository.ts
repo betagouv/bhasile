@@ -135,7 +135,11 @@ export const findBySearch = async ({
         include: {
           cpom: {
             include: {
-              actesAdministratifs: true,
+              actesAdministratifs: {
+                include: {
+                  fileUploads: true,
+                },
+              },
             },
           },
         },

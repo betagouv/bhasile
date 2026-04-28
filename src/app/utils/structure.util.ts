@@ -162,7 +162,6 @@ export const getCurrentCpomStructureDates = (
   structure: StructureApiRead
 ): { dateStart?: string; dateEnd?: string } => {
   const currentCpomStructure = getCurrentCpomStructure(structure);
-  console.log("currentCpomStructure", currentCpomStructure);
   if (!currentCpomStructure) {
     return {};
   }

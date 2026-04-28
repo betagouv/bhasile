@@ -302,7 +302,7 @@ export const isStructureInCpomPerYear = (
 
 export const getCpomStructuresWithDates = (
   structure: StructureDbDetails | StructureDbList
-): CpomStructureApiRead[] => {
+): CpomStructureApiRead[] | undefined => {
   const cpomStructures = structure.cpomStructures?.map((cpomStructure) => {
     const [cpomDateStart, cpomDateEnd] = getCpomDatesConvention(
       cpomStructure.cpom
