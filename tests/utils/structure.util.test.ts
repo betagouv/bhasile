@@ -39,6 +39,9 @@ vi.mock("@/constants", async () => {
 });
 
 describe("structure util", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   describe("getPlacesByCommunes", () => {
     it("should return an empty object when given an empty array", () => {
       // GIVEN
@@ -568,6 +571,8 @@ describe("structure util", () => {
 
     it("should return structure-specific dates when CPOM is currently active", () => {
       // GIVEN
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2025-01-15T00:00:00.000Z"));
       const structure = createStructure({
         id: 1,
         cpomStructures: [
@@ -611,9 +616,8 @@ describe("structure util", () => {
 
     it("should return CPOM fallback dates when structure-specific dates are null", () => {
       // GIVEN
-      const mockedDate = dayjs("2025-06-15");
       vi.useFakeTimers();
-      vi.setSystemTime(mockedDate.toDate());
+      vi.setSystemTime(new Date("2025-01-15T00:00:00.000Z"));
 
       const structure = createStructure({
         id: 2,
@@ -712,6 +716,8 @@ describe("structure util", () => {
 
     it("should handle mixed null structure dates correctly", () => {
       // GIVEN
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2025-05-15T00:00:00.000Z"));
       const structure = createStructure({
         id: 6,
         cpomStructures: [
