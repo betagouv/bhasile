@@ -1,15 +1,12 @@
 "use client";
 
-import { ReactElement, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import { useRegisterMapPoint } from "@/app/components/map/MapContext";
 
 import { StructureMarkerContent } from "./StructureMarkerContent";
 
-export const StructureMarker = ({
-  id,
-  coordinates,
-}: Props): ReactElement | null => {
+export const StructureMarker = ({ id, coordinates }: Props): null => {
   const registerPoint = useRegisterMapPoint();
 
   const lngLat = useMemo<[number, number]>(() => {

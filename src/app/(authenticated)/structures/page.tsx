@@ -36,9 +36,7 @@ export default function Structures(): ReactElement {
   const setVisualization = useCallback((next: "tableau" | "carte") => {
     setSelectedVisualization(next);
     sendEvent({ category: "visualisation", action: next });
-    if (typeof window !== "undefined") {
-      window.location.hash = next;
-    }
+    window.location.hash = next;
   }, []);
 
   useEffect(() => {
@@ -59,6 +57,7 @@ export default function Structures(): ReactElement {
       <div className="flex gap-2 px-6 border-b border-b-border-default-grey min-h-[4.35rem] justify-between items-center sticky top-0 bg-lifted-grey z-10">
         <SegmentedControl
           name="Visualisation"
+          value={selectedVisualization}
           options={options}
           onChange={(event) => {
             setVisualization(event as "tableau" | "carte");

@@ -54,10 +54,7 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
     return [toLngLat(sw), toLngLat(ne)] as [[number, number], [number, number]];
   }, []);
 
-  const center = useMemo(
-    () => toLngLat(FRANCE_CENTER as unknown as LatLngTuple),
-    []
-  );
+  const center = useMemo(() => toLngLat(FRANCE_CENTER as LatLngTuple), []);
 
   const getStructureLocations = useCallback((map: maplibregl.Map | null) => {
     if (!map) {
@@ -117,10 +114,10 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
 
     createdMap.addControl(new maplibregl.NavigationControl(), "top-right");
 
-    createdMap.on("load", () => {
+    createdMap.on("load", async () => {
       addOverlay(createdMap, Overlay.administrativeBoundaries);
       addStructuresSource(createdMap);
-      addStructuresMarkerImage(createdMap);
+      await addStructuresMarkerImage(createdMap);
       addStructuresLayers(createdMap);
 
       const cleanupInteractions = bindStructuresInteractions({
