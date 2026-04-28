@@ -1,10 +1,5 @@
-import {
-  StructureDbDetails,
-  StructureDbList,
-} from "@/app/api/structures/structure.db.type";
+import { ActeAdministratif } from "@/generated/prisma/client";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
-
-import { CpomDbDetails, CpomDbList } from "../cpoms/cpom.db.type";
 
 export type ActeDateTuple = [Date | null, Date | null];
 
@@ -19,12 +14,7 @@ const getMostFutureDate = (dates: (Date | null | undefined)[]): Date | null => {
 };
 
 export const getDatesOfCurrentActeAdministratif = (
-  actesAdministratifs: (
-    | StructureDbDetails
-    | StructureDbList
-    | CpomDbDetails
-    | CpomDbList
-  )["actesAdministratifs"],
+  actesAdministratifs: ActeAdministratif[],
   type: ActeAdministratifCategory,
   current: boolean = true
 ): ActeDateTuple => {
