@@ -1,8 +1,8 @@
 import { Repartition } from "@/types/adresse.type";
 import { FormKind } from "@/types/global";
 
-import { Option1Notices } from "./Option1Notices";
-import { Option2Notices } from "./Option2Notices";
+import { ImportOptionNotices } from "./ImportOptionNotices";
+import { ManualOptionNotices } from "./ManualOptionNotices";
 
 export const Notices = ({
   typeBati,
@@ -21,7 +21,7 @@ export const Notices = ({
           </p>
 
           {typeBati === Repartition.COLLECTIF ? (
-            <Option2Notices />
+            <ManualOptionNotices />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="rounded-lg bg-default-grey-hover p-6 flex flex-col gap-5">
@@ -36,16 +36,16 @@ export const Notices = ({
                 <p className="mb-0">
                   Veuillez remplir directement les champs ci-dessous.
                 </p>
-                <Option2Notices />
+                <ManualOptionNotices />
               </div>
-              <Option1Notices typeBati={typeBati} />
+              <ImportOptionNotices typeBati={typeBati} />
             </div>
           )}
         </div>
       )}
       {formKind === FormKind.MODIFICATION && (
         <div className="flex flex-col gap-3">
-          <Option2Notices />
+          <ManualOptionNotices />
         </div>
       )}
     </div>

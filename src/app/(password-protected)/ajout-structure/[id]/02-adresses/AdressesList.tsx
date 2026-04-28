@@ -6,8 +6,8 @@ import { useEffect, useRef } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
 import AddressWithValidation from "@/app/components/forms/AddressWithValidation";
-import { Option1Notices } from "@/app/components/forms/hebergement/Option1Notices";
-import { Option2Notices } from "@/app/components/forms/hebergement/Option2Notices";
+import { ImportOptionNotices } from "@/app/components/forms/hebergement/ImportOptionNotices";
+import { ManualOptionNotices } from "@/app/components/forms/hebergement/ManualOptionNotices";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { CURRENT_YEAR } from "@/constants";
@@ -95,10 +95,10 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
       <fieldset className="flex flex-col gap-8">
         <div className="flex flex-col gap-6" ref={hebergementsContainerRef}>
           {typeBati === Repartition.COLLECTIF ? (
-            <Option2Notices />
+            <ManualOptionNotices />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <Option1Notices typeBati={typeBati} />
+              <ImportOptionNotices typeBati={typeBati} />
 
               <div className="rounded-lg bg-default-grey-hover p-6 flex flex-col gap-5">
                 <div>
@@ -112,7 +112,7 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
                 <p className="mb-0">
                   Veuillez remplir directement les champs ci-dessous.
                 </p>
-                <Option2Notices />
+                <ManualOptionNotices />
               </div>
             </div>
           )}

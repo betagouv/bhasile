@@ -1,6 +1,6 @@
 import { CustomNotice } from "../../common/CustomNotice";
 
-export const Option2Notices = () => {
+export const ManualOptionNotices = () => {
   return (
     <>
       <CustomNotice

@@ -5,7 +5,7 @@ import { Repartition } from "@/types/adresse.type";
 
 import { AdressImporter } from "./AdressImporter";
 
-export const Option1Notices = ({ typeBati }: Props) => {
+export const ImportOptionNotices = ({ typeBati }: Props) => {
   const modelLink =
     typeBati === Repartition.DIFFUS ? MODELE_DIFFUS_LINK : MODELE_MIXTE_LINK;
 
