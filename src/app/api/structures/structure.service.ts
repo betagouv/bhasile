@@ -11,6 +11,7 @@ import {
 import { StructureColumn } from "@/types/ListColumn";
 
 import { processActivitesForStructure } from "../activites/activite.service";
+import { getDatesConvention as getCpomDatesConvention } from "../cpoms/cpom.util";
 import { StructureDbDetails, StructureDbList } from "./structure.db.type";
 import {
   countBySearch,
@@ -149,9 +150,26 @@ const dbStructureToApiRead = (
     : (dbStructure as StructureDbDetails).dnaStructures.flatMap(
         (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
       );
+  const cpomStructures = dbStructure.cpomStructures?.map((cpomStructure) => {
+    const [cpomDateStart, cpomDateEnd] = getCpomDatesConvention(
+      cpomStructure.cpom
+    );
+
+    return {
+      ...cpomStructure,
+      cpom: cpomStructure.cpom
+        ? {
+            ...cpomStructure.cpom,
+            dateStart: cpomDateStart,
+            dateEnd: cpomDateEnd,
+          }
+        : cpomStructure.cpom,
+    };
+  });
 
   return recursivelySerializeDates({
     ...dbStructure,
+    cpomStructures,
     debutConvention,
     finConvention,
     debutPeriodeAutorisation,

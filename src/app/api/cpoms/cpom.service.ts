@@ -1,16 +1,19 @@
-import { computeCpomDates } from "@/app/utils/cpom.util";
-import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
+import { recursivelySerializeDates } from "@/app/utils/date.util";
+import { CpomApiRead } from "@/schemas/api/cpom.schema";
 
-export const getFullCpom = (cpom: CpomApiWrite): CpomApiRead => {
-  const { dateStart, dateEnd } = computeCpomDates(cpom);
+import { CpomDbDetails, CpomDbList } from "./cpom.db.type";
+import { getDatesConvention } from "./cpom.util";
 
-  return {
+export const getFullCpom = (cpom: CpomDbDetails | CpomDbList): CpomApiRead => {
+  const [dateStart, dateEnd] = getDatesConvention(cpom);
+
+  return recursivelySerializeDates({
     ...cpom,
     dateStart,
     dateEnd,
-  };
+  }) as CpomApiRead;
 };
 
-export const getFullCpoms = (cpoms: CpomApiWrite[]): CpomApiRead[] => {
+export const getFullCpoms = (cpoms: CpomDbList[]): CpomApiRead[] => {
   return cpoms.map(getFullCpom);
 };

@@ -1,5 +1,4 @@
 import { DEFAULT_PAGE_SIZE } from "@/constants";
-import { Cpom } from "@/generated/prisma/client";
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
@@ -13,6 +12,7 @@ import { PrismaTransaction } from "@/types/prisma.type";
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
 import { CPOM_ORDER_CTE_SQL, CPOM_ORDER_JOINS_SQL } from "./cpom.constants";
+import { CpomDbDetails, CpomDbList } from "./cpom.db.type";
 import { buildCpomsOrderSql, buildCpomsWhereSql } from "./cpom.util";
 
 type SearchProps = {
@@ -46,7 +46,7 @@ export const findBySearch = async ({
   departements,
   column,
   direction,
-}: SearchProps): Promise<Cpom[]> => {
+}: SearchProps): Promise<CpomDbList[]> => {
   const cpomOrderIds = await getOrderedCpoms({
     page,
     departements,
@@ -102,7 +102,7 @@ export async function countBySearch({
   return Number(result[0]?.count ?? 0);
 }
 
-export const findOne = async (id: number): Promise<Cpom> => {
+export const findOne = async (id: number): Promise<CpomDbDetails> => {
   const cpom = await prisma.cpom.findFirstOrThrow({
     where: { id },
     include: {

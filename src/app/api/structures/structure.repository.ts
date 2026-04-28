@@ -133,7 +133,11 @@ export const findBySearch = async ({
       },
       cpomStructures: {
         include: {
-          cpom: true,
+          cpom: {
+            include: {
+              actesAdministratifs: true,
+            },
+          },
         },
       },
       operateur: true,

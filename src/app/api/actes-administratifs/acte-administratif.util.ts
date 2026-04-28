@@ -21,7 +21,8 @@ export const getDatesOfCurrentActeAdministratif = (
     | StructureDbDetails
     | StructureDbList
   )["actesAdministratifs"],
-  type: ActeAdministratifCategory
+  type: ActeAdministratifCategory,
+  current: boolean = true
 ): ActeDateTuple => {
   const now = new Date();
 
@@ -49,16 +50,16 @@ export const getDatesOfCurrentActeAdministratif = (
         endDate: effectiveEndDate ?? acteAdministratif.endDate,
       };
     });
-  const currentActeAdministratif = actesAdministratifsWithCorrectEndDate.find(
-    (acteAdministratif) => {
-      if (!acteAdministratif.startDate || !acteAdministratif.endDate) {
-        return false;
-      }
-      return (
-        acteAdministratif.startDate <= now && acteAdministratif.endDate >= now
-      );
-    }
-  );
+  const currentActeAdministratif = current
+    ? actesAdministratifsWithCorrectEndDate.find((acteAdministratif) => {
+        if (!acteAdministratif.startDate || !acteAdministratif.endDate) {
+          return false;
+        }
+        return (
+          acteAdministratif.startDate <= now && acteAdministratif.endDate >= now
+        );
+      })
+    : actesAdministratifsWithCorrectEndDate[0];
 
   if (!currentActeAdministratif) {
     return [null, null];

@@ -573,6 +573,8 @@ describe("structure util", () => {
             dateEnd: "2025-12-31T23:59:59.999Z",
             cpom: {
               id: 1,
+              dateStart: "2025-01-01T00:00:00.000Z",
+              dateEnd: "2025-12-31T23:59:59.999Z",
               actesAdministratifs: [
                 {
                   fileUploads: [
@@ -618,6 +620,8 @@ describe("structure util", () => {
             dateEnd: null,
             cpom: {
               id: 1,
+              dateStart: "2025-01-01T00:00:00.000Z",
+              dateEnd: "2025-12-31T23:59:59.999Z",
               actesAdministratifs: [
                 {
                   fileUploads: [
@@ -713,6 +717,8 @@ describe("structure util", () => {
             dateEnd: null,
             cpom: {
               id: 1,
+              dateStart: "2025-01-01T00:00:00.000Z",
+              dateEnd: "2025-12-31T23:59:59.999Z",
               actesAdministratifs: [
                 {
                   fileUploads: [

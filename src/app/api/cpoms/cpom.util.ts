@@ -1,6 +1,9 @@
 import { Prisma } from "@/generated/prisma/client";
 import { CpomColumn } from "@/types/ListColumn";
 
+import { getDatesOfCurrentActeAdministratif } from "../actes-administratifs/acte-administratif.util";
+import { CpomDbDetails, CpomDbList } from "./cpom.db.type";
+
 type CpomQueryFilters = {
   departements: string | null;
 };
@@ -32,3 +35,12 @@ export function buildCpomsWhereSql({
   const patterns = departementList.map((departement) => `%${departement}%`);
   return Prisma.sql`WHERE COALESCE(cd.departements, '') ILIKE ANY (ARRAY[${Prisma.join(patterns)}])`;
 }
+
+export const getDatesConvention = (
+  cpom: CpomDbDetails | CpomDbList
+): [Date | null, Date | null] =>
+  getDatesOfCurrentActeAdministratif(
+    cpom.actesAdministratifs,
+    "CONVENTION",
+    false
+  );

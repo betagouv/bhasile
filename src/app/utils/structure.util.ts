@@ -15,7 +15,6 @@ import { StructureType } from "@/types/structure.type";
 
 import { getDepartementFromCodePostal } from "./adresse.util";
 import { sortKeysByValue } from "./common.util";
-import { computeCpomDates } from "./cpom.util";
 import { getYearFromDate } from "./date.util";
 
 export const getPlacesByCommunes = (
@@ -145,10 +144,8 @@ export const getCurrentCpomStructures = (
   structure: StructureApiRead
 ): CpomStructureApiType | undefined => {
   return structure.cpomStructures?.find((cpomStructure) => {
-    const dateStart =
-      cpomStructure.dateStart ?? computeCpomDates(cpomStructure.cpom).dateStart;
-    const dateEnd =
-      cpomStructure.dateEnd ?? computeCpomDates(cpomStructure.cpom).dateEnd;
+    const dateStart = cpomStructure.dateStart ?? cpomStructure.cpom?.dateStart;
+    const dateEnd = cpomStructure.dateEnd ?? cpomStructure.cpom?.dateEnd;
 
     if (!dateStart || !dateEnd) {
       return false;
@@ -171,11 +168,9 @@ export const getCurrentCpomStructureDates = (
   }
 
   const currentCpomStructureDateStart =
-    currentCpomStructure.dateStart ??
-    computeCpomDates(currentCpomStructure.cpom).dateStart;
+    currentCpomStructure.dateStart ?? currentCpomStructure.cpom?.dateStart;
   const currentCpomStructureDateEnd =
-    currentCpomStructure.dateEnd ??
-    computeCpomDates(currentCpomStructure.cpom).dateEnd;
+    currentCpomStructure.dateEnd ?? currentCpomStructure.cpom?.dateEnd;
 
   return {
     dateStart: currentCpomStructureDateStart ?? undefined,

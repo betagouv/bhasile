@@ -1,6 +1,6 @@
 import { getDatesOfCurrentActeAdministratif } from "@/app/api/actes-administratifs/acte-administratif.util";
+import { getDatesConvention as getCpomDatesConvention } from "@/app/api/cpoms/cpom.util";
 import { getCoordinates } from "@/app/utils/adresse.util";
-import { computeCpomDates } from "@/app/utils/cpom.util";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
 import { Prisma, PublicType, StructureType } from "@/generated/prisma/client";
@@ -266,10 +266,11 @@ export const isStructureInCpom = (
   year: number = CURRENT_YEAR
 ): boolean =>
   structure.cpomStructures?.some((cpomStructure) => {
-    const dateStart =
-      cpomStructure.dateStart ?? computeCpomDates(cpomStructure.cpom).dateStart;
-    const dateEnd =
-      cpomStructure.dateEnd ?? computeCpomDates(cpomStructure.cpom).dateEnd;
+    const [cpomDateStart, cpomDateEnd] = getCpomDatesConvention(
+      cpomStructure.cpom
+    );
+    const dateStart = cpomStructure.dateStart ?? cpomDateStart;
+    const dateEnd = cpomStructure.dateEnd ?? cpomDateEnd;
 
     if (!dateStart || !dateEnd) {
       return false;
