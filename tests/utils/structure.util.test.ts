@@ -505,7 +505,13 @@ describe("structure util", () => {
             structureId: 6,
             dateStart: null,
             dateEnd: null,
-            cpom: undefined,
+            cpom: {
+              id: 1,
+              name: "CPOM Test",
+              actesAdministratifs: [],
+              budgets: [],
+              granularity: "DEPARTEMENTALE",
+            },
           },
         ],
       });
