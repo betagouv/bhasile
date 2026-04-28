@@ -2,7 +2,7 @@ import { CustomNotice } from "../../common/CustomNotice";
 
 export const ManualOptionNotices = () => {
   return (
-    <>
+    <div className="flex flex-col gap-4">
       <CustomNotice
         severity="info"
         className="!mb-0"
@@ -32,6 +32,6 @@ export const ManualOptionNotices = () => {
           </>
         }
       />
-    </>
+    </div>
   );
 };

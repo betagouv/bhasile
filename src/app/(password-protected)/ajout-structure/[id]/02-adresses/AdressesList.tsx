@@ -100,18 +100,18 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <ImportOptionNotices typeBati={typeBati} />
 
-              <div className="rounded-lg bg-default-grey-hover p-6 flex flex-col gap-5">
+              <div className="rounded-lg bg-default-grey-hover p-6 flex flex-col gap-8">
                 <div>
                   <h3 className="text-lg text-title-blue-france mb-0">
                     Option 2 - Remplissage manuel
                   </h3>
-                  <p className="text-sm text-mention-grey mb-0">
+                  <p className="text-sm text-title-blue-france mb-4">
                     (recommandé si moins de 12 adresses à saisir)
                   </p>
+                  <p className="mb-0">
+                    Veuillez remplir directement les champs ci-dessous.
+                  </p>
                 </div>
-                <p className="mb-0">
-                  Veuillez remplir directement les champs ci-dessous.
-                </p>
                 <ManualOptionNotices />
               </div>
             </div>

@@ -29,7 +29,7 @@ export const Notices = ({
                   <h3 className="text-lg text-title-blue-france mb-0">
                     Option 2 - Remplissage manuel
                   </h3>
-                  <p className="text-sm text-mention-grey mb-0">
+                  <p className="text-sm text-title-blue-france mb-0">
                     (recommandé si moins de 12 adresses à saisir)
                   </p>
                 </div>
