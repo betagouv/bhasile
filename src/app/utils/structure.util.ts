@@ -153,11 +153,8 @@ export const getCurrentCpomStructures = (
     if (!dateStart || !dateEnd) {
       return false;
     }
-
-    const yearDebut = getYearFromDate(dateStart);
-    const yearFin = getYearFromDate(dateEnd);
-
-    return yearDebut <= CURRENT_YEAR && yearFin >= CURRENT_YEAR;
+    const now = new Date().toISOString();
+    return dateStart <= now && dateEnd >= now;
   });
 };
 
@@ -165,7 +162,7 @@ export const getCurrentCpomStructureDates = (
   structure: StructureApiRead
 ): { dateStart?: string; dateEnd?: string } => {
   const currentCpomStructure = getCurrentCpomStructures(structure);
-
+  console.log("currentCpomStructure", currentCpomStructure);
   if (!currentCpomStructure) {
     return {};
   }
