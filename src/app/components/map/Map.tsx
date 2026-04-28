@@ -133,11 +133,14 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
       createdMap.once("remove", () => cleanupInteractions());
     });
 
-    const resizeObserver = new ResizeObserver(() => createdMap.resize());
-    resizeObserver.observe(containerRef.current);
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => createdMap.resize())
+        : null;
+    resizeObserver?.observe(containerRef.current);
 
     return () => {
-      resizeObserver.disconnect();
+      resizeObserver?.disconnect();
       popupRootRef.current?.unmount();
       popupRootRef.current = null;
       popupRef.current = null;
