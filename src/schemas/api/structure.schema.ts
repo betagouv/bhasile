@@ -11,6 +11,7 @@ import { budgetApiSchema } from "./budget.schema";
 import { contactApiSchema } from "./contact.schema";
 import { controleApiSchema } from "./controle.schema";
 import { cpomStructureApiSchema } from "./cpom.schema";
+import { CpomStructureApiRead } from "./cpom.schema";
 import { dnaStructureApiSchema } from "./dna-structure.schema";
 import { documentFinancierApiSchema } from "./documentFinancier.schema";
 import { evaluationApiSchema } from "./evaluation.schema";
@@ -132,7 +133,8 @@ export type StructureAgentUpdateApiType = z.infer<
 >;
 
 export type StructureApiWrite = z.infer<typeof structureApiSchema>;
-export type StructureApiRead = StructureApiWrite & {
+export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
+  cpomStructures?: CpomStructureApiRead[];
   repartition: Repartition;
   operateurLabel: string;
   isAutorisee: boolean;

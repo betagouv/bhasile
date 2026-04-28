@@ -37,10 +37,15 @@ export function buildCpomsWhereSql({
 }
 
 export const getDatesConvention = (
-  cpom: CpomDbDetails | CpomDbList
-): [Date | null, Date | null] =>
-  getDatesOfCurrentActeAdministratif(
+  cpom?: CpomDbDetails | CpomDbList
+): [Date | null, Date | null] => {
+  if (!cpom) {
+    return [null, null];
+  }
+
+  return getDatesOfCurrentActeAdministratif(
     cpom.actesAdministratifs,
     "CONVENTION",
     false
   );
+};
