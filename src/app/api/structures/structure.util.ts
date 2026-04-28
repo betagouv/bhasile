@@ -1,10 +1,15 @@
 import { getDatesOfCurrentActeAdministratif } from "@/app/api/actes-administratifs/acte-administratif.util";
 import { getDatesConvention as getCpomDatesConvention } from "@/app/api/cpoms/cpom.util";
 import { getCoordinates } from "@/app/utils/adresse.util";
-import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
+import {
+  getYearFromDate,
+  getYearRange,
+  recursivelySerializeDates,
+} from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
 import { Prisma, PublicType, StructureType } from "@/generated/prisma/client";
 import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
+import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { StructureColumn } from "@/types/ListColumn";
@@ -293,4 +298,26 @@ export const isStructureInCpomPerYear = (
     (acc, year) => ({ ...acc, [year]: isStructureInCpom(structure, year) }),
     {} as Record<number, boolean>
   );
+};
+
+export const getCpomStructuresWithDates = (
+  structure: StructureDbDetails | StructureDbList
+): CpomStructureApiRead[] => {
+  const cpomStructures = structure.cpomStructures?.map((cpomStructure) => {
+    const [cpomDateStart, cpomDateEnd] = getCpomDatesConvention(
+      cpomStructure.cpom
+    );
+
+    return recursivelySerializeDates({
+      ...cpomStructure,
+      cpom: cpomStructure.cpom
+        ? {
+            ...cpomStructure.cpom,
+            dateStart: cpomDateStart,
+            dateEnd: cpomDateEnd,
+          }
+        : cpomStructure.cpom,
+    }) as CpomStructureApiRead;
+  });
+  return cpomStructures;
 };

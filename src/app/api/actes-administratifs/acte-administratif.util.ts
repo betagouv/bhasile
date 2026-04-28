@@ -39,7 +39,7 @@ export const getDatesOfCurrentActeAdministratif = (
   const actesAdministratifsWithCorrectEndDate =
     parentActesAdministratifsWithCorrectType.map((acteAdministratif) => {
       const children =
-        actesAdministratifs.filter(
+        (actesAdministratifs ?? []).filter(
           (acte) => acte.parentId === acteAdministratif.id
         ) ?? [];
       const effectiveEndDate = getMostFutureDate(
