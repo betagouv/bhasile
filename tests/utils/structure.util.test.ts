@@ -16,7 +16,7 @@ import {
 } from "@/app/utils/structure.util";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
@@ -881,7 +881,7 @@ describe("structure util", () => {
   describe("getCpomStructureIndexAndBudgetIndexForAYearAndAType", () => {
     it("should return correct indices when finding matching structure and millesime", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [
+      const cpomStructures: CpomStructureApiRead[] = [
         {
           id: 1,
           cpomId: 1,
@@ -928,7 +928,7 @@ describe("structure util", () => {
 
     it("should return -1 for both indices when given empty array", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [];
+      const cpomStructures: CpomStructureApiRead[] = [];
 
       // WHEN
       const result = getCpomStructureIndexAndBudgetIndexForAYearAndAType(
@@ -946,7 +946,7 @@ describe("structure util", () => {
 
     it("should return -1 for both indices when no structure has matching year", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [
+      const cpomStructures: CpomStructureApiRead[] = [
         {
           id: 1,
           cpomId: 1,
@@ -1001,7 +1001,7 @@ describe("structure util", () => {
 
     it("should return indices for first structure when it has matching year", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [
+      const cpomStructures: CpomStructureApiRead[] = [
         {
           id: 1,
           cpomId: 1,
@@ -1079,7 +1079,7 @@ describe("structure util", () => {
 
     it("should return indices for later structure when first does not match", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [
+      const cpomStructures: CpomStructureApiRead[] = [
         {
           id: 1,
           cpomId: 1,
@@ -1157,7 +1157,7 @@ describe("structure util", () => {
 
     it("should skip structure undefined budgets", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [
+      const cpomStructures: CpomStructureApiRead[] = [
         {
           id: 1,
           cpomId: 1,
@@ -1229,7 +1229,7 @@ describe("structure util", () => {
 
     it("should return correct millesime index when structure has multiple millesimes", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [
+      const cpomStructures: CpomStructureApiRead[] = [
         {
           id: 1,
           cpomId: 1,
@@ -1286,7 +1286,7 @@ describe("structure util", () => {
 
     it("should use CURRENT_YEAR as default when no year is provided", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [
+      const cpomStructures: CpomStructureApiRead[] = [
         {
           id: 1,
           cpomId: 1,

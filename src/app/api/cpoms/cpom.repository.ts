@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import {
   CpomApiWrite,
   CpomDepartementApiType,
-  CpomStructureApiType,
+  CpomStructureApiWrite,
 } from "@/schemas/api/cpom.schema";
 import { CpomColumn } from "@/types/ListColumn";
 import { PrismaTransaction } from "@/types/prisma.type";
@@ -238,7 +238,7 @@ const syncCpomDepartements = async (
 
 const createOrUpdateCpomStructures = async (
   tx: PrismaTransaction,
-  structures: CpomStructureApiType[] | undefined,
+  structures: CpomStructureApiWrite[] | undefined,
   cpomId: number
 ): Promise<void> => {
   if (!structures || structures.length === 0) {

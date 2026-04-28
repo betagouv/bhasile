@@ -6,7 +6,7 @@ import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
 import {
   CpomStructureApiRead,
-  CpomStructureApiType,
+  CpomStructureApiWrite,
 } from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
@@ -198,7 +198,7 @@ export const getMillesimeIndexForAYear = (
   }) ?? -1;
 
 export const getCpomStructureIndexAndBudgetIndexForAYearAndAType = (
-  cpomStructures: CpomStructureApiType[],
+  cpomStructures: CpomStructureApiRead[] | CpomStructureApiWrite[],
   year: number = CURRENT_YEAR,
   type?: StructureType
 ): { cpomStructureIndex: number; budgetIndex: number } => {

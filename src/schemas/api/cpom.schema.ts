@@ -72,8 +72,8 @@ export const cpomApiReadSchema = cpomApiSchema.extend({
 });
 
 export type CpomDepartementApiType = z.infer<typeof cpomDepartementApiSchema>;
-export type CpomStructureApiType = z.infer<typeof cpomStructureApiSchema>;
-export type CpomStructureApiRead = Omit<CpomStructureApiType, "cpom"> & {
+export type CpomStructureApiWrite = z.infer<typeof cpomStructureApiSchema>;
+export type CpomStructureApiRead = Omit<CpomStructureApiWrite, "cpom"> & {
   cpom: CpomApiRead;
 };
 export type CpomApiWrite = z.infer<typeof cpomApiSchema>;

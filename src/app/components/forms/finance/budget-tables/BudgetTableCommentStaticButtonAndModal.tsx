@@ -8,7 +8,7 @@ import {
   getMillesimeIndexForAYear,
 } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
 export const BudgetTableCommentStaticButtonAndModal = ({
@@ -80,6 +80,6 @@ export const BudgetTableCommentStaticButtonAndModal = ({
 type Props = {
   type?: StructureType;
   year: number;
-  cpomStructures?: CpomStructureApiType[];
+  cpomStructures?: CpomStructureApiWrite[];
   budgets?: BudgetApiType[];
 };

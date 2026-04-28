@@ -2,7 +2,7 @@ import { Control, FieldValues } from "react-hook-form";
 
 import { getName, isInputDisabled } from "@/app/utils/budget.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
 import { StructureType } from "@/types/structure.type";
@@ -66,7 +66,7 @@ type Props = {
   control: Control<FieldValues>;
   budgets?: BudgetApiType[];
   indicateursFinanciers?: IndicateurFinancierApiType[];
-  cpomStructures?: CpomStructureApiType[];
+  cpomStructures?: CpomStructureApiWrite[];
   disabledYearsStart?: number;
   enabledYears?: number[];
   isCurrency?: boolean;

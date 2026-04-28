@@ -4,7 +4,7 @@ import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
   CpomApiRead,
   CpomDepartementApiType,
-  CpomStructureApiType,
+  CpomStructureApiRead,
 } from "@/schemas/api/cpom.schema";
 import { BudgetCpomFormValues } from "@/schemas/forms/base/cpom.schema";
 import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
@@ -54,7 +54,7 @@ export const getCpomDefaultValues = (cpom?: CpomApiRead): CpomFormValues => {
 };
 
 export const getStructureCpomDefaultValues = (
-  cpomStructures: CpomStructureApiType[] | undefined
+  cpomStructures: CpomStructureApiRead[] | undefined
 ) => {
   if (!cpomStructures) {
     return [];
