@@ -5,14 +5,9 @@ import "dotenv/config";
 
 import { NoteType } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
-import { BHASILE_USER_NAME } from "@/constants";
+import { BHASILE_USER_NAME, BHASILE_CONTACT_EMAIL } from "@/constants";
 
 const prisma = createPrismaClient();
-
-const BHASILE_CONTACT_EMAIL = process.env.BHASILE_CONTACT_EMAIL || "";
-if (BHASILE_CONTACT_EMAIL === "") {
-  throw new Error("BHASILE_CONTACT_EMAIL is not set");
-}
 
 async function main() {
   console.log(":robot: Upsert fake user...");
