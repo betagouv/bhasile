@@ -143,7 +143,7 @@ export const isStructureMultiDna = (structure: StructureApiRead): boolean => {
   );
 };
 
-export const getCurrentCpomStructures = (
+export const getCurrentCpomStructure = (
   structure: StructureApiRead
 ): CpomStructureApiRead | undefined => {
   return structure.cpomStructures?.find((cpomStructure) => {
@@ -161,7 +161,7 @@ export const getCurrentCpomStructures = (
 export const getCurrentCpomStructureDates = (
   structure: StructureApiRead
 ): { dateStart?: string; dateEnd?: string } => {
-  const currentCpomStructure = getCurrentCpomStructures(structure);
+  const currentCpomStructure = getCurrentCpomStructure(structure);
   console.log("currentCpomStructure", currentCpomStructure);
   if (!currentCpomStructure) {
     return {};

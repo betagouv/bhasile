@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ReactElement, useState } from "react";
 
-import { getCurrentCpomStructures } from "@/app/utils/structure.util";
+import { getCurrentCpomStructure } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
@@ -12,7 +12,7 @@ export const CpomViewer = (): ReactElement => {
 
   const { structure } = useStructureContext();
 
-  const currentCpomStructure = getCurrentCpomStructures(structure);
+  const currentCpomStructure = getCurrentCpomStructure(structure);
 
   return (
     <>
