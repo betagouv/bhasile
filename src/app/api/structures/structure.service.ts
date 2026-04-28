@@ -151,13 +151,21 @@ const dbStructureToApiRead = (
         (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
       );
 
-  return recursivelySerializeDates({
-    ...dbStructure,
-    cpomStructures: getCpomStructuresWithDates(dbStructure),
+  // TODO: remove this when we make the UI change
+  console.log(
     debutConvention,
     finConvention,
     debutPeriodeAutorisation,
-    finPeriodeAutorisation,
+    finPeriodeAutorisation
+  );
+  return recursivelySerializeDates({
+    ...dbStructure,
+    cpomStructures: getCpomStructuresWithDates(dbStructure),
+    // TODO: replace dates when we make the UI change
+    // debutConvention,
+    // finConvention,
+    // debutPeriodeAutorisation,
+    // finPeriodeAutorisation,
     latitude: dbStructure.latitude?.toString(),
     longitude: dbStructure.longitude?.toString(),
     activites,
