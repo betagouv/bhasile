@@ -4,7 +4,10 @@ import { CURRENT_YEAR } from "@/constants";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import {
+  CpomStructureApiRead,
+  CpomStructureApiType,
+} from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
@@ -142,7 +145,7 @@ export const isStructureMultiDna = (structure: StructureApiRead): boolean => {
 
 export const getCurrentCpomStructures = (
   structure: StructureApiRead
-): CpomStructureApiType | undefined => {
+): CpomStructureApiRead | undefined => {
   return structure.cpomStructures?.find((cpomStructure) => {
     const dateStart = cpomStructure.dateStart ?? cpomStructure.cpom?.dateStart;
     const dateEnd = cpomStructure.dateEnd ?? cpomStructure.cpom?.dateEnd;
