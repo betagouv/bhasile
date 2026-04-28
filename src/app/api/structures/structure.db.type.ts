@@ -45,6 +45,7 @@ export type StructureDbList = Prisma.StructureGetPayload<{
         dna: true;
       };
     };
+    actesAdministratifs: true;
   };
 }>;
 

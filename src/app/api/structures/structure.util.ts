@@ -1,3 +1,4 @@
+import { getDatesOfCurrentActeAdministratif } from "@/app/api/actes-administratifs/acte-administratif.util";
 import { getCoordinates } from "@/app/utils/adresse.util";
 import { computeCpomDates } from "@/app/utils/cpom.util";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
@@ -215,6 +216,22 @@ export const getRepartition = (
   }
   return Repartition.COLLECTIF;
 };
+
+export const getDatesConvention = (
+  structure: StructureDbDetails | StructureDbList
+): [Date | null, Date | null] =>
+  getDatesOfCurrentActeAdministratif(
+    structure.actesAdministratifs,
+    "CONVENTION"
+  );
+
+export const getDatesPeriodeAutorisation = (
+  structure: StructureDbDetails | StructureDbList
+): [Date | null, Date | null] =>
+  getDatesOfCurrentActeAdministratif(
+    structure.actesAdministratifs,
+    "ARRETE_AUTORISATION"
+  );
 
 const getCurrentPlacesByProperty = (
   structure: StructureDbDetails | StructureDbList,

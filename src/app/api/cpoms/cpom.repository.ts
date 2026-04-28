@@ -10,7 +10,7 @@ import {
 import { CpomColumn } from "@/types/ListColumn";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acteAdministratif.repository";
+import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
 import { CPOM_ORDER_CTE_SQL, CPOM_ORDER_JOINS_SQL } from "./cpom.constants";
 import { buildCpomsOrderSql, buildCpomsWhereSql } from "./cpom.util";

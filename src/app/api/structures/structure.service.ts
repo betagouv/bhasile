@@ -24,6 +24,8 @@ import {
   getCurrentPlacesAutorisees,
   getCurrentPlacesLogementsSociaux,
   getCurrentPlacesQpv,
+  getDatesConvention,
+  getDatesPeriodeAutorisation,
   getOperateurLabel,
   getRepartition,
   isStructureInCpom,
@@ -132,6 +134,9 @@ const dbStructureToApiRead = (
   dbStructure: StructureDbDetails | StructureDbList,
   simple: boolean = false
 ): StructureApiRead => {
+  const [debutConvention, finConvention] = getDatesConvention(dbStructure);
+  const [debutPeriodeAutorisation, finPeriodeAutorisation] =
+    getDatesPeriodeAutorisation(dbStructure);
   const allActivites = simple
     ? []
     : (dbStructure as StructureDbDetails).dnaStructures.flatMap(
@@ -147,6 +152,10 @@ const dbStructureToApiRead = (
 
   return recursivelySerializeDates({
     ...dbStructure,
+    debutConvention,
+    finConvention,
+    debutPeriodeAutorisation,
+    finPeriodeAutorisation,
     latitude: dbStructure.latitude?.toString(),
     longitude: dbStructure.longitude?.toString(),
     activites,
