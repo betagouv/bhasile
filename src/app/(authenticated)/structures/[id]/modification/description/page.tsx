@@ -18,6 +18,7 @@ import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { transformAgentFormContactsToApiContacts } from "@/app/utils/contacts.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
+import { BHASILE_CONTACT_EMAIL } from "@/constants";
 import {
   ModificationDescriptionFormValues,
   modificationDescriptionSchema,
@@ -27,8 +28,6 @@ import { FormKind } from "@/types/global";
 
 export default function ModificationDescription() {
   const { structure } = useStructureContext();
-  const BHASILE_CONTACT_EMAIL =
-    process.env.NEXT_PUBLIC_BHASILE_CONTACT_EMAIL || "";
 
   const { handleSubmit, backendError } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,

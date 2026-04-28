@@ -2,11 +2,9 @@ import Alert from "@codegouvfr/react-dsfr/Alert";
 import { ReactElement } from "react";
 
 import { ExternalLink } from "@/app/components/common/ExternalLink";
+import { BHASILE_CONTACT_EMAIL } from "@/constants";
 
 export const AccesRefuse = (): ReactElement => {
-  const BHASILE_CONTACT_EMAIL =
-    process.env.NEXT_PUBLIC_BHASILE_CONTACT_EMAIL || "";
-
   return (
     <div className="max-w-[600px] my-10">
       <Alert

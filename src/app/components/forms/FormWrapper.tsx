@@ -18,6 +18,7 @@ import { z } from "zod";
 import { FormProvider } from "@/app/context/FormContext";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { cn } from "@/app/utils/classname.util";
+import { BHASILE_CONTACT_EMAIL, BHASILE_PHONE_NUMBERS } from "@/constants";
 import { DeepPartial } from "@/types/global";
 
 // Define enum for footer buttons
@@ -52,10 +53,6 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
   showContactInfos = true,
 }: FormWrapperProps<TSchema>) {
   const router = useRouter();
-  const BHASILE_CONTACT_EMAIL =
-    process.env.NEXT_PUBLIC_BHASILE_CONTACT_EMAIL || "";
-  const BHASILE_PHONE_NUMBERS =
-    process.env.NEXT_PUBLIC_BHASILE_PHONE_NUMBERS || "";
 
   const {
     currentValue: localStorageValues,

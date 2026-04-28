@@ -44,6 +44,10 @@ export const MODELE_DIFFUS_LINK = "/adresses-diffus.xlsx";
 export const MODELE_MIXTE_LINK = "/adresses-mixte.xlsx";
 
 export const BHASILE_USER_NAME = "BhasileBot";
+export const BHASILE_CONTACT_EMAIL =
+  process.env.NEXT_PUBLIC_BHASILE_CONTACT_EMAIL || "";
+export const BHASILE_PHONE_NUMBERS =
+  process.env.NEXT_PUBLIC_BHASILE_PHONE_NUMBERS || "";
 
 export const DEPARTEMENTS: Departement[] = [
   {

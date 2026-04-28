@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { getFinanceFormTutorialLink } from "@/app/utils/tutorials.util";
+import { BHASILE_CONTACT_EMAIL } from "@/constants";
 
 import { useStructureContext } from "../../../(authenticated)/structures/[id]/_context/StructureClientContext";
 import { CustomNotice } from "../../common/CustomNotice";
@@ -11,8 +12,6 @@ export const BudgetTables = () => {
   const { structure } = useStructureContext();
   const { isAutorisee, isSubventionnee, type } = structure;
   const wasInCpom = Object.values(structure.isInCpomPerYear).some(Boolean);
-  const BHASILE_CONTACT_EMAIL =
-    process.env.NEXT_PUBLIC_BHASILE_CONTACT_EMAIL || "";
 
   return (
     <>

@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { ReactElement } from "react";
 
-export default function ConditionsGeneralesUtilisation(): ReactElement {
-  const BHASILE_CONTACT_EMAIL =
-    process.env.NEXT_PUBLIC_BHASILE_CONTACT_EMAIL || "";
+import { BHASILE_CONTACT_EMAIL } from "@/constants";
 
+export default function ConditionsGeneralesUtilisation(): ReactElement {
   return (
     <article>
       <h1 className="text-title-blue-france">
