@@ -23,7 +23,11 @@ export type StructureDbList = Prisma.StructureGetPayload<{
       include: {
         cpom: {
           include: {
-            actesAdministratifs: true;
+            actesAdministratifs: {
+              include: {
+                fileUploads: true;
+              };
+            };
           };
         };
       };

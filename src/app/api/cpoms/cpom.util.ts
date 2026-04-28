@@ -36,15 +36,15 @@ export function buildCpomsWhereSql({
   return Prisma.sql`WHERE COALESCE(cd.departements, '') ILIKE ANY (ARRAY[${Prisma.join(patterns)}])`;
 }
 
-export const getDatesConvention = (
-  cpom?: CpomDbDetails | CpomDbList
-): [Date | null, Date | null] => {
+export const getDatesConvention = (cpom?: {
+  actesAdministratifs: (CpomDbDetails | CpomDbList)["actesAdministratifs"];
+}): [Date | null, Date | null] => {
   if (!cpom) {
     return [null, null];
   }
 
   return getDatesOfCurrentActeAdministratif(
-    cpom.actesAdministratifs,
+    cpom.actesAdministratifs ?? [],
     "CONVENTION",
     false
   );
