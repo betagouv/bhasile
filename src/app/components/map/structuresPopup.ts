@@ -13,7 +13,9 @@ export function getOrCreatePopup({
   if (!popupRef.current) {
     popupRef.current = new maplibregl.Popup({
       closeButton: false,
-      closeOnClick: true,
+      // We manage closing ourselves, otherwise clicking another marker
+      // may close the current popup without opening the next one.
+      closeOnClick: false,
       maxWidth: "none",
     });
   }

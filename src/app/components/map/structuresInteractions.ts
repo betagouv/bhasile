@@ -90,6 +90,15 @@ export function bindStructuresInteractions({
     popup.setLngLat(coords).addTo(map);
   };
 
+  const onMapClick = (e: maplibregl.MapMouseEvent) => {
+    const features = map.queryRenderedFeatures(e.point, {
+      layers: [STRUCTURES_LAYER_UNCLUSTERED_ID],
+    });
+    if (features.length === 0) {
+      popupRef.current?.remove();
+    }
+  };
+
   const onMouseEnterClusters = () => {
     map.getCanvas().style.cursor = "pointer";
   };
@@ -106,6 +115,7 @@ export function bindStructuresInteractions({
 
   map.on("click", STRUCTURES_LAYER_CLUSTERS_ID, onClusterClick);
   map.on("click", STRUCTURES_LAYER_UNCLUSTERED_ID, onUnclusteredClick);
+  map.on("click", onMapClick);
   map.on("mouseenter", STRUCTURES_LAYER_CLUSTERS_ID, onMouseEnterClusters);
   map.on("mouseleave", STRUCTURES_LAYER_CLUSTERS_ID, onMouseLeaveClusters);
   map.on(
@@ -122,6 +132,7 @@ export function bindStructuresInteractions({
   return () => {
     map.off("click", STRUCTURES_LAYER_CLUSTERS_ID, onClusterClick);
     map.off("click", STRUCTURES_LAYER_UNCLUSTERED_ID, onUnclusteredClick);
+    map.off("click", onMapClick);
     map.off("mouseenter", STRUCTURES_LAYER_CLUSTERS_ID, onMouseEnterClusters);
     map.off("mouseleave", STRUCTURES_LAYER_CLUSTERS_ID, onMouseLeaveClusters);
     map.off(
