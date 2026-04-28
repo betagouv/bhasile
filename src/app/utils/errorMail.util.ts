@@ -1,11 +1,12 @@
-import { BHASILE_CONTACT_EMAIL } from "@/constants";
-
 export const getErrorEmail = (
   error?: string,
   structureCodeBhasile?: string | number,
   cpomId?: number,
   operateurId?: number
 ): string => {
+  const BHASILE_CONTACT_EMAIL =
+    process.env.NEXT_PUBLIC_BHASILE_CONTACT_EMAIL || "";
+
   let subject = "Problème avec le formulaire de Bhasile";
   if (structureCodeBhasile) {
     subject = `Problème avec le formulaire de Bhasile (code Bhasile ${structureCodeBhasile})`;

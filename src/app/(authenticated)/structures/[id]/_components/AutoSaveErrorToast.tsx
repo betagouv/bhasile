@@ -1,10 +1,12 @@
 "use client";
 
 import { useFetchState } from "@/app/context/FetchStateContext";
-import { BHASILE_CONTACT_EMAIL } from "@/constants";
 import { FetchState } from "@/types/fetch-state.type";
 
 export const AutoSaveErrorToast = () => {
+  const BHASILE_CONTACT_EMAIL =
+    process.env.NEXT_PUBLIC_BHASILE_CONTACT_EMAIL || "";
+
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("structure-save");
 

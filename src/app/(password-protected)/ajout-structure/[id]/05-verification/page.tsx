@@ -10,7 +10,6 @@ import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { useRedirectStructureCreation } from "@/app/hooks/useRedirectStructureCreation";
 import { useStructures } from "@/app/hooks/useStructures";
 import { getErrorEmail } from "@/app/utils/errorMail.util";
-import { BHASILE_CONTACT_EMAIL } from "@/constants";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { AjoutTypePlacesFormValues } from "@/schemas/forms/ajout/ajoutTypePlaces.schema";
 import { TypeBatiAndAdressesFormValues } from "@/schemas/forms/base/adresse.schema";
@@ -24,6 +23,9 @@ import { TypePlaces } from "./components/TypePlaces";
 
 export default function StepVerification() {
   useRedirectStructureCreation();
+
+  const BHASILE_CONTACT_EMAIL =
+    process.env.NEXT_PUBLIC_BHASILE_CONTACT_EMAIL || "";
 
   const { addStructure } = useStructures();
   const router = useRouter();

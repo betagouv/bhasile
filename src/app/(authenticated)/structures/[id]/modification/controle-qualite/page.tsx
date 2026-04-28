@@ -16,7 +16,6 @@ import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { transformFormControlesToApiControles } from "@/app/utils/controle.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { transformFormEvaluationsToApiEvaluations } from "@/app/utils/evaluation.util";
-import { BHASILE_CONTACT_EMAIL } from "@/constants";
 import {
   ModificationQualiteFormValues,
   modificationQualiteSchema,
@@ -27,6 +26,8 @@ import { useStructureContext } from "../../_context/StructureClientContext";
 
 export default function ModificationControleForm() {
   const { structure } = useStructureContext();
+  const BHASILE_CONTACT_EMAIL =
+    process.env.NEXT_PUBLIC_BHASILE_CONTACT_EMAIL || "";
 
   const { handleSubmit, backendError } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,

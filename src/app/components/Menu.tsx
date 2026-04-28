@@ -4,14 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
-import { BHASILE_CONTACT_EMAIL } from "@/constants";
-
 import { ExternalLink } from "./common/ExternalLink";
 import { Logo } from "./Logo";
 import { User } from "./User";
 
 export const Menu = (): ReactElement => {
   const pathname = usePathname();
+  const BHASILE_CONTACT_EMAIL =
+    process.env.NEXT_PUBLIC_BHASILE_CONTACT_EMAIL || "";
 
   const menuItems = [
     {

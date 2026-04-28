@@ -43,10 +43,7 @@ export const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30 Mo
 export const MODELE_DIFFUS_LINK = "/adresses-diffus.xlsx";
 export const MODELE_MIXTE_LINK = "/adresses-mixte.xlsx";
 
-export const BHASILE_CONTACT_EMAIL = "contact@bhasile.beta.gouv.fr";
-export const BHASILE_USER_NAME = "Bhasilou";
-
-export const BHASILE_PHONE_NUMBERS = "06 86 44 20 93 ou au 07 86 38 96 85";
+export const BHASILE_USER_NAME = "BhasileBot";
 
 export const DEPARTEMENTS: Departement[] = [
   {
