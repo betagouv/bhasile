@@ -53,6 +53,7 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
   showContactInfos = true,
 }: FormWrapperProps<TSchema>) {
   const router = useRouter();
+
   const {
     currentValue: localStorageValues,
     updateLocalStorageValue: updateLocalStorageValues,
