@@ -69,7 +69,7 @@ export default function Structures(): ReactElement {
     [selectedVisualization]
   );
 
-  const renderToolbar = (variant: "tableau" | "carte") => (
+  const Toolbar = ({ variant }: { variant: Visualization }): ReactElement => (
     <div className="flex gap-2 justify-end items-center py-3.5 px-6">
       <SearchBar placeholder="Code ou commune" inputId="structures-search" />
       <Filters />
@@ -120,7 +120,7 @@ export default function Structures(): ReactElement {
 
       {selectedVisualization === "tableau" && (
         <>
-          {renderToolbar("tableau")}
+          <Toolbar variant="tableau" />
           <div id="tableau">
             <ListLoader
               fetchStateName={"structure-search"}
@@ -144,7 +144,9 @@ export default function Structures(): ReactElement {
           <div className="absolute inset-0">
             <StructuresMap />
           </div>
-          <div className="relative z-10">{renderToolbar("carte")}</div>
+          <div className="relative z-10">
+            <Toolbar variant="carte" />
+          </div>
         </div>
       )}
     </div>
