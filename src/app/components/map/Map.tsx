@@ -38,6 +38,25 @@ function toLngLat([lat, lng]: LatLngTuple): [number, number] {
   return [lng, lat];
 }
 
+function overrideLimiteAdministrativeColor(
+  map: maplibregl.Map,
+  group: string,
+  color: string
+): void {
+  const layers = map.getStyle().layers ?? [];
+  for (const layer of layers) {
+    if (
+      (layer.metadata as { "cartefacile:group"?: string })?.[
+        "cartefacile:group"
+      ] === group
+    ) {
+      try {
+        map.setPaintProperty(layer.id, "line-color", color);
+      } catch {}
+    }
+  }
+}
+
 export const Map = ({ children }: PropsWithChildren): ReactElement => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -116,6 +135,17 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
 
     createdMap.on("load", async () => {
       addOverlay(createdMap, Overlay.administrativeBoundaries);
+      overrideLimiteAdministrativeColor(
+        createdMap,
+        "boundaries_regions",
+        "#2563eb"
+      );
+      overrideLimiteAdministrativeColor(
+        createdMap,
+        "boundaries_departements",
+        "#dc2626"
+      );
+
       addStructuresSource(createdMap);
       await addStructuresMarkerImage(createdMap);
       addStructuresLayers(createdMap);

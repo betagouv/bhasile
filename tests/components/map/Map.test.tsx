@@ -26,6 +26,8 @@ const addOverlay = vi.fn();
 let loadHandler: (() => void | Promise<void>) | null = null;
 
 vi.mock("maplibre-gl", () => {
+  const setPaintProperty = vi.fn();
+
   class Map {
     addControl() {}
     on(event: string, handler: () => void | Promise<void>) {
@@ -39,6 +41,21 @@ vi.mock("maplibre-gl", () => {
     getSource() {
       return { setData: vi.fn() };
     }
+    getStyle() {
+      return {
+        layers: [
+          {
+            id: "Limites - Region",
+            metadata: { "cartefacile:group": "boundaries_regions" },
+          },
+          {
+            id: "Limites - Departement",
+            metadata: { "cartefacile:group": "boundaries_departements" },
+          },
+        ],
+      };
+    }
+    setPaintProperty = setPaintProperty;
   }
 
   class NavigationControl {}
