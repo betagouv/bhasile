@@ -2,10 +2,9 @@
 
 import { ReactElement } from "react";
 
+import { Map } from "@/app/components/map/Map";
+import { StructureMarker } from "@/app/components/map/StructureMarker";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
-
-import { Map } from "../../../components/map/Map";
-import { StructureMarker } from "./StructureMarker";
 
 const StructuresMap = (): ReactElement => {
   const { structures } = useStructuresSearch({ map: true });

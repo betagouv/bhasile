@@ -66,7 +66,7 @@ export const useStructuresSearch = ({ map }: { map?: boolean }) => {
         if (places != null) {
           params.append("places", String(places));
         }
-        if (departements && !map) {
+        if (departements) {
           params.append("departements", departements);
         }
         if (map) {
