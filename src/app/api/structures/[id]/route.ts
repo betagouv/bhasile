@@ -23,14 +23,14 @@ export async function GET(request: NextRequest) {
       ? await getFullStructure(Number(id))
       : await findOneOperateur(Number(id));
 
-    createStructureEvent(request.method, structure.id);
-
     if (!structure) {
       return NextResponse.json(
         { error: "Structure not found" },
         { status: 404 }
       );
     }
+
+    createStructureEvent(request.method, structure.id);
 
     return NextResponse.json(structure);
   } catch (error) {
