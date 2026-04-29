@@ -18,6 +18,9 @@ type Visualization = "tableau" | "carte";
 export default function Structures(): ReactElement {
   const [selectedVisualization, setSelectedVisualization] =
     useState<Visualization>(() => {
+      if (typeof window === "undefined") {
+        return "tableau";
+      }
       const anchor = window.location.hash.replace("#", "");
       return anchor === "carte" ? "carte" : "tableau";
     });
