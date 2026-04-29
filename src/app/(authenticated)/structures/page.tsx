@@ -69,6 +69,22 @@ export default function Structures(): ReactElement {
     [selectedVisualization]
   );
 
+  const renderToolbar = (variant: "tableau" | "carte") => (
+    <div className="flex gap-2 justify-end items-center py-3.5 px-6">
+      <SearchBar placeholder="Code ou commune" inputId="structures-search" />
+      <Filters />
+      <p
+        className={[
+          "pl-3 text-mention-grey mb-0 min-w-24 text-right",
+          variant === "carte" ? "bg-lifted-grey/90 rounded px-2 py-1" : "",
+        ].join(" ")}
+      >
+        {totalStructures ?? 0} entrée
+        {(totalStructures ?? 0) > 1 ? "s" : ""}
+      </p>
+    </div>
+  );
+
   useEffect(() => {
     const applyAnchor = () => {
       const anchor = window.location.hash.replace("#", "");
@@ -101,34 +117,34 @@ export default function Structures(): ReactElement {
           </h2>
         </SegmentedControl>
       </div>
-      <div className="flex gap-2 justify-end items-center py-3.5 px-6 z-2">
-        <SearchBar placeholder="Code ou commune" inputId="structures-search" />
-        <Filters />
-        <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
-          {totalStructures ?? 0} entrée
-          {(totalStructures ?? 0) > 1 ? "s" : ""}
-        </p>
-      </div>
+
       {selectedVisualization === "tableau" && (
-        <div id="tableau">
-          <ListLoader
-            fetchStateName={"structure-search"}
-            items={structures}
-            entityName="structure"
-          >
-            {structures && (
-              <StructuresTable
-                structures={structures}
-                totalStructures={totalStructures}
-                ariaLabelledBy="structures-titre"
-              />
-            )}
-          </ListLoader>
-        </div>
+        <>
+          {renderToolbar("tableau")}
+          <div id="tableau">
+            <ListLoader
+              fetchStateName={"structure-search"}
+              items={structures}
+              entityName="structure"
+            >
+              {structures && (
+                <StructuresTable
+                  structures={structures}
+                  totalStructures={totalStructures}
+                  ariaLabelledBy="structures-titre"
+                />
+              )}
+            </ListLoader>
+          </div>
+        </>
       )}
+
       {selectedVisualization === "carte" && (
-        <div id="carte" className="flex-1">
-          <StructuresMap />
+        <div id="carte" className="relative flex-1 min-h-0">
+          <div className="absolute inset-0">
+            <StructuresMap />
+          </div>
+          <div className="relative z-10">{renderToolbar("carte")}</div>
         </div>
       )}
     </div>
