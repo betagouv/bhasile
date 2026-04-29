@@ -25,8 +25,8 @@ import {
   getCurrentPlacesAutorisees,
   getCurrentPlacesLogementsSociaux,
   getCurrentPlacesQpv,
-  getDatesConvention,
-  getDatesPeriodeAutorisation,
+  // getDatesConvention,
+  // getDatesPeriodeAutorisation,
   getOperateurLabel,
   getRepartition,
   isStructureInCpom,
@@ -135,9 +135,10 @@ const dbStructureToApiRead = (
   dbStructure: StructureDbDetails | StructureDbList,
   simple: boolean = false
 ): StructureApiRead => {
-  const [debutConvention, finConvention] = getDatesConvention(dbStructure);
-  const [debutPeriodeAutorisation, finPeriodeAutorisation] =
-    getDatesPeriodeAutorisation(dbStructure);
+  // TODO: replace the dates when we make the UI change and check for data coherence
+  // const [debutConvention, finConvention] = getDatesConvention(dbStructure);
+  // const [debutPeriodeAutorisation, finPeriodeAutorisation] =
+  //   getDatesPeriodeAutorisation(dbStructure);
   const allActivites = simple
     ? []
     : (dbStructure as StructureDbDetails).dnaStructures.flatMap(
@@ -151,21 +152,9 @@ const dbStructureToApiRead = (
         (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
       );
 
-  // TODO: remove this when we make the UI change
-  console.log(
-    debutConvention,
-    finConvention,
-    debutPeriodeAutorisation,
-    finPeriodeAutorisation
-  );
   return recursivelySerializeDates({
     ...dbStructure,
     cpomStructures: getCpomStructuresWithDates(dbStructure),
-    // TODO: replace dates when we make the UI change
-    // debutConvention,
-    // finConvention,
-    // debutPeriodeAutorisation,
-    // finPeriodeAutorisation,
     latitude: dbStructure.latitude?.toString(),
     longitude: dbStructure.longitude?.toString(),
     activites,
