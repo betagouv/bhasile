@@ -2,18 +2,50 @@
 
 import { sendEvent } from "@socialgouv/matomo-next";
 import dynamic from "next/dynamic";
-import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ReactElement,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { SegmentedControl } from "@/app/components/common/SegmentedControl";
 import { ListLoader } from "@/app/components/lists/ListLoader";
 import { usePersistStructuresSearchQuery } from "@/app/hooks/usePersistStructuresSearchQuery";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
+import { cn } from "@/app/utils/classname.util";
 
 import { Filters } from "../../components/filters/Filters";
 import { SearchBar } from "./_components/SearchBar";
 import { StructuresTable } from "./_components/StructuresTable";
 
 type Visualization = "tableau" | "carte";
+
+const Toolbar = memo(
+  ({
+    variant,
+    totalStructures,
+  }: {
+    variant: Visualization;
+    totalStructures: number | undefined;
+  }): ReactElement => (
+    <div className="flex gap-2 justify-end items-center py-3.5 px-6">
+      <SearchBar placeholder="Code ou commune" inputId="structures-search" />
+      <Filters />
+      <p
+        className={cn(
+          "pl-3 text-mention-grey mb-0 min-w-24 text-right",
+          variant === "carte" && "bg-lifted-grey/90 rounded px-2 py-1"
+        )}
+      >
+        {totalStructures ?? 0} entrée
+        {(totalStructures ?? 0) > 1 ? "s" : ""}
+      </p>
+    </div>
+  )
+);
 
 export default function Structures(): ReactElement {
   const [selectedVisualization, setSelectedVisualization] =
@@ -69,22 +101,6 @@ export default function Structures(): ReactElement {
     [selectedVisualization]
   );
 
-  const Toolbar = ({ variant }: { variant: Visualization }): ReactElement => (
-    <div className="flex gap-2 justify-end items-center py-3.5 px-6">
-      <SearchBar placeholder="Code ou commune" inputId="structures-search" />
-      <Filters />
-      <p
-        className={[
-          "pl-3 text-mention-grey mb-0 min-w-24 text-right",
-          variant === "carte" ? "bg-lifted-grey/90 rounded px-2 py-1" : "",
-        ].join(" ")}
-      >
-        {totalStructures ?? 0} entrée
-        {(totalStructures ?? 0) > 1 ? "s" : ""}
-      </p>
-    </div>
-  );
-
   useEffect(() => {
     const applyAnchor = () => {
       const anchor = window.location.hash.replace("#", "");
@@ -120,7 +136,7 @@ export default function Structures(): ReactElement {
 
       {selectedVisualization === "tableau" && (
         <>
-          <Toolbar variant="tableau" />
+          <Toolbar variant="tableau" totalStructures={totalStructures} />
           <div id="tableau">
             <ListLoader
               fetchStateName={"structure-search"}
@@ -145,7 +161,7 @@ export default function Structures(): ReactElement {
             <StructuresMap />
           </div>
           <div className="relative z-10">
-            <Toolbar variant="carte" />
+            <Toolbar variant="carte" totalStructures={totalStructures} />
           </div>
         </div>
       )}
