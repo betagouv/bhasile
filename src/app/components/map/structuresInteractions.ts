@@ -14,16 +14,16 @@ import {
 
 type LngLatTuple = [number, number];
 
-function isLngLatTuple(v: unknown): v is LngLatTuple {
+const isLngLatTuple = (value: unknown): value is LngLatTuple => {
   return (
-    Array.isArray(v) &&
-    v.length === 2 &&
-    typeof v[0] === "number" &&
-    typeof v[1] === "number"
+    Array.isArray(value) &&
+    value.length === 2 &&
+    typeof value[0] === "number" &&
+    typeof value[1] === "number"
   );
-}
+};
 
-export function bindStructuresInteractions({
+export const bindStructuresInteractions = ({
   map,
   pointsRef,
   popupRef,
@@ -33,7 +33,7 @@ export function bindStructuresInteractions({
   pointsRef: RefObject<Map<string, MapRegisteredPoint>>;
   popupRef: React.RefObject<maplibregl.Popup | null>;
   popupRootRef: React.RefObject<Root | null>;
-}): () => void {
+}): (() => void) => {
   const onClusterClick = async (e: maplibregl.MapLayerMouseEvent) => {
     const features = map.queryRenderedFeatures(e.point, {
       layers: [STRUCTURES_LAYER_CLUSTERS_ID],
@@ -90,8 +90,8 @@ export function bindStructuresInteractions({
     popup.setLngLat(coords).addTo(map);
   };
 
-  const onMapClick = (e: maplibregl.MapMouseEvent) => {
-    const features = map.queryRenderedFeatures(e.point, {
+  const onMapClick = (event: maplibregl.MapMouseEvent) => {
+    const features = map.queryRenderedFeatures(event.point, {
       layers: [STRUCTURES_LAYER_UNCLUSTERED_ID],
     });
     if (features.length === 0) {
@@ -146,4 +146,4 @@ export function bindStructuresInteractions({
       onMouseLeaveUnclustered
     );
   };
-}
+};

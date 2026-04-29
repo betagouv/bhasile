@@ -8,25 +8,21 @@ export const SegmentedControl = ({
   name,
   options,
   onChange,
-  value,
 }: Props): ReactElement => {
-  const isControlled = value !== undefined;
   return (
     <fieldset className={cn("fr-segmented fr-segmented--sm", className)}>
       <legend className="fr-segmented__legend fr-segmented__legend--inline">
         {children}
       </legend>
       <div className="fr-segmented__elements m-0">
-        {options.map(({ id, isChecked, label, value: optionValue, icon }) => (
+        {options.map(({ id, isChecked, label, value, icon }) => (
           <div className="fr-segmented__element" key={id}>
             <input
-              {...(isControlled
-                ? { checked: value === optionValue }
-                : { defaultChecked: isChecked })}
+              defaultChecked={isChecked}
               id={id}
               name={name}
               type="radio"
-              value={optionValue}
+              value={value}
               onChange={(event) => onChange?.(event.target.value)}
             />
             <label className={`fr-label ${icon} justify-center`} htmlFor={id}>
@@ -51,6 +47,5 @@ type Props = PropsWithChildren<
     }>;
     onChange?: (visualization: string) => void;
     className?: string;
-    value?: string;
   }>
 >;

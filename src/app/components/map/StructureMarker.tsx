@@ -19,7 +19,7 @@ export const StructureMarker = ({ id, coordinates }: Props): null => {
       id: String(id),
       lngLat,
       renderPopup: () => (
-        <div className="bhasile-maplibre-popup-content">
+        <div className="m-6">
           <StructureMarkerContent id={id} />
         </div>
       ),

@@ -1,7 +1,7 @@
 "use client";
 
 import maplibregl from "maplibre-gl";
-import { createRoot,Root } from "react-dom/client";
+import { createRoot, Root } from "react-dom/client";
 
 export function getOrCreatePopup({
   popupRef,
@@ -22,7 +22,7 @@ export function getOrCreatePopup({
 
   if (!popupRootRef.current) {
     const popupContainer = document.createElement("div");
-    popupContainer.className = "bhasile-map-popup";
+    popupContainer.className = "p-0! rounded-none!";
     popupRootRef.current = createRoot(popupContainer);
     popupRef.current.setDOMContent(popupContainer);
   }

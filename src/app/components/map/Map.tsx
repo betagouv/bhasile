@@ -21,6 +21,8 @@ import {
   FRANCE_CENTER,
   FRANCE_MAX_BOUNDS,
   LatLngTuple,
+  MAX_MAP_ZOOM,
+  MIN_MAP_ZOOM,
 } from "@/constants";
 
 import { MapLibreProvider, MapRegisteredPoint } from "./MapContext";
@@ -34,15 +36,15 @@ import {
 
 type FeatureId = string;
 
-function toLngLat([lat, lng]: LatLngTuple): [number, number] {
-  return [lng, lat];
-}
+const toLngLat = ([latitude, longitude]: LatLngTuple): [number, number] => {
+  return [longitude, latitude];
+};
 
-function overrideLimiteAdministrativeColor(
+const overrideLimiteAdministrativeColor = (
   map: maplibregl.Map,
   group: string,
   color: string
-): void {
+): void => {
   const layers = map.getStyle().layers ?? [];
   for (const layer of layers) {
     if (
@@ -55,7 +57,7 @@ function overrideLimiteAdministrativeColor(
       } catch {}
     }
   }
-}
+};
 
 export const Map = ({ children }: PropsWithChildren): ReactElement => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -68,9 +70,12 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
   );
 
   const maxBounds = useMemo(() => {
-    const sw = FRANCE_MAX_BOUNDS[0];
-    const ne = FRANCE_MAX_BOUNDS[1];
-    return [toLngLat(sw), toLngLat(ne)] as [[number, number], [number, number]];
+    const southWest = FRANCE_MAX_BOUNDS[0];
+    const northEast = FRANCE_MAX_BOUNDS[1];
+    return [toLngLat(southWest), toLngLat(northEast)] as [
+      [number, number],
+      [number, number],
+    ];
   }, []);
 
   const center = useMemo(() => toLngLat(FRANCE_CENTER as LatLngTuple), []);
@@ -87,10 +92,10 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
       return;
     }
 
-    const features = Array.from(pointsRef.current.values()).map((p) => ({
+    const features = Array.from(pointsRef.current.values()).map((point) => ({
       type: "Feature" as const,
-      properties: { id: p.id },
-      geometry: { type: "Point" as const, coordinates: p.lngLat },
+      properties: { id: point.id },
+      geometry: { type: "Point" as const, coordinates: point.lngLat },
     }));
 
     source.setData({
@@ -126,7 +131,8 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
       center,
       zoom: DEFAULT_MAP_ZOOM,
       maxBounds,
-      maxZoom: 18.9,
+      minZoom: MIN_MAP_ZOOM,
+      maxZoom: MAX_MAP_ZOOM,
       fadeDuration: 0,
     });
     mapRef.current = createdMap;
@@ -163,17 +169,20 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
       createdMap.once("remove", () => cleanupInteractions());
     });
 
-    const resizeObserver =
-      typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(() => createdMap.resize())
-        : null;
-    resizeObserver?.observe(containerRef.current);
-
     return () => {
-      resizeObserver?.disconnect();
-      popupRootRef.current?.unmount();
-      popupRootRef.current = null;
+      popupRef.current?.remove();
       popupRef.current = null;
+
+      const root = popupRootRef.current;
+      popupRootRef.current = null;
+      if (root) {
+        queueMicrotask(() => {
+          // necessary to avoid React error
+          try {
+            root.unmount();
+          } catch {}
+        });
+      }
       createdMap.remove();
       mapRef.current = null;
       setReadyMap(null);

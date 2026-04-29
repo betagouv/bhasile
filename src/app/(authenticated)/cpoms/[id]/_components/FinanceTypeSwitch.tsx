@@ -10,8 +10,8 @@ export const FinanceTypeSwitch = ({
 }: Props) => {
   return (
     <SegmentedControl
+      key={currentType}
       name="FinanceTypeSwitch"
-      value={currentType}
       options={cpomStructureTypes.map((type) => ({
         id: type,
         isChecked: currentType === type,

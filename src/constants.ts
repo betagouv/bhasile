@@ -5,6 +5,8 @@ export type LatLngTuple = [number, number];
 // Center of France https://fr.wikipedia.org/wiki/Centre_de_la_France
 export const FRANCE_CENTER: LatLngTuple = [46.6055983, 1.8750922];
 export const DEFAULT_MAP_ZOOM = 6;
+export const MIN_MAP_ZOOM = 6;
+export const MAX_MAP_ZOOM = 18;
 
 // Map bounds (France métropolitaine) (SW/NE)
 export const FRANCE_MAX_BOUNDS: [LatLngTuple, LatLngTuple] = [

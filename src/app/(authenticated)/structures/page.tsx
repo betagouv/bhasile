@@ -13,8 +13,14 @@ import { Filters } from "../../components/filters/Filters";
 import { SearchBar } from "./_components/SearchBar";
 import { StructuresTable } from "./_components/StructuresTable";
 
+type Visualization = "tableau" | "carte";
+
 export default function Structures(): ReactElement {
-  const [selectedVisualization, setSelectedVisualization] = useState("tableau");
+  const [selectedVisualization, setSelectedVisualization] =
+    useState<Visualization>(() => {
+      const anchor = window.location.hash.replace("#", "");
+      return anchor === "carte" ? "carte" : "tableau";
+    });
 
   usePersistStructuresSearchQuery();
 
@@ -39,11 +45,31 @@ export default function Structures(): ReactElement {
     window.location.hash = next;
   }, []);
 
+  const options = useMemo(
+    () => [
+      {
+        id: "tableau",
+        isChecked: selectedVisualization === "tableau",
+        label: "Tableau",
+        value: "tableau",
+        icon: "fr-icon-survey-line",
+      },
+      {
+        id: "carte",
+        isChecked: selectedVisualization === "carte",
+        label: "Carte",
+        value: "carte",
+        icon: "fr-icon-road-map-line",
+      },
+    ],
+    [selectedVisualization]
+  );
+
   useEffect(() => {
     const applyAnchor = () => {
       const anchor = window.location.hash.replace("#", "");
       if (anchor === "carte" || anchor === "tableau") {
-        setSelectedVisualization(anchor);
+        setSelectedVisualization(anchor as Visualization);
       }
     };
 
@@ -56,11 +82,11 @@ export default function Structures(): ReactElement {
     <div className="h-full w-full flex flex-col bg-alt-grey">
       <div className="flex gap-2 px-6 border-b border-b-border-default-grey min-h-[4.35rem] justify-between items-center sticky top-0 bg-lifted-grey z-10">
         <SegmentedControl
+          key={selectedVisualization}
           name="Visualisation"
-          value={selectedVisualization}
           options={options}
           onChange={(event) => {
-            setVisualization(event as "tableau" | "carte");
+            setVisualization(event as Visualization);
           }}
         >
           <h2
@@ -104,20 +130,3 @@ export default function Structures(): ReactElement {
     </div>
   );
 }
-
-const options = [
-  {
-    id: "tableau",
-    isChecked: true,
-    label: "Tableau",
-    value: "tableau",
-    icon: "fr-icon-survey-line",
-  },
-  {
-    id: "carte",
-    isChecked: false,
-    label: "Carte",
-    value: "carte",
-    icon: "fr-icon-road-map-line",
-  },
-];

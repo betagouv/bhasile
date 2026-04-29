@@ -37,7 +37,9 @@ export function MapLibreProvider({
 export function useMapLibreMap(): maplibregl.Map | null {
   const context = useContext(MapLibreContext);
   if (!context) {
-    throw new Error("useMapLibreMap must be used with a context");
+    throw new Error(
+      "useMapLibreMap doit être utilisé avec un contexte MapLibreProvider"
+    );
   }
   return context.map;
 }
@@ -45,7 +47,9 @@ export function useMapLibreMap(): maplibregl.Map | null {
 export function useRegisterMapPoint(): RegisterMapPoint {
   const context = useContext(MapLibreContext);
   if (!context) {
-    throw new Error("useRegisterMapPoint must be used with a context");
+    throw new Error(
+      "useRegisterMapPoint doit être utilisé avec un contexte MapLibreProvider"
+    );
   }
   return context.registerPoint;
 }

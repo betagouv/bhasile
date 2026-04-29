@@ -65,12 +65,3 @@ hr {
 .full-width-table > table > thead > tr > th:last-child {
   width: 100%;
 }
-
-.maplibregl-popup-content {
-  padding: 0 !important;
-  border-radius: 0 !important;
-}
-
-.bhasile-maplibre-popup-content {
-  margin: 1.5rem;
-}
