@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET, POST, PUT } from "@/app/api/structures/route";
 import { PublicType } from "@/types/structure.type";
+
 import { createStructure } from "../../test-utils/structure.factory";
 
 const mockGetServerSession = vi.fn();
@@ -72,7 +73,10 @@ describe("GET /api/structures", () => {
 
     // THEN
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ structures: [], totalStructures: 0 });
+    expect(await response.json()).toEqual({
+      structures: [],
+      totalStructures: 0,
+    });
   });
 });
 
