@@ -99,6 +99,9 @@ describe("POST /api/cpoms", () => {
     // THEN
     expect(response.status).toBe(400);
     expect(mockCreateOrUpdateCpom).not.toHaveBeenCalled();
+    expect(mockCreateCpomEvent).not.toHaveBeenCalled();
+    expect(mockFindBySearch).not.toHaveBeenCalled();
+    expect(mockCountBySearch).not.toHaveBeenCalled();
   });
 });
 
@@ -139,5 +142,8 @@ describe("PUT /api/cpoms", () => {
     // THEN
     expect(response.status).toBe(400);
     expect(mockCreateOrUpdateCpom).not.toHaveBeenCalled();
+    expect(mockCreateCpomEvent).not.toHaveBeenCalled();
+    expect(mockFindBySearch).not.toHaveBeenCalled();
+    expect(mockCountBySearch).not.toHaveBeenCalled();
   });
 });

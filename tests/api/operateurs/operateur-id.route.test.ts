@@ -115,5 +115,7 @@ describe("PUT /api/operateurs/[id]", () => {
     // THEN
     expect(response.status).toBe(400);
     expect(mockUpdateOne).not.toHaveBeenCalled();
+    expect(mockCreateOperateurEvent).not.toHaveBeenCalled();
+    expect(mockFindOne).not.toHaveBeenCalled();
   });
 });

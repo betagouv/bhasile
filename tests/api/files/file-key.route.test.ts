@@ -45,6 +45,8 @@ describe("GET /api/files/[key]", () => {
       url: "https://s3.example.com/test.pdf",
     });
     expect(mockPresignedGetObject).toHaveBeenCalled();
+    expect(mockFindOneByKey).not.toHaveBeenCalled();
+    expect(mockDeleteOneByKey).not.toHaveBeenCalled();
   });
 
   it("should return 404 when file is not found", async () => {
@@ -59,6 +61,8 @@ describe("GET /api/files/[key]", () => {
     // THEN
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({ error: "Aucun fichier trouvé" });
+    expect(mockPresignedGetObject).not.toHaveBeenCalled();
+    expect(mockDeleteOneByKey).not.toHaveBeenCalled();
   });
 
   it("should return file metadata when found", async () => {
@@ -98,6 +102,7 @@ describe("DELETE /api/files/[key]", () => {
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({ error: "Aucun fichier trouvé" });
     expect(mockRemoveObject).not.toHaveBeenCalled();
+    expect(mockDeleteOneByKey).not.toHaveBeenCalled();
   });
 
   it("should return deleted file on success", async () => {
@@ -139,5 +144,6 @@ describe("DELETE /api/files/[key]", () => {
     expect(await response.json()).toEqual({
       error: "Erreur lors de la suppression du fichier",
     });
+    expect(mockDeleteOneByKey).not.toHaveBeenCalled();
   });
 });

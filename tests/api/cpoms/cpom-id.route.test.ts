@@ -46,6 +46,7 @@ describe("GET /api/cpoms/[id]", () => {
     // THEN
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({ error: "Structure not found" });
+    expect(mockFindOne).toHaveBeenCalledWith(99);
   });
 
   it("should return 500 when repository throws", async () => {
@@ -61,5 +62,6 @@ describe("GET /api/cpoms/[id]", () => {
 
     // THEN
     expect(response.status).toBe(500);
+    expect(mockFindOne).toHaveBeenCalledWith(1);
   });
 });
