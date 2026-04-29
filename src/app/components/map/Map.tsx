@@ -138,12 +138,12 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
       overrideLimiteAdministrativeColor(
         createdMap,
         "boundaries_regions",
-        "#2563eb"
+        "#000091"
       );
       overrideLimiteAdministrativeColor(
         createdMap,
         "boundaries_departements",
-        "#dc2626"
+        "#6A6AF4"
       );
 
       addStructuresSource(createdMap);

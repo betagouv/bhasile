@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type Deferred<T> = {
@@ -111,15 +111,21 @@ describe("Map", () => {
     render(<Map />);
     expect(loadHandler).toBeTypeOf("function");
 
-    const loadPromise = loadHandler!();
+    let loadPromise: void | Promise<void>;
+    await act(async () => {
+      loadPromise = loadHandler!();
+      await Promise.resolve();
+    });
 
     // THEN
     expect(addStructuresMarkerImage).toHaveBeenCalledTimes(1);
     expect(addStructuresLayers).not.toHaveBeenCalled();
 
     // WHEN
-    markerDeferred.resolve();
-    await loadPromise;
+    await act(async () => {
+      markerDeferred.resolve();
+      await loadPromise;
+    });
 
     // THEN
     expect(addStructuresLayers).toHaveBeenCalledTimes(1);
