@@ -90,10 +90,10 @@ describe("GET /api/structures/[id]", () => {
     expect(mockFindOne).not.toHaveBeenCalled();
   });
 
-  it("should return 500 when structure is not found", async () => {
+  it("should return 404 when structure is not found", async () => {
     // GIVEN
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
-    mockFindOne.mockRejectedValueOnce(new Error("Not found"));
+    mockFindOne.mockResolvedValueOnce(null);
 
     const request = new NextRequest("http://localhost/api/structures/999");
 
@@ -101,7 +101,7 @@ describe("GET /api/structures/[id]", () => {
     const response = await GET(request);
 
     // THEN
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(404);
     expect(mockCreateStructureEvent).not.toHaveBeenCalled();
   });
 

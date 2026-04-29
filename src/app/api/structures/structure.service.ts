@@ -117,10 +117,11 @@ export const getFullStructures = async ({
 
 export const getFullStructure = async (
   id: number
-): Promise<StructureApiRead> => {
+): Promise<StructureApiRead | null> => {
   const dbStructure = await findOne(id);
+
   if (!dbStructure) {
-    throw new Error(`Structure avec l'identifiant ${id} non trouvée`);
+    return null;
   }
 
   const structure = dbStructureToApiRead(dbStructure);
