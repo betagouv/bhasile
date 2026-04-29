@@ -16,7 +16,7 @@ export const ImportOptionNotices = ({ typeBati }: Props) => {
           Option 1 - Remplissage semi-automatique
         </h3>
         <p className="text-sm text-title-blue-france mb-4">
-          (recommandé si plus de 12 adresses à saisir)
+          (recommandé si plus de 20 adresses à saisir)
         </p>
         <p className="mb-0">
           Veuillez télécharger le modèle et le compléter depuis un logiciel

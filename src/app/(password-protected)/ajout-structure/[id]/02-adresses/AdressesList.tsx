@@ -106,7 +106,7 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
                     Option 2 - Remplissage manuel
                   </h3>
                   <p className="text-sm text-title-blue-france mb-4">
-                    (recommandé si moins de 12 adresses à saisir)
+                    (recommandé si moins de 20 adresses à saisir)
                   </p>
                   <p className="mb-0">
                     Veuillez remplir directement les champs ci-dessous.
