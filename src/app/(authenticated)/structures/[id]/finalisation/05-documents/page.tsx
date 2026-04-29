@@ -64,6 +64,7 @@ export default function FinalisationQualite() {
 
   const key = structure?.actesAdministratifs
     ?.map((acteAdministratif) => acteAdministratif.id ?? acteAdministratif.uuid)
+    ?.sort((a, b) => `${a ?? ""}`.localeCompare(`${b ?? ""}`))
     ?.join(",");
 
   return (
