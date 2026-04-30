@@ -65,7 +65,7 @@ model StructureMillesime {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@unique([structureId, structureTransformationId, year])
+  @@unique([structureId, structureTransformationId, year]) // NOTA : je ne suis pas fan de ce unique qui ne fonctionne plus dans le cas courant où le structureMillesime n'est pas lié à une transformation donc que structureId et structureTransformationId est null
   @@schema("public")
 }
 
@@ -88,7 +88,7 @@ model StructureTypologie {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@unique([structureId, structureTransformationId, year])
+  @@unique([structureId, structureTransformationId, year]) // NOTA: idem ici... à réfléchir donc
   @@schema("public")
 }
 
