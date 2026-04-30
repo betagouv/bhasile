@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { Menu } from "../../../components/Menu";
+import { Menu } from "@/app/components/Menu";
 
 export const metadata: Metadata = {
   title: "Bhasile",
