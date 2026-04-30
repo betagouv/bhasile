@@ -2,8 +2,7 @@
 
 import { NextResponse } from "next/server";
 
-import { createOne } from "./file.repository";
-import { uploadFile, validateUpload } from "./file.service";
+import { createUploadedFile, uploadFile, validateUpload } from "./file.service";
 
 export async function POST(req: Request) {
   const formData = await req.formData();
@@ -30,7 +29,7 @@ export async function POST(req: Request) {
     file.type
   );
 
-  const createdFileUpload = await createOne({
+  const createdFileUpload = await createUploadedFile({
     key: uploadResult.key,
     mimeType: uploadResult.mimeType,
     originalName: uploadResult.originalName,

@@ -11,11 +11,16 @@ import {
 import { StructureColumn } from "@/types/ListColumn";
 
 import { processActivitesForStructure } from "../activites/activite.service";
-import { StructureDbDetails, StructureDbList } from "./structure.db.type";
+import {
+  StructureDbDetails,
+  StructureDbList,
+  StructureDbOperateur,
+} from "./structure.db.type";
 import {
   countBySearch,
   findBySearch,
   findOne,
+  findOneOperateur,
   getLatestPlacesAutoriseesPerStructure,
   updateOne,
 } from "./structure.repository";
@@ -126,6 +131,20 @@ export const getFullStructure = async (
   const structure = dbStructureToApiRead(dbStructure);
 
   return structure;
+};
+
+export const getStructureForOperateur = async (
+  id: number
+): Promise<StructureDbOperateur> => {
+  const dbStructure = await findOneOperateur(id);
+  if (!dbStructure) {
+    throw new Error(`Structure avec l'identifiant ${id} non trouvée`);
+  }
+  return dbStructure;
+};
+
+export const getStructure = async (id: number) => {
+  return findOne(id);
 };
 
 const dbStructureToApiRead = (

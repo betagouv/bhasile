@@ -180,3 +180,11 @@ export type StructureDbDetails = Prisma.StructureGetPayload<{
     };
   };
 }>;
+
+export type StructureDbOperateur = Prisma.StructureGetPayload<{
+  select: {
+    id: true;
+    codeBhasile: true;
+    forms: true;
+  };
+}>;

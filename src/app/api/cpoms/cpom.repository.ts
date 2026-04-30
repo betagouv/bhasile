@@ -102,8 +102,8 @@ export async function countBySearch({
   return Number(result[0]?.count ?? 0);
 }
 
-export const findOne = async (id: number): Promise<Cpom> => {
-  const cpom = await prisma.cpom.findFirstOrThrow({
+export const findOne = async (id: number): Promise<Cpom | null> => {
+  const cpom = await prisma.cpom.findFirst({
     where: { id },
     include: {
       structures: {

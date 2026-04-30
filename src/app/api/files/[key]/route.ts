@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { deleteOneByKey, findOneByKey } from "../file.repository";
-import { deleteFile, getDownloadLink } from "../file.service";
+import {
+  deleteFile,
+  deleteFileByStorageKey,
+  getDownloadLink,
+  getFileByKey,
+} from "../file.service";
 
 export async function GET(request: NextRequest) {
   const encodedKey = request.nextUrl.pathname.split("/").pop();
@@ -32,7 +36,7 @@ export async function GET(request: NextRequest) {
 
   const key = decodeURIComponent(encodedKey);
 
-  const file = await findOneByKey(key);
+  const file = await getFileByKey(key);
   if (!file) {
     return NextResponse.json(
       { error: "Aucun fichier trouvé" },
@@ -53,7 +57,7 @@ export async function DELETE(request: NextRequest) {
 
   const key = decodeURIComponent(encodedKey);
 
-  const file = await findOneByKey(key);
+  const file = await getFileByKey(key);
   if (!file) {
     return NextResponse.json(
       { error: "Aucun fichier trouvé" },
@@ -64,7 +68,7 @@ export async function DELETE(request: NextRequest) {
   try {
     await deleteFile(process.env.S3_BUCKET_NAME!, key);
 
-    const deletedFile = await deleteOneByKey(key);
+    const deletedFile = await deleteFileByStorageKey(key);
 
     return NextResponse.json(deletedFile);
   } catch (error) {
