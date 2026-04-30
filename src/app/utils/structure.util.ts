@@ -4,7 +4,10 @@ import { CURRENT_YEAR } from "@/constants";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import {
+  CpomStructureApiRead,
+  CpomStructureApiWrite,
+} from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
@@ -15,7 +18,6 @@ import { StructureType } from "@/types/structure.type";
 
 import { getDepartementFromCodePostal } from "./adresse.util";
 import { sortKeysByValue } from "./common.util";
-import { computeCpomDates } from "./cpom.util";
 import { getYearFromDate } from "./date.util";
 
 export const getPlacesByCommunes = (
@@ -141,41 +143,33 @@ export const isStructureMultiDna = (structure: StructureApiRead): boolean => {
   );
 };
 
-export const getCurrentCpomStructures = (
+export const getCurrentCpomStructure = (
   structure: StructureApiRead
-): CpomStructureApiType | undefined => {
+): CpomStructureApiRead | undefined => {
   return structure.cpomStructures?.find((cpomStructure) => {
-    const dateStart =
-      cpomStructure.dateStart ?? computeCpomDates(cpomStructure.cpom).dateStart;
-    const dateEnd =
-      cpomStructure.dateEnd ?? computeCpomDates(cpomStructure.cpom).dateEnd;
+    const dateStart = cpomStructure.dateStart ?? cpomStructure.cpom?.dateStart;
+    const dateEnd = cpomStructure.dateEnd ?? cpomStructure.cpom?.dateEnd;
 
     if (!dateStart || !dateEnd) {
       return false;
     }
-
-    const yearDebut = getYearFromDate(dateStart);
-    const yearFin = getYearFromDate(dateEnd);
-
-    return yearDebut <= CURRENT_YEAR && yearFin >= CURRENT_YEAR;
+    const now = new Date().toISOString();
+    return dateStart <= now && dateEnd >= now;
   });
 };
 
 export const getCurrentCpomStructureDates = (
   structure: StructureApiRead
 ): { dateStart?: string; dateEnd?: string } => {
-  const currentCpomStructure = getCurrentCpomStructures(structure);
-
+  const currentCpomStructure = getCurrentCpomStructure(structure);
   if (!currentCpomStructure) {
     return {};
   }
 
   const currentCpomStructureDateStart =
-    currentCpomStructure.dateStart ??
-    computeCpomDates(currentCpomStructure.cpom).dateStart;
+    currentCpomStructure.dateStart ?? currentCpomStructure.cpom?.dateStart;
   const currentCpomStructureDateEnd =
-    currentCpomStructure.dateEnd ??
-    computeCpomDates(currentCpomStructure.cpom).dateEnd;
+    currentCpomStructure.dateEnd ?? currentCpomStructure.cpom?.dateEnd;
 
   return {
     dateStart: currentCpomStructureDateStart ?? undefined,
@@ -203,7 +197,7 @@ export const getMillesimeIndexForAYear = (
   }) ?? -1;
 
 export const getCpomStructureIndexAndBudgetIndexForAYearAndAType = (
-  cpomStructures: CpomStructureApiType[],
+  cpomStructures: CpomStructureApiRead[] | CpomStructureApiWrite[],
   year: number = CURRENT_YEAR,
   type?: StructureType
 ): { cpomStructureIndex: number; budgetIndex: number } => {

@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import FinalisationIdentificationPage from "@/app/(authenticated)/structures/[id]/finalisation/01-identification/page";
+import FinalisationIdentificationPage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/01-identification/page";
 import { CURRENT_YEAR } from "@/constants";
 import { StructureType } from "@/types/structure.type";
 

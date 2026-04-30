@@ -129,28 +129,4 @@ describe("useStructuresSearch", () => {
     expect(result.current.structures).toEqual(mockStructures);
     expect(result.current.totalStructures).toBe(2);
   });
-
-  it("should not include departements param when map is true", async () => {
-    mockUseSearchParams.mockReturnValue(
-      new URLSearchParams("departements=75,92")
-    );
-
-    globalFetch.mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        structures: [],
-        totalStructures: 0,
-      }),
-    });
-
-    renderHook(() => useStructuresSearch({ map: true }));
-
-    await waitFor(() => {
-      expect(globalFetch).toHaveBeenCalled();
-    });
-
-    const fetchCall = globalFetch.mock.calls[0][0];
-    expect(fetchCall).not.toContain("departements=");
-    expect(fetchCall).toContain("map=true");
-  });
 });

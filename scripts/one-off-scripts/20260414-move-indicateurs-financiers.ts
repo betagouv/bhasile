@@ -1,3 +1,4 @@
+// @ts-nocheck
 // One-off script: move indicateurs financiers from Budget tables to the new IndicateurFinancier tables.
 // Usage: yarn one-off 20260414-move-indicateurs-financiers
 

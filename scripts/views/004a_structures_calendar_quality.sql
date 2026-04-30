@@ -5,6 +5,37 @@
 -- - "Conventions" are stored on `public."Structure"`: `debutConvention`, `finConvention`.
 -- - "Période d'autorisation" is stored on `public."Structure"`: `debutPeriodeAutorisation`, `finPeriodeAutorisation`.
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_calendar_quality" AS
+WITH
+  actes_administratifs_aggregate AS (
+    SELECT
+      aa."structureId" AS "id",
+      MIN(
+        CASE
+          WHEN aa."category" = 'CONVENTION' THEN aa."startDate"
+        END
+      ) AS "aa_debutConvention",
+      MAX(
+        CASE
+          WHEN aa."category" = 'CONVENTION' THEN aa."endDate"
+        END
+      ) AS "aa_finConvention",
+      MIN(
+        CASE
+          WHEN aa."category" = 'ARRETE_AUTORISATION' THEN aa."startDate"
+        END
+      ) AS "aa_debutPeriodeAutorisation",
+      MAX(
+        CASE
+          WHEN aa."category" = 'ARRETE_AUTORISATION' THEN aa."endDate"
+        END
+      ) AS "aa_finPeriodeAutorisation"
+    FROM
+      public."ActeAdministratif" aa
+    WHERE
+      aa."category" IN ('CONVENTION', 'ARRETE_AUTORISATION')
+    GROUP BY
+      aa."structureId"
+  )
 SELECT
   s."id" AS "id",
   -- Authorization dates presence flags
@@ -99,6 +130,34 @@ SELECT
     )
     ELSE FALSE
   END AS "has_issue_authorized_convention_missing_or_expired",
+  -- Dates in Structure should match dates derived from Actes Administratifs (when present)
+  COALESCE(
+    (
+      (
+        aaa."aa_debutConvention" IS NOT NULL
+        OR aaa."aa_finConvention" IS NOT NULL
+      )
+      AND (
+        aaa."aa_debutConvention" IS DISTINCT FROM s."debutConvention"
+        OR aaa."aa_finConvention" IS DISTINCT FROM s."finConvention"
+      )
+    ),
+    FALSE
+  ) AS "has_issue_convention_dates_differ_from_actes_administratifs",
+  COALESCE(
+    (
+      s."type" IN ('CADA', 'CPH')
+      AND (
+        aaa."aa_debutPeriodeAutorisation" IS NOT NULL
+        OR aaa."aa_finPeriodeAutorisation" IS NOT NULL
+      )
+      AND (
+        aaa."aa_debutPeriodeAutorisation" IS DISTINCT FROM s."debutPeriodeAutorisation"
+        OR aaa."aa_finPeriodeAutorisation" IS DISTINCT FROM s."finPeriodeAutorisation"
+      )
+    ),
+    FALSE
+  ) AS "has_issue_authorisation_dates_differ_from_actes_administratifs",
   -- Evaluation should be performed at least every 5 years, before the end of the convention.
   CASE
     WHEN s."finConvention" IS NULL THEN FALSE
@@ -127,6 +186,11 @@ SELECT
   END AS "has_issue_subsidized_convention_gt_3y"
 FROM
   public."Structure" s
+  LEFT JOIN actes_administratifs_aggregate aaa ON aaa."id" = s."id"
   LEFT JOIN public."Evaluation" e ON e."structureId" = s."id"
 GROUP BY
-  s."id";
+  s."id",
+  aaa."aa_debutConvention",
+  aaa."aa_finConvention",
+  aaa."aa_debutPeriodeAutorisation",
+  aaa."aa_finPeriodeAutorisation";

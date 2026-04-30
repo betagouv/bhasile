@@ -1,7 +1,7 @@
 import { Fragment, ReactNode } from "react";
 
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableLine } from "./BudgetTableLine";
@@ -57,7 +57,7 @@ type Props = {
     }[];
   }[];
   budgets?: BudgetApiType[];
-  cpomStructures?: CpomStructureApiType[];
+  cpomStructures?: CpomStructureApiWrite[];
   years: number[];
   enabledYears?: number[];
   canEdit?: boolean;

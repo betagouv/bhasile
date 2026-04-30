@@ -6,7 +6,7 @@ import { useFormContext } from "react-hook-form";
 
 import { getName, isInputDisabled } from "@/app/utils/budget.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
 export const BudgetTableCommentButtonAndModal = ({
@@ -135,6 +135,6 @@ type Props = {
   year: number;
   disabledYearsStart?: number;
   enabledYears?: number[];
-  cpomStructures?: CpomStructureApiType[];
+  cpomStructures?: CpomStructureApiWrite[];
   budgets?: BudgetApiType[];
 };

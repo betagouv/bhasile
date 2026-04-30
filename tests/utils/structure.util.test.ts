@@ -16,7 +16,7 @@ import {
 } from "@/app/utils/structure.util";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
@@ -39,6 +39,9 @@ vi.mock("@/constants", async () => {
 });
 
 describe("structure util", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   describe("getPlacesByCommunes", () => {
     it("should return an empty object when given an empty array", () => {
       // GIVEN
@@ -505,7 +508,13 @@ describe("structure util", () => {
             structureId: 6,
             dateStart: null,
             dateEnd: null,
-            cpom: undefined,
+            cpom: {
+              id: 1,
+              name: "CPOM Test",
+              actesAdministratifs: [],
+              budgets: [],
+              granularity: "DEPARTEMENTALE",
+            },
           },
         ],
       });
@@ -562,6 +571,8 @@ describe("structure util", () => {
 
     it("should return structure-specific dates when CPOM is currently active", () => {
       // GIVEN
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2025-01-15T00:00:00.000Z"));
       const structure = createStructure({
         id: 1,
         cpomStructures: [
@@ -573,6 +584,8 @@ describe("structure util", () => {
             dateEnd: "2025-12-31T23:59:59.999Z",
             cpom: {
               id: 1,
+              dateStart: "2025-01-01T00:00:00.000Z",
+              dateEnd: "2025-12-31T23:59:59.999Z",
               actesAdministratifs: [
                 {
                   fileUploads: [
@@ -603,9 +616,8 @@ describe("structure util", () => {
 
     it("should return CPOM fallback dates when structure-specific dates are null", () => {
       // GIVEN
-      const mockedDate = dayjs("2025-06-15");
       vi.useFakeTimers();
-      vi.setSystemTime(mockedDate.toDate());
+      vi.setSystemTime(new Date("2025-01-15T00:00:00.000Z"));
 
       const structure = createStructure({
         id: 2,
@@ -618,6 +630,8 @@ describe("structure util", () => {
             dateEnd: null,
             cpom: {
               id: 1,
+              dateStart: "2025-01-01T00:00:00.000Z",
+              dateEnd: "2025-12-31T23:59:59.999Z",
               actesAdministratifs: [
                 {
                   fileUploads: [
@@ -702,6 +716,8 @@ describe("structure util", () => {
 
     it("should handle mixed null structure dates correctly", () => {
       // GIVEN
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2025-05-15T00:00:00.000Z"));
       const structure = createStructure({
         id: 6,
         cpomStructures: [
@@ -713,6 +729,8 @@ describe("structure util", () => {
             dateEnd: null,
             cpom: {
               id: 1,
+              dateStart: "2025-01-01T00:00:00.000Z",
+              dateEnd: "2025-12-31T23:59:59.999Z",
               actesAdministratifs: [
                 {
                   fileUploads: [
@@ -863,7 +881,7 @@ describe("structure util", () => {
   describe("getCpomStructureIndexAndBudgetIndexForAYearAndAType", () => {
     it("should return correct indices when finding matching structure and millesime", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [
+      const cpomStructures: CpomStructureApiRead[] = [
         {
           id: 1,
           cpomId: 1,
@@ -910,7 +928,7 @@ describe("structure util", () => {
 
     it("should return -1 for both indices when given empty array", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [];
+      const cpomStructures: CpomStructureApiRead[] = [];
 
       // WHEN
       const result = getCpomStructureIndexAndBudgetIndexForAYearAndAType(
@@ -928,7 +946,7 @@ describe("structure util", () => {
 
     it("should return -1 for both indices when no structure has matching year", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [
+      const cpomStructures: CpomStructureApiRead[] = [
         {
           id: 1,
           cpomId: 1,
@@ -983,7 +1001,7 @@ describe("structure util", () => {
 
     it("should return indices for first structure when it has matching year", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [
+      const cpomStructures: CpomStructureApiRead[] = [
         {
           id: 1,
           cpomId: 1,
@@ -1061,7 +1079,7 @@ describe("structure util", () => {
 
     it("should return indices for later structure when first does not match", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [
+      const cpomStructures: CpomStructureApiRead[] = [
         {
           id: 1,
           cpomId: 1,
@@ -1139,7 +1157,7 @@ describe("structure util", () => {
 
     it("should skip structure undefined budgets", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [
+      const cpomStructures: CpomStructureApiRead[] = [
         {
           id: 1,
           cpomId: 1,
@@ -1211,7 +1229,7 @@ describe("structure util", () => {
 
     it("should return correct millesime index when structure has multiple millesimes", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [
+      const cpomStructures: CpomStructureApiRead[] = [
         {
           id: 1,
           cpomId: 1,
@@ -1268,7 +1286,7 @@ describe("structure util", () => {
 
     it("should use CURRENT_YEAR as default when no year is provided", () => {
       // GIVEN
-      const cpomStructures: CpomStructureApiType[] = [
+      const cpomStructures: CpomStructureApiRead[] = [
         {
           id: 1,
           cpomId: 1,

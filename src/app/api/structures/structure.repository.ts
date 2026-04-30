@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acteAdministratif.repository";
+import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import { createOrUpdateAdresses } from "../adresses/adresse.repository";
 import { createOrUpdateAntennes } from "../antennes/antenne.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
@@ -25,7 +25,11 @@ import {
   STRUCTURES_ORDER_CTE_SQL,
   STRUCTURES_ORDER_JOINS_SQL,
 } from "./structure.constants";
-import { StructureDbList, StructureDbMap } from "./structure.db.type";
+import {
+  StructureDbList,
+  StructureDbMap,
+  StructureDbOperateur,
+} from "./structure.db.type";
 import { SearchProps } from "./structure.service";
 import {
   buildStructuresOrderSql,
@@ -133,7 +137,15 @@ export const findBySearch = async ({
       },
       cpomStructures: {
         include: {
-          cpom: true,
+          cpom: {
+            include: {
+              actesAdministratifs: {
+                include: {
+                  fileUploads: true,
+                },
+              },
+            },
+          },
         },
       },
       operateur: true,
@@ -153,10 +165,16 @@ export const findBySearch = async ({
         },
       },
       dnaStructures: {
+        orderBy: {
+          dna: {
+            code: "asc",
+          },
+        },
         include: {
           dna: true,
         },
       },
+      actesAdministratifs: true,
     },
   });
 
@@ -227,18 +245,7 @@ export const getLatestPlacesAutoriseesPerStructure = async (): Promise<
 
 export const findOneOperateur = async (
   id: number
-): Promise<{
-  id: number;
-  codeBhasile: string | null;
-  forms: {
-    id: number;
-    createdAt: Date;
-    updatedAt: Date;
-    structureId: number | null;
-    formDefinitionId: number;
-    status: boolean;
-  }[];
-}> => {
+): Promise<StructureDbOperateur> => {
   return await prisma.structure.findUniqueOrThrow({
     where: { id },
     select: {
@@ -260,6 +267,11 @@ export const findOne = async (id: number) => {
         select: { text: true },
       },
       dnaStructures: {
+        orderBy: {
+          dna: {
+            code: "asc",
+          },
+        },
         include: {
           dna: {
             include: {

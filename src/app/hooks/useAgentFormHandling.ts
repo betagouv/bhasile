@@ -5,7 +5,7 @@ import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import { StepStatus } from "@/types/form.type";
 
-import { useStructureContext } from "../(authenticated)/structures/[id]/_context/StructureClientContext";
+import { useStructureContext } from "../(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { useFetchState } from "../context/FetchStateContext";
 import {
   FINALISATION_FORM_LABEL,

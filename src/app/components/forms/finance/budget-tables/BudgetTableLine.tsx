@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableLineInput } from "./BudgetTableLineInput";
@@ -76,7 +76,7 @@ type Props = {
   subLabel?: string;
   colored?: boolean;
   budgets?: BudgetApiType[];
-  cpomStructures?: CpomStructureApiType[];
+  cpomStructures?: CpomStructureApiWrite[];
   years: number[];
   disabledYearsStart?: number;
   enabledYears?: number[];

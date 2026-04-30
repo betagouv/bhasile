@@ -1,4 +1,4 @@
-import { useStructureContext } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
+import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import FieldSetActeAdministratif from "@/app/components/forms/actesAdministratifs/FieldSetActeAdministratif";
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
 import { getActesAdministratifsCategoryToDisplay } from "@/app/utils/acteAdministratif.util";
@@ -26,6 +26,7 @@ export const ActesAdministratifs = () => {
               title={rules.title}
               canAddFile={rules.canAddFile}
               canAddAvenant={rules.canAddAvenant}
+              avenantCanExtendDateEnd={true}
               isOptional={rules.isOptional}
               additionalFieldsType={rules.additionalFieldsType}
               documentLabel={rules.documentLabel}

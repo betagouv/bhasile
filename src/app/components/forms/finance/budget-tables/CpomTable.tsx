@@ -1,6 +1,6 @@
 import { useFormContext } from "react-hook-form";
 
-import { useCpomContext } from "@/app/(authenticated)/cpoms/[id]/_context/CpomClientContext";
+import { useCpomContext } from "@/app/(authenticated)/(with-menu)/cpoms/[id]/_context/CpomClientContext";
 import { Table } from "@/app/components/common/Table";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { parseFrenchNumber } from "@/app/utils/number.util";

@@ -63,7 +63,7 @@ export const Avenant = ({
           <Checkbox
             options={[
               {
-                label: `Cet avenant modifie la date de fin du ${categoryShortName}.`,
+                label: getCategoryNameExtendSentence(categoryShortName),
                 nativeInputProps: {
                   name: "",
                   value: "showEndDateInput",
@@ -108,4 +108,14 @@ type Props = {
   avenantCanExtendDateEnd: boolean;
   documentLabel: string;
   handleDeleteField: (index: number) => void;
+};
+
+const getCategoryNameExtendSentence = (categoryShortName: string) => {
+  if (categoryShortName === "convention") {
+    return "Cet avenant modifie la date de fin de la convention.";
+  }
+  if (categoryShortName === "arrêté") {
+    return "Cet avenant modifie la date de fin de l'arrêté.";
+  }
+  return `Cet avenant modifie la date de fin du ${categoryShortName}.`;
 };
