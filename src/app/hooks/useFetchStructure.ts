@@ -27,6 +27,7 @@ export const useFetchStructure = (id: number) => {
 
   useEffect(() => {
     const fetchStructure = async () => {
+      setStructure(undefined);
       const structure = await getStructure(id);
       setStructure(structure);
     };

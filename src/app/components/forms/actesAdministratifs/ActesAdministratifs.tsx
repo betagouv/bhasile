@@ -26,6 +26,7 @@ export const ActesAdministratifs = () => {
               title={rules.title}
               canAddFile={rules.canAddFile}
               canAddAvenant={rules.canAddAvenant}
+              avenantCanExtendDateEnd={true}
               isOptional={rules.isOptional}
               additionalFieldsType={rules.additionalFieldsType}
               documentLabel={rules.documentLabel}

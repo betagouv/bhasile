@@ -5,7 +5,7 @@ import "dotenv/config";
 
 import { NoteType } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
-import { BHASILE_CONTACT_EMAIL, BHASILE_USER_NAME } from "@/constants";
+import { BHASILE_USER_NAME, BHASILE_CONTACT_EMAIL } from "@/constants";
 
 const prisma = createPrismaClient();
 

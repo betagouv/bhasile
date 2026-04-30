@@ -1,10 +1,18 @@
-import { LatLngTuple } from "leaflet";
-
 import { Departement, Region } from "./types/departement.type";
+
+export type LatLngTuple = [number, number];
 
 // Center of France https://fr.wikipedia.org/wiki/Centre_de_la_France
 export const FRANCE_CENTER: LatLngTuple = [46.6055983, 1.8750922];
 export const DEFAULT_MAP_ZOOM = 6;
+export const MIN_MAP_ZOOM = 6;
+export const MAX_MAP_ZOOM = 18;
+
+// Map bounds (France métropolitaine) (SW/NE)
+export const FRANCE_MAX_BOUNDS: [LatLngTuple, LatLngTuple] = [
+  [38.976492485539424, -5.9326171875],
+  [53.291489065300226, 9.667968750000002],
+];
 
 export const DEFAULT_PAGE_SIZE = 20;
 export const MIDDLE_PAGE_SIZE = 12;
@@ -43,10 +51,11 @@ export const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30 Mo
 export const MODELE_DIFFUS_LINK = "/adresses-diffus.xlsx";
 export const MODELE_MIXTE_LINK = "/adresses-mixte.xlsx";
 
-export const BHASILE_CONTACT_EMAIL = "contact@bhasile.beta.gouv.fr";
-export const BHASILE_USER_NAME = "Bhasilou";
-
-export const BHASILE_PHONE_NUMBERS = "06 86 44 20 93 ou au 07 86 38 96 85";
+export const BHASILE_USER_NAME = "BhasileBot";
+export const BHASILE_CONTACT_EMAIL =
+  process.env.NEXT_PUBLIC_BHASILE_CONTACT_EMAIL || "";
+export const BHASILE_PHONE_NUMBERS =
+  process.env.NEXT_PUBLIC_BHASILE_PHONE_NUMBERS || "";
 
 export const DEPARTEMENTS: Departement[] = [
   {

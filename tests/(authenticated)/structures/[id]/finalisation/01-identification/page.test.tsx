@@ -74,11 +74,23 @@ describe("FinalisationIdentification page integration", () => {
     );
 
     // THEN
-    const putCall = mockedFetch.mock.calls.find(
+    const putCalls = mockedFetch.mock.calls.filter(
       (call) =>
         call[0] === "/api/structures" &&
         (call[1] as RequestInit | undefined)?.method === "PUT"
     );
+    const putCall = putCalls.find((call) => {
+      const body = (call[1] as RequestInit | undefined)?.body;
+      if (typeof body !== "string") {
+        return false;
+      }
+      try {
+        const parsed = JSON.parse(body);
+        return Array.isArray(parsed.forms);
+      } catch {
+        return false;
+      }
+    });
     expect(putCall).toBeDefined();
 
     const firstCallBody = JSON.parse(
