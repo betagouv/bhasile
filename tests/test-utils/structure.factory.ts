@@ -11,8 +11,19 @@ import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.sch
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 import { Repartition } from "@/types/adresse.type";
 import { ControleType } from "@/types/controle.type";
-import { StepStatus } from "@/types/form.type";
 import { PublicType, StructureType } from "@/types/structure.type";
+
+import { createCurrentPlaces } from "./factories/current-places.factory";
+import { createDefaultDnaStructures } from "./factories/dna-structure.factory";
+import {
+  createDefaultForms,
+  createFinalisationForm,
+} from "./factories/finalisation-form.factory";
+import { createDefaultFinesses } from "./factories/finess.factory";
+import { createOperateur } from "./factories/operateur.factory";
+import { createStructureTypologies } from "./factories/structure-typologies.factory";
+
+export { createAllFinalisationSteps } from "./factories/finalisation-form.factory";
 
 export const createStructure = ({
   id,
@@ -29,11 +40,13 @@ export const createStructure = ({
   forms,
 }: CreateStructuresArgs): StructureApiRead => {
   const structureType = type ?? StructureType.CADA;
+  const currentStructureTypologies =
+    structureTypologies ?? createStructureTypologies();
 
   return {
     id,
     codeBhasile: `BHA-${id}`,
-    operateur: { structureDnaCode: `C000${id}`, id: 1, name: "Adoma" },
+    operateur: createOperateur(id),
     filiale: undefined,
     operateurLabel: "Adoma",
     type: structureType,
@@ -56,54 +69,12 @@ export const createStructure = ({
     finPeriodeAutorisation: new Date("01/02/2025").toISOString(),
     adresses: adresses ?? [],
     notes: "Note 1",
-    structureTypologies:
-      structureTypologies ??
-      [0, 1, 2, 3].map((delta) => ({
-        id: delta + 1,
-        year: CURRENT_YEAR - delta,
-        placesAutorisees: 10,
-        pmr: 0,
-        lgbt: 0,
-        fvvTeh: 0,
-        placesACreer: 0,
-        placesAFermer: 0,
-        echeancePlacesACreer: undefined,
-        echeancePlacesAFermer: undefined,
-      })),
+    structureTypologies: currentStructureTypologies,
     structureMillesimes: structureMillesimes ?? [],
     cpomStructures: cpomStructures ?? [],
-    forms: forms ?? [
-      {
-        id: 1,
-        status: false,
-        formDefinition: {
-          id: 1,
-          slug: "finalisation",
-          name: "finalisation",
-          version: 1,
-        },
-        formSteps: createAllFinalisationSteps(),
-      },
-    ],
-    dnaStructures: dnaStructures ?? [
-      {
-        id: 1,
-        dna: {
-          id: 1,
-          code: "C0001",
-          description: "",
-        },
-        startDate: undefined,
-        endDate: undefined,
-      },
-    ],
-    finesses: finesses ?? [
-      {
-        id: 1,
-        code: "123456789",
-        description: "",
-      },
-    ],
+    forms: forms ?? createDefaultForms(),
+    dnaStructures: dnaStructures ?? createDefaultDnaStructures(),
+    finesses: finesses ?? createDefaultFinesses(),
     contacts: [],
     documentsFinanciers: [],
     repartition: Repartition.DIFFUS,
@@ -113,90 +84,17 @@ export const createStructure = ({
     isSubventionnee:
       structureType === StructureType.HUDA ||
       structureType === StructureType.CAES,
-    currentPlaces: {
-      placesAutorisees: structureTypologies?.[0]?.placesAutorisees ?? 0,
-      qpv: 0,
-      logementsSociaux: 0,
-    },
+    currentPlaces: createCurrentPlaces(currentStructureTypologies),
     isInCpom: false,
     isInCpomPerYear: {},
   };
 };
 
-export const createAllFinalisationSteps = () => [
-  {
-    id: 11,
-    status: StepStatus.NON_COMMENCE,
-    stepDefinition: {
-      id: 1,
-      label: "01-identification",
-      slug: "01-identification",
-    },
-  },
-  {
-    id: 12,
-    status: StepStatus.NON_COMMENCE,
-    stepDefinition: {
-      id: 2,
-      label: "02-documents-financiers",
-      slug: "02-documents-financiers",
-    },
-  },
-  {
-    id: 13,
-    status: StepStatus.NON_COMMENCE,
-    stepDefinition: {
-      id: 3,
-      label: "03-finance",
-      slug: "03-finance",
-    },
-  },
-  {
-    id: 14,
-    status: StepStatus.NON_COMMENCE,
-    stepDefinition: {
-      id: 4,
-      label: "04-controles",
-      slug: "04-controles",
-    },
-  },
-  {
-    id: 15,
-    status: StepStatus.NON_COMMENCE,
-    stepDefinition: {
-      id: 5,
-      label: "05-documents",
-      slug: "05-documents",
-    },
-  },
-  {
-    id: 16,
-    status: StepStatus.NON_COMMENCE,
-    stepDefinition: {
-      id: 6,
-      label: "06-notes",
-      slug: "06-notes",
-    },
-  },
-];
-
 export const createFinalisationValidStructure = (id: number) =>
   createStructure({
     id,
     type: StructureType.CADA,
-    forms: [
-      {
-        id: 1,
-        status: false,
-        formDefinition: {
-          id: 1,
-          slug: "finalisation",
-          name: "finalisation",
-          version: 1,
-        },
-        formSteps: createAllFinalisationSteps(),
-      },
-    ],
+    forms: [createFinalisationForm()],
   });
 
 export const createFinalisationDocumentsFinanciersValidStructure = (
