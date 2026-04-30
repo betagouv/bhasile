@@ -1,11 +1,11 @@
 import { useRouter } from "next/navigation";
 import { ReactElement } from "react";
 
-import { DateBars } from "@/app/(authenticated)/structures/(structure)/[id]/_components/_calendrier/DateBars";
 import { Block } from "@/app/components/common/Block";
 import { getCurrentCpomStructureDates } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
+import { DateBars } from "./DateBars";
 
 export const CalendrierBlock = (): ReactElement => {
   const { structure } = useStructureContext();
