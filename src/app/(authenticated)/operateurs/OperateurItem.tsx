@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ReactElement } from "react";
 
 import { Badge, BadgeType } from "@/app/components/common/Badge";
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { StructureType } from "@/types/structure.type";
 
 const getBadgeColor = (structureType: string): BadgeType => {
@@ -60,19 +61,25 @@ export const OperateurItem = ({
         </div>
         <div className="flex items-center">
           <div className="border-r border-default-grey pr-4 flex flex-col items-center max-w-[130px]">
-            <h3 className="text-xl mb-0.5">{nbStructures}</h3>
+            <h3 className="text-xl mb-0.5">
+              <NumberDisplay value={nbStructures} />
+            </h3>
             <span className="text-xs text-mention-grey text-center">
               structure{nbStructures > 1 ? "s" : ""} en France
             </span>
           </div>
           <div className="border-r border-default-grey px-4 flex flex-col items-center max-w-[140px]">
-            <h3 className="text-xl mb-0.5">{totalPlaces}</h3>
+            <h3 className="text-xl mb-0.5">
+              <NumberDisplay value={totalPlaces} />
+            </h3>
             <span className="text-xs text-mention-grey text-center">
               places autorisées en France
             </span>
           </div>
           <div className="pl-4 flex flex-col items-center max-w-[140px]">
-            <h3 className="text-xl mb-0.5">{pourcentageParc} %</h3>
+            <h3 className="text-xl mb-0.5">
+              <NumberDisplay value={pourcentageParc} />%
+            </h3>
             <span className="text-xs text-mention-grey text-center">
               du parc en nombre de places
             </span>
