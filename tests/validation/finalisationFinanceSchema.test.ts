@@ -5,7 +5,7 @@ import {
   createBudgetSansCpom,
   createEmptyCpomStructures,
   createValidBudget,
-} from "tests/test-utils/budget.factory";
+} from "tests/test-utils/factories/budget.factory";
 import z from "zod";
 
 import {

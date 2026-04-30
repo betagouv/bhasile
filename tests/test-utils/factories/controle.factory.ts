@@ -8,7 +8,7 @@ export const createControle = ({
   return {
     id: id ?? 1,
     structureDnaCode: "C0001",
-    date: date ?? new Date("01/02/2022").toISOString(),
+    date: date ?? new Date("2022-01-02").toISOString(),
     type: ControleType.INOPINE,
     fileUploads: [
       {

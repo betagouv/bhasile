@@ -23,12 +23,12 @@ import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.sch
 import { StructureType } from "@/types/structure.type";
 
 import { Repartition } from "../../src/types/adresse.type";
-import { createAdresse } from "../test-utils/adresse.factory";
-import { createAdresseTypologie } from "../test-utils/adresse-typologie.factory";
-import { createControle } from "../test-utils/controle.factory";
-import { createEvaluation } from "../test-utils/evaluation.factory";
+import { createAdresse } from "../test-utils/factories/adresse.factory";
+import { createAdresseTypologie } from "../test-utils/factories/adresse-typologie.factory";
+import { createControle } from "../test-utils/factories/controle.factory";
+import { createEvaluation } from "../test-utils/factories/evaluation.factory";
+import { createStructureTypologie } from "../test-utils/factories/structure-typologie.factory";
 import { createStructure } from "../test-utils/structure.factory";
-import { createStructureTypologie } from "../test-utils/structure-typologie.factory";
 
 vi.mock("@/constants", async () => {
   const actual = await vi.importActual("@/constants");

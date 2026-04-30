@@ -3,9 +3,9 @@ import { render, screen, within } from "@testing-library/react";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { StructuresTable } from "../../../src/app/(authenticated)/(with-menu)/structures/_components/StructuresTable";
-import { createAdresse } from "../../test-utils/adresse.factory";
+import { createAdresse } from "../../test-utils/factories/adresse.factory";
+import { createStructureTypologie } from "../../test-utils/factories/structure-typologie.factory";
 import { createStructure } from "../../test-utils/structure.factory";
-import { createStructureTypologie } from "../../test-utils/structure-typologie.factory";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
