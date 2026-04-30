@@ -9,9 +9,8 @@ import { ListLoader } from "@/app/components/lists/ListLoader";
 import { usePersistStructuresSearchQuery } from "@/app/hooks/usePersistStructuresSearchQuery";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
 
-import { Filters } from "../../components/filters/Filters";
-import { SearchBar } from "./_components/SearchBar";
 import { StructuresTable } from "./_components/StructuresTable";
+import { Toolbar } from "./_components/Toolbar";
 
 type Visualization = "tableau" | "carte";
 
@@ -101,34 +100,36 @@ export default function Structures(): ReactElement {
           </h2>
         </SegmentedControl>
       </div>
-      <div className="flex gap-2 justify-end items-center py-3.5 px-6 z-2">
-        <SearchBar placeholder="Code ou commune" inputId="structures-search" />
-        <Filters />
-        <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
-          {totalStructures ?? 0} entrée
-          {(totalStructures ?? 0) > 1 ? "s" : ""}
-        </p>
-      </div>
+
       {selectedVisualization === "tableau" && (
-        <div id="tableau">
-          <ListLoader
-            fetchStateName={"structure-search"}
-            items={structures}
-            entityName="structure"
-          >
-            {structures && (
-              <StructuresTable
-                structures={structures}
-                totalStructures={totalStructures}
-                ariaLabelledBy="structures-titre"
-              />
-            )}
-          </ListLoader>
-        </div>
+        <>
+          <Toolbar variant="tableau" totalStructures={totalStructures} />
+          <div id="tableau">
+            <ListLoader
+              fetchStateName={"structure-search"}
+              items={structures}
+              entityName="structure"
+            >
+              {structures && (
+                <StructuresTable
+                  structures={structures}
+                  totalStructures={totalStructures}
+                  ariaLabelledBy="structures-titre"
+                />
+              )}
+            </ListLoader>
+          </div>
+        </>
       )}
+
       {selectedVisualization === "carte" && (
-        <div id="carte" className="flex-1">
-          <StructuresMap />
+        <div id="carte" className="relative flex-1 min-h-0">
+          <div className="absolute inset-0">
+            <StructuresMap />
+          </div>
+          <div className="relative z-10">
+            <Toolbar variant="carte" totalStructures={totalStructures} />
+          </div>
         </div>
       )}
     </div>

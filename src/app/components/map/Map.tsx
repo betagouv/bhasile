@@ -137,7 +137,7 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
     });
     mapRef.current = createdMap;
 
-    createdMap.addControl(new maplibregl.NavigationControl(), "top-right");
+    createdMap.addControl(new maplibregl.NavigationControl(), "top-left");
 
     createdMap.on("load", async () => {
       addOverlay(createdMap, Overlay.administrativeBoundaries);
