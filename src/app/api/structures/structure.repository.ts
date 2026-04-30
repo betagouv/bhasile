@@ -25,7 +25,11 @@ import {
   STRUCTURES_ORDER_CTE_SQL,
   STRUCTURES_ORDER_JOINS_SQL,
 } from "./structure.constants";
-import { StructureDbList, StructureDbMap } from "./structure.db.type";
+import {
+  StructureDbList,
+  StructureDbMap,
+  StructureDbOperateur,
+} from "./structure.db.type";
 import { SearchProps } from "./structure.service";
 import {
   buildStructuresOrderSql,
@@ -232,18 +236,7 @@ export const getLatestPlacesAutoriseesPerStructure = async (): Promise<
 
 export const findOneOperateur = async (
   id: number
-): Promise<{
-  id: number;
-  codeBhasile: string | null;
-  forms: {
-    id: number;
-    createdAt: Date;
-    updatedAt: Date;
-    structureId: number | null;
-    formDefinitionId: number;
-    status: boolean;
-  }[];
-}> => {
+): Promise<StructureDbOperateur> => {
   return await prisma.structure.findUniqueOrThrow({
     where: { id },
     select: {
