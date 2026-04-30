@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { RepartitionBadge } from "@/app/(authenticated)/structures/_components/RepartitionBadge";
+import { RepartitionBadge } from "@/app/(authenticated)/structures/(structure)/_components/RepartitionBadge";
 import { useFetchStructure } from "@/app/hooks/useFetchStructure";
 import { formatDate } from "@/app/utils/date.util";
 import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
@@ -20,7 +20,9 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
 
   return (
     <div>
-      <div className="text-xs font-bold text-title-blue-france">{codeBhasile}</div>
+      <div className="text-xs font-bold text-title-blue-france">
+        {codeBhasile}
+      </div>
       <div className="text-xl text-title-blue-france m-0 flex gap-x-4 flex-wrap">
         <strong className="">
           {type}, {operateurLabel}
@@ -35,7 +37,7 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
                 {DEPARTEMENTS.find((d) => d.numero === departement)?.name ??
                   departement}
               </span>
-            ),
+            )
           )}
         </span>
       </div>
@@ -50,7 +52,10 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
         </div>
       )}
       <div className="text-sm mb-2">
-        <RepartitionBadge repartition={structure.repartition} className="m-0!" />
+        <RepartitionBadge
+          repartition={structure.repartition}
+          className="m-0!"
+        />
       </div>
       <div className="flex justify-end">
         <Link
@@ -68,4 +73,3 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
     </div>
   );
 };
-

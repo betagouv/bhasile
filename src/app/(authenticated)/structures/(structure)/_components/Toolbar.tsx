@@ -1,9 +1,8 @@
 import { ReactElement } from "react";
 
+import { Filters } from "@/app/components/filters/Filters";
+import { SearchBar } from "@/app/components/SearchBar";
 import { cn } from "@/app/utils/classname.util";
-
-import { Filters } from "../../../components/filters/Filters";
-import { SearchBar } from "./SearchBar";
 
 type Visualization = "tableau" | "carte";
 
