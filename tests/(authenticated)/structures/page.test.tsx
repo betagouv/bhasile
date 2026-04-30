@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import StructuresPage from "@/app/(authenticated)/structures/page";
+import StructuresPage from "@/app/(authenticated)/(with-menu)/structures/page";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -54,4 +54,3 @@ describe("Structures page (hash)", () => {
     });
   });
 });
-
