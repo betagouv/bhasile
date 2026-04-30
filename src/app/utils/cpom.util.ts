@@ -3,9 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
   CpomApiRead,
-  CpomApiWrite,
   CpomDepartementApiType,
-  CpomStructureApiType,
+  CpomStructureApiRead,
 } from "@/schemas/api/cpom.schema";
 import { BudgetCpomFormValues } from "@/schemas/forms/base/cpom.schema";
 import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
@@ -55,7 +54,7 @@ export const getCpomDefaultValues = (cpom?: CpomApiRead): CpomFormValues => {
 };
 
 export const getStructureCpomDefaultValues = (
-  cpomStructures: CpomStructureApiType[] | undefined
+  cpomStructures: CpomStructureApiRead[] | undefined
 ) => {
   if (!cpomStructures) {
     return [];
@@ -100,50 +99,6 @@ export const formatCpomName = (cpom: CpomApiRead): string => {
           .join(", ");
 
   return `${cpom.operateur?.name || ""} ${zone || ""}`;
-};
-
-export const computeCpomDates = (
-  cpom?: CpomApiWrite
-): { dateStart?: string; dateEnd?: string } => {
-  if (!cpom) {
-    return {
-      dateStart: undefined,
-      dateEnd: undefined,
-    };
-  }
-
-  if (!cpom.actesAdministratifs?.length) {
-    return {
-      dateStart: undefined,
-      dateEnd: undefined,
-    };
-  }
-
-  const dateEnd = cpom.actesAdministratifs.reduce(
-    (accumulator, current) => {
-      if (!current.endDate) {
-        return accumulator;
-      }
-      if (!accumulator) {
-        return current.endDate;
-      }
-      if (current.endDate > accumulator) {
-        return current.endDate;
-      }
-      return accumulator;
-    },
-    undefined as string | undefined
-  );
-
-  const dateStart =
-    cpom.actesAdministratifs.find(
-      (acteAdministratif) => acteAdministratif.startDate
-    )?.startDate ?? undefined;
-
-  return {
-    dateStart,
-    dateEnd,
-  };
 };
 
 export const getGranularityLabel = (

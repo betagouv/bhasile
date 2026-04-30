@@ -1,6 +1,6 @@
 import { CURRENT_YEAR } from "@/constants";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import { DnaStructureApiType } from "@/schemas/api/dna-structure.schema";
 import { FinessApiType } from "@/schemas/api/finess.schema";
 import { FormApiType } from "@/schemas/api/form.schema";
@@ -142,7 +142,7 @@ type CreateStructuresArgs = {
   type?: StructureType;
   finessCode?: string;
   publicType?: PublicType;
-  cpomStructures?: CpomStructureApiType[];
+  cpomStructures?: CpomStructureApiRead[];
   dnaStructures?: DnaStructureApiType[];
   finesses?: FinessApiType[];
   forms?: FormApiType[];

@@ -1,5 +1,5 @@
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { anyBudgetFormValues } from "@/schemas/forms/base/budget.schema";
 import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
@@ -79,7 +79,7 @@ export const isInputDisabled = (
   type?: StructureType | IndicateurFinancierType,
   disabledYearsStart?: number,
   enabledYears?: number[],
-  cpomStructures?: CpomStructureApiType[]
+  cpomStructures?: CpomStructureApiWrite[]
 ): boolean => {
   if (cpomStructures) {
     const { cpomStructureIndex, budgetIndex } =
@@ -106,7 +106,7 @@ export const getName = (
   year: number,
   type?: StructureType | IndicateurFinancierType,
   budgets?: BudgetApiType[],
-  cpomStructures?: CpomStructureApiType[],
+  cpomStructures?: CpomStructureApiWrite[],
   indicateursFinanciers?: IndicateurFinancierApiType[]
 ): string => {
   if (budgets) {

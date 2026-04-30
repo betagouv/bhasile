@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acteAdministratif.repository";
+import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import { createOrUpdateAdresses } from "../adresses/adresse.repository";
 import { createOrUpdateAntennes } from "../antennes/antenne.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
@@ -137,7 +137,15 @@ export const findBySearch = async ({
       },
       cpomStructures: {
         include: {
-          cpom: true,
+          cpom: {
+            include: {
+              actesAdministratifs: {
+                include: {
+                  fileUploads: true,
+                },
+              },
+            },
+          },
         },
       },
       operateur: true,
@@ -166,6 +174,7 @@ export const findBySearch = async ({
           dna: true,
         },
       },
+      actesAdministratifs: true,
     },
   });
 

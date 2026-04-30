@@ -1,5 +1,5 @@
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableCommentButtonAndModal } from "./BudgetTableCommentButtonAndModal";
@@ -52,7 +52,7 @@ type Props = {
   type?: StructureType;
   label: string;
   budgets?: BudgetApiType[];
-  cpomStructures?: CpomStructureApiType[];
+  cpomStructures?: CpomStructureApiWrite[];
   years: number[];
   disabledYearsStart?: number;
   enabledYears?: number[];

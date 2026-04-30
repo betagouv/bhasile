@@ -26,9 +26,12 @@ import {
 } from "./structure.repository";
 import {
   getAdresseAdministrativeCoordinates,
+  getCpomStructuresWithDates,
   getCurrentPlacesAutorisees,
   getCurrentPlacesLogementsSociaux,
   getCurrentPlacesQpv,
+  // getDatesConvention,
+  // getDatesPeriodeAutorisation,
   getOperateurLabel,
   getRepartition,
   isStructureInCpom,
@@ -151,6 +154,10 @@ const dbStructureToApiRead = (
   dbStructure: StructureDbDetails | StructureDbList,
   simple: boolean = false
 ): StructureApiRead => {
+  // TODO: replace the dates when we make the UI change and check for data coherence
+  // const [debutConvention, finConvention] = getDatesConvention(dbStructure);
+  // const [debutPeriodeAutorisation, finPeriodeAutorisation] =
+  //   getDatesPeriodeAutorisation(dbStructure);
   const allActivites = simple
     ? []
     : (dbStructure as StructureDbDetails).dnaStructures.flatMap(
@@ -166,6 +173,7 @@ const dbStructureToApiRead = (
 
   return recursivelySerializeDates({
     ...dbStructure,
+    cpomStructures: getCpomStructuresWithDates(dbStructure),
     latitude: dbStructure.latitude?.toString(),
     longitude: dbStructure.longitude?.toString(),
     activites,

@@ -3,7 +3,7 @@ import { useForm, useFormContext } from "react-hook-form";
 import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { Table } from "@/app/components/common/Table";
 import { getYearRange } from "@/app/utils/date.util";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { StructureType } from "@/types/structure.type";
 
 import { BudgetTableCommentLine } from "./BudgetTableCommentLine";
@@ -28,7 +28,7 @@ export const StructureCpomTable = ({
   const yearsInCpom = years.filter((year) => structure.isInCpomPerYear[year]);
 
   const cpomStructures = canEdit
-    ? (watch("cpomStructures") as CpomStructureApiType[])
+    ? (watch("cpomStructures") as CpomStructureApiWrite[])
     : structure?.cpomStructures;
 
   if (!cpomStructures) {

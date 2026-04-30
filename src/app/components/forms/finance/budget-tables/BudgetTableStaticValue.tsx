@@ -8,7 +8,7 @@ import {
   getMillesimeIndexForAYear,
 } from "@/app/utils/structure.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
 import { StructureType } from "@/types/structure.type";
@@ -94,7 +94,7 @@ type Props = {
   colored?: boolean;
   budgets?: BudgetApiType[];
   indicateursFinanciers?: IndicateurFinancierApiType[];
-  cpomStructures?: CpomStructureApiType[];
+  cpomStructures?: CpomStructureApiWrite[];
   disabledYearsStart?: number;
   enabledYears?: number[];
   isCurrency?: boolean;

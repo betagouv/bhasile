@@ -4,7 +4,7 @@ import {
   isStructureMultiDna,
 } from "@/app/utils/structure.util";
 import { ContactApiType } from "@/schemas/api/contact.schema";
-import { CpomStructureApiType } from "@/schemas/api/cpom.schema";
+import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
@@ -185,5 +185,5 @@ type StructureDefaultValues = Omit<
   evaluations: EvaluationFormValues[];
   budgets: anyBudgetFormValues;
   structureTypologies: structureTypologieSchemaTypeFormValues[];
-  cpomStructures: CpomStructureApiType[];
+  cpomStructures: CpomStructureApiWrite[];
 };

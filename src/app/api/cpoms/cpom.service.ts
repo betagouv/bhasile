@@ -1,22 +1,24 @@
-import { computeCpomDates } from "@/app/utils/cpom.util";
+import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 import { CpomColumn } from "@/types/ListColumn";
 
+import { CpomDbDetails, CpomDbList } from "./cpom.db.type";
 import {
   countBySearch,
   createOrUpdateCpom,
   findBySearch,
   findOne,
 } from "./cpom.repository";
+import { getDatesConvention } from "./cpom.util";
 
-export const getFullCpom = (cpom: CpomApiWrite): CpomApiRead => {
-  const { dateStart, dateEnd } = computeCpomDates(cpom);
+export const getFullCpom = (cpom: CpomDbDetails | CpomDbList): CpomApiRead => {
+  const [dateStart, dateEnd] = getDatesConvention(cpom);
 
-  return {
+  return recursivelySerializeDates({
     ...cpom,
     dateStart,
     dateEnd,
-  };
+  }) as CpomApiRead;
 };
 
 export const getCpoms = async ({
