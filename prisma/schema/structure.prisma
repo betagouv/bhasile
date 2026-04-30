@@ -1,6 +1,6 @@
 model Structure {
-  id                       Int                  @id @default(autoincrement())
-  codeBhasile              String               @unique
+  id                       Int                         @id @default(autoincrement())
+  codeBhasile              String                      @unique
   filiale                  String? // TODO: remove after first filling is complete, filiales via Operateur are connected in app and DB is backfilled
   type                     StructureType?
   adresseAdministrative    String?
@@ -34,15 +34,16 @@ model Structure {
   structureMillesimes      StructureMillesime[]
   budgets                  Budget[]
   indicateursFinanciers    IndicateurFinancier[]
-  operateur                Operateur?           @relation(fields: [operateurId], references: [id])
+  operateur                Operateur?                  @relation(fields: [operateurId], references: [id])
   operateurId              Int?
   forms                    Form[]
   campaigns                Campaign[]
   antennes                 Antenne[]
   finesses                 Finess[]
-  departement              Departement?         @relation(fields: [departementAdministratif], references: [numero])
+  departement              Departement?                @relation(fields: [departementAdministratif], references: [numero])
   userActions              UserAction[]
   userNotes                Note[]
+  transformations          TransformationOnStructure[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

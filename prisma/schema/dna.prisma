@@ -25,13 +25,15 @@ model Dna {
 }
 
 model DnaStructure {
-  id          Int       @id @default(autoincrement())
-  dnaId       Int
-  dna         Dna       @relation(fields: [dnaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureId Int
-  structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  startDate   DateTime? // Empty by default, set when a DNA changes its structure
-  endDate     DateTime? // Empty by default, set when a DNA changes its structure
+  id                        Int                      @id @default(autoincrement())
+  dnaId                     Int
+  dna                       Dna                      @relation(fields: [dnaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId               Int?
+  structure                 Structure?               @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  transformationStructure   TransformationStructure? @relation(fields: [transformationStructureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  transformationStructureId Int?
+  startDate                 DateTime? // Empty by default, set when a DNA changes its structure
+  endDate                   DateTime? // Empty by default, set when a DNA changes its structure
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -55,13 +57,15 @@ model Antenne {
 }
 
 model Finess {
-  id          Int       @id @default(autoincrement())
-  structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureId Int
-  code        String?   @unique
-  description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now()) @updatedAt
+  id                        Int                      @id @default(autoincrement())
+  structure                 Structure?               @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId               Int?
+  transformationStructure   TransformationStructure? @relation(fields: [transformationStructureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  transformationStructureId Int?
+  code                      String?                  @unique
+  description               String?
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime                 @default(now()) @updatedAt
 
   @@schema("public")
 }

@@ -1,0 +1,188 @@
+model Transformation {
+  id                       Int                         @id @default(autoincrement())
+  date                     DateTime?
+  etat                     TransformationEtat          @default(EN_COURS)
+  structures               TransformationOnStructure[]
+  transformationStructures TransformationStructure[]
+  creation                 TransformationCreation?
+  extension                TransformationExtension?
+  contraction              TransformationContraction?
+  fermeture                TransformationFermeture?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model TransformationOnStructure {
+  id               Int            @id @default(autoincrement())
+  transformationId Int
+  transformation   Transformation @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId      Int
+  structure        Structure      @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([transformationId, structureId])
+  @@schema("public")
+}
+
+model TransformationStructure {
+  id                       Int                                    @id @default(autoincrement())
+  transformationId         Int
+  transformation           Transformation                         @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  codeBhasile              String?
+  filiale                  String?
+  type                     StructureType?
+  adresseAdministrative    String?
+  codePostalAdministratif  String?
+  communeAdministrative    String?
+  departementAdministratif String?
+  latitude                 Decimal?
+  longitude                Decimal?
+  nom                      String?
+  debutConvention          DateTime?
+  finConvention            DateTime?
+  creationDate             DateTime?
+  date303                  DateTime?
+  lgbt                     Boolean?
+  fvvTeh                   Boolean?
+  public                   PublicType?
+  debutPeriodeAutorisation DateTime?
+  finPeriodeAutorisation   DateTime?
+  notes                    String?
+  nomOfii                  String?
+  directionTerritoriale    String?
+  dnaStructures            DnaStructure[]
+  adresses                 Adresse[]
+  contacts                 Contact[]
+  actesAdministratifs      ActeAdministratif[]
+  finesses                 Finess[]
+  creationLinks            CreationOnTransformationStructure[]
+  extensionLinks           ExtensionOnTransformationStructure[]
+  contractionLinks         ContractionOnTransformationStructure[]
+  fermetureLinks           FermetureOnTransformationStructure[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model TransformationCreation {
+  id               Int                                 @id @default(autoincrement())
+  transformationId Int                                 @unique
+  transformation   Transformation                      @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  date             DateTime?
+  structures       CreationOnTransformationStructure[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model CreationOnTransformationStructure {
+  id                        Int                     @id @default(autoincrement())
+  transformationCreationId  Int
+  transformationCreation    TransformationCreation  @relation(fields: [transformationCreationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  transformationStructureId Int
+  transformationStructure   TransformationStructure @relation(fields: [transformationStructureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([transformationCreationId, transformationStructureId])
+  @@schema("public")
+}
+
+model TransformationExtension {
+  id               Int                                  @id @default(autoincrement())
+  transformationId Int                                  @unique
+  transformation   Transformation                       @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  date             DateTime?
+  structures       ExtensionOnTransformationStructure[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model ExtensionOnTransformationStructure {
+  id                        Int                     @id @default(autoincrement())
+  transformationExtensionId Int
+  transformationExtension   TransformationExtension @relation(fields: [transformationExtensionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  transformationStructureId Int
+  transformationStructure   TransformationStructure @relation(fields: [transformationStructureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([transformationExtensionId, transformationStructureId])
+  @@schema("public")
+}
+
+model TransformationContraction {
+  id               Int                                    @id @default(autoincrement())
+  transformationId Int                                    @unique
+  transformation   Transformation                         @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  date             DateTime?
+  structures       ContractionOnTransformationStructure[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model ContractionOnTransformationStructure {
+  id                          Int                       @id @default(autoincrement())
+  transformationContractionId Int
+  transformationContraction   TransformationContraction @relation(fields: [transformationContractionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  transformationStructureId   Int
+  transformationStructure     TransformationStructure   @relation(fields: [transformationStructureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([transformationContractionId, transformationStructureId])
+  @@schema("public")
+}
+
+model TransformationFermeture {
+  id               Int                                  @id @default(autoincrement())
+  transformationId Int                                  @unique
+  transformation   Transformation                       @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  date             DateTime?
+  structures       FermetureOnTransformationStructure[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("public")
+}
+
+model FermetureOnTransformationStructure {
+  id                        Int                     @id @default(autoincrement())
+  transformationFermetureId Int
+  transformationFermeture   TransformationFermeture @relation(fields: [transformationFermetureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  transformationStructureId Int
+  transformationStructure   TransformationStructure @relation(fields: [transformationStructureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([transformationFermetureId, transformationStructureId])
+  @@schema("public")
+}
+
+enum TransformationEtat {
+  EN_COURS
+  FINALISEE
+  ANNULEE
+
+  @@schema("public")
+}

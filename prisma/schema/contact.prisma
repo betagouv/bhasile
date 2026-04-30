@@ -1,13 +1,15 @@
 model Contact {
-  id          Int        @id @default(autoincrement())
-  structure   Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureId Int?
-  prenom      String?
-  nom         String?
-  telephone   String?
-  email       String?
-  role        String?
-  perimetre   String?
+  id                        Int                      @id @default(autoincrement())
+  structure                 Structure?               @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId               Int?
+  transformationStructure   TransformationStructure? @relation(fields: [transformationStructureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  transformationStructureId Int?
+  prenom                    String?
+  nom                       String?
+  telephone                 String?
+  email                     String?
+  role                      String?
+  perimetre                 String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
