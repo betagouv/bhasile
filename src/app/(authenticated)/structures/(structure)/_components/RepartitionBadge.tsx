@@ -1,8 +1,7 @@
 import { ReactElement } from "react";
 
+import { Badge, BadgeType } from "@/app/components/common/Badge";
 import { Repartition } from "@/types/adresse.type";
-
-import { Badge, BadgeType } from "../../../../components/common/Badge";
 
 export const RepartitionBadge = ({
   repartition,
