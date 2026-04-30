@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import ModificationCalendrierPage from "@/app/(authenticated)/structures/[id]/modification/calendrier/page";
+import ModificationCalendrierPage from "@/app/(authenticated)/(with-menu)/structures/[id]/modification/calendrier/page";
 import { StructureType } from "@/types/structure.type";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";

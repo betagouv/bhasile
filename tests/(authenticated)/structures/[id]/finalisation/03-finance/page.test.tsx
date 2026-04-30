@@ -1,7 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import FinalisationFinancePage from "@/app/(authenticated)/structures/[id]/finalisation/03-finance/page";
+import FinalisationFinancePage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/03-finance/page";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationFinanceValidStructure } from "../../../../../test-utils/structure.factory";

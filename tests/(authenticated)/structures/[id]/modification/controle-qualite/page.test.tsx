@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import ModificationControleQualitePage from "@/app/(authenticated)/structures/[id]/modification/controle-qualite/page";
+import ModificationControleQualitePage from "@/app/(authenticated)/(with-menu)/structures/[id]/modification/controle-qualite/page";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationControlesValidStructure } from "../../../../../test-utils/structure.factory";

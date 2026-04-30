@@ -1,7 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import FinalisationControlesPage from "@/app/(authenticated)/structures/[id]/finalisation/04-controles/page";
+import FinalisationControlesPage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/04-controles/page";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createFinalisationControlesValidStructure } from "../../../../../test-utils/structure.factory";

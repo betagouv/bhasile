@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import ModificationActesAdministratifsPage from "@/app/(authenticated)/structures/[id]/modification/actes-administratifs/page";
+import ModificationActesAdministratifsPage from "@/app/(authenticated)/(with-menu)/structures/[id]/modification/actes-administratifs/page";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createStructure } from "../../../../../test-utils/structure.factory";

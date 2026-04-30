@@ -1,7 +1,7 @@
 import { waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import ModificationDescriptionPage from "@/app/(authenticated)/structures/[id]/modification/description/page";
+import ModificationDescriptionPage from "@/app/(authenticated)/(with-menu)/structures/[id]/modification/description/page";
 import { StructureType } from "@/types/structure.type";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";

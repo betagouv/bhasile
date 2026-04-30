@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import ModificationAdressesPage from "@/app/(authenticated)/structures/[id]/modification/adresses/page";
+import ModificationAdressesPage from "@/app/(authenticated)/(with-menu)/structures/[id]/modification/adresses/page";
 import { CURRENT_YEAR } from "@/constants";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";

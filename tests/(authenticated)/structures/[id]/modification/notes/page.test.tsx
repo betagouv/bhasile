@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import ModificationNotesPage from "@/app/(authenticated)/structures/[id]/modification/notes/page";
+import ModificationNotesPage from "@/app/(authenticated)/(with-menu)/structures/[id]/modification/notes/page";
 import { StructureType } from "@/types/structure.type";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";

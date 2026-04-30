@@ -3,7 +3,7 @@ import { vi } from "vitest";
 export const mockRouterPush = vi.fn();
 
 vi.mock(
-  "@/app/(authenticated)/structures/[id]/finalisation/_components/Tabs",
+  "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/_components/Tabs",
   () => ({ Tabs: () => <div>Tabs</div> })
 );
 
