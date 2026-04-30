@@ -51,16 +51,16 @@ export const AdressImporter = ({ typeBati }: Props): ReactElement => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center bg-alt-blue-france p-4 rounded min-h-16">
+    <div className="flex flex-col gap-3">
       <input
         type="file"
         id="adresses-upload"
         accept={SPREADSHEET_MIME_TYPES.join(",")}
-        className="file:bg-white file:p-2 file:rounded file:mr-2 file:cursor-pointer"
+        className="block w-full text-sm text-text-default-grey file:mr-3 file:cursor-pointer file:rounded file:border-0 file:bg-white file:px-4 file:py-2 file:text-sm file:font-medium"
         onChange={() => onAdressesUpload(typeBati)}
       />
       {parsingError && (
-        <div className="text-red-500 pt-2">
+        <div className="text-sm text-error-425-main pt-1">
           <i>L’import du tableur n’a pas fonctionné.</i>
           <br />
           Il se peut que vous n’ayez pas respecté tous les pré-requis. Vérifiez

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { findOne } from "../cpom.repository";
-import { getFullCpom } from "../cpom.service";
+import { getCpomById } from "../cpom.service";
 
 export async function GET(
   _request: NextRequest,
@@ -9,16 +8,12 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const cpom = await findOne(Number(id));
-
+    const cpom = await getCpomById(Number(id));
     if (!cpom) {
-      return NextResponse.json(
-        { error: "Structure not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "CPOM non trouvé" }, { status: 404 });
     }
 
-    return NextResponse.json(getFullCpom(cpom));
+    return NextResponse.json(cpom);
   } catch (error) {
     console.error("Error in GET /api/cpoms/[id]", error);
     return NextResponse.json(

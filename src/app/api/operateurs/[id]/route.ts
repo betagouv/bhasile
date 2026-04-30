@@ -3,8 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { operateurWriteApiSchema } from "@/schemas/api/operateur.schema";
 
 import { createOperateurEvent } from "../../user-action/user-action.service";
-import { updateOne } from "../operateur.repository";
-import { getOperateur } from "../operateur.service";
+import { getOperateur, updateOperateur } from "../operateur.service";
 
 export async function GET(
   request: NextRequest,
@@ -43,7 +42,7 @@ export async function PUT(
   try {
     const body = await request.json();
     const result = operateurWriteApiSchema.parse(body);
-    const operateur = await updateOne(result);
+    const operateur = await updateOperateur(result);
     createOperateurEvent(request.method, Number(id));
     return NextResponse.json({ operateurId: operateur.id }, { status: 201 });
   } catch (error) {

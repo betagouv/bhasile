@@ -11,9 +11,9 @@ import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 
 import { createStructureEvent } from "../user-action/user-action.service";
-import { findOne } from "./structure.repository";
 import {
   getFullStructures,
+  getStructure,
   updateStructureAgent,
   updateStructureOperateur,
 } from "./structure.service";
@@ -79,7 +79,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const result = structureAgentUpdateApiSchema.parse(body);
 
-    const existingStructure = await findOne(result.id);
+    const existingStructure = await getStructure(result.id);
 
     if (!canUpdateStructure(session.user as SessionUser, existingStructure)) {
       return NextResponse.json(

@@ -5,9 +5,12 @@ import {
   FILE_UPLOAD_EXPIRATION_DELAY,
   MAX_FILE_SIZE,
 } from "@/constants";
+import { FileUpload } from "@/generated/prisma/client";
 import { checkBucket, minioClient } from "@/lib/minio";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+
+import { createOne, deleteOneByKey, findOneByKey } from "./file.repository";
 
 export const uploadFile = async (
   bucketName: string,
@@ -102,4 +105,28 @@ export const getKeysFromIncomingDocumentsOrActes = (
     }
   }
   return keys;
+};
+
+export const createUploadedFile = async ({
+  key,
+  mimeType,
+  originalName,
+  fileSize,
+}: {
+  key: string;
+  mimeType: string;
+  originalName: string;
+  fileSize: number;
+}): Promise<FileUpload | null> => {
+  return createOne({ key, mimeType, originalName, fileSize });
+};
+
+export const getFileByKey = async (key: string): Promise<FileUpload | null> => {
+  return findOneByKey(key);
+};
+
+export const deleteFileByStorageKey = async (
+  key: string
+): Promise<FileUpload | null> => {
+  return deleteOneByKey(key);
 };

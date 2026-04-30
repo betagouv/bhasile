@@ -152,7 +152,7 @@ export default function FormAdresses() {
             <p className="max-w-3xl">
               Veuillez d’abord renseigner le type de bâti puis l’ensemble des
               adresses d’hébergement de la structure, et les informations
-              associées, au 1er janvier de l’année en cours.
+              associées, <strong>au 1er janvier de l’année en cours.</strong>
             </p>
             <fieldset className="flex flex-col gap-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

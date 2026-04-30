@@ -1,7 +1,16 @@
 import { Operateur } from "@/generated/prisma/client";
-import { OperateurApiRead } from "@/schemas/api/operateur.schema";
+import {
+  OperateurApiRead,
+  OperateurApiWrite,
+} from "@/schemas/api/operateur.schema";
 
-import { findOne, getPaginatedOperateurs } from "./operateur.repository";
+import {
+  countOperateurs,
+  findBySearchTerm,
+  findOne,
+  getPaginatedOperateurs,
+  updateOne,
+} from "./operateur.repository";
 
 export const getOperateurs = async ({
   page,
@@ -9,10 +18,10 @@ export const getOperateurs = async ({
 }: {
   page: number | null;
   search: string | null;
-}): Promise<Partial<Operateur>[]> => {
-  const operateurs = await getPaginatedOperateurs({ page, search });
+}): Promise<{ operateurs: Partial<Operateur>[]; totalOperateurs: number }> => {
+  const dbOperateurs = await getPaginatedOperateurs({ page, search });
 
-  return operateurs.map((row) => ({
+  const operateurs = dbOperateurs.map((row) => ({
     id: row.id,
     name: row.name,
     nbStructures: Number(row.nb_structures),
@@ -23,6 +32,13 @@ export const getOperateurs = async ({
       .replaceAll("}", "")
       .split(","),
   }));
+
+  const totalOperateurs = await countOperateurs({ search });
+
+  return {
+    operateurs,
+    totalOperateurs,
+  };
 };
 
 export const getOperateur = async (id: number): Promise<OperateurApiRead> => {
@@ -41,4 +57,16 @@ export const getOperateur = async (id: number): Promise<OperateurApiRead> => {
     ...operateur,
     vulnerabilites,
   };
+};
+
+export const updateOperateur = async (
+  operateur: OperateurApiWrite
+): Promise<Operateur> => {
+  return updateOne(operateur);
+};
+
+export const getOperateursSuggestions = async (
+  search: string | null
+): Promise<Operateur[]> => {
+  return findBySearchTerm(search);
 };

@@ -4,8 +4,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/next-auth/auth";
 
 import { createStructureEvent } from "../../user-action/user-action.service";
-import { findOneOperateur } from "../structure.repository";
-import { getFullStructure } from "../structure.service";
+import {
+  getFullStructure,
+  getStructureForOperateur,
+} from "../structure.service";
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,7 +23,7 @@ export async function GET(request: NextRequest) {
     const id = request.nextUrl.pathname.split("/").pop();
     const structure = isAuthenticated
       ? await getFullStructure(Number(id))
-      : await findOneOperateur(Number(id));
+      : await getStructureForOperateur(Number(id));
 
     if (!structure) {
       return NextResponse.json(
