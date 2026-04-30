@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import StructuresPage from "@/app/(authenticated)/structures/(structure)/page";
+import StructuresPage from "@/app/(authenticated)/(with-menu)/structures/page";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({

@@ -2,21 +2,27 @@
 
 import { useState } from "react";
 
-import { useStructureContext } from "@/app/(authenticated)/structures/(structure)/[id]/_context/StructureClientContext";
-import { FieldSetCalendrier } from "@/app/components/forms/calendrier/FieldSetCalendrier";
+import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSetHebergement";
+import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTypeBati";
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
+import { transformFormAdressesToApiAdresses } from "@/app/utils/adresse.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
-import { calendrierSchema } from "@/schemas/forms/base/calendrier.schema";
+import {
+  TypeBatiAndAdressesFormValues,
+  typeBatiAndAdressesSchema,
+} from "@/schemas/forms/base/adresse.schema";
 import { FetchState } from "@/types/fetch-state.type";
+import { FormKind } from "@/types/global";
 
-export default function ModificationCalendrier() {
+export default function ModificationAdresses() {
   const { structure } = useStructureContext();
 
   const { handleSubmit, backendError } = useAgentFormHandling({
@@ -29,21 +35,23 @@ export default function ModificationCalendrier() {
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("structure-save");
 
+  const onSubmit = (data: TypeBatiAndAdressesFormValues) => {
+    handleSubmit({
+      ...data,
+      id: structure.id,
+      adresses: transformFormAdressesToApiAdresses(data.adresses, structure.id),
+    });
+  };
   return (
     <>
       <ModificationTitle
-        step="Calendrier"
+        step="Adresses d’hébergement"
         handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
-        schema={calendrierSchema}
+        schema={typeBatiAndAdressesSchema}
         defaultValues={defaultValues}
-        onSubmit={(data) =>
-          handleSubmit({
-            ...data,
-            id: structure.id,
-          })
-        }
+        onSubmit={onSubmit}
         mode="onChange"
         submitButtonText="Valider"
         handleCancel={() => setShouldOpenModal(true)}
@@ -53,7 +61,8 @@ export default function ModificationCalendrier() {
         ]}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <FieldSetCalendrier />
+        <FieldSetTypeBati />
+        <FieldSetHebergement formKind={FormKind.MODIFICATION} />
       </FormWrapper>
       <LeaveModificationModal
         resetRoute={`/structures/${structure.id}`}

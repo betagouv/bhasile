@@ -4,7 +4,7 @@ import { useState } from "react";
 import { OperateurUpdateFormValues } from "@/schemas/forms/base/operateur.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
-import { useOperateurContext } from "../(authenticated)/operateurs/[id]/_context/OperateurClientContext";
+import { useOperateurContext } from "../(authenticated)/(with-menu)/operateurs/[id]/_context/OperateurClientContext";
 import { useFetchState } from "../context/FetchStateContext";
 import { useOperateur } from "./useOperateur";
 

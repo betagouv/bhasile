@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
-import { StructuresTable } from "../../../src/app/(authenticated)/structures/(structure)/_components/StructuresTable";
+import { StructuresTable } from "../../../src/app/(authenticated)/(with-menu)/structures/_components/StructuresTable";
 import { createAdresse } from "../../test-utils/adresse.factory";
 import { createStructure } from "../../test-utils/structure.factory";
 import { createStructureTypologie } from "../../test-utils/structure-typologie.factory";

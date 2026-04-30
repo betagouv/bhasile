@@ -1,5 +1,5 @@
 "use client";
-import { useStructureContext } from "@/app/(authenticated)/structures/(structure)/[id]/_context/StructureClientContext";
+import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { AutoSave } from "@/app/components/forms/AutoSave";
 import { Date303 } from "@/app/components/forms/finance/documents/Date303";
 import { DocumentsFinanciers } from "@/app/components/forms/finance/documents/DocumentsFinanciers";

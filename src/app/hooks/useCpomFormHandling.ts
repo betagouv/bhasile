@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
-import { useCpomContext } from "../(authenticated)/cpoms/[id]/_context/CpomClientContext";
+import { useCpomContext } from "../(authenticated)/(with-menu)/cpoms/[id]/_context/CpomClientContext";
 import { useFetchState } from "../context/FetchStateContext";
 import { useCpom } from "./useCpom";
 

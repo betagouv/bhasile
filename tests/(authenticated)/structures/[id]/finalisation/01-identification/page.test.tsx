@@ -8,8 +8,8 @@ import {
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { StructureClientProvider } from "@/app/(authenticated)/structures/(structure)/[id]/_context/StructureClientContext";
-import FinalisationIdentificationPage from "@/app/(authenticated)/structures/(structure)/[id]/finalisation/01-identification/page";
+import { StructureClientProvider } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
+import FinalisationIdentificationPage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/01-identification/page";
 import { FetchStateProvider } from "@/app/context/FetchStateContext";
 import { CURRENT_YEAR } from "@/constants";
 import { StepStatus } from "@/types/form.type";

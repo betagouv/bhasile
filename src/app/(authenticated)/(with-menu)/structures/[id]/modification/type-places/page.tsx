@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { useStructureContext } from "@/app/(authenticated)/structures/(structure)/[id]/_context/StructureClientContext";
+import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";

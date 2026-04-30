@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-import { useStructureContext } from "@/app/(authenticated)/structures/(structure)/[id]/_context/StructureClientContext";
+import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { BudgetTables } from "@/app/components/forms/finance/BudgetTables";
 import { DocumentsFinanciers } from "@/app/components/forms/finance/documents/DocumentsFinanciers";
 import { IndicateursFinanciers } from "@/app/components/forms/finance/IndicateursFinanciers";
