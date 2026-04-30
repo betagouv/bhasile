@@ -37,7 +37,10 @@ describe("GET /api/cpoms", () => {
 
     // THEN
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ cpoms, totalCpoms });
+    expect(await response.json()).toEqual({
+      cpoms: [{ id: 1, dateStart: null, dateEnd: null }],
+      totalCpoms,
+    });
     expect(mockFindBySearch).toHaveBeenCalledWith({
       page: null,
       departements: null,

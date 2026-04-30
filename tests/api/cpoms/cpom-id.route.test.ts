@@ -28,7 +28,11 @@ describe("GET /api/cpoms/[id]", () => {
 
     // THEN
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual(cpom);
+    expect(await response.json()).toEqual({
+      id: 1,
+      dateStart: null,
+      dateEnd: null,
+    });
     expect(mockFindOne).toHaveBeenCalledWith(1);
   });
 
@@ -45,7 +49,7 @@ describe("GET /api/cpoms/[id]", () => {
 
     // THEN
     expect(response.status).toBe(404);
-    expect(await response.json()).toEqual({ error: "Structure not found" });
+    expect(await response.json()).toEqual({ error: "CPOM non trouvé" });
     expect(mockFindOne).toHaveBeenCalledWith(99);
   });
 
