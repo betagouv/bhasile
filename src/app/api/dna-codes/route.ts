@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { findAll } from "./dna-codes.repository";
+import { getDnaCodes } from "./dna-codes.service";
 
 export async function GET(request: NextRequest) {
   const structureId = Number(request.nextUrl.searchParams.get("structureId"));
@@ -13,11 +13,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const [dnaCodes] = await Promise.all([
-      findAll({
-        structureId,
-      }),
-    ]);
+    const dnaCodes = await getDnaCodes(structureId);
     return NextResponse.json(dnaCodes);
   } catch (error) {
     console.error(error);

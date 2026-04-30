@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { checkAdressesExistence } from "@/app/api/adresses/adresse.repository";
+import { hasStructureAdresses } from "@/app/api/adresses/adresse.service";
 
 export async function HEAD(
   _request: NextRequest,
@@ -9,7 +9,7 @@ export async function HEAD(
   try {
     const { id } = await params;
 
-    const hasAdresses = await checkAdressesExistence(Number(id));
+    const hasAdresses = await hasStructureAdresses(Number(id));
 
     if (hasAdresses) {
       return new NextResponse(null, { status: 200 });

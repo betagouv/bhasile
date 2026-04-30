@@ -4,12 +4,7 @@ import { cpomApiAjoutSchema, cpomApiSchema } from "@/schemas/api/cpom.schema";
 import { CpomColumn } from "@/types/ListColumn";
 
 import { createCpomEvent } from "../user-action/user-action.service";
-import {
-  countBySearch,
-  createOrUpdateCpom,
-  findBySearch,
-} from "./cpom.repository";
-import { getFullCpoms } from "./cpom.service";
+import { getCpoms, saveCpom } from "./cpom.service";
 
 export async function GET(request: NextRequest) {
   const page = request.nextUrl.searchParams.get("page") as number | null;
@@ -23,19 +18,14 @@ export async function GET(request: NextRequest) {
     | null;
 
   try {
-    const [cpoms, totalCpoms] = await Promise.all([
-      findBySearch({
-        page,
-        departements,
-        column,
-        direction,
-      }),
-      countBySearch({
-        departements,
-      }),
-    ]);
+    const { cpoms, totalCpoms } = await getCpoms({
+      page,
+      departements,
+      column,
+      direction,
+    });
     return NextResponse.json({
-      cpoms: getFullCpoms(cpoms),
+      cpoms,
       totalCpoms,
     });
   } catch (error) {
@@ -51,7 +41,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const result = cpomApiAjoutSchema.parse(body);
-    const cpomId = await createOrUpdateCpom(result);
+    const cpomId = await saveCpom(result);
     createCpomEvent(request.method, cpomId);
     return NextResponse.json({ cpomId }, { status: 201 });
   } catch (error) {
@@ -65,7 +55,7 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
     const result = cpomApiSchema.parse(body);
-    const cpomId = await createOrUpdateCpom(result);
+    const cpomId = await saveCpom(result);
     createCpomEvent(request.method, cpomId);
     return NextResponse.json({ cpomId }, { status: 201 });
   } catch (error) {
