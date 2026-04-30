@@ -6,11 +6,11 @@ import { ReactElement, useMemo, useState } from "react";
 
 import { SegmentedControl } from "@/app/components/common/SegmentedControl";
 import { ListLoader } from "@/app/components/lists/ListLoader";
+import { SearchBar } from "@/app/components/SearchBar";
 import { usePersistStructuresSearchQuery } from "@/app/hooks/usePersistStructuresSearchQuery";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
 
 import { Filters } from "../../../components/filters/Filters";
-import { SearchBar } from "./_components/SearchBar";
 import { StructuresTable } from "./_components/StructuresTable";
 
 export default function Structures(): ReactElement {
