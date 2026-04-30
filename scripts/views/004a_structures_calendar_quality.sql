@@ -134,12 +134,12 @@ SELECT
   COALESCE(
     (
       (
-        aaaa."aa_debutConvention" IS NOT NULL
-        OR aaaa."aa_finConvention" IS NOT NULL
+        aaa."aa_debutConvention" IS NOT NULL
+        OR aaa."aa_finConvention" IS NOT NULL
       )
       AND (
-        aaaa."aa_debutConvention" IS DISTINCT FROM s."debutConvention"
-        OR aaaa."aa_finConvention" IS DISTINCT FROM s."finConvention"
+        aaa."aa_debutConvention" IS DISTINCT FROM s."debutConvention"
+        OR aaa."aa_finConvention" IS DISTINCT FROM s."finConvention"
       )
     ),
     FALSE
@@ -148,12 +148,12 @@ SELECT
     (
       s."type" IN ('CADA', 'CPH')
       AND (
-        aaaa."aa_debutPeriodeAutorisation" IS NOT NULL
-        OR aaaa."aa_finPeriodeAutorisation" IS NOT NULL
+        aaa."aa_debutPeriodeAutorisation" IS NOT NULL
+        OR aaa."aa_finPeriodeAutorisation" IS NOT NULL
       )
       AND (
-        aaaa."aa_debutPeriodeAutorisation" IS DISTINCT FROM s."debutPeriodeAutorisation"
-        OR aaaa."aa_finPeriodeAutorisation" IS DISTINCT FROM s."finPeriodeAutorisation"
+        aaa."aa_debutPeriodeAutorisation" IS DISTINCT FROM s."debutPeriodeAutorisation"
+        OR aaa."aa_finPeriodeAutorisation" IS DISTINCT FROM s."finPeriodeAutorisation"
       )
     ),
     FALSE
@@ -186,7 +186,11 @@ SELECT
   END AS "has_issue_subsidized_convention_gt_3y"
 FROM
   public."Structure" s
-  LEFT JOIN actes_administratifs_aggregate aaaa ON aaaa."id" = s."id"
+  LEFT JOIN actes_administratifs_aggregate aaa ON aaa."id" = s."id"
   LEFT JOIN public."Evaluation" e ON e."structureId" = s."id"
 GROUP BY
-  s."id";
+  s."id",
+  aaa."aa_debutConvention",
+  aaa."aa_finConvention",
+  aaa."aa_debutPeriodeAutorisation",
+  aaa."aa_finPeriodeAutorisation";
