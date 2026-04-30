@@ -5,7 +5,7 @@ import { ReactElement } from "react";
 import { ListLoader } from "@/app/components/lists/ListLoader";
 import { useOperateurSearch } from "@/app/hooks/useOperateurSearch";
 
-import { SearchBar } from "../structures/_components/SearchBar";
+import { SearchBar } from "../structures/(structure)/_components/SearchBar";
 import { OperateurList } from "./OperateursList";
 
 export default function Operateurs(): ReactElement {
