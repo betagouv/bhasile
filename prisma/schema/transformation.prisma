@@ -1,0 +1,127 @@
+model Transformation {
+  id                       Int                       @id @default(autoincrement())
+  type                     TransformationType
+  subtype                  TransformationSubtype
+  formId                   Int // TODO: créer en base un FormDefinition lié à la transfo (même sans Steps associés)
+  form                     Form                      @relation(fields: [formId], references: [id]) // Pour le lien au bouton "Finaliser"
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  structureTransformations StructureTransformation[]
+
+  @@schema("public")
+}
+
+// Décrit le cas général : vérifier si cela couver les différents cas de figure
+// Le détail des cas de figure "à la structure" est dans la table StructureTransformation
+enum TransformationType {
+  CREATION
+  EXTENSION_ET_CREATION
+  FERMETURE
+
+  @@schema("public")
+}
+
+// Subtype sans doute nécessaire pour adapter le front (ne serait-ce titre page par exemple) même si la logique métier est la même derrière.
+// A noter une hiérarchie entre Type et Subtype, non modélisée en DB, sans doute à modéliser en back
+// 
+// Types relevés dans les maquettes
+// 1 - ouverture ex nihilo (0->1)
+// 2 - ouverture depuis 1 ou plusieurs structures (n->1)
+// 3 - extension from scratch (1->1)
+// 4 - extension depuis structures qui contractent (n->1)
+// 5 - extension depuis structures qui ferment (n->1)
+// 6 - contraction avec transfert vers autre(s) structure(s)
+// 7 - contraction sans transfert de places
+// 8 - fermeture avec transfert vers 1 ou plusieurs structures
+// 9 - fermeture sans transfert
+// 10 - transfo HUDA vers CADA existant (même opérateur)
+// 11 - transfo HUDA vers CADA nouveau (même opérateur)
+// 12 - transfo HUDA et remise en concurrence des places
+enum TransformationSubtype {
+  OUVERTURE_EX_NIHILO
+  OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
+  EXTENSION_FROM_SCRATCH
+  EXTENSION_DEPUIS_STRUCTURES_QUI_CONTRACTENT
+  EXTENSION_DEPUIS_STRUCTURES_QUI_FERMENT
+  CONTRACTION_AVEC_TRANSFERT_VERS_AUTRE_STRUCTURE
+  CONTRACTION_SANS_TRANSFERT_DE_PLACES
+  FERMETURE_AVEC_TRANSFERT_VERS_UNE_OU_PLUSIEURS_STRUCTURES
+  FERMETURE_SANS_TRANSFERT
+  TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR
+  TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
+  TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES
+
+  @@schema("public")
+}
+
+model StructureTransformation {
+  id               Int                         @id @default(autoincrement())
+  structureId      Int
+  structure        Structure                   @relation(fields: [structureId], references: [id])
+  transformationId Int
+  transformation   Transformation              @relation(fields: [transformationId], references: [id])
+  date             DateTime
+  type             StructureTransformationType
+  motif            String? // Ne se retrouve que dans le cas d'une fermeture, voir en fonction des discussions avec Clara si c'est un enum, du champ libre, si ça doit être là ou dans Transformation...
+
+  // Tous ces champs représentent les champs scalaires de la structure post transformation. 
+  // À noter : une fois la transfo finalisée, ils viennent "écraser" en base les champs de la structure
+  // Souci potentiel : si la date est dans 3 mois on ne veut pas encore qu'ils écrasent les champs de la structure 
+  // Solution possible à discuter : migrer tous les champs scalaires dans StructureMillesime (à discuter)
+  public                   PublicType?
+  adresseAdministrative    String?
+  codePostalAdministratif  String?
+  communeAdministrative    String?
+  departementAdministratif String?
+  latitude                 Decimal?
+  longitude                Decimal?
+  nom                      String?
+  placesAutorisees         Int?
+  pmr                      Int?
+  lgbt                     Int?
+  fvvTeh                   Int?
+
+  // NOTA : sur tous les liens suivants, il s'agit d'une duplication des entrées en table, pas d'une réaffectation de la FK (pour conserver historique)
+  contacts Contact[]
+  adresses Adresse[] // Ici il faut prévoir en back une duplication de Adresse Typologie (une première associée à la transfo via le formulaire ; ue seconde sur la structure post finalisation de la transfo)
+  finesses Finess[]
+  antennes Antenne[]
+  dnas     DnaStructureTransformation[]
+
+  // Ici proposition à challenger aussi : on crée un lien vers des StructureTypologie et StructureMillesime 
+  // En back ça se manifeste comme ça : pour savoir ce qu'on affiche sur une année on peut avoir plusieurs millésimes : un lié à la structure seulement et 1..n liés à des opérations de transfo
+  // Auquel cas on prend le "plus tard de la transfo déjà passée"
+  structureMillesimes StructureMillesime[]
+  structureTypologies StructureTypologie[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@schema("public")
+}
+
+model DnaStructureTransformation {
+  id                        Int                     @id @default(autoincrement())
+  dnaId                     Int
+  dna                       Dna                     @relation(fields: [dnaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureTransformationId Int
+  structureTransformation   StructureTransformation @relation(fields: [structureTransformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  startDate DateTime
+  endDate   DateTime
+
+  @@schema("public")
+}
+
+// Décrit ce que vit la structure dans le cadre de la transformation (correspond sur les maquettes à l'intitulé à gauche)
+enum StructureTransformationType {
+  CREATION
+  FERMETURE
+  CONTRACTION
+  EXTENSION
+
+  @@schema("public")
+}
+
+// Prévoir en back : une duplication des différentes tables : depuis les structures d'origine lors de la création de la transfo puis depuis la transfo vers
+// les structures d'arrivée post transformation.
