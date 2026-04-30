@@ -2,12 +2,8 @@ model Transformation {
   id                       Int                         @id @default(autoincrement())
   date                     DateTime?
   etat                     TransformationEtat          @default(EN_COURS)
-  structures               TransformationOnStructure[]
+  structures               StructureTransformation[]
   transformationStructures TransformationStructure[]
-  creation                 TransformationCreation?
-  extension                TransformationExtension?
-  contraction              TransformationContraction?
-  fermeture                TransformationFermeture?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -15,7 +11,7 @@ model Transformation {
   @@schema("public")
 }
 
-model TransformationOnStructure {
+model StructureTransformation {
   id               Int            @id @default(autoincrement())
   transformationId Int
   transformation   Transformation @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -30,96 +26,38 @@ model TransformationOnStructure {
 }
 
 model TransformationStructure {
-  id                          Int                        @id @default(autoincrement())
-  transformationId            Int
-  transformation              Transformation             @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  transformationCreationId    Int?
-  transformationCreation      TransformationCreation?    @relation(fields: [transformationCreationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  transformationExtensionId   Int?
-  transformationExtension     TransformationExtension?   @relation(fields: [transformationExtensionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  transformationContractionId Int?
-  transformationContraction   TransformationContraction? @relation(fields: [transformationContractionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  transformationFermetureId   Int?
-  transformationFermeture     TransformationFermeture?   @relation(fields: [transformationFermetureId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  codeBhasile                 String?
-  filiale                     String?
-  type                        StructureType?
-  adresseAdministrative       String?
-  codePostalAdministratif     String?
-  communeAdministrative       String?
-  departementAdministratif    String?
-  latitude                    Decimal?
-  longitude                   Decimal?
-  nom                         String?
-  debutConvention             DateTime?
-  finConvention               DateTime?
-  creationDate                DateTime?
-  date303                     DateTime?
-  lgbt                        Boolean?
-  fvvTeh                      Boolean?
-  public                      PublicType?
-  debutPeriodeAutorisation    DateTime?
-  finPeriodeAutorisation      DateTime?
-  notes                       String?
-  nomOfii                     String?
-  directionTerritoriale       String?
-  dnaStructures               DnaStructure[]
-  adresses                    Adresse[]
-  contacts                    Contact[]
-  actesAdministratifs         ActeAdministratif[]
-  finesses                    Finess[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@schema("public")
-}
-
-model TransformationCreation {
-  id                       Int                       @id @default(autoincrement())
-  transformationId         Int                       @unique
-  transformation           Transformation            @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  date                     DateTime?
-  transformationStructures TransformationStructure[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@schema("public")
-}
-
-model TransformationExtension {
-  id                       Int                       @id @default(autoincrement())
-  transformationId         Int                       @unique
-  transformation           Transformation            @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  date                     DateTime?
-  transformationStructures TransformationStructure[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@schema("public")
-}
-
-model TransformationContraction {
-  id                       Int                       @id @default(autoincrement())
-  transformationId         Int                       @unique
-  transformation           Transformation            @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  date                     DateTime?
-  transformationStructures TransformationStructure[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@schema("public")
-}
-
-model TransformationFermeture {
-  id                       Int                       @id @default(autoincrement())
-  transformationId         Int                       @unique
-  transformation           Transformation            @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  date                     DateTime?
-  transformationStructures TransformationStructure[]
+  id                       Int                 @id @default(autoincrement())
+  transformationId         Int
+  transformation           Transformation      @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  transformationType       TransformationType?
+  transformationDate       DateTime?
+  codeBhasile              String?
+  filiale                  String?
+  type                     StructureType?
+  adresseAdministrative    String?
+  codePostalAdministratif  String?
+  communeAdministrative    String?
+  departementAdministratif String?
+  latitude                 Decimal?
+  longitude                Decimal?
+  nom                      String?
+  debutConvention          DateTime?
+  finConvention            DateTime?
+  creationDate             DateTime?
+  date303                  DateTime?
+  lgbt                     Boolean?
+  fvvTeh                   Boolean?
+  public                   PublicType?
+  debutPeriodeAutorisation DateTime?
+  finPeriodeAutorisation   DateTime?
+  notes                    String?
+  nomOfii                  String?
+  directionTerritoriale    String?
+  dnaStructures            DnaStructure[]
+  adresses                 Adresse[]
+  contacts                 Contact[]
+  actesAdministratifs      ActeAdministratif[]
+  finesses                 Finess[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -131,6 +69,15 @@ enum TransformationEtat {
   EN_COURS
   FINALISEE
   ANNULEE
+
+  @@schema("public")
+}
+
+enum TransformationType {
+  CREATION
+  EXTENSION
+  CONTRACTION
+  FERMETURE
 
   @@schema("public")
 }

@@ -43,7 +43,7 @@ model Structure {
   departement              Departement?                @relation(fields: [departementAdministratif], references: [numero])
   userActions              UserAction[]
   userNotes                Note[]
-  transformations          TransformationOnStructure[]
+  transformations          StructureTransformation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
