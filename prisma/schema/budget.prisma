@@ -6,9 +6,6 @@ model Budget {
   cpomId                            Int?
   year                              Int        @default(0)
   cpomStructureType                 StructureType?
-  ETP                               Float?
-  tauxEncadrement                   Float?
-  coutJournalier                    Float?
   dotationDemandee                  Float?
   dotationAccordee                  Float?
   totalProduitsProposes             Float?

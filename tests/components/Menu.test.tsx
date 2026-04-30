@@ -3,6 +3,7 @@ import client from "next-auth/react";
 import { describe, expect, it, Mock } from "vitest";
 
 import { Menu } from "@/app/components/Menu";
+import { BHASILE_CONTACT_EMAIL } from "@/constants";
 
 vitest.mock("next-auth/react");
 
@@ -35,7 +36,7 @@ describe("Menu", () => {
     const aide = screen.getByRole("link", {
       name: "Aide",
     });
-    expect(aide).toHaveAttribute("href", "mailto:contact@bhasile.beta.gouv.fr");
+    expect(aide).toHaveAttribute("href", `mailto:${BHASILE_CONTACT_EMAIL}`);
     expect(aide).toHaveAttribute("target", "_blank");
     expect(aide).toHaveAttribute("rel", "noopener external");
     const confidentialite = screen.getByRole("link", {

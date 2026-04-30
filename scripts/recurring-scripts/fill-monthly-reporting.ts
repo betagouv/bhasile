@@ -52,6 +52,8 @@ async function main() {
       "has_issue_authorized_convention_not_5y",
       "has_issue_authorized_convention_outside_authorisation_period",
       "has_issue_authorized_convention_missing_or_expired",
+      "has_issue_convention_dates_differ_from_actes_administratifs",
+      "has_issue_authorisation_dates_differ_from_actes_administratifs",
       "has_issue_evaluation_not_done_in_time",
       "has_issue_subsidized_convention_gt_3y",
       "has_issue_specific_places_gt_places_autorisees",

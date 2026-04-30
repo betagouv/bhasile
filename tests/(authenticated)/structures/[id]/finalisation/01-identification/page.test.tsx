@@ -8,8 +8,8 @@ import {
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { StructureClientProvider } from "@/app/(authenticated)/structures/[id]/_context/StructureClientContext";
-import FinalisationIdentificationPage from "@/app/(authenticated)/structures/[id]/finalisation/01-identification/page";
+import { StructureClientProvider } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
+import FinalisationIdentificationPage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/01-identification/page";
 import { FetchStateProvider } from "@/app/context/FetchStateContext";
 import { CURRENT_YEAR } from "@/constants";
 import { StepStatus } from "@/types/form.type";
@@ -74,11 +74,23 @@ describe("FinalisationIdentification page integration", () => {
     );
 
     // THEN
-    const putCall = mockedFetch.mock.calls.find(
+    const putCalls = mockedFetch.mock.calls.filter(
       (call) =>
         call[0] === "/api/structures" &&
         (call[1] as RequestInit | undefined)?.method === "PUT"
     );
+    const putCall = putCalls.find((call) => {
+      const body = (call[1] as RequestInit | undefined)?.body;
+      if (typeof body !== "string") {
+        return false;
+      }
+      try {
+        const parsed = JSON.parse(body);
+        return Array.isArray(parsed.forms);
+      } catch {
+        return false;
+      }
+    });
     expect(putCall).toBeDefined();
 
     const firstCallBody = JSON.parse(
