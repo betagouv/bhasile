@@ -1,3 +1,19 @@
+// Prévoir en back : une duplication des différentes tables : depuis les structures d'origine lors de la création de la transfo 
+// puis depuis la transfo vers les structures d'arrivée post transformation.
+// pas mal de "transferts de Transfo vers structure" ont lieu à une date postérieure à la date de validation
+// le plus simple semble être d'avoir un cron qui écrase les millésimes etc. à date de transfert
+// valider : principe de cron, pricnipe d'alerte s'il n'a pas tourné et principe qu'on écrase (donc pas de rollback possible)
+// Option 2 : tout millésimer (champs scalaires de structure passent dans structuremillesime) et donner un timestamp aux tables
+// Si transfo ultérieure à date du jour on prend les millésimes précédents, si transfo passée on la prend en compte
+// souci : plus lourd
+// Option 3 : "le pire des deux mondes" : on millésime tout et quand le cron tourne on crée un nouveau millésime
+// Option 4 : structure devient une coquille vide, on met un timestamp sur toutes les tables
+// on millésime des chanfgements futurs à des dates futures et quand on a dépassé des dates on les prend en compte
+// autre souci : dès qu'on modifie un champ on crée un millésime global donc on risque vite d'en avoir 200 par structure
+// (on peut aussi faire un timestamp à la journée)
+// 
+// Dépend aussi de ce qu'on veut conserver comme données ou non
+
 model Transformation {
   id                       Int                       @id @default(autoincrement())
   type                     TransformationType
@@ -82,6 +98,8 @@ model StructureTransformation {
   fvvTeh                   Int?
 
   // NOTA : sur tous les liens suivants, il s'agit d'une duplication des entrées en table, pas d'une réaffectation de la FK (pour conserver historique)
+  // NOTA : réfléchir au cas où la date est postérieure : quand applique-t-on le transfert de ces tables vers la structure ?
+  // cron ? Possibilité pendant ce temps de dire "attention pending changes dépendants de la transformation que todavia no esta arrivée à échéance"
   contacts Contact[]
   adresses Adresse[] // Ici il faut prévoir en back une duplication de Adresse Typologie (une première associée à la transfo via le formulaire ; ue seconde sur la structure post finalisation de la transfo)
   finesses Finess[]
@@ -100,15 +118,13 @@ model StructureTransformation {
   @@schema("public")
 }
 
+// quand la transfo est validée, on update le DnaStructure associé avec le startDate ou endDate selon le cas
 model DnaStructureTransformation {
   id                        Int                     @id @default(autoincrement())
   dnaId                     Int
   dna                       Dna                     @relation(fields: [dnaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   structureTransformationId Int
   structureTransformation   StructureTransformation @relation(fields: [structureTransformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  startDate DateTime
-  endDate   DateTime
 
   @@schema("public")
 }
@@ -122,6 +138,3 @@ enum StructureTransformationType {
 
   @@schema("public")
 }
-
-// Prévoir en back : une duplication des différentes tables : depuis les structures d'origine lors de la création de la transfo puis depuis la transfo vers
-// les structures d'arrivée post transformation.
