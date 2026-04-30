@@ -5,12 +5,12 @@ import dynamic from "next/dynamic";
 import { ReactElement, useMemo, useState } from "react";
 
 import { SegmentedControl } from "@/app/components/common/SegmentedControl";
+import { Filters } from "@/app/components/filters/Filters";
 import { ListLoader } from "@/app/components/lists/ListLoader";
 import { SearchBar } from "@/app/components/SearchBar";
 import { usePersistStructuresSearchQuery } from "@/app/hooks/usePersistStructuresSearchQuery";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
 
-import { Filters } from "../../../components/filters/Filters";
 import { StructuresTable } from "./_components/StructuresTable";
 
 export default function Structures(): ReactElement {

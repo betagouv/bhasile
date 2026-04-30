@@ -4,7 +4,8 @@ import { useMap } from "react-leaflet/hooks";
 import { Marker } from "react-leaflet/Marker";
 import { Popup } from "react-leaflet/Popup";
 
-import { singleMarkerIcon } from "../../../../components/map/SingleMarker";
+import { singleMarkerIcon } from "@/app/components/map/SingleMarker";
+
 import { StructureMarkerContent } from "./StructureMarkerContent";
 
 export const StructureMarker = ({ id, coordinates }: Props): ReactElement => {
