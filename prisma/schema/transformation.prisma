@@ -30,40 +30,44 @@ model TransformationOnStructure {
 }
 
 model TransformationStructure {
-  id                       Int                                    @id @default(autoincrement())
-  transformationId         Int
-  transformation           Transformation                         @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  codeBhasile              String?
-  filiale                  String?
-  type                     StructureType?
-  adresseAdministrative    String?
-  codePostalAdministratif  String?
-  communeAdministrative    String?
-  departementAdministratif String?
-  latitude                 Decimal?
-  longitude                Decimal?
-  nom                      String?
-  debutConvention          DateTime?
-  finConvention            DateTime?
-  creationDate             DateTime?
-  date303                  DateTime?
-  lgbt                     Boolean?
-  fvvTeh                   Boolean?
-  public                   PublicType?
-  debutPeriodeAutorisation DateTime?
-  finPeriodeAutorisation   DateTime?
-  notes                    String?
-  nomOfii                  String?
-  directionTerritoriale    String?
-  dnaStructures            DnaStructure[]
-  adresses                 Adresse[]
-  contacts                 Contact[]
-  actesAdministratifs      ActeAdministratif[]
-  finesses                 Finess[]
-  creationLinks            CreationOnTransformationStructure[]
-  extensionLinks           ExtensionOnTransformationStructure[]
-  contractionLinks         ContractionOnTransformationStructure[]
-  fermetureLinks           FermetureOnTransformationStructure[]
+  id                          Int                        @id @default(autoincrement())
+  transformationId            Int
+  transformation              Transformation             @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  transformationCreationId    Int?
+  transformationCreation      TransformationCreation?    @relation(fields: [transformationCreationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  transformationExtensionId   Int?
+  transformationExtension     TransformationExtension?   @relation(fields: [transformationExtensionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  transformationContractionId Int?
+  transformationContraction   TransformationContraction? @relation(fields: [transformationContractionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  transformationFermetureId   Int?
+  transformationFermeture     TransformationFermeture?   @relation(fields: [transformationFermetureId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  codeBhasile                 String?
+  filiale                     String?
+  type                        StructureType?
+  adresseAdministrative       String?
+  codePostalAdministratif     String?
+  communeAdministrative       String?
+  departementAdministratif    String?
+  latitude                    Decimal?
+  longitude                   Decimal?
+  nom                         String?
+  debutConvention             DateTime?
+  finConvention               DateTime?
+  creationDate                DateTime?
+  date303                     DateTime?
+  lgbt                        Boolean?
+  fvvTeh                      Boolean?
+  public                      PublicType?
+  debutPeriodeAutorisation    DateTime?
+  finPeriodeAutorisation      DateTime?
+  notes                       String?
+  nomOfii                     String?
+  directionTerritoriale       String?
+  dnaStructures               DnaStructure[]
+  adresses                    Adresse[]
+  contacts                    Contact[]
+  actesAdministratifs         ActeAdministratif[]
+  finesses                    Finess[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -72,110 +76,54 @@ model TransformationStructure {
 }
 
 model TransformationCreation {
-  id               Int                                 @id @default(autoincrement())
-  transformationId Int                                 @unique
-  transformation   Transformation                      @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  date             DateTime?
-  structures       CreationOnTransformationStructure[]
+  id                       Int                       @id @default(autoincrement())
+  transformationId         Int                       @unique
+  transformation           Transformation            @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  date                     DateTime?
+  transformationStructures TransformationStructure[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@schema("public")
-}
-
-model CreationOnTransformationStructure {
-  id                        Int                     @id @default(autoincrement())
-  transformationCreationId  Int
-  transformationCreation    TransformationCreation  @relation(fields: [transformationCreationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  transformationStructureId Int
-  transformationStructure   TransformationStructure @relation(fields: [transformationStructureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@unique([transformationCreationId, transformationStructureId])
   @@schema("public")
 }
 
 model TransformationExtension {
-  id               Int                                  @id @default(autoincrement())
-  transformationId Int                                  @unique
-  transformation   Transformation                       @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  date             DateTime?
-  structures       ExtensionOnTransformationStructure[]
+  id                       Int                       @id @default(autoincrement())
+  transformationId         Int                       @unique
+  transformation           Transformation            @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  date                     DateTime?
+  transformationStructures TransformationStructure[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@schema("public")
-}
-
-model ExtensionOnTransformationStructure {
-  id                        Int                     @id @default(autoincrement())
-  transformationExtensionId Int
-  transformationExtension   TransformationExtension @relation(fields: [transformationExtensionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  transformationStructureId Int
-  transformationStructure   TransformationStructure @relation(fields: [transformationStructureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@unique([transformationExtensionId, transformationStructureId])
   @@schema("public")
 }
 
 model TransformationContraction {
-  id               Int                                    @id @default(autoincrement())
-  transformationId Int                                    @unique
-  transformation   Transformation                         @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  date             DateTime?
-  structures       ContractionOnTransformationStructure[]
+  id                       Int                       @id @default(autoincrement())
+  transformationId         Int                       @unique
+  transformation           Transformation            @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  date                     DateTime?
+  transformationStructures TransformationStructure[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@schema("public")
-}
-
-model ContractionOnTransformationStructure {
-  id                          Int                       @id @default(autoincrement())
-  transformationContractionId Int
-  transformationContraction   TransformationContraction @relation(fields: [transformationContractionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  transformationStructureId   Int
-  transformationStructure     TransformationStructure   @relation(fields: [transformationStructureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@unique([transformationContractionId, transformationStructureId])
   @@schema("public")
 }
 
 model TransformationFermeture {
-  id               Int                                  @id @default(autoincrement())
-  transformationId Int                                  @unique
-  transformation   Transformation                       @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  date             DateTime?
-  structures       FermetureOnTransformationStructure[]
+  id                       Int                       @id @default(autoincrement())
+  transformationId         Int                       @unique
+  transformation           Transformation            @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  date                     DateTime?
+  transformationStructures TransformationStructure[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@schema("public")
-}
-
-model FermetureOnTransformationStructure {
-  id                        Int                     @id @default(autoincrement())
-  transformationFermetureId Int
-  transformationFermeture   TransformationFermeture @relation(fields: [transformationFermetureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  transformationStructureId Int
-  transformationStructure   TransformationStructure @relation(fields: [transformationStructureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@unique([transformationFermetureId, transformationStructureId])
   @@schema("public")
 }
 
