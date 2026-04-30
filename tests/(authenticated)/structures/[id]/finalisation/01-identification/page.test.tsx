@@ -13,6 +13,7 @@ import {
   FinalisationStepValidationPayload,
   findPutStructuresCall,
   flushAutoSaveDebounce,
+  getLatestPutStructuresPayloadMatching,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
 } from "../../../../../test-utils/structure-page-test.helpers";
@@ -52,7 +53,13 @@ describe("FinalisationIdentification page integration", () => {
     expect(putCall).toBeDefined();
 
     const firstCallBody =
-      getPutStructuresPayload<FinalisationStepValidationPayload>(mockedFetch);
+      getLatestPutStructuresPayloadMatching<FinalisationStepValidationPayload>(
+        mockedFetch,
+        (payload) =>
+          payload.forms?.[0]?.formSteps?.some(
+            (step) => step.stepDefinition.label === "01-identification"
+          ) ?? false
+      );
 
     expectFinalisationStepValidation(firstCallBody, {
       structureId: 77,

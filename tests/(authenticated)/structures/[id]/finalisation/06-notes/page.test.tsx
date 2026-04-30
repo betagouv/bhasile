@@ -11,6 +11,7 @@ import {
   FinalisationStepValidationPayload,
   findPutStructuresCall,
   flushAutoSaveDebounce,
+  getLatestPutStructuresPayloadMatching,
   getPutStructuresPayload,
   renderWithStructurePageProviders,
 } from "../../../../../test-utils/structure-page-test.helpers";
@@ -41,7 +42,13 @@ describe("FinalisationNotes page integration", () => {
     expect(putCall).toBeDefined();
 
     const body =
-      getPutStructuresPayload<FinalisationStepValidationPayload>(mockedFetch);
+      getLatestPutStructuresPayloadMatching<FinalisationStepValidationPayload>(
+        mockedFetch,
+        (payload) =>
+          payload.forms?.[0]?.formSteps?.some(
+            (step) => step.stepDefinition.label === "06-notes"
+          ) ?? false
+      );
     expectFinalisationStepValidation(body, {
       structureId: 77,
       stepLabel: "06-notes",
