@@ -18,7 +18,7 @@ export default function RadioCardGroup({
       return null;
     }
     return (
-      <label className="py-3 px-6 rounded-sm flex justify-between items-center">
+      <div className="py-3 px-6 rounded-sm flex justify-between items-center">
         <div className="flex items-center gap-3">
           <span className="block h-5 w-5 fr-icon-check-line text-action-high-blue-france" />
           <span className="flex-1 text-action-high-blue-france">
@@ -32,7 +32,7 @@ export default function RadioCardGroup({
         >
           Modifier
         </Button>
-      </label>
+      </div>
     );
   }
 
@@ -41,7 +41,6 @@ export default function RadioCardGroup({
       <div className="flex flex-col gap-3">
         {options.map((option) => {
           const id = `${name}-${option.value}`;
-          const isSelected = value === option.value;
 
           return (
             <div key={option.value}>
@@ -51,7 +50,7 @@ export default function RadioCardGroup({
                 type="radio"
                 name={name}
                 value={option.value}
-                checked={isSelected}
+                checked={false}
                 onChange={() => onChange?.(option.value)}
               />
 

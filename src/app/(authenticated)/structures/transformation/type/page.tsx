@@ -40,10 +40,7 @@ export default function TransformationSelectionPage() {
           <FromStructureTransformationForm
             structureId={structureId}
             transformationType={transformationType}
-            setTransformationType={(value) => {
-              console.log(value);
-              setTransformationType(value as TransformationType);
-            }}
+            setTransformationType={setTransformationType}
           />
         ) : null}
       </div>

@@ -35,11 +35,12 @@ export const FromStructureTransformationForm = ({
             { value: "fermeture", label: "Cette structure ferme" },
           ]}
           value={firstSelectedOption}
-          onChange={(value) =>
+          onChange={(value) => {
             setFirstSelectedOption(
               value as "extension" | "contraction" | "fermeture"
-            )
-          }
+            );
+            setTransformationType(undefined);
+          }}
         />
         {firstSelectedOption && (
           <RadioCardGroup
@@ -59,7 +60,9 @@ export const FromStructureTransformationForm = ({
 type Props = {
   structureId: number;
   transformationType?: TransformationType;
-  setTransformationType: (transformationType: TransformationType) => void;
+  setTransformationType: (
+    transformationType: TransformationType | undefined
+  ) => void;
 };
 
 const optionsByFirstSelectedOption = {
