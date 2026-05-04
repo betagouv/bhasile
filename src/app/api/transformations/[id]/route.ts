@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { transformationApiWriteSchema } from "@/schemas/api/transformation.schema";
 
 import {
-  getFullTransformation,
+  getTransformation,
   updateTransformation,
 } from "../transformation.service";
 
@@ -13,7 +13,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const transformation = await getFullTransformation(Number(id));
+    const transformation = await getTransformation(Number(id));
     if (!transformation) {
       return NextResponse.json(
         { error: "Transformation non trouvée" },

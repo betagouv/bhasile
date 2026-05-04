@@ -7,7 +7,7 @@ import {
 
 import { createOne, findOne, updateOne } from "./transformation.repository";
 
-export const getFullTransformation = async (
+export const getTransformation = async (
   id: number
 ): Promise<TransformationApiRead | null> => {
   const dbTransformation = await findOne(id);
