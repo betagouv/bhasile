@@ -1,44 +1,26 @@
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { StructureClientProvider } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import FinalisationIdentificationPage from "@/app/(authenticated)/(with-menu)/structures/[id]/finalisation/01-identification/page";
-import { FetchStateProvider } from "@/app/context/FetchStateContext";
 import { CURRENT_YEAR } from "@/constants";
-import { StepStatus } from "@/types/form.type";
 import { StructureType } from "@/types/structure.type";
 
 import { mockStructurePageFetch } from "../../../../../test-utils/http.mock";
 import { createStructure } from "../../../../../test-utils/structure.factory";
-
-const mockRouterPush = vi.fn();
+import {
+  expectFinalisationStepValidation,
+  FinalisationStepValidationPayload,
+  findPutStructuresCall,
+  flushAutoSaveDebounce,
+  getLatestPutStructuresPayloadMatching,
+  getPutStructuresPayload,
+  renderWithStructurePageProviders,
+} from "../../../../../test-utils/structure-page-test.helpers";
+import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mocks";
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockRouterPush,
-  }),
-}));
-
-vi.mock(
-  "@/app/(authenticated)/structures/[id]/finalisation/_components/Tabs",
-  () => ({
-    Tabs: () => <div>Tabs</div>,
-  })
-);
-
-vi.mock("@/app/components/SubmitError", () => ({
-  SubmitError: () => <div>Submit error</div>,
-}));
-
-vi.mock("@/app/components/ui/InformationBar", () => ({
-  InformationBar: () => <div>Information bar</div>,
+  useRouter: () => ({ push: mockRouterPush }),
 }));
 
 describe("FinalisationIdentification page integration", () => {
@@ -48,21 +30,14 @@ describe("FinalisationIdentification page integration", () => {
     global.fetch = vi.fn();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it("should submit and send updated finalisation step in PUT payload", async () => {
     // GIVEN
     const structure = createStructure({ id: 77, type: StructureType.CADA });
     const mockedFetch = mockStructurePageFetch(structure);
 
-    render(
-      <FetchStateProvider>
-        <StructureClientProvider structure={structure}>
-          <FinalisationIdentificationPage />
-        </StructureClientProvider>
-      </FetchStateProvider>
+    renderWithStructurePageProviders(
+      structure,
+      <FinalisationIdentificationPage />
     );
     await waitFor(() => {
       expect(mockedFetch).toHaveBeenCalledWith("/api/dna-codes?structureId=77");
@@ -74,41 +49,24 @@ describe("FinalisationIdentification page integration", () => {
     );
 
     // THEN
-    const putCalls = mockedFetch.mock.calls.filter(
-      (call) =>
-        call[0] === "/api/structures" &&
-        (call[1] as RequestInit | undefined)?.method === "PUT"
-    );
-    const putCall = putCalls.find((call) => {
-      const body = (call[1] as RequestInit | undefined)?.body;
-      if (typeof body !== "string") {
-        return false;
-      }
-      try {
-        const parsed = JSON.parse(body);
-        return Array.isArray(parsed.forms);
-      } catch {
-        return false;
-      }
-    });
+    const putCall = findPutStructuresCall(mockedFetch);
     expect(putCall).toBeDefined();
 
-    const firstCallBody = JSON.parse(
-      (putCall?.[1] as RequestInit).body as string
-    );
+    const firstCallBody =
+      getLatestPutStructuresPayloadMatching<FinalisationStepValidationPayload>(
+        mockedFetch,
+        (payload) =>
+          payload.forms?.[0]?.formSteps?.some(
+            (step) => step.stepDefinition.label === "01-identification"
+          ) ?? false
+      );
 
-    expect(firstCallBody.id).toBe(77);
-    expect(firstCallBody.forms[0].formSteps).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          stepDefinition: expect.objectContaining({
-            label: "01-identification",
-          }),
-          status: StepStatus.VALIDE,
-        }),
-      ])
-    );
-    expect(mockRouterPush).toHaveBeenCalledWith("02-documents-financiers");
+    expectFinalisationStepValidation(firstCallBody, {
+      structureId: 77,
+      stepLabel: "01-identification",
+      nextRoute: "02-documents-financiers",
+      mockRouterPush,
+    });
   });
 
   it("should autosave form data and send full expected payload", async () => {
@@ -116,16 +74,14 @@ describe("FinalisationIdentification page integration", () => {
     const structure = createStructure({ id: 78, type: StructureType.CADA });
     const mockedFetch = mockStructurePageFetch(structure);
 
-    render(
-      <FetchStateProvider>
-        <StructureClientProvider structure={structure}>
-          <FinalisationIdentificationPage />
-        </StructureClientProvider>
-      </FetchStateProvider>
+    renderWithStructurePageProviders(
+      structure,
+      <FinalisationIdentificationPage />
     );
     await waitFor(() => {
       expect(mockedFetch).toHaveBeenCalledWith("/api/dna-codes?structureId=78");
     });
+
     vi.useFakeTimers();
 
     // WHEN
@@ -153,23 +109,13 @@ describe("FinalisationIdentification page integration", () => {
     fireEvent.change(screen.getByLabelText("Téléphone"), {
       target: { value: newContact.telephone },
     });
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(500);
-      await vi.runOnlyPendingTimersAsync();
-      await Promise.resolve();
-    });
+    await flushAutoSaveDebounce();
 
     // THEN
-    const putCall = mockedFetch.mock.calls.find(
-      (call) =>
-        call[0] === "/api/structures" &&
-        (call[1] as RequestInit | undefined)?.method === "PUT"
-    );
+    const putCall = findPutStructuresCall(mockedFetch);
     expect(putCall).toBeDefined();
 
-    const actualPayload = JSON.parse(
-      (putCall?.[1] as RequestInit).body as string
-    );
+    const actualPayload = getPutStructuresPayload(mockedFetch);
 
     const expectedPayload = {
       id: 78,

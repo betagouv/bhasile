@@ -13,6 +13,5 @@ export const createAdresseTypologie = ({
 };
 
 type CreateTypologiesArgs = {
-  adresseId?: number;
-  placesAutorisees: number;
+  placesAutorisees?: number;
 };

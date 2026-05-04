@@ -19,11 +19,25 @@ export const mockStructurePageFetch = (structure: StructureLike) => {
 
   mockedFetch.mockImplementation((input, init) => {
     if (input === `/api/dna-codes?structureId=${structure.id}`) {
-      return Promise.resolve(toJsonResponse(200, [{ code: "C0001" }]) as Response);
+      return Promise.resolve(
+        toJsonResponse(200, [{ code: "C0001" }]) as Response
+      );
     }
 
     if (input === "/api/structures" && init?.method === "PUT") {
       return Promise.resolve(toJsonResponse(201, "OK") as Response);
+    }
+
+    if (typeof input === "string" && input.startsWith("/api/files/")) {
+      return Promise.resolve(
+        toJsonResponse(200, {
+          key: input.replace("/api/files/", ""),
+          contentType: "application/pdf",
+          fileName: "mock.pdf",
+          path: "mock/path.pdf",
+          id: 1,
+        }) as Response
+      );
     }
 
     if (input === `/api/structures/${structure.id}`) {
