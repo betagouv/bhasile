@@ -13,8 +13,11 @@ import {
 
 export const getFullTransformation = async (
   id: number
-): Promise<TransformationApiRead> => {
+): Promise<TransformationApiRead | null> => {
   const dbTransformation = await findOne(id);
+  if (!dbTransformation) {
+    return null;
+  }
   return recursivelySerializeDates(dbTransformation) as TransformationApiRead;
 };
 

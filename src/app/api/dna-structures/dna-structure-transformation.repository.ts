@@ -25,6 +25,9 @@ export const createOrUpdateDnaStructureTransformations = async (
     }
 
     const normalizedCode = dna.code.trim();
+    if (!normalizedCode) {
+      continue;
+    }
     const upsertedDna = await tx.dna.upsert({
       where: { code: normalizedCode },
       update: { description: dna.description },

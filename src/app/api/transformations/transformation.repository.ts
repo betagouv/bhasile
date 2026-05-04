@@ -178,7 +178,10 @@ const upsertStructureTransformation = async (
   let structureTransformationId: number;
   if (structureTransformation.id) {
     const updated = await tx.structureTransformation.update({
-      where: { id: structureTransformation.id },
+      where: {
+        id: structureTransformation.id,
+        transformationId,
+      },
       data: {
         ...scalarData,
         ...(structureTransformation.type !== undefined && {
