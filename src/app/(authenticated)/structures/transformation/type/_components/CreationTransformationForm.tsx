@@ -13,12 +13,13 @@ export const CreationTransformationForm = ({
       options={[
         {
           value: TransformationType.OUVERTURE_EX_NIHILO,
-          label: "OUVERTURE_EX_NIHILO",
+          label: "Une nouvelle structure est créée ex-nihilo",
         },
         {
           value:
             TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
-          label: "OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES",
+          label:
+            "Une nouvelle structure est créée à partir des places de plusieurs structures qui ferment",
         },
       ]}
       value={transformationType}

@@ -1,40 +1,96 @@
 "use client";
 
+import { useState } from "react";
+
 import RadioCardGroup from "@/app/components/forms/RadioCardGroup";
 import { TransformationType } from "@/types/transformation.type";
 
 import { FromStructureCard } from "./FromStructureCard";
 
+const optionsByFirstSelectedOption = {
+  extension: [
+    {
+      value: TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_CONTRACTENT,
+      label:
+        "Les nouvelles places sont issues d’une ou plusieurs autres structures n’ayant pas fermé (contraction).",
+    },
+    {
+      value: TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_FERMENT,
+      label:
+        "Les nouvelles places sont issues d’une ou plusieurs autres structures ayant fermé.",
+    },
+    {
+      value: TransformationType.EXTENSION_FROM_SCRATCH,
+      label: "Les nouvelles places sont créées.",
+    },
+  ],
+  contraction: [
+    {
+      value: TransformationType.CONTRACTION_AVEC_TRANSFERT_VERS_AUTRE_STRUCTURE,
+      label:
+        "Ses places sont transférées à une ou plusieurs autres structures existantes (extension).",
+    },
+    {
+      value: TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES,
+      label: "Ses places ne sont pas transférées.",
+    },
+  ],
+  fermeture: [
+    {
+      value:
+        TransformationType.FERMETURE_AVEC_TRANSFERT_VERS_UNE_OU_PLUSIEURS_STRUCTURES,
+      label:
+        "Ses places sont transférées à une ou plusieurs autres structures existantes (extension).",
+    },
+    {
+      value: TransformationType.FERMETURE_SANS_TRANSFERT,
+      label: "Ses places ne sont pas transférées.",
+    },
+  ],
+};
 export const FromStructureTransformationForm = ({
   structureId,
   transformationType,
   setTransformationType,
 }: Props) => {
+  const [firstSelectedOption, setFirstSelectedOption] = useState<
+    "extension" | "contraction" | "fermeture" | undefined
+  >(undefined);
   return (
     <>
       <FromStructureCard structureId={structureId} />
       <RadioCardGroup
-        name="type"
+        name="firstSelectedOption"
         options={[
           {
-            value:
-              TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
-            label: "TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR",
+            value: "extension",
+            label:
+              "Cette structure fait l'objet d'une extension de son nombre de places",
           },
           {
-            value:
-              TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR,
-            label: "TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR",
+            value: "contraction",
+            label:
+              "Cette structure fait l'objet d'une contraction de son nombre de places",
           },
-          {
-            value:
-              TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES,
-            label: "TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES",
-          },
+          { value: "fermeture", label: "Cette structure ferme" },
         ]}
-        value={transformationType}
-        onChange={(value) => setTransformationType(value as TransformationType)}
+        value={firstSelectedOption}
+        onChange={(value) =>
+          setFirstSelectedOption(
+            value as "extension" | "contraction" | "fermeture"
+          )
+        }
       />
+      {firstSelectedOption && (
+        <RadioCardGroup
+          name="type"
+          options={optionsByFirstSelectedOption[firstSelectedOption]}
+          value={transformationType}
+          onChange={(value) =>
+            setTransformationType(value as TransformationType)
+          }
+        />
+      )}
     </>
   );
 };
