@@ -35,8 +35,6 @@ export const createOrUpdateAntennes = async (
     return;
   }
 
-  await deleteAntennes(tx, antennes, entityId);
-
   for (const antenne of antennes) {
     await tx.antenne.upsert({
       where: { id: antenne.id || 0 },
