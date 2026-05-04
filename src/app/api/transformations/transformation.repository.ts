@@ -153,8 +153,6 @@ const buildScalarData = (
     structureTransformation.communeAdministrative ?? undefined,
   departementAdministratif:
     structureTransformation.departementAdministratif ?? undefined,
-  latitude: structureTransformation.latitude ?? undefined,
-  longitude: structureTransformation.longitude ?? undefined,
   nom: structureTransformation.nom ?? undefined,
   placesAutorisees: structureTransformation.placesAutorisees ?? undefined,
   pmr: structureTransformation.pmr ?? undefined,
