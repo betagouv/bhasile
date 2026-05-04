@@ -25,29 +25,7 @@ export default function AjoutStructurePage(): ReactElement {
           <span className="fr-icon-search-line fr-icon--md" />
           Quelle structure voulez-vous ajouter ?
         </h2>
-        <CustomNotice
-          severity="warning"
-          title=""
-          className="rounded [&_p]:flex [&_p]:items-center mb-4"
-          description={
-            <span className="text-default-grey">
-              Si vous n’établissez qu’un seul document budgétaire et/ou
-              financier pour une structure disposant de plusieurs codes DNA,
-              merci de nous contacter directement par email via{" "}
-              {
-                <a
-                  href={`mailto:${BHASILE_CONTACT_EMAIL}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  {BHASILE_CONTACT_EMAIL}
-                </a>
-              }
-              .
-            </span>
-          }
-        />
+
         <StructureSearch />
         <p className="text-mention-grey text-sm text-center mb-10">
           Si vous ne trouvez pas votre structure,{" "}
