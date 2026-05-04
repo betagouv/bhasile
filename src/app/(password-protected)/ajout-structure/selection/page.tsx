@@ -2,7 +2,6 @@
 
 import { ReactElement } from "react";
 
-import { CustomNotice } from "@/app/components/common/CustomNotice";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import { BackButton } from "@/app/components/structure-selection/BackButton";
 import { StructureSearch } from "@/app/components/structure-selection/StructureSearch";
