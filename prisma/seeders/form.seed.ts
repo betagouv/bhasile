@@ -62,7 +62,10 @@ export const createFakeFormStepDefinition = (
 
 export const createFakeForm = (
   formDefinitionId: number
-): Omit<Form, "id" | "structureCodeDna" | "structureId" | "transformation"> => {
+): Omit<
+  Form,
+  "id" | "structureCodeDna" | "structureId" | "transformationId"
+> => {
   return {
     formDefinitionId: formDefinitionId,
     status: faker.datatype.boolean(),
@@ -93,7 +96,7 @@ export const createFakeFormWithSteps = (
   options?: { isFinalised?: boolean }
 ): Omit<
   FormWithSteps,
-  "id" | "structureCodeDna" | "structureId" | "transformation"
+  "id" | "structureCodeDna" | "structureId" | "transformationId"
 > => {
   const fakeForm = createFakeForm(formDefinitionId);
   const isFinalised = options?.isFinalised ?? false;
