@@ -62,8 +62,6 @@ CREATE TABLE "StructureTransformation" (
     "codePostalAdministratif" TEXT,
     "communeAdministrative" TEXT,
     "departementAdministratif" TEXT,
-    "latitude" DECIMAL(65,30),
-    "longitude" DECIMAL(65,30),
     "nom" TEXT,
     "placesAutorisees" INTEGER,
     "pmr" INTEGER,
