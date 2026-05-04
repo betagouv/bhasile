@@ -60,7 +60,7 @@ export const findOne = async (id: number) => {
   });
 };
 
-export const createTransformation = async (
+export const createOne = async (
   input: TransformationApiCreation
 ): Promise<number> => {
   return await prisma.$transaction(async (tx) => {
@@ -87,7 +87,7 @@ export const createTransformation = async (
   });
 };
 
-export const updateTransformation = async (
+export const updateOne = async (
   input: TransformationApiWrite
 ): Promise<void> => {
   await prisma.$transaction(async (tx) => {
@@ -106,7 +106,7 @@ export const updateTransformation = async (
 
     if (input.structureTransformations) {
       for (const structureTransformation of input.structureTransformations) {
-        await upsertStructureTransformation(
+        await createOrUpdateStructureTransformation(
           tx,
           input.id,
           structureTransformation
@@ -162,7 +162,7 @@ const buildScalarData = (
   fvvTeh: structureTransformation.fvvTeh ?? undefined,
 });
 
-const upsertStructureTransformation = async (
+const createOrUpdateStructureTransformation = async (
   tx: PrismaTransaction,
   transformationId: number,
   structureTransformation: StructureTransformationApiType

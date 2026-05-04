@@ -5,11 +5,7 @@ import {
   TransformationApiWrite,
 } from "@/schemas/api/transformation.schema";
 
-import {
-  createTransformation as createTransformationRepository,
-  findOne,
-  updateTransformation as updateTransformationRepository,
-} from "./transformation.repository";
+import { createOne, findOne, updateOne } from "./transformation.repository";
 
 export const getFullTransformation = async (
   id: number
@@ -24,11 +20,11 @@ export const getFullTransformation = async (
 export const createTransformation = async (
   input: TransformationApiCreation
 ): Promise<number> => {
-  return createTransformationRepository(input);
+  return createOne(input);
 };
 
 export const updateTransformation = async (
   input: TransformationApiWrite
 ): Promise<void> => {
-  return updateTransformationRepository(input);
+  return updateOne(input);
 };
