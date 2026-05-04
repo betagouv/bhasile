@@ -19,7 +19,7 @@ export default function RadioCardGroup({
     }
     return (
       <label className="py-3 px-6 rounded-sm flex justify-between items-center">
-        <div className="flex items-start gap-3">
+        <div className="flex items-center gap-3">
           <span className="block h-5 w-5 fr-icon-check-line text-action-high-blue-france" />
           <span className="flex-1 text-action-high-blue-france">
             {selectedOption.label}

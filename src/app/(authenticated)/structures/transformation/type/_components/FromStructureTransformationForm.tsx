@@ -7,6 +7,61 @@ import { TransformationType } from "@/types/transformation.type";
 
 import { FromStructureCard } from "./FromStructureCard";
 
+export const FromStructureTransformationForm = ({
+  structureId,
+  transformationType,
+  setTransformationType,
+}: Props) => {
+  const [firstSelectedOption, setFirstSelectedOption] = useState<
+    "extension" | "contraction" | "fermeture" | undefined
+  >(undefined);
+  return (
+    <>
+      <FromStructureCard structureId={structureId} />
+      <div className="flex flex-col gap-2">
+        <RadioCardGroup
+          name="firstSelectedOption"
+          options={[
+            {
+              value: "extension",
+              label:
+                "Cette structure fait l'objet d'une extension de son nombre de places",
+            },
+            {
+              value: "contraction",
+              label:
+                "Cette structure fait l'objet d'une contraction de son nombre de places",
+            },
+            { value: "fermeture", label: "Cette structure ferme" },
+          ]}
+          value={firstSelectedOption}
+          onChange={(value) =>
+            setFirstSelectedOption(
+              value as "extension" | "contraction" | "fermeture"
+            )
+          }
+        />
+        {firstSelectedOption && (
+          <RadioCardGroup
+            name="type"
+            options={optionsByFirstSelectedOption[firstSelectedOption]}
+            value={transformationType}
+            onChange={(value) =>
+              setTransformationType(value as TransformationType)
+            }
+          />
+        )}
+      </div>
+    </>
+  );
+};
+
+type Props = {
+  structureId: number;
+  transformationType?: TransformationType;
+  setTransformationType: (transformationType: TransformationType) => void;
+};
+
 const optionsByFirstSelectedOption = {
   extension: [
     {
@@ -47,56 +102,4 @@ const optionsByFirstSelectedOption = {
       label: "Ses places ne sont pas transférées.",
     },
   ],
-};
-export const FromStructureTransformationForm = ({
-  structureId,
-  transformationType,
-  setTransformationType,
-}: Props) => {
-  const [firstSelectedOption, setFirstSelectedOption] = useState<
-    "extension" | "contraction" | "fermeture" | undefined
-  >(undefined);
-  return (
-    <>
-      <FromStructureCard structureId={structureId} />
-      <RadioCardGroup
-        name="firstSelectedOption"
-        options={[
-          {
-            value: "extension",
-            label:
-              "Cette structure fait l'objet d'une extension de son nombre de places",
-          },
-          {
-            value: "contraction",
-            label:
-              "Cette structure fait l'objet d'une contraction de son nombre de places",
-          },
-          { value: "fermeture", label: "Cette structure ferme" },
-        ]}
-        value={firstSelectedOption}
-        onChange={(value) =>
-          setFirstSelectedOption(
-            value as "extension" | "contraction" | "fermeture"
-          )
-        }
-      />
-      {firstSelectedOption && (
-        <RadioCardGroup
-          name="type"
-          options={optionsByFirstSelectedOption[firstSelectedOption]}
-          value={transformationType}
-          onChange={(value) =>
-            setTransformationType(value as TransformationType)
-          }
-        />
-      )}
-    </>
-  );
-};
-
-type Props = {
-  structureId: number;
-  transformationType?: TransformationType;
-  setTransformationType: (transformationType: TransformationType) => void;
 };

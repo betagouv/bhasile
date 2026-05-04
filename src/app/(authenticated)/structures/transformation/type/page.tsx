@@ -19,8 +19,8 @@ export default function TransformationSelectionPage() {
   >(undefined);
 
   return (
-    <div className="flex flex-col gap-4 max-w-4xl mx-auto mt-20">
-      <h1 className="text-xl font-bold text-title-blue-france text-center">
+    <div className="flex flex-col gap-8 max-w-4xl mx-auto mt-20">
+      <h1 className="mb-0 text-xl font-bold text-title-blue-france text-center">
         Quel est le cas de figure ?
       </h1>
       <div className="bg-white p-6 rounded-lg">
