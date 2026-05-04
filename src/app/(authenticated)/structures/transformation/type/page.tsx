@@ -19,9 +19,11 @@ export default function TransformationSelectionPage() {
   >(undefined);
 
   return (
-    <div>
-      <h1>Quel est le cas de figure ?</h1>
-      <div>
+    <div className="flex flex-col gap-4 max-w-4xl mx-auto mt-20">
+      <h1 className="text-xl font-bold text-title-blue-france text-center">
+        Quel est le cas de figure ?
+      </h1>
+      <div className="bg-white p-6 rounded-lg">
         {type === "huda" && (
           <HudaTransformationForm
             transformationType={transformationType}
@@ -38,7 +40,10 @@ export default function TransformationSelectionPage() {
           <FromStructureTransformationForm
             structureId={structureId}
             transformationType={transformationType}
-            setTransformationType={setTransformationType}
+            setTransformationType={(value) => {
+              console.log(value);
+              setTransformationType(value as TransformationType);
+            }}
           />
         ) : null}
       </div>

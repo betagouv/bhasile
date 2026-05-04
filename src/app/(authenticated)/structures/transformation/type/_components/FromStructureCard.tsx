@@ -8,7 +8,7 @@ export const FromStructureCard = ({ structureId }: Props) => {
   }
 
   return (
-    <div className="p-4 rounded-sm border-2 flex gap-4 relative border-default-grey-hover">
+    <div className="mb-8 p-4 rounded-sm border flex gap-4 relative border-default-grey">
       <span className="fr-icon-community-line fr-icon--md text-title-blue-france" />
       <div>
         <strong className="uppercase font-bold text-title-blue-france">
