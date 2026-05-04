@@ -16,6 +16,7 @@ export const createAntenneList = (
     for (let i = 0; i < nbAntennes; i++) {
       antenneList.push({
         structureId: structure.id,
+        structureTransformationId: null,
         name: faker.lorem.words(2),
         adresse: faker.location.streetAddress(),
         codePostal: faker.location.zipCode(),
