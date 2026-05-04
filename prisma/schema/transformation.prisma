@@ -17,9 +17,7 @@
 model Transformation {
   id                       Int                       @id @default(autoincrement())
   type                     TransformationType
-  subtype                  TransformationSubtype
-  formId                   Int // TODO: créer en base un FormDefinition lié à la transfo (même sans Steps associés)
-  form                     Form                      @relation(fields: [formId], references: [id]) // Pour le lien au bouton "Finaliser"
+  form                     Form?                     // Pour le lien au bouton "Finaliser"
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
   structureTransformations StructureTransformation[]
@@ -27,18 +25,8 @@ model Transformation {
   @@schema("public")
 }
 
-// Décrit le cas général : vérifier si cela couver les différents cas de figure
-// Le détail des cas de figure "à la structure" est dans la table StructureTransformation
-enum TransformationType {
-  CREATION
-  EXTENSION_ET_CREATION
-  FERMETURE
 
-  @@schema("public")
-}
-
-// Subtype sans doute nécessaire pour adapter le front (ne serait-ce titre page par exemple) même si la logique métier est la même derrière.
-// A noter une hiérarchie entre Type et Subtype, non modélisée en DB, sans doute à modéliser en back
+// Type sans doute nécessaire pour adapter le front (ne serait-ce titre page par exemple) même si la logique métier est la même derrière.
 // 
 // Types relevés dans les maquettes
 // 1 - ouverture ex nihilo (0->1)
@@ -53,7 +41,7 @@ enum TransformationType {
 // 10 - transfo HUDA vers CADA existant (même opérateur)
 // 11 - transfo HUDA vers CADA nouveau (même opérateur)
 // 12 - transfo HUDA et remise en concurrence des places
-enum TransformationSubtype {
+enum TransformationType {
   OUVERTURE_EX_NIHILO
   OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
   EXTENSION_FROM_SCRATCH
@@ -76,7 +64,7 @@ model StructureTransformation {
   structure        Structure                   @relation(fields: [structureId], references: [id])
   transformationId Int
   transformation   Transformation              @relation(fields: [transformationId], references: [id])
-  date             DateTime
+  date             DateTime?
   type             StructureTransformationType
   motif            String? // Ne se retrouve que dans le cas d'une fermeture, voir en fonction des discussions avec Clara si c'est un enum, du champ libre, si ça doit être là ou dans Transformation...
 
