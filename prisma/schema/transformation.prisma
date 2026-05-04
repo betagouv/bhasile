@@ -77,8 +77,6 @@ model StructureTransformation {
   codePostalAdministratif  String?
   communeAdministrative    String?
   departementAdministratif String?
-  latitude                 Decimal?
-  longitude                Decimal?
   nom                      String?
   placesAutorisees         Int?
   pmr                      Int?

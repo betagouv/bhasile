@@ -1,15 +1,16 @@
 import { FinessApiType } from "@/schemas/api/finess.schema";
+import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 const deleteFinesses = async (
   tx: PrismaTransaction,
   finessesToKeep: Partial<FinessApiType>[],
-  structureId: number
+  entityId: EntityId
 ): Promise<void> => {
-  const everyFinessesOfStructure = await tx.finess.findMany({
-    where: { structureId },
+  const everyFinessesOfEntity = await tx.finess.findMany({
+    where: entityId,
   });
-  const finessesToDelete = everyFinessesOfStructure.filter(
+  const finessesToDelete = everyFinessesOfEntity.filter(
     (finess) => !finessesToKeep.some((f) => f.id === finess.id)
   );
   await Promise.all(
@@ -22,13 +23,13 @@ const deleteFinesses = async (
 export const createOrUpdateFinesses = async (
   tx: PrismaTransaction,
   finesses: Partial<FinessApiType>[] = [],
-  structureId: number
+  entityId: EntityId
 ): Promise<void> => {
   if (!finesses || finesses.length === 0) {
     return;
   }
 
-  await deleteFinesses(tx, finesses, structureId);
+  await deleteFinesses(tx, finesses, entityId);
 
   for (const finess of finesses) {
     if (!finess.code) {
@@ -41,7 +42,7 @@ export const createOrUpdateFinesses = async (
         description: finess.description,
       },
       create: {
-        structureId,
+        ...entityId,
         code: finess.code,
         description: finess.description,
       },
