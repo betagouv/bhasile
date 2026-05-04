@@ -35,8 +35,6 @@ export const structureTransformationApiSchema = z.object({
   codePostalAdministratif: z.string().nullish(),
   communeAdministrative: z.string().nullish(),
   departementAdministratif: z.string().nullish(),
-  latitude: z.string().nullish(),
-  longitude: z.string().nullish(),
   nom: z.string().nullish(),
   placesAutorisees: z.number().int().nullish(),
   pmr: z.number().int().nullish(),
