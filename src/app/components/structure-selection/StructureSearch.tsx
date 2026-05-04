@@ -1,21 +1,17 @@
-import { ReactElement, useEffect } from "react";
-import { useFormContext } from "react-hook-form";
+import { ReactElement, useState } from "react";
 
 import { DepartementAutocomplete } from "@/app/components/forms/DepartementAutocomplete";
 import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
-import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
-import { useStructuresSelection } from "@/app/hooks/useStructuresSelection";
 import { StructureType } from "@/types/structure.type";
 
 import { StructuresList } from "./StructuresList";
+import Select from "@codegouvfr/react-dsfr/Select";
+import { useStructuresSelection } from "@/app/hooks/useStructuresSelection";
 
-export const StructureSearch = (): ReactElement => {
-  const parentFormContext = useFormContext();
-  const { control, watch, setValue } = parentFormContext;
-
-  const operateurName = watch("operateur.name");
-  const departementNumero = watch("departement.numero");
-  const type = watch("type");
+export const StructureSearch = ({selectedStructuresId, setSelectedStructuresId, fixedType}: Props): ReactElement => {
+  const [type, setType] = useState<StructureType | undefined>(fixedType);
+  const [operateurName, setOperateurName] = useState<string | undefined>(undefined);
+  const [departementNumero, setDepartementNumero] = useState<string | undefined>(undefined);
 
   const { structures } = useStructuresSelection({
     operateurName,
@@ -23,19 +19,16 @@ export const StructureSearch = (): ReactElement => {
     types: type,
   });
 
-  useEffect(() => {
-    setValue("structure", undefined);
-  }, [operateurName, departementNumero, type, setValue]);
-
   return (
     <div className="bg-white p-6 rounded-lg mb-2">
       <div className="grid grid-cols-3 gap-6 mb-2">
-        <SelectWithValidation
-          name="type"
-          control={control}
+        {!fixedType &&<Select
           label="Type de structure"
-          required
           id="type"
+          nativeSelectProps={{
+            value: type,
+            onChange: (event) => setType(event.target.value as StructureType),
+          }}
         >
           <option value="">Sélectionnez un type</option>
           {Object.values(StructureType)
@@ -45,11 +38,18 @@ export const StructureSearch = (): ReactElement => {
                 {type}
               </option>
             ))}
-        </SelectWithValidation>
-        <OperateurAutocomplete />
-        <DepartementAutocomplete />
+        </Select>
+        )}
+        <OperateurAutocomplete operateurName={operateurName} setOperateurName={setOperateurName} />
+        <DepartementAutocomplete departementNumero={departementNumero} setDepartementNumero={setDepartementNumero} />
       </div>
-      <StructuresList structures={structures} control={control} />
+      <StructuresList structures={structures} selectedStructuresId={selectedStructuresId} setSelectedStructuresId={setSelectedStructuresId} />
     </div>
   );
+};
+
+type Props = {
+  selectedStructuresId: number[];
+  setSelectedStructuresId: (structuresId: number[]) => void;
+  fixedType?: StructureType;
 };

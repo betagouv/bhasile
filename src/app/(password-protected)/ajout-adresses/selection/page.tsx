@@ -3,7 +3,7 @@
 import { ReactElement } from "react";
 
 import FormWrapper from "@/app/components/forms/FormWrapper";
-import { StructureSearch } from "@/app/components/structure-selection/StructureSearch";
+import { StructureSearch } from "@/app/components/structure-selection-rhf/StructureSearch";
 import { BHASILE_CONTACT_EMAIL, BHASILE_PHONE_NUMBERS } from "@/constants";
 import { ajoutStructureSchema } from "@/schemas/forms/ajout/ajoutStructure.schema";
 
