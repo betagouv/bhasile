@@ -90,36 +90,30 @@ export const createTransformation = async (
 export const updateTransformation = async (
   input: TransformationApiWrite
 ): Promise<void> => {
-  await prisma.$transaction(
-    async (tx) => {
-      if (input.type !== undefined) {
-        await tx.transformation.update({
-          where: { id: input.id },
-          data: { type: input.type },
-        });
-      }
-
-      if (input.form) {
-        await createOrUpdateForms(tx, [input.form], {
-          transformationId: input.id,
-        });
-      }
-
-      if (input.structureTransformations) {
-        for (const structureTransformation of input.structureTransformations) {
-          await upsertStructureTransformation(
-            tx,
-            input.id,
-            structureTransformation
-          );
-        }
-      }
-    },
-    {
-      maxWait: 5000,
-      timeout: 10000,
+  await prisma.$transaction(async (tx) => {
+    if (input.type !== undefined) {
+      await tx.transformation.update({
+        where: { id: input.id },
+        data: { type: input.type },
+      });
     }
-  );
+
+    if (input.form) {
+      await createOrUpdateForms(tx, [input.form], {
+        transformationId: input.id,
+      });
+    }
+
+    if (input.structureTransformations) {
+      for (const structureTransformation of input.structureTransformations) {
+        await upsertStructureTransformation(
+          tx,
+          input.id,
+          structureTransformation
+        );
+      }
+    }
+  });
 };
 
 const initializeTransformationForm = async (
