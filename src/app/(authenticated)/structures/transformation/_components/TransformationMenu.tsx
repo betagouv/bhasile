@@ -42,7 +42,11 @@ export const TransformationMenu = () => {
           pathname.includes("/fermeture")
         }
         disabled={!idTransformation}
-      />
+      >
+        <TransformationSteps
+          idTransformation={Number(idTransformation) ?? undefined}
+        />
+      </TransformationMenuItem>
       <TransformationMenuItem
         index={3}
         label="Verification"

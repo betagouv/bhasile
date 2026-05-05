@@ -7,30 +7,35 @@ export const TransformationMenuItem = ({
   url,
   isActive,
   disabled,
+  children,
 }: Props) => {
   const router = useRouter();
 
   return (
-    <Button
-      priority="tertiary no outline"
-      iconId="fr-icon-arrow-right-line"
-      className="fr-sidemenu__link before:content-none"
-      onClick={() => {
-        if (url) {
-          router.push(url);
-        }
-      }}
-      disabled={disabled}
-    >
-      {label}
-    </Button>
+    <div>
+      <Button
+        priority="tertiary no outline"
+        iconId="fr-icon-arrow-right-line"
+        className=""
+        onClick={() => {
+          if (url) {
+            router.push(url);
+          }
+        }}
+        disabled={disabled}
+      >
+        {label}
+      </Button>
+      {children}
+    </div>
   );
 };
 
 type Props = {
   index: number;
   label: string;
-  url: string;
-  isActive: boolean;
-  disabled: boolean;
+  url?: string;
+  isActive?: boolean;
+  disabled?: boolean;
+  children?: React.ReactNode;
 };
