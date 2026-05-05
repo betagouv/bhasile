@@ -1,44 +1,21 @@
 model Operateur {
-  id                Int                 @id @default(autoincrement())
-  name              String              @unique
-  structures        Structure[]
-  directionGenerale String?
-  siret             String?
-  siegeSocial       String?
-  parent            Operateur?          @relation("OperateurToOperateur", fields: [parentId], references: [id])
-  parentId          Int?
-  cpoms             Cpom[]
-  filiales          Operateur[]         @relation("OperateurToOperateur")
-  userActions       UserAction[]
-  dnas              Dna[]
-  documents         DocumentOperateur[]
+  id                  Int                 @id @default(autoincrement())
+  name                String              @unique
+  structures          Structure[]
+  directionGenerale   String?
+  siret               String?
+  siegeSocial         String?
+  parent              Operateur?          @relation("OperateurToOperateur", fields: [parentId], references: [id])
+  parentId            Int?
+  cpoms               Cpom[]
+  filiales            Operateur[]         @relation("OperateurToOperateur")
+  userActions         UserAction[]
+  dnas                Dna[]
+  actesAdministratifs ActeAdministratif[]
+  documentsFinanciers DocumentFinancier[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-
-  @@schema("public")
-}
-
-model DocumentOperateur {
-  id          Int                       @id @default(autoincrement())
-  category    DocumentOperateurCategory
-  date        DateTime?
-  name        String?
-  fileUploads FileUpload[]
-  operateur   Operateur?                @relation(fields: [operateurId], references: [id])
-  operateurId Int?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@schema("public")
-}
-
-enum DocumentOperateurCategory {
-  RAPPORT_ACTIVITE
-  FRAIS_DE_SIEGE
-  STATUTS
-  AUTRE
 
   @@schema("public")
 }

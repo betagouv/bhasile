@@ -4,6 +4,8 @@ import { Operateur, Prisma, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { OperateurApiWrite } from "@/schemas/api/operateur.schema";
 
+import { OperateurDbDetail } from "./operateur.db.type";
+
 export const findBySearchTerm = async (
   searchTerm: string | null
 ): Promise<Operateur[]> => {
@@ -91,9 +93,7 @@ export const countOperateurs = async ({
   });
 };
 
-export const findOne = async (
-  id: number
-): Promise<OperateurWithStructuresAndDocuments> => {
+export const findOne = async (id: number): Promise<OperateurDbDetail> => {
   return prisma.operateur.findFirstOrThrow({
     where: { id },
     include: {
@@ -103,7 +103,12 @@ export const findOne = async (
           fvvTeh: true,
         },
       },
-      documents: {
+      actesAdministratifs: {
+        include: {
+          fileUploads: true,
+        },
+      },
+      documentsFinanciers: {
         include: {
           fileUploads: true,
         },
@@ -120,22 +125,6 @@ export const updateOne = async (
     data: operateur,
   });
 };
-
-type OperateurWithStructuresAndDocuments = Prisma.OperateurGetPayload<{
-  include: {
-    structures: {
-      select: {
-        lgbt: true;
-        fvvTeh: true;
-      };
-    };
-    documents: {
-      include: {
-        fileUploads: true;
-      };
-    };
-  };
-}>;
 
 type OperateurStat = {
   id: number;

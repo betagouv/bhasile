@@ -6,7 +6,8 @@ import { v4 as uuidv4 } from "uuid";
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { AdditionalFieldsType } from "@/app/utils/documentOperateur.util";
 import { DocumentOperateurFormValues } from "@/schemas/forms/base/documentOperateur.schema";
-import { DocumentOperateurCategory } from "@/types/document-operateur.type";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
+import { DocumentFinancierCategory } from "@/types/document-financier.type";
 
 import { DocumentOperateur } from "./DocumentOperateur";
 
@@ -106,7 +107,7 @@ export default function FieldSetDocumentOperateur({
 }
 
 type Props = {
-  category: DocumentOperateurCategory;
+  category: ActeAdministratifCategory | DocumentFinancierCategory;
   categoryShortName: string;
   title: string;
   noTitleLegend?: boolean;

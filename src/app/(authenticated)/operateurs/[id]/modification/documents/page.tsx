@@ -37,7 +37,7 @@ export default function OperateurModificationDocuments() {
       <ModificationTitle
         step="Documents"
         handleCancel={() => setShouldOpenModal(true)}
-      />{" "}
+      />
       <FormWrapper
         schema={documentOperateurSchema}
         defaultValues={defaultValues}

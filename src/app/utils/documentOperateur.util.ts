@@ -2,7 +2,6 @@ import { v4 as uuidv4 } from "uuid";
 
 import { OperateurApiRead } from "@/schemas/api/operateur.schema";
 import { DocumentOperateurFormValues } from "@/schemas/forms/base/documentOperateur.schema";
-import { DocumentOperateurCategory } from "@/types/document-operateur.type";
 
 export const getDocumentsOperateurDefaultValues = (
   operateur: OperateurApiRead

@@ -2,7 +2,6 @@ import z from "zod";
 
 import { optionalFrenchDateToISO, zId } from "@/app/utils/zodCustomFields";
 import { fileApiSchema } from "@/schemas/api/file.schema";
-import { DocumentOperateurCategory } from "@/types/document-operateur.type";
 
 export const documentOperateurSchema = z
   .object({
