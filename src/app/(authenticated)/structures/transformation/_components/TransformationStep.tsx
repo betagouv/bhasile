@@ -34,7 +34,7 @@ export const TransformationStep = ({ step }: Props) => {
             step.id,
             step.type
           );
-          const isActive = pathname.includes(href);
+          const isActive = href && pathname.includes(href);
           return (
             <Link
               key={stepItem.route}
