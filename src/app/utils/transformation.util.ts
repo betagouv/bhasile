@@ -108,7 +108,7 @@ const getRoute = (
     [StructureTransformationType.CREATION]: "creation",
   };
 
-  return `/structures/transformation/${transformationId}/${types[StructureTransformationType.EXTENSION]}/${idStep}/${route}`;
+  return `/structures/transformation/${transformationId}/${types[type]}/${idStep}/${route}`;
 };
 
 export type Step = {

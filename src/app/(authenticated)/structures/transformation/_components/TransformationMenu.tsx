@@ -41,7 +41,9 @@ export const TransformationMenu = () => {
           disabled={true}
         >
           <TransformationSteps
-            transformationId={Number(transformationId) ?? undefined}
+            transformationId={
+              transformationId ? Number(transformationId) : undefined
+            }
           />
         </TransformationMenuItem>
         <TransformationMenuItem
