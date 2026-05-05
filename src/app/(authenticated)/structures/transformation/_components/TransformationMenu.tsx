@@ -46,7 +46,7 @@ export const TransformationMenu = () => {
         </TransformationMenuItem>
         <TransformationMenuItem
           index={3}
-          label="Verification"
+          label="Vérification"
           url={`/structures/transformation/${transformationId}/verification`}
           isActive={pathname.includes("/verification")}
           disabled={!transformationId}
