@@ -26,14 +26,14 @@ export const useFetchStructure = (id?: number) => {
   };
 
   useEffect(() => {
-    const fetchStructure = async () => {
+    const fetchStructure = async (id: number) => {
       setStructure(undefined);
       const structure = await getStructure(id);
       setStructure(structure);
     };
 
     if (id) {
-      fetchStructure();
+      fetchStructure(id);
     }
   }, [id]);
 
