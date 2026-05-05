@@ -108,7 +108,7 @@
     "stylelint": "^16.26.1",
     "stylelint-config-standard": "^39.0.1",
     "tsx": "^4.21.0",
-    "typescript": "^5",
+    "typescript": "^6",
     "vitest": "^4.1.4",
     "xlsx": "^0.18.5"
   }

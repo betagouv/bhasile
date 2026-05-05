@@ -59,7 +59,7 @@ export const transformationApiUpdateSchema = z.object({
     .optional(),
 });
 
-export const transformationApiCreateSchema = z.object({
+export const TransformationApiCreateSchema = z.object({
   type: z.nativeEnum(TransformationType),
   structureTransformations: z
     .array(
@@ -81,6 +81,6 @@ export type TransformationApiUpdate = z.infer<
   typeof transformationApiUpdateSchema
 >;
 export type TransformationApiCreate = z.infer<
-  typeof transformationApiCreateSchema
+  typeof TransformationApiCreateSchema
 >;
 export type TransformationApiRead = TransformationApiUpdate;
