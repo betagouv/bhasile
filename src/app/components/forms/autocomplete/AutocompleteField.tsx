@@ -4,9 +4,9 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import { Ref } from "react";
 
 import { AutocompleteSuggestion } from "@/app/hooks/useAutocomplete";
+import { useAutocompleteFieldUi } from "@/app/hooks/useAutocompleteFieldUi";
 
 import { Autocomplete } from "./Autocomplete";
-import { useAutocompleteFieldUi } from "./useAutocompleteFieldUi";
 
 export type AutocompleteFieldProps<T extends AutocompleteSuggestion> = {
   id: string;
