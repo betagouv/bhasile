@@ -17,7 +17,7 @@ export const TransformationMenuItem = ({
     <div>
       <Button
         className={cn(
-          "px-8 py-0 text-title-blue-france mb-0 flex items-center gap-3 w-full",
+          "px-6 py-0 text-title-blue-france mb-0 flex items-center gap-3 w-full",
           isActive ? "font-bold" : "",
           disabled ? "cursor-default" : ""
         )}

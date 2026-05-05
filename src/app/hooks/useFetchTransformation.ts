@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import {
+  StructureTransformationType,
+  TransformationType,
+} from "@/types/transformation.type";
 
 export const useFetchTransformation = (id?: number) => {
   const [transformation, setTransformation] = useState<
@@ -11,14 +15,28 @@ export const useFetchTransformation = (id?: number) => {
     id: number
   ): Promise<TransformationApiRead | undefined> => {
     try {
-      const baseUrl = process.env.NEXT_URL || "";
-      const result = await fetch(`${baseUrl}/api/transformations/${id}`);
-
-      if (!result.ok) {
-        throw new Error(`Failed to fetch transformation: ${result.status}`);
-      }
-
-      return await result.json();
+      // TODO: connect to the real API route
+      return {
+        id,
+        type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
+        structureTransformations: [
+          {
+            id: 1,
+            structureId: 1001,
+            type: StructureTransformationType.FERMETURE,
+          },
+          {
+            id: 2,
+            structureId: 1002,
+            type: StructureTransformationType.FERMETURE,
+          },
+          {
+            id: 3,
+            structureId: 1003,
+            type: StructureTransformationType.EXTENSION,
+          },
+        ],
+      };
     } catch (error) {
       console.error("Error fetching transformation:", error);
       return undefined;
