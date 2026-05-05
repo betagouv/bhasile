@@ -80,7 +80,7 @@ export type DnaStructureTransformationApiType = z.infer<
 export type TransformationApiUpdate = z.infer<
   typeof transformationApiUpdateSchema
 >;
-export type TransformationApiCreation = z.infer<
+export type TransformationApiCreate = z.infer<
   typeof transformationApiCreationSchema
 >;
 export type TransformationApiRead = TransformationApiUpdate;
