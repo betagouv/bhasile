@@ -1,24 +1,23 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ReactElement } from "react";
-import { useFormContext } from "react-hook-form";
 
 import { ValidationButtonWithHook } from "./ValidationButtonWithHook";
 
-export const ValidationButton = (): ReactElement => {
-  const parentFormContext = useFormContext();
-  const { watch } = parentFormContext;
-
-  const structure = watch("structure");
-
+export const ValidationButton = ({
+  selectedStructuresId,
+}: Props): ReactElement => {
   return (
     <div className="flex justify-center">
-      {structure ? (
-        <ValidationButtonWithHook key={structure.id} />
+      {selectedStructuresId.length > 0 ? (
+        <ValidationButtonWithHook
+          key={selectedStructuresId[0]}
+          structuresId={selectedStructuresId[0]}
+        />
       ) : (
         <Button
           type="button"
           onClick={() => ""}
-          disabled={!structure}
+          disabled={!selectedStructuresId.length}
           className="flex gap-2"
         >
           J’ai trouvé ma structure{" "}
@@ -27,4 +26,8 @@ export const ValidationButton = (): ReactElement => {
       )}
     </div>
   );
+};
+
+type Props = {
+  selectedStructuresId: number[];
 };

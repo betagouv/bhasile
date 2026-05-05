@@ -13,13 +13,9 @@ export default function TransformationSelectionPage() {
     <div>
       <StructureSearch
         selectedStructuresId={selectedStructuresId}
-        setSelectedStructuresId={(structuresId) =>
-          setSelectedStructuresId((prevSelectedStructuresId) => [
-            ...prevSelectedStructuresId,
-            ...structuresId,
-          ])
-        }
+        setSelectedStructuresId={setSelectedStructuresId}
         fixedType={StructureType.HUDA}
+        multiple
       />
     </div>
   );
