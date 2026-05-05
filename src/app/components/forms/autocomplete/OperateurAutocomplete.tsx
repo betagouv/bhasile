@@ -2,7 +2,6 @@
 
 import { ReactElement, Ref } from "react";
 
-import { AutocompleteSuggestion } from "@/app/hooks/useAutocomplete";
 import { useOperateurSuggestion } from "@/app/hooks/useOperateurSuggestion";
 
 import { AutocompleteField } from "./AutocompleteField";
@@ -19,7 +18,7 @@ export const OperateurAutocomplete = ({
   const fetchSuggestions = useOperateurSuggestion();
 
   return (
-    <AutocompleteField<AutocompleteSuggestion>
+    <AutocompleteField
       {...LABELS}
       name="operateur.name"
       value={operateurName ?? ""}
