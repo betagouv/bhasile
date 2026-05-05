@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
-export const useFetchStructure = (id: number) => {
+export const useFetchStructure = (id?: number) => {
   const [structure, setStructure] = useState<StructureApiRead | undefined>(
     undefined
   );
