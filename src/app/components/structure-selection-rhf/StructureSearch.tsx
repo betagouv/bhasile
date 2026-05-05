@@ -1,8 +1,8 @@
 import { ReactElement, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { DepartementAutocomplete } from "@/app/components/forms/DepartementAutocomplete";
-import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
+import { DepartementAutocomplete } from "@/app/components/forms/autocomplete/DepartementAutocomplete";
+import { OperateurAutocomplete } from "@/app/components/forms/autocomplete/OperateurAutocomplete";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { useStructuresSelection } from "@/app/hooks/useStructuresSelection";
 import { StructureType } from "@/types/structure.type";

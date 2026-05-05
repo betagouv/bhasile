@@ -1,14 +1,26 @@
-export default async function TransformationSelectionPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ type?: "huda" | "creation" | "base" }>;
-}) {
-  const { type } = await searchParams;
+"use client";
 
+import { useState } from "react";
+
+import { StructureSearch } from "@/app/components/structure-selection/StructureSearch";
+import { StructureType } from "@/types/structure.type";
+
+export default function TransformationSelectionPage() {
+  const [selectedStructuresId, setSelectedStructuresId] = useState<number[]>(
+    []
+  );
   return (
     <div>
-      <h1>Transformation - Selection</h1>
-      <p>type: {type ?? "non fourni"}</p>
+      <StructureSearch
+        selectedStructuresId={selectedStructuresId}
+        setSelectedStructuresId={(structuresId) =>
+          setSelectedStructuresId((prevSelectedStructuresId) => [
+            ...prevSelectedStructuresId,
+            ...structuresId,
+          ])
+        }
+        fixedType={StructureType.HUDA}
+      />
     </div>
   );
 }

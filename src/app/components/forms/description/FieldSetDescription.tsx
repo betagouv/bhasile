@@ -9,7 +9,7 @@ import { FormKind } from "@/types/global";
 import { PublicType, StructureType } from "@/types/structure.type";
 
 import InputWithValidation from "../InputWithValidation";
-import { OperateurAutocomplete } from "../OperateurAutocomplete";
+import { OperateurAutocomplete } from "../autocomplete/OperateurAutocomplete";
 import SelectWithValidation from "../SelectWithValidation";
 
 export const FieldSetDescription = ({

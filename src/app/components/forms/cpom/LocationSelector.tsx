@@ -2,7 +2,7 @@ import Select from "@codegouvfr/react-dsfr/Select";
 import { useEffect, useMemo, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
+import { OperateurAutocomplete } from "@/app/components/forms/autocomplete/OperateurAutocomplete";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { DEPARTEMENTS, REGIONS } from "@/constants";

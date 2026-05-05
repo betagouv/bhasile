@@ -13,7 +13,7 @@ import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContac
 import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
-import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
+import { OperateurAutocomplete } from "@/app/components/forms/autocomplete/OperateurAutocomplete";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { isStructureAutorisee } from "@/app/utils/structure.util";

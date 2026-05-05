@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { AutocompleteSuggestion } from "@/app/hooks/useAutocomplete";
 import { cn } from "@/app/utils/classname.util";
 
-// TODO: make this component generic and reusable
 export const Autocomplete = function Autocomplete<
   T extends AutocompleteSuggestion,
 >({
