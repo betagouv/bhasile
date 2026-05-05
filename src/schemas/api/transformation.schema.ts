@@ -50,7 +50,7 @@ export const structureTransformationApiSchema = z.object({
   structureTypologies: z.array(structureTypologieApiSchema).optional(),
 });
 
-export const transformationApiWriteSchema = z.object({
+export const transformationApiUpdateSchema = z.object({
   id: z.number(),
   type: z.nativeEnum(TransformationType).optional(),
   form: formApiSchema.optional(),
@@ -59,7 +59,7 @@ export const transformationApiWriteSchema = z.object({
     .optional(),
 });
 
-export const transformationApiCreationSchema = z.object({
+export const transformationApiCreateSchema = z.object({
   type: z.nativeEnum(TransformationType),
   structureTransformations: z
     .array(
@@ -77,10 +77,10 @@ export type StructureTransformationApiType = z.infer<
 export type DnaStructureTransformationApiType = z.infer<
   typeof dnaStructureTransformationApiSchema
 >;
-export type TransformationApiWrite = z.infer<
-  typeof transformationApiWriteSchema
+export type TransformationApiUpdate = z.infer<
+  typeof transformationApiUpdateSchema
 >;
-export type TransformationApiCreation = z.infer<
-  typeof transformationApiCreationSchema
+export type TransformationApiCreate = z.infer<
+  typeof transformationApiCreateSchema
 >;
-export type TransformationApiRead = TransformationApiWrite;
+export type TransformationApiRead = TransformationApiUpdate;
