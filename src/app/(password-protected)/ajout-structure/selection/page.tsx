@@ -1,31 +1,30 @@
 "use client";
 
-import { ReactElement } from "react";
+import { ReactElement, useState } from "react";
 
-import FormWrapper from "@/app/components/forms/FormWrapper";
-import { BackButton } from "@/app/components/structure-selection/BackButton";
 import { StructureSearch } from "@/app/components/structure-selection/StructureSearch";
 import { BHASILE_CONTACT_EMAIL, BHASILE_PHONE_NUMBERS } from "@/constants";
-import { ajoutStructureSchema } from "@/schemas/forms/ajout/ajoutStructure.schema";
 
+import { BackButton } from "./_components/BackButton";
 import { ValidationButton } from "./_components/ValidationButton";
 
 export default function AjoutStructurePage(): ReactElement {
+  const [selectedStructureIds, setSelectedStructuresId] = useState<number[]>(
+    []
+  );
+
   return (
-    <FormWrapper
-      schema={ajoutStructureSchema}
-      availableFooterButtons={[]}
-      className="bg-transparent border-none p-0"
-      showContactInfos={false}
-    >
+    <>
       <BackButton />
       <div className="max-w-5xl mx-auto mt-12">
         <h2 className="flex items-center gap-3 text-xl font-bold mb-8 text-title-blue-france justify-center">
           <span className="fr-icon-search-line fr-icon--md" />
           Quelle structure voulez-vous ajouter ?
         </h2>
-
-        <StructureSearch />
+        <StructureSearch
+          selectedStructureIds={selectedStructureIds}
+          setSelectedStructuresId={setSelectedStructuresId}
+        />
         <p className="text-mention-grey text-sm text-center mb-10">
           Si vous ne trouvez pas votre structure,{" "}
           <a
@@ -38,8 +37,8 @@ export default function AjoutStructurePage(): ReactElement {
           </a>{" "}
           ou par téléphone ({BHASILE_PHONE_NUMBERS})
         </p>
-        <ValidationButton />
+        <ValidationButton selectedStructureIds={selectedStructureIds} />
       </div>
-    </FormWrapper>
+    </>
   );
 }
