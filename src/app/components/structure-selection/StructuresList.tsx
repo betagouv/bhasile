@@ -3,23 +3,23 @@ import { StructureMinimalApiType } from "@/schemas/api/structure.schema";
 
 export const StructuresList = ({
   structures,
-  selectedStructuresId,
+  selectedStructureIds,
   setSelectedStructuresId,
   multiple = false,
 }: Props) => {
   const toggleStructure = (structureId: number) => {
     if (multiple) {
-      if (selectedStructuresId.includes(structureId)) {
+      if (selectedStructureIds.includes(structureId)) {
         setSelectedStructuresId(
-          selectedStructuresId.filter((id) => id !== structureId)
+          selectedStructureIds.filter((id) => id !== structureId)
         );
       } else {
-        setSelectedStructuresId([...selectedStructuresId, structureId]);
+        setSelectedStructuresId([...selectedStructureIds, structureId]);
       }
       return;
     }
 
-    if (selectedStructuresId.includes(structureId)) {
+    if (selectedStructureIds.includes(structureId)) {
       setSelectedStructuresId([]);
     } else {
       setSelectedStructuresId([structureId]);
@@ -38,7 +38,7 @@ export const StructuresList = ({
           </div>
         )}
         {structures?.map((structure) => {
-          const checked = selectedStructuresId.includes(structure.id);
+          const checked = selectedStructureIds.includes(structure.id);
           const inputId = `structure-${structure.id}`;
 
           return (
@@ -86,7 +86,7 @@ export const StructuresList = ({
 
 type Props = {
   structures: StructureMinimalApiType[] | undefined;
-  selectedStructuresId: number[];
+  selectedStructureIds: number[];
   setSelectedStructuresId: (structuresId: number[]) => void;
   multiple?: boolean;
 };

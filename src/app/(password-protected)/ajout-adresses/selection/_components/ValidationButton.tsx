@@ -11,7 +11,7 @@ const checkAdressesModal = createModal({
   isOpenedByDefault: false,
 });
 export const ValidationButton = ({
-  selectedStructuresId,
+  selectedStructureIds,
 }: Props): ReactElement => {
   const router = useRouter();
 
@@ -21,11 +21,11 @@ export const ValidationButton = ({
 
   const handleClick = async () => {
     try {
-      const hasAdresses = await checkAdressesExistence(selectedStructuresId[0]);
+      const hasAdresses = await checkAdressesExistence(selectedStructureIds[0]);
       if (hasAdresses) {
         checkAdressesModal.open();
       } else {
-        router.push(`/ajout-adresses/${selectedStructuresId[0]}/01-adresses`);
+        router.push(`/ajout-adresses/${selectedStructureIds[0]}/01-adresses`);
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
@@ -39,7 +39,7 @@ export const ValidationButton = ({
         <Button
           type="button"
           onClick={handleClick}
-          disabled={!selectedStructuresId.length}
+          disabled={!selectedStructureIds.length}
           className="flex gap-2 mb-4"
         >
           J’ai trouvé ma structure{" "}
@@ -50,7 +50,7 @@ export const ValidationButton = ({
         <p className="text-default-error m-0 p-0 text-center">
           Une erreur s’est produite.{" "}
           <a
-            href={getErrorEmail(error, selectedStructuresId[0])}
+            href={getErrorEmail(error, selectedStructureIds[0])}
             className="underline"
             target="_blank"
           >
@@ -78,5 +78,5 @@ export const ValidationButton = ({
 };
 
 type Props = {
-  selectedStructuresId: number[];
+  selectedStructureIds: number[];
 };

@@ -9,7 +9,7 @@ import { StructureType } from "@/types/structure.type";
 import { StructuresList } from "./StructuresList";
 
 export const StructureSearch = ({
-  selectedStructuresId,
+  selectedStructureIds,
   setSelectedStructuresId,
   fixedType,
   multiple = false,
@@ -64,7 +64,7 @@ export const StructureSearch = ({
       </div>
       <StructuresList
         structures={structures}
-        selectedStructuresId={selectedStructuresId}
+        selectedStructureIds={selectedStructureIds}
         setSelectedStructuresId={setSelectedStructuresId}
         multiple={multiple}
       />
@@ -73,7 +73,7 @@ export const StructureSearch = ({
 };
 
 export type StructureSearchProps = {
-  selectedStructuresId: number[];
+  selectedStructureIds: number[];
   setSelectedStructuresId: (structuresId: number[]) => void;
   fixedType?: StructureType;
   multiple?: boolean;

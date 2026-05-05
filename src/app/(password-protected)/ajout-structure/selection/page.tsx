@@ -10,7 +10,7 @@ import { BackButton } from "./_components/BackButton";
 import { ValidationButton } from "./_components/ValidationButton";
 
 export default function AjoutStructurePage(): ReactElement {
-  const [selectedStructuresId, setSelectedStructuresId] = useState<number[]>(
+  const [selectedStructureIds, setSelectedStructuresId] = useState<number[]>(
     []
   );
 
@@ -46,7 +46,7 @@ export default function AjoutStructurePage(): ReactElement {
           }
         />
         <StructureSearch
-          selectedStructuresId={selectedStructuresId}
+          selectedStructureIds={selectedStructureIds}
           setSelectedStructuresId={setSelectedStructuresId}
         />
         <p className="text-mention-grey text-sm text-center mb-10">
@@ -61,7 +61,7 @@ export default function AjoutStructurePage(): ReactElement {
           </a>{" "}
           ou par téléphone ({BHASILE_PHONE_NUMBERS})
         </p>
-        <ValidationButton selectedStructuresId={selectedStructuresId} />
+        <ValidationButton selectedStructureIds={selectedStructureIds} />
       </div>
     </>
   );

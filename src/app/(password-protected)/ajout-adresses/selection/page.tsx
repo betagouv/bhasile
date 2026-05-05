@@ -8,7 +8,7 @@ import { BHASILE_CONTACT_EMAIL, BHASILE_PHONE_NUMBERS } from "@/constants";
 import { ValidationButton } from "./_components/ValidationButton";
 
 export default function AjoutAdressesPage(): ReactElement {
-  const [selectedStructuresId, setSelectedStructuresId] = useState<number[]>(
+  const [selectedStructureIds, setSelectedStructuresId] = useState<number[]>(
     []
   );
   return (
@@ -18,7 +18,7 @@ export default function AjoutAdressesPage(): ReactElement {
         Sélectionnez votre structure
       </h2>
       <StructureSearch
-        selectedStructuresId={selectedStructuresId}
+        selectedStructureIds={selectedStructureIds}
         setSelectedStructuresId={setSelectedStructuresId}
       />
       <p className="text-mention-grey text-sm text-center mb-10">
@@ -28,7 +28,7 @@ export default function AjoutAdressesPage(): ReactElement {
         </a>{" "}
         ou par téléphone ({BHASILE_PHONE_NUMBERS})
       </p>
-      <ValidationButton selectedStructuresId={selectedStructuresId} />
+      <ValidationButton selectedStructureIds={selectedStructureIds} />
     </div>
   );
 }

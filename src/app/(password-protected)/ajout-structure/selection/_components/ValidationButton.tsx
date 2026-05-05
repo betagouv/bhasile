@@ -4,20 +4,20 @@ import { ReactElement } from "react";
 import { ValidationButtonWithHook } from "./ValidationButtonWithHook";
 
 export const ValidationButton = ({
-  selectedStructuresId,
+  selectedStructureIds,
 }: Props): ReactElement => {
   return (
     <div className="flex justify-center">
-      {selectedStructuresId.length > 0 ? (
+      {selectedStructureIds.length > 0 ? (
         <ValidationButtonWithHook
-          key={selectedStructuresId[0]}
-          structuresId={selectedStructuresId[0]}
+          key={selectedStructureIds[0]}
+          structuresId={selectedStructureIds[0]}
         />
       ) : (
         <Button
           type="button"
           onClick={() => ""}
-          disabled={!selectedStructuresId.length}
+          disabled={!selectedStructureIds.length}
           className="flex gap-2"
         >
           J’ai trouvé ma structure{" "}
@@ -29,5 +29,5 @@ export const ValidationButton = ({
 };
 
 type Props = {
-  selectedStructuresId: number[];
+  selectedStructureIds: number[];
 };
