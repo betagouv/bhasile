@@ -9,7 +9,7 @@ import { TransformationSteps } from "./TransformationSteps";
 
 export const TransformationMenu = () => {
   const pathname = usePathname();
-  const { idTransformation } = useParams();
+  const { transformationId } = useParams();
 
   return (
     <nav className="fr-sidemenu pe-0 h-screen sticky flex flex-col top-0 w-72 border-r border-default-grey bg-alt-blue-france shrink-0">
@@ -21,8 +21,8 @@ export const TransformationMenu = () => {
           index={1}
           label="Cas de figure"
           url={
-            idTransformation
-              ? `/structures/transformation/${idTransformation}/selection`
+            transformationId
+              ? `/structures/transformation/${transformationId}/selection`
               : "/structures/transformation/type"
           }
           isActive={
@@ -41,15 +41,15 @@ export const TransformationMenu = () => {
           disabled={true}
         >
           <TransformationSteps
-            idTransformation={Number(idTransformation) ?? undefined}
+            transformationId={Number(transformationId) ?? undefined}
           />
         </TransformationMenuItem>
         <TransformationMenuItem
           index={3}
           label="Verification"
-          url={`/structures/transformation/${idTransformation}/verification`}
+          url={`/structures/transformation/${transformationId}/verification`}
           isActive={pathname.includes("/verification")}
-          disabled={!idTransformation}
+          disabled={!transformationId}
         />
       </div>
     </nav>

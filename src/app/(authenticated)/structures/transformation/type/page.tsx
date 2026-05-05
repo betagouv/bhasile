@@ -11,7 +11,9 @@ import { HudaTransformationForm } from "./_components/HudaTransformationForm";
 
 export default function TransformationSelectionPage() {
   const searchParams = useSearchParams();
-  const structureId = Number(searchParams.get("structureId"));
+  const transformationStructureId = Number(
+    searchParams.get("transformationStructureId")
+  );
   const type = searchParams.get("type") as "creation" | "huda" | undefined;
 
   const [transformationType, setTransformationType] = useState<
@@ -36,9 +38,9 @@ export default function TransformationSelectionPage() {
             setTransformationType={setTransformationType}
           />
         )}
-        {structureId && !type ? (
+        {transformationStructureId && !type ? (
           <FromStructureTransformationForm
-            structureId={structureId}
+            transformationStructureId={transformationStructureId}
             transformationType={transformationType}
             setTransformationType={setTransformationType}
           />

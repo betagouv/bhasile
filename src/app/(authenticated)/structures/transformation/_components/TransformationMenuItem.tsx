@@ -28,6 +28,7 @@ export const TransformationMenuItem = ({
           }
         }}
         disabled={disabled}
+        aria-current={isActive ? "page" : undefined}
       >
         <span className="flex items-center justify-center w-7 h-7 rounded-full bg-active-blue-france text-white font-medium">
           {index}

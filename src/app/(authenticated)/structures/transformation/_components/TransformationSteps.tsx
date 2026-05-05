@@ -3,9 +3,9 @@ import { getTransformationSteps } from "@/app/utils/transformation.util";
 
 import { TransformationStep } from "./TransformationStep";
 
-export const TransformationSteps = ({ idTransformation }: Props) => {
+export const TransformationSteps = ({ transformationId }: Props) => {
   const { transformation } = useFetchTransformation(
-    idTransformation ? Number(idTransformation) : undefined
+    transformationId ? Number(transformationId) : undefined
   );
 
   if (!transformation) {
@@ -24,5 +24,5 @@ export const TransformationSteps = ({ idTransformation }: Props) => {
 };
 
 type Props = {
-  idTransformation: number | undefined;
+  transformationId: number | undefined;
 };
