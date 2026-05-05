@@ -6,7 +6,7 @@ import { Step } from "@/app/utils/transformation.util";
 import { StructureTransformationType } from "@/types/transformation.type";
 
 export const TransformationStep = ({ step }: Props) => {
-  const { idTransformation, idStructure } = useParams();
+  const { idTransformation } = useParams();
 
   return (
     <div className="relative">
@@ -30,7 +30,7 @@ export const TransformationStep = ({ step }: Props) => {
             href={getLink(
               stepItem.route,
               Number(idTransformation),
-              Number(idStructure),
+              step.id,
               step.type
             )}
             className="block py-2 pl-19 hover:font-bold text-sm hover:bg-white"
@@ -50,22 +50,22 @@ type Props = {
 const getLink = (
   route: string,
   idTransformation?: number,
-  idStructure?: number,
+  idStep?: number,
   type?: StructureTransformationType
 ) => {
-  if (!idTransformation || !idStructure || !type || !route) {
+  if (!idTransformation || !idStep || !type || !route) {
     return "";
   }
 
   switch (type) {
     case StructureTransformationType.EXTENSION:
-      return `/structures/transformation/${idTransformation}/extension/${idStructure}/${route}`;
+      return `/structures/transformation/${idTransformation}/extension/${idStep}/${route}`;
     case StructureTransformationType.CONTRACTION:
-      return `/structures/transformation/${idTransformation}/contraction/${idStructure}/${route}`;
+      return `/structures/transformation/${idTransformation}/contraction/${idStep}/${route}`;
     case StructureTransformationType.FERMETURE:
-      return `/structures/transformation/${idTransformation}/fermeture/${idStructure}/${route}`;
+      return `/structures/transformation/${idTransformation}/fermeture/${idStep}/${route}`;
     case StructureTransformationType.CREATION:
-      return `/structures/transformation/${idTransformation}/creation/${idStructure}/${route}`;
+      return `/structures/transformation/${idTransformation}/creation/${idStep}/${route}`;
   }
 };
 

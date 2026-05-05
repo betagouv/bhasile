@@ -22,10 +22,12 @@ export const TransformationMenu = () => {
           label="Cas de figure"
           url={
             idTransformation
-              ? `/structures/transformation/${idTransformation}/type`
+              ? `/structures/transformation/${idTransformation}/selection`
               : "/structures/transformation/type"
           }
-          isActive={pathname.includes("/type")}
+          isActive={
+            pathname.includes("/type") || pathname.includes("/selection")
+          }
         />
         <TransformationMenuItem
           index={2}
