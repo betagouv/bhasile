@@ -1,8 +1,8 @@
 import prisma from "@/lib/prisma";
 import {
   StructureTransformationApiType,
-  TransformationApiCreation,
-  TransformationApiWrite,
+  TransformationApiCreate,
+  TransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
@@ -61,7 +61,7 @@ export const findOne = async (id: number) => {
 };
 
 export const createOne = async (
-  input: TransformationApiCreation
+  input: TransformationApiCreate
 ): Promise<number> => {
   return await prisma.$transaction(async (tx) => {
     const transformation = await tx.transformation.create({
@@ -88,7 +88,7 @@ export const createOne = async (
 };
 
 export const updateOne = async (
-  input: TransformationApiWrite
+  input: TransformationApiUpdate
 ): Promise<void> => {
   await prisma.$transaction(async (tx) => {
     if (input.type !== undefined) {

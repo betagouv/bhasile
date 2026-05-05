@@ -1,8 +1,8 @@
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import {
-  TransformationApiCreation,
+  TransformationApiCreate,
   TransformationApiRead,
-  TransformationApiWrite,
+  TransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
 
 import { createOne, findOne, updateOne } from "./transformation.repository";
@@ -18,13 +18,13 @@ export const getTransformation = async (
 };
 
 export const createTransformation = async (
-  input: TransformationApiCreation
+  input: TransformationApiCreate
 ): Promise<number> => {
   return createOne(input);
 };
 
 export const updateTransformation = async (
-  input: TransformationApiWrite
+  input: TransformationApiUpdate
 ): Promise<void> => {
   return updateOne(input);
 };
