@@ -1,4 +1,7 @@
-import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import {
+  StructureTransformationApiType,
+  TransformationApiRead,
+} from "@/schemas/api/transformation.schema";
 import { StructureTransformationType } from "@/types/transformation.type";
 
 export const getTransformationSteps = (
@@ -15,7 +18,7 @@ export const getTransformationSteps = (
           id: structureTransformation.id,
           codeBhasile: String(structureTransformation.structureId), // TODO: change TransformationApiRead to include codeBhasile
           type: structureTransformation.type,
-          steps: getStepsByType(structureTransformation.type),
+          steps: getStepsByType(structureTransformation, transformation.id),
         };
       })
       .sort((a, b) => {
@@ -32,37 +35,80 @@ export const getTransformationSteps = (
   );
 };
 
-const getStepsByType = (type?: StructureTransformationType) => {
-  if (!type) {
+const getStepsByType = (
+  structureTransformation: StructureTransformationApiType,
+  transformationId: number
+) => {
+  if (!structureTransformation.type) {
     return [];
   }
 
-  switch (type) {
+  switch (structureTransformation.type) {
     case StructureTransformationType.EXTENSION:
     case StructureTransformationType.CONTRACTION:
     case StructureTransformationType.CREATION:
       return [
         {
           label: "Description",
-          route: "description",
+          route: getRoute(
+            "description",
+            transformationId,
+            structureTransformation.id,
+            structureTransformation.type
+          ),
         },
         {
           label: "Places et hébergement",
-          route: "places-et-hebergement",
+          route: getRoute(
+            "places-et-hebergement",
+            transformationId,
+            structureTransformation.id,
+            structureTransformation.type
+          ),
         },
         {
           label: "Actes administratifs",
-          route: "actes-administratifs",
+          route: getRoute(
+            "actes-administratifs",
+            transformationId,
+            structureTransformation.id,
+            structureTransformation.type
+          ),
         },
       ];
     case StructureTransformationType.FERMETURE:
       return [
         {
           label: "Description",
-          route: "description",
+          route: getRoute(
+            "description",
+            transformationId,
+            structureTransformation.id,
+            structureTransformation.type
+          ),
         },
       ];
   }
+};
+
+const getRoute = (
+  route: string,
+  transformationId?: number,
+  idStep?: number,
+  type?: StructureTransformationType
+) => {
+  if (!transformationId || !idStep || !type || !route) {
+    return "";
+  }
+
+  const types = {
+    [StructureTransformationType.EXTENSION]: "extension",
+    [StructureTransformationType.CONTRACTION]: "contraction",
+    [StructureTransformationType.FERMETURE]: "fermeture",
+    [StructureTransformationType.CREATION]: "creation",
+  };
+
+  return `/structures/transformation/${transformationId}/${types[StructureTransformationType.EXTENSION]}/${idStep}/${route}`;
 };
 
 export type Step = {

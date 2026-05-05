@@ -1,14 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import { cn } from "@/app/utils/classname.util";
 import { Step } from "@/app/utils/transformation.util";
 import { StructureTransformationType } from "@/types/transformation.type";
 
 export const TransformationStep = ({ step }: Props) => {
-  const { transformationId } = useParams();
-
   const pathname = usePathname();
   return (
     <div className="relative">
@@ -28,17 +26,11 @@ export const TransformationStep = ({ step }: Props) => {
       </div>
       <div className="flex flex-col gap-2">
         {step.steps.map((stepItem) => {
-          const href = getLink(
-            stepItem.route,
-            Number(transformationId),
-            step.id,
-            step.type
-          );
-          const isActive = href && pathname.includes(href);
+          const isActive = stepItem.route && pathname.includes(stepItem.route);
           return (
             <Link
               key={stepItem.route}
-              href={href}
+              href={stepItem.route}
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "block py-2 pl-19 hover:font-bold text-sm hover:bg-white",
@@ -56,30 +48,6 @@ export const TransformationStep = ({ step }: Props) => {
 
 type Props = {
   step: Step;
-};
-
-const getLink = (
-  route: string,
-  transformationId?: number,
-  idStep?: number,
-  type?: StructureTransformationType
-) => {
-  if (!transformationId || !idStep || !type || !route) {
-    return "";
-  }
-
-  switch (type) {
-    case StructureTransformationType.EXTENSION:
-      return `/structures/transformation/${transformationId}/extension/${idStep}/${route}`;
-    case StructureTransformationType.CONTRACTION:
-      return `/structures/transformation/${transformationId}/contraction/${idStep}/${route}`;
-    case StructureTransformationType.FERMETURE:
-      return `/structures/transformation/${transformationId}/fermeture/${idStep}/${route}`;
-    case StructureTransformationType.CREATION:
-      return `/structures/transformation/${transformationId}/creation/${idStep}/${route}`;
-    default:
-      return "";
-  }
 };
 
 const getLabel = (type?: StructureTransformationType, codeBhasile?: string) => {
