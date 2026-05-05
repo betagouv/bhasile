@@ -1,5 +1,5 @@
 import Select from "@codegouvfr/react-dsfr/Select";
-import { ReactElement, useEffect, useRef, useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { DepartementAutocomplete } from "@/app/components/forms/autocomplete/DepartementAutocomplete";
 import { OperateurAutocomplete } from "@/app/components/forms/autocomplete/OperateurAutocomplete";
@@ -27,13 +27,6 @@ export const StructureSearch = ({
     departements: departementNumero,
     types: type !== undefined ? String(type) : undefined,
   });
-
-  const setSelectedStructuresIdRef = useRef(setSelectedStructuresId);
-  setSelectedStructuresIdRef.current = setSelectedStructuresId;
-
-  useEffect(() => {
-    setSelectedStructuresIdRef.current([]);
-  }, [operateurName, departementNumero, type]);
 
   return (
     <div className="bg-white p-6 rounded-lg mb-2">
