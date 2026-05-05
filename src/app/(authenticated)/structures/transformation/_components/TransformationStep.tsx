@@ -9,10 +9,10 @@ export const TransformationStep = ({ step }: Props) => {
   const { idTransformation, idStructure } = useParams();
 
   return (
-    <div className="relative mt-6">
+    <div className="relative">
       <span
         aria-hidden
-        className="absolute left-[3.1rem] top-0 bottom-0 w-[3px] bg-[radial-gradient(circle,#6b7cff_1px,transparent_2.1px)] bg-[length:3px_10px] bg-repeat-y bg-top"
+        className="absolute left-[3.1rem] top-0 bottom-0 w-[1.5px] bg-[radial-gradient(circle,#6b7cff_0.5px,transparent_1px)] bg-[length:1.5px_5px] bg-repeat-y bg-top"
       />
       <div className="relative flex items-center gap-3 uppercase font-bold text-xs text-title-blue-france pl-9 mb-2">
         <span

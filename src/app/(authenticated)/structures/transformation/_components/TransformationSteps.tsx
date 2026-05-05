@@ -15,7 +15,7 @@ export const TransformationSteps = ({ idTransformation }: Props) => {
   const steps = getTransformationSteps(transformation);
 
   return (
-    <div>
+    <div className="flex flex-col gap-4 mt-6">
       {steps.map((step) => (
         <TransformationStep key={step.id} step={step} />
       ))}
