@@ -1,74 +1,60 @@
 "use client";
 
-import { ReactElement } from "react";
-import { useController } from "react-hook-form";
+import { ReactElement, Ref } from "react";
 
 import { AutocompleteSuggestion } from "@/app/hooks/useAutocomplete";
 import { useOperateurSuggestion } from "@/app/hooks/useOperateurSuggestion";
 
 import { AutocompleteField } from "./AutocompleteField";
-import { AutocompleteFieldRhf } from "./AutocompleteFieldRhf";
 
-export type OperateurAutocompleteProps = {
-  operateurName?: string | undefined;
-  setOperateurName?: (name: string | undefined) => void;
-  operateurId?: number | undefined;
-  setOperateurId?: (id: number | undefined) => void;
+export const OperateurAutocomplete = ({
+  operateurName,
+  setOperateurName,
+  setOperateurId,
+  externalInvalid,
+  externalError,
+  inputRef,
+  onBlurExtra,
+}: Props): ReactElement => {
+  const fetchSuggestions = useOperateurSuggestion();
+
+  return (
+    <AutocompleteField<AutocompleteSuggestion>
+      {...LABELS}
+      name="operateur.name"
+      value={operateurName ?? ""}
+      inputRef={inputRef}
+      onBlurExtra={onBlurExtra}
+      onValueChange={(next) => setOperateurName(next || undefined)}
+      onSelect={(suggestion) => {
+        setOperateurName(suggestion.label);
+        const id = Number(suggestion.id);
+        if (!Number.isNaN(id)) {
+          setOperateurId?.(id);
+        }
+      }}
+      onClear={() => setOperateurId?.(undefined)}
+      fetchSuggestions={fetchSuggestions}
+      externalInvalid={externalInvalid}
+      externalError={externalError}
+    />
+  );
 };
 
-const FETCH_LABELS = {
+type Props = {
+  operateurName: string | undefined;
+  setOperateurName: (name: string | undefined) => void;
+  setOperateurId?: (id: number | undefined) => void;
+  externalInvalid?: boolean;
+  externalError?: string;
+  inputRef?: Ref<HTMLInputElement>;
+  onBlurExtra?: () => void;
+};
+
+const LABELS = {
   id: "operateur",
   label: "Opérateur",
   notSelectedError:
     "Veuillez sélectionner un opérateur dans la liste déroulante",
   emptyMessage: "Continuez à saisir le nom de l'opérateur",
-};
-
-export const OperateurAutocomplete = (
-  props: OperateurAutocompleteProps = {}
-): ReactElement => {
-  const fetchSuggestions = useOperateurSuggestion();
-
-  if (props.setOperateurName) {
-    return (
-      <AutocompleteField<AutocompleteSuggestion>
-        {...FETCH_LABELS}
-        name="operateur.name"
-        value={props.operateurName ?? ""}
-        onValueChange={(next) => props.setOperateurName?.(next || undefined)}
-        onSelect={(suggestion) => {
-          props.setOperateurName?.(suggestion.label);
-          const id = Number(suggestion.id);
-          if (!Number.isNaN(id)) {
-            props.setOperateurId?.(id);
-          }
-        }}
-        onClear={() => props.setOperateurId?.(undefined)}
-        fetchSuggestions={fetchSuggestions}
-      />
-    );
-  }
-
-  return (
-    <>
-      <AutocompleteFieldRhf<AutocompleteSuggestion>
-        {...FETCH_LABELS}
-        name="operateur.name"
-        rules={{ required: true }}
-        fetchSuggestions={fetchSuggestions}
-        onAfterSelect={(suggestion, { setValue }) => {
-          setValue("operateur.id", suggestion.id);
-        }}
-      />
-      <OperateurIdHiddenInput />
-    </>
-  );
-};
-
-const OperateurIdHiddenInput = (): ReactElement => {
-  const { field } = useController({
-    name: "operateur.id",
-    rules: { required: true },
-  });
-  return <input aria-hidden="true" type="hidden" {...field} />;
 };

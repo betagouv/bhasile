@@ -2,7 +2,7 @@ import Select from "@codegouvfr/react-dsfr/Select";
 import { useEffect, useMemo, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { OperateurAutocomplete } from "@/app/components/forms/autocomplete/OperateurAutocomplete";
+import { OperateurAutocompleteRhf } from "@/app/components/forms/autocomplete/OperateurAutocompleteRhf";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 import { DEPARTEMENTS, REGIONS } from "@/constants";
@@ -130,7 +130,7 @@ export const LocationSelector = () => {
   return (
     <>
       <div className="grid grid-cols-3 gap-6">
-        <OperateurAutocomplete />
+        <OperateurAutocompleteRhf />
         <SelectWithValidation
           name="region.name"
           id="region"

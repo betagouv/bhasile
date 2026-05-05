@@ -8,8 +8,8 @@ import { PublicType, StructureType } from "@/types/structure.type";
 
 import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
 
-vi.mock("@/app/components/forms/autocomplete/OperateurAutocomplete", () => ({
-  OperateurAutocomplete: () => <div data-testid="operateur-autocomplete" />,
+vi.mock("@/app/components/forms/autocomplete/OperateurAutocompleteRhf", () => ({
+  OperateurAutocompleteRhf: () => <div data-testid="operateur-autocomplete" />,
 }));
 
 // Mock auto-animate

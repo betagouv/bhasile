@@ -1,8 +1,8 @@
 import { ReactElement, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { DepartementAutocomplete } from "@/app/components/forms/autocomplete/DepartementAutocomplete";
-import { OperateurAutocomplete } from "@/app/components/forms/autocomplete/OperateurAutocomplete";
+import { DepartementAutocompleteRhf } from "@/app/components/forms/autocomplete/DepartementAutocompleteRhf";
+import { OperateurAutocompleteRhf } from "@/app/components/forms/autocomplete/OperateurAutocompleteRhf";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { useStructuresSelection } from "@/app/hooks/useStructuresSelection";
 import { StructureType } from "@/types/structure.type";
@@ -46,8 +46,8 @@ export const StructureSearch = (): ReactElement => {
               </option>
             ))}
         </SelectWithValidation>
-        <OperateurAutocomplete />
-        <DepartementAutocomplete />
+        <OperateurAutocompleteRhf />
+        <DepartementAutocompleteRhf />
       </div>
       <StructuresList structures={structures} control={control} />
     </div>

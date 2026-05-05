@@ -1,7 +1,7 @@
 "use client";
 
 import Input from "@codegouvfr/react-dsfr/Input";
-import { ReactNode, Ref } from "react";
+import { Ref } from "react";
 
 import { AutocompleteSuggestion } from "@/app/hooks/useAutocomplete";
 
@@ -25,7 +25,6 @@ export type AutocompleteFieldProps<T extends AutocompleteSuggestion> = {
   emptyMessage?: string;
   externalError?: string;
   externalInvalid?: boolean;
-  hiddenInput?: ReactNode;
 };
 
 export const AutocompleteField = <T extends AutocompleteSuggestion>({
@@ -45,7 +44,6 @@ export const AutocompleteField = <T extends AutocompleteSuggestion>({
   emptyMessage,
   externalError,
   externalInvalid,
-  hiddenInput,
 }: AutocompleteFieldProps<T>) => {
   const ui = useAutocompleteFieldUi<T>({
     value,
@@ -96,7 +94,6 @@ export const AutocompleteField = <T extends AutocompleteSuggestion>({
         className="top-18"
         emptyMessage={emptyMessage}
       />
-      {hiddenInput}
     </div>
   );
 };
