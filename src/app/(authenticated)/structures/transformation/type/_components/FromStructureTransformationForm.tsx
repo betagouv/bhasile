@@ -78,7 +78,7 @@ const optionsByFirstSelectedOption = {
         "Les nouvelles places sont issues d’une ou plusieurs autres structures ayant fermé.",
     },
     {
-      value: TransformationType.EXTENSION_FROM_SCRATCH,
+      value: TransformationType.EXTENSION_EX_NIHILO,
       label: "Les nouvelles places sont créées.",
     },
   ],
