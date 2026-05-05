@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 
@@ -18,10 +19,11 @@ export const TransformationStep = ({ step }: Props) => {
       <div className="relative flex items-center gap-3 uppercase font-bold text-xs text-title-blue-france pl-9 mb-2">
         <span
           className={cn(
-            "flex items-center justify-center w-7 h-7 rounded-full bg-white text-title-blue-france",
-            getIcon(step.type)
+            "flex items-center justify-center w-7 h-7 rounded-full bg-white text-title-blue-france"
           )}
-        />
+        >
+          {getIcon(step.type)}
+        </span>
         {getLabel(step.type, step.codeBhasile)}
       </div>
       <div className="flex flex-col gap-2">
@@ -99,13 +101,22 @@ const getLabel = (type?: StructureTransformationType, codeBhasile?: string) => {
 const getIcon = (type?: StructureTransformationType) => {
   switch (type) {
     case StructureTransformationType.EXTENSION:
-      return "ri-expand-diagonal-line";
+      return <i className="ri-expand-diagonal-line " />;
     case StructureTransformationType.CONTRACTION:
-      return "ri-collapse-diagonal-line";
+      return <i className="ri-collapse-diagonal-line" />;
     case StructureTransformationType.CREATION:
-      return "ri-collapse-diagonal-line";
+      return <i className="fr-icon-add-line" />;
     case StructureTransformationType.FERMETURE:
-      return "ri-collapse-diagonal-line";
+      return (
+        <Image
+          src="/transformation-fermeture.svg"
+          alt=""
+          aria-hidden="true"
+          width={18}
+          height={18}
+        />
+      );
+
     default:
       return "";
   }

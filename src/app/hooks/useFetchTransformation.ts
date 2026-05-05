@@ -27,13 +27,23 @@ export const useFetchTransformation = (id?: number) => {
           },
           {
             id: 2,
+            structureId: 1003,
+            type: StructureTransformationType.EXTENSION,
+          },
+          {
+            id: 3,
             structureId: 1002,
             type: StructureTransformationType.FERMETURE,
           },
           {
-            id: 3,
+            id: 4,
             structureId: 1003,
-            type: StructureTransformationType.EXTENSION,
+            type: StructureTransformationType.CONTRACTION,
+          },
+          {
+            id: 5,
+            structureId: 1004,
+            type: StructureTransformationType.CREATION,
           },
         ],
       };
