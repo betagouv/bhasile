@@ -12,5 +12,4 @@ export const fileApiSchema = z.object({
   documentFinancierId: zId(),
   controleId: zId(),
   evaluationId: zId(),
-  documentOperateurId: zId(),
 });

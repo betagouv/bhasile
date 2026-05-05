@@ -1,7 +1,6 @@
 import { ReactElement } from "react";
 
 import { DownloadItem } from "@/app/components/common/DownloadItem";
-import { DocumentOperateurCategory } from "@/types/document-operateur.type";
 
 import { useOperateurContext } from "../_context/OperateurClientContext";
 

@@ -3,17 +3,28 @@ import { fakerFR as faker } from "@faker-js/faker";
 import { Operateur } from "@/generated/prisma/client";
 
 import {
-  createFakeDocumentOperateur,
-  DocumentOperateurWithFileUploads,
-} from "./document-operateur.seed";
+  ActeAdministratifWithFileUploads,
+  createFakeActeAdministratif,
+} from "./acte-administratif.seed";
+import {
+  createFakeDocumentFinancier,
+  DocumentFinancierWithFileUploads,
+} from "./document-financier";
 
-type OperateurWithDocumentsFinanciers = Operateur & {
-  documents: Omit<DocumentOperateurWithFileUploads, "id" | "operateurId">[];
+type OperateurWithDocuments = Operateur & {
+  actesAdministratifs: Omit<
+    ActeAdministratifWithFileUploads,
+    "id" | "operateurId" | "structureId" | "structureDnaCode" | "cpomId"
+  >[];
+  documentsFinanciers: Omit<
+    DocumentFinancierWithFileUploads,
+    "id" | "operateurId" | "structureId" | "structureDnaCode" | "cpomId"
+  >[];
 };
 
 export const createFakeOperateur = (
   index: number
-): Omit<OperateurWithDocumentsFinanciers, "id"> => {
+): Omit<OperateurWithDocuments, "id"> => {
   return {
     name: `Opérateur ${index + 1}`,
     directionGenerale: faker.lorem.words(2),
@@ -22,7 +33,12 @@ export const createFakeOperateur = (
     parentId: null,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-    documents: Array.from({ length: 5 }, () => createFakeDocumentOperateur()),
+    actesAdministratifs: Array.from({ length: 3 }, () =>
+      createFakeActeAdministratif()
+    ),
+    documentsFinanciers: Array.from({ length: 3 }, () =>
+      createFakeDocumentFinancier()
+    ),
   };
 };
 

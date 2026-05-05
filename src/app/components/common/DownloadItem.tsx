@@ -6,7 +6,6 @@ import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { DocumentFinancierGranularity } from "@/generated/prisma/enums";
 import { ActeAdministratifApiType } from "@/schemas/api/acte-administratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/document-financier.schema";
-import { DocumentOperateurApiRead } from "@/schemas/api/document-operateur.schema";
 
 import { DocumentGranularityBadge } from "./DocumentGranularityBadge";
 
@@ -82,10 +81,7 @@ export const DownloadItem = ({
 };
 
 type Props = {
-  item:
-    | ActeAdministratifApiType
-    | DocumentFinancierApiType
-    | DocumentOperateurApiRead;
+  item: ActeAdministratifApiType | DocumentFinancierApiType;
   displayGranularity?: boolean;
   index?: number;
 };
