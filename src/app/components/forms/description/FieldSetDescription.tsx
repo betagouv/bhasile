@@ -8,8 +8,8 @@ import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { FormKind } from "@/types/global";
 import { PublicType, StructureType } from "@/types/structure.type";
 
+import { OperateurAutocompleteRhf } from "../autocomplete/OperateurAutocompleteRhf";
 import InputWithValidation from "../InputWithValidation";
-import { OperateurAutocomplete } from "../OperateurAutocomplete";
 import SelectWithValidation from "../SelectWithValidation";
 
 export const FieldSetDescription = ({
@@ -79,7 +79,7 @@ export const FieldSetDescription = ({
                 ))}
             </SelectWithValidation>
 
-            <OperateurAutocomplete />
+            <OperateurAutocompleteRhf />
 
             <div ref={filialesContainerRef}>
               {isManagedByAFiliale && (

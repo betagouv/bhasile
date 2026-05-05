@@ -1,8 +1,8 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { useRouter } from "next/navigation";
 import { ReactElement } from "react";
-import { useFormContext } from "react-hook-form";
 
+import { useFetchStructure } from "@/app/hooks/useFetchStructure";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
@@ -15,24 +15,23 @@ import {
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { StructureTypologieWithoutEvolutionSchemaTypeFormValues } from "@/schemas/forms/base/structureTypologie.schema";
 
-export const ValidationButtonWithHook = (): ReactElement => {
+export const ValidationButtonWithHook = ({
+  structuresId,
+}: Props): ReactElement => {
   const router = useRouter();
 
-  const parentFormContext = useFormContext();
-  const { watch } = parentFormContext;
-
-  const structure = watch("structure");
+  const { structure } = useFetchStructure(structuresId);
 
   const {
     updateLocalStorageValue: updateIdentification,
     currentValue: localIdentificationValue,
-  } = useLocalStorage(`ajout-structure-${structure?.id}-identification`, {});
+  } = useLocalStorage(`ajout-structure-${structuresId}-identification`, {});
 
   const {
     updateLocalStorageValue: updateAdresses,
     currentValue: localAdressesValue,
   } = useLocalStorage(
-    `ajout-structure-${structure?.id}-adresses`,
+    `ajout-structure-${structuresId}-adresses`,
     {} as Partial<TypeBatiAndAdressesFormValues>
   );
 
@@ -40,7 +39,7 @@ export const ValidationButtonWithHook = (): ReactElement => {
     updateLocalStorageValue: updateTypePlaces,
     currentValue: localTypePlacesValue,
   } = useLocalStorage(
-    `ajout-structure-${structure?.id}-type-places`,
+    `ajout-structure-${structuresId}-type-places`,
     {} as Partial<AjoutTypePlacesFormValues>
   );
 
@@ -48,20 +47,21 @@ export const ValidationButtonWithHook = (): ReactElement => {
     updateLocalStorageValue: updateDocuments,
     currentValue: localDocumentsValue,
   } = useLocalStorage(
-    `ajout-structure-${structure?.id}-documents`,
+    `ajout-structure-${structuresId}-documents`,
     {} as Partial<DocumentsFinanciersFlexibleFormValues>
   );
 
   const handleValidation = () => {
     updateIdentification({
       ...localIdentificationValue,
-      id: structure?.id,
+      id: structuresId,
       nom: structure?.nom,
       codeBhasile: structure?.codeBhasile,
       operateur: structure?.operateur,
       type: structure?.type,
       dnaStructures: structure?.dnaStructures,
-      isMultiDna: structure?.dnaStructures?.length > 1,
+      isMultiDna:
+        structure?.dnaStructures && structure?.dnaStructures?.length > 1,
     });
 
     updateAdresses({
@@ -132,7 +132,7 @@ export const ValidationButtonWithHook = (): ReactElement => {
       ...localDocumentsValue,
       structureMillesimes: structureMillesimes,
     });
-    router.push(`/ajout-structure/${structure?.id}/01-identification`);
+    router.push(`/ajout-structure/${structuresId}/01-identification`);
   };
 
   return (
@@ -148,4 +148,8 @@ export const ValidationButtonWithHook = (): ReactElement => {
       </Button>
     </div>
   );
+};
+
+type Props = {
+  structuresId: number;
 };

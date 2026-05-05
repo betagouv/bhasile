@@ -16,7 +16,7 @@ import {
   useAutocomplete,
 } from "@/app/hooks/useAutocomplete";
 
-import { Autocomplete } from "./Autocomplete";
+import { Autocomplete } from "./autocomplete/Autocomplete";
 
 export default function AddressWithValidation<
   TFieldValues extends FieldValues = FieldValues,
