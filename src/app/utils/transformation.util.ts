@@ -8,7 +8,7 @@ import {
 export type StructureSelectionBlock = {
   id: string;
   multiple: boolean;
-  type: StructureTransformationType;
+  structureTransformationType: StructureTransformationType;
   fixedType?: StructureType;
   inheritOperateurFrom?: string;
   inheritDepartementFrom?: string;
@@ -28,7 +28,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
   [TransformationType.OUVERTURE_EX_NIHILO]: {
     blocks: [],
     buildAutoTransformations: () => [
-      { type: StructureTransformationType.CREATION },
+      { structureTransformationType: StructureTransformationType.CREATION },
     ],
   },
   [TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES]: {
@@ -36,7 +36,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "main",
         multiple: true,
-        type: StructureTransformationType.FERMETURE,
+        structureTransformationType: StructureTransformationType.FERMETURE,
       },
     ],
     buildAutoTransformations: () => [],
@@ -44,7 +44,10 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
   [TransformationType.EXTENSION_EX_NIHILO]: {
     blocks: [],
     buildAutoTransformations: (structureId) => [
-      { structureId, type: StructureTransformationType.EXTENSION },
+      {
+        structureId,
+        structureTransformationType: StructureTransformationType.EXTENSION,
+      },
     ],
   },
   [TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_CONTRACTENT]: {
@@ -52,11 +55,14 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "main",
         multiple: true,
-        type: StructureTransformationType.CONTRACTION,
+        structureTransformationType: StructureTransformationType.CONTRACTION,
       },
     ],
     buildAutoTransformations: (structureId) => [
-      { structureId, type: StructureTransformationType.EXTENSION },
+      {
+        structureId,
+        structureTransformationType: StructureTransformationType.EXTENSION,
+      },
     ],
   },
   [TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_FERMENT]: {
@@ -64,11 +70,14 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "main",
         multiple: true,
-        type: StructureTransformationType.FERMETURE,
+        structureTransformationType: StructureTransformationType.FERMETURE,
       },
     ],
     buildAutoTransformations: (structureId) => [
-      { structureId, type: StructureTransformationType.EXTENSION },
+      {
+        structureId,
+        structureTransformationType: StructureTransformationType.EXTENSION,
+      },
     ],
   },
   [TransformationType.CONTRACTION_AVEC_TRANSFERT_VERS_AUTRE_STRUCTURE]: {
@@ -76,17 +85,23 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "main",
         multiple: true,
-        type: StructureTransformationType.EXTENSION,
+        structureTransformationType: StructureTransformationType.EXTENSION,
       },
     ],
     buildAutoTransformations: (structureId) => [
-      { structureId, type: StructureTransformationType.CONTRACTION },
+      {
+        structureId,
+        structureTransformationType: StructureTransformationType.CONTRACTION,
+      },
     ],
   },
   [TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES]: {
     blocks: [],
     buildAutoTransformations: (structureId) => [
-      { structureId, type: StructureTransformationType.CONTRACTION },
+      {
+        structureId,
+        structureTransformationType: StructureTransformationType.CONTRACTION,
+      },
     ],
   },
   [TransformationType.FERMETURE_AVEC_TRANSFERT_VERS_UNE_OU_PLUSIEURS_STRUCTURES]:
@@ -95,17 +110,23 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         {
           id: "main",
           multiple: true,
-          type: StructureTransformationType.EXTENSION,
+          structureTransformationType: StructureTransformationType.EXTENSION,
         },
       ],
       buildAutoTransformations: (structureId) => [
-        { structureId, type: StructureTransformationType.FERMETURE },
+        {
+          structureId,
+          structureTransformationType: StructureTransformationType.FERMETURE,
+        },
       ],
     },
   [TransformationType.FERMETURE_SANS_TRANSFERT]: {
     blocks: [],
     buildAutoTransformations: (structureId) => [
-      { structureId, type: StructureTransformationType.FERMETURE },
+      {
+        structureId,
+        structureTransformationType: StructureTransformationType.FERMETURE,
+      },
     ],
   },
   [TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR]: {
@@ -113,13 +134,13 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "huda",
         multiple: true,
-        type: StructureTransformationType.FERMETURE,
+        structureTransformationType: StructureTransformationType.FERMETURE,
         fixedType: StructureType.HUDA,
       },
       {
         id: "cada",
         multiple: false,
-        type: StructureTransformationType.EXTENSION,
+        structureTransformationType: StructureTransformationType.EXTENSION,
         fixedType: StructureType.CADA,
         inheritOperateurFrom: "huda",
       },
@@ -131,12 +152,13 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "huda",
         multiple: true,
-        type: StructureTransformationType.FERMETURE,
+        structureTransformationType: StructureTransformationType.FERMETURE,
         fixedType: StructureType.HUDA,
+        inheritOperateurFrom: "huda",
       },
     ],
     buildAutoTransformations: () => [
-      { type: StructureTransformationType.CREATION },
+      { structureTransformationType: StructureTransformationType.CREATION },
     ],
   },
   [TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES]: {
@@ -144,7 +166,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "huda",
         multiple: true,
-        type: StructureTransformationType.FERMETURE,
+        structureTransformationType: StructureTransformationType.FERMETURE,
         fixedType: StructureType.HUDA,
       },
     ],

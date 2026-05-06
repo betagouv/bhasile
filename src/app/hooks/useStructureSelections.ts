@@ -117,7 +117,7 @@ export const useStructureSelections = ({
       ...transformationSpec.blocks.flatMap((block) =>
         (selectedStructureIdsByBlock[block.id] ?? []).map((id) => ({
           structureId: id,
-          type: block.type,
+          structureTransformationType: block.structureTransformationType,
         }))
       ),
     ],

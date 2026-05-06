@@ -1,11 +1,12 @@
 import { z } from "zod";
 
-import { PublicType } from "@/types/structure.type";
+import { PublicType, StructureType } from "@/types/structure.type";
 import {
   StructureTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
+import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
 import { adresseApiSchema } from "./adresse.schema";
 import { antenneApiSchema } from "./antenne.schema";
 import { contactApiSchema } from "./contact.schema";
@@ -26,10 +27,13 @@ export const dnaStructureTransformationApiSchema = z.object({
 export const structureTransformationApiSchema = z.object({
   id: z.number().optional(),
   structureId: z.number().optional(),
-  type: z.nativeEnum(StructureTransformationType).optional(),
-  date: z.string().datetime().nullish(),
-  motif: z.string().nullish(),
+  structureTransformationType: z
+    .nativeEnum(StructureTransformationType)
+    .optional(),
+  structureTransformationDate: z.string().datetime().nullish(),
+  structureTransformationMotif: z.string().nullish(),
 
+  type: z.nativeEnum(StructureType).nullish(),
   public: z.nativeEnum(PublicType).nullish(),
   adresseAdministrative: z.string().nullish(),
   codePostalAdministratif: z.string().nullish(),
@@ -46,6 +50,7 @@ export const structureTransformationApiSchema = z.object({
   finesses: z.array(finessApiSchema).optional(),
   antennes: z.array(antenneApiSchema).optional(),
   dnas: z.array(dnaStructureTransformationApiSchema).optional(),
+  actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
   structureMillesimes: z.array(structureMillesimeApiSchema).optional(),
   structureTypologies: z.array(structureTypologieApiSchema).optional(),
 });
@@ -65,7 +70,7 @@ export const transformationApiCreateSchema = z.object({
     .array(
       structureTransformationApiSchema.extend({
         structureId: z.number(),
-        type: z.nativeEnum(StructureTransformationType),
+        structureTransformationType: z.nativeEnum(StructureTransformationType),
       })
     )
     .min(1, "Au moins une structureTransformation est requise"),

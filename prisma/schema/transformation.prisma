@@ -17,14 +17,13 @@
 model Transformation {
   id                       Int                       @id @default(autoincrement())
   type                     TransformationType
-  form                     Form?                     // Pour le lien au bouton "Finaliser"
+  form                     Form? // Pour le lien au bouton "Finaliser"
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
   structureTransformations StructureTransformation[]
 
   @@schema("public")
 }
-
 
 // Type sans doute nécessaire pour adapter le front (ne serait-ce titre page par exemple) même si la logique métier est la même derrière.
 // 
@@ -59,19 +58,20 @@ enum TransformationType {
 }
 
 model StructureTransformation {
-  id               Int                         @id @default(autoincrement())
-  structureId      Int
-  structure        Structure                   @relation(fields: [structureId], references: [id])
-  transformationId Int
-  transformation   Transformation              @relation(fields: [transformationId], references: [id])
-  date             DateTime?
-  type             StructureTransformationType
-  motif            String? // Ne se retrouve que dans le cas d'une fermeture, voir en fonction des discussions avec Clara si c'est un enum, du champ libre, si ça doit être là ou dans Transformation...
+  id                           Int                         @id @default(autoincrement())
+  structureId                  Int
+  structure                    Structure                   @relation(fields: [structureId], references: [id])
+  transformationId             Int
+  transformation               Transformation              @relation(fields: [transformationId], references: [id])
+  structureTransformationDate  DateTime?
+  structureTransformationType  StructureTransformationType
+  structureTransformationMotif String? // Ne se retrouve que dans le cas d'une fermeture, voir en fonction des discussions avec Clara si c'est un enum, du champ libre, si ça doit être là ou dans Transformation...
 
   // Tous ces champs représentent les champs scalaires de la structure post transformation. 
   // À noter : une fois la transfo finalisée, ils viennent "écraser" en base les champs de la structure
   // Souci potentiel : si la date est dans 3 mois on ne veut pas encore qu'ils écrasent les champs de la structure 
   // Solution possible à discuter : migrer tous les champs scalaires dans StructureMillesime (à discuter)
+  type                     StructureType?
   public                   PublicType?
   adresseAdministrative    String?
   codePostalAdministratif  String?
@@ -86,11 +86,12 @@ model StructureTransformation {
   // NOTA : sur tous les liens suivants, il s'agit d'une duplication des entrées en table, pas d'une réaffectation de la FK (pour conserver historique)
   // NOTA : réfléchir au cas où la date est postérieure : quand applique-t-on le transfert de ces tables vers la structure ?
   // cron ? Possibilité pendant ce temps de dire "attention pending changes dépendants de la transformation que todavia no esta arrivée à échéance"
-  contacts Contact[]
-  adresses Adresse[] // Ici il faut prévoir en back une duplication de Adresse Typologie (une première associée à la transfo via le formulaire ; ue seconde sur la structure post finalisation de la transfo)
-  finesses Finess[]
-  antennes Antenne[]
-  dnas     DnaStructureTransformation[]
+  contacts            Contact[]
+  adresses            Adresse[] // Ici il faut prévoir en back une duplication de Adresse Typologie (une première associée à la transfo via le formulaire ; ue seconde sur la structure post finalisation de la transfo)
+  finesses            Finess[]
+  antennes            Antenne[]
+  dnas                DnaStructureTransformation[]
+  actesAdministratifs ActeAdministratif[]
 
   // Ici proposition à challenger aussi : on crée un lien vers des StructureTypologie et StructureMillesime 
   // En back ça se manifeste comme ça : pour savoir ce qu'on affiche sur une année on peut avoir plusieurs millésimes : un lié à la structure seulement et 1..n liés à des opérations de transfo
