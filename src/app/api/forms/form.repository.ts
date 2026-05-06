@@ -1,4 +1,5 @@
 import { FormApiType } from "@/schemas/api/form.schema";
+import { EntityId } from "@/types/Entity.type";
 import { StepStatus } from "@/types/form.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
@@ -7,7 +8,7 @@ import { convertToStepStatus } from "./form.util";
 export const createOrUpdateForms = async (
   tx: PrismaTransaction,
   forms: FormApiType[] | undefined,
-  structureId: number
+  entityId: EntityId
 ): Promise<void> => {
   if (!forms || forms.length === 0) {
     return;
@@ -15,14 +16,49 @@ export const createOrUpdateForms = async (
 
   await Promise.all(
     forms.map(async (form) => {
-      await createCompleteFormWithSteps(tx, structureId, form);
+      await createCompleteFormWithSteps(tx, entityId, form);
     })
   );
 };
 
+const getFormUniqueWhere = (
+  entityId: EntityId,
+  formDefinitionId: number
+):
+  | {
+      structureId_formDefinitionId: {
+        structureId: number;
+        formDefinitionId: number;
+      };
+    }
+  | {
+      transformationId_formDefinitionId: {
+        transformationId: number;
+        formDefinitionId: number;
+      };
+    } => {
+  if (entityId.structureId !== undefined) {
+    return {
+      structureId_formDefinitionId: {
+        structureId: entityId.structureId,
+        formDefinitionId,
+      },
+    };
+  }
+  if (entityId.transformationId !== undefined) {
+    return {
+      transformationId_formDefinitionId: {
+        transformationId: entityId.transformationId,
+        formDefinitionId,
+      },
+    };
+  }
+  throw new Error("structureId ou transformationId est requis pour un Form");
+};
+
 const createCompleteFormWithSteps = async (
   tx: PrismaTransaction,
-  structureId: number,
+  entityId: EntityId,
   form: FormApiType
 ): Promise<void> => {
   // 1. Récupérer la FormDefinition par slug
@@ -39,18 +75,13 @@ const createCompleteFormWithSteps = async (
 
   // 2. Créer ou mettre à jour le Form
   const formEntity = await tx.form.upsert({
-    where: {
-      structureId_formDefinitionId: {
-        structureId,
-        formDefinitionId: formDefinition.id,
-      },
-    },
+    where: getFormUniqueWhere(entityId, formDefinition.id),
     update: {
       status: form.status,
     },
     create: {
+      ...entityId,
       formDefinitionId: formDefinition.id,
-      structureId,
       status: form.status,
     },
   });

@@ -52,7 +52,7 @@ export const createOrUpdateActesAdministratifs = async (
 const createOrUpdateActeAdministratif = async (
   tx: PrismaTransaction,
   acteAdministratif: ActeAdministratifApiType,
-  entityId: { structureDnaCode?: string; cpomId?: number },
+  entityId: EntityId,
   parentId?: number
 ) => {
   const realParentId = (parentId ?? acteAdministratif.parentId) || undefined;

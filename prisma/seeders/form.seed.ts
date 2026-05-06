@@ -8,7 +8,14 @@ import {
   StepStatus,
 } from "@/generated/prisma/client";
 
-export const createFakeFormDefinition = (): Omit<FormDefinition, "id"> => {
+export const createFakeFormTransformation = (): Omit<FormDefinition, "id"> => {
+  return {
+    name: "transformation",
+    slug: "transformation-v1",
+    version: 1,
+  };
+};
+export const createFakeFormFinalisation = (): Omit<FormDefinition, "id"> => {
   return {
     name: "finalisation",
     slug: "finalisation-v1",
@@ -55,7 +62,10 @@ export const createFakeFormStepDefinition = (
 
 export const createFakeForm = (
   formDefinitionId: number
-): Omit<Form, "id" | "structureCodeDna" | "structureId"> => {
+): Omit<
+  Form,
+  "id" | "structureCodeDna" | "structureId" | "transformationId"
+> => {
   return {
     formDefinitionId: formDefinitionId,
     status: faker.datatype.boolean(),
@@ -84,7 +94,10 @@ export const createFakeFormWithSteps = (
   formDefinitionId: number,
   stepDefinitions: { id: number; slug: string }[],
   options?: { isFinalised?: boolean }
-): Omit<FormWithSteps, "id" | "structureCodeDna" | "structureId"> => {
+): Omit<
+  FormWithSteps,
+  "id" | "structureCodeDna" | "structureId" | "transformationId"
+> => {
   const fakeForm = createFakeForm(formDefinitionId);
   const isFinalised = options?.isFinalised ?? false;
   const verificationSlugs = ["01-identification", "02-documents-financiers"];

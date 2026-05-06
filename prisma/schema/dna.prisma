@@ -1,10 +1,11 @@
 model Dna {
-  id                           Int                         @id @default(autoincrement())
-  code                         String                      @unique
+  id                           Int                          @id @default(autoincrement())
+  code                         String                       @unique
   description                  String?
   activeInOfiiFileSince        DateTime? // date d'entrée dans le document Ofii
   inactiveInOfiiFileSince      DateTime? // date de sortie du document Ofii
   dnaStructures                DnaStructure[]
+  dnaStructureTransformations  DnaStructureTransformation[]
   activites                    Activite[]
   evenementsIndesirablesGraves EvenementIndesirableGrave[]
 
@@ -40,28 +41,34 @@ model DnaStructure {
 }
 
 model Antenne {
-  id          Int       @id @default(autoincrement())
-  structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureId Int
-  name        String?
-  adresse     String?
-  codePostal  String?
-  commune     String?
-  departement String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now()) @updatedAt
+  id                        Int                      @id @default(autoincrement())
+  structure                 Structure?               @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId               Int?
+  structureTransformation   StructureTransformation? @relation(fields: [structureTransformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureTransformationId Int?
+  name                      String?
+  adresse                   String?
+  codePostal                String?
+  commune                   String?
+  departement               String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@schema("public")
 }
 
 model Finess {
-  id          Int       @id @default(autoincrement())
-  structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureId Int
-  code        String?   @unique
-  description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now()) @updatedAt
+  id                        Int                      @id @default(autoincrement())
+  structure                 Structure?               @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId               Int?
+  structureTransformation   StructureTransformation? @relation(fields: [structureTransformationId], references: [id])
+  structureTransformationId Int?
+  code                      String?                  @unique
+  description               String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@schema("public")
 }
