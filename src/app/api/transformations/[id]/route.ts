@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { transformationApiWriteSchema } from "@/schemas/api/transformation.schema";
+import { transformationApiUpdateSchema } from "@/schemas/api/transformation.schema";
 
 import {
   getTransformation,
@@ -36,7 +36,7 @@ export async function GET(
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const result = transformationApiWriteSchema.parse(body);
+    const result = transformationApiUpdateSchema.parse(body);
     await updateTransformation(result);
     return NextResponse.json("Transformation mise à jour avec succès", {
       status: 201,

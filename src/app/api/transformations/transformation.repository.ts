@@ -1,21 +1,22 @@
 import prisma from "@/lib/prisma";
 import {
   StructureTransformationApiType,
-  TransformationApiCreation,
-  TransformationApiWrite,
+  TransformationApiCreate,
+  TransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { createOrUpdateAdresses } from "../adresses/adresse.repository";
 import { createOrUpdateAntennes } from "../antennes/antenne.repository";
 import { createOrUpdateContacts } from "../contacts/contact.repository";
-import { createOrUpdateDnaStructureTransformations } from "../dna-structures/dna-structure-transformation.repository";
+import { createOrUpdateDnaStructureTransformations } from "../dna-structure-transformations/dna-structure-transformation.repository";
 import { createOrUpdateFinesses } from "../finesses/finess.repository";
 import { createOrUpdateForms } from "../forms/form.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
 import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import { convertToPublicType } from "../structures/structure.util";
 
+//TODO: will change when integrating forms into transformation
 const TRANSFORMATION_FORM_SLUG = "transformation-v1";
 
 export const findOne = async (id: number) => {
@@ -61,7 +62,7 @@ export const findOne = async (id: number) => {
 };
 
 export const createOne = async (
-  input: TransformationApiCreation
+  input: TransformationApiCreate
 ): Promise<number> => {
   return await prisma.$transaction(async (tx) => {
     const transformation = await tx.transformation.create({
@@ -78,7 +79,7 @@ export const createOne = async (
           transformationId: transformation.id,
           structureId: structureTransformation.structureId,
           type: structureTransformation.type,
-          ...buildScalarData(structureTransformation),
+          ...getScalarData(structureTransformation),
         },
       });
     }
@@ -88,7 +89,7 @@ export const createOne = async (
 };
 
 export const updateOne = async (
-  input: TransformationApiWrite
+  input: TransformationApiUpdate
 ): Promise<void> => {
   await prisma.$transaction(async (tx) => {
     if (input.type !== undefined) {
@@ -139,7 +140,7 @@ const initializeTransformationForm = async (
   });
 };
 
-const buildScalarData = (
+const getScalarData = (
   structureTransformation: StructureTransformationApiType
 ) => ({
   date: structureTransformation.date ?? undefined,
@@ -165,7 +166,7 @@ const createOrUpdateStructureTransformation = async (
   transformationId: number,
   structureTransformation: StructureTransformationApiType
 ): Promise<void> => {
-  const scalarData = buildScalarData(structureTransformation);
+  const scalarData = getScalarData(structureTransformation);
 
   let structureTransformationId: number;
   if (structureTransformation.id) {
