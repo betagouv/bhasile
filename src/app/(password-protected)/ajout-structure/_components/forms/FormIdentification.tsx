@@ -9,11 +9,11 @@ import { useEffect, useRef, useState } from "react";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
+import { OperateurAutocompleteRhf } from "@/app/components/forms/autocomplete/OperateurAutocompleteRhf";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
 import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import FormWrapper from "@/app/components/forms/FormWrapper";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
-import { OperateurAutocomplete } from "@/app/components/forms/OperateurAutocomplete";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
@@ -144,7 +144,7 @@ export default function FormIdentification() {
                     ))}
                 </SelectWithValidation>
 
-                <OperateurAutocomplete />
+                <OperateurAutocompleteRhf />
 
                 <div ref={filialesContainerRef}>
                   {isManagedByAFiliale && (

@@ -28,14 +28,19 @@ export class SelectionPage extends BasePage {
 
   async selectStructure(data: TestStructureData): Promise<void> {
     await this.waitForLoad();
-    await this.formHelper.selectOption("#type", data.type);
+    await this.formHelper.selectOption("select.fr-select", data.type);
     await this.selectOperateur(data.operateur.searchTerm, data.operateur.name);
     const departement = data.departementAdministratif;
     await this.selectDepartement(departement);
 
-    const structureLabel = this.page.locator(
-      `label[for="${data.codeBhasile}"]`
+    const structureCheckboxByValue = this.page.locator(
+      `input[name="structure-selection"][value="${data.id}"]`
     );
+    const structureInputId =
+      (await structureCheckboxByValue.getAttribute("id").catch(() => null)) ??
+      `structure-${data.id}`;
+    const structureLabelSelector = `label[for="${structureInputId}"]`;
+    const structureLabel = this.page.locator(structureLabelSelector);
     await expect(structureLabel).toBeVisible({ timeout: TIMEOUTS.NAVIGATION });
     await structureLabel.click();
 

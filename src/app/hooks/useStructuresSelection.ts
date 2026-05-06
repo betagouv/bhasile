@@ -12,9 +12,9 @@ export const useStructuresSelection = ({
   >(undefined);
 
   const getStructures = async (
-    operateurName: string,
-    departements: string,
-    types: string
+    operateurName?: string,
+    departements?: string,
+    types?: string
   ): Promise<{
     structures: StructureMinimalApiType[];
     totalStructures: number;
@@ -22,13 +22,14 @@ export const useStructuresSelection = ({
     try {
       const baseUrl = process.env.NEXT_URL || "";
       const params = new URLSearchParams();
+
       if (operateurName) {
         params.append("operateurs", operateurName);
       }
-      if (departements.length > 0) {
+      if (departements && departements.length > 0) {
         params.append("departements", departements);
       }
-      if (types.length > 0) {
+      if (types && types.length > 0) {
         params.append("type", types);
       }
       params.append("selection", "true");
@@ -56,7 +57,6 @@ export const useStructuresSelection = ({
       );
       setStructures(structures);
     };
-
     if (operateurName && departements && types) {
       fetchStructures();
     } else {
@@ -70,7 +70,7 @@ export const useStructuresSelection = ({
 };
 
 type Props = {
-  operateurName: string;
-  departements: string;
-  types: string;
+  operateurName?: string;
+  departements?: string;
+  types?: string;
 };
