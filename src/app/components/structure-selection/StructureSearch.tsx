@@ -13,18 +13,36 @@ export const StructureSearch = ({
   setSelectedStructuresId,
   fixedType,
   multiple = false,
+  operateurName: operateurNameProp,
+  setOperateurName: setOperateurNameProp,
+  departementNumero: departementNumeroProp,
+  setDepartementNumero: setDepartementNumeroProp,
+  fixedOperateurName,
+  fixedDepartementNumero,
 }: Props): ReactElement => {
   const [type, setType] = useState<StructureType | undefined>(fixedType);
-  const [operateurName, setOperateurName] = useState<string | undefined>(
-    undefined
-  );
-  const [departementNumero, setDepartementNumero] = useState<
+
+  const [operateurNameInternal, setOperateurNameInternal] = useState<
     string | undefined
   >(undefined);
+  const [operateurName, setOperateurName] = setOperateurNameProp
+    ? [operateurNameProp, setOperateurNameProp]
+    : [operateurNameInternal, setOperateurNameInternal];
+
+  const [departementNumeroInternal, setDepartementNumeroInternal] = useState<
+    string | undefined
+  >(undefined);
+  const [departementNumero, setDepartementNumero] = setDepartementNumeroProp
+    ? [departementNumeroProp, setDepartementNumeroProp]
+    : [departementNumeroInternal, setDepartementNumeroInternal];
+
+  const effectiveOperateurName = fixedOperateurName ?? operateurName;
+  const effectiveDepartementNumero =
+    fixedDepartementNumero ?? departementNumero;
 
   const { structures } = useStructuresSelection({
-    operateurName,
-    departements: departementNumero,
+    operateurName: effectiveOperateurName,
+    departements: effectiveDepartementNumero,
     types: type !== undefined ? String(type) : undefined,
   });
 
@@ -38,8 +56,11 @@ export const StructureSearch = ({
             nativeSelectProps={{
               value: type ?? "",
               onChange: (event) => {
-                const v = event.target.value;
-                setType(v ? (v as StructureType) : undefined);
+                setType(
+                  event.target.value
+                    ? (event.target.value as StructureType)
+                    : undefined
+                );
               },
             }}
           >
@@ -53,14 +74,18 @@ export const StructureSearch = ({
               ))}
           </Select>
         )}
-        <OperateurAutocomplete
-          operateurName={operateurName}
-          setOperateurName={setOperateurName}
-        />
-        <DepartementAutocomplete
-          departementNumero={departementNumero}
-          setDepartementNumero={setDepartementNumero}
-        />
+        {!fixedOperateurName && (
+          <OperateurAutocomplete
+            operateurName={operateurName}
+            setOperateurName={setOperateurName}
+          />
+        )}
+        {!fixedDepartementNumero && (
+          <DepartementAutocomplete
+            departementNumero={departementNumero}
+            setDepartementNumero={setDepartementNumero}
+          />
+        )}
       </div>
       <StructuresList
         structures={structures}
@@ -77,6 +102,12 @@ export type StructureSearchProps = {
   setSelectedStructuresId: (structuresId: number[]) => void;
   fixedType?: StructureType;
   multiple?: boolean;
+  operateurName?: string;
+  setOperateurName?: (operateurName: string | undefined) => void;
+  departementNumero?: string;
+  setDepartementNumero?: (departementNumero: string | undefined) => void;
+  fixedOperateurName?: string;
+  fixedDepartementNumero?: string;
 };
 
 type Props = StructureSearchProps;

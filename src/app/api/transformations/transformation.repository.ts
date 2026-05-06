@@ -78,7 +78,8 @@ export const createOne = async (
         data: {
           transformationId: transformation.id,
           structureId: structureTransformation.structureId,
-          type: structureTransformation.type,
+          structureTransformationType:
+            structureTransformation.structureTransformationType,
           ...getScalarData(structureTransformation),
         },
       });
@@ -143,8 +144,10 @@ const initializeTransformationForm = async (
 const getScalarData = (
   structureTransformation: StructureTransformationApiType
 ) => ({
-  date: structureTransformation.date ?? undefined,
-  motif: structureTransformation.motif ?? undefined,
+  structureTransformationDate:
+    structureTransformation.structureTransformationDate ?? undefined,
+  structureTransformationMotif:
+    structureTransformation.structureTransformationMotif ?? undefined,
   public: convertToPublicType(structureTransformation.public),
   adresseAdministrative:
     structureTransformation.adresseAdministrative ?? undefined,
@@ -177,14 +180,16 @@ const createOrUpdateStructureTransformation = async (
       },
       data: {
         ...scalarData,
-        ...(structureTransformation.type !== undefined && {
-          type: structureTransformation.type,
-        }),
+        structureTransformationType:
+          structureTransformation.structureTransformationType,
       },
     });
     structureTransformationId = updated.id;
   } else {
-    if (!structureTransformation.structureId || !structureTransformation.type) {
+    if (
+      !structureTransformation.structureId ||
+      !structureTransformation.structureTransformationType
+    ) {
       throw new Error(
         "structureId et type sont requis pour créer une structureTransformation"
       );
@@ -193,7 +198,8 @@ const createOrUpdateStructureTransformation = async (
       data: {
         transformationId,
         structureId: structureTransformation.structureId,
-        type: structureTransformation.type,
+        structureTransformationType:
+          structureTransformation.structureTransformationType,
         ...scalarData,
       },
     });
