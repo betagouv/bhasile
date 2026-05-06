@@ -1,6 +1,7 @@
 import { DnaStructureApiType } from "@/schemas/api/dna-structure.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+import { upsertDna } from "../dna-codes/dna-codes.repository";
 import { getUniqueDnaCodesFromDnaStructures } from "./dna-structure.service";
 
 const deleteDnaStructures = async (
@@ -66,20 +67,10 @@ export const createOrUpdateDnaStructures = async (
   await checkForDuplicateDnaCodes(tx, dnaStructures, structureId);
 
   for (const dnaStructure of dnaStructures) {
-    const dna = dnaStructure.dna;
-    if (!dna?.code) {
+    const upsertedDna = await upsertDna(tx, dnaStructure.dna);
+    if (!upsertedDna) {
       continue;
     }
-
-    const normalizedCode = dna.code.trim();
-    const upsertedDna = await tx.dna.upsert({
-      where: { code: normalizedCode },
-      update: { description: dna.description },
-      create: {
-        code: normalizedCode,
-        description: dna.description,
-      },
-    });
 
     await tx.dnaStructure.upsert({
       where: { id: dnaStructure.id || 0 },
