@@ -22,6 +22,7 @@ export const TransformationTypeForms = ({
     StructureTransformationApiType[]
   >(initialStructureTransformations ?? []);
 
+  console.log(structureTransformations);
   return (
     <div className="flex flex-col gap-8 max-w-4xl mx-auto mt-20">
       <h1 className="mb-0 text-xl font-bold text-title-blue-france text-center">
@@ -52,8 +53,7 @@ export const TransformationTypeForms = ({
         <StructureSelections
           transformationType={transformationType}
           structureId={structureId}
-          structureTransformations={structureTransformations}
-          setStructureTransformations={setStructureTransformations}
+          onChange={setStructureTransformations}
         />
       ) : null}
     </div>
