@@ -689,6 +689,7 @@ describe("structure.repository db integration", () => {
     // GIVEN: a structure and one existing form bound to a definition
     const structure = await createStructure();
     const formDefinition = await prisma.formDefinition.findFirstOrThrow({
+      where: { stepsDefinition: { some: {} } },
       include: { stepsDefinition: true },
     });
     const firstStep = formDefinition.stepsDefinition[0];
