@@ -78,7 +78,7 @@ export const createOne = async (
           transformationId: transformation.id,
           structureId: structureTransformation.structureId,
           type: structureTransformation.type,
-          ...buildScalarData(structureTransformation),
+          ...getScalarData(structureTransformation),
         },
       });
     }
@@ -139,7 +139,7 @@ const initializeTransformationForm = async (
   });
 };
 
-const buildScalarData = (
+const getScalarData = (
   structureTransformation: StructureTransformationApiType
 ) => ({
   date: structureTransformation.date ?? undefined,
@@ -165,7 +165,7 @@ const createOrUpdateStructureTransformation = async (
   transformationId: number,
   structureTransformation: StructureTransformationApiType
 ): Promise<void> => {
-  const scalarData = buildScalarData(structureTransformation);
+  const scalarData = getScalarData(structureTransformation);
 
   let structureTransformationId: number;
   if (structureTransformation.id) {
