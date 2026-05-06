@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": false,
@@ -26,7 +25,10 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@/prisma-client": ["./prisma/client.ts"]
+      "@/prisma-client": ["./prisma/client.ts"],
+      "prisma/*": ["./prisma/*"],
+      "scripts/*": ["./scripts/*"],
+      "tests/*": ["./tests/*"]
     },
     "types": ["vitest/globals", "@testing-library/jest-dom"]
   },

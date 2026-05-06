@@ -51,6 +51,7 @@ export const TransformationTypeForms = ({
       {transformationType ? (
         <StructureSelections
           transformationType={transformationType}
+          structureId={structureId}
           structureTransformations={structureTransformations}
           setStructureTransformations={setStructureTransformations}
         />
