@@ -74,7 +74,7 @@ describe("GET /api/transformations/[id]", () => {
   it("should return 200 with serialized transformation", async () => {
     const payload = {
       id: 5,
-      type: TransformationType.EXTENSION_FROM_SCRATCH,
+      type: TransformationType.EXTENSION_EX_NIHILO,
       structureTransformations: [],
     };
     mockFindOne.mockResolvedValueOnce(payload);
