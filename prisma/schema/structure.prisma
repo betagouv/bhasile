@@ -1,6 +1,6 @@
 model Structure {
-  id                       Int                  @id @default(autoincrement())
-  codeBhasile              String               @unique
+  id                       Int                       @id @default(autoincrement())
+  codeBhasile              String                    @unique
   filiale                  String? // TODO: remove after first filling is complete, filiales via Operateur are connected in app and DB is backfilled
   type                     StructureType?
   adresseAdministrative    String?
@@ -34,15 +34,17 @@ model Structure {
   structureMillesimes      StructureMillesime[]
   budgets                  Budget[]
   indicateursFinanciers    IndicateurFinancier[]
-  operateur                Operateur?           @relation(fields: [operateurId], references: [id])
+  operateur                Operateur?                @relation(fields: [operateurId], references: [id])
   operateurId              Int?
   forms                    Form[]
   campaigns                Campaign[]
   antennes                 Antenne[]
   finesses                 Finess[]
-  departement              Departement?         @relation(fields: [departementAdministratif], references: [numero])
+  departement              Departement?              @relation(fields: [departementAdministratif], references: [numero])
   userActions              UserAction[]
   userNotes                Note[]
+  structureTransformations StructureTransformation[]
+  isArchived               Boolean                   @default(false) // Flag to know if the structure has been archived in the transformation process
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -51,37 +53,43 @@ model Structure {
 }
 
 model StructureMillesime {
-  id               Int        @id @default(autoincrement())
-  structure        Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureId      Int?
-  year             Int
-  cpom             Boolean    @default(false) // temporary field, while we are not sure of existing cpoms
-  operateurComment String?
+  id                        Int                      @id @default(autoincrement())
+  structure                 Structure?               @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId               Int?
+  structureTransformation   StructureTransformation? @relation(fields: [structureTransformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureTransformationId Int?
+  year                      Int
+  cpom                      Boolean                  @default(false) // temporary field, while we are not sure of existing cpoms
+  operateurComment          String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@unique([structureTransformationId, year])
   @@unique([structureId, year])
   @@schema("public")
 }
 
 model StructureTypologie {
-  id                    Int        @id @default(autoincrement())
-  structure             Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureId           Int?
-  year                  Int
-  placesAutorisees      Int?
-  pmr                   Int?
-  lgbt                  Int?
-  fvvTeh                Int?
-  placesACreer          Int?
-  placesAFermer         Int?
-  echeancePlacesACreer  DateTime?
-  echeancePlacesAFermer DateTime?
+  id                        Int                      @id @default(autoincrement())
+  structure                 Structure?               @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId               Int?
+  structureTransformation   StructureTransformation? @relation(fields: [structureTransformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureTransformationId Int?
+  year                      Int
+  placesAutorisees          Int?
+  pmr                       Int?
+  lgbt                      Int?
+  fvvTeh                    Int?
+  placesACreer              Int?
+  placesAFermer             Int?
+  echeancePlacesACreer      DateTime?
+  echeancePlacesAFermer     DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@unique([structureTransformationId, year])
   @@unique([structureId, year])
   @@schema("public")
 }

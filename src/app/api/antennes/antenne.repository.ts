@@ -1,15 +1,16 @@
 import { AntenneApiType } from "@/schemas/api/antenne.schema";
+import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 const deleteAntennes = async (
   tx: PrismaTransaction,
   antennesToKeep: Partial<AntenneApiType>[],
-  structureId: number
+  entityId: EntityId
 ): Promise<void> => {
-  const everyAntennesOfStructure = await tx.antenne.findMany({
-    where: { structureId: structureId },
+  const everyAntennesOfEntity = await tx.antenne.findMany({
+    where: entityId,
   });
-  const antennesToDelete = everyAntennesOfStructure.filter(
+  const antennesToDelete = everyAntennesOfEntity.filter(
     (antenne) => !antennesToKeep.some((a) => a.id === antenne.id)
   );
   await Promise.all(
@@ -22,19 +23,17 @@ const deleteAntennes = async (
 export const createOrUpdateAntennes = async (
   tx: PrismaTransaction,
   antennes: Partial<AntenneApiType>[] | undefined,
-  structureId: number
+  entityId: EntityId
 ): Promise<void> => {
   if (!antennes) {
     return;
   }
 
-  await deleteAntennes(tx, antennes, structureId);
+  await deleteAntennes(tx, antennes, entityId);
 
   if (antennes.length === 0) {
     return;
   }
-
-  await deleteAntennes(tx, antennes, structureId);
 
   for (const antenne of antennes) {
     await tx.antenne.upsert({
@@ -47,7 +46,7 @@ export const createOrUpdateAntennes = async (
         departement: antenne.departement,
       },
       create: {
-        structureId: structureId,
+        ...entityId,
         name: antenne.name,
         adresse: antenne.adresse,
         codePostal: antenne.codePostal,

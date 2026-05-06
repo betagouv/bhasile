@@ -13,8 +13,9 @@ import { createDnaList, createDnaStructures } from "./seeders/dna.seed";
 import { createEvenementsIndesirablesGraves } from "./seeders/evenement-indesirable-grave.seed";
 import { createFinessList } from "./seeders/finess.seed";
 import {
-  createFakeFormDefinition,
+  createFakeFormFinalisation,
   createFakeFormStepDefinition,
+  createFakeFormTransformation,
 } from "./seeders/form.seed";
 import { createNotesList } from "./seeders/note.seed";
 import {
@@ -42,8 +43,11 @@ export async function seed(): Promise<void> {
   await wipeTables(prisma);
 
   console.log("📋 Création des FormDefinitions...");
+  await prisma.formDefinition.create({
+    data: createFakeFormTransformation(),
+  });
   const formDefinition = await prisma.formDefinition.create({
-    data: createFakeFormDefinition(),
+    data: createFakeFormFinalisation(),
   });
 
   const formStepDefinitions = await prisma.formStepDefinition.createMany({
