@@ -47,9 +47,11 @@ export const StructureSelections = ({
             fixedOperatorName={inheritedOperator}
             fixedDepartementNumero={inheritedDepartement}
             operateurName={filtersByBlock[block.id]?.operateurName}
-            setOperateurName={(v) => setOperateurName(block.id, v)}
+            setOperateurName={(value) => setOperateurName(block.id, value)}
             departementNumero={filtersByBlock[block.id]?.departementNumero}
-            setDepartementNumero={(v) => setDepartementNumero(block.id, v)}
+            setDepartementNumero={(value) =>
+              setDepartementNumero(block.id, value)
+            }
             selectedStructureIds={selectedStructureIdsByBlock[block.id] ?? []}
             setSelectedStructuresId={(ids) => setSelection(block.id, ids)}
           />
