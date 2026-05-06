@@ -154,14 +154,14 @@ describe("transformation.repository db integration", () => {
     };
     await updateOne({
       id: transformationId,
-      type: TransformationType.EXTENSION_FROM_SCRATCH,
+      type: TransformationType.EXTENSION_EX_NIHILO,
       structureTransformations: [newStructureTransformation],
     });
 
     const transformation = await prisma.transformation.findUniqueOrThrow({
       where: { id: transformationId },
     });
-    expect(transformation.type).toBe(TransformationType.EXTENSION_FROM_SCRATCH);
+    expect(transformation.type).toBe(TransformationType.EXTENSION_EX_NIHILO);
 
     const st = await prisma.structureTransformation.findUniqueOrThrow({
       where: { id: structureTransformationId },
