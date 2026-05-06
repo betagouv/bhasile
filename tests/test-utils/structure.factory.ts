@@ -64,7 +64,7 @@ export const createStructure = ({
     finessCode: finessCode ?? "123456789",
     lgbt: true,
     fvvTeh: false,
-    public: publicType ?? PublicType.TOUT_PUBLIC,
+    public: publicType ?? ("TOUT_PUBLIC" as PublicType),
     debutPeriodeAutorisation: new Date("01/02/2022").toISOString(),
     finPeriodeAutorisation: new Date("01/02/2025").toISOString(),
     adresses: adresses ?? [],
