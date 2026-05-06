@@ -13,8 +13,8 @@ export const createStructureTypologie = ({
     pmr: 3,
     placesACreer: 1,
     placesAFermer: 2,
-    echeancePlacesACreer: new Date("01/02/2026").toISOString(),
-    echeancePlacesAFermer: new Date("01/02/2027").toISOString(),
+    echeancePlacesACreer: new Date("2026-01-02").toISOString(),
+    echeancePlacesAFermer: new Date("2027-01-02").toISOString(),
     ...props,
   };
 };
