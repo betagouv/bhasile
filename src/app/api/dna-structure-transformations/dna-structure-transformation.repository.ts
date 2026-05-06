@@ -1,6 +1,8 @@
 import { DnaStructureTransformationApiType } from "@/schemas/api/transformation.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+import { upsertDna } from "../dna-codes/dna-codes.repository";
+
 export const createOrUpdateDnaStructureTransformations = async (
   tx: PrismaTransaction,
   dnas: Partial<DnaStructureTransformationApiType>[] | undefined,
@@ -19,23 +21,10 @@ export const createOrUpdateDnaStructureTransformations = async (
   }
 
   for (const dnaStructureTransformation of dnas) {
-    const dna = dnaStructureTransformation.dna;
-    if (!dna?.code) {
+    const upsertedDna = await upsertDna(tx, dnaStructureTransformation.dna);
+    if (!upsertedDna) {
       continue;
     }
-
-    const normalizedCode = dna.code.trim();
-    if (!normalizedCode) {
-      continue;
-    }
-    const upsertedDna = await tx.dna.upsert({
-      where: { code: normalizedCode },
-      update: { description: dna.description },
-      create: {
-        code: normalizedCode,
-        description: dna.description,
-      },
-    });
 
     await tx.dnaStructureTransformation.create({
       data: {
