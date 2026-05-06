@@ -10,7 +10,7 @@ export type StructureSelectionBlock = {
   multiple: boolean;
   type: StructureTransformationType;
   fixedType?: StructureType;
-  inheritOperatorFrom?: string;
+  inheritOperateurFrom?: string;
   inheritDepartementFrom?: string;
 };
 
@@ -121,7 +121,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         multiple: false,
         type: StructureTransformationType.EXTENSION,
         fixedType: StructureType.CADA,
-        inheritOperatorFrom: "huda",
+        inheritOperateurFrom: "huda",
       },
     ],
     buildAutoTransformations: () => [],

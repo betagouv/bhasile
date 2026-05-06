@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import {
   StructureSelectionBlock,
@@ -31,13 +31,11 @@ export const useStructureSelections = ({
   >({});
 
   const previousTransformationType = useRef(transformationType);
-  useEffect(() => {
-    if (previousTransformationType.current !== transformationType) {
-      previousTransformationType.current = transformationType;
-      setSelectedStructureIdsByBlock({});
-      setFiltersByBlock({});
-    }
-  }, [transformationType]);
+  if (previousTransformationType.current !== transformationType) {
+    previousTransformationType.current = transformationType;
+    setSelectedStructureIdsByBlock({});
+    setFiltersByBlock({});
+  }
 
   const resetDependentsOf = (
     sourceBlockId: string,
@@ -45,7 +43,7 @@ export const useStructureSelections = ({
   ) => {
     const dependents = transformationSpec.blocks.filter((block) =>
       field === "operateurName"
-        ? block.inheritOperatorFrom === sourceBlockId
+        ? block.inheritOperateurFrom === sourceBlockId
         : block.inheritDepartementFrom === sourceBlockId
     );
     if (dependents.length === 0) {
@@ -71,7 +69,7 @@ export const useStructureSelections = ({
     });
   };
 
-  const setSelection = (blockId: string, ids: number[]) =>
+  const setSelectedStructureIds = (blockId: string, ids: number[]) =>
     setSelectedStructureIdsByBlock((prevSelectedStructureIdsByBlock) => ({
       ...prevSelectedStructureIdsByBlock,
       [blockId]: ids,
@@ -99,11 +97,11 @@ export const useStructureSelections = ({
     resetDependentsOf(blockId, "departementNumero");
   };
 
-  const getInheritedOperatorName = (
+  const getInheritedOperateurName = (
     block: StructureSelectionBlock
   ): string | undefined =>
-    block.inheritOperatorFrom
-      ? filtersByBlock[block.inheritOperatorFrom]?.operateurName
+    block.inheritOperateurFrom
+      ? filtersByBlock[block.inheritOperateurFrom]?.operateurName
       : undefined;
 
   const getInheritedDepartementNumero = (
@@ -130,10 +128,10 @@ export const useStructureSelections = ({
     blocks: transformationSpec.blocks,
     selectedStructureIdsByBlock,
     filtersByBlock,
-    setSelection,
+    setSelectedStructureIds,
     setOperateurName,
     setDepartementNumero,
-    getInheritedOperatorName,
+    getInheritedOperateurName,
     getInheritedDepartementNumero,
     structureTransformations,
   };

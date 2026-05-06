@@ -17,7 +17,7 @@ export const StructureSearch = ({
   setOperateurName: setOperateurNameProp,
   departementNumero: departementNumeroProp,
   setDepartementNumero: setDepartementNumeroProp,
-  fixedOperatorName,
+  fixedOperateurName,
   fixedDepartementNumero,
 }: Props): ReactElement => {
   const [type, setType] = useState<StructureType | undefined>(fixedType);
@@ -36,7 +36,7 @@ export const StructureSearch = ({
     ? [departementNumeroProp, setDepartementNumeroProp]
     : [departementNumeroInternal, setDepartementNumeroInternal];
 
-  const effectiveOperateurName = fixedOperatorName ?? operateurName;
+  const effectiveOperateurName = fixedOperateurName ?? operateurName;
   const effectiveDepartementNumero =
     fixedDepartementNumero ?? departementNumero;
 
@@ -74,7 +74,7 @@ export const StructureSearch = ({
               ))}
           </Select>
         )}
-        {!fixedOperatorName && (
+        {!fixedOperateurName && (
           <OperateurAutocomplete
             operateurName={operateurName}
             setOperateurName={setOperateurName}
@@ -106,7 +106,7 @@ export type StructureSearchProps = {
   setOperateurName?: (operateurName: string | undefined) => void;
   departementNumero?: string;
   setDepartementNumero?: (departementNumero: string | undefined) => void;
-  fixedOperatorName?: string;
+  fixedOperateurName?: string;
   fixedDepartementNumero?: string;
 };
 

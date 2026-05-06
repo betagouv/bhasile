@@ -14,10 +14,10 @@ export const StructureSelections = ({
     blocks,
     selectedStructureIdsByBlock,
     filtersByBlock,
-    setSelection,
+    setSelectedStructureIds,
     setOperateurName,
     setDepartementNumero,
-    getInheritedOperatorName,
+    getInheritedOperateurName,
     getInheritedDepartementNumero,
     structureTransformations,
   } = useStructureSelections({ transformationType, structureId });
@@ -29,10 +29,10 @@ export const StructureSelections = ({
   return (
     <div className="flex flex-col gap-4">
       {blocks.map((block) => {
-        const inheritedOperator = getInheritedOperatorName(block);
+        const inheritedOperateur = getInheritedOperateurName(block);
         const inheritedDepartement = getInheritedDepartementNumero(block);
 
-        if (block.inheritOperatorFrom && !inheritedOperator) {
+        if (block.inheritOperateurFrom && !inheritedOperateur) {
           return null;
         }
         if (block.inheritDepartementFrom && !inheritedDepartement) {
@@ -44,16 +44,16 @@ export const StructureSelections = ({
             key={block.id}
             multiple={block.multiple}
             fixedType={block.fixedType}
-            fixedOperatorName={inheritedOperator}
+            fixedOperateurName={inheritedOperateur}
             fixedDepartementNumero={inheritedDepartement}
             operateurName={filtersByBlock[block.id]?.operateurName}
-            setOperateurName={(value) => setOperateurName(block.id, value)}
+            setOperateurName={(v) => setOperateurName(block.id, v)}
             departementNumero={filtersByBlock[block.id]?.departementNumero}
-            setDepartementNumero={(value) =>
-              setDepartementNumero(block.id, value)
-            }
+            setDepartementNumero={(v) => setDepartementNumero(block.id, v)}
             selectedStructureIds={selectedStructureIdsByBlock[block.id] ?? []}
-            setSelectedStructuresId={(ids) => setSelection(block.id, ids)}
+            setSelectedStructuresId={(ids) =>
+              setSelectedStructureIds(block.id, ids)
+            }
           />
         );
       })}
