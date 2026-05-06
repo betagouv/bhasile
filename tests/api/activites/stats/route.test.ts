@@ -17,8 +17,7 @@ describe("GET /api/activites/stats", () => {
 
   it("should return average departement places with query params", async () => {
     // GIVEN
-    const averageData = { average: 42 };
-    mockGetDepartementActivitesAverage.mockResolvedValueOnce(averageData);
+    mockGetDepartementActivitesAverage.mockResolvedValueOnce({ average: 42 });
 
     const request = new NextRequest(
       "http://localhost/api/activites/stats?departement=75&startDate=2023-01-01&endDate=2023-12-31"
@@ -29,7 +28,7 @@ describe("GET /api/activites/stats", () => {
 
     // THEN
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual(averageData);
+    expect(await response.json()).toEqual({ average: 42 });
     expect(mockGetDepartementActivitesAverage).toHaveBeenCalledWith(
       "75",
       "2023-01-01",
@@ -39,8 +38,7 @@ describe("GET /api/activites/stats", () => {
 
   it("should return average departement places without query params", async () => {
     // GIVEN
-    const averageData = { average: 0 };
-    mockGetDepartementActivitesAverage.mockResolvedValueOnce(averageData);
+    mockGetDepartementActivitesAverage.mockResolvedValueOnce({ average: 0 });
 
     const request = new NextRequest("http://localhost/api/activites/stats");
 
@@ -49,7 +47,7 @@ describe("GET /api/activites/stats", () => {
 
     // THEN
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual(averageData);
+    expect(await response.json()).toEqual({ average: 0 });
     expect(mockGetDepartementActivitesAverage).toHaveBeenCalledWith(
       null,
       null,

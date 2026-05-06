@@ -2,7 +2,6 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET, POST, PUT } from "@/app/api/structures/route";
-import { PublicType } from "@/types/structure.type";
 
 import { createStructure } from "../../test-utils/structure.factory";
 
@@ -87,10 +86,7 @@ describe("POST /api/structures", () => {
 
   it("should return 201 on success", async () => {
     // GIVEN
-    const payload = {
-      ...createStructure({ id: 1 }),
-      public: PublicType.TOUT_PUBLIC,
-    };
+    const payload = createStructure({ id: 1 });
     mockGetAdresseAdministrativeCoordinates.mockResolvedValueOnce({});
     mockUpdateOne.mockResolvedValueOnce({ id: 1 });
 

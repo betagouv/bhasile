@@ -22,9 +22,7 @@ describe("GET /api/structures/stats", () => {
 
   it("should return min and max places autorisées", async () => {
     // GIVEN
-    mockGetLatestPlacesAutoriseesPerStructure
-      .mockResolvedValueOnce([500, 10])
-      .mockResolvedValueOnce([500, 10]);
+    mockGetLatestPlacesAutoriseesPerStructure.mockResolvedValue([500, 10]);
 
     // WHEN
     const response = await GET();

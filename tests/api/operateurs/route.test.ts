@@ -29,7 +29,7 @@ describe("GET /api/operateurs", () => {
         structure_types: "{CADA,HUDA}",
       },
     ]);
-    mockCountOperateurs.mockResolvedValueOnce(10);
+    mockCountOperateurs.mockResolvedValueOnce(1);
 
     const request = new NextRequest(
       "http://localhost/api/operateurs?page=1&search=Adoma"
@@ -51,7 +51,7 @@ describe("GET /api/operateurs", () => {
           structureTypes: ["CADA", "HUDA"],
         },
       ],
-      totalOperateurs: 10,
+      totalOperateurs: 1,
     });
     expect(mockGetPaginatedOperateurs).toHaveBeenCalledWith({
       page: "1",
