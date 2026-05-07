@@ -1,14 +1,14 @@
 export default async function TransformationSelectionsPage({
   params,
 }: {
-  params: Promise<{ idTransformation: string }>;
+  params: Promise<{ transformationId: string }>;
 }) {
-  const { idTransformation } = await params;
+  const { transformationId } = await params;
 
   return (
     <div>
       <h1>Transformation - Selections</h1>
-      <p>idTransformation: {idTransformation}</p>
+      <p>transformationId: {transformationId}</p>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Menu } from "@/app/components/Menu";
+import { TransformationMenu } from "./_components/TransformationMenu";
 
 export default function RootLayout({
   children,
@@ -7,7 +7,7 @@ export default function RootLayout({
 }>) {
   return (
     <main className="w-full max-w-screen flex bg-white" id="content">
-      <Menu />
+      <TransformationMenu />
       <div className="flex-1">{children}</div>
     </main>
   );
