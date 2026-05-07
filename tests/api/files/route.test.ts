@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "@/app/api/files/route";
@@ -69,18 +71,18 @@ describe("POST /api/files", () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json).toMatchObject({
-      key: "fixed-uuid-blob",
+      key: "fixed-uuid-test.pdf",
       mimeType: "application/pdf",
-      originalName: "blob",
+      originalName: "test.pdf",
       id: 42,
     });
     expect(mockCheckBucket).toHaveBeenCalled();
     expect(mockPutObject).toHaveBeenCalled();
     expect(mockCreateOne).toHaveBeenCalledWith({
-      key: "fixed-uuid-blob",
+      key: "fixed-uuid-test.pdf",
       mimeType: "application/pdf",
-      originalName: "blob",
-      fileSize: 9,
+      originalName: "test.pdf",
+      fileSize: 7,
     });
   });
 });
