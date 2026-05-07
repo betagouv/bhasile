@@ -1,6 +1,6 @@
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
 import { getDocumentsOperateurCategories } from "@/app/utils/documentOperateur.util";
-import { DocumentOperateurCategory } from "@/types/document-operateur.type";
+import { DocumentOperateurCategory } from "@/types/operateur.type";
 
 import FieldSetDocumentOperateur from "./FieldSetDocumentOperateur";
 

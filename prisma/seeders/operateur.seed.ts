@@ -9,7 +9,7 @@ import {
 import {
   createFakeDocumentFinancier,
   DocumentFinancierWithFileUploads,
-} from "./document-financier";
+} from "./document-financier.seed";
 
 type OperateurWithDocuments = Operateur & {
   actesAdministratifs: Omit<

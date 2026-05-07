@@ -13,7 +13,10 @@ export const getActesAdministratifsDefaultValues = (
   const categoriesToDisplay = (
     Object.entries(categoryDisplayRules) as [
       Exclude<ActeAdministratifCategory, "CPOM">,
-      (typeof categoryDisplayRules)[Exclude<ActeAdministratifCategory, "CPOM">],
+      (typeof categoryDisplayRules)[Exclude<
+        ActeAdministratifCategory,
+        "CPOM" | "FRAIS_DE_SIEGE" | "STATUTS"
+      >],
     ][]
   )
     .filter(([, rules]) => rules.shouldShow)
@@ -97,7 +100,7 @@ export const getActesAdministratifsCategoryToDisplay = (
 });
 
 type CategoryDisplayRulesType = Record<
-  Exclude<ActeAdministratifCategory, "CPOM">,
+  Exclude<ActeAdministratifCategory, "CPOM" | "FRAIS_DE_SIEGE" | "STATUTS">,
   {
     categoryShortName: string;
     title: string;

@@ -4,7 +4,8 @@ import { DeleteButton } from "@/app/components/common/DeleteButton";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import UploadWithValidation from "@/app/components/forms/UploadWithValidation";
 import { AdditionalFieldsType } from "@/app/utils/documentOperateur.util";
-import { DocumentOperateurFormValues } from "@/schemas/forms/base/documentOperateur.schema";
+import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
+import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 
 export const DocumentOperateur = ({
   document,
@@ -15,8 +16,10 @@ export const DocumentOperateur = ({
 }: Props) => {
   const { control, watch } = useFormContext();
 
-  const documentsOperateur: DocumentOperateurFormValues[] =
-    watch("documentsOperateur") || [];
+  const documentsOperateur: (
+    | ActeAdministratifFormValues
+    | DocumentFinancierFlexibleFormValues
+  )[] = watch("documentsOperateur") || [];
 
   const index = documentsOperateur.findIndex(
     (documentOperateur) =>
@@ -28,17 +31,29 @@ export const DocumentOperateur = ({
     return null;
   }
 
+  const isActeAdministratif = (
+    document: ActeAdministratifFormValues | DocumentFinancierFlexibleFormValues
+  ): document is ActeAdministratifFormValues => {
+    return "date" in document;
+  };
+
+  const getDocumentKey = (): string => {
+    return isActeAdministratif(document)
+      ? "actesAdministratifs"
+      : "documentsFinanciers";
+  };
+
   return (
     <>
       <div className="grid grid-cols-[1fr_1fr_auto] gap-6 items-start">
         <InputWithValidation
-          name={`documents.${index}.id`}
+          name={`${getDocumentKey()}.${index}.id`}
           control={control}
           label=""
           type="hidden"
         />
         <InputWithValidation
-          name={`documents.${index}.category`}
+          name={`${getDocumentKey()}.${index}.category`}
           control={control}
           label=""
           type="hidden"
@@ -47,8 +62,12 @@ export const DocumentOperateur = ({
         {additionalFieldsType === AdditionalFieldsType.DATE && (
           <div className="flex gap-6 items-start h-full">
             <InputWithValidation
-              name={`documents.${index}.date`}
-              defaultValue={document.date}
+              name={`${getDocumentKey()}.${index}.date`}
+              defaultValue={
+                isActeAdministratif(document)
+                  ? document.date
+                  : new Date(document.year, 0, 1).toDateString()
+              }
               control={control}
               label={categoryShortName}
               className="w-full mb-0"
@@ -59,7 +78,7 @@ export const DocumentOperateur = ({
         {additionalFieldsType === AdditionalFieldsType.NAME && (
           <div className="flex gap-6 items-start h-full">
             <InputWithValidation
-              name={`documents.${index}.name`}
+              name={`${getDocumentKey()}.${index}.name`}
               control={control}
               label="Nom du document"
               className="w-full mb-0"
@@ -72,7 +91,7 @@ export const DocumentOperateur = ({
         <div className="flex flex-col">
           <label className="mb-2">{documentLabel}</label>
           <UploadWithValidation
-            name={`documents.${index}.fileUploads.0.key`}
+            name={`${getDocumentKey()}.${index}.fileUploads.0.key`}
             control={control}
           />
         </div>
@@ -89,7 +108,7 @@ export const DocumentOperateur = ({
 };
 
 type Props = {
-  document: DocumentOperateurFormValues;
+  document: ActeAdministratifFormValues | DocumentFinancierFlexibleFormValues;
   additionalFieldsType?: AdditionalFieldsType;
   documentLabel: string;
   categoryShortName: string;

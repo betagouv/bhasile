@@ -5,9 +5,9 @@ import { v4 as uuidv4 } from "uuid";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { AdditionalFieldsType } from "@/app/utils/documentOperateur.util";
-import { DocumentOperateurFormValues } from "@/schemas/forms/base/documentOperateur.schema";
-import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
-import { DocumentFinancierCategory } from "@/types/document-financier.type";
+import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
+import { DocumentFinancierFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
+import { DocumentOperateurCategory } from "@/types/operateur.type";
 
 import { DocumentOperateur } from "./DocumentOperateur";
 
@@ -29,8 +29,10 @@ export default function FieldSetDocumentOperateur({
     name: "documentsOperateur",
   });
 
-  const documentsOperateur: DocumentOperateurFormValues[] =
-    watch("documentsOperateur") || [];
+  const documentsOperateur: (
+    | ActeAdministratifFormValues
+    | DocumentFinancierFlexibleFormValues
+  )[] = watch("documentsOperateur") || [];
 
   const documentsOfCategory = documentsOperateur.filter(
     (document) => document?.category === category
@@ -107,7 +109,7 @@ export default function FieldSetDocumentOperateur({
 }
 
 type Props = {
-  category: ActeAdministratifCategory | DocumentFinancierCategory;
+  category: DocumentOperateurCategory;
   categoryShortName: string;
   title: string;
   noTitleLegend?: boolean;

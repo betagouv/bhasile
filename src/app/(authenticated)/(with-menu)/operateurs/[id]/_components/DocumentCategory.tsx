@@ -1,18 +1,24 @@
 import { ReactElement } from "react";
 
 import { DownloadItem } from "@/app/components/common/DownloadItem";
+import { DocumentOperateurCategory } from "@/types/operateur.type";
 
 import { useOperateurContext } from "../_context/OperateurClientContext";
 
 export const DocumentCategory = ({ categoryName }: Props): ReactElement => {
   const { operateur } = useOperateurContext();
 
-  const operateurDocuments = operateur.documents.filter(
-    (document) => document.category === categoryName
+  const actesAdministratifs = operateur.actesAdministratifs.filter(
+    (acteAdministratif) => acteAdministratif.category === categoryName
   );
-  return operateurDocuments.length > 0 ? (
+  const documentsFinanciers = operateur.documentsFinanciers.filter(
+    (documentFinancier) => documentFinancier.category === categoryName
+  );
+  const documentsOperateur = [...actesAdministratifs, ...documentsFinanciers];
+
+  return documentsOperateur.length > 0 ? (
     <div className="grid grid-cols-3 gap-5 p-4">
-      {operateurDocuments.map((document) => (
+      {documentsOperateur.map((document) => (
         <DownloadItem key={document.id} item={document} />
       ))}
     </div>
