@@ -29,7 +29,7 @@ import { ControleWithFileUploads, createFakeControle } from "./controle.seed";
 import {
   createFakeDocumentFinancier,
   DocumentFinancierWithFileUploads,
-} from "./document-financier";
+} from "./document-financier.seed";
 import {
   createFakeEvaluation,
   EvaluationWithFileUploads,

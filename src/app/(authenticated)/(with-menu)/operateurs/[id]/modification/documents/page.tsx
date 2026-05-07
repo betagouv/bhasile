@@ -10,8 +10,8 @@ import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useOperateurFormHandling } from "@/app/hooks/useOperateurFormHandling";
-import { getDocumentsOperateurDefaultValues } from "@/app/utils/documentOperateur.util";
-import { documentOperateurSchema } from "@/schemas/forms/base/documentOperateur.schema";
+import { getOperateurDefaultValues } from "@/app/utils/operateur.util";
+import { operateurUpdateSchema } from "@/schemas/forms/base/operateur.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
 import { DocumentsOperateur } from "../../_components/DocumentsOperateur";
@@ -28,7 +28,7 @@ export default function OperateurModificationDocuments() {
     nextRoute: `/operateurs/${operateur.id}`,
   });
 
-  const defaultValues = getDocumentsOperateurDefaultValues(operateur);
+  const defaultValues = getOperateurDefaultValues(operateur);
 
   const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
@@ -39,7 +39,7 @@ export default function OperateurModificationDocuments() {
         handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
-        schema={documentOperateurSchema}
+        schema={operateurUpdateSchema}
         defaultValues={defaultValues}
         onSubmit={handleSubmit}
         handleCancel={() => setShouldOpenModal(true)}

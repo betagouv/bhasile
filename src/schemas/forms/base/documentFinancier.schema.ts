@@ -21,6 +21,7 @@ import { StructureType } from "@/types/structure.type";
 
 const DocumentFinancierSchema = z.object({
   id: zId(),
+  uuid: z.string().optional(), // The uuid is used to identify the acte administratif when it is not saved in the database (and so does not have an id)
   year: zSafeYear(),
   category: z.enum(DocumentFinancierCategory).optional(),
   granularity: z.enum(DocumentFinancierGranularity).optional(),

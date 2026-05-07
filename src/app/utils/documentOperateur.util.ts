@@ -1,43 +1,9 @@
-import { v4 as uuidv4 } from "uuid";
-
-import { OperateurApiRead } from "@/schemas/api/operateur.schema";
-import { DocumentOperateurFormValues } from "@/schemas/forms/base/documentOperateur.schema";
-
-export const getDocumentsOperateurDefaultValues = (
-  operateur: OperateurApiRead
-): DocumentOperateurFormValues[] => {
-  const categoryDisplayRules = getDocumentsOperateurCategories();
-  const categoriesToDisplay = (
-    Object.entries(categoryDisplayRules) as [
-      Exclude<DocumentOperateurCategory, "CPOM">,
-      (typeof categoryDisplayRules)[DocumentOperateurCategory],
-    ][]
-  ).map(([category]) => category);
-
-  const missingCategories = categoriesToDisplay.filter(
-    (category) =>
-      !operateur.documents?.some((documents) => documents.category === category)
-  );
-
-  return [
-    ...(operateur.documents?.map((document) => ({
-      id: document.id ?? undefined,
-      category: document.category,
-      date: document.date || undefined,
-      name: document.name,
-      fileUploads: document.fileUploads || undefined,
-    })) || []),
-    ...missingCategories.map((category) => ({
-      uuid: uuidv4(),
-      category,
-    })),
-  ];
-};
+import { DocumentOperateurCategory } from "@/types/operateur.type";
 
 export const getDocumentsOperateurCategories =
   (): CategoryDisplayRulesType => ({
     RAPPORT_ACTIVITE: {
-      categoryShortName: "rapport",
+      categoryShortName: "Rapport d'activité",
       title: "Rapport d'activité",
       canAddFile: true,
       isOptional: true,
@@ -46,7 +12,7 @@ export const getDocumentsOperateurCategories =
       addFileButtonLabel: "Ajouter un rapport d'activité",
     },
     FRAIS_DE_SIEGE: {
-      categoryShortName: "frais de siège",
+      categoryShortName: "Frais de siège",
       title: "Frais de siège",
       canAddFile: true,
       isOptional: true,
@@ -55,7 +21,7 @@ export const getDocumentsOperateurCategories =
       addFileButtonLabel: "Ajouter un frais de siège",
     },
     STATUTS: {
-      categoryShortName: "statut",
+      categoryShortName: "Statuts",
       title: "Statuts",
       canAddFile: true,
       isOptional: true,
