@@ -26,7 +26,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
       dir="ltr"
     >
       <head>
-        <DsfrHead />
+        <DsfrHead doDisableFavicon />
       </head>
       <body className="overscroll-none bg-default-grey-hover h-full">
         <DsfrProvider lang={lang}>
