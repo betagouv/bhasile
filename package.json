@@ -63,7 +63,7 @@
     "jsonwebtoken": "^9.0.3",
     "maplibre-gl": "^5.24.0",
     "minio": "^8.0.7",
-    "next": "16.2.4",
+    "next": "16.2.6",
     "next-auth": "^4.24.14",
     "pretty-bytes": "^7.1.0",
     "prisma": "^7.7.0",
