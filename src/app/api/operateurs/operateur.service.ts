@@ -3,6 +3,8 @@ import {
   OperateurApiRead,
   OperateurApiWrite,
 } from "@/schemas/api/operateur.schema";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
+import { DocumentFinancierCategory } from "@/types/document-financier.type";
 
 import {
   countOperateurs,
@@ -43,19 +45,41 @@ export const getOperateurs = async ({
 
 export const getOperateur = async (id: number): Promise<OperateurApiRead> => {
   const operateur = await findOne(id);
-  const vulnerabilites: string[] = [];
-  operateur.structures.forEach((structure) => {
-    if (structure.lgbt && !vulnerabilites.includes("LGBT")) {
-      vulnerabilites.push("LGBT");
-    }
-    if (structure.fvvTeh && !vulnerabilites.includes("FVV-TEH")) {
-      vulnerabilites.push("FVV-TEH");
-    }
-  });
 
   return {
     ...operateur,
-    vulnerabilites,
+    actesAdministratifs: operateur.actesAdministratifs?.map(
+      (acteAdministratif) => ({
+        ...acteAdministratif,
+        category: acteAdministratif.category as ActeAdministratifCategory,
+        parentId: acteAdministratif.parentId!,
+        cpomId: acteAdministratif.cpomId!,
+        date: new Date(acteAdministratif.date!).toISOString(),
+        startDate: new Date(acteAdministratif.date!).toISOString(),
+        endDate: new Date(acteAdministratif.date!).toISOString(),
+        fileUploads: acteAdministratif.fileUploads.map((fileUpload) => ({
+          ...fileUpload,
+          acteAdministratifId: fileUpload.acteAdministratifId!,
+          documentFinancierId: fileUpload.documentFinancierId!,
+          controleId: fileUpload.controleId!,
+          evaluationId: fileUpload.evaluationId!,
+        })),
+      })
+    ),
+    documentsFinanciers: operateur.documentsFinanciers?.map(
+      (documentFinancier) => ({
+        ...documentFinancier,
+        category: documentFinancier.category as DocumentFinancierCategory,
+        structureId: documentFinancier.structureId!,
+        fileUploads: documentFinancier.fileUploads.map((fileUpload) => ({
+          ...fileUpload,
+          acteAdministratifId: fileUpload.acteAdministratifId!,
+          documentFinancierId: fileUpload.documentFinancierId!,
+          controleId: fileUpload.controleId!,
+          evaluationId: fileUpload.evaluationId!,
+        })),
+      })
+    ),
   };
 };
 

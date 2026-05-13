@@ -33,6 +33,8 @@ model ActeAdministratif {
   parentId    Int?
   children    ActeAdministratif[]        @relation("ActeAdministratifToActeAdministratif")
   fileUploads FileUpload[]
+  operateur   Operateur?                 @relation(fields: [operateurId], references: [id])
+  operateurId Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -49,6 +51,8 @@ model DocumentFinancier {
   name        String?
   granularity DocumentFinancierGranularity @default(STRUCTURE)
   fileUploads FileUpload[]
+  operateur   Operateur?                   @relation(fields: [operateurId], references: [id])
+  operateurId Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -76,6 +80,8 @@ enum ActeAdministratifCategory {
   ARRETE_AUTORISATION
   CONVENTION
   ARRETE_TARIFICATION
+  FRAIS_DE_SIEGE
+  STATUTS
   AUTRE
   CPOM // Legacy category (for CPOM documents added before the CPOM form)
 

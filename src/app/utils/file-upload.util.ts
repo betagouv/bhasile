@@ -33,6 +33,8 @@ export const getCategoryLabel = (
     EVALUATION: "Évaluation",
     AUTRE: "Autre",
     AUTRE_FINANCIER: "Autre",
+    FRAIS_DE_SIEGE: "Frais de siège",
+    STATUTS: "Statuts",
   };
   return labels[category] || "";
 };

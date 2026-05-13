@@ -1,16 +1,18 @@
 model Operateur {
-  id                Int          @id @default(autoincrement())
-  name              String       @unique
-  structures        Structure[]
-  directionGenerale String?
-  siret             String?
-  siegeSocial       String?
-  parent            Operateur?   @relation("OperateurToOperateur", fields: [parentId], references: [id])
-  parentId          Int?
-  cpoms             Cpom[]
-  filiales          Operateur[]  @relation("OperateurToOperateur")
-  userActions       UserAction[]
-  dnas              Dna[]
+  id                  Int                 @id @default(autoincrement())
+  name                String              @unique
+  structures          Structure[]
+  directionGenerale   String?
+  siret               String?
+  siegeSocial         String?
+  parent              Operateur?          @relation("OperateurToOperateur", fields: [parentId], references: [id])
+  parentId            Int?
+  cpoms               Cpom[]
+  filiales            Operateur[]         @relation("OperateurToOperateur")
+  userActions         UserAction[]
+  dnas                Dna[]
+  actesAdministratifs ActeAdministratif[]
+  documentsFinanciers DocumentFinancier[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

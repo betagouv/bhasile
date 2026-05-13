@@ -36,7 +36,7 @@ describe("GET /api/operateurs/[id]", () => {
 
     // THEN
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ ...operateur, vulnerabilites: [] });
+    expect(await response.json()).toEqual({ ...operateur });
     expect(mockFindOne).toHaveBeenCalledWith(1);
     expect(mockCreateOperateurEvent).toHaveBeenCalledWith("GET", 1);
   });

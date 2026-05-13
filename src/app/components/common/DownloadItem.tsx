@@ -4,8 +4,8 @@ import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { DocumentFinancierGranularity } from "@/generated/prisma/enums";
-import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
-import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { ActeAdministratifApiType } from "@/schemas/api/acte-administratif.schema";
+import { DocumentFinancierApiType } from "@/schemas/api/document-financier.schema";
 
 import { DocumentGranularityBadge } from "./DocumentGranularityBadge";
 

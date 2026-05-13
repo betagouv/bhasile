@@ -4,6 +4,8 @@ import { Operateur, Prisma, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { OperateurApiWrite } from "@/schemas/api/operateur.schema";
 
+import { OperateurDbDetail } from "./operateur.db.type";
+
 export const findBySearchTerm = async (
   searchTerm: string | null
 ): Promise<Operateur[]> => {
@@ -24,6 +26,7 @@ export const getPaginatedOperateurs = async ({
   page: number | null;
   search: string | null;
 }): Promise<OperateurStat[]> => {
+  // TODO : transformer en Prisma classique et ajouter la logique restante dans operateur.service.ts
   return prisma.$queryRaw(Prisma.sql`
     WITH dernier_millesime_structure_typologie AS (
       SELECT DISTINCT ON (st."structureId")
@@ -71,6 +74,7 @@ export const countOperateurs = async ({
 }: {
   search: string | null;
 }): Promise<number> => {
+  // TODO : ajouter le filtre sur parentId null et nbStructures 0
   return prisma.operateur.count({
     where: {
       parentId: null,
@@ -89,14 +93,18 @@ export const countOperateurs = async ({
   });
 };
 
-export const findOne = async (id: number): Promise<OperateurWithStructures> => {
+export const findOne = async (id: number): Promise<OperateurDbDetail> => {
   return prisma.operateur.findFirstOrThrow({
     where: { id },
     include: {
-      structures: {
-        select: {
-          lgbt: true,
-          fvvTeh: true,
+      actesAdministratifs: {
+        include: {
+          fileUploads: true,
+        },
+      },
+      documentsFinanciers: {
+        include: {
+          fileUploads: true,
         },
       },
     },
@@ -111,17 +119,6 @@ export const updateOne = async (
     data: operateur,
   });
 };
-
-type OperateurWithStructures = Prisma.OperateurGetPayload<{
-  include: {
-    structures: {
-      select: {
-        lgbt: true;
-        fvvTeh: true;
-      };
-    };
-  };
-}>;
 
 type OperateurStat = {
   id: number;
