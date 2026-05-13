@@ -21,7 +21,6 @@ export type OperateurApiRead = {
   directionGenerale?: string | null;
   siret?: string | null;
   siegeSocial?: string | null;
-  vulnerabilites: string[];
   actesAdministratifs: ActeAdministratifApiType[];
   documentsFinanciers: DocumentFinancierApiType[];
 };

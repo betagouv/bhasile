@@ -13,7 +13,6 @@ export const getOperateurDefaultValues = (
     directionGenerale: operateur?.directionGenerale,
     siret: operateur?.siret,
     siegeSocial: operateur?.siegeSocial,
-    vulnerabilites: operateur?.vulnerabilites || [],
     actesAdministratifs: operateur?.actesAdministratifs?.length
       ? operateur?.actesAdministratifs
       : [
