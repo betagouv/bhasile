@@ -38,8 +38,8 @@ export const StructureSearch = ({
             nativeSelectProps={{
               value: type ?? "",
               onChange: (event) => {
-                const v = event.target.value;
-                setType(v ? (v as StructureType) : undefined);
+                const value = event.target.value;
+                setType(value ? (value as StructureType) : undefined);
               },
             }}
           >
