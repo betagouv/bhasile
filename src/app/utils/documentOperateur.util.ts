@@ -3,25 +3,25 @@ import { DocumentOperateurCategory } from "@/types/operateur.type";
 export const getDocumentsOperateurCategories =
   (): CategoryDisplayRulesType => ({
     RAPPORT_ACTIVITE: {
-      categoryShortName: "Rapport d'activité",
+      categoryShortName: "convention",
       title: "Rapport d'activité",
       canAddFile: true,
       isOptional: true,
-      additionalFieldsType: AdditionalFieldsType.DATE,
+      additionalFieldsType: AdditionalFieldsType.START_END_DATE,
       documentLabel: "Document",
       addFileButtonLabel: "Ajouter un rapport d'activité",
     },
     FRAIS_DE_SIEGE: {
-      categoryShortName: "Frais de siège",
+      categoryShortName: "arrêté",
       title: "Frais de siège",
       canAddFile: true,
       isOptional: true,
-      additionalFieldsType: AdditionalFieldsType.DATE,
+      additionalFieldsType: AdditionalFieldsType.START_END_DATE,
       documentLabel: "Document",
       addFileButtonLabel: "Ajouter un frais de siège",
     },
     STATUTS: {
-      categoryShortName: "Statuts",
+      categoryShortName: "Date du document",
       title: "Statuts",
       canAddFile: true,
       isOptional: true,
@@ -54,6 +54,7 @@ type CategoryDisplayRulesType = Record<
 >;
 
 export enum AdditionalFieldsType {
+  START_END_DATE,
   DATE,
   NAME,
 }

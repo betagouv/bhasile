@@ -15,7 +15,6 @@ export const operateurUpdateSchema = z.object({
   directionGenerale: z.string().nullish(),
   siret: z.string().nullish(),
   siegeSocial: z.string().nullish(),
-  vulnerabilites: z.array(z.string()).nullish(),
   actesAdministratifs: z.array(acteAdministratifApiSchema),
   documentsFinanciers: z.array(documentFinancierApiSchema),
 });

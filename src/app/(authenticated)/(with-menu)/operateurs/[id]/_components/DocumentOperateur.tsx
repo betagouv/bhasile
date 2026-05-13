@@ -58,7 +58,34 @@ export const DocumentOperateur = ({
           label=""
           type="hidden"
         />
-
+        {additionalFieldsType === AdditionalFieldsType.START_END_DATE && (
+          <div className="flex gap-6 items-start h-full">
+            <InputWithValidation
+              name={`${getDocumentKey()}.${index}.startDate`}
+              defaultValue={
+                isActeAdministratif(document)
+                  ? document.date
+                  : new Date(document.year, 0, 1).toDateString()
+              }
+              control={control}
+              label={`Début ${categoryShortName}`}
+              className="w-full mb-0"
+              type="date"
+            />
+            <InputWithValidation
+              name={`${getDocumentKey()}.${index}.endDate`}
+              defaultValue={
+                isActeAdministratif(document)
+                  ? document.date
+                  : new Date(document.year, 0, 1).toDateString()
+              }
+              control={control}
+              label={`Fin ${categoryShortName}`}
+              className="w-full mb-0"
+              type="date"
+            />
+          </div>
+        )}
         {additionalFieldsType === AdditionalFieldsType.DATE && (
           <div className="flex gap-6 items-start h-full">
             <InputWithValidation

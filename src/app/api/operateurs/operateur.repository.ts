@@ -97,12 +97,6 @@ export const findOne = async (id: number): Promise<OperateurDbDetail> => {
   return prisma.operateur.findFirstOrThrow({
     where: { id },
     include: {
-      structures: {
-        select: {
-          lgbt: true,
-          fvvTeh: true,
-        },
-      },
       actesAdministratifs: {
         include: {
           fileUploads: true,
