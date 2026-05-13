@@ -250,6 +250,7 @@ export const findOneOperateur = async (
     where: { id },
     select: {
       id: true,
+      type: true,
       codeBhasile: true,
       forms: true,
     },
