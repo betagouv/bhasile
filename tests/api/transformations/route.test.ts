@@ -29,7 +29,7 @@ describe("POST /api/transformations", () => {
       structureTransformations: [
         {
           structureId: 1,
-          type: StructureTransformationType.CREATION,
+          structureTransformationType: StructureTransformationType.CREATION,
         },
       ],
     };

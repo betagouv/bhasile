@@ -243,7 +243,8 @@ describe("TransformationMenu", () => {
             {
               id: 1,
               structureId: 1001,
-              type: StructureTransformationType.FERMETURE,
+              structureTransformationType:
+                StructureTransformationType.FERMETURE,
             },
           ],
         },
