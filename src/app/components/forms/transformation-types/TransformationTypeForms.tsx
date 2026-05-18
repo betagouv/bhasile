@@ -6,7 +6,10 @@ import { TransformationType } from "@/types/transformation.type";
 import { CreationTransformationForm } from "./CreationTransformationForm";
 import { FromStructureTransformationForm } from "./FromStructureTransformationForm";
 import { HudaTransformationForm } from "./HudaTransformationForm";
-import { StructureSelections } from "./StructureSelections";
+import {
+  StructureSelections,
+  StructureSelectionsState,
+} from "./StructureSelections";
 
 export const TransformationTypeForms = ({
   formType,
@@ -18,11 +21,13 @@ export const TransformationTypeForms = ({
     TransformationType | undefined
   >(initialTransformationType);
 
-  const [structureTransformations, setStructureTransformations] = useState<
-    StructureTransformationApiType[]
-  >(initialStructureTransformations ?? []);
+  const [selectionsState, setSelectionsState] =
+    useState<StructureSelectionsState>({
+      structureTransformations: initialStructureTransformations ?? [],
+      areSelectionsComplete: false,
+    });
 
-  console.log(structureTransformations);
+  console.log(selectionsState);
   return (
     <div className="flex flex-col gap-8 max-w-4xl mx-auto mt-20">
       <h1 className="mb-0 text-xl font-bold text-title-blue-france text-center">
@@ -53,7 +58,7 @@ export const TransformationTypeForms = ({
         <StructureSelections
           transformationType={transformationType}
           structureId={structureId}
-          onChange={setStructureTransformations}
+          onChange={setSelectionsState}
         />
       ) : null}
       {}

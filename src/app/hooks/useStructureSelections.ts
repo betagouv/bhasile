@@ -124,6 +124,14 @@ export const useStructureSelections = ({
     [transformationSpec, structureId, selectedStructureIdsByBlock]
   );
 
+  const areSelectionsComplete = useMemo<boolean>(
+    () =>
+      transformationSpec.blocks.every(
+        (block) => (selectedStructureIdsByBlock[block.id] ?? []).length > 0
+      ),
+    [transformationSpec, selectedStructureIdsByBlock]
+  );
+
   return {
     blocks: transformationSpec.blocks,
     selectedStructureIdsByBlock,
@@ -134,5 +142,6 @@ export const useStructureSelections = ({
     getInheritedOperateurName,
     getInheritedDepartementNumero,
     structureTransformations,
+    areSelectionsComplete,
   };
 };

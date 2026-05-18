@@ -20,13 +20,12 @@ export const StructureSelections = ({
     getInheritedOperateurName,
     getInheritedDepartementNumero,
     structureTransformations,
+    areSelectionsComplete,
   } = useStructureSelections({ transformationType, structureId });
 
   useEffect(() => {
-    onChange(structureTransformations);
-  }, [structureTransformations, onChange]);
-
-  console.log(selectedStructureIdsByBlock);
+    onChange({ structureTransformations, areSelectionsComplete });
+  }, [structureTransformations, areSelectionsComplete, onChange]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -64,10 +63,13 @@ export const StructureSelections = ({
   );
 };
 
+export type StructureSelectionsState = {
+  structureTransformations: StructureTransformationApiType[];
+  areSelectionsComplete: boolean;
+};
+
 type Props = {
   transformationType: TransformationType;
   structureId?: number;
-  onChange: (
-    structureTransformations: StructureTransformationApiType[]
-  ) => void;
+  onChange: (state: StructureSelectionsState) => void;
 };
