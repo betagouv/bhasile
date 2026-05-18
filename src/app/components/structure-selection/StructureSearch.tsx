@@ -1,5 +1,5 @@
 import Select from "@codegouvfr/react-dsfr/Select";
-import { ReactElement, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 
 import { DepartementAutocomplete } from "@/app/components/forms/autocomplete/DepartementAutocomplete";
 import { OperateurAutocomplete } from "@/app/components/forms/autocomplete/OperateurAutocomplete";
@@ -10,9 +10,10 @@ import { StructuresList } from "./StructuresList";
 
 export const StructureSearch = ({
   selectedStructureIds,
-  setSelectedStructuresId,
+  setSelectedStructureIds,
   fixedType,
   multiple = false,
+  label,
   operateurName: operateurNameProp,
   setOperateurName: setOperateurNameProp,
   departementNumero: departementNumeroProp,
@@ -46,8 +47,17 @@ export const StructureSearch = ({
     types: type !== undefined ? String(type) : undefined,
   });
 
+  useEffect(() => {
+    setSelectedStructureIds([]);
+  }, [structures, setSelectedStructureIds]);
+
   return (
     <div className="bg-white p-6 rounded-lg mb-2">
+      {label && (
+        <h3 className="text-base font-bold mb-4 text-title-blue-france">
+          {label}
+        </h3>
+      )}
       <div className="grid grid-cols-3 gap-6 mb-2">
         {!fixedType && (
           <Select
@@ -90,8 +100,9 @@ export const StructureSearch = ({
       <StructuresList
         structures={structures}
         selectedStructureIds={selectedStructureIds}
-        setSelectedStructuresId={setSelectedStructuresId}
+        setSelectedStructureIds={setSelectedStructureIds}
         multiple={multiple}
+        shouldShowLabel={!label}
       />
     </div>
   );
@@ -99,9 +110,10 @@ export const StructureSearch = ({
 
 export type StructureSearchProps = {
   selectedStructureIds: number[];
-  setSelectedStructuresId: (structuresId: number[]) => void;
+  setSelectedStructureIds: (structuresId: number[]) => void;
   fixedType?: StructureType;
   multiple?: boolean;
+  label?: string;
   operateurName?: string;
   setOperateurName?: (operateurName: string | undefined) => void;
   departementNumero?: string;

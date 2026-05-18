@@ -4,32 +4,35 @@ import { StructureMinimalApiType } from "@/schemas/api/structure.schema";
 export const StructuresList = ({
   structures,
   selectedStructureIds,
-  setSelectedStructuresId,
+  setSelectedStructureIds,
   multiple = false,
+  shouldShowLabel = true,
 }: Props) => {
   const toggleStructure = (structureId: number) => {
     if (multiple) {
       if (selectedStructureIds.includes(structureId)) {
-        setSelectedStructuresId(
+        setSelectedStructureIds(
           selectedStructureIds.filter((id) => id !== structureId)
         );
       } else {
-        setSelectedStructuresId([...selectedStructureIds, structureId]);
+        setSelectedStructureIds([...selectedStructureIds, structureId]);
       }
       return;
     }
 
     if (selectedStructureIds.includes(structureId)) {
-      setSelectedStructuresId([]);
+      setSelectedStructureIds([]);
     } else {
-      setSelectedStructuresId([structureId]);
+      setSelectedStructureIds([structureId]);
     }
   };
+
+  const label = shouldShowLabel ? "Sélectionnez votre structure" : "";
 
   return (
     <div>
       <h3 className="text-base font-bold mb-4 text-title-blue-france">
-        {!structures ? "" : "Sélectionnez votre structure"}
+        {!structures ? "" : label}
       </h3>
       <div className="flex flex-col gap-2 h-80 overflow-y-auto">
         {structures && structures?.length === 0 && (
@@ -87,6 +90,7 @@ export const StructuresList = ({
 type Props = {
   structures: StructureMinimalApiType[] | undefined;
   selectedStructureIds: number[];
-  setSelectedStructuresId: (structuresId: number[]) => void;
+  setSelectedStructureIds: (structuresId: number[]) => void;
   multiple?: boolean;
+  shouldShowLabel?: boolean;
 };

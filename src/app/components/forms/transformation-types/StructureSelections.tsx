@@ -26,6 +26,8 @@ export const StructureSelections = ({
     onChange(structureTransformations);
   }, [structureTransformations, onChange]);
 
+  console.log(selectedStructureIdsByBlock);
+
   return (
     <div className="flex flex-col gap-4">
       {blocks.map((block) => {
@@ -44,6 +46,7 @@ export const StructureSelections = ({
             key={block.id}
             multiple={block.multiple}
             fixedType={block.fixedType}
+            label={block.label}
             fixedOperateurName={inheritedOperateur}
             fixedDepartementNumero={inheritedDepartement}
             operateurName={filtersByBlock[block.id]?.operateurName}
@@ -51,7 +54,7 @@ export const StructureSelections = ({
             departementNumero={filtersByBlock[block.id]?.departementNumero}
             setDepartementNumero={(v) => setDepartementNumero(block.id, v)}
             selectedStructureIds={selectedStructureIdsByBlock[block.id] ?? []}
-            setSelectedStructuresId={(ids) =>
+            setSelectedStructureIds={(ids) =>
               setSelectedStructureIds(block.id, ids)
             }
           />

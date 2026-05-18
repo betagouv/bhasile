@@ -67,11 +67,11 @@ export async function seed(): Promise<void> {
   let bhasileCodesMap: Map<string, string[]> | undefined;
   if (GENERATE_BHASILE_CODES) {
     console.log("🔢 Génération des codes Bhasile par région...");
-    bhasileCodesMap = generateAllBhasileCodes(500); // Not all codes will be used
+    bhasileCodesMap = generateAllBhasileCodes(5000); // Not all codes will be used
     console.log("✅ Codes Bhasile générés");
   }
 
-  const operateursToInsert = Array.from({ length: 20 }, (_, index) =>
+  const operateursToInsert = Array.from({ length: 5 }, (_, index) =>
     createFakeOperateur(index)
   );
 
@@ -139,8 +139,8 @@ export async function seed(): Promise<void> {
   };
 
   for (const operateurToInsert of operateursToInsert) {
-    const nonOfiiCount = faker.number.int({ min: 20, max: 30 });
-    const ofiiCount = faker.number.int({ min: 100, max: 200 });
+    const nonOfiiCount = faker.number.int({ min: 200, max: 300 });
+    const ofiiCount = faker.number.int({ min: 1000, max: 2000 });
 
     console.log(
       `🏠 Ajout de ${nonOfiiCount} structures et ${ofiiCount} structures OFII pour ${operateurToInsert.name}`

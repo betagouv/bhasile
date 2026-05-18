@@ -6,9 +6,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="w-full max-w-screen flex bg-white" id="content">
+    <main className="w-full max-w-screen flex " id="content">
       <TransformationMenu />
-      <div className="flex-1">{children}</div>
+      <div className="flex-1 bg-alt-grey">{children}</div>
     </main>
   );
 }
