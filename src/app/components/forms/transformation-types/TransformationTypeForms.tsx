@@ -14,6 +14,7 @@ export const TransformationTypeForms = ({
   structureId,
   initialTransformationType,
   initialStructureTransformations,
+  onSubmit,
 }: Props) => {
   const [transformationType, setTransformationType] = useState<
     TransformationType | undefined
@@ -37,8 +38,9 @@ export const TransformationTypeForms = ({
     useState<boolean>(false);
 
   const handleSubmit = () => {
-    console.log(transformationType);
-    console.log(structureTransformations);
+    if (transformationType) {
+      onSubmit(transformationType, structureTransformations);
+    }
   };
 
   return (
@@ -74,9 +76,14 @@ export const TransformationTypeForms = ({
           onChange={setSelectionsState}
         />
       ) : null}
-      {areSelectionsComplete && (
-        <Button onClick={handleSubmit}>Je valider</Button>
-      )}
+      <div className="flex justify-center">
+        <Button
+          disabled={!areSelectionsComplete || !transformationType}
+          onClick={handleSubmit}
+        >
+          Je valider
+        </Button>
+      </div>
     </div>
   );
 };
@@ -86,4 +93,8 @@ type Props = {
   structureId?: number;
   initialTransformationType?: TransformationType;
   initialStructureTransformations?: StructureTransformationApiType[];
+  onSubmit: (
+    transformationType: TransformationType,
+    structureTransformations: StructureTransformationApiType[]
+  ) => void;
 };

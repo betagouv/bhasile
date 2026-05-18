@@ -69,7 +69,6 @@ export const transformationApiCreateSchema = z.object({
   structureTransformations: z
     .array(
       structureTransformationApiSchema.extend({
-        structureId: z.number(),
         structureTransformationType: z.nativeEnum(StructureTransformationType),
       })
     )
