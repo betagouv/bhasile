@@ -1,20 +1,12 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-
 import { TransformationTypeForms } from "@/app/components/forms/transformation-types/TransformationTypeForms";
-import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 import { TransformationType } from "@/types/transformation.type";
 
+import { useTransformationContext } from "../_context/TransformationClientContext";
+
 export default function TransformationSelectionsPage() {
-  const { idTransformation } = useParams();
-
-  const { transformation } = useFetchTransformation(Number(idTransformation));
-
-  if (!transformation) {
-    return null;
-  }
+  const { transformation } = useTransformationContext();
 
   const formType = getFormByType(transformation.type);
 
@@ -49,42 +41,4 @@ const getFormByType = (
     default:
       return undefined;
   }
-};
-
-// Temp hooks, waiting for PR 1232
-const useFetchTransformation = (id?: number) => {
-  const [transformation, setTransformation] = useState<
-    TransformationApiRead | undefined
-  >(undefined);
-
-  const getTransformation = async (
-    id: number
-  ): Promise<TransformationApiRead | undefined> => {
-    try {
-      return {
-        id,
-        type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
-        structureTransformations: [],
-      };
-    } catch (error) {
-      console.error("Error fetching transformation:", error);
-      return undefined;
-    }
-  };
-
-  useEffect(() => {
-    const fetchTransformation = async (id: number) => {
-      setTransformation(undefined);
-      const transformation = await getTransformation(id);
-      setTransformation(transformation);
-    };
-
-    if (id) {
-      fetchTransformation(id);
-    }
-  }, [id]);
-
-  return {
-    transformation,
-  };
 };

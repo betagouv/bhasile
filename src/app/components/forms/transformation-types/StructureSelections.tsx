@@ -63,13 +63,11 @@ export const StructureSelections = ({
   );
 };
 
-export type StructureSelectionsState = {
-  structureTransformations: StructureTransformationApiType[];
-  areSelectionsComplete: boolean;
-};
-
 type Props = {
   transformationType: TransformationType;
   structureId?: number;
-  onChange: (state: StructureSelectionsState) => void;
+  onChange: (state: {
+    structureTransformations: StructureTransformationApiType[];
+    areSelectionsComplete: boolean;
+  }) => void;
 };

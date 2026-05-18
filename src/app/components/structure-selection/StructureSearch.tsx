@@ -1,9 +1,10 @@
 import Select from "@codegouvfr/react-dsfr/Select";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 
 import { DepartementAutocomplete } from "@/app/components/forms/autocomplete/DepartementAutocomplete";
 import { OperateurAutocomplete } from "@/app/components/forms/autocomplete/OperateurAutocomplete";
 import { useStructuresSelection } from "@/app/hooks/useStructuresSelection";
+import { StructureMinimalApiType } from "@/schemas/api/structure.schema";
 import { StructureType } from "@/types/structure.type";
 
 import { StructuresList } from "./StructuresList";
@@ -47,8 +48,14 @@ export const StructureSearch = ({
     types: type !== undefined ? String(type) : undefined,
   });
 
+  const prevStructures = useRef<StructureMinimalApiType[] | undefined>(
+    undefined
+  );
   useEffect(() => {
-    setSelectedStructureIds([]);
+    if (prevStructures.current !== structures) {
+      prevStructures.current = structures;
+      setSelectedStructureIds([]);
+    }
   }, [structures, setSelectedStructureIds]);
 
   return (

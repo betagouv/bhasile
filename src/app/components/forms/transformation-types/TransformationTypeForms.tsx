@@ -1,3 +1,4 @@
+import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useState } from "react";
 
 import { StructureTransformationApiType } from "@/schemas/api/transformation.schema";
@@ -6,10 +7,7 @@ import { TransformationType } from "@/types/transformation.type";
 import { CreationTransformationForm } from "./CreationTransformationForm";
 import { FromStructureTransformationForm } from "./FromStructureTransformationForm";
 import { HudaTransformationForm } from "./HudaTransformationForm";
-import {
-  StructureSelections,
-  StructureSelectionsState,
-} from "./StructureSelections";
+import { StructureSelections } from "./StructureSelections";
 
 export const TransformationTypeForms = ({
   formType,
@@ -21,13 +19,28 @@ export const TransformationTypeForms = ({
     TransformationType | undefined
   >(initialTransformationType);
 
-  const [selectionsState, setSelectionsState] =
-    useState<StructureSelectionsState>({
-      structureTransformations: initialStructureTransformations ?? [],
-      areSelectionsComplete: false,
-    });
+  const setSelectionsState = ({
+    structureTransformations,
+    areSelectionsComplete,
+  }: {
+    structureTransformations: StructureTransformationApiType[];
+    areSelectionsComplete: boolean;
+  }) => {
+    setStructureTransformations(structureTransformations);
+    setAreSelectionsComplete(areSelectionsComplete);
+  };
 
-  console.log(selectionsState);
+  const [structureTransformations, setStructureTransformations] = useState<
+    StructureTransformationApiType[]
+  >(initialStructureTransformations ?? []);
+  const [areSelectionsComplete, setAreSelectionsComplete] =
+    useState<boolean>(false);
+
+  const handleSubmit = () => {
+    console.log(transformationType);
+    console.log(structureTransformations);
+  };
+
   return (
     <div className="flex flex-col gap-8 max-w-4xl mx-auto mt-20">
       <h1 className="mb-0 text-xl font-bold text-title-blue-france text-center">
@@ -61,7 +74,9 @@ export const TransformationTypeForms = ({
           onChange={setSelectionsState}
         />
       ) : null}
-      {}
+      {areSelectionsComplete && (
+        <Button onClick={handleSubmit}>Je valider</Button>
+      )}
     </div>
   );
 };
