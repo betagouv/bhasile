@@ -1,7 +1,7 @@
 import { useFetchStructure } from "@/app/hooks/useFetchStructure";
 
-export const FromStructureCard = ({ structureId }: Props) => {
-  const { structure } = useFetchStructure(structureId);
+export const FromStructureCard = ({ transformationStructureId }: Props) => {
+  const { structure } = useFetchStructure(transformationStructureId);
 
   if (!structure) {
     return null;
@@ -24,5 +24,5 @@ export const FromStructureCard = ({ structureId }: Props) => {
 };
 
 type Props = {
-  structureId: number;
+  transformationStructureId: number;
 };
