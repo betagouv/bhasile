@@ -9,7 +9,7 @@ import { BackButton } from "./_components/BackButton";
 import { ValidationButton } from "./_components/ValidationButton";
 
 export default function AjoutStructurePage(): ReactElement {
-  const [selectedStructureIds, setSelectedStructuresId] = useState<number[]>(
+  const [selectedStructureIds, setSelectedStructureIds] = useState<number[]>(
     []
   );
 
@@ -23,7 +23,7 @@ export default function AjoutStructurePage(): ReactElement {
         </h2>
         <StructureSearch
           selectedStructureIds={selectedStructureIds}
-          setSelectedStructuresId={setSelectedStructuresId}
+          setSelectedStructureIds={setSelectedStructureIds}
         />
         <p className="text-mention-grey text-sm text-center mb-10">
           Si vous ne trouvez pas votre structure,{" "}
