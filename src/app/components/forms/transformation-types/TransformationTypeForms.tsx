@@ -1,9 +1,12 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useState } from "react";
 
+import { useFetchState } from "@/app/context/FetchStateContext";
 import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import { FetchState } from "@/types/fetch-state.type";
 import { TransformationType } from "@/types/transformation.type";
 
+import { SubmitError } from "../../SubmitError";
 import { CreationTransformationForm } from "./CreationTransformationForm";
 import { FromStructureTransformationForm } from "./FromStructureTransformationForm";
 import { HudaTransformationForm } from "./HudaTransformationForm";
@@ -31,6 +34,9 @@ export const TransformationTypeForms = ({
     setAreSelectionsComplete(areSelectionsComplete);
   };
 
+  const { getFetchState } = useFetchState();
+  const saveState = getFetchState("transformation-save");
+
   const [structureTransformations, setStructureTransformations] = useState<
     StructureTransformationApiCreate[]
   >(initialStructureTransformations ?? []);
@@ -44,7 +50,7 @@ export const TransformationTypeForms = ({
   };
 
   return (
-    <div className="flex flex-col gap-8 max-w-4xl mx-auto mt-20">
+    <div className="flex flex-col gap-8 max-w-4xl mx-auto mt-20 mb-10">
       <h1 className="mb-0 text-xl font-bold text-title-blue-france text-center">
         Quel est le cas de figure ?
       </h1>
@@ -78,12 +84,17 @@ export const TransformationTypeForms = ({
       ) : null}
       <div className="flex justify-center">
         <Button
-          disabled={!areSelectionsComplete || !transformationType}
+          disabled={
+            !areSelectionsComplete ||
+            !transformationType ||
+            saveState === FetchState.LOADING
+          }
           onClick={handleSubmit}
         >
           Je valide
         </Button>
       </div>
+      {saveState === FetchState.ERROR && <SubmitError />}
     </div>
   );
 };
