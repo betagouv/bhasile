@@ -30,9 +30,7 @@ export default function TransformationSelectionPage() {
         type: transformationType,
         structureTransformations,
       });
-      if (transformationId) {
-        router.push(`/structures/transformation/${transformationId}`);
-      }
+      router.push(`/structures/transformation/${transformationId}`);
     } catch (error) {
       console.error(error);
       setFetchState("transformation-save", FetchState.ERROR);
