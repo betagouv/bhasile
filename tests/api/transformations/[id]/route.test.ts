@@ -59,7 +59,7 @@ describe("PUT /api/transformations/[id]", () => {
   });
 
   it("should return 201 when body is valid", async () => {
-    mockUpdateOne.mockResolvedValueOnce(undefined);
+    mockUpdateOne.mockResolvedValueOnce(7);
     const body = {
       id: 7,
       type: TransformationType.FERMETURE_SANS_TRANSFERT,
@@ -73,9 +73,7 @@ describe("PUT /api/transformations/[id]", () => {
     const response = await PUT(request as NextRequest);
 
     expect(response.status).toBe(201);
-    expect(await response.json()).toBe(
-      "Transformation mise à jour avec succès"
-    );
+    expect(await response.json()).toEqual({ transformationId: 7 });
     expect(mockUpdateOne).toHaveBeenCalledWith(body);
   });
 
