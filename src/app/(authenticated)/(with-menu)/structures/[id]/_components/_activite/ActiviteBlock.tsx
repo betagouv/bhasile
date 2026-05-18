@@ -48,16 +48,17 @@ export const ActiviteBlock = (): ReactElement => {
       </div>
       {showOfiiData && (
         <>
-          <div className="pt-10 pb-6">
+          <h4 className="text-lg text-title-blue-france">Indisponibilités</h4>
+          <div className="flex pt-10 pb-10">
             <ActivitePlaces />
+            <div className="pl-20 w-100">
+              <ActiviteMotifsIndisponibilite />
+            </div>
           </div>
-          <div className="pb-12">
-            <ActiviteMotifsIndisponibilite />
-          </div>
+          <hr className="pb-10!" />
           <ActiviteHistorique />
           <div className="italic pt-4 text-sm">
-            La méthode de calcul ayant changé au 01/01/2025, l’outil donne accès
-            aux données seulement à partir de cette date.
+            L’outil donne accès à ces données seulement à partir du 01/01/2025.
           </div>
         </>
       )}
