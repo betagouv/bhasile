@@ -91,8 +91,8 @@ export const createOne = async (
 
 export const updateOne = async (
   input: TransformationApiUpdate
-): Promise<void> => {
-  await prisma.$transaction(async (tx) => {
+): Promise<number> => {
+  return await prisma.$transaction(async (tx) => {
     if (input.type !== undefined) {
       await tx.transformation.update({
         where: { id: input.id },
