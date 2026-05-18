@@ -1,7 +1,7 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useState } from "react";
 
-import { StructureTransformationApiType } from "@/schemas/api/transformation.schema";
+import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { TransformationType } from "@/types/transformation.type";
 
 import { CreationTransformationForm } from "./CreationTransformationForm";
@@ -24,7 +24,7 @@ export const TransformationTypeForms = ({
     structureTransformations,
     areSelectionsComplete,
   }: {
-    structureTransformations: StructureTransformationApiType[];
+    structureTransformations: StructureTransformationApiCreate[];
     areSelectionsComplete: boolean;
   }) => {
     setStructureTransformations(structureTransformations);
@@ -32,7 +32,7 @@ export const TransformationTypeForms = ({
   };
 
   const [structureTransformations, setStructureTransformations] = useState<
-    StructureTransformationApiType[]
+    StructureTransformationApiCreate[]
   >(initialStructureTransformations ?? []);
   const [areSelectionsComplete, setAreSelectionsComplete] =
     useState<boolean>(false);
@@ -81,7 +81,7 @@ export const TransformationTypeForms = ({
           disabled={!areSelectionsComplete || !transformationType}
           onClick={handleSubmit}
         >
-          Je valider
+          Je valide
         </Button>
       </div>
     </div>
@@ -92,9 +92,9 @@ type Props = {
   formType: "creation" | "huda" | undefined;
   structureId?: number;
   initialTransformationType?: TransformationType;
-  initialStructureTransformations?: StructureTransformationApiType[];
+  initialStructureTransformations?: StructureTransformationApiCreate[];
   onSubmit: (
     transformationType: TransformationType,
-    structureTransformations: StructureTransformationApiType[]
+    structureTransformations: StructureTransformationApiCreate[]
   ) => void;
 };

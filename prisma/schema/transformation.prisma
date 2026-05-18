@@ -59,8 +59,8 @@ enum TransformationType {
 
 model StructureTransformation {
   id                           Int                         @id @default(autoincrement())
-  structureId                  Int
-  structure                    Structure                   @relation(fields: [structureId], references: [id])
+  structureId                  Int?
+  structure                    Structure?                  @relation(fields: [structureId], references: [id])
   transformationId             Int
   transformation               Transformation              @relation(fields: [transformationId], references: [id])
   structureTransformationDate  DateTime?

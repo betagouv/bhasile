@@ -1,5 +1,6 @@
 import {
-  StructureTransformationApiType,
+  StructureTransformationApiCreate,
+  StructureTransformationApiUpdate,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { StructureType } from "@/types/structure.type";
@@ -20,7 +21,7 @@ export const getTransformationSteps = (
       ?.map((structureTransformation) => {
         return {
           id: structureTransformation.id,
-          codeBhasile: String(structureTransformation.structureId), // TODO: change TransformationApiRead to include codeBhasile
+          codeBhasile: structureTransformation.structure?.codeBhasile,
           structureTransformationType:
             structureTransformation.structureTransformationType,
           steps: getStepsByType(structureTransformation, transformation.id),
@@ -45,7 +46,7 @@ export const getTransformationSteps = (
 };
 
 const getStepsByType = (
-  structureTransformation: StructureTransformationApiType,
+  structureTransformation: StructureTransformationApiUpdate,
   transformationId: number
 ) => {
   if (!structureTransformation.structureTransformationType) {
@@ -144,7 +145,7 @@ export type TransformationTypeSpec = {
   blocks: StructureSelectionBlock[];
   buildAutoTransformations: (
     structureId?: number
-  ) => StructureTransformationApiType[];
+  ) => StructureTransformationApiCreate[];
 };
 
 export const TRANSFORMATION_TYPE_SPECS: Record<

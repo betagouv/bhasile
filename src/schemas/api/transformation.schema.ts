@@ -15,7 +15,7 @@ import { formApiSchema } from "./form.schema";
 import { structureMillesimeApiSchema } from "./structure-millesime.schema";
 import { structureTypologieApiSchema } from "./structure-typologie.schema";
 
-export const dnaStructureTransformationApiSchema = z.object({
+const dnaStructureTransformationApiSchema = z.object({
   id: z.number().optional(),
   dna: z.object({
     id: z.number().optional(),
@@ -24,7 +24,7 @@ export const dnaStructureTransformationApiSchema = z.object({
   }),
 });
 
-export const structureTransformationApiSchema = z.object({
+const structureTransformationApiUpdateSchema = z.object({
   id: z.number().optional(),
   structureId: z.number().optional(),
   structureTransformationType: z
@@ -55,29 +55,40 @@ export const structureTransformationApiSchema = z.object({
   structureTypologies: z.array(structureTypologieApiSchema).optional(),
 });
 
+export const structureTransformationApiCreateSchema =
+  structureTransformationApiUpdateSchema.extend({
+    structureTransformationType: z.nativeEnum(StructureTransformationType),
+  });
 export const transformationApiUpdateSchema = z.object({
   id: z.number(),
   type: z.nativeEnum(TransformationType).optional(),
   form: formApiSchema.optional(),
   structureTransformations: z
-    .array(structureTransformationApiSchema)
+    .array(structureTransformationApiUpdateSchema)
     .optional(),
 });
 
 export const transformationApiCreateSchema = z.object({
   type: z.nativeEnum(TransformationType),
   structureTransformations: z
-    .array(
-      structureTransformationApiSchema.extend({
-        structureTransformationType: z.nativeEnum(StructureTransformationType),
-      })
-    )
+    .array(structureTransformationApiCreateSchema)
     .min(1, "Au moins une structureTransformation est requise"),
 });
 
-export type StructureTransformationApiType = z.infer<
-  typeof structureTransformationApiSchema
+export type StructureTransformationApiUpdate = z.infer<
+  typeof structureTransformationApiUpdateSchema
 >;
+export type StructureTransformationApiCreate = z.infer<
+  typeof structureTransformationApiCreateSchema
+>;
+export type StructureTransformationApiRead =
+  StructureTransformationApiUpdate & {
+    structureTransformationType: StructureTransformationType;
+    structure?: {
+      codeBhasile: string;
+    };
+  };
+
 export type DnaStructureTransformationApiType = z.infer<
   typeof dnaStructureTransformationApiSchema
 >;
@@ -87,4 +98,10 @@ export type TransformationApiUpdate = z.infer<
 export type TransformationApiCreate = z.infer<
   typeof transformationApiCreateSchema
 >;
-export type TransformationApiRead = TransformationApiUpdate;
+export type TransformationApiRead = Omit<
+  TransformationApiUpdate,
+  "structureTransformations"
+> & {
+  id: number;
+  structureTransformations: StructureTransformationApiRead[];
+};

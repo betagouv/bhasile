@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import {
-  StructureTransformationApiType,
+  StructureTransformationApiUpdate,
   TransformationApiCreate,
   TransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
@@ -142,7 +142,7 @@ const initializeTransformationForm = async (
 };
 
 const getScalarData = (
-  structureTransformation: StructureTransformationApiType
+  structureTransformation: StructureTransformationApiUpdate
 ) => ({
   structureTransformationDate:
     structureTransformation.structureTransformationDate ?? undefined,
@@ -167,7 +167,7 @@ const getScalarData = (
 const createOrUpdateStructureTransformation = async (
   tx: PrismaTransaction,
   transformationId: number,
-  structureTransformation: StructureTransformationApiType
+  structureTransformation: StructureTransformationApiUpdate
 ): Promise<void> => {
   const scalarData = getScalarData(structureTransformation);
 

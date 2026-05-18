@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 import { StructureSearch } from "@/app/components/structure-selection/StructureSearch";
 import { useStructureSelections } from "@/app/hooks/useStructureSelections";
-import { StructureTransformationApiType } from "@/schemas/api/transformation.schema";
+import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { TransformationType } from "@/types/transformation.type";
 
 export const StructureSelections = ({
@@ -67,7 +67,7 @@ type Props = {
   transformationType: TransformationType;
   structureId?: number;
   onChange: (state: {
-    structureTransformations: StructureTransformationApiType[];
+    structureTransformations: StructureTransformationApiCreate[];
     areSelectionsComplete: boolean;
   }) => void;
 };

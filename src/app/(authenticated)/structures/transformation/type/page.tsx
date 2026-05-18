@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 
 import { TransformationTypeForms } from "@/app/components/forms/transformation-types/TransformationTypeForms";
 import { useTransformations } from "@/app/hooks/useTransformations";
-import { StructureTransformationApiType } from "@/schemas/api/transformation.schema";
+import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { TransformationType } from "@/types/transformation.type";
 
 export default function TransformationSelectionPage() {
@@ -16,7 +16,7 @@ export default function TransformationSelectionPage() {
 
   const handleSubmit = (
     transformationType: TransformationType,
-    structureTransformations: StructureTransformationApiType[]
+    structureTransformations: StructureTransformationApiCreate[]
   ) => {
     createTransformation({
       type: transformationType,

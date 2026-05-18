@@ -4,7 +4,7 @@ import {
   StructureSelectionBlock,
   TRANSFORMATION_TYPE_SPECS,
 } from "@/app/utils/transformation.util";
-import { StructureTransformationApiType } from "@/schemas/api/transformation.schema";
+import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { TransformationType } from "@/types/transformation.type";
 
 type BlockFilters = {
@@ -111,7 +111,7 @@ export const useStructureSelections = ({
       ? filtersByBlock[block.inheritDepartementFrom]?.departementNumero
       : undefined;
 
-  const structureTransformations = useMemo<StructureTransformationApiType[]>(
+  const structureTransformations = useMemo<StructureTransformationApiCreate[]>(
     () => [
       ...transformationSpec.buildAutoTransformations(structureId),
       ...transformationSpec.blocks.flatMap((block) =>
