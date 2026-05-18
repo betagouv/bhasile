@@ -149,6 +149,7 @@ const getScalarData = (
     structureTransformation.structureTransformationDate ?? undefined,
   structureTransformationMotif:
     structureTransformation.structureTransformationMotif ?? undefined,
+  type: structureTransformation.type ?? undefined,
   public: convertToPublicType(structureTransformation.public),
   adresseAdministrative:
     structureTransformation.adresseAdministrative ?? undefined,
@@ -187,12 +188,9 @@ const createOrUpdateStructureTransformation = async (
     });
     structureTransformationId = updated.id;
   } else {
-    if (
-      !structureTransformation.structureId ||
-      !structureTransformation.structureTransformationType
-    ) {
+    if (!structureTransformation.structureTransformationType) {
       throw new Error(
-        "structureId et type sont requis pour créer une structureTransformation"
+        "structureTransformationType est requis pour créer une structureTransformation"
       );
     }
     const created = await tx.structureTransformation.create({
