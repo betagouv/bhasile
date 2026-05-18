@@ -54,19 +54,23 @@ export const FinancesBlock = (): ReactElement => {
         <DotationChart />
       </div>
       <hr className="mb-10" />
-      <h4
-        className="text-title-blue-france text-lg"
-        id="gestionBudgetaireTitle"
-      >
-        Gestion budgétaire
-      </h4>
-      {wasInCpom && (
-        <StructureCpomSwitch
-          handleChange={() =>
-            setShouldShowCpom((prevSetShouldShowCpom) => !prevSetShouldShowCpom)
-          }
-        />
-      )}
+      <div className="flex">
+        <h4
+          className="text-title-blue-france text-lg pr-6"
+          id="gestionBudgetaireTitle"
+        >
+          Gestion budgétaire
+        </h4>
+        {wasInCpom && (
+          <StructureCpomSwitch
+            handleChange={() =>
+              setShouldShowCpom(
+                (prevSetShouldShowCpom) => !prevSetShouldShowCpom
+              )
+            }
+          />
+        )}
+      </div>
       <div className="pb-12">
         {shouldShowCpom ? <CpomStaticTable /> : <StructureStaticTable />}
       </div>
