@@ -115,6 +115,7 @@ export const updateOne = async (
         );
       }
     }
+    return input.id;
   });
 };
 
