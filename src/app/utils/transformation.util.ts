@@ -32,14 +32,17 @@ export const getTransformationFormNavigation = ({
       step.name.toLowerCase() === transformationStructureStep.toLowerCase()
   );
 
+  const firstStep = flatSteps[0];
+  const currentStep = flatSteps[currentIndex];
   const prevStep = currentIndex > 0 ? flatSteps[currentIndex - 1] : undefined;
   const nextStep =
     currentIndex >= 0 && currentIndex < flatSteps.length - 1
       ? flatSteps[currentIndex + 1]
       : undefined;
 
-  return { prevStep, nextStep };
+  return { firstStep, currentStep, prevStep, nextStep };
 };
+
 export const getTransformationSteps = (
   transformation?: TransformationApiRead
 ): Step[] => {

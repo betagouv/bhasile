@@ -58,16 +58,16 @@ export const useTransformationFormHandling = () => {
 
   const transformationSteps = getTransformationSteps(transformation);
 
-  const { nextStep, prevStep } = getTransformationFormNavigation({
-    transformationSteps,
-    transformationStructureType,
-    transformationStructureId,
-    transformationStructureStep,
-  });
+  const { firstStep, currentStep, nextStep, prevStep } =
+    getTransformationFormNavigation({
+      transformationSteps,
+      transformationStructureType,
+      transformationStructureId,
+      transformationStructureStep,
+    });
 
-  if (!transformationStructureType || !transformationStructureId) {
-    const firstRoute = transformationSteps[0].steps[0].route;
-    router.replace(firstRoute);
+  if (!currentStep) {
+    router.replace(firstStep.route);
   }
 
   return {
