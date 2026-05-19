@@ -22,8 +22,48 @@ export const createFakeFormFinalisation = (): Omit<FormDefinition, "id"> => {
     version: 1,
   };
 };
+export const createFakeFormStructureTransformationCreation = (): Omit<
+  FormDefinition,
+  "id"
+> => {
+  return {
+    name: "structure-transformation-creation",
+    slug: "structure-transformation-creation-v1",
+    version: 1,
+  };
+};
+export const createFakeFormStructureTransformationExtension = (): Omit<
+  FormDefinition,
+  "id"
+> => {
+  return {
+    name: "structure-transformation-extension",
+    slug: "structure-transformation-extension-v1",
+    version: 1,
+  };
+};
+export const createFakeFormStructureTransformationContraction = (): Omit<
+  FormDefinition,
+  "id"
+> => {
+  return {
+    name: "structure-transformation-contraction",
+    slug: "structure-transformation-contraction-v1",
+    version: 1,
+  };
+};
+export const createFakeFormStructureTransformationFermeture = (): Omit<
+  FormDefinition,
+  "id"
+> => {
+  return {
+    name: "structure-transformation-fermeture",
+    slug: "structure-transformation-fermeture-v1",
+    version: 1,
+  };
+};
 
-export const createFakeFormStepDefinition = (
+export const createFakeFinalisationFormStepDefinition = (
   formDefinitionId: number
 ): Omit<FormStepDefinition, "id">[] => {
   return [
@@ -56,6 +96,40 @@ export const createFakeFormStepDefinition = (
       formDefinitionId,
       label: "06-notes",
       slug: "06-notes",
+    },
+  ];
+};
+
+export const createFakeStructureTransformationCreationFormStepDefinition = (
+  formDefinitionId: number
+): Omit<FormStepDefinition, "id">[] => {
+  return [
+    {
+      formDefinitionId,
+      label: "01-identification",
+      slug: "01-identification",
+    },
+    {
+      formDefinitionId,
+      label: "02-places-hebergement",
+      slug: "02-places-hebergement",
+    },
+    {
+      formDefinitionId,
+      label: "03-actes-administratifs",
+      slug: "03-actes-administratifs",
+    },
+  ];
+};
+
+export const createFakeStructureTransformationFermetureFormStepDefinition = (
+  formDefinitionId: number
+): Omit<FormStepDefinition, "id">[] => {
+  return [
+    {
+      formDefinitionId,
+      label: "01-identification",
+      slug: "01-identification",
     },
   ];
 };

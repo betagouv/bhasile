@@ -13,9 +13,15 @@ import { createDnaList, createDnaStructures } from "./seeders/dna.seed";
 import { createEvenementsIndesirablesGraves } from "./seeders/evenement-indesirable-grave.seed";
 import { createFinessList } from "./seeders/finess.seed";
 import {
+  createFakeFinalisationFormStepDefinition,
   createFakeFormFinalisation,
-  createFakeFormStepDefinition,
+  createFakeFormStructureTransformationContraction,
+  createFakeFormStructureTransformationCreation,
+  createFakeFormStructureTransformationExtension,
+  createFakeFormStructureTransformationFermeture,
   createFakeFormTransformation,
+  createFakeStructureTransformationCreationFormStepDefinition,
+  createFakeStructureTransformationFermetureFormStepDefinition,
 } from "./seeders/form.seed";
 import { createNotesList } from "./seeders/note.seed";
 import {
@@ -46,21 +52,64 @@ export async function seed(): Promise<void> {
   await prisma.formDefinition.create({
     data: createFakeFormTransformation(),
   });
-  const formDefinition = await prisma.formDefinition.create({
+
+  const formStructureTransformationCreationDefinition =
+    await prisma.formDefinition.create({
+      data: createFakeFormStructureTransformationCreation(),
+    });
+  await prisma.formStepDefinition.createMany({
+    data: createFakeStructureTransformationCreationFormStepDefinition(
+      formStructureTransformationCreationDefinition.id
+    ),
+  });
+  const formStructureTransformationExtensionDefinition =
+    await prisma.formDefinition.create({
+      data: createFakeFormStructureTransformationExtension(),
+    });
+  await prisma.formStepDefinition.createMany({
+    data: createFakeStructureTransformationCreationFormStepDefinition(
+      formStructureTransformationExtensionDefinition.id
+    ),
+  });
+  const formStructureTransformationContractionDefinition =
+    await prisma.formDefinition.create({
+      data: createFakeFormStructureTransformationContraction(),
+    });
+  await prisma.formStepDefinition.createMany({
+    data: createFakeStructureTransformationCreationFormStepDefinition(
+      formStructureTransformationContractionDefinition.id
+    ),
+  });
+  const formStructureTransformationFermetureDefinition =
+    await prisma.formDefinition.create({
+      data: createFakeFormStructureTransformationFermeture(),
+    });
+  await prisma.formStepDefinition.createMany({
+    data: createFakeStructureTransformationFermetureFormStepDefinition(
+      formStructureTransformationFermetureDefinition.id
+    ),
+  });
+
+  const formFinalisationDefinition = await prisma.formDefinition.create({
     data: createFakeFormFinalisation(),
   });
 
-  const formStepDefinitions = await prisma.formStepDefinition.createMany({
-    data: createFakeFormStepDefinition(formDefinition.id),
-  });
+  const formFinalisationStepDefinitions =
+    await prisma.formStepDefinition.createMany({
+      data: createFakeFinalisationFormStepDefinition(
+        formFinalisationDefinition.id
+      ),
+    });
 
   const stepDefinitions = await prisma.formStepDefinition.findMany({
-    where: { formDefinitionId: formDefinition.id },
+    where: { formDefinitionId: formFinalisationDefinition.id },
     orderBy: { slug: "asc" },
     select: { id: true, slug: true },
   });
 
-  console.log(`✅ ${formStepDefinitions.count} FormStepDefinitions créées`);
+  console.log(
+    `✅ ${formFinalisationStepDefinitions.count} FormStepDefinitions créées pour le formulaire finalisation`
+  );
 
   await seedRegionsAndDepartements(prisma);
 
@@ -93,7 +142,7 @@ export async function seed(): Promise<void> {
 
         return createFakeStuctureWithRelations({
           codeBhasile,
-          formDefinitionId: formDefinition.id,
+          formDefinitionId: formFinalisationDefinition.id,
           stepDefinitions,
           departementAdministratif,
           ofii: false,
