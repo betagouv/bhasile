@@ -12,7 +12,7 @@ type BlockFilters = {
   departementNumero?: string;
 };
 
-type Args = {
+type Props = {
   transformationType: TransformationType;
   structureId?: number;
 };
@@ -20,7 +20,7 @@ type Args = {
 export const useStructureSelections = ({
   transformationType,
   structureId,
-}: Args) => {
+}: Props) => {
   const transformationSpec = TRANSFORMATION_TYPE_SPECS[transformationType];
 
   const [selectedStructureIdsByBlock, setSelectedStructureIdsByBlock] =
