@@ -9,7 +9,7 @@ Document de réflexion sur la modélisation de l'état d'une structure dans le t
     - [Principe](#principe)
     - [Avantages](#avantages)
     - [Inconvénients](#inconvénients)
-  - [Option B - Rolling timestamp + opérations futures](#option-b---rolling-timestamp--opérations-futures)
+  - [Option B - Rolling timestamp + opérations futures \[PRIVILÉGIÉE À CE STADE\]](#option-b---rolling-timestamp--opérations-futures-privilégiée-à-ce-stade)
     - [Principe](#principe-1)
     - [Avantages](#avantages-1)
     - [Inconvénients](#inconvénients-1)
@@ -93,7 +93,7 @@ Tant que `effectiveDate > now`, l'app n'applique pas cet état à l'affichage co
 
 ---
 
-## Option B - Rolling timestamp + opérations futures
+## Option B - Rolling timestamp + opérations futures [PRIVILÉGIÉE À CE STADE]
 
 ### Principe
 
@@ -183,12 +183,13 @@ Même règles d'affichage que les autres options : `effectiveDate ≤ aujourd'hu
 
 Les données **futures** restent dans **`Transformation`** + **`StructureTransformation`** (figées à la validation via `Form`). La structure courante **n’obtient pas** de millésime à la date de validation : elle continue d’afficher le dernier état passé jusqu’à la **`StructureTransformation.date`**.
 
-Un **cron** (ex. quotidien) sélectionne les transfo validées dont la date d’effet est atteinte et **matérialise** alors les changements sur la structure : création du `StructureMillesime`, copie des collections, mise à jour DNA, etc. — selon les règles retenues (souvent proche de l’option A au moment du passage).
+Un **cron** quotidien sélectionne les transfo validées dont la date d’effet est atteinte et **matérialise** alors les changements sur la structure : création du `StructureMillesime`, copie des collections, mise à jour DNA, etc. — selon les règles retenues (proches de l’option A).
 
 Entre validation et date d’effet : bandeau « changement prévu » ; pas de double vérité sur la fiche structure (seule la transfo porte l’état futur).
 
 ### Avantages
 
+- **Modification de tables** beaucoup plus light
 - **Pas de millésime futur** à gérer en lecture : la fiche structure reste simple tant que la date n’est pas passée.
 - **Aligné** avec l’idée déjà évoquée dans les commentaires du schéma transfo (application à échéance).
 - Moins de risque d’**écraser** la structure trop tôt si la date est dans trois mois.
@@ -196,12 +197,11 @@ Entre validation et date d’effet : bandeau « changement prévu » ; pas de do
 
 ### Inconvénients
 
-- **Dépendance opérationnelle** : si le cron ne tourne pas ou rate un jour, les structures sont en retard → alerte / monitoring obligatoires.
+- **Dépendance opérationnelle** : si le cron ne tourne pas ou rate un jour, les structures sont en retard -> alerte / monitoring obligatoires.
 - **Pas de rollback trivial** après application (écrasement ou nouveau millésime sans annulation automatique).
 - **Fenêtre de lecture** : entre 00h00 et l’exécution du cron le jour J, l’état affiché peut encore être l’ancien (décalage d’un jour selon l’heure de passage).
 - **Historique** : la transfo figée + le millésime créé le jour J ; bien documenter la traçabilité (`transformationId` sur le millésime).
 - Complexité **batch** (ordre des transfo, plusieurs structures, plusieurs transfo le même jour) à cadrer dans le job.
-- Ne remplace pas le besoin d’un modèle de millésime pour les **modifs hors transfo** (il faut quand même A, B ou D pour le quotidien).
 
 ---
 
@@ -260,8 +260,8 @@ Interrogations sur :
 
 - **`StructureTypologie`** - déjà listée plus haut, mais clé `year` = campagne / déclaration, pas date de transfo ; à rattacher au millésime pour l’état « places à partir du… »
 - **`AdresseTypologie`** - idem, par `year` sous chaque adresse du millésime actuellement. Si on duplique les `Adresse` doit-on aussi dupliquer toutes les `AdresseTypologie` associées ?
-- **`DocumentFinancier`** - par `year` + catégorie
-- **`ActeAdministratif`** - plutôt événementiel (`date`, `startDate`, `endDate`)
+- **`DocumentFinancier`** - par `year` + catégorie. Absents du formulaire -> Plutôt les lier à un millésime qu'à un timestamp
+- **`ActeAdministratif`** - plutôt événementiel (`date`, `startDate`, `endDate`) -> Liés soit à une structure, soit à une structure transformation.
 
 Deux échelles à ne pas mélanger : `effectiveDate` du millésime (« à partir de quand la fiche est ainsi ») vs `year` des données annualisées (« pour l’année N »). En transfo stricte, seuls typologies et DNA bougent souvent ; budget et indicateurs peuvent rester sur l’année en cours jusqu’à la campagne.
 
@@ -321,7 +321,9 @@ Tables moins en lien de toute façon avec Structure
 - [ ] `DnaStructure` : à intégrer pour remplacer `startDate` / `endDate` ?
 - [ ] `CpomStructure` : à intégrer pour remplacer `startDate` / `endDate` ?
 - [ ] Gestion des unique (Codes Finess par exemple)
-- [ ] Exemple de **AdresseTypologie** (sous-adresse, par année/date) : graphe profond.
+- [ ] Exemple de **AdresseTypologie** (sous-adresse, par année/date) : graphe profond. En a-t-on vraiment besoin d'ailleurs côté métier ? Si non ça peut simplifier et être traité comme une table "non annuelle"
+- [ ] Quid des actes administratifs ? Début convention / fin convention prend le dessus sur les champs scalaires (cf discussion en cours où ~ 50% des entrées ne matchent pas). QUe veut-on faire des actes administratifs liés à la transfo ? Où se retrouvent les "arrêtés actant la contraction" et "autres documents" ? D'ailleurs c'est différent, les actes admin ne remplacent pas les précédents mais s'additionnent. Faut il les lier à `StructureTransformation` ? Dans ce cas que fait-on de la convention, on affiche les deux ? Veut-on pouvoir les modifier a posteriori ? Quelle interface ?
+- [ ] Changement d'opérateur : veut-on en faire une transfo (même hors formulaire) ? Dans tous les cas on aura moyen de gérer une sorte d'historique maintenant, à voir si on veut le rendre visible.
 
 ---
 
