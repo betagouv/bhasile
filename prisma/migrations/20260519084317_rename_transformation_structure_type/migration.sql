@@ -13,6 +13,9 @@ ALTER TABLE "Antenne" DROP CONSTRAINT "Antenne_structureTransformationId_fkey";
 -- DropForeignKey
 ALTER TABLE "Contact" DROP CONSTRAINT "Contact_structureTransformationId_fkey";
 
+-- DropForeignKey
+ALTER TABLE "StructureTransformation" DROP CONSTRAINT "StructureTransformation_structureId_fkey";
+
 -- AlterTable
 ALTER TABLE "ActeAdministratif" ADD COLUMN     "structureTransformationId" INTEGER;
 
@@ -22,6 +25,7 @@ DROP COLUMN "motif",
 ADD COLUMN     "structureTransformationDate" TIMESTAMP(3),
 ADD COLUMN     "structureTransformationMotif" TEXT,
 ADD COLUMN     "structureTransformationType" "StructureTransformationType" NOT NULL,
+ALTER COLUMN "structureId" DROP NOT NULL,
 DROP COLUMN "type",
 ADD COLUMN     "type" "StructureType";
 
@@ -33,3 +37,6 @@ ALTER TABLE "Antenne" ADD CONSTRAINT "Antenne_structureTransformationId_fkey" FO
 
 -- AddForeignKey
 ALTER TABLE "ActeAdministratif" ADD CONSTRAINT "ActeAdministratif_structureTransformationId_fkey" FOREIGN KEY ("structureTransformationId") REFERENCES "StructureTransformation"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "StructureTransformation" ADD CONSTRAINT "StructureTransformation_structureId_fkey" FOREIGN KEY ("structureId") REFERENCES "Structure"("id") ON DELETE SET NULL ON UPDATE CASCADE;
