@@ -11,7 +11,10 @@ import { createOrUpdateAntennes } from "../antennes/antenne.repository";
 import { createOrUpdateContacts } from "../contacts/contact.repository";
 import { createOrUpdateDnaStructureTransformations } from "../dna-structure-transformations/dna-structure-transformation.repository";
 import { createOrUpdateFinesses } from "../finesses/finess.repository";
-import { createOrUpdateForms } from "../forms/form.repository";
+import {
+  createOrUpdateForms,
+  initializeStructureTransformationDefaultForms,
+} from "../forms/form.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
 import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import { convertToPublicType } from "../structures/structure.util";
@@ -168,22 +171,11 @@ const createOrUpdateStructureTransformation = async (
 ): Promise<void> => {
   const scalarData = getScalarData(structureTransformation);
 
+  const isCreation = !!structureTransformation.id;
+
   let structureTransformationId: number;
-  if (structureTransformation.id) {
-    const updated = await tx.structureTransformation.update({
-      where: {
-        id: structureTransformation.id,
-        transformationId,
-      },
-      data: {
-        ...scalarData,
-        ...(structureTransformation.type !== undefined && {
-          type: structureTransformation.type,
-        }),
-      },
-    });
-    structureTransformationId = updated.id;
-  } else {
+
+  if (isCreation) {
     if (!structureTransformation.structureId || !structureTransformation.type) {
       throw new Error(
         "structureId et type sont requis pour créer une structureTransformation"
@@ -198,10 +190,37 @@ const createOrUpdateStructureTransformation = async (
       },
     });
     structureTransformationId = created.id;
+  } else {
+    const updated = await tx.structureTransformation.update({
+      where: {
+        id: structureTransformation.id,
+        transformationId,
+      },
+      data: {
+        ...scalarData,
+        ...(structureTransformation.type !== undefined && {
+          type: structureTransformation.type,
+        }),
+      },
+    });
+    structureTransformationId = updated.id;
   }
 
   const entityId = { structureTransformationId };
 
+  if (isCreation && structureTransformation.type) {
+    await initializeStructureTransformationDefaultForms(
+      tx,
+      structureTransformationId,
+      structureTransformation.type
+    );
+  }
+
+  await createOrUpdateForms(
+    tx,
+    structureTransformation.structureTransformationForms,
+    entityId
+  );
   await createOrUpdateContacts(tx, structureTransformation.contacts, entityId);
   await createOrUpdateAdresses(tx, structureTransformation.adresses, entityId);
   await createOrUpdateAntennes(tx, structureTransformation.antennes, entityId);
