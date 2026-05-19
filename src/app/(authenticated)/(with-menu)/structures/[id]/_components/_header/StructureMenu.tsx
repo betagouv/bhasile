@@ -10,7 +10,7 @@ export const StructureMenu = ({ structureId }: Props) => {
       <Button
         priority="tertiary no outline"
         iconId="ri-more-2-fill"
-        title="Transformer HUDA en CADA"
+        title="Menu structure"
         onClick={() => {
           setIsPanelOpen(!isPanelOpen);
         }}
