@@ -19,9 +19,19 @@ export const TransformationTypeForms = ({
   initialStructureTransformations,
   onSubmit,
 }: Props) => {
+  const { getFetchState } = useFetchState();
+  const saveState = getFetchState("transformation-save");
+
   const [transformationType, setTransformationType] = useState<
     TransformationType | undefined
   >(initialTransformationType);
+
+  const [structureTransformations, setStructureTransformations] = useState<
+    StructureTransformationApiCreate[]
+  >(initialStructureTransformations ?? []);
+
+  const [areSelectionsComplete, setAreSelectionsComplete] =
+    useState<boolean>(false);
 
   const setSelectionsState = ({
     structureTransformations,
@@ -33,15 +43,6 @@ export const TransformationTypeForms = ({
     setStructureTransformations(structureTransformations);
     setAreSelectionsComplete(areSelectionsComplete);
   };
-
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("transformation-save");
-
-  const [structureTransformations, setStructureTransformations] = useState<
-    StructureTransformationApiCreate[]
-  >(initialStructureTransformations ?? []);
-  const [areSelectionsComplete, setAreSelectionsComplete] =
-    useState<boolean>(false);
 
   const handleSubmit = () => {
     if (transformationType) {
