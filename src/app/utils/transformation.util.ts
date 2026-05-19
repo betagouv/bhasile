@@ -4,6 +4,42 @@ import {
 } from "@/schemas/api/transformation.schema";
 import { StructureTransformationType } from "@/types/transformation.type";
 
+type GetTransformationFormNavigationProps = {
+  transformationSteps: Step[];
+  transformationStructureType: StructureTransformationType;
+  transformationStructureId: number;
+  transformationStructureStep: string;
+};
+
+export const getTransformationFormNavigation = ({
+  transformationSteps,
+  transformationStructureType,
+  transformationStructureId,
+  transformationStructureStep,
+}: GetTransformationFormNavigationProps) => {
+  const flatSteps = transformationSteps.flatMap((step) =>
+    step.steps.map((stepItem) => ({
+      id: step.id,
+      type: step.type,
+      ...stepItem,
+    }))
+  );
+
+  const currentIndex = flatSteps.findIndex(
+    (step) =>
+      step.type?.toLowerCase() === transformationStructureType.toLowerCase() &&
+      step.id === transformationStructureId &&
+      step.name.toLowerCase() === transformationStructureStep.toLowerCase()
+  );
+
+  const prevStep = currentIndex > 0 ? flatSteps[currentIndex - 1] : undefined;
+  const nextStep =
+    currentIndex >= 0 && currentIndex < flatSteps.length - 1
+      ? flatSteps[currentIndex + 1]
+      : undefined;
+
+  return { prevStep, nextStep };
+};
 export const getTransformationSteps = (
   transformation?: TransformationApiRead
 ): Step[] => {
@@ -49,6 +85,7 @@ const getStepsByType = (
     case StructureTransformationType.CREATION:
       return [
         {
+          name: "description",
           label: "Description",
           route: getRoute(
             "description",
@@ -58,6 +95,7 @@ const getStepsByType = (
           ),
         },
         {
+          name: "places-et-hebergement",
           label: "Places et hébergement",
           route: getRoute(
             "places-et-hebergement",
@@ -67,6 +105,7 @@ const getStepsByType = (
           ),
         },
         {
+          name: "actes-administratifs",
           label: "Actes administratifs",
           route: getRoute(
             "actes-administratifs",
@@ -79,6 +118,7 @@ const getStepsByType = (
     case StructureTransformationType.FERMETURE:
       return [
         {
+          name: "description",
           label: "Description",
           route: getRoute(
             "description",
@@ -116,6 +156,7 @@ export type Step = {
   codeBhasile?: string;
   type?: StructureTransformationType;
   steps: {
+    name: string;
     label: string;
     route: string;
   }[];
