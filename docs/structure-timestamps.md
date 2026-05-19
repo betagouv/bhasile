@@ -17,6 +17,14 @@ Document de réflexion sur la modélisation de l'état d'une structure dans le t
     - [Principe](#principe-2)
     - [Avantages](#avantages-2)
     - [Inconvénients](#inconvénients-2)
+  - [Option D - Millésime partiel à chaque update](#option-d---millésime-partiel-à-chaque-update)
+    - [Principe](#principe-3)
+    - [Avantages](#avantages-3)
+    - [Inconvénients](#inconvénients-3)
+  - [Option E - Application différée par cron](#option-e---application-différée-par-cron)
+    - [Principe](#principe-4)
+    - [Avantages](#avantages-4)
+    - [Inconvénients](#inconvénients-4)
   - [Tables concernées - checklist](#tables-concernées---checklist)
     - [Coquille `Structure`](#coquille-structure)
     - [Conteneur de version](#conteneur-de-version)
@@ -137,6 +145,63 @@ C'est un modèle de **versioning par entité**, pas par millésime global.
 - **Suppressions** difficiles (contact retiré à M2 : lien absent vs contact supprimé ?).
 - **Collections** (liste de 12 adresses dont 1 seule change) : beaucoup de tables de passage.
 - On mutliplie la cmplexité des requêtes prisma avec de nombreux structure.structureMillesime.structureMillesimeContact.contact : repositories et seeds **beaucoup** plus lourds à maintenir.
+
+---
+
+## Option D - Millésime partiel à chaque update
+
+### Principe
+
+À chaque modification (hors brouillon transfo), on crée un nouveau **`StructureMillesime`** à la date du changement, mais on ne persiste que **le périmètre envoyé par le client** dans le `PUT` / le formulaire — pas une copie systématique de toutes les tables liées.
+
+**Aujourd'hui** (payload « large ») : si l'utilisateur ne modifie que le Finess, le body contient quand même contacts, adresses, typologies, etc. Le back recrée un millésime avec tout ce bloc → on duplique les contacts même sans changement métier, mais on ne touche pas au budget ni aux autres tables annualisées absentes du payload.
+
+**À terme** (payload « delta ») : les formulaires ne renvoient que les entités modifiées ; le millésime ne contient que ces lignes + les champs scalaires mis à jour. Les tables non envoyées restent celles du **millésime précédent** à la lecture (fusion du dernier état connu par collection).
+
+Même règles d'affichage que les autres options : `effectiveDate ≤ aujourd'hui` pour l'état courant ; millésime futur (ex. transfo validée) → bandeau.
+
+### Avantages
+
+- **Compromis** entre l'option A (tout dupliquer) et B/C : historique par jalons sans copier 15 tables à chaque fois si le client n'envoie pas tout.
+- **Aligné avec l'existant** : les `PUT` structure envoient déjà un arbre partiel ; pas de refonte copy-on-write immédiate.
+- **Évolutif** : en resserrant les payloads, on réduit le volume sans changer le modèle de données.
+- Les tables **annualisées** (budget, indicateurs) peuvent rester hors millésime tant qu'elles ne sont pas dans le body.
+
+### Inconvénients
+
+- **Lecture plus complexe** qu'en option A : pour afficher la fiche, il faut **recomposer** l'état (dernier millésime passé + pour chaque collection, dernier millésime qui a porté une ligne sur cette table — ou héritage explicite du millésime N-1).
+- **Millésimes « incomplets »** en base : ambiguïté si on oublie d'envoyer une collection (bug ou régression → données qui semblent disparaître).
+- Tant que les formulaires envoient tout le bloc identification / contacts, on garde une partie du **sur-duplication** de l'option A.
+- **Validation transfo** : à définir (snapshot complet depuis `StructureTransformation` à la validation, ou même logique partielle).
+- Tests et seeds plus difficiles qu'avec « un millésime = photo complète ».
+
+---
+
+## Option E - Application différée par cron
+
+### Principe
+
+Les données **futures** restent dans **`Transformation`** + **`StructureTransformation`** (figées à la validation via `Form`). La structure courante **n’obtient pas** de millésime à la date de validation : elle continue d’afficher le dernier état passé jusqu’à la **`StructureTransformation.date`**.
+
+Un **cron** (ex. quotidien) sélectionne les transfo validées dont la date d’effet est atteinte et **matérialise** alors les changements sur la structure : création du `StructureMillesime`, copie des collections, mise à jour DNA, etc. — selon les règles retenues (souvent proche de l’option A au moment du passage).
+
+Entre validation et date d’effet : bandeau « changement prévu » ; pas de double vérité sur la fiche structure (seule la transfo porte l’état futur).
+
+### Avantages
+
+- **Pas de millésime futur** à gérer en lecture : la fiche structure reste simple tant que la date n’est pas passée.
+- **Aligné** avec l’idée déjà évoquée dans les commentaires du schéma transfo (application à échéance).
+- Moins de risque d’**écraser** la structure trop tôt si la date est dans trois mois.
+- Peut se **combiner** avec A ou D au moment du cron (le job fait le snapshot complet ou partiel une fois pour toutes).
+
+### Inconvénients
+
+- **Dépendance opérationnelle** : si le cron ne tourne pas ou rate un jour, les structures sont en retard → alerte / monitoring obligatoires.
+- **Pas de rollback trivial** après application (écrasement ou nouveau millésime sans annulation automatique).
+- **Fenêtre de lecture** : entre 00h00 et l’exécution du cron le jour J, l’état affiché peut encore être l’ancien (décalage d’un jour selon l’heure de passage).
+- **Historique** : la transfo figée + le millésime créé le jour J ; bien documenter la traçabilité (`transformationId` sur le millésime).
+- Complexité **batch** (ordre des transfo, plusieurs structures, plusieurs transfo le même jour) à cadrer dans le job.
+- Ne remplace pas le besoin d’un modèle de millésime pour les **modifs hors transfo** (il faut quand même A, B ou D pour le quotidien).
 
 ---
 
