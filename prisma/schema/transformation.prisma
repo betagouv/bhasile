@@ -67,7 +67,7 @@ model StructureTransformation {
   date             DateTime?
   type             StructureTransformationType
   motif            String? // Ne se retrouve que dans le cas d'une fermeture, voir en fonction des discussions avec Clara si c'est un enum, du champ libre, si ça doit être là ou dans Transformation...
-
+  structureTransformationForms  Form[]
   // Tous ces champs représentent les champs scalaires de la structure post transformation. 
   // À noter : une fois la transfo finalisée, ils viennent "écraser" en base les champs de la structure
   // Souci potentiel : si la date est dans 3 mois on ne veut pas encore qu'ils écrasent les champs de la structure 
