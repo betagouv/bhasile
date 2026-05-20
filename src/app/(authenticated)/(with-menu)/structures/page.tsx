@@ -2,6 +2,7 @@
 
 import { sendEvent } from "@socialgouv/matomo-next";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 
 import { SegmentedControl } from "@/app/components/common/SegmentedControl";
@@ -83,7 +84,7 @@ export default function Structures(): ReactElement {
 
   return (
     <div className="h-full w-full flex flex-col bg-alt-grey">
-      <div className="flex gap-2 px-6 border-b border-b-border-default-grey min-h-[4.35rem] justify-between items-center sticky top-0 bg-lifted-grey z-10">
+      <div className="flex justify-between items-center px-6 border-b border-b-border-default-grey min-h-[4.35rem] sticky top-0 bg-lifted-grey z-10">
         <SegmentedControl
           key={selectedVisualization}
           name="Visualisation"
@@ -99,6 +100,22 @@ export default function Structures(): ReactElement {
             Structures d’hébergement
           </h2>
         </SegmentedControl>
+        <div className="flex items-center gap-4">
+          <Link
+            className="fr-btn fr-btn--secondary"
+            href="/structures/transformation/type?type=huda"
+          >
+            <span className="fr-icon-arrow-left-right-line fr-icon--sm" />{" "}
+            Transformer HUDA en CADA
+          </Link>
+          <Link
+            className="fr-btn fr-btn--secondary"
+            href="/structures/transformation/type?type=creation"
+          >
+            <span className="fr-icon-add-line fr-icon--sm" /> Créer une
+            structure
+          </Link>
+        </div>
       </div>
 
       {selectedVisualization === "tableau" && (
