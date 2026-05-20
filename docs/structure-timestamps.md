@@ -10,7 +10,7 @@ Document de réflexion sur la modélisation de l'état d'une structure dans le t
       - [Principe](#principe)
       - [Avantages](#avantages)
       - [Inconvénients](#inconvénients)
-  - [Tables concernées - checklist](#tables-concernées---checklist)
+  - [Tables concernées](#tables-concernées)
     - [Coquille `Structure`](#coquille-structure)
     - [Conteneur de version](#conteneur-de-version)
     - [Tables métier à lier à `StructureVersion`](#tables-métier-à-lier-à-structureversion)
@@ -95,9 +95,16 @@ Les tables liées pointent soit vers le rolling, soit vers des versions sauvegar
 
 ---
 
-## Tables concernées - checklist
+## Tables concernées
 
-Voici la liste des tables concernées avec les questions restantes
+Je pense que l'on a confondu jusque là deux notions qu'il faut reséparer.
+
+- `StructureMillesime` est à conserver en tant que tel : il est associé à une année, est immuable. Il concerne les indicateurs de la structure sur une certaine année, indépendamment de ce qu'a vécu la structure (transfos ou pas). Il s'agit essentiellement à date des indicateurs financiers et du budget.
+- `StructureVersion` doit lui devenir une table liée à `Structure` qui reprend quasiment l'ensemble des champs scalaires et tables liées actuellement à `Structure`. C'est elle qui va porter l'historique et le futur + le "rolling timestamp".
+
+Le schéma serait le suivant (voir détails ci dessous)
+
+![Modélisation StructureVersion](structure_version.png)
 
 ### Coquille `Structure`
 
@@ -108,11 +115,6 @@ Voici la liste des tables concernées avec les questions restantes
   - `createdAt` / `updatedAt`
 
 ### Conteneur de version
-
-Je pense que l'on a confondu jusque là deux notions qu'il faut reséparer.
-
-- `StructureMillesime` est à conserver en tant que tel : il est associé à une année, est immuable. Il concerne les indicateurs de la structure sur une certaine année, indépendamment de ce qu'a vécu la structure (transfos ou pas). Il s'agit essentiellement à date des indicateurs financiers et du budget.
-- `StructureVersion` doit lui devenir une table liée à `Structure` qui reprend quasiment l'ensemble des champs scalaires et tables liées actuellement à `Structure`. C'est elle qui va porter l'historique et le futur + le "rolling timestamp".
 
 - **`StructureVersion`** - entité centrale
   - `effectiveDate`,
@@ -136,7 +138,7 @@ Je pense que l'on a confondu jusque là deux notions qu'il faut reséparer.
 - **`Adresse`**
 - **`AdresseTypologie`** - enfant de `Adresse` (places, QPV, logement social ; aujourd’hui par `year`) -> Réfléchir à comment gérer cela ? A-t-on besoin d'historiser ou est-ce que les champs de AdresseTypologie ne deviennent pas des scalaires de Adresse, actualisés soit par les transfos soit par les campagnes d'actualisation ?
 - **`Antenne`**
-- **`Finess`** - gérer les `unique` sur le code Finess
+- **`Finess`** - gérer les `unique` sur le code Finess (dans ce cas via une table de passage)
 - **`DnaStructure`** - cf paragraphe spécifique en dessous.
 
 ### Tables métier à lier à `StructureMillesime`
