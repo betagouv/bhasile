@@ -1,15 +1,33 @@
-# Versionnage des champs d'une structure (StructureMillesime / StructureTimestamp)
+# Versionnage des champs d'une structure (StructureMillesime / StructureVersion)
 
 Document de réflexion sur la modélisation de l'état d'une structure dans le temps, en lien avec les **transformations** et les actualisations à venir.
 
-- [Versionnage des champs d'une structure (StructureMillesime / StructureTimestamp)](#versionnage-des-champs-dune-structure-structuremillesime--structuretimestamp)
+- [Versionnage des champs d'une structure (StructureMillesime / StructureVersion)](#versionnage-des-champs-dune-structure-structuremillesime--structureversion)
   - [Contexte](#contexte)
   - [Règles métier retenues](#règles-métier-retenues)
+  - [Option retenue](#option-retenue)
+    - [Option B - Rolling timestamp + versions sauvegardées \[PRIVILÉGIÉE À CE STADE\]](#option-b---rolling-timestamp--versions-sauvegardées-privilégiée-à-ce-stade)
+      - [Principe](#principe)
+      - [Avantages](#avantages)
+      - [Inconvénients](#inconvénients)
+  - [Tables concernées - checklist](#tables-concernées---checklist)
+    - [Coquille `Structure`](#coquille-structure)
+    - [Conteneur de version](#conteneur-de-version)
+    - [Tables métier à lier à `StructureVersion`](#tables-métier-à-lier-à-structureversion)
+    - [Tables métier à lier à `StructureMillesime`](#tables-métier-à-lier-à-structuremillesime)
+    - [Interrogations restantes](#interrogations-restantes)
+    - [StructureDna](#structuredna)
+    - [Reporting (vues SQL)](#reporting-vues-sql)
+    - [Non concerné par le chantier](#non-concerné-par-le-chantier)
+      - [DNA et données rattachées au code DNA (indirect)](#dna-et-données-rattachées-au-code-dna-indirect)
+      - [CPOM](#cpom)
+      - [Tables liées directement à la structure, plus "intéropérables"](#tables-liées-directement-à-la-structure-plus-intéropérables)
+      - [Tables moins en lien de toute façon avec Structure](#tables-moins-en-lien-de-toute-façon-avec-structure)
+      - [Fichiers](#fichiers)
+  - [Questions ouvertes](#questions-ouvertes)
+  - [Prochaines étapes](#prochaines-étapes)
+- [Options non retenues](#options-non-retenues)
   - [Option A - Millésime complet à chaque version](#option-a---millésime-complet-à-chaque-version)
-    - [Principe](#principe)
-    - [Avantages](#avantages)
-    - [Inconvénients](#inconvénients)
-  - [Option B - Rolling timestamp + opérations futures \[PRIVILÉGIÉE À CE STADE\]](#option-b---rolling-timestamp--opérations-futures-privilégiée-à-ce-stade)
     - [Principe](#principe-1)
     - [Avantages](#avantages-1)
     - [Inconvénients](#inconvénients-1)
@@ -25,21 +43,6 @@ Document de réflexion sur la modélisation de l'état d'une structure dans le t
     - [Principe](#principe-4)
     - [Avantages](#avantages-4)
     - [Inconvénients](#inconvénients-4)
-  - [Tables concernées - checklist](#tables-concernées---checklist)
-    - [Coquille `Structure`](#coquille-structure)
-    - [Conteneur de version](#conteneur-de-version)
-    - [Tables métier - liées à `Structure` aujourd’hui](#tables-métier---liées-à-structure-aujourdhui)
-    - [Tables métier - cas particuliers](#tables-métier---cas-particuliers)
-      - [Données déjà annualisées](#données-déjà-annualisées)
-      - [CPOM](#cpom)
-      - [StructureDna](#structuredna)
-    - [Reporting (vues SQL)](#reporting-vues-sql)
-    - [Non concerné par le chantier](#non-concerné-par-le-chantier)
-      - [DNA et données rattachées au code DNA (indirect)](#dna-et-données-rattachées-au-code-dna-indirect)
-    - [Tables non concernées a priori, plus "intéropérables"](#tables-non-concernées-a-priori-plus-intéropérables)
-    - [Fichiers](#fichiers)
-  - [Questions ouvertes](#questions-ouvertes)
-  - [Prochaines étapes](#prochaines-étapes)
 
 ## Contexte
 
@@ -51,7 +54,7 @@ Une structure peut en réalité évoluer pour plusieurs raisons :
 - **Modification courante** (fiche structure, campagne d'actualisation, correction opérateur…) ;
 - **Campagne d'actualisation** selon une logique à venir, à des moments spécifiques de l'année.
 
-Hitsoriquement, beaucoup de données sont rattachées directement à `Structure`, avec des millésimes partiels (`StructureMillesime`, `StructureTypologie` par **année**).
+Historiquement, beaucoup de données sont rattachées directement à `Structure`, avec des millésimes partiels (`StructureMillesime`, `StructureTypologie` par **année**).
 
 Objectif : **`Structure` = coquille stable** (id intéropérable et code Bhasile essentiellement) ; **état métier variable = version datée**.
 
@@ -64,6 +67,167 @@ Objectif : **`Structure` = coquille stable** (id intéropérable et code Bhasile
 - **Résolution** : Gérée en back
 
 ---
+
+## Option retenue
+
+Une option de modélisation a été retenue, les autres sont à retrouver en fin de document pour plus de clarté.
+
+### Option B - Rolling timestamp + versions sauvegardées [PRIVILÉGIÉE À CE STADE]
+
+#### Principe
+
+- **Un seul** état « courant » mutable (**rolling**), qui reflète la réalité aujourd'hui.
+- Chaque structure a un `StructureVersion` spécifique correspondant à ce rolling (flag ? absence de transformationId / actualisationId ?)
+- Les **opérations sauvegardées** (transfo validée à date ultérieure ou non, idem sur les actualisations) sont stockées à part ; tant qu'elles ne sont pas effectives, elles n'alimentent pas le rolling.
+- Quand la date passe : par défaut l'app affiche l'opération, si l'utilisateur modifie ça vient modifier le rolling détcté
+- Option de **conserver** certains jalons (transfo, campagne) comme millésimes nommés.
+
+Les tables liées pointent soit vers le rolling, soit vers des versions sauvegardées
+
+#### Avantages
+
+- **Léger** au quotidien : une correction ne duplique pas 15 tables.
+- On conserve un historique léger sur des points d'étape nommés, et on est capable de gérer un "état du quotidien"
+
+#### Inconvénients
+
+- **Historique un peu plus faible** si on écrase le rolling : impossible de répondre à « quelle était la fiche le 12 mars ? » sauf à revenir au dernier millésime explicite. Cependant cela ne semble pas être une demande métier
+
+---
+
+## Tables concernées - checklist
+
+Voici la liste des tables concernées avec les questions restantes
+
+### Coquille `Structure`
+
+- **`Structure`** - identité stable :
+  - `id`,
+  - `codeBhasile`,
+  - `filiale?` -> Modification à venir non liée à ce chantier
+  - `createdAt` / `updatedAt`
+
+### Conteneur de version
+
+Je pense que l'on a confondu jusque là deux notions qu'il faut reséparer.
+
+- `StructureMillesime` est à conserver en tant que tel : il est associé à une année, est immuable. Il concerne les indicateurs de la structure sur une certaine année, indépendamment de ce qu'a vécu la structure (transfos ou pas). Il s'agit essentiellement à date des indicateurs financiers et du budget.
+- `StructureVersion` doit lui devenir une table liée à `Structure` qui reprend quasiment l'ensemble des champs scalaires et tables liées actuellement à `Structure`. C'est elle qui va porter l'historique et le futur + le "rolling timestamp".
+
+- **`StructureVersion`** - entité centrale
+  - `effectiveDate`,
+  - `structureId`,
+  - `transformationId?`,
+  - `actualisationId?`,
+  - **Champs scalaires aujourd’hui sur `Structure`** - à migrer dans la version :
+    - `type`, `nom`, `public`
+    - `operateurId` (à vérifier, si l'on souhaite que la structure puisse changer d'opérateur)
+    - `adresseAdministrative`, `codePostalAdministratif`, `communeAdministrative`, `departementAdministratif`
+    - `latitude`, `longitude`
+    - `debutConvention`, `finConvention`, `creationDate`, `date303`, `debutPeriodeAutorisation`, `finPeriodeAutorisation` -> Dépréciation à venir via autre chantier pour passer par les dates des actes administratifs ? Migrés dans cette table en attendant
+    - `lgbt`, `fvvTeh` -> autre chantier possible (hors de celui-ci): aligner le type avec typologie
+    - `nomOfii`, `directionTerritoriale`, `notes`
+    - `isArchived`
+
+### Tables métier à lier à `StructureVersion`
+
+- **`StructureTypologie`** -> passer le year actuel à un timestamp (mais voir si au fond ça a du sens côté métier) : valider que l'évolution est maintenant liée à un timestamp, que ce soit via une transfo ou une campagne d'actualisation, et plus une année à proprement parler
+- **`Contact`**
+- **`Adresse`**
+- **`AdresseTypologie`** - enfant de `Adresse` (places, QPV, logement social ; aujourd’hui par `year`) -> Réfléchir à comment gérer cela ? A-t-on besoin d'historiser ou est-ce que les champs de AdresseTypologie ne deviennent pas des scalaires de Adresse, actualisés soit par les transfos soit par les campagnes d'actualisation ?
+- **`Antenne`**
+- **`Finess`** - gérer les `unique` sur le code Finess
+- **`DnaStructure`** - cf paragraphe spécifique en dessous.
+
+### Tables métier à lier à `StructureMillesime`
+
+À la différence des tables précédentes, ces tables sont liées à une "année" et ne sont pas impactée par un "changement de version de la structure".
+Actuellement la table ne contient que les champs `cpom` et `operateurComment` qui doivent faire l'objet d'un récolement propre avec les Cpoms dédiés (voir que faire des commentaires, si possible avec la nouvelle table `Notes`)
+
+- **`Budget`** - budgets structure (hors budget CPOM pur)
+- **`IndicateurFinancier`** - ETP, taux d’encadrement, coût journalier (par `year` + `type`)
+
+### Interrogations restantes
+
+- **`ActeAdministratif`** - plutôt événementiel (`date`, `startDate`, `endDate`) -> Liés soit à une structure, soit à une structure transformation.
+- **`DocumentFinancier`** - documents financiers structure
+
+### StructureDna
+
+Veut-on uniformiser le traitement avec le rattachement d'une structure à ses DNA ?
+Pour le coup il semble indispensable que les DNA associés à une structure soit gérés dans le cadre des transfos (c'est dans ce cas qu'on verra des changements).
+
+À noter : **`startDate` / `endDate`** sont donc dépréciés au profit de l’`effectiveDate` du millésime où le lien apparaît ou disparaît. Ceci étant dit on a 0 entrée avec un de ces champs rempli à date donc la migration devrait être facile.
+
+Je propose donc de gérer le lien d'une structure avec ses DNA en passant par la table de passage `StructureVersion`
+
+### Reporting (vues SQL)
+
+- **`ComparaisonPlaces`** (vue `reporting`)
+- **`StructuresAggregates`** (vue `reporting`)
+- **`StructuresFilling`** (vue `reporting`)
+
+-> À adapter pour joindre le **dernier millésime passé** plutôt que `Structure` directement.
+
+### Non concerné par le chantier
+
+#### DNA et données rattachées au code DNA (indirect)
+
+- **`Dna`** - référentiel hors périmètre (le lien change via `DnaStructure`, cf au dessus)
+- **`Activite`** - via `dnaCode`, pas `structureId`
+- **`EvenementIndesirableGrave`** - via `dnaCode`
+
+#### CPOM
+
+Veut-on uniformiser le traitement avec le rattachement d'une structure à ses CPOM ?
+
+- **`CpomStructure`** - appartenance structure x CPOM (`dateStart` / `dateEnd`)
+- **`CpomMillesime`** - millésime **CPOM** (pas structure) : hors périmètre
+
+-> Plutôt non, il s'agit d'un chantier bien à part. Le comportement des CPOM et leur rattachement à une structure reste donc inchangé.
+
+#### Tables liées directement à la structure, plus "intéropérables"
+
+- **`Controle`** (+ **`FileUpload`** liés)
+- **`Evaluation`** (+ **`FileUpload`** liés)
+- **`Note`** (`userNotes`)
+
+#### Tables moins en lien de toute façon avec Structure
+
+- **`Form`** / **`FormStep`** / **`FormDefinition`** / **`FormStepDefinition`**
+- **`Campaign`** - Inutilisée pour le moment de toute façon, usage à venir avec les actualisations ?
+- **`UserAction`** / **`User`** / **`Role`** - référentiels auth
+
+#### Fichiers
+
+- **`FileUpload`** - reste rattaché à l’entité parente (`ActeAdministratif`, `DocumentFinancier`, `Controle`, `Evaluation`) ; pas de FK directe structure (on remercie la refacto passée)
+
+---
+
+## Questions ouvertes
+
+- [ ] Valider qu'une structure ne peut pas avoir **plusieurs** millésimes le même jour (deux transfo) ? Gérer aussi le cas millésime manuel le jour d'une transfo
+- [ ] Gestion des unique (Codes Finess par exemple). Veut-on conserver un principe d'unicité du code Finess ? Si oui par cohérence profitons-en pour "clean" la string rentrée par l'utilisateur (que des chiffres sans espace)
+- [ ] Exemple de **AdresseTypologie** : en a-t-on vraiment besoin d'ailleurs côté métier ? Ou peut-on considérer que le seul moment où on gèrera ces adresses ce sera via les transfos (et éventuellement les campagnes d'actualisation) mais qu'on ne veut pas conserver d'historique annualisé par exemple ?
+- [ ] Actes administratifs ?
+  - [ ] Début convention / fin convention est censé à un moment prendre le dessus sur les champs scalaires (cf discussion en cours où ~ 50% des entrées ne matchent pas) : où en est-on
+  - [ ] Que veut-on faire des actes administratifs liés à la transfo ? Où se retrouvent les "arrêtés actant la contraction" et "autres documents" ? Dans ce cas que fait-on de la convention, on affiche les deux ? Veut-on pouvoir les modifier a posteriori ? Quelle interface ?
+- [ ] Changement d'opérateur : veut-on en faire une transfo (même hors formulaire) ? Dans tous les cas on aura moyen de gérer une sorte d'historique maintenant, à voir si on veut le rendre visible et en faire un type de transfo à part.
+
+---
+
+## Prochaines étapes
+
+- [ ] Création d'une branche avec premeir changement de schéma hors transfo et d'un script de migration idempotent et PR sur dev puis main
+- [ ] On joue le script idempotent une première fois, puis juste avant merge final
+- [ ] Rebase de migration (qui contient notamment la partie de schema transformation)
+- [ ] Fin de dev de la partie transfo sur migration, passage sur dev puis main
+- [ ] On rejoue le script idempotent
+- [ ] Cleaning des anciens liens entre `Structure` et ses différentes tables
+
+---
+
+# Options non retenues
 
 ## Option A - Millésime complet à chaque version
 
@@ -90,29 +254,6 @@ Tant que `effectiveDate > now`, l'app n'applique pas cet état à l'affichage co
 - **Volume** : beaucoup de lignes recopiées sans changement (2 contacts identiques dupliqués n fois).
 - Coût **écriture** à chaque petite modification (correction téléphone -> copie de tout).
 - Niveau "db" la compréhension métier est peu satisfaisante, aucun sens de dupliquer des contacts n fois. Par ailleurs des contraintes d'uniticté (sur un code Finess par exemple) sont à gérer
-
----
-
-## Option B - Rolling timestamp + opérations futures [PRIVILÉGIÉE À CE STADE]
-
-### Principe
-
-- **Un seul** état « courant » mutable (**rolling**), qui reflète la réalité aujourd'hui.
-- Chaque structure a un `StructureMillesime` spécifique correspondant à ce rolling (flag ? absence de transformationId / actualisationId ?)
-- Les **opérations futures** (transfo validée à date ultérieure) sont stockées à part ; tant qu'elles ne sont pas effectives, elles n'alimentent pas le rolling.
-- Quand la date passe : par défaut l'app affiche l'opération, si l'utilisateur modifie ça vient modifier le rolling détcté
-- Option de **conserver** certains jalons (transfo, campagne) comme millésimes nommés.
-
-Les tables liées pointent soit vers le rolling, soit vers des structures « pending » / `FutureStructureVersion`.
-
-### Avantages
-
-- **Léger** au quotidien : une correction ne duplique pas 15 tables.
-- On conserve un historique léger sur des points d'étape nommés, et on est capable de gérer un "état du quotidien"
-
-### Inconvénients
-
-- **Historique un peu plus faible** si on écrase le rolling : impossible de répondre à « quelle était la fiche le 12 mars ? » sauf à revenir au dernier millésime explicite. Cependant cela ne semble pas être une demande métier
 
 ---
 
@@ -202,136 +343,3 @@ Entre validation et date d’effet : bandeau « changement prévu » ; pas de do
 - **Fenêtre de lecture** : entre 00h00 et l’exécution du cron le jour J, l’état affiché peut encore être l’ancien (décalage d’un jour selon l’heure de passage).
 - **Historique** : la transfo figée + le millésime créé le jour J ; bien documenter la traçabilité (`transformationId` sur le millésime).
 - Complexité **batch** (ordre des transfo, plusieurs structures, plusieurs transfo le même jour) à cadrer dans le job.
-
----
-
-## Tables concernées - checklist
-
-Voici la liste des tables concernées avec les questions restantes
-
-### Coquille `Structure`
-
-- **`Structure`** - identité stable :
-  - `id`,
-  - `codeBhasile`,
-  - `filiale?` -> Modification à venir non liée à ce chantier
-  - `createdAt` / `updatedAt`
-
-### Conteneur de version
-
-- **`StructureMillesime`** / **`StructureTimestamp`** - entité centrale
-- `effectiveDate`,
-- `structureId`,
-- `transformationId?`,
-- `actualisationId?`,
-- **Champs scalaires aujourd’hui sur `Structure`** - à migrer dans le millésime :
-  - `type`, `nom`, `public`
-  - `operateurId` (à vérifier, si l'on souhaite que la structure puisse changer d'opérateur)
-  - `adresseAdministrative`, `codePostalAdministratif`, `communeAdministrative`, `departementAdministratif`
-  - `latitude`, `longitude`
-  - `debutConvention`, `finConvention`, `creationDate`, `date303`, `debutPeriodeAutorisation`, `finPeriodeAutorisation` -> Déjà dépréciés via autre chantier pour passer par les dates des actes administratifs ?
-  - `lgbt`, `fvvTeh` -> autre chantier possible : aligner le type avec typologie
-  - `nomOfii`, `directionTerritoriale`, `notes`
-  - `isArchived`
-
-### Tables métier - liées à `Structure` aujourd’hui
-
-- **`StructureMillesime`** -> compléter ave cles champs scalaires. Actuellement la table ne contient que les champs `cpom` et `operateurComment` qui doivent faire l'objet d'un récolement propre avec les Cpoms dédiés (voir que faire des commentaires, si possible avec la nouvelle table `Notes`)
-- **`StructureTypologie`** -> passer le year actuel à un timestamp (mais voir si au fond ça a du sens côté métier)
-- **`Contact`**
-- **`Adresse`**
-- **`AdresseTypologie`** - enfant de `Adresse` (places, QPV, logement social ; aujourd’hui par `year`) -> Réfléchir à comment gérer cela ?
-- **`Antenne`**
-- **`Finess`** - gérer les `unique` sur le code Finess
-- **`DnaStructure`** - lien DNA ↔ structure (`startDate` / `endDate`)
-- **`ActeAdministratif`** - actes rattachés structure (pas CPOM)
-- **`DocumentFinancier`** - documents financiers structure
-
-### Tables métier - cas particuliers
-
-#### Données déjà annualisées
-
-Veut-on les lier à un timestamp ou considère-t-on qu'en fait elles ont déjà leur échelle de temps et basta ? Y a-t-il un besoin dans le cadre strict des transformations par exemple ?
-
-- **`Budget`** - budgets structure (hors budget CPOM pur)
-- **`IndicateurFinancier`** - ETP, taux d’encadrement, coût journalier (par `year` + `type`)
-
-Interrogations sur :
-
-- **`StructureTypologie`** - déjà listée plus haut, mais clé `year` = campagne / déclaration, pas date de transfo ; à rattacher au millésime pour l’état « places à partir du… »
-- **`AdresseTypologie`** - idem, par `year` sous chaque adresse du millésime actuellement. Si on duplique les `Adresse` doit-on aussi dupliquer toutes les `AdresseTypologie` associées ?
-- **`DocumentFinancier`** - par `year` + catégorie. Absents du formulaire -> Plutôt les lier à un millésime qu'à un timestamp
-- **`ActeAdministratif`** - plutôt événementiel (`date`, `startDate`, `endDate`) -> Liés soit à une structure, soit à une structure transformation.
-
-Deux échelles à ne pas mélanger : `effectiveDate` du millésime (« à partir de quand la fiche est ainsi ») vs `year` des données annualisées (« pour l’année N »). En transfo stricte, seuls typologies et DNA bougent souvent ; budget et indicateurs peuvent rester sur l’année en cours jusqu’à la campagne.
-
-#### CPOM
-
-Veut-on uniformiser le traitement avec le rattachement d'une structure à ses CPOM ? Ça me semble être l’occasion de traiter le rattachement DNA x CPOM comme un fait versionné dans le millésime, plutôt qu'en utilisant les `startDate` / `endDate`.
-
-- **`CpomStructure`** - appartenance structure x CPOM (`dateStart` / `dateEnd`)
-- **`CpomMillesime`** - millésime **CPOM** (pas structure) : hors périmètre
-
-#### StructureDna
-
-Veut-on uniformiser le traitement avec le rattachement d'une structure à ses DNA ? Idem, ça me semble être l’occasion de traiter le rattachement DNA x structure comme un fait versionné dans le millésime, plutôt qu'en utilisant les `startDate` / `endDate`.
-
-- En **brouillon** : garder `DnaStructureTransformation` pour la saisie transfo.
-- À la **validation** : copier la liste des `DnaStructure` prévue dans le nouveau millésime de chaque structure concernée (comme les contacts).
-- **`startDate` / `endDate`** : on les déprécie au profit de l’`effectiveDate` du millésime où le lien apparaît ou disparaît.
-
-### Reporting (vues SQL)
-
-- **`ComparaisonPlaces`** (vue `reporting`)
-- **`StructuresAggregates`** (vue `reporting`)
-- **`StructuresFilling`** (vue `reporting`)
-
--> À adapter pour joindre le **dernier millésime passé** plutôt que `Structure` directement.
-
-### Non concerné par le chantier
-
-#### DNA et données rattachées au code DNA (indirect)
-
-- **`Dna`** - référentiel hors périmètre (le lien change via `DnaStructure`)
-- **`Activite`** - via `dnaCode`, pas `structureId`
-- **`EvenementIndesirableGrave`** - via `dnaCode`
-
-### Tables non concernées a priori, plus "intéropérables"
-
-- **`Controle`** (+ **`FileUpload`** liés)
-- **`Evaluation`** (+ **`FileUpload`** liés)
-- **`Note`** (`userNotes`)
-
-Tables moins en lien de toute façon avec Structure
-
-- **`Form`** / **`FormStep`** / **`FormDefinition`** / **`FormStepDefinition`**
-- **`Campaign`** - Inutilisée pour le moment de toute façon, usage à venir avec les actualisations ?
-- **`UserAction`** / **`User`** / **`Role`** - référentiels auth
-
-### Fichiers
-
-- **`FileUpload`** - reste rattaché à l’entité parente (`ActeAdministratif`, `DocumentFinancier`, `Controle`, `Evaluation`) ; pas de FK directe structure (on remercie la refacto passée)
-
----
-
-## Questions ouvertes
-
-- [ ] Renommer `StructureMillesime` -> `StructureTimestamp` et passer de `year` à `effectiveDate` partout ?
-- [ ] Valider qu'une structure ne peut pas avoir **plusieurs** millésimes le même jour (deux transfo) ? Gérer aussi le cas millésime manuel le jour d'une transfo
-- [ ] `DnaStructure` : à intégrer pour remplacer `startDate` / `endDate` ?
-- [ ] `CpomStructure` : à intégrer pour remplacer `startDate` / `endDate` ?
-- [ ] Gestion des unique (Codes Finess par exemple)
-- [ ] Exemple de **AdresseTypologie** (sous-adresse, par année/date) : graphe profond. En a-t-on vraiment besoin d'ailleurs côté métier ? Si non ça peut simplifier et être traité comme une table "non annuelle"
-- [ ] Quid des actes administratifs ? Début convention / fin convention prend le dessus sur les champs scalaires (cf discussion en cours où ~ 50% des entrées ne matchent pas). QUe veut-on faire des actes administratifs liés à la transfo ? Où se retrouvent les "arrêtés actant la contraction" et "autres documents" ? D'ailleurs c'est différent, les actes admin ne remplacent pas les précédents mais s'additionnent. Faut il les lier à `StructureTransformation` ? Dans ce cas que fait-on de la convention, on affiche les deux ? Veut-on pouvoir les modifier a posteriori ? Quelle interface ?
-- [ ] Changement d'opérateur : veut-on en faire une transfo (même hors formulaire) ? Dans tous les cas on aura moyen de gérer une sorte d'historique maintenant, à voir si on veut le rendre visible.
-
----
-
-## Prochaines étapes
-
-- [ ] Création d'une branche avec premeir changement de schéma hors transfo et d'un script de migration idempotent et PR sur dev puis main
-- [ ] On joue le script idempotent une première fois, puis juste avant merge final
-- [ ] Rebase de migration (qui contient notamment la partie de schema transformation)
-- [ ] Fin de dev de la partie transfo sur migration, passage sur dev puis main
-- [ ] On rejoue le script idempotent
-- [ ] Cleaning des anciens liens entre `Structure` et ses différentes tables
