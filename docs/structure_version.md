@@ -58,7 +58,7 @@ Historiquement, beaucoup de données sont rattachées directement à `Structure`
 
 Je pense que l'on a confondu jusque là deux notions qu'il faut reséparer.
 
-- `StructureMillesime` est à conserver en tant que tel : il est associé à une année, est immuable. Il concerne les indicateurs de la structure sur une certaine année, indépendamment de ce qu'a vécu la structure (transfos ou pas). Il s'agit essentiellement à date des indicateurs financiers et du budget.
+- `StructureMillesime` est associé à une année. Il concerne les indicateurs de la structure sur une certaine année, indépendamment de ce qu'a vécu la structure (transfos ou pas). Il va par ailleurs disparaître (cf remarque en dessous)
 - `StructureVersion` doit lui devenir une table liée à `Structure` qui reprend quasiment l'ensemble des champs scalaires et tables liées actuellement à `Structure`. C'est elle qui va porter l'historique et le futur + le "rolling timestamp".
 
 Objectif : **`Structure` = coquille stable** (id intéropérable et code Bhasile essentiellement) ; **état métier variable = version datée**.
@@ -130,10 +130,10 @@ Le schéma serait le suivant (voir détails ci dessous)
     - `operateurId` (à vérifier, si l'on souhaite que la structure puisse changer d'opérateur)
     - `adresseAdministrative`, `codePostalAdministratif`, `communeAdministrative`, `departementAdministratif`
     - `latitude`, `longitude`
-    - `debutConvention`, `finConvention`, `creationDate`, `date303`, `debutPeriodeAutorisation`, `finPeriodeAutorisation` -> Dépréciation à venir via autre chantier pour passer par les dates des actes administratifs ? Migrés dans cette table en attendant
+    - `creationDate`, `date303`
+    - `debutConvention`, `finConvention`,, `debutPeriodeAutorisation`, `finPeriodeAutorisation` -> Dépréciation à venir donc ils ne sont pas migrés
     - `lgbt`, `fvvTeh` -> autre chantier possible (hors de celui-ci): aligner le type avec typologie
     - `nomOfii`, `directionTerritoriale`, `notes`
-    - `isArchived`
 
 ### Tables métier à lier à `StructureVersion`
 
@@ -223,7 +223,7 @@ Veut-on uniformiser le traitement avec le rattachement d'une structure à ses CP
 
 ## Prochaines étapes
 
-- [ ] Création d'une branche avec premeir changement de schéma hors transfo et d'un script de migration idempotent et PR sur dev puis main
+- [ ] Création d'une branche avec premier changement de schéma hors transfo et d'un script de migration idempotent et PR sur dev puis main
 - [ ] On joue le script idempotent une première fois, puis juste avant merge final
 - [ ] Rebase de migration (qui contient notamment la partie de schema transformation)
 - [ ] Fin de dev de la partie transfo sur migration, passage sur dev puis main
