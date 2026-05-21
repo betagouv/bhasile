@@ -26,7 +26,7 @@ Document de réflexion sur la modélisation de l'état d'une structure dans le t
       - [Fichiers](#fichiers)
   - [Questions ouvertes](#questions-ouvertes)
   - [Prochaines étapes](#prochaines-étapes)
-- [Options non retenues](#options-non-retenues)
+- [\[Old\] Options non retenues](#old-options-non-retenues)
   - [Option A - Millésime complet à chaque version](#option-a---millésime-complet-à-chaque-version)
     - [Principe](#principe-1)
     - [Avantages](#avantages-1)
@@ -56,14 +56,21 @@ Une structure peut en réalité évoluer pour plusieurs raisons :
 
 Historiquement, beaucoup de données sont rattachées directement à `Structure`, avec des millésimes partiels (`StructureMillesime`, `StructureTypologie` par **année**).
 
+Je pense que l'on a confondu jusque là deux notions qu'il faut reséparer.
+
+- `StructureMillesime` est à conserver en tant que tel : il est associé à une année, est immuable. Il concerne les indicateurs de la structure sur une certaine année, indépendamment de ce qu'a vécu la structure (transfos ou pas). Il s'agit essentiellement à date des indicateurs financiers et du budget.
+- `StructureVersion` doit lui devenir une table liée à `Structure` qui reprend quasiment l'ensemble des champs scalaires et tables liées actuellement à `Structure`. C'est elle qui va porter l'historique et le futur + le "rolling timestamp".
+
 Objectif : **`Structure` = coquille stable** (id intéropérable et code Bhasile essentiellement) ; **état métier variable = version datée**.
+
+À noter : il a été envisagé de profiter de la refacto pour lier `Budget`, `IndicateursFinanciers` à `StructureMillesime` et standardiser le principe de table de passage. Néanmoins la table `Budget` peut aussi être liée à `Cpom` qui lui ne possède pas de table de millésime. Cela rend donc la présence d'un `year` encore obligatoire sur le `Budget` et rend la migration moins appropriée.
 
 ## Règles métier retenues
 
 - **Brouillon transfo ou actualisation** : Les données ne vivent que dans `Transformation` + `StructureTransformation` (et leurs enfants).
 - **Validation transfo ou actualisation** : Gérée via le **`Form.status`** lié à la transformation (`Form.transformationId`, bouton « Finaliser »). Une fois validée, la transfo **ne bouge plus**.
-- **Application structure** : À la validation : pour chaque `StructureTransformation`, création d'une version datée de `StructureMillesime` sur la structure à `StructureTransformation.date`.
-- **Affichage** : Dernier millésime / timestamp avec `effectiveDate ≤ date du jour`. Si version future existante on affiche un bandeau sur la fiche.
+- **Application structure** : À la validation : pour chaque `StructureTransformation`, création d'une version datée de `StructureVersion` sur la structure à `StructureTransformation.date`.
+- **Affichage** : Dernière version avec `effectiveDate ≤ date du jour`. Si version future existante on affiche un bandeau sur la fiche.
 - **Résolution** : Gérée en back
 
 ---
@@ -80,7 +87,7 @@ Une option de modélisation a été retenue, les autres sont à retrouver en fin
 - Chaque structure a un `StructureVersion` spécifique correspondant à ce rolling (flag ? absence de transformationId / actualisationId ?)
 - Les **opérations sauvegardées** (transfo validée à date ultérieure ou non, idem sur les actualisations) sont stockées à part ; tant qu'elles ne sont pas effectives, elles n'alimentent pas le rolling.
 - Quand la date passe : par défaut l'app affiche l'opération, si l'utilisateur modifie ça vient modifier le rolling détcté
-- Option de **conserver** certains jalons (transfo, campagne) comme millésimes nommés.
+- Option de **conserver** certains jalons (transfo, campagne) comme versions nommées.
 
 Les tables liées pointent soit vers le rolling, soit vers des versions sauvegardées
 
@@ -91,16 +98,11 @@ Les tables liées pointent soit vers le rolling, soit vers des versions sauvegar
 
 #### Inconvénients
 
-- **Historique un peu plus faible** si on écrase le rolling : impossible de répondre à « quelle était la fiche le 12 mars ? » sauf à revenir au dernier millésime explicite. Cependant cela ne semble pas être une demande métier
+- **Historique un peu plus faible** si on écrase le rolling : impossible de répondre à « quelle était la fiche le 12 mars ? » sauf à revenir à la dernière version explicite. Cependant cela ne semble pas être une demande métier
 
 ---
 
 ## Tables concernées
-
-Je pense que l'on a confondu jusque là deux notions qu'il faut reséparer.
-
-- `StructureMillesime` est à conserver en tant que tel : il est associé à une année, est immuable. Il concerne les indicateurs de la structure sur une certaine année, indépendamment de ce qu'a vécu la structure (transfos ou pas). Il s'agit essentiellement à date des indicateurs financiers et du budget.
-- `StructureVersion` doit lui devenir une table liée à `Structure` qui reprend quasiment l'ensemble des champs scalaires et tables liées actuellement à `Structure`. C'est elle qui va porter l'historique et le futur + le "rolling timestamp".
 
 Le schéma serait le suivant (voir détails ci dessous)
 
@@ -159,7 +161,7 @@ Actuellement la table ne contient que les champs `cpom` et `operateurComment` qu
 Veut-on uniformiser le traitement avec le rattachement d'une structure à ses DNA ?
 Pour le coup il semble indispensable que les DNA associés à une structure soit gérés dans le cadre des transfos (c'est dans ce cas qu'on verra des changements).
 
-À noter : **`startDate` / `endDate`** sont donc dépréciés au profit de l’`effectiveDate` du millésime où le lien apparaît ou disparaît. Ceci étant dit on a 0 entrée avec un de ces champs rempli à date donc la migration devrait être facile.
+À noter : **`startDate` / `endDate`** sont donc dépréciés au profit de l’`effectiveDate` de la version où le lien apparaît ou disparaît. Ceci étant dit on a 0 entrée avec un de ces champs rempli à date donc la migration devrait être facile.
 
 Je propose donc de gérer le lien d'une structure avec ses DNA en passant par la table de passage `StructureVersion`
 
@@ -169,7 +171,7 @@ Je propose donc de gérer le lien d'une structure avec ses DNA en passant par la
 - **`StructuresAggregates`** (vue `reporting`)
 - **`StructuresFilling`** (vue `reporting`)
 
--> À adapter pour joindre le **dernier millésime passé** plutôt que `Structure` directement.
+-> À adapter pour joindre la **dernière version passée** plutôt que `Structure` directement.
 
 ### Non concerné par le chantier
 
@@ -208,7 +210,7 @@ Veut-on uniformiser le traitement avec le rattachement d'une structure à ses CP
 
 ## Questions ouvertes
 
-- [ ] Valider qu'une structure ne peut pas avoir **plusieurs** millésimes le même jour (deux transfo) ? Gérer aussi le cas millésime manuel le jour d'une transfo
+- [ ] Valider qu'une structure ne peut pas avoir **plusieures** versions le même jour (deux transfo) ? Gérer aussi le cas rolling version manuelle le jour d'une transfo
 - [ ] Gestion des unique (Codes Finess par exemple). Veut-on conserver un principe d'unicité du code Finess ? Si oui par cohérence profitons-en pour "clean" la string rentrée par l'utilisateur (que des chiffres sans espace)
 - [ ] Exemple de **AdresseTypologie** : en a-t-on vraiment besoin d'ailleurs côté métier ? Ou peut-on considérer que le seul moment où on gèrera ces adresses ce sera via les transfos (et éventuellement les campagnes d'actualisation) mais qu'on ne veut pas conserver d'historique annualisé par exemple ?
 - [ ] Actes administratifs ?
@@ -229,7 +231,7 @@ Veut-on uniformiser le traitement avec le rattachement d'une structure à ses CP
 
 ---
 
-# Options non retenues
+# [Old] Options non retenues
 
 ## Option A - Millésime complet à chaque version
 

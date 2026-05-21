@@ -1,0 +1,51 @@
+// Phase 1 (hors transfo) : StructureVersion + FK optionnelles pour backfill.
+// TODO: retirer les liens à structureId après backfill, et rendre structureVersionId obligatoire sur les tables liées
+// Retirer les FK / scalaires redondants sur Structure.
+
+model StructureVersion {
+  id          Int       @id @default(autoincrement())
+  structureId Int
+  structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  effectiveDate DateTime
+
+  type                     StructureType?
+  adresseAdministrative    String?
+  codePostalAdministratif  String?
+  communeAdministrative    String?
+  departementAdministratif String?
+  latitude                 Decimal?
+  longitude                Decimal?
+  nom                      String?
+  debutConvention          DateTime?
+  finConvention            DateTime?
+  creationDate             DateTime?
+  date303                  DateTime?
+  lgbt                     Boolean?
+  fvvTeh                   Boolean?
+  public                   PublicType?
+  debutPeriodeAutorisation DateTime?
+  finPeriodeAutorisation   DateTime?
+  notes                    String?
+  nomOfii                  String?
+  directionTerritoriale    String?
+  isArchived               Boolean        @default(false)
+
+  operateur   Operateur? @relation(fields: [operateurId], references: [id])
+  operateurId Int?
+
+  departement Departement? @relation(fields: [departementAdministratif], references: [numero])
+
+  contacts            Contact[]
+  adresses            Adresse[]
+  structureTypologies StructureTypologie[]
+  antennes            Antenne[]
+  finesses            Finess[]
+  dnaStructures       DnaStructure[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([structureId, effectiveDate])
+  @@schema("public")
+}

@@ -1,7 +1,8 @@
 model Structure {
-  id                       Int                  @id @default(autoincrement())
-  codeBhasile              String               @unique
+  id                       Int                   @id @default(autoincrement())
+  codeBhasile              String                @unique
   filiale                  String? // TODO: remove after first filling is complete, filiales via Operateur are connected in app and DB is backfilled
+  // TODO: remove after backfill of structure version — champs migrés sur StructureVersion
   type                     StructureType?
   adresseAdministrative    String?
   codePostalAdministratif  String?
@@ -22,27 +23,28 @@ model Structure {
   notes                    String?
   nomOfii                  String?
   directionTerritoriale    String?
-  dnaStructures            DnaStructure[]
+  dnaStructures            DnaStructure[] // TODO: remove after backfill of structure version
   controles                Controle[]
   evaluations              Evaluation[]
-  adresses                 Adresse[]
-  contacts                 Contact[]
-  structureTypologies      StructureTypologie[]
+  adresses                 Adresse[] // TODO: remove after backfill of structure version
+  contacts                 Contact[] // TODO: remove after backfill of structure version
+  structureTypologies      StructureTypologie[] // TODO: remove after backfill of structure version
   actesAdministratifs      ActeAdministratif[]
   documentsFinanciers      DocumentFinancier[]
   cpomStructures           CpomStructure[]
   structureMillesimes      StructureMillesime[]
-  budgets                  Budget[]
-  indicateursFinanciers    IndicateurFinancier[]
-  operateur                Operateur?           @relation(fields: [operateurId], references: [id])
-  operateurId              Int?
+  budgets                  Budget[] // TODO: remove after backfill of structure version — via StructureMillesime uniquement
+  indicateursFinanciers    IndicateurFinancier[] // TODO: remove after backfill of structure version
+  operateur                Operateur?            @relation(fields: [operateurId], references: [id]) // TODO: remove after backfill of structure version
+  operateurId              Int? // TODO: remove after backfill of structure version
   forms                    Form[]
   campaigns                Campaign[]
-  antennes                 Antenne[]
-  finesses                 Finess[]
-  departement              Departement?         @relation(fields: [departementAdministratif], references: [numero])
+  antennes                 Antenne[] // TODO: remove after backfill of structure version
+  finesses                 Finess[] // TODO: remove after backfill of structure version
+  departement              Departement?          @relation(fields: [departementAdministratif], references: [numero])
   userActions              UserAction[]
   userNotes                Note[]
+  structureVersions        StructureVersion[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -66,9 +68,11 @@ model StructureMillesime {
 }
 
 model StructureTypologie {
-  id                    Int        @id @default(autoincrement())
-  structure             Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureId           Int?
+  id                    Int               @id @default(autoincrement())
+  structure             Structure?        @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TODO: remove after backfill of structure version
+  structureId           Int? // TODO: remove after backfill of structure version
+  structureVersion      StructureVersion? @relation(fields: [structureVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureVersionId    Int? // TODO: rendre obligatoire après backfill de structure version
   year                  Int
   placesAutorisees      Int?
   pmr                   Int?
@@ -82,7 +86,8 @@ model StructureTypologie {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@unique([structureId, year])
+  @@unique([structureId, year]) // TODO: remove after backfill of structure version
+  @@unique([structureVersionId, year])
   @@schema("public")
 }
 
