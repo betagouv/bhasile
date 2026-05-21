@@ -118,21 +118,22 @@ export class VerificationPage extends BasePage {
       }
     }
 
-    if (data.debutPeriodeAutorisation) {
+    const acteAutorisation = data.actesAdministratifs?.find(
+      (actesAdministratif) =>
+        actesAdministratif.category === "ARRETE_AUTORISATION"
+    );
+    if (acteAutorisation) {
       await expect(section).toContainText(
-        formatDate(data.debutPeriodeAutorisation)
+        formatDate(acteAutorisation.startDate)
       );
+      await expect(section).toContainText(formatDate(acteAutorisation.endDate));
     }
-    if (data.finPeriodeAutorisation) {
-      await expect(section).toContainText(
-        formatDate(data.finPeriodeAutorisation)
-      );
-    }
-    if (data.debutConvention) {
-      await expect(section).toContainText(formatDate(data.debutConvention));
-    }
-    if (data.finConvention) {
-      await expect(section).toContainText(formatDate(data.finConvention));
+    const acteConvention = data.actesAdministratifs?.find(
+      (actesAdministratif) => actesAdministratif.category === "CONVENTION"
+    );
+    if (acteConvention) {
+      await expect(section).toContainText(formatDate(acteConvention.startDate));
+      await expect(section).toContainText(formatDate(acteConvention.endDate));
     }
   }
 
