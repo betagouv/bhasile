@@ -8,7 +8,7 @@ model StructureVersion {
   structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   effectiveDate  DateTime
-  forceHistorize Boolean  @default(false) // false = rolling courant ; true = conserver dans l'historique
+  forceHistorize Boolean  @default(false) // false = conservé ou pas selon lien avec une tranformation ; true = conserver dans l'historique
 
   type                     StructureType?
   adresseAdministrative    String?
