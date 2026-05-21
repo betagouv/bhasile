@@ -32,6 +32,7 @@ const structureTransformationApiUpdateSchema = z.object({
     .optional(),
   structureTransformationDate: z.string().datetime().nullish(),
   structureTransformationMotif: z.string().nullish(),
+  structureTransformationForms: z.array(formApiSchema).optional(),
 
   type: z.nativeEnum(StructureType).nullish(),
   public: z.nativeEnum(PublicType).nullish(),

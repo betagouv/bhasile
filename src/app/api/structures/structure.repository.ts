@@ -16,7 +16,7 @@ import { createOrUpdateEvaluations } from "../evaluations/evaluation.repository"
 import { createOrUpdateFinesses } from "../finesses/finess.repository";
 import {
   createOrUpdateForms,
-  initializeDefaultForms,
+  initializeStructureDefaultForms,
 } from "../forms/form.repository";
 import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
@@ -426,7 +426,11 @@ export const updateOne = async (
       async (tx) => {
         const updatedStructure = await updateStructure(tx, structure);
 
-        await initializeDefaultForms(tx, isOperateurUpdate, structure.id);
+        await initializeStructureDefaultForms(
+          tx,
+          isOperateurUpdate,
+          structure.id
+        );
 
         await createOrUpdateDnaStructures(tx, dnaStructures, structure.id);
         await createOrUpdateFinesses(tx, finesses, {
