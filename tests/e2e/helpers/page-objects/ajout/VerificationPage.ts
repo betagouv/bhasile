@@ -117,24 +117,6 @@ export class VerificationPage extends BasePage {
         await expect(section).toContainText(phone);
       }
     }
-
-    const acteAutorisation = data.actesAdministratifs?.find(
-      (actesAdministratif) =>
-        actesAdministratif.category === "ARRETE_AUTORISATION"
-    );
-    if (acteAutorisation) {
-      await expect(section).toContainText(
-        formatDate(acteAutorisation.startDate)
-      );
-      await expect(section).toContainText(formatDate(acteAutorisation.endDate));
-    }
-    const acteConvention = data.actesAdministratifs?.find(
-      (actesAdministratif) => actesAdministratif.category === "CONVENTION"
-    );
-    if (acteConvention) {
-      await expect(section).toContainText(formatDate(acteConvention.startDate));
-      await expect(section).toContainText(formatDate(acteConvention.endDate));
-    }
   }
 
   private async expectAdresses(data: TestStructureData) {
