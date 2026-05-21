@@ -5,7 +5,10 @@
 
 */
 -- AlterTable
-ALTER TABLE "Adresse" ADD COLUMN     "structureVersionId" INTEGER;
+ALTER TABLE "Adresse" ADD COLUMN     "logementSocial" INTEGER,
+ADD COLUMN     "placesAutorisees" INTEGER,
+ADD COLUMN     "qpv" INTEGER,
+ADD COLUMN     "structureVersionId" INTEGER;
 
 -- AlterTable
 ALTER TABLE "Antenne" ADD COLUMN     "structureVersionId" INTEGER;
@@ -27,8 +30,7 @@ CREATE TABLE "StructureVersion" (
     "id" SERIAL NOT NULL,
     "structureId" INTEGER NOT NULL,
     "effectiveDate" TIMESTAMP(3) NOT NULL,
-    "slug" TEXT,
-    "shouldHistorize" BOOLEAN NOT NULL DEFAULT false,
+    "forceHistorize" BOOLEAN NOT NULL DEFAULT false,
     "type" "StructureType",
     "adresseAdministrative" TEXT,
     "codePostalAdministratif" TEXT,
@@ -37,19 +39,14 @@ CREATE TABLE "StructureVersion" (
     "latitude" DECIMAL(65,30),
     "longitude" DECIMAL(65,30),
     "nom" TEXT,
-    "debutConvention" TIMESTAMP(3),
-    "finConvention" TIMESTAMP(3),
     "creationDate" TIMESTAMP(3),
     "date303" TIMESTAMP(3),
     "lgbt" BOOLEAN,
     "fvvTeh" BOOLEAN,
     "public" "PublicType",
-    "debutPeriodeAutorisation" TIMESTAMP(3),
-    "finPeriodeAutorisation" TIMESTAMP(3),
     "notes" TEXT,
     "nomOfii" TEXT,
     "directionTerritoriale" TEXT,
-    "isArchived" BOOLEAN NOT NULL DEFAULT false,
     "operateurId" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -59,9 +56,6 @@ CREATE TABLE "StructureVersion" (
 
 -- CreateIndex
 CREATE INDEX "StructureVersion_structureId_effectiveDate_idx" ON "StructureVersion"("structureId", "effectiveDate");
-
--- CreateIndex
-CREATE UNIQUE INDEX "StructureVersion_structureId_slug_key" ON "StructureVersion"("structureId", "slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "StructureTypologie_structureVersionId_year_key" ON "StructureTypologie"("structureVersionId", "year");
