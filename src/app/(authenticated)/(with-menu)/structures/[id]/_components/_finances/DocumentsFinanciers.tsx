@@ -10,6 +10,8 @@ import { useStructureContext } from "../../_context/StructureClientContext";
 export const DocumentsFinanciers = (): ReactElement => {
   const { structure } = useStructureContext();
 
+  const { budgets, documentsFinanciers, structureMillesimes } = structure;
+
   const { years } = getYearRange();
 
   const startYear = structure.date303
@@ -21,7 +23,7 @@ export const DocumentsFinanciers = (): ReactElement => {
   const yearsToDisplay = years.filter((year) => year >= (startYear ?? 0));
 
   const getDocumentsFinanciersToDisplay = (budget: BudgetApiType) => {
-    return structure.documentsFinanciers?.filter(
+    return documentsFinanciers?.filter(
       (documentFinancier) => documentFinancier.year === budget.year
     );
   };
@@ -29,8 +31,9 @@ export const DocumentsFinanciers = (): ReactElement => {
   return (
     <>
       {yearsToDisplay.map((year) => {
-        const budget = structure.budgets?.find(
-          (budget) => budget.year === year
+        const budget = budgets?.find((budget) => budget.year === year);
+        const structureMillesime = structureMillesimes?.find(
+          (structureMillesime) => structureMillesime.year === year
         );
         return budget ? (
           <Accordion label={budget.year} key={budget.id}>
@@ -50,6 +53,13 @@ export const DocumentsFinanciers = (): ReactElement => {
                 )
               )}
             </div>
+            {structureMillesime?.operateurComment ? (
+              <p className="text-sm text-default-grey mb-0">
+                <strong>Commentaire</strong>
+                <br />
+                {structureMillesime.operateurComment}
+              </p>
+            ) : null}
           </Accordion>
         ) : null;
       })}
