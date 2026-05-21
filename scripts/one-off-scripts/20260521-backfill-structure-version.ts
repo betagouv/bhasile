@@ -93,6 +93,27 @@ async function main() {
       where: link,
       data: { structureVersionId: version.id },
     });
+
+    const adresses = await prisma.adresse.findMany({
+      where: { structureVersionId: version.id },
+      include: {
+        adresseTypologies: { orderBy: { year: "desc" }, take: 1 },
+      },
+    });
+
+    for (const adresse of adresses) {
+      const typologie = adresse.adresseTypologies[0];
+      if (!typologie) continue;
+
+      await prisma.adresse.update({
+        where: { id: adresse.id },
+        data: {
+          placesAutorisees: typologie.placesAutorisees,
+          qpv: typologie.qpv,
+          logementSocial: typologie.logementSocial,
+        },
+      });
+    }
   }
 
   console.log(`✅ Terminé (${structures.length} structures)`);

@@ -8,7 +8,10 @@ model Adresse {
   codePostal         String?
   commune            String?
   repartition        Repartition?
-  adresseTypologies  AdresseTypologie[]
+  placesAutorisees   Int?
+  qpv                Int?
+  logementSocial     Int?
+  adresseTypologies  AdresseTypologie[] // TODO: remove after migration
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -16,6 +19,7 @@ model Adresse {
   @@schema("public")
 }
 
+// TODO: remove model after migration 
 model AdresseTypologie {
   id               Int     @id @default(autoincrement())
   adresse          Adresse @relation(fields: [adresseId], references: [id], onDelete: Cascade)

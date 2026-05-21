@@ -139,8 +139,7 @@ Le schéma serait le suivant (voir détails ci dessous)
 
 - **`StructureTypologie`** -> passer le year actuel à un timestamp (mais voir si au fond ça a du sens côté métier) : valider que l'évolution est maintenant liée à un timestamp, que ce soit via une transfo ou une campagne d'actualisation, et plus une année à proprement parler
 - **`Contact`**
-- **`Adresse`**
-- **`AdresseTypologie`** - enfant de `Adresse` (places, QPV, logement social ; aujourd’hui par `year`) -> Réfléchir à comment gérer cela ? A-t-on besoin d'historiser ou est-ce que les champs de AdresseTypologie ne deviennent pas des scalaires de Adresse, actualisés soit par les transfos soit par les campagnes d'actualisation ?
+- **`Adresse`** - `placesAutorisees`, `qpv`, `logementSocial` (ex `AdresseTypologie`)
 - **`Antenne`**
 - **`Finess`** - gérer les `unique` sur le code Finess (dans ce cas via une table de passage)
 - **`DnaStructure`** - cf paragraphe spécifique en dessous.
