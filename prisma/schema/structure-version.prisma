@@ -7,7 +7,9 @@ model StructureVersion {
   structureId Int
   structure   Structure @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  effectiveDate DateTime
+  effectiveDate   DateTime
+  slug            String? // utile notamment pour l'idempotence du script de primo-backfill
+  shouldHistorize Boolean  @default(false) // false = rolling courant ; true = conserver dans l'historique
 
   type                     StructureType?
   adresseAdministrative    String?
@@ -46,6 +48,7 @@ model StructureVersion {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@unique([structureId, slug])
   @@index([structureId, effectiveDate])
   @@schema("public")
 }

@@ -121,6 +121,8 @@ Le schéma serait le suivant (voir détails ci dessous)
 - **`StructureVersion`** - entité centrale
   - `effectiveDate`,
   - `structureId`,
+  - `slug?`,
+  - `shouldHistorize`,
   - `transformationId?`,
   - `actualisationId?`,
   - **Champs scalaires aujourd’hui sur `Structure`** - à migrer dans la version :
