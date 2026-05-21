@@ -214,11 +214,11 @@ const createOrUpdateStructureTransformation = async (
 
   const entityId = { structureTransformationId };
 
-  if (isCreation && structureTransformation.type) {
+  if (isCreation && structureTransformation.structureTransformationType) {
     await initializeStructureTransformationDefaultForms(
       tx,
       structureTransformationId,
-      structureTransformation.type
+      structureTransformation.structureTransformationType
     );
   }
 
