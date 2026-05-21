@@ -27,9 +27,6 @@ model StructureVersion {
   nomOfii                  String?
   directionTerritoriale    String?
 
-  operateur   Operateur? @relation(fields: [operateurId], references: [id])
-  operateurId Int?
-
   departement Departement? @relation(fields: [departementAdministratif], references: [numero])
 
   contacts            Contact[]

@@ -30,7 +30,6 @@ function initialVersionData(structure) {
     notes: structure.notes,
     nomOfii: structure.nomOfii,
     directionTerritoriale: structure.directionTerritoriale,
-    operateurId: structure.operateurId,
   };
 }
 

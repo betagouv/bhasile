@@ -3,26 +3,26 @@ model Structure {
   codeBhasile              String                @unique
   filiale                  String? // TODO: remove after first filling is complete, filiales via Operateur are connected in app and DB is backfilled
   // TODO: remove after backfill of structure version — champs migrés sur StructureVersion
-  type                     StructureType?
-  adresseAdministrative    String?
-  codePostalAdministratif  String?
-  communeAdministrative    String?
-  departementAdministratif String?
-  latitude                 Decimal?
-  longitude                Decimal?
-  nom                      String?
+  type                     StructureType? // TODO: remove after backfill of structure version
+  adresseAdministrative    String? // TODO: remove after backfill of structure version
+  codePostalAdministratif  String? // TODO: remove after backfill of structure version
+  communeAdministrative    String? // TODO: remove after backfill of structure version
+  departementAdministratif String? // TODO: remove after backfill of structure version
+  latitude                 Decimal? // TODO: remove after backfill of structure version
+  longitude                Decimal? // TODO: remove after backfill of structure version
+  nom                      String? // TODO: remove after backfill of structure version
   debutConvention          DateTime? // TODO: remove after quality check
   finConvention            DateTime? // TODO: remove after quality check
-  creationDate             DateTime?
-  date303                  DateTime?
-  lgbt                     Boolean?
-  fvvTeh                   Boolean?
-  public                   PublicType?
+  creationDate             DateTime? // TODO: remove after backfill of structure version
+  date303                  DateTime? // TODO: remove after backfill of structure version
+  lgbt                     Boolean? // TODO: remove after backfill of structure version
+  fvvTeh                   Boolean? // TODO: remove after backfill of structure version
+  public                   PublicType? // TODO: remove after backfill of structure version
   debutPeriodeAutorisation DateTime? // TODO: remove after quality check
   finPeriodeAutorisation   DateTime? // TODO: remove after quality check
-  notes                    String?
-  nomOfii                  String?
-  directionTerritoriale    String?
+  notes                    String? // TODO: remove after backfill of structure version
+  nomOfii                  String? // TODO: remove after backfill of structure version
+  directionTerritoriale    String? // TODO: remove after backfill of structure version
   dnaStructures            DnaStructure[] // TODO: remove after backfill of structure version
   controles                Controle[]
   evaluations              Evaluation[]
@@ -35,13 +35,13 @@ model Structure {
   structureMillesimes      StructureMillesime[]
   budgets                  Budget[] // TODO: remove after backfill of structure version — via StructureMillesime uniquement
   indicateursFinanciers    IndicateurFinancier[] // TODO: remove after backfill of structure version
-  operateur                Operateur?            @relation(fields: [operateurId], references: [id]) // TODO: remove after backfill of structure version
-  operateurId              Int? // TODO: remove after backfill of structure version
+  operateur                Operateur?            @relation(fields: [operateurId], references: [id])
+  operateurId              Int?
   forms                    Form[]
   campaigns                Campaign[]
   antennes                 Antenne[] // TODO: remove after backfill of structure version
   finesses                 Finess[] // TODO: remove after backfill of structure version
-  departement              Departement?          @relation(fields: [departementAdministratif], references: [numero])
+  departement              Departement?          @relation(fields: [departementAdministratif], references: [numero]) // TODO: remove after backfill of structure version
   userActions              UserAction[]
   userNotes                Note[]
   structureVersions        StructureVersion[]
