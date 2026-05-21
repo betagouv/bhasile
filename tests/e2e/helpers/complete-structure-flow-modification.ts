@@ -12,7 +12,7 @@ import { ModificationData } from "./test-data/types";
 
 /**
  * Runs the modification flow: apply modification data for description,
- * calendrier, type places, finance, controle, actes administratifs, notes,
+ * type places, finance, controle, actes administratifs, notes,
  * then verify modifications were applied.
  * Expects the page to already be on the structure details page.
  */

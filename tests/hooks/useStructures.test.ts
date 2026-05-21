@@ -138,8 +138,6 @@ describe("useStructures integration", () => {
         communeAdministrative: "Paris",
         departementAdministratif: "75",
         nom: "Structure complete",
-        debutConvention: "2024-02-01T12:00:00.000Z",
-        finConvention: "2026-12-31T12:00:00.000Z",
         creationDate: "2020-03-15T12:00:00.000Z",
         date303: "2021-04-16T12:00:00.000Z",
         lgbt: true,
