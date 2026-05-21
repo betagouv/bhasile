@@ -1,5 +1,5 @@
 import {
-  StructureTransformationApiType,
+  StructureTransformationApiUpdate,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { StructureTransformationType } from "@/types/transformation.type";
@@ -16,8 +16,9 @@ export const getTransformationSteps = (
       ?.map((structureTransformation) => {
         return {
           id: structureTransformation.id,
-          codeBhasile: String(structureTransformation.structureId), // TODO: change TransformationApiRead to include codeBhasile
-          type: structureTransformation.type,
+          codeBhasile: structureTransformation.structure?.codeBhasile,
+          structureTransformationType:
+            structureTransformation.structureTransformationType,
           steps: getStepsByType(structureTransformation, transformation.id),
         };
       })
@@ -28,22 +29,26 @@ export const getTransformationSteps = (
           [StructureTransformationType.EXTENSION]: 2,
           [StructureTransformationType.CREATION]: 3,
         };
-        const aTypeOrder = a.type ? typeOrder[a.type] : 99;
-        const bTypeOrder = b.type ? typeOrder[b.type] : 99;
+        const aTypeOrder = a.structureTransformationType
+          ? typeOrder[a.structureTransformationType]
+          : 99;
+        const bTypeOrder = b.structureTransformationType
+          ? typeOrder[b.structureTransformationType]
+          : 99;
         return aTypeOrder - bTypeOrder;
       }) ?? []
   );
 };
 
 const getStepsByType = (
-  structureTransformation: StructureTransformationApiType,
+  structureTransformation: StructureTransformationApiUpdate,
   transformationId: number
 ) => {
-  if (!structureTransformation.type) {
+  if (!structureTransformation.structureTransformationType) {
     return [];
   }
 
-  switch (structureTransformation.type) {
+  switch (structureTransformation.structureTransformationType) {
     case StructureTransformationType.EXTENSION:
     case StructureTransformationType.CONTRACTION:
     case StructureTransformationType.CREATION:
@@ -54,7 +59,7 @@ const getStepsByType = (
             "description",
             transformationId,
             structureTransformation.id,
-            structureTransformation.type
+            structureTransformation.structureTransformationType
           ),
         },
         {
@@ -63,7 +68,7 @@ const getStepsByType = (
             "places-et-hebergement",
             transformationId,
             structureTransformation.id,
-            structureTransformation.type
+            structureTransformation.structureTransformationType
           ),
         },
         {
@@ -72,7 +77,7 @@ const getStepsByType = (
             "actes-administratifs",
             transformationId,
             structureTransformation.id,
-            structureTransformation.type
+            structureTransformation.structureTransformationType
           ),
         },
       ];
@@ -84,7 +89,7 @@ const getStepsByType = (
             "description",
             transformationId,
             structureTransformation.id,
-            structureTransformation.type
+            structureTransformation.structureTransformationType
           ),
         },
       ];
@@ -95,9 +100,9 @@ const getRoute = (
   route: string,
   transformationId?: number,
   idStep?: number,
-  type?: StructureTransformationType
+  structureTransformationType?: StructureTransformationType
 ) => {
-  if (!transformationId || !idStep || !type || !route) {
+  if (!transformationId || !idStep || !structureTransformationType || !route) {
     return "";
   }
 
@@ -108,13 +113,13 @@ const getRoute = (
     [StructureTransformationType.CREATION]: "creation",
   };
 
-  return `/structures/transformation/${transformationId}/${types[type]}/${idStep}/${route}`;
+  return `/structures/transformation/${transformationId}/${types[structureTransformationType]}/${idStep}/${route}`;
 };
 
 export type Step = {
   id?: number;
   codeBhasile?: string;
-  type?: StructureTransformationType;
+  structureTransformationType?: StructureTransformationType;
   steps: {
     label: string;
     route: string;

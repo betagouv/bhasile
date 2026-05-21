@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import {
-  StructureTransformationApiType,
+  StructureTransformationApiUpdate,
   TransformationApiCreate,
   TransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
@@ -81,7 +81,8 @@ export const createOne = async (
         data: {
           transformationId: transformation.id,
           structureId: structureTransformation.structureId,
-          type: structureTransformation.type,
+          structureTransformationType:
+            structureTransformation.structureTransformationType,
           ...getScalarData(structureTransformation),
         },
       });
@@ -93,8 +94,8 @@ export const createOne = async (
 
 export const updateOne = async (
   input: TransformationApiUpdate
-): Promise<void> => {
-  await prisma.$transaction(async (tx) => {
+): Promise<number> => {
+  return await prisma.$transaction(async (tx) => {
     if (input.type !== undefined) {
       await tx.transformation.update({
         where: { id: input.id },
@@ -117,6 +118,7 @@ export const updateOne = async (
         );
       }
     }
+    return input.id;
   });
 };
 
@@ -144,10 +146,13 @@ const initializeTransformationForm = async (
 };
 
 const getScalarData = (
-  structureTransformation: StructureTransformationApiType
+  structureTransformation: StructureTransformationApiUpdate
 ) => ({
-  date: structureTransformation.date ?? undefined,
-  motif: structureTransformation.motif ?? undefined,
+  structureTransformationDate:
+    structureTransformation.structureTransformationDate ?? undefined,
+  structureTransformationMotif:
+    structureTransformation.structureTransformationMotif ?? undefined,
+  type: structureTransformation.type ?? undefined,
   public: convertToPublicType(structureTransformation.public),
   adresseAdministrative:
     structureTransformation.adresseAdministrative ?? undefined,
@@ -167,7 +172,7 @@ const getScalarData = (
 const createOrUpdateStructureTransformation = async (
   tx: PrismaTransaction,
   transformationId: number,
-  structureTransformation: StructureTransformationApiType
+  structureTransformation: StructureTransformationApiUpdate
 ): Promise<void> => {
   const scalarData = getScalarData(structureTransformation);
 
@@ -176,16 +181,17 @@ const createOrUpdateStructureTransformation = async (
   let structureTransformationId: number;
 
   if (isCreation) {
-    if (!structureTransformation.structureId || !structureTransformation.type) {
+    if (!structureTransformation.structureTransformationType) {
       throw new Error(
-        "structureId et type sont requis pour créer une structureTransformation"
+        "structureTransformationType est requis pour créer une structureTransformation"
       );
     }
     const created = await tx.structureTransformation.create({
       data: {
         transformationId,
         structureId: structureTransformation.structureId,
-        type: structureTransformation.type,
+        structureTransformationType:
+          structureTransformation.structureTransformationType,
         ...scalarData,
       },
     });
@@ -208,11 +214,11 @@ const createOrUpdateStructureTransformation = async (
 
   const entityId = { structureTransformationId };
 
-  if (isCreation && structureTransformation.type) {
+  if (isCreation && structureTransformation.structureTransformationType) {
     await initializeStructureTransformationDefaultForms(
       tx,
       structureTransformationId,
-      structureTransformation.type
+      structureTransformation.structureTransformationType
     );
   }
 

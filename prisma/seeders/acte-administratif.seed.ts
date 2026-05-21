@@ -13,7 +13,11 @@ export type ActeAdministratifWithFileUploads = ActeAdministratif & {
 
 export const createFakeActeAdministratif = (): Omit<
   ActeAdministratifWithFileUploads,
-  "id" | "structureDnaCode" | "cpomId" | "structureId"
+  | "id"
+  | "structureDnaCode"
+  | "cpomId"
+  | "structureId"
+  | "structureTransformationId"
 > => {
   return {
     date: faker.date.past(),

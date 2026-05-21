@@ -1,51 +1,50 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { TransformationType } from "@/types/transformation.type";
-
-import { CreationTransformationForm } from "./_components/CreationTransformationForm";
-import { FromStructureTransformationForm } from "./_components/FromStructureTransformationForm";
-import { HudaTransformationForm } from "./_components/HudaTransformationForm";
+import { TransformationTypeForms } from "@/app/components/forms/transformation-types/TransformationTypeForms";
+import { useFetchState } from "@/app/context/FetchStateContext";
+import { useTransformations } from "@/app/hooks/useTransformations";
+import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import { FetchState } from "@/types/fetch-state.type";
+import {
+  TransformationFormType,
+  TransformationType,
+} from "@/types/transformation.type";
 
 export default function TransformationSelectionPage() {
   const searchParams = useSearchParams();
-  const transformationStructureId = Number(
-    searchParams.get("transformationStructureId")
-  );
-  const type = searchParams.get("type") as "creation" | "huda" | undefined;
+  const structureId = Number(searchParams.get("structureId"));
+  const type = searchParams.get("type") as TransformationFormType | undefined;
 
-  const [transformationType, setTransformationType] = useState<
-    TransformationType | undefined
-  >(undefined);
+  const router = useRouter();
+
+  const { createTransformation } = useTransformations();
+
+  const { setFetchState } = useFetchState();
+
+  const handleSubmit = async (
+    transformationType: TransformationType,
+    structureTransformations: StructureTransformationApiCreate[]
+  ) => {
+    setFetchState("transformation-save", FetchState.LOADING);
+    try {
+      const transformationId = await createTransformation({
+        type: transformationType,
+        structureTransformations,
+      });
+      router.push(`/structures/transformation/${transformationId}`);
+    } catch (error) {
+      console.error(error);
+      setFetchState("transformation-save", FetchState.ERROR);
+    }
+  };
 
   return (
-    <div className="flex flex-col gap-8 max-w-4xl mx-auto mt-20">
-      <h1 className="mb-0 text-xl font-bold text-title-blue-france text-center">
-        Quel est le cas de figure ?
-      </h1>
-      <div className="bg-white p-6 rounded-lg">
-        {type === "huda" && (
-          <HudaTransformationForm
-            transformationType={transformationType}
-            setTransformationType={setTransformationType}
-          />
-        )}
-        {type === "creation" && (
-          <CreationTransformationForm
-            transformationType={transformationType}
-            setTransformationType={setTransformationType}
-          />
-        )}
-        {transformationStructureId && !type ? (
-          <FromStructureTransformationForm
-            transformationStructureId={transformationStructureId}
-            transformationType={transformationType}
-            setTransformationType={setTransformationType}
-          />
-        ) : null}
-      </div>
-    </div>
+    <TransformationTypeForms
+      formType={type}
+      structureId={structureId}
+      onSubmit={handleSubmit}
+    />
   );
 }

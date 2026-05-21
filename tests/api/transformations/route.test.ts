@@ -29,7 +29,7 @@ describe("POST /api/transformations", () => {
       structureTransformations: [
         {
           structureId: 1,
-          type: StructureTransformationType.CREATION,
+          structureTransformationType: StructureTransformationType.CREATION,
         },
       ],
     };
@@ -42,7 +42,7 @@ describe("POST /api/transformations", () => {
     const response = await POST(request as NextRequest);
 
     expect(response.status).toBe(201);
-    expect(await response.json()).toEqual({ id: 99 });
+    expect(await response.json()).toEqual({ transformationId: 99 });
     expect(mockCreateOne).toHaveBeenCalledWith(body);
     expect(mockFindOne).not.toHaveBeenCalled();
     expect(mockUpdateOne).not.toHaveBeenCalled();
