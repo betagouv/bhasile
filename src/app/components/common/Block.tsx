@@ -29,9 +29,7 @@ export const Block = ({
           <span className={`text-title-blue-france mr-3 ${iconClass}`} />
           <h3 className="text-title-blue-france fr-h6 mb-12">{title}</h3>
         </div>
-        {disclaimer && (
-          <p className="text-sm text-title-blue-france mb-0">{disclaimer}</p>
-        )}
+        {disclaimer && disclaimer}
         <Can I="update" this={subject(entityType, entity)} ability={ability}>
           {onEdit && (
             <Button
