@@ -1,5 +1,5 @@
 import Select from "@codegouvfr/react-dsfr/Select";
-import { ReactElement, useEffect, useRef, useState } from "react";
+import { ReactElement, useEffect, useRef } from "react";
 
 import { DepartementAutocomplete } from "@/app/components/forms/autocomplete/DepartementAutocomplete";
 import { OperateurAutocomplete } from "@/app/components/forms/autocomplete/OperateurAutocomplete";
@@ -12,32 +12,19 @@ import { StructuresList } from "./StructuresList";
 export const StructureSearch = ({
   selectedStructureIds,
   setSelectedStructureIds,
-  fixedType,
+  structureType,
+  setStructureType,
   multiple = false,
   label,
-  operateurName: operateurNameProp,
-  setOperateurName: setOperateurNameProp,
-  departementNumero: departementNumeroProp,
-  setDepartementNumero: setDepartementNumeroProp,
+  operateurName,
+  setOperateurName,
+  departementNumero,
+  setDepartementNumero,
+  fixedType,
   fixedOperateurName,
   fixedDepartementNumero,
 }: Props): ReactElement => {
-  const [type, setType] = useState<StructureType | undefined>(fixedType);
-
-  const [operateurNameInternal, setOperateurNameInternal] = useState<
-    string | undefined
-  >(undefined);
-  const [operateurName, setOperateurName] = setOperateurNameProp
-    ? [operateurNameProp, setOperateurNameProp]
-    : [operateurNameInternal, setOperateurNameInternal];
-
-  const [departementNumeroInternal, setDepartementNumeroInternal] = useState<
-    string | undefined
-  >(undefined);
-  const [departementNumero, setDepartementNumero] = setDepartementNumeroProp
-    ? [departementNumeroProp, setDepartementNumeroProp]
-    : [departementNumeroInternal, setDepartementNumeroInternal];
-
+  const effectiveStructureType = fixedType ?? structureType;
   const effectiveOperateurName = fixedOperateurName ?? operateurName;
   const effectiveDepartementNumero =
     fixedDepartementNumero ?? departementNumero;
@@ -45,7 +32,7 @@ export const StructureSearch = ({
   const { structures } = useStructuresSelection({
     operateurName: effectiveOperateurName,
     departements: effectiveDepartementNumero,
-    types: type !== undefined ? String(type) : undefined,
+    types: effectiveStructureType,
   });
 
   const prevStructures = useRef<StructureMinimalApiType[] | undefined>(
@@ -71,9 +58,9 @@ export const StructureSearch = ({
             label="Type de structure"
             id="type"
             nativeSelectProps={{
-              value: type ?? "",
+              value: structureType ?? "",
               onChange: (event) => {
-                setType(
+                setStructureType(
                   event.target.value
                     ? (event.target.value as StructureType)
                     : undefined
@@ -118,13 +105,15 @@ export const StructureSearch = ({
 export type StructureSearchProps = {
   selectedStructureIds: number[];
   setSelectedStructureIds: (structuresId: number[]) => void;
+  structureType: StructureType | undefined;
+  setStructureType: (structureType: StructureType | undefined) => void;
+  operateurName: string | undefined;
+  setOperateurName: (operateurName: string | undefined) => void;
+  departementNumero: string | undefined;
+  setDepartementNumero: (departementNumero: string | undefined) => void;
   fixedType?: StructureType;
   multiple?: boolean;
   label?: string;
-  operateurName?: string;
-  setOperateurName?: (operateurName: string | undefined) => void;
-  departementNumero?: string;
-  setDepartementNumero?: (departementNumero: string | undefined) => void;
   fixedOperateurName?: string;
   fixedDepartementNumero?: string;
 };

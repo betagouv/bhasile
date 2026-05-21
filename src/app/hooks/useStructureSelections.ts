@@ -3,11 +3,13 @@ import { useMemo, useRef, useState } from "react";
 import {
   StructureSelectionBlock,
   TRANSFORMATION_TYPE_SPECS,
-} from "@/app/utils/transformation.util";
+} from "@/app/config/transformation.config";
 import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import { StructureType } from "@/types/structure.type";
 import { TransformationType } from "@/types/transformation.type";
 
 type BlockFilters = {
+  structureType?: StructureType;
   operateurName?: string;
   departementNumero?: string;
 };
@@ -97,6 +99,21 @@ export const useStructureSelections = ({
     resetDependentsOf(blockId, "departementNumero");
   };
 
+  const setStructureType = (
+    blockId: string,
+    structureType: StructureType | undefined
+  ) => {
+    setFiltersByBlock((prevFiltersByBlock) => ({
+      ...prevFiltersByBlock,
+      [blockId]: { ...prevFiltersByBlock[blockId], structureType },
+    }));
+  };
+
+  const getEffectiveStructureType = (
+    block: StructureSelectionBlock
+  ): StructureType | undefined =>
+    block.fixedType ?? filtersByBlock[block.id]?.structureType;
+
   const getInheritedOperateurName = (
     block: StructureSelectionBlock
   ): string | undefined =>
@@ -139,6 +156,8 @@ export const useStructureSelections = ({
     setSelectedStructureIds,
     setOperateurName,
     setDepartementNumero,
+    setStructureType,
+    getEffectiveStructureType,
     getInheritedOperateurName,
     getInheritedDepartementNumero,
     structureTransformations,

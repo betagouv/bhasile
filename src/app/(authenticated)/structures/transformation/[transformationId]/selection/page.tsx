@@ -2,7 +2,10 @@
 
 import { TransformationTypeForms } from "@/app/components/forms/transformation-types/TransformationTypeForms";
 import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
-import { TransformationType } from "@/types/transformation.type";
+import {
+  TransformationFormType,
+  TransformationType,
+} from "@/types/transformation.type";
 
 import { useTransformationContext } from "../_context/TransformationClientContext";
 
@@ -30,15 +33,15 @@ export default function TransformationSelectionsPage() {
 
 const getFormByType = (
   type?: TransformationType
-): "creation" | "huda" | undefined => {
+): TransformationFormType | undefined => {
   switch (type) {
     case TransformationType.OUVERTURE_EX_NIHILO:
     case TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES:
-      return "creation";
+      return TransformationFormType.CREATION;
     case TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR:
     case TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR:
     case TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES:
-      return "huda";
+      return TransformationFormType.HUDA;
     case TransformationType.EXTENSION_EX_NIHILO:
     case TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_CONTRACTENT:
     case TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_FERMENT:

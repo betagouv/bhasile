@@ -4,6 +4,7 @@ import { ReactElement, useState } from "react";
 
 import { StructureSearch } from "@/app/components/structure-selection/StructureSearch";
 import { BHASILE_CONTACT_EMAIL, BHASILE_PHONE_NUMBERS } from "@/constants";
+import { StructureType } from "@/types/structure.type";
 
 import { ValidationButton } from "./_components/ValidationButton";
 
@@ -11,6 +12,13 @@ export default function AjoutAdressesPage(): ReactElement {
   const [selectedStructureIds, setSelectedStructureIds] = useState<number[]>(
     []
   );
+  const [structureType, setStructureType] = useState<
+    StructureType | undefined
+  >();
+  const [operateurName, setOperateurName] = useState<string | undefined>();
+  const [departementNumero, setDepartementNumero] = useState<
+    string | undefined
+  >();
   return (
     <div className="max-w-5xl mx-auto mt-12">
       <h2 className="flex items-center gap-3 text-xl font-bold mb-8 text-title-blue-france justify-center">
@@ -20,6 +28,12 @@ export default function AjoutAdressesPage(): ReactElement {
       <StructureSearch
         selectedStructureIds={selectedStructureIds}
         setSelectedStructureIds={setSelectedStructureIds}
+        structureType={structureType}
+        setStructureType={setStructureType}
+        operateurName={operateurName}
+        setOperateurName={setOperateurName}
+        departementNumero={departementNumero}
+        setDepartementNumero={setDepartementNumero}
       />
       <p className="text-mention-grey text-sm text-center mb-10">
         Si vous ne trouvez pas votre structure,{" "}

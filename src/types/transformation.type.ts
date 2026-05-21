@@ -31,3 +31,10 @@ export const StructureTransformationType = {
 } as const;
 export type StructureTransformationType =
   (typeof StructureTransformationType)[keyof typeof StructureTransformationType];
+
+export const TransformationFormType = {
+  CREATION: "creation",
+  HUDA: "huda",
+} as const;
+export type TransformationFormType =
+  (typeof TransformationFormType)[keyof typeof TransformationFormType];

@@ -4,7 +4,10 @@ import { useState } from "react";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
-import { TransformationType } from "@/types/transformation.type";
+import {
+  TransformationFormType,
+  TransformationType,
+} from "@/types/transformation.type";
 
 import { SubmitError } from "../../SubmitError";
 import { CreationTransformationForm } from "./CreationTransformationForm";
@@ -56,13 +59,13 @@ export const TransformationTypeForms = ({
         Quel est le cas de figure ?
       </h1>
       <div className="bg-white p-6 rounded-lg">
-        {formType === "huda" && (
+        {formType === TransformationFormType.HUDA && (
           <HudaTransformationForm
             transformationType={transformationType}
             setTransformationType={setTransformationType}
           />
         )}
-        {formType === "creation" && (
+        {formType === TransformationFormType.CREATION && (
           <CreationTransformationForm
             transformationType={transformationType}
             setTransformationType={setTransformationType}
@@ -101,7 +104,7 @@ export const TransformationTypeForms = ({
 };
 
 type Props = {
-  formType: "creation" | "huda" | undefined;
+  formType: TransformationFormType | undefined;
   structureId?: number;
   initialTransformationType?: TransformationType;
   initialStructureTransformations?: StructureTransformationApiCreate[];

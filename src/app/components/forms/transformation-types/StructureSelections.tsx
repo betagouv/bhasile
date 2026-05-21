@@ -17,6 +17,8 @@ export const StructureSelections = ({
     setSelectedStructureIds,
     setOperateurName,
     setDepartementNumero,
+    setStructureType,
+    getEffectiveStructureType,
     getInheritedOperateurName,
     getInheritedDepartementNumero,
     structureTransformations,
@@ -46,6 +48,8 @@ export const StructureSelections = ({
             multiple={block.multiple}
             fixedType={block.fixedType}
             label={block.label}
+            structureType={getEffectiveStructureType(block)}
+            setStructureType={(v) => setStructureType(block.id, v)}
             fixedOperateurName={inheritedOperateur}
             fixedDepartementNumero={inheritedDepartement}
             operateurName={filtersByBlock[block.id]?.operateurName}

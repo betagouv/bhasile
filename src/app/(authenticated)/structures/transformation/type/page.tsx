@@ -7,12 +7,15 @@ import { useFetchState } from "@/app/context/FetchStateContext";
 import { useTransformations } from "@/app/hooks/useTransformations";
 import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
-import { TransformationType } from "@/types/transformation.type";
+import {
+  TransformationFormType,
+  TransformationType,
+} from "@/types/transformation.type";
 
 export default function TransformationSelectionPage() {
   const searchParams = useSearchParams();
   const structureId = Number(searchParams.get("structureId"));
-  const type = searchParams.get("type") as "creation" | "huda" | undefined;
+  const type = searchParams.get("type") as TransformationFormType | undefined;
 
   const router = useRouter();
 
