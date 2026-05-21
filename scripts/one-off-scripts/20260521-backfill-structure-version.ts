@@ -82,6 +82,8 @@ async function main() {
     });
   }
 
+  console.log("✅ StructureVersion backfilled, début des adresses");
+
   const adresses = await prisma.adresse.findMany({
     include: {
       adresseTypologies: {
