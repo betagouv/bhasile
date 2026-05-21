@@ -1,6 +1,7 @@
 // @ts-nocheck
 // One-off : version initiale (t0) par structure + structureVersionId sur les tables liées.
-// Idempotent via slug "initial-version". Usage : yarn one-off 20260521-backfill-structure-version
+// Idempotent : dernière StructureVersion avec forceHistorize true, sinon création.
+// Usage : yarn one-off 20260521-backfill-structure-version
 
 import "dotenv/config";
 
@@ -8,12 +9,11 @@ import { createPrismaClient } from "@/prisma-client";
 
 const prisma = createPrismaClient();
 
-const INITIAL_VERSION_SLUG = "initial-version";
-
 function initialVersionData(structure) {
   return {
+    structureId: structure.id,
     effectiveDate: structure.createdAt,
-    shouldHistorize: true,
+    forceHistorize: true,
     type: structure.type,
     adresseAdministrative: structure.adresseAdministrative,
     codePostalAdministratif: structure.codePostalAdministratif,
@@ -22,50 +22,38 @@ function initialVersionData(structure) {
     latitude: structure.latitude,
     longitude: structure.longitude,
     nom: structure.nom,
-    debutConvention: structure.debutConvention,
-    finConvention: structure.finConvention,
     creationDate: structure.creationDate,
     date303: structure.date303,
     lgbt: structure.lgbt,
     fvvTeh: structure.fvvTeh,
     public: structure.public,
-    debutPeriodeAutorisation: structure.debutPeriodeAutorisation,
-    finPeriodeAutorisation: structure.finPeriodeAutorisation,
     notes: structure.notes,
     nomOfii: structure.nomOfii,
     directionTerritoriale: structure.directionTerritoriale,
     operateurId: structure.operateurId,
-    isArchived: false,
   };
 }
 
 async function main() {
   console.log("🚀 Backfill initial StructureVersion");
 
-  const structures = await prisma.structure.findMany({
-    orderBy: { id: "asc" },
-  });
+  const structures = await prisma.structure.findMany({});
 
   for (const structure of structures) {
-    await prisma.structureVersion.updateMany({
-      where: { structureId: structure.id, slug: null },
-      data: { slug: INITIAL_VERSION_SLUG, shouldHistorize: true },
+    const versionData = initialVersionData(structure);
+
+    const existing = await prisma.structureVersion.findFirst({
+      where: { structureId: structure.id, forceHistorize: true },
+      orderBy: { updatedAt: "desc" },
+      select: { id: true },
     });
 
-    const version = await prisma.structureVersion.upsert({
-      where: {
-        structureId_slug: {
-          structureId: structure.id,
-          slug: INITIAL_VERSION_SLUG,
-        },
-      },
-      create: {
-        structureId: structure.id,
-        slug: INITIAL_VERSION_SLUG,
-        ...initialVersionData(structure),
-      },
-      update: initialVersionData(structure),
-    });
+    const version = existing
+      ? await prisma.structureVersion.update({
+          where: { id: existing.id },
+          data: versionData,
+        })
+      : await prisma.structureVersion.create({ data: versionData });
 
     const link = { structureId: structure.id, structureVersionId: null };
 
@@ -93,30 +81,35 @@ async function main() {
       where: link,
       data: { structureVersionId: version.id },
     });
-
-    const adresses = await prisma.adresse.findMany({
-      where: { structureVersionId: version.id },
-      include: {
-        adresseTypologies: { orderBy: { year: "desc" }, take: 1 },
-      },
-    });
-
-    for (const adresse of adresses) {
-      const typologie = adresse.adresseTypologies[0];
-      if (!typologie) continue;
-
-      await prisma.adresse.update({
-        where: { id: adresse.id },
-        data: {
-          placesAutorisees: typologie.placesAutorisees,
-          qpv: typologie.qpv,
-          logementSocial: typologie.logementSocial,
-        },
-      });
-    }
   }
 
-  console.log(`✅ Terminé (${structures.length} structures)`);
+  const adresses = await prisma.adresse.findMany({
+    include: {
+      adresseTypologies: {
+        where: { placesAutorisees: { gt: 0 } },
+        orderBy: { year: "desc" },
+        take: 1,
+      },
+    },
+  });
+
+  for (const adresse of adresses) {
+    const typologie = adresse.adresseTypologies[0];
+    if (!typologie) continue;
+
+    await prisma.adresse.update({
+      where: { id: adresse.id },
+      data: {
+        placesAutorisees: typologie.placesAutorisees,
+        qpv: typologie.qpv,
+        logementSocial: typologie.logementSocial,
+      },
+    });
+  }
+
+  console.log(
+    `✅ Terminé (${structures.length} structures, ${adresses.length} adresses)`
+  );
 }
 
 main()
