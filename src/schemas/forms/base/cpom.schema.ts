@@ -12,7 +12,7 @@ import { cpomDepartementApiSchema } from "@/schemas/api/cpom.schema";
 import { regionApiSchema } from "@/schemas/api/region.schema";
 import { StructureType } from "@/types/structure.type";
 
-import { acteAdministratifCpomSchema } from "./acteAdministratif.schema";
+import { acteAdministratifCpomSchema, filterActesWithKey } from "./acteAdministratif.schema";
 import { operateurSchema } from "./operateur.schema";
 
 const budgetCpomSchema = z.object({
@@ -80,7 +80,10 @@ export const financesCpomSchema = z.object({
 });
 
 export const actesAdministratifsCpomSchema = z.object({
-  actesAdministratifs: z.array(acteAdministratifCpomSchema),
+  actesAdministratifs: z.preprocess(
+    filterActesWithKey(["CONVENTION"]),
+    z.array(acteAdministratifCpomSchema).optional()
+  ),
 });
 
 export const compositionCpomSchema = z.object({
@@ -129,18 +132,21 @@ export const cpomSchema = descriptionCpomSchema
   )
   .refine(
     (data) => {
-      if (data.actesAdministratifs.length === 0) {
+      if (!data.actesAdministratifs?.length) {
         return true;
       }
-      const convention = data.actesAdministratifs.find(
-        (acteAdministratif) => !acteAdministratif.parentId
+      const convention = data.actesAdministratifs?.find(
+        (acteAdministratif) =>
+          !acteAdministratif.parentId &&
+          !acteAdministratif.parentUuid &&
+          acteAdministratif.category === "CONVENTION"
       );
       if (!convention) {
         return true;
       }
-      const avenants = data.actesAdministratifs.filter(
+      const avenants = data.actesAdministratifs?.filter(
         (acteAdministratif) => acteAdministratif.parentId
-      );
+      ) ?? [];
       for (const acteAdministratif of avenants) {
         const avenantEndDate = formatDateToIsoString(acteAdministratif.endDate);
 

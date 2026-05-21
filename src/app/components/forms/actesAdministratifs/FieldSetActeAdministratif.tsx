@@ -82,13 +82,15 @@ export default function FieldSetActeAdministratif({
           {title} {isOptional && "(optionnel)"}
         </legend>
       )}
-      {notice && (
+      {typeof notice === "string" ? (
         <CustomNotice
           severity="info"
           title=""
           className="rounded [&_p]:flex [&_p]:items-center w-fit"
           description={<>{notice}</>}
         />
+      ) : (
+        notice
       )}
       {actesOfCategory &&
         actesOfCategory.length > 0 &&

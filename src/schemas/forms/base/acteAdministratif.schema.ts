@@ -119,7 +119,7 @@ export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
   }
 );
 
-const filterActesWithKey =
+export const filterActesWithKey =
   (allowedCategories: ActeAdministratifCategory[] = []) =>
   (val: unknown) =>
     Array.isArray(val)

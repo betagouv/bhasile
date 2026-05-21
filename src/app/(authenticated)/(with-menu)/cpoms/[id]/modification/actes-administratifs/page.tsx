@@ -14,7 +14,6 @@ import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
 import { getCpomDefaultValues } from "@/app/utils/cpom.util";
 import { actesAdministratifsCpomSchema } from "@/schemas/forms/base/cpom.schema";
 import { FetchState } from "@/types/fetch-state.type";
-import { FormKind } from "@/types/global";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
 
@@ -35,7 +34,7 @@ export default function CpomModificationActesAdministratifs() {
   return (
     <>
       <ModificationTitle
-        step="Document de convention du CPOM"
+        step="Actes administratifs"
         handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
@@ -50,7 +49,7 @@ export default function CpomModificationActesAdministratifs() {
         ]}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <FieldSetActesAdministratifs formKind={FormKind.MODIFICATION} />
+        <FieldSetActesAdministratifs />
         {saveState === FetchState.ERROR && (
           <SubmitError cpomId={cpom.id} backendError={backendError} />
         )}
