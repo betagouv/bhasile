@@ -6,6 +6,7 @@ import { ReactElement } from "react";
 
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
+import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 
 import { useOperateurContext } from "../_context/OperateurClientContext";
 
@@ -14,11 +15,17 @@ export const OperateurHeader = (): ReactElement | null => {
   const pathname = usePathname();
 
   const { headerRef } = useHeaderHeight();
+  const { isHidden } = useHideOnScroll();
 
   const isRootPath = pathname === `/operateurs/${operateur?.id}`;
 
   return operateur ? (
-    <div className="sticky top-0 z-50 bg-lifted-grey" ref={headerRef}>
+    <div
+      className={`sticky top-0 z-50 bg-lifted-grey transition-transform duration-300 ease-in-out ${
+        isHidden ? "-translate-y-full" : "translate-y-0"
+      }`}
+      ref={headerRef}
+    >
       <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
         <Link
           className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"

@@ -9,6 +9,7 @@ import { ReactElement } from "react";
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
+import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -35,6 +36,7 @@ export const StructureHeader = (): ReactElement | null => {
     useAgentFormHandling();
 
   const { headerRef } = useHeaderHeight();
+  const { isHidden } = useHideOnScroll();
 
   const pathname = usePathname();
 
@@ -54,7 +56,12 @@ export const StructureHeader = (): ReactElement | null => {
 
   return structure ? (
     <>
-      <div className="sticky top-0 z-50 bg-lifted-grey" ref={headerRef}>
+      <div
+        className={`sticky top-0 z-50 bg-lifted-grey transition-transform duration-300 ease-in-out ${
+          isHidden ? "-translate-y-full" : "translate-y-0"
+        }`}
+        ref={headerRef}
+      >
         <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
           <Link
             href="/structures"
