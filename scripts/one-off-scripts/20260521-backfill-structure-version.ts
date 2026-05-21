@@ -12,7 +12,7 @@ const prisma = createPrismaClient();
 function initialVersionData(structure) {
   return {
     structureId: structure.id,
-    effectiveDate: structure.createdAt,
+    effectiveDate: structure.updatedAt,
     forceHistorize: true,
     type: structure.type,
     adresseAdministrative: structure.adresseAdministrative,
