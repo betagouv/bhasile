@@ -40,6 +40,8 @@ vi.mock("@/app/api/structures/structure.util", () => ({
   getRepartition: vi.fn().mockReturnValue("DIFFUS"),
   isStructureInCpom: vi.fn().mockReturnValue(false),
   isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
+  getDatesConvention: vi.fn().mockReturnValue([null, null]),
+  getDatesPeriodeAutorisation: vi.fn().mockReturnValue([null, null]),
 }));
 
 vi.mock("@/app/api/user-action/user-action.service", () => ({
@@ -88,6 +90,10 @@ describe("GET /api/structures/[id]", () => {
       cpomStructures: [],
       creationDate: "2020-01-01T00:00:00.000Z",
       date303: null,
+      debutConvention: null,
+      finConvention: null,
+      debutPeriodeAutorisation: null,
+      finPeriodeAutorisation: null,
       dnaStructures: [],
       latitude: "48.86",
       longitude: "2.34",

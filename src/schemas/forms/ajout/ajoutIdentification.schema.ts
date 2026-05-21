@@ -1,6 +1,5 @@
 import z from "zod";
 
-import { calendrierSchema } from "@/schemas/forms/base/calendrier.schema";
 import { identificationSchema } from "@/schemas/forms/base/identification.schema";
 
 import { adresseAdministrativeSchema } from "../base/adresseAdministrative.schema";
@@ -14,7 +13,6 @@ export const ajoutIdentificationSchema = identificationSchema
   .and(antennesSchema)
   .and(dnaStructuresSchema)
   .and(finessesSchema)
-  .and(calendrierSchema)
   .and(contactsSchema);
 
 export type AjoutIdentificationFormValues = z.infer<

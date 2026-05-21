@@ -41,8 +41,6 @@ export const caes1: TestStructureScenario = {
         telephone: "+33623456789",
       },
     ],
-    debutConvention: "2020-01-01",
-    finConvention: "2023-12-31",
     nom: "Structure Test",
     adresseAdministrative: {
       complete: "1 Rue de la Paix 75001 Paris",
@@ -275,8 +273,6 @@ export const caes1: TestStructureScenario = {
     fvvTeh: true,
     contacts: [{ email: "modif-caes1@example.com" }],
     notes: "Notes modification CAES 1 - filiale.",
-    debutConvention: "2021-01-15",
-    finConvention: "2024-06-30",
     ouvertureFermeture: {
       placesACreer: "5",
       echeancePlacesACreer: "2026-04-01",

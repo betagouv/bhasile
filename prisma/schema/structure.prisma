@@ -10,15 +10,15 @@ model Structure {
   latitude                 Decimal?
   longitude                Decimal?
   nom                      String?
-  debutConvention          DateTime?
-  finConvention            DateTime?
+  debutConvention          DateTime? // TODO: remove after quality check
+  finConvention            DateTime? // TODO: remove after quality check
   creationDate             DateTime?
   date303                  DateTime?
   lgbt                     Boolean?
   fvvTeh                   Boolean?
   public                   PublicType?
-  debutPeriodeAutorisation DateTime?
-  finPeriodeAutorisation   DateTime?
+  debutPeriodeAutorisation DateTime? // TODO: remove after quality check
+  finPeriodeAutorisation   DateTime? // TODO: remove after quality check
   notes                    String?
   nomOfii                  String?
   directionTerritoriale    String?

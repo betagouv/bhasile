@@ -44,8 +44,6 @@ export const huda1: TestStructureScenario = {
         telephone: "+33623456789",
       },
     ],
-    debutConvention: "2020-01-01",
-    finConvention: "2023-12-31",
     nom: "Structure Test",
     adresseAdministrative: {
       complete: "1 Rue de la Paix 75001 Paris",
@@ -281,8 +279,6 @@ export const huda1: TestStructureScenario = {
     fvvTeh: false,
     contacts: [{ email: "modif-huda1@example.com" }],
     notes: "Notes modification HUDA 1 - convention.",
-    debutConvention: "2021-03-01",
-    finConvention: "2024-09-30",
     ouvertureFermeture: {
       placesACreer: "6",
       echeancePlacesACreer: "2026-03-15",
