@@ -42,12 +42,12 @@ export function useTransformationContext(): TransformationContextType & {
 
   if (context === undefined) {
     throw new Error(
-      "useTransformationContext must be used within a TransformationProvider"
+      "useTransformationContext doit être utilisé à l'intérieur d'un TransformationProvider"
     );
   }
 
   if (context.transformation === null) {
-    throw new Error("Transformation is not available");
+    throw new Error("Transformation indisponible dans le contexte");
   }
   return {
     transformation: context.transformation,
