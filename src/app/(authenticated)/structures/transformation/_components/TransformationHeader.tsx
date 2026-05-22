@@ -2,7 +2,6 @@
 
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
-import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -13,20 +12,9 @@ import { getTransformationTitle } from "@/app/utils/transformation.util";
 import { FetchState } from "@/types/fetch-state.type";
 import { TransformationFormType } from "@/types/transformation.type";
 
-const annulerModal = createModal({
-  id: "annuler-demarche-transformation-modal",
-  isOpenedByDefault: false,
-});
-
-const enregistrementModal = createModal({
-  id: "enregistrement-avancee-transformation-modal",
-  isOpenedByDefault: false,
-});
-
-const quitterModal = createModal({
-  id: "quitter-transformation-modal",
-  isOpenedByDefault: false,
-});
+import { AnnulerDemarcheModal, annulerDemarcheModal } from "./AnnulerDemarcheModal";
+import { EnregistrementModal, enregistrementModal } from "./EnregistrementModal";
+import { QuitterModal, quitterModal } from "./QuitterModal";
 
 export const TransformationHeader = () => {
   const { transformation, setTransformation } =
@@ -114,7 +102,7 @@ export const TransformationHeader = () => {
               <>
                 <Button
                   priority="tertiary no outline"
-                  onClick={() => annulerModal.open()}
+                  onClick={() => annulerDemarcheModal.open()}
                 >
                   Annuler la démarche
                 </Button>
@@ -158,100 +146,16 @@ export const TransformationHeader = () => {
 
       {transformation && (
         <>
-          <annulerModal.Component
-            title="Attention, vous êtes sur le point d'annuler cette démarche."
-            buttons={[
-              {
-                doClosesModal: true,
-                children: "Revenir au formulaire",
-                type: "button",
-              },
-              {
-                doClosesModal: false,
-                children: "Annuler et quitter",
-                type: "button",
-                disabled: deleteState === FetchState.LOADING,
-                onClick: handleDelete,
-              },
-            ]}
-            className="[&_h1]:text-left! [&_p]:text-left!"
-          >
-            <>
-              <p>
-                Les données saisies ne seront pas conservées et les changements
-                ne seront pas effectifs, voulez-vous continuer ?
-              </p>
-              {deleteState === FetchState.ERROR && (
-                <Alert
-                  severity="error"
-                  small
-                  description="Une erreur est survenue lors de l'annulation. Veuillez réessayer."
-                />
-              )}
-            </>
-          </annulerModal.Component>
-
-          <enregistrementModal.Component
-            title="Votre avancée a été enregistrée."
-            buttons={[
-              {
-                doClosesModal: true,
-                children: "Revenir au formulaire",
-                type: "button",
-              },
-              {
-                doClosesModal: false,
-                children: "Quitter le formulaire",
-                type: "button",
-                onClick: () => router.push("/structures"),
-              },
-            ]}
-            className="[&_h1]:text-left! [&_p]:text-left!"
-          >
-            Vous retrouverez cette démarche dans l&apos;onglet « à finaliser ».
-          </enregistrementModal.Component>
-
-          <quitterModal.Component
-            title="Vous êtes sur le point de quitter un formulaire en cours de modification."
-            buttons={[
-              {
-                doClosesModal: true,
-                children: "Annuler",
-                type: "button",
-                priority: "secondary",
-              },
-              {
-                doClosesModal: false,
-                children: "Quitter",
-                type: "button",
-                priority: "primary",
-                onClick: () => router.push("/structures"),
-              },
-              {
-                doClosesModal: false,
-                children: "Enregistrer et quitter",
-                type: "button",
-                disabled: saveState === FetchState.LOADING,
-                onClick: handleSaveAndQuit,
-              },
-            ]}
-            className="[&_h1]:text-left! [&_p]:text-left!"
-          >
-            <>
-              <p>
-                Voulez-vous enregistrer votre avancée ? Vous retrouverez toutes
-                les structures en cours de création ou de transformation
-                enregistrées dans l&apos;onglet « à finaliser ».
-              </p>
-              {saveState === FetchState.ERROR && (
-                <Alert
-                  severity="error"
-                  small
-                  description="Une erreur est survenue lors de l'enregistrement. Veuillez réessayer."
-                />
-              )}
-            </>
-          </quitterModal.Component>
+          <AnnulerDemarcheModal
+            deleteState={deleteState}
+            onDelete={handleDelete}
+          />
+          <EnregistrementModal onQuit={() => router.push("/structures")} />
+          <QuitterModal
+            saveState={saveState}
+            onQuit={() => router.push("/structures")}
+            onSaveAndQuit={handleSaveAndQuit}
+          />
         </>
       )}
     </>
