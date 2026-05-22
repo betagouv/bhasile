@@ -171,9 +171,6 @@ const getScalarData = (
 
 export const deleteOne = async (id: number): Promise<void> => {
   await prisma.$transaction(async (tx) => {
-    await tx.structureTransformation.deleteMany({
-      where: { transformationId: id },
-    });
     await tx.transformation.delete({ where: { id } });
   });
 };
