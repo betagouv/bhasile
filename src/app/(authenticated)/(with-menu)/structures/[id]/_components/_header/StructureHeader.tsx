@@ -75,7 +75,7 @@ export const StructureHeader = (): ReactElement | null => {
                   <>
                     –
                     <span className="mb-0 text-title-grey text-lg italic font-normal">
-                      nom
+                      {nom}
                     </span>
                   </>
                 ) : null}
