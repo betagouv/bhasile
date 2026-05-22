@@ -1,10 +1,11 @@
 model Departement {
-  id                   Int               @id @default(autoincrement())
-  numero               String            @unique
+  id                   Int                @id @default(autoincrement())
+  numero               String             @unique
   name                 String
   structures           Structure[]
+  structureVersions    StructureVersion[]
   roleDepartements     RoleDepartement[]
-  regionAdministrative Region?           @relation(fields: [regionId], references: [id])
+  regionAdministrative Region?            @relation(fields: [regionId], references: [id])
   regionId             Int?
   cpoms                CpomDepartement[]
   dnas                 Dna[]

@@ -40,16 +40,21 @@ const createFakeAdresse = ({
   AdresseWithTypologies,
   "id" | "structureDnaCode" | "structureId"
 > => {
+  const typologieCourante = createFakeAdresseTypologie({
+    year: 2025,
+    placesAutorisees,
+  });
+
   return {
     adresse: faker.location.streetAddress(),
     codePostal: faker.location.zipCode(),
     commune: faker.location.city(),
     repartition,
-    adresseTypologies: [
-      createFakeAdresseTypologie({ year: 2025, placesAutorisees }),
-      createFakeAdresseTypologie({ year: 2024, placesAutorisees }),
-      createFakeAdresseTypologie({ year: 2023, placesAutorisees }),
-    ],
+    placesAutorisees: typologieCourante.placesAutorisees,
+    qpv: typologieCourante.qpv,
+    logementSocial: typologieCourante.logementSocial,
+    adresseTypologies: [typologieCourante],
+    structureVersionId: null,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   };
