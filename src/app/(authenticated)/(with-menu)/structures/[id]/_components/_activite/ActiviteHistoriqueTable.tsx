@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { ReactElement } from "react";
+import { ReactElement, ReactNode } from "react";
 
 import { Badge, BadgeType } from "@/app/components/common/Badge";
 import { Table } from "@/app/components/common/Table";
@@ -24,21 +24,21 @@ export const ActiviteHistoriqueTable = (): ReactElement => {
     {
       id: "placesIndisponibles",
       label: "Indisponibilité",
-      subLabel: "Seuil cible à 3%",
+      subLabel: <span>Seuil cible à 3&nbsp;%</span>,
       activites: getActiviteFor("placesIndisponibles"),
       seuil: typesActivite["placesIndisponibles"]?.seuil,
     },
     {
       id: "presencesInduesBPI",
       label: "Présences indues BPI",
-      subLabel: "Seuil cible à 3%",
+      subLabel: <span>Seuil cible à 3&nbsp;%</span>,
       activites: getActiviteFor("presencesInduesBPI"),
       seuil: typesActivite["presencesInduesBPI"]?.seuil,
     },
     {
       id: "presencesInduesDeboutees",
       label: "Présences indues déboutées",
-      subLabel: "Seuil cible à 4%",
+      subLabel: <span>Seuil cible à 4&nbsp;%</span>,
       activites: getActiviteFor("presencesInduesDeboutees"),
       seuil: typesActivite["presencesInduesDeboutees"]?.seuil,
     },
@@ -87,7 +87,7 @@ export const ActiviteHistoriqueTable = (): ReactElement => {
   return (
     <Table
       headings={getHeadings()}
-      ariaLabelledBy="TODO"
+      ariaLabelledBy="activite-historique-title"
       className="[&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
       enableBorders
       stickFirstColumn
@@ -97,7 +97,7 @@ export const ActiviteHistoriqueTable = (): ReactElement => {
           <td className="text-left! py-3! min-w-[200px]">
             <strong>{activiteType.label}</strong>
             <br />
-            <span>{activiteType.subLabel}</span>
+            {activiteType.subLabel}
           </td>
           {activiteType.activites?.map((activite, index) => (
             <td key={`${activiteType.label}-${index}`}>
@@ -123,7 +123,7 @@ export const ActiviteHistoriqueTable = (): ReactElement => {
 type ActiviteType = {
   id: string;
   label: string;
-  subLabel?: string;
+  subLabel?: ReactNode;
   activites?: (string | number | null)[];
   seuil?: number | null;
 };

@@ -12,7 +12,12 @@ export const ActiviteHistorique = (): ReactElement => {
   return (
     <div>
       <div className="flex items-center">
-        <h4 className="text-lg text-title-blue-france pr-6 mb-0">Historique</h4>
+        <h4
+          className="text-lg text-title-blue-france pr-6 mb-0"
+          id="activite-historique-title"
+        >
+          Historique
+        </h4>
         <SegmentedControl
           small
           legend=""
