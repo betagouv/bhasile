@@ -72,7 +72,7 @@ export const FinancesBlock = () => {
         ariaLabelledBy="gestionBudgetaire"
         headings={getBudgetTableHeading({ years })}
         enableBorders
-        className="[&_thead_tr_th]:!text-sm"
+        className="[&_thead_tr_th]:text-sm!"
         stickFirstColumn
       >
         <BudgetTableLines

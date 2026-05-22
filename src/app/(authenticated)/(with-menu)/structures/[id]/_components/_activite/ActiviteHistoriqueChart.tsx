@@ -1,0 +1,171 @@
+"use client";
+
+import dayjs, { Dayjs } from "dayjs";
+import { ReactElement, useEffect, useState } from "react";
+
+import LineChart from "@/app/components/common/LineChart";
+import { ActiviteStats, useActiviteStats } from "@/app/hooks/useActiviteStats";
+import { computeAverage } from "@/app/utils/common.util";
+import {
+  formatForCharts,
+  getLastMonths,
+  getYearFromDate,
+} from "@/app/utils/date.util";
+import { capitalizeFirstLetter } from "@/app/utils/string.util";
+import { ActiviteApiType } from "@/schemas/api/activite.schema";
+
+import { useStructureContext } from "../../_context/StructureClientContext";
+import { typesActivite } from "./activite.constants";
+import { ActiviteDurations } from "./ActiviteDurations";
+import { ActiviteTypes } from "./ActiviteTypes";
+
+export const ActiviteHistoriqueChart = (): ReactElement => {
+  const { structure } = useStructureContext();
+  const { activites = [], debutConvention, finConvention } = structure;
+
+  const [selectedMonths, setSelectedMonths] = useState<dayjs.Dayjs[]>(
+    getLastMonths(6)
+  );
+  const [typeActivite, setTypeActivite] = useState<keyof ActiviteApiType>(
+    "placesIndisponibles"
+  );
+
+  const [activiteStats, setActiviteStats] = useState<ActiviteStats>();
+
+  const { getStats } = useActiviteStats();
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const stats = await getStats(
+        structure.departementAdministratif,
+        selectedMonths[0]?.toISOString(),
+        (selectedMonths.at(-1) as Dayjs)?.toISOString()
+      );
+      setActiviteStats(stats);
+    };
+    fetchStats();
+  }, [
+    typeActivite,
+    selectedMonths,
+    setActiviteStats,
+    structure.departementAdministratif,
+    getStats,
+  ]);
+
+  const getCurrentActivite = (
+    activites: ActiviteApiType[],
+    date: dayjs.Dayjs
+  ): ActiviteApiType | undefined => {
+    return activites.find((activite) => {
+      const isSameMonth =
+        new Date(activite.date)?.getMonth() === date.get("month");
+      const isSameYear = getYearFromDate(activite.date) === date.get("year");
+      return isSameMonth && isSameYear;
+    });
+  };
+
+  const getActivitesData = (): (number | null)[] => {
+    return selectedMonths.map((selectedMonth) => {
+      const currentActivite = getCurrentActivite(activites, selectedMonth);
+      if (currentActivite) {
+        if (typeActivite === "placesAutorisees") {
+          return currentActivite?.placesAutorisees;
+        }
+        return (
+          ((currentActivite?.[typeActivite] as number) /
+            currentActivite?.placesAutorisees) *
+          100
+        );
+      }
+      return null;
+    });
+  };
+
+  const getSeuilCahierDesCharges = (): number[] => {
+    const currentActivites: (ActiviteApiType | undefined)[] =
+      selectedMonths.map((selectedMonth) => {
+        return getCurrentActivite(activites, selectedMonth);
+      });
+    return currentActivites.map(() => typesActivite[typeActivite]?.seuil || 0);
+  };
+
+  const getStructureAverage = (): number[] => {
+    const activitesData = getActivitesData();
+    const average = computeAverage(activitesData);
+    return Array(selectedMonths.length).fill(average);
+  };
+
+  const getDepartmentAverage = (): number[] => {
+    const activiteStatsKey =
+      `average${capitalizeFirstLetter(typeActivite)}` as keyof ActiviteStats;
+    const average = activiteStats?.[activiteStatsKey];
+    return Array(selectedMonths.length).fill(average);
+  };
+
+  return (
+    <div className="w-full">
+      <div className="flex pb-6">
+        <ActiviteTypes
+          typeActivite={typeActivite}
+          setTypeActivite={setTypeActivite}
+        />
+      </div>
+      <div className="pb-6">
+        <ActiviteDurations
+          setSelectedMonths={setSelectedMonths}
+          debutConvention={debutConvention}
+          finConvention={finConvention}
+        />
+      </div>
+      <div className="flex">
+        <div className="flex-4">
+          <LineChart
+            data={{
+              labels: selectedMonths.map(formatForCharts),
+              series: [
+                getActivitesData(),
+                getSeuilCahierDesCharges(),
+                getStructureAverage(),
+                getDepartmentAverage(),
+              ],
+            }}
+            options={{
+              fullWidth: true,
+              axisX: {
+                showGrid: false,
+                labelInterpolationFnc: (value, index) => {
+                  const skip = Math.ceil(selectedMonths.length / 8);
+                  return index % skip === 0 ? value : null;
+                },
+              },
+              axisY: {
+                offset: 50,
+                labelInterpolationFnc: (value) => {
+                  return value + " %";
+                },
+              },
+            }}
+          />
+        </div>
+        <div className="pl-5">
+          <div className="pb-2 flex items-center text-sm">
+            <div className="w-[40px] border-b-2 border-b-background-flat-blue-france mr-2 shrink-0 grow-0" />
+            {typesActivite[typeActivite]?.label}
+          </div>
+          <div className="pb-2 flex items-center text-sm">
+            <div className="w-[40px] border-b-2 border-default-blue-france border-dashed mr-2 shrink-0 grow-0" />
+            Seuil cahier des charges
+          </div>
+          <div className="pb-2 flex items-center text-sm">
+            <div className="w-[40px] border-b-2 border-default-green-archipel border-dotted mr-2 shrink-0 grow-0" />
+            Moyenne de la structure sur la période
+          </div>
+          <div className="pb-2 flex items-center text-sm">
+            <div className="w-[40px] border-b-2 border-default-purple-glycine border-dotted mr-2 shrink-0 grow-0" />
+            Moyenne départementale sur la période
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

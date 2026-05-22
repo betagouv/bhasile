@@ -13,6 +13,11 @@ export const ActiviteTypes = ({
   const { structure } = useStructureContext();
   const tags: ActiviteTag[] = [
     {
+      label: "Indisponibles",
+      value: "placesIndisponibles",
+      isDisplayed: true,
+    },
+    {
       label: "Présences indues BPI",
       value: "presencesInduesBPI",
       isDisplayed: structure.type !== StructureType.CPH,
@@ -26,16 +31,6 @@ export const ActiviteTypes = ({
       label: "Présences indues totales",
       value: "presencesIndues",
       isDisplayed: structure.type !== StructureType.CPH,
-    },
-    {
-      label: "Vacantes",
-      value: "placesVacantes",
-      isDisplayed: true,
-    },
-    {
-      label: "Indisponibles",
-      value: "placesIndisponibles",
-      isDisplayed: true,
     },
   ];
 

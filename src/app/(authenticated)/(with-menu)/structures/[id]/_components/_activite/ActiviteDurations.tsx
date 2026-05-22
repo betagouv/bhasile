@@ -76,7 +76,7 @@ export const ActiviteDurations = ({
   return (
     <div className="flex items-end">
       <div className="pr-2">
-        <SegmentedControl segments={getDurations()} hideLegend={true} />
+        <SegmentedControl segments={getDurations()} hideLegend={true} small />
       </div>
       {selectedDuration === "custom" && (
         <div className="pr-2">
