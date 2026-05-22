@@ -211,7 +211,7 @@ Veut-on uniformiser le traitement avec le rattachement d'une structure à ses CP
 
 ## Questions ouvertes
 
-- [ ] Valider qu'une structure ne peut pas avoir **plusieures** versions le même jour (deux transfo) ? Gérer aussi le cas rolling version manuelle le jour d'une transfo
+- [ ] Valider qu'une structure ne peut pas avoir **plusieurs** versions le même jour (deux transfo) ? Gérer aussi le cas rolling version manuelle le jour d'une transfo
 - [ ] Gestion des unique (Codes Finess par exemple). Veut-on conserver un principe d'unicité du code Finess ? Si oui par cohérence profitons-en pour "clean" la string rentrée par l'utilisateur (que des chiffres sans espace)
 - [ ] Exemple de **AdresseTypologie** : en a-t-on vraiment besoin d'ailleurs côté métier ? Ou peut-on considérer que le seul moment où on gèrera ces adresses ce sera via les transfos (et éventuellement les campagnes d'actualisation) mais qu'on ne veut pas conserver d'historique annualisé par exemple ?
 - [ ] Actes administratifs ?
