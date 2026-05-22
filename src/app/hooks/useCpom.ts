@@ -28,7 +28,9 @@ export const useCpom = () => {
     method: "POST" | "PUT"
   ): Promise<{ cpomId: number } | string> => {
     try {
-      const response = await fetch(`/api/cpoms`, {
+      const id = method === "PUT" ? (data as { id?: number }).id : undefined;
+      const url = id ? `/api/cpoms/${id}` : "/api/cpoms";
+      const response = await fetch(url, {
         method,
         body: JSON.stringify(data),
       });

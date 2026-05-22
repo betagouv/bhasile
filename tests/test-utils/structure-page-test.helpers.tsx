@@ -34,23 +34,21 @@ export const renderWithStructurePageProviders = (
     </FetchStateProvider>
   );
 
+const isPutStructuresCall = (call: unknown[]) =>
+  typeof call[0] === "string" &&
+  /^\/api\/structures\/\d+$/.test(call[0]) &&
+  (call[1] as RequestInit | undefined)?.method === "PUT";
+
 export const findPutStructuresCall = (mockedFetch: {
   mock: { calls: unknown[][] };
-}) =>
-  mockedFetch.mock.calls
-    .reverse()
-    .find(
-      (call) =>
-        call[0] === "/api/structures" &&
-        (call[1] as RequestInit | undefined)?.method === "PUT"
-    );
+}) => mockedFetch.mock.calls.reverse().find(isPutStructuresCall);
 
 export const getPutStructuresPayload = <T,>(mockedFetch: {
   mock: { calls: unknown[][] };
 }) => {
   const putCall = findPutStructuresCall(mockedFetch);
   if (!putCall) {
-    throw new Error("Expected one PUT call to /api/structures");
+    throw new Error("Expected one PUT call to /api/structures/:id");
   }
 
   return JSON.parse((putCall[1] as RequestInit).body as string) as T;
@@ -62,11 +60,7 @@ export const getLatestPutStructuresPayloadMatching = <T,>(
 ) => {
   const putCalls = mockedFetch.mock.calls
     .reverse()
-    .filter(
-      (call) =>
-        call[0] === "/api/structures" &&
-        (call[1] as RequestInit | undefined)?.method === "PUT"
-    );
+    .filter(isPutStructuresCall);
 
   for (const call of putCalls) {
     const payload = JSON.parse((call[1] as RequestInit).body as string) as T;
@@ -75,7 +69,7 @@ export const getLatestPutStructuresPayloadMatching = <T,>(
     }
   }
 
-  throw new Error("Expected one matching PUT call to /api/structures");
+  throw new Error("Expected one matching PUT call to /api/structures/:id");
 };
 
 export const clickButtonByName = async (name: string) => {
