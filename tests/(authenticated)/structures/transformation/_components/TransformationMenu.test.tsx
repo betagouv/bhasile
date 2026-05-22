@@ -242,10 +242,11 @@ describe("TransformationMenu", () => {
           structureTransformations: [
             {
               id: 1,
-              structureId: 1001,
-              structure: { codeBhasile: "1001" },
-              structureTransformationType:
-                StructureTransformationType.FERMETURE,
+              type: StructureTransformationType.FERMETURE,
+              structureVersion: {
+                structureId: 1001,
+                structure: { codeBhasile: "1001" },
+              },
             },
           ],
         },

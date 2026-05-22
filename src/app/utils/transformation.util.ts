@@ -16,9 +16,9 @@ export const getTransformationSteps = (
       ?.map((structureTransformation) => {
         return {
           id: structureTransformation.id,
-          codeBhasile: structureTransformation.structure?.codeBhasile,
-          structureTransformationType:
-            structureTransformation.structureTransformationType,
+          codeBhasile:
+            structureTransformation.structureVersion?.structure?.codeBhasile,
+          structureTransformationType: structureTransformation.type,
           steps: getStepsByType(structureTransformation, transformation.id),
         };
       })
@@ -43,12 +43,12 @@ export const getTransformationSteps = (
 const getStepsByType = (
   structureTransformation: StructureTransformationApiUpdate,
   transformationId: number
-) => {
-  if (!structureTransformation.structureTransformationType) {
+): Step["steps"] => {
+  if (!structureTransformation.type) {
     return [];
   }
 
-  switch (structureTransformation.structureTransformationType) {
+  switch (structureTransformation.type) {
     case StructureTransformationType.EXTENSION:
     case StructureTransformationType.CONTRACTION:
     case StructureTransformationType.CREATION:
@@ -59,7 +59,7 @@ const getStepsByType = (
             "description",
             transformationId,
             structureTransformation.id,
-            structureTransformation.structureTransformationType
+            structureTransformation.type
           ),
         },
         {
@@ -68,7 +68,7 @@ const getStepsByType = (
             "places-et-hebergement",
             transformationId,
             structureTransformation.id,
-            structureTransformation.structureTransformationType
+            structureTransformation.type
           ),
         },
         {
@@ -77,7 +77,7 @@ const getStepsByType = (
             "actes-administratifs",
             transformationId,
             structureTransformation.id,
-            structureTransformation.structureTransformationType
+            structureTransformation.type
           ),
         },
       ];
@@ -89,7 +89,7 @@ const getStepsByType = (
             "description",
             transformationId,
             structureTransformation.id,
-            structureTransformation.structureTransformationType
+            structureTransformation.type
           ),
         },
       ];

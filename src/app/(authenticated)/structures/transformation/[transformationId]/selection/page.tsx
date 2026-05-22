@@ -23,7 +23,10 @@ export default function TransformationSelectionsPage() {
   return (
     <TransformationTypeForms
       formType={formType}
-      structureId={transformation.structureTransformations?.[0]?.structureId}
+      structureId={
+        transformation.structureTransformations?.[0]?.structureVersion
+          ?.structureId ?? undefined
+      }
       initialTransformationType={transformation.type}
       initialStructureTransformations={transformation.structureTransformations}
       onSubmit={handleSubmit}

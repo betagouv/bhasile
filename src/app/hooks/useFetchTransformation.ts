@@ -22,29 +22,28 @@ export const useFetchTransformation = (id?: number) => {
         structureTransformations: [
           {
             id: 1,
-            structureId: 1001,
-            structureTransformationType: StructureTransformationType.FERMETURE,
+            type: StructureTransformationType.FERMETURE,
+            structureVersion: { structureId: 1001 },
           },
           {
             id: 2,
-            structureId: 1003,
-            structureTransformationType: StructureTransformationType.EXTENSION,
+            type: StructureTransformationType.EXTENSION,
+            structureVersion: { structureId: 1003 },
           },
           {
             id: 3,
-            structureId: 1002,
-            structureTransformationType: StructureTransformationType.FERMETURE,
+            type: StructureTransformationType.FERMETURE,
+            structureVersion: { structureId: 1002 },
           },
           {
             id: 4,
-            structureId: 1003,
-            structureTransformationType:
-              StructureTransformationType.CONTRACTION,
+            type: StructureTransformationType.CONTRACTION,
+            structureVersion: { structureId: 1003 },
           },
           {
             id: 5,
-            structureId: 1004,
-            structureTransformationType: StructureTransformationType.CREATION,
+            type: StructureTransformationType.CREATION,
+            structureVersion: { structureId: 1004 },
           },
         ],
       };

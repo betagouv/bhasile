@@ -8,7 +8,7 @@ import {
 export type StructureSelectionBlock = {
   id: string;
   multiple: boolean;
-  structureTransformationType: StructureTransformationType;
+  type: StructureTransformationType;
   fixedType?: StructureType;
   inheritOperateurFrom?: string;
   inheritDepartementFrom?: string;
@@ -29,7 +29,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
   [TransformationType.OUVERTURE_EX_NIHILO]: {
     blocks: [],
     buildAutoTransformations: () => [
-      { structureTransformationType: StructureTransformationType.CREATION },
+      { type: StructureTransformationType.CREATION },
     ],
   },
   [TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES]: {
@@ -37,7 +37,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "main",
         multiple: true,
-        structureTransformationType: StructureTransformationType.FERMETURE,
+        type: StructureTransformationType.FERMETURE,
         label: "Veuillez sélectionner la ou les structures qui ferment",
       },
     ],
@@ -47,8 +47,8 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     blocks: [],
     buildAutoTransformations: (structureId) => [
       {
-        structureId,
-        structureTransformationType: StructureTransformationType.EXTENSION,
+        type: StructureTransformationType.EXTENSION,
+        structureVersion: { structureId },
       },
     ],
   },
@@ -57,15 +57,15 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "main",
         multiple: true,
-        structureTransformationType: StructureTransformationType.CONTRACTION,
+        type: StructureTransformationType.CONTRACTION,
         label:
           "Veuillez sélectionner la ou les structures dont sont issues les places",
       },
     ],
     buildAutoTransformations: (structureId) => [
       {
-        structureId,
-        structureTransformationType: StructureTransformationType.EXTENSION,
+        type: StructureTransformationType.EXTENSION,
+        structureVersion: { structureId },
       },
     ],
   },
@@ -74,15 +74,15 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "main",
         multiple: true,
-        structureTransformationType: StructureTransformationType.FERMETURE,
+        type: StructureTransformationType.FERMETURE,
         label:
           "Veuillez sélectionner la ou les structures dont sont issues les places",
       },
     ],
     buildAutoTransformations: (structureId) => [
       {
-        structureId,
-        structureTransformationType: StructureTransformationType.EXTENSION,
+        type: StructureTransformationType.EXTENSION,
+        structureVersion: { structureId },
       },
     ],
   },
@@ -91,15 +91,15 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "main",
         multiple: true,
-        structureTransformationType: StructureTransformationType.EXTENSION,
+        type: StructureTransformationType.EXTENSION,
         label:
           "Veuillez sélectionner la ou les structures vers lesquelles les places sont transférées",
       },
     ],
     buildAutoTransformations: (structureId) => [
       {
-        structureId,
-        structureTransformationType: StructureTransformationType.CONTRACTION,
+        type: StructureTransformationType.CONTRACTION,
+        structureVersion: { structureId },
       },
     ],
   },
@@ -107,8 +107,8 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     blocks: [],
     buildAutoTransformations: (structureId) => [
       {
-        structureId,
-        structureTransformationType: StructureTransformationType.CONTRACTION,
+        type: StructureTransformationType.CONTRACTION,
+        structureVersion: { structureId },
       },
     ],
   },
@@ -118,15 +118,15 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         {
           id: "main",
           multiple: true,
-          structureTransformationType: StructureTransformationType.EXTENSION,
+          type: StructureTransformationType.EXTENSION,
           label:
             "Veuillez sélectionner la ou les structures vers lesquelles les places sont transférées",
         },
       ],
       buildAutoTransformations: (structureId) => [
         {
-          structureId,
-          structureTransformationType: StructureTransformationType.FERMETURE,
+          type: StructureTransformationType.FERMETURE,
+          structureVersion: { structureId },
         },
       ],
     },
@@ -134,8 +134,8 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     blocks: [],
     buildAutoTransformations: (structureId) => [
       {
-        structureId,
-        structureTransformationType: StructureTransformationType.FERMETURE,
+        type: StructureTransformationType.FERMETURE,
+        structureVersion: { structureId },
       },
     ],
   },
@@ -144,14 +144,14 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "huda",
         multiple: true,
-        structureTransformationType: StructureTransformationType.FERMETURE,
+        type: StructureTransformationType.FERMETURE,
         fixedType: StructureType.HUDA,
         label: "Veuillez sélectionner le ou les HUDA qui ferment",
       },
       {
         id: "cada",
         multiple: false,
-        structureTransformationType: StructureTransformationType.EXTENSION,
+        type: StructureTransformationType.EXTENSION,
         fixedType: StructureType.CADA,
         inheritOperateurFrom: "huda",
         inheritDepartementFrom: "huda",
@@ -165,15 +165,15 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "huda",
         multiple: true,
-        structureTransformationType: StructureTransformationType.FERMETURE,
+        type: StructureTransformationType.FERMETURE,
         fixedType: StructureType.HUDA,
         label: "Veuillez sélectionner le ou les HUDA qui ferment",
       },
     ],
     buildAutoTransformations: () => [
       {
-        structureTransformationType: StructureTransformationType.CREATION,
-        type: StructureType.CADA,
+        type: StructureTransformationType.CREATION,
+        structureVersion: { type: StructureType.CADA },
       },
     ],
   },
@@ -182,7 +182,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "huda",
         multiple: true,
-        structureTransformationType: StructureTransformationType.FERMETURE,
+        type: StructureTransformationType.FERMETURE,
         fixedType: StructureType.HUDA,
         label: "Veuillez sélectionner le ou les HUDA qui ferment",
       },

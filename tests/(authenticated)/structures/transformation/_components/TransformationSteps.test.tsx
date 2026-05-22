@@ -43,22 +43,19 @@ describe("TransformationSteps", () => {
       transformation: buildTransformation([
         {
           id: 1,
-          structureId: 1001,
-          structure: { codeBhasile: "1001" },
-          structureTransformationType: StructureTransformationType.FERMETURE,
-        },
+          type: StructureTransformationType.FERMETURE,
+          structureVersion: { structureId: 1001, structure: { codeBhasile: "1001" } },
+          },
         {
           id: 2,
-          structureId: 1002,
-          structure: { codeBhasile: "1002" },
-          structureTransformationType: StructureTransformationType.EXTENSION,
-        },
+          type: StructureTransformationType.EXTENSION,
+          structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+          },
         {
           id: 3,
-          structureId: 1003,
-          structure: { codeBhasile: "1003" },
-          structureTransformationType: StructureTransformationType.CREATION,
-        },
+          type: StructureTransformationType.CREATION,
+          structureVersion: { structureId: 1003, structure: { codeBhasile: "1003" } },
+          },
       ]),
     });
 
@@ -77,28 +74,24 @@ describe("TransformationSteps", () => {
       transformation: buildTransformation([
         {
           id: 1,
-          structureId: 1001,
-          structure: { codeBhasile: "1001" },
-          structureTransformationType: StructureTransformationType.CREATION,
-        },
+          type: StructureTransformationType.CREATION,
+          structureVersion: { structureId: 1001, structure: { codeBhasile: "1001" } },
+          },
         {
           id: 2,
-          structureId: 1002,
-          structure: { codeBhasile: "1002" },
-          structureTransformationType: StructureTransformationType.EXTENSION,
-        },
+          type: StructureTransformationType.EXTENSION,
+          structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+          },
         {
           id: 3,
-          structureId: 1003,
-          structure: { codeBhasile: "1003" },
-          structureTransformationType: StructureTransformationType.FERMETURE,
-        },
+          type: StructureTransformationType.FERMETURE,
+          structureVersion: { structureId: 1003, structure: { codeBhasile: "1003" } },
+          },
         {
           id: 4,
-          structureId: 1004,
-          structure: { codeBhasile: "1004" },
-          structureTransformationType: StructureTransformationType.CONTRACTION,
-        },
+          type: StructureTransformationType.CONTRACTION,
+          structureVersion: { structureId: 1004, structure: { codeBhasile: "1004" } },
+          },
       ]),
     });
 
@@ -123,10 +116,9 @@ describe("TransformationSteps", () => {
       transformation: buildTransformation([
         {
           id: 7,
-          structureId: 1002,
-          structure: { codeBhasile: "1002" },
-          structureTransformationType: StructureTransformationType.EXTENSION,
-        },
+          type: StructureTransformationType.EXTENSION,
+          structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+          },
       ]),
     });
 
@@ -151,10 +143,9 @@ describe("TransformationSteps", () => {
       transformation: buildTransformation([
         {
           id: 9,
-          structureId: 1001,
-          structure: { codeBhasile: "1001" },
-          structureTransformationType: StructureTransformationType.FERMETURE,
-        },
+          type: StructureTransformationType.FERMETURE,
+          structureVersion: { structureId: 1001, structure: { codeBhasile: "1001" } },
+          },
       ]),
     });
 
@@ -176,10 +167,9 @@ describe("TransformationSteps", () => {
       transformation: buildTransformation([
         {
           id: 7,
-          structureId: 1002,
-          structure: { codeBhasile: "1002" },
-          structureTransformationType: StructureTransformationType.EXTENSION,
-        },
+          type: StructureTransformationType.EXTENSION,
+          structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+          },
       ]),
     });
 
@@ -202,10 +192,9 @@ describe("TransformationSteps", () => {
       transformation: buildTransformation([
         {
           id: 7,
-          structureId: 1002,
-          structure: { codeBhasile: "1002" },
-          structureTransformationType: StructureTransformationType.EXTENSION,
-        },
+          type: StructureTransformationType.EXTENSION,
+          structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+          },
       ]),
     });
 
@@ -241,9 +230,11 @@ describe("TransformationSteps", () => {
         transformation: buildTransformation([
           {
             id: 7,
-            structureId: 1002,
-            structure: { codeBhasile: "1002" },
-            structureTransformationType: type,
+            type: type,
+            structureVersion: {
+              structureId: 1002,
+              structure: { codeBhasile: "1002" },
+            },
           },
         ]),
       });

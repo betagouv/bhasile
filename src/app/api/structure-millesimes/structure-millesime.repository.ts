@@ -5,33 +5,16 @@ import { PrismaTransaction } from "@/types/prisma.type";
 const getUniqueWhere = (
   entityId: EntityId,
   year: number
-):
-  | { structureId_year: { structureId: number; year: number } }
-  | {
-      structureTransformationId_year: {
-        structureTransformationId: number;
-        year: number;
-      };
-    } => {
-  if (entityId.structureId !== undefined) {
-    return {
-      structureId_year: {
-        structureId: entityId.structureId,
-        year,
-      },
-    };
+): { structureId_year: { structureId: number; year: number } } => {
+  if (entityId.structureId === undefined) {
+    throw new Error("structureId est requis pour un structureMillesime");
   }
-  if (entityId.structureTransformationId !== undefined) {
-    return {
-      structureTransformationId_year: {
-        structureTransformationId: entityId.structureTransformationId,
-        year,
-      },
-    };
-  }
-  throw new Error(
-    "structureId ou structureTransformationId est requis pour un structureMillesime"
-  );
+  return {
+    structureId_year: {
+      structureId: entityId.structureId,
+      year,
+    },
+  };
 };
 
 export const createOrUpdateStructureMillesimes = async (
@@ -49,7 +32,7 @@ export const createOrUpdateStructureMillesimes = async (
         where: getUniqueWhere(entityId, millesime.year),
         update: millesime,
         create: {
-          ...entityId,
+          structureId: entityId.structureId,
           ...millesime,
         },
       })

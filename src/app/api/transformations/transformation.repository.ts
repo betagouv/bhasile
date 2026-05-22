@@ -6,18 +6,14 @@ import {
 } from "@/schemas/api/transformation.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { createOrUpdateAdresses } from "../adresses/adresse.repository";
-import { createOrUpdateAntennes } from "../antennes/antenne.repository";
-import { createOrUpdateContacts } from "../contacts/contact.repository";
-import { createOrUpdateDnaStructureTransformations } from "../dna-structure-transformations/dna-structure-transformation.repository";
-import { createOrUpdateFinesses } from "../finesses/finess.repository";
 import {
   createOrUpdateForms,
   initializeStructureTransformationDefaultForms,
 } from "../forms/form.repository";
-import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
-import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
-import { convertToPublicType } from "../structures/structure.util";
+import {
+  createOneStructureVersion,
+  createOrUpdateStructureVersion,
+} from "../structure-versions/structure-version.repository";
 
 //TODO: will change when integrating forms into transformation
 const TRANSFORMATION_FORM_SLUG = "transformation-v1";
@@ -38,25 +34,20 @@ export const findOne = async (id: number) => {
       },
       structureTransformations: {
         include: {
-          structure: true,
-          contacts: true,
-          adresses: {
+          structureVersion: {
             include: {
-              adresseTypologies: {
+              structure: true,
+              contacts: true,
+              adresses: true,
+              finesses: true,
+              antennes: true,
+              dnaStructures: {
+                include: { dna: true },
+              },
+              structureTypologies: {
                 orderBy: { year: "desc" },
               },
             },
-          },
-          finesses: true,
-          antennes: true,
-          dnas: {
-            include: { dna: true },
-          },
-          structureTypologies: {
-            orderBy: { year: "desc" },
-          },
-          structureMillesimes: {
-            orderBy: { year: "desc" },
           },
         },
       },
@@ -77,15 +68,23 @@ export const createOne = async (
     await initializeTransformationForm(tx, transformation.id);
 
     for (const structureTransformation of input.structureTransformations) {
-      await tx.structureTransformation.create({
+      const created = await tx.structureTransformation.create({
         data: {
           transformationId: transformation.id,
-          structureId: structureTransformation.structureId,
-          structureTransformationType:
-            structureTransformation.structureTransformationType,
-          ...getScalarData(structureTransformation),
+          type: structureTransformation.type,
+          date: structureTransformation.date,
+          motif: structureTransformation.motif,
         },
       });
+
+      await createOneStructureVersion(
+        tx,
+        structureTransformation.structureVersion ?? {},
+        {
+          structureId: structureTransformation.structureVersion?.structureId,
+          structureTransformationId: created.id,
+        }
+      );
     }
 
     return transformation.id;
@@ -145,57 +144,34 @@ const initializeTransformationForm = async (
   });
 };
 
-const getScalarData = (
-  structureTransformation: StructureTransformationApiUpdate
-) => ({
-  structureTransformationDate:
-    structureTransformation.structureTransformationDate ?? undefined,
-  structureTransformationMotif:
-    structureTransformation.structureTransformationMotif ?? undefined,
-  type: structureTransformation.type ?? undefined,
-  public: convertToPublicType(structureTransformation.public),
-  adresseAdministrative:
-    structureTransformation.adresseAdministrative ?? undefined,
-  codePostalAdministratif:
-    structureTransformation.codePostalAdministratif ?? undefined,
-  communeAdministrative:
-    structureTransformation.communeAdministrative ?? undefined,
-  departementAdministratif:
-    structureTransformation.departementAdministratif ?? undefined,
-  nom: structureTransformation.nom ?? undefined,
-  placesAutorisees: structureTransformation.placesAutorisees ?? undefined,
-  pmr: structureTransformation.pmr ?? undefined,
-  lgbt: structureTransformation.lgbt ?? undefined,
-  fvvTeh: structureTransformation.fvvTeh ?? undefined,
-});
-
 const createOrUpdateStructureTransformation = async (
   tx: PrismaTransaction,
   transformationId: number,
   structureTransformation: StructureTransformationApiUpdate
 ): Promise<void> => {
-  const scalarData = getScalarData(structureTransformation);
-
-  const isCreation = !!structureTransformation.id;
+  const isCreation = !structureTransformation.id;
 
   let structureTransformationId: number;
 
   if (isCreation) {
-    if (!structureTransformation.structureTransformationType) {
-      throw new Error(
-        "structureTransformationType est requis pour créer une structureTransformation"
-      );
+    if (!structureTransformation.type) {
+      throw new Error("type est requis pour créer une structureTransformation");
     }
     const created = await tx.structureTransformation.create({
       data: {
         transformationId,
-        structureId: structureTransformation.structureId,
-        structureTransformationType:
-          structureTransformation.structureTransformationType,
-        ...scalarData,
+        type: structureTransformation.type,
+        date: structureTransformation.date,
+        motif: structureTransformation.motif,
       },
     });
     structureTransformationId = created.id;
+
+    await initializeStructureTransformationDefaultForms(
+      tx,
+      structureTransformationId,
+      structureTransformation.type
+    );
   } else {
     const updated = await tx.structureTransformation.update({
       where: {
@@ -203,47 +179,26 @@ const createOrUpdateStructureTransformation = async (
         transformationId,
       },
       data: {
-        ...scalarData,
-        ...(structureTransformation.type !== undefined && {
-          type: structureTransformation.type,
-        }),
+        type: structureTransformation.type,
+        date: structureTransformation.date,
+        motif: structureTransformation.motif,
       },
     });
     structureTransformationId = updated.id;
   }
 
-  const entityId = { structureTransformationId };
-
-  if (isCreation && structureTransformation.structureTransformationType) {
-    await initializeStructureTransformationDefaultForms(
+  if (structureTransformation.structureVersion) {
+    await createOrUpdateStructureVersion(
       tx,
-      structureTransformationId,
-      structureTransformation.structureTransformationType
+      structureTransformation.structureVersion,
+      {
+        structureId: structureTransformation.structureVersion.structureId,
+        structureTransformationId,
+      }
     );
   }
 
-  await createOrUpdateForms(
-    tx,
-    structureTransformation.structureTransformationForms,
-    entityId
-  );
-  await createOrUpdateContacts(tx, structureTransformation.contacts, entityId);
-  await createOrUpdateAdresses(tx, structureTransformation.adresses, entityId);
-  await createOrUpdateAntennes(tx, structureTransformation.antennes, entityId);
-  await createOrUpdateFinesses(tx, structureTransformation.finesses, entityId);
-  await createOrUpdateStructureTypologies(
-    tx,
-    structureTransformation.structureTypologies,
-    entityId
-  );
-  await createOrUpdateStructureMillesimes(
-    tx,
-    structureTransformation.structureMillesimes,
-    entityId
-  );
-  await createOrUpdateDnaStructureTransformations(
-    tx,
-    structureTransformation.dnas,
-    structureTransformationId
-  );
+  await createOrUpdateForms(tx, structureTransformation.forms, {
+    structureTransformationId,
+  });
 };

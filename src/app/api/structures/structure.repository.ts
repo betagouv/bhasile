@@ -433,7 +433,9 @@ export const updateOne = async (
           structure.id
         );
 
-        await createOrUpdateDnaStructures(tx, dnaStructures, structure.id);
+        await createOrUpdateDnaStructures(tx, dnaStructures, {
+          structureId: structure.id,
+        });
         await createOrUpdateFinesses(tx, finesses, {
           structureId: structure.id,
         });

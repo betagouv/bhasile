@@ -133,8 +133,8 @@ export const useStructureSelections = ({
       ...transformationSpec.buildAutoTransformations(structureId),
       ...transformationSpec.blocks.flatMap((block) =>
         (selectedStructureIdsByBlock[block.id] ?? []).map((id) => ({
-          structureId: id,
-          structureTransformationType: block.structureTransformationType,
+          type: block.type,
+          structureVersion: { structureId: id, type: block.fixedType },
         }))
       ),
     ],
