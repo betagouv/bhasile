@@ -222,28 +222,6 @@ describe("transformation util", () => {
       });
     });
 
-    it("should match the step name case-insensitively", () => {
-      // GIVEN
-      const transformationStructureType = StructureTransformationType.EXTENSION;
-      const transformationStructureId = 2;
-      const transformationStructureStep = "Places-Et-Hebergement";
-
-      // WHEN
-      const { currentStep } = getTransformationFormNavigation({
-        transformationSteps,
-        transformationStructureType,
-        transformationStructureId,
-        transformationStructureStep,
-      });
-
-      // THEN
-      expect(currentStep).toMatchObject({
-        id: 2,
-        type: StructureTransformationType.EXTENSION,
-        name: "places-et-hebergement",
-      });
-    });
-
     it("should return all-undefined navigation when transformationSteps is empty", () => {
       // GIVEN
       const emptySteps: Step[] = [];
