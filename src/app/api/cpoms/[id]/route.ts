@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getCpomById } from "../cpom.service";
+import { cpomApiSchema } from "@/schemas/api/cpom.schema";
+
+import { createCpomEvent } from "../../user-action/user-action.service";
+import { getCpomById, saveCpom } from "../cpom.service";
 
 export async function GET(
   _request: NextRequest,
@@ -23,5 +26,22 @@ export async function GET(
       },
       { status: 500 }
     );
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    const result = cpomApiSchema.parse({ ...body, id: Number(id) });
+    const cpomId = await saveCpom(result);
+    createCpomEvent(request.method, cpomId);
+    return NextResponse.json({ cpomId }, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(error, { status: 400 });
   }
 }

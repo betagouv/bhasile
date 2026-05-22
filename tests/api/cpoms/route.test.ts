@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { GET, POST, PUT } from "@/app/api/cpoms/route";
+import { GET, POST } from "@/app/api/cpoms/route";
 
 const mockFindBySearch = vi.fn();
 const mockCountBySearch = vi.fn();
@@ -108,45 +108,3 @@ describe("POST /api/cpoms", () => {
   });
 });
 
-describe("PUT /api/cpoms", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("should return 201 with cpomId on success", async () => {
-    // GIVEN
-    const payload = { id: 1 };
-    mockCreateOrUpdateCpom.mockResolvedValueOnce(2);
-
-    const request = new Request("http://localhost/api/cpoms", {
-      method: "PUT",
-      body: JSON.stringify(payload),
-    });
-
-    // WHEN
-    const response = await PUT(request as NextRequest);
-
-    // THEN
-    expect(response.status).toBe(201);
-    expect(await response.json()).toEqual({ cpomId: 2 });
-    expect(mockCreateCpomEvent).toHaveBeenCalledWith("PUT", 2);
-  });
-
-  it("should return 400 when id is invalid", async () => {
-    // GIVEN
-    const request = new Request("http://localhost/api/cpoms", {
-      method: "PUT",
-      body: JSON.stringify({ id: "not-a-number" }),
-    });
-
-    // WHEN
-    const response = await PUT(request as NextRequest);
-
-    // THEN
-    expect(response.status).toBe(400);
-    expect(mockCreateOrUpdateCpom).not.toHaveBeenCalled();
-    expect(mockCreateCpomEvent).not.toHaveBeenCalled();
-    expect(mockFindBySearch).not.toHaveBeenCalled();
-    expect(mockCountBySearch).not.toHaveBeenCalled();
-  });
-});

@@ -79,14 +79,13 @@ describe("PUT /api/operateurs/[id]", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 201 with operateurId on success", async () => {
+  it("should return 200 with operateurId on success", async () => {
     // GIVEN
-    const payload = { id: 1, name: "Adoma Modifié" };
     mockUpdateOne.mockResolvedValueOnce({ id: 1 });
 
     const request = new Request("http://localhost/api/operateurs/1", {
       method: "PUT",
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ name: "Adoma Modifié" }),
     });
 
     // WHEN
@@ -95,27 +94,27 @@ describe("PUT /api/operateurs/[id]", () => {
     });
 
     // THEN
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ operateurId: 1 });
+    expect(mockUpdateOne).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }));
     expect(mockCreateOperateurEvent).toHaveBeenCalledWith("PUT", 1);
   });
 
-  it("should return 400 when payload is invalid", async () => {
+  it("should return 400 when url id is not a valid number", async () => {
     // GIVEN
-    const request = new Request("http://localhost/api/operateurs/1", {
+    const request = new Request("http://localhost/api/operateurs/abc", {
       method: "PUT",
-      body: JSON.stringify({ id: "not-a-number" }),
+      body: JSON.stringify({ name: "Adoma" }),
     });
 
     // WHEN
     const response = await PUT(request as NextRequest, {
-      params: Promise.resolve({ id: "1" }),
+      params: Promise.resolve({ id: "abc" }),
     });
 
     // THEN
     expect(response.status).toBe(400);
     expect(mockUpdateOne).not.toHaveBeenCalled();
     expect(mockCreateOperateurEvent).not.toHaveBeenCalled();
-    expect(mockFindOne).not.toHaveBeenCalled();
   });
 });
