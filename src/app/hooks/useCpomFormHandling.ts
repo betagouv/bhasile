@@ -17,6 +17,9 @@ export const useCpomFormHandling = ({ cpomId, nextRoute, callBack }: Props) => {
   );
 
   const handleSubmit = async (data: Partial<CpomFormValues>) => {
+    if (!cpomId) {
+      return;
+    }
     try {
       await updateCpom(cpomId, data, setCpom);
       if (nextRoute) {
@@ -38,7 +41,7 @@ export const useCpomFormHandling = ({ cpomId, nextRoute, callBack }: Props) => {
 };
 
 export type Props = {
-  cpomId: number;
+  cpomId?: number;
   nextRoute?: string;
   callBack?: () => void;
 };
