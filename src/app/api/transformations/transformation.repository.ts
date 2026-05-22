@@ -171,19 +171,9 @@ const getScalarData = (
 
 export const deleteOne = async (id: number): Promise<void> => {
   await prisma.$transaction(async (tx) => {
-    const transformation = await tx.transformation.findUniqueOrThrow({
-      where: { id },
-      include: { form: true },
-    });
-
-    if (transformation.form?.status === true) {
-      throw new Error("Impossible de supprimer une transformation finalisée");
-    }
-
     await tx.structureTransformation.deleteMany({
       where: { transformationId: id },
     });
-
     await tx.transformation.delete({ where: { id } });
   });
 };

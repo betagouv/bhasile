@@ -35,5 +35,9 @@ export const updateTransformation = async (
 };
 
 export const deleteTransformation = async (id: number): Promise<void> => {
+  const transformation = await findOne(id);
+  if (transformation?.form?.status === true) {
+    throw new Error("Impossible de supprimer une transformation finalisée");
+  }
   await deleteOne(id);
 };
