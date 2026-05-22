@@ -5,6 +5,12 @@ import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
 
 export const StructureMenu = ({ structureId }: Props) => {
   const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
+
+  //TODO: remove this once transformation is ready
+  if (process.env.NODE_ENV === "production") {
+    return null;
+  }
+
   return (
     <div className="relative" ref={panelRef}>
       <Button
