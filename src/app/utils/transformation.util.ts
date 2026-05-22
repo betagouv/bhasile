@@ -1,8 +1,28 @@
+import { TRANSFORMATION_TYPE_SPECS } from "@/app/config/transformation.config";
 import {
   StructureTransformationApiUpdate,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
-import { StructureTransformationType } from "@/types/transformation.type";
+import {
+  StructureTransformationType,
+  TransformationFormType,
+  TransformationType,
+} from "@/types/transformation.type";
+
+export const getTransformationTitle = (
+  type: TransformationType | TransformationFormType | undefined
+): string => {
+  if (type && type in TRANSFORMATION_TYPE_SPECS) {
+    return TRANSFORMATION_TYPE_SPECS[type as TransformationType].title;
+  }
+  if (type === TransformationFormType.HUDA) {
+    return "Transformer HUDA en CADA";
+  }
+  if (type === TransformationFormType.CREATION) {
+    return "Nouvelle structure";
+  }
+  return "Transformer une structure";
+};
 
 export const getTransformationSteps = (
   transformation?: TransformationApiRead

@@ -62,7 +62,7 @@ model Finess {
   id                        Int                      @id @default(autoincrement())
   structure                 Structure?               @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   structureId               Int?
-  structureTransformation   StructureTransformation? @relation(fields: [structureTransformationId], references: [id])
+  structureTransformation   StructureTransformation? @relation(fields: [structureTransformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   structureTransformationId Int?
   code                      String?                  @unique
   description               String?

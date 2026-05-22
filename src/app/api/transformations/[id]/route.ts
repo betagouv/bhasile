@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { transformationApiUpdateSchema } from "@/schemas/api/transformation.schema";
 
 import {
+  deleteTransformation,
   getTransformation,
   updateTransformation,
 } from "../transformation.service";
@@ -30,6 +31,26 @@ export async function GET(
       },
       { status: 500 }
     );
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    await deleteTransformation(Number(id));
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    console.error("Error in DELETE /api/transformations/[id]", error);
+    if (
+      error instanceof Error &&
+      error.message.includes("transformation finalisée")
+    ) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 

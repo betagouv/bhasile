@@ -5,7 +5,12 @@ import {
   TransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
 
-import { createOne, findOne, updateOne } from "./transformation.repository";
+import {
+  createOne,
+  deleteOne,
+  findOne,
+  updateOne,
+} from "./transformation.repository";
 
 export const getTransformation = async (
   id: number
@@ -27,4 +32,8 @@ export const updateTransformation = async (
   input: TransformationApiUpdate
 ): Promise<number> => {
   return updateOne(input);
+};
+
+export const deleteTransformation = async (id: number): Promise<void> => {
+  await deleteOne(id);
 };
