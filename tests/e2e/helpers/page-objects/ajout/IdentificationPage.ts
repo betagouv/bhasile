@@ -57,32 +57,6 @@ export class IdentificationPage extends BasePage {
       });
     }
 
-    if (data.debutPeriodeAutorisation) {
-      await this.formHelper.fillDate(
-        'input[name="debutPeriodeAutorisation"]',
-        data.debutPeriodeAutorisation
-      );
-    }
-    if (data.finPeriodeAutorisation) {
-      await this.formHelper.fillDate(
-        'input[name="finPeriodeAutorisation"]',
-        data.finPeriodeAutorisation
-      );
-    }
-
-    if (data.debutConvention) {
-      await this.formHelper.fillDate(
-        'input[name="debutConvention"]',
-        data.debutConvention
-      );
-    }
-    if (data.finConvention) {
-      await this.formHelper.fillDate(
-        'input[name="finConvention"]',
-        data.finConvention
-      );
-    }
-
     if (data.nom) {
       await this.formHelper.fillInput('input[name="nom"]', data.nom);
     }

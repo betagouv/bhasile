@@ -1,11 +1,12 @@
 import { z } from "zod";
 
-import { PublicType } from "@/types/structure.type";
+import { PublicType, StructureType } from "@/types/structure.type";
 import {
   StructureTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
+import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
 import { adresseApiSchema } from "./adresse.schema";
 import { antenneApiSchema } from "./antenne.schema";
 import { contactApiSchema } from "./contact.schema";
@@ -14,7 +15,7 @@ import { formApiSchema } from "./form.schema";
 import { structureMillesimeApiSchema } from "./structure-millesime.schema";
 import { structureTypologieApiSchema } from "./structure-typologie.schema";
 
-export const dnaStructureTransformationApiSchema = z.object({
+const dnaStructureTransformationApiSchema = z.object({
   id: z.number().optional(),
   dna: z.object({
     id: z.number().optional(),
@@ -23,13 +24,17 @@ export const dnaStructureTransformationApiSchema = z.object({
   }),
 });
 
-export const structureTransformationApiSchema = z.object({
+const structureTransformationApiUpdateSchema = z.object({
   id: z.number().optional(),
   structureId: z.number().optional(),
-  type: z.nativeEnum(StructureTransformationType).optional(),
-  date: z.string().datetime().nullish(),
-  motif: z.string().nullish(),
+  structureTransformationType: z
+    .nativeEnum(StructureTransformationType)
+    .optional(),
+  structureTransformationDate: z.string().datetime().nullish(),
+  structureTransformationMotif: z.string().nullish(),
+  structureTransformationForms: z.array(formApiSchema).optional(),
 
+  type: z.nativeEnum(StructureType).nullish(),
   public: z.nativeEnum(PublicType).nullish(),
   adresseAdministrative: z.string().nullish(),
   codePostalAdministratif: z.string().nullish(),
@@ -46,34 +51,45 @@ export const structureTransformationApiSchema = z.object({
   finesses: z.array(finessApiSchema).optional(),
   antennes: z.array(antenneApiSchema).optional(),
   dnas: z.array(dnaStructureTransformationApiSchema).optional(),
+  actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
   structureMillesimes: z.array(structureMillesimeApiSchema).optional(),
   structureTypologies: z.array(structureTypologieApiSchema).optional(),
 });
 
+export const structureTransformationApiCreateSchema =
+  structureTransformationApiUpdateSchema.extend({
+    structureTransformationType: z.nativeEnum(StructureTransformationType),
+  });
 export const transformationApiUpdateSchema = z.object({
   id: z.number(),
   type: z.nativeEnum(TransformationType).optional(),
   form: formApiSchema.optional(),
   structureTransformations: z
-    .array(structureTransformationApiSchema)
+    .array(structureTransformationApiUpdateSchema)
     .optional(),
 });
 
 export const transformationApiCreateSchema = z.object({
   type: z.nativeEnum(TransformationType),
   structureTransformations: z
-    .array(
-      structureTransformationApiSchema.extend({
-        structureId: z.number(),
-        type: z.nativeEnum(StructureTransformationType),
-      })
-    )
+    .array(structureTransformationApiCreateSchema)
     .min(1, "Au moins une structureTransformation est requise"),
 });
 
-export type StructureTransformationApiType = z.infer<
-  typeof structureTransformationApiSchema
+export type StructureTransformationApiUpdate = z.infer<
+  typeof structureTransformationApiUpdateSchema
 >;
+export type StructureTransformationApiCreate = z.infer<
+  typeof structureTransformationApiCreateSchema
+>;
+export type StructureTransformationApiRead =
+  StructureTransformationApiUpdate & {
+    structureTransformationType: StructureTransformationType;
+    structure?: {
+      codeBhasile: string;
+    };
+  };
+
 export type DnaStructureTransformationApiType = z.infer<
   typeof dnaStructureTransformationApiSchema
 >;
@@ -83,4 +99,10 @@ export type TransformationApiUpdate = z.infer<
 export type TransformationApiCreate = z.infer<
   typeof transformationApiCreateSchema
 >;
-export type TransformationApiRead = TransformationApiUpdate;
+export type TransformationApiRead = Omit<
+  TransformationApiUpdate,
+  "structureTransformations"
+> & {
+  id: number;
+  structureTransformations: StructureTransformationApiRead[];
+};

@@ -5,10 +5,6 @@ import {
   adresseAdministrativeSchema,
 } from "@/schemas/forms/base/adresseAdministrative.schema";
 import {
-  calendrierAutoSaveSchema,
-  calendrierSchema,
-} from "@/schemas/forms/base/calendrier.schema";
-import {
   identificationSchemaWithContacts,
   identificationSchemaWithContactsAutoSaveSchema,
 } from "@/schemas/forms/base/identification.schema";
@@ -24,7 +20,6 @@ import { finessesSchema } from "../base/finess.schema";
 export const finalisationIdentificationSchema = identificationSchemaWithContacts
   .and(dnaStructuresSchema)
   .and(finessesSchema)
-  .and(calendrierSchema)
   .and(adresseAdministrativeSchema)
   .and(antennesSchema)
   .and(structureTypologiesSchema);
@@ -33,7 +28,6 @@ export const finalisationIdentificationAutoSaveSchema =
   identificationSchemaWithContactsAutoSaveSchema
     .and(dnaStructuresSchema)
     .and(finessesSchema)
-    .and(calendrierAutoSaveSchema)
     .and(adresseAdministrativeAutoSaveSchema)
     .and(antennesSchema)
     .and(structureTypologiesAutoSaveSchema);

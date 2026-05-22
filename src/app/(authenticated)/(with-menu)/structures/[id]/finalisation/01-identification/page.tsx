@@ -3,7 +3,6 @@ import { ReactElement } from "react";
 
 import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
 import { AutoSave } from "@/app/components/forms/AutoSave";
-import { FieldSetCalendrier } from "@/app/components/forms/calendrier/FieldSetCalendrier";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
 import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
 import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
@@ -94,9 +93,6 @@ export default function FinalisationIdentification(): ReactElement {
         <hr />
 
         <FieldSetContacts />
-        <hr />
-
-        <FieldSetCalendrier />
         <hr />
 
         <FieldSetTypePlaces

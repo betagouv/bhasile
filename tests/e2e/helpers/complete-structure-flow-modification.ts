@@ -1,7 +1,6 @@
 import { Page } from "@playwright/test";
 
 import { runModificationStep } from "./flow-step-runner";
-import { ModificationCalendrierPage } from "./page-objects/modification/ModificationCalendrierPage";
 import { ModificationControlePage } from "./page-objects/modification/ModificationControlePage";
 import { ModificationDescriptionPage } from "./page-objects/modification/ModificationDescriptionPage";
 import { ModificationDocumentsPage } from "./page-objects/modification/ModificationDocumentsPage";
@@ -13,7 +12,7 @@ import { ModificationData } from "./test-data/types";
 
 /**
  * Runs the modification flow: apply modification data for description,
- * calendrier, type places, finance, controle, actes administratifs, notes,
+ * type places, finance, controle, actes administratifs, notes,
  * then verify modifications were applied.
  * Expects the page to already be on the structure details page.
  */
@@ -28,10 +27,6 @@ export async function completeModificationFlow(
     {
       openEdit: () => structurePage.openDescriptionEdit(),
       page: new ModificationDescriptionPage(page),
-    },
-    {
-      openEdit: () => structurePage.openCalendrierEdit(),
-      page: new ModificationCalendrierPage(page),
     },
     {
       openEdit: () => structurePage.openTypePlacesEdit(),

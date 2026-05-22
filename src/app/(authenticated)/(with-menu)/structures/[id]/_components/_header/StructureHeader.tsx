@@ -14,6 +14,7 @@ import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { AutoSaveStatus } from "./AutoSaveStatus";
 import { FinalisationHeader } from "./FinalisationHeader";
+import { StructureMenu } from "./StructureMenu";
 
 const autoSaveModal = createModal({
   id: "autosave-modal",
@@ -55,45 +56,51 @@ export const StructureHeader = (): ReactElement | null => {
   return structure ? (
     <>
       <div className="sticky top-0 z-50 bg-lifted-grey" ref={headerRef}>
-        <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
-          <Link
-            href="/structures"
-            className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
-            title="Retour"
-          >
-            Retour
-          </Link>
-          <div>
-            <h2 className="text-title-blue-france text-xs uppercase mb-0">
-              <strong className="pr-3">Structure hébergement</strong>
-            </h2>
-            <h3 className="text-title-blue-france fr-h6 mb-0">
-              <strong className="pr-2">
-                {type}, {operateurLabel},{" "}
-                {structureTypologies?.[0]?.placesAutorisees} places
-              </strong>
-              <span className="pr-2">{" – "}</span>
-              <span className="mb-0 text-title-grey text-lg italic font-normal">
-                {nom ? `${nom}, ` : ""} {communeAdministrative},{" "}
-                {departementAdministratif}
-              </span>
-            </h3>
-          </div>
-          <div className="grow" />
-          {isFinalisationPath && (
-            <div className="flex items-center gap-3">
-              <AutoSaveStatus onStatusClick={() => autoSaveModal.open()} />
-
-              <Button
-                disabled={!isStructureReadyToFinalise}
-                onClick={async () => {
-                  await handleFinalisation();
-                  finalisationSuccessModal.open();
-                }}
-              >
-                Finaliser la création
-              </Button>
+        <div className="flex justify-between items-center border-b border-b-border-default-grey px-6 py-3">
+          <div className="flex items-center gap-2">
+            <Link
+              href="/structures"
+              className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
+              title="Retour"
+            >
+              Retour
+            </Link>
+            <div>
+              <h2 className="text-title-blue-france text-xs uppercase mb-0">
+                <strong className="pr-3">Structure hébergement</strong>
+              </h2>
+              <h3 className="text-title-blue-france fr-h6 mb-0">
+                <strong className="pr-2">
+                  {type}, {operateurLabel},{" "}
+                  {structureTypologies?.[0]?.placesAutorisees} places
+                </strong>
+                <span className="pr-2">{" – "}</span>
+                <span className="mb-0 text-title-grey text-lg italic font-normal">
+                  {nom ? `${nom}, ` : ""} {communeAdministrative},{" "}
+                  {departementAdministratif}
+                </span>
+              </h3>
             </div>
+          </div>
+
+          {isFinalisationPath ? (
+            <>
+              <div className="flex items-center gap-3">
+                <AutoSaveStatus onStatusClick={() => autoSaveModal.open()} />
+
+                <Button
+                  disabled={!isStructureReadyToFinalise}
+                  onClick={async () => {
+                    await handleFinalisation();
+                    finalisationSuccessModal.open();
+                  }}
+                >
+                  Finaliser la création
+                </Button>
+              </div>
+            </>
+          ) : (
+            <StructureMenu structureId={structure.id} />
           )}
         </div>
         {isRootPath && (

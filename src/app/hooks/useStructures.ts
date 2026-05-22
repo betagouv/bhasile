@@ -109,19 +109,11 @@ export const transformAjoutFormStructureToApiStructure = async (
     communeAdministrative: values.communeAdministrative,
     departementAdministratif: values.departementAdministratif,
     nom: values.nom,
-    debutConvention: formatDateToIsoString(values.debutConvention),
-    finConvention: formatDateToIsoString(values.finConvention),
     creationDate: formatDateToIsoString(values.creationDate),
     date303: formatDateToIsoString(values.date303),
     lgbt: values.lgbt,
     fvvTeh: values.fvvTeh,
     public: values.public,
-    debutPeriodeAutorisation: formatDateToIsoString(
-      values.debutPeriodeAutorisation
-    ),
-    finPeriodeAutorisation: formatDateToIsoString(
-      values.finPeriodeAutorisation
-    ),
     adresses,
     antennes: values.antennes,
     dnaStructures: values.dnaStructures,

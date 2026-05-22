@@ -44,17 +44,20 @@ describe("TransformationSteps", () => {
         {
           id: 1,
           structureId: 1001,
-          type: StructureTransformationType.FERMETURE,
+          structure: { codeBhasile: "1001" },
+          structureTransformationType: StructureTransformationType.FERMETURE,
         },
         {
           id: 2,
           structureId: 1002,
-          type: StructureTransformationType.EXTENSION,
+          structure: { codeBhasile: "1002" },
+          structureTransformationType: StructureTransformationType.EXTENSION,
         },
         {
           id: 3,
           structureId: 1003,
-          type: StructureTransformationType.CREATION,
+          structure: { codeBhasile: "1003" },
+          structureTransformationType: StructureTransformationType.CREATION,
         },
       ]),
     });
@@ -75,22 +78,26 @@ describe("TransformationSteps", () => {
         {
           id: 1,
           structureId: 1001,
-          type: StructureTransformationType.CREATION,
+          structure: { codeBhasile: "1001" },
+          structureTransformationType: StructureTransformationType.CREATION,
         },
         {
           id: 2,
           structureId: 1002,
-          type: StructureTransformationType.EXTENSION,
+          structure: { codeBhasile: "1002" },
+          structureTransformationType: StructureTransformationType.EXTENSION,
         },
         {
           id: 3,
           structureId: 1003,
-          type: StructureTransformationType.FERMETURE,
+          structure: { codeBhasile: "1003" },
+          structureTransformationType: StructureTransformationType.FERMETURE,
         },
         {
           id: 4,
           structureId: 1004,
-          type: StructureTransformationType.CONTRACTION,
+          structure: { codeBhasile: "1004" },
+          structureTransformationType: StructureTransformationType.CONTRACTION,
         },
       ]),
     });
@@ -117,7 +124,8 @@ describe("TransformationSteps", () => {
         {
           id: 7,
           structureId: 1002,
-          type: StructureTransformationType.EXTENSION,
+          structure: { codeBhasile: "1002" },
+          structureTransformationType: StructureTransformationType.EXTENSION,
         },
       ]),
     });
@@ -144,7 +152,8 @@ describe("TransformationSteps", () => {
         {
           id: 9,
           structureId: 1001,
-          type: StructureTransformationType.FERMETURE,
+          structure: { codeBhasile: "1001" },
+          structureTransformationType: StructureTransformationType.FERMETURE,
         },
       ]),
     });
@@ -168,7 +177,8 @@ describe("TransformationSteps", () => {
         {
           id: 7,
           structureId: 1002,
-          type: StructureTransformationType.EXTENSION,
+          structure: { codeBhasile: "1002" },
+          structureTransformationType: StructureTransformationType.EXTENSION,
         },
       ]),
     });
@@ -193,7 +203,8 @@ describe("TransformationSteps", () => {
         {
           id: 7,
           structureId: 1002,
-          type: StructureTransformationType.EXTENSION,
+          structure: { codeBhasile: "1002" },
+          structureTransformationType: StructureTransformationType.EXTENSION,
         },
       ]),
     });
@@ -228,7 +239,12 @@ describe("TransformationSteps", () => {
       // GIVEN
       mockUseFetchTransformation.mockReturnValue({
         transformation: buildTransformation([
-          { id: 7, structureId: 1002, type },
+          {
+            id: 7,
+            structureId: 1002,
+            structure: { codeBhasile: "1002" },
+            structureTransformationType: type,
+          },
         ]),
       });
 

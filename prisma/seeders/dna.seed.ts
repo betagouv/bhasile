@@ -45,6 +45,7 @@ export const createDnaStructures = ({
   const dnaStructures: Array<{
     dnaId: number;
     structureId: number;
+    structureVersionId: null;
     startDate: Date | null;
     endDate: Date | null;
   }> = [];
@@ -61,6 +62,7 @@ export const createDnaStructures = ({
       dnaStructures.push({
         dnaId,
         structureId,
+        structureVersionId: null,
         startDate:
           faker.helpers.maybe(() => faker.date.past({ years: 2 }), {
             probability: 0.1,

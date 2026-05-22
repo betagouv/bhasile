@@ -25,6 +25,6 @@ export const createTransformation = async (
 
 export const updateTransformation = async (
   input: TransformationApiUpdate
-): Promise<void> => {
+): Promise<number> => {
   return updateOne(input);
 };

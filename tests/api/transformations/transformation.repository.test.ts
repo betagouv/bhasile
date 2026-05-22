@@ -36,7 +36,7 @@ describe("transformation.repository db integration", () => {
       structureTransformations: [
         {
           structureId: structure.id,
-          type: StructureTransformationType.CREATION,
+          structureTransformationType: StructureTransformationType.CREATION,
         },
       ],
     });
@@ -95,7 +95,7 @@ describe("transformation.repository db integration", () => {
       structureTransformations: [
         {
           structureId: structure.id,
-          type: StructureTransformationType.EXTENSION,
+          structureTransformationType: StructureTransformationType.EXTENSION,
         },
       ],
     });
@@ -138,9 +138,9 @@ describe("transformation.repository db integration", () => {
 
     const newStructureTransformation = {
       id: structureTransformationId,
-      type: StructureTransformationType.FERMETURE,
-      date: "2023-08-08T12:00:00.000Z",
-      motif: "Motif fermeture test",
+      structureTransformationType: StructureTransformationType.FERMETURE,
+      structureTransformationDate: "2023-08-08T12:00:00.000Z",
+      structureTransformationMotif: "Motif fermeture test",
       public: PublicType.FAMILLE,
       adresseAdministrative: "5 avenue de la Transformation",
       codePostalAdministratif: "69000",
@@ -166,7 +166,11 @@ describe("transformation.repository db integration", () => {
     const st = await prisma.structureTransformation.findUniqueOrThrow({
       where: { id: structureTransformationId },
     });
-    expect({ ...st, date: st.date?.toISOString() }).toMatchObject({
+    expect({
+      ...st,
+      structureTransformationDate:
+        st.structureTransformationDate?.toISOString(),
+    }).toMatchObject({
       ...newStructureTransformation,
       public: "FAMILLE",
     });
@@ -437,7 +441,7 @@ describe("transformation.repository db integration", () => {
       structureTransformations: [
         {
           structureId: structureA.id,
-          type: StructureTransformationType.CREATION,
+          structureTransformationType: StructureTransformationType.CREATION,
         },
       ],
     });
@@ -448,7 +452,7 @@ describe("transformation.repository db integration", () => {
       structureTransformations: [
         {
           structureId: structureB.id,
-          type: StructureTransformationType.EXTENSION,
+          structureTransformationType: StructureTransformationType.EXTENSION,
         },
       ],
     });

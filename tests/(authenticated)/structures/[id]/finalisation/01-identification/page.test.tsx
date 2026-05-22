@@ -148,10 +148,6 @@ describe("FinalisationIdentification page integration", () => {
           description: "",
         },
       ],
-      debutPeriodeAutorisation: "2022-01-01T12:00:00.000Z",
-      finPeriodeAutorisation: "2025-01-01T12:00:00.000Z",
-      debutConvention: "2024-01-01T12:00:00.000Z",
-      finConvention: "2027-01-01T12:00:00.000Z",
       nom: "Les Mimosas",
       adresseAdministrativeComplete:
         "1, avenue de la République 75011 Paris 75",

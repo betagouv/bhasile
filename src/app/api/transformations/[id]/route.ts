@@ -37,10 +37,8 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
     const result = transformationApiUpdateSchema.parse(body);
-    await updateTransformation(result);
-    return NextResponse.json("Transformation mise à jour avec succès", {
-      status: 201,
-    });
+    const transformationId = await updateTransformation(result);
+    return NextResponse.json({ transformationId }, { status: 201 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(error, { status: 400 });

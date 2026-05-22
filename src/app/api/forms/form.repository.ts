@@ -1,3 +1,4 @@
+import { StructureTransformationType } from "@/generated/prisma/enums";
 import { FormApiType } from "@/schemas/api/form.schema";
 import { EntityId } from "@/types/Entity.type";
 import { StepStatus } from "@/types/form.type";
@@ -16,7 +17,7 @@ export const createOrUpdateForms = async (
 
   await Promise.all(
     forms.map(async (form) => {
-      await createCompleteFormWithSteps(tx, entityId, form);
+      await createOrUpdateCompleteFormWithSteps(tx, entityId, form);
     })
   );
 };
@@ -28,6 +29,12 @@ const getFormUniqueWhere = (
   | {
       structureId_formDefinitionId: {
         structureId: number;
+        formDefinitionId: number;
+      };
+    }
+  | {
+      structureTransformationId_formDefinitionId: {
+        structureTransformationId: number;
         formDefinitionId: number;
       };
     }
@@ -53,10 +60,20 @@ const getFormUniqueWhere = (
       },
     };
   }
-  throw new Error("structureId ou transformationId est requis pour un Form");
+  if (entityId.structureTransformationId !== undefined) {
+    return {
+      structureTransformationId_formDefinitionId: {
+        structureTransformationId: entityId.structureTransformationId,
+        formDefinitionId,
+      },
+    };
+  }
+  throw new Error(
+    "structureId, transformationId ou structureTransformationId est requis pour un Form"
+  );
 };
 
-const createCompleteFormWithSteps = async (
+const createOrUpdateCompleteFormWithSteps = async (
   tx: PrismaTransaction,
   entityId: EntityId,
   form: FormApiType
@@ -122,7 +139,7 @@ const createCompleteFormWithSteps = async (
   }
 };
 
-export const initializeDefaultForms = async (
+export const initializeStructureDefaultForms = async (
   tx: PrismaTransaction,
   isOperateurUpdate: boolean,
   structureId: number
@@ -164,6 +181,52 @@ export const initializeDefaultForms = async (
         formId: formEntity.id,
         stepDefinitionId: stepDefinition.id,
         status: status,
+      },
+    });
+  }
+};
+
+export const initializeStructureTransformationDefaultForms = async (
+  tx: PrismaTransaction,
+  structureTransformationId: number,
+  structureTransformationType: StructureTransformationType
+): Promise<void> => {
+  const slugs = {
+    [StructureTransformationType.FERMETURE]:
+      "structure-transformation-fermeture-v1",
+    [StructureTransformationType.EXTENSION]:
+      "structure-transformation-extension-v1",
+    [StructureTransformationType.CONTRACTION]:
+      "structure-transformation-contraction-v1",
+    [StructureTransformationType.CREATION]:
+      "structure-transformation-creation-v1",
+  };
+
+  const formDefinition = await tx.formDefinition.findUnique({
+    where: { slug: slugs[structureTransformationType] },
+    include: { stepsDefinition: true },
+  });
+
+  if (!formDefinition) {
+    throw new Error(
+      `FormDefinition with slug ${slugs[structureTransformationType]} not found`
+    );
+  }
+
+  const formEntity = await tx.form.create({
+    data: {
+      formDefinitionId: formDefinition.id,
+      structureTransformationId,
+      status: false,
+    },
+  });
+
+  for (const stepDefinition of formDefinition.stepsDefinition) {
+    await tx.formStep.create({
+      data: {
+        formId: formEntity.id,
+        stepDefinitionId: stepDefinition.id,
+        status: StepStatus.NON_COMMENCE,
       },
     });
   }
