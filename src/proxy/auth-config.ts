@@ -5,7 +5,6 @@ export const protectedApiRoutes: ApiRoute[] = [
     pattern: /^\/api\/structures$/,
     routes: {
       GET: "either",
-      PUT: "either",
       POST: "password",
     },
   },
@@ -13,6 +12,7 @@ export const protectedApiRoutes: ApiRoute[] = [
     pattern: /^\/api\/structures\/[^/]+$/,
     routes: {
       GET: "either",
+      PUT: "either",
     },
   },
   {
@@ -31,7 +31,6 @@ export const protectedApiRoutes: ApiRoute[] = [
     pattern: /^\/api\/cpoms$/,
     routes: {
       GET: "proconnect",
-      PUT: "proconnect",
       POST: "proconnect",
     },
   },
@@ -39,6 +38,7 @@ export const protectedApiRoutes: ApiRoute[] = [
     pattern: /^\/api\/cpoms\/[^/]+$/,
     routes: {
       GET: "proconnect",
+      PUT: "proconnect",
     },
   },
   {
