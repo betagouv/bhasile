@@ -1,8 +1,9 @@
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { DocumentOperateurCategory } from "@/types/operateur.type";
 
 export const getDocumentsOperateurCategories =
   (): CategoryDisplayRulesType => ({
-    RAPPORT_ACTIVITE: {
+    RAPPORT_ACTIVITE_OPERATEUR: {
       categoryShortName: "convention",
       title: "Rapport d'activité",
       canAddFile: true,
@@ -41,7 +42,14 @@ export const getDocumentsOperateurCategories =
   });
 
 type CategoryDisplayRulesType = Record<
-  DocumentOperateurCategory,
+  Exclude<
+    DocumentOperateurCategory | ActeAdministratifCategory,
+    | "RAPPORT_ACTIVITE"
+    | "ARRETE_AUTORISATION"
+    | "CONVENTION"
+    | "ARRETE_TARIFICATION"
+    | "CPOM"
+  >,
   {
     categoryShortName: string;
     title: string;

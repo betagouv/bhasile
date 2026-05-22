@@ -23,7 +23,7 @@ export const DocumentsBlock = (): ReactElement => {
       entityType="Operateur"
     >
       <CustomAccordion label="Rapports d'activité">
-        <DocumentCategory categoryName="RAPPORT_ACTIVITE" />
+        <DocumentCategory categoryName="RAPPORT_ACTIVITE_OPERATEUR" />
       </CustomAccordion>
       <CustomAccordion label="Frais de siège">
         <DocumentCategory categoryName="FRAIS_DE_SIEGE" />

@@ -3,7 +3,7 @@ export const ActeAdministratifCategory = [
   "CONVENTION",
   "ARRETE_TARIFICATION",
   "FRAIS_DE_SIEGE",
-  "STATUTS",
+  "RAPPORT_ACTIVITE_OPERATEUR",
   "AUTRE",
   "CPOM",
 ] as const;

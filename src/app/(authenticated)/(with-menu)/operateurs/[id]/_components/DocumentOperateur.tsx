@@ -16,10 +16,13 @@ export const DocumentOperateur = ({
 }: Props) => {
   const { control, watch } = useFormContext();
 
-  const documentsOperateur: (
-    | ActeAdministratifFormValues
-    | DocumentFinancierFlexibleFormValues
-  )[] = watch("documentsOperateur") || [];
+  const actesAdministratifs: ActeAdministratifFormValues[] =
+    watch("actesAdministratifs") || [];
+
+  const documentsFinanciers: DocumentFinancierFlexibleFormValues[] =
+    watch("documentsFinanciers") || [];
+
+  const documentsOperateur = [...actesAdministratifs, ...documentsFinanciers];
 
   const index = documentsOperateur.findIndex(
     (documentOperateur) =>
@@ -114,7 +117,6 @@ export const DocumentOperateur = ({
             />
           </div>
         )}
-
         <div className="flex flex-col">
           <label className="mb-2">{documentLabel}</label>
           <UploadWithValidation

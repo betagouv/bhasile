@@ -15,7 +15,7 @@ export const getActesAdministratifsDefaultValues = (
       Exclude<ActeAdministratifCategory, "CPOM">,
       (typeof categoryDisplayRules)[Exclude<
         ActeAdministratifCategory,
-        "CPOM" | "FRAIS_DE_SIEGE" | "STATUTS"
+        "CPOM" | "FRAIS_DE_SIEGE" | "STATUTS" | "RAPPORT_ACTIVITE_OPERATEUR"
       >],
     ][]
   )
@@ -100,7 +100,10 @@ export const getActesAdministratifsCategoryToDisplay = (
 });
 
 type CategoryDisplayRulesType = Record<
-  Exclude<ActeAdministratifCategory, "CPOM" | "FRAIS_DE_SIEGE" | "STATUTS">,
+  Exclude<
+    ActeAdministratifCategory,
+    "CPOM" | "FRAIS_DE_SIEGE" | "STATUTS" | "RAPPORT_ACTIVITE_OPERATEUR"
+  >,
   {
     categoryShortName: string;
     title: string;

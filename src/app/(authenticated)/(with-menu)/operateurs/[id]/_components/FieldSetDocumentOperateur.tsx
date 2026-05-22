@@ -24,23 +24,40 @@ export default function FieldSetDocumentOperateur({
   documentLabel,
 }: Props) {
   const { control, watch } = useFormContext();
-  const { append, remove } = useFieldArray({
-    control,
-    name: "documentsOperateur",
-  });
+  const { append: appendActeAdministratif, remove: removeActeAdministratif } =
+    useFieldArray({
+      control,
+      name: "actesAdministratifs",
+    });
 
-  const documentsOperateur: (
-    | ActeAdministratifFormValues
-    | DocumentFinancierFlexibleFormValues
-  )[] = watch("documentsOperateur") || [];
+  const { append: appendDocumentFinancier, remove: removeDocumentFinancier } =
+    useFieldArray({
+      control,
+      name: "documentsFinanciers",
+    });
 
-  const documentsOfCategory = documentsOperateur.filter(
-    (document) => document?.category === category
-  );
+  const actesAdministratifs: ActeAdministratifFormValues[] =
+    watch("actesAdministratifs") || [];
+
+  const documentsFinanciers: DocumentFinancierFlexibleFormValues[] =
+    watch("documentsFinanciers") || [];
+
+  const documentsOfCategory = [
+    ...actesAdministratifs,
+    ...documentsFinanciers,
+  ].filter((document) => document?.category === category);
+
+  const isActeAdministratif = (category: string): boolean => {
+    return category === "RAPPORT_ACTIVITE" || category === "FRAIS_DE_SIEGE";
+  };
 
   const handleAddNewField = (e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
+
+    const append = isActeAdministratif(category)
+      ? appendActeAdministratif
+      : appendDocumentFinancier;
 
     append({
       uuid: uuidv4(),
@@ -57,6 +74,10 @@ export default function FieldSetDocumentOperateur({
         return;
       }
     }
+
+    const remove = isActeAdministratif(category)
+      ? removeActeAdministratif
+      : removeDocumentFinancier;
 
     const indicesToRemove = [index];
 

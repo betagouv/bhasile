@@ -8,7 +8,7 @@ export const DocumentFinancierCategory = [
   "COMPTE_ADMINISTRATIF_RETENU",
   "DEMANDE_SUBVENTION",
   "COMPTE_RENDU_FINANCIER",
-  "RAPPORT_ACTIVITE_OPERATEUR",
+  "STATUTS",
   "AUTRE_FINANCIER",
 ] as const;
 
