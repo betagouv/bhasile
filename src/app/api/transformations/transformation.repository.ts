@@ -169,6 +169,10 @@ const getScalarData = (
   fvvTeh: structureTransformation.fvvTeh ?? undefined,
 });
 
+export const deleteOne = async (id: number): Promise<void> => {
+  await prisma.transformation.delete({ where: { id } });
+};
+
 const createOrUpdateStructureTransformation = async (
   tx: PrismaTransaction,
   transformationId: number,
