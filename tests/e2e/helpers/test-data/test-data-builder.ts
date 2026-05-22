@@ -145,18 +145,6 @@ export class TestStructureDataBuilder {
     return this;
   }
 
-  withPeriodeAutorisation(debut: string, fin: string): this {
-    this.data.debutPeriodeAutorisation = debut;
-    this.data.finPeriodeAutorisation = fin;
-    return this;
-  }
-
-  withConvention(debut: string, fin: string): this {
-    this.data.debutConvention = debut;
-    this.data.finConvention = fin;
-    return this;
-  }
-
   /**
    * Generic field modification
    */
@@ -273,14 +261,11 @@ export class TestStructureDataBuilder {
     return new TestStructureDataBuilder()
       .withType(StructureType.CADA)
       .withFinesses([{ code: "123456789", description: "Finess 1" }])
-      .withDnas([{ code: "C1234", description: "DNA 1" }])
-      .withPeriodeAutorisation("2020-01-01", "2025-12-31");
+      .withDnas([{ code: "C1234", description: "DNA 1" }]);
   }
 
   static forCAES(): TestStructureDataBuilder {
-    return new TestStructureDataBuilder()
-      .withType(StructureType.CAES)
-      .withConvention("2020-01-01", "2023-12-31");
+    return new TestStructureDataBuilder().withType(StructureType.CAES);
   }
 
   static forCPH(): TestStructureDataBuilder {

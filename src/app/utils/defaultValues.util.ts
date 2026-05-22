@@ -88,14 +88,6 @@ export const getDefaultValues = ({
     isMultiDna,
     dnaStructures,
     finesses,
-    debutPeriodeAutorisation: structure.isAutorisee
-      ? (structure.debutPeriodeAutorisation ?? undefined)
-      : undefined,
-    finPeriodeAutorisation: structure.isAutorisee
-      ? (structure.finPeriodeAutorisation ?? undefined)
-      : undefined,
-    debutConvention: structure.debutConvention ?? undefined,
-    finConvention: structure.finConvention ?? undefined,
     finessCode: structure.finessCode || undefined,
     public: structure.public
       ? PublicType[structure.public as string as keyof typeof PublicType]
@@ -134,10 +126,6 @@ type StructureDefaultValues = Omit<
   StructureApiRead,
   | "creationDate"
   | "nom"
-  | "debutPeriodeAutorisation"
-  | "finPeriodeAutorisation"
-  | "debutConvention"
-  | "finConvention"
   | "finesses"
   | "dnaStructures"
   | "public"
@@ -162,10 +150,6 @@ type StructureDefaultValues = Omit<
   nom: string;
   isMultiAntenne: boolean;
   isMultiDna: boolean;
-  debutPeriodeAutorisation?: string;
-  finPeriodeAutorisation?: string;
-  debutConvention?: string;
-  finConvention?: string;
   finesses: FinessFormValues[];
   dnaStructures: DnaStructureFormValues[];
   public?: PublicType;

@@ -34,10 +34,6 @@ export type TestStructureData = {
     email?: string;
     telephone?: string;
   }>;
-  debutPeriodeAutorisation?: string;
-  finPeriodeAutorisation?: string;
-  debutConvention?: string;
-  finConvention?: string;
   debutCpom?: string;
   finCpom?: string;
 

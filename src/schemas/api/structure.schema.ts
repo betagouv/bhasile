@@ -58,8 +58,6 @@ export const structureOperateurUpdateApiSchema =
       .min(1, "Le département de l'adresse administrative est requis"),
     latitude: z.string().optional(),
     longitude: z.string().optional(),
-    debutConvention: z.string().datetime().nullish(),
-    finConvention: z.string().datetime().nullish(),
     creationDate: z
       .string()
       .datetime({ message: "La date de création est requise" }),
@@ -72,8 +70,6 @@ export const structureOperateurUpdateApiSchema =
       message: "L'accueil de FVV-TEH dans la structure est requis",
     }),
     public: z.nativeEnum(PublicType),
-    debutPeriodeAutorisation: z.string().datetime().nullish(),
-    finPeriodeAutorisation: z.string().datetime().nullish(),
     adresses: z.array(adresseApiSchema),
     antennes: z.array(antenneApiSchema).optional(),
     dnaStructures: z.array(dnaStructureApiSchema).optional(),
@@ -134,6 +130,10 @@ export type StructureAgentUpdateApiType = z.infer<
 
 export type StructureApiWrite = z.infer<typeof structureApiSchema>;
 export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
+  debutConvention: string | null;
+  finConvention: string | null;
+  debutPeriodeAutorisation: string | null;
+  finPeriodeAutorisation: string | null;
   cpomStructures?: CpomStructureApiRead[];
   repartition: Repartition;
   operateurLabel: string;

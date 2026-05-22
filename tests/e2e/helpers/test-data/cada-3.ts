@@ -50,8 +50,6 @@ export const cada3: TestStructureScenario = {
         telephone: "+33623456789",
       },
     ],
-    debutPeriodeAutorisation: "2020-01-01",
-    finPeriodeAutorisation: "2025-12-31",
     nom: "Structure Test",
     adresseAdministrative: {
       complete: "1 Rue de la Paix 75001 Paris",
@@ -441,8 +439,6 @@ export const cada3: TestStructureScenario = {
     fvvTeh: true,
     contacts: [{ email: "modif-cada3@example.com" }],
     notes: "Notes modification CADA 3 - 10 adresses.",
-    debutPeriodeAutorisation: "2020-09-01",
-    finPeriodeAutorisation: "2026-08-31",
     ouvertureFermeture: {
       placesACreer: "5",
       echeancePlacesACreer: "2026-05-01",

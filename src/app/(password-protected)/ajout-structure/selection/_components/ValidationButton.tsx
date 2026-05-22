@@ -16,7 +16,6 @@ export const ValidationButton = ({
       ) : (
         <Button
           type="button"
-          onClick={() => ""}
           disabled={!selectedStructureIds.length}
           className="flex gap-2"
         >

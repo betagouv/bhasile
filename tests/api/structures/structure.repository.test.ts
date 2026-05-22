@@ -73,10 +73,6 @@ describe("structure.repository db integration", () => {
     const structure = await createStructure();
     const creationDate = "2020-02-02T00:00:00.000Z";
     const date303 = "2021-03-03T00:00:00.000Z";
-    const debutConvention = "2022-04-04T00:00:00.000Z";
-    const finConvention = "2023-05-05T00:00:00.000Z";
-    const debutPeriodeAutorisation = "2024-06-06T00:00:00.000Z";
-    const finPeriodeAutorisation = "2025-07-07T00:00:00.000Z";
 
     // WHEN: all scalar fields are sent in a single update
     await updateOne({
@@ -91,13 +87,9 @@ describe("structure.repository db integration", () => {
       longitude: "2.3522",
       nom: "Structure test complete",
       date303,
-      debutConvention,
-      finConvention,
       creationDate,
       lgbt: true,
       fvvTeh: false,
-      debutPeriodeAutorisation,
-      finPeriodeAutorisation,
       notes: "Notes de test",
       nomOfii: "Nom OFII",
       directionTerritoriale: "DT75",
@@ -117,17 +109,9 @@ describe("structure.repository db integration", () => {
     expect(updated.longitude?.toString()).toBe("2.3522");
     expect(updated.nom).toBe("Structure test complete");
     expect(updated.date303?.toISOString()).toBe(date303);
-    expect(updated.debutConvention?.toISOString()).toBe(debutConvention);
-    expect(updated.finConvention?.toISOString()).toBe(finConvention);
     expect(updated.creationDate?.toISOString()).toBe(creationDate);
     expect(updated.lgbt).toBe(true);
     expect(updated.fvvTeh).toBe(false);
-    expect(updated.debutPeriodeAutorisation?.toISOString()).toBe(
-      debutPeriodeAutorisation
-    );
-    expect(updated.finPeriodeAutorisation?.toISOString()).toBe(
-      finPeriodeAutorisation
-    );
     expect(updated.notes).toBe("Notes de test");
     expect(updated.nomOfii).toBe("Nom OFII");
     expect(updated.directionTerritoriale).toBe("DT75");
