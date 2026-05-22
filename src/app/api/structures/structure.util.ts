@@ -300,6 +300,17 @@ export const isStructureInCpomPerYear = (
   );
 };
 
+export const isMultiAntenne = (
+  antennes?: StructureDbDetails["antennes"]
+): boolean => (antennes?.length ?? 0) > 0;
+
+export const isMultiDna = (
+  dnaStructures?:
+    | StructureDbDetails["dnaStructures"]
+    | StructureDbList["dnaStructures"],
+  finesses?: StructureDbDetails["finesses"]
+): boolean => (dnaStructures?.length ?? 0) > 1 || (finesses?.length ?? 0) > 1;
+
 export const getCpomStructuresWithDates = (
   structure: StructureDbDetails | StructureDbList
 ): CpomStructureApiRead[] | undefined => {
@@ -315,6 +326,16 @@ export const getCpomStructuresWithDates = (
             ...cpomStructure.cpom,
             dateStart: cpomDateStart,
             dateEnd: cpomDateEnd,
+            granularity: cpomStructure.cpom.granularity,
+            actesAdministratifs:
+              cpomStructure.cpom.actesAdministratifs?.map(
+                (acteAdministratif) => ({
+                  ...acteAdministratif,
+                  startDate: acteAdministratif.startDate ?? undefined,
+                  endDate: acteAdministratif.endDate ?? undefined,
+                  date: acteAdministratif.date ?? undefined,
+                })
+              ) ?? [],
           }
         : cpomStructure.cpom,
     }) as CpomStructureApiRead;

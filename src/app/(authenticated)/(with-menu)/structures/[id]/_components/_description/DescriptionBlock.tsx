@@ -3,7 +3,6 @@ import { useRouter } from "next/navigation";
 import { ReactElement, useState } from "react";
 
 import { Block } from "@/app/components/common/Block";
-import { isStructureMultiAntenne } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { Adresses } from "./Adresses";
@@ -15,7 +14,6 @@ export const DescriptionBlock = (): ReactElement => {
   const { structure } = useStructureContext();
   const router = useRouter();
 
-  const isMultiAntennes = isStructureMultiAntenne(structure);
   const tabs = [
     {
       id: "general",
@@ -23,7 +21,7 @@ export const DescriptionBlock = (): ReactElement => {
     },
     {
       id: "sites",
-      label: isMultiAntennes ? "Sites et contacts" : "Contacts",
+      label: structure.isMultiAntenne ? "Sites et contacts" : "Contacts",
     },
     {
       id: "codes",

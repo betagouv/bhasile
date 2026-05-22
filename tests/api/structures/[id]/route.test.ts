@@ -48,10 +48,28 @@ vi.mock("@/app/api/structures/structure.util", () => ({
   getCurrentPlacesQpv: vi.fn().mockReturnValue(3),
   getOperateurLabel: vi.fn().mockReturnValue("Adoma"),
   getRepartition: vi.fn().mockReturnValue("DIFFUS"),
+  isMultiAntenne: vi.fn().mockReturnValue(false),
+  isMultiDna: vi.fn().mockReturnValue(false),
   isStructureInCpom: vi.fn().mockReturnValue(false),
   isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
   getDatesConvention: vi.fn().mockReturnValue([null, null]),
   getDatesPeriodeAutorisation: vi.fn().mockReturnValue([null, null]),
+}));
+
+vi.mock("@/app/api/antennes/antenne.util", () => ({
+  getAntennesApiRead: vi.fn().mockReturnValue(undefined),
+}));
+
+vi.mock("@/app/api/dna-structures/dna-structure.util", () => ({
+  getDnaStructuresApiRead: vi.fn().mockReturnValue([]),
+}));
+
+vi.mock("@/app/api/finesses/finess.util", () => ({
+  getFinessesApiRead: vi.fn().mockReturnValue(undefined),
+}));
+
+vi.mock("@/app/api/adresses/adresse.util", () => ({
+  getAdressesApiRead: vi.fn().mockReturnValue([]),
 }));
 
 vi.mock("@/app/api/user-action/user-action.service", () => ({
@@ -93,13 +111,21 @@ describe("GET /api/structures/[id]", () => {
     expect(await response.json()).toEqual({
       id: 1,
       name: "Test",
-      filiale: null,
+      nom: "",
+      filiale: undefined,
       operateur: { id: 1, name: "Adoma" },
       type: "CADA",
       adresses: [],
+      adresseAdministrative: "",
+      codePostalAdministratif: "",
+      communeAdministrative: "",
+      departementAdministratif: "",
+      adresseAdministrativeComplete: "",
+      contacts: [],
+      documentsFinanciers: [],
       cpomStructures: [],
       creationDate: "2020-01-01T00:00:00.000Z",
-      date303: null,
+      date303: undefined,
       debutConvention: null,
       finConvention: null,
       debutPeriodeAutorisation: null,
@@ -113,6 +139,12 @@ describe("GET /api/structures/[id]", () => {
       operateurLabel: "Adoma",
       isAutorisee: true,
       isSubventionnee: false,
+      isMultiAntenne: false,
+      isMultiDna: false,
+      typeBati: "DIFFUS",
+      antennes: undefined,
+      finesses: undefined,
+      public: undefined,
       currentPlaces: {
         placesAutorisees: 10,
         qpv: 3,

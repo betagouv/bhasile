@@ -2,16 +2,13 @@ import { ReactElement } from "react";
 
 import { formatCityName } from "@/app/utils/adresse.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
-import { isStructureMultiAntenne } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
 export const AntennesAndContacts = (): ReactElement => {
   const { structure } = useStructureContext();
 
-  const { antennes, contacts } = structure;
-
-  const isMultiAntennes = isStructureMultiAntenne(structure);
+  const { antennes, contacts, isMultiAntenne: isMultiAntennes } = structure;
 
   return (
     <>

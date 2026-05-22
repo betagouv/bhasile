@@ -5,6 +5,8 @@ import {
 } from "@/generated/prisma/client";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 
+import { StructureDbDetails } from "../structures/structure.db.type";
+
 export const convertToRepartition = (
   repartition: string | undefined
 ): Repartition => {
@@ -32,6 +34,24 @@ export const handleAdresses = (
       }) as unknown as AdresseInput
   );
 };
+
+export const getAdressesApiRead = (
+  adresses?: StructureDbDetails["adresses"]
+) =>
+  adresses?.map((adresse) => ({
+    ...adresse,
+    adresse: adresse.adresse ?? "",
+    codePostal: adresse.codePostal ?? "",
+    commune: adresse.commune ?? "",
+    repartition:
+      Repartition[
+        adresse.repartition?.trim().toUpperCase() as keyof typeof Repartition
+      ],
+    adresseComplete: [adresse.adresse, adresse.codePostal, adresse.commune]
+      .filter(Boolean)
+      .join(" ")
+      .trim(),
+  }));
 
 export type AdresseWithTypologies = Adresse & {
   adresseTypologies: AdresseTypologie[];
