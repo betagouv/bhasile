@@ -12,6 +12,7 @@ import { StructureApiRead } from "@/schemas/api/structure.schema";
 export const Block = ({
   title,
   iconClass,
+  disclaimer,
   onEdit,
   multipleEdit,
   children,
@@ -28,6 +29,7 @@ export const Block = ({
           <span className={`text-title-blue-france mr-3 ${iconClass}`} />
           <h3 className="text-title-blue-france fr-h6 mb-12">{title}</h3>
         </div>
+        {disclaimer}
         <Can I="update" this={subject(entityType, entity)} ability={ability}>
           {onEdit && (
             <Button
@@ -73,6 +75,7 @@ export const Block = ({
 type Props = PropsWithChildren<{
   title: string;
   iconClass: string;
+  disclaimer?: ReactElement;
   onEdit?: () => void;
   multipleEdit?: {
     label: ReactElement;

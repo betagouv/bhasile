@@ -117,23 +117,6 @@ export class VerificationPage extends BasePage {
         await expect(section).toContainText(phone);
       }
     }
-
-    if (data.debutPeriodeAutorisation) {
-      await expect(section).toContainText(
-        formatDate(data.debutPeriodeAutorisation)
-      );
-    }
-    if (data.finPeriodeAutorisation) {
-      await expect(section).toContainText(
-        formatDate(data.finPeriodeAutorisation)
-      );
-    }
-    if (data.debutConvention) {
-      await expect(section).toContainText(formatDate(data.debutConvention));
-    }
-    if (data.finConvention) {
-      await expect(section).toContainText(formatDate(data.finConvention));
-    }
   }
 
   private async expectAdresses(data: TestStructureData) {

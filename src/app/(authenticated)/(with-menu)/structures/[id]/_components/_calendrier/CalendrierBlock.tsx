@@ -1,4 +1,3 @@
-import { useRouter } from "next/navigation";
 import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
@@ -9,8 +8,6 @@ import { DateBars } from "./DateBars";
 
 export const CalendrierBlock = (): ReactElement => {
   const { structure } = useStructureContext();
-
-  const router = useRouter();
 
   const {
     debutPeriodeAutorisation,
@@ -49,9 +46,11 @@ export const CalendrierBlock = (): ReactElement => {
     <Block
       title="Calendrier"
       iconClass="fr-icon-calendar-todo-line"
-      onEdit={() => {
-        router.push(`/structures/${structure.id}/modification/calendrier`);
-      }}
+      disclaimer={
+        <p className="text-sm text-title-blue-france mb-0">
+          Données issues des actes administratifs
+        </p>
+      }
       entity={structure}
       entityType="Structure"
     >

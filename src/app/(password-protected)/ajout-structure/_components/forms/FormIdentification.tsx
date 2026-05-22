@@ -16,7 +16,6 @@ import FormWrapper from "@/app/components/forms/FormWrapper";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
-import { isStructureAutorisee } from "@/app/utils/structure.util";
 import {
   AjoutIdentificationFormValues,
   ajoutIdentificationSchema,
@@ -47,9 +46,6 @@ export default function FormIdentification() {
 
   const [isManagedByAFiliale, setIsManagedByAFiliale] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [type, setType] = useState<string | undefined>(
-    localStorageValues?.type
-  );
 
   useEffect(() => {
     if (localStorageValues && !isInitialized) {
@@ -129,7 +125,6 @@ export default function FormIdentification() {
                   control={control}
                   label="Type"
                   required
-                  onChange={(event) => setType(event)}
                   id="type"
                 >
                   <option value="">Sélectionnez un type</option>
@@ -224,69 +219,6 @@ export default function FormIdentification() {
             <hr />
 
             <FieldSetContacts />
-
-            <hr />
-            <div className="flex flex-col gap-2">
-              <h2 className="text-xl font-bold mb-4 text-title-blue-france">
-                Calendrier
-              </h2>
-              {isStructureAutorisee(type) && (
-                <fieldset className="flex flex-col gap-6">
-                  <legend className="text-lg font-bold mb-2 text-title-blue-france">
-                    Période d’autorisation en cours
-                  </legend>
-                  <div className="grid grid-cols-1 md:grid-cols-2 w-1/2 gap-6">
-                    <InputWithValidation
-                      name="debutPeriodeAutorisation"
-                      id="debutPeriodeAutorisation"
-                      control={control}
-                      type="date"
-                      label="Date de début"
-                    />
-
-                    <InputWithValidation
-                      name="finPeriodeAutorisation"
-                      id="finPeriodeAutorisation"
-                      control={control}
-                      type="date"
-                      label="Date de fin"
-                    />
-                  </div>
-                </fieldset>
-              )}
-
-              <fieldset className="flex flex-col gap-6">
-                <legend className="text-lg font-bold mb-2 text-title-blue-france">
-                  Convention en cours
-                  {isStructureAutorisee(type) ? " (optionnel)" : ""}
-                </legend>
-                {isStructureAutorisee(type) && (
-                  <CustomNotice
-                    severity="info"
-                    title=""
-                    className="rounded [&_p]:flex [&_p]:items-center"
-                    description="Uniquement si votre structure est sous convention."
-                  />
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-2 w-1/2 gap-6">
-                  <InputWithValidation
-                    name="debutConvention"
-                    id="debutConvention"
-                    control={control}
-                    type="date"
-                    label="Date de début"
-                  />
-
-                  <InputWithValidation
-                    name="finConvention"
-                    id="finConvention"
-                    control={control}
-                    type="date"
-                    label="Date de fin"
-                  />
-                </div>
-              </fieldset>
-            </div>
           </>
         );
       }}

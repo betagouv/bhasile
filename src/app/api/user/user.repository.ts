@@ -1,32 +1,41 @@
 import prisma from "@/lib/prisma";
 
+const UPDATE_INTERVAL_MINUTES = 60;
+
 export const upsertUser = async ({
   name,
   email,
   emailPattern,
 }: UpsertUserArgs): Promise<void> => {
-  await prisma.user.upsert({
+  const now = new Date();
+  const threshold = new Date(
+    now.getTime() - UPDATE_INTERVAL_MINUTES * 60 * 1000
+  );
+  const data = {
+    name,
+    lastConnection: now,
+    emailPattern: {
+      connect: {
+        pattern: emailPattern,
+      },
+    },
+  };
+
+  const existing = await prisma.user.findUnique({
     where: { email },
-    create: {
-      name,
-      email,
-      lastConnection: new Date(),
-      emailPattern: {
-        connect: {
-          pattern: emailPattern,
-        },
-      },
-    },
-    update: {
-      name,
-      lastConnection: new Date(),
-      emailPattern: {
-        connect: {
-          pattern: emailPattern,
-        },
-      },
-    },
+    select: { lastConnection: true },
   });
+
+  if (!existing) {
+    await prisma.user.create({ data: { email, ...data } });
+    return;
+  }
+
+  if (existing.lastConnection >= threshold) {
+    return;
+  }
+
+  await prisma.user.update({ where: { email }, data });
 };
 
 export const getUserByEmail = async ({ email }: { email?: string | null }) => {

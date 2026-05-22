@@ -10,6 +10,7 @@ export const createFakeContact = (): Omit<
   const nom = faker.person.lastName();
 
   return {
+    structureVersionId: null,
     prenom,
     nom,
     telephone: faker.phone.number().toString(),

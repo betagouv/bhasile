@@ -116,37 +116,6 @@ export const Identification = () => {
           )}
         </div>
       ))}
-
-      <h3 className="text-title-blue-france w-full flex justify-between text-lg mt-10">
-        Calendrier
-      </h3>
-
-      {localStorageValues?.debutPeriodeAutorisation ? (
-        <div className="border-b border-default-grey pb-2 mb-3">
-          <p className="mb-0">
-            <b className="pr-4">Période d’autorisation en cours</b>
-            {localStorageValues?.debutPeriodeAutorisation && (
-              <span>{localStorageValues?.debutPeriodeAutorisation}</span>
-            )}
-            {localStorageValues?.finPeriodeAutorisation && (
-              <span> - {localStorageValues?.finPeriodeAutorisation}</span>
-            )}
-          </p>
-        </div>
-      ) : null}
-      {localStorageValues?.debutConvention ? (
-        <div className="border-b border-default-grey pb-2 mb-3">
-          <p className="mb-0">
-            <b className="pr-4">Convention en cours</b>
-            {localStorageValues?.debutConvention && (
-              <span>{localStorageValues?.debutConvention}</span>
-            )}
-            {localStorageValues?.finConvention && (
-              <span> - {localStorageValues?.finConvention}</span>
-            )}
-          </p>
-        </div>
-      ) : null}
     </>
   );
 };

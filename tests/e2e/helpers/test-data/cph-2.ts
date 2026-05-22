@@ -46,8 +46,6 @@ export const cph2: TestStructureScenario = {
         telephone: "+33623456789",
       },
     ],
-    debutPeriodeAutorisation: "2020-01-01",
-    finPeriodeAutorisation: "2025-12-31",
     nom: "Structure Test",
     adresseAdministrative: {
       complete: "1 Rue de la Paix 75001 Paris",
@@ -377,8 +375,6 @@ export const cph2: TestStructureScenario = {
     fvvTeh: true,
     contacts: [{ email: "modif-cph2@example.com" }],
     notes: "Notes modification CPH 2 - mixte.",
-    debutPeriodeAutorisation: "2020-09-15",
-    finPeriodeAutorisation: "2026-09-14",
     ouvertureFermeture: {
       placesACreer: "4",
       echeancePlacesACreer: "2026-05-15",
