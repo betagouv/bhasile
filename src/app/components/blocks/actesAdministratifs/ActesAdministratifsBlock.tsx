@@ -78,5 +78,5 @@ type Props = {
   categoriesRules: CategoryDisplayRules;
   editRoute: string;
   cpomActesAdministratifs?: ActeAdministratifApiType[];
-  title: string;
+  title?: string;
 };
