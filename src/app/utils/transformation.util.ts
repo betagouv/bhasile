@@ -77,7 +77,7 @@ export const getTransformationSteps = (
           id: structureTransformation.id,
           codeBhasile:
             structureTransformation.structureVersion?.structure?.codeBhasile,
-          structureTransformationType: structureTransformation.type,
+          type: structureTransformation.type,
           steps: getStepsByType(structureTransformation, transformation.id),
         };
       })
@@ -88,12 +88,8 @@ export const getTransformationSteps = (
           [StructureTransformationType.EXTENSION]: 2,
           [StructureTransformationType.CREATION]: 3,
         };
-        const aTypeOrder = a.structureTransformationType
-          ? typeOrder[a.structureTransformationType]
-          : 99;
-        const bTypeOrder = b.structureTransformationType
-          ? typeOrder[b.structureTransformationType]
-          : 99;
+        const aTypeOrder = a.type ? typeOrder[a.type] : 99;
+        const bTypeOrder = b.type ? typeOrder[b.type] : 99;
         return aTypeOrder - bTypeOrder;
       }) ?? []
   );
