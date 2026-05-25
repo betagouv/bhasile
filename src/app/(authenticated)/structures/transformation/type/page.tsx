@@ -11,6 +11,8 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
+import { TransformationMenu } from "../_components/TransformationMenu";
+
 export default function TransformationSelectionPage() {
   const searchParams = useSearchParams();
   const structureId = Number(searchParams.get("structureId"));
@@ -36,13 +38,16 @@ export default function TransformationSelectionPage() {
   };
 
   return (
-    <>
-      <TransformationHeader />
-      <TransformationTypeForms
-        formType={type}
-        structureId={structureId}
-        onSubmit={handleSubmit}
-      />
-    </>
+    <main className="w-full max-w-screen flex" id="content">
+      <TransformationMenu />
+      <div className="flex-1 bg-alt-grey">
+        <TransformationHeader />
+        <TransformationTypeForms
+          formType={type}
+          structureId={structureId}
+          onSubmit={handleSubmit}
+        />
+      </div>
+    </main>
   );
 }

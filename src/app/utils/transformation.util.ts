@@ -45,8 +45,6 @@ export const getTransformationFormNavigation = ({
     }))
   );
 
-  console.log("flatSteps", flatSteps, transformationSteps);
-
   const currentIndex = flatSteps.findIndex(
     (step) =>
       step.type?.toLowerCase() === transformationStructureType?.toLowerCase() &&
