@@ -10,31 +10,32 @@ import {
 } from "@/types/transformation.type";
 
 const mockUsePathname = vi.fn<() => string>();
-const mockUseParams = vi.fn<() => Record<string, string | undefined>>();
 const mockRouterPush = vi.fn();
-const mockUseFetchTransformation =
-  vi.fn<() => { transformation: TransformationApiRead | undefined }>();
+const mockUseOptionalTransformationContext =
+  vi.fn<() => { transformation: TransformationApiRead | null }>();
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockUsePathname(),
-  useParams: () => mockUseParams(),
   useRouter: () => ({ push: mockRouterPush }),
 }));
 
-vi.mock("@/app/hooks/useFetchTransformation", () => ({
-  useFetchTransformation: () => mockUseFetchTransformation(),
-}));
+vi.mock(
+  "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext",
+  () => ({
+    useOptionalTransformationContext: () =>
+      mockUseOptionalTransformationContext(),
+  })
+);
 
 describe("TransformationMenu", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseFetchTransformation.mockReturnValue({ transformation: undefined });
+    mockUseOptionalTransformationContext.mockReturnValue({
+      transformation: null,
+    });
   });
 
   describe("when there is no transformationId", () => {
-    beforeEach(() => {
-      mockUseParams.mockReturnValue({});
-    });
 
     it("should mark 'Cas de figure' as active on /type pathname", () => {
       // GIVEN
@@ -97,7 +98,13 @@ describe("TransformationMenu", () => {
 
   describe("when there is a transformationId", () => {
     beforeEach(() => {
-      mockUseParams.mockReturnValue({ transformationId: "42" });
+      mockUseOptionalTransformationContext.mockReturnValue({
+        transformation: {
+          id: 42,
+          type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
+          structureTransformations: [],
+        },
+      });
     });
 
     it("should mark 'Cas de figure' as active on /selection pathname", () => {
@@ -235,7 +242,7 @@ describe("TransformationMenu", () => {
       mockUsePathname.mockReturnValue(
         "/structures/transformation/42/selection"
       );
-      mockUseFetchTransformation.mockReturnValue({
+      mockUseOptionalTransformationContext.mockReturnValue({
         transformation: {
           id: 42,
           type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
