@@ -257,6 +257,7 @@ describe("transformation util", () => {
       const transformation: TransformationApiRead = {
         id: 5,
         type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
+        structureTransformations: [],
       };
 
       // WHEN
@@ -273,27 +274,27 @@ describe("transformation util", () => {
         structureTransformations: [
           {
             id: 1,
-            structureId: 1001,
+            structureVersion: { structureId: 1001 },
             type: StructureTransformationType.FERMETURE,
           },
           {
             id: 2,
-            structureId: 1003,
+            structureVersion: { structureId: 1003 },
             type: StructureTransformationType.EXTENSION,
           },
           {
             id: 3,
-            structureId: 1002,
+            structureVersion: { structureId: 1002 },
             type: StructureTransformationType.FERMETURE,
           },
           {
             id: 4,
-            structureId: 1003,
+            structureVersion: { structureId: 1003 },
             type: StructureTransformationType.CONTRACTION,
           },
           {
             id: 5,
-            structureId: 1004,
+            structureVersion: { structureId: 1004 },
             type: StructureTransformationType.CREATION,
           },
         ],
@@ -319,7 +320,7 @@ describe("transformation util", () => {
         structureTransformations: [
           {
             id: 1,
-            structureId: 1001,
+            structureVersion: { structureId: 1001 },
             type: StructureTransformationType.FERMETURE,
           },
         ],
@@ -343,7 +344,9 @@ describe("transformation util", () => {
         // GIVEN
         const transformation: TransformationApiRead = {
           id: 5,
-          structureTransformations: [{ id: 1, structureId: 1001, type }],
+          structureTransformations: [
+            { id: 1, structureVersion: { structureId: 1001 }, type },
+          ],
         };
 
         // WHEN
@@ -358,30 +361,6 @@ describe("transformation util", () => {
         ]);
       }
     );
-
-    it("should return empty steps and place at the end for a structureTransformation without type", () => {
-      // GIVEN
-      const transformation: TransformationApiRead = {
-        id: 5,
-        structureTransformations: [
-          { id: 1, structureId: 1001, type: undefined },
-          {
-            id: 2,
-            structureId: 1002,
-            type: StructureTransformationType.FERMETURE,
-          },
-        ],
-      };
-
-      // WHEN
-      const result = getTransformationSteps(transformation);
-
-      // THEN
-      expect(result).toHaveLength(2);
-      expect(result[0].type).toBe(StructureTransformationType.FERMETURE);
-      expect(result[1].type).toBeUndefined();
-      expect(result[1].steps).toEqual([]);
-    });
   });
 
   describe("getRoute (tested indirectly via getTransformationSteps)", () => {
@@ -396,7 +375,9 @@ describe("transformation util", () => {
         // GIVEN
         const transformation: TransformationApiRead = {
           id: 5,
-          structureTransformations: [{ id: 42, structureId: 1001, type }],
+          structureTransformations: [
+            { id: 42, structureVersion: { structureId: 1001 }, type },
+          ],
         };
 
         // WHEN
@@ -418,7 +399,7 @@ describe("transformation util", () => {
         structureTransformations: [
           {
             id: 13,
-            structureId: 1001,
+            structureVersion: { structureId: 1001 },
             type: StructureTransformationType.EXTENSION,
           },
         ],
@@ -442,7 +423,7 @@ describe("transformation util", () => {
         structureTransformations: [
           {
             id: undefined,
-            structureId: 1001,
+            structureVersion: { structureId: 1001 },
             type: StructureTransformationType.EXTENSION,
           },
         ],

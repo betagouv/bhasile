@@ -182,7 +182,7 @@ const getRoute = (
 export type Step = {
   id?: number;
   codeBhasile?: string;
-  structureTransformationType?: StructureTransformationType;
+  type?: StructureTransformationType;
   steps: {
     name: string;
     label: string;

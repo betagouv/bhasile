@@ -20,9 +20,9 @@ export const TransformationStep = ({ step }: Props) => {
             "flex items-center justify-center w-7 h-7 rounded-full bg-white text-title-blue-france"
           )}
         >
-          {getIcon(step.structureTransformationType)}
+          {getIcon(step.type)}
         </span>
-        {getLabel(step.structureTransformationType, step.codeBhasile)}
+        {getLabel(step.type, step.codeBhasile)}
       </div>
       <div className="flex flex-col gap-2">
         {step.steps.map((stepItem) => {
