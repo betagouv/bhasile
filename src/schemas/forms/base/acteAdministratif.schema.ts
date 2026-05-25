@@ -24,6 +24,13 @@ export const acteAdministratifAutoSaveSchema = z.object({
 const SINGLE_DATE_CATEGORIES: ActeAdministratifCategory[] = ["STATUTS"];
 const NO_DATE_CATEGORIES: ActeAdministratifCategory[] = ["AUTRE"];
 
+const requiresStartEndDate = (
+  category: ActeAdministratifCategory | undefined
+): boolean =>
+  category !== undefined &&
+  !NO_DATE_CATEGORIES.includes(category) &&
+  !SINGLE_DATE_CATEGORIES.includes(category);
+
 const acteAdministratifSchema = acteAdministratifAutoSaveSchema
   .extend({
     fileUploads: z.array(fileApiSchema).optional(),
@@ -32,8 +39,7 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
     (data) => {
       const isNotAvenant = !data.parentId && !data.parentUuid;
       if (
-        !NO_DATE_CATEGORIES.includes(data.category!) &&
-        !SINGLE_DATE_CATEGORIES.includes(data.category!) &&
+        requiresStartEndDate(data.category) &&
         isNotAvenant &&
         data.fileUploads?.length
       ) {
@@ -50,8 +56,7 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
     (data) => {
       const isNotAvenant = !data.parentId && !data.parentUuid;
       if (
-        !NO_DATE_CATEGORIES.includes(data.category!) &&
-        !SINGLE_DATE_CATEGORIES.includes(data.category!) &&
+        requiresStartEndDate(data.category) &&
         isNotAvenant &&
         data.fileUploads?.length
       ) {

@@ -9,6 +9,8 @@ import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 import { ActesAdministratifsCategory } from "./ActesAdministratifsCategory";
 
+const CPOM_CATEGORY: ActeAdministratifCategory = "CONVENTION";
+
 export const ActesAdministratifsBlock = ({
   structure,
   operateur,
@@ -56,7 +58,7 @@ export const ActesAdministratifsBlock = ({
           )}
           {cpomActesAdministratifs?.length ? (
             <ActesAdministratifsCategory
-              category={"CONVENTION" as ActeAdministratifCategory}
+              category={CPOM_CATEGORY}
               title="CPOM"
               actesAdministratifs={cpomActesAdministratifs}
               isCpom
