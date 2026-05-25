@@ -3,9 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import {
   CategoryDisplayRule,
   CategoryDisplayRules,
-  getOperateurActesAdministratifsCategoryToDisplay,
 } from "@/config/acte-administratif.config";
-import { OperateurApiRead } from "@/schemas/api/operateur.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
@@ -46,11 +44,3 @@ export const getActesAdministratifsDefaultValues = (
     })),
   ];
 };
-
-export const getOperateurActesAdministratifsDefaultValues = (
-  operateur?: OperateurApiRead
-): ActeAdministratifFormValues[] =>
-  getActesAdministratifsDefaultValues(
-    operateur?.actesAdministratifs,
-    getOperateurActesAdministratifsCategoryToDisplay()
-  );

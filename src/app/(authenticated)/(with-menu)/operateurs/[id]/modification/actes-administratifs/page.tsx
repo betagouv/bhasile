@@ -11,7 +11,7 @@ import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useOperateurFormHandling } from "@/app/hooks/useOperateurFormHandling";
-import { getOperateurActesAdministratifsDefaultValues } from "@/app/utils/acteAdministratif.util";
+import { getOperateurDefaultValues } from "@/app/utils/operateur.util";
 import { getOperateurActesAdministratifsCategoryToDisplay } from "@/config/acte-administratif.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
@@ -32,10 +32,7 @@ export default function OperateurModificationActesAdministratifs() {
 
   const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
-  const defaultValues = {
-    id: operateur.id,
-    actesAdministratifs: getOperateurActesAdministratifsDefaultValues(operateur),
-  };
+  const defaultValues = getOperateurDefaultValues(operateur);
 
   const onSubmit = async (data: ActesAdministratifsFormValues) => {
     const actesAdministratifs = (data.actesAdministratifs ?? []).filter(
