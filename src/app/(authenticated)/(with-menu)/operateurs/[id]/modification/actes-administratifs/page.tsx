@@ -10,62 +10,53 @@ import { LeaveModificationModal } from "@/app/components/forms/LeaveModification
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
-import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
-import { getStructureActesAdministratifsCategoryToDisplay } from "@/app/utils/acteAdministratif.util";
-import { getDefaultValues } from "@/app/utils/defaultValues.util";
+import { useOperateurFormHandling } from "@/app/hooks/useOperateurFormHandling";
+import {
+  getOperateurActesAdministratifsCategoryToDisplay,
+  getOperateurActesAdministratifsDefaultValues,
+} from "@/app/utils/acteAdministratif.util";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
-  actesAdministratifsAutoriseesSchema,
   ActesAdministratifsFormValues,
-  actesAdministratifsSubventionneesSchema,
+  actesAdministratifsOperateurSchema,
 } from "@/schemas/forms/base/acteAdministratif.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
+import { useOperateurContext } from "../../_context/OperateurClientContext";
 
-export default function ModificationQualiteForm() {
-  const { structure } = useStructureContext();
+export default function OperateurModificationActesAdministratifs() {
+  const { operateur } = useOperateurContext();
 
-  let schema;
-  if (structure.isAutorisee) {
-    schema = actesAdministratifsAutoriseesSchema;
-  } else {
-    schema = actesAdministratifsSubventionneesSchema;
-  }
-
-  const { handleSubmit, backendError } = useAgentFormHandling({
-    nextRoute: `/structures/${structure.id}`,
+  const { handleSubmit, backendError } = useOperateurFormHandling({
+    operateurId: operateur.id,
+    nextRoute: `/operateurs/${operateur.id}`,
   });
 
   const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
-  const defaultValues = getDefaultValues({
-    structure,
-  });
+  const defaultValues = {
+    id: operateur.id,
+    actesAdministratifs: getOperateurActesAdministratifsDefaultValues(operateur),
+  };
 
   const onSubmit = async (data: ActesAdministratifsFormValues) => {
     const actesAdministratifs = (data.actesAdministratifs ?? []).filter(
-      (acteAdministratif) =>
-        acteAdministratif.fileUploads?.length &&
-        acteAdministratif.category &&
-        acteAdministratif.fileUploads[0].key
+      (acte) =>
+        acte.fileUploads?.length && acte.category && acte.fileUploads[0].key
     ) as ActeAdministratifApiType[];
 
     await handleSubmit({
+      id: operateur.id,
       actesAdministratifs,
-      id: structure.id,
     });
   };
 
   const { getFetchState } = useFetchState();
-  const saveState = getFetchState("structure-save");
+  const saveState = getFetchState("operateur-save");
 
-  const key = structure?.actesAdministratifs
+  const key = operateur.actesAdministratifs
     ?.map((acteAdministratif) => acteAdministratif.id ?? acteAdministratif.uuid)
     ?.join(",");
-
-  const categoriesRules =
-    getStructureActesAdministratifsCategoryToDisplay(structure);
 
   return (
     <>
@@ -74,28 +65,27 @@ export default function ModificationQualiteForm() {
         handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
-        schema={schema}
+        schema={actesAdministratifsOperateurSchema}
+        defaultValues={defaultValues}
         onSubmit={onSubmit}
         submitButtonText="Valider"
         handleCancel={() => setShouldOpenModal(true)}
         availableFooterButtons={[
-          FooterButtonType.SUBMIT,
           FooterButtonType.CANCEL,
+          FooterButtonType.SUBMIT,
         ]}
-        defaultValues={defaultValues}
         className="border-2 border-solid border-(--text-title-blue-france)"
         key={key}
       >
-        <ActesAdministratifs categoryDisplayRules={categoriesRules} />
+        <ActesAdministratifs
+          categoryDisplayRules={getOperateurActesAdministratifsCategoryToDisplay()}
+        />
         {saveState === FetchState.ERROR && (
-          <SubmitError
-            codeBhasile={structure.codeBhasile}
-            backendError={backendError}
-          />
+          <SubmitError operateurId={operateur.id} backendError={backendError} />
         )}
       </FormWrapper>
       <LeaveModificationModal
-        resetRoute={`/structures/${structure.id}`}
+        resetRoute={`/operateurs/${operateur.id}`}
         shouldOpen={shouldOpenModal}
         setShouldOpen={setShouldOpenModal}
       />

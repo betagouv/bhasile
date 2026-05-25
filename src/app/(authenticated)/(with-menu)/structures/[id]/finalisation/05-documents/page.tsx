@@ -9,6 +9,7 @@ import { SubmitError } from "@/app/components/SubmitError";
 import { InformationBar } from "@/app/components/ui/InformationBar";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
+import { getStructureActesAdministratifsCategoryToDisplay } from "@/app/utils/acteAdministratif.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
@@ -67,6 +68,9 @@ export default function FinalisationQualite() {
     ?.sort((a, b) => `${a ?? ""}`.localeCompare(`${b ?? ""}`))
     ?.join(",");
 
+  const categoriesRules =
+    getStructureActesAdministratifsCategoryToDisplay(structure);
+
   return (
     <>
       <Tabs currentStep={currentStep} />
@@ -96,7 +100,7 @@ export default function FinalisationQualite() {
           description="Veuillez importer l’ensemble des actes administratifs historiques afférents à la structure, que les dates d’effets soient actuelles ou révolues."
         />
 
-        <ActesAdministratifs />
+        <ActesAdministratifs categoryDisplayRules={categoriesRules} />
 
         {saveState === FetchState.ERROR && (
           <SubmitError

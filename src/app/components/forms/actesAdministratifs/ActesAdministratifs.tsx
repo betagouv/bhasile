@@ -1,42 +1,38 @@
-import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import FieldSetActeAdministratif from "@/app/components/forms/actesAdministratifs/FieldSetActeAdministratif";
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
-import { getActesAdministratifsCategoryToDisplay } from "@/app/utils/acteAdministratif.util";
+import { CategoryDisplayRules } from "@/app/utils/acteAdministratif.util";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
-export const ActesAdministratifs = () => {
-  const { structure } = useStructureContext();
-
-  const actesAdministratifsCategory =
-    getActesAdministratifsCategoryToDisplay(structure);
-
-  const filteredCategories = Object.entries(actesAdministratifsCategory).filter(
-    (acteAdministratifCategory) => acteAdministratifCategory[1].shouldShow
+export const ActesAdministratifs = ({ categoryDisplayRules }: Props) => {
+  const filteredCategories = Object.entries(categoryDisplayRules).filter(
+    ([, rules]) => rules.shouldShow
   );
 
   return (
     <>
       <MaxSizeNotice />
-      {filteredCategories.map(([category, rules], index) => {
-        return (
-          <div key={category}>
-            <FieldSetActeAdministratif
-              category={category as ActeAdministratifCategory}
-              categoryShortName={rules.categoryShortName}
-              title={rules.title}
-              canAddFile={rules.canAddFile}
-              canAddAvenant={rules.canAddAvenant}
-              avenantCanExtendDateEnd={true}
-              isOptional={rules.isOptional}
-              additionalFieldsType={rules.additionalFieldsType}
-              documentLabel={rules.documentLabel}
-              addFileButtonLabel={rules.addFileButtonLabel}
-              notice={rules.notice}
-            />
-            {index < filteredCategories.length - 1 && <hr />}
-          </div>
-        );
-      })}
+      {filteredCategories.map(([category, rules], index) => (
+        <div key={category}>
+          <FieldSetActeAdministratif
+            category={category as ActeAdministratifCategory}
+            categoryShortName={rules.categoryShortName}
+            title={rules.title}
+            canAddFile={rules.canAddFile}
+            canAddAvenant={rules.canAddAvenant}
+            avenantCanExtendDateEnd={true}
+            isOptional={rules.isOptional}
+            additionalFieldsType={rules.additionalFieldsType}
+            documentLabel={rules.documentLabel}
+            addFileButtonLabel={rules.addFileButtonLabel}
+            notice={rules.notice}
+          />
+          {index < filteredCategories.length - 1 && <hr />}
+        </div>
+      ))}
     </>
   );
+};
+
+type Props = {
+  categoryDisplayRules: CategoryDisplayRules;
 };

@@ -28,6 +28,8 @@ export const getCategoryLabel = (
     ARRETE_AUTORISATION: "Arrêté d'autorisation",
     CONVENTION: "Convention",
     ARRETE_TARIFICATION: "Arrêté de tarification",
+    FRAIS_DE_SIEGE: "Frais de siège",
+    STATUTS: "Statuts",
     CPOM: "CPOM",
     INSPECTION_CONTROLE: "Inspection contrôle",
     EVALUATION: "Évaluation",

@@ -135,6 +135,18 @@ export const ActeAdministratif = ({
             />
           </div>
         )}
+        {additionalFieldsType === AdditionalFieldsType.DATE && (
+          <div className="flex gap-6 items-start h-full">
+            <InputWithValidation
+              name={`actesAdministratifs.${index}.date`}
+              defaultValue={acte.date}
+              control={control}
+              label={`Date ${categoryShortName}`}
+              className="w-full mb-0"
+              type="date"
+            />
+          </div>
+        )}
         {additionalFieldsType === AdditionalFieldsType.NAME && (
           <div className="flex gap-6 items-start h-full">
             <InputWithValidation

@@ -4,6 +4,9 @@ import { Operateur, Prisma, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { OperateurApiWrite } from "@/schemas/api/operateur.schema";
 
+import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
+import { OperateurDbDetail } from "./operateur.db.type";
+
 export const findBySearchTerm = async (
   searchTerm: string | null
 ): Promise<Operateur[]> => {
@@ -89,7 +92,7 @@ export const countOperateurs = async ({
   });
 };
 
-export const findOne = async (id: number): Promise<OperateurWithStructures> => {
+export const findOne = async (id: number): Promise<OperateurDbDetail> => {
   return prisma.operateur.findFirstOrThrow({
     where: { id },
     include: {
@@ -99,6 +102,9 @@ export const findOne = async (id: number): Promise<OperateurWithStructures> => {
           fvvTeh: true,
         },
       },
+      actesAdministratifs: {
+        include: { fileUploads: true },
+      },
     },
   });
 };
@@ -106,22 +112,21 @@ export const findOne = async (id: number): Promise<OperateurWithStructures> => {
 export const updateOne = async (
   operateur: OperateurApiWrite
 ): Promise<Operateur> => {
-  return prisma.operateur.update({
-    where: { id: operateur.id },
-    data: operateur,
+  const { actesAdministratifs, ...operateurFields } = operateur;
+
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.operateur.update({
+      where: { id: operateur.id },
+      data: operateurFields,
+    });
+
+    await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
+      operateurId: operateur.id,
+    });
+
+    return updated;
   });
 };
-
-type OperateurWithStructures = Prisma.OperateurGetPayload<{
-  include: {
-    structures: {
-      select: {
-        lgbt: true;
-        fvvTeh: true;
-      };
-    };
-  };
-}>;
 
 type OperateurStat = {
   id: number;

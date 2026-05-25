@@ -19,7 +19,10 @@ import { structureTypologieSchemaTypeFormValues } from "@/schemas/forms/base/str
 import { Repartition } from "@/types/adresse.type";
 import { PublicType } from "@/types/structure.type";
 
-import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
+import {
+  getActesAdministratifsDefaultValues,
+  getStructureActesAdministratifsCategoryToDisplay,
+} from "./acteAdministratif.util";
 import { transformApiAdressesToFormAdresses } from "./adresse.util";
 import { transformApiAntennesToFormAntennes } from "./antenne.util";
 import { getBudgetsDefaultValues } from "./budget.util";
@@ -71,7 +74,10 @@ export const getDefaultValues = ({
     structure?.structureMillesimes || [],
     structureCreationYear
   );
-  const actesAdministratifs = getActesAdministratifsDefaultValues(structure);
+  const actesAdministratifs = getActesAdministratifsDefaultValues(
+    structure.actesAdministratifs,
+    getStructureActesAdministratifsCategoryToDisplay(structure)
+  );
 
   const controles = getControlesDefaultValues(structure.controles);
   const evaluations = getEvaluationsDefaultValues(
