@@ -1,8 +1,67 @@
+import { TRANSFORMATION_TYPE_SPECS } from "@/app/config/transformation.config";
 import {
   StructureTransformationApiUpdate,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
-import { StructureTransformationType } from "@/types/transformation.type";
+import {
+  StructureTransformationType,
+  TransformationFormType,
+  TransformationType,
+} from "@/types/transformation.type";
+
+export const getTransformationTitle = (
+  type: TransformationType | TransformationFormType | undefined
+): string => {
+  if (type && type in TRANSFORMATION_TYPE_SPECS) {
+    return TRANSFORMATION_TYPE_SPECS[type as TransformationType].title;
+  }
+  if (type === TransformationFormType.HUDA) {
+    return "Transformer HUDA en CADA";
+  }
+  if (type === TransformationFormType.CREATION) {
+    return "Nouvelle structure";
+  }
+  return "Transformer une structure";
+};
+
+type GetTransformationFormNavigationProps = {
+  transformationSteps: Step[];
+  transformationStructureType: StructureTransformationType;
+  transformationStructureId: number;
+  transformationStructureStep: string;
+};
+
+export const getTransformationFormNavigation = ({
+  transformationSteps,
+  transformationStructureType,
+  transformationStructureId,
+  transformationStructureStep,
+}: GetTransformationFormNavigationProps) => {
+  const flatSteps = transformationSteps.flatMap((step) =>
+    step.steps.map((stepItem) => ({
+      id: step.id,
+      type: step.type,
+      ...stepItem,
+    }))
+  );
+
+  const currentIndex = flatSteps.findIndex(
+    (step) =>
+      step.type?.toLowerCase() === transformationStructureType.toLowerCase() &&
+      step.id === transformationStructureId &&
+      step.name.toLowerCase() === transformationStructureStep.toLowerCase()
+  );
+
+  const firstStep = flatSteps[0];
+  const currentStep = flatSteps[currentIndex];
+  const prevStep = currentIndex > 0 ? flatSteps[currentIndex - 1] : undefined;
+  const nextStep =
+    currentIndex >= 0 && currentIndex < flatSteps.length - 1
+      ? flatSteps[currentIndex + 1]
+      : undefined;
+
+  return { firstStep, currentStep, prevStep, nextStep };
+};
 
 export const getTransformationSteps = (
   transformation?: TransformationApiRead
@@ -54,6 +113,7 @@ const getStepsByType = (
     case StructureTransformationType.CREATION:
       return [
         {
+          name: "description",
           label: "Description",
           route: getRoute(
             "description",
@@ -63,6 +123,7 @@ const getStepsByType = (
           ),
         },
         {
+          name: "places-et-hebergement",
           label: "Places et hébergement",
           route: getRoute(
             "places-et-hebergement",
@@ -72,6 +133,7 @@ const getStepsByType = (
           ),
         },
         {
+          name: "actes-administratifs",
           label: "Actes administratifs",
           route: getRoute(
             "actes-administratifs",
@@ -84,6 +146,7 @@ const getStepsByType = (
     case StructureTransformationType.FERMETURE:
       return [
         {
+          name: "description",
           label: "Description",
           route: getRoute(
             "description",
@@ -121,6 +184,7 @@ export type Step = {
   codeBhasile?: string;
   structureTransformationType?: StructureTransformationType;
   steps: {
+    name: string;
     label: string;
     route: string;
   }[];

@@ -35,6 +35,19 @@ export function TransformationClientProvider({
   );
 }
 
+export function useOptionalTransformationContext(): {
+  transformation: TransformationApiRead | null;
+  setTransformation: (t: TransformationApiRead) => void;
+} {
+  const context = useContext(TransformationContextInternal);
+  return {
+    transformation: context.transformation,
+    setTransformation: context.setTransformation as (
+      t: TransformationApiRead
+    ) => void,
+  };
+}
+
 export function useTransformationContext(): TransformationContextType & {
   setTransformation: (t: TransformationApiRead) => void;
 } {

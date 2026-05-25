@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 
+import { TransformationHeader } from "../_components/TransformationHeader";
 import { TransformationProvider } from "./_context/TransformationContext";
 
 async function getTransformation(id: string): Promise<TransformationApiRead> {
@@ -43,6 +44,7 @@ export default async function TransformationLayout({
 
   return (
     <TransformationProvider transformation={transformation}>
+      <TransformationHeader />
       {children}
     </TransformationProvider>
   );

@@ -117,6 +117,7 @@ export const protectedApiRoutes: ApiRoute[] = [
     routes: {
       GET: "proconnect",
       PUT: "proconnect",
+      DELETE: "proconnect",
     },
   },
 ];

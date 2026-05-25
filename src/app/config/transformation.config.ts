@@ -16,6 +16,7 @@ export type StructureSelectionBlock = {
 };
 
 export type TransformationTypeSpec = {
+  title: string;
   blocks: StructureSelectionBlock[];
   buildAutoTransformations: (
     structureId?: number
@@ -27,12 +28,14 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
   TransformationTypeSpec
 > = {
   [TransformationType.OUVERTURE_EX_NIHILO]: {
+    title: "Nouvelle structure",
     blocks: [],
     buildAutoTransformations: () => [
       { type: StructureTransformationType.CREATION },
     ],
   },
   [TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES]: {
+    title: "Nouvelle structure",
     blocks: [
       {
         id: "main",
@@ -44,6 +47,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     buildAutoTransformations: () => [],
   },
   [TransformationType.EXTENSION_EX_NIHILO]: {
+    title: "Transformer une structure",
     blocks: [],
     buildAutoTransformations: (structureId) => [
       {
@@ -53,6 +57,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     ],
   },
   [TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_CONTRACTENT]: {
+    title: "Transformer une structure",
     blocks: [
       {
         id: "main",
@@ -70,6 +75,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     ],
   },
   [TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_FERMENT]: {
+    title: "Transformer une structure",
     blocks: [
       {
         id: "main",
@@ -87,6 +93,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     ],
   },
   [TransformationType.CONTRACTION_AVEC_TRANSFERT_VERS_AUTRE_STRUCTURE]: {
+    title: "Transformer une structure",
     blocks: [
       {
         id: "main",
@@ -104,6 +111,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     ],
   },
   [TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES]: {
+    title: "Transformer une structure",
     blocks: [],
     buildAutoTransformations: (structureId) => [
       {
@@ -114,6 +122,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
   },
   [TransformationType.FERMETURE_AVEC_TRANSFERT_VERS_UNE_OU_PLUSIEURS_STRUCTURES]:
     {
+      title: "Transformer une structure",
       blocks: [
         {
           id: "main",
@@ -131,6 +140,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       ],
     },
   [TransformationType.FERMETURE_SANS_TRANSFERT]: {
+    title: "Transformer une structure",
     blocks: [],
     buildAutoTransformations: (structureId) => [
       {
@@ -140,6 +150,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     ],
   },
   [TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR]: {
+    title: "Transformer HUDA en CADA",
     blocks: [
       {
         id: "huda",
@@ -161,6 +172,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     buildAutoTransformations: () => [],
   },
   [TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR]: {
+    title: "Transformer HUDA en CADA",
     blocks: [
       {
         id: "huda",
@@ -178,6 +190,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     ],
   },
   [TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES]: {
+    title: "Transformer HUDA en CADA",
     blocks: [
       {
         id: "huda",
