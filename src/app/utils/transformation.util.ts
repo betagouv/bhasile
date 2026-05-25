@@ -26,9 +26,9 @@ export const getTransformationTitle = (
 
 type GetTransformationFormNavigationProps = {
   transformationSteps: Step[];
-  transformationStructureType: StructureTransformationType;
-  transformationStructureId: number;
-  transformationStructureStep: string;
+  transformationStructureType?: StructureTransformationType;
+  transformationStructureId?: number;
+  transformationStructureStep?: string;
 };
 
 export const getTransformationFormNavigation = ({
@@ -45,11 +45,13 @@ export const getTransformationFormNavigation = ({
     }))
   );
 
+  console.log("flatSteps", flatSteps, transformationSteps);
+
   const currentIndex = flatSteps.findIndex(
     (step) =>
-      step.type?.toLowerCase() === transformationStructureType.toLowerCase() &&
+      step.type?.toLowerCase() === transformationStructureType?.toLowerCase() &&
       step.id === transformationStructureId &&
-      step.name.toLowerCase() === transformationStructureStep.toLowerCase()
+      step.name.toLowerCase() === transformationStructureStep?.toLowerCase()
   );
 
   const firstStep = flatSteps[0];
