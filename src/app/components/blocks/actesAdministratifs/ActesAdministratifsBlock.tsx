@@ -18,6 +18,7 @@ export const ActesAdministratifsBlock = ({
   categoriesRules,
   editRoute,
   cpomActesAdministratifs,
+  title = "Actes administratifs",
 }: Props) => {
   const router = useRouter();
 
@@ -35,7 +36,7 @@ export const ActesAdministratifsBlock = ({
 
   return (
     <Block
-      title="Actes administratifs"
+      title={title}
       iconClass="fr-icon-file-text-line"
       onEdit={() => router.push(editRoute)}
       entity={structure ?? (operateur as OperateurApiRead)}
@@ -77,4 +78,5 @@ type Props = {
   categoriesRules: CategoryDisplayRules;
   editRoute: string;
   cpomActesAdministratifs?: ActeAdministratifApiType[];
+  title: string;
 };

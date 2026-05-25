@@ -16,6 +16,7 @@ export const ActesAdministratifsOperateur = (): ReactElement => {
       actesAdministratifs={operateur.actesAdministratifs}
       categoriesRules={categoriesRules}
       editRoute={`/operateurs/${operateur.id}/modification/actes-administratifs`}
+      title="Documents"
     />
   );
 };

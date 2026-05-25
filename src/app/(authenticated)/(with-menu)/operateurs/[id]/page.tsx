@@ -13,7 +13,7 @@ export default function OperateursPage(): ReactNode {
       <Section id="description">
         <DescriptionBlock />
       </Section>
-      <Section id="actes-administratifs">
+      <Section id="documents">
         <ActesAdministratifsOperateur />
       </Section>
     </>
