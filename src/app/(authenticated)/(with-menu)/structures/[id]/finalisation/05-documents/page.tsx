@@ -9,9 +9,9 @@ import { SubmitError } from "@/app/components/SubmitError";
 import { InformationBar } from "@/app/components/ui/InformationBar";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
-import { getStructureActesAdministratifsCategoryToDisplay } from "@/app/utils/acteAdministratif.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
+import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/acte-administratif.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   actesAdministratifsAutoriseesSchema,

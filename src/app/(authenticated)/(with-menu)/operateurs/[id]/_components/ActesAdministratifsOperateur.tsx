@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
 import { ActesAdministratifsBlock } from "@/app/components/blocks/actesAdministratifs/ActesAdministratifsBlock";
-import { getOperateurActesAdministratifsCategoryToDisplay } from "@/app/utils/acteAdministratif.util";
+import { getOperateurActesAdministratifsCategoryToDisplay } from "@/config/acte-administratif.config";
 
 import { useOperateurContext } from "../_context/OperateurClientContext";
 

@@ -1,6 +1,6 @@
 import FieldSetActeAdministratif from "@/app/components/forms/actesAdministratifs/FieldSetActeAdministratif";
 import { MaxSizeNotice } from "@/app/components/forms/MaxSizeNotice";
-import { CategoryDisplayRules } from "@/app/utils/acteAdministratif.util";
+import { CategoryDisplayRules } from "@/config/acte-administratif.config";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 export const ActesAdministratifs = ({ categoryDisplayRules }: Props) => {

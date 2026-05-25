@@ -11,10 +11,8 @@ import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useOperateurFormHandling } from "@/app/hooks/useOperateurFormHandling";
-import {
-  getOperateurActesAdministratifsCategoryToDisplay,
-  getOperateurActesAdministratifsDefaultValues,
-} from "@/app/utils/acteAdministratif.util";
+import { getOperateurActesAdministratifsDefaultValues } from "@/app/utils/acteAdministratif.util";
+import { getOperateurActesAdministratifsCategoryToDisplay } from "@/config/acte-administratif.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   ActesAdministratifsFormValues,

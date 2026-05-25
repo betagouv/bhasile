@@ -3,6 +3,7 @@ import {
   isStructureMultiAntenne,
   isStructureMultiDna,
 } from "@/app/utils/structure.util";
+import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/acte-administratif.config";
 import { ContactApiType } from "@/schemas/api/contact.schema";
 import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
@@ -19,10 +20,7 @@ import { structureTypologieSchemaTypeFormValues } from "@/schemas/forms/base/str
 import { Repartition } from "@/types/adresse.type";
 import { PublicType } from "@/types/structure.type";
 
-import {
-  getActesAdministratifsDefaultValues,
-  getStructureActesAdministratifsCategoryToDisplay,
-} from "./acteAdministratif.util";
+import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
 import { transformApiAdressesToFormAdresses } from "./adresse.util";
 import { transformApiAntennesToFormAntennes } from "./antenne.util";
 import { getBudgetsDefaultValues } from "./budget.util";

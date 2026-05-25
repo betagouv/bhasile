@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 
 import { Block } from "@/app/components/common/Block";
-import { CategoryDisplayRules } from "@/app/utils/acteAdministratif.util";
+import { CategoryDisplayRules } from "@/config/acte-administratif.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { OperateurApiRead } from "@/schemas/api/operateur.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
