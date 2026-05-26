@@ -453,6 +453,42 @@ describe("transformation.repository db integration", () => {
     expect(form.formDefinitionId).toBe(formDefinition.id);
   });
 
+  it("should NOT initialize a StructureVersion when structureVersion is not provided to createOne", async () => {
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureTransformations: [
+        { type: StructureTransformationType.CREATION },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const st = await prisma.structureTransformation.findFirstOrThrow({
+      where: { transformationId },
+    });
+    const sv = await prisma.structureVersion.findFirst({
+      where: { structureTransformationId: st.id },
+    });
+    expect(sv).toBeNull();
+  });
+
+  it("should initialize default forms for each structureTransformation on createOne", async () => {
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureTransformations: [
+        { type: StructureTransformationType.CREATION },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const st = await prisma.structureTransformation.findFirstOrThrow({
+      where: { transformationId },
+    });
+    const formCount = await prisma.form.count({
+      where: { structureTransformationId: st.id },
+    });
+    expect(formCount).toBeGreaterThan(0);
+  });
+
   it("should create a new structureTransformation when updateOne omits id but provides structureVersion.structureId and type", async () => {
     const structureA = await createStructure();
     const structureB = await createStructure();
