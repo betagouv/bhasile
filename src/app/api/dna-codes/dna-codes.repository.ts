@@ -8,15 +8,14 @@ export const findAll = async ({
   structureId?: number;
 }): Promise<{ code: string }[]> => {
   return prisma.dna.findMany({
-    where:
-      structureId === undefined
-        ? { dnaStructures: { none: {} } }
-        : {
-            OR: [
-              { dnaStructures: { none: {} } },
-              { dnaStructures: { some: { structureId } } },
-            ],
-          },
+    where: structureId
+      ? {
+          OR: [
+            { dnaStructures: { none: {} } },
+            { dnaStructures: { some: { structureId } } },
+          ],
+        }
+      : { dnaStructures: { none: {} } },
     select: { code: true },
   });
 };
