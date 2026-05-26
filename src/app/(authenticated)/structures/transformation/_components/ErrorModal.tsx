@@ -25,7 +25,7 @@ export const ErrorModal = ({ onQuit }: Props) => (
     ]}
     className="[&_h1]:text-left! [&_p]:text-left!"
   >
-    Une erreur est survenue l&apos;enregistrement. Veuillez réessayer.
+    L’enregistrement de la transformation a échoué. Veuillez réessayer.
   </errorModal.Component>
 );
 
