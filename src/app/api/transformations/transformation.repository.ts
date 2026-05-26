@@ -34,6 +34,7 @@ export const findOne = async (id: number) => {
       },
       structureTransformations: {
         include: {
+          operateur: { select: { id: true, name: true } },
           structureVersion: {
             include: {
               structure: {
@@ -78,6 +79,7 @@ export const createOne = async (
           type: structureTransformation.type,
           date: structureTransformation.date,
           motif: structureTransformation.motif,
+          operateurId: structureTransformation.operateurId,
         },
       });
 
@@ -171,6 +173,7 @@ const createOrUpdateStructureTransformation = async (
         type: structureTransformation.type,
         date: structureTransformation.date,
         motif: structureTransformation.motif,
+        operateurId: structureTransformation.operateurId,
       },
     });
     structureTransformationId = created.id;
@@ -190,6 +193,7 @@ const createOrUpdateStructureTransformation = async (
         type: structureTransformation.type,
         date: structureTransformation.date,
         motif: structureTransformation.motif,
+        operateurId: structureTransformation.operateurId,
       },
     });
     structureTransformationId = updated.id;

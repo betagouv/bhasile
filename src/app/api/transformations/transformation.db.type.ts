@@ -12,6 +12,7 @@ export type TransformationDb = Prisma.TransformationGetPayload<{
     };
     structureTransformations: {
       include: {
+        operateur: { select: { id: true; name: true } };
         structureVersion: {
           include: {
             structure: {

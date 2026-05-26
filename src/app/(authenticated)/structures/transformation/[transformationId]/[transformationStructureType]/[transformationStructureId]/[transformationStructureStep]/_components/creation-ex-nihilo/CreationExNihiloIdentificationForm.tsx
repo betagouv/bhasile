@@ -36,23 +36,26 @@ export const CreationExNihiloIdentificationForm = ({
 
   const { handleValidation } = useTransformationFormHandling();
 
-  const defaultValues =
-    getTransformationStructureVersionDefaultValues<CreationIdentificationFormValues>(
+  const defaultValues = {
+    ...getTransformationStructureVersionDefaultValues<CreationIdentificationFormValues>(
       structureTransformation.structureVersion
-    );
+    ),
+    operateur: structureTransformation.operateur,
+  };
 
   return (
     <FormWrapper
       schema={creationIdentificationSchema}
       defaultValues={defaultValues}
       onSubmit={(data) => {
-        const { creationDate, ...rest } = data;
+        const { creationDate, operateur, ...rest } = data;
         handleValidation({
           transformationId: transformation.id,
           structureTransformation: {
             id: structureTransformation.id,
             type: structureTransformation.type,
             date: creationDate,
+            operateurId: operateur?.id,
             structureVersion: rest,
           },
         });

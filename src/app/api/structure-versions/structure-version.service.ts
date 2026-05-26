@@ -39,6 +39,5 @@ export const dbStructureVersionToApiRead = (
     notes: version.notes ?? undefined,
     nomOfii: version.nomOfii ?? undefined,
     directionTerritoriale: version.directionTerritoriale ?? undefined,
-    operateur: version.structure?.operateur ?? undefined,
   }) as StructureVersionApiRead;
 };

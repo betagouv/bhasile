@@ -50,10 +50,13 @@ const dbTransformationToApiRead = (
   recursivelySerializeDates({
     ...transformation,
     structureTransformations: transformation.structureTransformations.map(
-      (st) => ({
-        ...st,
-        structureVersion: st.structureVersion
-          ? dbStructureVersionToApiRead(st.structureVersion)
+      (structureTransformation) => ({
+        ...structureTransformation,
+        operateur: structureTransformation.operateur ?? undefined,
+        structureVersion: structureTransformation.structureVersion
+          ? dbStructureVersionToApiRead(
+              structureTransformation.structureVersion
+            )
           : undefined,
       })
     ),
