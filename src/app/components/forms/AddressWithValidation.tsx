@@ -38,14 +38,17 @@ export default function AddressWithValidation<
 }: AddressWithValidationProps<TFieldValues>) {
   const finalControl = control;
 
-  const { field: fullAddressField, fieldState: fullAddressFieldState } =
-    useController({
-      name: fullAddress as Path<TFieldValues>,
-      control,
-      rules: {
-        required,
-      },
-    });
+  const {
+    field: fullAddressField,
+    fieldState: fullAddressFieldState,
+    formState,
+  } = useController({
+    name: fullAddress as Path<TFieldValues>,
+    control,
+    rules: {
+      required,
+    },
+  });
 
   const zipCodeFieldResult = useController({
     name: zipCode as Path<TFieldValues>,
@@ -229,21 +232,24 @@ export default function AddressWithValidation<
           label={label || "Adresse complète"}
           state={
             fullAddressFieldState.invalid ||
-            streetFieldResult.fieldState.invalid ||
-            zipCodeFieldResult.fieldState.invalid ||
-            cityFieldResult.fieldState.invalid ||
-            departmentFieldResult.fieldState.invalid ||
-            manualError
+            manualError ||
+            (formState.isSubmitted &&
+              (streetFieldResult.fieldState.invalid ||
+                zipCodeFieldResult.fieldState.invalid ||
+                cityFieldResult.fieldState.invalid ||
+                departmentFieldResult.fieldState.invalid))
               ? "error"
               : "default"
           }
           stateRelatedMessage={
             fullAddressFieldState.error?.message ||
-            streetFieldResult.fieldState.error?.message ||
-            zipCodeFieldResult.fieldState.error?.message ||
-            cityFieldResult.fieldState.error?.message ||
-            departmentFieldResult.fieldState.error?.message ||
-            manualError
+            manualError ||
+            (formState.isSubmitted &&
+              (streetFieldResult.fieldState.error?.message ||
+                zipCodeFieldResult.fieldState.error?.message ||
+                cityFieldResult.fieldState.error?.message ||
+                departmentFieldResult.fieldState.error?.message)) ||
+            undefined
           }
         />
 

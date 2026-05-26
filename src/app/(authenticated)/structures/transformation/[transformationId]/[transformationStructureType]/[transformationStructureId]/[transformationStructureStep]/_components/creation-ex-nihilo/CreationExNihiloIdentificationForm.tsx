@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 
 import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
@@ -28,7 +28,11 @@ export const CreationExNihiloIdentificationForm = ({
   const { transformationStructureId } = useParams();
   const structureTransformation = transformation.structureTransformations.find(
     (st) => st.id === Number(transformationStructureId)
-  )!;
+  );
+
+  if (!structureTransformation) {
+    notFound();
+  }
 
   const { handleValidation } = useTransformationFormHandling();
 

@@ -2,7 +2,11 @@ import { Prisma } from "@/generated/prisma/client";
 
 export type StructureVersionDb = Prisma.StructureVersionGetPayload<{
   include: {
-    structure: { include: { operateur: true } };
+    structure: {
+      include: {
+        operateur: { select: { id: true; name: true } };
+      };
+    };
     contacts: true;
     adresses: true;
     finesses: true;
