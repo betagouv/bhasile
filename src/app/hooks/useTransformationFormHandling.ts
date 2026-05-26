@@ -55,7 +55,9 @@ export const useTransformationFormHandling = () => {
         },
         setTransformation
       );
-      console.log("nextStep.route =", nextStep?.route);
+      if (nextStep) {
+        router.push(nextStep.route);
+      }
     } catch (error) {
       console.error(error);
     }
