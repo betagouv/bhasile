@@ -28,6 +28,17 @@ vi.mock(
   })
 );
 
+vi.mock("@/app/context/FetchStateContext", () => ({
+  useFetchState: () => ({
+    getFetchState: () => "idle",
+    setFetchState: vi.fn(),
+  }),
+}));
+
+vi.mock("@/app/components/SubmitError", () => ({
+  SubmitError: () => <div data-testid="submit-error" />,
+}));
+
 vi.mock(
   "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/contraction/ContractionFlow",
   () => ({

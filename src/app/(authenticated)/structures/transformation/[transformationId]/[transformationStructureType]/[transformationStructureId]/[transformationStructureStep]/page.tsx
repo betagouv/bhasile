@@ -3,11 +3,14 @@
 import { notFound, useParams } from "next/navigation";
 
 import { useTransformationContext } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
+import { SubmitError } from "@/app/components/SubmitError";
 import { TransformationStructureHeader } from "@/app/components/transformations/TransformationStructureHeader";
+import { useFetchState } from "@/app/context/FetchStateContext";
 import {
   StructureTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
+import { FetchState } from "@/types/fetch-state.type";
 import {
   StructureTransformationType,
   TransformationType,
@@ -22,6 +25,9 @@ import { FermetureFlow } from "./_components/fermeture/FermetureFlow";
 export default function TransformationStructureStepPage() {
   const { transformationStructureId } = useParams();
   const { transformation } = useTransformationContext();
+
+  const { getFetchState } = useFetchState();
+  const saveState = getFetchState("transformation-save");
 
   const structureTransformation = transformation?.structureTransformations.find(
     (structureTransformation) =>
@@ -38,6 +44,13 @@ export default function TransformationStructureStepPage() {
         structureTransformation={structureTransformation}
       />
       {renderFlow(structureTransformation, transformation)}
+      {saveState === FetchState.ERROR && (
+        <SubmitError
+          codeBhasile={
+            structureTransformation.structureVersion?.structure?.codeBhasile
+          }
+        />
+      )}
     </>
   );
 }
