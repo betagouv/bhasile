@@ -2,11 +2,9 @@ import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TransformationSteps } from "@/app/(authenticated)/structures/transformation/_components/TransformationSteps";
-import { TransformationApiRead } from "@/schemas/api/transformation.schema";
-import {
-  StructureTransformationType,
-  TransformationType,
-} from "@/types/transformation.type";
+import { StructureTransformationType } from "@/types/transformation.type";
+
+import { createTransformation } from "../../../../test-utils/factories/transformation.factory";
 
 const mockUsePathname = vi.fn<() => string>();
 
@@ -30,7 +28,7 @@ describe("TransformationSteps", () => {
 
   it("should render every structureTransformation as a step group", () => {
     // GIVEN
-    const transformation = buildTransformation([
+    const transformation = createTransformation({ structureTransformations: [
       {
         id: 1,
         type: StructureTransformationType.FERMETURE,
@@ -46,7 +44,7 @@ describe("TransformationSteps", () => {
         type: StructureTransformationType.CREATION,
         structureVersion: { structureId: 1003, structure: { codeBhasile: "1003" } },
       },
-    ]);
+    ] });
 
     // WHEN
     render(<TransformationSteps transformation={transformation} />);
@@ -59,7 +57,7 @@ describe("TransformationSteps", () => {
 
   it("should sort steps in the order Fermeture, Contraction, Extension, Création", () => {
     // GIVEN
-    const transformation = buildTransformation([
+    const transformation = createTransformation({ structureTransformations: [
       {
         id: 1,
         type: StructureTransformationType.CREATION,
@@ -80,7 +78,7 @@ describe("TransformationSteps", () => {
         type: StructureTransformationType.CONTRACTION,
         structureVersion: { structureId: 1004, structure: { codeBhasile: "1004" } },
       },
-    ]);
+    ] });
 
     // WHEN
     render(<TransformationSteps transformation={transformation} />);
@@ -99,13 +97,13 @@ describe("TransformationSteps", () => {
 
   it("should render the three substeps for an EXTENSION step", () => {
     // GIVEN
-    const transformation = buildTransformation([
+    const transformation = createTransformation({ structureTransformations: [
       {
         id: 7,
         type: StructureTransformationType.EXTENSION,
         structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
       },
-    ]);
+    ] });
 
     // WHEN
     render(<TransformationSteps transformation={transformation} />);
@@ -124,13 +122,13 @@ describe("TransformationSteps", () => {
 
   it("should only render the Description substep for a FERMETURE step", () => {
     // GIVEN
-    const transformation = buildTransformation([
+    const transformation = createTransformation({ structureTransformations: [
       {
         id: 9,
         type: StructureTransformationType.FERMETURE,
         structureVersion: { structureId: 1001, structure: { codeBhasile: "1001" } },
       },
-    ]);
+    ] });
 
     // WHEN
     render(<TransformationSteps transformation={transformation} />);
@@ -146,13 +144,13 @@ describe("TransformationSteps", () => {
     mockUsePathname.mockReturnValue(
       "/structures/transformation/42/extension/7/places-et-hebergement"
     );
-    const transformation = buildTransformation([
+    const transformation = createTransformation({ structureTransformations: [
       {
         id: 7,
         type: StructureTransformationType.EXTENSION,
         structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
       },
-    ]);
+    ] });
 
     // WHEN
     render(<TransformationSteps transformation={transformation} />);
@@ -169,13 +167,13 @@ describe("TransformationSteps", () => {
 
   it("should build hrefs for each substep based on the transformation and step ids", () => {
     // GIVEN
-    const transformation = buildTransformation([
+    const transformation = createTransformation({ structureTransformations: [
       {
         id: 7,
         type: StructureTransformationType.EXTENSION,
         structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
       },
-    ]);
+    ] });
 
     // WHEN
     const { container } = render(
@@ -207,7 +205,7 @@ describe("TransformationSteps", () => {
     "should use the segment matching a %s type in hrefs",
     (type: StructureTransformationType, segment: string) => {
       // GIVEN
-      const transformation = buildTransformation([
+      const transformation = createTransformation({ structureTransformations: [
         {
           id: 7,
           type: type,
@@ -216,7 +214,7 @@ describe("TransformationSteps", () => {
             structure: { codeBhasile: "1002" },
           },
         },
-      ]);
+      ] });
 
       // WHEN
       render(<TransformationSteps transformation={transformation} />);
@@ -230,10 +228,3 @@ describe("TransformationSteps", () => {
   );
 });
 
-const buildTransformation = (
-  structureTransformations: TransformationApiRead["structureTransformations"]
-): TransformationApiRead => ({
-  id: 42,
-  type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
-  structureTransformations,
-});
