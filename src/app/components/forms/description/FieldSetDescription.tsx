@@ -2,7 +2,7 @@ import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import autoAnimate from "@formkit/auto-animate";
 import { useEffect, useRef, useState } from "react";
-import { useForm, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { FormKind } from "@/types/global";
@@ -16,10 +16,10 @@ export const FieldSetDescription = ({
   formKind = FormKind.FINALISATION,
 }: Props) => {
   const filialesContainerRef = useRef(null);
-  const parentFormContext = useFormContext();
-  const localForm = useForm();
-  const { register, control, setValue, watch } = parentFormContext || localForm;
-  const [isManagedByAFiliale, setIsManagedByAFiliale] = useState(false);
+  const { register, control, setValue, watch } = useFormContext();
+  const [isManagedByAFiliale, setIsManagedByAFiliale] = useState(
+    () => !!watch("filiale")
+  );
 
   useEffect(() => {
     if (filialesContainerRef.current) {
@@ -27,16 +27,13 @@ export const FieldSetDescription = ({
     }
   }, [filialesContainerRef]);
 
-  const filiale = watch("filiale");
-
-  useEffect(() => {
-    setIsManagedByAFiliale(!!filiale);
-  }, [filiale]);
-
   return (
     <fieldset className="flex flex-col gap-6">
       <legend className="text-xl font-bold mb-10 text-title-blue-france">
-        {formKind === FormKind.MODIFICATION ? "Général" : "Description"}
+        {formKind === FormKind.MODIFICATION ||
+        formKind === FormKind.CREATION_EX_NIHILO
+          ? "Général"
+          : "Description"}
       </legend>
 
       {formKind !== FormKind.MODIFICATION && (
@@ -51,8 +48,11 @@ export const FieldSetDescription = ({
               name="managed-by-a-filiale"
               id="managed-by-a-filiale"
               onChange={() => {
-                setIsManagedByAFiliale(!isManagedByAFiliale);
-                setValue("filiale", "", { shouldValidate: true });
+                const next = !isManagedByAFiliale;
+                setIsManagedByAFiliale(next);
+                if (!next) {
+                  setValue("filiale", undefined, { shouldValidate: true });
+                }
               }}
             />
             <p className="pl-2">{isManagedByAFiliale ? "Oui" : "Non"}</p>
@@ -102,7 +102,11 @@ export const FieldSetDescription = ({
             name="creationDate"
             control={control}
             type="date"
-            label="Date de création de la structure"
+            label={
+              formKind === FormKind.CREATION_EX_NIHILO
+                ? "Date d’ouverture"
+                : "Date de création de la structure"
+            }
             id="creationDate"
           />
         )}
@@ -120,36 +124,40 @@ export const FieldSetDescription = ({
           ))}
         </SelectWithValidation>
       </div>
-      <CustomNotice
-        severity="info"
-        title=""
-        className="rounded [&_p]:flex [&_p]:items-center"
-        description="LGBT : Lesbiennes, Gays, Bisexuels et Transgenres – FVV : Femmes Victimes de Violences–TEH : Traîte des Êtres Humains"
-      />
-      <label className="flex gap-6">
-        Actuellement, la structure dispose-t-elle de places labellisées /
-        spécialisées ?
-        <Checkbox
-          options={[
-            {
-              label: "LGBT",
-              nativeInputProps: {
-                ...register("lgbt"),
-              },
-            },
-          ]}
-        />
-        <Checkbox
-          options={[
-            {
-              label: "FVV et TEH",
-              nativeInputProps: {
-                ...register("fvvTeh"),
-              },
-            },
-          ]}
-        />
-      </label>
+      {formKind !== FormKind.CREATION_EX_NIHILO && (
+        <>
+          <CustomNotice
+            severity="info"
+            title=""
+            className="rounded [&_p]:flex [&_p]:items-center"
+            description="LGBT : Lesbiennes, Gays, Bisexuels et Transgenres – FVV : Femmes Victimes de Violences–TEH : Traîte des Êtres Humains"
+          />
+          <label className="flex gap-6">
+            Actuellement, la structure dispose-t-elle de places labellisées /
+            spécialisées ?
+            <Checkbox
+              options={[
+                {
+                  label: "LGBT",
+                  nativeInputProps: {
+                    ...register("lgbt"),
+                  },
+                },
+              ]}
+            />
+            <Checkbox
+              options={[
+                {
+                  label: "FVV et TEH",
+                  nativeInputProps: {
+                    ...register("fvvTeh"),
+                  },
+                },
+              ]}
+            />
+          </label>
+        </>
+      )}
     </fieldset>
   );
 };
