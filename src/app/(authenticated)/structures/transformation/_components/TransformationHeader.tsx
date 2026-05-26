@@ -1,6 +1,5 @@
 "use client";
 
-import Alert from "@codegouvfr/react-dsfr/Alert";
 import Button from "@codegouvfr/react-dsfr/Button";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -12,8 +11,15 @@ import { getTransformationTitle } from "@/app/utils/transformation.util";
 import { FetchState } from "@/types/fetch-state.type";
 import { TransformationFormType } from "@/types/transformation.type";
 
-import { AnnulerDemarcheModal, annulerDemarcheModal } from "./AnnulerDemarcheModal";
-import { EnregistrementModal, enregistrementModal } from "./EnregistrementModal";
+import {
+  AnnulerDemarcheModal,
+  annulerDemarcheModal,
+} from "./AnnulerDemarcheModal";
+import {
+  EnregistrementModal,
+  enregistrementModal,
+} from "./EnregistrementModal";
+import { ErrorModal, errorModal } from "./ErrorModal";
 import { QuitterModal, quitterModal } from "./QuitterModal";
 
 export const TransformationHeader = () => {
@@ -44,6 +50,7 @@ export const TransformationHeader = () => {
       enregistrementModal.open();
     } catch (error) {
       console.error(error);
+      errorModal.open();
     }
   };
 
@@ -60,6 +67,7 @@ export const TransformationHeader = () => {
       router.push("/structures");
     } catch (error) {
       console.error(error);
+      errorModal.open();
     }
   };
 
@@ -133,15 +141,6 @@ export const TransformationHeader = () => {
             </Button>
           </div>
         </div>
-        {saveState === FetchState.ERROR && (
-          <div className="px-6 pb-3">
-            <Alert
-              severity="error"
-              small
-              description="Une erreur est survenue lors de l'enregistrement. Veuillez réessayer."
-            />
-          </div>
-        )}
       </div>
 
       {transformation && (
@@ -156,6 +155,7 @@ export const TransformationHeader = () => {
             onQuit={() => router.push("/structures")}
             onSaveAndQuit={handleSaveAndQuit}
           />
+          <ErrorModal onQuit={() => router.push("/structures")} />
         </>
       )}
     </>
