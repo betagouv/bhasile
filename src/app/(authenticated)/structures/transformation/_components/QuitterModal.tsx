@@ -10,17 +10,7 @@ export const quitterModal = createModal({
   isOpenedByDefault: false,
 });
 
-interface QuitterModalProps {
-  saveState: FetchState | undefined;
-  onQuit: () => void;
-  onSaveAndQuit: () => Promise<void>;
-}
-
-export const QuitterModal = ({
-  saveState,
-  onQuit,
-  onSaveAndQuit,
-}: QuitterModalProps) => (
+export const QuitterModal = ({ saveState, onQuit, onSaveAndQuit }: Props) => (
   <quitterModal.Component
     title="Vous êtes sur le point de quitter un formulaire en cours de modification."
     buttons={[
@@ -63,3 +53,9 @@ export const QuitterModal = ({
     </>
   </quitterModal.Component>
 );
+
+type Props = {
+  saveState: FetchState | undefined;
+  onQuit: () => void;
+  onSaveAndQuit: () => Promise<void>;
+};

@@ -2,14 +2,14 @@
 
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 
-export const enregistrementModal = createModal({
-  id: "enregistrement-avancee-transformation-modal",
+export const errorModal = createModal({
+  id: "error-transformation-modal",
   isOpenedByDefault: false,
 });
 
-export const EnregistrementModal = ({ onQuit }: Props) => (
-  <enregistrementModal.Component
-    title="Votre avancée a été enregistrée."
+export const ErrorModal = ({ onQuit }: Props) => (
+  <errorModal.Component
+    title="Une erreur est survenue."
     buttons={[
       {
         doClosesModal: true,
@@ -25,8 +25,8 @@ export const EnregistrementModal = ({ onQuit }: Props) => (
     ]}
     className="[&_h1]:text-left! [&_p]:text-left!"
   >
-    Vous retrouverez cette démarche dans l&apos;onglet « à finaliser ».
-  </enregistrementModal.Component>
+    Une erreur est survenue l&apos;enregistrement. Veuillez réessayer.
+  </errorModal.Component>
 );
 
 type Props = {
