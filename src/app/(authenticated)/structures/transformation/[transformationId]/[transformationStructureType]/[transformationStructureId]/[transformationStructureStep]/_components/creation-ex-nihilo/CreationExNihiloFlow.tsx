@@ -2,23 +2,21 @@
 
 import { useParams } from "next/navigation";
 
-import { StructureTransformationApiRead } from "@/schemas/api/transformation.schema";
+import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 import { StructureTransformationStep } from "@/types/transformation.type";
 
 import { CreationExNihiloIdentificationForm } from "./CreationExNihiloIdentificationForm";
 
 type Props = {
-  structureTransformation: StructureTransformationApiRead;
+  transformation: TransformationApiRead;
 };
 
-export const CreationExNihiloFlow = ({ structureTransformation }: Props) => {
+export const CreationExNihiloFlow = ({ transformation }: Props) => {
   const { transformationStructureStep } = useParams();
 
   if (transformationStructureStep === StructureTransformationStep.DESCRIPTION) {
     return (
-      <CreationExNihiloIdentificationForm
-        structureTransformation={structureTransformation}
-      />
+      <CreationExNihiloIdentificationForm transformation={transformation} />
     );
   }
 

@@ -5,6 +5,7 @@ import {
   TransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
 
+import { getStructureVersionApiRead } from "../structure-versions/structure-version.util";
 import {
   createOne,
   deleteOne,
@@ -19,7 +20,18 @@ export const getTransformation = async (
   if (!dbTransformation) {
     return null;
   }
-  return recursivelySerializeDates(dbTransformation) as TransformationApiRead;
+  const serialized = recursivelySerializeDates(
+    dbTransformation
+  ) as TransformationApiRead;
+  return {
+    ...serialized,
+    structureTransformations: serialized.structureTransformations.map((st) => ({
+      ...st,
+      structureVersion: st.structureVersion
+        ? getStructureVersionApiRead(st.structureVersion)
+        : undefined,
+    })),
+  };
 };
 
 export const createTransformation = async (

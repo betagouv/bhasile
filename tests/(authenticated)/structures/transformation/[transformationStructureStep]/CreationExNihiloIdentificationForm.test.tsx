@@ -3,8 +3,11 @@ import { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { CreationExNihiloIdentificationForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation-ex-nihilo/CreationExNihiloIdentificationForm";
-import { StructureTransformationApiRead } from "@/schemas/api/transformation.schema";
-import { StructureTransformationType } from "@/types/transformation.type";
+import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import {
+  StructureTransformationType,
+  TransformationType,
+} from "@/types/transformation.type";
 
 const mockHandleValidation = vi.fn();
 
@@ -12,6 +15,10 @@ vi.mock("@/app/hooks/useTransformationFormHandling", () => ({
   useTransformationFormHandling: () => ({
     handleValidation: mockHandleValidation,
   }),
+}));
+
+vi.mock("next/navigation", () => ({
+  useParams: () => ({ transformationStructureId: "7" }),
 }));
 
 type CapturedProps = {
@@ -56,23 +63,25 @@ vi.mock("@/app/components/forms/contacts/FieldSetContacts", () => ({
 describe("CreationExNihiloIdentificationForm", () => {
   it("should pass structureVersion as defaultValues but override id with undefined", () => {
     // GIVEN
-    const structureTransformation: StructureTransformationApiRead = {
-      id: 7,
-      type: StructureTransformationType.CREATION,
-      structureVersion: {
-        id: 999,
-        structureId: 42,
-        nom: "Les Coquelicots",
-        creationDate: "2024-01-01T00:00:00.000Z",
-      },
+    const transformation: TransformationApiRead = {
+      id: 12,
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureTransformations: [
+        {
+          id: 7,
+          type: StructureTransformationType.CREATION,
+          structureVersion: {
+            id: 999,
+            structureId: 42,
+            nom: "Les Coquelicots",
+            creationDate: "2024-01-01T00:00:00.000Z",
+          },
+        },
+      ],
     };
 
     // WHEN
-    render(
-      <CreationExNihiloIdentificationForm
-        structureTransformation={structureTransformation}
-      />
-    );
+    render(<CreationExNihiloIdentificationForm transformation={transformation} />);
 
     // THEN
     expect(captured.defaultValues).toMatchObject({
@@ -83,18 +92,20 @@ describe("CreationExNihiloIdentificationForm", () => {
     expect(captured.defaultValues?.id).toBeUndefined();
   });
 
-  it("should duplicate creationDate into effectiveDate when submitting", () => {
+  it("should pass transformationId and a structureTransformation update payload to handleValidation", () => {
     // GIVEN
-    const structureTransformation: StructureTransformationApiRead = {
-      id: 7,
-      type: StructureTransformationType.CREATION,
-      structureVersion: {},
+    const transformation: TransformationApiRead = {
+      id: 12,
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureTransformations: [
+        {
+          id: 7,
+          type: StructureTransformationType.CREATION,
+          structureVersion: {},
+        },
+      ],
     };
-    render(
-      <CreationExNihiloIdentificationForm
-        structureTransformation={structureTransformation}
-      />
-    );
+    render(<CreationExNihiloIdentificationForm transformation={transformation} />);
 
     // WHEN
     captured.onSubmit?.({
@@ -104,9 +115,15 @@ describe("CreationExNihiloIdentificationForm", () => {
 
     // THEN
     expect(mockHandleValidation).toHaveBeenCalledWith({
-      nom: "Les Coquelicots",
-      creationDate: "2024-01-01T00:00:00.000Z",
-      effectiveDate: "2024-01-01T00:00:00.000Z",
+      transformationId: 12,
+      structureTransformation: {
+        id: 7,
+        type: StructureTransformationType.CREATION,
+        date: "2024-01-01T00:00:00.000Z",
+        structureVersion: {
+          nom: "Les Coquelicots",
+        },
+      },
     });
   });
 });
