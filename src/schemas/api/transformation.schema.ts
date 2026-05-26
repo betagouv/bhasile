@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { ExcludeNullValues } from "@/types/global";
 import {
   StructureTransformationType,
   TransformationType,
@@ -7,7 +8,15 @@ import {
 
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
 import { formApiSchema } from "./form.schema";
-import { structureVersionApiSchema } from "./structure-version.schema";
+import {
+  structureVersionApiSchema,
+  StructureVersionApiType,
+} from "./structure-version.schema";
+
+export type StructureVersionApiRead =
+  ExcludeNullValues<StructureVersionApiType> & {
+    adresseAdministrativeComplete?: string;
+  };
 
 const structureTransformationApiUpdateSchema = z.object({
   id: z.number().optional(),
@@ -50,7 +59,7 @@ export type StructureTransformationApiCreate = z.infer<
 export type StructureTransformationApiRead =
   StructureTransformationApiUpdate & {
     type: StructureTransformationType;
-    structureVersion?: StructureTransformationApiUpdate["structureVersion"] & {
+    structureVersion?: StructureVersionApiRead & {
       structure?: {
         codeBhasile: string;
       };
