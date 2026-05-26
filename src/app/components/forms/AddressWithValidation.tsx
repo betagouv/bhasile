@@ -228,10 +228,22 @@ export default function AddressWithValidation<
           }}
           label={label || "Adresse complète"}
           state={
-            fullAddressFieldState.invalid || manualError ? "error" : "default"
+            fullAddressFieldState.invalid ||
+            streetFieldResult.fieldState.invalid ||
+            zipCodeFieldResult.fieldState.invalid ||
+            cityFieldResult.fieldState.invalid ||
+            departmentFieldResult.fieldState.invalid ||
+            manualError
+              ? "error"
+              : "default"
           }
           stateRelatedMessage={
-            fullAddressFieldState.error?.message || manualError
+            fullAddressFieldState.error?.message ||
+            streetFieldResult.fieldState.error?.message ||
+            zipCodeFieldResult.fieldState.error?.message ||
+            cityFieldResult.fieldState.error?.message ||
+            departmentFieldResult.fieldState.error?.message ||
+            manualError
           }
         />
 
