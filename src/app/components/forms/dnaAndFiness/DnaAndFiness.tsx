@@ -13,7 +13,10 @@ import InputWithValidation from "../InputWithValidation";
 import { FieldSetDna } from "./FieldSetDna";
 import { FieldSetFiness } from "./FieldSetFiness";
 
-export const DnaAndFiness = ({ formKind = FormKind.FINALISATION }: Props) => {
+export const DnaAndFiness = ({
+  formKind = FormKind.FINALISATION,
+  structureId,
+}: Props) => {
   const { watch, control, setValue } = useFormContext();
 
   const isMultiDna = watch("isMultiDna");
@@ -74,7 +77,7 @@ export const DnaAndFiness = ({ formKind = FormKind.FINALISATION }: Props) => {
       ) : null}
       {isMultiDna ? (
         <>
-          <FieldSetDna formKind={formKind} />
+          <FieldSetDna formKind={formKind} structureId={structureId} />
           {isAutorisee && <FieldSetFiness />}
         </>
       ) : (
@@ -83,6 +86,7 @@ export const DnaAndFiness = ({ formKind = FormKind.FINALISATION }: Props) => {
             index={0}
             label="Code DNA"
             disabled={formKind === FormKind.MODIFICATION}
+            structureId={structureId}
           />
           {isAutorisee && (
             <InputWithValidation
@@ -101,4 +105,5 @@ export const DnaAndFiness = ({ formKind = FormKind.FINALISATION }: Props) => {
 
 type Props = {
   formKind?: FormKind;
+  structureId?: number;
 };
