@@ -36,7 +36,9 @@ export const findOne = async (id: number) => {
         include: {
           structureVersion: {
             include: {
-              structure: true,
+              structure: {
+                include: { operateur: true },
+              },
               contacts: true,
               adresses: true,
               finesses: true,

@@ -20,18 +20,18 @@ export const getTransformation = async (
   if (!dbTransformation) {
     return null;
   }
-  const serialized = recursivelySerializeDates(
-    dbTransformation
-  ) as TransformationApiRead;
-  return {
-    ...serialized,
-    structureTransformations: serialized.structureTransformations.map((st) => ({
-      ...st,
-      structureVersion: st.structureVersion
-        ? getStructureVersionApiRead(st.structureVersion)
-        : undefined,
-    })),
+  const transformed = {
+    ...dbTransformation,
+    structureTransformations: dbTransformation.structureTransformations.map(
+      (st) => ({
+        ...st,
+        structureVersion: st.structureVersion
+          ? getStructureVersionApiRead(st.structureVersion)
+          : undefined,
+      })
+    ),
   };
+  return recursivelySerializeDates(transformed) as TransformationApiRead;
 };
 
 export const createTransformation = async (

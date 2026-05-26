@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { ExcludeNullValues } from "@/types/global";
 import {
   StructureTransformationType,
   TransformationType,
@@ -12,8 +13,11 @@ import {
   StructureVersionApiType,
 } from "./structure-version.schema";
 
-type ExcludeNullValues<T> = { [K in keyof T]: Exclude<T[K], null> };
-export type StructureVersionApiRead = ExcludeNullValues<StructureVersionApiType>;
+export type StructureVersionApiRead =
+  ExcludeNullValues<StructureVersionApiType> & {
+    adresseAdministrativeComplete?: string;
+    operateur?: { id: number; name: string };
+  };
 
 const structureTransformationApiUpdateSchema = z.object({
   id: z.number().optional(),
@@ -59,6 +63,7 @@ export type StructureTransformationApiRead =
     structureVersion?: StructureVersionApiRead & {
       structure?: {
         codeBhasile: string;
+        operateur?: { id: number; name: string };
       };
     };
   };
