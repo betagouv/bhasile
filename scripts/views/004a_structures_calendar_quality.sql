@@ -33,6 +33,7 @@ WITH
       public."ActeAdministratif" aa
     WHERE
       aa."category" IN ('CONVENTION', 'ARRETE_AUTORISATION')
+      AND aa."isMissing" IS NOT TRUE
     GROUP BY
       aa."structureId"
   )

@@ -80,6 +80,7 @@ WITH -- Last typology by structure
       public."IndicateurFinancier" i
     WHERE
       i."structureId" IS NOT NULL
+      AND i."isMissing" IS NOT TRUE
     ORDER BY
       i."structureId",
       i."year",
@@ -95,6 +96,8 @@ WITH -- Last typology by structure
       b."dotationAccordee"
     FROM
       public."Budget" b
+    WHERE
+      b."isMissing" IS NOT TRUE
     ORDER BY
       b."structureId",
       b."year" DESC
