@@ -22,6 +22,7 @@ const dbTransformationToApiRead = (
     structureTransformations: transformation.structureTransformations.map(
       (structureTransformation) => ({
         ...structureTransformation,
+        operateur: structureTransformation.operateur ?? undefined,
         structureVersion: structureTransformation.structureVersion
           ? dbStructureVersionToApiRead(
               structureTransformation.structureVersion

@@ -31,9 +31,14 @@ export const findOne = async (id: number) => {
       },
       structureTransformations: {
         include: {
+          operateur: { select: { id: true, name: true } },
           structureVersion: {
             include: {
-              structure: true,
+              structure: {
+                include: {
+                  operateur: { select: { id: true, name: true } },
+                },
+              },
               contacts: true,
               adresses: true,
               finesses: true,
@@ -180,6 +185,7 @@ const createStructureTransformation = async (
       type: structureTransformation.type,
       date: structureTransformation.date,
       motif: structureTransformation.motif,
+      operateurId: structureTransformation.operateurId,
     },
   });
 
@@ -206,6 +212,7 @@ const updateStructureTransformation = async (
       type: structureTransformation.type,
       date: structureTransformation.date,
       motif: structureTransformation.motif,
+      operateurId: structureTransformation.operateurId,
     },
   });
   return updated.id;
