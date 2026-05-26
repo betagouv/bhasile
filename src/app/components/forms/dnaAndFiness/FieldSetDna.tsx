@@ -16,7 +16,10 @@ const emptyDnaStructure: DnaStructureFormValues = {
   },
 };
 
-export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
+export const FieldSetDna = ({
+  formKind = FormKind.FINALISATION,
+  structureId,
+}: Props) => {
   const { control, watch, setValue } = useFormContext();
 
   const dnaStructures = (watch("dnaStructures") || [
@@ -54,6 +57,7 @@ export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
                 index={index}
                 label="Code"
                 disabled={formKind === FormKind.MODIFICATION}
+                structureId={structureId}
               />
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
@@ -98,4 +102,5 @@ export const FieldSetDna = ({ formKind = FormKind.FINALISATION }: Props) => {
 
 type Props = {
   formKind?: FormKind;
+  structureId?: number;
 };

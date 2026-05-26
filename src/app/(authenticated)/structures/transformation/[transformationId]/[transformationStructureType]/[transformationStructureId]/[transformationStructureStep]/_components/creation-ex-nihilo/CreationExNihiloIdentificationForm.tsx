@@ -10,7 +10,7 @@ import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
-import { getStructureTransformationDefaultValues } from "@/app/utils/transformation.util";
+import { getTransformationStructureVersionDefaultValues } from "@/app/utils/transformation.util";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 import {
   CreationIdentificationFormValues,
@@ -33,8 +33,8 @@ export const CreationExNihiloIdentificationForm = ({
   const { handleValidation } = useTransformationFormHandling();
 
   const defaultValues =
-    getStructureTransformationDefaultValues<CreationIdentificationFormValues>(
-      structureTransformation
+    getTransformationStructureVersionDefaultValues<CreationIdentificationFormValues>(
+      structureTransformation.structureVersion
     );
 
   return (
@@ -49,7 +49,7 @@ export const CreationExNihiloIdentificationForm = ({
             id: structureTransformation.id,
             type: structureTransformation.type,
             date: creationDate,
-            structureVersion: { ...rest },
+            structureVersion: rest,
           },
         });
       }}

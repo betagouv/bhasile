@@ -61,7 +61,7 @@ vi.mock("@/app/components/forms/contacts/FieldSetContacts", () => ({
 }));
 
 describe("CreationExNihiloIdentificationForm", () => {
-  it("should pass structureVersion as defaultValues but override id with undefined", () => {
+  it("should pass the structureVersion as defaultValues, including its id", () => {
     // GIVEN
     const transformation: TransformationApiRead = {
       id: 12,
@@ -85,11 +85,11 @@ describe("CreationExNihiloIdentificationForm", () => {
 
     // THEN
     expect(captured.defaultValues).toMatchObject({
+      id: 999,
       structureId: 42,
       nom: "Les Coquelicots",
       creationDate: "2024-01-01T00:00:00.000Z",
     });
-    expect(captured.defaultValues?.id).toBeUndefined();
   });
 
   it("should pass transformationId and a structureTransformation update payload to handleValidation", () => {
@@ -101,7 +101,7 @@ describe("CreationExNihiloIdentificationForm", () => {
         {
           id: 7,
           type: StructureTransformationType.CREATION,
-          structureVersion: {},
+          structureVersion: { id: 999 },
         },
       ],
     };
@@ -109,6 +109,7 @@ describe("CreationExNihiloIdentificationForm", () => {
 
     // WHEN
     captured.onSubmit?.({
+      id: 999,
       nom: "Les Coquelicots",
       creationDate: "2024-01-01T00:00:00.000Z",
     });
@@ -121,6 +122,7 @@ describe("CreationExNihiloIdentificationForm", () => {
         type: StructureTransformationType.CREATION,
         date: "2024-01-01T00:00:00.000Z",
         structureVersion: {
+          id: 999,
           nom: "Les Coquelicots",
         },
       },
