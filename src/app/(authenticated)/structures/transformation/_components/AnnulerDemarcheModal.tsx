@@ -10,15 +10,7 @@ export const annulerDemarcheModal = createModal({
   isOpenedByDefault: false,
 });
 
-interface AnnulerDemarcheModalProps {
-  deleteState: FetchState | undefined;
-  onDelete: () => Promise<void>;
-}
-
-export const AnnulerDemarcheModal = ({
-  deleteState,
-  onDelete,
-}: AnnulerDemarcheModalProps) => (
+export const AnnulerDemarcheModal = ({ deleteState, onDelete }: Props) => (
   <annulerDemarcheModal.Component
     title="Attention, vous êtes sur le point d'annuler cette démarche."
     buttons={[
@@ -52,3 +44,8 @@ export const AnnulerDemarcheModal = ({
     </>
   </annulerDemarcheModal.Component>
 );
+
+type Props = {
+  deleteState: FetchState | undefined;
+  onDelete: () => Promise<void>;
+};
