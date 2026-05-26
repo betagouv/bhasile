@@ -5,15 +5,18 @@ import { PrismaTransaction } from "@/types/prisma.type";
 export const findAll = async ({
   structureId,
 }: {
-  structureId: number;
+  structureId?: number;
 }): Promise<{ code: string }[]> => {
   return prisma.dna.findMany({
-    where: {
-      OR: [
-        { dnaStructures: { none: {} } },
-        { dnaStructures: { some: { structureId } } },
-      ],
-    },
+    where:
+      structureId === undefined
+        ? { dnaStructures: { none: {} } }
+        : {
+            OR: [
+              { dnaStructures: { none: {} } },
+              { dnaStructures: { some: { structureId } } },
+            ],
+          },
     select: { code: true },
   });
 };

@@ -1,8 +1,10 @@
 import { TRANSFORMATION_TYPE_SPECS } from "@/app/config/transformation.config";
 import {
+  StructureTransformationApiRead,
   StructureTransformationApiUpdate,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
+import { DeepPartial } from "@/types/global";
 import {
   StructureTransformationStep,
   StructureTransformationType,
@@ -186,6 +188,14 @@ export type Step = {
     route: string;
   }[];
 };
+
+export const getStructureTransformationDefaultValues = <T>(
+  structureTransformation: StructureTransformationApiRead
+): DeepPartial<T> =>
+  ({
+    ...structureTransformation.structureVersion,
+    id: undefined,
+  }) as DeepPartial<T>;
 
 export const getStructureTransformationLabel = (
   type?: StructureTransformationType,

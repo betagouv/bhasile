@@ -36,8 +36,13 @@ export const useTransformationFormHandling = () => {
     router.replace(firstStep.route);
   }
 
+  const handleValidation = (data: unknown) => {
+    console.log("handleValidation", data);
+  };
+
   return {
     nextStep,
     prevStep,
+    handleValidation,
   };
 };
