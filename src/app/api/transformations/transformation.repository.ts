@@ -10,10 +10,7 @@ import {
   createOrUpdateForms,
   initializeStructureTransformationDefaultForms,
 } from "../forms/form.repository";
-import {
-  createOneStructureVersion,
-  createOrUpdateStructureVersion,
-} from "../structure-versions/structure-version.repository";
+import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 
 //TODO: will change when integrating forms into transformation
 const TRANSFORMATION_FORM_SLUG = "transformation-v1";
@@ -73,23 +70,10 @@ export const createOne = async (
     await initializeTransformationForm(tx, transformation.id);
 
     for (const structureTransformation of input.structureTransformations) {
-      const created = await tx.structureTransformation.create({
-        data: {
-          transformationId: transformation.id,
-          type: structureTransformation.type,
-          date: structureTransformation.date,
-          motif: structureTransformation.motif,
-          operateurId: structureTransformation.operateurId,
-        },
-      });
-
-      await createOneStructureVersion(
+      await createOrUpdateStructureTransformation(
         tx,
-        structureTransformation.structureVersion ?? {},
-        {
-          structureId: structureTransformation.structureVersion?.structureId,
-          structureTransformationId: created.id,
-        }
+        transformation.id,
+        structureTransformation
       );
     }
 
@@ -159,45 +143,17 @@ const createOrUpdateStructureTransformation = async (
   transformationId: number,
   structureTransformation: StructureTransformationApiUpdate
 ): Promise<void> => {
-  const isCreation = !structureTransformation.id;
-
-  let structureTransformationId: number;
-
-  if (isCreation) {
-    if (!structureTransformation.type) {
-      throw new Error("type est requis pour créer une structureTransformation");
-    }
-    const created = await tx.structureTransformation.create({
-      data: {
+  const structureTransformationId = structureTransformation.id
+    ? await updateStructureTransformation(
+        tx,
         transformationId,
-        type: structureTransformation.type,
-        date: structureTransformation.date,
-        motif: structureTransformation.motif,
-        operateurId: structureTransformation.operateurId,
-      },
-    });
-    structureTransformationId = created.id;
-
-    await initializeStructureTransformationDefaultForms(
-      tx,
-      structureTransformationId,
-      structureTransformation.type
-    );
-  } else {
-    const updated = await tx.structureTransformation.update({
-      where: {
-        id: structureTransformation.id,
+        structureTransformation
+      )
+    : await createStructureTransformation(
+        tx,
         transformationId,
-      },
-      data: {
-        type: structureTransformation.type,
-        date: structureTransformation.date,
-        motif: structureTransformation.motif,
-        operateurId: structureTransformation.operateurId,
-      },
-    });
-    structureTransformationId = updated.id;
-  }
+        structureTransformation
+      );
 
   if (structureTransformation.structureVersion) {
     await createOrUpdateStructureVersion(
@@ -213,4 +169,51 @@ const createOrUpdateStructureTransformation = async (
   await createOrUpdateForms(tx, structureTransformation.forms, {
     structureTransformationId,
   });
+};
+
+const createStructureTransformation = async (
+  tx: PrismaTransaction,
+  transformationId: number,
+  structureTransformation: StructureTransformationApiUpdate
+): Promise<number> => {
+  if (!structureTransformation.type) {
+    throw new Error("type est requis pour créer une structureTransformation");
+  }
+  const created = await tx.structureTransformation.create({
+    data: {
+      transformationId,
+      type: structureTransformation.type,
+      date: structureTransformation.date,
+      motif: structureTransformation.motif,
+      operateurId: structureTransformation.operateurId,
+    },
+  });
+
+  await initializeStructureTransformationDefaultForms(
+    tx,
+    created.id,
+    structureTransformation.type
+  );
+
+  return created.id;
+};
+
+const updateStructureTransformation = async (
+  tx: PrismaTransaction,
+  transformationId: number,
+  structureTransformation: StructureTransformationApiUpdate
+): Promise<number> => {
+  const updated = await tx.structureTransformation.update({
+    where: {
+      id: structureTransformation.id,
+      transformationId,
+    },
+    data: {
+      type: structureTransformation.type,
+      date: structureTransformation.date,
+      motif: structureTransformation.motif,
+      operateurId: structureTransformation.operateurId,
+    },
+  });
+  return updated.id;
 };
