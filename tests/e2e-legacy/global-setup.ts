@@ -20,7 +20,7 @@ async function globalSetup(config: FullConfig): Promise<void> {
   }
 
   const authDir = path.join(process.cwd(), "playwright/.auth");
-  const authFile = path.join(authDir, "agent.json");
+  const authFile = path.join(authDir, "agent-legacy.json");
   fs.mkdirSync(authDir, { recursive: true });
 
   const browser = await chromium.launch();
