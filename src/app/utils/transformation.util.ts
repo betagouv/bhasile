@@ -1,4 +1,7 @@
-import { TRANSFORMATION_TYPE_SPECS } from "@/app/config/transformation.config";
+import {
+  STRUCTURE_TRANSFORMATION_TYPE_ORDER,
+  TRANSFORMATION_TYPE_SPECS,
+} from "@/app/config/transformation.config";
 import {
   StructureTransformationApiUpdate,
   TransformationApiRead,
@@ -26,9 +29,9 @@ export const getTransformationTitle = (
 
 type GetTransformationFormNavigationProps = {
   transformationSteps: Step[];
-  transformationStructureType: StructureTransformationType;
-  transformationStructureId: number;
-  transformationStructureStep: string;
+  transformationStructureType?: StructureTransformationType;
+  transformationStructureId?: number;
+  transformationStructureStep?: string;
 };
 
 export const getTransformationFormNavigation = ({
@@ -47,9 +50,9 @@ export const getTransformationFormNavigation = ({
 
   const currentIndex = flatSteps.findIndex(
     (step) =>
-      step.type?.toLowerCase() === transformationStructureType.toLowerCase() &&
+      step.type?.toLowerCase() === transformationStructureType?.toLowerCase() &&
       step.id === transformationStructureId &&
-      step.name.toLowerCase() === transformationStructureStep.toLowerCase()
+      step.name.toLowerCase() === transformationStructureStep?.toLowerCase()
   );
 
   const firstStep = flatSteps[0];
@@ -75,25 +78,15 @@ export const getTransformationSteps = (
       ?.map((structureTransformation) => {
         return {
           id: structureTransformation.id,
-          codeBhasile: structureTransformation.structure?.codeBhasile,
-          structureTransformationType:
-            structureTransformation.structureTransformationType,
+          codeBhasile:
+            structureTransformation.structureVersion?.structure?.codeBhasile,
+          type: structureTransformation.type,
           steps: getStepsByType(structureTransformation, transformation.id),
         };
       })
       .sort((a, b) => {
-        const typeOrder: Record<string, number> = {
-          [StructureTransformationType.FERMETURE]: 0,
-          [StructureTransformationType.CONTRACTION]: 1,
-          [StructureTransformationType.EXTENSION]: 2,
-          [StructureTransformationType.CREATION]: 3,
-        };
-        const aTypeOrder = a.structureTransformationType
-          ? typeOrder[a.structureTransformationType]
-          : 99;
-        const bTypeOrder = b.structureTransformationType
-          ? typeOrder[b.structureTransformationType]
-          : 99;
+        const aTypeOrder = STRUCTURE_TRANSFORMATION_TYPE_ORDER[a.type];
+        const bTypeOrder = STRUCTURE_TRANSFORMATION_TYPE_ORDER[b.type];
         return aTypeOrder - bTypeOrder;
       }) ?? []
   );
@@ -102,12 +95,12 @@ export const getTransformationSteps = (
 const getStepsByType = (
   structureTransformation: StructureTransformationApiUpdate,
   transformationId: number
-) => {
-  if (!structureTransformation.structureTransformationType) {
+): Step["steps"] => {
+  if (!structureTransformation.type) {
     return [];
   }
 
-  switch (structureTransformation.structureTransformationType) {
+  switch (structureTransformation.type) {
     case StructureTransformationType.EXTENSION:
     case StructureTransformationType.CONTRACTION:
     case StructureTransformationType.CREATION:
@@ -119,7 +112,7 @@ const getStepsByType = (
             "description",
             transformationId,
             structureTransformation.id,
-            structureTransformation.structureTransformationType
+            structureTransformation.type
           ),
         },
         {
@@ -129,7 +122,7 @@ const getStepsByType = (
             "places-et-hebergement",
             transformationId,
             structureTransformation.id,
-            structureTransformation.structureTransformationType
+            structureTransformation.type
           ),
         },
         {
@@ -139,7 +132,7 @@ const getStepsByType = (
             "actes-administratifs",
             transformationId,
             structureTransformation.id,
-            structureTransformation.structureTransformationType
+            structureTransformation.type
           ),
         },
       ];
@@ -152,7 +145,7 @@ const getStepsByType = (
             "description",
             transformationId,
             structureTransformation.id,
-            structureTransformation.structureTransformationType
+            structureTransformation.type
           ),
         },
       ];
@@ -182,7 +175,7 @@ const getRoute = (
 export type Step = {
   id?: number;
   codeBhasile?: string;
-  structureTransformationType?: StructureTransformationType;
+  type?: StructureTransformationType;
   steps: {
     name: string;
     label: string;

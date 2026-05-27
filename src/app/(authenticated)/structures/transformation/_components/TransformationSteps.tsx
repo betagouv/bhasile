@@ -1,13 +1,9 @@
-import { useFetchTransformation } from "@/app/hooks/useFetchTransformation";
 import { getTransformationSteps } from "@/app/utils/transformation.util";
+import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 
 import { TransformationStep } from "./TransformationStep";
 
-export const TransformationSteps = ({ transformationId }: Props) => {
-  const { transformation } = useFetchTransformation(
-    transformationId ? Number(transformationId) : undefined
-  );
-
+export const TransformationSteps = ({ transformation }: Props) => {
   if (!transformation) {
     return null;
   }
@@ -24,5 +20,5 @@ export const TransformationSteps = ({ transformationId }: Props) => {
 };
 
 type Props = {
-  transformationId: number | undefined;
+  transformation: TransformationApiRead | null;
 };

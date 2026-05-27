@@ -1,65 +1,30 @@
 import { z } from "zod";
 
-import { PublicType, StructureType } from "@/types/structure.type";
 import {
   StructureTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
-import { adresseApiSchema } from "./adresse.schema";
-import { antenneApiSchema } from "./antenne.schema";
-import { contactApiSchema } from "./contact.schema";
-import { finessApiSchema } from "./finess.schema";
 import { formApiSchema } from "./form.schema";
-import { structureMillesimeApiSchema } from "./structure-millesime.schema";
-import { structureTypologieApiSchema } from "./structure-typologie.schema";
-
-const dnaStructureTransformationApiSchema = z.object({
-  id: z.number().optional(),
-  dna: z.object({
-    id: z.number().optional(),
-    code: z.string(),
-    description: z.string().nullish(),
-  }),
-});
+import { structureVersionApiSchema } from "./structure-version.schema";
 
 const structureTransformationApiUpdateSchema = z.object({
   id: z.number().optional(),
-  structureId: z.number().optional(),
-  structureTransformationType: z
-    .nativeEnum(StructureTransformationType)
-    .optional(),
-  structureTransformationDate: z.string().datetime().nullish(),
-  structureTransformationMotif: z.string().nullish(),
-  structureTransformationForms: z.array(formApiSchema).optional(),
-
-  type: z.nativeEnum(StructureType).nullish(),
-  public: z.nativeEnum(PublicType).nullish(),
-  adresseAdministrative: z.string().nullish(),
-  codePostalAdministratif: z.string().nullish(),
-  communeAdministrative: z.string().nullish(),
-  departementAdministratif: z.string().nullish(),
-  nom: z.string().nullish(),
-  placesAutorisees: z.number().int().nullish(),
-  pmr: z.number().int().nullish(),
-  lgbt: z.number().int().nullish(),
-  fvvTeh: z.number().int().nullish(),
-
-  contacts: z.array(contactApiSchema).optional(),
-  adresses: z.array(adresseApiSchema).optional(),
-  finesses: z.array(finessApiSchema).optional(),
-  antennes: z.array(antenneApiSchema).optional(),
-  dnas: z.array(dnaStructureTransformationApiSchema).optional(),
+  type: z.nativeEnum(StructureTransformationType).optional(),
+  date: z.string().datetime().nullish(),
+  motif: z.string().nullish(),
+  forms: z.array(formApiSchema).optional(),
   actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
-  structureMillesimes: z.array(structureMillesimeApiSchema).optional(),
-  structureTypologies: z.array(structureTypologieApiSchema).optional(),
+
+  structureVersion: structureVersionApiSchema.optional(),
 });
 
 export const structureTransformationApiCreateSchema =
   structureTransformationApiUpdateSchema.extend({
-    structureTransformationType: z.nativeEnum(StructureTransformationType),
+    type: z.nativeEnum(StructureTransformationType),
   });
+
 export const transformationApiUpdateSchema = z.object({
   id: z.number(),
   type: z.nativeEnum(TransformationType).optional(),
@@ -84,15 +49,14 @@ export type StructureTransformationApiCreate = z.infer<
 >;
 export type StructureTransformationApiRead =
   StructureTransformationApiUpdate & {
-    structureTransformationType: StructureTransformationType;
-    structure?: {
-      codeBhasile: string;
+    type: StructureTransformationType;
+    structureVersion?: StructureTransformationApiUpdate["structureVersion"] & {
+      structure?: {
+        codeBhasile: string;
+      };
     };
   };
 
-export type DnaStructureTransformationApiType = z.infer<
-  typeof dnaStructureTransformationApiSchema
->;
 export type TransformationApiUpdate = z.infer<
   typeof transformationApiUpdateSchema
 >;

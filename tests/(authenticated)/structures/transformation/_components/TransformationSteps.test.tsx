@@ -9,15 +9,9 @@ import {
 } from "@/types/transformation.type";
 
 const mockUsePathname = vi.fn<() => string>();
-const mockUseFetchTransformation =
-  vi.fn<() => { transformation: TransformationApiRead | undefined }>();
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockUsePathname(),
-}));
-
-vi.mock("@/app/hooks/useFetchTransformation", () => ({
-  useFetchTransformation: () => mockUseFetchTransformation(),
 }));
 
 describe("TransformationSteps", () => {
@@ -27,11 +21,8 @@ describe("TransformationSteps", () => {
   });
 
   it("should render nothing when there is no transformation", () => {
-    // GIVEN
-    mockUseFetchTransformation.mockReturnValue({ transformation: undefined });
-
     // WHEN
-    const { container } = render(<TransformationSteps transformationId={42} />);
+    const { container } = render(<TransformationSteps transformation={null} />);
 
     // THEN
     expect(container).toBeEmptyDOMElement();
@@ -39,31 +30,26 @@ describe("TransformationSteps", () => {
 
   it("should render every structureTransformation as a step group", () => {
     // GIVEN
-    mockUseFetchTransformation.mockReturnValue({
-      transformation: buildTransformation([
-        {
-          id: 1,
-          structureId: 1001,
-          structure: { codeBhasile: "1001" },
-          structureTransformationType: StructureTransformationType.FERMETURE,
-        },
-        {
-          id: 2,
-          structureId: 1002,
-          structure: { codeBhasile: "1002" },
-          structureTransformationType: StructureTransformationType.EXTENSION,
-        },
-        {
-          id: 3,
-          structureId: 1003,
-          structure: { codeBhasile: "1003" },
-          structureTransformationType: StructureTransformationType.CREATION,
-        },
-      ]),
-    });
+    const transformation = buildTransformation([
+      {
+        id: 1,
+        type: StructureTransformationType.FERMETURE,
+        structureVersion: { structureId: 1001, structure: { codeBhasile: "1001" } },
+      },
+      {
+        id: 2,
+        type: StructureTransformationType.EXTENSION,
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+      },
+      {
+        id: 3,
+        type: StructureTransformationType.CREATION,
+        structureVersion: { structureId: 1003, structure: { codeBhasile: "1003" } },
+      },
+    ]);
 
     // WHEN
-    render(<TransformationSteps transformationId={42} />);
+    render(<TransformationSteps transformation={transformation} />);
 
     // THEN
     expect(screen.getByText("Fermeture 1001")).toBeInTheDocument();
@@ -73,37 +59,31 @@ describe("TransformationSteps", () => {
 
   it("should sort steps in the order Fermeture, Contraction, Extension, Création", () => {
     // GIVEN
-    mockUseFetchTransformation.mockReturnValue({
-      transformation: buildTransformation([
-        {
-          id: 1,
-          structureId: 1001,
-          structure: { codeBhasile: "1001" },
-          structureTransformationType: StructureTransformationType.CREATION,
-        },
-        {
-          id: 2,
-          structureId: 1002,
-          structure: { codeBhasile: "1002" },
-          structureTransformationType: StructureTransformationType.EXTENSION,
-        },
-        {
-          id: 3,
-          structureId: 1003,
-          structure: { codeBhasile: "1003" },
-          structureTransformationType: StructureTransformationType.FERMETURE,
-        },
-        {
-          id: 4,
-          structureId: 1004,
-          structure: { codeBhasile: "1004" },
-          structureTransformationType: StructureTransformationType.CONTRACTION,
-        },
-      ]),
-    });
+    const transformation = buildTransformation([
+      {
+        id: 1,
+        type: StructureTransformationType.CREATION,
+        structureVersion: { structureId: 1001, structure: { codeBhasile: "1001" } },
+      },
+      {
+        id: 2,
+        type: StructureTransformationType.EXTENSION,
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+      },
+      {
+        id: 3,
+        type: StructureTransformationType.FERMETURE,
+        structureVersion: { structureId: 1003, structure: { codeBhasile: "1003" } },
+      },
+      {
+        id: 4,
+        type: StructureTransformationType.CONTRACTION,
+        structureVersion: { structureId: 1004, structure: { codeBhasile: "1004" } },
+      },
+    ]);
 
     // WHEN
-    render(<TransformationSteps transformationId={42} />);
+    render(<TransformationSteps transformation={transformation} />);
 
     // THEN
     const labels = screen
@@ -119,19 +99,16 @@ describe("TransformationSteps", () => {
 
   it("should render the three substeps for an EXTENSION step", () => {
     // GIVEN
-    mockUseFetchTransformation.mockReturnValue({
-      transformation: buildTransformation([
-        {
-          id: 7,
-          structureId: 1002,
-          structure: { codeBhasile: "1002" },
-          structureTransformationType: StructureTransformationType.EXTENSION,
-        },
-      ]),
-    });
+    const transformation = buildTransformation([
+      {
+        id: 7,
+        type: StructureTransformationType.EXTENSION,
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+      },
+    ]);
 
     // WHEN
-    render(<TransformationSteps transformationId={42} />);
+    render(<TransformationSteps transformation={transformation} />);
 
     // THEN
     expect(
@@ -147,19 +124,16 @@ describe("TransformationSteps", () => {
 
   it("should only render the Description substep for a FERMETURE step", () => {
     // GIVEN
-    mockUseFetchTransformation.mockReturnValue({
-      transformation: buildTransformation([
-        {
-          id: 9,
-          structureId: 1001,
-          structure: { codeBhasile: "1001" },
-          structureTransformationType: StructureTransformationType.FERMETURE,
-        },
-      ]),
-    });
+    const transformation = buildTransformation([
+      {
+        id: 9,
+        type: StructureTransformationType.FERMETURE,
+        structureVersion: { structureId: 1001, structure: { codeBhasile: "1001" } },
+      },
+    ]);
 
     // WHEN
-    render(<TransformationSteps transformationId={42} />);
+    render(<TransformationSteps transformation={transformation} />);
 
     // THEN
     const links = screen.getAllByRole("link");
@@ -172,19 +146,16 @@ describe("TransformationSteps", () => {
     mockUsePathname.mockReturnValue(
       "/structures/transformation/42/extension/7/places-et-hebergement"
     );
-    mockUseFetchTransformation.mockReturnValue({
-      transformation: buildTransformation([
-        {
-          id: 7,
-          structureId: 1002,
-          structure: { codeBhasile: "1002" },
-          structureTransformationType: StructureTransformationType.EXTENSION,
-        },
-      ]),
-    });
+    const transformation = buildTransformation([
+      {
+        id: 7,
+        type: StructureTransformationType.EXTENSION,
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+      },
+    ]);
 
     // WHEN
-    render(<TransformationSteps transformationId={42} />);
+    render(<TransformationSteps transformation={transformation} />);
 
     // THEN
     const placesLink = screen.getByRole("link", {
@@ -198,19 +169,18 @@ describe("TransformationSteps", () => {
 
   it("should build hrefs for each substep based on the transformation and step ids", () => {
     // GIVEN
-    mockUseFetchTransformation.mockReturnValue({
-      transformation: buildTransformation([
-        {
-          id: 7,
-          structureId: 1002,
-          structure: { codeBhasile: "1002" },
-          structureTransformationType: StructureTransformationType.EXTENSION,
-        },
-      ]),
-    });
+    const transformation = buildTransformation([
+      {
+        id: 7,
+        type: StructureTransformationType.EXTENSION,
+        structureVersion: { structureId: 1002, structure: { codeBhasile: "1002" } },
+      },
+    ]);
 
     // WHEN
-    const { container } = render(<TransformationSteps transformationId={42} />);
+    const { container } = render(
+      <TransformationSteps transformation={transformation} />
+    );
 
     // THEN
     const links = within(container).getAllByRole("link");
@@ -237,19 +207,19 @@ describe("TransformationSteps", () => {
     "should use the segment matching a %s type in hrefs",
     (type: StructureTransformationType, segment: string) => {
       // GIVEN
-      mockUseFetchTransformation.mockReturnValue({
-        transformation: buildTransformation([
-          {
-            id: 7,
+      const transformation = buildTransformation([
+        {
+          id: 7,
+          type: type,
+          structureVersion: {
             structureId: 1002,
             structure: { codeBhasile: "1002" },
-            structureTransformationType: type,
           },
-        ]),
-      });
+        },
+      ]);
 
       // WHEN
-      render(<TransformationSteps transformationId={42} />);
+      render(<TransformationSteps transformation={transformation} />);
 
       // THEN
       expect(screen.getByRole("link", { name: "Description" })).toHaveAttribute(

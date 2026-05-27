@@ -28,8 +28,8 @@ describe("POST /api/transformations", () => {
       type: TransformationType.OUVERTURE_EX_NIHILO,
       structureTransformations: [
         {
-          structureId: 1,
-          structureTransformationType: StructureTransformationType.CREATION,
+          type: StructureTransformationType.CREATION,
+          structureVersion: { structureId: 1 },
         },
       ],
     };

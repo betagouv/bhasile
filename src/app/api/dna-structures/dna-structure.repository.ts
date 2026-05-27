@@ -1,4 +1,5 @@
 import { DnaStructureApiType } from "@/schemas/api/dna-structure.schema";
+import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { upsertDna } from "../dna-codes/dna-codes.repository";
@@ -7,12 +8,12 @@ import { getUniqueDnaCodesFromDnaStructures } from "./dna-structure.service";
 const deleteDnaStructures = async (
   tx: PrismaTransaction,
   dnaStructuresToKeep: Partial<DnaStructureApiType>[],
-  structureId: number
+  entityId: EntityId
 ): Promise<void> => {
-  const everyDnaStructuresOfStructure = await tx.dnaStructure.findMany({
-    where: { structureId },
+  const everyDnaStructuresOfEntity = await tx.dnaStructure.findMany({
+    where: entityId,
   });
-  const dnaStructuresToDelete = everyDnaStructuresOfStructure.filter(
+  const dnaStructuresToDelete = everyDnaStructuresOfEntity.filter(
     (dnaStructure) =>
       !dnaStructuresToKeep.some((ds) => ds.id === dnaStructure.id)
   );
@@ -26,7 +27,7 @@ const deleteDnaStructures = async (
 const checkForDuplicateDnaCodes = async (
   tx: PrismaTransaction,
   dnaStructures: Partial<DnaStructureApiType>[] = [],
-  structureId: number
+  entityId: EntityId
 ): Promise<void> => {
   const dnaCodes = getUniqueDnaCodesFromDnaStructures(dnaStructures);
 
@@ -36,9 +37,7 @@ const checkForDuplicateDnaCodes = async (
 
   const dnaLinkedToOtherStructures = await tx.dnaStructure.findMany({
     where: {
-      structureId: {
-        not: structureId,
-      },
+      NOT: entityId,
       dna: {
         code: {
           in: dnaCodes,
@@ -56,15 +55,15 @@ const checkForDuplicateDnaCodes = async (
 export const createOrUpdateDnaStructures = async (
   tx: PrismaTransaction,
   dnaStructures: Partial<DnaStructureApiType>[] = [],
-  structureId: number
+  entityId: EntityId
 ): Promise<void> => {
   if (!dnaStructures || dnaStructures.length === 0) {
     return;
   }
 
-  await deleteDnaStructures(tx, dnaStructures, structureId);
+  await deleteDnaStructures(tx, dnaStructures, entityId);
 
-  await checkForDuplicateDnaCodes(tx, dnaStructures, structureId);
+  await checkForDuplicateDnaCodes(tx, dnaStructures, entityId);
 
   for (const dnaStructure of dnaStructures) {
     const upsertedDna = await upsertDna(tx, dnaStructure.dna);
@@ -80,7 +79,7 @@ export const createOrUpdateDnaStructures = async (
         endDate: dnaStructure.endDate,
       },
       create: {
-        structureId,
+        ...entityId,
         dnaId: upsertedDna.id,
         startDate: dnaStructure.startDate,
         endDate: dnaStructure.endDate,

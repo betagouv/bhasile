@@ -8,7 +8,7 @@ import {
 export type StructureSelectionBlock = {
   id: string;
   multiple: boolean;
-  structureTransformationType: StructureTransformationType;
+  type: StructureTransformationType;
   fixedType?: StructureType;
   inheritOperateurFrom?: string;
   inheritDepartementFrom?: string;
@@ -21,6 +21,17 @@ export type TransformationTypeSpec = {
   buildAutoTransformations: (
     structureId?: number
   ) => StructureTransformationApiCreate[];
+  primaryStructureTransformationType?: StructureTransformationType;
+};
+
+export const STRUCTURE_TRANSFORMATION_TYPE_ORDER: Record<
+  StructureTransformationType,
+  number
+> = {
+  [StructureTransformationType.FERMETURE]: 0,
+  [StructureTransformationType.CONTRACTION]: 1,
+  [StructureTransformationType.EXTENSION]: 2,
+  [StructureTransformationType.CREATION]: 3,
 };
 
 export const TRANSFORMATION_TYPE_SPECS: Record<
@@ -31,7 +42,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     title: "Nouvelle structure",
     blocks: [],
     buildAutoTransformations: () => [
-      { structureTransformationType: StructureTransformationType.CREATION },
+      { type: StructureTransformationType.CREATION },
     ],
   },
   [TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES]: {
@@ -40,7 +51,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "main",
         multiple: true,
-        structureTransformationType: StructureTransformationType.FERMETURE,
+        type: StructureTransformationType.FERMETURE,
         label: "Veuillez sélectionner la ou les structures qui ferment",
       },
     ],
@@ -51,10 +62,11 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     blocks: [],
     buildAutoTransformations: (structureId) => [
       {
-        structureId,
-        structureTransformationType: StructureTransformationType.EXTENSION,
+        type: StructureTransformationType.EXTENSION,
+        structureVersion: { structureId },
       },
     ],
+    primaryStructureTransformationType: StructureTransformationType.EXTENSION,
   },
   [TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_CONTRACTENT]: {
     title: "Transformer une structure",
@@ -62,17 +74,18 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "main",
         multiple: true,
-        structureTransformationType: StructureTransformationType.CONTRACTION,
+        type: StructureTransformationType.CONTRACTION,
         label:
           "Veuillez sélectionner la ou les structures dont sont issues les places",
       },
     ],
     buildAutoTransformations: (structureId) => [
       {
-        structureId,
-        structureTransformationType: StructureTransformationType.EXTENSION,
+        type: StructureTransformationType.EXTENSION,
+        structureVersion: { structureId },
       },
     ],
+    primaryStructureTransformationType: StructureTransformationType.EXTENSION,
   },
   [TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_FERMENT]: {
     title: "Transformer une structure",
@@ -80,17 +93,18 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "main",
         multiple: true,
-        structureTransformationType: StructureTransformationType.FERMETURE,
+        type: StructureTransformationType.FERMETURE,
         label:
           "Veuillez sélectionner la ou les structures dont sont issues les places",
       },
     ],
     buildAutoTransformations: (structureId) => [
       {
-        structureId,
-        structureTransformationType: StructureTransformationType.EXTENSION,
+        type: StructureTransformationType.EXTENSION,
+        structureVersion: { structureId },
       },
     ],
+    primaryStructureTransformationType: StructureTransformationType.EXTENSION,
   },
   [TransformationType.CONTRACTION_AVEC_TRANSFERT_VERS_AUTRE_STRUCTURE]: {
     title: "Transformer une structure",
@@ -98,27 +112,29 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "main",
         multiple: true,
-        structureTransformationType: StructureTransformationType.EXTENSION,
+        type: StructureTransformationType.EXTENSION,
         label:
           "Veuillez sélectionner la ou les structures vers lesquelles les places sont transférées",
       },
     ],
     buildAutoTransformations: (structureId) => [
       {
-        structureId,
-        structureTransformationType: StructureTransformationType.CONTRACTION,
+        type: StructureTransformationType.CONTRACTION,
+        structureVersion: { structureId },
       },
     ],
+    primaryStructureTransformationType: StructureTransformationType.CONTRACTION,
   },
   [TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES]: {
     title: "Transformer une structure",
     blocks: [],
     buildAutoTransformations: (structureId) => [
       {
-        structureId,
-        structureTransformationType: StructureTransformationType.CONTRACTION,
+        type: StructureTransformationType.CONTRACTION,
+        structureVersion: { structureId },
       },
     ],
+    primaryStructureTransformationType: StructureTransformationType.CONTRACTION,
   },
   [TransformationType.FERMETURE_AVEC_TRANSFERT_VERS_UNE_OU_PLUSIEURS_STRUCTURES]:
     {
@@ -127,27 +143,29 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         {
           id: "main",
           multiple: true,
-          structureTransformationType: StructureTransformationType.EXTENSION,
+          type: StructureTransformationType.EXTENSION,
           label:
             "Veuillez sélectionner la ou les structures vers lesquelles les places sont transférées",
         },
       ],
       buildAutoTransformations: (structureId) => [
         {
-          structureId,
-          structureTransformationType: StructureTransformationType.FERMETURE,
+          type: StructureTransformationType.FERMETURE,
+          structureVersion: { structureId },
         },
       ],
+      primaryStructureTransformationType: StructureTransformationType.FERMETURE,
     },
   [TransformationType.FERMETURE_SANS_TRANSFERT]: {
     title: "Transformer une structure",
     blocks: [],
     buildAutoTransformations: (structureId) => [
       {
-        structureId,
-        structureTransformationType: StructureTransformationType.FERMETURE,
+        type: StructureTransformationType.FERMETURE,
+        structureVersion: { structureId },
       },
     ],
+    primaryStructureTransformationType: StructureTransformationType.FERMETURE,
   },
   [TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR]: {
     title: "Transformer HUDA en CADA",
@@ -155,14 +173,14 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "huda",
         multiple: true,
-        structureTransformationType: StructureTransformationType.FERMETURE,
+        type: StructureTransformationType.FERMETURE,
         fixedType: StructureType.HUDA,
         label: "Veuillez sélectionner le ou les HUDA qui ferment",
       },
       {
         id: "cada",
         multiple: false,
-        structureTransformationType: StructureTransformationType.EXTENSION,
+        type: StructureTransformationType.EXTENSION,
         fixedType: StructureType.CADA,
         inheritOperateurFrom: "huda",
         inheritDepartementFrom: "huda",
@@ -177,15 +195,15 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "huda",
         multiple: true,
-        structureTransformationType: StructureTransformationType.FERMETURE,
+        type: StructureTransformationType.FERMETURE,
         fixedType: StructureType.HUDA,
         label: "Veuillez sélectionner le ou les HUDA qui ferment",
       },
     ],
     buildAutoTransformations: () => [
       {
-        structureTransformationType: StructureTransformationType.CREATION,
-        type: StructureType.CADA,
+        type: StructureTransformationType.CREATION,
+        structureVersion: { type: StructureType.CADA },
       },
     ],
   },
@@ -195,7 +213,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         id: "huda",
         multiple: true,
-        structureTransformationType: StructureTransformationType.FERMETURE,
+        type: StructureTransformationType.FERMETURE,
         fixedType: StructureType.HUDA,
         label: "Veuillez sélectionner le ou les HUDA qui ferment",
       },

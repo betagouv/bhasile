@@ -1,15 +1,16 @@
 "use client";
 
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import { Logo } from "@/app/components/Logo";
 
+import { useOptionalTransformationContext } from "../[transformationId]/_context/TransformationClientContext";
 import { TransformationMenuItem } from "./TransformationMenuItem";
 import { TransformationSteps } from "./TransformationSteps";
 
 export const TransformationMenu = () => {
   const pathname = usePathname();
-  const { transformationId } = useParams();
+  const { transformation } = useOptionalTransformationContext();
 
   return (
     <nav className="fr-sidemenu pe-0 h-screen sticky flex flex-col top-0 w-72 border-r border-default-grey bg-alt-blue-france shrink-0">
@@ -21,8 +22,8 @@ export const TransformationMenu = () => {
           index={1}
           label="Cas de figure"
           url={
-            transformationId
-              ? `/structures/transformation/${transformationId}/selection`
+            transformation?.id
+              ? `/structures/transformation/${transformation.id}/selection`
               : "/structures/transformation/type"
           }
           isActive={
@@ -40,18 +41,14 @@ export const TransformationMenu = () => {
           }
           disabled={true}
         >
-          <TransformationSteps
-            transformationId={
-              transformationId ? Number(transformationId) : undefined
-            }
-          />
+          <TransformationSteps transformation={transformation} />
         </TransformationMenuItem>
         <TransformationMenuItem
           index={3}
           label="Vérification"
-          url={`/structures/transformation/${transformationId}/verification`}
+          url={`/structures/transformation/${transformation?.id}/verification`}
           isActive={pathname.includes("/verification")}
-          disabled={!transformationId}
+          disabled={!transformation?.id}
         />
       </div>
     </nav>

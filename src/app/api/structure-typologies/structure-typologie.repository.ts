@@ -9,8 +9,8 @@ const getUniqueWhere = (
 ):
   | { structureId_year: { structureId: number; year: number } }
   | {
-      structureTransformationId_year: {
-        structureTransformationId: number;
+      structureVersionId_year: {
+        structureVersionId: number;
         year: number;
       };
     } => {
@@ -22,16 +22,16 @@ const getUniqueWhere = (
       },
     };
   }
-  if (entityId.structureTransformationId !== undefined) {
+  if (entityId.structureVersionId !== undefined) {
     return {
-      structureTransformationId_year: {
-        structureTransformationId: entityId.structureTransformationId,
+      structureVersionId_year: {
+        structureVersionId: entityId.structureVersionId,
         year,
       },
     };
   }
   throw new Error(
-    "structureId ou structureTransformationId est requis pour une structureTypologie"
+    "structureId ou structureVersionId est requis pour une structureTypologie"
   );
 };
 
