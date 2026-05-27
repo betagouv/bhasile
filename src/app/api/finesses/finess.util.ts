@@ -4,7 +4,7 @@ export const getFinessesApiRead = (
   finesses?: StructureDbDetails["finesses"]
 ) =>
   finesses?.map((finess) => ({
-    ...finess,
+    id: finess.id,
     code: finess.code,
     description: finess.description ?? undefined,
   }));

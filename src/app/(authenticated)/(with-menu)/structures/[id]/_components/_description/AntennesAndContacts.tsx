@@ -8,7 +8,7 @@ import { useStructureContext } from "../../_context/StructureClientContext";
 export const AntennesAndContacts = (): ReactElement => {
   const { structure } = useStructureContext();
 
-  const { antennes, contacts, isMultiAntenne: isMultiAntennes } = structure;
+  const { antennes, contacts, isMultiAntenne } = structure;
 
   return (
     <>
@@ -35,7 +35,7 @@ export const AntennesAndContacts = (): ReactElement => {
       )}
       {contacts && contacts.length > 0 && (
         <table className="whitespace-nowrap">
-          {isMultiAntennes && (
+          {isMultiAntenne && (
             <caption className="text-title-blue-france text-lg mb-3 text-left font-bold">
               Contacts
             </caption>

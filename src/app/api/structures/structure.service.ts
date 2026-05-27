@@ -233,7 +233,7 @@ const dbStructureToApiRead = (
     documentsFinanciers:
       (dbStructure as StructureDbDetails).documentsFinanciers ?? [],
     adresseAdministrativeComplete,
-    isMultiAntenne: isMultiAntenne(antennes),
+    isMultiAntenne: isMultiAntenne((dbStructure as StructureDbDetails).antennes),
     isMultiDna: isMultiDna(
       dbStructure.dnaStructures,
       (dbStructure as StructureDbDetails).finesses

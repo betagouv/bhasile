@@ -2,8 +2,6 @@ import prisma from "@/lib/prisma";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { convertToRepartition } from "./adresse.util";
-
 const getEveryAdresseTypologiesOfAdresses = async (
   tx: PrismaTransaction,
   adresses: Partial<AdresseApiType>[]
@@ -62,14 +60,14 @@ export const createOrUpdateAdresses = async (
         adresse: adresse.adresse,
         codePostal: adresse.codePostal,
         commune: adresse.commune,
-        repartition: convertToRepartition(adresse.repartition),
+        repartition: adresse.repartition,
       },
       create: {
         structureId: structureId,
         adresse: adresse.adresse,
         codePostal: adresse.codePostal,
         commune: adresse.commune,
-        repartition: convertToRepartition(adresse.repartition),
+        repartition: adresse.repartition,
       },
     });
 

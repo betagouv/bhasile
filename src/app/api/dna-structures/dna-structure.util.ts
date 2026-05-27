@@ -9,7 +9,7 @@ export const getDnaStructuresApiRead = (
     | StructureDbList["dnaStructures"]
 ) =>
   dnaStructures?.map((dnaStructure) => ({
-    ...dnaStructure,
+    id: dnaStructure.id,
     startDate: dnaStructure.startDate ?? undefined,
     endDate: dnaStructure.endDate ?? undefined,
     dna: {

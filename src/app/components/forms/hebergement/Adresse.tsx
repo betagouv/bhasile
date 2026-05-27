@@ -5,7 +5,7 @@ import { Control, Controller, FieldValues } from "react-hook-form";
 import AddressWithValidation from "@/app/components/forms/AddressWithValidation";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
-import { Repartition } from "@/types/adresse.type";
+import { Repartition, RepartitionLabel } from "@/types/adresse.type";
 
 export const AdresseComponent = ({
   index,
@@ -53,7 +53,7 @@ export const AdresseComponent = ({
           .filter((repartition) => repartition !== Repartition.MIXTE)
           .map((repartition) => (
             <option key={repartition} value={repartition}>
-              {repartition}
+              {RepartitionLabel[repartition]}
             </option>
           ))}
       </SelectWithValidation>

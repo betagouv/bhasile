@@ -205,12 +205,10 @@ export const getRepartition = (
     (adresse) => adresse.repartition
   );
   const isDiffus = repartitions?.some(
-    (repartition) =>
-      repartition?.toUpperCase() === Repartition.DIFFUS.toUpperCase()
+    (repartition) => repartition === Repartition.DIFFUS
   );
   const isCollectif = repartitions?.some(
-    (repartition) =>
-      repartition?.toUpperCase() === Repartition.COLLECTIF.toUpperCase()
+    (repartition) => repartition === Repartition.COLLECTIF
   );
 
   if (isDiffus && isCollectif) {

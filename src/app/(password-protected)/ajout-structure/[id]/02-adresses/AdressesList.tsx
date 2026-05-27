@@ -13,7 +13,7 @@ import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
 import { CURRENT_YEAR } from "@/constants";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { AdresseAdministrativeFormValues } from "@/schemas/forms/base/adresseAdministrative.schema";
-import { Repartition } from "@/types/adresse.type";
+import { Repartition, RepartitionLabel } from "@/types/adresse.type";
 
 export const AdressesList = ({ adminAddress }: AdressesListProps) => {
   const { watch, control, setValue, getValues } = useFormContext();
@@ -171,7 +171,7 @@ export const AdressesList = ({ adminAddress }: AdressesListProps) => {
                 .filter((repartition) => repartition !== Repartition.MIXTE)
                 .map((repartition) => (
                   <option key={repartition} value={repartition}>
-                    {repartition}
+                    {RepartitionLabel[repartition]}
                   </option>
                 ))}
             </SelectWithValidation>
