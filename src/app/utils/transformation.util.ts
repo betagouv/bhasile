@@ -1,4 +1,7 @@
-import { TRANSFORMATION_TYPE_SPECS } from "@/app/config/transformation.config";
+import {
+  STRUCTURE_TRANSFORMATION_TYPE_ORDER,
+  TRANSFORMATION_TYPE_SPECS,
+} from "@/app/config/transformation.config";
 import {
   StructureTransformationApiUpdate,
   TransformationApiRead,
@@ -82,14 +85,8 @@ export const getTransformationSteps = (
         };
       })
       .sort((a, b) => {
-        const typeOrder: Record<string, number> = {
-          [StructureTransformationType.FERMETURE]: 0,
-          [StructureTransformationType.CONTRACTION]: 1,
-          [StructureTransformationType.EXTENSION]: 2,
-          [StructureTransformationType.CREATION]: 3,
-        };
-        const aTypeOrder = a.type ? typeOrder[a.type] : 99;
-        const bTypeOrder = b.type ? typeOrder[b.type] : 99;
+        const aTypeOrder = STRUCTURE_TRANSFORMATION_TYPE_ORDER[a.type];
+        const bTypeOrder = STRUCTURE_TRANSFORMATION_TYPE_ORDER[b.type];
         return aTypeOrder - bTypeOrder;
       }) ?? []
   );

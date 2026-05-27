@@ -1,6 +1,7 @@
 "use client";
 
 import { TransformationTypeForms } from "@/app/components/forms/transformation-types/TransformationTypeForms";
+import { TRANSFORMATION_TYPE_SPECS } from "@/app/config/transformation.config";
 import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import {
   TransformationFormType,
@@ -14,6 +15,17 @@ export default function TransformationSelectionsPage() {
 
   const formType = getFormByType(transformation.type);
 
+  const primaryStructureTransformationType = transformation.type
+    ? TRANSFORMATION_TYPE_SPECS[transformation.type]
+        .primaryStructureTransformationType
+    : undefined;
+  const primaryStructureTransformation =
+    primaryStructureTransformationType &&
+    transformation.structureTransformations?.find(
+      (structureTransformation) =>
+        structureTransformation.type === primaryStructureTransformationType
+    );
+
   const handleSubmit = (
     transformationType: TransformationType,
     structureTransformations: StructureTransformationApiCreate[]
@@ -24,8 +36,9 @@ export default function TransformationSelectionsPage() {
     <TransformationTypeForms
       formType={formType}
       structureId={
-        transformation.structureTransformations?.[0]?.structureVersion
-          ?.structureId ?? undefined
+        primaryStructureTransformation
+          ? primaryStructureTransformation.structureVersion?.structureId
+          : undefined
       }
       initialTransformationType={transformation.type}
       initialStructureTransformations={transformation.structureTransformations}

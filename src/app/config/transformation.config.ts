@@ -21,6 +21,17 @@ export type TransformationTypeSpec = {
   buildAutoTransformations: (
     structureId?: number
   ) => StructureTransformationApiCreate[];
+  primaryStructureTransformationType?: StructureTransformationType;
+};
+
+export const STRUCTURE_TRANSFORMATION_TYPE_ORDER: Record<
+  StructureTransformationType,
+  number
+> = {
+  [StructureTransformationType.FERMETURE]: 0,
+  [StructureTransformationType.CONTRACTION]: 1,
+  [StructureTransformationType.EXTENSION]: 2,
+  [StructureTransformationType.CREATION]: 3,
 };
 
 export const TRANSFORMATION_TYPE_SPECS: Record<
@@ -55,6 +66,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
+    primaryStructureTransformationType: StructureTransformationType.EXTENSION,
   },
   [TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_CONTRACTENT]: {
     title: "Transformer une structure",
@@ -73,6 +85,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
+    primaryStructureTransformationType: StructureTransformationType.EXTENSION,
   },
   [TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_FERMENT]: {
     title: "Transformer une structure",
@@ -91,6 +104,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
+    primaryStructureTransformationType: StructureTransformationType.EXTENSION,
   },
   [TransformationType.CONTRACTION_AVEC_TRANSFERT_VERS_AUTRE_STRUCTURE]: {
     title: "Transformer une structure",
@@ -109,6 +123,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
+    primaryStructureTransformationType: StructureTransformationType.CONTRACTION,
   },
   [TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES]: {
     title: "Transformer une structure",
@@ -119,6 +134,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
+    primaryStructureTransformationType: StructureTransformationType.CONTRACTION,
   },
   [TransformationType.FERMETURE_AVEC_TRANSFERT_VERS_UNE_OU_PLUSIEURS_STRUCTURES]:
     {
@@ -138,6 +154,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
           structureVersion: { structureId },
         },
       ],
+      primaryStructureTransformationType: StructureTransformationType.FERMETURE,
     },
   [TransformationType.FERMETURE_SANS_TRANSFERT]: {
     title: "Transformer une structure",
@@ -148,6 +165,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
+    primaryStructureTransformationType: StructureTransformationType.FERMETURE,
   },
   [TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR]: {
     title: "Transformer HUDA en CADA",
