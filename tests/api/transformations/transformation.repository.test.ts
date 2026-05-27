@@ -462,13 +462,14 @@ describe("transformation.repository db integration", () => {
     });
     createdTransformationIds.push(transformationId);
 
-    const st = await prisma.structureTransformation.findFirstOrThrow({
-      where: { transformationId },
+    const structureTransformation =
+      await prisma.structureTransformation.findFirstOrThrow({
+        where: { transformationId },
+      });
+    const structureVersion = await prisma.structureVersion.findFirst({
+      where: { structureTransformationId: structureTransformation.id },
     });
-    const sv = await prisma.structureVersion.findFirst({
-      where: { structureTransformationId: st.id },
-    });
-    expect(sv).toBeNull();
+    expect(structureVersion).toBeNull();
   });
 
   it("should initialize default forms for each structureTransformation on createOne", async () => {
@@ -480,11 +481,12 @@ describe("transformation.repository db integration", () => {
     });
     createdTransformationIds.push(transformationId);
 
-    const st = await prisma.structureTransformation.findFirstOrThrow({
-      where: { transformationId },
-    });
+    const structureTransformation =
+      await prisma.structureTransformation.findFirstOrThrow({
+        where: { transformationId },
+      });
     const formCount = await prisma.form.count({
-      where: { structureTransformationId: st.id },
+      where: { structureTransformationId: structureTransformation.id },
     });
     expect(formCount).toBeGreaterThan(0);
   });

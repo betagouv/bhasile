@@ -1,6 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 
-export type TransformationDb = Prisma.TransformationGetPayload<{
+export type TransformationDbDetails = Prisma.TransformationGetPayload<{
   include: {
     form: {
       include: {
