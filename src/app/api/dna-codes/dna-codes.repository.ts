@@ -4,16 +4,29 @@ import { PrismaTransaction } from "@/types/prisma.type";
 
 export const findAll = async ({
   structureId,
+  operateurId,
 }: {
-  structureId: number;
+  structureId?: number;
+  operateurId?: number;
 }): Promise<{ code: string }[]> => {
+  const structureFilter = structureId
+    ? {
+        OR: [
+          { dnaStructures: { none: {} } },
+          { dnaStructures: { some: { structureId } } },
+        ],
+      }
+    : { dnaStructures: { none: {} } };
+
+  const operateurFilter =
+    operateurId !== undefined
+      ? { OR: [{ operateurId }, { operateurId: null }] }
+      : null;
+
   return prisma.dna.findMany({
-    where: {
-      OR: [
-        { dnaStructures: { none: {} } },
-        { dnaStructures: { some: { structureId } } },
-      ],
-    },
+    where: operateurFilter
+      ? { AND: [structureFilter, operateurFilter] }
+      : structureFilter,
     select: { code: true },
   });
 };

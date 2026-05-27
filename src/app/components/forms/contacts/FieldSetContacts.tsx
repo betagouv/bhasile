@@ -20,7 +20,8 @@ export const FieldSetContacts = () => {
 
   const isMultiAntenne = watch("isMultiAntenne");
 
-  const contacts = (watch("contacts") || [emptyContact]) as ContactFormValues[];
+  const watchedContacts = watch("contacts") as ContactFormValues[] | undefined;
+  const contacts = watchedContacts?.length ? watchedContacts : [emptyContact];
 
   const notice = isMultiAntenne
     ? "Veuillez renseigner le contact d’au moins une personne responsable de la structure, de l’opérationnel et/ou du financier. Indiquez également un responsable de chaque site."

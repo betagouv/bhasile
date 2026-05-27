@@ -3,14 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDnaCodes } from "./dna-codes.service";
 
 export async function GET(request: NextRequest) {
-  const structureId = Number(request.nextUrl.searchParams.get("structureId"));
-
-  if (!structureId || isNaN(structureId)) {
-    return NextResponse.json(
-      { error: "StructureID doit être défini et être un nombre" },
-      { status: 400 }
-    );
-  }
+  const structureId =
+    Number(request.nextUrl.searchParams.get("structureId")) || undefined;
 
   try {
     const dnaCodes = await getDnaCodes(structureId);
