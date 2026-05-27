@@ -44,20 +44,19 @@ export const getOperateurs = async ({
 
 export const getOperateur = async (id: number): Promise<OperateurApiRead> => {
   const operateur = await findOne(id);
-  const vulnerabilites: string[] = [];
-  operateur.structures.forEach((structure) => {
-    if (structure.lgbt && !vulnerabilites.includes("LGBT")) {
-      vulnerabilites.push("LGBT");
-    }
-    if (structure.fvvTeh && !vulnerabilites.includes("FVV-TEH")) {
-      vulnerabilites.push("FVV-TEH");
-    }
-  });
 
   return recursivelySerializeDates({
     ...operateur,
-    vulnerabilites,
     actesAdministratifs: operateur.actesAdministratifs,
+    contacts: operateur.contacts?.map((contact) => ({
+      ...contact,
+      prenom: contact.prenom || "",
+      nom: contact.nom || "",
+      telephone: contact.telephone || "",
+      email: contact.email || "",
+      role: contact.role || "",
+      structureId: contact.structureId || undefined,
+    })),
   }) as OperateurApiRead;
 };
 

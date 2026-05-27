@@ -15,7 +15,7 @@ export const DescriptionBlock = () => {
       title="Description"
       iconClass="fr-icon-align-left"
       onEdit={() => {
-        router.push(`/operateurs/${operateur.id}/modification/description`);
+        router.push(`/operateurs/${operateur.id}/modification/contacts`);
       }}
       entity={operateur}
       entityType="Operateur"
@@ -28,11 +28,6 @@ export const DescriptionBlock = () => {
         <div className="flex gap-2 mb-3">
           <strong>SIRET</strong>
           {operateur?.siret || "N/A"}
-        </div>
-        <hr className="col-span-2" />
-        <div className="flex gap-2 mb-3">
-          <strong>Vulnérabilité</strong>
-          {operateur?.vulnerabilites?.join(", ") || "N/A"}
         </div>
         <hr className="col-span-2" />
         <div className="flex gap-2 mb-3">

@@ -15,7 +15,7 @@ const emptyContact: ContactFormValues = {
   perimetre: "",
 };
 
-export const FieldSetContacts = () => {
+export const FieldSetContacts = ({ displayPerimetre = false }: Props) => {
   const { watch, setValue } = useFormContext();
 
   const isMultiAntenne = watch("isMultiAntenne");
@@ -48,7 +48,7 @@ export const FieldSetContacts = () => {
       {contacts.map((_, index) => (
         <Contact
           key={index}
-          isMultiAntenne={isMultiAntenne}
+          isMultiAntenne={displayPerimetre || isMultiAntenne}
           handleDelete={index < 1 ? undefined : handleDelete}
           index={index}
         />
@@ -65,4 +65,8 @@ export const FieldSetContacts = () => {
       </Button>
     </>
   );
+};
+
+type Props = {
+  displayPerimetre?: boolean;
 };
