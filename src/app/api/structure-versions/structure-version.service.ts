@@ -2,10 +2,10 @@ import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { StructureVersionApiRead } from "@/schemas/api/transformation.schema";
 import { PublicType } from "@/types/structure.type";
 
-import { StructureVersionDb } from "./structure-version.db.type";
+import { StructureVersionDbDetails } from "./structure-version.db.type";
 
 export const dbStructureVersionToApiRead = (
-  version: StructureVersionDb
+  version: StructureVersionDbDetails
 ): StructureVersionApiRead => {
   const adresseAdministrativeComplete = [
     version.adresseAdministrative,

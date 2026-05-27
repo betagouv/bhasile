@@ -1,6 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 
-export type StructureVersionDb = Prisma.StructureVersionGetPayload<{
+export type StructureVersionDbDetails = Prisma.StructureVersionGetPayload<{
   include: {
     structure: true;
     contacts: true;

@@ -6,7 +6,7 @@ import {
 } from "@/schemas/api/transformation.schema";
 
 import { dbStructureVersionToApiRead } from "../structure-versions/structure-version.service";
-import { TransformationDb } from "./transformation.db.type";
+import { TransformationDbDetails } from "./transformation.db.type";
 import {
   createOne,
   deleteOne,
@@ -15,7 +15,7 @@ import {
 } from "./transformation.repository";
 
 const dbTransformationToApiRead = (
-  transformation: TransformationDb
+  transformation: TransformationDbDetails
 ): TransformationApiRead =>
   recursivelySerializeDates({
     ...transformation,
