@@ -67,22 +67,26 @@ export const createOne = async (
 
     await initializeTransformationForm(tx, transformation.id);
 
-    for (const structureTransformation of input.structureTransformations) {
-      const created = await tx.structureTransformation.create({
-        data: {
+    const createdStructureTransformations =
+      await tx.structureTransformation.createManyAndReturn({
+        data: input.structureTransformations.map((structureTransformation) => ({
           transformationId: transformation.id,
           type: structureTransformation.type,
           date: structureTransformation.date,
           motif: structureTransformation.motif,
-        },
+        })),
       });
 
+    for (const [
+      index,
+      structureTransformation,
+    ] of input.structureTransformations.entries()) {
       await createOneStructureVersion(
         tx,
         structureTransformation.structureVersion ?? {},
         {
           structureId: structureTransformation.structureVersion?.structureId,
-          structureTransformationId: created.id,
+          structureTransformationId: createdStructureTransformations[index].id,
         }
       );
     }
