@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
 import { Badge, BadgeType } from "@/app/components/common/Badge";
-import { Repartition } from "@/types/adresse.type";
+import { Repartition, RepartitionLabel } from "@/types/adresse.type";
 
 export const RepartitionBadge = ({
   repartition,
@@ -17,7 +17,7 @@ export const RepartitionBadge = ({
   };
   return (
     <Badge type={getBadgeType(repartition)} className={className}>
-      {repartition}
+      {RepartitionLabel[repartition]}
     </Badge>
   );
 };

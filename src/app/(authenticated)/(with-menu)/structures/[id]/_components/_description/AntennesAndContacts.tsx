@@ -2,16 +2,13 @@ import { ReactElement } from "react";
 
 import { formatCityName } from "@/app/utils/adresse.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
-import { isStructureMultiAntenne } from "@/app/utils/structure.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
 export const AntennesAndContacts = (): ReactElement => {
   const { structure } = useStructureContext();
 
-  const { antennes, contacts } = structure;
-
-  const isMultiAntennes = isStructureMultiAntenne(structure);
+  const { antennes, contacts, isMultiAntenne } = structure;
 
   return (
     <>
@@ -38,7 +35,7 @@ export const AntennesAndContacts = (): ReactElement => {
       )}
       {contacts && contacts.length > 0 && (
         <table className="whitespace-nowrap">
-          {isMultiAntennes && (
+          {isMultiAntenne && (
             <caption className="text-title-blue-france text-lg mb-3 text-left font-bold">
               Contacts
             </caption>

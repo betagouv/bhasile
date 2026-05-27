@@ -146,4 +146,9 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   };
   isInCpom: boolean;
   isInCpomPerYear: Record<number, boolean>;
+  nom: string;
+  adresseAdministrativeComplete: string;
+  isMultiAntenne: boolean;
+  isMultiDna: boolean;
+  typeBati: Repartition;
 };

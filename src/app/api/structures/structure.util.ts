@@ -205,12 +205,10 @@ export const getRepartition = (
     (adresse) => adresse.repartition
   );
   const isDiffus = repartitions?.some(
-    (repartition) =>
-      repartition?.toUpperCase() === Repartition.DIFFUS.toUpperCase()
+    (repartition) => repartition === Repartition.DIFFUS
   );
   const isCollectif = repartitions?.some(
-    (repartition) =>
-      repartition?.toUpperCase() === Repartition.COLLECTIF.toUpperCase()
+    (repartition) => repartition === Repartition.COLLECTIF
   );
 
   if (isDiffus && isCollectif) {
@@ -315,6 +313,16 @@ export const getCpomStructuresWithDates = (
             ...cpomStructure.cpom,
             dateStart: cpomDateStart,
             dateEnd: cpomDateEnd,
+            granularity: cpomStructure.cpom.granularity,
+            actesAdministratifs:
+              cpomStructure.cpom.actesAdministratifs?.map(
+                (acteAdministratif) => ({
+                  ...acteAdministratif,
+                  startDate: acteAdministratif.startDate ?? undefined,
+                  endDate: acteAdministratif.endDate ?? undefined,
+                  date: acteAdministratif.date ?? undefined,
+                })
+              ) ?? [],
           }
         : cpomStructure.cpom,
     }) as CpomStructureApiRead;

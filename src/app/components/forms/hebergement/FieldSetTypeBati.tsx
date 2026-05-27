@@ -1,7 +1,7 @@
 import { useFormContext } from "react-hook-form";
 
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
-import { Repartition } from "@/types/adresse.type";
+import { Repartition, RepartitionLabel } from "@/types/adresse.type";
 
 export const FieldSetTypeBati = () => {
   const { control } = useFormContext();
@@ -18,7 +18,7 @@ export const FieldSetTypeBati = () => {
 
         {Object.values(Repartition).map((repartition) => (
           <option key={repartition} value={repartition}>
-            {repartition}
+            {RepartitionLabel[repartition]}
           </option>
         ))}
       </SelectWithValidation>
