@@ -37,7 +37,7 @@ const getScalarData = (version: StructureVersionApiType) => ({
   directionTerritoriale: version.directionTerritoriale ?? undefined,
 });
 
-export const createOneStructureVersion = async (
+const createOneStructureVersion = async (
   tx: PrismaTransaction,
   version: StructureVersionApiType,
   parent: StructureVersionParent
@@ -67,7 +67,7 @@ export const createOneStructureVersion = async (
   return created.id;
 };
 
-export const updateOneStructureVersion = async (
+const updateOneStructureVersion = async (
   tx: PrismaTransaction,
   version: StructureVersionApiType
 ): Promise<number> => {

@@ -13,6 +13,8 @@ export type DeepPartial<T> = T extends object
     }
   : T;
 
+export type ExcludeNullValues<T> = { [K in keyof T]: Exclude<T[K], null> };
+
 export const FormKind = {
   AJOUT: "ajout",
   MODIFICATION: "modification",

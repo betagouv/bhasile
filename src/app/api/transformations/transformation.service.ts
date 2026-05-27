@@ -5,12 +5,31 @@ import {
   TransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
 
+import { dbStructureVersionToApiRead } from "../structure-versions/structure-version.service";
+import { TransformationDbDetails } from "./transformation.db.type";
 import {
   createOne,
   deleteOne,
   findOne,
   updateOne,
 } from "./transformation.repository";
+
+const dbTransformationToApiRead = (
+  transformation: TransformationDbDetails
+): TransformationApiRead =>
+  recursivelySerializeDates({
+    ...transformation,
+    structureTransformations: transformation.structureTransformations.map(
+      (structureTransformation) => ({
+        ...structureTransformation,
+        structureVersion: structureTransformation.structureVersion
+          ? dbStructureVersionToApiRead(
+              structureTransformation.structureVersion
+            )
+          : undefined,
+      })
+    ),
+  }) as TransformationApiRead;
 
 export const getTransformation = async (
   id: number
@@ -19,7 +38,7 @@ export const getTransformation = async (
   if (!dbTransformation) {
     return null;
   }
-  return recursivelySerializeDates(dbTransformation) as TransformationApiRead;
+  return dbTransformationToApiRead(dbTransformation);
 };
 
 export const createTransformation = async (
