@@ -298,17 +298,6 @@ export const isStructureInCpomPerYear = (
   );
 };
 
-export const isMultiAntenne = (
-  antennes?: StructureDbDetails["antennes"]
-): boolean => (antennes?.length ?? 0) > 0;
-
-export const isMultiDna = (
-  dnaStructures?:
-    | StructureDbDetails["dnaStructures"]
-    | StructureDbList["dnaStructures"],
-  finesses?: StructureDbDetails["finesses"]
-): boolean => (dnaStructures?.length ?? 0) > 1 || (finesses?.length ?? 0) > 1;
-
 export const getCpomStructuresWithDates = (
   structure: StructureDbDetails | StructureDbList
 ): CpomStructureApiRead[] | undefined => {

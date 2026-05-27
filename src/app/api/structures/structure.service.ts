@@ -39,8 +39,6 @@ import {
   getDatesPeriodeAutorisation,
   getOperateurLabel,
   getRepartition,
-  isMultiAntenne,
-  isMultiDna,
   isStructureInCpom,
   isStructureInCpomPerYear,
 } from "./structure.util";
@@ -196,6 +194,10 @@ const dbStructureToApiRead = (
     .join(" ");
   const typeBati = getRepartition(dbStructure);
 
+  const isMultiAntenne = (antennes?.length ?? 0) > 0;
+  const isMultiDna =
+    (dnaStructures?.length ?? 0) > 1 || (finesses?.length ?? 0) > 1;
+
   return recursivelySerializeDates({
     ...dbStructure,
     debutConvention,
@@ -233,11 +235,8 @@ const dbStructureToApiRead = (
     documentsFinanciers:
       (dbStructure as StructureDbDetails).documentsFinanciers ?? [],
     adresseAdministrativeComplete,
-    isMultiAntenne: isMultiAntenne((dbStructure as StructureDbDetails).antennes),
-    isMultiDna: isMultiDna(
-      dbStructure.dnaStructures,
-      (dbStructure as StructureDbDetails).finesses
-    ),
+    isMultiAntenne,
+    isMultiDna,
     typeBati,
     antennes,
     dnaStructures,

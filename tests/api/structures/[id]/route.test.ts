@@ -48,8 +48,6 @@ vi.mock("@/app/api/structures/structure.util", () => ({
   getCurrentPlacesQpv: vi.fn().mockReturnValue(3),
   getOperateurLabel: vi.fn().mockReturnValue("Adoma"),
   getRepartition: vi.fn().mockReturnValue("DIFFUS"),
-  isMultiAntenne: vi.fn().mockReturnValue(false),
-  isMultiDna: vi.fn().mockReturnValue(false),
   isStructureInCpom: vi.fn().mockReturnValue(false),
   isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
   getDatesConvention: vi.fn().mockReturnValue([null, null]),
