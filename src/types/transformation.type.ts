@@ -38,3 +38,11 @@ export const TransformationFormType = {
 } as const;
 export type TransformationFormType =
   (typeof TransformationFormType)[keyof typeof TransformationFormType];
+
+export const StructureTransformationStep = {
+  DESCRIPTION: "description",
+  PLACES_ET_HEBERGEMENT: "places-et-hebergement",
+  ACTES_ADMINISTRATIFS: "actes-administratifs",
+} as const;
+export type StructureTransformationStep =
+  (typeof StructureTransformationStep)[keyof typeof StructureTransformationStep];

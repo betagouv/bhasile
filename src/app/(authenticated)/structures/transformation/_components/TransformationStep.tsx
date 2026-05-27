@@ -1,10 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { TransformationStructureIcon } from "@/app/components/transformations/TransformationStructureIcon";
 import { cn } from "@/app/utils/classname.util";
-import { Step } from "@/app/utils/transformation.util";
-import { StructureTransformationType } from "@/types/transformation.type";
+import {
+  getStructureTransformationLabel,
+  Step,
+} from "@/app/utils/transformation.util";
 
 export const TransformationStep = ({ step }: Props) => {
   const pathname = usePathname();
@@ -20,9 +22,9 @@ export const TransformationStep = ({ step }: Props) => {
             "flex items-center justify-center w-7 h-7 rounded-full bg-white text-title-blue-france"
           )}
         >
-          {getIcon(step.type)}
+          <TransformationStructureIcon type={step.type} />
         </span>
-        {getLabel(step.type, step.codeBhasile)}
+        {getStructureTransformationLabel(step.type, step.codeBhasile)}
       </div>
       <div className="flex flex-col gap-2">
         {step.steps.map((stepItem) => {
@@ -48,44 +50,4 @@ export const TransformationStep = ({ step }: Props) => {
 
 type Props = {
   step: Step;
-};
-
-const getLabel = (type?: StructureTransformationType, codeBhasile?: string) => {
-  const code = codeBhasile ?? "";
-  switch (type) {
-    case StructureTransformationType.EXTENSION:
-      return `Extension ${code}`.trim();
-    case StructureTransformationType.CONTRACTION:
-      return `Contraction ${code}`.trim();
-    case StructureTransformationType.FERMETURE:
-      return `Fermeture ${code}`.trim();
-    case StructureTransformationType.CREATION:
-      return `Nouvelle structure`;
-    default:
-      return "";
-  }
-};
-
-const getIcon = (type?: StructureTransformationType) => {
-  switch (type) {
-    case StructureTransformationType.EXTENSION:
-      return <i className="ri-expand-diagonal-line " />;
-    case StructureTransformationType.CONTRACTION:
-      return <i className="ri-collapse-diagonal-line" />;
-    case StructureTransformationType.CREATION:
-      return <i className="fr-icon-add-line" />;
-    case StructureTransformationType.FERMETURE:
-      return (
-        <Image
-          src="/transformation-fermeture.svg"
-          alt=""
-          aria-hidden="true"
-          width={18}
-          height={18}
-        />
-      );
-
-    default:
-      return "";
-  }
 };

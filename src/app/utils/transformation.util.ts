@@ -7,6 +7,7 @@ import {
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import {
+  StructureTransformationStep,
   StructureTransformationType,
   TransformationFormType,
   TransformationType,
@@ -106,30 +107,30 @@ const getStepsByType = (
     case StructureTransformationType.CREATION:
       return [
         {
-          name: "description",
+          name: StructureTransformationStep.DESCRIPTION,
           label: "Description",
           route: getRoute(
-            "description",
+            StructureTransformationStep.DESCRIPTION,
             transformationId,
             structureTransformation.id,
             structureTransformation.type
           ),
         },
         {
-          name: "places-et-hebergement",
+          name: StructureTransformationStep.PLACES_ET_HEBERGEMENT,
           label: "Places et hébergement",
           route: getRoute(
-            "places-et-hebergement",
+            StructureTransformationStep.PLACES_ET_HEBERGEMENT,
             transformationId,
             structureTransformation.id,
             structureTransformation.type
           ),
         },
         {
-          name: "actes-administratifs",
+          name: StructureTransformationStep.ACTES_ADMINISTRATIFS,
           label: "Actes administratifs",
           route: getRoute(
-            "actes-administratifs",
+            StructureTransformationStep.ACTES_ADMINISTRATIFS,
             transformationId,
             structureTransformation.id,
             structureTransformation.type
@@ -139,10 +140,10 @@ const getStepsByType = (
     case StructureTransformationType.FERMETURE:
       return [
         {
-          name: "description",
+          name: StructureTransformationStep.DESCRIPTION,
           label: "Description",
           route: getRoute(
-            "description",
+            StructureTransformationStep.DESCRIPTION,
             transformationId,
             structureTransformation.id,
             structureTransformation.type
@@ -181,4 +182,23 @@ export type Step = {
     label: string;
     route: string;
   }[];
+};
+
+export const getStructureTransformationLabel = (
+  type?: StructureTransformationType,
+  codeBhasile?: string
+) => {
+  const code = codeBhasile ?? "";
+  switch (type) {
+    case StructureTransformationType.EXTENSION:
+      return `Extension ${code}`;
+    case StructureTransformationType.CONTRACTION:
+      return `Contraction ${code}`;
+    case StructureTransformationType.FERMETURE:
+      return `Fermeture ${code}`;
+    case StructureTransformationType.CREATION:
+      return `Nouvelle structure`;
+    default:
+      return "";
+  }
 };
