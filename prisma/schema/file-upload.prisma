@@ -33,6 +33,7 @@ model ActeAdministratif {
   name        String?
   parent      ActeAdministratif?         @relation("ActeAdministratifToActeAdministratif", fields: [parentId], references: [id], onDelete: Cascade)
   parentId    Int?
+  isMissing   Boolean?
   children    ActeAdministratif[]        @relation("ActeAdministratifToActeAdministratif")
   fileUploads FileUpload[]
 
@@ -49,6 +50,7 @@ model DocumentFinancier {
   category    DocumentFinancierCategory?
   year        Int
   name        String?
+  isMissing   Boolean?
   granularity DocumentFinancierGranularity @default(STRUCTURE)
   fileUploads FileUpload[]
 

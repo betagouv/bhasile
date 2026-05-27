@@ -42,6 +42,7 @@ WITH
       b."structureId" IS NOT NULL
       AND b."year" >= bd."startYear"
       AND b."year" < bd."endYearExclusive"
+      AND b."isMissing" IS NOT TRUE
   ),
   -- filter financial indicators on the same year range as budgets
   -- and keep one row per structure/year: REALISE first, PREVISIONNEL fallback
@@ -55,6 +56,7 @@ WITH
       i."structureId" IS NOT NULL
       AND i."year" >= bd."startYear"
       AND i."year" < bd."endYearExclusive"
+      AND i."isMissing" IS NOT TRUE
     ORDER BY
       i."structureId",
       i."year",
