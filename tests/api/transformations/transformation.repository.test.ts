@@ -18,6 +18,7 @@ import {
 describe("transformation.repository db integration", () => {
   const createdStructureIds: number[] = [];
   const createdTransformationIds: number[] = [];
+  const createdOperateurIds: number[] = [];
 
   const createStructure = async () => {
     const structure = await prisma.structure.create({
@@ -27,6 +28,14 @@ describe("transformation.repository db integration", () => {
     });
     createdStructureIds.push(structure.id);
     return structure;
+  };
+
+  const createOperateur = async () => {
+    const operateur = await prisma.operateur.create({
+      data: { name: `OP-TF-TEST-${Date.now()}-${randomUUID()}` },
+    });
+    createdOperateurIds.push(operateur.id);
+    return operateur;
   };
 
   const createBareTransformation = async () => {
@@ -86,6 +95,11 @@ describe("transformation.repository db integration", () => {
     if (createdStructureIds.length > 0) {
       await prisma.structure.deleteMany({
         where: { id: { in: createdStructureIds } },
+      });
+    }
+    if (createdOperateurIds.length > 0) {
+      await prisma.operateur.deleteMany({
+        where: { id: { in: createdOperateurIds } },
       });
     }
     await prisma.dna.deleteMany({
@@ -453,6 +467,40 @@ describe("transformation.repository db integration", () => {
     expect(form.formDefinitionId).toBe(formDefinition.id);
   });
 
+  it("should persist operateurId on structureTransformation when creating", async () => {
+    const operateur = await createOperateur();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureTransformations: [
+        {
+          type: StructureTransformationType.CREATION,
+          operateurId: operateur.id,
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const st = await prisma.structureTransformation.findFirstOrThrow({
+      where: { transformationId },
+    });
+    expect(st.operateurId).toBe(operateur.id);
+  });
+
+  it("should default operateurId to null when not provided on createOne", async () => {
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureTransformations: [
+        { type: StructureTransformationType.CREATION },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const st = await prisma.structureTransformation.findFirstOrThrow({
+      where: { transformationId },
+    });
+    expect(st.operateurId).toBeNull();
+  });
+
   it("should NOT initialize a StructureVersion when structureVersion is not provided to createOne", async () => {
     const transformationId = await createOne({
       type: TransformationType.OUVERTURE_EX_NIHILO,
@@ -489,6 +537,117 @@ describe("transformation.repository db integration", () => {
       where: { structureTransformationId: structureTransformation.id },
     });
     expect(formCount).toBeGreaterThan(0);
+  });
+
+  it("should update operateurId on updateOne", async () => {
+    const operateurA = await createOperateur();
+    const operateurB = await createOperateur();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureTransformations: [
+        {
+          type: StructureTransformationType.CREATION,
+          operateurId: operateurA.id,
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+    const st = await prisma.structureTransformation.findFirstOrThrow({
+      where: { transformationId },
+    });
+
+    await updateOne({
+      id: transformationId,
+      structureTransformations: [
+        { id: st.id, operateurId: operateurB.id },
+      ],
+    });
+
+    const updated = await prisma.structureTransformation.findUniqueOrThrow({
+      where: { id: st.id },
+    });
+    expect(updated.operateurId).toBe(operateurB.id);
+  });
+
+  it("should clear operateurId when explicitly set to null on updateOne", async () => {
+    const operateur = await createOperateur();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureTransformations: [
+        {
+          type: StructureTransformationType.CREATION,
+          operateurId: operateur.id,
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+    const st = await prisma.structureTransformation.findFirstOrThrow({
+      where: { transformationId },
+    });
+
+    await updateOne({
+      id: transformationId,
+      structureTransformations: [{ id: st.id, operateurId: null }],
+    });
+
+    const updated = await prisma.structureTransformation.findUniqueOrThrow({
+      where: { id: st.id },
+    });
+    expect(updated.operateurId).toBeNull();
+  });
+
+  it("should leave operateurId unchanged when omitted on updateOne", async () => {
+    const operateur = await createOperateur();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureTransformations: [
+        {
+          type: StructureTransformationType.CREATION,
+          operateurId: operateur.id,
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+    const st = await prisma.structureTransformation.findFirstOrThrow({
+      where: { transformationId },
+    });
+
+    // Update some other field without touching operateurId
+    await updateOne({
+      id: transformationId,
+      structureTransformations: [
+        { id: st.id, motif: "Untouched operateur" },
+      ],
+    });
+
+    const updated = await prisma.structureTransformation.findUniqueOrThrow({
+      where: { id: st.id },
+    });
+    expect(updated.operateurId).toBe(operateur.id);
+    expect(updated.motif).toBe("Untouched operateur");
+  });
+
+  it("should return operateur narrowed to { id, name } from findOne", async () => {
+    const operateur = await createOperateur();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureTransformations: [
+        {
+          type: StructureTransformationType.CREATION,
+          operateurId: operateur.id,
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const row = await findOne(transformationId);
+    const fetchedOperateur = row.structureTransformations[0].operateur;
+    expect(fetchedOperateur).toEqual({
+      id: operateur.id,
+      name: operateur.name,
+    });
+    // Ensure narrow shape: no siret, siegeSocial, createdAt, etc.
+    expect(Object.keys(fetchedOperateur ?? {}).sort()).toEqual(["id", "name"]);
   });
 
   it("should create a new structureTransformation when updateOne omits id but provides structureVersion.structureId and type", async () => {

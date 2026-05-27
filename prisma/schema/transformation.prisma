@@ -19,6 +19,9 @@ model StructureTransformation {
   forms            Form[]
   structureVersion StructureVersion?
 
+  operateurId Int?
+  operateur   Operateur? @relation(fields: [operateurId], references: [id])
+
   actesAdministratifs ActeAdministratif[]
 
   createdAt DateTime @default(now())

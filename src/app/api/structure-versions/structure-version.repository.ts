@@ -17,7 +17,7 @@ type StructureVersionParent = Pick<
 >;
 
 const getScalarData = (version: StructureVersionApiType) => ({
-  effectiveDate: version.effectiveDate ?? undefined,
+  effectiveDate: new Date().toISOString(),
   forceHistorize: version.forceHistorize ?? undefined,
   type: version.type ?? undefined,
   public: convertToPublicType(version.public),
@@ -51,11 +51,8 @@ const createOneStructureVersion = async (
     );
   }
 
-  const effectiveDate = version.effectiveDate ?? new Date().toISOString();
-
   const data: Prisma.StructureVersionUncheckedCreateInput = {
     ...getScalarData(version),
-    effectiveDate,
     structureId: parent.structureId,
     structureTransformationId: parent.structureTransformationId,
   };
@@ -75,7 +72,8 @@ const updateOneStructureVersion = async (
     throw new Error("id est requis pour mettre à jour une StructureVersion");
   }
 
-  const data: Prisma.StructureVersionUncheckedUpdateInput = getScalarData(version);
+  const data: Prisma.StructureVersionUncheckedUpdateInput =
+    getScalarData(version);
 
   await tx.structureVersion.update({
     where: { id: version.id },

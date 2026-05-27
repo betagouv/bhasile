@@ -63,7 +63,7 @@ export const FieldSetDescription = ({
               name="type"
               control={control}
               label="Type"
-              disabled={true}
+              disabled={formKind !== FormKind.CREATION_EX_NIHILO}
               required
               id="type"
             >

@@ -3,8 +3,14 @@
 import { notFound, useParams } from "next/navigation";
 
 import { useTransformationContext } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
+import { SubmitError } from "@/app/components/SubmitError";
 import { TransformationStructureHeader } from "@/app/components/transformations/TransformationStructureHeader";
-import { StructureTransformationApiRead } from "@/schemas/api/transformation.schema";
+import { useFetchState } from "@/app/context/FetchStateContext";
+import {
+  StructureTransformationApiRead,
+  TransformationApiRead,
+} from "@/schemas/api/transformation.schema";
+import { FetchState } from "@/types/fetch-state.type";
 import {
   StructureTransformationType,
   TransformationType,
@@ -20,6 +26,9 @@ export default function TransformationStructureStepPage() {
   const { transformationStructureId } = useParams();
   const { transformation } = useTransformationContext();
 
+  const { getFetchState } = useFetchState();
+  const saveState = getFetchState("transformation-save");
+
   const structureTransformation = transformation?.structureTransformations.find(
     (structureTransformation) =>
       structureTransformation.id === Number(transformationStructureId)
@@ -34,14 +43,21 @@ export default function TransformationStructureStepPage() {
       <TransformationStructureHeader
         structureTransformation={structureTransformation}
       />
-      {renderFlow(structureTransformation, transformation.type)}
+      {renderFlow(structureTransformation, transformation)}
+      {saveState === FetchState.ERROR && (
+        <SubmitError
+          codeBhasile={
+            structureTransformation.structureVersion?.structure?.codeBhasile
+          }
+        />
+      )}
     </>
   );
 }
 
 const renderFlow = (
   structureTransformation: StructureTransformationApiRead,
-  transformationType?: TransformationType
+  transformation: TransformationApiRead
 ) => {
   switch (structureTransformation.type) {
     case StructureTransformationType.FERMETURE:
@@ -57,12 +73,8 @@ const renderFlow = (
         <ContractionFlow structureTransformation={structureTransformation} />
       );
     case StructureTransformationType.CREATION:
-      if (transformationType === TransformationType.OUVERTURE_EX_NIHILO) {
-        return (
-          <CreationExNihiloFlow
-            structureTransformation={structureTransformation}
-          />
-        );
+      if (transformation.type === TransformationType.OUVERTURE_EX_NIHILO) {
+        return <CreationExNihiloFlow transformation={transformation} />;
       }
       return (
         <CreationDepuisStructuresFlow

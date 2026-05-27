@@ -1,5 +1,7 @@
 "use client";
 
+import { notFound, useParams } from "next/navigation";
+
 import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
 import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
@@ -8,8 +10,8 @@ import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
-import { getStructureTransformationDefaultValues } from "@/app/utils/transformation.util";
-import { StructureTransformationApiRead } from "@/schemas/api/transformation.schema";
+import { getTransformationStructureVersionDefaultValues } from "@/app/utils/transformation.util";
+import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 import {
   CreationIdentificationFormValues,
   creationIdentificationSchema,
@@ -17,29 +19,47 @@ import {
 import { FormKind } from "@/types/global";
 
 type Props = {
-  structureTransformation: StructureTransformationApiRead;
+  transformation: TransformationApiRead;
 };
 
 export const CreationExNihiloIdentificationForm = ({
-  structureTransformation,
+  transformation,
 }: Props) => {
+  const { transformationStructureId } = useParams();
+  const structureTransformation = transformation.structureTransformations.find(
+    (st) => st.id === Number(transformationStructureId)
+  );
+
+  if (!structureTransformation) {
+    notFound();
+  }
+
   const { handleValidation } = useTransformationFormHandling();
 
-  const defaultValues =
-    getStructureTransformationDefaultValues<CreationIdentificationFormValues>(
-      structureTransformation
-    );
+  const defaultValues = {
+    ...getTransformationStructureVersionDefaultValues<CreationIdentificationFormValues>(
+      structureTransformation.structureVersion
+    ),
+    operateur: structureTransformation.operateur,
+  };
 
   return (
     <FormWrapper
       schema={creationIdentificationSchema}
       defaultValues={defaultValues}
-      onSubmit={(data) =>
+      onSubmit={(data) => {
+        const { creationDate, operateur, ...rest } = data;
         handleValidation({
-          ...data,
-          effectiveDate: data.creationDate,
-        })
-      }
+          transformationId: transformation.id,
+          structureTransformation: {
+            id: structureTransformation.id,
+            type: structureTransformation.type,
+            date: creationDate,
+            operateurId: operateur?.id,
+            structureVersion: { ...rest, creationDate },
+          },
+        });
+      }}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       showContactInfos={false}

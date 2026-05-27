@@ -1,5 +1,6 @@
 import { useParams, useRouter } from "next/navigation";
 
+import { StructureTransformationApiUpdate } from "@/schemas/api/transformation.schema";
 import { StructureTransformationType } from "@/types/transformation.type";
 
 import { useTransformationContext } from "../(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
@@ -7,6 +8,7 @@ import {
   getTransformationFormNavigation,
   getTransformationSteps,
 } from "../utils/transformation.util";
+import { useTransformations } from "./useTransformations";
 
 export const useTransformationFormHandling = () => {
   const router = useRouter();
@@ -20,7 +22,8 @@ export const useTransformationFormHandling = () => {
     params.transformationStructureStep
   );
 
-  const { transformation } = useTransformationContext();
+  const { transformation, setTransformation } = useTransformationContext();
+  const { updateTransformation } = useTransformations();
 
   const transformationSteps = getTransformationSteps(transformation);
 
@@ -36,8 +39,28 @@ export const useTransformationFormHandling = () => {
     router.replace(firstStep.route);
   }
 
-  const handleValidation = (data: unknown) => {
-    console.log("handleValidation", data);
+  const handleValidation = async ({
+    transformationId,
+    structureTransformation,
+  }: {
+    transformationId: number;
+    structureTransformation: StructureTransformationApiUpdate;
+  }) => {
+    try {
+      await updateTransformation(
+        transformationId,
+        {
+          id: transformationId,
+          structureTransformations: [structureTransformation],
+        },
+        setTransformation
+      );
+      if (nextStep) {
+        router.push(nextStep.route);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return {

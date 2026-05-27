@@ -11,6 +11,7 @@ model Operateur {
   filiales          Operateur[]  @relation("OperateurToOperateur")
   userActions       UserAction[]
   dnas              Dna[]
+  structureTransformations StructureTransformation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

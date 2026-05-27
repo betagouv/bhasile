@@ -25,6 +25,7 @@ const structureTransformationApiUpdateSchema = z.object({
   motif: z.string().nullish(),
   forms: z.array(formApiSchema).optional(),
   actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
+  operateurId: z.number().nullish(),
 
   structureVersion: structureVersionApiSchema.optional(),
 });
@@ -59,9 +60,11 @@ export type StructureTransformationApiCreate = z.infer<
 export type StructureTransformationApiRead =
   StructureTransformationApiUpdate & {
     type: StructureTransformationType;
+    operateur?: { id: number; name: string };
     structureVersion?: StructureVersionApiRead & {
       structure?: {
         codeBhasile: string;
+        operateur?: { id: number; name: string };
       };
     };
   };

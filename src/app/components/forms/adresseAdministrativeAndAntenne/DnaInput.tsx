@@ -4,10 +4,9 @@ import { useFetchFreeDnaCodes } from "@/app/hooks/useFetchFreeDnaCodes";
 
 import SelectWithValidation from "../SelectWithValidation";
 
-export const DnaInput = ({ index, label, disabled }: Props) => {
-  const { watch, control } = useFormContext();
+export const DnaInput = ({ index, label, disabled, structureId }: Props) => {
+  const { control } = useFormContext();
 
-  const structureId = watch("id");
   const { freeDnaCodes } = useFetchFreeDnaCodes({ structureId });
 
   return (
@@ -35,4 +34,5 @@ type Props = {
   index: number;
   label: string;
   disabled?: boolean;
+  structureId?: number;
 };
