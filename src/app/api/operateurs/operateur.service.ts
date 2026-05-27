@@ -1,3 +1,4 @@
+import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { Operateur } from "@/generated/prisma/client";
 import {
   OperateurApiRead,
@@ -53,10 +54,11 @@ export const getOperateur = async (id: number): Promise<OperateurApiRead> => {
     }
   });
 
-  return {
+  return recursivelySerializeDates({
     ...operateur,
     vulnerabilites,
-  };
+    actesAdministratifs: operateur.actesAdministratifs,
+  }) as OperateurApiRead;
 };
 
 export const updateOperateur = async (

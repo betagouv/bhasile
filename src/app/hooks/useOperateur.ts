@@ -24,7 +24,7 @@ export const useOperateur = () => {
         "operateurId" in result &&
         result !== null
       ) {
-        const res = await fetch(`/api/operateur/${result.operateurId}`);
+        const res = await fetch(`/api/operateurs/${result.operateurId}`);
         if (res.ok) {
           const updatedOperateur = await res.json();
           setOperateur(updatedOperateur);

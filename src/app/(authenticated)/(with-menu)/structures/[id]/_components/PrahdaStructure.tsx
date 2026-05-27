@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 
 import { Section } from "@/app/components/common/Section";
 
-import { ActesAdministratifsBlock } from "./_actes-administratifs/ActesAdministratifsBlock";
+import { ActesAdministratifsStructure } from "./_actes-administratifs/ActesAdministratifsStructure";
 import { ActiviteBlock } from "./_activite/ActiviteBlock";
 import { CalendrierBlock } from "./_calendrier/CalendrierBlock";
 import { HudaPrahdaControlesBlock } from "./_controles/HudaPrahdaControlesBlock";
@@ -29,7 +29,7 @@ export const PrahdaStructure = (): ReactElement => {
         <ActiviteBlock />
       </Section>
       <Section id="actes-administratifs">
-        <ActesAdministratifsBlock />
+        <ActesAdministratifsStructure />
       </Section>
       <Section id="notes">
         <NotesBlock />

@@ -3,6 +3,7 @@ import {
   isStructureMultiAntenne,
   isStructureMultiDna,
 } from "@/app/utils/structure.util";
+import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/acte-administratif.config";
 import { ContactApiType } from "@/schemas/api/contact.schema";
 import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
@@ -71,7 +72,10 @@ export const getDefaultValues = ({
     structure?.structureMillesimes || [],
     structureCreationYear
   );
-  const actesAdministratifs = getActesAdministratifsDefaultValues(structure);
+  const actesAdministratifs = getActesAdministratifsDefaultValues(
+    structure.actesAdministratifs,
+    getStructureActesAdministratifsCategoryToDisplay(structure)
+  );
 
   const controles = getControlesDefaultValues(structure.controles);
   const evaluations = getEvaluationsDefaultValues(
