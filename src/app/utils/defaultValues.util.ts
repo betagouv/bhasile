@@ -1,4 +1,5 @@
 import { getRealCreationYear } from "@/app/utils/structure.util";
+import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/acte-administratif.config";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
@@ -40,7 +41,11 @@ export const getDefaultValues = ({
     structure?.structureMillesimes || [],
     structureCreationYear
   );
-  const actesAdministratifs = getActesAdministratifsDefaultValues(structure);
+  const actesAdministratifs = getActesAdministratifsDefaultValues(
+    structure.actesAdministratifs,
+    getStructureActesAdministratifsCategoryToDisplay(structure)
+  );
+
   const controles = getControlesDefaultValues(structure.controles);
   const evaluations = getEvaluationsDefaultValues(
     structure.evaluations,

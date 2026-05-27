@@ -3,9 +3,9 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { AdditionalFieldsType } from "@/app/utils/acteAdministratif.util";
 import { formatDateToIsoString } from "@/app/utils/date.util";
 import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
+import { AdditionalFieldsType } from "@/config/acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 
 import FieldSetActeAdministratif from "../actesAdministratifs/FieldSetActeAdministratif";

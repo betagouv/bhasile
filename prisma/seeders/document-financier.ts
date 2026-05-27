@@ -22,6 +22,7 @@ export const createFakeDocumentFinancier = (): Omit<
     category: faker.helpers.enumValue(DocumentFinancierCategory),
     granularity: faker.helpers.enumValue(DocumentFinancierGranularity),
     fileUploads: [createFakeFileUpload()],
+    isMissing: false,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   };

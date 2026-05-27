@@ -101,3 +101,23 @@ view StructuresGlobalQuality {
   @@map("structures_global_quality")
   @@schema("reporting")
 }
+
+view StructuresMissingHistory {
+  id                       Int
+  codeBhasile              String
+  operateur                String?
+  departementAdministratif String?
+  departement              String?
+  region                   String?
+  dna_codes                String?
+
+  has_missing_acte_administratif   Boolean
+  has_missing_budget               Boolean
+  has_missing_document_financier   Boolean
+  has_missing_indicateur_financier Boolean
+  has_any_missing                  Boolean
+
+  @@unique([id])
+  @@map("structures_missing_history")
+  @@schema("reporting")
+}
