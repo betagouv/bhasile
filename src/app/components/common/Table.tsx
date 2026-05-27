@@ -19,6 +19,7 @@ export const Table = ({
   enableBorders,
   hasErrors,
   stickFirstColumn,
+  defaultScrollRight,
 }: Props) => {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const scrollableAreaRef = useRef<HTMLDivElement>(null);
@@ -31,6 +32,10 @@ export const Table = ({
     const container = scrollableAreaRef.current;
     if (!container) {
       return;
+    }
+
+    if (defaultScrollRight) {
+      container.scrollLeft = container.scrollWidth;
     }
 
     const handleScroll = () => {
@@ -127,4 +132,5 @@ type Props = PropsWithChildren<{
   enableBorders?: boolean;
   hasErrors?: boolean;
   stickFirstColumn?: boolean;
+  defaultScrollRight?: boolean;
 }>;

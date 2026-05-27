@@ -51,10 +51,28 @@ export const ActiviteHistoriqueTable = (): ReactElement => {
   ];
 
   const getHeadings = () => {
-    const dates = structure.activites
-      ?.map((activite) => dayjs(activite.date).format("MMMM YYYY"))
-      .reverse();
-    return ["", ...(dates || [])];
+    const dates =
+      structure.activites
+        ?.map((activite) => {
+          const d = dayjs(activite.date);
+          const month = d.format("MMMM").toUpperCase();
+          const year = d.format("YYYY");
+          return (
+            <th scope="col" key={`${month}-${year}}`}>
+              {month}
+              <br />
+              {year}
+            </th>
+          );
+        })
+        .reverse() ?? [];
+
+    return [
+      <th scope="col" key="heading-label" className="min-w-[240px]">
+        {" "}
+      </th>,
+      ...dates,
+    ];
   };
 
   const computeSeuil = (
@@ -88,30 +106,36 @@ export const ActiviteHistoriqueTable = (): ReactElement => {
     <Table
       headings={getHeadings()}
       ariaLabelledBy="activite-historique-title"
-      className="[&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
+      className="text-mention-grey [&_thead_tr]:bg-transparent! [&_thead_tr]:h-12! w-full"
       enableBorders
       stickFirstColumn
+      defaultScrollRight
     >
       {activiteTypes.map((activiteType) => (
         <tr key={activiteType.label}>
-          <td className="text-left! py-3! min-w-[200px]">
+          <td className="text-left! py-3! min-w-[240px]">
             <strong>{activiteType.label}</strong>
             <br />
             {activiteType.subLabel}
           </td>
           {activiteType.activites?.map((activite, index) => (
-            <td key={`${activiteType.label}-${index}`}>
-              <span className="pr-2">{activite?.toString()}</span>&nbsp;
-              {activiteType.seuil && (
-                <Badge
-                  type={getBadgeType(
-                    computeSeuil(activite, index),
-                    activiteType
-                  )}
-                >
-                  {computeSeuil(activite, index)}%
-                </Badge>
-              )}
+            <td
+              key={`${activiteType.label}-${index}`}
+              className="min-w-[132px] whitespace-nowrap"
+            >
+              <span className="inline-flex items-center gap-6">
+                <span>{activite?.toString()}</span>
+                {activiteType.seuil && (
+                  <Badge
+                    type={getBadgeType(
+                      computeSeuil(activite, index),
+                      activiteType
+                    )}
+                  >
+                    {computeSeuil(activite, index)}%
+                  </Badge>
+                )}
+              </span>
             </td>
           ))}
         </tr>
