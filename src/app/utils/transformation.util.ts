@@ -191,11 +191,11 @@ export const getStructureTransformationLabel = (
   const code = codeBhasile ?? "";
   switch (type) {
     case StructureTransformationType.EXTENSION:
-      return `Extension ${code}`.trim();
+      return `Extension ${code}`;
     case StructureTransformationType.CONTRACTION:
-      return `Contraction ${code}`.trim();
+      return `Contraction ${code}`;
     case StructureTransformationType.FERMETURE:
-      return `Fermeture ${code}`.trim();
+      return `Fermeture ${code}`;
     case StructureTransformationType.CREATION:
       return `Nouvelle structure`;
     default:

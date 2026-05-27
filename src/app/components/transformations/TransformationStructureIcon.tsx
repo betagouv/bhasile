@@ -3,7 +3,7 @@ import Image from "next/image";
 import { cn } from "@/app/utils/classname.util";
 import { StructureTransformationType } from "@/types/transformation.type";
 
-export const TransformationStructureIcon = ({ type, large }: Props) => {
+export const TransformationStructureIcon = ({ type, large = false }: Props) => {
   switch (type) {
     case StructureTransformationType.EXTENSION:
       return (
