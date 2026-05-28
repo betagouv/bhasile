@@ -130,6 +130,25 @@ const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
   }
 );
 
+const acteAdministratifCreationExNihiloSchema = acteAdministratifSchema.refine(
+  (data) => {
+    const isNotAvenant = !data.parentId && !data.parentUuid;
+    if (
+      (data.category === "ARRETE_AUTORISATION" ||
+        data.category === "ARRETE_TARIFICATION" ||
+        data.category === "CONVENTION") &&
+      isNotAvenant
+    ) {
+      return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
+    }
+    return true;
+  },
+  {
+    message: "Ces documents sont obligatoires.",
+    path: ["fileUploads"],
+  }
+);
+
 export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
   (data) => {
     const isNotAvenant = !data.parentId && !data.parentUuid;
@@ -175,6 +194,17 @@ export const actesAdministratifsSubventionneesSchema = z.object({
   actesAdministratifs: z.preprocess(
     filterActesWithKey(["CONVENTION"]),
     z.array(acteAdministratifSubventionneesSchema).optional()
+  ),
+});
+
+export const actesAdministratifsCreationExNihiloSchema = z.object({
+  actesAdministratifs: z.preprocess(
+    filterActesWithKey([
+      "ARRETE_AUTORISATION",
+      "ARRETE_TARIFICATION",
+      "CONVENTION",
+    ]),
+    z.array(acteAdministratifCreationExNihiloSchema).optional()
   ),
 });
 

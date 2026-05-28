@@ -1,5 +1,5 @@
 import { getRealCreationYear } from "@/app/utils/structure.util";
-import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/acte-administratif.config";
+import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
