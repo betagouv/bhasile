@@ -12,14 +12,16 @@ export const FieldSetCurrentYearPlaces = () => {
         Types de place (tels que prévus dans la convention)
       </legend>
 
-      <InputWithValidation
-        name="structureTypologies.0.placesAutorisees"
-        id="structureTypologies.0.placesAutorisees"
-        control={control}
-        type="number"
-        min={0}
-        label="Nombre total de places autorisées"
-      />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <InputWithValidation
+          name="structureTypologies.0.placesAutorisees"
+          id="structureTypologies.0.placesAutorisees"
+          control={control}
+          type="number"
+          min={0}
+          label="Nombre total de places autorisées"
+        />
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <InputWithValidation

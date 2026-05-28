@@ -1,6 +1,6 @@
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import autoAnimate from "@formkit/auto-animate";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useForm, useFormContext } from "react-hook-form";
 
 import { CURRENT_YEAR } from "@/constants";
@@ -20,22 +20,13 @@ export const FieldSetHebergement = ({
     parentFormContext || localForm;
 
   const id = watch("id");
-  const typeBati = watch("typeBati") || Repartition.DIFFUS;
-  const adminAddress = watch("adresseAdministrativeComplete");
+  const selectedTypeBati = watch("typeBati");
+  const typeBati = selectedTypeBati || Repartition.DIFFUS;
+  const adminAdresse = watch("adresseAdministrativeComplete");
   const sameAddress = watch("sameAddress");
 
-  const adresses = (watch("adresses") || []) as FormAdresse[];
-
-  const hebergementsContainerRef = useRef(null);
-
-  useEffect(() => {
-    if (hebergementsContainerRef.current) {
-      autoAnimate(hebergementsContainerRef.current);
-    }
-  }, [hebergementsContainerRef]);
-
-  const handleAddAddress = () => {
-    const newAddress: FormAdresse = {
+  const createEmptyAdresse = useCallback(
+    (): FormAdresse => ({
       structureId: id,
       adresseComplete: "",
       adresse: "",
@@ -52,35 +43,64 @@ export const FieldSetHebergement = ({
           qpv: false,
         },
       ],
-    };
-    const currentAddresses = getValues("adresses") || [];
-    const updatedAddresses = [...currentAddresses, newAddress];
-    setValue("adresses", updatedAddresses, {
+    }),
+    [id, typeBati]
+  );
+
+  const watchedAdresses = (watch("adresses") || []) as FormAdresse[];
+
+  let adresses: FormAdresse[];
+  if (watchedAdresses.length) {
+    adresses = watchedAdresses;
+  } else if (selectedTypeBati) {
+    adresses = [createEmptyAdresse()];
+  } else {
+    adresses = [];
+  }
+
+  useEffect(() => {
+    if (selectedTypeBati && !getValues("adresses")?.length) {
+      setValue("adresses", [createEmptyAdresse()], { shouldValidate: false });
+    }
+  }, [selectedTypeBati, createEmptyAdresse, getValues, setValue]);
+
+  const hebergementsContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (hebergementsContainerRef.current) {
+      autoAnimate(hebergementsContainerRef.current);
+    }
+  }, [hebergementsContainerRef]);
+
+  const handleAddAdresse = () => {
+    const currentAdresses = getValues("adresses") || [];
+    const updatedAdresses = [...currentAdresses, createEmptyAdresse()];
+    setValue("adresses", updatedAdresses, {
       shouldValidate: false,
     });
   };
 
-  const handleRemoveAddress = (index: number) => {
-    const currentAddresses = getValues("adresses") || [];
-    const updatedAddresses = [...currentAddresses];
-    updatedAddresses.splice(index, 1);
-    setValue("adresses", updatedAddresses, {
+  const handleRemoveAdresse = (index: number) => {
+    const currentAdresses = getValues("adresses") || [];
+    const updatedAdresses = [...currentAdresses];
+    updatedAdresses.splice(index, 1);
+    setValue("adresses", updatedAdresses, {
       shouldValidate: false,
     });
   };
 
   const handleSameAddressChange = () => {
-    if (!sameAddress && (adminAddress === "" || adminAddress === undefined)) {
-      const adminAddressElement = document.getElementById(
+    if (!sameAddress && (adminAdresse === "" || adminAdresse === undefined)) {
+      const adminAdresseElement = document.getElementById(
         "adresseAdministrativeComplete"
       );
-      if (adminAddressElement) {
-        adminAddressElement.scrollIntoView({
+      if (adminAdresseElement) {
+        adminAdresseElement.scrollIntoView({
           behavior: "smooth",
           block: "center",
         });
         setTimeout(() => {
-          adminAddressElement.focus();
+          adminAdresseElement.focus();
 
           setError("adresseAdministrativeComplete", {
             type: "manual",
@@ -92,11 +112,11 @@ export const FieldSetHebergement = ({
 
     setValue("sameAddress", !sameAddress);
 
-    const firstAddress = getValues("adresses")?.[0];
+    const firstAdresse = getValues("adresses")?.[0];
     setValue("adresses", [
       {
-        ...firstAddress,
-        adresseComplete: adminAddress,
+        ...firstAdresse,
+        adresseComplete: adminAdresse,
         adresse: watch("adresseAdministrative"),
         codePostal: watch("codePostalAdministratif"),
         commune: watch("communeAdministrative"),
@@ -157,15 +177,15 @@ export const FieldSetHebergement = ({
             index={index}
             control={control}
             sameAddress={sameAddress}
-            handleRemoveAddress={handleRemoveAddress}
+            handleRemoveAdresse={handleRemoveAdresse}
             typeBati={typeBati}
           />
         ))}
-        {!sameAddress && (
+        {selectedTypeBati && !sameAddress && (
           <button
             onClick={(e) => {
               e.preventDefault();
-              handleAddAddress();
+              handleAddAdresse();
             }}
             className="fr-link fr-icon border-b w-fit pb-px hover:pb-0 hover:border-b-2"
           >

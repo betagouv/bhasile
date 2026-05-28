@@ -11,7 +11,7 @@ export const AdresseComponent = ({
   index,
   control,
   sameAddress,
-  handleRemoveAddress,
+  handleRemoveAdresse,
   typeBati,
 }: Props) => {
   return (
@@ -38,7 +38,6 @@ export const AdresseComponent = ({
         min={0}
         label="Places"
         className="w-1/12 mb-0"
-        variant="simple"
       />
       <SelectWithValidation
         name={`adresses.${index}.repartition`}
@@ -105,7 +104,7 @@ export const AdresseComponent = ({
               className="ml-auto rounded-4xl"
               onClick={(e) => {
                 e.preventDefault();
-                handleRemoveAddress(index);
+                handleRemoveAdresse(index);
               }}
               priority="tertiary no outline"
               title="Supprimer l'hébergement"
@@ -122,6 +121,6 @@ type Props = {
   index: number;
   control: Control<FieldValues>;
   sameAddress: boolean;
-  handleRemoveAddress: (index: number) => void;
+  handleRemoveAdresse: (index: number) => void;
   typeBati: Repartition;
 };
