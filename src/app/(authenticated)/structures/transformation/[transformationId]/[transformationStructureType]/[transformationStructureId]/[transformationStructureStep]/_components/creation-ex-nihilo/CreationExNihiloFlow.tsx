@@ -2,7 +2,10 @@
 
 import { useParams } from "next/navigation";
 
-import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import {
+  StructureTransformationApiRead,
+  TransformationApiRead,
+} from "@/schemas/api/transformation.schema";
 import { StructureTransformationStep } from "@/types/transformation.type";
 
 import { CreationExNihiloIdentificationForm } from "./CreationExNihiloIdentificationForm";
@@ -10,9 +13,13 @@ import { CreationExNihiloPlacesEtHebergementForm } from "./CreationExNihiloPlace
 
 type Props = {
   transformation: TransformationApiRead;
+  structureTransformation: StructureTransformationApiRead;
 };
 
-export const CreationExNihiloFlow = ({ transformation }: Props) => {
+export const CreationExNihiloFlow = ({
+  transformation,
+  structureTransformation,
+}: Props) => {
   const { transformationStructureStep } = useParams();
 
   if (transformationStructureStep === StructureTransformationStep.DESCRIPTION) {
@@ -26,7 +33,10 @@ export const CreationExNihiloFlow = ({ transformation }: Props) => {
     StructureTransformationStep.PLACES_ET_HEBERGEMENT
   ) {
     return (
-      <CreationExNihiloPlacesEtHebergementForm transformation={transformation} />
+      <CreationExNihiloPlacesEtHebergementForm
+        transformation={transformation}
+        structureTransformation={structureTransformation}
+      />
     );
   }
 

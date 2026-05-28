@@ -1,7 +1,5 @@
 "use client";
 
-import { notFound, useParams } from "next/navigation";
-
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
@@ -10,7 +8,10 @@ import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTyp
 import { FieldSetCurrentYearPlaces } from "@/app/components/forms/typePlace/FieldSetCurrentYearPlaces";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getTransformationStructureVersionDefaultValues } from "@/app/utils/transformation.util";
-import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import {
+  StructureTransformationApiRead,
+  TransformationApiRead,
+} from "@/schemas/api/transformation.schema";
 import {
   CreationPlacesEtHebergementFormValues,
   creationPlacesEtHebergementSchema,
@@ -19,20 +20,13 @@ import { FormKind } from "@/types/global";
 
 type Props = {
   transformation: TransformationApiRead;
+  structureTransformation: StructureTransformationApiRead;
 };
 
 export const CreationExNihiloPlacesEtHebergementForm = ({
   transformation,
+  structureTransformation,
 }: Props) => {
-  const { transformationStructureId } = useParams();
-  const structureTransformation = transformation.structureTransformations.find(
-    (st) => st.id === Number(transformationStructureId)
-  );
-
-  if (!structureTransformation) {
-    notFound();
-  }
-
   const { handleValidation } = useTransformationFormHandling();
 
   const defaultValues =
