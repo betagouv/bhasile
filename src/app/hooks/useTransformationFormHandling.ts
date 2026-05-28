@@ -1,6 +1,6 @@
 import { useParams, useRouter } from "next/navigation";
 
-import { StructureTransformationApiUpdate } from "@/schemas/api/transformation.schema";
+import { StructureTransformationApiUpdateClient } from "@/schemas/api/transformation.schema";
 import { StructureTransformationType } from "@/types/transformation.type";
 
 import { useTransformationContext } from "../(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
@@ -44,7 +44,7 @@ export const useTransformationFormHandling = () => {
     structureTransformation,
   }: {
     transformationId: number;
-    structureTransformation: StructureTransformationApiUpdate;
+    structureTransformation: StructureTransformationApiUpdateClient;
   }) => {
     try {
       await updateTransformation(
