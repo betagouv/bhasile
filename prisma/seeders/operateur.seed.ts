@@ -11,7 +11,12 @@ import {
 type OperateurWithActes = Operateur & {
   actesAdministratifs: Omit<
     ActeAdministratifWithFileUploads,
-    "id" | "operateurId" | "structureId" | "structureDnaCode" | "cpomId"
+    | "id"
+    | "operateurId"
+    | "structureId"
+    | "structureDnaCode"
+    | "cpomId"
+    | "structureTransformationId"
   >[];
 };
 
