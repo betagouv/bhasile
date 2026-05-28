@@ -34,7 +34,15 @@ function getReportingWindow(now = new Date()): {
 }
 
 async function main() {
-  const { start, end, month } = getReportingWindow();
+  const now = new Date();
+  if (dayjs(now).utc().date() !== 1) {
+    console.log(
+      "⏭️  Script ignoré: le reporting mensuel ne s'exécute que le 1er du mois (UTC)."
+    );
+    return;
+  }
+
+  const { start, end, month } = getReportingWindow(now);
   console.log(`📊 Remplissage reporting mensuel: ${month.toISOString()}`);
 
   try {
