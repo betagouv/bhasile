@@ -3,6 +3,7 @@ import {
   PropsWithChildren,
   ReactElement,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -19,6 +20,7 @@ export const Table = ({
   enableBorders,
   hasErrors,
   stickFirstColumn,
+  defaultScrollRight,
 }: Props) => {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const scrollableAreaRef = useRef<HTMLDivElement>(null);
@@ -26,6 +28,17 @@ export const Table = ({
   renderCountRef.current += 1;
 
   const [scrollReachedEnd, setScrollReachedEnd] = useState(false);
+
+  useLayoutEffect(() => {
+    const container = scrollableAreaRef.current;
+    if (!container) {
+      return;
+    }
+
+    if (defaultScrollRight) {
+      container.scrollLeft = container.scrollWidth;
+    }
+  }, [defaultScrollRight]);
 
   useEffect(() => {
     const container = scrollableAreaRef.current;
@@ -127,4 +140,5 @@ type Props = PropsWithChildren<{
   enableBorders?: boolean;
   hasErrors?: boolean;
   stickFirstColumn?: boolean;
+  defaultScrollRight?: boolean;
 }>;
