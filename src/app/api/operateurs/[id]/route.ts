@@ -41,10 +41,10 @@ export async function PUT(
   const { id } = await params;
   try {
     const body = await request.json();
-    const result = operateurWriteApiSchema.parse(body);
+    const result = operateurWriteApiSchema.parse({ ...body, id: Number(id) });
     const operateur = await updateOperateur(result);
-    createOperateurEvent(request.method, Number(id));
-    return NextResponse.json({ operateurId: operateur.id }, { status: 201 });
+    createOperateurEvent(request.method, operateur.id);
+    return NextResponse.json({ operateurId: operateur.id }, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(

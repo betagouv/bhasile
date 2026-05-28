@@ -203,13 +203,17 @@ describe("useStructures integration", () => {
 
       // THEN
       expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(mockFetch).toHaveBeenNthCalledWith(1, "/api/structures", {
-        method: "PUT",
-        body: JSON.stringify({
-          ...partialUpdate,
-          id: structureId,
-        }),
-      });
+      expect(mockFetch).toHaveBeenNthCalledWith(
+        1,
+        `/api/structures/${structureId}`,
+        {
+          method: "PUT",
+          body: JSON.stringify({
+            ...partialUpdate,
+            id: structureId,
+          }),
+        }
+      );
       expect(mockFetch).toHaveBeenNthCalledWith(
         2,
         `/api/structures/${structureId}`

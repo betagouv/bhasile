@@ -1,11 +1,16 @@
+import { cn } from "@/app/utils/classname.util";
+
 import { CustomNotice } from "../common/CustomNotice";
 
-export const MaxSizeNotice = () => {
+export const MaxSizeNotice = ({ className }: { className?: string }) => {
   return (
     <CustomNotice
       severity="info"
       title=""
-      className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
+      className={cn(
+        "rounded [&_p]:flex [&_p]:items-center mb-8 w-fit",
+        className
+      )}
       description={
         <>
           Taille maximale par fichier : 10 Mo. Formats supportés : pdf, xls,

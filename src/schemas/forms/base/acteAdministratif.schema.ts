@@ -21,6 +21,16 @@ export const acteAdministratifAutoSaveSchema = z.object({
   fileUploads: z.array(fileApiSchema.partial()).optional(),
 });
 
+const SINGLE_DATE_CATEGORIES: ActeAdministratifCategory[] = ["STATUTS"];
+const NO_DATE_CATEGORIES: ActeAdministratifCategory[] = ["AUTRE"];
+
+const requiresStartEndDate = (
+  category: ActeAdministratifCategory | undefined
+): boolean =>
+  category !== undefined &&
+  !NO_DATE_CATEGORIES.includes(category) &&
+  !SINGLE_DATE_CATEGORIES.includes(category);
+
 const acteAdministratifSchema = acteAdministratifAutoSaveSchema
   .extend({
     fileUploads: z.array(fileApiSchema).optional(),
@@ -29,7 +39,7 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
     (data) => {
       const isNotAvenant = !data.parentId && !data.parentUuid;
       if (
-        data.category !== "AUTRE" &&
+        requiresStartEndDate(data.category) &&
         isNotAvenant &&
         data.fileUploads?.length
       ) {
@@ -46,7 +56,7 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
     (data) => {
       const isNotAvenant = !data.parentId && !data.parentUuid;
       if (
-        data.category !== "AUTRE" &&
+        requiresStartEndDate(data.category) &&
         isNotAvenant &&
         data.fileUploads?.length
       ) {
@@ -69,6 +79,21 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
     },
     {
       message: "La date est obligatoire pour les avenants.",
+      path: ["date"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (
+        SINGLE_DATE_CATEGORIES.includes(data.category!) &&
+        data.fileUploads?.length
+      ) {
+        return !!data.date;
+      }
+      return true;
+    },
+    {
+      message: "La date est obligatoire.",
       path: ["date"],
     }
   );
@@ -119,7 +144,7 @@ export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
   }
 );
 
-const filterActesWithKey =
+export const filterActesWithKey =
   (allowedCategories: ActeAdministratifCategory[] = []) =>
   (val: unknown) =>
     Array.isArray(val)
@@ -157,6 +182,13 @@ export const actesAdministratifsAutoSaveSchema = z.object({
   actesAdministratifs: z.preprocess(
     filterActesWithKey(),
     z.array(acteAdministratifAutoSaveSchema).optional()
+  ),
+});
+
+export const actesAdministratifsOperateurSchema = z.object({
+  actesAdministratifs: z.preprocess(
+    filterActesWithKey(),
+    z.array(acteAdministratifSchema).optional()
   ),
 });
 

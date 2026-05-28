@@ -25,6 +25,7 @@ model Budget {
   reportANouveau                    Float?
   autre                             Float?
   commentaire                       String?
+  isMissing                         Boolean?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

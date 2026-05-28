@@ -119,12 +119,14 @@ const deleteActesAdministratifs = async (
   actesAdministratifsToKeep: ActeAdministratifApiType[],
   entityId: EntityId
 ): Promise<number[]> => {
-  const where =
-    entityId.structureId !== undefined
-      ? { structureId: entityId.structureId }
-      : { cpomId: entityId.cpomId };
-
-  if (entityId.structureId === undefined && entityId.cpomId === undefined) {
+  let where: { structureId: number } | { cpomId: number } | { operateurId: number };
+  if (entityId.structureId !== undefined) {
+    where = { structureId: entityId.structureId };
+  } else if (entityId.cpomId !== undefined) {
+    where = { cpomId: entityId.cpomId };
+  } else if (entityId.operateurId !== undefined) {
+    where = { operateurId: entityId.operateurId };
+  } else {
     return [];
   }
 

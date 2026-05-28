@@ -55,14 +55,14 @@ describe("ModificationAdresses page integration", () => {
       }>;
     }>(mockedFetch);
     expect(body.id).toBe(77);
-    expect(body.typeBati).toBe("Collectif");
+    expect(body.typeBati).toBe("COLLECTIF");
     expect(body.adresses).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           adresse: "1 rue de Paris",
           commune: "Paris",
           codePostal: "75011",
-          repartition: "Collectif",
+          repartition: "COLLECTIF",
           adresseTypologies: expect.arrayContaining([
             expect.objectContaining({
               placesAutorisees: 10,

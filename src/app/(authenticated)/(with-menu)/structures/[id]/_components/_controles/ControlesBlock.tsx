@@ -66,7 +66,7 @@ export const ControlesBlock = (): ReactElement => {
         )}
         <InformationCard
           primaryInformation={`${last12MonthsEIG.length} EIG`}
-          secondaryInformation="sur ces 12 derniers mois"
+          secondaryInformation="sur les 12 derniers mois"
         />
       </div>
       <div className="pt-12">

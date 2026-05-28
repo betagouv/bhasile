@@ -17,6 +17,7 @@ export const createFakeActeAdministratif = (): Omit<
   | "structureDnaCode"
   | "cpomId"
   | "structureId"
+  | "operateurId"
   | "structureTransformationId"
 > => {
   return {
@@ -25,6 +26,7 @@ export const createFakeActeAdministratif = (): Omit<
     category: faker.helpers.enumValue(ActeAdministratifCategory),
     startDate: faker.date.past(),
     endDate: faker.date.future(),
+    isMissing: false,
     parentId: null,
     fileUploads: [createFakeFileUpload()],
     createdAt: faker.date.past(),

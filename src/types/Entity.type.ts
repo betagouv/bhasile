@@ -4,4 +4,5 @@ export type EntityId = {
   structureTransformationId?: number;
   transformationId?: number;
   cpomId?: number;
+  operateurId?: number;
 };

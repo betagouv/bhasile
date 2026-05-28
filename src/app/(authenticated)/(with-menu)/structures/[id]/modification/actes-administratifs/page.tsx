@@ -12,6 +12,7 @@ import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
+import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/acte-administratif.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   actesAdministratifsAutoriseesSchema,
@@ -63,6 +64,9 @@ export default function ModificationQualiteForm() {
     ?.map((acteAdministratif) => acteAdministratif.id ?? acteAdministratif.uuid)
     ?.join(",");
 
+  const categoriesRules =
+    getStructureActesAdministratifsCategoryToDisplay(structure);
+
   return (
     <>
       <ModificationTitle
@@ -82,7 +86,7 @@ export default function ModificationQualiteForm() {
         className="border-2 border-solid border-(--text-title-blue-france)"
         key={key}
       >
-        <ActesAdministratifs />
+        <ActesAdministratifs categoryDisplayRules={categoriesRules} />
         {saveState === FetchState.ERROR && (
           <SubmitError
             codeBhasile={structure.codeBhasile}

@@ -3,8 +3,6 @@ import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { convertToRepartition } from "./adresse.util";
-
 const getEveryAdresseTypologiesOfAdresses = async (
   tx: PrismaTransaction,
   adresses: Partial<AdresseApiType>[]
@@ -63,14 +61,14 @@ export const createOrUpdateAdresses = async (
         adresse: adresse.adresse,
         codePostal: adresse.codePostal,
         commune: adresse.commune,
-        repartition: convertToRepartition(adresse.repartition),
+        repartition: adresse.repartition,
       },
       create: {
         ...entityId,
         adresse: adresse.adresse,
         codePostal: adresse.codePostal,
         commune: adresse.commune,
-        repartition: convertToRepartition(adresse.repartition),
+        repartition: adresse.repartition,
       },
     });
 

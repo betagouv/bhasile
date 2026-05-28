@@ -130,19 +130,6 @@ export const isStructureSubventionnee = (
   return type === StructureType.HUDA || type === StructureType.CAES;
 };
 
-export const isStructureMultiAntenne = (
-  structure: StructureApiRead
-): boolean => {
-  return (structure.antennes?.length ?? 0) > 0;
-};
-
-export const isStructureMultiDna = (structure: StructureApiRead): boolean => {
-  return (
-    (structure.dnaStructures?.length ?? 0) > 1 ||
-    (structure.finesses?.length ?? 0) > 1
-  );
-};
-
 export const getCurrentCpomStructure = (
   structure: StructureApiRead
 ): CpomStructureApiRead | undefined => {

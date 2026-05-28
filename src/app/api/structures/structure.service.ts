@@ -9,8 +9,13 @@ import {
   StructureApiRead,
 } from "@/schemas/api/structure.schema";
 import { StructureColumn } from "@/types/ListColumn";
+import { PublicType } from "@/types/structure.type";
 
 import { processActivitesForStructure } from "../activites/activite.service";
+import { getAdressesApiRead } from "../adresses/adresse.util";
+import { getAntennesApiRead } from "../antennes/antenne.util";
+import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
+import { getFinessesApiRead } from "../finesses/finess.util";
 import {
   StructureDbDetails,
   StructureDbList,
@@ -171,6 +176,28 @@ const dbStructureToApiRead = (
         (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
       );
 
+  const antennes = getAntennesApiRead(
+    (dbStructure as StructureDbDetails).antennes
+  );
+  const dnaStructures = getDnaStructuresApiRead(dbStructure.dnaStructures);
+  const finesses = getFinessesApiRead(
+    (dbStructure as StructureDbDetails).finesses
+  );
+  const adresses = getAdressesApiRead(dbStructure.adresses);
+  const adresseAdministrativeComplete = [
+    dbStructure.adresseAdministrative,
+    dbStructure.codePostalAdministratif,
+    dbStructure.communeAdministrative,
+    dbStructure.departementAdministratif,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const typeBati = getRepartition(dbStructure);
+
+  const isMultiAntenne = (antennes?.length ?? 0) > 0;
+  const isMultiDna =
+    (dnaStructures?.length ?? 0) > 1 || (finesses?.length ?? 0) > 1;
+
   return recursivelySerializeDates({
     ...dbStructure,
     debutConvention,
@@ -193,6 +220,28 @@ const dbStructureToApiRead = (
     },
     isInCpom: isStructureInCpom(dbStructure),
     isInCpomPerYear: isStructureInCpomPerYear(dbStructure),
+    nom: dbStructure.nom ?? "",
+    operateur: dbStructure.operateur ?? undefined,
+    filiale: dbStructure.filiale ?? undefined,
+    date303: dbStructure.date303 ?? undefined,
+    public: dbStructure.public
+      ? PublicType[dbStructure.public as string as keyof typeof PublicType]
+      : undefined,
+    adresseAdministrative: dbStructure.adresseAdministrative ?? "",
+    codePostalAdministratif: dbStructure.codePostalAdministratif ?? "",
+    communeAdministrative: dbStructure.communeAdministrative ?? "",
+    departementAdministratif: dbStructure.departementAdministratif ?? "",
+    contacts: (dbStructure as StructureDbDetails).contacts ?? [],
+    documentsFinanciers:
+      (dbStructure as StructureDbDetails).documentsFinanciers ?? [],
+    adresseAdministrativeComplete,
+    isMultiAntenne,
+    isMultiDna,
+    typeBati,
+    antennes,
+    dnaStructures,
+    finesses,
+    adresses,
   }) as StructureApiRead;
 };
 

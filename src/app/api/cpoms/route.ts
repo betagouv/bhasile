@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { cpomApiAjoutSchema, cpomApiSchema } from "@/schemas/api/cpom.schema";
+import { cpomApiAjoutSchema } from "@/schemas/api/cpom.schema";
 import { CpomColumn } from "@/types/ListColumn";
 
 import { createCpomEvent } from "../user-action/user-action.service";
@@ -50,16 +50,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// TODO : déplacer dans cpoms/[id] pour respecter les principes REST
-export async function PUT(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const result = cpomApiSchema.parse(body);
-    const cpomId = await saveCpom(result);
-    createCpomEvent(request.method, cpomId);
-    return NextResponse.json({ cpomId }, { status: 201 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(error, { status: 400 });
-  }
-}

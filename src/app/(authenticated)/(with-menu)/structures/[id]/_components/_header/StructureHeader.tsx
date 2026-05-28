@@ -6,9 +6,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactElement } from "react";
 
+import { Badge } from "@/app/components/common/Badge";
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
+import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -36,6 +38,7 @@ export const StructureHeader = (): ReactElement | null => {
     useAgentFormHandling();
 
   const { headerRef } = useHeaderHeight();
+  const { isHidden } = useHideOnScroll();
 
   const pathname = usePathname();
 
@@ -45,9 +48,9 @@ export const StructureHeader = (): ReactElement | null => {
   );
 
   const {
+    codeBhasile,
     type,
     operateurLabel,
-    structureTypologies,
     nom,
     communeAdministrative,
     departementAdministratif,
@@ -55,34 +58,46 @@ export const StructureHeader = (): ReactElement | null => {
 
   return structure ? (
     <>
-      <div className="sticky top-0 z-50 bg-lifted-grey" ref={headerRef}>
-        <div className="flex justify-between items-center border-b border-b-border-default-grey px-6 py-3">
-          <div className="flex items-center gap-2">
-            <Link
-              href="/structures"
-              className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
-              title="Retour"
-            >
-              Retour
-            </Link>
-            <div>
-              <h2 className="text-title-blue-france text-xs uppercase mb-0">
-                <strong className="pr-3">Structure hébergement</strong>
-              </h2>
-              <h3 className="text-title-blue-france fr-h6 mb-0">
-                <strong className="pr-2">
-                  {type}, {operateurLabel},{" "}
-                  {structureTypologies?.[0]?.placesAutorisees} places
-                </strong>
-                <span className="pr-2">{" – "}</span>
-                <span className="mb-0 text-title-grey text-lg italic font-normal">
-                  {nom ? `${nom}, ` : ""} {communeAdministrative},{" "}
-                  {departementAdministratif}
-                </span>
-              </h3>
-            </div>
+      <div
+        className={`sticky top-0 z-50 bg-lifted-grey transition-transform duration-300 ease-in-out ${
+          isHidden ? "-translate-y-full" : "translate-y-0"
+        }`}
+        ref={headerRef}
+      >
+        <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
+          <Link
+            href="/structures"
+            className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
+            title="Retour"
+          >
+            Retour
+          </Link>
+          <div>
+            <h2 className="text-title-blue-france text-xs uppercase mb-0">
+              <strong className="pr-3">Structure hébergement</strong>
+            </h2>
+            <h3 className="text-title-blue-france fr-h6 mb-0 flex items-center gap-4">
+              <span className="flex items-center gap-2">
+                <strong>{codeBhasile}</strong>
+                {nom ? (
+                  <>
+                    –
+                    <span className="mb-0 text-title-grey text-lg italic font-normal">
+                      {nom}
+                    </span>
+                  </>
+                ) : null}
+              </span>
+              <span className="flex items-center gap-2">
+                <Badge type="purple">{type}</Badge>{" "}
+                <Badge type="purple">{operateurLabel}</Badge>{" "}
+                <Badge type="purple">
+                  {communeAdministrative} ({departementAdministratif})
+                </Badge>
+              </span>
+            </h3>
           </div>
-
+          <div className="grow" />
           {isFinalisationPath ? (
             <>
               <div className="flex items-center gap-3">

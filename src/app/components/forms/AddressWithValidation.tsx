@@ -1,7 +1,6 @@
 "use client";
 
 import Input from "@codegouvfr/react-dsfr/Input";
-import { useEffect, useState } from "react";
 import {
   Control,
   FieldValues,
@@ -10,6 +9,7 @@ import {
   UseControllerProps,
 } from "react-hook-form";
 
+import { useAddressInteraction } from "@/app/hooks/useAddressInteraction";
 import { useAddressSuggestion } from "@/app/hooks/useAddressSuggestion";
 import {
   AutocompleteSuggestion,
@@ -86,21 +86,15 @@ export default function AddressWithValidation<
 
   const addressSuggestions = useAddressSuggestion();
 
-  // TODO : isolate this logic in a hook
-  const [hasInteracted, setHasInteracted] = useState(false);
-  const [hasSelected, setHasSelected] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
-  const [manualError, setManualError] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    if (!isFocused && hasInteracted && !hasSelected && fullAddressField.value) {
-      setManualError(
-        "Veuillez sélectionner une adresse dans la liste déroulante"
-      );
-    } else if (!fullAddressField.value || hasSelected) {
-      setManualError(undefined);
-    }
-  }, [isFocused, hasInteracted, hasSelected, fullAddressField.value]);
+  const {
+    hasInteracted,
+    setHasInteracted,
+    hasSelected,
+    setHasSelected,
+    setIsFocused,
+    manualError,
+    setManualError,
+  } = useAddressInteraction(fullAddressField.value);
 
   const {
     suggestions,

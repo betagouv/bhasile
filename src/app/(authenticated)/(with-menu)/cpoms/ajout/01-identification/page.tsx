@@ -25,7 +25,7 @@ export default function CpomAjoutIdentification() {
 
   const defaultValues = getCpomDefaultValues();
 
-  const { getFetchState, setFetchState } = useFetchState();
+  const { getFetchState } = useFetchState();
   const saveState = getFetchState("cpom-save");
 
   const [backendError, setBackendError] = useState<string | undefined>(
@@ -33,16 +33,12 @@ export default function CpomAjoutIdentification() {
   );
 
   const handleSubmit = async (data: CpomFormValues) => {
-    setFetchState("cpom-save", FetchState.LOADING);
-
-    const result = await addCpom(data);
-    if (typeof result === "object" && "cpomId" in result) {
-      setFetchState("cpom-save", FetchState.IDLE);
-      router.push(`/cpoms/${result.cpomId}/ajout/02-finances`);
-    } else {
-      setFetchState("cpom-save", FetchState.ERROR);
-      setBackendError(result);
-      console.error(result);
+    try {
+      const cpomId = await addCpom(data);
+      router.push(`/cpoms/${cpomId}/ajout/02-finances`);
+    } catch (error) {
+      setBackendError(String(error));
+      console.error(error);
     }
   };
 

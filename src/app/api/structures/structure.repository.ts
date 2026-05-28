@@ -512,7 +512,7 @@ const updateStructure = async (
       id: structure.id,
     },
     data: {
-      public: convertToPublicType(publicType!),
+      public: convertToPublicType(publicType),
       adresseAdministrative,
       codePostalAdministratif,
       communeAdministrative,

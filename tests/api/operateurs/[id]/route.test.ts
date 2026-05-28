@@ -79,14 +79,13 @@ describe("PUT /api/operateurs/[id]", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 201 with operateurId on success", async () => {
+  it("should return 200 with operateurId on success", async () => {
     // GIVEN
-    const payload = { id: 1, name: "Adoma Modifié" };
     mockUpdateOne.mockResolvedValueOnce({ id: 1 });
 
     const request = new Request("http://localhost/api/operateurs/1", {
       method: "PUT",
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ name: "Adoma Modifié" }),
     });
 
     // WHEN
@@ -95,16 +94,75 @@ describe("PUT /api/operateurs/[id]", () => {
     });
 
     // THEN
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ operateurId: 1 });
+    expect(mockUpdateOne).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }));
     expect(mockCreateOperateurEvent).toHaveBeenCalledWith("PUT", 1);
   });
 
-  it("should return 400 when payload is invalid", async () => {
+  it("should return 400 when url id is not a valid number", async () => {
+    // GIVEN
+    const request = new Request("http://localhost/api/operateurs/abc", {
+      method: "PUT",
+      body: JSON.stringify({ name: "Adoma" }),
+    });
+
+    // WHEN
+    const response = await PUT(request as NextRequest, {
+      params: Promise.resolve({ id: "abc" }),
+    });
+
+    // THEN
+    expect(response.status).toBe(400);
+    expect(mockUpdateOne).not.toHaveBeenCalled();
+    expect(mockCreateOperateurEvent).not.toHaveBeenCalled();
+  });
+
+  it("should accept actesAdministratifs in body and forward them to updateOne", async () => {
+    // GIVEN
+    mockUpdateOne.mockResolvedValueOnce({ id: 1 });
+
+    const acte = {
+      category: "STATUTS",
+      date: "2024-03-15",
+      fileUploads: [{ key: "abc123" }],
+    };
+    const request = new Request("http://localhost/api/operateurs/1", {
+      method: "PUT",
+      body: JSON.stringify({
+        name: "Adoma",
+        actesAdministratifs: [acte],
+      }),
+    });
+
+    // WHEN
+    const response = await PUT(request as NextRequest, {
+      params: Promise.resolve({ id: "1" }),
+    });
+
+    // THEN
+    expect(response.status).toBe(200);
+    expect(mockUpdateOne).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 1,
+        actesAdministratifs: expect.arrayContaining([
+          expect.objectContaining({
+            category: "STATUTS",
+            fileUploads: [expect.objectContaining({ key: "abc123" })],
+          }),
+        ]),
+      })
+    );
+  });
+
+  it("should return 400 when an acte has an invalid category", async () => {
     // GIVEN
     const request = new Request("http://localhost/api/operateurs/1", {
       method: "PUT",
-      body: JSON.stringify({ id: "not-a-number" }),
+      body: JSON.stringify({
+        name: "Adoma",
+        actesAdministratifs: [{ category: "INVALID_CATEGORY" }],
+      }),
     });
 
     // WHEN
@@ -115,7 +173,5 @@ describe("PUT /api/operateurs/[id]", () => {
     // THEN
     expect(response.status).toBe(400);
     expect(mockUpdateOne).not.toHaveBeenCalled();
-    expect(mockCreateOperateurEvent).not.toHaveBeenCalled();
-    expect(mockFindOne).not.toHaveBeenCalled();
   });
 });

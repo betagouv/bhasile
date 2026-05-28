@@ -3,13 +3,14 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { AdditionalFieldsType } from "@/app/utils/acteAdministratif.util";
 import { formatDateToIsoString } from "@/app/utils/date.util";
 import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
+import { AdditionalFieldsType } from "@/config/acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 
 import FieldSetActeAdministratif from "../actesAdministratifs/FieldSetActeAdministratif";
 import InputWithValidation from "../InputWithValidation";
+import { MaxSizeNotice } from "../MaxSizeNotice";
 
 dayjs.extend(customParseFormat);
 
@@ -25,14 +26,19 @@ export const DatesAndDocuments = () => {
   // We use a key to run the useEffect every time the dates change
   const actesDatesKey =
     actesAdministratifs
-      ?.map(
+      ?.filter((a) => a?.category === "CONVENTION")
+      .map(
         (acteAdministratif) =>
           `${acteAdministratif?.startDate ?? ""}-${acteAdministratif?.endDate ?? ""}`
       )
       .join("|") ?? "";
 
   useEffect(() => {
-    const dateEnd = actesAdministratifs.reduce((accumulator, current) => {
+    const conventionActes = actesAdministratifs.filter(
+      (acteAdministratif) => acteAdministratif?.category === "CONVENTION"
+    );
+
+    const dateEnd = conventionActes.reduce((accumulator, current) => {
       if (!current.endDate) {
         return accumulator;
       }
@@ -53,9 +59,8 @@ export const DatesAndDocuments = () => {
     }, "");
 
     const dateStart = formatDateToIsoString(
-      actesAdministratifs.find(
-        (acteAdministratif) => acteAdministratif.startDate
-      )?.startDate
+      conventionActes.find((acteAdministratif) => acteAdministratif.startDate)
+        ?.startDate
     );
 
     setValue("dateEnd", dateEnd);
@@ -82,8 +87,7 @@ export const DatesAndDocuments = () => {
         <FieldSetActeAdministratif
           category="CONVENTION"
           categoryShortName="CPOM"
-          title="CPOM"
-          noTitleLegend={true}
+          title="Contrat CPOM"
           canAddFile={false}
           canAddAvenant={true}
           avenantCanExtendDateEnd={true}
@@ -91,8 +95,21 @@ export const DatesAndDocuments = () => {
           additionalFieldsType={AdditionalFieldsType.DATE_START_END}
           documentLabel="Document"
           addFileButtonLabel="Ajouter un CPOM"
+          notice={<MaxSizeNotice className="mb-0" />}
         />
       </div>
+      <FieldSetActeAdministratif
+        category="AUTRE"
+        categoryShortName="autre"
+        title="Autres documents"
+        canAddFile={true}
+        canAddAvenant={false}
+        isOptional={true}
+        additionalFieldsType={AdditionalFieldsType.NAME}
+        documentLabel="Document"
+        addFileButtonLabel="Ajouter un document"
+        notice={<MaxSizeNotice className="mb-0" />}
+      />
       {errorMessages?.length > 0 && (
         <p className="text-default-error m-0 p-0">
           {errorMessages?.length ? errorMessages[0] : ""}

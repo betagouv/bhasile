@@ -40,7 +40,8 @@ export const useStructures = (): UseStructureResult => {
 
   const updateStructure = async (structure: unknown): Promise<string> => {
     try {
-      const response = await fetch("/api/structures", {
+      const id = (structure as { id?: number }).id;
+      const response = await fetch(`/api/structures/${id}`, {
         method: "PUT",
         body: JSON.stringify(structure),
       });
