@@ -6,6 +6,7 @@ import {
 } from "@/schemas/api/transformation.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import {
   createOrUpdateForms,
   initializeStructureTransformationDefaultForms,
@@ -32,6 +33,9 @@ export const findOne = async (id: number) => {
       structureTransformations: {
         include: {
           operateur: { select: { id: true, name: true } },
+          actesAdministratifs: {
+            include: { fileUploads: true },
+          },
           structureVersion: {
             include: {
               structure: {
@@ -169,6 +173,12 @@ const createOrUpdateStructureTransformation = async (
   await createOrUpdateForms(tx, structureTransformation.forms, {
     structureTransformationId,
   });
+
+  await createOrUpdateActesAdministratifs(
+    tx,
+    structureTransformation.actesAdministratifs,
+    { structureTransformationId }
+  );
 };
 
 const createStructureTransformation = async (

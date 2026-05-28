@@ -13,6 +13,9 @@ export type TransformationDbDetails = Prisma.TransformationGetPayload<{
     structureTransformations: {
       include: {
         operateur: { select: { id: true; name: true } };
+        actesAdministratifs: {
+          include: { fileUploads: true };
+        };
         structureVersion: {
           include: {
             structure: {
