@@ -3,6 +3,7 @@ import {
   PropsWithChildren,
   ReactElement,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -28,7 +29,7 @@ export const Table = ({
 
   const [scrollReachedEnd, setScrollReachedEnd] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const container = scrollableAreaRef.current;
     if (!container) {
       return;
@@ -36,6 +37,13 @@ export const Table = ({
 
     if (defaultScrollRight) {
       container.scrollLeft = container.scrollWidth;
+    }
+  }, [defaultScrollRight]);
+
+  useEffect(() => {
+    const container = scrollableAreaRef.current;
+    if (!container) {
+      return;
     }
 
     const handleScroll = () => {

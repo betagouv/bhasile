@@ -54,11 +54,11 @@ export const ActiviteHistoriqueTable = (): ReactElement => {
     const dates =
       structure.activites
         ?.map((activite) => {
-          const d = dayjs(activite.date);
-          const month = d.format("MMMM").toUpperCase();
-          const year = d.format("YYYY");
+          const date = dayjs(activite.date);
+          const month = date.format("MMMM").toUpperCase();
+          const year = date.format("YYYY");
           return (
-            <th scope="col" key={`${month}-${year}}`}>
+            <th scope="col" key={`${month}-${year}`}>
               {month}
               <br />
               {year}
