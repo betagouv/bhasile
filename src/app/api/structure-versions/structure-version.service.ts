@@ -8,8 +8,6 @@ import { getAntennesApiRead } from "../antennes/antenne.util";
 import type { StructureDbDetails } from "../structures/structure.db.type";
 import { StructureVersionDbDetails } from "./structure-version.db.type";
 
-// Champs scalaires communs à une Structure et à une StructureVersion, normalisés
-// vers l'input API : enums Prisma → enums applicatifs, null → undefined, dates → ISO.
 const mapVersionScalars = (
   source: StructureDbDetails | StructureVersionDbDetails
 ): Pick<

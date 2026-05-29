@@ -6,9 +6,6 @@ import { StructureVersionApiType } from "@/schemas/api/structure-version.schema"
 import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { TransformationType } from "@/types/transformation.type";
 
-// Ajoute aux structureTransformation cibles (`to`) les champs déclarés, agrégés depuis
-// les structureTransformation sources (`from`). Additif : on conserve ce que la cible
-// possède déjà (sa propre structure recopiée en couche A). Logique pure, sans DB.
 export const applyPrefill = (
   transformationType: TransformationType,
   structureTransformations: StructureTransformationApiCreate[]

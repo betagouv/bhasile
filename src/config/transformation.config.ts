@@ -21,8 +21,6 @@ export type StructureSelectionBlock = {
 
 export type PrefillField = "contacts" | "antennes" | "adresses";
 
-// Règle déclarative de pré-remplissage appliquée côté serveur à la création :
-// copie les `fields` des structureTransformation de type `from` vers celle de type `to`.
 export type PrefillRule = {
   from: StructureTransformationType;
   to: StructureTransformationType;
