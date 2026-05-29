@@ -127,11 +127,11 @@ describe("CreationExNihiloIdentificationForm", () => {
       structureTransformation: {
         id: 7,
         type: StructureTransformationType.CREATION,
-        date: "2024-01-01T00:00:00.000Z",
         structureVersion: {
           id: 999,
           nom: "Les Coquelicots",
           creationDate: "2024-01-01T00:00:00.000Z",
+          effectiveDate: "2024-01-01T00:00:00.000Z",
         },
       },
     });
