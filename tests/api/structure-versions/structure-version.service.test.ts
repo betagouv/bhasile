@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { mapStructureToVersionInput } from "@/app/api/structure-versions/structure-version.service";
+import { copyStructureVersion } from "@/app/api/structure-versions/structure-version.service";
 import type { StructureDbDetails } from "@/app/api/structures/structure.db.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 
@@ -109,9 +109,9 @@ const buildStructure = (): StructureDbDetails =>
     ],
   }) as unknown as StructureDbDetails;
 
-describe("mapStructureToVersionInput", () => {
+describe("copyStructureVersion", () => {
   it("copies scalars and converts Prisma enum keys to the app enum values", () => {
-    const result = mapStructureToVersionInput(buildStructure());
+    const result = copyStructureVersion(buildStructure());
 
     expect(result.type).toBe(StructureType.CADA);
     expect(result.public).toBe(PublicType.TOUT_PUBLIC);
@@ -120,7 +120,7 @@ describe("mapStructureToVersionInput", () => {
   });
 
   it("copies relations without their ids so they are recreated fresh", () => {
-    const result = mapStructureToVersionInput(buildStructure());
+    const result = copyStructureVersion(buildStructure());
 
     expect(result.contacts).toEqual([
       {
@@ -163,7 +163,7 @@ describe("mapStructureToVersionInput", () => {
   });
 
   it("lets overrides win over the structure scalars", () => {
-    const result = mapStructureToVersionInput(buildStructure(), {
+    const result = copyStructureVersion(buildStructure(), {
       type: StructureType.HUDA,
     });
 

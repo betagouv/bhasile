@@ -7,8 +7,8 @@ import {
 } from "@/schemas/api/transformation.schema";
 
 import {
+  copyStructureVersion,
   dbStructureVersionToApiRead,
-  mapStructureToVersionInput,
 } from "../structure-versions/structure-version.service";
 import { getStructure } from "../structures/structure.service";
 import { TransformationDbDetails } from "./transformation.db.type";
@@ -49,21 +49,20 @@ export const getTransformation = async (
 };
 
 export const createTransformation = async (
-  input: TransformationApiCreate
+  transformation: TransformationApiCreate
 ): Promise<number> => {
-  // Couche A : chaque structureTransformation liée à une structure existante est
-  // initialisée avec l'état courant de cette structure.
   const structureTransformationsWithSource = await Promise.all(
-    input.structureTransformations.map(enrichStructureTransformationFromSource)
+    transformation.structureTransformations.map(
+      enrichStructureTransformationFromSource
+    )
   );
 
-  // Couche B : on ajoute aux cibles les champs déclarés, agrégés depuis les sources.
   const structureTransformations = applyPrefill(
-    input.type,
+    transformation.type,
     structureTransformationsWithSource
   );
 
-  return createOne({ ...input, structureTransformations });
+  return createOne({ ...transformation, structureTransformations });
 };
 
 const enrichStructureTransformationFromSource = async (
@@ -78,7 +77,7 @@ const enrichStructureTransformationFromSource = async (
 
   return {
     ...structureTransformation,
-    structureVersion: mapStructureToVersionInput(
+    structureVersion: copyStructureVersion(
       structure,
       structureTransformation.structureVersion
     ),

@@ -8,6 +8,51 @@ import { getAntennesApiRead } from "../antennes/antenne.util";
 import type { StructureDbDetails } from "../structures/structure.db.type";
 import { StructureVersionDbDetails } from "./structure-version.db.type";
 
+// Champs scalaires communs à une Structure et à une StructureVersion, normalisés
+// vers l'input API : enums Prisma → enums applicatifs, null → undefined, dates → ISO.
+const mapVersionScalars = (
+  source: StructureDbDetails | StructureVersionDbDetails
+): Pick<
+  StructureVersionApiType,
+  | "type"
+  | "public"
+  | "adresseAdministrative"
+  | "codePostalAdministratif"
+  | "communeAdministrative"
+  | "departementAdministratif"
+  | "latitude"
+  | "longitude"
+  | "nom"
+  | "creationDate"
+  | "date303"
+  | "lgbt"
+  | "fvvTeh"
+  | "notes"
+  | "nomOfii"
+  | "directionTerritoriale"
+> => ({
+  type: source.type
+    ? StructureType[source.type as keyof typeof StructureType]
+    : undefined,
+  public: source.public
+    ? PublicType[source.public as string as keyof typeof PublicType]
+    : undefined,
+  adresseAdministrative: source.adresseAdministrative ?? undefined,
+  codePostalAdministratif: source.codePostalAdministratif ?? undefined,
+  communeAdministrative: source.communeAdministrative ?? undefined,
+  departementAdministratif: source.departementAdministratif ?? undefined,
+  latitude: source.latitude?.toString() ?? undefined,
+  longitude: source.longitude?.toString() ?? undefined,
+  nom: source.nom ?? undefined,
+  creationDate: source.creationDate?.toISOString() ?? undefined,
+  date303: source.date303?.toISOString() ?? undefined,
+  lgbt: source.lgbt ?? undefined,
+  fvvTeh: source.fvvTeh ?? undefined,
+  notes: source.notes ?? undefined,
+  nomOfii: source.nomOfii ?? undefined,
+  directionTerritoriale: source.directionTerritoriale ?? undefined,
+});
+
 export const dbStructureVersionToApiRead = (
   version: StructureVersionDbDetails
 ): StructureVersionApiRead => {
@@ -22,54 +67,17 @@ export const dbStructureVersionToApiRead = (
 
   return recursivelySerializeDates({
     ...version,
+    ...mapVersionScalars(version),
     effectiveDate: version.effectiveDate ?? undefined,
-    type: version.type ?? undefined,
-    public: version.public
-      ? (PublicType[version.public as string as keyof typeof PublicType] ??
-        undefined)
-      : undefined,
-    adresseAdministrative: version.adresseAdministrative ?? undefined,
-    codePostalAdministratif: version.codePostalAdministratif ?? undefined,
-    communeAdministrative: version.communeAdministrative ?? undefined,
-    departementAdministratif: version.departementAdministratif ?? undefined,
     adresseAdministrativeComplete: adresseAdministrativeComplete || undefined,
-    latitude: version.latitude ?? undefined,
-    longitude: version.longitude ?? undefined,
-    nom: version.nom ?? undefined,
-    creationDate: version.creationDate ?? undefined,
-    date303: version.date303 ?? undefined,
-    lgbt: version.lgbt ?? undefined,
-    fvvTeh: version.fvvTeh ?? undefined,
-    notes: version.notes ?? undefined,
-    nomOfii: version.nomOfii ?? undefined,
-    directionTerritoriale: version.directionTerritoriale ?? undefined,
   }) as StructureVersionApiRead;
 };
 
-export const mapStructureToVersionInput = (
+export const copyStructureVersion = (
   structure: StructureDbDetails,
   overrides: Partial<StructureVersionApiType> = {}
 ): StructureVersionApiType => ({
-  type: structure.type
-    ? StructureType[structure.type as keyof typeof StructureType]
-    : undefined,
-  public: structure.public
-    ? PublicType[structure.public as keyof typeof PublicType]
-    : undefined,
-  adresseAdministrative: structure.adresseAdministrative ?? undefined,
-  codePostalAdministratif: structure.codePostalAdministratif ?? undefined,
-  communeAdministrative: structure.communeAdministrative ?? undefined,
-  departementAdministratif: structure.departementAdministratif ?? undefined,
-  latitude: structure.latitude?.toString() ?? undefined,
-  longitude: structure.longitude?.toString() ?? undefined,
-  nom: structure.nom ?? undefined,
-  creationDate: structure.creationDate?.toISOString() ?? undefined,
-  date303: structure.date303?.toISOString() ?? undefined,
-  lgbt: structure.lgbt ?? undefined,
-  fvvTeh: structure.fvvTeh ?? undefined,
-  notes: structure.notes ?? undefined,
-  nomOfii: structure.nomOfii ?? undefined,
-  directionTerritoriale: structure.directionTerritoriale ?? undefined,
+  ...mapVersionScalars(structure),
   contacts: structure.contacts.map((contact) => ({
     prenom: contact.prenom ?? undefined,
     nom: contact.nom ?? undefined,
