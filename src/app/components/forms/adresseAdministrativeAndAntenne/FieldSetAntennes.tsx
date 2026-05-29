@@ -17,6 +17,8 @@ const emptyAntenne: AntenneFormValues = {
   departement: "",
 };
 
+const MIN_ANTENNES = 2;
+
 export const FieldSetAntennes = () => {
   const { control, watch, setValue } = useFormContext();
 
@@ -39,9 +41,18 @@ export const FieldSetAntennes = () => {
   };
 
   const handleDeleteAntenne = (index: number) => {
+    if (antennes.length > MIN_ANTENNES) {
+      setValue(
+        "antennes",
+        antennes.filter((_, antenneIndex) => antenneIndex !== index)
+      );
+      return;
+    }
     setValue(
       "antennes",
-      antennes.filter((_, i) => i !== index)
+      antennes.map((antenne, antenneIndex) =>
+        antenneIndex === index ? emptyAntenne : antenne
+      )
     );
   };
 
@@ -84,13 +95,11 @@ export const FieldSetAntennes = () => {
             </div>
           </div>
           <div className="w-8 mb-7">
-            {index >= 2 && (
-              <DeleteButton
-                onClick={() => handleDeleteAntenne(index)}
-                size="small"
-                backgroundColor="grey"
-              />
-            )}
+            <DeleteButton
+              onClick={() => handleDeleteAntenne(index)}
+              size="small"
+              backgroundColor="grey"
+            />
           </div>
         </div>
       ))}

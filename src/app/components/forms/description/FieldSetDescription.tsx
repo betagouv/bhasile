@@ -27,13 +27,16 @@ export const FieldSetDescription = ({
     }
   }, [filialesContainerRef]);
 
+  const title = getTitle(formKind);
+
+  const isCreation =
+    formKind === FormKind.CREATION_EX_NIHILO ||
+    formKind === FormKind.CREATION_FROM_STRUCTURE;
+
   return (
     <fieldset className="flex flex-col gap-6">
       <legend className="text-xl font-bold mb-10 text-title-blue-france">
-        {formKind === FormKind.MODIFICATION ||
-        formKind === FormKind.CREATION_EX_NIHILO
-          ? "Général"
-          : "Description"}
+        {title}
       </legend>
 
       {formKind !== FormKind.MODIFICATION && (
@@ -63,7 +66,7 @@ export const FieldSetDescription = ({
               name="type"
               control={control}
               label="Type"
-              disabled={formKind !== FormKind.CREATION_EX_NIHILO}
+              disabled={!isCreation}
               required
               id="type"
             >
@@ -103,7 +106,7 @@ export const FieldSetDescription = ({
             control={control}
             type="date"
             label={
-              formKind === FormKind.CREATION_EX_NIHILO
+              isCreation
                 ? "Date d’ouverture"
                 : "Date de création de la structure"
             }
@@ -124,7 +127,7 @@ export const FieldSetDescription = ({
           ))}
         </SelectWithValidation>
       </div>
-      {formKind !== FormKind.CREATION_EX_NIHILO && (
+      {!isCreation && (
         <>
           <CustomNotice
             severity="info"
@@ -164,4 +167,16 @@ export const FieldSetDescription = ({
 
 type Props = {
   formKind?: FormKind;
+};
+
+const getTitle = (formKind: FormKind): string => {
+  if (
+    formKind === FormKind.MODIFICATION ||
+    formKind === FormKind.CREATION_EX_NIHILO
+  ) {
+    return "Général";
+  } else if (formKind === FormKind.CREATION_FROM_STRUCTURE) {
+    return "Veuillez renseigner les champs suivants en considérant l’ensemble de la nouvelle structure.";
+  }
+  return "Description";
 };

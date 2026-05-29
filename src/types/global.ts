@@ -21,6 +21,7 @@ export const FormKind = {
   FINALISATION: "finalisation",
   ADRESSES_RECOVERY: "adresses-recovery",
   CREATION_EX_NIHILO: "creation-ex-nihilo",
+  CREATION_FROM_STRUCTURE: "creation-from-structure",
 } as const;
 
 export type FormKind = (typeof FormKind)[keyof typeof FormKind];

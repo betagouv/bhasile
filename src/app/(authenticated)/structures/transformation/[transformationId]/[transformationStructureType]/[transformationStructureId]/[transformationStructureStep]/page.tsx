@@ -78,6 +78,7 @@ const renderFlow = (
       }
       return (
         <CreationDepuisStructuresFlow
+          transformation={transformation}
           structureTransformation={structureTransformation}
         />
       );
