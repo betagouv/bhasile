@@ -1,11 +1,16 @@
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import {
+  StructureTransformationApiCreate,
   TransformationApiCreate,
   TransformationApiRead,
   TransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
 
-import { dbStructureVersionToApiRead } from "../structure-versions/structure-version.service";
+import {
+  dbStructureVersionToApiRead,
+  mapStructureToVersionInput,
+} from "../structure-versions/structure-version.service";
+import { getStructure } from "../structures/structure.service";
 import { TransformationDbDetails } from "./transformation.db.type";
 import {
   createOne,
@@ -13,6 +18,7 @@ import {
   findOne,
   updateOne,
 } from "./transformation.repository";
+import { applyPrefill } from "./transformation.util";
 
 const dbTransformationToApiRead = (
   transformation: TransformationDbDetails
@@ -45,7 +51,38 @@ export const getTransformation = async (
 export const createTransformation = async (
   input: TransformationApiCreate
 ): Promise<number> => {
-  return createOne(input);
+  // Couche A : chaque structureTransformation liée à une structure existante est
+  // initialisée avec l'état courant de cette structure.
+  const structureTransformationsWithSource = await Promise.all(
+    input.structureTransformations.map(enrichStructureTransformationFromSource)
+  );
+
+  // Couche B : on ajoute aux cibles les champs déclarés, agrégés depuis les sources.
+  const structureTransformations = applyPrefill(
+    input.type,
+    structureTransformationsWithSource
+  );
+
+  return createOne({ ...input, structureTransformations });
+};
+
+const enrichStructureTransformationFromSource = async (
+  structureTransformation: StructureTransformationApiCreate
+): Promise<StructureTransformationApiCreate> => {
+  const structureId = structureTransformation.structureVersion?.structureId;
+  if (!structureId) {
+    return structureTransformation;
+  }
+
+  const structure = await getStructure(structureId);
+
+  return {
+    ...structureTransformation,
+    structureVersion: mapStructureToVersionInput(
+      structure,
+      structureTransformation.structureVersion
+    ),
+  };
 };
 
 export const updateTransformation = async (

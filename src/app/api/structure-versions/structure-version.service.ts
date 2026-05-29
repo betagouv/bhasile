@@ -1,7 +1,11 @@
 import { recursivelySerializeDates } from "@/app/utils/date.util";
+import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
 import { StructureVersionApiRead } from "@/schemas/api/transformation.schema";
-import { PublicType } from "@/types/structure.type";
+import { PublicType, StructureType } from "@/types/structure.type";
 
+import { getAdressesApiRead } from "../adresses/adresse.util";
+import { getAntennesApiRead } from "../antennes/antenne.util";
+import type { StructureDbDetails } from "../structures/structure.db.type";
 import { StructureVersionDbDetails } from "./structure-version.db.type";
 
 export const dbStructureVersionToApiRead = (
@@ -41,3 +45,82 @@ export const dbStructureVersionToApiRead = (
     directionTerritoriale: version.directionTerritoriale ?? undefined,
   }) as StructureVersionApiRead;
 };
+
+// Recopie l'état courant d'une structure dans un input de StructureVersion.
+// Les relations sont mappées SANS leurs identifiants pour être recréées à neuf
+// sur la nouvelle version, sans toucher la structure source.
+// - dnaStructures : table de passage, on réutilise les Dna existants (via leur code) ;
+//   la création contourne le contrôle d'unicité côté version (cf. createOrUpdateDnaStructures).
+// - finesses : non copiées (le code FINESS est unique en base, on ne peut pas le dupliquer).
+export const mapStructureToVersionInput = (
+  structure: StructureDbDetails,
+  overrides: Partial<StructureVersionApiType> = {}
+): StructureVersionApiType => ({
+  type: structure.type
+    ? StructureType[structure.type as keyof typeof StructureType]
+    : undefined,
+  public: structure.public
+    ? PublicType[structure.public as keyof typeof PublicType]
+    : undefined,
+  adresseAdministrative: structure.adresseAdministrative ?? undefined,
+  codePostalAdministratif: structure.codePostalAdministratif ?? undefined,
+  communeAdministrative: structure.communeAdministrative ?? undefined,
+  departementAdministratif: structure.departementAdministratif ?? undefined,
+  latitude: structure.latitude?.toString() ?? undefined,
+  longitude: structure.longitude?.toString() ?? undefined,
+  nom: structure.nom ?? undefined,
+  creationDate: structure.creationDate?.toISOString() ?? undefined,
+  date303: structure.date303?.toISOString() ?? undefined,
+  lgbt: structure.lgbt ?? undefined,
+  fvvTeh: structure.fvvTeh ?? undefined,
+  notes: structure.notes ?? undefined,
+  nomOfii: structure.nomOfii ?? undefined,
+  directionTerritoriale: structure.directionTerritoriale ?? undefined,
+  contacts: structure.contacts.map((contact) => ({
+    prenom: contact.prenom ?? undefined,
+    nom: contact.nom ?? undefined,
+    telephone: contact.telephone ?? undefined,
+    email: contact.email ?? undefined,
+    role: contact.role ?? undefined,
+    perimetre: contact.perimetre ?? undefined,
+  })),
+  antennes: (getAntennesApiRead(structure.antennes) ?? []).map((antenne) => ({
+    name: antenne.name,
+    adresse: antenne.adresse,
+    codePostal: antenne.codePostal,
+    commune: antenne.commune,
+    departement: antenne.departement,
+  })),
+  adresses: (getAdressesApiRead(structure.adresses) ?? []).map((adresse) => ({
+    adresse: adresse.adresse,
+    codePostal: adresse.codePostal,
+    commune: adresse.commune,
+    repartition: adresse.repartition,
+    adresseTypologies: adresse.adresseTypologies.map((typologie) => ({
+      placesAutorisees: typologie.placesAutorisees,
+      year: typologie.year,
+      qpv: typologie.qpv,
+      logementSocial: typologie.logementSocial,
+    })),
+  })),
+  structureTypologies: structure.structureTypologies.map((typologie) => ({
+    year: typologie.year,
+    placesAutorisees: typologie.placesAutorisees ?? undefined,
+    pmr: typologie.pmr ?? undefined,
+    lgbt: typologie.lgbt ?? undefined,
+    fvvTeh: typologie.fvvTeh ?? undefined,
+    placesACreer: typologie.placesACreer,
+    placesAFermer: typologie.placesAFermer,
+    echeancePlacesACreer: typologie.echeancePlacesACreer?.toISOString(),
+    echeancePlacesAFermer: typologie.echeancePlacesAFermer?.toISOString(),
+  })),
+  dnaStructures: structure.dnaStructures.map((dnaStructure) => ({
+    dna: {
+      code: dnaStructure.dna.code,
+      description: dnaStructure.dna.description ?? undefined,
+    },
+    startDate: dnaStructure.startDate?.toISOString() ?? undefined,
+    endDate: dnaStructure.endDate?.toISOString() ?? undefined,
+  })),
+  ...overrides,
+});

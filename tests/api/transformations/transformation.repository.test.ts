@@ -7,6 +7,7 @@ import {
   findOne,
   updateOne,
 } from "@/app/api/transformations/transformation.repository";
+import { createTransformation } from "@/app/api/transformations/transformation.service";
 import prisma from "@/lib/prisma";
 import { Repartition } from "@/types/adresse.type";
 import { PublicType } from "@/types/structure.type";
@@ -802,5 +803,195 @@ describe("transformation.repository db integration", () => {
     expect(remaining).toHaveLength(1);
     expect(remaining[0].category).toBe("ARRETE_AUTORISATION");
     expect(remaining[0].fileUploads).toMatchObject([{ key: keptFile.key }]);
+  });
+
+  const seedRichStructure = async () => {
+    const structure = await createStructure();
+    const contact = await prisma.contact.create({
+      data: {
+        structureId: structure.id,
+        prenom: "Nicolas",
+        nom: "Leboeuf",
+        telephone: "0652464214",
+        email: "nicolas.leboeuf@lesmimosas.fr",
+        role: "Responsable structure",
+        perimetre: "Toutes les antennes",
+      },
+    });
+    const antenne = await prisma.antenne.create({
+      data: {
+        structureId: structure.id,
+        name: "Avranches Nord",
+        adresse: "2 rue B",
+        codePostal: "50300",
+        commune: "Avranches",
+        departement: "50",
+      },
+    });
+    const adresse = await prisma.adresse.create({
+      data: {
+        structureId: structure.id,
+        adresse: "3 rue C",
+        codePostal: "50300",
+        commune: "Avranches",
+        repartition: Repartition.COLLECTIF,
+        placesAutorisees: 10,
+        qpv: 0,
+        logementSocial: 0,
+      },
+    });
+    await prisma.adresseTypologie.create({
+      data: {
+        adresseId: adresse.id,
+        placesAutorisees: 10,
+        year: 2024,
+        qpv: 0,
+        logementSocial: 0,
+      },
+    });
+    const dna = await prisma.dna.create({
+      data: { code: `DNA-TF-TEST-${randomUUID()}` },
+    });
+    await prisma.dnaStructure.create({
+      data: { structureId: structure.id, dnaId: dna.id },
+    });
+    // Le FINESS (code unique en base) ne doit pas être recopié ni faire échouer la création.
+    await prisma.finess.create({
+      data: {
+        structureId: structure.id,
+        code: `FIN-TF-TEST-${randomUUID()}`,
+      },
+    });
+    return {
+      structure,
+      contactId: contact.id,
+      antenneId: antenne.id,
+      dnaId: dna.id,
+    };
+  };
+
+  const versionRelationsInclude = {
+    structureVersion: {
+      include: {
+        contacts: true,
+        antennes: true,
+        adresses: { include: { adresseTypologies: true } },
+        dnaStructures: true,
+        finesses: true,
+      },
+    },
+  } as const;
+
+  it("should copy the source structure data into the new structureVersion on createOne (layer A)", async () => {
+    const { structure, contactId, antenneId, dnaId } =
+      await seedRichStructure();
+
+    const transformationId = await createTransformation({
+      type: TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
+      structureTransformations: [
+        {
+          type: StructureTransformationType.FERMETURE,
+          structureVersion: { structureId: structure.id },
+        },
+        { type: StructureTransformationType.CREATION },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const fermeture = await prisma.structureTransformation.findFirstOrThrow({
+      where: { transformationId, type: StructureTransformationType.FERMETURE },
+      include: versionRelationsInclude,
+    });
+    const version = fermeture.structureVersion;
+    if (!version) {
+      throw new Error("La version de la fermeture devrait exister");
+    }
+
+    expect(version.contacts).toHaveLength(1);
+    expect(version.contacts[0].nom).toBe("Leboeuf");
+    expect(version.contacts[0].id).not.toBe(contactId);
+    expect(version.antennes).toHaveLength(1);
+    expect(version.antennes[0].id).not.toBe(antenneId);
+    expect(version.adresses).toHaveLength(1);
+    expect(version.adresses[0].adresseTypologies).toHaveLength(1);
+
+    // dnaStructures : nouvelle ligne de jonction, mais même Dna réutilisé.
+    expect(version.dnaStructures).toHaveLength(1);
+    expect(version.dnaStructures[0].dnaId).toBe(dnaId);
+    expect(version.dnaStructures[0].structureId).toBeNull();
+    const dnaCount = await prisma.dna.count({ where: { id: dnaId } });
+    expect(dnaCount).toBe(1);
+
+    // finesses : non recopiées (code unique en base).
+    expect(version.finesses).toHaveLength(0);
+
+    // La structure source n'est pas modifiée.
+    const sourceContacts = await prisma.contact.findMany({
+      where: { structureId: structure.id },
+    });
+    expect(sourceContacts).toHaveLength(1);
+    expect(sourceContacts[0].id).toBe(contactId);
+  });
+
+  it("should prefill the CREATION structureVersion from the closing structure (layer B)", async () => {
+    const { structure } = await seedRichStructure();
+
+    const transformationId = await createTransformation({
+      type: TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
+      structureTransformations: [
+        {
+          type: StructureTransformationType.FERMETURE,
+          structureVersion: { structureId: structure.id },
+        },
+        { type: StructureTransformationType.CREATION },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const creation = await prisma.structureTransformation.findFirstOrThrow({
+      where: { transformationId, type: StructureTransformationType.CREATION },
+      include: versionRelationsInclude,
+    });
+    const version = creation.structureVersion;
+    if (!version) {
+      throw new Error("La version de la création devrait exister");
+    }
+
+    expect(version.contacts).toHaveLength(1);
+    expect(version.contacts[0].nom).toBe("Leboeuf");
+    expect(version.antennes).toHaveLength(1);
+    expect(version.antennes[0].name).toBe("Avranches Nord");
+    expect(version.adresses).toHaveLength(1);
+    expect(version.adresses[0].adresseTypologies).toHaveLength(1);
+  });
+
+  it("should accumulate data from several closing structures additively (layer B)", async () => {
+    const first = await seedRichStructure();
+    const second = await seedRichStructure();
+
+    const transformationId = await createTransformation({
+      type: TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
+      structureTransformations: [
+        {
+          type: StructureTransformationType.FERMETURE,
+          structureVersion: { structureId: first.structure.id },
+        },
+        {
+          type: StructureTransformationType.FERMETURE,
+          structureVersion: { structureId: second.structure.id },
+        },
+        { type: StructureTransformationType.CREATION },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const creation = await prisma.structureTransformation.findFirstOrThrow({
+      where: { transformationId, type: StructureTransformationType.CREATION },
+      include: versionRelationsInclude,
+    });
+
+    expect(creation.structureVersion?.contacts).toHaveLength(2);
+    expect(creation.structureVersion?.antennes).toHaveLength(2);
+    expect(creation.structureVersion?.adresses).toHaveLength(2);
   });
 });

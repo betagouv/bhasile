@@ -29,6 +29,13 @@ const checkForDuplicateDnaCodes = async (
   dnaStructures: Partial<DnaStructureApiType>[] = [],
   entityId: EntityId
 ): Promise<void> => {
+  // Le contrôle d'unicité protège le flux d'édition d'une structure. Les versions de
+  // transformation sont des brouillons : on autorise un code DNA déjà actif ailleurs
+  // (ex. recopie d'une structure qui ferme dans la nouvelle version).
+  if (entityId.structureVersionId !== undefined) {
+    return;
+  }
+
   const dnaCodes = getUniqueDnaCodesFromDnaStructures(dnaStructures);
 
   if (dnaCodes.length === 0) {
