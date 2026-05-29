@@ -64,17 +64,15 @@ describe("CreationExNihiloActesAdministratifsForm (integration via FormWrapper)"
 
   it("submits the filled acts to handleValidation, dropping the empty Autres documents row", async () => {
     // GIVEN the three required acts are filled (file + dates), Autres documents left empty
+    const transformation = transformationWithActes([
+      filledActe(1, "ARRETE_AUTORISATION", "k-autorisation"),
+      filledActe(2, "CONVENTION", "k-convention"),
+      filledActe(3, "ARRETE_TARIFICATION", "k-tarification"),
+    ]);
     render(
       <CreationExNihiloActesAdministratifsForm
-        structureTransformation={createStructureTransformation({
-          id: 7,
-          type: StructureTransformationType.CREATION,
-        })}
-        transformation={transformationWithActes([
-          filledActe(1, "ARRETE_AUTORISATION", "k-autorisation"),
-          filledActe(2, "CONVENTION", "k-convention"),
-          filledActe(3, "ARRETE_TARIFICATION", "k-tarification"),
-        ])}
+        structureTransformation={transformation.structureTransformations[0]}
+        transformation={transformation}
       />
     );
 
@@ -100,13 +98,11 @@ describe("CreationExNihiloActesAdministratifsForm (integration via FormWrapper)"
 
   it("does not submit when the required documents are missing", async () => {
     // GIVEN no acts provided -> the form seeds empty rows for each required category
+    const transformation = transformationWithActes([]);
     render(
       <CreationExNihiloActesAdministratifsForm
-        structureTransformation={createStructureTransformation({
-          id: 7,
-          type: StructureTransformationType.CREATION,
-        })}
-        transformation={transformationWithActes([])}
+        structureTransformation={transformation.structureTransformations[0]}
+        transformation={transformation}
       />
     );
 
