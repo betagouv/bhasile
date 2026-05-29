@@ -45,6 +45,7 @@ export const CreationExNihiloActesAdministratifsForm = ({
           structureTransformation: {
             id: structureTransformation.id,
             type: structureTransformation.type,
+            forms: structureTransformation.forms,
             actesAdministratifs:
               data.actesAdministratifs as ActeAdministratifApiType[],
           },

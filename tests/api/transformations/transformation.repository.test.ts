@@ -803,4 +803,28 @@ describe("transformation.repository db integration", () => {
     expect(remaining[0].category).toBe("ARRETE_AUTORISATION");
     expect(remaining[0].fileUploads).toMatchObject([{ key: keptFile.key }]);
   });
+
+  it("should return structureTransformation forms with their steps from findOne", async () => {
+    const { transformationId, structureTransformationId } =
+      await createBareTransformation();
+
+    const row = await findOne(transformationId);
+    const structureTransformation = row.structureTransformations.find(
+      (candidate) => candidate.id === structureTransformationId
+    );
+    const creationForm = structureTransformation?.forms.find(
+      (form) =>
+        form.formDefinition.slug === "structure-transformation-creation-v1"
+    );
+    expect(creationForm).toBeDefined();
+    expect(
+      creationForm?.formSteps.map((formStep) => formStep.stepDefinition.slug)
+    ).toEqual(
+      expect.arrayContaining([
+        "01-identification",
+        "02-places-hebergement",
+        "03-actes-administratifs",
+      ])
+    );
+  });
 });

@@ -127,6 +127,9 @@ describe("CreationExNihiloIdentificationForm", () => {
       structureTransformation: {
         id: 7,
         type: StructureTransformationType.CREATION,
+        forms: undefined,
+        date: "2024-01-01T00:00:00.000Z",
+        operateurId: undefined,
         structureVersion: {
           id: 999,
           nom: "Les Coquelicots",
