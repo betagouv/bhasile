@@ -46,12 +46,6 @@ export const dbStructureVersionToApiRead = (
   }) as StructureVersionApiRead;
 };
 
-// Recopie l'état courant d'une structure dans un input de StructureVersion.
-// Les relations sont mappées SANS leurs identifiants pour être recréées à neuf
-// sur la nouvelle version, sans toucher la structure source.
-// - dnaStructures : table de passage, on réutilise les Dna existants (via leur code) ;
-//   la création contourne le contrôle d'unicité côté version (cf. createOrUpdateDnaStructures).
-// - finesses : non copiées (le code FINESS est unique en base, on ne peut pas le dupliquer).
 export const mapStructureToVersionInput = (
   structure: StructureDbDetails,
   overrides: Partial<StructureVersionApiType> = {}
