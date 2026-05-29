@@ -231,6 +231,25 @@ describe("useTransformationFormHandling", () => {
     );
   });
 
+  it("should be a no-op (no crash, no update) when currentStep is not resolved", async () => {
+    // GIVEN — invalid step in URL → currentStep is undefined
+    mockUseParams.mockReturnValue({
+      transformationStructureType: StructureTransformationType.CREATION,
+      transformationStructureId: "7",
+      transformationStructureStep: "unknown-step",
+    });
+
+    // WHEN
+    const { result } = renderHook(() => useTransformationFormHandling());
+
+    // THEN — does not dereference currentStep.name, does not save, does not navigate
+    await expect(
+      result.current.handleValidation(buildPayload())
+    ).resolves.toBeUndefined();
+    expect(mockUpdateTransformation).not.toHaveBeenCalled();
+    expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
   it("should expose nextStep and prevStep based on the current position", () => {
     // GIVEN — currentStep is "places-et-hebergement" (middle of 3 steps)
     mockUseParams.mockReturnValue({

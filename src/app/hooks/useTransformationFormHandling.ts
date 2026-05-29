@@ -47,6 +47,10 @@ export const useTransformationFormHandling = () => {
     transformationId: number;
     structureTransformation: StructureTransformationApiUpdateClient;
   }) => {
+    if (!currentStep) {
+      return;
+    }
+
     try {
       await updateTransformation(
         transformationId,
