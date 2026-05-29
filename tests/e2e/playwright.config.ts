@@ -4,6 +4,9 @@ import { defineConfig } from "@playwright/test";
 
 const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3000";
 
+const parsedWorkers = Number(process.env.E2E_WORKERS);
+const workers = Number.isInteger(parsedWorkers) && parsedWorkers > 0 ? parsedWorkers : 5;
+
 export default defineConfig({
   testDir: ".",
   testMatch: ["specs/**/*.spec.ts"],
@@ -11,7 +14,7 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 10_000 },
   fullyParallel: true,
-  workers: Number(process.env.E2E_WORKERS) ?? 5,
+  workers,
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
     baseURL,
