@@ -92,7 +92,11 @@ export const CreationExNihiloIdentificationForm = ({
 
       <hr />
 
-      <DnaAndFiness />
+      <DnaAndFiness
+        entityId={{
+          structureVersionId: structureTransformation.structureVersion?.id,
+        }}
+      />
 
       <hr />
 
