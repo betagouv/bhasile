@@ -1,8 +1,8 @@
 "use client";
 
-import Alert from "@codegouvfr/react-dsfr/Alert";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 
+import { SubmitError } from "@/app/components/SubmitError";
 import { FetchState } from "@/types/fetch-state.type";
 
 export const quitterModal = createModal({
@@ -44,11 +44,7 @@ export const QuitterModal = ({ saveState, onQuit, onSaveAndQuit }: Props) => (
         l&apos;onglet « à finaliser ».
       </p>
       {saveState === FetchState.ERROR && (
-        <Alert
-          severity="error"
-          small
-          description="Une erreur est survenue lors de l'enregistrement. Veuillez réessayer."
-        />
+        <SubmitError backendError="Une erreur est survenue lors de l'enregistrement. Veuillez réessayer." />
       )}
     </>
   </quitterModal.Component>

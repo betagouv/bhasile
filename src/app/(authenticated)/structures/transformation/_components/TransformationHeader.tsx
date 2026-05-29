@@ -42,8 +42,12 @@ export const TransformationHeader = () => {
       return;
     }
     try {
-      await saveCurrentForm();
-      enregistrementModal.open();
+      const saved = await saveCurrentForm();
+      if (saved) {
+        enregistrementModal.open();
+      } else {
+        errorModal.open();
+      }
     } catch (error) {
       console.error(error);
       errorModal.open();
@@ -55,8 +59,13 @@ export const TransformationHeader = () => {
       return;
     }
     try {
-      await saveCurrentForm();
-      router.push("/structures");
+      const saved = await saveCurrentForm();
+      if (saved) {
+        router.push("/structures");
+      } else {
+        quitterModal.close();
+        errorModal.open();
+      }
     } catch (error) {
       console.error(error);
     }

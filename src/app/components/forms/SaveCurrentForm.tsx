@@ -24,9 +24,10 @@ export const SaveCurrentForm = <TSchema extends z.ZodTypeAny>({
       const result = schema.safeParse(getValues());
       if (!result.success) {
         console.error("SaveCurrentForm: données invalides", result.error);
-        throw result.error;
+        return false;
       }
       await onSaveRef.current(result.data);
+      return true;
     };
 
     registerSaver(saveCurrentForm);

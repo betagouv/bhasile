@@ -13,7 +13,7 @@ import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 
 import { TransformationContextType } from "./TransformationContext";
 
-type SaveCurrentFormFn = () => Promise<void>;
+type SaveCurrentFormFn = () => Promise<boolean>;
 
 type TransformationContextInternalType = {
   transformation: TransformationApiRead | null;
@@ -27,7 +27,7 @@ const TransformationContextInternal =
     transformation: null,
     setTransformation: () => {},
     registerSaver: () => {},
-    saveCurrentForm: async () => {},
+    saveCurrentForm: async () => false,
   });
 
 export function TransformationClientProvider({
@@ -48,7 +48,7 @@ export function TransformationClientProvider({
     if (!saverRef.current) {
       throw new Error("Aucun formulaire enregistrable n'est monté");
     }
-    await saverRef.current();
+    return saverRef.current();
   }, []);
 
   return (
