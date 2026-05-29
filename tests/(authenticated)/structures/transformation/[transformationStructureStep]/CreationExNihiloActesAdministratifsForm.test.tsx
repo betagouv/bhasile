@@ -41,7 +41,9 @@ const filledActe = (
   fileUploads: [{ id, key }],
 });
 
-const transformationWithActes = (actesAdministratifs: ActeAdministratifApiType[]) =>
+const transformationWithActes = (
+  actesAdministratifs: ActeAdministratifApiType[]
+) =>
   createTransformation({
     id: 12,
     type: TransformationType.OUVERTURE_EX_NIHILO,
@@ -64,6 +66,10 @@ describe("CreationExNihiloActesAdministratifsForm (integration via FormWrapper)"
     // GIVEN the three required acts are filled (file + dates), Autres documents left empty
     render(
       <CreationExNihiloActesAdministratifsForm
+        structureTransformation={createStructureTransformation({
+          id: 7,
+          type: StructureTransformationType.CREATION,
+        })}
         transformation={transformationWithActes([
           filledActe(1, "ARRETE_AUTORISATION", "k-autorisation"),
           filledActe(2, "CONVENTION", "k-convention"),
@@ -96,6 +102,10 @@ describe("CreationExNihiloActesAdministratifsForm (integration via FormWrapper)"
     // GIVEN no acts provided -> the form seeds empty rows for each required category
     render(
       <CreationExNihiloActesAdministratifsForm
+        structureTransformation={createStructureTransformation({
+          id: 7,
+          type: StructureTransformationType.CREATION,
+        })}
         transformation={transformationWithActes([])}
       />
     );
