@@ -3,7 +3,10 @@ import { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { CreationExNihiloIdentificationForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation-ex-nihilo/CreationExNihiloIdentificationForm";
-import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import {
+  StructureTransformationApiRead,
+  TransformationApiRead,
+} from "@/schemas/api/transformation.schema";
 import {
   StructureTransformationType,
   TransformationType,
@@ -15,10 +18,6 @@ vi.mock("@/app/hooks/useTransformationFormHandling", () => ({
   useTransformationFormHandling: () => ({
     handleValidation: mockHandleValidation,
   }),
-}));
-
-vi.mock("next/navigation", () => ({
-  useParams: () => ({ transformationStructureId: "7" }),
 }));
 
 type CapturedProps = {
@@ -63,25 +62,29 @@ vi.mock("@/app/components/forms/contacts/FieldSetContacts", () => ({
 describe("CreationExNihiloIdentificationForm", () => {
   it("should pass the structureVersion as defaultValues, including its id", () => {
     // GIVEN
+    const structureTransformation: StructureTransformationApiRead = {
+      id: 7,
+      type: StructureTransformationType.CREATION,
+      structureVersion: {
+        id: 999,
+        structureId: 42,
+        nom: "Les Coquelicots",
+        creationDate: "2024-01-01T00:00:00.000Z",
+      },
+    };
     const transformation: TransformationApiRead = {
       id: 12,
       type: TransformationType.OUVERTURE_EX_NIHILO,
-      structureTransformations: [
-        {
-          id: 7,
-          type: StructureTransformationType.CREATION,
-          structureVersion: {
-            id: 999,
-            structureId: 42,
-            nom: "Les Coquelicots",
-            creationDate: "2024-01-01T00:00:00.000Z",
-          },
-        },
-      ],
+      structureTransformations: [structureTransformation],
     };
 
     // WHEN
-    render(<CreationExNihiloIdentificationForm transformation={transformation} />);
+    render(
+      <CreationExNihiloIdentificationForm
+        transformation={transformation}
+        structureTransformation={structureTransformation}
+      />
+    );
 
     // THEN
     expect(captured.defaultValues).toMatchObject({
@@ -94,18 +97,22 @@ describe("CreationExNihiloIdentificationForm", () => {
 
   it("should pass transformationId and a structureTransformation update payload to handleValidation", () => {
     // GIVEN
+    const structureTransformation: StructureTransformationApiRead = {
+      id: 7,
+      type: StructureTransformationType.CREATION,
+      structureVersion: { id: 999 },
+    };
     const transformation: TransformationApiRead = {
       id: 12,
       type: TransformationType.OUVERTURE_EX_NIHILO,
-      structureTransformations: [
-        {
-          id: 7,
-          type: StructureTransformationType.CREATION,
-          structureVersion: { id: 999 },
-        },
-      ],
+      structureTransformations: [structureTransformation],
     };
-    render(<CreationExNihiloIdentificationForm transformation={transformation} />);
+    render(
+      <CreationExNihiloIdentificationForm
+        transformation={transformation}
+        structureTransformation={structureTransformation}
+      />
+    );
 
     // WHEN
     captured.onSubmit?.({
