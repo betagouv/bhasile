@@ -48,9 +48,12 @@ export const CreationExNihiloIdentificationForm = ({
           structureTransformation: {
             id: structureTransformation.id,
             type: structureTransformation.type,
-            date: creationDate,
             operateurId: operateur?.id,
-            structureVersion: { ...rest, creationDate },
+            structureVersion: {
+              ...rest,
+              creationDate,
+              effectiveDate: creationDate,
+            },
           },
         });
       }}
