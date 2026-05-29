@@ -1,7 +1,5 @@
 "use client";
 
-import { notFound, useParams } from "next/navigation";
-
 import { ActesAdministratifs } from "@/app/components/forms/actesAdministratifs/ActesAdministratifs";
 import FormWrapper, {
   FooterButtonType,
@@ -10,26 +8,21 @@ import { useTransformationFormHandling } from "@/app/hooks/useTransformationForm
 import { getActesAdministratifsDefaultValues } from "@/app/utils/acteAdministratif.util";
 import { creationExNihiloActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
-import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import {
+  StructureTransformationApiRead,
+  TransformationApiRead,
+} from "@/schemas/api/transformation.schema";
 import { creationActesAdministratifsSchema } from "@/schemas/forms/transformation/creationActesAdministratifs.schema";
 
 type Props = {
+  structureTransformation: StructureTransformationApiRead;
   transformation: TransformationApiRead;
 };
 
 export const CreationExNihiloActesAdministratifsForm = ({
+  structureTransformation,
   transformation,
 }: Props) => {
-  const { transformationStructureId } = useParams();
-  const structureTransformation = transformation.structureTransformations.find(
-    (structureTransformation) =>
-      structureTransformation.id === Number(transformationStructureId)
-  );
-
-  if (!structureTransformation) {
-    notFound();
-  }
-
   const { handleValidation, prevStep } = useTransformationFormHandling();
 
   const categoryDisplayRules =

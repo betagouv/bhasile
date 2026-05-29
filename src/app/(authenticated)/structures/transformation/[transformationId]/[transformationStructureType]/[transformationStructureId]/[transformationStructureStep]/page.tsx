@@ -74,7 +74,12 @@ const renderFlow = (
       );
     case StructureTransformationType.CREATION:
       if (transformation.type === TransformationType.OUVERTURE_EX_NIHILO) {
-        return <CreationExNihiloFlow transformation={transformation} />;
+        return (
+          <CreationExNihiloFlow
+            structureTransformation={structureTransformation}
+            transformation={transformation}
+          />
+        );
       }
       return (
         <CreationDepuisStructuresFlow
