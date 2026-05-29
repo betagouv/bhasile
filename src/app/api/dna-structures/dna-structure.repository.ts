@@ -34,6 +34,8 @@ export const createOrUpdateDnaStructures = async (
 
   await deleteDnaStructures(tx, dnaStructures, entityId);
 
+  //TODO: Once structureVersion is implemented, check for DNA associated to other structures
+
   for (const dnaStructure of dnaStructures) {
     const upsertedDna = await upsertDna(tx, dnaStructure.dna);
     if (!upsertedDna) {
