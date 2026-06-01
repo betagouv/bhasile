@@ -8,7 +8,7 @@ export const BudgetTableTitleLine = ({ label }: Props) => {
         className="text-left! text-xs! font-bold uppercase bg-default-grey-hover!"
         colSpan={years.length + 1}
       >
-        {label}
+        <span className="sticky left-4 inline-block">{label}</span>
       </td>
     </tr>
   );
