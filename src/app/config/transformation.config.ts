@@ -55,7 +55,9 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         label: "Veuillez sélectionner la ou les structures qui ferment",
       },
     ],
-    buildAutoTransformations: () => [],
+    buildAutoTransformations: () => [
+      { type: StructureTransformationType.CREATION },
+    ],
   },
   [TransformationType.EXTENSION_EX_NIHILO]: {
     title: "Transformer une structure",
