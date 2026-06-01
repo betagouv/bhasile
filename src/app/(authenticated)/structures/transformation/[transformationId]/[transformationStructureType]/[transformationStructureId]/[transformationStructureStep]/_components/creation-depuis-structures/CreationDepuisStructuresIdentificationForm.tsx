@@ -52,9 +52,12 @@ export const CreationDepuisStructuresIdentificationForm = ({
           structureTransformation: {
             id: structureTransformation.id,
             type: structureTransformation.type,
-            date: creationDate,
             operateurId: operateur?.id,
-            structureVersion: { ...rest, creationDate },
+            structureVersion: {
+              ...rest,
+              creationDate,
+              effectiveDate: creationDate,
+            },
           },
         });
       }}
@@ -72,7 +75,7 @@ export const CreationDepuisStructuresIdentificationForm = ({
 
       <hr />
 
-      <DnaAndFiness />
+      <DnaAndFiness formKind={FormKind.CREATION_FROM_STRUCTURE} />
 
       <hr />
 

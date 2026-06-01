@@ -52,27 +52,41 @@ export const AdresseAdministrativeAndAntennes = ({
       )}
       <FieldSetAdresseAdministrative formKind={formKind} />
       {formKind === FormKind.CREATION_FROM_STRUCTURE && (
-        <RadioButtons
-          legend="Est-ce que la structure est répartie en plusieurs sites administratifs distants ? Si oui, veuillez nommer chacun des sites."
-          orientation="horizontal"
-          name="isMultiAntenne"
-          options={[
-            {
-              label: "Oui",
-              nativeInputProps: {
-                checked: isMultiAntenne === true,
-                onChange: () => setValue("isMultiAntenne", true),
-              },
-            },
-            {
-              label: "Non",
-              nativeInputProps: {
-                checked: isMultiAntenne === false,
-                onChange: () => setValue("isMultiAntenne", false),
-              },
-            },
-          ]}
-        />
+        <>
+          <hr />
+          <div className="flex gap-6">
+            <legend
+              id="isMultiAntenne-legend"
+              className="text-xl font-bold mb-4 text-title-blue-france flex-1"
+            >
+              Est-ce que la structure est répartie en plusieurs sites
+              administratifs distants ? Si oui, veuillez nommer chacun des
+              sites.
+            </legend>
+            <RadioButtons
+              aria-labelledby="isMultiAntenne-legend"
+              orientation="horizontal"
+              name="isMultiAntenne"
+              options={[
+                {
+                  label: "Oui",
+                  nativeInputProps: {
+                    checked: isMultiAntenne === true,
+                    onChange: () => setValue("isMultiAntenne", true),
+                  },
+                },
+                {
+                  label: "Non",
+                  nativeInputProps: {
+                    checked: isMultiAntenne === false,
+                    onChange: () => setValue("isMultiAntenne", false),
+                  },
+                },
+              ]}
+              className="mr-10"
+            />
+          </div>
+        </>
       )}
       <FieldSetAntennes />
     </>

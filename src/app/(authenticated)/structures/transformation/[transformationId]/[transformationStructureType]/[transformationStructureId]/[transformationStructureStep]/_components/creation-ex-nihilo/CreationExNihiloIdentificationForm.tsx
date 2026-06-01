@@ -72,7 +72,7 @@ export const CreationExNihiloIdentificationForm = ({
 
       <hr />
 
-      <DnaAndFiness />
+      <DnaAndFiness formKind={FormKind.CREATION_EX_NIHILO} />
 
       <hr />
 
