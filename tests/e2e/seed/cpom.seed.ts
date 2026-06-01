@@ -8,7 +8,6 @@ export type SeededCpom = {
   name: string;
   granularity: CpomGranularity;
   operateurId: number;
-  structureIds: number[];
   departementIds: number[];
   regionId: number | null;
 };
@@ -56,13 +55,6 @@ export const createCpomForTest = async (
             },
           }
         : undefined,
-      structures: input.structureIds?.length
-        ? {
-            createMany: {
-              data: input.structureIds.map((structureId) => ({ structureId })),
-            },
-          }
-        : undefined,
       actesAdministratifs: input.acteConvention
         ? {
             create: [
@@ -86,7 +78,6 @@ export const createCpomForTest = async (
     name: cpom.name ?? input.name,
     granularity: cpom.granularity,
     operateurId: cpom.operateurId,
-    structureIds: input.structureIds ?? [],
     departementIds,
     regionId: cpom.regionId,
   };

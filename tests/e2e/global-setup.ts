@@ -6,7 +6,9 @@ import { chromium, type FullConfig } from "@playwright/test";
 import { authenticateWithProConnect } from "./proconnect-login";
 import { cleanupOrphans } from "./seed/orphan-cleanup";
 
-const AUTH_TTL_MS = 30 * 60 * 1000; // 30 min — re-auth window
+// ProConnect émet des sessions valides 12h
+// (https://partenaires.proconnect.gouv.fr/docs/fournisseur-service/implementation_technique).
+const AUTH_TTL_MS = 12 * 60 * 60 * 1000;
 
 async function globalSetup(config: FullConfig): Promise<void> {
   await cleanupOrphans();

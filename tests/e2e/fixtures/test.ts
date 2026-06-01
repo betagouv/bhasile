@@ -46,15 +46,16 @@ export const test = base.extend<Fixtures>({
   },
 
   structuresPool: async ({}, use) => {
-    const created: SeededStructure[] = [];
+    const created = await Promise.all([
+      createStructureForTest(),
+      createStructureForTest(),
+      createStructureForTest(),
+    ]);
     try {
-      for (let i = 0; i < 3; i++) {
-        created.push(await createStructureForTest());
-      }
       await use(created);
     } finally {
       await Promise.allSettled(
-        created.map((s) => deleteStructureByCode(s.codeBhasile))
+        created.map((structure) => deleteStructureByCode(structure.codeBhasile))
       );
     }
   },
