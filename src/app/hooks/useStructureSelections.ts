@@ -3,7 +3,7 @@ import { useMemo, useRef, useState } from "react";
 import {
   StructureSelectionBlock,
   TRANSFORMATION_TYPE_SPECS,
-} from "@/app/config/transformation.config";
+} from "@/config/transformation.config";
 import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { StructureType } from "@/types/structure.type";
 import { TransformationType } from "@/types/transformation.type";

@@ -38,6 +38,17 @@ describe("transformation.repository db integration", () => {
     return operateur;
   };
 
+  const createFileUpload = async (prefix: string) => {
+    return prisma.fileUpload.create({
+      data: {
+        key: `FILE-TF-TEST-${prefix}-${Date.now()}-${randomUUID()}`,
+        mimeType: "application/pdf",
+        fileSize: 42,
+        originalName: `${prefix}.pdf`,
+      },
+    });
+  };
+
   const createBareTransformation = async () => {
     const structure = await createStructure();
     const transformationId = await createOne({
@@ -104,6 +115,9 @@ describe("transformation.repository db integration", () => {
     }
     await prisma.dna.deleteMany({
       where: { code: { startsWith: "DNA-TF-TEST-" } },
+    });
+    await prisma.fileUpload.deleteMany({
+      where: { key: { startsWith: "FILE-TF-TEST-" } },
     });
   });
 
@@ -687,5 +701,106 @@ describe("transformation.repository db integration", () => {
       (r) => r.structureVersion?.structureId === structureB.id
     );
     expect(created?.type).toBe(StructureTransformationType.EXTENSION);
+  });
+
+  it("should persist and read back actesAdministratifs on a structureTransformation via updateOne/findOne", async () => {
+    const { transformationId, structureTransformationId } =
+      await createBareTransformation();
+    const file = await createFileUpload("acte");
+
+    await updateOne({
+      id: transformationId,
+      structureTransformations: [
+        {
+          id: structureTransformationId,
+          actesAdministratifs: [
+            {
+              category: "ARRETE_AUTORISATION",
+              startDate: "2024-01-01T00:00:00.000Z",
+              endDate: "2025-01-01T00:00:00.000Z",
+              fileUploads: [{ key: file.key }],
+            },
+          ],
+        },
+      ],
+    });
+
+    // persisted on the structureTransformation
+    const persisted = await prisma.acteAdministratif.findMany({
+      where: { structureTransformationId },
+      include: { fileUploads: true },
+    });
+    expect(persisted).toHaveLength(1);
+    expect(persisted[0].category).toBe("ARRETE_AUTORISATION");
+    expect(persisted[0].fileUploads).toMatchObject([{ key: file.key }]);
+
+    // read back through the findOne include
+    const row = await findOne(transformationId);
+    const structureTransformation = row.structureTransformations.find(
+      (candidate) => candidate.id === structureTransformationId
+    );
+    expect(structureTransformation?.actesAdministratifs).toHaveLength(1);
+    expect(structureTransformation?.actesAdministratifs[0].category).toBe(
+      "ARRETE_AUTORISATION"
+    );
+    expect(
+      structureTransformation?.actesAdministratifs[0].fileUploads
+    ).toMatchObject([{ key: file.key }]);
+  });
+
+  it("should delete structureTransformation actesAdministratifs that are no longer present (scoped cleanup)", async () => {
+    const { transformationId, structureTransformationId } =
+      await createBareTransformation();
+    const keptFile = await createFileUpload("keep");
+    const droppedFile = await createFileUpload("drop");
+
+    // first save: two actes
+    await updateOne({
+      id: transformationId,
+      structureTransformations: [
+        {
+          id: structureTransformationId,
+          actesAdministratifs: [
+            {
+              category: "ARRETE_AUTORISATION",
+              fileUploads: [{ key: keptFile.key }],
+            },
+            {
+              category: "ARRETE_TARIFICATION",
+              fileUploads: [{ key: droppedFile.key }],
+            },
+          ],
+        },
+      ],
+    });
+    expect(
+      await prisma.acteAdministratif.count({
+        where: { structureTransformationId },
+      })
+    ).toBe(2);
+
+    // second save: only the first acte remains
+    await updateOne({
+      id: transformationId,
+      structureTransformations: [
+        {
+          id: structureTransformationId,
+          actesAdministratifs: [
+            {
+              category: "ARRETE_AUTORISATION",
+              fileUploads: [{ key: keptFile.key }],
+            },
+          ],
+        },
+      ],
+    });
+
+    const remaining = await prisma.acteAdministratif.findMany({
+      where: { structureTransformationId },
+      include: { fileUploads: true },
+    });
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0].category).toBe("ARRETE_AUTORISATION");
+    expect(remaining[0].fileUploads).toMatchObject([{ key: keptFile.key }]);
   });
 });

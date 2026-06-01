@@ -1,5 +1,11 @@
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
-import { TransformationType } from "@/types/transformation.type";
+import {
+  StructureTransformationType,
+  TransformationType,
+} from "@/types/transformation.type";
+
+type StructureTransformationApiReadItem =
+  TransformationApiRead["structureTransformations"][number];
 
 export const createTransformation = ({
   id = 42,
@@ -13,4 +19,14 @@ export const createTransformation = ({
   id,
   type,
   structureTransformations,
+});
+
+export const createStructureTransformation = ({
+  id = 7,
+  type = StructureTransformationType.CREATION,
+  ...overrides
+}: Partial<StructureTransformationApiReadItem> = {}): StructureTransformationApiReadItem => ({
+  id,
+  type,
+  ...overrides,
 });

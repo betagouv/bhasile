@@ -8,6 +8,7 @@ import {
 } from "@/schemas/api/transformation.schema";
 import { StructureTransformationStep } from "@/types/transformation.type";
 
+import { CreationExNihiloActesAdministratifsForm } from "./CreationExNihiloActesAdministratifsForm";
 import { CreationExNihiloIdentificationForm } from "./CreationExNihiloIdentificationForm";
 import { CreationExNihiloPlacesEtHebergementForm } from "./CreationExNihiloPlacesEtHebergementForm";
 
@@ -37,6 +38,18 @@ export const CreationExNihiloFlow = ({
   ) {
     return (
       <CreationExNihiloPlacesEtHebergementForm
+        transformation={transformation}
+        structureTransformation={structureTransformation}
+      />
+    );
+  }
+
+  if (
+    transformationStructureStep ===
+    StructureTransformationStep.ACTES_ADMINISTRATIFS
+  ) {
+    return (
+      <CreationExNihiloActesAdministratifsForm
         transformation={transformation}
         structureTransformation={structureTransformation}
       />

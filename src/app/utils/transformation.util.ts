@@ -1,7 +1,7 @@
 import {
   STRUCTURE_TRANSFORMATION_TYPE_ORDER,
   TRANSFORMATION_TYPE_SPECS,
-} from "@/app/config/transformation.config";
+} from "@/config/transformation.config";
 import {
   StructureTransformationApiUpdate,
   StructureVersionApiRead,
