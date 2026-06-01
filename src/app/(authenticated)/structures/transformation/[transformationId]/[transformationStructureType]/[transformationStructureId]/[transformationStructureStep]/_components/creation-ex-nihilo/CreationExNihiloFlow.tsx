@@ -44,5 +44,17 @@ export const CreationExNihiloFlow = ({
     );
   }
 
+  if (
+    transformationStructureStep ===
+    StructureTransformationStep.ACTES_ADMINISTRATIFS
+  ) {
+    return (
+      <CreationExNihiloActesAdministratifsForm
+        transformation={transformation}
+        structureTransformation={structureTransformation}
+      />
+    );
+  }
+
   return null;
 };
