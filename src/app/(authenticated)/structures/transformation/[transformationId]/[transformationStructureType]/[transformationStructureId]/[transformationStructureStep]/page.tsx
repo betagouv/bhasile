@@ -76,8 +76,8 @@ const renderFlow = (
       if (transformation.type === TransformationType.OUVERTURE_EX_NIHILO) {
         return (
           <CreationExNihiloFlow
-            structureTransformation={structureTransformation}
             transformation={transformation}
+            structureTransformation={structureTransformation}
           />
         );
       }

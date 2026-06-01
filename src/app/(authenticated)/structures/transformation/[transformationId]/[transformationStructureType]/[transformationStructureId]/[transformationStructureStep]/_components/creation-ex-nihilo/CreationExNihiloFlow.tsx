@@ -12,19 +12,22 @@ import { CreationExNihiloActesAdministratifsForm } from "./CreationExNihiloActes
 import { CreationExNihiloIdentificationForm } from "./CreationExNihiloIdentificationForm";
 
 type Props = {
-  structureTransformation: StructureTransformationApiRead;
   transformation: TransformationApiRead;
+  structureTransformation: StructureTransformationApiRead;
 };
 
 export const CreationExNihiloFlow = ({
-  structureTransformation,
   transformation,
+  structureTransformation,
 }: Props) => {
   const { transformationStructureStep } = useParams();
 
   if (transformationStructureStep === StructureTransformationStep.DESCRIPTION) {
     return (
-      <CreationExNihiloIdentificationForm transformation={transformation} />
+      <CreationExNihiloIdentificationForm
+        transformation={transformation}
+        structureTransformation={structureTransformation}
+      />
     );
   }
 
