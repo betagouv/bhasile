@@ -1,7 +1,5 @@
 "use client";
 
-import { notFound, useParams } from "next/navigation";
-
 import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
 import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
@@ -11,7 +9,10 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getTransformationStructureVersionDefaultValues } from "@/app/utils/transformation.util";
-import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import {
+  StructureTransformationApiRead,
+  TransformationApiRead,
+} from "@/schemas/api/transformation.schema";
 import {
   CreationIdentificationFormValues,
   creationIdentificationSchema,
@@ -20,20 +21,13 @@ import { FormKind } from "@/types/global";
 
 type Props = {
   transformation: TransformationApiRead;
+  structureTransformation: StructureTransformationApiRead;
 };
 
 export const CreationExNihiloIdentificationForm = ({
   transformation,
+  structureTransformation,
 }: Props) => {
-  const { transformationStructureId } = useParams();
-  const structureTransformation = transformation.structureTransformations.find(
-    (st) => st.id === Number(transformationStructureId)
-  );
-
-  if (!structureTransformation) {
-    notFound();
-  }
-
   const { handleValidation } = useTransformationFormHandling();
 
   const defaultValues = {
@@ -54,9 +48,12 @@ export const CreationExNihiloIdentificationForm = ({
           structureTransformation: {
             id: structureTransformation.id,
             type: structureTransformation.type,
-            date: creationDate,
             operateurId: operateur?.id,
-            structureVersion: { ...rest, creationDate },
+            structureVersion: {
+              ...rest,
+              creationDate,
+              effectiveDate: creationDate,
+            },
           },
         });
       }}
