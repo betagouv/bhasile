@@ -10,7 +10,6 @@ import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSet
 import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTypeBati";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { useStructures } from "@/app/hooks/useStructures";
-import { transformFormAdressesToApiAdresses } from "@/app/utils/adresse.util";
 import { getYearFromDate } from "@/app/utils/date.util";
 import { getErrorEmail } from "@/app/utils/errorMail.util";
 import { CURRENT_YEAR } from "@/constants";
@@ -91,7 +90,7 @@ export const AdressesRecovery = ({ id }: { id: number }) => {
   const handleSubmit = async (data: TypeBatiAndAdressesFormValues) => {
     const result = await updateStructure({
       id,
-      adresses: transformFormAdressesToApiAdresses(data.adresses, id),
+      adresses: data.adresses,
       typeBati: data.typeBati,
     });
 

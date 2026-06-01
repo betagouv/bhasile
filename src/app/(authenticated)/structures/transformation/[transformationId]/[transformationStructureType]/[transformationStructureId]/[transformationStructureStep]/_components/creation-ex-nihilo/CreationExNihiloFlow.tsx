@@ -9,6 +9,7 @@ import {
 import { StructureTransformationStep } from "@/types/transformation.type";
 
 import { CreationExNihiloIdentificationForm } from "./CreationExNihiloIdentificationForm";
+import { CreationExNihiloPlacesEtHebergementForm } from "./CreationExNihiloPlacesEtHebergementForm";
 
 type Props = {
   transformation: TransformationApiRead;
@@ -24,6 +25,18 @@ export const CreationExNihiloFlow = ({
   if (transformationStructureStep === StructureTransformationStep.DESCRIPTION) {
     return (
       <CreationExNihiloIdentificationForm
+        transformation={transformation}
+        structureTransformation={structureTransformation}
+      />
+    );
+  }
+
+  if (
+    transformationStructureStep ===
+    StructureTransformationStep.PLACES_ET_HEBERGEMENT
+  ) {
+    return (
+      <CreationExNihiloPlacesEtHebergementForm
         transformation={transformation}
         structureTransformation={structureTransformation}
       />

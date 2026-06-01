@@ -72,9 +72,19 @@ export type StructureTransformationApiRead =
 export type TransformationApiUpdate = z.infer<
   typeof transformationApiUpdateSchema
 >;
+
 export type TransformationApiCreate = z.infer<
   typeof transformationApiCreateSchema
 >;
+
+export type TransformationApiUpdateClient = z.input<
+  typeof transformationApiUpdateSchema
+>;
+
+export type StructureTransformationApiUpdateClient = z.input<
+  typeof structureTransformationApiUpdateSchema
+>;
+
 export type TransformationApiRead = Omit<
   TransformationApiUpdate,
   "structureTransformations"

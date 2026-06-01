@@ -128,7 +128,14 @@ export type StructureAgentUpdateApiType = z.infer<
   typeof structureAgentUpdateApiSchema
 >;
 
+export type StructureAgentUpdateApiClient = z.input<
+  typeof structureAgentUpdateApiSchema
+>;
+
 export type StructureApiWrite = z.infer<typeof structureApiSchema>;
+
+export type StructureApiWriteClient = z.input<typeof structureApiSchema>;
+
 export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   debutConvention: string | null;
   finConvention: string | null;
