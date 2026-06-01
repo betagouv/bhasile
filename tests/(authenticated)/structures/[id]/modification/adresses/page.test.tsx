@@ -49,8 +49,8 @@ describe("ModificationAdresses page integration", () => {
         adresseTypologies?: Array<{
           year: number;
           placesAutorisees: number;
-          qpv: number;
-          logementSocial: number;
+          qpv: boolean;
+          logementSocial: boolean;
         }>;
       }>;
     }>(mockedFetch);
@@ -66,8 +66,8 @@ describe("ModificationAdresses page integration", () => {
           adresseTypologies: expect.arrayContaining([
             expect.objectContaining({
               placesAutorisees: 10,
-              qpv: 0,
-              logementSocial: 0,
+              qpv: false,
+              logementSocial: false,
             }),
           ]),
         }),

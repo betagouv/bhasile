@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import {
   StructureTransformationApiRead,
-  StructureTransformationApiUpdate,
+  StructureTransformationApiUpdateClient,
 } from "@/schemas/api/transformation.schema";
 import {
   StructureTransformationStep,
@@ -57,7 +57,7 @@ const buildTransformation = () =>
 
 const buildPayload = (): {
   transformationId: number;
-  structureTransformation: StructureTransformationApiUpdate;
+  structureTransformation: StructureTransformationApiUpdateClient;
 } => ({
   transformationId: 12,
   structureTransformation: {

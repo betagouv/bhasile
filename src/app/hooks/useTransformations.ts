@@ -2,14 +2,14 @@ import { useFetchState } from "@/app/context/FetchStateContext";
 import {
   TransformationApiCreate,
   TransformationApiRead,
-  TransformationApiUpdate,
+  TransformationApiUpdateClient,
 } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
 
 const createOrUpdateTransformation = async (
   url: string,
   method: "POST" | "PUT",
-  transformation: TransformationApiCreate | TransformationApiUpdate
+  transformation: TransformationApiCreate | TransformationApiUpdateClient
 ): Promise<number> => {
   const response = await fetch(url, {
     method,
@@ -48,7 +48,7 @@ export const useTransformations = () => {
 
   const updateTransformation = async (
     id: number,
-    transformation: TransformationApiUpdate,
+    transformation: TransformationApiUpdateClient,
     setTransformation: (transformation: TransformationApiRead) => void
   ): Promise<number> => {
     setFetchState("transformation-save", FetchState.LOADING);
