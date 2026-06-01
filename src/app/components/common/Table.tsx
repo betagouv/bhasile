@@ -72,7 +72,10 @@ export const Table = ({
     >
       <div
         ref={scrollableAreaRef}
-        className="w-full max-w-full min-w-0 overflow-x-auto"
+        className={cn(
+          "w-full max-w-full min-w-0 overflow-x-auto",
+          stickFirstColumn && "pb-3"
+        )}
         style={stickFirstColumn ? { contain: "inline-size" } : undefined}
       >
         <table
