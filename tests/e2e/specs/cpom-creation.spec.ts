@@ -94,7 +94,6 @@ test.describe("CPOM creation", () => {
     page,
     structuresPool,
   }) => {
-    // Île-de-France: 75, 77, 78, 91, 92, 93, 94, 95
     const ILE_DE_FRANCE_NUMEROS = [
       "75",
       "77",
@@ -112,7 +111,7 @@ test.describe("CPOM creation", () => {
       granularity: "REGIONALE",
       operateurSearch: "Opér",
       region: "Île-de-France",
-      departementNumeros: [], // not used: REGIONALE auto-selects all departements of the region
+      departementNumeros: [],
       acteStartDate: "2024-01-01",
       acteEndDate: "2025-12-31",
       structureIds: [structuresPool[0].id],

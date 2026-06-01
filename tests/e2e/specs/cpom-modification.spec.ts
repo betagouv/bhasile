@@ -7,8 +7,6 @@ test.describe("CPOM modification", () => {
     page,
     seededCpom,
   }) => {
-    // Seeded CPOM defaults to DEPARTEMENTALE in Île-de-France with dept 75.
-    // We switch to 92 (also in Île-de-France).
     const modification = new CpomModificationPage(page, seededCpom.id);
     await modification.goto("description");
     await modification.selectDepartement("92");
