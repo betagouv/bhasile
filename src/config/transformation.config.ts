@@ -1,3 +1,7 @@
+import {
+  AdditionalFieldsType,
+  CategoryDisplayRules,
+} from "@/config/acte-administratif.config";
 import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { StructureType } from "@/types/structure.type";
 import {
@@ -223,3 +227,52 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     buildAutoTransformations: () => [],
   },
 };
+
+export const creationExNihiloActesAdministratifsCategoryToDisplay: CategoryDisplayRules =
+  {
+    ARRETE_AUTORISATION: {
+      categoryShortName: "arrêté",
+      title: "Arrêté d'autorisation",
+      canAddFile: false,
+      canAddAvenant: false,
+      isOptional: false,
+      shouldShow: true,
+      additionalFieldsType: AdditionalFieldsType.DATE_START_END,
+      documentLabel: "Document",
+      addFileButtonLabel: "Ajouter un arrêté d'autorisation",
+    },
+    CONVENTION: {
+      categoryShortName: "convention",
+      title: "Convention",
+      canAddFile: false,
+      canAddAvenant: false,
+      isOptional: false,
+      shouldShow: true,
+      additionalFieldsType: AdditionalFieldsType.DATE_START_END,
+      documentLabel: "Document",
+      addFileButtonLabel: "Ajouter une convention",
+    },
+    ARRETE_TARIFICATION: {
+      categoryShortName: "arrêté",
+      title: "Arrêté de tarification",
+      canAddFile: false,
+      canAddAvenant: false,
+      isOptional: false,
+      shouldShow: true,
+      additionalFieldsType: AdditionalFieldsType.DATE_START_END,
+      documentLabel: "Document",
+      addFileButtonLabel: "Ajouter un arrêté de tarification",
+    },
+    AUTRE: {
+      categoryShortName: "autre",
+      title: "Autres documents",
+      canAddFile: true,
+      canAddAvenant: false,
+      isOptional: true,
+      shouldShow: true,
+      additionalFieldsType: AdditionalFieldsType.NAME,
+      documentLabel: "Document",
+      addFileButtonLabel: "Ajouter un document",
+      notice: `Dans cette catégorie, vous avez la possibilité d'importer d'autres documents utiles à l'analyse de la structure (ex: Plans Pluriannuels d'Investissements)`,
+    },
+  };

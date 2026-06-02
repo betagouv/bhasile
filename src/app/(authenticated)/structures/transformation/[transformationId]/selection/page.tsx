@@ -1,7 +1,7 @@
 "use client";
 
 import { TransformationTypeForms } from "@/app/components/forms/transformation-types/TransformationTypeForms";
-import { TRANSFORMATION_TYPE_SPECS } from "@/app/config/transformation.config";
+import { TRANSFORMATION_TYPE_SPECS } from "@/config/transformation.config";
 import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import {
   TransformationFormType,

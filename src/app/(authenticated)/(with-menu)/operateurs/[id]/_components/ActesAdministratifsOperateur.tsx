@@ -1,14 +1,14 @@
 import { ReactElement } from "react";
 
 import { ActesAdministratifsBlock } from "@/app/components/blocks/actesAdministratifs/ActesAdministratifsBlock";
-import { getOperateurActesAdministratifsCategoryToDisplay } from "@/config/acte-administratif.config";
+import { operateurActesAdministratifsCategoryToDisplay } from "@/config/operateur.config";
 
 import { useOperateurContext } from "../_context/OperateurClientContext";
 
 export const ActesAdministratifsOperateur = (): ReactElement => {
   const { operateur } = useOperateurContext();
 
-  const categoriesRules = getOperateurActesAdministratifsCategoryToDisplay();
+  const categoriesRules = operateurActesAdministratifsCategoryToDisplay;
 
   return (
     <ActesAdministratifsBlock

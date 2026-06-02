@@ -1,7 +1,7 @@
 import {
   STRUCTURE_TRANSFORMATION_TYPE_ORDER,
   TRANSFORMATION_TYPE_SPECS,
-} from "@/app/config/transformation.config";
+} from "@/config/transformation.config";
 import {
   StructureTransformationApiUpdate,
   StructureVersionApiRead,
@@ -14,6 +14,8 @@ import {
   TransformationFormType,
   TransformationType,
 } from "@/types/transformation.type";
+
+import { transformApiAdressesToFormAdresses } from "./adresse.util";
 
 export const getTransformationTitle = (
   type: TransformationType | TransformationFormType | undefined
@@ -188,7 +190,11 @@ export type Step = {
 
 export const getTransformationStructureVersionDefaultValues = <T>(
   structureVersion?: StructureVersionApiRead
-): DeepPartial<T> => ({ ...structureVersion }) as DeepPartial<T>;
+): DeepPartial<T> =>
+  ({
+    ...structureVersion,
+    adresses: transformApiAdressesToFormAdresses(structureVersion?.adresses),
+  }) as DeepPartial<T>;
 
 export const getStructureTransformationLabel = (
   type?: StructureTransformationType,

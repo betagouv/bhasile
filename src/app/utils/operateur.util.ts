@@ -1,4 +1,4 @@
-import { getOperateurActesAdministratifsCategoryToDisplay } from "@/config/acte-administratif.config";
+import { operateurActesAdministratifsCategoryToDisplay } from "@/config/operateur.config";
 import { OperateurApiRead } from "@/schemas/api/operateur.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { OperateurUpdateFormValues } from "@/schemas/forms/base/operateur.schema";
@@ -24,7 +24,7 @@ export const getOperateurDefaultValues = (
     vulnerabilites: operateur?.vulnerabilites || [],
     actesAdministratifs: getActesAdministratifsDefaultValues(
       operateur?.actesAdministratifs,
-      getOperateurActesAdministratifsCategoryToDisplay()
+      operateurActesAdministratifsCategoryToDisplay
     ),
   };
 };

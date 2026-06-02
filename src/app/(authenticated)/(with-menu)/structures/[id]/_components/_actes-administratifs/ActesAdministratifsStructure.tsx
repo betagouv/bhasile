@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
 import { ActesAdministratifsBlock } from "@/app/components/blocks/actesAdministratifs/ActesAdministratifsBlock";
-import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/acte-administratif.config";
+import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 
 import { useStructureContext } from "../../_context/StructureClientContext";

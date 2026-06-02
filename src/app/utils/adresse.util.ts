@@ -18,46 +18,8 @@ export const getDepartementFromCodePostal = (codePostal: string) =>
     ? (codePostal?.trim().slice(0, 3) ?? "")
     : (codePostal?.trim().slice(0, 2) ?? "")) || "";
 
-export const transformFormAdressesToApiAdresses = (
-  adresses: FormAdresse[] = [],
-  id?: number
-): AdresseApiType[] => {
-  if (!adresses) {
-    return [];
-  }
-  return adresses
-    .filter(
-      (adresse) =>
-        adresse.adresse !== "" &&
-        adresse.codePostal !== "" &&
-        adresse.commune !== ""
-    )
-    .filter((adresse) => adresse.structureId || id)
-    .map((adresse) => {
-      return {
-        id: adresse.id,
-        structureId: adresse.structureId || id,
-        adresse: adresse.adresse,
-        codePostal: adresse.codePostal,
-        commune: adresse.commune,
-        repartition: adresse.repartition,
-        adresseTypologies:
-          adresse.adresseTypologies?.map((adresseTypologie) => ({
-            ...adresseTypologie,
-            placesAutorisees: Number(adresseTypologie.placesAutorisees),
-            logementSocial: adresseTypologie.logementSocial
-              ? Number(adresseTypologie.placesAutorisees)
-              : 0,
-            qpv: adresseTypologie.qpv
-              ? Number(adresseTypologie.placesAutorisees)
-              : 0,
-          })) || [],
-      };
-    });
-};
-
 export const transformApiAdressesToFormAdresses = (
-  adresses?: AdresseApiType[]
+  adresses?: Partial<AdresseApiType>[]
 ): FormAdresse[] | undefined =>
   adresses?.map((adresse) => ({
     ...adresse,
