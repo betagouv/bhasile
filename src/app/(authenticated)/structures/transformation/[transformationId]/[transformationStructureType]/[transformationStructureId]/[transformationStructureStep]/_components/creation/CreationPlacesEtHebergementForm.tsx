@@ -23,7 +23,7 @@ type Props = {
   structureTransformation: StructureTransformationApiRead;
 };
 
-export const CreationExNihiloPlacesEtHebergementForm = ({
+export const CreationPlacesEtHebergementForm = ({
   transformation,
   structureTransformation,
 }: Props) => {
@@ -62,7 +62,7 @@ export const CreationExNihiloPlacesEtHebergementForm = ({
 
       <FieldSetTypeBati />
 
-      <FieldSetHebergement formKind={FormKind.CREATION_EX_NIHILO} />
+      <FieldSetHebergement formKind={FormKind.OUVERTURE_EX_NIHILO} />
     </FormWrapper>
   );
 };

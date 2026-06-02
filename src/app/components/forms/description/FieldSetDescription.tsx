@@ -30,8 +30,8 @@ export const FieldSetDescription = ({
   const title = getTitle(formKind);
 
   const isCreation =
-    formKind === FormKind.CREATION_EX_NIHILO ||
-    formKind === FormKind.CREATION_FROM_STRUCTURE;
+    formKind === FormKind.OUVERTURE_EX_NIHILO ||
+    formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES;
 
   return (
     <>
@@ -186,10 +186,10 @@ type Props = {
 const getTitle = (formKind: FormKind): string => {
   if (
     formKind === FormKind.MODIFICATION ||
-    formKind === FormKind.CREATION_EX_NIHILO
+    formKind === FormKind.OUVERTURE_EX_NIHILO
   ) {
     return "Général";
-  } else if (formKind === FormKind.CREATION_FROM_STRUCTURE) {
+  } else if (formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES) {
     return "Veuillez renseigner les champs suivants en considérant l’ensemble de la nouvelle structure.";
   }
   return "Description";

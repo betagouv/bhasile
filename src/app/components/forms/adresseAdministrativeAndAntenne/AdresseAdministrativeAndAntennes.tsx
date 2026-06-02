@@ -22,11 +22,11 @@ export const AdresseAdministrativeAndAntennes = ({
   return (
     <>
       <h2 className="text-xl font-bold mb-4 text-title-blue-france">
-        {formKind === FormKind.CREATION_FROM_STRUCTURE
+        {formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
           ? "Veuillez saisir l’adresse administrative principale de la structure."
           : "Adresses administratives"}
       </h2>
-      {formKind !== FormKind.CREATION_FROM_STRUCTURE && (
+      {formKind !== FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES && (
         <>
           <CustomNotice
             severity="info"
@@ -51,7 +51,7 @@ export const AdresseAdministrativeAndAntennes = ({
         </>
       )}
       <FieldSetAdresseAdministrative formKind={formKind} />
-      {formKind === FormKind.CREATION_FROM_STRUCTURE && (
+      {formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES && (
         <>
           <hr />
           <div className="flex gap-6">

@@ -20,8 +20,9 @@ export const FormKind = {
   MODIFICATION: "modification",
   FINALISATION: "finalisation",
   ADRESSES_RECOVERY: "adresses-recovery",
-  CREATION_EX_NIHILO: "creation-ex-nihilo",
-  CREATION_FROM_STRUCTURE: "creation-from-structure",
+  OUVERTURE_EX_NIHILO: "ouverture-ex-nihilo",
+  OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES:
+    "ouverture-depuis-une-ou-plusieurs-structures",
 } as const;
 
 export type FormKind = (typeof FormKind)[keyof typeof FormKind];

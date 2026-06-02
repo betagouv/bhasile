@@ -22,11 +22,13 @@ import { FormKind } from "@/types/global";
 type Props = {
   transformation: TransformationApiRead;
   structureTransformation: StructureTransformationApiRead;
+  formKind: FormKind;
 };
 
-export const CreationExNihiloIdentificationForm = ({
+export const CreationIdentificationForm = ({
   transformation,
   structureTransformation,
+  formKind,
 }: Props) => {
   const { handleValidation } = useTransformationFormHandling();
 
@@ -34,7 +36,10 @@ export const CreationExNihiloIdentificationForm = ({
     ...getTransformationStructureVersionDefaultValues<CreationIdentificationFormValues>(
       structureTransformation.structureVersion
     ),
+    // TODO: move those server-side once every PR is merged
     operateur: structureTransformation.operateur,
+    isMultiAntenne:
+      (structureTransformation.structureVersion?.antennes?.length ?? 0) > 0,
   };
 
   return (
@@ -61,19 +66,19 @@ export const CreationExNihiloIdentificationForm = ({
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       showContactInfos={false}
     >
-      <FieldSetDescription formKind={FormKind.CREATION_EX_NIHILO} />
+      <FieldSetDescription formKind={formKind} />
 
       <hr />
 
-      <AdresseAdministrativeAndAntennes />
+      <AdresseAdministrativeAndAntennes formKind={formKind} />
 
       <hr />
 
-      <DnaAndFiness formKind={FormKind.CREATION_EX_NIHILO} />
+      <DnaAndFiness formKind={formKind} />
 
       <hr />
 
-      <FieldSetContacts />
+      <FieldSetContacts formKind={formKind} />
     </FormWrapper>
   );
 };

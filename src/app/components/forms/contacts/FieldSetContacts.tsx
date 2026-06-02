@@ -33,7 +33,7 @@ export const FieldSetContacts = ({
   const contacts = watchedContacts?.length ? watchedContacts : [emptyContact];
 
   const title =
-    formKind === FormKind.CREATION_FROM_STRUCTURE
+    formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
       ? "Veuillez mettre à jour les contacts afin de ne conserver que ceux qui sont adaptés à la nouvelle structure."
       : "Contacts";
 
@@ -71,7 +71,7 @@ export const FieldSetContacts = ({
         <Contact
           key={index}
           isMultiAntenne={
-            isMultiAntenne || formKind === FormKind.CREATION_FROM_STRUCTURE
+            isMultiAntenne || formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
           }
           handleDelete={handleDelete}
           index={index}

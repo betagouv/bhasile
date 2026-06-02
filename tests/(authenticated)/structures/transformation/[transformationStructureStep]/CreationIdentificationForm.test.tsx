@@ -2,11 +2,12 @@ import { render } from "@testing-library/react";
 import { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { CreationExNihiloIdentificationForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation-ex-nihilo/CreationExNihiloIdentificationForm";
+import { CreationIdentificationForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation/CreationIdentificationForm";
 import {
   StructureTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
+import { FormKind } from "@/types/global";
 import {
   StructureTransformationType,
   TransformationType,
@@ -59,7 +60,7 @@ vi.mock("@/app/components/forms/contacts/FieldSetContacts", () => ({
   FieldSetContacts: () => null,
 }));
 
-describe("CreationExNihiloIdentificationForm", () => {
+describe("CreationIdentificationForm", () => {
   it("should pass the structureVersion as defaultValues, including its id", () => {
     // GIVEN
     const structureTransformation: StructureTransformationApiRead = {
@@ -80,9 +81,10 @@ describe("CreationExNihiloIdentificationForm", () => {
 
     // WHEN
     render(
-      <CreationExNihiloIdentificationForm
+      <CreationIdentificationForm
         transformation={transformation}
         structureTransformation={structureTransformation}
+        formKind={FormKind.OUVERTURE_EX_NIHILO}
       />
     );
 
@@ -108,9 +110,10 @@ describe("CreationExNihiloIdentificationForm", () => {
       structureTransformations: [structureTransformation],
     };
     render(
-      <CreationExNihiloIdentificationForm
+      <CreationIdentificationForm
         transformation={transformation}
         structureTransformation={structureTransformation}
+        formKind={FormKind.OUVERTURE_EX_NIHILO}
       />
     );
 

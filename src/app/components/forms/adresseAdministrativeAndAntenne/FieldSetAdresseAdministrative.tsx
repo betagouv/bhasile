@@ -50,7 +50,7 @@ export const FieldSetAdresseAdministrative = ({
 
   return (
     <fieldset className="flex flex-col gap-3">
-      {formKind !== FormKind.CREATION_FROM_STRUCTURE && (
+      {formKind !== FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES && (
         <legend className="text-lg font-bold mb-2 text-title-blue-france">
           Structure
         </legend>
