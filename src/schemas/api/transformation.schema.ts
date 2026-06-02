@@ -64,6 +64,7 @@ export type StructureTransformationApiRead =
     structureVersion?: StructureVersionApiRead & {
       structure?: {
         codeBhasile: string;
+        departementAdministratif?: string;
         operateur?: { id: number; name: string };
       };
     };
@@ -90,5 +91,7 @@ export type TransformationApiRead = Omit<
   "structureTransformations"
 > & {
   id: number;
+  createdAt?: string;
+  updatedAt?: string;
   structureTransformations: StructureTransformationApiRead[];
 };

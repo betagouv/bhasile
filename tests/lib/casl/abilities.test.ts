@@ -31,6 +31,16 @@ describe("Permissions : canUpdateStructure", () => {
     expect(canUpdateStructure(user, structure69)).toBe(true);
   });
 
+  it("should allow a user with role NATIONAL to update any structure even with empty allowedDepartements", () => {
+    const user = {
+      id: "user1bis",
+      role: "NATIONAL",
+      allowedDepartements: [] as string[],
+    } as SessionUser;
+
+    expect(canUpdateStructure(user, structure69)).toBe(true);
+  });
+
   it("should allow a user with role DEPARTEMENT to update structure if department in allowedDepartments", () => {
     const user = {
       id: "user2",

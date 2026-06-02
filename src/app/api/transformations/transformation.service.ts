@@ -1,15 +1,19 @@
 import { recursivelySerializeDates } from "@/app/utils/date.util";
+import { getTransformationDepartement } from "@/app/utils/transformation.util";
+import { canUpdateDepartement } from "@/lib/casl/abilities";
 import {
   TransformationApiCreate,
   TransformationApiRead,
   TransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
+import { SessionUser } from "@/types/global";
 
 import { dbStructureVersionToApiRead } from "../structure-versions/structure-version.service";
 import { TransformationDbDetails } from "./transformation.db.type";
 import {
   createOne,
   deleteOne,
+  findAll,
   findOne,
   updateOne,
 } from "./transformation.repository";
@@ -40,6 +44,17 @@ export const getTransformation = async (
     return null;
   }
   return dbTransformationToApiRead(dbTransformation);
+};
+
+export const getOngoingTransformationsForUser = async (
+  user: SessionUser
+): Promise<TransformationApiRead[]> => {
+  const dbTransformations = await findAll();
+  return dbTransformations
+    .map(dbTransformationToApiRead)
+    .filter((transformation) =>
+      canUpdateDepartement(user, getTransformationDepartement(transformation))
+    );
 };
 
 export const createTransformation = async (

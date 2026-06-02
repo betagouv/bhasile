@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
+import { getServerSession } from "next-auth";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { POST } from "@/app/api/transformations/route";
+import { GET, POST } from "@/app/api/transformations/route";
 import {
   StructureTransformationType,
   TransformationType,
@@ -10,12 +11,19 @@ import {
 const mockCreateOne = vi.fn();
 const mockFindOne = vi.fn();
 const mockUpdateOne = vi.fn();
+const mockFindAll = vi.fn();
 
 vi.mock("@/app/api/transformations/transformation.repository", () => ({
   createOne: (...args: unknown[]) => mockCreateOne(...args),
   findOne: (...args: unknown[]) => mockFindOne(...args),
   updateOne: (...args: unknown[]) => mockUpdateOne(...args),
+  findAll: (...args: unknown[]) => mockFindAll(...args),
 }));
+
+vi.mock("@/lib/next-auth/auth", () => ({ authOptions: {} }));
+vi.mock("next-auth", () => ({ getServerSession: vi.fn() }));
+
+const mockGetServerSession = vi.mocked(getServerSession);
 
 describe("POST /api/transformations", () => {
   beforeEach(() => {
@@ -62,5 +70,40 @@ describe("POST /api/transformations", () => {
 
     expect(response.status).toBe(400);
     expect(mockCreateOne).not.toHaveBeenCalled();
+  });
+});
+
+describe("GET /api/transformations", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns ongoing transformations the agent can access", async () => {
+    mockGetServerSession.mockResolvedValueOnce({
+      user: {
+        id: "1",
+        name: "Agent",
+        email: "agent@example.com",
+        role: "DEPARTEMENT",
+        allowedDepartements: ["50"],
+      },
+    } as never);
+    mockFindAll.mockResolvedValueOnce([]);
+
+    const response = await GET();
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual([]);
+    expect(mockFindAll).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns an empty list when unauthenticated", async () => {
+    mockGetServerSession.mockResolvedValueOnce(null);
+
+    const response = await GET();
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual([]);
+    expect(mockFindAll).not.toHaveBeenCalled();
   });
 });
