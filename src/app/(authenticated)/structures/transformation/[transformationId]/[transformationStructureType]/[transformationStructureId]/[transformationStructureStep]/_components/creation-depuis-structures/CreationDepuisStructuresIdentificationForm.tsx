@@ -34,9 +34,8 @@ export const CreationDepuisStructuresIdentificationForm = ({
     ...getTransformationStructureVersionDefaultValues<CreationIdentificationFormValues>(
       structureTransformation.structureVersion
     ),
+    // TODO: move those server-side once every PR is merged
     operateur: structureTransformation.operateur,
-    // Champ d'UI (hors schéma) : on l'active si la structure a déjà des sites
-    // (pré-remplis côté serveur à la création de la transformation).
     isMultiAntenne:
       (structureTransformation.structureVersion?.antennes?.length ?? 0) > 0,
   };
