@@ -126,7 +126,7 @@ export default function FieldSetActeAdministratif({
                 setValue(
                   `actesAdministratifs.${radioActeIndex}.category`,
                   groupCategory,
-                  { shouldValidate: true, shouldDirty: true }
+                  { shouldValidate: true }
                 ),
             },
           }))}
