@@ -130,15 +130,21 @@ const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
   }
 );
 
-const acteAdministratifCreationExNihiloSchema = acteAdministratifSchema.refine(
+const REQUIRED_CREATION_CATEGORIES: (ActeAdministratifCategory | undefined)[] = [
+  "ARRETE_AUTORISATION",
+  "ARRETE_FUSION",
+  "ARRETE_TARIFICATION",
+  "CONVENTION",
+  undefined,
+];
+
+const acteAdministratifCreationSchema = acteAdministratifSchema.refine(
   (data) => {
     const isNotAvenant = !data.parentId && !data.parentUuid;
-    if (
-      (data.category === "ARRETE_AUTORISATION" ||
-        data.category === "ARRETE_TARIFICATION" ||
-        data.category === "CONVENTION") &&
-      isNotAvenant
-    ) {
+    if (!isNotAvenant) {
+      return true;
+    }
+    if (REQUIRED_CREATION_CATEGORIES.includes(data.category)) {
       return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
     }
     return true;
@@ -164,7 +170,7 @@ export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
 );
 
 export const filterActesWithKey =
-  (allowedCategories: ActeAdministratifCategory[] = []) =>
+  (allowedCategories: (ActeAdministratifCategory | undefined)[] = []) =>
   (val: unknown) =>
     Array.isArray(val)
       ? val.filter(
@@ -174,7 +180,7 @@ export const filterActesWithKey =
           }) => {
             if (
               allowedCategories.includes(
-                acte?.category as ActeAdministratifCategory
+                acte?.category as ActeAdministratifCategory | undefined
               )
             ) {
               return true;
@@ -197,14 +203,10 @@ export const actesAdministratifsSubventionneesSchema = z.object({
   ),
 });
 
-export const actesAdministratifsCreationExNihiloSchema = z.object({
+export const actesAdministratifsCreationSchema = z.object({
   actesAdministratifs: z.preprocess(
-    filterActesWithKey([
-      "ARRETE_AUTORISATION",
-      "ARRETE_TARIFICATION",
-      "CONVENTION",
-    ]),
-    z.array(acteAdministratifCreationExNihiloSchema).optional()
+    filterActesWithKey(REQUIRED_CREATION_CATEGORIES),
+    z.array(acteAdministratifCreationSchema).optional()
   ),
 });
 

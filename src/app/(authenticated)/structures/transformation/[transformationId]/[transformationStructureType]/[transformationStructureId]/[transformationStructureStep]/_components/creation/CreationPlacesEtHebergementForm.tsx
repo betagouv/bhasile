@@ -17,6 +17,7 @@ import {
   creationPlacesEtHebergementSchema,
 } from "@/schemas/forms/transformation/creationPlacesEtHebergement.schema";
 import { FormKind } from "@/types/global";
+import { TransformationType } from "@/types/transformation.type";
 
 type Props = {
   transformation: TransformationApiRead;
@@ -33,6 +34,11 @@ export const CreationPlacesEtHebergementForm = ({
     getTransformationStructureVersionDefaultValues<CreationPlacesEtHebergementFormValues>(
       structureTransformation.structureVersion
     );
+
+  const formKind =
+    transformation.type === TransformationType.OUVERTURE_EX_NIHILO
+      ? FormKind.OUVERTURE_EX_NIHILO
+      : FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES;
 
   return (
     <FormWrapper
@@ -60,9 +66,9 @@ export const CreationPlacesEtHebergementForm = ({
 
       <hr />
 
-      <FieldSetTypeBati />
+      <FieldSetTypeBati formKind={formKind} />
 
-      <FieldSetHebergement formKind={FormKind.OUVERTURE_EX_NIHILO} />
+      <FieldSetHebergement formKind={formKind} />
     </FormWrapper>
   );
 };

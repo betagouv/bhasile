@@ -6,13 +6,13 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getActesAdministratifsDefaultValues } from "@/app/utils/acteAdministratif.util";
-import { creationExNihiloActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
+import { getCreationActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   StructureTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
-import { creationActesAdministratifsSchema } from "@/schemas/forms/transformation/creationActesAdministratifs.schema";
+import { actesAdministratifsCreationSchema } from "@/schemas/forms/base/acteAdministratif.schema";
 
 type Props = {
   structureTransformation: StructureTransformationApiRead;
@@ -25,8 +25,9 @@ export const CreationActesAdministratifsForm = ({
 }: Props) => {
   const { handleValidation, prevStep } = useTransformationFormHandling();
 
-  const categoryDisplayRules =
-    creationExNihiloActesAdministratifsCategoryToDisplay;
+  const categoryDisplayRules = getCreationActesAdministratifsCategoryToDisplay(
+    transformation.type
+  );
 
   const defaultValues = {
     actesAdministratifs: getActesAdministratifsDefaultValues(
@@ -37,7 +38,7 @@ export const CreationActesAdministratifsForm = ({
 
   return (
     <FormWrapper
-      schema={creationActesAdministratifsSchema}
+      schema={actesAdministratifsCreationSchema}
       defaultValues={defaultValues}
       onSubmit={(data) => {
         handleValidation({

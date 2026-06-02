@@ -19,6 +19,7 @@ export type CategoryDisplayRule = {
   documentLabel: string;
   addFileButtonLabel: string;
   notice?: string | ReactElement;
+  alternativeCategories?: ActeAdministratifCategory[];
 };
 
 export type CategoryDisplayRules = Partial<

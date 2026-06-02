@@ -26,6 +26,7 @@ export const getCategoryLabel = (
     COMPTE_RENDU_FINANCIER: "Compte-rendu financier",
     RAPPORT_ACTIVITE_OPERATEUR: "Rapport d'activité de l'opérateur",
     ARRETE_AUTORISATION: "Arrêté d'autorisation",
+    ARRETE_FUSION: "Arrêté de fusion",
     CONVENTION: "Convention",
     ARRETE_TARIFICATION: "Arrêté de tarification",
     FRAIS_DE_SIEGE: "Frais de siège",

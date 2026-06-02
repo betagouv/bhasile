@@ -11,21 +11,24 @@ export const getActesAdministratifsDefaultValues = (
   actesAdministratifs: ActeAdministratifFormValues[] | undefined,
   categoryRules: CategoryDisplayRules
 ): ActeAdministratifFormValues[] => {
-  const categoriesToDisplay = (
+  const rulesToDisplay = (
     Object.entries(categoryRules) as [
       ActeAdministratifCategory,
       CategoryDisplayRule,
     ][]
-  )
-    .filter(([, rules]) => rules.shouldShow)
-    .map(([category]) => category);
+  ).filter(([, rules]) => rules.shouldShow);
 
-  const missingCategories = categoriesToDisplay.filter(
-    (category) =>
-      !actesAdministratifs?.some(
-        (acteAdministratif) => acteAdministratif.category === category
+  const missingRules = rulesToDisplay.filter(([category, rules]) => {
+    const groupCategories: ActeAdministratifCategory[] = [
+      category,
+      ...(rules.alternativeCategories ?? []),
+    ];
+    return !actesAdministratifs?.some((acteAdministratif) =>
+      groupCategories.includes(
+        acteAdministratif.category as ActeAdministratifCategory
       )
-  );
+    );
+  });
 
   return [
     ...(actesAdministratifs?.map((acteAdministratif) => ({
@@ -38,7 +41,7 @@ export const getActesAdministratifsDefaultValues = (
       parentId: acteAdministratif.parentId || undefined,
       fileUploads: acteAdministratif.fileUploads || undefined,
     })) || []),
-    ...missingCategories.map((category) => ({
+    ...missingRules.map(([category]) => ({
       uuid: uuidv4(),
       category,
     })),
