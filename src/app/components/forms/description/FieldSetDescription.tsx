@@ -37,7 +37,7 @@ export const FieldSetDescription = ({
     <>
       {isCreation ? (
         <>
-          <fieldset className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <InputWithValidation
               name="creationDate"
               control={control}
@@ -45,7 +45,7 @@ export const FieldSetDescription = ({
               label="Date d’ouverture"
               id="creationDate"
             />
-          </fieldset>
+          </div>
           <hr />
         </>
       ) : null}
@@ -189,7 +189,9 @@ const getTitle = (formKind: FormKind): string => {
     formKind === FormKind.OUVERTURE_EX_NIHILO
   ) {
     return "Général";
-  } else if (formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES) {
+  } else if (
+    formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
+  ) {
     return "Veuillez renseigner les champs suivants en considérant l’ensemble de la nouvelle structure.";
   }
   return "Description";

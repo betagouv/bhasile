@@ -55,16 +55,16 @@ export const AdresseAdministrativeAndAntennes = ({
         <>
           <hr />
           <div className="flex gap-6">
-            <legend
-              id="isMultiAntenne-legend"
+            <h2
+              id="isMultiAntenne-title"
               className="text-xl font-bold mb-4 text-title-blue-france flex-1"
             >
               Est-ce que la structure est répartie en plusieurs sites
               administratifs distants ? Si oui, veuillez nommer chacun des
               sites.
-            </legend>
+            </h2>
             <RadioButtons
-              aria-labelledby="isMultiAntenne-legend"
+              aria-labelledby="isMultiAntenne-title"
               orientation="horizontal"
               name="isMultiAntenne"
               options={[

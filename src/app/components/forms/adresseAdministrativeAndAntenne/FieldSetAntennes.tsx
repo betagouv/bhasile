@@ -2,6 +2,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { areAllValuesEmpty } from "@/app/utils/common.util";
 import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 
 import { DeleteButton } from "../../common/DeleteButton";
@@ -66,7 +67,7 @@ export const FieldSetAntennes = () => {
         Sites administratifs
       </legend>
 
-      {antennes.map((_, index) => (
+      {antennes.map((antenne, index) => (
         <div key={index} className="flex gap-6 items-end">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1">
             <div className="flex flex-col gap-1">
@@ -95,11 +96,14 @@ export const FieldSetAntennes = () => {
             </div>
           </div>
           <div className="w-8 mb-7">
-            <DeleteButton
-              onClick={() => handleDeleteAntenne(index)}
-              size="small"
-              backgroundColor="grey"
-            />
+            {(antennes.length > MIN_ANTENNES ||
+              !areAllValuesEmpty(antenne)) && (
+              <DeleteButton
+                onClick={() => handleDeleteAntenne(index)}
+                size="small"
+                backgroundColor="grey"
+              />
+            )}
           </div>
         </div>
       ))}

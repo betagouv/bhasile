@@ -2,6 +2,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
+import { areAllValuesEmpty } from "@/app/utils/common.util";
 import { ContactFormValues } from "@/schemas/forms/base/contact.schema";
 import { FormKind } from "@/types/global";
 
@@ -67,16 +68,18 @@ export const FieldSetContacts = ({
 
       <CustomNotice severity="info" title="" description={notice} />
 
-      {contacts.map((_, index) => (
-        <Contact
-          key={index}
-          isMultiAntenne={
-            isMultiAntenne || formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
-          }
-          handleDelete={handleDelete}
-          index={index}
-        />
-      ))}
+      {contacts.map((contact, index) => {
+        const canDelete =
+          contacts.length > MIN_CONTACTS || !areAllValuesEmpty(contact);
+        return (
+          <Contact
+            key={index}
+            isMultiAntenne={isMultiAntenne}
+            handleDelete={canDelete ? handleDelete : undefined}
+            index={index}
+          />
+        );
+      })}
 
       <Button
         type="button"
