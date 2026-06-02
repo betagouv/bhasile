@@ -274,7 +274,9 @@ describe("FieldSetDescription", () => {
         </FormTestWrapper>
       );
 
-      const typeSelect = screen.getByLabelText("Type") as HTMLSelectElement;
+      const typeSelect = screen.getByLabelText(
+        "Type de structure"
+      ) as HTMLSelectElement;
       expect(typeSelect).toBeInTheDocument();
       expect(typeSelect.value).toBe(StructureType.HUDA);
     });
