@@ -4,6 +4,7 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
+import { getCategoryGroup } from "@/app/utils/acteAdministratif.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
 import { AdditionalFieldsType } from "@/config/acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
@@ -35,10 +36,7 @@ export default function FieldSetActeAdministratif({
   const actesAdministratifs: ActeAdministratifFormValues[] =
     watch("actesAdministratifs") || [];
 
-  const groupCategories: ActeAdministratifCategory[] = [
-    category,
-    ...(alternativeCategories ?? []),
-  ];
+  const groupCategories = getCategoryGroup(category, alternativeCategories);
 
   const isInGroup = (acteCategory: ActeAdministratifCategory | undefined) => {
     if (alternativeCategories?.length) {

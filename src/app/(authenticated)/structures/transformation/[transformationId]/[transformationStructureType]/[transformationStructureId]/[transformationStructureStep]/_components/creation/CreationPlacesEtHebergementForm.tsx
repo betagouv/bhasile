@@ -52,6 +52,7 @@ export const CreationPlacesEtHebergementForm = ({
             type: structureTransformation.type,
             structureVersion: {
               id: structureTransformation.structureVersion?.id,
+              public: data.public,
               adresses: data.adresses,
               structureTypologies: data.structureTypologies,
             },

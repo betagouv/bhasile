@@ -7,6 +7,11 @@ import {
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
+export const getCategoryGroup = (
+  category: ActeAdministratifCategory,
+  alternativeCategories?: ActeAdministratifCategory[]
+): ActeAdministratifCategory[] => [category, ...(alternativeCategories ?? [])];
+
 export const getActesAdministratifsDefaultValues = (
   actesAdministratifs: ActeAdministratifFormValues[] | undefined,
   categoryRules: CategoryDisplayRules
@@ -19,10 +24,10 @@ export const getActesAdministratifsDefaultValues = (
   ).filter(([, rules]) => rules.shouldShow);
 
   const missingRules = rulesToDisplay.filter(([category, rules]) => {
-    const groupCategories: ActeAdministratifCategory[] = [
+    const groupCategories = getCategoryGroup(
       category,
-      ...(rules.alternativeCategories ?? []),
-    ];
+      rules.alternativeCategories
+    );
     return !actesAdministratifs?.some((acteAdministratif) =>
       groupCategories.includes(
         acteAdministratif.category as ActeAdministratifCategory

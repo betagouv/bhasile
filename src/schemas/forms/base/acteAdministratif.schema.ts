@@ -130,12 +130,11 @@ const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
   }
 );
 
-const REQUIRED_CREATION_CATEGORIES: (ActeAdministratifCategory | undefined)[] = [
+const REQUIRED_CREATION_CATEGORIES: ActeAdministratifCategory[] = [
   "ARRETE_AUTORISATION",
   "ARRETE_FUSION",
   "ARRETE_TARIFICATION",
   "CONVENTION",
-  undefined,
 ];
 
 const acteAdministratifCreationSchema = acteAdministratifSchema.refine(
@@ -144,7 +143,7 @@ const acteAdministratifCreationSchema = acteAdministratifSchema.refine(
     if (!isNotAvenant) {
       return true;
     }
-    if (REQUIRED_CREATION_CATEGORIES.includes(data.category)) {
+    if (data.category && REQUIRED_CREATION_CATEGORIES.includes(data.category)) {
       return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
     }
     return true;
@@ -170,7 +169,7 @@ export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
 );
 
 export const filterActesWithKey =
-  (allowedCategories: (ActeAdministratifCategory | undefined)[] = []) =>
+  (allowedCategories: ActeAdministratifCategory[] = []) =>
   (val: unknown) =>
     Array.isArray(val)
       ? val.filter(
@@ -180,7 +179,7 @@ export const filterActesWithKey =
           }) => {
             if (
               allowedCategories.includes(
-                acte?.category as ActeAdministratifCategory | undefined
+                acte?.category as ActeAdministratifCategory
               )
             ) {
               return true;
