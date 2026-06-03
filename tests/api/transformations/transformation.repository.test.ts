@@ -221,6 +221,31 @@ describe("transformation.repository db integration", () => {
     });
   });
 
+  it("should persist a provided structureVersion.effectiveDate on updateOne", async () => {
+    const { transformationId, structureTransformationId, structureVersionId } =
+      await createBareTransformation();
+    const fermetureDate = "2024-09-30T00:00:00.000Z";
+
+    await updateOne({
+      id: transformationId,
+      structureTransformations: [
+        {
+          id: structureTransformationId,
+          type: StructureTransformationType.FERMETURE,
+          structureVersion: {
+            id: structureVersionId,
+            effectiveDate: fermetureDate,
+          },
+        },
+      ],
+    });
+
+    const structureVersion = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: structureVersionId },
+    });
+    expect(structureVersion.effectiveDate.toISOString()).toBe(fermetureDate);
+  });
+
   it("should replace structureVersion contacts on updateOne", async () => {
     const { transformationId, structureTransformationId, structureVersionId } =
       await createBareTransformation();
@@ -573,9 +598,7 @@ describe("transformation.repository db integration", () => {
 
     await updateOne({
       id: transformationId,
-      structureTransformations: [
-        { id: st.id, operateurId: operateurB.id },
-      ],
+      structureTransformations: [{ id: st.id, operateurId: operateurB.id }],
     });
 
     const updated = await prisma.structureTransformation.findUniqueOrThrow({
@@ -630,9 +653,7 @@ describe("transformation.repository db integration", () => {
     // Update some other field without touching operateurId
     await updateOne({
       id: transformationId,
-      structureTransformations: [
-        { id: st.id, motif: "Untouched operateur" },
-      ],
+      structureTransformations: [{ id: st.id, motif: "Untouched operateur" }],
     });
 
     const updated = await prisma.structureTransformation.findUniqueOrThrow({
@@ -695,9 +716,9 @@ describe("transformation.repository db integration", () => {
       orderBy: { id: "asc" },
     });
     expect(rows).toHaveLength(2);
-    expect(
-      rows.map((r) => r.structureVersion?.structureId).sort()
-    ).toEqual([structureA.id, structureB.id].sort());
+    expect(rows.map((r) => r.structureVersion?.structureId).sort()).toEqual(
+      [structureA.id, structureB.id].sort()
+    );
     const created = rows.find(
       (r) => r.structureVersion?.structureId === structureB.id
     );
@@ -993,5 +1014,29 @@ describe("transformation.repository db integration", () => {
     expect(creation.structureVersion?.contacts).toHaveLength(2);
     expect(creation.structureVersion?.antennes).toHaveLength(2);
     expect(creation.structureVersion?.adresses).toHaveLength(2);
+  });
+
+  it("should return structureTransformation forms with their steps from findOne", async () => {
+    const { transformationId, structureTransformationId } =
+      await createBareTransformation();
+
+    const row = await findOne(transformationId);
+    const structureTransformation = row.structureTransformations.find(
+      (candidate) => candidate.id === structureTransformationId
+    );
+    const creationForm = structureTransformation?.forms.find(
+      (form) =>
+        form.formDefinition.slug === "structure-transformation-creation-v1"
+    );
+    expect(creationForm).toBeDefined();
+    expect(
+      creationForm?.formSteps.map((formStep) => formStep.stepDefinition.slug)
+    ).toEqual(
+      expect.arrayContaining([
+        "01-identification",
+        "02-places-hebergement",
+        "03-actes-administratifs",
+      ])
+    );
   });
 });

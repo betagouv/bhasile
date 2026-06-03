@@ -88,4 +88,8 @@ export const contactsSchema = z.object({
   contacts: z.tuple([requiredContactSchema]).rest(optionalContactSchema),
 });
 
+export const contactsAutoSaveSchema = z.object({
+  contacts: z.array(requiredContactSchema.partial()).optional(),
+});
+
 export type ContactFormValues = z.infer<typeof contactSchema>;

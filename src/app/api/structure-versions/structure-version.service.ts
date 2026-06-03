@@ -63,9 +63,18 @@ export const dbStructureVersionToApiRead = (
     .filter(Boolean)
     .join(" ");
 
+  const antennes = getAntennesApiRead(version.antennes);
+  const isMultiAntenne = (version.antennes?.length ?? 0) > 0;
+  const isMultiDna =
+    (version.dnaStructures?.length ?? 0) > 1 ||
+    (version.finesses?.length ?? 0) > 1;
+
   return recursivelySerializeDates({
     ...version,
     ...mapVersionScalars(version),
+    antennes,
+    isMultiAntenne,
+    isMultiDna,
     effectiveDate: version.effectiveDate ?? undefined,
     adresseAdministrativeComplete: adresseAdministrativeComplete || undefined,
   }) as StructureVersionApiRead;

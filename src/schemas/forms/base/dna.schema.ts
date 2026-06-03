@@ -46,4 +46,10 @@ export const dnaStructuresSchema = z
     }
   );
 
+export const dnaStructuresAutoSaveSchema = z.object({
+  dnaStructures: z
+    .array(dnaStructureSchema.extend({ dna: dnaSchema.partial() }).partial())
+    .optional(),
+});
+
 export type DnaStructureFormValues = z.infer<typeof dnaStructureSchema>;
