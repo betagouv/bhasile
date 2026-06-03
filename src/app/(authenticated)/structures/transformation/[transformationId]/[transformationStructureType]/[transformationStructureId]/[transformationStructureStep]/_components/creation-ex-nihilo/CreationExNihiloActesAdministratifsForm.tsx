@@ -4,15 +4,21 @@ import { ActesAdministratifs } from "@/app/components/forms/actesAdministratifs/
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { SaveCurrentForm } from "@/app/components/forms/SaveCurrentForm";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getActesAdministratifsDefaultValues } from "@/app/utils/acteAdministratif.util";
 import { creationExNihiloActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   StructureTransformationApiRead,
+  StructureTransformationApiUpdateClient,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
-import { creationActesAdministratifsSchema } from "@/schemas/forms/transformation/creationActesAdministratifs.schema";
+import {
+  CreationActesAdministratifsDraftFormValues,
+  creationActesAdministratifsDraftSchema,
+  creationActesAdministratifsSchema,
+} from "@/schemas/forms/transformation/creationActesAdministratifs.schema";
 
 type Props = {
   structureTransformation: StructureTransformationApiRead;
@@ -23,7 +29,8 @@ export const CreationExNihiloActesAdministratifsForm = ({
   structureTransformation,
   transformation,
 }: Props) => {
-  const { handleValidation, prevStep } = useTransformationFormHandling();
+  const { handleValidation, handleSave, prevStep } =
+    useTransformationFormHandling();
 
   const categoryDisplayRules =
     creationExNihiloActesAdministratifsCategoryToDisplay;
@@ -35,6 +42,16 @@ export const CreationExNihiloActesAdministratifsForm = ({
     ),
   };
 
+  const buildStructureTransformation = (
+    data: CreationActesAdministratifsDraftFormValues
+  ): StructureTransformationApiUpdateClient => ({
+    id: structureTransformation.id,
+    type: structureTransformation.type,
+    forms: structureTransformation.forms,
+    actesAdministratifs: (data.actesAdministratifs ??
+      []) as ActeAdministratifApiType[],
+  });
+
   return (
     <FormWrapper
       schema={creationActesAdministratifsSchema}
@@ -42,13 +59,7 @@ export const CreationExNihiloActesAdministratifsForm = ({
       onSubmit={(data) => {
         handleValidation({
           transformationId: transformation.id,
-          structureTransformation: {
-            id: structureTransformation.id,
-            type: structureTransformation.type,
-            forms: structureTransformation.forms,
-            actesAdministratifs:
-              data.actesAdministratifs as ActeAdministratifApiType[],
-          },
+          structureTransformation: buildStructureTransformation(data),
         });
       }}
       submitButtonText="Étape suivante"
@@ -56,6 +67,16 @@ export const CreationExNihiloActesAdministratifsForm = ({
       previousStep={prevStep?.route}
       showContactInfos={false}
     >
+      <SaveCurrentForm
+        schema={creationActesAdministratifsDraftSchema}
+        onSave={(data) =>
+          handleSave({
+            transformationId: transformation.id,
+            structureTransformation: buildStructureTransformation(data),
+          })
+        }
+      />
+
       <ActesAdministratifs categoryDisplayRules={categoryDisplayRules} />
     </FormWrapper>
   );

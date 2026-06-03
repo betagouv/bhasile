@@ -40,6 +40,23 @@ export const useTransformationFormHandling = () => {
     router.replace(firstStep.route);
   }
 
+  const handleSave = async ({
+    transformationId,
+    structureTransformation,
+  }: {
+    transformationId: number;
+    structureTransformation: StructureTransformationApiUpdateClient;
+  }) => {
+    await updateTransformation(
+      transformationId,
+      {
+        id: transformationId,
+        structureTransformations: [structureTransformation],
+      },
+      setTransformation
+    );
+  };
+
   const handleValidation = async ({
     transformationId,
     structureTransformation,
@@ -52,21 +69,15 @@ export const useTransformationFormHandling = () => {
     }
 
     try {
-      await updateTransformation(
+      await handleSave({
         transformationId,
-        {
-          id: transformationId,
-          structureTransformations: [
-            {
-              ...structureTransformation,
-              forms: structureTransformation.forms?.map((form) =>
-                validateStructureTransformationFormStep(form, currentStep.name)
-              ),
-            },
-          ],
+        structureTransformation: {
+          ...structureTransformation,
+          forms: structureTransformation.forms?.map((form) =>
+            validateStructureTransformationFormStep(form, currentStep.name)
+          ),
         },
-        setTransformation
-      );
+      });
       if (nextStep) {
         router.push(nextStep.route);
       }
@@ -79,5 +90,6 @@ export const useTransformationFormHandling = () => {
     nextStep,
     prevStep,
     handleValidation,
+    handleSave,
   };
 };

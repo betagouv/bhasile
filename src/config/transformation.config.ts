@@ -276,6 +276,21 @@ export const creationExNihiloActesAdministratifsCategoryToDisplay: CategoryDispl
     },
   };
 
+export const fermetureActesAdministratifsCategoryToDisplay: CategoryDisplayRules =
+  {
+    AUTRE: {
+      categoryShortName: "autre",
+      title: "Arrêtés ou documents actant la fermeture",
+      canAddFile: true,
+      canAddAvenant: false,
+      isOptional: true,
+      shouldShow: true,
+      additionalFieldsType: AdditionalFieldsType.NAME,
+      documentLabel: "Document",
+      addFileButtonLabel: "Ajouter un document",
+    },
+  };
+
 export const STRUCTURE_TRANSFORMATION_FORM_NAME: Record<
   StructureTransformationType,
   string
