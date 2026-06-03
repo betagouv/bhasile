@@ -20,6 +20,14 @@ export type StructureSelectionBlock = {
   label?: string;
 };
 
+export type PrefillField = "contacts" | "antennes" | "adresses";
+
+export type PrefillRule = {
+  from: StructureTransformationType;
+  to: StructureTransformationType;
+  fields: PrefillField[];
+};
+
 export type TransformationTypeSpec = {
   title: string;
   blocks: StructureSelectionBlock[];
@@ -27,6 +35,7 @@ export type TransformationTypeSpec = {
     structureId?: number
   ) => StructureTransformationApiCreate[];
   primaryStructureTransformationType?: StructureTransformationType;
+  prefill?: PrefillRule[];
 };
 
 export const STRUCTURE_TRANSFORMATION_TYPE_ORDER: Record<
@@ -62,6 +71,13 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     ],
     buildAutoTransformations: () => [
       { type: StructureTransformationType.CREATION },
+    ],
+    prefill: [
+      {
+        from: StructureTransformationType.FERMETURE,
+        to: StructureTransformationType.CREATION,
+        fields: ["contacts", "antennes", "adresses"],
+      },
     ],
   },
   [TransformationType.EXTENSION_EX_NIHILO]: {
