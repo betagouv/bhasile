@@ -1,13 +1,55 @@
 import {
+  areAllValuesEmpty,
   computeAverage,
   convertObjectToArray,
   getPercentage,
+  isEmptyValue,
   isNullOrUndefined,
   reverseObjectKeyValues,
   sortKeysByValue,
 } from "@/app/utils/common.util";
 
 describe("common util", () => {
+  describe("isEmptyValue", () => {
+    it.each([undefined, null, "", []])(
+      "should return true for %s",
+      (value) => {
+        expect(isEmptyValue(value)).toStrictEqual(true);
+      }
+    );
+
+    it.each(["text", 0, 42, false, ["item"]])(
+      "should return false for %s",
+      (value) => {
+        expect(isEmptyValue(value)).toStrictEqual(false);
+      }
+    );
+  });
+
+  describe("areAllValuesEmpty", () => {
+    it("should return true when every value is empty", () => {
+      expect(
+        areAllValuesEmpty({ prenom: "", nom: "", telephone: "" })
+      ).toStrictEqual(true);
+    });
+
+    it("should return true for an object with no values", () => {
+      expect(areAllValuesEmpty({})).toStrictEqual(true);
+    });
+
+    it("should return false when at least one value is filled", () => {
+      expect(
+        areAllValuesEmpty({ prenom: "Jean", nom: "", telephone: "" })
+      ).toStrictEqual(false);
+    });
+
+    it("should return false when only an id is present", () => {
+      expect(areAllValuesEmpty({ id: 42, prenom: "", nom: "" })).toStrictEqual(
+        false
+      );
+    });
+  });
+
   describe("sortKeysByValue", () => {
     it("should return an empty object when given an empty object", () => {
       // GIVEN

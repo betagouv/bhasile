@@ -1,12 +1,11 @@
 "use client";
 
-import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
-import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
-import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
-import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSetHebergement";
+import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTypeBati";
+import { FieldSetCurrentYearPlaces } from "@/app/components/forms/typePlace/FieldSetCurrentYearPlaces";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getTransformationStructureVersionDefaultValues } from "@/app/utils/transformation.util";
 import {
@@ -14,9 +13,9 @@ import {
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import {
-  CreationIdentificationFormValues,
-  creationIdentificationSchema,
-} from "@/schemas/forms/transformation/creationIdentification.schema";
+  CreationPlacesEtHebergementFormValues,
+  creationPlacesEtHebergementSchema,
+} from "@/schemas/forms/transformation/creationPlacesEtHebergement.schema";
 import { FormKind } from "@/types/global";
 
 type Props = {
@@ -24,35 +23,31 @@ type Props = {
   structureTransformation: StructureTransformationApiRead;
 };
 
-export const CreationExNihiloIdentificationForm = ({
+export const CreationPlacesEtHebergementForm = ({
   transformation,
   structureTransformation,
 }: Props) => {
   const { handleValidation } = useTransformationFormHandling();
 
-  const defaultValues = {
-    ...getTransformationStructureVersionDefaultValues<CreationIdentificationFormValues>(
+  const defaultValues =
+    getTransformationStructureVersionDefaultValues<CreationPlacesEtHebergementFormValues>(
       structureTransformation.structureVersion
-    ),
-    operateur: structureTransformation.operateur,
-  };
+    );
 
   return (
     <FormWrapper
-      schema={creationIdentificationSchema}
+      schema={creationPlacesEtHebergementSchema}
       defaultValues={defaultValues}
       onSubmit={(data) => {
-        const { creationDate, operateur, ...rest } = data;
         handleValidation({
           transformationId: transformation.id,
           structureTransformation: {
             id: structureTransformation.id,
             type: structureTransformation.type,
-            operateurId: operateur?.id,
             structureVersion: {
-              ...rest,
-              creationDate,
-              effectiveDate: creationDate,
+              id: structureTransformation.structureVersion?.id,
+              adresses: data.adresses,
+              structureTypologies: data.structureTypologies,
             },
           },
         });
@@ -61,19 +56,13 @@ export const CreationExNihiloIdentificationForm = ({
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       showContactInfos={false}
     >
-      <FieldSetDescription formKind={FormKind.CREATION_EX_NIHILO} />
+      <FieldSetCurrentYearPlaces />
 
       <hr />
 
-      <AdresseAdministrativeAndAntennes />
+      <FieldSetTypeBati />
 
-      <hr />
-
-      <DnaAndFiness />
-
-      <hr />
-
-      <FieldSetContacts />
+      <FieldSetHebergement formKind={FormKind.OUVERTURE_EX_NIHILO} />
     </FormWrapper>
   );
 };

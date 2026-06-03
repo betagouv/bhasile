@@ -47,18 +47,9 @@ vi.mock(
 );
 
 vi.mock(
-  "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation-depuis-structures/CreationDepuisStructuresFlow",
+  "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation/CreationFlow",
   () => ({
-    CreationDepuisStructuresFlow: () => (
-      <div data-testid="creation-depuis-structures-flow" />
-    ),
-  })
-);
-
-vi.mock(
-  "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation-ex-nihilo/CreationExNihiloFlow",
-  () => ({
-    CreationExNihiloFlow: () => <div data-testid="creation-ex-nihilo-flow" />,
+    CreationFlow: () => <div data-testid="creation-flow" />,
   })
 );
 
@@ -148,31 +139,12 @@ describe("TransformationStructureStepPage", () => {
     expect(screen.getByTestId("contraction-flow")).toBeInTheDocument();
   });
 
-  it("should render CreationExNihiloFlow when structureTransformation.type is CREATION and transformation.type is OUVERTURE_EX_NIHILO", () => {
-    // GIVEN
-    const structureTransformation: StructureTransformationApiRead = {
-      id: 7,
-      type: StructureTransformationType.CREATION,
-    };
-    mockUseTransformationContext.mockReturnValue({
-      transformation: createTransformation({
-        type: TransformationType.OUVERTURE_EX_NIHILO,
-        structureTransformations: [structureTransformation],
-      }),
-    });
-
-    // WHEN
-    render(<TransformationStructureStepPage />);
-
-    // THEN
-    expect(screen.getByTestId("creation-ex-nihilo-flow")).toBeInTheDocument();
-  });
-
   it.each([
+    TransformationType.OUVERTURE_EX_NIHILO,
     TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
     TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR,
   ])(
-    "should render CreationDepuisStructuresFlow when CREATION and transformation.type is %s",
+    "should render CreationFlow when CREATION and transformation.type is %s",
     (transformationType) => {
       // GIVEN
       const structureTransformation: StructureTransformationApiRead = {
@@ -190,9 +162,7 @@ describe("TransformationStructureStepPage", () => {
       render(<TransformationStructureStepPage />);
 
       // THEN
-      expect(
-        screen.getByTestId("creation-depuis-structures-flow")
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("creation-flow")).toBeInTheDocument();
     }
   );
 

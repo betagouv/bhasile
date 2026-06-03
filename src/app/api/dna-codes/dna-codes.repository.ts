@@ -1,22 +1,29 @@
-import { Dna } from "@/generated/prisma/client";
+import { Dna, Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
+import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 export const findAll = async ({
-  structureId,
+  entityId = {},
   operateurId,
 }: {
-  structureId?: number;
+  entityId?: EntityId;
   operateurId?: number;
-}): Promise<{ code: string }[]> => {
-  const structureFilter = structureId
-    ? {
-        OR: [
-          { dnaStructures: { none: {} } },
-          { dnaStructures: { some: { structureId } } },
-        ],
-      }
-    : { dnaStructures: { none: {} } };
+} = {}): Promise<{ code: string }[]> => {
+  const { structureId, structureVersionId } = entityId;
+
+  const ownershipFilters: Prisma.DnaWhereInput[] = [
+    { dnaStructures: { none: {} } },
+  ];
+  if (structureId) {
+    ownershipFilters.push({ dnaStructures: { some: { structureId } } });
+  }
+  if (structureVersionId) {
+    ownershipFilters.push({
+      dnaStructures: { some: { structureVersionId } },
+    });
+  }
+  const structureFilter: Prisma.DnaWhereInput = { OR: ownershipFilters };
 
   const operateurFilter =
     operateurId !== undefined

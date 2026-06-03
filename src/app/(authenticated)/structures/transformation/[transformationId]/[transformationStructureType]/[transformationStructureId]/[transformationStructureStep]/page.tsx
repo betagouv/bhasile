@@ -11,14 +11,10 @@ import {
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
-import {
-  StructureTransformationType,
-  TransformationType,
-} from "@/types/transformation.type";
+import { StructureTransformationType } from "@/types/transformation.type";
 
 import { ContractionFlow } from "./_components/contraction/ContractionFlow";
-import { CreationDepuisStructuresFlow } from "./_components/creation-depuis-structures/CreationDepuisStructuresFlow";
-import { CreationExNihiloFlow } from "./_components/creation-ex-nihilo/CreationExNihiloFlow";
+import { CreationFlow } from "./_components/creation/CreationFlow";
 import { ExtensionFlow } from "./_components/extension/ExtensionFlow";
 import { FermetureFlow } from "./_components/fermeture/FermetureFlow";
 
@@ -62,7 +58,10 @@ const renderFlow = (
   switch (structureTransformation.type) {
     case StructureTransformationType.FERMETURE:
       return (
-        <FermetureFlow structureTransformation={structureTransformation} />
+        <FermetureFlow
+          transformation={transformation}
+          structureTransformation={structureTransformation}
+        />
       );
     case StructureTransformationType.EXTENSION:
       return (
@@ -73,16 +72,9 @@ const renderFlow = (
         <ContractionFlow structureTransformation={structureTransformation} />
       );
     case StructureTransformationType.CREATION:
-      if (transformation.type === TransformationType.OUVERTURE_EX_NIHILO) {
-        return (
-          <CreationExNihiloFlow
-            transformation={transformation}
-            structureTransformation={structureTransformation}
-          />
-        );
-      }
       return (
-        <CreationDepuisStructuresFlow
+        <CreationFlow
+          transformation={transformation}
           structureTransformation={structureTransformation}
         />
       );

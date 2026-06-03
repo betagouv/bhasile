@@ -4,9 +4,13 @@ import {
   getTransformationFormNavigation,
   getTransformationSteps,
   Step,
+  validateStructureTransformationFormStep,
 } from "@/app/utils/transformation.util";
+import { FormApiType } from "@/schemas/api/form.schema";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import { StepStatus } from "@/types/form.type";
 import {
+  StructureTransformationStep,
   StructureTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
@@ -469,6 +473,121 @@ describe("transformation util", () => {
 
       // THEN
       expect(result[0].steps.map((step) => step.route)).toEqual(["", "", ""]);
+    });
+  });
+
+  describe("validateStructureTransformationFormStep", () => {
+    const buildCreationForm = (): FormApiType => ({
+      id: 100,
+      status: false,
+      formDefinition: {
+        id: 10,
+        name: "structure-transformation-creation",
+        slug: "structure-transformation-creation-v1",
+        version: 1,
+      },
+      formSteps: [
+        {
+          id: 1001,
+          status: StepStatus.NON_COMMENCE,
+          stepDefinition: {
+            id: 201,
+            slug: "01-identification",
+            label: "Description",
+          },
+        },
+        {
+          id: 1002,
+          status: StepStatus.NON_COMMENCE,
+          stepDefinition: {
+            id: 202,
+            slug: "02-places-hebergement",
+            label: "Places et hébergement",
+          },
+        },
+        {
+          id: 1003,
+          status: StepStatus.NON_COMMENCE,
+          stepDefinition: {
+            id: 203,
+            slug: "03-actes-administratifs",
+            label: "Actes administratifs",
+          },
+        },
+      ],
+    });
+
+    it("flips only the validated route step to VALIDE, mapping it to its form step slug", () => {
+      const form = validateStructureTransformationFormStep(
+        buildCreationForm(),
+        StructureTransformationStep.ACTES_ADMINISTRATIFS
+      );
+
+      const statusBySlug = Object.fromEntries(
+        form.formSteps.map((formStep) => [
+          formStep.stepDefinition.slug,
+          formStep.status,
+        ])
+      );
+      expect(statusBySlug).toEqual({
+        "01-identification": StepStatus.NON_COMMENCE,
+        "02-places-hebergement": StepStatus.NON_COMMENCE,
+        "03-actes-administratifs": StepStatus.VALIDE,
+      });
+    });
+
+    it("maps the description route step to the 01-identification form step", () => {
+      const form = validateStructureTransformationFormStep(
+        buildCreationForm(),
+        StructureTransformationStep.DESCRIPTION
+      );
+
+      const identificationStep = form.formSteps.find(
+        (formStep) => formStep.stepDefinition.slug === "01-identification"
+      );
+      expect(identificationStep?.status).toBe(StepStatus.VALIDE);
+    });
+
+    it("preserves the form and step ids read from the database", () => {
+      const form = validateStructureTransformationFormStep(
+        buildCreationForm(),
+        StructureTransformationStep.DESCRIPTION
+      );
+
+      expect(form.id).toBe(100);
+      expect(form.formDefinition.id).toBe(10);
+      expect(form.formSteps.map((formStep) => formStep.id)).toEqual([
+        1001, 1002, 1003,
+      ]);
+    });
+
+    it("returns the form unchanged when the step does not belong to the form", () => {
+      const form = buildCreationForm();
+      // a fermeture form only exposes the description step
+      form.formDefinition.name = "structure-transformation-fermeture";
+
+      const result = validateStructureTransformationFormStep(
+        form,
+        StructureTransformationStep.ACTES_ADMINISTRATIFS
+      );
+
+      expect(
+        result.formSteps.every((s) => s.status === StepStatus.NON_COMMENCE)
+      ).toBe(true);
+    });
+
+    it("returns the form unchanged for an unknown form name", () => {
+      const form = buildCreationForm();
+      form.formDefinition.name = "unknown-form";
+
+      const result = validateStructureTransformationFormStep(
+        form,
+        StructureTransformationStep.DESCRIPTION
+      );
+
+      expect(
+        result.formSteps.every((s) => s.status === StepStatus.NON_COMMENCE)
+      ).toBe(true);
     });
   });
 });
