@@ -220,6 +220,31 @@ describe("transformation.repository db integration", () => {
     });
   });
 
+  it("should persist a provided structureVersion.effectiveDate on updateOne", async () => {
+    const { transformationId, structureTransformationId, structureVersionId } =
+      await createBareTransformation();
+    const fermetureDate = "2024-09-30T00:00:00.000Z";
+
+    await updateOne({
+      id: transformationId,
+      structureTransformations: [
+        {
+          id: structureTransformationId,
+          type: StructureTransformationType.FERMETURE,
+          structureVersion: {
+            id: structureVersionId,
+            effectiveDate: fermetureDate,
+          },
+        },
+      ],
+    });
+
+    const structureVersion = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: structureVersionId },
+    });
+    expect(structureVersion.effectiveDate.toISOString()).toBe(fermetureDate);
+  });
+
   it("should replace structureVersion contacts on updateOne", async () => {
     const { transformationId, structureTransformationId, structureVersionId } =
       await createBareTransformation();

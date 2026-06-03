@@ -7,13 +7,17 @@ import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
+import { SaveCurrentForm } from "@/app/components/forms/SaveCurrentForm";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getTransformationStructureVersionDefaultValues } from "@/app/utils/transformation.util";
 import {
   StructureTransformationApiRead,
+  StructureTransformationApiUpdateClient,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import {
+  CreationIdentificationDraftFormValues,
+  creationIdentificationDraftSchema,
   CreationIdentificationFormValues,
   creationIdentificationSchema,
 } from "@/schemas/forms/transformation/creationIdentification.schema";
@@ -30,7 +34,7 @@ export const CreationIdentificationForm = ({
   structureTransformation,
   formKind,
 }: Props) => {
-  const { handleValidation } = useTransformationFormHandling();
+  const { handleValidation, handleSave } = useTransformationFormHandling();
 
   const defaultValues = {
     ...getTransformationStructureVersionDefaultValues<CreationIdentificationFormValues>(
@@ -42,30 +46,49 @@ export const CreationIdentificationForm = ({
       (structureTransformation.structureVersion?.antennes?.length ?? 0) > 0,
   };
 
+  const buildStructureTransformation = (
+    data: CreationIdentificationDraftFormValues
+  ): StructureTransformationApiUpdateClient => {
+    const { creationDate, operateur, ...rest } = data;
+    return {
+      id: structureTransformation.id,
+      type: structureTransformation.type,
+      operateurId: operateur?.id,
+      structureVersion: {
+        ...rest,
+        dnaStructures: rest.dnaStructures?.filter(
+          (dnaStructure) => dnaStructure.dna?.code
+        ),
+        creationDate,
+        effectiveDate: creationDate,
+      } as StructureTransformationApiUpdateClient["structureVersion"],
+    };
+  };
+
   return (
     <FormWrapper
       schema={creationIdentificationSchema}
       defaultValues={defaultValues}
       onSubmit={(data) => {
-        const { creationDate, operateur, ...rest } = data;
         handleValidation({
           transformationId: transformation.id,
-          structureTransformation: {
-            id: structureTransformation.id,
-            type: structureTransformation.type,
-            operateurId: operateur?.id,
-            structureVersion: {
-              ...rest,
-              creationDate,
-              effectiveDate: creationDate,
-            },
-          },
+          structureTransformation: buildStructureTransformation(data),
         });
       }}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       showContactInfos={false}
     >
+      <SaveCurrentForm
+        schema={creationIdentificationDraftSchema}
+        onSave={(data) =>
+          handleSave({
+            transformationId: transformation.id,
+            structureTransformation: buildStructureTransformation(data),
+          })
+        }
+      />
+
       <FieldSetDescription formKind={formKind} />
 
       <hr />
@@ -74,7 +97,12 @@ export const CreationIdentificationForm = ({
 
       <hr />
 
-      <DnaAndFiness formKind={formKind} />
+      <DnaAndFiness
+        formKind={formKind}
+        entityId={{
+          structureVersionId: structureTransformation.structureVersion?.id,
+        }}
+      />
 
       <hr />
 

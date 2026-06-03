@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 
+import { EntityId } from "@/types/Entity.type";
+
 export const useFetchFreeDnaCodes = ({
-  structureId,
+  entityId,
 }: {
-  structureId?: number;
+  entityId?: EntityId;
 } = {}) => {
+  const { structureId, structureVersionId } = entityId ?? {};
   const [freeDnaCodes, setFreeDnaCodes] = useState<{ code: string }[]>([]);
 
   useEffect(() => {
@@ -15,6 +18,9 @@ export const useFetchFreeDnaCodes = ({
       if (structureId) {
         params.append("structureId", String(structureId));
       }
+      if (structureVersionId) {
+        params.append("structureVersionId", String(structureVersionId));
+      }
 
       const result = await fetch(
         `${baseUrl}/api/dna-codes?${params.toString()}`
@@ -24,7 +30,7 @@ export const useFetchFreeDnaCodes = ({
       setFreeDnaCodes(data);
     };
     fetchFreeDnaCodes();
-  }, [structureId]);
+  }, [structureId, structureVersionId]);
 
   return { freeDnaCodes };
 };

@@ -276,3 +276,18 @@ export const creationExNihiloActesAdministratifsCategoryToDisplay: CategoryDispl
       notice: `Dans cette catégorie, vous avez la possibilité d'importer d'autres documents utiles à l'analyse de la structure (ex: Plans Pluriannuels d'Investissements)`,
     },
   };
+
+export const fermetureActesAdministratifsCategoryToDisplay: CategoryDisplayRules =
+  {
+    AUTRE: {
+      categoryShortName: "autre",
+      title: "Arrêtés ou documents actant la fermeture",
+      canAddFile: true,
+      canAddAvenant: false,
+      isOptional: true,
+      shouldShow: true,
+      additionalFieldsType: AdditionalFieldsType.NAME,
+      documentLabel: "Document",
+      addFileButtonLabel: "Ajouter un document",
+    },
+  };

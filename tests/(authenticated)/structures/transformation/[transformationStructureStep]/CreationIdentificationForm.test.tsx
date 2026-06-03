@@ -18,6 +18,7 @@ const mockHandleValidation = vi.fn();
 vi.mock("@/app/hooks/useTransformationFormHandling", () => ({
   useTransformationFormHandling: () => ({
     handleValidation: mockHandleValidation,
+    handleSave: vi.fn(),
   }),
 }));
 
@@ -58,6 +59,9 @@ vi.mock("@/app/components/forms/dnaAndFiness/DnaAndFiness", () => ({
 }));
 vi.mock("@/app/components/forms/contacts/FieldSetContacts", () => ({
   FieldSetContacts: () => null,
+}));
+vi.mock("@/app/components/forms/SaveCurrentForm", () => ({
+  SaveCurrentForm: () => null,
 }));
 
 describe("CreationIdentificationForm", () => {

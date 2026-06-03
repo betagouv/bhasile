@@ -17,4 +17,8 @@ export const antennesSchema = z.object({
   antennes: z.array(antenneSchema),
 });
 
+export const antennesAutoSaveSchema = z.object({
+  antennes: z.array(antenneSchema.partial()).optional(),
+});
+
 export type AntenneFormValues = z.infer<typeof antenneSchema>;
