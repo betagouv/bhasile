@@ -1,12 +1,15 @@
 import {
+  STRUCTURE_TRANSFORMATION_FORM_STEPS,
   STRUCTURE_TRANSFORMATION_TYPE_ORDER,
   TRANSFORMATION_TYPE_SPECS,
 } from "@/config/transformation.config";
+import { FormApiType } from "@/schemas/api/form.schema";
 import {
   StructureTransformationApiUpdate,
   StructureVersionApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
+import { StepStatus } from "@/types/form.type";
 import { DeepPartial } from "@/types/global";
 import {
   StructureTransformationStep,
@@ -213,4 +216,29 @@ export const getStructureTransformationLabel = (
     default:
       return "";
   }
+};
+
+export const validateStructureTransformationFormStep = (
+  form: FormApiType,
+  stepToValidate: string
+): FormApiType => {
+  const formStepSpecs =
+    STRUCTURE_TRANSFORMATION_FORM_STEPS[form.formDefinition.name] ?? [];
+
+  const stepSlugToValidate = formStepSpecs.find(
+    (formStepSpec) => formStepSpec.name === stepToValidate
+  )?.slug;
+
+  if (!stepSlugToValidate) {
+    return form;
+  }
+
+  return {
+    ...form,
+    formSteps: form.formSteps.map((formStep) =>
+      formStep.stepDefinition.slug === stepSlugToValidate
+        ? { ...formStep, status: StepStatus.VALIDE }
+        : formStep
+    ),
+  };
 };

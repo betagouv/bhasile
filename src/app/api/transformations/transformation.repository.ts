@@ -33,6 +33,14 @@ export const findOne = async (id: number) => {
       structureTransformations: {
         include: {
           operateur: { select: { id: true, name: true } },
+          forms: {
+            include: {
+              formDefinition: true,
+              formSteps: {
+                include: { stepDefinition: true },
+              },
+            },
+          },
           actesAdministratifs: {
             include: { fileUploads: true },
           },

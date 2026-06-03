@@ -5,6 +5,7 @@ import {
 import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { StructureType } from "@/types/structure.type";
 import {
+  StructureTransformationStep,
   StructureTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
@@ -289,3 +290,57 @@ export const fermetureActesAdministratifsCategoryToDisplay: CategoryDisplayRules
       addFileButtonLabel: "Ajouter un document",
     },
   };
+
+export const STRUCTURE_TRANSFORMATION_FORM_NAME: Record<
+  StructureTransformationType,
+  string
+> = {
+  [StructureTransformationType.CREATION]: "structure-transformation-creation",
+  [StructureTransformationType.EXTENSION]: "structure-transformation-extension",
+  [StructureTransformationType.CONTRACTION]:
+    "structure-transformation-contraction",
+  [StructureTransformationType.FERMETURE]: "structure-transformation-fermeture",
+};
+
+export type StructureTransformationFormStepSpec = {
+  name: StructureTransformationStep;
+  slug: string;
+};
+
+const STRUCTURE_TRANSFORMATION_COMPLETE_FORM_STEPS: StructureTransformationFormStepSpec[] =
+  [
+    {
+      name: StructureTransformationStep.DESCRIPTION,
+      slug: "01-identification",
+    },
+    {
+      name: StructureTransformationStep.PLACES_ET_HEBERGEMENT,
+      slug: "02-places-hebergement",
+    },
+    {
+      name: StructureTransformationStep.ACTES_ADMINISTRATIFS,
+      slug: "03-actes-administratifs",
+    },
+  ];
+
+const STRUCTURE_TRANSFORMATION_FERMETURE_FORM_STEPS: StructureTransformationFormStepSpec[] =
+  [
+    {
+      name: StructureTransformationStep.DESCRIPTION,
+      slug: "01-identification",
+    },
+  ];
+
+export const STRUCTURE_TRANSFORMATION_FORM_STEPS: Record<
+  string,
+  StructureTransformationFormStepSpec[]
+> = {
+  [STRUCTURE_TRANSFORMATION_FORM_NAME[StructureTransformationType.CREATION]]:
+    STRUCTURE_TRANSFORMATION_COMPLETE_FORM_STEPS,
+  [STRUCTURE_TRANSFORMATION_FORM_NAME[StructureTransformationType.EXTENSION]]:
+    STRUCTURE_TRANSFORMATION_COMPLETE_FORM_STEPS,
+  [STRUCTURE_TRANSFORMATION_FORM_NAME[StructureTransformationType.CONTRACTION]]:
+    STRUCTURE_TRANSFORMATION_COMPLETE_FORM_STEPS,
+  [STRUCTURE_TRANSFORMATION_FORM_NAME[StructureTransformationType.FERMETURE]]:
+    STRUCTURE_TRANSFORMATION_FERMETURE_FORM_STEPS,
+};

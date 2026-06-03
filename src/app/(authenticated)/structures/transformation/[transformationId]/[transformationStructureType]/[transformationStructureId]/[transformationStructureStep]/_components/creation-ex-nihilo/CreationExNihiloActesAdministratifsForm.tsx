@@ -47,6 +47,7 @@ export const CreationExNihiloActesAdministratifsForm = ({
   ): StructureTransformationApiUpdateClient => ({
     id: structureTransformation.id,
     type: structureTransformation.type,
+    forms: structureTransformation.forms,
     actesAdministratifs: (data.actesAdministratifs ??
       []) as ActeAdministratifApiType[],
   });
