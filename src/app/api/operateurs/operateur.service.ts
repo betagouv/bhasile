@@ -5,6 +5,7 @@ import {
   OperateurApiWrite,
 } from "@/schemas/api/operateur.schema";
 
+import { getContactsApiRead } from "../contacts/contact.util";
 import {
   countOperateurs,
   findBySearchTerm,
@@ -44,20 +45,11 @@ export const getOperateurs = async ({
 
 export const getOperateur = async (id: number): Promise<OperateurApiRead> => {
   const operateur = await findOne(id);
-  const vulnerabilites: string[] = [];
-  operateur.structures.forEach((structure) => {
-    if (structure.lgbt && !vulnerabilites.includes("LGBT")) {
-      vulnerabilites.push("LGBT");
-    }
-    if (structure.fvvTeh && !vulnerabilites.includes("FVV-TEH")) {
-      vulnerabilites.push("FVV-TEH");
-    }
-  });
 
   return recursivelySerializeDates({
     ...operateur,
-    vulnerabilites,
     actesAdministratifs: operateur.actesAdministratifs,
+    contacts: getContactsApiRead(operateur.contacts),
   }) as OperateurApiRead;
 };
 

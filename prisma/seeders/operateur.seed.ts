@@ -1,17 +1,22 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { Operateur } from "@/generated/prisma/client";
+import { Contact, Operateur } from "@/generated/prisma/client";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 import {
   ActeAdministratifWithFileUploads,
   createFakeActeAdministratif,
 } from "./acte-administratif.seed";
+import { createFakeContact } from "./contact.seed";
 
 type OperateurWithActes = Operateur & {
   actesAdministratifs: Omit<
     ActeAdministratifWithFileUploads,
     "id" | "operateurId" | "structureId" | "structureDnaCode" | "cpomId"
+  >[];
+  contacts: Omit<
+    Contact,
+    "id" | "structureDnaCode" | "structureId" | "operateurId"
   >[];
 };
 
@@ -37,6 +42,9 @@ export const createFakeOperateur = (
     siret: faker.number.int(10000000000000).toString(),
     siegeSocial: faker.lorem.words(2),
     parentId: null,
+    contacts: Array.from({ length: faker.number.int({ min: 1, max: 4 }) }, () =>
+      createFakeContact()
+    ),
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
     actesAdministratifs: createFakeOperateurActes(),

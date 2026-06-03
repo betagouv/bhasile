@@ -31,11 +31,6 @@ export const DescriptionBlock = () => {
         </div>
         <hr className="col-span-2" />
         <div className="flex gap-2 mb-3">
-          <strong>Vulnérabilité</strong>
-          {operateur?.vulnerabilites?.join(", ") || "N/A"}
-        </div>
-        <hr className="col-span-2" />
-        <div className="flex gap-2 mb-3">
           <strong>Siège social</strong>
           {operateur?.siegeSocial || "N/A"}
         </div>

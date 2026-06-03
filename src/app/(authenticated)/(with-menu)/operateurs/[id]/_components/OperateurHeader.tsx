@@ -52,6 +52,11 @@ export const OperateurHeader = (): ReactElement | null => {
               isDisplayed: true,
             },
             {
+              label: "Contacts",
+              section: "#contacts",
+              isDisplayed: true,
+            },
+            {
               label: "Documents",
               section: "#documents",
               isDisplayed: true,

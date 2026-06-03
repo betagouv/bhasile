@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { OperateurApiWrite } from "@/schemas/api/operateur.schema";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
+import { createOrUpdateContacts } from "../contacts/contact.repository";
 import { OperateurDbDetail } from "./operateur.db.type";
 
 export const findBySearchTerm = async (
@@ -96,12 +97,7 @@ export const findOne = async (id: number): Promise<OperateurDbDetail> => {
   return prisma.operateur.findFirstOrThrow({
     where: { id },
     include: {
-      structures: {
-        select: {
-          lgbt: true,
-          fvvTeh: true,
-        },
-      },
+      contacts: true,
       actesAdministratifs: {
         include: { fileUploads: true },
       },
@@ -112,7 +108,7 @@ export const findOne = async (id: number): Promise<OperateurDbDetail> => {
 export const updateOne = async (
   operateur: OperateurApiWrite
 ): Promise<Operateur> => {
-  const { actesAdministratifs, ...operateurFields } = operateur;
+  const { actesAdministratifs, contacts, ...operateurFields } = operateur;
 
   return prisma.$transaction(async (tx) => {
     const updated = await tx.operateur.update({
@@ -121,6 +117,10 @@ export const updateOne = async (
     });
 
     await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
+      operateurId: operateur.id,
+    });
+
+    await createOrUpdateContacts(tx, contacts, {
       operateurId: operateur.id,
     });
 

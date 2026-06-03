@@ -431,7 +431,9 @@ export const updateOne = async (
 
         await createOrUpdateDnaStructures(tx, dnaStructures, structure.id);
         await createOrUpdateFinesses(tx, finesses, structure.id);
-        await createOrUpdateContacts(tx, contacts, structure.id);
+        await createOrUpdateContacts(tx, contacts, {
+          structureId: structure.id,
+        });
         await createOrUpdateBudgets(tx, budgets, { structureId: structure.id });
         await createOrUpdateIndicateursFinanciers(tx, indicateursFinanciers, {
           structureId: structure.id,
