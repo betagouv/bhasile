@@ -62,7 +62,10 @@ const renderFlow = (
   switch (structureTransformation.type) {
     case StructureTransformationType.FERMETURE:
       return (
-        <FermetureFlow structureTransformation={structureTransformation} />
+        <FermetureFlow
+          transformation={transformation}
+          structureTransformation={structureTransformation}
+        />
       );
     case StructureTransformationType.EXTENSION:
       return (
