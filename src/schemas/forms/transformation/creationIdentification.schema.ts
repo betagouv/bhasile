@@ -26,12 +26,10 @@ import {
 } from "@/schemas/forms/base/finess.schema";
 import { operateurSchema } from "@/schemas/forms/base/operateur.schema";
 import { structureBaseSchema } from "@/schemas/forms/base/structure.base.schema";
-import { PublicType } from "@/types/structure.type";
 
 const baseCreationIdentificationSchema = structureBaseSchema.extend({
   operateur: operateurSchema,
   creationDate: nullishFrenchDateToISO(),
-  public: z.nativeEnum(PublicType),
   filiale: z.string().optional(),
 });
 

@@ -25,7 +25,7 @@ type Props = {
   transformation: TransformationApiRead;
 };
 
-export const CreationExNihiloActesAdministratifsForm = ({
+export const CreationActesAdministratifsForm = ({
   structureTransformation,
   transformation,
 }: Props) => {

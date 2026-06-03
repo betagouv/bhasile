@@ -48,6 +48,7 @@ export const DnaAndFiness = ({
   }, [isMultiDna, setValue, watch]);
 
   // We had a bug that set finess to [null], so we have to clean it up
+  // TODO: to delete once the ajout form is dead
   const finesses = watch("finesses");
   useEffect(() => {
     if (finesses && finesses[0] === null) {
@@ -55,10 +56,15 @@ export const DnaAndFiness = ({
     }
   }, [finesses, setValue]);
 
+  const title =
+    formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
+      ? `Veuillez ne retenir qu’un seul code DNA ${isAutorisee ? "et FINESS" : ""} pour l’ensemble de la structure (sauf cas exceptionnels). Veuillez vous assurer qu’une fiche de paramétrage a été transmise à l’OFII.`
+      : `Code${isMultiDna ? "s" : ""} DNA${isAutorisee ? " et FINESS" : ""}`;
+
   return (
     <>
-      <h2 className="text-xl font-bold mb-4 text-title-blue-france">
-        Code{isMultiDna ? "s" : ""} DNA{isAutorisee && " et FINESS"}
+      <h2 className="text-xl font-bold mb-4 text-title-blue-france max-w-3xl">
+        {title}
       </h2>
       {!isAutorisee || formKind !== FormKind.MODIFICATION ? (
         <Checkbox
