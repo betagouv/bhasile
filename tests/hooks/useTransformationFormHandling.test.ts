@@ -6,6 +6,7 @@ import {
   StructureTransformationApiRead,
   StructureTransformationApiUpdateClient,
 } from "@/schemas/api/transformation.schema";
+import { StepStatus } from "@/types/form.type";
 import {
   StructureTransformationStep,
   StructureTransformationType,
@@ -43,6 +44,51 @@ vi.mock("@/app/hooks/useTransformations", () => ({
 
 const setTransformation = vi.fn();
 
+const buildCreationForm = (validatedSlug?: string) => ({
+  id: 100,
+  status: false,
+  formDefinition: {
+    id: 10,
+    name: "structure-transformation-creation",
+    slug: "structure-transformation-creation-v1",
+    version: 1,
+  },
+  formSteps: [
+    {
+      id: 1001,
+      status:
+        validatedSlug === "01-identification"
+          ? StepStatus.VALIDE
+          : StepStatus.NON_COMMENCE,
+      stepDefinition: { id: 201, slug: "01-identification", label: "Description" },
+    },
+    {
+      id: 1002,
+      status:
+        validatedSlug === "02-places-hebergement"
+          ? StepStatus.VALIDE
+          : StepStatus.NON_COMMENCE,
+      stepDefinition: {
+        id: 202,
+        slug: "02-places-hebergement",
+        label: "Places et hébergement",
+      },
+    },
+    {
+      id: 1003,
+      status:
+        validatedSlug === "03-actes-administratifs"
+          ? StepStatus.VALIDE
+          : StepStatus.NON_COMMENCE,
+      stepDefinition: {
+        id: 203,
+        slug: "03-actes-administratifs",
+        label: "Actes administratifs",
+      },
+    },
+  ],
+});
+
 const buildTransformation = () =>
   createTransformation({
     id: 12,
@@ -63,6 +109,7 @@ const buildPayload = (): {
   structureTransformation: {
     id: 7,
     type: StructureTransformationType.CREATION,
+    forms: [buildCreationForm()],
     structureVersion: { nom: "Les Coquelicots" },
   },
 });
@@ -85,15 +132,16 @@ describe("useTransformationFormHandling", () => {
     vi.resetAllMocks();
   });
 
-  it("should build the TransformationApiUpdate payload and forward setTransformation", async () => {
+  it("should reuse the read form, mark the current step as VALIDE and forward setTransformation", async () => {
     // GIVEN
     mockUpdateTransformation.mockResolvedValue(12);
 
-    // WHEN
+    // WHEN — currentStep is "description"
     const { result } = renderHook(() => useTransformationFormHandling());
     await result.current.handleValidation(buildPayload());
 
-    // THEN
+    // THEN — the form read from the context keeps its ids and the "description"
+    // step (01-identification) is the only one flipped to VALIDE
     expect(mockUpdateTransformation).toHaveBeenCalledWith(
       12,
       {
@@ -103,6 +151,7 @@ describe("useTransformationFormHandling", () => {
             id: 7,
             type: StructureTransformationType.CREATION,
             structureVersion: { nom: "Les Coquelicots" },
+            forms: [buildCreationForm("01-identification")],
           },
         ],
       },
@@ -180,6 +229,25 @@ describe("useTransformationFormHandling", () => {
     expect(mockRouterReplace).toHaveBeenCalledWith(
       "/structures/transformation/12/creation/7/description"
     );
+  });
+
+  it("should be a no-op (no crash, no update) when currentStep is not resolved", async () => {
+    // GIVEN — invalid step in URL → currentStep is undefined
+    mockUseParams.mockReturnValue({
+      transformationStructureType: StructureTransformationType.CREATION,
+      transformationStructureId: "7",
+      transformationStructureStep: "unknown-step",
+    });
+
+    // WHEN
+    const { result } = renderHook(() => useTransformationFormHandling());
+
+    // THEN — does not dereference currentStep.name, does not save, does not navigate
+    await expect(
+      result.current.handleValidation(buildPayload())
+    ).resolves.toBeUndefined();
+    expect(mockUpdateTransformation).not.toHaveBeenCalled();
+    expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
   it("should expose nextStep and prevStep based on the current position", () => {

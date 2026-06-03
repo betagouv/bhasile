@@ -53,6 +53,7 @@ export const CreationIdentificationForm = ({
     return {
       id: structureTransformation.id,
       type: structureTransformation.type,
+      forms: structureTransformation.forms,
       operateurId: operateur?.id,
       structureVersion: {
         ...rest,

@@ -7,6 +7,7 @@ import { useTransformationContext } from "../(authenticated)/structures/transfor
 import {
   getTransformationFormNavigation,
   getTransformationSteps,
+  validateStructureTransformationFormStep,
 } from "../utils/transformation.util";
 import { useTransformations } from "./useTransformations";
 
@@ -63,8 +64,20 @@ export const useTransformationFormHandling = () => {
     transformationId: number;
     structureTransformation: StructureTransformationApiUpdateClient;
   }) => {
+    if (!currentStep) {
+      return;
+    }
+
     try {
-      await handleSave({ transformationId, structureTransformation });
+      await handleSave({
+        transformationId,
+        structureTransformation: {
+          ...structureTransformation,
+          forms: structureTransformation.forms?.map((form) =>
+            validateStructureTransformationFormStep(form, currentStep.name)
+          ),
+        },
+      });
       if (nextStep) {
         router.push(nextStep.route);
       }
