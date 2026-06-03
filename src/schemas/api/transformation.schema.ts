@@ -16,6 +16,8 @@ import {
 export type StructureVersionApiRead =
   ExcludeNullValues<StructureVersionApiType> & {
     adresseAdministrativeComplete?: string;
+    isMultiAntenne?: boolean;
+    isMultiDna?: boolean;
   };
 
 const structureTransformationApiUpdateSchema = z.object({

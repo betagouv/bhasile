@@ -23,9 +23,9 @@ import { ErrorModal, errorModal } from "./ErrorModal";
 import { QuitterModal, quitterModal } from "./QuitterModal";
 
 export const TransformationHeader = () => {
-  const { transformation, setTransformation } =
+  const { transformation, saveCurrentForm } =
     useOptionalTransformationContext();
-  const { updateTransformation, deleteTransformation } = useTransformations();
+  const { deleteTransformation } = useTransformations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { getFetchState } = useFetchState();
@@ -42,12 +42,12 @@ export const TransformationHeader = () => {
       return;
     }
     try {
-      await updateTransformation(
-        transformation.id,
-        { id: transformation.id },
-        setTransformation
-      );
-      enregistrementModal.open();
+      const saved = await saveCurrentForm();
+      if (saved) {
+        enregistrementModal.open();
+      } else {
+        errorModal.open();
+      }
     } catch (error) {
       console.error(error);
       errorModal.open();
@@ -59,15 +59,15 @@ export const TransformationHeader = () => {
       return;
     }
     try {
-      await updateTransformation(
-        transformation.id,
-        { id: transformation.id },
-        setTransformation
-      );
-      router.push("/structures");
+      const saved = await saveCurrentForm();
+      if (saved) {
+        router.push("/structures");
+      } else {
+        quitterModal.close();
+        errorModal.open();
+      }
     } catch (error) {
       console.error(error);
-      errorModal.open();
     }
   };
 

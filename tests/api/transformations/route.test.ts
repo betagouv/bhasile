@@ -8,16 +8,14 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
-const mockCreateOne = vi.fn();
-const mockFindOne = vi.fn();
-const mockUpdateOne = vi.fn();
-const mockFindAll = vi.fn();
+const mockCreateTransformation = vi.fn();
+const mockGetOngoingTransformationsForUser = vi.fn();
 
-vi.mock("@/app/api/transformations/transformation.repository", () => ({
-  createOne: (...args: unknown[]) => mockCreateOne(...args),
-  findOne: (...args: unknown[]) => mockFindOne(...args),
-  updateOne: (...args: unknown[]) => mockUpdateOne(...args),
-  findAll: (...args: unknown[]) => mockFindAll(...args),
+vi.mock("@/app/api/transformations/transformation.service", () => ({
+  createTransformation: (...args: unknown[]) =>
+    mockCreateTransformation(...args),
+  getOngoingTransformationsForUser: (...args: unknown[]) =>
+    mockGetOngoingTransformationsForUser(...args),
 }));
 
 vi.mock("@/lib/next-auth/auth", () => ({ authOptions: {} }));
@@ -31,7 +29,7 @@ describe("POST /api/transformations", () => {
   });
 
   it("should return 201 and transformation id when body is valid", async () => {
-    mockCreateOne.mockResolvedValueOnce(99);
+    mockCreateTransformation.mockResolvedValueOnce(99);
     const body = {
       type: TransformationType.OUVERTURE_EX_NIHILO,
       structureTransformations: [
@@ -51,9 +49,7 @@ describe("POST /api/transformations", () => {
 
     expect(response.status).toBe(201);
     expect(await response.json()).toEqual({ transformationId: 99 });
-    expect(mockCreateOne).toHaveBeenCalledWith(body);
-    expect(mockFindOne).not.toHaveBeenCalled();
-    expect(mockUpdateOne).not.toHaveBeenCalled();
+    expect(mockCreateTransformation).toHaveBeenCalledWith(body);
   });
 
   it("should return 400 when body does not match schema", async () => {
@@ -69,7 +65,7 @@ describe("POST /api/transformations", () => {
     const response = await POST(request as NextRequest);
 
     expect(response.status).toBe(400);
-    expect(mockCreateOne).not.toHaveBeenCalled();
+    expect(mockCreateTransformation).not.toHaveBeenCalled();
   });
 });
 
@@ -88,13 +84,13 @@ describe("GET /api/transformations", () => {
         allowedDepartements: ["50"],
       },
     } as never);
-    mockFindAll.mockResolvedValueOnce([]);
+    mockGetOngoingTransformationsForUser.mockResolvedValueOnce([]);
 
     const response = await GET();
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual([]);
-    expect(mockFindAll).toHaveBeenCalledTimes(1);
+    expect(mockGetOngoingTransformationsForUser).toHaveBeenCalledTimes(1);
   });
 
   it("returns an empty list when unauthenticated", async () => {
@@ -104,6 +100,6 @@ describe("GET /api/transformations", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual([]);
-    expect(mockFindAll).not.toHaveBeenCalled();
+    expect(mockGetOngoingTransformationsForUser).not.toHaveBeenCalled();
   });
 });

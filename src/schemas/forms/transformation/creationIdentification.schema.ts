@@ -1,19 +1,35 @@
 import z from "zod";
 
-import { nullishFrenchDateToISO } from "@/app/utils/zodCustomFields";
-import { adresseAdministrativeSchema } from "@/schemas/forms/base/adresseAdministrative.schema";
-import { antennesSchema } from "@/schemas/forms/base/antenne.schema";
-import { contactsSchema } from "@/schemas/forms/base/contact.schema";
-import { dnaStructuresSchema } from "@/schemas/forms/base/dna.schema";
-import { finessesSchema } from "@/schemas/forms/base/finess.schema";
+import {
+  blankStringsToUndefined,
+  nullishFrenchDateToISO,
+} from "@/app/utils/zodCustomFields";
+import {
+  adresseAdministrativeAutoSaveSchema,
+  adresseAdministrativeSchema,
+} from "@/schemas/forms/base/adresseAdministrative.schema";
+import {
+  antennesAutoSaveSchema,
+  antennesSchema,
+} from "@/schemas/forms/base/antenne.schema";
+import {
+  contactsAutoSaveSchema,
+  contactsSchema,
+} from "@/schemas/forms/base/contact.schema";
+import {
+  dnaStructuresAutoSaveSchema,
+  dnaStructuresSchema,
+} from "@/schemas/forms/base/dna.schema";
+import {
+  finessesAutoSaveSchema,
+  finessesSchema,
+} from "@/schemas/forms/base/finess.schema";
 import { operateurSchema } from "@/schemas/forms/base/operateur.schema";
 import { structureBaseSchema } from "@/schemas/forms/base/structure.base.schema";
-import { PublicType } from "@/types/structure.type";
 
 const baseCreationIdentificationSchema = structureBaseSchema.extend({
   operateur: operateurSchema,
   creationDate: nullishFrenchDateToISO(),
-  public: z.nativeEnum(PublicType),
   filiale: z.string().optional(),
 });
 
@@ -24,6 +40,21 @@ export const creationIdentificationSchema = baseCreationIdentificationSchema
   .and(finessesSchema)
   .and(contactsSchema);
 
+export const creationIdentificationDraftSchema = z.preprocess(
+  blankStringsToUndefined,
+  baseCreationIdentificationSchema
+    .partial()
+    .and(adresseAdministrativeAutoSaveSchema)
+    .and(antennesAutoSaveSchema)
+    .and(dnaStructuresAutoSaveSchema)
+    .and(finessesAutoSaveSchema)
+    .and(contactsAutoSaveSchema)
+);
+
 export type CreationIdentificationFormValues = z.infer<
   typeof creationIdentificationSchema
+>;
+
+export type CreationIdentificationDraftFormValues = z.infer<
+  typeof creationIdentificationDraftSchema
 >;

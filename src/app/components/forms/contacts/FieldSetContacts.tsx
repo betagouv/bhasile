@@ -2,7 +2,9 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
+import { areAllValuesEmpty } from "@/app/utils/common.util";
 import { ContactFormValues } from "@/schemas/forms/base/contact.schema";
+import { FormKind } from "@/types/global";
 
 import { Contact } from "./Contact";
 
@@ -15,7 +17,15 @@ const emptyContact: ContactFormValues = {
   perimetre: "",
 };
 
-export const FieldSetContacts = () => {
+const MIN_CONTACTS = 1;
+
+type Props = {
+  formKind?: FormKind;
+};
+
+export const FieldSetContacts = ({
+  formKind = FormKind.FINALISATION,
+}: Props) => {
   const { watch, setValue } = useFormContext();
 
   const isMultiAntenne = watch("isMultiAntenne");
@@ -23,14 +33,28 @@ export const FieldSetContacts = () => {
   const watchedContacts = watch("contacts") as ContactFormValues[] | undefined;
   const contacts = watchedContacts?.length ? watchedContacts : [emptyContact];
 
+  const title =
+    formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
+      ? "Veuillez mettre à jour les contacts afin de ne conserver que ceux qui sont adaptés à la nouvelle structure."
+      : "Contacts";
+
   const notice = isMultiAntenne
     ? "Veuillez renseigner le contact d’au moins une personne responsable de la structure, de l’opérationnel et/ou du financier. Indiquez également un responsable de chaque site."
     : "Veuillez renseigner le contact d’au moins une personne responsable de la structure, de l’opérationnel et/ou du financier.";
 
   const handleDelete = (index: number) => {
+    if (contacts.length > MIN_CONTACTS) {
+      setValue(
+        "contacts",
+        contacts.filter((_, contactIndex) => contactIndex !== index)
+      );
+      return;
+    }
     setValue(
       "contacts",
-      contacts.filter((_, i) => i !== index)
+      contacts.map((contact, contactIndex) =>
+        contactIndex === index ? emptyContact : contact
+      )
     );
   };
 
@@ -40,20 +64,22 @@ export const FieldSetContacts = () => {
 
   return (
     <>
-      <h2 className="text-xl font-bold mb-0 text-title-blue-france">
-        Contacts
-      </h2>
+      <h2 className="text-xl font-bold mb-0 text-title-blue-france">{title}</h2>
 
       <CustomNotice severity="info" title="" description={notice} />
 
-      {contacts.map((_, index) => (
-        <Contact
-          key={index}
-          isMultiAntenne={isMultiAntenne}
-          handleDelete={index < 1 ? undefined : handleDelete}
-          index={index}
-        />
-      ))}
+      {contacts.map((contact, index) => {
+        const canDelete =
+          contacts.length > MIN_CONTACTS || !areAllValuesEmpty(contact);
+        return (
+          <Contact
+            key={index}
+            isMultiAntenne={isMultiAntenne}
+            handleDelete={canDelete ? handleDelete : undefined}
+            index={index}
+          />
+        );
+      })}
 
       <Button
         type="button"

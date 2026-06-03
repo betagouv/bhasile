@@ -2,13 +2,18 @@ import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { getTransformationDepartement } from "@/app/utils/transformation.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import {
+  StructureTransformationApiCreate,
   TransformationApiCreate,
   TransformationApiRead,
   TransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
 import { SessionUser } from "@/types/global";
 
-import { dbStructureVersionToApiRead } from "../structure-versions/structure-version.service";
+import {
+  copyStructureVersion,
+  dbStructureVersionToApiRead,
+} from "../structure-versions/structure-version.service";
+import { getStructure } from "../structures/structure.service";
 import { TransformationDbDetails } from "./transformation.db.type";
 import {
   createOne,
@@ -17,6 +22,7 @@ import {
   findOne,
   updateOne,
 } from "./transformation.repository";
+import { applyPrefill } from "./transformation.util";
 
 const dbTransformationToApiRead = (
   transformation: TransformationDbDetails
@@ -58,9 +64,39 @@ export const getOngoingTransformationsForUser = async (
 };
 
 export const createTransformation = async (
-  input: TransformationApiCreate
+  transformation: TransformationApiCreate
 ): Promise<number> => {
-  return createOne(input);
+  const structureTransformationsWithSource = await Promise.all(
+    transformation.structureTransformations.map(
+      enrichStructureTransformationFromSource
+    )
+  );
+
+  const structureTransformations = applyPrefill(
+    transformation.type,
+    structureTransformationsWithSource
+  );
+
+  return createOne({ ...transformation, structureTransformations });
+};
+
+const enrichStructureTransformationFromSource = async (
+  structureTransformation: StructureTransformationApiCreate
+): Promise<StructureTransformationApiCreate> => {
+  const structureId = structureTransformation.structureVersion?.structureId;
+  if (!structureId) {
+    return structureTransformation;
+  }
+
+  const structure = await getStructure(structureId);
+
+  return {
+    ...structureTransformation,
+    structureVersion: copyStructureVersion(
+      structure,
+      structureTransformation.structureVersion
+    ),
+  };
 };
 
 export const updateTransformation = async (

@@ -6,7 +6,7 @@ import {
 } from "tests/test-utils/factories/transformation.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CreationExNihiloActesAdministratifsForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation-ex-nihilo/CreationExNihiloActesAdministratifsForm";
+import { CreationActesAdministratifsForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation/CreationActesAdministratifsForm";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import {
@@ -56,7 +56,7 @@ const transformationWithActes = (
     ],
   });
 
-describe("CreationExNihiloActesAdministratifsForm (integration via FormWrapper)", () => {
+describe("CreationActesAdministratifsForm (integration via FormWrapper)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
@@ -70,7 +70,7 @@ describe("CreationExNihiloActesAdministratifsForm (integration via FormWrapper)"
       filledActe(3, "ARRETE_TARIFICATION", "k-tarification"),
     ]);
     render(
-      <CreationExNihiloActesAdministratifsForm
+      <CreationActesAdministratifsForm
         structureTransformation={transformation.structureTransformations[0]}
         transformation={transformation}
       />
@@ -100,7 +100,7 @@ describe("CreationExNihiloActesAdministratifsForm (integration via FormWrapper)"
     // GIVEN no acts provided -> the form seeds empty rows for each required category
     const transformation = transformationWithActes([]);
     render(
-      <CreationExNihiloActesAdministratifsForm
+      <CreationActesAdministratifsForm
         structureTransformation={transformation.structureTransformations[0]}
         transformation={transformation}
       />

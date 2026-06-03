@@ -12,4 +12,8 @@ export const finessesSchema = z.object({
   finesses: z.array(finessSchema).optional(),
 });
 
+export const finessesAutoSaveSchema = z.object({
+  finesses: z.array(finessSchema.partial()).optional(),
+});
+
 export type FinessFormValues = z.infer<typeof finessSchema>;
