@@ -10,7 +10,7 @@ import {
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { StepStatus } from "@/types/form.type";
-import { DeepPartial } from "@/types/global";
+import { DeepPartial, FormKind } from "@/types/global";
 import {
   StructureTransformationStep,
   StructureTransformationType,
@@ -198,6 +198,27 @@ export const getTransformationStructureVersionDefaultValues = <T>(
     ...structureVersion,
     adresses: transformApiAdressesToFormAdresses(structureVersion?.adresses),
   }) as DeepPartial<T>;
+
+export const isCreation = (formKind: FormKind): boolean =>
+  formKind === FormKind.OUVERTURE_EX_NIHILO ||
+  formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES;
+
+export const isTransformationSurStructureExistante = (
+  formKind: FormKind
+): boolean =>
+  formKind === FormKind.EXTENSION || formKind === FormKind.CONTRACTION;
+
+export const getTransformationNounAvecArticle = (
+  formKind: FormKind
+): string => {
+  if (formKind === FormKind.EXTENSION) {
+    return "l’extension";
+  }
+  if (formKind === FormKind.CONTRACTION) {
+    return "la contraction";
+  }
+  return "";
+};
 
 export const getStructureTransformationLabel = (
   type?: StructureTransformationType,

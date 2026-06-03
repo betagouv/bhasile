@@ -1,10 +1,10 @@
 "use client";
 
 import { ActesAdministratifs } from "@/app/components/forms/actesAdministratifs/ActesAdministratifs";
+import { EffectiveDateInput } from "@/app/components/forms/EffectiveDateInput";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getActesAdministratifsDefaultValues } from "@/app/utils/acteAdministratif.util";
 import { fermetureActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
@@ -64,14 +64,10 @@ export const FermetureDescriptionForm = ({
       previousStep={prevStep?.route}
       showContactInfos={false}
     >
-      <div className="grid grid-cols-3">
-        <InputWithValidation
-          name="effectiveDate"
-          type="date"
-          label="Date de la fermeture"
-          hintText={codeBhasile ? `de la structure ${codeBhasile}` : undefined}
-        />
-      </div>
+      <EffectiveDateInput
+        label="Date de la fermeture"
+        hintText={codeBhasile ? `de la structure ${codeBhasile}` : undefined}
+      />
       <ActesAdministratifs categoryDisplayRules={categoryDisplayRules} />
     </FormWrapper>
   );

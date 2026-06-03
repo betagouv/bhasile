@@ -3,6 +3,10 @@ import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { areAllValuesEmpty } from "@/app/utils/common.util";
+import {
+  getTransformationNounAvecArticle,
+  isTransformationSurStructureExistante,
+} from "@/app/utils/transformation.util";
 import { ContactFormValues } from "@/schemas/forms/base/contact.schema";
 import { FormKind } from "@/types/global";
 
@@ -33,10 +37,7 @@ export const FieldSetContacts = ({
   const watchedContacts = watch("contacts") as ContactFormValues[] | undefined;
   const contacts = watchedContacts?.length ? watchedContacts : [emptyContact];
 
-  const title =
-    formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
-      ? "Veuillez mettre à jour les contacts afin de ne conserver que ceux qui sont adaptés à la nouvelle structure."
-      : "Contacts";
+  const title = getTitle(formKind);
 
   const notice = isMultiAntenne
     ? "Veuillez renseigner le contact d’au moins une personne responsable de la structure, de l’opérationnel et/ou du financier. Indiquez également un responsable de chaque site."
@@ -92,4 +93,16 @@ export const FieldSetContacts = ({
       </Button>
     </>
   );
+};
+
+const getTitle = (formKind: FormKind): string => {
+  if (isTransformationSurStructureExistante(formKind)) {
+    return `Veuillez ajouter ou supprimer les contacts afin de ne conserver que ceux qui sont adaptés suite à ${getTransformationNounAvecArticle(
+      formKind
+    )}.`;
+  }
+  if (formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES) {
+    return "Veuillez mettre à jour les contacts afin de ne conserver que ceux qui sont adaptés à la nouvelle structure.";
+  }
+  return "Contacts";
 };
