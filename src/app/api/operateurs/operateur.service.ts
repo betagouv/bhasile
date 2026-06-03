@@ -49,7 +49,7 @@ export const getOperateur = async (id: number): Promise<OperateurApiRead> => {
   return recursivelySerializeDates({
     ...operateur,
     actesAdministratifs: operateur.actesAdministratifs,
-    contacts: getContactsApiRead(operateur),
+    contacts: getContactsApiRead(operateur.contacts),
   }) as OperateurApiRead;
 };
 

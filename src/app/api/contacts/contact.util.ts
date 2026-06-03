@@ -1,7 +1,7 @@
-import { OperateurDbDetail } from "../operateurs/operateur.db.type";
+import { Contact } from "@/generated/prisma/client";
 
-export const getContactsApiRead = (operateur: OperateurDbDetail) => {
-  return operateur.contacts?.map((contact) => ({
+export const getContactsApiRead = (contacts: Contact[]) => {
+  return contacts?.map((contact) => ({
     ...contact,
     prenom: contact.prenom || "",
     nom: contact.nom || "",
