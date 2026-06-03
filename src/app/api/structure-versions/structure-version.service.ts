@@ -2,6 +2,7 @@ import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { StructureVersionApiRead } from "@/schemas/api/transformation.schema";
 import { PublicType } from "@/types/structure.type";
 
+import { getAntennesApiRead } from "../antennes/antenne.util";
 import { StructureVersionDbDetails } from "./structure-version.db.type";
 
 export const dbStructureVersionToApiRead = (
@@ -15,6 +16,12 @@ export const dbStructureVersionToApiRead = (
   ]
     .filter(Boolean)
     .join(" ");
+
+  const antennes = getAntennesApiRead(version.antennes);
+  const isMultiAntenne = (version.antennes?.length ?? 0) > 0;
+  const isMultiDna =
+    (version.dnaStructures?.length ?? 0) > 1 ||
+    (version.finesses?.length ?? 0) > 1;
 
   return recursivelySerializeDates({
     ...version,
@@ -39,5 +46,8 @@ export const dbStructureVersionToApiRead = (
     notes: version.notes ?? undefined,
     nomOfii: version.nomOfii ?? undefined,
     directionTerritoriale: version.directionTerritoriale ?? undefined,
+    antennes,
+    isMultiAntenne,
+    isMultiDna,
   }) as StructureVersionApiRead;
 };

@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { DnaStructureFormValues } from "@/schemas/forms/base/dna.schema";
+import { EntityId } from "@/types/Entity.type";
 import { FormKind } from "@/types/global";
 
 import { DeleteButton } from "../../common/DeleteButton";
@@ -18,7 +19,7 @@ const emptyDnaStructure: DnaStructureFormValues = {
 
 export const FieldSetDna = ({
   formKind = FormKind.FINALISATION,
-  structureId,
+  entityId,
 }: Props) => {
   const { control, watch, setValue } = useFormContext();
 
@@ -57,7 +58,7 @@ export const FieldSetDna = ({
                 index={index}
                 label="Code"
                 disabled={formKind === FormKind.MODIFICATION}
-                structureId={structureId}
+                entityId={entityId}
               />
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
@@ -102,5 +103,5 @@ export const FieldSetDna = ({
 
 type Props = {
   formKind?: FormKind;
-  structureId?: number;
+  entityId?: EntityId;
 };

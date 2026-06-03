@@ -6,6 +6,7 @@ import {
   isStructureAutorisee,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
+import { EntityId } from "@/types/Entity.type";
 import { FormKind } from "@/types/global";
 
 import { DnaInput } from "../adresseAdministrativeAndAntenne/DnaInput";
@@ -15,7 +16,7 @@ import { FieldSetFiness } from "./FieldSetFiness";
 
 export const DnaAndFiness = ({
   formKind = FormKind.FINALISATION,
-  structureId,
+  entityId,
 }: Props) => {
   const { watch, control, setValue } = useFormContext();
 
@@ -77,7 +78,7 @@ export const DnaAndFiness = ({
       ) : null}
       {isMultiDna ? (
         <>
-          <FieldSetDna formKind={formKind} structureId={structureId} />
+          <FieldSetDna formKind={formKind} entityId={entityId} />
           {isAutorisee && <FieldSetFiness />}
         </>
       ) : (
@@ -86,7 +87,7 @@ export const DnaAndFiness = ({
             index={0}
             label="Code DNA"
             disabled={formKind === FormKind.MODIFICATION}
-            structureId={structureId}
+            entityId={entityId}
           />
           {isAutorisee && (
             <InputWithValidation
@@ -105,5 +106,5 @@ export const DnaAndFiness = ({
 
 type Props = {
   formKind?: FormKind;
-  structureId?: number;
+  entityId?: EntityId;
 };
