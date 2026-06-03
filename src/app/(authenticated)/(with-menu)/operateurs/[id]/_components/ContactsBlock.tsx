@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { ReactElement } from "react";
+import { Fragment, ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
 
@@ -20,7 +20,7 @@ export const ContactsBlock = (): ReactElement => {
       }}
     >
       {operateur.contacts?.map((contact, index) => (
-        <>
+        <Fragment key={contact.id}>
           <div className="flex gap-2 mb-3">
             <div className="w-full italic">
               {contact.prenom} {contact.nom}
@@ -32,10 +32,8 @@ export const ContactsBlock = (): ReactElement => {
             <div className="w-full underline">{contact.email}</div>
             <div className="w-full">{contact.telephone}</div>
           </div>
-          {index < operateur.contacts.length - 1 && (
-            <hr className="col-span-2" />
-          )}
-        </>
+          {index < operateur.contacts.length - 1 && <hr />}
+        </Fragment>
       ))}
     </Block>
   );

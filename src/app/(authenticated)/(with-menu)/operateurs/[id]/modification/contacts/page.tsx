@@ -37,7 +37,7 @@ export default function OperateurModificationContacts() {
       <ModificationTitle
         step="Contacts nationaux et territoriaux"
         handleCancel={() => setShouldOpenModal(true)}
-      />{" "}
+      />
       <FormWrapper
         schema={operateurUpdateSchema}
         defaultValues={defaultValues}

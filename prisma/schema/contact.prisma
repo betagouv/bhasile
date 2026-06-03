@@ -10,7 +10,7 @@ model Contact {
   email              String?
   role               String?
   perimetre          String?
-  operateur          Operateur?        @relation(fields: [operateurId], references: [id])
+  operateur          Operateur?        @relation(fields: [operateurId], references: [id], onDelete: Cascade)
   operateurId        Int?
 
   createdAt DateTime @default(now())

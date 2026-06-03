@@ -5,6 +5,7 @@ import {
   OperateurApiWrite,
 } from "@/schemas/api/operateur.schema";
 
+import { getContactsApiRead } from "../contacts/contact.util";
 import {
   countOperateurs,
   findBySearchTerm,
@@ -48,15 +49,7 @@ export const getOperateur = async (id: number): Promise<OperateurApiRead> => {
   return recursivelySerializeDates({
     ...operateur,
     actesAdministratifs: operateur.actesAdministratifs,
-    contacts: operateur.contacts?.map((contact) => ({
-      ...contact,
-      prenom: contact.prenom || "",
-      nom: contact.nom || "",
-      telephone: contact.telephone || "",
-      email: contact.email || "",
-      role: contact.role || "",
-      structureId: contact.structureId || undefined,
-    })),
+    contacts: getContactsApiRead(operateur),
   }) as OperateurApiRead;
 };
 

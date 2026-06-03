@@ -21,7 +21,7 @@ export const createOrUpdateContacts = async (
   } else if (entityId.operateurId !== undefined) {
     where = { operateurId: entityId.operateurId };
   } else {
-    return;
+    throw new Error("ID d'entité invalidee");
   }
 
   await tx.contact.deleteMany({ where });

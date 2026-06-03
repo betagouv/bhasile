@@ -15,7 +15,7 @@ export const DescriptionBlock = () => {
       title="Description"
       iconClass="fr-icon-align-left"
       onEdit={() => {
-        router.push(`/operateurs/${operateur.id}/modification/contacts`);
+        router.push(`/operateurs/${operateur.id}/modification/description`);
       }}
       entity={operateur}
       entityType="Operateur"
