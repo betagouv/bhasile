@@ -60,6 +60,7 @@ describe("transformation util", () => {
       const { firstStep, currentStep, prevStep, nextStep } =
         getTransformationFormNavigation({
           transformationSteps,
+          transformationId: 5,
           transformationStructureType,
           transformationStructureId,
           transformationStructureStep,
@@ -98,6 +99,7 @@ describe("transformation util", () => {
       const { currentStep, prevStep, nextStep } =
         getTransformationFormNavigation({
           transformationSteps,
+          transformationId: 5,
           transformationStructureType,
           transformationStructureId,
           transformationStructureStep,
@@ -117,7 +119,7 @@ describe("transformation util", () => {
       });
     });
 
-    it("should return undefined nextStep when step is the very last one", () => {
+    it("should return the verification step as nextStep when on the last form step", () => {
       // GIVEN
       const transformationStructureType = StructureTransformationType.EXTENSION;
       const transformationStructureId = 2;
@@ -127,6 +129,7 @@ describe("transformation util", () => {
       const { currentStep, prevStep, nextStep } =
         getTransformationFormNavigation({
           transformationSteps,
+          transformationId: 5,
           transformationStructureType,
           transformationStructureId,
           transformationStructureStep,
@@ -143,6 +146,31 @@ describe("transformation util", () => {
         type: StructureTransformationType.EXTENSION,
         name: "places-et-hebergement",
       });
+      expect(nextStep).toMatchObject({
+        name: "verification",
+        route: "/structures/transformation/5/verification",
+      });
+    });
+
+    it("should resolve the verification step and expose the last form step as prevStep", () => {
+      // WHEN
+      const { currentStep, prevStep, nextStep } =
+        getTransformationFormNavigation({
+          transformationSteps,
+          transformationId: 5,
+          transformationStructureStep: "verification",
+        });
+
+      // THEN
+      expect(currentStep).toMatchObject({
+        name: "verification",
+        route: "/structures/transformation/5/verification",
+      });
+      expect(prevStep).toMatchObject({
+        id: 2,
+        type: StructureTransformationType.EXTENSION,
+        name: "actes-administratifs",
+      });
       expect(nextStep).toBeUndefined();
     });
 
@@ -155,6 +183,7 @@ describe("transformation util", () => {
       // WHEN
       const { prevStep, nextStep } = getTransformationFormNavigation({
         transformationSteps,
+        transformationId: 5,
         transformationStructureType,
         transformationStructureId,
         transformationStructureStep,
@@ -183,6 +212,7 @@ describe("transformation util", () => {
       const { firstStep, currentStep, prevStep, nextStep } =
         getTransformationFormNavigation({
           transformationSteps,
+          transformationId: 5,
           transformationStructureType,
           transformationStructureId,
           transformationStructureStep,
@@ -209,6 +239,7 @@ describe("transformation util", () => {
       // WHEN
       const { currentStep } = getTransformationFormNavigation({
         transformationSteps,
+        transformationId: 5,
         transformationStructureType,
         transformationStructureId,
         transformationStructureStep,
@@ -222,7 +253,7 @@ describe("transformation util", () => {
       });
     });
 
-    it("should return all-undefined navigation when transformationSteps is empty", () => {
+    it("should return only the verification step as firstStep when transformationSteps is empty", () => {
       // GIVEN
       const emptySteps: Step[] = [];
 
@@ -230,13 +261,17 @@ describe("transformation util", () => {
       const { firstStep, currentStep, prevStep, nextStep } =
         getTransformationFormNavigation({
           transformationSteps: emptySteps,
+          transformationId: 5,
           transformationStructureType: StructureTransformationType.EXTENSION,
           transformationStructureId: 2,
           transformationStructureStep: "description",
         });
 
       // THEN
-      expect(firstStep).toBeUndefined();
+      expect(firstStep).toMatchObject({
+        name: "verification",
+        route: "/structures/transformation/5/verification",
+      });
       expect(currentStep).toBeUndefined();
       expect(prevStep).toBeUndefined();
       expect(nextStep).toBeUndefined();

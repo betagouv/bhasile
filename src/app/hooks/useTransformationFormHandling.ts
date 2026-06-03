@@ -1,39 +1,19 @@
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import { StructureTransformationApiUpdateClient } from "@/schemas/api/transformation.schema";
-import { StructureTransformationType } from "@/types/transformation.type";
 
 import { useTransformationContext } from "../(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
-import {
-  getTransformationFormNavigation,
-  getTransformationSteps,
-} from "../utils/transformation.util";
+import { useTransformationFormNavigation } from "./useTransformationFormNavigation";
 import { useTransformations } from "./useTransformations";
 
 export const useTransformationFormHandling = () => {
   const router = useRouter();
 
-  const params = useParams();
-
-  const transformationStructureType =
-    params.transformationStructureType as StructureTransformationType;
-  const transformationStructureId = Number(params.transformationStructureId);
-  const transformationStructureStep = String(
-    params.transformationStructureStep
-  );
-
-  const { transformation, setTransformation } = useTransformationContext();
+  const { setTransformation } = useTransformationContext();
   const { updateTransformation } = useTransformations();
 
-  const transformationSteps = getTransformationSteps(transformation);
-
   const { firstStep, currentStep, nextStep, prevStep } =
-    getTransformationFormNavigation({
-      transformationSteps,
-      transformationStructureType,
-      transformationStructureId,
-      transformationStructureStep,
-    });
+    useTransformationFormNavigation();
 
   if (!currentStep) {
     router.replace(firstStep.route);

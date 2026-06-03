@@ -38,6 +38,8 @@ export const STRUCTURE_TRANSFORMATION_TYPE_ORDER: Record<
   [StructureTransformationType.CREATION]: 3,
 };
 
+export const VERIFICATION_STEP_NAME = "verification";
+
 export const TRANSFORMATION_TYPE_SPECS: Record<
   TransformationType,
   TransformationTypeSpec

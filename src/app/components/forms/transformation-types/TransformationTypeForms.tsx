@@ -73,7 +73,7 @@ export const TransformationTypeForms = ({
         )}
         {structureId && !formType ? (
           <FromStructureTransformationForm
-            transformationStructureId={structureId}
+            structureId={structureId}
             transformationType={transformationType}
             setTransformationType={setTransformationType}
           />
