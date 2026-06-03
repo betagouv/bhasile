@@ -129,7 +129,7 @@ export const StructuresTable = ({
         </p>
       </finalisationModal.Component>
       <noPermissionsModal.Component
-        title="La page de cette structure n’est pas encore finalisée."
+        title="Vous n'avez pas les droits pour finaliser cette structure."
         buttons={[
           {
             doClosesModal: true,
