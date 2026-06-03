@@ -209,6 +209,13 @@ export const actesAdministratifsCreationSchema = z.object({
   ),
 });
 
+export const actesAdministratifsFermetureSchema = z.object({
+  actesAdministratifs: z.preprocess(
+    filterActesWithKey(),
+    z.array(acteAdministratifSchema).optional()
+  ),
+});
+
 export const actesAdministratifsAutoSaveSchema = z.object({
   actesAdministratifs: z.preprocess(
     filterActesWithKey(),

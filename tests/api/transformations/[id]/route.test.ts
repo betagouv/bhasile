@@ -4,14 +4,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, PUT } from "@/app/api/transformations/[id]/route";
 import { TransformationType } from "@/types/transformation.type";
 
-const mockCreateOne = vi.fn();
-const mockFindOne = vi.fn();
-const mockUpdateOne = vi.fn();
+const mockGetTransformation = vi.fn();
+const mockUpdateTransformation = vi.fn();
+const mockDeleteTransformation = vi.fn();
 
-vi.mock("@/app/api/transformations/transformation.repository", () => ({
-  createOne: (...args: unknown[]) => mockCreateOne(...args),
-  findOne: (...args: unknown[]) => mockFindOne(...args),
-  updateOne: (...args: unknown[]) => mockUpdateOne(...args),
+vi.mock("@/app/api/transformations/transformation.service", () => ({
+  getTransformation: (...args: unknown[]) => mockGetTransformation(...args),
+  updateTransformation: (...args: unknown[]) =>
+    mockUpdateTransformation(...args),
+  deleteTransformation: (...args: unknown[]) =>
+    mockDeleteTransformation(...args),
 }));
 
 describe("GET /api/transformations/[id]", () => {
@@ -25,7 +27,7 @@ describe("GET /api/transformations/[id]", () => {
       type: TransformationType.EXTENSION_EX_NIHILO,
       structureTransformations: [],
     };
-    mockFindOne.mockResolvedValueOnce(payload);
+    mockGetTransformation.mockResolvedValueOnce(payload);
     const request = new Request("http://localhost/api/transformations/5");
 
     const response = await GET(request as NextRequest, {
@@ -34,11 +36,11 @@ describe("GET /api/transformations/[id]", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual(payload);
-    expect(mockFindOne).toHaveBeenCalledWith(5);
+    expect(mockGetTransformation).toHaveBeenCalledWith(5);
   });
 
   it("should return 404 when transformation is not found", async () => {
-    mockFindOne.mockResolvedValueOnce(null);
+    mockGetTransformation.mockResolvedValueOnce(null);
     const request = new Request("http://localhost/api/transformations/404");
 
     const response = await GET(request as NextRequest, {
@@ -49,7 +51,7 @@ describe("GET /api/transformations/[id]", () => {
     expect(await response.json()).toEqual({
       error: "Transformation non trouvée",
     });
-    expect(mockFindOne).toHaveBeenCalledWith(404);
+    expect(mockGetTransformation).toHaveBeenCalledWith(404);
   });
 });
 
@@ -59,7 +61,7 @@ describe("PUT /api/transformations/[id]", () => {
   });
 
   it("should return 201 when body is valid", async () => {
-    mockUpdateOne.mockResolvedValueOnce(7);
+    mockUpdateTransformation.mockResolvedValueOnce(7);
     const body = {
       id: 7,
       type: TransformationType.FERMETURE_SANS_TRANSFERT,
@@ -74,7 +76,7 @@ describe("PUT /api/transformations/[id]", () => {
 
     expect(response.status).toBe(201);
     expect(await response.json()).toEqual({ transformationId: 7 });
-    expect(mockUpdateOne).toHaveBeenCalledWith(body);
+    expect(mockUpdateTransformation).toHaveBeenCalledWith(body);
   });
 
   it("should return 400 when body does not match schema", async () => {
@@ -87,6 +89,6 @@ describe("PUT /api/transformations/[id]", () => {
     const response = await PUT(request as NextRequest);
 
     expect(response.status).toBe(400);
-    expect(mockUpdateOne).not.toHaveBeenCalled();
+    expect(mockUpdateTransformation).not.toHaveBeenCalled();
   });
 });

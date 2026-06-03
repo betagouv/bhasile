@@ -13,6 +13,14 @@ export type TransformationDbDetails = Prisma.TransformationGetPayload<{
     structureTransformations: {
       include: {
         operateur: { select: { id: true; name: true } };
+        forms: {
+          include: {
+            formDefinition: true;
+            formSteps: {
+              include: { stepDefinition: true };
+            };
+          };
+        };
         actesAdministratifs: {
           include: { fileUploads: true };
         };
