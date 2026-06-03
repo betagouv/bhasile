@@ -1,5 +1,6 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
+import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
@@ -12,6 +13,15 @@ import { FormKind } from "@/types/global";
 import { FieldSetAdresseAdministrative } from "./FieldSetAdresseAdministrative";
 import { FieldSetAntennes } from "./FieldSetAntennes";
 
+const ADRESSE_FIELD_NAMES = [
+  "nom",
+  "adresseAdministrativeComplete",
+  "adresseAdministrative",
+  "codePostalAdministratif",
+  "communeAdministrative",
+  "departementAdministratif",
+] as const;
+
 type Props = {
   formKind?: FormKind;
 };
@@ -19,22 +29,79 @@ type Props = {
 export const AdresseAdministrativeAndAntennes = ({
   formKind = FormKind.FINALISATION,
 }: Props) => {
-  const { watch, setValue } = useFormContext();
+  const { watch, setValue, getValues } = useFormContext();
 
   const isMultiAntenne = watch("isMultiAntenne");
 
+  const isTransformation = isTransformationSurStructureExistante(formKind);
   const showSitesRadio =
-    isTransformationSurStructureExistante(formKind) ||
+    isTransformation ||
     formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES;
 
-  const title = getTitle(formKind);
-  const sitesQuestionLabel = getSitesQuestionLabel(formKind);
+  const [hasAdresseChanged, setHasAdresseChanged] = useState<
+    boolean | undefined
+  >(undefined);
+
+  const originalAdresseRef = useRef<Record<string, unknown> | null>(null);
+  useEffect(() => {
+    if (isTransformation && originalAdresseRef.current === null) {
+      originalAdresseRef.current = Object.fromEntries(
+        ADRESSE_FIELD_NAMES.map((fieldName) => [fieldName, getValues(fieldName)])
+      );
+    }
+  }, [isTransformation, getValues]);
+
+  const handleDidTransformationChangeAdresse = (changed: boolean) => {
+    setHasAdresseChanged(changed);
+    ADRESSE_FIELD_NAMES.forEach((fieldName) => {
+      if (changed) {
+        setValue(fieldName, "");
+      } else {
+        setValue(fieldName, originalAdresseRef.current?.[fieldName] ?? "");
+      }
+    });
+  };
+
+  const isAdresseLocked = isTransformation && hasAdresseChanged !== true;
 
   return (
     <>
-      <h2 className="text-xl font-bold mb-4 text-title-blue-france">
-        {title}
-      </h2>
+      {isTransformation ? (
+        <div className="flex gap-6">
+          <h2
+            id="hasAdresseChanged-title"
+            className="text-xl font-bold mb-4 text-title-blue-france flex-1"
+          >
+            {getAdresseChangedQuestion(formKind)}
+          </h2>
+          <RadioButtons
+            aria-labelledby="hasAdresseChanged-title"
+            orientation="horizontal"
+            name="hasAdresseChanged"
+            options={[
+              {
+                label: "Oui",
+                nativeInputProps: {
+                  checked: hasAdresseChanged === true,
+                  onChange: () => handleDidTransformationChangeAdresse(true),
+                },
+              },
+              {
+                label: "Non",
+                nativeInputProps: {
+                  checked: hasAdresseChanged === false,
+                  onChange: () => handleDidTransformationChangeAdresse(false),
+                },
+              },
+            ]}
+            className="mr-10"
+          />
+        </div>
+      ) : (
+        <h2 className="text-xl font-bold mb-4 text-title-blue-france">
+          {getTitle(formKind)}
+        </h2>
+      )}
       {!showSitesRadio && (
         <>
           <CustomNotice
@@ -59,7 +126,10 @@ export const AdresseAdministrativeAndAntennes = ({
           />
         </>
       )}
-      <FieldSetAdresseAdministrative formKind={formKind} />
+      <FieldSetAdresseAdministrative
+        formKind={formKind}
+        locked={isAdresseLocked}
+      />
       {showSitesRadio && (
         <>
           <hr />
@@ -68,7 +138,7 @@ export const AdresseAdministrativeAndAntennes = ({
               id="isMultiAntenne-title"
               className="text-xl font-bold mb-4 text-title-blue-france flex-1"
             >
-              {sitesQuestionLabel}
+              {getSitesQuestionLabel(formKind)}
             </h2>
             <RadioButtons
               aria-labelledby="isMultiAntenne-title"
@@ -101,16 +171,16 @@ export const AdresseAdministrativeAndAntennes = ({
 };
 
 const getTitle = (formKind: FormKind): string => {
-  if (isTransformationSurStructureExistante(formKind)) {
-    return `Veuillez saisir l’adresse administrative principale de la structure suite à ${getTransformationNounAvecArticle(
-      formKind
-    )}.`;
-  }
   if (formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES) {
     return "Veuillez saisir l’adresse administrative principale de la structure.";
   }
   return "Adresses administratives";
 };
+
+const getAdresseChangedQuestion = (formKind: FormKind): string =>
+  `Est-ce que le nom d’usage de la structure et/ou son adresse administrative principale changent suite à ${getTransformationNounAvecArticle(
+    formKind
+  )} ?`;
 
 const getSitesQuestionLabel = (formKind: FormKind): string => {
   if (isTransformationSurStructureExistante(formKind)) {
