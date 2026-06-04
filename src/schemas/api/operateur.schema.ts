@@ -7,6 +7,7 @@ import {
   ActeAdministratifApiType,
 } from "./acteAdministratif.schema";
 import { contactApiSchema, ContactApiType } from "./contact.schema";
+import { fileApiSchema, FileUploadApiType } from "./file.schema";
 
 export const operateurSuggestionApiSchema = z.object({
   id: z.number().optional(),
@@ -26,6 +27,7 @@ export type OperateurApiRead = {
   siegeSocial?: string | null;
   actesAdministratifs: ActeAdministratifApiType[];
   contacts: ContactApiType[];
+  logo: FileUploadApiType;
 };
 
 export const operateurWriteApiSchema = z.object({
@@ -36,6 +38,7 @@ export const operateurWriteApiSchema = z.object({
   siegeSocial: z.string().nullish(),
   actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
   contacts: z.array(contactApiSchema).optional(),
+  logo: fileApiSchema.optional(),
 });
 
 export type OperateurApiWrite = z.infer<typeof operateurWriteApiSchema>;

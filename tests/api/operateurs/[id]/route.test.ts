@@ -27,6 +27,9 @@ describe("GET /api/operateurs/[id]", () => {
     const operateur = {
       id: 1,
       name: "Adoma",
+      logo: {
+        key: "uuid-file-key",
+      },
       contacts: [
         {
           prenom: "John",
@@ -96,6 +99,9 @@ describe("PUT /api/operateurs/[id]", () => {
     // GIVEN
     const body = {
       name: "Adoma Modifié",
+      logo: {
+        key: "uuid-file-key",
+      },
       contacts: [
         {
           prenom: "John",

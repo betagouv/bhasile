@@ -62,9 +62,11 @@ export const getPaginatedOperateurs = async ({
       os.nb_structures,
       os.total_places,
       ROUND((os.total_places::float / NULLIF(tp.total, 0) * 100)::numeric, 2)::float as pourcentage_parc,
-      os.structure_types
+      os.structure_types,
+      fl."key" as logo_key
     FROM operateurs_stats os
     CROSS JOIN total_places tp
+    LEFT JOIN public."FileUpload" fl ON fl."operateurId" = os.id
     ORDER BY nb_structures DESC
     LIMIT ${MIDDLE_PAGE_SIZE} OFFSET ${(page ?? 0) * MIDDLE_PAGE_SIZE}
   `);
@@ -101,6 +103,7 @@ export const findOne = async (id: number): Promise<OperateurDbDetail> => {
       actesAdministratifs: {
         include: { fileUploads: true },
       },
+      logo: true,
     },
   });
 };
@@ -108,12 +111,15 @@ export const findOne = async (id: number): Promise<OperateurDbDetail> => {
 export const updateOne = async (
   operateur: OperateurApiWrite
 ): Promise<Operateur> => {
-  const { actesAdministratifs, contacts, ...operateurFields } = operateur;
+  const { actesAdministratifs, contacts, logo, ...operateurFields } = operateur;
 
   return prisma.$transaction(async (tx) => {
     const updated = await tx.operateur.update({
       where: { id: operateur.id },
-      data: operateurFields,
+      data: {
+        ...operateurFields,
+        ...(logo && { logo: { connect: { id: logo.id } } }),
+      },
     });
 
     await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
@@ -135,4 +141,5 @@ type OperateurStat = {
   total_places: number;
   pourcentage_parc: number;
   structure_types: StructureType[];
+  logo_key: string;
 };
