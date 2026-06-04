@@ -35,11 +35,15 @@ export const convertToPublicType = (
 export const getOperateurLabel = (
   structure: StructureDbDetails | StructureDbList
 ): string => {
-  const { filiale, operateur } = structure;
-  if (filiale) {
-    return `${filiale} (${operateur?.name ?? ""})`;
+  const { operateur } = structure;
+  if (!operateur) {
+    return "";
   }
-  return operateur?.name ?? "";
+  if (operateur.parentId) {
+    const parentName = operateur.parent!.name;
+    return `${operateur.name} (${parentName})`;
+  }
+  return operateur.name;
 };
 
 export const getAdresseAdministrativeCoordinates = async (
