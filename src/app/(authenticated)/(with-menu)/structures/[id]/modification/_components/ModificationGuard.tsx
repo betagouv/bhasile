@@ -2,16 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ReactElement, ReactNode, useEffect } from "react";
+import { PropsWithChildren, ReactNode, useEffect } from "react";
 
 import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { useCanUpdateStructure } from "@/app/hooks/useCanUpdateStructure";
 
 export const ModificationGuard = ({
   children,
-}: {
-  children: ReactNode;
-}): ReactElement | null => {
+}: PropsWithChildren): ReactNode => {
   const router = useRouter();
   const { status } = useSession();
   const { structure } = useStructureContext();
@@ -27,5 +25,5 @@ export const ModificationGuard = ({
     return null;
   }
 
-  return <>{children}</>;
+  return children;
 };

@@ -1,11 +1,7 @@
-import { ReactNode } from "react";
+import { PropsWithChildren } from "react";
 
 import { ModificationGuard } from "./_components/ModificationGuard";
 
-export default function ModificationLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function ModificationLayout({ children }: PropsWithChildren) {
   return <ModificationGuard>{children}</ModificationGuard>;
 }
