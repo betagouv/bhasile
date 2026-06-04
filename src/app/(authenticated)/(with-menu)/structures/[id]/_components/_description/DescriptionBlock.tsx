@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { ReactElement, useState } from "react";
 
 import { Block } from "@/app/components/common/Block";
+import { useCanUpdateStructure } from "@/app/hooks/useCanUpdateStructure";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { Adresses } from "./Adresses";
@@ -13,6 +14,7 @@ import { General } from "./General";
 export const DescriptionBlock = (): ReactElement => {
   const { structure } = useStructureContext();
   const router = useRouter();
+  const canEdit = useCanUpdateStructure(structure);
 
   const tabs = [
     {
@@ -27,10 +29,14 @@ export const DescriptionBlock = (): ReactElement => {
       id: "codes",
       label: structure.isAutorisee ? "Codes DNA & FINESS" : "Codes DNA",
     },
-    {
-      id: "adresses",
-      label: "Adresses d'hébergement",
-    },
+    ...(canEdit
+      ? [
+          {
+            id: "adresses",
+            label: "Adresses d'hébergement",
+          },
+        ]
+      : []),
   ];
 
   const [selectedTabId, setSelectedTabId] = useState<string>("general");
