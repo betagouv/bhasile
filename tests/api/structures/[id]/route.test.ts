@@ -11,6 +11,7 @@ const mockUpdateOne = vi.fn();
 const mockCreateStructureEvent = vi.fn();
 const mockGetDepartementActivitesAverage = vi.fn();
 const mockGetAdresseAdministrativeCoordinates = vi.fn();
+const mockGetAdressesApiRead = vi.fn();
 
 vi.mock("next-auth", () => ({
   getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
@@ -67,7 +68,7 @@ vi.mock("@/app/api/finesses/finess.util", () => ({
 }));
 
 vi.mock("@/app/api/adresses/adresse.util", () => ({
-  getAdressesApiRead: vi.fn().mockReturnValue([]),
+  getAdressesApiRead: (...args: unknown[]) => mockGetAdressesApiRead(...args),
 }));
 
 vi.mock("@/app/api/user-action/user-action.service", () => ({
@@ -78,9 +79,10 @@ vi.mock("@/app/api/user-action/user-action.service", () => ({
 describe("GET /api/structures/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetAdressesApiRead.mockReturnValue([]);
   });
 
-  it("should return full structure when authenticated", async () => {
+  it("should return full structure when authenticated with edit rights", async () => {
     // GIVEN
     const dbStructure = {
       id: 1,
@@ -98,6 +100,8 @@ describe("GET /api/structures/[id]", () => {
     };
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindOne.mockResolvedValueOnce(dbStructure);
+    mockCanUpdateStructure.mockReturnValueOnce(true);
+    mockGetAdressesApiRead.mockReturnValueOnce([{ id: 1 }]);
 
     const request = new NextRequest("http://localhost/api/structures/1");
 
@@ -113,7 +117,7 @@ describe("GET /api/structures/[id]", () => {
       filiale: undefined,
       operateur: { id: 1, name: "Adoma" },
       type: "CADA",
-      adresses: [],
+      adresses: [{ id: 1 }],
       adresseAdministrative: "",
       codePostalAdministratif: "",
       communeAdministrative: "",
@@ -153,6 +157,31 @@ describe("GET /api/structures/[id]", () => {
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);
     expect(mockFindOneOperateur).not.toHaveBeenCalled();
+  });
+
+  it("should strip adresses d'hébergement when authenticated user lacks edit rights", async () => {
+    // GIVEN
+    const dbStructure = {
+      id: 1,
+      type: "CADA",
+      adresses: [{ id: 42 }],
+      cpomStructures: [],
+      creationDate: new Date("2020-01-01"),
+      dnaStructures: [],
+    };
+    mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
+    mockFindOne.mockResolvedValueOnce(dbStructure);
+    mockCanUpdateStructure.mockReturnValueOnce(false);
+    mockGetAdressesApiRead.mockReturnValueOnce([{ id: 42 }]);
+
+    const request = new NextRequest("http://localhost/api/structures/1");
+
+    // WHEN
+    const response = await GET(request);
+
+    // THEN
+    expect(response.status).toBe(200);
+    expect((await response.json()).adresses).toEqual([]);
   });
 
   it("should return limited structure when not authenticated", async () => {

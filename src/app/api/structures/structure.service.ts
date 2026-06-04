@@ -4,10 +4,12 @@ import {
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import { Structure } from "@/generated/prisma/client";
+import { canUpdateStructure } from "@/lib/casl/abilities";
 import {
   StructureAgentUpdateApiType,
   StructureApiRead,
 } from "@/schemas/api/structure.schema";
+import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 import { PublicType } from "@/types/structure.type";
 
@@ -129,7 +131,8 @@ export const getFullStructures = async ({
 };
 
 export const getFullStructure = async (
-  id: number
+  id: number,
+  user?: SessionUser
 ): Promise<StructureApiRead | null> => {
   const dbStructure = await findOne(id);
 
@@ -138,6 +141,10 @@ export const getFullStructure = async (
   }
 
   const structure = dbStructureToApiRead(dbStructure);
+
+  if (user && !canUpdateStructure(user, dbStructure)) {
+    structure.adresses = [];
+  }
 
   return structure;
 };
