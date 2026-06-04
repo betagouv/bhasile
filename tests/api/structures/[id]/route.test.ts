@@ -159,7 +159,7 @@ describe("GET /api/structures/[id]", () => {
     expect(mockFindOneOperateur).not.toHaveBeenCalled();
   });
 
-  it("should strip adresses d'hébergement when authenticated user lacks edit rights", async () => {
+  it("should redact the exact adresse but keep the commune when authenticated user lacks edit rights", async () => {
     // GIVEN
     const dbStructure = {
       id: 1,
@@ -172,7 +172,15 @@ describe("GET /api/structures/[id]", () => {
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindOne.mockResolvedValueOnce(dbStructure);
     mockCanUpdateStructure.mockReturnValueOnce(false);
-    mockGetAdressesApiRead.mockReturnValueOnce([{ id: 42 }]);
+    mockGetAdressesApiRead.mockReturnValueOnce([
+      {
+        id: 42,
+        adresse: "12 rue secrète",
+        codePostal: "75001",
+        commune: "Paris",
+        adresseComplete: "12 rue secrète 75001 Paris",
+      },
+    ]);
 
     const request = new NextRequest("http://localhost/api/structures/1");
 
@@ -181,7 +189,15 @@ describe("GET /api/structures/[id]", () => {
 
     // THEN
     expect(response.status).toBe(200);
-    expect((await response.json()).adresses).toEqual([]);
+    expect((await response.json()).adresses).toEqual([
+      {
+        id: 42,
+        adresse: "",
+        codePostal: "75001",
+        commune: "Paris",
+        adresseComplete: "75001 Paris",
+      },
+    ]);
   });
 
   it("should return limited structure when not authenticated", async () => {

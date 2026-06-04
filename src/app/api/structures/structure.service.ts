@@ -84,19 +84,22 @@ export const updateStructureOperateur = async (
   );
 };
 
-export const getFullStructures = async ({
-  search,
-  page,
-  type,
-  bati,
-  placesAutorisees,
-  departements,
-  map,
-  column,
-  direction,
-  operateurs,
-  selection,
-}: SearchProps): Promise<{
+export const getFullStructures = async (
+  {
+    search,
+    page,
+    type,
+    bati,
+    placesAutorisees,
+    departements,
+    map,
+    column,
+    direction,
+    operateurs,
+    selection,
+  }: SearchProps,
+  user?: SessionUser
+): Promise<{
   structures: StructureApiRead[];
   totalStructures: number;
 }> => {
@@ -123,9 +126,11 @@ export const getFullStructures = async ({
     operateurs,
   });
 
-  const structures = dbStructures.map((structure) =>
-    dbStructureToApiRead(structure, true)
-  );
+  const structures = dbStructures.map((dbStructure) => {
+    const structure = dbStructureToApiRead(dbStructure, true);
+    structure.adresses = getReadableAdresses(structure, user);
+    return structure;
+  });
 
   return { structures, totalStructures };
 };
@@ -141,12 +146,27 @@ export const getFullStructure = async (
   }
 
   const structure = dbStructureToApiRead(dbStructure);
-
-  if (user && !canUpdateStructure(user, dbStructure)) {
-    structure.adresses = [];
-  }
+  structure.adresses = getReadableAdresses(structure, user);
 
   return structure;
+};
+
+const getReadableAdresses = (
+  structure: StructureApiRead,
+  user?: SessionUser
+): StructureApiRead["adresses"] => {
+  if (user && canUpdateStructure(user, structure)) {
+    return structure.adresses;
+  }
+
+  return structure.adresses?.map((adresse) => ({
+    ...adresse,
+    adresse: "",
+    adresseComplete: [adresse.codePostal, adresse.commune]
+      .filter(Boolean)
+      .join(" ")
+      .trim(),
+  }));
 };
 
 export const getStructureForOperateur = async (
