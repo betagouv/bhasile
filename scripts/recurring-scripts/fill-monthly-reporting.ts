@@ -9,7 +9,17 @@ import utc from "dayjs/plugin/utc.js";
 import type { Prisma } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
 
+import {
+  INDICATEURS_IMPACT,
+  INDICATEURS_UTILES,
+  REPORTING_QUALITY_INDICATOR_FIELDS,
+  type ReportingQualityIndicatorField,
+  sumIndicatorCounts,
+} from "./reporting-indicator-categories";
+
 const prisma = createPrismaClient();
+
+const VISIT_SESSION_GAP_MINUTES = 30;
 
 dayjs.extend(utc);
 
@@ -32,6 +42,27 @@ function getReportingWindow(now = new Date()): {
 
   return { start: start.toDate(), end: end.toDate(), month: month.toDate() };
 }
+ 
+function countVisitsFromActions(
+  actions: { userId: number; createdAt: Date }[]
+): number {
+  let visitsCount = 0;
+  const lastSeenAtByUser = new Map<number, Date>();
+  for (const action of actions) {
+    const prev = lastSeenAtByUser.get(action.userId);
+    if (!prev) {
+      visitsCount++;
+      lastSeenAtByUser.set(action.userId, action.createdAt);
+      continue;
+    }
+
+    if (dayjs(action.createdAt).diff(dayjs(prev), "minute") > VISIT_SESSION_GAP_MINUTES) {
+      visitsCount++;
+    }
+    lastSeenAtByUser.set(action.userId, action.createdAt);
+  }
+  return visitsCount;
+}
 
 async function main() {
   const now = new Date();
@@ -53,35 +84,9 @@ async function main() {
     });
     const issuesCountSum = issuesAgg._sum.issuesCount ?? 0;
 
-    const indicatorFields = [
-      "has_issue_authorisation_dates_undefined",
-      "has_issue_authorisation_period_not_15y",
-      "has_issue_convention_dates_undefined",
-      "has_issue_authorized_convention_not_5y",
-      "has_issue_authorized_convention_outside_authorisation_period",
-      "has_issue_authorized_convention_missing_or_expired",
-      "has_issue_convention_dates_differ_from_actes_administratifs",
-      "has_issue_authorisation_dates_differ_from_actes_administratifs",
-      "has_issue_evaluation_not_done_in_time",
-      "has_issue_subsidized_convention_gt_3y",
-      "has_issue_specific_places_gt_places_autorisees",
-      "has_issue_places_structure_vs_address_diff_gt_10pct",
-      "has_issue_dept_code",
-      "has_issue_multi_dna",
-      "has_issue_cpom_mono_structure",
-      "has_issue_taux_encadrement_max_gt_25",
-      "has_issue_taux_encadrement_min_eq_0",
-      "has_issue_cout_journalier_max_gt_35",
-      "has_issue_cout_journalier_min_lt_15",
-      "has_issue_resultat_net_eq_0",
-      "has_issue_authorized_affectations_breakdown_missing",
-      "has_issue_authorized_reprise_plus_affectations_mismatch",
-      "has_issue_subsidized_deficit_nonzero_boxes",
-      "has_issue_subsidized_excedent_rules",
-      "has_issue_excedent_left_in_report_a_nouveau",
-    ] as const;
+    const indicatorFields = REPORTING_QUALITY_INDICATOR_FIELDS;
 
-    type IndicatorField = (typeof indicatorFields)[number];
+    type IndicatorField = ReportingQualityIndicatorField;
 
     const whereTrue = (
       field: IndicatorField
@@ -105,6 +110,15 @@ async function main() {
       indicatorCountsEntries
     ) as Record<IndicatorField, number>;
 
+    const indicateursUtilesCount = sumIndicatorCounts(
+      indicatorCounts,
+      INDICATEURS_UTILES
+    );
+    const indicateursImpactCount = sumIndicatorCounts(
+      indicatorCounts,
+      INDICATEURS_IMPACT
+    );
+
     await prisma.monthlyStructuresGlobalQualityCount.upsert({
       where: { month },
       create: {
@@ -112,12 +126,16 @@ async function main() {
         structuresCount,
         indicatorsCount,
         issuesCountSum,
+        indicateursUtilesCount,
+        indicateursImpactCount,
         ...indicatorCounts,
       },
       update: {
         structuresCount,
         indicatorsCount,
         issuesCountSum,
+        indicateursUtilesCount,
+        indicateursImpactCount,
         ...indicatorCounts,
       },
     });
@@ -131,21 +149,7 @@ async function main() {
       orderBy: [{ userId: "asc" }, { createdAt: "asc" }],
     });
 
-    let visitsCount = 0;
-    const lastSeenAtByUser = new Map<number, Date>();
-    for (const action of actions) {
-      const prev = lastSeenAtByUser.get(action.userId);
-      if (!prev) {
-        visitsCount++;
-        lastSeenAtByUser.set(action.userId, action.createdAt);
-        continue;
-      }
-
-      if (dayjs(action.createdAt).diff(dayjs(prev), "minute") > 30) {
-        visitsCount++;
-      }
-      lastSeenAtByUser.set(action.userId, action.createdAt);
-    }
+    const visitsCount = countVisitsFromActions(actions);
 
     const readsCount = await prisma.userAction.count({
       where: {
@@ -181,6 +185,79 @@ async function main() {
         structuresUpdatedCount,
       },
     });
+
+    const departements = await prisma.departement.findMany({
+      select: {
+        numero: true,
+        regionAdministrative: { select: { id: true, name: true } },
+      },
+    });
+    const regionByDeptNumero = new Map(
+      departements.map((departement) => [
+        departement.numero,
+        departement.regionAdministrative,
+      ])
+    );
+
+    const structureActions = await prisma.userAction.findMany({
+      where: {
+        createdAt: { gte: start, lt: end },
+        structureId: { not: null },
+      },
+      select: {
+        userId: true,
+        createdAt: true,
+        structure: {
+          select: { departementAdministratif: true },
+        },
+      },
+      orderBy: [{ userId: "asc" }, { createdAt: "asc" }],
+    });
+
+    const actionsByRegionId = new Map<
+      number,
+      { regionName: string; actions: { userId: number; createdAt: Date }[] }
+    >();
+
+    for (const action of structureActions) {
+      const deptNumero = action.structure?.departementAdministratif;
+      if (!deptNumero) {
+        continue;
+      }
+      const region = regionByDeptNumero.get(deptNumero);
+      if (!region?.id) {
+        continue;
+      }
+
+      const bucket = actionsByRegionId.get(region.id) ?? {
+        regionName: region.name,
+        actions: [],
+      };
+      bucket.actions.push({
+        userId: action.userId,
+        createdAt: action.createdAt,
+      });
+      actionsByRegionId.set(region.id, bucket);
+    }
+
+    for (const [regionId, { regionName, actions: regionActions }] of actionsByRegionId) {
+      const regionalVisitsCount = countVisitsFromActions(regionActions);
+      await prisma.monthlyReportingVisitsByRegion.upsert({
+        where: {
+          month_regionId: { month, regionId },
+        },
+        create: {
+          month,
+          regionId,
+          regionName,
+          visitsCount: regionalVisitsCount,
+        },
+        update: {
+          regionName,
+          visitsCount: regionalVisitsCount,
+        },
+      });
+    }
 
     // Snapshot du support
     await prisma.monthlySupportContact.upsert({

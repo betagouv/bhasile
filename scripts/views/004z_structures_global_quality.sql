@@ -6,6 +6,8 @@
 -- - structures_places_quality: places-related indicators (specific places vs authorized)
 -- - structures_finance_quality: finance-related indicators (budgets, affectations)
 -- - structures_characteristics_quality: characteristics (e.g. DNA vs departement)
+-- - structures_documents_quality: missing administrative documents
+-- - structures_activite_quality: activite thresholds (indues, indisponibilités)
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_global_quality" AS
 SELECT
   sc."id" AS "id",
@@ -55,6 +57,8 @@ SELECT
   -- Finance: taux d'encadrement min equals 0 (NULL does not count)
   COALESCE(fin."has_issue_taux_encadrement_min_eq_0", FALSE) AS "has_issue_taux_encadrement_min_eq_0",
   -- Finance: coût journalier max > 25
+  COALESCE(fin."has_issue_cout_journalier_max_gt_25", FALSE) AS "has_issue_cout_journalier_max_gt_25",
+  -- Finance: coût journalier max > 35
   COALESCE(fin."has_issue_cout_journalier_max_gt_35", FALSE) AS "has_issue_cout_journalier_max_gt_35",
   -- Finance: coût journalier min < 15
   COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE) AS "has_issue_cout_journalier_min_lt_15",
@@ -70,6 +74,13 @@ SELECT
   COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE) AS "has_issue_subsidized_excedent_rules",
   -- Finance: excedent left in report à nouveau
   COALESCE(fin."has_issue_excedent_left_in_report_a_nouveau", FALSE) AS "has_issue_excedent_left_in_report_a_nouveau",
+  -- Documents
+  COALESCE(doc."has_issue_missing_convention_document", FALSE) AS "has_issue_missing_convention_document",
+  COALESCE(doc."has_issue_missing_autorisation_document", FALSE) AS "has_issue_missing_autorisation_document",
+  COALESCE(doc."has_issue_missing_cpom_document", FALSE) AS "has_issue_missing_cpom_document",
+  -- Activite
+  COALESCE(act."has_issue_places_indisponibles_gt_3pct", FALSE) AS "has_issue_places_indisponibles_gt_3pct",
+  COALESCE(act."has_issue_presences_indues_gt_7pct", FALSE) AS "has_issue_presences_indues_gt_7pct",
   -- Count total number of issues (true values)
   (
     (COALESCE(cal."has_issue_authorisation_dates_undefined", FALSE)::int) + (COALESCE(cal."has_issue_authorisation_period_not_15y", FALSE)::int) + (COALESCE(cal."has_issue_convention_dates_undefined", FALSE)::int) + (COALESCE(cal."has_issue_authorized_convention_not_5y", FALSE)::int) + (
@@ -78,9 +89,9 @@ SELECT
       COALESCE(cal."has_issue_convention_dates_differ_from_actes_administratifs", FALSE)::int
     ) + (
       COALESCE(cal."has_issue_authorisation_dates_differ_from_actes_administratifs", FALSE)::int
-    ) + (COALESCE(cal."has_issue_evaluation_not_done_in_time", FALSE)::int) + (COALESCE(cal."has_issue_subsidized_convention_gt_3y", FALSE)::int) + (COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE)::int) + (COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE)::int) + (COALESCE(ch."has_issue_dept_code", FALSE)::int) + (COALESCE(ch."has_issue_multi_dna", FALSE)::int) + (COALESCE(ch."has_issue_cpom_mono_structure", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_max_gt_25", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_min_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_max_gt_35", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_resultat_net_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_authorized_affectations_breakdown_missing", FALSE)::int) + (
+    ) + (COALESCE(cal."has_issue_evaluation_not_done_in_time", FALSE)::int) + (COALESCE(cal."has_issue_subsidized_convention_gt_3y", FALSE)::int) + (COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE)::int) + (COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE)::int) + (COALESCE(ch."has_issue_dept_code", FALSE)::int) + (COALESCE(ch."has_issue_multi_dna", FALSE)::int) + (COALESCE(ch."has_issue_cpom_mono_structure", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_max_gt_25", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_min_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_max_gt_25", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_max_gt_35", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_resultat_net_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_authorized_affectations_breakdown_missing", FALSE)::int) + (
       COALESCE(fin."has_issue_authorized_reprise_plus_affectations_mismatch", FALSE)::int
-    ) + (COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE)::int) + (COALESCE(fin."has_issue_excedent_left_in_report_a_nouveau", FALSE)::int)
+    ) + (COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE)::int) + (COALESCE(fin."has_issue_excedent_left_in_report_a_nouveau", FALSE)::int) + (COALESCE(doc."has_issue_missing_convention_document", FALSE)::int) + (COALESCE(doc."has_issue_missing_autorisation_document", FALSE)::int) + (COALESCE(doc."has_issue_missing_cpom_document", FALSE)::int) + (COALESCE(act."has_issue_places_indisponibles_gt_3pct", FALSE)::int) + (COALESCE(act."has_issue_presences_indues_gt_7pct", FALSE)::int)
   ) AS "issues_count"
 FROM
 :"SCHEMA"."structures_core" sc
@@ -88,6 +99,8 @@ FROM
   LEFT JOIN:"SCHEMA"."structures_places_quality" pl ON pl."id" = sc."id"
   LEFT JOIN:"SCHEMA"."structures_characteristics_quality" ch ON ch."id" = sc."id"
   LEFT JOIN:"SCHEMA"."structures_finance_quality" fin ON fin."id" = sc."id"
+  LEFT JOIN:"SCHEMA"."structures_documents_quality" doc ON doc."id" = sc."id"
+  LEFT JOIN:"SCHEMA"."structures_activite_quality" act ON act."id" = sc."id"
   LEFT JOIN public."Form" f ON f."structureId" = sc."id"
   LEFT JOIN public."FormDefinition" fd ON fd."id" = f."formDefinitionId"
 WHERE
