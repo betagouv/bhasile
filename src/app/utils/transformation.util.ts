@@ -5,6 +5,7 @@ import {
 } from "@/config/transformation.config";
 import { FormApiType } from "@/schemas/api/form.schema";
 import {
+  StructureTransformationApiRead,
   StructureTransformationApiUpdate,
   StructureVersionApiRead,
   TransformationApiRead,
@@ -189,6 +190,30 @@ export type Step = {
     label: string;
     route: string;
   }[];
+};
+
+export type AdresseSource = {
+  nom: string;
+  adresseAdministrative: string;
+  adresseAdministrativeComplete: string;
+  codePostalAdministratif: string;
+  communeAdministrative: string;
+  departementAdministratif: string;
+};
+
+export const getAdresseSource = (
+  structureTransformation: StructureTransformationApiRead
+): AdresseSource => {
+  const structure = structureTransformation.structureVersion?.structure;
+  return {
+    nom: structure?.nom ?? "",
+    adresseAdministrative: structure?.adresseAdministrative ?? "",
+    adresseAdministrativeComplete:
+      structure?.adresseAdministrativeComplete ?? "",
+    codePostalAdministratif: structure?.codePostalAdministratif ?? "",
+    communeAdministrative: structure?.communeAdministrative ?? "",
+    departementAdministratif: structure?.departementAdministratif ?? "",
+  };
 };
 
 export const getTransformationStructureVersionDefaultValues = <T>(

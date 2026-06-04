@@ -49,9 +49,9 @@ vi.mock("@/app/components/forms/EffectiveDateInput", () => ({
   EffectiveDateInput: () => null,
 }));
 vi.mock(
-  "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes",
+  "@/app/components/forms/adresseAdministrativeAndAntenne/TransformationAdresseAdministrative",
   () => ({
-    AdresseAdministrativeAndAntennes: () => null,
+    TransformationAdresseAdministrative: () => null,
   })
 );
 vi.mock("@/app/components/forms/dnaAndFiness/DnaAndFiness", () => ({

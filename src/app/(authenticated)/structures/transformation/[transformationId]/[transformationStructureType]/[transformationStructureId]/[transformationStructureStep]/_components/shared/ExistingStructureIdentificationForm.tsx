@@ -1,6 +1,6 @@
 "use client";
 
-import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
+import { TransformationAdresseAdministrative } from "@/app/components/forms/adresseAdministrativeAndAntenne/TransformationAdresseAdministrative";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
 import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import { EffectiveDateInput } from "@/app/components/forms/EffectiveDateInput";
@@ -10,6 +10,7 @@ import FormWrapper, {
 import { SaveCurrentForm } from "@/app/components/forms/SaveCurrentForm";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import {
+  getAdresseSource,
   getTransformationNounAvecArticle,
   getTransformationStructureVersionDefaultValues,
 } from "@/app/utils/transformation.util";
@@ -95,7 +96,10 @@ export const ExistingStructureIdentificationForm = ({
 
       <hr />
 
-      <AdresseAdministrativeAndAntennes formKind={formKind} />
+      <TransformationAdresseAdministrative
+        formKind={formKind}
+        originalAdresse={getAdresseSource(structureTransformation)}
+      />
 
       <hr />
 

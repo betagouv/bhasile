@@ -2,20 +2,15 @@ import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { StructureVersionApiRead } from "@/schemas/api/transformation.schema";
 import { PublicType } from "@/types/structure.type";
 
+import { buildAdresseAdministrativeComplete } from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { StructureVersionDbDetails } from "./structure-version.db.type";
 
 export const dbStructureVersionToApiRead = (
   version: StructureVersionDbDetails
 ): StructureVersionApiRead => {
-  const adresseAdministrativeComplete = [
-    version.adresseAdministrative,
-    version.codePostalAdministratif,
-    version.communeAdministrative,
-    version.departementAdministratif,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const adresseAdministrativeComplete =
+    buildAdresseAdministrativeComplete(version);
 
   const antennes = getAntennesApiRead(version.antennes);
   const isMultiAntenne = (version.antennes?.length ?? 0) > 0;

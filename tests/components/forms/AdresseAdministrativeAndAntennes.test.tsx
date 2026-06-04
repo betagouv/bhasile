@@ -1,5 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
@@ -13,7 +12,7 @@ vi.mock("@/app/hooks/useAddressSuggestion", () => ({
   useAddressSuggestion: () => mockUseAddressSuggestion,
 }));
 
-const ORIGINAL_ADRESSE = {
+const ADRESSE = {
   nom: "Les Mimosas",
   adresseAdministrativeComplete: "58 boulevard Vauban, 50300 Avranches",
   adresseAdministrative: "58 boulevard Vauban",
@@ -22,10 +21,13 @@ const ORIGINAL_ADRESSE = {
   departementAdministratif: "50",
 };
 
-const renderWithFormKind = (formKind: FormKind) =>
+const renderComponent = (props: {
+  formKind: FormKind;
+  isAdresseAdministrativeLocked?: boolean;
+}) =>
   render(
-    <FormTestWrapper defaultValues={ORIGINAL_ADRESSE}>
-      <AdresseAdministrativeAndAntennes formKind={formKind} />
+    <FormTestWrapper defaultValues={ADRESSE}>
+      <AdresseAdministrativeAndAntennes {...props} />
     </FormTestWrapper>
   );
 
@@ -34,76 +36,46 @@ const getNomInput = () =>
 const getAdresseInput = () =>
   screen.getByLabelText("Adresse principale de la structure");
 
-// Sur une transformation, deux groupes Oui/Non coexistent (changement d'adresse
-// + sites administratifs) : on cible le radio « adresse a changé » via le
-// conteneur de sa question.
-const clickAdresseChangedRadio = async (
-  user: ReturnType<typeof userEvent.setup>,
-  answer: "Oui" | "Non"
-) => {
-  const question = screen.getByText(
-    /Est-ce que le nom d.usage de la structure/i
-  );
-  const group = question.closest("div") as HTMLElement;
-  await user.click(within(group).getByLabelText(answer));
-};
-
 describe("AdresseAdministrativeAndAntennes", () => {
   beforeEach(() => {
     mockUseAddressSuggestion.mockResolvedValue([]);
   });
 
-  describe("transformation (extension / contraction)", () => {
-    it("affiche la question et verrouille nom + adresse tant qu'il n'y a pas de réponse", () => {
-      renderWithFormKind(FormKind.EXTENSION);
-
-      expect(
-        screen.getByText(/Est-ce que le nom d.usage de la structure/i)
-      ).toBeInTheDocument();
-      expect(getNomInput()).toBeDisabled();
-      expect(getAdresseInput()).toBeDisabled();
-      expect(getNomInput()).toHaveValue(ORIGINAL_ADRESSE.nom);
+  it("verrouille nom + adresse quand isAdresseAdministrativeLocked est vrai", () => {
+    renderComponent({
+      formKind: FormKind.EXTENSION,
+      isAdresseAdministrativeLocked: true,
     });
 
-    it("déverrouille et vide les champs quand on répond Oui", async () => {
-      const user = userEvent.setup();
-      renderWithFormKind(FormKind.EXTENSION);
-
-      await clickAdresseChangedRadio(user, "Oui");
-
-      await waitFor(() => {
-        expect(getNomInput()).not.toBeDisabled();
-      });
-      expect(getNomInput()).toHaveValue("");
-      expect(getAdresseInput()).not.toBeDisabled();
-    });
-
-    it("restaure l'adresse d'origine et reverrouille quand on répond Non après Oui", async () => {
-      const user = userEvent.setup();
-      renderWithFormKind(FormKind.EXTENSION);
-
-      await clickAdresseChangedRadio(user, "Oui");
-      await waitFor(() => expect(getNomInput()).toHaveValue(""));
-
-      await clickAdresseChangedRadio(user, "Non");
-
-      await waitFor(() => {
-        expect(getNomInput()).toHaveValue(ORIGINAL_ADRESSE.nom);
-      });
-      expect(getNomInput()).toBeDisabled();
-      expect(getAdresseInput()).toBeDisabled();
-    });
+    expect(getNomInput()).toBeDisabled();
+    expect(getAdresseInput()).toBeDisabled();
   });
 
-  describe("hors transformation (création / finalisation)", () => {
-    it("n'affiche pas la question et ne verrouille pas les champs", () => {
-      renderWithFormKind(FormKind.FINALISATION);
-
-      expect(
-        screen.queryByText(/Est-ce que le nom d.usage de la structure/i)
-      ).not.toBeInTheDocument();
-      expect(getNomInput()).not.toBeDisabled();
-      expect(getAdresseInput()).not.toBeDisabled();
+  it("laisse les champs éditables quand isAdresseAdministrativeLocked est faux", () => {
+    renderComponent({
+      formKind: FormKind.EXTENSION,
+      isAdresseAdministrativeLocked: false,
     });
+
+    expect(getNomInput()).not.toBeDisabled();
+    expect(getAdresseInput()).not.toBeDisabled();
+  });
+
+  it("ne rend plus la question « adresse a changé » (remontée dans le composant parent)", () => {
+    renderComponent({
+      formKind: FormKind.EXTENSION,
+      isAdresseAdministrativeLocked: true,
+    });
+
+    expect(
+      screen.queryByText(/Est-ce que le nom d.usage de la structure/i)
+    ).not.toBeInTheDocument();
+  });
+
+  it("hors transformation : pas de verrou par défaut", () => {
+    renderComponent({ formKind: FormKind.FINALISATION });
+
+    expect(getNomInput()).not.toBeDisabled();
+    expect(getAdresseInput()).not.toBeDisabled();
   });
 });

@@ -12,7 +12,10 @@ import { StructureColumn } from "@/types/ListColumn";
 import { PublicType } from "@/types/structure.type";
 
 import { processActivitesForStructure } from "../activites/activite.service";
-import { getAdressesApiRead } from "../adresses/adresse.util";
+import {
+  buildAdresseAdministrativeComplete,
+  getAdressesApiRead,
+} from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getFinessesApiRead } from "../finesses/finess.util";
@@ -184,14 +187,8 @@ const dbStructureToApiRead = (
     (dbStructure as StructureDbDetails).finesses
   );
   const adresses = getAdressesApiRead(dbStructure.adresses);
-  const adresseAdministrativeComplete = [
-    dbStructure.adresseAdministrative,
-    dbStructure.codePostalAdministratif,
-    dbStructure.communeAdministrative,
-    dbStructure.departementAdministratif,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const adresseAdministrativeComplete =
+    buildAdresseAdministrativeComplete(dbStructure);
   const typeBati = getRepartition(dbStructure);
 
   const isMultiAntenne = (antennes?.length ?? 0) > 0;

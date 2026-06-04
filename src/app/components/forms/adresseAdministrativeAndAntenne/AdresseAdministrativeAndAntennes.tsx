@@ -1,6 +1,5 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
@@ -13,23 +12,16 @@ import { FormKind } from "@/types/global";
 import { FieldSetAdresseAdministrative } from "./FieldSetAdresseAdministrative";
 import { FieldSetAntennes } from "./FieldSetAntennes";
 
-const ADRESSE_FIELD_NAMES = [
-  "nom",
-  "adresseAdministrativeComplete",
-  "adresseAdministrative",
-  "codePostalAdministratif",
-  "communeAdministrative",
-  "departementAdministratif",
-] as const;
-
 type Props = {
   formKind?: FormKind;
+  isAdresseAdministrativeLocked?: boolean;
 };
 
 export const AdresseAdministrativeAndAntennes = ({
   formKind = FormKind.FINALISATION,
+  isAdresseAdministrativeLocked = false,
 }: Props) => {
-  const { watch, setValue, getValues } = useFormContext();
+  const { watch, setValue } = useFormContext();
 
   const isMultiAntenne = watch("isMultiAntenne");
 
@@ -38,66 +30,9 @@ export const AdresseAdministrativeAndAntennes = ({
     isTransformation ||
     formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES;
 
-  const [hasAdresseChanged, setHasAdresseChanged] = useState<
-    boolean | undefined
-  >(undefined);
-
-  const originalAdresseRef = useRef<Record<string, unknown> | null>(null);
-  useEffect(() => {
-    if (isTransformation && originalAdresseRef.current === null) {
-      originalAdresseRef.current = Object.fromEntries(
-        ADRESSE_FIELD_NAMES.map((fieldName) => [fieldName, getValues(fieldName)])
-      );
-    }
-  }, [isTransformation, getValues]);
-
-  const handleDidTransformationChangeAdresse = (changed: boolean) => {
-    setHasAdresseChanged(changed);
-    ADRESSE_FIELD_NAMES.forEach((fieldName) => {
-      if (changed) {
-        setValue(fieldName, "");
-      } else {
-        setValue(fieldName, originalAdresseRef.current?.[fieldName] ?? "");
-      }
-    });
-  };
-
-  const isAdresseLocked = isTransformation && hasAdresseChanged !== true;
-
   return (
     <>
-      {isTransformation ? (
-        <div className="flex gap-6">
-          <h2
-            id="hasAdresseChanged-title"
-            className="text-xl font-bold mb-4 text-title-blue-france flex-1"
-          >
-            {getAdresseChangedQuestion(formKind)}
-          </h2>
-          <RadioButtons
-            aria-labelledby="hasAdresseChanged-title"
-            orientation="horizontal"
-            name="hasAdresseChanged"
-            options={[
-              {
-                label: "Oui",
-                nativeInputProps: {
-                  checked: hasAdresseChanged === true,
-                  onChange: () => handleDidTransformationChangeAdresse(true),
-                },
-              },
-              {
-                label: "Non",
-                nativeInputProps: {
-                  checked: hasAdresseChanged === false,
-                  onChange: () => handleDidTransformationChangeAdresse(false),
-                },
-              },
-            ]}
-            className="mr-10"
-          />
-        </div>
-      ) : (
+      {!isTransformation && (
         <h2 className="text-xl font-bold mb-4 text-title-blue-france">
           {getTitle(formKind)}
         </h2>
@@ -128,7 +63,7 @@ export const AdresseAdministrativeAndAntennes = ({
       )}
       <FieldSetAdresseAdministrative
         formKind={formKind}
-        locked={isAdresseLocked}
+        locked={isAdresseAdministrativeLocked}
       />
       {showSitesRadio && (
         <>
@@ -176,11 +111,6 @@ const getTitle = (formKind: FormKind): string => {
   }
   return "Adresses administratives";
 };
-
-const getAdresseChangedQuestion = (formKind: FormKind): string =>
-  `Est-ce que le nom d’usage de la structure et/ou son adresse administrative principale changent suite à ${getTransformationNounAvecArticle(
-    formKind
-  )} ?`;
 
 const getSitesQuestionLabel = (formKind: FormKind): string => {
   if (isTransformationSurStructureExistante(formKind)) {
