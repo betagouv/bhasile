@@ -11,6 +11,15 @@ const mockCountBySearch = vi.fn();
 const mockUpdateOne = vi.fn();
 const mockGetAdresseAdministrativeCoordinates = vi.fn();
 const mockCreateUserAction = vi.fn();
+const mockGetServerSession = vi.fn();
+
+vi.mock("next-auth", () => ({
+  getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
+}));
+
+vi.mock("@/lib/next-auth/auth", () => ({
+  authOptions: {},
+}));
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
   updateOne: (...args: unknown[]) => mockUpdateOne(...args),

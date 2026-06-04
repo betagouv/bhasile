@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 
+import { authOptions } from "@/lib/next-auth/auth";
 import { structureOperateurUpdateApiSchema } from "@/schemas/api/structure.schema";
+import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 
 import { createStructureEvent } from "../user-action/user-action.service";
@@ -10,6 +13,7 @@ import {
 } from "./structure.service";
 
 export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions);
   const search = request.nextUrl.searchParams.get("search");
   const page = request.nextUrl.searchParams.get("page") as number | null;
   const type = request.nextUrl.searchParams.get("type");
@@ -29,19 +33,22 @@ export async function GET(request: NextRequest) {
   const map = request.nextUrl.searchParams.get("map") === "true";
   const selection = request.nextUrl.searchParams.get("selection") === "true";
 
-  const { structures, totalStructures } = await getFullStructures({
-    search,
-    page,
-    type,
-    bati,
-    placesAutorisees,
-    departements,
-    map,
-    column,
-    direction,
-    operateurs,
-    selection,
-  });
+  const { structures, totalStructures } = await getFullStructures(
+    {
+      search,
+      page,
+      type,
+      bati,
+      placesAutorisees,
+      departements,
+      map,
+      column,
+      direction,
+      operateurs,
+      selection,
+    },
+    session?.user as SessionUser | undefined
+  );
 
   return NextResponse.json({ structures, totalStructures });
 }
