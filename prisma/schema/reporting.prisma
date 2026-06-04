@@ -1,4 +1,23 @@
 // TABLES
+// Remplissage manuel (Metabase) — indicateurs globaux / enquête
+model GlobalIndicators {
+  id Int @id @default(autoincrement())
+
+  budgetAnnuel              Decimal?
+  notePriseEnMain           Float?
+  noteClarteInfos           Float?
+  noteFaciliteUtilisation   Float?
+  noteRobustesseTech        Float?
+  noteRemplacementExcel     Float?
+  noteGainTemps             Float?
+  noteAmeliorationPilotage  Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@schema("reporting")
+}
+
 model MonthlyReportingMetric {
   id    Int      @id @default(autoincrement())
   month DateTime @unique
@@ -10,6 +29,20 @@ model MonthlyReportingMetric {
 
   createdAt DateTime @default(now())
 
+  @@schema("reporting")
+}
+
+// Visites (sessions 30 min) par région administrative de la structure consultée
+model MonthlyReportingVisitsByRegion {
+  id          Int      @id @default(autoincrement())
+  month       DateTime
+  regionId    Int
+  regionName  String
+  visitsCount Int
+
+  createdAt DateTime @default(now())
+
+  @@unique([month, regionId])
   @@schema("reporting")
 }
 
@@ -34,6 +67,10 @@ model MonthlyStructuresGlobalQualityCount {
   indicatorsCount Int
   issuesCountSum  Int
 
+  // Agrégats par catégorie (somme des décomptes par indicateur du mois)
+  indicateursUtilesCount Int
+  indicateursImpactCount Int
+
   has_issue_authorisation_dates_undefined                        Int
   has_issue_authorized_convention_not_5y                         Int
   has_issue_convention_dates_undefined                           Int
@@ -51,7 +88,13 @@ model MonthlyStructuresGlobalQualityCount {
   has_issue_cpom_mono_structure                                  Int
   has_issue_taux_encadrement_max_gt_25                           Int
   has_issue_taux_encadrement_min_eq_0                            Int
+  has_issue_cout_journalier_max_gt_25                            Int
   has_issue_cout_journalier_max_gt_35                            Int
+  has_issue_missing_convention_document                          Int
+  has_issue_missing_autorisation_document                        Int
+  has_issue_missing_cpom_document                                Int
+  has_issue_places_indisponibles_gt_3pct                         Int
+  has_issue_presences_indues_gt_7pct                             Int
   has_issue_cout_journalier_min_lt_15                            Int
   has_issue_resultat_net_eq_0                                    Int
   has_issue_authorized_affectations_breakdown_missing            Int
@@ -66,6 +109,45 @@ model MonthlyStructuresGlobalQualityCount {
 }
 
 // VIEWS
+view IndicateursGlobaux {
+  id Int
+
+  globalIndicatorsUpdatedAt DateTime? @map("global_indicators_updated_at")
+  budgetAnnuel              Decimal?  @map("budget_annuel")
+
+  updatesCountTotal           Int @map("updates_count_total")
+  indicateursUtilesCountMax   Int @map("indicateurs_utiles_count_max")
+  indicateursImpactCountMax   Int @map("indicateurs_impact_count_max")
+
+  noteFaciliteUtilisationMoyenne4 Float? @map("note_facilite_utilisation_moyenne_4_criteres")
+  noteRemplacementExcel           Float? @map("note_remplacement_excel")
+  noteGainTemps                   Float? @map("note_gain_temps")
+  noteAmeliorationPilotage        Float? @map("note_amelioration_pilotage")
+
+  coutParMiseAJour       Decimal? @map("cout_par_mise_a_jour")
+  coutParSituationUtile  Decimal? @map("cout_par_situation_utile")
+  coutParDetectionImpact Decimal? @map("cout_par_detection_impact")
+
+  @@unique([id])
+  @@map("indicateurs_globaux")
+  @@schema("reporting")
+}
+
+view ReportingMensuel {
+  month DateTime @unique
+
+  visitsCount                 Int      @map("visits_count")
+  phoneCallsCount             Int?     @map("phone_calls_count")
+  emailsCount                 Int?     @map("emails_count")
+  scoreBesoinSupportPourMille Decimal? @map("score_besoin_support_pour_mille")
+  updatesCount                Int      @map("updates_count")
+  indicateursUtilesCount      Int      @map("indicateurs_utiles_count")
+  indicateursImpactCount      Int      @map("indicateurs_impact_count")
+
+  @@map("reporting_mensuel")
+  @@schema("reporting")
+}
+
 view StructuresGlobalQuality {
   id Int
 
@@ -86,7 +168,13 @@ view StructuresGlobalQuality {
   has_issue_cpom_mono_structure                                  Boolean?
   has_issue_taux_encadrement_max_gt_25                           Boolean?
   has_issue_taux_encadrement_min_eq_0                            Boolean?
+  has_issue_cout_journalier_max_gt_25                            Boolean?
   has_issue_cout_journalier_max_gt_35                            Boolean?
+  has_issue_missing_convention_document                          Boolean?
+  has_issue_missing_autorisation_document                        Boolean?
+  has_issue_missing_cpom_document                                Boolean?
+  has_issue_places_indisponibles_gt_3pct                         Boolean?
+  has_issue_presences_indues_gt_7pct                             Boolean?
   has_issue_cout_journalier_min_lt_15                            Boolean?
   has_issue_resultat_net_eq_0                                    Boolean?
   has_issue_authorized_affectations_breakdown_missing            Boolean?
