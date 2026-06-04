@@ -21,11 +21,15 @@ import { FormKind } from "@/types/global";
 type Props = {
   transformation: TransformationApiRead;
   structureTransformation: StructureTransformationApiRead;
+  formKind: FormKind;
+  originalPlaces?: number;
 };
 
-export const CreationPlacesEtHebergementForm = ({
+export const PlacesEtHebergementForm = ({
   transformation,
   structureTransformation,
+  formKind,
+  originalPlaces,
 }: Props) => {
   const { handleValidation } = useTransformationFormHandling();
 
@@ -46,6 +50,7 @@ export const CreationPlacesEtHebergementForm = ({
             type: structureTransformation.type,
             structureVersion: {
               id: structureTransformation.structureVersion?.id,
+              public: data.public,
               adresses: data.adresses,
               structureTypologies: data.structureTypologies,
             },
@@ -56,13 +61,16 @@ export const CreationPlacesEtHebergementForm = ({
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       showContactInfos={false}
     >
-      <FieldSetCurrentYearPlaces />
+      <FieldSetCurrentYearPlaces
+        formKind={formKind}
+        originalPlaces={originalPlaces}
+      />
 
       <hr />
 
-      <FieldSetTypeBati />
+      <FieldSetTypeBati formKind={formKind} />
 
-      <FieldSetHebergement formKind={FormKind.OUVERTURE_EX_NIHILO} />
+      <FieldSetHebergement formKind={formKind} />
     </FormWrapper>
   );
 };

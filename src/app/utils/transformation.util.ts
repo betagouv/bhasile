@@ -216,6 +216,12 @@ export const getAdresseSource = (
   };
 };
 
+export const getPlacesSource = (
+  structureTransformation: StructureTransformationApiRead
+): number =>
+  structureTransformation.structureVersion?.structure?.structureTypologies?.[0]
+    ?.placesAutorisees ?? 0;
+
 export const getTransformationStructureVersionDefaultValues = <T>(
   structureVersion?: StructureVersionApiRead
 ): DeepPartial<T> =>

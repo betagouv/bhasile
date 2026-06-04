@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   getAdresseSource,
+  getPlacesSource,
   getTransformationFormNavigation,
   getTransformationNounAvecArticle,
   getTransformationSteps,
@@ -633,6 +634,35 @@ describe("transformation util", () => {
         communeAdministrative: "",
         departementAdministratif: "",
       });
+    });
+  });
+
+  describe("getPlacesSource", () => {
+    it("retourne placesAutorisees de la typologie source la plus récente ([0], ordonné desc)", () => {
+      const structureTransformation: StructureTransformationApiRead = {
+        id: 1,
+        type: StructureTransformationType.EXTENSION,
+        structureVersion: {
+          structure: {
+            codeBhasile: "BHA-NOR-001",
+            structureTypologies: [
+              { year: 2026, placesAutorisees: 47 },
+              { year: 2025, placesAutorisees: 40 },
+            ],
+          },
+        },
+      };
+
+      expect(getPlacesSource(structureTransformation)).toBe(47);
+    });
+
+    it("retourne 0 quand la structure source n'a pas de typologie", () => {
+      const structureTransformation: StructureTransformationApiRead = {
+        id: 1,
+        type: StructureTransformationType.EXTENSION,
+      };
+
+      expect(getPlacesSource(structureTransformation)).toBe(0);
     });
   });
 

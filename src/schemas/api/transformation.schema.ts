@@ -73,6 +73,7 @@ export type StructureTransformationApiRead =
         codePostalAdministratif?: string | null;
         communeAdministrative?: string | null;
         departementAdministratif?: string | null;
+        structureTypologies?: { year: number; placesAutorisees: number | null }[];
       };
     };
   };

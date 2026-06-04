@@ -12,9 +12,9 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
+import { PlacesEtHebergementForm } from "../shared/PlacesEtHebergementForm";
 import { CreationActesAdministratifsForm } from "./CreationActesAdministratifsForm";
 import { CreationIdentificationForm } from "./CreationIdentificationForm";
-import { CreationPlacesEtHebergementForm } from "./CreationPlacesEtHebergementForm";
 
 type Props = {
   transformation: TransformationApiRead;
@@ -47,9 +47,10 @@ export const CreationFlow = ({
     StructureTransformationStep.PLACES_ET_HEBERGEMENT
   ) {
     return (
-      <CreationPlacesEtHebergementForm
+      <PlacesEtHebergementForm
         transformation={transformation}
         structureTransformation={structureTransformation}
+        formKind={formKind}
       />
     );
   }
