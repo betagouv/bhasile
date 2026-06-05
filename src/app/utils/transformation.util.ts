@@ -42,7 +42,8 @@ export const getStructureTransformationDepartement = (
 ): string | undefined =>
   structureTransformation?.structureVersion?.departementAdministratif ??
   structureTransformation?.structureVersion?.structure
-    ?.departementAdministratif;
+    ?.departementAdministratif ??
+  undefined;
 
 export const getReferenceStructureTransformation = (
   transformation: TransformationApiRead

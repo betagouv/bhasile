@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getAdresseSource,
   getReferenceStructureTransformation,
   getStructureTransformationDepartement,
   getTransformationDepartement,
-  getAdresseSource,
   getTransformationFormNavigation,
   getTransformationNounAvecArticle,
   getTransformationSteps,
@@ -688,38 +688,6 @@ describe("transformation util", () => {
     ])("returns %s → '%s'", (formKind, expected) => {
       expect(getTransformationNounAvecArticle(formKind)).toBe(expected);
     });
-  });
-});
-
-describe("getStructureTransformationDepartement", () => {
-  it("retourne le département de la structureVersion quand il est présent", () => {
-    const structureTransformation = createStructureTransformation({
-      structureVersion: { departementAdministratif: "50" },
-    });
-
-    expect(getStructureTransformationDepartement(structureTransformation)).toBe(
-      "50"
-    );
-  });
-
-  it("retombe sur le département de la structure liée quand la version n'en a pas", () => {
-    const structureTransformation = createStructureTransformation({
-      structureVersion: {
-        structure: { codeBhasile: "ABC", departementAdministratif: "13" },
-      },
-    });
-
-    expect(getStructureTransformationDepartement(structureTransformation)).toBe(
-      "13"
-    );
-  });
-
-  it("retourne undefined quand ni la version ni la structure n'ont de département", () => {
-    const structureTransformation = createStructureTransformation();
-
-    expect(
-      getStructureTransformationDepartement(structureTransformation)
-    ).toBeUndefined();
   });
 });
 
