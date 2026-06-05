@@ -79,13 +79,13 @@ export const getStructureActesAdministratifsCategoryToDisplay = (
 export const getOperateurActesAdministratifsCategoryToDisplay =
   (): CategoryDisplayRules => ({
     RAPPORT_ACTIVITE_OPERATEUR: {
-      categoryShortName: "convention",
+      categoryShortName: "du rapport",
       title: "Rapport d'activité",
       canAddFile: true,
       canAddAvenant: false,
       isOptional: true,
       shouldShow: true,
-      additionalFieldsType: AdditionalFieldsType.DATE_START_END,
+      additionalFieldsType: AdditionalFieldsType.DATE,
       documentLabel: "Document",
       addFileButtonLabel: "Ajouter un rapport",
     },
@@ -96,7 +96,7 @@ export const getOperateurActesAdministratifsCategoryToDisplay =
       canAddAvenant: false,
       isOptional: true,
       shouldShow: true,
-      additionalFieldsType: AdditionalFieldsType.DATE_START_END,
+      additionalFieldsType: AdditionalFieldsType.NAME,
       documentLabel: "Document",
       addFileButtonLabel: "Ajouter des frais de siège",
     },
