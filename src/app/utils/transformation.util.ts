@@ -2,6 +2,7 @@ import {
   STRUCTURE_TRANSFORMATION_FORM_STEPS,
   STRUCTURE_TRANSFORMATION_TYPE_ORDER,
   TRANSFORMATION_TYPE_SPECS,
+  VERIFICATION_STEP_NAME,
 } from "@/config/transformation.config";
 import { FormApiType } from "@/schemas/api/form.schema";
 import {
@@ -37,6 +38,7 @@ export const getTransformationTitle = (
 
 type GetTransformationFormNavigationProps = {
   transformationSteps: Step[];
+  transformationId: number;
   transformationStructureType?: StructureTransformationType;
   transformationStructureId?: number;
   transformationStructureStep?: string;
@@ -44,24 +46,38 @@ type GetTransformationFormNavigationProps = {
 
 export const getTransformationFormNavigation = ({
   transformationSteps,
+  transformationId,
   transformationStructureType,
   transformationStructureId,
   transformationStructureStep,
 }: GetTransformationFormNavigationProps) => {
-  const flatSteps = transformationSteps.flatMap((step) =>
-    step.steps.map((stepItem) => ({
-      id: step.id,
-      type: step.type,
-      ...stepItem,
-    }))
-  );
+  const flatSteps = [
+    ...transformationSteps.flatMap((step) =>
+      step.steps.map((stepItem) => ({
+        id: step.id,
+        type: step.type,
+        ...stepItem,
+      }))
+    ),
+    {
+      id: undefined,
+      type: undefined,
+      name: VERIFICATION_STEP_NAME,
+      label: "Vérification",
+      route: `/structures/transformation/${transformationId}/verification`,
+    },
+  ];
 
-  const currentIndex = flatSteps.findIndex(
-    (step) =>
+  const currentIndex = flatSteps.findIndex((step) => {
+    if (step.name === VERIFICATION_STEP_NAME) {
+      return transformationStructureStep?.toLowerCase() === VERIFICATION_STEP_NAME;
+    }
+    return (
       step.type?.toLowerCase() === transformationStructureType?.toLowerCase() &&
       step.id === transformationStructureId &&
       step.name.toLowerCase() === transformationStructureStep?.toLowerCase()
-  );
+    );
+  });
 
   const firstStep = flatSteps[0];
   const currentStep = flatSteps[currentIndex];
@@ -74,6 +90,22 @@ export const getTransformationFormNavigation = ({
   return { firstStep, currentStep, prevStep, nextStep };
 };
 
+export const sortStructureTransformationsByType = <
+  T extends { type?: StructureTransformationType },
+>(
+  items: T[]
+): T[] => {
+  return [...items].sort((firstItem, secondItem) => {
+    const firstOrder = firstItem.type
+      ? STRUCTURE_TRANSFORMATION_TYPE_ORDER[firstItem.type]
+      : Infinity;
+    const secondOrder = secondItem.type
+      ? STRUCTURE_TRANSFORMATION_TYPE_ORDER[secondItem.type]
+      : Infinity;
+    return firstOrder - secondOrder;
+  });
+};
+
 export const getTransformationSteps = (
   transformation?: TransformationApiRead
 ): Step[] => {
@@ -81,22 +113,14 @@ export const getTransformationSteps = (
     return [];
   }
 
-  return (
-    transformation.structureTransformations
-      ?.map((structureTransformation) => {
-        return {
-          id: structureTransformation.id,
-          codeBhasile:
-            structureTransformation.structureVersion?.structure?.codeBhasile,
-          type: structureTransformation.type,
-          steps: getStepsByType(structureTransformation, transformation.id),
-        };
-      })
-      .sort((a, b) => {
-        const aTypeOrder = STRUCTURE_TRANSFORMATION_TYPE_ORDER[a.type];
-        const bTypeOrder = STRUCTURE_TRANSFORMATION_TYPE_ORDER[b.type];
-        return aTypeOrder - bTypeOrder;
-      }) ?? []
+  return sortStructureTransformationsByType(
+    transformation.structureTransformations?.map((structureTransformation) => ({
+      id: structureTransformation.id,
+      codeBhasile:
+        structureTransformation.structureVersion?.structure?.codeBhasile,
+      type: structureTransformation.type,
+      steps: getStepsByType(structureTransformation, transformation.id),
+    })) ?? []
   );
 };
 
