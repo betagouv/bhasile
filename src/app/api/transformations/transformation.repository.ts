@@ -8,7 +8,7 @@ import { PrismaTransaction } from "@/types/prisma.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import {
-  createOrUpdateForms,
+  createOrUpdateForm,
   initializeStructureVersionTransformationDefaultForms,
 } from "../forms/form.repository";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
@@ -67,11 +67,9 @@ export const updateOne = async (
       });
     }
 
-    if (input.form) {
-      await createOrUpdateForms(tx, [input.form], {
-        transformationId: input.id,
-      });
-    }
+    await createOrUpdateForm(tx, input.form, {
+      transformationId: input.id,
+    });
 
     if (input.structureVersionTransformations) {
       for (const structureVersionTransformation of input.structureVersionTransformations) {
@@ -141,13 +139,9 @@ const createOrUpdateStructureVersionTransformation = async (
     );
   }
 
-  await createOrUpdateForms(
-    tx,
-    structureVersionTransformation.form
-      ? [structureVersionTransformation.form]
-      : [],
-    { structureVersionTransformationId }
-  );
+  await createOrUpdateForm(tx, structureVersionTransformation.form, {
+    structureVersionTransformationId,
+  });
 
   await createOrUpdateActesAdministratifs(
     tx,

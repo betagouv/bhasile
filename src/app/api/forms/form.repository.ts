@@ -22,6 +22,17 @@ export const createOrUpdateForms = async (
   );
 };
 
+export const createOrUpdateForm = async (
+  tx: PrismaTransaction,
+  form: FormApiType | undefined,
+  entityId: EntityId
+): Promise<void> => {
+  if (!form) {
+    return;
+  }
+  await createOrUpdateCompleteFormWithSteps(tx, entityId, form);
+};
+
 const getFormUniqueWhere = (
   entityId: EntityId,
   formDefinitionId: number

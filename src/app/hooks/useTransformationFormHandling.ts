@@ -53,12 +53,12 @@ export const useTransformationFormHandling = () => {
         transformationId,
         structureVersionTransformation: {
           ...structureVersionTransformation,
-          form: structureVersionTransformation.form
-            ? validateStructureVersionTransformationFormStep(
-                structureVersionTransformation.form,
-                currentStep.name
-              )
-            : structureVersionTransformation.form,
+          form:
+            structureVersionTransformation.form &&
+            validateStructureVersionTransformationFormStep(
+              structureVersionTransformation.form,
+              currentStep.name
+            ),
         },
       });
       if (nextStep) {
