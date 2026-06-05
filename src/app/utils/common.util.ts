@@ -62,3 +62,7 @@ export const convertObjectToArray = (
 export const isNullOrUndefined = (value: unknown): boolean => {
   return value === undefined || value === null;
 };
+
+export const isBlank = (value: unknown): boolean => {
+  return isNullOrUndefined(value) || value === "";
+};

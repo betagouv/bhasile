@@ -3,6 +3,7 @@ import autoAnimate from "@formkit/auto-animate";
 import { useCallback, useEffect, useRef } from "react";
 import { useFieldArray, useForm, useFormContext } from "react-hook-form";
 
+import { isAdresseEmpty } from "@/app/utils/adresse.util";
 import { CURRENT_YEAR } from "@/constants";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { Repartition } from "@/types/adresse.type";
@@ -199,20 +200,4 @@ export const FieldSetHebergement = ({
 
 type Props = {
   formKind?: FormKind;
-};
-
-const isAdresseEmpty = (adresse: FormAdresse): boolean => {
-  const typologie = adresse.adresseTypologies?.[0];
-  const isBlank = (value: unknown): boolean =>
-    value === undefined || value === null || value === "";
-  return (
-    isBlank(adresse.adresseComplete) &&
-    isBlank(adresse.adresse) &&
-    isBlank(adresse.codePostal) &&
-    isBlank(adresse.commune) &&
-    isBlank(adresse.departement) &&
-    isBlank(typologie?.placesAutorisees) &&
-    !typologie?.logementSocial &&
-    !typologie?.qpv
-  );
 };

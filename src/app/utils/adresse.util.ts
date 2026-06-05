@@ -1,6 +1,8 @@
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 
+import { isBlank } from "./common.util";
+
 export const getCoordinates = async (address: string): Promise<Coordinates> => {
   const result = await fetch(
     `https://data.geopf.fr/geocodage/search/?q=${address}&autocomplete=0&limit=1`
@@ -127,6 +129,20 @@ export const formatCityName = (city?: string): string | undefined | null => {
   }
 
   return result;
+};
+
+export const isAdresseEmpty = (adresse: FormAdresse): boolean => {
+  const typologie = adresse.adresseTypologies?.[0];
+  return (
+    isBlank(adresse.adresseComplete) &&
+    isBlank(adresse.adresse) &&
+    isBlank(adresse.codePostal) &&
+    isBlank(adresse.commune) &&
+    isBlank(adresse.departement) &&
+    isBlank(typologie?.placesAutorisees) &&
+    !typologie?.logementSocial &&
+    !typologie?.qpv
+  );
 };
 
 type Coordinates = {
