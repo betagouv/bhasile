@@ -21,8 +21,14 @@ export const acteAdministratifAutoSaveSchema = z.object({
   fileUploads: z.array(fileApiSchema.partial()).optional(),
 });
 
-const SINGLE_DATE_CATEGORIES: ActeAdministratifCategory[] = ["STATUTS"];
-const NO_DATE_CATEGORIES: ActeAdministratifCategory[] = ["AUTRE"];
+const SINGLE_DATE_CATEGORIES: ActeAdministratifCategory[] = [
+  "RAPPORT_ACTIVITE_OPERATEUR",
+  "STATUTS",
+];
+const NO_DATE_CATEGORIES: ActeAdministratifCategory[] = [
+  "FRAIS_DE_SIEGE",
+  "AUTRE",
+];
 
 const requiresStartEndDate = (
   category: ActeAdministratifCategory | undefined
