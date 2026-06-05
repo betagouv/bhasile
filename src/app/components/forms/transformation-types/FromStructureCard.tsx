@@ -1,28 +1,26 @@
+import { StructureCard } from "@/app/components/StructureCard";
 import { useFetchStructure } from "@/app/hooks/useFetchStructure";
 
-export const FromStructureCard = ({ transformationStructureId }: Props) => {
-  const { structure } = useFetchStructure(transformationStructureId);
+export const FromStructureCard = ({ structureId }: Props) => {
+  const { structure } = useFetchStructure(structureId);
 
-  if (!structure) {
+  if (!structure || !structure.codeBhasile) {
     return null;
   }
 
   return (
-    <div className="mb-8 p-4 rounded-sm border flex gap-4 relative border-default-grey">
-      <span className="fr-icon-community-line fr-icon--md text-title-blue-france" />
-      <div>
-        <strong className="uppercase font-bold text-title-blue-france">
-          {structure.nom}
-        </strong>
-        <div className="text-sm">
-          {structure.codeBhasile} - {structure.type}, {structure.operateur.name}
-          , {structure.departementAdministratif}
-        </div>
-      </div>
+    <div className="mb-8">
+      <StructureCard
+        nom={structure.nom}
+        codeBhasile={structure.codeBhasile}
+        type={structure.type}
+        operateur={structure.operateur}
+        departementAdministratif={structure.departementAdministratif}
+      />
     </div>
   );
 };
 
 type Props = {
-  transformationStructureId: number;
+  structureId: number;
 };

@@ -68,6 +68,12 @@ export type StructureTransformationApiRead =
         codeBhasile: string;
         departementAdministratif?: string;
         operateur?: { id: number; name: string };
+        nom?: string | null;
+        adresseAdministrative?: string | null;
+        adresseAdministrativeComplete?: string;
+        codePostalAdministratif?: string | null;
+        communeAdministrative?: string | null;
+        departementAdministratif?: string | null;
       };
     };
   };

@@ -7,7 +7,7 @@ import FormWrapper, {
 import { SaveCurrentForm } from "@/app/components/forms/SaveCurrentForm";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getActesAdministratifsDefaultValues } from "@/app/utils/acteAdministratif.util";
-import { creationExNihiloActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
+import { getCreationActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   StructureTransformationApiRead,
@@ -15,10 +15,10 @@ import {
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import {
-  CreationActesAdministratifsDraftFormValues,
-  creationActesAdministratifsDraftSchema,
-  creationActesAdministratifsSchema,
-} from "@/schemas/forms/transformation/creationActesAdministratifs.schema";
+  ActesAdministratifsAutoSaveFormValues,
+  actesAdministratifsAutoSaveSchema,
+  actesAdministratifsCreationSchema,
+} from "@/schemas/forms/base/acteAdministratif.schema";
 
 type Props = {
   structureTransformation: StructureTransformationApiRead;
@@ -32,8 +32,9 @@ export const CreationActesAdministratifsForm = ({
   const { handleValidation, handleSave, prevStep } =
     useTransformationFormHandling();
 
-  const categoryDisplayRules =
-    creationExNihiloActesAdministratifsCategoryToDisplay;
+  const categoryDisplayRules = getCreationActesAdministratifsCategoryToDisplay(
+    transformation.type
+  );
 
   const defaultValues = {
     actesAdministratifs: getActesAdministratifsDefaultValues(
@@ -43,7 +44,7 @@ export const CreationActesAdministratifsForm = ({
   };
 
   const buildStructureTransformation = (
-    data: CreationActesAdministratifsDraftFormValues
+    data: ActesAdministratifsAutoSaveFormValues
   ): StructureTransformationApiUpdateClient => ({
     id: structureTransformation.id,
     type: structureTransformation.type,
@@ -54,7 +55,7 @@ export const CreationActesAdministratifsForm = ({
 
   return (
     <FormWrapper
-      schema={creationActesAdministratifsSchema}
+      schema={actesAdministratifsCreationSchema}
       defaultValues={defaultValues}
       onSubmit={(data) => {
         handleValidation({
@@ -68,7 +69,7 @@ export const CreationActesAdministratifsForm = ({
       showContactInfos={false}
     >
       <SaveCurrentForm
-        schema={creationActesAdministratifsDraftSchema}
+        schema={actesAdministratifsAutoSaveSchema}
         onSave={(data) =>
           handleSave({
             transformationId: transformation.id,

@@ -40,13 +40,6 @@ vi.mock("@/app/components/SubmitError", () => ({
 }));
 
 vi.mock(
-  "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/contraction/ContractionFlow",
-  () => ({
-    ContractionFlow: () => <div data-testid="contraction-flow" />,
-  })
-);
-
-vi.mock(
   "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation/CreationFlow",
   () => ({
     CreationFlow: () => <div data-testid="creation-flow" />,
@@ -54,9 +47,9 @@ vi.mock(
 );
 
 vi.mock(
-  "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/extension/ExtensionFlow",
+  "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/ExistingStructureFlow",
   () => ({
-    ExtensionFlow: () => <div data-testid="extension-flow" />,
+    ExistingStructureFlow: () => <div data-testid="existing-structure-flow" />,
   })
 );
 
@@ -99,45 +92,39 @@ describe("TransformationStructureStepPage", () => {
     expect(screen.getByTestId("fermeture-flow")).toBeInTheDocument();
   });
 
-  it("should render ExtensionFlow when structureTransformation.type is EXTENSION", () => {
-    // GIVEN
-    const structureTransformation: StructureTransformationApiRead = {
-      id: 7,
-      type: StructureTransformationType.EXTENSION,
-    };
-    mockUseTransformationContext.mockReturnValue({
-      transformation: createTransformation({
-        type: TransformationType.EXTENSION_EX_NIHILO,
-        structureTransformations: [structureTransformation],
-      }),
-    });
+  it.each([
+    [
+      StructureTransformationType.EXTENSION,
+      TransformationType.EXTENSION_EX_NIHILO,
+    ],
+    [
+      StructureTransformationType.CONTRACTION,
+      TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES,
+    ],
+  ])(
+    "should render ExistingStructureFlow when structureTransformation.type is %s",
+    (structureTransformationType, transformationType) => {
+      // GIVEN
+      const structureTransformation: StructureTransformationApiRead = {
+        id: 7,
+        type: structureTransformationType,
+      };
+      mockUseTransformationContext.mockReturnValue({
+        transformation: createTransformation({
+          type: transformationType,
+          structureTransformations: [structureTransformation],
+        }),
+      });
 
-    // WHEN
-    render(<TransformationStructureStepPage />);
+      // WHEN
+      render(<TransformationStructureStepPage />);
 
-    // THEN
-    expect(screen.getByTestId("extension-flow")).toBeInTheDocument();
-  });
-
-  it("should render ContractionFlow when structureTransformation.type is CONTRACTION", () => {
-    // GIVEN
-    const structureTransformation: StructureTransformationApiRead = {
-      id: 7,
-      type: StructureTransformationType.CONTRACTION,
-    };
-    mockUseTransformationContext.mockReturnValue({
-      transformation: createTransformation({
-        type: TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES,
-        structureTransformations: [structureTransformation],
-      }),
-    });
-
-    // WHEN
-    render(<TransformationStructureStepPage />);
-
-    // THEN
-    expect(screen.getByTestId("contraction-flow")).toBeInTheDocument();
-  });
+      // THEN
+      expect(
+        screen.getByTestId("existing-structure-flow")
+      ).toBeInTheDocument();
+    }
+  );
 
   it.each([
     TransformationType.OUVERTURE_EX_NIHILO,

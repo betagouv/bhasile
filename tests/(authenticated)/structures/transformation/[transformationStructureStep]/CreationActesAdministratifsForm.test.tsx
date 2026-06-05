@@ -42,11 +42,12 @@ const filledActe = (
 });
 
 const transformationWithActes = (
-  actesAdministratifs: ActeAdministratifApiType[]
+  actesAdministratifs: ActeAdministratifApiType[],
+  type: TransformationType = TransformationType.OUVERTURE_EX_NIHILO
 ) =>
   createTransformation({
     id: 12,
-    type: TransformationType.OUVERTURE_EX_NIHILO,
+    type,
     structureTransformations: [
       createStructureTransformation({
         id: 7,
@@ -115,5 +116,104 @@ describe("CreationActesAdministratifsForm (integration via FormWrapper)", () => 
 
     // THEN validation blocks the submission
     expect(mockHandleValidation).not.toHaveBeenCalled();
+  });
+
+  it("renders the autorisation/fusion radio for non-ex-nihilo creations with autorisation preselected by default", async () => {
+    const transformation = transformationWithActes(
+      [],
+      TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
+    );
+    render(
+      <CreationActesAdministratifsForm
+        structureTransformation={transformation.structureTransformations[0]}
+        transformation={transformation}
+      />
+    );
+
+    // Autorisation is the default selection, fusion is the alternative
+    const autorisationRadio = screen.getByRole("radio", {
+      name: "Arrêté d'autorisation",
+    });
+    const fusionRadio = screen.getByRole("radio", {
+      name: "Arrêté de fusion",
+    });
+    expect(autorisationRadio).toBeChecked();
+    expect(fusionRadio).not.toBeChecked();
+
+    // Submit without filling the docs -> blocked
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
+    );
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(mockHandleValidation).not.toHaveBeenCalled();
+  });
+
+  it("submits with category ARRETE_FUSION when the user picks fusion and fills the other required docs", async () => {
+    const transformation = transformationWithActes(
+      [
+        filledActe(2, "CONVENTION", "k-convention"),
+        filledActe(3, "ARRETE_TARIFICATION", "k-tarification"),
+      ],
+      TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
+    );
+    render(
+      <CreationActesAdministratifsForm
+        structureTransformation={transformation.structureTransformations[0]}
+        transformation={transformation}
+      />
+    );
+
+    // Pick fusion in the radio
+    await userEvent.click(
+      screen.getByRole("radio", { name: "Arrêté de fusion" })
+    );
+
+    // Fill the dates of the radio slot (the first DATE_START_END block)
+    const startDateInputs = screen.getAllByLabelText("Début arrêté");
+    const endDateInputs = screen.getAllByLabelText("Fin arrêté");
+    await userEvent.type(startDateInputs[0], "2024-01-01");
+    await userEvent.type(endDateInputs[0], "2025-01-01");
+
+    // Stub the file upload by directly setting the hidden file key field
+    const fileInputs = document.querySelectorAll(
+      'input[name^="actesAdministratifs."][name$=".fileUploads.0.key"]'
+    );
+    // First one is the radio slot
+    const firstFileInput = fileInputs[0] as HTMLInputElement;
+    await userEvent.type(firstFileInput, "k-fusion");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
+    );
+
+    await waitFor(() => expect(mockHandleValidation).toHaveBeenCalledTimes(1));
+    const payload = mockHandleValidation.mock.calls[0][0];
+    const actes = payload.structureTransformation.actesAdministratifs;
+    const radioActe = actes.find(
+      (acte: { category: string }) =>
+        acte.category === "ARRETE_FUSION" || acte.category === "ARRETE_AUTORISATION"
+    );
+    expect(radioActe?.category).toBe("ARRETE_FUSION");
+  });
+
+  it("pre-selects the radio on the persisted category when navigating back to the step", () => {
+    const transformation = transformationWithActes(
+      [filledActe(1, "ARRETE_FUSION", "k-fusion")],
+      TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
+    );
+    render(
+      <CreationActesAdministratifsForm
+        structureTransformation={transformation.structureTransformations[0]}
+        transformation={transformation}
+      />
+    );
+
+    expect(
+      screen.getByRole("radio", { name: "Arrêté de fusion" })
+    ).toBeChecked();
+    expect(
+      screen.getByRole("radio", { name: "Arrêté d'autorisation" })
+    ).not.toBeChecked();
   });
 });
