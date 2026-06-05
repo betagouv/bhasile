@@ -1,6 +1,13 @@
+import { getYearRange } from "@/app/utils/date.util";
+import { CURRENT_YEAR } from "@/constants";
+
 import { expect, test } from "../fixtures/test";
 import { CpomModificationPage } from "../pages/cpom-modification.page";
+import { attachStructureToCpom } from "../seed/cpom.seed";
 import { prisma } from "../seed/prisma";
+
+const FINANCE_CURRENT_YEAR_ROW_INDEX =
+  getYearRange().years.indexOf(CURRENT_YEAR);
 
 test.describe("CPOM modification", () => {
   test("description: changing departement persists", async ({
@@ -37,15 +44,34 @@ test.describe("CPOM modification", () => {
     expect(persisted.map((p) => p.structureId)).toContain(seededStructure.id);
   });
 
-  // The sections below require richer UI interactions (dynamic budget tables,
-  // file uploads). They are stubs for now — implement once the foundation has
-  // shaken out.
+  test("finances: updating a budget cell persists", async ({
+    page,
+    seededCpomWithDates,
+    seededStructure,
+  }) => {
+    await attachStructureToCpom(seededCpomWithDates.id, seededStructure.id);
+    const modification = new CpomModificationPage(page, seededCpomWithDates.id);
+    const newDotationDemandee = 424242;
 
-  test.skip("finances: updating a budget cell persists", async () => {
-    // TODO: target a single CpomTables cell by year/StructureType and fill it,
-    // then verify the Budget row in DB (cpomId + year + cpomStructureType).
+    await modification.goto("finances");
+    await modification.fillDotationDemandee(
+      FINANCE_CURRENT_YEAR_ROW_INDEX,
+      newDotationDemandee
+    );
+    await modification.submitAndWaitForSave();
+
+    const persisted = await prisma.budget.findFirstOrThrow({
+      where: {
+        cpomId: seededCpomWithDates.id,
+        year: CURRENT_YEAR,
+        cpomStructureType: seededStructure.type,
+      },
+      select: { dotationDemandee: true },
+    });
+    expect(persisted.dotationDemandee).toBe(newDotationDemandee);
   });
 
+  // Upload S3 (vrai bucket dev) : laissé en skip, traité dans un second temps.
   test.skip("actes-administratifs: uploading a new acte persists", async () => {
     // TODO: requires S3 stub or real Minio. Reuse fixtures/files/sample.pdf
     // via setInputFiles and tag @slow.
