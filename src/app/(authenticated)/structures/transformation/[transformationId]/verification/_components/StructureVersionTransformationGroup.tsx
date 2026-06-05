@@ -1,28 +1,28 @@
 import { TransformationStructureIcon } from "@/app/components/transformations/TransformationStructureIcon";
-import { StructureTransformationApiRead } from "@/schemas/api/transformation.schema";
-import { StructureTransformationType } from "@/types/transformation.type";
+import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
+import { StructureVersionTransformationType } from "@/types/transformation.type";
 
-import { StructureTransformationItem } from "./StructureTransformationItem";
+import { StructureVersionTransformationItem } from "./StructureVersionTransformationItem";
 
 type Props = {
-  type: StructureTransformationType;
-  structureTransformations: StructureTransformationApiRead[];
+  type: StructureVersionTransformationType;
+  structureVersionTransformations: StructureVersionTransformationApiRead[];
 };
 
-export const StructureTransformationGroup = ({
+export const StructureVersionTransformationGroup = ({
   type,
-  structureTransformations,
+  structureVersionTransformations,
 }: Props) => {
   return (
     <div className="bg-white p-6 rounded-lg flex flex-col gap-6">
       <div className="flex items-center gap-2 text-title-blue-france font-bold">
         <TransformationStructureIcon type={type} />
-        <span>{getGroupLabel(type, structureTransformations.length)}</span>
+        <span>{getGroupLabel(type, structureVersionTransformations.length)}</span>
       </div>
-      {structureTransformations.map((structureTransformation) => (
-        <StructureTransformationItem
-          key={structureTransformation.id}
-          structureTransformation={structureTransformation}
+      {structureVersionTransformations.map((structureVersionTransformation) => (
+        <StructureVersionTransformationItem
+          key={structureVersionTransformation.id}
+          structureVersionTransformation={structureVersionTransformation}
         />
       ))}
     </div>
@@ -30,18 +30,18 @@ export const StructureTransformationGroup = ({
 };
 
 const getGroupLabel = (
-  type: StructureTransformationType,
+  type: StructureVersionTransformationType,
   count: number
 ): string => {
   const isPlural = count > 1;
   switch (type) {
-    case StructureTransformationType.CREATION:
+    case StructureVersionTransformationType.CREATION:
       return isPlural ? "Nouvelles structures" : "Nouvelle structure";
-    case StructureTransformationType.EXTENSION:
+    case StructureVersionTransformationType.EXTENSION:
       return isPlural ? "Extensions" : "Extension";
-    case StructureTransformationType.CONTRACTION:
+    case StructureVersionTransformationType.CONTRACTION:
       return isPlural ? "Contractions" : "Contraction";
-    case StructureTransformationType.FERMETURE:
+    case StructureVersionTransformationType.FERMETURE:
       return isPlural ? "Fermetures" : "Fermeture";
   }
 };

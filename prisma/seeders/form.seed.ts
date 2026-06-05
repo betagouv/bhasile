@@ -22,7 +22,7 @@ export const createFakeFormFinalisation = (): Omit<FormDefinition, "id"> => {
     version: 1,
   };
 };
-export const createFakeFormStructureTransformationCreation = (): Omit<
+export const createFakeFormStructureVersionTransformationCreation = (): Omit<
   FormDefinition,
   "id"
 > => {
@@ -32,7 +32,7 @@ export const createFakeFormStructureTransformationCreation = (): Omit<
     version: 1,
   };
 };
-export const createFakeFormStructureTransformationExtension = (): Omit<
+export const createFakeFormStructureVersionTransformationExtension = (): Omit<
   FormDefinition,
   "id"
 > => {
@@ -42,7 +42,7 @@ export const createFakeFormStructureTransformationExtension = (): Omit<
     version: 1,
   };
 };
-export const createFakeFormStructureTransformationContraction = (): Omit<
+export const createFakeFormStructureVersionTransformationContraction = (): Omit<
   FormDefinition,
   "id"
 > => {
@@ -52,7 +52,7 @@ export const createFakeFormStructureTransformationContraction = (): Omit<
     version: 1,
   };
 };
-export const createFakeFormStructureTransformationFermeture = (): Omit<
+export const createFakeFormStructureVersionTransformationFermeture = (): Omit<
   FormDefinition,
   "id"
 > => {
@@ -100,7 +100,7 @@ export const createFakeFinalisationFormStepDefinition = (
   ];
 };
 
-export const createFakeStructureTransformationCreationFormStepDefinition = (
+export const createFakeStructureVersionTransformationCreationFormStepDefinition = (
   formDefinitionId: number
 ): Omit<FormStepDefinition, "id">[] => {
   return [
@@ -122,7 +122,7 @@ export const createFakeStructureTransformationCreationFormStepDefinition = (
   ];
 };
 
-export const createFakeStructureTransformationFermetureFormStepDefinition = (
+export const createFakeStructureVersionTransformationFermetureFormStepDefinition = (
   formDefinitionId: number
 ): Omit<FormStepDefinition, "id">[] => {
   return [
@@ -142,7 +142,7 @@ export const createFakeForm = (
   | "structureCodeDna"
   | "structureId"
   | "transformationId"
-  | "structureTransformationId"
+  | "structureVersionTransformationId"
 > => {
   return {
     formDefinitionId: formDefinitionId,
@@ -178,7 +178,7 @@ export const createFakeFormWithSteps = (
   | "structureCodeDna"
   | "structureId"
   | "transformationId"
-  | "structureTransformationId"
+  | "structureVersionTransformationId"
 > => {
   const fakeForm = createFakeForm(formDefinitionId);
   const isFinalised = options?.isFinalised ?? false;

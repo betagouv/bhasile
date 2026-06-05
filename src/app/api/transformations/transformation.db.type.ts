@@ -11,11 +11,11 @@ export const transformationInclude = {
       },
     },
   },
-  structureTransformations: {
+  structureVersionTransformations: {
     orderBy: { id: "asc" },
     include: {
       operateur: { select: { id: true, name: true } },
-      forms: {
+      form: {
         include: {
           formDefinition: true,
           formSteps: {

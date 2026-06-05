@@ -4,12 +4,12 @@ import { describe, expect, it, vi } from "vitest";
 
 import { ExistingStructureIdentificationForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/ExistingStructureIdentificationForm";
 import {
-  StructureTransformationApiRead,
+  StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { FormKind } from "@/types/global";
 import {
-  StructureTransformationType,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
@@ -67,9 +67,9 @@ vi.mock("@/app/components/forms/SaveCurrentForm", () => ({
 describe("ExistingStructureIdentificationForm", () => {
   it("passe le structureVersion (et son id) en defaultValues", () => {
     // GIVEN
-    const structureTransformation: StructureTransformationApiRead = {
+    const structureVersionTransformation: StructureVersionTransformationApiRead = {
       id: 7,
-      type: StructureTransformationType.EXTENSION,
+      type: StructureVersionTransformationType.EXTENSION,
       structureVersion: {
         id: 999,
         structureId: 42,
@@ -80,14 +80,14 @@ describe("ExistingStructureIdentificationForm", () => {
     const transformation: TransformationApiRead = {
       id: 12,
       type: TransformationType.EXTENSION_EX_NIHILO,
-      structureTransformations: [structureTransformation],
+      structureVersionTransformations: [structureVersionTransformation],
     };
 
     // WHEN
     render(
       <ExistingStructureIdentificationForm
         transformation={transformation}
-        structureTransformation={structureTransformation}
+        structureVersionTransformation={structureVersionTransformation}
         formKind={FormKind.EXTENSION}
       />
     );
@@ -101,22 +101,22 @@ describe("ExistingStructureIdentificationForm", () => {
     });
   });
 
-  it("construit le payload avec effectiveDate et le type de la structureTransformation, sans creationDate", () => {
+  it("construit le payload avec effectiveDate et le type de la structureVersionTransformation, sans creationDate", () => {
     // GIVEN
-    const structureTransformation: StructureTransformationApiRead = {
+    const structureVersionTransformation: StructureVersionTransformationApiRead = {
       id: 7,
-      type: StructureTransformationType.CONTRACTION,
+      type: StructureVersionTransformationType.CONTRACTION,
       structureVersion: { id: 999 },
     };
     const transformation: TransformationApiRead = {
       id: 12,
       type: TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES,
-      structureTransformations: [structureTransformation],
+      structureVersionTransformations: [structureVersionTransformation],
     };
     render(
       <ExistingStructureIdentificationForm
         transformation={transformation}
-        structureTransformation={structureTransformation}
+        structureVersionTransformation={structureVersionTransformation}
         formKind={FormKind.CONTRACTION}
       />
     );
@@ -131,9 +131,9 @@ describe("ExistingStructureIdentificationForm", () => {
     // THEN
     expect(mockHandleValidation).toHaveBeenCalledWith({
       transformationId: 12,
-      structureTransformation: {
+      structureVersionTransformation: {
         id: 7,
-        type: StructureTransformationType.CONTRACTION,
+        type: StructureVersionTransformationType.CONTRACTION,
         forms: undefined,
         structureVersion: {
           id: 999,

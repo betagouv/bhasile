@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { ExcludeNullValues } from "@/types/global";
 import {
-  StructureTransformationType,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
@@ -20,48 +20,47 @@ export type StructureVersionApiRead =
     isMultiDna?: boolean;
   };
 
-const structureTransformationApiUpdateSchema = z.object({
+const structureVersionTransformationApiUpdateSchema = z.object({
   id: z.number().optional(),
-  type: z.nativeEnum(StructureTransformationType).optional(),
-  date: z.string().datetime().nullish(),
+  type: z.nativeEnum(StructureVersionTransformationType).optional(),
   motif: z.string().nullish(),
-  forms: z.array(formApiSchema).optional(),
+  form: formApiSchema.optional(),
   actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
   operateurId: z.number().nullish(),
 
   structureVersion: structureVersionApiSchema.optional(),
 });
 
-export const structureTransformationApiCreateSchema =
-  structureTransformationApiUpdateSchema.extend({
-    type: z.nativeEnum(StructureTransformationType),
+export const structureVersionTransformationApiCreateSchema =
+  structureVersionTransformationApiUpdateSchema.extend({
+    type: z.nativeEnum(StructureVersionTransformationType),
   });
 
 export const transformationApiUpdateSchema = z.object({
   id: z.number(),
   type: z.nativeEnum(TransformationType).optional(),
   form: formApiSchema.optional(),
-  structureTransformations: z
-    .array(structureTransformationApiUpdateSchema)
+  structureVersionTransformations: z
+    .array(structureVersionTransformationApiUpdateSchema)
     .optional(),
 });
 
 export const transformationApiCreateSchema = z.object({
   type: z.nativeEnum(TransformationType),
-  structureTransformations: z
-    .array(structureTransformationApiCreateSchema)
-    .min(1, "Au moins une structureTransformation est requise"),
+  structureVersionTransformations: z
+    .array(structureVersionTransformationApiCreateSchema)
+    .min(1, "Au moins une structureVersionTransformation est requise"),
 });
 
-export type StructureTransformationApiUpdate = z.infer<
-  typeof structureTransformationApiUpdateSchema
+export type StructureVersionTransformationApiUpdate = z.infer<
+  typeof structureVersionTransformationApiUpdateSchema
 >;
-export type StructureTransformationApiCreate = z.infer<
-  typeof structureTransformationApiCreateSchema
+export type StructureVersionTransformationApiCreate = z.infer<
+  typeof structureVersionTransformationApiCreateSchema
 >;
-export type StructureTransformationApiRead =
-  StructureTransformationApiUpdate & {
-    type: StructureTransformationType;
+export type StructureVersionTransformationApiRead =
+  StructureVersionTransformationApiUpdate & {
+    type: StructureVersionTransformationType;
     operateur?: { id: number; name: string };
     structureVersion?: StructureVersionApiRead & {
       structure?: {
@@ -89,16 +88,16 @@ export type TransformationApiUpdateClient = z.input<
   typeof transformationApiUpdateSchema
 >;
 
-export type StructureTransformationApiUpdateClient = z.input<
-  typeof structureTransformationApiUpdateSchema
+export type StructureVersionTransformationApiUpdateClient = z.input<
+  typeof structureVersionTransformationApiUpdateSchema
 >;
 
 export type TransformationApiRead = Omit<
   TransformationApiUpdate,
-  "structureTransformations"
+  "structureVersionTransformations"
 > & {
   id: number;
   createdAt?: string;
   updatedAt?: string;
-  structureTransformations: StructureTransformationApiRead[];
+  structureVersionTransformations: StructureVersionTransformationApiRead[];
 };

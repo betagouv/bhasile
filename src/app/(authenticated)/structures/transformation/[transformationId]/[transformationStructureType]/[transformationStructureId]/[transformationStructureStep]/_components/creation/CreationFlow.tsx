@@ -3,12 +3,12 @@
 import { useParams } from "next/navigation";
 
 import {
-  StructureTransformationApiRead,
+  StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { FormKind } from "@/types/global";
 import {
-  StructureTransformationStep,
+  StructureVersionTransformationStep,
   TransformationType,
 } from "@/types/transformation.type";
 
@@ -18,12 +18,12 @@ import { CreationPlacesEtHebergementForm } from "./CreationPlacesEtHebergementFo
 
 type Props = {
   transformation: TransformationApiRead;
-  structureTransformation: StructureTransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
 };
 
 export const CreationFlow = ({
   transformation,
-  structureTransformation,
+  structureVersionTransformation,
 }: Props) => {
   const { transformationStructureStep } = useParams();
 
@@ -32,11 +32,11 @@ export const CreationFlow = ({
       ? FormKind.OUVERTURE_EX_NIHILO
       : FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES;
 
-  if (transformationStructureStep === StructureTransformationStep.DESCRIPTION) {
+  if (transformationStructureStep === StructureVersionTransformationStep.DESCRIPTION) {
     return (
       <CreationIdentificationForm
         transformation={transformation}
-        structureTransformation={structureTransformation}
+        structureVersionTransformation={structureVersionTransformation}
         formKind={formKind}
       />
     );
@@ -44,24 +44,24 @@ export const CreationFlow = ({
 
   if (
     transformationStructureStep ===
-    StructureTransformationStep.PLACES_ET_HEBERGEMENT
+    StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT
   ) {
     return (
       <CreationPlacesEtHebergementForm
         transformation={transformation}
-        structureTransformation={structureTransformation}
+        structureVersionTransformation={structureVersionTransformation}
       />
     );
   }
 
   if (
     transformationStructureStep ===
-    StructureTransformationStep.ACTES_ADMINISTRATIFS
+    StructureVersionTransformationStep.ACTES_ADMINISTRATIFS
   ) {
     return (
       <TransformationActesAdministratifsForm
         transformation={transformation}
-        structureTransformation={structureTransformation}
+        structureVersionTransformation={structureVersionTransformation}
       />
     );
   }

@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import {
-  StructureTransformationApiUpdate,
+  StructureVersionTransformationApiUpdate,
   TransformationApiCreate,
   TransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
@@ -9,7 +9,7 @@ import { PrismaTransaction } from "@/types/prisma.type";
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import {
   createOrUpdateForms,
-  initializeStructureTransformationDefaultForms,
+  initializeStructureVersionTransformationDefaultForms,
 } from "../forms/form.repository";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 import { transformationInclude } from "./transformation.db.type";
@@ -44,11 +44,11 @@ export const createOne = async (
 
     await initializeTransformationForm(tx, transformation.id);
 
-    for (const structureTransformation of input.structureTransformations) {
-      await createOrUpdateStructureTransformation(
+    for (const structureVersionTransformation of input.structureVersionTransformations) {
+      await createOrUpdateStructureVersionTransformation(
         tx,
         transformation.id,
-        structureTransformation
+        structureVersionTransformation
       );
     }
 
@@ -73,12 +73,12 @@ export const updateOne = async (
       });
     }
 
-    if (input.structureTransformations) {
-      for (const structureTransformation of input.structureTransformations) {
-        await createOrUpdateStructureTransformation(
+    if (input.structureVersionTransformations) {
+      for (const structureVersionTransformation of input.structureVersionTransformations) {
+        await createOrUpdateStructureVersionTransformation(
           tx,
           input.id,
-          structureTransformation
+          structureVersionTransformation
         );
       }
     }
@@ -113,87 +113,89 @@ export const deleteOne = async (id: number): Promise<void> => {
   await prisma.transformation.delete({ where: { id } });
 };
 
-const createOrUpdateStructureTransformation = async (
+const createOrUpdateStructureVersionTransformation = async (
   tx: PrismaTransaction,
   transformationId: number,
-  structureTransformation: StructureTransformationApiUpdate
+  structureVersionTransformation: StructureVersionTransformationApiUpdate
 ): Promise<void> => {
-  const structureTransformationId = structureTransformation.id
-    ? await updateStructureTransformation(
+  const structureVersionTransformationId = structureVersionTransformation.id
+    ? await updateStructureVersionTransformation(
         tx,
         transformationId,
-        structureTransformation
+        structureVersionTransformation
       )
-    : await createStructureTransformation(
+    : await createStructureVersionTransformation(
         tx,
         transformationId,
-        structureTransformation
+        structureVersionTransformation
       );
 
-  if (structureTransformation.structureVersion) {
+  if (structureVersionTransformation.structureVersion) {
     await createOrUpdateStructureVersion(
       tx,
-      structureTransformation.structureVersion,
+      structureVersionTransformation.structureVersion,
       {
-        structureId: structureTransformation.structureVersion.structureId,
-        structureTransformationId,
+        structureId: structureVersionTransformation.structureVersion.structureId,
+        structureVersionTransformationId,
       }
     );
   }
 
-  await createOrUpdateForms(tx, structureTransformation.forms, {
-    structureTransformationId,
-  });
+  await createOrUpdateForms(
+    tx,
+    structureVersionTransformation.form
+      ? [structureVersionTransformation.form]
+      : [],
+    { structureVersionTransformationId }
+  );
 
   await createOrUpdateActesAdministratifs(
     tx,
-    structureTransformation.actesAdministratifs,
-    { structureTransformationId }
+    structureVersionTransformation.actesAdministratifs,
+    { structureVersionTransformationId }
   );
 };
 
-const createStructureTransformation = async (
+const createStructureVersionTransformation = async (
   tx: PrismaTransaction,
   transformationId: number,
-  structureTransformation: StructureTransformationApiUpdate
+  structureVersionTransformation: StructureVersionTransformationApiUpdate
 ): Promise<number> => {
-  if (!structureTransformation.type) {
-    throw new Error("type est requis pour créer une structureTransformation");
+  if (!structureVersionTransformation.type) {
+    throw new Error("type est requis pour créer une structureVersionTransformation");
   }
-  const created = await tx.structureTransformation.create({
+  const created = await tx.structureVersionTransformation.create({
     data: {
       transformationId,
-      type: structureTransformation.type,
-      date: structureTransformation.date,
-      motif: structureTransformation.motif,
-      operateurId: structureTransformation.operateurId,
+      type: structureVersionTransformation.type,
+      motif: structureVersionTransformation.motif,
+      operateurId: structureVersionTransformation.operateurId,
     },
   });
 
-  await initializeStructureTransformationDefaultForms(
+  await initializeStructureVersionTransformationDefaultForms(
     tx,
     created.id,
-    structureTransformation.type
+    structureVersionTransformation.type
   );
 
   return created.id;
 };
 
-const updateStructureTransformation = async (
+const updateStructureVersionTransformation = async (
   tx: PrismaTransaction,
   transformationId: number,
-  structureTransformation: StructureTransformationApiUpdate
+  structureVersionTransformation: StructureVersionTransformationApiUpdate
 ): Promise<number> => {
-  const updated = await tx.structureTransformation.update({
+  const updated = await tx.structureVersionTransformation.update({
     where: {
-      id: structureTransformation.id,
+      id: structureVersionTransformation.id,
       transformationId,
     },
     data: {
-      type: structureTransformation.type,
-      date: structureTransformation.date,
-      motif: structureTransformation.motif,
-      operateurId: structureTransformation.operateurId,
+      type: structureVersionTransformation.type,
+      motif: structureVersionTransformation.motif,
+      operateurId: structureVersionTransformation.operateurId,
     },
   });
   return updated.id;

@@ -25,7 +25,7 @@ describe("GET /api/transformations/[id]", () => {
     const payload = {
       id: 5,
       type: TransformationType.EXTENSION_EX_NIHILO,
-      structureTransformations: [],
+      structureVersionTransformations: [],
     };
     mockGetTransformation.mockResolvedValueOnce(payload);
     const request = new Request("http://localhost/api/transformations/5");

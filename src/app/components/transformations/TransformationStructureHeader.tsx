@@ -1,26 +1,26 @@
-import { getStructureTransformationLabel } from "@/app/utils/transformation.util";
-import { StructureTransformationApiRead } from "@/schemas/api/transformation.schema";
+import { getStructureVersionTransformationLabel } from "@/app/utils/transformation.util";
+import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 
 import { TransformationStructureIcon } from "./TransformationStructureIcon";
 
 type Props = {
-  structureTransformation: StructureTransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
 };
 
 export const TransformationStructureHeader = ({
-  structureTransformation,
+  structureVersionTransformation,
 }: Props) => {
   return (
     <h1 className="relative flex items-center gap-3 pl-4 mb-4 text-xl font-bold text-title-blue-france">
       <span className="flex items-center justify-center w-10 h-10 rounded-full bg-white text-title-blue-france">
         <TransformationStructureIcon
-          type={structureTransformation.type}
+          type={structureVersionTransformation.type}
           large
         />
       </span>
-      {getStructureTransformationLabel(
-        structureTransformation.type,
-        structureTransformation.structureVersion?.structure?.codeBhasile
+      {getStructureVersionTransformationLabel(
+        structureVersionTransformation.type,
+        structureVersionTransformation.structureVersion?.structure?.codeBhasile
       )}
     </h1>
   );

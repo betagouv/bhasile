@@ -3,13 +3,13 @@
 import { useParams } from "next/navigation";
 
 import {
-  StructureTransformationApiRead,
+  StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { FormKind } from "@/types/global";
 import {
-  StructureTransformationStep,
-  StructureTransformationType,
+  StructureVersionTransformationStep,
+  StructureVersionTransformationType,
 } from "@/types/transformation.type";
 
 import { ExistingStructureIdentificationForm } from "./ExistingStructureIdentificationForm";
@@ -17,25 +17,25 @@ import { TransformationActesAdministratifsForm } from "./TransformationActesAdmi
 
 type Props = {
   transformation: TransformationApiRead;
-  structureTransformation: StructureTransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
 };
 
 export const ExistingStructureFlow = ({
   transformation,
-  structureTransformation,
+  structureVersionTransformation,
 }: Props) => {
   const { transformationStructureStep } = useParams();
 
   const formKind =
-    structureTransformation.type === StructureTransformationType.CONTRACTION
+    structureVersionTransformation.type === StructureVersionTransformationType.CONTRACTION
       ? FormKind.CONTRACTION
       : FormKind.EXTENSION;
 
-  if (transformationStructureStep === StructureTransformationStep.DESCRIPTION) {
+  if (transformationStructureStep === StructureVersionTransformationStep.DESCRIPTION) {
     return (
       <ExistingStructureIdentificationForm
         transformation={transformation}
-        structureTransformation={structureTransformation}
+        structureVersionTransformation={structureVersionTransformation}
         formKind={formKind}
       />
     );
@@ -43,12 +43,12 @@ export const ExistingStructureFlow = ({
 
   if (
     transformationStructureStep ===
-    StructureTransformationStep.ACTES_ADMINISTRATIFS
+    StructureVersionTransformationStep.ACTES_ADMINISTRATIFS
   ) {
     return (
       <TransformationActesAdministratifsForm
         transformation={transformation}
-        structureTransformation={structureTransformation}
+        structureVersionTransformation={structureVersionTransformation}
       />
     );
   }

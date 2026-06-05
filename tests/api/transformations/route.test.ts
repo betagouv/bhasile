@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET, POST } from "@/app/api/transformations/route";
 import {
-  StructureTransformationType,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
@@ -32,9 +32,9 @@ describe("POST /api/transformations", () => {
     mockCreateTransformation.mockResolvedValueOnce(99);
     const body = {
       type: TransformationType.OUVERTURE_EX_NIHILO,
-      structureTransformations: [
+      structureVersionTransformations: [
         {
-          type: StructureTransformationType.CREATION,
+          type: StructureVersionTransformationType.CREATION,
           structureVersion: { structureId: 1 },
         },
       ],
@@ -58,7 +58,7 @@ describe("POST /api/transformations", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         type: TransformationType.OUVERTURE_EX_NIHILO,
-        structureTransformations: [],
+        structureVersionTransformations: [],
       }),
     });
 

@@ -1,4 +1,4 @@
-import { StructureTransformationType } from "@/generated/prisma/enums";
+import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { FormApiType } from "@/schemas/api/form.schema";
 import { EntityId } from "@/types/Entity.type";
 import { StepStatus } from "@/types/form.type";
@@ -33,10 +33,7 @@ const getFormUniqueWhere = (
       };
     }
   | {
-      structureTransformationId_formDefinitionId: {
-        structureTransformationId: number;
-        formDefinitionId: number;
-      };
+      structureVersionTransformationId: number;
     }
   | {
       transformationId_formDefinitionId: {
@@ -60,16 +57,13 @@ const getFormUniqueWhere = (
       },
     };
   }
-  if (entityId.structureTransformationId !== undefined) {
+  if (entityId.structureVersionTransformationId !== undefined) {
     return {
-      structureTransformationId_formDefinitionId: {
-        structureTransformationId: entityId.structureTransformationId,
-        formDefinitionId,
-      },
+      structureVersionTransformationId: entityId.structureVersionTransformationId,
     };
   }
   throw new Error(
-    "structureId, transformationId ou structureTransformationId est requis pour un Form"
+    "structureId, transformationId ou structureVersionTransformationId est requis pour un Form"
   );
 };
 
@@ -186,37 +180,37 @@ export const initializeStructureDefaultForms = async (
   }
 };
 
-export const initializeStructureTransformationDefaultForms = async (
+export const initializeStructureVersionTransformationDefaultForms = async (
   tx: PrismaTransaction,
-  structureTransformationId: number,
-  structureTransformationType: StructureTransformationType
+  structureVersionTransformationId: number,
+  structureVersionTransformationType: StructureVersionTransformationType
 ): Promise<void> => {
   const slugs = {
-    [StructureTransformationType.FERMETURE]:
+    [StructureVersionTransformationType.FERMETURE]:
       "structure-transformation-fermeture-v1",
-    [StructureTransformationType.EXTENSION]:
+    [StructureVersionTransformationType.EXTENSION]:
       "structure-transformation-extension-v1",
-    [StructureTransformationType.CONTRACTION]:
+    [StructureVersionTransformationType.CONTRACTION]:
       "structure-transformation-contraction-v1",
-    [StructureTransformationType.CREATION]:
+    [StructureVersionTransformationType.CREATION]:
       "structure-transformation-creation-v1",
   };
 
   const formDefinition = await tx.formDefinition.findUnique({
-    where: { slug: slugs[structureTransformationType] },
+    where: { slug: slugs[structureVersionTransformationType] },
     include: { stepsDefinition: true },
   });
 
   if (!formDefinition) {
     throw new Error(
-      `FormDefinition with slug ${slugs[structureTransformationType]} not found`
+      `FormDefinition with slug ${slugs[structureVersionTransformationType]} not found`
     );
   }
 
   const formEntity = await tx.form.create({
     data: {
       formDefinitionId: formDefinition.id,
-      structureTransformationId,
+      structureVersionTransformationId,
       status: false,
     },
   });

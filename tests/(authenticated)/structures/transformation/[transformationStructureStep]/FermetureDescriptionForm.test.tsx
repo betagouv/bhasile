@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
-  createStructureTransformation,
+  createStructureVersionTransformation,
   createTransformation,
 } from "tests/test-utils/factories/transformation.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -10,7 +10,7 @@ import { FermetureDescriptionForm } from "@/app/(authenticated)/structures/trans
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 import {
-  StructureTransformationType,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
@@ -30,16 +30,16 @@ vi.mock("next/navigation", () => ({
 }));
 
 const fermetureTransformation = (
-  structureVersion: TransformationApiRead["structureTransformations"][number]["structureVersion"],
+  structureVersion: TransformationApiRead["structureVersionTransformations"][number]["structureVersion"],
   actesAdministratifs: ActeAdministratifApiType[] = []
 ) =>
   createTransformation({
     id: 12,
     type: TransformationType.FERMETURE_SANS_TRANSFERT,
-    structureTransformations: [
-      createStructureTransformation({
+    structureVersionTransformations: [
+      createStructureVersionTransformation({
         id: 7,
-        type: StructureTransformationType.FERMETURE,
+        type: StructureVersionTransformationType.FERMETURE,
         structureVersion,
         actesAdministratifs,
       }),
@@ -47,11 +47,11 @@ const fermetureTransformation = (
   });
 
 const renderForm = (transformation: TransformationApiRead) => {
-  const [structureTransformation] = transformation.structureTransformations;
+  const [structureVersionTransformation] = transformation.structureVersionTransformations;
   return render(
     <FermetureDescriptionForm
       transformation={transformation}
-      structureTransformation={structureTransformation}
+      structureVersionTransformation={structureVersionTransformation}
     />
   );
 };
@@ -89,16 +89,16 @@ describe("FermetureDescriptionForm (integration via FormWrapper)", () => {
     await waitFor(() => expect(mockHandleValidation).toHaveBeenCalledTimes(1));
     const payload = mockHandleValidation.mock.calls[0][0];
     expect(payload.transformationId).toBe(12);
-    expect(payload.structureTransformation.id).toBe(7);
-    expect(payload.structureTransformation.type).toBe(
-      StructureTransformationType.FERMETURE
+    expect(payload.structureVersionTransformation.id).toBe(7);
+    expect(payload.structureVersionTransformation.type).toBe(
+      StructureVersionTransformationType.FERMETURE
     );
-    expect(payload.structureTransformation.structureVersion).toEqual({
+    expect(payload.structureVersionTransformation.structureVersion).toEqual({
       id: 12,
       structureId: 104,
       effectiveDate: "2024-09-30T12:00:00.000Z",
     });
-    expect(payload.structureTransformation.actesAdministratifs).toEqual([]);
+    expect(payload.structureVersionTransformation.actesAdministratifs).toEqual([]);
   });
 
   it("does not submit when the closure date is missing", async () => {
@@ -138,7 +138,7 @@ describe("FermetureDescriptionForm (integration via FormWrapper)", () => {
     // THEN the document is forwarded alongside the closure date
     await waitFor(() => expect(mockHandleValidation).toHaveBeenCalledTimes(1));
     const payload = mockHandleValidation.mock.calls[0][0];
-    const actes = payload.structureTransformation.actesAdministratifs;
+    const actes = payload.structureVersionTransformation.actesAdministratifs;
     expect(actes).toHaveLength(1);
     expect(actes[0].category).toBe("AUTRE");
     expect(actes[0].fileUploads).toMatchObject([{ key: "k-autre" }]);

@@ -4,7 +4,7 @@ import {
   StructureSelectionBlock,
   TRANSFORMATION_TYPE_SPECS,
 } from "@/config/transformation.config";
-import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { StructureType } from "@/types/structure.type";
 import { TransformationType } from "@/types/transformation.type";
 
@@ -128,7 +128,7 @@ export const useStructureSelections = ({
       ? filtersByBlock[block.inheritDepartementFrom]?.departementNumero
       : undefined;
 
-  const structureTransformations = useMemo<StructureTransformationApiCreate[]>(
+  const structureVersionTransformations = useMemo<StructureVersionTransformationApiCreate[]>(
     () => [
       ...transformationSpec.buildAutoTransformations(structureId),
       ...transformationSpec.blocks.flatMap((block) =>
@@ -160,7 +160,7 @@ export const useStructureSelections = ({
     getEffectiveStructureType,
     getInheritedOperateurName,
     getInheritedDepartementNumero,
-    structureTransformations,
+    structureVersionTransformations,
     areSelectionsComplete,
   };
 };

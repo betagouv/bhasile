@@ -9,7 +9,7 @@ import { FieldSetCurrentYearPlaces } from "@/app/components/forms/typePlace/Fiel
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getTransformationStructureVersionDefaultValues } from "@/app/utils/transformation.util";
 import {
-  StructureTransformationApiRead,
+  StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import {
@@ -21,18 +21,18 @@ import { TransformationType } from "@/types/transformation.type";
 
 type Props = {
   transformation: TransformationApiRead;
-  structureTransformation: StructureTransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
 };
 
 export const CreationPlacesEtHebergementForm = ({
   transformation,
-  structureTransformation,
+  structureVersionTransformation,
 }: Props) => {
   const { handleValidation } = useTransformationFormHandling();
 
   const defaultValues =
     getTransformationStructureVersionDefaultValues<CreationPlacesEtHebergementFormValues>(
-      structureTransformation.structureVersion
+      structureVersionTransformation.structureVersion
     );
 
   const formKind =
@@ -47,11 +47,11 @@ export const CreationPlacesEtHebergementForm = ({
       onSubmit={(data) => {
         handleValidation({
           transformationId: transformation.id,
-          structureTransformation: {
-            id: structureTransformation.id,
-            type: structureTransformation.type,
+          structureVersionTransformation: {
+            id: structureVersionTransformation.id,
+            type: structureVersionTransformation.type,
             structureVersion: {
-              id: structureTransformation.structureVersion?.id,
+              id: structureVersionTransformation.structureVersion?.id,
               public: data.public,
               adresses: data.adresses,
               structureTypologies: data.structureTypologies,

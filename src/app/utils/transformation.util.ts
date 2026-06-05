@@ -1,21 +1,21 @@
 import {
-  STRUCTURE_TRANSFORMATION_FORM_STEPS,
-  STRUCTURE_TRANSFORMATION_TYPE_ORDER,
+  STRUCTURE_VERSION_TRANSFORMATION_FORM_STEPS,
+  STRUCTURE_VERSION_TRANSFORMATION_TYPE_ORDER,
   TRANSFORMATION_TYPE_SPECS,
   VERIFICATION_STEP_NAME,
 } from "@/config/transformation.config";
 import { FormApiType } from "@/schemas/api/form.schema";
 import {
-  StructureTransformationApiRead,
-  StructureTransformationApiUpdate,
   StructureVersionApiRead,
+  StructureVersionTransformationApiRead,
+  StructureVersionTransformationApiUpdate,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { StepStatus } from "@/types/form.type";
 import { DeepPartial, FormKind } from "@/types/global";
 import {
-  StructureTransformationStep,
-  StructureTransformationType,
+  StructureVersionTransformationStep,
+  StructureVersionTransformationType,
   TransformationFormType,
   TransformationType,
 } from "@/types/transformation.type";
@@ -37,32 +37,32 @@ export const getTransformationTitle = (
   return "Transformer une structure";
 };
 
-export const getStructureTransformationDepartement = (
-  structureTransformation?: StructureTransformationApiRead
+export const getStructureVersionTransformationDepartement = (
+  structureVersionTransformation?: StructureVersionTransformationApiRead
 ): string | undefined =>
-  structureTransformation?.structureVersion?.departementAdministratif ??
-  structureTransformation?.structureVersion?.structure
+  structureVersionTransformation?.structureVersion?.departementAdministratif ??
+  structureVersionTransformation?.structureVersion?.structure
     ?.departementAdministratif ??
   undefined;
 
-export const getReferenceStructureTransformation = (
+export const getReferenceStructureVersionTransformation = (
   transformation: TransformationApiRead
-): StructureTransformationApiRead | undefined =>
-  transformation.structureTransformations.find((structureTransformation) =>
-    getStructureTransformationDepartement(structureTransformation)
-  ) ?? transformation.structureTransformations[0];
+): StructureVersionTransformationApiRead | undefined =>
+  transformation.structureVersionTransformations.find((structureVersionTransformation) =>
+    getStructureVersionTransformationDepartement(structureVersionTransformation)
+  ) ?? transformation.structureVersionTransformations[0];
 
 export const getTransformationDepartement = (
   transformation: TransformationApiRead
 ): string | undefined =>
-  getStructureTransformationDepartement(
-    getReferenceStructureTransformation(transformation)
+  getStructureVersionTransformationDepartement(
+    getReferenceStructureVersionTransformation(transformation)
   );
 
 type GetTransformationFormNavigationProps = {
   transformationSteps: Step[];
   transformationId: number;
-  transformationStructureType?: StructureTransformationType;
+  transformationStructureType?: StructureVersionTransformationType;
   transformationStructureId?: number;
   transformationStructureStep?: string;
 };
@@ -113,17 +113,17 @@ export const getTransformationFormNavigation = ({
   return { firstStep, currentStep, prevStep, nextStep };
 };
 
-export const sortStructureTransformationsByType = <
-  T extends { type?: StructureTransformationType },
+export const sortStructureVersionTransformationsByType = <
+  T extends { type?: StructureVersionTransformationType },
 >(
   items: T[]
 ): T[] => {
   return [...items].sort((firstItem, secondItem) => {
     const firstOrder = firstItem.type
-      ? STRUCTURE_TRANSFORMATION_TYPE_ORDER[firstItem.type]
+      ? STRUCTURE_VERSION_TRANSFORMATION_TYPE_ORDER[firstItem.type]
       : Infinity;
     const secondOrder = secondItem.type
-      ? STRUCTURE_TRANSFORMATION_TYPE_ORDER[secondItem.type]
+      ? STRUCTURE_VERSION_TRANSFORMATION_TYPE_ORDER[secondItem.type]
       : Infinity;
     return firstOrder - secondOrder;
   });
@@ -136,71 +136,71 @@ export const getTransformationSteps = (
     return [];
   }
 
-  return sortStructureTransformationsByType(
-    transformation.structureTransformations?.map((structureTransformation) => ({
-      id: structureTransformation.id,
+  return sortStructureVersionTransformationsByType(
+    transformation.structureVersionTransformations?.map((structureVersionTransformation) => ({
+      id: structureVersionTransformation.id,
       codeBhasile:
-        structureTransformation.structureVersion?.structure?.codeBhasile,
-      type: structureTransformation.type,
-      steps: getStepsByType(structureTransformation, transformation.id),
+        structureVersionTransformation.structureVersion?.structure?.codeBhasile,
+      type: structureVersionTransformation.type,
+      steps: getStepsByType(structureVersionTransformation, transformation.id),
     })) ?? []
   );
 };
 
 const getStepsByType = (
-  structureTransformation: StructureTransformationApiUpdate,
+  structureVersionTransformation: StructureVersionTransformationApiUpdate,
   transformationId: number
 ): Step["steps"] => {
-  if (!structureTransformation.type) {
+  if (!structureVersionTransformation.type) {
     return [];
   }
 
-  switch (structureTransformation.type) {
-    case StructureTransformationType.EXTENSION:
-    case StructureTransformationType.CONTRACTION:
-    case StructureTransformationType.CREATION:
+  switch (structureVersionTransformation.type) {
+    case StructureVersionTransformationType.EXTENSION:
+    case StructureVersionTransformationType.CONTRACTION:
+    case StructureVersionTransformationType.CREATION:
       return [
         {
-          name: StructureTransformationStep.DESCRIPTION,
+          name: StructureVersionTransformationStep.DESCRIPTION,
           label: "Description",
           route: getRoute(
-            StructureTransformationStep.DESCRIPTION,
+            StructureVersionTransformationStep.DESCRIPTION,
             transformationId,
-            structureTransformation.id,
-            structureTransformation.type
+            structureVersionTransformation.id,
+            structureVersionTransformation.type
           ),
         },
         {
-          name: StructureTransformationStep.PLACES_ET_HEBERGEMENT,
+          name: StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
           label: "Places et hébergement",
           route: getRoute(
-            StructureTransformationStep.PLACES_ET_HEBERGEMENT,
+            StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
             transformationId,
-            structureTransformation.id,
-            structureTransformation.type
+            structureVersionTransformation.id,
+            structureVersionTransformation.type
           ),
         },
         {
-          name: StructureTransformationStep.ACTES_ADMINISTRATIFS,
+          name: StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
           label: "Actes administratifs",
           route: getRoute(
-            StructureTransformationStep.ACTES_ADMINISTRATIFS,
+            StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
             transformationId,
-            structureTransformation.id,
-            structureTransformation.type
+            structureVersionTransformation.id,
+            structureVersionTransformation.type
           ),
         },
       ];
-    case StructureTransformationType.FERMETURE:
+    case StructureVersionTransformationType.FERMETURE:
       return [
         {
-          name: StructureTransformationStep.DESCRIPTION,
+          name: StructureVersionTransformationStep.DESCRIPTION,
           label: "Description",
           route: getRoute(
-            StructureTransformationStep.DESCRIPTION,
+            StructureVersionTransformationStep.DESCRIPTION,
             transformationId,
-            structureTransformation.id,
-            structureTransformation.type
+            structureVersionTransformation.id,
+            structureVersionTransformation.type
           ),
         },
       ];
@@ -211,26 +211,26 @@ const getRoute = (
   route: string,
   transformationId?: number,
   idStep?: number,
-  structureTransformationType?: StructureTransformationType
+  structureVersionTransformationType?: StructureVersionTransformationType
 ) => {
-  if (!transformationId || !idStep || !structureTransformationType || !route) {
+  if (!transformationId || !idStep || !structureVersionTransformationType || !route) {
     return "";
   }
 
   const types = {
-    [StructureTransformationType.EXTENSION]: "extension",
-    [StructureTransformationType.CONTRACTION]: "contraction",
-    [StructureTransformationType.FERMETURE]: "fermeture",
-    [StructureTransformationType.CREATION]: "creation",
+    [StructureVersionTransformationType.EXTENSION]: "extension",
+    [StructureVersionTransformationType.CONTRACTION]: "contraction",
+    [StructureVersionTransformationType.FERMETURE]: "fermeture",
+    [StructureVersionTransformationType.CREATION]: "creation",
   };
 
-  return `/structures/transformation/${transformationId}/${types[structureTransformationType]}/${idStep}/${route}`;
+  return `/structures/transformation/${transformationId}/${types[structureVersionTransformationType]}/${idStep}/${route}`;
 };
 
 export type Step = {
   id?: number;
   codeBhasile?: string;
-  type?: StructureTransformationType;
+  type?: StructureVersionTransformationType;
   steps: {
     name: string;
     label: string;
@@ -248,9 +248,9 @@ export type AdresseSource = {
 };
 
 export const getAdresseSource = (
-  structureTransformation: StructureTransformationApiRead
+  structureVersionTransformation: StructureVersionTransformationApiRead
 ): AdresseSource => {
-  const structure = structureTransformation.structureVersion?.structure;
+  const structure = structureVersionTransformation.structureVersion?.structure;
   return {
     nom: structure?.nom ?? "",
     adresseAdministrative: structure?.adresseAdministrative ?? "",
@@ -291,31 +291,31 @@ export const getTransformationNounAvecArticle = (
   return "";
 };
 
-export const getStructureTransformationLabel = (
-  type?: StructureTransformationType,
+export const getStructureVersionTransformationLabel = (
+  type?: StructureVersionTransformationType,
   codeBhasile?: string
 ) => {
   const code = codeBhasile ?? "";
   switch (type) {
-    case StructureTransformationType.EXTENSION:
+    case StructureVersionTransformationType.EXTENSION:
       return `Extension ${code}`;
-    case StructureTransformationType.CONTRACTION:
+    case StructureVersionTransformationType.CONTRACTION:
       return `Contraction ${code}`;
-    case StructureTransformationType.FERMETURE:
+    case StructureVersionTransformationType.FERMETURE:
       return `Fermeture ${code}`;
-    case StructureTransformationType.CREATION:
+    case StructureVersionTransformationType.CREATION:
       return `Nouvelle structure`;
     default:
       return "";
   }
 };
 
-export const validateStructureTransformationFormStep = (
+export const validateStructureVersionTransformationFormStep = (
   form: FormApiType,
   stepToValidate: string
 ): FormApiType => {
   const formStepSpecs =
-    STRUCTURE_TRANSFORMATION_FORM_STEPS[form.formDefinition.name] ?? [];
+    STRUCTURE_VERSION_TRANSFORMATION_FORM_STEPS[form.formDefinition.name] ?? [];
 
   const stepSlugToValidate = formStepSpecs.find(
     (formStepSpec) => formStepSpec.name === stepToValidate

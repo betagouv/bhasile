@@ -23,14 +23,14 @@ export const TransformationType = {
 export type TransformationType =
   (typeof TransformationType)[keyof typeof TransformationType];
 
-export const StructureTransformationType = {
+export const StructureVersionTransformationType = {
   CREATION: "CREATION",
   FERMETURE: "FERMETURE",
   CONTRACTION: "CONTRACTION",
   EXTENSION: "EXTENSION",
 } as const;
-export type StructureTransformationType =
-  (typeof StructureTransformationType)[keyof typeof StructureTransformationType];
+export type StructureVersionTransformationType =
+  (typeof StructureVersionTransformationType)[keyof typeof StructureVersionTransformationType];
 
 export const TransformationFormType = {
   CREATION: "creation",
@@ -39,10 +39,10 @@ export const TransformationFormType = {
 export type TransformationFormType =
   (typeof TransformationFormType)[keyof typeof TransformationFormType];
 
-export const StructureTransformationStep = {
+export const StructureVersionTransformationStep = {
   DESCRIPTION: "description",
   PLACES_ET_HEBERGEMENT: "places-et-hebergement",
   ACTES_ADMINISTRATIFS: "actes-administratifs",
 } as const;
-export type StructureTransformationStep =
-  (typeof StructureTransformationStep)[keyof typeof StructureTransformationStep];
+export type StructureVersionTransformationStep =
+  (typeof StructureVersionTransformationStep)[keyof typeof StructureVersionTransformationStep];

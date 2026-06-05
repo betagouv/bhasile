@@ -4,13 +4,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ExistingStructureFlow } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/ExistingStructureFlow";
 import { FormKind } from "@/types/global";
 import {
-  StructureTransformationStep,
-  StructureTransformationType,
+  StructureVersionTransformationStep,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
 import {
-  createStructureTransformation,
+  createStructureVersionTransformation,
   createTransformation,
 } from "../../../../test-utils/factories/transformation.factory";
 
@@ -36,18 +36,18 @@ vi.mock(
   })
 );
 
-const renderFlow = (structureType: StructureTransformationType) => {
-  const structureTransformation = createStructureTransformation({
+const renderFlow = (structureType: StructureVersionTransformationType) => {
+  const structureVersionTransformation = createStructureVersionTransformation({
     type: structureType,
   });
   const transformation = createTransformation({
     type: TransformationType.EXTENSION_EX_NIHILO,
-    structureTransformations: [structureTransformation],
+    structureVersionTransformations: [structureVersionTransformation],
   });
   return render(
     <ExistingStructureFlow
       transformation={transformation}
-      structureTransformation={structureTransformation}
+      structureVersionTransformation={structureVersionTransformation}
     />
   );
 };
@@ -58,15 +58,15 @@ describe("ExistingStructureFlow", () => {
     captured.formKind = undefined;
   });
 
-  describe("formKind dérivé du type de la structureTransformation", () => {
+  describe("formKind dérivé du type de la structureVersionTransformation", () => {
     it.each([
-      [StructureTransformationType.EXTENSION, FormKind.EXTENSION],
-      [StructureTransformationType.CONTRACTION, FormKind.CONTRACTION],
+      [StructureVersionTransformationType.EXTENSION, FormKind.EXTENSION],
+      [StructureVersionTransformationType.CONTRACTION, FormKind.CONTRACTION],
     ])(
       "passe le type %s en formKind %s à la Description",
       (structureType, expectedFormKind) => {
         mockUseParams.mockReturnValue({
-          transformationStructureStep: StructureTransformationStep.DESCRIPTION,
+          transformationStructureStep: StructureVersionTransformationStep.DESCRIPTION,
         });
 
         renderFlow(structureType);
@@ -81,10 +81,10 @@ describe("ExistingStructureFlow", () => {
     it("ne rend rien en dehors de l'étape Description", () => {
       mockUseParams.mockReturnValue({
         transformationStructureStep:
-          StructureTransformationStep.PLACES_ET_HEBERGEMENT,
+          StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
       });
 
-      renderFlow(StructureTransformationType.EXTENSION);
+      renderFlow(StructureVersionTransformationType.EXTENSION);
 
       expect(
         screen.queryByTestId("identification-form")

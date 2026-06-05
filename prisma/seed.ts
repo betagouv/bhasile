@@ -15,13 +15,13 @@ import { createFinessList } from "./seeders/finess.seed";
 import {
   createFakeFinalisationFormStepDefinition,
   createFakeFormFinalisation,
-  createFakeFormStructureTransformationContraction,
-  createFakeFormStructureTransformationCreation,
-  createFakeFormStructureTransformationExtension,
-  createFakeFormStructureTransformationFermeture,
+  createFakeFormStructureVersionTransformationContraction,
+  createFakeFormStructureVersionTransformationCreation,
+  createFakeFormStructureVersionTransformationExtension,
+  createFakeFormStructureVersionTransformationFermeture,
   createFakeFormTransformation,
-  createFakeStructureTransformationCreationFormStepDefinition,
-  createFakeStructureTransformationFermetureFormStepDefinition,
+  createFakeStructureVersionTransformationCreationFormStepDefinition,
+  createFakeStructureVersionTransformationFermetureFormStepDefinition,
 } from "./seeders/form.seed";
 import { createNotesList } from "./seeders/note.seed";
 import {
@@ -53,40 +53,40 @@ export async function seed(): Promise<void> {
     data: createFakeFormTransformation(),
   });
 
-  const formStructureTransformationCreationDefinition =
+  const formStructureVersionTransformationCreationDefinition =
     await prisma.formDefinition.create({
-      data: createFakeFormStructureTransformationCreation(),
+      data: createFakeFormStructureVersionTransformationCreation(),
     });
   await prisma.formStepDefinition.createMany({
-    data: createFakeStructureTransformationCreationFormStepDefinition(
-      formStructureTransformationCreationDefinition.id
+    data: createFakeStructureVersionTransformationCreationFormStepDefinition(
+      formStructureVersionTransformationCreationDefinition.id
     ),
   });
-  const formStructureTransformationExtensionDefinition =
+  const formStructureVersionTransformationExtensionDefinition =
     await prisma.formDefinition.create({
-      data: createFakeFormStructureTransformationExtension(),
+      data: createFakeFormStructureVersionTransformationExtension(),
     });
   await prisma.formStepDefinition.createMany({
-    data: createFakeStructureTransformationCreationFormStepDefinition(
-      formStructureTransformationExtensionDefinition.id
+    data: createFakeStructureVersionTransformationCreationFormStepDefinition(
+      formStructureVersionTransformationExtensionDefinition.id
     ),
   });
-  const formStructureTransformationContractionDefinition =
+  const formStructureVersionTransformationContractionDefinition =
     await prisma.formDefinition.create({
-      data: createFakeFormStructureTransformationContraction(),
+      data: createFakeFormStructureVersionTransformationContraction(),
     });
   await prisma.formStepDefinition.createMany({
-    data: createFakeStructureTransformationCreationFormStepDefinition(
-      formStructureTransformationContractionDefinition.id
+    data: createFakeStructureVersionTransformationCreationFormStepDefinition(
+      formStructureVersionTransformationContractionDefinition.id
     ),
   });
-  const formStructureTransformationFermetureDefinition =
+  const formStructureVersionTransformationFermetureDefinition =
     await prisma.formDefinition.create({
-      data: createFakeFormStructureTransformationFermeture(),
+      data: createFakeFormStructureVersionTransformationFermeture(),
     });
   await prisma.formStepDefinition.createMany({
-    data: createFakeStructureTransformationFermetureFormStepDefinition(
-      formStructureTransformationFermetureDefinition.id
+    data: createFakeStructureVersionTransformationFermetureFormStepDefinition(
+      formStructureVersionTransformationFermetureDefinition.id
     ),
   });
 
