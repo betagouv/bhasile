@@ -33,6 +33,9 @@ export const getOperateurs = async ({
       .replaceAll("{", "")
       .replaceAll("}", "")
       .split(","),
+    logo: {
+      key: row.logo_key,
+    },
   }));
 
   const totalOperateurs = await countOperateurs({ search });
