@@ -4,6 +4,9 @@ import {
   buildTransformationTypologie,
   getAdresseSource,
   getPlacesSource,
+  getReferenceStructureTransformation,
+  getStructureTransformationDepartement,
+  getTransformationDepartement,
   getTransformationFormNavigation,
   getTransformationNounAvecArticle,
   getTransformationSteps,
@@ -25,6 +28,11 @@ import {
   StructureTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
+
+import {
+  createStructureTransformation,
+  createTransformation,
+} from "../test-utils/factories/transformation.factory";
 
 describe("transformation util", () => {
   describe("getTransformationFormNavigation", () => {
@@ -75,6 +83,7 @@ describe("transformation util", () => {
       const { firstStep, currentStep, prevStep, nextStep } =
         getTransformationFormNavigation({
           transformationSteps,
+          transformationId: 5,
           transformationStructureType,
           transformationStructureId,
           transformationStructureStep,
@@ -113,6 +122,7 @@ describe("transformation util", () => {
       const { currentStep, prevStep, nextStep } =
         getTransformationFormNavigation({
           transformationSteps,
+          transformationId: 5,
           transformationStructureType,
           transformationStructureId,
           transformationStructureStep,
@@ -132,7 +142,7 @@ describe("transformation util", () => {
       });
     });
 
-    it("should return undefined nextStep when step is the very last one", () => {
+    it("should return the verification step as nextStep when on the last form step", () => {
       // GIVEN
       const transformationStructureType = StructureTransformationType.EXTENSION;
       const transformationStructureId = 2;
@@ -142,6 +152,7 @@ describe("transformation util", () => {
       const { currentStep, prevStep, nextStep } =
         getTransformationFormNavigation({
           transformationSteps,
+          transformationId: 5,
           transformationStructureType,
           transformationStructureId,
           transformationStructureStep,
@@ -158,6 +169,31 @@ describe("transformation util", () => {
         type: StructureTransformationType.EXTENSION,
         name: "places-et-hebergement",
       });
+      expect(nextStep).toMatchObject({
+        name: "verification",
+        route: "/structures/transformation/5/verification",
+      });
+    });
+
+    it("should resolve the verification step and expose the last form step as prevStep", () => {
+      // WHEN
+      const { currentStep, prevStep, nextStep } =
+        getTransformationFormNavigation({
+          transformationSteps,
+          transformationId: 5,
+          transformationStructureStep: "verification",
+        });
+
+      // THEN
+      expect(currentStep).toMatchObject({
+        name: "verification",
+        route: "/structures/transformation/5/verification",
+      });
+      expect(prevStep).toMatchObject({
+        id: 2,
+        type: StructureTransformationType.EXTENSION,
+        name: "actes-administratifs",
+      });
       expect(nextStep).toBeUndefined();
     });
 
@@ -170,6 +206,7 @@ describe("transformation util", () => {
       // WHEN
       const { prevStep, nextStep } = getTransformationFormNavigation({
         transformationSteps,
+        transformationId: 5,
         transformationStructureType,
         transformationStructureId,
         transformationStructureStep,
@@ -198,6 +235,7 @@ describe("transformation util", () => {
       const { firstStep, currentStep, prevStep, nextStep } =
         getTransformationFormNavigation({
           transformationSteps,
+          transformationId: 5,
           transformationStructureType,
           transformationStructureId,
           transformationStructureStep,
@@ -224,6 +262,7 @@ describe("transformation util", () => {
       // WHEN
       const { currentStep } = getTransformationFormNavigation({
         transformationSteps,
+        transformationId: 5,
         transformationStructureType,
         transformationStructureId,
         transformationStructureStep,
@@ -237,7 +276,7 @@ describe("transformation util", () => {
       });
     });
 
-    it("should return all-undefined navigation when transformationSteps is empty", () => {
+    it("should return only the verification step as firstStep when transformationSteps is empty", () => {
       // GIVEN
       const emptySteps: Step[] = [];
 
@@ -245,13 +284,17 @@ describe("transformation util", () => {
       const { firstStep, currentStep, prevStep, nextStep } =
         getTransformationFormNavigation({
           transformationSteps: emptySteps,
+          transformationId: 5,
           transformationStructureType: StructureTransformationType.EXTENSION,
           transformationStructureId: 2,
           transformationStructureStep: "description",
         });
 
       // THEN
-      expect(firstStep).toBeUndefined();
+      expect(firstStep).toMatchObject({
+        name: "verification",
+        route: "/structures/transformation/5/verification",
+      });
       expect(currentStep).toBeUndefined();
       expect(prevStep).toBeUndefined();
       expect(nextStep).toBeUndefined();
@@ -834,5 +877,90 @@ describe("transformation util", () => {
     ])("returns %s → '%s'", (formKind, expected) => {
       expect(getTransformationNounAvecArticle(formKind)).toBe(expected);
     });
+  });
+});
+
+describe("getReferenceStructureTransformation", () => {
+  it("retourne la première structureTransformation qui a un département", () => {
+    const sansDepartement = createStructureTransformation({ id: 1 });
+    const avecDepartement = createStructureTransformation({
+      id: 2,
+      structureVersion: { departementAdministratif: "50" },
+    });
+    const transformation = createTransformation({
+      structureTransformations: [sansDepartement, avecDepartement],
+    });
+
+    expect(getReferenceStructureTransformation(transformation)).toBe(
+      avecDepartement
+    );
+  });
+
+  it("retombe sur la première structureTransformation quand aucune n'a de département", () => {
+    const premiere = createStructureTransformation({ id: 1 });
+    const seconde = createStructureTransformation({ id: 2 });
+    const transformation = createTransformation({
+      structureTransformations: [premiere, seconde],
+    });
+
+    expect(getReferenceStructureTransformation(transformation)).toBe(premiere);
+  });
+});
+
+describe("getTransformationDepartement", () => {
+  it("résout le département via la structure liée de la structureTransformation de référence", () => {
+    const transformation = createTransformation({
+      structureTransformations: [
+        createStructureTransformation({ id: 1 }),
+        createStructureTransformation({
+          id: 2,
+          structureVersion: {
+            structure: { codeBhasile: "ABC", departementAdministratif: "13" },
+          },
+        }),
+      ],
+    });
+
+    expect(getTransformationDepartement(transformation)).toBe("13");
+  });
+
+  it("retourne undefined quand aucune structureTransformation n'a de département", () => {
+    const transformation = createTransformation({
+      structureTransformations: [createStructureTransformation()],
+    });
+
+    expect(getTransformationDepartement(transformation)).toBeUndefined();
+  });
+});
+
+describe("getStructureTransformationDepartement", () => {
+  it("retourne le département de la structureVersion quand il est présent", () => {
+    const structureTransformation = createStructureTransformation({
+      structureVersion: { departementAdministratif: "50" },
+    });
+
+    expect(getStructureTransformationDepartement(structureTransformation)).toBe(
+      "50"
+    );
+  });
+
+  it("retombe sur le département de la structure liée quand la version n'en a pas", () => {
+    const structureTransformation = createStructureTransformation({
+      structureVersion: {
+        structure: { codeBhasile: "ABC", departementAdministratif: "13" },
+      },
+    });
+
+    expect(getStructureTransformationDepartement(structureTransformation)).toBe(
+      "13"
+    );
+  });
+
+  it("retourne undefined quand ni la version ni la structure n'ont de département", () => {
+    const structureTransformation = createStructureTransformation();
+
+    expect(
+      getStructureTransformationDepartement(structureTransformation)
+    ).toBeUndefined();
   });
 });

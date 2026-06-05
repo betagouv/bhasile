@@ -10,10 +10,6 @@ import { Repartition, RepartitionLabel } from "@/types/adresse.type";
 import { FormKind } from "@/types/global";
 import { PublicType } from "@/types/structure.type";
 
-type Props = {
-  formKind?: FormKind;
-};
-
 export const FieldSetTypeBati = ({
   formKind = FormKind.FINALISATION,
 }: Props) => {
@@ -64,4 +60,8 @@ export const FieldSetTypeBati = ({
       </div>
     </fieldset>
   );
+};
+
+type Props = {
+  formKind?: FormKind;
 };

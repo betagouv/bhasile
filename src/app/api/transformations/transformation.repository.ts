@@ -12,6 +12,7 @@ import {
   initializeStructureTransformationDefaultForms,
 } from "../forms/form.repository";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
+import { transformationInclude } from "./transformation.db.type";
 
 //TODO: will change when integrating forms into transformation
 const TRANSFORMATION_FORM_SLUG = "transformation-v1";
@@ -19,56 +20,15 @@ const TRANSFORMATION_FORM_SLUG = "transformation-v1";
 export const findOne = async (id: number) => {
   return prisma.transformation.findUniqueOrThrow({
     where: { id },
-    include: {
-      form: {
-        include: {
-          formDefinition: true,
-          formSteps: {
-            include: {
-              stepDefinition: true,
-            },
-          },
-        },
-      },
-      structureTransformations: {
-        include: {
-          operateur: { select: { id: true, name: true } },
-          forms: {
-            include: {
-              formDefinition: true,
-              formSteps: {
-                include: { stepDefinition: true },
-              },
-            },
-          },
-          actesAdministratifs: {
-            include: { fileUploads: true },
-          },
-          structureVersion: {
-            include: {
-              structure: {
-                include: {
-                  operateur: { select: { id: true, name: true } },
-                  structureTypologies: {
-                    orderBy: { year: "desc" },
-                  },
-                },
-              },
-              contacts: true,
-              adresses: true,
-              finesses: true,
-              antennes: true,
-              dnaStructures: {
-                include: { dna: true },
-              },
-              structureTypologies: {
-                orderBy: { year: "desc" },
-              },
-            },
-          },
-        },
-      },
-    },
+    include: transformationInclude,
+  });
+};
+
+export const findAll = async () => {
+  return prisma.transformation.findMany({
+    where: { form: { status: false } },
+    orderBy: { updatedAt: "desc" },
+    include: transformationInclude,
   });
 };
 

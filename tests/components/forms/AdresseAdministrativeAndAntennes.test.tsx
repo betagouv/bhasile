@@ -32,9 +32,9 @@ const renderComponent = (props: {
   );
 
 const getNomInput = () =>
-  screen.getByLabelText("Nom de la structure (optionnel)");
+  screen.getByRole("textbox", { name: "Nom de la structure (optionnel)" });
 const getAdresseInput = () =>
-  screen.getByLabelText("Adresse principale de la structure");
+  screen.getByRole("combobox", { name: "Adresse principale de la structure" });
 
 describe("AdresseAdministrativeAndAntennes", () => {
   beforeEach(() => {

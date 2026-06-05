@@ -16,6 +16,7 @@ import {
 import { createTransformation } from "../test-utils/factories/transformation.factory";
 
 const mockUseParams = vi.fn();
+const mockUsePathname = vi.fn();
 const mockRouterPush = vi.fn();
 const mockRouterReplace = vi.fn();
 const mockUseTransformationContext = vi.fn();
@@ -23,6 +24,7 @@ const mockUpdateTransformation = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useParams: () => mockUseParams(),
+  usePathname: () => mockUsePathname(),
   useRouter: () => ({
     push: mockRouterPush,
     replace: mockRouterReplace,
@@ -126,6 +128,9 @@ describe("useTransformationFormHandling", () => {
       transformationStructureId: "7",
       transformationStructureStep: StructureTransformationStep.DESCRIPTION,
     });
+    mockUsePathname.mockReturnValue(
+      "/structures/transformation/12/creation/7/description"
+    );
   });
 
   afterEach(() => {
@@ -174,14 +179,17 @@ describe("useTransformationFormHandling", () => {
     );
   });
 
-  it("should NOT navigate when there is no next step", async () => {
-    // GIVEN — currentStep is the last one (actes-administratifs)
+  it("should push to /verification after submitting the last form step", async () => {
+    // GIVEN — currentStep is the last form step (actes-administratifs)
     mockUseParams.mockReturnValue({
       transformationStructureType: StructureTransformationType.CREATION,
       transformationStructureId: "7",
       transformationStructureStep:
         StructureTransformationStep.ACTES_ADMINISTRATIFS,
     });
+    mockUsePathname.mockReturnValue(
+      "/structures/transformation/12/creation/7/actes-administratifs"
+    );
     mockUpdateTransformation.mockResolvedValue(12);
 
     // WHEN
@@ -189,7 +197,9 @@ describe("useTransformationFormHandling", () => {
     await result.current.handleValidation(buildPayload());
 
     // THEN
-    expect(mockRouterPush).not.toHaveBeenCalled();
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      "/structures/transformation/12/verification"
+    );
   });
 
   it("should log the error and not navigate when updateTransformation rejects", async () => {
@@ -258,6 +268,9 @@ describe("useTransformationFormHandling", () => {
       transformationStructureStep:
         StructureTransformationStep.PLACES_ET_HEBERGEMENT,
     });
+    mockUsePathname.mockReturnValue(
+      "/structures/transformation/12/creation/7/places-et-hebergement"
+    );
 
     // WHEN
     const { result } = renderHook(() => useTransformationFormHandling());
@@ -269,5 +282,22 @@ describe("useTransformationFormHandling", () => {
     expect(result.current.nextStep?.route).toBe(
       "/structures/transformation/12/creation/7/actes-administratifs"
     );
+  });
+
+  it("should resolve the verification step when on the /verification page", () => {
+    // GIVEN — URL params have no structure-step segments
+    mockUseParams.mockReturnValue({});
+    mockUsePathname.mockReturnValue(
+      "/structures/transformation/12/verification"
+    );
+
+    // WHEN
+    const { result } = renderHook(() => useTransformationFormHandling());
+
+    // THEN — prevStep is the last form step, no nextStep
+    expect(result.current.prevStep?.route).toBe(
+      "/structures/transformation/12/creation/7/actes-administratifs"
+    );
+    expect(result.current.nextStep).toBeUndefined();
   });
 });

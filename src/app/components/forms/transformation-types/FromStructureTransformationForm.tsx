@@ -8,7 +8,7 @@ import { TransformationType } from "@/types/transformation.type";
 import { FromStructureCard } from "./FromStructureCard";
 
 export const FromStructureTransformationForm = ({
-  transformationStructureId,
+  structureId,
   transformationType,
   setTransformationType,
 }: Props) => {
@@ -17,9 +17,7 @@ export const FromStructureTransformationForm = ({
   >(undefined);
   return (
     <>
-      <FromStructureCard
-        transformationStructureId={transformationStructureId}
-      />
+      <FromStructureCard structureId={structureId} />
       <div className="flex flex-col gap-2">
         <RadioCardGroup
           name="firstSelectedOption"
@@ -60,7 +58,7 @@ export const FromStructureTransformationForm = ({
 };
 
 type Props = {
-  transformationStructureId: number;
+  structureId: number;
   transformationType?: TransformationType;
   setTransformationType: (
     transformationType: TransformationType | undefined
