@@ -13,6 +13,7 @@ import {
 } from "@/types/transformation.type";
 
 import { ExistingStructureIdentificationForm } from "./ExistingStructureIdentificationForm";
+import { TransformationActesAdministratifsForm } from "./TransformationActesAdministratifsForm";
 
 type Props = {
   transformation: TransformationApiRead;
@@ -36,6 +37,18 @@ export const ExistingStructureFlow = ({
         transformation={transformation}
         structureTransformation={structureTransformation}
         formKind={formKind}
+      />
+    );
+  }
+
+  if (
+    transformationStructureStep ===
+    StructureTransformationStep.ACTES_ADMINISTRATIFS
+  ) {
+    return (
+      <TransformationActesAdministratifsForm
+        transformation={transformation}
+        structureTransformation={structureTransformation}
       />
     );
   }

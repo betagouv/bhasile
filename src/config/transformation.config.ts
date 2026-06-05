@@ -247,7 +247,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
   },
 };
 
-export const getCreationActesAdministratifsCategoryToDisplay = (
+const getCreationActesAdministratifsCategoryToDisplay = (
   transformationType: TransformationType | undefined
 ): CategoryDisplayRules => ({
   ARRETE_AUTORISATION: {
@@ -318,6 +318,102 @@ export const fermetureActesAdministratifsCategoryToDisplay: CategoryDisplayRules
       addFileButtonLabel: "Ajouter un document",
     },
   };
+
+export const extensionActesAdministratifsCategoryToDisplay: CategoryDisplayRules =
+  {
+    CONVENTION: {
+      categoryShortName: "convention",
+      title: "Convention",
+      canAddFile: false,
+      canAddAvenant: false,
+      isOptional: false,
+      shouldShow: true,
+      additionalFieldsType: AdditionalFieldsType.DATE_START_END,
+      documentLabel: "Document",
+      addFileButtonLabel: "Ajouter une convention",
+    },
+    ARRETE_EXTENSION: {
+      categoryShortName: "arrêté",
+      title: "Arrêté d'extension",
+      canAddFile: false,
+      canAddAvenant: false,
+      isOptional: false,
+      shouldShow: true,
+      additionalFieldsType: AdditionalFieldsType.DATE,
+      documentLabel: "Document",
+      addFileButtonLabel: "Ajouter un arrêté d'extension",
+      notice:
+        "Pour rappel, les dates de l'arrêté d'autorisation n'ont pas vocation à changer pour cette transformation.",
+    },
+    AUTRE: {
+      categoryShortName: "autre",
+      title: "Autres documents",
+      canAddFile: true,
+      canAddAvenant: false,
+      isOptional: true,
+      shouldShow: true,
+      additionalFieldsType: AdditionalFieldsType.NAME,
+      documentLabel: "Document",
+      addFileButtonLabel: "Ajouter un document",
+      notice:
+        "Pour rappel, dans le cadre d'une extension de grande ampleur, il est obligatoire de mener une visite de conformité au plus tard 3 semaines avant l'ouverture, et son procès-verbal doit être transmis au maximum 15 jours après la visite.",
+    },
+  };
+
+export const contractionActesAdministratifsCategoryToDisplay: CategoryDisplayRules =
+  {
+    CONVENTION: {
+      categoryShortName: "convention",
+      title: "Convention",
+      canAddFile: false,
+      canAddAvenant: false,
+      isOptional: false,
+      shouldShow: true,
+      additionalFieldsType: AdditionalFieldsType.DATE_START_END,
+      documentLabel: "Document",
+      addFileButtonLabel: "Ajouter une convention",
+    },
+    ARRETE_CONTRACTION: {
+      categoryShortName: "arrêté",
+      title: "Arrêté actant la contraction",
+      canAddFile: false,
+      canAddAvenant: false,
+      isOptional: false,
+      shouldShow: true,
+      additionalFieldsType: AdditionalFieldsType.DATE,
+      documentLabel: "Document",
+      addFileButtonLabel: "Ajouter un arrêté",
+    },
+    AUTRE: {
+      categoryShortName: "autre",
+      title: "Autres documents",
+      canAddFile: true,
+      canAddAvenant: false,
+      isOptional: true,
+      shouldShow: true,
+      additionalFieldsType: AdditionalFieldsType.NAME,
+      documentLabel: "Document",
+      addFileButtonLabel: "Ajouter un document",
+      notice:
+        "Dans cette catégorie, vous avez la possibilité d'importer d'autres documents utiles à l'analyse de la structure (ex: arrêté modificatif au budget, arrêté de tarification provisoire...).",
+    },
+  };
+
+export const getTransformationActesAdministratifsCategoryToDisplay = (
+  structureTransformationType: StructureTransformationType,
+  transformationType: TransformationType | undefined
+): CategoryDisplayRules => {
+  switch (structureTransformationType) {
+    case StructureTransformationType.EXTENSION:
+      return extensionActesAdministratifsCategoryToDisplay;
+    case StructureTransformationType.CONTRACTION:
+      return contractionActesAdministratifsCategoryToDisplay;
+    case StructureTransformationType.FERMETURE:
+      return fermetureActesAdministratifsCategoryToDisplay;
+    case StructureTransformationType.CREATION:
+      return getCreationActesAdministratifsCategoryToDisplay(transformationType);
+  }
+};
 
 export const STRUCTURE_TRANSFORMATION_FORM_NAME: Record<
   StructureTransformationType,

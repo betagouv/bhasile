@@ -12,7 +12,7 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
-import { CreationActesAdministratifsForm } from "./CreationActesAdministratifsForm";
+import { TransformationActesAdministratifsForm } from "../shared/TransformationActesAdministratifsForm";
 import { CreationIdentificationForm } from "./CreationIdentificationForm";
 import { CreationPlacesEtHebergementForm } from "./CreationPlacesEtHebergementForm";
 
@@ -59,7 +59,7 @@ export const CreationFlow = ({
     StructureTransformationStep.ACTES_ADMINISTRATIFS
   ) {
     return (
-      <CreationActesAdministratifsForm
+      <TransformationActesAdministratifsForm
         transformation={transformation}
         structureTransformation={structureTransformation}
       />
