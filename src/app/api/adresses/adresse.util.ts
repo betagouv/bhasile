@@ -1,5 +1,4 @@
 import { Adresse, AdresseTypologie } from "@/generated/prisma/client";
-import { AdresseApiType } from "@/schemas/api/adresse.schema";
 
 import { StructureDbDetails } from "../structures/structure.db.type";
 
