@@ -118,7 +118,7 @@ export const updateOne = async (
       where: { id: operateur.id },
       data: {
         ...operateurFields,
-        ...(logo && { logo: { connect: { id: logo.id } } }),
+        ...(logo && { logo: { connect: { key: logo.key } } }),
       },
     });
 

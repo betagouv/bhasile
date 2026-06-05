@@ -22,7 +22,12 @@ export const DescriptionBlock = () => {
       entityType="Operateur"
     >
       <div className="flex items-center">
-        <OperateurLogo name={operateur.name} size={160} logo={operateur.logo} />
+        <OperateurLogo
+          name={operateur.name}
+          size={160}
+          logo={operateur.logo}
+          id={operateur.id}
+        />
         <div className="grid grid-cols-2">
           <div className="flex gap-2 mb-3">
             <strong>Direction générale</strong>

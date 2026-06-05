@@ -33,7 +33,7 @@ export const OperateurItem = ({
     <div className="border border-default-grey rounded-[10px] bg-white">
       <div className="flex px-6 py-4 justify-between">
         <div className="flex">
-          <OperateurLogo name={name} logo={logo} />
+          <OperateurLogo name={name} logo={logo} id={id} />
           <div className="flex-col">
             <h3 className="text-title-blue-france text-xl mb-2">{name}</h3>
             <div className="flex pb-1.5">

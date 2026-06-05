@@ -18,7 +18,7 @@ export const operateurUpdateSchema = z.object({
   siegeSocial: z.string().nullish(),
   actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
   contacts: z.array(contactApiSchema),
-  logo: fileApiSchema.optional(),
+  logo: fileApiSchema.nullish(),
 });
 
 export type OperateurUpdateFormValues = z.infer<typeof operateurUpdateSchema>;

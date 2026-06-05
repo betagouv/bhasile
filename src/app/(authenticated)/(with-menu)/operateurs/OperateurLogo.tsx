@@ -11,9 +11,11 @@ export const OperateurLogo = ({
   name,
   size = 80,
   logo,
+  id,
 }: Props): ReactElement => {
+  const fetchName = `operateur-logo-${id}`;
   const { getFetchState, setFetchState } = useFetchState();
-  const fetchState = getFetchState("operateur-logo");
+  const fetchState = getFetchState(fetchName);
   const { getFile } = useFileUpload();
   const [logoUrl, setLogoUrl] = useState<string>("");
   const [imageError, setImageError] = useState(false);
@@ -21,28 +23,33 @@ export const OperateurLogo = ({
   useEffect(() => {
     const loadLogo = async () => {
       if (!logo?.key) {
-        setFetchState("operateur-logo", FetchState.IDLE);
+        setFetchState(fetchName, FetchState.IDLE);
         return;
       }
 
       try {
-        setFetchState("operateur-logo", FetchState.LOADING);
+        setFetchState(fetchName, FetchState.LOADING);
         const { fileUrl } = await getFile(logo.key);
         setLogoUrl(fileUrl);
         setImageError(false);
-        setFetchState("operateur-logo", FetchState.IDLE);
+        setFetchState(fetchName, FetchState.IDLE);
       } catch (error) {
         console.error("Erreur lors du chargement du logo:", error);
-        setFetchState("operateur-logo", FetchState.ERROR);
+        setFetchState(fetchName, FetchState.ERROR);
       }
     };
 
     loadLogo();
-  }, [logo?.key, getFile, setFetchState]);
+  }, [logo?.key, getFile, setFetchState, fetchName]);
 
   const handleImageError = () => {
     setImageError(true);
   };
+
+  const showPlaceholder =
+    fetchState === FetchState.ERROR ||
+    (fetchState === FetchState.IDLE && !logoUrl) ||
+    imageError;
 
   return (
     <div
@@ -54,7 +61,7 @@ export const OperateurLogo = ({
           <Loader />
         </div>
       )}
-      {fetchState === FetchState.ERROR && (
+      {showPlaceholder && (
         <Image
           src="/logo.svg"
           alt={`Logo ${name}`}
@@ -73,15 +80,6 @@ export const OperateurLogo = ({
           style={{ objectFit: "contain" }}
         />
       )}
-      {(fetchState === FetchState.IDLE && !logoUrl) || imageError ? (
-        <Image
-          src="/logo.svg"
-          alt={`Logo ${name}`}
-          fill
-          loading="eager"
-          style={{ objectFit: "contain" }}
-        />
-      ) : null}
     </div>
   );
 };
@@ -90,4 +88,5 @@ type Props = {
   name: string;
   size?: number;
   logo?: FileUploadApiType;
+  id: number;
 };
