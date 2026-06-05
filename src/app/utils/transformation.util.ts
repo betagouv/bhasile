@@ -37,6 +37,28 @@ export const getTransformationTitle = (
   return "Transformer une structure";
 };
 
+export const getStructureTransformationDepartement = (
+  structureTransformation?: StructureTransformationApiRead
+): string | undefined =>
+  structureTransformation?.structureVersion?.departementAdministratif ??
+  structureTransformation?.structureVersion?.structure
+    ?.departementAdministratif ??
+  undefined;
+
+export const getReferenceStructureTransformation = (
+  transformation: TransformationApiRead
+): StructureTransformationApiRead | undefined =>
+  transformation.structureTransformations.find((structureTransformation) =>
+    getStructureTransformationDepartement(structureTransformation)
+  ) ?? transformation.structureTransformations[0];
+
+export const getTransformationDepartement = (
+  transformation: TransformationApiRead
+): string | undefined =>
+  getStructureTransformationDepartement(
+    getReferenceStructureTransformation(transformation)
+  );
+
 type GetTransformationFormNavigationProps = {
   transformationSteps: Step[];
   transformationId: number;

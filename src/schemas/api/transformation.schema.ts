@@ -98,5 +98,7 @@ export type TransformationApiRead = Omit<
   "structureTransformations"
 > & {
   id: number;
+  createdAt?: string;
+  updatedAt?: string;
   structureTransformations: StructureTransformationApiRead[];
 };

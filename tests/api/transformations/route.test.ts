@@ -1,18 +1,27 @@
 import { NextRequest } from "next/server";
+import { getServerSession } from "next-auth";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { POST } from "@/app/api/transformations/route";
+import { GET, POST } from "@/app/api/transformations/route";
 import {
   StructureTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
 const mockCreateTransformation = vi.fn();
+const mockGetOngoingTransformationsForUser = vi.fn();
 
 vi.mock("@/app/api/transformations/transformation.service", () => ({
   createTransformation: (...args: unknown[]) =>
     mockCreateTransformation(...args),
+  getOngoingTransformationsForUser: (...args: unknown[]) =>
+    mockGetOngoingTransformationsForUser(...args),
 }));
+
+vi.mock("@/lib/next-auth/auth", () => ({ authOptions: {} }));
+vi.mock("next-auth", () => ({ getServerSession: vi.fn() }));
+
+const mockGetServerSession = vi.mocked(getServerSession);
 
 describe("POST /api/transformations", () => {
   beforeEach(() => {
@@ -57,5 +66,40 @@ describe("POST /api/transformations", () => {
 
     expect(response.status).toBe(400);
     expect(mockCreateTransformation).not.toHaveBeenCalled();
+  });
+});
+
+describe("GET /api/transformations", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns ongoing transformations the agent can access", async () => {
+    mockGetServerSession.mockResolvedValueOnce({
+      user: {
+        id: "1",
+        name: "Agent",
+        email: "agent@example.com",
+        role: "DEPARTEMENT",
+        allowedDepartements: ["50"],
+      },
+    } as never);
+    mockGetOngoingTransformationsForUser.mockResolvedValueOnce([]);
+
+    const response = await GET();
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual([]);
+    expect(mockGetOngoingTransformationsForUser).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns an empty list when unauthenticated", async () => {
+    mockGetServerSession.mockResolvedValueOnce(null);
+
+    const response = await GET();
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual([]);
+    expect(mockGetOngoingTransformationsForUser).not.toHaveBeenCalled();
   });
 });

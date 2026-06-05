@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   getAdresseSource,
+  getReferenceStructureTransformation,
+  getStructureTransformationDepartement,
+  getTransformationDepartement,
   getTransformationFormNavigation,
   getTransformationNounAvecArticle,
   getTransformationSteps,
@@ -22,6 +25,11 @@ import {
   StructureTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
+
+import {
+  createStructureTransformation,
+  createTransformation,
+} from "../test-utils/factories/transformation.factory";
 
 describe("transformation util", () => {
   describe("getTransformationFormNavigation", () => {
@@ -680,5 +688,143 @@ describe("transformation util", () => {
     ])("returns %s → '%s'", (formKind, expected) => {
       expect(getTransformationNounAvecArticle(formKind)).toBe(expected);
     });
+  });
+});
+
+describe("getReferenceStructureTransformation", () => {
+  it("retourne la première structureTransformation qui a un département", () => {
+    const sansDepartement = createStructureTransformation({ id: 1 });
+    const avecDepartement = createStructureTransformation({
+      id: 2,
+      structureVersion: { departementAdministratif: "50" },
+    });
+    const transformation = createTransformation({
+      structureTransformations: [sansDepartement, avecDepartement],
+    });
+
+    expect(getReferenceStructureTransformation(transformation)).toBe(
+      avecDepartement
+    );
+  });
+
+  it("retombe sur la première structureTransformation quand aucune n'a de département", () => {
+    const premiere = createStructureTransformation({ id: 1 });
+    const seconde = createStructureTransformation({ id: 2 });
+    const transformation = createTransformation({
+      structureTransformations: [premiere, seconde],
+    });
+
+    expect(getReferenceStructureTransformation(transformation)).toBe(premiere);
+  });
+});
+
+describe("getTransformationDepartement", () => {
+  it("résout le département via la structure liée de la structureTransformation de référence", () => {
+    const transformation = createTransformation({
+      structureTransformations: [
+        createStructureTransformation({ id: 1 }),
+        createStructureTransformation({
+          id: 2,
+          structureVersion: {
+            structure: { codeBhasile: "ABC", departementAdministratif: "13" },
+          },
+        }),
+      ],
+    });
+
+    expect(getTransformationDepartement(transformation)).toBe("13");
+  });
+
+  it("retourne undefined quand aucune structureTransformation n'a de département", () => {
+    const transformation = createTransformation({
+      structureTransformations: [createStructureTransformation()],
+    });
+
+    expect(getTransformationDepartement(transformation)).toBeUndefined();
+  });
+});
+
+describe("getStructureTransformationDepartement", () => {
+  it("retourne le département de la structureVersion quand il est présent", () => {
+    const structureTransformation = createStructureTransformation({
+      structureVersion: { departementAdministratif: "50" },
+    });
+
+    expect(getStructureTransformationDepartement(structureTransformation)).toBe(
+      "50"
+    );
+  });
+
+  it("retombe sur le département de la structure liée quand la version n'en a pas", () => {
+    const structureTransformation = createStructureTransformation({
+      structureVersion: {
+        structure: { codeBhasile: "ABC", departementAdministratif: "13" },
+      },
+    });
+
+    expect(getStructureTransformationDepartement(structureTransformation)).toBe(
+      "13"
+    );
+  });
+
+  it("retourne undefined quand ni la version ni la structure n'ont de département", () => {
+    const structureTransformation = createStructureTransformation();
+
+    expect(
+      getStructureTransformationDepartement(structureTransformation)
+    ).toBeUndefined();
+  });
+});
+
+describe("getReferenceStructureTransformation", () => {
+  it("retourne la première structureTransformation qui a un département", () => {
+    const sansDepartement = createStructureTransformation({ id: 1 });
+    const avecDepartement = createStructureTransformation({
+      id: 2,
+      structureVersion: { departementAdministratif: "50" },
+    });
+    const transformation = createTransformation({
+      structureTransformations: [sansDepartement, avecDepartement],
+    });
+
+    expect(getReferenceStructureTransformation(transformation)).toBe(
+      avecDepartement
+    );
+  });
+
+  it("retombe sur la première structureTransformation quand aucune n'a de département", () => {
+    const premiere = createStructureTransformation({ id: 1 });
+    const seconde = createStructureTransformation({ id: 2 });
+    const transformation = createTransformation({
+      structureTransformations: [premiere, seconde],
+    });
+
+    expect(getReferenceStructureTransformation(transformation)).toBe(premiere);
+  });
+});
+
+describe("getTransformationDepartement", () => {
+  it("résout le département via la structure liée de la structureTransformation de référence", () => {
+    const transformation = createTransformation({
+      structureTransformations: [
+        createStructureTransformation({ id: 1 }),
+        createStructureTransformation({
+          id: 2,
+          structureVersion: {
+            structure: { codeBhasile: "ABC", departementAdministratif: "13" },
+          },
+        }),
+      ],
+    });
+
+    expect(getTransformationDepartement(transformation)).toBe("13");
+  });
+
+  it("retourne undefined quand aucune structureTransformation n'a de département", () => {
+    const transformation = createTransformation({
+      structureTransformations: [createStructureTransformation()],
+    });
+
+    expect(getTransformationDepartement(transformation)).toBeUndefined();
   });
 });
