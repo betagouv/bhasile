@@ -13,10 +13,9 @@ import {
 import { FetchState } from "@/types/fetch-state.type";
 import { StructureTransformationType } from "@/types/transformation.type";
 
-import { ContractionFlow } from "./_components/contraction/ContractionFlow";
 import { CreationFlow } from "./_components/creation/CreationFlow";
-import { ExtensionFlow } from "./_components/extension/ExtensionFlow";
 import { FermetureFlow } from "./_components/fermeture/FermetureFlow";
+import { ExistingStructureFlow } from "./_components/shared/ExistingStructureFlow";
 
 export default function TransformationStructureStepPage() {
   const { transformationStructureId } = useParams();
@@ -64,12 +63,12 @@ const renderFlow = (
         />
       );
     case StructureTransformationType.EXTENSION:
-      return (
-        <ExtensionFlow structureTransformation={structureTransformation} />
-      );
     case StructureTransformationType.CONTRACTION:
       return (
-        <ContractionFlow structureTransformation={structureTransformation} />
+        <ExistingStructureFlow
+          transformation={transformation}
+          structureTransformation={structureTransformation}
+        />
       );
     case StructureTransformationType.CREATION:
       return (

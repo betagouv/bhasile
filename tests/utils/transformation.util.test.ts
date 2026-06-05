@@ -1,14 +1,22 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getAdresseSource,
   getTransformationFormNavigation,
+  getTransformationNounAvecArticle,
   getTransformationSteps,
+  isCreation,
+  isTransformationSurStructureExistante,
   Step,
   validateStructureTransformationFormStep,
 } from "@/app/utils/transformation.util";
 import { FormApiType } from "@/schemas/api/form.schema";
-import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import {
+  StructureTransformationApiRead,
+  TransformationApiRead,
+} from "@/schemas/api/transformation.schema";
 import { StepStatus } from "@/types/form.type";
+import { FormKind } from "@/types/global";
 import {
   StructureTransformationStep,
   StructureTransformationType,
@@ -588,6 +596,89 @@ describe("transformation util", () => {
       expect(
         result.formSteps.every((s) => s.status === StepStatus.NON_COMMENCE)
       ).toBe(true);
+    });
+  });
+
+  describe("isCreation", () => {
+    it.each([
+      [FormKind.OUVERTURE_EX_NIHILO, true],
+      [FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES, true],
+      [FormKind.EXTENSION, false],
+      [FormKind.CONTRACTION, false],
+      [FormKind.MODIFICATION, false],
+      [FormKind.FINALISATION, false],
+    ])("returns %s → %s", (formKind, expected) => {
+      expect(isCreation(formKind)).toBe(expected);
+    });
+  });
+
+  describe("isTransformationSurStructureExistante", () => {
+    it.each([
+      [FormKind.EXTENSION, true],
+      [FormKind.CONTRACTION, true],
+      [FormKind.OUVERTURE_EX_NIHILO, false],
+      [FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES, false],
+      [FormKind.MODIFICATION, false],
+      [FormKind.FINALISATION, false],
+    ])("returns %s → %s", (formKind, expected) => {
+      expect(isTransformationSurStructureExistante(formKind)).toBe(expected);
+    });
+  });
+
+  describe("getAdresseSource", () => {
+    it("projette l'adresse de la structure source (stable, pré-transformation)", () => {
+      const structureTransformation: StructureTransformationApiRead = {
+        id: 1,
+        type: StructureTransformationType.EXTENSION,
+        structureVersion: {
+          structure: {
+            codeBhasile: "BHA-NOR-001",
+            nom: "Les Mimosas",
+            adresseAdministrative: "58 boulevard Vauban",
+            adresseAdministrativeComplete:
+              "58 boulevard Vauban 50300 Avranches",
+            codePostalAdministratif: "50300",
+            communeAdministrative: "Avranches",
+            departementAdministratif: "50",
+          },
+        },
+      };
+
+      expect(getAdresseSource(structureTransformation)).toEqual({
+        nom: "Les Mimosas",
+        adresseAdministrative: "58 boulevard Vauban",
+        adresseAdministrativeComplete: "58 boulevard Vauban 50300 Avranches",
+        codePostalAdministratif: "50300",
+        communeAdministrative: "Avranches",
+        departementAdministratif: "50",
+      });
+    });
+
+    it("normalise les champs absents en chaîne vide", () => {
+      const structureTransformation: StructureTransformationApiRead = {
+        id: 1,
+        type: StructureTransformationType.EXTENSION,
+      };
+
+      expect(getAdresseSource(structureTransformation)).toEqual({
+        nom: "",
+        adresseAdministrative: "",
+        adresseAdministrativeComplete: "",
+        codePostalAdministratif: "",
+        communeAdministrative: "",
+        departementAdministratif: "",
+      });
+    });
+  });
+
+  describe("getTransformationNounAvecArticle", () => {
+    it.each([
+      [FormKind.EXTENSION, "l’extension"],
+      [FormKind.CONTRACTION, "la contraction"],
+      [FormKind.OUVERTURE_EX_NIHILO, ""],
+      [FormKind.FINALISATION, ""],
+    ])("returns %s → '%s'", (formKind, expected) => {
+      expect(getTransformationNounAvecArticle(formKind)).toBe(expected);
     });
   });
 });

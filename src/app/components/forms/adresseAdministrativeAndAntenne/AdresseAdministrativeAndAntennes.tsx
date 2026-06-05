@@ -3,6 +3,10 @@ import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
+import {
+  getTransformationNounAvecArticle,
+  isTransformationSurStructureExistante,
+} from "@/app/utils/transformation.util";
 import { FormKind } from "@/types/global";
 
 import { FieldSetAdresseAdministrative } from "./FieldSetAdresseAdministrative";
@@ -10,23 +14,30 @@ import { FieldSetAntennes } from "./FieldSetAntennes";
 
 type Props = {
   formKind?: FormKind;
+  isAdresseAdministrativeLocked?: boolean;
 };
 
 export const AdresseAdministrativeAndAntennes = ({
   formKind = FormKind.FINALISATION,
+  isAdresseAdministrativeLocked = false,
 }: Props) => {
   const { watch, setValue } = useFormContext();
 
   const isMultiAntenne = watch("isMultiAntenne");
 
+  const isTransformation = isTransformationSurStructureExistante(formKind);
+  const showSitesRadio =
+    isTransformation ||
+    formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES;
+
   return (
     <>
-      <h2 className="text-xl font-bold mb-4 text-title-blue-france">
-        {formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
-          ? "Veuillez saisir l’adresse administrative principale de la structure."
-          : "Adresses administratives"}
-      </h2>
-      {formKind !== FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES && (
+      {!isTransformation && (
+        <h2 className="text-xl font-bold mb-4 text-title-blue-france">
+          {getTitle(formKind)}
+        </h2>
+      )}
+      {!showSitesRadio && (
         <>
           <CustomNotice
             severity="info"
@@ -50,8 +61,11 @@ export const AdresseAdministrativeAndAntennes = ({
           />
         </>
       )}
-      <FieldSetAdresseAdministrative formKind={formKind} />
-      {formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES && (
+      <FieldSetAdresseAdministrative
+        formKind={formKind}
+        locked={isAdresseAdministrativeLocked}
+      />
+      {showSitesRadio && (
         <>
           <hr />
           <div className="flex gap-6">
@@ -59,9 +73,7 @@ export const AdresseAdministrativeAndAntennes = ({
               id="isMultiAntenne-title"
               className="text-xl font-bold mb-4 text-title-blue-france flex-1"
             >
-              Est-ce que la structure est répartie en plusieurs sites
-              administratifs distants ? Si oui, veuillez nommer chacun des
-              sites.
+              {getSitesQuestionLabel(formKind)}
             </h2>
             <RadioButtons
               aria-labelledby="isMultiAntenne-title"
@@ -91,4 +103,20 @@ export const AdresseAdministrativeAndAntennes = ({
       <FieldSetAntennes />
     </>
   );
+};
+
+const getTitle = (formKind: FormKind): string => {
+  if (formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES) {
+    return "Veuillez saisir l’adresse administrative principale de la structure.";
+  }
+  return "Adresses administratives";
+};
+
+const getSitesQuestionLabel = (formKind: FormKind): string => {
+  if (isTransformationSurStructureExistante(formKind)) {
+    return `Est-ce que ${getTransformationNounAvecArticle(
+      formKind
+    )} modifie la répartition de la structure en plusieurs sites administratifs distants ? Si oui, veuillez nommer chacun des sites.`;
+  }
+  return "Est-ce que la structure est répartie en plusieurs sites administratifs distants ? Si oui, veuillez nommer chacun des sites.";
 };

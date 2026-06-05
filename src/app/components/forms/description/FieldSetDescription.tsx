@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
+import { isCreation as isCreationFormKind } from "@/app/utils/transformation.util";
 import { FormKind } from "@/types/global";
 import { PublicType, StructureType } from "@/types/structure.type";
 
@@ -29,9 +30,7 @@ export const FieldSetDescription = ({
 
   const title = getTitle(formKind);
 
-  const isCreation =
-    formKind === FormKind.OUVERTURE_EX_NIHILO ||
-    formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES;
+  const isCreation = isCreationFormKind(formKind);
 
   return (
     <>

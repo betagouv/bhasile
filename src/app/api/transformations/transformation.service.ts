@@ -6,6 +6,7 @@ import {
   TransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
 
+import { buildAdresseAdministrativeComplete } from "../adresses/adresse.util";
 import {
   copyStructureVersion,
   dbStructureVersionToApiRead,
@@ -26,15 +27,27 @@ const dbTransformationToApiRead = (
   recursivelySerializeDates({
     ...transformation,
     structureTransformations: transformation.structureTransformations.map(
-      (structureTransformation) => ({
-        ...structureTransformation,
-        operateur: structureTransformation.operateur ?? undefined,
-        structureVersion: structureTransformation.structureVersion
-          ? dbStructureVersionToApiRead(
-              structureTransformation.structureVersion
-            )
-          : undefined,
-      })
+      (structureTransformation) => {
+        const structureVersion = structureTransformation.structureVersion;
+        return {
+          ...structureTransformation,
+          operateur: structureTransformation.operateur ?? undefined,
+          structureVersion: structureVersion
+            ? {
+                ...dbStructureVersionToApiRead(structureVersion),
+                structure: structureVersion.structure
+                  ? {
+                      ...structureVersion.structure,
+                      adresseAdministrativeComplete:
+                        buildAdresseAdministrativeComplete(
+                          structureVersion.structure
+                        ) || undefined,
+                    }
+                  : undefined,
+              }
+            : undefined,
+        };
+      }
     ),
   }) as TransformationApiRead;
 

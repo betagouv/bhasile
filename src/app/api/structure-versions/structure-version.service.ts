@@ -3,7 +3,10 @@ import { StructureVersionApiType } from "@/schemas/api/structure-version.schema"
 import { StructureVersionApiRead } from "@/schemas/api/transformation.schema";
 import { PublicType, StructureType } from "@/types/structure.type";
 
-import { getAdressesApiRead } from "../adresses/adresse.util";
+import {
+  buildAdresseAdministrativeComplete,
+  getAdressesApiRead,
+} from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import type { StructureDbDetails } from "../structures/structure.db.type";
 import { StructureVersionDbDetails } from "./structure-version.db.type";
@@ -54,14 +57,8 @@ const mapVersionScalars = (
 export const dbStructureVersionToApiRead = (
   version: StructureVersionDbDetails
 ): StructureVersionApiRead => {
-  const adresseAdministrativeComplete = [
-    version.adresseAdministrative,
-    version.codePostalAdministratif,
-    version.communeAdministrative,
-    version.departementAdministratif,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const adresseAdministrativeComplete =
+    buildAdresseAdministrativeComplete(version);
 
   const antennes = getAntennesApiRead(version.antennes);
   const isMultiAntenne = (version.antennes?.length ?? 0) > 0;
