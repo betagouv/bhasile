@@ -3,6 +3,7 @@ import {
   STRUCTURE_TRANSFORMATION_TYPE_ORDER,
   TRANSFORMATION_TYPE_SPECS,
 } from "@/config/transformation.config";
+import { CURRENT_YEAR } from "@/constants";
 import { FormApiType } from "@/schemas/api/form.schema";
 import {
   StructureTransformationApiRead,
@@ -20,6 +21,11 @@ import {
 } from "@/types/transformation.type";
 
 import { transformApiAdressesToFormAdresses } from "./adresse.util";
+import { getYearFromDate } from "./date.util";
+import {
+  getMillesimeIndexForAYear,
+  getMostRecentMillesime,
+} from "./structure.util";
 
 export const getTransformationTitle = (
   type: TransformationType | TransformationFormType | undefined
@@ -216,11 +222,43 @@ export const getAdresseSource = (
   };
 };
 
+const getEffectiveYear = (effectiveDate: string | null | undefined): number =>
+  getYearFromDate(effectiveDate) || CURRENT_YEAR;
+
+const resolveSourceTypologie = <T extends { year: number }>(
+  typologies: T[] | undefined,
+  year: number | undefined
+): T | undefined => {
+  if (!typologies?.length) {
+    return undefined;
+  }
+  const index = getMillesimeIndexForAYear(typologies, year);
+  return index >= 0 ? typologies[index] : getMostRecentMillesime(typologies);
+};
+
 export const getPlacesSource = (
   structureTransformation: StructureTransformationApiRead
-): number =>
-  structureTransformation.structureVersion?.structure?.structureTypologies?.[0]
-    ?.placesAutorisees ?? 0;
+): number => {
+  const structureVersion = structureTransformation.structureVersion;
+  const typologies = structureVersion?.structure?.structureTypologies;
+  const year = getEffectiveYear(structureVersion?.effectiveDate);
+  return resolveSourceTypologie(typologies, year)?.placesAutorisees ?? 0;
+};
+
+export const buildTransformationTypologie = (
+  structureVersion?: StructureVersionApiRead
+) => {
+  const typologies = structureVersion?.structureTypologies;
+  const year = getEffectiveYear(structureVersion?.effectiveDate);
+  const sourceTypologie = resolveSourceTypologie(typologies, year);
+  return {
+    year,
+    placesAutorisees: sourceTypologie?.placesAutorisees,
+    pmr: sourceTypologie?.pmr,
+    lgbt: sourceTypologie?.lgbt,
+    fvvTeh: sourceTypologie?.fvvTeh,
+  };
+};
 
 export const getTransformationStructureVersionDefaultValues = <T>(
   structureVersion?: StructureVersionApiRead

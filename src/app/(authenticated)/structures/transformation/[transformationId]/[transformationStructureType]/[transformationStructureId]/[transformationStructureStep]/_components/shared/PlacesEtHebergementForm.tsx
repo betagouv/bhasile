@@ -5,9 +5,12 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSetHebergement";
 import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTypeBati";
-import { FieldSetCurrentYearPlaces } from "@/app/components/forms/typePlace/FieldSetCurrentYearPlaces";
+import { FieldSetTransformationPlaces } from "@/app/components/forms/typePlace/FieldSetTransformationPlaces";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
-import { getTransformationStructureVersionDefaultValues } from "@/app/utils/transformation.util";
+import {
+  buildTransformationTypologie,
+  getTransformationStructureVersionDefaultValues,
+} from "@/app/utils/transformation.util";
 import {
   StructureTransformationApiRead,
   TransformationApiRead,
@@ -16,7 +19,7 @@ import {
   CreationPlacesEtHebergementFormValues,
   creationPlacesEtHebergementSchema,
 } from "@/schemas/forms/transformation/creationPlacesEtHebergement.schema";
-import { FormKind } from "@/types/global";
+import { DeepPartial, FormKind } from "@/types/global";
 
 type Props = {
   transformation: TransformationApiRead;
@@ -33,10 +36,14 @@ export const PlacesEtHebergementForm = ({
 }: Props) => {
   const { handleValidation } = useTransformationFormHandling();
 
-  const defaultValues =
-    getTransformationStructureVersionDefaultValues<CreationPlacesEtHebergementFormValues>(
+  const defaultValues: DeepPartial<CreationPlacesEtHebergementFormValues> = {
+    ...getTransformationStructureVersionDefaultValues<CreationPlacesEtHebergementFormValues>(
       structureTransformation.structureVersion
-    );
+    ),
+    structureTypologies: [
+      buildTransformationTypologie(structureTransformation.structureVersion),
+    ],
+  };
 
   return (
     <FormWrapper
@@ -61,7 +68,7 @@ export const PlacesEtHebergementForm = ({
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       showContactInfos={false}
     >
-      <FieldSetCurrentYearPlaces
+      <FieldSetTransformationPlaces
         formKind={formKind}
         originalPlaces={originalPlaces}
       />
