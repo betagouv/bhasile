@@ -18,26 +18,7 @@ export const buildAdresseAdministrativeComplete = (parts: {
     .filter(Boolean)
     .join(" ");
 
-export const handleAdresses = (
-  dnaCode: string,
-  adresses: AdresseApiType[]
-): AdresseInput[] => {
-  return adresses.map(
-    (adresse) =>
-      ({
-        adresse: adresse.adresse,
-        codePostal: adresse.codePostal,
-        commune: adresse.commune,
-        repartition: adresse.repartition,
-        structureDnaCode: dnaCode,
-        adresseTypologies: adresse.adresseTypologies,
-      }) as unknown as AdresseInput
-  );
-};
-
-export const getAdressesApiRead = (
-  adresses?: StructureDbDetails["adresses"]
-) =>
+export const getAdressesApiRead = (adresses?: StructureDbDetails["adresses"]) =>
   adresses?.map((adresse) => ({
     id: adresse.id,
     adresse: adresse.adresse ?? "",

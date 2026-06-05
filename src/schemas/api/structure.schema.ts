@@ -23,7 +23,7 @@ import { operateurSuggestionApiSchema } from "./operateur.schema";
 import { structureMillesimeApiSchema } from "./structure-millesime.schema";
 import { structureTypologieApiSchema } from "./structure-typologie.schema";
 
-export const structureMinimalApiSchema = z.object({
+const structureMinimalApiSchema = z.object({
   id: z.number(),
   codeBhasile: z.string().optional(),
   operateur: operateurSuggestionApiSchema,

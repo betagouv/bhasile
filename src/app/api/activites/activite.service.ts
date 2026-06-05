@@ -117,7 +117,7 @@ export const processActivitesForStructure = (
     .filter((r): r is StructureActiviteRow => r !== null);
 };
 
-export const computePlacesVacantesAndPlacesOccupees = (
+const computePlacesVacantesAndPlacesOccupees = (
   placesAutorisees: number | null | undefined,
   placesIndisponibles: number | null | undefined,
   tauxOccupation: number | null | undefined
