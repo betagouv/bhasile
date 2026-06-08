@@ -2,6 +2,7 @@ model Departement {
   id                   Int                @id @default(autoincrement())
   numero               String             @unique
   name                 String
+  population           Int? // Pour le calcul du taux d'équipement (places autorisées / population)
   structures           Structure[]
   structureVersions    StructureVersion[]
   roleDepartements     RoleDepartement[]
