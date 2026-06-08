@@ -15,6 +15,7 @@ import {
 
 import { ExistingStructureIdentificationForm } from "./ExistingStructureIdentificationForm";
 import { PlacesEtHebergementForm } from "./PlacesEtHebergementForm";
+import { TransformationActesAdministratifsForm } from "./TransformationActesAdministratifsForm";
 
 type Props = {
   transformation: TransformationApiRead;
@@ -52,6 +53,18 @@ export const ExistingStructureFlow = ({
         structureTransformation={structureTransformation}
         formKind={formKind}
         originalPlaces={getPlacesSource(structureTransformation)}
+      />
+    );
+  }
+
+  if (
+    transformationStructureStep ===
+    StructureTransformationStep.ACTES_ADMINISTRATIFS
+  ) {
+    return (
+      <TransformationActesAdministratifsForm
+        transformation={transformation}
+        structureTransformation={structureTransformation}
       />
     );
   }

@@ -1,5 +1,6 @@
 import {
   AdditionalFieldsType,
+  CategoryDisplayRule,
   CategoryDisplayRules,
 } from "@/config/acte-administratif.config";
 import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
@@ -247,7 +248,31 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
   },
 };
 
-export const getCreationActesAdministratifsCategoryToDisplay = (
+const CONVENTION_RULE: CategoryDisplayRule = {
+  categoryShortName: "convention",
+  title: "Convention",
+  canAddFile: false,
+  canAddAvenant: false,
+  isOptional: false,
+  shouldShow: true,
+  additionalFieldsType: AdditionalFieldsType.DATE_START_END,
+  documentLabel: "Document",
+  addFileButtonLabel: "Ajouter une convention",
+};
+
+const AUTRE_RULE: CategoryDisplayRule = {
+  categoryShortName: "autre",
+  title: "Autres documents",
+  canAddFile: true,
+  canAddAvenant: false,
+  isOptional: true,
+  shouldShow: true,
+  additionalFieldsType: AdditionalFieldsType.NAME,
+  documentLabel: "Document",
+  addFileButtonLabel: "Ajouter un document",
+};
+
+const getCreationActesAdministratifsCategoryToDisplay = (
   transformationType: TransformationType | undefined
 ): CategoryDisplayRules => ({
   ARRETE_AUTORISATION: {
@@ -268,17 +293,7 @@ export const getCreationActesAdministratifsCategoryToDisplay = (
         ? undefined
         : ["ARRETE_FUSION"],
   },
-  CONVENTION: {
-    categoryShortName: "convention",
-    title: "Convention",
-    canAddFile: false,
-    canAddAvenant: false,
-    isOptional: false,
-    shouldShow: true,
-    additionalFieldsType: AdditionalFieldsType.DATE_START_END,
-    documentLabel: "Document",
-    addFileButtonLabel: "Ajouter une convention",
-  },
+  CONVENTION: CONVENTION_RULE,
   ARRETE_TARIFICATION: {
     categoryShortName: "arrêté",
     title: "Arrêté de tarification",
@@ -291,15 +306,7 @@ export const getCreationActesAdministratifsCategoryToDisplay = (
     addFileButtonLabel: "Ajouter un arrêté de tarification",
   },
   AUTRE: {
-    categoryShortName: "autre",
-    title: "Autres documents",
-    canAddFile: true,
-    canAddAvenant: false,
-    isOptional: true,
-    shouldShow: true,
-    additionalFieldsType: AdditionalFieldsType.NAME,
-    documentLabel: "Document",
-    addFileButtonLabel: "Ajouter un document",
+    ...AUTRE_RULE,
     notice: `Dans cette catégorie, vous avez la possibilité d'importer d'autres documents utiles à l'analyse de la structure (ex: Plans Pluriannuels d'Investissements)`,
   },
 });
@@ -318,6 +325,64 @@ export const fermetureActesAdministratifsCategoryToDisplay: CategoryDisplayRules
       addFileButtonLabel: "Ajouter un document",
     },
   };
+
+const extensionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
+  CONVENTION: CONVENTION_RULE,
+  ARRETE_EXTENSION: {
+    categoryShortName: "arrêté",
+    title: "Arrêté d'extension",
+    canAddFile: false,
+    canAddAvenant: false,
+    isOptional: false,
+    shouldShow: true,
+    additionalFieldsType: AdditionalFieldsType.DATE,
+    documentLabel: "Document",
+    addFileButtonLabel: "Ajouter un arrêté d'extension",
+    notice:
+      "Pour rappel, les dates de l'arrêté d'autorisation n'ont pas vocation à changer pour cette transformation.",
+  },
+  AUTRE: {
+    ...AUTRE_RULE,
+    notice:
+      "Pour rappel, dans le cadre d'une extension de grande ampleur, il est obligatoire de mener une visite de conformité au plus tard 3 semaines avant l'ouverture, et son procès-verbal doit être transmis au maximum 15 jours après la visite.",
+  },
+};
+
+const contractionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
+  CONVENTION: CONVENTION_RULE,
+  ARRETE_CONTRACTION: {
+    categoryShortName: "arrêté",
+    title: "Arrêté actant la contraction",
+    canAddFile: false,
+    canAddAvenant: false,
+    isOptional: false,
+    shouldShow: true,
+    additionalFieldsType: AdditionalFieldsType.DATE,
+    documentLabel: "Document",
+    addFileButtonLabel: "Ajouter un arrêté",
+  },
+  AUTRE: {
+    ...AUTRE_RULE,
+    notice:
+      "Dans cette catégorie, vous avez la possibilité d'importer d'autres documents utiles à l'analyse de la structure (ex: arrêté modificatif au budget, arrêté de tarification provisoire...).",
+  },
+};
+
+export const getTransformationActesAdministratifsCategoryToDisplay = (
+  structureTransformationType: StructureTransformationType,
+  transformationType: TransformationType | undefined
+): CategoryDisplayRules => {
+  switch (structureTransformationType) {
+    case StructureTransformationType.EXTENSION:
+      return extensionActesAdministratifsCategoryToDisplay;
+    case StructureTransformationType.CONTRACTION:
+      return contractionActesAdministratifsCategoryToDisplay;
+    case StructureTransformationType.FERMETURE:
+      return fermetureActesAdministratifsCategoryToDisplay;
+    case StructureTransformationType.CREATION:
+      return getCreationActesAdministratifsCategoryToDisplay(transformationType);
+  }
+};
 
 export const STRUCTURE_TRANSFORMATION_FORM_NAME: Record<
   StructureTransformationType,

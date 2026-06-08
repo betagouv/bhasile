@@ -6,7 +6,7 @@ import {
 } from "tests/test-utils/factories/transformation.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CreationActesAdministratifsForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation/CreationActesAdministratifsForm";
+import { TransformationActesAdministratifsForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/TransformationActesAdministratifsForm";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import {
@@ -57,7 +57,7 @@ const transformationWithActes = (
     ],
   });
 
-describe("CreationActesAdministratifsForm (integration via FormWrapper)", () => {
+describe("TransformationActesAdministratifsForm (integration via FormWrapper)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
@@ -71,7 +71,7 @@ describe("CreationActesAdministratifsForm (integration via FormWrapper)", () => 
       filledActe(3, "ARRETE_TARIFICATION", "k-tarification"),
     ]);
     render(
-      <CreationActesAdministratifsForm
+      <TransformationActesAdministratifsForm
         structureTransformation={transformation.structureTransformations[0]}
         transformation={transformation}
       />
@@ -101,7 +101,7 @@ describe("CreationActesAdministratifsForm (integration via FormWrapper)", () => 
     // GIVEN no acts provided -> the form seeds empty rows for each required category
     const transformation = transformationWithActes([]);
     render(
-      <CreationActesAdministratifsForm
+      <TransformationActesAdministratifsForm
         structureTransformation={transformation.structureTransformations[0]}
         transformation={transformation}
       />
@@ -124,7 +124,7 @@ describe("CreationActesAdministratifsForm (integration via FormWrapper)", () => 
       TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
     );
     render(
-      <CreationActesAdministratifsForm
+      <TransformationActesAdministratifsForm
         structureTransformation={transformation.structureTransformations[0]}
         transformation={transformation}
       />
@@ -158,7 +158,7 @@ describe("CreationActesAdministratifsForm (integration via FormWrapper)", () => 
       TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
     );
     render(
-      <CreationActesAdministratifsForm
+      <TransformationActesAdministratifsForm
         structureTransformation={transformation.structureTransformations[0]}
         transformation={transformation}
       />
@@ -203,7 +203,7 @@ describe("CreationActesAdministratifsForm (integration via FormWrapper)", () => 
       TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
     );
     render(
-      <CreationActesAdministratifsForm
+      <TransformationActesAdministratifsForm
         structureTransformation={transformation.structureTransformations[0]}
         transformation={transformation}
       />

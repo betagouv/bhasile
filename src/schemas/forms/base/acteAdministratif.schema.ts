@@ -21,7 +21,11 @@ export const acteAdministratifAutoSaveSchema = z.object({
   fileUploads: z.array(fileApiSchema.partial()).optional(),
 });
 
-const SINGLE_DATE_CATEGORIES: ActeAdministratifCategory[] = ["STATUTS"];
+const SINGLE_DATE_CATEGORIES: ActeAdministratifCategory[] = [
+  "STATUTS",
+  "ARRETE_EXTENSION",
+  "ARRETE_CONTRACTION",
+];
 const NO_DATE_CATEGORIES: ActeAdministratifCategory[] = ["AUTRE"];
 
 const requiresStartEndDate = (
@@ -130,23 +134,31 @@ const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
   }
 );
 
-const REQUIRED_CREATION_CATEGORIES: ActeAdministratifCategory[] = [
+const REQUIRED_TRANSFORMATION_CATEGORIES: ActeAdministratifCategory[] = [
   "ARRETE_AUTORISATION",
   "ARRETE_FUSION",
   "ARRETE_TARIFICATION",
   "CONVENTION",
+  "ARRETE_EXTENSION",
+  "ARRETE_CONTRACTION",
 ];
 
-const acteAdministratifCreationSchema = acteAdministratifSchema.refine(
+const acteAdministratifTransformationSchema = acteAdministratifSchema.refine(
   (data) => {
     const isNotAvenant = !data.parentId && !data.parentUuid;
     if (!isNotAvenant) {
       return true;
     }
-    if (data.category && REQUIRED_CREATION_CATEGORIES.includes(data.category)) {
-      return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
+    if (
+      !data.category ||
+      !REQUIRED_TRANSFORMATION_CATEGORIES.includes(data.category)
+    ) {
+      return true;
     }
-    return true;
+    if (SINGLE_DATE_CATEGORIES.includes(data.category)) {
+      return !!data.fileUploads?.length && !!data.date;
+    }
+    return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
   },
   {
     message: "Ces documents sont obligatoires.",
@@ -202,10 +214,10 @@ export const actesAdministratifsSubventionneesSchema = z.object({
   ),
 });
 
-export const actesAdministratifsCreationSchema = z.object({
+export const actesAdministratifsTransformationSchema = z.object({
   actesAdministratifs: z.preprocess(
-    filterActesWithKey(REQUIRED_CREATION_CATEGORIES),
-    z.array(acteAdministratifCreationSchema).optional()
+    filterActesWithKey(REQUIRED_TRANSFORMATION_CATEGORIES),
+    z.array(acteAdministratifTransformationSchema).optional()
   ),
 });
 

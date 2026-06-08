@@ -27,6 +27,8 @@ export const getCategoryLabel = (
     RAPPORT_ACTIVITE_OPERATEUR: "Rapport d'activité de l'opérateur",
     ARRETE_AUTORISATION: "Arrêté d'autorisation",
     ARRETE_FUSION: "Arrêté de fusion",
+    ARRETE_EXTENSION: "Arrêté d'extension",
+    ARRETE_CONTRACTION: "Arrêté actant la contraction",
     CONVENTION: "Convention",
     ARRETE_TARIFICATION: "Arrêté de tarification",
     FRAIS_DE_SIEGE: "Frais de siège",

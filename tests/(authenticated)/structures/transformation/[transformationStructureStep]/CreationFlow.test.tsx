@@ -40,9 +40,11 @@ vi.mock(
 );
 
 vi.mock(
-  "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation/CreationActesAdministratifsForm",
+  "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/TransformationActesAdministratifsForm",
   () => ({
-    CreationActesAdministratifsForm: () => <div data-testid="actes-form" />,
+    TransformationActesAdministratifsForm: () => (
+      <div data-testid="actes-form" />
+    ),
   })
 );
 
