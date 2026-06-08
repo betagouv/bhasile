@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { StatistiquesFiltersRaw } from "@/schemas/api/statistique.schema";
+
 import { getStatistiques } from "./statistique.service";
-import { StatistiquesFiltersRaw } from "./statistique.type";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;

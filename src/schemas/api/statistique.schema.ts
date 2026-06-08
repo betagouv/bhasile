@@ -1,9 +1,10 @@
 import { Repartition, StructureType } from "@/generated/prisma/client";
 
+// Filtres passés en query params à GET /api/statistiques
 export type StatistiquesFiltersRaw = {
   /** Numéros de départements séparés par virgule */
   departements: string | null;
-  /** Codes de régions séparés par virgule (ex: "11,75") */
+  /** IDs de régions séparés par virgule */
   regions: string | null;
   /** IDs d'opérateurs séparés par virgule — les filiales sont incluses automatiquement */
   operateurs: string | null;
@@ -94,11 +95,10 @@ export type TauxEquipementDept = {
   nom: string;
   placesAutorisees: number;
   population: number | null;
-  /** Nombre de places pour 1 000 habitants */
   tauxPour1000: number | null;
 };
 
-export type StatistiquesResult = {
+export type StatistiquesApiRead = {
   nbStructures: number;
   nbCpoms: number;
   byType: TypeStructureStat[];

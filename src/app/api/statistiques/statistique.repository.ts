@@ -1,89 +1,19 @@
-import { Prisma, Repartition, StructureType } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 
-// ---- Row types (shapes returned by DB queries) ----
-
-export type StructureRow = {
-  id: number;
-  type: StructureType | null;
-  departementAdministratif: string | null;
-};
-
-export type TypologieRow = {
-  structureId: number | null;
-  year: number;
-  placesAutorisees: number | null;
-  pmr: number | null;
-  lgbt: number | null;
-  fvvTeh: number | null;
-};
-
-export type AdresseRow = {
-  structureId: number | null;
-  repartition: Repartition | null;
-  logementSocial: number | null;
-};
-
-export type BudgetAggRow = {
-  year: number;
-  dotationDemandee: number;
-  dotationAccordee: number;
-  totalProduits: number;
-  totalCharges: number;
-};
-
-export type IndicateurRow = {
-  structureId: number | null;
-  year: number;
-  type: string;
-  ETP: number | null;
-  tauxEncadrement: number | null;
-  coutJournalier: number | null;
-};
-
-export type MedianRow = {
-  year: number;
-  tauxEncadrementMedian: number | null;
-  coutJournalierMedian: number | null;
-};
-
-export type GlobalMedianRow = {
-  tauxEncadrementMedian: number | null;
-  coutJournalierMedian: number | null;
-};
-
-export type EigRow = {
-  type: string;
-  evenementDate: Date;
-};
-
-export type EvaluationRow = {
-  date: Date | null;
-  note: number | null;
-  notePersonne: number | null;
-  notePro: number | null;
-  noteStructure: number | null;
-};
-
-export type ActiviteRow = {
-  dnaCode: string | null;
-  date: Date;
-  placesAutorisees: number | null;
-  placesIndisponibles: number | null;
-  placesOccupees: number | null;
-  desinsectisation: number | null;
-  remiseEnEtat: number | null;
-  sousOccupation: number | null;
-  travaux: number | null;
-  presencesInduesBPI: number | null;
-  presencesInduesDeboutees: number | null;
-};
-
-export type DepartementRow = {
-  numero: string;
-  name: string;
-  population: number | null;
-};
+export type {
+  ActiviteRow,
+  AdresseRow,
+  BudgetAggRow,
+  DepartementRow,
+  EigRow,
+  EvaluationRow,
+  GlobalMedianRow,
+  IndicateurRow,
+  MedianRow,
+  StructureRow,
+  TypologieRow,
+} from "./statistique.db.type";
 
 // ---- Query functions ----
 

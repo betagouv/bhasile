@@ -6,9 +6,16 @@ import {
   ActiviteRow,
   AdresseRow,
   BudgetAggRow,
-  countCpoms,
   DepartementRow,
   EvaluationRow,
+  GlobalMedianRow,
+  IndicateurRow,
+  MedianRow,
+  StructureRow,
+  TypologieRow,
+} from "./statistique.db.type";
+import {
+  countCpoms,
   findActivitesTimeSeries,
   findBudgetsByYear,
   findDepartementsWithPopulation,
@@ -23,11 +30,6 @@ import {
   findStructureIds,
   findStructuresWithTypes,
   findStructureTypologies,
-  GlobalMedianRow,
-  IndicateurRow,
-  MedianRow,
-  StructureRow,
-  TypologieRow,
 } from "./statistique.repository";
 import {
   ActiviteStat,
@@ -36,12 +38,12 @@ import {
   FinanceStat,
   FinanceStatByYear,
   PlacesSpecialesStat,
+  StatistiquesApiRead,
   StatistiquesFiltersRaw,
-  StatistiquesResult,
   TauxEquipementDept,
   TypeStructureStat,
   YearStat,
-} from "./statistique.type";
+} from "@/schemas/api/statistique.schema";
 
 // ---- helpers ----
 
@@ -405,7 +407,7 @@ export const buildStructureWhere = async (
 
 export const getStatistiques = async (
   filters: StatistiquesFiltersRaw
-): Promise<StatistiquesResult> => {
+): Promise<StatistiquesApiRead> => {
   const where = await buildStructureWhere(filters);
   const structureIds = await findStructureIds(where);
 
@@ -523,7 +525,7 @@ export const getStatistiques = async (
   };
 };
 
-const emptyResult = (): StatistiquesResult => ({
+const emptyResult = (): StatistiquesApiRead => ({
   nbStructures: 0,
   nbCpoms: 0,
   byType: [],
