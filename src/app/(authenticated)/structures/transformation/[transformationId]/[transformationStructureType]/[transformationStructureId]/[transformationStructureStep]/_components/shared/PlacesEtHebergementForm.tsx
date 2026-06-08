@@ -5,9 +5,12 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSetHebergement";
 import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTypeBati";
-import { FieldSetCurrentYearPlaces } from "@/app/components/forms/typePlace/FieldSetCurrentYearPlaces";
+import { FieldSetTransformationPlaces } from "@/app/components/forms/typePlace/FieldSetTransformationPlaces";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
-import { getTransformationStructureVersionDefaultValues } from "@/app/utils/transformation.util";
+import {
+  buildTransformationTypologie,
+  getTransformationStructureVersionDefaultValues,
+} from "@/app/utils/transformation.util";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,
@@ -16,29 +19,33 @@ import {
   CreationPlacesEtHebergementFormValues,
   creationPlacesEtHebergementSchema,
 } from "@/schemas/forms/transformation/creationPlacesEtHebergement.schema";
-import { FormKind } from "@/types/global";
-import { TransformationType } from "@/types/transformation.type";
+import { DeepPartial, FormKind } from "@/types/global";
 
 type Props = {
   transformation: TransformationApiRead;
   structureVersionTransformation: StructureVersionTransformationApiRead;
+  formKind: FormKind;
+  originalPlaces?: number;
 };
 
-export const CreationPlacesEtHebergementForm = ({
+export const PlacesEtHebergementForm = ({
   transformation,
   structureVersionTransformation,
+  formKind,
+  originalPlaces,
 }: Props) => {
   const { handleValidation } = useTransformationFormHandling();
 
-  const defaultValues =
-    getTransformationStructureVersionDefaultValues<CreationPlacesEtHebergementFormValues>(
+  const defaultValues: DeepPartial<CreationPlacesEtHebergementFormValues> = {
+    ...getTransformationStructureVersionDefaultValues<CreationPlacesEtHebergementFormValues>(
       structureVersionTransformation.structureVersion
-    );
-
-  const formKind =
-    transformation.type === TransformationType.OUVERTURE_EX_NIHILO
-      ? FormKind.OUVERTURE_EX_NIHILO
-      : FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES;
+    ),
+    structureTypologies: [
+      buildTransformationTypologie(
+        structureVersionTransformation.structureVersion
+      ),
+    ],
+  };
 
   return (
     <FormWrapper
@@ -63,7 +70,10 @@ export const CreationPlacesEtHebergementForm = ({
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       showContactInfos={false}
     >
-      <FieldSetCurrentYearPlaces />
+      <FieldSetTransformationPlaces
+        formKind={formKind}
+        originalPlaces={originalPlaces}
+      />
 
       <hr />
 

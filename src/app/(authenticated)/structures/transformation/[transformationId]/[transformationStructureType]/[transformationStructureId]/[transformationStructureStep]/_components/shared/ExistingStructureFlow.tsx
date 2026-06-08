@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 
+import { getPlacesSource } from "@/app/utils/transformation.util";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,
@@ -13,6 +14,7 @@ import {
 } from "@/types/transformation.type";
 
 import { ExistingStructureIdentificationForm } from "./ExistingStructureIdentificationForm";
+import { PlacesEtHebergementForm } from "./PlacesEtHebergementForm";
 import { TransformationActesAdministratifsForm } from "./TransformationActesAdministratifsForm";
 
 type Props = {
@@ -37,6 +39,20 @@ export const ExistingStructureFlow = ({
         transformation={transformation}
         structureVersionTransformation={structureVersionTransformation}
         formKind={formKind}
+      />
+    );
+  }
+
+  if (
+    transformationStructureStep ===
+    StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT
+  ) {
+    return (
+      <PlacesEtHebergementForm
+        transformation={transformation}
+        structureVersionTransformation={structureVersionTransformation}
+        formKind={formKind}
+        originalPlaces={getPlacesSource(structureVersionTransformation)}
       />
     );
   }

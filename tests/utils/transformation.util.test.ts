@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildTransformationTypologie,
   getAdresseSource,
+  getPlacesSource,
   getReferenceStructureVersionTransformation,
   getStructureVersionTransformationDepartement,
   getTransformationDepartement,
@@ -15,6 +17,7 @@ import {
 } from "@/app/utils/transformation.util";
 import { FormApiType } from "@/schemas/api/form.schema";
 import {
+  StructureVersionApiRead,
   StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
@@ -72,7 +75,8 @@ describe("transformation util", () => {
 
     it("should return defined prevStep and nextStep when step is in the middle of its group", () => {
       // GIVEN
-      const transformationStructureType = StructureVersionTransformationType.EXTENSION;
+      const transformationStructureType =
+        StructureVersionTransformationType.EXTENSION;
       const transformationStructureId = 2;
       const transformationStructureStep = "places-et-hebergement";
 
@@ -111,7 +115,8 @@ describe("transformation util", () => {
 
     it("should return undefined prevStep when step is the very first one", () => {
       // GIVEN
-      const transformationStructureType = StructureVersionTransformationType.FERMETURE;
+      const transformationStructureType =
+        StructureVersionTransformationType.FERMETURE;
       const transformationStructureId = 1;
       const transformationStructureStep = "description";
 
@@ -141,7 +146,8 @@ describe("transformation util", () => {
 
     it("should return the verification step as nextStep when on the last form step", () => {
       // GIVEN
-      const transformationStructureType = StructureVersionTransformationType.EXTENSION;
+      const transformationStructureType =
+        StructureVersionTransformationType.EXTENSION;
       const transformationStructureId = 2;
       const transformationStructureStep = "actes-administratifs";
 
@@ -196,7 +202,8 @@ describe("transformation util", () => {
 
     it("should compute prevStep from a previous group when crossing structureVersionTransformation boundaries", () => {
       // GIVEN
-      const transformationStructureType = StructureVersionTransformationType.EXTENSION;
+      const transformationStructureType =
+        StructureVersionTransformationType.EXTENSION;
       const transformationStructureId = 2;
       const transformationStructureStep = "description";
 
@@ -224,7 +231,8 @@ describe("transformation util", () => {
 
     it("should return undefined currentStep/prevStep/nextStep when step is not found, but keep firstStep", () => {
       // GIVEN
-      const transformationStructureType = StructureVersionTransformationType.EXTENSION;
+      const transformationStructureType =
+        StructureVersionTransformationType.EXTENSION;
       const transformationStructureId = 999;
       const transformationStructureStep = "description";
 
@@ -282,7 +290,8 @@ describe("transformation util", () => {
         getTransformationFormNavigation({
           transformationSteps: emptySteps,
           transformationId: 5,
-          transformationStructureType: StructureVersionTransformationType.EXTENSION,
+          transformationStructureType:
+            StructureVersionTransformationType.EXTENSION,
           transformationStructureId: 2,
           transformationStructureStep: "description",
         });
@@ -635,22 +644,23 @@ describe("transformation util", () => {
 
   describe("getAdresseSource", () => {
     it("projette l'adresse de la structure source (stable, pré-transformation)", () => {
-      const structureVersionTransformation: StructureVersionTransformationApiRead = {
-        id: 1,
-        type: StructureVersionTransformationType.EXTENSION,
-        structureVersion: {
-          structure: {
-            codeBhasile: "BHA-NOR-001",
-            nom: "Les Mimosas",
-            adresseAdministrative: "58 boulevard Vauban",
-            adresseAdministrativeComplete:
-              "58 boulevard Vauban 50300 Avranches",
-            codePostalAdministratif: "50300",
-            communeAdministrative: "Avranches",
-            departementAdministratif: "50",
+      const structureVersionTransformation: StructureVersionTransformationApiRead =
+        {
+          id: 1,
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: {
+            structure: {
+              codeBhasile: "BHA-NOR-001",
+              nom: "Les Mimosas",
+              adresseAdministrative: "58 boulevard Vauban",
+              adresseAdministrativeComplete:
+                "58 boulevard Vauban 50300 Avranches",
+              codePostalAdministratif: "50300",
+              communeAdministrative: "Avranches",
+              departementAdministratif: "50",
+            },
           },
-        },
-      };
+        };
 
       expect(getAdresseSource(structureVersionTransformation)).toEqual({
         nom: "Les Mimosas",
@@ -663,10 +673,11 @@ describe("transformation util", () => {
     });
 
     it("normalise les champs absents en chaîne vide", () => {
-      const structureVersionTransformation: StructureVersionTransformationApiRead = {
-        id: 1,
-        type: StructureVersionTransformationType.EXTENSION,
-      };
+      const structureVersionTransformation: StructureVersionTransformationApiRead =
+        {
+          id: 1,
+          type: StructureVersionTransformationType.EXTENSION,
+        };
 
       expect(getAdresseSource(structureVersionTransformation)).toEqual({
         nom: "",
@@ -675,6 +686,197 @@ describe("transformation util", () => {
         codePostalAdministratif: "",
         communeAdministrative: "",
         departementAdministratif: "",
+      });
+    });
+  });
+
+  describe("getPlacesSource", () => {
+    it("retourne placesAutorisees de la typologie source correspondant à l'année de l'effectiveDate", () => {
+      const structureVersionTransformation: StructureVersionTransformationApiRead =
+        {
+          id: 1,
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: {
+            effectiveDate: "2025-08-25T12:00:00.000Z",
+            structure: {
+              codeBhasile: "BHA-NOR-001",
+              structureTypologies: [
+                { year: 2026, placesAutorisees: 47 },
+                { year: 2025, placesAutorisees: 40 },
+              ],
+            },
+          },
+        };
+
+      expect(getPlacesSource(structureVersionTransformation)).toBe(40);
+    });
+
+    it("retombe sur la typologie la plus récente quand aucune ne correspond à l'année de l'effectiveDate", () => {
+      const structureVersionTransformation: StructureVersionTransformationApiRead =
+        {
+          id: 1,
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: {
+            effectiveDate: "2027-01-01T12:00:00.000Z",
+            structure: {
+              codeBhasile: "BHA-NOR-001",
+              structureTypologies: [
+                { year: 2026, placesAutorisees: 47 },
+                { year: 2025, placesAutorisees: 40 },
+              ],
+            },
+          },
+        };
+
+      expect(getPlacesSource(structureVersionTransformation)).toBe(47);
+    });
+
+    it("retombe sur la typologie la plus récente (max year, pas [0]) quand l'ordre n'est pas décroissant", () => {
+      const structureVersionTransformation: StructureVersionTransformationApiRead =
+        {
+          id: 1,
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: {
+            effectiveDate: "2030-01-01T12:00:00.000Z",
+            structure: {
+              codeBhasile: "BHA-NOR-001",
+              structureTypologies: [
+                { year: 2024, placesAutorisees: 40 },
+                { year: 2026, placesAutorisees: 50 },
+                { year: 2025, placesAutorisees: 47 },
+              ],
+            },
+          },
+        };
+
+      expect(getPlacesSource(structureVersionTransformation)).toBe(50);
+    });
+
+    it("retombe sur la typologie la plus récente quand effectiveDate est absente", () => {
+      const structureVersionTransformation: StructureVersionTransformationApiRead =
+        {
+          id: 1,
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: {
+            structure: {
+              codeBhasile: "BHA-NOR-001",
+              structureTypologies: [
+                { year: 2026, placesAutorisees: 47 },
+                { year: 2025, placesAutorisees: 40 },
+              ],
+            },
+          },
+        };
+
+      expect(getPlacesSource(structureVersionTransformation)).toBe(47);
+    });
+
+    it("retourne 0 quand la structure source n'a pas de typologie", () => {
+      const structureVersionTransformation: StructureVersionTransformationApiRead =
+        {
+          id: 1,
+          type: StructureVersionTransformationType.EXTENSION,
+        };
+
+      expect(getPlacesSource(structureVersionTransformation)).toBe(0);
+    });
+  });
+
+  describe("buildTransformationTypologie", () => {
+    it("date le typologie à l'année de l'effectiveDate et le préremplit depuis la typologie source de cette année", () => {
+      const structureVersion = {
+        effectiveDate: "2025-08-25T12:00:00.000Z",
+        structureTypologies: [
+          { year: 2026, placesAutorisees: 50, pmr: 3, lgbt: 2, fvvTeh: 1 },
+          { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
+          { year: 2024, placesAutorisees: 40, pmr: 1, lgbt: 0, fvvTeh: 0 },
+        ],
+      } as StructureVersionApiRead;
+
+      expect(buildTransformationTypologie(structureVersion)).toEqual({
+        year: 2025,
+        placesAutorisees: 47,
+        pmr: 2,
+        lgbt: 1,
+        fvvTeh: 0,
+      });
+    });
+
+    it("retombe sur la typologie la plus récente quand aucune ne correspond à l'année de l'effectiveDate", () => {
+      const structureVersion = {
+        effectiveDate: "2026-08-25T12:00:00.000Z",
+        structureTypologies: [
+          { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
+          { year: 2024, placesAutorisees: 40, pmr: 1, lgbt: 0, fvvTeh: 0 },
+        ],
+      } as StructureVersionApiRead;
+
+      expect(buildTransformationTypologie(structureVersion)).toEqual({
+        year: 2026,
+        placesAutorisees: 47,
+        pmr: 2,
+        lgbt: 1,
+        fvvTeh: 0,
+      });
+    });
+
+    it("utilise l'année réelle en cours quand effectiveDate est absente, préremplie depuis la typologie la plus récente", () => {
+      const structureVersion = {
+        structureTypologies: [
+          { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
+          { year: 2024, placesAutorisees: 40, pmr: 1, lgbt: 0, fvvTeh: 0 },
+        ],
+      } as StructureVersionApiRead;
+
+      expect(buildTransformationTypologie(structureVersion)).toEqual({
+        year: new Date().getFullYear(),
+        placesAutorisees: 47,
+        pmr: 2,
+        lgbt: 1,
+        fvvTeh: 0,
+      });
+    });
+
+    it("prérempli depuis la typologie la plus récente (max year, pas typologies[0]) quand l'ordre n'est pas décroissant", () => {
+      const structureVersion = {
+        effectiveDate: "2030-01-01T12:00:00.000Z",
+        structureTypologies: [
+          { year: 2024, placesAutorisees: 40, pmr: 1, lgbt: 0, fvvTeh: 0 },
+          { year: 2026, placesAutorisees: 50, pmr: 3, lgbt: 2, fvvTeh: 1 },
+          { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
+        ],
+      } as StructureVersionApiRead;
+
+      expect(buildTransformationTypologie(structureVersion)).toEqual({
+        year: 2030,
+        placesAutorisees: 50,
+        pmr: 3,
+        lgbt: 2,
+        fvvTeh: 1,
+      });
+    });
+
+    it("retombe sur l'année réelle en cours sans effectiveDate ni typologie source (structureVersion absente)", () => {
+      expect(buildTransformationTypologie(undefined)).toEqual({
+        year: new Date().getFullYear(),
+        placesAutorisees: undefined,
+        pmr: undefined,
+        lgbt: undefined,
+        fvvTeh: undefined,
+      });
+    });
+
+    it("retombe sur l'année réelle en cours pour une création ex-nihilo (typologies vides, pas d'effectiveDate)", () => {
+      const structureVersion = {
+        structureTypologies: [],
+      } as StructureVersionApiRead;
+
+      expect(buildTransformationTypologie(structureVersion)).toEqual({
+        year: new Date().getFullYear(),
+        placesAutorisees: undefined,
+        pmr: undefined,
+        lgbt: undefined,
+        fvvTeh: undefined,
       });
     });
   });
@@ -714,7 +916,9 @@ describe("getReferenceStructureVersionTransformation", () => {
       structureVersionTransformations: [premiere, seconde],
     });
 
-    expect(getReferenceStructureVersionTransformation(transformation)).toBe(premiere);
+    expect(getReferenceStructureVersionTransformation(transformation)).toBe(
+      premiere
+    );
   });
 });
 
@@ -746,32 +950,43 @@ describe("getTransformationDepartement", () => {
 
 describe("getStructureVersionTransformationDepartement", () => {
   it("retourne le département de la structureVersion quand il est présent", () => {
-    const structureVersionTransformation = createStructureVersionTransformation({
-      structureVersion: { departementAdministratif: "50" },
-    });
-
-    expect(getStructureVersionTransformationDepartement(structureVersionTransformation)).toBe(
-      "50"
+    const structureVersionTransformation = createStructureVersionTransformation(
+      {
+        structureVersion: { departementAdministratif: "50" },
+      }
     );
+
+    expect(
+      getStructureVersionTransformationDepartement(
+        structureVersionTransformation
+      )
+    ).toBe("50");
   });
 
   it("retombe sur le département de la structure liée quand la version n'en a pas", () => {
-    const structureVersionTransformation = createStructureVersionTransformation({
-      structureVersion: {
-        structure: { codeBhasile: "ABC", departementAdministratif: "13" },
-      },
-    });
-
-    expect(getStructureVersionTransformationDepartement(structureVersionTransformation)).toBe(
-      "13"
+    const structureVersionTransformation = createStructureVersionTransformation(
+      {
+        structureVersion: {
+          structure: { codeBhasile: "ABC", departementAdministratif: "13" },
+        },
+      }
     );
+
+    expect(
+      getStructureVersionTransformationDepartement(
+        structureVersionTransformation
+      )
+    ).toBe("13");
   });
 
   it("retourne undefined quand ni la version ni la structure n'ont de département", () => {
-    const structureVersionTransformation = createStructureVersionTransformation();
+    const structureVersionTransformation =
+      createStructureVersionTransformation();
 
     expect(
-      getStructureVersionTransformationDepartement(structureVersionTransformation)
+      getStructureVersionTransformationDepartement(
+        structureVersionTransformation
+      )
     ).toBeUndefined();
   });
 });
@@ -799,7 +1014,9 @@ describe("getReferenceStructureVersionTransformation", () => {
       structureVersionTransformations: [premiere, seconde],
     });
 
-    expect(getReferenceStructureVersionTransformation(transformation)).toBe(premiere);
+    expect(getReferenceStructureVersionTransformation(transformation)).toBe(
+      premiere
+    );
   });
 });
 

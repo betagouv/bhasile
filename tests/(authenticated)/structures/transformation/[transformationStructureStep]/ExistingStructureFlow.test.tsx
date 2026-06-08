@@ -20,7 +20,11 @@ vi.mock("next/navigation", () => ({
   useParams: () => mockUseParams(),
 }));
 
-const captured: { formKind?: FormKind } = {};
+const captured: {
+  identificationFormKind?: FormKind;
+  placesFormKind?: FormKind;
+  originalPlaces?: number;
+} = {};
 
 vi.mock(
   "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/ExistingStructureIdentificationForm",
@@ -30,9 +34,35 @@ vi.mock(
     }: {
       formKind: FormKind;
     }) => {
-      captured.formKind = formKind;
+      captured.identificationFormKind = formKind;
       return <div data-testid="identification-form" />;
     },
+  })
+);
+
+vi.mock(
+  "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/PlacesEtHebergementForm",
+  () => ({
+    PlacesEtHebergementForm: ({
+      formKind,
+      originalPlaces,
+    }: {
+      formKind: FormKind;
+      originalPlaces?: number;
+    }) => {
+      captured.placesFormKind = formKind;
+      captured.originalPlaces = originalPlaces;
+      return <div data-testid="places-form" />;
+    },
+  })
+);
+
+vi.mock(
+  "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/TransformationActesAdministratifsForm",
+  () => ({
+    TransformationActesAdministratifsForm: () => (
+      <div data-testid="actes-form" />
+    ),
   })
 );
 
@@ -55,7 +85,9 @@ const renderFlow = (structureType: StructureVersionTransformationType) => {
 describe("ExistingStructureFlow", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    captured.formKind = undefined;
+    captured.identificationFormKind = undefined;
+    captured.placesFormKind = undefined;
+    captured.originalPlaces = undefined;
   });
 
   describe("formKind dérivé du type de la structureVersionTransformation", () => {
@@ -66,22 +98,49 @@ describe("ExistingStructureFlow", () => {
       "passe le type %s en formKind %s à la Description",
       (structureType, expectedFormKind) => {
         mockUseParams.mockReturnValue({
-          transformationStructureStep: StructureVersionTransformationStep.DESCRIPTION,
+          transformationStructureStep:
+            StructureVersionTransformationStep.DESCRIPTION,
         });
 
         renderFlow(structureType);
 
         expect(screen.getByTestId("identification-form")).toBeInTheDocument();
-        expect(captured.formKind).toBe(expectedFormKind);
+        expect(captured.identificationFormKind).toBe(expectedFormKind);
       }
     );
   });
 
   describe("routing par étape", () => {
-    it("ne rend rien en dehors de l'étape Description", () => {
+    it("rend le form Places et hébergement avec formKind + originalPlaces", () => {
       mockUseParams.mockReturnValue({
         transformationStructureStep:
           StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
+      });
+
+      renderFlow(StructureVersionTransformationType.CONTRACTION);
+
+      expect(screen.getByTestId("places-form")).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("identification-form")
+      ).not.toBeInTheDocument();
+      expect(captured.placesFormKind).toBe(FormKind.CONTRACTION);
+      expect(captured.originalPlaces).toBe(0);
+    });
+
+    it("rend le form actes administratifs sur l'étape ACTES_ADMINISTRATIFS", () => {
+      mockUseParams.mockReturnValue({
+        transformationStructureStep:
+          StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
+      });
+
+      renderFlow(StructureVersionTransformationType.EXTENSION);
+
+      expect(screen.getByTestId("actes-form")).toBeInTheDocument();
+    });
+
+    it("ne rend rien pour une étape inconnue", () => {
+      mockUseParams.mockReturnValue({
+        transformationStructureStep: "unknown-step",
       });
 
       renderFlow(StructureVersionTransformationType.EXTENSION);
@@ -89,6 +148,8 @@ describe("ExistingStructureFlow", () => {
       expect(
         screen.queryByTestId("identification-form")
       ).not.toBeInTheDocument();
+      expect(screen.queryByTestId("places-form")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("actes-form")).not.toBeInTheDocument();
     });
   });
 });
