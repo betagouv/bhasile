@@ -74,6 +74,7 @@ export type StructureVersionTransformationApiRead =
         communeAdministrative?: string | null;
         departementAdministratif?: string | null;
         actesAdministratifs?: StructureParentActe[];
+        structureTypologies?: { year: number; placesAutorisees: number | null }[];
       };
     };
   };

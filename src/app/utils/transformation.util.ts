@@ -4,6 +4,7 @@ import {
   TRANSFORMATION_TYPE_SPECS,
   VERIFICATION_STEP_NAME,
 } from "@/config/transformation.config";
+import { CURRENT_YEAR } from "@/constants";
 import { FormApiType } from "@/schemas/api/form.schema";
 import {
   StructureVersionApiRead,
@@ -21,6 +22,11 @@ import {
 } from "@/types/transformation.type";
 
 import { transformApiAdressesToFormAdresses } from "./adresse.util";
+import { getYearFromDate } from "./date.util";
+import {
+  getMillesimeIndexForAYear,
+  getMostRecentMillesime,
+} from "./structure.util";
 
 export const getTransformationTitle = (
   type: TransformationType | TransformationFormType | undefined
@@ -48,8 +54,11 @@ export const getStructureVersionTransformationDepartement = (
 export const getReferenceStructureVersionTransformation = (
   transformation: TransformationApiRead
 ): StructureVersionTransformationApiRead | undefined =>
-  transformation.structureVersionTransformations.find((structureVersionTransformation) =>
-    getStructureVersionTransformationDepartement(structureVersionTransformation)
+  transformation.structureVersionTransformations.find(
+    (structureVersionTransformation) =>
+      getStructureVersionTransformationDepartement(
+        structureVersionTransformation
+      )
   ) ?? transformation.structureVersionTransformations[0];
 
 export const getTransformationDepartement = (
@@ -93,7 +102,9 @@ export const getTransformationFormNavigation = ({
 
   const currentIndex = flatSteps.findIndex((step) => {
     if (step.name === VERIFICATION_STEP_NAME) {
-      return transformationStructureStep?.toLowerCase() === VERIFICATION_STEP_NAME;
+      return (
+        transformationStructureStep?.toLowerCase() === VERIFICATION_STEP_NAME
+      );
     }
     return (
       step.type?.toLowerCase() === transformationStructureType?.toLowerCase() &&
@@ -137,13 +148,19 @@ export const getTransformationSteps = (
   }
 
   return sortStructureVersionTransformationsByType(
-    transformation.structureVersionTransformations?.map((structureVersionTransformation) => ({
-      id: structureVersionTransformation.id,
-      codeBhasile:
-        structureVersionTransformation.structureVersion?.structure?.codeBhasile,
-      type: structureVersionTransformation.type,
-      steps: getStepsByType(structureVersionTransformation, transformation.id),
-    })) ?? []
+    transformation.structureVersionTransformations?.map(
+      (structureVersionTransformation) => ({
+        id: structureVersionTransformation.id,
+        codeBhasile:
+          structureVersionTransformation.structureVersion?.structure
+            ?.codeBhasile,
+        type: structureVersionTransformation.type,
+        steps: getStepsByType(
+          structureVersionTransformation,
+          transformation.id
+        ),
+      })
+    ) ?? []
   );
 };
 
@@ -213,7 +230,12 @@ const getRoute = (
   idStep?: number,
   structureVersionTransformationType?: StructureVersionTransformationType
 ) => {
-  if (!transformationId || !idStep || !structureVersionTransformationType || !route) {
+  if (
+    !transformationId ||
+    !idStep ||
+    !structureVersionTransformationType ||
+    !route
+  ) {
     return "";
   }
 
@@ -259,6 +281,44 @@ export const getAdresseSource = (
     codePostalAdministratif: structure?.codePostalAdministratif ?? "",
     communeAdministrative: structure?.communeAdministrative ?? "",
     departementAdministratif: structure?.departementAdministratif ?? "",
+  };
+};
+
+const getEffectiveYear = (effectiveDate: string | null | undefined): number =>
+  getYearFromDate(effectiveDate) || CURRENT_YEAR;
+
+const resolveSourceTypologie = <T extends { year: number }>(
+  typologies: T[] | undefined,
+  year: number | undefined
+): T | undefined => {
+  if (!typologies?.length) {
+    return undefined;
+  }
+  const index = getMillesimeIndexForAYear(typologies, year);
+  return index >= 0 ? typologies[index] : getMostRecentMillesime(typologies);
+};
+
+export const getPlacesSource = (
+  structureVersionTransformation: StructureVersionTransformationApiRead
+): number => {
+  const structureVersion = structureVersionTransformation.structureVersion;
+  const typologies = structureVersion?.structure?.structureTypologies;
+  const year = getEffectiveYear(structureVersion?.effectiveDate);
+  return resolveSourceTypologie(typologies, year)?.placesAutorisees ?? 0;
+};
+
+export const buildTransformationTypologie = (
+  structureVersion?: StructureVersionApiRead
+) => {
+  const typologies = structureVersion?.structureTypologies;
+  const year = getEffectiveYear(structureVersion?.effectiveDate);
+  const sourceTypologie = resolveSourceTypologie(typologies, year);
+  return {
+    year,
+    placesAutorisees: sourceTypologie?.placesAutorisees,
+    pmr: sourceTypologie?.pmr,
+    lgbt: sourceTypologie?.lgbt,
+    fvvTeh: sourceTypologie?.fvvTeh,
   };
 };
 

@@ -45,6 +45,9 @@ export const transformationInclude = {
                   children: { select: { endDate: true } },
                 },
               },
+              structureTypologies: {
+                orderBy: { year: "desc" },
+              },
             },
           },
           contacts: true,

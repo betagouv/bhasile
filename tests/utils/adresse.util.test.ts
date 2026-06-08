@@ -3,7 +3,22 @@ import { describe, expect, it } from "vitest";
 import {
   formatCityName,
   getDepartementFromCodePostal,
+  isAdresseEmpty,
 } from "@/app/utils/adresse.util";
+import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
+import { Repartition } from "@/types/adresse.type";
+
+const makeEmptyAdresse = (
+  overrides: Partial<FormAdresse> = {}
+): FormAdresse => ({
+  adresseComplete: "",
+  adresse: "",
+  codePostal: "",
+  commune: "",
+  departement: "",
+  repartition: Repartition.DIFFUS,
+  ...overrides,
+});
 
 describe("adresse util", () => {
   describe("getDepartementFromCodePostal", () => {
@@ -64,6 +79,103 @@ describe("adresse util", () => {
 
     it("handles names with apostrophe", () => {
       expect(formatCityName("L'Isle d'abeau")).toBe("L'Isle-d'Abeau");
+    });
+  });
+
+  describe("isAdresseEmpty", () => {
+    it("returns true when every field is blank and there is no typologie", () => {
+      expect(isAdresseEmpty(makeEmptyAdresse())).toBe(true);
+    });
+
+    it("returns true when the typologie is present but holds no value", () => {
+      expect(
+        isAdresseEmpty(
+          makeEmptyAdresse({
+            adresseTypologies: [
+              {
+                year: 2026,
+                placesAutorisees: null,
+                logementSocial: false,
+                qpv: false,
+              },
+            ],
+          })
+        )
+      ).toBe(true);
+    });
+
+    it("returns false when adresseComplete is filled", () => {
+      expect(
+        isAdresseEmpty(
+          makeEmptyAdresse({
+            adresseComplete: "1 rue de la Paix, 75002 Paris",
+          })
+        )
+      ).toBe(false);
+    });
+
+    it("returns false when adresse is filled", () => {
+      expect(
+        isAdresseEmpty(makeEmptyAdresse({ adresse: "1 rue de la Paix" }))
+      ).toBe(false);
+    });
+
+    it("returns false when codePostal is filled", () => {
+      expect(
+        isAdresseEmpty(makeEmptyAdresse({ codePostal: "75002" }))
+      ).toBe(false);
+    });
+
+    it("returns false when commune is filled", () => {
+      expect(isAdresseEmpty(makeEmptyAdresse({ commune: "Paris" }))).toBe(
+        false
+      );
+    });
+
+    it("returns false when departement is filled", () => {
+      expect(isAdresseEmpty(makeEmptyAdresse({ departement: "75" }))).toBe(
+        false
+      );
+    });
+
+    it("returns false when placesAutorisees is set", () => {
+      expect(
+        isAdresseEmpty(
+          makeEmptyAdresse({
+            adresseTypologies: [{ year: 2026, placesAutorisees: 10 }],
+          })
+        )
+      ).toBe(false);
+    });
+
+    it("treats a placesAutorisees of 0 as a filled value", () => {
+      expect(
+        isAdresseEmpty(
+          makeEmptyAdresse({
+            adresseTypologies: [{ year: 2026, placesAutorisees: 0 }],
+          })
+        )
+      ).toBe(false);
+    });
+
+    it("returns false when logementSocial is true", () => {
+      expect(
+        isAdresseEmpty(
+          makeEmptyAdresse({
+            adresseTypologies: [{ year: 2026, logementSocial: true }],
+          })
+        )
+      ).toBe(false);
+    });
+
+    it("returns false when qpv is true", () => {
+      expect(
+        isAdresseEmpty(
+          makeEmptyAdresse({
+            adresseTypologies: [{ year: 2026, qpv: true }],
+          })
+        )
+      ).toBe(false);
     });
   });
 });
