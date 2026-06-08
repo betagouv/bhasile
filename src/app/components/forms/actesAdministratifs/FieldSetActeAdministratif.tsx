@@ -4,9 +4,11 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
-import { getCategoryGroup } from "@/app/utils/acteAdministratif.util";
-import { getCategoryLabel } from "@/app/utils/file-upload.util";
-import { AdditionalFieldsType } from "@/config/acte-administratif.config";
+import { useActeAdministratifRadios } from "@/app/hooks/useActeAdministratifRadios";
+import {
+  AdditionalFieldsType,
+  AvenantAlternative,
+} from "@/config/acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
@@ -26,8 +28,9 @@ export default function FieldSetActeAdministratif({
   additionalFieldsType,
   documentLabel,
   alternativeCategories,
+  avenantAlternative,
 }: FieldSetActeAdministratifProps) {
-  const { control, watch, setValue } = useFormContext();
+  const { control, watch } = useFormContext();
   const { append, remove } = useFieldArray({
     control,
     name: "actesAdministratifs",
@@ -36,27 +39,14 @@ export default function FieldSetActeAdministratif({
   const actesAdministratifs: ActeAdministratifFormValues[] =
     watch("actesAdministratifs") || [];
 
-  const groupCategories = getCategoryGroup(category, alternativeCategories);
-
-  const isInGroup = (acteCategory: ActeAdministratifCategory | undefined) => {
-    if (alternativeCategories?.length) {
-      return acteCategory === undefined || groupCategories.includes(acteCategory);
-    }
-    return acteCategory === category;
-  };
-
-  const actesOfCategory = actesAdministratifs.filter(
-    (acte) => isInGroup(acte?.category) && !acte.parentId && !acte.parentUuid
-  );
-
-  const radioActe = alternativeCategories?.length ? actesOfCategory[0] : undefined;
-  const radioActeIndex = radioActe
-    ? actesAdministratifs.findIndex(
-        (acte) =>
-          (radioActe.uuid && acte.uuid === radioActe.uuid) ||
-          (radioActe.id && acte.id === radioActe.id)
-      )
-    : -1;
+  const { actesOfCategory, categoryRadio, avenantRadio, getAdditionalFieldsType } =
+    useActeAdministratifRadios({
+      category,
+      title,
+      additionalFieldsType,
+      alternativeCategories,
+      avenantAlternative,
+    });
 
   const handleAddNewField = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -80,20 +70,20 @@ export default function FieldSetActeAdministratif({
 
     const parent = actesAdministratifs[index];
     const avenantIndices = actesAdministratifs
-      .map((field, index) => ({ field, index }))
+      .map((field, fieldIndex) => ({ field, fieldIndex }))
       .filter(
         ({ field }) =>
           (field.parentId && field.parentId === parent?.id) ||
           (field.parentUuid && field.parentUuid === parent?.uuid)
       )
-      .map(({ index }) => index);
+      .map(({ fieldIndex }) => fieldIndex);
 
     const indicesToRemove = [...avenantIndices, index];
 
     indicesToRemove.sort((a, b) => b - a);
 
-    indicesToRemove.forEach((index) => {
-      remove(index);
+    indicesToRemove.forEach((indexToRemove) => {
+      remove(indexToRemove);
     });
   };
 
@@ -114,32 +104,27 @@ export default function FieldSetActeAdministratif({
       ) : (
         notice
       )}
-      {alternativeCategories?.length && radioActeIndex !== -1 && (
+      {categoryRadio && (
         <RadioButtons
           orientation="horizontal"
-          name={`actesAdministratifs.${radioActeIndex}.categoryChoice`}
-          options={groupCategories.map((groupCategory) => ({
-            label: getCategoryLabel(groupCategory),
-            nativeInputProps: {
-              checked: radioActe?.category === groupCategory,
-              onChange: () =>
-                setValue(
-                  `actesAdministratifs.${radioActeIndex}.category`,
-                  groupCategory,
-                  { shouldValidate: true }
-                ),
-            },
-          }))}
+          name={categoryRadio.name}
+          options={categoryRadio.options}
         />
       )}
-      {actesOfCategory &&
-        actesOfCategory.length > 0 &&
+      {avenantRadio && (
+        <RadioButtons
+          orientation="horizontal"
+          name={avenantRadio.name}
+          options={avenantRadio.options}
+        />
+      )}
+      {actesOfCategory.length > 0 &&
         actesOfCategory.map((acte) => (
           <div key={acte.id || acte.uuid} className="mb-4">
             <ActeAdministratif
               categoryShortName={categoryShortName}
               acte={acte}
-              additionalFieldsType={additionalFieldsType}
+              additionalFieldsType={getAdditionalFieldsType(acte)}
               documentLabel={documentLabel}
               handleDeleteField={handleDeleteField}
               canAddAvenant={canAddAvenant}
@@ -174,4 +159,5 @@ type FieldSetActeAdministratifProps = {
   additionalFieldsType?: AdditionalFieldsType;
   documentLabel: string;
   alternativeCategories?: ActeAdministratifCategory[];
+  avenantAlternative?: AvenantAlternative;
 };

@@ -4,6 +4,7 @@ import {
   CategoryDisplayRules,
 } from "@/config/acte-administratif.config";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { StructureType } from "@/types/structure.type";
 import {
   StructureVersionTransformationStep,
@@ -260,6 +261,14 @@ const CONVENTION_RULE: CategoryDisplayRule = {
   addFileButtonLabel: "Ajouter une convention",
 };
 
+const CONVENTION_WITH_AVENANT_RULE: CategoryDisplayRule = {
+  ...CONVENTION_RULE,
+  avenantAlternative: {
+    parentCategory: "CONVENTION",
+    avenantLabel: "Avenant convention",
+  },
+};
+
 const AUTRE_RULE: CategoryDisplayRule = {
   categoryShortName: "autre",
   title: "Autres documents",
@@ -327,7 +336,7 @@ export const fermetureActesAdministratifsCategoryToDisplay: CategoryDisplayRules
   };
 
 const extensionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
-  CONVENTION: CONVENTION_RULE,
+  CONVENTION: CONVENTION_WITH_AVENANT_RULE,
   ARRETE_EXTENSION: {
     categoryShortName: "arrêté",
     title: "Arrêté d'extension",
@@ -340,6 +349,10 @@ const extensionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
     addFileButtonLabel: "Ajouter un arrêté d'extension",
     notice:
       "Pour rappel, les dates de l'arrêté d'autorisation n'ont pas vocation à changer pour cette transformation.",
+    avenantAlternative: {
+      parentCategory: "ARRETE_AUTORISATION",
+      avenantLabel: "Avenant arrêté d'autorisation",
+    },
   },
   AUTRE: {
     ...AUTRE_RULE,
@@ -349,7 +362,7 @@ const extensionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
 };
 
 const contractionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
-  CONVENTION: CONVENTION_RULE,
+  CONVENTION: CONVENTION_WITH_AVENANT_RULE,
   ARRETE_CONTRACTION: {
     categoryShortName: "arrêté",
     title: "Arrêté actant la contraction",
@@ -360,12 +373,30 @@ const contractionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
     additionalFieldsType: AdditionalFieldsType.DATE,
     documentLabel: "Document",
     addFileButtonLabel: "Ajouter un arrêté",
+    avenantAlternative: {
+      parentCategory: "ARRETE_AUTORISATION",
+      avenantLabel: "Avenant arrêté d'autorisation",
+    },
   },
   AUTRE: {
     ...AUTRE_RULE,
     notice:
       "Dans cette catégorie, vous avez la possibilité d'importer d'autres documents utiles à l'analyse de la structure (ex: arrêté modificatif au budget, arrêté de tarification provisoire...).",
   },
+};
+
+const collectAvenantParentCategories = (
+  ruleSets: CategoryDisplayRules[]
+): ActeAdministratifCategory[] => {
+  const categories = new Set<ActeAdministratifCategory>();
+  for (const ruleSet of ruleSets) {
+    for (const rule of Object.values(ruleSet)) {
+      if (rule?.avenantAlternative) {
+        categories.add(rule.avenantAlternative.parentCategory);
+      }
+    }
+  }
+  return [...categories];
 };
 
 export const getTransformationActesAdministratifsCategoryToDisplay = (
@@ -383,6 +414,21 @@ export const getTransformationActesAdministratifsCategoryToDisplay = (
       return getCreationActesAdministratifsCategoryToDisplay(transformationType);
   }
 };
+
+// Catégories d'actes de la structure pouvant servir de parent à un avenant de
+// transformation. Dérivé de TOUS les jeux de règles de transformation (et non codé en
+// dur ni limité à certains types) pour rester synchronisé avec les
+// avenantAlternative.parentCategory : la requête Prisma qui charge les actes parents de
+// la structure s'appuie dessus.
+export const AVENANT_PARENT_CATEGORIES = collectAvenantParentCategories(
+  Object.values(StructureVersionTransformationType).map(
+    (structureVersionTransformationType) =>
+      getTransformationActesAdministratifsCategoryToDisplay(
+        structureVersionTransformationType,
+        undefined
+      )
+  )
+);
 
 export const STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME: Record<
   StructureVersionTransformationType,
