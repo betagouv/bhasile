@@ -3,11 +3,11 @@ import autoAnimate from "@formkit/auto-animate";
 import { useCallback, useEffect, useRef } from "react";
 import { useFieldArray, useForm, useFormContext } from "react-hook-form";
 
+import { isAdresseEmpty } from "@/app/utils/adresse.util";
 import {
   getTransformationNounAvecArticle,
   isTransformationSurStructureExistante,
 } from "@/app/utils/transformation.util";
-import { isAdresseEmpty } from "@/app/utils/adresse.util";
 import { CURRENT_YEAR } from "@/constants";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { Repartition } from "@/types/adresse.type";
