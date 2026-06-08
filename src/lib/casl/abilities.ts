@@ -49,9 +49,13 @@ const defineAgentRules = (
   { can }: AbilityBuilder<AppAbility>,
   user: SessionUser
 ) => {
-  can("update", "Structure", {
-    departementAdministratif: { in: user.allowedDepartements },
-  });
+  if (user.role === "NATIONAL") {
+    can("update", "Structure");
+  } else {
+    can("update", "Structure", {
+      departementAdministratif: { in: user.allowedDepartements },
+    });
+  }
   can("update", ["Cpom", "Operateur"]);
 };
 
@@ -65,4 +69,15 @@ export const canUpdateStructure = (
 ) => {
   const ability = defineAbilityFor(user);
   return ability.can("update", subject("Structure", structure as Structure));
+};
+
+export const canUpdateDepartement = (
+  user: SessionUser,
+  departementAdministratif?: string | null
+) => {
+  const ability = defineAbilityFor(user);
+  return ability.can(
+    "update",
+    subject("Structure", { departementAdministratif } as Structure)
+  );
 };

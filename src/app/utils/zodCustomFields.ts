@@ -126,6 +126,9 @@ export const zSafePositiveDecimalsNullish = () =>
 export const zSafePositiveInteger = () =>
   z.preprocess(numberPreprocess, z.number().int().min(0));
 
+export const zSafeStrictlyPositiveInteger = () =>
+  z.preprocess(numberPreprocess, z.number().int().positive());
+
 export const zSafePositiveIntegerNullish = () =>
   z.preprocess(numberPreprocess, z.number().int().min(0).nullish());
 
@@ -151,3 +154,21 @@ export const zId = () =>
           : val,
     z.number().optional()
   );
+
+export const blankStringsToUndefined = (value: unknown): unknown => {
+  if (value === "") {
+    return undefined;
+  }
+  if (Array.isArray(value)) {
+    return value.map(blankStringsToUndefined);
+  }
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nestedValue]) => [
+        key,
+        blankStringsToUndefined(nestedValue),
+      ])
+    );
+  }
+  return value;
+};

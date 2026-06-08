@@ -74,7 +74,10 @@ export default function ModificationDescription() {
         <hr />
         <AdresseAdministrativeAndAntennes />
         <hr />
-        <DnaAndFiness formKind={FormKind.MODIFICATION} />
+        <DnaAndFiness
+          formKind={FormKind.MODIFICATION}
+          entityId={{ structureId: structure.id }}
+        />
         <hr />
         <FieldSetContacts />
       </FormWrapper>

@@ -14,23 +14,30 @@ describe("GET /api/dna-codes", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 400 when structureId is missing", async () => {
+  it("should return unassigned dna codes when structureId is missing", async () => {
     // GIVEN
+    const dnaCodes = [{ code: "C0001" }];
+    mockFindAll.mockResolvedValueOnce(dnaCodes);
+
     const request = new NextRequest("http://localhost/api/dna-codes");
 
     // WHEN
     const response = await GET(request);
 
     // THEN
-    expect(response.status).toBe(400);
-    expect(await response.json()).toEqual({
-      error: "StructureID doit être défini et être un nombre",
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(dnaCodes);
+    expect(mockFindAll).toHaveBeenCalledWith({
+      entityId: { structureId: undefined, structureVersionId: undefined },
+      operateurId: undefined,
     });
-    expect(mockFindAll).not.toHaveBeenCalled();
   });
 
-  it("should return 400 when structureId is not a number", async () => {
+  it("should fall back to unassigned codes when structureId is not a number", async () => {
     // GIVEN
+    const dnaCodes = [{ code: "C0001" }];
+    mockFindAll.mockResolvedValueOnce(dnaCodes);
+
     const request = new NextRequest(
       "http://localhost/api/dna-codes?structureId=abc"
     );
@@ -39,8 +46,12 @@ describe("GET /api/dna-codes", () => {
     const response = await GET(request);
 
     // THEN
-    expect(response.status).toBe(400);
-    expect(mockFindAll).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(dnaCodes);
+    expect(mockFindAll).toHaveBeenCalledWith({
+      entityId: { structureId: undefined, structureVersionId: undefined },
+      operateurId: undefined,
+    });
   });
 
   it("should return dna codes for a valid structureId", async () => {
@@ -58,7 +69,31 @@ describe("GET /api/dna-codes", () => {
     // THEN
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual(dnaCodes);
-    expect(mockFindAll).toHaveBeenCalledWith({ structureId: 42 });
+    expect(mockFindAll).toHaveBeenCalledWith({
+      entityId: { structureId: 42, structureVersionId: undefined },
+      operateurId: undefined,
+    });
+  });
+
+  it("should return dna codes for a valid structureVersionId", async () => {
+    // GIVEN
+    const dnaCodes = [{ id: 1, code: "C0001" }];
+    mockFindAll.mockResolvedValueOnce(dnaCodes);
+
+    const request = new NextRequest(
+      "http://localhost/api/dna-codes?structureVersionId=7"
+    );
+
+    // WHEN
+    const response = await GET(request);
+
+    // THEN
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(dnaCodes);
+    expect(mockFindAll).toHaveBeenCalledWith({
+      entityId: { structureId: undefined, structureVersionId: 7 },
+      operateurId: undefined,
+    });
   });
 
   it("should return 500 when repository throws", async () => {

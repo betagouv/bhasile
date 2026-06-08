@@ -46,7 +46,7 @@ describe("FieldSetDescription", () => {
         })
       ).toBeInTheDocument();
 
-      expect(screen.getByLabelText("Type")).toBeInTheDocument();
+      expect(screen.getByLabelText("Type de structure")).toBeInTheDocument();
 
       expect(screen.getByTestId("operateur-autocomplete")).toBeInTheDocument();
 
@@ -252,7 +252,9 @@ describe("FieldSetDescription", () => {
         </FormTestWrapper>
       );
 
-      const typeSelect = screen.getByLabelText("Type") as HTMLSelectElement;
+      const typeSelect = screen.getByLabelText(
+        "Type de structure"
+      ) as HTMLSelectElement;
       const options = Array.from(typeSelect.options).map((opt) => opt.value);
 
       expect(options).toContain(StructureType.CADA);
@@ -274,7 +276,9 @@ describe("FieldSetDescription", () => {
         </FormTestWrapper>
       );
 
-      const typeSelect = screen.getByLabelText("Type") as HTMLSelectElement;
+      const typeSelect = screen.getByLabelText(
+        "Type de structure"
+      ) as HTMLSelectElement;
       expect(typeSelect).toBeInTheDocument();
       expect(typeSelect.value).toBe(StructureType.HUDA);
     });

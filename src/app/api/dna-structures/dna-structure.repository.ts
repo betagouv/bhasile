@@ -1,17 +1,18 @@
 import { DnaStructureApiType } from "@/schemas/api/dna-structure.schema";
+import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
-import { getUniqueDnaCodesFromDnaStructures } from "./dna-structure.service";
+import { upsertDna } from "../dna-codes/dna-codes.repository";
 
 const deleteDnaStructures = async (
   tx: PrismaTransaction,
   dnaStructuresToKeep: Partial<DnaStructureApiType>[],
-  structureId: number
+  entityId: EntityId
 ): Promise<void> => {
-  const everyDnaStructuresOfStructure = await tx.dnaStructure.findMany({
-    where: { structureId },
+  const everyDnaStructuresOfEntity = await tx.dnaStructure.findMany({
+    where: entityId,
   });
-  const dnaStructuresToDelete = everyDnaStructuresOfStructure.filter(
+  const dnaStructuresToDelete = everyDnaStructuresOfEntity.filter(
     (dnaStructure) =>
       !dnaStructuresToKeep.some((ds) => ds.id === dnaStructure.id)
   );
@@ -22,64 +23,24 @@ const deleteDnaStructures = async (
   );
 };
 
-const checkForDuplicateDnaCodes = async (
-  tx: PrismaTransaction,
-  dnaStructures: Partial<DnaStructureApiType>[] = [],
-  structureId: number
-): Promise<void> => {
-  const dnaCodes = getUniqueDnaCodesFromDnaStructures(dnaStructures);
-
-  if (dnaCodes.length === 0) {
-    return;
-  }
-
-  const dnaLinkedToOtherStructures = await tx.dnaStructure.findMany({
-    where: {
-      structureId: {
-        not: structureId,
-      },
-      dna: {
-        code: {
-          in: dnaCodes,
-        },
-      },
-      endDate: null,
-    },
-  });
-
-  if (dnaLinkedToOtherStructures.length > 0) {
-    throw new Error("Ce ou ces codes DNA sont déjà liés à d'autres structures");
-  }
-};
-
 export const createOrUpdateDnaStructures = async (
   tx: PrismaTransaction,
   dnaStructures: Partial<DnaStructureApiType>[] = [],
-  structureId: number
+  entityId: EntityId
 ): Promise<void> => {
   if (!dnaStructures || dnaStructures.length === 0) {
     return;
   }
 
-  await deleteDnaStructures(tx, dnaStructures, structureId);
+  await deleteDnaStructures(tx, dnaStructures, entityId);
 
-  await checkForDuplicateDnaCodes(tx, dnaStructures, structureId);
+  //TODO: Once structureVersion is implemented, check for DNA associated to other structures
 
   for (const dnaStructure of dnaStructures) {
-    const dna = dnaStructure.dna;
-    if (!dna?.code) {
+    const upsertedDna = await upsertDna(tx, dnaStructure.dna);
+    if (!upsertedDna) {
       continue;
     }
-
-    const normalizedCode = dna.code.trim();
-    const upsertedDna = await tx.dna.upsert({
-      where: { code: normalizedCode },
-      update: { description: dna.description },
-      create: {
-        code: normalizedCode,
-        description: dna.description,
-      },
-    });
 
     await tx.dnaStructure.upsert({
       where: { id: dnaStructure.id || 0 },
@@ -89,7 +50,7 @@ export const createOrUpdateDnaStructures = async (
         endDate: dnaStructure.endDate,
       },
       create: {
-        structureId,
+        ...entityId,
         dnaId: upsertedDna.id,
         startDate: dnaStructure.startDate,
         endDate: dnaStructure.endDate,

@@ -15,16 +15,9 @@ export const createOrUpdateContacts = async (
     return;
   }
 
-  let where: { structureId: number } | { operateurId: number };
-  if (entityId.structureId !== undefined) {
-    where = { structureId: entityId.structureId };
-  } else if (entityId.operateurId !== undefined) {
-    where = { operateurId: entityId.operateurId };
-  } else {
-    throw new Error("ID d'entité invalide");
-  }
-
-  await tx.contact.deleteMany({ where });
+  await tx.contact.deleteMany({
+    where: entityId,
+  });
 
   if (contacts.length === 0) {
     return;

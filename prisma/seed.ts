@@ -13,8 +13,15 @@ import { createDnaList, createDnaStructures } from "./seeders/dna.seed";
 import { createEvenementsIndesirablesGraves } from "./seeders/evenement-indesirable-grave.seed";
 import { createFinessList } from "./seeders/finess.seed";
 import {
-  createFakeFormDefinition,
-  createFakeFormStepDefinition,
+  createFakeFinalisationFormStepDefinition,
+  createFakeFormFinalisation,
+  createFakeFormStructureVersionTransformationContraction,
+  createFakeFormStructureVersionTransformationCreation,
+  createFakeFormStructureVersionTransformationExtension,
+  createFakeFormStructureVersionTransformationFermeture,
+  createFakeFormTransformation,
+  createFakeStructureVersionTransformationCreationFormStepDefinition,
+  createFakeStructureVersionTransformationFermetureFormStepDefinition,
 } from "./seeders/form.seed";
 import { createNotesList } from "./seeders/note.seed";
 import {
@@ -42,32 +49,78 @@ export async function seed(): Promise<void> {
   await wipeTables(prisma);
 
   console.log("📋 Création des FormDefinitions...");
-  const formDefinition = await prisma.formDefinition.create({
-    data: createFakeFormDefinition(),
+  await prisma.formDefinition.create({
+    data: createFakeFormTransformation(),
   });
 
-  const formStepDefinitions = await prisma.formStepDefinition.createMany({
-    data: createFakeFormStepDefinition(formDefinition.id),
+  const formStructureVersionTransformationCreationDefinition =
+    await prisma.formDefinition.create({
+      data: createFakeFormStructureVersionTransformationCreation(),
+    });
+  await prisma.formStepDefinition.createMany({
+    data: createFakeStructureVersionTransformationCreationFormStepDefinition(
+      formStructureVersionTransformationCreationDefinition.id
+    ),
   });
+  const formStructureVersionTransformationExtensionDefinition =
+    await prisma.formDefinition.create({
+      data: createFakeFormStructureVersionTransformationExtension(),
+    });
+  await prisma.formStepDefinition.createMany({
+    data: createFakeStructureVersionTransformationCreationFormStepDefinition(
+      formStructureVersionTransformationExtensionDefinition.id
+    ),
+  });
+  const formStructureVersionTransformationContractionDefinition =
+    await prisma.formDefinition.create({
+      data: createFakeFormStructureVersionTransformationContraction(),
+    });
+  await prisma.formStepDefinition.createMany({
+    data: createFakeStructureVersionTransformationCreationFormStepDefinition(
+      formStructureVersionTransformationContractionDefinition.id
+    ),
+  });
+  const formStructureVersionTransformationFermetureDefinition =
+    await prisma.formDefinition.create({
+      data: createFakeFormStructureVersionTransformationFermeture(),
+    });
+  await prisma.formStepDefinition.createMany({
+    data: createFakeStructureVersionTransformationFermetureFormStepDefinition(
+      formStructureVersionTransformationFermetureDefinition.id
+    ),
+  });
+
+  const formFinalisationDefinition = await prisma.formDefinition.create({
+    data: createFakeFormFinalisation(),
+  });
+
+  const formFinalisationStepDefinitions =
+    await prisma.formStepDefinition.createMany({
+      data: createFakeFinalisationFormStepDefinition(
+        formFinalisationDefinition.id
+      ),
+    });
 
   const stepDefinitions = await prisma.formStepDefinition.findMany({
-    where: { formDefinitionId: formDefinition.id },
+    where: { formDefinitionId: formFinalisationDefinition.id },
     orderBy: { slug: "asc" },
     select: { id: true, slug: true },
   });
 
-  console.log(`✅ ${formStepDefinitions.count} FormStepDefinitions créées`);
+  console.log(
+    `✅ ${formFinalisationStepDefinitions.count} FormStepDefinitions créées pour le formulaire finalisation`
+  );
 
   await seedRegionsAndDepartements(prisma);
 
   let bhasileCodesMap: Map<string, string[]> | undefined;
   if (GENERATE_BHASILE_CODES) {
     console.log("🔢 Génération des codes Bhasile par région...");
-    bhasileCodesMap = generateAllBhasileCodes(500); // Not all codes will be used
+    bhasileCodesMap = generateAllBhasileCodes(5000); // Not all codes will be used
     console.log("✅ Codes Bhasile générés");
   }
 
-  const operateursToInsert = Array.from({ length: 20 }, (_, index) =>
+  const operateursToInsert = Array.from({ length: 5 }, (_, index) =>
     createFakeOperateur(index)
   );
 
@@ -89,7 +142,7 @@ export async function seed(): Promise<void> {
 
         return createFakeStuctureWithRelations({
           codeBhasile,
-          formDefinitionId: formDefinition.id,
+          formDefinitionId: formFinalisationDefinition.id,
           stepDefinitions,
           departementAdministratif,
           ofii: false,
@@ -135,8 +188,8 @@ export async function seed(): Promise<void> {
   };
 
   for (const operateurToInsert of operateursToInsert) {
-    const nonOfiiCount = faker.number.int({ min: 20, max: 30 });
-    const ofiiCount = faker.number.int({ min: 100, max: 200 });
+    const nonOfiiCount = faker.number.int({ min: 200, max: 300 });
+    const ofiiCount = faker.number.int({ min: 1000, max: 2000 });
 
     console.log(
       `🏠 Ajout de ${nonOfiiCount} structures et ${ofiiCount} structures OFII pour ${operateurToInsert.name}`

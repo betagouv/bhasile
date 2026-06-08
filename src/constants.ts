@@ -25,7 +25,8 @@ export const THREE_MONTHS_IN_SECONDS = 60 * 60 * 24 * 31 * 3;
 export const FILE_UPLOAD_EXPIRATION_DELAY = 60 * 60; // 1 hour
 
 export const START_YEAR = 2021;
-export const CURRENT_YEAR = 2026;
+
+export const CURRENT_YEAR = new Date().getFullYear();
 
 export const DOCUMENTS_FINANCIERS_OPEN_YEAR = 2025;
 

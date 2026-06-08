@@ -12,7 +12,7 @@ import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useOperateurFormHandling } from "@/app/hooks/useOperateurFormHandling";
 import { getOperateurDefaultValues } from "@/app/utils/operateur.util";
-import { getOperateurActesAdministratifsCategoryToDisplay } from "@/config/acte-administratif.config";
+import { operateurActesAdministratifsCategoryToDisplay } from "@/config/operateur.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   ActesAdministratifsFormValues,
@@ -73,7 +73,7 @@ export default function OperateurModificationActesAdministratifs() {
         key={key}
       >
         <ActesAdministratifs
-          categoryDisplayRules={getOperateurActesAdministratifsCategoryToDisplay()}
+          categoryDisplayRules={operateurActesAdministratifsCategoryToDisplay}
         />
         {saveState === FetchState.ERROR && (
           <SubmitError operateurId={operateur.id} backendError={backendError} />

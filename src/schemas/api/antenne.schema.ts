@@ -9,6 +9,7 @@ export const antenneApiSchema = z.object({
   codePostal: z.string().optional(),
   commune: z.string().optional(),
   departement: z.string().optional(),
+  adresseComplete: z.string().optional(),
 });
 
 export type AntenneApiType = z.infer<typeof antenneApiSchema>;

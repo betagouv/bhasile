@@ -8,15 +8,62 @@ import {
   StepStatus,
 } from "@/generated/prisma/client";
 
-export const createFakeFormDefinition = (): Omit<FormDefinition, "id"> => {
+export const createFakeFormTransformation = (): Omit<FormDefinition, "id"> => {
+  return {
+    name: "transformation",
+    slug: "transformation-v1",
+    version: 1,
+  };
+};
+export const createFakeFormFinalisation = (): Omit<FormDefinition, "id"> => {
   return {
     name: "finalisation",
     slug: "finalisation-v1",
     version: 1,
   };
 };
+export const createFakeFormStructureVersionTransformationCreation = (): Omit<
+  FormDefinition,
+  "id"
+> => {
+  return {
+    name: "structure-transformation-creation",
+    slug: "structure-transformation-creation-v1",
+    version: 1,
+  };
+};
+export const createFakeFormStructureVersionTransformationExtension = (): Omit<
+  FormDefinition,
+  "id"
+> => {
+  return {
+    name: "structure-transformation-extension",
+    slug: "structure-transformation-extension-v1",
+    version: 1,
+  };
+};
+export const createFakeFormStructureVersionTransformationContraction = (): Omit<
+  FormDefinition,
+  "id"
+> => {
+  return {
+    name: "structure-transformation-contraction",
+    slug: "structure-transformation-contraction-v1",
+    version: 1,
+  };
+};
+export const createFakeFormStructureVersionTransformationFermeture = (): Omit<
+  FormDefinition,
+  "id"
+> => {
+  return {
+    name: "structure-transformation-fermeture",
+    slug: "structure-transformation-fermeture-v1",
+    version: 1,
+  };
+};
 
-export const createFakeFormStepDefinition = (
+export const createFakeFinalisationFormStepDefinition = (
   formDefinitionId: number
 ): Omit<FormStepDefinition, "id">[] => {
   return [
@@ -53,9 +100,50 @@ export const createFakeFormStepDefinition = (
   ];
 };
 
+export const createFakeStructureVersionTransformationCreationFormStepDefinition = (
+  formDefinitionId: number
+): Omit<FormStepDefinition, "id">[] => {
+  return [
+    {
+      formDefinitionId,
+      label: "01-identification",
+      slug: "01-identification",
+    },
+    {
+      formDefinitionId,
+      label: "02-places-hebergement",
+      slug: "02-places-hebergement",
+    },
+    {
+      formDefinitionId,
+      label: "03-actes-administratifs",
+      slug: "03-actes-administratifs",
+    },
+  ];
+};
+
+export const createFakeStructureVersionTransformationFermetureFormStepDefinition = (
+  formDefinitionId: number
+): Omit<FormStepDefinition, "id">[] => {
+  return [
+    {
+      formDefinitionId,
+      label: "01-identification",
+      slug: "01-identification",
+    },
+  ];
+};
+
 export const createFakeForm = (
   formDefinitionId: number
-): Omit<Form, "id" | "structureCodeDna" | "structureId"> => {
+): Omit<
+  Form,
+  | "id"
+  | "structureCodeDna"
+  | "structureId"
+  | "transformationId"
+  | "structureVersionTransformationId"
+> => {
   return {
     formDefinitionId: formDefinitionId,
     status: faker.datatype.boolean(),
@@ -84,7 +172,14 @@ export const createFakeFormWithSteps = (
   formDefinitionId: number,
   stepDefinitions: { id: number; slug: string }[],
   options?: { isFinalised?: boolean }
-): Omit<FormWithSteps, "id" | "structureCodeDna" | "structureId"> => {
+): Omit<
+  FormWithSteps,
+  | "id"
+  | "structureCodeDna"
+  | "structureId"
+  | "transformationId"
+  | "structureVersionTransformationId"
+> => {
   const fakeForm = createFakeForm(formDefinitionId);
   const isFinalised = options?.isFinalised ?? false;
   const verificationSlugs = ["01-identification", "02-documents-financiers"];
