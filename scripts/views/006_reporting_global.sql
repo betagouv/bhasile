@@ -1,7 +1,7 @@
 -- Matrice Metabase — indicateurs globaux (1 ligne) : questionnaire + Efficient
 -- Agrégats usage/qualité : MAX (ou SUM pour les MAJ) sur les mois disponibles dans les tables Monthly*
 -- Séries mensuelles : reporting."reporting_mensuel"
-CREATE OR REPLACE VIEW:"SCHEMA"."indicateurs_globaux" AS
+CREATE OR REPLACE VIEW:"SCHEMA"."reporting_global" AS
 WITH
   global_indicators_latest AS (
     SELECT

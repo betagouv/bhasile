@@ -1,4 +1,16 @@
 // TABLES
+// Tarifs journaliers cibles par type de structure et zonage IDF / non-IDF (8 entrées)
+// Remplissage manuel (Metabase)
+model TarifJournalierCible {
+  id            Int     @id @default(autoincrement())
+  structureType StructureType
+  isIdf         Boolean
+  tarifCible    Decimal
+
+  @@unique([structureType, isIdf])
+  @@schema("reporting")
+}
+
 // Remplissage manuel (Metabase) — indicateurs globaux / enquête
 model GlobalIndicators {
   id Int @id @default(autoincrement())
@@ -88,8 +100,7 @@ model MonthlyStructuresGlobalQualityCount {
   has_issue_cpom_mono_structure                                  Int
   has_issue_taux_encadrement_max_gt_threshold                    Int
   has_issue_taux_encadrement_min_eq_0                            Int
-  has_issue_cout_journalier_max_gt_25                            Int
-  has_issue_cout_journalier_max_gt_35                            Int
+  has_issue_cout_journalier_max_gt_tarif_cible                   Int
   has_issue_missing_convention_document                          Int
   has_issue_missing_autorisation_document                        Int
   has_issue_missing_cpom_document                                Int
@@ -109,7 +120,7 @@ model MonthlyStructuresGlobalQualityCount {
 }
 
 // VIEWS
-view IndicateursGlobaux {
+view ReportingGlobal {
   id Int
 
   globalIndicatorsUpdatedAt DateTime? @map("global_indicators_updated_at")
@@ -129,7 +140,7 @@ view IndicateursGlobaux {
   coutParDetectionImpact Decimal? @map("cout_par_detection_impact")
 
   @@unique([id])
-  @@map("indicateurs_globaux")
+  @@map("reporting_global")
   @@schema("reporting")
 }
 
@@ -168,8 +179,7 @@ view StructuresGlobalQuality {
   has_issue_cpom_mono_structure                                  Boolean?
   has_issue_taux_encadrement_max_gt_threshold                    Boolean?
   has_issue_taux_encadrement_min_eq_0                            Boolean?
-  has_issue_cout_journalier_max_gt_25                            Boolean?
-  has_issue_cout_journalier_max_gt_35                            Boolean?
+  has_issue_cout_journalier_max_gt_tarif_cible                   Boolean?
   has_issue_missing_convention_document                          Boolean?
   has_issue_missing_autorisation_document                        Boolean?
   has_issue_missing_cpom_document                                Boolean?

@@ -3,7 +3,7 @@
  * Metabase : indicateurs_utiles_count / indicateurs_impact_count dans reporting_mensuel ;
  * détail par colonne has_issue_* dans MonthlyStructuresGlobalQualityCount.
  *
- * Seuils activité 7 % / 3 % et coût 25 € : à valider avec Émilie.
+ * Seuils activité 7 % / 3 % ; tarifs journaliers cibles dans reporting."TarifJournalierCible".
  */
 
 export const INDICATEURS_UTILES = [
@@ -20,10 +20,10 @@ export const INDICATEURS_UTILES = [
 ] as const;
 
 export const INDICATEURS_IMPACT = [
-  "has_issue_taux_encadrement_max_gt_threshold", // CADA/CPH > 20, HUDA/CAES > 25
-  "has_issue_cout_journalier_max_gt_25",         // TODO: seuil à valider avec Émilie
+  "has_issue_taux_encadrement_max_gt_threshold",    // CADA/CPH > 20, HUDA/CAES > 25
+  "has_issue_cout_journalier_max_gt_tarif_cible",   // tarif cible par type et zonage IDF / non-IDF
   "has_issue_places_indisponibles_gt_3pct",
-  "has_issue_presences_indues_gt_7pct",          // CADA+HUDA uniquement
+  "has_issue_presences_indues_gt_7pct",             // CADA+HUDA uniquement
   "has_issue_evaluation_not_done_in_time",
 ] as const;
 
@@ -38,7 +38,6 @@ export const INDICATEURS_NON_CLASSIFIES = [
   "has_issue_specific_places_gt_places_autorisees",
   "has_issue_places_structure_vs_address_diff_gt_10pct",
   "has_issue_taux_encadrement_min_eq_0",
-  "has_issue_cout_journalier_max_gt_35",
   "has_issue_cout_journalier_min_lt_15",
   "has_issue_resultat_net_eq_0",
   "has_issue_authorized_affectations_breakdown_missing",

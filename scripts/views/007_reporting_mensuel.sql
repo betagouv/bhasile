@@ -1,5 +1,5 @@
 -- Matrice Metabase — données MENSUELLES (cron, 1 ligne / mois)
--- Globaux (questionnaire + Efficient) : reporting."indicateurs_globaux"
+-- Globaux (questionnaire + Efficient) : reporting."reporting_global"
 -- Détail qualité : reporting."MonthlyStructuresGlobalQualityCount"
 -- Visites par région : reporting."MonthlyReportingVisitsByRegion"
 CREATE OR REPLACE VIEW:"SCHEMA"."reporting_mensuel" AS

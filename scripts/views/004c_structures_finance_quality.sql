@@ -11,7 +11,8 @@ WITH
       s."id",
       s."type" AS "structureType",
       s."creationDate" AS "creationDate",
-      s."date303" AS "date303"
+      s."date303" AS "date303",
+      s."departementAdministratif" AS "departementAdministratif"
     FROM
       public."Structure" s
   ),
@@ -30,6 +31,25 @@ WITH
       )::int AS "endYearExclusive"
     FROM
       structures s
+  ),
+  structures_idf AS (
+    SELECT
+      s."id",
+      s."structureType",
+      COALESCE(r."code" = 'FR-IDF', FALSE) AS "isIdf"
+    FROM
+      structures s
+      LEFT JOIN public."Departement" dep ON dep."numero" = s."departementAdministratif"
+      LEFT JOIN public."Region" r ON r."id" = dep."regionId"
+  ),
+  tarifs AS (
+    SELECT
+      si."id" AS "structureId",
+      t."tarifCible"
+    FROM
+      structures_idf si
+      LEFT JOIN reporting."TarifJournalierCible" t ON t."structureType" = si."structureType"
+      AND t."isIdf" = si."isIdf"
   ),
   -- filter budgets from the structure date 303 joining year, or creation year to the current year
   budgets_filtered AS (
@@ -181,11 +201,8 @@ SELECT
   END AS "has_issue_taux_encadrement_max_gt_threshold",
   -- Budget rates: taux d'encadrement min equals 0 (NULL does not count as issue)
   COALESCE(br."taux_encadrement_min" = 0, FALSE) AS "has_issue_taux_encadrement_min_eq_0",
-  -- TODO: seuil coût journalier à fixer avec Émilie (actuellement 25 € et 35 € comme proxy)
-  -- Budget rates: coût journalier max > 25 (across filtered years)
-  COALESCE(br."cout_journalier_max" > 25, FALSE) AS "has_issue_cout_journalier_max_gt_25",
-  -- Budget rates: coût journalier max > 35 (across filtered years)
-  COALESCE(br."cout_journalier_max" > 35, FALSE) AS "has_issue_cout_journalier_max_gt_35",
+  -- Budget rates: coût journalier max > tarif cible (par type et zonage IDF / non-IDF)
+  COALESCE(br."cout_journalier_max" > tc."tarifCible", FALSE) AS "has_issue_cout_journalier_max_gt_tarif_cible",
   -- Budget rates: coût journalier min < 15 (across filtered years)
   COALESCE(br."cout_journalier_min" < 15, FALSE) AS "has_issue_cout_journalier_min_lt_15",
   -- Budget indicators (aggregated from multiple years)
@@ -198,4 +215,5 @@ SELECT
 FROM
   structures s
   LEFT JOIN budget_indicators bi ON bi."id" = s."id"
-  LEFT JOIN budgets_rates br ON br."structureId" = s."id";
+  LEFT JOIN budgets_rates br ON br."structureId" = s."id"
+  LEFT JOIN tarifs tc ON tc."structureId" = s."id";
