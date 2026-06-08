@@ -1,20 +1,16 @@
+import { sumValues } from "@/app/utils/math.util";
 import { Prisma, Repartition, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
-import { sumValues } from "@/app/utils/math.util";
 
 import {
   ActiviteRow,
   AdresseRow,
   BudgetAggRow,
+  countCpoms,
   DepartementRow,
   EvaluationRow,
-  GlobalMedianRow,
-  IndicateurRow,
-  MedianRow,
-  StructureRow,
-  TypologieRow,
-  countCpoms,
   findActivitesTimeSeries,
+  findBudgetsByYear,
   findDepartementsWithPopulation,
   findDnaCodes,
   findEigs,
@@ -23,11 +19,15 @@ import {
   findIndicateursFinanciers,
   findLatestActivitesPerDna,
   findMedianIndicateursByYear,
-  findBudgetsByYear,
   findStructureAdresses,
   findStructureIds,
-  findStructureTypologies,
   findStructuresWithTypes,
+  findStructureTypologies,
+  GlobalMedianRow,
+  IndicateurRow,
+  MedianRow,
+  StructureRow,
+  TypologieRow,
 } from "./statistique.repository";
 import {
   ActiviteStat,
@@ -54,7 +54,7 @@ const getLastTypologiePerStructure = (
 ): Map<number, TypologieRow> => {
   const map = new Map<number, TypologieRow>();
   for (const typologie of typologies) {
-    if (typologie.structureId !== null) map.set(typologie.structureId, typologie);
+    if (typologie.structureId !== null) {map.set(typologie.structureId, typologie);}
   }
   return map;
 };
@@ -64,7 +64,7 @@ const getBatiPerStructure = (
 ): Map<number, Repartition> => {
   const byStructure = new Map<number, Repartition[]>();
   for (const adresse of adresses) {
-    if (adresse.structureId === null || adresse.repartition === null) continue;
+    if (adresse.structureId === null || adresse.repartition === null) {continue;}
     const list = byStructure.get(adresse.structureId) ?? [];
     list.push(adresse.repartition);
     byStructure.set(adresse.structureId, list);
@@ -73,9 +73,9 @@ const getBatiPerStructure = (
   for (const [structureId, repartitions] of byStructure) {
     const hasDiffus = repartitions.includes(Repartition.DIFFUS);
     const hasCollectif = repartitions.includes(Repartition.COLLECTIF);
-    if (hasDiffus && hasCollectif) result.set(structureId, Repartition.MIXTE);
-    else if (hasDiffus) result.set(structureId, Repartition.DIFFUS);
-    else result.set(structureId, Repartition.COLLECTIF);
+    if (hasDiffus && hasCollectif) {result.set(structureId, Repartition.MIXTE);}
+    else if (hasDiffus) {result.set(structureId, Repartition.DIFFUS);}
+    else {result.set(structureId, Repartition.COLLECTIF);}
   }
   return result;
 };
@@ -136,7 +136,7 @@ const computePlacesSpeciales = (
     fvvTeh = 0;
   for (const structure of structures) {
     const typologie = lastTypologieMap.get(structure.id);
-    if (!typologie) continue;
+    if (!typologie) {continue;}
     placesAutorisees += typologie.placesAutorisees ?? 0;
     pmr += typologie.pmr ?? 0;
     lgbt += typologie.lgbt ?? 0;
@@ -255,7 +255,7 @@ const aggregateFinanceStat = (
 
 const avg = (values: (number | null)[]): number | null => {
   const valid = values.filter((value): value is number => value !== null);
-  if (valid.length === 0) return null;
+  if (valid.length === 0) {return null;}
   return (sumValues(valid) ?? 0) / valid.length;
 };
 
@@ -342,7 +342,7 @@ const computeTauxEquipement = (
 ): TauxEquipementDept[] => {
   const placesByDept = new Map<string, number>();
   for (const structure of structures) {
-    if (!structure.departementAdministratif) continue;
+    if (!structure.departementAdministratif) {continue;}
     const typologie = lastTypologieMap.get(structure.id);
     placesByDept.set(
       structure.departementAdministratif,

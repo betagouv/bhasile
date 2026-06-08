@@ -203,7 +203,7 @@ export const findIndicateursFinanciers = async (
 export const findMedianIndicateursByYear = async (
   structureIds: number[]
 ): Promise<MedianRow[]> => {
-  if (structureIds.length === 0) return [];
+  if (structureIds.length === 0) {return [];}
   return prisma.$queryRaw<MedianRow[]>(Prisma.sql`
     SELECT
       year,
@@ -223,7 +223,7 @@ export const findGlobalMedianIndicateurs = async (
   structureIds: number[]
 ): Promise<GlobalMedianRow> => {
   if (structureIds.length === 0)
-    return { tauxEncadrementMedian: null, coutJournalierMedian: null };
+    {return { tauxEncadrementMedian: null, coutJournalierMedian: null };}
   const [row] = await prisma.$queryRaw<GlobalMedianRow[]>(Prisma.sql`
     SELECT
       PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY "tauxEncadrement") AS "tauxEncadrementMedian",
@@ -251,7 +251,7 @@ export const findEigs = async (
   dnaCodes: string[],
   since: Date
 ): Promise<EigRow[]> => {
-  if (dnaCodes.length === 0) return [];
+  if (dnaCodes.length === 0) {return [];}
   return prisma.evenementIndesirableGrave.findMany({
     where: {
       dnaCode: { in: dnaCodes },
@@ -283,7 +283,7 @@ export const findEvaluations = async (
 export const findLatestActivitesPerDna = async (
   dnaCodes: string[]
 ): Promise<ActiviteRow[]> => {
-  if (dnaCodes.length === 0) return [];
+  if (dnaCodes.length === 0) {return [];}
   return prisma.$queryRaw<ActiviteRow[]>(Prisma.sql`
     SELECT DISTINCT ON (a."dnaCode")
       a."dnaCode",
@@ -307,7 +307,7 @@ export const findLatestActivitesPerDna = async (
 export const findActivitesTimeSeries = async (
   dnaCodes: string[]
 ): Promise<ActiviteRow[]> => {
-  if (dnaCodes.length === 0) return [];
+  if (dnaCodes.length === 0) {return [];}
   return prisma.activite.findMany({
     where: { dnaCode: { in: dnaCodes } },
     select: {
