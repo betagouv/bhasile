@@ -55,8 +55,6 @@ export async function authenticateWithProConnect(
     await clickPrimaryLoginSubmit(page);
   }
 
-  await maybeClickOAuthConsent(page);
-
   const appOrigin = process.env.NEXT_PUBLIC_URL ?? "http://localhost:3000";
   const appHost = new URL(appOrigin).hostname;
 
@@ -89,16 +87,4 @@ async function clickPrimaryLoginSubmit(page: Page): Promise<void> {
     .locator('button[type="submit"], input[type="submit"]')
     .first()
     .click();
-}
-
-async function maybeClickOAuthConsent(page: Page): Promise<void> {
-  const consent = page.getByRole("button", {
-    name: /autoriser|continuer|accepter|j.autorise/i,
-  });
-  try {
-    await consent.first().waitFor({ state: "visible", timeout: 12_000 });
-    await consent.first().click();
-  } catch {
-    // No consent step (or already on app callback).
-  }
 }
