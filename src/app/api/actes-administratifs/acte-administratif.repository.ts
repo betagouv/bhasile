@@ -79,10 +79,6 @@ const createOrUpdateAvenants = async (
     ) {
       continue;
     }
-    // Le parent (acte d'une autre entité) peut avoir disparu entre le chargement et la
-    // sauvegarde. Plutôt que de perdre silencieusement l'acte saisi (et d'orpheliner son
-    // fichier déjà téléversé) ou de provoquer une violation de clé étrangère, on
-    // l'enregistre sans parent (acte simple).
     const parentId = (await parentNoLongerExists(tx, avenant))
       ? undefined
       : resolvedParentId;
