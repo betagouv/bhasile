@@ -1,34 +1,37 @@
 "use client";
 
 import { ActesAdministratifs } from "@/app/components/forms/actesAdministratifs/ActesAdministratifs";
+import { EffectiveDateInput } from "@/app/components/forms/EffectiveDateInput";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getActesAdministratifsDefaultValues } from "@/app/utils/acteAdministratif.util";
-import { creationExNihiloActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
+import { fermetureActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   StructureTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
-import { creationActesAdministratifsSchema } from "@/schemas/forms/transformation/creationActesAdministratifs.schema";
+import { fermetureSchema } from "@/schemas/forms/transformation/fermeture.schema";
 
 type Props = {
-  structureTransformation: StructureTransformationApiRead;
   transformation: TransformationApiRead;
+  structureTransformation: StructureTransformationApiRead;
 };
 
-export const CreationExNihiloActesAdministratifsForm = ({
-  structureTransformation,
+export const FermetureDescriptionForm = ({
   transformation,
+  structureTransformation,
 }: Props) => {
   const { handleValidation, prevStep } = useTransformationFormHandling();
 
-  const categoryDisplayRules =
-    creationExNihiloActesAdministratifsCategoryToDisplay;
+  const categoryDisplayRules = fermetureActesAdministratifsCategoryToDisplay;
+  const codeBhasile =
+    structureTransformation.structureVersion?.structure?.codeBhasile;
 
   const defaultValues = {
+    effectiveDate: structureTransformation.structureVersion?.effectiveDate,
     actesAdministratifs: getActesAdministratifsDefaultValues(
       structureTransformation.actesAdministratifs,
       categoryDisplayRules
@@ -37,7 +40,7 @@ export const CreationExNihiloActesAdministratifsForm = ({
 
   return (
     <FormWrapper
-      schema={creationActesAdministratifsSchema}
+      schema={fermetureSchema}
       defaultValues={defaultValues}
       onSubmit={(data) => {
         handleValidation({
@@ -45,6 +48,12 @@ export const CreationExNihiloActesAdministratifsForm = ({
           structureTransformation: {
             id: structureTransformation.id,
             type: structureTransformation.type,
+            structureVersion: {
+              id: structureTransformation.structureVersion?.id,
+              structureId:
+                structureTransformation.structureVersion?.structureId,
+              effectiveDate: data.effectiveDate,
+            },
             actesAdministratifs:
               data.actesAdministratifs as ActeAdministratifApiType[],
           },
@@ -55,6 +64,10 @@ export const CreationExNihiloActesAdministratifsForm = ({
       previousStep={prevStep?.route}
       showContactInfos={false}
     >
+      <EffectiveDateInput
+        label="Date de la fermeture"
+        hintText={codeBhasile ? `de la structure ${codeBhasile}` : undefined}
+      />
       <ActesAdministratifs categoryDisplayRules={categoryDisplayRules} />
     </FormWrapper>
   );

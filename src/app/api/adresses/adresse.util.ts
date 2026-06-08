@@ -3,6 +3,21 @@ import { AdresseApiType } from "@/schemas/api/adresse.schema";
 
 import { StructureDbDetails } from "../structures/structure.db.type";
 
+export const buildAdresseAdministrativeComplete = (parts: {
+  adresseAdministrative?: string | null;
+  codePostalAdministratif?: string | null;
+  communeAdministrative?: string | null;
+  departementAdministratif?: string | null;
+}): string =>
+  [
+    parts.adresseAdministrative,
+    parts.codePostalAdministratif,
+    parts.communeAdministrative,
+    parts.departementAdministratif,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
 export const handleAdresses = (
   dnaCode: string,
   adresses: AdresseApiType[]

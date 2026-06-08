@@ -1,13 +1,18 @@
 import {
+  STRUCTURE_TRANSFORMATION_FORM_STEPS,
   STRUCTURE_TRANSFORMATION_TYPE_ORDER,
   TRANSFORMATION_TYPE_SPECS,
+  VERIFICATION_STEP_NAME,
 } from "@/config/transformation.config";
+import { FormApiType } from "@/schemas/api/form.schema";
 import {
+  StructureTransformationApiRead,
   StructureTransformationApiUpdate,
   StructureVersionApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
-import { DeepPartial } from "@/types/global";
+import { StepStatus } from "@/types/form.type";
+import { DeepPartial, FormKind } from "@/types/global";
 import {
   StructureTransformationStep,
   StructureTransformationType,
@@ -32,8 +37,31 @@ export const getTransformationTitle = (
   return "Transformer une structure";
 };
 
+export const getStructureTransformationDepartement = (
+  structureTransformation?: StructureTransformationApiRead
+): string | undefined =>
+  structureTransformation?.structureVersion?.departementAdministratif ??
+  structureTransformation?.structureVersion?.structure
+    ?.departementAdministratif ??
+  undefined;
+
+export const getReferenceStructureTransformation = (
+  transformation: TransformationApiRead
+): StructureTransformationApiRead | undefined =>
+  transformation.structureTransformations.find((structureTransformation) =>
+    getStructureTransformationDepartement(structureTransformation)
+  ) ?? transformation.structureTransformations[0];
+
+export const getTransformationDepartement = (
+  transformation: TransformationApiRead
+): string | undefined =>
+  getStructureTransformationDepartement(
+    getReferenceStructureTransformation(transformation)
+  );
+
 type GetTransformationFormNavigationProps = {
   transformationSteps: Step[];
+  transformationId: number;
   transformationStructureType?: StructureTransformationType;
   transformationStructureId?: number;
   transformationStructureStep?: string;
@@ -41,24 +69,38 @@ type GetTransformationFormNavigationProps = {
 
 export const getTransformationFormNavigation = ({
   transformationSteps,
+  transformationId,
   transformationStructureType,
   transformationStructureId,
   transformationStructureStep,
 }: GetTransformationFormNavigationProps) => {
-  const flatSteps = transformationSteps.flatMap((step) =>
-    step.steps.map((stepItem) => ({
-      id: step.id,
-      type: step.type,
-      ...stepItem,
-    }))
-  );
+  const flatSteps = [
+    ...transformationSteps.flatMap((step) =>
+      step.steps.map((stepItem) => ({
+        id: step.id,
+        type: step.type,
+        ...stepItem,
+      }))
+    ),
+    {
+      id: undefined,
+      type: undefined,
+      name: VERIFICATION_STEP_NAME,
+      label: "Vérification",
+      route: `/structures/transformation/${transformationId}/verification`,
+    },
+  ];
 
-  const currentIndex = flatSteps.findIndex(
-    (step) =>
+  const currentIndex = flatSteps.findIndex((step) => {
+    if (step.name === VERIFICATION_STEP_NAME) {
+      return transformationStructureStep?.toLowerCase() === VERIFICATION_STEP_NAME;
+    }
+    return (
       step.type?.toLowerCase() === transformationStructureType?.toLowerCase() &&
       step.id === transformationStructureId &&
       step.name.toLowerCase() === transformationStructureStep?.toLowerCase()
-  );
+    );
+  });
 
   const firstStep = flatSteps[0];
   const currentStep = flatSteps[currentIndex];
@@ -71,6 +113,22 @@ export const getTransformationFormNavigation = ({
   return { firstStep, currentStep, prevStep, nextStep };
 };
 
+export const sortStructureTransformationsByType = <
+  T extends { type?: StructureTransformationType },
+>(
+  items: T[]
+): T[] => {
+  return [...items].sort((firstItem, secondItem) => {
+    const firstOrder = firstItem.type
+      ? STRUCTURE_TRANSFORMATION_TYPE_ORDER[firstItem.type]
+      : Infinity;
+    const secondOrder = secondItem.type
+      ? STRUCTURE_TRANSFORMATION_TYPE_ORDER[secondItem.type]
+      : Infinity;
+    return firstOrder - secondOrder;
+  });
+};
+
 export const getTransformationSteps = (
   transformation?: TransformationApiRead
 ): Step[] => {
@@ -78,22 +136,14 @@ export const getTransformationSteps = (
     return [];
   }
 
-  return (
-    transformation.structureTransformations
-      ?.map((structureTransformation) => {
-        return {
-          id: structureTransformation.id,
-          codeBhasile:
-            structureTransformation.structureVersion?.structure?.codeBhasile,
-          type: structureTransformation.type,
-          steps: getStepsByType(structureTransformation, transformation.id),
-        };
-      })
-      .sort((a, b) => {
-        const aTypeOrder = STRUCTURE_TRANSFORMATION_TYPE_ORDER[a.type];
-        const bTypeOrder = STRUCTURE_TRANSFORMATION_TYPE_ORDER[b.type];
-        return aTypeOrder - bTypeOrder;
-      }) ?? []
+  return sortStructureTransformationsByType(
+    transformation.structureTransformations?.map((structureTransformation) => ({
+      id: structureTransformation.id,
+      codeBhasile:
+        structureTransformation.structureVersion?.structure?.codeBhasile,
+      type: structureTransformation.type,
+      steps: getStepsByType(structureTransformation, transformation.id),
+    })) ?? []
   );
 };
 
@@ -188,6 +238,30 @@ export type Step = {
   }[];
 };
 
+export type AdresseSource = {
+  nom: string;
+  adresseAdministrative: string;
+  adresseAdministrativeComplete: string;
+  codePostalAdministratif: string;
+  communeAdministrative: string;
+  departementAdministratif: string;
+};
+
+export const getAdresseSource = (
+  structureTransformation: StructureTransformationApiRead
+): AdresseSource => {
+  const structure = structureTransformation.structureVersion?.structure;
+  return {
+    nom: structure?.nom ?? "",
+    adresseAdministrative: structure?.adresseAdministrative ?? "",
+    adresseAdministrativeComplete:
+      structure?.adresseAdministrativeComplete ?? "",
+    codePostalAdministratif: structure?.codePostalAdministratif ?? "",
+    communeAdministrative: structure?.communeAdministrative ?? "",
+    departementAdministratif: structure?.departementAdministratif ?? "",
+  };
+};
+
 export const getTransformationStructureVersionDefaultValues = <T>(
   structureVersion?: StructureVersionApiRead
 ): DeepPartial<T> =>
@@ -195,6 +269,27 @@ export const getTransformationStructureVersionDefaultValues = <T>(
     ...structureVersion,
     adresses: transformApiAdressesToFormAdresses(structureVersion?.adresses),
   }) as DeepPartial<T>;
+
+export const isCreation = (formKind: FormKind): boolean =>
+  formKind === FormKind.OUVERTURE_EX_NIHILO ||
+  formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES;
+
+export const isTransformationSurStructureExistante = (
+  formKind: FormKind
+): boolean =>
+  formKind === FormKind.EXTENSION || formKind === FormKind.CONTRACTION;
+
+export const getTransformationNounAvecArticle = (
+  formKind: FormKind
+): string => {
+  if (formKind === FormKind.EXTENSION) {
+    return "l’extension";
+  }
+  if (formKind === FormKind.CONTRACTION) {
+    return "la contraction";
+  }
+  return "";
+};
 
 export const getStructureTransformationLabel = (
   type?: StructureTransformationType,
@@ -213,4 +308,29 @@ export const getStructureTransformationLabel = (
     default:
       return "";
   }
+};
+
+export const validateStructureTransformationFormStep = (
+  form: FormApiType,
+  stepToValidate: string
+): FormApiType => {
+  const formStepSpecs =
+    STRUCTURE_TRANSFORMATION_FORM_STEPS[form.formDefinition.name] ?? [];
+
+  const stepSlugToValidate = formStepSpecs.find(
+    (formStepSpec) => formStepSpec.name === stepToValidate
+  )?.slug;
+
+  if (!stepSlugToValidate) {
+    return form;
+  }
+
+  return {
+    ...form,
+    formSteps: form.formSteps.map((formStep) =>
+      formStep.stepDefinition.slug === stepSlugToValidate
+        ? { ...formStep, status: StepStatus.VALIDE }
+        : formStep
+    ),
+  };
 };

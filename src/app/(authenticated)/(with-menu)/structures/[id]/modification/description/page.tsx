@@ -76,7 +76,7 @@ export default function ModificationDescription() {
         <hr />
         <DnaAndFiness
           formKind={FormKind.MODIFICATION}
-          structureId={structure.id}
+          entityId={{ structureId: structure.id }}
         />
         <hr />
         <FieldSetContacts />

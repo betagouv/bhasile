@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
+import { isCreation as isCreationFormKind } from "@/app/utils/transformation.util";
 import { FormKind } from "@/types/global";
 import { PublicType, StructureType } from "@/types/structure.type";
 
@@ -27,141 +28,170 @@ export const FieldSetDescription = ({
     }
   }, [filialesContainerRef]);
 
+  const title = getTitle(formKind);
+
+  const isCreation = isCreationFormKind(formKind);
+
   return (
-    <fieldset className="flex flex-col gap-6">
-      <legend className="text-xl font-bold mb-10 text-title-blue-france">
-        {formKind === FormKind.MODIFICATION ||
-        formKind === FormKind.CREATION_EX_NIHILO
-          ? "Général"
-          : "Description"}
-      </legend>
-
-      {formKind !== FormKind.MODIFICATION && (
+    <>
+      {isCreation ? (
         <>
-          <div className="flex">
-            <ToggleSwitch
-              label="Cette structure appartient-elle à une filiale d’opérateur (ex: YSOS, filiale de SOS) ?"
-              labelPosition="left"
-              showCheckedHint={false}
-              className="w-fit [&_label]:gap-2"
-              checked={isManagedByAFiliale}
-              name="managed-by-a-filiale"
-              id="managed-by-a-filiale"
-              onChange={() => {
-                const next = !isManagedByAFiliale;
-                setIsManagedByAFiliale(next);
-                if (!next) {
-                  setValue("filiale", undefined, { shouldValidate: true });
-                }
-              }}
-            />
-            <p className="pl-2">{isManagedByAFiliale ? "Oui" : "Non"}</p>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <SelectWithValidation
-              name="type"
+            <InputWithValidation
+              name="creationDate"
               control={control}
-              label="Type"
-              disabled={formKind !== FormKind.CREATION_EX_NIHILO}
-              required
-              id="type"
-            >
-              <option value="">Sélectionnez un type</option>
-              {Object.values(StructureType)
-                .filter(
-                  (structureType) => structureType !== StructureType.PRAHDA
-                )
-                .map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-            </SelectWithValidation>
-
-            <OperateurAutocompleteRhf />
-
-            <div ref={filialesContainerRef}>
-              {isManagedByAFiliale && (
-                <InputWithValidation
-                  name="filiale"
-                  control={control}
-                  type="text"
-                  label="Filiale"
-                  id="filiale"
-                />
-              )}
-            </div>
+              type="date"
+              label="Date d’ouverture"
+              id="creationDate"
+            />
           </div>
+          <hr />
         </>
-      )}
+      ) : null}
+      <fieldset className="flex flex-col gap-6">
+        <legend className="text-xl font-bold mb-10 text-title-blue-france">
+          {title}
+        </legend>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {formKind !== FormKind.MODIFICATION && (
-          <InputWithValidation
-            name="creationDate"
-            control={control}
-            type="date"
-            label={
-              formKind === FormKind.CREATION_EX_NIHILO
-                ? "Date d’ouverture"
-                : "Date de création de la structure"
-            }
-            id="creationDate"
-          />
+          <>
+            <div className="flex">
+              <ToggleSwitch
+                label="Cette structure appartient-elle à une filiale d’opérateur (ex: YSOS, filiale de SOS) ?"
+                labelPosition="left"
+                showCheckedHint={false}
+                className="w-fit [&_label]:gap-2"
+                checked={isManagedByAFiliale}
+                name="managed-by-a-filiale"
+                id="managed-by-a-filiale"
+                onChange={() => {
+                  const next = !isManagedByAFiliale;
+                  setIsManagedByAFiliale(next);
+                  if (!next) {
+                    setValue("filiale", undefined, { shouldValidate: true });
+                  }
+                }}
+              />
+              <p className="pl-2">{isManagedByAFiliale ? "Oui" : "Non"}</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <SelectWithValidation
+                name="type"
+                control={control}
+                label="Type de structure"
+                disabled={!isCreation}
+                required
+                id="type"
+              >
+                <option value="">Sélectionnez un type</option>
+                {Object.values(StructureType)
+                  .filter(
+                    (structureType) => structureType !== StructureType.PRAHDA
+                  )
+                  .map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+              </SelectWithValidation>
+
+              <OperateurAutocompleteRhf />
+
+              <div ref={filialesContainerRef}>
+                {isManagedByAFiliale && (
+                  <InputWithValidation
+                    name="filiale"
+                    control={control}
+                    type="text"
+                    label="Filiale"
+                    id="filiale"
+                  />
+                )}
+              </div>
+            </div>
+          </>
         )}
-        <SelectWithValidation
-          name="public"
-          control={control}
-          label="Public"
-          id="public"
-        >
-          <option value="">Sélectionnez une option</option>
-          {Object.values(PublicType).map((publicType) => (
-            <option key={publicType} value={publicType}>
-              {publicType}
-            </option>
-          ))}
-        </SelectWithValidation>
-      </div>
-      {formKind !== FormKind.CREATION_EX_NIHILO && (
-        <>
-          <CustomNotice
-            severity="info"
-            title=""
-            className="rounded [&_p]:flex [&_p]:items-center"
-            description="LGBT : Lesbiennes, Gays, Bisexuels et Transgenres – FVV : Femmes Victimes de Violences–TEH : Traîte des Êtres Humains"
-          />
-          <label className="flex gap-6">
-            Actuellement, la structure dispose-t-elle de places labellisées /
-            spécialisées ?
-            <Checkbox
-              options={[
-                {
-                  label: "LGBT",
-                  nativeInputProps: {
-                    ...register("lgbt"),
-                  },
-                },
-              ]}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {formKind !== FormKind.MODIFICATION && !isCreation ? (
+            <InputWithValidation
+              name="creationDate"
+              control={control}
+              type="date"
+              label="Date de création de la structure"
+              id="creationDate"
             />
-            <Checkbox
-              options={[
-                {
-                  label: "FVV et TEH",
-                  nativeInputProps: {
-                    ...register("fvvTeh"),
-                  },
-                },
-              ]}
+          ) : null}
+          {!isCreation ? (
+            <SelectWithValidation
+              name="public"
+              control={control}
+              label="Public"
+              id="public"
+            >
+              <option value="">Sélectionnez une option</option>
+              {Object.values(PublicType).map((publicType) => (
+                <option key={publicType} value={publicType}>
+                  {publicType}
+                </option>
+              ))}
+            </SelectWithValidation>
+          ) : null}
+        </div>
+        {!isCreation && (
+          <>
+            <CustomNotice
+              severity="info"
+              title=""
+              className="rounded [&_p]:flex [&_p]:items-center"
+              description="LGBT : Lesbiennes, Gays, Bisexuels et Transgenres – FVV : Femmes Victimes de Violences–TEH : Traîte des Êtres Humains"
             />
-          </label>
-        </>
-      )}
-    </fieldset>
+            <label className="flex gap-6">
+              Actuellement, la structure dispose-t-elle de places labellisées /
+              spécialisées ?
+              <Checkbox
+                options={[
+                  {
+                    label: "LGBT",
+                    nativeInputProps: {
+                      ...register("lgbt"),
+                    },
+                  },
+                ]}
+              />
+              <Checkbox
+                options={[
+                  {
+                    label: "FVV et TEH",
+                    nativeInputProps: {
+                      ...register("fvvTeh"),
+                    },
+                  },
+                ]}
+              />
+            </label>
+          </>
+        )}
+      </fieldset>
+    </>
   );
 };
 
 type Props = {
   formKind?: FormKind;
+};
+
+const getTitle = (formKind: FormKind): string => {
+  if (
+    formKind === FormKind.MODIFICATION ||
+    formKind === FormKind.OUVERTURE_EX_NIHILO
+  ) {
+    return "Général";
+  } else if (
+    formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
+  ) {
+    return "Veuillez renseigner les champs suivants en considérant l’ensemble de la nouvelle structure.";
+  }
+  return "Description";
 };

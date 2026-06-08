@@ -2,11 +2,12 @@ import { render } from "@testing-library/react";
 import { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { CreationExNihiloIdentificationForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation-ex-nihilo/CreationExNihiloIdentificationForm";
+import { ExistingStructureIdentificationForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/ExistingStructureIdentificationForm";
 import {
   StructureTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
+import { FormKind } from "@/types/global";
 import {
   StructureTransformationType,
   TransformationType,
@@ -17,6 +18,7 @@ const mockHandleValidation = vi.fn();
 vi.mock("@/app/hooks/useTransformationFormHandling", () => ({
   useTransformationFormHandling: () => ({
     handleValidation: mockHandleValidation,
+    handleSave: vi.fn(),
   }),
 }));
 
@@ -43,13 +45,13 @@ vi.mock("@/app/components/forms/FormWrapper", () => ({
   FooterButtonType: { CANCEL: "cancel", SAVE: "save", SUBMIT: "submit" },
 }));
 
-vi.mock("@/app/components/forms/description/FieldSetDescription", () => ({
-  FieldSetDescription: () => null,
+vi.mock("@/app/components/forms/EffectiveDateInput", () => ({
+  EffectiveDateInput: () => null,
 }));
 vi.mock(
-  "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes",
+  "@/app/components/forms/adresseAdministrativeAndAntenne/TransformationAdresseAdministrative",
   () => ({
-    AdresseAdministrativeAndAntennes: () => null,
+    TransformationAdresseAdministrative: () => null,
   })
 );
 vi.mock("@/app/components/forms/dnaAndFiness/DnaAndFiness", () => ({
@@ -58,31 +60,35 @@ vi.mock("@/app/components/forms/dnaAndFiness/DnaAndFiness", () => ({
 vi.mock("@/app/components/forms/contacts/FieldSetContacts", () => ({
   FieldSetContacts: () => null,
 }));
+vi.mock("@/app/components/forms/SaveCurrentForm", () => ({
+  SaveCurrentForm: () => null,
+}));
 
-describe("CreationExNihiloIdentificationForm", () => {
-  it("should pass the structureVersion as defaultValues, including its id", () => {
+describe("ExistingStructureIdentificationForm", () => {
+  it("passe le structureVersion (et son id) en defaultValues", () => {
     // GIVEN
     const structureTransformation: StructureTransformationApiRead = {
       id: 7,
-      type: StructureTransformationType.CREATION,
+      type: StructureTransformationType.EXTENSION,
       structureVersion: {
         id: 999,
         structureId: 42,
-        nom: "Les Coquelicots",
-        creationDate: "2024-01-01T00:00:00.000Z",
+        nom: "Les Mimosas",
+        effectiveDate: "2026-08-25T00:00:00.000Z",
       },
     };
     const transformation: TransformationApiRead = {
       id: 12,
-      type: TransformationType.OUVERTURE_EX_NIHILO,
+      type: TransformationType.EXTENSION_EX_NIHILO,
       structureTransformations: [structureTransformation],
     };
 
     // WHEN
     render(
-      <CreationExNihiloIdentificationForm
+      <ExistingStructureIdentificationForm
         transformation={transformation}
         structureTransformation={structureTransformation}
+        formKind={FormKind.EXTENSION}
       />
     );
 
@@ -90,35 +96,36 @@ describe("CreationExNihiloIdentificationForm", () => {
     expect(captured.defaultValues).toMatchObject({
       id: 999,
       structureId: 42,
-      nom: "Les Coquelicots",
-      creationDate: "2024-01-01T00:00:00.000Z",
+      nom: "Les Mimosas",
+      effectiveDate: "2026-08-25T00:00:00.000Z",
     });
   });
 
-  it("should pass transformationId and a structureTransformation update payload to handleValidation", () => {
+  it("construit le payload avec effectiveDate et le type de la structureTransformation, sans creationDate", () => {
     // GIVEN
     const structureTransformation: StructureTransformationApiRead = {
       id: 7,
-      type: StructureTransformationType.CREATION,
+      type: StructureTransformationType.CONTRACTION,
       structureVersion: { id: 999 },
     };
     const transformation: TransformationApiRead = {
       id: 12,
-      type: TransformationType.OUVERTURE_EX_NIHILO,
+      type: TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES,
       structureTransformations: [structureTransformation],
     };
     render(
-      <CreationExNihiloIdentificationForm
+      <ExistingStructureIdentificationForm
         transformation={transformation}
         structureTransformation={structureTransformation}
+        formKind={FormKind.CONTRACTION}
       />
     );
 
     // WHEN
     captured.onSubmit?.({
       id: 999,
-      nom: "Les Coquelicots",
-      creationDate: "2024-01-01T00:00:00.000Z",
+      nom: "Les Mimosas",
+      effectiveDate: "2026-08-25T00:00:00.000Z",
     });
 
     // THEN
@@ -126,12 +133,13 @@ describe("CreationExNihiloIdentificationForm", () => {
       transformationId: 12,
       structureTransformation: {
         id: 7,
-        type: StructureTransformationType.CREATION,
+        type: StructureTransformationType.CONTRACTION,
+        forms: undefined,
         structureVersion: {
           id: 999,
-          nom: "Les Coquelicots",
-          creationDate: "2024-01-01T00:00:00.000Z",
-          effectiveDate: "2024-01-01T00:00:00.000Z",
+          nom: "Les Mimosas",
+          dnaStructures: undefined,
+          effectiveDate: "2026-08-25T00:00:00.000Z",
         },
       },
     });

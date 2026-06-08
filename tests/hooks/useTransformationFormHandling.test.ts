@@ -6,6 +6,7 @@ import {
   StructureTransformationApiRead,
   StructureTransformationApiUpdateClient,
 } from "@/schemas/api/transformation.schema";
+import { StepStatus } from "@/types/form.type";
 import {
   StructureTransformationStep,
   StructureTransformationType,
@@ -15,6 +16,7 @@ import {
 import { createTransformation } from "../test-utils/factories/transformation.factory";
 
 const mockUseParams = vi.fn();
+const mockUsePathname = vi.fn();
 const mockRouterPush = vi.fn();
 const mockRouterReplace = vi.fn();
 const mockUseTransformationContext = vi.fn();
@@ -22,6 +24,7 @@ const mockUpdateTransformation = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useParams: () => mockUseParams(),
+  usePathname: () => mockUsePathname(),
   useRouter: () => ({
     push: mockRouterPush,
     replace: mockRouterReplace,
@@ -43,6 +46,51 @@ vi.mock("@/app/hooks/useTransformations", () => ({
 
 const setTransformation = vi.fn();
 
+const buildCreationForm = (validatedSlug?: string) => ({
+  id: 100,
+  status: false,
+  formDefinition: {
+    id: 10,
+    name: "structure-transformation-creation",
+    slug: "structure-transformation-creation-v1",
+    version: 1,
+  },
+  formSteps: [
+    {
+      id: 1001,
+      status:
+        validatedSlug === "01-identification"
+          ? StepStatus.VALIDE
+          : StepStatus.NON_COMMENCE,
+      stepDefinition: { id: 201, slug: "01-identification", label: "Description" },
+    },
+    {
+      id: 1002,
+      status:
+        validatedSlug === "02-places-hebergement"
+          ? StepStatus.VALIDE
+          : StepStatus.NON_COMMENCE,
+      stepDefinition: {
+        id: 202,
+        slug: "02-places-hebergement",
+        label: "Places et hébergement",
+      },
+    },
+    {
+      id: 1003,
+      status:
+        validatedSlug === "03-actes-administratifs"
+          ? StepStatus.VALIDE
+          : StepStatus.NON_COMMENCE,
+      stepDefinition: {
+        id: 203,
+        slug: "03-actes-administratifs",
+        label: "Actes administratifs",
+      },
+    },
+  ],
+});
+
 const buildTransformation = () =>
   createTransformation({
     id: 12,
@@ -63,6 +111,7 @@ const buildPayload = (): {
   structureTransformation: {
     id: 7,
     type: StructureTransformationType.CREATION,
+    forms: [buildCreationForm()],
     structureVersion: { nom: "Les Coquelicots" },
   },
 });
@@ -79,21 +128,25 @@ describe("useTransformationFormHandling", () => {
       transformationStructureId: "7",
       transformationStructureStep: StructureTransformationStep.DESCRIPTION,
     });
+    mockUsePathname.mockReturnValue(
+      "/structures/transformation/12/creation/7/description"
+    );
   });
 
   afterEach(() => {
     vi.resetAllMocks();
   });
 
-  it("should build the TransformationApiUpdate payload and forward setTransformation", async () => {
+  it("should reuse the read form, mark the current step as VALIDE and forward setTransformation", async () => {
     // GIVEN
     mockUpdateTransformation.mockResolvedValue(12);
 
-    // WHEN
+    // WHEN — currentStep is "description"
     const { result } = renderHook(() => useTransformationFormHandling());
     await result.current.handleValidation(buildPayload());
 
-    // THEN
+    // THEN — the form read from the context keeps its ids and the "description"
+    // step (01-identification) is the only one flipped to VALIDE
     expect(mockUpdateTransformation).toHaveBeenCalledWith(
       12,
       {
@@ -103,6 +156,7 @@ describe("useTransformationFormHandling", () => {
             id: 7,
             type: StructureTransformationType.CREATION,
             structureVersion: { nom: "Les Coquelicots" },
+            forms: [buildCreationForm("01-identification")],
           },
         ],
       },
@@ -125,14 +179,17 @@ describe("useTransformationFormHandling", () => {
     );
   });
 
-  it("should NOT navigate when there is no next step", async () => {
-    // GIVEN — currentStep is the last one (actes-administratifs)
+  it("should push to /verification after submitting the last form step", async () => {
+    // GIVEN — currentStep is the last form step (actes-administratifs)
     mockUseParams.mockReturnValue({
       transformationStructureType: StructureTransformationType.CREATION,
       transformationStructureId: "7",
       transformationStructureStep:
         StructureTransformationStep.ACTES_ADMINISTRATIFS,
     });
+    mockUsePathname.mockReturnValue(
+      "/structures/transformation/12/creation/7/actes-administratifs"
+    );
     mockUpdateTransformation.mockResolvedValue(12);
 
     // WHEN
@@ -140,7 +197,9 @@ describe("useTransformationFormHandling", () => {
     await result.current.handleValidation(buildPayload());
 
     // THEN
-    expect(mockRouterPush).not.toHaveBeenCalled();
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      "/structures/transformation/12/verification"
+    );
   });
 
   it("should log the error and not navigate when updateTransformation rejects", async () => {
@@ -182,6 +241,25 @@ describe("useTransformationFormHandling", () => {
     );
   });
 
+  it("should be a no-op (no crash, no update) when currentStep is not resolved", async () => {
+    // GIVEN — invalid step in URL → currentStep is undefined
+    mockUseParams.mockReturnValue({
+      transformationStructureType: StructureTransformationType.CREATION,
+      transformationStructureId: "7",
+      transformationStructureStep: "unknown-step",
+    });
+
+    // WHEN
+    const { result } = renderHook(() => useTransformationFormHandling());
+
+    // THEN — does not dereference currentStep.name, does not save, does not navigate
+    await expect(
+      result.current.handleValidation(buildPayload())
+    ).resolves.toBeUndefined();
+    expect(mockUpdateTransformation).not.toHaveBeenCalled();
+    expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
   it("should expose nextStep and prevStep based on the current position", () => {
     // GIVEN — currentStep is "places-et-hebergement" (middle of 3 steps)
     mockUseParams.mockReturnValue({
@@ -190,6 +268,9 @@ describe("useTransformationFormHandling", () => {
       transformationStructureStep:
         StructureTransformationStep.PLACES_ET_HEBERGEMENT,
     });
+    mockUsePathname.mockReturnValue(
+      "/structures/transformation/12/creation/7/places-et-hebergement"
+    );
 
     // WHEN
     const { result } = renderHook(() => useTransformationFormHandling());
@@ -201,5 +282,22 @@ describe("useTransformationFormHandling", () => {
     expect(result.current.nextStep?.route).toBe(
       "/structures/transformation/12/creation/7/actes-administratifs"
     );
+  });
+
+  it("should resolve the verification step when on the /verification page", () => {
+    // GIVEN — URL params have no structure-step segments
+    mockUseParams.mockReturnValue({});
+    mockUsePathname.mockReturnValue(
+      "/structures/transformation/12/verification"
+    );
+
+    // WHEN
+    const { result } = renderHook(() => useTransformationFormHandling());
+
+    // THEN — prevStep is the last form step, no nextStep
+    expect(result.current.prevStep?.route).toBe(
+      "/structures/transformation/12/creation/7/actes-administratifs"
+    );
+    expect(result.current.nextStep).toBeUndefined();
   });
 });

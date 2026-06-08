@@ -7,6 +7,7 @@ import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 
 import { SegmentedControl } from "@/app/components/common/SegmentedControl";
 import { ListLoader } from "@/app/components/lists/ListLoader";
+import { OngoingTransformationsBanner } from "@/app/components/transformations/OngoingTransformationsBanner";
 import { usePersistStructuresSearchQuery } from "@/app/hooks/usePersistStructuresSearchQuery";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
 
@@ -18,7 +19,6 @@ type Visualization = "tableau" | "carte";
 export default function Structures(): ReactElement {
   const [selectedVisualization, setSelectedVisualization] =
     useState<Visualization>(() => {
-      // Safe value, necessary for build
       if (typeof window === "undefined") {
         return "tableau";
       }
@@ -119,6 +119,8 @@ export default function Structures(): ReactElement {
           </div>
         )}
       </div>
+
+      <OngoingTransformationsBanner />
 
       {selectedVisualization === "tableau" && (
         <>

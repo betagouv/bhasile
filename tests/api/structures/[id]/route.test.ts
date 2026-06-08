@@ -66,7 +66,10 @@ vi.mock("@/app/api/finesses/finess.util", () => ({
   getFinessesApiRead: vi.fn().mockReturnValue(undefined),
 }));
 
-vi.mock("@/app/api/adresses/adresse.util", () => ({
+vi.mock("@/app/api/adresses/adresse.util", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("@/app/api/adresses/adresse.util")
+  >()),
   getAdressesApiRead: vi.fn().mockReturnValue([]),
 }));
 

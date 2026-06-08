@@ -66,3 +66,11 @@ export const isNullOrUndefined = (value: unknown): boolean => {
 export const isBlank = (value: unknown): boolean => {
   return isNullOrUndefined(value) || value === "";
 };
+
+export const isEmptyValue = (value: unknown): boolean => {
+  return isBlank(value) || (Array.isArray(value) && value.length === 0);
+};
+
+export const areAllValuesEmpty = (object: Record<string, unknown>): boolean => {
+  return Object.values(object).every(isEmptyValue);
+};

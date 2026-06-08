@@ -16,6 +16,8 @@ import {
 export type StructureVersionApiRead =
   ExcludeNullValues<StructureVersionApiType> & {
     adresseAdministrativeComplete?: string;
+    isMultiAntenne?: boolean;
+    isMultiDna?: boolean;
   };
 
 const structureTransformationApiUpdateSchema = z.object({
@@ -65,6 +67,12 @@ export type StructureTransformationApiRead =
       structure?: {
         codeBhasile: string;
         operateur?: { id: number; name: string };
+        nom?: string | null;
+        adresseAdministrative?: string | null;
+        adresseAdministrativeComplete?: string;
+        codePostalAdministratif?: string | null;
+        communeAdministrative?: string | null;
+        departementAdministratif?: string | null;
       };
     };
   };
@@ -90,5 +98,7 @@ export type TransformationApiRead = Omit<
   "structureTransformations"
 > & {
   id: number;
+  createdAt?: string;
+  updatedAt?: string;
   structureTransformations: StructureTransformationApiRead[];
 };

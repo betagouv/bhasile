@@ -17,7 +17,7 @@ type StructureVersionParent = Pick<
 >;
 
 const getScalarData = (version: StructureVersionApiType) => ({
-  effectiveDate: new Date().toISOString(),
+  effectiveDate: version.effectiveDate ?? new Date().toISOString(),
   forceHistorize: version.forceHistorize ?? undefined,
   type: version.type ?? undefined,
   public: convertToPublicType(version.public),

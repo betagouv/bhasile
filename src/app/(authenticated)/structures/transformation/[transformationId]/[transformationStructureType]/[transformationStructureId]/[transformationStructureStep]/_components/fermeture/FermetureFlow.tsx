@@ -1,19 +1,23 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import {
+  StructureTransformationApiRead,
+  TransformationApiRead,
+} from "@/schemas/api/transformation.schema";
 
-import { StructureTransformationApiRead } from "@/schemas/api/transformation.schema";
+import { FermetureDescriptionForm } from "./FermetureDescriptionForm";
 
 type Props = {
+  transformation: TransformationApiRead;
   structureTransformation: StructureTransformationApiRead;
 };
 
-export const FermetureFlow = ({ structureTransformation }: Props) => {
-  const { transformationStructureStep } = useParams();
-
-  return (
-    <div>
-      {structureTransformation.type} - {transformationStructureStep}
-    </div>
-  );
-};
+export const FermetureFlow = ({
+  transformation,
+  structureTransformation,
+}: Props) => (
+  <FermetureDescriptionForm
+    transformation={transformation}
+    structureTransformation={structureTransformation}
+  />
+);

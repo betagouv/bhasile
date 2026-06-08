@@ -11,16 +11,11 @@ import {
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
-import {
-  StructureTransformationType,
-  TransformationType,
-} from "@/types/transformation.type";
+import { StructureTransformationType } from "@/types/transformation.type";
 
-import { ContractionFlow } from "./_components/contraction/ContractionFlow";
-import { CreationDepuisStructuresFlow } from "./_components/creation-depuis-structures/CreationDepuisStructuresFlow";
-import { CreationExNihiloFlow } from "./_components/creation-ex-nihilo/CreationExNihiloFlow";
-import { ExtensionFlow } from "./_components/extension/ExtensionFlow";
+import { CreationFlow } from "./_components/creation/CreationFlow";
 import { FermetureFlow } from "./_components/fermeture/FermetureFlow";
+import { ExistingStructureFlow } from "./_components/shared/ExistingStructureFlow";
 
 export default function TransformationStructureStepPage() {
   const { transformationStructureId } = useParams();
@@ -62,27 +57,23 @@ const renderFlow = (
   switch (structureTransformation.type) {
     case StructureTransformationType.FERMETURE:
       return (
-        <FermetureFlow structureTransformation={structureTransformation} />
+        <FermetureFlow
+          transformation={transformation}
+          structureTransformation={structureTransformation}
+        />
       );
     case StructureTransformationType.EXTENSION:
-      return (
-        <ExtensionFlow structureTransformation={structureTransformation} />
-      );
     case StructureTransformationType.CONTRACTION:
       return (
-        <ContractionFlow structureTransformation={structureTransformation} />
+        <ExistingStructureFlow
+          transformation={transformation}
+          structureTransformation={structureTransformation}
+        />
       );
     case StructureTransformationType.CREATION:
-      if (transformation.type === TransformationType.OUVERTURE_EX_NIHILO) {
-        return (
-          <CreationExNihiloFlow
-            transformation={transformation}
-            structureTransformation={structureTransformation}
-          />
-        );
-      }
       return (
-        <CreationDepuisStructuresFlow
+        <CreationFlow
+          transformation={transformation}
           structureTransformation={structureTransformation}
         />
       );
