@@ -1,4 +1,5 @@
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import { StructureVersionTransformationApiUpdateClient } from "@/schemas/api/transformation.schema";
 
@@ -16,9 +17,11 @@ export const useTransformationFormHandling = () => {
   const { firstStep, currentStep, nextStep, prevStep } =
     useTransformationFormNavigation();
 
-  if (!currentStep) {
-    router.replace(firstStep.route);
-  }
+  useEffect(() => {
+    if (!currentStep) {
+      router.replace(firstStep.route);
+    }
+  }, [currentStep, firstStep.route, router]);
 
   const handleSave = async ({
     transformationId,
