@@ -93,7 +93,8 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
-    primaryStructureVersionTransformationType: StructureVersionTransformationType.EXTENSION,
+    primaryStructureVersionTransformationType:
+      StructureVersionTransformationType.EXTENSION,
   },
   [TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_CONTRACTENT]: {
     title: "Transformer une structure",
@@ -112,7 +113,8 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
-    primaryStructureVersionTransformationType: StructureVersionTransformationType.EXTENSION,
+    primaryStructureVersionTransformationType:
+      StructureVersionTransformationType.EXTENSION,
   },
   [TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_FERMENT]: {
     title: "Transformer une structure",
@@ -131,7 +133,8 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
-    primaryStructureVersionTransformationType: StructureVersionTransformationType.EXTENSION,
+    primaryStructureVersionTransformationType:
+      StructureVersionTransformationType.EXTENSION,
   },
   [TransformationType.CONTRACTION_AVEC_TRANSFERT_VERS_AUTRE_STRUCTURE]: {
     title: "Transformer une structure",
@@ -150,7 +153,8 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
-    primaryStructureVersionTransformationType: StructureVersionTransformationType.CONTRACTION,
+    primaryStructureVersionTransformationType:
+      StructureVersionTransformationType.CONTRACTION,
   },
   [TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES]: {
     title: "Transformer une structure",
@@ -161,7 +165,8 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
-    primaryStructureVersionTransformationType: StructureVersionTransformationType.CONTRACTION,
+    primaryStructureVersionTransformationType:
+      StructureVersionTransformationType.CONTRACTION,
   },
   [TransformationType.FERMETURE_AVEC_TRANSFERT_VERS_UNE_OU_PLUSIEURS_STRUCTURES]:
     {
@@ -181,7 +186,8 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
           structureVersion: { structureId },
         },
       ],
-      primaryStructureVersionTransformationType: StructureVersionTransformationType.FERMETURE,
+      primaryStructureVersionTransformationType:
+        StructureVersionTransformationType.FERMETURE,
     },
   [TransformationType.FERMETURE_SANS_TRANSFERT]: {
     title: "Transformer une structure",
@@ -192,7 +198,8 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
-    primaryStructureVersionTransformationType: StructureVersionTransformationType.FERMETURE,
+    primaryStructureVersionTransformationType:
+      StructureVersionTransformationType.FERMETURE,
   },
   [TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR]: {
     title: "Transformer HUDA en CADA",
@@ -411,15 +418,12 @@ export const getTransformationActesAdministratifsCategoryToDisplay = (
     case StructureVersionTransformationType.FERMETURE:
       return fermetureActesAdministratifsCategoryToDisplay;
     case StructureVersionTransformationType.CREATION:
-      return getCreationActesAdministratifsCategoryToDisplay(transformationType);
+      return getCreationActesAdministratifsCategoryToDisplay(
+        transformationType
+      );
   }
 };
 
-// Catégories d'actes de la structure pouvant servir de parent à un avenant de
-// transformation. Dérivé de TOUS les jeux de règles de transformation (et non codé en
-// dur ni limité à certains types) pour rester synchronisé avec les
-// avenantAlternative.parentCategory : la requête Prisma qui charge les actes parents de
-// la structure s'appuie dessus.
 export const AVENANT_PARENT_CATEGORIES = collectAvenantParentCategories(
   Object.values(StructureVersionTransformationType).map(
     (structureVersionTransformationType) =>
@@ -434,11 +438,14 @@ export const STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME: Record<
   StructureVersionTransformationType,
   string
 > = {
-  [StructureVersionTransformationType.CREATION]: "structure-transformation-creation",
-  [StructureVersionTransformationType.EXTENSION]: "structure-transformation-extension",
+  [StructureVersionTransformationType.CREATION]:
+    "structure-transformation-creation",
+  [StructureVersionTransformationType.EXTENSION]:
+    "structure-transformation-extension",
   [StructureVersionTransformationType.CONTRACTION]:
     "structure-transformation-contraction",
-  [StructureVersionTransformationType.FERMETURE]: "structure-transformation-fermeture",
+  [StructureVersionTransformationType.FERMETURE]:
+    "structure-transformation-fermeture",
 };
 
 export type StructureVersionTransformationFormStepSpec = {
@@ -474,12 +481,16 @@ export const STRUCTURE_VERSION_TRANSFORMATION_FORM_STEPS: Record<
   string,
   StructureVersionTransformationFormStepSpec[]
 > = {
-  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[StructureVersionTransformationType.CREATION]]:
-    STRUCTURE_VERSION_TRANSFORMATION_COMPLETE_FORM_STEPS,
-  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[StructureVersionTransformationType.EXTENSION]]:
-    STRUCTURE_VERSION_TRANSFORMATION_COMPLETE_FORM_STEPS,
-  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[StructureVersionTransformationType.CONTRACTION]]:
-    STRUCTURE_VERSION_TRANSFORMATION_COMPLETE_FORM_STEPS,
-  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[StructureVersionTransformationType.FERMETURE]]:
-    STRUCTURE_VERSION_TRANSFORMATION_FERMETURE_FORM_STEPS,
+  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[
+    StructureVersionTransformationType.CREATION
+  ]]: STRUCTURE_VERSION_TRANSFORMATION_COMPLETE_FORM_STEPS,
+  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[
+    StructureVersionTransformationType.EXTENSION
+  ]]: STRUCTURE_VERSION_TRANSFORMATION_COMPLETE_FORM_STEPS,
+  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[
+    StructureVersionTransformationType.CONTRACTION
+  ]]: STRUCTURE_VERSION_TRANSFORMATION_COMPLETE_FORM_STEPS,
+  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[
+    StructureVersionTransformationType.FERMETURE
+  ]]: STRUCTURE_VERSION_TRANSFORMATION_FERMETURE_FORM_STEPS,
 };

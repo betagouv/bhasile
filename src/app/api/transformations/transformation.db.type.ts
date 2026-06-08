@@ -37,6 +37,7 @@ export const transformationInclude = {
                   parentId: null,
                   category: { in: AVENANT_PARENT_CATEGORIES },
                 },
+                orderBy: { startDate: "desc" },
                 select: {
                   id: true,
                   category: true,

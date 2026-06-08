@@ -127,9 +127,7 @@ const createOrUpdateActeAdministratif = async (
   entityId: EntityId,
   parentId?: number
 ) => {
-  // Le parentId est résolu par l'appelant (avec garde-fou sur un parent disparu) ; on ne
-  // retombe pas sur acteAdministratif.parentId, qui pourrait être périmé.
-  const realParentId = parentId;
+  const realParentId = parentId ?? null;
 
   const fileKey = acteAdministratif.fileUploads?.[0]?.key;
   if (!fileKey) {

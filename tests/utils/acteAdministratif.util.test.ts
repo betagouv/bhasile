@@ -69,6 +69,28 @@ describe("getCurrentStructureParentActe", () => {
     expect(resolved).toEqual({ id: 7, startYear: 2020, endYear: 2030 });
   });
 
+  it("picks the most recent (latest startDate) when several actes are in effect at once", () => {
+    // Two ARRETE_AUTORISATION both span the reference date (e.g. a renewal entered before
+    // the previous one expired). The later-starting one must win, regardless of array order.
+    const resolved = getCurrentStructureParentActe(
+      [
+        parentActe({
+          id: 1,
+          startDate: "2018-01-01T12:00:00.000Z",
+          endDate: "2030-01-01T12:00:00.000Z",
+        }),
+        parentActe({
+          id: 2,
+          startDate: "2023-01-01T12:00:00.000Z",
+          endDate: "2032-01-01T12:00:00.000Z",
+        }),
+      ],
+      "ARRETE_AUTORISATION",
+      REFERENCE_DATE
+    );
+    expect(resolved).toEqual({ id: 2, startYear: 2023, endYear: 2032 });
+  });
+
   it("uses the most future avenant endDate as the effective end (max children ?? parent)", () => {
     const resolved = getCurrentStructureParentActe(
       [

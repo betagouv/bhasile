@@ -43,28 +43,45 @@ export const getCurrentStructureParentActe = (
   category: ActeAdministratifCategory,
   referenceDate: Date
 ): ResolvedAvenantParent | undefined => {
-  const candidates = (structureActes ?? []).filter(
-    (acteAdministratif) => acteAdministratif.category === category
-  );
-  for (const candidate of candidates) {
+  let mostRecent:
+    | { id: number; startDate: Date; effectiveEndDate: Date }
+    | undefined;
+
+  for (const candidate of structureActes ?? []) {
+    if (candidate.category !== category) {
+      continue;
+    }
     const startDate = toDate(candidate.startDate);
     const effectiveEndDate = getEffectiveEndDate(
       toDate(candidate.endDate),
       candidate.children.map((child) => toDate(child.endDate))
     );
     if (
-      startDate &&
-      effectiveEndDate &&
-      isCurrentlyInEffect(startDate, effectiveEndDate, referenceDate)
+      !startDate ||
+      !effectiveEndDate ||
+      !isCurrentlyInEffect(startDate, effectiveEndDate, referenceDate)
     ) {
-      return {
-        id: candidate.id,
-        startYear: startDate.getUTCFullYear(),
-        endYear: effectiveEndDate.getUTCFullYear(),
-      };
+      continue;
+    }
+
+    const isMoreRecent =
+      !mostRecent ||
+      startDate > mostRecent.startDate ||
+      (startDate.getTime() === mostRecent.startDate.getTime() &&
+        candidate.id > mostRecent.id);
+    if (isMoreRecent) {
+      mostRecent = { id: candidate.id, startDate, effectiveEndDate };
     }
   }
-  return undefined;
+
+  if (!mostRecent) {
+    return undefined;
+  }
+  return {
+    id: mostRecent.id,
+    startYear: mostRecent.startDate.getUTCFullYear(),
+    endYear: mostRecent.effectiveEndDate.getUTCFullYear(),
+  };
 };
 
 // TODO: Faire en sorte de chercher le parent dans TOUS les actes administratifs, autres transformations comprises
