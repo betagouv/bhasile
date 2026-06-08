@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TransformationMenu } from "@/app/(authenticated)/structures/transformation/_components/TransformationMenu";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 import {
-  StructureTransformationType,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
@@ -102,7 +102,7 @@ describe("TransformationMenu", () => {
         transformation: {
           id: 42,
           type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
-          structureTransformations: [],
+          structureVersionTransformations: [],
         },
       });
     });
@@ -246,10 +246,10 @@ describe("TransformationMenu", () => {
         transformation: {
           id: 42,
           type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
-          structureTransformations: [
+          structureVersionTransformations: [
             {
               id: 1,
-              type: StructureTransformationType.FERMETURE,
+              type: StructureVersionTransformationType.FERMETURE,
               structureVersion: {
                 structureId: 1001,
                 structure: { codeBhasile: "1001" },

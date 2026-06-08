@@ -3,13 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import {
-  StructureTransformationApiRead,
-  StructureTransformationApiUpdateClient,
+  StructureVersionTransformationApiRead,
+  StructureVersionTransformationApiUpdateClient,
 } from "@/schemas/api/transformation.schema";
 import { StepStatus } from "@/types/form.type";
 import {
-  StructureTransformationStep,
-  StructureTransformationType,
+  StructureVersionTransformationStep,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
@@ -95,23 +95,23 @@ const buildTransformation = () =>
   createTransformation({
     id: 12,
     type: TransformationType.OUVERTURE_EX_NIHILO,
-    structureTransformations: [
+    structureVersionTransformations: [
       {
         id: 7,
-        type: StructureTransformationType.CREATION,
-      } as StructureTransformationApiRead,
+        type: StructureVersionTransformationType.CREATION,
+      } as StructureVersionTransformationApiRead,
     ],
   });
 
 const buildPayload = (): {
   transformationId: number;
-  structureTransformation: StructureTransformationApiUpdateClient;
+  structureVersionTransformation: StructureVersionTransformationApiUpdateClient;
 } => ({
   transformationId: 12,
-  structureTransformation: {
+  structureVersionTransformation: {
     id: 7,
-    type: StructureTransformationType.CREATION,
-    forms: [buildCreationForm()],
+    type: StructureVersionTransformationType.CREATION,
+    form: buildCreationForm(),
     structureVersion: { nom: "Les Coquelicots" },
   },
 });
@@ -124,9 +124,9 @@ describe("useTransformationFormHandling", () => {
       setTransformation,
     });
     mockUseParams.mockReturnValue({
-      transformationStructureType: StructureTransformationType.CREATION,
+      transformationStructureType: StructureVersionTransformationType.CREATION,
       transformationStructureId: "7",
-      transformationStructureStep: StructureTransformationStep.DESCRIPTION,
+      transformationStructureStep: StructureVersionTransformationStep.DESCRIPTION,
     });
     mockUsePathname.mockReturnValue(
       "/structures/transformation/12/creation/7/description"
@@ -151,12 +151,12 @@ describe("useTransformationFormHandling", () => {
       12,
       {
         id: 12,
-        structureTransformations: [
+        structureVersionTransformations: [
           {
             id: 7,
-            type: StructureTransformationType.CREATION,
+            type: StructureVersionTransformationType.CREATION,
             structureVersion: { nom: "Les Coquelicots" },
-            forms: [buildCreationForm("01-identification")],
+            form: buildCreationForm("01-identification"),
           },
         ],
       },
@@ -182,10 +182,10 @@ describe("useTransformationFormHandling", () => {
   it("should push to /verification after submitting the last form step", async () => {
     // GIVEN — currentStep is the last form step (actes-administratifs)
     mockUseParams.mockReturnValue({
-      transformationStructureType: StructureTransformationType.CREATION,
+      transformationStructureType: StructureVersionTransformationType.CREATION,
       transformationStructureId: "7",
       transformationStructureStep:
-        StructureTransformationStep.ACTES_ADMINISTRATIFS,
+        StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
     });
     mockUsePathname.mockReturnValue(
       "/structures/transformation/12/creation/7/actes-administratifs"
@@ -226,7 +226,7 @@ describe("useTransformationFormHandling", () => {
   it("should redirect to the firstStep when currentStep is not found", () => {
     // GIVEN — invalid step in URL
     mockUseParams.mockReturnValue({
-      transformationStructureType: StructureTransformationType.CREATION,
+      transformationStructureType: StructureVersionTransformationType.CREATION,
       transformationStructureId: "7",
       transformationStructureStep: "unknown-step",
     });
@@ -244,7 +244,7 @@ describe("useTransformationFormHandling", () => {
   it("should be a no-op (no crash, no update) when currentStep is not resolved", async () => {
     // GIVEN — invalid step in URL → currentStep is undefined
     mockUseParams.mockReturnValue({
-      transformationStructureType: StructureTransformationType.CREATION,
+      transformationStructureType: StructureVersionTransformationType.CREATION,
       transformationStructureId: "7",
       transformationStructureStep: "unknown-step",
     });
@@ -263,10 +263,10 @@ describe("useTransformationFormHandling", () => {
   it("should expose nextStep and prevStep based on the current position", () => {
     // GIVEN — currentStep is "places-et-hebergement" (middle of 3 steps)
     mockUseParams.mockReturnValue({
-      transformationStructureType: StructureTransformationType.CREATION,
+      transformationStructureType: StructureVersionTransformationType.CREATION,
       transformationStructureId: "7",
       transformationStructureStep:
-        StructureTransformationStep.PLACES_ET_HEBERGEMENT,
+        StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
     });
     mockUsePathname.mockReturnValue(
       "/structures/transformation/12/creation/7/places-et-hebergement"

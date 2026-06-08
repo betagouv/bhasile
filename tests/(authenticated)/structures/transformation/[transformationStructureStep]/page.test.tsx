@@ -2,9 +2,9 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import TransformationStructureStepPage from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/page";
-import { StructureTransformationApiRead } from "@/schemas/api/transformation.schema";
+import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import {
-  StructureTransformationType,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
@@ -72,16 +72,16 @@ describe("TransformationStructureStepPage", () => {
     mockUseParams.mockReturnValue({ transformationStructureId: "7" });
   });
 
-  it("should render FermetureFlow when structureTransformation.type is FERMETURE", () => {
+  it("should render FermetureFlow when structureVersionTransformation.type is FERMETURE", () => {
     // GIVEN
-    const structureTransformation: StructureTransformationApiRead = {
+    const structureVersionTransformation: StructureVersionTransformationApiRead = {
       id: 7,
-      type: StructureTransformationType.FERMETURE,
+      type: StructureVersionTransformationType.FERMETURE,
     };
     mockUseTransformationContext.mockReturnValue({
       transformation: createTransformation({
         type: TransformationType.FERMETURE_SANS_TRANSFERT,
-        structureTransformations: [structureTransformation],
+        structureVersionTransformations: [structureVersionTransformation],
       }),
     });
 
@@ -94,25 +94,25 @@ describe("TransformationStructureStepPage", () => {
 
   it.each([
     [
-      StructureTransformationType.EXTENSION,
+      StructureVersionTransformationType.EXTENSION,
       TransformationType.EXTENSION_EX_NIHILO,
     ],
     [
-      StructureTransformationType.CONTRACTION,
+      StructureVersionTransformationType.CONTRACTION,
       TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES,
     ],
   ])(
-    "should render ExistingStructureFlow when structureTransformation.type is %s",
-    (structureTransformationType, transformationType) => {
+    "should render ExistingStructureFlow when structureVersionTransformation.type is %s",
+    (structureVersionTransformationType, transformationType) => {
       // GIVEN
-      const structureTransformation: StructureTransformationApiRead = {
+      const structureVersionTransformation: StructureVersionTransformationApiRead = {
         id: 7,
-        type: structureTransformationType,
+        type: structureVersionTransformationType,
       };
       mockUseTransformationContext.mockReturnValue({
         transformation: createTransformation({
           type: transformationType,
-          structureTransformations: [structureTransformation],
+          structureVersionTransformations: [structureVersionTransformation],
         }),
       });
 
@@ -134,14 +134,14 @@ describe("TransformationStructureStepPage", () => {
     "should render CreationFlow when CREATION and transformation.type is %s",
     (transformationType) => {
       // GIVEN
-      const structureTransformation: StructureTransformationApiRead = {
+      const structureVersionTransformation: StructureVersionTransformationApiRead = {
         id: 7,
-        type: StructureTransformationType.CREATION,
+        type: StructureVersionTransformationType.CREATION,
       };
       mockUseTransformationContext.mockReturnValue({
         transformation: createTransformation({
           type: transformationType,
-          structureTransformations: [structureTransformation],
+          structureVersionTransformations: [structureVersionTransformation],
         }),
       });
 
@@ -155,14 +155,14 @@ describe("TransformationStructureStepPage", () => {
 
   it("should render the TransformationStructureHeader above the flow", () => {
     // GIVEN
-    const structureTransformation: StructureTransformationApiRead = {
+    const structureVersionTransformation: StructureVersionTransformationApiRead = {
       id: 7,
-      type: StructureTransformationType.FERMETURE,
+      type: StructureVersionTransformationType.FERMETURE,
     };
     mockUseTransformationContext.mockReturnValue({
       transformation: createTransformation({
         type: TransformationType.FERMETURE_SANS_TRANSFERT,
-        structureTransformations: [structureTransformation],
+        structureVersionTransformations: [structureVersionTransformation],
       }),
     });
 
@@ -186,17 +186,17 @@ describe("TransformationStructureStepPage", () => {
     expect(mockNotFound).toHaveBeenCalled();
   });
 
-  it("should call notFound when structureTransformation id does not match", () => {
+  it("should call notFound when structureVersionTransformation id does not match", () => {
     // GIVEN
     mockUseParams.mockReturnValue({ transformationStructureId: "999" });
-    const structureTransformation: StructureTransformationApiRead = {
+    const structureVersionTransformation: StructureVersionTransformationApiRead = {
       id: 7,
-      type: StructureTransformationType.FERMETURE,
+      type: StructureVersionTransformationType.FERMETURE,
     };
     mockUseTransformationContext.mockReturnValue({
       transformation: createTransformation({
         type: TransformationType.FERMETURE_SANS_TRANSFERT,
-        structureTransformations: [structureTransformation],
+        structureVersionTransformations: [structureVersionTransformation],
       }),
     });
 

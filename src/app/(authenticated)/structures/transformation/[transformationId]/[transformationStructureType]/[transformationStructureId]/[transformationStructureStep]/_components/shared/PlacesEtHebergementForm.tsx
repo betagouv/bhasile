@@ -12,7 +12,7 @@ import {
   getTransformationStructureVersionDefaultValues,
 } from "@/app/utils/transformation.util";
 import {
-  StructureTransformationApiRead,
+  StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import {
@@ -23,14 +23,14 @@ import { DeepPartial, FormKind } from "@/types/global";
 
 type Props = {
   transformation: TransformationApiRead;
-  structureTransformation: StructureTransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
   formKind: FormKind;
   originalPlaces?: number;
 };
 
 export const PlacesEtHebergementForm = ({
   transformation,
-  structureTransformation,
+  structureVersionTransformation,
   formKind,
   originalPlaces,
 }: Props) => {
@@ -38,10 +38,12 @@ export const PlacesEtHebergementForm = ({
 
   const defaultValues: DeepPartial<CreationPlacesEtHebergementFormValues> = {
     ...getTransformationStructureVersionDefaultValues<CreationPlacesEtHebergementFormValues>(
-      structureTransformation.structureVersion
+      structureVersionTransformation.structureVersion
     ),
     structureTypologies: [
-      buildTransformationTypologie(structureTransformation.structureVersion),
+      buildTransformationTypologie(
+        structureVersionTransformation.structureVersion
+      ),
     ],
   };
 
@@ -52,11 +54,11 @@ export const PlacesEtHebergementForm = ({
       onSubmit={(data) => {
         handleValidation({
           transformationId: transformation.id,
-          structureTransformation: {
-            id: structureTransformation.id,
-            type: structureTransformation.type,
+          structureVersionTransformation: {
+            id: structureVersionTransformation.id,
+            type: structureVersionTransformation.type,
             structureVersion: {
-              id: structureTransformation.structureVersion?.id,
+              id: structureVersionTransformation.structureVersion?.id,
               public: data.public,
               adresses: data.adresses,
               structureTypologies: data.structureTypologies,

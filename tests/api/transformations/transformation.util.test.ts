@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import { applyPrefill } from "@/app/api/transformations/transformation.util";
-import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import {
-  StructureTransformationType,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
 describe("applyPrefill", () => {
   it("adds FERMETURE contacts/antennes/adresses to the CREATION (OUVERTURE_DEPUIS)", () => {
-    const structureTransformations: StructureTransformationApiCreate[] = [
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
       {
-        type: StructureTransformationType.FERMETURE,
+        type: StructureVersionTransformationType.FERMETURE,
         structureVersion: {
           contacts: [{ prenom: "Nicolas", nom: "Leboeuf" }],
           antennes: [{ name: "Avranches Nord" }],
@@ -19,24 +19,24 @@ describe("applyPrefill", () => {
         },
       },
       {
-        type: StructureTransformationType.FERMETURE,
+        type: StructureVersionTransformationType.FERMETURE,
         structureVersion: {
           contacts: [{ prenom: "Chloé", nom: "Pouillevet" }],
           antennes: [{ name: "Avranches Sud" }],
           adresses: [{ adresse: "2 rue B", adresseTypologies: [] }],
         },
       },
-      { type: StructureTransformationType.CREATION },
+      { type: StructureVersionTransformationType.CREATION },
     ];
 
     const result = applyPrefill(
       TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
-      structureTransformations
+      structureVersionTransformations
     );
 
     const creation = result.find(
-      (structureTransformation) =>
-        structureTransformation.type === StructureTransformationType.CREATION
+      (structureVersionTransformation) =>
+        structureVersionTransformation.type === StructureVersionTransformationType.CREATION
     );
     expect(creation?.structureVersion?.contacts).toHaveLength(2);
     expect(creation?.structureVersion?.antennes).toHaveLength(2);
@@ -44,22 +44,22 @@ describe("applyPrefill", () => {
 
     // Les sources (FERMETURE) ne sont pas modifiées.
     const fermetures = result.filter(
-      (structureTransformation) =>
-        structureTransformation.type === StructureTransformationType.FERMETURE
+      (structureVersionTransformation) =>
+        structureVersionTransformation.type === StructureVersionTransformationType.FERMETURE
     );
     expect(fermetures[0].structureVersion?.contacts).toHaveLength(1);
   });
 
   it("keeps the target's own data and appends the sources (additive)", () => {
-    const structureTransformations: StructureTransformationApiCreate[] = [
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
       {
-        type: StructureTransformationType.FERMETURE,
+        type: StructureVersionTransformationType.FERMETURE,
         structureVersion: {
           contacts: [{ prenom: "Chloé", nom: "Pouillevet" }],
         },
       },
       {
-        type: StructureTransformationType.CREATION,
+        type: StructureVersionTransformationType.CREATION,
         structureVersion: {
           contacts: [{ prenom: "Existant", nom: "Cible" }],
         },
@@ -68,12 +68,12 @@ describe("applyPrefill", () => {
 
     const result = applyPrefill(
       TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
-      structureTransformations
+      structureVersionTransformations
     );
 
     const creation = result.find(
-      (structureTransformation) =>
-        structureTransformation.type === StructureTransformationType.CREATION
+      (structureVersionTransformation) =>
+        structureVersionTransformation.type === StructureVersionTransformationType.CREATION
     );
     expect(creation?.structureVersion?.contacts).toEqual([
       { prenom: "Existant", nom: "Cible" },
@@ -81,19 +81,19 @@ describe("applyPrefill", () => {
     ]);
   });
 
-  it("returns the structureTransformations unchanged when the type has no prefill config", () => {
-    const structureTransformations: StructureTransformationApiCreate[] = [
+  it("returns the structureVersionTransformations unchanged when the type has no prefill config", () => {
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
       {
-        type: StructureTransformationType.CREATION,
+        type: StructureVersionTransformationType.CREATION,
         structureVersion: { contacts: [{ prenom: "Solo", nom: "Test" }] },
       },
     ];
 
     const result = applyPrefill(
       TransformationType.OUVERTURE_EX_NIHILO,
-      structureTransformations
+      structureVersionTransformations
     );
 
-    expect(result).toBe(structureTransformations);
+    expect(result).toBe(structureVersionTransformations);
   });
 });

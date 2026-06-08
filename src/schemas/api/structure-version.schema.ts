@@ -12,7 +12,7 @@ import { structureTypologieApiSchema } from "./structure-typologie.schema";
 export const structureVersionApiSchema = z.object({
   id: z.number().optional(),
   structureId: z.number().optional(),
-  structureTransformationId: z.number().optional(),
+  structureVersionTransformationId: z.number().optional(),
 
   effectiveDate: z.string().datetime().nullish(),
   forceHistorize: z.boolean().optional(),

@@ -2,7 +2,7 @@ import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { getTransformationDepartement } from "@/app/utils/transformation.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import {
-  StructureTransformationApiCreate,
+  StructureVersionTransformationApiCreate,
   TransformationApiCreate,
   TransformationApiRead,
   TransformationApiUpdate,
@@ -30,12 +30,12 @@ const dbTransformationToApiRead = (
 ): TransformationApiRead =>
   recursivelySerializeDates({
     ...transformation,
-    structureTransformations: transformation.structureTransformations.map(
-      (structureTransformation) => {
-        const structureVersion = structureTransformation.structureVersion;
+    structureVersionTransformations: transformation.structureVersionTransformations.map(
+      (structureVersionTransformation) => {
+        const structureVersion = structureVersionTransformation.structureVersion;
         return {
-          ...structureTransformation,
-          operateur: structureTransformation.operateur ?? undefined,
+          ...structureVersionTransformation,
+          operateur: structureVersionTransformation.operateur ?? undefined,
           structureVersion: structureVersion
             ? {
                 ...dbStructureVersionToApiRead(structureVersion),
@@ -79,35 +79,35 @@ export const getOngoingTransformationsForUser = async (
 export const createTransformation = async (
   transformation: TransformationApiCreate
 ): Promise<number> => {
-  const structureTransformationsWithSource = await Promise.all(
-    transformation.structureTransformations.map(
-      enrichStructureTransformationFromSource
+  const structureVersionTransformationsWithSource = await Promise.all(
+    transformation.structureVersionTransformations.map(
+      enrichStructureVersionTransformationFromSource
     )
   );
 
-  const structureTransformations = applyPrefill(
+  const structureVersionTransformations = applyPrefill(
     transformation.type,
-    structureTransformationsWithSource
+    structureVersionTransformationsWithSource
   );
 
-  return createOne({ ...transformation, structureTransformations });
+  return createOne({ ...transformation, structureVersionTransformations });
 };
 
-const enrichStructureTransformationFromSource = async (
-  structureTransformation: StructureTransformationApiCreate
-): Promise<StructureTransformationApiCreate> => {
-  const structureId = structureTransformation.structureVersion?.structureId;
+const enrichStructureVersionTransformationFromSource = async (
+  structureVersionTransformation: StructureVersionTransformationApiCreate
+): Promise<StructureVersionTransformationApiCreate> => {
+  const structureId = structureVersionTransformation.structureVersion?.structureId;
   if (!structureId) {
-    return structureTransformation;
+    return structureVersionTransformation;
   }
 
   const structure = await getStructure(structureId);
 
   return {
-    ...structureTransformation,
+    ...structureVersionTransformation,
     structureVersion: copyStructureVersion(
       structure,
-      structureTransformation.structureVersion
+      structureVersionTransformation.structureVersion
     ),
   };
 };

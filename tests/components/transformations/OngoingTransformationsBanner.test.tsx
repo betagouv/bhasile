@@ -8,7 +8,7 @@ import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 import { StructureType } from "@/types/structure.type";
 
 import {
-  createStructureTransformation,
+  createStructureVersionTransformation,
   createTransformation,
 } from "../../test-utils/factories/transformation.factory";
 
@@ -29,8 +29,8 @@ vi.mock("next/link", () => ({
 const adomaTransformation: TransformationApiRead = {
   ...createTransformation({
     id: 7,
-    structureTransformations: [
-      createStructureTransformation({
+    structureVersionTransformations: [
+      createStructureVersionTransformation({
         id: 1,
         operateur: { id: 1, name: "ADOMA" },
         structureVersion: {
@@ -38,7 +38,7 @@ const adomaTransformation: TransformationApiRead = {
           type: StructureType.CADA,
         },
       }),
-      createStructureTransformation({
+      createStructureVersionTransformation({
         id: 2,
         structureVersion: { type: StructureType.HUDA },
       }),
@@ -101,8 +101,8 @@ describe("OngoingTransformationsBanner", () => {
         {
           ...createTransformation({
             id: 9,
-            structureTransformations: [
-              createStructureTransformation({
+            structureVersionTransformations: [
+              createStructureVersionTransformation({
                 id: 1,
                 operateur: { id: 2, name: "COALLIA" },
                 structureVersion: {
@@ -131,8 +131,8 @@ describe("OngoingTransformationsBanner", () => {
       transformations: [
         createTransformation({
           id: 11,
-          structureTransformations: [
-            createStructureTransformation({
+          structureVersionTransformations: [
+            createStructureVersionTransformation({
               id: 1,
               structureVersion: {
                 structure: { codeBhasile: "ABC", departementAdministratif: "13" },

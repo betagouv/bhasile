@@ -2,7 +2,7 @@
 
 import { TransformationTypeForms } from "@/app/components/forms/transformation-types/TransformationTypeForms";
 import { TRANSFORMATION_TYPE_SPECS } from "@/config/transformation.config";
-import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import {
   TransformationFormType,
   TransformationType,
@@ -15,33 +15,33 @@ export default function TransformationSelectionsPage() {
 
   const formType = getFormByType(transformation.type);
 
-  const primaryStructureTransformationType = transformation.type
+  const primaryStructureVersionTransformationType = transformation.type
     ? TRANSFORMATION_TYPE_SPECS[transformation.type]
-        .primaryStructureTransformationType
+        .primaryStructureVersionTransformationType
     : undefined;
-  const primaryStructureTransformation =
-    primaryStructureTransformationType &&
-    transformation.structureTransformations?.find(
-      (structureTransformation) =>
-        structureTransformation.type === primaryStructureTransformationType
+  const primaryStructureVersionTransformation =
+    primaryStructureVersionTransformationType &&
+    transformation.structureVersionTransformations?.find(
+      (structureVersionTransformation) =>
+        structureVersionTransformation.type === primaryStructureVersionTransformationType
     );
 
   const handleSubmit = (
     transformationType: TransformationType,
-    structureTransformations: StructureTransformationApiCreate[]
+    structureVersionTransformations: StructureVersionTransformationApiCreate[]
   ) => {
-    console.log(transformationType, structureTransformations);
+    console.log(transformationType, structureVersionTransformations);
   };
   return (
     <TransformationTypeForms
       formType={formType}
       structureId={
-        primaryStructureTransformation
-          ? primaryStructureTransformation.structureVersion?.structureId
+        primaryStructureVersionTransformation
+          ? primaryStructureVersionTransformation.structureVersion?.structureId
           : undefined
       }
       initialTransformationType={transformation.type}
-      initialStructureTransformations={transformation.structureTransformations}
+      initialStructureVersionTransformations={transformation.structureVersionTransformations}
       onSubmit={handleSubmit}
     />
   );

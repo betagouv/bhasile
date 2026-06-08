@@ -1,9 +1,9 @@
 import { useRouter } from "next/navigation";
 
-import { StructureTransformationApiUpdateClient } from "@/schemas/api/transformation.schema";
+import { StructureVersionTransformationApiUpdateClient } from "@/schemas/api/transformation.schema";
 
 import { useTransformationContext } from "../(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
-import { validateStructureTransformationFormStep } from "../utils/transformation.util";
+import { validateStructureVersionTransformationFormStep } from "../utils/transformation.util";
 import { useTransformationFormNavigation } from "./useTransformationFormNavigation";
 import { useTransformations } from "./useTransformations";
 
@@ -22,16 +22,16 @@ export const useTransformationFormHandling = () => {
 
   const handleSave = async ({
     transformationId,
-    structureTransformation,
+    structureVersionTransformation,
   }: {
     transformationId: number;
-    structureTransformation: StructureTransformationApiUpdateClient;
+    structureVersionTransformation: StructureVersionTransformationApiUpdateClient;
   }) => {
     await updateTransformation(
       transformationId,
       {
         id: transformationId,
-        structureTransformations: [structureTransformation],
+        structureVersionTransformations: [structureVersionTransformation],
       },
       setTransformation
     );
@@ -39,10 +39,10 @@ export const useTransformationFormHandling = () => {
 
   const handleValidation = async ({
     transformationId,
-    structureTransformation,
+    structureVersionTransformation,
   }: {
     transformationId: number;
-    structureTransformation: StructureTransformationApiUpdateClient;
+    structureVersionTransformation: StructureVersionTransformationApiUpdateClient;
   }) => {
     if (!currentStep) {
       return;
@@ -51,11 +51,14 @@ export const useTransformationFormHandling = () => {
     try {
       await handleSave({
         transformationId,
-        structureTransformation: {
-          ...structureTransformation,
-          forms: structureTransformation.forms?.map((form) =>
-            validateStructureTransformationFormStep(form, currentStep.name)
-          ),
+        structureVersionTransformation: {
+          ...structureVersionTransformation,
+          form:
+            structureVersionTransformation.form &&
+            validateStructureVersionTransformationFormStep(
+              structureVersionTransformation.form,
+              currentStep.name
+            ),
         },
       });
       if (nextStep) {

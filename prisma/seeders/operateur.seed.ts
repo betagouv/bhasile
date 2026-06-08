@@ -16,7 +16,7 @@ type OperateurWithActes = Operateur & {
     | "structureId"
     | "structureDnaCode"
     | "cpomId"
-    | "structureTransformationId"
+    | "structureVersionTransformationId"
   >[];
 };
 

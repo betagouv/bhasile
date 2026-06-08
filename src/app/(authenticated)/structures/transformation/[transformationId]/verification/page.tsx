@@ -8,13 +8,13 @@ import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useTransformationFormNavigation } from "@/app/hooks/useTransformationFormNavigation";
 import { useTransformations } from "@/app/hooks/useTransformations";
-import { sortStructureTransformationsByType } from "@/app/utils/transformation.util";
-import { StructureTransformationApiRead } from "@/schemas/api/transformation.schema";
+import { sortStructureVersionTransformationsByType } from "@/app/utils/transformation.util";
+import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
-import { StructureTransformationType } from "@/types/transformation.type";
+import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 import { useTransformationContext } from "../_context/TransformationClientContext";
-import { StructureTransformationGroup } from "./_components/StructureTransformationGroup";
+import { StructureVersionTransformationGroup } from "./_components/StructureVersionTransformationGroup";
 
 export default function TransformationVerificationPage() {
   const router = useRouter();
@@ -26,14 +26,14 @@ export default function TransformationVerificationPage() {
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("transformation-save");
 
-  const groups = groupStructureTransformationsByType(
-    transformation.structureTransformations
+  const groups = groupStructureVersionTransformationsByType(
+    transformation.structureVersionTransformations
   );
 
   const allChildFormsAreValidated =
-    transformation.structureTransformations.every(
-      (structureTransformation) =>
-        structureTransformation.forms?.[0]?.status === true
+    transformation.structureVersionTransformations.every(
+      (structureVersionTransformation) =>
+        structureVersionTransformation.form?.status === true
     );
   const canSubmit =
     transformation.form !== undefined &&
@@ -74,10 +74,10 @@ export default function TransformationVerificationPage() {
       </h2>
       <div className="flex flex-col gap-6">
         {groups.map((group) => (
-          <StructureTransformationGroup
+          <StructureVersionTransformationGroup
             key={group.type}
             type={group.type}
-            structureTransformations={group.items}
+            structureVersionTransformations={group.items}
           />
         ))}
       </div>
@@ -97,26 +97,26 @@ export default function TransformationVerificationPage() {
 }
 
 type Group = {
-  type: StructureTransformationType;
-  items: StructureTransformationApiRead[];
+  type: StructureVersionTransformationType;
+  items: StructureVersionTransformationApiRead[];
 };
 
-const groupStructureTransformationsByType = (
-  structureTransformations: StructureTransformationApiRead[]
+const groupStructureVersionTransformationsByType = (
+  structureVersionTransformations: StructureVersionTransformationApiRead[]
 ): Group[] => {
-  const sortedStructureTransformations = sortStructureTransformationsByType(
-    structureTransformations
+  const sortedStructureVersionTransformations = sortStructureVersionTransformationsByType(
+    structureVersionTransformations
   );
-  return sortedStructureTransformations.reduce<Group[]>(
-    (accumulator, structureTransformation) => {
+  return sortedStructureVersionTransformations.reduce<Group[]>(
+    (accumulator, structureVersionTransformation) => {
       const lastGroup = accumulator[accumulator.length - 1];
-      if (lastGroup && lastGroup.type === structureTransformation.type) {
-        lastGroup.items.push(structureTransformation);
+      if (lastGroup && lastGroup.type === structureVersionTransformation.type) {
+        lastGroup.items.push(structureVersionTransformation);
         return accumulator;
       }
       accumulator.push({
-        type: structureTransformation.type,
-        items: [structureTransformation],
+        type: structureVersionTransformation.type,
+        items: [structureVersionTransformation],
       });
       return accumulator;
     },

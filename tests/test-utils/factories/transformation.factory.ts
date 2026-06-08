@@ -1,31 +1,31 @@
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 import {
-  StructureTransformationType,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
-type StructureTransformationApiReadItem =
-  TransformationApiRead["structureTransformations"][number];
+type StructureVersionTransformationApiReadItem =
+  TransformationApiRead["structureVersionTransformations"][number];
 
 export const createTransformation = ({
   id = 42,
   type = TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
-  structureTransformations = [],
+  structureVersionTransformations = [],
 }: {
   id?: number;
   type?: TransformationType;
-  structureTransformations?: TransformationApiRead["structureTransformations"];
+  structureVersionTransformations?: TransformationApiRead["structureVersionTransformations"];
 } = {}): TransformationApiRead => ({
   id,
   type,
-  structureTransformations,
+  structureVersionTransformations,
 });
 
-export const createStructureTransformation = ({
+export const createStructureVersionTransformation = ({
   id = 7,
-  type = StructureTransformationType.CREATION,
+  type = StructureVersionTransformationType.CREATION,
   ...overrides
-}: Partial<StructureTransformationApiReadItem> = {}): StructureTransformationApiReadItem => ({
+}: Partial<StructureVersionTransformationApiReadItem> = {}): StructureVersionTransformationApiReadItem => ({
   id,
   type,
   ...overrides,

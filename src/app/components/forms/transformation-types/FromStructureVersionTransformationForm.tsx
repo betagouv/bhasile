@@ -7,7 +7,7 @@ import { TransformationType } from "@/types/transformation.type";
 
 import { FromStructureCard } from "./FromStructureCard";
 
-export const FromStructureTransformationForm = ({
+export const FromStructureVersionTransformationForm = ({
   structureId,
   transformationType,
   setTransformationType,

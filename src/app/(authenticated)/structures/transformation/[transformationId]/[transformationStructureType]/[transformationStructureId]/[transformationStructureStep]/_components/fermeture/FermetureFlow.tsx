@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  StructureTransformationApiRead,
+  StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 
@@ -9,15 +9,15 @@ import { FermetureDescriptionForm } from "./FermetureDescriptionForm";
 
 type Props = {
   transformation: TransformationApiRead;
-  structureTransformation: StructureTransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
 };
 
 export const FermetureFlow = ({
   transformation,
-  structureTransformation,
+  structureVersionTransformation,
 }: Props) => (
   <FermetureDescriptionForm
     transformation={transformation}
-    structureTransformation={structureTransformation}
+    structureVersionTransformation={structureVersionTransformation}
   />
 );

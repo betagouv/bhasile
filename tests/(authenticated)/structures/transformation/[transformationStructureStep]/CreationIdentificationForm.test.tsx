@@ -4,12 +4,12 @@ import { describe, expect, it, vi } from "vitest";
 
 import { CreationIdentificationForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation/CreationIdentificationForm";
 import {
-  StructureTransformationApiRead,
+  StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { FormKind } from "@/types/global";
 import {
-  StructureTransformationType,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
@@ -67,9 +67,9 @@ vi.mock("@/app/components/forms/SaveCurrentForm", () => ({
 describe("CreationIdentificationForm", () => {
   it("should pass the structureVersion as defaultValues, including its id", () => {
     // GIVEN
-    const structureTransformation: StructureTransformationApiRead = {
+    const structureVersionTransformation: StructureVersionTransformationApiRead = {
       id: 7,
-      type: StructureTransformationType.CREATION,
+      type: StructureVersionTransformationType.CREATION,
       structureVersion: {
         id: 999,
         structureId: 42,
@@ -80,14 +80,14 @@ describe("CreationIdentificationForm", () => {
     const transformation: TransformationApiRead = {
       id: 12,
       type: TransformationType.OUVERTURE_EX_NIHILO,
-      structureTransformations: [structureTransformation],
+      structureVersionTransformations: [structureVersionTransformation],
     };
 
     // WHEN
     render(
       <CreationIdentificationForm
         transformation={transformation}
-        structureTransformation={structureTransformation}
+        structureVersionTransformation={structureVersionTransformation}
         formKind={FormKind.OUVERTURE_EX_NIHILO}
       />
     );
@@ -101,22 +101,22 @@ describe("CreationIdentificationForm", () => {
     });
   });
 
-  it("should pass transformationId and a structureTransformation update payload to handleValidation", () => {
+  it("should pass transformationId and a structureVersionTransformation update payload to handleValidation", () => {
     // GIVEN
-    const structureTransformation: StructureTransformationApiRead = {
+    const structureVersionTransformation: StructureVersionTransformationApiRead = {
       id: 7,
-      type: StructureTransformationType.CREATION,
+      type: StructureVersionTransformationType.CREATION,
       structureVersion: { id: 999 },
     };
     const transformation: TransformationApiRead = {
       id: 12,
       type: TransformationType.OUVERTURE_EX_NIHILO,
-      structureTransformations: [structureTransformation],
+      structureVersionTransformations: [structureVersionTransformation],
     };
     render(
       <CreationIdentificationForm
         transformation={transformation}
-        structureTransformation={structureTransformation}
+        structureVersionTransformation={structureVersionTransformation}
         formKind={FormKind.OUVERTURE_EX_NIHILO}
       />
     );
@@ -131,9 +131,9 @@ describe("CreationIdentificationForm", () => {
     // THEN
     expect(mockHandleValidation).toHaveBeenCalledWith({
       transformationId: 12,
-      structureTransformation: {
+      structureVersionTransformation: {
         id: 7,
-        type: StructureTransformationType.CREATION,
+        type: StructureVersionTransformationType.CREATION,
         forms: undefined,
         operateurId: undefined,
         structureVersion: {

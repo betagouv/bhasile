@@ -1,7 +1,7 @@
 import { useParams, usePathname } from "next/navigation";
 
 import { VERIFICATION_STEP_NAME } from "@/config/transformation.config";
-import { StructureTransformationType } from "@/types/transformation.type";
+import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 import { useTransformationContext } from "../(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import {
@@ -18,7 +18,7 @@ export const useTransformationFormNavigation = () => {
   const isOnVerificationPage = pathname.endsWith(`/${VERIFICATION_STEP_NAME}`);
 
   const transformationStructureType =
-    params.transformationStructureType as StructureTransformationType;
+    params.transformationStructureType as StructureVersionTransformationType;
 
   const transformationStructureId = Number(params.transformationStructureId);
 

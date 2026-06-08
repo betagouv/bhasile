@@ -2,8 +2,8 @@ import Link from "next/link";
 
 import { formatDate } from "@/app/utils/date.util";
 import {
-  getReferenceStructureTransformation,
-  getStructureTransformationDepartement,
+  getReferenceStructureVersionTransformation,
+  getStructureVersionTransformationDepartement,
 } from "@/app/utils/transformation.util";
 import { DEPARTEMENTS } from "@/constants";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
@@ -13,25 +13,25 @@ export const OngoingTransformation = ({
 }: {
   transformation: TransformationApiRead;
 }): React.ReactNode => {
-  const referenceStructureTransformation =
-    getReferenceStructureTransformation(transformation);
+  const referenceStructureVersionTransformation =
+    getReferenceStructureVersionTransformation(transformation);
 
-  const departementNumero = getStructureTransformationDepartement(
-    referenceStructureTransformation
+  const departementNumero = getStructureVersionTransformationDepartement(
+    referenceStructureVersionTransformation
   );
   const departementName = DEPARTEMENTS.find(
     (departement) => departement.numero === departementNumero
   )?.name;
 
-  const operateurName = referenceStructureTransformation?.operateur?.name;
+  const operateurName = referenceStructureVersionTransformation?.operateur?.name;
 
-  const structureCount = transformation.structureTransformations.length;
+  const structureCount = transformation.structureVersionTransformations.length;
   const structureTypes = [
     ...new Set(
-      transformation.structureTransformations.flatMap(
-        (structureTransformation) =>
-          structureTransformation.structureVersion?.type
-            ? [structureTransformation.structureVersion.type]
+      transformation.structureVersionTransformations.flatMap(
+        (structureVersionTransformation) =>
+          structureVersionTransformation.structureVersion?.type
+            ? [structureVersionTransformation.structureVersion.type]
             : []
       )
     ),

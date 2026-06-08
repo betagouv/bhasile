@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 import {
-  StructureTransformationType,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
@@ -19,30 +19,30 @@ export const useFetchTransformation = (id?: number) => {
       return {
         id,
         type: TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR,
-        structureTransformations: [
+        structureVersionTransformations: [
           {
             id: 1,
-            type: StructureTransformationType.FERMETURE,
+            type: StructureVersionTransformationType.FERMETURE,
             structureVersion: { structureId: 1001 },
           },
           {
             id: 2,
-            type: StructureTransformationType.EXTENSION,
+            type: StructureVersionTransformationType.EXTENSION,
             structureVersion: { structureId: 1003 },
           },
           {
             id: 3,
-            type: StructureTransformationType.FERMETURE,
+            type: StructureVersionTransformationType.FERMETURE,
             structureVersion: { structureId: 1002 },
           },
           {
             id: 4,
-            type: StructureTransformationType.CONTRACTION,
+            type: StructureVersionTransformationType.CONTRACTION,
             structureVersion: { structureId: 1003 },
           },
           {
             id: 5,
-            type: StructureTransformationType.CREATION,
+            type: StructureVersionTransformationType.CREATION,
             structureVersion: { structureId: 1004 },
           },
         ],

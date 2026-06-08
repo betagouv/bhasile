@@ -18,7 +18,7 @@ export const createFakeActeAdministratif = (): Omit<
   | "cpomId"
   | "structureId"
   | "operateurId"
-  | "structureTransformationId"
+  | "structureVersionTransformationId"
 > => {
   return {
     date: faker.date.past(),

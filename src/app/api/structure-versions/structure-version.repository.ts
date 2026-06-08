@@ -13,7 +13,7 @@ import { convertToPublicType } from "../structures/structure.util";
 
 type StructureVersionParent = Pick<
   EntityId,
-  "structureId" | "structureTransformationId"
+  "structureId" | "structureVersionTransformationId"
 >;
 
 const getScalarData = (version: StructureVersionApiType) => ({
@@ -44,17 +44,17 @@ const createOneStructureVersion = async (
 ): Promise<number> => {
   if (
     parent.structureId === undefined &&
-    parent.structureTransformationId === undefined
+    parent.structureVersionTransformationId === undefined
   ) {
     throw new Error(
-      "structureId ou structureTransformationId est requis pour créer une StructureVersion"
+      "structureId ou structureVersionTransformationId est requis pour créer une StructureVersion"
     );
   }
 
   const data: Prisma.StructureVersionUncheckedCreateInput = {
     ...getScalarData(version),
     structureId: parent.structureId,
-    structureTransformationId: parent.structureTransformationId,
+    structureVersionTransformationId: parent.structureVersionTransformationId,
   };
 
   const created = await tx.structureVersion.create({ data });

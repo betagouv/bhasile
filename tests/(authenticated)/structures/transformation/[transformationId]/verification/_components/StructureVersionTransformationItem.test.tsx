@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { StructureTransformationItem } from "@/app/(authenticated)/structures/transformation/[transformationId]/verification/_components/StructureTransformationItem";
-import { StructureTransformationApiRead } from "@/schemas/api/transformation.schema";
+import { StructureVersionTransformationItem } from "@/app/(authenticated)/structures/transformation/[transformationId]/verification/_components/StructureVersionTransformationItem";
+import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import { StructureType } from "@/types/structure.type";
-import { StructureTransformationType } from "@/types/transformation.type";
+import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 type StructureCardStubProps = {
   nom: string;
@@ -33,11 +33,11 @@ vi.mock("@/app/components/StructureCard", () => ({
   ),
 }));
 
-const buildCompleteStructureTransformation = (
-  overrides: Partial<StructureTransformationApiRead> = {}
-): StructureTransformationApiRead => ({
+const buildCompleteStructureVersionTransformation = (
+  overrides: Partial<StructureVersionTransformationApiRead> = {}
+): StructureVersionTransformationApiRead => ({
   id: 1,
-  type: StructureTransformationType.EXTENSION,
+  type: StructureVersionTransformationType.EXTENSION,
   structureVersion: {
     nom: "ACTION NORMANDIE",
     type: StructureType.CADA,
@@ -57,15 +57,15 @@ const buildCompleteStructureTransformation = (
   ...overrides,
 });
 
-describe("StructureTransformationItem", () => {
+describe("StructureVersionTransformationItem", () => {
   it("should render the StructureCard with values derived from structureVersion + structure", () => {
     // GIVEN
-    const structureTransformation = buildCompleteStructureTransformation();
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation();
 
     // WHEN
     render(
-      <StructureTransformationItem
-        structureTransformation={structureTransformation}
+      <StructureVersionTransformationItem
+        structureVersionTransformation={structureVersionTransformation}
       />
     );
 
@@ -86,17 +86,17 @@ describe("StructureTransformationItem", () => {
     "should hide the StructureCard when structureVersion.%s is missing",
     (_label, structureVersionOverride) => {
       // GIVEN
-      const structureTransformation = buildCompleteStructureTransformation({
+      const structureVersionTransformation = buildCompleteStructureVersionTransformation({
         structureVersion: {
-          ...buildCompleteStructureTransformation().structureVersion,
+          ...buildCompleteStructureVersionTransformation().structureVersion,
           ...structureVersionOverride,
         },
       });
 
       // WHEN
       render(
-        <StructureTransformationItem
-          structureTransformation={structureTransformation}
+        <StructureVersionTransformationItem
+          structureVersionTransformation={structureVersionTransformation}
         />
       );
 
@@ -107,9 +107,9 @@ describe("StructureTransformationItem", () => {
 
   it("should hide the StructureCard when codeBhasile is missing", () => {
     // GIVEN
-    const structureTransformation = buildCompleteStructureTransformation({
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       structureVersion: {
-        ...buildCompleteStructureTransformation().structureVersion,
+        ...buildCompleteStructureVersionTransformation().structureVersion,
         structure: {
           // @ts-expect-error — testing the runtime guard against a missing codeBhasile
           codeBhasile: undefined,
@@ -120,8 +120,8 @@ describe("StructureTransformationItem", () => {
 
     // WHEN
     render(
-      <StructureTransformationItem
-        structureTransformation={structureTransformation}
+      <StructureVersionTransformationItem
+        structureVersionTransformation={structureVersionTransformation}
       />
     );
 
@@ -130,19 +130,19 @@ describe("StructureTransformationItem", () => {
   });
 
   it("should hide the StructureCard when no operateur is resolvable", () => {
-    // GIVEN — structureVersion.structure.operateur missing AND structureTransformation.operateur missing
-    const structureTransformation = buildCompleteStructureTransformation({
+    // GIVEN — structureVersion.structure.operateur missing AND structureVersionTransformation.operateur missing
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       operateur: undefined,
       structureVersion: {
-        ...buildCompleteStructureTransformation().structureVersion,
+        ...buildCompleteStructureVersionTransformation().structureVersion,
         structure: { codeBhasile: "BHA-NOR-025", operateur: undefined },
       },
     });
 
     // WHEN
     render(
-      <StructureTransformationItem
-        structureTransformation={structureTransformation}
+      <StructureVersionTransformationItem
+        structureVersionTransformation={structureVersionTransformation}
       />
     );
 
@@ -150,20 +150,20 @@ describe("StructureTransformationItem", () => {
     expect(screen.queryByTestId("structure-card")).not.toBeInTheDocument();
   });
 
-  it("should fall back to structureTransformation.operateur when structureVersion.structure.operateur is missing", () => {
+  it("should fall back to structureVersionTransformation.operateur when structureVersion.structure.operateur is missing", () => {
     // GIVEN
-    const structureTransformation = buildCompleteStructureTransformation({
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       operateur: { id: 99, name: "Opérateur fallback" },
       structureVersion: {
-        ...buildCompleteStructureTransformation().structureVersion,
+        ...buildCompleteStructureVersionTransformation().structureVersion,
         structure: { codeBhasile: "BHA-NOR-025", operateur: undefined },
       },
     });
 
     // WHEN
     render(
-      <StructureTransformationItem
-        structureTransformation={structureTransformation}
+      <StructureVersionTransformationItem
+        structureVersionTransformation={structureVersionTransformation}
       />
     );
 
@@ -175,22 +175,22 @@ describe("StructureTransformationItem", () => {
   });
 
   it.each([
-    [StructureTransformationType.CREATION, "ouverture"],
-    [StructureTransformationType.EXTENSION, "extension"],
-    [StructureTransformationType.CONTRACTION, "contraction"],
-    [StructureTransformationType.FERMETURE, "fermeture"],
+    [StructureVersionTransformationType.CREATION, "ouverture"],
+    [StructureVersionTransformationType.EXTENSION, "extension"],
+    [StructureVersionTransformationType.CONTRACTION, "contraction"],
+    [StructureVersionTransformationType.FERMETURE, "fermeture"],
   ])(
     "should render the verb '%s' for type %s",
-    (structureTransformationType, expectedVerb) => {
+    (structureVersionTransformationType, expectedVerb) => {
       // GIVEN
-      const structureTransformation = buildCompleteStructureTransformation({
-        type: structureTransformationType,
+      const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+        type: structureVersionTransformationType,
       });
 
       // WHEN
       render(
-        <StructureTransformationItem
-          structureTransformation={structureTransformation}
+        <StructureVersionTransformationItem
+          structureVersionTransformation={structureVersionTransformation}
         />
       );
 
@@ -204,17 +204,17 @@ describe("StructureTransformationItem", () => {
 
   it("should hide the effectiveDate line and placesAutorisees line when effectiveDate is missing", () => {
     // GIVEN
-    const structureTransformation = buildCompleteStructureTransformation({
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       structureVersion: {
-        ...buildCompleteStructureTransformation().structureVersion,
+        ...buildCompleteStructureVersionTransformation().structureVersion,
         effectiveDate: undefined,
       },
     });
 
     // WHEN
     render(
-      <StructureTransformationItem
-        structureTransformation={structureTransformation}
+      <StructureVersionTransformationItem
+        structureVersionTransformation={structureVersionTransformation}
       />
     );
 
@@ -225,14 +225,14 @@ describe("StructureTransformationItem", () => {
 
   it("should hide the placesAutorisees line for FERMETURE even when the typology exists", () => {
     // GIVEN
-    const structureTransformation = buildCompleteStructureTransformation({
-      type: StructureTransformationType.FERMETURE,
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+      type: StructureVersionTransformationType.FERMETURE,
     });
 
     // WHEN
     render(
-      <StructureTransformationItem
-        structureTransformation={structureTransformation}
+      <StructureVersionTransformationItem
+        structureVersionTransformation={structureVersionTransformation}
       />
     );
 
@@ -241,21 +241,21 @@ describe("StructureTransformationItem", () => {
   });
 
   it.each([
-    StructureTransformationType.CREATION,
-    StructureTransformationType.EXTENSION,
-    StructureTransformationType.CONTRACTION,
+    StructureVersionTransformationType.CREATION,
+    StructureVersionTransformationType.EXTENSION,
+    StructureVersionTransformationType.CONTRACTION,
   ])(
     "should render the placesAutorisees line for type %s",
-    (structureTransformationType) => {
+    (structureVersionTransformationType) => {
       // GIVEN
-      const structureTransformation = buildCompleteStructureTransformation({
-        type: structureTransformationType,
+      const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+        type: structureVersionTransformationType,
       });
 
       // WHEN
       render(
-        <StructureTransformationItem
-          structureTransformation={structureTransformation}
+        <StructureVersionTransformationItem
+          structureVersionTransformation={structureVersionTransformation}
         />
       );
 
@@ -269,17 +269,17 @@ describe("StructureTransformationItem", () => {
 
   it("should hide the placesAutorisees line when no typology matches the effectiveDate year", () => {
     // GIVEN — effectiveDate is 2026 but typology is for 2025
-    const structureTransformation = buildCompleteStructureTransformation({
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       structureVersion: {
-        ...buildCompleteStructureTransformation().structureVersion,
+        ...buildCompleteStructureVersionTransformation().structureVersion,
         structureTypologies: [{ year: 2025, placesAutorisees: 47 }],
       },
     });
 
     // WHEN
     render(
-      <StructureTransformationItem
-        structureTransformation={structureTransformation}
+      <StructureVersionTransformationItem
+        structureVersionTransformation={structureVersionTransformation}
       />
     );
 
