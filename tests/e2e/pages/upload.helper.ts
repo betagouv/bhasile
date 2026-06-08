@@ -1,7 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type { Page } from "@playwright/test";
+import type { Locator } from "@playwright/test";
 
 import { expect } from "../fixtures/test";
 
@@ -15,14 +15,11 @@ export const SAMPLE_PDF = path.resolve(
   "sample.pdf"
 );
 
-export const uploadToField = async (
-  page: Page,
-  fieldKeyName: string,
+export const uploadToContainer = async (
+  container: Locator,
   filePath: string = SAMPLE_PDF
 ): Promise<void> => {
-  const container = page.locator(
-    `div.bg-alt-blue-france:has(input[name="${fieldKeyName}"])`
-  );
+  const page = container.page();
   const fileInput = container.locator('input[type="file"]');
   const fileName = path.basename(filePath);
 

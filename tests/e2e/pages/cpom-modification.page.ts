@@ -1,17 +1,13 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import { expect } from "../fixtures/test";
-import { SAMPLE_PDF, uploadToField } from "./upload.helper";
+import { SAMPLE_PDF, uploadToContainer } from "./upload.helper";
 
 export type CpomSection =
   | "description"
   | "composition"
   | "finances"
   | "actes-administratifs";
-
-const CPOM_CONVENTION_INDEX = 0;
-const CPOM_AVENANT_INDEX = 1;
-const CPOM_AUTRE_INDEX = 2;
 
 export class CpomModificationPage {
   constructor(
@@ -27,7 +23,19 @@ export class CpomModificationPage {
       this.page.getByRole("button", { name: "Valider", exact: true })
     ).toBeVisible();
 
-    await this.page.waitForLoadState("networkidle", { timeout: 15000 });
+    await this.page
+      .waitForLoadState("networkidle", { timeout: 15000 })
+      .catch(() => {});
+  }
+
+  private conventionFieldset(): Locator {
+    return this.page.locator('fieldset:has(> legend:has-text("Contrat CPOM"))');
+  }
+
+  private autreFieldset(): Locator {
+    return this.page.locator(
+      'fieldset:has(> legend:has-text("Autres documents"))'
+    );
   }
 
   async selectRegion(region: string): Promise<void> {
@@ -62,60 +70,56 @@ export class CpomModificationPage {
   }
 
   async fillConventionDates(startDate: string, endDate: string): Promise<void> {
-    await this.page
-      .locator(
-        `input[name="actesAdministratifs.${CPOM_CONVENTION_INDEX}.startDate"]`
-      )
-      .fill(startDate);
-    await this.page
-      .locator(
-        `input[name="actesAdministratifs.${CPOM_CONVENTION_INDEX}.endDate"]`
-      )
-      .fill(endDate);
+    const fieldset = this.conventionFieldset();
+    await fieldset.locator('input[name$=".startDate"]').first().fill(startDate);
+    await fieldset.locator('input[name$=".endDate"]').first().fill(endDate);
   }
 
   async uploadConventionDocument(filePath: string = SAMPLE_PDF): Promise<void> {
-    await uploadToField(
-      this.page,
-      `actesAdministratifs.${CPOM_CONVENTION_INDEX}.fileUploads.0.key`,
+    await uploadToContainer(
+      this.conventionFieldset().locator("div.bg-alt-blue-france").first(),
       filePath
     );
   }
 
   async addConventionAvenant(): Promise<void> {
-    await this.page.getByRole("button", { name: /Ajouter un avenant/ }).click();
+    await this.conventionFieldset()
+      .getByRole("button", { name: /Ajouter un avenant/ })
+      .click();
   }
 
   async fillAvenantDate(date: string): Promise<void> {
-    await this.page
-      .locator(`input[name="actesAdministratifs.${CPOM_AVENANT_INDEX}.date"]`)
+    await this.conventionFieldset()
+      .locator('div.border-l-2 input[name$=".date"]')
+      .first()
       .fill(date);
   }
 
   async uploadAvenantDocument(filePath: string = SAMPLE_PDF): Promise<void> {
-    await uploadToField(
-      this.page,
-      `actesAdministratifs.${CPOM_AVENANT_INDEX}.fileUploads.0.key`,
+    await uploadToContainer(
+      this.conventionFieldset()
+        .locator("div.border-l-2 div.bg-alt-blue-france")
+        .first(),
       filePath
     );
   }
 
   async addAutreDocument(): Promise<void> {
-    await this.page
+    await this.autreFieldset()
       .getByRole("button", { name: /Ajouter un document/ })
       .click();
   }
 
   async fillAutreName(name: string): Promise<void> {
-    await this.page
-      .locator(`input[name="actesAdministratifs.${CPOM_AUTRE_INDEX}.name"]`)
+    await this.autreFieldset()
+      .locator('input[name$=".name"]')
+      .first()
       .fill(name);
   }
 
   async uploadAutreDocument(filePath: string = SAMPLE_PDF): Promise<void> {
-    await uploadToField(
-      this.page,
-      `actesAdministratifs.${CPOM_AUTRE_INDEX}.fileUploads.0.key`,
+    await uploadToContainer(
+      this.autreFieldset().locator("div.bg-alt-blue-france").first(),
       filePath
     );
   }
