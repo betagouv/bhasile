@@ -57,6 +57,15 @@ vi.mock(
   })
 );
 
+vi.mock(
+  "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/TransformationActesAdministratifsForm",
+  () => ({
+    TransformationActesAdministratifsForm: () => (
+      <div data-testid="actes-form" />
+    ),
+  })
+);
+
 const renderFlow = (structureType: StructureTransformationType) => {
   const structureTransformation = createStructureTransformation({
     type: structureType,
@@ -117,10 +126,20 @@ describe("ExistingStructureFlow", () => {
       expect(captured.originalPlaces).toBe(0);
     });
 
-    it("ne rend rien pour une étape non encore implémentée", () => {
+    it("rend le form actes administratifs sur l'étape ACTES_ADMINISTRATIFS", () => {
       mockUseParams.mockReturnValue({
         transformationStructureStep:
           StructureTransformationStep.ACTES_ADMINISTRATIFS,
+      });
+
+      renderFlow(StructureTransformationType.EXTENSION);
+
+      expect(screen.getByTestId("actes-form")).toBeInTheDocument();
+    });
+
+    it("ne rend rien pour une étape inconnue", () => {
+      mockUseParams.mockReturnValue({
+        transformationStructureStep: "unknown-step",
       });
 
       renderFlow(StructureTransformationType.EXTENSION);
@@ -129,6 +148,7 @@ describe("ExistingStructureFlow", () => {
         screen.queryByTestId("identification-form")
       ).not.toBeInTheDocument();
       expect(screen.queryByTestId("places-form")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("actes-form")).not.toBeInTheDocument();
     });
   });
 });
