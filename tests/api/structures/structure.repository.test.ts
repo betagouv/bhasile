@@ -544,6 +544,120 @@ describe("structure.repository db integration", () => {
     expect(actes[0].fileUploads).toMatchObject([{ key: keptFile.key }]);
   });
 
+  it("should keep an avenant added to an existing fileless acte", async () => {
+    // GIVEN: a convention already in base WITHOUT any file
+    const structure = await createStructure();
+    const conventionWithoutFile = await prisma.acteAdministratif.create({
+      data: {
+        structureId: structure.id,
+        category: "CONVENTION",
+        name: "Convention sans fichier",
+      },
+    });
+    const conventionFile = await createFileUpload("convention");
+    const avenantFile = await createFileUpload("avenant");
+
+    // WHEN: the convention gains a file and an avenant is added pointing at its
+    // existing id (the form sends the convention id as the avenant parentId)
+    const actes = await updateStructureAndFetch(
+      structure.id,
+      {
+        actesAdministratifs: [
+          {
+            id: conventionWithoutFile.id,
+            category: "CONVENTION" as const,
+            fileUploads: [{ key: conventionFile.key }],
+          },
+          {
+            category: "CONVENTION" as const,
+            parentId: conventionWithoutFile.id,
+            fileUploads: [{ key: avenantFile.key }],
+          },
+        ],
+      },
+      () =>
+        prisma.acteAdministratif.findMany({
+          where: { structureId: structure.id },
+          include: { fileUploads: true },
+          orderBy: { id: "asc" },
+        })
+    );
+
+    // THEN: the convention keeps its id and the avenant is persisted under it
+    expect(actes).toHaveLength(2);
+
+    const convention = actes.find(
+      (acte) => acte.id === conventionWithoutFile.id
+    );
+    expect(convention).toBeDefined();
+    expect(convention?.parentId).toBeNull();
+    expect(convention?.fileUploads.map((file) => file.key)).toEqual([
+      conventionFile.key,
+    ]);
+
+    const avenant = actes.find((acte) => acte.id !== conventionWithoutFile.id);
+    expect(avenant).toBeDefined();
+    expect(avenant?.parentId).toBe(conventionWithoutFile.id);
+    expect(avenant?.fileUploads.map((file) => file.key)).toEqual([
+      avenantFile.key,
+    ]);
+  });
+
+  it("should not update an acte owned by another structure when its id is sent", async () => {
+    // GIVEN: an acte owned by another structure
+    const otherStructure = await createStructure();
+    const otherFile = await createFileUpload("other-acte");
+    const foreignActe = await prisma.acteAdministratif.create({
+      data: {
+        structureId: otherStructure.id,
+        category: "CONVENTION",
+        name: "Acte d'une autre structure",
+        fileUploads: { connect: { key: otherFile.key } },
+      },
+    });
+
+    // WHEN: the saved structure sends a payload carrying the foreign acte id
+    const structure = await createStructure();
+    const newFile = await createFileUpload("hijack");
+    const { foreignAfter, ownActes } = await updateStructureAndFetch(
+      structure.id,
+      {
+        actesAdministratifs: [
+          {
+            id: foreignActe.id,
+            category: "CONVENTION" as const,
+            name: "Tentative de réassignation",
+            fileUploads: [{ key: newFile.key }],
+          },
+        ],
+      },
+      async () => ({
+        foreignAfter: await prisma.acteAdministratif.findUniqueOrThrow({
+          where: { id: foreignActe.id },
+          include: { fileUploads: true },
+        }),
+        ownActes: await prisma.acteAdministratif.findMany({
+          where: { structureId: structure.id },
+          include: { fileUploads: true },
+        }),
+      })
+    );
+
+    // THEN: the foreign acte is untouched (owner, fields and file preserved)
+    expect(foreignAfter.structureId).toBe(otherStructure.id);
+    expect(foreignAfter.name).toBe("Acte d'une autre structure");
+    expect(foreignAfter.fileUploads.map((file) => file.key)).toEqual([
+      otherFile.key,
+    ]);
+
+    // AND: the saving structure gets its own brand-new acte instead
+    expect(ownActes).toHaveLength(1);
+    expect(ownActes[0].id).not.toBe(foreignActe.id);
+    expect(ownActes[0].fileUploads.map((file) => file.key)).toEqual([
+      newFile.key,
+    ]);
+  });
+
   it("should upsert documentsFinanciers and delete missing ones", async () => {
     // GIVEN: one existing document financier with file
     const structure = await createStructure();
