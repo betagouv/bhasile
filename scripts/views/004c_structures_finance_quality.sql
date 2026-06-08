@@ -171,11 +171,17 @@ WITH
   )
 SELECT
   s."id" AS "id",
-  -- Budget rates: taux d'encadrement and coût journalier should be between 15 and 25
-  -- Budget rates: taux d'encadrement max > 25 (across filtered years)
-  COALESCE(br."taux_encadrement_max" > 25, FALSE) AS "has_issue_taux_encadrement_max_gt_25",
+  -- Taux encadrement > seuil selon financement :
+  -- tarifées (CADA/CPH) : 1 ETP / 15-20 → flag si > 20
+  -- subventionnées (HUDA/CAES) : 1 ETP / 20-25 → flag si > 25
+  CASE
+    WHEN s."structureType" IN ('CADA', 'CPH') THEN COALESCE(br."taux_encadrement_max" > 20, FALSE)
+    WHEN s."structureType" IN ('HUDA', 'CAES') THEN COALESCE(br."taux_encadrement_max" > 25, FALSE)
+    ELSE FALSE
+  END AS "has_issue_taux_encadrement_max_gt_threshold",
   -- Budget rates: taux d'encadrement min equals 0 (NULL does not count as issue)
   COALESCE(br."taux_encadrement_min" = 0, FALSE) AS "has_issue_taux_encadrement_min_eq_0",
+  -- TODO: seuil coût journalier à fixer avec Émilie (actuellement 25 € et 35 € comme proxy)
   -- Budget rates: coût journalier max > 25 (across filtered years)
   COALESCE(br."cout_journalier_max" > 25, FALSE) AS "has_issue_cout_journalier_max_gt_25",
   -- Budget rates: coût journalier max > 35 (across filtered years)

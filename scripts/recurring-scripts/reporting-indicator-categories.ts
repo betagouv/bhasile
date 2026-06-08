@@ -20,10 +20,10 @@ export const INDICATEURS_UTILES = [
 ] as const;
 
 export const INDICATEURS_IMPACT = [
-  "has_issue_taux_encadrement_max_gt_25",
-  "has_issue_cout_journalier_max_gt_25",
+  "has_issue_taux_encadrement_max_gt_threshold", // CADA/CPH > 20, HUDA/CAES > 25
+  "has_issue_cout_journalier_max_gt_25",         // TODO: seuil à valider avec Émilie
   "has_issue_places_indisponibles_gt_3pct",
-  "has_issue_presences_indues_gt_7pct",
+  "has_issue_presences_indues_gt_7pct",          // CADA+HUDA uniquement
   "has_issue_evaluation_not_done_in_time",
 ] as const;
 

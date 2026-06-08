@@ -1,9 +1,10 @@
 -- Objective: activite quality indicators per structure
 -- One row per structure, boolean columns for activite thresholds
 --
--- Notes:
--- - Thresholds match UI (activite.constants.ts): presences indues 7%, places indisponibles 3%
--- - Based on last activite per linked DNA code, aggregated at structure level
+-- Scoping:
+-- - Présences indues (total > 7%) : CADA + HUDA uniquement (pas suivi en pratique pour CPH/CAES)
+-- - Indisponibilité (> 3%) : toutes structures
+-- - Basé sur le dernier millésime Activite par DNA, agrégé à la structure
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_activite_quality" AS
 WITH
   activite_dernier_millesime_par_dna AS (
@@ -21,7 +22,7 @@ WITH
       a."dnaCode",
       a."date" DESC
   ),
-  activite_dernier_millesime_par_structure AS (
+  activite_par_structure AS (
     SELECT
       ds."structureId" AS "structureId",
       BOOL_OR(
@@ -47,7 +48,11 @@ WITH
 SELECT
   s."id" AS "id",
   COALESCE(act."has_issue_places_indisponibles_gt_3pct", FALSE) AS "has_issue_places_indisponibles_gt_3pct",
-  COALESCE(act."has_issue_presences_indues_gt_7pct", FALSE) AS "has_issue_presences_indues_gt_7pct"
+  -- Présences indues total > 7% : CADA + HUDA uniquement
+  CASE
+    WHEN s."type" IN ('CADA', 'HUDA') THEN COALESCE(act."has_issue_presences_indues_gt_7pct", FALSE)
+    ELSE FALSE
+  END AS "has_issue_presences_indues_gt_7pct"
 FROM
   public."Structure" s
-  LEFT JOIN activite_dernier_millesime_par_structure act ON act."structureId" = s."id";
+  LEFT JOIN activite_par_structure act ON act."structureId" = s."id";
