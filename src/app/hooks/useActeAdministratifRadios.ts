@@ -23,7 +23,8 @@ export const useActeAdministratifRadios = ({
   const actesAdministratifs: ActeAdministratifFormValues[] =
     watch("actesAdministratifs") || [];
 
-  const canCreateAvenant = avenantAlternative?.parentId != null;
+  const resolvedParent = avenantAlternative?.resolvedParent;
+  const canCreateAvenant = resolvedParent != null;
 
   const groupCategories = getCategoryGroup(
     category,
@@ -88,7 +89,7 @@ export const useActeAdministratifRadios = ({
   };
 
   const selectAvenant = (index: number) => {
-    if (!avenantAlternative || avenantAlternative.parentId == null) {
+    if (!avenantAlternative || !resolvedParent) {
       return;
     }
     setValue(
@@ -96,10 +97,7 @@ export const useActeAdministratifRadios = ({
       avenantAlternative.parentCategory,
       { shouldValidate: true }
     );
-    setValue(
-      `actesAdministratifs.${index}.parentId`,
-      avenantAlternative.parentId
-    );
+    setValue(`actesAdministratifs.${index}.parentId`, resolvedParent.id);
     clearUnusedDateFields(index, AdditionalFieldsType.DATE);
   };
 
@@ -123,7 +121,7 @@ export const useActeAdministratifRadios = ({
       : null;
 
   const avenantRadio: RadioConfig | null =
-    avenantAlternative && canCreateAvenant && primaryActeIndex !== -1
+    avenantAlternative && resolvedParent && primaryActeIndex !== -1
       ? {
           name: `actesAdministratifs.${primaryActeIndex}.avenantChoice`,
           options: [
@@ -135,7 +133,7 @@ export const useActeAdministratifRadios = ({
               },
             },
             {
-              label: avenantAlternative.avenantLabel,
+              label: `${avenantAlternative.avenantLabel} ${resolvedParent.startYear} - ${resolvedParent.endYear}`,
               nativeInputProps: {
                 checked: isAvenantSelected,
                 onChange: () => selectAvenant(primaryActeIndex),

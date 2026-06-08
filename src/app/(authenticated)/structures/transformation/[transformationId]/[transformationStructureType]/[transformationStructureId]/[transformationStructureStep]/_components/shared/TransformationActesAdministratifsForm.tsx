@@ -35,12 +35,18 @@ export const TransformationActesAdministratifsForm = ({
   const { handleValidation, handleSave, prevStep } =
     useTransformationFormHandling();
 
+  const effectiveDate =
+    structureVersionTransformation.structureVersion?.effectiveDate;
+  const referenceDate = effectiveDate ? new Date(effectiveDate) : new Date();
+
   const categoryDisplayRules = resolveAvenantParentIds(
     getTransformationActesAdministratifsCategoryToDisplay(
       structureVersionTransformation.type,
       transformation.type
     ),
-    structureVersionTransformation.structureVersion?.structure?.actesAdministratifs
+    structureVersionTransformation.structureVersion?.structure
+      ?.actesAdministratifs,
+    referenceDate
   );
 
   const defaultValues = {
@@ -67,7 +73,8 @@ export const TransformationActesAdministratifsForm = ({
       onSubmit={(data) => {
         handleValidation({
           transformationId: transformation.id,
-          structureVersionTransformation: buildStructureVersionTransformation(data),
+          structureVersionTransformation:
+            buildStructureVersionTransformation(data),
         });
       }}
       submitButtonText="Étape suivante"
@@ -80,7 +87,8 @@ export const TransformationActesAdministratifsForm = ({
         onSave={(data) =>
           handleSave({
             transformationId: transformation.id,
-            structureVersionTransformation: buildStructureVersionTransformation(data),
+            structureVersionTransformation:
+              buildStructureVersionTransformation(data),
           })
         }
       />

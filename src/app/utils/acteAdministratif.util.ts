@@ -1,8 +1,13 @@
 import { v4 as uuidv4 } from "uuid";
 
 import {
+  getEffectiveEndDate,
+  isCurrentlyInEffect,
+} from "@/app/utils/date.util";
+import {
   CategoryDisplayRule,
   CategoryDisplayRules,
+  ResolvedAvenantParent,
 } from "@/config/acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import {
@@ -30,49 +35,59 @@ export const getCategoryGroup = (
   ]),
 ];
 
-export const getLatestStructureParentActeId = (
+const toDate = (value: string | null): Date | null =>
+  value ? new Date(value) : null;
+
+export const getCurrentStructureParentActe = (
   structureActes: StructureParentActe[] | undefined,
-  category: ActeAdministratifCategory
-): number | undefined => {
+  category: ActeAdministratifCategory,
+  referenceDate: Date
+): ResolvedAvenantParent | undefined => {
   const candidates = (structureActes ?? []).filter(
     (acteAdministratif) => acteAdministratif.category === category
   );
-  if (candidates.length === 0) {
-    return undefined;
+  for (const candidate of candidates) {
+    const startDate = toDate(candidate.startDate);
+    const effectiveEndDate = getEffectiveEndDate(
+      toDate(candidate.endDate),
+      candidate.children.map((child) => toDate(child.endDate))
+    );
+    if (
+      startDate &&
+      effectiveEndDate &&
+      isCurrentlyInEffect(startDate, effectiveEndDate, referenceDate)
+    ) {
+      return {
+        id: candidate.id,
+        startYear: startDate.getUTCFullYear(),
+        endYear: effectiveEndDate.getUTCFullYear(),
+      };
+    }
   }
-  const mostRecent = candidates.reduce((latest, acteAdministratif) => {
-    const acteStartDate = acteAdministratif.startDate ?? "";
-    const latestStartDate = latest.startDate ?? "";
-    if (acteStartDate > latestStartDate) {
-      return acteAdministratif;
-    }
-    if (acteStartDate === latestStartDate && acteAdministratif.id > latest.id) {
-      return acteAdministratif;
-    }
-    return latest;
-  });
-  return mostRecent.id;
+  return undefined;
 };
 
 // TODO: Faire en sorte de chercher le parent dans TOUS les actes administratifs, autres transformations comprises
 export const resolveAvenantParentIds = (
   categoryRules: CategoryDisplayRules,
-  structureActes: StructureParentActe[] | undefined
+  structureActes: StructureParentActe[] | undefined,
+  referenceDate: Date
 ): CategoryDisplayRules =>
   Object.fromEntries(
     getCategoryRuleEntries(categoryRules).map(([category, rule]) => {
       if (!rule.avenantAlternative) {
         return [category, rule];
       }
-      const parentId = getLatestStructureParentActeId(
+      const resolvedParent = getCurrentStructureParentActe(
         structureActes,
-        rule.avenantAlternative.parentCategory
+        rule.avenantAlternative.parentCategory,
+        referenceDate
       );
       return [
         category,
         {
           ...rule,
-          avenantAlternative: { ...rule.avenantAlternative, parentId },
+          avenantAlternative: { ...rule.avenantAlternative, resolvedParent },
         },
       ];
     })

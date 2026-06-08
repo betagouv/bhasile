@@ -8,10 +8,16 @@ export enum AdditionalFieldsType {
   NAME,
 }
 
+export type ResolvedAvenantParent = {
+  id: number;
+  startYear: number;
+  endYear: number;
+};
+
 export type AvenantAlternative = {
   parentCategory: ActeAdministratifCategory;
   avenantLabel: string;
-  parentId?: number;
+  resolvedParent?: ResolvedAvenantParent;
 };
 
 export type CategoryDisplayRule = {

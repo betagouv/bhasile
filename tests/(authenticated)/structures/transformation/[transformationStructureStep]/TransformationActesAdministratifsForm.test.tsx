@@ -236,6 +236,17 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
 type ReadStructureVersion =
   TransformationApiRead["structureVersionTransformations"][number]["structureVersion"];
 
+const currentParentActe = (
+  id: number,
+  category: ActeAdministratifCategory
+): StructureParentActe => ({
+  id,
+  category,
+  startDate: "2020-01-01T12:00:00.000Z",
+  endDate: "2099-12-31T12:00:00.000Z",
+  children: [],
+});
+
 const extensionWithStructureActes = (
   structureActes: StructureParentActe[],
   savedActes: ActeAdministratifApiType[] = []
@@ -263,8 +274,8 @@ describe("TransformationActesAdministratifsForm — avenant alternative (extensi
 
   it("renders the standalone/avenant radios with the standalone option preselected", () => {
     const transformation = extensionWithStructureActes([
-      { id: 99, category: "ARRETE_AUTORISATION", startDate: "2024-01-01" },
-      { id: 88, category: "CONVENTION", startDate: "2024-01-01" },
+      currentParentActe(99, "ARRETE_AUTORISATION"),
+      currentParentActe(88, "CONVENTION"),
     ]);
     render(
       <TransformationActesAdministratifsForm
@@ -276,14 +287,17 @@ describe("TransformationActesAdministratifsForm — avenant alternative (extensi
     );
 
     expect(screen.getByRole("radio", { name: "Convention" })).toBeChecked();
+    // the avenant option shows the current parent acte's date range
     expect(
-      screen.getByRole("radio", { name: "Avenant convention" })
+      screen.getByRole("radio", { name: "Avenant convention 2020 - 2099" })
     ).not.toBeChecked();
     expect(
       screen.getByRole("radio", { name: "Arrêté d'extension" })
     ).toBeChecked();
     expect(
-      screen.getByRole("radio", { name: "Avenant arrêté d'autorisation" })
+      screen.getByRole("radio", {
+        name: "Avenant arrêté d'autorisation 2020 - 2099",
+      })
     ).not.toBeChecked();
 
     expect(
@@ -322,10 +336,17 @@ describe("TransformationActesAdministratifsForm — avenant alternative (extensi
     ).toBeInTheDocument();
   });
 
-  it("marks the acte as an avenant of the structure's arrêté d'autorisation on submit", async () => {
+  it("marks the acte as an avenant of the structure's current arrêté d'autorisation on submit", async () => {
     const transformation = extensionWithStructureActes([
-      { id: 50, category: "ARRETE_AUTORISATION", startDate: "2020-01-01" },
-      { id: 99, category: "ARRETE_AUTORISATION", startDate: "2024-01-01" },
+      // expired -> not the current acte
+      {
+        id: 50,
+        category: "ARRETE_AUTORISATION",
+        startDate: "2000-01-01T12:00:00.000Z",
+        endDate: "2005-01-01T12:00:00.000Z",
+        children: [],
+      },
+      currentParentActe(99, "ARRETE_AUTORISATION"),
     ]);
     render(
       <TransformationActesAdministratifsForm
@@ -338,7 +359,9 @@ describe("TransformationActesAdministratifsForm — avenant alternative (extensi
 
     // pick the avenant option for the arrêté block
     await userEvent.click(
-      screen.getByRole("radio", { name: "Avenant arrêté d'autorisation" })
+      screen.getByRole("radio", {
+        name: "Avenant arrêté d'autorisation 2020 - 2099",
+      })
     );
 
     // fill its single date + file
@@ -360,7 +383,7 @@ describe("TransformationActesAdministratifsForm — avenant alternative (extensi
       (acte: { category: string }) => acte.category === "ARRETE_AUTORISATION"
     );
     expect(avenant).toBeDefined();
-    // most recent arrêté d'autorisation (by startDate) is id 99
+    // id 99 is the arrêté d'autorisation in effect today; id 50 is expired
     expect(avenant.parentId).toBe(99);
   });
 

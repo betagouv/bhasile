@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   getActesAdministratifsDefaultValues,
   getCategoryGroup,
-  getLatestStructureParentActeId,
+  getCurrentStructureParentActe,
   resolveAvenantParentIds,
 } from "@/app/utils/acteAdministratif.util";
 import {
@@ -11,6 +11,20 @@ import {
   CategoryDisplayRule,
   CategoryDisplayRules,
 } from "@/config/acte-administratif.config";
+import { StructureParentActe } from "@/types/acte-administratif.type";
+
+const REFERENCE_DATE = new Date("2025-06-01T12:00:00.000Z");
+
+const parentActe = (
+  overrides: Partial<StructureParentActe> = {}
+): StructureParentActe => ({
+  id: 1,
+  category: "ARRETE_AUTORISATION",
+  startDate: "2020-01-01T12:00:00.000Z",
+  endDate: "2030-01-01T12:00:00.000Z",
+  children: [],
+  ...overrides,
+});
 
 const arreteExtensionRule: CategoryDisplayRule = {
   categoryShortName: "arrêté",
@@ -42,39 +56,93 @@ describe("getCategoryGroup", () => {
   });
 });
 
-describe("getLatestStructureParentActeId", () => {
-  it("returns the id of the most recent acte by startDate", () => {
-    const id = getLatestStructureParentActeId(
+describe("getCurrentStructureParentActe", () => {
+  it("returns the parent acte in effect at the reference date, with its start/end years", () => {
+    const resolved = getCurrentStructureParentActe(
       [
-        { id: 1, category: "ARRETE_AUTORISATION", startDate: "2020-01-01" },
-        { id: 2, category: "ARRETE_AUTORISATION", startDate: "2023-06-01" },
-        { id: 3, category: "CONVENTION", startDate: "2024-01-01" },
+        parentActe({ id: 7, category: "ARRETE_AUTORISATION" }),
+        parentActe({ id: 8, category: "CONVENTION" }),
       ],
-      "ARRETE_AUTORISATION"
+      "ARRETE_AUTORISATION",
+      REFERENCE_DATE
     );
-    expect(id).toBe(2);
+    expect(resolved).toEqual({ id: 7, startYear: 2020, endYear: 2030 });
   });
 
-  it("breaks ties on equal startDate with the highest id", () => {
-    const id = getLatestStructureParentActeId(
+  it("uses the most future avenant endDate as the effective end (max children ?? parent)", () => {
+    const resolved = getCurrentStructureParentActe(
       [
-        { id: 5, category: "CONVENTION", startDate: "2023-01-01" },
-        { id: 9, category: "CONVENTION", startDate: "2023-01-01" },
+        parentActe({
+          id: 7,
+          endDate: "2030-01-01T12:00:00.000Z",
+          children: [
+            { endDate: "2028-01-01T12:00:00.000Z" },
+            { endDate: "2035-01-01T12:00:00.000Z" },
+          ],
+        }),
       ],
-      "CONVENTION"
+      "ARRETE_AUTORISATION",
+      REFERENCE_DATE
     );
-    expect(id).toBe(9);
+    expect(resolved?.endYear).toBe(2035);
+  });
+
+  it("treats an acte as current when an avenant extends its end past the reference date", () => {
+    const resolved = getCurrentStructureParentActe(
+      [
+        parentActe({
+          id: 7,
+          endDate: "2024-01-01T12:00:00.000Z", // expired on its own
+          children: [{ endDate: "2030-01-01T12:00:00.000Z" }], // avenant extends it
+        }),
+      ],
+      "ARRETE_AUTORISATION",
+      REFERENCE_DATE
+    );
+    expect(resolved).toEqual({ id: 7, startYear: 2020, endYear: 2030 });
+  });
+
+  it("returns undefined for an expired or not-yet-started acte", () => {
+    expect(
+      getCurrentStructureParentActe(
+        [
+          parentActe({
+            startDate: "2010-01-01T12:00:00.000Z",
+            endDate: "2015-01-01T12:00:00.000Z",
+          }),
+        ],
+        "ARRETE_AUTORISATION",
+        REFERENCE_DATE
+      )
+    ).toBeUndefined();
+    expect(
+      getCurrentStructureParentActe(
+        [
+          parentActe({
+            startDate: "2030-01-01T12:00:00.000Z",
+            endDate: "2040-01-01T12:00:00.000Z",
+          }),
+        ],
+        "ARRETE_AUTORISATION",
+        REFERENCE_DATE
+      )
+    ).toBeUndefined();
   });
 
   it("returns undefined when no acte of the category exists", () => {
     expect(
-      getLatestStructureParentActeId(
-        [{ id: 1, category: "CONVENTION", startDate: "2024-01-01" }],
-        "ARRETE_AUTORISATION"
+      getCurrentStructureParentActe(
+        [parentActe({ category: "CONVENTION" })],
+        "ARRETE_AUTORISATION",
+        REFERENCE_DATE
       )
     ).toBeUndefined();
     expect(
-      getLatestStructureParentActeId(undefined, "ARRETE_AUTORISATION")
+      getCurrentStructureParentActe(
+        undefined,
+        "ARRETE_AUTORISATION",
+        REFERENCE_DATE
+      )
     ).toBeUndefined();
   });
 });
@@ -82,20 +150,22 @@ describe("getLatestStructureParentActeId", () => {
 describe("resolveAvenantParentIds", () => {
   const rules: CategoryDisplayRules = { ARRETE_EXTENSION: arreteExtensionRule };
 
-  it("injects the resolved parentId when an eligible parent exists", () => {
-    const resolved = resolveAvenantParentIds(rules, [
-      { id: 42, category: "ARRETE_AUTORISATION", startDate: "2024-01-01" },
-    ]);
-    expect(resolved.ARRETE_EXTENSION?.avenantAlternative?.parentId).toBe(42);
+  it("injects the resolved parent (id + years) when a current parent exists", () => {
+    const resolved = resolveAvenantParentIds(
+      rules,
+      [parentActe({ id: 42, category: "ARRETE_AUTORISATION" })],
+      REFERENCE_DATE
+    );
+    expect(
+      resolved.ARRETE_EXTENSION?.avenantAlternative?.resolvedParent
+    ).toEqual({ id: 42, startYear: 2020, endYear: 2030 });
   });
 
-  it("keeps the avenantAlternative but leaves parentId undefined when no eligible parent exists", () => {
-    // The avenantAlternative must survive so a saved avenant stays recognized/rendered;
-    // the missing parentId is what hides the "create avenant" choice downstream.
-    const resolved = resolveAvenantParentIds(rules, []);
+  it("keeps the avenantAlternative but leaves resolvedParent undefined when no current parent exists", () => {
+    const resolved = resolveAvenantParentIds(rules, [], REFERENCE_DATE);
     expect(resolved.ARRETE_EXTENSION?.avenantAlternative).toBeDefined();
     expect(
-      resolved.ARRETE_EXTENSION?.avenantAlternative?.parentId
+      resolved.ARRETE_EXTENSION?.avenantAlternative?.resolvedParent
     ).toBeUndefined();
   });
 
@@ -103,7 +173,7 @@ describe("resolveAvenantParentIds", () => {
     const plainRules: CategoryDisplayRules = {
       AUTRE: { ...arreteExtensionRule, avenantAlternative: undefined },
     };
-    const resolved = resolveAvenantParentIds(plainRules, []);
+    const resolved = resolveAvenantParentIds(plainRules, [], REFERENCE_DATE);
     expect(resolved.AUTRE?.avenantAlternative).toBeUndefined();
   });
 });
