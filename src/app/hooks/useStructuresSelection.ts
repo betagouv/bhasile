@@ -6,6 +6,7 @@ export const useStructuresSelection = ({
   operateurName,
   departements,
   types,
+  finalisedOnly,
 }: Props) => {
   const [structures, setStructures] = useState<
     StructureMinimalApiType[] | undefined
@@ -14,7 +15,8 @@ export const useStructuresSelection = ({
   const getStructures = async (
     operateurName?: string,
     departements?: string,
-    types?: string
+    types?: string,
+    finalisedOnly?: boolean
   ): Promise<{
     structures: StructureMinimalApiType[];
     totalStructures: number;
@@ -33,6 +35,9 @@ export const useStructuresSelection = ({
         params.append("type", types);
       }
       params.append("selection", "true");
+      if (finalisedOnly) {
+        params.append("finalised", "true");
+      }
       const result = await fetch(
         `${baseUrl}/api/structures?${params.toString()}`
       );
@@ -53,7 +58,8 @@ export const useStructuresSelection = ({
       const { structures } = await getStructures(
         operateurName,
         departements,
-        types
+        types,
+        finalisedOnly
       );
       setStructures(structures);
     };
@@ -62,7 +68,7 @@ export const useStructuresSelection = ({
     } else {
       setStructures(undefined);
     }
-  }, [operateurName, departements, types]);
+  }, [operateurName, departements, types, finalisedOnly]);
 
   return {
     structures,
@@ -73,4 +79,5 @@ type Props = {
   operateurName?: string;
   departements?: string;
   types?: string;
+  finalisedOnly?: boolean;
 };

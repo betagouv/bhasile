@@ -86,6 +86,7 @@ type StructureQueryFilters = {
   departements: string | null;
   operateurs: string | null;
   selection?: boolean;
+  finalised?: boolean;
 };
 
 export const buildStructuresOrderSql = (
@@ -114,6 +115,7 @@ export const buildStructuresWhereSql = ({
   placesAutorisees,
   operateurs,
   selection,
+  finalised,
 }: StructureQueryFilters): Prisma.Sql => {
   const conditions: Prisma.Sql[] = [];
   const typeList = type?.split(",").filter(Boolean) ?? [];
@@ -123,6 +125,18 @@ export const buildStructuresWhereSql = ({
   if (!selection) {
     conditions.push(
       Prisma.sql`EXISTS (SELECT 1 FROM public."Form" f WHERE f."structureId" = s.id)`
+    );
+  }
+  if (finalised) {
+    conditions.push(
+      Prisma.sql`EXISTS (
+        SELECT 1
+        FROM public."Form" f
+        JOIN public."FormDefinition" fd ON fd.id = f."formDefinitionId"
+        WHERE f."structureId" = s.id
+          AND fd."slug" = 'finalisation-v1'
+          AND f."status" = true
+      )`
     );
   }
   if (typeList.length > 0) {

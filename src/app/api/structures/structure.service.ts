@@ -58,6 +58,7 @@ export type SearchProps = {
   direction?: "asc" | "desc" | null;
   map?: boolean;
   selection?: boolean;
+  finalised?: boolean;
 };
 
 export const updateStructureAgent = async (
@@ -97,6 +98,7 @@ export const getFullStructures = async ({
   direction,
   operateurs,
   selection,
+  finalised,
 }: SearchProps): Promise<{
   structures: StructureApiRead[];
   totalStructures: number;
@@ -113,6 +115,7 @@ export const getFullStructures = async ({
     direction,
     operateurs,
     selection,
+    finalised,
   })) as StructureDbList[];
   const totalStructures = await countBySearch({
     search,
