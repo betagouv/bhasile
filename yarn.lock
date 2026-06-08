@@ -2305,10 +2305,10 @@
     convert-source-map "^2.0.0"
     tinyrainbow "^3.1.0"
 
-"@xmldom/xmldom@^0.8.11":
-  version "0.8.13"
-  resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.8.13.tgz#00d1dd940b218dff2e49309d410d8bb212159225"
-  integrity sha512-KRYzxepc14G/CEpEGc3Yn+JKaAeT63smlDr+vjB8jRfgTBBI9wRj/nkQEO+ucV8p8I9bfKLWp37uHgFrbntPvw==
+"@xmldom/xmldom@^0.9.9":
+  version "0.9.10"
+  resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.9.10.tgz#a0ad5a26fe8aa996310870726e1704977f769dee"
+  integrity sha512-A9gOqLdi6cV4ibazAjcQufGj0B1y/vDqYrcuP6d/6x8P27gRS8643Dj9o1dEKtB6O7fwxb2FgBmJS2mX7gpvdw==
 
 "@yarnpkg/lockfile@^1.1.0":
   version "1.1.0"
@@ -5712,12 +5712,12 @@ react@^19.2.6:
   resolved "https://registry.yarnpkg.com/react/-/react-19.2.6.tgz#3dadb8e12b2a7934c1d5317973e5dce1301f9a4d"
   integrity sha512-sfWGGfavi0xr8Pg0sVsyHMAOziVYKgPLNrS7ig+ivMNb3wbCBw3KxtflsGBAwD3gYQlE/AEZsTLgToRrSCjb0Q==
 
-read-excel-file@^7.0.2:
-  version "7.0.3"
-  resolved "https://registry.yarnpkg.com/read-excel-file/-/read-excel-file-7.0.3.tgz#c3e77ce5103ed0e1e4263c1c1a6aec16ecf78aa7"
-  integrity sha512-S9+WgwNbVFeCRAT90sMuTDqN3Ez9Nz2tywXvdH1XSKM8SxZlrFBjmB0/IiYMBCFx71YSitOUSUDjGLXhAj1V0A==
+read-excel-file@^9.0.10:
+  version "9.0.10"
+  resolved "https://registry.yarnpkg.com/read-excel-file/-/read-excel-file-9.0.10.tgz#c54ac933ec1737b3760b4812e4f10d7d223f4112"
+  integrity sha512-Y0KhCerC+ybj2IrS5htrGRc7LXtyQT1rJ6MGqF28kJeRYjRt0HN1ne0jd0Xnwqh2gTJRs3fe0D9TLUYrBhT+LQ==
   dependencies:
-    "@xmldom/xmldom" "^0.8.11"
+    "@xmldom/xmldom" "^0.9.9"
     fflate "^0.8.2"
     unzipper "^0.12.3"
 
