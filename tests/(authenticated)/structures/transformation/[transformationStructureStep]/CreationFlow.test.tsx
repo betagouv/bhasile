@@ -33,9 +33,9 @@ vi.mock(
 );
 
 vi.mock(
-  "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation/CreationPlacesEtHebergementForm",
+  "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/PlacesEtHebergementForm",
   () => ({
-    CreationPlacesEtHebergementForm: () => <div data-testid="places-form" />,
+    PlacesEtHebergementForm: () => <div data-testid="places-form" />,
   })
 );
 

@@ -817,6 +817,14 @@ describe("structure util", () => {
       // THEN
       expect(result).toBe(-1);
     });
+
+    it("should return -1 when the array is undefined (watch() not yet hydrated)", () => {
+      // WHEN
+      const result = getMillesimeIndexForAYear(undefined, 2025);
+
+      // THEN
+      expect(result).toBe(-1);
+    });
   });
 
   describe("getMillesimeIndexForAYear", () => {
