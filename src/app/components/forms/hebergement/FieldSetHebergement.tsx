@@ -4,6 +4,10 @@ import { useCallback, useEffect, useRef } from "react";
 import { useFieldArray, useForm, useFormContext } from "react-hook-form";
 
 import { isAdresseEmpty } from "@/app/utils/adresse.util";
+import {
+  getTransformationNounAvecArticle,
+  isTransformationSurStructureExistante,
+} from "@/app/utils/transformation.util";
 import { CURRENT_YEAR } from "@/constants";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { Repartition } from "@/types/adresse.type";
@@ -141,6 +145,13 @@ export const FieldSetHebergement = ({
 
   return (
     <div>
+      {isTransformationSurStructureExistante(formKind) && (
+        <h2 className="text-xl font-bold mb-4 text-title-blue-france">
+          {`Veuillez conserver uniquement les adresses d’hébergement qui composent l’ensemble de la structure une fois ${getTransformationNounAvecArticle(
+            formKind
+          )} effective et actualiser le nombre de place attribué à chacune d’entre elles ainsi que leurs particularités.`}
+        </h2>
+      )}
       <fieldset className="flex flex-col gap-6">
         <Notices
           typeBati={typeBati}

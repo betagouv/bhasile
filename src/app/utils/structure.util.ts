@@ -2,17 +2,13 @@ import dayjs from "dayjs";
 
 import { CURRENT_YEAR } from "@/constants";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
-import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
 import {
   CpomStructureApiRead,
   CpomStructureApiWrite,
 } from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
-import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
-import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
-import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
 import { StructureType } from "@/types/structure.type";
 
@@ -164,24 +160,33 @@ export const getCurrentCpomStructureDates = (
   };
 };
 
-export const getMillesimeIndexForAYear = (
-  typologies?:
-    | StructureTypologieApiType[]
-    | StructureMillesimeApiType[]
-    | BudgetApiType[],
+export const getMillesimeIndexForAYear = <
+  T extends {
+    year: number;
+    type?: StructureType | IndicateurFinancierType;
+    cpomStructureType?: StructureType;
+  },
+>(
+  millesimes: T[] | undefined,
   year: number = CURRENT_YEAR,
   type?: StructureType | IndicateurFinancierType
 ): number =>
-  typologies?.findIndex((typology) => {
+  millesimes?.findIndex((millesime) => {
     if (type) {
       return (
-        typology.year === year &&
-        ((typology as BudgetApiType).cpomStructureType === type ||
-          (typology as IndicateurFinancierApiType).type === type)
+        millesime.year === year &&
+        (millesime.cpomStructureType === type || millesime.type === type)
       );
     }
-    return typology.year === year;
+    return millesime.year === year;
   }) ?? -1;
+
+export const getMostRecentMillesime = <T extends { year: number }>(
+  millesimes: T[]
+): T =>
+  millesimes.reduce((mostRecent, millesime) =>
+    millesime.year > mostRecent.year ? millesime : mostRecent
+  );
 
 export const getCpomStructureIndexAndBudgetIndexForAYearAndAType = (
   cpomStructures: CpomStructureApiRead[] | CpomStructureApiWrite[],

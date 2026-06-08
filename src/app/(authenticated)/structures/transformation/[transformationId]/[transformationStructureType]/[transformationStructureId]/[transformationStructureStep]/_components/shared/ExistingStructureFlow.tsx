@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 
+import { getPlacesSource } from "@/app/utils/transformation.util";
 import {
   StructureTransformationApiRead,
   TransformationApiRead,
@@ -13,6 +14,7 @@ import {
 } from "@/types/transformation.type";
 
 import { ExistingStructureIdentificationForm } from "./ExistingStructureIdentificationForm";
+import { PlacesEtHebergementForm } from "./PlacesEtHebergementForm";
 
 type Props = {
   transformation: TransformationApiRead;
@@ -36,6 +38,20 @@ export const ExistingStructureFlow = ({
         transformation={transformation}
         structureTransformation={structureTransformation}
         formKind={formKind}
+      />
+    );
+  }
+
+  if (
+    transformationStructureStep ===
+    StructureTransformationStep.PLACES_ET_HEBERGEMENT
+  ) {
+    return (
+      <PlacesEtHebergementForm
+        transformation={transformation}
+        structureTransformation={structureTransformation}
+        formKind={formKind}
+        originalPlaces={getPlacesSource(structureTransformation)}
       />
     );
   }
