@@ -76,7 +76,9 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     ]);
     render(
       <TransformationActesAdministratifsForm
-        structureVersionTransformation={transformation.structureVersionTransformations[0]}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
         transformation={transformation}
       />
     );
@@ -106,7 +108,9 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     const transformation = transformationWithActes([]);
     render(
       <TransformationActesAdministratifsForm
-        structureVersionTransformation={transformation.structureVersionTransformations[0]}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
         transformation={transformation}
       />
     );
@@ -131,7 +135,9 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     );
     render(
       <TransformationActesAdministratifsForm
-        structureVersionTransformation={transformation.structureVersionTransformations[0]}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
         transformation={transformation}
       />
     );
@@ -163,7 +169,9 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     );
     render(
       <TransformationActesAdministratifsForm
-        structureVersionTransformation={transformation.structureVersionTransformations[0]}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
         transformation={transformation}
       />
     );
@@ -196,7 +204,8 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     const actes = payload.structureVersionTransformation.actesAdministratifs;
     const radioActe = actes.find(
       (acte: { category: string }) =>
-        acte.category === "ARRETE_FUSION" || acte.category === "ARRETE_AUTORISATION"
+        acte.category === "ARRETE_FUSION" ||
+        acte.category === "ARRETE_AUTORISATION"
     );
     expect(radioActe?.category).toBe("ARRETE_FUSION");
   });
@@ -208,7 +217,9 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     );
     render(
       <TransformationActesAdministratifsForm
-        structureVersionTransformation={transformation.structureVersionTransformations[0]}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
         transformation={transformation}
       />
     );
@@ -257,7 +268,9 @@ describe("TransformationActesAdministratifsForm — avenant alternative (extensi
     ]);
     render(
       <TransformationActesAdministratifsForm
-        structureVersionTransformation={transformation.structureVersionTransformations[0]}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
         transformation={transformation}
       />
     );
@@ -272,13 +285,22 @@ describe("TransformationActesAdministratifsForm — avenant alternative (extensi
     expect(
       screen.getByRole("radio", { name: "Avenant arrêté d'autorisation" })
     ).not.toBeChecked();
+
+    expect(
+      screen.getByText("Convention ou avenant convention")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Arrêté d'extension ou avenant arrêté d'autorisation")
+    ).toBeInTheDocument();
   });
 
   it("hides the avenant option when the structure has no eligible parent acte", () => {
     const transformation = extensionWithStructureActes([]);
     render(
       <TransformationActesAdministratifsForm
-        structureVersionTransformation={transformation.structureVersionTransformations[0]}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
         transformation={transformation}
       />
     );
@@ -291,6 +313,13 @@ describe("TransformationActesAdministratifsForm — avenant alternative (extensi
     ).toBeNull();
     // the standalone arrêté field is still rendered
     expect(screen.getByLabelText("Date arrêté")).toBeInTheDocument();
+    // without an eligible parent, the legend stays the plain block title
+    expect(
+      screen.queryByText("Arrêté d'extension ou avenant arrêté d'autorisation")
+    ).toBeNull();
+    expect(
+      screen.getByText("Arrêté d'extension", { selector: "legend" })
+    ).toBeInTheDocument();
   });
 
   it("marks the acte as an avenant of the structure's arrêté d'autorisation on submit", async () => {
@@ -300,7 +329,9 @@ describe("TransformationActesAdministratifsForm — avenant alternative (extensi
     ]);
     render(
       <TransformationActesAdministratifsForm
-        structureVersionTransformation={transformation.structureVersionTransformations[0]}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
         transformation={transformation}
       />
     );
@@ -350,7 +381,9 @@ describe("TransformationActesAdministratifsForm — avenant alternative (extensi
     );
     render(
       <TransformationActesAdministratifsForm
-        structureVersionTransformation={transformation.structureVersionTransformations[0]}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
         transformation={transformation}
       />
     );

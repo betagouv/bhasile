@@ -39,14 +39,19 @@ export default function FieldSetActeAdministratif({
   const actesAdministratifs: ActeAdministratifFormValues[] =
     watch("actesAdministratifs") || [];
 
-  const { actesOfCategory, categoryRadio, avenantRadio, getAdditionalFieldsType } =
-    useActeAdministratifRadios({
-      category,
-      title,
-      additionalFieldsType,
-      alternativeCategories,
-      avenantAlternative,
-    });
+  const {
+    actesOfCategory,
+    legend,
+    categoryRadio,
+    avenantRadio,
+    getAdditionalFieldsType,
+  } = useActeAdministratifRadios({
+    category,
+    title,
+    additionalFieldsType,
+    alternativeCategories,
+    avenantAlternative,
+  });
 
   const handleAddNewField = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -91,7 +96,7 @@ export default function FieldSetActeAdministratif({
     <fieldset className="flex flex-col gap-6 w-full">
       {!noTitleLegend && (
         <legend className="text-xl font-bold mb-4 text-title-blue-france">
-          {title} {isOptional && "(optionnel)"}
+          {legend} {isOptional && "(optionnel)"}
         </legend>
       )}
       {typeof notice === "string" ? (

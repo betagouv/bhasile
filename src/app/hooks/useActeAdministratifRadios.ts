@@ -3,6 +3,7 @@ import { useFormContext } from "react-hook-form";
 
 import { getCategoryGroup } from "@/app/utils/acteAdministratif.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
+import { lowercaseFirstLetter } from "@/app/utils/string.util";
 import {
   AdditionalFieldsType,
   AvenantAlternative,
@@ -149,8 +150,14 @@ export const useActeAdministratifRadios = ({
       ? AdditionalFieldsType.DATE
       : additionalFieldsType;
 
+  const legend =
+    avenantAlternative && canCreateAvenant && primaryActeIndex !== -1
+      ? `${title} ou ${lowercaseFirstLetter(avenantAlternative.avenantLabel)}`
+      : title;
+
   return {
     actesOfCategory,
+    legend,
     categoryRadio,
     avenantRadio,
     getAdditionalFieldsType,
@@ -172,6 +179,7 @@ type RadioConfig = {
 
 type UseActeAdministratifRadios = {
   actesOfCategory: ActeAdministratifFormValues[];
+  legend: string;
   categoryRadio: RadioConfig | null;
   avenantRadio: RadioConfig | null;
   getAdditionalFieldsType: (
