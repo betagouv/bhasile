@@ -1,5 +1,4 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { areAllValuesEmpty } from "@/app/utils/common.util";
@@ -9,7 +8,7 @@ import { DeleteButton } from "../../common/DeleteButton";
 import AddressWithValidation from "../AddressWithValidation";
 import InputWithValidation from "../InputWithValidation";
 
-const emptyAntenne: AntenneFormValues = {
+export const emptyAntenne: AntenneFormValues = {
   name: "",
   adresseComplete: "",
   adresse: "",
@@ -18,24 +17,12 @@ const emptyAntenne: AntenneFormValues = {
   departement: "",
 };
 
-const MIN_ANTENNES = 2;
+export const MIN_ANTENNES = 2;
 
 export const FieldSetAntennes = () => {
   const { control, watch, setValue } = useFormContext();
 
   const antennes = (watch("antennes") || []) as AntenneFormValues[];
-
-  const isMultiAntenne = watch("isMultiAntenne");
-
-  const antennesLength = antennes.length;
-  useEffect(() => {
-    if (isMultiAntenne && antennesLength === 0) {
-      setValue("antennes", [emptyAntenne, emptyAntenne]);
-    }
-    if (!isMultiAntenne) {
-      setValue("antennes", []);
-    }
-  }, [isMultiAntenne, antennesLength, setValue]);
 
   const handleAddNewAntenne = () => {
     setValue("antennes", [...antennes, emptyAntenne]);
@@ -56,10 +43,6 @@ export const FieldSetAntennes = () => {
       )
     );
   };
-
-  if (!isMultiAntenne) {
-    return null;
-  }
 
   return (
     <fieldset className="flex flex-col gap-6">
