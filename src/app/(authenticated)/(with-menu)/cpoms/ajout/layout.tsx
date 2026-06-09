@@ -8,7 +8,7 @@ export default async function CpomLayout({
   return (
     <div className="flex flex-col h-full bg-alt-grey gap-3 pb-4">
       <CpomAjoutHeader />
-      <div className="mx-4">{children}</div>;
+      <div className="max-w-6xl mx-auto px-3">{children}</div>;
     </div>
   );
 }
