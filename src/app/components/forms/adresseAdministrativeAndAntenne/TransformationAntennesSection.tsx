@@ -99,6 +99,11 @@ export const TransformationAntennesSection = ({
       {antennesLength > 0 && (
         <FieldSetAntennes locked={!hasRepartitionChanged} />
       )}
+      {antennesLength === 0 && !hasRepartitionChanged && (
+        <p className="text-sm text-mention-grey italic">
+          La structure n’est pas répartie en plusieurs sites administratifs.
+        </p>
+      )}
     </>
   );
 };

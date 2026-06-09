@@ -92,13 +92,19 @@ describe("TransformationAntennesSection", () => {
     expect(nomInput("Édité")).not.toBeDisabled();
   });
 
-  it("prefill vide : aucun fieldset par défaut, 2 lignes vides éditables sur Oui", () => {
+  it("prefill vide : message à la place des inputs par défaut, 2 lignes vides éditables sur Oui", () => {
     renderSection();
 
     expect(screen.queryByText("Sites administratifs")).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/n.est pas répartie en plusieurs sites administratifs/i)
+    ).toBeInTheDocument();
 
     clickRadio("Oui");
 
+    expect(
+      screen.queryByText(/n.est pas répartie en plusieurs sites administratifs/i)
+    ).not.toBeInTheDocument();
     const nomInputs = screen.getAllByRole("textbox", { name: "Nom du site" });
     expect(nomInputs).toHaveLength(2);
     nomInputs.forEach((input) => expect(input).not.toBeDisabled());
