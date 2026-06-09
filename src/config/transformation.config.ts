@@ -276,6 +276,12 @@ const CONVENTION_WITH_AVENANT_RULE: CategoryDisplayRule = {
   },
 };
 
+const HUDA_CADA_CONVENTION_RULE: CategoryDisplayRule = {
+  ...CONVENTION_RULE,
+  notice:
+    "Une nouvelle convention doit être signée tel que publié par décret le 3 janvier 2026. Sa durée doit être équivalente au temps restant de la précédente convention.",
+};
+
 const AUTRE_RULE: CategoryDisplayRule = {
   categoryShortName: "autre",
   title: "Autres documents",
@@ -368,6 +374,21 @@ const extensionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
   },
 };
 
+const getExtensionActesAdministratifsCategoryToDisplay = (
+  transformationType: TransformationType | undefined
+): CategoryDisplayRules => {
+  if (
+    transformationType ===
+    TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR
+  ) {
+    return {
+      ...extensionActesAdministratifsCategoryToDisplay,
+      CONVENTION: HUDA_CADA_CONVENTION_RULE,
+    };
+  }
+  return extensionActesAdministratifsCategoryToDisplay;
+};
+
 const contractionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
   CONVENTION: CONVENTION_WITH_AVENANT_RULE,
   ARRETE_CONTRACTION: {
@@ -412,7 +433,9 @@ export const getTransformationActesAdministratifsCategoryToDisplay = (
 ): CategoryDisplayRules => {
   switch (structureVersionTransformationType) {
     case StructureVersionTransformationType.EXTENSION:
-      return extensionActesAdministratifsCategoryToDisplay;
+      return getExtensionActesAdministratifsCategoryToDisplay(
+        transformationType
+      );
     case StructureVersionTransformationType.CONTRACTION:
       return contractionActesAdministratifsCategoryToDisplay;
     case StructureVersionTransformationType.FERMETURE:
