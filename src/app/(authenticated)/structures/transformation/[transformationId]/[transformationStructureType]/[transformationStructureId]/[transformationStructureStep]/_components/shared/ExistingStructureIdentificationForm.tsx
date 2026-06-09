@@ -2,7 +2,7 @@
 
 import { TransformationAdresseAdministrative } from "@/app/components/forms/adresseAdministrativeAndAntenne/TransformationAdresseAdministrative";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
-import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
+import { TransformationDnaAndFiness } from "@/app/components/forms/dnaAndFiness/TransformationDnaAndFiness";
 import { EffectiveDateInput } from "@/app/components/forms/EffectiveDateInput";
 import FormWrapper, {
   FooterButtonType,
@@ -103,8 +103,7 @@ export const ExistingStructureIdentificationForm = ({
 
       <hr />
 
-      <DnaAndFiness
-        formKind={formKind}
+      <TransformationDnaAndFiness
         entityId={{
           structureVersionId: structureVersionTransformation.structureVersion?.id,
         }}
