@@ -6,6 +6,7 @@ import {
   AdresseSource,
   getTransformationNounAvecArticle,
 } from "@/app/utils/transformation.util";
+import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 import { FormKind } from "@/types/global";
 
 import { AdresseAdministrativeAndAntennes } from "./AdresseAdministrativeAndAntennes";
@@ -22,11 +23,13 @@ const ADRESSE_FIELD_NAMES: readonly (keyof AdresseSource)[] = [
 type Props = {
   formKind: FormKind;
   originalAdresse: AdresseSource;
+  originalAntennes: AntenneFormValues[];
 };
 
 export const TransformationAdresseAdministrative = ({
   formKind,
   originalAdresse,
+  originalAntennes,
 }: Props) => {
   const { getValues, setValue } = useFormContext();
 
@@ -92,6 +95,7 @@ export const TransformationAdresseAdministrative = ({
       <AdresseAdministrativeAndAntennes
         formKind={formKind}
         isAdresseAdministrativeLocked={!hasAdresseChanged}
+        originalAntennes={originalAntennes}
       />
     </>
   );

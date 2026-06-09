@@ -3,6 +3,7 @@ import { useFormContext } from "react-hook-form";
 import { describe, expect, it, vi } from "vitest";
 
 import { TransformationAntennesSection } from "@/app/components/forms/adresseAdministrativeAndAntenne/TransformationAntennesSection";
+import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 import { FormKind } from "@/types/global";
 
 import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
@@ -13,94 +14,112 @@ vi.mock("@/app/components/forms/AddressWithValidation", () => ({
 
 const IsMultiAntenneProbe = () => {
   const { watch } = useFormContext();
-  return <span data-testid="is-multi-antenne">{String(watch("isMultiAntenne"))}</span>;
+  return (
+    <span data-testid="is-multi-antenne">{String(watch("isMultiAntenne"))}</span>
+  );
 };
 
-const renderSection = (defaultValues: Record<string, unknown> = {}) =>
+const makeAntenne = (name: string): AntenneFormValues => ({
+  name,
+  adresse: "1 rue X",
+  codePostal: "50300",
+  commune: "Avranches",
+});
+
+const renderSection = (
+  defaultValues: Record<string, unknown> = {},
+  originalAntennes: AntenneFormValues[] = []
+) =>
   render(
     <FormTestWrapper defaultValues={defaultValues}>
-      <TransformationAntennesSection formKind={FormKind.EXTENSION} />
+      <TransformationAntennesSection
+        formKind={FormKind.EXTENSION}
+        originalAntennes={originalAntennes}
+      />
       <IsMultiAntenneProbe />
     </FormTestWrapper>
   );
 
-const existingAntennes = [
-  {
-    name: "Avranches Nord",
-    adresse: "1 rue A",
-    codePostal: "50300",
-    commune: "Avranches",
-  },
-  {
-    name: "Avranches Sud",
-    adresse: "2 rue B",
-    codePostal: "50300",
-    commune: "Avranches",
-  },
-];
-
 const clickRadio = (label: "Oui" | "Non") =>
   fireEvent.click(screen.getByRole("radio", { name: label }));
 
+const nomInput = (value: string) => screen.getByDisplayValue(value);
+
 describe("TransformationAntennesSection", () => {
-  it("n'affiche aucune réponse cochée ni les inputs par défaut", () => {
-    renderSection();
+  it("coche Non par défaut et affiche les antennes préremplies en disabled", () => {
+    renderSection({ antennes: [makeAntenne("Avranches Nord")] }, [
+      makeAntenne("Avranches Nord"),
+    ]);
 
+    expect(screen.getByRole("radio", { name: "Non" })).toBeChecked();
     expect(screen.getByRole("radio", { name: "Oui" })).not.toBeChecked();
-    expect(screen.getByRole("radio", { name: "Non" })).not.toBeChecked();
-    expect(screen.queryByText("Sites administratifs")).not.toBeInTheDocument();
+    expect(nomInput("Avranches Nord")).toBeDisabled();
   });
 
-  it("affiche 2 sites vides quand on répond Oui sur une structure sans antenne", () => {
-    renderSection();
+  it("active les inputs quand on coche Oui", () => {
+    renderSection({ antennes: [makeAntenne("Avranches Nord")] }, [
+      makeAntenne("Avranches Nord"),
+    ]);
 
     clickRadio("Oui");
 
+    expect(nomInput("Avranches Nord")).not.toBeDisabled();
+  });
+
+  it("restaure le prefill et jette l'édition quand on recoche Non", () => {
+    renderSection({ antennes: [makeAntenne("Avranches Nord")] }, [
+      makeAntenne("Avranches Nord"),
+    ]);
+
+    clickRadio("Oui");
+    fireEvent.change(nomInput("Avranches Nord"), {
+      target: { value: "Édité" },
+    });
+    expect(nomInput("Édité")).toBeInTheDocument();
+
+    clickRadio("Non");
+
+    expect(nomInput("Avranches Nord")).toBeDisabled();
+    expect(screen.queryByDisplayValue("Édité")).not.toBeInTheDocument();
+  });
+
+  it("coche Oui à la reprise quand les antennes persistées diffèrent du prefill", () => {
+    renderSection({ antennes: [makeAntenne("Édité")] }, [
+      makeAntenne("Original"),
+    ]);
+
+    expect(screen.getByRole("radio", { name: "Oui" })).toBeChecked();
+    expect(nomInput("Édité")).not.toBeDisabled();
+  });
+
+  it("prefill vide : aucun fieldset par défaut, 2 lignes vides éditables sur Oui", () => {
+    renderSection();
+
+    expect(screen.queryByText("Sites administratifs")).not.toBeInTheDocument();
+
+    clickRadio("Oui");
+
+    const nomInputs = screen.getAllByRole("textbox", { name: "Nom du site" });
+    expect(nomInputs).toHaveLength(2);
+    nomInputs.forEach((input) => expect(input).not.toBeDisabled());
+  });
+
+  it("prefill vide : recocher Non fait disparaître le fieldset", () => {
+    renderSection();
+
+    clickRadio("Oui");
     expect(screen.getByText("Sites administratifs")).toBeInTheDocument();
-    expect(
-      screen.getAllByRole("textbox", { name: "Nom du site" })
-    ).toHaveLength(2);
-  });
-
-  it("masque les inputs quand on répond Non, sans afficher d'antenne", () => {
-    renderSection();
-
-    clickRadio("Oui");
-    clickRadio("Non");
-
-    expect(screen.queryByText("Sites administratifs")).not.toBeInTheDocument();
-  });
-
-  it("pré-remplit les antennes existantes sur Oui, masquées par défaut", () => {
-    renderSection({ antennes: existingAntennes });
-
-    expect(screen.queryByText("Sites administratifs")).not.toBeInTheDocument();
-
-    clickRadio("Oui");
-
-    expect(screen.getByDisplayValue("Avranches Nord")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("Avranches Sud")).toBeInTheDocument();
-  });
-
-  it("restaure le snapshot initial et jette l'édition au retour sur Non", () => {
-    renderSection({ antennes: existingAntennes });
-
-    clickRadio("Oui");
-    const firstName = screen.getByDisplayValue("Avranches Nord");
-    fireEvent.change(firstName, { target: { value: "Site modifié" } });
-    expect(screen.getByDisplayValue("Site modifié")).toBeInTheDocument();
 
     clickRadio("Non");
-    clickRadio("Oui");
-
-    expect(screen.getByDisplayValue("Avranches Nord")).toBeInTheDocument();
-    expect(screen.queryByDisplayValue("Site modifié")).not.toBeInTheDocument();
-  });
-
-  it("garde isMultiAntenne à true quand la structure a des antennes, inputs masqués", () => {
-    renderSection({ antennes: existingAntennes });
 
     expect(screen.queryByText("Sites administratifs")).not.toBeInTheDocument();
+  });
+
+  it("garde isMultiAntenne à true quand la structure a des antennes", () => {
+    renderSection({ antennes: [makeAntenne("Avranches Nord")] }, [
+      makeAntenne("Avranches Nord"),
+    ]);
+
     expect(screen.getByTestId("is-multi-antenne")).toHaveTextContent("true");
   });
 

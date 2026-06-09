@@ -19,7 +19,11 @@ export const emptyAntenne: AntenneFormValues = {
 
 export const MIN_ANTENNES = 2;
 
-export const FieldSetAntennes = () => {
+export const FieldSetAntennes = ({
+  locked = false,
+}: {
+  locked?: boolean;
+} = {}) => {
   const { control, watch, setValue } = useFormContext();
 
   const antennes = (watch("antennes") || []) as AntenneFormValues[];
@@ -60,6 +64,7 @@ export const FieldSetAntennes = () => {
                 type="text"
                 label="Nom du site"
                 className="mb-0"
+                disabled={locked}
               />
               <span className="text-[#666666] text-sm">
                 ex : Avranches Nord
@@ -75,18 +80,20 @@ export const FieldSetAntennes = () => {
                 city={`antennes.${index}.commune`}
                 department={`antennes.${index}.departement`}
                 label="Adresse"
+                disabled={locked}
               />
             </div>
           </div>
           <div className="w-8 mb-7">
-            {(antennes.length > MIN_ANTENNES ||
-              !areAllValuesEmpty(antenne)) && (
-              <DeleteButton
-                onClick={() => handleDeleteAntenne(index)}
-                size="small"
-                backgroundColor="grey"
-              />
-            )}
+            {!locked &&
+              (antennes.length > MIN_ANTENNES ||
+                !areAllValuesEmpty(antenne)) && (
+                <DeleteButton
+                  onClick={() => handleDeleteAntenne(index)}
+                  size="small"
+                  backgroundColor="grey"
+                />
+              )}
           </div>
         </div>
       ))}
@@ -96,6 +103,7 @@ export const FieldSetAntennes = () => {
         priority="tertiary no outline"
         className="underline font-normal p-0"
         onClick={handleAddNewAntenne}
+        disabled={locked}
       >
         Ajouter un site administratif
       </Button>

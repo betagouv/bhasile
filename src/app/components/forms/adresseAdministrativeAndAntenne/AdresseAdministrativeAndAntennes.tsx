@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { isTransformationSurStructureExistante } from "@/app/utils/transformation.util";
+import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 import { FormKind } from "@/types/global";
 
 import { Antennes } from "./Antennes";
@@ -13,11 +14,13 @@ import { TransformationAntennesSection } from "./TransformationAntennesSection";
 type Props = {
   formKind?: FormKind;
   isAdresseAdministrativeLocked?: boolean;
+  originalAntennes?: AntenneFormValues[];
 };
 
 export const AdresseAdministrativeAndAntennes = ({
   formKind = FormKind.FINALISATION,
   isAdresseAdministrativeLocked = false,
+  originalAntennes = [],
 }: Props) => {
   const { watch, setValue } = useFormContext();
 
@@ -65,7 +68,10 @@ export const AdresseAdministrativeAndAntennes = ({
         locked={isAdresseAdministrativeLocked}
       />
       {isExtensionOrContraction ? (
-        <TransformationAntennesSection formKind={formKind} />
+        <TransformationAntennesSection
+          formKind={formKind}
+          originalAntennes={originalAntennes}
+        />
       ) : (
         <>
           {isOuvertureFromStructure && (

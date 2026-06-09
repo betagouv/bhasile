@@ -8,30 +8,43 @@ import { FormKind } from "@/types/global";
 
 import { emptyAntenne, FieldSetAntennes } from "./FieldSetAntennes";
 
+const antennesSignature = (antennes: AntenneFormValues[]): string =>
+  antennes
+    .map((antenne) =>
+      [
+        antenne.name ?? "",
+        antenne.adresse ?? "",
+        antenne.codePostal ?? "",
+        antenne.commune ?? "",
+        antenne.departement ?? "",
+      ].join("|")
+    )
+    .join("§");
+
 type Props = {
   formKind: FormKind;
+  originalAntennes: AntenneFormValues[];
 };
 
-export const TransformationAntennesSection = ({ formKind }: Props) => {
+export const TransformationAntennesSection = ({
+  formKind,
+  originalAntennes,
+}: Props) => {
   const { watch, getValues, setValue } = useFormContext();
 
   const antennes = (watch("antennes") || []) as AntenneFormValues[];
-  const isMultiAntenne = watch("isMultiAntenne");
   const antennesLength = antennes.length;
 
-  const [hasRepartitionChanged, setHasRepartitionChanged] = useState<
-    boolean | undefined
-  >(undefined);
-  const [originalAntennes] = useState<AntenneFormValues[]>(() =>
-    structuredClone((getValues("antennes") ?? []) as AntenneFormValues[])
+  const [hasRepartitionChanged, setHasRepartitionChanged] = useState<boolean>(
+    () =>
+      antennesSignature(
+        (getValues("antennes") ?? []) as AntenneFormValues[]
+      ) !== antennesSignature(originalAntennes)
   );
 
   useEffect(() => {
-    const nextIsMultiAntenne = antennesLength > 0;
-    if (isMultiAntenne !== nextIsMultiAntenne) {
-      setValue("isMultiAntenne", nextIsMultiAntenne);
-    }
-  }, [antennesLength, isMultiAntenne, setValue]);
+    setValue("isMultiAntenne", antennesLength > 0);
+  }, [antennesLength, setValue]);
 
   const handleAnswer = (modifiesRepartition: boolean) => {
     setHasRepartitionChanged(modifiesRepartition);
@@ -48,7 +61,7 @@ export const TransformationAntennesSection = ({ formKind }: Props) => {
 
   const title = `Est-ce que ${getTransformationNounAvecArticle(
     formKind
-  )} modifie la répartition de la structure en plusieurs sites administratifs distants ? Si oui, veuillez nommer chacun des sites.`;
+  )} change la situation indiquée ci-dessous concernant la répartition de la structure en plusieurs sites administratifs ? Si oui, veuillez bien nommer chacun des sites.`;
 
   return (
     <>
@@ -83,7 +96,9 @@ export const TransformationAntennesSection = ({ formKind }: Props) => {
           className="mr-10"
         />
       </div>
-      {hasRepartitionChanged === true && <FieldSetAntennes />}
+      {antennesLength > 0 && (
+        <FieldSetAntennes locked={!hasRepartitionChanged} />
+      )}
     </>
   );
 };
