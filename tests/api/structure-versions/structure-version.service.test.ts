@@ -218,6 +218,16 @@ const buildStructureVersion = (
   }) as unknown as StructureVersionDbDetails;
 
 describe("dbStructureVersionToApiRead", () => {
+  it("computes adresseComplete on the version addresses", () => {
+    const result = dbStructureVersionToApiRead(
+      buildStructureVersion([Repartition.COLLECTIF])
+    );
+
+    expect(result.adresses?.[0]?.adresseComplete).toBe(
+      "3 rue C 50300 Avranches"
+    );
+  });
+
   it("infère typeBati COLLECTIF quand toutes les adresses sont collectives", () => {
     const result = dbStructureVersionToApiRead(
       buildStructureVersion([Repartition.COLLECTIF, Repartition.COLLECTIF])
