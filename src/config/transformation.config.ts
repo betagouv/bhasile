@@ -92,7 +92,8 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
-    primaryStructureVersionTransformationType: StructureVersionTransformationType.EXTENSION,
+    primaryStructureVersionTransformationType:
+      StructureVersionTransformationType.EXTENSION,
   },
   [TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_CONTRACTENT]: {
     title: "Transformer une structure",
@@ -111,7 +112,15 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
-    primaryStructureVersionTransformationType: StructureVersionTransformationType.EXTENSION,
+    prefill: [
+      {
+        from: StructureVersionTransformationType.CONTRACTION,
+        to: StructureVersionTransformationType.EXTENSION,
+        fields: ["contacts", "antennes", "adresses"],
+      },
+    ],
+    primaryStructureVersionTransformationType:
+      StructureVersionTransformationType.EXTENSION,
   },
   [TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_FERMENT]: {
     title: "Transformer une structure",
@@ -130,7 +139,15 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
-    primaryStructureVersionTransformationType: StructureVersionTransformationType.EXTENSION,
+    prefill: [
+      {
+        from: StructureVersionTransformationType.FERMETURE,
+        to: StructureVersionTransformationType.EXTENSION,
+        fields: ["contacts", "antennes", "adresses"],
+      },
+    ],
+    primaryStructureVersionTransformationType:
+      StructureVersionTransformationType.EXTENSION,
   },
   [TransformationType.CONTRACTION_AVEC_TRANSFERT_VERS_AUTRE_STRUCTURE]: {
     title: "Transformer une structure",
@@ -149,7 +166,15 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
-    primaryStructureVersionTransformationType: StructureVersionTransformationType.CONTRACTION,
+    prefill: [
+      {
+        from: StructureVersionTransformationType.CONTRACTION,
+        to: StructureVersionTransformationType.EXTENSION,
+        fields: ["contacts", "antennes", "adresses"],
+      },
+    ],
+    primaryStructureVersionTransformationType:
+      StructureVersionTransformationType.CONTRACTION,
   },
   [TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES]: {
     title: "Transformer une structure",
@@ -160,7 +185,8 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
-    primaryStructureVersionTransformationType: StructureVersionTransformationType.CONTRACTION,
+    primaryStructureVersionTransformationType:
+      StructureVersionTransformationType.CONTRACTION,
   },
   [TransformationType.FERMETURE_AVEC_TRANSFERT_VERS_UNE_OU_PLUSIEURS_STRUCTURES]:
     {
@@ -180,7 +206,15 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
           structureVersion: { structureId },
         },
       ],
-      primaryStructureVersionTransformationType: StructureVersionTransformationType.FERMETURE,
+      prefill: [
+        {
+          from: StructureVersionTransformationType.FERMETURE,
+          to: StructureVersionTransformationType.EXTENSION,
+          fields: ["contacts", "antennes", "adresses"],
+        },
+      ],
+      primaryStructureVersionTransformationType:
+        StructureVersionTransformationType.FERMETURE,
     },
   [TransformationType.FERMETURE_SANS_TRANSFERT]: {
     title: "Transformer une structure",
@@ -191,7 +225,8 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
-    primaryStructureVersionTransformationType: StructureVersionTransformationType.FERMETURE,
+    primaryStructureVersionTransformationType:
+      StructureVersionTransformationType.FERMETURE,
   },
   [TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR]: {
     title: "Transformer HUDA en CADA",
@@ -214,6 +249,13 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       },
     ],
     buildAutoTransformations: () => [],
+    prefill: [
+      {
+        from: StructureVersionTransformationType.FERMETURE,
+        to: StructureVersionTransformationType.EXTENSION,
+        fields: ["contacts", "antennes", "adresses"],
+      },
+    ],
   },
   [TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR]: {
     title: "Transformer HUDA en CADA",
@@ -230,6 +272,13 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         type: StructureVersionTransformationType.CREATION,
         structureVersion: { type: StructureType.CADA },
+      },
+    ],
+    prefill: [
+      {
+        from: StructureVersionTransformationType.FERMETURE,
+        to: StructureVersionTransformationType.CREATION,
+        fields: ["contacts", "antennes", "adresses"],
       },
     ],
   },
@@ -380,7 +429,9 @@ export const getTransformationActesAdministratifsCategoryToDisplay = (
     case StructureVersionTransformationType.FERMETURE:
       return fermetureActesAdministratifsCategoryToDisplay;
     case StructureVersionTransformationType.CREATION:
-      return getCreationActesAdministratifsCategoryToDisplay(transformationType);
+      return getCreationActesAdministratifsCategoryToDisplay(
+        transformationType
+      );
   }
 };
 
@@ -388,11 +439,14 @@ export const STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME: Record<
   StructureVersionTransformationType,
   string
 > = {
-  [StructureVersionTransformationType.CREATION]: "structure-transformation-creation",
-  [StructureVersionTransformationType.EXTENSION]: "structure-transformation-extension",
+  [StructureVersionTransformationType.CREATION]:
+    "structure-transformation-creation",
+  [StructureVersionTransformationType.EXTENSION]:
+    "structure-transformation-extension",
   [StructureVersionTransformationType.CONTRACTION]:
     "structure-transformation-contraction",
-  [StructureVersionTransformationType.FERMETURE]: "structure-transformation-fermeture",
+  [StructureVersionTransformationType.FERMETURE]:
+    "structure-transformation-fermeture",
 };
 
 export type StructureVersionTransformationFormStepSpec = {
@@ -428,12 +482,16 @@ export const STRUCTURE_VERSION_TRANSFORMATION_FORM_STEPS: Record<
   string,
   StructureVersionTransformationFormStepSpec[]
 > = {
-  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[StructureVersionTransformationType.CREATION]]:
-    STRUCTURE_VERSION_TRANSFORMATION_COMPLETE_FORM_STEPS,
-  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[StructureVersionTransformationType.EXTENSION]]:
-    STRUCTURE_VERSION_TRANSFORMATION_COMPLETE_FORM_STEPS,
-  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[StructureVersionTransformationType.CONTRACTION]]:
-    STRUCTURE_VERSION_TRANSFORMATION_COMPLETE_FORM_STEPS,
-  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[StructureVersionTransformationType.FERMETURE]]:
-    STRUCTURE_VERSION_TRANSFORMATION_FERMETURE_FORM_STEPS,
+  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[
+    StructureVersionTransformationType.CREATION
+  ]]: STRUCTURE_VERSION_TRANSFORMATION_COMPLETE_FORM_STEPS,
+  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[
+    StructureVersionTransformationType.EXTENSION
+  ]]: STRUCTURE_VERSION_TRANSFORMATION_COMPLETE_FORM_STEPS,
+  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[
+    StructureVersionTransformationType.CONTRACTION
+  ]]: STRUCTURE_VERSION_TRANSFORMATION_COMPLETE_FORM_STEPS,
+  [STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME[
+    StructureVersionTransformationType.FERMETURE
+  ]]: STRUCTURE_VERSION_TRANSFORMATION_FERMETURE_FORM_STEPS,
 };
