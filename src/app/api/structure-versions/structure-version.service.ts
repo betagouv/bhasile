@@ -61,6 +61,7 @@ export const dbStructureVersionToApiRead = (
     buildAdresseAdministrativeComplete(version);
 
   const antennes = getAntennesApiRead(version.antennes);
+  const adresses = getAdressesApiRead(version.adresses);
   const isMultiAntenne = (version.antennes?.length ?? 0) > 0;
   const isMultiDna =
     (version.dnaStructures?.length ?? 0) > 1 ||
@@ -70,6 +71,7 @@ export const dbStructureVersionToApiRead = (
     ...version,
     ...mapVersionScalars(version),
     antennes,
+    adresses,
     isMultiAntenne,
     isMultiDna,
     effectiveDate: version.effectiveDate ?? undefined,

@@ -37,7 +37,13 @@ export const transformationInclude = {
             },
           },
           contacts: true,
-          adresses: true,
+          adresses: {
+            include: {
+              adresseTypologies: {
+                orderBy: { year: "desc" },
+              },
+            },
+          },
           finesses: true,
           antennes: true,
           dnaStructures: {
