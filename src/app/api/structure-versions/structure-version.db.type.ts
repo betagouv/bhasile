@@ -8,7 +8,15 @@ export type StructureVersionDbDetails = Prisma.StructureVersionGetPayload<{
       };
     };
     contacts: true;
-    adresses: true;
+    adresses: {
+      include: {
+        adresseTypologies: {
+          orderBy: {
+            year: "desc";
+          };
+        };
+      };
+    };
     finesses: true;
     antennes: true;
     dnaStructures: {

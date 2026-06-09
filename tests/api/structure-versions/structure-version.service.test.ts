@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { copyStructureVersion } from "@/app/api/structure-versions/structure-version.service";
+import type { StructureVersionDbDetails } from "@/app/api/structure-versions/structure-version.db.type";
+import {
+  copyStructureVersion,
+  dbStructureVersionToApiRead,
+} from "@/app/api/structure-versions/structure-version.service";
 import type { StructureDbDetails } from "@/app/api/structures/structure.db.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 
@@ -168,5 +172,56 @@ describe("copyStructureVersion", () => {
     });
 
     expect(result.type).toBe(StructureType.HUDA);
+  });
+});
+
+const buildStructureVersion = (): StructureVersionDbDetails =>
+  ({
+    type: "CADA",
+    public: "TOUT_PUBLIC",
+    nom: "Version source",
+    adresseAdministrative: "1 rue de la Source",
+    codePostalAdministratif: "50000",
+    communeAdministrative: "Saint-Lô",
+    departementAdministratif: "50",
+    latitude: null,
+    longitude: null,
+    creationDate: null,
+    date303: null,
+    lgbt: false,
+    fvvTeh: false,
+    notes: null,
+    nomOfii: null,
+    directionTerritoriale: null,
+    effectiveDate: null,
+    antennes: [],
+    finesses: [],
+    dnaStructures: [],
+    structureTypologies: [],
+    contacts: [],
+    adresses: [
+      {
+        id: 9,
+        structureId: 1,
+        structureVersionId: null,
+        adresse: "3 rue C",
+        codePostal: "50300",
+        commune: "Avranches",
+        repartition: "COLLECTIF",
+        placesAutorisees: 10,
+        qpv: 0,
+        logementSocial: 0,
+        adresseTypologies: [],
+      },
+    ],
+  }) as unknown as StructureVersionDbDetails;
+
+describe("dbStructureVersionToApiRead", () => {
+  it("computes adresseComplete on the version addresses", () => {
+    const result = dbStructureVersionToApiRead(buildStructureVersion());
+
+    expect(result.adresses?.[0]?.adresseComplete).toBe(
+      "3 rue C 50300 Avranches"
+    );
   });
 });
