@@ -25,10 +25,12 @@ const MIN_CONTACTS = 1;
 
 type Props = {
   formKind?: FormKind;
+  displayPerimetre?: boolean;
 };
 
 export const FieldSetContacts = ({
   formKind = FormKind.FINALISATION,
+  displayPerimetre = false,
 }: Props) => {
   const { watch, setValue } = useFormContext();
 
@@ -75,7 +77,7 @@ export const FieldSetContacts = ({
         return (
           <Contact
             key={index}
-            isMultiAntenne={isMultiAntenne}
+            isMultiAntenne={displayPerimetre || isMultiAntenne}
             handleDelete={canDelete ? handleDelete : undefined}
             index={index}
           />

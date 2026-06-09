@@ -47,6 +47,7 @@ export const StructureSelections = ({
             key={block.id}
             multiple={block.multiple}
             fixedType={block.fixedType}
+            finalisedOnly
             label={block.label}
             structureType={getEffectiveStructureType(block)}
             setStructureType={(v) => setStructureType(block.id, v)}

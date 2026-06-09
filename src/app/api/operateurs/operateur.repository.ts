@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { OperateurApiWrite } from "@/schemas/api/operateur.schema";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
+import { createOrUpdateContacts } from "../contacts/contact.repository";
 import { OperateurDbDetail } from "./operateur.db.type";
 
 export const findBySearchTerm = async (
@@ -61,9 +62,11 @@ export const getPaginatedOperateurs = async ({
       os.nb_structures,
       os.total_places,
       ROUND((os.total_places::float / NULLIF(tp.total, 0) * 100)::numeric, 2)::float as pourcentage_parc,
-      os.structure_types
+      os.structure_types,
+      fl."key" as logo_key
     FROM operateurs_stats os
     CROSS JOIN total_places tp
+    LEFT JOIN public."FileUpload" fl ON fl."operateurId" = os.id
     ORDER BY nb_structures DESC
     LIMIT ${MIDDLE_PAGE_SIZE} OFFSET ${(page ?? 0) * MIDDLE_PAGE_SIZE}
   `);
@@ -96,15 +99,11 @@ export const findOne = async (id: number): Promise<OperateurDbDetail> => {
   return prisma.operateur.findFirstOrThrow({
     where: { id },
     include: {
-      structures: {
-        select: {
-          lgbt: true,
-          fvvTeh: true,
-        },
-      },
+      contacts: true,
       actesAdministratifs: {
         include: { fileUploads: true },
       },
+      logo: true,
     },
   });
 };
@@ -112,15 +111,22 @@ export const findOne = async (id: number): Promise<OperateurDbDetail> => {
 export const updateOne = async (
   operateur: OperateurApiWrite
 ): Promise<Operateur> => {
-  const { actesAdministratifs, ...operateurFields } = operateur;
+  const { actesAdministratifs, contacts, logo, ...operateurFields } = operateur;
 
   return prisma.$transaction(async (tx) => {
     const updated = await tx.operateur.update({
       where: { id: operateur.id },
-      data: operateurFields,
+      data: {
+        ...operateurFields,
+        ...(logo && { logo: { connect: { key: logo.key } } }),
+      },
     });
 
     await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
+      operateurId: operateur.id,
+    });
+
+    await createOrUpdateContacts(tx, contacts, {
       operateurId: operateur.id,
     });
 
@@ -135,4 +141,5 @@ type OperateurStat = {
   total_places: number;
   pourcentage_parc: number;
   structure_types: StructureType[];
+  logo_key: string;
 };

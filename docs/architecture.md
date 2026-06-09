@@ -33,6 +33,40 @@ Le projet est basé sur :
   - `types` : contient les types TypeScript de l'application
 - `tests` : suit la même arborescence que `src`, en y ajoutant des utilitaires de test
 
+## 🧬 Nommage des types (schemas Zod)
+
+Les schémas Zod vivent dans `src/schemas/` (`api/` pour l'API, `forms/` pour les formulaires). Les types qu'on en dérive suivent la convention `<Entité><Suffixe>` en PascalCase (ex : `OperateurApiRead`, `TransformationApiUpdate`, `ContactFormValues`).
+
+| Suffixe      | Quand l'utiliser                                                |
+| ------------ | --------------------------------------------------------------- |
+| `FormValues` | Types utilisés dans l'UI des formulaires (`src/schemas/forms/`) |
+| `ApiType`    | Type API quand lecture et écriture ne sont pas différenciées    |
+| `ApiRead`    | Type API en lecture (lecture/écriture différenciées)            |
+| `ApiWrite`   | Type API en écriture (création/update non différenciées)        |
+| `ApiCreate`  | Type API en création (création/update différenciées)            |
+| `ApiUpdate`  | Type API en update (création/update différenciées)              |
+
+Quand un schéma `Api*` applique une transformation (coercition, `.transform()`, valeur par défaut, etc.), ce que le client envoie diffère du type inféré côté serveur. On ajoute alors un type parallèle suffixé `Client`, basé sur `z.input` au lieu de `z.infer` :
+
+| Suffixe           | Pendant de  |
+| ----------------- | ----------- |
+| `ApiClient`       | `ApiType`   |
+| `ApiWriteClient`  | `ApiWrite`  |
+| `ApiCreateClient` | `ApiCreate` |
+| `ApiUpdateClient` | `ApiUpdate` |
+
+Exemple typique (`src/schemas/api/transformation.schema.ts`) :
+
+```ts
+export const transformationApiUpdateSchema = z.object({ /* ... */ });
+
+// Type vu côté serveur après validation (sortie de Zod) :
+export type TransformationApiUpdate = z.infer<typeof transformationApiUpdateSchema>;
+
+// Type que le client doit envoyer (entrée de Zod, avant transformation) :
+export type TransformationApiUpdateClient = z.input<typeof transformationApiUpdateSchema>;
+```
+
 ## 🔨 Outils de développement
 
 - [TypeScript](https://www.typescriptlang.org/) : faut-il encore le présenter ?

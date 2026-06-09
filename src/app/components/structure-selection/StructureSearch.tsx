@@ -23,6 +23,7 @@ export const StructureSearch = ({
   fixedType,
   fixedOperateurName,
   fixedDepartementNumero,
+  finalisedOnly,
 }: Props): ReactElement => {
   const effectiveStructureType = fixedType ?? structureType;
   const effectiveOperateurName = fixedOperateurName ?? operateurName;
@@ -33,6 +34,7 @@ export const StructureSearch = ({
     operateurName: effectiveOperateurName,
     departements: effectiveDepartementNumero,
     types: effectiveStructureType,
+    finalisedOnly,
   });
 
   const prevStructures = useRef<StructureMinimalApiType[] | undefined>(
@@ -116,6 +118,7 @@ export type StructureSearchProps = {
   label?: string;
   fixedOperateurName?: string;
   fixedDepartementNumero?: string;
+  finalisedOnly?: boolean;
 };
 
 type Props = StructureSearchProps;

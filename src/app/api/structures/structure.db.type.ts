@@ -32,7 +32,11 @@ export type StructureDbList = Prisma.StructureGetPayload<{
         };
       };
     };
-    operateur: true;
+    operateur: {
+      include: {
+        parent: true,
+      },
+    };
     structureMillesimes: {
       orderBy: {
         year: "desc";
@@ -176,7 +180,11 @@ export type StructureDbDetails = Prisma.StructureGetPayload<{
         year: "desc";
       };
     };
-    operateur: true;
+    operateur: {
+      include: {
+        parent: true,
+      },
+    };
     forms: {
       include: {
         formDefinition: true;

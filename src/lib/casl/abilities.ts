@@ -2,6 +2,7 @@ import { AbilityBuilder, PureAbility, subject } from "@casl/ability";
 import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
 
 import { Cpom, Operateur, Structure, User } from "@/generated/prisma/client";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
 
 export type AppAbility = PureAbility<
@@ -62,9 +63,12 @@ const defineAnonymousRules = ({ can }: AbilityBuilder<AppAbility>) => {
   can("read", ["Structure", "Cpom", "Operateur"]);
 };
 
-export const canUpdateStructure = (user: SessionUser, structure: Structure) => {
+export const canUpdateStructure = (
+  user: SessionUser,
+  structure: Structure | StructureApiRead
+) => {
   const ability = defineAbilityFor(user);
-  return ability.can("update", subject("Structure", structure));
+  return ability.can("update", subject("Structure", structure as Structure));
 };
 
 export const canUpdateDepartement = (
