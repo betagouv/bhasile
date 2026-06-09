@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 import { StructureSearch } from "@/app/components/structure-selection/StructureSearch";
 import { useStructureSelections } from "@/app/hooks/useStructureSelections";
-import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { TransformationType } from "@/types/transformation.type";
 
 export const StructureSelections = ({
@@ -21,13 +21,13 @@ export const StructureSelections = ({
     getEffectiveStructureType,
     getInheritedOperateurName,
     getInheritedDepartementNumero,
-    structureTransformations,
+    structureVersionTransformations,
     areSelectionsComplete,
   } = useStructureSelections({ transformationType, structureId });
 
   useEffect(() => {
-    onChange({ structureTransformations, areSelectionsComplete });
-  }, [structureTransformations, areSelectionsComplete, onChange]);
+    onChange({ structureVersionTransformations, areSelectionsComplete });
+  }, [structureVersionTransformations, areSelectionsComplete, onChange]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -72,7 +72,7 @@ type Props = {
   transformationType: TransformationType;
   structureId?: number;
   onChange: (state: {
-    structureTransformations: StructureTransformationApiCreate[];
+    structureVersionTransformations: StructureVersionTransformationApiCreate[];
     areSelectionsComplete: boolean;
   }) => void;
 };

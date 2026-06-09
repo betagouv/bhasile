@@ -4,13 +4,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CreationFlow } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/creation/CreationFlow";
 import { FormKind } from "@/types/global";
 import {
-  StructureTransformationStep,
-  StructureTransformationType,
+  StructureVersionTransformationStep,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
 import {
-  createStructureTransformation,
+  createStructureVersionTransformation,
   createTransformation,
 } from "../../../../test-utils/factories/transformation.factory";
 
@@ -49,17 +49,17 @@ vi.mock(
 );
 
 const renderFlow = (transformationType: TransformationType) => {
-  const structureTransformation = createStructureTransformation({
-    type: StructureTransformationType.CREATION,
+  const structureVersionTransformation = createStructureVersionTransformation({
+    type: StructureVersionTransformationType.CREATION,
   });
   const transformation = createTransformation({
     type: transformationType,
-    structureTransformations: [structureTransformation],
+    structureVersionTransformations: [structureVersionTransformation],
   });
   return render(
     <CreationFlow
       transformation={transformation}
-      structureTransformation={structureTransformation}
+      structureVersionTransformation={structureVersionTransformation}
     />
   );
 };
@@ -85,7 +85,7 @@ describe("CreationFlow", () => {
       "passes %s as formKind %s to the identification form",
       (transformationType, expectedFormKind) => {
         mockUseParams.mockReturnValue({
-          transformationStructureStep: StructureTransformationStep.DESCRIPTION,
+          transformationStructureStep: StructureVersionTransformationStep.DESCRIPTION,
         });
 
         renderFlow(transformationType);
@@ -100,7 +100,7 @@ describe("CreationFlow", () => {
     it("renders the places et hebergement form on the PLACES_ET_HEBERGEMENT step", () => {
       mockUseParams.mockReturnValue({
         transformationStructureStep:
-          StructureTransformationStep.PLACES_ET_HEBERGEMENT,
+          StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
       });
 
       renderFlow(TransformationType.OUVERTURE_EX_NIHILO);
@@ -111,7 +111,7 @@ describe("CreationFlow", () => {
     it("renders the actes administratifs form on the ACTES_ADMINISTRATIFS step", () => {
       mockUseParams.mockReturnValue({
         transformationStructureStep:
-          StructureTransformationStep.ACTES_ADMINISTRATIFS,
+          StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
       });
 
       renderFlow(TransformationType.OUVERTURE_EX_NIHILO);

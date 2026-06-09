@@ -15,8 +15,8 @@ import {
   getTransformationStructureVersionDefaultValues,
 } from "@/app/utils/transformation.util";
 import {
-  StructureTransformationApiRead,
-  StructureTransformationApiUpdateClient,
+  StructureVersionTransformationApiRead,
+  StructureVersionTransformationApiUpdateClient,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import {
@@ -29,40 +29,40 @@ import { FormKind } from "@/types/global";
 
 type Props = {
   transformation: TransformationApiRead;
-  structureTransformation: StructureTransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
   formKind: FormKind;
 };
 
 export const ExistingStructureIdentificationForm = ({
   transformation,
-  structureTransformation,
+  structureVersionTransformation,
   formKind,
 }: Props) => {
   const { handleValidation, handleSave } = useTransformationFormHandling();
 
   const defaultValues = {
     ...getTransformationStructureVersionDefaultValues<TransformationIdentificationFormValues>(
-      structureTransformation.structureVersion
+      structureVersionTransformation.structureVersion
     ),
     isMultiAntenne:
-      (structureTransformation.structureVersion?.antennes?.length ?? 0) > 0,
+      (structureVersionTransformation.structureVersion?.antennes?.length ?? 0) > 0,
   };
 
-  const buildStructureTransformation = (
+  const buildStructureVersionTransformation = (
     data: TransformationIdentificationDraftFormValues
-  ): StructureTransformationApiUpdateClient => {
+  ): StructureVersionTransformationApiUpdateClient => {
     const { effectiveDate, ...rest } = data;
     return {
-      id: structureTransformation.id,
-      type: structureTransformation.type,
-      forms: structureTransformation.forms,
+      id: structureVersionTransformation.id,
+      type: structureVersionTransformation.type,
+      form: structureVersionTransformation.form,
       structureVersion: {
         ...rest,
         dnaStructures: rest.dnaStructures?.filter(
           (dnaStructure) => dnaStructure.dna?.code
         ),
         effectiveDate,
-      } as StructureTransformationApiUpdateClient["structureVersion"],
+      } as StructureVersionTransformationApiUpdateClient["structureVersion"],
     };
   };
 
@@ -73,7 +73,7 @@ export const ExistingStructureIdentificationForm = ({
       onSubmit={(data) => {
         handleValidation({
           transformationId: transformation.id,
-          structureTransformation: buildStructureTransformation(data),
+          structureVersionTransformation: buildStructureVersionTransformation(data),
         });
       }}
       submitButtonText="Étape suivante"
@@ -85,7 +85,7 @@ export const ExistingStructureIdentificationForm = ({
         onSave={(data) =>
           handleSave({
             transformationId: transformation.id,
-            structureTransformation: buildStructureTransformation(data),
+            structureVersionTransformation: buildStructureVersionTransformation(data),
           })
         }
       />
@@ -98,7 +98,7 @@ export const ExistingStructureIdentificationForm = ({
 
       <TransformationAdresseAdministrative
         formKind={formKind}
-        originalAdresse={getAdresseSource(structureTransformation)}
+        originalAdresse={getAdresseSource(structureVersionTransformation)}
       />
 
       <hr />
@@ -106,7 +106,7 @@ export const ExistingStructureIdentificationForm = ({
       <DnaAndFiness
         formKind={formKind}
         entityId={{
-          structureVersionId: structureTransformation.structureVersion?.id,
+          structureVersionId: structureVersionTransformation.structureVersion?.id,
         }}
       />
 

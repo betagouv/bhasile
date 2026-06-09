@@ -24,7 +24,23 @@ describe("GET /api/operateurs/[id]", () => {
 
   it("should return operateur when found", async () => {
     // GIVEN
-    const operateur = { id: 1, name: "Adoma", structures: [] };
+    const operateur = {
+      id: 1,
+      name: "Adoma",
+      logo: {
+        key: "uuid-file-key",
+      },
+      contacts: [
+        {
+          prenom: "John",
+          nom: "Doe",
+          perimetre: "Sud Ouest",
+          role: "Directeur",
+          email: "john.doe@example.com",
+          telephone: "0123456789",
+        },
+      ],
+    };
     mockFindOne.mockResolvedValueOnce(operateur);
 
     const request = new NextRequest("http://localhost/api/operateurs/1");
@@ -36,7 +52,7 @@ describe("GET /api/operateurs/[id]", () => {
 
     // THEN
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ ...operateur, vulnerabilites: [] });
+    expect(await response.json()).toEqual(operateur);
     expect(mockFindOne).toHaveBeenCalledWith(1);
     expect(mockCreateOperateurEvent).toHaveBeenCalledWith("GET", 1);
   });
@@ -81,11 +97,30 @@ describe("PUT /api/operateurs/[id]", () => {
 
   it("should return 200 with operateurId on success", async () => {
     // GIVEN
-    mockUpdateOne.mockResolvedValueOnce({ id: 1 });
+    const body = {
+      name: "Adoma Modifié",
+      logo: {
+        key: "uuid-file-key",
+      },
+      contacts: [
+        {
+          prenom: "John",
+          nom: "Doe",
+          perimetre: "Sud Ouest",
+          role: "Directeur",
+          email: "john.doe@example.com",
+          telephone: "0123456789",
+        },
+      ],
+    };
+    mockUpdateOne.mockResolvedValueOnce({
+      id: 1,
+      ...body,
+    });
 
     const request = new Request("http://localhost/api/operateurs/1", {
       method: "PUT",
-      body: JSON.stringify({ name: "Adoma Modifié" }),
+      body: JSON.stringify(body),
     });
 
     // WHEN
@@ -95,8 +130,10 @@ describe("PUT /api/operateurs/[id]", () => {
 
     // THEN
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ operateurId: 1 });
-    expect(mockUpdateOne).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }));
+    expect(await response.json()).toStrictEqual({
+      operateurId: 1,
+    });
+    expect(mockUpdateOne).toHaveBeenCalledWith({ id: 1, ...body });
     expect(mockCreateOperateurEvent).toHaveBeenCalledWith("PUT", 1);
   });
 

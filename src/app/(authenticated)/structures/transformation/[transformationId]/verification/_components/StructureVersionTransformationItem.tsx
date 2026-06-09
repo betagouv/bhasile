@@ -1,20 +1,20 @@
 import { StructureCard } from "@/app/components/StructureCard";
 import { formatDate, getYearFromDate } from "@/app/utils/date.util";
-import { StructureTransformationApiRead } from "@/schemas/api/transformation.schema";
-import { StructureTransformationType } from "@/types/transformation.type";
+import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
+import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 type Props = {
-  structureTransformation: StructureTransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
 };
 
-export const StructureTransformationItem = ({
-  structureTransformation,
+export const StructureVersionTransformationItem = ({
+  structureVersionTransformation,
 }: Props) => {
-  const cardProps = buildCardProps(structureTransformation);
+  const cardProps = buildCardProps(structureVersionTransformation);
 
-  const effectiveDate = structureTransformation.structureVersion?.effectiveDate;
+  const effectiveDate = structureVersionTransformation.structureVersion?.effectiveDate;
 
-  const placesAutorisees = getPlacesAutorisees(structureTransformation);
+  const placesAutorisees = getPlacesAutorisees(structureVersionTransformation);
 
   return (
     <div className="flex flex-col gap-2">
@@ -23,7 +23,7 @@ export const StructureTransformationItem = ({
         <div className="flex items-center gap-2 text-sm">
           <span className="fr-icon-check-line fr-icon--sm text-title-blue-france" />
           <span>
-            {getEffectiveDateLabel(structureTransformation.type)} le{" "}
+            {getEffectiveDateLabel(structureVersionTransformation.type)} le{" "}
             <strong>{formatDate(effectiveDate)}</strong>
           </span>
         </div>
@@ -41,14 +41,14 @@ export const StructureTransformationItem = ({
 };
 
 const buildCardProps = (
-  structureTransformation: StructureTransformationApiRead
+  structureVersionTransformation: StructureVersionTransformationApiRead
 ) => {
-  const structureVersion = structureTransformation.structureVersion;
+  const structureVersion = structureVersionTransformation.structureVersion;
   const nom = structureVersion?.nom;
   const codeBhasile = structureVersion?.structure?.codeBhasile;
   const structureType = structureVersion?.type;
   const operateur =
-    structureVersion?.structure?.operateur ?? structureTransformation.operateur;
+    structureVersion?.structure?.operateur ?? structureVersionTransformation.operateur;
   const departementAdministratif = structureVersion?.departementAdministratif;
 
   if (
@@ -71,33 +71,33 @@ const buildCardProps = (
 };
 
 const getPlacesAutorisees = (
-  structureTransformation: StructureTransformationApiRead
+  structureVersionTransformation: StructureVersionTransformationApiRead
 ): number | undefined => {
-  if (structureTransformation.type === StructureTransformationType.FERMETURE) {
+  if (structureVersionTransformation.type === StructureVersionTransformationType.FERMETURE) {
     return undefined;
   }
 
-  const effectiveDate = structureTransformation.structureVersion?.effectiveDate;
+  const effectiveDate = structureVersionTransformation.structureVersion?.effectiveDate;
   if (!effectiveDate) {
     return undefined;
   }
 
   const year = getYearFromDate(effectiveDate);
 
-  return structureTransformation.structureVersion?.structureTypologies?.find(
+  return structureVersionTransformation.structureVersion?.structureTypologies?.find(
     (structureTypology) => structureTypology.year === year
   )?.placesAutorisees;
 };
 
-const getEffectiveDateLabel = (type: StructureTransformationType): string => {
+const getEffectiveDateLabel = (type: StructureVersionTransformationType): string => {
   switch (type) {
-    case StructureTransformationType.CREATION:
+    case StructureVersionTransformationType.CREATION:
       return "ouverture";
-    case StructureTransformationType.EXTENSION:
+    case StructureVersionTransformationType.EXTENSION:
       return "extension";
-    case StructureTransformationType.CONTRACTION:
+    case StructureVersionTransformationType.CONTRACTION:
       return "contraction";
-    case StructureTransformationType.FERMETURE:
+    case StructureVersionTransformationType.FERMETURE:
       return "fermeture";
   }
 };

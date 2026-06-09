@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
-  createStructureTransformation,
+  createStructureVersionTransformation,
   createTransformation,
 } from "tests/test-utils/factories/transformation.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -10,7 +10,7 @@ import { TransformationActesAdministratifsForm } from "@/app/(authenticated)/str
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import {
-  StructureTransformationType,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
@@ -48,10 +48,10 @@ const transformationWithActes = (
   createTransformation({
     id: 12,
     type,
-    structureTransformations: [
-      createStructureTransformation({
+    structureVersionTransformations: [
+      createStructureVersionTransformation({
         id: 7,
-        type: StructureTransformationType.CREATION,
+        type: StructureVersionTransformationType.CREATION,
         actesAdministratifs,
       }),
     ],
@@ -72,7 +72,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     ]);
     render(
       <TransformationActesAdministratifsForm
-        structureTransformation={transformation.structureTransformations[0]}
+        structureVersionTransformation={transformation.structureVersionTransformations[0]}
         transformation={transformation}
       />
     );
@@ -86,11 +86,11 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     await waitFor(() => expect(mockHandleValidation).toHaveBeenCalledTimes(1));
     const payload = mockHandleValidation.mock.calls[0][0];
     expect(payload.transformationId).toBe(12);
-    expect(payload.structureTransformation.id).toBe(7);
-    expect(payload.structureTransformation.type).toBe(
-      StructureTransformationType.CREATION
+    expect(payload.structureVersionTransformation.id).toBe(7);
+    expect(payload.structureVersionTransformation.type).toBe(
+      StructureVersionTransformationType.CREATION
     );
-    const actes = payload.structureTransformation.actesAdministratifs;
+    const actes = payload.structureVersionTransformation.actesAdministratifs;
     expect(actes).toHaveLength(3);
     expect(
       actes.map((acte: { category: string }) => acte.category).sort()
@@ -102,7 +102,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     const transformation = transformationWithActes([]);
     render(
       <TransformationActesAdministratifsForm
-        structureTransformation={transformation.structureTransformations[0]}
+        structureVersionTransformation={transformation.structureVersionTransformations[0]}
         transformation={transformation}
       />
     );
@@ -125,7 +125,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     );
     render(
       <TransformationActesAdministratifsForm
-        structureTransformation={transformation.structureTransformations[0]}
+        structureVersionTransformation={transformation.structureVersionTransformations[0]}
         transformation={transformation}
       />
     );
@@ -159,7 +159,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     );
     render(
       <TransformationActesAdministratifsForm
-        structureTransformation={transformation.structureTransformations[0]}
+        structureVersionTransformation={transformation.structureVersionTransformations[0]}
         transformation={transformation}
       />
     );
@@ -189,7 +189,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
 
     await waitFor(() => expect(mockHandleValidation).toHaveBeenCalledTimes(1));
     const payload = mockHandleValidation.mock.calls[0][0];
-    const actes = payload.structureTransformation.actesAdministratifs;
+    const actes = payload.structureVersionTransformation.actesAdministratifs;
     const radioActe = actes.find(
       (acte: { category: string }) =>
         acte.category === "ARRETE_FUSION" || acte.category === "ARRETE_AUTORISATION"
@@ -204,7 +204,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     );
     render(
       <TransformationActesAdministratifsForm
-        structureTransformation={transformation.structureTransformations[0]}
+        structureVersionTransformation={transformation.structureVersionTransformations[0]}
         transformation={transformation}
       />
     );

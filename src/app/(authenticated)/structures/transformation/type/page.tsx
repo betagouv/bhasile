@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { TransformationHeader } from "@/app/(authenticated)/structures/transformation/_components/TransformationHeader";
 import { TransformationTypeForms } from "@/app/components/forms/transformation-types/TransformationTypeForms";
 import { useTransformations } from "@/app/hooks/useTransformations";
-import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import {
   TransformationFormType,
   TransformationType,
@@ -24,12 +24,12 @@ export default function TransformationSelectionPage() {
 
   const handleSubmit = async (
     transformationType: TransformationType,
-    structureTransformations: StructureTransformationApiCreate[]
+    structureVersionTransformations: StructureVersionTransformationApiCreate[]
   ) => {
     try {
       const transformationId = await createTransformation({
         type: transformationType,
-        structureTransformations,
+        structureVersionTransformations,
       });
       router.push(`/structures/transformation/${transformationId}`);
     } catch (error) {

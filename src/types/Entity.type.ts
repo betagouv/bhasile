@@ -1,7 +1,7 @@
 export type EntityId = {
   structureId?: number;
   structureVersionId?: number;
-  structureTransformationId?: number;
+  structureVersionTransformationId?: number;
   transformationId?: number;
   cpomId?: number;
   operateurId?: number;

@@ -12,6 +12,8 @@ model FileUpload {
   controleId          Int?
   evaluation          Evaluation?        @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
   evaluationId        Int?
+  operateur           Operateur?         @relation(fields: [operateurId], references: [id], onDelete: Cascade)
+  operateurId         Int?               @unique
 
   createdAt DateTime @default(now())
 
@@ -26,8 +28,8 @@ model ActeAdministratif {
   cpomId                    Int?
   operateur   Operateur?                             @relation(fields: [operateurId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   operateurId Int?
-  structureTransformationId Int?
-  structureTransformation   StructureTransformation? @relation(fields: [structureTransformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureVersionTransformationId Int?
+  structureVersionTransformation   StructureVersionTransformation? @relation(fields: [structureVersionTransformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
 
   category    ActeAdministratifCategory?

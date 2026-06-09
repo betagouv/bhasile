@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { TransformationStructureIcon } from "@/app/components/transformations/TransformationStructureIcon";
 import { cn } from "@/app/utils/classname.util";
 import {
-  getStructureTransformationLabel,
+  getStructureVersionTransformationLabel,
   Step,
 } from "@/app/utils/transformation.util";
 
@@ -24,7 +24,7 @@ export const TransformationStep = ({ step }: Props) => {
         >
           <TransformationStructureIcon type={step.type} />
         </span>
-        {getStructureTransformationLabel(step.type, step.codeBhasile)}
+        {getStructureVersionTransformationLabel(step.type, step.codeBhasile)}
       </div>
       <div className="flex flex-col gap-2">
         {step.steps.map((stepItem) => {

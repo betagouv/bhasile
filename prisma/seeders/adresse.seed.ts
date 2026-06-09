@@ -16,7 +16,7 @@ export const createFakeAdresses = ({
   placesAutorisees,
 }: CreateFakeAdressesArgs): Omit<
   AdresseWithTypologies,
-  "id" | "structureDnaCode" | "structureId" | "structureTransformationId"
+  "id" | "structureDnaCode" | "structureId" | "structureVersionTransformationId"
 >[] => {
   const count = faker.number.int({ min: 1, max: 10 });
   const hasCollectif = faker.datatype.boolean();
@@ -38,7 +38,7 @@ const createFakeAdresse = ({
   repartition,
 }: CreateFakeAdresseArgs): Omit<
   AdresseWithTypologies,
-  "id" | "structureDnaCode" | "structureId" | "structureTransformationId"
+  "id" | "structureDnaCode" | "structureId" | "structureVersionTransformationId"
 > => {
   const typologieCourante = createFakeAdresseTypologie({
     year: 2025,

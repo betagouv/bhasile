@@ -1,11 +1,11 @@
 import Image from "next/image";
 
 import { cn } from "@/app/utils/classname.util";
-import { StructureTransformationType } from "@/types/transformation.type";
+import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 export const TransformationStructureIcon = ({ type, large = false }: Props) => {
   switch (type) {
-    case StructureTransformationType.EXTENSION:
+    case StructureVersionTransformationType.EXTENSION:
       return (
         <i
           className={cn(
@@ -14,7 +14,7 @@ export const TransformationStructureIcon = ({ type, large = false }: Props) => {
           )}
         />
       );
-    case StructureTransformationType.CONTRACTION:
+    case StructureVersionTransformationType.CONTRACTION:
       return (
         <i
           className={cn(
@@ -23,7 +23,7 @@ export const TransformationStructureIcon = ({ type, large = false }: Props) => {
           )}
         />
       );
-    case StructureTransformationType.CREATION:
+    case StructureVersionTransformationType.CREATION:
       return (
         <i
           className={cn(
@@ -32,7 +32,7 @@ export const TransformationStructureIcon = ({ type, large = false }: Props) => {
           )}
         />
       );
-    case StructureTransformationType.FERMETURE:
+    case StructureVersionTransformationType.FERMETURE:
       return (
         <Image
           src="/transformation-fermeture.svg"
@@ -49,6 +49,6 @@ export const TransformationStructureIcon = ({ type, large = false }: Props) => {
 };
 
 type Props = {
-  type?: StructureTransformationType;
+  type?: StructureVersionTransformationType;
   large?: boolean;
 };

@@ -3,31 +3,31 @@ import {
   TRANSFORMATION_TYPE_SPECS,
 } from "@/config/transformation.config";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
-import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { TransformationType } from "@/types/transformation.type";
 
 export const applyPrefill = (
   transformationType: TransformationType,
-  structureTransformations: StructureTransformationApiCreate[]
-): StructureTransformationApiCreate[] => {
+  structureVersionTransformations: StructureVersionTransformationApiCreate[]
+): StructureVersionTransformationApiCreate[] => {
   const rules = TRANSFORMATION_TYPE_SPECS[transformationType].prefill ?? [];
   if (rules.length === 0) {
-    return structureTransformations;
+    return structureVersionTransformations;
   }
 
-  return structureTransformations.map((structureTransformation) => {
+  return structureVersionTransformations.map((structureVersionTransformation) => {
     const applicableRules = rules.filter(
-      (rule) => rule.to === structureTransformation.type
+      (rule) => rule.to === structureVersionTransformation.type
     );
     if (applicableRules.length === 0) {
-      return structureTransformation;
+      return structureVersionTransformation;
     }
 
     let structureVersion: StructureVersionApiType = {
-      ...structureTransformation.structureVersion,
+      ...structureVersionTransformation.structureVersion,
     };
     for (const rule of applicableRules) {
-      const sources = structureTransformations.filter(
+      const sources = structureVersionTransformations.filter(
         (candidate) => candidate.type === rule.from
       );
       structureVersion = appendPrefillFields(
@@ -37,13 +37,13 @@ export const applyPrefill = (
       );
     }
 
-    return { ...structureTransformation, structureVersion };
+    return { ...structureVersionTransformation, structureVersion };
   });
 };
 
 const appendPrefillFields = (
   version: StructureVersionApiType,
-  sources: StructureTransformationApiCreate[],
+  sources: StructureVersionTransformationApiCreate[],
   fields: PrefillField[]
 ): StructureVersionApiType => {
   let result = version;

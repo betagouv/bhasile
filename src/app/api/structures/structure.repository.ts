@@ -152,7 +152,11 @@ export const findBySearch = async ({
           },
         },
       },
-      operateur: true,
+      operateur: {
+        include: {
+          parent: true,
+        },
+      },
       structureMillesimes: {
         orderBy: {
           year: "desc",
@@ -389,7 +393,11 @@ export const findOne = async (id: number) => {
           year: "desc",
         },
       },
-      operateur: true,
+      operateur: {
+        include: {
+          parent: true,
+        },
+      },
       forms: {
         include: {
           formDefinition: true,

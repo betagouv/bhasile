@@ -4,19 +4,18 @@ model Transformation {
   form                     Form? // Pour le lien au bouton "Finaliser"
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
-  structureTransformations StructureTransformation[]
+  structureVersionTransformations StructureVersionTransformation[]
 
   @@schema("public")
 }
 
-model StructureTransformation {
+model StructureVersionTransformation {
   id               Int                         @id @default(autoincrement())
   transformationId Int
   transformation   Transformation              @relation(fields: [transformationId], references: [id])
-  date             DateTime?
-  type             StructureTransformationType
+  type             StructureVersionTransformationType
   motif            String? // Ne se retrouve que dans le cas d'une fermeture, voir en fonction des discussions avec Clara si c'est un enum, du champ libre, si ça doit être là ou dans Transformation...
-  forms            Form[]
+  form             Form?
   structureVersion StructureVersion?
 
   operateurId Int?
@@ -47,7 +46,7 @@ enum TransformationType {
   @@schema("public")
 }
 
-enum StructureTransformationType {
+enum StructureVersionTransformationType {
   CREATION
   FERMETURE
   CONTRACTION

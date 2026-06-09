@@ -11,8 +11,8 @@ import { SaveCurrentForm } from "@/app/components/forms/SaveCurrentForm";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getTransformationStructureVersionDefaultValues } from "@/app/utils/transformation.util";
 import {
-  StructureTransformationApiRead,
-  StructureTransformationApiUpdateClient,
+  StructureVersionTransformationApiRead,
+  StructureVersionTransformationApiUpdateClient,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import {
@@ -25,35 +25,35 @@ import { FormKind } from "@/types/global";
 
 type Props = {
   transformation: TransformationApiRead;
-  structureTransformation: StructureTransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
   formKind: FormKind;
 };
 
 export const CreationIdentificationForm = ({
   transformation,
-  structureTransformation,
+  structureVersionTransformation,
   formKind,
 }: Props) => {
   const { handleValidation, handleSave } = useTransformationFormHandling();
 
   const defaultValues = {
     ...getTransformationStructureVersionDefaultValues<CreationIdentificationFormValues>(
-      structureTransformation.structureVersion
+      structureVersionTransformation.structureVersion
     ),
     // TODO: move those server-side once every PR is merged
-    operateur: structureTransformation.operateur,
+    operateur: structureVersionTransformation.operateur,
     isMultiAntenne:
-      (structureTransformation.structureVersion?.antennes?.length ?? 0) > 0,
+      (structureVersionTransformation.structureVersion?.antennes?.length ?? 0) > 0,
   };
 
-  const buildStructureTransformation = (
+  const buildStructureVersionTransformation = (
     data: CreationIdentificationDraftFormValues
-  ): StructureTransformationApiUpdateClient => {
+  ): StructureVersionTransformationApiUpdateClient => {
     const { creationDate, operateur, ...rest } = data;
     return {
-      id: structureTransformation.id,
-      type: structureTransformation.type,
-      forms: structureTransformation.forms,
+      id: structureVersionTransformation.id,
+      type: structureVersionTransformation.type,
+      form: structureVersionTransformation.form,
       operateurId: operateur?.id,
       structureVersion: {
         ...rest,
@@ -62,7 +62,7 @@ export const CreationIdentificationForm = ({
         ),
         creationDate,
         effectiveDate: creationDate,
-      } as StructureTransformationApiUpdateClient["structureVersion"],
+      } as StructureVersionTransformationApiUpdateClient["structureVersion"],
     };
   };
 
@@ -73,7 +73,7 @@ export const CreationIdentificationForm = ({
       onSubmit={(data) => {
         handleValidation({
           transformationId: transformation.id,
-          structureTransformation: buildStructureTransformation(data),
+          structureVersionTransformation: buildStructureVersionTransformation(data),
         });
       }}
       submitButtonText="Étape suivante"
@@ -85,7 +85,7 @@ export const CreationIdentificationForm = ({
         onSave={(data) =>
           handleSave({
             transformationId: transformation.id,
-            structureTransformation: buildStructureTransformation(data),
+            structureVersionTransformation: buildStructureVersionTransformation(data),
           })
         }
       />
@@ -101,7 +101,7 @@ export const CreationIdentificationForm = ({
       <DnaAndFiness
         formKind={formKind}
         entityId={{
-          structureVersionId: structureTransformation.structureVersion?.id,
+          structureVersionId: structureVersionTransformation.structureVersion?.id,
         }}
       />
 

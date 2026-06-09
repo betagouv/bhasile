@@ -1,11 +1,13 @@
 // import Button from "@codegouvfr/react-dsfr/Button";
-import Image from "next/image";
 import Link from "next/link";
 import { ReactElement } from "react";
 
 import { Badge, BadgeType } from "@/app/components/common/Badge";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
+import { FileUploadApiType } from "@/schemas/api/file.schema";
 import { StructureType } from "@/types/structure.type";
+
+import { OperateurLogo } from "./OperateurLogo";
 
 const getBadgeColor = (structureType: string): BadgeType => {
   const types: Record<string, BadgeType> = {
@@ -25,14 +27,13 @@ export const OperateurItem = ({
   totalPlaces,
   pourcentageParc,
   structureTypes,
+  logo,
 }: Props): ReactElement => {
   return (
     <div className="border border-default-grey rounded-[10px] bg-white">
       <div className="flex px-6 py-4 justify-between">
         <div className="flex">
-          <div className="relative h-[80] w-[80] mr-10">
-            <Image src="/logo.svg" alt={`Logo ${name}`} fill loading="eager" />
-          </div>
+          <OperateurLogo name={name} logo={logo} id={id} />
           <div className="flex-col">
             <h3 className="text-title-blue-france text-xl mb-2">{name}</h3>
             <div className="flex pb-1.5">
@@ -103,4 +104,5 @@ type Props = {
   totalPlaces: number;
   pourcentageParc: number;
   structureTypes: StructureType[];
+  logo: FileUploadApiType;
 };

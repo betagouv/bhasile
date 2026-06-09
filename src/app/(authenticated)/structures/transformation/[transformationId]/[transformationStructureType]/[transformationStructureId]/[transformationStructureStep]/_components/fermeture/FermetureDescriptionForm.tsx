@@ -10,30 +10,30 @@ import { getActesAdministratifsDefaultValues } from "@/app/utils/acteAdministrat
 import { fermetureActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
-  StructureTransformationApiRead,
+  StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { fermetureSchema } from "@/schemas/forms/transformation/fermeture.schema";
 
 type Props = {
   transformation: TransformationApiRead;
-  structureTransformation: StructureTransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
 };
 
 export const FermetureDescriptionForm = ({
   transformation,
-  structureTransformation,
+  structureVersionTransformation,
 }: Props) => {
   const { handleValidation, prevStep } = useTransformationFormHandling();
 
   const categoryDisplayRules = fermetureActesAdministratifsCategoryToDisplay;
   const codeBhasile =
-    structureTransformation.structureVersion?.structure?.codeBhasile;
+    structureVersionTransformation.structureVersion?.structure?.codeBhasile;
 
   const defaultValues = {
-    effectiveDate: structureTransformation.structureVersion?.effectiveDate,
+    effectiveDate: structureVersionTransformation.structureVersion?.effectiveDate,
     actesAdministratifs: getActesAdministratifsDefaultValues(
-      structureTransformation.actesAdministratifs,
+      structureVersionTransformation.actesAdministratifs,
       categoryDisplayRules
     ),
   };
@@ -45,13 +45,13 @@ export const FermetureDescriptionForm = ({
       onSubmit={(data) => {
         handleValidation({
           transformationId: transformation.id,
-          structureTransformation: {
-            id: structureTransformation.id,
-            type: structureTransformation.type,
+          structureVersionTransformation: {
+            id: structureVersionTransformation.id,
+            type: structureVersionTransformation.type,
             structureVersion: {
-              id: structureTransformation.structureVersion?.id,
+              id: structureVersionTransformation.structureVersion?.id,
               structureId:
-                structureTransformation.structureVersion?.structureId,
+                structureVersionTransformation.structureVersion?.structureId,
               effectiveDate: data.effectiveDate,
             },
             actesAdministratifs:

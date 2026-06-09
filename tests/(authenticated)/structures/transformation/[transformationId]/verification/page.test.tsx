@@ -4,10 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import TransformationVerificationPage from "@/app/(authenticated)/structures/transformation/[transformationId]/verification/page";
 import {
-  StructureTransformationApiRead,
+  StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
-import { StructureTransformationType } from "@/types/transformation.type";
+import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 const mockRouterPush = vi.fn();
 const mockUseTransformationContext = vi.fn();
@@ -49,18 +49,18 @@ vi.mock("@/app/hooks/useTransformationFormNavigation", () => ({
 }));
 
 vi.mock(
-  "@/app/(authenticated)/structures/transformation/[transformationId]/verification/_components/StructureTransformationGroup",
+  "@/app/(authenticated)/structures/transformation/[transformationId]/verification/_components/StructureVersionTransformationGroup",
   () => ({
-    StructureTransformationGroup: ({
+    StructureVersionTransformationGroup: ({
       type,
-      structureTransformations,
+      structureVersionTransformations,
     }: {
       type: string;
-      structureTransformations: StructureTransformationApiRead[];
+      structureVersionTransformations: StructureVersionTransformationApiRead[];
     }) => (
       <div
         data-testid={`structure-transformation-group-${type}`}
-        data-count={structureTransformations.length}
+        data-count={structureVersionTransformations.length}
       />
     ),
   })
@@ -77,27 +77,27 @@ const buildForm = (status: boolean) => ({
   formSteps: [],
 });
 
-const buildStructureTransformation = (
+const buildStructureVersionTransformation = (
   childFormStatus: boolean | undefined,
   id = 1,
-  type: StructureTransformationType = StructureTransformationType.EXTENSION
-): StructureTransformationApiRead => ({
+  type: StructureVersionTransformationType = StructureVersionTransformationType.EXTENSION
+): StructureVersionTransformationApiRead => ({
   id,
   type,
-  forms: childFormStatus === undefined ? undefined : [buildForm(childFormStatus)],
+  form: childFormStatus === undefined ? undefined : buildForm(childFormStatus),
 });
 
 const buildTransformation = ({
   form,
-  structureTransformations,
+  structureVersionTransformations,
 }: {
   form?: ReturnType<typeof buildForm>;
-  structureTransformations: StructureTransformationApiRead[];
+  structureVersionTransformations: StructureVersionTransformationApiRead[];
 }): TransformationApiRead =>
   ({
     id: 42,
     form,
-    structureTransformations,
+    structureVersionTransformations,
   }) as TransformationApiRead;
 
 describe("TransformationVerificationPage", () => {
@@ -113,7 +113,7 @@ describe("TransformationVerificationPage", () => {
     mockUseTransformationContext.mockReturnValue({
       transformation: buildTransformation({
         form: undefined,
-        structureTransformations: [buildStructureTransformation(true)],
+        structureVersionTransformations: [buildStructureVersionTransformation(true)],
       }),
       setTransformation: mockSetTransformation,
     });
@@ -132,9 +132,9 @@ describe("TransformationVerificationPage", () => {
     mockUseTransformationContext.mockReturnValue({
       transformation: buildTransformation({
         form: buildForm(false),
-        structureTransformations: [
-          buildStructureTransformation(true, 1),
-          buildStructureTransformation(false, 2),
+        structureVersionTransformations: [
+          buildStructureVersionTransformation(true, 1),
+          buildStructureVersionTransformation(false, 2),
         ],
       }),
       setTransformation: mockSetTransformation,
@@ -149,12 +149,12 @@ describe("TransformationVerificationPage", () => {
     ).toBeDisabled();
   });
 
-  it("should disable the certify button when a structureTransformation has no forms at all", () => {
+  it("should disable the certify button when a structureVersionTransformation has no forms at all", () => {
     // GIVEN
     mockUseTransformationContext.mockReturnValue({
       transformation: buildTransformation({
         form: buildForm(false),
-        structureTransformations: [buildStructureTransformation(undefined)],
+        structureVersionTransformations: [buildStructureVersionTransformation(undefined)],
       }),
       setTransformation: mockSetTransformation,
     });
@@ -174,7 +174,7 @@ describe("TransformationVerificationPage", () => {
     mockUseTransformationContext.mockReturnValue({
       transformation: buildTransformation({
         form: buildForm(false),
-        structureTransformations: [buildStructureTransformation(true)],
+        structureVersionTransformations: [buildStructureVersionTransformation(true)],
       }),
       setTransformation: mockSetTransformation,
     });
@@ -193,9 +193,9 @@ describe("TransformationVerificationPage", () => {
     mockUseTransformationContext.mockReturnValue({
       transformation: buildTransformation({
         form: buildForm(false),
-        structureTransformations: [
-          buildStructureTransformation(true, 1),
-          buildStructureTransformation(true, 2),
+        structureVersionTransformations: [
+          buildStructureVersionTransformation(true, 1),
+          buildStructureVersionTransformation(true, 2),
         ],
       }),
       setTransformation: mockSetTransformation,
@@ -217,7 +217,7 @@ describe("TransformationVerificationPage", () => {
     mockUseTransformationContext.mockReturnValue({
       transformation: buildTransformation({
         form: buildForm(false),
-        structureTransformations: [buildStructureTransformation(true)],
+        structureVersionTransformations: [buildStructureVersionTransformation(true)],
       }),
       setTransformation: mockSetTransformation,
     });
@@ -248,7 +248,7 @@ describe("TransformationVerificationPage", () => {
     mockUseTransformationContext.mockReturnValue({
       transformation: buildTransformation({
         form: buildForm(false),
-        structureTransformations: [buildStructureTransformation(true)],
+        structureVersionTransformations: [buildStructureVersionTransformation(true)],
       }),
       setTransformation: mockSetTransformation,
     });
@@ -268,7 +268,7 @@ describe("TransformationVerificationPage", () => {
     mockUseTransformationContext.mockReturnValue({
       transformation: buildTransformation({
         form: buildForm(false),
-        structureTransformations: [buildStructureTransformation(true)],
+        structureVersionTransformations: [buildStructureVersionTransformation(true)],
       }),
       setTransformation: mockSetTransformation,
     });
@@ -280,26 +280,26 @@ describe("TransformationVerificationPage", () => {
     expect(screen.getByTestId("submit-error")).toBeInTheDocument();
   });
 
-  it("should render one group per StructureTransformationType, sorted FERMETURE → CONTRACTION → EXTENSION → CREATION", () => {
+  it("should render one group per StructureVersionTransformationType, sorted FERMETURE → CONTRACTION → EXTENSION → CREATION", () => {
     // GIVEN
     mockUseTransformationContext.mockReturnValue({
       transformation: buildTransformation({
         form: buildForm(false),
-        structureTransformations: [
-          buildStructureTransformation(
+        structureVersionTransformations: [
+          buildStructureVersionTransformation(
             true,
             1,
-            StructureTransformationType.CREATION
+            StructureVersionTransformationType.CREATION
           ),
-          buildStructureTransformation(
+          buildStructureVersionTransformation(
             true,
             2,
-            StructureTransformationType.FERMETURE
+            StructureVersionTransformationType.FERMETURE
           ),
-          buildStructureTransformation(
+          buildStructureVersionTransformation(
             true,
             3,
-            StructureTransformationType.FERMETURE
+            StructureVersionTransformationType.FERMETURE
           ),
         ],
       }),

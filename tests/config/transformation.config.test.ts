@@ -3,14 +3,14 @@ import { describe, expect, it } from "vitest";
 import { AdditionalFieldsType } from "@/config/acte-administratif.config";
 import { getTransformationActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
 import {
-  StructureTransformationType,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
 describe("getTransformationActesAdministratifsCategoryToDisplay", () => {
   it("renvoie les catégories d'extension (Convention, Arrêté d'extension à date unique, Autres)", () => {
     const rules = getTransformationActesAdministratifsCategoryToDisplay(
-      StructureTransformationType.EXTENSION,
+      StructureVersionTransformationType.EXTENSION,
       undefined
     );
 
@@ -31,7 +31,7 @@ describe("getTransformationActesAdministratifsCategoryToDisplay", () => {
 
   it("renvoie les catégories de contraction (Convention, Arrêté actant la contraction à date unique, Autres)", () => {
     const rules = getTransformationActesAdministratifsCategoryToDisplay(
-      StructureTransformationType.CONTRACTION,
+      StructureVersionTransformationType.CONTRACTION,
       undefined
     );
 
@@ -48,12 +48,12 @@ describe("getTransformationActesAdministratifsCategoryToDisplay", () => {
 
   it("délègue aux catégories de création et adapte l'arrêté d'autorisation selon le type de démarche", () => {
     const exNihilo = getTransformationActesAdministratifsCategoryToDisplay(
-      StructureTransformationType.CREATION,
+      StructureVersionTransformationType.CREATION,
       TransformationType.OUVERTURE_EX_NIHILO
     );
     const depuisStructures =
       getTransformationActesAdministratifsCategoryToDisplay(
-        StructureTransformationType.CREATION,
+        StructureVersionTransformationType.CREATION,
         TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
       );
 
@@ -69,7 +69,7 @@ describe("getTransformationActesAdministratifsCategoryToDisplay", () => {
 
   it("renvoie les catégories de fermeture", () => {
     const rules = getTransformationActesAdministratifsCategoryToDisplay(
-      StructureTransformationType.FERMETURE,
+      StructureVersionTransformationType.FERMETURE,
       undefined
     );
 

@@ -7,11 +7,11 @@ import { SubmitError } from "@/app/components/SubmitError";
 import { TransformationStructureHeader } from "@/app/components/transformations/TransformationStructureHeader";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import {
-  StructureTransformationApiRead,
+  StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
-import { StructureTransformationType } from "@/types/transformation.type";
+import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 import { CreationFlow } from "./_components/creation/CreationFlow";
 import { FermetureFlow } from "./_components/fermeture/FermetureFlow";
@@ -24,25 +24,25 @@ export default function TransformationStructureStepPage() {
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("transformation-save");
 
-  const structureTransformation = transformation?.structureTransformations.find(
-    (structureTransformation) =>
-      structureTransformation.id === Number(transformationStructureId)
+  const structureVersionTransformation = transformation?.structureVersionTransformations.find(
+    (structureVersionTransformation) =>
+      structureVersionTransformation.id === Number(transformationStructureId)
   );
 
-  if (!transformation || !structureTransformation) {
+  if (!transformation || !structureVersionTransformation) {
     notFound();
   }
 
   return (
     <>
       <TransformationStructureHeader
-        structureTransformation={structureTransformation}
+        structureVersionTransformation={structureVersionTransformation}
       />
-      {renderFlow(structureTransformation, transformation)}
+      {renderFlow(structureVersionTransformation, transformation)}
       {saveState === FetchState.ERROR && (
         <SubmitError
           codeBhasile={
-            structureTransformation.structureVersion?.structure?.codeBhasile
+            structureVersionTransformation.structureVersion?.structure?.codeBhasile
           }
         />
       )}
@@ -51,30 +51,30 @@ export default function TransformationStructureStepPage() {
 }
 
 const renderFlow = (
-  structureTransformation: StructureTransformationApiRead,
+  structureVersionTransformation: StructureVersionTransformationApiRead,
   transformation: TransformationApiRead
 ) => {
-  switch (structureTransformation.type) {
-    case StructureTransformationType.FERMETURE:
+  switch (structureVersionTransformation.type) {
+    case StructureVersionTransformationType.FERMETURE:
       return (
         <FermetureFlow
           transformation={transformation}
-          structureTransformation={structureTransformation}
+          structureVersionTransformation={structureVersionTransformation}
         />
       );
-    case StructureTransformationType.EXTENSION:
-    case StructureTransformationType.CONTRACTION:
+    case StructureVersionTransformationType.EXTENSION:
+    case StructureVersionTransformationType.CONTRACTION:
       return (
         <ExistingStructureFlow
           transformation={transformation}
-          structureTransformation={structureTransformation}
+          structureVersionTransformation={structureVersionTransformation}
         />
       );
-    case StructureTransformationType.CREATION:
+    case StructureVersionTransformationType.CREATION:
       return (
         <CreationFlow
           transformation={transformation}
-          structureTransformation={structureTransformation}
+          structureVersionTransformation={structureVersionTransformation}
         />
       );
     default:

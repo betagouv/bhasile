@@ -2,7 +2,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useState } from "react";
 
 import { useFetchState } from "@/app/context/FetchStateContext";
-import { StructureTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import {
   TransformationFormType,
@@ -11,7 +11,7 @@ import {
 
 import { SubmitError } from "../../SubmitError";
 import { CreationTransformationForm } from "./CreationTransformationForm";
-import { FromStructureTransformationForm } from "./FromStructureTransformationForm";
+import { FromStructureVersionTransformationForm } from "./FromStructureVersionTransformationForm";
 import { HudaTransformationForm } from "./HudaTransformationForm";
 import { StructureSelections } from "./StructureSelections";
 
@@ -19,7 +19,7 @@ export const TransformationTypeForms = ({
   formType,
   structureId,
   initialTransformationType,
-  initialStructureTransformations,
+  initialStructureVersionTransformations,
   onSubmit,
 }: Props) => {
   const { getFetchState } = useFetchState();
@@ -29,27 +29,27 @@ export const TransformationTypeForms = ({
     TransformationType | undefined
   >(initialTransformationType);
 
-  const [structureTransformations, setStructureTransformations] = useState<
-    StructureTransformationApiCreate[]
-  >(initialStructureTransformations ?? []);
+  const [structureVersionTransformations, setStructureVersionTransformations] = useState<
+    StructureVersionTransformationApiCreate[]
+  >(initialStructureVersionTransformations ?? []);
 
   const [areSelectionsComplete, setAreSelectionsComplete] =
     useState<boolean>(false);
 
   const setSelectionsState = ({
-    structureTransformations,
+    structureVersionTransformations,
     areSelectionsComplete,
   }: {
-    structureTransformations: StructureTransformationApiCreate[];
+    structureVersionTransformations: StructureVersionTransformationApiCreate[];
     areSelectionsComplete: boolean;
   }) => {
-    setStructureTransformations(structureTransformations);
+    setStructureVersionTransformations(structureVersionTransformations);
     setAreSelectionsComplete(areSelectionsComplete);
   };
 
   const handleSubmit = () => {
     if (transformationType) {
-      onSubmit(transformationType, structureTransformations);
+      onSubmit(transformationType, structureVersionTransformations);
     }
   };
 
@@ -72,7 +72,7 @@ export const TransformationTypeForms = ({
           />
         )}
         {structureId && !formType ? (
-          <FromStructureTransformationForm
+          <FromStructureVersionTransformationForm
             structureId={structureId}
             transformationType={transformationType}
             setTransformationType={setTransformationType}
@@ -107,9 +107,9 @@ type Props = {
   formType: TransformationFormType | undefined;
   structureId?: number;
   initialTransformationType?: TransformationType;
-  initialStructureTransformations?: StructureTransformationApiCreate[];
+  initialStructureVersionTransformations?: StructureVersionTransformationApiCreate[];
   onSubmit: (
     transformationType: TransformationType,
-    structureTransformations: StructureTransformationApiCreate[]
+    structureVersionTransformations: StructureVersionTransformationApiCreate[]
   ) => void;
 };
