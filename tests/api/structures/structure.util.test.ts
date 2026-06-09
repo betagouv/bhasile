@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { StructureDbList } from "@/app/api/structures/structure.db.type";
 import {
+  buildStructuresWhereSql,
   getDatesConvention,
   getDatesPeriodeAutorisation,
 } from "@/app/api/structures/structure.util";
@@ -52,5 +53,40 @@ describe("structure dates from actes administratifs", () => {
       new Date("2024-01-01T00:00:00.000Z"),
       new Date("2027-01-01T00:00:00.000Z"),
     ]);
+  });
+});
+
+const emptyFilters = {
+  search: null,
+  type: null,
+  bati: null,
+  placesAutorisees: null,
+  departements: null,
+  operateurs: null,
+};
+
+const whereSqlText = (filters: Parameters<typeof buildStructuresWhereSql>[0]) =>
+  buildStructuresWhereSql(filters).strings.join(" ");
+
+describe("buildStructuresWhereSql finalised filter", () => {
+  it("restricts to structures whose finalisation form is finalised", () => {
+    const sql = whereSqlText({
+      ...emptyFilters,
+      selection: true,
+      finalised: true,
+    });
+
+    expect(sql).toContain(`fd."slug" = 'finalisation-v1'`);
+    expect(sql).toContain(`f."status" = true`);
+  });
+
+  it("adds no finalisation condition when finalised is not requested", () => {
+    const selectionSql = whereSqlText({ ...emptyFilters, selection: true });
+    expect(selectionSql).not.toContain("finalisation-v1");
+
+    const listSql = whereSqlText({ ...emptyFilters, selection: false });
+    expect(listSql).not.toContain("finalisation-v1");
+    // The non-selection list keeps its "has a Form" filter, unchanged.
+    expect(listSql).toContain(`EXISTS (SELECT 1 FROM public."Form" f`);
   });
 });
