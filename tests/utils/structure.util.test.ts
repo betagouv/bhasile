@@ -84,7 +84,7 @@ describe("structure util", () => {
   });
 
   describe("getRepartition", () => {
-    it("should return Collectif when given no adresses", () => {
+    it("should return undefined when given no adresses", () => {
       // GIVEN
       const structure = createStructure({ id: 1, adresses: [] });
 
@@ -94,7 +94,7 @@ describe("structure util", () => {
       );
 
       // THEN
-      expect(repartition).toBe(Repartition.COLLECTIF);
+      expect(repartition).toBeUndefined();
     });
     it("should return Collectif when given adresses with only collectif", () => {
       // GIVEN

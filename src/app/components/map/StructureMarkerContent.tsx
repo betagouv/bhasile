@@ -53,7 +53,7 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
       )}
       <div className="text-sm mb-2">
         <RepartitionBadge
-          repartition={structure.repartition}
+          repartition={structure.typeBati}
           className="m-0!"
         />
       </div>

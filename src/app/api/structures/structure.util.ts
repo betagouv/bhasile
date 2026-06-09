@@ -14,6 +14,7 @@ import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { StructureColumn } from "@/types/ListColumn";
 
+import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import { StructureDbDetails, StructureDbList } from "./structure.db.type";
 
 const typesPublic: Record<string, PublicType> = {
@@ -204,8 +205,8 @@ export const buildStructuresWhereSql = ({
 };
 
 export const getRepartition = (
-  structure: StructureDbDetails | StructureDbList
-): Repartition => {
+  structure: StructureDbDetails | StructureDbList | StructureVersionDbDetails
+): Repartition | undefined => {
   const repartitions = structure.adresses?.map(
     (adresse) => adresse.repartition
   );
@@ -222,7 +223,10 @@ export const getRepartition = (
   if (isDiffus) {
     return Repartition.DIFFUS;
   }
-  return Repartition.COLLECTIF;
+  if (isCollectif) {
+    return Repartition.COLLECTIF;
+  }
+  return undefined;
 };
 
 export const getDatesConvention = (

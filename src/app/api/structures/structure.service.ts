@@ -236,7 +236,6 @@ const dbStructureToApiRead = (
     longitude: dbStructure.longitude?.toString(),
     activites,
     evenementsIndesirablesGraves: aggregatedEIGs,
-    repartition: getRepartition(dbStructure),
     operateurLabel: getOperateurLabel(dbStructure),
     isAutorisee: isStructureAutorisee(dbStructure.type),
     isSubventionnee: isStructureSubventionnee(dbStructure.type),

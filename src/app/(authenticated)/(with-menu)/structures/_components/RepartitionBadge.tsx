@@ -6,7 +6,10 @@ import { Repartition, RepartitionLabel } from "@/types/adresse.type";
 export const RepartitionBadge = ({
   repartition,
   className,
-}: Props): ReactElement => {
+}: Props): ReactElement | null => {
+  if (!repartition) {
+    return null;
+  }
   const getBadgeType = (repartition: Repartition): BadgeType => {
     const typesByRepartition: Record<Repartition, BadgeType> = {
       [Repartition.DIFFUS]: "new",
@@ -23,6 +26,6 @@ export const RepartitionBadge = ({
 };
 
 type Props = {
-  repartition: Repartition;
+  repartition?: Repartition;
   className?: string;
 };

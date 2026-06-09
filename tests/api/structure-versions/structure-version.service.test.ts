@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { copyStructureVersion } from "@/app/api/structure-versions/structure-version.service";
+import type { StructureVersionDbDetails } from "@/app/api/structure-versions/structure-version.db.type";
+import {
+  copyStructureVersion,
+  dbStructureVersionToApiRead,
+} from "@/app/api/structure-versions/structure-version.service";
 import type { StructureDbDetails } from "@/app/api/structures/structure.db.type";
+import { Repartition } from "@/types/adresse.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 
 const buildStructure = (): StructureDbDetails =>
@@ -168,5 +173,78 @@ describe("copyStructureVersion", () => {
     });
 
     expect(result.type).toBe(StructureType.HUDA);
+  });
+});
+
+const buildStructureVersion = (
+  repartitions: Repartition[]
+): StructureVersionDbDetails =>
+  ({
+    type: "CADA",
+    public: "TOUT_PUBLIC",
+    nom: "Version source",
+    adresseAdministrative: "1 rue de la Source",
+    codePostalAdministratif: "50000",
+    communeAdministrative: "Saint-Lô",
+    departementAdministratif: "50",
+    latitude: null,
+    longitude: null,
+    creationDate: null,
+    date303: null,
+    lgbt: false,
+    fvvTeh: false,
+    notes: null,
+    nomOfii: null,
+    directionTerritoriale: null,
+    effectiveDate: null,
+    antennes: [],
+    finesses: [],
+    dnaStructures: [],
+    structureTypologies: [],
+    contacts: [],
+    adresses: repartitions.map((repartition, index) => ({
+      id: index + 1,
+      structureId: 1,
+      structureVersionId: null,
+      adresse: "3 rue C",
+      codePostal: "50300",
+      commune: "Avranches",
+      repartition,
+      placesAutorisees: 10,
+      qpv: 0,
+      logementSocial: 0,
+      adresseTypologies: [],
+    })),
+  }) as unknown as StructureVersionDbDetails;
+
+describe("dbStructureVersionToApiRead", () => {
+  it("infère typeBati COLLECTIF quand toutes les adresses sont collectives", () => {
+    const result = dbStructureVersionToApiRead(
+      buildStructureVersion([Repartition.COLLECTIF, Repartition.COLLECTIF])
+    );
+
+    expect(result.typeBati).toBe(Repartition.COLLECTIF);
+  });
+
+  it("infère typeBati DIFFUS quand toutes les adresses sont diffuses", () => {
+    const result = dbStructureVersionToApiRead(
+      buildStructureVersion([Repartition.DIFFUS])
+    );
+
+    expect(result.typeBati).toBe(Repartition.DIFFUS);
+  });
+
+  it("infère typeBati MIXTE quand les adresses mêlent diffus et collectif", () => {
+    const result = dbStructureVersionToApiRead(
+      buildStructureVersion([Repartition.DIFFUS, Repartition.COLLECTIF])
+    );
+
+    expect(result.typeBati).toBe(Repartition.MIXTE);
+  });
+
+  it("laisse typeBati undefined quand il n'y a aucune adresse", () => {
+    const result = dbStructureVersionToApiRead(buildStructureVersion([]));
+
+    expect(result.typeBati).toBeUndefined();
   });
 });

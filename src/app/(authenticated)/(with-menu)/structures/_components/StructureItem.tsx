@@ -28,7 +28,7 @@ export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
         {getCommuneLabel(structure)}
       </td>
       <td className="text-left! whitespace-nowrap">
-        <RepartitionBadge repartition={structure.repartition} />
+        <RepartitionBadge repartition={structure.typeBati} />
       </td>
       <td className="text-left!">
         {structure.structureTypologies?.[0]?.placesAutorisees}

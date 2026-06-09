@@ -140,7 +140,6 @@ describe("GET /api/structures/[id]", () => {
       longitude: "2.34",
       activites: [],
       evenementsIndesirablesGraves: [],
-      repartition: "DIFFUS",
       operateurLabel: "Adoma",
       isAutorisee: true,
       isSubventionnee: false,

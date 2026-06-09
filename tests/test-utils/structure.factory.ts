@@ -81,7 +81,6 @@ export const createStructure = ({
     finesses: finesses ?? createDefaultFinesses(),
     contacts: [],
     documentsFinanciers: [],
-    repartition: Repartition.DIFFUS,
     adresseAdministrativeComplete: [
       adresseAdministrativeValue,
       codePostalAdministratif,
@@ -207,7 +206,6 @@ export const createModificationAdressesValidStructure = (id: number) => {
   const structure = createStructure({ id, type: StructureType.CADA });
   return {
     ...structure,
-    repartition: Repartition.COLLECTIF,
     typeBati: Repartition.COLLECTIF,
     adresses: [
       {
