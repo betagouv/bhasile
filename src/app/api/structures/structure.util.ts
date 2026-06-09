@@ -7,7 +7,7 @@ import {
   recursivelySerializeDates,
 } from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
-import { Prisma, PublicType, StructureType } from "@/generated/prisma/client";
+import { Prisma, PublicType } from "@/generated/prisma/client";
 import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
@@ -67,19 +67,6 @@ export const getAdresseAdministrativeCoordinates = async (
     latitude: coordinates.latitude?.toString(),
     longitude: coordinates.longitude?.toString(),
   };
-};
-
-export const convertToStructureType = (
-  structureType: string
-): StructureType => {
-  const typesStructures: Record<string, StructureType> = {
-    CADA: StructureType.CADA,
-    HUDA: StructureType.HUDA,
-    CPH: StructureType.CPH,
-    CAES: StructureType.CAES,
-    PRAHDA: StructureType.PRAHDA,
-  };
-  return typesStructures[structureType.trim()];
 };
 
 type StructureQueryFilters = {

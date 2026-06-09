@@ -14,7 +14,7 @@ import { validateAffectationReservesDetails } from "./budget/validateAffectation
 import { cpomStructureSchema } from "./cpom.schema";
 import { indicateurFinancierSchema } from "./indicateurFinancier.schema";
 
-export const budgetBaseSchema = z.object({
+const budgetBaseSchema = z.object({
   id: zId(),
   year: zSafeYear(),
 
@@ -48,7 +48,7 @@ export const budgetAutoriseeOpenYear2Schema = budgetBaseSchema.extend({
   autre: zSafeDecimalsNullish(),
 });
 
-export const budgetAutoriseeOpenSchemaWithoutRefinement =
+const budgetAutoriseeOpenSchemaWithoutRefinement =
   budgetBaseSchema.extend({
     dotationDemandee: zSafePositiveDecimals(),
     dotationAccordee: zSafePositiveDecimals(),

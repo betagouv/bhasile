@@ -2,7 +2,7 @@ import z from "zod";
 
 import { zId } from "@/app/utils/zodCustomFields";
 
-export const requiredContactSchema = z.object({
+const requiredContactSchema = z.object({
   id: zId(),
   prenom: z.string().nonempty("Le prénom est requis"),
   nom: z.string().nonempty("Le nom est requis"),
@@ -18,7 +18,7 @@ export const requiredContactSchema = z.object({
     .min(10, "Le numéro de téléphone doit contenir au moins 10 caractères"),
 });
 
-export const optionalContactSchema = z
+const optionalContactSchema = z
   .object({
     id: zId(),
     prenom: z.string().optional(),

@@ -34,16 +34,6 @@ export function MapLibreProvider({
   );
 }
 
-export function useMapLibreMap(): maplibregl.Map | null {
-  const context = useContext(MapLibreContext);
-  if (!context) {
-    throw new Error(
-      "useMapLibreMap doit être utilisé avec un contexte MapLibreProvider"
-    );
-  }
-  return context.map;
-}
-
 export function useRegisterMapPoint(): RegisterMapPoint {
   const context = useContext(MapLibreContext);
   if (!context) {
