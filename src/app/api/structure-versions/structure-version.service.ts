@@ -9,7 +9,7 @@ import {
 } from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import type { StructureDbDetails } from "../structures/structure.db.type";
-import { getRepartition } from "../structures/structure.util";
+import { getTypeBati } from "../structures/structure.util";
 import { StructureVersionDbDetails } from "./structure-version.db.type";
 
 const mapVersionScalars = (
@@ -62,7 +62,7 @@ export const dbStructureVersionToApiRead = (
     buildAdresseAdministrativeComplete(version);
 
   const antennes = getAntennesApiRead(version.antennes);
-  const typeBati = getRepartition(version);
+  const typeBati = getTypeBati(version);
   const isMultiAntenne = (version.antennes?.length ?? 0) > 0;
   const isMultiDna =
     (version.dnaStructures?.length ?? 0) > 1 ||

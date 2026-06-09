@@ -43,7 +43,7 @@ import {
   getDatesConvention,
   getDatesPeriodeAutorisation,
   getOperateurLabel,
-  getRepartition,
+  getTypeBati,
   isStructureInCpom,
   isStructureInCpomPerYear,
 } from "./structure.util";
@@ -219,7 +219,7 @@ const dbStructureToApiRead = (
   const adresses = getAdressesApiRead(dbStructure.adresses);
   const adresseAdministrativeComplete =
     buildAdresseAdministrativeComplete(dbStructure);
-  const typeBati = getRepartition(dbStructure);
+  const typeBati = getTypeBati(dbStructure);
 
   const isMultiAntenne = (antennes?.length ?? 0) > 0;
   const isMultiDna =

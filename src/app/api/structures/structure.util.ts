@@ -204,7 +204,7 @@ export const buildStructuresWhereSql = ({
   return Prisma.sql`WHERE ${combined}`;
 };
 
-export const getRepartition = (
+export const getTypeBati = (
   structure: StructureDbDetails | StructureDbList | StructureVersionDbDetails
 ): Repartition | undefined => {
   const repartitions = structure.adresses?.map(

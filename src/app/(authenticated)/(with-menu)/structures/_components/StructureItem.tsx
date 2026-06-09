@@ -9,7 +9,7 @@ import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 import { getPlacesByCommunes } from "@/app/utils/structure.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
-import { RepartitionBadge } from "./RepartitionBadge";
+import { TypeBatiBadge } from "./TypeBatiBadge";
 
 export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
   const isStructureFinalisee = getFinalisationFormStatus(structure);
@@ -28,7 +28,7 @@ export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
         {getCommuneLabel(structure)}
       </td>
       <td className="text-left! whitespace-nowrap">
-        <RepartitionBadge repartition={structure.typeBati} />
+        <TypeBatiBadge typeBati={structure.typeBati} />
       </td>
       <td className="text-left!">
         {structure.structureTypologies?.[0]?.placesAutorisees}

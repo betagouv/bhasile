@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 
 import { StructureDbDetails } from "@/app/api/structures/structure.db.type";
 import {
-  getRepartition,
+  getTypeBati,
   isStructureInCpom,
 } from "@/app/api/structures/structure.util";
 import {
@@ -83,18 +83,18 @@ describe("structure util", () => {
     });
   });
 
-  describe("getRepartition", () => {
+  describe("getTypeBati", () => {
     it("should return undefined when given no adresses", () => {
       // GIVEN
       const structure = createStructure({ id: 1, adresses: [] });
 
       // WHEN
-      const repartition = getRepartition(
+      const typeBati = getTypeBati(
         structure as unknown as StructureDbDetails
       );
 
       // THEN
-      expect(repartition).toBeUndefined();
+      expect(typeBati).toBeUndefined();
     });
     it("should return Collectif when given adresses with only collectif", () => {
       // GIVEN
@@ -105,12 +105,12 @@ describe("structure util", () => {
       const structure = createStructure({ id: 2, adresses });
 
       // WHEN
-      const repartition = getRepartition(
+      const typeBati = getTypeBati(
         structure as unknown as StructureDbDetails
       );
 
       // THEN
-      expect(repartition).toBe(Repartition.COLLECTIF);
+      expect(typeBati).toBe(Repartition.COLLECTIF);
     });
     it("should return Diffus when given adresses with only diffus", () => {
       // GIVEN
@@ -121,12 +121,12 @@ describe("structure util", () => {
       const structure = createStructure({ id: 3, adresses });
 
       // WHEN
-      const repartition = getRepartition(
+      const typeBati = getTypeBati(
         structure as unknown as StructureDbDetails
       );
 
       // THEN
-      expect(repartition).toBe(Repartition.DIFFUS);
+      expect(typeBati).toBe(Repartition.DIFFUS);
     });
     it("should return Mixte when given adresses with diffus and collectif", () => {
       const adresses = [
@@ -136,12 +136,12 @@ describe("structure util", () => {
       const structure = createStructure({ id: 4, adresses });
 
       // WHEN
-      const repartition = getRepartition(
+      const typeBati = getTypeBati(
         structure as unknown as StructureDbDetails
       );
 
       // THEN
-      expect(repartition).toBe(Repartition.MIXTE);
+      expect(typeBati).toBe(Repartition.MIXTE);
     });
   });
   describe("getLastVisitInMonths", () => {
