@@ -7,8 +7,8 @@ export const createFakeContact = (): Omit<
   | "id"
   | "structureDnaCode"
   | "structureId"
-  | "structureVersionTransformationId"
   | "operateurId"
+  | "structureVersionTransformationId"
 > => {
   const prenom = faker.person.firstName();
   const nom = faker.person.lastName();
