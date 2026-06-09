@@ -47,6 +47,7 @@ export default function SelectWithValidation<
       nativeSelectProps={{
         ...field,
         id,
+        value: field.value ?? "",
         onChange: (e) => {
           field.onChange(e);
           onChange?.(e.target.value);

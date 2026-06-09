@@ -1,6 +1,8 @@
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 
+import { isBlank } from "./common.util";
+
 export const getCoordinates = async (address: string): Promise<Coordinates> => {
   const result = await fetch(
     `https://data.geopf.fr/geocodage/search/?q=${address}&autocomplete=0&limit=1`
@@ -18,46 +20,8 @@ export const getDepartementFromCodePostal = (codePostal: string) =>
     ? (codePostal?.trim().slice(0, 3) ?? "")
     : (codePostal?.trim().slice(0, 2) ?? "")) || "";
 
-export const transformFormAdressesToApiAdresses = (
-  adresses: FormAdresse[] = [],
-  id?: number
-): AdresseApiType[] => {
-  if (!adresses) {
-    return [];
-  }
-  return adresses
-    .filter(
-      (adresse) =>
-        adresse.adresse !== "" &&
-        adresse.codePostal !== "" &&
-        adresse.commune !== ""
-    )
-    .filter((adresse) => adresse.structureId || id)
-    .map((adresse) => {
-      return {
-        id: adresse.id,
-        structureId: adresse.structureId || id,
-        adresse: adresse.adresse,
-        codePostal: adresse.codePostal,
-        commune: adresse.commune,
-        repartition: adresse.repartition,
-        adresseTypologies:
-          adresse.adresseTypologies?.map((adresseTypologie) => ({
-            ...adresseTypologie,
-            placesAutorisees: Number(adresseTypologie.placesAutorisees),
-            logementSocial: adresseTypologie.logementSocial
-              ? Number(adresseTypologie.placesAutorisees)
-              : 0,
-            qpv: adresseTypologie.qpv
-              ? Number(adresseTypologie.placesAutorisees)
-              : 0,
-          })) || [],
-      };
-    });
-};
-
 export const transformApiAdressesToFormAdresses = (
-  adresses?: AdresseApiType[]
+  adresses?: Partial<AdresseApiType>[]
 ): FormAdresse[] | undefined =>
   adresses?.map((adresse) => ({
     ...adresse,
@@ -165,6 +129,20 @@ export const formatCityName = (city?: string): string | undefined | null => {
   }
 
   return result;
+};
+
+export const isAdresseEmpty = (adresse: FormAdresse): boolean => {
+  const typologie = adresse.adresseTypologies?.[0];
+  return (
+    isBlank(adresse.adresseComplete) &&
+    isBlank(adresse.adresse) &&
+    isBlank(adresse.codePostal) &&
+    isBlank(adresse.commune) &&
+    isBlank(adresse.departement) &&
+    isBlank(typologie?.placesAutorisees) &&
+    !typologie?.logementSocial &&
+    !typologie?.qpv
+  );
 };
 
 type Coordinates = {

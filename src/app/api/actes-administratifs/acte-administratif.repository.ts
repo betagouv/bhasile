@@ -132,13 +132,16 @@ const deleteActesAdministratifs = async (
   let where:
     | { structureId: number }
     | { cpomId: number }
-    | { operateurId: number };
+    | { operateurId: number }
+    | { structureVersionTransformationId: number };
   if (entityId.structureId !== undefined) {
     where = { structureId: entityId.structureId };
   } else if (entityId.cpomId !== undefined) {
     where = { cpomId: entityId.cpomId };
   } else if (entityId.operateurId !== undefined) {
     where = { operateurId: entityId.operateurId };
+  } else if (entityId.structureVersionTransformationId !== undefined) {
+    where = { structureVersionTransformationId: entityId.structureVersionTransformationId };
   } else {
     return [];
   }

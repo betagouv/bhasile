@@ -15,9 +15,14 @@ export const createOrUpdateContacts = async (
     return;
   }
 
-  let where: { structureId: number } | { operateurId: number };
+  let where:
+    | { structureId: number }
+    | { structureVersionId: number }
+    | { operateurId: number };
   if (entityId.structureId !== undefined) {
     where = { structureId: entityId.structureId };
+  } else if (entityId.structureVersionId !== undefined) {
+    where = { structureVersionId: entityId.structureVersionId };
   } else if (entityId.operateurId !== undefined) {
     where = { operateurId: entityId.operateurId };
   } else {

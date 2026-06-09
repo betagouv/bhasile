@@ -89,7 +89,7 @@ export default function FinalisationIdentification(): ReactElement {
         <AdresseAdministrativeAndAntennes />
         <hr />
 
-        <DnaAndFiness />
+        <DnaAndFiness entityId={{ structureId: structure.id }} />
         <hr />
 
         <FieldSetContacts />

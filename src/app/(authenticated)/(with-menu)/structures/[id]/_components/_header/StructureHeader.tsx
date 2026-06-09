@@ -16,6 +16,7 @@ import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { AutoSaveStatus } from "./AutoSaveStatus";
 import { FinalisationHeader } from "./FinalisationHeader";
+import { StructureMenu } from "./StructureMenu";
 
 const autoSaveModal = createModal({
   id: "autosave-modal",
@@ -97,20 +98,24 @@ export const StructureHeader = (): ReactElement | null => {
             </h3>
           </div>
           <div className="grow" />
-          {isFinalisationPath && (
-            <div className="flex items-center gap-3">
-              <AutoSaveStatus onStatusClick={() => autoSaveModal.open()} />
+          {isFinalisationPath ? (
+            <>
+              <div className="flex items-center gap-3">
+                <AutoSaveStatus onStatusClick={() => autoSaveModal.open()} />
 
-              <Button
-                disabled={!isStructureReadyToFinalise}
-                onClick={async () => {
-                  await handleFinalisation();
-                  finalisationSuccessModal.open();
-                }}
-              >
-                Finaliser la création
-              </Button>
-            </div>
+                <Button
+                  disabled={!isStructureReadyToFinalise}
+                  onClick={async () => {
+                    await handleFinalisation();
+                    finalisationSuccessModal.open();
+                  }}
+                >
+                  Finaliser la création
+                </Button>
+              </div>
+            </>
+          ) : (
+            <StructureMenu structureId={structure.id} />
           )}
         </div>
         {isRootPath && (

@@ -62,3 +62,15 @@ export const convertObjectToArray = (
 export const isNullOrUndefined = (value: unknown): boolean => {
   return value === undefined || value === null;
 };
+
+export const isBlank = (value: unknown): boolean => {
+  return isNullOrUndefined(value) || value === "";
+};
+
+export const isEmptyValue = (value: unknown): boolean => {
+  return isBlank(value) || (Array.isArray(value) && value.length === 0);
+};
+
+export const areAllValuesEmpty = (object: Record<string, unknown>): boolean => {
+  return Object.values(object).every(isEmptyValue);
+};

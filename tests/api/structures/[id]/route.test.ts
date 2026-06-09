@@ -67,7 +67,10 @@ vi.mock("@/app/api/finesses/finess.util", () => ({
   getFinessesApiRead: vi.fn().mockReturnValue(undefined),
 }));
 
-vi.mock("@/app/api/adresses/adresse.util", () => ({
+vi.mock("@/app/api/adresses/adresse.util", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("@/app/api/adresses/adresse.util")
+  >()),
   getAdressesApiRead: (...args: unknown[]) => mockGetAdressesApiRead(...args),
 }));
 
@@ -325,6 +328,63 @@ describe("PUT /api/structures/[id]", () => {
     expect(await response.json()).toBe("Structure mise à jour avec succès");
     expect(mockUpdateOne).toHaveBeenCalledWith(
       expect.objectContaining({ id: 3, ...coordinates }),
+      false
+    );
+  });
+
+  it("should convert adresse qpv/logementSocial booleans to numbers via the schema transform", async () => {
+    // GIVEN
+    mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
+    mockFindOne.mockResolvedValueOnce({ id: 4 });
+    mockCanUpdateStructure.mockReturnValueOnce(true);
+    mockGetAdresseAdministrativeCoordinates.mockResolvedValueOnce({});
+    mockUpdateOne.mockResolvedValueOnce({ id: 4 });
+
+    const request = new Request("http://localhost/api/structures/4", {
+      method: "PUT",
+      body: JSON.stringify({
+        id: 4,
+        adresses: [
+          {
+            adresse: "1 rue de Paris",
+            codePostal: "75011",
+            commune: "Paris",
+            repartition: "DIFFUS",
+            adresseTypologies: [
+              {
+                year: 2024,
+                placesAutorisees: 10,
+                qpv: true,
+                logementSocial: false,
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    // WHEN
+    const response = await PUT(request as NextRequest, {
+      params: Promise.resolve({ id: "4" }),
+    });
+
+    // THEN — the route's zod parse converts the booleans:
+    // qpv true → placesAutorisees (10), logementSocial false → 0
+    expect(response.status).toBe(200);
+    expect(mockUpdateOne).toHaveBeenCalledWith(
+      expect.objectContaining({
+        adresses: [
+          expect.objectContaining({
+            adresseTypologies: [
+              expect.objectContaining({
+                placesAutorisees: 10,
+                qpv: 10,
+                logementSocial: 0,
+              }),
+            ],
+          }),
+        ],
+      }),
       false
     );
   });

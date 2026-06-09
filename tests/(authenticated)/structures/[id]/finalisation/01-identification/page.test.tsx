@@ -91,9 +91,7 @@ describe("FinalisationIdentification page integration", () => {
       telephone: "0612345678",
       email: "jean.dupont@example.com",
       role: "Directeur",
-      perimetre: "",
     };
-    fireEvent.click(screen.getByRole("button", { name: "Ajouter un contact" }));
     fireEvent.change(screen.getByLabelText("Prénom"), {
       target: { value: newContact.prenom },
     });

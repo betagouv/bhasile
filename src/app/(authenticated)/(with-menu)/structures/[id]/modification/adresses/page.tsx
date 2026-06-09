@@ -13,7 +13,6 @@ import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
-import { transformFormAdressesToApiAdresses } from "@/app/utils/adresse.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import {
   TypeBatiAndAdressesFormValues,
@@ -39,7 +38,7 @@ export default function ModificationAdresses() {
     handleSubmit({
       ...data,
       id: structure.id,
-      adresses: transformFormAdressesToApiAdresses(data.adresses, structure.id),
+      adresses: data.adresses,
     });
   };
   return (

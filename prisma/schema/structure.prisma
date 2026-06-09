@@ -1,6 +1,6 @@
 model Structure {
-  id                       Int                   @id @default(autoincrement())
-  codeBhasile              String                @unique
+  id                       Int                       @id @default(autoincrement())
+  codeBhasile              String                    @unique
   filiale                  String? // TODO: remove after first filling is complete, filiales via Operateur are connected in app and DB is backfilled
   // TODO: remove after backfill of structure version — champs migrés sur StructureVersion
   type                     StructureType? // TODO: remove after backfill of structure version
@@ -35,13 +35,13 @@ model Structure {
   structureMillesimes      StructureMillesime[]
   budgets                  Budget[] // TODO: remove after backfill of structure version — via StructureMillesime uniquement
   indicateursFinanciers    IndicateurFinancier[] // TODO: remove after backfill of structure version
-  operateur                Operateur?            @relation(fields: [operateurId], references: [id])
+  operateur                Operateur?                @relation(fields: [operateurId], references: [id])
   operateurId              Int?
   forms                    Form[]
   campaigns                Campaign[]
   antennes                 Antenne[] // TODO: remove after backfill of structure version
   finesses                 Finess[] // TODO: remove after backfill of structure version
-  departement              Departement?          @relation(fields: [departementAdministratif], references: [numero]) // TODO: remove after backfill of structure version
+  departement              Departement?              @relation(fields: [departementAdministratif], references: [numero]) // TODO: remove after backfill of structure version
   userActions              UserAction[]
   userNotes                Note[]
   structureVersions        StructureVersion[]

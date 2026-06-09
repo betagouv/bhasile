@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
+import { StructureAgentUpdateApiClient } from "@/schemas/api/structure.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import { StepStatus } from "@/types/form.type";
 
@@ -32,7 +32,7 @@ export const useAgentFormHandling = ({
   );
 
   const updateStructure = async (
-    data: StructureAgentUpdateApiType
+    data: StructureAgentUpdateApiClient
   ): Promise<void> => {
     setFetchState("structure-save", FetchState.LOADING);
 
@@ -58,7 +58,7 @@ export const useAgentFormHandling = ({
     }
   };
 
-  const handleAutoSave = async (data: StructureAgentUpdateApiType) => {
+  const handleAutoSave = async (data: StructureAgentUpdateApiClient) => {
     await updateStructure(data);
   };
 
@@ -126,7 +126,7 @@ export const useAgentFormHandling = ({
     });
   };
 
-  const handleSubmit = async (data: StructureAgentUpdateApiType) => {
+  const handleSubmit = async (data: StructureAgentUpdateApiClient) => {
     await updateStructure(data);
     if (nextRoute) {
       router.push(nextRoute);

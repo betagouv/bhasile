@@ -1,4 +1,6 @@
+import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { FormApiType } from "@/schemas/api/form.schema";
+import { EntityId } from "@/types/Entity.type";
 import { StepStatus } from "@/types/form.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
@@ -7,7 +9,7 @@ import { convertToStepStatus } from "./form.util";
 export const createOrUpdateForms = async (
   tx: PrismaTransaction,
   forms: FormApiType[] | undefined,
-  structureId: number
+  entityId: EntityId
 ): Promise<void> => {
   if (!forms || forms.length === 0) {
     return;
@@ -15,14 +17,70 @@ export const createOrUpdateForms = async (
 
   await Promise.all(
     forms.map(async (form) => {
-      await createCompleteFormWithSteps(tx, structureId, form);
+      await createOrUpdateCompleteFormWithSteps(tx, entityId, form);
     })
   );
 };
 
-const createCompleteFormWithSteps = async (
+export const createOrUpdateForm = async (
   tx: PrismaTransaction,
-  structureId: number,
+  form: FormApiType | undefined,
+  entityId: EntityId
+): Promise<void> => {
+  if (!form) {
+    return;
+  }
+  await createOrUpdateCompleteFormWithSteps(tx, entityId, form);
+};
+
+const getFormUniqueWhere = (
+  entityId: EntityId,
+  formDefinitionId: number
+):
+  | {
+      structureId_formDefinitionId: {
+        structureId: number;
+        formDefinitionId: number;
+      };
+    }
+  | {
+      structureVersionTransformationId: number;
+    }
+  | {
+      transformationId_formDefinitionId: {
+        transformationId: number;
+        formDefinitionId: number;
+      };
+    } => {
+  if (entityId.structureId !== undefined) {
+    return {
+      structureId_formDefinitionId: {
+        structureId: entityId.structureId,
+        formDefinitionId,
+      },
+    };
+  }
+  if (entityId.transformationId !== undefined) {
+    return {
+      transformationId_formDefinitionId: {
+        transformationId: entityId.transformationId,
+        formDefinitionId,
+      },
+    };
+  }
+  if (entityId.structureVersionTransformationId !== undefined) {
+    return {
+      structureVersionTransformationId: entityId.structureVersionTransformationId,
+    };
+  }
+  throw new Error(
+    "structureId, transformationId ou structureVersionTransformationId est requis pour un Form"
+  );
+};
+
+const createOrUpdateCompleteFormWithSteps = async (
+  tx: PrismaTransaction,
+  entityId: EntityId,
   form: FormApiType
 ): Promise<void> => {
   // 1. Récupérer la FormDefinition par slug
@@ -39,18 +97,13 @@ const createCompleteFormWithSteps = async (
 
   // 2. Créer ou mettre à jour le Form
   const formEntity = await tx.form.upsert({
-    where: {
-      structureId_formDefinitionId: {
-        structureId,
-        formDefinitionId: formDefinition.id,
-      },
-    },
+    where: getFormUniqueWhere(entityId, formDefinition.id),
     update: {
       status: form.status,
     },
     create: {
+      ...entityId,
       formDefinitionId: formDefinition.id,
-      structureId,
       status: form.status,
     },
   });
@@ -91,7 +144,7 @@ const createCompleteFormWithSteps = async (
   }
 };
 
-export const initializeDefaultForms = async (
+export const initializeStructureDefaultForms = async (
   tx: PrismaTransaction,
   isOperateurUpdate: boolean,
   structureId: number
@@ -133,6 +186,52 @@ export const initializeDefaultForms = async (
         formId: formEntity.id,
         stepDefinitionId: stepDefinition.id,
         status: status,
+      },
+    });
+  }
+};
+
+export const initializeStructureVersionTransformationDefaultForms = async (
+  tx: PrismaTransaction,
+  structureVersionTransformationId: number,
+  structureVersionTransformationType: StructureVersionTransformationType
+): Promise<void> => {
+  const slugs = {
+    [StructureVersionTransformationType.FERMETURE]:
+      "structure-transformation-fermeture-v1",
+    [StructureVersionTransformationType.EXTENSION]:
+      "structure-transformation-extension-v1",
+    [StructureVersionTransformationType.CONTRACTION]:
+      "structure-transformation-contraction-v1",
+    [StructureVersionTransformationType.CREATION]:
+      "structure-transformation-creation-v1",
+  };
+
+  const formDefinition = await tx.formDefinition.findUnique({
+    where: { slug: slugs[structureVersionTransformationType] },
+    include: { stepsDefinition: true },
+  });
+
+  if (!formDefinition) {
+    throw new Error(
+      `FormDefinition with slug ${slugs[structureVersionTransformationType]} not found`
+    );
+  }
+
+  const formEntity = await tx.form.create({
+    data: {
+      formDefinitionId: formDefinition.id,
+      structureVersionTransformationId,
+      status: false,
+    },
+  });
+
+  for (const stepDefinition of formDefinition.stepsDefinition) {
+    await tx.formStep.create({
+      data: {
+        formId: formEntity.id,
+        stepDefinitionId: stepDefinition.id,
+        status: StepStatus.NON_COMMENCE,
       },
     });
   }
