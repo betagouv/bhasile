@@ -35,7 +35,7 @@ export const INDICATEUR_FINANCIER_CUTOFF_YEAR = 2024;
 export const AUTORISEE_OPEN_YEAR = 2025;
 export const SUBVENTIONNEE_OPEN_YEAR = 2024;
 
-export const IMAGE_MIME_TYPES = [
+const IMAGE_MIME_TYPES = [
   "image/jpg",
   "image/jpeg",
   "image/png",

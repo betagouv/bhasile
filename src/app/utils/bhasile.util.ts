@@ -7,7 +7,9 @@ const BHASILE_PREFIX = "BHA";
 type BhasileDbClient = PrismaTransaction;
 
 export function normalizeRegionCode(regionCode?: string | null): string | null {
-  if (!regionCode) {return null;}
+  if (!regionCode) {
+    return null;
+  }
   return regionCode.replace(/^FR-/, "");
 }
 
@@ -30,7 +32,9 @@ function extractCounterFromCode(
   const match = codeBhasile.match(
     new RegExp(`^${BHASILE_PREFIX}-${normalizedRegionCode}-(\\d{3})$`)
   );
-  if (!match) {return null;}
+  if (!match) {
+    return null;
+  }
   return parseInt(match[1]);
 }
 

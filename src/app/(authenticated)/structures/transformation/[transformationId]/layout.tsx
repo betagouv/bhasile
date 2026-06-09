@@ -49,7 +49,7 @@ export default async function TransformationLayout({
         <TransformationMenu />
         <div className="flex-1 bg-alt-grey">
           <TransformationHeader />
-          {children}
+          <div className="max-w-6xl mx-auto">{children}</div>
         </div>
       </main>
     </TransformationProvider>

@@ -14,7 +14,7 @@ type AdresseTypologieApiRead = {
   logementSocial: number;
 };
 
-export const adresseTypologieApiSchema = z
+const adresseTypologieApiSchema = z
   .object({
     id: z.number().optional(),
     year: zSafeYear(),

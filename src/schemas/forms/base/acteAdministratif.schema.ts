@@ -8,7 +8,7 @@ import {
 import { fileApiSchema } from "@/schemas/api/file.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
-export const acteAdministratifAutoSaveSchema = z.object({
+const acteAdministratifAutoSaveSchema = z.object({
   id: zId(),
   uuid: z.string().optional(), // The uuid is used to identify the acte administratif when it is not saved in the database (and so does not have an id)
   category: z.enum(ActeAdministratifCategory).optional(),

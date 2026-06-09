@@ -7,7 +7,7 @@ import {
   recursivelySerializeDates,
 } from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
-import { Prisma, PublicType, StructureType } from "@/generated/prisma/client";
+import { Prisma, PublicType } from "@/generated/prisma/client";
 import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
@@ -69,19 +69,6 @@ export const getAdresseAdministrativeCoordinates = async (
   };
 };
 
-export const convertToStructureType = (
-  structureType: string
-): StructureType => {
-  const typesStructures: Record<string, StructureType> = {
-    CADA: StructureType.CADA,
-    HUDA: StructureType.HUDA,
-    CPH: StructureType.CPH,
-    CAES: StructureType.CAES,
-    PRAHDA: StructureType.PRAHDA,
-  };
-  return typesStructures[structureType.trim()];
-};
-
 type StructureQueryFilters = {
   search: string | null;
   type: string | null;
@@ -90,6 +77,7 @@ type StructureQueryFilters = {
   departements: string | null;
   operateurs: string | null;
   selection?: boolean;
+  finalised?: boolean;
 };
 
 export const buildStructuresOrderSql = (
@@ -118,6 +106,7 @@ export const buildStructuresWhereSql = ({
   placesAutorisees,
   operateurs,
   selection,
+  finalised,
 }: StructureQueryFilters): Prisma.Sql => {
   const conditions: Prisma.Sql[] = [];
   const typeList = type?.split(",").filter(Boolean) ?? [];
@@ -127,6 +116,18 @@ export const buildStructuresWhereSql = ({
   if (!selection) {
     conditions.push(
       Prisma.sql`EXISTS (SELECT 1 FROM public."Form" f WHERE f."structureId" = s.id)`
+    );
+  }
+  if (finalised) {
+    conditions.push(
+      Prisma.sql`EXISTS (
+        SELECT 1
+        FROM public."Form" f
+        JOIN public."FormDefinition" fd ON fd.id = f."formDefinitionId"
+        WHERE f."structureId" = s.id
+          AND fd."slug" = 'finalisation-v1'
+          AND f."status" = true
+      )`
     );
   }
   if (typeList.length > 0) {

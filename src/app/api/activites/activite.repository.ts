@@ -34,38 +34,6 @@ export type StructureActivitePrismaRow = {
   presencesInduesDeboutees: number | null;
 };
 
-export const getActivitesForStructureRaw = async (
-  structureId: number
-): Promise<StructureActivitePrismaRow[]> => {
-  return prisma.activite.findMany({
-    where: {
-      dna: {
-        dnaStructures: {
-          some: {
-            structureId,
-          },
-        },
-      },
-    },
-    orderBy: {
-      date: "desc",
-    },
-    select: {
-      id: true,
-      date: true,
-      placesAutorisees: true,
-      desinsectisation: true,
-      remiseEnEtat: true,
-      sousOccupation: true,
-      travaux: true,
-      placesIndisponibles: true,
-      tauxOccupation: true,
-      presencesInduesBPI: true,
-      presencesInduesDeboutees: true,
-    },
-  });
-};
-
 export const getDepartementActivitesAverage = async (
   departementNumero: string | null,
   startDate: string | null | undefined,
