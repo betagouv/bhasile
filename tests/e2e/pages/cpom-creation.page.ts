@@ -110,10 +110,12 @@ export class CpomCreationPage {
   async uploadActeFile(file = "sample.pdf"): Promise<void> {
     const fileInput = this.page.locator('input[type="file"]').first();
     await fileInput.setInputFiles(fixturePath(file));
-    const acte0Container = this.page
+    const firstActeContainer = this.page
       .locator('input[name="actesAdministratifs.0.startDate"]')
       .locator("xpath=ancestor::fieldset[1]");
-    await expect(acte0Container.getByRole("link", { name: file })).toBeVisible({
+    await expect(
+      firstActeContainer.getByRole("link", { name: file })
+    ).toBeVisible({
       timeout: 30_000,
     });
   }

@@ -49,25 +49,25 @@ describe("ModificationAdresses page integration", () => {
         adresseTypologies?: Array<{
           year: number;
           placesAutorisees: number;
-          qpv: number;
-          logementSocial: number;
+          qpv: boolean;
+          logementSocial: boolean;
         }>;
       }>;
     }>(mockedFetch);
     expect(body.id).toBe(77);
-    expect(body.typeBati).toBe("Collectif");
+    expect(body.typeBati).toBe("COLLECTIF");
     expect(body.adresses).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           adresse: "1 rue de Paris",
           commune: "Paris",
           codePostal: "75011",
-          repartition: "Collectif",
+          repartition: "COLLECTIF",
           adresseTypologies: expect.arrayContaining([
             expect.objectContaining({
               placesAutorisees: 10,
-              qpv: 0,
-              logementSocial: 0,
+              qpv: false,
+              logementSocial: false,
             }),
           ]),
         }),

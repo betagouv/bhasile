@@ -1,0 +1,56 @@
+model Transformation {
+  id                       Int                       @id @default(autoincrement())
+  type                     TransformationType
+  form                     Form? // Pour le lien au bouton "Finaliser"
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  structureVersionTransformations StructureVersionTransformation[]
+
+  @@schema("public")
+}
+
+model StructureVersionTransformation {
+  id               Int                         @id @default(autoincrement())
+  transformationId Int
+  transformation   Transformation              @relation(fields: [transformationId], references: [id])
+  type             StructureVersionTransformationType
+  motif            String? // Ne se retrouve que dans le cas d'une fermeture, voir en fonction des discussions avec Clara si c'est un enum, du champ libre, si ça doit être là ou dans Transformation...
+  form             Form?
+  structureVersion StructureVersion?
+
+  operateurId Int?
+  operateur   Operateur? @relation(fields: [operateurId], references: [id])
+
+  actesAdministratifs ActeAdministratif[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@schema("public")
+}
+
+enum TransformationType {
+  OUVERTURE_EX_NIHILO
+  OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
+  EXTENSION_EX_NIHILO
+  EXTENSION_DEPUIS_STRUCTURES_QUI_CONTRACTENT
+  EXTENSION_DEPUIS_STRUCTURES_QUI_FERMENT
+  CONTRACTION_AVEC_TRANSFERT_VERS_AUTRE_STRUCTURE
+  CONTRACTION_SANS_TRANSFERT_DE_PLACES
+  FERMETURE_AVEC_TRANSFERT_VERS_UNE_OU_PLUSIEURS_STRUCTURES
+  FERMETURE_SANS_TRANSFERT
+  TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR
+  TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
+  TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES
+
+  @@schema("public")
+}
+
+enum StructureVersionTransformationType {
+  CREATION
+  FERMETURE
+  CONTRACTION
+  EXTENSION
+
+  @@schema("public")
+}

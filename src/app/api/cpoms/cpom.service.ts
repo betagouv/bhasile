@@ -11,7 +11,7 @@ import {
 } from "./cpom.repository";
 import { getDatesConvention } from "./cpom.util";
 
-export const getFullCpom = (cpom: CpomDbDetails | CpomDbList): CpomApiRead => {
+const getFullCpom = (cpom: CpomDbDetails | CpomDbList): CpomApiRead => {
   const [dateStart, dateEnd] = getDatesConvention(cpom);
 
   return recursivelySerializeDates({

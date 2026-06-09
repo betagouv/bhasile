@@ -1,8 +1,7 @@
 import prisma from "@/lib/prisma";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
+import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
-
-import { convertToRepartition } from "./adresse.util";
 
 const getEveryAdresseTypologiesOfAdresses = async (
   tx: PrismaTransaction,
@@ -25,12 +24,12 @@ const getEveryAdresseTypologiesOfAdresses = async (
 const deleteAdresses = async (
   tx: PrismaTransaction,
   adressesToKeep: Partial<AdresseApiType>[],
-  structureId: number
+  entityId: EntityId
 ): Promise<void> => {
-  const everyAdressesOfStructure = await tx.adresse.findMany({
-    where: { structureId: structureId },
+  const everyAdressesOfEntity = await tx.adresse.findMany({
+    where: entityId,
   });
-  const adressesToDelete = everyAdressesOfStructure.filter(
+  const adressesToDelete = everyAdressesOfEntity.filter(
     (adresse) => !adressesToKeep.some((a) => a.id === adresse.id)
   );
   await Promise.all(
@@ -43,14 +42,14 @@ const deleteAdresses = async (
 export const createOrUpdateAdresses = async (
   tx: PrismaTransaction,
   adresses: Partial<AdresseApiType>[] = [],
-  structureId: number
+  entityId: EntityId
 ): Promise<void> => {
   if (!adresses || adresses.length === 0) {
     return;
   }
 
   // Delete adresses that are not in the provided array
-  await deleteAdresses(tx, adresses, structureId);
+  await deleteAdresses(tx, adresses, entityId);
 
   // Fetch all typologies for existing addresses
   const allTypologies = await getEveryAdresseTypologiesOfAdresses(tx, adresses);
@@ -62,14 +61,14 @@ export const createOrUpdateAdresses = async (
         adresse: adresse.adresse,
         codePostal: adresse.codePostal,
         commune: adresse.commune,
-        repartition: convertToRepartition(adresse.repartition),
+        repartition: adresse.repartition,
       },
       create: {
-        structureId: structureId,
+        ...entityId,
         adresse: adresse.adresse,
         codePostal: adresse.codePostal,
         commune: adresse.commune,
-        repartition: convertToRepartition(adresse.repartition),
+        repartition: adresse.repartition,
       },
     });
 

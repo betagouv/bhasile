@@ -1,7 +1,13 @@
 export const ActeAdministratifCategory = [
   "ARRETE_AUTORISATION",
+  "ARRETE_FUSION",
+  "ARRETE_EXTENSION",
+  "ARRETE_CONTRACTION",
   "CONVENTION",
   "ARRETE_TARIFICATION",
+  "RAPPORT_ACTIVITE_OPERATEUR",
+  "FRAIS_DE_SIEGE",
+  "STATUTS",
   "AUTRE",
   "CPOM",
 ] as const;

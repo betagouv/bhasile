@@ -7,13 +7,14 @@ import {
   recursivelySerializeDates,
 } from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
-import { Prisma, PublicType, StructureType } from "@/generated/prisma/client";
+import { Prisma, PublicType } from "@/generated/prisma/client";
 import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { StructureColumn } from "@/types/ListColumn";
 
+import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import { StructureDbDetails, StructureDbList } from "./structure.db.type";
 
 const typesPublic: Record<string, PublicType> = {
@@ -35,11 +36,15 @@ export const convertToPublicType = (
 export const getOperateurLabel = (
   structure: StructureDbDetails | StructureDbList
 ): string => {
-  const { filiale, operateur } = structure;
-  if (filiale) {
-    return `${filiale} (${operateur?.name ?? ""})`;
+  const { operateur } = structure;
+  if (!operateur) {
+    return "";
   }
-  return operateur?.name ?? "";
+  if (operateur.parentId) {
+    const parentName = operateur.parent!.name;
+    return `${operateur.name} (${parentName})`;
+  }
+  return operateur.name;
 };
 
 export const getAdresseAdministrativeCoordinates = async (
@@ -65,19 +70,6 @@ export const getAdresseAdministrativeCoordinates = async (
   };
 };
 
-export const convertToStructureType = (
-  structureType: string
-): StructureType => {
-  const typesStructures: Record<string, StructureType> = {
-    CADA: StructureType.CADA,
-    HUDA: StructureType.HUDA,
-    CPH: StructureType.CPH,
-    CAES: StructureType.CAES,
-    PRAHDA: StructureType.PRAHDA,
-  };
-  return typesStructures[structureType.trim()];
-};
-
 type StructureQueryFilters = {
   search: string | null;
   type: string | null;
@@ -86,6 +78,7 @@ type StructureQueryFilters = {
   departements: string | null;
   operateurs: string | null;
   selection?: boolean;
+  finalised?: boolean;
 };
 
 export const buildStructuresOrderSql = (
@@ -114,6 +107,7 @@ export const buildStructuresWhereSql = ({
   placesAutorisees,
   operateurs,
   selection,
+  finalised,
 }: StructureQueryFilters): Prisma.Sql => {
   const conditions: Prisma.Sql[] = [];
   const typeList = type?.split(",").filter(Boolean) ?? [];
@@ -123,6 +117,18 @@ export const buildStructuresWhereSql = ({
   if (!selection) {
     conditions.push(
       Prisma.sql`EXISTS (SELECT 1 FROM public."Form" f WHERE f."structureId" = s.id)`
+    );
+  }
+  if (finalised) {
+    conditions.push(
+      Prisma.sql`EXISTS (
+        SELECT 1
+        FROM public."Form" f
+        JOIN public."FormDefinition" fd ON fd.id = f."formDefinitionId"
+        WHERE f."structureId" = s.id
+          AND fd."slug" = 'finalisation-v1'
+          AND f."status" = true
+      )`
     );
   }
   if (typeList.length > 0) {
@@ -198,19 +204,17 @@ export const buildStructuresWhereSql = ({
   return Prisma.sql`WHERE ${combined}`;
 };
 
-export const getRepartition = (
-  structure: StructureDbDetails | StructureDbList
-): Repartition => {
+export const getTypeBati = (
+  structure: StructureDbDetails | StructureDbList | StructureVersionDbDetails
+): Repartition | undefined => {
   const repartitions = structure.adresses?.map(
     (adresse) => adresse.repartition
   );
   const isDiffus = repartitions?.some(
-    (repartition) =>
-      repartition?.toUpperCase() === Repartition.DIFFUS.toUpperCase()
+    (repartition) => repartition === Repartition.DIFFUS
   );
   const isCollectif = repartitions?.some(
-    (repartition) =>
-      repartition?.toUpperCase() === Repartition.COLLECTIF.toUpperCase()
+    (repartition) => repartition === Repartition.COLLECTIF
   );
 
   if (isDiffus && isCollectif) {
@@ -219,7 +223,10 @@ export const getRepartition = (
   if (isDiffus) {
     return Repartition.DIFFUS;
   }
-  return Repartition.COLLECTIF;
+  if (isCollectif) {
+    return Repartition.COLLECTIF;
+  }
+  return undefined;
 };
 
 export const getDatesConvention = (
@@ -315,6 +322,16 @@ export const getCpomStructuresWithDates = (
             ...cpomStructure.cpom,
             dateStart: cpomDateStart,
             dateEnd: cpomDateEnd,
+            granularity: cpomStructure.cpom.granularity,
+            actesAdministratifs:
+              cpomStructure.cpom.actesAdministratifs?.map(
+                (acteAdministratif) => ({
+                  ...acteAdministratif,
+                  startDate: acteAdministratif.startDate ?? undefined,
+                  endDate: acteAdministratif.endDate ?? undefined,
+                  date: acteAdministratif.date ?? undefined,
+                })
+              ) ?? [],
           }
         : cpomStructure.cpom,
     }) as CpomStructureApiRead;

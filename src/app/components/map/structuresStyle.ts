@@ -2,11 +2,11 @@
 
 import maplibregl from "maplibre-gl";
 
-export const SINGLE_MARKER_IMAGE_ID = "structure-marker";
-export const SINGLE_MARKER_PUBLIC_PATH = "/structure-marker.svg";
+const SINGLE_MARKER_IMAGE_ID = "structure-marker";
+const SINGLE_MARKER_PUBLIC_PATH = "/structure-marker.svg";
 export const STRUCTURES_SOURCE_ID = "structures";
 export const STRUCTURES_LAYER_CLUSTERS_ID = "structure-clusters";
-export const STRUCTURES_LAYER_CLUSTER_COUNT_ID = "structure-cluster-count";
+const STRUCTURES_LAYER_CLUSTER_COUNT_ID = "structure-cluster-count";
 export const STRUCTURES_LAYER_UNCLUSTERED_ID = "structure-unclustered-point";
 
 const addSingleMarkerImage = async (map: maplibregl.Map): Promise<void> => {

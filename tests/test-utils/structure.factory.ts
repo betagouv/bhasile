@@ -42,6 +42,11 @@ export const createStructure = ({
   const structureType = type ?? StructureType.CADA;
   const currentStructureTypologies =
     structureTypologies ?? createStructureTypologies();
+  const adresseAdministrativeValue =
+    adresseAdministrative ?? "1, avenue de la République";
+  const codePostalAdministratif = "75011";
+  const communeAdministrative = "Paris";
+  const departementAdministratif = "75";
 
   return {
     id,
@@ -50,11 +55,10 @@ export const createStructure = ({
     filiale: undefined,
     operateurLabel: "Adoma",
     type: structureType,
-    adresseAdministrative:
-      adresseAdministrative ?? "1, avenue de la République",
-    codePostalAdministratif: "75011",
-    communeAdministrative: "Paris",
-    departementAdministratif: "75",
+    adresseAdministrative: adresseAdministrativeValue,
+    codePostalAdministratif,
+    communeAdministrative,
+    departementAdministratif,
     latitude: "48.8670239",
     longitude: "2.3612011",
     nom: "Les Mimosas",
@@ -66,7 +70,7 @@ export const createStructure = ({
     finessCode: finessCode ?? "123456789",
     lgbt: true,
     fvvTeh: false,
-    public: publicType ?? ("TOUT_PUBLIC" as PublicType),
+    public: publicType ?? PublicType.TOUT_PUBLIC,
     adresses: adresses ?? [],
     notes: "Note 1",
     structureTypologies: currentStructureTypologies,
@@ -77,7 +81,17 @@ export const createStructure = ({
     finesses: finesses ?? createDefaultFinesses(),
     contacts: [],
     documentsFinanciers: [],
-    repartition: Repartition.DIFFUS,
+    adresseAdministrativeComplete: [
+      adresseAdministrativeValue,
+      codePostalAdministratif,
+      communeAdministrative,
+      departementAdministratif,
+    ]
+      .filter(Boolean)
+      .join(" "),
+    isMultiAntenne: false,
+    isMultiDna: false,
+    typeBati: Repartition.DIFFUS,
     isAutorisee:
       structureType === StructureType.CADA ||
       structureType === StructureType.CPH,
@@ -192,7 +206,7 @@ export const createModificationAdressesValidStructure = (id: number) => {
   const structure = createStructure({ id, type: StructureType.CADA });
   return {
     ...structure,
-    repartition: Repartition.COLLECTIF,
+    typeBati: Repartition.COLLECTIF,
     adresses: [
       {
         id: 1,

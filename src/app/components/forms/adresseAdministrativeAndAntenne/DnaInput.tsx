@@ -1,14 +1,14 @@
 import { useFormContext } from "react-hook-form";
 
 import { useFetchFreeDnaCodes } from "@/app/hooks/useFetchFreeDnaCodes";
+import { EntityId } from "@/types/Entity.type";
 
 import SelectWithValidation from "../SelectWithValidation";
 
-export const DnaInput = ({ index, label, disabled }: Props) => {
-  const { watch, control } = useFormContext();
+export const DnaInput = ({ index, label, disabled, entityId }: Props) => {
+  const { control } = useFormContext();
 
-  const structureId = watch("id");
-  const { freeDnaCodes } = useFetchFreeDnaCodes({ structureId });
+  const { freeDnaCodes } = useFetchFreeDnaCodes({ entityId });
 
   return (
     <SelectWithValidation
@@ -35,4 +35,5 @@ type Props = {
   index: number;
   label: string;
   disabled?: boolean;
+  entityId?: EntityId;
 };

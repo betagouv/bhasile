@@ -23,7 +23,7 @@ const evaluationAutoSaveSchema = z.object({
   uuid: z.string().optional(), // Used to identify the evaluation when it is not saved in the database (and so does not have an id)
 });
 
-export const evaluationSchema = evaluationAutoSaveSchema
+const evaluationSchema = evaluationAutoSaveSchema
   .refine(
     (data) => {
       const year = data.date ? getYearFromDate(data.date) : undefined;
@@ -61,7 +61,7 @@ export const evaluationSchema = evaluationAutoSaveSchema
     }
   );
 
-export const evaluationsSchema = z.object({
+const evaluationsSchema = z.object({
   evaluations: z.array(evaluationSchema).optional(),
   noEvaluationStructure: z.boolean().optional(),
 });

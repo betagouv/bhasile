@@ -1,9 +1,11 @@
+import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { Operateur } from "@/generated/prisma/client";
 import {
   OperateurApiRead,
   OperateurApiWrite,
 } from "@/schemas/api/operateur.schema";
 
+import { getContactsApiRead } from "../contacts/contact.util";
 import {
   countOperateurs,
   findBySearchTerm,
@@ -31,6 +33,9 @@ export const getOperateurs = async ({
       .replaceAll("{", "")
       .replaceAll("}", "")
       .split(","),
+    logo: {
+      key: row.logo_key,
+    },
   }));
 
   const totalOperateurs = await countOperateurs({ search });
@@ -43,20 +48,12 @@ export const getOperateurs = async ({
 
 export const getOperateur = async (id: number): Promise<OperateurApiRead> => {
   const operateur = await findOne(id);
-  const vulnerabilites: string[] = [];
-  operateur.structures.forEach((structure) => {
-    if (structure.lgbt && !vulnerabilites.includes("LGBT")) {
-      vulnerabilites.push("LGBT");
-    }
-    if (structure.fvvTeh && !vulnerabilites.includes("FVV-TEH")) {
-      vulnerabilites.push("FVV-TEH");
-    }
-  });
 
-  return {
+  return recursivelySerializeDates({
     ...operateur,
-    vulnerabilites,
-  };
+    actesAdministratifs: operateur.actesAdministratifs,
+    contacts: getContactsApiRead(operateur.contacts),
+  }) as OperateurApiRead;
 };
 
 export const updateOperateur = async (

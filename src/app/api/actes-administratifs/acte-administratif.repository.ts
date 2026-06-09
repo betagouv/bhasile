@@ -52,24 +52,50 @@ export const createOrUpdateActesAdministratifs = async (
 const createOrUpdateActeAdministratif = async (
   tx: PrismaTransaction,
   acteAdministratif: ActeAdministratifApiType,
-  entityId: { structureDnaCode?: string; cpomId?: number },
+  entityId: EntityId,
   parentId?: number
 ) => {
   const realParentId = (parentId ?? acteAdministratif.parentId) || undefined;
 
-  const fileKey = acteAdministratif.fileUploads?.[0]?.key;
-  if (!fileKey) {
-    return tx.acteAdministratif.create({
-      data: {
-        ...entityId,
-        category: acteAdministratif.category,
-        date: acteAdministratif.date,
-        startDate: acteAdministratif.startDate,
-        endDate: acteAdministratif.endDate,
-        name: acteAdministratif.name,
-        parentId: realParentId,
-      },
+  const fileUploadKeys = (acteAdministratif.fileUploads ?? [])
+    .map((fileUpload) => fileUpload?.key)
+    .filter((key): key is string => Boolean(key));
+
+  const scalarData = {
+    ...entityId,
+    category: acteAdministratif.category,
+    date: acteAdministratif.date,
+    startDate: acteAdministratif.startDate,
+    endDate: acteAdministratif.endDate,
+    name: acteAdministratif.name,
+    parentId: realParentId,
+  };
+
+  if (acteAdministratif.id !== undefined) {
+    const ownedActe = await tx.acteAdministratif.findFirst({
+      where: { id: acteAdministratif.id, ...entityId },
+      select: { id: true },
     });
+    if (ownedActe) {
+      return tx.acteAdministratif.update({
+        where: { id: ownedActe.id },
+        data: {
+          ...scalarData,
+          fileUploads: {
+            deleteMany:
+              fileUploadKeys.length > 0
+                ? { key: { notIn: fileUploadKeys } }
+                : {},
+            connect: fileUploadKeys.map((key) => ({ key })),
+          },
+        },
+      });
+    }
+  }
+
+  const fileKey = fileUploadKeys[0];
+  if (!fileKey) {
+    return tx.acteAdministratif.create({ data: scalarData });
   }
 
   const existingFileUpload = await tx.fileUpload.findUnique({
@@ -80,17 +106,9 @@ const createOrUpdateActeAdministratif = async (
     return tx.acteAdministratif.update({
       where: { id: existingFileUpload.acteAdministratifId },
       data: {
-        ...entityId,
-        category: acteAdministratif.category,
-        date: acteAdministratif.date,
-        startDate: acteAdministratif.startDate,
-        endDate: acteAdministratif.endDate,
-        name: acteAdministratif.name,
-        parentId: realParentId,
+        ...scalarData,
         fileUploads: {
-          connect: (acteAdministratif.fileUploads ?? []).map((fileUpload) => ({
-            key: fileUpload?.key,
-          })),
+          connect: fileUploadKeys.map((key) => ({ key })),
         },
       },
     });
@@ -98,17 +116,9 @@ const createOrUpdateActeAdministratif = async (
 
   return tx.acteAdministratif.create({
     data: {
-      ...entityId,
-      category: acteAdministratif.category,
-      date: acteAdministratif.date,
-      startDate: acteAdministratif.startDate,
-      endDate: acteAdministratif.endDate,
-      name: acteAdministratif.name,
-      parentId: realParentId,
+      ...scalarData,
       fileUploads: {
-        connect: (acteAdministratif.fileUploads ?? []).map((fileUpload) => ({
-          key: fileUpload?.key,
-        })),
+        connect: fileUploadKeys.map((key) => ({ key })),
       },
     },
   });
@@ -119,17 +129,31 @@ const deleteActesAdministratifs = async (
   actesAdministratifsToKeep: ActeAdministratifApiType[],
   entityId: EntityId
 ): Promise<number[]> => {
-  const where =
-    entityId.structureId !== undefined
-      ? { structureId: entityId.structureId }
-      : { cpomId: entityId.cpomId };
-
-  if (entityId.structureId === undefined && entityId.cpomId === undefined) {
+  let where:
+    | { structureId: number }
+    | { cpomId: number }
+    | { operateurId: number }
+    | { structureVersionTransformationId: number };
+  if (entityId.structureId !== undefined) {
+    where = { structureId: entityId.structureId };
+  } else if (entityId.cpomId !== undefined) {
+    where = { cpomId: entityId.cpomId };
+  } else if (entityId.operateurId !== undefined) {
+    where = { operateurId: entityId.operateurId };
+  } else if (entityId.structureVersionTransformationId !== undefined) {
+    where = { structureVersionTransformationId: entityId.structureVersionTransformationId };
+  } else {
     return [];
   }
 
   const fileKeysToKeep = getKeysFromIncomingDocumentsOrActes(
     actesAdministratifsToKeep
+  );
+
+  const acteIdsToKeep = new Set(
+    actesAdministratifsToKeep
+      .map((acteAdministratif) => acteAdministratif.id)
+      .filter((id): id is number => id !== undefined)
   );
 
   const allActesAdministratifs = await tx.acteAdministratif.findMany({
@@ -139,6 +163,9 @@ const deleteActesAdministratifs = async (
 
   const actesAdministratifsToDelete = allActesAdministratifs.filter(
     (acteAdministratif) => {
+      if (acteIdsToKeep.has(acteAdministratif.id)) {
+        return false;
+      }
       const hasMatchingFile = acteAdministratif.fileUploads.some((file) =>
         fileKeysToKeep.has(file.key)
       );

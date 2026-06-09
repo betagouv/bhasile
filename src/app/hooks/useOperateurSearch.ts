@@ -1,6 +1,7 @@
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { FileUploadApiType } from "@/schemas/api/file.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import { StructureType } from "@/types/structure.type";
 
@@ -60,13 +61,13 @@ export const useOperateurSearch = () => {
   );
 
   useEffect(() => {
-    const fetchStructures = async () => {
+    const fetchOperateurs = async () => {
       const { operateurs, totalOperateurs } = await getOperateurs(page, search);
       setOperateurs(operateurs);
       setTotalOperateurs(totalOperateurs);
     };
 
-    fetchStructures();
+    fetchOperateurs();
   }, [getOperateurs, page, search]);
 
   return {
@@ -82,4 +83,5 @@ export type OperateurStatsApiType = {
   totalPlaces: number;
   pourcentageParc: number;
   structureTypes: StructureType[];
+  logo: FileUploadApiType;
 };

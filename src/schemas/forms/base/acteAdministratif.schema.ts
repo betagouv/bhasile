@@ -8,7 +8,7 @@ import {
 import { fileApiSchema } from "@/schemas/api/file.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
-export const acteAdministratifAutoSaveSchema = z.object({
+const acteAdministratifAutoSaveSchema = z.object({
   id: zId(),
   uuid: z.string().optional(), // The uuid is used to identify the acte administratif when it is not saved in the database (and so does not have an id)
   category: z.enum(ActeAdministratifCategory).optional(),
@@ -21,6 +21,24 @@ export const acteAdministratifAutoSaveSchema = z.object({
   fileUploads: z.array(fileApiSchema.partial()).optional(),
 });
 
+const SINGLE_DATE_CATEGORIES: ActeAdministratifCategory[] = [
+  "RAPPORT_ACTIVITE_OPERATEUR",
+  "STATUTS",
+  "ARRETE_EXTENSION",
+  "ARRETE_CONTRACTION",
+];
+const NO_DATE_CATEGORIES: ActeAdministratifCategory[] = [
+  "FRAIS_DE_SIEGE",
+  "AUTRE",
+];
+
+const requiresStartEndDate = (
+  category: ActeAdministratifCategory | undefined
+): boolean =>
+  category !== undefined &&
+  !NO_DATE_CATEGORIES.includes(category) &&
+  !SINGLE_DATE_CATEGORIES.includes(category);
+
 const acteAdministratifSchema = acteAdministratifAutoSaveSchema
   .extend({
     fileUploads: z.array(fileApiSchema).optional(),
@@ -29,7 +47,7 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
     (data) => {
       const isNotAvenant = !data.parentId && !data.parentUuid;
       if (
-        data.category !== "AUTRE" &&
+        requiresStartEndDate(data.category) &&
         isNotAvenant &&
         data.fileUploads?.length
       ) {
@@ -46,7 +64,7 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
     (data) => {
       const isNotAvenant = !data.parentId && !data.parentUuid;
       if (
-        data.category !== "AUTRE" &&
+        requiresStartEndDate(data.category) &&
         isNotAvenant &&
         data.fileUploads?.length
       ) {
@@ -69,6 +87,21 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
     },
     {
       message: "La date est obligatoire pour les avenants.",
+      path: ["date"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (
+        SINGLE_DATE_CATEGORIES.includes(data.category!) &&
+        data.fileUploads?.length
+      ) {
+        return !!data.date;
+      }
+      return true;
+    },
+    {
+      message: "La date est obligatoire.",
       path: ["date"],
     }
   );
@@ -98,6 +131,38 @@ const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
       return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
     }
     return true;
+  },
+  {
+    message: "Ces documents sont obligatoires.",
+    path: ["fileUploads"],
+  }
+);
+
+const REQUIRED_TRANSFORMATION_CATEGORIES: ActeAdministratifCategory[] = [
+  "ARRETE_AUTORISATION",
+  "ARRETE_FUSION",
+  "ARRETE_TARIFICATION",
+  "CONVENTION",
+  "ARRETE_EXTENSION",
+  "ARRETE_CONTRACTION",
+];
+
+const acteAdministratifTransformationSchema = acteAdministratifSchema.refine(
+  (data) => {
+    const isNotAvenant = !data.parentId && !data.parentUuid;
+    if (!isNotAvenant) {
+      return true;
+    }
+    if (
+      !data.category ||
+      !REQUIRED_TRANSFORMATION_CATEGORIES.includes(data.category)
+    ) {
+      return true;
+    }
+    if (SINGLE_DATE_CATEGORIES.includes(data.category)) {
+      return !!data.fileUploads?.length && !!data.date;
+    }
+    return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
   },
   {
     message: "Ces documents sont obligatoires.",
@@ -153,10 +218,31 @@ export const actesAdministratifsSubventionneesSchema = z.object({
   ),
 });
 
+export const actesAdministratifsTransformationSchema = z.object({
+  actesAdministratifs: z.preprocess(
+    filterActesWithKey(REQUIRED_TRANSFORMATION_CATEGORIES),
+    z.array(acteAdministratifTransformationSchema).optional()
+  ),
+});
+
+export const actesAdministratifsFermetureSchema = z.object({
+  actesAdministratifs: z.preprocess(
+    filterActesWithKey(),
+    z.array(acteAdministratifSchema).optional()
+  ),
+});
+
 export const actesAdministratifsAutoSaveSchema = z.object({
   actesAdministratifs: z.preprocess(
     filterActesWithKey(),
     z.array(acteAdministratifAutoSaveSchema).optional()
+  ),
+});
+
+export const actesAdministratifsOperateurSchema = z.object({
+  actesAdministratifs: z.preprocess(
+    filterActesWithKey(),
+    z.array(acteAdministratifSchema).optional()
   ),
 });
 

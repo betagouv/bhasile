@@ -64,6 +64,56 @@ describe("FieldSetContacts", () => {
     });
   });
 
+  describe("Delete button visibility", () => {
+    it("should hide the delete button when the only contact is pristine", () => {
+      render(
+        <FormTestWrapper
+          defaultValues={{
+            contacts: [{ prenom: "", nom: "", email: "", telephone: "", role: "" }],
+          }}
+        >
+          <FieldSetContacts />
+        </FormTestWrapper>
+      );
+
+      expect(
+        screen.queryByRole("button", { name: "Supprimer" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("should show the delete button when the only contact has data", () => {
+      render(
+        <FormTestWrapper
+          defaultValues={{
+            contacts: [createContact({ id: 1 })],
+          }}
+        >
+          <FieldSetContacts />
+        </FormTestWrapper>
+      );
+
+      expect(
+        screen.getByRole("button", { name: "Supprimer" })
+      ).toBeInTheDocument();
+    });
+
+    it("should show a delete button on every contact when above the minimum, even pristine ones", () => {
+      render(
+        <FormTestWrapper
+          defaultValues={{
+            contacts: [createContact({ id: 1 }), {}],
+          }}
+        >
+          <FieldSetContacts />
+        </FormTestWrapper>
+      );
+
+      expect(
+        screen.getAllByRole("button", { name: "Supprimer" })
+      ).toHaveLength(2);
+    });
+  });
+
   describe("Form interactions", () => {
     it("should update prenom field value", async () => {
       const user = userEvent.setup();

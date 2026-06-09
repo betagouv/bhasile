@@ -4,13 +4,23 @@ import {
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import { Structure } from "@/generated/prisma/client";
+import { canUpdateStructure } from "@/lib/casl/abilities";
 import {
   StructureAgentUpdateApiType,
   StructureApiRead,
 } from "@/schemas/api/structure.schema";
+import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
+import { PublicType } from "@/types/structure.type";
 
 import { processActivitesForStructure } from "../activites/activite.service";
+import {
+  buildAdresseAdministrativeComplete,
+  getAdressesApiRead,
+} from "../adresses/adresse.util";
+import { getAntennesApiRead } from "../antennes/antenne.util";
+import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
+import { getFinessesApiRead } from "../finesses/finess.util";
 import {
   StructureDbDetails,
   StructureDbList,
@@ -33,7 +43,7 @@ import {
   getDatesConvention,
   getDatesPeriodeAutorisation,
   getOperateurLabel,
-  getRepartition,
+  getTypeBati,
   isStructureInCpom,
   isStructureInCpomPerYear,
 } from "./structure.util";
@@ -50,6 +60,7 @@ export type SearchProps = {
   direction?: "asc" | "desc" | null;
   map?: boolean;
   selection?: boolean;
+  finalised?: boolean;
 };
 
 export const updateStructureAgent = async (
@@ -77,19 +88,23 @@ export const updateStructureOperateur = async (
   );
 };
 
-export const getFullStructures = async ({
-  search,
-  page,
-  type,
-  bati,
-  placesAutorisees,
-  departements,
-  map,
-  column,
-  direction,
-  operateurs,
-  selection,
-}: SearchProps): Promise<{
+export const getFullStructures = async (
+  {
+    search,
+    page,
+    type,
+    bati,
+    placesAutorisees,
+    departements,
+    map,
+    column,
+    direction,
+    operateurs,
+    selection,
+    finalised,
+  }: SearchProps,
+  user?: SessionUser
+): Promise<{
   structures: StructureApiRead[];
   totalStructures: number;
 }> => {
@@ -105,6 +120,7 @@ export const getFullStructures = async ({
     direction,
     operateurs,
     selection,
+    finalised,
   })) as StructureDbList[];
   const totalStructures = await countBySearch({
     search,
@@ -116,15 +132,18 @@ export const getFullStructures = async ({
     operateurs,
   });
 
-  const structures = dbStructures.map((structure) =>
-    dbStructureToApiRead(structure, true)
-  );
+  const structures = dbStructures.map((dbStructure) => {
+    const structure = dbStructureToApiRead(dbStructure, true);
+    structure.adresses = getReadableAdresses(structure, user);
+    return structure;
+  });
 
   return { structures, totalStructures };
 };
 
 export const getFullStructure = async (
-  id: number
+  id: number,
+  user?: SessionUser
 ): Promise<StructureApiRead | null> => {
   const dbStructure = await findOne(id);
 
@@ -133,8 +152,27 @@ export const getFullStructure = async (
   }
 
   const structure = dbStructureToApiRead(dbStructure);
+  structure.adresses = getReadableAdresses(structure, user);
 
   return structure;
+};
+
+const getReadableAdresses = (
+  structure: StructureApiRead,
+  user?: SessionUser
+): StructureApiRead["adresses"] => {
+  if (user && canUpdateStructure(user, structure)) {
+    return structure.adresses;
+  }
+
+  return structure.adresses?.map((adresse) => ({
+    ...adresse,
+    adresse: "",
+    adresseComplete: [adresse.codePostal, adresse.commune]
+      .filter(Boolean)
+      .join(" ")
+      .trim(),
+  }));
 };
 
 export const getStructureForOperateur = async (
@@ -171,6 +209,22 @@ const dbStructureToApiRead = (
         (dnaStructure) => dnaStructure.dna.evenementsIndesirablesGraves
       );
 
+  const antennes = getAntennesApiRead(
+    (dbStructure as StructureDbDetails).antennes
+  );
+  const dnaStructures = getDnaStructuresApiRead(dbStructure.dnaStructures);
+  const finesses = getFinessesApiRead(
+    (dbStructure as StructureDbDetails).finesses
+  );
+  const adresses = getAdressesApiRead(dbStructure.adresses);
+  const adresseAdministrativeComplete =
+    buildAdresseAdministrativeComplete(dbStructure);
+  const typeBati = getTypeBati(dbStructure);
+
+  const isMultiAntenne = (antennes?.length ?? 0) > 0;
+  const isMultiDna =
+    (dnaStructures?.length ?? 0) > 1 || (finesses?.length ?? 0) > 1;
+
   return recursivelySerializeDates({
     ...dbStructure,
     debutConvention,
@@ -182,7 +236,6 @@ const dbStructureToApiRead = (
     longitude: dbStructure.longitude?.toString(),
     activites,
     evenementsIndesirablesGraves: aggregatedEIGs,
-    repartition: getRepartition(dbStructure),
     operateurLabel: getOperateurLabel(dbStructure),
     isAutorisee: isStructureAutorisee(dbStructure.type),
     isSubventionnee: isStructureSubventionnee(dbStructure.type),
@@ -193,6 +246,28 @@ const dbStructureToApiRead = (
     },
     isInCpom: isStructureInCpom(dbStructure),
     isInCpomPerYear: isStructureInCpomPerYear(dbStructure),
+    nom: dbStructure.nom ?? "",
+    operateur: dbStructure.operateur ?? undefined,
+    filiale: dbStructure.filiale ?? undefined,
+    date303: dbStructure.date303 ?? undefined,
+    public: dbStructure.public
+      ? PublicType[dbStructure.public as string as keyof typeof PublicType]
+      : undefined,
+    adresseAdministrative: dbStructure.adresseAdministrative ?? "",
+    codePostalAdministratif: dbStructure.codePostalAdministratif ?? "",
+    communeAdministrative: dbStructure.communeAdministrative ?? "",
+    departementAdministratif: dbStructure.departementAdministratif ?? "",
+    contacts: (dbStructure as StructureDbDetails).contacts ?? [],
+    documentsFinanciers:
+      (dbStructure as StructureDbDetails).documentsFinanciers ?? [],
+    adresseAdministrativeComplete,
+    isMultiAntenne,
+    isMultiDna,
+    typeBati,
+    antennes,
+    dnaStructures,
+    finesses,
+    adresses,
   }) as StructureApiRead;
 };
 

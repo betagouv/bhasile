@@ -9,7 +9,7 @@ export type StructureWithDnasForSeed = {
   dnaStructures: { dna: { code: string } | null }[];
 };
 
-export const createFakeEvenementIndesirableGrave = ({
+const createFakeEvenementIndesirableGrave = ({
   dnaCode,
 }: CreateFakeEvenementIndesirableGraveArgs): Omit<
   EvenementIndesirableGrave,

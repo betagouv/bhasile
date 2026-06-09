@@ -15,10 +15,6 @@ export type SeededCpom = {
 export const createCpomForTest = async (
   overrides: Partial<CpomSeedInput> = {}
 ): Promise<SeededCpom> => {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Les tests e2e ne doivent pas être exécutés en production");
-  }
-
   const input = buildCpomSeed(overrides);
 
   let regionId = input.regionId;

@@ -64,7 +64,8 @@ export const FiltersBatis = () => {
                 nativeInputProps: {
                   name: "structure-bati",
                   value: Repartition.COLLECTIF,
-                  checked: batis.includes("Collectif") || noFilterOnBati,
+                  checked:
+                    batis.includes(Repartition.COLLECTIF) || noFilterOnBati,
                   onChange: handleTypeChange,
                 },
               },
@@ -79,7 +80,8 @@ export const FiltersBatis = () => {
                 nativeInputProps: {
                   name: "structure-bati",
                   value: Repartition.DIFFUS,
-                  checked: batis.includes("Diffus") || noFilterOnBati,
+                  checked:
+                    batis.includes(Repartition.DIFFUS) || noFilterOnBati,
                   onChange: handleTypeChange,
                 },
               },
@@ -94,7 +96,8 @@ export const FiltersBatis = () => {
                 nativeInputProps: {
                   name: "structure-bati",
                   value: Repartition.MIXTE,
-                  checked: batis.includes("Mixte") || noFilterOnBati,
+                  checked:
+                    batis.includes(Repartition.MIXTE) || noFilterOnBati,
                   onChange: handleTypeChange,
                 },
               },
