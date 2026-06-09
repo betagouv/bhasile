@@ -6,23 +6,23 @@ import { TransformationClientProvider } from "@/app/(authenticated)/structures/t
 import { PlacesEtHebergementForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/PlacesEtHebergementForm";
 import { FetchStateProvider } from "@/app/context/FetchStateContext";
 import { CURRENT_YEAR } from "@/constants";
-import { StructureTransformationApiRead } from "@/schemas/api/transformation.schema";
+import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import { Repartition } from "@/types/adresse.type";
 import { FormKind } from "@/types/global";
 import { PublicType } from "@/types/structure.type";
 import {
-  StructureTransformationStep,
-  StructureTransformationType,
+  StructureVersionTransformationStep,
+  StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
 import {
-  createStructureTransformation,
+  createStructureVersionTransformation,
   createTransformation,
 } from "../../../../test-utils/factories/transformation.factory";
 
 const TRANSFORMATION_ID = 12;
-const STRUCTURE_TRANSFORMATION_ID = 7;
+const STRUCTURE_VERSION_TRANSFORMATION_ID = 7;
 const ORIGINAL_PLACES = 47;
 
 const mockUseParams = vi.fn();
@@ -76,34 +76,34 @@ const buildStructureVersion = () =>
       },
     ],
   }) as unknown as NonNullable<
-    StructureTransformationApiRead["structureVersion"]
+    StructureVersionTransformationApiRead["structureVersion"]
   >;
 
-const renderForm = (structureType: StructureTransformationType) => {
-  const structureTransformation = createStructureTransformation({
-    id: STRUCTURE_TRANSFORMATION_ID,
+const renderForm = (structureType: StructureVersionTransformationType) => {
+  const structureVersionTransformation = createStructureVersionTransformation({
+    id: STRUCTURE_VERSION_TRANSFORMATION_ID,
     type: structureType,
     structureVersion: buildStructureVersion(),
   });
   const transformation = createTransformation({
     id: TRANSFORMATION_ID,
     type:
-      structureType === StructureTransformationType.EXTENSION
+      structureType === StructureVersionTransformationType.EXTENSION
         ? TransformationType.EXTENSION_EX_NIHILO
         : TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES,
-    structureTransformations: [structureTransformation],
+    structureVersionTransformations: [structureVersionTransformation],
   });
 
   mockUseParams.mockReturnValue({
     transformationId: String(TRANSFORMATION_ID),
     transformationStructureType: structureType,
-    transformationStructureId: String(STRUCTURE_TRANSFORMATION_ID),
+    transformationStructureId: String(STRUCTURE_VERSION_TRANSFORMATION_ID),
     transformationStructureStep:
-      StructureTransformationStep.PLACES_ET_HEBERGEMENT,
+      StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
   });
 
   const formKind =
-    structureType === StructureTransformationType.EXTENSION
+    structureType === StructureVersionTransformationType.EXTENSION
       ? FormKind.EXTENSION
       : FormKind.CONTRACTION;
 
@@ -112,7 +112,7 @@ const renderForm = (structureType: StructureTransformationType) => {
       <TransformationClientProvider transformation={transformation}>
         <PlacesEtHebergementForm
           transformation={transformation}
-          structureTransformation={structureTransformation}
+          structureVersionTransformation={structureVersionTransformation}
           formKind={formKind}
           originalPlaces={ORIGINAL_PLACES}
         />
@@ -139,7 +139,7 @@ const getPutPayloadPlaces = () => {
       init?.method === "PUT"
   );
   const body = JSON.parse(putCall?.[1]?.body as string);
-  return body.structureTransformations[0].structureVersion
+  return body.structureVersionTransformations[0].structureVersion
     .structureTypologies[0].placesAutorisees;
 };
 
@@ -166,7 +166,7 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
           json: () =>
             Promise.resolve({
               id: TRANSFORMATION_ID,
-              structureTransformations: [],
+              structureVersionTransformations: [],
             }),
         } as Response);
       }
@@ -175,7 +175,7 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
   });
 
   it("bloque une extension qui n'ajoute aucune place (égalité)", async () => {
-    renderForm(StructureTransformationType.EXTENSION);
+    renderForm(StructureVersionTransformationType.EXTENSION);
 
     await setPlaces(ORIGINAL_PLACES);
     await submit();
@@ -189,7 +189,7 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
   });
 
   it("laisse passer une extension qui ajoute des places", async () => {
-    renderForm(StructureTransformationType.EXTENSION);
+    renderForm(StructureVersionTransformationType.EXTENSION);
 
     await setPlaces(ORIGINAL_PLACES + 3);
     await submit();
@@ -204,7 +204,7 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
   });
 
   it("bloque une contraction qui ne retire aucune place (égalité)", async () => {
-    renderForm(StructureTransformationType.CONTRACTION);
+    renderForm(StructureVersionTransformationType.CONTRACTION);
 
     await setPlaces(ORIGINAL_PLACES);
     await submit();
@@ -218,7 +218,7 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
   });
 
   it("laisse passer une contraction qui retire des places", async () => {
-    renderForm(StructureTransformationType.CONTRACTION);
+    renderForm(StructureVersionTransformationType.CONTRACTION);
 
     await setPlaces(ORIGINAL_PLACES - 7);
     await submit();
