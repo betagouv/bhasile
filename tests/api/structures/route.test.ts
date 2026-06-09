@@ -36,7 +36,7 @@ vi.mock("@/app/api/structures/structure.util", () => ({
   getCurrentPlacesLogementsSociaux: vi.fn().mockReturnValue(0),
   getCurrentPlacesQpv: vi.fn().mockReturnValue(0),
   getOperateurLabel: vi.fn().mockReturnValue(""),
-  getRepartition: vi.fn().mockReturnValue("DIFFUS"),
+  getTypeBati: vi.fn().mockReturnValue("DIFFUS"),
   isStructureInCpom: vi.fn().mockReturnValue(false),
   isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
 }));

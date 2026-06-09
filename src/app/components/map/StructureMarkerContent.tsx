@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { RepartitionBadge } from "@/app/(authenticated)/(with-menu)/structures/_components/RepartitionBadge";
+import { TypeBatiBadge } from "@/app/(authenticated)/(with-menu)/structures/_components/TypeBatiBadge";
 import { useFetchStructure } from "@/app/hooks/useFetchStructure";
 import { formatDate } from "@/app/utils/date.util";
 import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
@@ -52,8 +52,8 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
         </div>
       )}
       <div className="text-sm mb-2">
-        <RepartitionBadge
-          repartition={structure.repartition}
+        <TypeBatiBadge
+          typeBati={structure.typeBati}
           className="m-0!"
         />
       </div>

@@ -142,7 +142,6 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   debutPeriodeAutorisation: string | null;
   finPeriodeAutorisation: string | null;
   cpomStructures?: CpomStructureApiRead[];
-  repartition: Repartition;
   operateurLabel: string;
   isAutorisee: boolean;
   isSubventionnee: boolean;
@@ -157,5 +156,5 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   adresseAdministrativeComplete: string;
   isMultiAntenne: boolean;
   isMultiDna: boolean;
-  typeBati: Repartition;
+  typeBati?: Repartition;
 };
