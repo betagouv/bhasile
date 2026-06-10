@@ -64,7 +64,7 @@ vi.mock("@/app/api/dna-structures/dna-structure.util", () => ({
 }));
 
 vi.mock("@/app/api/finesses/finess.util", () => ({
-  getFinessesApiRead: vi.fn().mockReturnValue(undefined),
+  getStructureFinessesApiRead: vi.fn().mockReturnValue(undefined),
 }));
 
 vi.mock("@/app/api/adresses/adresse.util", async (importOriginal) => ({
@@ -147,7 +147,7 @@ describe("GET /api/structures/[id]", () => {
       isMultiDna: false,
       typeBati: "DIFFUS",
       antennes: undefined,
-      finesses: undefined,
+      structureFinesses: undefined,
       public: undefined,
       currentPlaces: {
         placesAutorisees: 10,

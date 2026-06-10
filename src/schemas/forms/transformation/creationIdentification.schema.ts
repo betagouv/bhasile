@@ -21,8 +21,8 @@ import {
   dnaStructuresSchema,
 } from "@/schemas/forms/base/dna.schema";
 import {
-  finessesAutoSaveSchema,
-  finessesSchema,
+  structureFinessesAutoSaveSchema,
+  structureFinessesSchema,
 } from "@/schemas/forms/base/finess.schema";
 import { operateurSchema } from "@/schemas/forms/base/operateur.schema";
 import { structureBaseSchema } from "@/schemas/forms/base/structure.base.schema";
@@ -37,7 +37,7 @@ export const creationIdentificationSchema = baseCreationIdentificationSchema
   .and(adresseAdministrativeSchema)
   .and(antennesSchema)
   .and(dnaStructuresSchema)
-  .and(finessesSchema)
+  .and(structureFinessesSchema)
   .and(contactsSchema);
 
 export const creationIdentificationDraftSchema = z.preprocess(
@@ -47,7 +47,7 @@ export const creationIdentificationDraftSchema = z.preprocess(
     .and(adresseAdministrativeAutoSaveSchema)
     .and(antennesAutoSaveSchema)
     .and(dnaStructuresAutoSaveSchema)
-    .and(finessesAutoSaveSchema)
+    .and(structureFinessesAutoSaveSchema)
     .and(contactsAutoSaveSchema)
 );
 

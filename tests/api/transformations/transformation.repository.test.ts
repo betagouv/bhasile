@@ -366,14 +366,15 @@ describe("transformation.repository db integration", () => {
   it("should replace structureVersion finesses on updateOne", async () => {
     const { transformationId, structureVersionTransformationId, structureVersionId } =
       await createBareTransformation();
-    await prisma.finess.create({
+    await prisma.structureFiness.create({
       data: {
-        structureVersionId,
-        code: `FIN-OLD-TF-${Date.now()}-${randomUUID()}`,
+        structureVersion: { connect: { id: structureVersionId } },
+        finess: {
+          create: { code: `FIN-OLD-TF-${Date.now()}-${randomUUID()}` },
+        },
       },
     });
     const newCode = `FIN-NEW-TF-${Date.now()}-${randomUUID()}`;
-    const newFiness = { code: newCode, description: "finess transfo" };
     await updateOne({
       id: transformationId,
       structureVersionTransformations: [
@@ -381,16 +382,20 @@ describe("transformation.repository db integration", () => {
           id: structureVersionTransformationId,
           structureVersion: {
             id: structureVersionId,
-            finesses: [newFiness],
+            structureFinesses: [
+              { description: "finess transfo", finess: { code: newCode } },
+            ],
           },
         },
       ],
     });
-    const finesses = await prisma.finess.findMany({
+    const structureFinesses = await prisma.structureFiness.findMany({
       where: { structureVersionId },
+      include: { finess: true },
     });
-    expect(finesses).toHaveLength(1);
-    expect(finesses[0]).toMatchObject(newFiness);
+    expect(structureFinesses).toHaveLength(1);
+    expect(structureFinesses[0].finess.code).toBe(newCode);
+    expect(structureFinesses[0].description).toBe("finess transfo");
   });
 
   it("should upsert structureVersion structureTypologies by year on updateOne", async () => {
@@ -453,7 +458,7 @@ describe("transformation.repository db integration", () => {
           structureVersion: {
             id: structureVersionId,
             dnaStructures: [
-              { dna: { code: newCode, description: "Desc transfo" } },
+              { description: "Desc transfo", dna: { code: newCode } },
             ],
           },
         },
@@ -465,7 +470,7 @@ describe("transformation.repository db integration", () => {
     });
     expect(links).toHaveLength(1);
     expect(links[0].dna.code).toBe(newCode);
-    expect(links[0].dna.description).toBe("Desc transfo");
+    expect(links[0].description).toBe("Desc transfo");
   });
 
   it("should upsert transformation form status on updateOne", async () => {
@@ -874,11 +879,12 @@ describe("transformation.repository db integration", () => {
     await prisma.dnaStructure.create({
       data: { structureId: structure.id, dnaId: dna.id },
     });
-    // Le FINESS (code unique en base) ne doit pas être recopié ni faire échouer la création.
-    await prisma.finess.create({
+    const structureFiness = await prisma.structureFiness.create({
       data: {
-        structureId: structure.id,
-        code: `FIN-TF-TEST-${randomUUID()}`,
+        structure: { connect: { id: structure.id } },
+        finess: {
+          create: { code: `FIN-TF-TEST-${randomUUID()}` },
+        },
       },
     });
     return {
@@ -886,6 +892,7 @@ describe("transformation.repository db integration", () => {
       contactId: contact.id,
       antenneId: antenne.id,
       dnaId: dna.id,
+      finessId: structureFiness.finessId,
     };
   };
 
@@ -896,13 +903,13 @@ describe("transformation.repository db integration", () => {
         antennes: true,
         adresses: { include: { adresseTypologies: true } },
         dnaStructures: true,
-        finesses: true,
+        structureFinesses: true,
       },
     },
   } as const;
 
   it("should copy the source structure data into the new structureVersion on createOne (layer A)", async () => {
-    const { structure, contactId, antenneId, dnaId } =
+    const { structure, contactId, antenneId, dnaId, finessId } =
       await seedRichStructure();
 
     const transformationId = await createTransformation({
@@ -941,8 +948,12 @@ describe("transformation.repository db integration", () => {
     const dnaCount = await prisma.dna.count({ where: { id: dnaId } });
     expect(dnaCount).toBe(1);
 
-    // finesses : non recopiées (code unique en base).
-    expect(version.finesses).toHaveLength(0);
+    // structureFinesses : nouvelle ligne de jonction, mais même Finess réutilisé.
+    expect(version.structureFinesses).toHaveLength(1);
+    expect(version.structureFinesses[0].finessId).toBe(finessId);
+    expect(version.structureFinesses[0].structureId).toBeNull();
+    const finessCount = await prisma.finess.count({ where: { id: finessId } });
+    expect(finessCount).toBe(1);
 
     // La structure source n'est pas modifiée.
     const sourceContacts = await prisma.contact.findMany({

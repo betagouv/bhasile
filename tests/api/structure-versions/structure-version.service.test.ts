@@ -76,13 +76,14 @@ const buildStructure = (): StructureDbDetails =>
         ],
       },
     ],
-    finesses: [
+    structureFinesses: [
       {
         id: 10,
         structureId: 1,
         structureVersionId: null,
-        code: "FIN-1",
-        description: null,
+        finessId: 20,
+        description: "FINESS toute la structure",
+        finess: { id: 20, code: "FIN-1", description: null },
       },
     ],
     structureTypologies: [
@@ -107,6 +108,7 @@ const buildStructure = (): StructureDbDetails =>
         structureId: 1,
         structureVersionId: null,
         dnaId: 50,
+        description: "DNA site d'Avranches",
         startDate: null,
         endDate: null,
         dna: { id: 50, code: "DNA-1", description: null },
@@ -152,19 +154,24 @@ describe("copyStructureVersion", () => {
       logementSocial: 0,
     });
 
-    // Les finesses ne sont pas recopiées : le code FINESS est unique en base.
-    expect(result.finesses).toBeUndefined();
+    // structureFinesses : table de passage recopiée sans id, en réutilisant le Finess via son code unique.
+    // La description est portée par le lien, pas par l'entité référentielle.
+    expect(result.structureFinesses).toEqual([
+      {
+        description: "FINESS toute la structure",
+        finess: { code: "FIN-1" },
+      },
+    ]);
     expect(result.structureTypologies?.[0]).toMatchObject({
       year: 2024,
       placesAutorisees: 10,
     });
 
     // dnaStructures : table de passage recopiée, en réutilisant le Dna via son code.
+    // La description est portée par le lien, pas par l'entité référentielle.
     expect(result.dnaStructures?.[0]).not.toHaveProperty("id");
-    expect(result.dnaStructures?.[0]?.dna).toEqual({
-      code: "DNA-1",
-      description: undefined,
-    });
+    expect(result.dnaStructures?.[0]?.description).toBe("DNA site d'Avranches");
+    expect(result.dnaStructures?.[0]?.dna).toEqual({ code: "DNA-1" });
   });
 
   it("lets overrides win over the structure scalars", () => {
@@ -198,7 +205,7 @@ const buildStructureVersion = (
     directionTerritoriale: null,
     effectiveDate: null,
     antennes: [],
-    finesses: [],
+    structureFinesses: [],
     dnaStructures: [],
     structureTypologies: [],
     contacts: [],

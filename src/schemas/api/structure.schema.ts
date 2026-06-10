@@ -16,7 +16,7 @@ import { dnaStructureApiSchema } from "./dna-structure.schema";
 import { documentFinancierApiSchema } from "./documentFinancier.schema";
 import { evaluationApiSchema } from "./evaluation.schema";
 import { evenementIndesirableGraveApiSchema } from "./evenement-indesirable-grave.schema";
-import { finessApiSchema } from "./finess.schema";
+import { structureFinessApiSchema } from "./finess.schema";
 import { formApiSchema } from "./form.schema";
 import { indicateurFinancierApiSchema } from "./indicateurFinancier.schema";
 import { operateurSuggestionApiSchema } from "./operateur.schema";
@@ -73,7 +73,7 @@ export const structureOperateurUpdateApiSchema =
     adresses: z.array(adresseApiSchema),
     antennes: z.array(antenneApiSchema).optional(),
     dnaStructures: z.array(dnaStructureApiSchema).optional(),
-    finesses: z.array(finessApiSchema).optional(),
+    structureFinesses: z.array(structureFinessApiSchema).optional(),
     structureTypologies: z.array(structureTypologieApiSchema),
     forms: z.array(formApiSchema).optional(),
     contacts: z.array(contactApiSchema),
@@ -86,7 +86,7 @@ const partialStructureOperateurUpdateApiSchema =
     codeBhasile: z.string().optional(),
     adresses: z.array(adresseApiSchema.partial()).optional(),
     dnaStructures: z.array(dnaStructureApiSchema.partial()).optional(),
-    finesses: z.array(finessApiSchema.partial()).optional(),
+    structureFinesses: z.array(structureFinessApiSchema.partial()).optional(),
     forms: z.array(formApiSchema.partial()).optional(),
     contacts: z.array(contactApiSchema.partial()).optional(),
     documentsFinanciers: z.array(documentFinancierApiSchema).optional(),

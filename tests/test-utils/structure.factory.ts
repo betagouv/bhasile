@@ -4,7 +4,7 @@ import { CURRENT_YEAR } from "@/constants";
 import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import { DnaStructureApiType } from "@/schemas/api/dna-structure.schema";
-import { FinessApiType } from "@/schemas/api/finess.schema";
+import { StructureFinessApiType } from "@/schemas/api/finess.schema";
 import { FormApiType } from "@/schemas/api/form.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
@@ -19,7 +19,7 @@ import {
   createDefaultForms,
   createFinalisationForm,
 } from "./factories/finalisation-form.factory";
-import { createDefaultFinesses } from "./factories/finess.factory";
+import { createDefaultStructureFinesses } from "./factories/finess.factory";
 import { createOperateur } from "./factories/operateur.factory";
 import { createStructureTypologies } from "./factories/structure-typologies.factory";
 
@@ -36,7 +36,7 @@ export const createStructure = ({
   structureMillesimes = [],
   cpomStructures = [],
   dnaStructures,
-  finesses,
+  structureFinesses,
   forms,
 }: CreateStructuresArgs): StructureApiRead => {
   const structureType = type ?? StructureType.CADA;
@@ -78,7 +78,7 @@ export const createStructure = ({
     cpomStructures: cpomStructures ?? [],
     forms: forms ?? createDefaultForms(),
     dnaStructures: dnaStructures ?? createDefaultDnaStructures(),
-    finesses: finesses ?? createDefaultFinesses(),
+    structureFinesses: structureFinesses ?? createDefaultStructureFinesses(),
     contacts: [],
     documentsFinanciers: [],
     adresseAdministrativeComplete: [
@@ -244,6 +244,6 @@ type CreateStructuresArgs = {
   publicType?: PublicType;
   cpomStructures?: CpomStructureApiRead[];
   dnaStructures?: DnaStructureApiType[];
-  finesses?: FinessApiType[];
+  structureFinesses?: StructureFinessApiType[];
   forms?: FormApiType[];
 };

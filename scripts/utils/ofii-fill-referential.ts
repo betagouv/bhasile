@@ -303,7 +303,6 @@ export const fillOfiiStructureFromRows = async (
           where: { code: row.dnaCode },
           create: {
             code: row.dnaCode,
-            description: null,
             activeInOfiiFileSince: date,
             inactiveInOfiiFileSince: null,
             departementAdministratif: depNumero,

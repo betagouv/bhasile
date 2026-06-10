@@ -46,12 +46,14 @@ export const createOrUpdateDnaStructures = async (
       where: { id: dnaStructure.id || 0 },
       update: {
         dnaId: upsertedDna.id,
+        description: dnaStructure.description,
         startDate: dnaStructure.startDate,
         endDate: dnaStructure.endDate,
       },
       create: {
         ...entityId,
         dnaId: upsertedDna.id,
+        description: dnaStructure.description,
         startDate: dnaStructure.startDate,
         endDate: dnaStructure.endDate,
       },

@@ -8,6 +8,7 @@ import {
   getAdressesApiRead,
 } from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";
+import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import type { StructureDbDetails } from "../structures/structure.db.type";
 import { getTypeBati } from "../structures/structure.util";
 import { StructureVersionDbDetails } from "./structure-version.db.type";
@@ -63,17 +64,21 @@ export const dbStructureVersionToApiRead = (
 
   const antennes = getAntennesApiRead(version.antennes);
   const adresses = getAdressesApiRead(version.adresses);
+  const structureFinesses = getStructureFinessesApiRead(
+    version.structureFinesses
+  );
   const typeBati = getTypeBati(version);
   const isMultiAntenne = (version.antennes?.length ?? 0) > 0;
   const isMultiDna =
     (version.dnaStructures?.length ?? 0) > 1 ||
-    (version.finesses?.length ?? 0) > 1;
+    (version.structureFinesses?.length ?? 0) > 1;
 
   return recursivelySerializeDates({
     ...version,
     ...mapVersionScalars(version),
     antennes,
     adresses,
+    structureFinesses,
     typeBati,
     isMultiAntenne,
     isMultiDna,
@@ -102,6 +107,19 @@ export const copyStructureVersion = (
     commune: antenne.commune,
     departement: antenne.departement,
   })),
+  // TODO: simplify once finess.code is mandatory in db
+  structureFinesses: structure.structureFinesses.flatMap((structureFiness) =>
+    structureFiness.finess.code
+      ? [
+          {
+            description: structureFiness.description ?? undefined,
+            finess: {
+              code: structureFiness.finess.code,
+            },
+          },
+        ]
+      : []
+  ),
   adresses: (getAdressesApiRead(structure.adresses) ?? []).map((adresse) => ({
     adresse: adresse.adresse,
     codePostal: adresse.codePostal,
@@ -126,9 +144,9 @@ export const copyStructureVersion = (
     echeancePlacesAFermer: typologie.echeancePlacesAFermer?.toISOString(),
   })),
   dnaStructures: structure.dnaStructures.map((dnaStructure) => ({
+    description: dnaStructure.description ?? undefined,
     dna: {
       code: dnaStructure.dna.code,
-      description: dnaStructure.dna.description ?? undefined,
     },
     startDate: dnaStructure.startDate?.toISOString() ?? undefined,
     endDate: dnaStructure.endDate?.toISOString() ?? undefined,

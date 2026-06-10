@@ -1,10 +1,12 @@
 import { StructureDbDetails } from "../structures/structure.db.type";
 
-export const getFinessesApiRead = (
-  finesses?: StructureDbDetails["finesses"]
+export const getStructureFinessesApiRead = (
+  structureFinesses?: StructureDbDetails["structureFinesses"]
 ) =>
-  finesses?.map((finess) => ({
-    id: finess.id,
-    code: finess.code,
-    description: finess.description ?? undefined,
+  structureFinesses?.map((structureFiness) => ({
+    id: structureFiness.id,
+    description: structureFiness.description ?? undefined,
+    finess: {
+      code: structureFiness.finess.code,
+    },
   }));

@@ -41,8 +41,17 @@ export const createStructureForTest = async (
           },
         })),
       },
-      finesses: {
-        create: [{ code: input.finessCode }],
+      structureFinesses: {
+        create: [
+          {
+            finess: {
+              connectOrCreate: {
+                where: { code: input.finessCode },
+                create: { code: input.finessCode },
+              },
+            },
+          },
+        ],
       },
     },
   });

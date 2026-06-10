@@ -20,7 +20,7 @@ import {
 } from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
-import { getFinessesApiRead } from "../finesses/finess.util";
+import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import {
   StructureDbDetails,
   StructureDbList,
@@ -213,8 +213,8 @@ const dbStructureToApiRead = (
     (dbStructure as StructureDbDetails).antennes
   );
   const dnaStructures = getDnaStructuresApiRead(dbStructure.dnaStructures);
-  const finesses = getFinessesApiRead(
-    (dbStructure as StructureDbDetails).finesses
+  const structureFinesses = getStructureFinessesApiRead(
+    (dbStructure as StructureDbDetails).structureFinesses
   );
   const adresses = getAdressesApiRead(dbStructure.adresses);
   const adresseAdministrativeComplete =
@@ -223,7 +223,7 @@ const dbStructureToApiRead = (
 
   const isMultiAntenne = (antennes?.length ?? 0) > 0;
   const isMultiDna =
-    (dnaStructures?.length ?? 0) > 1 || (finesses?.length ?? 0) > 1;
+    (dnaStructures?.length ?? 0) > 1 || (structureFinesses?.length ?? 0) > 1;
 
   return recursivelySerializeDates({
     ...dbStructure,
@@ -266,7 +266,7 @@ const dbStructureToApiRead = (
     typeBati,
     antennes,
     dnaStructures,
-    finesses,
+    structureFinesses,
     adresses,
   }) as StructureApiRead;
 };

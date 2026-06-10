@@ -44,7 +44,9 @@ export const transformationInclude = {
               },
             },
           },
-          finesses: true,
+          structureFinesses: {
+            include: { finess: true },
+          },
           antennes: true,
           dnaStructures: {
             include: { dna: true },

@@ -466,7 +466,7 @@ describe("structure.repository db integration", () => {
     const newCode = `DNA-NEW-${Date.now()}-${randomUUID()}`;
     await updateOne({
       id: structure.id,
-      dnaStructures: [{ dna: { code: newCode, description: "New DNA" } }],
+      dnaStructures: [{ description: "New DNA", dna: { code: newCode } }],
     });
 
     // THEN: only the new DNA link remains on structure
@@ -479,31 +479,36 @@ describe("structure.repository db integration", () => {
   });
 
   it("should replace finesses list", async () => {
-    // GIVEN: one existing FINESS
+    // GIVEN: one existing FINESS linked to the structure
     const structure = await createStructure();
-    await prisma.finess.create({
+    await prisma.structureFiness.create({
       data: {
-        structureId: structure.id,
-        code: `FIN-OLD-${Date.now()}-${randomUUID()}`,
+        structure: { connect: { id: structure.id } },
+        finess: {
+          create: { code: `FIN-OLD-${Date.now()}-${randomUUID()}` },
+        },
       },
     });
 
-    // WHEN: a new FINESS list is sent
+    // WHEN: a new FINESS list is sent (description portée par le lien)
     const newCode = `FIN-NEW-${Date.now()}-${randomUUID()}`;
-    const newFiness = { code: newCode, description: "new finess" };
-    const finesses = await updateStructureAndFetch(
+    const structureFinesses = await updateStructureAndFetch(
       structure.id,
       {
-        finesses: [newFiness],
+        structureFinesses: [
+          { description: "new finess", finess: { code: newCode } },
+        ],
       },
       () =>
-        prisma.finess.findMany({
+        prisma.structureFiness.findMany({
           where: { structureId: structure.id },
+          include: { finess: true },
         })
     );
 
-    expect(finesses).toHaveLength(1);
-    expect(finesses[0]).toMatchObject(newFiness);
+    expect(structureFinesses).toHaveLength(1);
+    expect(structureFinesses[0].finess.code).toBe(newCode);
+    expect(structureFinesses[0].description).toBe("new finess");
   });
 
   it("should upsert actesAdministratifs and delete missing ones", async () => {

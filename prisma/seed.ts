@@ -266,8 +266,34 @@ export async function seed(): Promise<void> {
 
   console.log("🏥 Création et liaison des codes FINESS...");
   const finessList = createFinessList(allStructures);
-  await prisma.finess.createMany({ data: finessList });
-  console.log(`✅ ${finessList.length} codes FINESS créés et structures liées`);
+  await prisma.finess.createMany({
+    data: finessList.map((finess) => ({
+      code: finess.code,
+      createdAt: finess.createdAt,
+      updatedAt: finess.updatedAt,
+    })),
+  });
+  const createdFinesses = await prisma.finess.findMany({
+    where: { code: { in: finessList.map((finess) => finess.code) } },
+    select: { id: true, code: true },
+  });
+  const finessIdByCode = new Map<string, number>();
+  for (const finess of createdFinesses) {
+    if (finess.code) {
+      finessIdByCode.set(finess.code, finess.id);
+    }
+  }
+  // La description est une annotation du lien : portée par StructureFiness.
+  const structureFinessLinks = finessList.flatMap((finess) => {
+    const finessId = finessIdByCode.get(finess.code);
+    return finessId
+      ? [{ finessId, structureId: finess.structureId, description: finess.description }]
+      : [];
+  });
+  await prisma.structureFiness.createMany({ data: structureFinessLinks });
+  console.log(
+    `✅ ${finessList.length} codes FINESS créés et ${structureFinessLinks.length} liens StructureFiness`
+  );
 
   // Si on génère des codes Bhasile en seed, on génère aussi des DNA et on crée entre 1 et 3 liens DnaStructure par structure,
   if (GENERATE_BHASILE_CODES) {

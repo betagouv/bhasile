@@ -13,7 +13,7 @@ import { createOrUpdateControles } from "../controles/controle.repository";
 import { createOrUpdateDnaStructures } from "../dna-structures/dna-structure.repository";
 import { createOrUpdateDocumentsFinanciers } from "../documents-financiers/documentFinancier.repository";
 import { createOrUpdateEvaluations } from "../evaluations/evaluation.repository";
-import { createOrUpdateFinesses } from "../finesses/finess.repository";
+import { createOrUpdateStructureFinesses } from "../finesses/finess.repository";
 import {
   createOrUpdateForms,
   initializeStructureDefaultForms,
@@ -29,6 +29,10 @@ import {
   StructureDbList,
   StructureDbMap,
   StructureDbOperateur,
+  structureDetailsInclude,
+  structureListInclude,
+  structureMapSelect,
+  structureOperateurSelect,
 } from "./structure.db.type";
 import { SearchProps } from "./structure.service";
 import {
@@ -115,11 +119,7 @@ export const findBySearch = async ({
           in: structuresIds.map((structure) => structure.id),
         },
       },
-      select: {
-        id: true,
-        latitude: true,
-        longitude: true,
-      },
+      select: structureMapSelect,
     });
   }
 
@@ -129,61 +129,7 @@ export const findBySearch = async ({
         in: structuresIds.map((structure) => structure.id),
       },
     },
-    include: {
-      adresses: {
-        include: {
-          adresseTypologies: {
-            orderBy: {
-              year: "desc",
-            },
-          },
-        },
-      },
-      cpomStructures: {
-        include: {
-          cpom: {
-            include: {
-              actesAdministratifs: {
-                include: {
-                  fileUploads: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      operateur: {
-        include: {
-          parent: true,
-        },
-      },
-      structureMillesimes: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      structureTypologies: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      forms: {
-        include: {
-          formDefinition: true,
-        },
-      },
-      dnaStructures: {
-        orderBy: {
-          dna: {
-            code: "asc",
-          },
-        },
-        include: {
-          dna: true,
-        },
-      },
-      actesAdministratifs: true,
-    },
+    include: structureListInclude,
   });
 
   const orderedStructures = structuresIds
@@ -256,12 +202,7 @@ export const findOneOperateur = async (
 ): Promise<StructureDbOperateur> => {
   return await prisma.structure.findUniqueOrThrow({
     where: { id },
-    select: {
-      id: true,
-      type: true,
-      codeBhasile: true,
-      forms: true,
-    },
+    select: structureOperateurSelect,
   });
 };
 
@@ -270,145 +211,7 @@ export const findOne = async (id: number) => {
     where: {
       id,
     },
-    include: {
-      userNotes: {
-        orderBy: { createdAt: "desc" },
-        select: { text: true },
-      },
-      dnaStructures: {
-        orderBy: {
-          dna: {
-            code: "asc",
-          },
-        },
-        include: {
-          dna: {
-            include: {
-              activites: {
-                orderBy: {
-                  date: "desc",
-                },
-              },
-              evenementsIndesirablesGraves: {
-                orderBy: {
-                  evenementDate: "desc",
-                },
-              },
-            },
-          },
-        },
-      },
-      finesses: true,
-      adresses: {
-        include: {
-          adresseTypologies: {
-            orderBy: {
-              year: "desc",
-            },
-          },
-        },
-      },
-      antennes: true,
-      contacts: true,
-      structureTypologies: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      structureMillesimes: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      cpomStructures: {
-        include: {
-          cpom: {
-            include: {
-              structures: {
-                include: {
-                  structure: {
-                    select: {
-                      id: true,
-                      codeBhasile: true,
-                      type: true,
-                      communeAdministrative: true,
-                      operateur: {
-                        select: {
-                          name: true,
-                        },
-                      },
-                      forms: true,
-                    },
-                  },
-                },
-              },
-              operateur: true,
-              actesAdministratifs: {
-                include: {
-                  fileUploads: true,
-                },
-              },
-              budgets: {
-                orderBy: {
-                  year: "desc",
-                },
-              },
-            },
-          },
-        },
-      },
-      evaluations: {
-        include: {
-          fileUploads: true,
-        },
-        orderBy: {
-          date: "desc",
-        },
-      },
-      controles: {
-        include: {
-          fileUploads: true,
-        },
-        orderBy: {
-          date: "desc",
-        },
-      },
-      actesAdministratifs: {
-        include: {
-          fileUploads: true,
-        },
-      },
-      documentsFinanciers: {
-        include: {
-          fileUploads: true,
-        },
-      },
-      budgets: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      indicateursFinanciers: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      operateur: {
-        include: {
-          parent: true,
-        },
-      },
-      forms: {
-        include: {
-          formDefinition: true,
-          formSteps: {
-            include: {
-              stepDefinition: true,
-            },
-          },
-        },
-      },
-    },
+    include: structureDetailsInclude,
   });
   return structure;
 };
@@ -426,7 +229,7 @@ export const updateOne = async (
       adresses,
       antennes,
       dnaStructures,
-      finesses,
+      structureFinesses,
       actesAdministratifs,
       documentsFinanciers,
       controles,
@@ -448,7 +251,7 @@ export const updateOne = async (
         await createOrUpdateDnaStructures(tx, dnaStructures, {
           structureId: structure.id,
         });
-        await createOrUpdateFinesses(tx, finesses, {
+        await createOrUpdateStructureFinesses(tx, structureFinesses, {
           structureId: structure.id,
         });
         await createOrUpdateContacts(tx, contacts, {

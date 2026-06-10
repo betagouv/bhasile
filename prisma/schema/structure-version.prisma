@@ -36,7 +36,8 @@ model StructureVersion {
   adresses            Adresse[]
   structureTypologies StructureTypologie[]
   antennes            Antenne[]
-  finesses            Finess[]
+  structureFinesses   StructureFiness[]
+  finesses            Finess[] // TODO: remove after backfill structure finess
   dnaStructures       DnaStructure[]
 
   createdAt DateTime @default(now())

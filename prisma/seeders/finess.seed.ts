@@ -1,15 +1,21 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
-import { Finess } from "@/generated/prisma/client";
-
 type StructureForFiness = {
   id: number;
 };
 
+export type FinessSeed = {
+  code: string;
+  description: string;
+  structureId: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export const createFinessList = (
   structures: StructureForFiness[]
-): Omit<Finess, "id">[] => {
-  const list: Omit<Finess, "id">[] = [];
+): FinessSeed[] => {
+  const list: FinessSeed[] = [];
   let counter = 0;
 
   for (const structure of structures) {
@@ -19,7 +25,6 @@ export const createFinessList = (
       list.push({
         code,
         structureId: structure.id,
-        structureVersionId: null,
         description: faker.word.noun(),
         createdAt: faker.date.past(),
         updatedAt: faker.date.past(),
