@@ -385,12 +385,19 @@ export const validateStructureVersionTransformationFormStep = (
     return form;
   }
 
+  const formSteps = form.formSteps.map((formStep) =>
+    formStep.stepDefinition.slug === stepSlugToValidate
+      ? { ...formStep, status: StepStatus.VALIDE }
+      : formStep
+  );
+
+  const allFormStepsValidated = formSteps.every(
+    (formStep) => formStep.status === StepStatus.VALIDE
+  );
+
   return {
     ...form,
-    formSteps: form.formSteps.map((formStep) =>
-      formStep.stepDefinition.slug === stepSlugToValidate
-        ? { ...formStep, status: StepStatus.VALIDE }
-        : formStep
-    ),
+    status: allFormStepsValidated,
+    formSteps,
   };
 };
