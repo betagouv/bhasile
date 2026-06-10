@@ -283,11 +283,16 @@ export async function seed(): Promise<void> {
       finessIdByCode.set(finess.code, finess.id);
     }
   }
-  // La description est une annotation du lien : portée par StructureFiness.
   const structureFinessLinks = finessList.flatMap((finess) => {
     const finessId = finessIdByCode.get(finess.code);
     return finessId
-      ? [{ finessId, structureId: finess.structureId, description: finess.description }]
+      ? [
+          {
+            finessId,
+            structureId: finess.structureId,
+            description: finess.description,
+          },
+        ]
       : [];
   });
   await prisma.structureFiness.createMany({ data: structureFinessLinks });
