@@ -6,7 +6,7 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { SaveCurrentForm } from "@/app/components/forms/SaveCurrentForm";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
-import { getActesAdministratifsDefaultValues } from "@/app/utils/acteAdministratif.util";
+import { getTransformationDefaultValues } from "@/app/utils/transformation.util";
 import { getTransformationActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
@@ -17,6 +17,7 @@ import {
 import {
   ActesAdministratifsAutoSaveFormValues,
   actesAdministratifsAutoSaveSchema,
+  ActesAdministratifsTransformationFormValues,
   actesAdministratifsTransformationSchema,
 } from "@/schemas/forms/base/acteAdministratif.schema";
 
@@ -38,12 +39,11 @@ export const TransformationActesAdministratifsForm = ({
       transformation.type
     );
 
-  const defaultValues = {
-    actesAdministratifs: getActesAdministratifsDefaultValues(
-      structureVersionTransformation.actesAdministratifs,
-      categoryDisplayRules
-    ),
-  };
+  const defaultValues =
+    getTransformationDefaultValues<ActesAdministratifsTransformationFormValues>({
+      transformation,
+      structureVersionTransformation,
+    });
 
   const buildStructureVersionTransformation = (
     data: ActesAdministratifsAutoSaveFormValues

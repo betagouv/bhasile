@@ -9,7 +9,7 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { SaveCurrentForm } from "@/app/components/forms/SaveCurrentForm";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
-import { getTransformationStructureVersionDefaultValues } from "@/app/utils/transformation.util";
+import { getTransformationDefaultValues } from "@/app/utils/transformation.util";
 import {
   StructureVersionTransformationApiRead,
   StructureVersionTransformationApiUpdateClient,
@@ -36,15 +36,11 @@ export const CreationIdentificationForm = ({
 }: Props) => {
   const { handleValidation, handleSave } = useTransformationFormHandling();
 
-  const defaultValues = {
-    ...getTransformationStructureVersionDefaultValues<CreationIdentificationFormValues>(
-      structureVersionTransformation.structureVersion
-    ),
-    // TODO: move those server-side once every PR is merged
-    operateur: structureVersionTransformation.operateur,
-    isMultiAntenne:
-      (structureVersionTransformation.structureVersion?.antennes?.length ?? 0) > 0,
-  };
+  const defaultValues =
+    getTransformationDefaultValues<CreationIdentificationFormValues>({
+      transformation,
+      structureVersionTransformation,
+    });
 
   const buildStructureVersionTransformation = (
     data: CreationIdentificationDraftFormValues

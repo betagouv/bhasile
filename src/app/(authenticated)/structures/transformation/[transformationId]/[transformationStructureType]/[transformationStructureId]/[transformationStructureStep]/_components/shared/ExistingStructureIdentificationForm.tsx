@@ -11,8 +11,8 @@ import { SaveCurrentForm } from "@/app/components/forms/SaveCurrentForm";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import {
   getAdresseSource,
+  getTransformationDefaultValues,
   getTransformationNounAvecArticle,
-  getTransformationStructureVersionDefaultValues,
 } from "@/app/utils/transformation.util";
 import {
   StructureVersionTransformationApiRead,
@@ -40,13 +40,11 @@ export const ExistingStructureIdentificationForm = ({
 }: Props) => {
   const { handleValidation, handleSave } = useTransformationFormHandling();
 
-  const defaultValues = {
-    ...getTransformationStructureVersionDefaultValues<TransformationIdentificationFormValues>(
-      structureVersionTransformation.structureVersion
-    ),
-    isMultiAntenne:
-      (structureVersionTransformation.structureVersion?.antennes?.length ?? 0) > 0,
-  };
+  const defaultValues =
+    getTransformationDefaultValues<TransformationIdentificationFormValues>({
+      transformation,
+      structureVersionTransformation,
+    });
 
   const buildStructureVersionTransformation = (
     data: TransformationIdentificationDraftFormValues
