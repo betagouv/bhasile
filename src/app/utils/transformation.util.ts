@@ -164,6 +164,29 @@ export const getTransformationSteps = (
   );
 };
 
+const getStructureVersionTransformationFormStepStatus = (
+  structureVersionTransformation: StructureVersionTransformationApiUpdate,
+  stepName: StructureVersionTransformationStep
+): StepStatus => {
+  const form = structureVersionTransformation.form;
+  if (!form) {
+    return StepStatus.NON_COMMENCE;
+  }
+  const formStepSpecs =
+    STRUCTURE_VERSION_TRANSFORMATION_FORM_STEPS[form.formDefinition.name] ?? [];
+  const stepSlug = formStepSpecs.find(
+    (formStepSpec) => formStepSpec.name === stepName
+  )?.slug;
+  if (!stepSlug) {
+    return StepStatus.NON_COMMENCE;
+  }
+  return (
+    form.formSteps.find(
+      (formStep) => formStep.stepDefinition.slug === stepSlug
+    )?.status ?? StepStatus.NON_COMMENCE
+  );
+};
+
 const getStepsByType = (
   structureVersionTransformation: StructureVersionTransformationApiUpdate,
   transformationId: number
@@ -172,54 +195,42 @@ const getStepsByType = (
     return [];
   }
 
+  const buildStep = (
+    name: StructureVersionTransformationStep,
+    label: string
+  ) => ({
+    name,
+    label,
+    route: getRoute(
+      name,
+      transformationId,
+      structureVersionTransformation.id,
+      structureVersionTransformation.type
+    ),
+    status: getStructureVersionTransformationFormStepStatus(
+      structureVersionTransformation,
+      name
+    ),
+  });
+
   switch (structureVersionTransformation.type) {
     case StructureVersionTransformationType.EXTENSION:
     case StructureVersionTransformationType.CONTRACTION:
     case StructureVersionTransformationType.CREATION:
       return [
-        {
-          name: StructureVersionTransformationStep.DESCRIPTION,
-          label: "Description",
-          route: getRoute(
-            StructureVersionTransformationStep.DESCRIPTION,
-            transformationId,
-            structureVersionTransformation.id,
-            structureVersionTransformation.type
-          ),
-        },
-        {
-          name: StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
-          label: "Places et hébergement",
-          route: getRoute(
-            StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
-            transformationId,
-            structureVersionTransformation.id,
-            structureVersionTransformation.type
-          ),
-        },
-        {
-          name: StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
-          label: "Actes administratifs",
-          route: getRoute(
-            StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
-            transformationId,
-            structureVersionTransformation.id,
-            structureVersionTransformation.type
-          ),
-        },
+        buildStep(StructureVersionTransformationStep.DESCRIPTION, "Description"),
+        buildStep(
+          StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
+          "Places et hébergement"
+        ),
+        buildStep(
+          StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
+          "Actes administratifs"
+        ),
       ];
     case StructureVersionTransformationType.FERMETURE:
       return [
-        {
-          name: StructureVersionTransformationStep.DESCRIPTION,
-          label: "Description",
-          route: getRoute(
-            StructureVersionTransformationStep.DESCRIPTION,
-            transformationId,
-            structureVersionTransformation.id,
-            structureVersionTransformation.type
-          ),
-        },
+        buildStep(StructureVersionTransformationStep.DESCRIPTION, "Description"),
       ];
   }
 };
@@ -257,7 +268,28 @@ export type Step = {
     name: string;
     label: string;
     route: string;
+    status: StepStatus;
   }[];
+};
+
+export const getTransformationOriginRoute = (
+  transformation: TransformationApiRead
+): string => {
+  const spec = transformation.type
+    ? TRANSFORMATION_TYPE_SPECS[transformation.type]
+    : undefined;
+  const primaryType = spec?.primaryStructureVersionTransformationType;
+  if (!primaryType) {
+    return "/structures";
+  }
+  const primaryStructureVersionTransformation =
+    transformation.structureVersionTransformations.find(
+      (structureVersionTransformation) =>
+        structureVersionTransformation.type === primaryType
+    );
+  const originStructureId =
+    primaryStructureVersionTransformation?.structureVersion?.structureId;
+  return originStructureId ? `/structures/${originStructureId}` : "/structures";
 };
 
 export type AdresseSource = {
