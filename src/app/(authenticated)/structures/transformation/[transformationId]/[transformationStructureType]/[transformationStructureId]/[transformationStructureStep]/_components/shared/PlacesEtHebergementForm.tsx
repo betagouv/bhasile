@@ -5,6 +5,7 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSetHebergement";
 import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTypeBati";
+import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
 import { FieldSetTransformationPlaces } from "@/app/components/forms/typePlace/FieldSetTransformationPlaces";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import {
@@ -13,10 +14,12 @@ import {
 } from "@/app/utils/transformation.util";
 import {
   StructureVersionTransformationApiRead,
+  StructureVersionTransformationApiUpdateClient,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
 import {
-  CreationPlacesEtHebergementFormValues,
+  CreationPlacesEtHebergementDraftFormValues,
+  creationPlacesEtHebergementDraftSchema,
   getPlacesEtHebergementSchema,
 } from "@/schemas/forms/transformation/creationPlacesEtHebergement.schema";
 import { DeepPartial, FormKind } from "@/types/global";
@@ -34,42 +37,62 @@ export const PlacesEtHebergementForm = ({
   formKind,
   originalPlaces,
 }: Props) => {
-  const { handleValidation } = useTransformationFormHandling();
+  const { goToNextStep, handleSave, shouldShowIncompleteSteps } =
+    useTransformationFormHandling();
 
-  const defaultValues: DeepPartial<CreationPlacesEtHebergementFormValues> = {
-    ...getTransformationStructureVersionDefaultValues<CreationPlacesEtHebergementFormValues>(
-      structureVersionTransformation.structureVersion
-    ),
-    structureTypologies: [
-      buildTransformationTypologie(
+  const strictSchema = getPlacesEtHebergementSchema(formKind, originalPlaces);
+
+  const defaultValues: DeepPartial<CreationPlacesEtHebergementDraftFormValues> =
+    {
+      ...getTransformationStructureVersionDefaultValues<CreationPlacesEtHebergementDraftFormValues>(
         structureVersionTransformation.structureVersion
       ),
-    ],
-  };
+      structureTypologies: [
+        buildTransformationTypologie(
+          structureVersionTransformation.structureVersion
+        ),
+      ],
+    };
+
+  const buildStructureVersionTransformation = (
+    data: CreationPlacesEtHebergementDraftFormValues
+  ): StructureVersionTransformationApiUpdateClient => ({
+    id: structureVersionTransformation.id,
+    type: structureVersionTransformation.type,
+    structureVersion: {
+      id: structureVersionTransformation.structureVersion?.id,
+      public: data.public,
+      adresses: data.adresses,
+      structureTypologies: data.structureTypologies,
+    } as StructureVersionTransformationApiUpdateClient["structureVersion"],
+  });
 
   return (
     <FormWrapper
-      schema={getPlacesEtHebergementSchema(formKind, originalPlaces)}
+      schema={
+        shouldShowIncompleteSteps
+          ? strictSchema
+          : creationPlacesEtHebergementDraftSchema
+      }
       defaultValues={defaultValues}
-      onSubmit={(data) => {
-        handleValidation({
-          transformationId: transformation.id,
-          structureVersionTransformation: {
-            id: structureVersionTransformation.id,
-            type: structureVersionTransformation.type,
-            structureVersion: {
-              id: structureVersionTransformation.structureVersion?.id,
-              public: data.public,
-              adresses: data.adresses,
-              structureTypologies: data.structureTypologies,
-            },
-          },
-        });
-      }}
+      onSubmit={goToNextStep}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       showContactInfos={false}
     >
+      <TransformationFormController
+        schema={creationPlacesEtHebergementDraftSchema}
+        onSave={(data, values) =>
+          handleSave({
+            transformationId: transformation.id,
+            structureVersionTransformation:
+              buildStructureVersionTransformation(data),
+            strictSchema,
+            values,
+          })
+        }
+      />
+
       <FieldSetTransformationPlaces
         formKind={formKind}
         originalPlaces={originalPlaces}

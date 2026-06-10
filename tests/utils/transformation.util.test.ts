@@ -13,8 +13,8 @@ import {
   getTransformationSteps,
   isCreation,
   isTransformationSurStructureExistante,
+  setStructureVersionTransformationFormStepStatus,
   Step,
-  validateStructureVersionTransformationFormStep,
 } from "@/app/utils/transformation.util";
 import { FormApiType } from "@/schemas/api/form.schema";
 import {
@@ -690,7 +690,7 @@ describe("transformation util", () => {
     });
   });
 
-  describe("validateStructureVersionTransformationFormStep", () => {
+  describe("setStructureVersionTransformationFormStepStatus", () => {
     const buildCreationForm = (validatedSlugs: string[] = []): FormApiType => ({
       id: 100,
       status: false,
@@ -737,10 +737,11 @@ describe("transformation util", () => {
       ],
     });
 
-    it("flips only the validated route step to VALIDE, mapping it to its form step slug", () => {
-      const form = validateStructureVersionTransformationFormStep(
+    it("flips only the targeted route step to the given status, mapping it to its form step slug", () => {
+      const form = setStructureVersionTransformationFormStepStatus(
         buildCreationForm(),
-        StructureVersionTransformationStep.ACTES_ADMINISTRATIFS
+        StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
+        StepStatus.VALIDE
       );
 
       const statusBySlug = Object.fromEntries(
@@ -757,9 +758,10 @@ describe("transformation util", () => {
     });
 
     it("maps the description route step to the 01-identification form step", () => {
-      const form = validateStructureVersionTransformationFormStep(
+      const form = setStructureVersionTransformationFormStepStatus(
         buildCreationForm(),
-        StructureVersionTransformationStep.DESCRIPTION
+        StructureVersionTransformationStep.DESCRIPTION,
+        StepStatus.VALIDE
       );
 
       const identificationStep = form.formSteps.find(
@@ -768,10 +770,25 @@ describe("transformation util", () => {
       expect(identificationStep?.status).toBe(StepStatus.VALIDE);
     });
 
+    it("downgrades a previously validated step when the given status is COMMENCE", () => {
+      const form = setStructureVersionTransformationFormStepStatus(
+        buildCreationForm(["01-identification"]),
+        StructureVersionTransformationStep.DESCRIPTION,
+        StepStatus.COMMENCE
+      );
+
+      const identificationStep = form.formSteps.find(
+        (formStep) => formStep.stepDefinition.slug === "01-identification"
+      );
+      expect(identificationStep?.status).toBe(StepStatus.COMMENCE);
+      expect(form.status).toBe(false);
+    });
+
     it("preserves the form and step ids read from the database", () => {
-      const form = validateStructureVersionTransformationFormStep(
+      const form = setStructureVersionTransformationFormStepStatus(
         buildCreationForm(),
-        StructureVersionTransformationStep.DESCRIPTION
+        StructureVersionTransformationStep.DESCRIPTION,
+        StepStatus.VALIDE
       );
 
       expect(form.id).toBe(100);
@@ -786,9 +803,10 @@ describe("transformation util", () => {
       // a fermeture form only exposes the description step
       form.formDefinition.name = "structure-transformation-fermeture";
 
-      const result = validateStructureVersionTransformationFormStep(
+      const result = setStructureVersionTransformationFormStepStatus(
         form,
-        StructureVersionTransformationStep.ACTES_ADMINISTRATIFS
+        StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
+        StepStatus.VALIDE
       );
 
       expect(
@@ -802,9 +820,10 @@ describe("transformation util", () => {
       const form = buildCreationForm();
       form.formDefinition.name = "unknown-form";
 
-      const result = validateStructureVersionTransformationFormStep(
+      const result = setStructureVersionTransformationFormStepStatus(
         form,
-        StructureVersionTransformationStep.DESCRIPTION
+        StructureVersionTransformationStep.DESCRIPTION,
+        StepStatus.VALIDE
       );
 
       expect(
@@ -815,9 +834,10 @@ describe("transformation util", () => {
     });
 
     it("sets the form status to true once the last remaining step is validated", () => {
-      const form = validateStructureVersionTransformationFormStep(
+      const form = setStructureVersionTransformationFormStepStatus(
         buildCreationForm(["01-identification", "02-places-hebergement"]),
-        StructureVersionTransformationStep.ACTES_ADMINISTRATIFS
+        StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
+        StepStatus.VALIDE
       );
 
       expect(
@@ -829,9 +849,10 @@ describe("transformation util", () => {
     });
 
     it("keeps the form status false while at least one step is not validated", () => {
-      const form = validateStructureVersionTransformationFormStep(
+      const form = setStructureVersionTransformationFormStepStatus(
         buildCreationForm(["01-identification"]),
-        StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT
+        StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
+        StepStatus.VALIDE
       );
 
       expect(form.status).toBe(false);

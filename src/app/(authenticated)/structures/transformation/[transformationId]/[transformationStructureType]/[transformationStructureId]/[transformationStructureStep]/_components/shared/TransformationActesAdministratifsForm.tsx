@@ -4,7 +4,7 @@ import { ActesAdministratifs } from "@/app/components/forms/actesAdministratifs/
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { SaveCurrentForm } from "@/app/components/forms/SaveCurrentForm";
+import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getActesAdministratifsDefaultValues } from "@/app/utils/acteAdministratif.util";
 import { getTransformationActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
@@ -29,7 +29,7 @@ export const TransformationActesAdministratifsForm = ({
   structureVersionTransformation,
   transformation,
 }: Props) => {
-  const { handleValidation, handleSave, prevStep } =
+  const { goToNextStep, handleSave, prevStep, shouldShowIncompleteSteps } =
     useTransformationFormHandling();
 
   const categoryDisplayRules =
@@ -56,25 +56,27 @@ export const TransformationActesAdministratifsForm = ({
 
   return (
     <FormWrapper
-      schema={actesAdministratifsTransformationSchema}
+      schema={
+        shouldShowIncompleteSteps
+          ? actesAdministratifsTransformationSchema
+          : actesAdministratifsAutoSaveSchema
+      }
       defaultValues={defaultValues}
-      onSubmit={(data) => {
-        handleValidation({
-          transformationId: transformation.id,
-          structureVersionTransformation: buildStructureVersionTransformation(data),
-        });
-      }}
+      onSubmit={goToNextStep}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       previousStep={prevStep?.route}
       showContactInfos={false}
     >
-      <SaveCurrentForm
+      <TransformationFormController
         schema={actesAdministratifsAutoSaveSchema}
-        onSave={(data) =>
+        onSave={(data, values) =>
           handleSave({
             transformationId: transformation.id,
-            structureVersionTransformation: buildStructureVersionTransformation(data),
+            structureVersionTransformation:
+              buildStructureVersionTransformation(data),
+            strictSchema: actesAdministratifsTransformationSchema,
+            values,
           })
         }
       />

@@ -7,7 +7,7 @@ import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { SaveCurrentForm } from "@/app/components/forms/SaveCurrentForm";
+import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getTransformationStructureVersionDefaultValues } from "@/app/utils/transformation.util";
 import {
@@ -18,7 +18,6 @@ import {
 import {
   CreationIdentificationDraftFormValues,
   creationIdentificationDraftSchema,
-  CreationIdentificationFormValues,
   creationIdentificationSchema,
 } from "@/schemas/forms/transformation/creationIdentification.schema";
 import { FormKind } from "@/types/global";
@@ -34,16 +33,18 @@ export const CreationIdentificationForm = ({
   structureVersionTransformation,
   formKind,
 }: Props) => {
-  const { handleValidation, handleSave } = useTransformationFormHandling();
+  const { goToNextStep, handleSave, shouldShowIncompleteSteps } =
+    useTransformationFormHandling();
 
   const defaultValues = {
-    ...getTransformationStructureVersionDefaultValues<CreationIdentificationFormValues>(
+    ...getTransformationStructureVersionDefaultValues<CreationIdentificationDraftFormValues>(
       structureVersionTransformation.structureVersion
     ),
     // TODO: move those server-side once every PR is merged
     operateur: structureVersionTransformation.operateur,
     isMultiAntenne:
-      (structureVersionTransformation.structureVersion?.antennes?.length ?? 0) > 0,
+      (structureVersionTransformation.structureVersion?.antennes?.length ?? 0) >
+      0,
   };
 
   const buildStructureVersionTransformation = (
@@ -67,24 +68,26 @@ export const CreationIdentificationForm = ({
 
   return (
     <FormWrapper
-      schema={creationIdentificationSchema}
+      schema={
+        shouldShowIncompleteSteps
+          ? creationIdentificationSchema
+          : creationIdentificationDraftSchema
+      }
       defaultValues={defaultValues}
-      onSubmit={(data) => {
-        handleValidation({
-          transformationId: transformation.id,
-          structureVersionTransformation: buildStructureVersionTransformation(data),
-        });
-      }}
+      onSubmit={goToNextStep}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       showContactInfos={false}
     >
-      <SaveCurrentForm
+      <TransformationFormController
         schema={creationIdentificationDraftSchema}
-        onSave={(data) =>
+        onSave={(data, values) =>
           handleSave({
             transformationId: transformation.id,
-            structureVersionTransformation: buildStructureVersionTransformation(data),
+            structureVersionTransformation:
+              buildStructureVersionTransformation(data),
+            strictSchema: creationIdentificationSchema,
+            values,
           })
         }
       />
@@ -100,7 +103,8 @@ export const CreationIdentificationForm = ({
       <DnaAndFiness
         formKind={formKind}
         entityId={{
-          structureVersionId: structureVersionTransformation.structureVersion?.id,
+          structureVersionId:
+            structureVersionTransformation.structureVersion?.id,
         }}
       />
 
