@@ -111,7 +111,7 @@ export type TauxEquipementDept = {
   tauxPour1000: number | null;
 };
 
-export const statistiquesApiSchema = z.object({
+export const statistiqueApiReadSchema = z.object({
   totalStructures: z.number(),
   totalCpoms: z.number(),
   totalPlaces: z.number(),
@@ -232,4 +232,4 @@ export const statistiquesApiSchema = z.object({
   }),
 });
 
-export type StatistiquesApiType = z.infer<typeof statistiquesApiSchema>;
+export type StatistiqueApiRead = z.infer<typeof statistiqueApiReadSchema>;

@@ -46,7 +46,7 @@ import {
   FinanceStat,
   FinanceStatByYear,
   PlacesSpecialesStat,
-  StatistiquesApiType,
+  StatistiqueApiRead,
   StatistiquesFiltersRaw,
   TauxEquipementDept,
   TypeStructureStat,
@@ -371,7 +371,7 @@ const buildStructureWhere = async (
 
 export const getStatistiques = async (
   filters: StatistiquesFiltersRaw
-): Promise<StatistiquesApiType> => {
+): Promise<StatistiqueApiRead> => {
   const where = await buildStructureWhere(filters);
   const structureIds = await findStructureIds(where);
 
@@ -513,7 +513,7 @@ export const getStatistiques = async (
   };
 };
 
-const emptyResult = (): StatistiquesApiType => ({
+const emptyResult = (): StatistiqueApiRead => ({
   totalStructures: 0,
   totalCpoms: 0,
   totalPlaces: 0,
