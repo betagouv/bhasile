@@ -14,7 +14,7 @@ import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { StructureColumn } from "@/types/ListColumn";
 
-import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
+import { StructureVersionDbTransformation } from "../structure-versions/structure-version.db.type";
 import { StructureDbDetails, StructureDbList } from "./structure.db.type";
 
 const typesPublic: Record<string, PublicType> = {
@@ -206,7 +206,7 @@ export const buildStructuresWhereSql = ({
 };
 
 export const getTypeBati = (
-  structure: StructureDbDetails | StructureDbList | StructureVersionDbDetails
+  structure: StructureDbDetails | StructureDbList | StructureVersionDbTransformation
 ): Repartition | undefined => {
   const repartitions = structure.adresses?.map(
     (adresse) => adresse.repartition

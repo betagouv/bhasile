@@ -21,6 +21,8 @@ import {
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
+import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
+import { resolveCurrentVersion } from "../structure-versions/structure-version.service";
 import {
   StructureDbDetails,
   StructureDbList,
@@ -31,8 +33,10 @@ import {
   findBySearch,
   findOne,
   findOneOperateur,
+  findStructureDepartement,
   getLatestPlacesAutoriseesPerStructure,
   updateOne,
+  VERSIONED_FIELD_KEYS,
 } from "./structure.repository";
 import {
   getAdresseAdministrativeCoordinates,
@@ -141,17 +145,33 @@ export const getFullStructures = async (
   return { structures, totalStructures };
 };
 
+export const getResolvedStructure = async (
+  id: number
+): Promise<StructureDbDetails | null> => {
+  const dbStructure = await findOne(id);
+  if (!dbStructure) {
+    return null;
+  }
+  const currentVersion = resolveCurrentVersion(
+    dbStructure.structureVersions,
+    new Date()
+  );
+  return currentVersion
+    ? mergeStructureWithVersion(dbStructure, currentVersion)
+    : dbStructure;
+};
+
 export const getFullStructure = async (
   id: number,
   user?: SessionUser
 ): Promise<StructureApiRead | null> => {
-  const dbStructure = await findOne(id);
+  const resolvedDbStructure = await getResolvedStructure(id);
 
-  if (!dbStructure) {
+  if (!resolvedDbStructure) {
     return null;
   }
 
-  const structure = dbStructureToApiRead(dbStructure);
+  const structure = dbStructureToApiRead(resolvedDbStructure);
   structure.adresses = getReadableAdresses(structure, user);
 
   return structure;
@@ -185,8 +205,21 @@ export const getStructureForOperateur = async (
   return dbStructure;
 };
 
-export const getStructure = async (id: number) => {
-  return findOne(id);
+export const getStructureDepartement = async (
+  id: number
+): Promise<string | null> => {
+  const { departementAdministratif } = await findStructureDepartement(id);
+  return departementAdministratif;
+};
+
+const mergeStructureWithVersion = (
+  dbStructure: StructureDbDetails,
+  version: StructureVersionDbDetails
+): StructureDbDetails => {
+  const versionedOverlay = Object.fromEntries(
+    VERSIONED_FIELD_KEYS.map((key) => [key, version[key]])
+  ) as Partial<StructureDbDetails>;
+  return { ...dbStructure, ...versionedOverlay };
 };
 
 const dbStructureToApiRead = (
@@ -268,6 +301,7 @@ const dbStructureToApiRead = (
     dnaStructures,
     structureFinesses,
     adresses,
+    structureVersions: undefined,
   }) as StructureApiRead;
 };
 

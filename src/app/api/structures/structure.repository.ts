@@ -2,25 +2,22 @@ import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { Prisma, Structure, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
+import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
-import { createOrUpdateAdresses } from "../adresses/adresse.repository";
-import { createOrUpdateAntennes } from "../antennes/antenne.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
-import { createOrUpdateContacts } from "../contacts/contact.repository";
 import { createOrUpdateControles } from "../controles/controle.repository";
-import { createOrUpdateDnaStructures } from "../dna-structures/dna-structure.repository";
 import { createOrUpdateDocumentsFinanciers } from "../documents-financiers/documentFinancier.repository";
 import { createOrUpdateEvaluations } from "../evaluations/evaluation.repository";
-import { createOrUpdateStructureFinesses } from "../finesses/finess.repository";
 import {
   createOrUpdateForms,
   initializeStructureDefaultForms,
 } from "../forms/form.repository";
 import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
-import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
+import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
+import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 import {
   STRUCTURES_ORDER_CTE_SQL,
   STRUCTURES_ORDER_JOINS_SQL,
@@ -38,7 +35,6 @@ import { SearchProps } from "./structure.service";
 import {
   buildStructuresOrderSql,
   buildStructuresWhereSql,
-  convertToPublicType,
 } from "./structure.util";
 
 const getOrderedStructures = async ({
@@ -206,6 +202,15 @@ export const findOneOperateur = async (
   });
 };
 
+export const findStructureDepartement = async (
+  id: number
+): Promise<{ departementAdministratif: string | null }> => {
+  return await prisma.structure.findUniqueOrThrow({
+    where: { id },
+    select: { departementAdministratif: true },
+  });
+};
+
 export const findOne = async (id: number) => {
   const structure = await prisma.structure.findFirstOrThrow({
     where: {
@@ -216,20 +221,76 @@ export const findOne = async (id: number) => {
   return structure;
 };
 
+export const VERSIONED_FIELD_KEYS = [
+  "type",
+  "public",
+  "adresseAdministrative",
+  "codePostalAdministratif",
+  "communeAdministrative",
+  "departementAdministratif",
+  "latitude",
+  "longitude",
+  "nom",
+  "creationDate",
+  "date303",
+  "lgbt",
+  "fvvTeh",
+  "notes",
+  "nomOfii",
+  "directionTerritoriale",
+  "contacts",
+  "adresses",
+  "antennes",
+  "structureFinesses",
+  "dnaStructures",
+  "structureTypologies",
+] as const satisfies readonly (keyof StructureAgentUpdateApiType &
+  keyof StructureVersionDbDetails)[];
+
+const hasVersionedFields = (structure: StructureAgentUpdateApiType): boolean =>
+  VERSIONED_FIELD_KEYS.some((key) => structure[key] !== undefined);
+
+const writeRollingVersion = async (
+  tx: PrismaTransaction,
+  structure: StructureAgentUpdateApiType
+): Promise<void> => {
+  if (!hasVersionedFields(structure)) {
+    return;
+  }
+
+  const rollingVersion = await tx.structureVersion.findFirst({
+    where: {
+      structureId: structure.id,
+      structureVersionTransformationId: null,
+      forceHistorize: false,
+    },
+    select: { id: true },
+  });
+
+  const versionedData = Object.fromEntries(
+    VERSIONED_FIELD_KEYS.map((key) => [key, structure[key]])
+  ) as Pick<StructureAgentUpdateApiType, (typeof VERSIONED_FIELD_KEYS)[number]>;
+
+  const versionPayload: StructureVersionApiType = {
+    id: rollingVersion?.id,
+    structureId: structure.id,
+    effectiveDate: new Date().toISOString(),
+    ...versionedData,
+  };
+
+  await createOrUpdateStructureVersion(tx, versionPayload, {
+    structureId: structure.id,
+  });
+};
+
 export const updateOne = async (
   structure: StructureAgentUpdateApiType,
   isOperateurUpdate: boolean = false
 ): Promise<Structure> => {
   try {
     const {
-      contacts,
       budgets,
       indicateursFinanciers,
-      structureTypologies,
-      adresses,
-      antennes,
-      dnaStructures,
-      structureFinesses,
       actesAdministratifs,
       documentsFinanciers,
       controles,
@@ -248,26 +309,9 @@ export const updateOne = async (
           structure.id
         );
 
-        await createOrUpdateDnaStructures(tx, dnaStructures, {
-          structureId: structure.id,
-        });
-        await createOrUpdateStructureFinesses(tx, structureFinesses, {
-          structureId: structure.id,
-        });
-        await createOrUpdateContacts(tx, contacts, {
-          structureId: structure.id,
-        });
+        await writeRollingVersion(tx, structure);
         await createOrUpdateBudgets(tx, budgets, { structureId: structure.id });
         await createOrUpdateIndicateursFinanciers(tx, indicateursFinanciers, {
-          structureId: structure.id,
-        });
-        await createOrUpdateStructureTypologies(tx, structureTypologies, {
-          structureId: structure.id,
-        });
-        await createOrUpdateAdresses(tx, adresses, {
-          structureId: structure.id,
-        });
-        await createOrUpdateAntennes(tx, antennes, {
           structureId: structure.id,
         });
         await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
@@ -301,55 +345,14 @@ const updateStructure = async (
   tx: PrismaTransaction,
   structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
-  const {
-    public: publicType,
-    departementAdministratif,
-    operateur,
-    adresseAdministrative,
-    codePostalAdministratif,
-    communeAdministrative,
-    filiale,
-    type,
-    latitude,
-    longitude,
-    nom,
-    date303,
-    creationDate,
-    lgbt,
-    fvvTeh,
-    notes,
-    nomOfii,
-    directionTerritoriale,
-  } = structure;
+  const { operateur, filiale } = structure;
 
   const updatedStructure = await tx.structure.update({
     where: {
       id: structure.id,
     },
     data: {
-      public: convertToPublicType(publicType),
-      adresseAdministrative,
-      codePostalAdministratif,
-      communeAdministrative,
       filiale,
-      type,
-      latitude,
-      longitude,
-      nom,
-      date303,
-      creationDate,
-      lgbt,
-      fvvTeh,
-      notes,
-      nomOfii,
-      directionTerritoriale,
-      departement: departementAdministratif
-        ? {
-            connect: {
-              numero: departementAdministratif,
-            },
-          }
-        : undefined,
       operateur: {
         connect: operateur
           ? {
