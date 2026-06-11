@@ -44,11 +44,30 @@ resultatNetProposeParOperateur = totalProduitsProposes - totalChargesProposees
 
 ## Écarts sémantiques notables
 
-Je propose de renommer ces champs en DB afin de mieux coller
+### Renommages simples
 
-| Champ DB                         | Label UI                                      | Proposition                       |
-| -------------------------------- | --------------------------------------------- | --------------------------------- |
-| `excedentDeduit`                 | "Excédent réemployé"                          | `excedentReemploye`               |
-| `repriseEtat`                    | "Déficit compensé par l'État" (subventionnée) | `deficitCompenseEtat`             |
-| `reserveCompensationBFR`         | "Réserve de couverture de BFR"                | `reserveCouvertureBfr`            |
-| `affectationReservesFondsDedies` | "Affectation réserves & provision"            | `affectationReservesEtProvisions` |
+| Champ DB                 | Label UI                       | Proposition            |
+| ------------------------ | ------------------------------ | ---------------------- |
+| `excedentDeduit`         | "Excédent réemployé"           | `excedentReemploye`    |
+| `reserveCompensationBFR` | "Réserve de couverture de BFR" | `reserveCouvertureBfr` |
+
+### `repriseEtat` - à splitter en deux champs
+
+`repriseEtat` stocke deux réalités métier distinctes selon le type de structure :
+
+- **Tarifée** : bucket d'affectation qui entre dans l'équation `repriseEtat + sum_affectations = résultatNet`. C'est une reprise par l'État dans le cadre de la tarification.
+- **Subventionnée** : ligne descriptive "Déficit compensé par l'État", sans rôle dans l'équilibre budgétaire.
+
+Il faudrait pour être logique deux champs séparés, par exemple
+
+- `repriseEtatAffectation` (tarifée)
+- `deficitCompenseEtat` (subventionnée).
+
+### `fondsDedies` vs `affectationReservesFondsDedies`
+
+Ces deux champs coexistent dans le modèle `Budget` mais s'appliquent à des types opposés :
+
+- `fondsDedies` -> subventionnée uniquement ("Restant fonds dédiés") -> à renommer en `restantFondsDedies`
+- `affectationReservesFondsDedies` -> tarifée uniquement ("Affectation réserves & provision") -> à renommer en `affectationReservesEtProvisions`
+
+Le chevauchement de noms est trompeur dans le schéma Prisma : on ne peut pas deviner lequel s'applique à quel type sans consulter l'UI.
