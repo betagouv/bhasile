@@ -1,22 +1,29 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   createStructureVersionTransformation,
   createTransformation,
+  createTransformationForm,
 } from "tests/test-utils/factories/transformation.factory";
+import {
+  getSavedFormStepStatus,
+  getSavedStructureVersionTransformation,
+  mockTransformationFetch,
+  renderTransformationForm,
+} from "tests/test-utils/transformationForm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { TransformationClientProvider } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { FermetureDescriptionForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/fermeture/FermetureDescriptionForm";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import { StepStatus } from "@/types/form.type";
 import {
   StructureVersionTransformationStep,
   StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
-const mockUpdateTransformation = vi.fn();
+const TRANSFORMATION_ID = 12;
 const mockRouterPush = vi.fn();
 
 vi.mock("next/navigation", () => ({
@@ -30,18 +37,14 @@ vi.mock("next/navigation", () => ({
   notFound: vi.fn(),
 }));
 
-vi.mock("@/app/hooks/useTransformations", () => ({
-  useTransformations: () => ({
-    updateTransformation: mockUpdateTransformation,
-  }),
-}));
+let fetchMock: ReturnType<typeof mockTransformationFetch>;
 
 const fermetureTransformation = (
   structureVersion: TransformationApiRead["structureVersionTransformations"][number]["structureVersion"],
   actesAdministratifs: ActeAdministratifApiType[] = []
 ) =>
   createTransformation({
-    id: 12,
+    id: TRANSFORMATION_ID,
     type: TransformationType.FERMETURE_SANS_TRANSFERT,
     structureVersionTransformations: [
       createStructureVersionTransformation({
@@ -49,6 +52,9 @@ const fermetureTransformation = (
         type: StructureVersionTransformationType.FERMETURE,
         structureVersion,
         actesAdministratifs,
+        form: createTransformationForm("structure-transformation-fermeture", [
+          { slug: "01-identification", label: "Description" },
+        ]),
       }),
     ],
   });
@@ -56,13 +62,12 @@ const fermetureTransformation = (
 const renderForm = (transformation: TransformationApiRead) => {
   const [structureVersionTransformation] =
     transformation.structureVersionTransformations;
-  return render(
-    <TransformationClientProvider transformation={transformation}>
-      <FermetureDescriptionForm
-        transformation={transformation}
-        structureVersionTransformation={structureVersionTransformation}
-      />
-    </TransformationClientProvider>
+  return renderTransformationForm(
+    transformation,
+    <FermetureDescriptionForm
+      transformation={transformation}
+      structureVersionTransformation={structureVersionTransformation}
+    />
   );
 };
 
@@ -73,20 +78,17 @@ const fillClosureDate = (container: HTMLElement, htmlDate: string) => {
   fireEvent.change(dateInput, { target: { value: htmlDate } });
 };
 
-const getSavedStructureVersionTransformation = () => {
-  const [, payload] = mockUpdateTransformation.mock.calls[0];
-  return payload.structureVersionTransformations[0];
-};
+const savedStructureVersionTransformation = () =>
+  getSavedStructureVersionTransformation(fetchMock, TRANSFORMATION_ID);
 
-describe("FermetureDescriptionForm (integration via FormWrapper)", () => {
+describe("FermetureDescriptionForm (integration up to fetch)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUpdateTransformation.mockResolvedValue(12);
     localStorage.clear();
+    fetchMock = mockTransformationFetch(TRANSFORMATION_ID);
   });
 
-  it("saves the closure date as structureVersion.effectiveDate and drops the empty document row", async () => {
-    // GIVEN a fermeture with an existing structureVersion and no document filled
+  it("saves the closure date as structureVersion.effectiveDate, drops the empty document row and derives VALIDE", async () => {
     const { container } = renderForm(
       fermetureTransformation({
         id: 12,
@@ -95,45 +97,73 @@ describe("FermetureDescriptionForm (integration via FormWrapper)", () => {
       })
     );
 
-    // WHEN the agent picks a closure date and submits
     fillClosureDate(container, "2024-09-30");
     await userEvent.click(
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    // THEN the date is forwarded as effectiveDate and the empty AUTRE row is filtered out
-    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
-    const structureVersionTransformation = getSavedStructureVersionTransformation();
-    expect(structureVersionTransformation.id).toBe(7);
-    expect(structureVersionTransformation.type).toBe(
-      StructureVersionTransformationType.FERMETURE
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
     );
+    const structureVersionTransformation = savedStructureVersionTransformation();
     expect(structureVersionTransformation.structureVersion).toEqual({
       id: 12,
       structureId: 104,
       effectiveDate: "2024-09-30T12:00:00.000Z",
     });
     expect(structureVersionTransformation.actesAdministratifs).toEqual([]);
+    expect(
+      getSavedFormStepStatus(fetchMock, TRANSFORMATION_ID, "01-identification")
+    ).toBe(StepStatus.VALIDE);
+    expect(structureVersionTransformation.form.status).toBe(true);
   });
 
-  it("still navigates to the next step when the closure date is missing", async () => {
-    // GIVEN a fermeture without a closure date
+  it("still navigates to the next step when the closure date is missing, step stays COMMENCE", async () => {
     renderForm(fermetureTransformation({ id: 12, structureId: 104 }));
 
-    // WHEN submitting without filling the date
     await userEvent.click(
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    // THEN the incomplete step is saved and the user moves on (no blocking)
-    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+    expect(
+      getSavedFormStepStatus(fetchMock, TRANSFORMATION_ID, "01-identification")
+    ).toBe(StepStatus.COMMENCE);
+    expect(savedStructureVersionTransformation().form.status).toBe(false);
     expect(mockRouterPush).toHaveBeenCalledWith(
       "/structures/transformation/12/verification"
     );
   });
 
+  it("does not navigate when the save request fails", async () => {
+    fetchMock = mockTransformationFetch(TRANSFORMATION_ID, { failSave: true });
+    const { container } = renderForm(
+      fermetureTransformation({ id: 12, structureId: 104 })
+    );
+
+    fillClosureDate(container, "2024-09-30");
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
+    );
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+    expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
   it("forwards an existing document of the AUTRE category", async () => {
-    // GIVEN a fermeture with a document already uploaded
     const { container } = renderForm(
       fermetureTransformation({ id: 12, structureId: 104 }, [
         {
@@ -145,16 +175,18 @@ describe("FermetureDescriptionForm (integration via FormWrapper)", () => {
       ])
     );
 
-    // WHEN the agent picks a closure date and submits
     fillClosureDate(container, "2024-09-30");
     await userEvent.click(
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    // THEN the document is forwarded alongside the closure date
-    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
-    const actes =
-      getSavedStructureVersionTransformation().actesAdministratifs;
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+    const actes = savedStructureVersionTransformation().actesAdministratifs;
     expect(actes).toHaveLength(1);
     expect(actes[0].category).toBe("AUTRE");
     expect(actes[0].fileUploads).toMatchObject([{ key: "k-autre" }]);

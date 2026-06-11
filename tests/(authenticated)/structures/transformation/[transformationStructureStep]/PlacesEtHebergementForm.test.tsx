@@ -1,13 +1,23 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import {
+  createStandardTransformationForm,
+  createStructureVersionTransformation,
+  createTransformation,
+} from "tests/test-utils/factories/transformation.factory";
+import {
+  getSavedFormStepStatus,
+  getSavedStructureVersionTransformation,
+  mockTransformationFetch,
+  renderTransformationForm,
+} from "tests/test-utils/transformationForm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { TransformationClientProvider } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { PlacesEtHebergementForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/PlacesEtHebergementForm";
-import { FetchStateProvider } from "@/app/context/FetchStateContext";
 import { CURRENT_YEAR } from "@/constants";
 import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import { Repartition } from "@/types/adresse.type";
+import { StepStatus } from "@/types/form.type";
 import { FormKind } from "@/types/global";
 import { PublicType } from "@/types/structure.type";
 import {
@@ -15,11 +25,6 @@ import {
   StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
-
-import {
-  createStructureVersionTransformation,
-  createTransformation,
-} from "../../../../test-utils/factories/transformation.factory";
 
 const TRANSFORMATION_ID = 12;
 const STRUCTURE_VERSION_TRANSFORMATION_ID = 7;
@@ -41,7 +46,7 @@ vi.mock("@/app/components/forms/hebergement/FieldSetHebergement", () => ({
   FieldSetHebergement: () => null,
 }));
 
-const mockFetch = vi.fn();
+let fetchMock: ReturnType<typeof mockTransformationFetch>;
 
 const buildStructureVersion = () =>
   ({
@@ -79,11 +84,19 @@ const buildStructureVersion = () =>
     StructureVersionTransformationApiRead["structureVersion"]
   >;
 
-const renderForm = (structureType: StructureVersionTransformationType) => {
+const renderForm = (
+  structureType: StructureVersionTransformationType,
+  options?: { showIncompleteSteps?: boolean }
+) => {
+  const formName =
+    structureType === StructureVersionTransformationType.EXTENSION
+      ? "structure-transformation-extension"
+      : "structure-transformation-contraction";
   const structureVersionTransformation = createStructureVersionTransformation({
     id: STRUCTURE_VERSION_TRANSFORMATION_ID,
     type: structureType,
     structureVersion: buildStructureVersion(),
+    form: createStandardTransformationForm(formName),
   });
   const transformation = createTransformation({
     id: TRANSFORMATION_ID,
@@ -107,17 +120,15 @@ const renderForm = (structureType: StructureVersionTransformationType) => {
       ? FormKind.EXTENSION
       : FormKind.CONTRACTION;
 
-  render(
-    <FetchStateProvider>
-      <TransformationClientProvider transformation={transformation}>
-        <PlacesEtHebergementForm
-          transformation={transformation}
-          structureVersionTransformation={structureVersionTransformation}
-          formKind={formKind}
-          originalPlaces={ORIGINAL_PLACES}
-        />
-      </TransformationClientProvider>
-    </FetchStateProvider>
+  return renderTransformationForm(
+    transformation,
+    <PlacesEtHebergementForm
+      transformation={transformation}
+      structureVersionTransformation={structureVersionTransformation}
+      formKind={formKind}
+      originalPlaces={ORIGINAL_PLACES}
+    />,
+    options
   );
 };
 
@@ -132,119 +143,98 @@ const setPlaces = async (value: number) => {
 const submit = () =>
   userEvent.click(screen.getByRole("button", { name: "Étape suivante" }));
 
-const getPutPayloadPlaces = () => {
-  const putCall = mockFetch.mock.calls.find(
-    ([url, init]) =>
-      url === `/api/transformations/${TRANSFORMATION_ID}` &&
-      init?.method === "PUT"
+const getSavedPlaces = () =>
+  getSavedStructureVersionTransformation(fetchMock, TRANSFORMATION_ID)
+    .structureVersion.structureTypologies[0].placesAutorisees;
+
+const getSavedPlacesStepStatus = () =>
+  getSavedFormStepStatus(fetchMock, TRANSFORMATION_ID, "02-places-hebergement");
+
+const expectPutSent = () =>
+  waitFor(() =>
+    expect(fetchMock).toHaveBeenCalledWith(
+      `/api/transformations/${TRANSFORMATION_ID}`,
+      expect.objectContaining({ method: "PUT" })
+    )
   );
-  const body = JSON.parse(putCall?.[1]?.body as string);
-  return body.structureVersionTransformations[0].structureVersion
-    .structureTypologies[0].placesAutorisees;
-};
 
 describe("PlacesEtHebergementForm — contrainte de variation des places", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    global.fetch = mockFetch;
-    mockFetch.mockImplementation((input, init) => {
-      const url = String(input);
-      if (
-        url === `/api/transformations/${TRANSFORMATION_ID}` &&
-        init?.method === "PUT"
-      ) {
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          json: () => Promise.resolve({ transformationId: TRANSFORMATION_ID }),
-        } as Response);
-      }
-      if (url === `/api/transformations/${TRANSFORMATION_ID}`) {
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          json: () =>
-            Promise.resolve({
-              id: TRANSFORMATION_ID,
-              structureVersionTransformations: [],
-            }),
-        } as Response);
-      }
-      return Promise.reject(new Error(`Unexpected fetch call: ${url}`));
-    });
+    localStorage.clear();
+    fetchMock = mockTransformationFetch(TRANSFORMATION_ID);
   });
 
-  it("enregistre une extension sans ajout de place sans bloquer la navigation", async () => {
+  it("enregistre une extension sans ajout de place sans bloquer, étape COMMENCE", async () => {
     renderForm(StructureVersionTransformationType.EXTENSION);
 
     await setPlaces(ORIGINAL_PLACES);
     await submit();
 
-    // Le submit n'est plus bloqué : la sauvegarde part malgré la contrainte non respectée
-    await waitFor(() =>
-      expect(mockFetch).toHaveBeenCalledWith(
-        `/api/transformations/${TRANSFORMATION_ID}`,
-        expect.objectContaining({ method: "PUT" })
-      )
-    );
-    expect(getPutPayloadPlaces()).toBe(ORIGINAL_PLACES);
-    // Schema permissif : aucune erreur de contrainte affichée inline
+    await expectPutSent();
+    expect(getSavedPlaces()).toBe(ORIGINAL_PLACES);
     expect(
       screen.queryByText(
         `Le nombre de places autorisées doit être supérieur au nombre de places précédent (${ORIGINAL_PLACES}).`
       )
     ).not.toBeInTheDocument();
+    expect(getSavedPlacesStepStatus()).toBe(StepStatus.COMMENCE);
   });
 
-  it("laisse passer une extension qui ajoute des places", async () => {
+  it("laisse passer une extension qui ajoute des places, étape VALIDE", async () => {
     renderForm(StructureVersionTransformationType.EXTENSION);
 
     await setPlaces(ORIGINAL_PLACES + 3);
     await submit();
 
-    await waitFor(() =>
-      expect(mockFetch).toHaveBeenCalledWith(
-        `/api/transformations/${TRANSFORMATION_ID}`,
-        expect.objectContaining({ method: "PUT" })
-      )
-    );
-    expect(getPutPayloadPlaces()).toBe(ORIGINAL_PLACES + 3);
+    await expectPutSent();
+    expect(getSavedPlaces()).toBe(ORIGINAL_PLACES + 3);
+    expect(getSavedPlacesStepStatus()).toBe(StepStatus.VALIDE);
   });
 
-  it("enregistre une contraction sans retrait de place sans bloquer la navigation", async () => {
+  it("enregistre une contraction sans retrait de place sans bloquer, étape COMMENCE", async () => {
     renderForm(StructureVersionTransformationType.CONTRACTION);
 
     await setPlaces(ORIGINAL_PLACES);
     await submit();
 
-    // Le submit n'est plus bloqué : la sauvegarde part malgré la contrainte non respectée
-    await waitFor(() =>
-      expect(mockFetch).toHaveBeenCalledWith(
-        `/api/transformations/${TRANSFORMATION_ID}`,
-        expect.objectContaining({ method: "PUT" })
-      )
-    );
-    expect(getPutPayloadPlaces()).toBe(ORIGINAL_PLACES);
-    // Schema permissif : aucune erreur de contrainte affichée inline
+    await expectPutSent();
+    expect(getSavedPlaces()).toBe(ORIGINAL_PLACES);
     expect(
       screen.queryByText(
         `Le nombre de places autorisées doit être inférieur au nombre de places précédent (${ORIGINAL_PLACES}).`
       )
     ).not.toBeInTheDocument();
+    expect(getSavedPlacesStepStatus()).toBe(StepStatus.COMMENCE);
   });
 
-  it("laisse passer une contraction qui retire des places", async () => {
+  it("après « Je confirme » (flag true), le resolver strict affiche l'erreur de variation et bloque la sauvegarde", async () => {
+    renderForm(StructureVersionTransformationType.EXTENSION, {
+      showIncompleteSteps: true,
+    });
+
+    expect(
+      await screen.findByText(
+        `Le nombre de places autorisées doit être supérieur au nombre de places précédent (${ORIGINAL_PLACES}).`
+      )
+    ).toBeInTheDocument();
+
+    await submit();
+
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      `/api/transformations/${TRANSFORMATION_ID}`,
+      expect.objectContaining({ method: "PUT" })
+    );
+  });
+
+  it("laisse passer une contraction qui retire des places, étape VALIDE", async () => {
     renderForm(StructureVersionTransformationType.CONTRACTION);
 
     await setPlaces(ORIGINAL_PLACES - 7);
     await submit();
 
-    await waitFor(() =>
-      expect(mockFetch).toHaveBeenCalledWith(
-        `/api/transformations/${TRANSFORMATION_ID}`,
-        expect.objectContaining({ method: "PUT" })
-      )
-    );
-    expect(getPutPayloadPlaces()).toBe(ORIGINAL_PLACES - 7);
+    await expectPutSent();
+    expect(getSavedPlaces()).toBe(ORIGINAL_PLACES - 7);
+    expect(getSavedPlacesStepStatus()).toBe(StepStatus.VALIDE);
   });
 });

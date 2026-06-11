@@ -1,23 +1,30 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
+  createStandardTransformationForm,
   createStructureVersionTransformation,
   createTransformation,
 } from "tests/test-utils/factories/transformation.factory";
+import {
+  getSavedFormStepStatus,
+  getSavedStructureVersionTransformation,
+  mockTransformationFetch,
+  renderTransformationForm,
+} from "tests/test-utils/transformationForm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { TransformationClientProvider } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { TransformationActesAdministratifsForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/TransformationActesAdministratifsForm";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
+import { StepStatus } from "@/types/form.type";
 import {
   StructureVersionTransformationStep,
   StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
-const mockUpdateTransformation = vi.fn();
+const TRANSFORMATION_ID = 12;
 const mockRouterPush = vi.fn();
 
 vi.mock("next/navigation", () => ({
@@ -33,11 +40,7 @@ vi.mock("next/navigation", () => ({
   notFound: vi.fn(),
 }));
 
-vi.mock("@/app/hooks/useTransformations", () => ({
-  useTransformations: () => ({
-    updateTransformation: mockUpdateTransformation,
-  }),
-}));
+let fetchMock: ReturnType<typeof mockTransformationFetch>;
 
 const filledActe = (
   id: number,
@@ -56,43 +59,44 @@ const transformationWithActes = (
   type: TransformationType = TransformationType.OUVERTURE_EX_NIHILO
 ) =>
   createTransformation({
-    id: 12,
+    id: TRANSFORMATION_ID,
     type,
     structureVersionTransformations: [
       createStructureVersionTransformation({
         id: 7,
         type: StructureVersionTransformationType.CREATION,
         actesAdministratifs,
+        form: createStandardTransformationForm("structure-transformation-creation"),
       }),
     ],
   });
 
 const renderForm = (transformation: TransformationApiRead) =>
-  render(
-    <TransformationClientProvider transformation={transformation}>
-      <TransformationActesAdministratifsForm
-        structureVersionTransformation={
-          transformation.structureVersionTransformations[0]
-        }
-        transformation={transformation}
-      />
-    </TransformationClientProvider>
+  renderTransformationForm(
+    transformation,
+    <TransformationActesAdministratifsForm
+      structureVersionTransformation={
+        transformation.structureVersionTransformations[0]
+      }
+      transformation={transformation}
+    />
   );
 
-const getSavedActes = () => {
-  const [, payload] = mockUpdateTransformation.mock.calls[0];
-  return payload.structureVersionTransformations[0].actesAdministratifs;
-};
+const getSavedActes = () =>
+  getSavedStructureVersionTransformation(fetchMock, TRANSFORMATION_ID)
+    .actesAdministratifs;
 
-describe("TransformationActesAdministratifsForm (integration via FormWrapper)", () => {
+const getSavedActesStepStatus = () =>
+  getSavedFormStepStatus(fetchMock, TRANSFORMATION_ID, "03-actes-administratifs");
+
+describe("TransformationActesAdministratifsForm (integration up to fetch)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUpdateTransformation.mockResolvedValue(12);
     localStorage.clear();
+    fetchMock = mockTransformationFetch(TRANSFORMATION_ID);
   });
 
-  it("saves the filled acts, dropping the empty Autres documents row", async () => {
-    // GIVEN the three required acts are filled (file + dates), Autres documents left empty
+  it("saves the filled acts, dropping the empty Autres documents row, and derives VALIDE", async () => {
     const transformation = transformationWithActes([
       filledActe(1, "ARRETE_AUTORISATION", "k-autorisation"),
       filledActe(2, "CONVENTION", "k-convention"),
@@ -100,32 +104,39 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     ]);
     renderForm(transformation);
 
-    // WHEN
     await userEvent.click(
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    // THEN the form saves the payload (empty AUTRE filtered out by the schema)
-    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
     const actes = getSavedActes();
     expect(actes).toHaveLength(3);
     expect(
       actes.map((acte: { category: string }) => acte.category).sort()
     ).toEqual(["ARRETE_AUTORISATION", "ARRETE_TARIFICATION", "CONVENTION"]);
+    expect(getSavedActesStepStatus()).toBe(StepStatus.VALIDE);
   });
 
-  it("still navigates to the next step when the required documents are missing", async () => {
-    // GIVEN no acts provided -> the form seeds empty rows for each required category
+  it("still navigates to the next step when the required documents are missing, step stays COMMENCE", async () => {
     const transformation = transformationWithActes([]);
     renderForm(transformation);
 
-    // WHEN
     await userEvent.click(
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    // THEN the incomplete step is saved and the user moves on (no blocking)
-    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+    expect(getSavedActesStepStatus()).toBe(StepStatus.COMMENCE);
     expect(mockRouterPush).toHaveBeenCalledWith(
       "/structures/transformation/12/verification"
     );
@@ -138,7 +149,6 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     );
     renderForm(transformation);
 
-    // Autorisation is the default selection, fusion is the alternative
     const autorisationRadio = screen.getByRole("radio", {
       name: "Arrêté d'autorisation",
     });
@@ -159,22 +169,18 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     );
     renderForm(transformation);
 
-    // Pick fusion in the radio
     await userEvent.click(
       screen.getByRole("radio", { name: "Arrêté de fusion" })
     );
 
-    // Fill the dates of the radio slot (the first DATE_START_END block)
     const startDateInputs = screen.getAllByLabelText("Début arrêté");
     const endDateInputs = screen.getAllByLabelText("Fin arrêté");
     await userEvent.type(startDateInputs[0], "2024-01-01");
     await userEvent.type(endDateInputs[0], "2025-01-01");
 
-    // Stub the file upload by directly setting the hidden file key field
     const fileInputs = document.querySelectorAll(
       'input[name^="actesAdministratifs."][name$=".fileUploads.0.key"]'
     );
-    // First one is the radio slot
     const firstFileInput = fileInputs[0] as HTMLInputElement;
     await userEvent.type(firstFileInput, "k-fusion");
 
@@ -182,7 +188,12 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
     const actes = getSavedActes();
     const radioActe = actes.find(
       (acte: { category: string }) =>

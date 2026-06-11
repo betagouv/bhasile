@@ -31,9 +31,6 @@ const FieldErrorProbe = ({ name }: { name: string }) => {
   );
 };
 
-// The form mirrors production: the FormWrapper resolver is the STRICT schema once
-// shouldShowIncompleteSteps is true (which is the only way errors must surface),
-// while the controller's draft schema only drives the saver.
 const Harness = ({ defaultValues }: { defaultValues: { nom: string } }) => {
   const methods = useForm({
     resolver: zodResolver(strictSchema),
@@ -69,7 +66,6 @@ describe("TransformationFormController", () => {
   it("does not trigger validation while shouldShowIncompleteSteps is false", async () => {
     render(<Harness defaultValues={{ nom: "" }} />);
 
-    // give effects a chance to run
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.getByTestId("error-nom")).toHaveTextContent("");
   });
@@ -81,6 +77,23 @@ describe("TransformationFormController", () => {
     });
 
     render(<Harness defaultValues={{ nom: "" }} />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("error-nom")).toHaveTextContent(
+        "Le nom est requis"
+      )
+    );
+  });
+
+  it("triggers validation when shouldShowIncompleteSteps flips from false to true", async () => {
+    const { rerender } = render(<Harness defaultValues={{ nom: "" }} />);
+    expect(screen.getByTestId("error-nom")).toHaveTextContent("");
+
+    mockUseOptionalTransformationContext.mockReturnValue({
+      registerSaver: mockRegisterSaver,
+      shouldShowIncompleteSteps: true,
+    });
+    rerender(<Harness defaultValues={{ nom: "" }} />);
 
     await waitFor(() =>
       expect(screen.getByTestId("error-nom")).toHaveTextContent(

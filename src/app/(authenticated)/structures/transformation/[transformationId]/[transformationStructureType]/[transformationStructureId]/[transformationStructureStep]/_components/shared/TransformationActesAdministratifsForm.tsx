@@ -56,6 +56,7 @@ export const TransformationActesAdministratifsForm = ({
 
   return (
     <FormWrapper
+      key={shouldShowIncompleteSteps ? "strict" : "draft"}
       schema={
         shouldShowIncompleteSteps
           ? actesAdministratifsTransformationSchema

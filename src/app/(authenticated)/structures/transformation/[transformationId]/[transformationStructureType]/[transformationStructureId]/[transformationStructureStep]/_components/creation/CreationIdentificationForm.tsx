@@ -68,6 +68,7 @@ export const CreationIdentificationForm = ({
 
   return (
     <FormWrapper
+      key={shouldShowIncompleteSteps ? "strict" : "draft"}
       schema={
         shouldShowIncompleteSteps
           ? creationIdentificationSchema

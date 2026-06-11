@@ -61,6 +61,7 @@ export const FermetureDescriptionForm = ({
 
   return (
     <FormWrapper
+      key={shouldShowIncompleteSteps ? "strict" : "draft"}
       schema={
         shouldShowIncompleteSteps ? fermetureSchema : fermetureDraftSchema
       }

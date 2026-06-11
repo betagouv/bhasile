@@ -11,6 +11,7 @@ import {
   getTransformationNounAvecArticle,
   getTransformationOriginRoute,
   getTransformationSteps,
+  getTransformationStructureVersionDefaultValues,
   isCreation,
   isTransformationSurStructureExistante,
   setStructureVersionTransformationFormStepStatus,
@@ -856,6 +857,57 @@ describe("transformation util", () => {
       );
 
       expect(form.status).toBe(false);
+    });
+  });
+
+  describe("getTransformationStructureVersionDefaultValues", () => {
+    it("spreads the structureVersion fields and coerces adresse typologie booleans", () => {
+      const result = getTransformationStructureVersionDefaultValues({
+        id: 5,
+        nom: "Les Iris",
+        adresses: [
+          {
+            id: 1,
+            adresse: "12 rue des Lilas",
+            adresseTypologies: [
+              {
+                year: 2024,
+                placesAutorisees: 10,
+                qpv: null,
+                logementSocial: 1,
+              },
+            ],
+          },
+        ],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+
+      expect(result).toMatchObject({ id: 5, nom: "Les Iris" });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const adresses = (result as any).adresses;
+      expect(adresses[0].adresseTypologies[0]).toMatchObject({
+        year: 2024,
+        placesAutorisees: 10,
+        qpv: false,
+        logementSocial: true,
+      });
+    });
+
+    it("returns undefined adresses when the structureVersion is undefined", () => {
+      expect(getTransformationStructureVersionDefaultValues(undefined)).toEqual({
+        adresses: undefined,
+      });
+    });
+
+    it("leaves adresses undefined when the structureVersion has none", () => {
+      const result = getTransformationStructureVersionDefaultValues({
+        id: 5,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+
+      expect(result).toMatchObject({ id: 5 });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((result as any).adresses).toBeUndefined();
     });
   });
 

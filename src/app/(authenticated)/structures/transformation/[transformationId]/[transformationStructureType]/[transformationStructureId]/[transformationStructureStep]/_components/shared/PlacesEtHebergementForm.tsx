@@ -69,6 +69,7 @@ export const PlacesEtHebergementForm = ({
 
   return (
     <FormWrapper
+      key={shouldShowIncompleteSteps ? "strict" : "draft"}
       schema={
         shouldShowIncompleteSteps
           ? strictSchema

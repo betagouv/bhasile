@@ -78,4 +78,40 @@ describe("AdresseAdministrativeAndAntennes", () => {
     expect(getNomInput()).not.toBeDisabled();
     expect(getAdresseInput()).not.toBeDisabled();
   });
+
+  it("création depuis des structures : titre dédié et radio Oui/Non sur la répartition en sites", () => {
+    renderComponent({
+      formKind: FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
+    });
+
+    expect(
+      screen.getByRole("heading", {
+        name: /saisir l.adresse administrative principale de la structure/i,
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/répartie en plusieurs sites administratifs distants/i)
+    ).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Oui" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Non" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("checkbox", {
+        name: /répartie sur plusieurs sites administratifs géographiquement distants/i,
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it("création ex-nihilo : titre standard et case à cocher sur la répartition en sites", () => {
+    renderComponent({ formKind: FormKind.OUVERTURE_EX_NIHILO });
+
+    expect(
+      screen.getByRole("heading", { name: "Adresses administratives" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("checkbox", {
+        name: /répartie sur plusieurs sites administratifs géographiquement distants/i,
+      })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("radio", { name: "Oui" })).not.toBeInTheDocument();
+  });
 });

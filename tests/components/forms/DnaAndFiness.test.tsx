@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import { useFetchFreeDnaCodes } from "@/app/hooks/useFetchFreeDnaCodes";
+import { FormKind } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 
 import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
@@ -153,6 +154,37 @@ describe("DnaAndFiness", () => {
         name: "Code",
       });
       expect(codeSelectsAfter).toHaveLength(2);
+    });
+  });
+
+  describe("Title depending on formKind", () => {
+    it("shows the OFII single-code message when creating from existing structures", () => {
+      render(
+        <FormTestWrapper defaultValues={defaultValuesAutorisee}>
+          <DnaAndFiness
+            formKind={FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES}
+          />
+        </FormTestWrapper>
+      );
+
+      expect(
+        screen.getByRole("heading", {
+          name: /Veuillez ne retenir qu.un seul code DNA et FINESS.*transmise à l.OFII/i,
+        })
+      ).toBeInTheDocument();
+    });
+
+    it("keeps the standard title (no OFII message) for an extension", () => {
+      render(
+        <FormTestWrapper defaultValues={defaultValuesAutorisee}>
+          <DnaAndFiness formKind={FormKind.EXTENSION} />
+        </FormTestWrapper>
+      );
+
+      expect(screen.queryByText(/transmise à l.OFII/i)).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Code DNA et FINESS" })
+      ).toBeInTheDocument();
     });
   });
 });
