@@ -1,6 +1,6 @@
 // TABLES
-// Tarifs journaliers cibles par type de structure et zonage IDF / non-IDF (8 entrées)
-// Remplissage manuel (Metabase)
+
+// Tarifs journaliers cibles par type de structure et zonage (remplissage manuel)
 model TarifJournalierCible {
   id            Int           @id @default(autoincrement())
   structureType StructureType
@@ -11,7 +11,7 @@ model TarifJournalierCible {
   @@schema("reporting")
 }
 
-// Remplissage manuel (Metabase) — indicateurs globaux / enquête
+// Indicateurs globaux d'impact (remplissage manuel)
 model GlobalIndicators {
   id Int @id @default(autoincrement())
 
@@ -30,6 +30,7 @@ model GlobalIndicators {
   @@schema("reporting")
 }
 
+// Statistiques mensuelles d'usage (remplissage par cron)
 model MonthlyReportingMetric {
   id    Int      @id @default(autoincrement())
   month DateTime @unique
@@ -44,7 +45,7 @@ model MonthlyReportingMetric {
   @@schema("reporting")
 }
 
-// Visites (sessions 30 min) par région administrative de la structure consultée
+// Visites par région administrative de la structure consultée (remplissage par cron)
 model MonthlyReportingVisitsByRegion {
   id          Int      @id @default(autoincrement())
   month       DateTime
@@ -58,6 +59,7 @@ model MonthlyReportingVisitsByRegion {
   @@schema("reporting")
 }
 
+// Statistiques mensuelles de support (remplissage manuel)
 model MonthlySupportContact {
   id    Int      @id @default(autoincrement())
   month DateTime @unique
@@ -71,6 +73,7 @@ model MonthlySupportContact {
   @@schema("reporting")
 }
 
+// Statistiques mensuelles de qualité des structures (remplissage par cron)
 model MonthlyStructuresGlobalQualityCount {
   id    Int      @id @default(autoincrement())
   month DateTime @unique
