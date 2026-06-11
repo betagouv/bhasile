@@ -1,6 +1,6 @@
 // Utils pour générer les codes Bhasile
 
-import { REGIONS } from "@/constants";
+import { DEPARTEMENTS, REGIONS } from "@/constants";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 const BHASILE_PREFIX = "BHA";
@@ -18,6 +18,18 @@ export function getNormalizedRegionCodeFromName(
 ): string | null {
   const regionCode = REGIONS.find((region) => region.name === regionName)?.code;
   return normalizeRegionCode(regionCode);
+}
+
+export function getNormalizedRegionCodeFromDepartement(
+  departementNumero?: string | null
+): string | null {
+  if (!departementNumero) {
+    return null;
+  }
+  const departement = DEPARTEMENTS.find(
+    (departement) => departement.numero === departementNumero
+  );
+  return getNormalizedRegionCodeFromName(departement?.region);
 }
 
 function formatBhasileCode(regionCode: string, counter: number): string {
