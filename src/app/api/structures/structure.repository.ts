@@ -264,6 +264,7 @@ const writeRollingVersion = async (
       structureVersionTransformationId: null,
       forceHistorize: false,
     },
+    orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
     select: { id: true },
   });
 

@@ -54,6 +54,7 @@ describe("structure.repository db integration", () => {
         structureVersionTransformationId: null,
         forceHistorize: false,
       },
+      orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
       include: {
         contacts: true,
         adresses: { include: { adresseTypologies: true } },
