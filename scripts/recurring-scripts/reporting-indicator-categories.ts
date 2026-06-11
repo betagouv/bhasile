@@ -7,8 +7,6 @@
  */
 
 export const INDICATEURS_UTILES = [
-  "has_issue_authorisation_dates_undefined",
-  "has_issue_convention_dates_undefined",
   "has_issue_authorized_convention_missing_or_expired",
   "has_issue_evaluation_not_done_in_time",
   "has_issue_multi_dna",

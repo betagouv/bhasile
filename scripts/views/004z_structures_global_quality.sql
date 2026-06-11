@@ -19,13 +19,9 @@ SELECT
   sc."dna_codes" AS "dna_codes",
   sc."updatedAt" AS "updatedAt",
   -- Calendar indicators
-  -- Calendar: missing authorization dates for authorized structures
-  COALESCE(cal."has_issue_authorisation_dates_undefined", FALSE) AS "has_issue_authorisation_dates_undefined",
-  -- Calendar: authorization period is not 15 years (authorized structures)
+  -- Calendar: authorization period is not 15 years (authorized structures, from actes administratifs)
   COALESCE(cal."has_issue_authorisation_period_not_15y", FALSE) AS "has_issue_authorisation_period_not_15y",
-  -- Calendar: missing convention dates
-  COALESCE(cal."has_issue_convention_dates_undefined", FALSE) AS "has_issue_convention_dates_undefined",
-  -- Calendar: convention duration not 5 years (authorized structures)
+  -- Calendar: convention duration not 5 years (authorized structures, from actes administratifs)
   COALESCE(cal."has_issue_authorized_convention_not_5y", FALSE) AS "has_issue_authorized_convention_not_5y",
   -- Calendar: convention outside authorization period (authorized structures)
   COALESCE(cal."has_issue_authorized_convention_outside_authorisation_period", FALSE) AS "has_issue_authorized_convention_outside_authorisation_period",
@@ -81,7 +77,7 @@ SELECT
   COALESCE(act."has_issue_presences_indues_gt_7pct", FALSE) AS "has_issue_presences_indues_gt_7pct",
   -- Count total number of issues (true values)
   (
-    (COALESCE(cal."has_issue_authorisation_dates_undefined", FALSE)::int) + (COALESCE(cal."has_issue_authorisation_period_not_15y", FALSE)::int) + (COALESCE(cal."has_issue_convention_dates_undefined", FALSE)::int) + (COALESCE(cal."has_issue_authorized_convention_not_5y", FALSE)::int) + (
+    (COALESCE(cal."has_issue_authorisation_period_not_15y", FALSE)::int) + (COALESCE(cal."has_issue_authorized_convention_not_5y", FALSE)::int) + (
       COALESCE(cal."has_issue_authorized_convention_outside_authorisation_period", FALSE)::int
     ) + (COALESCE(cal."has_issue_authorized_convention_missing_or_expired", FALSE)::int) + (
       COALESCE(cal."has_issue_convention_dates_differ_from_actes_administratifs", FALSE)::int

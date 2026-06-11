@@ -2,8 +2,8 @@
 -- One row per structure, boolean columns for calendar-related data quality issues
 --
 -- Notes:
--- - "Conventions" are stored on `public."Structure"`: `debutConvention`, `finConvention`.
--- - "Période d'autorisation" is stored on `public."Structure"`: `debutPeriodeAutorisation`, `finPeriodeAutorisation`.
+-- - Calendar dates are derived from `public."ActeAdministratif"` (CONVENTION / ARRETE_AUTORISATION).
+-- - "differ_from_actes_administratifs" checks compare AA-derived dates against operator-entered fields on `public."Structure"`.
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_calendar_quality" AS
 WITH
   actes_administratifs_aggregate AS (
@@ -39,95 +39,79 @@ WITH
   )
 SELECT
   s."id" AS "id",
-  -- Authorization dates presence flags
+  -- Authorized structures: authorization period must be 15 years (based on actes administratifs)
   CASE
     WHEN s."type" IN ('CADA', 'CPH') THEN (
-      s."debutPeriodeAutorisation" IS NULL
-      OR s."finPeriodeAutorisation" IS NULL
-    )
-    ELSE FALSE
-  END AS "has_issue_authorisation_dates_undefined",
-  -- Subsidized structures: convention dates presence flags
-  CASE
-    WHEN s."type" IN ('HUDA', 'CAES') THEN (
-      s."debutConvention" IS NULL
-      OR s."finConvention" IS NULL
-    )
-    ELSE FALSE
-  END AS "has_issue_convention_dates_undefined",
-  -- Authorized structures: authorization period must be 15 years
-  CASE
-    WHEN s."type" IN ('CADA', 'CPH') THEN (
-      s."debutPeriodeAutorisation" IS NOT NULL
-      AND s."finPeriodeAutorisation" IS NOT NULL
+      aaa."aa_debutPeriodeAutorisation" IS NOT NULL
+      AND aaa."aa_finPeriodeAutorisation" IS NOT NULL
       AND (
         EXTRACT(
           YEAR
           FROM
-            s."finPeriodeAutorisation"
+            aaa."aa_finPeriodeAutorisation"
         )::int - EXTRACT(
           YEAR
           FROM
-            s."debutPeriodeAutorisation"
+            aaa."aa_debutPeriodeAutorisation"
         )::int
       ) <> 15
     )
     ELSE FALSE
   END AS "has_issue_authorisation_period_not_15y",
-  -- Authorized structures: convention should last 5 years
+  -- Authorized structures: convention should last 5 years (based on actes administratifs)
   CASE
     WHEN s."type" IN ('CADA', 'CPH') THEN (
-      s."debutConvention" IS NOT NULL
-      AND s."finConvention" IS NOT NULL
+      aaa."aa_debutConvention" IS NOT NULL
+      AND aaa."aa_finConvention" IS NOT NULL
       AND (
         EXTRACT(
           YEAR
           FROM
-            s."finConvention"
+            aaa."aa_finConvention"
         )::int - EXTRACT(
           YEAR
           FROM
-            s."debutConvention"
+            aaa."aa_debutConvention"
         )::int
       ) <> 5
     )
     ELSE FALSE
   END AS "has_issue_authorized_convention_not_5y",
-  -- Authorized structures: convention must be within the authorization period
+  -- Authorized structures: convention must be within the authorization period (based on actes administratifs)
   CASE
     WHEN s."type" IN ('CADA', 'CPH') THEN (
-      s."debutPeriodeAutorisation" IS NOT NULL
-      AND s."finPeriodeAutorisation" IS NOT NULL
-      AND s."debutConvention" IS NOT NULL
-      AND s."finConvention" IS NOT NULL
+      aaa."aa_debutPeriodeAutorisation" IS NOT NULL
+      AND aaa."aa_finPeriodeAutorisation" IS NOT NULL
+      AND aaa."aa_debutConvention" IS NOT NULL
+      AND aaa."aa_finConvention" IS NOT NULL
       AND (
         EXTRACT(
           YEAR
           FROM
-            s."debutConvention"
+            aaa."aa_debutConvention"
         )::int < EXTRACT(
           YEAR
           FROM
-            s."debutPeriodeAutorisation"
+            aaa."aa_debutPeriodeAutorisation"
         )::int
         OR EXTRACT(
           YEAR
           FROM
-            s."finConvention"
+            aaa."aa_finConvention"
         )::int > EXTRACT(
           YEAR
           FROM
-            s."finPeriodeAutorisation"
+            aaa."aa_finPeriodeAutorisation"
         )::int
       )
     )
     ELSE FALSE
   END AS "has_issue_authorized_convention_outside_authorisation_period",
-  -- Authorized structures: missing convention dates (convention is required)
+  -- Authorized structures: missing convention in actes administratifs (convention is required)
   CASE
     WHEN s."type" IN ('CADA', 'CPH') THEN (
-      s."debutConvention" IS NULL
-      OR s."finConvention" IS NULL
+      aaa."aa_debutConvention" IS NULL
+      OR aaa."aa_finConvention" IS NULL
     )
     ELSE FALSE
   END AS "has_issue_authorized_convention_missing_or_expired",
