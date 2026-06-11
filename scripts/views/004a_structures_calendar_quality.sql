@@ -13,22 +13,22 @@ WITH
         CASE
           WHEN aa."category" = 'CONVENTION' THEN aa."startDate"
         END
-      ) AS "aa_debutConvention",
+      ) AS "debutConvention",
       MAX(
         CASE
           WHEN aa."category" = 'CONVENTION' THEN aa."endDate"
         END
-      ) AS "aa_finConvention",
+      ) AS "finConvention",
       MIN(
         CASE
           WHEN aa."category" = 'ARRETE_AUTORISATION' THEN aa."startDate"
         END
-      ) AS "aa_debutPeriodeAutorisation",
+      ) AS "debutPeriodeAutorisation",
       MAX(
         CASE
           WHEN aa."category" = 'ARRETE_AUTORISATION' THEN aa."endDate"
         END
-      ) AS "aa_finPeriodeAutorisation"
+      ) AS "finPeriodeAutorisation"
     FROM
       public."ActeAdministratif" aa
     WHERE
@@ -42,17 +42,17 @@ SELECT
   -- Authorized structures: authorization period must be 15 years (based on actes administratifs)
   CASE
     WHEN s."type" IN ('CADA', 'CPH') THEN (
-      aaa."aa_debutPeriodeAutorisation" IS NOT NULL
-      AND aaa."aa_finPeriodeAutorisation" IS NOT NULL
+      aaa."debutPeriodeAutorisation" IS NOT NULL
+      AND aaa."finPeriodeAutorisation" IS NOT NULL
       AND (
         EXTRACT(
           YEAR
           FROM
-            aaa."aa_finPeriodeAutorisation"
+            aaa."finPeriodeAutorisation"
         )::int - EXTRACT(
           YEAR
           FROM
-            aaa."aa_debutPeriodeAutorisation"
+            aaa."debutPeriodeAutorisation"
         )::int
       ) <> 15
     )
@@ -61,17 +61,17 @@ SELECT
   -- Authorized structures: convention should last 5 years (based on actes administratifs)
   CASE
     WHEN s."type" IN ('CADA', 'CPH') THEN (
-      aaa."aa_debutConvention" IS NOT NULL
-      AND aaa."aa_finConvention" IS NOT NULL
+      aaa."debutConvention" IS NOT NULL
+      AND aaa."finConvention" IS NOT NULL
       AND (
         EXTRACT(
           YEAR
           FROM
-            aaa."aa_finConvention"
+            aaa."finConvention"
         )::int - EXTRACT(
           YEAR
           FROM
-            aaa."aa_debutConvention"
+            aaa."debutConvention"
         )::int
       ) <> 5
     )
@@ -80,28 +80,28 @@ SELECT
   -- Authorized structures: convention must be within the authorization period (based on actes administratifs)
   CASE
     WHEN s."type" IN ('CADA', 'CPH') THEN (
-      aaa."aa_debutPeriodeAutorisation" IS NOT NULL
-      AND aaa."aa_finPeriodeAutorisation" IS NOT NULL
-      AND aaa."aa_debutConvention" IS NOT NULL
-      AND aaa."aa_finConvention" IS NOT NULL
+      aaa."debutPeriodeAutorisation" IS NOT NULL
+      AND aaa."finPeriodeAutorisation" IS NOT NULL
+      AND aaa."debutConvention" IS NOT NULL
+      AND aaa."finConvention" IS NOT NULL
       AND (
         EXTRACT(
           YEAR
           FROM
-            aaa."aa_debutConvention"
+            aaa."debutConvention"
         )::int < EXTRACT(
           YEAR
           FROM
-            aaa."aa_debutPeriodeAutorisation"
+            aaa."debutPeriodeAutorisation"
         )::int
         OR EXTRACT(
           YEAR
           FROM
-            aaa."aa_finConvention"
+            aaa."finConvention"
         )::int > EXTRACT(
           YEAR
           FROM
-            aaa."aa_finPeriodeAutorisation"
+            aaa."finPeriodeAutorisation"
         )::int
       )
     )
@@ -110,8 +110,8 @@ SELECT
   -- Authorized structures: missing convention in actes administratifs (convention is required)
   CASE
     WHEN s."type" IN ('CADA', 'CPH') THEN (
-      aaa."aa_debutConvention" IS NULL
-      OR aaa."aa_finConvention" IS NULL
+      aaa."debutConvention" IS NULL
+      OR aaa."finConvention" IS NULL
     )
     ELSE FALSE
   END AS "has_issue_authorized_convention_missing_or_expired",
@@ -119,12 +119,12 @@ SELECT
   COALESCE(
     (
       (
-        aaa."aa_debutConvention" IS NOT NULL
-        OR aaa."aa_finConvention" IS NOT NULL
+        aaa."debutConvention" IS NOT NULL
+        OR aaa."finConvention" IS NOT NULL
       )
       AND (
-        aaa."aa_debutConvention" IS DISTINCT FROM s."debutConvention"
-        OR aaa."aa_finConvention" IS DISTINCT FROM s."finConvention"
+        aaa."debutConvention" IS DISTINCT FROM s."debutConvention"
+        OR aaa."finConvention" IS DISTINCT FROM s."finConvention"
       )
     ),
     FALSE
@@ -133,12 +133,12 @@ SELECT
     (
       s."type" IN ('CADA', 'CPH')
       AND (
-        aaa."aa_debutPeriodeAutorisation" IS NOT NULL
-        OR aaa."aa_finPeriodeAutorisation" IS NOT NULL
+        aaa."debutPeriodeAutorisation" IS NOT NULL
+        OR aaa."finPeriodeAutorisation" IS NOT NULL
       )
       AND (
-        aaa."aa_debutPeriodeAutorisation" IS DISTINCT FROM s."debutPeriodeAutorisation"
-        OR aaa."aa_finPeriodeAutorisation" IS DISTINCT FROM s."finPeriodeAutorisation"
+        aaa."debutPeriodeAutorisation" IS DISTINCT FROM s."debutPeriodeAutorisation"
+        OR aaa."finPeriodeAutorisation" IS DISTINCT FROM s."finPeriodeAutorisation"
       )
     ),
     FALSE
@@ -176,7 +176,7 @@ FROM
   LEFT JOIN public."Evaluation" e ON e."structureId" = s."id"
 GROUP BY
   s."id",
-  aaa."aa_debutConvention",
-  aaa."aa_finConvention",
-  aaa."aa_debutPeriodeAutorisation",
-  aaa."aa_finPeriodeAutorisation";
+  aaa."debutConvention",
+  aaa."finConvention",
+  aaa."debutPeriodeAutorisation",
+  aaa."finPeriodeAutorisation";
