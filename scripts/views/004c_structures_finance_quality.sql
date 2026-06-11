@@ -32,11 +32,11 @@ WITH
     FROM
       structures s
   ),
-  structures_idf AS (
+  structures_with_idf_boolean AS (
     SELECT
       s."id",
       s."structureType",
-      COALESCE(r."code" = 'FR-IDF', FALSE) AS "isIdf"
+      COALESCE(r."code" = 'FR-IDF', FALSE) AS "belongsToIdf"
     FROM
       structures s
       LEFT JOIN public."Departement" dep ON dep."numero" = s."departementAdministratif"
@@ -47,9 +47,9 @@ WITH
       si."id" AS "structureId",
       t."tarifCible"
     FROM
-      structures_idf si
+      structures_with_idf_boolean si
       LEFT JOIN reporting."TarifJournalierCible" t ON t."structureType" = si."structureType"
-      AND t."isIdf" = si."isIdf"
+      AND t."belongsToIdf" = si."belongsToIdf"
   ),
   -- filter budgets from the structure date 303 joining year, or creation year to the current year
   budgets_filtered AS (
@@ -65,7 +65,7 @@ WITH
       AND b."isMissing" IS NOT TRUE
   ),
   -- filter financial indicators on the same year range as budgets
-  -- and keep one row per structure/year: REALISE first, PREVISIONNEL fallback
+  -- and keep one row per structure/year: REALISE first, PREVISIONNEL as a fallback
   indicateurs_financiers_filtered AS (
     SELECT DISTINCT
       ON (i."structureId", i."year") i.*
@@ -100,20 +100,20 @@ WITH
       b."repriseEtat" AS "repriseEtat",
       b."excedentRecupere" AS "excedentRecupere",
       b."excedentDeduit" AS "excedentDeduit",
+      b."fondsDedies" AS "fondsDedies",
+      b."affectationReservesFondsDedies" AS "affectationReservesFondsDedies",
       b."reserveInvestissement" AS "reserveInvestissement",
       b."chargesNonReconductibles" AS "chargesNonReconductibles",
       b."reserveCompensationDeficits" AS "reserveCompensationDeficits",
       b."reserveCompensationBFR" AS "reserveCompensationBFR",
       b."reserveCompensationAmortissements" AS "reserveCompensationAmortissements",
-      b."fondsDedies" AS "fondsDedies",
-      b."affectationReservesFondsDedies" AS "affectationReservesFondsDedies",
       b."reportANouveau" AS "reportANouveau",
       b."autre" AS "autre",
-      -- Sum of affectations: NULL if the sum is 0 (all NULL)
+      -- Sum of the tarifée affectation breakdown (7 detail buckets); NULL if all are NULL/0
       NULLIF(
-        COALESCE(b."excedentRecupere", 0) + COALESCE(b."excedentDeduit", 0) + COALESCE(b."reserveInvestissement", 0) + COALESCE(b."chargesNonReconductibles", 0) + COALESCE(b."reserveCompensationDeficits", 0) + COALESCE(b."reserveCompensationBFR", 0) + COALESCE(b."reserveCompensationAmortissements", 0) + COALESCE(b."fondsDedies", 0) + COALESCE(b."affectationReservesFondsDedies", 0) + COALESCE(b."reportANouveau", 0) + COALESCE(b."autre", 0),
+        COALESCE(b."reserveInvestissement", 0) + COALESCE(b."chargesNonReconductibles", 0) + COALESCE(b."reserveCompensationDeficits", 0) + COALESCE(b."reserveCompensationBFR", 0) + COALESCE(b."reserveCompensationAmortissements", 0) + COALESCE(b."reportANouveau", 0) + COALESCE(b."autre", 0),
         0
-      ) AS "sum_affectations"
+      ) AS "sum_breakdown_affectations"
     FROM
       budgets_filtered b
   ),
@@ -134,55 +134,60 @@ WITH
       s."id",
       -- Résultat net = 0 is considered an issue (exclut les NULL)
       BOOL_OR(be."resultat_net" = 0) AS "has_issue_resultat_net_eq_0",
-      -- Authorized structures: if excedent, affectations breakdown must be present (not all NULL/0)
+      -- Authorized structures: affectationReservesFondsDedies is filled but breakdown detail is missing, when RN is non-zero
       BOOL_OR(
         s."structureType" IN ('CADA', 'CPH')
-        AND be."resultat_net" > 0
-        AND be."sum_affectations" IS NULL
+        AND be."resultat_net" IS NOT NULL
+        AND be."resultat_net" <> 0
+        AND COALESCE(be."affectationReservesFondsDedies", 0) <> 0
+        AND be."sum_breakdown_affectations" IS NULL
       ) AS "has_issue_authorized_affectations_breakdown_missing",
-      -- Authorized structures: repriseEtat + affectations must equal resultat_net (within epsilon)
+      -- Authorized structures: repriseEtat + affectationReservesFondsDedies must equal resultat_net (within epsilon)
       BOOL_OR(
         s."structureType" IN ('CADA', 'CPH')
-        AND be."resultat_net" > 0
-        AND be."sum_affectations" IS NOT NULL
-        AND ABS((COALESCE(be."repriseEtat", 0) + be."sum_affectations") - be."resultat_net") > 0.01
+        AND be."resultat_net" IS NOT NULL
+        AND be."affectationReservesFondsDedies" IS NOT NULL
+        AND ABS(
+          (COALESCE(be."repriseEtat", 0) + COALESCE(be."affectationReservesFondsDedies", 0)) - be."resultat_net"
+        ) > 0.01
       ) AS "has_issue_authorized_reprise_plus_affectations_mismatch",
-      -- Subsidized structures: deficit => all affectation buckets should be 0 or NULL except deficit compensation
+      -- Authorized structures: sign error on repriseEtat — equation holds only with flipped sign
+      BOOL_OR(
+        s."structureType" IN ('CADA', 'CPH')
+        AND be."resultat_net" IS NOT NULL
+        AND be."repriseEtat" IS NOT NULL
+        AND be."affectationReservesFondsDedies" IS NOT NULL
+        AND ABS(
+          (COALESCE(be."repriseEtat", 0) + COALESCE(be."affectationReservesFondsDedies", 0)) - be."resultat_net"
+        ) > 0.01
+        AND ABS(
+          (-COALESCE(be."repriseEtat", 0) + COALESCE(be."affectationReservesFondsDedies", 0)) - be."resultat_net"
+        ) <= 0.01
+      ) AS "has_issue_authorized_reprise_wrong_sign",
+      -- Subsidized structures: RN < 0 => excedentRecupere, excedentDeduit, fondsDedies must all be 0/NULL
       BOOL_OR(
         s."structureType" IN ('HUDA', 'CAES')
         AND be."resultat_net" < 0
         AND (
-          (COALESCE(be."excedentRecupere", 0) <> 0)
-          OR (COALESCE(be."excedentDeduit", 0) <> 0)
-          OR (COALESCE(be."reserveInvestissement", 0) <> 0)
-          OR (COALESCE(be."chargesNonReconductibles", 0) <> 0)
-          OR (COALESCE(be."reserveCompensationBFR", 0) <> 0)
-          OR (COALESCE(be."reserveCompensationAmortissements", 0) <> 0)
-          OR (COALESCE(be."fondsDedies", 0) <> 0)
-          OR (COALESCE(be."affectationReservesFondsDedies", 0) <> 0)
-          OR (COALESCE(be."reportANouveau", 0) <> 0)
-          OR (COALESCE(be."autre", 0) <> 0)
+          COALESCE(be."excedentRecupere", 0) <> 0
+          OR COALESCE(be."excedentDeduit", 0) <> 0
+          OR COALESCE(be."fondsDedies", 0) <> 0
         )
       ) AS "has_issue_subsidized_deficit_nonzero_boxes",
-      -- Subsidized structures: excedent => deficit compensation must be 0/NULL and
-      -- (excedentRecupere + excedentDeduit + fondsDedies) should equal resultat_net
+      -- Subsidized structures: RN > 0 => repriseEtat must be 0/NULL
       BOOL_OR(
         s."structureType" IN ('HUDA', 'CAES')
         AND be."resultat_net" > 0
-        AND (
-          COALESCE(be."reserveCompensationDeficits", 0) <> 0
-          OR ABS(
-            (
-              COALESCE(be."excedentRecupere", 0) + COALESCE(be."excedentDeduit", 0) + COALESCE(be."fondsDedies", 0)
-            ) - be."resultat_net"
-          ) > 0.01
-        )
-      ) AS "has_issue_subsidized_excedent_rules",
-      -- Excedent left as "report à nouveau" (i.e. not really affected)
+        AND COALESCE(be."repriseEtat", 0) <> 0
+      ) AS "has_issue_subsidized_reprise_etat_nonzero",
+      -- Subsidized structures: RN > 0 => excedentRecupere + excedentDeduit + fondsDedies must equal resultat_net
       BOOL_OR(
-        be."resultat_net" > 0
-        AND COALESCE(be."reportANouveau", 0) > 0
-      ) AS "has_issue_excedent_left_in_report_a_nouveau"
+        s."structureType" IN ('HUDA', 'CAES')
+        AND be."resultat_net" > 0
+        AND ABS(
+          (COALESCE(be."excedentRecupere", 0) + COALESCE(be."excedentDeduit", 0) + COALESCE(be."fondsDedies", 0)) - be."resultat_net"
+        ) > 0.01
+      ) AS "has_issue_subsidized_excedent_rules"
     FROM
       structures s
       LEFT JOIN budgets_enriched be ON be."structureId" = s."id"
@@ -209,9 +214,10 @@ SELECT
   COALESCE(bi."has_issue_resultat_net_eq_0", FALSE) AS "has_issue_resultat_net_eq_0",
   COALESCE(bi."has_issue_authorized_affectations_breakdown_missing", FALSE) AS "has_issue_authorized_affectations_breakdown_missing",
   COALESCE(bi."has_issue_authorized_reprise_plus_affectations_mismatch", FALSE) AS "has_issue_authorized_reprise_plus_affectations_mismatch",
+  COALESCE(bi."has_issue_authorized_reprise_wrong_sign", FALSE) AS "has_issue_authorized_reprise_wrong_sign",
   COALESCE(bi."has_issue_subsidized_deficit_nonzero_boxes", FALSE) AS "has_issue_subsidized_deficit_nonzero_boxes",
-  COALESCE(bi."has_issue_subsidized_excedent_rules", FALSE) AS "has_issue_subsidized_excedent_rules",
-  COALESCE(bi."has_issue_excedent_left_in_report_a_nouveau", FALSE) AS "has_issue_excedent_left_in_report_a_nouveau"
+  COALESCE(bi."has_issue_subsidized_reprise_etat_nonzero", FALSE) AS "has_issue_subsidized_reprise_etat_nonzero",
+  COALESCE(bi."has_issue_subsidized_excedent_rules", FALSE) AS "has_issue_subsidized_excedent_rules"
 FROM
   structures s
   LEFT JOIN budget_indicators bi ON bi."id" = s."id"

@@ -11,7 +11,6 @@ export const INDICATEURS_UTILES = [
   "has_issue_evaluation_not_done_in_time",
   "has_issue_multi_dna",
   "has_issue_cpom_mono_structure",
-  "has_issue_excedent_left_in_report_a_nouveau",
   "has_issue_missing_convention_document",
   "has_issue_missing_autorisation_document",
   "has_issue_missing_cpom_document",
@@ -40,7 +39,9 @@ export const INDICATEURS_NON_CLASSIFIES = [
   "has_issue_resultat_net_eq_0",
   "has_issue_authorized_affectations_breakdown_missing",
   "has_issue_authorized_reprise_plus_affectations_mismatch",
+  "has_issue_authorized_reprise_wrong_sign",
   "has_issue_subsidized_deficit_nonzero_boxes",
+  "has_issue_subsidized_reprise_etat_nonzero",
   "has_issue_subsidized_excedent_rules",
 ] as const;
 

@@ -68,6 +68,6 @@ Il faudrait pour être logique deux champs séparés, par exemple
 Ces deux champs coexistent dans le modèle `Budget` mais s'appliquent à des types opposés :
 
 - `fondsDedies` -> subventionnée uniquement ("Restant fonds dédiés") -> à renommer en `restantFondsDedies`
-- `affectationReservesFondsDedies` -> tarifée uniquement ("Affectation réserves & provision") -> à renommer en `affectationReservesEtProvisions`
+- `affectationReservesFondsDedies` -> tarifée uniquement ("Affectation réserves & provision") -> à renommer en `affectationGlobale`
 
 Le chevauchement de noms est trompeur dans le schéma Prisma : on ne peut pas deviner lequel s'applique à quel type sans consulter l'UI.
