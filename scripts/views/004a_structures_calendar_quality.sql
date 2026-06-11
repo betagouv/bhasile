@@ -2,8 +2,7 @@
 -- One row per structure, boolean columns for calendar-related data quality issues
 --
 -- Notes:
--- - Calendar dates are derived from `public."ActeAdministratif"` (CONVENTION / ARRETE_AUTORISATION).
--- - "differ_from_actes_administratifs" checks compare AA-derived dates against operator-entered fields on `public."Structure"`.
+-- - Calendar dates are derived now from Actes Administratifs
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_calendar_quality" AS
 WITH
   actes_administratifs_aggregate AS (

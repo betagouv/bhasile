@@ -1,10 +1,5 @@
 -- Objective: documents quality indicators per structure
 -- One row per structure, boolean columns for missing administrative documents
---
--- Notes:
--- - Document presence: acte administratif principal (parentId IS NULL) with uploaded file, not flagged isMissing
--- - Autorisation document required only for authorized structure types (CADA, CPH)
--- - CPOM document required when the structure belongs to at least one CPOM (convention on the CPOM)
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_documents_quality" AS
 WITH
   acte_with_file AS (

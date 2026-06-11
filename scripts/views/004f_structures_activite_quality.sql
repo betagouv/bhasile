@@ -1,10 +1,5 @@
 -- Objective: activite quality indicators per structure
 -- One row per structure, boolean columns for activite thresholds
---
--- Scoping:
--- - Présences indues (total > 7%) : CADA + HUDA uniquement (pas suivi en pratique pour CPH/CAES)
--- - Indisponibilité (> 3%) : toutes structures
--- - Basé sur le dernier millésime Activite par DNA, agrégé à la structure
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_activite_quality" AS
 WITH
   activite_dernier_millesime_par_dna AS (

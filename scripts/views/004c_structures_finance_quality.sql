@@ -64,8 +64,7 @@ WITH
       AND b."year" < bd."endYearExclusive"
       AND b."isMissing" IS NOT TRUE
   ),
-  -- filter financial indicators on the same year range as budgets
-  -- and keep one row per structure/year: REALISE first, PREVISIONNEL as a fallback
+  -- filter financial indicators on the same year range as budgets and keep one row per structure/year: REALISE first, PREVISIONNEL as a fallback
   indicateurs_financiers_filtered AS (
     SELECT DISTINCT
       ON (i."structureId", i."year") i.*
@@ -109,7 +108,7 @@ WITH
       b."reserveCompensationAmortissements" AS "reserveCompensationAmortissements",
       b."reportANouveau" AS "reportANouveau",
       b."autre" AS "autre",
-      -- Sum of the tarifée affectation breakdown (7 detail buckets); NULL if all are NULL/0
+      -- Sum of the tarifée affectation breakdown
       NULLIF(
         COALESCE(b."reserveInvestissement", 0) + COALESCE(b."chargesNonReconductibles", 0) + COALESCE(b."reserveCompensationDeficits", 0) + COALESCE(b."reserveCompensationBFR", 0) + COALESCE(b."reserveCompensationAmortissements", 0) + COALESCE(b."reportANouveau", 0) + COALESCE(b."autre", 0),
         0
@@ -134,7 +133,7 @@ WITH
       s."id",
       -- Résultat net = 0 is considered an issue (exclut les NULL)
       BOOL_OR(be."resultat_net" = 0) AS "has_issue_resultat_net_eq_0",
-      -- Authorized structures: affectationReservesFondsDedies is filled but breakdown detail is missing, when RN is non-zero
+      -- Authorized structures: affectationReservesFondsDedies is filled but breakdown detail is missing, when resultat_net is non-zero
       BOOL_OR(
         s."structureType" IN ('CADA', 'CPH')
         AND be."resultat_net" IS NOT NULL
@@ -170,7 +169,7 @@ WITH
           ) - be."resultat_net"
         ) <= 0.01
       ) AS "has_issue_authorized_reprise_wrong_sign",
-      -- Subsidized structures: RN < 0 => excedentRecupere, excedentDeduit, fondsDedies must all be 0/NULL
+      -- Subsidized structures: resultat_net < 0 => excedentRecupere, excedentDeduit, fondsDedies must all be 0/NULL
       BOOL_OR(
         s."structureType" IN ('HUDA', 'CAES')
         AND be."resultat_net" < 0
@@ -180,13 +179,13 @@ WITH
           OR COALESCE(be."fondsDedies", 0) <> 0
         )
       ) AS "has_issue_subsidized_deficit_nonzero_boxes",
-      -- Subsidized structures: RN > 0 => repriseEtat must be 0/NULL
+      -- Subsidized structures: resultat_net > 0 => repriseEtat must be 0/NULL
       BOOL_OR(
         s."structureType" IN ('HUDA', 'CAES')
         AND be."resultat_net" > 0
         AND COALESCE(be."repriseEtat", 0) <> 0
       ) AS "has_issue_subsidized_reprise_etat_nonzero",
-      -- Subsidized structures: RN > 0 => excedentRecupere + excedentDeduit + fondsDedies must equal resultat_net
+      -- Subsidized structures: resultat_net > 0 => excedentRecupere + excedentDeduit + fondsDedies must equal resultat_net
       BOOL_OR(
         s."structureType" IN ('HUDA', 'CAES')
         AND be."resultat_net" > 0
