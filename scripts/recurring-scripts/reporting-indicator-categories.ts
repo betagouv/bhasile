@@ -34,7 +34,7 @@ export const INDICATEURS_NON_CLASSIFIES = [
   "has_issue_authorisation_dates_differ_from_actes_administratifs",
   "has_issue_specific_places_gt_places_autorisees",
   "has_issue_places_structure_vs_address_diff_gt_10pct",
-  "has_issue_taux_encadrement_min_eq_0",
+  "has_issue_taux_encadrement_min_lt_2",
   "has_issue_cout_journalier_min_lt_15",
   "has_issue_resultat_net_eq_0",
   "has_issue_authorized_affectations_breakdown_missing",

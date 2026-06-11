@@ -1,33 +1,19 @@
--- Matrice Metabase — indicateurs globaux (1 ligne) : questionnaire + Efficient
--- Agrégats usage/qualité : MAX (ou SUM pour les MAJ) sur les mois disponibles dans les tables Monthly*
--- Séries mensuelles : reporting."reporting_mensuel"
-CREATE OR REPLACE VIEW:"SCHEMA"."reporting_global" AS
-WITH
-  global_indicators_latest AS (
-    SELECT
-      gi.*
-    FROM
-      reporting."GlobalIndicators" gi
-    ORDER BY
-      gi."updatedAt" DESC
-    LIMIT
-      1
-  ),
-  usage_agg AS (
-    SELECT
-      COALESCE(SUM(m."updatesCount"), 0)::int AS "updates_count_total"
-    FROM
-      reporting."MonthlyReportingMetric" m
+-- Indicateurs d'impact globaux
+CREATE OR REPLACE VIEW :"SCHEMA"."reporting_global" AS WITH global_indicators_latest AS (
+    SELECT gi.*
+    FROM reporting."GlobalIndicators" gi
+    ORDER BY gi."updatedAt" DESC
+    LIMIT 1
+  ), usage_agg AS (
+    SELECT COALESCE(SUM(m."updatesCount"), 0)::int AS "updates_count_total"
+    FROM reporting."MonthlyReportingMetric" m
   ),
   quality_agg AS (
-    SELECT
-      COALESCE(MAX(q."indicateursUtilesCount"), 0)::int AS "indicateurs_utiles_count_max",
+    SELECT COALESCE(MAX(q."indicateursUtilesCount"), 0)::int AS "indicateurs_utiles_count_max",
       COALESCE(MAX(q."indicateursImpactCount"), 0)::int AS "indicateurs_impact_count_max"
-    FROM
-      reporting."MonthlyStructuresGlobalQualityCount" q
+    FROM reporting."MonthlyStructuresGlobalQualityCount" q
   )
-SELECT
-  1 AS "id",
+SELECT 1 AS "id",
   gi."updatedAt" AS "global_indicators_updated_at",
   gi."budgetAnnuel" AS "budget_annuel",
   u."updates_count_total",
@@ -73,7 +59,6 @@ SELECT
     AND gi."budgetAnnuel" IS NOT NULL THEN gi."budgetAnnuel" / qa."indicateurs_impact_count_max"::numeric
     ELSE NULL
   END AS "cout_par_detection_impact"
-FROM
-  global_indicators_latest gi
+FROM global_indicators_latest gi
   CROSS JOIN usage_agg u
   CROSS JOIN quality_agg qa;

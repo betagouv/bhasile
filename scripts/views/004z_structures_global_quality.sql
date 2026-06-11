@@ -51,7 +51,7 @@ SELECT
   -- Finance: taux d'encadrement > seuil selon type (CADA/CPH > 20, HUDA/CAES > 25)
   COALESCE(fin."has_issue_taux_encadrement_max_gt_threshold", FALSE) AS "has_issue_taux_encadrement_max_gt_threshold",
   -- Finance: taux d'encadrement min equals 0 (NULL does not count)
-  COALESCE(fin."has_issue_taux_encadrement_min_eq_0", FALSE) AS "has_issue_taux_encadrement_min_eq_0",
+  COALESCE(fin."has_issue_taux_encadrement_min_lt_2", FALSE) AS "has_issue_taux_encadrement_min_lt_2",
   -- Finance: coût journalier max > tarif cible (par type et zonage IDF / non-IDF)
   COALESCE(fin."has_issue_cout_journalier_max_gt_tarif_cible", FALSE) AS "has_issue_cout_journalier_max_gt_tarif_cible",
   -- Finance: coût journalier min < 15
@@ -85,7 +85,7 @@ SELECT
       COALESCE(cal."has_issue_convention_dates_differ_from_actes_administratifs", FALSE)::int
     ) + (
       COALESCE(cal."has_issue_authorisation_dates_differ_from_actes_administratifs", FALSE)::int
-    ) + (COALESCE(cal."has_issue_evaluation_not_done_in_time", FALSE)::int) + (COALESCE(cal."has_issue_subsidized_convention_gt_3y", FALSE)::int) + (COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE)::int) + (COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE)::int) + (COALESCE(ch."has_issue_dept_code", FALSE)::int) + (COALESCE(ch."has_issue_multi_dna", FALSE)::int) + (COALESCE(ch."has_issue_cpom_mono_structure", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_max_gt_threshold", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_min_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_max_gt_tarif_cible", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_resultat_net_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_authorized_affectations_breakdown_missing", FALSE)::int) + (
+    ) + (COALESCE(cal."has_issue_evaluation_not_done_in_time", FALSE)::int) + (COALESCE(cal."has_issue_subsidized_convention_gt_3y", FALSE)::int) + (COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE)::int) + (COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE)::int) + (COALESCE(ch."has_issue_dept_code", FALSE)::int) + (COALESCE(ch."has_issue_multi_dna", FALSE)::int) + (COALESCE(ch."has_issue_cpom_mono_structure", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_max_gt_threshold", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_min_lt_2", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_max_gt_tarif_cible", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_resultat_net_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_authorized_affectations_breakdown_missing", FALSE)::int) + (
       COALESCE(fin."has_issue_authorized_reprise_plus_affectations_mismatch", FALSE)::int
     ) + (COALESCE(fin."has_issue_authorized_reprise_wrong_sign", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_reprise_etat_nonzero", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE)::int) + (COALESCE(doc."has_issue_missing_convention_document", FALSE)::int) + (COALESCE(doc."has_issue_missing_autorisation_document", FALSE)::int) + (COALESCE(doc."has_issue_missing_cpom_document", FALSE)::int) + (COALESCE(act."has_issue_places_indisponibles_gt_3pct", FALSE)::int) + (COALESCE(act."has_issue_presences_indues_gt_7pct", FALSE)::int)
   ) AS "issues_count"
