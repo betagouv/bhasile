@@ -2,13 +2,18 @@ import { getYearFromDate } from "@/app/utils/date.util";
 import { average, sumValues } from "@/app/utils/math.util";
 import { Prisma, Repartition, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
+import { STRUCTURE_TYPES_DISPLAY_ORDER } from "@/types/structure.type";
 
 import {
   StatistiqueDbActivite,
   StatistiqueDbAdresse,
   StatistiqueDbBudgetAgg,
   StatistiqueDbDepartement,
+  StatistiqueDbDnaLink,
+  StatistiqueDbEig,
   StatistiqueDbEvaluation,
+  StatistiqueDbIndicateurMedianByType,
+  StatistiqueDbIndicateurMedianByYearAndType,
   StatistiqueDbIndicateurMedianGlobal,
   StatistiqueDbIndicateurFinancier,
   StatistiqueDbIndicateurMedian,
@@ -20,6 +25,7 @@ import {
   buildStructureTypesStats,
   getBatiPerStructure,
   getLastTypologiePerStructure,
+  sortByDefinedOrder,
 } from "./statistique.util";
 import {
   countCpoms,
@@ -27,13 +33,15 @@ import {
   findCpomStructures,
   findBudgetsByYear,
   findDepartementsWithPopulation,
-  findDnaCodes,
+  findDnaLinksByStructure,
   findEigs,
   findEvaluations,
   findGlobalMedianIndicateurs,
+  findGlobalMedianIndicateursByType,
   findIndicateursFinanciers,
   findLatestActivites,
   findYearlyMedianIndicateurs,
+  findYearlyMedianIndicateursByType,
   findStructureAdresses,
   findStructureIds,
   findStructuresWithTypes,
@@ -42,7 +50,9 @@ import {
 import {
   ActiviteStat,
   BatiStat,
+  EigStat,
   EvaluationStat,
+  FinanceMedianByType,
   FinanceStat,
   FinanceStatByYear,
   PlacesSpecialesStat,
@@ -153,10 +163,33 @@ const computeYearStats = (
   });
 };
 
+const buildMediansByType = (
+  rows: StatistiqueDbIndicateurMedianByType[],
+  types: StructureType[]
+): FinanceMedianByType[] =>
+  types.map((type) => {
+    const row = rows.find((entry) => entry.type === type);
+    return {
+      type,
+      tauxEncadrementMedian: row?.tauxEncadrementMedian ?? null,
+      coutJournalierMedian: row?.coutJournalierMedian ?? null,
+    };
+  });
+
+const getFinanceTypes = (structures: StatistiqueDbStructure[]): StructureType[] =>
+  sortByDefinedOrder(
+    structures
+      .map((structure) => structure.type)
+      .filter((type): type is StructureType => type !== null),
+    STRUCTURE_TYPES_DISPLAY_ORDER as StructureType[]
+  );
+
 const computeFinanceByYear = (
   budgets: StatistiqueDbBudgetAgg[],
   indicateurs: StatistiqueDbIndicateurFinancier[],
-  medians: StatistiqueDbIndicateurMedian[]
+  medians: StatistiqueDbIndicateurMedian[],
+  mediansByType: StatistiqueDbIndicateurMedianByYearAndType[],
+  financeTypes: StructureType[]
 ): FinanceStatByYear[] => {
   const years = [
     ...new Set([
@@ -187,6 +220,10 @@ const computeFinanceByYear = (
       totalETP,
       tauxEncadrementMedian: median?.tauxEncadrementMedian ?? null,
       coutJournalierMedian: median?.coutJournalierMedian ?? null,
+      byType: buildMediansByType(
+        mediansByType.filter((entry) => entry.year === year),
+        financeTypes
+      ),
       totalProduits,
       totalCharges,
       excedents: resultatNet > 0 ? resultatNet : 0,
@@ -198,7 +235,9 @@ const computeFinanceByYear = (
 
 const aggregateFinanceStat = (
   byYear: FinanceStatByYear[],
-  globalMedian: StatistiqueDbIndicateurMedianGlobal
+  globalMedian: StatistiqueDbIndicateurMedianGlobal,
+  globalMediansByType: StatistiqueDbIndicateurMedianByType[],
+  financeTypes: StructureType[]
 ): FinanceStat => ({
   totalDotationsDemandees: byYear.reduce(
     (acc, yearStat) => acc + yearStat.totalDotationsDemandees,
@@ -211,6 +250,7 @@ const aggregateFinanceStat = (
   totalETP: byYear.reduce((acc, yearStat) => acc + yearStat.totalETP, 0),
   tauxEncadrementMedian: globalMedian.tauxEncadrementMedian,
   coutJournalierMedian: globalMedian.coutJournalierMedian,
+  byType: buildMediansByType(globalMediansByType, financeTypes),
   totalProduits: byYear.reduce(
     (acc, yearStat) => acc + yearStat.totalProduits,
     0
@@ -245,6 +285,40 @@ const computeEvaluationStat = (
     moyenneStructure: average(
       filtered.map((evaluation) => evaluation.noteStructure)
     ),
+  };
+};
+
+const isEigComportementViolent = (type: string): boolean =>
+  type.toLowerCase().includes("comportement violent");
+
+const computeEigStat = (
+  eigs: StatistiqueDbEig[],
+  dnaLinks: StatistiqueDbDnaLink[],
+  structureIds: number[],
+  totalPlaces: number
+): EigStat => {
+  const nbComportementViolent = eigs.filter((eig) =>
+    isEigComportementViolent(eig.type)
+  ).length;
+  const nbAutres = eigs.length - nbComportementViolent;
+  const dnaCodesWithEig = new Set(eigs.map((eig) => eig.dnaCode));
+  const structureIdsWithEig = new Set<number>();
+
+  for (const link of dnaLinks) {
+    if (link.structureId !== null && dnaCodesWithEig.has(link.dna.code)) {
+      structureIdsWithEig.add(link.structureId);
+    }
+  }
+
+  return {
+    pour1000PlacesSur12Mois:
+      totalPlaces > 0 ? (eigs.length / totalPlaces) * 1000 : null,
+    tauxComportementViolent:
+      eigs.length > 0 ? nbComportementViolent / eigs.length : null,
+    nbComportementViolent,
+    nbAutres,
+    nbStructuresSansDeclaration:
+      structureIds.length - structureIdsWithEig.size,
   };
 };
 
@@ -372,6 +446,7 @@ const buildStructureWhere = async (
 export const getStatistiques = async (
   filters: StatistiquesFiltersRaw
 ): Promise<StatistiqueApiRead> => {
+  // TODO: exposer meta.updatedAt par bloc (campagne actualisation, OFII, instant T)
   const where = await buildStructureWhere(filters);
   const structureIds = await findStructureIds(where);
 
@@ -392,7 +467,9 @@ export const getStatistiques = async (
     indicateurs,
     mediansByYear,
     globalMedian,
-    dnaCodes,
+    globalMediansByType,
+    mediansByYearAndType,
+    dnaLinks,
     evaluations,
   ] = await Promise.all([
     countCpoms(structureIds),
@@ -404,9 +481,13 @@ export const getStatistiques = async (
     findIndicateursFinanciers(structureIds),
     findYearlyMedianIndicateurs(structureIds),
     findGlobalMedianIndicateurs(structureIds),
-    findDnaCodes(structureIds),
+    findGlobalMedianIndicateursByType(structureIds),
+    findYearlyMedianIndicateursByType(structureIds),
+    findDnaLinksByStructure(structureIds),
     findEvaluations(structureIds),
   ]);
+
+  const dnaCodes = [...new Set(dnaLinks.map((link) => link.dna.code))];
 
   const [eigs, latestActivites, activitesTimeSeries] = await Promise.all([
     findEigs(dnaCodes, twelveMonthsAgo),
@@ -448,20 +529,22 @@ export const getStatistiques = async (
     departements
   );
 
+  const financeTypes = getFinanceTypes(structures);
   const financeByYear = computeFinanceByYear(
     budgets,
     indicateurs,
-    mediansByYear
+    mediansByYear,
+    mediansByYearAndType,
+    financeTypes
   );
-  const finance = aggregateFinanceStat(financeByYear, globalMedian);
+  const finance = aggregateFinanceStat(
+    financeByYear,
+    globalMedian,
+    globalMediansByType,
+    financeTypes
+  );
 
-  const eigPour1000PlacesSur12Mois =
-    totalPlaces > 0 ? (eigs.length / totalPlaces) * 1000 : null;
-  const eigViolents = eigs.filter((eig) =>
-    eig.type.toLowerCase().includes("comportement violent")
-  ).length;
-  const tauxEigComportementViolent =
-    eigs.length > 0 ? eigViolents / eigs.length : null;
+  const eig = computeEigStat(eigs, dnaLinks, structureIds, totalPlaces);
 
   const evalYears = [
     ...new Set(
@@ -506,8 +589,7 @@ export const getStatistiques = async (
     placesSpeciales,
     finance,
     financeByYear,
-    eigPour1000PlacesSur12Mois,
-    tauxEigComportementViolent,
+    eig,
     evaluationsByYear,
     activites,
   };
@@ -535,6 +617,7 @@ const emptyResult = (): StatistiqueApiRead => ({
     totalETP: 0,
     tauxEncadrementMedian: null,
     coutJournalierMedian: null,
+    byType: [],
     totalProduits: 0,
     totalCharges: 0,
     excedents: 0,
@@ -542,8 +625,13 @@ const emptyResult = (): StatistiqueApiRead => ({
     resultatNet: 0,
   },
   financeByYear: [],
-  eigPour1000PlacesSur12Mois: null,
-  tauxEigComportementViolent: null,
+  eig: {
+    pour1000PlacesSur12Mois: null,
+    tauxComportementViolent: null,
+    nbComportementViolent: 0,
+    nbAutres: 0,
+    nbStructuresSansDeclaration: 0,
+  },
   evaluationsByYear: [],
   activites: {
     placesEnregistreesDna: 0,

@@ -1,4 +1,4 @@
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma, StructureType } from "@/generated/prisma/client";
 
 export type StatistiqueDbStructure = Prisma.StructureGetPayload<{
   select: {
@@ -39,8 +39,16 @@ export type StatistiqueDbEvaluation = Prisma.EvaluationGetPayload<{
 
 export type StatistiqueDbEig = Prisma.EvenementIndesirableGraveGetPayload<{
   select: {
+    dnaCode: true;
     type: true;
     evenementDate: true;
+  };
+}>;
+
+export type StatistiqueDbDnaLink = Prisma.DnaStructureGetPayload<{
+  select: {
+    structureId: true;
+    dna: { select: { code: true } };
   };
 }>;
 
@@ -95,6 +103,17 @@ export type StatistiqueDbIndicateurMedianGlobal = {
   tauxEncadrementMedian: number | null;
   coutJournalierMedian: number | null;
 };
+
+export type StatistiqueDbIndicateurMedianByType = {
+  type: StructureType;
+  tauxEncadrementMedian: number | null;
+  coutJournalierMedian: number | null;
+};
+
+export type StatistiqueDbIndicateurMedianByYearAndType =
+  StatistiqueDbIndicateurMedianByType & {
+    year: number;
+  };
 
 export type StatistiqueDbCpomStructure = Prisma.CpomStructureGetPayload<{
   select: {

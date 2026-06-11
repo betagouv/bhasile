@@ -54,6 +54,18 @@ export type YearStat = {
   placesSpeciales: PlacesSpecialesStat;
 };
 
+export type FinanceMedianByType = {
+  type: StructureType;
+  tauxEncadrementMedian: number | null;
+  coutJournalierMedian: number | null;
+};
+
+export const financeMedianByTypeSchema = z.object({
+  type: z.nativeEnum(StructureType),
+  tauxEncadrementMedian: z.number().nullable(),
+  coutJournalierMedian: z.number().nullable(),
+});
+
 export type FinanceStatByYear = {
   year: number;
   totalDotationsDemandees: number;
@@ -62,6 +74,7 @@ export type FinanceStatByYear = {
   // TODO: vérifier selon hypothèses cible (REALISE vs PREVISIONNEL, périmètre CPOM)
   tauxEncadrementMedian: number | null;
   coutJournalierMedian: number | null;
+  byType: FinanceMedianByType[];
   totalProduits: number;
   totalCharges: number;
   excedents: number;
@@ -70,6 +83,14 @@ export type FinanceStatByYear = {
 };
 
 export type FinanceStat = Omit<FinanceStatByYear, "year">;
+
+export type EigStat = {
+  pour1000PlacesSur12Mois: number | null;
+  tauxComportementViolent: number | null;
+  nbComportementViolent: number;
+  nbAutres: number;
+  nbStructuresSansDeclaration: number;
+};
 
 export type EvaluationStat = {
   year?: number;
@@ -177,6 +198,7 @@ export const statistiqueApiReadSchema = z.object({
     totalETP: z.number(),
     tauxEncadrementMedian: z.number().nullable(),
     coutJournalierMedian: z.number().nullable(),
+    byType: z.array(financeMedianByTypeSchema),
     totalProduits: z.number(),
     totalCharges: z.number(),
     excedents: z.number(),
@@ -191,6 +213,7 @@ export const statistiqueApiReadSchema = z.object({
       totalETP: z.number(),
       tauxEncadrementMedian: z.number().nullable(),
       coutJournalierMedian: z.number().nullable(),
+      byType: z.array(financeMedianByTypeSchema),
       totalProduits: z.number(),
       totalCharges: z.number(),
       excedents: z.number(),
@@ -198,8 +221,13 @@ export const statistiqueApiReadSchema = z.object({
       resultatNet: z.number(),
     })
   ),
-  eigPour1000PlacesSur12Mois: z.number().nullable(),
-  tauxEigComportementViolent: z.number().nullable(),
+  eig: z.object({
+    pour1000PlacesSur12Mois: z.number().nullable(),
+    tauxComportementViolent: z.number().nullable(),
+    nbComportementViolent: z.number(),
+    nbAutres: z.number(),
+    nbStructuresSansDeclaration: z.number(),
+  }),
   evaluationsByYear: z.array(
     z.object({
       year: z.number().optional(),

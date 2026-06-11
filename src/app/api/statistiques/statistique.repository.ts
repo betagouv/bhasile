@@ -7,8 +7,11 @@ import type {
   StatistiqueDbBudgetAgg,
   StatistiqueDbCpomStructure,
   StatistiqueDbDepartement,
+  StatistiqueDbDnaLink,
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
+  StatistiqueDbIndicateurMedianByType,
+  StatistiqueDbIndicateurMedianByYearAndType,
   StatistiqueDbIndicateurMedianGlobal,
   StatistiqueDbIndicateurFinancier,
   StatistiqueDbIndicateurMedian,
@@ -27,7 +30,11 @@ export const findStructureIds = async (
   return rows.map((r) => r.id);
 };
 
+/** CPOMs ayant au moins une structure du périmètre filtré (régional ou départemental). */
 export const countCpoms = async (structureIds: number[]): Promise<number> => {
+  if (structureIds.length === 0) {
+    return 0;
+  }
   return prisma.cpom.count({
     where: {
       structures: {
@@ -187,15 +194,66 @@ export const findGlobalMedianIndicateurs = async (
   return row ?? { tauxEncadrementMedian: null, coutJournalierMedian: null };
 };
 
-/** Codes DNA liés aux structures filtrées */
-export const findDnaCodes = async (
+export const findGlobalMedianIndicateursByType = async (
   structureIds: number[]
-): Promise<string[]> => {
-  const rows = await prisma.dnaStructure.findMany({
+): Promise<StatistiqueDbIndicateurMedianByType[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+  return prisma.$queryRaw<StatistiqueDbIndicateurMedianByType[]>(Prisma.sql`
+    SELECT
+      s.type AS type,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY i."tauxEncadrement") AS "tauxEncadrementMedian",
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY i."coutJournalier")  AS "coutJournalierMedian"
+    FROM public."IndicateurFinancier" i
+    INNER JOIN public."Structure" s ON s.id = i."structureId"
+    WHERE i."structureId" IN (${Prisma.join(structureIds)})
+      AND i."isMissing" IS NOT TRUE
+      AND i.type = 'REALISE'
+      AND s.type IS NOT NULL
+    GROUP BY s.type
+    ORDER BY s.type ASC
+  `);
+};
+
+export const findYearlyMedianIndicateursByType = async (
+  structureIds: number[]
+): Promise<StatistiqueDbIndicateurMedianByYearAndType[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+  return prisma.$queryRaw<StatistiqueDbIndicateurMedianByYearAndType[]>(
+    Prisma.sql`
+    SELECT
+      i.year,
+      s.type AS type,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY i."tauxEncadrement") AS "tauxEncadrementMedian",
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY i."coutJournalier")  AS "coutJournalierMedian"
+    FROM public."IndicateurFinancier" i
+    INNER JOIN public."Structure" s ON s.id = i."structureId"
+    WHERE i."structureId" IN (${Prisma.join(structureIds)})
+      AND i."isMissing" IS NOT TRUE
+      AND i.type = 'REALISE'
+      AND s.type IS NOT NULL
+    GROUP BY i.year, s.type
+    ORDER BY i.year ASC, s.type ASC
+  `
+  );
+};
+
+export const findDnaLinksByStructure = async (
+  structureIds: number[]
+): Promise<StatistiqueDbDnaLink[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+  return prisma.dnaStructure.findMany({
     where: { structureId: { in: structureIds } },
-    select: { dna: { select: { code: true } } },
+    select: {
+      structureId: true,
+      dna: { select: { code: true } },
+    },
   });
-  return [...new Set(rows.map((r) => r.dna.code))];
 };
 
 export const findEigs = async (
@@ -210,7 +268,7 @@ export const findEigs = async (
       dnaCode: { in: dnaCodes },
       evenementDate: { gte: since },
     },
-    select: { type: true, evenementDate: true },
+    select: { dnaCode: true, type: true, evenementDate: true },
   });
 };
 

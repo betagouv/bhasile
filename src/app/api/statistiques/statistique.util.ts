@@ -19,7 +19,7 @@ import {
   StatistiqueDbTypologie,
 } from "./statistique.db.type";
 
-const sortByDefinedOrder = <T>(items: Iterable<T>, order: T[]): T[] =>
+export const sortByDefinedOrder = <T>(items: Iterable<T>, order: T[]): T[] =>
   [...new Set(items)].sort(
     (itemA, itemB) => order.indexOf(itemA) - order.indexOf(itemB)
   );
