@@ -4,14 +4,10 @@ import { Repartition, StructureType } from "@/generated/prisma/client";
 
 // Filtres passés en query params à GET /api/statistiques
 export type StatistiquesFiltersRaw = {
-  /** Numéros de départements séparés par virgule */
-  departements: string | null;
-  /** IDs de régions séparés par virgule */
-  regions: string | null;
-  /** IDs d'opérateurs séparés par virgule — les filiales sont incluses automatiquement */
-  operateurs: string | null;
-  /** Types de structures séparés par virgule (CADA, HUDA, …) */
-  types: string | null;
+  departements: string | null; // Numéros de départements séparés par virgule
+  regions: string | null; // Codes de régions séparés par virgule
+  operateurs: string | null; // Codes d'opérateurs séparés par virgule
+  types: string | null; // Types de structures séparés par virgule
 };
 
 export const structureStatByYearSchema = z.object({
@@ -98,14 +94,12 @@ export type PresencesInduesMois = {
 };
 
 export type ActiviteStat = {
-  /** Nombre de places enregistrées dans DNA (dernier millésime mensuel) */
   placesEnregistreesDna: number;
   placesDisponibles: number;
   placesIndisponibles: number;
   motifsIndisponibilite: MotifIndisponibilite;
   presencesInduesTotalBPI: number;
   presencesInduesTotalDeboutees: number;
-  /** Suivi des présences indues mois par mois */
   suivi: PresencesInduesMois[];
 };
 

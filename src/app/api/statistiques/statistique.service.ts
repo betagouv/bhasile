@@ -3,24 +3,26 @@ import { Prisma, Repartition, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 
 import {
-  ActiviteRow,
-  AdresseRow,
-  BudgetAggRow,
-  DepartementRow,
-  EvaluationRow,
-  GlobalMedianRow,
-  IndicateurRow,
-  MedianRow,
-  StructureRow,
-  TypologieRow,
+  StatistiqueDbActivite,
+  StatistiqueDbAdresse,
+  StatistiqueDbBudgetAgg,
+  StatistiqueDbDepartement,
+  StatistiqueDbEvaluation,
+  StatistiqueDbIndicateurMedianGlobal,
+  StatistiqueDbIndicateurFinancier,
+  StatistiqueDbIndicateurMedian,
+  StatistiqueDbStructure,
+  StatistiqueDbTypologie,
 } from "./statistique.db.type";
 import {
-  buildStructureBatisPivot,
-  buildStructureTypesPivot,
+  buildStructureBatisStats,
+  buildStructureTypesStats,
+  getBatiPerStructure,
+  getLastTypologiePerStructure,
 } from "./statistique.util";
 import {
   countCpoms,
-  findActivitesTimeSeries,
+  findActivites,
   findCpomStructures,
   findBudgetsByYear,
   findDepartementsWithPopulation,
@@ -29,8 +31,8 @@ import {
   findEvaluations,
   findGlobalMedianIndicateurs,
   findIndicateursFinanciers,
-  findLatestActivitesPerDna,
-  findMedianIndicateursByYear,
+  findLatestActivites,
+  findYearlyMedianIndicateurs,
   findStructureAdresses,
   findStructureIds,
   findStructuresWithTypes,
@@ -50,51 +52,9 @@ import {
   YearStat,
 } from "@/schemas/api/statistique.schema";
 
-/**
- * Retourne la dernière typologie valide par structureId.
- */
-const getLastTypologiePerStructure = (
-  typologies: TypologieRow[]
-): Map<number, TypologieRow> => {
-  const map = new Map<number, TypologieRow>();
-  for (const typologie of typologies) {
-    if (typologie.structureId !== null) {
-      map.set(typologie.structureId, typologie);
-    }
-  }
-  return map;
-};
-
-const getBatiPerStructure = (
-  adresses: AdresseRow[]
-): Map<number, Repartition> => {
-  const byStructure = new Map<number, Repartition[]>();
-  for (const adresse of adresses) {
-    if (adresse.structureId === null || adresse.repartition === null) {
-      continue;
-    }
-    const list = byStructure.get(adresse.structureId) ?? [];
-    list.push(adresse.repartition);
-    byStructure.set(adresse.structureId, list);
-  }
-  const result = new Map<number, Repartition>();
-  for (const [structureId, repartitions] of byStructure) {
-    const hasDiffus = repartitions.includes(Repartition.DIFFUS);
-    const hasCollectif = repartitions.includes(Repartition.COLLECTIF);
-    if (hasDiffus && hasCollectif) {
-      result.set(structureId, Repartition.MIXTE);
-    } else if (hasDiffus) {
-      result.set(structureId, Repartition.DIFFUS);
-    } else {
-      result.set(structureId, Repartition.COLLECTIF);
-    }
-  }
-  return result;
-};
-
 const computeTypeStats = (
-  structures: StructureRow[],
-  lastTypologieMap: Map<number, TypologieRow>
+  structures: StatistiqueDbStructure[],
+  lastTypologieMap: Map<number, StatistiqueDbTypologie>
 ): TypeStructureStat[] => {
   const map = new Map<
     StructureType | null,
@@ -116,9 +76,9 @@ const computeTypeStats = (
 };
 
 const computeBatiStats = (
-  structures: StructureRow[],
+  structures: StatistiqueDbStructure[],
   batiMap: Map<number, Repartition>,
-  lastTypologieMap: Map<number, TypologieRow>
+  lastTypologieMap: Map<number, StatistiqueDbTypologie>
 ): BatiStat[] => {
   const map = new Map<Repartition, { count: number; places: number }>();
   for (const structure of structures) {
@@ -138,9 +98,9 @@ const computeBatiStats = (
 };
 
 const computePlacesSpeciales = (
-  structures: StructureRow[],
-  lastTypologieMap: Map<number, TypologieRow>,
-  adresses: AdresseRow[]
+  structures: StatistiqueDbStructure[],
+  lastTypologieMap: Map<number, StatistiqueDbTypologie>,
+  adresses: StatistiqueDbAdresse[]
 ): PlacesSpecialesStat => {
   let pmr = 0,
     lgbt = 0,
@@ -165,8 +125,8 @@ const computePlacesSpeciales = (
 };
 
 const computeTotalPlaces = (
-  structures: StructureRow[],
-  lastTypologieMap: Map<number, TypologieRow>
+  structures: StatistiqueDbStructure[],
+  lastTypologieMap: Map<number, StatistiqueDbTypologie>
 ): number => {
   let totalPlaces = 0;
   for (const structure of structures) {
@@ -180,9 +140,9 @@ const computeTotalPlaces = (
 };
 
 const computeYearStats = (
-  typologies: TypologieRow[],
-  structures: StructureRow[],
-  adresses: AdresseRow[],
+  typologies: StatistiqueDbTypologie[],
+  structures: StatistiqueDbStructure[],
+  adresses: StatistiqueDbAdresse[],
   batiMap: Map<number, Repartition>
 ): YearStat[] => {
   const years = [
@@ -210,9 +170,9 @@ const computeYearStats = (
 };
 
 const computeFinanceByYear = (
-  budgets: BudgetAggRow[],
-  indicateurs: IndicateurRow[],
-  medians: MedianRow[]
+  budgets: StatistiqueDbBudgetAgg[],
+  indicateurs: StatistiqueDbIndicateurFinancier[],
+  medians: StatistiqueDbIndicateurMedian[]
 ): FinanceStatByYear[] => {
   const years = [
     ...new Set([
@@ -254,7 +214,7 @@ const computeFinanceByYear = (
 
 const aggregateFinanceStat = (
   byYear: FinanceStatByYear[],
-  globalMedian: GlobalMedianRow
+  globalMedian: StatistiqueDbIndicateurMedianGlobal
 ): FinanceStat => ({
   totalDotationsDemandees: byYear.reduce(
     (acc, yearStat) => acc + yearStat.totalDotationsDemandees,
@@ -289,7 +249,7 @@ const avg = (values: (number | null)[]): number | null => {
 };
 
 const computeEvaluationStat = (
-  evaluations: EvaluationRow[],
+  evaluations: StatistiqueDbEvaluation[],
   year?: number
 ): EvaluationStat => {
   const filtered = year
@@ -311,8 +271,8 @@ const computeEvaluationStat = (
 };
 
 const computeActiviteStat = (
-  latest: ActiviteRow[],
-  timeSeries: ActiviteRow[]
+  latest: StatistiqueDbActivite[],
+  timeSeries: StatistiqueDbActivite[]
 ): ActiviteStat => {
   const placesAutorisees =
     sumValues(latest.map((activite) => activite.placesAutorisees)) ?? 0;
@@ -366,9 +326,9 @@ const computeActiviteStat = (
 };
 
 const computeTauxEquipement = (
-  structures: StructureRow[],
-  lastTypologieMap: Map<number, TypologieRow>,
-  departements: DepartementRow[]
+  structures: StatistiqueDbStructure[],
+  lastTypologieMap: Map<number, StatistiqueDbTypologie>,
+  departements: StatistiqueDbDepartement[]
 ): TauxEquipementDept[] => {
   const placesByDept = new Map<string, number>();
   for (const structure of structures) {
@@ -393,8 +353,6 @@ const computeTauxEquipement = (
     };
   });
 };
-
-// ---- Filtres ----
 
 export const buildStructureWhere = async (
   filters: StatistiquesFiltersRaw
@@ -433,8 +391,6 @@ export const buildStructureWhere = async (
   return where;
 };
 
-// ---- Point d'entrée ----
-
 export const getStatistiques = async (
   filters: StatistiquesFiltersRaw
 ): Promise<StatistiquesApiType> => {
@@ -468,7 +424,7 @@ export const getStatistiques = async (
     findCpomStructures(structureIds),
     findBudgetsByYear(structureIds),
     findIndicateursFinanciers(structureIds),
-    findMedianIndicateursByYear(structureIds),
+    findYearlyMedianIndicateurs(structureIds),
     findGlobalMedianIndicateurs(structureIds),
     findDnaCodes(structureIds),
     findEvaluations(structureIds),
@@ -476,8 +432,8 @@ export const getStatistiques = async (
 
   const [eigs, latestActivites, activitesTimeSeries] = await Promise.all([
     findEigs(dnaCodes, twelveMonthsAgo),
-    findLatestActivitesPerDna(dnaCodes),
-    findActivitesTimeSeries(dnaCodes),
+    findLatestActivites(dnaCodes),
+    findActivites(dnaCodes),
   ]);
 
   const deptNumeros = [
@@ -540,13 +496,13 @@ export const getStatistiques = async (
 
   const activites = computeActiviteStat(latestActivites, activitesTimeSeries);
 
-  const structureTypes = buildStructureTypesPivot(
+  const structureTypes = buildStructureTypesStats(
     byYear,
     structures,
     typologies,
     cpomLinks
   );
-  const structureBatis = buildStructureBatisPivot(
+  const structureBatis = buildStructureBatisStats(
     byYear,
     structures,
     typologies,

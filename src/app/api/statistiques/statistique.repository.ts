@@ -2,36 +2,19 @@ import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 
 import type {
-  ActiviteRow,
-  AdresseRow,
-  BudgetAggRow,
-  CpomStructureRow,
-  DepartementRow,
-  EigRow,
-  EvaluationRow,
-  GlobalMedianRow,
-  IndicateurRow,
-  MedianRow,
-  StructureRow,
-  TypologieRow,
+  StatistiqueDbActivite,
+  StatistiqueDbAdresse,
+  StatistiqueDbBudgetAgg,
+  StatistiqueDbCpomStructure,
+  StatistiqueDbDepartement,
+  StatistiqueDbEig,
+  StatistiqueDbEvaluation,
+  StatistiqueDbIndicateurMedianGlobal,
+  StatistiqueDbIndicateurFinancier,
+  StatistiqueDbIndicateurMedian,
+  StatistiqueDbStructure,
+  StatistiqueDbTypologie,
 } from "./statistique.db.type";
-
-export type {
-  ActiviteRow,
-  AdresseRow,
-  BudgetAggRow,
-  CpomStructureRow,
-  DepartementRow,
-  EigRow,
-  EvaluationRow,
-  GlobalMedianRow,
-  IndicateurRow,
-  MedianRow,
-  StructureRow,
-  TypologieRow,
-} from "./statistique.db.type";
-
-// ---- Query functions ----
 
 export const findStructureIds = async (
   where: Prisma.StructureWhereInput
@@ -56,7 +39,7 @@ export const countCpoms = async (structureIds: number[]): Promise<number> => {
 
 export const findCpomStructures = async (
   structureIds: number[]
-): Promise<CpomStructureRow[]> => {
+): Promise<StatistiqueDbCpomStructure[]> => {
   if (structureIds.length === 0) {
     return [];
   }
@@ -73,7 +56,7 @@ export const findCpomStructures = async (
 
 export const findStructuresWithTypes = async (
   structureIds: number[]
-): Promise<StructureRow[]> => {
+): Promise<StatistiqueDbStructure[]> => {
   return prisma.structure.findMany({
     where: { id: { in: structureIds } },
     select: {
@@ -86,7 +69,7 @@ export const findStructuresWithTypes = async (
 
 export const findStructureTypologies = async (
   structureIds: number[]
-): Promise<TypologieRow[]> => {
+): Promise<StatistiqueDbTypologie[]> => {
   return prisma.structureTypologie.findMany({
     where: { structureId: { in: structureIds } },
     select: {
@@ -103,7 +86,7 @@ export const findStructureTypologies = async (
 
 export const findStructureAdresses = async (
   structureIds: number[]
-): Promise<AdresseRow[]> => {
+): Promise<StatistiqueDbAdresse[]> => {
   return prisma.adresse.findMany({
     where: { structureId: { in: structureIds } },
     select: {
@@ -116,7 +99,7 @@ export const findStructureAdresses = async (
 
 export const findBudgetsByYear = async (
   structureIds: number[]
-): Promise<BudgetAggRow[]> => {
+): Promise<StatistiqueDbBudgetAgg[]> => {
   const grouped = await prisma.budget.groupBy({
     by: ["year"],
     where: {
@@ -143,7 +126,7 @@ export const findBudgetsByYear = async (
 /** Indicateurs bruts pour aggrégation ETP */
 export const findIndicateursFinanciers = async (
   structureIds: number[]
-): Promise<IndicateurRow[]> => {
+): Promise<StatistiqueDbIndicateurFinancier[]> => {
   return prisma.indicateurFinancier.findMany({
     where: {
       structureId: { in: structureIds },
@@ -163,13 +146,13 @@ export const findIndicateursFinanciers = async (
 };
 
 /** Médiane taux d'encadrement + coût journalier par année */
-export const findMedianIndicateursByYear = async (
+export const findYearlyMedianIndicateurs = async (
   structureIds: number[]
-): Promise<MedianRow[]> => {
+): Promise<StatistiqueDbIndicateurMedian[]> => {
   if (structureIds.length === 0) {
     return [];
   }
-  return prisma.$queryRaw<MedianRow[]>(Prisma.sql`
+  return prisma.$queryRaw<StatistiqueDbIndicateurMedian[]>(Prisma.sql`
     SELECT
       year,
       PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY "tauxEncadrement") AS "tauxEncadrementMedian",
@@ -186,11 +169,13 @@ export const findMedianIndicateursByYear = async (
 /** Médiane globale */
 export const findGlobalMedianIndicateurs = async (
   structureIds: number[]
-): Promise<GlobalMedianRow> => {
+): Promise<StatistiqueDbIndicateurMedianGlobal> => {
   if (structureIds.length === 0) {
     return { tauxEncadrementMedian: null, coutJournalierMedian: null };
   }
-  const [row] = await prisma.$queryRaw<GlobalMedianRow[]>(Prisma.sql`
+  const [row] = await prisma.$queryRaw<
+    StatistiqueDbIndicateurMedianGlobal[]
+  >(Prisma.sql`
     SELECT
       PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY "tauxEncadrement") AS "tauxEncadrementMedian",
       PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY "coutJournalier")  AS "coutJournalierMedian"
@@ -216,7 +201,7 @@ export const findDnaCodes = async (
 export const findEigs = async (
   dnaCodes: string[],
   since: Date
-): Promise<EigRow[]> => {
+): Promise<StatistiqueDbEig[]> => {
   if (dnaCodes.length === 0) {
     return [];
   }
@@ -231,7 +216,7 @@ export const findEigs = async (
 
 export const findEvaluations = async (
   structureIds: number[]
-): Promise<EvaluationRow[]> => {
+): Promise<StatistiqueDbEvaluation[]> => {
   return prisma.evaluation.findMany({
     where: { structureId: { in: structureIds } },
     select: {
@@ -244,16 +229,14 @@ export const findEvaluations = async (
   });
 };
 
-/**
- * Dernier millésime mensuel par DNA pour agréger sur l'état courant des activités.
- */
-export const findLatestActivitesPerDna = async (
+/** Dernier millésime mensuel par DNA pour agréger sur l'état courant des activités. */
+export const findLatestActivites = async (
   dnaCodes: string[]
-): Promise<ActiviteRow[]> => {
+): Promise<StatistiqueDbActivite[]> => {
   if (dnaCodes.length === 0) {
     return [];
   }
-  return prisma.$queryRaw<ActiviteRow[]>(Prisma.sql`
+  return prisma.$queryRaw<StatistiqueDbActivite[]>(Prisma.sql`
     SELECT DISTINCT ON (a."dnaCode")
       a."dnaCode",
       a.date,
@@ -273,9 +256,9 @@ export const findLatestActivitesPerDna = async (
 };
 
 /** Toutes les activités, pour le suivi des présences indues dans le temps */
-export const findActivitesTimeSeries = async (
+export const findActivites = async (
   dnaCodes: string[]
-): Promise<ActiviteRow[]> => {
+): Promise<StatistiqueDbActivite[]> => {
   if (dnaCodes.length === 0) {
     return [];
   }
@@ -300,7 +283,7 @@ export const findActivitesTimeSeries = async (
 
 export const findDepartementsWithPopulation = async (
   departementNumeros: string[]
-): Promise<DepartementRow[]> => {
+): Promise<StatistiqueDbDepartement[]> => {
   return prisma.departement.findMany({
     where:
       departementNumeros.length > 0

@@ -1,6 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 
-export type StructureRow = Prisma.StructureGetPayload<{
+export type StatistiqueDbStructure = Prisma.StructureGetPayload<{
   select: {
     id: true;
     type: true;
@@ -8,7 +8,7 @@ export type StructureRow = Prisma.StructureGetPayload<{
   };
 }>;
 
-export type TypologieRow = Prisma.StructureTypologieGetPayload<{
+export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
   select: {
     structureId: true;
     year: true;
@@ -19,7 +19,7 @@ export type TypologieRow = Prisma.StructureTypologieGetPayload<{
   };
 }>;
 
-export type AdresseRow = Prisma.AdresseGetPayload<{
+export type StatistiqueDbAdresse = Prisma.AdresseGetPayload<{
   select: {
     structureId: true;
     repartition: true;
@@ -27,7 +27,7 @@ export type AdresseRow = Prisma.AdresseGetPayload<{
   };
 }>;
 
-export type EvaluationRow = Prisma.EvaluationGetPayload<{
+export type StatistiqueDbEvaluation = Prisma.EvaluationGetPayload<{
   select: {
     date: true;
     note: true;
@@ -37,14 +37,14 @@ export type EvaluationRow = Prisma.EvaluationGetPayload<{
   };
 }>;
 
-export type EigRow = Prisma.EvenementIndesirableGraveGetPayload<{
+export type StatistiqueDbEig = Prisma.EvenementIndesirableGraveGetPayload<{
   select: {
     type: true;
     evenementDate: true;
   };
 }>;
 
-export type ActiviteRow = Prisma.ActiviteGetPayload<{
+export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
   select: {
     dnaCode: true;
     date: true;
@@ -60,7 +60,7 @@ export type ActiviteRow = Prisma.ActiviteGetPayload<{
   };
 }>;
 
-export type IndicateurRow = Prisma.IndicateurFinancierGetPayload<{
+export type StatistiqueDbIndicateurFinancier = Prisma.IndicateurFinancierGetPayload<{
   select: {
     structureId: true;
     year: true;
@@ -71,7 +71,7 @@ export type IndicateurRow = Prisma.IndicateurFinancierGetPayload<{
   };
 }>;
 
-export type DepartementRow = Prisma.DepartementGetPayload<{
+export type StatistiqueDbDepartement = Prisma.DepartementGetPayload<{
   select: {
     numero: true;
     name: true;
@@ -79,7 +79,7 @@ export type DepartementRow = Prisma.DepartementGetPayload<{
   };
 }>;
 
-export type BudgetAggRow = {
+export type StatistiqueDbBudgetAgg = {
   year: number;
   dotationDemandee: number;
   dotationAccordee: number;
@@ -87,18 +87,18 @@ export type BudgetAggRow = {
   totalCharges: number;
 };
 
-export type MedianRow = {
+export type StatistiqueDbIndicateurMedian = {
   year: number;
   tauxEncadrementMedian: number | null;
   coutJournalierMedian: number | null;
 };
 
-export type GlobalMedianRow = {
+export type StatistiqueDbIndicateurMedianGlobal = {
   tauxEncadrementMedian: number | null;
   coutJournalierMedian: number | null;
 };
 
-export type CpomStructureRow = Prisma.CpomStructureGetPayload<{
+export type StatistiqueDbCpomStructure = Prisma.CpomStructureGetPayload<{
   select: {
     cpomId: true;
     structureId: true;

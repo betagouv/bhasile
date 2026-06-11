@@ -1,4 +1,5 @@
 import { Repartition, StructureType } from "@/generated/prisma/client";
+import { getYearFromDate } from "@/app/utils/date.util";
 import {
   StructureBatiStat,
   StructureStatByYear,
@@ -8,12 +9,13 @@ import {
 import { RepartitionLabel } from "@/types/adresse.type";
 
 import {
-  AdresseRow,
-  CpomStructureRow,
-  StructureRow,
-  TypologieRow,
+  StatistiqueDbAdresse,
+  StatistiqueDbCpomStructure,
+  StatistiqueDbStructure,
+  StatistiqueDbTypologie,
 } from "./statistique.db.type";
 
+// Tri pour affichage simplifié ensuite côté front
 const STRUCTURE_TYPE_ORDER: StructureType[] = [
   StructureType.CADA,
   StructureType.CAES,
@@ -28,10 +30,24 @@ const BATI_ORDER: Repartition[] = [
   Repartition.MIXTE,
 ];
 
-const getLastTypologiePerStructure = (
-  typologies: TypologieRow[]
-): Map<number, TypologieRow> => {
-  const map = new Map<number, TypologieRow>();
+const sortTypes = (types: Iterable<StructureType | null>): StructureType[] =>
+  [...new Set(types)]
+    .filter((type): type is StructureType => type !== null)
+    .sort(
+      (typeA, typeB) =>
+        STRUCTURE_TYPE_ORDER.indexOf(typeA) -
+        STRUCTURE_TYPE_ORDER.indexOf(typeB)
+    );
+
+const sortBatis = (batis: Iterable<Repartition>): Repartition[] =>
+  [...new Set(batis)].sort(
+    (batiA, batiB) => BATI_ORDER.indexOf(batiA) - BATI_ORDER.indexOf(batiB)
+  );
+
+export const getLastTypologiePerStructure = (
+  typologies: StatistiqueDbTypologie[]
+): Map<number, StatistiqueDbTypologie> => {
+  const map = new Map<number, StatistiqueDbTypologie>();
   for (const typologie of typologies) {
     if (typologie.structureId !== null) {
       map.set(typologie.structureId, typologie);
@@ -40,8 +56,8 @@ const getLastTypologiePerStructure = (
   return map;
 };
 
-const getBatiPerStructure = (
-  adresses: AdresseRow[]
+export const getBatiPerStructure = (
+  adresses: StatistiqueDbAdresse[]
 ): Map<number, Repartition> => {
   const byStructure = new Map<number, Repartition[]>();
   for (const adresse of adresses) {
@@ -67,46 +83,49 @@ const getBatiPerStructure = (
   return result;
 };
 
-const isCpomLinkActiveAtYearEnd = (
-  dateStart: Date | null,
-  dateEnd: Date | null,
-  year: number
-): boolean => {
-  const yearEnd = new Date(year, 11, 31, 23, 59, 59, 999);
-  const startOk = !dateStart || dateStart <= yearEnd;
-  const endOk = !dateEnd || dateEnd >= yearEnd;
-  return startOk && endOk;
-};
-
-export const countCpomsForStructureSet = (
-  cpomLinks: CpomStructureRow[],
+const countCpomsForStructureSet = (
+  cpomLinks: StatistiqueDbCpomStructure[],
   structureIds: Set<number>,
   year: number
 ): number => {
   const activeCpomIds = new Set<number>();
   for (const link of cpomLinks) {
-    if (!structureIds.has(link.structureId)) {
-      continue;
+    if (
+      structureIds.has(link.structureId) &&
+      (!link.dateStart || getYearFromDate(link.dateStart) <= year) &&
+      (!link.dateEnd || getYearFromDate(link.dateEnd) >= year)
+    ) {
+      activeCpomIds.add(link.cpomId);
     }
-    if (!isCpomLinkActiveAtYearEnd(link.dateStart, link.dateEnd, year)) {
-      continue;
-    }
-    activeCpomIds.add(link.cpomId);
   }
   return activeCpomIds.size;
 };
 
-const getStructureIdsByTypeAtYear = (
+// Retourne les structures pour une année donnée
+
+const getActiveStructuresAtYear = (
   year: number,
-  structures: StructureRow[],
-  typologies: TypologieRow[]
-): Map<StructureType | null, Set<number>> => {
+  structures: StatistiqueDbStructure[],
+  typologies: StatistiqueDbTypologie[]
+): StatistiqueDbStructure[] => {
   const lastTypologieMap = getLastTypologiePerStructure(
     typologies.filter((typologie) => typologie.year <= year)
   );
-  const map = new Map<StructureType | null, Set<number>>();
-  for (const structure of structures) {
-    if (!lastTypologieMap.has(structure.id)) {
+  return structures.filter((structure) => lastTypologieMap.has(structure.id));
+};
+
+const getStructureIdsByTypeAtYear = (
+  year: number,
+  structures: StatistiqueDbStructure[],
+  typologies: StatistiqueDbTypologie[]
+): Map<StructureType, Set<number>> => {
+  const map = new Map<StructureType, Set<number>>();
+  for (const structure of getActiveStructuresAtYear(
+    year,
+    structures,
+    typologies
+  )) {
+    if (structure.type === null) {
       continue;
     }
     const ids = map.get(structure.type) ?? new Set<number>();
@@ -118,18 +137,16 @@ const getStructureIdsByTypeAtYear = (
 
 const getStructureIdsByBatiAtYear = (
   year: number,
-  structures: StructureRow[],
-  typologies: TypologieRow[],
+  structures: StatistiqueDbStructure[],
+  typologies: StatistiqueDbTypologie[],
   batiMap: Map<number, Repartition>
 ): Map<Repartition, Set<number>> => {
-  const lastTypologieMap = getLastTypologiePerStructure(
-    typologies.filter((typologie) => typologie.year <= year)
-  );
   const map = new Map<Repartition, Set<number>>();
-  for (const structure of structures) {
-    if (!lastTypologieMap.has(structure.id)) {
-      continue;
-    }
+  for (const structure of getActiveStructuresAtYear(
+    year,
+    structures,
+    typologies
+  )) {
     const bati = batiMap.get(structure.id) ?? Repartition.COLLECTIF;
     const ids = map.get(bati) ?? new Set<number>();
     ids.add(structure.id);
@@ -138,89 +155,84 @@ const getStructureIdsByBatiAtYear = (
   return map;
 };
 
-const sortTypes = (types: Iterable<StructureType | null>): StructureType[] => {
-  const unique = [...new Set(types)].filter(
-    (type): type is StructureType => type !== null
-  );
-  return unique.sort(
-    (typeA, typeB) =>
-      STRUCTURE_TYPE_ORDER.indexOf(typeA) - STRUCTURE_TYPE_ORDER.indexOf(typeB)
-  );
-};
+// Regroupe les stats annuelles par catégorie (type, bâti, ...) pour le format API front
 
-const sortBatis = (batis: Iterable<Repartition>): Repartition[] => {
-  const unique = [...new Set(batis)];
-  return unique.sort(
-    (batiA, batiB) => BATI_ORDER.indexOf(batiA) - BATI_ORDER.indexOf(batiB)
-  );
-};
-
-const buildByYearEntries = (
-  yearsDesc: YearStat[],
-  getStructureIdsForYear: (yearStat: YearStat) => Set<number>,
-  getStatsForYear: (
-    yearStat: YearStat
-  ) => Pick<StructureStatByYear, "structures" | "places">,
-  cpomLinks: CpomStructureRow[]
-): StructureStatByYear[] =>
-  yearsDesc.map((yearStat) => {
-    const structureIds = getStructureIdsForYear(yearStat);
-    const stats = getStatsForYear(yearStat);
-    return {
-      year: yearStat.year,
-      structures: stats.structures,
-      places: stats.places,
-      cpoms: countCpomsForStructureSet(
-        cpomLinks,
-        structureIds,
-        yearStat.year
-      ),
-    };
-  });
-
-export const buildStructureTypesPivot = (
+const buildGroupedStatsByYear = <FieldToGroupBy>(
   byYear: YearStat[],
-  structures: StructureRow[],
-  typologies: TypologieRow[],
-  cpomLinks: CpomStructureRow[]
+  cpomLinks: StatistiqueDbCpomStructure[],
+  fieldsToGroupBy: FieldToGroupBy[],
+  options: {
+    getLabel: (fieldToGroupBy: FieldToGroupBy) => string;
+    getStructureIds: (
+      year: number,
+      fieldToGroupBy: FieldToGroupBy
+    ) => Set<number>;
+    getStats: (
+      yearStat: YearStat,
+      fieldToGroupBy: FieldToGroupBy
+    ) => Pick<StructureStatByYear, "structures" | "places">;
+  }
+): StructureTypeStat[] => {
+  const yearsDesc = [...byYear].sort((yearA, yearB) => yearB.year - yearA.year);
+
+  return fieldsToGroupBy.map((fieldToGroupBy) => ({
+    label: options.getLabel(fieldToGroupBy),
+    byYear: yearsDesc.map((yearStat) => {
+      const stats = options.getStats(yearStat, fieldToGroupBy);
+      return {
+        year: yearStat.year,
+        structures: stats.structures,
+        places: stats.places,
+        cpoms: countCpomsForStructureSet(
+          cpomLinks,
+          options.getStructureIds(yearStat.year, fieldToGroupBy),
+          yearStat.year
+        ),
+      };
+    }),
+  }));
+};
+
+export const buildStructureTypesStats = (
+  byYear: YearStat[],
+  structures: StatistiqueDbStructure[],
+  typologies: StatistiqueDbTypologie[],
+  cpomLinks: StatistiqueDbCpomStructure[]
 ): StructureTypeStat[] => {
   if (byYear.length === 0) {
     return [];
   }
 
   const types = sortTypes(
-    byYear.flatMap((yearStat) => yearStat.byType.map((typeStat) => typeStat.type))
+    byYear.flatMap((yearStat) =>
+      yearStat.byType.map((typeStat) => typeStat.type)
+    )
   );
-  const yearsDesc = [...byYear].sort((yearA, yearB) => yearB.year - yearA.year);
 
-  return types.map((type) => ({
-    label: type,
-    byYear: buildByYearEntries(
-      yearsDesc,
-      (yearStat) =>
-        getStructureIdsByTypeAtYear(yearStat.year, structures, typologies).get(
-          type
-        ) ?? new Set<number>(),
-      (yearStat) => {
-        const typeStat = yearStat.byType.find(
-          (entry) => entry.type === type
-        );
-        return {
-          structures: typeStat?.structures ?? 0,
-          places: typeStat?.places ?? 0,
-        };
-      },
-      cpomLinks
-    ),
-  }));
+  return buildGroupedStatsByYear(byYear, cpomLinks, types, {
+    getLabel: (structureType) => structureType,
+    getStructureIds: (year, structureType) =>
+      getStructureIdsByTypeAtYear(year, structures, typologies).get(
+        structureType
+      ) ?? new Set<number>(),
+    getStats: (yearStat, structureType) => {
+      const typeStat = yearStat.byType.find(
+        (entry) => entry.type === structureType
+      );
+      return {
+        structures: typeStat?.structures ?? 0,
+        places: typeStat?.places ?? 0,
+      };
+    },
+  });
 };
 
-export const buildStructureBatisPivot = (
+export const buildStructureBatisStats = (
   byYear: YearStat[],
-  structures: StructureRow[],
-  typologies: TypologieRow[],
-  adresses: AdresseRow[],
-  cpomLinks: CpomStructureRow[]
+  structures: StatistiqueDbStructure[],
+  typologies: StatistiqueDbTypologie[],
+  adresses: StatistiqueDbAdresse[],
+  cpomLinks: StatistiqueDbCpomStructure[]
 ): StructureBatiStat[] => {
   if (byYear.length === 0) {
     return [];
@@ -228,29 +240,27 @@ export const buildStructureBatisPivot = (
 
   const batiMap = getBatiPerStructure(adresses);
   const batis = sortBatis(
-    byYear.flatMap((yearStat) => yearStat.byBati.map((batiStat) => batiStat.bati))
+    byYear.flatMap((yearStat) =>
+      yearStat.byBati.map((batiStat) => batiStat.bati)
+    )
   );
-  const yearsDesc = [...byYear].sort((yearA, yearB) => yearB.year - yearA.year);
 
-  return batis.map((bati) => ({
-    label: RepartitionLabel[bati as keyof typeof RepartitionLabel] ?? bati,
-    byYear: buildByYearEntries(
-      yearsDesc,
-      (yearStat) =>
-        getStructureIdsByBatiAtYear(
-          yearStat.year,
-          structures,
-          typologies,
-          batiMap
-        ).get(bati) ?? new Set<number>(),
-      (yearStat) => {
-        const batiStat = yearStat.byBati.find((entry) => entry.bati === bati);
-        return {
-          structures: batiStat?.structures ?? 0,
-          places: batiStat?.places ?? 0,
-        };
-      },
-      cpomLinks
-    ),
-  }));
+  return buildGroupedStatsByYear(byYear, cpomLinks, batis, {
+    getLabel: (repartition) =>
+      RepartitionLabel[repartition as keyof typeof RepartitionLabel] ??
+      repartition,
+    getStructureIds: (year, repartition) =>
+      getStructureIdsByBatiAtYear(year, structures, typologies, batiMap).get(
+        repartition
+      ) ?? new Set<number>(),
+    getStats: (yearStat, repartition) => {
+      const batiStat = yearStat.byBati.find(
+        (entry) => entry.bati === repartition
+      );
+      return {
+        structures: batiStat?.structures ?? 0,
+        places: batiStat?.places ?? 0,
+      };
+    },
+  });
 };
