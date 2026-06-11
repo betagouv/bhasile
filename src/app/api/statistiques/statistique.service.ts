@@ -15,8 +15,13 @@ import {
   TypologieRow,
 } from "./statistique.db.type";
 import {
+  buildStructureBatisPivot,
+  buildStructureTypesPivot,
+} from "./statistique.util";
+import {
   countCpoms,
   findActivitesTimeSeries,
+  findCpomStructures,
   findBudgetsByYear,
   findDepartementsWithPopulation,
   findDnaCodes,
@@ -38,25 +43,24 @@ import {
   FinanceStat,
   FinanceStatByYear,
   PlacesSpecialesStat,
-  StatistiquesApiRead,
+  StatistiquesApiType,
   StatistiquesFiltersRaw,
   TauxEquipementDept,
   TypeStructureStat,
   YearStat,
 } from "@/schemas/api/statistique.schema";
 
-// ---- helpers ----
-
 /**
- * Retourne la dernière StructureTypologie valide par structureId.
- * typologies doit être trié par year ASC (le dernier overwrite gagne).
+ * Retourne la dernière typologie valide par structureId.
  */
 const getLastTypologiePerStructure = (
   typologies: TypologieRow[]
 ): Map<number, TypologieRow> => {
   const map = new Map<number, TypologieRow>();
   for (const typologie of typologies) {
-    if (typologie.structureId !== null) {map.set(typologie.structureId, typologie);}
+    if (typologie.structureId !== null) {
+      map.set(typologie.structureId, typologie);
+    }
   }
   return map;
 };
@@ -66,7 +70,9 @@ const getBatiPerStructure = (
 ): Map<number, Repartition> => {
   const byStructure = new Map<number, Repartition[]>();
   for (const adresse of adresses) {
-    if (adresse.structureId === null || adresse.repartition === null) {continue;}
+    if (adresse.structureId === null || adresse.repartition === null) {
+      continue;
+    }
     const list = byStructure.get(adresse.structureId) ?? [];
     list.push(adresse.repartition);
     byStructure.set(adresse.structureId, list);
@@ -75,9 +81,13 @@ const getBatiPerStructure = (
   for (const [structureId, repartitions] of byStructure) {
     const hasDiffus = repartitions.includes(Repartition.DIFFUS);
     const hasCollectif = repartitions.includes(Repartition.COLLECTIF);
-    if (hasDiffus && hasCollectif) {result.set(structureId, Repartition.MIXTE);}
-    else if (hasDiffus) {result.set(structureId, Repartition.DIFFUS);}
-    else {result.set(structureId, Repartition.COLLECTIF);}
+    if (hasDiffus && hasCollectif) {
+      result.set(structureId, Repartition.MIXTE);
+    } else if (hasDiffus) {
+      result.set(structureId, Repartition.DIFFUS);
+    } else {
+      result.set(structureId, Repartition.COLLECTIF);
+    }
   }
   return result;
 };
@@ -100,8 +110,8 @@ const computeTypeStats = (
   }
   return Array.from(map.entries()).map(([type, { count, places }]) => ({
     type,
-    nbStructures: count,
-    placesAutorisees: places,
+    structures: count,
+    places,
   }));
 };
 
@@ -122,8 +132,8 @@ const computeBatiStats = (
   }
   return Array.from(map.entries()).map(([bati, { count, places }]) => ({
     bati,
-    nbStructures: count,
-    placesAutorisees: places,
+    structures: count,
+    places,
   }));
 };
 
@@ -132,14 +142,14 @@ const computePlacesSpeciales = (
   lastTypologieMap: Map<number, TypologieRow>,
   adresses: AdresseRow[]
 ): PlacesSpecialesStat => {
-  let placesAutorisees = 0,
-    pmr = 0,
+  let pmr = 0,
     lgbt = 0,
     fvvTeh = 0;
   for (const structure of structures) {
     const typologie = lastTypologieMap.get(structure.id);
-    if (!typologie) {continue;}
-    placesAutorisees += typologie.placesAutorisees ?? 0;
+    if (!typologie) {
+      continue;
+    }
     pmr += typologie.pmr ?? 0;
     lgbt += typologie.lgbt ?? 0;
     fvvTeh += typologie.fvvTeh ?? 0;
@@ -151,7 +161,22 @@ const computePlacesSpeciales = (
         adresse.structureId !== null && structureIds.has(adresse.structureId!)
     )
     .reduce((acc, adresse) => acc + (adresse.logementSocial ?? 0), 0);
-  return { placesAutorisees, pmr, lgbt, fvvTeh, logementsSociaux };
+  return { pmr, lgbt, fvvTeh, logementsSociaux };
+};
+
+const computeTotalPlaces = (
+  structures: StructureRow[],
+  lastTypologieMap: Map<number, TypologieRow>
+): number => {
+  let totalPlaces = 0;
+  for (const structure of structures) {
+    const typologie = lastTypologieMap.get(structure.id);
+    if (!typologie) {
+      continue;
+    }
+    totalPlaces += typologie.placesAutorisees ?? 0;
+  }
+  return totalPlaces;
 };
 
 const computeYearStats = (
@@ -160,9 +185,9 @@ const computeYearStats = (
   adresses: AdresseRow[],
   batiMap: Map<number, Repartition>
 ): YearStat[] => {
-  const years = [...new Set(typologies.map((typologie) => typologie.year))].sort(
-    (yearA, yearB) => yearA - yearB
-  );
+  const years = [
+    ...new Set(typologies.map((typologie) => typologie.year)),
+  ].sort((yearA, yearB) => yearA - yearB);
 
   return years.map((year) => {
     const lastTypologieMap = getLastTypologiePerStructure(
@@ -257,7 +282,9 @@ const aggregateFinanceStat = (
 
 const avg = (values: (number | null)[]): number | null => {
   const valid = values.filter((value): value is number => value !== null);
-  if (valid.length === 0) {return null;}
+  if (valid.length === 0) {
+    return null;
+  }
   return (sumValues(valid) ?? 0) / valid.length;
 };
 
@@ -306,7 +333,8 @@ const computeActiviteStat = (
       presencesInduesBPI:
         curr.presencesInduesBPI + (activite.presencesInduesBPI ?? 0),
       presencesInduesDeboutees:
-        curr.presencesInduesDeboutees + (activite.presencesInduesDeboutees ?? 0),
+        curr.presencesInduesDeboutees +
+        (activite.presencesInduesDeboutees ?? 0),
     });
   }
 
@@ -344,7 +372,9 @@ const computeTauxEquipement = (
 ): TauxEquipementDept[] => {
   const placesByDept = new Map<string, number>();
   for (const structure of structures) {
-    if (!structure.departementAdministratif) {continue;}
+    if (!structure.departementAdministratif) {
+      continue;
+    }
     const typologie = lastTypologieMap.get(structure.id);
     placesByDept.set(
       structure.departementAdministratif,
@@ -357,7 +387,7 @@ const computeTauxEquipement = (
     return {
       departement: dept.numero,
       nom: dept.name,
-      placesAutorisees: places,
+      places,
       population: dept.population,
       tauxPour1000: dept.population ? (places / dept.population) * 1000 : null,
     };
@@ -407,7 +437,7 @@ export const buildStructureWhere = async (
 
 export const getStatistiques = async (
   filters: StatistiquesFiltersRaw
-): Promise<StatistiquesApiRead> => {
+): Promise<StatistiquesApiType> => {
   const where = await buildStructureWhere(filters);
   const structureIds = await findStructureIds(where);
 
@@ -423,6 +453,7 @@ export const getStatistiques = async (
     structures,
     typologies,
     adresses,
+    cpomLinks,
     budgets,
     indicateurs,
     mediansByYear,
@@ -434,6 +465,7 @@ export const getStatistiques = async (
     findStructuresWithTypes(structureIds),
     findStructureTypologies(structureIds),
     findStructureAdresses(structureIds),
+    findCpomStructures(structureIds),
     findBudgetsByYear(structureIds),
     findIndicateursFinanciers(structureIds),
     findMedianIndicateursByYear(structureIds),
@@ -457,10 +489,8 @@ export const getStatistiques = async (
   ];
   const departements = await findDepartementsWithPopulation(deptNumeros);
 
-  // ---- agrégation ----
-
   const lastTypologieMap = getLastTypologiePerStructure(typologies);
-  // batiMap calculé une seule fois, partagé entre byBati global et byYear
+
   const batiMap = getBatiPerStructure(adresses);
 
   const byType = computeTypeStats(structures, lastTypologieMap);
@@ -471,6 +501,7 @@ export const getStatistiques = async (
     lastTypologieMap,
     adresses
   );
+  const totalPlaces = computeTotalPlaces(structures, lastTypologieMap);
 
   const tauxEquipement = computeTauxEquipement(
     structures,
@@ -478,10 +509,13 @@ export const getStatistiques = async (
     departements
   );
 
-  const financeByYear = computeFinanceByYear(budgets, indicateurs, mediansByYear);
+  const financeByYear = computeFinanceByYear(
+    budgets,
+    indicateurs,
+    mediansByYear
+  );
   const finance = aggregateFinanceStat(financeByYear, globalMedian);
 
-  const totalPlaces = placesSpeciales.placesAutorisees;
   const eigPour1000PlacesSur12Mois =
     totalPlaces > 0 ? (eigs.length / totalPlaces) * 1000 : null;
   const eigViolents = eigs.filter((eig) =>
@@ -500,16 +534,32 @@ export const getStatistiques = async (
     ),
   ].sort((yearA, yearB) => yearA - yearB);
 
-  const evaluations2026 = computeEvaluationStat(evaluations, 2026);
   const evaluationsByYear = evalYears.map((year) =>
     computeEvaluationStat(evaluations, year)
   );
 
   const activites = computeActiviteStat(latestActivites, activitesTimeSeries);
 
+  const structureTypes = buildStructureTypesPivot(
+    byYear,
+    structures,
+    typologies,
+    cpomLinks
+  );
+  const structureBatis = buildStructureBatisPivot(
+    byYear,
+    structures,
+    typologies,
+    adresses,
+    cpomLinks
+  );
+
   return {
-    nbStructures: structureIds.length,
-    nbCpoms,
+    totalStructures: structureIds.length,
+    totalCpoms: nbCpoms,
+    totalPlaces,
+    structureTypes,
+    structureBatis,
     byType,
     byBati,
     byYear,
@@ -519,21 +569,22 @@ export const getStatistiques = async (
     financeByYear,
     eigPour1000PlacesSur12Mois,
     tauxEigComportementViolent,
-    evaluations2026,
     evaluationsByYear,
     activites,
   };
 };
 
-const emptyResult = (): StatistiquesApiRead => ({
-  nbStructures: 0,
-  nbCpoms: 0,
+const emptyResult = (): StatistiquesApiType => ({
+  totalStructures: 0,
+  totalCpoms: 0,
+  totalPlaces: 0,
+  structureTypes: [],
+  structureBatis: [],
   byType: [],
   byBati: [],
   byYear: [],
   tauxEquipement: [],
   placesSpeciales: {
-    placesAutorisees: 0,
     pmr: 0,
     lgbt: 0,
     fvvTeh: 0,
@@ -554,14 +605,6 @@ const emptyResult = (): StatistiquesApiRead => ({
   financeByYear: [],
   eigPour1000PlacesSur12Mois: null,
   tauxEigComportementViolent: null,
-  evaluations2026: {
-    year: 2026,
-    nbEvaluations: 0,
-    moyenneGenerale: null,
-    moyennePersonne: null,
-    moyennePro: null,
-    moyenneStructure: null,
-  },
   evaluationsByYear: [],
   activites: {
     placesEnregistreesDna: 0,

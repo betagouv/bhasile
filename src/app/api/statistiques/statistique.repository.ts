@@ -1,10 +1,26 @@
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 
+import type {
+  ActiviteRow,
+  AdresseRow,
+  BudgetAggRow,
+  CpomStructureRow,
+  DepartementRow,
+  EigRow,
+  EvaluationRow,
+  GlobalMedianRow,
+  IndicateurRow,
+  MedianRow,
+  StructureRow,
+  TypologieRow,
+} from "./statistique.db.type";
+
 export type {
   ActiviteRow,
   AdresseRow,
   BudgetAggRow,
+  CpomStructureRow,
   DepartementRow,
   EigRow,
   EvaluationRow,
@@ -34,6 +50,23 @@ export const countCpoms = async (structureIds: number[]): Promise<number> => {
       structures: {
         some: { structureId: { in: structureIds } },
       },
+    },
+  });
+};
+
+export const findCpomStructures = async (
+  structureIds: number[]
+): Promise<CpomStructureRow[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+  return prisma.cpomStructure.findMany({
+    where: { structureId: { in: structureIds } },
+    select: {
+      cpomId: true,
+      structureId: true,
+      dateStart: true,
+      dateEnd: true,
     },
   });
 };
@@ -98,16 +131,16 @@ export const findBudgetsByYear = async (
     },
     orderBy: { year: "asc" },
   });
-  return grouped.map((g) => ({
-    year: g.year,
-    dotationDemandee: g._sum.dotationDemandee ?? 0,
-    dotationAccordee: g._sum.dotationAccordee ?? 0,
-    totalProduits: g._sum.totalProduits ?? 0,
-    totalCharges: g._sum.totalCharges ?? 0,
+  return grouped.map((group) => ({
+    year: group.year,
+    dotationDemandee: group._sum.dotationDemandee ?? 0,
+    dotationAccordee: group._sum.dotationAccordee ?? 0,
+    totalProduits: group._sum.totalProduits ?? 0,
+    totalCharges: group._sum.totalCharges ?? 0,
   }));
 };
 
-/** Indicateurs bruts pour aggrégation ETP en TypeScript */
+/** Indicateurs bruts pour aggrégation ETP */
 export const findIndicateursFinanciers = async (
   structureIds: number[]
 ): Promise<IndicateurRow[]> => {
@@ -129,11 +162,13 @@ export const findIndicateursFinanciers = async (
   });
 };
 
-/** Médiane taux d'encadrement + coût journalier par année — raw SQL (PERCENTILE_CONT) */
+/** Médiane taux d'encadrement + coût journalier par année */
 export const findMedianIndicateursByYear = async (
   structureIds: number[]
 ): Promise<MedianRow[]> => {
-  if (structureIds.length === 0) {return [];}
+  if (structureIds.length === 0) {
+    return [];
+  }
   return prisma.$queryRaw<MedianRow[]>(Prisma.sql`
     SELECT
       year,
@@ -148,12 +183,13 @@ export const findMedianIndicateursByYear = async (
   `);
 };
 
-/** Médiane globale (tous millésimes confondus) */
+/** Médiane globale */
 export const findGlobalMedianIndicateurs = async (
   structureIds: number[]
 ): Promise<GlobalMedianRow> => {
-  if (structureIds.length === 0)
-    {return { tauxEncadrementMedian: null, coutJournalierMedian: null };}
+  if (structureIds.length === 0) {
+    return { tauxEncadrementMedian: null, coutJournalierMedian: null };
+  }
   const [row] = await prisma.$queryRaw<GlobalMedianRow[]>(Prisma.sql`
     SELECT
       PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY "tauxEncadrement") AS "tauxEncadrementMedian",
@@ -181,7 +217,9 @@ export const findEigs = async (
   dnaCodes: string[],
   since: Date
 ): Promise<EigRow[]> => {
-  if (dnaCodes.length === 0) {return [];}
+  if (dnaCodes.length === 0) {
+    return [];
+  }
   return prisma.evenementIndesirableGrave.findMany({
     where: {
       dnaCode: { in: dnaCodes },
@@ -207,13 +245,14 @@ export const findEvaluations = async (
 };
 
 /**
- * Dernier millésime mensuel par DNA — raw SQL DISTINCT ON.
- * Permet d'agréger sur l'état courant des activités.
+ * Dernier millésime mensuel par DNA pour agréger sur l'état courant des activités.
  */
 export const findLatestActivitesPerDna = async (
   dnaCodes: string[]
 ): Promise<ActiviteRow[]> => {
-  if (dnaCodes.length === 0) {return [];}
+  if (dnaCodes.length === 0) {
+    return [];
+  }
   return prisma.$queryRaw<ActiviteRow[]>(Prisma.sql`
     SELECT DISTINCT ON (a."dnaCode")
       a."dnaCode",
@@ -233,11 +272,13 @@ export const findLatestActivitesPerDna = async (
   `);
 };
 
-/** Toutes les activités — pour le suivi des présences indues dans le temps */
+/** Toutes les activités, pour le suivi des présences indues dans le temps */
 export const findActivitesTimeSeries = async (
   dnaCodes: string[]
 ): Promise<ActiviteRow[]> => {
-  if (dnaCodes.length === 0) {return [];}
+  if (dnaCodes.length === 0) {
+    return [];
+  }
   return prisma.activite.findMany({
     where: { dnaCode: { in: dnaCodes } },
     select: {

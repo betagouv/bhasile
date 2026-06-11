@@ -1,3 +1,5 @@
+import z from "zod";
+
 import { Repartition, StructureType } from "@/generated/prisma/client";
 
 // Filtres passés en query params à GET /api/statistiques
@@ -12,20 +14,37 @@ export type StatistiquesFiltersRaw = {
   types: string | null;
 };
 
+export const structureStatByYearSchema = z.object({
+  year: z.number(),
+  structures: z.number(),
+  cpoms: z.number(),
+  places: z.number(),
+});
+
+export const structureTypeStatSchema = z.object({
+  label: z.string(),
+  byYear: z.array(structureStatByYearSchema),
+});
+
+export const structureBatiStatSchema = structureTypeStatSchema;
+
+export type StructureStatByYear = z.infer<typeof structureStatByYearSchema>;
+export type StructureTypeStat = z.infer<typeof structureTypeStatSchema>;
+export type StructureBatiStat = z.infer<typeof structureBatiStatSchema>;
+
 export type TypeStructureStat = {
   type: StructureType | null;
-  nbStructures: number;
-  placesAutorisees: number;
+  structures: number;
+  places: number;
 };
 
 export type BatiStat = {
   bati: Repartition;
-  nbStructures: number;
-  placesAutorisees: number;
+  structures: number;
+  places: number;
 };
 
 export type PlacesSpecialesStat = {
-  placesAutorisees: number;
   pmr: number;
   lgbt: number;
   fvvTeh: number;
@@ -93,24 +112,130 @@ export type ActiviteStat = {
 export type TauxEquipementDept = {
   departement: string;
   nom: string;
-  placesAutorisees: number;
+  places: number;
   population: number | null;
   tauxPour1000: number | null;
 };
 
-export type StatistiquesApiRead = {
-  nbStructures: number;
-  nbCpoms: number;
-  byType: TypeStructureStat[];
-  byBati: BatiStat[];
-  byYear: YearStat[];
-  tauxEquipement: TauxEquipementDept[];
-  placesSpeciales: PlacesSpecialesStat;
-  finance: FinanceStat;
-  financeByYear: FinanceStatByYear[];
-  eigPour1000PlacesSur12Mois: number | null;
-  tauxEigComportementViolent: number | null;
-  evaluations2026: EvaluationStat;
-  evaluationsByYear: EvaluationStat[];
-  activites: ActiviteStat;
-};
+export const statistiquesApiSchema = z.object({
+  totalStructures: z.number(),
+  totalCpoms: z.number(),
+  totalPlaces: z.number(),
+  structureTypes: z.array(structureTypeStatSchema),
+  structureBatis: z.array(structureBatiStatSchema),
+  byType: z.array(
+    z.object({
+      type: z.nativeEnum(StructureType).nullable(),
+      structures: z.number(),
+      places: z.number(),
+    })
+  ),
+  byBati: z.array(
+    z.object({
+      bati: z.nativeEnum(Repartition),
+      structures: z.number(),
+      places: z.number(),
+    })
+  ),
+  byYear: z.array(
+    z.object({
+      year: z.number(),
+      byType: z.array(
+        z.object({
+          type: z.nativeEnum(StructureType).nullable(),
+          structures: z.number(),
+          places: z.number(),
+        })
+      ),
+      byBati: z.array(
+        z.object({
+          bati: z.nativeEnum(Repartition),
+          structures: z.number(),
+          places: z.number(),
+        })
+      ),
+      placesSpeciales: z.object({
+        pmr: z.number(),
+        lgbt: z.number(),
+        fvvTeh: z.number(),
+        logementsSociaux: z.number(),
+      }),
+    })
+  ),
+  tauxEquipement: z.array(
+    z.object({
+      departement: z.string(),
+      nom: z.string(),
+      places: z.number(),
+      population: z.number().nullable(),
+      tauxPour1000: z.number().nullable(),
+    })
+  ),
+  placesSpeciales: z.object({
+    pmr: z.number(),
+    lgbt: z.number(),
+    fvvTeh: z.number(),
+    logementsSociaux: z.number(),
+  }),
+  finance: z.object({
+    totalDotationsDemandees: z.number(),
+    totalDotationsAccordees: z.number(),
+    totalETP: z.number(),
+    tauxEncadrementMedian: z.number().nullable(),
+    coutJournalierMedian: z.number().nullable(),
+    totalProduits: z.number(),
+    totalCharges: z.number(),
+    excedents: z.number(),
+    deficits: z.number(),
+    resultatNet: z.number(),
+  }),
+  financeByYear: z.array(
+    z.object({
+      year: z.number(),
+      totalDotationsDemandees: z.number(),
+      totalDotationsAccordees: z.number(),
+      totalETP: z.number(),
+      tauxEncadrementMedian: z.number().nullable(),
+      coutJournalierMedian: z.number().nullable(),
+      totalProduits: z.number(),
+      totalCharges: z.number(),
+      excedents: z.number(),
+      deficits: z.number(),
+      resultatNet: z.number(),
+    })
+  ),
+  eigPour1000PlacesSur12Mois: z.number().nullable(),
+  tauxEigComportementViolent: z.number().nullable(),
+  evaluationsByYear: z.array(
+    z.object({
+      year: z.number().optional(),
+      nbEvaluations: z.number(),
+      moyenneGenerale: z.number().nullable(),
+      moyennePersonne: z.number().nullable(),
+      moyennePro: z.number().nullable(),
+      moyenneStructure: z.number().nullable(),
+    })
+  ),
+  activites: z.object({
+    placesEnregistreesDna: z.number(),
+    placesDisponibles: z.number(),
+    placesIndisponibles: z.number(),
+    motifsIndisponibilite: z.object({
+      desinsectisation: z.number(),
+      remiseEnEtat: z.number(),
+      sousOccupation: z.number(),
+      travaux: z.number(),
+    }),
+    presencesInduesTotalBPI: z.number(),
+    presencesInduesTotalDeboutees: z.number(),
+    suivi: z.array(
+      z.object({
+        date: z.coerce.date(),
+        presencesInduesBPI: z.number(),
+        presencesInduesDeboutees: z.number(),
+      })
+    ),
+  }),
+});
+
+export type StatistiquesApiType = z.infer<typeof statistiquesApiSchema>;

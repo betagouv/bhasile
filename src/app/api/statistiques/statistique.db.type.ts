@@ -44,7 +44,7 @@ export type EigRow = Prisma.EvenementIndesirableGraveGetPayload<{
   };
 }>;
 
-export type ActiviteNativeRow = Prisma.ActiviteGetPayload<{
+export type ActiviteRow = Prisma.ActiviteGetPayload<{
   select: {
     dnaCode: true;
     date: true;
@@ -98,5 +98,11 @@ export type GlobalMedianRow = {
   coutJournalierMedian: number | null;
 };
 
-/** Ligne retournée par le raw SQL DISTINCT ON (même shape qu'ActiviteNativeRow) */
-export type ActiviteRow = ActiviteNativeRow;
+export type CpomStructureRow = Prisma.CpomStructureGetPayload<{
+  select: {
+    cpomId: true;
+    structureId: true;
+    dateStart: true;
+    dateEnd: true;
+  };
+}>;
