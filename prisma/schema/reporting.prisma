@@ -2,12 +2,12 @@
 // Tarifs journaliers cibles par type de structure et zonage IDF / non-IDF (8 entrées)
 // Remplissage manuel (Metabase)
 model TarifJournalierCible {
-  id            Int     @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
   structureType StructureType
-  isIdf         Boolean
+  belongsToIdf  Boolean
   tarifCible    Decimal
 
-  @@unique([structureType, isIdf])
+  @@unique([structureType, belongsToIdf])
   @@schema("reporting")
 }
 
@@ -15,14 +15,14 @@ model TarifJournalierCible {
 model GlobalIndicators {
   id Int @id @default(autoincrement())
 
-  budgetAnnuel              Decimal?
-  notePriseEnMain           Float?
-  noteClarteInfos           Float?
-  noteFaciliteUtilisation   Float?
-  noteRobustesseTech        Float?
-  noteRemplacementExcel     Float?
-  noteGainTemps             Float?
-  noteAmeliorationPilotage  Float?
+  budgetAnnuel             Decimal?
+  notePriseEnMain          Float?
+  noteClarteInfos          Float?
+  noteFaciliteUtilisation  Float?
+  noteRobustesseTech       Float?
+  noteRemplacementExcel    Float?
+  noteGainTemps            Float?
+  noteAmeliorationPilotage Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -125,9 +125,9 @@ view ReportingGlobal {
   globalIndicatorsUpdatedAt DateTime? @map("global_indicators_updated_at")
   budgetAnnuel              Decimal?  @map("budget_annuel")
 
-  updatesCountTotal           Int @map("updates_count_total")
-  indicateursUtilesCountMax   Int @map("indicateurs_utiles_count_max")
-  indicateursImpactCountMax   Int @map("indicateurs_impact_count_max")
+  updatesCountTotal         Int @map("updates_count_total")
+  indicateursUtilesCountMax Int @map("indicateurs_utiles_count_max")
+  indicateursImpactCountMax Int @map("indicateurs_impact_count_max")
 
   noteFaciliteUtilisationMoyenne4 Float? @map("note_facilite_utilisation_moyenne_4_criteres")
   noteRemplacementExcel           Float? @map("note_remplacement_excel")
