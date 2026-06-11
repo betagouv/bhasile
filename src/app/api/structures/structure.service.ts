@@ -23,6 +23,7 @@ import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import { resolveCurrentVersion } from "../structure-versions/structure-version.service";
+import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   StructureDbDetails,
   StructureDbList,
@@ -36,7 +37,6 @@ import {
   findStructureDepartement,
   getLatestPlacesAutoriseesPerStructure,
   updateOne,
-  VERSIONED_FIELD_KEYS,
 } from "./structure.repository";
 import {
   getAdresseAdministrativeCoordinates,
