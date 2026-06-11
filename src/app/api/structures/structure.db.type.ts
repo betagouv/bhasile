@@ -15,6 +15,28 @@ export const structureOperateurSelect = {
   forms: true,
 } satisfies Prisma.StructureSelect;
 
+export const structureListVersionInclude = {
+  contacts: true,
+  adresses: {
+    include: {
+      adresseTypologies: {
+        orderBy: { year: "desc" },
+      },
+    },
+  },
+  antennes: true,
+  structureFinesses: {
+    include: { finess: true },
+  },
+  structureTypologies: {
+    orderBy: { year: "desc" },
+  },
+  dnaStructures: {
+    orderBy: { dna: { code: "asc" } },
+    include: { dna: true },
+  },
+} satisfies Prisma.StructureVersionInclude;
+
 export const structureListInclude = {
   adresses: {
     include: {
@@ -22,6 +44,11 @@ export const structureListInclude = {
         orderBy: { year: "desc" },
       },
     },
+  },
+  structureVersions: {
+    orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
+    take: 1,
+    include: structureListVersionInclude,
   },
   cpomStructures: {
     include: {

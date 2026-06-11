@@ -1,5 +1,19 @@
 import { Prisma } from "@/generated/prisma/client";
 
+export const currentVersionWhere = (
+  now: Date
+): Prisma.StructureVersionWhereInput => ({
+  effectiveDate: { lte: now },
+  OR: [
+    { structureVersionTransformationId: null },
+    {
+      structureVersionTransformation: {
+        transformation: { form: { status: true } },
+      },
+    },
+  ],
+});
+
 export const structureVersionDetailsInclude = {
   contacts: true,
   adresses: {
@@ -44,34 +58,35 @@ export type StructureVersionDbDetails = Prisma.StructureVersionGetPayload<{
   include: typeof structureVersionDetailsInclude;
 }>;
 
-export type StructureVersionDbTransformation = Prisma.StructureVersionGetPayload<{
-  include: {
-    structure: {
-      include: {
-        operateur: { select: { id: true; name: true } };
+export type StructureVersionDbTransformation =
+  Prisma.StructureVersionGetPayload<{
+    include: {
+      structure: {
+        include: {
+          operateur: { select: { id: true; name: true } };
+        };
       };
-    };
-    contacts: true;
-    adresses: {
-      include: {
-        adresseTypologies: {
-          orderBy: {
-            year: "desc";
+      contacts: true;
+      adresses: {
+        include: {
+          adresseTypologies: {
+            orderBy: {
+              year: "desc";
+            };
           };
         };
       };
-    };
-    structureFinesses: {
-      include: {
-        finess: true;
+      structureFinesses: {
+        include: {
+          finess: true;
+        };
+      };
+      antennes: true;
+      dnaStructures: {
+        include: { dna: true };
+      };
+      structureTypologies: {
+        orderBy: { year: "desc" };
       };
     };
-    antennes: true;
-    dnaStructures: {
-      include: { dna: true };
-    };
-    structureTypologies: {
-      orderBy: { year: "desc" };
-    };
-  };
-}>;
+  }>;

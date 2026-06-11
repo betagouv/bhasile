@@ -1,13 +1,14 @@
 -- Objective: core structure attributes for reporting/filters
 -- One row per structure, centralizes common joins (operateur, departement, region) and DNA aggregation.
+-- Versioned attributes (type, departementAdministratif, DNA links) are read from the current version.
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_core" AS
 SELECT
   s."id" AS "id",
   s."codeBhasile" AS "codeBhasile",
-  s."type" AS "structureType",
+  sv."type" AS "structureType",
   s."createdAt" AS "createdAt",
   s."updatedAt" AS "updatedAt",
-  s."departementAdministratif" AS "departementAdministratif",
+  sv."departementAdministratif" AS "departementAdministratif",
   dep."name" AS "departement",
   r."name" AS "region",
   o."name" AS "operateur",
@@ -22,18 +23,20 @@ SELECT
   ) AS "dna_codes"
 FROM
   public."Structure" s
+  LEFT JOIN:"SCHEMA"."structures_current_version" scv ON scv."structureId" = s."id"
+  LEFT JOIN public."StructureVersion" sv ON sv."id" = scv."version_id"
   LEFT JOIN public."Operateur" o ON o."id" = s."operateurId"
-  LEFT JOIN public."Departement" dep ON dep."numero" = s."departementAdministratif"
+  LEFT JOIN public."Departement" dep ON dep."numero" = sv."departementAdministratif"
   LEFT JOIN public."Region" r ON r."id" = dep."regionId"
-  LEFT JOIN public."DnaStructure" ds ON ds."structureId" = s."id"
+  LEFT JOIN public."DnaStructure" ds ON ds."structureVersionId" = scv."version_id"
   LEFT JOIN public."Dna" dna ON dna."id" = ds."dnaId"
 GROUP BY
   s."id",
   s."codeBhasile",
-  s."type",
+  sv."type",
   s."createdAt",
   s."updatedAt",
-  s."departementAdministratif",
+  sv."departementAdministratif",
   dep."name",
   r."name",
   o."name";

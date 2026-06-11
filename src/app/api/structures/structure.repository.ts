@@ -16,10 +16,14 @@ import {
 } from "../forms/form.repository";
 import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
-import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
+import {
+  currentVersionWhere,
+  StructureVersionDbDetails,
+} from "../structure-versions/structure-version.db.type";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 import {
-  STRUCTURES_ORDER_CTE_SQL,
+  buildCurrentVersionCteSql,
+  buildStructuresOrderCteSql,
   STRUCTURES_ORDER_JOINS_SQL,
 } from "./structure.constants";
 import {
@@ -28,7 +32,7 @@ import {
   StructureDbOperateur,
   structureDetailsInclude,
   structureListInclude,
-  structureMapSelect,
+  structureListVersionInclude,
   structureOperateurSelect,
 } from "./structure.db.type";
 import { SearchProps } from "./structure.service";
@@ -37,20 +41,23 @@ import {
   buildStructuresWhereSql,
 } from "./structure.util";
 
-const getOrderedStructures = async ({
-  search,
-  page,
-  type,
-  bati,
-  placesAutorisees,
-  departements,
-  operateurs,
-  column,
-  direction,
-  selection,
-  finalised,
-  map,
-}: SearchProps): Promise<{ id: number }[]> => {
+const getOrderedStructures = async (
+  {
+    search,
+    page,
+    type,
+    bati,
+    placesAutorisees,
+    departements,
+    operateurs,
+    column,
+    direction,
+    selection,
+    finalised,
+    map,
+  }: SearchProps,
+  now: Date
+): Promise<{ id: number }[]> => {
   const whereSql = buildStructuresWhereSql({
     search,
     type,
@@ -71,7 +78,7 @@ const getOrderedStructures = async ({
       : Prisma.sql`LIMIT ${DEFAULT_PAGE_SIZE} OFFSET ${(page ?? 0) * DEFAULT_PAGE_SIZE}`;
 
   return prisma.$queryRaw<{ id: number }[]>(Prisma.sql`
-    ${STRUCTURES_ORDER_CTE_SQL}
+    ${buildStructuresOrderCteSql(now)}
     SELECT s.id
     ${STRUCTURES_ORDER_JOINS_SQL}
     ${whereSql}
@@ -94,44 +101,63 @@ export const findBySearch = async ({
   selection,
   finalised,
 }: SearchProps): Promise<StructureDbList[] | StructureDbMap[]> => {
-  const structuresIds = await getOrderedStructures({
-    search,
-    page,
-    type,
-    bati,
-    placesAutorisees,
-    departements,
-    operateurs,
-    column,
-    direction,
-    map,
-    selection,
-    finalised,
-  });
+  const now = new Date();
+  const structuresIds = await getOrderedStructures(
+    {
+      search,
+      page,
+      type,
+      bati,
+      placesAutorisees,
+      departements,
+      operateurs,
+      column,
+      direction,
+      map,
+      selection,
+      finalised,
+    },
+    now
+  );
+  const ids = structuresIds.map((structure) => structure.id);
+
   if (map) {
-    return prisma.structure.findMany({
-      where: {
-        id: {
-          in: structuresIds.map((structure) => structure.id),
+    const mapStructures = await prisma.structure.findMany({
+      where: { id: { in: ids } },
+      select: {
+        id: true,
+        structureVersions: {
+          where: currentVersionWhere(now),
+          orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
+          take: 1,
+          select: { latitude: true, longitude: true },
         },
       },
-      select: structureMapSelect,
     });
+    return mapStructures.map((structure) => ({
+      id: structure.id,
+      latitude: structure.structureVersions[0]?.latitude ?? null,
+      longitude: structure.structureVersions[0]?.longitude ?? null,
+    }));
   }
 
   const structures = await prisma.structure.findMany({
-    where: {
-      id: {
-        in: structuresIds.map((structure) => structure.id),
+    where: { id: { in: ids } },
+    include: {
+      ...structureListInclude,
+      structureVersions: {
+        where: currentVersionWhere(now),
+        orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
+        take: 1,
+        include: structureListVersionInclude,
       },
     },
-    include: structureListInclude,
   });
 
   const orderedStructures = structuresIds
-    .map((structuresIds) => {
-      return structures.find((structure) => structure.id === structuresIds.id);
-    })
+    .map((orderedId) =>
+      structures.find((structure) => structure.id === orderedId.id)
+    )
     .filter((structure) => structure !== undefined);
 
   return orderedStructures;
@@ -145,6 +171,7 @@ export const countBySearch = async ({
   departements,
   operateurs,
 }: SearchProps): Promise<number> => {
+  const now = new Date();
   const whereSql = buildStructuresWhereSql({
     search,
     type,
@@ -155,7 +182,7 @@ export const countBySearch = async ({
     selection: false,
   });
   const result = await prisma.$queryRaw<{ count: bigint }[]>(Prisma.sql`
-    ${STRUCTURES_ORDER_CTE_SQL}
+    ${buildStructuresOrderCteSql(now)}
     SELECT COUNT(*)::bigint AS count
     ${STRUCTURES_ORDER_JOINS_SQL}
     ${whereSql}
@@ -166,31 +193,22 @@ export const countBySearch = async ({
 export const getLatestPlacesAutoriseesPerStructure = async (): Promise<
   number[]
 > => {
-  const allTypologies = await prisma.structureTypologie.findMany({
-    orderBy: {
-      year: "desc",
-    },
-    select: {
-      structureId: true,
-      placesAutorisees: true,
-    },
-  });
+  const now = new Date();
+  const rows = await prisma.$queryRaw<{ placesAutorisees: number | null }[]>(
+    Prisma.sql`
+      WITH ${buildCurrentVersionCteSql(now)}
+      SELECT DISTINCT ON (cv."structureId")
+        st."placesAutorisees" AS "placesAutorisees"
+      FROM current_version cv
+      JOIN public."StructureTypologie" st ON st."structureVersionId" = cv.version_id
+      WHERE st."placesAutorisees" IS NOT NULL
+      ORDER BY cv."structureId", st."year" DESC
+    `
+  );
 
-  const seenStructures = new Set<string>();
-
-  return allTypologies
-    .filter((typology) => typology.structureId !== null)
-    .filter((typology) => {
-      if (
-        seenStructures.has(typology.structureId as unknown as string) ||
-        typology.placesAutorisees === null
-      ) {
-        return false;
-      }
-      seenStructures.add(typology.structureId as unknown as string);
-      return true;
-    })
-    .map((typology) => typology.placesAutorisees as number);
+  return rows
+    .map((row) => row.placesAutorisees)
+    .filter((placesAutorisees): placesAutorisees is number => placesAutorisees !== null);
 };
 
 export const findOneOperateur = async (

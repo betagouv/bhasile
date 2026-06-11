@@ -21,7 +21,6 @@ import {
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
-import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import { resolveCurrentVersion } from "../structure-versions/structure-version.service";
 import {
   StructureDbDetails,
@@ -137,7 +136,11 @@ export const getFullStructures = async (
   });
 
   const structures = dbStructures.map((dbStructure) => {
-    const structure = dbStructureToApiRead(dbStructure, true);
+    const resolvedVersion = dbStructure.structureVersions?.[0];
+    const resolvedStructure = resolvedVersion
+      ? mergeStructureWithVersion(dbStructure, resolvedVersion)
+      : dbStructure;
+    const structure = dbStructureToApiRead(resolvedStructure, true);
     structure.adresses = getReadableAdresses(structure, user);
     return structure;
   });
@@ -212,13 +215,13 @@ export const getStructureDepartement = async (
   return departementAdministratif;
 };
 
-const mergeStructureWithVersion = (
-  dbStructure: StructureDbDetails,
-  version: StructureVersionDbDetails
-): StructureDbDetails => {
+const mergeStructureWithVersion = <T>(
+  dbStructure: T,
+  version: Record<(typeof VERSIONED_FIELD_KEYS)[number], unknown>
+): T => {
   const versionedOverlay = Object.fromEntries(
     VERSIONED_FIELD_KEYS.map((key) => [key, version[key]])
-  ) as Partial<StructureDbDetails>;
+  ) as Partial<T>;
   return { ...dbStructure, ...versionedOverlay };
 };
 

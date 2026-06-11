@@ -9,11 +9,13 @@ WITH
   structures AS (
     SELECT
       s."id",
-      s."type" AS "structureType",
-      s."creationDate" AS "creationDate",
-      s."date303" AS "date303"
+      sv."type" AS "structureType",
+      sv."creationDate" AS "creationDate",
+      sv."date303" AS "date303"
     FROM
       public."Structure" s
+      LEFT JOIN:"SCHEMA"."structures_current_version" scv ON scv."structureId" = s."id"
+      LEFT JOIN public."StructureVersion" sv ON sv."id" = scv."version_id"
   ),
   bound_dates AS (
     SELECT

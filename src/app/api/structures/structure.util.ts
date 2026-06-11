@@ -88,11 +88,11 @@ export const buildStructuresOrderSql = (
   const dir = direction === "desc" ? Prisma.sql`DESC` : Prisma.sql`ASC`;
   const byColumn: Record<StructureColumn, Prisma.Sql> = {
     codeBhasile: Prisma.sql`s."codeBhasile"`,
-    type: Prisma.sql`s."type"`,
+    type: Prisma.sql`sv."type"`,
     operateur: Prisma.sql`o."name"`,
-    departementAdministratif: Prisma.sql`s."departementAdministratif"`,
+    departementAdministratif: Prisma.sql`sv."departementAdministratif"`,
     bati: Prisma.sql`sr.bati`,
-    communes: Prisma.sql`s."communeAdministrative"`,
+    communes: Prisma.sql`sv."communeAdministrative"`,
     placesAutorisees: Prisma.sql`st."placesAutorisees"`,
     finConvention: Prisma.sql`s."finConvention"`,
   };
@@ -132,11 +132,11 @@ export const buildStructuresWhereSql = ({
     );
   }
   if (typeList.length > 0) {
-    conditions.push(Prisma.sql`s."type"::text IN (${Prisma.join(typeList)})`);
+    conditions.push(Prisma.sql`sv."type"::text IN (${Prisma.join(typeList)})`);
   }
   if (depList.length > 0) {
     conditions.push(
-      Prisma.sql`s."departementAdministratif" IN (${Prisma.join(depList)})`
+      Prisma.sql`sv."departementAdministratif" IN (${Prisma.join(depList)})`
     );
   }
   if (opList.length > 0) {
@@ -166,20 +166,20 @@ export const buildStructuresWhereSql = ({
         SELECT 1
         FROM public."DnaStructure" ds
         JOIN public."Dna" d ON d.id = ds."dnaId"
-        WHERE ds."structureId" = s.id
+        WHERE ds."structureVersionId" = sv.id
           AND d.code ILIKE ${like}
       )
       OR EXISTS (
         SELECT 1
         FROM public."StructureFiness" sf
         JOIN public."Finess" f ON f.id = sf."finessId"
-        WHERE sf."structureId" = s.id
+        WHERE sf."structureVersionId" = sv.id
           AND COALESCE(f."code", '') ILIKE ${like}
       )
-      OR COALESCE(s."nom", '') ILIKE ${like}
-      OR s."departementAdministratif" ILIKE ${like}
-      OR s."communeAdministrative" ILIKE ${like}
-      OR s."codePostalAdministratif" ILIKE ${like}
+      OR COALESCE(sv."nom", '') ILIKE ${like}
+      OR sv."departementAdministratif" ILIKE ${like}
+      OR sv."communeAdministrative" ILIKE ${like}
+      OR sv."codePostalAdministratif" ILIKE ${like}
       OR COALESCE(o."name", '') ILIKE ${like}
     )`);
   }

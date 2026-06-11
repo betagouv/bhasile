@@ -3,7 +3,11 @@ import { randomUUID } from "node:crypto";
 import { afterAll, describe, expect, it } from "vitest";
 
 import { updateOne } from "@/app/api/structures/structure.repository";
-import { getFullStructure } from "@/app/api/structures/structure.service";
+import {
+  getFullStructure,
+  getFullStructures,
+  type SearchProps,
+} from "@/app/api/structures/structure.service";
 import prisma from "@/lib/prisma";
 import { Repartition } from "@/types/adresse.type";
 import { ControleType } from "@/types/controle.type";
@@ -893,5 +897,228 @@ describe("structure.repository db integration", () => {
 
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject(newStructureMillesime);
+  });
+
+  describe("résolution liste/carte (PR#3)", () => {
+    const createdTransformationIds: number[] = [];
+    const createdSvtIds: number[] = [];
+
+    const baseSearch: SearchProps = {
+      search: null,
+      page: null,
+      type: null,
+      bati: null,
+      placesAutorisees: null,
+      departements: null,
+      operateurs: null,
+      column: null,
+      direction: null,
+      map: false,
+      selection: true,
+      finalised: false,
+    };
+
+    const listStructures = async (overrides: Partial<SearchProps>) => {
+      const { structures } = await getFullStructures({
+        ...baseSearch,
+        ...overrides,
+      });
+      return structures;
+    };
+
+    const createTransfoVersion = async (
+      structureId: number,
+      {
+        type,
+        nom,
+        effectiveDate,
+        formStatus,
+      }: {
+        type: StructureType;
+        nom: string;
+        effectiveDate: string;
+        formStatus: boolean;
+      }
+    ) => {
+      const formDefinition = await prisma.formDefinition.findFirstOrThrow();
+      const transformation = await prisma.transformation.create({
+        data: { type: "EXTENSION_EX_NIHILO" },
+      });
+      createdTransformationIds.push(transformation.id);
+      const form = await prisma.form.create({
+        data: {
+          transformationId: transformation.id,
+          formDefinitionId: formDefinition.id,
+          status: formStatus,
+        },
+      });
+      const svt = await prisma.structureVersionTransformation.create({
+        data: { transformationId: transformation.id, type: "EXTENSION" },
+      });
+      createdSvtIds.push(svt.id);
+      await prisma.structureVersion.create({
+        data: {
+          structureId,
+          structureVersionTransformationId: svt.id,
+          effectiveDate,
+          type,
+          nom,
+        },
+      });
+      return { form };
+    };
+
+    afterAll(async () => {
+      if (createdSvtIds.length > 0) {
+        await prisma.structureVersionTransformation.deleteMany({
+          where: { id: { in: createdSvtIds } },
+        });
+      }
+      if (createdTransformationIds.length > 0) {
+        await prisma.transformation.deleteMany({
+          where: { id: { in: createdTransformationIds } },
+        });
+      }
+    });
+
+    it("la liste reflète les scalaires et relations de la version résolue", async () => {
+      // GIVEN: a structure edited via the rolling write (scalars + relations on the version)
+      const structure = await createStructure();
+      const nom = `Liste-Nom-${randomUUID()}`;
+      const dnaCode = `DNA-LST-${randomUUID()}`;
+      await updateOne({
+        id: structure.id,
+        type: StructureType.HUDA,
+        nom,
+        adresses: [
+          {
+            adresse: "1 rue Résolue",
+            codePostal: "75001",
+            commune: "Paris",
+            repartition: Repartition.DIFFUS,
+            adresseTypologies: [
+              { year: 2026, placesAutorisees: 42, qpv: 0, logementSocial: 0 },
+            ],
+          },
+        ],
+        structureTypologies: [{ year: 2026, placesAutorisees: 42 }],
+        dnaStructures: [{ dna: { code: dnaCode } }],
+      });
+
+      // WHEN: the structure is read through the list path
+      const structures = await listStructures({ search: structure.codeBhasile });
+      const row = structures.find(
+        (structureApiRead) => structureApiRead.codeBhasile === structure.codeBhasile
+      );
+
+      // THEN: the list reflects the resolved version, not the frozen (null) shell
+      expect(row).toBeDefined();
+      expect(row?.type).toBe(StructureType.HUDA);
+      expect(row?.nom).toBe(nom);
+      expect(row?.typeBati).toBe(Repartition.DIFFUS);
+      expect(row?.currentPlaces?.placesAutorisees).toBe(42);
+      expect(
+        row?.dnaStructures?.some((dnaStructure) => dnaStructure.dna.code === dnaCode)
+      ).toBe(true);
+    });
+
+    it("la recherche et le filtre type portent sur la version résolue", async () => {
+      // GIVEN: a structure whose versioned nom/type live only on the rolling version
+      const structure = await createStructure();
+      const nom = `Recherche-${randomUUID()}`;
+      await updateOne({ id: structure.id, type: StructureType.CADA, nom });
+
+      // WHEN/THEN: searching by the resolved nom finds the structure
+      const byNom = await listStructures({ search: nom });
+      expect(
+        byNom.some(
+          (structureApiRead) =>
+            structureApiRead.codeBhasile === structure.codeBhasile
+        )
+      ).toBe(true);
+
+      // AND: filtering by the resolved type includes it
+      const byType = await listStructures({
+        search: structure.codeBhasile,
+        type: StructureType.CADA,
+      });
+      expect(
+        byType.some(
+          (structureApiRead) =>
+            structureApiRead.codeBhasile === structure.codeBhasile
+        )
+      ).toBe(true);
+
+      // AND: filtering by another type excludes it
+      const byOtherType = await listStructures({
+        search: structure.codeBhasile,
+        type: StructureType.HUDA,
+      });
+      expect(
+        byOtherType.some(
+          (structureApiRead) =>
+            structureApiRead.codeBhasile === structure.codeBhasile
+        )
+      ).toBe(false);
+    });
+
+    it("fiche et liste résolvent la même version", async () => {
+      // GIVEN: a structure edited via the rolling write
+      const structure = await createStructure();
+      const nom = `Coherence-${randomUUID()}`;
+      await updateOne({ id: structure.id, type: StructureType.HUDA, nom });
+
+      // WHEN: read through both the fiche and the list
+      const fiche = await getFullStructure(structure.id);
+      const [listRow] = await listStructures({ search: structure.codeBhasile });
+
+      // THEN: both resolve the version identically
+      expect(fiche?.type).toBe(StructureType.HUDA);
+      expect(listRow?.type).toBe(fiche?.type);
+      expect(listRow?.nom).toBe(fiche?.nom);
+    });
+
+    it("gate transfo : brouillon ignoré, finalisé gagnant — fiche et liste d'accord", async () => {
+      // GIVEN: a rolling version (CADA) dated in the past
+      const structure = await createStructure();
+      const rollingNom = `Rolling-${randomUUID()}`;
+      const transfoNom = `Transfo-${randomUUID()}`;
+      await updateOne({
+        id: structure.id,
+        type: StructureType.CADA,
+        nom: rollingNom,
+      });
+      const rolling = await fetchRollingVersion(structure.id);
+      await prisma.structureVersion.update({
+        where: { id: rolling.id },
+        data: { effectiveDate: new Date("2026-01-01T00:00:00.000Z") },
+      });
+
+      // AND: a more recent transfo version (HUDA) whose form is not finalised
+      const { form } = await createTransfoVersion(structure.id, {
+        type: StructureType.HUDA,
+        nom: transfoNom,
+        effectiveDate: "2026-03-01T00:00:00.000Z",
+        formStatus: false,
+      });
+
+      // WHEN: the transfo form is a draft -> it is ignored, the rolling wins
+      const ficheDraft = await getFullStructure(structure.id);
+      const [listDraft] = await listStructures({ search: structure.codeBhasile });
+      expect(ficheDraft?.type).toBe(StructureType.CADA);
+      expect(listDraft?.type).toBe(StructureType.CADA);
+      expect(listDraft?.nom).toBe(rollingNom);
+
+      // WHEN: the transfo form is finalised -> the more recent transfo version wins
+      await prisma.form.update({
+        where: { id: form.id },
+        data: { status: true },
+      });
+      const ficheFinal = await getFullStructure(structure.id);
+      const [listFinal] = await listStructures({ search: structure.codeBhasile });
+      expect(ficheFinal?.type).toBe(StructureType.HUDA);
+      expect(listFinal?.type).toBe(StructureType.HUDA);
+      expect(listFinal?.nom).toBe(transfoNom);
+    });
   });
 });
