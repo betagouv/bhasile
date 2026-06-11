@@ -1,7 +1,7 @@
 # Champs Budget - correspondance DB / UI
 
 Ce document recense la correspondance entre les champs du modèle Prisma `Budget` et les labels affichés dans l'interface, selon le type de structure (tarifée ou subventionnée).
-Il a pour ovjectif de clarifier les différences et de chercher à harmoniser le slabels afin d'éviter les erreurs associées.
+Il a pour objectif de clarifier les différences et de chercher à harmoniser les labels afin d'éviter les erreurs associées.
 
 ## Rappel types de structures
 

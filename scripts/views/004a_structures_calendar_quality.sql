@@ -22,12 +22,12 @@ WITH
         CASE
           WHEN aa."category" = 'ARRETE_AUTORISATION' THEN aa."startDate"
         END
-      ) AS "debutPeriodeAutorisation",
+      ) AS "debutAutorisation",
       MAX(
         CASE
           WHEN aa."category" = 'ARRETE_AUTORISATION' THEN aa."endDate"
         END
-      ) AS "finPeriodeAutorisation"
+      ) AS "finAutorisation"
     FROM
       public."ActeAdministratif" aa
     WHERE
@@ -41,17 +41,17 @@ SELECT
   -- Authorized structures: authorization period must be 15 years (based on actes administratifs)
   CASE
     WHEN s."type" IN ('CADA', 'CPH') THEN (
-      aaa."debutPeriodeAutorisation" IS NOT NULL
-      AND aaa."finPeriodeAutorisation" IS NOT NULL
+      aaa."debutAutorisation" IS NOT NULL
+      AND aaa."finAutorisation" IS NOT NULL
       AND (
         EXTRACT(
           YEAR
           FROM
-            aaa."finPeriodeAutorisation"
+            aaa."finAutorisation"
         )::int - EXTRACT(
           YEAR
           FROM
-            aaa."debutPeriodeAutorisation"
+            aaa."debutAutorisation"
         )::int
       ) <> 15
     )
@@ -79,8 +79,8 @@ SELECT
   -- Authorized structures: convention must be within the authorization period (based on actes administratifs)
   CASE
     WHEN s."type" IN ('CADA', 'CPH') THEN (
-      aaa."debutPeriodeAutorisation" IS NOT NULL
-      AND aaa."finPeriodeAutorisation" IS NOT NULL
+      aaa."debutAutorisation" IS NOT NULL
+      AND aaa."finAutorisation" IS NOT NULL
       AND aaa."debutConvention" IS NOT NULL
       AND aaa."finConvention" IS NOT NULL
       AND (
@@ -91,7 +91,7 @@ SELECT
         )::int < EXTRACT(
           YEAR
           FROM
-            aaa."debutPeriodeAutorisation"
+            aaa."debutAutorisation"
         )::int
         OR EXTRACT(
           YEAR
@@ -100,7 +100,7 @@ SELECT
         )::int > EXTRACT(
           YEAR
           FROM
-            aaa."finPeriodeAutorisation"
+            aaa."finAutorisation"
         )::int
       )
     )
@@ -132,38 +132,38 @@ SELECT
     (
       s."type" IN ('CADA', 'CPH')
       AND (
-        aaa."debutPeriodeAutorisation" IS NOT NULL
-        OR aaa."finPeriodeAutorisation" IS NOT NULL
+        aaa."debutAutorisation" IS NOT NULL
+        OR aaa."finAutorisation" IS NOT NULL
       )
       AND (
-        aaa."debutPeriodeAutorisation" IS DISTINCT FROM s."debutPeriodeAutorisation"
-        OR aaa."finPeriodeAutorisation" IS DISTINCT FROM s."finPeriodeAutorisation"
+        aaa."debutAutorisation" IS DISTINCT FROM s."debutPeriodeAutorisation"
+        OR aaa."finAutorisation" IS DISTINCT FROM s."finPeriodeAutorisation"
       )
     ),
     FALSE
   ) AS "has_issue_authorisation_dates_differ_from_actes_administratifs",
   -- Evaluation should be performed at least every 5 years, before the end of the convention.
   CASE
-    WHEN s."finConvention" IS NULL THEN FALSE
+    WHEN aaa."finConvention" IS NULL THEN FALSE
     WHEN s."type" IN ('HUDA', 'CAES') THEN FALSE
     WHEN MAX(e."date") IS NULL THEN TRUE
-    WHEN MAX(e."date") < (s."finConvention" - INTERVAL '5 years') THEN TRUE
+    WHEN MAX(e."date") < (aaa."finConvention" - INTERVAL '5 years') THEN TRUE
     ELSE FALSE
   END AS "has_issue_evaluation_not_done_in_time",
-  -- Subsidized structures: convention duration must be <= 3 years
+  -- Subsidized structures: convention duration must be <= 3 years (based on actes administratifs)
   CASE
     WHEN s."type" IN ('HUDA', 'CAES') THEN (
-      s."debutConvention" IS NOT NULL
-      AND s."finConvention" IS NOT NULL
+      aaa."debutConvention" IS NOT NULL
+      AND aaa."finConvention" IS NOT NULL
       AND (
         EXTRACT(
           YEAR
           FROM
-            s."finConvention"
+            aaa."finConvention"
         )::int - EXTRACT(
           YEAR
           FROM
-            s."debutConvention"
+            aaa."debutConvention"
         )::int
       ) > 3
     )
@@ -177,5 +177,5 @@ GROUP BY
   s."id",
   aaa."debutConvention",
   aaa."finConvention",
-  aaa."debutPeriodeAutorisation",
-  aaa."finPeriodeAutorisation";
+  aaa."debutAutorisation",
+  aaa."finAutorisation";

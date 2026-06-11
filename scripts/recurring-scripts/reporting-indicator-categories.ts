@@ -1,9 +1,5 @@
 /**
- * Répartition indicateurs qualité → agrégats mensuels (cron).
- * Metabase : indicateurs_utiles_count / indicateurs_impact_count dans reporting_mensuel ;
- * détail par colonne has_issue_* dans MonthlyStructuresGlobalQualityCount.
- *
- * Seuils activité 7 % / 3 % ; tarifs journaliers cibles dans reporting."TarifJournalierCible".
+ * Répartition indicateurs qualité en impact vs utiles
  */
 
 export const INDICATEURS_UTILES = [
@@ -17,10 +13,10 @@ export const INDICATEURS_UTILES = [
 ] as const;
 
 export const INDICATEURS_IMPACT = [
-  "has_issue_taux_encadrement_max_gt_threshold",    // CADA/CPH > 20, HUDA/CAES > 25
-  "has_issue_cout_journalier_max_gt_tarif_cible",   // tarif cible par type et zonage IDF / non-IDF
+  "has_issue_taux_encadrement_max_gt_threshold",
+  "has_issue_cout_journalier_max_gt_tarif_cible",
   "has_issue_places_indisponibles_gt_3pct",
-  "has_issue_presences_indues_gt_7pct",             // CADA+HUDA uniquement
+  "has_issue_presences_indues_gt_7pct",
   "has_issue_evaluation_not_done_in_time",
 ] as const;
 
@@ -59,5 +55,4 @@ export type ReportingQualityIndicatorField =
 export const sumIndicatorCounts = (
   counts: Record<ReportingQualityIndicatorField, number>,
   fields: readonly ReportingQualityIndicatorField[]
-): number =>
-  fields.reduce((sum, field) => sum + (counts[field] ?? 0), 0);
+): number => fields.reduce((sum, field) => sum + (counts[field] ?? 0), 0);

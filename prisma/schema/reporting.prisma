@@ -86,35 +86,35 @@ model MonthlyStructuresGlobalQualityCount {
   indicateursUtilesCount Int
   indicateursImpactCount Int
 
-  has_issue_authorisation_period_not_15y                         Int
-  has_issue_authorized_convention_not_5y                         Int
-  has_issue_authorized_convention_outside_authorisation_period   Int
-  has_issue_authorized_convention_missing_or_expired             Int
-  has_issue_convention_dates_differ_from_actes_administratifs    Int
-  has_issue_authorisation_dates_differ_from_actes_administratifs Int
-  has_issue_evaluation_not_done_in_time                          Int
-  has_issue_subsidized_convention_gt_3y                          Int
-  has_issue_specific_places_gt_places_autorisees                 Int
-  has_issue_places_structure_vs_address_diff_gt_10pct            Int
-  has_issue_dept_code                                            Int
-  has_issue_multi_dna                                            Int
-  has_issue_cpom_mono_structure                                  Int
-  has_issue_taux_encadrement_max_gt_threshold                    Int
-  has_issue_taux_encadrement_min_lt_2                            Int
-  has_issue_cout_journalier_max_gt_tarif_cible                   Int
-  has_issue_missing_convention_document                          Int
-  has_issue_missing_autorisation_document                        Int
-  has_issue_missing_cpom_document                                Int
-  has_issue_places_indisponibles_gt_3pct                         Int
-  has_issue_presences_indues_gt_7pct                             Int
-  has_issue_cout_journalier_min_lt_15                            Int
-  has_issue_resultat_net_eq_0                                    Int
-  has_issue_authorized_affectations_breakdown_missing            Int
-  has_issue_authorized_reprise_plus_affectations_mismatch        Int
-  has_issue_authorized_reprise_wrong_sign                        Int
-  has_issue_subsidized_deficit_nonzero_boxes                     Int
-  has_issue_subsidized_reprise_etat_nonzero                      Int
-  has_issue_subsidized_excedent_rules                            Int
+  has_issue_authorisation_period_not_15y                         Int?
+  has_issue_authorized_convention_not_5y                         Int?
+  has_issue_authorized_convention_outside_authorisation_period   Int?
+  has_issue_authorized_convention_missing_or_expired             Int?
+  has_issue_convention_dates_differ_from_actes_administratifs    Int?
+  has_issue_authorisation_dates_differ_from_actes_administratifs Int?
+  has_issue_evaluation_not_done_in_time                          Int?
+  has_issue_subsidized_convention_gt_3y                          Int?
+  has_issue_specific_places_gt_places_autorisees                 Int?
+  has_issue_places_structure_vs_address_diff_gt_10pct            Int?
+  has_issue_dept_code                                            Int?
+  has_issue_multi_dna                                            Int?
+  has_issue_cpom_mono_structure                                  Int?
+  has_issue_taux_encadrement_max_gt_threshold                    Int?
+  has_issue_taux_encadrement_min_lt_2                            Int?
+  has_issue_cout_journalier_max_gt_tarif_cible                   Int?
+  has_issue_missing_convention_document                          Int?
+  has_issue_missing_autorisation_document                        Int?
+  has_issue_missing_cpom_document                                Int?
+  has_issue_places_indisponibles_gt_3pct                         Int?
+  has_issue_presences_indues_gt_7pct                             Int?
+  has_issue_cout_journalier_min_lt_15                            Int?
+  has_issue_resultat_net_eq_0                                    Int?
+  has_issue_authorized_affectations_breakdown_missing            Int?
+  has_issue_authorized_reprise_plus_affectations_mismatch        Int?
+  has_issue_authorized_reprise_wrong_sign                        Int?
+  has_issue_subsidized_deficit_nonzero_boxes                     Int?
+  has_issue_subsidized_reprise_etat_nonzero                      Int?
+  has_issue_subsidized_excedent_rules                            Int?
 
   createdAt DateTime @default(now())
 
