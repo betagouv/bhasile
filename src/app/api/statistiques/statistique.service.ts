@@ -1,4 +1,5 @@
-import { sumValues } from "@/app/utils/math.util";
+import { getYearFromDate } from "@/app/utils/date.util";
+import { average, sumValues } from "@/app/utils/math.util";
 import { Prisma, Repartition, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 
@@ -52,50 +53,48 @@ import {
   YearStat,
 } from "@/schemas/api/statistique.schema";
 
+const aggregateStructuresByKey = <Key>(
+  structures: StatistiqueDbStructure[],
+  lastTypologieMap: Map<number, StatistiqueDbTypologie>,
+  getKey: (structure: StatistiqueDbStructure) => Key
+): Map<Key, { structures: number; places: number }> => {
+  const map = new Map<Key, { structures: number; places: number }>();
+  for (const structure of structures) {
+    const typologie = lastTypologieMap.get(structure.id);
+    const key = getKey(structure);
+    const current = map.get(key) ?? { structures: 0, places: 0 };
+    map.set(key, {
+      structures: current.structures + 1,
+      places: current.places + (typologie?.placesAutorisees ?? 0),
+    });
+  }
+  return map;
+};
+
 const computeTypeStats = (
   structures: StatistiqueDbStructure[],
   lastTypologieMap: Map<number, StatistiqueDbTypologie>
-): TypeStructureStat[] => {
-  const map = new Map<
-    StructureType | null,
-    { count: number; places: number }
-  >();
-  for (const structure of structures) {
-    const typologie = lastTypologieMap.get(structure.id);
-    const curr = map.get(structure.type) ?? { count: 0, places: 0 };
-    map.set(structure.type, {
-      count: curr.count + 1,
-      places: curr.places + (typologie?.placesAutorisees ?? 0),
-    });
-  }
-  return Array.from(map.entries()).map(([type, { count, places }]) => ({
-    type,
-    structures: count,
-    places,
-  }));
-};
+): TypeStructureStat[] =>
+  Array.from(
+    aggregateStructuresByKey(
+      structures,
+      lastTypologieMap,
+      (structure) => structure.type
+    ).entries()
+  ).map(([type, stats]) => ({ type, ...stats }));
 
 const computeBatiStats = (
   structures: StatistiqueDbStructure[],
   batiMap: Map<number, Repartition>,
   lastTypologieMap: Map<number, StatistiqueDbTypologie>
-): BatiStat[] => {
-  const map = new Map<Repartition, { count: number; places: number }>();
-  for (const structure of structures) {
-    const bati = batiMap.get(structure.id) ?? Repartition.COLLECTIF;
-    const typologie = lastTypologieMap.get(structure.id);
-    const curr = map.get(bati) ?? { count: 0, places: 0 };
-    map.set(bati, {
-      count: curr.count + 1,
-      places: curr.places + (typologie?.placesAutorisees ?? 0),
-    });
-  }
-  return Array.from(map.entries()).map(([bati, { count, places }]) => ({
-    bati,
-    structures: count,
-    places,
-  }));
-};
+): BatiStat[] =>
+  Array.from(
+    aggregateStructuresByKey(
+      structures,
+      lastTypologieMap,
+      (structure) => batiMap.get(structure.id) ?? Repartition.COLLECTIF
+    ).entries()
+  ).map(([bati, stats]) => ({ bati, ...stats }));
 
 const computePlacesSpeciales = (
   structures: StatistiqueDbStructure[],
@@ -122,21 +121,6 @@ const computePlacesSpeciales = (
     )
     .reduce((acc, adresse) => acc + (adresse.logementSocial ?? 0), 0);
   return { pmr, lgbt, fvvTeh, logementsSociaux };
-};
-
-const computeTotalPlaces = (
-  structures: StatistiqueDbStructure[],
-  lastTypologieMap: Map<number, StatistiqueDbTypologie>
-): number => {
-  let totalPlaces = 0;
-  for (const structure of structures) {
-    const typologie = lastTypologieMap.get(structure.id);
-    if (!typologie) {
-      continue;
-    }
-    totalPlaces += typologie.placesAutorisees ?? 0;
-  }
-  return totalPlaces;
 };
 
 const computeYearStats = (
@@ -240,14 +224,6 @@ const aggregateFinanceStat = (
   resultatNet: byYear.reduce((acc, yearStat) => acc + yearStat.resultatNet, 0),
 });
 
-const avg = (values: (number | null)[]): number | null => {
-  const valid = values.filter((value): value is number => value !== null);
-  if (valid.length === 0) {
-    return null;
-  }
-  return (sumValues(valid) ?? 0) / valid.length;
-};
-
 const computeEvaluationStat = (
   evaluations: StatistiqueDbEvaluation[],
   year?: number
@@ -255,16 +231,18 @@ const computeEvaluationStat = (
   const filtered = year
     ? evaluations.filter(
         (evaluation) =>
-          evaluation.date && new Date(evaluation.date).getFullYear() === year
+          evaluation.date && getYearFromDate(evaluation.date) === year
       )
     : evaluations;
   return {
     year,
     nbEvaluations: filtered.length,
-    moyenneGenerale: avg(filtered.map((evaluation) => evaluation.note)),
-    moyennePersonne: avg(filtered.map((evaluation) => evaluation.notePersonne)),
-    moyennePro: avg(filtered.map((evaluation) => evaluation.notePro)),
-    moyenneStructure: avg(
+    moyenneGenerale: average(filtered.map((evaluation) => evaluation.note)),
+    moyennePersonne: average(
+      filtered.map((evaluation) => evaluation.notePersonne)
+    ),
+    moyennePro: average(filtered.map((evaluation) => evaluation.notePro)),
+    moyenneStructure: average(
       filtered.map((evaluation) => evaluation.noteStructure)
     ),
   };
@@ -354,7 +332,7 @@ const computeTauxEquipement = (
   });
 };
 
-export const buildStructureWhere = async (
+const buildStructureWhere = async (
   filters: StatistiquesFiltersRaw
 ): Promise<Prisma.StructureWhereInput> => {
   const where: Prisma.StructureWhereInput = {};
@@ -457,7 +435,12 @@ export const getStatistiques = async (
     lastTypologieMap,
     adresses
   );
-  const totalPlaces = computeTotalPlaces(structures, lastTypologieMap);
+  const totalPlaces =
+    sumValues(
+      structures.map(
+        (structure) => lastTypologieMap.get(structure.id)?.placesAutorisees
+      )
+    ) ?? 0;
 
   const tauxEquipement = computeTauxEquipement(
     structures,
@@ -484,7 +467,7 @@ export const getStatistiques = async (
     ...new Set(
       evaluations
         .map((evaluation) =>
-          evaluation.date ? new Date(evaluation.date).getFullYear() : null
+          evaluation.date ? getYearFromDate(evaluation.date) : null
         )
         .filter((year): year is number => year !== null)
     ),

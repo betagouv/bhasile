@@ -1,4 +1,3 @@
-import { Repartition, StructureType } from "@/generated/prisma/client";
 import { getYearFromDate } from "@/app/utils/date.util";
 import {
   StructureBatiStat,
@@ -6,7 +5,12 @@ import {
   StructureTypeStat,
   YearStat,
 } from "@/schemas/api/statistique.schema";
-import { RepartitionLabel } from "@/types/adresse.type";
+import {
+  REPARTITION_DISPLAY_ORDER,
+  Repartition,
+  RepartitionLabel,
+} from "@/types/adresse.type";
+import { STRUCTURE_TYPES_DISPLAY_ORDER, StructureType } from "@/types/structure.type";
 
 import {
   StatistiqueDbAdresse,
@@ -15,34 +19,27 @@ import {
   StatistiqueDbTypologie,
 } from "./statistique.db.type";
 
-// Tri pour affichage simplifié ensuite côté front
-const STRUCTURE_TYPE_ORDER: StructureType[] = [
-  StructureType.CADA,
-  StructureType.CAES,
-  StructureType.CPH,
-  StructureType.HUDA,
-  StructureType.PRAHDA,
-];
-
-const BATI_ORDER: Repartition[] = [
-  Repartition.DIFFUS,
-  Repartition.COLLECTIF,
-  Repartition.MIXTE,
-];
-
-const sortTypes = (types: Iterable<StructureType | null>): StructureType[] =>
-  [...new Set(types)]
-    .filter((type): type is StructureType => type !== null)
-    .sort(
-      (typeA, typeB) =>
-        STRUCTURE_TYPE_ORDER.indexOf(typeA) -
-        STRUCTURE_TYPE_ORDER.indexOf(typeB)
-    );
-
-const sortBatis = (batis: Iterable<Repartition>): Repartition[] =>
-  [...new Set(batis)].sort(
-    (batiA, batiB) => BATI_ORDER.indexOf(batiA) - BATI_ORDER.indexOf(batiB)
+const sortByDefinedOrder = <T>(items: Iterable<T>, order: T[]): T[] =>
+  [...new Set(items)].sort(
+    (itemA, itemB) => order.indexOf(itemA) - order.indexOf(itemB)
   );
+
+const getRepartitionFromRepartitions = (
+  repartitions: (Repartition | null | undefined)[]
+): Repartition => {
+  const valid = repartitions.filter(
+    (repartition): repartition is Repartition => repartition != null
+  );
+  const hasDiffus = valid.includes(Repartition.DIFFUS);
+  const hasCollectif = valid.includes(Repartition.COLLECTIF);
+  if (hasDiffus && hasCollectif) {
+    return Repartition.MIXTE;
+  }
+  if (hasDiffus) {
+    return Repartition.DIFFUS;
+  }
+  return Repartition.COLLECTIF;
+};
 
 export const getLastTypologiePerStructure = (
   typologies: StatistiqueDbTypologie[]
@@ -70,15 +67,7 @@ export const getBatiPerStructure = (
   }
   const result = new Map<number, Repartition>();
   for (const [structureId, repartitions] of byStructure) {
-    const hasDiffus = repartitions.includes(Repartition.DIFFUS);
-    const hasCollectif = repartitions.includes(Repartition.COLLECTIF);
-    if (hasDiffus && hasCollectif) {
-      result.set(structureId, Repartition.MIXTE);
-    } else if (hasDiffus) {
-      result.set(structureId, Repartition.DIFFUS);
-    } else {
-      result.set(structureId, Repartition.COLLECTIF);
-    }
+    result.set(structureId, getRepartitionFromRepartitions(repartitions));
   }
   return result;
 };
@@ -100,8 +89,6 @@ const countCpomsForStructureSet = (
   }
   return activeCpomIds.size;
 };
-
-// Retourne les structures pour une année donnée
 
 const getActiveStructuresAtYear = (
   year: number,
@@ -155,37 +142,32 @@ const getStructureIdsByBatiAtYear = (
   return map;
 };
 
-// Regroupe les stats annuelles par catégorie (type, bâti, ...) pour le format API front
-
-const buildGroupedStatsByYear = <FieldToGroupBy>(
+const buildGroupedStatsByYear = <Key>(
   byYear: YearStat[],
   cpomLinks: StatistiqueDbCpomStructure[],
-  fieldsToGroupBy: FieldToGroupBy[],
+  keys: Key[],
   options: {
-    getLabel: (fieldToGroupBy: FieldToGroupBy) => string;
-    getStructureIds: (
-      year: number,
-      fieldToGroupBy: FieldToGroupBy
-    ) => Set<number>;
+    getLabel: (key: Key) => string;
+    getStructureIds: (year: number, key: Key) => Set<number>;
     getStats: (
       yearStat: YearStat,
-      fieldToGroupBy: FieldToGroupBy
+      key: Key
     ) => Pick<StructureStatByYear, "structures" | "places">;
   }
 ): StructureTypeStat[] => {
   const yearsDesc = [...byYear].sort((yearA, yearB) => yearB.year - yearA.year);
 
-  return fieldsToGroupBy.map((fieldToGroupBy) => ({
-    label: options.getLabel(fieldToGroupBy),
+  return keys.map((key) => ({
+    label: options.getLabel(key),
     byYear: yearsDesc.map((yearStat) => {
-      const stats = options.getStats(yearStat, fieldToGroupBy);
+      const stats = options.getStats(yearStat, key);
       return {
         year: yearStat.year,
         structures: stats.structures,
         places: stats.places,
         cpoms: countCpomsForStructureSet(
           cpomLinks,
-          options.getStructureIds(yearStat.year, fieldToGroupBy),
+          options.getStructureIds(yearStat.year, key),
           yearStat.year
         ),
       };
@@ -203,18 +185,24 @@ export const buildStructureTypesStats = (
     return [];
   }
 
-  const types = sortTypes(
+  const structureIdsByYear = new Map(
+    byYear.map((yearStat) => [
+      yearStat.year,
+      getStructureIdsByTypeAtYear(yearStat.year, structures, typologies),
+    ])
+  );
+
+  const types = sortByDefinedOrder(
     byYear.flatMap((yearStat) =>
       yearStat.byType.map((typeStat) => typeStat.type)
-    )
-  );
+    ),
+    STRUCTURE_TYPES_DISPLAY_ORDER as StructureType[]
+  ).filter((type): type is StructureType => type !== null);
 
   return buildGroupedStatsByYear(byYear, cpomLinks, types, {
     getLabel: (structureType) => structureType,
     getStructureIds: (year, structureType) =>
-      getStructureIdsByTypeAtYear(year, structures, typologies).get(
-        structureType
-      ) ?? new Set<number>(),
+      structureIdsByYear.get(year)?.get(structureType) ?? new Set<number>(),
     getStats: (yearStat, structureType) => {
       const typeStat = yearStat.byType.find(
         (entry) => entry.type === structureType
@@ -239,10 +227,23 @@ export const buildStructureBatisStats = (
   }
 
   const batiMap = getBatiPerStructure(adresses);
-  const batis = sortBatis(
+  const structureIdsByYear = new Map(
+    byYear.map((yearStat) => [
+      yearStat.year,
+      getStructureIdsByBatiAtYear(
+        yearStat.year,
+        structures,
+        typologies,
+        batiMap
+      ),
+    ])
+  );
+
+  const batis = sortByDefinedOrder(
     byYear.flatMap((yearStat) =>
       yearStat.byBati.map((batiStat) => batiStat.bati)
-    )
+    ),
+    REPARTITION_DISPLAY_ORDER as Repartition[]
   );
 
   return buildGroupedStatsByYear(byYear, cpomLinks, batis, {
@@ -250,9 +251,7 @@ export const buildStructureBatisStats = (
       RepartitionLabel[repartition as keyof typeof RepartitionLabel] ??
       repartition,
     getStructureIds: (year, repartition) =>
-      getStructureIdsByBatiAtYear(year, structures, typologies, batiMap).get(
-        repartition
-      ) ?? new Set<number>(),
+      structureIdsByYear.get(year)?.get(repartition) ?? new Set<number>(),
     getStats: (yearStat, repartition) => {
       const batiStat = yearStat.byBati.find(
         (entry) => entry.bati === repartition

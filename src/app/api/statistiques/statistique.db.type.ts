@@ -46,11 +46,9 @@ export type StatistiqueDbEig = Prisma.EvenementIndesirableGraveGetPayload<{
 
 export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
   select: {
-    dnaCode: true;
     date: true;
     placesAutorisees: true;
     placesIndisponibles: true;
-    placesOccupees: true;
     desinsectisation: true;
     remiseEnEtat: true;
     sousOccupation: true;

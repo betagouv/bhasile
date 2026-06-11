@@ -1,3 +1,13 @@
+export const average = (
+  values: (number | null | undefined)[]
+): number | null => {
+  const valid = values.filter((value): value is number => typeof value === "number");
+  if (valid.length === 0) {
+    return null;
+  }
+  return (sumValues(valid) ?? 0) / valid.length;
+};
+
 export const sumValues = (
   values: Array<number | null | undefined>
 ): number | null => {

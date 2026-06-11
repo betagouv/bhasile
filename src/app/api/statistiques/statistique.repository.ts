@@ -238,11 +238,9 @@ export const findLatestActivites = async (
   }
   return prisma.$queryRaw<StatistiqueDbActivite[]>(Prisma.sql`
     SELECT DISTINCT ON (a."dnaCode")
-      a."dnaCode",
       a.date,
       a."placesAutorisees",
       a."placesIndisponibles",
-      a."placesOccupees",
       a.desinsectisation,
       a."remiseEnEtat",
       a."sousOccupation",
@@ -265,11 +263,9 @@ export const findActivites = async (
   return prisma.activite.findMany({
     where: { dnaCode: { in: dnaCodes } },
     select: {
-      dnaCode: true,
       date: true,
       placesAutorisees: true,
       placesIndisponibles: true,
-      placesOccupees: true,
       desinsectisation: true,
       remiseEnEtat: true,
       sousOccupation: true,
