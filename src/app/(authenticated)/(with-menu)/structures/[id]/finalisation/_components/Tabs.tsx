@@ -4,7 +4,7 @@ import { FINALISATION_STEPS } from "@/app/utils/finalisationForm.util";
 
 import { Tab } from "./Tab";
 
-export const steps: Record<string, ReactNode> = {
+const steps: Record<string, ReactNode> = {
   "01-identification": (
     <>
       Identification

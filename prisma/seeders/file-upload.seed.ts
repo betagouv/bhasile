@@ -12,6 +12,7 @@ export const createFakeFileUpload = (): Omit<
   | "parentFileUploadId"
   | "structureId"
   | "cpomId"
+  | "operateurId"
 > => {
   const { mime, ext } = randomDocFile();
   const fileName = faker.system.commonFileName(ext);

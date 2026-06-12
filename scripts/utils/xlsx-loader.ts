@@ -17,4 +17,3 @@ export const loadXlsxBufferFromS3 = async (
   const fileName = objectName.split("/").pop() ?? objectName;
   return { buffer, fileName };
 };
-

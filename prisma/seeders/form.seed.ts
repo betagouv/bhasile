@@ -152,7 +152,7 @@ export const createFakeForm = (
   };
 };
 
-export const createFakeFormStep = (
+const createFakeFormStep = (
   stepDefinitionId: number,
   statusOverride?: StepStatus
 ): Omit<FormStep, "id" | "formId"> => {

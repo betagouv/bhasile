@@ -110,7 +110,7 @@ export const structureTypologieWithoutEvolutionSchema = z.object({
   year: zSafeYear(),
 });
 
-export const placesEvolutionSchema = z.object({
+const placesEvolutionSchema = z.object({
   year: zSafeYear(),
   placesACreer: zSafePositiveDecimalsNullish(),
   placesAFermer: zSafePositiveDecimalsNullish(),
@@ -126,7 +126,7 @@ export const structureTypologiesWithoutTypePlacesSchemaWithMandatoryEvolution =
     mandatoryEvolutionRefine
   );
 
-export const structureTypologieSchema =
+const structureTypologieSchema =
   structureTypologieWithoutEvolutionSchema.and(placesEvolutionSchema);
 
 export const structureTypologiesSchema = z.object({

@@ -4,10 +4,12 @@ import {
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import { Structure } from "@/generated/prisma/client";
+import { canUpdateStructure } from "@/lib/casl/abilities";
 import {
   StructureAgentUpdateApiType,
   StructureApiRead,
 } from "@/schemas/api/structure.schema";
+import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 import { PublicType } from "@/types/structure.type";
 
@@ -41,7 +43,7 @@ import {
   getDatesConvention,
   getDatesPeriodeAutorisation,
   getOperateurLabel,
-  getRepartition,
+  getTypeBati,
   isStructureInCpom,
   isStructureInCpomPerYear,
 } from "./structure.util";
@@ -58,6 +60,7 @@ export type SearchProps = {
   direction?: "asc" | "desc" | null;
   map?: boolean;
   selection?: boolean;
+  finalised?: boolean;
 };
 
 export const updateStructureAgent = async (
@@ -85,19 +88,23 @@ export const updateStructureOperateur = async (
   );
 };
 
-export const getFullStructures = async ({
-  search,
-  page,
-  type,
-  bati,
-  placesAutorisees,
-  departements,
-  map,
-  column,
-  direction,
-  operateurs,
-  selection,
-}: SearchProps): Promise<{
+export const getFullStructures = async (
+  {
+    search,
+    page,
+    type,
+    bati,
+    placesAutorisees,
+    departements,
+    map,
+    column,
+    direction,
+    operateurs,
+    selection,
+    finalised,
+  }: SearchProps,
+  user?: SessionUser
+): Promise<{
   structures: StructureApiRead[];
   totalStructures: number;
 }> => {
@@ -113,6 +120,7 @@ export const getFullStructures = async ({
     direction,
     operateurs,
     selection,
+    finalised,
   })) as StructureDbList[];
   const totalStructures = await countBySearch({
     search,
@@ -124,15 +132,18 @@ export const getFullStructures = async ({
     operateurs,
   });
 
-  const structures = dbStructures.map((structure) =>
-    dbStructureToApiRead(structure, true)
-  );
+  const structures = dbStructures.map((dbStructure) => {
+    const structure = dbStructureToApiRead(dbStructure, true);
+    structure.adresses = getReadableAdresses(structure, user);
+    return structure;
+  });
 
   return { structures, totalStructures };
 };
 
 export const getFullStructure = async (
-  id: number
+  id: number,
+  user?: SessionUser
 ): Promise<StructureApiRead | null> => {
   const dbStructure = await findOne(id);
 
@@ -141,8 +152,27 @@ export const getFullStructure = async (
   }
 
   const structure = dbStructureToApiRead(dbStructure);
+  structure.adresses = getReadableAdresses(structure, user);
 
   return structure;
+};
+
+const getReadableAdresses = (
+  structure: StructureApiRead,
+  user?: SessionUser
+): StructureApiRead["adresses"] => {
+  if (user && canUpdateStructure(user, structure)) {
+    return structure.adresses;
+  }
+
+  return structure.adresses?.map((adresse) => ({
+    ...adresse,
+    adresse: "",
+    adresseComplete: [adresse.codePostal, adresse.commune]
+      .filter(Boolean)
+      .join(" ")
+      .trim(),
+  }));
 };
 
 export const getStructureForOperateur = async (
@@ -189,7 +219,7 @@ const dbStructureToApiRead = (
   const adresses = getAdressesApiRead(dbStructure.adresses);
   const adresseAdministrativeComplete =
     buildAdresseAdministrativeComplete(dbStructure);
-  const typeBati = getRepartition(dbStructure);
+  const typeBati = getTypeBati(dbStructure);
 
   const isMultiAntenne = (antennes?.length ?? 0) > 0;
   const isMultiDna =
@@ -206,7 +236,6 @@ const dbStructureToApiRead = (
     longitude: dbStructure.longitude?.toString(),
     activites,
     evenementsIndesirablesGraves: aggregatedEIGs,
-    repartition: getRepartition(dbStructure),
     operateurLabel: getOperateurLabel(dbStructure),
     isAutorisee: isStructureAutorisee(dbStructure.type),
     isSubventionnee: isStructureSubventionnee(dbStructure.type),

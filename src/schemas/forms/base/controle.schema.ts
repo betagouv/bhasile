@@ -8,7 +8,7 @@ const fileUploadSchema = z.object({
   id: zId(),
 });
 
-export const controleAutoSaveSchema = z.object({
+const controleAutoSaveSchema = z.object({
   id: zId(),
   date: optionalFrenchDateToISO(),
   type: z.nativeEnum(ControleType).optional(),
@@ -16,7 +16,7 @@ export const controleAutoSaveSchema = z.object({
   uuid: z.string().optional(), // Used to identify the controle when it is not saved in the database (and so does not have an id)
 });
 
-export const controleSchema = controleAutoSaveSchema.refine(
+const controleSchema = controleAutoSaveSchema.refine(
   (data) => {
     if (data.fileUploads) {
       if (

@@ -21,6 +21,7 @@ export const OperateurList = ({
             totalPlaces={operateur.totalPlaces}
             pourcentageParc={operateur.pourcentageParc}
             structureTypes={operateur.structureTypes}
+            logo={operateur.logo}
           />
         </div>
       ))}

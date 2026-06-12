@@ -162,6 +162,7 @@ SELECT
   -- Evaluation should be performed at least every 5 years, before the end of the convention.
   CASE
     WHEN s."finConvention" IS NULL THEN FALSE
+    WHEN s."type" IN ('HUDA', 'CAES') THEN FALSE
     WHEN MAX(e."date") IS NULL THEN TRUE
     WHEN MAX(e."date") < (s."finConvention" - INTERVAL '5 years') THEN TRUE
     ELSE FALSE

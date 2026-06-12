@@ -11,6 +11,7 @@ const mockUpdateOne = vi.fn();
 const mockCreateStructureEvent = vi.fn();
 const mockGetDepartementActivitesAverage = vi.fn();
 const mockGetAdresseAdministrativeCoordinates = vi.fn();
+const mockGetAdressesApiRead = vi.fn();
 
 vi.mock("next-auth", () => ({
   getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
@@ -47,7 +48,7 @@ vi.mock("@/app/api/structures/structure.util", () => ({
   getCurrentPlacesLogementsSociaux: vi.fn().mockReturnValue(2),
   getCurrentPlacesQpv: vi.fn().mockReturnValue(3),
   getOperateurLabel: vi.fn().mockReturnValue("Adoma"),
-  getRepartition: vi.fn().mockReturnValue("DIFFUS"),
+  getTypeBati: vi.fn().mockReturnValue("DIFFUS"),
   isStructureInCpom: vi.fn().mockReturnValue(false),
   isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
   getDatesConvention: vi.fn().mockReturnValue([null, null]),
@@ -70,7 +71,7 @@ vi.mock("@/app/api/adresses/adresse.util", async (importOriginal) => ({
   ...(await importOriginal<
     typeof import("@/app/api/adresses/adresse.util")
   >()),
-  getAdressesApiRead: vi.fn().mockReturnValue([]),
+  getAdressesApiRead: (...args: unknown[]) => mockGetAdressesApiRead(...args),
 }));
 
 vi.mock("@/app/api/user-action/user-action.service", () => ({
@@ -81,9 +82,10 @@ vi.mock("@/app/api/user-action/user-action.service", () => ({
 describe("GET /api/structures/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetAdressesApiRead.mockReturnValue([]);
   });
 
-  it("should return full structure when authenticated", async () => {
+  it("should return full structure when authenticated with edit rights", async () => {
     // GIVEN
     const dbStructure = {
       id: 1,
@@ -101,6 +103,8 @@ describe("GET /api/structures/[id]", () => {
     };
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindOne.mockResolvedValueOnce(dbStructure);
+    mockCanUpdateStructure.mockReturnValueOnce(true);
+    mockGetAdressesApiRead.mockReturnValueOnce([{ id: 1 }]);
 
     const request = new NextRequest("http://localhost/api/structures/1");
 
@@ -116,7 +120,7 @@ describe("GET /api/structures/[id]", () => {
       filiale: undefined,
       operateur: { id: 1, name: "Adoma" },
       type: "CADA",
-      adresses: [],
+      adresses: [{ id: 1 }],
       adresseAdministrative: "",
       codePostalAdministratif: "",
       communeAdministrative: "",
@@ -136,7 +140,6 @@ describe("GET /api/structures/[id]", () => {
       longitude: "2.34",
       activites: [],
       evenementsIndesirablesGraves: [],
-      repartition: "DIFFUS",
       operateurLabel: "Adoma",
       isAutorisee: true,
       isSubventionnee: false,
@@ -156,6 +159,47 @@ describe("GET /api/structures/[id]", () => {
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);
     expect(mockFindOneOperateur).not.toHaveBeenCalled();
+  });
+
+  it("should redact the exact adresse but keep the commune when authenticated user lacks edit rights", async () => {
+    // GIVEN
+    const dbStructure = {
+      id: 1,
+      type: "CADA",
+      adresses: [{ id: 42 }],
+      cpomStructures: [],
+      creationDate: new Date("2020-01-01"),
+      dnaStructures: [],
+    };
+    mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
+    mockFindOne.mockResolvedValueOnce(dbStructure);
+    mockCanUpdateStructure.mockReturnValueOnce(false);
+    mockGetAdressesApiRead.mockReturnValueOnce([
+      {
+        id: 42,
+        adresse: "12 rue secrète",
+        codePostal: "75001",
+        commune: "Paris",
+        adresseComplete: "12 rue secrète 75001 Paris",
+      },
+    ]);
+
+    const request = new NextRequest("http://localhost/api/structures/1");
+
+    // WHEN
+    const response = await GET(request);
+
+    // THEN
+    expect(response.status).toBe(200);
+    expect((await response.json()).adresses).toEqual([
+      {
+        id: 42,
+        adresse: "",
+        codePostal: "75001",
+        commune: "Paris",
+        adresseComplete: "75001 Paris",
+      },
+    ]);
   });
 
   it("should return limited structure when not authenticated", async () => {

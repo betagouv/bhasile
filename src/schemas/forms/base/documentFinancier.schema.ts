@@ -28,7 +28,7 @@ const DocumentFinancierSchema = z.object({
   fileUploads: z.array(fileApiSchema).optional(),
 });
 
-export const DocumentsFinanciersSchema = z.object({
+const DocumentsFinanciersSchema = z.object({
   creationDate: optionalFrenchDateToISO(),
   date303: nullishFrenchDateToISO(),
   documentsFinanciers: z.array(DocumentFinancierSchema).optional(),

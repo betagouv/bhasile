@@ -48,7 +48,7 @@ export const PrahdaDescriptionBlock = (): ReactElement => {
       <hr />
       <div className="flex mb-2">
         <strong className="pr-2">Type de bâti</strong>
-        <span className="pr-1">{structure.repartition}</span>
+        <span className="pr-1">{structure.typeBati}</span>
       </div>
     </Block>
   );

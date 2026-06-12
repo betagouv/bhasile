@@ -17,7 +17,7 @@ import {
 } from "@/schemas/api/transformation.schema";
 import {
   CreationPlacesEtHebergementFormValues,
-  creationPlacesEtHebergementSchema,
+  getPlacesEtHebergementSchema,
 } from "@/schemas/forms/transformation/creationPlacesEtHebergement.schema";
 import { DeepPartial, FormKind } from "@/types/global";
 
@@ -49,7 +49,7 @@ export const PlacesEtHebergementForm = ({
 
   return (
     <FormWrapper
-      schema={creationPlacesEtHebergementSchema}
+      schema={getPlacesEtHebergementSchema(formKind, originalPlaces)}
       defaultValues={defaultValues}
       onSubmit={(data) => {
         handleValidation({

@@ -35,6 +35,14 @@ export const INDICATEUR_FINANCIER_CUTOFF_YEAR = 2024;
 export const AUTORISEE_OPEN_YEAR = 2025;
 export const SUBVENTIONNEE_OPEN_YEAR = 2024;
 
+const IMAGE_MIME_TYPES = [
+  "image/jpg",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+];
+
 export const SPREADSHEET_MIME_TYPES = [
   "application/vnd.ms-excel",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -44,6 +52,7 @@ export const SPREADSHEET_MIME_TYPES = [
 ];
 export const ALLOWED_MIME_TYPES = [
   "application/pdf",
+  ...IMAGE_MIME_TYPES,
   ...SPREADSHEET_MIME_TYPES,
 ];
 

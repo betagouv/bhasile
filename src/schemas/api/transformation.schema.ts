@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { StructureParentActe } from "@/types/acte-administratif.type";
+import { Repartition } from "@/types/adresse.type";
 import { ExcludeNullValues } from "@/types/global";
 import {
   StructureVersionTransformationType,
@@ -19,6 +20,7 @@ export type StructureVersionApiRead =
     adresseAdministrativeComplete?: string;
     isMultiAntenne?: boolean;
     isMultiDna?: boolean;
+    typeBati?: Repartition;
   };
 
 const structureVersionTransformationApiUpdateSchema = z.object({

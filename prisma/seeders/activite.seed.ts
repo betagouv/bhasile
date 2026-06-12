@@ -18,7 +18,7 @@ export const createFakeActivites = ({
   );
 };
 
-export const createFakeActivite = ({
+const createFakeActivite = ({
   dnaCode,
   date,
 }: CreateFakeActiviteArgs): Omit<Activite, "id" | "structureDnaCode"> => {

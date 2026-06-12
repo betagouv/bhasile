@@ -27,6 +27,7 @@ describe("GET /api/operateurs", () => {
         total_places: 20,
         pourcentage_parc: 5.4,
         structure_types: "{CADA,HUDA}",
+        logo: {},
       },
     ]);
     mockCountOperateurs.mockResolvedValueOnce(1);
@@ -49,6 +50,7 @@ describe("GET /api/operateurs", () => {
           totalPlaces: 20,
           pourcentageParc: 5.4,
           structureTypes: ["CADA", "HUDA"],
+          logo: {},
         },
       ],
       totalOperateurs: 1,
