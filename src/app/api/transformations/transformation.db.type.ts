@@ -31,6 +31,7 @@ export const transformationInclude = {
           structure: {
             include: {
               operateur: { select: { id: true, name: true } },
+              antennes: true,
               structureTypologies: {
                 orderBy: { year: "desc" },
               },
