@@ -3,13 +3,13 @@
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_global_quality" AS
 SELECT
   sc."id" AS "id",
-  sc."codeBhasile" AS "codeBhasile",
+  sc."codeBhasile" AS "code_bhasile",
   sc."operateur" AS "operateur",
-  sc."departementAdministratif" AS "departementAdministratif",
+  sc."departementAdministratif" AS "departement_administratif",
   sc."departement" AS "departement",
   sc."region" AS "region",
   sc."dna_codes" AS "dna_codes",
-  sc."updatedAt" AS "updatedAt",
+  sc."updatedAt" AS "updated_at",
   -- Calendar indicators
   -- Calendar: authorization period is not 15 years (authorized structures, from actes administratifs)
   COALESCE(cal."has_issue_authorisation_period_not_15y", FALSE) AS "has_issue_authorisation_period_not_15y",

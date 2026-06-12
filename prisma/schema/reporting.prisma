@@ -3,11 +3,12 @@
 // Tarifs journaliers cibles par type de structure et zonage (remplissage manuel)
 model TarifJournalierCible {
   id            Int           @id @default(autoincrement())
-  structureType StructureType
-  belongsToIdf  Boolean
-  tarifCible    Decimal
+  structureType StructureType @map("structure_type")
+  belongsToIdf  Boolean       @map("belongs_to_idf")
+  tarifCible    Decimal       @map("tarif_cible")
 
   @@unique([structureType, belongsToIdf])
+  @@map("tarif_journalier_cible")
   @@schema("reporting")
 }
 
@@ -15,18 +16,19 @@ model TarifJournalierCible {
 model GlobalIndicators {
   id Int @id @default(autoincrement())
 
-  budgetAnnuel             Decimal?
-  notePriseEnMain          Float?
-  noteClarteInfos          Float?
-  noteFaciliteUtilisation  Float?
-  noteRobustesseTech       Float?
-  noteRemplacementExcel    Float?
-  noteGainTemps            Float?
-  noteAmeliorationPilotage Float?
+  budgetAnnuel             Decimal? @map("budget_annuel")
+  notePriseEnMain          Float?   @map("note_prise_en_main")
+  noteClarteInfos          Float?   @map("note_clarte_infos")
+  noteFaciliteUtilisation  Float?   @map("note_facilite_utilisation")
+  noteRobustesseTech       Float?   @map("note_robustesse_tech")
+  noteRemplacementExcel    Float?   @map("note_remplacement_excel")
+  noteGainTemps            Float?   @map("note_gain_temps")
+  noteAmeliorationPilotage Float?   @map("note_amelioration_pilotage")
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
+  @@map("global_indicators")
   @@schema("reporting")
 }
 
@@ -35,13 +37,14 @@ model MonthlyReportingMetric {
   id    Int      @id @default(autoincrement())
   month DateTime @unique
 
-  visitsCount            Int
-  readsCount             Int
-  updatesCount           Int
-  structuresUpdatedCount Int
+  visitsCount            Int @map("visits_count")
+  readsCount             Int @map("reads_count")
+  updatesCount           Int @map("updates_count")
+  structuresUpdatedCount Int @map("structures_updated_count")
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
+  @@map("monthly_reporting_metric")
   @@schema("reporting")
 }
 
@@ -49,13 +52,14 @@ model MonthlyReportingMetric {
 model MonthlyReportingVisitsByRegion {
   id          Int      @id @default(autoincrement())
   month       DateTime
-  regionId    Int
-  regionName  String
-  visitsCount Int
+  regionId    Int      @map("region_id")
+  regionName  String   @map("region_name")
+  visitsCount Int      @map("visits_count")
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@unique([month, regionId])
+  @@map("monthly_reporting_visits_by_region")
   @@schema("reporting")
 }
 
@@ -64,12 +68,13 @@ model MonthlySupportContact {
   id    Int      @id @default(autoincrement())
   month DateTime @unique
 
-  phoneCallsCount Int?
-  emailsCount     Int?
+  phoneCallsCount Int?    @map("phone_calls_count")
+  emailsCount     Int?    @map("emails_count")
   notes           String?
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
+  @@map("monthly_support_contact")
   @@schema("reporting")
 }
 
@@ -78,13 +83,13 @@ model MonthlyStructuresGlobalQualityCount {
   id    Int      @id @default(autoincrement())
   month DateTime @unique
 
-  structuresCount Int
-  indicatorsCount Int
-  issuesCountSum  Int
+  structuresCount Int @map("structures_count")
+  indicatorsCount Int @map("indicators_count")
+  issuesCountSum  Int @map("issues_count_sum")
 
   // Agrégats par catégorie (somme des décomptes par indicateur du mois)
-  indicateursUtilesCount Int?
-  indicateursImpactCount Int?
+  indicateursUtilesCount Int? @map("indicateurs_utiles_count")
+  indicateursImpactCount Int? @map("indicateurs_impact_count")
 
   has_issue_authorisation_period_not_15y                         Int?
   has_issue_authorized_convention_not_5y                         Int?
@@ -116,8 +121,9 @@ model MonthlyStructuresGlobalQualityCount {
   has_issue_subsidized_reprise_etat_nonzero                      Int?
   has_issue_subsidized_excedent_rules                            Int?
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
+  @@map("monthly_structures_global_quality_count")
   @@schema("reporting")
 }
 
@@ -203,9 +209,9 @@ view StructuresGlobalQuality {
 
 view StructuresMissingHistory {
   id                       Int
-  codeBhasile              String
+  codeBhasile              String  @map("code_bhasile")
   operateur                String?
-  departementAdministratif String?
+  departementAdministratif String? @map("departement_administratif")
   departement              String?
   region                   String?
   dna_codes                String?

@@ -45,11 +45,11 @@ WITH
   tarifs AS (
     SELECT
       si."id" AS "structureId",
-      t."tarifCible"
+      t."tarif_cible"
     FROM
       structures_with_idf_boolean si
-      LEFT JOIN reporting."TarifJournalierCible" t ON t."structureType" = si."structureType"
-      AND t."belongsToIdf" = si."belongsToIdf"
+      LEFT JOIN reporting."tarif_journalier_cible" t ON t."structure_type" = si."structureType"
+      AND t."belongs_to_idf" = si."belongsToIdf"
   ),
   -- filter budgets from the structure date 303 joining year, or creation year to the current year
   budgets_filtered AS (
@@ -215,7 +215,7 @@ SELECT
   -- Budget rates: taux d'encadrement min equals 0 (NULL does not count as issue)
   COALESCE(br."taux_encadrement_min" < 2, FALSE) AS "has_issue_taux_encadrement_min_lt_2",
   -- Budget rates: coût journalier max > tarif cible (par type et zonage IDF / non-IDF)
-  COALESCE(br."cout_journalier_max" > tc."tarifCible", FALSE) AS "has_issue_cout_journalier_max_gt_tarif_cible",
+  COALESCE(br."cout_journalier_max" > tc."tarif_cible", FALSE) AS "has_issue_cout_journalier_max_gt_tarif_cible",
   -- Budget rates: coût journalier min < 15 (across filtered years)
   COALESCE(br."cout_journalier_min" < 15, FALSE) AS "has_issue_cout_journalier_min_lt_15",
   -- Budget indicators (aggregated from multiple years)
