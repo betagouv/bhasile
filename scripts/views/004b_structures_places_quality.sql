@@ -3,39 +3,37 @@
 --
 -- Notes:
 -- - Checks that specific places (LGBT, FVV TEH, PMR) are not greater than authorized places
--- - Checks are done on the current version's `public."StructureTypologie"` rows
+-- - Checks are done year by year on `public."StructureTypologie"`
 -- - Compares places between structure and addresses (difference > 10%)
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_places_quality" AS
 WITH
-  -- Last typology by structure (current version)
+  -- Last typology by structure
   structure_typologie_dernier_millesime AS (
     SELECT DISTINCT
-      ON (scv."structureId") scv."structureId" AS "structureId",
+      ON (st."structureId") st."structureId",
       st."placesAutorisees",
       st."pmr",
       st."lgbt",
       st."fvvTeh",
       st."year"
     FROM
-:"SCHEMA"."structures_current_version" scv
-      JOIN public."StructureTypologie" st ON st."structureVersionId" = scv."version_id"
+      public."StructureTypologie" st
     ORDER BY
-      scv."structureId",
+      st."structureId",
       st."year" DESC
   ),
-  -- Last typology by address (current version)
+  -- Last typology by address
   adresse_typologie_dernier_millesime AS (
     SELECT DISTINCT
-      ON (aty."adresseId") scv."structureId" AS "structureId",
+      ON (aty."adresseId") a."structureId",
       a."id" AS "adresse_id",
       aty."placesAutorisees",
       aty."qpv",
       aty."logementSocial",
       aty."year"
     FROM
-:"SCHEMA"."structures_current_version" scv
-      JOIN public."Adresse" a ON a."structureVersionId" = scv."version_id"
-      JOIN public."AdresseTypologie" aty ON aty."adresseId" = a."id"
+      public."AdresseTypologie" aty
+      JOIN public."Adresse" a ON a."id" = aty."adresseId"
     ORDER BY
       aty."adresseId",
       aty."year" DESC
@@ -65,20 +63,19 @@ WITH
       LEFT JOIN structure_typologie_dernier_millesime sdm ON sdm."structureId" = s."id"
       LEFT JOIN adresses_agregees aa ON aa."structureId" = s."id"
   ),
-  -- Specific places issues (current version, year by year)
+  -- Specific places issues (year by year)
   specific_places_issues AS (
     SELECT
-      scv."structureId" AS "structureId",
+      st."structureId" AS "structureId",
       BOOL_OR(
         st."lgbt" > st."placesAutorisees"
         OR st."fvvTeh" > st."placesAutorisees"
         OR st."pmr" > st."placesAutorisees"
       ) AS "has_issue_specific_places_gt_places_autorisees"
     FROM
-:"SCHEMA"."structures_current_version" scv
-      JOIN public."StructureTypologie" st ON st."structureVersionId" = scv."version_id"
+      public."StructureTypologie" st
     GROUP BY
-      scv."structureId"
+      st."structureId"
   )
 SELECT
   s."id" AS "id",

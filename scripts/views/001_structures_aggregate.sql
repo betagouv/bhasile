@@ -1,36 +1,32 @@
 -- Objective: aggregate indicators per structure
--- Versioned relations (typologies, adresses, DNA links) and scalars (type, public,
--- latitude, longitude) are resolved through the current version of each structure.
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_aggregates" AS
-WITH -- Last typology by structure (current version)
+WITH -- Last typology by structure
   structure_typologie_dernier_millesime AS (
     SELECT DISTINCT
-      ON (scv."structureId") scv."structureId" AS "structureId",
+      ON (st."structureId") st."structureId",
       st."placesAutorisees",
       st."pmr",
       st."lgbt",
       st."fvvTeh",
       st."year"
     FROM
-:"SCHEMA"."structures_current_version" scv
-      JOIN public."StructureTypologie" st ON st."structureVersionId" = scv."version_id"
+      public."StructureTypologie" st
     ORDER BY
-      scv."structureId",
+      st."structureId",
       st."year" DESC
   ),
-  -- Last typology by address (current version)
+  -- Last typology by address
   adresse_typologie_dernier_millesime AS (
     SELECT DISTINCT
-      ON (aty."adresseId") scv."structureId" AS "structureId",
+      ON (aty."adresseId") a."structureId",
       a."id" AS "adresse_id",
       aty."placesAutorisees",
       aty."qpv",
       aty."logementSocial",
       aty."year"
     FROM
-:"SCHEMA"."structures_current_version" scv
-      JOIN public."Adresse" a ON a."structureVersionId" = scv."version_id"
-      JOIN public."AdresseTypologie" aty ON aty."adresseId" = a."id"
+      public."AdresseTypologie" aty
+      JOIN public."Adresse" a ON a."id" = aty."adresseId"
     ORDER BY
       aty."adresseId",
       aty."year" DESC
@@ -49,19 +45,18 @@ WITH -- Last typology by structure (current version)
       a."dnaCode",
       a."date" DESC
   ),
-  -- Aggregate last activites per structure across the current version's DNAs
+  -- Aggregate last activites per structure across all linked DNAs
   activite_dernier_millesime_par_structure AS (
     SELECT
-      scv."structureId" AS "structureId",
+      ds."structureId" AS "structureId",
       MAX(ad."date") AS "date",
       SUM(ad."placesAutorisees") AS "placesAutorisees"
     FROM
       activite_dernier_millesime_par_dna ad
       JOIN public."Dna" d ON d."code" = ad."dnaCode"
       JOIN public."DnaStructure" ds ON ds."dnaId" = d."id"
-      JOIN:"SCHEMA"."structures_current_version" scv ON scv."version_id" = ds."structureVersionId"
     GROUP BY
-      scv."structureId"
+      ds."structureId"
   ),
   -- Aggregate by structure on the last typologies of addresses
   adresses_agregees AS (
@@ -161,10 +156,10 @@ SELECT
   sc."id" AS "id",
   sc."codeBhasile" AS "codeBhasile",
   sc."operateur" AS "operateur",
-  sv.latitude AS "latitude",
-  sv.longitude AS "longitude",
-  sv.public AS "public",
-  sv.type AS "type",
+  s.latitude AS "latitude",
+  s.longitude AS "longitude",
+  s.public AS "public",
+  s.type AS "type",
   sc."region" AS "region",
   sc."departement" AS "departement",
   sc."departementAdministratif" AS "departementAdministratif",
@@ -197,8 +192,6 @@ SELECT
 FROM
 :"SCHEMA"."structures_core" sc
   JOIN public."Structure" s ON s."id" = sc."id"
-  LEFT JOIN:"SCHEMA"."structures_current_version" scv ON scv."structureId" = s."id"
-  LEFT JOIN public."StructureVersion" sv ON sv."id" = scv."version_id"
   LEFT JOIN places_agregees pa ON pa."id" = s."id"
   LEFT JOIN structure_typologie_dernier_millesime sdm ON sdm."structureId" = s."id"
   LEFT JOIN adresses_agregees aa ON aa."structureId" = s."id"

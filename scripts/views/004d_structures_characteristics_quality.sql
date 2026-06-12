@@ -11,8 +11,8 @@ SELECT
       SUBSTRING(
         d."code"
         FROM
-          2 FOR LENGTH(TRIM(sv."departementAdministratif"))
-      ) <> TRIM(sv."departementAdministratif")
+          2 FOR LENGTH(TRIM(s."departementAdministratif"))
+      ) <> TRIM(s."departementAdministratif")
     ),
     FALSE
   ) AS "has_issue_dept_code",
@@ -22,9 +22,7 @@ SELECT
   COALESCE(BOOL_OR(cpom_counts."structuresCount" <= 1), FALSE) AS "has_issue_cpom_mono_structure"
 FROM
   public."Structure" s
-  LEFT JOIN:"SCHEMA"."structures_current_version" scv ON scv."structureId" = s."id"
-  LEFT JOIN public."StructureVersion" sv ON sv."id" = scv."version_id"
-  LEFT JOIN public."DnaStructure" ds ON ds."structureVersionId" = scv."version_id"
+  LEFT JOIN public."DnaStructure" ds ON ds."structureId" = s."id"
   LEFT JOIN public."Dna" d ON d."id" = ds."dnaId"
   LEFT JOIN public."CpomStructure" cs ON cs."structureId" = s."id"
   LEFT JOIN (
