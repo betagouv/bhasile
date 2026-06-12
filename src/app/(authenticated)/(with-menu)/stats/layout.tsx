@@ -1,5 +1,5 @@
 // import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+// import { notFound } from "next/navigation";
 import { ReactNode } from "react";
 
 import { StatistiquesApiType } from "@/schemas/api/statistiques.schema";
@@ -100,10 +100,6 @@ export default async function StatistiquesLayout({
   children: ReactNode;
 }) {
   const statistiques = await getStatistiques();
-
-  if (!statistiques) {
-    notFound();
-  }
 
   return (
     <StatistiquesProvider statistiques={statistiques}>

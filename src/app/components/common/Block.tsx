@@ -7,7 +7,6 @@ import { AbilityContext } from "@/app/context/AbilityContext";
 import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
 import { CpomApiRead } from "@/schemas/api/cpom.schema";
 import { OperateurApiRead } from "@/schemas/api/operateur.schema";
-import { StatistiquesApiType } from "@/schemas/api/statistiques.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 export const Block = ({
@@ -82,10 +81,6 @@ type Props = PropsWithChildren<{
     label: ReactElement;
     onClick: () => void;
   }[];
-  entity:
-    | StructureApiRead
-    | CpomApiRead
-    | OperateurApiRead
-    | StatistiquesApiType;
-  entityType: "Structure" | "Cpom" | "Operateur" | "Statistiques";
+  entity: StructureApiRead | CpomApiRead | OperateurApiRead;
+  entityType: "Structure" | "Cpom" | "Operateur";
 }>;

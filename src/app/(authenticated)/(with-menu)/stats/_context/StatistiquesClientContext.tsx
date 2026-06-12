@@ -8,13 +8,11 @@ import { StatistiquesContextType } from "./StatistiquesContext";
 
 type StatistiquesContextInternalType = {
   statistiques: StatistiquesApiType | null;
-  setStatistiques: (statistiques: StatistiquesApiType | null) => void;
 };
 
 const StatistiquesContextInternal =
   createContext<StatistiquesContextInternalType>({
     statistiques: null,
-    setStatistiques: () => {},
   });
 
 export function StatistiquesClientProvider({
@@ -24,20 +22,16 @@ export function StatistiquesClientProvider({
   children: ReactNode;
   statistiques: StatistiquesApiType | null;
 }) {
-  const [statistiques, setStatistiques] = useState(initialStatistiques);
+  const [statistiques] = useState(initialStatistiques);
 
   return (
-    <StatistiquesContextInternal.Provider
-      value={{ statistiques: statistiques, setStatistiques: setStatistiques }}
-    >
+    <StatistiquesContextInternal.Provider value={{ statistiques }}>
       {children}
     </StatistiquesContextInternal.Provider>
   );
 }
 
-export function useStatistiquesContext(): StatistiquesContextType & {
-  setStatistiques: (statistiques: StatistiquesApiType | null) => void;
-} {
+export function useStatistiquesContext(): StatistiquesContextType {
   const context = useContext(StatistiquesContextInternal);
 
   if (context === undefined) {
@@ -51,6 +45,5 @@ export function useStatistiquesContext(): StatistiquesContextType & {
   }
   return {
     statistiques: context.statistiques,
-    setStatistiques: context.setStatistiques,
   };
 }
