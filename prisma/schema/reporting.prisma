@@ -2,12 +2,12 @@
 
 // Tarifs journaliers cibles par type de structure et zonage (remplissage manuel)
 model TarifJournalierCible {
-  id            Int           @id @default(autoincrement())
-  structureType StructureType @map("structure_type")
-  belongsToIdf  Boolean       @map("belongs_to_idf")
-  tarifCible    Decimal       @map("tarif_cible")
+  id             Int           @id @default(autoincrement())
+  structure_type StructureType
+  belongs_to_idf Boolean
+  tarif_cible    Decimal
 
-  @@unique([structureType, belongsToIdf])
+  @@unique([structure_type, belongs_to_idf])
   @@map("tarif_journalier_cible")
   @@schema("reporting")
 }
@@ -16,17 +16,17 @@ model TarifJournalierCible {
 model GlobalIndicators {
   id Int @id @default(autoincrement())
 
-  budgetAnnuel             Decimal? @map("budget_annuel")
-  notePriseEnMain          Float?   @map("note_prise_en_main")
-  noteClarteInfos          Float?   @map("note_clarte_infos")
-  noteFaciliteUtilisation  Float?   @map("note_facilite_utilisation")
-  noteRobustesseTech       Float?   @map("note_robustesse_tech")
-  noteRemplacementExcel    Float?   @map("note_remplacement_excel")
-  noteGainTemps            Float?   @map("note_gain_temps")
-  noteAmeliorationPilotage Float?   @map("note_amelioration_pilotage")
+  budget_annuel              Decimal?
+  note_prise_en_main         Float?
+  note_clarte_infos          Float?
+  note_facilite_utilisation  Float?
+  note_robustesse_tech       Float?
+  note_remplacement_excel    Float?
+  note_gain_temps            Float?
+  note_amelioration_pilotage Float?
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
 
   @@map("global_indicators")
   @@schema("reporting")
@@ -37,12 +37,12 @@ model MonthlyReportingMetric {
   id    Int      @id @default(autoincrement())
   month DateTime @unique
 
-  visitsCount            Int @map("visits_count")
-  readsCount             Int @map("reads_count")
-  updatesCount           Int @map("updates_count")
-  structuresUpdatedCount Int @map("structures_updated_count")
+  visits_count             Int
+  reads_count              Int
+  updates_count            Int
+  structures_updated_count Int
 
-  createdAt DateTime @default(now()) @map("created_at")
+  created_at DateTime @default(now())
 
   @@map("monthly_reporting_metric")
   @@schema("reporting")
@@ -50,15 +50,15 @@ model MonthlyReportingMetric {
 
 // Visites par région administrative de la structure consultée (remplissage par cron)
 model MonthlyReportingVisitsByRegion {
-  id          Int      @id @default(autoincrement())
-  month       DateTime
-  regionId    Int      @map("region_id")
-  regionName  String   @map("region_name")
-  visitsCount Int      @map("visits_count")
+  id           Int      @id @default(autoincrement())
+  month        DateTime
+  region_id    Int
+  region_name  String
+  visits_count Int
 
-  createdAt DateTime @default(now()) @map("created_at")
+  created_at DateTime @default(now())
 
-  @@unique([month, regionId])
+  @@unique([month, region_id])
   @@map("monthly_reporting_visits_by_region")
   @@schema("reporting")
 }
@@ -68,11 +68,11 @@ model MonthlySupportContact {
   id    Int      @id @default(autoincrement())
   month DateTime @unique
 
-  phoneCallsCount Int?    @map("phone_calls_count")
-  emailsCount     Int?    @map("emails_count")
-  notes           String?
+  phone_calls_count Int?
+  emails_count      Int?
+  notes             String?
 
-  createdAt DateTime @default(now()) @map("created_at")
+  created_at DateTime @default(now())
 
   @@map("monthly_support_contact")
   @@schema("reporting")
@@ -83,13 +83,13 @@ model MonthlyStructuresGlobalQualityCount {
   id    Int      @id @default(autoincrement())
   month DateTime @unique
 
-  structuresCount Int @map("structures_count")
-  indicatorsCount Int @map("indicators_count")
-  issuesCountSum  Int @map("issues_count_sum")
+  structures_count Int
+  indicators_count Int
+  issues_count_sum Int
 
   // Agrégats par catégorie (somme des décomptes par indicateur du mois)
-  indicateursUtilesCount Int? @map("indicateurs_utiles_count")
-  indicateursImpactCount Int? @map("indicateurs_impact_count")
+  indicateurs_utiles_count Int?
+  indicateurs_impact_count Int?
 
   has_issue_authorisation_period_not_15y                         Int?
   has_issue_authorized_convention_not_5y                         Int?
@@ -121,7 +121,7 @@ model MonthlyStructuresGlobalQualityCount {
   has_issue_subsidized_reprise_etat_nonzero                      Int?
   has_issue_subsidized_excedent_rules                            Int?
 
-  createdAt DateTime @default(now()) @map("created_at")
+  created_at DateTime @default(now())
 
   @@map("monthly_structures_global_quality_count")
   @@schema("reporting")
@@ -131,21 +131,21 @@ model MonthlyStructuresGlobalQualityCount {
 view ReportingGlobal {
   id Int
 
-  globalIndicatorsUpdatedAt DateTime? @map("global_indicators_updated_at")
-  budgetAnnuel              Decimal?  @map("budget_annuel")
+  global_indicators_updated_at DateTime?
+  budget_annuel                Decimal?
 
-  updatesCountTotal         Int @map("updates_count_total")
-  indicateursUtilesCountMax Int @map("indicateurs_utiles_count_max")
-  indicateursImpactCountMax Int @map("indicateurs_impact_count_max")
+  updates_count_total          Int
+  indicateurs_utiles_count_max Int
+  indicateurs_impact_count_max Int
 
-  noteFaciliteUtilisationMoyenne4 Float? @map("note_facilite_utilisation_moyenne_4_criteres")
-  noteRemplacementExcel           Float? @map("note_remplacement_excel")
-  noteGainTemps                   Float? @map("note_gain_temps")
-  noteAmeliorationPilotage        Float? @map("note_amelioration_pilotage")
+  note_facilite_utilisation_moyenne_4_criteres Float?
+  note_remplacement_excel                      Float?
+  note_gain_temps                              Float?
+  note_amelioration_pilotage                   Float?
 
-  coutParMiseAJour       Decimal? @map("cout_par_mise_a_jour")
-  coutParSituationUtile  Decimal? @map("cout_par_situation_utile")
-  coutParDetectionImpact Decimal? @map("cout_par_detection_impact")
+  cout_par_mise_a_jour      Decimal?
+  cout_par_situation_utile  Decimal?
+  cout_par_detection_impact Decimal?
 
   @@unique([id])
   @@map("reporting_global")
@@ -155,13 +155,13 @@ view ReportingGlobal {
 view ReportingMensuel {
   month DateTime @unique
 
-  visitsCount                 Int      @map("visits_count")
-  phoneCallsCount             Int?     @map("phone_calls_count")
-  emailsCount                 Int?     @map("emails_count")
-  scoreBesoinSupportPourMille Decimal? @map("score_besoin_support_pour_mille")
-  updatesCount                Int      @map("updates_count")
-  indicateursUtilesCount      Int      @map("indicateurs_utiles_count")
-  indicateursImpactCount      Int      @map("indicateurs_impact_count")
+  visits_count                    Int
+  phone_calls_count               Int?
+  emails_count                    Int?
+  score_besoin_support_pour_mille Decimal?
+  updates_count                   Int
+  indicateurs_utiles_count        Int
+  indicateurs_impact_count        Int
 
   @@map("reporting_mensuel")
   @@schema("reporting")
@@ -200,7 +200,7 @@ view StructuresGlobalQuality {
   has_issue_subsidized_reprise_etat_nonzero                      Boolean?
   has_issue_subsidized_excedent_rules                            Boolean?
 
-  issuesCount Int @map("issues_count")
+  issues_count Int
 
   @@unique([id])
   @@map("structures_global_quality")
@@ -208,13 +208,13 @@ view StructuresGlobalQuality {
 }
 
 view StructuresMissingHistory {
-  id                       Int
-  codeBhasile              String  @map("code_bhasile")
-  operateur                String?
-  departementAdministratif String? @map("departement_administratif")
-  departement              String?
-  region                   String?
-  dna_codes                String?
+  id                        Int
+  code_bhasile              String
+  operateur                 String?
+  departement_administratif String?
+  departement               String?
+  region                    String?
+  dna_codes                 String?
 
   has_missing_acte_administratif   Boolean
   has_missing_budget               Boolean

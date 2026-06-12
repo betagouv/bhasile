@@ -80,9 +80,9 @@ async function main() {
     // Snapshot de la qualité
     const structuresCount = await prisma.structuresGlobalQuality.count();
     const issuesAgg = await prisma.structuresGlobalQuality.aggregate({
-      _sum: { issuesCount: true },
+      _sum: { issues_count: true },
     });
-    const issuesCountSum = issuesAgg._sum.issuesCount ?? 0;
+    const issuesCountSum = issuesAgg._sum.issues_count ?? 0;
 
     const indicatorFields = REPORTING_QUALITY_INDICATOR_FIELDS;
 
@@ -123,19 +123,19 @@ async function main() {
       where: { month },
       create: {
         month,
-        structuresCount,
-        indicatorsCount,
-        issuesCountSum,
-        indicateursUtilesCount,
-        indicateursImpactCount,
+        structures_count: structuresCount,
+        indicators_count: indicatorsCount,
+        issues_count_sum: issuesCountSum,
+        indicateurs_utiles_count: indicateursUtilesCount,
+        indicateurs_impact_count: indicateursImpactCount,
         ...indicatorCounts,
       },
       update: {
-        structuresCount,
-        indicatorsCount,
-        issuesCountSum,
-        indicateursUtilesCount,
-        indicateursImpactCount,
+        structures_count: structuresCount,
+        indicators_count: indicatorsCount,
+        issues_count_sum: issuesCountSum,
+        indicateurs_utiles_count: indicateursUtilesCount,
+        indicateurs_impact_count: indicateursImpactCount,
         ...indicatorCounts,
       },
     });
@@ -173,16 +173,16 @@ async function main() {
       where: { month },
       create: {
         month,
-        visitsCount,
-        readsCount,
-        updatesCount,
-        structuresUpdatedCount,
+        visits_count: visitsCount,
+        reads_count: readsCount,
+        updates_count: updatesCount,
+        structures_updated_count: structuresUpdatedCount,
       },
       update: {
-        visitsCount,
-        readsCount,
-        updatesCount,
-        structuresUpdatedCount,
+        visits_count: visitsCount,
+        reads_count: readsCount,
+        updates_count: updatesCount,
+        structures_updated_count: structuresUpdatedCount,
       },
     });
 
@@ -244,17 +244,17 @@ async function main() {
       const regionalVisitsCount = countVisitsFromActions(regionActions);
       await prisma.monthlyReportingVisitsByRegion.upsert({
         where: {
-          month_regionId: { month, regionId },
+          month_region_id: { month, region_id: regionId },
         },
         create: {
           month,
-          regionId,
-          regionName,
-          visitsCount: regionalVisitsCount,
+          region_id: regionId,
+          region_name: regionName,
+          visits_count: regionalVisitsCount,
         },
         update: {
-          regionName,
-          visitsCount: regionalVisitsCount,
+          region_name: regionName,
+          visits_count: regionalVisitsCount,
         },
       });
     }
@@ -264,8 +264,8 @@ async function main() {
       where: { month },
       create: {
         month,
-        phoneCallsCount: null,
-        emailsCount: null,
+        phone_calls_count: null,
+        emails_count: null,
         notes: null,
       },
       update: {},
