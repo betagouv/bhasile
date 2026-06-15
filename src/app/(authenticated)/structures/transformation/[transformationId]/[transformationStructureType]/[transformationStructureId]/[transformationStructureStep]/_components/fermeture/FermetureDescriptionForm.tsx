@@ -6,14 +6,17 @@ import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
-import { getActesAdministratifsDefaultValues } from "@/app/utils/acteAdministratif.util";
+import { getTransformationDefaultValues } from "@/app/utils/transformation.util";
 import { fermetureActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
-import { fermetureSchema } from "@/schemas/forms/transformation/fermeture.schema";
+import {
+  FermetureFormValues,
+  fermetureSchema,
+} from "@/schemas/forms/transformation/fermeture.schema";
 
 type Props = {
   transformation: TransformationApiRead;
@@ -30,13 +33,10 @@ export const FermetureDescriptionForm = ({
   const codeBhasile =
     structureVersionTransformation.structureVersion?.structure?.codeBhasile;
 
-  const defaultValues = {
-    effectiveDate: structureVersionTransformation.structureVersion?.effectiveDate,
-    actesAdministratifs: getActesAdministratifsDefaultValues(
-      structureVersionTransformation.actesAdministratifs,
-      categoryDisplayRules
-    ),
-  };
+  const defaultValues = getTransformationDefaultValues<FermetureFormValues>({
+    transformation,
+    structureVersionTransformation,
+  });
 
   return (
     <FormWrapper

@@ -6,6 +6,7 @@ import {
   getPlacesSource,
   getReferenceStructureVersionTransformation,
   getStructureVersionTransformationDepartement,
+  getTransformationDefaultValues,
   getTransformationDepartement,
   getTransformationFormNavigation,
   getTransformationNounAvecArticle,
@@ -878,6 +879,89 @@ describe("transformation util", () => {
         lgbt: undefined,
         fvvTeh: undefined,
       });
+    });
+  });
+
+  describe("getTransformationDefaultValues", () => {
+    type DefaultValues = {
+      operateur?: { id: number; name: string };
+      isMultiAntenne?: boolean;
+      structureTypologies?: {
+        year: number;
+        placesAutorisees: number | null;
+        pmr: number | null;
+        lgbt: number | null;
+        fvvTeh: number | null;
+      }[];
+      actesAdministratifs?: { category: string }[];
+    };
+
+    const buildStructureVersionTransformation = (
+      type: StructureVersionTransformationType
+    ): StructureVersionTransformationApiRead => ({
+      id: 1,
+      type,
+      operateur: { id: 9, name: "Opérateur Test" },
+      structureVersion: {
+        isMultiAntenne: true,
+        antennes: [],
+        effectiveDate: "2025-08-25T12:00:00.000Z",
+        adresses: [],
+        structureTypologies: [
+          { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
+        ],
+      } as StructureVersionApiRead,
+    });
+
+    const getDefaultValuesFor = (
+      type: StructureVersionTransformationType
+    ): DefaultValues =>
+      getTransformationDefaultValues({
+        transformation: createTransformation(),
+        structureVersionTransformation: buildStructureVersionTransformation(type),
+      }) as DefaultValues;
+
+    it("passe operateur depuis la structureVersionTransformation", () => {
+      expect(
+        getDefaultValuesFor(StructureVersionTransformationType.EXTENSION)
+          .operateur
+      ).toEqual({ id: 9, name: "Opérateur Test" });
+    });
+
+    it("utilise isMultiAntenne porté par le spread (valeur serveur) sans le recalculer depuis antennes", () => {
+      // structureVersion.isMultiAntenne vaut true alors que antennes est vide :
+      // on doit obtenir true, ce qui prouve qu'on ne recalcule plus côté client.
+      expect(
+        getDefaultValuesFor(StructureVersionTransformationType.EXTENSION)
+          .isMultiAntenne
+      ).toBe(true);
+    });
+
+    it("résout structureTypologies pour l'année de l'effectiveDate", () => {
+      expect(
+        getDefaultValuesFor(StructureVersionTransformationType.EXTENSION)
+          .structureTypologies
+      ).toEqual([
+        { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
+      ]);
+    });
+
+    it("calcule les actesAdministratifs avec les règles de catégorie de la fermeture", () => {
+      const categories = getDefaultValuesFor(
+        StructureVersionTransformationType.FERMETURE
+      ).actesAdministratifs?.map((acteAdministratif) => acteAdministratif.category);
+
+      expect(categories).toEqual(["AUTRE"]);
+    });
+
+    it("calcule les actesAdministratifs avec les règles de catégorie de l'extension", () => {
+      const categories = getDefaultValuesFor(
+        StructureVersionTransformationType.EXTENSION
+      ).actesAdministratifs?.map((acteAdministratif) => acteAdministratif.category);
+
+      expect(categories?.slice().sort()).toEqual(
+        ["ARRETE_EXTENSION", "AUTRE", "CONVENTION"].sort()
+      );
     });
   });
 
