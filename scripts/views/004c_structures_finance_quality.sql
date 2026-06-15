@@ -148,9 +148,7 @@ WITH
         AND be."resultat_net" <> 0
         AND COALESCE(be."affectationReservesFondsDedies", 0) <> 0
         AND be."sum_breakdown_affectations" IS NOT NULL
-        AND ABS(
-          be."sum_breakdown_affectations" - be."affectationReservesFondsDedies"
-        ) > 0.01
+        AND ABS(be."sum_breakdown_affectations" - be."affectationReservesFondsDedies") > 0.01
       ) AS "has_issue_authorized_affectations_breakdown_mismatch",
       -- Authorized structures: repriseEtat + affectationReservesFondsDedies must equal resultat_net (within epsilon)
       BOOL_OR(

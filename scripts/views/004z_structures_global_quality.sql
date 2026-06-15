@@ -83,9 +83,7 @@ SELECT
       COALESCE(fin."has_issue_authorized_affectations_breakdown_mismatch", FALSE)::int
     ) + (
       COALESCE(fin."has_issue_authorized_reprise_plus_affectations_mismatch", FALSE)::int
-    ) + (COALESCE(fin."has_issue_authorized_reprise_wrong_sign", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE)::int) + (
-      COALESCE(fin."has_issue_subsidized_excedent_reprise_etat_nonzero", FALSE)::int
-    ) + (COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE)::int) + (COALESCE(doc."has_issue_missing_convention_document", FALSE)::int) + (COALESCE(doc."has_issue_missing_autorisation_document", FALSE)::int) + (COALESCE(doc."has_issue_missing_cpom_document", FALSE)::int) + (COALESCE(act."has_issue_places_indisponibles_gt_3pct", FALSE)::int) + (COALESCE(act."has_issue_presences_indues_gt_7pct", FALSE)::int)
+    ) + (COALESCE(fin."has_issue_authorized_reprise_wrong_sign", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_excedent_reprise_etat_nonzero", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE)::int) + (COALESCE(doc."has_issue_missing_convention_document", FALSE)::int) + (COALESCE(doc."has_issue_missing_autorisation_document", FALSE)::int) + (COALESCE(doc."has_issue_missing_cpom_document", FALSE)::int) + (COALESCE(act."has_issue_places_indisponibles_gt_3pct", FALSE)::int) + (COALESCE(act."has_issue_presences_indues_gt_7pct", FALSE)::int)
   ) AS "issues_count"
 FROM
 :"SCHEMA"."structures_core" sc
