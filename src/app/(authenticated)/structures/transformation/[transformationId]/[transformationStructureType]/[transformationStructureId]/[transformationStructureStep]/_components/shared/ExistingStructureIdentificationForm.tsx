@@ -54,7 +54,6 @@ export const ExistingStructureIdentificationForm = ({
     return {
       id: structureVersionTransformation.id,
       type: structureVersionTransformation.type,
-      form: structureVersionTransformation.form,
       structureVersion: {
         ...rest,
         dnaStructures: rest.dnaStructures?.filter(

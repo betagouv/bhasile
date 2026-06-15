@@ -503,7 +503,7 @@ describe("transformation util", () => {
   });
 
   describe("validateStructureVersionTransformationFormStep", () => {
-    const buildCreationForm = (): FormApiType => ({
+    const buildCreationForm = (validatedSlugs: string[] = []): FormApiType => ({
       id: 100,
       status: false,
       formDefinition: {
@@ -515,7 +515,9 @@ describe("transformation util", () => {
       formSteps: [
         {
           id: 1001,
-          status: StepStatus.NON_COMMENCE,
+          status: validatedSlugs.includes("01-identification")
+            ? StepStatus.VALIDE
+            : StepStatus.NON_COMMENCE,
           stepDefinition: {
             id: 201,
             slug: "01-identification",
@@ -524,7 +526,9 @@ describe("transformation util", () => {
         },
         {
           id: 1002,
-          status: StepStatus.NON_COMMENCE,
+          status: validatedSlugs.includes("02-places-hebergement")
+            ? StepStatus.VALIDE
+            : StepStatus.NON_COMMENCE,
           stepDefinition: {
             id: 202,
             slug: "02-places-hebergement",
@@ -533,7 +537,9 @@ describe("transformation util", () => {
         },
         {
           id: 1003,
-          status: StepStatus.NON_COMMENCE,
+          status: validatedSlugs.includes("03-actes-administratifs")
+            ? StepStatus.VALIDE
+            : StepStatus.NON_COMMENCE,
           stepDefinition: {
             id: 203,
             slug: "03-actes-administratifs",
@@ -598,7 +604,9 @@ describe("transformation util", () => {
       );
 
       expect(
-        result.formSteps.every((s) => s.status === StepStatus.NON_COMMENCE)
+        result.formSteps.every(
+          (formStep) => formStep.status === StepStatus.NON_COMMENCE
+        )
       ).toBe(true);
     });
 
@@ -612,8 +620,33 @@ describe("transformation util", () => {
       );
 
       expect(
-        result.formSteps.every((s) => s.status === StepStatus.NON_COMMENCE)
+        result.formSteps.every(
+          (formStep) => formStep.status === StepStatus.NON_COMMENCE
+        )
       ).toBe(true);
+    });
+
+    it("passe le statut du formulaire à true une fois la dernière étape restante validée", () => {
+      const form = validateStructureVersionTransformationFormStep(
+        buildCreationForm(["01-identification", "02-places-hebergement"]),
+        StructureVersionTransformationStep.ACTES_ADMINISTRATIFS
+      );
+
+      expect(
+        form.formSteps.every(
+          (formStep) => formStep.status === StepStatus.VALIDE
+        )
+      ).toBe(true);
+      expect(form.status).toBe(true);
+    });
+
+    it("garde le statut du formulaire à false tant qu'au moins une étape n'est pas validée", () => {
+      const form = validateStructureVersionTransformationFormStep(
+        buildCreationForm(["01-identification"]),
+        StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT
+      );
+
+      expect(form.status).toBe(false);
     });
   });
 
