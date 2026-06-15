@@ -1,6 +1,6 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ReactNode } from "react";
-import { useFormContext } from "react-hook-form";
+import { FieldValues, useFieldArray, useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "../../common/CustomNotice";
 import { DeleteButton } from "../../common/DeleteButton";
@@ -17,22 +17,23 @@ export const TransformationCodeSection = ({
   getDescriptionFieldName,
   renderCodeInput,
 }: Props) => {
-  const { control, watch, setValue } = useFormContext();
+  const { control, watch } = useFormContext();
+  const { append, remove } = useFieldArray({ control, name: fieldArrayName });
 
   const savedItems = watch(fieldArrayName) as unknown[] | undefined;
-  const items =
-    savedItems && savedItems.length > 0 ? savedItems : [emptyItem];
+  const items = savedItems && savedItems.length > 0 ? savedItems : [emptyItem];
   const hasMultipleCodes = items.length > 1;
 
   const handleAdd = () => {
-    setValue(fieldArrayName, [...items, emptyItem]);
+    if (savedItems && savedItems.length > 0) {
+      append(emptyItem);
+    } else {
+      append([emptyItem, emptyItem]);
+    }
   };
 
   const handleDelete = (indexToDelete: number) => {
-    setValue(
-      fieldArrayName,
-      items.filter((_, index) => index !== indexToDelete)
-    );
+    remove(indexToDelete);
   };
 
   return (
@@ -96,7 +97,7 @@ type Props = {
   title: ReactNode;
   noticeDescription: ReactNode;
   fieldArrayName: string;
-  emptyItem: unknown;
+  emptyItem: FieldValues;
   singleCodeLabel: string;
   descriptionHint: string;
   addButtonLabel: string;
