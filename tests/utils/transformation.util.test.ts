@@ -625,7 +625,7 @@ describe("transformation util", () => {
       ).toBe(true);
     });
 
-    it("sets the form status to true once the last remaining step is validated", () => {
+    it("passe le statut du formulaire à true une fois la dernière étape restante validée", () => {
       const form = validateStructureVersionTransformationFormStep(
         buildCreationForm(["01-identification", "02-places-hebergement"]),
         StructureVersionTransformationStep.ACTES_ADMINISTRATIFS
@@ -639,7 +639,7 @@ describe("transformation util", () => {
       expect(form.status).toBe(true);
     });
 
-    it("keeps the form status false while at least one step is not validated", () => {
+    it("garde le statut du formulaire à false tant qu'au moins une étape n'est pas validée", () => {
       const form = validateStructureVersionTransformationFormStep(
         buildCreationForm(["01-identification"]),
         StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT
