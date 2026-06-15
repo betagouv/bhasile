@@ -164,12 +164,3 @@ export const computeEvaluationsByMonth = (
 export const computeEvaluationSummary = (
   evaluations: StatistiqueDbEvaluation[]
 ): EvaluationStat => computeEvaluationStatFromList(evaluations);
-
-export const emptyEvaluationStat = (): EvaluationStat => ({
-  nbEvaluations: 0,
-  nbStructuresEvaluees: 0,
-  moyenneGenerale: null,
-  moyennePersonne: null,
-  moyennePro: null,
-  moyenneStructure: null,
-});

@@ -10,6 +10,7 @@ import type {
   StatistiqueDbTypologie,
 } from "./db.type";
 import { buildStructureWhere } from "./filters";
+import { StatistiquesPerimetreVideError } from "./errors";
 import {
   findAdresseTypologies,
   findDepartementsWithPopulation,
@@ -39,12 +40,12 @@ export type StatistiquesContext = {
 
 export const buildStatistiquesContext = async (
   filters: StatistiquesFiltersRaw
-): Promise<StatistiquesContext | null> => {
+): Promise<StatistiquesContext> => {
   const where = await buildStructureWhere(filters);
   const structureIds = await findStructureIds(where);
 
   if (structureIds.length === 0) {
-    return null;
+    throw new StatistiquesPerimetreVideError();
   }
 
   const [nbCpoms, structures, typologies, adresses, adresseTypologies, cpomLinks, dnaLinks] =

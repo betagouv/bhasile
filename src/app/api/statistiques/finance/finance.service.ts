@@ -12,7 +12,6 @@ import {
 import {
   buildFinanceScopeStatistiques,
   computeFinanceByYearForScope,
-  emptyFinanceScopeStat,
   getStructureIdsByFinanceScope,
 } from "./finance.util";
 
@@ -94,8 +93,3 @@ export const getFinanceStatistiques = async (
     }
   );
 };
-
-export const emptyFinanceStatistiques = (): StatistiqueApiRead["finance"] => ({
-  summary: emptyFinanceScopeStat(),
-  byYear: [],
-});

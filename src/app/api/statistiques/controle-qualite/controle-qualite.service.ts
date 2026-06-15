@@ -9,7 +9,6 @@ import {
   computeEigSummary,
   computeEvaluationsByMonth,
   computeEvaluationSummary,
-  emptyEvaluationStat,
 } from "./controle-qualite.util";
 
 export const getControleQualiteStatistiques = async (
@@ -43,19 +42,3 @@ export const getControleQualiteStatistiques = async (
     },
   };
 };
-
-export const emptyControleQualiteStatistiques =
-  (): StatistiqueApiRead["controleQualite"] => ({
-    eig: {
-      pour1000PlacesSur12Mois: null,
-      tauxComportementViolent: null,
-      nbComportementViolent: 0,
-      nbAutres: 0,
-      nbStructuresSansDeclaration: 0,
-    },
-    eigByMonth: [],
-    evaluations: {
-      summary: emptyEvaluationStat(),
-      byMonth: [],
-    },
-  });

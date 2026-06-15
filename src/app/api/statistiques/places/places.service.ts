@@ -4,7 +4,6 @@ import { StatistiquesContext } from "../shared/context";
 import {
   computeGlobalPlacesStats,
   computePlacesYearStats,
-  emptyPlacesSpeciales,
 } from "./places.util";
 
 export const getPlacesStatistiques = (
@@ -34,10 +33,3 @@ export const getPlacesStatistiques = (
 
   return { ...global, byYear };
 };
-
-export const emptyPlacesStatistiques = (): StatistiqueApiRead["places"] => ({
-  totalPlaces: 0,
-  tauxEquipement: [],
-  placesSpeciales: emptyPlacesSpeciales(),
-  byYear: [],
-});

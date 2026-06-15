@@ -19,14 +19,6 @@ import {
   getTypologieYears,
 } from "../shared/typologie.util";
 
-const emptyPlacesSpeciales = (): PlacesSpecialesStat => ({
-  pmr: 0,
-  lgbt: 0,
-  fvvTeh: 0,
-  qpv: 0,
-  logementsSociaux: 0,
-});
-
 const sumAdressePlacesSpeciales = (
   adresses: StatistiqueDbAdresse[]
 ): Pick<PlacesSpecialesStat, "qpv" | "logementsSociaux"> => ({
@@ -184,5 +176,3 @@ export const computePlacesYearStats = (
       ),
     };
   });
-
-export { emptyPlacesSpeciales };

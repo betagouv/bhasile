@@ -13,6 +13,9 @@ import type {
 export const findBudgetsByYear = async (
   structureIds: number[]
 ): Promise<StatistiqueDbBudgetAgg[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
   const grouped = await prisma.budget.groupBy({
     by: ["year"],
     where: {
@@ -39,6 +42,9 @@ export const findBudgetsByYear = async (
 export const findIndicateursFinanciers = async (
   structureIds: number[]
 ): Promise<StatistiqueDbIndicateurFinancier[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
   return prisma.indicateurFinancier.findMany({
     where: {
       structureId: { in: structureIds },

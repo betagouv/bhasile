@@ -222,9 +222,3 @@ export const buildFinanceScopeStatistiques = (
     byYear,
   };
 };
-
-export const emptyFinanceScopeStat = (): FinanceScopeStat => ({
-  total: emptyFinanceStat(),
-  autorisees: emptyFinanceStat(),
-  subventionnees: emptyFinanceStat(),
-});

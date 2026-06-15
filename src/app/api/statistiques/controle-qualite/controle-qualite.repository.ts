@@ -18,6 +18,9 @@ export const findEigs = async (
 export const findEvaluations = async (
   structureIds: number[]
 ): Promise<StatistiqueDbEvaluation[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
   return prisma.evaluation.findMany({
     where: { structureId: { in: structureIds } },
     select: {

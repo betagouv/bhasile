@@ -16,16 +16,3 @@ export const getActiviteStatistiques = async (
 
   return computeActiviteStat(latestActivites, activitesTimeSeries);
 };
-
-export const emptyActiviteStatistiques = (): StatistiqueApiRead["activite"] => ({
-  placesEnregistreesDna: 0,
-  placesDisponibles: 0,
-  placesIndisponibles: 0,
-  motifsIndisponibilite: {
-    desinsectisation: 0,
-    remiseEnEtat: 0,
-    sousOccupation: 0,
-    travaux: 0,
-  },
-  presencesInduesByMonth: [],
-});

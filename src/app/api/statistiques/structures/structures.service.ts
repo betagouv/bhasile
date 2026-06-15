@@ -1,6 +1,5 @@
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
-import { emptyBatis, emptyStructureTypes } from "../shared/aggregation.util";
 import { StatistiquesContext } from "../shared/context";
 import {
   computeGlobalStructuresStats,
@@ -34,13 +33,3 @@ export const getStructuresStatistiques = (
     byYear,
   };
 };
-
-export const emptyStructuresStatistiques =
-  (): StatistiqueApiRead["structures"] => ({
-    totalStructures: 0,
-    totalCpoms: 0,
-    structuresAvecCpom: 0,
-    structureTypes: emptyStructureTypes(),
-    structureBatis: emptyBatis(),
-    byYear: [],
-  });
