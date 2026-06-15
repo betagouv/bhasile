@@ -76,7 +76,7 @@
     "react-dom": "^19.2.7",
     "react-hook-form": "^7.78.0",
     "react-number-format": "^5.4.5",
-    "read-excel-file": "^7.0.2",
+    "read-excel-file": "^9.1.1",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.0",
     "tsx": "^4.22.4",
