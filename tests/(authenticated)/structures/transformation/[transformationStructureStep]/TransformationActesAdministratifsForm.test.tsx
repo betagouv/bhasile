@@ -61,13 +61,13 @@ const transformationWithActes = (
     ],
   });
 
-describe("TransformationActesAdministratifsForm (integration via FormWrapper)", () => {
+describe("TransformationActesAdministratifsForm (intégration via FormWrapper)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
   });
 
-  it("submits the filled acts to handleValidation, dropping the empty Autres documents row", async () => {
+  it("soumet à handleValidation les actes remplis, en écartant la ligne Autres documents vide", async () => {
     // GIVEN the three required acts are filled (file + dates), Autres documents left empty
     const transformation = transformationWithActes([
       filledActe(1, "ARRETE_AUTORISATION", "k-autorisation"),
@@ -103,7 +103,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     ).toEqual(["ARRETE_AUTORISATION", "ARRETE_TARIFICATION", "CONVENTION"]);
   });
 
-  it("submits with no acts now that they are all optional for transformations", async () => {
+  it("soumet sans aucun acte, désormais tous optionnels pour les transformations", async () => {
     // GIVEN no acts provided -> the form seeds empty rows for each category
     const transformation = transformationWithActes([]);
     render(
@@ -128,7 +128,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     ).toHaveLength(0);
   });
 
-  it("renders the autorisation/fusion radio for non-ex-nihilo creations with autorisation preselected by default", async () => {
+  it("affiche le radio autorisation/fusion pour les créations non ex-nihilo, avec autorisation présélectionnée par défaut", async () => {
     const transformation = transformationWithActes(
       [],
       TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
@@ -159,7 +159,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     await waitFor(() => expect(mockHandleValidation).toHaveBeenCalledTimes(1));
   });
 
-  it("submits with category ARRETE_FUSION when the user picks fusion and fills the other required docs", async () => {
+  it("soumet avec la catégorie ARRETE_FUSION quand l'utilisateur choisit fusion et remplit les autres documents requis", async () => {
     const transformation = transformationWithActes(
       [
         filledActe(2, "CONVENTION", "k-convention"),
@@ -210,7 +210,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     expect(radioActe?.category).toBe("ARRETE_FUSION");
   });
 
-  it("pre-selects the radio on the persisted category when navigating back to the step", () => {
+  it("présélectionne le radio sur la catégorie enregistrée au retour sur l'étape", () => {
     const transformation = transformationWithActes(
       [filledActe(1, "ARRETE_FUSION", "k-fusion")],
       TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
@@ -266,13 +266,13 @@ const extensionWithStructureActes = (
     ],
   });
 
-describe("TransformationActesAdministratifsForm — avenant alternative (extension)", () => {
+describe("TransformationActesAdministratifsForm — alternative avenant (extension)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
   });
 
-  it("renders the standalone/avenant radios with the standalone option preselected", () => {
+  it("affiche les radios autonome/avenant avec l'option autonome présélectionnée", () => {
     const transformation = extensionWithStructureActes([
       currentParentActe(99, "ARRETE_AUTORISATION"),
       currentParentActe(88, "CONVENTION"),
@@ -308,7 +308,7 @@ describe("TransformationActesAdministratifsForm — avenant alternative (extensi
     ).toBeInTheDocument();
   });
 
-  it("hides the avenant option when the structure has no eligible parent acte", () => {
+  it("masque l'option avenant quand la structure n'a pas d'acte parent éligible", () => {
     const transformation = extensionWithStructureActes([]);
     render(
       <TransformationActesAdministratifsForm
@@ -336,7 +336,7 @@ describe("TransformationActesAdministratifsForm — avenant alternative (extensi
     ).toBeInTheDocument();
   });
 
-  it("marks the acte as an avenant of the structure's current arrêté d'autorisation on submit", async () => {
+  it("marque l'acte comme avenant de l'arrêté d'autorisation en cours de la structure à la soumission", async () => {
     const transformation = extensionWithStructureActes([
       // expired -> not the current acte
       {
@@ -387,7 +387,7 @@ describe("TransformationActesAdministratifsForm — avenant alternative (extensi
     expect(avenant.parentId).toBe(99);
   });
 
-  it("still renders a saved avenant as a single-date acte when its structure parent is gone", () => {
+  it("affiche tout de même un avenant enregistré comme un acte à date unique quand son parent de structure a disparu", () => {
     // The structure's parent acte was deleted/changed, so no eligible parent resolves,
     // but a previously-saved avenant must remain visible (not silently dropped).
     const transformation = extensionWithStructureActes(
