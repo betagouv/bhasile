@@ -141,6 +141,15 @@ WITH
         AND COALESCE(be."affectationReservesFondsDedies", 0) <> 0
         AND be."sum_breakdown_affectations" IS NULL
       ) AS "has_issue_authorized_affectations_breakdown_missing",
+      -- Authorized structures: breakdown detail sum does not match affectationReservesFondsDedies (within epsilon)
+      BOOL_OR(
+        s."structureType" IN ('CADA', 'CPH')
+        AND be."resultat_net" IS NOT NULL
+        AND be."resultat_net" <> 0
+        AND COALESCE(be."affectationReservesFondsDedies", 0) <> 0
+        AND be."sum_breakdown_affectations" IS NOT NULL
+        AND ABS(be."sum_breakdown_affectations" - be."affectationReservesFondsDedies") > 0.01
+      ) AS "has_issue_authorized_affectations_breakdown_mismatch",
       -- Authorized structures: repriseEtat + affectationReservesFondsDedies must equal resultat_net (within epsilon)
       BOOL_OR(
         s."structureType" IN ('CADA', 'CPH')
@@ -184,7 +193,7 @@ WITH
         s."structureType" IN ('HUDA', 'CAES')
         AND be."resultat_net" > 0
         AND COALESCE(be."repriseEtat", 0) <> 0
-      ) AS "has_issue_subsidized_reprise_etat_nonzero",
+      ) AS "has_issue_subsidized_excedent_reprise_etat_nonzero",
       -- Subsidized structures: resultat_net > 0 => excedentRecupere + excedentDeduit + fondsDedies must equal resultat_net
       BOOL_OR(
         s."structureType" IN ('HUDA', 'CAES')
@@ -221,10 +230,11 @@ SELECT
   -- Budget indicators (aggregated from multiple years)
   COALESCE(bi."has_issue_resultat_net_eq_0", FALSE) AS "has_issue_resultat_net_eq_0",
   COALESCE(bi."has_issue_authorized_affectations_breakdown_missing", FALSE) AS "has_issue_authorized_affectations_breakdown_missing",
+  COALESCE(bi."has_issue_authorized_affectations_breakdown_mismatch", FALSE) AS "has_issue_authorized_affectations_breakdown_mismatch",
   COALESCE(bi."has_issue_authorized_reprise_plus_affectations_mismatch", FALSE) AS "has_issue_authorized_reprise_plus_affectations_mismatch",
   COALESCE(bi."has_issue_authorized_reprise_wrong_sign", FALSE) AS "has_issue_authorized_reprise_wrong_sign",
   COALESCE(bi."has_issue_subsidized_deficit_nonzero_boxes", FALSE) AS "has_issue_subsidized_deficit_nonzero_boxes",
-  COALESCE(bi."has_issue_subsidized_reprise_etat_nonzero", FALSE) AS "has_issue_subsidized_reprise_etat_nonzero",
+  COALESCE(bi."has_issue_subsidized_excedent_reprise_etat_nonzero", FALSE) AS "has_issue_subsidized_excedent_reprise_etat_nonzero",
   COALESCE(bi."has_issue_subsidized_excedent_rules", FALSE) AS "has_issue_subsidized_excedent_rules"
 FROM
   structures s

@@ -115,10 +115,11 @@ model MonthlyStructuresGlobalQualityCount {
   has_issue_cout_journalier_min_lt_15                            Int?
   has_issue_resultat_net_eq_0                                    Int?
   has_issue_authorized_affectations_breakdown_missing            Int?
+  has_issue_authorized_affectations_breakdown_mismatch          Int?
   has_issue_authorized_reprise_plus_affectations_mismatch        Int?
   has_issue_authorized_reprise_wrong_sign                        Int?
   has_issue_subsidized_deficit_nonzero_boxes                     Int?
-  has_issue_subsidized_reprise_etat_nonzero                      Int?
+  has_issue_subsidized_excedent_reprise_etat_nonzero            Int?
   has_issue_subsidized_excedent_rules                            Int?
 
   created_at DateTime @default(now())
@@ -194,10 +195,11 @@ view StructuresGlobalQuality {
   has_issue_cout_journalier_min_lt_15                            Boolean?
   has_issue_resultat_net_eq_0                                    Boolean?
   has_issue_authorized_affectations_breakdown_missing            Boolean?
+  has_issue_authorized_affectations_breakdown_mismatch          Boolean?
   has_issue_authorized_reprise_plus_affectations_mismatch        Boolean?
   has_issue_authorized_reprise_wrong_sign                        Boolean?
   has_issue_subsidized_deficit_nonzero_boxes                     Boolean?
-  has_issue_subsidized_reprise_etat_nonzero                      Boolean?
+  has_issue_subsidized_excedent_reprise_etat_nonzero            Boolean?
   has_issue_subsidized_excedent_rules                            Boolean?
 
   issues_count Int
