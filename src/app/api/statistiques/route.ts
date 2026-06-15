@@ -9,7 +9,6 @@ export async function GET(request: NextRequest) {
 
   const filters: StatistiquesFiltersRaw = {
     departements: searchParams.get("departements"),
-    regions: searchParams.get("regions"),
     operateurs: searchParams.get("operateurs"),
     types: searchParams.get("types"),
   };

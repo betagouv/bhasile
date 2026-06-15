@@ -1,0 +1,111 @@
+import { Prisma } from "@/generated/prisma/client";
+import prisma from "@/lib/prisma";
+
+import type {
+  StatistiqueDbAdresse,
+  StatistiqueDbAdresseTypologie,
+  StatistiqueDbDepartement,
+  StatistiqueDbDnaLink,
+  StatistiqueDbStructure,
+  StatistiqueDbTypologie,
+} from "./db.type";
+
+export const findStructureIds = async (
+  where: Prisma.StructureWhereInput
+): Promise<number[]> => {
+  // TODO: exclure les structures avec un acte de transformation de type fermeture effectif à date
+  const rows = await prisma.structure.findMany({
+    where,
+    select: { id: true },
+  });
+  return rows.map((r) => r.id);
+};
+
+export const findStructuresWithTypes = async (
+  structureIds: number[]
+): Promise<StatistiqueDbStructure[]> => {
+  return prisma.structure.findMany({
+    where: { id: { in: structureIds } },
+    select: {
+      id: true,
+      type: true,
+      departementAdministratif: true,
+    },
+  });
+};
+
+export const findStructureTypologies = async (
+  structureIds: number[]
+): Promise<StatistiqueDbTypologie[]> => {
+  return prisma.structureTypologie.findMany({
+    where: { structureId: { in: structureIds } },
+    select: {
+      structureId: true,
+      year: true,
+      placesAutorisees: true,
+      pmr: true,
+      lgbt: true,
+      fvvTeh: true,
+    },
+    orderBy: { year: "asc" },
+  });
+};
+
+export const findStructureAdresses = async (
+  structureIds: number[]
+): Promise<StatistiqueDbAdresse[]> => {
+  return prisma.adresse.findMany({
+    where: { structureId: { in: structureIds } },
+    select: {
+      structureId: true,
+      repartition: true,
+      qpv: true,
+      logementSocial: true,
+    },
+  });
+};
+
+export const findAdresseTypologies = async (
+  structureIds: number[]
+): Promise<StatistiqueDbAdresseTypologie[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+  return prisma.adresseTypologie.findMany({
+    where: { adresse: { structureId: { in: structureIds } } },
+    select: {
+      year: true,
+      qpv: true,
+      logementSocial: true,
+      adresse: { select: { structureId: true } },
+    },
+    orderBy: { year: "asc" },
+  });
+};
+
+export const findDnaLinksByStructure = async (
+  structureIds: number[]
+): Promise<StatistiqueDbDnaLink[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+  return prisma.dnaStructure.findMany({
+    where: { structureId: { in: structureIds } },
+    select: {
+      structureId: true,
+      dna: { select: { code: true } },
+    },
+  });
+};
+
+export const findDepartementsWithPopulation = async (
+  departementNumeros: string[]
+): Promise<StatistiqueDbDepartement[]> => {
+  return prisma.departement.findMany({
+    where:
+      departementNumeros.length > 0
+        ? { numero: { in: departementNumeros } }
+        : undefined,
+    select: { numero: true, name: true, population: true },
+  });
+};

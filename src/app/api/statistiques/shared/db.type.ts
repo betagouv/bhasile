@@ -23,12 +23,23 @@ export type StatistiqueDbAdresse = Prisma.AdresseGetPayload<{
   select: {
     structureId: true;
     repartition: true;
+    qpv: true;
     logementSocial: true;
+  };
+}>;
+
+export type StatistiqueDbAdresseTypologie = Prisma.AdresseTypologieGetPayload<{
+  select: {
+    year: true;
+    qpv: true;
+    logementSocial: true;
+    adresse: { select: { structureId: true } };
   };
 }>;
 
 export type StatistiqueDbEvaluation = Prisma.EvaluationGetPayload<{
   select: {
+    structureId: true;
     date: true;
     note: true;
     notePersonne: true;
