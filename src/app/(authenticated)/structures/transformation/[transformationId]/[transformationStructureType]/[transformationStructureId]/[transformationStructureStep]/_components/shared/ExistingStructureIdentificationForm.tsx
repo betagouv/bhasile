@@ -11,6 +11,7 @@ import { SaveCurrentForm } from "@/app/components/forms/SaveCurrentForm";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import {
   getAdresseSource,
+  getInitialAntennes,
   getTransformationDefaultValues,
   getTransformationNounAvecArticle,
 } from "@/app/utils/transformation.util";
@@ -97,6 +98,10 @@ export const ExistingStructureIdentificationForm = ({
       <TransformationAdresseAdministrative
         formKind={formKind}
         originalAdresse={getAdresseSource(structureVersionTransformation)}
+        originalAntennes={getInitialAntennes(
+          transformation,
+          structureVersionTransformation
+        )}
       />
 
       <hr />

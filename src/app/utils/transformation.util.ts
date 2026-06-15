@@ -13,6 +13,7 @@ import {
   StructureVersionTransformationApiUpdate,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
+import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 import { StepStatus } from "@/types/form.type";
 import { DeepPartial, FormKind } from "@/types/global";
 import {
@@ -284,6 +285,49 @@ export const getAdresseSource = (
     communeAdministrative: structure?.communeAdministrative ?? "",
     departementAdministratif: structure?.departementAdministratif ?? "",
   };
+};
+
+const getSourceStructureAntennes = (
+  structureVersionTransformation: StructureVersionTransformationApiRead
+): AntenneFormValues[] =>
+  (
+    structureVersionTransformation.structureVersion?.structure?.antennes ?? []
+  ).map((antenne) => ({
+    name: antenne.name ?? "",
+    adresseComplete: antenne.adresseComplete ?? "",
+    adresse: antenne.adresse ?? "",
+    codePostal: antenne.codePostal ?? "",
+    commune: antenne.commune ?? "",
+    departement: antenne.departement ?? "",
+  }));
+
+export const getInitialAntennes = (
+  transformation: TransformationApiRead,
+  structureVersionTransformation: StructureVersionTransformationApiRead
+): AntenneFormValues[] => {
+  const baseAntennes = getSourceStructureAntennes(
+    structureVersionTransformation
+  );
+
+  const transformationType = transformation.type;
+  if (!transformationType) {
+    return baseAntennes;
+  }
+
+  const rules = TRANSFORMATION_TYPE_SPECS[transformationType]?.prefill ?? [];
+  const applicableRules = rules.filter(
+    (rule) =>
+      rule.to === structureVersionTransformation.type &&
+      rule.fields.includes("antennes")
+  );
+
+  const prefilledAntennes = applicableRules.flatMap((rule) =>
+    transformation.structureVersionTransformations
+      .filter((candidate) => candidate.type === rule.from)
+      .flatMap(getSourceStructureAntennes)
+  );
+
+  return [...baseAntennes, ...prefilledAntennes];
 };
 
 const getEffectiveYear = (effectiveDate: string | null | undefined): number =>
