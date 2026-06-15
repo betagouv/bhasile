@@ -9,6 +9,7 @@ import {
 } from "@/types/transformation.type";
 
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
+import { AntenneApiType } from "./antenne.schema";
 import { formApiSchema } from "./form.schema";
 import {
   structureVersionApiSchema,
@@ -75,6 +76,7 @@ export type StructureVersionTransformationApiRead =
         codePostalAdministratif?: string | null;
         communeAdministrative?: string | null;
         departementAdministratif?: string | null;
+        antennes?: AntenneApiType[];
         actesAdministratifs?: StructureParentActe[];
         structureTypologies?: { year: number; placesAutorisees: number | null }[];
       };

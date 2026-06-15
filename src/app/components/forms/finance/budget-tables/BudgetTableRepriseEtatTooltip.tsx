@@ -11,7 +11,7 @@ export const BudgetTableRepriseEtatTooltip = () => {
         </>
       }
     >
-      Reprise état{" "}
+      Reprise État{" "}
       <i className="fr-icon-information-line before:scale-50 before:origin-left" />
     </Tooltip>
   );
