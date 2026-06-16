@@ -6,6 +6,7 @@ import {
   getPlacesSource,
   getReferenceStructureVersionTransformation,
   getStructureVersionTransformationDepartement,
+  getTransformationDefaultValues,
   getTransformationDepartement,
   getTransformationFormNavigation,
   getTransformationNounAvecArticle,
@@ -739,7 +740,7 @@ describe("transformation util", () => {
       ).toBe(true);
     });
 
-    it("sets the form status to true once the last remaining step is validated", () => {
+    it("passe le statut du formulaire à true une fois la dernière étape restante validée", () => {
       const form = validateStructureVersionTransformationFormStep(
         buildCreationForm(["01-identification", "02-places-hebergement"]),
         StructureVersionTransformationStep.ACTES_ADMINISTRATIFS
@@ -753,7 +754,7 @@ describe("transformation util", () => {
       expect(form.status).toBe(true);
     });
 
-    it("keeps the form status false while at least one step is not validated", () => {
+    it("garde le statut du formulaire à false tant qu'au moins une étape n'est pas validée", () => {
       const form = validateStructureVersionTransformationFormStep(
         buildCreationForm(["01-identification"]),
         StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT
@@ -1028,6 +1029,89 @@ describe("transformation util", () => {
     });
   });
 
+  describe("getTransformationDefaultValues", () => {
+    type DefaultValues = {
+      operateur?: { id: number; name: string };
+      isMultiAntenne?: boolean;
+      structureTypologies?: {
+        year: number;
+        placesAutorisees: number | null;
+        pmr: number | null;
+        lgbt: number | null;
+        fvvTeh: number | null;
+      }[];
+      actesAdministratifs?: { category: string }[];
+    };
+
+    const buildStructureVersionTransformation = (
+      type: StructureVersionTransformationType
+    ): StructureVersionTransformationApiRead => ({
+      id: 1,
+      type,
+      operateur: { id: 9, name: "Opérateur Test" },
+      structureVersion: {
+        isMultiAntenne: true,
+        antennes: [],
+        effectiveDate: "2025-08-25T12:00:00.000Z",
+        adresses: [],
+        structureTypologies: [
+          { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
+        ],
+      } as StructureVersionApiRead,
+    });
+
+    const getDefaultValuesFor = (
+      type: StructureVersionTransformationType
+    ): DefaultValues =>
+      getTransformationDefaultValues({
+        transformation: createTransformation(),
+        structureVersionTransformation: buildStructureVersionTransformation(type),
+      }) as DefaultValues;
+
+    it("passe operateur depuis la structureVersionTransformation", () => {
+      expect(
+        getDefaultValuesFor(StructureVersionTransformationType.EXTENSION)
+          .operateur
+      ).toEqual({ id: 9, name: "Opérateur Test" });
+    });
+
+    it("utilise isMultiAntenne porté par le spread (valeur serveur) sans le recalculer depuis antennes", () => {
+      // structureVersion.isMultiAntenne vaut true alors que antennes est vide :
+      // on doit obtenir true, ce qui prouve qu'on ne recalcule plus côté client.
+      expect(
+        getDefaultValuesFor(StructureVersionTransformationType.EXTENSION)
+          .isMultiAntenne
+      ).toBe(true);
+    });
+
+    it("résout structureTypologies pour l'année de l'effectiveDate", () => {
+      expect(
+        getDefaultValuesFor(StructureVersionTransformationType.EXTENSION)
+          .structureTypologies
+      ).toEqual([
+        { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
+      ]);
+    });
+
+    it("calcule les actesAdministratifs avec les règles de catégorie de la fermeture", () => {
+      const categories = getDefaultValuesFor(
+        StructureVersionTransformationType.FERMETURE
+      ).actesAdministratifs?.map((acteAdministratif) => acteAdministratif.category);
+
+      expect(categories).toEqual(["AUTRE"]);
+    });
+
+    it("calcule les actesAdministratifs avec les règles de catégorie de l'extension", () => {
+      const categories = getDefaultValuesFor(
+        StructureVersionTransformationType.EXTENSION
+      ).actesAdministratifs?.map((acteAdministratif) => acteAdministratif.category);
+
+      expect(categories?.slice().sort()).toEqual(
+        ["ARRETE_EXTENSION", "AUTRE", "CONVENTION"].sort()
+      );
+    });
+  });
+
   describe("getTransformationNounAvecArticle", () => {
     it.each([
       [FormKind.EXTENSION, "l’extension"],
@@ -1135,5 +1219,60 @@ describe("getStructureVersionTransformationDepartement", () => {
         structureVersionTransformation
       )
     ).toBeUndefined();
+  });
+});
+
+describe("getReferenceStructureVersionTransformation", () => {
+  it("retourne la première structureVersionTransformation qui a un département", () => {
+    const sansDepartement = createStructureVersionTransformation({ id: 1 });
+    const avecDepartement = createStructureVersionTransformation({
+      id: 2,
+      structureVersion: { departementAdministratif: "50" },
+    });
+    const transformation = createTransformation({
+      structureVersionTransformations: [sansDepartement, avecDepartement],
+    });
+
+    expect(getReferenceStructureVersionTransformation(transformation)).toBe(
+      avecDepartement
+    );
+  });
+
+  it("retombe sur la première structureVersionTransformation quand aucune n'a de département", () => {
+    const premiere = createStructureVersionTransformation({ id: 1 });
+    const seconde = createStructureVersionTransformation({ id: 2 });
+    const transformation = createTransformation({
+      structureVersionTransformations: [premiere, seconde],
+    });
+
+    expect(getReferenceStructureVersionTransformation(transformation)).toBe(
+      premiere
+    );
+  });
+});
+
+describe("getTransformationDepartement", () => {
+  it("résout le département via la structure liée de la structureVersionTransformation de référence", () => {
+    const transformation = createTransformation({
+      structureVersionTransformations: [
+        createStructureVersionTransformation({ id: 1 }),
+        createStructureVersionTransformation({
+          id: 2,
+          structureVersion: {
+            structure: { codeBhasile: "ABC", departementAdministratif: "13" },
+          },
+        }),
+      ],
+    });
+
+    expect(getTransformationDepartement(transformation)).toBe("13");
+  });
+
+  it("retourne undefined quand aucune structureVersionTransformation n'a de département", () => {
+    const transformation = createTransformation({
+      structureVersionTransformations: [createStructureVersionTransformation()],
+    });
+
+    expect(getTransformationDepartement(transformation)).toBeUndefined();
   });
 });

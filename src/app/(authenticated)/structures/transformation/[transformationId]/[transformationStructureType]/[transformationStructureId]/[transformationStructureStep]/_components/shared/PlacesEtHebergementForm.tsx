@@ -7,10 +7,7 @@ import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSet
 import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTypeBati";
 import { FieldSetTransformationPlaces } from "@/app/components/forms/typePlace/FieldSetTransformationPlaces";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
-import {
-  buildTransformationTypologie,
-  getTransformationStructureVersionDefaultValues,
-} from "@/app/utils/transformation.util";
+import { getTransformationDefaultValues } from "@/app/utils/transformation.util";
 import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,
@@ -19,7 +16,7 @@ import {
   CreationPlacesEtHebergementFormValues,
   getPlacesEtHebergementSchema,
 } from "@/schemas/forms/transformation/creationPlacesEtHebergement.schema";
-import { DeepPartial, FormKind } from "@/types/global";
+import { FormKind } from "@/types/global";
 
 type Props = {
   transformation: TransformationApiRead;
@@ -36,16 +33,11 @@ export const PlacesEtHebergementForm = ({
 }: Props) => {
   const { handleValidation } = useTransformationFormHandling();
 
-  const defaultValues: DeepPartial<CreationPlacesEtHebergementFormValues> = {
-    ...getTransformationStructureVersionDefaultValues<CreationPlacesEtHebergementFormValues>(
-      structureVersionTransformation.structureVersion
-    ),
-    structureTypologies: [
-      buildTransformationTypologie(
-        structureVersionTransformation.structureVersion
-      ),
-    ],
-  };
+  const defaultValues =
+    getTransformationDefaultValues<CreationPlacesEtHebergementFormValues>({
+      transformation,
+      structureVersionTransformation,
+    });
 
   return (
     <FormWrapper

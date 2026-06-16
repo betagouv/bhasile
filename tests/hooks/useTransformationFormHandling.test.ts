@@ -170,7 +170,7 @@ describe("useTransformationFormHandling", () => {
     );
   });
 
-  it("should derive the child form status to true once the last step is validated", async () => {
+  it("passe le statut du formulaire enfant à true une fois la dernière étape validée", async () => {
     // GIVEN — the two first steps of the child form are already VALIDE
     mockUseTransformationContext.mockReturnValue({
       transformation: buildTransformation(
