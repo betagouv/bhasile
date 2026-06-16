@@ -1,3 +1,4 @@
+import { AVENANT_PARENT_CATEGORIES } from "@/config/transformation.config";
 import { Prisma } from "@/generated/prisma/client";
 
 export const transformationInclude = {
@@ -32,6 +33,20 @@ export const transformationInclude = {
             include: {
               operateur: { select: { id: true, name: true } },
               antennes: true,
+              actesAdministratifs: {
+                where: {
+                  parentId: null,
+                  category: { in: AVENANT_PARENT_CATEGORIES },
+                },
+                orderBy: { startDate: "desc" },
+                select: {
+                  id: true,
+                  category: true,
+                  startDate: true,
+                  endDate: true,
+                  children: { select: { endDate: true } },
+                },
+              },
               structureTypologies: {
                 orderBy: { year: "desc" },
               },

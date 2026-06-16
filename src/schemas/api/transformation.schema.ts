@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { StructureParentActe } from "@/types/acte-administratif.type";
 import { Repartition } from "@/types/adresse.type";
 import { ExcludeNullValues } from "@/types/global";
 import {
@@ -76,6 +77,7 @@ export type StructureVersionTransformationApiRead =
         communeAdministrative?: string | null;
         departementAdministratif?: string | null;
         antennes?: AntenneApiType[];
+        actesAdministratifs?: StructureParentActe[];
         structureTypologies?: { year: number; placesAutorisees: number | null }[];
       };
     };

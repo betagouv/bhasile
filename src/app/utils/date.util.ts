@@ -108,6 +108,33 @@ export const getYearFromDate = (
   return 0;
 };
 
+export const getMostFutureDate = (
+  dates: (Date | null | undefined)[]
+): Date | null => {
+  const validDates = dates.filter((date): date is Date => !!date);
+  if (validDates.length === 0) {
+    return null;
+  }
+  return validDates.reduce((latestDate, currentDate) =>
+    currentDate > latestDate ? currentDate : latestDate
+  );
+};
+
+export const getEffectiveEndDate = (
+  baseEndDate: Date | null | undefined,
+  overrideEndDates: (Date | null | undefined)[]
+): Date | null => getMostFutureDate(overrideEndDates) ?? baseEndDate ?? null;
+
+export const isCurrentlyInEffect = (
+  startDate: Date | null | undefined,
+  endDate: Date | null | undefined,
+  referenceDate: Date
+): boolean =>
+  !!startDate &&
+  !!endDate &&
+  startDate <= referenceDate &&
+  endDate >= referenceDate;
+
 export const getTypePlacesYearRange = (): { years: number[] } => {
   const { years } = getYearRange({
     startYear: 2023,
