@@ -6,7 +6,7 @@ import { Badge } from "@/app/components/common/Badge";
 import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { formatCityName } from "@/app/utils/adresse.util";
-import { Repartition } from "@/types/adresse.type";
+import { RepartitionLabel } from "@/types/adresse.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
@@ -43,11 +43,7 @@ export const Adresses = (): ReactElement => {
               places
             </td>
             <td className="py-3 pr-8">
-              {
-                Repartition[
-                  adresse.repartition as unknown as keyof typeof Repartition
-                ]
-              }
+              {adresse.repartition ? RepartitionLabel[adresse.repartition] : ""}
             </td>
             <td className="py-3 w-full">
               {adresse.adresseTypologies?.[0]?.qpv ? (

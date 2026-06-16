@@ -1,12 +1,11 @@
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 
-import { transformFormAdressesToApiAdresses } from "@/app/utils/adresse.util";
 import { transformAgentFormContactsToApiContacts } from "@/app/utils/contacts.util";
 import { formatDateToIsoString } from "@/app/utils/date.util";
 import {
   StructureApiRead,
-  StructureApiWrite,
+  StructureApiWriteClient,
 } from "@/schemas/api/structure.schema";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { AjoutTypePlacesFormValues } from "@/schemas/forms/ajout/ajoutTypePlaces.schema";
@@ -93,12 +92,7 @@ type UseStructureResult = {
 
 export const transformAjoutFormStructureToApiStructure = async (
   values: AjoutFormValues
-): Promise<DeepPartial<StructureApiWrite>> => {
-  const adresses = transformFormAdressesToApiAdresses(
-    values.adresses,
-    values.id
-  );
-
+): Promise<DeepPartial<StructureApiWriteClient>> => {
   return {
     id: values.id,
     codeBhasile: values.codeBhasile,
@@ -115,7 +109,7 @@ export const transformAjoutFormStructureToApiStructure = async (
     lgbt: values.lgbt,
     fvvTeh: values.fvvTeh,
     public: values.public,
-    adresses,
+    adresses: values.adresses,
     antennes: values.antennes,
     dnaStructures: values.dnaStructures,
     finesses: values.finesses,

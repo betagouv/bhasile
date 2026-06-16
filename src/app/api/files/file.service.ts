@@ -61,24 +61,6 @@ export const getDownloadLink = async (
   }
 };
 
-export const listFiles = async (bucketName: string): Promise<void> => {
-  try {
-    const files = await new Promise((resolve, reject) => {
-      const fetchedFiles: unknown[] = [];
-      const stream = minioClient.listObjectsV2(bucketName, "", true, "");
-      stream.on("data", (obj) => fetchedFiles.push(obj.name));
-      stream.on("error", reject);
-      stream.on("end", () => {
-        resolve(fetchedFiles);
-      });
-    });
-    console.log(`Fichiers du bucket ${bucketName}`, files);
-  } catch (error) {
-    console.error(error);
-    throw new Error("Impossible de récupérer les objets");
-  }
-};
-
 export const validateUpload = (
   mimeType: string,
   fileSize: number

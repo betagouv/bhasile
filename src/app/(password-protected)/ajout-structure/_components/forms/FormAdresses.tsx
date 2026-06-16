@@ -9,7 +9,7 @@ import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { CURRENT_YEAR } from "@/constants";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
 import { typeBatiAndAdressesSchema } from "@/schemas/forms/base/adresse.schema";
-import { Repartition } from "@/types/adresse.type";
+import { Repartition, RepartitionLabel } from "@/types/adresse.type";
 
 import { AdressesList } from "../../[id]/02-adresses/AdressesList";
 
@@ -167,7 +167,7 @@ export default function FormAdresses() {
 
                   {Object.values(Repartition).map((repartition) => (
                     <option key={repartition} value={repartition}>
-                      {repartition}
+                      {RepartitionLabel[repartition]}
                     </option>
                   ))}
                 </SelectWithValidation>

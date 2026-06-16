@@ -22,7 +22,7 @@ async function globalSetup(config: FullConfig): Promise<void> {
 
   if (!email || !password) {
     throw new Error(
-      "E2E_AGENT_EMAIL and E2E_AGENT_PASSWORD must be set for e2e global setup."
+      "E2E_AGENT_EMAIL et E2E_AGENT_PASSWORD doivent être définis pour le global setup e2e."
     );
   }
 
@@ -31,7 +31,9 @@ async function globalSetup(config: FullConfig): Promise<void> {
   fs.mkdirSync(authDir, { recursive: true });
 
   if (isAuthFileUsable(authFile)) {
-    console.log("Skipping ProConnect authentication (auth file is usable)");
+    console.log(
+      "Authentification ProConnect ignorée (fichier d'auth réutilisable)"
+    );
     return;
   }
 

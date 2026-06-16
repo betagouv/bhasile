@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import UploadWithValidation from "@/app/components/forms/UploadWithValidation";
-import { AdditionalFieldsType } from "@/app/utils/acteAdministratif.util";
+import { AdditionalFieldsType } from "@/config/acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 
 import { DeleteButton } from "../../common/DeleteButton";
@@ -130,6 +130,18 @@ export const ActeAdministratif = ({
               name={`actesAdministratifs.${index}.endDate`}
               control={control}
               label={`Fin ${categoryShortName}`}
+              className="w-full mb-0"
+              type="date"
+            />
+          </div>
+        )}
+        {additionalFieldsType === AdditionalFieldsType.DATE && (
+          <div className="flex gap-6 items-start h-full">
+            <InputWithValidation
+              name={`actesAdministratifs.${index}.date`}
+              defaultValue={acte.date}
+              control={control}
+              label={`Date ${categoryShortName}`}
               className="w-full mb-0"
               type="date"
             />

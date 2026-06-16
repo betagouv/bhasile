@@ -2,10 +2,6 @@ import { E2E_PREFIX } from "../data/ids";
 import { prisma } from "./prisma";
 
 export const cleanupOrphans = async (): Promise<void> => {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Les tests e2e ne doivent pas être exécutés en production");
-  }
-
   const errors: string[] = [];
 
   const cpoms = await prisma.cpom.findMany({

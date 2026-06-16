@@ -18,10 +18,6 @@ export type SeededStructure = {
 export const createStructureForTest = async (
   overrides: Partial<StructureSeedInput> = {}
 ): Promise<SeededStructure> => {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Les tests e2e ne doivent pas être exécutés en production");
-  }
-
   const input = buildStructureSeed(overrides);
 
   const structure = await prisma.structure.create({

@@ -14,6 +14,7 @@ export const acteAdministratifApiSchema = z.object({
   uuid: z.string().optional(),
   structureDnaCode: z.string().optional(),
   cpomId: zId(),
+  operateurId: zId(),
   date: optionalFrenchDateToISO(),
   startDate: optionalFrenchDateToISO(),
   endDate: nullishFrenchDateToISO(),

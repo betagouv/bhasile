@@ -1,7 +1,10 @@
 import { AbilityBuilder, PureAbility, subject } from "@casl/ability";
 import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
 
+import { getTransformationDepartement } from "@/app/utils/transformation.util";
 import { Cpom, Operateur, Structure, User } from "@/generated/prisma/client";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
+import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 import { SessionUser } from "@/types/global";
 
 export type AppAbility = PureAbility<
@@ -48,9 +51,13 @@ const defineAgentRules = (
   { can }: AbilityBuilder<AppAbility>,
   user: SessionUser
 ) => {
-  can("update", "Structure", {
-    departementAdministratif: { in: user.allowedDepartements },
-  });
+  if (user.role === "NATIONAL") {
+    can("update", "Structure");
+  } else {
+    can("update", "Structure", {
+      departementAdministratif: { in: user.allowedDepartements },
+    });
+  }
   can("update", ["Cpom", "Operateur"]);
 };
 
@@ -58,7 +65,26 @@ const defineAnonymousRules = ({ can }: AbilityBuilder<AppAbility>) => {
   can("read", ["Structure", "Cpom", "Operateur"]);
 };
 
-export const canUpdateStructure = (user: SessionUser, structure: Structure) => {
+export const canUpdateStructure = (
+  user: SessionUser,
+  structure: Structure | StructureApiRead
+) => {
   const ability = defineAbilityFor(user);
-  return ability.can("update", subject("Structure", structure));
+  return ability.can("update", subject("Structure", structure as Structure));
 };
+
+export const canUpdateDepartement = (
+  user: SessionUser,
+  departementAdministratif?: string | null
+) => {
+  const ability = defineAbilityFor(user);
+  return ability.can(
+    "update",
+    subject("Structure", { departementAdministratif } as Structure)
+  );
+};
+
+export const canUpdateTransformation = (
+  user: SessionUser,
+  transformation: TransformationApiRead
+) => canUpdateDepartement(user, getTransformationDepartement(transformation));

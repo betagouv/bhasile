@@ -4,7 +4,6 @@ import { BudgetApiType } from "@/schemas/api/budget.schema";
 import {
   CpomApiRead,
   CpomDepartementApiType,
-  CpomStructureApiRead,
 } from "@/schemas/api/cpom.schema";
 import { BudgetCpomFormValues } from "@/schemas/forms/base/cpom.schema";
 import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
@@ -51,30 +50,6 @@ export const getCpomDefaultValues = (cpom?: CpomApiRead): CpomFormValues => {
           },
         ],
   };
-};
-
-export const getStructureCpomDefaultValues = (
-  cpomStructures: CpomStructureApiRead[] | undefined
-) => {
-  if (!cpomStructures) {
-    return [];
-  }
-  return cpomStructures.map((cpomStructure) => ({
-    ...cpomStructure,
-    cpom: {
-      ...cpomStructure.cpom,
-      granularity: cpomStructure.cpom?.granularity ?? "REGIONALE",
-      region: cpomStructure.cpom?.region ?? undefined,
-      departements: cpomStructure.cpom?.departements ?? undefined,
-      actesAdministratifs:
-        cpomStructure.cpom?.actesAdministratifs?.map((acteAdministratif) => ({
-          ...acteAdministratif,
-          startDate: acteAdministratif.startDate ?? undefined,
-          endDate: acteAdministratif.endDate ?? undefined,
-          date: acteAdministratif.date ?? undefined,
-        })) ?? [],
-    },
-  }));
 };
 
 const getCpomBudgetsDefaultValues = (

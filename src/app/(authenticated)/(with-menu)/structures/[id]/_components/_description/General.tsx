@@ -3,7 +3,6 @@ import { ReactElement } from "react";
 
 import { formatCityName } from "@/app/utils/adresse.util";
 import { formatDate } from "@/app/utils/date.util";
-import { PublicType } from "@/types/structure.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { CpomViewer } from "./CpomViewer";
@@ -59,14 +58,12 @@ export const General = (): ReactElement => {
       </div>
       <div className="flex gap-2 mb-3">
         <strong>Type de bâti</strong>
-        {structure.repartition}
+        {structure.typeBati}
       </div>
       <hr className="col-span-2" />
       <div className="flex gap-2 mb-3">
         <strong>Public</strong>
-        {publicValue
-          ? PublicType[String(publicValue) as keyof typeof PublicType]
-          : "N/A"}
+        {publicValue ?? "N/A"}
       </div>
       <div className="flex gap-2 mb-3">
         <strong>Vulnérabilité</strong>

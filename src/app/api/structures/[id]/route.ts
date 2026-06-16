@@ -27,7 +27,10 @@ export async function GET(request: NextRequest) {
 
     const id = request.nextUrl.pathname.split("/").pop();
     const structure = isAuthenticated
-      ? await getFullStructure(Number(id))
+      ? await getFullStructure(
+          Number(id),
+          session?.user as SessionUser | undefined
+        )
       : await getStructureForOperateur(Number(id));
 
     if (!structure) {

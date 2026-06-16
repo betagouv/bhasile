@@ -15,7 +15,7 @@ async function globalSetup(config: FullConfig): Promise<void> {
 
   if (!password || !email) {
     throw new Error(
-      "E2E_AGENT_EMAIL and E2E_AGENT_PASSWORD must be set for Playwright global setup (ProConnect login)."
+      "E2E_AGENT_EMAIL et E2E_AGENT_PASSWORD doivent être définis pour le global setup Playwright (login ProConnect)."
     );
   }
 

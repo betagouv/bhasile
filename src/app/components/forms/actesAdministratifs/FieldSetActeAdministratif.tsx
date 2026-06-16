@@ -1,9 +1,14 @@
 import Button from "@codegouvfr/react-dsfr/Button";
+import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
 import { CustomNotice } from "@/app/components/common/CustomNotice";
-import { AdditionalFieldsType } from "@/app/utils/acteAdministratif.util";
+import { useActeAdministratifRadios } from "@/app/hooks/useActeAdministratifRadios";
+import {
+  AdditionalFieldsType,
+  AvenantAlternative,
+} from "@/config/acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
@@ -22,6 +27,8 @@ export default function FieldSetActeAdministratif({
   addFileButtonLabel,
   additionalFieldsType,
   documentLabel,
+  alternativeCategories,
+  avenantAlternative,
 }: FieldSetActeAdministratifProps) {
   const { control, watch } = useFormContext();
   const { append, remove } = useFieldArray({
@@ -32,9 +39,19 @@ export default function FieldSetActeAdministratif({
   const actesAdministratifs: ActeAdministratifFormValues[] =
     watch("actesAdministratifs") || [];
 
-  const actesOfCategory = actesAdministratifs.filter(
-    (acte) => acte?.category === category && !acte.parentId && !acte.parentUuid
-  );
+  const {
+    actesOfCategory,
+    legend,
+    categoryRadio,
+    avenantRadio,
+    getAdditionalFieldsType,
+  } = useActeAdministratifRadios({
+    category,
+    title,
+    additionalFieldsType,
+    alternativeCategories,
+    avenantAlternative,
+  });
 
   const handleAddNewField = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -58,20 +75,20 @@ export default function FieldSetActeAdministratif({
 
     const parent = actesAdministratifs[index];
     const avenantIndices = actesAdministratifs
-      .map((field, index) => ({ field, index }))
+      .map((field, fieldIndex) => ({ field, fieldIndex }))
       .filter(
         ({ field }) =>
           (field.parentId && field.parentId === parent?.id) ||
           (field.parentUuid && field.parentUuid === parent?.uuid)
       )
-      .map(({ index }) => index);
+      .map(({ fieldIndex }) => fieldIndex);
 
     const indicesToRemove = [...avenantIndices, index];
 
     indicesToRemove.sort((a, b) => b - a);
 
-    indicesToRemove.forEach((index) => {
-      remove(index);
+    indicesToRemove.forEach((indexToRemove) => {
+      remove(indexToRemove);
     });
   };
 
@@ -79,7 +96,7 @@ export default function FieldSetActeAdministratif({
     <fieldset className="flex flex-col gap-6 w-full">
       {!noTitleLegend && (
         <legend className="text-xl font-bold mb-4 text-title-blue-france">
-          {title} {isOptional && "(optionnel)"}
+          {legend} {isOptional && "(optionnel)"}
         </legend>
       )}
       {typeof notice === "string" ? (
@@ -92,14 +109,27 @@ export default function FieldSetActeAdministratif({
       ) : (
         notice
       )}
-      {actesOfCategory &&
-        actesOfCategory.length > 0 &&
+      {categoryRadio && (
+        <RadioButtons
+          orientation="horizontal"
+          name={categoryRadio.name}
+          options={categoryRadio.options}
+        />
+      )}
+      {avenantRadio && (
+        <RadioButtons
+          orientation="horizontal"
+          name={avenantRadio.name}
+          options={avenantRadio.options}
+        />
+      )}
+      {actesOfCategory.length > 0 &&
         actesOfCategory.map((acte) => (
           <div key={acte.id || acte.uuid} className="mb-4">
             <ActeAdministratif
               categoryShortName={categoryShortName}
               acte={acte}
-              additionalFieldsType={additionalFieldsType}
+              additionalFieldsType={getAdditionalFieldsType(acte)}
               documentLabel={documentLabel}
               handleDeleteField={handleDeleteField}
               canAddAvenant={canAddAvenant}
@@ -133,4 +163,6 @@ type FieldSetActeAdministratifProps = {
   addFileButtonLabel?: string;
   additionalFieldsType?: AdditionalFieldsType;
   documentLabel: string;
+  alternativeCategories?: ActeAdministratifCategory[];
+  avenantAlternative?: AvenantAlternative;
 };

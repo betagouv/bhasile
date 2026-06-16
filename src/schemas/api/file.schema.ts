@@ -13,3 +13,5 @@ export const fileApiSchema = z.object({
   controleId: zId(),
   evaluationId: zId(),
 });
+
+export type FileUploadApiType = z.infer<typeof fileApiSchema>;

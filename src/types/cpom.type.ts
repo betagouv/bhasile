@@ -1,4 +1,4 @@
-export const CpomGranularity = [
+const CpomGranularity = [
   "DEPARTEMENTALE",
   "INTERDEPARTEMENTALE",
   "REGIONALE",

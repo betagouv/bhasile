@@ -29,6 +29,10 @@ vi.mock("@/app/hooks/useStructuresSearch", () => ({
   useStructuresSearch: () => ({ structures: [], totalStructures: 0 }),
 }));
 
+vi.mock("@/app/hooks/useOngoingTransformations", () => ({
+  useOngoingTransformations: () => ({ transformations: [] }),
+}));
+
 vi.mock("@/app/components/lists/ListLoader", () => ({
   ListLoader: ({ children }: { children: ReactNode }) => (
     <div data-testid="list-loader">{children}</div>

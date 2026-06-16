@@ -7,14 +7,14 @@ import {
 } from "@/app/utils/zodCustomFields";
 import { Repartition } from "@/types/adresse.type";
 
-export const adresseTypologieSchema = z.object({
+const adresseTypologieSchema = z.object({
   year: zSafeYear(),
   placesAutorisees: zSafePositiveIntegerNullish(),
   qpv: z.boolean().optional(),
   logementSocial: z.boolean().optional(),
 });
 
-export const adresseSchema = z.object({
+const adresseSchema = z.object({
   id: zId(),
   structureId: zId(),
   adresseComplete: z.string().optional(),
@@ -26,7 +26,7 @@ export const adresseSchema = z.object({
   adresseTypologies: z.array(adresseTypologieSchema).optional(),
 });
 
-export const adresseWithPlacesRequired = adresseSchema.superRefine(
+const adresseWithPlacesRequired = adresseSchema.superRefine(
   (adresse, ctx) => {
     if (
       adresse.adresseComplete &&
@@ -44,7 +44,7 @@ export const adresseWithPlacesRequired = adresseSchema.superRefine(
   }
 );
 
-export const typeBatiSchema = z.object({
+const typeBatiSchema = z.object({
   typeBati: z.nativeEnum(Repartition),
   sameAddress: z.boolean().optional(),
 });
@@ -81,6 +81,24 @@ export const typeBatiAndAdressesSchema = typeBatiSchema
       }
     });
   });
+
+const adresseAutoSaveSchema = z.object({
+  id: zId(),
+  structureId: zId(),
+  adresseComplete: z.string().optional(),
+  adresse: z.string().optional(),
+  codePostal: z.string().optional(),
+  commune: z.string().optional(),
+  departement: z.string().optional(),
+  repartition: z.nativeEnum(Repartition).optional(),
+  adresseTypologies: z.array(adresseTypologieSchema.partial()).optional(),
+});
+
+export const typeBatiAndAdressesAutoSaveSchema = z.object({
+  typeBati: z.nativeEnum(Repartition).optional(),
+  sameAddress: z.boolean().optional(),
+  adresses: z.array(adresseAutoSaveSchema).optional(),
+});
 
 export type FormAdresseTypologie = z.infer<typeof adresseTypologieSchema>;
 

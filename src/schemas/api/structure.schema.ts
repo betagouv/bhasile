@@ -23,7 +23,7 @@ import { operateurSuggestionApiSchema } from "./operateur.schema";
 import { structureMillesimeApiSchema } from "./structure-millesime.schema";
 import { structureTypologieApiSchema } from "./structure-typologie.schema";
 
-export const structureMinimalApiSchema = z.object({
+const structureMinimalApiSchema = z.object({
   id: z.number(),
   codeBhasile: z.string().optional(),
   operateur: operateurSuggestionApiSchema,
@@ -128,14 +128,20 @@ export type StructureAgentUpdateApiType = z.infer<
   typeof structureAgentUpdateApiSchema
 >;
 
+export type StructureAgentUpdateApiClient = z.input<
+  typeof structureAgentUpdateApiSchema
+>;
+
 export type StructureApiWrite = z.infer<typeof structureApiSchema>;
+
+export type StructureApiWriteClient = z.input<typeof structureApiSchema>;
+
 export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   debutConvention: string | null;
   finConvention: string | null;
   debutPeriodeAutorisation: string | null;
   finPeriodeAutorisation: string | null;
   cpomStructures?: CpomStructureApiRead[];
-  repartition: Repartition;
   operateurLabel: string;
   isAutorisee: boolean;
   isSubventionnee: boolean;
@@ -146,4 +152,9 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   };
   isInCpom: boolean;
   isInCpomPerYear: Record<number, boolean>;
+  nom: string;
+  adresseAdministrativeComplete: string;
+  isMultiAntenne: boolean;
+  isMultiDna: boolean;
+  typeBati?: Repartition;
 };

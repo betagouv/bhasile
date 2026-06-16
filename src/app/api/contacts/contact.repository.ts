@@ -1,4 +1,5 @@
 import { ContactApiType } from "@/schemas/api/contact.schema";
+import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 // WARNING: attenion, auparavant on avait un type de contact,
@@ -8,15 +9,27 @@ import { PrismaTransaction } from "@/types/prisma.type";
 export const createOrUpdateContacts = async (
   tx: PrismaTransaction,
   contacts: Partial<ContactApiType>[] | undefined,
-  structureId: number
+  entityId: EntityId
 ): Promise<void> => {
   if (!contacts) {
     return;
   }
 
-  await tx.contact.deleteMany({
-    where: { structureId },
-  });
+  let where:
+    | { structureId: number }
+    | { structureVersionId: number }
+    | { operateurId: number };
+  if (entityId.structureId !== undefined) {
+    where = { structureId: entityId.structureId };
+  } else if (entityId.structureVersionId !== undefined) {
+    where = { structureVersionId: entityId.structureVersionId };
+  } else if (entityId.operateurId !== undefined) {
+    where = { operateurId: entityId.operateurId };
+  } else {
+    throw new Error("ID d'entité invalide");
+  }
+
+  await tx.contact.deleteMany({ where });
 
   if (contacts.length === 0) {
     return;
@@ -24,7 +37,7 @@ export const createOrUpdateContacts = async (
 
   await tx.contact.createMany({
     data: contacts.map((contact) => ({
-      structureId,
+      ...entityId,
       prenom: contact.prenom ?? "",
       nom: contact.nom ?? "",
       telephone: contact.telephone ?? "",

@@ -1,5 +1,5 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
@@ -13,12 +13,20 @@ import { ManualAddressInputs } from "./ManualAddressInputs";
 
 export const FieldSetAdresseAdministrative = ({
   formKind = FormKind.FINALISATION,
+  locked = false,
 }: {
   formKind?: FormKind;
+  locked?: boolean;
 }) => {
   const { control, watch, setValue, getValues } = useFormContext();
 
   const [isManualAddress, setIsManualAddress] = useState(false);
+
+  useEffect(() => {
+    if (locked && isManualAddress) {
+      setIsManualAddress(false);
+    }
+  }, [locked, isManualAddress]);
 
   const handleAddressAdministrativeChange = () => {
     if (watch("typeBati") === Repartition.COLLECTIF && watch("sameAddress")) {
@@ -50,9 +58,11 @@ export const FieldSetAdresseAdministrative = ({
 
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="text-lg font-bold mb-2 text-title-blue-france">
-        Structure
-      </legend>
+      {formKind !== FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES && (
+        <legend className="text-lg font-bold mb-2 text-title-blue-france">
+          Structure
+        </legend>
+      )}
       <div
         className={cn(
           "grid grid-cols-1 gap-6",
@@ -68,6 +78,7 @@ export const FieldSetAdresseAdministrative = ({
             type="text"
             label="Nom de la structure (optionnel)"
             className="mb-0"
+            disabled={locked}
           />
           <span className="text-[#666666] text-sm">ex. Les Coquelicots</span>
         </div>
@@ -82,7 +93,7 @@ export const FieldSetAdresseAdministrative = ({
             department="departementAdministratif"
             label="Adresse principale de la structure"
             onSelectSuggestion={handleAddressAdministrativeChange}
-            disabled={isManualAddress}
+            disabled={isManualAddress || locked}
           />
           <span className="text-[#666666] text-sm">
             indiquée dans les documents de contractualisation
@@ -108,6 +119,7 @@ export const FieldSetAdresseAdministrative = ({
       <Button
         priority="tertiary no outline"
         type="button"
+        disabled={locked}
         iconId={
           isManualAddress ? "fr-icon-arrow-go-back-line" : "fr-icon-add-line"
         }

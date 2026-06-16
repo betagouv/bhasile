@@ -25,7 +25,8 @@ export const THREE_MONTHS_IN_SECONDS = 60 * 60 * 24 * 31 * 3;
 export const FILE_UPLOAD_EXPIRATION_DELAY = 60 * 60; // 1 hour
 
 export const START_YEAR = 2021;
-export const CURRENT_YEAR = 2026;
+
+export const CURRENT_YEAR = new Date().getFullYear();
 
 export const DOCUMENTS_FINANCIERS_OPEN_YEAR = 2025;
 
@@ -33,6 +34,14 @@ export const INDICATEUR_FINANCIER_CUTOFF_YEAR = 2024;
 
 export const AUTORISEE_OPEN_YEAR = 2025;
 export const SUBVENTIONNEE_OPEN_YEAR = 2024;
+
+const IMAGE_MIME_TYPES = [
+  "image/jpg",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+];
 
 export const SPREADSHEET_MIME_TYPES = [
   "application/vnd.ms-excel",
@@ -43,6 +52,7 @@ export const SPREADSHEET_MIME_TYPES = [
 ];
 export const ALLOWED_MIME_TYPES = [
   "application/pdf",
+  ...IMAGE_MIME_TYPES,
   ...SPREADSHEET_MIME_TYPES,
 ];
 

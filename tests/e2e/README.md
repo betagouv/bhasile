@@ -2,7 +2,7 @@
 
 Suite e2e Playwright. Cohabite avec `tests/e2e-legacy/` pendant la transition — la suite legacy couvre l'ajout et la finalisation, briques en voie de disparition du produit. Une fois ces flux retirés, `tests/e2e-legacy/` sera supprimé.
 
-## Périmètre
+## 🎯 Périmètre
 
 Trois flux couverts :
 
@@ -12,7 +12,7 @@ Trois flux couverts :
 
 Les flux d'ajout et de finalisation de structure sont testés dans `tests/e2e-legacy/`.
 
-## Lancer
+## 🏃 Lancer
 
 ```bash
 yarn test:e2e          # suite complète
@@ -20,13 +20,13 @@ yarn test:e2e:ui       # mode UI Playwright (interactif, debug)
 yarn test:e2e -g notes # filtre par grep
 ```
 
-## Pré-requis
+## 📦 Pré-requis
 
 - L'application tourne sur `E2E_BASE_URL` (défaut `http://localhost:3000`).
 - DB Postgres accessible via `DATABASE_URL` (lecture/écriture).
 - Variables d'env : `E2E_AGENT_EMAIL`, `E2E_AGENT_PASSWORD` pour ProConnect. `E2E_WORKERS` définit le nombre de tests en parallèle
 
-## Principes
+## 🧱 Principes
 
 - **Fixtures Playwright** (`fixtures/test.ts`) pour le setup/teardown — pas de `try/finally` impératif.
 - **Seeding direct Prisma** (`seed/`) — pas d'aller-retour via l'UI ni l'API HTTP pour préparer les données.
@@ -34,7 +34,7 @@ yarn test:e2e -g notes # filtre par grep
 - **POM léger** (`pages/`) : une classe par page, méthodes nommées par intention métier, pas d'héritage. Sélecteurs sémantiques (`getByRole`, `getByLabel`).
 - **Aucun import depuis `tests/e2e-legacy/`**. Dépendances `src/` autorisées : `src/types/*`, `@/generated/prisma/client`, `@/prisma-client`, ainsi que les **constantes et utilitaires purs** servant de source de vérité partagée avec l'app (`@/constants`, `@/app/utils/date.util`) — à privilégier plutôt que de dupliquer une valeur (plages d'années, etc.). Ne jamais importer de code à effet de bord (accès DB, `server-only`, composants React).
 
-## Cleanup orphelins
+## 🧹 Cleanup orphelins
 
 Les fixtures nettoient en teardown même en cas d'échec, et `cleanupOrphans()` tourne en globalSetup pour purger tout résidu avant chaque run. Si jamais des records restent (kill -9, panne réseau), ils portent tous le préfixe `E2E-` et peuvent être supprimés en masse :
 
@@ -43,7 +43,7 @@ DELETE FROM "Cpom" WHERE name LIKE 'E2E-%';
 DELETE FROM "Structure" WHERE "codeBhasile" LIKE 'E2E-%';
 ```
 
-## Ajouter un test
+## ➕ Ajouter un test
 
 1. Identifier la section concernée (structure-modification / cpom-creation / cpom-modification).
 2. Récupérer les fixtures nécessaires via destructuring : `test("...", async ({ page, seededStructure }) => { ... })`.

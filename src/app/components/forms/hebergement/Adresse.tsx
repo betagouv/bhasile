@@ -1,17 +1,17 @@
-import Button from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Control, Controller, FieldValues } from "react-hook-form";
 
+import { DeleteButton } from "@/app/components/common/DeleteButton";
 import AddressWithValidation from "@/app/components/forms/AddressWithValidation";
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import SelectWithValidation from "@/app/components/forms/SelectWithValidation";
-import { Repartition } from "@/types/adresse.type";
+import { Repartition, RepartitionLabel } from "@/types/adresse.type";
 
 export const AdresseComponent = ({
   index,
   control,
   sameAddress,
-  handleRemoveAddress,
+  handleRemoveAdresse,
   typeBati,
 }: Props) => {
   return (
@@ -38,7 +38,6 @@ export const AdresseComponent = ({
         min={0}
         label="Places"
         className="w-1/12 mb-0"
-        variant="simple"
       />
       <SelectWithValidation
         name={`adresses.${index}.repartition`}
@@ -53,7 +52,7 @@ export const AdresseComponent = ({
           .filter((repartition) => repartition !== Repartition.MIXTE)
           .map((repartition) => (
             <option key={repartition} value={repartition}>
-              {repartition}
+              {RepartitionLabel[repartition]}
             </option>
           ))}
       </SelectWithValidation>
@@ -99,17 +98,15 @@ export const AdresseComponent = ({
             )}
           />
 
-          {index !== 0 && (
-            <Button
-              iconId="fr-icon-delete-line"
-              className="ml-auto rounded-4xl"
-              onClick={(e) => {
-                e.preventDefault();
-                handleRemoveAddress(index);
+          {handleRemoveAdresse && (
+            <DeleteButton
+              onClick={(event) => {
+                event.preventDefault();
+                handleRemoveAdresse(index);
               }}
-              priority="tertiary no outline"
-              title="Supprimer l'hébergement"
               size="small"
+              backgroundColor="grey"
+              className="ml-auto"
             />
           )}
         </div>
@@ -122,6 +119,6 @@ type Props = {
   index: number;
   control: Control<FieldValues>;
   sameAddress: boolean;
-  handleRemoveAddress: (index: number) => void;
+  handleRemoveAdresse?: (index: number) => void;
   typeBati: Repartition;
 };

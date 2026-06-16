@@ -4,7 +4,7 @@ import { z } from "zod";
 type ErrorMapCtx = z.ErrorMapCtx;
 
 // French error messages for Zod
-export const frenchErrorMap = (
+const frenchErrorMap = (
   issue: z.ZodIssueOptionalMessage,
   ctx: ErrorMapCtx
 ): { message: string } => {

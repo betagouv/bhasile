@@ -16,7 +16,7 @@ import { createOrUpdateEvaluations } from "../evaluations/evaluation.repository"
 import { createOrUpdateFinesses } from "../finesses/finess.repository";
 import {
   createOrUpdateForms,
-  initializeDefaultForms,
+  initializeStructureDefaultForms,
 } from "../forms/form.repository";
 import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
@@ -48,6 +48,7 @@ const getOrderedStructures = async ({
   column,
   direction,
   selection,
+  finalised,
   map,
 }: SearchProps): Promise<{ id: number }[]> => {
   const whereSql = buildStructuresWhereSql({
@@ -58,6 +59,7 @@ const getOrderedStructures = async ({
     departements,
     operateurs,
     selection,
+    finalised,
   });
   const orderSql = buildStructuresOrderSql(
     column ?? "departementAdministratif",
@@ -90,6 +92,7 @@ export const findBySearch = async ({
   direction,
   map,
   selection,
+  finalised,
 }: SearchProps): Promise<StructureDbList[] | StructureDbMap[]> => {
   const structuresIds = await getOrderedStructures({
     search,
@@ -103,6 +106,7 @@ export const findBySearch = async ({
     direction,
     map,
     selection,
+    finalised,
   });
   if (map) {
     return prisma.structure.findMany({
@@ -148,7 +152,11 @@ export const findBySearch = async ({
           },
         },
       },
-      operateur: true,
+      operateur: {
+        include: {
+          parent: true,
+        },
+      },
       structureMillesimes: {
         orderBy: {
           year: "desc",
@@ -385,7 +393,11 @@ export const findOne = async (id: number) => {
           year: "desc",
         },
       },
-      operateur: true,
+      operateur: {
+        include: {
+          parent: true,
+        },
+      },
       forms: {
         include: {
           formDefinition: true,
@@ -427,22 +439,34 @@ export const updateOne = async (
       async (tx) => {
         const updatedStructure = await updateStructure(tx, structure);
 
-        await initializeDefaultForms(tx, isOperateurUpdate, structure.id);
+        await initializeStructureDefaultForms(
+          tx,
+          isOperateurUpdate,
+          structure.id
+        );
 
-        await createOrUpdateDnaStructures(tx, dnaStructures, structure.id);
-        await createOrUpdateFinesses(tx, finesses, structure.id);
-        await createOrUpdateContacts(tx, contacts, structure.id);
+        await createOrUpdateDnaStructures(tx, dnaStructures, {
+          structureId: structure.id,
+        });
+        await createOrUpdateFinesses(tx, finesses, {
+          structureId: structure.id,
+        });
+        await createOrUpdateContacts(tx, contacts, {
+          structureId: structure.id,
+        });
         await createOrUpdateBudgets(tx, budgets, { structureId: structure.id });
         await createOrUpdateIndicateursFinanciers(tx, indicateursFinanciers, {
           structureId: structure.id,
         });
-        await createOrUpdateStructureTypologies(
-          tx,
-          structureTypologies,
-          structure.id
-        );
-        await createOrUpdateAdresses(tx, adresses, structure.id);
-        await createOrUpdateAntennes(tx, antennes, structure.id);
+        await createOrUpdateStructureTypologies(tx, structureTypologies, {
+          structureId: structure.id,
+        });
+        await createOrUpdateAdresses(tx, adresses, {
+          structureId: structure.id,
+        });
+        await createOrUpdateAntennes(tx, antennes, {
+          structureId: structure.id,
+        });
         await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
           structureId: structure.id,
         });
@@ -450,13 +474,11 @@ export const updateOne = async (
           structureId: structure.id,
         });
         await createOrUpdateControles(tx, controles, structure.id);
-        await createOrUpdateForms(tx, forms, structure.id);
+        await createOrUpdateForms(tx, forms, { structureId: structure.id });
         await createOrUpdateEvaluations(tx, evaluations, structure.id);
-        await createOrUpdateStructureMillesimes(
-          tx,
-          structureMillesimes,
-          structure.id
-        );
+        await createOrUpdateStructureMillesimes(tx, structureMillesimes, {
+          structureId: structure.id,
+        });
 
         return updatedStructure;
       },
@@ -502,7 +524,7 @@ const updateStructure = async (
       id: structure.id,
     },
     data: {
-      public: convertToPublicType(publicType!),
+      public: convertToPublicType(publicType),
       adresseAdministrative,
       codePostalAdministratif,
       communeAdministrative,

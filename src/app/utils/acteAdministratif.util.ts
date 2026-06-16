@@ -1,33 +1,138 @@
-import type { ReactElement } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-import { StructureApiRead } from "@/schemas/api/structure.schema";
+import {
+  getEffectiveEndDate,
+  isCurrentlyInEffect,
+} from "@/app/utils/date.util";
+import {
+  CategoryDisplayRule,
+  CategoryDisplayRules,
+  ResolvedAvenantParent,
+} from "@/config/acte-administratif.config";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
-import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
+import {
+  ActeAdministratifCategory,
+  StructureParentActe,
+} from "@/types/acte-administratif.type";
 
-export const getActesAdministratifsDefaultValues = (
-  structure: StructureApiRead
-): ActeAdministratifFormValues[] => {
-  const categoryDisplayRules =
-    getActesAdministratifsCategoryToDisplay(structure);
-  const categoriesToDisplay = (
-    Object.entries(categoryDisplayRules) as [
-      Exclude<ActeAdministratifCategory, "CPOM">,
-      (typeof categoryDisplayRules)[Exclude<ActeAdministratifCategory, "CPOM">],
-    ][]
-  )
-    .filter(([, rules]) => rules.shouldShow)
-    .map(([category]) => category);
+const getCategoryRuleEntries = (
+  categoryRules: CategoryDisplayRules
+): [ActeAdministratifCategory, CategoryDisplayRule][] =>
+  Object.entries(categoryRules) as [
+    ActeAdministratifCategory,
+    CategoryDisplayRule,
+  ][];
 
-  const missingCategories = categoriesToDisplay.filter(
-    (category) =>
-      !structure.actesAdministratifs?.some(
-        (acteAdministratif) => acteAdministratif.category === category
-      )
+export const getCategoryGroup = (
+  category: ActeAdministratifCategory,
+  alternativeCategories?: ActeAdministratifCategory[],
+  avenantParentCategory?: ActeAdministratifCategory
+): ActeAdministratifCategory[] => [
+  ...new Set([
+    category,
+    ...(alternativeCategories ?? []),
+    ...(avenantParentCategory ? [avenantParentCategory] : []),
+  ]),
+];
+
+const toDate = (value: string | null): Date | null =>
+  value ? new Date(value) : null;
+
+export const getCurrentStructureParentActe = (
+  structureActes: StructureParentActe[] | undefined,
+  category: ActeAdministratifCategory,
+  referenceDate: Date
+): ResolvedAvenantParent | undefined => {
+  let mostRecent:
+    | { id: number; startDate: Date; effectiveEndDate: Date }
+    | undefined;
+
+  for (const candidate of structureActes ?? []) {
+    if (candidate.category !== category) {
+      continue;
+    }
+    const startDate = toDate(candidate.startDate);
+    const effectiveEndDate = getEffectiveEndDate(
+      toDate(candidate.endDate),
+      candidate.children.map((child) => toDate(child.endDate))
+    );
+    if (
+      !startDate ||
+      !effectiveEndDate ||
+      !isCurrentlyInEffect(startDate, effectiveEndDate, referenceDate)
+    ) {
+      continue;
+    }
+
+    const isMoreRecent =
+      !mostRecent ||
+      startDate > mostRecent.startDate ||
+      (startDate.getTime() === mostRecent.startDate.getTime() &&
+        candidate.id > mostRecent.id);
+    if (isMoreRecent) {
+      mostRecent = { id: candidate.id, startDate, effectiveEndDate };
+    }
+  }
+
+  if (!mostRecent) {
+    return undefined;
+  }
+  return {
+    id: mostRecent.id,
+    startYear: mostRecent.startDate.getUTCFullYear(),
+    endYear: mostRecent.effectiveEndDate.getUTCFullYear(),
+  };
+};
+
+// TODO: Faire en sorte de chercher le parent dans TOUS les actes administratifs, autres transformations comprises
+export const resolveAvenantParentIds = (
+  categoryRules: CategoryDisplayRules,
+  structureActes: StructureParentActe[] | undefined,
+  referenceDate: Date
+): CategoryDisplayRules =>
+  Object.fromEntries(
+    getCategoryRuleEntries(categoryRules).map(([category, rule]) => {
+      if (!rule.avenantAlternative) {
+        return [category, rule];
+      }
+      const resolvedParent = getCurrentStructureParentActe(
+        structureActes,
+        rule.avenantAlternative.parentCategory,
+        referenceDate
+      );
+      return [
+        category,
+        {
+          ...rule,
+          avenantAlternative: { ...rule.avenantAlternative, resolvedParent },
+        },
+      ];
+    })
   );
 
+export const getActesAdministratifsDefaultValues = (
+  actesAdministratifs: ActeAdministratifFormValues[] | undefined,
+  categoryRules: CategoryDisplayRules
+): ActeAdministratifFormValues[] => {
+  const rulesToDisplay = getCategoryRuleEntries(categoryRules).filter(
+    ([, rules]) => rules.shouldShow
+  );
+
+  const missingRules = rulesToDisplay.filter(([category, rules]) => {
+    const groupCategories = getCategoryGroup(
+      category,
+      rules.alternativeCategories,
+      rules.avenantAlternative?.parentCategory
+    );
+    return !actesAdministratifs?.some((acteAdministratif) =>
+      groupCategories.includes(
+        acteAdministratif.category as ActeAdministratifCategory
+      )
+    );
+  });
+
   return [
-    ...(structure.actesAdministratifs?.map((acteAdministratif) => ({
+    ...(actesAdministratifs?.map((acteAdministratif) => ({
       id: acteAdministratif.id ?? undefined,
       category: acteAdministratif.category,
       date: acteAdministratif.date || undefined,
@@ -37,82 +142,9 @@ export const getActesAdministratifsDefaultValues = (
       parentId: acteAdministratif.parentId || undefined,
       fileUploads: acteAdministratif.fileUploads || undefined,
     })) || []),
-    ...missingCategories.map((category) => ({
+    ...missingRules.map(([category]) => ({
       uuid: uuidv4(),
       category,
     })),
   ];
 };
-
-export const getActesAdministratifsCategoryToDisplay = (
-  structure?: StructureApiRead
-): CategoryDisplayRulesType => ({
-  ARRETE_AUTORISATION: {
-    categoryShortName: "arrêté",
-    title: "Arrêtés d'autorisation",
-    canAddFile: true,
-    canAddAvenant: true,
-    isOptional: false,
-    shouldShow: structure?.isAutorisee ?? false,
-    additionalFieldsType: AdditionalFieldsType.DATE_START_END,
-    documentLabel: "Document",
-    addFileButtonLabel: "Ajouter un arrêté d'autorisation",
-  },
-  ARRETE_TARIFICATION: {
-    categoryShortName: "arrêté",
-    title: "Arrêtés de tarification",
-    canAddFile: true,
-    canAddAvenant: true,
-    isOptional: false,
-    shouldShow: structure?.isAutorisee ?? false,
-    additionalFieldsType: AdditionalFieldsType.DATE_START_END,
-    documentLabel: "Document",
-    addFileButtonLabel: "Ajouter un arrêté de tarification",
-  },
-  CONVENTION: {
-    categoryShortName: "convention",
-    title: "Conventions",
-    canAddFile: true,
-    canAddAvenant: true,
-    isOptional: !(structure?.isSubventionnee ?? false),
-    shouldShow: true,
-    additionalFieldsType: AdditionalFieldsType.DATE_START_END,
-    documentLabel: "Document",
-    addFileButtonLabel: "Ajouter une convention",
-  },
-  AUTRE: {
-    categoryShortName: "autre",
-    title: "Autres documents",
-    canAddFile: true,
-    canAddAvenant: false,
-    isOptional: true,
-    shouldShow: true,
-    additionalFieldsType: AdditionalFieldsType.NAME,
-    documentLabel: "Document",
-    addFileButtonLabel: "Ajouter un document",
-    notice: `Dans cette catégorie, vous avez la possibilité d’importer d’autres
-        documents utiles à l’analyse de la structure (ex: 
-        Plans Pluriannuels d’Investissements)`,
-  },
-});
-
-type CategoryDisplayRulesType = Record<
-  Exclude<ActeAdministratifCategory, "CPOM">,
-  {
-    categoryShortName: string;
-    title: string;
-    canAddFile: boolean;
-    canAddAvenant: boolean;
-    isOptional: boolean;
-    shouldShow: boolean;
-    additionalFieldsType: AdditionalFieldsType;
-    documentLabel: string;
-    addFileButtonLabel: string;
-    notice?: string | ReactElement;
-  }
->;
-
-export enum AdditionalFieldsType {
-  DATE_START_END,
-  NAME,
-}
