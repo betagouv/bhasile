@@ -311,11 +311,17 @@ const dbStructureToApiRead = (
 export const getMaxPlacesAutorisees = async (): Promise<number> => {
   const latestPlacesAutoriseesOfEveryStructure =
     await getLatestPlacesAutoriseesPerStructure();
+  if (latestPlacesAutoriseesOfEveryStructure.length === 0) {
+    return 0;
+  }
   return Math.max(...latestPlacesAutoriseesOfEveryStructure);
 };
 
 export const getMinPlacesAutorisees = async (): Promise<number> => {
   const latestPlacesAutoriseesOfEveryStructure =
     await getLatestPlacesAutoriseesPerStructure();
+  if (latestPlacesAutoriseesOfEveryStructure.length === 0) {
+    return 0;
+  }
   return Math.min(...latestPlacesAutoriseesOfEveryStructure);
 };
