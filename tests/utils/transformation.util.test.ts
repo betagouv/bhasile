@@ -33,6 +33,7 @@ import {
 import {
   createStructureVersionTransformation,
   createTransformation,
+  createTransformationForm,
 } from "../test-utils/factories/transformation.factory";
 
 describe("transformation util", () => {
@@ -431,7 +432,7 @@ describe("transformation util", () => {
       }
     );
 
-    it("carries each form step status read from the structureVersionTransformation form", () => {
+    it("reporte le statut de chaque étape lu depuis le formulaire de la structureVersionTransformation", () => {
       // GIVEN — an extension whose form has only the description step validated
       const transformation: TransformationApiRead = {
         id: 5,
@@ -440,45 +441,9 @@ describe("transformation util", () => {
             id: 1,
             type: StructureVersionTransformationType.EXTENSION,
             structureVersion: { structureId: 1001 },
-            form: {
-              id: 100,
-              status: false,
-              formDefinition: {
-                id: 10,
-                name: "structure-transformation-extension",
-                slug: "structure-transformation-extension-v1",
-                version: 1,
-              },
-              formSteps: [
-                {
-                  id: 1001,
-                  status: StepStatus.VALIDE,
-                  stepDefinition: {
-                    id: 201,
-                    slug: "01-identification",
-                    label: "Description",
-                  },
-                },
-                {
-                  id: 1002,
-                  status: StepStatus.NON_COMMENCE,
-                  stepDefinition: {
-                    id: 202,
-                    slug: "02-places-hebergement",
-                    label: "Places et hébergement",
-                  },
-                },
-                {
-                  id: 1003,
-                  status: StepStatus.NON_COMMENCE,
-                  stepDefinition: {
-                    id: 203,
-                    slug: "03-actes-administratifs",
-                    label: "Actes administratifs",
-                  },
-                },
-              ],
-            },
+            form: createTransformationForm({
+              validatedSlugs: ["01-identification"],
+            }),
           } as StructureVersionTransformationApiRead,
         ],
       };
@@ -494,7 +459,7 @@ describe("transformation util", () => {
       ]);
     });
 
-    it("defaults each step status to NON_COMMENCE when the form is absent", () => {
+    it("met chaque statut d'étape à NON_COMMENCE par défaut quand le formulaire est absent", () => {
       // GIVEN
       const transformation: TransformationApiRead = {
         id: 5,
@@ -604,7 +569,7 @@ describe("transformation util", () => {
         StructureVersionTransformationType.FERMETURE,
       ],
     ])(
-      "returns the impacted structure page for %s",
+      "renvoie la page de la structure impactée pour %s",
       (transformationType, primaryType) => {
         // GIVEN
         const transformation = createTransformation({
@@ -626,7 +591,7 @@ describe("transformation util", () => {
       }
     );
 
-    it("picks the primary type's structure when several structureVersionTransformations exist", () => {
+    it("choisit la structure du type principal quand plusieurs structureVersionTransformations existent", () => {
       // GIVEN — a contraction with transfer: 1 contraction (primary) + 1 extension target
       const transformation = createTransformation({
         id: 5,
@@ -654,7 +619,7 @@ describe("transformation util", () => {
     it.each([
       TransformationType.OUVERTURE_EX_NIHILO,
       TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES,
-    ])("returns /structures for %s (no primary type)", (transformationType) => {
+    ])("renvoie /structures pour %s (pas de type principal)", (transformationType) => {
       // GIVEN
       const transformation = createTransformation({
         id: 5,
@@ -672,7 +637,7 @@ describe("transformation util", () => {
       expect(getTransformationOriginRoute(transformation)).toBe("/structures");
     });
 
-    it("falls back to /structures when the primary structureVersionTransformation has no structureId", () => {
+    it("se rabat sur /structures quand la structureVersionTransformation principale n'a pas de structureId", () => {
       // GIVEN
       const transformation = createTransformation({
         id: 5,
@@ -691,51 +656,11 @@ describe("transformation util", () => {
   });
 
   describe("validateStructureVersionTransformationFormStep", () => {
-    const buildCreationForm = (validatedSlugs: string[] = []): FormApiType => ({
-      id: 100,
-      status: false,
-      formDefinition: {
-        id: 10,
+    const buildCreationForm = (validatedSlugs: string[] = []): FormApiType =>
+      createTransformationForm({
         name: "structure-transformation-creation",
-        slug: "structure-transformation-creation-v1",
-        version: 1,
-      },
-      formSteps: [
-        {
-          id: 1001,
-          status: validatedSlugs.includes("01-identification")
-            ? StepStatus.VALIDE
-            : StepStatus.NON_COMMENCE,
-          stepDefinition: {
-            id: 201,
-            slug: "01-identification",
-            label: "Description",
-          },
-        },
-        {
-          id: 1002,
-          status: validatedSlugs.includes("02-places-hebergement")
-            ? StepStatus.VALIDE
-            : StepStatus.NON_COMMENCE,
-          stepDefinition: {
-            id: 202,
-            slug: "02-places-hebergement",
-            label: "Places et hébergement",
-          },
-        },
-        {
-          id: 1003,
-          status: validatedSlugs.includes("03-actes-administratifs")
-            ? StepStatus.VALIDE
-            : StepStatus.NON_COMMENCE,
-          stepDefinition: {
-            id: 203,
-            slug: "03-actes-administratifs",
-            label: "Actes administratifs",
-          },
-        },
-      ],
-    });
+        validatedSlugs,
+      });
 
     it("flips only the validated route step to VALIDE, mapping it to its form step slug", () => {
       const form = validateStructureVersionTransformationFormStep(

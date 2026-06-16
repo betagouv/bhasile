@@ -146,7 +146,7 @@ describe("TransformationVerificationPage", () => {
     mockGetFetchState.mockReturnValue(FetchState.IDLE);
   });
 
-  it("keeps the certify button clickable even when a child form is not validated", () => {
+  it("garde le bouton de certification cliquable même quand un formulaire enfant n'est pas validé", () => {
     // GIVEN
     mockContext(
       buildTransformation({
@@ -165,7 +165,7 @@ describe("TransformationVerificationPage", () => {
     expect(certifyButton()).toBeEnabled();
   });
 
-  it("disables the certify button only while a save is in flight", () => {
+  it("désactive le bouton de certification uniquement pendant une sauvegarde en cours", () => {
     // GIVEN
     mockGetFetchState.mockReturnValue(FetchState.LOADING);
     mockContext(
@@ -184,7 +184,7 @@ describe("TransformationVerificationPage", () => {
     expect(certifyButton()).toBeDisabled();
   });
 
-  it("flags incomplete steps and does not finalize when a child form is not validated", async () => {
+  it("signale les étapes incomplètes et ne finalise pas quand un formulaire enfant n'est pas validé", async () => {
     // GIVEN
     const user = userEvent.setup();
     mockContext(
@@ -207,7 +207,7 @@ describe("TransformationVerificationPage", () => {
     expect(mockModalOpen).not.toHaveBeenCalled();
   });
 
-  it("finalizes the transformation and opens the modal when every child form is validated", async () => {
+  it("finalise la transformation et ouvre la modale quand tous les formulaires enfants sont validés", async () => {
     // GIVEN
     const user = userEvent.setup();
     mockUpdateTransformation.mockResolvedValue(42);
@@ -238,7 +238,7 @@ describe("TransformationVerificationPage", () => {
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
-  it("does not open the modal when updateTransformation rejects", async () => {
+  it("n'ouvre pas la modale quand updateTransformation échoue", async () => {
     // GIVEN
     const user = userEvent.setup();
     mockUpdateTransformation.mockRejectedValue(new Error("boom"));
@@ -263,7 +263,7 @@ describe("TransformationVerificationPage", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it("shows the incomplete message when the flag is set and steps remain", () => {
+  it("affiche le message d'incomplétude quand le flag est activé et qu'il reste des étapes", () => {
     // GIVEN
     mockContext(
       buildTransformation({
@@ -284,7 +284,7 @@ describe("TransformationVerificationPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("hides the incomplete message when every step is validated even if the flag is set", () => {
+  it("masque le message d'incomplétude quand toutes les étapes sont validées même si le flag est activé", () => {
     // GIVEN
     mockContext(
       buildTransformation({
@@ -305,7 +305,7 @@ describe("TransformationVerificationPage", () => {
     ).toBeNull();
   });
 
-  it("adds the remise-en-concurrence invitation to the modal body for a HUDA remise transformation", () => {
+  it("ajoute l'invitation à la remise en concurrence dans le corps de la modale pour une transformation HUDA de remise", () => {
     // GIVEN
     mockContext(
       buildTransformation({
@@ -324,7 +324,7 @@ describe("TransformationVerificationPage", () => {
     expect(screen.getByText(/Créer une structure/)).toBeInTheDocument();
   });
 
-  it("omits the remise-en-concurrence invitation for a standard transformation", () => {
+  it("omet l'invitation à la remise en concurrence pour une transformation standard", () => {
     // GIVEN
     mockContext(
       buildTransformation({
@@ -343,7 +343,7 @@ describe("TransformationVerificationPage", () => {
     expect(screen.queryByText(/Créer une structure/)).toBeNull();
   });
 
-  it("renders SubmitError when fetchState is ERROR", () => {
+  it("affiche SubmitError quand fetchState vaut ERROR", () => {
     // GIVEN
     mockGetFetchState.mockReturnValue(FetchState.ERROR);
     mockContext(
@@ -362,7 +362,7 @@ describe("TransformationVerificationPage", () => {
     expect(screen.getByTestId("submit-error")).toBeInTheDocument();
   });
 
-  it("renders one group per StructureVersionTransformationType, sorted FERMETURE → CREATION", () => {
+  it("affiche un groupe par StructureVersionTransformationType, trié FERMETURE → CREATION", () => {
     // GIVEN
     mockContext(
       buildTransformation({
