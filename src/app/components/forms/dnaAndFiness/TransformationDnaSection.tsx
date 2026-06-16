@@ -13,8 +13,8 @@ const FAQ_URL = "/11-FAQ%20Transformation%20HUDA%20en%20CADA_FV.pdf";
 const emptyDnaStructure: DnaStructureFormValues = {
   dna: {
     code: "",
-    description: "",
   },
+  description: "",
 };
 
 export const TransformationDnaSection = ({ entityId }: Props) => {
@@ -26,7 +26,7 @@ export const TransformationDnaSection = ({ entityId }: Props) => {
       addButtonLabel="Ajouter un code DNA"
       descriptionHint="ex : Site d’Avranches Nord et Sud ou Extension 2022"
       getDescriptionFieldName={(index) =>
-        `dnaStructures.${index}.dna.description`
+        `dnaStructures.${index}.description`
       }
       renderCodeInput={(index, label) => (
         <DnaInput index={index} label={label} entityId={entityId} />
