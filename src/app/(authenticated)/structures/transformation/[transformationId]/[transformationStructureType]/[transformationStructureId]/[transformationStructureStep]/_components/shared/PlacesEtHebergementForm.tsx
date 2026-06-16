@@ -31,7 +31,7 @@ export const PlacesEtHebergementForm = ({
   formKind,
   originalPlaces,
 }: Props) => {
-  const { handleValidation } = useTransformationFormHandling();
+  const { handleValidation, backLink } = useTransformationFormHandling();
 
   const defaultValues =
     getTransformationDefaultValues<CreationPlacesEtHebergementFormValues>({
@@ -60,6 +60,7 @@ export const PlacesEtHebergementForm = ({
       }}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
+      backLink={backLink}
       showContactInfos={false}
     >
       <FieldSetTransformationPlaces

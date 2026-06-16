@@ -124,7 +124,14 @@ export const getTransformationFormNavigation = ({
       ? flatSteps[currentIndex + 1]
       : undefined;
 
-  return { firstStep, currentStep, prevStep, nextStep };
+  const backLink = prevStep
+    ? { href: prevStep.route, label: "Étape précédente" }
+    : {
+        href: `/structures/transformation/${transformationId}/selection`,
+        label: "Modifier le cas de figure",
+      };
+
+  return { firstStep, currentStep, prevStep, nextStep, backLink };
 };
 
 export const sortStructureVersionTransformationsByType = <

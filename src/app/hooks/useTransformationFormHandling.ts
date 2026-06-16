@@ -14,7 +14,7 @@ export const useTransformationFormHandling = () => {
   const { transformation, setTransformation } = useTransformationContext();
   const { updateTransformation } = useTransformations();
 
-  const { firstStep, currentStep, nextStep, prevStep } =
+  const { firstStep, currentStep, nextStep, backLink } =
     useTransformationFormNavigation();
 
   useEffect(() => {
@@ -80,7 +80,7 @@ export const useTransformationFormHandling = () => {
 
   return {
     nextStep,
-    prevStep,
+    backLink,
     handleValidation,
     handleSave,
   };

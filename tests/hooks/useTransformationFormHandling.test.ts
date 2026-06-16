@@ -312,7 +312,7 @@ describe("useTransformationFormHandling", () => {
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
-  it("should expose nextStep and prevStep based on the current position", () => {
+  it("devrait exposer nextStep et un backLink « étape précédente » selon la position courante", () => {
     // GIVEN — currentStep is "places-et-hebergement" (middle of 3 steps)
     mockUseParams.mockReturnValue({
       transformationStructureType: StructureVersionTransformationType.CREATION,
@@ -328,15 +328,16 @@ describe("useTransformationFormHandling", () => {
     const { result } = renderHook(() => useTransformationFormHandling());
 
     // THEN
-    expect(result.current.prevStep?.route).toBe(
-      "/structures/transformation/12/creation/7/description"
-    );
+    expect(result.current.backLink).toEqual({
+      href: "/structures/transformation/12/creation/7/description",
+      label: "Étape précédente",
+    });
     expect(result.current.nextStep?.route).toBe(
       "/structures/transformation/12/creation/7/actes-administratifs"
     );
   });
 
-  it("should resolve the verification step when on the /verification page", () => {
+  it("devrait résoudre l'étape de vérification quand on est sur la page /verification", () => {
     // GIVEN — URL params have no structure-step segments
     mockUseParams.mockReturnValue({});
     mockUsePathname.mockReturnValue(
@@ -346,10 +347,11 @@ describe("useTransformationFormHandling", () => {
     // WHEN
     const { result } = renderHook(() => useTransformationFormHandling());
 
-    // THEN — prevStep is the last form step, no nextStep
-    expect(result.current.prevStep?.route).toBe(
-      "/structures/transformation/12/creation/7/actes-administratifs"
-    );
+    // THEN — backLink points to the last form step, no nextStep
+    expect(result.current.backLink).toEqual({
+      href: "/structures/transformation/12/creation/7/actes-administratifs",
+      label: "Étape précédente",
+    });
     expect(result.current.nextStep).toBeUndefined();
   });
 });

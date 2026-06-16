@@ -39,7 +39,8 @@ export const ExistingStructureIdentificationForm = ({
   structureVersionTransformation,
   formKind,
 }: Props) => {
-  const { handleValidation, handleSave } = useTransformationFormHandling();
+  const { handleValidation, handleSave, backLink } =
+    useTransformationFormHandling();
 
   const defaultValues =
     getTransformationDefaultValues<TransformationIdentificationFormValues>({
@@ -76,6 +77,7 @@ export const ExistingStructureIdentificationForm = ({
       }}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
+      backLink={backLink}
       showContactInfos={false}
     >
       <SaveCurrentForm

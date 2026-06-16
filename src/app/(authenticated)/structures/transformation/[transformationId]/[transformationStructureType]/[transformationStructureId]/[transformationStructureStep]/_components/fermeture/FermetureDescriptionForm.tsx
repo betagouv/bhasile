@@ -27,7 +27,7 @@ export const FermetureDescriptionForm = ({
   transformation,
   structureVersionTransformation,
 }: Props) => {
-  const { handleValidation, prevStep } = useTransformationFormHandling();
+  const { handleValidation, backLink } = useTransformationFormHandling();
 
   const categoryDisplayRules = fermetureActesAdministratifsCategoryToDisplay;
   const codeBhasile =
@@ -61,7 +61,7 @@ export const FermetureDescriptionForm = ({
       }}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
-      previousStep={prevStep?.route}
+      backLink={backLink}
       showContactInfos={false}
     >
       <EffectiveDateInput
