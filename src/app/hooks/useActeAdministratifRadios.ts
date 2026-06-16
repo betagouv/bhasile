@@ -17,7 +17,7 @@ export const useActeAdministratifRadios = ({
   additionalFieldsType,
   alternativeCategories,
   avenantAlternative,
-}: Props): UseActeAdministratifRadios => {
+}: UseActeAdministratifRadiosArgs): UseActeAdministratifRadios => {
   const { watch, setValue } = useFormContext();
 
   const actesAdministratifs: ActeAdministratifFormValues[] =
@@ -162,7 +162,7 @@ export const useActeAdministratifRadios = ({
   };
 };
 
-type Props = {
+type UseActeAdministratifRadiosArgs = {
   category: ActeAdministratifCategory;
   title: string;
   additionalFieldsType?: AdditionalFieldsType;

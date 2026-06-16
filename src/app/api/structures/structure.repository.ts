@@ -48,6 +48,7 @@ const getOrderedStructures = async ({
   column,
   direction,
   selection,
+  finalised,
   map,
 }: SearchProps): Promise<{ id: number }[]> => {
   const whereSql = buildStructuresWhereSql({
@@ -58,6 +59,7 @@ const getOrderedStructures = async ({
     departements,
     operateurs,
     selection,
+    finalised,
   });
   const orderSql = buildStructuresOrderSql(
     column ?? "departementAdministratif",
@@ -90,6 +92,7 @@ export const findBySearch = async ({
   direction,
   map,
   selection,
+  finalised,
 }: SearchProps): Promise<StructureDbList[] | StructureDbMap[]> => {
   const structuresIds = await getOrderedStructures({
     search,
@@ -103,6 +106,7 @@ export const findBySearch = async ({
     direction,
     map,
     selection,
+    finalised,
   });
   if (map) {
     return prisma.structure.findMany({
@@ -148,7 +152,11 @@ export const findBySearch = async ({
           },
         },
       },
-      operateur: true,
+      operateur: {
+        include: {
+          parent: true,
+        },
+      },
       structureMillesimes: {
         orderBy: {
           year: "desc",
@@ -385,7 +393,11 @@ export const findOne = async (id: number) => {
           year: "desc",
         },
       },
-      operateur: true,
+      operateur: {
+        include: {
+          parent: true,
+        },
+      },
       forms: {
         include: {
           formDefinition: true,

@@ -1,1 +1,1 @@
-postdeploy: yarn install --production --silent && yarn add --dev prisma tsx dotenv --no-save --silent && yarn delete-views && yarn prisma:deploy && yarn apply-views
+postdeploy: yarn delete-views && yarn prisma:deploy && yarn apply-views

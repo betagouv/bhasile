@@ -21,10 +21,10 @@ export const getOperateurDefaultValues = (
     directionGenerale: operateur?.directionGenerale,
     siret: operateur?.siret,
     siegeSocial: operateur?.siegeSocial,
-    vulnerabilites: operateur?.vulnerabilites || [],
     actesAdministratifs: getActesAdministratifsDefaultValues(
       operateur?.actesAdministratifs,
       operateurActesAdministratifsCategoryToDisplay
     ),
+    contacts: operateur?.contacts || [],
   };
 };

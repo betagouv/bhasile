@@ -5,9 +5,8 @@ import { useButtonsPanel } from "@/app/hooks/useButtonsPanel";
 
 export const StructureMenu = ({ structureId }: Props) => {
   const { isPanelOpen, setIsPanelOpen, panelRef } = useButtonsPanel();
-
   //TODO: remove this once transformation is ready
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NEXT_PUBLIC_SHOW_TRANSFORMATION !== "true") {
     return null;
   }
 

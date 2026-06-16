@@ -14,7 +14,7 @@ type AdresseTypologieApiRead = {
   logementSocial: number;
 };
 
-export const adresseTypologieApiSchema = z
+const adresseTypologieApiSchema = z
   .object({
     id: z.number().optional(),
     year: zSafeYear(),
@@ -39,6 +39,7 @@ export const adresseApiSchema = z.object({
   adresse: z.string().optional(),
   codePostal: z.string().optional(),
   commune: z.string().optional(),
+  adresseComplete: z.string().optional(),
   repartition: z.nativeEnum(Repartition).optional(),
   adresseTypologies: z.array(adresseTypologieApiSchema),
 });

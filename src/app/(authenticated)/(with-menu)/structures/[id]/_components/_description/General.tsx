@@ -58,7 +58,7 @@ export const General = (): ReactElement => {
       </div>
       <div className="flex gap-2 mb-3">
         <strong>Type de bâti</strong>
-        {structure.repartition}
+        {structure.typeBati}
       </div>
       <hr className="col-span-2" />
       <div className="flex gap-2 mb-3">

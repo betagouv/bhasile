@@ -54,9 +54,12 @@ vi.mock(
     TransformationAdresseAdministrative: () => null,
   })
 );
-vi.mock("@/app/components/forms/dnaAndFiness/DnaAndFiness", () => ({
-  DnaAndFiness: () => null,
-}));
+vi.mock(
+  "@/app/components/forms/dnaAndFiness/TransformationDnaAndFiness",
+  () => ({
+    TransformationDnaAndFiness: () => null,
+  })
+);
 vi.mock("@/app/components/forms/contacts/FieldSetContacts", () => ({
   FieldSetContacts: () => null,
 }));

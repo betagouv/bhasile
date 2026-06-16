@@ -6,6 +6,7 @@ import {
   getPlacesSource,
   getReferenceStructureVersionTransformation,
   getStructureVersionTransformationDepartement,
+  getTransformationDefaultValues,
   getTransformationDepartement,
   getTransformationFormNavigation,
   getTransformationNounAvecArticle,
@@ -502,7 +503,7 @@ describe("transformation util", () => {
   });
 
   describe("validateStructureVersionTransformationFormStep", () => {
-    const buildCreationForm = (): FormApiType => ({
+    const buildCreationForm = (validatedSlugs: string[] = []): FormApiType => ({
       id: 100,
       status: false,
       formDefinition: {
@@ -514,7 +515,9 @@ describe("transformation util", () => {
       formSteps: [
         {
           id: 1001,
-          status: StepStatus.NON_COMMENCE,
+          status: validatedSlugs.includes("01-identification")
+            ? StepStatus.VALIDE
+            : StepStatus.NON_COMMENCE,
           stepDefinition: {
             id: 201,
             slug: "01-identification",
@@ -523,7 +526,9 @@ describe("transformation util", () => {
         },
         {
           id: 1002,
-          status: StepStatus.NON_COMMENCE,
+          status: validatedSlugs.includes("02-places-hebergement")
+            ? StepStatus.VALIDE
+            : StepStatus.NON_COMMENCE,
           stepDefinition: {
             id: 202,
             slug: "02-places-hebergement",
@@ -532,7 +537,9 @@ describe("transformation util", () => {
         },
         {
           id: 1003,
-          status: StepStatus.NON_COMMENCE,
+          status: validatedSlugs.includes("03-actes-administratifs")
+            ? StepStatus.VALIDE
+            : StepStatus.NON_COMMENCE,
           stepDefinition: {
             id: 203,
             slug: "03-actes-administratifs",
@@ -597,7 +604,9 @@ describe("transformation util", () => {
       );
 
       expect(
-        result.formSteps.every((s) => s.status === StepStatus.NON_COMMENCE)
+        result.formSteps.every(
+          (formStep) => formStep.status === StepStatus.NON_COMMENCE
+        )
       ).toBe(true);
     });
 
@@ -611,8 +620,33 @@ describe("transformation util", () => {
       );
 
       expect(
-        result.formSteps.every((s) => s.status === StepStatus.NON_COMMENCE)
+        result.formSteps.every(
+          (formStep) => formStep.status === StepStatus.NON_COMMENCE
+        )
       ).toBe(true);
+    });
+
+    it("passe le statut du formulaire à true une fois la dernière étape restante validée", () => {
+      const form = validateStructureVersionTransformationFormStep(
+        buildCreationForm(["01-identification", "02-places-hebergement"]),
+        StructureVersionTransformationStep.ACTES_ADMINISTRATIFS
+      );
+
+      expect(
+        form.formSteps.every(
+          (formStep) => formStep.status === StepStatus.VALIDE
+        )
+      ).toBe(true);
+      expect(form.status).toBe(true);
+    });
+
+    it("garde le statut du formulaire à false tant qu'au moins une étape n'est pas validée", () => {
+      const form = validateStructureVersionTransformationFormStep(
+        buildCreationForm(["01-identification"]),
+        StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT
+      );
+
+      expect(form.status).toBe(false);
     });
   });
 
@@ -878,6 +912,89 @@ describe("transformation util", () => {
         lgbt: undefined,
         fvvTeh: undefined,
       });
+    });
+  });
+
+  describe("getTransformationDefaultValues", () => {
+    type DefaultValues = {
+      operateur?: { id: number; name: string };
+      isMultiAntenne?: boolean;
+      structureTypologies?: {
+        year: number;
+        placesAutorisees: number | null;
+        pmr: number | null;
+        lgbt: number | null;
+        fvvTeh: number | null;
+      }[];
+      actesAdministratifs?: { category: string }[];
+    };
+
+    const buildStructureVersionTransformation = (
+      type: StructureVersionTransformationType
+    ): StructureVersionTransformationApiRead => ({
+      id: 1,
+      type,
+      operateur: { id: 9, name: "Opérateur Test" },
+      structureVersion: {
+        isMultiAntenne: true,
+        antennes: [],
+        effectiveDate: "2025-08-25T12:00:00.000Z",
+        adresses: [],
+        structureTypologies: [
+          { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
+        ],
+      } as StructureVersionApiRead,
+    });
+
+    const getDefaultValuesFor = (
+      type: StructureVersionTransformationType
+    ): DefaultValues =>
+      getTransformationDefaultValues({
+        transformation: createTransformation(),
+        structureVersionTransformation: buildStructureVersionTransformation(type),
+      }) as DefaultValues;
+
+    it("passe operateur depuis la structureVersionTransformation", () => {
+      expect(
+        getDefaultValuesFor(StructureVersionTransformationType.EXTENSION)
+          .operateur
+      ).toEqual({ id: 9, name: "Opérateur Test" });
+    });
+
+    it("utilise isMultiAntenne porté par le spread (valeur serveur) sans le recalculer depuis antennes", () => {
+      // structureVersion.isMultiAntenne vaut true alors que antennes est vide :
+      // on doit obtenir true, ce qui prouve qu'on ne recalcule plus côté client.
+      expect(
+        getDefaultValuesFor(StructureVersionTransformationType.EXTENSION)
+          .isMultiAntenne
+      ).toBe(true);
+    });
+
+    it("résout structureTypologies pour l'année de l'effectiveDate", () => {
+      expect(
+        getDefaultValuesFor(StructureVersionTransformationType.EXTENSION)
+          .structureTypologies
+      ).toEqual([
+        { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
+      ]);
+    });
+
+    it("calcule les actesAdministratifs avec les règles de catégorie de la fermeture", () => {
+      const categories = getDefaultValuesFor(
+        StructureVersionTransformationType.FERMETURE
+      ).actesAdministratifs?.map((acteAdministratif) => acteAdministratif.category);
+
+      expect(categories).toEqual(["AUTRE"]);
+    });
+
+    it("calcule les actesAdministratifs avec les règles de catégorie de l'extension", () => {
+      const categories = getDefaultValuesFor(
+        StructureVersionTransformationType.EXTENSION
+      ).actesAdministratifs?.map((acteAdministratif) => acteAdministratif.category);
+
+      expect(categories?.slice().sort()).toEqual(
+        ["ARRETE_EXTENSION", "AUTRE", "CONVENTION"].sort()
+      );
     });
   });
 

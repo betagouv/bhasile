@@ -113,6 +113,13 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
+    prefill: [
+      {
+        from: StructureVersionTransformationType.CONTRACTION,
+        to: StructureVersionTransformationType.EXTENSION,
+        fields: ["contacts", "antennes", "adresses"],
+      },
+    ],
     primaryStructureVersionTransformationType:
       StructureVersionTransformationType.EXTENSION,
   },
@@ -133,6 +140,13 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         structureVersion: { structureId },
       },
     ],
+    prefill: [
+      {
+        from: StructureVersionTransformationType.FERMETURE,
+        to: StructureVersionTransformationType.EXTENSION,
+        fields: ["contacts", "antennes", "adresses"],
+      },
+    ],
     primaryStructureVersionTransformationType:
       StructureVersionTransformationType.EXTENSION,
   },
@@ -151,6 +165,13 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         type: StructureVersionTransformationType.CONTRACTION,
         structureVersion: { structureId },
+      },
+    ],
+    prefill: [
+      {
+        from: StructureVersionTransformationType.CONTRACTION,
+        to: StructureVersionTransformationType.EXTENSION,
+        fields: ["contacts", "antennes", "adresses"],
       },
     ],
     primaryStructureVersionTransformationType:
@@ -184,6 +205,13 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         {
           type: StructureVersionTransformationType.FERMETURE,
           structureVersion: { structureId },
+        },
+      ],
+      prefill: [
+        {
+          from: StructureVersionTransformationType.FERMETURE,
+          to: StructureVersionTransformationType.EXTENSION,
+          fields: ["contacts", "antennes", "adresses"],
         },
       ],
       primaryStructureVersionTransformationType:
@@ -222,6 +250,13 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       },
     ],
     buildAutoTransformations: () => [],
+    prefill: [
+      {
+        from: StructureVersionTransformationType.FERMETURE,
+        to: StructureVersionTransformationType.EXTENSION,
+        fields: ["contacts", "antennes", "adresses"],
+      },
+    ],
   },
   [TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR]: {
     title: "Transformer HUDA en CADA",
@@ -238,6 +273,13 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         type: StructureVersionTransformationType.CREATION,
         structureVersion: { type: StructureType.CADA },
+      },
+    ],
+    prefill: [
+      {
+        from: StructureVersionTransformationType.FERMETURE,
+        to: StructureVersionTransformationType.CREATION,
+        fields: ["contacts", "antennes", "adresses"],
       },
     ],
   },

@@ -183,4 +183,56 @@ describe("acte-administratif util", () => {
       new Date("2026-03-01T00:00:00.000Z"),
     ]);
   });
+
+  it("falls back to the expired acte when none is currently in range", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-15T00:00:00.000Z"));
+    const actesAdministratifs: ActeAdministratifStub[] = [
+      {
+        id: 31,
+        category: "CONVENTION",
+        startDate: new Date("2023-01-01T00:00:00.000Z"),
+        endDate: new Date("2024-12-31T00:00:00.000Z"),
+      },
+    ];
+
+    expect(
+      getDatesOfCurrentActeAdministratif(
+        actesAdministratifs as unknown as ActesAdministratifsInput,
+        "CONVENTION"
+      )
+    ).toEqual([
+      new Date("2023-01-01T00:00:00.000Z"),
+      new Date("2024-12-31T00:00:00.000Z"),
+    ]);
+  });
+
+  it("falls back to the most recent expired acte when several are expired", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-15T00:00:00.000Z"));
+    const actesAdministratifs: ActeAdministratifStub[] = [
+      {
+        id: 41,
+        category: "CONVENTION",
+        startDate: new Date("2021-01-01T00:00:00.000Z"),
+        endDate: new Date("2022-12-31T00:00:00.000Z"),
+      },
+      {
+        id: 42,
+        category: "CONVENTION",
+        startDate: new Date("2023-01-01T00:00:00.000Z"),
+        endDate: new Date("2024-12-31T00:00:00.000Z"),
+      },
+    ];
+
+    expect(
+      getDatesOfCurrentActeAdministratif(
+        actesAdministratifs as unknown as ActesAdministratifsInput,
+        "CONVENTION"
+      )
+    ).toEqual([
+      new Date("2023-01-01T00:00:00.000Z"),
+      new Date("2024-12-31T00:00:00.000Z"),
+    ]);
+  });
 });

@@ -3,6 +3,7 @@ import {
   PropsWithChildren,
   ReactElement,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -19,6 +20,7 @@ export const Table = ({
   enableBorders,
   hasErrors,
   stickFirstColumn,
+  defaultScrollRight,
 }: Props) => {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const scrollableAreaRef = useRef<HTMLDivElement>(null);
@@ -26,6 +28,17 @@ export const Table = ({
   renderCountRef.current += 1;
 
   const [scrollReachedEnd, setScrollReachedEnd] = useState(false);
+
+  useLayoutEffect(() => {
+    const container = scrollableAreaRef.current;
+    if (!container) {
+      return;
+    }
+
+    if (defaultScrollRight) {
+      container.scrollLeft = container.scrollWidth;
+    }
+  }, [defaultScrollRight]);
 
   useEffect(() => {
     const container = scrollableAreaRef.current;
@@ -59,7 +72,10 @@ export const Table = ({
     >
       <div
         ref={scrollableAreaRef}
-        className="w-full max-w-full min-w-0 overflow-x-auto"
+        className={cn(
+          "w-full max-w-full min-w-0 overflow-x-auto",
+          stickFirstColumn && "pb-3"
+        )}
         style={stickFirstColumn ? { contain: "inline-size" } : undefined}
       >
         <table
@@ -68,7 +84,7 @@ export const Table = ({
             "min-w-full",
             stickFirstColumn && [
               "[&_tr>*:first-child]:sticky [&_tr>*:first-child]:left-0 [&_tr>*:first-child]:bg-white [&_tr>*:first-child]:z-20",
-              "[&_tr>*:first-child]:before:content-[''] [&_tr>*:first-child]:before:absolute [&_tr>*:first-child]:before:right-[-6em] [&_tr>*:first-child]:before:top-0 [&_tr>*:first-child]:before:bottom-0 [&_tr>*:first-child]:before:w-[6em]",
+              "[&_tr>*:first-child]:before:content-[''] [&_tr>*:first-child]:before:pointer-events-none [&_tr>*:first-child]:before:absolute [&_tr>*:first-child]:before:right-[-6em] [&_tr>*:first-child]:before:top-0 [&_tr>*:first-child]:before:bottom-0 [&_tr>*:first-child]:before:w-[6em]",
               "[&_tr>*:first-child]:before:bg-linear-to-l [&_tr>*:first-child]:before:from-transparent [&_tr>*:first-child]:before:to-white",
               "[&_tr>*:first-child]:before:opacity-100 [&_tr>*:first-child]:before:transition-opacity [&_tr>*:first-child]:before:duration-30",
             ],
@@ -127,4 +143,5 @@ type Props = PropsWithChildren<{
   enableBorders?: boolean;
   hasErrors?: boolean;
   stickFirstColumn?: boolean;
+  defaultScrollRight?: boolean;
 }>;

@@ -28,6 +28,7 @@ const eslintConfig = [
       "simple-import-sort": simpleImportSort,
     },
     rules: {
+      "react-hooks/exhaustive-deps": "error",
       "no-restricted-imports": [
         "error",
         {

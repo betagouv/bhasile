@@ -9,6 +9,7 @@ import { LeaveModificationModal } from "@/app/components/forms/LeaveModification
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { FieldSetDescription } from "@/app/components/forms/operateur/FieldSetDescription";
 import { FieldSetDirectionGenerale } from "@/app/components/forms/operateur/FieldSetDirectionGenerale";
+import { FieldSetSiegeSocial } from "@/app/components/forms/operateur/FieldSetSiegeSocial";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useOperateurFormHandling } from "@/app/hooks/useOperateurFormHandling";
@@ -54,6 +55,8 @@ export default function OperateurModificationDescription() {
         <FieldSetDescription />
         <hr />
         <FieldSetDirectionGenerale />
+        <hr />
+        <FieldSetSiegeSocial />
         {saveState === FetchState.ERROR && (
           <SubmitError operateurId={operateur.id} backendError={backendError} />
         )}

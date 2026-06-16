@@ -7,6 +7,21 @@ import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 export type ActeDateTuple = [Date | null, Date | null];
 
+const getMostRecentByEndDate = <ActeWithEndDate extends { endDate: Date | null }>(
+  actes: ActeWithEndDate[]
+): ActeWithEndDate | undefined => {
+  let mostRecentActe: ActeWithEndDate | undefined;
+  for (const acte of actes) {
+    if (!acte.endDate) {
+      continue;
+    }
+    if (!mostRecentActe?.endDate || acte.endDate > mostRecentActe.endDate) {
+      mostRecentActe = acte;
+    }
+  }
+  return mostRecentActe;
+};
+
 export const getDatesOfCurrentActeAdministratif = (
   actesAdministratifs: ActeAdministratif[],
   type: ActeAdministratifCategory,
@@ -39,13 +54,13 @@ export const getDatesOfCurrentActeAdministratif = (
       };
     });
   const currentActeAdministratif = current
-    ? actesAdministratifsWithCorrectEndDate.find((acteAdministratif) =>
+    ? (actesAdministratifsWithCorrectEndDate.find((acteAdministratif) =>
         isCurrentlyInEffect(
           acteAdministratif.startDate,
           acteAdministratif.endDate,
           now
         )
-      )
+      ) ?? getMostRecentByEndDate(actesAdministratifsWithCorrectEndDate))
     : actesAdministratifsWithCorrectEndDate[0];
 
   if (!currentActeAdministratif) {

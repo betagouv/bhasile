@@ -1,4 +1,5 @@
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import { StructureVersionTransformationApiUpdateClient } from "@/schemas/api/transformation.schema";
 
@@ -10,15 +11,17 @@ import { useTransformations } from "./useTransformations";
 export const useTransformationFormHandling = () => {
   const router = useRouter();
 
-  const { setTransformation } = useTransformationContext();
+  const { transformation, setTransformation } = useTransformationContext();
   const { updateTransformation } = useTransformations();
 
   const { firstStep, currentStep, nextStep, prevStep } =
     useTransformationFormNavigation();
 
-  if (!currentStep) {
-    router.replace(firstStep.route);
-  }
+  useEffect(() => {
+    if (!currentStep) {
+      router.replace(firstStep.route);
+    }
+  }, [currentStep, firstStep.route, router]);
 
   const handleSave = async ({
     transformationId,
@@ -48,15 +51,21 @@ export const useTransformationFormHandling = () => {
       return;
     }
 
+    const currentStructureVersionTransformation =
+      transformation.structureVersionTransformations.find(
+        (structureVersionTransformationItem) =>
+          structureVersionTransformationItem.id === currentStep.id
+      );
+
     try {
       await handleSave({
         transformationId,
         structureVersionTransformation: {
           ...structureVersionTransformation,
           form:
-            structureVersionTransformation.form &&
+            currentStructureVersionTransformation?.form &&
             validateStructureVersionTransformationFormStep(
-              structureVersionTransformation.form,
+              currentStructureVersionTransformation.form,
               currentStep.name
             ),
         },

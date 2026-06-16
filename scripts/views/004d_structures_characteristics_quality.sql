@@ -1,7 +1,5 @@
 -- Objective: characteristics quality indicators per structure
 -- One row per structure, boolean columns for characteristics-related data quality issues
---
--- Issue: DNA code incoherent with departement
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_characteristics_quality" AS
 SELECT
   s."id" AS "id",

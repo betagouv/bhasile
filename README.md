@@ -78,6 +78,10 @@ Tout le processus de création et migration de la base de données est décrit d
 
 La procédure pour mettre à jour le référentiel OFII (et l’activité associée) tous les mois est décrite dans [ce document](docs/ofii_referential.md).
 
+## 🤖 Mise à jour de dépendances
+
+La procédure pour mettre à jour les dépendances (via dependabot) est décrite dans [ce document](docs/dependabot.md).
+
 ## 🏗️ Architecture
 
 Pour en savoir plus sur l'architecture du projet, allez sur [le document d'architecture](docs/architecture.md)
