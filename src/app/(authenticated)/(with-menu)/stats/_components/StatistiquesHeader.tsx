@@ -40,6 +40,11 @@ export const StatistiquesHeader = (): ReactElement | null => {
             section: "#types-places",
             isDisplayed: true,
           },
+          {
+            label: "Finance",
+            section: "#finance",
+            isDisplayed: true,
+          },
         ]}
       />
     </div>
