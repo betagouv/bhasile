@@ -3,7 +3,7 @@ import { StructureFinessFormValues } from "@/schemas/forms/base/finess.schema";
 import InputWithValidation from "../InputWithValidation";
 import { TransformationCodeSection } from "./TransformationCodeSection";
 
-const emptyFiness: StructureFinessFormValues = {
+const emptyStructureFiness: StructureFinessFormValues = {
   description: "",
   finess: {
     code: "",
@@ -14,7 +14,7 @@ export const TransformationFinessSection = () => {
   return (
     <TransformationCodeSection
       fieldArrayName="structureFinesses"
-      emptyItem={emptyFiness}
+      emptyItem={emptyStructureFiness}
       singleCodeLabel="Code FINESS"
       addButtonLabel="Ajouter un code FINESS"
       descriptionHint="ex : Toute la structure"

@@ -16,15 +16,13 @@ import {
 } from "../forms/form.repository";
 import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
-import {
-  currentVersionWhere,
-  StructureVersionDbDetails,
-} from "../structure-versions/structure-version.db.type";
+import { currentVersionWhere } from "../structure-versions/structure-version.db.type";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 import {
   buildCurrentVersionCteSql,
   buildStructuresOrderCteSql,
   STRUCTURES_ORDER_JOINS_SQL,
+  VERSIONED_FIELD_KEYS,
 } from "./structure.constants";
 import {
   StructureDbList,
@@ -238,32 +236,6 @@ export const findOne = async (id: number) => {
   });
   return structure;
 };
-
-export const VERSIONED_FIELD_KEYS = [
-  "type",
-  "public",
-  "adresseAdministrative",
-  "codePostalAdministratif",
-  "communeAdministrative",
-  "departementAdministratif",
-  "latitude",
-  "longitude",
-  "nom",
-  "creationDate",
-  "date303",
-  "lgbt",
-  "fvvTeh",
-  "notes",
-  "nomOfii",
-  "directionTerritoriale",
-  "contacts",
-  "adresses",
-  "antennes",
-  "structureFinesses",
-  "dnaStructures",
-  "structureTypologies",
-] as const satisfies readonly (keyof StructureAgentUpdateApiType &
-  keyof StructureVersionDbDetails)[];
 
 const hasVersionedFields = (structure: StructureAgentUpdateApiType): boolean =>
   VERSIONED_FIELD_KEYS.some((key) => structure[key] !== undefined);
