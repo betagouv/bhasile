@@ -29,6 +29,36 @@ describe("getTransformationActesAdministratifsCategoryToDisplay", () => {
     expect(rules.AUTRE?.isOptional).toBe(true);
   });
 
+  it("conserve l'alternative avenant de la convention pour une extension classique", () => {
+    const rules = getTransformationActesAdministratifsCategoryToDisplay(
+      StructureVersionTransformationType.EXTENSION,
+      undefined
+    );
+
+    expect(rules.CONVENTION?.avenantAlternative?.parentCategory).toBe(
+      "CONVENTION"
+    );
+    expect(rules.CONVENTION?.notice).toBeUndefined();
+  });
+
+  it("retire l'alternative avenant de la convention et ajoute une notice pour une transformation HUDA vers CADA existant", () => {
+    const rules = getTransformationActesAdministratifsCategoryToDisplay(
+      StructureVersionTransformationType.EXTENSION,
+      TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR
+    );
+
+    expect(rules.CONVENTION?.avenantAlternative).toBeUndefined();
+    expect(rules.CONVENTION?.notice).toBe(
+      "Une nouvelle convention doit être signée tel que publié par décret le 3 janvier 2026. Sa durée doit être équivalente au temps restant de la précédente convention."
+    );
+    expect(rules.ARRETE_EXTENSION?.avenantAlternative?.parentCategory).toBe(
+      "ARRETE_AUTORISATION"
+    );
+    expect(rules.ARRETE_EXTENSION?.notice).toBe(
+      "Pour rappel, les dates de l'arrêté d'autorisation n'ont pas vocation à changer pour cette transformation."
+    );
+  });
+
   it("renvoie les catégories de contraction (Convention, Arrêté actant la contraction à date unique, Autres)", () => {
     const rules = getTransformationActesAdministratifsCategoryToDisplay(
       StructureVersionTransformationType.CONTRACTION,
