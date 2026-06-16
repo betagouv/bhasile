@@ -9,7 +9,7 @@ export const TransformationFormController = <TSchema extends z.ZodTypeAny>({
   onSave,
 }: {
   schema: TSchema;
-  onSave: (data: z.infer<TSchema>, values: unknown) => Promise<void>;
+  onSave: (data: z.infer<TSchema>, values: z.infer<TSchema>) => Promise<void>;
 }) => {
   const { getValues, trigger } = useFormContext<z.infer<TSchema>>();
   const { registerSaver, shouldShowIncompleteSteps } =

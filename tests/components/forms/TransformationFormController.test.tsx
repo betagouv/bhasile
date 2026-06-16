@@ -17,6 +17,9 @@ vi.mock(
   })
 );
 
+// Le controller est générique sur le schéma : un schéma minimal suffit à tester sa
+// logique propre (enregistrer le saver, déclencher la validation). Les vrais schémas
+// de formulaire sont exercés par les tests d'intégration des forms.
 const draftSchema = z.object({ nom: z.string().optional() });
 const strictSchema = z.object({
   nom: z.string().min(1, "Le nom est requis"),
@@ -31,10 +34,14 @@ const FieldErrorProbe = ({ name }: { name: string }) => {
   );
 };
 
-// The form mirrors production: the FormWrapper resolver is the STRICT schema once
-// shouldShowIncompleteSteps is true (which is the only way errors must surface),
-// while the controller's draft schema only drives the saver.
-const Harness = ({ defaultValues }: { defaultValues: { nom: string } }) => {
+// Reproduit la production : le resolver du FormWrapper est le schéma STRICT dès que
+// shouldShowIncompleteSteps est true (seul cas où les erreurs doivent apparaître),
+// tandis que le schéma draft du controller ne pilote que le saver.
+const ControllerTestForm = ({
+  defaultValues,
+}: {
+  defaultValues: { nom: string };
+}) => {
   const methods = useForm({
     resolver: zodResolver(strictSchema),
     defaultValues,
@@ -60,27 +67,27 @@ describe("TransformationFormController", () => {
     vi.resetAllMocks();
   });
 
-  it("registers a saver on mount", () => {
-    render(<Harness defaultValues={{ nom: "" }} />);
+  it("enregistre un saver au montage", () => {
+    render(<ControllerTestForm defaultValues={{ nom: "" }} />);
 
     expect(mockRegisterSaver).toHaveBeenCalledWith(expect.any(Function));
   });
 
-  it("does not trigger validation while shouldShowIncompleteSteps is false", async () => {
-    render(<Harness defaultValues={{ nom: "" }} />);
+  it("ne déclenche pas la validation tant que shouldShowIncompleteSteps est false", async () => {
+    render(<ControllerTestForm defaultValues={{ nom: "" }} />);
 
     // give effects a chance to run
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.getByTestId("error-nom")).toHaveTextContent("");
   });
 
-  it("triggers validation on mount when shouldShowIncompleteSteps is true, surfacing the strict errors", async () => {
+  it("déclenche la validation au montage quand shouldShowIncompleteSteps est true, faisant apparaître les erreurs strictes", async () => {
     mockUseOptionalTransformationContext.mockReturnValue({
       registerSaver: mockRegisterSaver,
       shouldShowIncompleteSteps: true,
     });
 
-    render(<Harness defaultValues={{ nom: "" }} />);
+    render(<ControllerTestForm defaultValues={{ nom: "" }} />);
 
     await waitFor(() =>
       expect(screen.getByTestId("error-nom")).toHaveTextContent(
@@ -89,13 +96,13 @@ describe("TransformationFormController", () => {
     );
   });
 
-  it("surfaces no error when the form already satisfies the strict schema", async () => {
+  it("n'affiche aucune erreur quand le formulaire satisfait déjà le schéma strict", async () => {
     mockUseOptionalTransformationContext.mockReturnValue({
       registerSaver: mockRegisterSaver,
       shouldShowIncompleteSteps: true,
     });
 
-    render(<Harness defaultValues={{ nom: "Les Coquelicots" }} />);
+    render(<ControllerTestForm defaultValues={{ nom: "Les Coquelicots" }} />);
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.getByTestId("error-nom")).toHaveTextContent("");

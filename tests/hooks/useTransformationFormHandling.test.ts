@@ -48,7 +48,9 @@ vi.mock("@/app/hooks/useTransformations", () => ({
 
 const setTransformation = vi.fn();
 
-// The strict schema passes for { nom: "Les Coquelicots" } and fails otherwise
+// Le hook reçoit le schéma strict en paramètre : un schéma minimal suffit à tester
+// son branchement (VALIDE / COMMENCE). Il passe pour { nom: "Les Coquelicots" } et
+// échoue sinon. Les vrais schémas sont exercés par les tests d'intégration des forms.
 const strictSchema = z.object({ nom: z.string().min(1) });
 
 const buildCreationForm = (validatedSlugs: string[] = []) => ({
@@ -157,7 +159,7 @@ describe("useTransformationFormHandling", () => {
   });
 
   describe("handleSave", () => {
-    it("reuses the read form and marks the current step VALIDE when the strict schema passes", async () => {
+    it("réutilise le formulaire lu et passe l'étape courante à VALIDE quand le schéma strict passe", async () => {
       // GIVEN — currentStep is "description" and the values satisfy the strict schema
       mockUpdateTransformation.mockResolvedValue(12);
 
@@ -183,7 +185,7 @@ describe("useTransformationFormHandling", () => {
       );
     });
 
-    it("marks the current step COMMENCE when the strict schema fails", async () => {
+    it("passe l'étape courante à COMMENCE quand le schéma strict échoue", async () => {
       // GIVEN — values that do not satisfy the strict schema
       mockUpdateTransformation.mockResolvedValue(12);
 
@@ -203,7 +205,7 @@ describe("useTransformationFormHandling", () => {
       expect(savedForm.status).toBe(false);
     });
 
-    it("derives the child form status to true once the last step is validated", async () => {
+    it("passe le statut du formulaire enfant à true une fois la dernière étape validée", async () => {
       // GIVEN — the two first steps of the child form are already VALIDE
       mockUseTransformationContext.mockReturnValue({
         transformation: buildTransformation(
@@ -253,7 +255,7 @@ describe("useTransformationFormHandling", () => {
   });
 
   describe("goToNextStep", () => {
-    it("saves the current form and pushes to nextStep.route on success", async () => {
+    it("sauvegarde le formulaire courant et navigue vers nextStep.route en cas de succès", async () => {
       // GIVEN — the shared saver succeeds
       mockSaveCurrentForm.mockResolvedValue(true);
 
@@ -269,7 +271,7 @@ describe("useTransformationFormHandling", () => {
       );
     });
 
-    it("pushes to /verification after submitting the last form step", async () => {
+    it("navigue vers /verification après la soumission de la dernière étape du formulaire", async () => {
       // GIVEN — currentStep is the last form step (actes-administratifs)
       mockUseParams.mockReturnValue({
         transformationStructureType: StructureVersionTransformationType.CREATION,
@@ -292,7 +294,7 @@ describe("useTransformationFormHandling", () => {
       );
     });
 
-    it("does not navigate when the shared saver fails (invalid draft / save error)", async () => {
+    it("ne navigue pas quand le saver partagé échoue (draft invalide / erreur de sauvegarde)", async () => {
       // GIVEN — the saver could not persist
       mockSaveCurrentForm.mockResolvedValue(false);
 
@@ -305,7 +307,7 @@ describe("useTransformationFormHandling", () => {
       expect(mockRouterPush).not.toHaveBeenCalled();
     });
 
-    it("logs the error and does not navigate when the saver rejects", async () => {
+    it("logue l'erreur et ne navigue pas quand le saver rejette", async () => {
       // GIVEN
       const error = new Error("boom");
       mockSaveCurrentForm.mockRejectedValue(error);
@@ -324,7 +326,7 @@ describe("useTransformationFormHandling", () => {
       consoleErrorSpy.mockRestore();
     });
 
-    it("is a no-op (no save, no navigation) when currentStep is not resolved", async () => {
+    it("ne fait rien (pas de sauvegarde, pas de navigation) quand currentStep n'est pas résolu", async () => {
       // GIVEN — invalid step in URL → currentStep is undefined
       mockUseParams.mockReturnValue({
         transformationStructureType: StructureVersionTransformationType.CREATION,

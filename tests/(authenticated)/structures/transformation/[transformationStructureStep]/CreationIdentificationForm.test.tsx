@@ -99,7 +99,7 @@ const renderForm = () => {
 };
 
 describe("CreationIdentificationForm", () => {
-  it("should pass the structureVersion as defaultValues, including its id", () => {
+  it("passe le structureVersion (et son id) en defaultValues", () => {
     // GIVEN
     const structureVersionTransformation: StructureVersionTransformationApiRead = {
       id: 7,
@@ -135,7 +135,7 @@ describe("CreationIdentificationForm", () => {
     });
   });
 
-  it("should delegate the navigation to goToNextStep on submit", () => {
+  it("délègue la navigation à goToNextStep au submit", () => {
     // GIVEN
     renderForm();
 
@@ -146,7 +146,7 @@ describe("CreationIdentificationForm", () => {
     expect(mockGoToNextStep).toHaveBeenCalledTimes(1);
   });
 
-  it("should build the update payload and forward it to handleSave with the strict schema and raw values when saving", () => {
+  it("construit le payload de mise à jour et le transmet à handleSave avec le schéma strict et les valeurs brutes lors de l'enregistrement", () => {
     // GIVEN
     renderForm();
     const rawValues = {

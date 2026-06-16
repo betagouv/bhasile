@@ -78,14 +78,14 @@ const getSavedStructureVersionTransformation = () => {
   return payload.structureVersionTransformations[0];
 };
 
-describe("FermetureDescriptionForm (integration via FormWrapper)", () => {
+describe("FermetureDescriptionForm (intégration via FormWrapper)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUpdateTransformation.mockResolvedValue(12);
     localStorage.clear();
   });
 
-  it("saves the closure date as structureVersion.effectiveDate and drops the empty document row", async () => {
+  it("enregistre la date de fermeture dans structureVersion.effectiveDate et écarte la ligne de document vide", async () => {
     // GIVEN a fermeture with an existing structureVersion and no document filled
     const { container } = renderForm(
       fermetureTransformation({
@@ -116,7 +116,7 @@ describe("FermetureDescriptionForm (integration via FormWrapper)", () => {
     expect(structureVersionTransformation.actesAdministratifs).toEqual([]);
   });
 
-  it("still navigates to the next step when the closure date is missing", async () => {
+  it("navigue quand même vers l'étape suivante quand la date de fermeture est absente", async () => {
     // GIVEN a fermeture without a closure date
     renderForm(fermetureTransformation({ id: 12, structureId: 104 }));
 
@@ -132,7 +132,7 @@ describe("FermetureDescriptionForm (integration via FormWrapper)", () => {
     );
   });
 
-  it("forwards an existing document of the AUTRE category", async () => {
+  it("transmet un document existant de la catégorie AUTRE", async () => {
     // GIVEN a fermeture with a document already uploaded
     const { container } = renderForm(
       fermetureTransformation({ id: 12, structureId: 104 }, [

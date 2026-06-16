@@ -83,7 +83,7 @@ const getSavedActes = () => {
   return payload.structureVersionTransformations[0].actesAdministratifs;
 };
 
-describe("TransformationActesAdministratifsForm (integration via FormWrapper)", () => {
+describe("TransformationActesAdministratifsForm (intégration via FormWrapper)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUpdateTransformation.mockResolvedValue(12);
@@ -99,7 +99,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     localStorage.clear();
   });
 
-  it("saves the filled acts, dropping the empty Autres documents row", async () => {
+  it("enregistre les actes remplis, en écartant la ligne Autres documents vide", async () => {
     // GIVEN the three required acts are filled (file + dates), Autres documents left empty
     const transformation = transformationWithActes([
       filledActe(1, "ARRETE_AUTORISATION", "k-autorisation"),
@@ -122,7 +122,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     ).toEqual(["ARRETE_AUTORISATION", "ARRETE_TARIFICATION", "CONVENTION"]);
   });
 
-  it("still navigates to the next step when the required documents are missing", async () => {
+  it("navigue quand même vers l'étape suivante quand les documents requis sont absents", async () => {
     // GIVEN no acts provided -> the form seeds empty rows for each required category
     const transformation = transformationWithActes([]);
     renderForm(transformation);
@@ -139,7 +139,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     );
   });
 
-  it("renders the autorisation/fusion radio for non-ex-nihilo creations with autorisation preselected by default", async () => {
+  it("affiche le radio autorisation/fusion pour les créations non ex-nihilo, avec autorisation présélectionnée par défaut", async () => {
     const transformation = transformationWithActes(
       [],
       TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
@@ -157,7 +157,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     expect(fusionRadio).not.toBeChecked();
   });
 
-  it("saves the ARRETE_FUSION category when the user picks fusion and fills the other required docs", async () => {
+  it("enregistre la catégorie ARRETE_FUSION quand l'utilisateur choisit fusion et remplit les autres documents requis", async () => {
     const transformation = transformationWithActes(
       [
         filledActe(2, "CONVENTION", "k-convention"),
@@ -200,7 +200,7 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     expect(radioActe?.category).toBe("ARRETE_FUSION");
   });
 
-  it("pre-selects the radio on the persisted category when navigating back to the step", () => {
+  it("présélectionne le radio sur la catégorie enregistrée au retour sur l'étape", () => {
     const transformation = transformationWithActes(
       [filledActe(1, "ARRETE_FUSION", "k-fusion")],
       TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
