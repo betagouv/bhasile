@@ -138,38 +138,6 @@ const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
   }
 );
 
-const REQUIRED_TRANSFORMATION_CATEGORIES: ActeAdministratifCategory[] = [
-  "ARRETE_AUTORISATION",
-  "ARRETE_FUSION",
-  "ARRETE_TARIFICATION",
-  "CONVENTION",
-  "ARRETE_EXTENSION",
-  "ARRETE_CONTRACTION",
-];
-
-const acteAdministratifTransformationSchema = acteAdministratifSchema.refine(
-  (data) => {
-    const isNotAvenant = !data.parentId && !data.parentUuid;
-    if (!isNotAvenant) {
-      return true;
-    }
-    if (
-      !data.category ||
-      !REQUIRED_TRANSFORMATION_CATEGORIES.includes(data.category)
-    ) {
-      return true;
-    }
-    if (SINGLE_DATE_CATEGORIES.includes(data.category)) {
-      return !!data.fileUploads?.length && !!data.date;
-    }
-    return !!data.fileUploads?.length && !!data.startDate && !!data.endDate;
-  },
-  {
-    message: "Ces documents sont obligatoires.",
-    path: ["fileUploads"],
-  }
-);
-
 export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
   (data) => {
     const isNotAvenant = !data.parentId && !data.parentUuid;
@@ -220,8 +188,8 @@ export const actesAdministratifsSubventionneesSchema = z.object({
 
 export const actesAdministratifsTransformationSchema = z.object({
   actesAdministratifs: z.preprocess(
-    filterActesWithKey(REQUIRED_TRANSFORMATION_CATEGORIES),
-    z.array(acteAdministratifTransformationSchema).optional()
+    filterActesWithKey(),
+    z.array(acteAdministratifSchema).optional()
   ),
 });
 
@@ -257,4 +225,8 @@ export type ActesAdministratifsFormValues = z.infer<
 
 export type ActesAdministratifsAutoSaveFormValues = z.infer<
   typeof actesAdministratifsAutoSaveSchema
+>;
+
+export type ActesAdministratifsTransformationFormValues = z.infer<
+  typeof actesAdministratifsTransformationSchema
 >;

@@ -4,18 +4,35 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TransformationSteps } from "@/app/(authenticated)/structures/transformation/_components/TransformationSteps";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
-import { createTransformation } from "../../../../test-utils/factories/transformation.factory";
+import {
+  createTransformation,
+  createTransformationForm,
+} from "../../../../test-utils/factories/transformation.factory";
 
 const mockUsePathname = vi.fn<() => string>();
+const mockUseOptionalTransformationContext = vi.fn<
+  () => { shouldShowIncompleteSteps: boolean }
+>();
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockUsePathname(),
 }));
 
+vi.mock(
+  "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext",
+  () => ({
+    useOptionalTransformationContext: () =>
+      mockUseOptionalTransformationContext(),
+  })
+);
+
 describe("TransformationSteps", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUsePathname.mockReturnValue("/");
+    mockUseOptionalTransformationContext.mockReturnValue({
+      shouldShowIncompleteSteps: false,
+    });
   });
 
   it("should render nothing when there is no transformation", () => {
@@ -226,5 +243,82 @@ describe("TransformationSteps", () => {
       );
     }
   );
+
+  it("affiche une pastille rouge sur chaque étape non validée quand shouldShowIncompleteSteps est true", () => {
+    // GIVEN — flag set and an extension whose steps are all not validated (no form)
+    mockUseOptionalTransformationContext.mockReturnValue({
+      shouldShowIncompleteSteps: true,
+    });
+    const transformation = createTransformation({
+      structureVersionTransformations: [
+        {
+          id: 7,
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: {
+            structureId: 1002,
+            structure: { codeBhasile: "1002" },
+          },
+        },
+      ],
+    });
+
+    // WHEN
+    render(<TransformationSteps transformation={transformation} />);
+
+    // THEN — one pastille per substep
+    expect(screen.getAllByText("Étape non complétée")).toHaveLength(3);
+  });
+
+  it("n'affiche aucune pastille quand shouldShowIncompleteSteps est false", () => {
+    // GIVEN — flag unset (default)
+    const transformation = createTransformation({
+      structureVersionTransformations: [
+        {
+          id: 7,
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: {
+            structureId: 1002,
+            structure: { codeBhasile: "1002" },
+          },
+        },
+      ],
+    });
+
+    // WHEN
+    render(<TransformationSteps transformation={transformation} />);
+
+    // THEN
+    expect(screen.queryByText("Étape non complétée")).toBeNull();
+  });
+
+  it("n'affiche pas de pastille sur une étape validée même quand le flag est activé", () => {
+    // GIVEN — flag set and a form where only the description step is VALIDE
+    mockUseOptionalTransformationContext.mockReturnValue({
+      shouldShowIncompleteSteps: true,
+    });
+    const transformation = createTransformation({
+      structureVersionTransformations: [
+        {
+          id: 7,
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: {
+            structureId: 1002,
+            structure: { codeBhasile: "1002" },
+          },
+          form: createTransformationForm({ validatedSlugs: ["01-identification"] }),
+        },
+      ],
+    });
+
+    // WHEN
+    render(<TransformationSteps transformation={transformation} />);
+
+    // THEN — pastilles only on the two non-validated substeps
+    expect(screen.getAllByText("Étape non complétée")).toHaveLength(2);
+    const descriptionLink = screen.getByRole("link", { name: "Description" });
+    expect(
+      within(descriptionLink).queryByText("Étape non complétée")
+    ).toBeNull();
+  });
 });
 

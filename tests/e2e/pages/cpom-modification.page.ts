@@ -33,6 +33,15 @@ export class CpomModificationPage {
     await this.page.locator("select#departements").selectOption(numero);
   }
 
+  async fillDotationDemandee(
+    yearRowIndex: number,
+    value: number
+  ): Promise<void> {
+    await this.page
+      .locator(`input[id="budgets.${yearRowIndex}.dotationDemandee"]`)
+      .fill(String(value));
+  }
+
   async attachStructure(structureId: number): Promise<void> {
     const checkbox = this.page.locator(
       `input[name="structures"][value="${structureId}"]`

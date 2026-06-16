@@ -1,5 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import TransformationVerificationPage from "@/app/(authenticated)/structures/transformation/[transformationId]/verification/page";
@@ -7,15 +8,36 @@ import {
   StructureVersionTransformationApiRead,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
-import { StructureVersionTransformationType } from "@/types/transformation.type";
+import { FetchState } from "@/types/fetch-state.type";
+import {
+  StructureVersionTransformationType,
+  TransformationType,
+} from "@/types/transformation.type";
 
+const { mockModalOpen } = vi.hoisted(() => ({ mockModalOpen: vi.fn() }));
 const mockRouterPush = vi.fn();
 const mockUseTransformationContext = vi.fn();
 const mockUpdateTransformation = vi.fn();
 const mockGetFetchState = vi.fn();
+const setShouldShowIncompleteSteps = vi.fn();
+const mockSetTransformation = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
+}));
+
+vi.mock("@codegouvfr/react-dsfr/Modal", () => ({
+  createModal: () => ({
+    open: mockModalOpen,
+    close: vi.fn(),
+    Component: ({ children }: { children: ReactNode }) => (
+      <div data-testid="confirmation-modal">{children}</div>
+    ),
+  }),
+}));
+
+vi.mock("@codegouvfr/react-dsfr/Modal/useIsModalOpen", () => ({
+  useIsModalOpen: () => false,
 }));
 
 vi.mock(
@@ -89,142 +111,118 @@ const buildStructureVersionTransformation = (
 
 const buildTransformation = ({
   form,
+  type,
   structureVersionTransformations,
 }: {
   form?: ReturnType<typeof buildForm>;
+  type?: TransformationType;
   structureVersionTransformations: StructureVersionTransformationApiRead[];
 }): TransformationApiRead =>
   ({
     id: 42,
+    type,
     form,
     structureVersionTransformations,
   }) as TransformationApiRead;
 
-describe("TransformationVerificationPage", () => {
-  const mockSetTransformation = vi.fn();
+const mockContext = (
+  transformation: TransformationApiRead,
+  shouldShowIncompleteSteps = false
+) => {
+  mockUseTransformationContext.mockReturnValue({
+    transformation,
+    setTransformation: mockSetTransformation,
+    shouldShowIncompleteSteps,
+    setShouldShowIncompleteSteps,
+  });
+};
 
+const certifyButton = () =>
+  screen.getByRole("button", { name: /je confirme/i });
+
+describe("TransformationVerificationPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetFetchState.mockReturnValue(0); // FetchState.IDLE
+    mockGetFetchState.mockReturnValue(FetchState.IDLE);
   });
 
-  it("should disable the certify button when transformation.form is undefined", () => {
+  it("garde le bouton de certification cliquable même quand un formulaire enfant n'est pas validé", () => {
     // GIVEN
-    mockUseTransformationContext.mockReturnValue({
-      transformation: buildTransformation({
-        form: undefined,
-        structureVersionTransformations: [buildStructureVersionTransformation(true)],
-      }),
-      setTransformation: mockSetTransformation,
-    });
-
-    // WHEN
-    render(<TransformationVerificationPage />);
-
-    // THEN
-    expect(
-      screen.getByRole("button", { name: /je confirme/i })
-    ).toBeDisabled();
-  });
-
-  it("should disable the certify button when at least one child form is not validated", () => {
-    // GIVEN
-    mockUseTransformationContext.mockReturnValue({
-      transformation: buildTransformation({
+    mockContext(
+      buildTransformation({
         form: buildForm(false),
         structureVersionTransformations: [
           buildStructureVersionTransformation(true, 1),
           buildStructureVersionTransformation(false, 2),
         ],
-      }),
-      setTransformation: mockSetTransformation,
-    });
+      })
+    );
 
     // WHEN
     render(<TransformationVerificationPage />);
 
     // THEN
-    expect(
-      screen.getByRole("button", { name: /je confirme/i })
-    ).toBeDisabled();
+    expect(certifyButton()).toBeEnabled();
   });
 
-  it("should disable the certify button when a structureVersionTransformation has no forms at all", () => {
+  it("désactive le bouton de certification uniquement pendant une sauvegarde en cours", () => {
     // GIVEN
-    mockUseTransformationContext.mockReturnValue({
-      transformation: buildTransformation({
+    mockGetFetchState.mockReturnValue(FetchState.LOADING);
+    mockContext(
+      buildTransformation({
         form: buildForm(false),
-        structureVersionTransformations: [buildStructureVersionTransformation(undefined)],
-      }),
-      setTransformation: mockSetTransformation,
-    });
+        structureVersionTransformations: [
+          buildStructureVersionTransformation(true),
+        ],
+      })
+    );
 
     // WHEN
     render(<TransformationVerificationPage />);
 
     // THEN
-    expect(
-      screen.getByRole("button", { name: /je confirme/i })
-    ).toBeDisabled();
+    expect(certifyButton()).toBeDisabled();
   });
 
-  it("should disable the certify button while save is in flight", () => {
-    // GIVEN — fetchState LOADING (FetchState.LOADING = 1)
-    mockGetFetchState.mockReturnValue(1);
-    mockUseTransformationContext.mockReturnValue({
-      transformation: buildTransformation({
-        form: buildForm(false),
-        structureVersionTransformations: [buildStructureVersionTransformation(true)],
-      }),
-      setTransformation: mockSetTransformation,
-    });
-
-    // WHEN
-    render(<TransformationVerificationPage />);
-
-    // THEN
-    expect(
-      screen.getByRole("button", { name: /je confirme/i })
-    ).toBeDisabled();
-  });
-
-  it("should enable the certify button when all child forms are validated and no save is in flight", () => {
+  it("signale les étapes incomplètes et ne finalise pas quand un formulaire enfant n'est pas validé", async () => {
     // GIVEN
-    mockUseTransformationContext.mockReturnValue({
-      transformation: buildTransformation({
+    const user = userEvent.setup();
+    mockContext(
+      buildTransformation({
         form: buildForm(false),
         structureVersionTransformations: [
           buildStructureVersionTransformation(true, 1),
-          buildStructureVersionTransformation(true, 2),
+          buildStructureVersionTransformation(false, 2),
         ],
-      }),
-      setTransformation: mockSetTransformation,
-    });
+      })
+    );
 
     // WHEN
     render(<TransformationVerificationPage />);
+    await user.click(certifyButton());
 
     // THEN
-    expect(
-      screen.getByRole("button", { name: /je confirme/i })
-    ).toBeEnabled();
+    expect(setShouldShowIncompleteSteps).toHaveBeenCalledWith(true);
+    expect(mockUpdateTransformation).not.toHaveBeenCalled();
+    expect(mockModalOpen).not.toHaveBeenCalled();
   });
 
-  it("should PUT the transformation with form.status set to true and redirect to /structures on submit", async () => {
+  it("finalise la transformation et ouvre la modale quand tous les formulaires enfants sont validés", async () => {
     // GIVEN
     const user = userEvent.setup();
     mockUpdateTransformation.mockResolvedValue(42);
-    mockUseTransformationContext.mockReturnValue({
-      transformation: buildTransformation({
+    mockContext(
+      buildTransformation({
         form: buildForm(false),
-        structureVersionTransformations: [buildStructureVersionTransformation(true)],
-      }),
-      setTransformation: mockSetTransformation,
-    });
+        structureVersionTransformations: [
+          buildStructureVersionTransformation(true),
+        ],
+      })
+    );
 
     // WHEN
     render(<TransformationVerificationPage />);
-    await user.click(screen.getByRole("button", { name: /je confirme/i }));
+    await user.click(certifyButton());
 
     // THEN
     expect(mockUpdateTransformation).toHaveBeenCalledWith(
@@ -235,43 +233,127 @@ describe("TransformationVerificationPage", () => {
       },
       mockSetTransformation
     );
-    expect(mockRouterPush).toHaveBeenCalledWith("/structures");
+    await waitFor(() => expect(mockModalOpen).toHaveBeenCalled());
+    expect(setShouldShowIncompleteSteps).not.toHaveBeenCalled();
+    expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
-  it("should not redirect when updateTransformation rejects", async () => {
+  it("n'ouvre pas la modale quand updateTransformation échoue", async () => {
     // GIVEN
     const user = userEvent.setup();
     mockUpdateTransformation.mockRejectedValue(new Error("boom"));
     const consoleErrorSpy = vi
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    mockUseTransformationContext.mockReturnValue({
-      transformation: buildTransformation({
+    mockContext(
+      buildTransformation({
         form: buildForm(false),
-        structureVersionTransformations: [buildStructureVersionTransformation(true)],
-      }),
-      setTransformation: mockSetTransformation,
-    });
+        structureVersionTransformations: [
+          buildStructureVersionTransformation(true),
+        ],
+      })
+    );
 
     // WHEN
     render(<TransformationVerificationPage />);
-    await user.click(screen.getByRole("button", { name: /je confirme/i }));
+    await user.click(certifyButton());
 
     // THEN
-    expect(mockRouterPush).not.toHaveBeenCalled();
+    expect(mockModalOpen).not.toHaveBeenCalled();
     consoleErrorSpy.mockRestore();
   });
 
-  it("should render SubmitError when fetchState is ERROR", () => {
-    // GIVEN — FetchState.ERROR = 2
-    mockGetFetchState.mockReturnValue(2);
-    mockUseTransformationContext.mockReturnValue({
-      transformation: buildTransformation({
+  it("affiche le message d'incomplétude quand le flag est activé et qu'il reste des étapes", () => {
+    // GIVEN
+    mockContext(
+      buildTransformation({
         form: buildForm(false),
-        structureVersionTransformations: [buildStructureVersionTransformation(true)],
+        structureVersionTransformations: [
+          buildStructureVersionTransformation(false),
+        ],
       }),
-      setTransformation: mockSetTransformation,
-    });
+      true
+    );
+
+    // WHEN
+    render(<TransformationVerificationPage />);
+
+    // THEN
+    expect(
+      screen.getByText(/Certaines étapes ne sont pas encore complétées/)
+    ).toBeInTheDocument();
+  });
+
+  it("masque le message d'incomplétude quand toutes les étapes sont validées même si le flag est activé", () => {
+    // GIVEN
+    mockContext(
+      buildTransformation({
+        form: buildForm(false),
+        structureVersionTransformations: [
+          buildStructureVersionTransformation(true),
+        ],
+      }),
+      true
+    );
+
+    // WHEN
+    render(<TransformationVerificationPage />);
+
+    // THEN
+    expect(
+      screen.queryByText(/Certaines étapes ne sont pas encore complétées/)
+    ).toBeNull();
+  });
+
+  it("ajoute l'invitation à la remise en concurrence dans le corps de la modale pour une transformation HUDA de remise", () => {
+    // GIVEN
+    mockContext(
+      buildTransformation({
+        form: buildForm(false),
+        type: TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES,
+        structureVersionTransformations: [
+          buildStructureVersionTransformation(true),
+        ],
+      })
+    );
+
+    // WHEN
+    render(<TransformationVerificationPage />);
+
+    // THEN
+    expect(screen.getByText(/Créer une structure/)).toBeInTheDocument();
+  });
+
+  it("omet l'invitation à la remise en concurrence pour une transformation standard", () => {
+    // GIVEN
+    mockContext(
+      buildTransformation({
+        form: buildForm(false),
+        type: TransformationType.OUVERTURE_EX_NIHILO,
+        structureVersionTransformations: [
+          buildStructureVersionTransformation(true),
+        ],
+      })
+    );
+
+    // WHEN
+    render(<TransformationVerificationPage />);
+
+    // THEN
+    expect(screen.queryByText(/Créer une structure/)).toBeNull();
+  });
+
+  it("affiche SubmitError quand fetchState vaut ERROR", () => {
+    // GIVEN
+    mockGetFetchState.mockReturnValue(FetchState.ERROR);
+    mockContext(
+      buildTransformation({
+        form: buildForm(false),
+        structureVersionTransformations: [
+          buildStructureVersionTransformation(true),
+        ],
+      })
+    );
 
     // WHEN
     render(<TransformationVerificationPage />);
@@ -280,10 +362,10 @@ describe("TransformationVerificationPage", () => {
     expect(screen.getByTestId("submit-error")).toBeInTheDocument();
   });
 
-  it("should render one group per StructureVersionTransformationType, sorted FERMETURE → CONTRACTION → EXTENSION → CREATION", () => {
+  it("affiche un groupe par StructureVersionTransformationType, trié FERMETURE → CREATION", () => {
     // GIVEN
-    mockUseTransformationContext.mockReturnValue({
-      transformation: buildTransformation({
+    mockContext(
+      buildTransformation({
         form: buildForm(false),
         structureVersionTransformations: [
           buildStructureVersionTransformation(
@@ -302,9 +384,8 @@ describe("TransformationVerificationPage", () => {
             StructureVersionTransformationType.FERMETURE
           ),
         ],
-      }),
-      setTransformation: mockSetTransformation,
-    });
+      })
+    );
 
     // WHEN
     render(<TransformationVerificationPage />);

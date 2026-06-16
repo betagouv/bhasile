@@ -6,7 +6,10 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { SaveCurrentForm } from "@/app/components/forms/SaveCurrentForm";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
-import { getActesAdministratifsDefaultValues } from "@/app/utils/acteAdministratif.util";
+import {
+  getActesAdministratifsDefaultValues,
+  resolveAvenantParentIds,
+} from "@/app/utils/acteAdministratif.util";
 import { getTransformationActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
@@ -32,11 +35,19 @@ export const TransformationActesAdministratifsForm = ({
   const { handleValidation, handleSave, prevStep } =
     useTransformationFormHandling();
 
-  const categoryDisplayRules =
+  const effectiveDate =
+    structureVersionTransformation.structureVersion?.effectiveDate;
+  const referenceDate = effectiveDate ? new Date(effectiveDate) : new Date();
+
+  const categoryDisplayRules = resolveAvenantParentIds(
     getTransformationActesAdministratifsCategoryToDisplay(
       structureVersionTransformation.type,
       transformation.type
-    );
+    ),
+    structureVersionTransformation.structureVersion?.structure
+      ?.actesAdministratifs,
+    referenceDate
+  );
 
   const defaultValues = {
     actesAdministratifs: getActesAdministratifsDefaultValues(
@@ -50,7 +61,6 @@ export const TransformationActesAdministratifsForm = ({
   ): StructureVersionTransformationApiUpdateClient => ({
     id: structureVersionTransformation.id,
     type: structureVersionTransformation.type,
-    form: structureVersionTransformation.form,
     actesAdministratifs: (data.actesAdministratifs ??
       []) as ActeAdministratifApiType[],
   });
@@ -62,7 +72,8 @@ export const TransformationActesAdministratifsForm = ({
       onSubmit={(data) => {
         handleValidation({
           transformationId: transformation.id,
-          structureVersionTransformation: buildStructureVersionTransformation(data),
+          structureVersionTransformation:
+            buildStructureVersionTransformation(data),
         });
       }}
       submitButtonText="Étape suivante"
@@ -75,7 +86,8 @@ export const TransformationActesAdministratifsForm = ({
         onSave={(data) =>
           handleSave({
             transformationId: transformation.id,
-            structureVersionTransformation: buildStructureVersionTransformation(data),
+            structureVersionTransformation:
+              buildStructureVersionTransformation(data),
           })
         }
       />

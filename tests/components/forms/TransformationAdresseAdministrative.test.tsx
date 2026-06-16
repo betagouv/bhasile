@@ -31,6 +31,7 @@ const renderComponent = (
       <TransformationAdresseAdministrative
         formKind={FormKind.EXTENSION}
         originalAdresse={ADRESSE_SOURCE}
+        originalAntennes={[]}
       />
     </FormTestWrapper>
   );

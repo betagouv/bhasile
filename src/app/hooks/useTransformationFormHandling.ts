@@ -11,7 +11,7 @@ import { useTransformations } from "./useTransformations";
 export const useTransformationFormHandling = () => {
   const router = useRouter();
 
-  const { setTransformation } = useTransformationContext();
+  const { transformation, setTransformation } = useTransformationContext();
   const { updateTransformation } = useTransformations();
 
   const { firstStep, currentStep, nextStep, prevStep } =
@@ -51,15 +51,21 @@ export const useTransformationFormHandling = () => {
       return;
     }
 
+    const currentStructureVersionTransformation =
+      transformation.structureVersionTransformations.find(
+        (structureVersionTransformationItem) =>
+          structureVersionTransformationItem.id === currentStep.id
+      );
+
     try {
       await handleSave({
         transformationId,
         structureVersionTransformation: {
           ...structureVersionTransformation,
           form:
-            structureVersionTransformation.form &&
+            currentStructureVersionTransformation?.form &&
             validateStructureVersionTransformationFormStep(
-              structureVersionTransformation.form,
+              currentStructureVersionTransformation.form,
               currentStep.name
             ),
         },
