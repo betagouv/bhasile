@@ -8,7 +8,8 @@ export const buildCurrentVersionCteSql = (now: Date): Prisma.Sql => Prisma.sql`
     FROM public."StructureVersion" sv
     LEFT JOIN public."StructureVersionTransformation" svt ON svt.id = sv."structureVersionTransformationId"
     LEFT JOIN public."Form" f ON f."transformationId" = svt."transformationId"
-    WHERE sv."effectiveDate" <= ${now.toISOString()}::timestamptz AT TIME ZONE 'UTC'
+    WHERE sv."structureId" IS NOT NULL
+      AND sv."effectiveDate" <= ${now.toISOString()}::timestamptz AT TIME ZONE 'UTC'
       AND (sv."structureVersionTransformationId" IS NULL OR f."status" IS TRUE)
     ORDER BY sv."structureId", sv."effectiveDate" DESC, sv.id DESC
   )

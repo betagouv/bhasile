@@ -184,9 +184,6 @@ export type StructureDbMap = Prisma.StructureGetPayload<{
   select: typeof structureMapSelect;
 }>;
 
-// La version courante est résolue et hydratée uniquement dans findBySearch (qui
-// applique le where de validité). On compose ici le type pour exposer
-// structureVersions sans jamais matérialiser un include take:1 sans where.
 export type StructureDbList = Prisma.StructureGetPayload<{
   include: typeof structureListInclude & {
     structureVersions: { include: typeof structureListVersionInclude };
