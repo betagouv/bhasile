@@ -1,4 +1,5 @@
 import {
+  getTransformationActesAdministratifsCategoryToDisplay,
   STRUCTURE_VERSION_TRANSFORMATION_FORM_STEPS,
   STRUCTURE_VERSION_TRANSFORMATION_TYPE_ORDER,
   TRANSFORMATION_TYPE_SPECS,
@@ -12,6 +13,7 @@ import {
   StructureVersionTransformationApiUpdate,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
+import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 import { StepStatus } from "@/types/form.type";
 import { DeepPartial, FormKind } from "@/types/global";
 import {
@@ -21,6 +23,7 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
+import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
 import { transformApiAdressesToFormAdresses } from "./adresse.util";
 import { getYearFromDate } from "./date.util";
 import {
@@ -164,6 +167,29 @@ export const getTransformationSteps = (
   );
 };
 
+const getStructureVersionTransformationFormStepStatus = (
+  structureVersionTransformation: StructureVersionTransformationApiUpdate,
+  stepName: StructureVersionTransformationStep
+): StepStatus => {
+  const form = structureVersionTransformation.form;
+  if (!form) {
+    return StepStatus.NON_COMMENCE;
+  }
+  const formStepSpecs =
+    STRUCTURE_VERSION_TRANSFORMATION_FORM_STEPS[form.formDefinition.name] ?? [];
+  const stepSlug = formStepSpecs.find(
+    (formStepSpec) => formStepSpec.name === stepName
+  )?.slug;
+  if (!stepSlug) {
+    return StepStatus.NON_COMMENCE;
+  }
+  return (
+    form.formSteps.find(
+      (formStep) => formStep.stepDefinition.slug === stepSlug
+    )?.status ?? StepStatus.NON_COMMENCE
+  );
+};
+
 const getStepsByType = (
   structureVersionTransformation: StructureVersionTransformationApiUpdate,
   transformationId: number
@@ -172,54 +198,42 @@ const getStepsByType = (
     return [];
   }
 
+  const buildStep = (
+    name: StructureVersionTransformationStep,
+    label: string
+  ) => ({
+    name,
+    label,
+    route: getRoute(
+      name,
+      transformationId,
+      structureVersionTransformation.id,
+      structureVersionTransformation.type
+    ),
+    status: getStructureVersionTransformationFormStepStatus(
+      structureVersionTransformation,
+      name
+    ),
+  });
+
   switch (structureVersionTransformation.type) {
     case StructureVersionTransformationType.EXTENSION:
     case StructureVersionTransformationType.CONTRACTION:
     case StructureVersionTransformationType.CREATION:
       return [
-        {
-          name: StructureVersionTransformationStep.DESCRIPTION,
-          label: "Description",
-          route: getRoute(
-            StructureVersionTransformationStep.DESCRIPTION,
-            transformationId,
-            structureVersionTransformation.id,
-            structureVersionTransformation.type
-          ),
-        },
-        {
-          name: StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
-          label: "Places et hébergement",
-          route: getRoute(
-            StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
-            transformationId,
-            structureVersionTransformation.id,
-            structureVersionTransformation.type
-          ),
-        },
-        {
-          name: StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
-          label: "Actes administratifs",
-          route: getRoute(
-            StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
-            transformationId,
-            structureVersionTransformation.id,
-            structureVersionTransformation.type
-          ),
-        },
+        buildStep(StructureVersionTransformationStep.DESCRIPTION, "Description"),
+        buildStep(
+          StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
+          "Places et hébergement"
+        ),
+        buildStep(
+          StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
+          "Actes administratifs"
+        ),
       ];
     case StructureVersionTransformationType.FERMETURE:
       return [
-        {
-          name: StructureVersionTransformationStep.DESCRIPTION,
-          label: "Description",
-          route: getRoute(
-            StructureVersionTransformationStep.DESCRIPTION,
-            transformationId,
-            structureVersionTransformation.id,
-            structureVersionTransformation.type
-          ),
-        },
+        buildStep(StructureVersionTransformationStep.DESCRIPTION, "Description"),
       ];
   }
 };
@@ -257,7 +271,28 @@ export type Step = {
     name: string;
     label: string;
     route: string;
+    status: StepStatus;
   }[];
+};
+
+export const getTransformationOriginRoute = (
+  transformation: TransformationApiRead
+): string => {
+  const spec = transformation.type
+    ? TRANSFORMATION_TYPE_SPECS[transformation.type]
+    : undefined;
+  const primaryType = spec?.primaryStructureVersionTransformationType;
+  if (!primaryType) {
+    return "/structures";
+  }
+  const primaryStructureVersionTransformation =
+    transformation.structureVersionTransformations.find(
+      (structureVersionTransformation) =>
+        structureVersionTransformation.type === primaryType
+    );
+  const originStructureId =
+    primaryStructureVersionTransformation?.structureVersion?.structureId;
+  return originStructureId ? `/structures/${originStructureId}` : "/structures";
 };
 
 export type AdresseSource = {
@@ -282,6 +317,49 @@ export const getAdresseSource = (
     communeAdministrative: structure?.communeAdministrative ?? "",
     departementAdministratif: structure?.departementAdministratif ?? "",
   };
+};
+
+const getSourceStructureAntennes = (
+  structureVersionTransformation: StructureVersionTransformationApiRead
+): AntenneFormValues[] =>
+  (
+    structureVersionTransformation.structureVersion?.structure?.antennes ?? []
+  ).map((antenne) => ({
+    name: antenne.name ?? "",
+    adresseComplete: antenne.adresseComplete ?? "",
+    adresse: antenne.adresse ?? "",
+    codePostal: antenne.codePostal ?? "",
+    commune: antenne.commune ?? "",
+    departement: antenne.departement ?? "",
+  }));
+
+export const getInitialAntennes = (
+  transformation: TransformationApiRead,
+  structureVersionTransformation: StructureVersionTransformationApiRead
+): AntenneFormValues[] => {
+  const baseAntennes = getSourceStructureAntennes(
+    structureVersionTransformation
+  );
+
+  const transformationType = transformation.type;
+  if (!transformationType) {
+    return baseAntennes;
+  }
+
+  const rules = TRANSFORMATION_TYPE_SPECS[transformationType]?.prefill ?? [];
+  const applicableRules = rules.filter(
+    (rule) =>
+      rule.to === structureVersionTransformation.type &&
+      rule.fields.includes("antennes")
+  );
+
+  const prefilledAntennes = applicableRules.flatMap((rule) =>
+    transformation.structureVersionTransformations
+      .filter((candidate) => candidate.type === rule.from)
+      .flatMap(getSourceStructureAntennes)
+  );
+
+  return [...baseAntennes, ...prefilledAntennes];
 };
 
 const getEffectiveYear = (effectiveDate: string | null | undefined): number =>
@@ -322,13 +400,31 @@ export const buildTransformationTypologie = (
   };
 };
 
-export const getTransformationStructureVersionDefaultValues = <T>(
-  structureVersion?: StructureVersionApiRead
-): DeepPartial<T> =>
-  ({
+export const getTransformationDefaultValues = <T>({
+  transformation,
+  structureVersionTransformation,
+}: {
+  transformation: TransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
+}): DeepPartial<T> => {
+  const structureVersion = structureVersionTransformation.structureVersion;
+  const categoryDisplayRules =
+    getTransformationActesAdministratifsCategoryToDisplay(
+      structureVersionTransformation.type,
+      transformation.type
+    );
+
+  return {
     ...structureVersion,
     adresses: transformApiAdressesToFormAdresses(structureVersion?.adresses),
-  }) as DeepPartial<T>;
+    operateur: structureVersionTransformation.operateur,
+    structureTypologies: [buildTransformationTypologie(structureVersion)],
+    actesAdministratifs: getActesAdministratifsDefaultValues(
+      structureVersionTransformation.actesAdministratifs,
+      categoryDisplayRules
+    ),
+  } as DeepPartial<T>;
+};
 
 export const isCreation = (formKind: FormKind): boolean =>
   formKind === FormKind.OUVERTURE_EX_NIHILO ||
@@ -385,12 +481,19 @@ export const validateStructureVersionTransformationFormStep = (
     return form;
   }
 
+  const formSteps = form.formSteps.map((formStep) =>
+    formStep.stepDefinition.slug === stepSlugToValidate
+      ? { ...formStep, status: StepStatus.VALIDE }
+      : formStep
+  );
+
+  const allFormStepsValidated = formSteps.every(
+    (formStep) => formStep.status === StepStatus.VALIDE
+  );
+
   return {
     ...form,
-    formSteps: form.formSteps.map((formStep) =>
-      formStep.stepDefinition.slug === stepSlugToValidate
-        ? { ...formStep, status: StepStatus.VALIDE }
-        : formStep
-    ),
+    status: allFormStepsValidated,
+    formSteps,
   };
 };

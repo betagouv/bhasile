@@ -10,6 +10,7 @@ import {
 import { SessionUser } from "@/types/global";
 
 import { buildAdresseAdministrativeComplete } from "../adresses/adresse.util";
+import { getAntennesApiRead } from "../antennes/antenne.util";
 import {
   copyStructureVersion,
   dbStructureVersionToApiRead,
@@ -46,6 +47,9 @@ const dbTransformationToApiRead = (
                         buildAdresseAdministrativeComplete(
                           structureVersion.structure
                         ) || undefined,
+                      antennes: getAntennesApiRead(
+                        structureVersion.structure.antennes
+                      ),
                     }
                   : undefined,
               }

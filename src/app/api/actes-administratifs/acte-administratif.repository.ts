@@ -17,36 +17,108 @@ export const createOrUpdateActesAdministratifs = async (
     await deleteActesAdministratifs(tx, actesAdministratifs, entityId)
   );
 
-  const roots = actesAdministratifs.filter(
-    (acteAdministratif) =>
-      !acteAdministratif.parentId && !acteAdministratif.parentUuid
-  );
-  const children = actesAdministratifs.filter(
-    (acteAdministratif) =>
-      acteAdministratif.parentId || acteAdministratif.parentUuid
-  );
+  const { parents, avenants } =
+    partitionParentsAndAvenants(actesAdministratifs);
 
-  const uuidToId = new Map<string, number>();
+  const parentIdsByUuid = await createOrUpdateParents(tx, parents, entityId);
 
-  for (const acte of roots) {
-    const result = await createOrUpdateActeAdministratif(tx, acte, entityId);
-    if (acte.uuid) {
-      uuidToId.set(acte.uuid, result.id);
+  await createOrUpdateAvenants(
+    tx,
+    avenants,
+    entityId,
+    parentIdsByUuid,
+    deletedIds
+  );
+};
+
+const partitionParentsAndAvenants = (
+  actesAdministratifs: ActeAdministratifApiType[]
+): {
+  parents: ActeAdministratifApiType[];
+  avenants: ActeAdministratifApiType[];
+} => {
+  const parents: ActeAdministratifApiType[] = [];
+  const avenants: ActeAdministratifApiType[] = [];
+  for (const acteAdministratif of actesAdministratifs) {
+    if (acteAdministratif.parentId || acteAdministratif.parentUuid) {
+      avenants.push(acteAdministratif);
+    } else {
+      parents.push(acteAdministratif);
     }
   }
+  return { parents, avenants };
+};
 
-  for (const acte of children) {
-    const resolvedParentId =
-      acte.parentId ??
-      (acte.parentUuid ? uuidToId.get(acte.parentUuid) : undefined);
-    if (!resolvedParentId && acte.parentUuid) {
-      continue;
+const createOrUpdateParents = async (
+  tx: PrismaTransaction,
+  parents: ActeAdministratifApiType[],
+  entityId: EntityId
+): Promise<Map<string, number>> => {
+  const parentIdsByUuid = new Map<string, number>();
+  for (const parent of parents) {
+    const created = await createOrUpdateActeAdministratif(tx, parent, entityId);
+    if (parent.uuid) {
+      parentIdsByUuid.set(parent.uuid, created.id);
     }
-    if (resolvedParentId !== undefined && deletedIds.has(resolvedParentId)) {
-      continue;
-    }
-    await createOrUpdateActeAdministratif(tx, acte, entityId, resolvedParentId);
   }
+  return parentIdsByUuid;
+};
+
+const createOrUpdateAvenants = async (
+  tx: PrismaTransaction,
+  avenants: ActeAdministratifApiType[],
+  entityId: EntityId,
+  parentIdsByUuid: Map<string, number>,
+  deletedIds: Set<number>
+): Promise<void> => {
+  for (const avenant of avenants) {
+    const resolvedParentId = resolveParentId(avenant, parentIdsByUuid);
+    if (
+      hasUnresolvedParentUuid(avenant, resolvedParentId) ||
+      parentWasDeleted(resolvedParentId, deletedIds)
+    ) {
+      continue;
+    }
+    const parentId = (await parentNoLongerExists(tx, avenant))
+      ? undefined
+      : resolvedParentId;
+    await createOrUpdateActeAdministratif(tx, avenant, entityId, parentId);
+  }
+};
+
+const resolveParentId = (
+  avenant: ActeAdministratifApiType,
+  parentIdsByUuid: Map<string, number>
+): number | undefined =>
+  avenant.parentId ??
+  (avenant.parentUuid ? parentIdsByUuid.get(avenant.parentUuid) : undefined);
+
+const hasUnresolvedParentUuid = (
+  avenant: ActeAdministratifApiType,
+  parentId: number | undefined
+): boolean => !parentId && !!avenant.parentUuid;
+
+const parentWasDeleted = (
+  parentId: number | undefined,
+  deletedIds: Set<number>
+): boolean => parentId !== undefined && deletedIds.has(parentId);
+
+const parentNoLongerExists = async (
+  tx: PrismaTransaction,
+  avenant: ActeAdministratifApiType
+): Promise<boolean> =>
+  avenant.parentId !== undefined &&
+  !(await checkActeAdministratifExistence(tx, avenant.parentId));
+
+const checkActeAdministratifExistence = async (
+  tx: PrismaTransaction,
+  id: number
+): Promise<boolean> => {
+  const existing = await tx.acteAdministratif.findUnique({
+    where: { id },
+    select: { id: true },
+  });
+  return existing !== null;
 };
 
 const createOrUpdateActeAdministratif = async (
@@ -55,7 +127,7 @@ const createOrUpdateActeAdministratif = async (
   entityId: EntityId,
   parentId?: number
 ) => {
-  const realParentId = (parentId ?? acteAdministratif.parentId) || undefined;
+  const realParentId = parentId ?? null;
 
   const fileUploadKeys = (acteAdministratif.fileUploads ?? [])
     .map((fileUpload) => fileUpload?.key)
@@ -141,7 +213,10 @@ const deleteActesAdministratifs = async (
   } else if (entityId.operateurId !== undefined) {
     where = { operateurId: entityId.operateurId };
   } else if (entityId.structureVersionTransformationId !== undefined) {
-    where = { structureVersionTransformationId: entityId.structureVersionTransformationId };
+    where = {
+      structureVersionTransformationId:
+        entityId.structureVersionTransformationId,
+    };
   } else {
     return [];
   }

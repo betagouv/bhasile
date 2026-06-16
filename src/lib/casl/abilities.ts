@@ -1,8 +1,10 @@
 import { AbilityBuilder, PureAbility, subject } from "@casl/ability";
 import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
 
+import { getTransformationDepartement } from "@/app/utils/transformation.util";
 import { Cpom, Operateur, Structure, User } from "@/generated/prisma/client";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
+import { TransformationApiRead } from "@/schemas/api/transformation.schema";
 import { SessionUser } from "@/types/global";
 
 export type AppAbility = PureAbility<
@@ -81,3 +83,8 @@ export const canUpdateDepartement = (
     subject("Structure", { departementAdministratif } as Structure)
   );
 };
+
+export const canUpdateTransformation = (
+  user: SessionUser,
+  transformation: TransformationApiRead
+) => canUpdateDepartement(user, getTransformationDepartement(transformation));

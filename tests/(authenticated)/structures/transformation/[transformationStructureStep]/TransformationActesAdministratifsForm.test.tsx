@@ -8,7 +8,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TransformationActesAdministratifsForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/TransformationActesAdministratifsForm";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
-import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
+import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import {
+  ActeAdministratifCategory,
+  StructureParentActe,
+} from "@/types/acte-administratif.type";
 import {
   StructureVersionTransformationType,
   TransformationType,
@@ -57,13 +61,13 @@ const transformationWithActes = (
     ],
   });
 
-describe("TransformationActesAdministratifsForm (integration via FormWrapper)", () => {
+describe("TransformationActesAdministratifsForm (intégration via FormWrapper)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
   });
 
-  it("submits the filled acts to handleValidation, dropping the empty Autres documents row", async () => {
+  it("soumet à handleValidation les actes remplis, en écartant la ligne Autres documents vide", async () => {
     // GIVEN the three required acts are filled (file + dates), Autres documents left empty
     const transformation = transformationWithActes([
       filledActe(1, "ARRETE_AUTORISATION", "k-autorisation"),
@@ -72,7 +76,9 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     ]);
     render(
       <TransformationActesAdministratifsForm
-        structureVersionTransformation={transformation.structureVersionTransformations[0]}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
         transformation={transformation}
       />
     );
@@ -97,35 +103,41 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     ).toEqual(["ARRETE_AUTORISATION", "ARRETE_TARIFICATION", "CONVENTION"]);
   });
 
-  it("does not submit when the required documents are missing", async () => {
-    // GIVEN no acts provided -> the form seeds empty rows for each required category
+  it("soumet sans aucun acte, désormais tous optionnels pour les transformations", async () => {
+    // GIVEN no acts provided -> the form seeds empty rows for each category
     const transformation = transformationWithActes([]);
     render(
       <TransformationActesAdministratifsForm
-        structureVersionTransformation={transformation.structureVersionTransformations[0]}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
         transformation={transformation}
       />
     );
 
-    // WHEN
+    // WHEN submitting without filling anything
     await userEvent.click(
       screen.getByRole("button", { name: "Étape suivante" })
     );
-    // let the async zod validation settle
-    await new Promise((resolve) => setTimeout(resolve, 50));
 
-    // THEN validation blocks the submission
-    expect(mockHandleValidation).not.toHaveBeenCalled();
+    // THEN validation passes and forwards an empty actes payload (empty rows dropped)
+    await waitFor(() => expect(mockHandleValidation).toHaveBeenCalledTimes(1));
+    const payload = mockHandleValidation.mock.calls[0][0];
+    expect(
+      payload.structureVersionTransformation.actesAdministratifs
+    ).toHaveLength(0);
   });
 
-  it("renders the autorisation/fusion radio for non-ex-nihilo creations with autorisation preselected by default", async () => {
+  it("affiche le radio autorisation/fusion pour les créations non ex-nihilo, avec autorisation présélectionnée par défaut", async () => {
     const transformation = transformationWithActes(
       [],
       TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
     );
     render(
       <TransformationActesAdministratifsForm
-        structureVersionTransformation={transformation.structureVersionTransformations[0]}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
         transformation={transformation}
       />
     );
@@ -140,16 +152,14 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     expect(autorisationRadio).toBeChecked();
     expect(fusionRadio).not.toBeChecked();
 
-    // Submit without filling the docs -> blocked
+    // Submit without filling the docs -> now allowed (acts are optional)
     await userEvent.click(
       screen.getByRole("button", { name: "Étape suivante" })
     );
-    await new Promise((resolve) => setTimeout(resolve, 50));
-
-    expect(mockHandleValidation).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockHandleValidation).toHaveBeenCalledTimes(1));
   });
 
-  it("submits with category ARRETE_FUSION when the user picks fusion and fills the other required docs", async () => {
+  it("soumet avec la catégorie ARRETE_FUSION quand l'utilisateur choisit fusion et remplit les autres documents requis", async () => {
     const transformation = transformationWithActes(
       [
         filledActe(2, "CONVENTION", "k-convention"),
@@ -159,7 +169,9 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     );
     render(
       <TransformationActesAdministratifsForm
-        structureVersionTransformation={transformation.structureVersionTransformations[0]}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
         transformation={transformation}
       />
     );
@@ -192,19 +204,22 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     const actes = payload.structureVersionTransformation.actesAdministratifs;
     const radioActe = actes.find(
       (acte: { category: string }) =>
-        acte.category === "ARRETE_FUSION" || acte.category === "ARRETE_AUTORISATION"
+        acte.category === "ARRETE_FUSION" ||
+        acte.category === "ARRETE_AUTORISATION"
     );
     expect(radioActe?.category).toBe("ARRETE_FUSION");
   });
 
-  it("pre-selects the radio on the persisted category when navigating back to the step", () => {
+  it("présélectionne le radio sur la catégorie enregistrée au retour sur l'étape", () => {
     const transformation = transformationWithActes(
       [filledActe(1, "ARRETE_FUSION", "k-fusion")],
       TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
     );
     render(
       <TransformationActesAdministratifsForm
-        structureVersionTransformation={transformation.structureVersionTransformations[0]}
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
         transformation={transformation}
       />
     );
@@ -215,5 +230,193 @@ describe("TransformationActesAdministratifsForm (integration via FormWrapper)", 
     expect(
       screen.getByRole("radio", { name: "Arrêté d'autorisation" })
     ).not.toBeChecked();
+  });
+});
+
+type ReadStructureVersion =
+  TransformationApiRead["structureVersionTransformations"][number]["structureVersion"];
+
+const currentParentActe = (
+  id: number,
+  category: ActeAdministratifCategory
+): StructureParentActe => ({
+  id,
+  category,
+  startDate: "2020-01-01T12:00:00.000Z",
+  endDate: "2099-12-31T12:00:00.000Z",
+  children: [],
+});
+
+const extensionWithStructureActes = (
+  structureActes: StructureParentActe[],
+  savedActes: ActeAdministratifApiType[] = []
+) =>
+  createTransformation({
+    id: 12,
+    type: TransformationType.EXTENSION_EX_NIHILO,
+    structureVersionTransformations: [
+      createStructureVersionTransformation({
+        id: 7,
+        type: StructureVersionTransformationType.EXTENSION,
+        actesAdministratifs: savedActes,
+        structureVersion: {
+          structure: { actesAdministratifs: structureActes },
+        } as ReadStructureVersion,
+      }),
+    ],
+  });
+
+describe("TransformationActesAdministratifsForm — alternative avenant (extension)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+  });
+
+  it("affiche les radios autonome/avenant avec l'option autonome présélectionnée", () => {
+    const transformation = extensionWithStructureActes([
+      currentParentActe(99, "ARRETE_AUTORISATION"),
+      currentParentActe(88, "CONVENTION"),
+    ]);
+    render(
+      <TransformationActesAdministratifsForm
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
+        transformation={transformation}
+      />
+    );
+
+    expect(screen.getByRole("radio", { name: "Convention" })).toBeChecked();
+    // the avenant option shows the current parent acte's date range
+    expect(
+      screen.getByRole("radio", { name: "Avenant convention 2020 - 2099" })
+    ).not.toBeChecked();
+    expect(
+      screen.getByRole("radio", { name: "Arrêté d'extension" })
+    ).toBeChecked();
+    expect(
+      screen.getByRole("radio", {
+        name: "Avenant arrêté d'autorisation 2020 - 2099",
+      })
+    ).not.toBeChecked();
+
+    expect(
+      screen.getByText("Convention ou avenant convention")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Arrêté d'extension ou avenant arrêté d'autorisation")
+    ).toBeInTheDocument();
+  });
+
+  it("masque l'option avenant quand la structure n'a pas d'acte parent éligible", () => {
+    const transformation = extensionWithStructureActes([]);
+    render(
+      <TransformationActesAdministratifsForm
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
+        transformation={transformation}
+      />
+    );
+
+    expect(
+      screen.queryByRole("radio", { name: "Avenant arrêté d'autorisation" })
+    ).toBeNull();
+    expect(
+      screen.queryByRole("radio", { name: "Avenant convention" })
+    ).toBeNull();
+    // the standalone arrêté field is still rendered
+    expect(screen.getByLabelText("Date arrêté")).toBeInTheDocument();
+    // without an eligible parent, the legend stays the plain block title
+    expect(
+      screen.queryByText("Arrêté d'extension ou avenant arrêté d'autorisation")
+    ).toBeNull();
+    expect(
+      screen.getByText("Arrêté d'extension", { selector: "legend" })
+    ).toBeInTheDocument();
+  });
+
+  it("marque l'acte comme avenant de l'arrêté d'autorisation en cours de la structure à la soumission", async () => {
+    const transformation = extensionWithStructureActes([
+      // expired -> not the current acte
+      {
+        id: 50,
+        category: "ARRETE_AUTORISATION",
+        startDate: "2000-01-01T12:00:00.000Z",
+        endDate: "2005-01-01T12:00:00.000Z",
+        children: [],
+      },
+      currentParentActe(99, "ARRETE_AUTORISATION"),
+    ]);
+    render(
+      <TransformationActesAdministratifsForm
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
+        transformation={transformation}
+      />
+    );
+
+    // pick the avenant option for the arrêté block
+    await userEvent.click(
+      screen.getByRole("radio", {
+        name: "Avenant arrêté d'autorisation 2020 - 2099",
+      })
+    );
+
+    // fill its single date + file
+    await userEvent.type(screen.getByLabelText("Date arrêté"), "2024-03-15");
+    const arreteFileInput = document.querySelector(
+      'input[name="actesAdministratifs.1.fileUploads.0.key"]'
+    ) as HTMLInputElement;
+    await userEvent.type(arreteFileInput, "k-avenant");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
+    );
+
+    await waitFor(() => expect(mockHandleValidation).toHaveBeenCalledTimes(1));
+    const actes =
+      mockHandleValidation.mock.calls[0][0].structureVersionTransformation
+        .actesAdministratifs;
+    const avenant = actes.find(
+      (acte: { category: string }) => acte.category === "ARRETE_AUTORISATION"
+    );
+    expect(avenant).toBeDefined();
+    // id 99 is the arrêté d'autorisation in effect today; id 50 is expired
+    expect(avenant.parentId).toBe(99);
+  });
+
+  it("affiche tout de même un avenant enregistré comme un acte à date unique quand son parent de structure a disparu", () => {
+    // The structure's parent acte was deleted/changed, so no eligible parent resolves,
+    // but a previously-saved avenant must remain visible (not silently dropped).
+    const transformation = extensionWithStructureActes(
+      [],
+      [
+        {
+          id: 5,
+          category: "ARRETE_AUTORISATION",
+          parentId: 99,
+          date: "2024-03-15T12:00:00.000Z",
+          fileUploads: [{ id: 5, key: "k-orphan" }],
+        },
+      ]
+    );
+    render(
+      <TransformationActesAdministratifsForm
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
+        transformation={transformation}
+      />
+    );
+
+    // Rendered as an avenant: single "Date arrêté", never the start/end pair.
+    expect(screen.getByLabelText("Date arrêté")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Début arrêté")).toBeNull();
+    // The "create avenant" choice is hidden — there is no live parent to amend.
+    expect(
+      screen.queryByRole("radio", { name: "Avenant arrêté d'autorisation" })
+    ).toBeNull();
   });
 });
