@@ -1,17 +1,11 @@
+import {
+  getEffectiveEndDate,
+  isCurrentlyInEffect,
+} from "@/app/utils/date.util";
 import { ActeAdministratif } from "@/generated/prisma/client";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 export type ActeDateTuple = [Date | null, Date | null];
-
-const getMostFutureDate = (dates: (Date | null | undefined)[]): Date | null => {
-  const validDates = dates.filter((date): date is Date => !!date);
-  if (validDates.length === 0) {
-    return null;
-  }
-  return validDates.reduce((latestDate, currentDate) =>
-    currentDate > latestDate ? currentDate : latestDate
-  );
-};
 
 const getMostRecentByEndDate = <ActeWithEndDate extends { endDate: Date | null }>(
   actes: ActeWithEndDate[]
@@ -51,23 +45,22 @@ export const getDatesOfCurrentActeAdministratif = (
         (actesAdministratifs ?? []).filter(
           (acte) => acte.parentId === acteAdministratif.id
         ) ?? [];
-      const effectiveEndDate = getMostFutureDate(
-        children.map((child) => child.endDate)
-      );
       return {
         startDate: acteAdministratif.startDate,
-        endDate: effectiveEndDate ?? acteAdministratif.endDate,
+        endDate: getEffectiveEndDate(
+          acteAdministratif.endDate,
+          children.map((child) => child.endDate)
+        ),
       };
     });
   const currentActeAdministratif = current
-    ? (actesAdministratifsWithCorrectEndDate.find((acteAdministratif) => {
-        if (!acteAdministratif.startDate || !acteAdministratif.endDate) {
-          return false;
-        }
-        return (
-          acteAdministratif.startDate <= now && acteAdministratif.endDate >= now
-        );
-      }) ?? getMostRecentByEndDate(actesAdministratifsWithCorrectEndDate))
+    ? (actesAdministratifsWithCorrectEndDate.find((acteAdministratif) =>
+        isCurrentlyInEffect(
+          acteAdministratif.startDate,
+          acteAdministratif.endDate,
+          now
+        )
+      ) ?? getMostRecentByEndDate(actesAdministratifsWithCorrectEndDate))
     : actesAdministratifsWithCorrectEndDate[0];
 
   if (!currentActeAdministratif) {

@@ -14,3 +14,11 @@ export const ActeAdministratifCategory = [
 
 export type ActeAdministratifCategory =
   (typeof ActeAdministratifCategory)[number];
+
+export type StructureParentActe = {
+  id: number;
+  category: ActeAdministratifCategory | null;
+  startDate: string | null;
+  endDate: string | null;
+  children: { endDate: string | null }[];
+};
