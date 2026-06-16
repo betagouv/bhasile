@@ -52,6 +52,8 @@ SELECT
   COALESCE(fin."has_issue_resultat_net_eq_0", FALSE) AS "has_issue_resultat_net_eq_0",
   -- Finance (authorized): excedent but affectations breakdown missing (all NULL/0)
   COALESCE(fin."has_issue_authorized_affectations_breakdown_missing", FALSE) AS "has_issue_authorized_affectations_breakdown_missing",
+  -- Finance (authorized): affectations breakdown sum does not match affectationReservesFondsDedies
+  COALESCE(fin."has_issue_authorized_affectations_breakdown_mismatch", FALSE) AS "has_issue_authorized_affectations_breakdown_mismatch",
   -- Finance (authorized): repriseEtat + affectationReservesFondsDedies does not match résultat net
   COALESCE(fin."has_issue_authorized_reprise_plus_affectations_mismatch", FALSE) AS "has_issue_authorized_reprise_plus_affectations_mismatch",
   -- Finance (authorized): sign error on repriseEtat (equation holds only with flipped sign)
@@ -59,7 +61,7 @@ SELECT
   -- Finance (subsidized): resultat_net < 0 but excedentRecupere/excedentDeduit/fondsDedies are non-zero
   COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE) AS "has_issue_subsidized_deficit_nonzero_boxes",
   -- Finance (subsidized): resultat_net > 0 but repriseEtat is non-zero
-  COALESCE(fin."has_issue_subsidized_reprise_etat_nonzero", FALSE) AS "has_issue_subsidized_reprise_etat_nonzero",
+  COALESCE(fin."has_issue_subsidized_excedent_reprise_etat_nonzero", FALSE) AS "has_issue_subsidized_excedent_reprise_etat_nonzero",
   -- Finance (subsidized): excedentRecupere + excedentDeduit + fondsDedies does not match résultat net
   COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE) AS "has_issue_subsidized_excedent_rules",
   -- Documents
@@ -78,8 +80,10 @@ SELECT
     ) + (
       COALESCE(cal."has_issue_authorisation_dates_differ_from_actes_administratifs", FALSE)::int
     ) + (COALESCE(cal."has_issue_evaluation_not_done_in_time", FALSE)::int) + (COALESCE(cal."has_issue_subsidized_convention_gt_3y", FALSE)::int) + (COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE)::int) + (COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE)::int) + (COALESCE(ch."has_issue_dept_code", FALSE)::int) + (COALESCE(ch."has_issue_multi_dna", FALSE)::int) + (COALESCE(ch."has_issue_cpom_mono_structure", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_max_gt_threshold", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_min_lt_2", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_max_gt_tarif_cible", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_resultat_net_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_authorized_affectations_breakdown_missing", FALSE)::int) + (
+      COALESCE(fin."has_issue_authorized_affectations_breakdown_mismatch", FALSE)::int
+    ) + (
       COALESCE(fin."has_issue_authorized_reprise_plus_affectations_mismatch", FALSE)::int
-    ) + (COALESCE(fin."has_issue_authorized_reprise_wrong_sign", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_reprise_etat_nonzero", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE)::int) + (COALESCE(doc."has_issue_missing_convention_document", FALSE)::int) + (COALESCE(doc."has_issue_missing_autorisation_document", FALSE)::int) + (COALESCE(doc."has_issue_missing_cpom_document", FALSE)::int) + (COALESCE(act."has_issue_places_indisponibles_gt_3pct", FALSE)::int) + (COALESCE(act."has_issue_presences_indues_gt_7pct", FALSE)::int)
+    ) + (COALESCE(fin."has_issue_authorized_reprise_wrong_sign", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_deficit_nonzero_boxes", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_excedent_reprise_etat_nonzero", FALSE)::int) + (COALESCE(fin."has_issue_subsidized_excedent_rules", FALSE)::int) + (COALESCE(doc."has_issue_missing_convention_document", FALSE)::int) + (COALESCE(doc."has_issue_missing_autorisation_document", FALSE)::int) + (COALESCE(doc."has_issue_missing_cpom_document", FALSE)::int) + (COALESCE(act."has_issue_places_indisponibles_gt_3pct", FALSE)::int) + (COALESCE(act."has_issue_presences_indues_gt_7pct", FALSE)::int)
   ) AS "issues_count"
 FROM
 :"SCHEMA"."structures_core" sc

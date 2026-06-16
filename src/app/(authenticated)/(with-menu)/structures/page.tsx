@@ -100,7 +100,7 @@ export default function Structures(): ReactElement {
             Structures d’hébergement
           </h2>
         </SegmentedControl>
-        {process.env.NODE_ENV !== "production" && ( //TODO: remove this once transformation is ready
+        {process.env.NEXT_PUBLIC_SHOW_TRANSFORMATION === "true" && ( //TODO: remove this once transformation is ready
           <div className="flex items-center gap-4">
             <Link
               className="fr-btn fr-btn--secondary"

@@ -34,10 +34,11 @@ export const INDICATEURS_NON_CLASSIFIES = [
   "has_issue_cout_journalier_min_lt_15",
   "has_issue_resultat_net_eq_0",
   "has_issue_authorized_affectations_breakdown_missing",
+  "has_issue_authorized_affectations_breakdown_mismatch",
   "has_issue_authorized_reprise_plus_affectations_mismatch",
   "has_issue_authorized_reprise_wrong_sign",
   "has_issue_subsidized_deficit_nonzero_boxes",
-  "has_issue_subsidized_reprise_etat_nonzero",
+  "has_issue_subsidized_excedent_reprise_etat_nonzero",
   "has_issue_subsidized_excedent_rules",
 ] as const;
 

@@ -1,4 +1,5 @@
 import {
+  getTransformationActesAdministratifsCategoryToDisplay,
   STRUCTURE_VERSION_TRANSFORMATION_FORM_STEPS,
   STRUCTURE_VERSION_TRANSFORMATION_TYPE_ORDER,
   TRANSFORMATION_TYPE_SPECS,
@@ -22,6 +23,7 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
+import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
 import { transformApiAdressesToFormAdresses } from "./adresse.util";
 import { getYearFromDate } from "./date.util";
 import {
@@ -366,13 +368,31 @@ export const buildTransformationTypologie = (
   };
 };
 
-export const getTransformationStructureVersionDefaultValues = <T>(
-  structureVersion?: StructureVersionApiRead
-): DeepPartial<T> =>
-  ({
+export const getTransformationDefaultValues = <T>({
+  transformation,
+  structureVersionTransformation,
+}: {
+  transformation: TransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
+}): DeepPartial<T> => {
+  const structureVersion = structureVersionTransformation.structureVersion;
+  const categoryDisplayRules =
+    getTransformationActesAdministratifsCategoryToDisplay(
+      structureVersionTransformation.type,
+      transformation.type
+    );
+
+  return {
     ...structureVersion,
     adresses: transformApiAdressesToFormAdresses(structureVersion?.adresses),
-  }) as DeepPartial<T>;
+    operateur: structureVersionTransformation.operateur,
+    structureTypologies: [buildTransformationTypologie(structureVersion)],
+    actesAdministratifs: getActesAdministratifsDefaultValues(
+      structureVersionTransformation.actesAdministratifs,
+      categoryDisplayRules
+    ),
+  } as DeepPartial<T>;
+};
 
 export const isCreation = (formKind: FormKind): boolean =>
   formKind === FormKind.OUVERTURE_EX_NIHILO ||
@@ -429,12 +449,19 @@ export const validateStructureVersionTransformationFormStep = (
     return form;
   }
 
+  const formSteps = form.formSteps.map((formStep) =>
+    formStep.stepDefinition.slug === stepSlugToValidate
+      ? { ...formStep, status: StepStatus.VALIDE }
+      : formStep
+  );
+
+  const allFormStepsValidated = formSteps.every(
+    (formStep) => formStep.status === StepStatus.VALIDE
+  );
+
   return {
     ...form,
-    formSteps: form.formSteps.map((formStep) =>
-      formStep.stepDefinition.slug === stepSlugToValidate
-        ? { ...formStep, status: StepStatus.VALIDE }
-        : formStep
-    ),
+    status: allFormStepsValidated,
+    formSteps,
   };
 };

@@ -2,7 +2,7 @@
 
 import { TransformationAdresseAdministrative } from "@/app/components/forms/adresseAdministrativeAndAntenne/TransformationAdresseAdministrative";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
-import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
+import { TransformationDnaAndFiness } from "@/app/components/forms/dnaAndFiness/TransformationDnaAndFiness";
 import { EffectiveDateInput } from "@/app/components/forms/EffectiveDateInput";
 import FormWrapper, {
   FooterButtonType,
@@ -12,8 +12,8 @@ import { useTransformationFormHandling } from "@/app/hooks/useTransformationForm
 import {
   getAdresseSource,
   getInitialAntennes,
+  getTransformationDefaultValues,
   getTransformationNounAvecArticle,
-  getTransformationStructureVersionDefaultValues,
 } from "@/app/utils/transformation.util";
 import {
   StructureVersionTransformationApiRead,
@@ -41,13 +41,11 @@ export const ExistingStructureIdentificationForm = ({
 }: Props) => {
   const { handleValidation, handleSave } = useTransformationFormHandling();
 
-  const defaultValues = {
-    ...getTransformationStructureVersionDefaultValues<TransformationIdentificationFormValues>(
-      structureVersionTransformation.structureVersion
-    ),
-    isMultiAntenne:
-      (structureVersionTransformation.structureVersion?.antennes?.length ?? 0) > 0,
-  };
+  const defaultValues =
+    getTransformationDefaultValues<TransformationIdentificationFormValues>({
+      transformation,
+      structureVersionTransformation,
+    });
 
   const buildStructureVersionTransformation = (
     data: TransformationIdentificationDraftFormValues
@@ -56,7 +54,6 @@ export const ExistingStructureIdentificationForm = ({
     return {
       id: structureVersionTransformation.id,
       type: structureVersionTransformation.type,
-      form: structureVersionTransformation.form,
       structureVersion: {
         ...rest,
         dnaStructures: rest.dnaStructures?.filter(
@@ -108,8 +105,7 @@ export const ExistingStructureIdentificationForm = ({
 
       <hr />
 
-      <DnaAndFiness
-        formKind={formKind}
+      <TransformationDnaAndFiness
         entityId={{
           structureVersionId: structureVersionTransformation.structureVersion?.id,
         }}

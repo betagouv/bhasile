@@ -104,9 +104,8 @@ type Group = {
 const groupStructureVersionTransformationsByType = (
   structureVersionTransformations: StructureVersionTransformationApiRead[]
 ): Group[] => {
-  const sortedStructureVersionTransformations = sortStructureVersionTransformationsByType(
-    structureVersionTransformations
-  );
+  const sortedStructureVersionTransformations =
+    sortStructureVersionTransformationsByType(structureVersionTransformations);
   return sortedStructureVersionTransformations.reduce<Group[]>(
     (accumulator, structureVersionTransformation) => {
       const lastGroup = accumulator[accumulator.length - 1];

@@ -61,7 +61,6 @@ export const TransformationActesAdministratifsForm = ({
   ): StructureVersionTransformationApiUpdateClient => ({
     id: structureVersionTransformation.id,
     type: structureVersionTransformation.type,
-    form: structureVersionTransformation.form,
     actesAdministratifs: (data.actesAdministratifs ??
       []) as ActeAdministratifApiType[],
   });

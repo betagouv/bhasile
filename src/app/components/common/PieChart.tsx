@@ -40,6 +40,15 @@ export default function PieChart({
     } else if (data.series.length === 3) {
       css += `.${chartClass} .ct-series-b .ct-slice-pie { fill: ${colors[1]} !important; }
               .${chartClass} .ct-series-c .ct-slice-pie { fill: ${colors[2]} !important; }`;
+    } else if (data.series.length === 4) {
+      css += `.${chartClass} .ct-series-b .ct-slice-pie { fill: ${colors[1]} !important; }
+              .${chartClass} .ct-series-c .ct-slice-pie { fill: ${colors[2]} !important; }
+              .${chartClass} .ct-series-d .ct-slice-pie { fill: ${colors[3]} !important; }`;
+    } else if (data.series.length === 5) {
+      css += `.${chartClass} .ct-series-b .ct-slice-pie { fill: ${colors[1]} !important; }
+              .${chartClass} .ct-series-c .ct-slice-pie { fill: ${colors[2]} !important; }
+              .${chartClass} .ct-series-d .ct-slice-pie { fill: ${colors[3]} !important; }
+              .${chartClass} .ct-series-e .ct-slice-pie { fill: ${colors[4]} !important; }`;
     }
     return css;
   };

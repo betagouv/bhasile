@@ -226,3 +226,7 @@ export type ActesAdministratifsFormValues = z.infer<
 export type ActesAdministratifsAutoSaveFormValues = z.infer<
   typeof actesAdministratifsAutoSaveSchema
 >;
+
+export type ActesAdministratifsTransformationFormValues = z.infer<
+  typeof actesAdministratifsTransformationSchema
+>;
