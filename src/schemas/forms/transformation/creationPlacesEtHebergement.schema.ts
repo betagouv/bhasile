@@ -1,7 +1,14 @@
 import z from "zod";
 
-import { typeBatiAndAdressesSchema } from "@/schemas/forms/base/adresse.schema";
-import { structureTypologieWithoutEvolutionSchema } from "@/schemas/forms/base/structureTypologie.schema";
+import { blankStringsToUndefined } from "@/app/utils/zodCustomFields";
+import {
+  typeBatiAndAdressesAutoSaveSchema,
+  typeBatiAndAdressesSchema,
+} from "@/schemas/forms/base/adresse.schema";
+import {
+  structureTypologiesAutoSaveSchema,
+  structureTypologieWithoutEvolutionSchema,
+} from "@/schemas/forms/base/structureTypologie.schema";
 import { FormKind } from "@/types/global";
 import { PublicType } from "@/types/structure.type";
 
@@ -12,8 +19,19 @@ export const creationPlacesEtHebergementSchema = typeBatiAndAdressesSchema.and(
   })
 );
 
+export const creationPlacesEtHebergementDraftSchema = z.preprocess(
+  blankStringsToUndefined,
+  typeBatiAndAdressesAutoSaveSchema
+    .and(z.object({ public: z.nativeEnum(PublicType).optional() }))
+    .and(structureTypologiesAutoSaveSchema)
+);
+
 export type CreationPlacesEtHebergementFormValues = z.infer<
   typeof creationPlacesEtHebergementSchema
+>;
+
+export type CreationPlacesEtHebergementDraftFormValues = z.infer<
+  typeof creationPlacesEtHebergementDraftSchema
 >;
 
 const PLACES_AUTORISEES_PATH = ["structureTypologies", 0, "placesAutorisees"];

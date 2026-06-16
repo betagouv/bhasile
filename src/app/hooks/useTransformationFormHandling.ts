@@ -1,17 +1,24 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { z } from "zod";
 
 import { StructureVersionTransformationApiUpdateClient } from "@/schemas/api/transformation.schema";
+import { StepStatus } from "@/types/form.type";
 
 import { useTransformationContext } from "../(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
-import { validateStructureVersionTransformationFormStep } from "../utils/transformation.util";
+import { setStructureVersionTransformationFormStepStatus } from "../utils/transformation.util";
 import { useTransformationFormNavigation } from "./useTransformationFormNavigation";
 import { useTransformations } from "./useTransformations";
 
 export const useTransformationFormHandling = () => {
   const router = useRouter();
 
-  const { transformation, setTransformation } = useTransformationContext();
+  const {
+    transformation,
+    setTransformation,
+    saveCurrentForm,
+    shouldShowIncompleteSteps,
+  } = useTransformationContext();
   const { updateTransformation } = useTransformations();
 
   const { firstStep, currentStep, nextStep, prevStep } =
@@ -26,51 +33,54 @@ export const useTransformationFormHandling = () => {
   const handleSave = async ({
     transformationId,
     structureVersionTransformation,
+    strictSchema,
+    values,
   }: {
     transformationId: number;
     structureVersionTransformation: StructureVersionTransformationApiUpdateClient;
+    strictSchema: z.ZodTypeAny;
+    values: unknown;
   }) => {
+    const currentStructureVersionTransformation =
+      transformation.structureVersionTransformations.find(
+        (structureVersionTransformationItem) =>
+          structureVersionTransformationItem.id === currentStep?.id
+      );
+
+    const stepStatus = strictSchema.safeParse(values).success
+      ? StepStatus.VALIDE
+      : StepStatus.COMMENCE;
+
     await updateTransformation(
       transformationId,
       {
         id: transformationId,
-        structureVersionTransformations: [structureVersionTransformation],
+        structureVersionTransformations: [
+          {
+            ...structureVersionTransformation,
+            form:
+              currentStructureVersionTransformation?.form && currentStep
+                ? setStructureVersionTransformationFormStepStatus(
+                    currentStructureVersionTransformation.form,
+                    currentStep.name,
+                    stepStatus
+                  )
+                : structureVersionTransformation.form,
+          },
+        ],
       },
       setTransformation
     );
   };
 
-  const handleValidation = async ({
-    transformationId,
-    structureVersionTransformation,
-  }: {
-    transformationId: number;
-    structureVersionTransformation: StructureVersionTransformationApiUpdateClient;
-  }) => {
+  const goToNextStep = async () => {
     if (!currentStep) {
       return;
     }
 
-    const currentStructureVersionTransformation =
-      transformation.structureVersionTransformations.find(
-        (structureVersionTransformationItem) =>
-          structureVersionTransformationItem.id === currentStep.id
-      );
-
     try {
-      await handleSave({
-        transformationId,
-        structureVersionTransformation: {
-          ...structureVersionTransformation,
-          form:
-            currentStructureVersionTransformation?.form &&
-            validateStructureVersionTransformationFormStep(
-              currentStructureVersionTransformation.form,
-              currentStep.name
-            ),
-        },
-      });
-      if (nextStep) {
+      const saved = await saveCurrentForm();
+      if (saved && nextStep) {
         router.push(nextStep.route);
       }
     } catch (error) {
@@ -81,7 +91,8 @@ export const useTransformationFormHandling = () => {
   return {
     nextStep,
     prevStep,
-    handleValidation,
+    goToNextStep,
     handleSave,
+    shouldShowIncompleteSteps,
   };
 };
