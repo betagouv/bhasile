@@ -11,7 +11,6 @@ export const TypesPlacesStatsTable = (): ReactElement => {
   const topLevelStats: StructureStat[] = statistiques.typesPlaces
     .slice(0, 2)
     .map((typePlace) => ({
-      id: `typePlace-${typePlace.label}`,
       label: typePlace.label,
       value: typePlace.byYear.map((yearItem) => yearItem.nbPlaces).reverse(),
     }));
@@ -71,7 +70,7 @@ export const TypesPlacesStatsTable = (): ReactElement => {
             <tr>
               <td
                 className="text-left! text-xs! font-bold uppercase bg-default-grey-hover!"
-                colSpan={statistiques.typesPlaces[0].byYear.length + 1}
+                colSpan={statistiques.typesPlaces?.[0]?.byYear.length + 1}
               >
                 <span className="sticky left-4 inline-block">
                   {section.title}
@@ -125,7 +124,6 @@ const getHeadings = (statistiques: StatistiquesApiType) => {
 };
 
 type StructureStat = {
-  id: string;
   label: string;
   value?: (string | number | null)[];
 };
