@@ -1,3 +1,8 @@
+import {
+  getNextBhasileCode,
+  getNormalizedRegionCodeFromDepartement,
+} from "@/app/utils/bhasile.util";
+import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
   StructureVersionTransformationApiUpdate,
@@ -5,6 +10,7 @@ import {
   TransformationApiUpdate,
 } from "@/schemas/api/transformation.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
+import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import {
@@ -60,6 +66,26 @@ export const updateOne = async (
   input: TransformationApiUpdate
 ): Promise<number> => {
   return await prisma.$transaction(async (tx) => {
+    const existingTransformation = await tx.transformation.findUniqueOrThrow({
+      where: { id: input.id },
+      select: { form: { select: { status: true } } },
+    });
+
+    if (existingTransformation.form?.status === true) {
+      throw new Error("Impossible de modifier une transformation finalisée");
+    }
+
+    const isFinalizing = input.form?.status === true;
+    if (isFinalizing) {
+      const finalized = await tx.form.updateMany({
+        where: { transformationId: input.id, status: false },
+        data: { status: true },
+      });
+      if (finalized.count === 0) {
+        throw new Error("Impossible de modifier une transformation finalisée");
+      }
+    }
+
     if (input.type !== undefined) {
       await tx.transformation.update({
         where: { id: input.id },
@@ -80,7 +106,96 @@ export const updateOne = async (
         );
       }
     }
+
+    if (isFinalizing) {
+      await createStructuresForCreationBlocks(tx, input.id);
+    }
+
     return input.id;
+  });
+};
+
+type CreationBlock = Prisma.StructureVersionTransformationGetPayload<{
+  include: { structureVersion: true };
+}>;
+
+const createStructuresForCreationBlocks = async (
+  tx: PrismaTransaction,
+  transformationId: number
+): Promise<void> => {
+  const transformation = await tx.transformation.findUniqueOrThrow({
+    where: { id: transformationId },
+    include: {
+      structureVersionTransformations: {
+        include: { structureVersion: true },
+      },
+    },
+  });
+
+  const bhasileCounterCache = new Map<string, number>();
+
+  const creationStructureVersionTransformations =
+    transformation.structureVersionTransformations.filter(
+      (structureVersionTransformation) =>
+        structureVersionTransformation.type ===
+        StructureVersionTransformationType.CREATION
+    );
+
+  for (const structureVersionTransformation of creationStructureVersionTransformations) {
+    await createStructureFromCreationBlock(
+      tx,
+      structureVersionTransformation,
+      bhasileCounterCache
+    );
+  }
+};
+
+const createStructureFromCreationBlock = async (
+  tx: PrismaTransaction,
+  structureVersionTransformation: CreationBlock,
+  bhasileCounterCache: Map<string, number>
+): Promise<void> => {
+  const { structureVersion, operateurId } = structureVersionTransformation;
+
+  if (!structureVersion) {
+    throw new Error(
+      `Bloc création ${structureVersionTransformation.id} : structureVersion manquante`
+    );
+  }
+
+  if (structureVersion.structureId) {
+    return;
+  }
+
+  if (!operateurId) {
+    throw new Error(
+      `Bloc création ${structureVersionTransformation.id} : opérateur manquant`
+    );
+  }
+
+  const regionCode = getNormalizedRegionCodeFromDepartement(
+    structureVersion.departementAdministratif
+  );
+
+  if (!regionCode) {
+    throw new Error(
+      `Bloc création ${structureVersionTransformation.id} : région indérivable pour le département ${structureVersion.departementAdministratif}`
+    );
+  }
+
+  const codeBhasile = await getNextBhasileCode(
+    tx,
+    regionCode,
+    bhasileCounterCache
+  );
+
+  const structure = await tx.structure.create({
+    data: { codeBhasile, operateurId },
+  });
+
+  await tx.structureVersion.update({
+    where: { id: structureVersion.id },
+    data: { structureId: structure.id },
   });
 };
 
@@ -133,7 +248,8 @@ const createOrUpdateStructureVersionTransformation = async (
       tx,
       structureVersionTransformation.structureVersion,
       {
-        structureId: structureVersionTransformation.structureVersion.structureId,
+        structureId:
+          structureVersionTransformation.structureVersion.structureId,
         structureVersionTransformationId,
       }
     );
@@ -156,7 +272,9 @@ const createStructureVersionTransformation = async (
   structureVersionTransformation: StructureVersionTransformationApiUpdate
 ): Promise<number> => {
   if (!structureVersionTransformation.type) {
-    throw new Error("type est requis pour créer une structureVersionTransformation");
+    throw new Error(
+      "type est requis pour créer une structureVersionTransformation"
+    );
   }
   const created = await tx.structureVersionTransformation.create({
     data: {
