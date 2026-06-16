@@ -10,6 +10,7 @@ import {
   getTransformationDepartement,
   getTransformationFormNavigation,
   getTransformationNounAvecArticle,
+  getTransformationOriginRoute,
   getTransformationSteps,
   isCreation,
   isTransformationSurStructureExistante,
@@ -33,6 +34,7 @@ import {
 import {
   createStructureVersionTransformation,
   createTransformation,
+  createTransformationForm,
 } from "../test-utils/factories/transformation.factory";
 
 describe("transformation util", () => {
@@ -46,6 +48,7 @@ describe("transformation util", () => {
             name: "description",
             label: "Description",
             route: "/structures/transformation/5/fermeture/1/description",
+            status: StepStatus.NON_COMMENCE,
           },
         ],
       },
@@ -57,18 +60,21 @@ describe("transformation util", () => {
             name: "description",
             label: "Description",
             route: "/structures/transformation/5/extension/2/description",
+            status: StepStatus.NON_COMMENCE,
           },
           {
             name: "places-et-hebergement",
             label: "Places et hébergement",
             route:
               "/structures/transformation/5/extension/2/places-et-hebergement",
+            status: StepStatus.NON_COMMENCE,
           },
           {
             name: "actes-administratifs",
             label: "Actes administratifs",
             route:
               "/structures/transformation/5/extension/2/actes-administratifs",
+            status: StepStatus.NON_COMMENCE,
           },
         ],
       },
@@ -426,6 +432,53 @@ describe("transformation util", () => {
         ]);
       }
     );
+
+    it("reporte le statut de chaque étape lu depuis le formulaire de la structureVersionTransformation", () => {
+      // GIVEN — an extension whose form has only the description step validated
+      const transformation: TransformationApiRead = {
+        id: 5,
+        structureVersionTransformations: [
+          {
+            id: 1,
+            type: StructureVersionTransformationType.EXTENSION,
+            structureVersion: { structureId: 1001 },
+            form: createTransformationForm({
+              validatedSlugs: ["01-identification"],
+            }),
+          } as StructureVersionTransformationApiRead,
+        ],
+      };
+
+      // WHEN
+      const result = getTransformationSteps(transformation);
+
+      // THEN
+      expect(result[0].steps.map((step) => step.status)).toEqual([
+        StepStatus.VALIDE,
+        StepStatus.NON_COMMENCE,
+        StepStatus.NON_COMMENCE,
+      ]);
+    });
+
+    it("met chaque statut d'étape à NON_COMMENCE par défaut quand le formulaire est absent", () => {
+      // GIVEN
+      const transformation: TransformationApiRead = {
+        id: 5,
+        structureVersionTransformations: [
+          {
+            id: 1,
+            type: StructureVersionTransformationType.FERMETURE,
+            structureVersion: { structureId: 1001 },
+          },
+        ],
+      };
+
+      // WHEN
+      const result = getTransformationSteps(transformation);
+
+      // THEN
+      expect(result[0].steps[0].status).toBe(StepStatus.NON_COMMENCE);
+    });
   });
 
   describe("getRoute (tested indirectly via getTransformationSteps)", () => {
@@ -502,52 +555,113 @@ describe("transformation util", () => {
     });
   });
 
-  describe("validateStructureVersionTransformationFormStep", () => {
-    const buildCreationForm = (validatedSlugs: string[] = []): FormApiType => ({
-      id: 100,
-      status: false,
-      formDefinition: {
-        id: 10,
-        name: "structure-transformation-creation",
-        slug: "structure-transformation-creation-v1",
-        version: 1,
-      },
-      formSteps: [
-        {
-          id: 1001,
-          status: validatedSlugs.includes("01-identification")
-            ? StepStatus.VALIDE
-            : StepStatus.NON_COMMENCE,
-          stepDefinition: {
-            id: 201,
-            slug: "01-identification",
-            label: "Description",
-          },
-        },
-        {
-          id: 1002,
-          status: validatedSlugs.includes("02-places-hebergement")
-            ? StepStatus.VALIDE
-            : StepStatus.NON_COMMENCE,
-          stepDefinition: {
-            id: 202,
-            slug: "02-places-hebergement",
-            label: "Places et hébergement",
-          },
-        },
-        {
-          id: 1003,
-          status: validatedSlugs.includes("03-actes-administratifs")
-            ? StepStatus.VALIDE
-            : StepStatus.NON_COMMENCE,
-          stepDefinition: {
-            id: 203,
-            slug: "03-actes-administratifs",
-            label: "Actes administratifs",
-          },
-        },
+  describe("getTransformationOriginRoute", () => {
+    it.each([
+      [
+        TransformationType.EXTENSION_EX_NIHILO,
+        StructureVersionTransformationType.EXTENSION,
       ],
+      [
+        TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES,
+        StructureVersionTransformationType.CONTRACTION,
+      ],
+      [
+        TransformationType.FERMETURE_SANS_TRANSFERT,
+        StructureVersionTransformationType.FERMETURE,
+      ],
+    ])(
+      "renvoie la page de la structure impactée pour %s",
+      (transformationType, primaryType) => {
+        // GIVEN
+        const transformation = createTransformation({
+          id: 5,
+          type: transformationType,
+          structureVersionTransformations: [
+            {
+              id: 1,
+              type: primaryType,
+              structureVersion: { structureId: 1001 },
+            } as StructureVersionTransformationApiRead,
+          ],
+        });
+
+        // THEN
+        expect(getTransformationOriginRoute(transformation)).toBe(
+          "/structures/1001"
+        );
+      }
+    );
+
+    it("choisit la structure du type principal quand plusieurs structureVersionTransformations existent", () => {
+      // GIVEN — a contraction with transfer: 1 contraction (primary) + 1 extension target
+      const transformation = createTransformation({
+        id: 5,
+        type: TransformationType.CONTRACTION_AVEC_TRANSFERT_VERS_AUTRE_STRUCTURE,
+        structureVersionTransformations: [
+          {
+            id: 1,
+            type: StructureVersionTransformationType.EXTENSION,
+            structureVersion: { structureId: 2002 },
+          } as StructureVersionTransformationApiRead,
+          {
+            id: 2,
+            type: StructureVersionTransformationType.CONTRACTION,
+            structureVersion: { structureId: 3003 },
+          } as StructureVersionTransformationApiRead,
+        ],
+      });
+
+      // THEN — the contraction's structure, not the extension's
+      expect(getTransformationOriginRoute(transformation)).toBe(
+        "/structures/3003"
+      );
     });
+
+    it.each([
+      TransformationType.OUVERTURE_EX_NIHILO,
+      TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES,
+    ])("renvoie /structures pour %s (pas de type principal)", (transformationType) => {
+      // GIVEN
+      const transformation = createTransformation({
+        id: 5,
+        type: transformationType,
+        structureVersionTransformations: [
+          {
+            id: 1,
+            type: StructureVersionTransformationType.CREATION,
+            structureVersion: { structureId: 1001 },
+          } as StructureVersionTransformationApiRead,
+        ],
+      });
+
+      // THEN
+      expect(getTransformationOriginRoute(transformation)).toBe("/structures");
+    });
+
+    it("se rabat sur /structures quand la structureVersionTransformation principale n'a pas de structureId", () => {
+      // GIVEN
+      const transformation = createTransformation({
+        id: 5,
+        type: TransformationType.EXTENSION_EX_NIHILO,
+        structureVersionTransformations: [
+          {
+            id: 1,
+            type: StructureVersionTransformationType.EXTENSION,
+          } as StructureVersionTransformationApiRead,
+        ],
+      });
+
+      // THEN
+      expect(getTransformationOriginRoute(transformation)).toBe("/structures");
+    });
+  });
+
+  describe("validateStructureVersionTransformationFormStep", () => {
+    const buildCreationForm = (validatedSlugs: string[] = []): FormApiType =>
+      createTransformationForm({
+        name: "structure-transformation-creation",
+        validatedSlugs,
+      });
 
     it("flips only the validated route step to VALIDE, mapping it to its form step slug", () => {
       const form = validateStructureVersionTransformationFormStep(
