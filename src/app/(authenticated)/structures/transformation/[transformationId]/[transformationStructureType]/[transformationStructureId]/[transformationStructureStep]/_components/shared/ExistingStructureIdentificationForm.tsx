@@ -7,7 +7,7 @@ import { EffectiveDateInput } from "@/app/components/forms/EffectiveDateInput";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { SaveCurrentForm } from "@/app/components/forms/SaveCurrentForm";
+import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import {
   getAdresseSource,
@@ -23,7 +23,6 @@ import {
 import {
   TransformationIdentificationDraftFormValues,
   transformationIdentificationDraftSchema,
-  TransformationIdentificationFormValues,
   transformationIdentificationSchema,
 } from "@/schemas/forms/transformation/transformationIdentification.schema";
 import { FormKind } from "@/types/global";
@@ -39,14 +38,16 @@ export const ExistingStructureIdentificationForm = ({
   structureVersionTransformation,
   formKind,
 }: Props) => {
-  const { handleValidation, handleSave, backLink } =
+  const { goToNextStep, handleSave, backLink, shouldShowIncompleteSteps } =
     useTransformationFormHandling();
 
   const defaultValues =
-    getTransformationDefaultValues<TransformationIdentificationFormValues>({
-      transformation,
-      structureVersionTransformation,
-    });
+    getTransformationDefaultValues<TransformationIdentificationDraftFormValues>(
+      {
+        transformation,
+        structureVersionTransformation,
+      }
+    );
 
   const buildStructureVersionTransformation = (
     data: TransformationIdentificationDraftFormValues
@@ -67,25 +68,27 @@ export const ExistingStructureIdentificationForm = ({
 
   return (
     <FormWrapper
-      schema={transformationIdentificationSchema}
+      schema={
+        shouldShowIncompleteSteps
+          ? transformationIdentificationSchema
+          : transformationIdentificationDraftSchema
+      }
       defaultValues={defaultValues}
-      onSubmit={(data) => {
-        handleValidation({
-          transformationId: transformation.id,
-          structureVersionTransformation: buildStructureVersionTransformation(data),
-        });
-      }}
+      onSubmit={goToNextStep}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       backLink={backLink}
       showContactInfos={false}
     >
-      <SaveCurrentForm
+      <TransformationFormController
         schema={transformationIdentificationDraftSchema}
-        onSave={(data) =>
+        onSave={(data, values) =>
           handleSave({
             transformationId: transformation.id,
-            structureVersionTransformation: buildStructureVersionTransformation(data),
+            structureVersionTransformation:
+              buildStructureVersionTransformation(data),
+            strictSchema: transformationIdentificationSchema,
+            values,
           })
         }
       />
@@ -109,7 +112,8 @@ export const ExistingStructureIdentificationForm = ({
 
       <TransformationDnaAndFiness
         entityId={{
-          structureVersionId: structureVersionTransformation.structureVersion?.id,
+          structureVersionId:
+            structureVersionTransformation.structureVersion?.id,
         }}
       />
 

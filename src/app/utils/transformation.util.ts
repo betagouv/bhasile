@@ -473,24 +473,25 @@ export const getStructureVersionTransformationLabel = (
   }
 };
 
-export const validateStructureVersionTransformationFormStep = (
+export const setStructureVersionTransformationFormStepStatus = (
   form: FormApiType,
-  stepToValidate: string
+  stepName: string,
+  status: StepStatus
 ): FormApiType => {
   const formStepSpecs =
     STRUCTURE_VERSION_TRANSFORMATION_FORM_STEPS[form.formDefinition.name] ?? [];
 
-  const stepSlugToValidate = formStepSpecs.find(
-    (formStepSpec) => formStepSpec.name === stepToValidate
+  const stepSlug = formStepSpecs.find(
+    (formStepSpec) => formStepSpec.name === stepName
   )?.slug;
 
-  if (!stepSlugToValidate) {
+  if (!stepSlug) {
     return form;
   }
 
   const formSteps = form.formSteps.map((formStep) =>
-    formStep.stepDefinition.slug === stepSlugToValidate
-      ? { ...formStep, status: StepStatus.VALIDE }
+    formStep.stepDefinition.slug === stepSlug
+      ? { ...formStep, status }
       : formStep
   );
 
