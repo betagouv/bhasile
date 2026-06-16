@@ -6,6 +6,7 @@ import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { Section } from "@/app/components/common/Section";
 
 import { StructuresBlock } from "./_components/structures/StructuresBlock";
+import { TypesPlacesBlock } from "./_components/type-places/TypesPlacesBlock";
 
 export default function Statistiques(): ReactElement {
   return (
@@ -17,6 +18,9 @@ export default function Statistiques(): ReactElement {
       />
       <Section id="structures">
         <StructuresBlock />
+      </Section>
+      <Section id="types-places">
+        <TypesPlacesBlock />
       </Section>
     </>
   );
