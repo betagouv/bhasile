@@ -26,6 +26,7 @@ export const ActesAdministratifs = ({ categoryDisplayRules }: Props) => {
             addFileButtonLabel={rules.addFileButtonLabel}
             notice={rules.notice}
             alternativeCategories={rules.alternativeCategories}
+            avenantAlternative={rules.avenantAlternative}
           />
           {index < filteredCategories.length - 1 && <hr />}
         </div>

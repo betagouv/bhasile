@@ -46,9 +46,13 @@ vi.mock("@/app/hooks/useTransformations", () => ({
 
 const setTransformation = vi.fn();
 
-const buildCreationForm = (validatedSlug?: string) => ({
+const buildCreationForm = (validatedSlugs: string[] = []) => ({
   id: 100,
-  status: false,
+  status: [
+    "01-identification",
+    "02-places-hebergement",
+    "03-actes-administratifs",
+  ].every((slug) => validatedSlugs.includes(slug)),
   formDefinition: {
     id: 10,
     name: "structure-transformation-creation",
@@ -58,18 +62,20 @@ const buildCreationForm = (validatedSlug?: string) => ({
   formSteps: [
     {
       id: 1001,
-      status:
-        validatedSlug === "01-identification"
-          ? StepStatus.VALIDE
-          : StepStatus.NON_COMMENCE,
-      stepDefinition: { id: 201, slug: "01-identification", label: "Description" },
+      status: validatedSlugs.includes("01-identification")
+        ? StepStatus.VALIDE
+        : StepStatus.NON_COMMENCE,
+      stepDefinition: {
+        id: 201,
+        slug: "01-identification",
+        label: "Description",
+      },
     },
     {
       id: 1002,
-      status:
-        validatedSlug === "02-places-hebergement"
-          ? StepStatus.VALIDE
-          : StepStatus.NON_COMMENCE,
+      status: validatedSlugs.includes("02-places-hebergement")
+        ? StepStatus.VALIDE
+        : StepStatus.NON_COMMENCE,
       stepDefinition: {
         id: 202,
         slug: "02-places-hebergement",
@@ -78,10 +84,9 @@ const buildCreationForm = (validatedSlug?: string) => ({
     },
     {
       id: 1003,
-      status:
-        validatedSlug === "03-actes-administratifs"
-          ? StepStatus.VALIDE
-          : StepStatus.NON_COMMENCE,
+      status: validatedSlugs.includes("03-actes-administratifs")
+        ? StepStatus.VALIDE
+        : StepStatus.NON_COMMENCE,
       stepDefinition: {
         id: 203,
         slug: "03-actes-administratifs",
@@ -91,7 +96,7 @@ const buildCreationForm = (validatedSlug?: string) => ({
   ],
 });
 
-const buildTransformation = () =>
+const buildTransformation = (form = buildCreationForm()) =>
   createTransformation({
     id: 12,
     type: TransformationType.OUVERTURE_EX_NIHILO,
@@ -99,6 +104,7 @@ const buildTransformation = () =>
       {
         id: 7,
         type: StructureVersionTransformationType.CREATION,
+        form,
       } as StructureVersionTransformationApiRead,
     ],
   });
@@ -111,7 +117,6 @@ const buildPayload = (): {
   structureVersionTransformation: {
     id: 7,
     type: StructureVersionTransformationType.CREATION,
-    form: buildCreationForm(),
     structureVersion: { nom: "Les Coquelicots" },
   },
 });
@@ -126,7 +131,8 @@ describe("useTransformationFormHandling", () => {
     mockUseParams.mockReturnValue({
       transformationStructureType: StructureVersionTransformationType.CREATION,
       transformationStructureId: "7",
-      transformationStructureStep: StructureVersionTransformationStep.DESCRIPTION,
+      transformationStructureStep:
+        StructureVersionTransformationStep.DESCRIPTION,
     });
     mockUsePathname.mockReturnValue(
       "/structures/transformation/12/creation/7/description"
@@ -156,7 +162,53 @@ describe("useTransformationFormHandling", () => {
             id: 7,
             type: StructureVersionTransformationType.CREATION,
             structureVersion: { nom: "Les Coquelicots" },
-            form: buildCreationForm("01-identification"),
+            form: buildCreationForm(["01-identification"]),
+          },
+        ],
+      },
+      setTransformation
+    );
+  });
+
+  it("passe le statut du formulaire enfant à true une fois la dernière étape validée", async () => {
+    // GIVEN — the two first steps of the child form are already VALIDE
+    mockUseTransformationContext.mockReturnValue({
+      transformation: buildTransformation(
+        buildCreationForm(["01-identification", "02-places-hebergement"])
+      ),
+      setTransformation,
+    });
+    // AND — the current step is the last one (actes-administratifs)
+    mockUseParams.mockReturnValue({
+      transformationStructureType: StructureVersionTransformationType.CREATION,
+      transformationStructureId: "7",
+      transformationStructureStep:
+        StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
+    });
+    mockUsePathname.mockReturnValue(
+      "/structures/transformation/12/creation/7/actes-administratifs"
+    );
+    mockUpdateTransformation.mockResolvedValue(12);
+
+    // WHEN
+    const { result } = renderHook(() => useTransformationFormHandling());
+    await result.current.handleValidation(buildPayload());
+
+    // THEN — every step is VALIDE so the child form status is derived to true
+    expect(mockUpdateTransformation).toHaveBeenCalledWith(
+      12,
+      {
+        id: 12,
+        structureVersionTransformations: [
+          {
+            id: 7,
+            type: StructureVersionTransformationType.CREATION,
+            structureVersion: { nom: "Les Coquelicots" },
+            form: buildCreationForm([
+              "01-identification",
+              "02-places-hebergement",
+              "03-actes-administratifs",
+            ]),
           },
         ],
       },

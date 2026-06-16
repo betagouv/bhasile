@@ -8,6 +8,18 @@ export enum AdditionalFieldsType {
   NAME,
 }
 
+export type ResolvedAvenantParent = {
+  id: number;
+  startYear: number;
+  endYear: number;
+};
+
+export type AvenantAlternative = {
+  parentCategory: ActeAdministratifCategory;
+  avenantLabel: string;
+  resolvedParent?: ResolvedAvenantParent;
+};
+
 export type CategoryDisplayRule = {
   categoryShortName: string;
   title: string;
@@ -20,6 +32,7 @@ export type CategoryDisplayRule = {
   addFileButtonLabel: string;
   notice?: string | ReactElement;
   alternativeCategories?: ActeAdministratifCategory[];
+  avenantAlternative?: AvenantAlternative;
 };
 
 export type CategoryDisplayRules = Partial<

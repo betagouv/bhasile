@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { StructureParentActe } from "@/types/acte-administratif.type";
 import { Repartition } from "@/types/adresse.type";
 import { ExcludeNullValues } from "@/types/global";
 import {
@@ -8,6 +9,7 @@ import {
 } from "@/types/transformation.type";
 
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
+import { AntenneApiType } from "./antenne.schema";
 import { formApiSchema } from "./form.schema";
 import {
   structureVersionApiSchema,
@@ -74,6 +76,8 @@ export type StructureVersionTransformationApiRead =
         codePostalAdministratif?: string | null;
         communeAdministrative?: string | null;
         departementAdministratif?: string | null;
+        antennes?: AntenneApiType[];
+        actesAdministratifs?: StructureParentActe[];
         structureTypologies?: { year: number; placesAutorisees: number | null }[];
       };
     };
