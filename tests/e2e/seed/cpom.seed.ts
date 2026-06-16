@@ -78,3 +78,12 @@ export const createCpomForTest = async (
     regionId: cpom.regionId,
   };
 };
+
+export const attachStructureToCpom = async (
+  cpomId: number,
+  structureId: number
+): Promise<void> => {
+  await prisma.cpomStructure.create({
+    data: { cpomId, structureId },
+  });
+};
