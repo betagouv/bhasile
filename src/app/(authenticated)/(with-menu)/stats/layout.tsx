@@ -13,6 +13,74 @@ async function getStatistiques(): Promise<StatistiquesApiType> {
     totalStructures: 42,
     totalCpoms: 12,
     totalPlaces: 106,
+    tauxEquipement: 4,
+    structuresAvecCpom: 23,
+    placesAutorisees: 57,
+    placesPmr: 4,
+    placesLgbt: 5,
+    placesFvvTeh: 6,
+    placesQPV: 7,
+    placesLogementsSociaux: 8,
+    typesPlaces: [
+      {
+        label: "Places autorisées",
+        byYear: [
+          { year: 2026, nbPlaces: 32000 },
+          { year: 2025, nbPlaces: 31000 },
+          { year: 2024, nbPlaces: 30000 },
+        ],
+      },
+      {
+        label: "Taux d'équipement",
+        byYear: [
+          { year: 2026, nbPlaces: 4 },
+          { year: 2025, nbPlaces: 3 },
+          { year: 2024, nbPlaces: 2 },
+        ],
+      },
+      {
+        label: "Places PMR",
+        byYear: [
+          { year: 2026, nbPlaces: 520 },
+          { year: 2025, nbPlaces: 510 },
+          { year: 2024, nbPlaces: 500 },
+        ],
+      },
+      {
+        label: "Places LGBT",
+        subLabel: "(spécialisées)",
+        byYear: [
+          { year: 2026, nbPlaces: 1000 },
+          { year: 2025, nbPlaces: 900 },
+          { year: 2024, nbPlaces: 800 },
+        ],
+      },
+      {
+        label: "Places FVV-TEH",
+        subLabel: "(labellisées)",
+        byYear: [
+          { year: 2026, nbPlaces: 400 },
+          { year: 2025, nbPlaces: 300 },
+          { year: 2024, nbPlaces: 200 },
+        ],
+      },
+      {
+        label: "Places QPV",
+        byYear: [
+          { year: 2026, nbPlaces: 2000 },
+          { year: 2025, nbPlaces: 1800 },
+          { year: 2024, nbPlaces: 1700 },
+        ],
+      },
+      {
+        label: "Places en logements sociaux",
+        byYear: [
+          { year: 2026, nbPlaces: 1500 },
+          { year: 2025, nbPlaces: 1450 },
+          { year: 2024, nbPlaces: 1400 },
+        ],
+      },
+    ],
     structureTypes: [
       {
         label: "CADA",
