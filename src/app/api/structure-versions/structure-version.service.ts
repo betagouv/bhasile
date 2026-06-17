@@ -26,11 +26,11 @@ const isVersionValid = (version: StructureVersionDbDetails): boolean => {
   );
 };
 
-export const resolveCurrentVersion = (
+export const getValidVersions = (
   versions: StructureVersionDbDetails[],
   now: Date
-): StructureVersionDbDetails | undefined => {
-  return versions
+): StructureVersionDbDetails[] =>
+  versions
     .filter(
       (version) =>
         version.effectiveDate.getTime() <= now.getTime() &&
@@ -43,8 +43,12 @@ export const resolveCurrentVersion = (
         return dateDiff;
       }
       return second.id - first.id;
-    })[0];
-};
+    });
+
+export const resolveCurrentVersion = (
+  versions: StructureVersionDbDetails[],
+  now: Date
+): StructureVersionDbDetails | undefined => getValidVersions(versions, now)[0];
 
 const mapVersionScalars = (
   source: StructureDbDetails | StructureVersionDbTransformation

@@ -7,14 +7,27 @@ import {
   recursivelySerializeDates,
 } from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
-import { Prisma, PublicType } from "@/generated/prisma/client";
+import {
+  Prisma,
+  PublicType,
+  StructureVersionTransformationType,
+} from "@/generated/prisma/client";
 import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 import { StructureColumn } from "@/types/ListColumn";
+import {
+  CpomRef,
+  HistoryEvent,
+  StructureRef,
+} from "@/types/structure-history.type";
 
-import { StructureVersionDbTransformation } from "../structure-versions/structure-version.db.type";
+import {
+  StructureVersionDbDetails,
+  StructureVersionDbTransformation,
+} from "../structure-versions/structure-version.db.type";
+import { getValidVersions } from "../structure-versions/structure-version.service";
 import { StructureDbDetails, StructureDbList } from "./structure.db.type";
 
 const typesPublic: Record<string, PublicType> = {
@@ -206,7 +219,10 @@ export const buildStructuresWhereSql = ({
 };
 
 export const getTypeBati = (
-  structure: StructureDbDetails | StructureDbList | StructureVersionDbTransformation
+  structure:
+    | StructureDbDetails
+    | StructureDbList
+    | StructureVersionDbTransformation
 ): Repartition | undefined => {
   const repartitions = structure.adresses?.map(
     (adresse) => adresse.repartition
@@ -338,4 +354,177 @@ export const getCpomStructuresWithDates = (
     }) as CpomStructureApiRead;
   });
   return cpomStructures;
+};
+
+type SiblingTransformation = NonNullable<
+  StructureVersionDbDetails["structureVersionTransformation"]
+>["transformation"]["structureVersionTransformations"][number];
+
+const PLACE_LOSER_TYPES: StructureVersionTransformationType[] = [
+  StructureVersionTransformationType.CONTRACTION,
+  StructureVersionTransformationType.FERMETURE,
+];
+
+const PLACE_GAINER_TYPES: StructureVersionTransformationType[] = [
+  StructureVersionTransformationType.CREATION,
+  StructureVersionTransformationType.EXTENSION,
+];
+
+const getCounterpartStructures = (
+  siblings: SiblingTransformation[],
+  ownTransformationId: number,
+  counterpartTypes: StructureVersionTransformationType[]
+): StructureRef[] =>
+  siblings
+    .filter(
+      (sibling) =>
+        sibling.id !== ownTransformationId &&
+        counterpartTypes.includes(sibling.type)
+    )
+    .map((sibling) => sibling.structureVersion?.structure)
+    .filter((structure): structure is StructureRef => structure != null);
+
+const buildCreationEvent = (
+  structure: StructureDbDetails,
+  validVersions: StructureVersionDbDetails[]
+): HistoryEvent | null => {
+  const creationVersion = validVersions.find(
+    (version) =>
+      version.structureVersionTransformation?.type ===
+      StructureVersionTransformationType.CREATION
+  );
+
+  if (creationVersion) {
+    const { id: ownTransformationId, transformation } =
+      creationVersion.structureVersionTransformation!;
+    return {
+      kind: "CREATION",
+      date: creationVersion.effectiveDate.toISOString(),
+      sources: getCounterpartStructures(
+        transformation.structureVersionTransformations,
+        ownTransformationId,
+        PLACE_LOSER_TYPES
+      ),
+    };
+  }
+
+  const fallbackDate =
+    structure.creationDate ??
+    validVersions[validVersions.length - 1]?.effectiveDate;
+
+  return fallbackDate
+    ? { kind: "CREATION", date: fallbackDate.toISOString(), sources: [] }
+    : null;
+};
+
+const buildTransformationEvent = (
+  version: StructureVersionDbDetails
+): HistoryEvent | null => {
+  const structureVersionTransformation = version.structureVersionTransformation;
+  if (!structureVersionTransformation) {
+    return null;
+  }
+
+  const date = version.effectiveDate.toISOString();
+  const {
+    id: ownTransformationId,
+    motif,
+    transformation,
+    type,
+  } = structureVersionTransformation;
+  const siblings = transformation.structureVersionTransformations;
+
+  switch (type) {
+    case StructureVersionTransformationType.EXTENSION:
+      return {
+        kind: "EXTENSION",
+        date,
+        sources: getCounterpartStructures(
+          siblings,
+          ownTransformationId,
+          PLACE_LOSER_TYPES
+        ),
+      };
+    case StructureVersionTransformationType.CONTRACTION:
+      return {
+        kind: "CONTRACTION",
+        date,
+        targets: getCounterpartStructures(
+          siblings,
+          ownTransformationId,
+          PLACE_GAINER_TYPES
+        ),
+      };
+    case StructureVersionTransformationType.FERMETURE:
+      return {
+        kind: "FERMETURE",
+        date,
+        targets: getCounterpartStructures(
+          siblings,
+          ownTransformationId,
+          PLACE_GAINER_TYPES
+        ),
+        motif,
+      };
+    default:
+      return null;
+  }
+};
+
+const buildCpomEvents = (
+  cpomStructures: CpomStructureApiRead[]
+): HistoryEvent[] => {
+  const now = new Date().toISOString();
+  const events: HistoryEvent[] = [];
+
+  cpomStructures.forEach((cpomStructure) => {
+    const { cpom } = cpomStructure;
+    if (!cpom || cpom.id === undefined) {
+      return;
+    }
+
+    const entryDate = cpomStructure.dateStart ?? cpom.dateStart;
+    const exitDate = cpomStructure.dateEnd ?? cpom.dateEnd;
+
+    const cpomRef: CpomRef = {
+      id: cpom.id,
+      operateurName: cpom.operateur?.name ?? "",
+      departements:
+        cpom.departements
+          ?.map((cpomDepartement) => cpomDepartement.departement?.numero)
+          .filter((numero): numero is string => Boolean(numero)) ?? [],
+    };
+
+    if (entryDate && entryDate <= now) {
+      events.push({ kind: "CPOM_ENTRY", date: entryDate, cpom: cpomRef });
+    }
+    if (exitDate && exitDate <= now) {
+      events.push({ kind: "CPOM_EXIT", date: exitDate, cpom: cpomRef });
+    }
+  });
+
+  return events;
+};
+
+export const buildStructureHistory = (
+  structure: StructureDbDetails,
+  cpomStructures: CpomStructureApiRead[]
+): HistoryEvent[] => {
+  const validVersions = getValidVersions(
+    structure.structureVersions ?? [],
+    new Date()
+  );
+
+  const events = [
+    buildCreationEvent(structure, validVersions),
+    ...validVersions.map(buildTransformationEvent),
+    ...buildCpomEvents(cpomStructures),
+  ].filter((event): event is HistoryEvent => event !== null);
+
+  return events.sort((first, second) => {
+    if (first.date === second.date) {
+      return 0;
+    }
+    return first.date < second.date ? 1 : -1;
+  });
 };
