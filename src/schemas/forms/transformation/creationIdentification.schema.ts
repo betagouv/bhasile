@@ -2,7 +2,7 @@ import z from "zod";
 
 import {
   blankStringsToUndefined,
-  nullishFrenchDateToISO,
+  frenchDateToISO,
 } from "@/app/utils/zodCustomFields";
 import {
   adresseAdministrativeAutoSaveSchema,
@@ -29,7 +29,7 @@ import { structureBaseSchema } from "@/schemas/forms/base/structure.base.schema"
 
 const baseCreationIdentificationSchema = structureBaseSchema.extend({
   operateur: operateurSchema,
-  creationDate: nullishFrenchDateToISO(),
+  creationDate: frenchDateToISO(),
   filiale: z.string().optional(),
 });
 
