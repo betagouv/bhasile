@@ -4,6 +4,7 @@ import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresse
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
 import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
 import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
+import { TransformationDnaAndFiness } from "@/app/components/forms/dnaAndFiness/TransformationDnaAndFiness";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
@@ -21,12 +22,6 @@ import {
   creationIdentificationSchema,
 } from "@/schemas/forms/transformation/creationIdentification.schema";
 import { FormKind } from "@/types/global";
-
-type Props = {
-  transformation: TransformationApiRead;
-  structureVersionTransformation: StructureVersionTransformationApiRead;
-  formKind: FormKind;
-};
 
 export const CreationIdentificationForm = ({
   transformation,
@@ -86,26 +81,34 @@ export const CreationIdentificationForm = ({
           })
         }
       />
-
       <FieldSetDescription formKind={formKind} />
-
       <hr />
-
       <AdresseAdministrativeAndAntennes formKind={formKind} />
-
       <hr />
-
-      <DnaAndFiness
-        formKind={formKind}
-        entityId={{
-          structureVersionId:
-            structureVersionTransformation.structureVersion?.id,
-        }}
-      />
-
+      {formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES ? (
+        <TransformationDnaAndFiness
+          entityId={{
+            structureVersionId:
+              structureVersionTransformation.structureVersion?.id,
+          }}
+        />
+      ) : (
+        <DnaAndFiness
+          formKind={formKind}
+          entityId={{
+            structureVersionId:
+              structureVersionTransformation.structureVersion?.id,
+          }}
+        />
+      )}
       <hr />
-
       <FieldSetContacts formKind={formKind} />
     </FormWrapper>
   );
+};
+
+type Props = {
+  transformation: TransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
+  formKind: FormKind;
 };
