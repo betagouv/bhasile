@@ -11,7 +11,7 @@ export default defineConfig({
   workers: 1, // Run tests sequentially to avoid race conditions
   use: {
     baseURL,
-    headless: true,
+    headless: false,
     viewport: { width: 1600, height: 800 },
     ignoreHTTPSErrors: true,
     storageState: "playwright/.auth/agent-legacy.json",
