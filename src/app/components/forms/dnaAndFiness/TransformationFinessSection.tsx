@@ -1,26 +1,30 @@
-import { FinessFormValues } from "@/schemas/forms/base/finess.schema";
+import { StructureFinessFormValues } from "@/schemas/forms/base/finess.schema";
 
 import InputWithValidation from "../InputWithValidation";
 import { TransformationCodeSection } from "./TransformationCodeSection";
 
-const emptyFiness: FinessFormValues = {
-  code: "",
+const emptyStructureFiness: StructureFinessFormValues = {
   description: "",
+  finess: {
+    code: "",
+  },
 };
 
 export const TransformationFinessSection = () => {
   return (
     <TransformationCodeSection
-      fieldArrayName="finesses"
-      emptyItem={emptyFiness}
+      fieldArrayName="structureFinesses"
+      emptyItem={emptyStructureFiness}
       singleCodeLabel="Code FINESS"
       addButtonLabel="Ajouter un code FINESS"
       descriptionHint="ex : Toute la structure"
-      getDescriptionFieldName={(index) => `finesses.${index}.description`}
+      getDescriptionFieldName={(index) =>
+        `structureFinesses.${index}.description`
+      }
       renderCodeInput={(index, label) => (
         <InputWithValidation
-          name={`finesses.${index}.code`}
-          id={`finesses.${index}.code`}
+          name={`structureFinesses.${index}.finess.code`}
+          id={`structureFinesses.${index}.finess.code`}
           type="text"
           label={label}
         />

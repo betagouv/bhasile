@@ -112,7 +112,7 @@ export const transformAjoutFormStructureToApiStructure = async (
     adresses: values.adresses,
     antennes: values.antennes,
     dnaStructures: values.dnaStructures,
-    finesses: values.finesses,
+    structureFinesses: values.structureFinesses,
     contacts: transformAgentFormContactsToApiContacts(values.contacts),
     structureMillesimes:
       values.structureMillesimes?.map((millesime) => ({

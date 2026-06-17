@@ -1,7 +1,7 @@
 model Dna {
   id                           Int                         @id @default(autoincrement())
   code                         String                      @unique
-  description                  String?
+  description                  String? // TODO: remove after backfill code-link descriptions
   activeInOfiiFileSince        DateTime? // date d'entrée dans le document Ofii
   inactiveInOfiiFileSince      DateTime? // date de sortie du document Ofii
   dnaStructures                DnaStructure[]
@@ -32,12 +32,15 @@ model DnaStructure {
   structure          Structure?        @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TODO: remove after backfill of structure version
   structureVersion   StructureVersion? @relation(fields: [structureVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   structureVersionId Int? // TODO: rendre obligatoire après backfill de structure version
+  description        String?
   startDate          DateTime? // TODO: remove after backfill of structure version - remplacé par effectiveDate de la version
   endDate            DateTime? // TODO: remove after backfill of structure version
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@unique([structureId, dnaId])
+  @@unique([structureVersionId, dnaId])
   @@schema("public")
 }
 
@@ -60,14 +63,33 @@ model Antenne {
 
 model Finess {
   id                 Int               @id @default(autoincrement())
-  structure          Structure?        @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TODO: remove after backfill of structure version
-  structureId        Int? // TODO: remove after backfill of structure version
-  structureVersion   StructureVersion? @relation(fields: [structureVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureVersionId Int? // TODO: rendre obligatoire après backfill de structure version et revoir application du unique sur code en front (vérifier avant doublons en db)
-  code               String?           @unique
-  description        String?
+  code               String?           @unique //TODO Rendre obligatoire après le backfill
+  description        String? // TODO: remove after backfill code-link descriptions
+  structureFinesses  StructureFiness[]
+  structure          Structure?        @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TODO: remove after backfill structure finess
+  structureId        Int? // TODO: remove after backfill structure finess
+  structureVersion   StructureVersion? @relation(fields: [structureVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TODO: remove after backfill structure finess
+  structureVersionId Int? // TODO: remove after backfill structure finess
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @default(now()) @updatedAt
 
+  @@schema("public")
+}
+
+model StructureFiness {
+  id                 Int               @id @default(autoincrement())
+  finessId           Int
+  finess             Finess            @relation(fields: [finessId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId        Int? // TODO: remove after backfill of structure version
+  structure          Structure?        @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TODO: remove after backfill of structure version
+  structureVersion   StructureVersion? @relation(fields: [structureVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureVersionId Int? // TODO: rendre obligatoire après backfill de structure version
+  description        String? 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([structureId, finessId])
+  @@unique([structureVersionId, finessId])
   @@schema("public")
 }

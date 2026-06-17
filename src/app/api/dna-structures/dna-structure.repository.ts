@@ -41,17 +41,19 @@ export const createOrUpdateDnaStructures = async (
     if (!upsertedDna) {
       continue;
     }
-
+    // TODO: use the unique constraints instead of id
     await tx.dnaStructure.upsert({
       where: { id: dnaStructure.id || 0 },
       update: {
         dnaId: upsertedDna.id,
+        description: dnaStructure.description,
         startDate: dnaStructure.startDate,
         endDate: dnaStructure.endDate,
       },
       create: {
         ...entityId,
         dnaId: upsertedDna.id,
+        description: dnaStructure.description,
         startDate: dnaStructure.startDate,
         endDate: dnaStructure.endDate,
       },

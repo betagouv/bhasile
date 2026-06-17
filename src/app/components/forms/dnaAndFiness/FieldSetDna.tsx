@@ -11,9 +11,9 @@ import { DnaInput } from "../adresseAdministrativeAndAntenne/DnaInput";
 import InputWithValidation from "../InputWithValidation";
 
 const emptyDnaStructure: DnaStructureFormValues = {
+  description: "",
   dna: {
     code: "",
-    description: "",
   },
 };
 
@@ -63,8 +63,8 @@ export const FieldSetDna = ({
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
               <InputWithValidation
-                name={`dnaStructures.${index}.dna.description`}
-                id={`dnaStructures.${index}.dna.description`}
+                name={`dnaStructures.${index}.description`}
+                id={`dnaStructures.${index}.description`}
                 control={control}
                 type="text"
                 label="Description"

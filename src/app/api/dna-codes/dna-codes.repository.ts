@@ -40,7 +40,7 @@ export const findAll = async ({
 
 export const upsertDna = async (
   tx: PrismaTransaction,
-  dna: { code?: string | null; description?: string | null } | undefined | null
+  dna: { code?: string | null } | undefined | null
 ): Promise<Dna | null> => {
   const normalizedCode = dna?.code?.trim();
   if (!normalizedCode) {
@@ -49,7 +49,7 @@ export const upsertDna = async (
 
   return tx.dna.upsert({
     where: { code: normalizedCode },
-    update: { description: dna?.description },
-    create: { code: normalizedCode, description: dna?.description },
+    update: {},
+    create: { code: normalizedCode },
   });
 };

@@ -102,13 +102,13 @@ export class IdentificationPage extends BasePage {
           }
           if (finess.code) {
             await this.formHelper.fillInput(
-              `input[name="finesses.${i}.code"]`,
+              `input[name="structureFinesses.${i}.finess.code"]`,
               finess.code
             );
           }
           if (finess.description) {
             await this.formHelper.fillInputIfExists(
-              `input[name="finesses.${i}.description"]`,
+              `input[name="structureFinesses.${i}.finess.description"]`,
               finess.description
             );
           }
@@ -117,7 +117,7 @@ export class IdentificationPage extends BasePage {
     } else {
       if (isAutorisee && finesses[0]?.code) {
         await this.formHelper.fillInput(
-          'input[name="finesses.0.code"]',
+          'input[name="structureFinesses.0.finess.code"]',
           finesses[0].code
         );
       }

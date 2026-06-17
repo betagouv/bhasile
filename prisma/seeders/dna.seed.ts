@@ -14,7 +14,7 @@ export const createDnaList = (count: number): Omit<Dna, "id">[] => {
 
     dnaList.push({
       code,
-      description: faker.lorem.words(2),
+      description: null,
       activeInOfiiFileSince:
         faker.helpers.maybe(() => faker.date.past({ years: 4 }), {
           probability: 0.1,
@@ -46,6 +46,7 @@ export const createDnaStructures = ({
     dnaId: number;
     structureId: number;
     structureVersionId: null;
+    description: string;
     startDate: Date | null;
     endDate: Date | null;
   }> = [];
@@ -63,6 +64,7 @@ export const createDnaStructures = ({
         dnaId,
         structureId,
         structureVersionId: null,
+        description: faker.lorem.words(2),
         startDate:
           faker.helpers.maybe(() => faker.date.past({ years: 2 }), {
             probability: 0.1,

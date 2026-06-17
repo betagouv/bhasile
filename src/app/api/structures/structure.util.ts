@@ -171,8 +171,9 @@ export const buildStructuresWhereSql = ({
       )
       OR EXISTS (
         SELECT 1
-        FROM public."Finess" f
-        WHERE f."structureId" = s.id
+        FROM public."StructureFiness" sf
+        JOIN public."Finess" f ON f.id = sf."finessId"
+        WHERE sf."structureId" = s.id
           AND COALESCE(f."code", '') ILIKE ${like}
       )
       OR COALESCE(s."nom", '') ILIKE ${like}

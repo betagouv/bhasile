@@ -40,7 +40,8 @@ model Structure {
   forms                    Form[]
   campaigns                Campaign[]
   antennes                 Antenne[] // TODO: remove after backfill of structure version
-  finesses                 Finess[] // TODO: remove after backfill of structure version
+  structureFinesses        StructureFiness[] // TODO: remove after backfill of structure version
+  finesses                 Finess[] // TODO: remove after backfill structure finess
   departement              Departement?              @relation(fields: [departementAdministratif], references: [numero]) // TODO: remove after backfill of structure version
   userActions              UserAction[]
   userNotes                Note[]

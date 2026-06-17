@@ -15,15 +15,15 @@ vi.mock("@/app/hooks/useFetchFreeDnaCodes", () => ({
 const defaultValuesAutorisee = {
   type: StructureType.CADA,
   isMultiDna: false,
-  dnaStructures: [{ dna: { code: "", description: "" } }],
-  finesses: [{ code: "", description: "" }],
+  dnaStructures: [{ description: "", dna: { code: "" } }],
+  structureFinesses: [{ description: "", finess: { code: "" } }],
 };
 
 const defaultValuesSubventionnee = {
   type: StructureType.HUDA,
   isMultiDna: false,
-  dnaStructures: [{ dna: { code: "", description: "" } }],
-  finesses: [],
+  dnaStructures: [{ description: "", dna: { code: "" } }],
+  structureFinesses: [],
 };
 
 const mockedUseFetchFreeDnaCodes = vi.mocked(useFetchFreeDnaCodes);
@@ -71,12 +71,12 @@ describe("DnaAndFiness", () => {
             ...defaultValuesAutorisee,
             isMultiDna: true,
             dnaStructures: [
-              { dna: { code: "C0001", description: "DNA 1" } },
-              { dna: { code: "C0002", description: "DNA 2" } },
+              { description: "DNA 1", dna: { code: "C0001" } },
+              { description: "DNA 2", dna: { code: "C0002" } },
             ],
-            finesses: [
-              { code: "123456789", description: "Finess 1" },
-              { code: "987654321", description: "Finess 2" },
+            structureFinesses: [
+              { description: "Finess 1", finess: { code: "123456789" } },
+              { description: "Finess 2", finess: { code: "987654321" } },
             ],
           }}
         >
@@ -131,8 +131,8 @@ describe("DnaAndFiness", () => {
           defaultValues={{
             ...defaultValuesAutorisee,
             isMultiDna: true,
-            dnaStructures: [{ dna: { code: "", description: "" } }],
-            finesses: [{ code: "", description: "" }],
+            dnaStructures: [{ description: "", dna: { code: "" } }],
+            structureFinesses: [{ description: "", finess: { code: "" } }],
           }}
         >
           <DnaAndFiness />

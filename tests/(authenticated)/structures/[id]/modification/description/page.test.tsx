@@ -59,11 +59,12 @@ describe("ModificationDescription page integration", () => {
       contacts: unknown[];
       dnaStructures: Array<{
         id: number;
-        dna: { code: string; description: string };
+        description: string;
+        dna: { code: string };
         startDate: string | null;
         endDate: string | null;
       }>;
-      finesses: unknown[];
+      structureFinesses: unknown[];
       type: string;
     }>(mockedFetch);
     expect(body.id).toBe(77);
@@ -92,7 +93,7 @@ describe("ModificationDescription page integration", () => {
         }),
       ])
     );
-    expect(body.finesses).toEqual(structure.finesses);
+    expect(body.structureFinesses).toEqual(structure.structureFinesses);
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
   });
 });

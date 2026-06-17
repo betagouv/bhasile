@@ -1,207 +1,170 @@
 import { Prisma } from "@/generated/prisma/client";
 
+export const structureMapSelect = {
+  id: true,
+  latitude: true,
+  longitude: true,
+} satisfies Prisma.StructureSelect;
+
+export const structureOperateurSelect = {
+  id: true,
+  type: true,
+  codeBhasile: true,
+  forms: true,
+} satisfies Prisma.StructureSelect;
+
+export const structureListInclude = {
+  adresses: {
+    include: {
+      adresseTypologies: {
+        orderBy: { year: "desc" },
+      },
+    },
+  },
+  cpomStructures: {
+    include: {
+      cpom: {
+        include: {
+          actesAdministratifs: {
+            include: { fileUploads: true },
+          },
+        },
+      },
+    },
+  },
+  operateur: {
+    include: { parent: true },
+  },
+  structureMillesimes: {
+    orderBy: { year: "desc" },
+  },
+  structureTypologies: {
+    orderBy: { year: "desc" },
+  },
+  forms: {
+    include: { formDefinition: true },
+  },
+  dnaStructures: {
+    orderBy: { dna: { code: "asc" } },
+    include: { dna: true },
+  },
+  actesAdministratifs: true,
+} satisfies Prisma.StructureInclude;
+
+export const structureDetailsInclude = {
+  userNotes: {
+    orderBy: { createdAt: "desc" },
+    select: { text: true },
+  },
+  dnaStructures: {
+    orderBy: { dna: { code: "asc" } },
+    include: {
+      dna: {
+        include: {
+          activites: {
+            orderBy: { date: "desc" },
+          },
+          evenementsIndesirablesGraves: {
+            orderBy: { evenementDate: "desc" },
+          },
+        },
+      },
+    },
+  },
+  structureFinesses: {
+    include: { finess: true },
+  },
+  adresses: {
+    include: {
+      adresseTypologies: {
+        orderBy: { year: "desc" },
+      },
+    },
+  },
+  antennes: true,
+  contacts: true,
+  structureTypologies: {
+    orderBy: { year: "desc" },
+  },
+  structureMillesimes: {
+    orderBy: { year: "desc" },
+  },
+  cpomStructures: {
+    include: {
+      cpom: {
+        include: {
+          structures: {
+            include: {
+              structure: {
+                select: {
+                  id: true,
+                  codeBhasile: true,
+                  type: true,
+                  communeAdministrative: true,
+                  operateur: {
+                    select: { name: true },
+                  },
+                  forms: true,
+                },
+              },
+            },
+          },
+          operateur: true,
+          actesAdministratifs: {
+            include: { fileUploads: true },
+          },
+          budgets: {
+            orderBy: { year: "desc" },
+          },
+        },
+      },
+    },
+  },
+  evaluations: {
+    include: { fileUploads: true },
+    orderBy: { date: "desc" },
+  },
+  controles: {
+    include: { fileUploads: true },
+    orderBy: { date: "desc" },
+  },
+  actesAdministratifs: {
+    include: { fileUploads: true },
+  },
+  documentsFinanciers: {
+    include: { fileUploads: true },
+  },
+  budgets: {
+    orderBy: { year: "desc" },
+  },
+  indicateursFinanciers: {
+    orderBy: { year: "desc" },
+  },
+  operateur: {
+    include: { parent: true },
+  },
+  forms: {
+    include: {
+      formDefinition: true,
+      formSteps: {
+        include: { stepDefinition: true },
+      },
+    },
+  },
+} satisfies Prisma.StructureInclude;
+
 export type StructureDbMap = Prisma.StructureGetPayload<{
-  select: {
-    id: true;
-    latitude: true;
-    longitude: true;
-  };
+  select: typeof structureMapSelect;
 }>;
 
 export type StructureDbList = Prisma.StructureGetPayload<{
-  include: {
-    adresses: {
-      include: {
-        adresseTypologies: {
-          orderBy: {
-            year: "desc";
-          };
-        };
-      };
-    };
-    cpomStructures: {
-      include: {
-        cpom: {
-          include: {
-            actesAdministratifs: {
-              include: {
-                fileUploads: true;
-              };
-            };
-          };
-        };
-      };
-    };
-    operateur: {
-      include: {
-        parent: true,
-      },
-    };
-    structureMillesimes: {
-      orderBy: {
-        year: "desc";
-      };
-    };
-    structureTypologies: {
-      orderBy: {
-        year: "desc";
-      };
-    };
-    forms: {
-      include: {
-        formDefinition: true;
-      };
-    };
-    dnaStructures: {
-      include: {
-        dna: true;
-      };
-    };
-    actesAdministratifs: true;
-  };
+  include: typeof structureListInclude;
 }>;
 
 export type StructureDbDetails = Prisma.StructureGetPayload<{
-  include: {
-    userNotes: {
-      orderBy: { createdAt: "desc" };
-      select: { text: true };
-    };
-    dnaStructures: {
-      include: {
-        dna: {
-          include: {
-            activites: {
-              orderBy: {
-                date: "desc";
-              };
-            };
-            evenementsIndesirablesGraves: {
-              orderBy: {
-                evenementDate: "desc";
-              };
-            };
-          };
-        };
-      };
-    };
-    finesses: true;
-    adresses: {
-      include: {
-        adresseTypologies: {
-          orderBy: {
-            year: "desc";
-          };
-        };
-      };
-    };
-    antennes: true;
-    contacts: true;
-    structureTypologies: {
-      orderBy: {
-        year: "desc";
-      };
-    };
-    structureMillesimes: {
-      orderBy: {
-        year: "desc";
-      };
-    };
-    cpomStructures: {
-      include: {
-        cpom: {
-          include: {
-            structures: {
-              include: {
-                structure: {
-                  select: {
-                    id: true;
-                    codeBhasile: true;
-                    type: true;
-                    communeAdministrative: true;
-                    operateur: {
-                      select: {
-                        name: true;
-                      };
-                    };
-                    forms: true;
-                  };
-                };
-              };
-            };
-            operateur: true;
-            actesAdministratifs: {
-              include: {
-                fileUploads: true;
-              };
-            };
-            budgets: {
-              orderBy: {
-                year: "desc";
-              };
-            };
-          };
-        };
-      };
-    };
-    evaluations: {
-      include: {
-        fileUploads: true;
-      };
-      orderBy: {
-        date: "desc";
-      };
-    };
-    controles: {
-      include: {
-        fileUploads: true;
-      };
-      orderBy: {
-        date: "desc";
-      };
-    };
-    actesAdministratifs: {
-      include: {
-        fileUploads: true;
-      };
-    };
-    documentsFinanciers: {
-      include: {
-        fileUploads: true;
-      };
-    };
-    budgets: {
-      orderBy: {
-        year: "desc";
-      };
-    };
-    indicateursFinanciers: {
-      orderBy: {
-        year: "desc";
-      };
-    };
-    operateur: {
-      include: {
-        parent: true,
-      },
-    };
-    forms: {
-      include: {
-        formDefinition: true;
-        formSteps: {
-          include: {
-            stepDefinition: true;
-          };
-        };
-      };
-    };
-  };
+  include: typeof structureDetailsInclude;
 }>;
 
 export type StructureDbOperateur = Prisma.StructureGetPayload<{
-  select: {
-    id: true;
-    codeBhasile: true;
-    forms: true;
-  };
+  select: typeof structureOperateurSelect;
 }>;

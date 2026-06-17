@@ -17,7 +17,11 @@ export type StructureVersionDbDetails = Prisma.StructureVersionGetPayload<{
         };
       };
     };
-    finesses: true;
+    structureFinesses: {
+      include: {
+        finess: true;
+      };
+    };
     antennes: true;
     dnaStructures: {
       include: { dna: true };

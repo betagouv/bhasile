@@ -72,7 +72,7 @@ async function main() {
       where: link,
       data: { structureVersionId: version.id },
     });
-    await prisma.finess.updateMany({
+    await prisma.structureFiness.updateMany({
       where: link,
       data: { structureVersionId: version.id },
     });
