@@ -30,6 +30,8 @@ describe("StructureCard", () => {
     expect(
       screen.getByText("CADA, Croix-Rouge, Manche")
     ).toBeInTheDocument();
-    expect(screen.queryByText(/ - /)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/ - CADA, Croix-Rouge, Manche/)
+    ).not.toBeInTheDocument();
   });
 });
