@@ -30,7 +30,7 @@ export const FermetureDescriptionForm = ({
   transformation,
   structureVersionTransformation,
 }: Props) => {
-  const { goToNextStep, handleSave, prevStep, shouldShowIncompleteSteps } =
+  const { goToNextStep, handleSave, backLink, shouldShowIncompleteSteps } =
     useTransformationFormHandling();
 
   const categoryDisplayRules = fermetureActesAdministratifsCategoryToDisplay;
@@ -66,7 +66,7 @@ export const FermetureDescriptionForm = ({
       onSubmit={goToNextStep}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
-      previousStep={prevStep?.route}
+      backLink={backLink}
       showContactInfos={false}
     >
       <TransformationFormController
