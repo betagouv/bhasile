@@ -1,4 +1,3 @@
-// @ts-nocheck
 // One-off en 2 étapes  :
 //   1. Créer les liens StructureFiness depuis Finess.structureId / structureVersionId.
 //   2. Déplace `description` de Dna/Finess vers DnaStructure/StructureFiness.
