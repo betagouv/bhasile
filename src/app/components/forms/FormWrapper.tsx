@@ -147,7 +147,7 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
               className="flex gap-2 fr-link fr-icon  w-fit text-title-blue-france"
             >
               <i className="fr-icon-arrow-left-s-line before:w-4"></i>
-              {backLink.label ?? "Étape précédente"}
+              {backLink.label}
             </Link>
           )}
           {typeof children === "function" ? children(methods) : children}
@@ -239,7 +239,7 @@ type FormWrapperProps<TSchema extends z.ZodTypeAny> = {
   resetRoute?: string;
   handleCancel?: () => void;
   showSubmitButton?: boolean;
-  backLink?: { href: string; label?: string };
+  backLink?: { href: string; label: string };
   availableFooterButtons?: Array<FooterButtonType>;
   showAutoSaveMention?: boolean;
   showContactInfos?: boolean;
