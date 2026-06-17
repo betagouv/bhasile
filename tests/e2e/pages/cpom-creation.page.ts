@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import type { Page } from "@playwright/test";
 
 import { expect } from "../fixtures/test";
+import { fillAutocomplete } from "./shared/autocomplete.helper";
 import { uploadToContainer } from "./upload.helper";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -55,15 +56,7 @@ export class CpomCreationPage {
   }
 
   async fillOperateurAutocomplete(searchTerm: string): Promise<void> {
-    const input = this.page.locator("#operateur");
-    await input.click();
-    await input.fill("");
-    await input.pressSequentially(searchTerm, { delay: 80 });
-    const firstOption = this.page
-      .locator('#autocomplete-suggestions li[role="option"]')
-      .first();
-    await firstOption.waitFor({ state: "visible", timeout: 25_000 });
-    await firstOption.click();
+    await fillAutocomplete(this.page, "#operateur", searchTerm);
   }
 
   async selectRegion(region: string): Promise<void> {

@@ -3,7 +3,13 @@ import type { Locator, Page } from "@playwright/test";
 import { ControleType } from "@/types/controle.type";
 
 import { expect } from "../fixtures/test";
-import { SAMPLE_PDF, uploadToContainer } from "./upload.helper";
+import {
+  fillActeDate,
+  fillActeName,
+  fillActeStartEndDates,
+  uploadActeDocument,
+} from "./shared/actes.helper";
+import { SAMPLE_PDF } from "./upload.helper";
 
 export type Section =
   | "description"
@@ -94,23 +100,15 @@ export class StructureModificationPage {
   }
 
   async uploadControleRapport(filePath: string = SAMPLE_PDF): Promise<void> {
-    await uploadToContainer(
-      this.controlesFieldset().locator("div.bg-alt-blue-france").first(),
-      filePath
-    );
+    await uploadActeDocument(this.controlesFieldset(), filePath);
   }
 
   async fillConventionDates(startDate: string, endDate: string): Promise<void> {
-    const fieldset = this.conventionFieldset();
-    await fieldset.locator('input[name$=".startDate"]').first().fill(startDate);
-    await fieldset.locator('input[name$=".endDate"]').first().fill(endDate);
+    await fillActeStartEndDates(this.conventionFieldset(), startDate, endDate);
   }
 
   async uploadConventionDocument(filePath: string = SAMPLE_PDF): Promise<void> {
-    await uploadToContainer(
-      this.conventionFieldset().locator("div.bg-alt-blue-france").first(),
-      filePath
-    );
+    await uploadActeDocument(this.conventionFieldset(), filePath);
   }
 
   async addConventionAvenant(): Promise<void> {
@@ -120,33 +118,22 @@ export class StructureModificationPage {
   }
 
   async fillAvenantDate(date: string): Promise<void> {
-    await this.conventionFieldset()
-      .locator('div.border-l-2 input[name$=".date"]')
-      .first()
-      .fill(date);
+    await fillActeDate(this.conventionFieldset().locator("div.border-l-2"), date);
   }
 
   async uploadAvenantDocument(filePath: string = SAMPLE_PDF): Promise<void> {
-    await uploadToContainer(
-      this.conventionFieldset()
-        .locator("div.border-l-2 div.bg-alt-blue-france")
-        .first(),
+    await uploadActeDocument(
+      this.conventionFieldset().locator("div.border-l-2"),
       filePath
     );
   }
 
   async fillAutreName(name: string): Promise<void> {
-    await this.autreFieldset()
-      .locator('input[name$=".name"]')
-      .first()
-      .fill(name);
+    await fillActeName(this.autreFieldset(), name);
   }
 
   async uploadAutreDocument(filePath: string = SAMPLE_PDF): Promise<void> {
-    await uploadToContainer(
-      this.autreFieldset().locator("div.bg-alt-blue-france").first(),
-      filePath
-    );
+    await uploadActeDocument(this.autreFieldset(), filePath);
   }
 
   async toggleLgbt(): Promise<void> {

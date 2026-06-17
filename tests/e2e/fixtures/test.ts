@@ -3,12 +3,21 @@ import { test as base } from "@playwright/test";
 
 import { StructureType } from "@/types/structure.type";
 
-import { deleteCpomById, deleteStructureByCode } from "../seed/cleanup";
+import {
+  deleteCpomById,
+  deleteStructureByCode,
+  deleteTransformationGraph,
+} from "../seed/cleanup";
 import { createCpomForTest, SeededCpom } from "../seed/cpom.seed";
 import {
   createStructureForTest,
   SeededStructure,
 } from "../seed/structure.seed";
+import {
+  createTransformationSource,
+  type SeededTransformationSource,
+  seedKnownDnaCode,
+} from "../seed/transformation-source.seed";
 
 export type Fixtures = {
   seededStructure: SeededStructure;
@@ -16,6 +25,19 @@ export type Fixtures = {
   seededCpom: SeededCpom;
   seededCpomWithDates: SeededCpom;
   structuresPool: SeededStructure[];
+  registerTransformation: (transformationId: number) => void;
+  knownDnaCode: string;
+  closingStructure: SeededTransformationSource;
+  extendedStructure: SeededTransformationSource;
+  contractionSources: SeededTransformationSource[];
+  hudaSources: SeededTransformationSource[];
+  cadaTarget: SeededTransformationSource;
+};
+
+const teardownSource = async (
+  source: SeededTransformationSource
+): Promise<void> => {
+  await deleteStructureByCode(source.codeBhasile).catch(() => {});
 };
 
 export const test = base.extend<Fixtures>({
@@ -71,6 +93,74 @@ export const test = base.extend<Fixtures>({
       await Promise.allSettled(
         created.map((structure) => deleteStructureByCode(structure.codeBhasile))
       );
+    }
+  },
+
+  // Collecte les transformations créées pendant un test et supprime leur graphe
+  // au teardown (avant les sources, pour éviter les FK pendantes).
+  registerTransformation: async ({}, use) => {
+    const transformationIds: number[] = [];
+    await use((transformationId: number) => {
+      transformationIds.push(transformationId);
+    });
+    for (const transformationId of transformationIds) {
+      await deleteTransformationGraph(transformationId).catch(() => {});
+    }
+  },
+
+  knownDnaCode: async ({}, use) => {
+    const code = await seedKnownDnaCode();
+    await use(code);
+    // Le code DNA orphelin est nettoyé par l'orphan-cleanup (préfixe E2E-).
+  },
+
+  closingStructure: async ({}, use) => {
+    const source = await createTransformationSource({ type: StructureType.CADA });
+    try {
+      await use(source);
+    } finally {
+      await teardownSource(source);
+    }
+  },
+
+  extendedStructure: async ({}, use) => {
+    const source = await createTransformationSource({ type: StructureType.CADA });
+    try {
+      await use(source);
+    } finally {
+      await teardownSource(source);
+    }
+  },
+
+  contractionSources: async ({}, use) => {
+    const sources = [
+      await createTransformationSource({ type: StructureType.CADA }),
+    ];
+    try {
+      await use(sources);
+    } finally {
+      await Promise.allSettled(sources.map(teardownSource));
+    }
+  },
+
+  hudaSources: async ({}, use) => {
+    const sources = [
+      await createTransformationSource({ type: StructureType.HUDA }),
+      await createTransformationSource({ type: StructureType.HUDA }),
+    ];
+    try {
+      await use(sources);
+    } finally {
+      await Promise.allSettled(sources.map(teardownSource));
+    }
+  },
+
+  cadaTarget: async ({}, use) => {
+    const source = await createTransformationSource({ type: StructureType.CADA });
+    try {
+      await use(source);
+    } finally {
+      await teardownSource(source);
     }
   },
 });
