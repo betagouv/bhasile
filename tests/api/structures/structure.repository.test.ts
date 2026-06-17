@@ -478,6 +478,29 @@ describe("structure.repository db integration", () => {
     expect(links[0].dna.code).toBe(newCode);
   });
 
+  it("should collapse duplicate DNA codes into a single link instead of crashing", async () => {
+    // GIVEN: an empty structure
+    const structure = await createStructure();
+    const duplicatedCode = `DNA-DUP-${Date.now()}-${randomUUID()}`;
+
+    // WHEN: the same DNA code is sent twice in one update (e.g. an autosaved draft)
+    await updateOne({
+      id: structure.id,
+      dnaStructures: [
+        { description: "Premier", dna: { code: duplicatedCode } },
+        { description: "Doublon", dna: { code: duplicatedCode } },
+      ],
+    });
+
+    // THEN: the save succeeds (no P2002) and a single link survives
+    const links = await prisma.dnaStructure.findMany({
+      where: { structureId: structure.id },
+      include: { dna: true },
+    });
+    expect(links).toHaveLength(1);
+    expect(links[0].dna.code).toBe(duplicatedCode);
+  });
+
   it("should replace finesses list", async () => {
     // GIVEN: one existing FINESS linked to the structure
     const structure = await createStructure();
@@ -509,6 +532,29 @@ describe("structure.repository db integration", () => {
     expect(structureFinesses).toHaveLength(1);
     expect(structureFinesses[0].finess.code).toBe(newCode);
     expect(structureFinesses[0].description).toBe("new finess");
+  });
+
+  it("should collapse duplicate FINESS codes into a single link instead of crashing", async () => {
+    // GIVEN: an empty structure
+    const structure = await createStructure();
+    const duplicatedCode = `FIN-DUP-${Date.now()}-${randomUUID()}`;
+
+    // WHEN: the same FINESS code is sent twice in one update (e.g. an autosaved draft)
+    await updateOne({
+      id: structure.id,
+      structureFinesses: [
+        { description: "Premier", finess: { code: duplicatedCode } },
+        { description: "Doublon", finess: { code: duplicatedCode } },
+      ],
+    });
+
+    // THEN: the save succeeds (no P2002) and a single link survives
+    const structureFinesses = await prisma.structureFiness.findMany({
+      where: { structureId: structure.id },
+      include: { finess: true },
+    });
+    expect(structureFinesses).toHaveLength(1);
+    expect(structureFinesses[0].finess.code).toBe(duplicatedCode);
   });
 
   it("should upsert actesAdministratifs and delete missing ones", async () => {

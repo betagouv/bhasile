@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { structureFinessesSchema } from "@/schemas/forms/base/finess.schema";
+import {
+  structureFinessesAutoSaveSchema,
+  structureFinessesSchema,
+} from "@/schemas/forms/base/finess.schema";
 
 describe("structureFinessesSchema", () => {
   it("accepts distinct FINESS codes", () => {
@@ -41,6 +44,34 @@ describe("structureFinessesSchema", () => {
 
   it("accepts an empty list", () => {
     const result = structureFinessesSchema.safeParse({ structureFinesses: [] });
+
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("structureFinessesAutoSaveSchema", () => {
+  it("rejects duplicate FINESS codes while saving a draft", () => {
+    const result = structureFinessesAutoSaveSchema.safeParse({
+      structureFinesses: [
+        { finess: { code: "123456789" } },
+        { finess: { code: "123456789" } },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe(
+      "Les codes FINESS doivent être uniques"
+    );
+  });
+
+  it("tolerates blank or incomplete rows being filled in", () => {
+    const result = structureFinessesAutoSaveSchema.safeParse({
+      structureFinesses: [
+        { finess: { code: "123456789" } },
+        { finess: {} },
+        {},
+      ],
+    });
 
     expect(result.success).toBe(true);
   });
