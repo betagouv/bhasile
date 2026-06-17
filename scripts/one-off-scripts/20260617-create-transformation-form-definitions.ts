@@ -1,4 +1,3 @@
-// @ts-nocheck
 // One-off : crée les FormDefinition + FormStepDefinition de la feature transformation.
 // Idempotent : upsert sur slug (FormDefinition) et [formDefinitionId, slug] (FormStepDefinition).
 // Usage : yarn one-off 20260617-create-transformation-form-definitions
@@ -44,9 +43,7 @@ const formDefinitions = [
 ];
 
 async function main() {
-  console.log(
-    "🚀 Création des FormDefinition de la feature transformation..."
-  );
+  console.log("🚀 Création des FormDefinition de la feature transformation...");
 
   for (const formDefinitionData of formDefinitions) {
     const formDefinition = await prisma.formDefinition.upsert({
@@ -92,7 +89,8 @@ async function main() {
   });
 
   const totalSteps = persistedDefinitions.reduce(
-    (accumulator, definition) => accumulator + definition._count.stepsDefinition,
+    (accumulator, definition) =>
+      accumulator + definition._count.stepsDefinition,
     0
   );
 
