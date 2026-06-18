@@ -20,14 +20,10 @@ import {
   findStructuresWithTypes,
   findStructureTypologies,
 } from "./repository";
-import {
-  countCpoms,
-  findCpomStructures,
-} from "../structures/structures.repository";
+import { findCpomStructures } from "../structures/structures.repository";
 
 export type StatistiquesContext = {
   structureIds: number[];
-  nbCpoms: number;
   structures: StatistiqueDbStructure[];
   typologies: StatistiqueDbTypologie[];
   adresses: StatistiqueDbAdresse[];
@@ -48,9 +44,8 @@ export const buildStatistiquesContext = async (
     throw new StatistiquesPerimetreVideError();
   }
 
-  const [nbCpoms, structures, typologies, adresses, adresseTypologies, cpomLinks, dnaLinks] =
+  const [structures, typologies, adresses, adresseTypologies, cpomLinks, dnaLinks] =
     await Promise.all([
-      countCpoms(structureIds),
       findStructuresWithTypes(structureIds),
       findStructureTypologies(structureIds),
       findStructureAdresses(structureIds),
@@ -72,7 +67,6 @@ export const buildStatistiquesContext = async (
 
   return {
     structureIds,
-    nbCpoms,
     structures,
     typologies,
     adresses,

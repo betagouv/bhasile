@@ -1,17 +1,8 @@
-import { getYearFromDate } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
-import { StructureType } from "@/generated/prisma/client";
-import {
-  BatiStat,
-  TypeStructureStat,
-} from "@/schemas/api/statistique.schema";
-import { REPARTITION_DISPLAY_ORDER } from "@/types/adresse.type";
-import { STRUCTURE_TYPES_DISPLAY_ORDER } from "@/types/structure.type";
 
 import type {
   StatistiqueDbAdresse,
   StatistiqueDbAdresseTypologie,
-  StatistiqueDbCpomStructure,
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
 } from "./db.type";
@@ -33,15 +24,6 @@ const GLOBAL_TYPOLOGY_FIELDS = [
   StatistiqueDbTypologie,
   "placesAutorisees" | "pmr" | "lgbt" | "fvvTeh"
 >)[];
-
-/** Année unique (byYear) ou millésime propre à chaque structure (global). */
-export type StatistiqueYearRef = number | Map<number, number>;
-
-const getYearForStructure = (
-  structureId: number,
-  yearRef: StatistiqueYearRef
-): number | undefined =>
-  typeof yearRef === "number" ? yearRef : yearRef.get(structureId);
 
 // -------- Typologies (millésime) --------
 
@@ -162,57 +144,6 @@ export const sumGlobalAdressePlacesSpeciales = (
   return { qpv, logementsSociaux };
 };
 
-// -------- CPOM --------
-
-const isCpomLinkActiveForYear = (
-  link: StatistiqueDbCpomStructure,
-  year: number
-): boolean =>
-  (!link.dateStart || getYearFromDate(link.dateStart) <= year) &&
-  (!link.dateEnd || getYearFromDate(link.dateEnd) >= year);
-
-export const countCpoms = (
-  cpomLinks: StatistiqueDbCpomStructure[],
-  structureIds: Set<number>,
-  yearRef: StatistiqueYearRef
-): number => {
-  const activeCpomIds = new Set<number>();
-
-  for (const link of cpomLinks) {
-    if (!structureIds.has(link.structureId)) {
-      continue;
-    }
-    const year = getYearForStructure(link.structureId, yearRef);
-    if (year !== undefined && isCpomLinkActiveForYear(link, year)) {
-      activeCpomIds.add(link.cpomId);
-    }
-  }
-
-  return activeCpomIds.size;
-};
-
-export const countStructuresWithCpom = (
-  cpomLinks: StatistiqueDbCpomStructure[],
-  structureIds: number[],
-  yearRef: StatistiqueYearRef
-): number => {
-  const idSet = new Set(structureIds);
-  const structuresWithCpom = new Set<number>();
-
-  for (const link of cpomLinks) {
-    const year = getYearForStructure(link.structureId, yearRef);
-    if (
-      idSet.has(link.structureId) &&
-      year !== undefined &&
-      isCpomLinkActiveForYear(link, year)
-    ) {
-      structuresWithCpom.add(link.structureId);
-    }
-  }
-
-  return structuresWithCpom.size;
-};
-
 // -------- Monthly --------
 
 export const getMonthKey = (date: Date): string => date.toISOString().slice(0, 7);
@@ -221,29 +152,3 @@ export const monthKeyToDate = (key: string): Date => new Date(`${key}-01`);
 
 export const getMonthKeysFromDates = (dates: Date[]): string[] =>
   [...new Set(dates.map(getMonthKey))].sort();
-
-// -------- Display fill --------
-
-export const fillStructureTypes = (stats: TypeStructureStat[]): TypeStructureStat[] => {
-  const map = new Map(
-    stats
-      .filter((stat): stat is TypeStructureStat & { type: StructureType } =>
-        stat.type !== null
-      )
-      .map((stat) => [stat.type, stat])
-  );
-  return STRUCTURE_TYPES_DISPLAY_ORDER.map((type) => ({
-    type,
-    structures: map.get(type)?.structures ?? 0,
-    places: map.get(type)?.places ?? 0,
-  }));
-};
-
-export const fillBatis = (stats: BatiStat[]): BatiStat[] => {
-  const map = new Map(stats.map((stat) => [stat.bati, stat]));
-  return REPARTITION_DISPLAY_ORDER.map((bati) => ({
-    bati,
-    structures: map.get(bati)?.structures ?? 0,
-    places: map.get(bati)?.places ?? 0,
-  }));
-};

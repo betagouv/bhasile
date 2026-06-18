@@ -20,21 +20,26 @@ export type BatiStat = {
   places: number;
 };
 
+/** Séries annuelles : décomptes de structures uniquement (pas de places). */
+export type StructuresByYearStat = {
+  year: number;
+  totalStructures: number;
+  totalCpoms: number;
+  structuresCada: number;
+  structuresCph: number;
+  structuresHuda: number;
+  structuresCaes: number;
+  structuresBatiCollectif: number;
+  structuresBatiDiffus: number;
+  structuresBatiMixte: number;
+};
+
 export type PlacesSpecialesStat = {
   pmr: number;
   lgbt: number;
   fvvTeh: number;
   qpv: number;
   logementsSociaux: number;
-};
-
-export type StructuresYearStat = {
-  year: number;
-  totalStructures: number;
-  totalCpoms: number;
-  structuresAvecCpom: number;
-  structureTypes: TypeStructureStat[];
-  structureBatis: BatiStat[];
 };
 
 export type PlacesYearStat = {
@@ -203,6 +208,19 @@ const evaluationStatSchema = z.object({
   moyenneStructure: z.number().nullable(),
 });
 
+const structuresByYearStatSchema = z.object({
+  year: z.number(),
+  totalStructures: z.number(),
+  totalCpoms: z.number(),
+  structuresCada: z.number(),
+  structuresCph: z.number(),
+  structuresHuda: z.number(),
+  structuresCaes: z.number(),
+  structuresBatiCollectif: z.number(),
+  structuresBatiDiffus: z.number(),
+  structuresBatiMixte: z.number(),
+});
+
 export const statistiqueApiReadSchema = z.object({
   structures: z.object({
     totalStructures: z.number(),
@@ -210,16 +228,7 @@ export const statistiqueApiReadSchema = z.object({
     structuresAvecCpom: z.number(),
     structureTypes: z.array(typeStructureStatSchema),
     structureBatis: z.array(batiStatSchema),
-    byYear: z.array(
-      z.object({
-        year: z.number(),
-        totalStructures: z.number(),
-        totalCpoms: z.number(),
-        structuresAvecCpom: z.number(),
-        structureTypes: z.array(typeStructureStatSchema),
-        structureBatis: z.array(batiStatSchema),
-      })
-    ),
+    byYear: z.array(structuresByYearStatSchema),
   }),
   places: z.object({
     totalPlaces: z.number(),
