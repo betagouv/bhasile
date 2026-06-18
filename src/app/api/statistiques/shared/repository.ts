@@ -19,7 +19,7 @@ export const findStructureIds = async (
     where,
     select: { id: true },
   });
-  return rows.map((r) => r.id);
+  return rows.map((row) => row.id);
 };
 
 export const findStructuresWithTypes = async (

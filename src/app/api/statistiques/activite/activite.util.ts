@@ -52,14 +52,14 @@ const buildDnaEligibilityByActiviteScope = (
     if (link.structureId === null) {
       continue;
     }
-    const type = structureTypeById.get(link.structureId);
-    if (!type) {
+    const structureType = structureTypeById.get(link.structureId);
+    if (!structureType) {
       continue;
     }
-    if (isStructureEligibleForActiviteIndisponibilite(type)) {
+    if (isStructureEligibleForActiviteIndisponibilite(structureType)) {
       indisponibilite.add(link.dna.code);
     }
-    if (isStructureEligibleForActivitePresencesIndues(type)) {
+    if (isStructureEligibleForActivitePresencesIndues(structureType)) {
       presencesIndues.add(link.dna.code);
     }
   }
@@ -67,31 +67,35 @@ const buildDnaEligibilityByActiviteScope = (
   return { indisponibilite, presencesIndues };
 };
 
-const toMonthStat = (key: string, acc: MonthAccumulator): ActiviteByMonthStat => {
-  const presencesInduesTotal = acc.presencesInduesBPI + acc.presencesInduesDeboutees;
+const toMonthStat = (
+  monthKey: string,
+  monthTotals: MonthAccumulator
+): ActiviteByMonthStat => {
+  const presencesInduesTotal =
+    monthTotals.presencesInduesBPI + monthTotals.presencesInduesDeboutees;
 
   return {
-    date: monthKeyToDate(key),
-    placesEnregistreesDna: acc.placesEnregistreesDna,
-    placesIndisponibles: acc.placesIndisponibles,
+    date: monthKeyToDate(monthKey),
+    placesEnregistreesDna: monthTotals.placesEnregistreesDna,
+    placesIndisponibles: monthTotals.placesIndisponibles,
     tauxIndisponibilite: ratio(
-      acc.placesIndisponibles,
-      acc.placesAutoriseesIndispo
+      monthTotals.placesIndisponibles,
+      monthTotals.placesAutoriseesIndispo
     ),
-    presencesInduesBPI: acc.presencesInduesBPI,
+    presencesInduesBPI: monthTotals.presencesInduesBPI,
     tauxPresencesInduesBPI: ratio(
-      acc.presencesInduesBPI,
-      acc.placesAutoriseesPresencesIndues
+      monthTotals.presencesInduesBPI,
+      monthTotals.placesAutoriseesPresencesIndues
     ),
-    presencesInduesDeboutees: acc.presencesInduesDeboutees,
+    presencesInduesDeboutees: monthTotals.presencesInduesDeboutees,
     tauxPresencesInduesDeboutees: ratio(
-      acc.presencesInduesDeboutees,
-      acc.placesAutoriseesPresencesIndues
+      monthTotals.presencesInduesDeboutees,
+      monthTotals.placesAutoriseesPresencesIndues
     ),
     presencesInduesTotal,
     tauxPresencesInduesTotal: ratio(
       presencesInduesTotal,
-      acc.placesAutoriseesPresencesIndues
+      monthTotals.placesAutoriseesPresencesIndues
     ),
   };
 };
@@ -109,29 +113,29 @@ export const computeActiviteStatistiques = (
       continue;
     }
 
-    const key = getMonthKey(new Date(activite.date));
-    const acc = byMonth.get(key) ?? emptyMonthAccumulator();
+    const monthKey = getMonthKey(new Date(activite.date));
+    const monthTotals = byMonth.get(monthKey) ?? emptyMonthAccumulator();
     const placesAutorisees = activite.placesAutorisees ?? 0;
 
-    acc.placesEnregistreesDna += placesAutorisees;
+    monthTotals.placesEnregistreesDna += placesAutorisees;
 
     if (eligibility.indisponibilite.has(activite.dnaCode)) {
-      acc.placesAutoriseesIndispo += placesAutorisees;
-      acc.placesIndisponibles += activite.placesIndisponibles ?? 0;
+      monthTotals.placesAutoriseesIndispo += placesAutorisees;
+      monthTotals.placesIndisponibles += activite.placesIndisponibles ?? 0;
     }
 
     if (eligibility.presencesIndues.has(activite.dnaCode)) {
-      acc.placesAutoriseesPresencesIndues += placesAutorisees;
-      acc.presencesInduesBPI += activite.presencesInduesBPI ?? 0;
-      acc.presencesInduesDeboutees += activite.presencesInduesDeboutees ?? 0;
+      monthTotals.placesAutoriseesPresencesIndues += placesAutorisees;
+      monthTotals.presencesInduesBPI += activite.presencesInduesBPI ?? 0;
+      monthTotals.presencesInduesDeboutees += activite.presencesInduesDeboutees ?? 0;
     }
 
-    byMonth.set(key, acc);
+    byMonth.set(monthKey, monthTotals);
   }
 
   return {
     byMonth: [...byMonth.entries()]
-      .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
-      .map(([key, acc]) => toMonthStat(key, acc)),
+      .sort(([monthKeyA], [monthKeyB]) => monthKeyA.localeCompare(monthKeyB))
+      .map(([monthKey, monthTotals]) => toMonthStat(monthKey, monthTotals)),
   };
 };

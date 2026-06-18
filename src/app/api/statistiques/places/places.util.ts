@@ -127,14 +127,16 @@ const computeTauxEquipement = (
     );
   }
 
-  return departements.map((dept) => {
-    const places = placesByDept.get(dept.numero) ?? 0;
+  return departements.map((departement) => {
+    const places = placesByDept.get(departement.numero) ?? 0;
     return {
-      departement: dept.numero,
-      nom: dept.name,
+      departement: departement.numero,
+      nom: departement.name,
       places,
-      population: dept.population,
-      tauxPour1000: dept.population ? (places / dept.population) * 1000 : null,
+      population: departement.population,
+      tauxPour1000: departement.population
+        ? (places / departement.population) * 1000
+        : null,
     };
   });
 };

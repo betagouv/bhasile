@@ -51,9 +51,9 @@ const getBatiPerStructure = (
     if (adresse.structureId === null || adresse.repartition === null) {
       continue;
     }
-    const list = byStructure.get(adresse.structureId) ?? [];
-    list.push(adresse.repartition);
-    byStructure.set(adresse.structureId, list);
+    const repartitionsForStructure = byStructure.get(adresse.structureId) ?? [];
+    repartitionsForStructure.push(adresse.repartition);
+    byStructure.set(adresse.structureId, repartitionsForStructure);
   }
 
   const result = new Map<number, Repartition>();
@@ -94,12 +94,12 @@ const countStructuresWithActiveCpom = (
   structureIds: number[],
   year: number
 ): number => {
-  const idSet = new Set(structureIds);
+  const structureIdSet = new Set(structureIds);
   const structuresWithCpom = new Set<number>();
 
   for (const link of cpomLinks) {
     if (
-      idSet.has(link.structureId) &&
+      structureIdSet.has(link.structureId) &&
       isCpomLinkActiveForYear(link, year)
     ) {
       structuresWithCpom.add(link.structureId);
@@ -109,53 +109,53 @@ const countStructuresWithActiveCpom = (
   return structuresWithCpom.size;
 };
 
-const aggregateByKey = <Key>(
+const aggregateByKey = <GroupKey>(
   structures: StatistiqueDbStructure[],
   typologieMap: Map<number, StatistiqueDbTypologie>,
-  getKey: (structure: StatistiqueDbStructure) => Key | null
-): Map<Key, { structures: number; places: number }> => {
-  const map = new Map<Key, { structures: number; places: number }>();
+  getGroupKey: (structure: StatistiqueDbStructure) => GroupKey | null
+): Map<GroupKey, { structures: number; places: number }> => {
+  const statsByGroupKey = new Map<GroupKey, { structures: number; places: number }>();
 
   for (const structure of structures) {
     const typologie = typologieMap.get(structure.id);
     if (!typologie) {
       continue;
     }
-    const key = getKey(structure);
-    if (key === null) {
+    const groupKey = getGroupKey(structure);
+    if (groupKey === null) {
       continue;
     }
-    const current = map.get(key) ?? { structures: 0, places: 0 };
-    map.set(key, {
+    const current = statsByGroupKey.get(groupKey) ?? { structures: 0, places: 0 };
+    statsByGroupKey.set(groupKey, {
       structures: current.structures + 1,
       places: current.places + (typologie.placesAutorisees ?? 0),
     });
   }
 
-  return map;
+  return statsByGroupKey;
 };
 
 const fillStructureTypes = (stats: TypeStructureStat[]): TypeStructureStat[] => {
-  const map = new Map(
+  const statsByType = new Map(
     stats
       .filter((stat): stat is TypeStructureStat & { type: StructureType } =>
         stat.type !== null
       )
       .map((stat) => [stat.type, stat])
   );
-  return STRUCTURE_TYPES_DISPLAY_ORDER.map((type) => ({
-    type,
-    structures: map.get(type)?.structures ?? 0,
-    places: map.get(type)?.places ?? 0,
+  return STRUCTURE_TYPES_DISPLAY_ORDER.map((structureType) => ({
+    type: structureType,
+    structures: statsByType.get(structureType)?.structures ?? 0,
+    places: statsByType.get(structureType)?.places ?? 0,
   }));
 };
 
 const fillBatis = (stats: BatiStat[]): BatiStat[] => {
-  const map = new Map(stats.map((stat) => [stat.bati, stat]));
+  const statsByBati = new Map(stats.map((stat) => [stat.bati, stat]));
   return REPARTITION_DISPLAY_ORDER.map((bati) => ({
     bati,
-    structures: map.get(bati)?.structures ?? 0,
-    places: map.get(bati)?.places ?? 0,
+    structures: statsByBati.get(bati)?.structures ?? 0,
+    places: statsByBati.get(bati)?.places ?? 0,
   }));
 };
 
@@ -172,10 +172,12 @@ const computeTypeStats = (
       ).entries()
     )
       .filter(
-        (entry): entry is [StructureType, { structures: number; places: number }] =>
-          entry[0] !== null
+        (
+          groupEntry
+        ): groupEntry is [StructureType, { structures: number; places: number }] =>
+          groupEntry[0] !== null
       )
-      .map(([type, stats]) => ({ type, ...stats }))
+      .map(([structureType, typeStats]) => ({ type: structureType, ...typeStats }))
   );
 
 const computeBatiStats = (
@@ -188,7 +190,7 @@ const computeBatiStats = (
       aggregateByKey(structures, typologieMap, (structure) =>
         batiMap.get(structure.id) ?? Repartition.COLLECTIF
       ).entries()
-    ).map(([bati, stats]) => ({ bati, ...stats }))
+    ).map(([bati, batiStats]) => ({ bati, ...batiStats }))
   );
 
 const countStructuresByType = (
@@ -217,12 +219,12 @@ const computeByYearStats = (
       structures,
       getTypologieMapForExactYear(typologies, year)
     );
-    const activeIds = activeStructures.map((structure) => structure.id);
+    const activeStructureIds = activeStructures.map((structure) => structure.id);
 
     return {
       year,
       totalStructures: activeStructures.length,
-      totalCpoms: countActiveCpoms(cpomLinks, new Set(activeIds), year),
+      totalCpoms: countActiveCpoms(cpomLinks, new Set(activeStructureIds), year),
       structuresCada: countStructuresByType(activeStructures, StructureType.CADA),
       structuresCph: countStructuresByType(activeStructures, StructureType.CPH),
       structuresHuda: countStructuresByType(activeStructures, StructureType.HUDA),

@@ -81,18 +81,19 @@ const computeScopeYearStats = (
   minYear: number,
   aggregation: NumericAggregation
 ): Array<FinanceByYearScopeStat & { year: number }> => {
-  const idSet = new Set(structureIds);
+  const structureIdSet = new Set(structureIds);
   const scopedIndicateurs = indicateurs.filter(
     (indicateur) =>
-      indicateur.structureId !== null && idSet.has(indicateur.structureId)
+      indicateur.structureId !== null &&
+      structureIdSet.has(indicateur.structureId)
   );
 
   let excedentCumule = 0;
   let deficitCumule = 0;
 
   return getFinanceYears(budgets, scopedIndicateurs, minYear).map((year) => {
-    const budget = budgets.find((entry) => entry.year === year);
-    const indicsForYear = scopedIndicateurs.filter(
+    const budget = budgets.find((budgetRow) => budgetRow.year === year);
+    const indicateursForYear = scopedIndicateurs.filter(
       (indicateur) => indicateur.year === year
     );
     const totalProduits = budget?.totalProduits ?? 0;
@@ -109,13 +110,13 @@ const computeScopeYearStats = (
       dotationDemandee: budget?.dotationDemandee ?? 0,
       dotationAccordee: budget?.dotationAccordee ?? 0,
       totalETP:
-        sumValues(indicsForYear.map((indicateur) => indicateur.ETP)) ?? 0,
+        sumValues(indicateursForYear.map((indicateur) => indicateur.ETP)) ?? 0,
       tauxEncadrement: aggregateValues(
-        indicsForYear.map((indicateur) => indicateur.tauxEncadrement),
+        indicateursForYear.map((indicateur) => indicateur.tauxEncadrement),
         aggregation
       ),
       coutJournalier: aggregateValues(
-        indicsForYear.map((indicateur) => indicateur.coutJournalier),
+        indicateursForYear.map((indicateur) => indicateur.coutJournalier),
         aggregation
       ),
       totalProduits,
@@ -132,12 +133,25 @@ const scopeStatForYear = (
   stats: Array<FinanceByYearScopeStat & { year: number }>,
   year: number
 ): FinanceByYearScopeStat => {
-  const { year: _year, ...scopeStat } =
-    stats.find((entry) => entry.year === year) ?? {
+  const scopeStat =
+    stats.find((yearStat) => yearStat.year === year) ?? {
       year,
       ...emptyByYearScopeStat(),
     };
-  return scopeStat;
+
+  return {
+    dotationDemandee: scopeStat.dotationDemandee,
+    dotationAccordee: scopeStat.dotationAccordee,
+    totalETP: scopeStat.totalETP,
+    tauxEncadrement: scopeStat.tauxEncadrement,
+    coutJournalier: scopeStat.coutJournalier,
+    totalProduits: scopeStat.totalProduits,
+    totalCharges: scopeStat.totalCharges,
+    resultatNet: scopeStat.resultatNet,
+    excedentCumule: scopeStat.excedentCumule,
+    deficitCumule: scopeStat.deficitCumule,
+    soldeCumule: scopeStat.soldeCumule,
+  };
 };
 
 const buildByYearStats = (
@@ -174,9 +188,9 @@ const buildByYearStats = (
 
   const years = [
     ...new Set([
-      ...totalStats.map((entry) => entry.year),
-      ...autoriseesStats.map((entry) => entry.year),
-      ...subventionneesStats.map((entry) => entry.year),
+      ...totalStats.map((yearStat) => yearStat.year),
+      ...autoriseesStats.map((yearStat) => yearStat.year),
+      ...subventionneesStats.map((yearStat) => yearStat.year),
     ]),
   ].sort((yearA, yearB) => yearA - yearB);
 

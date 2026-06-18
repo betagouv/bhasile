@@ -89,7 +89,7 @@ const computeEvaluationNotesForMonth = (
   const structureIds = new Set(
     evaluations
       .map((evaluation) => evaluation.structureId)
-      .filter((id): id is number => id !== null)
+      .filter((structureId): structureId is number => structureId !== null)
   );
 
   return {
@@ -129,9 +129,9 @@ const computeControleQualiteByMonth = (
     (evaluation) => evaluation.date
   );
 
-  return mergeSortedMonthKeys(eigsByMonth, evaluationsByMonth).map((key) => {
-    const eigsForMonth = eigsByMonth.get(key) ?? [];
-    const evaluationsForMonth = evaluationsByMonth.get(key) ?? [];
+  return mergeSortedMonthKeys(eigsByMonth, evaluationsByMonth).map((monthKey) => {
+    const eigsForMonth = eigsByMonth.get(monthKey) ?? [];
+    const evaluationsForMonth = evaluationsByMonth.get(monthKey) ?? [];
     const { nbEig, nbEigComportementViolent } = countEigs(eigsForMonth);
     const structureIdsWithEig = getStructureIdsFromEigs(
       eigsForMonth,
@@ -146,7 +146,7 @@ const computeControleQualiteByMonth = (
     );
 
     return {
-      date: monthKeyToDate(key),
+      date: monthKeyToDate(monthKey),
       nbStructuresSansDeclarationEig,
       partStructuresSansDeclarationEig:
         partSansDeclaration !== null ? partSansDeclaration * 100 : null,

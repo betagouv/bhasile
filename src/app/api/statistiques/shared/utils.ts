@@ -41,7 +41,7 @@ export const getLastTypologiePerStructure = (
     byStructure.set(typologie.structureId, rows);
   }
 
-  const map = new Map<number, StatistiqueDbTypologie>();
+  const typologieByStructureId = new Map<number, StatistiqueDbTypologie>();
 
   for (const [structureId, rows] of byStructure) {
     const resolved: StatistiqueDbTypologie = {
@@ -53,22 +53,22 @@ export const getLastTypologiePerStructure = (
       fvvTeh: null,
     };
 
-    for (let index = rows.length - 1; index >= 0; index -= 1) {
-      const row = rows[index];
+    for (let rowIndex = rows.length - 1; rowIndex >= 0; rowIndex -= 1) {
+      const typologieRow = rows[rowIndex];
       for (const field of GLOBAL_TYPOLOGY_FIELDS) {
-        if (resolved[field] == null && row[field] != null) {
-          resolved[field] = row[field];
+        if (resolved[field] == null && typologieRow[field] != null) {
+          resolved[field] = typologieRow[field];
           if (field === "placesAutorisees") {
-            resolved.year = row.year;
+            resolved.year = typologieRow.year;
           }
         }
       }
     }
 
-    map.set(structureId, resolved);
+    typologieByStructureId.set(structureId, resolved);
   }
 
-  return map;
+  return typologieByStructureId;
 };
 
 /** Typologies remontées pour un millésime donné uniquement. */
@@ -76,13 +76,13 @@ export const getTypologieMapForExactYear = (
   typologies: StatistiqueDbTypologie[],
   year: number
 ): Map<number, StatistiqueDbTypologie> => {
-  const map = new Map<number, StatistiqueDbTypologie>();
+  const typologieByStructureId = new Map<number, StatistiqueDbTypologie>();
   for (const typologie of typologies) {
     if (typologie.year === year && typologie.structureId !== null) {
-      map.set(typologie.structureId, typologie);
+      typologieByStructureId.set(typologie.structureId, typologie);
     }
   }
-  return map;
+  return typologieByStructureId;
 };
 
 export const getTypologieYears = (typologies: StatistiqueDbTypologie[]): number[] =>
@@ -131,25 +131,26 @@ export const getActiveStructuresScope = (
 export const buildDnaCodeToStructureIds = (
   dnaLinks: StatistiqueDbDnaLink[]
 ): Map<string, Set<number>> => {
-  const map = new Map<string, Set<number>>();
+  const dnaCodeToStructureIds = new Map<string, Set<number>>();
 
   for (const link of dnaLinks) {
     if (link.structureId === null) {
       continue;
     }
-    const structureIds = map.get(link.dna.code) ?? new Set<number>();
+    const structureIds = dnaCodeToStructureIds.get(link.dna.code) ?? new Set<number>();
     structureIds.add(link.structureId);
-    map.set(link.dna.code, structureIds);
+    dnaCodeToStructureIds.set(link.dna.code, structureIds);
   }
 
-  return map;
+  return dnaCodeToStructureIds;
 };
 
 // -------- Monthly --------
 
 export const getMonthKey = (date: Date): string => date.toISOString().slice(0, 7);
 
-export const monthKeyToDate = (key: string): Date => new Date(`${key}-01`);
+export const monthKeyToDate = (monthKey: string): Date =>
+  new Date(`${monthKey}-01`);
 
 export const getTwelveMonthCutoffKey = (): string => {
   const twelveMonthsAgo = new Date();
@@ -157,21 +158,21 @@ export const getTwelveMonthCutoffKey = (): string => {
   return getMonthKey(twelveMonthsAgo);
 };
 
-export const groupByMonthKey = <T>(
-  items: T[],
-  getDate: (item: T) => Date | null | undefined
-): Map<string, T[]> => {
-  const byMonth = new Map<string, T[]>();
+export const groupByMonthKey = <Item>(
+  items: Item[],
+  getDate: (item: Item) => Date | null | undefined
+): Map<string, Item[]> => {
+  const byMonth = new Map<string, Item[]>();
 
   for (const item of items) {
     const date = getDate(item);
     if (!date) {
       continue;
     }
-    const key = getMonthKey(date);
-    const list = byMonth.get(key) ?? [];
-    list.push(item);
-    byMonth.set(key, list);
+    const monthKey = getMonthKey(date);
+    const itemsForMonth = byMonth.get(monthKey) ?? [];
+    itemsForMonth.push(item);
+    byMonth.set(monthKey, itemsForMonth);
   }
 
   return byMonth;
