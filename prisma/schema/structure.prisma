@@ -125,25 +125,11 @@ view ComparaisonPlaces {
 }
 
 view StructuresAggregates {
-  dnaCode                     String?
+  id                          Int    @unique
   places_autorisees_structure Int?
-  pmr_structure               Int?
-  lgbt_structure              Int?
-  fvv_teh_structure           Int?
-  places_autorisees_adresse   Int?
-  qpv_adresse                 Int?
-  logement_social_adresse     Int?
-  date_adresse                DateTime?
-  nb_adresses                 Int?
-  date_structure              DateTime?
-  nb_places_activite          Int?
-  diff_places_adresse         Int?
-  pct_diff_places_adresse     Float?
-  diff_places_activite        Int?
-  pct_diff_places_activite    Float?
-  created_at                  DateTime?
-  updated_at                  DateTime?
+  dotation_derniere_annee     Float?
 
+  @@map("structures_aggregates")
   @@schema("reporting")
 }
 

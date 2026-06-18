@@ -135,6 +135,11 @@ view ReportingGlobal {
   global_indicators_updated_at DateTime?
   budget_annuel                Decimal?
 
+  places_suivies_total           Int
+  dotation_structures_hors_cpom  Decimal?
+  dotation_cpoms                 Decimal?
+  dotation_parc_total            Decimal?
+
   updates_count_total          Int
   indicateurs_utiles_count_max Int
   indicateurs_impact_count_max Int
@@ -143,6 +148,9 @@ view ReportingGlobal {
   note_remplacement_excel                      Float?
   note_gain_temps                              Float?
   note_amelioration_pilotage                   Float?
+
+  first_update_at       DateTime?
+  budget_depense_prorata Decimal?
 
   cout_par_mise_a_jour      Decimal?
   cout_par_situation_utile  Decimal?
