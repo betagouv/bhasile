@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { sumValues, weightedAverage } from "@/app/utils/math.util";
+import { aggregateValues, median, sumValues, weightedAverage } from "@/app/utils/math.util";
 
 describe("math util", () => {
   describe("sum", () => {
@@ -43,6 +43,24 @@ describe("math util", () => {
           { weight: 0, value: 1 },
         ])
       ).toBe(null);
+    });
+  });
+
+  describe("median", () => {
+    it("should compute median for odd and even counts", () => {
+      expect(median([3, 1, 2])).toBe(2);
+      expect(median([1, 2, 3, 4])).toBe(2.5);
+    });
+
+    it("should ignore null and return null when empty", () => {
+      expect(median([null, undefined])).toBe(null);
+    });
+  });
+
+  describe("aggregateValues", () => {
+    it("should delegate to mean or median", () => {
+      expect(aggregateValues([1, 2, 9], "moyenne")).toBe(4);
+      expect(aggregateValues([1, 2, 9], "mediane")).toBe(2);
     });
   });
 });

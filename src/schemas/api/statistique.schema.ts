@@ -2,10 +2,14 @@ import z from "zod";
 
 import { Repartition, StructureType } from "@/generated/prisma/client";
 
+export type FinanceAggregation = "moyenne" | "mediane";
+
 export type StatistiquesFiltersRaw = {
   departements: string | null;
   operateurs: string | null;
   types: string | null;
+  /** Agrégation des taux/coûts finance : `moyenne` (défaut) ou `mediane`. */
+  aggregation: string | null;
 };
 
 export type TypeStructureStat = {
@@ -53,40 +57,31 @@ export type PlacesByYearStat = {
   logementsSociaux: number;
 };
 
-export type FinanceMedianByType = {
-  type: StructureType;
-  tauxEncadrementMedian: number | null;
-  coutJournalierMedian: number | null;
+export type FinanceScopeBreakdown<T> = {
+  total: T;
+  autorisees: T;
+  subventionnees: T;
 };
 
-export type FinanceStatByYear = {
-  year: number;
-  totalDotationsDemandees: number;
-  totalDotationsAccordees: number;
+export type FinanceByYearScopeStat = {
+  dotationDemandee: number;
+  dotationAccordee: number;
   totalETP: number;
-  tauxEncadrementMedian: number | null;
-  coutJournalierMedian: number | null;
-  byType: FinanceMedianByType[];
+  tauxEncadrement: number | null;
+  coutJournalier: number | null;
   totalProduits: number;
   totalCharges: number;
-  excedents: number;
-  deficits: number;
   resultatNet: number;
+  excedentCumule: number;
+  deficitCumule: number;
+  soldeCumule: number;
 };
 
-export type FinanceStat = Omit<FinanceStatByYear, "year">;
-
-export type FinanceScopeStat = {
-  total: FinanceStat;
-  autorisees: FinanceStat;
-  subventionnees: FinanceStat;
-};
-
-export type FinanceScopeStatByYear = {
+export type FinanceByYearStat = {
   year: number;
-  total: FinanceStatByYear;
-  autorisees: FinanceStatByYear;
-  subventionnees: FinanceStatByYear;
+  total: FinanceByYearScopeStat;
+  autorisees: FinanceByYearScopeStat;
+  subventionnees: FinanceByYearScopeStat;
 };
 
 export type EigStat = {
@@ -165,41 +160,25 @@ const placesByYearStatSchema = placesIndicatorsSchema.extend({
   year: z.number(),
 });
 
-const financeMedianByTypeSchema = z.object({
-  type: z.nativeEnum(StructureType),
-  tauxEncadrementMedian: z.number().nullable(),
-  coutJournalierMedian: z.number().nullable(),
-});
-
-const financeStatSchema = z.object({
-  totalDotationsDemandees: z.number(),
-  totalDotationsAccordees: z.number(),
+const financeByYearScopeStatSchema = z.object({
+  dotationDemandee: z.number(),
+  dotationAccordee: z.number(),
   totalETP: z.number(),
-  tauxEncadrementMedian: z.number().nullable(),
-  coutJournalierMedian: z.number().nullable(),
-  byType: z.array(financeMedianByTypeSchema),
+  tauxEncadrement: z.number().nullable(),
+  coutJournalier: z.number().nullable(),
   totalProduits: z.number(),
   totalCharges: z.number(),
-  excedents: z.number(),
-  deficits: z.number(),
   resultatNet: z.number(),
+  excedentCumule: z.number(),
+  deficitCumule: z.number(),
+  soldeCumule: z.number(),
 });
 
-const financeStatByYearSchema = financeStatSchema.extend({
+const financeByYearStatSchema = z.object({
   year: z.number(),
-});
-
-const financeScopeStatSchema = z.object({
-  total: financeStatSchema,
-  autorisees: financeStatSchema,
-  subventionnees: financeStatSchema,
-});
-
-const financeScopeStatByYearSchema = z.object({
-  year: z.number(),
-  total: financeStatByYearSchema,
-  autorisees: financeStatByYearSchema,
-  subventionnees: financeStatByYearSchema,
+  total: financeByYearScopeStatSchema,
+  autorisees: financeByYearScopeStatSchema,
+  subventionnees: financeByYearScopeStatSchema,
 });
 
 const eigStatSchema = z.object({
@@ -245,8 +224,8 @@ export const statistiqueApiReadSchema = z.object({
     byYear: z.array(placesByYearStatSchema),
   }),
   finance: z.object({
-    summary: financeScopeStatSchema,
-    byYear: z.array(financeScopeStatByYearSchema),
+    aggregation: z.enum(["moyenne", "mediane"]),
+    byYear: z.array(financeByYearStatSchema),
   }),
   controleQualite: z.object({
     eig: eigStatSchema,

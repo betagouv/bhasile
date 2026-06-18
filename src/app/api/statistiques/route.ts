@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     departements: searchParams.get("departements"),
     operateurs: searchParams.get("operateurs"),
     types: searchParams.get("types"),
+    aggregation: searchParams.get("aggregation"),
   };
 
   try {
