@@ -1,4 +1,3 @@
-import { sumValues } from "@/app/utils/math.util";
 import {
   PlacesSpecialesStat,
   PlacesYearStat,
@@ -14,10 +13,12 @@ import type {
   StatistiqueDbTypologie,
 } from "../shared/db.type";
 import {
+  computeTotalPlaces,
+  filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
   getTypologieYears,
-} from "../shared/typologie.util";
+} from "../shared/utils";
 
 const sumAdressePlacesSpeciales = (
   adresses: StatistiqueDbAdresse[]
@@ -79,16 +80,6 @@ export const computePlacesSpeciales = (
   return { pmr, lgbt, fvvTeh, ...adressePlaces };
 };
 
-export const computeTotalPlaces = (
-  structures: StatistiqueDbStructure[],
-  typologieMap: Map<number, StatistiqueDbTypologie>
-): number =>
-  sumValues(
-    structures.map(
-      (structure) => typologieMap.get(structure.id)?.placesAutorisees
-    )
-  ) ?? 0;
-
 export const computeTauxEquipement = (
   structures: StatistiqueDbStructure[],
   typologieMap: Map<number, StatistiqueDbTypologie>,
@@ -132,9 +123,7 @@ export const computeGlobalPlacesStats = (
   "totalPlaces" | "placesSpeciales" | "tauxEquipement"
 > => {
   const typologieMap = getLastTypologiePerStructure(typologies);
-  const activeStructures = structures.filter((structure) =>
-    typologieMap.has(structure.id)
-  );
+  const activeStructures = filterStructuresWithTypologie(structures, typologieMap);
 
   return {
     totalPlaces: computeTotalPlaces(activeStructures, typologieMap),
@@ -160,9 +149,7 @@ export const computePlacesYearStats = (
 ): PlacesYearStat[] =>
   getTypologieYears(typologies).map((year) => {
     const typologieMap = getTypologieMapForExactYear(typologies, year);
-    const activeStructures = structures.filter((structure) =>
-      typologieMap.has(structure.id)
-    );
+    const activeStructures = filterStructuresWithTypologie(structures, typologieMap);
 
     return {
       year,

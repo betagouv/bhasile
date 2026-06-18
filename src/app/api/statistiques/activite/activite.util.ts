@@ -5,7 +5,7 @@ import {
   getMonthKey,
   getMonthKeysFromDates,
   monthKeyToDate,
-} from "../shared/monthly.util";
+} from "../shared/utils";
 import type { StatistiqueDbActivite } from "../shared/db.type";
 
 const computePresencesInduesByMonth = (

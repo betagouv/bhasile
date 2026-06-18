@@ -5,6 +5,7 @@ import { StatistiquesFiltersRaw } from "@/schemas/api/statistique.schema";
 export const buildStructureWhere = async (
   filters: StatistiquesFiltersRaw
 ): Promise<Prisma.StructureWhereInput> => {
+  // TODO(structure-version): filtrer type/département sur version effective (shared/utils)
   const where: Prisma.StructureWhereInput = {};
 
   const typeList = filters.types?.split(",").filter(Boolean) ?? [];

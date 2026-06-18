@@ -10,7 +10,7 @@ import {
   getMonthKey,
   getMonthKeysFromDates,
   monthKeyToDate,
-} from "../shared/monthly.util";
+} from "../shared/utils";
 import type {
   StatistiqueDbDnaLink,
   StatistiqueDbEig,

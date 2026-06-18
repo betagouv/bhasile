@@ -1,4 +1,3 @@
-import { getYearFromDate } from "@/app/utils/date.util";
 import {
   BatiStat,
   StructuresYearStat,
@@ -7,10 +6,6 @@ import {
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
-import {
-  fillBatis,
-  fillStructureTypes,
-} from "../shared/aggregation.util";
 import type {
   StatistiqueDbAdresse,
   StatistiqueDbCpomStructure,
@@ -18,10 +13,16 @@ import type {
   StatistiqueDbTypologie,
 } from "../shared/db.type";
 import {
+  countCpomsForYear,
+  countStructuresWithCpom,
+  fillBatis,
+  fillStructureTypes,
+  filterStructuresWithTypologie,
   getLastTypologiePerStructure,
+  getLatestTypologieYear,
   getTypologieMapForExactYear,
   getTypologieYears,
-} from "../shared/typologie.util";
+} from "../shared/utils";
 
 const getRepartitionFromRepartitions = (
   repartitions: (Repartition | null | undefined)[]
@@ -57,43 +58,6 @@ export const getBatiPerStructure = (
     result.set(structureId, getRepartitionFromRepartitions(repartitions));
   }
   return result;
-};
-
-export const countCpomsForYear = (
-  cpomLinks: StatistiqueDbCpomStructure[],
-  structureIds: Set<number>,
-  year: number
-): number => {
-  const activeCpomIds = new Set<number>();
-  for (const link of cpomLinks) {
-    if (
-      structureIds.has(link.structureId) &&
-      (!link.dateStart || getYearFromDate(link.dateStart) <= year) &&
-      (!link.dateEnd || getYearFromDate(link.dateEnd) >= year)
-    ) {
-      activeCpomIds.add(link.cpomId);
-    }
-  }
-  return activeCpomIds.size;
-};
-
-export const countStructuresWithCpom = (
-  cpomLinks: StatistiqueDbCpomStructure[],
-  structureIds: number[],
-  year: number
-): number => {
-  const idSet = new Set(structureIds);
-  const structuresWithCpom = new Set<number>();
-  for (const link of cpomLinks) {
-    if (
-      idSet.has(link.structureId) &&
-      (!link.dateStart || getYearFromDate(link.dateStart) <= year) &&
-      (!link.dateEnd || getYearFromDate(link.dateEnd) >= year)
-    ) {
-      structuresWithCpom.add(link.structureId);
-    }
-  }
-  return structuresWithCpom.size;
 };
 
 const aggregateStructuresByKey = <Key>(
@@ -166,9 +130,7 @@ const computeStructuresSnapshot = (
   | "structureTypes"
   | "structureBatis"
 > => {
-  const activeStructures = structures.filter((structure) =>
-    typologieMap.has(structure.id)
-  );
+  const activeStructures = filterStructuresWithTypologie(structures, typologieMap);
   const activeIds = new Set(activeStructures.map((structure) => structure.id));
 
   return {
@@ -192,10 +154,7 @@ export const computeGlobalStructuresStats = (
 ): Omit<StructuresYearStat, "year"> => {
   const typologieMap = getLastTypologiePerStructure(typologies);
   const batiMap = getBatiPerStructure(adresses);
-  const latestYear =
-    typologies.length > 0
-      ? Math.max(...typologies.map((typologie) => typologie.year))
-      : new Date().getFullYear();
+  const latestYear = getLatestTypologieYear(typologies);
 
   return computeStructuresSnapshot(
     structures,

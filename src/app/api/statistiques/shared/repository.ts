@@ -13,7 +13,7 @@ import type {
 export const findStructureIds = async (
   where: Prisma.StructureWhereInput
 ): Promise<number[]> => {
-  // TODO: exclure les structures avec un acte de transformation de type fermeture effectif à date
+  // TODO(structure-version): filtrer/exclure via shared/utils (fermeture effective, champs version)
   const rows = await prisma.structure.findMany({
     where,
     select: { id: true },
@@ -24,6 +24,7 @@ export const findStructureIds = async (
 export const findStructuresWithTypes = async (
   structureIds: number[]
 ): Promise<StatistiqueDbStructure[]> => {
+  // TODO(structure-version): lire type/département depuis version effective (shared/utils)
   return prisma.structure.findMany({
     where: { id: { in: structureIds } },
     select: {

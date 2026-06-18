@@ -1,8 +1,7 @@
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesContext } from "../shared/context";
-import { getLastTypologiePerStructure } from "../shared/typologie.util";
-import { computeTotalPlaces } from "../places/places.util";
+import { computeTotalPlaces, getLastTypologiePerStructure } from "../shared/utils";
 import { findEigs, findEvaluations } from "./controle-qualite.repository";
 import {
   computeEigByMonth,
