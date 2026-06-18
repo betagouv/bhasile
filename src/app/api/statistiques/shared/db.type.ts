@@ -21,6 +21,7 @@ export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
 
 export type StatistiqueDbAdresse = Prisma.AdresseGetPayload<{
   select: {
+    id: true;
     structureId: true;
     repartition: true;
     qpv: true;
@@ -30,6 +31,7 @@ export type StatistiqueDbAdresse = Prisma.AdresseGetPayload<{
 
 export type StatistiqueDbAdresseTypologie = Prisma.AdresseTypologieGetPayload<{
   select: {
+    adresseId: true;
     year: true;
     qpv: true;
     logementSocial: true;

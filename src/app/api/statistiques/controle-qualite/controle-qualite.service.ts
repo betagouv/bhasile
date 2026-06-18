@@ -1,7 +1,11 @@
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesContext } from "../shared/context";
-import { computeTotalPlaces, getLastTypologiePerStructure } from "../shared/utils";
+import {
+  computeTotalPlaces,
+  filterStructuresWithTypologie,
+  getLastTypologiePerStructure,
+} from "../shared/utils";
 import { findEigs, findEvaluations } from "./controle-qualite.repository";
 import {
   computeEigByMonth,
@@ -16,7 +20,8 @@ export const getControleQualiteStatistiques = async (
   const { structureIds, structures, typologies, dnaLinks, dnaCodes } = context;
 
   const typologieMap = getLastTypologiePerStructure(typologies);
-  const totalPlaces = computeTotalPlaces(structures, typologieMap);
+  const activeStructures = filterStructuresWithTypologie(structures, typologieMap);
+  const totalPlaces = computeTotalPlaces(activeStructures, typologieMap);
 
   const [eigs, evaluations] = await Promise.all([
     findEigs(dnaCodes),

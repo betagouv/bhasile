@@ -1,4 +1,7 @@
-import { StatistiqueApiRead, StatistiquesFiltersRaw } from "@/schemas/api/statistique.schema";
+import {
+  StatistiqueApiRead,
+  StatistiquesFiltersRaw,
+} from "@/schemas/api/statistique.schema";
 
 import { getActiviteStatistiques } from "./activite/activite.service";
 import { getControleQualiteStatistiques } from "./controle-qualite/controle-qualite.service";
@@ -11,15 +14,16 @@ export const getStatistiques = async (
   filters: StatistiquesFiltersRaw
 ): Promise<StatistiqueApiRead> => {
   // TODO: exposer meta.updatedAt par bloc (campagne actualisation, OFII, instant T)
+  // TODO: add RMU
   const context = await buildStatistiquesContext(filters);
 
-  const [finance, controleQualite, activite, structures, places] =
+  const [structures, places, finance, controleQualite, activite] =
     await Promise.all([
+      getStructuresStatistiques(context),
+      getPlacesStatistiques(context),
       getFinanceStatistiques(context),
       getControleQualiteStatistiques(context),
       getActiviteStatistiques(context),
-      getStructuresStatistiques(context),
-      getPlacesStatistiques(context),
     ]);
 
   return {

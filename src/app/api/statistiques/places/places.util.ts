@@ -18,17 +18,8 @@ import {
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
   getTypologieYears,
+  sumGlobalAdressePlacesSpeciales,
 } from "../shared/utils";
-
-const sumAdressePlacesSpeciales = (
-  adresses: StatistiqueDbAdresse[]
-): Pick<PlacesSpecialesStat, "qpv" | "logementsSociaux"> => ({
-  qpv: adresses.reduce((acc, adresse) => acc + (adresse.qpv ?? 0), 0),
-  logementsSociaux: adresses.reduce(
-    (acc, adresse) => acc + (adresse.logementSocial ?? 0),
-    0
-  ),
-});
 
 const sumAdresseTypologiePlacesSpeciales = (
   adresseTypologies: StatistiqueDbAdresseTypologie[],
@@ -67,15 +58,11 @@ export const computePlacesSpeciales = (
   }
 
   const structureIds = new Set(structures.map((structure) => structure.id));
-  const relevantAdresses = adresses.filter(
-    (adresse) =>
-      adresse.structureId !== null && structureIds.has(adresse.structureId)
-  );
 
   const adressePlaces =
     year !== undefined
       ? sumAdresseTypologiePlacesSpeciales(adresseTypologies, year)
-      : sumAdressePlacesSpeciales(relevantAdresses);
+      : sumGlobalAdressePlacesSpeciales(adresses, adresseTypologies, structureIds);
 
   return { pmr, lgbt, fvvTeh, ...adressePlaces };
 };

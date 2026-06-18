@@ -58,6 +58,7 @@ export const findStructureAdresses = async (
   return prisma.adresse.findMany({
     where: { structureId: { in: structureIds } },
     select: {
+      id: true,
       structureId: true,
       repartition: true,
       qpv: true,
@@ -75,6 +76,7 @@ export const findAdresseTypologies = async (
   return prisma.adresseTypologie.findMany({
     where: { adresse: { structureId: { in: structureIds } } },
     select: {
+      adresseId: true,
       year: true,
       qpv: true,
       logementSocial: true,

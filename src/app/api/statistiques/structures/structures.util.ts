@@ -13,15 +13,15 @@ import type {
   StatistiqueDbTypologie,
 } from "../shared/db.type";
 import {
-  countCpomsForYear,
+  countCpoms,
   countStructuresWithCpom,
   fillBatis,
   fillStructureTypes,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
-  getLatestTypologieYear,
   getTypologieMapForExactYear,
   getTypologieYears,
+  type StatistiqueYearRef,
 } from "../shared/utils";
 
 const getRepartitionFromRepartitions = (
@@ -121,7 +121,7 @@ const computeStructuresSnapshot = (
   typologieMap: Map<number, StatistiqueDbTypologie>,
   batiMap: Map<number, Repartition>,
   cpomLinks: StatistiqueDbCpomStructure[],
-  year: number
+  yearRef: StatistiqueYearRef
 ): Pick<
   StructuresYearStat,
   | "totalStructures"
@@ -131,16 +131,12 @@ const computeStructuresSnapshot = (
   | "structureBatis"
 > => {
   const activeStructures = filterStructuresWithTypologie(structures, typologieMap);
-  const activeIds = new Set(activeStructures.map((structure) => structure.id));
+  const activeIds = activeStructures.map((structure) => structure.id);
 
   return {
     totalStructures: activeStructures.length,
-    totalCpoms: countCpomsForYear(cpomLinks, activeIds, year),
-    structuresAvecCpom: countStructuresWithCpom(
-      cpomLinks,
-      activeStructures.map((structure) => structure.id),
-      year
-    ),
+    totalCpoms: countCpoms(cpomLinks, new Set(activeIds), yearRef),
+    structuresAvecCpom: countStructuresWithCpom(cpomLinks, activeIds, yearRef),
     structureTypes: computeTypeStats(activeStructures, typologieMap),
     structureBatis: computeBatiStats(activeStructures, batiMap, typologieMap),
   };
@@ -153,15 +149,19 @@ export const computeGlobalStructuresStats = (
   cpomLinks: StatistiqueDbCpomStructure[]
 ): Omit<StructuresYearStat, "year"> => {
   const typologieMap = getLastTypologiePerStructure(typologies);
-  const batiMap = getBatiPerStructure(adresses);
-  const latestYear = getLatestTypologieYear(typologies);
+  const structureYears = new Map(
+    [...typologieMap.entries()].map(([structureId, typologie]) => [
+      structureId,
+      typologie.year,
+    ])
+  );
 
   return computeStructuresSnapshot(
     structures,
     typologieMap,
-    batiMap,
+    getBatiPerStructure(adresses),
     cpomLinks,
-    latestYear
+    structureYears
   );
 };
 
