@@ -68,7 +68,7 @@ test.describe("Transformations — comportements transverses", () => {
     await mockBanApi(page);
   });
 
-  test("1 — la finalisation est bloquée si des étapes sont incomplètes", async ({
+  test("la finalisation est bloquée si des étapes sont incomplètes", async ({
     page,
     closingStructure,
     registerTransformation,
@@ -89,7 +89,7 @@ test.describe("Transformations — comportements transverses", () => {
     expect(draft.form?.status).toBe(false);
   });
 
-  test("3 — le bandeau des transformations en cours s'affiche au-dessus de la liste", async ({
+  test("le bandeau des transformations en cours s'affiche au-dessus de la liste", async ({
     page,
     closingStructure,
     registerTransformation,
@@ -111,7 +111,7 @@ test.describe("Transformations — comportements transverses", () => {
     ).toBeAttached();
   });
 
-  test.fixme("4 — annuler la démarche supprime le brouillon", async ({
+  test.fixme("annuler la démarche supprime le brouillon", async ({
     page,
     closingStructure,
   }) => {
@@ -129,7 +129,7 @@ test.describe("Transformations — comportements transverses", () => {
     expect(deleted).toBeNull();
   });
 
-  test("2 — enregistrer l'avancée via le header sauvegarde un brouillon", async ({
+  test("enregistrer l'avancée via le header sauvegarde un brouillon", async ({
     page,
     knownDnaCodes,
     registerTransformation,
@@ -151,7 +151,7 @@ test.describe("Transformations — comportements transverses", () => {
     ).toBe("E2E-DRAFT-NOM");
   });
 
-  test("5 — quitter en cours de saisie ouvre la pop-in de confirmation", async ({
+  test("quitter en cours de saisie ouvre la pop-in de confirmation", async ({
     page,
     knownDnaCodes,
     registerTransformation,

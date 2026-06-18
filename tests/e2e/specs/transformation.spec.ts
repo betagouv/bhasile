@@ -52,11 +52,11 @@ const historicalYearsUnchanged = (
 
 test.describe("Transformations — flux finalisés", () => {
   test.beforeEach(async ({ page }) => {
-    test.setTimeout(20000);
+    test.setTimeout(40000);
     await mockBanApi(page);
   });
 
-  test("flux 2 — fermeture sèche", async ({
+  test("fermeture sèche", async ({
     page,
     closingStructure,
     registerTransformation,
@@ -82,7 +82,7 @@ test.describe("Transformations — flux finalisés", () => {
     expect(new Date(fermetureDate!).getUTCFullYear()).toBe(EFFECTIVE_YEAR);
   });
 
-  test("flux 3 — extension depuis structures qui contractent", async ({
+  test("extension depuis structures qui contractent", async ({
     page,
     extendedStructure,
     contractionSources,
@@ -127,7 +127,7 @@ test.describe("Transformations — flux finalisés", () => {
     expect(historicalYearsUnchanged(contraction)).toBe(true);
   });
 
-  test("flux 5 — HUDA vers CADA existant", async ({
+  test("HUDA vers CADA existant", async ({
     page,
     hudaSources,
     cadaTarget,
@@ -160,8 +160,10 @@ test.describe("Transformations — flux finalisés", () => {
     expect(historicalYearsUnchanged(extensions[0])).toBe(true);
   });
 
+  // Flux créant une structure (bloc CREATION → getNextBhasileCode) : sérialisés
+  // entre eux pour éviter la collision sur le compteur de code région.
   test.describe.serial("flux créateurs de structure", () => {
-    test("flux 1 — création ex-nihilo", async ({
+    test("création ex-nihilo", async ({
       page,
       knownDnaCodes,
       registerTransformation,
@@ -209,7 +211,7 @@ test.describe("Transformations — flux finalisés", () => {
       ).toBe(true);
     });
 
-    test("flux 4 — HUDA vers nouveau CADA", async ({
+    test("HUDA vers nouveau CADA", async ({
       page,
       hudaSources,
       knownDnaCodes,

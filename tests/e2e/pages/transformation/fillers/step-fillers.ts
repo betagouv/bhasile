@@ -21,7 +21,7 @@ const byId = (id: string): string => `[id="${id}"]`;
 type Brique = "creation" | "extension" | "contraction" | "fermeture";
 
 const detectBrique = (url: string): Brique => {
-  if (url.includes("/creation/") || url.includes("/ouverture/")) {
+  if (url.includes("/creation/")) {
     return "creation";
   }
   if (url.includes("/extension/")) {

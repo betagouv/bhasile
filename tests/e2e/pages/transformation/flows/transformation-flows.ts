@@ -81,7 +81,7 @@ const finishFlow = async (
   await finalizeTransformation(page);
 };
 
-/** Flux 1 — Création ex-nihilo (kitchen-sink des champs optionnels + 1 upload). */
+/** Création ex-nihilo (kitchen-sink des champs optionnels + 1 upload). */
 export const runCreationExNihilo = async (
   page: Page,
   params: { dnaCodes: string[] }
@@ -105,7 +105,7 @@ export const runCreationExNihilo = async (
   return transformationId;
 };
 
-/** Flux 2 — Fermeture sèche (1 étape + upload doc de fermeture). */
+/** Fermeture sèche (1 étape + upload doc de fermeture). */
 export const runFermetureSeche = async (
   page: Page,
   params: { sourceStructureId: number }
@@ -123,7 +123,7 @@ export const runFermetureSeche = async (
   return transformationId;
 };
 
-/** Flux 3 — Extension depuis structures qui contractent (contraction + extension, prefill). */
+/** Extension depuis structures qui contractent (contraction + extension, prefill). */
 export const runExtensionFromContractions = async (
   page: Page,
   params: { extendedStructureId: number; contractionSourceIds: number[] }
@@ -147,7 +147,7 @@ export const runExtensionFromContractions = async (
   return transformationId;
 };
 
-/** Flux 4 — HUDA → nouveau CADA (N fermetures + création depuis sources). */
+/** HUDA → nouveau CADA (N fermetures + création depuis sources). */
 export const runHudaToNewCada = async (
   page: Page,
   params: { hudaSourceIds: number[]; dnaCode: string }
@@ -169,7 +169,7 @@ export const runHudaToNewCada = async (
   return transformationId;
 };
 
-/** Flux 5 — HUDA → CADA existant (N fermetures + extension, héritage opérateur). */
+/** HUDA → CADA existant (N fermetures + extension, héritage opérateur). */
 export const runHudaToExistingCada = async (
   page: Page,
   params: { hudaSourceIds: number[]; cadaTargetId: number }

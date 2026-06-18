@@ -1,6 +1,5 @@
 import { prisma } from "./prisma";
 
-/** Charge le graphe complet d'une transformation pour les assertions DB. */
 export const fetchTransformationGraph = async (transformationId: number) => {
   return prisma.transformation.findUniqueOrThrow({
     where: { id: transformationId },
