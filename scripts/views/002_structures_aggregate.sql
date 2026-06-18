@@ -3,14 +3,24 @@ CREATE OR REPLACE VIEW:"SCHEMA"."structures_aggregates" AS
 WITH
   structure_typologie_dernier_millesime AS (
     SELECT DISTINCT
-      ON (st."structureId") st."structureId",
+      ON (sc."id") sc."id" AS "structureId",
       st."placesAutorisees"
     FROM
-      public."StructureTypologie" st
+:"SCHEMA"."structures_core" sc
+      INNER JOIN public."StructureTypologie" st ON (
+        (
+          sc."structure_version_id" IS NOT NULL
+          AND st."structureVersionId" = sc."structure_version_id"
+        )
+        OR (
+          sc."structure_version_id" IS NULL
+          AND st."structureId" = sc."id"
+        )
+      )
     WHERE
       st."placesAutorisees" IS NOT NULL
     ORDER BY
-      st."structureId",
+      sc."id",
       st."year" DESC
   ),
   cpom_convention_dates AS (
@@ -90,7 +100,9 @@ SELECT
   sc."region" AS "region",
   sc."operateur" AS "operateur",
   sc."structure_type" AS "structure_type",
-  sf."public" AS "public",
+  sc."public" AS "public",
+  sc."latitude" AS "latitude",
+  sc."longitude" AS "longitude",
   sc."updated_at" AS "updated_at",
   sf."finalisation_status" AS "finalisation_status",
   sf."finalisation_status_detail" AS "finalisation_status_detail",
