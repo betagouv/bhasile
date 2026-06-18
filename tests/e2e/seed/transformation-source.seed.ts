@@ -24,11 +24,6 @@ export type SeededTransformationSource = SeededStructure & {
   placesAutorisees: number;
 };
 
-/**
- * Marque une structure comme finalisée pour qu'elle apparaisse dans la
- * sélection des transformations (le filtre `finalised` exige un Form
- * `finalisation-v1` à `status = true`).
- */
 const seedFinalisationForm = async (structureId: number): Promise<void> => {
   const formDefinition = await prisma.formDefinition.findUnique({
     where: { slug: FINALISATION_FORM_SLUG },
@@ -120,13 +115,6 @@ const seedAdresses = async (structureId: number): Promise<void> => {
   }
 };
 
-/**
- * Crée une structure source finalisée et enrichie (contacts, antennes,
- * adresses + typologies, structureTypologies, DNA, FINESS, Form finalisé)
- * — utilisable comme source/cible d'une transformation : sélectionnable et
- * avec des données à pré-remplir (`copyStructureVersion` lit ces relations
- * legacy sur `Structure`).
- */
 export const createTransformationSource = async (
   overrides: Partial<TransformationSourceInput> = {}
 ): Promise<SeededTransformationSource> => {
@@ -151,12 +139,8 @@ export const createTransformationSource = async (
   };
 };
 
-/**
- * Crée un code DNA connu en base (référentiel) pour les flux de création,
- * où le champ DNA est en autocomplete et n'accepte qu'un code existant.
- */
-export const seedKnownDnaCode = async (): Promise<string> => {
-  const code = uniqueDnaCode();
-  await prisma.dna.create({ data: { code } });
-  return code;
+export const seedKnownDnaCodes = async (count: number): Promise<string[]> => {
+  const codes = Array.from({ length: count }, () => uniqueDnaCode());
+  await prisma.dna.createMany({ data: codes.map((code) => ({ code })) });
+  return codes;
 };

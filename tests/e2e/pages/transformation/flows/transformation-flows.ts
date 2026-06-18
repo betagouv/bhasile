@@ -3,7 +3,10 @@ import type { Page } from "@playwright/test";
 import { StructureType } from "@/types/structure.type";
 import { TransformationType } from "@/types/transformation.type";
 
-import { buildCreationNom } from "../../../data/transformation.factory";
+import {
+  buildCreationNom,
+  OPERATEUR_SEARCH,
+} from "../../../data/transformation.factory";
 import {
   enterViaCreationCta,
   enterViaHudaCta,
@@ -27,16 +30,25 @@ import {
   gotoVerification,
 } from "../transformation-nav.helper";
 
-const OPERATEUR_SEARCH = "Opér";
+const STEPS_PER_BRIQUE = 3;
 
-const EMPTY_CONTEXT: FillContext = {
-  creationNom: "",
-  dnaCode: "",
+export const creationContext = (
+  dnaCodes: string[],
+  creationNom: string = buildCreationNom()
+): FillContext => ({
+  creationNom,
+  dnaCode: dnaCodes[0] ?? "",
+  secondDnaCode: dnaCodes[1] ?? "",
   operateurSearch: OPERATEUR_SEARCH,
   structureType: StructureType.CADA,
-};
+});
 
-const captureTransformationId = async (page: Page): Promise<number> => {
+const EMPTY_CONTEXT: FillContext = creationContext([], "");
+
+const emptySteps = (count: number): FillOptions[] =>
+  Array.from({ length: count }, () => ({}));
+
+export const captureTransformationId = async (page: Page): Promise<number> => {
   await page.waitForURL(/\/structures\/transformation\/\d+(\/|$)/, {
     timeout: 30_000,
   });
@@ -44,6 +56,9 @@ const captureTransformationId = async (page: Page): Promise<number> => {
   if (!match) {
     throw new Error(`transformationId introuvable dans l'URL: ${page.url()}`);
   }
+  await page.waitForURL(/\/structures\/transformation\/\d+\/[a-z-]+\/\d+\/\w/, {
+    timeout: 30_000,
+  });
   return Number(match[1]);
 };
 
@@ -69,14 +84,9 @@ const finishFlow = async (
 /** Flux 1 — Création ex-nihilo (kitchen-sink des champs optionnels + 1 upload). */
 export const runCreationExNihilo = async (
   page: Page,
-  params: { dnaCode: string }
+  params: { dnaCodes: string[] }
 ): Promise<number> => {
-  const context: FillContext = {
-    creationNom: buildCreationNom(),
-    dnaCode: params.dnaCode,
-    operateurSearch: OPERATEUR_SEARCH,
-    structureType: StructureType.CADA,
-  };
+  const context = creationContext(params.dnaCodes);
   await enterViaCreationCta(page);
   await selectTransformationType(page, TransformationType.OUVERTURE_EX_NIHILO);
   await submitSelection(page);
@@ -86,7 +96,6 @@ export const runCreationExNihilo = async (
       withAntennes: true,
       withSecondDna: true,
       withSecondContact: true,
-      withFiness: true,
       withFiliale: true,
     },
     { typeBati: "DIFFUS", withQpvPmr: true },
@@ -103,7 +112,10 @@ export const runFermetureSeche = async (
 ): Promise<number> => {
   await enterViaStructureMenu(page, params.sourceStructureId);
   await selectFirstOption(page, "fermeture");
-  await selectTransformationType(page, TransformationType.FERMETURE_SANS_TRANSFERT);
+  await selectTransformationType(
+    page,
+    TransformationType.FERMETURE_SANS_TRANSFERT
+  );
   await submitSelection(page);
   const transformationId = await captureTransformationId(page);
   await walkSteps(page, EMPTY_CONTEXT, [{ withFermetureDoc: true }]);
@@ -129,16 +141,8 @@ export const runExtensionFromContractions = async (
   await submitSelection(page);
   const transformationId = await captureTransformationId(page);
 
-  // Contraction (3 étapes) puis extension (3 étapes, avec changement d'adresse).
-  const contractionSteps: FillOptions[] = params.contractionSourceIds.flatMap(
-    () => [{}, {}, {}]
-  );
-  await walkSteps(page, EMPTY_CONTEXT, [
-    ...contractionSteps,
-    { changeAddress: true },
-    {},
-    {},
-  ]);
+  const briques = params.contractionSourceIds.length + 1;
+  await walkSteps(page, EMPTY_CONTEXT, emptySteps(briques * STEPS_PER_BRIQUE));
   await finishFlow(page, transformationId);
   return transformationId;
 };
@@ -148,12 +152,7 @@ export const runHudaToNewCada = async (
   page: Page,
   params: { hudaSourceIds: number[]; dnaCode: string }
 ): Promise<number> => {
-  const context: FillContext = {
-    creationNom: buildCreationNom(),
-    dnaCode: params.dnaCode,
-    operateurSearch: OPERATEUR_SEARCH,
-    structureType: StructureType.CADA,
-  };
+  const context = creationContext([params.dnaCode]);
   await enterViaHudaCta(page);
   await selectTransformationType(
     page,
@@ -163,8 +162,9 @@ export const runHudaToNewCada = async (
   await submitSelection(page);
   const transformationId = await captureTransformationId(page);
 
-  const fermetureSteps: FillOptions[] = params.hudaSourceIds.map(() => ({}));
-  await walkSteps(page, context, [...fermetureSteps, {}, {}, {}]);
+  // N fermetures (1 étape chacune) + une brique création (3 étapes).
+  const steps = emptySteps(params.hudaSourceIds.length + STEPS_PER_BRIQUE);
+  await walkSteps(page, context, steps);
   await finishFlow(page, transformationId);
   return transformationId;
 };
@@ -179,14 +179,14 @@ export const runHudaToExistingCada = async (
     page,
     TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR
   );
-  // Les HUDA d'abord (le bloc CADA hérite de leur opérateur et n'apparaît qu'ensuite).
   await selectSources(page, { structureIds: params.hudaSourceIds });
   await pickStructures(page, [params.cadaTargetId]);
   await submitSelection(page);
   const transformationId = await captureTransformationId(page);
 
-  const fermetureSteps: FillOptions[] = params.hudaSourceIds.map(() => ({}));
-  await walkSteps(page, EMPTY_CONTEXT, [...fermetureSteps, {}, {}, {}]);
+  // N fermetures (1 étape chacune) + une brique extension (3 étapes).
+  const steps = emptySteps(params.hudaSourceIds.length + STEPS_PER_BRIQUE);
+  await walkSteps(page, EMPTY_CONTEXT, steps);
   await finishFlow(page, transformationId);
   return transformationId;
 };

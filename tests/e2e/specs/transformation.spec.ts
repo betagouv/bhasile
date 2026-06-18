@@ -1,9 +1,12 @@
+import { StructureType } from "@/types/structure.type";
 import {
   StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
+import { TRANSFORMATION_TEST_VALUES } from "../data/transformation.factory";
 import { expect, test } from "../fixtures/test";
+import { PARIS_ADDRESS } from "../pages/shared/address.helper";
 import { mockBanApi } from "../pages/shared/ban-mock.helper";
 import {
   runCreationExNihilo,
@@ -12,21 +15,44 @@ import {
   runHudaToExistingCada,
   runHudaToNewCada,
 } from "../pages/transformation/flows/transformation-flows";
-import { fetchTransformationGraph } from "../seed/transformation-assert";
+import {
+  fetchTransformationGraph,
+  type TransformationGraph,
+} from "../seed/transformation-assert";
+import { SOURCE_PLACES_AUTORISEES } from "../seed/transformation-source.seed";
 
-// WIP — flux 2 vert. Les flux marqués `` butent sur 3 blocages
-// d'interaction de formulaire à finaliser avec observation navigateur :
-//  1. operateur.id en création (OperateurAutocompleteRhf) : l'autocomplete
-//     remplit le nom mais pas l'id → "Ce champ est requis" (flux 1, 4).
-//  2. select#type contrôlé : selectOption ne propage pas l'onChange → filtre
-//     type vide → liste de sélection vide (flux 3).
-//  3. une étape du walk n'atteint pas VALIDE (identification existante/places) :
-//     flux 5 atteint la vérification mais finalisation bloquée (flux 3, 5).
+const EFFECTIVE_YEAR = Number(
+  TRANSFORMATION_TEST_VALUES.effectiveDate.slice(0, 4)
+);
+
+type StructureVersionTransformationGraph =
+  TransformationGraph["structureVersionTransformations"][number];
+
+const placesForEffectiveYear = (
+  svt: StructureVersionTransformationGraph | undefined
+): number | null | undefined =>
+  svt?.structureVersion?.structureTypologies.find(
+    (typologie) => typologie.year === EFFECTIVE_YEAR
+  )?.placesAutorisees;
+
+const historicalYearsUnchanged = (
+  svt: StructureVersionTransformationGraph | undefined
+): boolean => {
+  const historical =
+    svt?.structureVersion?.structureTypologies.filter(
+      (typologie) => typologie.year !== EFFECTIVE_YEAR
+    ) ?? [];
+  return (
+    historical.length > 0 &&
+    historical.every(
+      (typologie) => typologie.placesAutorisees === SOURCE_PLACES_AUTORISEES
+    )
+  );
+};
+
 test.describe("Transformations — flux finalisés", () => {
   test.beforeEach(async ({ page }) => {
-    // Les flux multi-briques (saisie + walk de plusieurs étapes) dépassent le
-    // timeout par défaut de 30s.
-    test.setTimeout(120_000);
+    test.setTimeout(20000);
     await mockBanApi(page);
   });
 
@@ -51,10 +77,12 @@ test.describe("Transformations — flux finalisés", () => {
     expect(fermeture.type).toBe(StructureVersionTransformationType.FERMETURE);
     expect(fermeture.form?.status).toBe(true);
     expect(fermeture.structureVersion?.structureId).toBe(closingStructure.id);
+    const fermetureDate = fermeture.structureVersion?.effectiveDate;
+    expect(fermetureDate).toBeTruthy();
+    expect(new Date(fermetureDate!).getUTCFullYear()).toBe(EFFECTIVE_YEAR);
   });
 
-  // TODO(blocages 2 & 3) : select#type contrôlé + validation d'un step.
-  test.fixme("flux 3 — extension depuis structures qui contractent", async ({
+  test("flux 3 — extension depuis structures qui contractent", async ({
     page,
     extendedStructure,
     contractionSources,
@@ -85,16 +113,21 @@ test.describe("Transformations — flux finalisés", () => {
     );
     expect(extension).toBeDefined();
     expect(contraction).toBeDefined();
-    expect(
-      extension?.structureVersion?.structureTypologies[0]?.placesAutorisees
-    ).toBe(20);
-    expect(
-      contraction?.structureVersion?.structureTypologies[0]?.placesAutorisees
-    ).toBe(5);
+    expect(extension?.structureVersion?.structureId).toBe(extendedStructure.id);
+    expect(contraction?.structureVersion?.structureId).toBe(
+      contractionSources[0].id
+    );
+    expect(placesForEffectiveYear(extension)).toBe(
+      TRANSFORMATION_TEST_VALUES.extensionPlaces
+    );
+    expect(placesForEffectiveYear(contraction)).toBe(
+      TRANSFORMATION_TEST_VALUES.contractionPlaces
+    );
+    expect(historicalYearsUnchanged(extension)).toBe(true);
+    expect(historicalYearsUnchanged(contraction)).toBe(true);
   });
 
-  // TODO(blocage 3) : un step n'atteint pas VALIDE (sélection OK, va jusqu'à la vérif).
-  test.fixme("flux 5 — HUDA vers CADA existant", async ({
+  test("flux 5 — HUDA vers CADA existant", async ({
     page,
     hudaSources,
     cadaTarget,
@@ -121,19 +154,20 @@ test.describe("Transformations — flux finalisés", () => {
     expect(fermetures).toHaveLength(hudaSources.length);
     expect(extensions).toHaveLength(1);
     expect(extensions[0]?.structureVersion?.structureId).toBe(cadaTarget.id);
+    expect(placesForEffectiveYear(extensions[0])).toBe(
+      TRANSFORMATION_TEST_VALUES.extensionPlaces
+    );
+    expect(historicalYearsUnchanged(extensions[0])).toBe(true);
   });
 
-  // Flux créant une structure (bloc CREATION → getNextBhasileCode) : sérialisés
-  // entre eux pour éviter la collision sur le compteur de code région.
   test.describe.serial("flux créateurs de structure", () => {
-    // TODO(blocage 1) : operateur.id non renseigné par l'autocomplete RHF.
-    test.fixme("flux 1 — création ex-nihilo", async ({
+    test("flux 1 — création ex-nihilo", async ({
       page,
-      knownDnaCode,
+      knownDnaCodes,
       registerTransformation,
     }) => {
       const transformationId = await runCreationExNihilo(page, {
-        dnaCode: knownDnaCode,
+        dnaCodes: knownDnaCodes,
       });
       registerTransformation(transformationId);
 
@@ -145,34 +179,45 @@ test.describe("Transformations — flux finalisés", () => {
       const creation = transformation.structureVersionTransformations[0];
       expect(creation.type).toBe(StructureVersionTransformationType.CREATION);
       expect(creation.form?.status).toBe(true);
-      expect(creation.structureVersion?.structure?.codeBhasile).toBeTruthy();
-      expect(creation.structureVersion?.nom).toContain("E2E-");
 
-      // Persistance des champs optionnels (matrice de couverture).
-      expect(creation.structureVersion?.antennes.length).toBeGreaterThanOrEqual(
-        2
+      const version = creation.structureVersion;
+      expect(version?.structure?.codeBhasile).toBeTruthy();
+      expect(version?.nom).toContain("E2E-");
+      expect(version?.type).toBe(StructureType.CADA);
+      expect(version?.public).toBeTruthy();
+      expect(version?.adresseAdministrative).toBe(PARIS_ADDRESS.adresse);
+      expect(version?.communeAdministrative).toBe(PARIS_ADDRESS.commune);
+      expect(placesForEffectiveYear(creation)).toBe(
+        TRANSFORMATION_TEST_VALUES.creationPlaces
       );
-      expect(creation.structureVersion?.contacts.length).toBeGreaterThanOrEqual(
-        2
-      );
-      expect(creation.structureVersion?.finesses.length).toBeGreaterThanOrEqual(
-        1
-      );
+
+      const antenneNames = version?.antennes.map((antenne) => antenne.name);
+      expect(antenneNames).toContain("Site A");
+      expect(antenneNames).toContain("Site B");
       expect(
-        creation.structureVersion?.dnaStructures.length
-      ).toBeGreaterThanOrEqual(2);
+        version?.contacts.some(
+          (contact) => contact.email === "contact0@example.fr"
+        )
+      ).toBe(true);
+      const dnaCodes = version?.dnaStructures.map(
+        (dnaStructure) => dnaStructure.dna.code
+      );
+      expect(dnaCodes).toContain(knownDnaCodes[0]);
+      expect(dnaCodes).toContain(knownDnaCodes[1]);
+      expect(
+        version?.finesses.some((finess) => finess.code?.startsWith("E2E-FIN-"))
+      ).toBe(true);
     });
 
-    // TODO(blocage 1) : operateur.id non renseigné (bloc création).
-    test.fixme("flux 4 — HUDA vers nouveau CADA", async ({
+    test("flux 4 — HUDA vers nouveau CADA", async ({
       page,
       hudaSources,
-      knownDnaCode,
+      knownDnaCodes,
       registerTransformation,
     }) => {
       const transformationId = await runHudaToNewCada(page, {
         hudaSourceIds: hudaSources.map((source) => source.id),
-        dnaCode: knownDnaCode,
+        dnaCode: knownDnaCodes[0],
       });
       registerTransformation(transformationId);
 
@@ -190,9 +235,14 @@ test.describe("Transformations — flux finalisés", () => {
       );
       expect(fermetures).toHaveLength(hudaSources.length);
       expect(creations).toHaveLength(1);
-      expect(
-        creations[0]?.structureVersion?.structure?.codeBhasile
-      ).toBeTruthy();
+
+      const creationVersion = creations[0]?.structureVersion;
+      expect(creationVersion?.structure?.codeBhasile).toBeTruthy();
+      expect(creationVersion?.nom).toContain("E2E-");
+      expect(creationVersion?.type).toBe(StructureType.CADA);
+      expect(placesForEffectiveYear(creations[0])).toBe(
+        TRANSFORMATION_TEST_VALUES.creationPlaces
+      );
     });
   });
 });

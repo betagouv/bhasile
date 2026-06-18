@@ -7,9 +7,25 @@ const TRANSFO_API = "/api/transformations/";
 
 const FINALIZE_BUTTON = "Je confirme et certifie les informations";
 
-/** Valide l'étape courante (PUT) et avance. */
 export const clickEtapeSuivante = async (page: Page): Promise<void> => {
-  await clickAndWaitForPut(page, TRANSFO_API, "Étape suivante");
+  const urlBefore = page.url();
+  const putPromise = page.waitForResponse(
+    (response) =>
+      response.url().includes(TRANSFO_API) &&
+      response.request().method() === "PUT",
+    { timeout: 20_000 }
+  );
+  await page
+    .getByRole("button", { name: "Étape suivante", exact: true })
+    .click();
+  const response = await putPromise;
+  if (!response.ok()) {
+    const body = await response.text().catch(() => "");
+    throw new Error(`PUT étape ${response.status()}: ${body.slice(0, 400)}`);
+  }
+  await page.waitForURL((url) => url.toString() !== urlBefore, {
+    timeout: 15_000,
+  });
 };
 
 export const gotoVerification = async (
@@ -25,16 +41,17 @@ export const gotoVerification = async (
   ).toBeVisible();
 };
 
-/** Finalise (PUT status=true) et ferme la pop-in de confirmation. */
 export const finalizeTransformation = async (page: Page): Promise<void> => {
   await clickAndWaitForPut(page, TRANSFO_API, FINALIZE_BUTTON);
   await expect(
-    page.getByText("Les données ont été prises en compte.")
+    page.getByText("Les données ont été prises en compte.").first()
   ).toBeVisible();
-  await page.getByRole("button", { name: /j.ai compris/i }).click();
+  await page
+    .getByRole("button", { name: /j.ai compris/i })
+    .first()
+    .click();
 };
 
-/** Tente de finaliser alors que des étapes sont incomplètes (doit échouer). */
 export const tryFinalizeExpectingBlock = async (page: Page): Promise<void> => {
   await page.getByRole("button", { name: FINALIZE_BUTTON }).click();
   await expect(
@@ -42,7 +59,6 @@ export const tryFinalizeExpectingBlock = async (page: Page): Promise<void> => {
   ).toBeVisible();
 };
 
-/** Header "Enregistrer l'avancée" → PUT + pop-in de confirmation. */
 export const saveProgress = async (page: Page): Promise<void> => {
   await clickAndWaitForPut(page, TRANSFO_API, "Enregistrer l'avancée");
   await expect(
@@ -50,7 +66,6 @@ export const saveProgress = async (page: Page): Promise<void> => {
   ).toBeVisible();
 };
 
-/** Header "Annuler la démarche" → confirmation → DELETE. */
 export const annulerDemarche = async (page: Page): Promise<void> => {
   await page.getByRole("button", { name: "Annuler la démarche" }).click();
   await expect(

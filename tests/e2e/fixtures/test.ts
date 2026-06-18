@@ -16,7 +16,7 @@ import {
 import {
   createTransformationSource,
   type SeededTransformationSource,
-  seedKnownDnaCode,
+  seedKnownDnaCodes,
 } from "../seed/transformation-source.seed";
 
 export type Fixtures = {
@@ -26,7 +26,7 @@ export type Fixtures = {
   seededCpomWithDates: SeededCpom;
   structuresPool: SeededStructure[];
   registerTransformation: (transformationId: number) => void;
-  knownDnaCode: string;
+  knownDnaCodes: string[];
   closingStructure: SeededTransformationSource;
   extendedStructure: SeededTransformationSource;
   contractionSources: SeededTransformationSource[];
@@ -96,8 +96,6 @@ export const test = base.extend<Fixtures>({
     }
   },
 
-  // Collecte les transformations créées pendant un test et supprime leur graphe
-  // au teardown (avant les sources, pour éviter les FK pendantes).
   registerTransformation: async ({}, use) => {
     const transformationIds: number[] = [];
     await use((transformationId: number) => {
@@ -108,14 +106,15 @@ export const test = base.extend<Fixtures>({
     }
   },
 
-  knownDnaCode: async ({}, use) => {
-    const code = await seedKnownDnaCode();
-    await use(code);
-    // Le code DNA orphelin est nettoyé par l'orphan-cleanup (préfixe E2E-).
+  knownDnaCodes: async ({}, use) => {
+    const codes = await seedKnownDnaCodes(2);
+    await use(codes);
   },
 
   closingStructure: async ({}, use) => {
-    const source = await createTransformationSource({ type: StructureType.CADA });
+    const source = await createTransformationSource({
+      type: StructureType.CADA,
+    });
     try {
       await use(source);
     } finally {
@@ -124,7 +123,9 @@ export const test = base.extend<Fixtures>({
   },
 
   extendedStructure: async ({}, use) => {
-    const source = await createTransformationSource({ type: StructureType.CADA });
+    const source = await createTransformationSource({
+      type: StructureType.CADA,
+    });
     try {
       await use(source);
     } finally {
@@ -156,7 +157,9 @@ export const test = base.extend<Fixtures>({
   },
 
   cadaTarget: async ({}, use) => {
-    const source = await createTransformationSource({ type: StructureType.CADA });
+    const source = await createTransformationSource({
+      type: StructureType.CADA,
+    });
     try {
       await use(source);
     } finally {

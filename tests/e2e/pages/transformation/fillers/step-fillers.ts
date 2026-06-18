@@ -1,7 +1,8 @@
-import type { Locator, Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
-import { StructureType } from "@/types/structure.type";
+import { PublicType, StructureType } from "@/types/structure.type";
 
+import { uniqueFinessCode } from "../../../data/ids";
 import { TRANSFORMATION_TEST_VALUES } from "../../../data/transformation.factory";
 import {
   acteFieldsetByLegend,
@@ -15,37 +16,49 @@ import {
 } from "../../shared/address.helper";
 import { fillAutocomplete } from "../../shared/autocomplete.helper";
 
-/** Sélecteur d'attribut pour les ids RHF contenant des points (échappement CSS). */
 const byId = (id: string): string => `[id="${id}"]`;
 
-const isVisible = (page: Page, selector: string): Promise<boolean> =>
-  page
-    .locator(selector)
-    .first()
-    .isVisible()
-    .catch(() => false);
+type Brique = "creation" | "extension" | "contraction" | "fermeture";
 
-/**
- * Remplit un champ et vérifie que la valeur tient (les formulaires de structure
- * existante re-render au chargement du prefill → une saisie unique se perd).
- */
-const robustFill = async (
-  page: Page,
-  locator: Locator,
-  value: string
-): Promise<void> => {
-  await locator.waitFor({ state: "visible", timeout: 10_000 }).catch(() => {});
-  // Laisse le prefill (reset des defaultValues) se poser AVANT de saisir.
-  await page.waitForTimeout(500);
-  for (let attempt = 0; attempt < 3; attempt++) {
-    // Vraie frappe (click + tout sélectionner + taper) : un simple `fill` est
-    // parfois écrasé par le re-render du prefill.
-    await locator.click().catch(() => {});
-    await locator.press("ControlOrMeta+a").catch(() => {});
-    await locator.pressSequentially(value, { delay: 40 }).catch(() => {});
-    await page.waitForTimeout(200);
-    if ((await locator.inputValue().catch(() => "")) === value) {
-      return;
+const detectBrique = (url: string): Brique => {
+  if (url.includes("/creation/") || url.includes("/ouverture/")) {
+    return "creation";
+  }
+  if (url.includes("/extension/")) {
+    return "extension";
+  }
+  if (url.includes("/contraction/")) {
+    return "contraction";
+  }
+  if (url.includes("/fermeture/")) {
+    return "fermeture";
+  }
+  throw new Error(`Brique de transformation non reconnue: ${url}`);
+};
+
+const placesForBrique = (brique: Brique): number => {
+  if (brique === "contraction") {
+    return TRANSFORMATION_TEST_VALUES.contractionPlaces;
+  }
+  if (brique === "extension") {
+    return TRANSFORMATION_TEST_VALUES.extensionPlaces;
+  }
+  return TRANSFORMATION_TEST_VALUES.creationPlaces;
+};
+
+const robustFill = async (locator: Locator, value: string): Promise<void> => {
+  await expect(async () => {
+    await locator.fill(value);
+    await expect(locator).toHaveValue(value, { timeout: 1_000 });
+  }).toPass({ timeout: 10_000 });
+};
+
+const fillEmptyFinessCodes = async (page: Page): Promise<void> => {
+  const finessCodes = page.locator('input[name$=".code"][name^="finesses."]');
+  for (let index = 0; index < (await finessCodes.count()); index++) {
+    const field = finessCodes.nth(index);
+    if (!(await field.inputValue())) {
+      await field.fill(uniqueFinessCode());
     }
   }
 };
@@ -53,6 +66,7 @@ const robustFill = async (
 export type FillContext = {
   creationNom: string;
   dnaCode: string;
+  secondDnaCode: string;
   operateurSearch: string;
   structureType: StructureType;
 };
@@ -61,7 +75,6 @@ export type FillOptions = {
   withAntennes?: boolean;
   withSecondDna?: boolean;
   withSecondContact?: boolean;
-  withFiness?: boolean;
   withFiliale?: boolean;
   withQpvPmr?: boolean;
   withUploadActe?: boolean;
@@ -90,7 +103,8 @@ export const fillCreationIdentification = async (
     .fill(TRANSFORMATION_TEST_VALUES.effectiveDate);
 
   if (options.withFiliale) {
-    await page.locator("#managed-by-a-filiale").check({ force: true });
+    // DSFR ToggleSwitch : l'`id` est sur le wrapper, la checkbox est `${id}-input`.
+    await page.locator("#managed-by-a-filiale-input").check({ force: true });
     await page.locator("#filiale").fill("Filiale E2E");
   }
 
@@ -101,23 +115,27 @@ export const fillCreationIdentification = async (
 
   if (options.withAntennes) {
     await page.locator('input[name="isMultiAntenne"]').check({ force: true });
+    await page
+      .locator('input[name="antennes.0.name"]')
+      .waitFor({ state: "visible", timeout: 10_000 });
     await page.locator('input[name="antennes.0.name"]').fill("Site A");
     await fillAutocompleteAddress(page, byId("antennes.0.adresseComplete"));
-    await page
-      .getByRole("button", { name: /Ajouter un site administratif/i })
-      .click();
     await page.locator('input[name="antennes.1.name"]').fill("Site B");
     await fillAutocompleteAddress(page, byId("antennes.1.adresseComplete"));
   }
 
+  await page
+    .locator(byId("dnaStructures.0.dna.code"))
+    .selectOption(context.dnaCode);
   if (options.withSecondDna) {
     await page.locator('input[name="isMultiDna"]').check({ force: true });
+    await page.getByRole("button", { name: /Ajouter un code DNA/i }).click();
+    await page
+      .locator(byId("dnaStructures.1.dna.code"))
+      .selectOption(context.secondDnaCode);
   }
-  await page.locator(byId("dnaStructures.0.dna.code")).selectOption(context.dnaCode);
 
-  if (options.withFiness) {
-    await page.locator(byId("finesses.0.code")).fill("E2E-FINESS-001");
-  }
+  await fillEmptyFinessCodes(page);
 
   await fillContact(page, 0);
   if (options.withSecondContact) {
@@ -130,16 +148,13 @@ export const fillExistingIdentification = async (
   page: Page,
   options: FillOptions = {}
 ): Promise<void> => {
-  await page.waitForLoadState("networkidle", { timeout: 1_500 }).catch(() => {});
   await robustFill(
-    page,
     page.locator("#effectiveDate"),
     TRANSFORMATION_TEST_VALUES.effectiveDate
   );
 
-  // "Adresse administrative changée ?" : il FAUT répondre (sinon l'adresse
-  // pré-remplie n'est pas confirmée). "Non" garde l'adresse d'origine.
   const group = page.locator('[aria-labelledby="hasAdresseChanged-title"]');
+  await group.waitFor({ state: "visible", timeout: 15_000 });
   await group
     .getByRole("radio", { name: options.changeAddress ? "Oui" : "Non" })
     .check({ force: true });
@@ -147,51 +162,36 @@ export const fillExistingIdentification = async (
     await fillAdminAddressManually(page);
   }
 
-  // Champs requis NON pré-remplis : le code FINESS et le périmètre des contacts.
-  if (await isVisible(page, byId("finesses.0.code"))) {
-    await robustFill(page, page.locator(byId("finesses.0.code")), "E2E-FIN-EXIST");
+  await fillEmptyFinessCodes(page);
+  const perimetres = page.locator('input[name$=".perimetre"]');
+  for (let index = 0; index < (await perimetres.count()); index++) {
+    await perimetres.nth(index).fill("National");
   }
-  if (await isVisible(page, byId("contacts.0.perimetre"))) {
-    await robustFill(page, page.locator(byId("contacts.0.perimetre")), "National");
-  }
-  // DNA, contacts (hors périmètre) et adresses sont pré-remplis (copyStructureVersion).
 };
 
 export const fillPlacesHebergement = async (
   page: Page,
   options: FillOptions = {}
 ): Promise<void> => {
-  const url = page.url();
-  const isContraction = url.includes("/contraction/");
-  const isExtension = url.includes("/extension/");
-  const isCreation = url.includes("/creation/") || url.includes("/ouverture/");
+  const brique = detectBrique(page.url());
+  const places = placesForBrique(brique);
 
-  const places = isContraction
-    ? TRANSFORMATION_TEST_VALUES.contractionPlaces
-    : isExtension
-      ? TRANSFORMATION_TEST_VALUES.extensionPlaces
-      : TRANSFORMATION_TEST_VALUES.creationPlaces;
-
-  await page.waitForLoadState("networkidle", { timeout: 1_500 }).catch(() => {});
-  // Cible le spinbutton visible par son nom (l'id RHF diffère selon le form).
   await robustFill(
-    page,
-    page.getByRole("spinbutton", {
-      name: /Nombre total de places autoris/i,
-    }),
+    page.locator(byId("structureTypologies.0.placesAutorisees")),
     String(places)
   );
 
-  if (options.withQpvPmr) {
-    await page.locator(byId("structureTypologies.0.pmr")).fill("2");
-  }
+  await page
+    .locator(byId("structureTypologies.0.pmr"))
+    .fill(options.withQpvPmr ? "2" : "0");
 
-  // public / type de bâti / hébergement : uniquement en création. Pour une
-  // structure existante (extension/contraction) ils sont pré-remplis depuis la
-  // source — les re-régler casserait les valeurs (et l'option n'existe pas).
-  if (isCreation) {
-    await page.locator("#public").selectOption("TOUT_PUBLIC");
-    await page.locator("#typeBati").selectOption(options.typeBati ?? "COLLECTIF");
+  if (brique === "creation") {
+    await page.locator(byId("structureTypologies.0.lgbt")).fill("0");
+    await page.locator(byId("structureTypologies.0.fvvTeh")).fill("0");
+    await page.locator("#public").selectOption(PublicType.TOUT_PUBLIC);
+    await page
+      .locator("#typeBati")
+      .selectOption(options.typeBati ?? "COLLECTIF");
     await fillAutocompleteAddress(page, byId("adresses.0.adresseComplete"));
     await page
       .locator(byId("adresses.0.adresseTypologies.0.placesAutorisees"))
@@ -204,10 +204,8 @@ export const fillActesStep = async (
   options: FillOptions = {}
 ): Promise<void> => {
   if (!options.withUploadActe) {
-    return; // actes optionnels → l'étape se valide vide
+    return;
   }
-  // Upload best-effort : les actes étant optionnels, un souci d'upload ne doit
-  // pas casser le flux de finalisation.
   try {
     const fieldset = acteFieldsetByLegend(page, "Arrêté d'autorisation");
     await fillActeStartEndDates(
@@ -230,7 +228,6 @@ export const fillFermetureStep = async (
     .fill(TRANSFORMATION_TEST_VALUES.effectiveDate);
 
   if (options.withFermetureDoc) {
-    // Upload best-effort (document de fermeture optionnel).
     try {
       const fieldset = acteFieldsetByLegend(
         page,
@@ -247,31 +244,26 @@ export const fillFermetureStep = async (
   }
 };
 
-/**
- * Remplit l'étape courante en détectant le formulaire affiché (résilient au
- * nommage des routes). Ordre : places → identification création → identification
- * structure existante → fermeture → actes (fallback).
- */
 export const fillCurrentStep = async (
   page: Page,
   context: FillContext,
   options: FillOptions = {}
 ): Promise<void> => {
-  if (await isVisible(page, "#typeBati")) {
+  const url = page.url();
+  if (url.includes("/places-et-hebergement")) {
     await fillPlacesHebergement(page, options);
     return;
   }
-  if (await isVisible(page, "#type")) {
-    await fillCreationIdentification(page, context, options);
+  if (url.includes("/actes-administratifs")) {
+    await fillActesStep(page, options);
     return;
   }
-  if (await isVisible(page, '[aria-labelledby="hasAdresseChanged-title"]')) {
-    await fillExistingIdentification(page, options);
-    return;
-  }
-  if (await isVisible(page, "#effectiveDate")) {
+  const brique = detectBrique(url);
+  if (brique === "fermeture") {
     await fillFermetureStep(page, options);
-    return;
+  } else if (brique === "creation") {
+    await fillCreationIdentification(page, context, options);
+  } else {
+    await fillExistingIdentification(page, options);
   }
-  await fillActesStep(page, options);
 };
