@@ -179,6 +179,14 @@ view ReportingMensuel {
 view StructuresGlobalQuality {
   id Int
 
+  code_bhasile              String?
+  operateur                 String?
+  departement_administratif String?
+  departement               String?
+  region                    String?
+  dna_codes                 String?
+  updated_at                DateTime?
+
   has_issue_authorisation_period_not_15y                         Boolean?
   has_issue_authorized_convention_not_5y                         Boolean?
   has_issue_authorized_convention_outside_authorisation_period   Boolean?

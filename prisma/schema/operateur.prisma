@@ -25,13 +25,13 @@ model Operateur {
 view OperateursAggregates {
   id                          Int
   name                        String
-  directionGenerale           String?
+  direction_generale          String?
+  siege_social                String?
   siret                       String?
-  siegeSocial                 String?
   nb_structures               Int
   places_autorisees_structure Int?
-  createdAt                   DateTime?
-  updatedAt                   DateTime?
+  created_at                  DateTime?
+  updated_at                  DateTime?
 
   @@map("operateurs_aggregates")
   @@schema("reporting")

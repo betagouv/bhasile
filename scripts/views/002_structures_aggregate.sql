@@ -83,9 +83,21 @@ WITH
   )
 SELECT
   sc."id" AS "id",
+  sc."code_bhasile" AS "code_bhasile",
+  sc."dna_codes" AS "dna_codes",
+  sc."departement_administratif" AS "departement_administratif",
+  sc."departement" AS "departement",
+  sc."region" AS "region",
+  sc."operateur" AS "operateur",
+  sc."structure_type" AS "structure_type",
+  sf."public" AS "public",
+  sc."updated_at" AS "updated_at",
+  sf."finalisation_status" AS "finalisation_status",
+  sf."finalisation_status_detail" AS "finalisation_status_detail",
   sdm."placesAutorisees" AS "places_autorisees_structure",
   bdm."dotation_derniere_annee" AS "dotation_derniere_annee"
 FROM
 :"SCHEMA"."structures_core" sc
+  LEFT JOIN:"SCHEMA"."structures_filling" sf ON sf."id" = sc."id"
   LEFT JOIN structure_typologie_dernier_millesime sdm ON sdm."structureId" = sc."id"
   LEFT JOIN budget_dernier_millesime bdm ON bdm."structureId" = sc."id";

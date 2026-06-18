@@ -3,11 +3,11 @@
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_core" AS
 SELECT
   s."id" AS "id",
-  s."codeBhasile" AS "codeBhasile",
-  s."type" AS "structureType",
-  s."createdAt" AS "createdAt",
-  s."updatedAt" AS "updatedAt",
-  s."departementAdministratif" AS "departementAdministratif",
+  s."codeBhasile" AS "code_bhasile",
+  s."type" AS "structure_type",
+  s."createdAt" AS "created_at",
+  s."updatedAt" AS "updated_at",
+  s."departementAdministratif" AS "departement_administratif",
   dep."name" AS "departement",
   r."name" AS "region",
   o."name" AS "operateur",
