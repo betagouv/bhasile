@@ -9,7 +9,7 @@ import type {
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
-} from "./db.type";
+} from "../statistiques.db.type";
 
 export const findStructureIds = async (
   where: Prisma.StructureWhereInput

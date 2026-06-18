@@ -8,12 +8,12 @@ import {
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
-import { getMonthKey, monthKeyToDate } from "../shared/utils";
+import { getMonthKey, monthKeyToDate } from "../shared/shared.utils";
 import type {
   StatistiqueDbActivite,
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
-} from "../shared/db.type";
+} from "../statistiques.db.type";
 
 type DnaEligibility = {
   indisponibilite: Set<string>;
@@ -127,7 +127,8 @@ export const computeActiviteStatistiques = (
     if (eligibility.presencesIndues.has(activite.dnaCode)) {
       monthTotals.placesAutoriseesPresencesIndues += placesAutorisees;
       monthTotals.presencesInduesBPI += activite.presencesInduesBPI ?? 0;
-      monthTotals.presencesInduesDeboutees += activite.presencesInduesDeboutees ?? 0;
+      monthTotals.presencesInduesDeboutees +=
+        activite.presencesInduesDeboutees ?? 0;
     }
 
     byMonth.set(monthKey, monthTotals);

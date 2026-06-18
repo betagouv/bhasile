@@ -1,6 +1,6 @@
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
-import { StatistiquesContext } from "../shared/context";
+import { StatistiquesContext } from "../shared/shared.service";
 import { findActivites } from "./activite.repository";
 import { computeActiviteStatistiques } from "./activite.util";
 

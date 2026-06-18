@@ -1,6 +1,6 @@
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
-import { StatistiquesContext } from "../shared/context";
+import { StatistiquesContext } from "../shared/shared.service";
 import { computeStructuresStatistiques } from "./structures.util";
 
 export const getStructuresStatistiques = (

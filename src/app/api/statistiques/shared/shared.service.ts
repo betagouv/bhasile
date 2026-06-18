@@ -8,9 +8,9 @@ import type {
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
-} from "./db.type";
+} from "../statistiques.db.type";
 import { buildStructureWhere } from "./filters";
-import { StatistiquesPerimetreVideError } from "./errors";
+import { StatistiquesPerimetreVideError } from "./shared.utils";
 import {
   findAdresseTypologies,
   findDepartementsWithPopulation,
@@ -44,15 +44,21 @@ export const buildStatistiquesContext = async (
     throw new StatistiquesPerimetreVideError();
   }
 
-  const [structures, typologies, adresses, adresseTypologies, cpomLinks, dnaLinks] =
-    await Promise.all([
-      findStructuresWithTypes(structureIds),
-      findStructureTypologies(structureIds),
-      findStructureAdresses(structureIds),
-      findAdresseTypologies(structureIds),
-      findCpomStructures(structureIds),
-      findDnaLinksByStructure(structureIds),
-    ]);
+  const [
+    structures,
+    typologies,
+    adresses,
+    adresseTypologies,
+    cpomLinks,
+    dnaLinks,
+  ] = await Promise.all([
+    findStructuresWithTypes(structureIds),
+    findStructureTypologies(structureIds),
+    findStructureAdresses(structureIds),
+    findAdresseTypologies(structureIds),
+    findCpomStructures(structureIds),
+    findDnaLinksByStructure(structureIds),
+  ]);
 
   const dnaCodes = [...new Set(dnaLinks.map((link) => link.dna.code))];
 

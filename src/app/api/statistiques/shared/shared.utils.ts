@@ -1,10 +1,10 @@
-import { sumValues } from "@/app/utils/math.util";
+import { NumericAggregation, sumValues } from "@/app/utils/math.util";
 
 import type {
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
-} from "./db.type";
+} from "../statistiques.db.type";
 
 /**
  * Shared stats helpers.
@@ -85,7 +85,9 @@ export const getTypologieMapForExactYear = (
   return typologieByStructureId;
 };
 
-export const getTypologieYears = (typologies: StatistiqueDbTypologie[]): number[] =>
+export const getTypologieYears = (
+  typologies: StatistiqueDbTypologie[]
+): number[] =>
   [...new Set(typologies.map((typologie) => typologie.year))].sort(
     (yearA, yearB) => yearA - yearB
   );
@@ -117,7 +119,10 @@ export const getActiveStructuresScope = (
   typologies: StatistiqueDbTypologie[]
 ): ActiveStructuresScope => {
   const typologieMap = getLastTypologiePerStructure(typologies);
-  const activeStructures = filterStructuresWithTypologie(structures, typologieMap);
+  const activeStructures = filterStructuresWithTypologie(
+    structures,
+    typologieMap
+  );
 
   return {
     activeStructures,
@@ -137,7 +142,8 @@ export const buildDnaCodeToStructureIds = (
     if (link.structureId === null) {
       continue;
     }
-    const structureIds = dnaCodeToStructureIds.get(link.dna.code) ?? new Set<number>();
+    const structureIds =
+      dnaCodeToStructureIds.get(link.dna.code) ?? new Set<number>();
     structureIds.add(link.structureId);
     dnaCodeToStructureIds.set(link.dna.code, structureIds);
   }
@@ -147,7 +153,8 @@ export const buildDnaCodeToStructureIds = (
 
 // -------- Monthly --------
 
-export const getMonthKey = (date: Date): string => date.toISOString().slice(0, 7);
+export const getMonthKey = (date: Date): string =>
+  date.toISOString().slice(0, 7);
 
 export const monthKeyToDate = (monthKey: string): Date =>
   new Date(`${monthKey}-01`);
@@ -182,3 +189,15 @@ export const mergeSortedMonthKeys = (
   ...monthMaps: Array<Map<string, unknown>>
 ): string[] =>
   [...new Set(monthMaps.flatMap((monthMap) => [...monthMap.keys()]))].sort();
+
+export const parseNumericAggregation = (
+  aggregationParam: string | null
+): NumericAggregation =>
+  aggregationParam === "mediane" ? "mediane" : "moyenne";
+
+export class StatistiquesPerimetreVideError extends Error {
+  constructor() {
+    super("Aucune structure ne correspond aux filtres sélectionnés.");
+    this.name = "StatistiquesPerimetreVideError";
+  }
+}

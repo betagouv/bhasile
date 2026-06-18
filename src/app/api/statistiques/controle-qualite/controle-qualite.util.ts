@@ -1,5 +1,9 @@
 import { isEigComportementViolent } from "@/app/utils/eig.util";
-import { aggregateValues, NumericAggregation, ratio } from "@/app/utils/math.util";
+import {
+  aggregateValues,
+  NumericAggregation,
+  ratio,
+} from "@/app/utils/math.util";
 import {
   ControleQualiteByMonthStat,
   EigStat,
@@ -13,12 +17,12 @@ import {
   groupByMonthKey,
   mergeSortedMonthKeys,
   monthKeyToDate,
-} from "../shared/utils";
+} from "../shared/shared.utils";
 import type {
   StatistiqueDbDnaLink,
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
-} from "../shared/db.type";
+} from "../statistiques.db.type";
 
 const getStructureIdsFromEigs = (
   eigs: StatistiqueDbEig[],
@@ -69,8 +73,7 @@ const computeEigSummary = (
   const cutoff = getTwelveMonthCutoffKey();
   const recentEigs = eigs.filter(
     (eig) =>
-      eig.evenementDate &&
-      getMonthKey(new Date(eig.evenementDate)) >= cutoff
+      eig.evenementDate && getMonthKey(new Date(eig.evenementDate)) >= cutoff
   );
   const { nbEig, nbEigComportementViolent } = countEigs(recentEigs);
 
@@ -129,33 +132,35 @@ const computeControleQualiteByMonth = (
     (evaluation) => evaluation.date
   );
 
-  return mergeSortedMonthKeys(eigsByMonth, evaluationsByMonth).map((monthKey) => {
-    const eigsForMonth = eigsByMonth.get(monthKey) ?? [];
-    const evaluationsForMonth = evaluationsByMonth.get(monthKey) ?? [];
-    const { nbEig, nbEigComportementViolent } = countEigs(eigsForMonth);
-    const structureIdsWithEig = getStructureIdsFromEigs(
-      eigsForMonth,
-      dnaCodeToStructureIds,
-      activeStructureIdSet
-    );
-    const nbStructuresSansDeclarationEig =
-      totalStructures - structureIdsWithEig.size;
-    const partSansDeclaration = ratio(
-      nbStructuresSansDeclarationEig,
-      totalStructures
-    );
+  return mergeSortedMonthKeys(eigsByMonth, evaluationsByMonth).map(
+    (monthKey) => {
+      const eigsForMonth = eigsByMonth.get(monthKey) ?? [];
+      const evaluationsForMonth = evaluationsByMonth.get(monthKey) ?? [];
+      const { nbEig, nbEigComportementViolent } = countEigs(eigsForMonth);
+      const structureIdsWithEig = getStructureIdsFromEigs(
+        eigsForMonth,
+        dnaCodeToStructureIds,
+        activeStructureIdSet
+      );
+      const nbStructuresSansDeclarationEig =
+        totalStructures - structureIdsWithEig.size;
+      const partSansDeclaration = ratio(
+        nbStructuresSansDeclarationEig,
+        totalStructures
+      );
 
-    return {
-      date: monthKeyToDate(monthKey),
-      nbStructuresSansDeclarationEig,
-      partStructuresSansDeclarationEig:
-        partSansDeclaration !== null ? partSansDeclaration * 100 : null,
-      nbEig,
-      nbEigComportementViolent,
-      tauxEigComportementViolent: ratio(nbEigComportementViolent, nbEig),
-      ...computeEvaluationNotesForMonth(evaluationsForMonth, aggregation),
-    };
-  });
+      return {
+        date: monthKeyToDate(monthKey),
+        nbStructuresSansDeclarationEig,
+        partStructuresSansDeclarationEig:
+          partSansDeclaration !== null ? partSansDeclaration * 100 : null,
+        nbEig,
+        nbEigComportementViolent,
+        tauxEigComportementViolent: ratio(nbEigComportementViolent, nbEig),
+        ...computeEvaluationNotesForMonth(evaluationsForMonth, aggregation),
+      };
+    }
+  );
 };
 
 export const computeControleQualiteStatistiques = (

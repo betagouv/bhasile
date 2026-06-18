@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { StatistiquesFiltersRaw } from "@/schemas/api/statistique.schema";
 
-import { StatistiquesPerimetreVideError } from "./shared/errors";
+import { StatistiquesPerimetreVideError } from "./shared/shared.utils";
 import { getStatistiques } from "./statistique.service";
 
 export async function GET(request: NextRequest) {

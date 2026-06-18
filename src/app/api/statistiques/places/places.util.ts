@@ -10,18 +10,24 @@ import type {
   StatistiqueDbDepartement,
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
-} from "../shared/db.type";
+} from "../statistiques.db.type";
 import {
   computeTotalPlaces,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
   getTypologieYears,
-} from "../shared/utils";
+} from "../shared/shared.utils";
 
 type PlacesIndicators = Pick<
   StatistiqueApiRead["places"],
-  "totalPlaces" | "tauxEquipement" | "pmr" | "lgbt" | "fvvTeh" | "qpv" | "logementsSociaux"
+  | "totalPlaces"
+  | "tauxEquipement"
+  | "pmr"
+  | "lgbt"
+  | "fvvTeh"
+  | "qpv"
+  | "logementsSociaux"
 >;
 
 const sumStructureTypologiePlacesSpeciales = (
@@ -73,7 +79,10 @@ const sumGlobalAdressePlacesSpeciales = (
   adresseTypologies: StatistiqueDbAdresseTypologie[],
   structureIds: Set<number>
 ): Pick<PlacesIndicators, "qpv" | "logementsSociaux"> => {
-  const lastTypologieByAdresse = new Map<number, StatistiqueDbAdresseTypologie>();
+  const lastTypologieByAdresse = new Map<
+    number,
+    StatistiqueDbAdresseTypologie
+  >();
 
   for (const typologie of adresseTypologies) {
     const structureId = typologie.adresse.structureId;
@@ -87,7 +96,10 @@ const sumGlobalAdressePlacesSpeciales = (
   let logementsSociaux = 0;
 
   for (const adresse of adresses) {
-    if (adresse.structureId === null || !structureIds.has(adresse.structureId)) {
+    if (
+      adresse.structureId === null ||
+      !structureIds.has(adresse.structureId)
+    ) {
       continue;
     }
 
@@ -149,16 +161,29 @@ const computePlacesIndicators = (
   departements: StatistiqueDbDepartement[],
   year?: number
 ): PlacesIndicators => {
-  const activeStructures = filterStructuresWithTypologie(structures, typologieMap);
-  const structureIds = new Set(activeStructures.map((structure) => structure.id));
+  const activeStructures = filterStructuresWithTypologie(
+    structures,
+    typologieMap
+  );
+  const structureIds = new Set(
+    activeStructures.map((structure) => structure.id)
+  );
   const structurePlaces = sumStructureTypologiePlacesSpeciales(
     activeStructures,
     typologieMap
   );
   const adressePlaces =
     year !== undefined
-      ? sumAdresseTypologiePlacesSpeciales(adresseTypologies, structureIds, year)
-      : sumGlobalAdressePlacesSpeciales(adresses, adresseTypologies, structureIds);
+      ? sumAdresseTypologiePlacesSpeciales(
+          adresseTypologies,
+          structureIds,
+          year
+        )
+      : sumGlobalAdressePlacesSpeciales(
+          adresses,
+          adresseTypologies,
+          structureIds
+        );
 
   return {
     totalPlaces: computeTotalPlaces(activeStructures, typologieMap),

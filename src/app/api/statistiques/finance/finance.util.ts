@@ -18,7 +18,7 @@ import type {
   StatistiqueDbBudgetAgg,
   StatistiqueDbIndicateurFinancier,
   StatistiqueDbStructure,
-} from "../shared/db.type";
+} from "../statistiques.db.type";
 
 type FinanceScopeIds = {
   total: number[];
@@ -133,11 +133,10 @@ const scopeStatForYear = (
   stats: Array<FinanceByYearScopeStat & { year: number }>,
   year: number
 ): FinanceByYearScopeStat => {
-  const scopeStat =
-    stats.find((yearStat) => yearStat.year === year) ?? {
-      year,
-      ...emptyByYearScopeStat(),
-    };
+  const scopeStat = stats.find((yearStat) => yearStat.year === year) ?? {
+    year,
+    ...emptyByYearScopeStat(),
+  };
 
   return {
     dotationDemandee: scopeStat.dotationDemandee,

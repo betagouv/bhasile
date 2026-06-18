@@ -1,7 +1,10 @@
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
-import { StatistiquesContext } from "../shared/context";
-import { findBudgetsByYear, findIndicateursFinanciers } from "./finance.repository";
+import { StatistiquesContext } from "../shared/shared.service";
+import {
+  findBudgetsByYear,
+  findIndicateursFinanciers,
+} from "./finance.repository";
 import {
   computeFinanceStatistiques,
   getStructureIdsByFinanceScope,

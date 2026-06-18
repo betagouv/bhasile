@@ -1,6 +1,9 @@
 import prisma from "@/lib/prisma";
 
-import type { StatistiqueDbEig, StatistiqueDbEvaluation } from "../shared/db.type";
+import type {
+  StatistiqueDbEig,
+  StatistiqueDbEvaluation,
+} from "../statistiques.db.type";
 
 export const findEigs = async (
   dnaCodes: string[]

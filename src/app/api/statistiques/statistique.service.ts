@@ -6,10 +6,10 @@ import {
 import { getActiviteStatistiques } from "./activite/activite.service";
 import { getControleQualiteStatistiques } from "./controle-qualite/controle-qualite.service";
 import { getFinanceStatistiques } from "./finance/finance.service";
-import { parseNumericAggregation } from "./shared/aggregation";
 import { getPlacesStatistiques } from "./places/places.service";
-import { buildStatistiquesContext } from "./shared/context";
+import { buildStatistiquesContext } from "./shared/shared.service";
 import { getStructuresStatistiques } from "./structures/structures.service";
+import { parseNumericAggregation } from "./shared/shared.utils";
 
 export const getStatistiques = async (
   filters: StatistiquesFiltersRaw

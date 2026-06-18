@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import type {
   StatistiqueDbBudgetAgg,
   StatistiqueDbIndicateurFinancier,
-} from "../shared/db.type";
+} from "../statistiques.db.type";
 
 export const findBudgetsByYear = async (
   structureIds: number[]

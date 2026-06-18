@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 
-import type { StatistiqueDbActivite } from "../shared/db.type";
+import type { StatistiqueDbActivite } from "../statistiques.db.type";
 
 export const findActivites = async (
   dnaCodes: string[]
