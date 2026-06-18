@@ -38,7 +38,6 @@ model Structure {
   operateur                Operateur?                @relation(fields: [operateurId], references: [id])
   operateurId              Int?
   forms                    Form[]
-  campaigns                Campaign[]
   antennes                 Antenne[] // TODO: remove after backfill of structure version
   structureFinesses        StructureFiness[] // TODO: remove after backfill of structure version
   finesses                 Finess[] // TODO: remove after backfill structure finess

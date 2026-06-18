@@ -1,0 +1,10 @@
+//TODO: Update the model for actualisation campaigns
+
+model Campaign {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  structureVersions StructureVersion[]
+
+  @@schema("public")
+}

@@ -71,14 +71,3 @@ enum StepStatus {
 
   @@schema("public")
 }
-
-model Campaign {
-  id          Int     @id @default(autoincrement())
-  structureId Int?
-  name        String
-  launched    Boolean @default(false)
-
-  structure Structure? @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  @@schema("public")
-}
