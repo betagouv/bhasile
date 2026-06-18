@@ -34,18 +34,23 @@ export type StructuresByYearStat = {
   structuresBatiMixte: number;
 };
 
-export type PlacesSpecialesStat = {
+export type TauxEquipementDept = {
+  departement: string;
+  nom: string;
+  places: number;
+  population: number | null;
+  tauxPour1000: number | null;
+};
+
+export type PlacesByYearStat = {
+  year: number;
+  totalPlaces: number;
+  tauxEquipement: TauxEquipementDept[];
   pmr: number;
   lgbt: number;
   fvvTeh: number;
   qpv: number;
   logementsSociaux: number;
-};
-
-export type PlacesYearStat = {
-  year: number;
-  totalPlaces: number;
-  placesSpeciales: PlacesSpecialesStat;
 };
 
 export type FinanceMedianByType = {
@@ -126,14 +131,6 @@ export type PresencesInduesMonthStat = {
   placesAutorisees: number;
 };
 
-export type TauxEquipementDept = {
-  departement: string;
-  nom: string;
-  places: number;
-  population: number | null;
-  tauxPour1000: number | null;
-};
-
 const typeStructureStatSchema = z.object({
   type: z.nativeEnum(StructureType),
   structures: z.number(),
@@ -146,12 +143,26 @@ const batiStatSchema = z.object({
   places: z.number(),
 });
 
-const placesSpecialesSchema = z.object({
+const tauxEquipementDeptSchema = z.object({
+  departement: z.string(),
+  nom: z.string(),
+  places: z.number(),
+  population: z.number().nullable(),
+  tauxPour1000: z.number().nullable(),
+});
+
+const placesIndicatorsSchema = z.object({
+  totalPlaces: z.number(),
+  tauxEquipement: z.array(tauxEquipementDeptSchema),
   pmr: z.number(),
   lgbt: z.number(),
   fvvTeh: z.number(),
   qpv: z.number(),
   logementsSociaux: z.number(),
+});
+
+const placesByYearStatSchema = placesIndicatorsSchema.extend({
+  year: z.number(),
 });
 
 const financeMedianByTypeSchema = z.object({
@@ -230,25 +241,8 @@ export const statistiqueApiReadSchema = z.object({
     structureBatis: z.array(batiStatSchema),
     byYear: z.array(structuresByYearStatSchema),
   }),
-  places: z.object({
-    totalPlaces: z.number(),
-    tauxEquipement: z.array(
-      z.object({
-        departement: z.string(),
-        nom: z.string(),
-        places: z.number(),
-        population: z.number().nullable(),
-        tauxPour1000: z.number().nullable(),
-      })
-    ),
-    placesSpeciales: placesSpecialesSchema,
-    byYear: z.array(
-      z.object({
-        year: z.number(),
-        totalPlaces: z.number(),
-        placesSpeciales: placesSpecialesSchema,
-      })
-    ),
+  places: placesIndicatorsSchema.extend({
+    byYear: z.array(placesByYearStatSchema),
   }),
   finance: z.object({
     summary: financeScopeStatSchema,

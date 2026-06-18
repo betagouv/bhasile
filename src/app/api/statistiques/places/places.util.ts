@@ -1,6 +1,5 @@
 import {
-  PlacesSpecialesStat,
-  PlacesYearStat,
+  PlacesByYearStat,
   StatistiqueApiRead,
   TauxEquipementDept,
 } from "@/schemas/api/statistique.schema";
@@ -18,35 +17,21 @@ import {
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
   getTypologieYears,
-  sumGlobalAdressePlacesSpeciales,
 } from "../shared/utils";
 
-const sumAdresseTypologiePlacesSpeciales = (
-  adresseTypologies: StatistiqueDbAdresseTypologie[],
-  year: number
-): Pick<PlacesSpecialesStat, "qpv" | "logementsSociaux"> => {
-  const filtered = adresseTypologies.filter(
-    (typologie) => typologie.year === year
-  );
-  return {
-    qpv: filtered.reduce((acc, typologie) => acc + typologie.qpv, 0),
-    logementsSociaux: filtered.reduce(
-      (acc, typologie) => acc + typologie.logementSocial,
-      0
-    ),
-  };
-};
+type PlacesIndicators = Pick<
+  StatistiqueApiRead["places"],
+  "totalPlaces" | "tauxEquipement" | "pmr" | "lgbt" | "fvvTeh" | "qpv" | "logementsSociaux"
+>;
 
-export const computePlacesSpeciales = (
+const sumStructureTypologiePlacesSpeciales = (
   structures: StatistiqueDbStructure[],
-  typologieMap: Map<number, StatistiqueDbTypologie>,
-  adresses: StatistiqueDbAdresse[],
-  adresseTypologies: StatistiqueDbAdresseTypologie[],
-  year?: number
-): PlacesSpecialesStat => {
-  let pmr = 0,
-    lgbt = 0,
-    fvvTeh = 0;
+  typologieMap: Map<number, StatistiqueDbTypologie>
+): Pick<PlacesIndicators, "pmr" | "lgbt" | "fvvTeh"> => {
+  let pmr = 0;
+  let lgbt = 0;
+  let fvvTeh = 0;
+
   for (const structure of structures) {
     const typologie = typologieMap.get(structure.id);
     if (!typologie) {
@@ -57,22 +42,76 @@ export const computePlacesSpeciales = (
     fvvTeh += typologie.fvvTeh ?? 0;
   }
 
-  const structureIds = new Set(structures.map((structure) => structure.id));
-
-  const adressePlaces =
-    year !== undefined
-      ? sumAdresseTypologiePlacesSpeciales(adresseTypologies, year)
-      : sumGlobalAdressePlacesSpeciales(adresses, adresseTypologies, structureIds);
-
-  return { pmr, lgbt, fvvTeh, ...adressePlaces };
+  return { pmr, lgbt, fvvTeh };
 };
 
-export const computeTauxEquipement = (
+const sumAdresseTypologiePlacesSpeciales = (
+  adresseTypologies: StatistiqueDbAdresseTypologie[],
+  structureIds: Set<number>,
+  year: number
+): Pick<PlacesIndicators, "qpv" | "logementsSociaux"> => {
+  let qpv = 0;
+  let logementsSociaux = 0;
+
+  for (const typologie of adresseTypologies) {
+    if (typologie.year !== year) {
+      continue;
+    }
+    const structureId = typologie.adresse.structureId;
+    if (structureId === null || !structureIds.has(structureId)) {
+      continue;
+    }
+    qpv += typologie.qpv;
+    logementsSociaux += typologie.logementSocial;
+  }
+
+  return { qpv, logementsSociaux };
+};
+
+const sumGlobalAdressePlacesSpeciales = (
+  adresses: StatistiqueDbAdresse[],
+  adresseTypologies: StatistiqueDbAdresseTypologie[],
+  structureIds: Set<number>
+): Pick<PlacesIndicators, "qpv" | "logementsSociaux"> => {
+  const lastTypologieByAdresse = new Map<number, StatistiqueDbAdresseTypologie>();
+
+  for (const typologie of adresseTypologies) {
+    const structureId = typologie.adresse.structureId;
+    if (structureId === null || !structureIds.has(structureId)) {
+      continue;
+    }
+    lastTypologieByAdresse.set(typologie.adresseId, typologie);
+  }
+
+  let qpv = 0;
+  let logementsSociaux = 0;
+
+  for (const adresse of adresses) {
+    if (adresse.structureId === null || !structureIds.has(adresse.structureId)) {
+      continue;
+    }
+
+    const lastTypologie = lastTypologieByAdresse.get(adresse.id);
+    if (lastTypologie) {
+      qpv += lastTypologie.qpv;
+      logementsSociaux += lastTypologie.logementSocial;
+      continue;
+    }
+
+    qpv += adresse.qpv ?? 0;
+    logementsSociaux += adresse.logementSocial ?? 0;
+  }
+
+  return { qpv, logementsSociaux };
+};
+
+const computeTauxEquipement = (
   structures: StatistiqueDbStructure[],
   typologieMap: Map<number, StatistiqueDbTypologie>,
   departements: StatistiqueDbDepartement[]
 ): TauxEquipementDept[] => {
   const placesByDept = new Map<string, number>();
+
   for (const structure of structures) {
     if (!structure.departementAdministratif) {
       continue;
@@ -87,6 +126,7 @@ export const computeTauxEquipement = (
         (typologie.placesAutorisees ?? 0)
     );
   }
+
   return departements.map((dept) => {
     const places = placesByDept.get(dept.numero) ?? 0;
     return {
@@ -99,54 +139,82 @@ export const computeTauxEquipement = (
   });
 };
 
-export const computeGlobalPlacesStats = (
+const computePlacesIndicators = (
   structures: StatistiqueDbStructure[],
-  typologies: StatistiqueDbTypologie[],
+  typologieMap: Map<number, StatistiqueDbTypologie>,
   adresses: StatistiqueDbAdresse[],
   adresseTypologies: StatistiqueDbAdresseTypologie[],
-  departements: StatistiqueDbDepartement[]
-): Pick<
-  StatistiqueApiRead["places"],
-  "totalPlaces" | "placesSpeciales" | "tauxEquipement"
-> => {
-  const typologieMap = getLastTypologiePerStructure(typologies);
+  departements: StatistiqueDbDepartement[],
+  year?: number
+): PlacesIndicators => {
   const activeStructures = filterStructuresWithTypologie(structures, typologieMap);
+  const structureIds = new Set(activeStructures.map((structure) => structure.id));
+  const structurePlaces = sumStructureTypologiePlacesSpeciales(
+    activeStructures,
+    typologieMap
+  );
+  const adressePlaces =
+    year !== undefined
+      ? sumAdresseTypologiePlacesSpeciales(adresseTypologies, structureIds, year)
+      : sumGlobalAdressePlacesSpeciales(adresses, adresseTypologies, structureIds);
 
   return {
     totalPlaces: computeTotalPlaces(activeStructures, typologieMap),
-    placesSpeciales: computePlacesSpeciales(
-      activeStructures,
-      typologieMap,
-      adresses,
-      adresseTypologies
-    ),
     tauxEquipement: computeTauxEquipement(
       activeStructures,
       typologieMap,
       departements
     ),
+    ...structurePlaces,
+    ...adressePlaces,
   };
 };
 
-export const computePlacesYearStats = (
+const computeByYearStats = (
   structures: StatistiqueDbStructure[],
   typologies: StatistiqueDbTypologie[],
   adresses: StatistiqueDbAdresse[],
-  adresseTypologies: StatistiqueDbAdresseTypologie[]
-): PlacesYearStat[] =>
-  getTypologieYears(typologies).map((year) => {
-    const typologieMap = getTypologieMapForExactYear(typologies, year);
-    const activeStructures = filterStructuresWithTypologie(structures, typologieMap);
+  adresseTypologies: StatistiqueDbAdresseTypologie[],
+  departements: StatistiqueDbDepartement[]
+): PlacesByYearStat[] =>
+  getTypologieYears(typologies).map((year) => ({
+    year,
+    ...computePlacesIndicators(
+      structures,
+      getTypologieMapForExactYear(typologies, year),
+      adresses,
+      adresseTypologies,
+      departements,
+      year
+    ),
+  }));
 
-    return {
-      year,
-      totalPlaces: computeTotalPlaces(activeStructures, typologieMap),
-      placesSpeciales: computePlacesSpeciales(
-        activeStructures,
-        typologieMap,
-        adresses,
-        adresseTypologies,
-        year
-      ),
-    };
-  });
+export const computePlacesStatistiques = (
+  structures: StatistiqueDbStructure[],
+  typologies: StatistiqueDbTypologie[],
+  adresses: StatistiqueDbAdresse[],
+  adresseTypologies: StatistiqueDbAdresseTypologie[],
+  departements: StatistiqueDbDepartement[]
+): StatistiqueApiRead["places"] => {
+  // TODO(fermeture): exclure les structures avec fermeture effective (filtre global périmètre)
+  // TODO(actualisation): exposer updatedAt quand les formulaires d'actualisation seront disponibles
+
+  const typologieMap = getLastTypologiePerStructure(typologies);
+
+  return {
+    ...computePlacesIndicators(
+      structures,
+      typologieMap,
+      adresses,
+      adresseTypologies,
+      departements
+    ),
+    byYear: computeByYearStats(
+      structures,
+      typologies,
+      adresses,
+      adresseTypologies,
+      departements
+    ),
+  };
+};

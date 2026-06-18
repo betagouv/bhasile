@@ -1,8 +1,6 @@
 import { sumValues } from "@/app/utils/math.util";
 
 import type {
-  StatistiqueDbAdresse,
-  StatistiqueDbAdresseTypologie,
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
 } from "./db.type";
@@ -106,43 +104,6 @@ export const computeTotalPlaces = (
       (structure) => typologieMap.get(structure.id)?.placesAutorisees
     )
   ) ?? 0;
-
-export const sumGlobalAdressePlacesSpeciales = (
-  adresses: StatistiqueDbAdresse[],
-  adresseTypologies: StatistiqueDbAdresseTypologie[],
-  structureIds: Set<number>
-): { qpv: number; logementsSociaux: number } => {
-  const lastTypologieByAdresse = new Map<number, StatistiqueDbAdresseTypologie>();
-
-  for (const typologie of adresseTypologies) {
-    const structureId = typologie.adresse.structureId;
-    if (structureId === null || !structureIds.has(structureId)) {
-      continue;
-    }
-    lastTypologieByAdresse.set(typologie.adresseId, typologie);
-  }
-
-  let qpv = 0;
-  let logementsSociaux = 0;
-
-  for (const adresse of adresses) {
-    if (adresse.structureId === null || !structureIds.has(adresse.structureId)) {
-      continue;
-    }
-
-    const lastTypologie = lastTypologieByAdresse.get(adresse.id);
-    if (lastTypologie) {
-      qpv += lastTypologie.qpv;
-      logementsSociaux += lastTypologie.logementSocial;
-      continue;
-    }
-
-    qpv += adresse.qpv ?? 0;
-    logementsSociaux += adresse.logementSocial ?? 0;
-  }
-
-  return { qpv, logementsSociaux };
-};
 
 // -------- Monthly --------
 

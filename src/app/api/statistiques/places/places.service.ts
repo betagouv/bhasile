@@ -1,10 +1,7 @@
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesContext } from "../shared/context";
-import {
-  computeGlobalPlacesStats,
-  computePlacesYearStats,
-} from "./places.util";
+import { computePlacesStatistiques } from "./places.util";
 
 export const getPlacesStatistiques = (
   context: StatistiquesContext
@@ -17,19 +14,11 @@ export const getPlacesStatistiques = (
     departements,
   } = context;
 
-  const global = computeGlobalPlacesStats(
+  return computePlacesStatistiques(
     structures,
     typologies,
     adresses,
     adresseTypologies,
     departements
   );
-  const byYear = computePlacesYearStats(
-    structures,
-    typologies,
-    adresses,
-    adresseTypologies
-  );
-
-  return { ...global, byYear };
 };
