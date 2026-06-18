@@ -61,3 +61,6 @@ export const weightedAverage = (
 
   return sumWeight === 0 ? null : sumWeighted / sumWeight;
 };
+
+export const ratio = (numerator: number, denominator: number): number | null =>
+  denominator > 0 ? numerator / denominator : null;

@@ -14,13 +14,13 @@ import { StatistiquesPerimetreVideError } from "./errors";
 import {
   findAdresseTypologies,
   findDepartementsWithPopulation,
+  findCpomStructures,
   findDnaLinksByStructure,
   findStructureAdresses,
   findStructureIds,
   findStructuresWithTypes,
   findStructureTypologies,
 } from "./repository";
-import { findCpomStructures } from "../structures/structures.repository";
 
 export type StatistiquesContext = {
   structureIds: number[];

@@ -9,7 +9,6 @@ import {
 } from "@/app/utils/math.util";
 import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
 import {
-  FinanceAggregation,
   FinanceByYearScopeStat,
   FinanceByYearStat,
   StatistiqueApiRead,
@@ -149,28 +148,27 @@ const buildByYearStats = (
     subventionnees: StatistiqueDbBudgetAgg[];
   },
   indicateurs: StatistiqueDbIndicateurFinancier[],
-  minYear: number,
   aggregation: NumericAggregation
 ): FinanceByYearStat[] => {
   const totalStats = computeScopeYearStats(
     scopeIds.total,
     budgets.total,
     indicateurs,
-    minYear,
+    DOCUMENTS_FINANCIERS_OPEN_YEAR,
     aggregation
   );
   const autoriseesStats = computeScopeYearStats(
     scopeIds.autorisees,
     budgets.autorisees,
     indicateurs,
-    minYear,
+    DOCUMENTS_FINANCIERS_OPEN_YEAR,
     aggregation
   );
   const subventionneesStats = computeScopeYearStats(
     scopeIds.subventionnees,
     budgets.subventionnees,
     indicateurs,
-    minYear,
+    DOCUMENTS_FINANCIERS_OPEN_YEAR,
     aggregation
   );
 
@@ -191,29 +189,15 @@ const buildByYearStats = (
 };
 
 export const computeFinanceStatistiques = (
-  structures: StatistiqueDbStructure[],
+  scopeIds: FinanceScopeIds,
   budgets: {
     total: StatistiqueDbBudgetAgg[];
     autorisees: StatistiqueDbBudgetAgg[];
     subventionnees: StatistiqueDbBudgetAgg[];
   },
   indicateurs: StatistiqueDbIndicateurFinancier[],
-  aggregation: FinanceAggregation
-): StatistiqueApiRead["finance"] => {
-  // TODO(fermeture): exclure les structures avec fermeture effective (filtre global périmètre)
-  // TODO(actualisation): exposer updatedAt quand les formulaires d'actualisation seront disponibles
-
-  const scopeIds = getStructureIdsByFinanceScope(structures);
-  const byYear = buildByYearStats(
-    scopeIds,
-    budgets,
-    indicateurs,
-    DOCUMENTS_FINANCIERS_OPEN_YEAR,
-    aggregation
-  );
-
-  return {
-    aggregation,
-    byYear,
-  };
-};
+  aggregation: NumericAggregation
+): StatistiqueApiRead["finance"] => ({
+  aggregation,
+  byYear: buildByYearStats(scopeIds, budgets, indicateurs, aggregation),
+});

@@ -1,6 +1,7 @@
 import { sumValues } from "@/app/utils/math.util";
 
 import type {
+  StatistiqueDbDnaLink,
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
 } from "./db.type";
@@ -8,9 +9,9 @@ import type {
 /**
  * Shared stats helpers.
  *
- * TODO(structure-version): centraliser ici résolution `StructureVersion`
- * (dernière version avec effectiveDate <= now) puis basculer les stats
- * vers champs portés par version. Garder API des helpers stable.
+ * TODO(fermeture): exclure les structures fermées du périmètre.
+ * TODO(actualisation): exposer updatedAt par bloc quand disponible.
+ * TODO(structure-version): résolution `StructureVersion` (effectiveDate <= now).
  */
 
 const GLOBAL_TYPOLOGY_FIELDS = [
@@ -105,11 +106,78 @@ export const computeTotalPlaces = (
     )
   ) ?? 0;
 
+export type ActiveStructuresScope = {
+  activeStructures: StatistiqueDbStructure[];
+  activeStructureIds: number[];
+  totalPlacesAutorisees: number;
+};
+
+export const getActiveStructuresScope = (
+  structures: StatistiqueDbStructure[],
+  typologies: StatistiqueDbTypologie[]
+): ActiveStructuresScope => {
+  const typologieMap = getLastTypologiePerStructure(typologies);
+  const activeStructures = filterStructuresWithTypologie(structures, typologieMap);
+
+  return {
+    activeStructures,
+    activeStructureIds: activeStructures.map((structure) => structure.id),
+    totalPlacesAutorisees: computeTotalPlaces(activeStructures, typologieMap),
+  };
+};
+
+// -------- DNA --------
+
+export const buildDnaCodeToStructureIds = (
+  dnaLinks: StatistiqueDbDnaLink[]
+): Map<string, Set<number>> => {
+  const map = new Map<string, Set<number>>();
+
+  for (const link of dnaLinks) {
+    if (link.structureId === null) {
+      continue;
+    }
+    const structureIds = map.get(link.dna.code) ?? new Set<number>();
+    structureIds.add(link.structureId);
+    map.set(link.dna.code, structureIds);
+  }
+
+  return map;
+};
+
 // -------- Monthly --------
 
 export const getMonthKey = (date: Date): string => date.toISOString().slice(0, 7);
 
 export const monthKeyToDate = (key: string): Date => new Date(`${key}-01`);
 
-export const getMonthKeysFromDates = (dates: Date[]): string[] =>
-  [...new Set(dates.map(getMonthKey))].sort();
+export const getTwelveMonthCutoffKey = (): string => {
+  const twelveMonthsAgo = new Date();
+  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+  return getMonthKey(twelveMonthsAgo);
+};
+
+export const groupByMonthKey = <T>(
+  items: T[],
+  getDate: (item: T) => Date | null | undefined
+): Map<string, T[]> => {
+  const byMonth = new Map<string, T[]>();
+
+  for (const item of items) {
+    const date = getDate(item);
+    if (!date) {
+      continue;
+    }
+    const key = getMonthKey(date);
+    const list = byMonth.get(key) ?? [];
+    list.push(item);
+    byMonth.set(key, list);
+  }
+
+  return byMonth;
+};
+
+export const mergeSortedMonthKeys = (
+  ...monthMaps: Array<Map<string, unknown>>
+): string[] =>
+  [...new Set(monthMaps.flatMap((monthMap) => [...monthMap.keys()]))].sort();

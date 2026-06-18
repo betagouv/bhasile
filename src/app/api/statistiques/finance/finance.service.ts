@@ -23,7 +23,7 @@ export const getFinanceStatistiques = async (
     ]);
 
   return computeFinanceStatistiques(
-    structures,
+    scopeIds,
     {
       total: budgetsTotal,
       autorisees: budgetsAutorisees,

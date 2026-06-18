@@ -2,7 +2,7 @@ import {
   isStructureEligibleForActiviteIndisponibilite,
   isStructureEligibleForActivitePresencesIndues,
 } from "@/app/utils/structure.util";
-import { StructureType } from "@/generated/prisma/client";
+import { ratio } from "@/app/utils/math.util";
 import {
   ActiviteByMonthStat,
   StatistiqueApiRead,
@@ -38,10 +38,7 @@ const emptyMonthAccumulator = (): MonthAccumulator => ({
   presencesInduesDeboutees: 0,
 });
 
-const ratio = (numerator: number, denominator: number): number | null =>
-  denominator > 0 ? numerator / denominator : null;
-
-export const buildDnaEligibilityByActiviteScope = (
+const buildDnaEligibilityByActiviteScope = (
   dnaLinks: StatistiqueDbDnaLink[],
   structures: StatistiqueDbStructure[]
 ): DnaEligibility => {
@@ -55,9 +52,7 @@ export const buildDnaEligibilityByActiviteScope = (
     if (link.structureId === null) {
       continue;
     }
-    const type = structureTypeById.get(link.structureId) as
-      | StructureType
-      | undefined;
+    const type = structureTypeById.get(link.structureId);
     if (!type) {
       continue;
     }
@@ -103,11 +98,10 @@ const toMonthStat = (key: string, acc: MonthAccumulator): ActiviteByMonthStat =>
 
 export const computeActiviteStatistiques = (
   activites: StatistiqueDbActivite[],
-  eligibility: DnaEligibility
+  dnaLinks: StatistiqueDbDnaLink[],
+  structures: StatistiqueDbStructure[]
 ): StatistiqueApiRead["activite"] => {
-  // TODO(fermeture): exclure les structures avec fermeture effective (filtre global périmètre)
-  // TODO(actualisation): exposer updatedAt quand les formulaires d'actualisation seront disponibles
-
+  const eligibility = buildDnaEligibilityByActiviteScope(dnaLinks, structures);
   const byMonth = new Map<string, MonthAccumulator>();
 
   for (const activite of activites) {

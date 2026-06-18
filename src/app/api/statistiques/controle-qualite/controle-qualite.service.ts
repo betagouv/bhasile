@@ -2,11 +2,7 @@ import { NumericAggregation } from "@/app/utils/math.util";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesContext } from "../shared/context";
-import {
-  computeTotalPlaces,
-  filterStructuresWithTypologie,
-  getLastTypologiePerStructure,
-} from "../shared/utils";
+import { getActiveStructuresScope } from "../shared/utils";
 import { findEigs, findEvaluations } from "./controle-qualite.repository";
 import { computeControleQualiteStatistiques } from "./controle-qualite.util";
 
@@ -15,13 +11,9 @@ export const getControleQualiteStatistiques = async (
   aggregation: NumericAggregation
 ): Promise<StatistiqueApiRead["controleQualite"]> => {
   const { structureIds, structures, typologies, dnaLinks, dnaCodes } = context;
-
-  const typologieMap = getLastTypologiePerStructure(typologies);
-  const activeStructures = filterStructuresWithTypologie(structures, typologieMap);
-  const activeStructureIds = activeStructures.map((structure) => structure.id);
-  const totalPlacesAutorisees = computeTotalPlaces(
-    activeStructures,
-    typologieMap
+  const { activeStructureIds, totalPlacesAutorisees } = getActiveStructuresScope(
+    structures,
+    typologies
   );
 
   const [eigs, evaluations] = await Promise.all([

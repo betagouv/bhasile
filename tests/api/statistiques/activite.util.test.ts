@@ -2,10 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { StructureType } from "@/generated/prisma/client";
 
-import {
-  buildDnaEligibilityByActiviteScope,
-  computeActiviteStatistiques,
-} from "@/app/api/statistiques/activite/activite.util";
+import { computeActiviteStatistiques } from "@/app/api/statistiques/activite/activite.util";
 
 describe("activite statistiques util", () => {
   const structures = [
@@ -20,21 +17,7 @@ describe("activite statistiques util", () => {
     { structureId: 3, dna: { code: "DNA03" } },
   ];
 
-  it("should scope indispo and presences indues by structure type", () => {
-    const eligibility = buildDnaEligibilityByActiviteScope(
-      dnaLinks,
-      structures
-    );
-
-    expect([...eligibility.indisponibilite]).toEqual(["DNA01", "DNA03"]);
-    expect([...eligibility.presencesIndues]).toEqual(["DNA02", "DNA03"]);
-  });
-
   it("should aggregate monthly stats with scoped rates", () => {
-    const eligibility = buildDnaEligibilityByActiviteScope(
-      dnaLinks,
-      structures
-    );
     const result = computeActiviteStatistiques(
       [
         {
@@ -62,7 +45,8 @@ describe("activite statistiques util", () => {
           presencesInduesDeboutees: 3,
         },
       ],
-      eligibility
+      dnaLinks,
+      structures
     );
 
     expect(result.byMonth).toHaveLength(1);

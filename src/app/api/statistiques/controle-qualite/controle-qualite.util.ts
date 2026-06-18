@@ -1,8 +1,5 @@
 import { isEigComportementViolent } from "@/app/utils/eig.util";
-import {
-  aggregateValues,
-  NumericAggregation,
-} from "@/app/utils/math.util";
+import { aggregateValues, NumericAggregation, ratio } from "@/app/utils/math.util";
 import {
   ControleQualiteByMonthStat,
   EigStat,
@@ -10,7 +7,11 @@ import {
 } from "@/schemas/api/statistique.schema";
 
 import {
+  buildDnaCodeToStructureIds,
   getMonthKey,
+  getTwelveMonthCutoffKey,
+  groupByMonthKey,
+  mergeSortedMonthKeys,
   monthKeyToDate,
 } from "../shared/utils";
 import type {
@@ -18,23 +19,6 @@ import type {
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
 } from "../shared/db.type";
-
-const buildDnaCodeToStructureIds = (
-  dnaLinks: StatistiqueDbDnaLink[]
-): Map<string, Set<number>> => {
-  const map = new Map<string, Set<number>>();
-
-  for (const link of dnaLinks) {
-    if (link.structureId === null) {
-      continue;
-    }
-    const codes = map.get(link.dna.code) ?? new Set<number>();
-    codes.add(link.structureId);
-    map.set(link.dna.code, codes);
-  }
-
-  return map;
-};
 
 const getStructureIdsFromEigs = (
   eigs: StatistiqueDbEig[],
@@ -78,13 +62,7 @@ const countEigs = (
   };
 };
 
-const getTwelveMonthCutoffKey = (): string => {
-  const twelveMonthsAgo = new Date();
-  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
-  return getMonthKey(twelveMonthsAgo);
-};
-
-export const computeEigSummary = (
+const computeEigSummary = (
   eigs: StatistiqueDbEig[],
   totalPlacesAutorisees: number
 ): EigStat => {
@@ -135,7 +113,7 @@ const computeEvaluationNotesForMonth = (
   };
 };
 
-export const computeControleQualiteByMonth = (
+const computeControleQualiteByMonth = (
   activeStructureIds: number[],
   eigs: StatistiqueDbEig[],
   evaluations: StatistiqueDbEvaluation[],
@@ -145,34 +123,13 @@ export const computeControleQualiteByMonth = (
   const activeStructureIdSet = new Set(activeStructureIds);
   const totalStructures = activeStructureIds.length;
   const dnaCodeToStructureIds = buildDnaCodeToStructureIds(dnaLinks);
+  const eigsByMonth = groupByMonthKey(eigs, (eig) => eig.evenementDate);
+  const evaluationsByMonth = groupByMonthKey(
+    evaluations,
+    (evaluation) => evaluation.date
+  );
 
-  const eigsByMonth = new Map<string, StatistiqueDbEig[]>();
-  for (const eig of eigs) {
-    if (!eig.evenementDate) {
-      continue;
-    }
-    const key = getMonthKey(new Date(eig.evenementDate));
-    const list = eigsByMonth.get(key) ?? [];
-    list.push(eig);
-    eigsByMonth.set(key, list);
-  }
-
-  const evaluationsByMonth = new Map<string, StatistiqueDbEvaluation[]>();
-  for (const evaluation of evaluations) {
-    if (!evaluation.date) {
-      continue;
-    }
-    const key = getMonthKey(new Date(evaluation.date));
-    const list = evaluationsByMonth.get(key) ?? [];
-    list.push(evaluation);
-    evaluationsByMonth.set(key, list);
-  }
-
-  const monthKeys = [
-    ...new Set([...eigsByMonth.keys(), ...evaluationsByMonth.keys()]),
-  ].sort();
-
-  return monthKeys.map((key) => {
+  return mergeSortedMonthKeys(eigsByMonth, evaluationsByMonth).map((key) => {
     const eigsForMonth = eigsByMonth.get(key) ?? [];
     const evaluationsForMonth = evaluationsByMonth.get(key) ?? [];
     const { nbEig, nbEigComportementViolent } = countEigs(eigsForMonth);
@@ -183,18 +140,19 @@ export const computeControleQualiteByMonth = (
     );
     const nbStructuresSansDeclarationEig =
       totalStructures - structureIdsWithEig.size;
+    const partSansDeclaration = ratio(
+      nbStructuresSansDeclarationEig,
+      totalStructures
+    );
 
     return {
       date: monthKeyToDate(key),
       nbStructuresSansDeclarationEig,
       partStructuresSansDeclarationEig:
-        totalStructures > 0
-          ? (nbStructuresSansDeclarationEig / totalStructures) * 100
-          : null,
+        partSansDeclaration !== null ? partSansDeclaration * 100 : null,
       nbEig,
       nbEigComportementViolent,
-      tauxEigComportementViolent:
-        nbEig > 0 ? nbEigComportementViolent / nbEig : null,
+      tauxEigComportementViolent: ratio(nbEigComportementViolent, nbEig),
       ...computeEvaluationNotesForMonth(evaluationsForMonth, aggregation),
     };
   });
@@ -207,19 +165,14 @@ export const computeControleQualiteStatistiques = (
   evaluations: StatistiqueDbEvaluation[],
   dnaLinks: StatistiqueDbDnaLink[],
   aggregation: NumericAggregation
-): StatistiqueApiRead["controleQualite"] => {
-  // TODO(fermeture): exclure les structures avec fermeture effective (filtre global périmètre)
-  // TODO(actualisation): exposer updatedAt quand les formulaires d'actualisation seront disponibles
-
-  return {
-    aggregation,
-    eig: computeEigSummary(eigs, totalPlacesAutorisees),
-    byMonth: computeControleQualiteByMonth(
-      activeStructureIds,
-      eigs,
-      evaluations,
-      dnaLinks,
-      aggregation
-    ),
-  };
-};
+): StatistiqueApiRead["controleQualite"] => ({
+  aggregation,
+  eig: computeEigSummary(eigs, totalPlacesAutorisees),
+  byMonth: computeControleQualiteByMonth(
+    activeStructureIds,
+    eigs,
+    evaluations,
+    dnaLinks,
+    aggregation
+  ),
+});

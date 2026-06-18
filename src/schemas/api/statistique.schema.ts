@@ -1,14 +1,15 @@
 import z from "zod";
 
 import { Repartition, StructureType } from "@/generated/prisma/client";
+import type { NumericAggregation } from "@/app/utils/math.util";
 
-export type FinanceAggregation = "moyenne" | "mediane";
+export type StatistiquesAggregation = NumericAggregation;
 
 export type StatistiquesFiltersRaw = {
   departements: string | null;
   operateurs: string | null;
   types: string | null;
-  /** Agrégation des taux/coûts finance : `moyenne` (défaut) ou `mediane`. */
+  /** Agrégation moyenne / médiane (`moyenne` par défaut). */
   aggregation: string | null;
 };
 
@@ -55,12 +56,6 @@ export type PlacesByYearStat = {
   fvvTeh: number;
   qpv: number;
   logementsSociaux: number;
-};
-
-export type FinanceScopeBreakdown<T> = {
-  total: T;
-  autorisees: T;
-  subventionnees: T;
 };
 
 export type FinanceByYearScopeStat = {

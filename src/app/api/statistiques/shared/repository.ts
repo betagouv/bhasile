@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import type {
   StatistiqueDbAdresse,
   StatistiqueDbAdresseTypologie,
+  StatistiqueDbCpomStructure,
   StatistiqueDbDepartement,
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
@@ -110,5 +111,22 @@ export const findDepartementsWithPopulation = async (
         ? { numero: { in: departementNumeros } }
         : undefined,
     select: { numero: true, name: true, population: true },
+  });
+};
+
+export const findCpomStructures = async (
+  structureIds: number[]
+): Promise<StatistiqueDbCpomStructure[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+  return prisma.cpomStructure.findMany({
+    where: { structureId: { in: structureIds } },
+    select: {
+      cpomId: true,
+      structureId: true,
+      dateStart: true,
+      dateEnd: true,
+    },
   });
 };

@@ -251,9 +251,6 @@ export const computeStructuresStatistiques = (
   adresses: StatistiqueDbAdresse[],
   cpomLinks: StatistiqueDbCpomStructure[]
 ): StatistiqueApiRead["structures"] => {
-  // TODO(fermeture): exclure les structures avec fermeture effective (filtre global périmètre)
-  // TODO(actualisation): exposer updatedAt quand les formulaires d'actualisation seront disponibles
-
   const typologieMap = getLastTypologiePerStructure(typologies);
   const activeStructures = filterStructuresWithTypologie(structures, typologieMap);
   const batiMap = getBatiPerStructure(adresses);

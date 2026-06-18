@@ -196,9 +196,6 @@ export const computePlacesStatistiques = (
   adresseTypologies: StatistiqueDbAdresseTypologie[],
   departements: StatistiqueDbDepartement[]
 ): StatistiqueApiRead["places"] => {
-  // TODO(fermeture): exclure les structures avec fermeture effective (filtre global périmètre)
-  // TODO(actualisation): exposer updatedAt quand les formulaires d'actualisation seront disponibles
-
   const typologieMap = getLastTypologiePerStructure(typologies);
 
   return {
