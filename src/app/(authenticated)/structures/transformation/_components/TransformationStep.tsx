@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { TransformationStructureIcon } from "@/app/components/transformations/TransformationStructureIcon";
+import { StructureEventIcon } from "@/app/components/structures/StructureEventIcon";
 import { cn } from "@/app/utils/classname.util";
 import {
   getStructureVersionTransformationLabel,
@@ -26,7 +26,7 @@ export const TransformationStep = ({ step }: Props) => {
             "flex items-center justify-center w-7 h-7 rounded-full bg-white text-title-blue-france"
           )}
         >
-          <TransformationStructureIcon type={step.type} />
+          <StructureEventIcon kind={step.type} />
         </span>
         {getStructureVersionTransformationLabel(step.type, step.codeBhasile)}
       </div>

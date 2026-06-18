@@ -10,6 +10,7 @@ import { Adresses } from "./Adresses";
 import { AntennesAndContacts } from "./AntennesAndContacts";
 import { Codes } from "./Codes";
 import { General } from "./General";
+import { Historique } from "./Historique";
 
 export const DescriptionBlock = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -37,6 +38,10 @@ export const DescriptionBlock = (): ReactElement => {
           },
         ]
       : []),
+    {
+      id: "historique",
+      label: "Historique",
+    },
   ];
 
   const [selectedTabId, setSelectedTabId] = useState<string>("general");
@@ -83,6 +88,7 @@ export const DescriptionBlock = (): ReactElement => {
         {selectedTabId === "sites" && <AntennesAndContacts />}
         {selectedTabId === "codes" && <Codes />}
         {selectedTabId === "adresses" && <Adresses />}
+        {selectedTabId === "historique" && <Historique />}
       </Tabs>
     </Block>
   );
