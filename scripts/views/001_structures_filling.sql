@@ -45,11 +45,10 @@ SELECT
   END AS "finalisation_status",
   sc."operateur" AS "operateur",
   sc."structure_type" AS "structure_type",
-  s."public" AS "public",
+  sc."public" AS "public",
   sc."region" AS "region",
   sc."created_at" AS "created_at",
   sc."updated_at" AS "updated_at"
 FROM
 :"SCHEMA"."structures_core" sc
-  JOIN public."Structure" s ON s."id" = sc."id"
-  LEFT JOIN finalisation_forms ff ON ff."structureId" = s."id";
+  LEFT JOIN finalisation_forms ff ON ff."structureId" = sc."id";

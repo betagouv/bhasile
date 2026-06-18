@@ -121,6 +121,8 @@ view StructuresAggregates {
   operateur                   String?
   structure_type              String?
   public                      String?
+  latitude                    Decimal?
+  longitude                   Decimal?
   updated_at                  DateTime?
   finalisation_status         String?
   finalisation_status_detail  String?
