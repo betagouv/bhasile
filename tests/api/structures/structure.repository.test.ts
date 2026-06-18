@@ -22,6 +22,9 @@ describe("structure.repository db integration", () => {
     const structure = await prisma.structure.create({
       data: {
         codeBhasile: `BHA-DB-TEST-${Date.now()}-${Math.random()}`,
+        structureVersions: {
+          create: { effectiveDate: new Date("2020-01-01T12:00:00.000Z") },
+        },
       },
     });
     createdStructureIds.push(structure.id);
@@ -51,12 +54,11 @@ describe("structure.repository db integration", () => {
     return fetchData();
   };
 
-  const fetchRollingVersion = (structureId: number) =>
+  const fetchCurrentVersion = (structureId: number) =>
     prisma.structureVersion.findFirstOrThrow({
       where: {
         structureId,
         structureVersionTransformationId: null,
-        forceHistorize: false,
       },
       orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
       include: {
@@ -119,7 +121,7 @@ describe("structure.repository db integration", () => {
     });
 
     // THEN: les scalaires versionnés sont sur le rolling, filiale reste sur Structure
-    const version = await fetchRollingVersion(structure.id);
+    const version = await fetchCurrentVersion(structure.id);
     expect(version.public).toBe("FAMILLE");
     expect(version.adresseAdministrative).toBe("10 rue de la Paix");
     expect(version.codePostalAdministratif).toBe("75001");
@@ -154,7 +156,7 @@ describe("structure.repository db integration", () => {
     });
 
     // THEN: le rolling référence le département attendu
-    const version = await fetchRollingVersion(structure.id);
+    const version = await fetchCurrentVersion(structure.id);
     expect(version.departementAdministratif).toBe(departement.numero);
   });
 
@@ -202,7 +204,7 @@ describe("structure.repository db integration", () => {
     const version = await updateStructureAndFetch(
       structure.id,
       { contacts: [newContact] },
-      () => fetchRollingVersion(structure.id)
+      () => fetchCurrentVersion(structure.id)
     );
 
     expect(version.contacts).toHaveLength(1);
@@ -226,7 +228,7 @@ describe("structure.repository db integration", () => {
     const version = await updateStructureAndFetch(
       structure.id,
       { nom: "Nom mis à jour sans contacts" },
-      () => fetchRollingVersion(structure.id)
+      () => fetchCurrentVersion(structure.id)
     );
 
     // THEN: the scalar is updated and the contacts are preserved
@@ -235,22 +237,55 @@ describe("structure.repository db integration", () => {
     expect(version.contacts[0]).toMatchObject(existingContact);
   });
 
-  it("does not create a rolling version when the payload has no versioned field", async () => {
-    // GIVEN: a structure with no rolling version yet
+  it("does not create a new version when the payload has no versioned field", async () => {
+    // GIVEN: a structure with only its initial version
     const structure = await createStructure();
 
     // WHEN: an update carries only non-versioned data (e.g. a budget)
     await updateOne({ id: structure.id, budgets: [{ year: 2024 }] });
 
-    // THEN: no empty rolling version is created (which would shadow the read model)
-    const rolling = await prisma.structureVersion.findFirst({
-      where: {
-        structureId: structure.id,
-        structureVersionTransformationId: null,
-        forceHistorize: false,
+    // THEN: no extra version is created — only the initial one remains
+    const versionCount = await prisma.structureVersion.count({
+      where: { structureId: structure.id },
+    });
+    expect(versionCount).toBe(1);
+  });
+
+  it("applies a correction in place and preserves the current version effectiveDate", async () => {
+    // GIVEN: a structure with its initial version (effectiveDate 2020-01-01)
+    const structure = await createStructure();
+
+    // WHEN: a correction updates a versioned scalar
+    await updateOne({ id: structure.id, nom: "Nom corrigé" });
+
+    // THEN: the scalar is updated on the same version, its effectiveDate untouched
+    const version = await fetchCurrentVersion(structure.id);
+    expect(version.nom).toBe("Nom corrigé");
+    expect(version.effectiveDate.toISOString()).toBe(
+      "2020-01-01T12:00:00.000Z"
+    );
+    const versionCount = await prisma.structureVersion.count({
+      where: { structureId: structure.id },
+    });
+    expect(versionCount).toBe(1);
+  });
+
+  it("throws when correcting a structure that has no current version (future-only)", async () => {
+    // GIVEN: a structure whose only version is effective in the future
+    const structure = await prisma.structure.create({
+      data: {
+        codeBhasile: `BHA-DB-TEST-${Date.now()}-${Math.random()}`,
+        structureVersions: {
+          create: { effectiveDate: new Date("2099-01-01T12:00:00.000Z") },
+        },
       },
     });
-    expect(rolling).toBeNull();
+    createdStructureIds.push(structure.id);
+
+    // WHEN/THEN: a versioned correction has no current version to land on → throws
+    await expect(
+      updateOne({ id: structure.id, nom: "Tentative de correction" })
+    ).rejects.toThrow("Aucune version courante");
   });
 
   it("should upsert structure budgets by year", async () => {
@@ -375,7 +410,7 @@ describe("structure.repository db integration", () => {
     const version = await updateStructureAndFetch(
       structure.id,
       { structureTypologies: [newStructureTypologie] },
-      () => fetchRollingVersion(structure.id)
+      () => fetchCurrentVersion(structure.id)
     );
 
     expect(version.structureTypologies).toHaveLength(1);
@@ -396,7 +431,7 @@ describe("structure.repository db integration", () => {
         },
       ],
     });
-    const initialVersion = await fetchRollingVersion(structure.id);
+    const initialVersion = await fetchCurrentVersion(structure.id);
     const oldAdresseId = initialVersion.adresses[0].id;
 
     // WHEN: update receives a new address list
@@ -415,7 +450,7 @@ describe("structure.repository db integration", () => {
     });
 
     // THEN: old address is removed and new one created with typology
-    const version = await fetchRollingVersion(structure.id);
+    const version = await fetchCurrentVersion(structure.id);
     expect(version.adresses).toHaveLength(1);
     expect(version.adresses[0].id).not.toBe(oldAdresseId);
     expect(version.adresses[0]).toMatchObject({
@@ -447,7 +482,7 @@ describe("structure.repository db integration", () => {
     const version = await updateStructureAndFetch(
       structure.id,
       { antennes: [newAntenne] },
-      () => fetchRollingVersion(structure.id)
+      () => fetchCurrentVersion(structure.id)
     );
 
     expect(version.antennes).toHaveLength(1);
@@ -471,7 +506,7 @@ describe("structure.repository db integration", () => {
     });
 
     // THEN: only the new DNA link remains on the rolling version
-    const version = await fetchRollingVersion(structure.id);
+    const version = await fetchCurrentVersion(structure.id);
     expect(version.dnaStructures).toHaveLength(1);
     expect(version.dnaStructures[0].dna.code).toBe(newCode);
     expect(version.dnaStructures[0].description).toBe("New DNA");
@@ -522,7 +557,7 @@ describe("structure.repository db integration", () => {
           { description: "new finess", finess: { code: newCode } },
         ],
       },
-      () => fetchRollingVersion(structure.id)
+      () => fetchCurrentVersion(structure.id)
     );
 
     expect(version.structureFinesses).toHaveLength(1);
@@ -1088,7 +1123,7 @@ describe("structure.repository db integration", () => {
         type: StructureType.CADA,
         nom: rollingNom,
       });
-      const rolling = await fetchRollingVersion(structure.id);
+      const rolling = await fetchCurrentVersion(structure.id);
       await prisma.structureVersion.update({
         where: { id: rolling.id },
         data: { effectiveDate: new Date("2026-01-01T00:00:00.000Z") },

@@ -108,7 +108,10 @@ export const getLatestPlacesAutoriseesPerStructure = async (
 
   return rows
     .map((row) => row.placesAutorisees)
-    .filter((placesAutorisees): placesAutorisees is number => placesAutorisees !== null);
+    .filter(
+      (placesAutorisees): placesAutorisees is number =>
+        placesAutorisees !== null
+    );
 };
 
 export const findOneOperateur = async (
@@ -142,7 +145,7 @@ export const findOne = async (id: number) => {
 const hasVersionedFields = (structure: StructureAgentUpdateApiType): boolean =>
   VERSIONED_FIELD_KEYS.some((key) => structure[key] !== undefined);
 
-const writeRollingVersion = async (
+const writeToCurrentVersion = async (
   tx: PrismaTransaction,
   structure: StructureAgentUpdateApiType
 ): Promise<void> => {
@@ -150,24 +153,29 @@ const writeRollingVersion = async (
     return;
   }
 
-  const rollingVersion = await tx.structureVersion.findFirst({
+  const currentVersion = await tx.structureVersion.findFirst({
     where: {
       structureId: structure.id,
-      structureVersionTransformationId: null,
-      forceHistorize: false,
+      ...currentVersionWhere(new Date()),
     },
     orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
-    select: { id: true },
+    select: { id: true, effectiveDate: true },
   });
+
+  if (!currentVersion) {
+    throw new Error(
+      `Aucune version courante à modifier pour la structure ${structure.id}`
+    );
+  }
 
   const versionedData = Object.fromEntries(
     VERSIONED_FIELD_KEYS.map((key) => [key, structure[key]])
   ) as Pick<StructureAgentUpdateApiType, (typeof VERSIONED_FIELD_KEYS)[number]>;
 
   const versionPayload: StructureVersionApiType = {
-    id: rollingVersion?.id,
+    id: currentVersion.id,
     structureId: structure.id,
-    effectiveDate: new Date().toISOString(),
+    effectiveDate: currentVersion.effectiveDate.toISOString(),
     ...versionedData,
   };
 
@@ -202,7 +210,7 @@ export const updateOne = async (
           structure.id
         );
 
-        await writeRollingVersion(tx, structure);
+        await writeToCurrentVersion(tx, structure);
         await createOrUpdateBudgets(tx, budgets, { structureId: structure.id });
         await createOrUpdateIndicateursFinanciers(tx, indicateursFinanciers, {
           structureId: structure.id,

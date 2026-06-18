@@ -222,7 +222,7 @@ export const getStructureDepartement = async (
   return departementAdministratif;
 };
 
-const mergeStructureWithVersion = <T>(
+export const mergeStructureWithVersion = <T>(
   dbStructure: T,
   version: Record<(typeof VERSIONED_FIELD_KEYS)[number], unknown>
 ): T => {
