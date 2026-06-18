@@ -126,6 +126,17 @@ export const isStructureSubventionnee = (
   return type === StructureType.HUDA || type === StructureType.CAES;
 };
 
+/** Suivi activité — indisponibilités : toutes structures sauf CAES. */
+export const isStructureEligibleForActiviteIndisponibilite = (
+  type: StructureType | string | undefined | null
+): boolean => type != null && type !== StructureType.CAES;
+
+/** Suivi activité — présences indues : CAES et CPH uniquement. */
+export const isStructureEligibleForActivitePresencesIndues = (
+  type: StructureType | string | undefined | null
+): boolean =>
+  type === StructureType.CAES || type === StructureType.CPH;
+
 export const getCurrentCpomStructure = (
   structure: StructureApiRead
 ): CpomStructureApiRead | undefined => {

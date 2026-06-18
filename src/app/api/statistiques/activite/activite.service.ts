@@ -1,18 +1,19 @@
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesContext } from "../shared/context";
-import { findActivites, findLatestActivites } from "./activite.repository";
-import { computeActiviteStat } from "./activite.util";
+import { findActivites } from "./activite.repository";
+import {
+  buildDnaEligibilityByActiviteScope,
+  computeActiviteStatistiques,
+} from "./activite.util";
 
 export const getActiviteStatistiques = async (
   context: StatistiquesContext
 ): Promise<StatistiqueApiRead["activite"]> => {
-  const { dnaCodes } = context;
+  const { structures, dnaLinks, dnaCodes } = context;
 
-  const [latestActivites, activitesTimeSeries] = await Promise.all([
-    findLatestActivites(dnaCodes),
-    findActivites(dnaCodes),
-  ]);
+  const eligibility = buildDnaEligibilityByActiviteScope(dnaLinks, structures);
+  const activites = await findActivites(dnaCodes);
 
-  return computeActiviteStat(latestActivites, activitesTimeSeries);
+  return computeActiviteStatistiques(activites, eligibility);
 };

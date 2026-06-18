@@ -105,18 +105,17 @@ export type ControleQualiteByMonthStat = {
   noteStructure: number | null;
 };
 
-export type MotifIndisponibilite = {
-  desinsectisation: number;
-  remiseEnEtat: number;
-  sousOccupation: number;
-  travaux: number;
-};
-
-export type PresencesInduesMonthStat = {
+export type ActiviteByMonthStat = {
   date: Date;
+  placesEnregistreesDna: number;
+  placesIndisponibles: number;
+  tauxIndisponibilite: number | null;
   presencesInduesBPI: number;
+  tauxPresencesInduesBPI: number | null;
   presencesInduesDeboutees: number;
-  placesAutorisees: number;
+  tauxPresencesInduesDeboutees: number | null;
+  presencesInduesTotal: number;
+  tauxPresencesInduesTotal: number | null;
 };
 
 const typeStructureStatSchema = z.object({
@@ -194,6 +193,19 @@ const controleQualiteByMonthStatSchema = z.object({
   noteStructure: z.number().nullable(),
 });
 
+const activiteByMonthStatSchema = z.object({
+  date: z.coerce.date(),
+  placesEnregistreesDna: z.number(),
+  placesIndisponibles: z.number(),
+  tauxIndisponibilite: z.number().nullable(),
+  presencesInduesBPI: z.number(),
+  tauxPresencesInduesBPI: z.number().nullable(),
+  presencesInduesDeboutees: z.number(),
+  tauxPresencesInduesDeboutees: z.number().nullable(),
+  presencesInduesTotal: z.number(),
+  tauxPresencesInduesTotal: z.number().nullable(),
+});
+
 const structuresByYearStatSchema = z.object({
   year: z.number(),
   totalStructures: z.number(),
@@ -229,23 +241,7 @@ export const statistiqueApiReadSchema = z.object({
     byMonth: z.array(controleQualiteByMonthStatSchema),
   }),
   activite: z.object({
-    placesEnregistreesDna: z.number(),
-    placesDisponibles: z.number(),
-    placesIndisponibles: z.number(),
-    motifsIndisponibilite: z.object({
-      desinsectisation: z.number(),
-      remiseEnEtat: z.number(),
-      sousOccupation: z.number(),
-      travaux: z.number(),
-    }),
-    presencesInduesByMonth: z.array(
-      z.object({
-        date: z.coerce.date(),
-        presencesInduesBPI: z.number(),
-        presencesInduesDeboutees: z.number(),
-        placesAutorisees: z.number(),
-      })
-    ),
+    byMonth: z.array(activiteByMonthStatSchema),
   }),
 });
 

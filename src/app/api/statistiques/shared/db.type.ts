@@ -67,13 +67,10 @@ export type StatistiqueDbDnaLink = Prisma.DnaStructureGetPayload<{
 
 export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
   select: {
+    dnaCode: true;
     date: true;
     placesAutorisees: true;
     placesIndisponibles: true;
-    desinsectisation: true;
-    remiseEnEtat: true;
-    sousOccupation: true;
-    travaux: true;
     presencesInduesBPI: true;
     presencesInduesDeboutees: true;
   };
