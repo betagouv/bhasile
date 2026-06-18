@@ -85,31 +85,24 @@ export type FinanceByYearStat = {
 };
 
 export type EigStat = {
-  pour1000PlacesSur12Mois: number | null;
-  tauxComportementViolent: number | null;
-  nbComportementViolent: number;
-  nbAutres: number;
-  nbStructuresSansDeclaration: number;
+  /** Nombre d'EIG pour 1 000 places autorisées, sur les 12 derniers mois glissants. */
+  eigPour1000PlacesAutorisees: number | null;
+  nbEig: number;
+  nbEigComportementViolent: number;
 };
 
-export type EigMonthStat = {
+export type ControleQualiteByMonthStat = {
   date: Date;
-  nbComportementViolent: number;
-  nbAutres: number;
-  nbTotal: number;
-};
-
-export type EvaluationStat = {
-  nbEvaluations: number;
+  nbStructuresSansDeclarationEig: number;
+  partStructuresSansDeclarationEig: number | null;
+  nbEig: number;
+  nbEigComportementViolent: number;
+  tauxEigComportementViolent: number | null;
   nbStructuresEvaluees: number;
-  moyenneGenerale: number | null;
-  moyennePersonne: number | null;
-  moyennePro: number | null;
-  moyenneStructure: number | null;
-};
-
-export type EvaluationMonthStat = EvaluationStat & {
-  date: Date;
+  noteGenerale: number | null;
+  notePersonne: number | null;
+  notePro: number | null;
+  noteStructure: number | null;
 };
 
 export type MotifIndisponibilite = {
@@ -182,20 +175,23 @@ const financeByYearStatSchema = z.object({
 });
 
 const eigStatSchema = z.object({
-  pour1000PlacesSur12Mois: z.number().nullable(),
-  tauxComportementViolent: z.number().nullable(),
-  nbComportementViolent: z.number(),
-  nbAutres: z.number(),
-  nbStructuresSansDeclaration: z.number(),
+  eigPour1000PlacesAutorisees: z.number().nullable(),
+  nbEig: z.number(),
+  nbEigComportementViolent: z.number(),
 });
 
-const evaluationStatSchema = z.object({
-  nbEvaluations: z.number(),
+const controleQualiteByMonthStatSchema = z.object({
+  date: z.coerce.date(),
+  nbStructuresSansDeclarationEig: z.number(),
+  partStructuresSansDeclarationEig: z.number().nullable(),
+  nbEig: z.number(),
+  nbEigComportementViolent: z.number(),
+  tauxEigComportementViolent: z.number().nullable(),
   nbStructuresEvaluees: z.number(),
-  moyenneGenerale: z.number().nullable(),
-  moyennePersonne: z.number().nullable(),
-  moyennePro: z.number().nullable(),
-  moyenneStructure: z.number().nullable(),
+  noteGenerale: z.number().nullable(),
+  notePersonne: z.number().nullable(),
+  notePro: z.number().nullable(),
+  noteStructure: z.number().nullable(),
 });
 
 const structuresByYearStatSchema = z.object({
@@ -228,23 +224,9 @@ export const statistiqueApiReadSchema = z.object({
     byYear: z.array(financeByYearStatSchema),
   }),
   controleQualite: z.object({
+    aggregation: z.enum(["moyenne", "mediane"]),
     eig: eigStatSchema,
-    eigByMonth: z.array(
-      z.object({
-        date: z.coerce.date(),
-        nbComportementViolent: z.number(),
-        nbAutres: z.number(),
-        nbTotal: z.number(),
-      })
-    ),
-    evaluations: z.object({
-      summary: evaluationStatSchema,
-      byMonth: z.array(
-        evaluationStatSchema.extend({
-          date: z.coerce.date(),
-        })
-      ),
-    }),
+    byMonth: z.array(controleQualiteByMonthStatSchema),
   }),
   activite: z.object({
     placesEnregistreesDna: z.number(),

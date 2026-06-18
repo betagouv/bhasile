@@ -35,7 +35,7 @@ Paramètre URL `?aggregation=` :
 | `moyenne` (défaut) | Moyenne arithmétique |
 | `mediane` | Médiane |
 
-S’applique à `tauxEncadrement` et `coutJournalier` dans chaque entrée `byYear`. La valeur utilisée est exposée dans `finance.aggregation`.
+S’applique à `tauxEncadrement` et `coutJournalier` dans chaque entrée `byYear`, et aux notes d’évaluation dans `controleQualite.byMonth`. La valeur utilisée est exposée dans `finance.aggregation` et `controleQualite.aggregation`.
 
 ## Séries `byYear`
 

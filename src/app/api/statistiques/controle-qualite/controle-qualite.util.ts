@@ -1,14 +1,16 @@
-import { average } from "@/app/utils/math.util";
+import { isEigComportementViolent } from "@/app/utils/eig.util";
 import {
-  EigMonthStat,
+  aggregateValues,
+  NumericAggregation,
+} from "@/app/utils/math.util";
+import {
+  ControleQualiteByMonthStat,
   EigStat,
-  EvaluationMonthStat,
-  EvaluationStat,
+  StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
 import {
   getMonthKey,
-  getMonthKeysFromDates,
   monthKeyToDate,
 } from "../shared/utils";
 import type {
@@ -17,104 +19,95 @@ import type {
   StatistiqueDbEvaluation,
 } from "../shared/db.type";
 
-export const isEigComportementViolent = (type: string): boolean =>
-  type.toLowerCase().includes("comportement violent");
+const buildDnaCodeToStructureIds = (
+  dnaLinks: StatistiqueDbDnaLink[]
+): Map<string, Set<number>> => {
+  const map = new Map<string, Set<number>>();
 
-export const computeEigByMonth = (eigs: StatistiqueDbEig[]): EigMonthStat[] => {
-  const byMonth = new Map<
-    string,
-    { nbComportementViolent: number; nbAutres: number }
-  >();
-
-  for (const eig of eigs) {
-    if (!eig.evenementDate) {
+  for (const link of dnaLinks) {
+    if (link.structureId === null) {
       continue;
     }
-    const key = getMonthKey(new Date(eig.evenementDate));
-    const current = byMonth.get(key) ?? {
-      nbComportementViolent: 0,
-      nbAutres: 0,
-    };
-    if (isEigComportementViolent(eig.type)) {
-      current.nbComportementViolent += 1;
-    } else {
-      current.nbAutres += 1;
-    }
-    byMonth.set(key, current);
+    const codes = map.get(link.dna.code) ?? new Set<number>();
+    codes.add(link.structureId);
+    map.set(link.dna.code, codes);
   }
 
-  return getMonthKeysFromDates(
-    eigs
-      .map((eig) => eig.evenementDate)
-      .filter((date): date is Date => date !== null)
-      .map((date) => new Date(date))
-  ).map((key) => {
-    const stats = byMonth.get(key) ?? {
-      nbComportementViolent: 0,
-      nbAutres: 0,
-    };
-    return {
-      date: monthKeyToDate(key),
-      nbComportementViolent: stats.nbComportementViolent,
-      nbAutres: stats.nbAutres,
-      nbTotal: stats.nbComportementViolent + stats.nbAutres,
-    };
-  });
+  return map;
+};
+
+const getStructureIdsFromEigs = (
+  eigs: StatistiqueDbEig[],
+  dnaCodeToStructureIds: Map<string, Set<number>>,
+  activeStructureIds: Set<number>
+): Set<number> => {
+  const structureIds = new Set<number>();
+
+  for (const eig of eigs) {
+    if (!eig.dnaCode) {
+      continue;
+    }
+    const linkedStructureIds = dnaCodeToStructureIds.get(eig.dnaCode);
+    if (!linkedStructureIds) {
+      continue;
+    }
+    for (const structureId of linkedStructureIds) {
+      if (activeStructureIds.has(structureId)) {
+        structureIds.add(structureId);
+      }
+    }
+  }
+
+  return structureIds;
+};
+
+const countEigs = (
+  eigs: StatistiqueDbEig[]
+): { nbEig: number; nbEigComportementViolent: number } => {
+  let nbEigComportementViolent = 0;
+
+  for (const eig of eigs) {
+    if (eig.type && isEigComportementViolent(eig.type)) {
+      nbEigComportementViolent += 1;
+    }
+  }
+
+  return {
+    nbEig: eigs.length,
+    nbEigComportementViolent,
+  };
+};
+
+const getTwelveMonthCutoffKey = (): string => {
+  const twelveMonthsAgo = new Date();
+  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+  return getMonthKey(twelveMonthsAgo);
 };
 
 export const computeEigSummary = (
-  eigByMonth: EigMonthStat[],
   eigs: StatistiqueDbEig[],
-  dnaLinks: StatistiqueDbDnaLink[],
-  structureIds: number[],
-  totalPlaces: number
+  totalPlacesAutorisees: number
 ): EigStat => {
-  const twelveMonthsAgo = new Date();
-  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
-  const cutoff = getMonthKey(twelveMonthsAgo);
-
-  const recentMonths = eigByMonth.filter(
-    (monthStat) => getMonthKey(monthStat.date) >= cutoff
-  );
-  const nbComportementViolent = recentMonths.reduce(
-    (acc, monthStat) => acc + monthStat.nbComportementViolent,
-    0
-  );
-  const nbAutres = recentMonths.reduce(
-    (acc, monthStat) => acc + monthStat.nbAutres,
-    0
-  );
-  const nbTotal = nbComportementViolent + nbAutres;
-
+  const cutoff = getTwelveMonthCutoffKey();
   const recentEigs = eigs.filter(
     (eig) =>
       eig.evenementDate &&
       getMonthKey(new Date(eig.evenementDate)) >= cutoff
   );
-  const dnaCodesWithEig = new Set(recentEigs.map((eig) => eig.dnaCode));
-  const structureIdsWithEig = new Set<number>();
-
-  for (const link of dnaLinks) {
-    if (link.structureId !== null && dnaCodesWithEig.has(link.dna.code)) {
-      structureIdsWithEig.add(link.structureId);
-    }
-  }
+  const { nbEig, nbEigComportementViolent } = countEigs(recentEigs);
 
   return {
-    pour1000PlacesSur12Mois:
-      totalPlaces > 0 ? (nbTotal / totalPlaces) * 1000 : null,
-    tauxComportementViolent:
-      nbTotal > 0 ? nbComportementViolent / nbTotal : null,
-    nbComportementViolent,
-    nbAutres,
-    nbStructuresSansDeclaration:
-      structureIds.length - structureIdsWithEig.size,
+    eigPour1000PlacesAutorisees:
+      totalPlacesAutorisees > 0 ? (nbEig / totalPlacesAutorisees) * 1000 : null,
+    nbEig,
+    nbEigComportementViolent,
   };
 };
 
-const computeEvaluationStatFromList = (
-  evaluations: StatistiqueDbEvaluation[]
-): EvaluationStat => {
+const computeEvaluationNotesForMonth = (
+  evaluations: StatistiqueDbEvaluation[],
+  aggregation: NumericAggregation
+) => {
   const structureIds = new Set(
     evaluations
       .map((evaluation) => evaluation.structureId)
@@ -122,45 +115,111 @@ const computeEvaluationStatFromList = (
   );
 
   return {
-    nbEvaluations: evaluations.length,
     nbStructuresEvaluees: structureIds.size,
-    moyenneGenerale: average(evaluations.map((evaluation) => evaluation.note)),
-    moyennePersonne: average(
-      evaluations.map((evaluation) => evaluation.notePersonne)
+    noteGenerale: aggregateValues(
+      evaluations.map((evaluation) => evaluation.note),
+      aggregation
     ),
-    moyennePro: average(evaluations.map((evaluation) => evaluation.notePro)),
-    moyenneStructure: average(
-      evaluations.map((evaluation) => evaluation.noteStructure)
+    notePersonne: aggregateValues(
+      evaluations.map((evaluation) => evaluation.notePersonne),
+      aggregation
+    ),
+    notePro: aggregateValues(
+      evaluations.map((evaluation) => evaluation.notePro),
+      aggregation
+    ),
+    noteStructure: aggregateValues(
+      evaluations.map((evaluation) => evaluation.noteStructure),
+      aggregation
     ),
   };
 };
 
-export const computeEvaluationsByMonth = (
-  evaluations: StatistiqueDbEvaluation[]
-): EvaluationMonthStat[] => {
-  const byMonth = new Map<string, StatistiqueDbEvaluation[]>();
+export const computeControleQualiteByMonth = (
+  activeStructureIds: number[],
+  eigs: StatistiqueDbEig[],
+  evaluations: StatistiqueDbEvaluation[],
+  dnaLinks: StatistiqueDbDnaLink[],
+  aggregation: NumericAggregation
+): ControleQualiteByMonthStat[] => {
+  const activeStructureIdSet = new Set(activeStructureIds);
+  const totalStructures = activeStructureIds.length;
+  const dnaCodeToStructureIds = buildDnaCodeToStructureIds(dnaLinks);
 
+  const eigsByMonth = new Map<string, StatistiqueDbEig[]>();
+  for (const eig of eigs) {
+    if (!eig.evenementDate) {
+      continue;
+    }
+    const key = getMonthKey(new Date(eig.evenementDate));
+    const list = eigsByMonth.get(key) ?? [];
+    list.push(eig);
+    eigsByMonth.set(key, list);
+  }
+
+  const evaluationsByMonth = new Map<string, StatistiqueDbEvaluation[]>();
   for (const evaluation of evaluations) {
     if (!evaluation.date) {
       continue;
     }
     const key = getMonthKey(new Date(evaluation.date));
-    const list = byMonth.get(key) ?? [];
+    const list = evaluationsByMonth.get(key) ?? [];
     list.push(evaluation);
-    byMonth.set(key, list);
+    evaluationsByMonth.set(key, list);
   }
 
-  return getMonthKeysFromDates(
-    evaluations
-      .map((evaluation) => evaluation.date)
-      .filter((date): date is Date => date !== null)
-      .map((date) => new Date(date))
-  ).map((key) => ({
-    date: monthKeyToDate(key),
-    ...computeEvaluationStatFromList(byMonth.get(key) ?? []),
-  }));
+  const monthKeys = [
+    ...new Set([...eigsByMonth.keys(), ...evaluationsByMonth.keys()]),
+  ].sort();
+
+  return monthKeys.map((key) => {
+    const eigsForMonth = eigsByMonth.get(key) ?? [];
+    const evaluationsForMonth = evaluationsByMonth.get(key) ?? [];
+    const { nbEig, nbEigComportementViolent } = countEigs(eigsForMonth);
+    const structureIdsWithEig = getStructureIdsFromEigs(
+      eigsForMonth,
+      dnaCodeToStructureIds,
+      activeStructureIdSet
+    );
+    const nbStructuresSansDeclarationEig =
+      totalStructures - structureIdsWithEig.size;
+
+    return {
+      date: monthKeyToDate(key),
+      nbStructuresSansDeclarationEig,
+      partStructuresSansDeclarationEig:
+        totalStructures > 0
+          ? (nbStructuresSansDeclarationEig / totalStructures) * 100
+          : null,
+      nbEig,
+      nbEigComportementViolent,
+      tauxEigComportementViolent:
+        nbEig > 0 ? nbEigComportementViolent / nbEig : null,
+      ...computeEvaluationNotesForMonth(evaluationsForMonth, aggregation),
+    };
+  });
 };
 
-export const computeEvaluationSummary = (
-  evaluations: StatistiqueDbEvaluation[]
-): EvaluationStat => computeEvaluationStatFromList(evaluations);
+export const computeControleQualiteStatistiques = (
+  activeStructureIds: number[],
+  totalPlacesAutorisees: number,
+  eigs: StatistiqueDbEig[],
+  evaluations: StatistiqueDbEvaluation[],
+  dnaLinks: StatistiqueDbDnaLink[],
+  aggregation: NumericAggregation
+): StatistiqueApiRead["controleQualite"] => {
+  // TODO(fermeture): exclure les structures avec fermeture effective (filtre global périmètre)
+  // TODO(actualisation): exposer updatedAt quand les formulaires d'actualisation seront disponibles
+
+  return {
+    aggregation,
+    eig: computeEigSummary(eigs, totalPlacesAutorisees),
+    byMonth: computeControleQualiteByMonth(
+      activeStructureIds,
+      eigs,
+      evaluations,
+      dnaLinks,
+      aggregation
+    ),
+  };
+};

@@ -41,11 +41,6 @@ const emptyByYearScopeStat = (): FinanceByYearScopeStat => ({
   soldeCumule: 0,
 });
 
-export const parseFinanceAggregation = (
-  aggregationParam: string | null
-): FinanceAggregation =>
-  aggregationParam === "mediane" ? "mediane" : "moyenne";
-
 export const getStructureIdsByFinanceScope = (
   structures: StatistiqueDbStructure[]
 ): FinanceScopeIds => {
