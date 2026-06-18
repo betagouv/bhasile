@@ -18,8 +18,8 @@ export const getStatistiques = async (
       getFinanceStatistiques(context),
       getControleQualiteStatistiques(context),
       getActiviteStatistiques(context),
-      Promise.resolve(getStructuresStatistiques(context)),
-      Promise.resolve(getPlacesStatistiques(context)),
+      getStructuresStatistiques(context),
+      getPlacesStatistiques(context),
     ]);
 
   return {
