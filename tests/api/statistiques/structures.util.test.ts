@@ -92,12 +92,14 @@ describe("structures statistics util", () => {
           structureId: 1,
           dateStart: new Date("2024-01-01"),
           dateEnd: new Date("2025-12-31"),
+          cpom: { actesAdministratifs: [] },
         },
         {
           cpomId: 101,
           structureId: 1,
           dateStart: new Date("2020-01-01"),
           dateEnd: new Date("2023-12-31"),
+          cpom: { actesAdministratifs: [] },
         },
       ]
     );

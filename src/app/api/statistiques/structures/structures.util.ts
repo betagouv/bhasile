@@ -1,4 +1,7 @@
-import { getYearFromDate } from "@/app/utils/date.util";
+import {
+  isStructureInCpom,
+} from "@/app/api/structures/structure.util";
+import type { StructureDbList } from "@/app/api/structures/structure.db.type";
 import { CURRENT_YEAR } from "@/constants";
 import {
   BatiStat,
@@ -63,13 +66,6 @@ const getBatiPerStructure = (
   return result;
 };
 
-const isCpomLinkActiveForYear = (
-  link: StatistiqueDbCpomStructure,
-  year: number
-): boolean =>
-  (!link.dateStart || getYearFromDate(link.dateStart) <= year) &&
-  (!link.dateEnd || getYearFromDate(link.dateEnd) >= year);
-
 const countActiveCpoms = (
   cpomLinks: StatistiqueDbCpomStructure[],
   structureIds: Set<number>,
@@ -80,7 +76,7 @@ const countActiveCpoms = (
   for (const link of cpomLinks) {
     if (
       structureIds.has(link.structureId) &&
-      isCpomLinkActiveForYear(link, year)
+      isStructureInCpom({ cpomStructures: [link] } as StructureDbList, year)
     ) {
       activeCpomIds.add(link.cpomId);
     }
@@ -95,18 +91,30 @@ const countStructuresWithActiveCpom = (
   year: number
 ): number => {
   const structureIdSet = new Set(structureIds);
-  const structuresWithCpom = new Set<number>();
+  const linksByStructure = new Map<number, StatistiqueDbCpomStructure[]>();
 
   for (const link of cpomLinks) {
+    if (!structureIdSet.has(link.structureId)) {
+      continue;
+    }
+    const structureLinks = linksByStructure.get(link.structureId) ?? [];
+    structureLinks.push(link);
+    linksByStructure.set(link.structureId, structureLinks);
+  }
+
+  let count = 0;
+  for (const structureLinks of linksByStructure.values()) {
     if (
-      structureIdSet.has(link.structureId) &&
-      isCpomLinkActiveForYear(link, year)
+      isStructureInCpom(
+        { cpomStructures: structureLinks } as StructureDbList,
+        year
+      )
     ) {
-      structuresWithCpom.add(link.structureId);
+      count += 1;
     }
   }
 
-  return structuresWithCpom.size;
+  return count;
 };
 
 const aggregateByKey = <GroupKey>(

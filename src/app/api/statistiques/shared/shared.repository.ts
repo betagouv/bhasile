@@ -127,6 +127,19 @@ export const findCpomStructures = async (
       structureId: true,
       dateStart: true,
       dateEnd: true,
+      cpom: {
+        select: {
+          actesAdministratifs: {
+            select: {
+              id: true,
+              category: true,
+              startDate: true,
+              endDate: true,
+              parentId: true,
+            },
+          },
+        },
+      },
     },
   });
 };

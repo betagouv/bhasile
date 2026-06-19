@@ -1,6 +1,6 @@
 # `controleQualite`
 
-Périmètre, `aggregation`, séries : [README parent](../README.md). Structures **actives**. Places EIG = somme `placesAutorisees` résolues.
+Structures **actives**. Places EIG = somme `placesAutorisees` résolues.
 
 ## Sources
 
@@ -10,15 +10,15 @@ Périmètre, `aggregation`, séries : [README parent](../README.md). Structures 
 
 ## Vue globale `eig` (12 mois glissants)
 
-| Champ | Calcul |
-|-------|--------|
-| `tauxEig` | `nbEig / places autorisées` |
-| `nbEig`, `nbEigComportementViolent`, `tauxEigComportementViolent` | Comptages / ratios |
-| `moyenneEvaluationsCurrentYear` | Moyenne ou médiane notes `CURRENT_YEAR` |
+| Champ                                                             | Calcul                                  |
+| ----------------------------------------------------------------- | --------------------------------------- |
+| `tauxEig`                                                         | `nbEig / places autorisées`             |
+| `nbEig`, `nbEigComportementViolent`, `tauxEigComportementViolent` | Comptages / ratios                      |
+| `moyenneEvaluationsCurrentYear`                                   | Moyenne ou médiane notes `CURRENT_YEAR` |
 
 ## `byMonth` / `byTrimester` / `byYear`
 
-Recalcul sur **toutes** données période — pas d'agrégation front.
+Recalcul sur **toutes** données période - pas d'agrégation front.
 
 Clés : `date` (mois), `year`+`trimester`, `year`.
 
