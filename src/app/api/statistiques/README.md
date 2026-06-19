@@ -4,6 +4,8 @@ Statistiques agrégées du parc hébergement.
 
 ## TODO post chantier transformation
 
+Les éléments suivants seront à rebrancher post MEP du chantier amenant la notion de `Transformation` (et recongurant donc l'essentiel des liens à `Structure`)
+
 | ID                          | Sujet                                                                                                                                                                          |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **TODO(fermeture)**         | Exclure structures fermées effectivement.                                                                                                                                      |
