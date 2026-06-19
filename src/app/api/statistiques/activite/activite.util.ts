@@ -9,12 +9,13 @@ import {
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
-import { getMonthKey, monthKeyToDate } from "../shared/shared.utils";
 import type {
   StatistiqueDbActivite,
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
 } from "../statistiques.db.type";
+
+const toMonthKey = (date: Date): string => date.toISOString().slice(0, 7);
 
 type DnaEligibility = {
   indisponibilite: Set<string>;
@@ -76,7 +77,7 @@ const toMonthStat = (
     monthTotals.presencesInduesBPI + monthTotals.presencesInduesDeboutees;
 
   return {
-    date: monthKeyToDate(monthKey),
+    date: new Date(`${monthKey}-01`),
     placesEnregistreesDna: monthTotals.placesEnregistreesDna,
     placesIndisponibles: monthTotals.placesIndisponibles,
     tauxIndisponibilite: toStatRate(
@@ -122,7 +123,7 @@ export const computeActiviteStatistiques = (
       continue;
     }
 
-    const monthKey = getMonthKey(new Date(activite.date));
+    const monthKey = toMonthKey(new Date(activite.date));
     const monthTotals = byMonth.get(monthKey) ?? emptyMonthAccumulator();
     const placesAutorisees = activite.placesAutorisees ?? 0;
 

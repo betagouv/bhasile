@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { computeControleQualiteStatistiques } from "@/app/api/statistiques/controle-qualite/controle-qualite.util";
 
@@ -11,17 +11,15 @@ vi.mock("@/constants", async () => {
   };
 });
 
-vi.mock("@/app/api/statistiques/shared/shared.utils", async () => {
-  const actual = await vi.importActual<
-    typeof import("@/app/api/statistiques/shared/shared.utils")
-  >("@/app/api/statistiques/shared/shared.utils");
-  return {
-    ...actual,
-    getTwelveMonthCutoffKey: () => "2020-01",
-  };
-});
-
 describe("quality control statistics util", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-15"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   const dnaLinks = [
     { structureId: 1, dna: { code: "DNA01" } },
     { structureId: 2, dna: { code: "DNA02" } },

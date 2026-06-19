@@ -245,7 +245,9 @@ const computeBatiStats = (
   batiMap: Map<number, Repartition>,
   adresses: StatistiqueDbAdresse[]
 ): BatiStat[] => {
-  const activeStructureIds = new Set(structures.map((structure) => structure.id));
+  const activeStructureIds = new Set(
+    structures.map((structure) => structure.id)
+  );
   const structuresByBati = countStructuresPerBati(structures, batiMap);
   const placesByBati = sumPlacesPerBati(adresses, activeStructureIds);
 

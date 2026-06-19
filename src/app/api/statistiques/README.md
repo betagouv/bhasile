@@ -8,7 +8,7 @@ Les éléments suivants seront à rebrancher post MEP du chantier amenant la not
 
 | ID                          | Sujet                                                                                                                                                                          |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **TODO(fermeture)**         | `filterStructuresActives` : exclure structures avec transfo FERMETURE effective (date de référence selon contexte : globale, `byYear`, `byMonth`…).                            |
+| **TODO(fermeture)**         | `filterStructuresActives` (`typologie.utils`) : exclure structures avec transfo FERMETURE effective (date de référence selon contexte : globale, `byYear`, `byMonth`…). |
 | **TODO(actualisation)**     | `updatedAt` par bloc (sans doute implémentable après le chantier "formulaire d'actualisation").                                                                                |
 | **TODO(structure-version)** | Pivot `shared/` : dernière `StructureVersion` effective (`effectiveDate` ≤ aujourd'hui), plus `Structure.type` / `departementAdministratif` directs. Chantier transformations. |
 
@@ -28,7 +28,7 @@ Le service est découpé par "bloc fonctionnel" avec un socle commun
 
 ```
 route.ts -> statistique.service.ts
-              ├── shared/
+              ├── shared/ (contexte BDD, typologie.utils)
               ├── structures/ | places/ | finance/ | controle-qualite/ | activite/
 ```
 

@@ -1,35 +1,23 @@
-import { NumericAggregation, sumValues } from "@/app/utils/math.util";
+import { sumValues } from "@/app/utils/math.util";
 
 import type {
-  StatistiqueDbDnaLink,
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
 } from "../statistiques.db.type";
 
 /**
- * Shared stats helpers.
- *
- * TODO(actualisation): exposer updatedAt par bloc quand disponible.
- * TODO(structure-version): résolution `StructureVersion` (effectiveDate <= now).
+ * TODO(post-transfo) : exclure les structures avec transfo FERMETURE effective.
  */
-
-// -------- Périmètre structures --------
-
-/** Passe-plat. TODO(post-transfo) : exclure les structures avec transfo FERMETURE effective. */
 export const filterStructuresActives = (
   structures: StatistiqueDbStructure[]
 ): StatistiqueDbStructure[] => structures;
 
-// -------- Typologies (millésime) --------
-const GLOBAL_TYPOLOGY_FIELDS = [
+const TYPOLOGIE_AGGREGATE_FIELDS = [
   "placesAutorisees",
   "pmr",
   "lgbt",
   "fvvTeh",
-] as const satisfies readonly (keyof Pick<
-  StatistiqueDbTypologie,
-  "placesAutorisees" | "pmr" | "lgbt" | "fvvTeh"
->)[];
+] as const satisfies readonly (keyof StatistiqueDbTypologie)[];
 
 /** Dernière valeur non nulle par champ et par structure (agrégat global). */
 export const getLastTypologiePerStructure = (
@@ -60,7 +48,7 @@ export const getLastTypologiePerStructure = (
 
     for (let rowIndex = rows.length - 1; rowIndex >= 0; rowIndex -= 1) {
       const typologieRow = rows[rowIndex];
-      for (const field of GLOBAL_TYPOLOGY_FIELDS) {
+      for (const field of TYPOLOGIE_AGGREGATE_FIELDS) {
         if (resolved[field] == null && typologieRow[field] != null) {
           resolved[field] = typologieRow[field];
           if (field === "placesAutorisees") {
@@ -112,125 +100,3 @@ export const computeTotalPlaces = (
       (structure) => typologieMap.get(structure.id)?.placesAutorisees
     )
   ) ?? 0;
-
-export type StructuresTypologieScope = {
-  structuresActives: StatistiqueDbStructure[];
-  structuresWithTypologie: StatistiqueDbStructure[];
-  structureIdsWithTypologie: number[];
-  totalPlacesAutorisees: number;
-};
-
-export const getStructuresTypologieScope = (
-  structures: StatistiqueDbStructure[],
-  typologies: StatistiqueDbTypologie[]
-): StructuresTypologieScope => {
-  const structuresActives = filterStructuresActives(structures);
-  const typologieMap = getLastTypologiePerStructure(typologies);
-  const structuresWithTypologie = filterStructuresWithTypologie(
-    structuresActives,
-    typologieMap
-  );
-
-  return {
-    structuresActives,
-    structuresWithTypologie,
-    structureIdsWithTypologie: structuresWithTypologie.map(
-      (structure) => structure.id
-    ),
-    totalPlacesAutorisees: computeTotalPlaces(
-      structuresWithTypologie,
-      typologieMap
-    ),
-  };
-};
-
-// -------- DNA --------
-
-export const buildDnaCodeToStructureIds = (
-  dnaLinks: StatistiqueDbDnaLink[]
-): Map<string, Set<number>> => {
-  const dnaCodeToStructureIds = new Map<string, Set<number>>();
-
-  for (const link of dnaLinks) {
-    if (link.structureId === null) {
-      continue;
-    }
-    const structureIds =
-      dnaCodeToStructureIds.get(link.dna.code) ?? new Set<number>();
-    structureIds.add(link.structureId);
-    dnaCodeToStructureIds.set(link.dna.code, structureIds);
-  }
-
-  return dnaCodeToStructureIds;
-};
-
-// -------- Monthly --------
-
-export const getMonthKey = (date: Date): string =>
-  date.toISOString().slice(0, 7);
-
-export const getYearKey = (date: Date): string =>
-  date.toISOString().slice(0, 4);
-
-export const getTrimesterKey = (date: Date): string => {
-  const month = Number(date.toISOString().slice(5, 7));
-  const year = date.toISOString().slice(0, 4);
-  const trimester = Math.ceil(month / 3);
-  return `${year}-Q${trimester}`;
-};
-
-export const parseTrimesterKey = (
-  trimesterKey: string
-): { year: number; trimester: number } => {
-  const [year, trimesterPart] = trimesterKey.split("-Q");
-  return { year: Number(year), trimester: Number(trimesterPart) };
-};
-
-export const monthKeyToDate = (monthKey: string): Date =>
-  new Date(`${monthKey}-01`);
-
-export const getTwelveMonthCutoffKey = (): string => {
-  const twelveMonthsAgo = new Date();
-  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
-  return getMonthKey(twelveMonthsAgo);
-};
-
-export const groupByMonthKey = <Item>(
-  items: Item[],
-  getDate: (item: Item) => Date | null | undefined
-): Map<string, Item[]> => groupByPeriodKey(items, getDate, getMonthKey);
-
-export const groupByPeriodKey = <Item>(
-  items: Item[],
-  getDate: (item: Item) => Date | null | undefined,
-  getPeriodKey: (date: Date) => string
-): Map<string, Item[]> => {
-  const byPeriod = new Map<string, Item[]>();
-
-  for (const item of items) {
-    const date = getDate(item);
-    if (!date) {
-      continue;
-    }
-    const periodKey = getPeriodKey(date);
-    const itemsForPeriod = byPeriod.get(periodKey) ?? [];
-    itemsForPeriod.push(item);
-    byPeriod.set(periodKey, itemsForPeriod);
-  }
-
-  return byPeriod;
-};
-
-export const mergeSortedMonthKeys = (
-  ...monthMaps: Array<Map<string, unknown>>
-): string[] => mergeSortedPeriodKeys(...monthMaps);
-
-export const mergeSortedPeriodKeys = (
-  ...periodMaps: Array<Map<string, unknown>>
-): string[] =>
-  [...new Set(periodMaps.flatMap((periodMap) => [...periodMap.keys()]))].sort();
-
-export const parseNumericAggregation = (
-  aggregationParam: string | null
-): NumericAggregation =>
-  aggregationParam === "mediane" ? "mediane" : "moyenne";

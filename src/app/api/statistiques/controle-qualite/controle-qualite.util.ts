@@ -15,22 +15,73 @@ import {
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
-import {
-  buildDnaCodeToStructureIds,
-  getMonthKey,
-  getTrimesterKey,
-  getTwelveMonthCutoffKey,
-  getYearKey,
-  groupByPeriodKey,
-  mergeSortedPeriodKeys,
-  monthKeyToDate,
-  parseTrimesterKey,
-} from "../shared/shared.utils";
 import type {
   StatistiqueDbDnaLink,
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
 } from "../statistiques.db.type";
+
+const toMonthKey = (date: Date): string => date.toISOString().slice(0, 7);
+
+const toYearKey = (date: Date): string => date.toISOString().slice(0, 4);
+
+const toTrimesterKey = (date: Date): string => {
+  const month = Number(date.toISOString().slice(5, 7));
+  const year = date.toISOString().slice(0, 4);
+  return `${year}-Q${Math.ceil(month / 3)}`;
+};
+
+const parseTrimesterKey = (
+  trimesterKey: string
+): { year: number; trimester: number } => {
+  const [year, trimesterPart] = trimesterKey.split("-Q");
+  return { year: Number(year), trimester: Number(trimesterPart) };
+};
+
+const getTwelveMonthCutoffKey = (): string => {
+  const twelveMonthsAgo = new Date();
+  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+  return toMonthKey(twelveMonthsAgo);
+};
+
+const buildDnaCodeToStructureIds = (
+  dnaLinks: StatistiqueDbDnaLink[]
+): Map<string, Set<number>> => {
+  const dnaCodeToStructureIds = new Map<string, Set<number>>();
+
+  for (const link of dnaLinks) {
+    if (link.structureId === null) {
+      continue;
+    }
+    const structureIds =
+      dnaCodeToStructureIds.get(link.dna.code) ?? new Set<number>();
+    structureIds.add(link.structureId);
+    dnaCodeToStructureIds.set(link.dna.code, structureIds);
+  }
+
+  return dnaCodeToStructureIds;
+};
+
+const groupByPeriodKey = <Item>(
+  items: Item[],
+  getDate: (item: Item) => Date | null | undefined,
+  getPeriodKey: (date: Date) => string
+): Map<string, Item[]> => {
+  const byPeriod = new Map<string, Item[]>();
+
+  for (const item of items) {
+    const date = getDate(item);
+    if (!date) {
+      continue;
+    }
+    const periodKey = getPeriodKey(date);
+    const itemsForPeriod = byPeriod.get(periodKey) ?? [];
+    itemsForPeriod.push(item);
+    byPeriod.set(periodKey, itemsForPeriod);
+  }
+
+  return byPeriod;
+};
 
 const getStructureIdsFromEigs = (
   eigs: StatistiqueDbEig[],
@@ -97,7 +148,7 @@ const computeEigSummary = (
   const cutoff = getTwelveMonthCutoffKey();
   const recentEigs = eigs.filter(
     (eig) =>
-      eig.evenementDate && getMonthKey(new Date(eig.evenementDate)) >= cutoff
+      eig.evenementDate && toMonthKey(new Date(eig.evenementDate)) >= cutoff
   );
   const { nbEig, nbEigComportementViolent } = countEigs(recentEigs);
   const evaluationsCurrentYear = filterEvaluationsForYear(
@@ -226,7 +277,14 @@ const computeControleQualiteByPeriod = <Entry extends ControleQualitePeriodStat>
     getPeriodKey
   );
 
-  return mergeSortedPeriodKeys(eigsByPeriod, evaluationsByPeriod).map(
+  return [
+    ...new Set([
+      ...eigsByPeriod.keys(),
+      ...evaluationsByPeriod.keys(),
+    ]),
+  ]
+    .sort()
+    .map(
     (periodKey) =>
       ({
         ...mapPeriodKey(periodKey),
@@ -239,7 +297,7 @@ const computeControleQualiteByPeriod = <Entry extends ControleQualitePeriodStat>
           context.aggregation
         ),
       }) as Entry
-  );
+    );
 };
 
 const buildSeriesContext = (
@@ -252,51 +310,6 @@ const buildSeriesContext = (
   dnaCodeToStructureIds: buildDnaCodeToStructureIds(dnaLinks),
   aggregation,
 });
-
-const computeControleQualiteByMonth = (
-  activeStructureIds: number[],
-  eigs: StatistiqueDbEig[],
-  evaluations: StatistiqueDbEvaluation[],
-  dnaLinks: StatistiqueDbDnaLink[],
-  aggregation: NumericAggregation
-): ControleQualiteByMonthStat[] =>
-  computeControleQualiteByPeriod(
-    eigs,
-    evaluations,
-    buildSeriesContext(activeStructureIds, dnaLinks, aggregation),
-    getMonthKey,
-    (monthKey) => ({ date: monthKeyToDate(monthKey) })
-  );
-
-const computeControleQualiteByTrimester = (
-  activeStructureIds: number[],
-  eigs: StatistiqueDbEig[],
-  evaluations: StatistiqueDbEvaluation[],
-  dnaLinks: StatistiqueDbDnaLink[],
-  aggregation: NumericAggregation
-): ControleQualiteByTrimesterStat[] =>
-  computeControleQualiteByPeriod(
-    eigs,
-    evaluations,
-    buildSeriesContext(activeStructureIds, dnaLinks, aggregation),
-    getTrimesterKey,
-    (trimesterKey) => parseTrimesterKey(trimesterKey)
-  );
-
-const computeControleQualiteByYear = (
-  activeStructureIds: number[],
-  eigs: StatistiqueDbEig[],
-  evaluations: StatistiqueDbEvaluation[],
-  dnaLinks: StatistiqueDbDnaLink[],
-  aggregation: NumericAggregation
-): ControleQualiteByYearStat[] =>
-  computeControleQualiteByPeriod(
-    eigs,
-    evaluations,
-    buildSeriesContext(activeStructureIds, dnaLinks, aggregation),
-    getYearKey,
-    (yearKey) => ({ year: Number(yearKey) })
-  );
 
 export const computeControleQualiteStatistiques = (
   activeStructureIds: number[],
@@ -312,6 +325,11 @@ export const computeControleQualiteStatistiques = (
       evaluation.structureId !== null &&
       activeStructureIdSet.has(evaluation.structureId)
   );
+  const seriesContext = buildSeriesContext(
+    activeStructureIds,
+    dnaLinks,
+    aggregation
+  );
 
   return {
     aggregation,
@@ -322,26 +340,26 @@ export const computeControleQualiteStatistiques = (
       activeStructureIdSet,
       aggregation
     ),
-    byMonth: computeControleQualiteByMonth(
-      activeStructureIds,
+    byMonth: computeControleQualiteByPeriod<ControleQualiteByMonthStat>(
       eigs,
       evaluationsActives,
-      dnaLinks,
-      aggregation
+      seriesContext,
+      toMonthKey,
+      (monthKey) => ({ date: new Date(`${monthKey}-01`) })
     ),
-    byTrimester: computeControleQualiteByTrimester(
-      activeStructureIds,
+    byTrimester: computeControleQualiteByPeriod<ControleQualiteByTrimesterStat>(
       eigs,
       evaluationsActives,
-      dnaLinks,
-      aggregation
+      seriesContext,
+      toTrimesterKey,
+      parseTrimesterKey
     ),
-    byYear: computeControleQualiteByYear(
-      activeStructureIds,
+    byYear: computeControleQualiteByPeriod<ControleQualiteByYearStat>(
       eigs,
       evaluationsActives,
-      dnaLinks,
-      aggregation
+      seriesContext,
+      toYearKey,
+      (yearKey) => ({ year: Number(yearKey) })
     ),
   };
 };

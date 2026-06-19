@@ -5,13 +5,19 @@ import type { NumericAggregation } from "@/app/utils/math.util";
 
 export type StatistiquesAggregation = NumericAggregation;
 
-export type StatistiquesFiltersRaw = {
-  departements: string | null;
-  operateurs: string | null;
-  types: string | null;
-  /** Agrégation moyenne / médiane (`moyenne` par défaut). */
-  aggregation: string | null;
-};
+export const statistiquesFiltersSchema = z.object({
+  departements: z.string().nullable(),
+  operateurs: z.string().nullable(),
+  types: z.string().nullable(),
+  aggregation: z
+    .string()
+    .nullable()
+    .transform(
+      (value): NumericAggregation => (value === "mediane" ? "mediane" : "moyenne")
+    ),
+});
+
+export type StatistiquesFilters = z.infer<typeof statistiquesFiltersSchema>;
 
 export type TypeStructureStat = {
   type: StructureType;

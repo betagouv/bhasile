@@ -159,11 +159,6 @@ export const computePlacesStatistiques = (
       adresses,
       departements
     ),
-    byYear: computeByYearStats(
-      structures,
-      typologies,
-      adresses,
-      departements
-    ),
+    byYear: computeByYearStats(structures, typologies, adresses, departements),
   };
 };

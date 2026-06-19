@@ -1,6 +1,6 @@
 import { Prisma, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
-import { StatistiquesFiltersRaw } from "@/schemas/api/statistique.schema";
+import { StatistiquesFilters } from "@/schemas/api/statistique.schema";
 
 import type {
   StatistiqueDbAdresse,
@@ -32,9 +32,9 @@ export type StatistiquesContext = {
 };
 
 const buildStructureWhere = async (
-  filters: StatistiquesFiltersRaw
+  filters: StatistiquesFilters
 ): Promise<Prisma.StructureWhereInput> => {
-  // TODO(structure-version): filtrer type/département sur version effective (shared/utils)
+  // TODO(structure-version): filtrer type/département sur version effective (typologie.utils)
   const where: Prisma.StructureWhereInput = {};
 
   const typeList = filters.types?.split(",").filter(Boolean) ?? [];
@@ -64,7 +64,7 @@ const buildStructureWhere = async (
 };
 
 export const buildStatistiquesContext = async (
-  filters: StatistiquesFiltersRaw
+  filters: StatistiquesFilters
 ): Promise<StatistiquesContext | null> => {
   const where = await buildStructureWhere(filters);
   const structureIds = await findStructureIds(where);
