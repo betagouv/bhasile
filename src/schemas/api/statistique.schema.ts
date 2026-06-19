@@ -39,18 +39,12 @@ export type StructuresByYearStat = {
   structuresBatiMixte: number;
 };
 
-export type TauxEquipementDept = {
-  departement: string;
-  nom: string;
-  places: number;
-  population: number | null;
-  tauxPour1000: number | null;
-};
-
 export type PlacesByYearStat = {
   year: number;
   totalPlaces: number;
-  tauxEquipement: TauxEquipementDept[];
+  population: number | null;
+  /** Ratio places / population, ou `null` si population absente. */
+  tauxEquipement: number | null;
   pmr: number;
   lgbt: number;
   fvvTeh: number;
@@ -80,8 +74,8 @@ export type FinanceByYearStat = {
 };
 
 export type EigStat = {
-  /** Nombre d'EIG pour 1 000 places autorisées, sur les 12 derniers mois glissants. */
-  eigPour1000PlacesAutorisees: number | null;
+  /** Ratio EIG / places autorisées sur les 12 derniers mois glissants. */
+  tauxEig: number | null;
   nbEig: number;
   nbEigComportementViolent: number;
 };
@@ -125,17 +119,10 @@ const batiStatSchema = z.object({
   places: z.number(),
 });
 
-const tauxEquipementDeptSchema = z.object({
-  departement: z.string(),
-  nom: z.string(),
-  places: z.number(),
-  population: z.number().nullable(),
-  tauxPour1000: z.number().nullable(),
-});
-
 const placesIndicatorsSchema = z.object({
   totalPlaces: z.number(),
-  tauxEquipement: z.array(tauxEquipementDeptSchema),
+  population: z.number().nullable(),
+  tauxEquipement: z.number().nullable(),
   pmr: z.number(),
   lgbt: z.number(),
   fvvTeh: z.number(),
@@ -169,7 +156,7 @@ const financeByYearStatSchema = z.object({
 });
 
 const eigStatSchema = z.object({
-  eigPour1000PlacesAutorisees: z.number().nullable(),
+  tauxEig: z.number().nullable(),
   nbEig: z.number(),
   nbEigComportementViolent: z.number(),
 });

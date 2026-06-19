@@ -1,7 +1,7 @@
+import { toStatRate } from "@/app/utils/statistiques-format.util";
 import {
   PlacesByYearStat,
   StatistiqueApiRead,
-  TauxEquipementDept,
 } from "@/schemas/api/statistique.schema";
 
 import type {
@@ -22,6 +22,7 @@ import {
 type PlacesIndicators = Pick<
   StatistiqueApiRead["places"],
   | "totalPlaces"
+  | "population"
   | "tauxEquipement"
   | "pmr"
   | "lgbt"
@@ -117,40 +118,32 @@ const sumGlobalAdressePlacesSpeciales = (
   return { qpv, logementsSociaux };
 };
 
-const computeTauxEquipement = (
-  structures: StatistiqueDbStructure[],
-  typologieMap: Map<number, StatistiqueDbTypologie>,
+const computeTauxEquipementAgrege = (
+  totalPlaces: number,
   departements: StatistiqueDbDepartement[]
-): TauxEquipementDept[] => {
-  const placesByDept = new Map<string, number>();
-
-  for (const structure of structures) {
-    if (!structure.departementAdministratif) {
-      continue;
-    }
-    const typologie = typologieMap.get(structure.id);
-    if (!typologie) {
-      continue;
-    }
-    placesByDept.set(
-      structure.departementAdministratif,
-      (placesByDept.get(structure.departementAdministratif) ?? 0) +
-        (typologie.placesAutorisees ?? 0)
-    );
+): Pick<PlacesIndicators, "population" | "tauxEquipement"> => {
+  if (departements.length === 0) {
+    return { population: null, tauxEquipement: null };
   }
 
-  return departements.map((departement) => {
-    const places = placesByDept.get(departement.numero) ?? 0;
-    return {
-      departement: departement.numero,
-      nom: departement.name,
-      places,
-      population: departement.population,
-      tauxPour1000: departement.population
-        ? (places / departement.population) * 1000
-        : null,
-    };
-  });
+  const hasAllPopulations = departements.every(
+    (departement) => departement.population != null
+  );
+  if (!hasAllPopulations) {
+    return { population: null, tauxEquipement: null };
+  }
+
+  const population = departements.reduce(
+    (sum, departement) => sum + (departement.population ?? 0),
+    0
+  );
+
+  return {
+    population,
+    tauxEquipement: toStatRate(
+      population > 0 ? totalPlaces / population : null
+    ),
+  };
 };
 
 const computePlacesIndicators = (
@@ -185,13 +178,11 @@ const computePlacesIndicators = (
           structureIds
         );
 
+  const totalPlaces = computeTotalPlaces(activeStructures, typologieMap);
+
   return {
-    totalPlaces: computeTotalPlaces(activeStructures, typologieMap),
-    tauxEquipement: computeTauxEquipement(
-      activeStructures,
-      typologieMap,
-      departements
-    ),
+    totalPlaces,
+    ...computeTauxEquipementAgrege(totalPlaces, departements),
     ...structurePlaces,
     ...adressePlaces,
   };

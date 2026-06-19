@@ -1,37 +1,49 @@
 import prisma from "@/lib/prisma";
 
 import type {
-  StatistiqueDbBudgetAgg,
+  StatistiqueDbBudget,
   StatistiqueDbIndicateurFinancier,
 } from "../statistiques.db.type";
 
-export const findBudgetsByYear = async (
+export const findBudgets = async (
   structureIds: number[]
-): Promise<StatistiqueDbBudgetAgg[]> => {
+): Promise<StatistiqueDbBudget[]> => {
   if (structureIds.length === 0) {
     return [];
   }
-  const grouped = await prisma.budget.groupBy({
-    by: ["year"],
+
+  const budgets = await prisma.budget.findMany({
     where: {
       structureId: { in: structureIds },
       isMissing: { not: true },
     },
-    _sum: {
+    select: {
+      structureId: true,
+      year: true,
       dotationDemandee: true,
       dotationAccordee: true,
       totalProduits: true,
       totalCharges: true,
     },
-    orderBy: { year: "asc" },
+    orderBy: [{ year: "asc" }, { structureId: "asc" }],
   });
-  return grouped.map((group) => ({
-    year: group.year,
-    dotationDemandee: group._sum.dotationDemandee ?? 0,
-    dotationAccordee: group._sum.dotationAccordee ?? 0,
-    totalProduits: group._sum.totalProduits ?? 0,
-    totalCharges: group._sum.totalCharges ?? 0,
-  }));
+
+  return budgets.flatMap((budget) => {
+    if (budget.structureId === null) {
+      return [];
+    }
+
+    return [
+      {
+        structureId: budget.structureId,
+        year: budget.year,
+        dotationDemandee: budget.dotationDemandee ?? 0,
+        dotationAccordee: budget.dotationAccordee ?? 0,
+        totalProduits: budget.totalProduits ?? 0,
+        totalCharges: budget.totalCharges ?? 0,
+      },
+    ];
+  });
 };
 
 export const findIndicateursFinanciers = async (

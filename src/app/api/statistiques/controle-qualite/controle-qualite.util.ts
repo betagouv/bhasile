@@ -1,4 +1,5 @@
 import { isEigComportementViolent } from "@/app/utils/eig.util";
+import { toStatNumber, toStatRate } from "@/app/utils/statistiques-format.util";
 import {
   aggregateValues,
   NumericAggregation,
@@ -78,8 +79,9 @@ const computeEigSummary = (
   const { nbEig, nbEigComportementViolent } = countEigs(recentEigs);
 
   return {
-    eigPour1000PlacesAutorisees:
-      totalPlacesAutorisees > 0 ? (nbEig / totalPlacesAutorisees) * 1000 : null,
+    tauxEig: toStatRate(
+      totalPlacesAutorisees > 0 ? nbEig / totalPlacesAutorisees : null
+    ),
     nbEig,
     nbEigComportementViolent,
   };
@@ -97,21 +99,29 @@ const computeEvaluationNotesForMonth = (
 
   return {
     nbStructuresEvaluees: structureIds.size,
-    noteGenerale: aggregateValues(
-      evaluations.map((evaluation) => evaluation.note),
-      aggregation
+    noteGenerale: toStatNumber(
+      aggregateValues(
+        evaluations.map((evaluation) => evaluation.note),
+        aggregation
+      )
     ),
-    notePersonne: aggregateValues(
-      evaluations.map((evaluation) => evaluation.notePersonne),
-      aggregation
+    notePersonne: toStatNumber(
+      aggregateValues(
+        evaluations.map((evaluation) => evaluation.notePersonne),
+        aggregation
+      )
     ),
-    notePro: aggregateValues(
-      evaluations.map((evaluation) => evaluation.notePro),
-      aggregation
+    notePro: toStatNumber(
+      aggregateValues(
+        evaluations.map((evaluation) => evaluation.notePro),
+        aggregation
+      )
     ),
-    noteStructure: aggregateValues(
-      evaluations.map((evaluation) => evaluation.noteStructure),
-      aggregation
+    noteStructure: toStatNumber(
+      aggregateValues(
+        evaluations.map((evaluation) => evaluation.noteStructure),
+        aggregation
+      )
     ),
   };
 };
@@ -152,11 +162,12 @@ const computeControleQualiteByMonth = (
       return {
         date: monthKeyToDate(monthKey),
         nbStructuresSansDeclarationEig,
-        partStructuresSansDeclarationEig:
-          partSansDeclaration !== null ? partSansDeclaration * 100 : null,
+        partStructuresSansDeclarationEig: toStatRate(partSansDeclaration),
         nbEig,
         nbEigComportementViolent,
-        tauxEigComportementViolent: ratio(nbEigComportementViolent, nbEig),
+        tauxEigComportementViolent: toStatRate(
+          ratio(nbEigComportementViolent, nbEig)
+        ),
         ...computeEvaluationNotesForMonth(evaluationsForMonth, aggregation),
       };
     }

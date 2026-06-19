@@ -103,6 +103,10 @@ export type StatistiqueDbBudgetAgg = {
   totalCharges: number;
 };
 
+export type StatistiqueDbBudget = StatistiqueDbBudgetAgg & {
+  structureId: number;
+};
+
 export type StatistiqueDbCpomStructure = Prisma.CpomStructureGetPayload<{
   select: {
     cpomId: true;

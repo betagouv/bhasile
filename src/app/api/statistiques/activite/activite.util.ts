@@ -2,6 +2,7 @@ import {
   isStructureEligibleForActiviteIndisponibilite,
   isStructureEligibleForActivitePresencesIndues,
 } from "@/app/utils/structure.util";
+import { toStatRate } from "@/app/utils/statistiques-format.util";
 import { ratio } from "@/app/utils/math.util";
 import {
   ActiviteByMonthStat,
@@ -78,24 +79,32 @@ const toMonthStat = (
     date: monthKeyToDate(monthKey),
     placesEnregistreesDna: monthTotals.placesEnregistreesDna,
     placesIndisponibles: monthTotals.placesIndisponibles,
-    tauxIndisponibilite: ratio(
-      monthTotals.placesIndisponibles,
-      monthTotals.placesAutoriseesIndispo
+    tauxIndisponibilite: toStatRate(
+      ratio(
+        monthTotals.placesIndisponibles,
+        monthTotals.placesAutoriseesIndispo
+      )
     ),
     presencesInduesBPI: monthTotals.presencesInduesBPI,
-    tauxPresencesInduesBPI: ratio(
-      monthTotals.presencesInduesBPI,
-      monthTotals.placesAutoriseesPresencesIndues
+    tauxPresencesInduesBPI: toStatRate(
+      ratio(
+        monthTotals.presencesInduesBPI,
+        monthTotals.placesAutoriseesPresencesIndues
+      )
     ),
     presencesInduesDeboutees: monthTotals.presencesInduesDeboutees,
-    tauxPresencesInduesDeboutees: ratio(
-      monthTotals.presencesInduesDeboutees,
-      monthTotals.placesAutoriseesPresencesIndues
+    tauxPresencesInduesDeboutees: toStatRate(
+      ratio(
+        monthTotals.presencesInduesDeboutees,
+        monthTotals.placesAutoriseesPresencesIndues
+      )
     ),
     presencesInduesTotal,
-    tauxPresencesInduesTotal: ratio(
-      presencesInduesTotal,
-      monthTotals.placesAutoriseesPresencesIndues
+    tauxPresencesInduesTotal: toStatRate(
+      ratio(
+        presencesInduesTotal,
+        monthTotals.placesAutoriseesPresencesIndues
+      )
     ),
   };
 };

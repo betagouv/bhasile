@@ -2,12 +2,12 @@ import {
   isStructureAutorisee,
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
+import { toStatNumber } from "@/app/utils/statistiques-format.util";
 import {
   aggregateValues,
   NumericAggregation,
   sumValues,
 } from "@/app/utils/math.util";
-import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
 import {
   FinanceByYearScopeStat,
   FinanceByYearStat,
@@ -15,7 +15,7 @@ import {
 } from "@/schemas/api/statistique.schema";
 
 import type {
-  StatistiqueDbBudgetAgg,
+  StatistiqueDbBudget,
   StatistiqueDbIndicateurFinancier,
   StatistiqueDbStructure,
 } from "../statistiques.db.type";
@@ -60,25 +60,73 @@ export const getStructureIdsByFinanceScope = (
   return { total, autorisees, subventionnees };
 };
 
+const aggregateBudgetsByYear = (
+  budgets: StatistiqueDbBudget[]
+): Map<number, Omit<StatistiqueDbBudget, "structureId">> => {
+  const budgetsByYear = new Map<
+    number,
+    Omit<StatistiqueDbBudget, "structureId">
+  >();
+
+  for (const budget of budgets) {
+    const current = budgetsByYear.get(budget.year) ?? {
+      year: budget.year,
+      dotationDemandee: 0,
+      dotationAccordee: 0,
+      totalProduits: 0,
+      totalCharges: 0,
+    };
+
+    budgetsByYear.set(budget.year, {
+      year: budget.year,
+      dotationDemandee: current.dotationDemandee + budget.dotationDemandee,
+      dotationAccordee: current.dotationAccordee + budget.dotationAccordee,
+      totalProduits: current.totalProduits + budget.totalProduits,
+      totalCharges: current.totalCharges + budget.totalCharges,
+    });
+  }
+
+  return budgetsByYear;
+};
+
+const getYearExcedentDeficit = (
+  budgets: StatistiqueDbBudget[],
+  year: number
+): { excedent: number; deficit: number } => {
+  let excedent = 0;
+  let deficit = 0;
+
+  for (const budget of budgets) {
+    if (budget.year !== year) {
+      continue;
+    }
+
+    const resultatNet = budget.totalProduits - budget.totalCharges;
+    if (resultatNet > 0) {
+      excedent += resultatNet;
+    } else if (resultatNet < 0) {
+      deficit += Math.abs(resultatNet);
+    }
+  }
+
+  return { excedent, deficit };
+};
+
 const getFinanceYears = (
-  budgets: StatistiqueDbBudgetAgg[],
-  indicateurs: StatistiqueDbIndicateurFinancier[],
-  minYear: number
+  budgets: StatistiqueDbBudget[],
+  indicateurs: StatistiqueDbIndicateurFinancier[]
 ): number[] =>
   [
     ...new Set([
       ...budgets.map((budget) => budget.year),
       ...indicateurs.map((indicateur) => indicateur.year),
     ]),
-  ]
-    .filter((year) => year >= minYear)
-    .sort((yearA, yearB) => yearA - yearB);
+  ].sort((yearA, yearB) => yearA - yearB);
 
 const computeScopeYearStats = (
   structureIds: number[],
-  budgets: StatistiqueDbBudgetAgg[],
+  budgets: StatistiqueDbBudget[],
   indicateurs: StatistiqueDbIndicateurFinancier[],
-  minYear: number,
   aggregation: NumericAggregation
 ): Array<FinanceByYearScopeStat & { year: number }> => {
   const structureIdSet = new Set(structureIds);
@@ -87,20 +135,20 @@ const computeScopeYearStats = (
       indicateur.structureId !== null &&
       structureIdSet.has(indicateur.structureId)
   );
+  const budgetsByYear = aggregateBudgetsByYear(budgets);
 
   let excedentCumule = 0;
   let deficitCumule = 0;
 
-  return getFinanceYears(budgets, scopedIndicateurs, minYear).map((year) => {
-    const budget = budgets.find((budgetRow) => budgetRow.year === year);
+  return getFinanceYears(budgets, scopedIndicateurs).map((year) => {
+    const budget = budgetsByYear.get(year);
     const indicateursForYear = scopedIndicateurs.filter(
       (indicateur) => indicateur.year === year
     );
     const totalProduits = budget?.totalProduits ?? 0;
     const totalCharges = budget?.totalCharges ?? 0;
     const resultatNet = totalProduits - totalCharges;
-    const excedent = resultatNet > 0 ? resultatNet : 0;
-    const deficit = resultatNet < 0 ? Math.abs(resultatNet) : 0;
+    const { excedent, deficit } = getYearExcedentDeficit(budgets, year);
 
     excedentCumule += excedent;
     deficitCumule += deficit;
@@ -109,15 +157,20 @@ const computeScopeYearStats = (
       year,
       dotationDemandee: budget?.dotationDemandee ?? 0,
       dotationAccordee: budget?.dotationAccordee ?? 0,
-      totalETP:
-        sumValues(indicateursForYear.map((indicateur) => indicateur.ETP)) ?? 0,
-      tauxEncadrement: aggregateValues(
-        indicateursForYear.map((indicateur) => indicateur.tauxEncadrement),
-        aggregation
+      totalETP: toStatNumber(
+        sumValues(indicateursForYear.map((indicateur) => indicateur.ETP)) ?? 0
+      ) ?? 0,
+      tauxEncadrement: toStatNumber(
+        aggregateValues(
+          indicateursForYear.map((indicateur) => indicateur.tauxEncadrement),
+          aggregation
+        )
       ),
-      coutJournalier: aggregateValues(
-        indicateursForYear.map((indicateur) => indicateur.coutJournalier),
-        aggregation
+      coutJournalier: toStatNumber(
+        aggregateValues(
+          indicateursForYear.map((indicateur) => indicateur.coutJournalier),
+          aggregation
+        )
       ),
       totalProduits,
       totalCharges,
@@ -133,32 +186,45 @@ const scopeStatForYear = (
   stats: Array<FinanceByYearScopeStat & { year: number }>,
   year: number
 ): FinanceByYearScopeStat => {
-  const scopeStat = stats.find((yearStat) => yearStat.year === year) ?? {
-    year,
-    ...emptyByYearScopeStat(),
-  };
+  const scopeStat = stats.find((yearStat) => yearStat.year === year);
+  if (scopeStat) {
+    return {
+      dotationDemandee: scopeStat.dotationDemandee,
+      dotationAccordee: scopeStat.dotationAccordee,
+      totalETP: scopeStat.totalETP,
+      tauxEncadrement: scopeStat.tauxEncadrement,
+      coutJournalier: scopeStat.coutJournalier,
+      totalProduits: scopeStat.totalProduits,
+      totalCharges: scopeStat.totalCharges,
+      resultatNet: scopeStat.resultatNet,
+      excedentCumule: scopeStat.excedentCumule,
+      deficitCumule: scopeStat.deficitCumule,
+      soldeCumule: scopeStat.soldeCumule,
+    };
+  }
 
-  return {
-    dotationDemandee: scopeStat.dotationDemandee,
-    dotationAccordee: scopeStat.dotationAccordee,
-    totalETP: scopeStat.totalETP,
-    tauxEncadrement: scopeStat.tauxEncadrement,
-    coutJournalier: scopeStat.coutJournalier,
-    totalProduits: scopeStat.totalProduits,
-    totalCharges: scopeStat.totalCharges,
-    resultatNet: scopeStat.resultatNet,
-    excedentCumule: scopeStat.excedentCumule,
-    deficitCumule: scopeStat.deficitCumule,
-    soldeCumule: scopeStat.soldeCumule,
-  };
+  const previousStat = [...stats]
+    .filter((yearStat) => yearStat.year < year)
+    .at(-1);
+
+  if (previousStat) {
+    return {
+      ...emptyByYearScopeStat(),
+      excedentCumule: previousStat.excedentCumule,
+      deficitCumule: previousStat.deficitCumule,
+      soldeCumule: previousStat.soldeCumule,
+    };
+  }
+
+  return emptyByYearScopeStat();
 };
 
 const buildByYearStats = (
   scopeIds: FinanceScopeIds,
   budgets: {
-    total: StatistiqueDbBudgetAgg[];
-    autorisees: StatistiqueDbBudgetAgg[];
-    subventionnees: StatistiqueDbBudgetAgg[];
+    total: StatistiqueDbBudget[];
+    autorisees: StatistiqueDbBudget[];
+    subventionnees: StatistiqueDbBudget[];
   },
   indicateurs: StatistiqueDbIndicateurFinancier[],
   aggregation: NumericAggregation
@@ -167,21 +233,18 @@ const buildByYearStats = (
     scopeIds.total,
     budgets.total,
     indicateurs,
-    DOCUMENTS_FINANCIERS_OPEN_YEAR,
     aggregation
   );
   const autoriseesStats = computeScopeYearStats(
     scopeIds.autorisees,
     budgets.autorisees,
     indicateurs,
-    DOCUMENTS_FINANCIERS_OPEN_YEAR,
     aggregation
   );
   const subventionneesStats = computeScopeYearStats(
     scopeIds.subventionnees,
     budgets.subventionnees,
     indicateurs,
-    DOCUMENTS_FINANCIERS_OPEN_YEAR,
     aggregation
   );
 
@@ -204,9 +267,9 @@ const buildByYearStats = (
 export const computeFinanceStatistiques = (
   scopeIds: FinanceScopeIds,
   budgets: {
-    total: StatistiqueDbBudgetAgg[];
-    autorisees: StatistiqueDbBudgetAgg[];
-    subventionnees: StatistiqueDbBudgetAgg[];
+    total: StatistiqueDbBudget[];
+    autorisees: StatistiqueDbBudget[];
+    subventionnees: StatistiqueDbBudget[];
   },
   indicateurs: StatistiqueDbIndicateurFinancier[],
   aggregation: NumericAggregation

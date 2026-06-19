@@ -29,7 +29,7 @@ Helper partagé : `isEigComportementViolent` (`src/app/utils/eig.util.ts`).
 
 | Champ | Calcul |
 |-------|--------|
-| `eigPour1000PlacesAutorisees` | `(nbEig / places autorisées) × 1 000` |
+| `tauxEig` | `nbEig / places autorisées` (ratio) |
 | `nbEig` | Nombre d’EIG sur la période |
 | `nbEigComportementViolent` | Parmi ces EIG, ceux dont le `type` correspond au motif violent |
 
@@ -42,7 +42,7 @@ Une entrée par mois présent dans les EIG ou les évaluations du périmètre.
 | Champ | Calcul |
 |-------|--------|
 | `nbStructuresSansDeclarationEig` | Structures du périmètre sans aucun EIG ce mois-là |
-| `partStructuresSansDeclarationEig` | `%` (0–100) de ces structures |
+| `partStructuresSansDeclarationEig` | Ratio (0–1) de ces structures |
 | `nbEig` | Nombre d’EIG du mois |
 | `nbEigComportementViolent` | EIG à motif violent |
 | `tauxEigComportementViolent` | `nbEigComportementViolent / nbEig` |

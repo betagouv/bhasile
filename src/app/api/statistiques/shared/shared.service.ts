@@ -1,3 +1,5 @@
+import { Prisma, StructureType } from "@/generated/prisma/client";
+import prisma from "@/lib/prisma";
 import { StatistiquesFiltersRaw } from "@/schemas/api/statistique.schema";
 
 import type {
@@ -9,8 +11,6 @@ import type {
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
 } from "../statistiques.db.type";
-import { buildStructureWhere } from "./filters";
-import { StatistiquesPerimetreVideError } from "./shared.utils";
 import {
   findAdresseTypologies,
   findDepartementsWithPopulation,
@@ -20,7 +20,8 @@ import {
   findStructureIds,
   findStructuresWithTypes,
   findStructureTypologies,
-} from "./repository";
+} from "./shared.repository";
+import { StatistiquesPerimetreVideError } from "./shared.utils";
 
 export type StatistiquesContext = {
   structureIds: number[];
@@ -32,6 +33,38 @@ export type StatistiquesContext = {
   dnaLinks: StatistiqueDbDnaLink[];
   dnaCodes: string[];
   departements: StatistiqueDbDepartement[];
+};
+
+const buildStructureWhere = async (
+  filters: StatistiquesFiltersRaw
+): Promise<Prisma.StructureWhereInput> => {
+  // TODO(structure-version): filtrer type/département sur version effective (shared/utils)
+  const where: Prisma.StructureWhereInput = {};
+
+  const typeList = filters.types?.split(",").filter(Boolean) ?? [];
+  if (typeList.length > 0) {
+    where.type = { in: typeList as StructureType[] };
+  }
+
+  const depList = filters.departements?.split(",").filter(Boolean) ?? [];
+  if (depList.length > 0) {
+    where.departementAdministratif = { in: depList };
+  }
+
+  const operateurIds =
+    filters.operateurs?.split(",").filter(Boolean).map(Number) ?? [];
+  if (operateurIds.length > 0) {
+    const filiales = await prisma.operateur.findMany({
+      where: { parentId: { in: operateurIds } },
+      select: { id: true },
+    });
+    const allOperateurIds = [
+      ...new Set([...operateurIds, ...filiales.map((filiale) => filiale.id)]),
+    ];
+    where.operateurId = { in: allOperateurIds };
+  }
+
+  return where;
 };
 
 export const buildStatistiquesContext = async (
@@ -66,7 +99,7 @@ export const buildStatistiquesContext = async (
     ...new Set(
       structures
         .map((structure) => structure.departementAdministratif)
-        .filter((dept): dept is string => dept !== null)
+        .filter((departement): departement is string => departement !== null)
     ),
   ];
   const departements = await findDepartementsWithPopulation(deptNumeros);

@@ -10,7 +10,7 @@ Hypothèses de calcul pour l’API `GET /api/statistiques` (bloc `finance`).
 
 ## Millésimes
 
-- **Première année** : `DOCUMENTS_FINANCIERS_OPEN_YEAR` (constante, actuellement 2025). Les séries `byYear` ne remontent pas avant cette année.
+- Une entrée par année présente dans les budgets (`Budget`, hors `isMissing`) ou les indicateurs réalisés (`IndicateurFinancier` type `REALISE`, hors `isMissing`) du périmètre.
 - Le choix de l’année affichée en tableau de bord se fait côté front à partir de `finance.byYear`.
 
 ## Scopes (total / autorisées / subventionnées)
@@ -37,9 +37,15 @@ Paramètre URL `?aggregation=` :
 
 S’applique à `tauxEncadrement` et `coutJournalier` dans chaque entrée `byYear`, et aux notes d’évaluation dans `controleQualite.byMonth`. La valeur utilisée est exposée dans `finance.aggregation` et `controleQualite.aggregation`.
 
+## Format des nombres en sortie API
+
+- **Taux** (ratios 0–1 ou plus, ex. `tauxEquipement`, `tauxEig`, `tauxIndisponibilite`) : 3 décimales.
+- **Indicateurs décimaux** (ex. `tauxEncadrement`, `coutJournalier`, `note*`, `totalETP`) : 1 décimale.
+- **Comptages et montants agrégés** : valeur brute (entiers ou montants non arrondis).
+
 ## Séries `byYear`
 
-Une entrée par année ≥ `DOCUMENTS_FINANCIERS_OPEN_YEAR` présente dans les budgets ou indicateurs du scope.
+Une entrée par année présente dans les budgets ou indicateurs du scope.
 
 Par scope (`total`, `autorisees`, `subventionnees`) et par année :
 
@@ -52,10 +58,10 @@ Par scope (`total`, `autorisees`, `subventionnees`) et par année :
 | `coutJournalier` | Moyenne ou médiane des coûts journaliers (selon `aggregation`) |
 | `totalProduits` | Somme `Budget.totalProduits` |
 | `totalCharges` | Somme `Budget.totalCharges` |
-| `resultatNet` | `totalProduits − totalCharges` |
-| `excedentCumule` | Somme des résultats nets positifs depuis la première année du scope |
-| `deficitCumule` | Somme des \|résultats nets négatifs\| depuis la première année du scope |
-| `soldeCumule` | `excedentCumule − deficitCumule` (= cumul `totalProduits − totalCharges`) |
+| `resultatNet` | `totalProduits − totalCharges` (agrégat du scope) |
+| `excedentCumule` | Somme cumulée des résultats nets **positifs** de chaque structure du scope (un RN négatif n’y contribue pas) |
+| `deficitCumule` | Somme cumulée des \|résultats nets négatifs\| de chaque structure du scope (un RN positif n’y contribue pas) |
+| `soldeCumule` | `excedentCumule − deficitCumule` (= cumul des résultats nets de chaque structure) |
 
 Les cumuls sont calculés **indépendamment** par scope, dans l’ordre chronologique des années.
 

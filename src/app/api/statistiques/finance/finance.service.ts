@@ -2,7 +2,7 @@ import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesContext } from "../shared/shared.service";
 import {
-  findBudgetsByYear,
+  findBudgets,
   findIndicateursFinanciers,
 } from "./finance.repository";
 import {
@@ -19,9 +19,9 @@ export const getFinanceStatistiques = async (
 
   const [budgetsTotal, budgetsAutorisees, budgetsSubventionnees, indicateurs] =
     await Promise.all([
-      findBudgetsByYear(scopeIds.total),
-      findBudgetsByYear(scopeIds.autorisees),
-      findBudgetsByYear(scopeIds.subventionnees),
+      findBudgets(scopeIds.total),
+      findBudgets(scopeIds.autorisees),
+      findBudgets(scopeIds.subventionnees),
       findIndicateursFinanciers(scopeIds.total),
     ]);
 
