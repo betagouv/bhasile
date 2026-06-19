@@ -56,7 +56,7 @@ export const findIndicateursFinanciers = async (
     where: {
       structureId: { in: structureIds },
       isMissing: { not: true },
-      type: "REALISE",
+      type: { in: ["REALISE", "PREVISIONNEL"] },
     },
     select: {
       structureId: true,

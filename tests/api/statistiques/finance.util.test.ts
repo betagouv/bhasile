@@ -111,4 +111,51 @@ describe("finance statistics util", () => {
     expect(year2025?.subventionnees.deficitCumule).toBe(30);
     expect(year2025?.subventionnees.soldeCumule).toBe(-30);
   });
+
+  it("resolves financial indicators with REALISE first and PREVISIONNEL fallback per field", () => {
+    const scopeIds = getStructureIdsByFinanceScope([structures[0], structures[1]]);
+    const budgets = [budgetRow(1, 2024, 0, 0)];
+
+    const result = computeFinanceStatistiques(
+      scopeIds,
+      {
+        total: budgets,
+        autorisees: budgets,
+        subventionnees: [],
+      },
+      [
+        {
+          structureId: 1,
+          year: 2024,
+          type: "REALISE",
+          ETP: 10,
+          tauxEncadrement: null,
+          coutJournalier: 50,
+        },
+        {
+          structureId: 1,
+          year: 2024,
+          type: "PREVISIONNEL",
+          ETP: 99,
+          tauxEncadrement: 0.8,
+          coutJournalier: 99,
+        },
+        {
+          structureId: 2,
+          year: 2024,
+          type: "PREVISIONNEL",
+          ETP: 5,
+          tauxEncadrement: 0.5,
+          coutJournalier: 40,
+        },
+      ],
+      "moyenne"
+    );
+
+    const year2024 = result.byYear.find((entry) => entry.year === 2024);
+
+    expect(year2024?.total.totalETP).toBe(15);
+    expect(year2024?.total.tauxEncadrement).toBe(0.7);
+    expect(year2024?.total.coutJournalier).toBe(45);
+  });
 });

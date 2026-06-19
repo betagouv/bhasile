@@ -123,6 +123,46 @@ const getFinanceYears = (
     ]),
   ].sort((yearA, yearB) => yearA - yearB);
 
+const resolveIndicateurFinancier = (
+  realise: StatistiqueDbIndicateurFinancier | undefined,
+  previsionnel: StatistiqueDbIndicateurFinancier | undefined
+): Pick<
+  StatistiqueDbIndicateurFinancier,
+  "ETP" | "tauxEncadrement" | "coutJournalier"
+> => ({
+  ETP: realise?.ETP ?? previsionnel?.ETP ?? null,
+  tauxEncadrement:
+    realise?.tauxEncadrement ?? previsionnel?.tauxEncadrement ?? null,
+  coutJournalier: realise?.coutJournalier ?? previsionnel?.coutJournalier ?? null,
+});
+
+const getResolvedIndicateursForYear = (
+  structureIds: number[],
+  indicateurs: StatistiqueDbIndicateurFinancier[],
+  year: number
+): Array<
+  Pick<StatistiqueDbIndicateurFinancier, "ETP" | "tauxEncadrement" | "coutJournalier">
+> => {
+  const byStructureAndType = new Map<string, StatistiqueDbIndicateurFinancier>();
+
+  for (const indicateur of indicateurs) {
+    if (indicateur.structureId === null || indicateur.year !== year) {
+      continue;
+    }
+    byStructureAndType.set(
+      `${indicateur.structureId}-${indicateur.type}`,
+      indicateur
+    );
+  }
+
+  return structureIds.map((structureId) =>
+    resolveIndicateurFinancier(
+      byStructureAndType.get(`${structureId}-REALISE`),
+      byStructureAndType.get(`${structureId}-PREVISIONNEL`)
+    )
+  );
+};
+
 const computeScopeYearStats = (
   structureIds: number[],
   budgets: StatistiqueDbBudget[],
@@ -142,8 +182,10 @@ const computeScopeYearStats = (
 
   return getFinanceYears(budgets, scopedIndicateurs).map((year) => {
     const budget = budgetsByYear.get(year);
-    const indicateursForYear = scopedIndicateurs.filter(
-      (indicateur) => indicateur.year === year
+    const indicateursForYear = getResolvedIndicateursForYear(
+      structureIds,
+      scopedIndicateurs,
+      year
     );
     const totalProduits = budget?.totalProduits ?? 0;
     const totalCharges = budget?.totalCharges ?? 0;

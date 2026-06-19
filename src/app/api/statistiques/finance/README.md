@@ -1,9 +1,26 @@
 # `finance`
 
+## TODO (hors transfo)
+
+Valider le comportement fallback de `REALISE` vers `PREVISIONNEL`
+
 ## Millésimes
 
-Toutes années avec budget (`Budget`, hors `isMissing`) ou indicateur réalisé (`IndicateurFinancier` `REALISE`, hors `isMissing`).
-Le choix de l'année affichée se fait en front.
+Union des années présentes dans :
+
+- `Budget` (hors `isMissing`)
+- `IndicateurFinancier` `REALISE` ou `PREVISIONNEL` (hors `isMissing`)
+
+Le front choisit l'année affichée dans `byYear`.
+
+## Indicateurs financiers (`ETP`, `tauxEncadrement`, `coutJournalier`)
+
+Par structure et par année, **par champ** :
+
+1. valeur `REALISE` si renseignée ;
+2. sinon repli `PREVISIONNEL`.
+
+Puis agrégation scope : somme (`ETP`), moyenne ou médiane (taux).
 
 ## Scopes
 
@@ -15,17 +32,18 @@ Le choix de l'année affichée se fait en front.
 
 ## `byYear` (par scope)
 
-| Champ                                                                               | Calcul                                          |
-| ----------------------------------------------------------------------------------- | ----------------------------------------------- |
-| `dotationDemandee`, `dotationAccordee`, `totalProduits`, `totalCharges`, `totalETP` | Sommes                                          |
-| `tauxEncadrement`, `coutJournalier`                                                 | Moyenne ou médiane                              |
-| `resultatNet`                                                                       | `totalProduits − totalCharges` (agrégat scope)  |
-| `excedentCumule`                                                                    | Cumul RN **positifs** par structure, puis somme |
-| `deficitCumule`                                                                     | Cumul \|RN négatifs\| par structure, puis somme |
-| `soldeCumule`                                                                       | `excedentCumule − deficitCumule`                |
+| Champ                                                                   | Calcul                                          |
+| ----------------------------------------------------------------------- | ----------------------------------------------- |
+| `dotationDemandee`, `dotationAccordee`, `totalProduits`, `totalCharges` | Sommes (`Budget`)                               |
+| `totalETP`                                                              | Somme (indicateurs résolus)                     |
+| `tauxEncadrement`, `coutJournalier`                                     | Moyenne ou médiane (indicateurs résolus)        |
+| `resultatNet`                                                           | `totalProduits − totalCharges` (agrégat scope)  |
+| `excedentCumule`                                                        | Cumul RN **positifs** par structure, puis somme |
+| `deficitCumule`                                                         | Cumul \|RN négatifs\| par structure, puis somme |
+| `soldeCumule`                                                           | `excedentCumule − deficitCumule`                |
 
 Cumuls par scope, chronologiques. Année absente dans un scope -> report cumuls.
 
 ## Sources
 
-`Budget`, `IndicateurFinancier` (`REALISE`).
+`Budget`, `IndicateurFinancier` (`REALISE` + `PREVISIONNEL` en repli).
