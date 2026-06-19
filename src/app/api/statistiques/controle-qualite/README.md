@@ -37,24 +37,40 @@ Helper partagé : `isEigComportementViolent` (`src/app/utils/eig.util.ts`).
 
 Fenêtre EIG : mois courant inclus, 12 mois en arrière (clé `YYYY-MM`).
 
-## Séries `byMonth`
+## Séries temporelles : `byMonth`, `byTrimester`, `byYear`
 
-Une entrée par mois présent dans les EIG ou les évaluations du périmètre.
+Trois granularités exposées avec **les mêmes indicateurs** et **la même logique de calcul**, appliquée sur l’ensemble des EIG et évaluations de la période concernée.
+
+| Série | Clé de regroupement |
+|-------|---------------------|
+| `byMonth` | `YYYY-MM` (champ `date` = 1er du mois) |
+| `byTrimester` | trimestre calendaire (`year` + `trimester` 1–4) |
+| `byYear` | année calendaire (`year`) |
+
+### Pourquoi trois séries côté API ?
+
+Les moyennes et médianes de notes **ne sont pas additives** : on ne peut pas recomposer un trimestre ou une année en faisant la moyenne des moyennes mensuelles.
+
+Exemple : 1 évaluation à 2/5 en janvier et 10 évaluations à 4/5 en février donnent une moyenne trimestrielle de `(2 + 10×4) / 11 ≈ 3,8`, pas la moyenne de `(2 + 4) / 2 = 3`.
+
+Le front choisit donc directement la série adaptée à la fenêtre affichée (`byMonth`, `byTrimester` ou `byYear`) plutôt que d’agréger des points mensuels.
+
+### Indicateurs par période
 
 | Champ | Calcul |
 |-------|--------|
-| `nbStructuresSansDeclarationEig` | Structures du périmètre sans aucun EIG ce mois-là |
+| `nbStructuresSansDeclarationEig` | Structures du périmètre sans aucun EIG sur la période |
 | `partStructuresSansDeclarationEig` | Ratio (0–1) de ces structures |
-| `nbEig` | Nombre d’EIG du mois |
+| `nbEig` | Nombre d’EIG de la période |
 | `nbEigComportementViolent` | EIG à motif violent |
 | `tauxEigComportementViolent` | `nbEigComportementViolent / nbEig` |
-| `nbStructuresEvaluees` | Structures distinctes ayant au moins une évaluation ce mois |
-| `noteGenerale` | Moyenne ou médiane des `note` (selon `aggregation`) |
+| `nbStructuresEvaluees` | Structures distinctes ayant au moins une évaluation sur la période |
+| `noteGenerale` | Moyenne ou médiane des `note` de **toutes** les évaluations de la période |
 | `notePersonne` | Moyenne ou médiane des `notePersonne` |
 | `notePro` | Moyenne ou médiane des `notePro` |
 | `noteStructure` | Moyenne ou médiane des `noteStructure` |
 
-Le choix du mois affiché en tableau de bord se fait côté front à partir de `byMonth`.
+Les taux EIG sont aussi recalculés sur les totaux de la période (pas la moyenne des taux mensuels).
 
 ## Agrégation moyenne / médiane
 
@@ -65,7 +81,7 @@ Paramètre URL `?aggregation=` (partagé avec finance) :
 | `moyenne` (défaut) | Moyenne arithmétique |
 | `mediane` | Médiane |
 
-S’applique aux champs `note*` de `byMonth` et à `eig.moyenneEvaluationsCurrentYear`. Exposé dans `controleQualite.aggregation`.
+S’applique aux champs `note*` des séries temporelles et à `eig.moyenneEvaluationsCurrentYear`. Exposé dans `controleQualite.aggregation`.
 
 ## Paramètres API
 

@@ -82,8 +82,7 @@ export type EigStat = {
   moyenneEvaluationsCurrentYear: number | null;
 };
 
-export type ControleQualiteByMonthStat = {
-  date: Date;
+export type ControleQualitePeriodStat = {
   nbStructuresSansDeclarationEig: number;
   partStructuresSansDeclarationEig: number | null;
   nbEig: number;
@@ -94,6 +93,19 @@ export type ControleQualiteByMonthStat = {
   notePersonne: number | null;
   notePro: number | null;
   noteStructure: number | null;
+};
+
+export type ControleQualiteByMonthStat = ControleQualitePeriodStat & {
+  date: Date;
+};
+
+export type ControleQualiteByTrimesterStat = ControleQualitePeriodStat & {
+  year: number;
+  trimester: number;
+};
+
+export type ControleQualiteByYearStat = ControleQualitePeriodStat & {
+  year: number;
 };
 
 export type ActiviteByMonthStat = {
@@ -165,8 +177,7 @@ const eigStatSchema = z.object({
   moyenneEvaluationsCurrentYear: z.number().nullable(),
 });
 
-const controleQualiteByMonthStatSchema = z.object({
-  date: z.coerce.date(),
+const controleQualitePeriodStatSchema = z.object({
   nbStructuresSansDeclarationEig: z.number(),
   partStructuresSansDeclarationEig: z.number().nullable(),
   nbEig: z.number(),
@@ -177,6 +188,20 @@ const controleQualiteByMonthStatSchema = z.object({
   notePersonne: z.number().nullable(),
   notePro: z.number().nullable(),
   noteStructure: z.number().nullable(),
+});
+
+const controleQualiteByMonthStatSchema = controleQualitePeriodStatSchema.extend({
+  date: z.coerce.date(),
+});
+
+const controleQualiteByTrimesterStatSchema =
+  controleQualitePeriodStatSchema.extend({
+    year: z.number(),
+    trimester: z.number(),
+  });
+
+const controleQualiteByYearStatSchema = controleQualitePeriodStatSchema.extend({
+  year: z.number(),
 });
 
 const activiteByMonthStatSchema = z.object({
@@ -225,6 +250,8 @@ export const statistiqueApiReadSchema = z.object({
     aggregation: z.enum(["moyenne", "mediane"]),
     eig: eigStatSchema,
     byMonth: z.array(controleQualiteByMonthStatSchema),
+    byTrimester: z.array(controleQualiteByTrimesterStatSchema),
+    byYear: z.array(controleQualiteByYearStatSchema),
   }),
   activite: z.object({
     byMonth: z.array(activiteByMonthStatSchema),

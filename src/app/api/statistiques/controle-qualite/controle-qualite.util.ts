@@ -8,6 +8,9 @@ import {
 } from "@/app/utils/math.util";
 import {
   ControleQualiteByMonthStat,
+  ControleQualiteByTrimesterStat,
+  ControleQualiteByYearStat,
+  ControleQualitePeriodStat,
   EigStat,
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
@@ -15,10 +18,13 @@ import {
 import {
   buildDnaCodeToStructureIds,
   getMonthKey,
+  getTrimesterKey,
   getTwelveMonthCutoffKey,
-  groupByMonthKey,
-  mergeSortedMonthKeys,
+  getYearKey,
+  groupByPeriodKey,
+  mergeSortedPeriodKeys,
   monthKeyToDate,
+  parseTrimesterKey,
 } from "../shared/shared.utils";
 import type {
   StatistiqueDbDnaLink,
@@ -118,10 +124,17 @@ const computeEigSummary = (
   };
 };
 
-const computeEvaluationNotesForMonth = (
+const computeEvaluationNotes = (
   evaluations: StatistiqueDbEvaluation[],
   aggregation: NumericAggregation
-) => {
+): Pick<
+  ControleQualitePeriodStat,
+  | "nbStructuresEvaluees"
+  | "noteGenerale"
+  | "notePersonne"
+  | "notePro"
+  | "noteStructure"
+> => {
   const structureIds = new Set(
     evaluations
       .map((evaluation) => evaluation.structureId)
@@ -157,53 +170,133 @@ const computeEvaluationNotesForMonth = (
   };
 };
 
+const computeControleQualitePeriodStat = (
+  eigsForPeriod: StatistiqueDbEig[],
+  evaluationsForPeriod: StatistiqueDbEvaluation[],
+  activeStructureIdSet: Set<number>,
+  totalStructures: number,
+  dnaCodeToStructureIds: Map<string, Set<number>>,
+  aggregation: NumericAggregation
+): ControleQualitePeriodStat => {
+  const { nbEig, nbEigComportementViolent } = countEigs(eigsForPeriod);
+  const structureIdsWithEig = getStructureIdsFromEigs(
+    eigsForPeriod,
+    dnaCodeToStructureIds,
+    activeStructureIdSet
+  );
+  const nbStructuresSansDeclarationEig =
+    totalStructures - structureIdsWithEig.size;
+
+  return {
+    nbStructuresSansDeclarationEig,
+    partStructuresSansDeclarationEig: toStatRate(
+      ratio(nbStructuresSansDeclarationEig, totalStructures)
+    ),
+    nbEig,
+    nbEigComportementViolent,
+    tauxEigComportementViolent: toStatRate(
+      ratio(nbEigComportementViolent, nbEig)
+    ),
+    ...computeEvaluationNotes(evaluationsForPeriod, aggregation),
+  };
+};
+
+type ControleQualiteSeriesContext = {
+  activeStructureIdSet: Set<number>;
+  totalStructures: number;
+  dnaCodeToStructureIds: Map<string, Set<number>>;
+  aggregation: NumericAggregation;
+};
+
+const computeControleQualiteByPeriod = <Entry extends ControleQualitePeriodStat>(
+  eigs: StatistiqueDbEig[],
+  evaluations: StatistiqueDbEvaluation[],
+  context: ControleQualiteSeriesContext,
+  getPeriodKey: (date: Date) => string,
+  mapPeriodKey: (periodKey: string) => Omit<Entry, keyof ControleQualitePeriodStat>
+): Entry[] => {
+  const eigsByPeriod = groupByPeriodKey(
+    eigs,
+    (eig) => eig.evenementDate,
+    getPeriodKey
+  );
+  const evaluationsByPeriod = groupByPeriodKey(
+    evaluations,
+    (evaluation) => evaluation.date,
+    getPeriodKey
+  );
+
+  return mergeSortedPeriodKeys(eigsByPeriod, evaluationsByPeriod).map(
+    (periodKey) =>
+      ({
+        ...mapPeriodKey(periodKey),
+        ...computeControleQualitePeriodStat(
+          eigsByPeriod.get(periodKey) ?? [],
+          evaluationsByPeriod.get(periodKey) ?? [],
+          context.activeStructureIdSet,
+          context.totalStructures,
+          context.dnaCodeToStructureIds,
+          context.aggregation
+        ),
+      }) as Entry
+  );
+};
+
+const buildSeriesContext = (
+  activeStructureIds: number[],
+  dnaLinks: StatistiqueDbDnaLink[],
+  aggregation: NumericAggregation
+): ControleQualiteSeriesContext => ({
+  activeStructureIdSet: new Set(activeStructureIds),
+  totalStructures: activeStructureIds.length,
+  dnaCodeToStructureIds: buildDnaCodeToStructureIds(dnaLinks),
+  aggregation,
+});
+
 const computeControleQualiteByMonth = (
   activeStructureIds: number[],
   eigs: StatistiqueDbEig[],
   evaluations: StatistiqueDbEvaluation[],
   dnaLinks: StatistiqueDbDnaLink[],
   aggregation: NumericAggregation
-): ControleQualiteByMonthStat[] => {
-  const activeStructureIdSet = new Set(activeStructureIds);
-  const totalStructures = activeStructureIds.length;
-  const dnaCodeToStructureIds = buildDnaCodeToStructureIds(dnaLinks);
-  const eigsByMonth = groupByMonthKey(eigs, (eig) => eig.evenementDate);
-  const evaluationsByMonth = groupByMonthKey(
+): ControleQualiteByMonthStat[] =>
+  computeControleQualiteByPeriod(
+    eigs,
     evaluations,
-    (evaluation) => evaluation.date
+    buildSeriesContext(activeStructureIds, dnaLinks, aggregation),
+    getMonthKey,
+    (monthKey) => ({ date: monthKeyToDate(monthKey) })
   );
 
-  return mergeSortedMonthKeys(eigsByMonth, evaluationsByMonth).map(
-    (monthKey) => {
-      const eigsForMonth = eigsByMonth.get(monthKey) ?? [];
-      const evaluationsForMonth = evaluationsByMonth.get(monthKey) ?? [];
-      const { nbEig, nbEigComportementViolent } = countEigs(eigsForMonth);
-      const structureIdsWithEig = getStructureIdsFromEigs(
-        eigsForMonth,
-        dnaCodeToStructureIds,
-        activeStructureIdSet
-      );
-      const nbStructuresSansDeclarationEig =
-        totalStructures - structureIdsWithEig.size;
-      const partSansDeclaration = ratio(
-        nbStructuresSansDeclarationEig,
-        totalStructures
-      );
-
-      return {
-        date: monthKeyToDate(monthKey),
-        nbStructuresSansDeclarationEig,
-        partStructuresSansDeclarationEig: toStatRate(partSansDeclaration),
-        nbEig,
-        nbEigComportementViolent,
-        tauxEigComportementViolent: toStatRate(
-          ratio(nbEigComportementViolent, nbEig)
-        ),
-        ...computeEvaluationNotesForMonth(evaluationsForMonth, aggregation),
-      };
-    }
+const computeControleQualiteByTrimester = (
+  activeStructureIds: number[],
+  eigs: StatistiqueDbEig[],
+  evaluations: StatistiqueDbEvaluation[],
+  dnaLinks: StatistiqueDbDnaLink[],
+  aggregation: NumericAggregation
+): ControleQualiteByTrimesterStat[] =>
+  computeControleQualiteByPeriod(
+    eigs,
+    evaluations,
+    buildSeriesContext(activeStructureIds, dnaLinks, aggregation),
+    getTrimesterKey,
+    (trimesterKey) => parseTrimesterKey(trimesterKey)
   );
-};
+
+const computeControleQualiteByYear = (
+  activeStructureIds: number[],
+  eigs: StatistiqueDbEig[],
+  evaluations: StatistiqueDbEvaluation[],
+  dnaLinks: StatistiqueDbDnaLink[],
+  aggregation: NumericAggregation
+): ControleQualiteByYearStat[] =>
+  computeControleQualiteByPeriod(
+    eigs,
+    evaluations,
+    buildSeriesContext(activeStructureIds, dnaLinks, aggregation),
+    getYearKey,
+    (yearKey) => ({ year: Number(yearKey) })
+  );
 
 export const computeControleQualiteStatistiques = (
   activeStructureIds: number[],
@@ -212,20 +305,38 @@ export const computeControleQualiteStatistiques = (
   evaluations: StatistiqueDbEvaluation[],
   dnaLinks: StatistiqueDbDnaLink[],
   aggregation: NumericAggregation
-): StatistiqueApiRead["controleQualite"] => ({
-  aggregation,
-  eig: computeEigSummary(
-    eigs,
-    totalPlacesAutorisees,
-    evaluations,
-    new Set(activeStructureIds),
-    aggregation
-  ),
-  byMonth: computeControleQualiteByMonth(
-    activeStructureIds,
-    eigs,
-    evaluations,
-    dnaLinks,
-    aggregation
-  ),
-});
+): StatistiqueApiRead["controleQualite"] => {
+  const activeStructureIdSet = new Set(activeStructureIds);
+
+  return {
+    aggregation,
+    eig: computeEigSummary(
+      eigs,
+      totalPlacesAutorisees,
+      evaluations,
+      activeStructureIdSet,
+      aggregation
+    ),
+    byMonth: computeControleQualiteByMonth(
+      activeStructureIds,
+      eigs,
+      evaluations,
+      dnaLinks,
+      aggregation
+    ),
+    byTrimester: computeControleQualiteByTrimester(
+      activeStructureIds,
+      eigs,
+      evaluations,
+      dnaLinks,
+      aggregation
+    ),
+    byYear: computeControleQualiteByYear(
+      activeStructureIds,
+      eigs,
+      evaluations,
+      dnaLinks,
+      aggregation
+    ),
+  };
+};

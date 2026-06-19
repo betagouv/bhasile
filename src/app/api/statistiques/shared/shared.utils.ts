@@ -156,6 +156,23 @@ export const buildDnaCodeToStructureIds = (
 export const getMonthKey = (date: Date): string =>
   date.toISOString().slice(0, 7);
 
+export const getYearKey = (date: Date): string =>
+  date.toISOString().slice(0, 4);
+
+export const getTrimesterKey = (date: Date): string => {
+  const month = Number(date.toISOString().slice(5, 7));
+  const year = date.toISOString().slice(0, 4);
+  const trimester = Math.ceil(month / 3);
+  return `${year}-Q${trimester}`;
+};
+
+export const parseTrimesterKey = (
+  trimesterKey: string
+): { year: number; trimester: number } => {
+  const [year, trimesterPart] = trimesterKey.split("-Q");
+  return { year: Number(year), trimester: Number(trimesterPart) };
+};
+
 export const monthKeyToDate = (monthKey: string): Date =>
   new Date(`${monthKey}-01`);
 
@@ -168,27 +185,38 @@ export const getTwelveMonthCutoffKey = (): string => {
 export const groupByMonthKey = <Item>(
   items: Item[],
   getDate: (item: Item) => Date | null | undefined
+): Map<string, Item[]> =>
+  groupByPeriodKey(items, getDate, getMonthKey);
+
+export const groupByPeriodKey = <Item>(
+  items: Item[],
+  getDate: (item: Item) => Date | null | undefined,
+  getPeriodKey: (date: Date) => string
 ): Map<string, Item[]> => {
-  const byMonth = new Map<string, Item[]>();
+  const byPeriod = new Map<string, Item[]>();
 
   for (const item of items) {
     const date = getDate(item);
     if (!date) {
       continue;
     }
-    const monthKey = getMonthKey(date);
-    const itemsForMonth = byMonth.get(monthKey) ?? [];
-    itemsForMonth.push(item);
-    byMonth.set(monthKey, itemsForMonth);
+    const periodKey = getPeriodKey(date);
+    const itemsForPeriod = byPeriod.get(periodKey) ?? [];
+    itemsForPeriod.push(item);
+    byPeriod.set(periodKey, itemsForPeriod);
   }
 
-  return byMonth;
+  return byPeriod;
 };
 
 export const mergeSortedMonthKeys = (
   ...monthMaps: Array<Map<string, unknown>>
+): string[] => mergeSortedPeriodKeys(...monthMaps);
+
+export const mergeSortedPeriodKeys = (
+  ...periodMaps: Array<Map<string, unknown>>
 ): string[] =>
-  [...new Set(monthMaps.flatMap((monthMap) => [...monthMap.keys()]))].sort();
+  [...new Set(periodMaps.flatMap((periodMap) => [...periodMap.keys()]))].sort();
 
 export const parseNumericAggregation = (
   aggregationParam: string | null
