@@ -37,7 +37,6 @@ describe("places statistics util", () => {
         },
       ],
       [],
-      [],
       departements
     );
 
@@ -58,7 +57,6 @@ describe("places statistics util", () => {
           fvvTeh: 0,
         },
       ],
-      [],
       [],
       [{ numero: "01", name: "Ain", population: null }]
     );
@@ -89,7 +87,6 @@ describe("places statistics util", () => {
         },
       ],
       [],
-      [],
       departements.slice(0, 1)
     );
 
@@ -112,7 +109,6 @@ describe("places statistics util", () => {
           fvvTeh: 0,
         },
       ],
-      [],
       [],
       departements.slice(0, 1)
     );

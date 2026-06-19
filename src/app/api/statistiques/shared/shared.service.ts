@@ -4,7 +4,6 @@ import { StatistiquesFiltersRaw } from "@/schemas/api/statistique.schema";
 
 import type {
   StatistiqueDbAdresse,
-  StatistiqueDbAdresseTypologie,
   StatistiqueDbCpomStructure,
   StatistiqueDbDepartement,
   StatistiqueDbDnaLink,
@@ -12,7 +11,6 @@ import type {
   StatistiqueDbTypologie,
 } from "../statistiques.db.type";
 import {
-  findAdresseTypologies,
   findDepartementsWithPopulation,
   findCpomStructures,
   findDnaLinksByStructure,
@@ -27,7 +25,6 @@ export type StatistiquesContext = {
   structures: StatistiqueDbStructure[];
   typologies: StatistiqueDbTypologie[];
   adresses: StatistiqueDbAdresse[];
-  adresseTypologies: StatistiqueDbAdresseTypologie[];
   cpomLinks: StatistiqueDbCpomStructure[];
   dnaLinks: StatistiqueDbDnaLink[];
   dnaCodes: string[];
@@ -76,21 +73,14 @@ export const buildStatistiquesContext = async (
     return null;
   }
 
-  const [
-    structures,
-    typologies,
-    adresses,
-    adresseTypologies,
-    cpomLinks,
-    dnaLinks,
-  ] = await Promise.all([
-    findStructuresWithTypes(structureIds),
-    findStructureTypologies(structureIds),
-    findStructureAdresses(structureIds),
-    findAdresseTypologies(structureIds),
-    findCpomStructures(structureIds),
-    findDnaLinksByStructure(structureIds),
-  ]);
+  const [structures, typologies, adresses, cpomLinks, dnaLinks] =
+    await Promise.all([
+      findStructuresWithTypes(structureIds),
+      findStructureTypologies(structureIds),
+      findStructureAdresses(structureIds),
+      findCpomStructures(structureIds),
+      findDnaLinksByStructure(structureIds),
+    ]);
 
   const dnaCodes = [...new Set(dnaLinks.map((link) => link.dna.code))];
 
@@ -108,7 +98,6 @@ export const buildStatistiquesContext = async (
     structures,
     typologies,
     adresses,
-    adresseTypologies,
     cpomLinks,
     dnaLinks,
     dnaCodes,

@@ -1,5 +1,9 @@
 # `structures`
 
+## TODO post Transfo
+
+- Filtrer les places sur les `Adresses` liées à la dernière `StructureVersion` déjà écoulée
+
 ## Typologie (`StructureTypologie`)
 
 | Périmètre                              | Règle                                                                       |
@@ -9,21 +13,21 @@
 
 ## Vue globale
 
-| Champ                | Calcul                                                                                       |
-| -------------------- | -------------------------------------------------------------------------------------------- |
-| `totalStructures`    | Toutes structures filtrées                                                                   |
-| `totalCpoms`         | CPOM distincts actifs année courante, avec réemploi de `isStructureInCpom`  |
-| `structuresAvecCpom` | Structures avec ≥1 CPOM actif année courante                                                 |
-| `structureTypes[]`   | Par `Structure.type` — structures actives ; places = somme `placesAutorisees` résolues       |
+| Champ                | Calcul                                                                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `totalStructures`    | Toutes structures filtrées                                                                                                                 |
+| `totalCpoms`         | CPOM distincts actifs année courante, avec réemploi de `isStructureInCpom`                                                                 |
+| `structuresAvecCpom` | Structures avec ≥1 CPOM actif année courante                                                                                               |
+| `structureTypes[]`   | Par `Structure.type` — structures actives ; places = somme `placesAutorisees` résolues                                                     |
 | `structureBatis[]`   | **Structures** : bâti agrégé (`getRepartitionFromRepartitions`). **Places** : somme par `Adresse.repartition` + `Adresse.placesAutorisees` |
 
 ### Bâti (`structureBatis[]`)
 
 **Comptage structures** : agrégation structure via `getRepartitionFromRepartitions` (COLLECTIF + DIFFUS → MIXTE).
 
-**Comptage places** : par adresse, selon son `repartition` + `Adresse.placesAutorisees` — évite de basculer toutes les places en MIXTE quand la structure mélange collectif et diffus.
+**Comptage places** : par adresse, selon son `repartition` + `Adresse.placesAutorisees`.
 
-> `AdresseTypologie` en cours de dépréciation : pas utilisé ici pour les places bâti (contrairement à l'onglet places pour QPV / logements sociaux, encore sur typologies adresse le temps de la migration).
+> `AdresseTypologie` en cours de dépréciation : non utilisé dans les stats (voir onglet `places`).
 
 - `repartition` absente → COLLECTIF
 

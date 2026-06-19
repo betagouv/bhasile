@@ -2,7 +2,8 @@
 
 ## Millésimes
 
-Toutes années avec budget (`Budget`, hors `isMissing`) ou indicateur réalisé (`IndicateurFinancier` `REALISE`, hors `isMissing`). Choix année = front.
+Toutes années avec budget (`Budget`, hors `isMissing`) ou indicateur réalisé (`IndicateurFinancier` `REALISE`, hors `isMissing`).
+Le choix de l'année affichée se fait en front.
 
 ## Scopes
 

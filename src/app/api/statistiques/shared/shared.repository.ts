@@ -3,7 +3,6 @@ import prisma from "@/lib/prisma";
 
 import type {
   StatistiqueDbAdresse,
-  StatistiqueDbAdresseTypologie,
   StatistiqueDbCpomStructure,
   StatistiqueDbDepartement,
   StatistiqueDbDnaLink,
@@ -66,25 +65,6 @@ export const findStructureAdresses = async (
       qpv: true,
       logementSocial: true,
     },
-  });
-};
-
-export const findAdresseTypologies = async (
-  structureIds: number[]
-): Promise<StatistiqueDbAdresseTypologie[]> => {
-  if (structureIds.length === 0) {
-    return [];
-  }
-  return prisma.adresseTypologie.findMany({
-    where: { adresse: { structureId: { in: structureIds } } },
-    select: {
-      adresseId: true,
-      year: true,
-      qpv: true,
-      logementSocial: true,
-      adresse: { select: { structureId: true } },
-    },
-    orderBy: { year: "asc" },
   });
 };
 

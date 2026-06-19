@@ -30,16 +30,6 @@ export type StatistiqueDbAdresse = Prisma.AdresseGetPayload<{
   };
 }>;
 
-export type StatistiqueDbAdresseTypologie = Prisma.AdresseTypologieGetPayload<{
-  select: {
-    adresseId: true;
-    year: true;
-    qpv: true;
-    logementSocial: true;
-    adresse: { select: { structureId: true } };
-  };
-}>;
-
 export type StatistiqueDbEvaluation = Prisma.EvaluationGetPayload<{
   select: {
     structureId: true;

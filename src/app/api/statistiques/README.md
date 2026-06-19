@@ -2,6 +2,24 @@
 
 Statistiques agrégées du parc hébergement.
 
+## TODO post chantier transformation
+
+| ID                          | Sujet                                                                                                                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **TODO(fermeture)**         | Exclure structures fermées effectivement.                                                                                                                                      |
+| **TODO(actualisation)**     | `updatedAt` par bloc (sans doute implémentable après le chantier "formulaire d'actualisation").                                                                                |
+| **TODO(structure-version)** | Pivot `shared/` : dernière `StructureVersion` effective (`effectiveDate` ≤ aujourd'hui), plus `Structure.type` / `departementAdministratif` directs. Chantier transformations. |
+
+## Onglets
+
+| Bloc              | README                                                     |
+| ----------------- | ---------------------------------------------------------- |
+| `structures`      | [structures/README.md](./structures/README.md)             |
+| `places`          | [places/README.md](./places/README.md)                     |
+| `finance`         | [finance/README.md](./finance/README.md)                   |
+| `controleQualite` | [controle-qualite/README.md](./controle-qualite/README.md) |
+| `activite`        | [activite/README.md](./activite/README.md)                 |
+
 ## Architecture
 
 Le service est découpé par "bloc fonctionnel" avec un socle commun
@@ -60,21 +78,3 @@ Pour tous les `byYear` ou autres agrgéations par date en revanche, on retourne 
 ## Séries temporelles
 
 Indicateurs recalculés en back sur les données brutes de la période : le front ne peut en effet pas recombiner les sous-périodes de son côté (ex. moyenne de moyennes mensuelles).
-
-## TODO post chantier transformation
-
-| ID                          | Sujet                                                                                                                                                                          |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **TODO(fermeture)**         | Exclure structures fermées effectivement.                                                                                                                                      |
-| **TODO(actualisation)**     | `updatedAt` par bloc (sans doute implémentable après le chantier "formulaire d'actualisation").                                                                                |
-| **TODO(structure-version)** | Pivot `shared/` : dernière `StructureVersion` effective (`effectiveDate` ≤ aujourd'hui), plus `Structure.type` / `departementAdministratif` directs. Chantier transformations. |
-
-## Onglets
-
-| Bloc              | README                                                     |
-| ----------------- | ---------------------------------------------------------- |
-| `structures`      | [structures/README.md](./structures/README.md)             |
-| `places`          | [places/README.md](./places/README.md)                     |
-| `finance`         | [finance/README.md](./finance/README.md)                   |
-| `controleQualite` | [controle-qualite/README.md](./controle-qualite/README.md) |
-| `activite`        | [activite/README.md](./activite/README.md)                 |

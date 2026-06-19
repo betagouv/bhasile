@@ -1,23 +1,31 @@
 # `places`
 
-Périmètre, résolution typologie : [README parent](../README.md). Structures **actives** uniquement.
+## TODO post Transfo
+
+Champs à l'adresse :
+
+- À filtrer sur la dernière `StructureVersion` déjà écoulée
+- À prendre dans "dernière transfo en cours d'année n" pour `byYear`
+
+> `AdresseTypologie` en cours de dépréciation : QPV et logements sociaux lus directement sur `Adresse`.
 
 ## Vue globale
 
-Dernière valeur non nulle par structure/champ (millésimes peuvent différer).
+Dernière valeur non nulle par structure/champ (millésimes peuvent différer) pour `StructureTypologie`.
 
-| Champ | Calcul |
-|-------|--------|
-| `totalPlaces` | Somme `placesAutorisees` résolues |
-| `population` | Somme `Departement.population` ; `null` si manque |
-| `tauxEquipement` | `totalPlaces / population` |
-| `pmr`, `lgbt`, `fvvTeh` | Somme dernières valeurs `StructureTypologie` |
-| `qpv`, `logementsSociaux` | Dernière `AdresseTypologie` ou repli `Adresse` ; somme |
+| Champ                     | Calcul                                                   |
+| ------------------------- | -------------------------------------------------------- |
+| `totalPlaces`             | Somme `placesAutorisees` résolues (`StructureTypologie`) |
+| `population`              | Somme `Departement.population` ; `null` si manque        |
+| `tauxEquipement`          | `totalPlaces / population`                               |
+| `pmr`, `lgbt`, `fvvTeh`   | Somme dernières valeurs `StructureTypologie`             |
+| `qpv`, `logementsSociaux` | Somme `Adresse.qpv` / `Adresse.logementSocial`           |
 
 ## `byYear`
 
-Millésime exact, mêmes indicateurs.
+Millésime exact sur `StructureTypologie` (`totalPlaces`, `pmr`, etc.).
+`qpv` / `logementsSociaux` : valeurs courantes `Adresse` (pas de millésime adresse).
 
 ## Sources
 
-`StructureTypologie`, `AdresseTypologie` / `Adresse`, `Departement`, `Structure.departementAdministratif`.
+`StructureTypologie`, `Adresse`, `Departement`, `Structure.departementAdministratif`.
