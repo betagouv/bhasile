@@ -17,7 +17,7 @@ describe("activite statistics util", () => {
     { structureId: 3, dna: { code: "DNA03" } },
   ];
 
-  it("scopes indisponibilite (excl. CAES) and presences indues (CAES+CPH only) when computing rates", () => {
+  it("scopes indisponibilite (excl. CAES) and presences indues (excl. CAES+CPH) when computing rates", () => {
     const result = computeActiviteStatistiques(
       [
         {
@@ -54,14 +54,14 @@ describe("activite statistics util", () => {
     expect(march2025).toMatchObject({
       placesEnregistreesDna: 190,
       placesIndisponibles: 14,
-      presencesInduesBPI: 6,
-      presencesInduesDeboutees: 4,
-      presencesInduesTotal: 10,
+      presencesInduesBPI: 5,
+      presencesInduesDeboutees: 2,
+      presencesInduesTotal: 7,
     });
     // Indispo denominator: CADA + CPH only (100 + 40 places, 10 + 4 indispo)
     expect(march2025?.tauxIndisponibilite).toBe(0.1);
-    // Presences indues denominator: CAES + CPH only (50 + 40 places)
-    expect(march2025?.tauxPresencesInduesTotal).toBe(0.111);
+    // Presences indues denominator: CADA only (100 places)
+    expect(march2025?.tauxPresencesInduesTotal).toBe(0.07);
   });
 
   it("aggregates each month independently", () => {

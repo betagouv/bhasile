@@ -3,9 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { computeControleQualiteStatistiques } from "@/app/api/statistiques/controle-qualite/controle-qualite.util";
 
 vi.mock("@/constants", async () => {
-  const actual = await vi.importActual<typeof import("@/constants")>(
-    "@/constants"
-  );
+  const actual =
+    await vi.importActual<typeof import("@/constants")>("@/constants");
   return {
     ...actual,
     CURRENT_YEAR: 2025,
@@ -60,7 +59,7 @@ describe("quality control statistics util", () => {
       (entry) => entry.year === 2025 && entry.trimester === 1
     );
 
-    // (2 + 10×4) / 11 ≈ 3,8 — pas la moyenne de 2 et 4
+    // (2 + 10×4) / 11 ≈ 3,8 - pas la moyenne de 2 et 4
     expect(trimester2025Q1?.noteGenerale).toBe(3.8);
     expect(result.byYear[0]?.noteGenerale).toBe(3.8);
   });

@@ -18,7 +18,7 @@
 | `totalStructures`    | Toutes structures filtrées                                                                                                                 |
 | `totalCpoms`         | CPOM distincts actifs année courante, avec réemploi de `isStructureInCpom`                                                                 |
 | `structuresAvecCpom` | Structures avec ≥1 CPOM actif année courante                                                                                               |
-| `structureTypes[]`   | Par `Structure.type` — structures actives ; places = somme `placesAutorisees` résolues                                                     |
+| `structureTypes[]`   | Par `Structure.type` - structures actives ; places = somme `placesAutorisees` résolues                                                     |
 | `structureBatis[]`   | **Structures** : bâti agrégé (`getRepartitionFromRepartitions`). **Places** : somme par `Adresse.repartition` + `Adresse.placesAutorisees` |
 
 ### Bâti (`structureBatis[]`)

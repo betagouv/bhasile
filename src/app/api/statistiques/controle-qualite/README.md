@@ -4,7 +4,7 @@
 
 - EIG : `EvenementIndesirableGrave` via `dnaCode`
 - Évaluations : `Evaluation` par `structureId`
-- Violent : sous-chaîne `comportement violent` (insensible à la casse, espaces normalisés) — `isEigComportementViolent`
+- Violent : sous-chaîne `comportement violent` (insensible à la casse, espaces normalisés) - `isEigComportementViolent`
 
 ## Vue globale `eig` (12 mois glissants)
 
