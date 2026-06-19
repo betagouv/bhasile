@@ -4,7 +4,7 @@ import { StructureType } from "@/generated/prisma/client";
 
 import { computeActiviteStatistiques } from "@/app/api/statistiques/activite/activite.util";
 
-describe("activite statistiques util", () => {
+describe("activite statistics util", () => {
   const structures = [
     { id: 1, type: StructureType.CADA, departementAdministratif: "75" },
     { id: 2, type: StructureType.CAES, departementAdministratif: "75" },
@@ -17,7 +17,7 @@ describe("activite statistiques util", () => {
     { structureId: 3, dna: { code: "DNA03" } },
   ];
 
-  it("should aggregate monthly stats with scoped rates", () => {
+  it("scopes indisponibilite (excl. CAES) and presences indues (CAES+CPH only) when computing rates", () => {
     const result = computeActiviteStatistiques(
       [
         {
@@ -49,15 +49,47 @@ describe("activite statistiques util", () => {
       structures
     );
 
-    expect(result.byMonth).toHaveLength(1);
-    expect(result.byMonth[0]).toMatchObject({
+    const march2025 = result.byMonth[0];
+
+    expect(march2025).toMatchObject({
       placesEnregistreesDna: 190,
       placesIndisponibles: 14,
-      tauxIndisponibilite: 14 / 140,
       presencesInduesBPI: 6,
       presencesInduesDeboutees: 4,
       presencesInduesTotal: 10,
-      tauxPresencesInduesTotal: 10 / 90,
     });
+    // Indispo denominator: CADA + CPH only (100 + 40 places, 10 + 4 indispo)
+    expect(march2025?.tauxIndisponibilite).toBe(0.1);
+    // Presences indues denominator: CAES + CPH only (50 + 40 places)
+    expect(march2025?.tauxPresencesInduesTotal).toBe(0.111);
+  });
+
+  it("aggregates each month independently", () => {
+    const result = computeActiviteStatistiques(
+      [
+        {
+          dnaCode: "DNA01",
+          date: new Date("2025-02-10"),
+          placesAutorisees: 80,
+          placesIndisponibles: 8,
+          presencesInduesBPI: 0,
+          presencesInduesDeboutees: 0,
+        },
+        {
+          dnaCode: "DNA01",
+          date: new Date("2025-03-10"),
+          placesAutorisees: 100,
+          placesIndisponibles: 5,
+          presencesInduesBPI: 0,
+          presencesInduesDeboutees: 0,
+        },
+      ],
+      [{ structureId: 1, dna: { code: "DNA01" } }],
+      [structures[0]]
+    );
+
+    expect(result.byMonth).toHaveLength(2);
+    expect(result.byMonth[0]?.placesIndisponibles).toBe(8);
+    expect(result.byMonth[1]?.placesIndisponibles).toBe(5);
   });
 });
