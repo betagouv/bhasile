@@ -1,5 +1,7 @@
 # `controleQualite`
 
+Structures actives avec typologie (≥1 `StructureTypologie`). Places EIG = somme `placesAutorisees` résolues.
+
 ## Sources
 
 - EIG : `EvenementIndesirableGrave` via `dnaCode`

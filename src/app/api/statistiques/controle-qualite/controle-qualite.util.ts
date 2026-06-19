@@ -307,34 +307,39 @@ export const computeControleQualiteStatistiques = (
   aggregation: NumericAggregation
 ): StatistiqueApiRead["controleQualite"] => {
   const activeStructureIdSet = new Set(activeStructureIds);
+  const evaluationsActives = evaluations.filter(
+    (evaluation) =>
+      evaluation.structureId !== null &&
+      activeStructureIdSet.has(evaluation.structureId)
+  );
 
   return {
     aggregation,
     eig: computeEigSummary(
       eigs,
       totalPlacesAutorisees,
-      evaluations,
+      evaluationsActives,
       activeStructureIdSet,
       aggregation
     ),
     byMonth: computeControleQualiteByMonth(
       activeStructureIds,
       eigs,
-      evaluations,
+      evaluationsActives,
       dnaLinks,
       aggregation
     ),
     byTrimester: computeControleQualiteByTrimester(
       activeStructureIds,
       eigs,
-      evaluations,
+      evaluationsActives,
       dnaLinks,
       aggregation
     ),
     byYear: computeControleQualiteByYear(
       activeStructureIds,
       eigs,
-      evaluations,
+      evaluationsActives,
       dnaLinks,
       aggregation
     ),

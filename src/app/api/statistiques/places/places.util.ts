@@ -12,6 +12,7 @@ import type {
 } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
+  filterStructuresActives,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
@@ -106,19 +107,23 @@ const computePlacesIndicators = (
   adresses: StatistiqueDbAdresse[],
   departements: StatistiqueDbDepartement[]
 ): PlacesIndicators => {
-  const activeStructures = filterStructuresWithTypologie(
-    structures,
+  const structuresActives = filterStructuresActives(structures);
+  const structuresWithTypologie = filterStructuresWithTypologie(
+    structuresActives,
     typologieMap
   );
   const structureIds = new Set(
-    activeStructures.map((structure) => structure.id)
+    structuresWithTypologie.map((structure) => structure.id)
   );
-  const totalPlaces = computeTotalPlaces(activeStructures, typologieMap);
+  const totalPlaces = computeTotalPlaces(structuresWithTypologie, typologieMap);
 
   return {
     totalPlaces,
     ...computeTauxEquipementAgrege(totalPlaces, departements),
-    ...sumStructureTypologiePlacesSpeciales(activeStructures, typologieMap),
+    ...sumStructureTypologiePlacesSpeciales(
+      structuresWithTypologie,
+      typologieMap
+    ),
     ...sumAdressePlacesSpeciales(adresses, structureIds),
   };
 };

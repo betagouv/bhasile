@@ -6,16 +6,16 @@
 
 ## Typologie (`StructureTypologie`)
 
-| Périmètre                              | Règle                                                                       |
-| -------------------------------------- | --------------------------------------------------------------------------- |
-| `totalStructures`                      | Toutes structures filtrées                                                  |
-| `structureTypes[]`, `structureBatis[]` | **Structures actives** uniquement = au moins une ligne `StructureTypologie` |
+| Périmètre                              | Règle                                                            |
+| -------------------------------------- | ---------------------------------------------------------------- |
+| `totalStructures`                      | Structures actives (`filterStructuresActives`)                   |
+| `structureTypes[]`, `structureBatis[]` | Structures actives **avec** typologie (>=1 `StructureTypologie`) |
 
 ## Vue globale
 
 | Champ                | Calcul                                                                                                                                     |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `totalStructures`    | Toutes structures filtrées                                                                                                                 |
+| `totalStructures`    | Structures actives (`filterStructuresActives`)                                                                                             |
 | `totalCpoms`         | CPOM distincts actifs année courante, avec réemploi de `isStructureInCpom`                                                                 |
 | `structuresAvecCpom` | Structures avec ≥1 CPOM actif année courante                                                                                               |
 | `structureTypes[]`   | Par `Structure.type` - structures actives ; places = somme `placesAutorisees` résolues                                                     |
@@ -33,7 +33,7 @@
 
 ## `byYear`
 
-Millésime exact `StructureTypologie`. Structures actives = typologie sur l'année. CPOM : `isStructureInCpom` par année.
+Millésime exact `StructureTypologie`. `totalStructures` = structures actives **avec** typologie sur l'année. CPOM : `isStructureInCpom` par année.
 
 ## Sources
 

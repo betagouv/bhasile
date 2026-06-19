@@ -9,11 +9,18 @@ import type {
 /**
  * Shared stats helpers.
  *
- * TODO(fermeture): exclure les structures fermées du périmètre.
  * TODO(actualisation): exposer updatedAt par bloc quand disponible.
  * TODO(structure-version): résolution `StructureVersion` (effectiveDate <= now).
  */
 
+// -------- Périmètre structures --------
+
+/** Passe-plat. TODO(post-transfo) : exclure les structures avec transfo FERMETURE effective. */
+export const filterStructuresActives = (
+  structures: StatistiqueDbStructure[]
+): StatistiqueDbStructure[] => structures;
+
+// -------- Typologies (millésime) --------
 const GLOBAL_TYPOLOGY_FIELDS = [
   "placesAutorisees",
   "pmr",
@@ -23,8 +30,6 @@ const GLOBAL_TYPOLOGY_FIELDS = [
   StatistiqueDbTypologie,
   "placesAutorisees" | "pmr" | "lgbt" | "fvvTeh"
 >)[];
-
-// -------- Typologies (millésime) --------
 
 /** Dernière valeur non nulle par champ et par structure (agrégat global). */
 export const getLastTypologiePerStructure = (
@@ -108,26 +113,34 @@ export const computeTotalPlaces = (
     )
   ) ?? 0;
 
-export type ActiveStructuresScope = {
-  activeStructures: StatistiqueDbStructure[];
-  activeStructureIds: number[];
+export type StructuresTypologieScope = {
+  structuresActives: StatistiqueDbStructure[];
+  structuresWithTypologie: StatistiqueDbStructure[];
+  structureIdsWithTypologie: number[];
   totalPlacesAutorisees: number;
 };
 
-export const getActiveStructuresScope = (
+export const getStructuresTypologieScope = (
   structures: StatistiqueDbStructure[],
   typologies: StatistiqueDbTypologie[]
-): ActiveStructuresScope => {
+): StructuresTypologieScope => {
+  const structuresActives = filterStructuresActives(structures);
   const typologieMap = getLastTypologiePerStructure(typologies);
-  const activeStructures = filterStructuresWithTypologie(
-    structures,
+  const structuresWithTypologie = filterStructuresWithTypologie(
+    structuresActives,
     typologieMap
   );
 
   return {
-    activeStructures,
-    activeStructureIds: activeStructures.map((structure) => structure.id),
-    totalPlacesAutorisees: computeTotalPlaces(activeStructures, typologieMap),
+    structuresActives,
+    structuresWithTypologie,
+    structureIdsWithTypologie: structuresWithTypologie.map(
+      (structure) => structure.id
+    ),
+    totalPlacesAutorisees: computeTotalPlaces(
+      structuresWithTypologie,
+      typologieMap
+    ),
   };
 };
 
@@ -185,8 +198,7 @@ export const getTwelveMonthCutoffKey = (): string => {
 export const groupByMonthKey = <Item>(
   items: Item[],
   getDate: (item: Item) => Date | null | undefined
-): Map<string, Item[]> =>
-  groupByPeriodKey(items, getDate, getMonthKey);
+): Map<string, Item[]> => groupByPeriodKey(items, getDate, getMonthKey);
 
 export const groupByPeriodKey = <Item>(
   items: Item[],

@@ -4,7 +4,7 @@ Liée à la structure par ses codes DNA liées (`DnaStructure`).
 
 ## TODO
 
-Du coup si les places enregistrées DNA sont remontées pour tous les types de structure, mais les indisponibles pour toutes sauf les CAES et les indues toutes sauf CAES et CPH, est-ce qu'on ne va pas fausser les seuils en agrégeant (si mais que faire)
+Les dénominateurs de taux diffèrent selon les scopes (toutes structures vs hors CAES vs hors CAES+CPH) alors que `placesEnregistreesDna` agrège tout : à garder en tête pour l'interprétation des seuils agrégés.
 
 ## Scopes
 

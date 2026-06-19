@@ -8,7 +8,7 @@ Les éléments suivants seront à rebrancher post MEP du chantier amenant la not
 
 | ID                          | Sujet                                                                                                                                                                          |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **TODO(fermeture)**         | Exclure structures fermées effectivement.                                                                                                                                      |
+| **TODO(fermeture)**         | `filterStructuresActives` : exclure structures avec transfo FERMETURE effective (date de référence selon contexte : globale, `byYear`, `byMonth`…).                            |
 | **TODO(actualisation)**     | `updatedAt` par bloc (sans doute implémentable après le chantier "formulaire d'actualisation").                                                                                |
 | **TODO(structure-version)** | Pivot `shared/` : dernière `StructureVersion` effective (`effectiveDate` ≤ aujourd'hui), plus `Structure.type` / `departementAdministratif` directs. Chantier transformations. |
 
@@ -54,7 +54,11 @@ GET /api/statistiques?departements=01,02,03&types=CADA,CPH&operateurs=1,2
 
 ## Périmètre
 
-Le périmètre de base vient filtrer sur les structures qui matchent le filtre `buildStructureWhere` qui sera à mettre à jour post chantier de Transfo.
+Filtre structures via `buildStructureWhere` (à rebaser sur `StructureVersion` post transfo).
+
+**Structures actives** : `filterStructuresActives` - passe-plat ; à implémenter post transfo (FERMETURE).
+
+**Avec typologie** (≥1 `StructureTypologie`) : requis pour agrégats places, répartitions type/bâti, contrôle qualité. `structures.totalStructures` = structures actives (avec ou sans typologie).
 
 ## `aggregation`
 
@@ -73,9 +77,9 @@ Utile dans `finance.aggregation` et `controleQualite.aggregation`.
 
 ## Typologie - dernière valeur non nulle
 
-Sur les blocs structures et places, l'encart "global" retourne pour chaque champ la première valeur non `null` du millésime le plus récent au plus ancien. Il ne s'agit donc pas d'un "snapshot du premier millésime complet" mais du "meilleur estimatif agrégé des structures non fermées".
+Sur les blocs structures et places, l'encart global retourne pour chaque champ la première valeur non `null` du millésime le plus récent au plus ancien (par structure). Ce n'est pas un snapshot d'un millésime complet mais un estimatif champ par champ.
 
-Pour tous les `byYear` ou autres agrgéations par date en revanche, on retourne le millésime exact.
+Pour tous les `byYear` ou autres agrégations par date : millésime exact.
 
 ## Séries temporelles
 
