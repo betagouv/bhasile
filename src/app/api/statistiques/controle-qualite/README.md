@@ -32,8 +32,10 @@ Helper partagé : `isEigComportementViolent` (`src/app/utils/eig.util.ts`).
 | `tauxEig` | `nbEig / places autorisées` (ratio) |
 | `nbEig` | Nombre d’EIG sur la période |
 | `nbEigComportementViolent` | Parmi ces EIG, ceux dont le `type` correspond au motif violent |
+| `tauxEigComportementViolent` | `nbEigComportementViolent / nbEig` sur la même période |
+| `moyenneEvaluationsCurrentYear` | Moyenne ou médiane des `note` des évaluations de `CURRENT_YEAR` (selon `aggregation`) |
 
-Fenêtre : mois courant inclus, 12 mois en arrière (clé `YYYY-MM`).
+Fenêtre EIG : mois courant inclus, 12 mois en arrière (clé `YYYY-MM`).
 
 ## Séries `byMonth`
 
@@ -63,7 +65,7 @@ Paramètre URL `?aggregation=` (partagé avec finance) :
 | `moyenne` (défaut) | Moyenne arithmétique |
 | `mediane` | Médiane |
 
-S’applique aux champs `note*` de `byMonth`. Exposé dans `controleQualite.aggregation`.
+S’applique aux champs `note*` de `byMonth` et à `eig.moyenneEvaluationsCurrentYear`. Exposé dans `controleQualite.aggregation`.
 
 ## Paramètres API
 

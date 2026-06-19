@@ -1,3 +1,4 @@
+import { CURRENT_YEAR } from "@/constants";
 import { isEigComportementViolent } from "@/app/utils/eig.util";
 import { toStatNumber, toStatRate } from "@/app/utils/statistiques-format.util";
 import {
@@ -67,9 +68,25 @@ const countEigs = (
   };
 };
 
+const filterEvaluationsForYear = (
+  evaluations: StatistiqueDbEvaluation[],
+  activeStructureIds: Set<number>,
+  year: number
+): StatistiqueDbEvaluation[] =>
+  evaluations.filter(
+    (evaluation) =>
+      evaluation.structureId !== null &&
+      activeStructureIds.has(evaluation.structureId) &&
+      evaluation.date !== null &&
+      new Date(evaluation.date).getFullYear() === year
+  );
+
 const computeEigSummary = (
   eigs: StatistiqueDbEig[],
-  totalPlacesAutorisees: number
+  totalPlacesAutorisees: number,
+  evaluations: StatistiqueDbEvaluation[],
+  activeStructureIds: Set<number>,
+  aggregation: NumericAggregation
 ): EigStat => {
   const cutoff = getTwelveMonthCutoffKey();
   const recentEigs = eigs.filter(
@@ -77,6 +94,11 @@ const computeEigSummary = (
       eig.evenementDate && getMonthKey(new Date(eig.evenementDate)) >= cutoff
   );
   const { nbEig, nbEigComportementViolent } = countEigs(recentEigs);
+  const evaluationsCurrentYear = filterEvaluationsForYear(
+    evaluations,
+    activeStructureIds,
+    CURRENT_YEAR
+  );
 
   return {
     tauxEig: toStatRate(
@@ -84,6 +106,15 @@ const computeEigSummary = (
     ),
     nbEig,
     nbEigComportementViolent,
+    tauxEigComportementViolent: toStatRate(
+      ratio(nbEigComportementViolent, nbEig)
+    ),
+    moyenneEvaluationsCurrentYear: toStatNumber(
+      aggregateValues(
+        evaluationsCurrentYear.map((evaluation) => evaluation.note),
+        aggregation
+      )
+    ),
   };
 };
 
@@ -183,7 +214,13 @@ export const computeControleQualiteStatistiques = (
   aggregation: NumericAggregation
 ): StatistiqueApiRead["controleQualite"] => ({
   aggregation,
-  eig: computeEigSummary(eigs, totalPlacesAutorisees),
+  eig: computeEigSummary(
+    eigs,
+    totalPlacesAutorisees,
+    evaluations,
+    new Set(activeStructureIds),
+    aggregation
+  ),
   byMonth: computeControleQualiteByMonth(
     activeStructureIds,
     eigs,

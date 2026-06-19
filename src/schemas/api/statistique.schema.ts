@@ -78,6 +78,8 @@ export type EigStat = {
   tauxEig: number | null;
   nbEig: number;
   nbEigComportementViolent: number;
+  tauxEigComportementViolent: number | null;
+  moyenneEvaluationsCurrentYear: number | null;
 };
 
 export type ControleQualiteByMonthStat = {
@@ -159,6 +161,8 @@ const eigStatSchema = z.object({
   tauxEig: z.number().nullable(),
   nbEig: z.number(),
   nbEigComportementViolent: z.number(),
+  tauxEigComportementViolent: z.number().nullable(),
+  moyenneEvaluationsCurrentYear: z.number().nullable(),
 });
 
 const controleQualiteByMonthStatSchema = z.object({
