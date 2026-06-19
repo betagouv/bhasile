@@ -1,12 +1,10 @@
 # `controleQualite`
 
-Structures **actives**. Places EIG = somme `placesAutorisees` résolues.
-
 ## Sources
 
 - EIG : `EvenementIndesirableGrave` via `dnaCode`
 - Évaluations : `Evaluation` par `structureId`
-- Violent : `/comportement\s+violent/i` (`isEigComportementViolent`)
+- Violent : sous-chaîne `comportement violent` (insensible à la casse, espaces normalisés) — `isEigComportementViolent`
 
 ## Vue globale `eig` (12 mois glissants)
 

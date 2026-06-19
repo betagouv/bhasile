@@ -10,6 +10,16 @@ describe("eig util", () => {
       expect(isEigComportementViolent("Agression - comportement violent")).toBe(
         true
       );
+      expect(
+        isEigComportementViolent(
+          "10. Comportement violent de la part des usagers envers d'autres usagers ou envers du personnel, au sein de la structure, ainsi que manquement grave au règlement de fonctionnement"
+        )
+      ).toBe(true);
+      expect(
+        isEigComportementViolent(
+          "10. COMPORTEMENT VIOLENT de la part des usagers"
+        )
+      ).toBe(true);
     });
 
     it("should not match other motifs", () => {
