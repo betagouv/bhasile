@@ -35,6 +35,7 @@ describe("structures statistics util", () => {
           id: 10,
           structureId: 1,
           repartition: Repartition.COLLECTIF,
+          placesAutorisees: 100,
           qpv: 0,
           logementSocial: 0,
         },
@@ -42,6 +43,7 @@ describe("structures statistics util", () => {
           id: 11,
           structureId: 2,
           repartition: Repartition.DIFFUS,
+          placesAutorisees: 0,
           qpv: 0,
           logementSocial: 0,
         },
@@ -69,6 +71,57 @@ describe("structures statistics util", () => {
       bati: Repartition.DIFFUS,
       structures: 0,
       places: 0,
+    });
+  });
+
+  it("splits bati places per address repartition even when structure is mixte", () => {
+    const result = computeStructuresStatistiques(
+      [{ id: 1, type: StructureType.CADA, departementAdministratif: "75" }],
+      [
+        {
+          structureId: 1,
+          year: 2024,
+          placesAutorisees: 100,
+          pmr: 0,
+          lgbt: 0,
+          fvvTeh: 0,
+        },
+      ],
+      [
+        {
+          id: 10,
+          structureId: 1,
+          repartition: Repartition.COLLECTIF,
+          placesAutorisees: 60,
+          qpv: 0,
+          logementSocial: 0,
+        },
+        {
+          id: 11,
+          structureId: 1,
+          repartition: Repartition.DIFFUS,
+          placesAutorisees: 40,
+          qpv: 0,
+          logementSocial: 0,
+        },
+      ],
+      []
+    );
+
+    expect(result.structureBatis).toContainEqual({
+      bati: Repartition.MIXTE,
+      structures: 1,
+      places: 0,
+    });
+    expect(result.structureBatis).toContainEqual({
+      bati: Repartition.COLLECTIF,
+      structures: 0,
+      places: 60,
+    });
+    expect(result.structureBatis).toContainEqual({
+      bati: Repartition.DIFFUS,
+      structures: 0,
+      places: 40,
     });
   });
 

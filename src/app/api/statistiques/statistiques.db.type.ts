@@ -24,6 +24,7 @@ export type StatistiqueDbAdresse = Prisma.AdresseGetPayload<{
     id: true;
     structureId: true;
     repartition: true;
+    placesAutorisees: true;
     qpv: true;
     logementSocial: true;
   };

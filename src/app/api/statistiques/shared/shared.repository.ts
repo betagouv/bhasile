@@ -62,6 +62,7 @@ export const findStructureAdresses = async (
       id: true,
       structureId: true,
       repartition: true,
+      placesAutorisees: true,
       qpv: true,
       logementSocial: true,
     },

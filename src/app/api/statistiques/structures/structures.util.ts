@@ -45,6 +45,43 @@ const getRepartitionFromRepartitions = (
   return Repartition.COLLECTIF;
 };
 
+const countStructuresPerBati = (
+  structures: StatistiqueDbStructure[],
+  batiMap: Map<number, Repartition>
+): Map<Repartition, number> => {
+  const countsByBati = new Map<Repartition, number>();
+
+  for (const structure of structures) {
+    const bati = batiMap.get(structure.id) ?? Repartition.COLLECTIF;
+    countsByBati.set(bati, (countsByBati.get(bati) ?? 0) + 1);
+  }
+
+  return countsByBati;
+};
+
+const sumPlacesPerBati = (
+  adresses: StatistiqueDbAdresse[],
+  activeStructureIds: Set<number>
+): Map<Repartition, number> => {
+  const placesByBati = new Map<Repartition, number>();
+
+  for (const adresse of adresses) {
+    if (
+      adresse.structureId === null ||
+      !activeStructureIds.has(adresse.structureId)
+    ) {
+      continue;
+    }
+
+    const bati = adresse.repartition ?? Repartition.COLLECTIF;
+    const places = adresse.placesAutorisees ?? 0;
+
+    placesByBati.set(bati, (placesByBati.get(bati) ?? 0) + places);
+  }
+
+  return placesByBati;
+};
+
 const getBatiPerStructure = (
   adresses: StatistiqueDbAdresse[]
 ): Map<number, Repartition> => {
@@ -205,17 +242,20 @@ const computeTypeStats = (
 const computeBatiStats = (
   structures: StatistiqueDbStructure[],
   batiMap: Map<number, Repartition>,
-  typologieMap: Map<number, StatistiqueDbTypologie>
-): BatiStat[] =>
-  fillBatis(
-    Array.from(
-      aggregateByKey(
-        structures,
-        typologieMap,
-        (structure) => batiMap.get(structure.id) ?? Repartition.COLLECTIF
-      ).entries()
-    ).map(([bati, batiStats]) => ({ bati, ...batiStats }))
+  adresses: StatistiqueDbAdresse[]
+): BatiStat[] => {
+  const activeStructureIds = new Set(structures.map((structure) => structure.id));
+  const structuresByBati = countStructuresPerBati(structures, batiMap);
+  const placesByBati = sumPlacesPerBati(adresses, activeStructureIds);
+
+  return fillBatis(
+    REPARTITION_DISPLAY_ORDER.map((bati) => ({
+      bati,
+      structures: structuresByBati.get(bati) ?? 0,
+      places: placesByBati.get(bati) ?? 0,
+    }))
   );
+};
 
 const countStructuresByType = (
   structures: StatistiqueDbStructure[],
@@ -312,7 +352,7 @@ export const computeStructuresStatistiques = (
       CURRENT_YEAR
     ),
     structureTypes: computeTypeStats(activeStructures, typologieMap),
-    structureBatis: computeBatiStats(activeStructures, batiMap, typologieMap),
+    structureBatis: computeBatiStats(activeStructures, batiMap, adresses),
     byYear: computeByYearStats(structures, typologies, batiMap, cpomLinks),
   };
 };
