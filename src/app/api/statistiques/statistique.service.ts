@@ -13,10 +13,12 @@ import { parseNumericAggregation } from "./shared/shared.utils";
 
 export const getStatistiques = async (
   filters: StatistiquesFiltersRaw
-): Promise<StatistiqueApiRead> => {
-  // TODO: exposer meta.updatedAt par bloc (campagne actualisation, OFII, instant T)
-  // TODO: add RMU
+): Promise<StatistiqueApiRead | null> => {
   const context = await buildStatistiquesContext(filters);
+  if (!context) {
+    return null;
+  }
+
   const aggregation = parseNumericAggregation(filters.aggregation);
 
   const [structures, places, finance, controleQualite, activite] =

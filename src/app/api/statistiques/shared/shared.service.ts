@@ -21,7 +21,6 @@ import {
   findStructuresWithTypes,
   findStructureTypologies,
 } from "./shared.repository";
-import { StatistiquesPerimetreVideError } from "./shared.utils";
 
 export type StatistiquesContext = {
   structureIds: number[];
@@ -69,12 +68,12 @@ const buildStructureWhere = async (
 
 export const buildStatistiquesContext = async (
   filters: StatistiquesFiltersRaw
-): Promise<StatistiquesContext> => {
+): Promise<StatistiquesContext | null> => {
   const where = await buildStructureWhere(filters);
   const structureIds = await findStructureIds(where);
 
   if (structureIds.length === 0) {
-    throw new StatistiquesPerimetreVideError();
+    return null;
   }
 
   const [

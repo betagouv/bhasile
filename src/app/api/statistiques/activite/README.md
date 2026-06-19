@@ -1,48 +1,27 @@
-# Statistiques — onglet Activité
+# `activite`
 
-Hypothèses de calcul pour l’API `GET /api/statistiques` (bloc `activite`).
+Périmètre : [README parent](../README.md). `Activite` via `dnaCode` → `DnaStructure`.
 
-## Périmètre
+## Scopes
 
-- Même périmètre de structures que les autres onglets (filtres URL `departements`, `operateurs`, `types`).
-- Données `Activite` liées au périmètre via `dnaCode` → `DnaStructure`.
-- **TODO(fermeture)** : exclusion des structures fermées (pas encore implémentée).
-- **TODO(actualisation)** : `updatedAt` quand les formulaires d’actualisation seront disponibles.
+| Indicateur | Structures |
+|------------|------------|
+| `placesEnregistreesDna` | Toutes |
+| Indisponibilités | Toutes sauf CAES |
+| Présences indues | CAES + CPH |
 
-## Données sources
+`dnaCode` dans scope si ≥1 structure liée a le bon type.
 
-- Table `Activite` (OFII / Démarches Numériques), une ligne par `dnaCode` et par mois (`date`).
-
-## Scopes par indicateur
-
-| Indicateur | Structures incluses |
-|------------|---------------------|
-| `placesEnregistreesDna` | Toutes les structures du périmètre |
-| Indisponibilités | Toutes **sauf CAES** (CADA, CPH, HUDA) |
-| Présences indues (BPI, déboutées, total) | **CAES et CPH** uniquement |
-
-Un `dnaCode` est rattaché au scope si au moins une structure liée du périmètre correspond au type attendu.
-
-## Séries `byMonth`
-
-Une entrée par mois présent dans les activités du périmètre. Le choix du mois affiché se fait côté front.
+## `byMonth`
 
 | Champ | Calcul |
 |-------|--------|
-| `placesEnregistreesDna` | Somme des `placesAutorisees` (toutes structures) |
-| `placesIndisponibles` | Somme des `placesIndisponibles` (hors CAES) |
-| `tauxIndisponibilite` | `placesIndisponibles / placesAutorisees` du scope indispo |
-| `presencesInduesBPI` | Somme des `presencesInduesBPI` (CAES + CPH) |
-| `tauxPresencesInduesBPI` | `presencesInduesBPI / placesAutorisees` du scope présences indues |
-| `presencesInduesDeboutees` | Somme des `presencesInduesDeboutees` (CAES + CPH) |
-| `tauxPresencesInduesDeboutees` | `presencesInduesDeboutees / placesAutorisees` du scope présences indues |
-| `presencesInduesTotal` | `presencesInduesBPI + presencesInduesDeboutees` |
-| `tauxPresencesInduesTotal` | `presencesInduesTotal / placesAutorisees` du scope présences indues |
+| `placesEnregistreesDna` | Somme `placesAutorisees` |
+| `placesIndisponibles`, `tauxIndisponibilite` | Scope hors CAES |
+| `presencesIndues*`, `tauxPresencesIndues*` | Scope CAES+CPH ; `Total` = BPI + déboutées |
 
-Les taux sont des ratios (0–1), `null` si le dénominateur est nul.
+Taux = ratio 0–1, `null` si dénominateur nul.
 
-## Paramètres API
+## Source
 
-```
-GET /api/statistiques?departements=75
-```
+`Activite` — 1 ligne / `dnaCode` / mois.

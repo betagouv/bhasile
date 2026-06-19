@@ -222,10 +222,3 @@ export const parseNumericAggregation = (
   aggregationParam: string | null
 ): NumericAggregation =>
   aggregationParam === "mediane" ? "mediane" : "moyenne";
-
-export class StatistiquesPerimetreVideError extends Error {
-  constructor() {
-    super("Aucune structure ne correspond aux filtres sélectionnés.");
-    this.name = "StatistiquesPerimetreVideError";
-  }
-}

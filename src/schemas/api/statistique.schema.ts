@@ -259,3 +259,4 @@ export const statistiqueApiReadSchema = z.object({
 });
 
 export type StatistiqueApiRead = z.infer<typeof statistiqueApiReadSchema>;
+export type StatistiqueApiResponse = StatistiqueApiRead | null;
