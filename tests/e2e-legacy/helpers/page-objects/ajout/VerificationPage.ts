@@ -4,6 +4,7 @@ import { expect } from "@playwright/test";
 import { formatCityName } from "@/app/utils/adresse.util";
 import { formatDate } from "@/app/utils/date.util";
 import { formatPhoneNumber } from "@/app/utils/phone.util";
+import { isStructureAutorisee } from "@/app/utils/structure.util";
 
 import { URLS } from "../../constants";
 import { ElementNotFoundError } from "../../error-handler";
@@ -87,13 +88,15 @@ export class VerificationPage extends BasePage {
         await expect(section).toContainText(dna.description);
       }
     }
-    for (const finess of data.finesses ?? []) {
-      if (!finess.code) {
-        continue;
-      }
-      await expect(section).toContainText(finess.code);
-      if ((data.finesses?.length ?? 0) > 1 && finess.description) {
-        await expect(section).toContainText(finess.description);
+    if (isStructureAutorisee(data.type)) {
+      for (const finess of data.finesses ?? []) {
+        if (!finess.code) {
+          continue;
+        }
+        await expect(section).toContainText(finess.code);
+        if ((data.finesses?.length ?? 0) > 1 && finess.description) {
+          await expect(section).toContainText(finess.description);
+        }
       }
     }
 

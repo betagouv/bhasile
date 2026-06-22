@@ -101,8 +101,8 @@ export class IdentificationPage extends BasePage {
             );
           }
           if (finess.description) {
-            await this.formHelper.fillInputIfExists(
-              `input[name="structureFinesses.${i}.finess.description"]`,
+            await this.formHelper.fillInput(
+              `input[name="structureFinesses.${i}.description"]`,
               finess.description
             );
           }
