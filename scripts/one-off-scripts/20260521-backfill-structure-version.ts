@@ -38,6 +38,9 @@ async function main() {
 
   const structures = await prisma.structure.findMany({});
 
+  let createdVersionsCount = 0;
+  let updatedVersionsCount = 0;
+
   for (const structure of structures) {
     const versionData = initialVersionData(structure);
 
@@ -59,6 +62,7 @@ async function main() {
         where: { id: existing.id },
         data: { ...versionData, campaignId },
       });
+      updatedVersionsCount += 1;
     } else {
       const campaign = await prisma.campaign.create({
         data: { name: "initialisation" },
@@ -66,6 +70,7 @@ async function main() {
       version = await prisma.structureVersion.create({
         data: { ...versionData, campaignId: campaign.id },
       });
+      createdVersionsCount += 1;
     }
 
     const link = { structureId: structure.id, structureVersionId: null };
@@ -96,7 +101,9 @@ async function main() {
     });
   }
 
-  console.log("✅ StructureVersion backfilled, début des adresses");
+  console.log(
+    `✅ StructureVersions : ${createdVersionsCount} créées, ${updatedVersionsCount} mises à jour (${structures.length} structures). Début des adresses…`
+  );
 
   const adresses = await prisma.adresse.findMany({
     include: {
