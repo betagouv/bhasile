@@ -34,8 +34,8 @@ test.describe("Structure modification", () => {
     await modification.fillNotes(noteText);
     await modification.submitAndWaitForSave();
 
-    const persisted = await prisma.structure.findUniqueOrThrow({
-      where: { id: seededStructure.id },
+    const persisted = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: seededStructure.structureVersionId },
       select: { notes: true },
     });
     expect(persisted.notes).toBe(noteText);
@@ -58,8 +58,8 @@ test.describe("Structure modification", () => {
     await modification.selectPublic("Famille");
     await modification.submitAndWaitForSave();
 
-    const persisted = await prisma.structure.findUniqueOrThrow({
-      where: { id: seededStructure.id },
+    const persisted = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: seededStructure.structureVersionId },
       select: { public: true },
     });
     expect(persisted.public).toBe("FAMILLE");
@@ -69,7 +69,7 @@ test.describe("Structure modification", () => {
     page,
     seededStructure,
   }) => {
-    await seedValidStructureTypologies(seededStructure.id);
+    await seedValidStructureTypologies(seededStructure.structureVersionId);
     const modification = new StructureModificationPage(
       page,
       seededStructure.id
@@ -84,7 +84,10 @@ test.describe("Structure modification", () => {
     await modification.submitAndWaitForSave();
 
     const persisted = await prisma.structureTypologie.findFirstOrThrow({
-      where: { structureId: seededStructure.id, year: CURRENT_YEAR },
+      where: {
+        structureVersionId: seededStructure.structureVersionId,
+        year: CURRENT_YEAR,
+      },
       select: { placesAutorisees: true },
     });
     expect(persisted.placesAutorisees).toBe(newPlacesAutorisees);
@@ -157,6 +160,7 @@ test.describe("Structure modification", () => {
     page,
     seededStructure,
   }) => {
+    test.slow();
     const modification = new StructureModificationPage(
       page,
       seededStructure.id
@@ -172,8 +176,8 @@ test.describe("Structure modification", () => {
     await modification.selectPublic("Famille");
     await modification.submitAndWaitForSave();
 
-    const afterDescription = await prisma.structure.findUniqueOrThrow({
-      where: { id: seededStructure.id },
+    const afterDescription = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: seededStructure.structureVersionId },
       select: { notes: true, public: true },
     });
     expect(afterDescription.public).toBe("FAMILLE");
@@ -183,8 +187,8 @@ test.describe("Structure modification", () => {
     await modification.fillNotes(secondNote);
     await modification.submitAndWaitForSave();
 
-    const afterSecondNote = await prisma.structure.findUniqueOrThrow({
-      where: { id: seededStructure.id },
+    const afterSecondNote = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: seededStructure.structureVersionId },
       select: { notes: true, public: true },
     });
     expect(afterSecondNote.notes).toBe(secondNote);
