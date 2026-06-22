@@ -7,7 +7,10 @@ import {
   findOne,
   updateOne,
 } from "@/app/api/transformations/transformation.repository";
-import { createTransformation } from "@/app/api/transformations/transformation.service";
+import {
+  createTransformation,
+  getTransformation,
+} from "@/app/api/transformations/transformation.service";
 import { getNormalizedRegionCodeFromDepartement } from "@/app/utils/bhasile.util";
 import prisma from "@/lib/prisma";
 import { Repartition } from "@/types/adresse.type";
@@ -1300,5 +1303,80 @@ describe("transformation.repository db integration", () => {
       where: { operateurId: operateur.id },
     });
     expect(structureCountForOperateur).toBe(1);
+  });
+
+  // --- Lecture transfo : la source résolue = le prédécesseur de la transfo ---
+
+  const createStructureWithInitVersion = async (
+    effectiveDate: string,
+    versionData: Record<string, unknown> = {}
+  ) => {
+    const structure = await createStructure();
+    const version = await prisma.structureVersion.create({
+      data: {
+        structureId: structure.id,
+        effectiveDate: new Date(effectiveDate),
+        ...versionData,
+      },
+    });
+    return { structure, version };
+  };
+
+  const createExtensionTransfo = async (
+    structureId: number,
+    effectiveDate: string
+  ) => {
+    const transformationId = await createOne({
+      type: TransformationType.EXTENSION_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: { structureId, effectiveDate },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+    return transformationId;
+  };
+
+  it("should resolve the predecessor (init) onto structureVersion.structure when the transfo is dated after it", async () => {
+    const { structure, version } = await createStructureWithInitVersion(
+      "2024-01-01T12:00:00.000Z",
+      { nom: "Nom de la version source" }
+    );
+    await prisma.structureTypologie.create({
+      data: { structureVersionId: version.id, year: 2024, placesAutorisees: 30 },
+    });
+
+    const transformationId = await createExtensionTransfo(
+      structure.id,
+      "2024-06-01T12:00:00.000Z"
+    );
+
+    const transformation = await getTransformation(transformationId);
+    const sourceStructure =
+      transformation?.structureVersionTransformations[0].structureVersion
+        ?.structure;
+    expect(sourceStructure?.nom).toBe("Nom de la version source");
+    expect(sourceStructure?.structureTypologies?.[0]?.placesAutorisees).toBe(30);
+  });
+
+  it("should resolve no predecessor when the transfo is dated before the init version", async () => {
+    const { structure } = await createStructureWithInitVersion(
+      "2024-09-01T12:00:00.000Z",
+      { nom: "Nom de la version source" }
+    );
+
+    const transformationId = await createExtensionTransfo(
+      structure.id,
+      "2024-03-01T12:00:00.000Z"
+    );
+
+    const transformation = await getTransformation(transformationId);
+    const sourceStructure =
+      transformation?.structureVersionTransformations[0].structureVersion
+        ?.structure;
+    expect(sourceStructure?.nom ?? null).toBeNull();
+    expect(sourceStructure?.structureTypologies ?? []).toHaveLength(0);
   });
 });

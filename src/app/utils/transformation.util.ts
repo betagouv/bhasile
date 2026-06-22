@@ -385,11 +385,11 @@ const resolveSourceTypologie = <T extends { year: number }>(
 
 export const getPlacesSource = (
   structureVersionTransformation: StructureVersionTransformationApiRead
-): number => {
+): number | undefined => {
   const structureVersion = structureVersionTransformation.structureVersion;
   const typologies = structureVersion?.structure?.structureTypologies;
   const year = getEffectiveYear(structureVersion?.effectiveDate);
-  return resolveSourceTypologie(typologies, year)?.placesAutorisees ?? 0;
+  return resolveSourceTypologie(typologies, year)?.placesAutorisees ?? undefined;
 };
 
 export const buildTransformationTypologie = (

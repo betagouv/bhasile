@@ -124,7 +124,7 @@ describe("ExistingStructureFlow", () => {
         screen.queryByTestId("identification-form")
       ).not.toBeInTheDocument();
       expect(captured.placesFormKind).toBe(FormKind.CONTRACTION);
-      expect(captured.originalPlaces).toBe(0);
+      expect(captured.originalPlaces).toBeUndefined();
     });
 
     it("rend le form actes administratifs sur l'étape ACTES_ADMINISTRATIFS", () => {

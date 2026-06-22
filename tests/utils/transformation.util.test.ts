@@ -1009,14 +1009,14 @@ describe("transformation util", () => {
       expect(getPlacesSource(structureVersionTransformation)).toBe(47);
     });
 
-    it("retourne 0 quand la structure source n'a pas de typologie", () => {
+    it("retourne undefined quand la structure source n'a pas de typologie", () => {
       const structureVersionTransformation: StructureVersionTransformationApiRead =
         {
           id: 1,
           type: StructureVersionTransformationType.EXTENSION,
         };
 
-      expect(getPlacesSource(structureVersionTransformation)).toBe(0);
+      expect(getPlacesSource(structureVersionTransformation)).toBeUndefined();
     });
   });
 
