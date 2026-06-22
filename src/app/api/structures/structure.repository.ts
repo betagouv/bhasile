@@ -108,7 +108,10 @@ export const getLatestPlacesAutoriseesPerStructure = async (
 
   return rows
     .map((row) => row.placesAutorisees)
-    .filter((placesAutorisees): placesAutorisees is number => placesAutorisees !== null);
+    .filter(
+      (placesAutorisees): placesAutorisees is number =>
+        placesAutorisees !== null
+    );
 };
 
 export const findOneOperateur = async (
@@ -330,7 +333,7 @@ export const createMinimalStructureVersion = async (
     where: { structureId, structureVersionTransformationId: null },
   });
 
-  await prisma.structureVersion.create({
+  const createdVersion = await prisma.structureVersion.create({
     data: {
       structureId,
       effectiveDate: version.effectiveDate ?? new Date("2020-01-01"),
@@ -341,6 +344,11 @@ export const createMinimalStructureVersion = async (
       adresseAdministrative: version.adresseAdministrative,
       nom: version.nom,
     },
+  });
+
+  await prisma.dnaStructure.updateMany({
+    where: { structureId, structureVersionId: null },
+    data: { structureVersionId: createdVersion.id },
   });
 };
 
