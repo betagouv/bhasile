@@ -305,7 +305,9 @@ describe("TransformationSteps", () => {
             structureId: 1002,
             structure: { codeBhasile: "1002" },
           },
-          form: createTransformationForm({ validatedSlugs: ["01-identification"] }),
+          form: createTransformationForm({
+            validatedSlugs: ["01-identification"],
+          }),
         },
       ],
     });

@@ -7,12 +7,11 @@ import {
   recursivelySerializeDates,
 } from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
-import { Prisma, PublicType } from "@/generated/prisma/client";
+import { PublicType } from "@/generated/prisma/client";
 import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
-import { StructureColumn } from "@/types/ListColumn";
 
 import { StructureVersionDbTransformation } from "../structure-versions/structure-version.db.type";
 import { StructureDbDetails, StructureDbList } from "./structure.db.type";
@@ -68,141 +67,6 @@ export const getAdresseAdministrativeCoordinates = async (
     latitude: coordinates.latitude?.toString(),
     longitude: coordinates.longitude?.toString(),
   };
-};
-
-type StructureQueryFilters = {
-  search: string | null;
-  type: string | null;
-  bati: string | null;
-  placesAutorisees: string | null;
-  departements: string | null;
-  operateurs: string | null;
-  selection?: boolean;
-  finalised?: boolean;
-};
-
-export const buildStructuresOrderSql = (
-  column: StructureColumn,
-  direction: "asc" | "desc"
-): Prisma.Sql => {
-  const dir = direction === "desc" ? Prisma.sql`DESC` : Prisma.sql`ASC`;
-  const byColumn: Record<StructureColumn, Prisma.Sql> = {
-    codeBhasile: Prisma.sql`s."codeBhasile"`,
-    type: Prisma.sql`sv."type"`,
-    operateur: Prisma.sql`o."name"`,
-    departementAdministratif: Prisma.sql`sv."departementAdministratif"`,
-    bati: Prisma.sql`sr.bati`,
-    communes: Prisma.sql`sv."communeAdministrative"`,
-    placesAutorisees: Prisma.sql`st."placesAutorisees"`,
-    finConvention: Prisma.sql`s."finConvention"`,
-  };
-  return Prisma.sql`${byColumn[column]} ${dir}, s."codeBhasile" ASC`;
-};
-
-export const buildStructuresWhereSql = ({
-  search,
-  type,
-  bati,
-  departements,
-  placesAutorisees,
-  operateurs,
-  selection,
-  finalised,
-}: StructureQueryFilters): Prisma.Sql => {
-  const conditions: Prisma.Sql[] = [];
-  const typeList = type?.split(",").filter(Boolean) ?? [];
-  const depList = departements?.split(",").filter(Boolean) ?? [];
-  const opList = operateurs?.split(",").filter(Boolean) ?? [];
-
-  if (!selection) {
-    conditions.push(
-      Prisma.sql`EXISTS (SELECT 1 FROM public."Form" f WHERE f."structureId" = s.id)`
-    );
-  }
-  if (finalised) {
-    conditions.push(
-      Prisma.sql`EXISTS (
-        SELECT 1
-        FROM public."Form" f
-        JOIN public."FormDefinition" fd ON fd.id = f."formDefinitionId"
-        WHERE f."structureId" = s.id
-          AND fd."slug" = 'finalisation-v1'
-          AND f."status" = true
-      )`
-    );
-  }
-  if (typeList.length > 0) {
-    conditions.push(Prisma.sql`sv."type"::text IN (${Prisma.join(typeList)})`);
-  }
-  if (depList.length > 0) {
-    conditions.push(
-      Prisma.sql`sv."departementAdministratif" IN (${Prisma.join(depList)})`
-    );
-  }
-  if (opList.length > 0) {
-    conditions.push(Prisma.sql`o."name" IN (${Prisma.join(opList)})`);
-  }
-  if (placesAutorisees) {
-    const [minStr, maxStr] = placesAutorisees.split(",");
-    const min = minStr ? parseInt(minStr, 10) : null;
-    const max = maxStr ? parseInt(maxStr, 10) : null;
-    if (
-      min !== null &&
-      max !== null &&
-      !Number.isNaN(min) &&
-      !Number.isNaN(max)
-    ) {
-      conditions.push(
-        Prisma.sql`st."placesAutorisees" >= ${min} AND st."placesAutorisees" <= ${max}`
-      );
-    }
-  }
-
-  if (search) {
-    const like = `%${search}%`;
-    conditions.push(Prisma.sql`(
-      s."codeBhasile" ILIKE ${like}
-      OR EXISTS (
-        SELECT 1
-        FROM public."DnaStructure" ds
-        JOIN public."Dna" d ON d.id = ds."dnaId"
-        WHERE ds."structureVersionId" = sv.id
-          AND d.code ILIKE ${like}
-      )
-      OR EXISTS (
-        SELECT 1
-        FROM public."StructureFiness" sf
-        JOIN public."Finess" f ON f.id = sf."finessId"
-        WHERE sf."structureVersionId" = sv.id
-          AND COALESCE(f."code", '') ILIKE ${like}
-      )
-      OR COALESCE(sv."nom", '') ILIKE ${like}
-      OR sv."departementAdministratif" ILIKE ${like}
-      OR sv."communeAdministrative" ILIKE ${like}
-      OR sv."codePostalAdministratif" ILIKE ${like}
-      OR COALESCE(o."name", '') ILIKE ${like}
-    )`);
-  }
-  if (bati) {
-    const batiList = bati
-      .split(",")
-      .filter(Boolean)
-      .map((value) => value.toUpperCase());
-    if (batiList.length > 0) {
-      conditions.push(
-        Prisma.sql`UPPER(COALESCE(sr.bati, '')) IN (${Prisma.join(batiList)})`
-      );
-    }
-  }
-
-  if (conditions.length === 0) {
-    return Prisma.sql``;
-  }
-  let combined = conditions[0];
-  for (let i = 1; i < conditions.length; i += 1) {
-    combined = Prisma.sql`${combined} AND ${conditions[i]}`;
-  }
-  return Prisma.sql`WHERE ${combined}`;
 };
 
 export const getTypeBati = (

@@ -1,3 +1,13 @@
+/*
+  Warnings:
+
+  - A unique constraint covering the columns `[structureId,dnaId]` on the table `DnaStructure` will be added. If there are existing duplicate values, this will fail.
+  - A unique constraint covering the columns `[structureVersionId,dnaId]` on the table `DnaStructure` will be added. If there are existing duplicate values, this will fail.
+
+*/
+-- AlterTable
+ALTER TABLE "DnaStructure" ADD COLUMN     "description" TEXT;
+
 -- CreateTable
 CREATE TABLE "StructureFiness" (
     "id" SERIAL NOT NULL,
@@ -17,6 +27,12 @@ CREATE UNIQUE INDEX "StructureFiness_structureId_finessId_key" ON "StructureFine
 -- CreateIndex
 CREATE UNIQUE INDEX "StructureFiness_structureVersionId_finessId_key" ON "StructureFiness"("structureVersionId", "finessId");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "DnaStructure_structureId_dnaId_key" ON "DnaStructure"("structureId", "dnaId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "DnaStructure_structureVersionId_dnaId_key" ON "DnaStructure"("structureVersionId", "dnaId");
+
 -- AddForeignKey
 ALTER TABLE "StructureFiness" ADD CONSTRAINT "StructureFiness_finessId_fkey" FOREIGN KEY ("finessId") REFERENCES "Finess"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -25,12 +41,3 @@ ALTER TABLE "StructureFiness" ADD CONSTRAINT "StructureFiness_structureId_fkey" 
 
 -- AddForeignKey
 ALTER TABLE "StructureFiness" ADD CONSTRAINT "StructureFiness_structureVersionId_fkey" FOREIGN KEY ("structureVersionId") REFERENCES "StructureVersion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AlterTable : description du lien DNA portée par la table de passage
-ALTER TABLE "DnaStructure" ADD COLUMN "description" TEXT;
-
--- CreateIndex
-CREATE UNIQUE INDEX "DnaStructure_structureId_dnaId_key" ON "DnaStructure"("structureId", "dnaId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "DnaStructure_structureVersionId_dnaId_key" ON "DnaStructure"("structureVersionId", "dnaId");

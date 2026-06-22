@@ -1,4 +1,7 @@
-import { recursivelySerializeDates } from "@/app/utils/date.util";
+import {
+  recursivelySerializeDates,
+  startOfNextUtcDay,
+} from "@/app/utils/date.util";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
 import { StructureVersionApiRead } from "@/schemas/api/transformation.schema";
 import { PublicType, StructureType } from "@/types/structure.type";
@@ -30,11 +33,11 @@ export const resolveCurrentVersion = (
   versions: StructureVersionDbDetails[],
   now: Date
 ): StructureVersionDbDetails | undefined => {
+  const upperBound = startOfNextUtcDay(now).getTime();
   return versions
     .filter(
       (version) =>
-        version.effectiveDate.getTime() <= now.getTime() &&
-        isVersionValid(version)
+        version.effectiveDate.getTime() < upperBound && isVersionValid(version)
     )
     .sort((first, second) => {
       const dateDiff =

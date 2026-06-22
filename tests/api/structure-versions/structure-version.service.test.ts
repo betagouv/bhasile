@@ -58,6 +58,36 @@ describe("resolveCurrentVersion", () => {
     expect(resolveCurrentVersion([past, future], now)?.id).toBe(1);
   });
 
+  it("retient une version effective aujourd'hui même si l'heure courante précède son horodatage", () => {
+    const todayMorning = new Date("2026-06-15T08:00:00.000Z");
+    const yesterday = buildVersion({
+      id: 1,
+      effectiveDate: new Date("2026-06-14T12:00:00.000Z"),
+    });
+    const todayAtNoon = buildVersion({
+      id: 2,
+      effectiveDate: new Date("2026-06-15T12:00:00.000Z"),
+    });
+
+    expect(
+      resolveCurrentVersion([yesterday, todayAtNoon], todayMorning)?.id
+    ).toBe(2);
+  });
+
+  it("ignore une version qui ne prend effet que demain", () => {
+    const todayMorning = new Date("2026-06-15T08:00:00.000Z");
+    const today = buildVersion({
+      id: 1,
+      effectiveDate: new Date("2026-06-15T12:00:00.000Z"),
+    });
+    const tomorrow = buildVersion({
+      id: 2,
+      effectiveDate: new Date("2026-06-16T12:00:00.000Z"),
+    });
+
+    expect(resolveCurrentVersion([today, tomorrow], todayMorning)?.id).toBe(1);
+  });
+
   it("ignore une version de transfo dont le form n'est pas finalisé", () => {
     const rolling = buildVersion({
       id: 1,
@@ -252,6 +282,8 @@ describe("copyStructureVersion", () => {
       logementSocial: 0,
     });
 
+    // structureFinesses : table de passage recopiée sans id, en réutilisant le Finess via son code unique.
+    // La description est portée par le lien, pas par l'entité référentielle.
     expect(result.structureFinesses).toEqual([
       {
         description: "FINESS toute la structure",
@@ -263,6 +295,8 @@ describe("copyStructureVersion", () => {
       placesAutorisees: 10,
     });
 
+    // dnaStructures : table de passage recopiée, en réutilisant le Dna via son code.
+    // La description est portée par le lien, pas par l'entité référentielle.
     expect(result.dnaStructures?.[0]).not.toHaveProperty("id");
     expect(result.dnaStructures?.[0]?.description).toBe("DNA site d'Avranches");
     expect(result.dnaStructures?.[0]?.dna).toEqual({ code: "DNA-1" });

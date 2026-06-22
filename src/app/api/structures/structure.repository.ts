@@ -1,5 +1,4 @@
-import { DEFAULT_PAGE_SIZE } from "@/constants";
-import { Prisma, Structure, StructureType } from "@/generated/prisma/client";
+import { Structure, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
@@ -16,16 +15,9 @@ import {
 } from "../forms/form.repository";
 import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
-import {
-  currentVersionWhere,
-  StructureVersionDbDetails,
-} from "../structure-versions/structure-version.db.type";
+import { currentVersionWhere } from "../structure-versions/structure-version.db.type";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
-import {
-  buildCurrentVersionCteSql,
-  buildStructuresOrderCteSql,
-  STRUCTURES_ORDER_JOINS_SQL,
-} from "./structure.constants";
+import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   StructureDbList,
   StructureDbMap,
@@ -37,91 +29,25 @@ import {
 } from "./structure.db.type";
 import { SearchProps } from "./structure.service";
 import {
-  buildStructuresOrderSql,
-  buildStructuresWhereSql,
-} from "./structure.util";
+  buildCountStructuresQuery,
+  buildLatestPlacesAutoriseesQuery,
+  buildOrderedStructureIdsQuery,
+} from "./structure.sql";
 
 const getOrderedStructures = async (
-  {
-    search,
-    page,
-    type,
-    bati,
-    placesAutorisees,
-    departements,
-    operateurs,
-    column,
-    direction,
-    selection,
-    finalised,
-    map,
-  }: SearchProps,
+  props: SearchProps,
   now: Date
-): Promise<{ id: number }[]> => {
-  const whereSql = buildStructuresWhereSql({
-    search,
-    type,
-    bati,
-    placesAutorisees,
-    departements,
-    operateurs,
-    selection,
-    finalised,
-  });
-  const orderSql = buildStructuresOrderSql(
-    column ?? "departementAdministratif",
-    direction ?? "asc"
-  );
-  const paginationSql =
-    selection || map
-      ? Prisma.sql``
-      : Prisma.sql`LIMIT ${DEFAULT_PAGE_SIZE} OFFSET ${(page ?? 0) * DEFAULT_PAGE_SIZE}`;
+): Promise<{ id: number }[]> =>
+  prisma.$queryRaw<{ id: number }[]>(buildOrderedStructureIdsQuery(props, now));
 
-  return prisma.$queryRaw<{ id: number }[]>(Prisma.sql`
-    ${buildStructuresOrderCteSql(now)}
-    SELECT s.id
-    ${STRUCTURES_ORDER_JOINS_SQL}
-    ${whereSql}
-    ORDER BY ${orderSql}
-    ${paginationSql}
-  `);
-};
-
-export const findBySearch = async ({
-  search,
-  page,
-  type,
-  bati,
-  placesAutorisees,
-  departements,
-  operateurs,
-  column,
-  direction,
-  map,
-  selection,
-  finalised,
-}: SearchProps): Promise<StructureDbList[] | StructureDbMap[]> => {
-  const now = new Date();
-  const structuresIds = await getOrderedStructures(
-    {
-      search,
-      page,
-      type,
-      bati,
-      placesAutorisees,
-      departements,
-      operateurs,
-      column,
-      direction,
-      map,
-      selection,
-      finalised,
-    },
-    now
-  );
+export const findBySearch = async (
+  props: SearchProps,
+  now: Date
+): Promise<StructureDbList[] | StructureDbMap[]> => {
+  const structuresIds = await getOrderedStructures(props, now);
   const ids = structuresIds.map((structure) => structure.id);
 
-  if (map) {
+  if (props.map) {
     const mapStructures = await prisma.structure.findMany({
       where: { id: { in: ids } },
       select: {
@@ -163,47 +89,21 @@ export const findBySearch = async ({
   return orderedStructures;
 };
 
-export const countBySearch = async ({
-  search,
-  type,
-  bati,
-  placesAutorisees,
-  departements,
-  operateurs,
-}: SearchProps): Promise<number> => {
-  const now = new Date();
-  const whereSql = buildStructuresWhereSql({
-    search,
-    type,
-    bati,
-    departements,
-    placesAutorisees,
-    operateurs,
-    selection: false,
-  });
-  const result = await prisma.$queryRaw<{ count: bigint }[]>(Prisma.sql`
-    ${buildStructuresOrderCteSql(now)}
-    SELECT COUNT(*)::bigint AS count
-    ${STRUCTURES_ORDER_JOINS_SQL}
-    ${whereSql}
-  `);
+export const countBySearch = async (
+  props: SearchProps,
+  now: Date
+): Promise<number> => {
+  const result = await prisma.$queryRaw<{ count: bigint }[]>(
+    buildCountStructuresQuery(props, now)
+  );
   return Number(result[0]?.count ?? 0);
 };
 
-export const getLatestPlacesAutoriseesPerStructure = async (): Promise<
-  number[]
-> => {
-  const now = new Date();
+export const getLatestPlacesAutoriseesPerStructure = async (
+  now: Date
+): Promise<number[]> => {
   const rows = await prisma.$queryRaw<{ placesAutorisees: number | null }[]>(
-    Prisma.sql`
-      WITH ${buildCurrentVersionCteSql(now)}
-      SELECT DISTINCT ON (cv."structureId")
-        st."placesAutorisees" AS "placesAutorisees"
-      FROM current_version cv
-      JOIN public."StructureTypologie" st ON st."structureVersionId" = cv.version_id
-      WHERE st."placesAutorisees" IS NOT NULL
-      ORDER BY cv."structureId", st."year" DESC
-    `
+    buildLatestPlacesAutoriseesQuery(now)
   );
 
   return rows
@@ -238,32 +138,6 @@ export const findOne = async (id: number) => {
   });
   return structure;
 };
-
-export const VERSIONED_FIELD_KEYS = [
-  "type",
-  "public",
-  "adresseAdministrative",
-  "codePostalAdministratif",
-  "communeAdministrative",
-  "departementAdministratif",
-  "latitude",
-  "longitude",
-  "nom",
-  "creationDate",
-  "date303",
-  "lgbt",
-  "fvvTeh",
-  "notes",
-  "nomOfii",
-  "directionTerritoriale",
-  "contacts",
-  "adresses",
-  "antennes",
-  "structureFinesses",
-  "dnaStructures",
-  "structureTypologies",
-] as const satisfies readonly (keyof StructureAgentUpdateApiType &
-  keyof StructureVersionDbDetails)[];
 
 const hasVersionedFields = (structure: StructureAgentUpdateApiType): boolean =>
   VERSIONED_FIELD_KEYS.some((key) => structure[key] !== undefined);

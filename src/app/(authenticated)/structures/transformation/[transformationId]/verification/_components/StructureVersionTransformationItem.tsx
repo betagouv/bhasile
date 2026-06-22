@@ -51,13 +51,7 @@ const buildCardProps = (
     structureVersion?.structure?.operateur ?? structureVersionTransformation.operateur;
   const departementAdministratif = structureVersion?.departementAdministratif;
 
-  if (
-    !nom ||
-    !codeBhasile ||
-    !structureType ||
-    !operateur ||
-    !departementAdministratif
-  ) {
+  if (!nom || !structureType || !operateur || !departementAdministratif) {
     return null;
   }
 

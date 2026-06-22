@@ -22,6 +22,7 @@ import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import { resolveCurrentVersion } from "../structure-versions/structure-version.service";
+import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   StructureDbDetails,
   StructureDbList,
@@ -35,7 +36,6 @@ import {
   findStructureDepartement,
   getLatestPlacesAutoriseesPerStructure,
   updateOne,
-  VERSIONED_FIELD_KEYS,
 } from "./structure.repository";
 import {
   getAdresseAdministrativeCoordinates,
@@ -111,29 +111,36 @@ export const getFullStructures = async (
   structures: StructureApiRead[];
   totalStructures: number;
 }> => {
-  const dbStructures = (await findBySearch({
-    search,
-    page,
-    type,
-    bati,
-    placesAutorisees,
-    departements,
-    map,
-    column,
-    direction,
-    operateurs,
-    selection,
-    finalised,
-  })) as StructureDbList[];
-  const totalStructures = await countBySearch({
-    search,
-    page,
-    type,
-    bati,
-    placesAutorisees,
-    departements,
-    operateurs,
-  });
+  const now = new Date();
+  const dbStructures = (await findBySearch(
+    {
+      search,
+      page,
+      type,
+      bati,
+      placesAutorisees,
+      departements,
+      map,
+      column,
+      direction,
+      operateurs,
+      selection,
+      finalised,
+    },
+    now
+  )) as StructureDbList[];
+  const totalStructures = await countBySearch(
+    {
+      search,
+      page,
+      type,
+      bati,
+      placesAutorisees,
+      departements,
+      operateurs,
+    },
+    now
+  );
 
   const structures = dbStructures.map((dbStructure) => {
     const resolvedVersion = dbStructure.structureVersions?.[0];
@@ -308,20 +315,16 @@ const dbStructureToApiRead = (
   }) as StructureApiRead;
 };
 
-export const getMaxPlacesAutorisees = async (): Promise<number> => {
+export const getBoundsPlacesAutorisees = async (
+  now: Date
+): Promise<{ min: number; max: number }> => {
   const latestPlacesAutoriseesOfEveryStructure =
-    await getLatestPlacesAutoriseesPerStructure();
+    await getLatestPlacesAutoriseesPerStructure(now);
   if (latestPlacesAutoriseesOfEveryStructure.length === 0) {
-    return 0;
+    return { min: 0, max: 0 };
   }
-  return Math.max(...latestPlacesAutoriseesOfEveryStructure);
-};
-
-export const getMinPlacesAutorisees = async (): Promise<number> => {
-  const latestPlacesAutoriseesOfEveryStructure =
-    await getLatestPlacesAutoriseesPerStructure();
-  if (latestPlacesAutoriseesOfEveryStructure.length === 0) {
-    return 0;
-  }
-  return Math.min(...latestPlacesAutoriseesOfEveryStructure);
+  return {
+    min: Math.min(...latestPlacesAutoriseesOfEveryStructure),
+    max: Math.max(...latestPlacesAutoriseesOfEveryStructure),
+  };
 };

@@ -11,10 +11,10 @@ const INSTRUCTIONS_URL = "/Instruction%20INTV2609238J.pdf";
 const FAQ_URL = "/11-FAQ%20Transformation%20HUDA%20en%20CADA_FV.pdf";
 
 const emptyDnaStructure: DnaStructureFormValues = {
+  description: "",
   dna: {
     code: "",
   },
-  description: "",
 };
 
 export const TransformationDnaSection = ({ entityId }: Props) => {
