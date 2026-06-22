@@ -1,18 +1,18 @@
 model Transformation {
-  id                       Int                       @id @default(autoincrement())
-  type                     TransformationType
-  form                     Form? // Pour le lien au bouton "Finaliser"
-  createdAt                DateTime                  @default(now())
-  updatedAt                DateTime                  @updatedAt
+  id                              Int                              @id @default(autoincrement())
+  type                            TransformationType
+  form                            Form? // Pour le lien au bouton "Finaliser"
+  createdAt                       DateTime                         @default(now())
+  updatedAt                       DateTime                         @updatedAt
   structureVersionTransformations StructureVersionTransformation[]
 
   @@schema("public")
 }
 
 model StructureVersionTransformation {
-  id               Int                         @id @default(autoincrement())
+  id               Int                                @id @default(autoincrement())
   transformationId Int
-  transformation   Transformation              @relation(fields: [transformationId], references: [id])
+  transformation   Transformation                     @relation(fields: [transformationId], references: [id])
   type             StructureVersionTransformationType
   motif            String? // Ne se retrouve que dans le cas d'une fermeture, voir en fonction des discussions avec Clara si c'est un enum, du champ libre, si ça doit être là ou dans Transformation...
   form             Form?

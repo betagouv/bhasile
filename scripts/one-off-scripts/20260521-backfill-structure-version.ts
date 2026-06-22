@@ -1,6 +1,7 @@
 // @ts-nocheck
-// One-off : version initiale (t0) par structure + structureVersionId sur les tables liées.
-// Idempotent : dernière StructureVersion avec forceHistorize true, sinon création.
+// One-off : version initiale (t0) par structure, rattachée à une Campaign "initialisation",
+// + structureVersionId sur les tables liées.
+// Idempotent : réutilise la version sans transfo existante, sinon création ; garantit la Campaign.
 // Usage : yarn one-off 20260521-backfill-structure-version
 
 import "dotenv/config";
@@ -13,7 +14,6 @@ function initialVersionData(structure) {
   return {
     structureId: structure.id,
     effectiveDate: structure.updatedAt,
-    forceHistorize: true,
     type: structure.type,
     adresseAdministrative: structure.adresseAdministrative,
     codePostalAdministratif: structure.codePostalAdministratif,
@@ -42,17 +42,24 @@ async function main() {
     const versionData = initialVersionData(structure);
 
     const existing = await prisma.structureVersion.findFirst({
-      where: { structureId: structure.id, forceHistorize: true },
+      where: {
+        structureId: structure.id,
+        structureVersionTransformationId: null,
+      },
       orderBy: { updatedAt: "desc" },
-      select: { id: true },
+      select: { id: true, campaignId: true },
     });
 
     const version = existing
       ? await prisma.structureVersion.update({
           where: { id: existing.id },
-          data: versionData,
+          data: existing.campaignId
+            ? versionData
+            : { ...versionData, campaign: { create: { name: "initialisation" } } },
         })
-      : await prisma.structureVersion.create({ data: versionData });
+      : await prisma.structureVersion.create({
+          data: { ...versionData, campaign: { create: { name: "initialisation" } } },
+        });
 
     const link = { structureId: structure.id, structureVersionId: null };
 
