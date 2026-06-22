@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { areCodesUnique } from "@/app/utils/string.util";
+import { areCodesUnique } from "@/app/utils/common.util";
 import { zId } from "@/app/utils/zodCustomFields";
 
 const finessSchema = z.object({
