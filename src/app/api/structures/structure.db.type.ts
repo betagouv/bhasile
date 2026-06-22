@@ -1,5 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 
+import { structureVersionDetailsInclude } from "../structure-versions/structure-version.db.type";
+
 export const structureMapSelect = {
   id: true,
   latitude: true,
@@ -12,6 +14,28 @@ export const structureOperateurSelect = {
   codeBhasile: true,
   forms: true,
 } satisfies Prisma.StructureSelect;
+
+export const structureListVersionInclude = {
+  contacts: true,
+  adresses: {
+    include: {
+      adresseTypologies: {
+        orderBy: { year: "desc" },
+      },
+    },
+  },
+  antennes: true,
+  structureFinesses: {
+    include: { finess: true },
+  },
+  structureTypologies: {
+    orderBy: { year: "desc" },
+  },
+  dnaStructures: {
+    orderBy: { dna: { code: "asc" } },
+    include: { dna: true },
+  },
+} satisfies Prisma.StructureVersionInclude;
 
 export const structureListInclude = {
   adresses: {
@@ -151,6 +175,9 @@ export const structureDetailsInclude = {
       },
     },
   },
+  structureVersions: {
+    include: structureVersionDetailsInclude,
+  },
 } satisfies Prisma.StructureInclude;
 
 export type StructureDbMap = Prisma.StructureGetPayload<{
@@ -158,7 +185,9 @@ export type StructureDbMap = Prisma.StructureGetPayload<{
 }>;
 
 export type StructureDbList = Prisma.StructureGetPayload<{
-  include: typeof structureListInclude;
+  include: typeof structureListInclude & {
+    structureVersions: { include: typeof structureListVersionInclude };
+  };
 }>;
 
 export type StructureDbDetails = Prisma.StructureGetPayload<{

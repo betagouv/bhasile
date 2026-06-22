@@ -1,8 +1,9 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import { ControleType } from "@/types/controle.type";
 
 import { expect } from "../fixtures/test";
+import { SAMPLE_PDF, uploadContainer, uploadToContainer } from "./upload.helper";
 
 export type Section =
   | "description"
@@ -70,14 +71,80 @@ export class StructureModificationPage {
       .check({ force: true });
   }
 
+  private controlesFieldset(): Locator {
+    return this.page.locator(
+      'fieldset:has(> legend:has-text("Inspections-contrôles"))'
+    );
+  }
+
+  private conventionFieldset(): Locator {
+    return this.page.locator('fieldset:has(> legend:has-text("Conventions"))');
+  }
+
+  private autreFieldset(): Locator {
+    return this.page.locator(
+      'fieldset:has(> legend:has-text("Autres documents"))'
+    );
+  }
+
   async addControle(date: string, type: ControleType): Promise<void> {
-    await this.page
-      .getByRole("button", { name: /Ajouter une inspection-contrôle/ })
+    const fieldset = this.controlesFieldset();
+    await fieldset.locator('input[name$=".date"]').first().fill(date);
+    await fieldset.locator('select[name$=".type"]').first().selectOption(type);
+  }
+
+  async uploadControleRapport(filePath: string = SAMPLE_PDF): Promise<void> {
+    await uploadToContainer(
+      uploadContainer(this.controlesFieldset()).first(),
+      filePath
+    );
+  }
+
+  async fillConventionDates(startDate: string, endDate: string): Promise<void> {
+    const fieldset = this.conventionFieldset();
+    await fieldset.locator('input[name$=".startDate"]').first().fill(startDate);
+    await fieldset.locator('input[name$=".endDate"]').first().fill(endDate);
+  }
+
+  async uploadConventionDocument(filePath: string = SAMPLE_PDF): Promise<void> {
+    await uploadToContainer(
+      uploadContainer(this.conventionFieldset()).first(),
+      filePath
+    );
+  }
+
+  async addConventionAvenant(): Promise<void> {
+    await this.conventionFieldset()
+      .getByRole("button", { name: /Ajouter un avenant/ })
       .click();
-    await this.page.locator(`input[name="controles.0.date"]`).fill(date);
-    await this.page
-      .locator(`select[name="controles.0.type"]`)
-      .selectOption(type);
+  }
+
+  async fillAvenantDate(date: string): Promise<void> {
+    await this.conventionFieldset()
+      .locator('input[name$=".date"]')
+      .first()
+      .fill(date);
+  }
+
+  async uploadAvenantDocument(filePath: string = SAMPLE_PDF): Promise<void> {
+    await uploadToContainer(
+      uploadContainer(this.conventionFieldset()).last(),
+      filePath
+    );
+  }
+
+  async fillAutreName(name: string): Promise<void> {
+    await this.autreFieldset()
+      .locator('input[name$=".name"]')
+      .first()
+      .fill(name);
+  }
+
+  async uploadAutreDocument(filePath: string = SAMPLE_PDF): Promise<void> {
+    await uploadToContainer(
+      uploadContainer(this.autreFieldset()).first(),
+      filePath
+    );
   }
 
   async toggleLgbt(): Promise<void> {

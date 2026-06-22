@@ -33,6 +33,6 @@ describe("GET /api/structures/stats", () => {
       maxPlacesAutorisees: 500,
       minPlacesAutorisees: 10,
     });
-    expect(mockGetLatestPlacesAutoriseesPerStructure).toHaveBeenCalledTimes(2);
+    expect(mockGetLatestPlacesAutoriseesPerStructure).toHaveBeenCalledTimes(1);
   });
 });
