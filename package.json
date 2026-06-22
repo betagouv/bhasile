@@ -45,6 +45,7 @@
     "prisma:push": "prisma db push && prisma generate",
     "predev": "react-dsfr update-icons --silent",
     "prebuild": "react-dsfr update-icons --silent",
+    "reset-views": "yarn delete-views:dev && yarn prisma:deploy && yarn apply-views:dev",
     "postinstall": "npx patch-package && prisma generate",
     "sql:format:check": "set -e; failed=0; for f in scripts/views/*.sql; do tmp=$(mktemp); sql-formatter \"$f\" --config sql-formatter.config.json > \"$tmp\"; if ! diff -u \"$f\" \"$tmp\" >/dev/null; then echo \"SQL formatting issues in $f\"; failed=1; fi; rm -f \"$tmp\"; done; [ \"$failed\" -eq 0 ] || exit 1",
     "sql:format:fix": "for f in scripts/views/*.sql; do sql-formatter \"$f\" --config sql-formatter.config.json --fix; done"
@@ -80,7 +81,7 @@
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.0",
     "tsx": "^4.22.4",
-    "uuid": "^14.0.0",
+    "uuid": "^14.0.1",
     "zod": "^3.25.74 "
   },
   "devDependencies": {
@@ -97,7 +98,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.2",
-    "csv-parse": "^6.2.1",
+    "csv-parse": "^7.0.0",
     "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",

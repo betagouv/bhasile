@@ -188,8 +188,8 @@ export async function seed(): Promise<void> {
   };
 
   for (const operateurToInsert of operateursToInsert) {
-    const nonOfiiCount = faker.number.int({ min: 200, max: 300 });
-    const ofiiCount = faker.number.int({ min: 1000, max: 2000 });
+    const nonOfiiCount = faker.number.int({ min: 900, max: 1100 });
+    const ofiiCount = faker.number.int({ min: 200, max: 300 });
 
     console.log(
       `🏠 Ajout de ${nonOfiiCount} structures et ${ofiiCount} structures OFII pour ${operateurToInsert.name}`

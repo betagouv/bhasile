@@ -174,18 +174,26 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
     });
   });
 
-  it("bloque une extension qui n'ajoute aucune place (égalité)", async () => {
+  it("enregistre une extension sans ajout de place sans bloquer la navigation", async () => {
     renderForm(StructureVersionTransformationType.EXTENSION);
 
     await setPlaces(ORIGINAL_PLACES);
     await submit();
 
+    // Le submit n'est plus bloqué : la sauvegarde part malgré la contrainte non respectée
+    await waitFor(() =>
+      expect(mockFetch).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+    expect(getPutPayloadPlaces()).toBe(ORIGINAL_PLACES);
+    // Schema permissif : aucune erreur de contrainte affichée inline
     expect(
-      await screen.findByText(
+      screen.queryByText(
         `Le nombre de places autorisées doit être supérieur au nombre de places précédent (${ORIGINAL_PLACES}).`
       )
-    ).toBeInTheDocument();
-    expect(mockFetch).not.toHaveBeenCalled();
+    ).not.toBeInTheDocument();
   });
 
   it("laisse passer une extension qui ajoute des places", async () => {
@@ -203,18 +211,26 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
     expect(getPutPayloadPlaces()).toBe(ORIGINAL_PLACES + 3);
   });
 
-  it("bloque une contraction qui ne retire aucune place (égalité)", async () => {
+  it("enregistre une contraction sans retrait de place sans bloquer la navigation", async () => {
     renderForm(StructureVersionTransformationType.CONTRACTION);
 
     await setPlaces(ORIGINAL_PLACES);
     await submit();
 
+    // Le submit n'est plus bloqué : la sauvegarde part malgré la contrainte non respectée
+    await waitFor(() =>
+      expect(mockFetch).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+    expect(getPutPayloadPlaces()).toBe(ORIGINAL_PLACES);
+    // Schema permissif : aucune erreur de contrainte affichée inline
     expect(
-      await screen.findByText(
+      screen.queryByText(
         `Le nombre de places autorisées doit être inférieur au nombre de places précédent (${ORIGINAL_PLACES}).`
       )
-    ).toBeInTheDocument();
-    expect(mockFetch).not.toHaveBeenCalled();
+    ).not.toBeInTheDocument();
   });
 
   it("laisse passer une contraction qui retire des places", async () => {

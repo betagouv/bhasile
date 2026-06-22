@@ -4,12 +4,11 @@ import { StructureType } from "@/types/structure.type";
 import { TestStructureScenario } from "./types";
 
 export const cph1: TestStructureScenario = {
-  name: "CPH 1 - Collectif, single address, all docs, old eval, controls, filiale",
+  name: "CPH 1 - Collectif, single address, all docs, old eval, controls",
   formData: {
     codeBhasile: "BHA-TST-001",
     type: StructureType.CPH,
     cpom: false,
-    filiale: "Filiale Test",
     operateur: {
       name: "Opérateur 1",
       searchTerm: "Opér",
@@ -367,7 +366,7 @@ export const cph1: TestStructureScenario = {
     lgbt: true,
     fvvTeh: true,
     contacts: [{ email: "modif-cph1@example.com" }],
-    notes: "Notes modification CPH 1 - filiale.",
+    notes: "Notes modification CPH 1.",
     ouvertureFermeture: {
       placesACreer: "3",
       echeancePlacesACreer: "2026-02-01",
