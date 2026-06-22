@@ -200,13 +200,15 @@ export class StructureDetailsPage extends BasePage {
           await expect(block).toContainText(dna.description);
         }
       }
-      for (const finess of finesses) {
-        if (!finess.code) {
-          continue;
-        }
-        await expect(block).toContainText(finess.code.replaceAll(" ", ""));
-        if (finesses.length > 1 && finess.description) {
-          await expect(block).toContainText(finess.description);
+      if (isStructureAutorisee(typeValue)) {
+        for (const finess of finesses) {
+          if (!finess.code) {
+            continue;
+          }
+          await expect(block).toContainText(finess.code.replaceAll(" ", ""));
+          if (finesses.length > 1 && finess.description) {
+            await expect(block).toContainText(finess.description);
+          }
         }
       }
     }
