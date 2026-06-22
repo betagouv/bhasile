@@ -58,6 +58,7 @@ export const createOrUpdateStructureFinesses = async (
       continue;
     }
 
+    // TODO: use the unique constraints instead of id
     await tx.structureFiness.upsert({
       where: { id: structureFiness.id || 0 },
       update: {

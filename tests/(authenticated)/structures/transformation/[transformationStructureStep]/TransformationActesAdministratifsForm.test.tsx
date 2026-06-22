@@ -6,6 +6,7 @@ import {
 } from "tests/test-utils/factories/transformation.factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { TransformationClientProvider } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { TransformationActesAdministratifsForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/TransformationActesAdministratifsForm";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
@@ -14,23 +15,27 @@ import {
   StructureParentActe,
 } from "@/types/acte-administratif.type";
 import {
+  StructureVersionTransformationStep,
   StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
-const mockHandleValidation = vi.fn();
-
-vi.mock("@/app/hooks/useTransformationFormHandling", () => ({
-  useTransformationFormHandling: () => ({
-    handleValidation: mockHandleValidation,
-    prevStep: { route: "/prev-route" },
-  }),
-}));
+const mockUpdateTransformation = vi.fn();
+const mockRouterPush = vi.fn();
+const mockUseParams = vi.fn();
+const mockUsePathname = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useParams: () => ({ transformationStructureId: "7" }),
-  useRouter: () => ({ push: vi.fn() }),
+  useParams: () => mockUseParams(),
+  usePathname: () => mockUsePathname(),
+  useRouter: () => ({ push: mockRouterPush, replace: vi.fn() }),
   notFound: vi.fn(),
+}));
+
+vi.mock("@/app/hooks/useTransformations", () => ({
+  useTransformations: () => ({
+    updateTransformation: mockUpdateTransformation,
+  }),
 }));
 
 const filledActe = (
@@ -61,71 +66,77 @@ const transformationWithActes = (
     ],
   });
 
+const renderForm = (transformation: TransformationApiRead) =>
+  render(
+    <TransformationClientProvider transformation={transformation}>
+      <TransformationActesAdministratifsForm
+        structureVersionTransformation={
+          transformation.structureVersionTransformations[0]
+        }
+        transformation={transformation}
+      />
+    </TransformationClientProvider>
+  );
+
+const getSavedActes = () => {
+  const [, payload] = mockUpdateTransformation.mock.calls[0];
+  return payload.structureVersionTransformations[0].actesAdministratifs;
+};
+
 describe("TransformationActesAdministratifsForm (intégration via FormWrapper)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUpdateTransformation.mockResolvedValue(12);
+    mockUseParams.mockReturnValue({
+      transformationStructureType: StructureVersionTransformationType.CREATION,
+      transformationStructureId: "7",
+      transformationStructureStep:
+        StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
+    });
+    mockUsePathname.mockReturnValue(
+      "/structures/transformation/12/creation/7/actes-administratifs"
+    );
     localStorage.clear();
   });
 
-  it("soumet à handleValidation les actes remplis, en écartant la ligne Autres documents vide", async () => {
+  it("enregistre les actes remplis, en écartant la ligne Autres documents vide", async () => {
     // GIVEN the three required acts are filled (file + dates), Autres documents left empty
     const transformation = transformationWithActes([
       filledActe(1, "ARRETE_AUTORISATION", "k-autorisation"),
       filledActe(2, "CONVENTION", "k-convention"),
       filledActe(3, "ARRETE_TARIFICATION", "k-tarification"),
     ]);
-    render(
-      <TransformationActesAdministratifsForm
-        structureVersionTransformation={
-          transformation.structureVersionTransformations[0]
-        }
-        transformation={transformation}
-      />
-    );
+    renderForm(transformation);
 
     // WHEN
     await userEvent.click(
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    // THEN the form validates and forwards the payload (empty AUTRE filtered out by the schema)
-    await waitFor(() => expect(mockHandleValidation).toHaveBeenCalledTimes(1));
-    const payload = mockHandleValidation.mock.calls[0][0];
-    expect(payload.transformationId).toBe(12);
-    expect(payload.structureVersionTransformation.id).toBe(7);
-    expect(payload.structureVersionTransformation.type).toBe(
-      StructureVersionTransformationType.CREATION
-    );
-    const actes = payload.structureVersionTransformation.actesAdministratifs;
+    // THEN the form saves the payload (empty AUTRE filtered out by the schema)
+    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
+    const actes = getSavedActes();
     expect(actes).toHaveLength(3);
     expect(
       actes.map((acte: { category: string }) => acte.category).sort()
     ).toEqual(["ARRETE_AUTORISATION", "ARRETE_TARIFICATION", "CONVENTION"]);
   });
 
-  it("soumet sans aucun acte, désormais tous optionnels pour les transformations", async () => {
-    // GIVEN no acts provided -> the form seeds empty rows for each category
+  it("navigue quand même vers l'étape suivante quand les documents requis sont absents", async () => {
+    // GIVEN no acts provided -> the form seeds empty rows for each required category
     const transformation = transformationWithActes([]);
-    render(
-      <TransformationActesAdministratifsForm
-        structureVersionTransformation={
-          transformation.structureVersionTransformations[0]
-        }
-        transformation={transformation}
-      />
-    );
+    renderForm(transformation);
 
-    // WHEN submitting without filling anything
+    // WHEN
     await userEvent.click(
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    // THEN validation passes and forwards an empty actes payload (empty rows dropped)
-    await waitFor(() => expect(mockHandleValidation).toHaveBeenCalledTimes(1));
-    const payload = mockHandleValidation.mock.calls[0][0];
-    expect(
-      payload.structureVersionTransformation.actesAdministratifs
-    ).toHaveLength(0);
+    // THEN the incomplete step is saved and the user moves on (no blocking)
+    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      "/structures/transformation/12/verification"
+    );
   });
 
   it("affiche le radio autorisation/fusion pour les créations non ex-nihilo, avec autorisation présélectionnée par défaut", async () => {
@@ -133,14 +144,7 @@ describe("TransformationActesAdministratifsForm (intégration via FormWrapper)",
       [],
       TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
     );
-    render(
-      <TransformationActesAdministratifsForm
-        structureVersionTransformation={
-          transformation.structureVersionTransformations[0]
-        }
-        transformation={transformation}
-      />
-    );
+    renderForm(transformation);
 
     // Autorisation is the default selection, fusion is the alternative
     const autorisationRadio = screen.getByRole("radio", {
@@ -151,15 +155,9 @@ describe("TransformationActesAdministratifsForm (intégration via FormWrapper)",
     });
     expect(autorisationRadio).toBeChecked();
     expect(fusionRadio).not.toBeChecked();
-
-    // Submit without filling the docs -> now allowed (acts are optional)
-    await userEvent.click(
-      screen.getByRole("button", { name: "Étape suivante" })
-    );
-    await waitFor(() => expect(mockHandleValidation).toHaveBeenCalledTimes(1));
   });
 
-  it("soumet avec la catégorie ARRETE_FUSION quand l'utilisateur choisit fusion et remplit les autres documents requis", async () => {
+  it("enregistre la catégorie ARRETE_FUSION quand l'utilisateur choisit fusion et remplit les autres documents requis", async () => {
     const transformation = transformationWithActes(
       [
         filledActe(2, "CONVENTION", "k-convention"),
@@ -167,14 +165,7 @@ describe("TransformationActesAdministratifsForm (intégration via FormWrapper)",
       ],
       TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
     );
-    render(
-      <TransformationActesAdministratifsForm
-        structureVersionTransformation={
-          transformation.structureVersionTransformations[0]
-        }
-        transformation={transformation}
-      />
-    );
+    renderForm(transformation);
 
     // Pick fusion in the radio
     await userEvent.click(
@@ -199,9 +190,8 @@ describe("TransformationActesAdministratifsForm (intégration via FormWrapper)",
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    await waitFor(() => expect(mockHandleValidation).toHaveBeenCalledTimes(1));
-    const payload = mockHandleValidation.mock.calls[0][0];
-    const actes = payload.structureVersionTransformation.actesAdministratifs;
+    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
+    const actes = getSavedActes();
     const radioActe = actes.find(
       (acte: { category: string }) =>
         acte.category === "ARRETE_FUSION" ||
@@ -215,14 +205,7 @@ describe("TransformationActesAdministratifsForm (intégration via FormWrapper)",
       [filledActe(1, "ARRETE_FUSION", "k-fusion")],
       TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
     );
-    render(
-      <TransformationActesAdministratifsForm
-        structureVersionTransformation={
-          transformation.structureVersionTransformations[0]
-        }
-        transformation={transformation}
-      />
-    );
+    renderForm(transformation);
 
     expect(
       screen.getByRole("radio", { name: "Arrêté de fusion" })
@@ -269,6 +252,16 @@ const extensionWithStructureActes = (
 describe("TransformationActesAdministratifsForm — alternative avenant (extension)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUpdateTransformation.mockResolvedValue(12);
+    mockUseParams.mockReturnValue({
+      transformationStructureType: StructureVersionTransformationType.EXTENSION,
+      transformationStructureId: "7",
+      transformationStructureStep:
+        StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
+    });
+    mockUsePathname.mockReturnValue(
+      "/structures/transformation/12/extension/7/actes-administratifs"
+    );
     localStorage.clear();
   });
 
@@ -277,14 +270,7 @@ describe("TransformationActesAdministratifsForm — alternative avenant (extensi
       currentParentActe(99, "ARRETE_AUTORISATION"),
       currentParentActe(88, "CONVENTION"),
     ]);
-    render(
-      <TransformationActesAdministratifsForm
-        structureVersionTransformation={
-          transformation.structureVersionTransformations[0]
-        }
-        transformation={transformation}
-      />
-    );
+    renderForm(transformation);
 
     expect(screen.getByRole("radio", { name: "Convention" })).toBeChecked();
     // the avenant option shows the current parent acte's date range
@@ -310,14 +296,7 @@ describe("TransformationActesAdministratifsForm — alternative avenant (extensi
 
   it("masque l'option avenant quand la structure n'a pas d'acte parent éligible", () => {
     const transformation = extensionWithStructureActes([]);
-    render(
-      <TransformationActesAdministratifsForm
-        structureVersionTransformation={
-          transformation.structureVersionTransformations[0]
-        }
-        transformation={transformation}
-      />
-    );
+    renderForm(transformation);
 
     expect(
       screen.queryByRole("radio", { name: "Avenant arrêté d'autorisation" })
@@ -348,14 +327,7 @@ describe("TransformationActesAdministratifsForm — alternative avenant (extensi
       },
       currentParentActe(99, "ARRETE_AUTORISATION"),
     ]);
-    render(
-      <TransformationActesAdministratifsForm
-        structureVersionTransformation={
-          transformation.structureVersionTransformations[0]
-        }
-        transformation={transformation}
-      />
-    );
+    renderForm(transformation);
 
     // pick the avenant option for the arrêté block
     await userEvent.click(
@@ -375,10 +347,10 @@ describe("TransformationActesAdministratifsForm — alternative avenant (extensi
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    await waitFor(() => expect(mockHandleValidation).toHaveBeenCalledTimes(1));
-    const actes =
-      mockHandleValidation.mock.calls[0][0].structureVersionTransformation
-        .actesAdministratifs;
+    await waitFor(() =>
+      expect(mockUpdateTransformation).toHaveBeenCalledTimes(1)
+    );
+    const actes = getSavedActes();
     const avenant = actes.find(
       (acte: { category: string }) => acte.category === "ARRETE_AUTORISATION"
     );
@@ -402,14 +374,7 @@ describe("TransformationActesAdministratifsForm — alternative avenant (extensi
         },
       ]
     );
-    render(
-      <TransformationActesAdministratifsForm
-        structureVersionTransformation={
-          transformation.structureVersionTransformations[0]
-        }
-        transformation={transformation}
-      />
-    );
+    renderForm(transformation);
 
     // Rendered as an avenant: single "Date arrêté", never the start/end pair.
     expect(screen.getByLabelText("Date arrêté")).toBeInTheDocument();

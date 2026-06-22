@@ -48,9 +48,9 @@ WITH
   )
 SELECT
   sc."id" AS "id",
-  sc."codeBhasile" AS "code_bhasile",
+  sc."code_bhasile" AS "code_bhasile",
   sc."operateur" AS "operateur",
-  sc."departementAdministratif" AS "departement_administratif",
+  sc."departement_administratif" AS "departement_administratif",
   sc."departement" AS "departement",
   sc."region" AS "region",
   sc."dna_codes" AS "dna_codes",
