@@ -78,6 +78,11 @@ export type StatistiqueDbIndicateurFinancier = Prisma.IndicateurFinancierGetPayl
   };
 }>;
 
+export type StatistiqueDbIndicateurFinancierMetriques = Omit<
+  StatistiqueDbIndicateurFinancier,
+  "structureId" | "year" | "type"
+>;
+
 export type StatistiqueDbDepartement = Prisma.DepartementGetPayload<{
   select: {
     numero: true;

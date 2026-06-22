@@ -4,7 +4,10 @@ import {
   NumericAggregation,
   ratio,
 } from "@/app/utils/math.util";
-import { toStatNumber, toStatRate } from "@/app/utils/statistiques-format.util";
+import {
+  roundStatsNumber,
+  roundStatsRate,
+} from "@/app/utils/statistiques-format.util";
 import { CURRENT_YEAR } from "@/constants";
 import {
   ControleQualiteByMonthStat,
@@ -158,15 +161,15 @@ const computeEigSummary = (
   );
 
   return {
-    tauxEig: toStatRate(
+    tauxEig: roundStatsRate(
       totalPlacesAutorisees > 0 ? nbEig / totalPlacesAutorisees : null
     ),
     nbEig,
     nbEigComportementViolent,
-    tauxEigComportementViolent: toStatRate(
+    tauxEigComportementViolent: roundStatsRate(
       ratio(nbEigComportementViolent, nbEig)
     ),
-    moyenneEvaluationsCurrentYear: toStatNumber(
+    moyenneEvaluationsCurrentYear: roundStatsNumber(
       aggregateValues(
         evaluationsCurrentYear.map((evaluation) => evaluation.note),
         aggregation
@@ -194,25 +197,25 @@ const computeEvaluationNotes = (
 
   return {
     nbStructuresEvaluees: structureIds.size,
-    noteGenerale: toStatNumber(
+    noteGenerale: roundStatsNumber(
       aggregateValues(
         evaluations.map((evaluation) => evaluation.note),
         aggregation
       )
     ),
-    notePersonne: toStatNumber(
+    notePersonne: roundStatsNumber(
       aggregateValues(
         evaluations.map((evaluation) => evaluation.notePersonne),
         aggregation
       )
     ),
-    notePro: toStatNumber(
+    notePro: roundStatsNumber(
       aggregateValues(
         evaluations.map((evaluation) => evaluation.notePro),
         aggregation
       )
     ),
-    noteStructure: toStatNumber(
+    noteStructure: roundStatsNumber(
       aggregateValues(
         evaluations.map((evaluation) => evaluation.noteStructure),
         aggregation
@@ -240,12 +243,12 @@ const computeControleQualitePeriodStat = (
 
   return {
     nbStructuresSansDeclarationEig,
-    partStructuresSansDeclarationEig: toStatRate(
+    partStructuresSansDeclarationEig: roundStatsRate(
       ratio(nbStructuresSansDeclarationEig, totalStructures)
     ),
     nbEig,
     nbEigComportementViolent,
-    tauxEigComportementViolent: toStatRate(
+    tauxEigComportementViolent: roundStatsRate(
       ratio(nbEigComportementViolent, nbEig)
     ),
     ...computeEvaluationNotes(evaluationsForPeriod, aggregation),
@@ -259,12 +262,16 @@ type ControleQualiteSeriesContext = {
   aggregation: NumericAggregation;
 };
 
-const computeControleQualiteByPeriod = <Entry extends ControleQualitePeriodStat>(
+const computeControleQualiteByPeriod = <
+  Entry extends ControleQualitePeriodStat,
+>(
   eigs: StatistiqueDbEig[],
   evaluations: StatistiqueDbEvaluation[],
   context: ControleQualiteSeriesContext,
   getPeriodKey: (date: Date) => string,
-  mapPeriodKey: (periodKey: string) => Omit<Entry, keyof ControleQualitePeriodStat>
+  mapPeriodKey: (
+    periodKey: string
+  ) => Omit<Entry, keyof ControleQualitePeriodStat>
 ): Entry[] => {
   const eigsByPeriod = groupByPeriodKey(
     eigs,
@@ -277,26 +284,21 @@ const computeControleQualiteByPeriod = <Entry extends ControleQualitePeriodStat>
     getPeriodKey
   );
 
-  return [
-    ...new Set([
-      ...eigsByPeriod.keys(),
-      ...evaluationsByPeriod.keys(),
-    ]),
-  ]
+  return [...new Set([...eigsByPeriod.keys(), ...evaluationsByPeriod.keys()])]
     .sort()
     .map(
-    (periodKey) =>
-      ({
-        ...mapPeriodKey(periodKey),
-        ...computeControleQualitePeriodStat(
-          eigsByPeriod.get(periodKey) ?? [],
-          evaluationsByPeriod.get(periodKey) ?? [],
-          context.activeStructureIdSet,
-          context.totalStructures,
-          context.dnaCodeToStructureIds,
-          context.aggregation
-        ),
-      }) as Entry
+      (periodKey) =>
+        ({
+          ...mapPeriodKey(periodKey),
+          ...computeControleQualitePeriodStat(
+            eigsByPeriod.get(periodKey) ?? [],
+            evaluationsByPeriod.get(periodKey) ?? [],
+            context.activeStructureIdSet,
+            context.totalStructures,
+            context.dnaCodeToStructureIds,
+            context.aggregation
+          ),
+        }) as Entry
     );
 };
 

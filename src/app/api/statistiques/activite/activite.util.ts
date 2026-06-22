@@ -1,5 +1,5 @@
 import { ratio } from "@/app/utils/math.util";
-import { toStatRate } from "@/app/utils/statistiques-format.util";
+import { roundStatsRate } from "@/app/utils/statistiques-format.util";
 import {
   isStructureEligibleForActiviteIndisponibilite,
   isStructureEligibleForActivitePresencesIndues,
@@ -80,32 +80,29 @@ const toMonthStat = (
     date: new Date(`${monthKey}-01`),
     placesEnregistreesDna: monthTotals.placesEnregistreesDna,
     placesIndisponibles: monthTotals.placesIndisponibles,
-    tauxIndisponibilite: toStatRate(
+    tauxIndisponibilite: roundStatsRate(
       ratio(
         monthTotals.placesIndisponibles,
         monthTotals.placesAutoriseesIndispo
       )
     ),
     presencesInduesBPI: monthTotals.presencesInduesBPI,
-    tauxPresencesInduesBPI: toStatRate(
+    tauxPresencesInduesBPI: roundStatsRate(
       ratio(
         monthTotals.presencesInduesBPI,
         monthTotals.placesAutoriseesPresencesIndues
       )
     ),
     presencesInduesDeboutees: monthTotals.presencesInduesDeboutees,
-    tauxPresencesInduesDeboutees: toStatRate(
+    tauxPresencesInduesDeboutees: roundStatsRate(
       ratio(
         monthTotals.presencesInduesDeboutees,
         monthTotals.placesAutoriseesPresencesIndues
       )
     ),
     presencesInduesTotal,
-    tauxPresencesInduesTotal: toStatRate(
-      ratio(
-        presencesInduesTotal,
-        monthTotals.placesAutoriseesPresencesIndues
-      )
+    tauxPresencesInduesTotal: roundStatsRate(
+      ratio(presencesInduesTotal, monthTotals.placesAutoriseesPresencesIndues)
     ),
   };
 };

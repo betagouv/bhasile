@@ -1,4 +1,4 @@
-import { toStatRate } from "@/app/utils/statistiques-format.util";
+import { roundStatsRate } from "@/app/utils/statistiques-format.util";
 import {
   PlacesByYearStat,
   StatistiqueApiRead,
@@ -95,7 +95,7 @@ const computeTauxEquipementAgrege = (
 
   return {
     population,
-    tauxEquipement: toStatRate(
+    tauxEquipement: roundStatsRate(
       population > 0 ? totalPlaces / population : null
     ),
   };
