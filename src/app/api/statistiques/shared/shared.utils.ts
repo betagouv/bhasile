@@ -100,3 +100,26 @@ export const computeTotalPlaces = (
       (structure) => typologieMap.get(structure.id)?.placesAutorisees
     )
   ) ?? 0;
+
+// TODO: réemployer ces utils temporels pour les indicateurs RMU à implémenter.
+
+export const toMonthKey = (date: Date): string =>
+  date.toISOString().slice(0, 7);
+
+export const toYearKey = (date: Date): string => date.toISOString().slice(0, 4);
+
+export const toTrimesterKey = (date: Date): string => {
+  const month = Number(date.toISOString().slice(5, 7));
+  const year = date.toISOString().slice(0, 4);
+  return `${year}-Q${Math.ceil(month / 3)}`;
+};
+
+export const parseTrimesterKey = (
+  trimesterKey: string
+): { year: number; trimester: number } => {
+  const [year, trimesterPart] = trimesterKey.split("-Q");
+  return { year: Number(year), trimester: Number(trimesterPart) };
+};
+
+export const monthKeyToDate = (monthKey: string): Date =>
+  new Date(`${monthKey}-01`);

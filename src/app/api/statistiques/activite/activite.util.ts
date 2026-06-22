@@ -14,8 +14,7 @@ import type {
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
 } from "../statistiques.db.type";
-
-const toMonthKey = (date: Date): string => date.toISOString().slice(0, 7);
+import { monthKeyToDate, toMonthKey } from "../shared/shared.utils";
 
 type DnaEligibility = {
   indisponibilite: Set<string>;
@@ -77,7 +76,7 @@ const toMonthStat = (
     monthTotals.presencesInduesBPI + monthTotals.presencesInduesDeboutees;
 
   return {
-    date: new Date(`${monthKey}-01`),
+    date: monthKeyToDate(monthKey),
     placesEnregistreesDna: monthTotals.placesEnregistreesDna,
     placesIndisponibles: monthTotals.placesIndisponibles,
     tauxIndisponibilite: roundStatsRate(

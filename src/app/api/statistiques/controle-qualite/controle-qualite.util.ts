@@ -13,6 +13,7 @@ import {
   ControleQualiteByMonthStat,
   ControleQualiteByTrimesterStat,
   ControleQualiteByYearStat,
+  ControleQualiteEvaluationStat,
   ControleQualitePeriodStat,
   EigStat,
   StatistiqueApiRead,
@@ -23,23 +24,13 @@ import type {
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
 } from "../statistiques.db.type";
-
-const toMonthKey = (date: Date): string => date.toISOString().slice(0, 7);
-
-const toYearKey = (date: Date): string => date.toISOString().slice(0, 4);
-
-const toTrimesterKey = (date: Date): string => {
-  const month = Number(date.toISOString().slice(5, 7));
-  const year = date.toISOString().slice(0, 4);
-  return `${year}-Q${Math.ceil(month / 3)}`;
-};
-
-const parseTrimesterKey = (
-  trimesterKey: string
-): { year: number; trimester: number } => {
-  const [year, trimesterPart] = trimesterKey.split("-Q");
-  return { year: Number(year), trimester: Number(trimesterPart) };
-};
+import {
+  monthKeyToDate,
+  parseTrimesterKey,
+  toMonthKey,
+  toTrimesterKey,
+  toYearKey,
+} from "../shared/shared.utils";
 
 const getTwelveMonthCutoffKey = (): string => {
   const twelveMonthsAgo = new Date();
@@ -181,14 +172,7 @@ const computeEigSummary = (
 const computeEvaluationNotes = (
   evaluations: StatistiqueDbEvaluation[],
   aggregation: NumericAggregation
-): Pick<
-  ControleQualitePeriodStat,
-  | "nbStructuresEvaluees"
-  | "noteGenerale"
-  | "notePersonne"
-  | "notePro"
-  | "noteStructure"
-> => {
+): ControleQualiteEvaluationStat => {
   const structureIds = new Set(
     evaluations
       .map((evaluation) => evaluation.structureId)
@@ -347,7 +331,7 @@ export const computeControleQualiteStatistiques = (
       evaluationsActives,
       seriesContext,
       toMonthKey,
-      (monthKey) => ({ date: new Date(`${monthKey}-01`) })
+      (monthKey) => ({ date: monthKeyToDate(monthKey) })
     ),
     byTrimester: computeControleQualiteByPeriod<ControleQualiteByTrimesterStat>(
       eigs,

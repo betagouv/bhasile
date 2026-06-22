@@ -102,6 +102,15 @@ export type ControleQualitePeriodStat = {
   noteStructure: number | null;
 };
 
+export type ControleQualiteEvaluationStat = Omit<
+  ControleQualitePeriodStat,
+  | "nbStructuresSansDeclarationEig"
+  | "partStructuresSansDeclarationEig"
+  | "nbEig"
+  | "nbEigComportementViolent"
+  | "tauxEigComportementViolent"
+>;
+
 export type ControleQualiteByMonthStat = ControleQualitePeriodStat & {
   date: Date;
 };
