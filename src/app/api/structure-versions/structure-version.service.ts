@@ -29,15 +29,15 @@ const isVersionValid = (version: StructureVersionDbDetails): boolean => {
   );
 };
 
-export const resolveCurrentVersion = (
+const resolveLatestValidBefore = (
   versions: StructureVersionDbDetails[],
-  now: Date
-): StructureVersionDbDetails | undefined => {
-  const upperBound = startOfNextUtcDay(now).getTime();
-  return versions
+  upperBoundMs: number
+): StructureVersionDbDetails | undefined =>
+  versions
     .filter(
       (version) =>
-        version.effectiveDate.getTime() < upperBound && isVersionValid(version)
+        version.effectiveDate.getTime() < upperBoundMs &&
+        isVersionValid(version)
     )
     .sort((first, second) => {
       const dateDiff =
@@ -47,7 +47,18 @@ export const resolveCurrentVersion = (
       }
       return second.id - first.id;
     })[0];
-};
+
+export const resolveCurrentVersion = (
+  versions: StructureVersionDbDetails[],
+  now: Date
+): StructureVersionDbDetails | undefined =>
+  resolveLatestValidBefore(versions, startOfNextUtcDay(now).getTime());
+
+export const resolvePredecessor = (
+  versions: StructureVersionDbDetails[],
+  effectiveDate: Date
+): StructureVersionDbDetails | undefined =>
+  resolveLatestValidBefore(versions, effectiveDate.getTime());
 
 const mapVersionScalars = (
   source: StructureDbDetails | StructureVersionDbTransformation

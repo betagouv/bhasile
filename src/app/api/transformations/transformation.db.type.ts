@@ -1,6 +1,8 @@
 import { AVENANT_PARENT_CATEGORIES } from "@/config/transformation.config";
 import { Prisma } from "@/generated/prisma/client";
 
+import { structureVersionDetailsInclude } from "../structure-versions/structure-version.db.type";
+
 export const transformationInclude = {
   form: {
     include: {
@@ -49,6 +51,9 @@ export const transformationInclude = {
               },
               structureTypologies: {
                 orderBy: { year: "desc" },
+              },
+              structureVersions: {
+                include: structureVersionDetailsInclude,
               },
             },
           },
