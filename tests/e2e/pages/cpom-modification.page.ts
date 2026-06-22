@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import { expect } from "../fixtures/test";
-import { SAMPLE_PDF, uploadToContainer } from "./upload.helper";
+import { SAMPLE_PDF, uploadContainer, uploadToContainer } from "./upload.helper";
 
 export type CpomSection =
   | "description"
@@ -77,7 +77,7 @@ export class CpomModificationPage {
 
   async uploadConventionDocument(filePath: string = SAMPLE_PDF): Promise<void> {
     await uploadToContainer(
-      this.conventionFieldset().locator("div.bg-alt-blue-france").first(),
+      uploadContainer(this.conventionFieldset()).first(),
       filePath
     );
   }
@@ -90,16 +90,14 @@ export class CpomModificationPage {
 
   async fillAvenantDate(date: string): Promise<void> {
     await this.conventionFieldset()
-      .locator('div.border-l-2 input[name$=".date"]')
+      .locator('input[name$=".date"]')
       .first()
       .fill(date);
   }
 
   async uploadAvenantDocument(filePath: string = SAMPLE_PDF): Promise<void> {
     await uploadToContainer(
-      this.conventionFieldset()
-        .locator("div.border-l-2 div.bg-alt-blue-france")
-        .first(),
+      uploadContainer(this.conventionFieldset()).last(),
       filePath
     );
   }
@@ -119,7 +117,7 @@ export class CpomModificationPage {
 
   async uploadAutreDocument(filePath: string = SAMPLE_PDF): Promise<void> {
     await uploadToContainer(
-      this.autreFieldset().locator("div.bg-alt-blue-france").first(),
+      uploadContainer(this.autreFieldset()).first(),
       filePath
     );
   }

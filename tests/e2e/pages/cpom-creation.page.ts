@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import type { Page } from "@playwright/test";
 
 import { expect } from "../fixtures/test";
-import { uploadToContainer } from "./upload.helper";
+import { uploadContainer, uploadToContainer } from "./upload.helper";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -110,7 +110,7 @@ export class CpomCreationPage {
 
   async uploadActeFile(file = "sample.pdf"): Promise<void> {
     await uploadToContainer(
-      this.page.locator("div.bg-alt-blue-france").first(),
+      uploadContainer(this.page).first(),
       fixturePath(file)
     );
   }

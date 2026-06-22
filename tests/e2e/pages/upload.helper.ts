@@ -1,7 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type { Locator } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import { expect } from "../fixtures/test";
 
@@ -14,6 +14,9 @@ export const SAMPLE_PDF = path.resolve(
   "files",
   "sample.pdf"
 );
+
+export const uploadContainer = (scope: Locator | Page): Locator =>
+  scope.locator('div:has(> input[type="file"])');
 
 export const uploadToContainer = async (
   container: Locator,

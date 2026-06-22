@@ -3,7 +3,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ControleType } from "@/types/controle.type";
 
 import { expect } from "../fixtures/test";
-import { SAMPLE_PDF, uploadToContainer } from "./upload.helper";
+import { SAMPLE_PDF, uploadContainer, uploadToContainer } from "./upload.helper";
 
 export type Section =
   | "description"
@@ -95,7 +95,7 @@ export class StructureModificationPage {
 
   async uploadControleRapport(filePath: string = SAMPLE_PDF): Promise<void> {
     await uploadToContainer(
-      this.controlesFieldset().locator("div.bg-alt-blue-france").first(),
+      uploadContainer(this.controlesFieldset()).first(),
       filePath
     );
   }
@@ -108,7 +108,7 @@ export class StructureModificationPage {
 
   async uploadConventionDocument(filePath: string = SAMPLE_PDF): Promise<void> {
     await uploadToContainer(
-      this.conventionFieldset().locator("div.bg-alt-blue-france").first(),
+      uploadContainer(this.conventionFieldset()).first(),
       filePath
     );
   }
@@ -121,16 +121,14 @@ export class StructureModificationPage {
 
   async fillAvenantDate(date: string): Promise<void> {
     await this.conventionFieldset()
-      .locator('div.border-l-2 input[name$=".date"]')
+      .locator('input[name$=".date"]')
       .first()
       .fill(date);
   }
 
   async uploadAvenantDocument(filePath: string = SAMPLE_PDF): Promise<void> {
     await uploadToContainer(
-      this.conventionFieldset()
-        .locator("div.border-l-2 div.bg-alt-blue-france")
-        .first(),
+      uploadContainer(this.conventionFieldset()).last(),
       filePath
     );
   }
@@ -144,7 +142,7 @@ export class StructureModificationPage {
 
   async uploadAutreDocument(filePath: string = SAMPLE_PDF): Promise<void> {
     await uploadToContainer(
-      this.autreFieldset().locator("div.bg-alt-blue-france").first(),
+      uploadContainer(this.autreFieldset()).first(),
       filePath
     );
   }
