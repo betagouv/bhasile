@@ -1,7 +1,31 @@
-import { Finess } from "@/generated/prisma/client";
+import { Finess, Prisma } from "@/generated/prisma/client";
 import { StructureFinessApiType } from "@/schemas/api/finess.schema";
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
+
+const buildStructureFinessWhere = (
+  structureFinessId: number | undefined,
+  entityId: EntityId,
+  finessId: number
+): Prisma.StructureFinessWhereUniqueInput => {
+  if (structureFinessId) {
+    return { id: structureFinessId };
+  }
+  if (entityId.structureVersionId != null) {
+    return {
+      structureVersionId_finessId: {
+        structureVersionId: entityId.structureVersionId,
+        finessId,
+      },
+    };
+  }
+  if (entityId.structureId != null) {
+    return {
+      structureId_finessId: { structureId: entityId.structureId, finessId },
+    };
+  }
+  return { id: 0 };
+};
 
 const deleteStructureFinesses = async (
   tx: PrismaTransaction,
@@ -58,9 +82,12 @@ export const createOrUpdateStructureFinesses = async (
       continue;
     }
 
-    // TODO: use the unique constraints instead of id
     await tx.structureFiness.upsert({
-      where: { id: structureFiness.id || 0 },
+      where: buildStructureFinessWhere(
+        structureFiness.id,
+        entityId,
+        upsertedFiness.id
+      ),
       update: {
         finessId: upsertedFiness.id,
         description: structureFiness.description,

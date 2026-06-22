@@ -477,6 +477,26 @@ describe("structure.repository db integration", () => {
     expect(version.dnaStructures[0].description).toBe("New DNA");
   });
 
+  it("should collapse duplicate DNA codes into a single link instead of crashing", async () => {
+    // GIVEN: an empty structure
+    const structure = await createStructure();
+    const duplicatedCode = `DNA-DUP-${Date.now()}-${randomUUID()}`;
+
+    // WHEN: the same DNA code is sent twice in one update (e.g. an autosaved draft)
+    await updateOne({
+      id: structure.id,
+      dnaStructures: [
+        { description: "Premier", dna: { code: duplicatedCode } },
+        { description: "Doublon", dna: { code: duplicatedCode } },
+      ],
+    });
+
+    // THEN: the save succeeds (no P2002) and a single link survives on the rolling version
+    const version = await fetchRollingVersion(structure.id);
+    expect(version.dnaStructures).toHaveLength(1);
+    expect(version.dnaStructures[0].dna.code).toBe(duplicatedCode);
+  });
+
   it("getFullStructure resolves the rolling version into the read model", async () => {
     // GIVEN: a structure edited via the rolling write
     const structure = await createStructure();
@@ -528,6 +548,26 @@ describe("structure.repository db integration", () => {
     expect(version.structureFinesses).toHaveLength(1);
     expect(version.structureFinesses[0].finess.code).toBe(newCode);
     expect(version.structureFinesses[0].description).toBe("new finess");
+  });
+
+  it("should collapse duplicate FINESS codes into a single link instead of crashing", async () => {
+    // GIVEN: an empty structure
+    const structure = await createStructure();
+    const duplicatedCode = `FIN-DUP-${Date.now()}-${randomUUID()}`;
+
+    // WHEN: the same FINESS code is sent twice in one update (e.g. an autosaved draft)
+    await updateOne({
+      id: structure.id,
+      structureFinesses: [
+        { description: "Premier", finess: { code: duplicatedCode } },
+        { description: "Doublon", finess: { code: duplicatedCode } },
+      ],
+    });
+
+    // THEN: the save succeeds (no P2002) and a single link survives on the rolling version
+    const version = await fetchRollingVersion(structure.id);
+    expect(version.structureFinesses).toHaveLength(1);
+    expect(version.structureFinesses[0].finess.code).toBe(duplicatedCode);
   });
 
   it("should upsert actesAdministratifs and delete missing ones", async () => {

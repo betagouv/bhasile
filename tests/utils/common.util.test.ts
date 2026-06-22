@@ -1,5 +1,6 @@
 import {
   areAllValuesEmpty,
+  areCodesUnique,
   computeAverage,
   convertObjectToArray,
   getPercentage,
@@ -294,6 +295,91 @@ describe("common util", () => {
 
       // WHEN
       const result = isNullOrUndefined(value);
+
+      // THEN
+      expect(result).toStrictEqual(false);
+    });
+  });
+
+  describe("areCodesUnique", () => {
+    it("should return true when all extracted codes are distinct", () => {
+      // GIVEN
+      const items = [{ code: "C-001" }, { code: "H-002" }];
+
+      // WHEN
+      const result = areCodesUnique(items, (item) => item.code);
+
+      // THEN
+      expect(result).toStrictEqual(true);
+    });
+
+    it("should return false when two extracted codes are equal", () => {
+      // GIVEN
+      const items = [{ code: "C-001" }, { code: "C-001" }];
+
+      // WHEN
+      const result = areCodesUnique(items, (item) => item.code);
+
+      // THEN
+      expect(result).toStrictEqual(false);
+    });
+
+    it("should treat codes differing only by whitespace as equal", () => {
+      // GIVEN
+      const items = [{ code: "C-001" }, { code: "  C-001  " }];
+
+      // WHEN
+      const result = areCodesUnique(items, (item) => item.code);
+
+      // THEN
+      expect(result).toStrictEqual(false);
+    });
+
+    it("should ignore blank, null and undefined codes", () => {
+      // GIVEN
+      const items = [
+        { code: "C-001" },
+        { code: "" },
+        { code: "   " },
+        { code: null },
+        { code: undefined },
+      ];
+
+      // WHEN
+      const result = areCodesUnique(items, (item) => item.code);
+
+      // THEN
+      expect(result).toStrictEqual(true);
+    });
+
+    it("should return true for an empty array", () => {
+      // GIVEN
+      const items: { code: string }[] = [];
+
+      // WHEN
+      const result = areCodesUnique(items, (item) => item.code);
+
+      // THEN
+      expect(result).toStrictEqual(true);
+    });
+
+    it("should return true when the items list is undefined", () => {
+      // WHEN
+      const result = areCodesUnique(
+        undefined,
+        (item: { code: string }) => item.code
+      );
+
+      // THEN
+      expect(result).toStrictEqual(true);
+    });
+
+    it("should work with any item shape thanks to the extractor", () => {
+      // GIVEN
+      const items = [{ siret: "111" }, { siret: "222" }, { siret: "111" }];
+
+      // WHEN
+      const result = areCodesUnique(items, (item) => item.siret);
 
       // THEN
       expect(result).toStrictEqual(false);
