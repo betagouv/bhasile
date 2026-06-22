@@ -1,5 +1,7 @@
+import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 
+import { buildCurrentVersionCteSql } from "../structures/structure.sql";
 import { ActiviteStats } from "./activite.type";
 
 export type StructureActiviteRow = {
@@ -37,14 +39,16 @@ export type StructureActivitePrismaRow = {
 export const getDepartementActivitesAverage = async (
   departementNumero: string | null,
   startDate: string | null | undefined,
-  endDate: string | null | undefined
+  endDate: string | null | undefined,
+  now: Date
 ): Promise<ActiviteStats | null> => {
   if (startDate === "undefined" || endDate === "undefined") {
     return null;
   }
 
-  const result = (await prisma.$queryRaw`
-    SELECT 
+  const result = (await prisma.$queryRaw(Prisma.sql`
+    WITH ${buildCurrentVersionCteSql(now)}
+    SELECT
       d.numero,
       ROUND(AVG(a."placesAutorisees"), 2) as "averagePlacesAutorisees",
       ROUND(AVG(a."placesIndisponibles"), 2) as "averagePlacesIndisponibles",
@@ -68,12 +72,13 @@ export const getDepartementActivitesAverage = async (
     FROM "Activite" a
     INNER JOIN "Dna" dna ON dna."code" = a."dnaCode"
     INNER JOIN "DnaStructure" ds ON ds."dnaId" = dna."id"
-    INNER JOIN "StructureVersion" sv ON sv."id" = ds."structureVersionId"
+    INNER JOIN current_version cv ON cv.version_id = ds."structureVersionId"
+    INNER JOIN "StructureVersion" sv ON sv."id" = cv.version_id
     INNER JOIN "Departement" d ON sv."departementAdministratif" = d."numero"
     WHERE a.date BETWEEN ${startDate} AND ${endDate}
       AND d."numero" = ${departementNumero}
     GROUP BY d.id, d.numero
-  `) as ActiviteStats[];
+  `)) as ActiviteStats[];
 
   return result[0] || null;
 };

@@ -2,7 +2,7 @@ import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 import { CpomColumn } from "@/types/ListColumn";
 
-import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
+import { resolveStructureVersionScalars } from "../structure-versions/structure-version.util";
 import { CpomDbDetails, CpomDbList } from "./cpom.db.type";
 import {
   countBySearch,
@@ -16,19 +16,12 @@ const resolveCpomStructureScalars = (
   cpomStructure: CpomDbDetails["structures"][number],
   now: Date
 ) => {
-  const linkedStructure = cpomStructure.structure;
-  if (!linkedStructure) {
+  if (!cpomStructure.structure) {
     return cpomStructure;
   }
-  const { structureVersions, ...structureRest } = linkedStructure;
-  const currentVersion = resolveCurrentVersion(structureVersions, now);
   return {
     ...cpomStructure,
-    structure: {
-      ...structureRest,
-      type: currentVersion?.type ?? null,
-      communeAdministrative: currentVersion?.communeAdministrative ?? null,
-    },
+    structure: resolveStructureVersionScalars(cpomStructure.structure, now),
   };
 };
 

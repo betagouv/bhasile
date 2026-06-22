@@ -14,7 +14,7 @@ import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 
 import { StructureVersionDbTransformation } from "../structure-versions/structure-version.db.type";
-import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
+import { resolveStructureVersionScalars } from "../structure-versions/structure-version.util";
 import { StructureDbDetails, StructureDbList } from "./structure.db.type";
 
 const typesPublic: Record<string, PublicType> = {
@@ -229,20 +229,11 @@ const resolveLinkedStructureScalars = (
   linkedStructure: CpomLinkedStructureRow,
   now: Date
 ) => {
-  const linked = linkedStructure.structure;
-  if (!linked) {
+  if (!linkedStructure.structure) {
     return linkedStructure;
   }
-  const currentVersion = resolveCurrentVersion(linked.structureVersions, now);
   return {
     ...linkedStructure,
-    structure: {
-      id: linked.id,
-      codeBhasile: linked.codeBhasile,
-      operateur: linked.operateur,
-      forms: linked.forms,
-      type: currentVersion?.type ?? null,
-      communeAdministrative: currentVersion?.communeAdministrative ?? null,
-    },
+    structure: resolveStructureVersionScalars(linkedStructure.structure, now),
   };
 };

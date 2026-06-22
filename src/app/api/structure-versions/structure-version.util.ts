@@ -1,4 +1,10 @@
 import { startOfNextUtcDay } from "@/app/utils/date.util";
+import { StructureType } from "@/generated/prisma/client";
+
+type VersionScalars = {
+  type: StructureType | null;
+  communeAdministrative: string | null;
+};
 
 type ResolvableVersion = {
   id: number;
@@ -51,3 +57,18 @@ export const resolvePredecessor = <TVersion extends ResolvableVersion>(
   effectiveDate: Date
 ): TVersion | undefined =>
   resolveLatestValidBefore(versions, effectiveDate.getTime());
+
+export const resolveStructureVersionScalars = <
+  TStructure extends { structureVersions: (ResolvableVersion & VersionScalars)[] },
+>(
+  structure: TStructure,
+  now: Date
+): Omit<TStructure, "structureVersions"> & VersionScalars => {
+  const { structureVersions, ...structureRest } = structure;
+  const currentVersion = resolveCurrentVersion(structureVersions, now);
+  return {
+    ...structureRest,
+    type: currentVersion?.type ?? null,
+    communeAdministrative: currentVersion?.communeAdministrative ?? null,
+  };
+};
