@@ -310,6 +310,41 @@ export const createMinimalStructure = async (
 };
 
 // Only used in e2e tests
+export const createMinimalStructureVersion = async (
+  structureId: number,
+  version: {
+    type: StructureType;
+    departementAdministratif?: string;
+    communeAdministrative?: string;
+    codePostalAdministratif?: string;
+    adresseAdministrative?: string;
+    nom?: string;
+    effectiveDate?: Date;
+  }
+): Promise<void> => {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("This function is only used in e2e tests");
+  }
+
+  await prisma.structureVersion.deleteMany({
+    where: { structureId, structureVersionTransformationId: null },
+  });
+
+  await prisma.structureVersion.create({
+    data: {
+      structureId,
+      effectiveDate: version.effectiveDate ?? new Date("2020-01-01"),
+      type: version.type,
+      departementAdministratif: version.departementAdministratif,
+      communeAdministrative: version.communeAdministrative,
+      codePostalAdministratif: version.codePostalAdministratif,
+      adresseAdministrative: version.adresseAdministrative,
+      nom: version.nom,
+    },
+  });
+};
+
+// Only used in e2e tests
 export const deleteStructure = async (codeBhasile: string): Promise<void> => {
   if (process.env.NODE_ENV === "production") {
     throw new Error("This function is only used in e2e tests");

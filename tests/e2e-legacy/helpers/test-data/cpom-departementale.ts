@@ -60,7 +60,7 @@ export const cpomDepartementale: {
   modificationFormData: {
     granularity: "DEPARTEMENTALE",
     region: "Île-de-France",
-    departements: "92",
+    departements: "75",
     operateur: {
       name: "Opérateur 1",
       searchTerm: "Opér",
