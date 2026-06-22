@@ -44,10 +44,10 @@ import { wipeTables } from "./utils/wipe";
 const prisma = createPrismaClient();
 const GENERATE_BHASILE_CODES = true; // Set to false to try migration one off script
 
-export const seedNumber = (number: number): number =>
+const seedNumber = (number: number): number =>
   process.env.SMALL_SEED ? Math.floor(number / 10) : number;
 
-export async function seed(): Promise<void> {
+async function seed(): Promise<void> {
   console.log("🗑️ Suppression des données existantes...");
   await wipeTables(prisma);
 
