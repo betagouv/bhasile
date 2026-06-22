@@ -1,9 +1,9 @@
 -- Objective: core structure attributes for reporting/filters
--- One row per structure, centralizes common joins (operateur, departement, region) and DNA aggregation.
--- Last effective version < now, or structure as a fallback.
+-- One row per structure with a current StructureVersion, centralizes common joins
+-- (operateur, departement, region) and DNA aggregation.
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_core" AS
 WITH
-  structure_version_latest AS (
+  structure_version_current AS (
     SELECT DISTINCT
       ON (sv."structureId") sv."structureId",
       sv."id" AS "structure_version_id",
@@ -11,38 +11,49 @@ WITH
       sv."departementAdministratif",
       sv."latitude",
       sv."longitude",
-      sv."public"
+      sv."public",
+      sv."creationDate",
+      sv."date303"
     FROM
       public."StructureVersion" sv
+      LEFT JOIN public."StructureVersionTransformation" svt ON svt."id" = sv."structureVersionTransformationId"
+      LEFT JOIN public."Form" f ON f."transformationId" = svt."transformationId"
     WHERE
       sv."structureId" IS NOT NULL
-      AND sv."effectiveDate" <= CURRENT_TIMESTAMP
+      AND sv."effectiveDate" < (
+        ((CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date + 1)::timestamp AT TIME ZONE 'UTC'
+      )
+      AND (
+        sv."structureVersionTransformationId" IS NULL
+        OR f."status" IS TRUE
+      )
     ORDER BY
       sv."structureId",
       sv."effectiveDate" DESC,
-      sv."updatedAt" DESC,
       sv."id" DESC
   )
 SELECT
   s."id" AS "id",
-  svl."structure_version_id" AS "structure_version_id",
+  svc."structure_version_id" AS "structure_version_id",
   s."codeBhasile" AS "code_bhasile",
-  COALESCE(svl."type", s."type") AS "structure_type",
+  svc."type" AS "structure_type",
   s."createdAt" AS "created_at",
   s."updatedAt" AS "updated_at",
-  COALESCE(svl."departementAdministratif", s."departementAdministratif") AS "departement_administratif",
-  COALESCE(svl."latitude", s."latitude") AS "latitude",
-  COALESCE(svl."longitude", s."longitude") AS "longitude",
-  COALESCE(svl."public", s."public") AS "public",
+  svc."creationDate" AS "creation_date",
+  svc."date303" AS "date_303",
+  svc."departementAdministratif" AS "departement_administratif",
+  svc."latitude" AS "latitude",
+  svc."longitude" AS "longitude",
+  svc."public" AS "public",
   dep."name" AS "departement",
   r."name" AS "region",
   o."name" AS "operateur",
   dna_agg."dna_codes" AS "dna_codes"
 FROM
   public."Structure" s
-  LEFT JOIN structure_version_latest svl ON svl."structureId" = s."id"
+  INNER JOIN structure_version_current svc ON svc."structureId" = s."id"
   LEFT JOIN public."Operateur" o ON o."id" = s."operateurId"
-  LEFT JOIN public."Departement" dep ON dep."numero" = COALESCE(svl."departementAdministratif", s."departementAdministratif")
+  LEFT JOIN public."Departement" dep ON dep."numero" = svc."departementAdministratif"
   LEFT JOIN public."Region" r ON r."id" = dep."regionId"
   LEFT JOIN LATERAL (
     SELECT
@@ -59,12 +70,5 @@ FROM
       public."DnaStructure" ds
       JOIN public."Dna" dna ON dna."id" = ds."dnaId"
     WHERE
-      (
-        svl."structure_version_id" IS NOT NULL
-        AND ds."structureVersionId" = svl."structure_version_id"
-      )
-      OR (
-        svl."structure_version_id" IS NULL
-        AND ds."structureId" = s."id"
-      )
+      ds."structureVersionId" = svc."structure_version_id"
   ) dna_agg ON TRUE;

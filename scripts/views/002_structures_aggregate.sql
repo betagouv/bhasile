@@ -7,16 +7,7 @@ WITH
       st."placesAutorisees"
     FROM
 :"SCHEMA"."structures_core" sc
-      INNER JOIN public."StructureTypologie" st ON (
-        (
-          sc."structure_version_id" IS NOT NULL
-          AND st."structureVersionId" = sc."structure_version_id"
-        )
-        OR (
-          sc."structure_version_id" IS NULL
-          AND st."structureId" = sc."id"
-        )
-      )
+      INNER JOIN public."StructureTypologie" st ON st."structureVersionId" = sc."structure_version_id"
     WHERE
       st."placesAutorisees" IS NOT NULL
     ORDER BY
