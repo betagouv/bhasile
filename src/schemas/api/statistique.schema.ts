@@ -1,7 +1,8 @@
 import z from "zod";
 
-import { Repartition, StructureType } from "@/generated/prisma/client";
 import type { NumericAggregation } from "@/app/utils/math.util";
+import { Repartition } from "@/types/adresse.type";
+import { StructureType } from "@/types/structure.type";
 
 export type StatistiquesAggregation = NumericAggregation;
 

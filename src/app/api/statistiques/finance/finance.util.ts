@@ -1,13 +1,13 @@
 import {
-  isStructureAutorisee,
-  isStructureSubventionnee,
-} from "@/app/utils/structure.util";
-import { toStatNumber } from "@/app/utils/statistiques-format.util";
-import {
   aggregateValues,
   NumericAggregation,
   sumValues,
 } from "@/app/utils/math.util";
+import { toStatNumber } from "@/app/utils/statistiques-format.util";
+import {
+  isStructureAutorisee,
+  isStructureSubventionnee,
+} from "@/app/utils/structure.util";
 import {
   FinanceByYearScopeStat,
   FinanceByYearStat,

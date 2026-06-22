@@ -1,7 +1,7 @@
+import type { StructureDbList } from "@/app/api/structures/structure.db.type";
 import {
   isStructureInCpom,
 } from "@/app/api/structures/structure.util";
-import type { StructureDbList } from "@/app/api/structures/structure.db.type";
 import { CURRENT_YEAR } from "@/constants";
 import {
   BatiStat,
@@ -15,12 +15,6 @@ import {
   StructureType,
 } from "@/types/structure.type";
 
-import type {
-  StatistiqueDbAdresse,
-  StatistiqueDbCpomStructure,
-  StatistiqueDbStructure,
-  StatistiqueDbTypologie,
-} from "../statistiques.db.type";
 import {
   filterStructuresActives,
   filterStructuresWithTypologie,
@@ -28,6 +22,12 @@ import {
   getTypologieMapForExactYear,
   getTypologieYears,
 } from "../shared/shared.utils";
+import type {
+  StatistiqueDbAdresse,
+  StatistiqueDbCpomStructure,
+  StatistiqueDbStructure,
+  StatistiqueDbTypologie,
+} from "../statistiques.db.type";
 
 const getRepartitionFromRepartitions = (
   repartitions: (Repartition | null | undefined)[]
@@ -74,7 +74,7 @@ const sumPlacesPerBati = (
       continue;
     }
 
-    const bati = adresse.repartition ?? Repartition.COLLECTIF;
+    const bati = (adresse.repartition ?? Repartition.COLLECTIF) as Repartition;
     const places = adresse.placesAutorisees ?? 0;
 
     placesByBati.set(bati, (placesByBati.get(bati) ?? 0) + places);
@@ -99,7 +99,7 @@ const getBatiPerStructure = (
 
   const result = new Map<number, Repartition>();
   for (const [structureId, repartitions] of byStructure) {
-    result.set(structureId, getRepartitionFromRepartitions(repartitions));
+    result.set(structureId, getRepartitionFromRepartitions(repartitions) as Repartition);
   }
   return result;
 };

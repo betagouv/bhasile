@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { computeStructuresStatistiques } from "@/app/api/statistiques/structures/structures.util";
-import { Repartition, StructureType } from "@/generated/prisma/client";
+import { Repartition } from "@/types/adresse.type";
+import { StructureType } from "@/types/structure.type";
 
 vi.mock("@/constants", async () => {
   const actual = await vi.importActual<typeof import("@/constants")>(

@@ -1,9 +1,9 @@
+import { ratio } from "@/app/utils/math.util";
+import { toStatRate } from "@/app/utils/statistiques-format.util";
 import {
   isStructureEligibleForActiviteIndisponibilite,
   isStructureEligibleForActivitePresencesIndues,
 } from "@/app/utils/structure.util";
-import { toStatRate } from "@/app/utils/statistiques-format.util";
-import { ratio } from "@/app/utils/math.util";
 import {
   ActiviteByMonthStat,
   StatistiqueApiRead,

@@ -4,12 +4,6 @@ import {
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
-import type {
-  StatistiqueDbAdresse,
-  StatistiqueDbDepartement,
-  StatistiqueDbStructure,
-  StatistiqueDbTypologie,
-} from "../statistiques.db.type";
 import {
   computeTotalPlaces,
   filterStructuresActives,
@@ -18,6 +12,12 @@ import {
   getTypologieMapForExactYear,
   getTypologieYears,
 } from "../shared/shared.utils";
+import type {
+  StatistiqueDbAdresse,
+  StatistiqueDbDepartement,
+  StatistiqueDbStructure,
+  StatistiqueDbTypologie,
+} from "../statistiques.db.type";
 
 type PlacesIndicators = Pick<
   StatistiqueApiRead["places"],

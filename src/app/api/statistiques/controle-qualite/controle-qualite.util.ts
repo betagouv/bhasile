@@ -1,11 +1,11 @@
-import { CURRENT_YEAR } from "@/constants";
 import { isEigComportementViolent } from "@/app/utils/eig.util";
-import { toStatNumber, toStatRate } from "@/app/utils/statistiques-format.util";
 import {
   aggregateValues,
   NumericAggregation,
   ratio,
 } from "@/app/utils/math.util";
+import { toStatNumber, toStatRate } from "@/app/utils/statistiques-format.util";
+import { CURRENT_YEAR } from "@/constants";
 import {
   ControleQualiteByMonthStat,
   ControleQualiteByTrimesterStat,

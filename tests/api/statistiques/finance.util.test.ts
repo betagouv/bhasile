@@ -4,9 +4,8 @@ import {
   computeFinanceStatistiques,
   getStructureIdsByFinanceScope,
 } from "@/app/api/statistiques/finance/finance.util";
-import { StructureType } from "@/generated/prisma/client";
-
 import type { StatistiqueDbBudget } from "@/app/api/statistiques/statistiques.db.type";
+import { StructureType } from "@/types/structure.type";
 
 const budgetRow = (
   structureId: number,

@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { StructureType } from "@/generated/prisma/client";
-
 import { computeActiviteStatistiques } from "@/app/api/statistiques/activite/activite.util";
+import { StructureType } from "@/types/structure.type";
 
 describe("activite statistics util", () => {
   const structures = [

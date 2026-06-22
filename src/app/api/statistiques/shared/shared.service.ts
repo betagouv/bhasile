@@ -11,8 +11,8 @@ import type {
   StatistiqueDbTypologie,
 } from "../statistiques.db.type";
 import {
-  findDepartementsWithPopulation,
   findCpomStructures,
+  findDepartementsWithPopulation,
   findDnaLinksByStructure,
   findStructureAdresses,
   findStructureIds,
