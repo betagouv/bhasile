@@ -46,6 +46,13 @@ export const formatDateToIsoString = (
   return undefined;
 };
 
+export const startOfNextUtcDay = (reference: Date): Date => {
+  const nextDay = new Date(reference);
+  nextDay.setUTCHours(0, 0, 0, 0);
+  nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+  return nextDay;
+};
+
 export const getMonthsBetween = (
   startDate?: string | null,
   endDate?: string | null

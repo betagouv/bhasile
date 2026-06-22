@@ -58,6 +58,36 @@ describe("resolveCurrentVersion", () => {
     expect(resolveCurrentVersion([past, future], now)?.id).toBe(1);
   });
 
+  it("retient une version effective aujourd'hui même si l'heure courante précède son horodatage", () => {
+    const todayMorning = new Date("2026-06-15T08:00:00.000Z");
+    const yesterday = buildVersion({
+      id: 1,
+      effectiveDate: new Date("2026-06-14T12:00:00.000Z"),
+    });
+    const todayAtNoon = buildVersion({
+      id: 2,
+      effectiveDate: new Date("2026-06-15T12:00:00.000Z"),
+    });
+
+    expect(
+      resolveCurrentVersion([yesterday, todayAtNoon], todayMorning)?.id
+    ).toBe(2);
+  });
+
+  it("ignore une version qui ne prend effet que demain", () => {
+    const todayMorning = new Date("2026-06-15T08:00:00.000Z");
+    const today = buildVersion({
+      id: 1,
+      effectiveDate: new Date("2026-06-15T12:00:00.000Z"),
+    });
+    const tomorrow = buildVersion({
+      id: 2,
+      effectiveDate: new Date("2026-06-16T12:00:00.000Z"),
+    });
+
+    expect(resolveCurrentVersion([today, tomorrow], todayMorning)?.id).toBe(1);
+  });
+
   it("ignore une version de transfo dont le form n'est pas finalisé", () => {
     const rolling = buildVersion({
       id: 1,

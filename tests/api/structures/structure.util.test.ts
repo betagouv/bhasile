@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { StructureDbList } from "@/app/api/structures/structure.db.type";
+import { buildStructuresWhereSql } from "@/app/api/structures/structure.sql";
 import {
-  buildStructuresWhereSql,
   getDatesConvention,
   getDatesPeriodeAutorisation,
 } from "@/app/api/structures/structure.util";

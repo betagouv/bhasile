@@ -15,6 +15,28 @@ export const structureOperateurSelect = {
   forms: true,
 } satisfies Prisma.StructureSelect;
 
+export const structureListVersionInclude = {
+  contacts: true,
+  adresses: {
+    include: {
+      adresseTypologies: {
+        orderBy: { year: "desc" },
+      },
+    },
+  },
+  antennes: true,
+  structureFinesses: {
+    include: { finess: true },
+  },
+  structureTypologies: {
+    orderBy: { year: "desc" },
+  },
+  dnaStructures: {
+    orderBy: { dna: { code: "asc" } },
+    include: { dna: true },
+  },
+} satisfies Prisma.StructureVersionInclude;
+
 export const structureListInclude = {
   adresses: {
     include: {
@@ -163,7 +185,9 @@ export type StructureDbMap = Prisma.StructureGetPayload<{
 }>;
 
 export type StructureDbList = Prisma.StructureGetPayload<{
-  include: typeof structureListInclude;
+  include: typeof structureListInclude & {
+    structureVersions: { include: typeof structureListVersionInclude };
+  };
 }>;
 
 export type StructureDbDetails = Prisma.StructureGetPayload<{
