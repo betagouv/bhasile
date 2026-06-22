@@ -1,8 +1,11 @@
 -- Objective: core structure attributes for reporting/filters
 -- One row per structure with a current StructureVersion, centralizes common joins
 -- (operateur, departement, region) and DNA aggregation.
-CREATE OR REPLACE VIEW :"SCHEMA"."structures_core" AS WITH structure_version_current AS (
-    SELECT DISTINCT ON (sv."structureId") sv."structureId",
+CREATE OR REPLACE VIEW:"SCHEMA"."structures_core" AS
+WITH
+  structure_version_current AS (
+    SELECT DISTINCT
+      ON (sv."structureId") sv."structureId",
       sv."id" AS "structure_version_id",
       sv."type",
       sv."departementAdministratif",
@@ -11,31 +14,40 @@ CREATE OR REPLACE VIEW :"SCHEMA"."structures_core" AS WITH structure_version_cur
       sv."public",
       sv."creationDate",
       sv."date303"
-    FROM public."StructureVersion" sv
+    FROM
+      public."StructureVersion" sv
       LEFT JOIN public."StructureVersionTransformation" svt ON svt."id" = sv."structureVersionTransformationId"
       LEFT JOIN public."Form" f ON f."transformationId" = svt."transformationId"
-    WHERE sv."structureId" IS NOT NULL
+    WHERE
+      sv."structureId" IS NOT NULL
       AND sv."effectiveDate" < NOW()
       AND (
+        -- Filter out structures versions linked to a non finished transformation
         sv."structureVersionTransformationId" IS NULL
         OR f."status" IS TRUE
       )
-    ORDER BY sv."structureId",
+    ORDER BY
+      sv."structureId",
       sv."effectiveDate" DESC,
       sv."id" DESC
   ),
   dna_codes_by_version AS (
-    SELECT ds."structureVersionId",
+    SELECT
+      ds."structureVersionId",
       STRING_AGG(
         DISTINCT dna."code",
         ', '
-        ORDER BY dna."code"
+        ORDER BY
+          dna."code"
       ) AS "dna_codes"
-    FROM public."DnaStructure" ds
+    FROM
+      public."DnaStructure" ds
       JOIN public."Dna" dna ON dna."id" = ds."dnaId"
-    GROUP BY ds."structureVersionId"
+    GROUP BY
+      ds."structureVersionId"
   )
-SELECT s."id" AS "id",
+SELECT
+  s."id" AS "id",
   svc."structure_version_id" AS "structure_version_id",
   s."codeBhasile" AS "code_bhasile",
   svc."type" AS "structure_type",
@@ -51,7 +63,8 @@ SELECT s."id" AS "id",
   r."name" AS "region",
   o."name" AS "operateur",
   COALESCE(dna."dna_codes", '') AS "dna_codes"
-FROM public."Structure" s
+FROM
+  public."Structure" s
   INNER JOIN structure_version_current svc ON svc."structureId" = s."id"
   LEFT JOIN public."Operateur" o ON o."id" = s."operateurId"
   LEFT JOIN public."Departement" dep ON dep."numero" = svc."departementAdministratif"
