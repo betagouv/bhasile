@@ -1,6 +1,8 @@
 /* eslint-disable react-hooks/rules-of-hooks -- Playwright's `use` fixture parameter shadows the React hook name. */
 import { test as base } from "@playwright/test";
 
+import { StructureType } from "@/types/structure.type";
+
 import { deleteCpomById, deleteStructureByCode } from "../seed/cleanup";
 import { createCpomForTest, SeededCpom } from "../seed/cpom.seed";
 import {
@@ -10,6 +12,7 @@ import {
 
 export type Fixtures = {
   seededStructure: SeededStructure;
+  seededSubventionneeStructure: SeededStructure;
   seededCpom: SeededCpom;
   seededCpomWithDates: SeededCpom;
   structuresPool: SeededStructure[];
@@ -18,6 +21,17 @@ export type Fixtures = {
 export const test = base.extend<Fixtures>({
   seededStructure: async ({}, use) => {
     const structure = await createStructureForTest();
+    try {
+      await use(structure);
+    } finally {
+      await deleteStructureByCode(structure.codeBhasile).catch(() => {});
+    }
+  },
+
+  seededSubventionneeStructure: async ({}, use) => {
+    const structure = await createStructureForTest({
+      type: StructureType.HUDA,
+    });
     try {
       await use(structure);
     } finally {

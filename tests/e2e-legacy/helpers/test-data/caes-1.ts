@@ -4,12 +4,11 @@ import { StructureType } from "@/types/structure.type";
 import { TestStructureScenario } from "./types";
 
 export const caes1: TestStructureScenario = {
-  name: "CAES 1 - Collectif, single address, two contacts, all docs, old eval, no controls, filiale",
+  name: "CAES 1 - Collectif, single address, two contacts, all docs, old eval, no controls",
   formData: {
     codeBhasile: "BHA-TST-001",
     type: StructureType.CAES,
     cpom: false,
-    filiale: "Filiale Test",
     operateur: {
       name: "Opérateur 1",
       searchTerm: "Opér",
@@ -272,7 +271,7 @@ export const caes1: TestStructureScenario = {
     lgbt: false,
     fvvTeh: true,
     contacts: [{ email: "modif-caes1@example.com" }],
-    notes: "Notes modification CAES 1 - filiale.",
+    notes: "Notes modification CAES 1.",
     ouvertureFermeture: {
       placesACreer: "5",
       echeancePlacesACreer: "2026-04-01",

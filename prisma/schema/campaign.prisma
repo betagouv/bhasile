@@ -4,7 +4,7 @@ model Campaign {
   id   Int    @id @default(autoincrement())
   name String
 
-  structureVersions StructureVersion[]
+  structureVersion StructureVersion?
 
   @@schema("public")
 }

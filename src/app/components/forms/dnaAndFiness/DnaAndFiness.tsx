@@ -56,10 +56,7 @@ export const DnaAndFiness = ({
     }
   }, [structureFinesses, setValue]);
 
-  const title =
-    formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
-      ? `Veuillez ne retenir qu’un seul code DNA ${isAutorisee ? "et FINESS" : ""} pour l’ensemble de la structure (sauf cas exceptionnels). Veuillez vous assurer qu’une fiche de paramétrage a été transmise à l’OFII.`
-      : `Code${isMultiDna ? "s" : ""} DNA${isAutorisee ? " et FINESS" : ""}`;
+  const title = `Code${isMultiDna ? "s" : ""} DNA${isAutorisee ? " et FINESS" : ""}`;
 
   return (
     <>

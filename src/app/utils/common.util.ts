@@ -74,3 +74,13 @@ export const isEmptyValue = (value: unknown): boolean => {
 export const areAllValuesEmpty = (object: Record<string, unknown>): boolean => {
   return Object.values(object).every(isEmptyValue);
 };
+
+export const areCodesUnique = <T>(
+  items: T[] | undefined,
+  getCode: (item: T) => string | null | undefined
+): boolean => {
+  const normalizedCodes = (items ?? [])
+    .map((item) => getCode(item)?.trim())
+    .filter((code): code is string => Boolean(code));
+  return normalizedCodes.length === new Set(normalizedCodes).size;
+};

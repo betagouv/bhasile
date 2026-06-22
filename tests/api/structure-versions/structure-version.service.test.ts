@@ -282,6 +282,8 @@ describe("copyStructureVersion", () => {
       logementSocial: 0,
     });
 
+    // structureFinesses : table de passage recopiée sans id, en réutilisant le Finess via son code unique.
+    // La description est portée par le lien, pas par l'entité référentielle.
     expect(result.structureFinesses).toEqual([
       {
         description: "FINESS toute la structure",
@@ -293,6 +295,8 @@ describe("copyStructureVersion", () => {
       placesAutorisees: 10,
     });
 
+    // dnaStructures : table de passage recopiée, en réutilisant le Dna via son code.
+    // La description est portée par le lien, pas par l'entité référentielle.
     expect(result.dnaStructures?.[0]).not.toHaveProperty("id");
     expect(result.dnaStructures?.[0]?.description).toBe("DNA site d'Avranches");
     expect(result.dnaStructures?.[0]?.dna).toEqual({ code: "DNA-1" });

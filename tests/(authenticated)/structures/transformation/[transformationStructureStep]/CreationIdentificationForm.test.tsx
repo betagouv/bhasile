@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -13,12 +13,14 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
-const mockHandleValidation = vi.fn();
+const mockGoToNextStep = vi.fn();
+const mockHandleSave = vi.fn();
 
 vi.mock("@/app/hooks/useTransformationFormHandling", () => ({
   useTransformationFormHandling: () => ({
-    handleValidation: mockHandleValidation,
-    handleSave: vi.fn(),
+    goToNextStep: mockGoToNextStep,
+    handleSave: mockHandleSave,
+    shouldShowIncompleteSteps: false,
   }),
 }));
 
@@ -45,6 +47,21 @@ vi.mock("@/app/components/forms/FormWrapper", () => ({
   FooterButtonType: { CANCEL: "cancel", SAVE: "save", SUBMIT: "submit" },
 }));
 
+const capturedSaver: {
+  onSave?: (data: Record<string, unknown>, values: unknown) => void;
+} = {};
+
+vi.mock("@/app/components/forms/TransformationFormController", () => ({
+  TransformationFormController: ({
+    onSave,
+  }: {
+    onSave: (data: Record<string, unknown>, values: unknown) => void;
+  }) => {
+    capturedSaver.onSave = onSave;
+    return null;
+  },
+}));
+
 vi.mock("@/app/components/forms/description/FieldSetDescription", () => ({
   FieldSetDescription: () => null,
 }));
@@ -55,17 +72,39 @@ vi.mock(
   })
 );
 vi.mock("@/app/components/forms/dnaAndFiness/DnaAndFiness", () => ({
-  DnaAndFiness: () => null,
+  DnaAndFiness: () => <div data-testid="dna-and-finess" />,
+}));
+vi.mock("@/app/components/forms/dnaAndFiness/TransformationDnaAndFiness", () => ({
+  TransformationDnaAndFiness: () => (
+    <div data-testid="transformation-dna-and-finess" />
+  ),
 }));
 vi.mock("@/app/components/forms/contacts/FieldSetContacts", () => ({
   FieldSetContacts: () => null,
 }));
-vi.mock("@/app/components/forms/SaveCurrentForm", () => ({
-  SaveCurrentForm: () => null,
-}));
+
+const renderForm = (formKind: FormKind = FormKind.OUVERTURE_EX_NIHILO) => {
+  const structureVersionTransformation: StructureVersionTransformationApiRead = {
+    id: 7,
+    type: StructureVersionTransformationType.CREATION,
+    structureVersion: { id: 999 },
+  };
+  const transformation: TransformationApiRead = {
+    id: 12,
+    type: TransformationType.OUVERTURE_EX_NIHILO,
+    structureVersionTransformations: [structureVersionTransformation],
+  };
+  render(
+    <CreationIdentificationForm
+      transformation={transformation}
+      structureVersionTransformation={structureVersionTransformation}
+      formKind={formKind}
+    />
+  );
+};
 
 describe("CreationIdentificationForm", () => {
-  it("should pass the structureVersion as defaultValues, including its id", () => {
+  it("passe le structureVersion (et son id) en defaultValues", () => {
     // GIVEN
     const structureVersionTransformation: StructureVersionTransformationApiRead = {
       id: 7,
@@ -101,40 +140,64 @@ describe("CreationIdentificationForm", () => {
     });
   });
 
-  it("should pass transformationId and a structureVersionTransformation update payload to handleValidation", () => {
+  it("affiche DnaAndFiness pour une ouverture ex nihilo", () => {
+    // GIVEN / WHEN
+    renderForm(FormKind.OUVERTURE_EX_NIHILO);
+
+    // THEN
+    expect(screen.getByTestId("dna-and-finess")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("transformation-dna-and-finess")
+    ).not.toBeInTheDocument();
+  });
+
+  it("affiche TransformationDnaAndFiness pour une ouverture depuis une ou plusieurs structures", () => {
+    // GIVEN / WHEN
+    renderForm(FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES);
+
+    // THEN
+    expect(
+      screen.getByTestId("transformation-dna-and-finess")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("dna-and-finess")).not.toBeInTheDocument();
+  });
+
+  it("délègue la navigation à goToNextStep au submit", () => {
     // GIVEN
-    const structureVersionTransformation: StructureVersionTransformationApiRead = {
-      id: 7,
-      type: StructureVersionTransformationType.CREATION,
-      structureVersion: { id: 999 },
-    };
-    const transformation: TransformationApiRead = {
-      id: 12,
-      type: TransformationType.OUVERTURE_EX_NIHILO,
-      structureVersionTransformations: [structureVersionTransformation],
-    };
-    render(
-      <CreationIdentificationForm
-        transformation={transformation}
-        structureVersionTransformation={structureVersionTransformation}
-        formKind={FormKind.OUVERTURE_EX_NIHILO}
-      />
-    );
+    renderForm();
 
     // WHEN
-    captured.onSubmit?.({
+    captured.onSubmit?.({});
+
+    // THEN
+    expect(mockGoToNextStep).toHaveBeenCalledTimes(1);
+  });
+
+  it("construit le payload de mise à jour et le transmet à handleSave avec le schéma strict et les valeurs brutes lors de l'enregistrement", () => {
+    // GIVEN
+    renderForm();
+    const rawValues = {
       id: 999,
       nom: "Les Coquelicots",
       creationDate: "2024-01-01T00:00:00.000Z",
-    });
+    };
+
+    // WHEN — the shared saver runs with the parsed draft data and the raw values
+    capturedSaver.onSave?.(
+      {
+        id: 999,
+        nom: "Les Coquelicots",
+        creationDate: "2024-01-01T00:00:00.000Z",
+      },
+      rawValues
+    );
 
     // THEN
-    expect(mockHandleValidation).toHaveBeenCalledWith({
+    expect(mockHandleSave).toHaveBeenCalledWith({
       transformationId: 12,
       structureVersionTransformation: {
         id: 7,
         type: StructureVersionTransformationType.CREATION,
-        forms: undefined,
         operateurId: undefined,
         structureVersion: {
           id: 999,
@@ -144,6 +207,8 @@ describe("CreationIdentificationForm", () => {
           effectiveDate: "2024-01-01T00:00:00.000Z",
         },
       },
+      strictSchema: expect.anything(),
+      values: rawValues,
     });
   });
 });

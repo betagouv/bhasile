@@ -2,7 +2,7 @@ import { StructureType } from "@/types/structure.type";
 
 type Props = {
   nom: string;
-  codeBhasile: string;
+  codeBhasile?: string;
   type: StructureType;
   operateur: { name: string };
   departementAdministratif: string;
@@ -23,7 +23,8 @@ export const StructureCard = ({
           {nom}
         </strong>
         <div className="text-sm">
-          {codeBhasile} - {type}, {operateur.name}, {departementAdministratif}
+          {codeBhasile && `${codeBhasile} - `}
+          {type}, {operateur.name}, {departementAdministratif}
         </div>
       </div>
     </div>
