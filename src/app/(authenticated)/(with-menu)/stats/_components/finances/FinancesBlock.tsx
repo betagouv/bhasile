@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 
+// import { formatDate } from "@/app/utils/date.util";
 import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
 
 import { DotationChart } from "../../../structures/[id]/_components/_finances/DotationChart";
@@ -20,7 +21,7 @@ export const FinancesBlock = (): ReactElement => {
         </div>
         {/* TODO : à mettre à jour quand on aura les campagnes d'actualisation */}
         {/* <div className="flex items-center text-right text-xs text-title-blue-france">
-          Données mises à jour le {new Date().toLocaleDateString()}
+          Données mises à jour le {formatDate(new Date())}
         </div> */}
       </div>
       <h4 className="text-title-blue-france text-lg">

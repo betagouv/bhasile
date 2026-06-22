@@ -1,5 +1,5 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import { ReactElement, useState } from "react";
+import { Fragment, ReactElement, useState } from "react";
 
 export const MultiInformationCard = ({
   informations,
@@ -8,7 +8,7 @@ export const MultiInformationCard = ({
   const [showDetails, setShowDetails] = useState(false);
 
   return (
-    <div className="px-6 py-3 rounded-xl bg-alt-blue-france flex-col w-[220] h-full flex justify-center items-center">
+    <div className="px-6 py-3 rounded-xl bg-alt-blue-france flex-col w-[220px] h-full flex justify-center items-center">
       {detailLabel && (
         <div className="flex justify-end w-full">
           <Button
@@ -25,7 +25,7 @@ export const MultiInformationCard = ({
       {!showDetails &&
         informations.map(
           ({ primaryInformation, secondaryInformation }, index) => (
-            <>
+            <Fragment key={index}>
               <div
                 className={`font-bold mb-0 ${index === 0 ? "text-2xl" : "text-xl"}`}
               >
@@ -37,7 +37,7 @@ export const MultiInformationCard = ({
               {index !== informations.length - 1 && (
                 <hr className="w-full pb-4! mt-4" />
               )}
-            </>
+            </Fragment>
           )
         )}
       {showDetails && <div className="text-center text-sm">{detailLabel}</div>}

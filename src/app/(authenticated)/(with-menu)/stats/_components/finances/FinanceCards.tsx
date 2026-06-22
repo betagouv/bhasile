@@ -1,6 +1,7 @@
 import { ReactElement } from "react";
 
 import { MultiInformationCard } from "@/app/components/MultiInformationCard";
+import { formatCurrency } from "@/app/utils/number.util";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
@@ -13,16 +14,20 @@ export const FinanceCards = (): ReactElement => {
         <MultiInformationCard
           informations={[
             {
-              primaryInformation: `${statistiques.dotationAnnuelle} €`,
+              primaryInformation: formatCurrency(statistiques.dotationAnnuelle),
               secondaryInformation:
                 "dotation totale annuelle versée par l'Etat",
             },
             {
-              primaryInformation: `${statistiques.dotationAutorisees} €`,
+              primaryInformation: formatCurrency(
+                statistiques.dotationAutorisees
+              ),
               secondaryInformation: "pour les structures autorisées",
             },
             {
-              primaryInformation: `${statistiques.dotationSubventionnees} €`,
+              primaryInformation: formatCurrency(
+                statistiques.dotationSubventionnees
+              ),
               secondaryInformation: "pour les structures subventionnées",
             },
           ]}
@@ -71,15 +76,19 @@ export const FinanceCards = (): ReactElement => {
           detailLabel="coût de la structure pour une journée et pour une place"
           informations={[
             {
-              primaryInformation: `${statistiques.coutJournalier} €`,
+              primaryInformation: formatCurrency(statistiques.coutJournalier),
               secondaryInformation: "coût place journalier moyen",
             },
             {
-              primaryInformation: `${statistiques.coutJournalierAutorisees} €`,
+              primaryInformation: formatCurrency(
+                statistiques.coutJournalierAutorisees
+              ),
               secondaryInformation: "pour les structures autorisées",
             },
             {
-              primaryInformation: `${statistiques.coutJournalierSubventionnees} €`,
+              primaryInformation: formatCurrency(
+                statistiques.coutJournalierSubventionnees
+              ),
               secondaryInformation: "pour les structures subventionnées",
             },
           ]}

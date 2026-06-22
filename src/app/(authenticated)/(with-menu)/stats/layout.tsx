@@ -8,7 +8,6 @@ import { StatistiquesHeader } from "./_components/StatistiquesHeader";
 import { StatistiquesProvider } from "./_context/StatistiquesContext";
 
 async function getStatistiques(): Promise<StatistiquesApiType> {
-  await (() => {});
   return {
     totalStructures: 42,
     totalCpoms: 12,

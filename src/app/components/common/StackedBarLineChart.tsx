@@ -5,7 +5,7 @@ import "chartist/dist/index.css";
 import * as Chartist from "chartist";
 import { useEffect, useId, useRef } from "react";
 
-export default function StackedBarLineChart({ data }: Props) {
+export const StackedBarLineChart = ({ data }: Props) => {
   const barChartRef = useRef<HTMLDivElement>(null);
   const lineChartRef = useRef<HTMLDivElement>(null);
   const id = useId();
@@ -111,7 +111,8 @@ export default function StackedBarLineChart({ data }: Props) {
         lineChart.detach();
       }
     };
-  }, [data]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className={chartClass} style={{ position: "relative", height: 340 }}>
@@ -139,7 +140,7 @@ export default function StackedBarLineChart({ data }: Props) {
       />
     </div>
   );
-}
+};
 
 type Props = {
   data: {

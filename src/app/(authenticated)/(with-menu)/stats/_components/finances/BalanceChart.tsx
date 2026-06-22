@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 
-import StackedBarLineChart from "@/app/components/common/StackedBarLineChart";
+import { StackedBarLineChart } from "@/app/components/common/StackedBarLineChart";
 import { getYearRange } from "@/app/utils/date.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 

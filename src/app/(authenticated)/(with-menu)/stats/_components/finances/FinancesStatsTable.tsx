@@ -158,7 +158,14 @@ export const FinancesStatsTable = (): ReactElement => {
                     className="whitespace-nowrap align-middle"
                   >
                     {row.isBadge && cellValue !== "•" ? (
-                      <Badge severity="success" noIcon>
+                      <Badge
+                        severity={
+                          cellValue.toString().startsWith("-")
+                            ? "error"
+                            : "success"
+                        }
+                        noIcon
+                      >
                         {cellValue.toString().startsWith("-")
                           ? cellValue
                           : `+ ${cellValue}`}
