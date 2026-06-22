@@ -224,7 +224,7 @@ describe("GET /api/structures/[id]", () => {
     // THEN
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual(structure);
-    expect(mockFindOneOperateur).toHaveBeenCalledWith(1);
+    expect(mockFindOneOperateur).toHaveBeenCalledWith(1, expect.any(Date));
     expect(mockFindOne).not.toHaveBeenCalled();
   });
 

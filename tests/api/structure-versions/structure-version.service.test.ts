@@ -7,8 +7,8 @@ import type {
 import {
   copyStructureVersion,
   dbStructureVersionToApiRead,
-  resolveCurrentVersion,
 } from "@/app/api/structure-versions/structure-version.service";
+import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import type { StructureDbDetails } from "@/app/api/structures/structure.db.type";
 import { Repartition } from "@/types/adresse.type";
 import { PublicType, StructureType } from "@/types/structure.type";
