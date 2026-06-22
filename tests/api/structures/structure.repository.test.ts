@@ -899,7 +899,7 @@ describe("structure.repository db integration", () => {
     expect(rows[0]).toMatchObject(newStructureMillesime);
   });
 
-  describe("résolution liste/carte (PR#3)", () => {
+  describe("résolution liste/carte", () => {
     const createdTransformationIds: number[] = [];
     const createdSvtIds: number[] = [];
 
@@ -1078,7 +1078,7 @@ describe("structure.repository db integration", () => {
       expect(listRow?.nom).toBe(fiche?.nom);
     });
 
-    it("gate transfo : brouillon ignoré, finalisé gagnant — fiche et liste d'accord", async () => {
+    it("fiche et liste ignorent une transfo en brouillon et retiennent la transfo une fois finalisée", async () => {
       // GIVEN: a rolling version (CADA) dated in the past
       const structure = await createStructure();
       const rollingNom = `Rolling-${randomUUID()}`;
