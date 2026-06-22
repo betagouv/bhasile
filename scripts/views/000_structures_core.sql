@@ -31,6 +31,21 @@ WITH
       sv."structureId",
       sv."effectiveDate" DESC,
       sv."id" DESC
+  ),
+  dna_codes_by_version AS (
+    SELECT
+      ds."structureVersionId",
+      STRING_AGG(
+        DISTINCT dna."code",
+        ', '
+        ORDER BY
+          dna."code"
+      ) AS "dna_codes"
+    FROM
+      public."DnaStructure" ds
+      JOIN public."Dna" dna ON dna."id" = ds."dnaId"
+    GROUP BY
+      ds."structureVersionId"
   )
 SELECT
   s."id" AS "id",
@@ -48,27 +63,11 @@ SELECT
   dep."name" AS "departement",
   r."name" AS "region",
   o."name" AS "operateur",
-  dna_agg."dna_codes" AS "dna_codes"
+  COALESCE(dna."dna_codes", '') AS "dna_codes"
 FROM
   public."Structure" s
   INNER JOIN structure_version_current svc ON svc."structureId" = s."id"
   LEFT JOIN public."Operateur" o ON o."id" = s."operateurId"
   LEFT JOIN public."Departement" dep ON dep."numero" = svc."departementAdministratif"
   LEFT JOIN public."Region" r ON r."id" = dep."regionId"
-  LEFT JOIN LATERAL (
-    SELECT
-      COALESCE(
-        STRING_AGG(
-          DISTINCT dna."code",
-          ', '
-          ORDER BY
-            dna."code"
-        ),
-        ''
-      ) AS "dna_codes"
-    FROM
-      public."DnaStructure" ds
-      JOIN public."Dna" dna ON dna."id" = ds."dnaId"
-    WHERE
-      ds."structureVersionId" = svc."structure_version_id"
-  ) dna_agg ON TRUE;
+  LEFT JOIN dna_codes_by_version dna ON dna."structureVersionId" = svc."structure_version_id";
