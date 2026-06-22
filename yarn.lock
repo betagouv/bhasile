@@ -242,10 +242,10 @@
     "@ucast/core" "^1.10.0"
     "@ucast/js" "^3.0.1"
 
-"@casl/react@^6.0.0":
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/@casl/react/-/react-6.0.0.tgz#0461aee45ed31b477b0adcc349abf794e31c3bf0"
-  integrity sha512-XLjvUf/DLlS7AcRDXb3GtTrDGxQk09XDTWXs6tKdbeHqSWeydssngFJDFmf7MUtsza/BU+yXgS+C8j/RRx3MbA==
+"@casl/react@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/@casl/react/-/react-7.0.0.tgz#0df8035f80e874c579d55b9ee2cc2319e12c3d3a"
+  integrity sha512-TfSujWNo4IosHoYZpkGdKXwlKdUBeJCm5CxaApjsOeyNFRfXcGWhHkikK4b6D0L+HgiRiizE7PxHhpc7lv3Z/g==
 
 "@codegouvfr/react-dsfr@^1.32.4":
   version "1.32.4"
