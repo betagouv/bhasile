@@ -68,8 +68,8 @@ export const getDepartementActivitesAverage = async (
     FROM "Activite" a
     INNER JOIN "Dna" dna ON dna."code" = a."dnaCode"
     INNER JOIN "DnaStructure" ds ON ds."dnaId" = dna."id"
-    INNER JOIN "Structure" s ON s."id" = ds."structureId"
-    INNER JOIN "Departement" d ON s."departementAdministratif" = d."numero"
+    INNER JOIN "StructureVersion" sv ON sv."id" = ds."structureVersionId"
+    INNER JOIN "Departement" d ON sv."departementAdministratif" = d."numero"
     WHERE a.date BETWEEN ${startDate} AND ${endDate}
       AND d."numero" = ${departementNumero}
     GROUP BY d.id, d.numero
