@@ -1,4 +1,3 @@
-// @ts-nocheck
 // One-off : version initiale (t0) par structure, rattachée à une Campaign "initialisation",
 // + structureVersionId sur les tables liées.
 // Idempotent : réutilise la version sans transfo existante, sinon création ; garantit la Campaign.
@@ -6,11 +5,12 @@
 
 import "dotenv/config";
 
+import type { Structure } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
 
 const prisma = createPrismaClient();
 
-function initialVersionData(structure) {
+function initialVersionData(structure: Structure) {
   return {
     structureId: structure.id,
     effectiveDate: structure.updatedAt,
@@ -50,16 +50,23 @@ async function main() {
       select: { id: true, campaignId: true },
     });
 
-    const version = existing
-      ? await prisma.structureVersion.update({
-          where: { id: existing.id },
-          data: existing.campaignId
-            ? versionData
-            : { ...versionData, campaign: { create: { name: "initialisation" } } },
-        })
-      : await prisma.structureVersion.create({
-          data: { ...versionData, campaign: { create: { name: "initialisation" } } },
-        });
+    let version;
+    if (existing) {
+      const campaignId =
+        existing.campaignId ??
+        (await prisma.campaign.create({ data: { name: "initialisation" } })).id;
+      version = await prisma.structureVersion.update({
+        where: { id: existing.id },
+        data: { ...versionData, campaignId },
+      });
+    } else {
+      const campaign = await prisma.campaign.create({
+        data: { name: "initialisation" },
+      });
+      version = await prisma.structureVersion.create({
+        data: { ...versionData, campaignId: campaign.id },
+      });
+    }
 
     const link = { structureId: structure.id, structureVersionId: null };
 
