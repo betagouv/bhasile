@@ -3,7 +3,9 @@ export type NumericAggregation = "moyenne" | "mediane";
 export const average = (
   values: (number | null | undefined)[]
 ): number | null => {
-  const valid = values.filter((value): value is number => typeof value === "number");
+  const valid = values.filter(
+    (value): value is number => typeof value === "number"
+  );
   if (valid.length === 0) {
     return null;
   }
@@ -26,7 +28,7 @@ export const median = (
   return valid[mid];
 };
 
-/** Agrège des valeurs numériques (moyenne ou médiane), valeurs nulles ignorées. */
+// Agrège des valeurs numériques (moyenne ou médiane)
 export const aggregateValues = (
   values: (number | null | undefined)[],
   aggregation: NumericAggregation
@@ -54,7 +56,9 @@ export const weightedAverage = (
   let sumWeighted = 0;
 
   for (const { weight, value } of pairs) {
-    if (typeof weight !== "number" || typeof value !== "number") {continue;}
+    if (typeof weight !== "number" || typeof value !== "number") {
+      continue;
+    }
     sumWeight += weight;
     sumWeighted += weight * value;
   }

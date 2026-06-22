@@ -5,9 +5,7 @@ import type {
   StatistiqueDbTypologie,
 } from "../statistiques.db.type";
 
-/**
- * TODO(post-transfo) : exclure les structures avec transfo FERMETURE effective.
- */
+// TODO(post-transfo) : exclure les structures avec transfo FERMETURE effective.
 export const filterStructuresActives = (
   structures: StatistiqueDbStructure[]
 ): StatistiqueDbStructure[] => structures;
@@ -19,7 +17,7 @@ const TYPOLOGIE_AGGREGATE_FIELDS = [
   "fvvTeh",
 ] as const satisfies readonly (keyof StatistiqueDbTypologie)[];
 
-/** Dernière valeur non nulle par champ et par structure (agrégat global). */
+// Dernière valeur non nulle par champ et par structure (agrégat global).
 export const getLastTypologiePerStructure = (
   typologies: StatistiqueDbTypologie[]
 ): Map<number, StatistiqueDbTypologie> => {
@@ -64,7 +62,7 @@ export const getLastTypologiePerStructure = (
   return typologieByStructureId;
 };
 
-/** Typologies remontées pour un millésime donné uniquement. */
+// Typologies remontées pour un millésime donné uniquement.
 export const getTypologieMapForExactYear = (
   typologies: StatistiqueDbTypologie[],
   year: number

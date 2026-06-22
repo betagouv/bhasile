@@ -8,7 +8,7 @@ Les éléments suivants seront à rebrancher post MEP du chantier amenant la not
 
 | ID                          | Sujet                                                                                                                                                                          |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **TODO(fermeture)**         | `filterStructuresActives` (`typologie.utils`) : exclure structures avec transfo FERMETURE effective (date de référence selon contexte : globale, `byYear`, `byMonth`…). |
+| **TODO(fermeture)**         | `filterStructuresActives` (`typologie.utils`) : exclure structures avec transfo FERMETURE effective (date de référence selon contexte : globale, `byYear`, `byMonth`...).      |
 | **TODO(actualisation)**     | `updatedAt` par bloc (sans doute implémentable après le chantier "formulaire d'actualisation").                                                                                |
 | **TODO(structure-version)** | Pivot `shared/` : dernière `StructureVersion` effective (`effectiveDate` ≤ aujourd'hui), plus `Structure.type` / `departementAdministratif` directs. Chantier transformations. |
 
@@ -28,8 +28,8 @@ Le service est découpé par "bloc fonctionnel" avec un socle commun
 
 ```
 route.ts -> statistique.service.ts
-              ├── shared/ (contexte BDD, typologie.utils)
-              ├── structures/ | places/ | finance/ | controle-qualite/ | activite/
+        ├── shared/ (contexte BDD, typologie.utils)
+        ├── structures/ | places/ | finance/ | controle-qualite/ | activite/
 ```
 
 Schéma : `src/schemas/api/statistique.schema.ts`.
@@ -38,8 +38,8 @@ Schéma : `src/schemas/api/statistique.schema.ts`.
 
 | Paramètre      | Description                                                             |
 | -------------- | ----------------------------------------------------------------------- |
-| `departements` | Numéros `,`-séparés (`01,02`)                                           |
-| `operateurs`   | IDs `,`-séparés (filiales incluses)                                     |
+| `departements` | Numéros séparés par des virgules (`01,02`)                              |
+| `operateurs`   | IDs séparés par des virgules (filiales incluses)                        |
 | `types`        | `StructureType` (`CADA,CPH`)                                            |
 | `aggregation`  | `moyenne` (défaut) ou `mediane` (utile pour finance + contrôle qualité) |
 
@@ -83,4 +83,4 @@ Pour tous les `byYear` ou autres agrégations par date : millésime exact.
 
 ## Séries temporelles
 
-Indicateurs recalculés en back sur les données brutes de la période : le front ne peut en effet pas recombiner les sous-périodes de son côté (ex. moyenne de moyennes mensuelles).
+Indicateurs recalculés en back sur les données brutes de la période : le front ne peut en effet pas recombiner les sous-périodes de son côté (ex : moyenne de moyennes mensuelles).

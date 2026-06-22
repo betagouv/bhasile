@@ -24,8 +24,4 @@ Les dénominateurs de taux diffèrent selon les scopes (toutes structures vs hor
 | `placesIndisponibles`, `tauxIndisponibilite` | Scope hors CAES                                    |
 | `presencesIndues*`, `tauxPresencesIndues*`   | Scope hors CAES et CPH ; `Total` = BPI + déboutées |
 
-Taux = ratio 0–1, `null` si dénominateur nul.
-
-## Source
-
-`Activite` - 1 ligne / `dnaCode` / mois.
+Taux = ratio 0-1, `null` si dénominateur nul.

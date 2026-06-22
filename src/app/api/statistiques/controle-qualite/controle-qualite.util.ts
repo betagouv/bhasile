@@ -19,11 +19,6 @@ import {
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
-import type {
-  StatistiqueDbDnaLink,
-  StatistiqueDbEig,
-  StatistiqueDbEvaluation,
-} from "../statistiques.db.type";
 import {
   monthKeyToDate,
   parseTrimesterKey,
@@ -31,6 +26,11 @@ import {
   toTrimesterKey,
   toYearKey,
 } from "../shared/shared.utils";
+import type {
+  StatistiqueDbDnaLink,
+  StatistiqueDbEig,
+  StatistiqueDbEvaluation,
+} from "../statistiques.db.type";
 
 const getTwelveMonthCutoffKey = (): string => {
   const twelveMonthsAgo = new Date();
