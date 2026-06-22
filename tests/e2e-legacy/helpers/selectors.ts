@@ -17,8 +17,6 @@ export const SELECTORS = {
   CHECKBOX_BY_NAME: (name: string) => `input[name="${name}"]`,
 
   // Common form fields
-  FILIALE_TOGGLE: "#managed-by-a-filiale-input",
-  FILIALE_INPUT: "#filiale",
   PUBLIC_SELECT: "#public",
   DEPARTEMENT_INPUT: "#departement",
 

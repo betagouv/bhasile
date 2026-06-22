@@ -31,12 +31,6 @@ export class IdentificationPage extends BasePage {
       await this.waitHelper.waitForUIUpdate();
     }
 
-    if (data.filiale) {
-      await this.formHelper.toggleSwitch(SELECTORS.FILIALE_TOGGLE, true);
-      await this.waitHelper.waitForFormFieldReady(SELECTORS.FILIALE_INPUT);
-      await this.formHelper.fillInput(SELECTORS.FILIALE_INPUT, data.filiale);
-    }
-
     if (data.creationDate) {
       await this.formHelper.fillDate(
         'input[name="creationDate"]',
@@ -86,7 +80,7 @@ export class IdentificationPage extends BasePage {
       for (const [i, dna] of dnas.entries()) {
         if (dna.description) {
           await this.formHelper.fillInput(
-            `input[name="dnaStructures.${i}.dna.description"]`,
+            `input[name="dnaStructures.${i}.description"]`,
             dna.description
           );
         }

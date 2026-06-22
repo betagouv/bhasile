@@ -44,7 +44,10 @@ import { wipeTables } from "./utils/wipe";
 const prisma = createPrismaClient();
 const GENERATE_BHASILE_CODES = true; // Set to false to try migration one off script
 
-export async function seed(): Promise<void> {
+const seedNumber = (number: number): number =>
+  process.env.SMALL_SEED ? Math.floor(number / 10) : number;
+
+async function seed(): Promise<void> {
   console.log("🗑️ Suppression des données existantes...");
   await wipeTables(prisma);
 
@@ -116,7 +119,7 @@ export async function seed(): Promise<void> {
   let bhasileCodesMap: Map<string, string[]> | undefined;
   if (GENERATE_BHASILE_CODES) {
     console.log("🔢 Génération des codes Bhasile par région...");
-    bhasileCodesMap = generateAllBhasileCodes(5000); // Not all codes will be used
+    bhasileCodesMap = generateAllBhasileCodes(seedNumber(5000)); // Not all codes will be used
     console.log("✅ Codes Bhasile générés");
   }
 
@@ -188,8 +191,14 @@ export async function seed(): Promise<void> {
   };
 
   for (const operateurToInsert of operateursToInsert) {
-    const nonOfiiCount = faker.number.int({ min: 200, max: 300 });
-    const ofiiCount = faker.number.int({ min: 1000, max: 2000 });
+    const nonOfiiCount = faker.number.int({
+      min: seedNumber(900),
+      max: seedNumber(1100),
+    });
+    const ofiiCount = faker.number.int({
+      min: seedNumber(200),
+      max: seedNumber(300),
+    });
 
     console.log(
       `🏠 Ajout de ${nonOfiiCount} structures et ${ofiiCount} structures OFII pour ${operateurToInsert.name}`
@@ -304,8 +313,8 @@ export async function seed(): Promise<void> {
   if (GENERATE_BHASILE_CODES) {
     console.log("🧬 Création des codes DNA (1 à 3 par structure)...");
 
-    const perStructureCounts = allStructures.map((s) => ({
-      structureId: s.id,
+    const perStructureCounts = allStructures.map((structure) => ({
+      structureId: structure.id,
       count: faker.number.int({ min: 1, max: 3 }),
     }));
     const totalDnasNeeded = perStructureCounts.reduce(
@@ -322,7 +331,7 @@ export async function seed(): Promise<void> {
     const createdDnas = await prisma.dna.findMany({
       where: {
         code: {
-          in: dnaList.map((d) => d.code),
+          in: dnaList.map((dna) => dna.code),
         },
       },
       select: { id: true, code: true },

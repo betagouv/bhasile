@@ -20,7 +20,6 @@ import {
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 import { transformationInclude } from "./transformation.db.type";
 
-//TODO: will change when integrating forms into transformation
 const TRANSFORMATION_FORM_SLUG = "transformation-v1";
 
 export const findOne = async (id: number) => {

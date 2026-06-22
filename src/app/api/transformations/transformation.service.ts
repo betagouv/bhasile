@@ -14,8 +14,12 @@ import { getAntennesApiRead } from "../antennes/antenne.util";
 import {
   copyStructureVersion,
   dbStructureVersionToApiRead,
+  resolvePredecessor,
 } from "../structure-versions/structure-version.service";
-import { getResolvedStructure } from "../structures/structure.service";
+import {
+  getResolvedStructure,
+  mergeStructureWithVersion,
+} from "../structures/structure.service";
 import { TransformationDbDetails } from "./transformation.db.type";
 import {
   createOne,
@@ -34,21 +38,33 @@ const dbTransformationToApiRead = (
     structureVersionTransformations: transformation.structureVersionTransformations.map(
       (structureVersionTransformation) => {
         const structureVersion = structureVersionTransformation.structureVersion;
+        const sourceStructure = structureVersion?.structure;
+        const predecessor =
+          sourceStructure && structureVersion
+            ? resolvePredecessor(
+                sourceStructure.structureVersions,
+                structureVersion.effectiveDate
+              )
+            : undefined;
+        const resolvedSourceStructure =
+          sourceStructure && predecessor
+            ? mergeStructureWithVersion(sourceStructure, predecessor)
+            : sourceStructure;
         return {
           ...structureVersionTransformation,
           operateur: structureVersionTransformation.operateur ?? undefined,
           structureVersion: structureVersion
             ? {
                 ...dbStructureVersionToApiRead(structureVersion),
-                structure: structureVersion.structure
+                structure: resolvedSourceStructure
                   ? {
-                      ...structureVersion.structure,
+                      ...resolvedSourceStructure,
                       adresseAdministrativeComplete:
                         buildAdresseAdministrativeComplete(
-                          structureVersion.structure
+                          resolvedSourceStructure
                         ) || undefined,
                       antennes: getAntennesApiRead(
-                        structureVersion.structure.antennes
+                        resolvedSourceStructure.antennes
                       ),
                     }
                   : undefined,

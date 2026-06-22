@@ -1,5 +1,7 @@
 import { getTypePlacesYearRange, getYearRange } from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
+import { minioClient } from "@/lib/minio";
+import { ControleType } from "@/types/controle.type";
 
 import { expect, test } from "../fixtures/test";
 import { StructureModificationPage } from "../pages/structure-modification.page";
@@ -14,6 +16,8 @@ const TYPE_PLACES_CURRENT_YEAR_ROW_INDEX =
   getTypePlacesYearRange().years.indexOf(CURRENT_YEAR);
 const FINANCE_CURRENT_YEAR_ROW_INDEX =
   getYearRange().years.indexOf(CURRENT_YEAR);
+
+const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME!;
 
 test.describe("Structure modification", () => {
   test("notes: updates persist after reload", async ({
@@ -30,8 +34,8 @@ test.describe("Structure modification", () => {
     await modification.fillNotes(noteText);
     await modification.submitAndWaitForSave();
 
-    const persisted = await prisma.structure.findUniqueOrThrow({
-      where: { id: seededStructure.id },
+    const persisted = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: seededStructure.structureVersionId },
       select: { notes: true },
     });
     expect(persisted.notes).toBe(noteText);
@@ -54,8 +58,8 @@ test.describe("Structure modification", () => {
     await modification.selectPublic("Famille");
     await modification.submitAndWaitForSave();
 
-    const persisted = await prisma.structure.findUniqueOrThrow({
-      where: { id: seededStructure.id },
+    const persisted = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: seededStructure.structureVersionId },
       select: { public: true },
     });
     expect(persisted.public).toBe("FAMILLE");
@@ -65,7 +69,7 @@ test.describe("Structure modification", () => {
     page,
     seededStructure,
   }) => {
-    await seedValidStructureTypologies(seededStructure.id);
+    await seedValidStructureTypologies(seededStructure.structureVersionId);
     const modification = new StructureModificationPage(
       page,
       seededStructure.id
@@ -80,7 +84,10 @@ test.describe("Structure modification", () => {
     await modification.submitAndWaitForSave();
 
     const persisted = await prisma.structureTypologie.findFirstOrThrow({
-      where: { structureId: seededStructure.id, year: CURRENT_YEAR },
+      where: {
+        structureVersionId: seededStructure.structureVersionId,
+        year: CURRENT_YEAR,
+      },
       select: { placesAutorisees: true },
     });
     expect(persisted.placesAutorisees).toBe(newPlacesAutorisees);
@@ -112,20 +119,48 @@ test.describe("Structure modification", () => {
     expect(persisted.dotationDemandee).toBe(newDotationDemandee);
   });
 
-  // Dépendant d'un upload S3 : un contrôle ne persiste QUE s'il porte un fichier.
-  // transformFormControlesToApiControles (src/app/utils/controle.util.ts) filtre
-  // tout contrôle sans `fileUploads[0].key`. À traiter avec les autres tests
-  // d'upload. La page-object expose déjà addControle() et
-  // markStructureHasNoEvaluation() (structure autorisée).
-  test.skip("controle-qualite: adding a controle row persists", async () => {
-    // TODO: uploader fixtures/files/sample.pdf via le champ "Rapport", attendre
-    // le key, markStructureHasNoEvaluation(), puis addControle(date, type) + submit.
-  });
+  test(
+    "controle-qualite: adding a controle row persists",
+    { tag: "@slow" },
+    async ({ page, seededStructure }) => {
+      test.slow();
+      const modification = new StructureModificationPage(
+        page,
+        seededStructure.id
+      );
+      const controleDate = "2024-03-15";
+
+      await modification.goto("controle-qualite");
+      await modification.markStructureHasNoEvaluation();
+      await modification.uploadControleRapport();
+      await modification.addControle(controleDate, ControleType.PROGRAMME);
+      await modification.submitAndWaitForSave();
+
+      const controles = await prisma.controle.findMany({
+        where: { structureId: seededStructure.id },
+        include: { fileUploads: true },
+      });
+      const controle = controles.find(
+        (persistedControle) => persistedControle.fileUploads.length > 0
+      );
+      expect(controle).toBeDefined();
+      expect(controle!.type).toBe("PROGRAMME");
+      expect(controle!.fileUploads[0].key).toBeTruthy();
+      expect(controle!.date.toISOString()).toContain("2024-03-15");
+
+      const stat = await minioClient.statObject(
+        S3_BUCKET_NAME,
+        controle!.fileUploads[0].key
+      );
+      expect(stat.size).toBeGreaterThan(0);
+    }
+  );
 
   test("cascade: editing several sections in sequence stays consistent", async ({
     page,
     seededStructure,
   }) => {
+    test.slow();
     const modification = new StructureModificationPage(
       page,
       seededStructure.id
@@ -141,8 +176,8 @@ test.describe("Structure modification", () => {
     await modification.selectPublic("Famille");
     await modification.submitAndWaitForSave();
 
-    const afterDescription = await prisma.structure.findUniqueOrThrow({
-      where: { id: seededStructure.id },
+    const afterDescription = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: seededStructure.structureVersionId },
       select: { notes: true, public: true },
     });
     expect(afterDescription.public).toBe("FAMILLE");
@@ -152,17 +187,67 @@ test.describe("Structure modification", () => {
     await modification.fillNotes(secondNote);
     await modification.submitAndWaitForSave();
 
-    const afterSecondNote = await prisma.structure.findUniqueOrThrow({
-      where: { id: seededStructure.id },
+    const afterSecondNote = await prisma.structureVersion.findUniqueOrThrow({
+      where: { id: seededStructure.structureVersionId },
       select: { notes: true, public: true },
     });
     expect(afterSecondNote.notes).toBe(secondNote);
     expect(afterSecondNote.public).toBe("FAMILLE");
   });
 
-  // Upload S3 (vrai bucket dev) : laissé en skip, traité dans un second temps.
-  test.skip("actes-administratifs: uploading a new acte persists", async () => {
-    // TODO: requires actual S3 stub or real Minio. Tag @slow once implemented.
-    // Use fixtures/files/sample.pdf via page.setInputFiles().
-  });
+  test(
+    "actes-administratifs: uploading convention, avenant and autre persists",
+    { tag: "@slow" },
+    async ({ page, seededSubventionneeStructure }) => {
+      test.slow();
+      const modification = new StructureModificationPage(
+        page,
+        seededSubventionneeStructure.id
+      );
+      const autreName = `Doc e2e ${Date.now()}`;
+
+      await modification.goto("actes-administratifs");
+
+      await modification.fillConventionDates("2024-01-01", "2026-12-31");
+      await modification.uploadConventionDocument();
+
+      await modification.addConventionAvenant();
+      await modification.fillAvenantDate("2025-06-01");
+      await modification.uploadAvenantDocument();
+
+      await modification.fillAutreName(autreName);
+      await modification.uploadAutreDocument();
+
+      await modification.submitAndWaitForSave();
+
+      const actes = await prisma.acteAdministratif.findMany({
+        where: { structureId: seededSubventionneeStructure.id },
+        include: { fileUploads: true },
+      });
+
+      const convention = actes.find(
+        (acte) => acte.category === "CONVENTION" && acte.parentId === null
+      );
+      expect(convention).toBeDefined();
+      expect(convention!.fileUploads[0]?.key).toBeTruthy();
+      expect(convention!.startDate).not.toBeNull();
+      expect(convention!.endDate).not.toBeNull();
+
+      const avenant = actes.find((acte) => acte.parentId === convention!.id);
+      expect(avenant).toBeDefined();
+      expect(avenant!.fileUploads[0]?.key).toBeTruthy();
+      expect(avenant!.date).not.toBeNull();
+
+      const autre = actes.find((acte) => acte.category === "AUTRE");
+      expect(autre).toBeDefined();
+      expect(autre!.fileUploads[0]?.key).toBeTruthy();
+      expect(autre!.name).toBe(autreName);
+
+      const stat = await minioClient.statObject(
+        S3_BUCKET_NAME,
+        convention!.fileUploads[0].key
+      );
+      expect(stat.size).toBeGreaterThan(0);
+    }
+  );
 });

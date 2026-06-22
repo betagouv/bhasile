@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 
-import {
-  getMaxPlacesAutorisees,
-  getMinPlacesAutorisees,
-} from "../structure.service";
+import { getBoundsPlacesAutorisees } from "../structure.service";
 
 export async function GET() {
-  const maxPlacesAutorisees = await getMaxPlacesAutorisees();
-  const minPlacesAutorisees = await getMinPlacesAutorisees();
+  const now = new Date();
+  const { min: minPlacesAutorisees, max: maxPlacesAutorisees } =
+    await getBoundsPlacesAutorisees(now);
 
   return NextResponse.json({
     maxPlacesAutorisees,

@@ -84,7 +84,7 @@ model StructureFiness {
   structure          Structure?        @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade) // TODO: remove after backfill of structure version
   structureVersion   StructureVersion? @relation(fields: [structureVersionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   structureVersionId Int? // TODO: rendre obligatoire après backfill de structure version
-  description        String? 
+  description        String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
