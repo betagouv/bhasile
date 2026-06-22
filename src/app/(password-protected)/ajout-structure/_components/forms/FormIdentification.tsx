@@ -26,6 +26,7 @@ export default function FormIdentification() {
   const params = useParams();
   const searchParams = useSearchParams();
   const isEditMode = searchParams.get("mode") === "edit";
+  const structureId = Number(params.id) || undefined;
 
   const previousRoute = "/ajout-structure/selection";
   const resetRoute = `/ajout-structure/${params.id}/01-identification`;
@@ -214,7 +215,7 @@ export default function FormIdentification() {
 
             <hr />
 
-            <DnaAndFiness />
+            <DnaAndFiness entityId={{ structureId }} />
 
             <hr />
 

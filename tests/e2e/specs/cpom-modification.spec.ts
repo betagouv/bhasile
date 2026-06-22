@@ -1,5 +1,6 @@
 import { getYearRange } from "@/app/utils/date.util";
 import { CURRENT_YEAR } from "@/constants";
+import { minioClient } from "@/lib/minio";
 
 import { expect, test } from "../fixtures/test";
 import { CpomModificationPage } from "../pages/cpom-modification.page";
@@ -8,6 +9,8 @@ import { prisma } from "../seed/prisma";
 
 const FINANCE_CURRENT_YEAR_ROW_INDEX =
   getYearRange().years.indexOf(CURRENT_YEAR);
+
+const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME!;
 
 test.describe("CPOM modification", () => {
   test("description: changing departement persists", async ({
@@ -71,9 +74,55 @@ test.describe("CPOM modification", () => {
     expect(persisted.dotationDemandee).toBe(newDotationDemandee);
   });
 
-  // Upload S3 (vrai bucket dev) : laissé en skip, traité dans un second temps.
-  test.skip("actes-administratifs: uploading a new acte persists", async () => {
-    // TODO: requires S3 stub or real Minio. Reuse fixtures/files/sample.pdf
-    // via setInputFiles and tag @slow.
-  });
+  test(
+    "actes-administratifs: uploading convention, avenant and autre persists",
+    { tag: "@slow" },
+    async ({ page, seededCpom }) => {
+      test.slow();
+      const modification = new CpomModificationPage(page, seededCpom.id);
+      const autreName = `Doc e2e ${Date.now()}`;
+
+      await modification.goto("actes-administratifs");
+
+      await modification.fillConventionDates("2024-01-01", "2026-12-31");
+      await modification.uploadConventionDocument();
+
+      await modification.addConventionAvenant();
+      await modification.fillAvenantDate("2025-06-01");
+      await modification.uploadAvenantDocument();
+
+      await modification.addAutreDocument();
+      await modification.fillAutreName(autreName);
+      await modification.uploadAutreDocument();
+
+      await modification.submitAndWaitForSave();
+
+      const actes = await prisma.acteAdministratif.findMany({
+        where: { cpomId: seededCpom.id },
+        include: { fileUploads: true },
+      });
+
+      const convention = actes.find(
+        (acte) => acte.category === "CONVENTION" && acte.parentId === null
+      );
+      expect(convention).toBeDefined();
+      expect(convention!.fileUploads[0]?.key).toBeTruthy();
+
+      const avenant = actes.find((acte) => acte.parentId === convention!.id);
+      expect(avenant).toBeDefined();
+      expect(avenant!.fileUploads[0]?.key).toBeTruthy();
+      expect(avenant!.date).not.toBeNull();
+
+      const autre = actes.find((acte) => acte.category === "AUTRE");
+      expect(autre).toBeDefined();
+      expect(autre!.fileUploads[0]?.key).toBeTruthy();
+      expect(autre!.name).toBe(autreName);
+
+      const stat = await minioClient.statObject(
+        S3_BUCKET_NAME,
+        convention!.fileUploads[0].key
+      );
+      expect(stat.size).toBeGreaterThan(0);
+    }
+  );
 });

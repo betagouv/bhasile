@@ -1,5 +1,6 @@
 import z from "zod";
 
+import { areCodesUnique } from "@/app/utils/common.util";
 import { zId } from "@/app/utils/zodCustomFields";
 
 const finessSchema = z.object({
@@ -13,33 +14,41 @@ const structureFinessSchema = z.object({
   finess: finessSchema,
 });
 
+const uniqueFinessCodesError = {
+  message: "Les codes FINESS doivent être uniques",
+  path: ["structureFinesses"],
+};
+
 export const structureFinessesSchema = z
   .object({
     structureFinesses: z.array(structureFinessSchema).optional(),
   })
   .refine(
-    (data) => {
-      if (!data.structureFinesses || data.structureFinesses.length === 0) {
-        return true;
-      }
-      const codes = data.structureFinesses.map((structureFiness) =>
-        structureFiness.finess?.code?.trim()
-      );
-      const uniqueCodes = new Set(codes);
-      return codes.length === uniqueCodes.size;
-    },
-    {
-      message: "Les codes FINESS doivent être uniques",
-      path: ["structureFinesses"],
-    }
+    (data) =>
+      areCodesUnique(
+        data.structureFinesses,
+        (structureFiness) => structureFiness.finess?.code
+      ),
+    uniqueFinessCodesError
   );
 
-export const structureFinessesAutoSaveSchema = z.object({
-  structureFinesses: z
-    .array(
-      structureFinessSchema.extend({ finess: finessSchema.partial() }).partial()
-    )
-    .optional(),
-});
+export const structureFinessesAutoSaveSchema = z
+  .object({
+    structureFinesses: z
+      .array(
+        structureFinessSchema
+          .extend({ finess: finessSchema.partial() })
+          .partial()
+      )
+      .optional(),
+  })
+  .refine(
+    (data) =>
+      areCodesUnique(
+        data.structureFinesses,
+        (structureFiness) => structureFiness.finess?.code
+      ),
+    uniqueFinessCodesError
+  );
 
 export type StructureFinessFormValues = z.infer<typeof structureFinessSchema>;

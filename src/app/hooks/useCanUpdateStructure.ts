@@ -1,15 +1,12 @@
 "use client";
 
 import { subject } from "@casl/ability";
-import { useContext } from "react";
+import { useAbility } from "@casl/react";
 
-import { AbilityContext } from "@/app/context/AbilityContext";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
-export const useCanUpdateStructure = (
-  structure: StructureApiRead
-): boolean => {
-  const ability = useContext(AbilityContext);
+export const useCanUpdateStructure = (structure: StructureApiRead): boolean => {
+  const ability = useAbility();
 
   return ability.can("update", subject("Structure", structure));
 };
