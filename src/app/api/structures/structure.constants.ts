@@ -1,4 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
+import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
+
+import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 
 export const STRUCTURES_ORDER_CTE_SQL = Prisma.sql`
   WITH dernier_millesime_structure_typologie AS (
@@ -28,3 +31,29 @@ export const STRUCTURES_ORDER_JOINS_SQL = Prisma.sql`
   LEFT JOIN dernier_millesime_structure_typologie st ON st."structureId" = s.id
   LEFT JOIN structure_repartition sr ON sr."structureId" = s.id
 `;
+
+export const VERSIONED_FIELD_KEYS = [
+  "type",
+  "public",
+  "adresseAdministrative",
+  "codePostalAdministratif",
+  "communeAdministrative",
+  "departementAdministratif",
+  "latitude",
+  "longitude",
+  "nom",
+  "creationDate",
+  "date303",
+  "lgbt",
+  "fvvTeh",
+  "notes",
+  "nomOfii",
+  "directionTerritoriale",
+  "contacts",
+  "adresses",
+  "antennes",
+  "structureFinesses",
+  "dnaStructures",
+  "structureTypologies",
+] as const satisfies readonly (keyof StructureAgentUpdateApiType &
+  keyof StructureVersionDbDetails)[];

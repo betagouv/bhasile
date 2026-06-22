@@ -1,6 +1,50 @@
 import { Prisma } from "@/generated/prisma/client";
 
+export const structureVersionDetailsInclude = {
+  contacts: true,
+  adresses: {
+    include: {
+      adresseTypologies: {
+        orderBy: { year: "desc" },
+      },
+    },
+  },
+  antennes: true,
+  structureFinesses: {
+    include: { finess: true },
+  },
+  structureTypologies: {
+    orderBy: { year: "desc" },
+  },
+  dnaStructures: {
+    orderBy: { dna: { code: "asc" } },
+    include: {
+      dna: {
+        include: {
+          activites: {
+            orderBy: { date: "desc" },
+          },
+          evenementsIndesirablesGraves: {
+            orderBy: { evenementDate: "desc" },
+          },
+        },
+      },
+    },
+  },
+  structureVersionTransformation: {
+    include: {
+      transformation: {
+        include: { form: true },
+      },
+    },
+  },
+} satisfies Prisma.StructureVersionInclude;
+
 export type StructureVersionDbDetails = Prisma.StructureVersionGetPayload<{
+  include: typeof structureVersionDetailsInclude;
+}>;
+
+export type StructureVersionDbTransformation = Prisma.StructureVersionGetPayload<{
   include: {
     structure: {
       include: {

@@ -11,10 +11,43 @@ import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import type { StructureDbDetails } from "../structures/structure.db.type";
 import { getTypeBati } from "../structures/structure.util";
-import { StructureVersionDbDetails } from "./structure-version.db.type";
+import {
+  StructureVersionDbDetails,
+  StructureVersionDbTransformation,
+} from "./structure-version.db.type";
+
+const isVersionValid = (version: StructureVersionDbDetails): boolean => {
+  if (version.structureVersionTransformationId === null) {
+    return true;
+  }
+  return (
+    version.structureVersionTransformation?.transformation?.form?.status ===
+    true
+  );
+};
+
+export const resolveCurrentVersion = (
+  versions: StructureVersionDbDetails[],
+  now: Date
+): StructureVersionDbDetails | undefined => {
+  return versions
+    .filter(
+      (version) =>
+        version.effectiveDate.getTime() <= now.getTime() &&
+        isVersionValid(version)
+    )
+    .sort((first, second) => {
+      const dateDiff =
+        second.effectiveDate.getTime() - first.effectiveDate.getTime();
+      if (dateDiff !== 0) {
+        return dateDiff;
+      }
+      return second.id - first.id;
+    })[0];
+};
 
 const mapVersionScalars = (
-  source: StructureDbDetails | StructureVersionDbDetails
+  source: StructureDbDetails | StructureVersionDbTransformation
 ): Pick<
   StructureVersionApiType,
   | "type"
@@ -57,7 +90,7 @@ const mapVersionScalars = (
 });
 
 export const dbStructureVersionToApiRead = (
-  version: StructureVersionDbDetails
+  version: StructureVersionDbTransformation
 ): StructureVersionApiRead => {
   const adresseAdministrativeComplete =
     buildAdresseAdministrativeComplete(version);

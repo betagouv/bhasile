@@ -5,8 +5,10 @@ import { GET, PUT } from "@/app/api/structures/[id]/route";
 
 const mockGetServerSession = vi.fn();
 const mockCanUpdateStructure = vi.fn();
+const mockCanUpdateDepartement = vi.fn();
 const mockFindOne = vi.fn();
 const mockFindOneOperateur = vi.fn();
+const mockFindStructureDepartement = vi.fn();
 const mockUpdateOne = vi.fn();
 const mockCreateStructureEvent = vi.fn();
 const mockGetDepartementActivitesAverage = vi.fn();
@@ -23,11 +25,15 @@ vi.mock("@/lib/next-auth/auth", () => ({
 
 vi.mock("@/lib/casl/abilities", () => ({
   canUpdateStructure: (...args: unknown[]) => mockCanUpdateStructure(...args),
+  canUpdateDepartement: (...args: unknown[]) =>
+    mockCanUpdateDepartement(...args),
 }));
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
   findOne: (...args: unknown[]) => mockFindOne(...args),
   findOneOperateur: (...args: unknown[]) => mockFindOneOperateur(...args),
+  findStructureDepartement: (...args: unknown[]) =>
+    mockFindStructureDepartement(...args),
   updateOne: (...args: unknown[]) => mockUpdateOne(...args),
 }));
 
@@ -100,6 +106,7 @@ describe("GET /api/structures/[id]", () => {
       dnaStructures: [],
       latitude: 48.86,
       longitude: 2.34,
+      structureVersions: [],
     };
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindOne.mockResolvedValueOnce(dbStructure);
@@ -170,6 +177,7 @@ describe("GET /api/structures/[id]", () => {
       cpomStructures: [],
       creationDate: new Date("2020-01-01"),
       dnaStructures: [],
+      structureVersions: [],
     };
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindOne.mockResolvedValueOnce(dbStructure);
@@ -278,11 +286,12 @@ describe("PUT /api/structures/[id]", () => {
   it("should return 403 when user has insufficient rights", async () => {
     // GIVEN
     const session = { user: { id: 1 } };
-    const existingStructure = { id: 2 };
 
     mockGetServerSession.mockResolvedValueOnce(session);
-    mockFindOne.mockResolvedValueOnce(existingStructure);
-    mockCanUpdateStructure.mockReturnValueOnce(false);
+    mockFindStructureDepartement.mockResolvedValueOnce({
+      departementAdministratif: "75",
+    });
+    mockCanUpdateDepartement.mockReturnValueOnce(false);
 
     const request = new Request("http://localhost/api/structures/2", {
       method: "PUT",
@@ -307,8 +316,10 @@ describe("PUT /api/structures/[id]", () => {
     const updatedStructure = { id: 3 };
 
     mockGetServerSession.mockResolvedValueOnce(session);
-    mockFindOne.mockResolvedValueOnce({ id: 3 });
-    mockCanUpdateStructure.mockReturnValueOnce(true);
+    mockFindStructureDepartement.mockResolvedValueOnce({
+      departementAdministratif: "75",
+    });
+    mockCanUpdateDepartement.mockReturnValueOnce(true);
     mockGetAdresseAdministrativeCoordinates.mockResolvedValueOnce(coordinates);
     mockUpdateOne.mockResolvedValueOnce(updatedStructure);
 
@@ -334,8 +345,10 @@ describe("PUT /api/structures/[id]", () => {
   it("should convert adresse qpv/logementSocial booleans to numbers via the schema transform", async () => {
     // GIVEN
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
-    mockFindOne.mockResolvedValueOnce({ id: 4 });
-    mockCanUpdateStructure.mockReturnValueOnce(true);
+    mockFindStructureDepartement.mockResolvedValueOnce({
+      departementAdministratif: "75",
+    });
+    mockCanUpdateDepartement.mockReturnValueOnce(true);
     mockGetAdresseAdministrativeCoordinates.mockResolvedValueOnce({});
     mockUpdateOne.mockResolvedValueOnce({ id: 4 });
 

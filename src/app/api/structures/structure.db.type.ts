@@ -1,5 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 
+import { structureVersionDetailsInclude } from "../structure-versions/structure-version.db.type";
+
 export const structureMapSelect = {
   id: true,
   latitude: true,
@@ -150,6 +152,9 @@ export const structureDetailsInclude = {
         include: { stepDefinition: true },
       },
     },
+  },
+  structureVersions: {
+    include: structureVersionDetailsInclude,
   },
 } satisfies Prisma.StructureInclude;
 

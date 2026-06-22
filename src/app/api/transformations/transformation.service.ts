@@ -15,7 +15,7 @@ import {
   copyStructureVersion,
   dbStructureVersionToApiRead,
 } from "../structure-versions/structure-version.service";
-import { getStructure } from "../structures/structure.service";
+import { getResolvedStructure } from "../structures/structure.service";
 import { TransformationDbDetails } from "./transformation.db.type";
 import {
   createOne,
@@ -105,7 +105,10 @@ const enrichStructureVersionTransformationFromSource = async (
     return structureVersionTransformation;
   }
 
-  const structure = await getStructure(structureId);
+  const structure = await getResolvedStructure(structureId);
+  if (!structure) {
+    return structureVersionTransformation;
+  }
 
   return {
     ...structureVersionTransformation,

@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, describe, expect, it } from "vitest";
 
 import { updateOne } from "@/app/api/structures/structure.repository";
+import { getFullStructure } from "@/app/api/structures/structure.service";
 import prisma from "@/lib/prisma";
 import { Repartition } from "@/types/adresse.type";
 import { ControleType } from "@/types/controle.type";
@@ -45,6 +46,24 @@ describe("structure.repository db integration", () => {
     });
     return fetchData();
   };
+
+  const fetchRollingVersion = (structureId: number) =>
+    prisma.structureVersion.findFirstOrThrow({
+      where: {
+        structureId,
+        structureVersionTransformationId: null,
+        forceHistorize: false,
+      },
+      orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
+      include: {
+        contacts: true,
+        adresses: { include: { adresseTypologies: true } },
+        antennes: true,
+        structureFinesses: { include: { finess: true } },
+        structureTypologies: true,
+        dnaStructures: { include: { dna: true } },
+      },
+    });
 
   afterAll(async () => {
     if (createdStructureIds.length > 0) {
@@ -95,26 +114,28 @@ describe("structure.repository db integration", () => {
       directionTerritoriale: "DT75",
     });
 
-    // THEN: every scalar field is persisted
+    // THEN: les scalaires versionnés sont sur le rolling, filiale reste sur Structure
+    const version = await fetchRollingVersion(structure.id);
+    expect(version.public).toBe("FAMILLE");
+    expect(version.adresseAdministrative).toBe("10 rue de la Paix");
+    expect(version.codePostalAdministratif).toBe("75001");
+    expect(version.communeAdministrative).toBe("Paris");
+    expect(version.type).toBe(StructureType.CADA);
+    expect(version.latitude?.toString()).toBe("48.8566");
+    expect(version.longitude?.toString()).toBe("2.3522");
+    expect(version.nom).toBe("Structure test complete");
+    expect(version.date303?.toISOString()).toBe(date303);
+    expect(version.creationDate?.toISOString()).toBe(creationDate);
+    expect(version.lgbt).toBe(true);
+    expect(version.fvvTeh).toBe(false);
+    expect(version.notes).toBe("Notes de test");
+    expect(version.nomOfii).toBe("Nom OFII");
+    expect(version.directionTerritoriale).toBe("DT75");
+
     const updated = await prisma.structure.findUniqueOrThrow({
       where: { id: structure.id },
     });
-    expect(updated.public).toBe("FAMILLE");
-    expect(updated.adresseAdministrative).toBe("10 rue de la Paix");
-    expect(updated.codePostalAdministratif).toBe("75001");
-    expect(updated.communeAdministrative).toBe("Paris");
     expect(updated.filiale).toBe("Filiale test");
-    expect(updated.type).toBe(StructureType.CADA);
-    expect(updated.latitude?.toString()).toBe("48.8566");
-    expect(updated.longitude?.toString()).toBe("2.3522");
-    expect(updated.nom).toBe("Structure test complete");
-    expect(updated.date303?.toISOString()).toBe(date303);
-    expect(updated.creationDate?.toISOString()).toBe(creationDate);
-    expect(updated.lgbt).toBe(true);
-    expect(updated.fvvTeh).toBe(false);
-    expect(updated.notes).toBe("Notes de test");
-    expect(updated.nomOfii).toBe("Nom OFII");
-    expect(updated.directionTerritoriale).toBe("DT75");
   });
 
   it("should update departementAdministratif relation", async () => {
@@ -128,11 +149,9 @@ describe("structure.repository db integration", () => {
       departementAdministratif: departement.numero,
     });
 
-    // THEN: structure references the expected department
-    const updated = await prisma.structure.findUniqueOrThrow({
-      where: { id: structure.id },
-    });
-    expect(updated.departementAdministratif).toBe(departement.numero);
+    // THEN: le rolling référence le département attendu
+    const version = await fetchRollingVersion(structure.id);
+    expect(version.departementAdministratif).toBe(departement.numero);
   });
 
   it("should update operateur relation", async () => {
@@ -156,30 +175,14 @@ describe("structure.repository db integration", () => {
     expect(updated.operateurId).toBe(operateur.id);
   });
 
-  it("should replace structure contacts on update", async () => {
-    // GIVEN: a structure with two existing contacts
+  it("should replace structure contacts on the rolling version", async () => {
+    // GIVEN: a structure whose rolling version already holds two contacts
     const structure = await createStructure();
-
-    await prisma.contact.createMany({
-      data: [
-        {
-          structureId: structure.id,
-          prenom: "Alice",
-          nom: "Legacy",
-          email: "alice.legacy@example.test",
-          telephone: "0100000001",
-          role: "Ancien role",
-          perimetre: "Ancien perimetre",
-        },
-        {
-          structureId: structure.id,
-          prenom: "Bob",
-          nom: "Legacy",
-          email: "bob.legacy@example.test",
-          telephone: "0100000002",
-          role: "Ancien role",
-          perimetre: "Ancien perimetre",
-        },
+    await updateOne({
+      id: structure.id,
+      contacts: [
+        { prenom: "Alice", nom: "Legacy", email: "alice.legacy@example.test" },
+        { prenom: "Bob", nom: "Legacy", email: "bob.legacy@example.test" },
       ],
     });
 
@@ -192,24 +195,18 @@ describe("structure.repository db integration", () => {
       role: "Direction",
       perimetre: "National",
     };
-    const contacts = await updateStructureAndFetch(
+    const version = await updateStructureAndFetch(
       structure.id,
-      {
-        contacts: [newContact],
-      },
-      () =>
-        prisma.contact.findMany({
-          where: { structureId: structure.id },
-          orderBy: { id: "asc" },
-        })
+      { contacts: [newContact] },
+      () => fetchRollingVersion(structure.id)
     );
 
-    expect(contacts).toHaveLength(1);
-    expect(contacts[0]).toMatchObject(newContact);
+    expect(version.contacts).toHaveLength(1);
+    expect(version.contacts[0]).toMatchObject(newContact);
   });
 
-  it("should not modify contacts when updating only scalar fields", async () => {
-    // GIVEN: a structure with existing contacts
+  it("should not modify the rolling version contacts when updating only scalar fields", async () => {
+    // GIVEN: a rolling version that already holds a contact
     const structure = await createStructure();
     const existingContact = {
       prenom: "Contact",
@@ -219,26 +216,37 @@ describe("structure.repository db integration", () => {
       role: "Coordination",
       perimetre: "Regional",
     };
-    await prisma.contact.create({
-      data: {
-        structureId: structure.id,
-        ...existingContact,
-      },
-    });
+    await updateOne({ id: structure.id, contacts: [existingContact] });
 
-    const contacts = await updateStructureAndFetch(
+    // WHEN: only a scalar field is updated (no contacts in the payload)
+    const version = await updateStructureAndFetch(
       structure.id,
-      {
-        nom: "Nom mis à jour sans contacts",
-      },
-      () =>
-        prisma.contact.findMany({
-          where: { structureId: structure.id },
-        })
+      { nom: "Nom mis à jour sans contacts" },
+      () => fetchRollingVersion(structure.id)
     );
 
-    expect(contacts).toHaveLength(1);
-    expect(contacts[0]).toMatchObject(existingContact);
+    // THEN: the scalar is updated and the contacts are preserved
+    expect(version.nom).toBe("Nom mis à jour sans contacts");
+    expect(version.contacts).toHaveLength(1);
+    expect(version.contacts[0]).toMatchObject(existingContact);
+  });
+
+  it("does not create a rolling version when the payload has no versioned field", async () => {
+    // GIVEN: a structure with no rolling version yet
+    const structure = await createStructure();
+
+    // WHEN: an update carries only non-versioned data (e.g. a budget)
+    await updateOne({ id: structure.id, budgets: [{ year: 2024 }] });
+
+    // THEN: no empty rolling version is created (which would shadow the read model)
+    const rolling = await prisma.structureVersion.findFirst({
+      where: {
+        structureId: structure.id,
+        structureVersionTransformationId: null,
+        forceHistorize: false,
+      },
+    });
+    expect(rolling).toBeNull();
   });
 
   it("should upsert structure budgets by year", async () => {
@@ -350,45 +358,42 @@ describe("structure.repository db integration", () => {
     expect(rows[0]).toMatchObject(newIndicateurFinancier);
   });
 
-  it("should upsert structureTypologies by year", async () => {
-    // GIVEN: one existing structure typology
+  it("should upsert structureTypologies by year on the rolling version", async () => {
+    // GIVEN: a rolling version with one typology for 2024
     const structure = await createStructure();
-    await prisma.structureTypologie.create({
-      data: {
-        structureId: structure.id,
-        year: 2024,
-        placesAutorisees: 10,
-      },
+    await updateOne({
+      id: structure.id,
+      structureTypologies: [{ year: 2024, placesAutorisees: 10 }],
     });
 
     // WHEN: same year receives new values
     const newStructureTypologie = { year: 2024, placesAutorisees: 25, pmr: 2 };
-    const rows = await updateStructureAndFetch(
+    const version = await updateStructureAndFetch(
       structure.id,
-      {
-        structureTypologies: [newStructureTypologie],
-      },
-      () =>
-        prisma.structureTypologie.findMany({
-          where: { structureId: structure.id },
-        })
+      { structureTypologies: [newStructureTypologie] },
+      () => fetchRollingVersion(structure.id)
     );
 
-    expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject(newStructureTypologie);
+    expect(version.structureTypologies).toHaveLength(1);
+    expect(version.structureTypologies[0]).toMatchObject(newStructureTypologie);
   });
 
-  it("should replace adresses list and typologies", async () => {
-    // GIVEN: one existing address
+  it("should replace adresses list and typologies on the rolling version", async () => {
+    // GIVEN: a rolling version with one address
     const structure = await createStructure();
-    const oldAdresse = await prisma.adresse.create({
-      data: {
-        structureId: structure.id,
-        adresse: "Ancienne adresse",
-        codePostal: "13000",
-        commune: "Marseille",
-      },
+    await updateOne({
+      id: structure.id,
+      adresses: [
+        {
+          adresse: "Ancienne adresse",
+          codePostal: "13000",
+          commune: "Marseille",
+          repartition: Repartition.COLLECTIF,
+        },
+      ],
     });
+    const initialVersion = await fetchRollingVersion(structure.id);
+    const oldAdresseId = initialVersion.adresses[0].id;
 
     // WHEN: update receives a new address list
     const newAdresse = {
@@ -406,29 +411,27 @@ describe("structure.repository db integration", () => {
     });
 
     // THEN: old address is removed and new one created with typology
-    const adresses = await prisma.adresse.findMany({
-      where: { structureId: structure.id },
-      include: { adresseTypologies: true },
-    });
-    expect(adresses).toHaveLength(1);
-    expect(adresses[0].id).not.toBe(oldAdresse.id);
-    expect(adresses[0]).toMatchObject({
+    const version = await fetchRollingVersion(structure.id);
+    expect(version.adresses).toHaveLength(1);
+    expect(version.adresses[0].id).not.toBe(oldAdresseId);
+    expect(version.adresses[0]).toMatchObject({
       adresse: newAdresse.adresse,
       codePostal: newAdresse.codePostal,
       commune: newAdresse.commune,
       repartition: "DIFFUS",
     });
-    expect(adresses[0].adresseTypologies).toHaveLength(1);
-    expect(adresses[0].adresseTypologies[0]).toMatchObject(
+    expect(version.adresses[0].adresseTypologies).toHaveLength(1);
+    expect(version.adresses[0].adresseTypologies[0]).toMatchObject(
       newAdresse.adresseTypologies[0]
     );
   });
 
-  it("should replace antennes list", async () => {
-    // GIVEN: one existing antenne
+  it("should replace antennes list on the rolling version", async () => {
+    // GIVEN: a rolling version with one antenne
     const structure = await createStructure();
-    await prisma.antenne.create({
-      data: { structureId: structure.id, name: "old-antenne" },
+    await updateOne({
+      id: structure.id,
+      antennes: [{ name: "old-antenne" }],
     });
 
     // WHEN: one different antenne is sent
@@ -437,29 +440,23 @@ describe("structure.repository db integration", () => {
       commune: "Lyon",
       departement: "69",
     };
-    const antennes = await updateStructureAndFetch(
+    const version = await updateStructureAndFetch(
       structure.id,
-      {
-        antennes: [newAntenne],
-      },
-      () =>
-        prisma.antenne.findMany({
-          where: { structureId: structure.id },
-        })
+      { antennes: [newAntenne] },
+      () => fetchRollingVersion(structure.id)
     );
 
-    expect(antennes).toHaveLength(1);
-    expect(antennes[0]).toMatchObject(newAntenne);
+    expect(version.antennes).toHaveLength(1);
+    expect(version.antennes[0]).toMatchObject(newAntenne);
   });
 
-  it("should replace dnaStructures list", async () => {
-    // GIVEN: one existing dna link
+  it("should replace dnaStructures list on the rolling version", async () => {
+    // GIVEN: a rolling version with one dna link
     const structure = await createStructure();
-    const oldDna = await prisma.dna.create({
-      data: { code: `DNA-OLD-${Date.now()}-${randomUUID()}` },
-    });
-    await prisma.dnaStructure.create({
-      data: { structureId: structure.id, dnaId: oldDna.id },
+    const oldCode = `DNA-OLD-${Date.now()}-${randomUUID()}`;
+    await updateOne({
+      id: structure.id,
+      dnaStructures: [{ dna: { code: oldCode } }],
     });
 
     // WHEN: a different dna code is provided
@@ -469,46 +466,64 @@ describe("structure.repository db integration", () => {
       dnaStructures: [{ description: "New DNA", dna: { code: newCode } }],
     });
 
-    // THEN: only the new DNA link remains on structure
-    const links = await prisma.dnaStructure.findMany({
-      where: { structureId: structure.id },
-      include: { dna: true },
-    });
-    expect(links).toHaveLength(1);
-    expect(links[0].dna.code).toBe(newCode);
+    // THEN: only the new DNA link remains on the rolling version
+    const version = await fetchRollingVersion(structure.id);
+    expect(version.dnaStructures).toHaveLength(1);
+    expect(version.dnaStructures[0].dna.code).toBe(newCode);
+    expect(version.dnaStructures[0].description).toBe("New DNA");
   });
 
-  it("should replace finesses list", async () => {
-    // GIVEN: one existing FINESS linked to the structure
+  it("getFullStructure resolves the rolling version into the read model", async () => {
+    // GIVEN: a structure edited via the rolling write
     const structure = await createStructure();
-    await prisma.structureFiness.create({
-      data: {
-        structure: { connect: { id: structure.id } },
-        finess: {
-          create: { code: `FIN-OLD-${Date.now()}-${randomUUID()}` },
+    await updateOne({
+      id: structure.id,
+      type: StructureType.CADA,
+      nom: "Nom versionné",
+      adresses: [
+        {
+          adresse: "1 rue Versionnée",
+          codePostal: "75001",
+          commune: "Paris",
+          repartition: Repartition.DIFFUS,
         },
-      },
+      ],
+    });
+
+    // WHEN: the fiche is read end-to-end (findOne + résolution + merge)
+    const read = await getFullStructure(structure.id);
+
+    // THEN: the read model reflects the rolling version, not the frozen shell
+    expect(read?.nom).toBe("Nom versionné");
+    expect(read?.type).toBe(StructureType.CADA);
+    expect(read?.adresses?.[0]?.commune).toBe("Paris");
+  });
+
+  it("should replace finesses list on the rolling version", async () => {
+    // GIVEN: a rolling version with one FINESS link
+    const structure = await createStructure();
+    await updateOne({
+      id: structure.id,
+      structureFinesses: [
+        { finess: { code: `FIN-OLD-${Date.now()}-${randomUUID()}` } },
+      ],
     });
 
     // WHEN: a new FINESS list is sent (description portée par le lien)
     const newCode = `FIN-NEW-${Date.now()}-${randomUUID()}`;
-    const structureFinesses = await updateStructureAndFetch(
+    const version = await updateStructureAndFetch(
       structure.id,
       {
         structureFinesses: [
           { description: "new finess", finess: { code: newCode } },
         ],
       },
-      () =>
-        prisma.structureFiness.findMany({
-          where: { structureId: structure.id },
-          include: { finess: true },
-        })
+      () => fetchRollingVersion(structure.id)
     );
 
-    expect(structureFinesses).toHaveLength(1);
-    expect(structureFinesses[0].finess.code).toBe(newCode);
-    expect(structureFinesses[0].description).toBe("new finess");
+    expect(version.structureFinesses).toHaveLength(1);
+    expect(version.structureFinesses[0].finess.code).toBe(newCode);
+    expect(version.structureFinesses[0].description).toBe("new finess");
   });
 
   it("should upsert actesAdministratifs and delete missing ones", async () => {
