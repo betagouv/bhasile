@@ -5,14 +5,13 @@ import Link from "next/link";
 import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { formatCityName } from "@/app/utils/adresse.util";
 import { formatDate } from "@/app/utils/date.util";
-import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 import { getPlacesByCommunes } from "@/app/utils/structure.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { TypeBatiBadge } from "./TypeBatiBadge";
 
 export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
-  const isStructureFinalisee = getFinalisationFormStatus(structure);
+  const isStructureFinalisee = structure.isFinalised;
 
   return (
     <tr

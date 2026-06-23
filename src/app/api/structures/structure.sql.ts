@@ -3,7 +3,23 @@ import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { Prisma } from "@/generated/prisma/client";
 import { StructureColumn } from "@/types/ListColumn";
 
+import { FINALISATION_FORM_SLUG } from "./structure.constants";
 import type { SearchProps } from "./structure.service";
+
+const buildBornFromCreationSql = (now: Date): Prisma.Sql => Prisma.sql`
+  EXISTS (
+    SELECT 1
+    FROM public."StructureVersion" sv_creation
+    JOIN public."StructureVersionTransformation" svt_creation
+      ON svt_creation.id = sv_creation."structureVersionTransformationId"
+    JOIN public."Form" f_creation
+      ON f_creation."transformationId" = svt_creation."transformationId"
+    WHERE sv_creation."structureId" = s.id
+      AND svt_creation."type" = 'CREATION'::public."StructureVersionTransformationType"
+      AND sv_creation."effectiveDate" < ${startOfNextUtcDay(now).toISOString()}::timestamptz AT TIME ZONE 'UTC'
+      AND f_creation."status" IS TRUE
+  )
+`;
 
 const buildCurrentVersionCteSql = (now: Date): Prisma.Sql => Prisma.sql`
   current_version AS (
@@ -83,16 +99,19 @@ export const buildStructuresOrderSql = (
   return Prisma.sql`${byColumn[column]} ${dir}, s."codeBhasile" ASC`;
 };
 
-export const buildStructuresWhereSql = ({
-  search,
-  type,
-  bati,
-  departements,
-  placesAutorisees,
-  operateurs,
-  selection,
-  finalised,
-}: StructureQueryFilters): Prisma.Sql => {
+export const buildStructuresWhereSql = (
+  {
+    search,
+    type,
+    bati,
+    departements,
+    placesAutorisees,
+    operateurs,
+    selection,
+    finalised,
+  }: StructureQueryFilters,
+  now: Date
+): Prisma.Sql => {
   const conditions: Prisma.Sql[] = [];
   const typeList = type?.split(",").filter(Boolean) ?? [];
   const depList = departements?.split(",").filter(Boolean) ?? [];
@@ -100,19 +119,19 @@ export const buildStructuresWhereSql = ({
 
   if (!selection) {
     conditions.push(
-      Prisma.sql`EXISTS (SELECT 1 FROM public."Form" f WHERE f."structureId" = s.id)`
+      Prisma.sql`(EXISTS (SELECT 1 FROM public."Form" f WHERE f."structureId" = s.id) OR ${buildBornFromCreationSql(now)})`
     );
   }
   if (finalised) {
     conditions.push(
-      Prisma.sql`EXISTS (
+      Prisma.sql`(EXISTS (
         SELECT 1
         FROM public."Form" f
         JOIN public."FormDefinition" fd ON fd.id = f."formDefinitionId"
         WHERE f."structureId" = s.id
-          AND fd."slug" = 'finalisation-v1'
+          AND fd."slug" = ${FINALISATION_FORM_SLUG}
           AND f."status" = true
-      )`
+      ) OR ${buildBornFromCreationSql(now)})`
     );
   }
   if (typeList.length > 0) {
@@ -206,16 +225,19 @@ export const buildOrderedStructureIdsQuery = (
   }: SearchProps,
   now: Date
 ): Prisma.Sql => {
-  const whereSql = buildStructuresWhereSql({
-    search,
-    type,
-    bati,
-    placesAutorisees,
-    departements,
-    operateurs,
-    selection,
-    finalised,
-  });
+  const whereSql = buildStructuresWhereSql(
+    {
+      search,
+      type,
+      bati,
+      placesAutorisees,
+      departements,
+      operateurs,
+      selection,
+      finalised,
+    },
+    now
+  );
   const orderSql = buildStructuresOrderSql(
     column ?? "departementAdministratif",
     direction ?? "asc"
@@ -227,7 +249,7 @@ export const buildOrderedStructureIdsQuery = (
 
   return Prisma.sql`
     ${buildStructuresOrderCteSql(now)}
-    SELECT s.id
+    SELECT s.id, ${buildBornFromCreationSql(now)} AS "bornFromCreation"
     ${STRUCTURES_ORDER_JOINS_SQL}
     ${whereSql}
     ORDER BY ${orderSql}
@@ -246,15 +268,18 @@ export const buildCountStructuresQuery = (
   }: SearchProps,
   now: Date
 ): Prisma.Sql => {
-  const whereSql = buildStructuresWhereSql({
-    search,
-    type,
-    bati,
-    departements,
-    placesAutorisees,
-    operateurs,
-    selection: false,
-  });
+  const whereSql = buildStructuresWhereSql(
+    {
+      search,
+      type,
+      bati,
+      departements,
+      placesAutorisees,
+      operateurs,
+      selection: false,
+    },
+    now
+  );
   return Prisma.sql`
     ${buildStructuresOrderCteSql(now)}
     SELECT COUNT(*)::bigint AS count

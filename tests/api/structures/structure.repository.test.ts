@@ -1197,4 +1197,239 @@ describe("structure.repository db integration", () => {
       expect(listFinal?.nom).toBe(transfoNom);
     });
   });
+
+  describe("contrat finalisation et visibilité", () => {
+    const createdTransformationIds: number[] = [];
+    const createdSvtIds: number[] = [];
+
+    // selection: false -> exerce le filtre de visibilité (EXISTS Form OR bornFromCreation)
+    const baseSearch: SearchProps = {
+      search: null,
+      page: null,
+      type: null,
+      bati: null,
+      placesAutorisees: null,
+      departements: null,
+      operateurs: null,
+      column: null,
+      direction: null,
+      map: false,
+      selection: false,
+      finalised: false,
+    };
+
+    const listBy = async (
+      codeBhasile: string,
+      overrides: Partial<SearchProps> = {}
+    ) => {
+      const { structures } = await getFullStructures({
+        ...baseSearch,
+        search: codeBhasile,
+        ...overrides,
+      });
+      return structures;
+    };
+
+    const findRow = (
+      structures: Awaited<ReturnType<typeof listBy>>,
+      codeBhasile: string
+    ) => structures.find((structure) => structure.codeBhasile === codeBhasile);
+
+    // Coquille sans version (comme une structure née d'une transfo, avant versions)
+    const createShellStructure = async () => {
+      const structure = await prisma.structure.create({
+        data: { codeBhasile: `BHA-DB-TEST-${Date.now()}-${randomUUID()}` },
+      });
+      createdStructureIds.push(structure.id);
+      return structure;
+    };
+
+    const addTransfoVersion = async (
+      structureId: number,
+      {
+        svtType,
+        effectiveDate,
+      }: {
+        svtType: "CREATION" | "EXTENSION";
+        effectiveDate: string;
+      }
+    ) => {
+      const formDefinition = await prisma.formDefinition.findFirstOrThrow();
+      const transformation = await prisma.transformation.create({
+        data: { type: "OUVERTURE_EX_NIHILO" },
+      });
+      createdTransformationIds.push(transformation.id);
+      // Form de la transfo à true : sinon la version n'est pas "courante" (currentVersionWhere)
+      await prisma.form.create({
+        data: {
+          transformationId: transformation.id,
+          formDefinitionId: formDefinition.id,
+          status: true,
+        },
+      });
+      const svt = await prisma.structureVersionTransformation.create({
+        data: { transformationId: transformation.id, type: svtType },
+      });
+      createdSvtIds.push(svt.id);
+      await prisma.structureVersion.create({
+        data: {
+          structureId,
+          structureVersionTransformationId: svt.id,
+          effectiveDate,
+          type: StructureType.CADA,
+          nom: `V-${randomUUID()}`,
+        },
+      });
+    };
+
+    // Née d'une transfo CREATION : coquille + version liée à une SVT CREATION, aucun form finalisation
+    const createCreationBornStructure = async () => {
+      const structure = await createShellStructure();
+      await addTransfoVersion(structure.id, {
+        svtType: "CREATION",
+        effectiveDate: "2020-01-01T12:00:00.000Z",
+      });
+      return structure;
+    };
+
+    // Normale : version classique (transfo null) + form finalisation-v1 au statut voulu
+    const createStructureWithFinalisationForm = async (status: boolean) => {
+      const structure = await createStructure();
+      const formDefinition = await prisma.formDefinition.findUniqueOrThrow({
+        where: { slug: "finalisation-v1" },
+      });
+      await prisma.form.create({
+        data: {
+          structureId: structure.id,
+          formDefinitionId: formDefinition.id,
+          status,
+        },
+      });
+      return structure;
+    };
+
+    afterAll(async () => {
+      if (createdSvtIds.length > 0) {
+        await prisma.structureVersionTransformation.deleteMany({
+          where: { id: { in: createdSvtIds } },
+        });
+      }
+      if (createdTransformationIds.length > 0) {
+        await prisma.transformation.deleteMany({
+          where: { id: { in: createdTransformationIds } },
+        });
+      }
+    });
+
+    it("une structure née d'une transfo CREATION apparaît dans la liste et est finalisée", async () => {
+      // GIVEN: a structure born from a CREATION block (no finalisation form)
+      const structure = await createCreationBornStructure();
+
+      // WHEN: read through the (paginated) list path
+      const row = findRow(
+        await listBy(structure.codeBhasile),
+        structure.codeBhasile
+      );
+
+      // THEN: it is visible despite having no finalisation form, and counts as finalised
+      expect(row).toBeDefined();
+      expect(row?.isFinalised).toBe(true);
+
+      // AND: the detail read (TS .some() realization) agrees with the SQL one
+      const fiche = await getFullStructure(structure.id);
+      expect(fiche?.isFinalised).toBe(true);
+    });
+
+    it("une coquille sans form ni transfo (référentiel) reste cachée de la liste", async () => {
+      // GIVEN: a bare structure with a current version but no form and no transfo
+      const structure = await createStructure();
+
+      // WHEN/THEN: the visibility filter excludes it
+      const row = findRow(
+        await listBy(structure.codeBhasile),
+        structure.codeBhasile
+      );
+      expect(row).toBeUndefined();
+    });
+
+    it("une normale finalisée est visible et finalisée ; non finalisée est visible mais non finalisée", async () => {
+      // GIVEN: one finalised and one in-progress structure
+      const finalised = await createStructureWithFinalisationForm(true);
+      const inProgress = await createStructureWithFinalisationForm(false);
+
+      // THEN: both appear in the managed list (selection: false)
+      const finalisedRow = findRow(
+        await listBy(finalised.codeBhasile),
+        finalised.codeBhasile
+      );
+      const inProgressRow = findRow(
+        await listBy(inProgress.codeBhasile),
+        inProgress.codeBhasile
+      );
+      expect(finalisedRow?.isFinalised).toBe(true);
+      expect(inProgressRow?.isFinalised).toBe(false);
+    });
+
+    it("CREATION puis EXTENSION : finalisée via l'historique, pas via la version courante", async () => {
+      // GIVEN: a CREATION-born structure later extended (current version = EXTENSION)
+      const structure = await createCreationBornStructure();
+      await addTransfoVersion(structure.id, {
+        svtType: "EXTENSION",
+        effectiveDate: "2021-06-01T12:00:00.000Z",
+      });
+
+      // THEN: still finalised (the CREATION lives in history, not in the current version)
+      const row = findRow(
+        await listBy(structure.codeBhasile),
+        structure.codeBhasile
+      );
+      expect(row).toBeDefined();
+      expect(row?.isFinalised).toBe(true);
+
+      // AND: the detail .some() realization also scans history, not just the current EXTENSION
+      const fiche = await getFullStructure(structure.id);
+      expect(fiche?.isFinalised).toBe(true);
+    });
+
+    it("une CREATION future-datée n'est pas encore finalisée (détail et liste cohérents)", async () => {
+      // GIVEN: a structure whose only version is a CREATION effective in the future
+      const structure = await createShellStructure();
+      await addTransfoVersion(structure.id, {
+        svtType: "CREATION",
+        effectiveDate: "2099-01-01T12:00:00.000Z",
+      });
+
+      // THEN: hidden from the list (no current version yet)
+      const row = findRow(
+        await listBy(structure.codeBhasile),
+        structure.codeBhasile
+      );
+      expect(row).toBeUndefined();
+
+      // AND: detail agrees — born-from-creation only counts once the CREATION is effective,
+      // so isFinalised is false instead of the loose .some() returning true.
+      const fiche = await getFullStructure(structure.id);
+      expect(fiche?.isFinalised).toBe(false);
+    });
+
+    it("le filtre finalised=true inclut une structure née d'une CREATION et exclut une non finalisée", async () => {
+      // GIVEN: a CREATION-born structure and an in-progress normal one
+      const creationBorn = await createCreationBornStructure();
+      const inProgress = await createStructureWithFinalisationForm(false);
+
+      // THEN: the finalised filter keeps the CREATION-born, drops the in-progress
+      expect(
+        findRow(
+          await listBy(creationBorn.codeBhasile, { finalised: true }),
+          creationBorn.codeBhasile
+        )
+      ).toBeDefined();
+      expect(
+        findRow(
+          await listBy(inProgress.codeBhasile, { finalised: true }),
+          inProgress.codeBhasile
+        )
+      ).toBeUndefined();
+    });
+  });
 });

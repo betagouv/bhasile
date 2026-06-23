@@ -19,7 +19,7 @@ import { currentVersionWhere } from "../structure-versions/structure-version.db.
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
-  StructureDbList,
+  StructureDbListItem,
   StructureDbMap,
   StructureDbOperateur,
   structureDetailsInclude,
@@ -37,13 +37,15 @@ import {
 const getOrderedStructures = async (
   props: SearchProps,
   now: Date
-): Promise<{ id: number }[]> =>
-  prisma.$queryRaw<{ id: number }[]>(buildOrderedStructureIdsQuery(props, now));
+): Promise<{ id: number; bornFromCreation: boolean }[]> =>
+  prisma.$queryRaw<{ id: number; bornFromCreation: boolean }[]>(
+    buildOrderedStructureIdsQuery(props, now)
+  );
 
 export const findBySearch = async (
   props: SearchProps,
   now: Date
-): Promise<StructureDbList[] | StructureDbMap[]> => {
+): Promise<StructureDbListItem[] | StructureDbMap[]> => {
   const structuresIds = await getOrderedStructures(props, now);
   const ids = structuresIds.map((structure) => structure.id);
 
@@ -81,9 +83,18 @@ export const findBySearch = async (
   });
 
   const orderedStructures = structuresIds
-    .map((orderedId) =>
-      structures.find((structure) => structure.id === orderedId.id)
-    )
+    .map((orderedStructure) => {
+      const structure = structures.find(
+        (candidate) => candidate.id === orderedStructure.id
+      );
+      if (!structure) {
+        return undefined;
+      }
+      return {
+        ...structure,
+        bornFromCreation: orderedStructure.bornFromCreation,
+      };
+    })
     .filter((structure) => structure !== undefined);
 
   return orderedStructures;
