@@ -1,6 +1,9 @@
-import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
+import {
+  StatistiqueApiRead,
+  type StatistiquesAggregation,
+} from "@/schemas/api/statistique.schema";
 
-import { StatistiquesContext } from "../shared/shared.service";
+import type { StatistiquesContext } from "../statistiques.db.type";
 import {
   findBudgets,
   findIndicateursFinanciers,
@@ -12,7 +15,7 @@ import {
 
 export const getFinanceStatistiques = async (
   context: StatistiquesContext,
-  aggregation: StatistiqueApiRead["finance"]["aggregation"]
+  aggregation: StatistiquesAggregation
 ): Promise<StatistiqueApiRead["finance"]> => {
   const { structures } = context;
   const scopeIds = getStructureIdsByFinanceScope(structures);

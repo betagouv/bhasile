@@ -30,7 +30,6 @@ type TypesPlaces = {
 };
 
 type Finance = {
-  aggregation: string;
   byYear: FinanceByYear[];
 };
 

@@ -11,12 +11,13 @@ import {
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
   getTypologieYears,
-} from "../shared/shared.utils";
+} from "../statistiques.utils";
 import type {
   StatistiqueDbAdresse,
   StatistiqueDbDepartement,
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
+  StatistiqueDbTypologieValues,
 } from "../statistiques.db.type";
 
 type PlacesIndicators = Pick<
@@ -33,7 +34,7 @@ type PlacesIndicators = Pick<
 
 const sumStructureTypologiePlacesSpeciales = (
   structures: StatistiqueDbStructure[],
-  typologieMap: Map<number, StatistiqueDbTypologie>
+  typologieMap: Map<number, StatistiqueDbTypologieValues>
 ): Pick<PlacesIndicators, "pmr" | "lgbt" | "fvvTeh"> => {
   let pmr = 0;
   let lgbt = 0;
@@ -103,7 +104,7 @@ const computeTauxEquipementAgrege = (
 
 const computePlacesIndicators = (
   structures: StatistiqueDbStructure[],
-  typologieMap: Map<number, StatistiqueDbTypologie>,
+  typologieMap: Map<number, StatistiqueDbTypologieValues>,
   adresses: StatistiqueDbAdresse[],
   departements: StatistiqueDbDepartement[]
 ): PlacesIndicators => {

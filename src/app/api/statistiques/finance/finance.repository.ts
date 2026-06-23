@@ -15,9 +15,10 @@ export const findBudgets = async (
   const budgets = await prisma.budget.findMany({
     where: {
       structureId: { in: structureIds },
-      isMissing: { not: true },
+      OR: [{ isMissing: null }, { isMissing: false }],
     },
     select: {
+      id: true,
       structureId: true,
       year: true,
       dotationDemandee: true,
@@ -35,6 +36,7 @@ export const findBudgets = async (
 
     return [
       {
+        id: budget.id,
         structureId: budget.structureId,
         year: budget.year,
         dotationDemandee: budget.dotationDemandee ?? 0,
@@ -55,10 +57,11 @@ export const findIndicateursFinanciers = async (
   return prisma.indicateurFinancier.findMany({
     where: {
       structureId: { in: structureIds },
-      isMissing: { not: true },
+      OR: [{ isMissing: null }, { isMissing: false }],
       type: { in: ["REALISE", "PREVISIONNEL"] },
     },
     select: {
+      id: true,
       structureId: true,
       year: true,
       type: true,

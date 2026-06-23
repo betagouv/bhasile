@@ -9,7 +9,7 @@ import {
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
-import { monthKeyToDate, toMonthKey } from "../shared/shared.utils";
+import { monthKeyToDate, toMonthKey } from "../statistiques.utils";
 import type {
   StatistiqueDbActivite,
   StatistiqueDbDnaLink,

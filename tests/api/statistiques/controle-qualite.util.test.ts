@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { computeControleQualiteStatistiques } from "@/app/api/statistiques/controle-qualite/controle-qualite.util";
+import { computeControleQualiteStatistiques } from "@/app/api/statistiques/controle-qualite/controle-qualite-evaluation.util";
 
 vi.mock("@/constants", async () => {
   const actual =
@@ -21,18 +21,19 @@ describe("quality control statistics util", () => {
     vi.useRealTimers();
   });
   const dnaLinks = [
-    { structureId: 1, dna: { code: "DNA01" } },
-    { structureId: 2, dna: { code: "DNA02" } },
-    { structureId: 3, dna: { code: "DNA03" } },
+    { id: 1, structureId: 1, dna: { code: "DNA01" } },
+    { id: 2, structureId: 2, dna: { code: "DNA02" } },
+    { id: 3, structureId: 3, dna: { code: "DNA03" } },
   ];
 
-  it("aggregates trimester evaluation notes from raw evaluations, not monthly averages", () => {
+  it("should aggregate trimester notes from raw evaluations", () => {
     const result = computeControleQualiteStatistiques(
       [1],
       100,
       [],
       [
         {
+          id: 1,
           structureId: 1,
           date: new Date("2025-01-15"),
           note: 2,
@@ -40,7 +41,8 @@ describe("quality control statistics util", () => {
           notePro: null,
           noteStructure: null,
         },
-        ...Array.from({ length: 10 }, () => ({
+        ...Array.from({ length: 10 }, (_, index) => ({
+          id: index + 2,
           structureId: 1,
           date: new Date("2025-02-15"),
           note: 4,
@@ -62,32 +64,37 @@ describe("quality control statistics util", () => {
     expect(result.byYear[0]?.noteGenerale).toBe(3.8);
   });
 
-  it("computes violent EIG rate from period totals, not the average of monthly rates", () => {
+  it("should compute trimester EIG rate from period totals", () => {
     const result = computeControleQualiteStatistiques(
       [1],
       100,
       [
         {
+          id: 1,
           dnaCode: "DNA01",
           type: "comportement violent",
           evenementDate: new Date("2025-01-10"),
         },
         {
+          id: 2,
           dnaCode: "DNA01",
           type: "autre motif",
           evenementDate: new Date("2025-02-10"),
         },
-        ...Array.from({ length: 6 }, () => ({
+        ...Array.from({ length: 6 }, (_, index) => ({
+          id: index + 3,
           dnaCode: "DNA01",
           type: "autre motif",
           evenementDate: new Date("2025-02-15"),
         })),
         {
+          id: 9,
           dnaCode: "DNA01",
           type: "comportement violent",
           evenementDate: new Date("2025-02-20"),
         },
         {
+          id: 10,
           dnaCode: "DNA01",
           type: "comportement violent",
           evenementDate: new Date("2025-02-25"),
@@ -115,12 +122,13 @@ describe("quality control statistics util", () => {
     expect(trimester?.nbEig).toBe(10);
   });
 
-  it("counts structures without EIG declaration over the full period", () => {
+  it("should count structures without EIG declaration", () => {
     const result = computeControleQualiteStatistiques(
       [1, 2, 3],
       300,
       [
         {
+          id: 1,
           dnaCode: "DNA01",
           type: "autre",
           evenementDate: new Date("2025-03-01"),
@@ -140,13 +148,14 @@ describe("quality control statistics util", () => {
     expect(march?.partStructuresSansDeclarationEig).toBe(0.667);
   });
 
-  it("uses median aggregation for evaluation notes when requested", () => {
+  it("should use median aggregation for evaluation notes", () => {
     const result = computeControleQualiteStatistiques(
       [1],
       100,
       [],
       [
         {
+          id: 1,
           structureId: 1,
           date: new Date("2025-06-01"),
           note: 2,
@@ -155,6 +164,7 @@ describe("quality control statistics util", () => {
           noteStructure: null,
         },
         {
+          id: 2,
           structureId: 1,
           date: new Date("2025-06-15"),
           note: 4,
@@ -163,6 +173,7 @@ describe("quality control statistics util", () => {
           noteStructure: null,
         },
         {
+          id: 3,
           structureId: 1,
           date: new Date("2025-06-20"),
           note: 5,

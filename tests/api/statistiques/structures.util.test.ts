@@ -15,7 +15,7 @@ vi.mock("@/constants", async () => {
 });
 
 describe("structures statistics util", () => {
-  it("counts type and bati breakdown only for structures with typologie", () => {
+  it("should count type and bati only with typologie", () => {
     const result = computeStructuresStatistiques(
       [
         { id: 1, type: StructureType.CADA, departementAdministratif: "75" },
@@ -23,6 +23,7 @@ describe("structures statistics util", () => {
       ],
       [
         {
+          id: 1,
           structureId: 1,
           year: 2024,
           placesAutorisees: 100,
@@ -75,11 +76,12 @@ describe("structures statistics util", () => {
     });
   });
 
-  it("splits bati places per address repartition even when structure is mixte", () => {
+  it("should split bati places by address repartition", () => {
     const result = computeStructuresStatistiques(
       [{ id: 1, type: StructureType.CADA, departementAdministratif: "75" }],
       [
         {
+          id: 1,
           structureId: 1,
           year: 2024,
           placesAutorisees: 100,
@@ -126,11 +128,12 @@ describe("structures statistics util", () => {
     });
   });
 
-  it("counts active CPOMs for the current year only", () => {
+  it("should count active CPOMs for current year only", () => {
     const result = computeStructuresStatistiques(
       [{ id: 1, type: StructureType.CADA, departementAdministratif: "75" }],
       [
         {
+          id: 1,
           structureId: 1,
           year: 2025,
           placesAutorisees: 50,
@@ -142,6 +145,7 @@ describe("structures statistics util", () => {
       [],
       [
         {
+          id: 1,
           cpomId: 100,
           structureId: 1,
           dateStart: new Date("2024-01-01"),
@@ -149,6 +153,7 @@ describe("structures statistics util", () => {
           cpom: { actesAdministratifs: [] },
         },
         {
+          id: 2,
           cpomId: 101,
           structureId: 1,
           dateStart: new Date("2020-01-01"),

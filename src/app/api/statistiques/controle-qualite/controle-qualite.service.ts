@@ -1,15 +1,15 @@
 import { NumericAggregation } from "@/app/utils/math.util";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
-import { StatistiquesContext } from "../shared/shared.service";
+import type { StatistiquesContext } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
   filterStructuresActives,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
-} from "../shared/shared.utils";
+} from "../statistiques.utils";
 import { findEigs, findEvaluations } from "./controle-qualite.repository";
-import { computeControleQualiteStatistiques } from "./controle-qualite.util";
+import { computeControleQualiteStatistiques } from "./controle-qualite-evaluation.util";
 
 export const getControleQualiteStatistiques = async (
   context: StatistiquesContext,

@@ -10,6 +10,7 @@ export type StatistiqueDbStructure = Prisma.StructureGetPayload<{
 
 export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
   select: {
+    id: true;
     structureId: true;
     year: true;
     placesAutorisees: true;
@@ -18,6 +19,8 @@ export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
     fvvTeh: true;
   };
 }>;
+
+export type StatistiqueDbTypologieValues = Omit<StatistiqueDbTypologie, "id">;
 
 export type StatistiqueDbAdresse = Prisma.AdresseGetPayload<{
   select: {
@@ -32,6 +35,7 @@ export type StatistiqueDbAdresse = Prisma.AdresseGetPayload<{
 
 export type StatistiqueDbEvaluation = Prisma.EvaluationGetPayload<{
   select: {
+    id: true;
     structureId: true;
     date: true;
     note: true;
@@ -43,6 +47,7 @@ export type StatistiqueDbEvaluation = Prisma.EvaluationGetPayload<{
 
 export type StatistiqueDbEig = Prisma.EvenementIndesirableGraveGetPayload<{
   select: {
+    id: true;
     dnaCode: true;
     type: true;
     evenementDate: true;
@@ -51,6 +56,7 @@ export type StatistiqueDbEig = Prisma.EvenementIndesirableGraveGetPayload<{
 
 export type StatistiqueDbDnaLink = Prisma.DnaStructureGetPayload<{
   select: {
+    id: true;
     structureId: true;
     dna: { select: { code: true } };
   };
@@ -58,6 +64,7 @@ export type StatistiqueDbDnaLink = Prisma.DnaStructureGetPayload<{
 
 export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
   select: {
+    id: true;
     dnaCode: true;
     date: true;
     placesAutorisees: true;
@@ -69,6 +76,7 @@ export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
 
 export type StatistiqueDbIndicateurFinancier = Prisma.IndicateurFinancierGetPayload<{
   select: {
+    id: true;
     structureId: true;
     year: true;
     type: true;
@@ -80,11 +88,12 @@ export type StatistiqueDbIndicateurFinancier = Prisma.IndicateurFinancierGetPayl
 
 export type StatistiqueDbIndicateurFinancierMetriques = Omit<
   StatistiqueDbIndicateurFinancier,
-  "structureId" | "year" | "type"
+  "id" | "structureId" | "year" | "type"
 >;
 
 export type StatistiqueDbDepartement = Prisma.DepartementGetPayload<{
   select: {
+    id: true;
     numero: true;
     name: true;
     population: true;
@@ -100,11 +109,13 @@ export type StatistiqueDbBudgetAgg = {
 };
 
 export type StatistiqueDbBudget = StatistiqueDbBudgetAgg & {
+  id: number;
   structureId: number;
 };
 
 export type StatistiqueDbCpomStructure = Prisma.CpomStructureGetPayload<{
   select: {
+    id: true;
     cpomId: true;
     structureId: true;
     dateStart: true;
@@ -124,3 +135,14 @@ export type StatistiqueDbCpomStructure = Prisma.CpomStructureGetPayload<{
     };
   };
 }>;
+
+export type StatistiquesContext = {
+  structureIds: number[];
+  structures: StatistiqueDbStructure[];
+  typologies: StatistiqueDbTypologie[];
+  adresses: StatistiqueDbAdresse[];
+  cpomLinks: StatistiqueDbCpomStructure[];
+  dnaLinks: StatistiqueDbDnaLink[];
+  dnaCodes: string[];
+  departements: StatistiqueDbDepartement[];
+};

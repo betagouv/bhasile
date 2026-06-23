@@ -11,6 +11,7 @@ export const findActivites = async (
   return prisma.activite.findMany({
     where: { dnaCode: { in: dnaCodes } },
     select: {
+      id: true,
       dnaCode: true,
       date: true,
       placesAutorisees: true,

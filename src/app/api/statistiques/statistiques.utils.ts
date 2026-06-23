@@ -3,7 +3,8 @@ import { sumValues } from "@/app/utils/math.util";
 import type {
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
-} from "../statistiques.db.type";
+  StatistiqueDbTypologieValues,
+} from "./statistiques.db.type";
 
 // TODO(post-transfo) : exclure les structures avec transfo FERMETURE effective.
 export const filterStructuresActives = (
@@ -15,12 +16,12 @@ const TYPOLOGIE_AGGREGATE_FIELDS = [
   "pmr",
   "lgbt",
   "fvvTeh",
-] as const satisfies readonly (keyof StatistiqueDbTypologie)[];
+] as const satisfies readonly (keyof StatistiqueDbTypologieValues)[];
 
 // Dernière valeur non nulle par champ et par structure (agrégat global).
 export const getLastTypologiePerStructure = (
   typologies: StatistiqueDbTypologie[]
-): Map<number, StatistiqueDbTypologie> => {
+): Map<number, StatistiqueDbTypologieValues> => {
   const byStructure = new Map<number, StatistiqueDbTypologie[]>();
 
   for (const typologie of typologies) {
@@ -32,10 +33,13 @@ export const getLastTypologiePerStructure = (
     byStructure.set(typologie.structureId, rows);
   }
 
-  const typologieByStructureId = new Map<number, StatistiqueDbTypologie>();
+  const typologieByStructureId = new Map<
+    number,
+    StatistiqueDbTypologieValues
+  >();
 
   for (const [structureId, rows] of byStructure) {
-    const resolved: StatistiqueDbTypologie = {
+    const resolved: StatistiqueDbTypologieValues = {
       structureId,
       year: rows[rows.length - 1].year,
       placesAutorisees: null,
@@ -66,8 +70,11 @@ export const getLastTypologiePerStructure = (
 export const getTypologieMapForExactYear = (
   typologies: StatistiqueDbTypologie[],
   year: number
-): Map<number, StatistiqueDbTypologie> => {
-  const typologieByStructureId = new Map<number, StatistiqueDbTypologie>();
+): Map<number, StatistiqueDbTypologieValues> => {
+  const typologieByStructureId = new Map<
+    number,
+    StatistiqueDbTypologieValues
+  >();
   for (const typologie of typologies) {
     if (typologie.year === year && typologie.structureId !== null) {
       typologieByStructureId.set(typologie.structureId, typologie);
@@ -85,13 +92,13 @@ export const getTypologieYears = (
 
 export const filterStructuresWithTypologie = (
   structures: StatistiqueDbStructure[],
-  typologieMap: Map<number, StatistiqueDbTypologie>
+  typologieMap: Map<number, StatistiqueDbTypologieValues>
 ): StatistiqueDbStructure[] =>
   structures.filter((structure) => typologieMap.has(structure.id));
 
 export const computeTotalPlaces = (
   structures: StatistiqueDbStructure[],
-  typologieMap: Map<number, StatistiqueDbTypologie>
+  typologieMap: Map<number, StatistiqueDbTypologieValues>
 ): number =>
   sumValues(
     structures.map(

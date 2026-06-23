@@ -27,7 +27,7 @@ type FinanceScopeIds = {
   subventionnees: number[];
 };
 
-const emptyByYearScopeStat = (): FinanceByYearScopeStat => ({
+const emptyByYearScopeStat = {
   dotationDemandee: 0,
   dotationAccordee: 0,
   totalETP: 0,
@@ -39,7 +39,7 @@ const emptyByYearScopeStat = (): FinanceByYearScopeStat => ({
   excedentCumule: 0,
   deficitCumule: 0,
   soldeCumule: 0,
-});
+};
 
 export const getStructureIdsByFinanceScope = (
   structures: StatistiqueDbStructure[]
@@ -63,10 +63,10 @@ export const getStructureIdsByFinanceScope = (
 
 const aggregateBudgetsByYear = (
   budgets: StatistiqueDbBudget[]
-): Map<number, Omit<StatistiqueDbBudget, "structureId">> => {
+): Map<number, Omit<StatistiqueDbBudget, "id" | "structureId">> => {
   const budgetsByYear = new Map<
     number,
-    Omit<StatistiqueDbBudget, "structureId">
+    Omit<StatistiqueDbBudget, "id" | "structureId">
   >();
 
   for (const budget of budgets) {
@@ -252,14 +252,14 @@ const scopeStatForYear = (
 
   if (previousStat) {
     return {
-      ...emptyByYearScopeStat(),
+      ...emptyByYearScopeStat,
       excedentCumule: previousStat.excedentCumule,
       deficitCumule: previousStat.deficitCumule,
       soldeCumule: previousStat.soldeCumule,
     };
   }
 
-  return emptyByYearScopeStat();
+  return emptyByYearScopeStat;
 };
 
 const buildByYearFinanceStats = (
@@ -317,6 +317,5 @@ export const computeFinanceStatistiques = (
   indicateurs: StatistiqueDbIndicateurFinancier[],
   aggregation: NumericAggregation
 ): StatistiqueApiRead["finance"] => ({
-  aggregation,
   byYear: buildByYearFinanceStats(scopeIds, budgets, indicateurs, aggregation),
 });

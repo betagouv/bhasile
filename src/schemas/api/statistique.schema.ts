@@ -259,11 +259,9 @@ export const statistiqueApiReadSchema = z.object({
     byYear: z.array(placesByYearStatSchema),
   }),
   finance: z.object({
-    aggregation: z.enum(["moyenne", "mediane"]),
     byYear: z.array(financeByYearStatSchema),
   }),
   controleQualite: z.object({
-    aggregation: z.enum(["moyenne", "mediane"]),
     eig: eigStatSchema,
     byMonth: z.array(controleQualiteByMonthStatSchema),
     byTrimester: z.array(controleQualiteByTrimesterStatSchema),

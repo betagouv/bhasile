@@ -1,13 +1,5 @@
-import { isEigComportementViolent } from "@/app/utils/eig.util";
-import {
-  aggregateValues,
-  NumericAggregation,
-  ratio,
-} from "@/app/utils/math.util";
-import {
-  roundStatsNumber,
-  roundStatsRate,
-} from "@/app/utils/statistiques-format.util";
+import { aggregateValues, NumericAggregation } from "@/app/utils/math.util";
+import { roundStatsNumber } from "@/app/utils/statistiques-format.util";
 import { CURRENT_YEAR } from "@/constants";
 import {
   ControleQualiteByMonthStat,
@@ -25,36 +17,18 @@ import {
   toMonthKey,
   toTrimesterKey,
   toYearKey,
-} from "../shared/shared.utils";
+} from "../statistiques.utils";
 import type {
   StatistiqueDbDnaLink,
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
 } from "../statistiques.db.type";
-
-const getTwelveMonthCutoffKey = (): string => {
-  const twelveMonthsAgo = new Date();
-  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
-  return toMonthKey(twelveMonthsAgo);
-};
-
-const buildDnaCodeToStructureIds = (
-  dnaLinks: StatistiqueDbDnaLink[]
-): Map<string, Set<number>> => {
-  const dnaCodeToStructureIds = new Map<string, Set<number>>();
-
-  for (const link of dnaLinks) {
-    if (link.structureId === null) {
-      continue;
-    }
-    const structureIds =
-      dnaCodeToStructureIds.get(link.dna.code) ?? new Set<number>();
-    structureIds.add(link.structureId);
-    dnaCodeToStructureIds.set(link.dna.code, structureIds);
-  }
-
-  return dnaCodeToStructureIds;
-};
+import {
+  buildDnaCodeToStructureIds,
+  computeEigPeriodMetrics,
+  computeEigRates,
+  filterRecentEigs,
+} from "./controle-qualite-eig.util";
 
 const groupByPeriodKey = <Item>(
   items: Item[],
@@ -77,48 +51,6 @@ const groupByPeriodKey = <Item>(
   return byPeriod;
 };
 
-const getStructureIdsFromEigs = (
-  eigs: StatistiqueDbEig[],
-  dnaCodeToStructureIds: Map<string, Set<number>>,
-  activeStructureIds: Set<number>
-): Set<number> => {
-  const structureIds = new Set<number>();
-
-  for (const eig of eigs) {
-    if (!eig.dnaCode) {
-      continue;
-    }
-    const linkedStructureIds = dnaCodeToStructureIds.get(eig.dnaCode);
-    if (!linkedStructureIds) {
-      continue;
-    }
-    for (const structureId of linkedStructureIds) {
-      if (activeStructureIds.has(structureId)) {
-        structureIds.add(structureId);
-      }
-    }
-  }
-
-  return structureIds;
-};
-
-const countEigs = (
-  eigs: StatistiqueDbEig[]
-): { nbEig: number; nbEigComportementViolent: number } => {
-  let nbEigComportementViolent = 0;
-
-  for (const eig of eigs) {
-    if (eig.type && isEigComportementViolent(eig.type)) {
-      nbEigComportementViolent += 1;
-    }
-  }
-
-  return {
-    nbEig: eigs.length,
-    nbEigComportementViolent,
-  };
-};
-
 const filterEvaluationsForYear = (
   evaluations: StatistiqueDbEvaluation[],
   activeStructureIds: Set<number>,
@@ -132,42 +64,36 @@ const filterEvaluationsForYear = (
       new Date(evaluation.date).getFullYear() === year
   );
 
+const computeMoyenneEvaluationsCurrentYear = (
+  evaluations: StatistiqueDbEvaluation[],
+  activeStructureIds: Set<number>,
+  aggregation: NumericAggregation
+): number | null =>
+  roundStatsNumber(
+    aggregateValues(
+      filterEvaluationsForYear(
+        evaluations,
+        activeStructureIds,
+        CURRENT_YEAR
+      ).map((evaluation) => evaluation.note),
+      aggregation
+    )
+  );
+
 const computeEigSummary = (
   eigs: StatistiqueDbEig[],
   totalPlacesAutorisees: number,
   evaluations: StatistiqueDbEvaluation[],
   activeStructureIds: Set<number>,
   aggregation: NumericAggregation
-): EigStat => {
-  const cutoff = getTwelveMonthCutoffKey();
-  const recentEigs = eigs.filter(
-    (eig) =>
-      eig.evenementDate && toMonthKey(new Date(eig.evenementDate)) >= cutoff
-  );
-  const { nbEig, nbEigComportementViolent } = countEigs(recentEigs);
-  const evaluationsCurrentYear = filterEvaluationsForYear(
+): EigStat => ({
+  ...computeEigRates(filterRecentEigs(eigs), totalPlacesAutorisees),
+  moyenneEvaluationsCurrentYear: computeMoyenneEvaluationsCurrentYear(
     evaluations,
     activeStructureIds,
-    CURRENT_YEAR
-  );
-
-  return {
-    tauxEig: roundStatsRate(
-      totalPlacesAutorisees > 0 ? nbEig / totalPlacesAutorisees : null
-    ),
-    nbEig,
-    nbEigComportementViolent,
-    tauxEigComportementViolent: roundStatsRate(
-      ratio(nbEigComportementViolent, nbEig)
-    ),
-    moyenneEvaluationsCurrentYear: roundStatsNumber(
-      aggregateValues(
-        evaluationsCurrentYear.map((evaluation) => evaluation.note),
-        aggregation
-      )
-    ),
-  };
-};
+    aggregation
+  ),
+});
 
 const computeEvaluationNotes = (
   evaluations: StatistiqueDbEvaluation[],
@@ -215,29 +141,15 @@ const computeControleQualitePeriodStat = (
   totalStructures: number,
   dnaCodeToStructureIds: Map<string, Set<number>>,
   aggregation: NumericAggregation
-): ControleQualitePeriodStat => {
-  const { nbEig, nbEigComportementViolent } = countEigs(eigsForPeriod);
-  const structureIdsWithEig = getStructureIdsFromEigs(
+): ControleQualitePeriodStat => ({
+  ...computeEigPeriodMetrics(
     eigsForPeriod,
-    dnaCodeToStructureIds,
-    activeStructureIdSet
-  );
-  const nbStructuresSansDeclarationEig =
-    totalStructures - structureIdsWithEig.size;
-
-  return {
-    nbStructuresSansDeclarationEig,
-    partStructuresSansDeclarationEig: roundStatsRate(
-      ratio(nbStructuresSansDeclarationEig, totalStructures)
-    ),
-    nbEig,
-    nbEigComportementViolent,
-    tauxEigComportementViolent: roundStatsRate(
-      ratio(nbEigComportementViolent, nbEig)
-    ),
-    ...computeEvaluationNotes(evaluationsForPeriod, aggregation),
-  };
-};
+    activeStructureIdSet,
+    totalStructures,
+    dnaCodeToStructureIds
+  ),
+  ...computeEvaluationNotes(evaluationsForPeriod, aggregation),
+});
 
 type ControleQualiteSeriesContext = {
   activeStructureIdSet: Set<number>;
@@ -318,7 +230,6 @@ export const computeControleQualiteStatistiques = (
   );
 
   return {
-    aggregation,
     eig: computeEigSummary(
       eigs,
       totalPlacesAutorisees,

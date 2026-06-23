@@ -11,15 +11,16 @@ describe("activite statistics util", () => {
   ];
 
   const dnaLinks = [
-    { structureId: 1, dna: { code: "DNA01" } },
-    { structureId: 2, dna: { code: "DNA02" } },
-    { structureId: 3, dna: { code: "DNA03" } },
+    { id: 1, structureId: 1, dna: { code: "DNA01" } },
+    { id: 2, structureId: 2, dna: { code: "DNA02" } },
+    { id: 3, structureId: 3, dna: { code: "DNA03" } },
   ];
 
-  it("scopes indisponibilite (excl. CAES) and presences indues (excl. CAES+CPH) when computing rates", () => {
+  it("should apply type scoping to rate denominators", () => {
     const result = computeActiviteStatistiques(
       [
         {
+          id: 1,
           dnaCode: "DNA01",
           date: new Date("2025-03-15"),
           placesAutorisees: 100,
@@ -28,6 +29,7 @@ describe("activite statistics util", () => {
           presencesInduesDeboutees: 2,
         },
         {
+          id: 2,
           dnaCode: "DNA02",
           date: new Date("2025-03-15"),
           placesAutorisees: 50,
@@ -36,6 +38,7 @@ describe("activite statistics util", () => {
           presencesInduesDeboutees: 1,
         },
         {
+          id: 3,
           dnaCode: "DNA03",
           date: new Date("2025-03-15"),
           placesAutorisees: 40,
@@ -63,10 +66,11 @@ describe("activite statistics util", () => {
     expect(march2025?.tauxPresencesInduesTotal).toBe(0.07);
   });
 
-  it("aggregates each month independently", () => {
+  it("should aggregate months independently", () => {
     const result = computeActiviteStatistiques(
       [
         {
+          id: 1,
           dnaCode: "DNA01",
           date: new Date("2025-02-10"),
           placesAutorisees: 80,
@@ -75,6 +79,7 @@ describe("activite statistics util", () => {
           presencesInduesDeboutees: 0,
         },
         {
+          id: 4,
           dnaCode: "DNA01",
           date: new Date("2025-03-10"),
           placesAutorisees: 100,
@@ -83,7 +88,7 @@ describe("activite statistics util", () => {
           presencesInduesDeboutees: 0,
         },
       ],
-      [{ structureId: 1, dna: { code: "DNA01" } }],
+      [{ id: 1, structureId: 1, dna: { code: "DNA01" } }],
       [structures[0]]
     );
 

@@ -8,7 +8,7 @@ import type {
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
-} from "../statistiques.db.type";
+} from "./statistiques.db.type";
 
 export const findStructureIds = async (
   where: Prisma.StructureWhereInput
@@ -41,6 +41,7 @@ export const findStructureTypologies = async (
   return prisma.structureTypologie.findMany({
     where: { structureId: { in: structureIds } },
     select: {
+      id: true,
       structureId: true,
       year: true,
       placesAutorisees: true,
@@ -77,6 +78,7 @@ export const findDnaLinksByStructure = async (
   return prisma.dnaStructure.findMany({
     where: { structureId: { in: structureIds } },
     select: {
+      id: true,
       structureId: true,
       dna: { select: { code: true } },
     },
@@ -91,7 +93,7 @@ export const findDepartementsWithPopulation = async (
       departementNumeros.length > 0
         ? { numero: { in: departementNumeros } }
         : undefined,
-    select: { numero: true, name: true, population: true },
+    select: { id: true, numero: true, name: true, population: true },
   });
 };
 
@@ -104,6 +106,7 @@ export const findCpomStructures = async (
   return prisma.cpomStructure.findMany({
     where: { structureId: { in: structureIds } },
     select: {
+      id: true,
       cpomId: true,
       structureId: true,
       dateStart: true,

@@ -11,15 +11,16 @@ describe("places statistics util", () => {
   ];
 
   const departements = [
-    { numero: "01", name: "Ain", population: 100_000 },
-    { numero: "02", name: "Aisne", population: 50_000 },
+    { id: 1, numero: "01", name: "Ain", population: 100_000 },
+    { id: 2, numero: "02", name: "Aisne", population: 50_000 },
   ];
 
-  it("aggregates equipment rate from total places and total population", () => {
+  it("should compute equipment rate from places and population", () => {
     const result = computePlacesStatistiques(
       structures.slice(0, 2),
       [
         {
+          id: 1,
           structureId: 1,
           year: 2024,
           placesAutorisees: 100,
@@ -28,6 +29,7 @@ describe("places statistics util", () => {
           fvvTeh: 0,
         },
         {
+          id: 2,
           structureId: 2,
           year: 2024,
           placesAutorisees: 50,
@@ -44,11 +46,12 @@ describe("places statistics util", () => {
     expect(result.population).toBe(150_000);
   });
 
-  it("returns null equipment rate when a department population is missing", () => {
+  it("should return null equipment rate without population", () => {
     const result = computePlacesStatistiques(
       [structures[0]],
       [
         {
+          id: 1,
           structureId: 1,
           year: 2024,
           placesAutorisees: 100,
@@ -58,18 +61,19 @@ describe("places statistics util", () => {
         },
       ],
       [],
-      [{ numero: "01", name: "Ain", population: null }]
+      [{ id: 1, numero: "01", name: "Ain", population: null }]
     );
 
     expect(result.tauxEquipement).toBeNull();
     expect(result.population).toBeNull();
   });
 
-  it("resolves global indicators from the latest non-null typology value per field", () => {
+  it("should resolve indicators from latest non-null typology per field", () => {
     const result = computePlacesStatistiques(
       [structures[0]],
       [
         {
+          id: 1,
           structureId: 1,
           year: 2023,
           placesAutorisees: 80,
@@ -78,6 +82,7 @@ describe("places statistics util", () => {
           fvvTeh: 0,
         },
         {
+          id: 2,
           structureId: 1,
           year: 2024,
           placesAutorisees: 100,
@@ -96,11 +101,12 @@ describe("places statistics util", () => {
     expect(result.fvvTeh).toBe(2);
   });
 
-  it("excludes structures without typologie from place totals", () => {
+  it("should exclude structures without typologie from totals", () => {
     const result = computePlacesStatistiques(
       structures,
       [
         {
+          id: 1,
           structureId: 1,
           year: 2024,
           placesAutorisees: 100,

@@ -1,7 +1,5 @@
 import type { StructureDbList } from "@/app/api/structures/structure.db.type";
-import {
-  isStructureInCpom,
-} from "@/app/api/structures/structure.util";
+import { isStructureInCpom } from "@/app/api/structures/structure.util";
 import { CURRENT_YEAR } from "@/constants";
 import {
   BatiStat,
@@ -21,12 +19,13 @@ import {
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
   getTypologieYears,
-} from "../shared/shared.utils";
+} from "../statistiques.utils";
 import type {
   StatistiqueDbAdresse,
   StatistiqueDbCpomStructure,
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
+  StatistiqueDbTypologieValues,
 } from "../statistiques.db.type";
 
 const getRepartitionFromRepartitions = (
@@ -99,7 +98,10 @@ const getBatiPerStructure = (
 
   const result = new Map<number, Repartition>();
   for (const [structureId, repartitions] of byStructure) {
-    result.set(structureId, getRepartitionFromRepartitions(repartitions) as Repartition);
+    result.set(
+      structureId,
+      getRepartitionFromRepartitions(repartitions) as Repartition
+    );
   }
   return result;
 };
@@ -157,7 +159,7 @@ const countStructuresWithActiveCpom = (
 
 const aggregateByKey = <GroupKey>(
   structures: StatistiqueDbStructure[],
-  typologieMap: Map<number, StatistiqueDbTypologie>,
+  typologieMap: Map<number, StatistiqueDbTypologieValues>,
   getGroupKey: (structure: StatistiqueDbStructure) => GroupKey | null
 ): Map<GroupKey, { structures: number; places: number }> => {
   const statsByGroupKey = new Map<
@@ -216,7 +218,7 @@ const fillBatis = (stats: BatiStat[]): BatiStat[] => {
 
 const computeTypeStats = (
   structures: StatistiqueDbStructure[],
-  typologieMap: Map<number, StatistiqueDbTypologie>
+  typologieMap: Map<number, StatistiqueDbTypologieValues>
 ): TypeStructureStat[] =>
   fillStructureTypes(
     Array.from(

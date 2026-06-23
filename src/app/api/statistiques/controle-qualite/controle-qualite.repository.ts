@@ -13,7 +13,7 @@ export const findEigs = async (
   }
   return prisma.evenementIndesirableGrave.findMany({
     where: { dnaCode: { in: dnaCodes } },
-    select: { dnaCode: true, type: true, evenementDate: true },
+    select: { id: true, dnaCode: true, type: true, evenementDate: true },
     orderBy: { evenementDate: "asc" },
   });
 };
@@ -27,6 +27,7 @@ export const findEvaluations = async (
   return prisma.evaluation.findMany({
     where: { structureId: { in: structureIds } },
     select: {
+      id: true,
       structureId: true,
       date: true,
       note: true,
