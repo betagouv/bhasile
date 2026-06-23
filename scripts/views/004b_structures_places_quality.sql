@@ -10,24 +10,25 @@ WITH
   -- Last typology by structure
   structure_typologie_dernier_millesime AS (
     SELECT DISTINCT
-      ON (st."structureId") st."structureId",
+      ON (sc."id") sc."id" AS "structureId",
       st."placesAutorisees",
       st."pmr",
       st."lgbt",
       st."fvvTeh",
       st."year"
     FROM
-      public."StructureTypologie" st
+:"SCHEMA"."structures_core" sc
+      INNER JOIN public."StructureTypologie" st ON st."structureVersionId" = sc."structure_version_id"
     WHERE
       st."placesAutorisees" IS NOT NULL
     ORDER BY
-      st."structureId",
+      sc."id",
       st."year" DESC
   ),
   -- Last typology by address
   adresse_typologie_dernier_millesime AS (
     SELECT DISTINCT
-      ON (aty."adresseId") a."structureId",
+      ON (aty."adresseId") sc."id" AS "structureId",
       a."id" AS "adresse_id",
       aty."placesAutorisees",
       aty."qpv",
@@ -36,6 +37,7 @@ WITH
     FROM
       public."AdresseTypologie" aty
       JOIN public."Adresse" a ON a."id" = aty."adresseId"
+      JOIN:"SCHEMA"."structures_core" sc ON sc."structure_version_id" = a."structureVersionId"
     WHERE
       aty."placesAutorisees" IS NOT NULL
     ORDER BY
@@ -55,7 +57,7 @@ WITH
   -- Places comparison: structure vs addresses
   places_comparison AS (
     SELECT
-      s."id",
+      sc."id",
       COALESCE(
         ABS(
           COALESCE(sdm."placesAutorisees", 0) - COALESCE(aa."places_autorisees_adresse", 0)
@@ -63,31 +65,32 @@ WITH
         0
       ) AS pct_diff_places_adresse
     FROM
-      public."Structure" s
-      LEFT JOIN structure_typologie_dernier_millesime sdm ON sdm."structureId" = s."id"
-      LEFT JOIN adresses_agregees aa ON aa."structureId" = s."id"
+:"SCHEMA"."structures_core" sc
+      LEFT JOIN structure_typologie_dernier_millesime sdm ON sdm."structureId" = sc."id"
+      LEFT JOIN adresses_agregees aa ON aa."structureId" = sc."id"
   ),
   -- Specific places issues (year by year)
   specific_places_issues AS (
     SELECT
-      st."structureId" AS "structureId",
+      sc."id" AS "structureId",
       BOOL_OR(
         st."lgbt" > st."placesAutorisees"
         OR st."fvvTeh" > st."placesAutorisees"
         OR st."pmr" > st."placesAutorisees"
       ) AS "has_issue_specific_places_gt_places_autorisees"
     FROM
-      public."StructureTypologie" st
+:"SCHEMA"."structures_core" sc
+      INNER JOIN public."StructureTypologie" st ON st."structureVersionId" = sc."structure_version_id"
     GROUP BY
-      st."structureId"
+      sc."id"
   )
 SELECT
-  s."id" AS "id",
+  sc."id" AS "id",
   -- Specific places > authorized places
   COALESCE(spi."has_issue_specific_places_gt_places_autorisees", FALSE) AS "has_issue_specific_places_gt_places_autorisees",
   -- Places structure vs addresses: difference > 10%
   COALESCE(pc."pct_diff_places_adresse" > 10, FALSE) AS "has_issue_places_structure_vs_address_diff_gt_10pct"
 FROM
-  public."Structure" s
-  LEFT JOIN specific_places_issues spi ON spi."structureId" = s."id"
-  LEFT JOIN places_comparison pc ON pc."id" = s."id";
+:"SCHEMA"."structures_core" sc
+  LEFT JOIN specific_places_issues spi ON spi."structureId" = sc."id"
+  LEFT JOIN places_comparison pc ON pc."id" = sc."id";

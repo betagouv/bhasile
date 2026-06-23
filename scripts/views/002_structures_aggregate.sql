@@ -7,16 +7,7 @@ WITH
       st."placesAutorisees"
     FROM
 :"SCHEMA"."structures_core" sc
-      INNER JOIN public."StructureTypologie" st ON (
-        (
-          sc."structure_version_id" IS NOT NULL
-          AND st."structureVersionId" = sc."structure_version_id"
-        )
-        OR (
-          sc."structure_version_id" IS NULL
-          AND st."structureId" = sc."id"
-        )
-      )
+      INNER JOIN public."StructureTypologie" st ON st."structureVersionId" = sc."structure_version_id"
     WHERE
       st."placesAutorisees" IS NOT NULL
     ORDER BY
@@ -39,26 +30,6 @@ WITH
     ORDER BY
       aa."cpomId",
       aa."endDate" DESC
-  ),
-  structure_in_cpom_for_year AS (
-    SELECT DISTINCT
-      cs."structureId",
-      gs."year"
-    FROM
-      public."CpomStructure" cs
-      JOIN cpom_convention_dates cp ON cp."cpomId" = cs."cpomId"
-      CROSS JOIN LATERAL GENERATE_SERIES(
-        EXTRACT(
-          YEAR
-          FROM
-            COALESCE(cs."dateStart", cp."cpom_start")
-        )::int,
-        EXTRACT(
-          YEAR
-          FROM
-            COALESCE(cs."dateEnd", cp."cpom_end")
-        )::int
-      ) AS gs ("year")
   ),
   structure_budget_dernier_millesime AS (
     SELECT DISTINCT
@@ -83,13 +54,29 @@ WITH
     SELECT
       sb."structureId",
       CASE
-        WHEN sic."structureId" IS NOT NULL THEN NULL
+        WHEN EXISTS (
+          SELECT
+            1
+          FROM
+            public."CpomStructure" cs
+            JOIN cpom_convention_dates cp ON cp."cpomId" = cs."cpomId"
+          WHERE
+            cs."structureId" = sb."structureId"
+            AND sb."year" >= EXTRACT(
+              YEAR
+              FROM
+                COALESCE(cs."dateStart", cp."cpom_start")
+            )::int
+            AND sb."year" <= EXTRACT(
+              YEAR
+              FROM
+                COALESCE(cs."dateEnd", cp."cpom_end")
+            )::int
+        ) THEN NULL
         ELSE COALESCE(sb."dotationAccordee", sb."dotationDemandee")
       END AS "dotation_derniere_annee"
     FROM
       structure_budget_dernier_millesime sb
-      LEFT JOIN structure_in_cpom_for_year sic ON sic."structureId" = sb."structureId"
-      AND sic."year" = sb."year"
   )
 SELECT
   sc."id" AS "id",
