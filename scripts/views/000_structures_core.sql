@@ -20,7 +20,9 @@ WITH
       LEFT JOIN public."Form" f ON f."transformationId" = svt."transformationId"
     WHERE
       sv."structureId" IS NOT NULL
-      AND sv."effectiveDate" < NOW()
+      AND sv."effectiveDate" < (
+        (DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC') + INTERVAL '1 day') AT TIME ZONE 'UTC'
+      )
       AND (
         -- Filter out structures versions linked to a non finished transformation
         sv."structureVersionTransformationId" IS NULL
