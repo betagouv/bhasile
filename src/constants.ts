@@ -1,4 +1,5 @@
 import { Departement, Region } from "./types/departement.type";
+import { StructureType } from "./types/structure.type";
 
 export type LatLngTuple = [number, number];
 
@@ -34,6 +35,8 @@ export const INDICATEUR_FINANCIER_CUTOFF_YEAR = 2024;
 
 export const AUTORISEE_OPEN_YEAR = 2025;
 export const SUBVENTIONNEE_OPEN_YEAR = 2024;
+
+export const EXCLUDED_STRUCTURE_TYPES = [StructureType.PRAHDA] as const;
 
 const IMAGE_MIME_TYPES = [
   "image/jpg",

@@ -1,3 +1,4 @@
+import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
 import { Prisma, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import {
@@ -21,16 +22,47 @@ import {
 } from "./statistiques.repository";
 import { getStructuresStatistiques } from "./structures/structures.service";
 
+const excludedStructureTypes = new Set<string>(EXCLUDED_STRUCTURE_TYPES);
+
+const buildTypeWhere = (
+  filters: StatistiquesFilters
+): Prisma.StructureWhereInput["type"] => {
+  const typeList = filters.types?.split(",").filter(Boolean) ?? [];
+
+  if (typeList.length > 0) {
+    return {
+      in: typeList.filter(
+        (type) => !excludedStructureTypes.has(type)
+      ) as StructureType[],
+    };
+  }
+
+  return { notIn: EXCLUDED_STRUCTURE_TYPES as unknown as StructureType[] };
+};
+
 const buildStructureWhere = async (
   filters: StatistiquesFilters
 ): Promise<Prisma.StructureWhereInput> => {
   // TODO(structure-version): filtrer type/département sur version effective (typologie.utils)
-  const where: Prisma.StructureWhereInput = {};
+  // For now we filter hat finalised initialisation and remove prahdas/
+  const where: Prisma.StructureWhereInput = {
+    structureVersions: {
+      some: {
+        structureVersionTransformation: {
+          transformation: {
+            form: {
+              is: {
+                status: true,
+                formDefinition: { slug: "finalisation-v1" },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
 
-  const typeList = filters.types?.split(",").filter(Boolean) ?? [];
-  if (typeList.length > 0) {
-    where.type = { in: typeList as StructureType[] };
-  }
+  where.type = buildTypeWhere(filters);
 
   const depList = filters.departements?.split(",").filter(Boolean) ?? [];
   if (depList.length > 0) {
