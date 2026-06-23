@@ -70,19 +70,13 @@ const addDays = (date: Date, days: number): Date => {
   return result;
 };
 
-const pickNbTransfos = (): number => {
-  const roll = faker.number.int({ min: 1, max: 100 });
-  if (roll <= 40) {
-    return 0;
-  }
-  if (roll <= 70) {
-    return 1;
-  }
-  if (roll <= 90) {
-    return 2;
-  }
-  return 3;
-};
+const pickNbTransfos = (): number =>
+  faker.helpers.weightedArrayElement([
+    { weight: 40, value: 0 },
+    { weight: 30, value: 1 },
+    { weight: 20, value: 2 },
+    { weight: 10, value: 3 },
+  ]);
 
 const planStructureHistory = (
   ofii: boolean,
@@ -561,11 +555,6 @@ export const seedStructureWithVersions = async (
           params.now
         );
 
-  const filiale = params.ofii
-    ? null
-    : (faker.helpers.maybe(() => faker.word.noun(), { probability: 0.5 }) ??
-      null);
-
   const nonVersioned = params.ofii
     ? {}
     : buildNonVersionedRelations({
@@ -596,7 +585,6 @@ export const seedStructureWithVersions = async (
     const structureData: Prisma.StructureUncheckedCreateInput = {
       codeBhasile: params.codeBhasile,
       operateurId: params.operateurId,
-      filiale,
       ...convertToPrismaObject(nonVersioned),
       structureVersions: {
         create: [{ campaignId: campaign.id, ...versionCommon }],
@@ -615,7 +603,6 @@ export const seedStructureWithVersions = async (
     const structureData: Prisma.StructureUncheckedCreateInput = {
       codeBhasile: params.codeBhasile,
       operateurId: params.operateurId,
-      filiale,
       ...convertToPrismaObject(nonVersioned),
     };
     const structure = await prisma.structure.create({

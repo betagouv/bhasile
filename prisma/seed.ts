@@ -222,7 +222,7 @@ async function seed(): Promise<void> {
     if (structureIdsToMove.length > 0) {
       await prisma.structure.updateMany({
         where: { id: { in: structureIdsToMove } },
-        data: { operateurId: filiale.id },
+        data: { operateurId: filiale.id, filiale: filiale.name },
       });
       await prisma.structureVersionTransformation.updateMany({
         where: {
