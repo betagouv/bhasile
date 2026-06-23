@@ -11,6 +11,11 @@ import {
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
+import type {
+  StatistiqueDbDnaLink,
+  StatistiqueDbEig,
+  StatistiqueDbEvaluation,
+} from "../statistiques.db.type";
 import {
   monthKeyToDate,
   parseTrimesterKey,
@@ -18,11 +23,6 @@ import {
   toTrimesterKey,
   toYearKey,
 } from "../statistiques.utils";
-import type {
-  StatistiqueDbDnaLink,
-  StatistiqueDbEig,
-  StatistiqueDbEvaluation,
-} from "../statistiques.db.type";
 import {
   buildDnaCodeToStructureIds,
   computeEigPeriodMetrics,

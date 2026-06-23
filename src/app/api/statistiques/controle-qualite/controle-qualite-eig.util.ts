@@ -6,11 +6,11 @@ import type {
   EigStat,
 } from "@/schemas/api/statistique.schema";
 
-import { toMonthKey } from "../statistiques.utils";
 import type {
   StatistiqueDbDnaLink,
   StatistiqueDbEig,
 } from "../statistiques.db.type";
+import { toMonthKey } from "../statistiques.utils";
 
 const getTwelveMonthCutoffKey = (): string => {
   const twelveMonthsAgo = new Date();

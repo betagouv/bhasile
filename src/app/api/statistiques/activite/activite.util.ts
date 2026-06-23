@@ -9,12 +9,12 @@ import {
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
-import { monthKeyToDate, toMonthKey } from "../statistiques.utils";
 import type {
   StatistiqueDbActivite,
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
 } from "../statistiques.db.type";
+import { monthKeyToDate, toMonthKey } from "../statistiques.utils";
 
 type DnaEligibility = {
   indisponibilite: Set<string>;

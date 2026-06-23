@@ -9,6 +9,7 @@ import { getActiviteStatistiques } from "./activite/activite.service";
 import { getControleQualiteStatistiques } from "./controle-qualite/controle-qualite.service";
 import { getFinanceStatistiques } from "./finance/finance.service";
 import { getPlacesStatistiques } from "./places/places.service";
+import type { StatistiquesContext } from "./statistiques.db.type";
 import {
   findCpomStructures,
   findDepartementsWithPopulation,
@@ -19,7 +20,6 @@ import {
   findStructureTypologies,
 } from "./statistiques.repository";
 import { getStructuresStatistiques } from "./structures/structures.service";
-import type { StatistiquesContext } from "./statistiques.db.type";
 
 const buildStructureWhere = async (
   filters: StatistiquesFilters

@@ -13,13 +13,6 @@ import {
   StructureType,
 } from "@/types/structure.type";
 
-import {
-  filterStructuresActives,
-  filterStructuresWithTypologie,
-  getLastTypologiePerStructure,
-  getTypologieMapForExactYear,
-  getTypologieYears,
-} from "../statistiques.utils";
 import type {
   StatistiqueDbAdresse,
   StatistiqueDbCpomStructure,
@@ -27,6 +20,13 @@ import type {
   StatistiqueDbTypologie,
   StatistiqueDbTypologieValues,
 } from "../statistiques.db.type";
+import {
+  filterStructuresActives,
+  filterStructuresWithTypologie,
+  getLastTypologiePerStructure,
+  getTypologieMapForExactYear,
+  getTypologieYears,
+} from "../statistiques.utils";
 
 const getRepartitionFromRepartitions = (
   repartitions: (Repartition | null | undefined)[]
