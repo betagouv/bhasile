@@ -35,31 +35,28 @@ export const DnaAndFiness = ({
   useEffect(() => {
     if (!isMultiDna) {
       const dnaStructures = watch("dnaStructures");
-      const finesses = watch("finesses");
+      const structureFinesses = watch("structureFinesses");
 
       if (dnaStructures && dnaStructures[0]) {
         setValue("dnaStructures", [dnaStructures?.[0]]);
       }
 
-      if (finesses && finesses[0]) {
-        setValue("finesses", [finesses?.[0]]);
+      if (structureFinesses && structureFinesses[0]) {
+        setValue("structureFinesses", [structureFinesses?.[0]]);
       }
     }
   }, [isMultiDna, setValue, watch]);
 
   // We had a bug that set finess to [null], so we have to clean it up
   // TODO: to delete once the ajout form is dead
-  const finesses = watch("finesses");
+  const structureFinesses = watch("structureFinesses");
   useEffect(() => {
-    if (finesses && finesses[0] === null) {
-      setValue("finesses", undefined);
+    if (structureFinesses && structureFinesses[0] === null) {
+      setValue("structureFinesses", undefined);
     }
-  }, [finesses, setValue]);
+  }, [structureFinesses, setValue]);
 
-  const title =
-    formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
-      ? `Veuillez ne retenir qu’un seul code DNA ${isAutorisee ? "et FINESS" : ""} pour l’ensemble de la structure (sauf cas exceptionnels). Veuillez vous assurer qu’une fiche de paramétrage a été transmise à l’OFII.`
-      : `Code${isMultiDna ? "s" : ""} DNA${isAutorisee ? " et FINESS" : ""}`;
+  const title = `Code${isMultiDna ? "s" : ""} DNA${isAutorisee ? " et FINESS" : ""}`;
 
   return (
     <>
@@ -97,8 +94,8 @@ export const DnaAndFiness = ({
           />
           {isAutorisee && (
             <InputWithValidation
-              name="finesses.0.code"
-              id="finesses.0.code"
+              name="structureFinesses.0.finess.code"
+              id="structureFinesses.0.finess.code"
               control={control}
               type="text"
               label="Code FINESS"

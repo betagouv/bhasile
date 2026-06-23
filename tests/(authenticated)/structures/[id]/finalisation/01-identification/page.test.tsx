@@ -131,19 +131,22 @@ describe("FinalisationIdentification page integration", () => {
       dnaStructures: [
         {
           id: 1,
+          description: "",
           dna: {
             code: "C0001",
-            description: "",
           },
           startDate: null,
           endDate: null,
         },
       ],
-      finesses: [
+      structureFinesses: [
         {
           id: 1,
-          code: "123456789",
           description: "",
+          finess: {
+            id: 1,
+            code: "123456789",
+          },
         },
       ],
       nom: "Les Mimosas",

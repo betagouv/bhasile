@@ -31,12 +31,6 @@ export class IdentificationPage extends BasePage {
       await this.waitHelper.waitForUIUpdate();
     }
 
-    if (data.filiale) {
-      await this.formHelper.toggleSwitch(SELECTORS.FILIALE_TOGGLE, true);
-      await this.waitHelper.waitForFormFieldReady(SELECTORS.FILIALE_INPUT);
-      await this.formHelper.fillInput(SELECTORS.FILIALE_INPUT, data.filiale);
-    }
-
     if (data.creationDate) {
       await this.formHelper.fillDate(
         'input[name="creationDate"]',
@@ -86,7 +80,7 @@ export class IdentificationPage extends BasePage {
       for (const [i, dna] of dnas.entries()) {
         if (dna.description) {
           await this.formHelper.fillInput(
-            `input[name="dnaStructures.${i}.dna.description"]`,
+            `input[name="dnaStructures.${i}.description"]`,
             dna.description
           );
         }
@@ -102,13 +96,13 @@ export class IdentificationPage extends BasePage {
           }
           if (finess.code) {
             await this.formHelper.fillInput(
-              `input[name="finesses.${i}.code"]`,
+              `input[name="structureFinesses.${i}.finess.code"]`,
               finess.code
             );
           }
           if (finess.description) {
-            await this.formHelper.fillInputIfExists(
-              `input[name="finesses.${i}.description"]`,
+            await this.formHelper.fillInput(
+              `input[name="structureFinesses.${i}.description"]`,
               finess.description
             );
           }
@@ -117,7 +111,7 @@ export class IdentificationPage extends BasePage {
     } else {
       if (isAutorisee && finesses[0]?.code) {
         await this.formHelper.fillInput(
-          'input[name="finesses.0.code"]',
+          'input[name="structureFinesses.0.finess.code"]',
           finesses[0].code
         );
       }

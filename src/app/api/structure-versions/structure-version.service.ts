@@ -1,4 +1,7 @@
-import { recursivelySerializeDates } from "@/app/utils/date.util";
+import {
+  recursivelySerializeDates,
+  startOfNextUtcDay,
+} from "@/app/utils/date.util";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
 import { StructureVersionApiRead } from "@/schemas/api/transformation.schema";
 import { PublicType, StructureType } from "@/types/structure.type";
@@ -8,12 +11,57 @@ import {
   getAdressesApiRead,
 } from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";
+import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import type { StructureDbDetails } from "../structures/structure.db.type";
 import { getTypeBati } from "../structures/structure.util";
-import { StructureVersionDbDetails } from "./structure-version.db.type";
+import {
+  StructureVersionDbDetails,
+  StructureVersionDbTransformation,
+} from "./structure-version.db.type";
+
+const isVersionValid = (version: StructureVersionDbDetails): boolean => {
+  if (version.structureVersionTransformationId === null) {
+    return true;
+  }
+  return (
+    version.structureVersionTransformation?.transformation?.form?.status ===
+    true
+  );
+};
+
+const resolveLatestValidBefore = (
+  versions: StructureVersionDbDetails[],
+  upperBoundMs: number
+): StructureVersionDbDetails | undefined =>
+  versions
+    .filter(
+      (version) =>
+        version.effectiveDate.getTime() < upperBoundMs &&
+        isVersionValid(version)
+    )
+    .sort((first, second) => {
+      const dateDiff =
+        second.effectiveDate.getTime() - first.effectiveDate.getTime();
+      if (dateDiff !== 0) {
+        return dateDiff;
+      }
+      return second.id - first.id;
+    })[0];
+
+export const resolveCurrentVersion = (
+  versions: StructureVersionDbDetails[],
+  now: Date
+): StructureVersionDbDetails | undefined =>
+  resolveLatestValidBefore(versions, startOfNextUtcDay(now).getTime());
+
+export const resolvePredecessor = (
+  versions: StructureVersionDbDetails[],
+  effectiveDate: Date
+): StructureVersionDbDetails | undefined =>
+  resolveLatestValidBefore(versions, effectiveDate.getTime());
 
 const mapVersionScalars = (
-  source: StructureDbDetails | StructureVersionDbDetails
+  source: StructureDbDetails | StructureVersionDbTransformation
 ): Pick<
   StructureVersionApiType,
   | "type"
@@ -56,24 +104,28 @@ const mapVersionScalars = (
 });
 
 export const dbStructureVersionToApiRead = (
-  version: StructureVersionDbDetails
+  version: StructureVersionDbTransformation
 ): StructureVersionApiRead => {
   const adresseAdministrativeComplete =
     buildAdresseAdministrativeComplete(version);
 
   const antennes = getAntennesApiRead(version.antennes);
   const adresses = getAdressesApiRead(version.adresses);
+  const structureFinesses = getStructureFinessesApiRead(
+    version.structureFinesses
+  );
   const typeBati = getTypeBati(version);
   const isMultiAntenne = (version.antennes?.length ?? 0) > 0;
   const isMultiDna =
     (version.dnaStructures?.length ?? 0) > 1 ||
-    (version.finesses?.length ?? 0) > 1;
+    (version.structureFinesses?.length ?? 0) > 1;
 
   return recursivelySerializeDates({
     ...version,
     ...mapVersionScalars(version),
     antennes,
     adresses,
+    structureFinesses,
     typeBati,
     isMultiAntenne,
     isMultiDna,
@@ -102,6 +154,19 @@ export const copyStructureVersion = (
     commune: antenne.commune,
     departement: antenne.departement,
   })),
+  // TODO: simplify once finess.code is mandatory in db
+  structureFinesses: structure.structureFinesses.flatMap((structureFiness) =>
+    structureFiness.finess.code
+      ? [
+          {
+            description: structureFiness.description ?? undefined,
+            finess: {
+              code: structureFiness.finess.code,
+            },
+          },
+        ]
+      : []
+  ),
   adresses: (getAdressesApiRead(structure.adresses) ?? []).map((adresse) => ({
     adresse: adresse.adresse,
     codePostal: adresse.codePostal,
@@ -126,9 +191,9 @@ export const copyStructureVersion = (
     echeancePlacesAFermer: typologie.echeancePlacesAFermer?.toISOString(),
   })),
   dnaStructures: structure.dnaStructures.map((dnaStructure) => ({
+    description: dnaStructure.description ?? undefined,
     dna: {
       code: dnaStructure.dna.code,
-      description: dnaStructure.dna.description ?? undefined,
     },
     startDate: dnaStructure.startDate?.toISOString() ?? undefined,
     endDate: dnaStructure.endDate?.toISOString() ?? undefined,

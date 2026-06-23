@@ -94,8 +94,10 @@ describe("useStructures integration", () => {
           public: "Tout public",
           adresses: [],
           antennes: [],
-          dnaStructures: [{ id: 1, dna: { code: "C0001", description: "" } }],
-          finesses: [{ id: 1, code: "123456789", description: "" }],
+          dnaStructures: [{ id: 1, description: "", dna: { code: "C0001" } }],
+          structureFinesses: [
+            { id: 1, description: "", finess: { id: 1, code: "123456789" } },
+          ],
           contacts: [
             { nom: "", prenom: "", role: "", email: "", telephone: "" },
             {
@@ -145,8 +147,10 @@ describe("useStructures integration", () => {
         public: "Tout public",
         adresses: [],
         antennes: [],
-        dnaStructures: [{ id: 1, dna: { code: "C0001", description: "" } }],
-        finesses: [{ id: 1, code: "123456789", description: "" }],
+        dnaStructures: [{ id: 1, description: "", dna: { code: "C0001" } }],
+        structureFinesses: [
+          { id: 1, description: "", finess: { id: 1, code: "123456789" } },
+        ],
         contacts: [
           {
             nom: "Valide",

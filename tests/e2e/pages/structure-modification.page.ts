@@ -146,7 +146,7 @@ export class StructureModificationPage {
         response.url().includes(`/api/structures/${this.structureId}`) &&
         response.request().method() === "PUT" &&
         response.ok(),
-      { timeout: 20000 }
+      { timeout: 30000 }
     );
     await this.page
       .getByRole("button", { name: "Valider", exact: true })

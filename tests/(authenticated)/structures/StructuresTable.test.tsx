@@ -1,5 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
+import { SessionProvider } from "next-auth/react";
 
+import { AppAbilityProvider } from "@/app/context/AbilityContext";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { StructuresTable } from "../../../src/app/(authenticated)/(with-menu)/structures/_components/StructuresTable";
@@ -13,6 +15,23 @@ vi.mock("next/navigation", () => ({
   }),
   useSearchParams: () => new URLSearchParams("page=0"),
 }));
+
+vi.mock("next-auth/react", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next-auth/react")>();
+  return {
+    ...actual,
+    SessionProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
+    useSession: vi.fn(() => ({
+      data: {
+        expires: "1",
+        user: { email: "test@example.com", name: "John Doe", role: "NATIONAL" },
+      },
+      status: "authenticated",
+    })),
+  };
+});
 
 describe("StructuresTable", () => {
   it("should show table headings and content elements when rendered", () => {
@@ -43,11 +62,15 @@ describe("StructuresTable", () => {
 
     // WHEN
     render(
-      <StructuresTable
-        structures={structures}
-        totalStructures={structures.length}
-        ariaLabelledBy={ariaLabelledBy}
-      />
+      <SessionProvider>
+        <AppAbilityProvider>
+          <StructuresTable
+            structures={structures}
+            totalStructures={structures.length}
+            ariaLabelledBy={ariaLabelledBy}
+          />
+        </AppAbilityProvider>
+      </SessionProvider>
     );
 
     // THEN

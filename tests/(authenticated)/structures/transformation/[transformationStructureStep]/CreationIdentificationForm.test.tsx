@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -72,13 +72,18 @@ vi.mock(
   })
 );
 vi.mock("@/app/components/forms/dnaAndFiness/DnaAndFiness", () => ({
-  DnaAndFiness: () => null,
+  DnaAndFiness: () => <div data-testid="dna-and-finess" />,
+}));
+vi.mock("@/app/components/forms/dnaAndFiness/TransformationDnaAndFiness", () => ({
+  TransformationDnaAndFiness: () => (
+    <div data-testid="transformation-dna-and-finess" />
+  ),
 }));
 vi.mock("@/app/components/forms/contacts/FieldSetContacts", () => ({
   FieldSetContacts: () => null,
 }));
 
-const renderForm = () => {
+const renderForm = (formKind: FormKind = FormKind.OUVERTURE_EX_NIHILO) => {
   const structureVersionTransformation: StructureVersionTransformationApiRead = {
     id: 7,
     type: StructureVersionTransformationType.CREATION,
@@ -93,7 +98,7 @@ const renderForm = () => {
     <CreationIdentificationForm
       transformation={transformation}
       structureVersionTransformation={structureVersionTransformation}
-      formKind={FormKind.OUVERTURE_EX_NIHILO}
+      formKind={formKind}
     />
   );
 };
@@ -133,6 +138,28 @@ describe("CreationIdentificationForm", () => {
       nom: "Les Coquelicots",
       creationDate: "2024-01-01T00:00:00.000Z",
     });
+  });
+
+  it("affiche DnaAndFiness pour une ouverture ex nihilo", () => {
+    // GIVEN / WHEN
+    renderForm(FormKind.OUVERTURE_EX_NIHILO);
+
+    // THEN
+    expect(screen.getByTestId("dna-and-finess")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("transformation-dna-and-finess")
+    ).not.toBeInTheDocument();
+  });
+
+  it("affiche TransformationDnaAndFiness pour une ouverture depuis une ou plusieurs structures", () => {
+    // GIVEN / WHEN
+    renderForm(FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES);
+
+    // THEN
+    expect(
+      screen.getByTestId("transformation-dna-and-finess")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("dna-and-finess")).not.toBeInTheDocument();
   });
 
   it("délègue la navigation à goToNextStep au submit", () => {

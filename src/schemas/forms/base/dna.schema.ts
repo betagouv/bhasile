@@ -1,20 +1,26 @@
 import z from "zod";
 
+import { areCodesUnique } from "@/app/utils/common.util";
 import { nullishFrenchDateToISO, zId } from "@/app/utils/zodCustomFields";
 
 const dnaSchema = z.object({
   id: zId(),
   code: z.string().min(1, "Le code DNA est obligatoire"),
-  description: z.string().nullish(),
 });
 
 const dnaStructureSchema = z.object({
   id: zId(),
+  description: z.string().nullish(),
   dna: dnaSchema,
   structureId: zId(),
   startDate: nullishFrenchDateToISO(),
   endDate: nullishFrenchDateToISO(),
 });
+
+const uniqueDnaCodesError = {
+  message: "Les codes DNA doivent être uniques",
+  path: ["dnaStructures"],
+};
 
 export const dnaStructuresSchema = z
   .object({
@@ -30,26 +36,21 @@ export const dnaStructuresSchema = z
     }
   )
   .refine(
-    (data) => {
-      if (!data.dnaStructures || data.dnaStructures.length === 0) {
-        return true;
-      }
-      const codes = data.dnaStructures.map((dnaStructure) =>
-        dnaStructure.dna?.code?.trim()
-      );
-      const uniqueCodes = new Set(codes);
-      return codes.length === uniqueCodes.size;
-    },
-    {
-      message: "Les codes DNA doivent être uniques",
-      path: ["dnaStructures"],
-    }
+    (data) =>
+      areCodesUnique(data.dnaStructures, (dnaStructure) => dnaStructure.dna?.code),
+    uniqueDnaCodesError
   );
 
-export const dnaStructuresAutoSaveSchema = z.object({
-  dnaStructures: z
-    .array(dnaStructureSchema.extend({ dna: dnaSchema.partial() }).partial())
-    .optional(),
-});
+export const dnaStructuresAutoSaveSchema = z
+  .object({
+    dnaStructures: z
+      .array(dnaStructureSchema.extend({ dna: dnaSchema.partial() }).partial())
+      .optional(),
+  })
+  .refine(
+    (data) =>
+      areCodesUnique(data.dnaStructures, (dnaStructure) => dnaStructure.dna?.code),
+    uniqueDnaCodesError
+  );
 
 export type DnaStructureFormValues = z.infer<typeof dnaStructureSchema>;

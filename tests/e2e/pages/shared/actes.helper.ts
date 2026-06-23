@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 
-import { SAMPLE_PDF, uploadToContainer } from "../upload.helper";
+import { SAMPLE_PDF, uploadContainer, uploadToContainer } from "../upload.helper";
 
 /** Scope un acte par le texte de sa légende de fieldset. */
 export const acteFieldsetByLegend = (page: Page, legend: string): Locator =>
@@ -33,8 +33,5 @@ export const uploadActeDocument = async (
   scope: Locator,
   filePath: string = SAMPLE_PDF
 ): Promise<void> => {
-  await uploadToContainer(
-    scope.locator("div.bg-alt-blue-france").first(),
-    filePath
-  );
+  await uploadToContainer(uploadContainer(scope).first(), filePath);
 };

@@ -312,6 +312,75 @@ describe("transformation util", () => {
       expect(prevStep).toBeUndefined();
       expect(nextStep).toBeUndefined();
     });
+
+    it("devrait exposer un backLink vers la page de sélection quand l'étape est la toute première", () => {
+      // GIVEN
+      const transformationStructureType =
+        StructureVersionTransformationType.FERMETURE;
+      const transformationStructureId = 1;
+      const transformationStructureStep = "description";
+
+      // WHEN
+      const { backLink } = getTransformationFormNavigation({
+        transformationSteps,
+        transformationId: 5,
+        transformationStructureType,
+        transformationStructureId,
+        transformationStructureStep,
+      });
+
+      // THEN
+      expect(backLink).toEqual({
+        href: "/structures/transformation/5/selection",
+        label: "Modifier le cas de figure",
+      });
+    });
+
+    it("devrait exposer un backLink vers l'étape précédente au sein du même groupe", () => {
+      // GIVEN
+      const transformationStructureType =
+        StructureVersionTransformationType.EXTENSION;
+      const transformationStructureId = 2;
+      const transformationStructureStep = "places-et-hebergement";
+
+      // WHEN
+      const { backLink } = getTransformationFormNavigation({
+        transformationSteps,
+        transformationId: 5,
+        transformationStructureType,
+        transformationStructureId,
+        transformationStructureStep,
+      });
+
+      // THEN
+      expect(backLink).toEqual({
+        href: "/structures/transformation/5/extension/2/description",
+        label: "Étape précédente",
+      });
+    });
+
+    it("devrait exposer un backLink vers le groupe précédent en franchissant les frontières de structureVersionTransformation", () => {
+      // GIVEN
+      const transformationStructureType =
+        StructureVersionTransformationType.EXTENSION;
+      const transformationStructureId = 2;
+      const transformationStructureStep = "description";
+
+      // WHEN
+      const { backLink } = getTransformationFormNavigation({
+        transformationSteps,
+        transformationId: 5,
+        transformationStructureType,
+        transformationStructureId,
+        transformationStructureStep,
+      });
+
+      // THEN
+      expect(backLink).toEqual({
+        href: "/structures/transformation/5/fermeture/1/description",
+        label: "Étape précédente",
+      });
+    });
   });
 
   describe("getTransformationSteps", () => {
@@ -940,14 +1009,14 @@ describe("transformation util", () => {
       expect(getPlacesSource(structureVersionTransformation)).toBe(47);
     });
 
-    it("retourne 0 quand la structure source n'a pas de typologie", () => {
+    it("retourne undefined quand la structure source n'a pas de typologie", () => {
       const structureVersionTransformation: StructureVersionTransformationApiRead =
         {
           id: 1,
           type: StructureVersionTransformationType.EXTENSION,
         };
 
-      expect(getPlacesSource(structureVersionTransformation)).toBe(0);
+      expect(getPlacesSource(structureVersionTransformation)).toBeUndefined();
     });
   });
 

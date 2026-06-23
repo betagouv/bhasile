@@ -8,7 +8,7 @@ import { StructureVersionTransformationType } from "@/types/transformation.type"
 
 type StructureCardStubProps = {
   nom: string;
-  codeBhasile: string;
+  codeBhasile?: string;
   type: StructureType;
   operateur: { name: string };
   departementAdministratif: string;
@@ -105,16 +105,15 @@ describe("StructureVersionTransformationItem", () => {
     }
   );
 
-  it("should hide the StructureCard when codeBhasile is missing", () => {
-    // GIVEN
+  it("should render the StructureCard without codeBhasile when the structure is not created yet", () => {
+    // GIVEN — a CREATION block: the structure (and its codeBhasile) does not exist
+    // yet, and the operateur is carried by the structureVersionTransformation itself
     const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+      type: StructureVersionTransformationType.CREATION,
+      operateur: { id: 7, name: "Croix-Rouge" },
       structureVersion: {
         ...buildCompleteStructureVersionTransformation().structureVersion,
-        structure: {
-          // @ts-expect-error — testing the runtime guard against a missing codeBhasile
-          codeBhasile: undefined,
-          operateur: { id: 1, name: "X" },
-        },
+        structure: undefined,
       },
     });
 
@@ -126,7 +125,12 @@ describe("StructureVersionTransformationItem", () => {
     );
 
     // THEN
-    expect(screen.queryByTestId("structure-card")).not.toBeInTheDocument();
+    const card = screen.getByTestId("structure-card");
+    expect(card).toHaveAttribute("data-nom", "ACTION NORMANDIE");
+    expect(card).not.toHaveAttribute("data-code");
+    expect(card).toHaveAttribute("data-type", "CADA");
+    expect(card).toHaveAttribute("data-operateur", "Croix-Rouge");
+    expect(card).toHaveAttribute("data-dept", "Manche");
   });
 
   it("should hide the StructureCard when no operateur is resolvable", () => {

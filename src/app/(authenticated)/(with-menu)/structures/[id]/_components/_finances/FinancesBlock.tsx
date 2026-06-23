@@ -51,7 +51,10 @@ export const FinancesBlock = (): ReactElement => {
         Dotation et équilibre économique
       </h4>
       <div className="pb-12">
-        <DotationChart />
+        <DotationChart
+          budgets={structure.budgets}
+          isAutorisee={structure.isAutorisee}
+        />
       </div>
       <hr className="mb-10" />
       <div className="flex">

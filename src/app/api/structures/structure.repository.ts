@@ -1,254 +1,117 @@
-import { DEFAULT_PAGE_SIZE } from "@/constants";
-import { Prisma, Structure, StructureType } from "@/generated/prisma/client";
+import { Structure, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
+import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
-import { createOrUpdateAdresses } from "../adresses/adresse.repository";
-import { createOrUpdateAntennes } from "../antennes/antenne.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
-import { createOrUpdateContacts } from "../contacts/contact.repository";
 import { createOrUpdateControles } from "../controles/controle.repository";
-import { createOrUpdateDnaStructures } from "../dna-structures/dna-structure.repository";
 import { createOrUpdateDocumentsFinanciers } from "../documents-financiers/documentFinancier.repository";
 import { createOrUpdateEvaluations } from "../evaluations/evaluation.repository";
-import { createOrUpdateFinesses } from "../finesses/finess.repository";
 import {
   createOrUpdateForms,
   initializeStructureDefaultForms,
 } from "../forms/form.repository";
 import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
-import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
-import {
-  STRUCTURES_ORDER_CTE_SQL,
-  STRUCTURES_ORDER_JOINS_SQL,
-} from "./structure.constants";
+import { currentVersionWhere } from "../structure-versions/structure-version.db.type";
+import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
+import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   StructureDbList,
   StructureDbMap,
   StructureDbOperateur,
+  structureDetailsInclude,
+  structureListInclude,
+  structureListVersionInclude,
+  structureOperateurSelect,
 } from "./structure.db.type";
 import { SearchProps } from "./structure.service";
 import {
-  buildStructuresOrderSql,
-  buildStructuresWhereSql,
-  convertToPublicType,
-} from "./structure.util";
+  buildCountStructuresQuery,
+  buildLatestPlacesAutoriseesQuery,
+  buildOrderedStructureIdsQuery,
+} from "./structure.sql";
 
-const getOrderedStructures = async ({
-  search,
-  page,
-  type,
-  bati,
-  placesAutorisees,
-  departements,
-  operateurs,
-  column,
-  direction,
-  selection,
-  finalised,
-  map,
-}: SearchProps): Promise<{ id: number }[]> => {
-  const whereSql = buildStructuresWhereSql({
-    search,
-    type,
-    bati,
-    placesAutorisees,
-    departements,
-    operateurs,
-    selection,
-    finalised,
-  });
-  const orderSql = buildStructuresOrderSql(
-    column ?? "departementAdministratif",
-    direction ?? "asc"
-  );
-  const paginationSql =
-    selection || map
-      ? Prisma.sql``
-      : Prisma.sql`LIMIT ${DEFAULT_PAGE_SIZE} OFFSET ${(page ?? 0) * DEFAULT_PAGE_SIZE}`;
+const getOrderedStructures = async (
+  props: SearchProps,
+  now: Date
+): Promise<{ id: number }[]> =>
+  prisma.$queryRaw<{ id: number }[]>(buildOrderedStructureIdsQuery(props, now));
 
-  return prisma.$queryRaw<{ id: number }[]>(Prisma.sql`
-    ${STRUCTURES_ORDER_CTE_SQL}
-    SELECT s.id
-    ${STRUCTURES_ORDER_JOINS_SQL}
-    ${whereSql}
-    ORDER BY ${orderSql}
-    ${paginationSql}
-  `);
-};
+export const findBySearch = async (
+  props: SearchProps,
+  now: Date
+): Promise<StructureDbList[] | StructureDbMap[]> => {
+  const structuresIds = await getOrderedStructures(props, now);
+  const ids = structuresIds.map((structure) => structure.id);
 
-export const findBySearch = async ({
-  search,
-  page,
-  type,
-  bati,
-  placesAutorisees,
-  departements,
-  operateurs,
-  column,
-  direction,
-  map,
-  selection,
-  finalised,
-}: SearchProps): Promise<StructureDbList[] | StructureDbMap[]> => {
-  const structuresIds = await getOrderedStructures({
-    search,
-    page,
-    type,
-    bati,
-    placesAutorisees,
-    departements,
-    operateurs,
-    column,
-    direction,
-    map,
-    selection,
-    finalised,
-  });
-  if (map) {
-    return prisma.structure.findMany({
-      where: {
-        id: {
-          in: structuresIds.map((structure) => structure.id),
-        },
-      },
+  if (props.map) {
+    const mapStructures = await prisma.structure.findMany({
+      where: { id: { in: ids } },
       select: {
         id: true,
-        latitude: true,
-        longitude: true,
+        structureVersions: {
+          where: currentVersionWhere(now),
+          orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
+          take: 1,
+          select: { latitude: true, longitude: true },
+        },
       },
     });
+    return mapStructures.map((structure) => ({
+      id: structure.id,
+      latitude: structure.structureVersions[0]?.latitude ?? null,
+      longitude: structure.structureVersions[0]?.longitude ?? null,
+    }));
   }
 
   const structures = await prisma.structure.findMany({
-    where: {
-      id: {
-        in: structuresIds.map((structure) => structure.id),
-      },
-    },
+    where: { id: { in: ids } },
     include: {
-      adresses: {
-        include: {
-          adresseTypologies: {
-            orderBy: {
-              year: "desc",
-            },
-          },
-        },
+      ...structureListInclude,
+      structureVersions: {
+        where: currentVersionWhere(now),
+        orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
+        take: 1,
+        include: structureListVersionInclude,
       },
-      cpomStructures: {
-        include: {
-          cpom: {
-            include: {
-              actesAdministratifs: {
-                include: {
-                  fileUploads: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      operateur: {
-        include: {
-          parent: true,
-        },
-      },
-      structureMillesimes: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      structureTypologies: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      forms: {
-        include: {
-          formDefinition: true,
-        },
-      },
-      dnaStructures: {
-        orderBy: {
-          dna: {
-            code: "asc",
-          },
-        },
-        include: {
-          dna: true,
-        },
-      },
-      actesAdministratifs: true,
     },
   });
 
   const orderedStructures = structuresIds
-    .map((structuresIds) => {
-      return structures.find((structure) => structure.id === structuresIds.id);
-    })
+    .map((orderedId) =>
+      structures.find((structure) => structure.id === orderedId.id)
+    )
     .filter((structure) => structure !== undefined);
 
   return orderedStructures;
 };
 
-export const countBySearch = async ({
-  search,
-  type,
-  bati,
-  placesAutorisees,
-  departements,
-  operateurs,
-}: SearchProps): Promise<number> => {
-  const whereSql = buildStructuresWhereSql({
-    search,
-    type,
-    bati,
-    departements,
-    placesAutorisees,
-    operateurs,
-    selection: false,
-  });
-  const result = await prisma.$queryRaw<{ count: bigint }[]>(Prisma.sql`
-    ${STRUCTURES_ORDER_CTE_SQL}
-    SELECT COUNT(*)::bigint AS count
-    ${STRUCTURES_ORDER_JOINS_SQL}
-    ${whereSql}
-  `);
+export const countBySearch = async (
+  props: SearchProps,
+  now: Date
+): Promise<number> => {
+  const result = await prisma.$queryRaw<{ count: bigint }[]>(
+    buildCountStructuresQuery(props, now)
+  );
   return Number(result[0]?.count ?? 0);
 };
 
-export const getLatestPlacesAutoriseesPerStructure = async (): Promise<
-  number[]
-> => {
-  const allTypologies = await prisma.structureTypologie.findMany({
-    orderBy: {
-      year: "desc",
-    },
-    select: {
-      structureId: true,
-      placesAutorisees: true,
-    },
-  });
+export const getLatestPlacesAutoriseesPerStructure = async (
+  now: Date
+): Promise<number[]> => {
+  const rows = await prisma.$queryRaw<{ placesAutorisees: number | null }[]>(
+    buildLatestPlacesAutoriseesQuery(now)
+  );
 
-  const seenStructures = new Set<string>();
-
-  return allTypologies
-    .filter((typology) => typology.structureId !== null)
-    .filter((typology) => {
-      if (
-        seenStructures.has(typology.structureId as unknown as string) ||
-        typology.placesAutorisees === null
-      ) {
-        return false;
-      }
-      seenStructures.add(typology.structureId as unknown as string);
-      return true;
-    })
-    .map((typology) => typology.placesAutorisees as number);
+  return rows
+    .map((row) => row.placesAutorisees)
+    .filter(
+      (placesAutorisees): placesAutorisees is number =>
+        placesAutorisees !== null
+    );
 };
 
 export const findOneOperateur = async (
@@ -256,12 +119,16 @@ export const findOneOperateur = async (
 ): Promise<StructureDbOperateur> => {
   return await prisma.structure.findUniqueOrThrow({
     where: { id },
-    select: {
-      id: true,
-      type: true,
-      codeBhasile: true,
-      forms: true,
-    },
+    select: structureOperateurSelect,
+  });
+};
+
+export const findStructureDepartement = async (
+  id: number
+): Promise<{ departementAdministratif: string | null }> => {
+  return await prisma.structure.findUniqueOrThrow({
+    where: { id },
+    select: { departementAdministratif: true },
   });
 };
 
@@ -270,147 +137,51 @@ export const findOne = async (id: number) => {
     where: {
       id,
     },
-    include: {
-      userNotes: {
-        orderBy: { createdAt: "desc" },
-        select: { text: true },
-      },
-      dnaStructures: {
-        orderBy: {
-          dna: {
-            code: "asc",
-          },
-        },
-        include: {
-          dna: {
-            include: {
-              activites: {
-                orderBy: {
-                  date: "desc",
-                },
-              },
-              evenementsIndesirablesGraves: {
-                orderBy: {
-                  evenementDate: "desc",
-                },
-              },
-            },
-          },
-        },
-      },
-      finesses: true,
-      adresses: {
-        include: {
-          adresseTypologies: {
-            orderBy: {
-              year: "desc",
-            },
-          },
-        },
-      },
-      antennes: true,
-      contacts: true,
-      structureTypologies: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      structureMillesimes: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      cpomStructures: {
-        include: {
-          cpom: {
-            include: {
-              structures: {
-                include: {
-                  structure: {
-                    select: {
-                      id: true,
-                      codeBhasile: true,
-                      type: true,
-                      communeAdministrative: true,
-                      operateur: {
-                        select: {
-                          name: true,
-                        },
-                      },
-                      forms: true,
-                    },
-                  },
-                },
-              },
-              operateur: true,
-              actesAdministratifs: {
-                include: {
-                  fileUploads: true,
-                },
-              },
-              budgets: {
-                orderBy: {
-                  year: "desc",
-                },
-              },
-            },
-          },
-        },
-      },
-      evaluations: {
-        include: {
-          fileUploads: true,
-        },
-        orderBy: {
-          date: "desc",
-        },
-      },
-      controles: {
-        include: {
-          fileUploads: true,
-        },
-        orderBy: {
-          date: "desc",
-        },
-      },
-      actesAdministratifs: {
-        include: {
-          fileUploads: true,
-        },
-      },
-      documentsFinanciers: {
-        include: {
-          fileUploads: true,
-        },
-      },
-      budgets: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      indicateursFinanciers: {
-        orderBy: {
-          year: "desc",
-        },
-      },
-      operateur: {
-        include: {
-          parent: true,
-        },
-      },
-      forms: {
-        include: {
-          formDefinition: true,
-          formSteps: {
-            include: {
-              stepDefinition: true,
-            },
-          },
-        },
-      },
-    },
+    include: structureDetailsInclude,
   });
   return structure;
+};
+
+const hasVersionedFields = (structure: StructureAgentUpdateApiType): boolean =>
+  VERSIONED_FIELD_KEYS.some((key) => structure[key] !== undefined);
+
+const writeToCurrentVersion = async (
+  tx: PrismaTransaction,
+  structure: StructureAgentUpdateApiType
+): Promise<void> => {
+  if (!hasVersionedFields(structure)) {
+    return;
+  }
+
+  const currentVersion = await tx.structureVersion.findFirst({
+    where: {
+      structureId: structure.id,
+      ...currentVersionWhere(new Date()),
+    },
+    orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
+    select: { id: true, effectiveDate: true },
+  });
+
+  if (!currentVersion) {
+    throw new Error(
+      `Aucune version courante à modifier pour la structure ${structure.id}`
+    );
+  }
+
+  const versionedData = Object.fromEntries(
+    VERSIONED_FIELD_KEYS.map((key) => [key, structure[key]])
+  ) as Pick<StructureAgentUpdateApiType, (typeof VERSIONED_FIELD_KEYS)[number]>;
+
+  const versionPayload: StructureVersionApiType = {
+    id: currentVersion.id,
+    structureId: structure.id,
+    effectiveDate: currentVersion.effectiveDate.toISOString(),
+    ...versionedData,
+  };
+
+  await createOrUpdateStructureVersion(tx, versionPayload, {
+    structureId: structure.id,
+  });
 };
 
 export const updateOne = async (
@@ -419,14 +190,8 @@ export const updateOne = async (
 ): Promise<Structure> => {
   try {
     const {
-      contacts,
       budgets,
       indicateursFinanciers,
-      structureTypologies,
-      adresses,
-      antennes,
-      dnaStructures,
-      finesses,
       actesAdministratifs,
       documentsFinanciers,
       controles,
@@ -445,26 +210,9 @@ export const updateOne = async (
           structure.id
         );
 
-        await createOrUpdateDnaStructures(tx, dnaStructures, {
-          structureId: structure.id,
-        });
-        await createOrUpdateFinesses(tx, finesses, {
-          structureId: structure.id,
-        });
-        await createOrUpdateContacts(tx, contacts, {
-          structureId: structure.id,
-        });
+        await writeToCurrentVersion(tx, structure);
         await createOrUpdateBudgets(tx, budgets, { structureId: structure.id });
         await createOrUpdateIndicateursFinanciers(tx, indicateursFinanciers, {
-          structureId: structure.id,
-        });
-        await createOrUpdateStructureTypologies(tx, structureTypologies, {
-          structureId: structure.id,
-        });
-        await createOrUpdateAdresses(tx, adresses, {
-          structureId: structure.id,
-        });
-        await createOrUpdateAntennes(tx, antennes, {
           structureId: structure.id,
         });
         await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
@@ -498,55 +246,14 @@ const updateStructure = async (
   tx: PrismaTransaction,
   structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
-  const {
-    public: publicType,
-    departementAdministratif,
-    operateur,
-    adresseAdministrative,
-    codePostalAdministratif,
-    communeAdministrative,
-    filiale,
-    type,
-    latitude,
-    longitude,
-    nom,
-    date303,
-    creationDate,
-    lgbt,
-    fvvTeh,
-    notes,
-    nomOfii,
-    directionTerritoriale,
-  } = structure;
+  const { operateur, filiale } = structure;
 
   const updatedStructure = await tx.structure.update({
     where: {
       id: structure.id,
     },
     data: {
-      public: convertToPublicType(publicType),
-      adresseAdministrative,
-      codePostalAdministratif,
-      communeAdministrative,
       filiale,
-      type,
-      latitude,
-      longitude,
-      nom,
-      date303,
-      creationDate,
-      lgbt,
-      fvvTeh,
-      notes,
-      nomOfii,
-      directionTerritoriale,
-      departement: departementAdministratif
-        ? {
-            connect: {
-              numero: departementAdministratif,
-            },
-          }
-        : undefined,
       operateur: {
         connect: operateur
           ? {
@@ -608,6 +315,46 @@ export const createMinimalStructure = async (
   });
 
   return upsertedStructure;
+};
+
+// Only used in e2e tests
+export const createMinimalStructureVersion = async (
+  structureId: number,
+  version: {
+    type: StructureType;
+    departementAdministratif?: string;
+    communeAdministrative?: string;
+    codePostalAdministratif?: string;
+    adresseAdministrative?: string;
+    nom?: string;
+    effectiveDate?: Date;
+  }
+): Promise<void> => {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("This function is only used in e2e tests");
+  }
+
+  await prisma.structureVersion.deleteMany({
+    where: { structureId, structureVersionTransformationId: null },
+  });
+
+  const createdVersion = await prisma.structureVersion.create({
+    data: {
+      structureId,
+      effectiveDate: version.effectiveDate ?? new Date("2020-01-01"),
+      type: version.type,
+      departementAdministratif: version.departementAdministratif,
+      communeAdministrative: version.communeAdministrative,
+      codePostalAdministratif: version.codePostalAdministratif,
+      adresseAdministrative: version.adresseAdministrative,
+      nom: version.nom,
+    },
+  });
+
+  await prisma.dnaStructure.updateMany({
+    where: { structureId, structureVersionId: null },
+    data: { structureVersionId: createdVersion.id },
+  });
 };
 
 // Only used in e2e tests

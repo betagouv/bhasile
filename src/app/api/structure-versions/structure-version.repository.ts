@@ -7,7 +7,7 @@ import { createOrUpdateAdresses } from "../adresses/adresse.repository";
 import { createOrUpdateAntennes } from "../antennes/antenne.repository";
 import { createOrUpdateContacts } from "../contacts/contact.repository";
 import { createOrUpdateDnaStructures } from "../dna-structures/dna-structure.repository";
-import { createOrUpdateFinesses } from "../finesses/finess.repository";
+import { createOrUpdateStructureFinesses } from "../finesses/finess.repository";
 import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import { convertToPublicType } from "../structures/structure.util";
 
@@ -18,7 +18,6 @@ type StructureVersionParent = Pick<
 
 const getScalarData = (version: StructureVersionApiType) => ({
   effectiveDate: version.effectiveDate ?? new Date().toISOString(),
-  forceHistorize: version.forceHistorize ?? undefined,
   type: version.type ?? undefined,
   public: convertToPublicType(version.public),
   adresseAdministrative: version.adresseAdministrative ?? undefined,
@@ -106,7 +105,7 @@ const persistRelations = async (
   await createOrUpdateContacts(tx, version.contacts, entityId);
   await createOrUpdateAdresses(tx, version.adresses, entityId);
   await createOrUpdateAntennes(tx, version.antennes, entityId);
-  await createOrUpdateFinesses(tx, version.finesses, entityId);
+  await createOrUpdateStructureFinesses(tx, version.structureFinesses, entityId);
   await createOrUpdateStructureTypologies(
     tx,
     version.structureTypologies,

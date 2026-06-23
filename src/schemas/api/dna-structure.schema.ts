@@ -5,11 +5,11 @@ import { zId } from "@/app/utils/zodCustomFields";
 const dnaApiSchema = z.object({
   id: zId(),
   code: z.string(),
-  description: z.string().nullish(),
 });
 
 export const dnaStructureApiSchema = z.object({
   id: zId(),
+  description: z.string().nullish(),
   dna: dnaApiSchema,
   startDate: z.string().datetime().nullish(),
   endDate: z.string().datetime().nullish(),
