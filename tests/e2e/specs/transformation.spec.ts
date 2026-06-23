@@ -207,7 +207,9 @@ test.describe("Transformations — flux finalisés", () => {
       expect(dnaCodes).toContain(knownDnaCodes[0]);
       expect(dnaCodes).toContain(knownDnaCodes[1]);
       expect(
-        version?.finesses.some((finess) => finess.code?.startsWith("E2E-FIN-"))
+        version?.structureFinesses.some((structureFiness) =>
+          structureFiness.finess.code?.startsWith("E2E-FIN-")
+        )
       ).toBe(true);
     });
 

@@ -42,11 +42,11 @@ const seedFinalisationForm = async (structureId: number): Promise<void> => {
   });
 };
 
-const seedContacts = async (structureId: number): Promise<void> => {
+const seedContacts = async (structureVersionId: number): Promise<void> => {
   await prisma.contact.createMany({
     data: [
       {
-        structureId,
+        structureVersionId,
         prenom: "Jean",
         nom: "Dupont",
         role: "Directeur",
@@ -54,7 +54,7 @@ const seedContacts = async (structureId: number): Promise<void> => {
         telephone: "0102030405",
       },
       {
-        structureId,
+        structureVersionId,
         prenom: "Marie",
         nom: "Martin",
         role: "Référente",
@@ -88,11 +88,11 @@ const seedAntennes = async (structureId: number): Promise<void> => {
   });
 };
 
-const seedAdresses = async (structureId: number): Promise<void> => {
+const seedAdresses = async (structureVersionId: number): Promise<void> => {
   for (const [index, suffix] of ["A", "B"].entries()) {
     await prisma.adresse.create({
       data: {
-        structureId,
+        structureVersionId,
         adresse: `${index + 1} rue d'Hébergement ${suffix}`,
         codePostal: "75004",
         commune: "Paris",
@@ -126,10 +126,10 @@ export const createTransformationSource = async (
     dnaCodes: [{ code: dnaCode }],
   });
 
-  await seedValidStructureTypologies(structure.id);
-  await seedContacts(structure.id);
+  await seedValidStructureTypologies(structure.structureVersionId);
+  await seedContacts(structure.structureVersionId);
   await seedAntennes(structure.id);
-  await seedAdresses(structure.id);
+  await seedAdresses(structure.structureVersionId);
   await seedFinalisationForm(structure.id);
 
   return {

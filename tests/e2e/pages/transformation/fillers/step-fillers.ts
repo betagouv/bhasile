@@ -54,7 +54,9 @@ const robustFill = async (locator: Locator, value: string): Promise<void> => {
 };
 
 const fillEmptyFinessCodes = async (page: Page): Promise<void> => {
-  const finessCodes = page.locator('input[name$=".code"][name^="finesses."]');
+  const finessCodes = page.locator(
+    'input[name^="structureFinesses."][name$=".finess.code"]'
+  );
   for (let index = 0; index < (await finessCodes.count()); index++) {
     const field = finessCodes.nth(index);
     if (!(await field.inputValue())) {
@@ -196,6 +198,12 @@ export const fillPlacesHebergement = async (
     await page
       .locator(byId("adresses.0.adresseTypologies.0.placesAutorisees"))
       .fill(String(places));
+  } else {
+    // Structure existante : le type de bâti n'est pas un champ persisté
+    // (donc jamais prérempli), il doit être sélectionné à chaque passage.
+    await page
+      .locator("#typeBati")
+      .selectOption(options.typeBati ?? "COLLECTIF");
   }
 };
 

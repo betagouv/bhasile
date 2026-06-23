@@ -61,6 +61,9 @@ export const ExistingStructureIdentificationForm = ({
         dnaStructures: rest.dnaStructures?.filter(
           (dnaStructure) => dnaStructure.dna?.code
         ),
+        structureFinesses: rest.structureFinesses?.filter(
+          (structureFiness) => structureFiness.finess?.code
+        ),
         effectiveDate,
       } as StructureVersionTransformationApiUpdateClient["structureVersion"],
     };

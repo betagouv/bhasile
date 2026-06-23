@@ -67,10 +67,12 @@ export const saveProgress = async (page: Page): Promise<void> => {
 };
 
 export const annulerDemarche = async (page: Page): Promise<void> => {
-  await page.getByRole("button", { name: "Annuler la démarche" }).click();
-  await expect(
-    page.getByText(/vous êtes sur le point d.annuler/i)
-  ).toBeVisible();
+  await expect(async () => {
+    await page.getByRole("button", { name: "Annuler la démarche" }).click();
+    await expect(
+      page.getByText(/vous êtes sur le point d.annuler/i)
+    ).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: 15000 });
   const deletePromise = page.waitForResponse(
     (response) =>
       response.url().includes(TRANSFO_API) &&

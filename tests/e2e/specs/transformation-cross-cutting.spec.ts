@@ -111,7 +111,7 @@ test.describe("Transformations — comportements transverses", () => {
     ).toBeAttached();
   });
 
-  test.fixme("annuler la démarche supprime le brouillon", async ({
+  test("annuler la démarche supprime le brouillon", async ({
     page,
     closingStructure,
   }) => {
