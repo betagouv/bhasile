@@ -11,10 +11,20 @@ import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { IndicateurFinancierType } from "@/types/indicateur-financier.type";
 import { StructureType } from "@/types/structure.type";
+import { HistoryEvent } from "@/types/structure-history.type";
 
 import { getDepartementFromCodePostal } from "./adresse.util";
 import { sortKeysByValue } from "./common.util";
 import { getYearFromDate } from "./date.util";
+
+type FermetureEvent = Extract<HistoryEvent, { kind: "FERMETURE" }>;
+
+export const getFermetureEvent = (
+  structure: StructureApiRead
+): FermetureEvent | undefined =>
+  structure.history?.find(
+    (event): event is FermetureEvent => event.kind === "FERMETURE"
+  );
 
 export const getPlacesByCommunes = (
   adresses: AdresseApiType[]

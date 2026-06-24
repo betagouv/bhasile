@@ -3,6 +3,7 @@
 import { sendEvent } from "@socialgouv/matomo-next";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 
 import { SegmentedControl } from "@/app/components/common/SegmentedControl";
@@ -27,6 +28,11 @@ export default function Structures(): ReactElement {
     });
 
   usePersistStructuresSearchQuery();
+
+  const searchParams = useSearchParams();
+  const statut =
+    searchParams.get("statut") === "fermees" ? "fermees" : "actives";
+  const isClosed = statut === "fermees";
 
   const { structures, totalStructures } = useStructuresSearch({ map: false });
 
@@ -133,9 +139,11 @@ export default function Structures(): ReactElement {
             >
               {structures && (
                 <StructuresTable
+                  key={statut}
                   structures={structures}
                   totalStructures={totalStructures}
                   ariaLabelledBy="structures-titre"
+                  isClosed={isClosed}
                 />
               )}
             </ListLoader>

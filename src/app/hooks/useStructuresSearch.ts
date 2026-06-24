@@ -35,6 +35,7 @@ export const useStructuresSearch = ({ map }: { map?: boolean }) => {
     | "asc"
     | "desc"
     | null;
+  const isClosed: boolean = searchParams.get("statut") === "fermees";
 
   const getStructures = useCallback(
     async (
@@ -45,7 +46,8 @@ export const useStructuresSearch = ({ map }: { map?: boolean }) => {
       places: string | null,
       departements: string | null,
       column: StructureColumn | null,
-      direction: "asc" | "desc" | null
+      direction: "asc" | "desc" | null,
+      isClosed: boolean
     ): Promise<{ structures: StructureApiRead[]; totalStructures: number }> => {
       setFetchState(`structure-${map ? "map" : "search"}`, FetchState.LOADING);
       try {
@@ -77,6 +79,9 @@ export const useStructuresSearch = ({ map }: { map?: boolean }) => {
         }
         if (direction) {
           params.append("direction", direction);
+        }
+        if (isClosed) {
+          params.append("isClosed", "true");
         }
         const result = await fetch(
           `${baseUrl}/api/structures?${params.toString()}`
@@ -110,7 +115,8 @@ export const useStructuresSearch = ({ map }: { map?: boolean }) => {
         places,
         departements,
         column,
-        direction
+        direction,
+        isClosed
       );
       setStructures(structures);
       setTotalStructures(totalStructures);
@@ -126,6 +132,7 @@ export const useStructuresSearch = ({ map }: { map?: boolean }) => {
     departements,
     column,
     direction,
+    isClosed,
     getStructures,
   ]);
 

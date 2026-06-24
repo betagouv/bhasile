@@ -23,7 +23,7 @@ const noPermissionsModal = createModal({
   isOpenedByDefault: false,
 });
 
-const COLUMNS: ListColumn[] = [
+const SHARED_COLUMNS: ListColumn[] = [
   {
     label: "Code",
     column: "codeBhasile",
@@ -54,7 +54,9 @@ const COLUMNS: ListColumn[] = [
     column: "bati",
     orderBy: true,
   },
+];
 
+const ACTIVE_TRAILING_COLUMNS: ListColumn[] = [
   {
     label: "Places aut.",
     column: "placesAutorisees",
@@ -67,13 +69,32 @@ const COLUMNS: ListColumn[] = [
   },
 ];
 
+const CLOSED_TRAILING_COLUMNS: ListColumn[] = [
+  {
+    label: "Archivé le",
+    column: "effectiveDate",
+    orderBy: false,
+  },
+  {
+    label: "Motif",
+    column: "motif",
+    orderBy: false,
+  },
+];
+
 export const StructuresTable = ({
   structures,
   totalStructures,
   ariaLabelledBy,
+  isClosed,
 }: Props): ReactElement => {
   const router = useRouter();
   const ability = useAbility();
+
+  const columns = [
+    ...SHARED_COLUMNS,
+    ...(isClosed ? CLOSED_TRAILING_COLUMNS : ACTIVE_TRAILING_COLUMNS),
+  ];
 
   const [selectedStructure, setSelectedStructure] =
     useState<StructureApiRead | null>(null);
@@ -89,13 +110,14 @@ export const StructuresTable = ({
   return (
     <>
       <div className="px-4 h-full">
-        <ListTableHeadings ariaLabelledBy={ariaLabelledBy} columns={COLUMNS}>
+        <ListTableHeadings ariaLabelledBy={ariaLabelledBy} columns={columns}>
           {structures.map((structure, index) => (
             <StructureItem
               key={structure.id}
               structure={structure}
               index={index}
               handleOpenModal={handleOpenModal}
+              isClosed={isClosed}
             />
           ))}
         </ListTableHeadings>
@@ -152,4 +174,5 @@ type Props = {
   structures: StructureApiRead[];
   totalStructures: number;
   ariaLabelledBy: string;
+  isClosed: boolean;
 };
