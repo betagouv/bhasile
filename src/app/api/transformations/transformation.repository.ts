@@ -108,6 +108,7 @@ export const updateOne = async (
 
     if (isFinalizing) {
       await createStructuresForCreationBlocks(tx, input.id);
+      await moveActesAdministratifsToStructures(tx, input.id);
     }
 
     return input.id;
@@ -146,6 +147,35 @@ const createStructuresForCreationBlocks = async (
       structureVersionTransformation,
       bhasileCounterCache
     );
+  }
+};
+
+const moveActesAdministratifsToStructures = async (
+  tx: PrismaTransaction,
+  transformationId: number
+): Promise<void> => {
+  const structureVersionTransformations =
+    await tx.structureVersionTransformation.findMany({
+      where: { transformationId },
+      select: { id: true, structureVersion: { select: { structureId: true } } },
+    });
+
+  for (const structureVersionTransformation of structureVersionTransformations) {
+    const structureId =
+      structureVersionTransformation.structureVersion?.structureId ?? null;
+
+    if (!structureId) {
+      throw new Error(
+        `Transformation ${transformationId}, SVT ${structureVersionTransformation.id} : structure cible introuvable, actes non basculables`
+      );
+    }
+
+    await tx.acteAdministratif.updateMany({
+      where: {
+        structureVersionTransformationId: structureVersionTransformation.id,
+      },
+      data: { structureId, structureVersionTransformationId: null },
+    });
   }
 };
 
