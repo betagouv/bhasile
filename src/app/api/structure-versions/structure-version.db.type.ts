@@ -1,9 +1,10 @@
+import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { Prisma } from "@/generated/prisma/client";
 
 export const currentVersionWhere = (
   now: Date
 ): Prisma.StructureVersionWhereInput => ({
-  effectiveDate: { lte: now },
+  effectiveDate: { lt: startOfNextUtcDay(now) },
   OR: [
     { structureVersionTransformationId: null },
     {

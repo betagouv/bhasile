@@ -342,7 +342,9 @@ const getCreationActesAdministratifsCategoryToDisplay = (
   ARRETE_AUTORISATION: {
     categoryShortName: "arrêté",
     title:
-      transformationType === TransformationType.OUVERTURE_EX_NIHILO
+      transformationType === TransformationType.OUVERTURE_EX_NIHILO ||
+      transformationType ===
+        TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
         ? "Arrêté d'autorisation"
         : "Arrêté d'autorisation ou arrêté de fusion des structures",
     canAddFile: false,
@@ -353,22 +355,28 @@ const getCreationActesAdministratifsCategoryToDisplay = (
     documentLabel: "Document",
     addFileButtonLabel: "Ajouter un arrêté d'autorisation",
     alternativeCategories:
-      transformationType === TransformationType.OUVERTURE_EX_NIHILO
+      transformationType === TransformationType.OUVERTURE_EX_NIHILO ||
+      transformationType ===
+        TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
         ? undefined
         : ["ARRETE_FUSION"],
   },
   CONVENTION: CONVENTION_RULE,
-  ARRETE_TARIFICATION: {
-    categoryShortName: "arrêté",
-    title: "Arrêté de tarification",
-    canAddFile: false,
-    canAddAvenant: false,
-    isOptional: false,
-    shouldShow: true,
-    additionalFieldsType: AdditionalFieldsType.DATE_START_END,
-    documentLabel: "Document",
-    addFileButtonLabel: "Ajouter un arrêté de tarification",
-  },
+  ...(transformationType === TransformationType.OUVERTURE_EX_NIHILO
+    ? {
+        ARRETE_TARIFICATION: {
+          categoryShortName: "arrêté",
+          title: "Arrêté de tarification",
+          canAddFile: false,
+          canAddAvenant: false,
+          isOptional: false,
+          shouldShow: true,
+          additionalFieldsType: AdditionalFieldsType.DATE_START_END,
+          documentLabel: "Document",
+          addFileButtonLabel: "Ajouter un arrêté de tarification",
+        },
+      }
+    : {}),
   AUTRE: {
     ...AUTRE_RULE,
     notice: `Dans cette catégorie, vous avez la possibilité d'importer d'autres documents utiles à l'analyse de la structure (ex: Plans Pluriannuels d'Investissements)`,

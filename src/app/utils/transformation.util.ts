@@ -124,7 +124,14 @@ export const getTransformationFormNavigation = ({
       ? flatSteps[currentIndex + 1]
       : undefined;
 
-  return { firstStep, currentStep, prevStep, nextStep };
+  const backLink = prevStep
+    ? { href: prevStep.route, label: "Étape précédente" }
+    : {
+        href: `/structures/transformation/${transformationId}/selection`,
+        label: "Modifier le cas de figure",
+      };
+
+  return { firstStep, currentStep, prevStep, nextStep, backLink };
 };
 
 export const sortStructureVersionTransformationsByType = <
@@ -378,11 +385,11 @@ const resolveSourceTypologie = <T extends { year: number }>(
 
 export const getPlacesSource = (
   structureVersionTransformation: StructureVersionTransformationApiRead
-): number => {
+): number | undefined => {
   const structureVersion = structureVersionTransformation.structureVersion;
   const typologies = structureVersion?.structure?.structureTypologies;
   const year = getEffectiveYear(structureVersion?.effectiveDate);
-  return resolveSourceTypologie(typologies, year)?.placesAutorisees ?? 0;
+  return resolveSourceTypologie(typologies, year)?.placesAutorisees ?? undefined;
 };
 
 export const buildTransformationTypologie = (
@@ -466,24 +473,25 @@ export const getStructureVersionTransformationLabel = (
   }
 };
 
-export const validateStructureVersionTransformationFormStep = (
+export const setStructureVersionTransformationFormStepStatus = (
   form: FormApiType,
-  stepToValidate: string
+  stepName: string,
+  status: StepStatus
 ): FormApiType => {
   const formStepSpecs =
     STRUCTURE_VERSION_TRANSFORMATION_FORM_STEPS[form.formDefinition.name] ?? [];
 
-  const stepSlugToValidate = formStepSpecs.find(
-    (formStepSpec) => formStepSpec.name === stepToValidate
+  const stepSlug = formStepSpecs.find(
+    (formStepSpec) => formStepSpec.name === stepName
   )?.slug;
 
-  if (!stepSlugToValidate) {
+  if (!stepSlug) {
     return form;
   }
 
   const formSteps = form.formSteps.map((formStep) =>
-    formStep.stepDefinition.slug === stepSlugToValidate
-      ? { ...formStep, status: StepStatus.VALIDE }
+    formStep.stepDefinition.slug === stepSlug
+      ? { ...formStep, status }
       : formStep
   );
 

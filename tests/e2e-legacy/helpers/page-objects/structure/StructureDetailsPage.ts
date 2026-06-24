@@ -148,9 +148,7 @@ export class StructureDetailsPage extends BasePage {
     await expect(
       block.getByText("Code Bhasile", { exact: true }).locator("..")
     ).toContainText(data.codeBhasile);
-    const operateurLabel = data.filiale
-      ? `${data.filiale} (${data.operateur.name})`
-      : data.operateur.name;
+    const operateurLabel = data.operateur.name;
     if (operateurLabel) {
       await expect(
         block.getByText("Opérateur", { exact: true }).locator("..")

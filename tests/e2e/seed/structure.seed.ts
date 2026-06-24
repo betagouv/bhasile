@@ -9,6 +9,7 @@ import { prisma } from "./prisma";
 
 export type SeededStructure = {
   id: number;
+  structureVersionId: number;
   codeBhasile: string;
   nom: string;
   type: StructureSeedInput["type"];
@@ -19,6 +20,7 @@ export const createStructureForTest = async (
   overrides: Partial<StructureSeedInput> = {}
 ): Promise<SeededStructure> => {
   const input = buildStructureSeed(overrides);
+  const effectiveDate = new Date(`${input.creationDate}T12:00:00.000Z`);
 
   const structure = await prisma.structure.create({
     data: {
@@ -30,7 +32,7 @@ export const createStructureForTest = async (
       codePostalAdministratif: input.codePostalAdministratif,
       communeAdministrative: input.communeAdministrative,
       departementAdministratif: input.departementAdministratif,
-      creationDate: new Date(`${input.creationDate}T12:00:00.000Z`),
+      creationDate: effectiveDate,
       lgbt: input.lgbt,
       fvvTeh: input.fvvTeh,
       public: input.public,
@@ -59,8 +61,50 @@ export const createStructureForTest = async (
     },
   });
 
+  // L'app lit/écrit les champs versionnés via StructureVersion : on crée la
+  // version courante que le parcours agent met à jour.
+  const structureVersion = await prisma.structureVersion.create({
+    data: {
+      structureId: structure.id,
+      effectiveDate,
+      type: input.type,
+      public: input.public,
+      nom: input.nom,
+      adresseAdministrative: input.adresseAdministrative,
+      codePostalAdministratif: input.codePostalAdministratif,
+      communeAdministrative: input.communeAdministrative,
+      departementAdministratif: input.departementAdministratif,
+      creationDate: effectiveDate,
+      lgbt: input.lgbt,
+      fvvTeh: input.fvvTeh,
+      dnaStructures: {
+        create: input.dnaCodes.map(({ code }) => ({
+          dna: {
+            connectOrCreate: {
+              where: { code },
+              create: { code },
+            },
+          },
+        })),
+      },
+      structureFinesses: {
+        create: [
+          {
+            finess: {
+              connectOrCreate: {
+                where: { code: input.finessCode },
+                create: { code: input.finessCode },
+              },
+            },
+          },
+        ],
+      },
+    },
+  });
+
   return {
     id: structure.id,
+    structureVersionId: structureVersion.id,
     codeBhasile: structure.codeBhasile,
     nom: structure.nom ?? input.nom,
     type: input.type,
@@ -72,11 +116,11 @@ const TYPE_PLACES_YEARS = getTypePlacesYearRange().years;
 const FINANCE_YEARS = getYearRange().years;
 
 export const seedValidStructureTypologies = async (
-  structureId: number
+  structureVersionId: number
 ): Promise<void> => {
   await prisma.structureTypologie.createMany({
     data: TYPE_PLACES_YEARS.map((year) => ({
-      structureId,
+      structureVersionId,
       year,
       placesAutorisees: 10,
       pmr: 0,
