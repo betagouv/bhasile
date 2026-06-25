@@ -14,7 +14,7 @@ import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
 
 import { StructureVersionDbTransformation } from "../structure-versions/structure-version.db.type";
-import { resolveStructureVersionScalars } from "../structure-versions/structure-version.util";
+import { resolveCurrentVersionFields } from "../structure-versions/structure-version.util";
 import { StructureDbDetails, StructureDbList } from "./structure.db.type";
 
 const typesPublic: Record<string, PublicType> = {
@@ -204,7 +204,7 @@ export const getCpomStructuresWithDates = (
             ...(linkedStructures
               ? {
                   structures: linkedStructures.map((linkedStructure) =>
-                    resolveLinkedStructureScalars(linkedStructure, now)
+                    resolveLinkedStructureFields(linkedStructure, now)
                   ),
                 }
               : {}),
@@ -225,7 +225,7 @@ type CpomLinkedStructureRow = CpomDetailsView extends {
   ? Row
   : never;
 
-const resolveLinkedStructureScalars = (
+const resolveLinkedStructureFields = (
   linkedStructure: CpomLinkedStructureRow,
   now: Date
 ) => {
@@ -234,6 +234,6 @@ const resolveLinkedStructureScalars = (
   }
   return {
     ...linkedStructure,
-    structure: resolveStructureVersionScalars(linkedStructure.structure, now),
+    structure: resolveCurrentVersionFields(linkedStructure.structure, now),
   };
 };

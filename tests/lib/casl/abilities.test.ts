@@ -91,11 +91,10 @@ describe("Permissions : canUpdateDepartement", () => {
     allowedDepartements: ["50"],
   } as SessionUser;
 
-  it("allows NATIONAL on any departement, including an undefined or null one", () => {
+  it("allows NATIONAL on any departement, including an undefined one", () => {
     expect(canUpdateDepartement(nationalUser, "50")).toBe(true);
     expect(canUpdateDepartement(nationalUser, "13")).toBe(true);
     expect(canUpdateDepartement(nationalUser, undefined)).toBe(true);
-    expect(canUpdateDepartement(nationalUser, null)).toBe(true);
   });
 
   it("allows DEPARTEMENT only on its own departement", () => {

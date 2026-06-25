@@ -976,7 +976,7 @@ describe("structure.repository db integration", () => {
     expect(rows[0]).toMatchObject(newStructureMillesime);
   });
 
-  describe("résolution liste/carte (PR#3)", () => {
+  describe("résolution liste/carte", () => {
     const createdTransformationIds: number[] = [];
     const createdSvtIds: number[] = [];
 

@@ -13,7 +13,7 @@ import type { StructureDbDetails } from "../structures/structure.db.type";
 import { getTypeBati } from "../structures/structure.util";
 import { StructureVersionDbTransformation } from "./structure-version.db.type";
 
-const mapVersionScalars = (
+const mapVersionFields = (
   source: StructureDbDetails | StructureVersionDbTransformation
 ): Pick<
   StructureVersionApiType,
@@ -75,7 +75,7 @@ export const dbStructureVersionToApiRead = (
 
   return recursivelySerializeDates({
     ...version,
-    ...mapVersionScalars(version),
+    ...mapVersionFields(version),
     antennes,
     adresses,
     structureFinesses,
@@ -91,7 +91,7 @@ export const copyStructureVersion = (
   structure: StructureDbDetails,
   overrides: Partial<StructureVersionApiType> = {}
 ): StructureVersionApiType => ({
-  ...mapVersionScalars(structure),
+  ...mapVersionFields(structure),
   contacts: structure.contacts.map((contact) => ({
     prenom: contact.prenom ?? undefined,
     nom: contact.nom ?? undefined,
