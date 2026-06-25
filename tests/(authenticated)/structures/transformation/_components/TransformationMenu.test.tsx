@@ -19,6 +19,8 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
 }));
 
+vi.mock("next-auth/react");
+
 vi.mock(
   "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext",
   () => ({
