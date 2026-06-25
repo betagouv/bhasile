@@ -3,7 +3,7 @@ import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { Prisma } from "@/generated/prisma/client";
 import { StructureColumn } from "@/types/ListColumn";
 
-import { FINALISATION_FORM_SLUG } from "./structure.constants";
+import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
 import type { SearchProps } from "./structure.service";
 
 const buildBornFromCreationSql = (now: Date): Prisma.Sql => Prisma.sql`

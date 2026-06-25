@@ -25,11 +25,9 @@ import {
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
+import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
 import { resolveCurrentVersion } from "../structure-versions/structure-version.service";
-import {
-  FINALISATION_FORM_SLUG,
-  VERSIONED_FIELD_KEYS,
-} from "./structure.constants";
+import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   StructureDbDetails,
   StructureDbList,
