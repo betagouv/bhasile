@@ -1,12 +1,16 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   createStructureVersionTransformation,
   createTransformation,
 } from "tests/test-utils/factories/transformation.factory";
+import {
+  getSavedStructureVersionTransformation,
+  mockTransformationFetch,
+  renderTransformationForm,
+} from "tests/test-utils/transformationForm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { TransformationClientProvider } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { TransformationActesAdministratifsForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/TransformationActesAdministratifsForm";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
@@ -20,7 +24,8 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
-const mockUpdateTransformation = vi.fn();
+const TRANSFORMATION_ID = 12;
+
 const mockRouterPush = vi.fn();
 const mockUseParams = vi.fn();
 const mockUsePathname = vi.fn();
@@ -32,11 +37,7 @@ vi.mock("next/navigation", () => ({
   notFound: vi.fn(),
 }));
 
-vi.mock("@/app/hooks/useTransformations", () => ({
-  useTransformations: () => ({
-    updateTransformation: mockUpdateTransformation,
-  }),
-}));
+let fetchMock: ReturnType<typeof mockTransformationFetch>;
 
 const filledActe = (
   id: number,
@@ -55,7 +56,7 @@ const transformationWithActes = (
   type: TransformationType = TransformationType.OUVERTURE_EX_NIHILO
 ) =>
   createTransformation({
-    id: 12,
+    id: TRANSFORMATION_ID,
     type,
     structureVersionTransformations: [
       createStructureVersionTransformation({
@@ -67,26 +68,32 @@ const transformationWithActes = (
   });
 
 const renderForm = (transformation: TransformationApiRead) =>
-  render(
-    <TransformationClientProvider transformation={transformation}>
-      <TransformationActesAdministratifsForm
-        structureVersionTransformation={
-          transformation.structureVersionTransformations[0]
-        }
-        transformation={transformation}
-      />
-    </TransformationClientProvider>
+  renderTransformationForm(
+    transformation,
+    <TransformationActesAdministratifsForm
+      structureVersionTransformation={
+        transformation.structureVersionTransformations[0]
+      }
+      transformation={transformation}
+    />
   );
 
-const getSavedActes = () => {
-  const [, payload] = mockUpdateTransformation.mock.calls[0];
-  return payload.structureVersionTransformations[0].actesAdministratifs;
-};
+const getSavedActes = () =>
+  getSavedStructureVersionTransformation(fetchMock, TRANSFORMATION_ID)
+    .actesAdministratifs;
 
-describe("TransformationActesAdministratifsForm (intégration via FormWrapper)", () => {
+const waitForSavePut = () =>
+  waitFor(() =>
+    expect(fetchMock).toHaveBeenCalledWith(
+      `/api/transformations/${TRANSFORMATION_ID}`,
+      expect.objectContaining({ method: "PUT" })
+    )
+  );
+
+describe("TransformationActesAdministratifsForm (intégration jusqu'au fetch)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUpdateTransformation.mockResolvedValue(12);
+    fetchMock = mockTransformationFetch(TRANSFORMATION_ID);
     mockUseParams.mockReturnValue({
       transformationStructureType: StructureVersionTransformationType.CREATION,
       transformationStructureId: "7",
@@ -114,7 +121,7 @@ describe("TransformationActesAdministratifsForm (intégration via FormWrapper)",
     );
 
     // THEN the form saves the payload (empty AUTRE filtered out by the schema)
-    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
+    await waitForSavePut();
     const actes = getSavedActes();
     expect(actes).toHaveLength(3);
     expect(
@@ -133,9 +140,11 @@ describe("TransformationActesAdministratifsForm (intégration via FormWrapper)",
     );
 
     // THEN the incomplete step is saved and the user moves on (no blocking)
-    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
-    expect(mockRouterPush).toHaveBeenCalledWith(
-      "/structures/transformation/12/verification"
+    await waitForSavePut();
+    await waitFor(() =>
+      expect(mockRouterPush).toHaveBeenCalledWith(
+        "/structures/transformation/12/verification"
+      )
     );
   });
 
@@ -190,7 +199,7 @@ describe("TransformationActesAdministratifsForm (intégration via FormWrapper)",
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
+    await waitForSavePut();
     const actes = getSavedActes();
     const radioActe = actes.find(
       (acte: { category: string }) =>
@@ -235,7 +244,7 @@ const extensionWithStructureActes = (
   savedActes: ActeAdministratifApiType[] = []
 ) =>
   createTransformation({
-    id: 12,
+    id: TRANSFORMATION_ID,
     type: TransformationType.EXTENSION_EX_NIHILO,
     structureVersionTransformations: [
       createStructureVersionTransformation({
@@ -252,7 +261,7 @@ const extensionWithStructureActes = (
 describe("TransformationActesAdministratifsForm — alternative avenant (extension)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUpdateTransformation.mockResolvedValue(12);
+    fetchMock = mockTransformationFetch(TRANSFORMATION_ID);
     mockUseParams.mockReturnValue({
       transformationStructureType: StructureVersionTransformationType.EXTENSION,
       transformationStructureId: "7",
@@ -347,9 +356,7 @@ describe("TransformationActesAdministratifsForm — alternative avenant (extensi
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    await waitFor(() =>
-      expect(mockUpdateTransformation).toHaveBeenCalledTimes(1)
-    );
+    await waitForSavePut();
     const actes = getSavedActes();
     const avenant = actes.find(
       (acte: { category: string }) => acte.category === "ARRETE_AUTORISATION"
