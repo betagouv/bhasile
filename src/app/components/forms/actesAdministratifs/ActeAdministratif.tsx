@@ -95,7 +95,7 @@ export const ActeAdministratif = ({
 
   return (
     <>
-      <div className="grid grid-cols-[1fr_1fr_auto] gap-6 items-start">
+      <div className="relative grid grid-cols-2 gap-6 items-start">
         <InputWithValidation
           name={`actesAdministratifs.${index}.id`}
           control={control}
@@ -116,13 +116,13 @@ export const ActeAdministratif = ({
         />
 
         {additionalFieldsType === AdditionalFieldsType.DATE_START_END && (
-          <div className="flex gap-6 items-start h-full">
+          <div className="grid grid-cols-2 gap-6">
             <InputWithValidation
               name={`actesAdministratifs.${index}.startDate`}
               defaultValue={acte.startDate}
               control={control}
               label={`Début ${categoryShortName}`}
-              className="w-full mb-0"
+              className="mb-0"
               type="date"
             />
 
@@ -130,48 +130,45 @@ export const ActeAdministratif = ({
               name={`actesAdministratifs.${index}.endDate`}
               control={control}
               label={`Fin ${categoryShortName}`}
-              className="w-full mb-0"
+              className="mb-0"
               type="date"
             />
           </div>
         )}
         {additionalFieldsType === AdditionalFieldsType.DATE && (
-          <div className="flex gap-6 items-start h-full">
-            <InputWithValidation
-              name={`actesAdministratifs.${index}.date`}
-              defaultValue={acte.date}
-              control={control}
-              label={`Date ${categoryShortName}`}
-              className="w-full mb-0"
-              type="date"
-            />
-          </div>
+          <InputWithValidation
+            name={`actesAdministratifs.${index}.date`}
+            defaultValue={acte.date}
+            control={control}
+            label={`Date ${categoryShortName}`}
+            className="mb-0"
+            type="date"
+          />
         )}
         {additionalFieldsType === AdditionalFieldsType.NAME && (
-          <div className="flex gap-6 items-start h-full">
-            <InputWithValidation
-              name={`actesAdministratifs.${index}.name`}
-              control={control}
-              label="Nom du document"
-              className="w-full mb-0"
-              type="text"
-              hintText="32 caractères maximum"
-            />
-          </div>
+          <InputWithValidation
+            name={`actesAdministratifs.${index}.name`}
+            control={control}
+            label="Nom du document"
+            className="mb-0"
+            type="text"
+            hintText="32 caractères maximum"
+          />
         )}
-
-        <div className="flex flex-col">
+        <div className="flex flex-col flex-1 pr-12">
           <label className="mb-2">{documentLabel}</label>
           <UploadWithValidation
             name={`actesAdministratifs.${index}.fileUploads.0.key`}
             control={control}
+            className="w-auto"
           />
         </div>
         {index > 0 && (
           <DeleteButton
             onClick={() => handleDeleteField(index)}
             backgroundColor="grey"
-            className="mt-8"
+            className="absolute top-8 right-0"
+            size="small"
           />
         )}
       </div>

@@ -39,7 +39,7 @@ export const Avenant = ({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-6 my-6">
+    <div className="relative grid grid-cols-2 gap-6 my-6">
       <div>
         <div className="flex gap-6 items-start">
           <InputWithValidation
@@ -84,20 +84,20 @@ export const Avenant = ({
           />
         )}
       </div>
-      <div className="flex">
-        <div className="flex flex-col w-full">
-          <label className="mb-2">{documentLabel}</label>
-          <UploadWithValidation
-            name={`actesAdministratifs.${index}.fileUploads.0.key`}
-            control={control}
-          />
-        </div>
-        <DeleteButton
-          onClick={() => handleDeleteField(index)}
-          backgroundColor="grey"
-          className="mt-8"
+      <div className="flex flex-col w-full pr-12">
+        <label className="mb-2">{documentLabel}</label>
+        <UploadWithValidation
+          name={`actesAdministratifs.${index}.fileUploads.0.key`}
+          control={control}
+          className="w-auto"
         />
       </div>
+      <DeleteButton
+        onClick={() => handleDeleteField(index)}
+        backgroundColor="grey"
+        className="absolute top-8 right-0"
+        size="small"
+      />
     </div>
   );
 };
