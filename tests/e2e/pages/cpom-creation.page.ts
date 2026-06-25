@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import type { Page } from "@playwright/test";
 
 import { expect } from "../fixtures/test";
+import { uploadContainer, uploadToContainer } from "./upload.helper";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -108,16 +109,10 @@ export class CpomCreationPage {
   }
 
   async uploadActeFile(file = "sample.pdf"): Promise<void> {
-    const fileInput = this.page.locator('input[type="file"]').first();
-    await fileInput.setInputFiles(fixturePath(file));
-    const firstActeContainer = this.page
-      .locator('input[name="actesAdministratifs.0.startDate"]')
-      .locator("xpath=ancestor::fieldset[1]");
-    await expect(
-      firstActeContainer.getByRole("link", { name: file })
-    ).toBeVisible({
-      timeout: 30_000,
-    });
+    await uploadToContainer(
+      uploadContainer(this.page).first(),
+      fixturePath(file)
+    );
   }
 
   async attachStructures(structureIds: number[]): Promise<void> {

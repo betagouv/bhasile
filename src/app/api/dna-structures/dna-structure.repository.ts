@@ -1,8 +1,31 @@
+import { Prisma } from "@/generated/prisma/client";
 import { DnaStructureApiType } from "@/schemas/api/dna-structure.schema";
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
 import { upsertDna } from "../dna-codes/dna-codes.repository";
+
+const buildDnaStructureWhere = (
+  dnaStructureId: number | undefined,
+  entityId: EntityId,
+  dnaId: number
+): Prisma.DnaStructureWhereUniqueInput => {
+  if (dnaStructureId) {
+    return { id: dnaStructureId };
+  }
+  if (entityId.structureVersionId != null) {
+    return {
+      structureVersionId_dnaId: {
+        structureVersionId: entityId.structureVersionId,
+        dnaId,
+      },
+    };
+  }
+  if (entityId.structureId != null) {
+    return { structureId_dnaId: { structureId: entityId.structureId, dnaId } };
+  }
+  return { id: 0 };
+};
 
 const deleteDnaStructures = async (
   tx: PrismaTransaction,
@@ -41,9 +64,12 @@ export const createOrUpdateDnaStructures = async (
     if (!upsertedDna) {
       continue;
     }
-
     await tx.dnaStructure.upsert({
-      where: { id: dnaStructure.id || 0 },
+      where: buildDnaStructureWhere(
+        dnaStructure.id,
+        entityId,
+        upsertedDna.id
+      ),
       update: {
         dnaId: upsertedDna.id,
         description: dnaStructure.description,

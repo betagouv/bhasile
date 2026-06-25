@@ -13,12 +13,14 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
-const mockHandleValidation = vi.fn();
+const mockGoToNextStep = vi.fn();
+const mockHandleSave = vi.fn();
 
 vi.mock("@/app/hooks/useTransformationFormHandling", () => ({
   useTransformationFormHandling: () => ({
-    handleValidation: mockHandleValidation,
-    handleSave: vi.fn(),
+    goToNextStep: mockGoToNextStep,
+    handleSave: mockHandleSave,
+    shouldShowIncompleteSteps: false,
   }),
 }));
 
@@ -45,6 +47,21 @@ vi.mock("@/app/components/forms/FormWrapper", () => ({
   FooterButtonType: { CANCEL: "cancel", SAVE: "save", SUBMIT: "submit" },
 }));
 
+const capturedSaver: {
+  onSave?: (data: Record<string, unknown>, values: unknown) => void;
+} = {};
+
+vi.mock("@/app/components/forms/TransformationFormController", () => ({
+  TransformationFormController: ({
+    onSave,
+  }: {
+    onSave: (data: Record<string, unknown>, values: unknown) => void;
+  }) => {
+    capturedSaver.onSave = onSave;
+    return null;
+  },
+}));
+
 vi.mock("@/app/components/forms/EffectiveDateInput", () => ({
   EffectiveDateInput: () => null,
 }));
@@ -63,9 +80,26 @@ vi.mock(
 vi.mock("@/app/components/forms/contacts/FieldSetContacts", () => ({
   FieldSetContacts: () => null,
 }));
-vi.mock("@/app/components/forms/SaveCurrentForm", () => ({
-  SaveCurrentForm: () => null,
-}));
+
+const renderForm = () => {
+  const structureVersionTransformation: StructureVersionTransformationApiRead = {
+    id: 7,
+    type: StructureVersionTransformationType.CONTRACTION,
+    structureVersion: { id: 999 },
+  };
+  const transformation: TransformationApiRead = {
+    id: 12,
+    type: TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES,
+    structureVersionTransformations: [structureVersionTransformation],
+  };
+  render(
+    <ExistingStructureIdentificationForm
+      transformation={transformation}
+      structureVersionTransformation={structureVersionTransformation}
+      formKind={FormKind.CONTRACTION}
+    />
+  );
+};
 
 describe("ExistingStructureIdentificationForm", () => {
   it("passe le structureVersion (et son id) en defaultValues", () => {
@@ -104,40 +138,42 @@ describe("ExistingStructureIdentificationForm", () => {
     });
   });
 
-  it("construit le payload avec effectiveDate et le type de la structureVersionTransformation, sans creationDate", () => {
+  it("délègue la navigation à goToNextStep au submit", () => {
     // GIVEN
-    const structureVersionTransformation: StructureVersionTransformationApiRead = {
-      id: 7,
-      type: StructureVersionTransformationType.CONTRACTION,
-      structureVersion: { id: 999 },
-    };
-    const transformation: TransformationApiRead = {
-      id: 12,
-      type: TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES,
-      structureVersionTransformations: [structureVersionTransformation],
-    };
-    render(
-      <ExistingStructureIdentificationForm
-        transformation={transformation}
-        structureVersionTransformation={structureVersionTransformation}
-        formKind={FormKind.CONTRACTION}
-      />
-    );
+    renderForm();
 
     // WHEN
-    captured.onSubmit?.({
+    captured.onSubmit?.({});
+
+    // THEN
+    expect(mockGoToNextStep).toHaveBeenCalledTimes(1);
+  });
+
+  it("construit le payload (effectiveDate, type, sans creationDate) et le transmet à handleSave avec le schema strict et les valeurs brutes", () => {
+    // GIVEN
+    renderForm();
+    const rawValues = {
       id: 999,
       nom: "Les Mimosas",
       effectiveDate: "2026-08-25T00:00:00.000Z",
-    });
+    };
+
+    // WHEN — the shared saver runs with the parsed draft data and the raw values
+    capturedSaver.onSave?.(
+      {
+        id: 999,
+        nom: "Les Mimosas",
+        effectiveDate: "2026-08-25T00:00:00.000Z",
+      },
+      rawValues
+    );
 
     // THEN
-    expect(mockHandleValidation).toHaveBeenCalledWith({
+    expect(mockHandleSave).toHaveBeenCalledWith({
       transformationId: 12,
       structureVersionTransformation: {
         id: 7,
         type: StructureVersionTransformationType.CONTRACTION,
-        forms: undefined,
         structureVersion: {
           id: 999,
           nom: "Les Mimosas",
@@ -145,6 +181,8 @@ describe("ExistingStructureIdentificationForm", () => {
           effectiveDate: "2026-08-25T00:00:00.000Z",
         },
       },
+      strictSchema: expect.anything(),
+      values: rawValues,
     });
   });
 });

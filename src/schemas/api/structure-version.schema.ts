@@ -15,7 +15,6 @@ export const structureVersionApiSchema = z.object({
   structureVersionTransformationId: z.number().optional(),
 
   effectiveDate: z.string().datetime().nullish(),
-  forceHistorize: z.boolean().optional(),
 
   type: z.nativeEnum(StructureType).nullish(),
   public: z.nativeEnum(PublicType).nullish(),

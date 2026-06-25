@@ -112,11 +112,6 @@ export class TestStructureDataBuilder {
     return this;
   }
 
-  withFiliale(filiale: string): this {
-    this.data.filiale = filiale;
-    return this;
-  }
-
   withFinessCode(finessCode: string): this {
     this.data.finesses = [{ code: finessCode, description: "" }];
     return this;

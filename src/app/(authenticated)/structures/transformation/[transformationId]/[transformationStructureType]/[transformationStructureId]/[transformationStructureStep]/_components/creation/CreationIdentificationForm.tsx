@@ -4,10 +4,11 @@ import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresse
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
 import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
 import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
+import { TransformationDnaAndFiness } from "@/app/components/forms/dnaAndFiness/TransformationDnaAndFiness";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { SaveCurrentForm } from "@/app/components/forms/SaveCurrentForm";
+import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getTransformationDefaultValues } from "@/app/utils/transformation.util";
 import {
@@ -18,26 +19,20 @@ import {
 import {
   CreationIdentificationDraftFormValues,
   creationIdentificationDraftSchema,
-  CreationIdentificationFormValues,
   creationIdentificationSchema,
 } from "@/schemas/forms/transformation/creationIdentification.schema";
 import { FormKind } from "@/types/global";
-
-type Props = {
-  transformation: TransformationApiRead;
-  structureVersionTransformation: StructureVersionTransformationApiRead;
-  formKind: FormKind;
-};
 
 export const CreationIdentificationForm = ({
   transformation,
   structureVersionTransformation,
   formKind,
 }: Props) => {
-  const { handleValidation, handleSave } = useTransformationFormHandling();
+  const { goToNextStep, handleSave, backLink, shouldShowIncompleteSteps } =
+    useTransformationFormHandling();
 
   const defaultValues =
-    getTransformationDefaultValues<CreationIdentificationFormValues>({
+    getTransformationDefaultValues<CreationIdentificationDraftFormValues>({
       transformation,
       structureVersionTransformation,
     });
@@ -63,46 +58,58 @@ export const CreationIdentificationForm = ({
 
   return (
     <FormWrapper
-      schema={creationIdentificationSchema}
+      schema={
+        shouldShowIncompleteSteps
+          ? creationIdentificationSchema
+          : creationIdentificationDraftSchema
+      }
       defaultValues={defaultValues}
-      onSubmit={(data) => {
-        handleValidation({
-          transformationId: transformation.id,
-          structureVersionTransformation: buildStructureVersionTransformation(data),
-        });
-      }}
+      onSubmit={goToNextStep}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
+      backLink={backLink}
       showContactInfos={false}
     >
-      <SaveCurrentForm
+      <TransformationFormController
         schema={creationIdentificationDraftSchema}
-        onSave={(data) =>
+        onSave={(data, values) =>
           handleSave({
             transformationId: transformation.id,
-            structureVersionTransformation: buildStructureVersionTransformation(data),
+            structureVersionTransformation:
+              buildStructureVersionTransformation(data),
+            strictSchema: creationIdentificationSchema,
+            values,
           })
         }
       />
-
       <FieldSetDescription formKind={formKind} />
-
       <hr />
-
       <AdresseAdministrativeAndAntennes formKind={formKind} />
-
       <hr />
-
-      <DnaAndFiness
-        formKind={formKind}
-        entityId={{
-          structureVersionId: structureVersionTransformation.structureVersion?.id,
-        }}
-      />
-
+      {formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES ? (
+        <TransformationDnaAndFiness
+          entityId={{
+            structureVersionId:
+              structureVersionTransformation.structureVersion?.id,
+          }}
+        />
+      ) : (
+        <DnaAndFiness
+          formKind={formKind}
+          entityId={{
+            structureVersionId:
+              structureVersionTransformation.structureVersion?.id,
+          }}
+        />
+      )}
       <hr />
-
       <FieldSetContacts formKind={formKind} />
     </FormWrapper>
   );
+};
+
+type Props = {
+  transformation: TransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
+  formKind: FormKind;
 };

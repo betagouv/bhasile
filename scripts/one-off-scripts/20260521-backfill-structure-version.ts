@@ -1,19 +1,19 @@
-// @ts-nocheck
-// One-off : version initiale (t0) par structure + structureVersionId sur les tables liées.
-// Idempotent : dernière StructureVersion avec forceHistorize true, sinon création.
+// One-off : version initiale (t0) par structure, rattachée à une Campaign "initialisation",
+// + structureVersionId sur les tables liées.
+// Idempotent : réutilise la version sans transfo existante, sinon création ; garantit la Campaign.
 // Usage : yarn one-off 20260521-backfill-structure-version
 
 import "dotenv/config";
 
+import type { Structure } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/prisma-client";
 
 const prisma = createPrismaClient();
 
-function initialVersionData(structure) {
+function initialVersionData(structure: Structure) {
   return {
     structureId: structure.id,
     effectiveDate: structure.updatedAt,
-    forceHistorize: true,
     type: structure.type,
     adresseAdministrative: structure.adresseAdministrative,
     codePostalAdministratif: structure.codePostalAdministratif,
@@ -38,21 +38,40 @@ async function main() {
 
   const structures = await prisma.structure.findMany({});
 
+  let createdVersionsCount = 0;
+  let updatedVersionsCount = 0;
+
   for (const structure of structures) {
     const versionData = initialVersionData(structure);
 
     const existing = await prisma.structureVersion.findFirst({
-      where: { structureId: structure.id, forceHistorize: true },
+      where: {
+        structureId: structure.id,
+        structureVersionTransformationId: null,
+      },
       orderBy: { updatedAt: "desc" },
-      select: { id: true },
+      select: { id: true, campaignId: true },
     });
 
-    const version = existing
-      ? await prisma.structureVersion.update({
-          where: { id: existing.id },
-          data: versionData,
-        })
-      : await prisma.structureVersion.create({ data: versionData });
+    let version;
+    if (existing) {
+      const campaignId =
+        existing.campaignId ??
+        (await prisma.campaign.create({ data: { name: "initialisation" } })).id;
+      version = await prisma.structureVersion.update({
+        where: { id: existing.id },
+        data: { ...versionData, campaignId },
+      });
+      updatedVersionsCount += 1;
+    } else {
+      const campaign = await prisma.campaign.create({
+        data: { name: "initialisation" },
+      });
+      version = await prisma.structureVersion.create({
+        data: { ...versionData, campaignId: campaign.id },
+      });
+      createdVersionsCount += 1;
+    }
 
     const link = { structureId: structure.id, structureVersionId: null };
 
@@ -82,7 +101,9 @@ async function main() {
     });
   }
 
-  console.log("✅ StructureVersion backfilled, début des adresses");
+  console.log(
+    `✅ StructureVersions : ${createdVersionsCount} créées, ${updatedVersionsCount} mises à jour (${structures.length} structures). Début des adresses…`
+  );
 
   const adresses = await prisma.adresse.findMany({
     include: {

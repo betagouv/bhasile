@@ -8,7 +8,6 @@ export type TestStructureData = {
   codeBhasile: string;
   type: StructureType;
   cpom: boolean;
-  filiale?: string;
   operateur: {
     name: string;
     searchTerm: string;

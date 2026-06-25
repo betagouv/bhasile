@@ -13,6 +13,7 @@ WITH
       public."Activite" a
     WHERE
       a."dnaCode" IS NOT NULL
+      AND a."placesAutorisees" IS NOT NULL
     ORDER BY
       a."dnaCode",
       a."date" DESC
