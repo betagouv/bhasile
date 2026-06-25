@@ -48,6 +48,9 @@ vi.mock("@/app/hooks/useTransformations", () => ({
 
 const setTransformation = vi.fn();
 
+// Le hook reçoit le schéma strict en paramètre : un schéma minimal suffit à tester
+// son branchement (VALIDE / COMMENCE). Il passe pour { nom: "Les Coquelicots" } et
+// échoue sinon. Les vrais schémas sont exercés par les tests d'intégration des forms.
 const strictSchema = z.object({ nom: z.string().min(1) });
 
 const buildCreationForm = (validatedSlugs: string[] = []) => ({
@@ -156,12 +159,15 @@ describe("useTransformationFormHandling", () => {
   });
 
   describe("handleSave", () => {
-    it("reuses the read form and marks the current step VALIDE when the strict schema passes", async () => {
+    it("réutilise le formulaire lu et passe l'étape courante à VALIDE quand le schéma strict passe", async () => {
+      // GIVEN — currentStep is "description" and the values satisfy the strict schema
       mockUpdateTransformation.mockResolvedValue(12);
 
+      // WHEN
       const { result } = renderHook(() => useTransformationFormHandling());
       await result.current.handleSave(buildSavePayload());
 
+      // THEN — the "description" step (01-identification) is flipped to VALIDE
       expect(mockUpdateTransformation).toHaveBeenCalledWith(
         12,
         {
@@ -179,12 +185,15 @@ describe("useTransformationFormHandling", () => {
       );
     });
 
-    it("marks the current step COMMENCE when the strict schema fails", async () => {
+    it("passe l'étape courante à COMMENCE quand le schéma strict échoue", async () => {
+      // GIVEN — values that do not satisfy the strict schema
       mockUpdateTransformation.mockResolvedValue(12);
 
+      // WHEN
       const { result } = renderHook(() => useTransformationFormHandling());
       await result.current.handleSave(buildSavePayload({ nom: "" }));
 
+      // THEN — the "description" step (01-identification) is set to COMMENCE
       const savedForm =
         mockUpdateTransformation.mock.calls[0][1]
           .structureVersionTransformations[0].form;
@@ -196,7 +205,8 @@ describe("useTransformationFormHandling", () => {
       expect(savedForm.status).toBe(false);
     });
 
-    it("derives the child form status to true once the last step is validated", async () => {
+    it("passe le statut du formulaire enfant à true une fois la dernière étape validée", async () => {
+      // GIVEN — the two first steps of the child form are already VALIDE
       mockUseTransformationContext.mockReturnValue({
         transformation: buildTransformation(
           buildCreationForm(["01-identification", "02-places-hebergement"])
@@ -205,6 +215,7 @@ describe("useTransformationFormHandling", () => {
         saveCurrentForm: mockSaveCurrentForm,
         shouldShowIncompleteSteps: false,
       });
+      // AND — the current step is the last one (actes-administratifs)
       mockUseParams.mockReturnValue({
         transformationStructureType: StructureVersionTransformationType.CREATION,
         transformationStructureId: "7",
@@ -216,9 +227,11 @@ describe("useTransformationFormHandling", () => {
       );
       mockUpdateTransformation.mockResolvedValue(12);
 
+      // WHEN
       const { result } = renderHook(() => useTransformationFormHandling());
       await result.current.handleSave(buildSavePayload());
 
+      // THEN — every step is VALIDE so the child form status is derived to true
       expect(mockUpdateTransformation).toHaveBeenCalledWith(
         12,
         {
@@ -242,12 +255,15 @@ describe("useTransformationFormHandling", () => {
   });
 
   describe("goToNextStep", () => {
-    it("saves the current form and pushes to nextStep.route on success", async () => {
+    it("sauvegarde le formulaire courant et navigue vers nextStep.route en cas de succès", async () => {
+      // GIVEN — the shared saver succeeds
       mockSaveCurrentForm.mockResolvedValue(true);
 
+      // WHEN
       const { result } = renderHook(() => useTransformationFormHandling());
       await result.current.goToNextStep();
 
+      // THEN — currentStep is "description" → nextStep is "places-et-hebergement"
       expect(mockSaveCurrentForm).toHaveBeenCalledTimes(1);
       expect(mockRouterPush).toHaveBeenCalledTimes(1);
       expect(mockRouterPush).toHaveBeenCalledWith(
@@ -255,7 +271,8 @@ describe("useTransformationFormHandling", () => {
       );
     });
 
-    it("pushes to /verification after submitting the last form step", async () => {
+    it("navigue vers /verification après la soumission de la dernière étape du formulaire", async () => {
+      // GIVEN — currentStep is the last form step (actes-administratifs)
       mockUseParams.mockReturnValue({
         transformationStructureType: StructureVersionTransformationType.CREATION,
         transformationStructureId: "7",
@@ -267,49 +284,60 @@ describe("useTransformationFormHandling", () => {
       );
       mockSaveCurrentForm.mockResolvedValue(true);
 
+      // WHEN
       const { result } = renderHook(() => useTransformationFormHandling());
       await result.current.goToNextStep();
 
+      // THEN
       expect(mockRouterPush).toHaveBeenCalledWith(
         "/structures/transformation/12/verification"
       );
     });
 
-    it("does not navigate when the shared saver fails (invalid draft / save error)", async () => {
+    it("ne navigue pas quand le saver partagé échoue (draft invalide / erreur de sauvegarde)", async () => {
+      // GIVEN — the saver could not persist
       mockSaveCurrentForm.mockResolvedValue(false);
 
+      // WHEN
       const { result } = renderHook(() => useTransformationFormHandling());
       await result.current.goToNextStep();
 
+      // THEN
       expect(mockSaveCurrentForm).toHaveBeenCalledTimes(1);
       expect(mockRouterPush).not.toHaveBeenCalled();
     });
 
-    it("logs the error and does not navigate when the saver rejects", async () => {
+    it("logue l'erreur et ne navigue pas quand le saver rejette", async () => {
+      // GIVEN
       const error = new Error("boom");
       mockSaveCurrentForm.mockRejectedValue(error);
       const consoleErrorSpy = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
 
+      // WHEN
       const { result } = renderHook(() => useTransformationFormHandling());
       await expect(result.current.goToNextStep()).resolves.toBeUndefined();
 
+      // THEN
       expect(consoleErrorSpy).toHaveBeenCalledWith(error);
       expect(mockRouterPush).not.toHaveBeenCalled();
 
       consoleErrorSpy.mockRestore();
     });
 
-    it("is a no-op (no save, no navigation) when currentStep is not resolved", async () => {
+    it("ne fait rien (pas de sauvegarde, pas de navigation) quand currentStep n'est pas résolu", async () => {
+      // GIVEN — invalid step in URL → currentStep is undefined
       mockUseParams.mockReturnValue({
         transformationStructureType: StructureVersionTransformationType.CREATION,
         transformationStructureId: "7",
         transformationStructureStep: "unknown-step",
       });
 
+      // WHEN
       const { result } = renderHook(() => useTransformationFormHandling());
 
+      // THEN — does not save and does not navigate
       await expect(result.current.goToNextStep()).resolves.toBeUndefined();
       expect(mockSaveCurrentForm).not.toHaveBeenCalled();
       expect(mockRouterPush).not.toHaveBeenCalled();
@@ -317,21 +345,25 @@ describe("useTransformationFormHandling", () => {
   });
 
   it("should redirect to the firstStep when currentStep is not found", () => {
+    // GIVEN — invalid step in URL
     mockUseParams.mockReturnValue({
       transformationStructureType: StructureVersionTransformationType.CREATION,
       transformationStructureId: "7",
       transformationStructureStep: "unknown-step",
     });
 
+    // WHEN
     renderHook(() => useTransformationFormHandling());
 
+    // THEN
     expect(mockRouterReplace).toHaveBeenCalledTimes(1);
     expect(mockRouterReplace).toHaveBeenCalledWith(
       "/structures/transformation/12/creation/7/description"
     );
   });
 
-  it("should expose nextStep and prevStep based on the current position", () => {
+  it("devrait exposer nextStep et un backLink « étape précédente » selon la position courante", () => {
+    // GIVEN — currentStep is "places-et-hebergement" (middle of 3 steps)
     mockUseParams.mockReturnValue({
       transformationStructureType: StructureVersionTransformationType.CREATION,
       transformationStructureId: "7",
@@ -342,27 +374,34 @@ describe("useTransformationFormHandling", () => {
       "/structures/transformation/12/creation/7/places-et-hebergement"
     );
 
+    // WHEN
     const { result } = renderHook(() => useTransformationFormHandling());
 
-    expect(result.current.prevStep?.route).toBe(
-      "/structures/transformation/12/creation/7/description"
-    );
+    // THEN
+    expect(result.current.backLink).toEqual({
+      href: "/structures/transformation/12/creation/7/description",
+      label: "Étape précédente",
+    });
     expect(result.current.nextStep?.route).toBe(
       "/structures/transformation/12/creation/7/actes-administratifs"
     );
   });
 
-  it("should resolve the verification step when on the /verification page", () => {
+  it("devrait résoudre l'étape de vérification quand on est sur la page /verification", () => {
+    // GIVEN — URL params have no structure-step segments
     mockUseParams.mockReturnValue({});
     mockUsePathname.mockReturnValue(
       "/structures/transformation/12/verification"
     );
 
+    // WHEN
     const { result } = renderHook(() => useTransformationFormHandling());
 
-    expect(result.current.prevStep?.route).toBe(
-      "/structures/transformation/12/creation/7/actes-administratifs"
-    );
+    // THEN — backLink points to the last form step, no nextStep
+    expect(result.current.backLink).toEqual({
+      href: "/structures/transformation/12/creation/7/actes-administratifs",
+      label: "Étape précédente",
+    });
     expect(result.current.nextStep).toBeUndefined();
   });
 });

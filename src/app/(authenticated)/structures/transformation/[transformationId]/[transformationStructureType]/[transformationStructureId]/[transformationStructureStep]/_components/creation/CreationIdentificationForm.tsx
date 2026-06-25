@@ -4,12 +4,13 @@ import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresse
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
 import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
 import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
+import { TransformationDnaAndFiness } from "@/app/components/forms/dnaAndFiness/TransformationDnaAndFiness";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
 import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
-import { getTransformationStructureVersionDefaultValues } from "@/app/utils/transformation.util";
+import { getTransformationDefaultValues } from "@/app/utils/transformation.util";
 import {
   StructureVersionTransformationApiRead,
   StructureVersionTransformationApiUpdateClient,
@@ -22,30 +23,19 @@ import {
 } from "@/schemas/forms/transformation/creationIdentification.schema";
 import { FormKind } from "@/types/global";
 
-type Props = {
-  transformation: TransformationApiRead;
-  structureVersionTransformation: StructureVersionTransformationApiRead;
-  formKind: FormKind;
-};
-
 export const CreationIdentificationForm = ({
   transformation,
   structureVersionTransformation,
   formKind,
 }: Props) => {
-  const { goToNextStep, handleSave, shouldShowIncompleteSteps } =
+  const { goToNextStep, handleSave, backLink, shouldShowIncompleteSteps } =
     useTransformationFormHandling();
 
-  const defaultValues = {
-    ...getTransformationStructureVersionDefaultValues<CreationIdentificationDraftFormValues>(
-      structureVersionTransformation.structureVersion
-    ),
-    // TODO: move those server-side once every PR is merged
-    operateur: structureVersionTransformation.operateur,
-    isMultiAntenne:
-      (structureVersionTransformation.structureVersion?.antennes?.length ?? 0) >
-      0,
-  };
+  const defaultValues =
+    getTransformationDefaultValues<CreationIdentificationDraftFormValues>({
+      transformation,
+      structureVersionTransformation,
+    });
 
   const buildStructureVersionTransformation = (
     data: CreationIdentificationDraftFormValues
@@ -68,7 +58,6 @@ export const CreationIdentificationForm = ({
 
   return (
     <FormWrapper
-      key={shouldShowIncompleteSteps ? "strict" : "draft"}
       schema={
         shouldShowIncompleteSteps
           ? creationIdentificationSchema
@@ -78,6 +67,7 @@ export const CreationIdentificationForm = ({
       onSubmit={goToNextStep}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
+      backLink={backLink}
       showContactInfos={false}
     >
       <TransformationFormController
@@ -92,26 +82,34 @@ export const CreationIdentificationForm = ({
           })
         }
       />
-
       <FieldSetDescription formKind={formKind} />
-
       <hr />
-
       <AdresseAdministrativeAndAntennes formKind={formKind} />
-
       <hr />
-
-      <DnaAndFiness
-        formKind={formKind}
-        entityId={{
-          structureVersionId:
-            structureVersionTransformation.structureVersion?.id,
-        }}
-      />
-
+      {formKind === FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES ? (
+        <TransformationDnaAndFiness
+          entityId={{
+            structureVersionId:
+              structureVersionTransformation.structureVersion?.id,
+          }}
+        />
+      ) : (
+        <DnaAndFiness
+          formKind={formKind}
+          entityId={{
+            structureVersionId:
+              structureVersionTransformation.structureVersion?.id,
+          }}
+        />
+      )}
       <hr />
-
       <FieldSetContacts formKind={formKind} />
     </FormWrapper>
   );
+};
+
+type Props = {
+  transformation: TransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
+  formKind: FormKind;
 };

@@ -4,7 +4,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import { useFetchFreeDnaCodes } from "@/app/hooks/useFetchFreeDnaCodes";
-import { FormKind } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 
 import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
@@ -16,15 +15,15 @@ vi.mock("@/app/hooks/useFetchFreeDnaCodes", () => ({
 const defaultValuesAutorisee = {
   type: StructureType.CADA,
   isMultiDna: false,
-  dnaStructures: [{ dna: { code: "", description: "" } }],
-  finesses: [{ code: "", description: "" }],
+  dnaStructures: [{ description: "", dna: { code: "" } }],
+  structureFinesses: [{ description: "", finess: { code: "" } }],
 };
 
 const defaultValuesSubventionnee = {
   type: StructureType.HUDA,
   isMultiDna: false,
-  dnaStructures: [{ dna: { code: "", description: "" } }],
-  finesses: [],
+  dnaStructures: [{ description: "", dna: { code: "" } }],
+  structureFinesses: [],
 };
 
 const mockedUseFetchFreeDnaCodes = vi.mocked(useFetchFreeDnaCodes);
@@ -72,12 +71,12 @@ describe("DnaAndFiness", () => {
             ...defaultValuesAutorisee,
             isMultiDna: true,
             dnaStructures: [
-              { dna: { code: "C0001", description: "DNA 1" } },
-              { dna: { code: "C0002", description: "DNA 2" } },
+              { description: "DNA 1", dna: { code: "C0001" } },
+              { description: "DNA 2", dna: { code: "C0002" } },
             ],
-            finesses: [
-              { code: "123456789", description: "Finess 1" },
-              { code: "987654321", description: "Finess 2" },
+            structureFinesses: [
+              { description: "Finess 1", finess: { code: "123456789" } },
+              { description: "Finess 2", finess: { code: "987654321" } },
             ],
           }}
         >
@@ -132,8 +131,8 @@ describe("DnaAndFiness", () => {
           defaultValues={{
             ...defaultValuesAutorisee,
             isMultiDna: true,
-            dnaStructures: [{ dna: { code: "", description: "" } }],
-            finesses: [{ code: "", description: "" }],
+            dnaStructures: [{ description: "", dna: { code: "" } }],
+            structureFinesses: [{ description: "", finess: { code: "" } }],
           }}
         >
           <DnaAndFiness />
@@ -154,37 +153,6 @@ describe("DnaAndFiness", () => {
         name: "Code",
       });
       expect(codeSelectsAfter).toHaveLength(2);
-    });
-  });
-
-  describe("Title depending on formKind", () => {
-    it("shows the OFII single-code message when creating from existing structures", () => {
-      render(
-        <FormTestWrapper defaultValues={defaultValuesAutorisee}>
-          <DnaAndFiness
-            formKind={FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES}
-          />
-        </FormTestWrapper>
-      );
-
-      expect(
-        screen.getByRole("heading", {
-          name: /Veuillez ne retenir qu.un seul code DNA et FINESS.*transmise à l.OFII/i,
-        })
-      ).toBeInTheDocument();
-    });
-
-    it("keeps the standard title (no OFII message) for an extension", () => {
-      render(
-        <FormTestWrapper defaultValues={defaultValuesAutorisee}>
-          <DnaAndFiness formKind={FormKind.EXTENSION} />
-        </FormTestWrapper>
-      );
-
-      expect(screen.queryByText(/transmise à l.OFII/i)).not.toBeInTheDocument();
-      expect(
-        screen.getByRole("heading", { name: "Code DNA et FINESS" })
-      ).toBeInTheDocument();
     });
   });
 });

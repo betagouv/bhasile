@@ -1,4 +1,5 @@
 import {
+  getTransformationActesAdministratifsCategoryToDisplay,
   STRUCTURE_VERSION_TRANSFORMATION_FORM_STEPS,
   STRUCTURE_VERSION_TRANSFORMATION_TYPE_ORDER,
   TRANSFORMATION_TYPE_SPECS,
@@ -12,6 +13,7 @@ import {
   StructureVersionTransformationApiUpdate,
   TransformationApiRead,
 } from "@/schemas/api/transformation.schema";
+import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 import { StepStatus } from "@/types/form.type";
 import { DeepPartial, FormKind } from "@/types/global";
 import {
@@ -21,6 +23,7 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
+import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
 import { transformApiAdressesToFormAdresses } from "./adresse.util";
 import { getYearFromDate } from "./date.util";
 import {
@@ -121,7 +124,14 @@ export const getTransformationFormNavigation = ({
       ? flatSteps[currentIndex + 1]
       : undefined;
 
-  return { firstStep, currentStep, prevStep, nextStep };
+  const backLink = prevStep
+    ? { href: prevStep.route, label: "Étape précédente" }
+    : {
+        href: `/structures/transformation/${transformationId}/selection`,
+        label: "Modifier le cas de figure",
+      };
+
+  return { firstStep, currentStep, prevStep, nextStep, backLink };
 };
 
 export const sortStructureVersionTransformationsByType = <
@@ -316,6 +326,49 @@ export const getAdresseSource = (
   };
 };
 
+const getSourceStructureAntennes = (
+  structureVersionTransformation: StructureVersionTransformationApiRead
+): AntenneFormValues[] =>
+  (
+    structureVersionTransformation.structureVersion?.structure?.antennes ?? []
+  ).map((antenne) => ({
+    name: antenne.name ?? "",
+    adresseComplete: antenne.adresseComplete ?? "",
+    adresse: antenne.adresse ?? "",
+    codePostal: antenne.codePostal ?? "",
+    commune: antenne.commune ?? "",
+    departement: antenne.departement ?? "",
+  }));
+
+export const getInitialAntennes = (
+  transformation: TransformationApiRead,
+  structureVersionTransformation: StructureVersionTransformationApiRead
+): AntenneFormValues[] => {
+  const baseAntennes = getSourceStructureAntennes(
+    structureVersionTransformation
+  );
+
+  const transformationType = transformation.type;
+  if (!transformationType) {
+    return baseAntennes;
+  }
+
+  const rules = TRANSFORMATION_TYPE_SPECS[transformationType]?.prefill ?? [];
+  const applicableRules = rules.filter(
+    (rule) =>
+      rule.to === structureVersionTransformation.type &&
+      rule.fields.includes("antennes")
+  );
+
+  const prefilledAntennes = applicableRules.flatMap((rule) =>
+    transformation.structureVersionTransformations
+      .filter((candidate) => candidate.type === rule.from)
+      .flatMap(getSourceStructureAntennes)
+  );
+
+  return [...baseAntennes, ...prefilledAntennes];
+};
+
 const getEffectiveYear = (effectiveDate: string | null | undefined): number =>
   getYearFromDate(effectiveDate) || CURRENT_YEAR;
 
@@ -332,11 +385,11 @@ const resolveSourceTypologie = <T extends { year: number }>(
 
 export const getPlacesSource = (
   structureVersionTransformation: StructureVersionTransformationApiRead
-): number => {
+): number | undefined => {
   const structureVersion = structureVersionTransformation.structureVersion;
   const typologies = structureVersion?.structure?.structureTypologies;
   const year = getEffectiveYear(structureVersion?.effectiveDate);
-  return resolveSourceTypologie(typologies, year)?.placesAutorisees ?? 0;
+  return resolveSourceTypologie(typologies, year)?.placesAutorisees ?? undefined;
 };
 
 export const buildTransformationTypologie = (
@@ -354,13 +407,31 @@ export const buildTransformationTypologie = (
   };
 };
 
-export const getTransformationStructureVersionDefaultValues = <T>(
-  structureVersion?: StructureVersionApiRead
-): DeepPartial<T> =>
-  ({
+export const getTransformationDefaultValues = <T>({
+  transformation,
+  structureVersionTransformation,
+}: {
+  transformation: TransformationApiRead;
+  structureVersionTransformation: StructureVersionTransformationApiRead;
+}): DeepPartial<T> => {
+  const structureVersion = structureVersionTransformation.structureVersion;
+  const categoryDisplayRules =
+    getTransformationActesAdministratifsCategoryToDisplay(
+      structureVersionTransformation.type,
+      transformation.type
+    );
+
+  return {
     ...structureVersion,
     adresses: transformApiAdressesToFormAdresses(structureVersion?.adresses),
-  }) as DeepPartial<T>;
+    operateur: structureVersionTransformation.operateur,
+    structureTypologies: [buildTransformationTypologie(structureVersion)],
+    actesAdministratifs: getActesAdministratifsDefaultValues(
+      structureVersionTransformation.actesAdministratifs,
+      categoryDisplayRules
+    ),
+  } as DeepPartial<T>;
+};
 
 export const isCreation = (formKind: FormKind): boolean =>
   formKind === FormKind.OUVERTURE_EX_NIHILO ||

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { canUpdateStructure } from "@/lib/casl/abilities";
+import { canUpdateDepartement } from "@/lib/casl/abilities";
 import { authOptions } from "@/lib/next-auth/auth";
 import { structureAgentUpdateApiSchema } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
@@ -9,7 +9,7 @@ import { SessionUser } from "@/types/global";
 import { createStructureEvent } from "../../user-action/user-action.service";
 import {
   getFullStructure,
-  getStructure,
+  getStructureDepartement,
   getStructureForOperateur,
   updateStructureAgent,
 } from "../structure.service";
@@ -69,9 +69,14 @@ export async function PUT(
     const body = await request.json();
     const result = structureAgentUpdateApiSchema.parse({ ...body, id: Number(id) });
 
-    const existingStructure = await getStructure(result.id);
+    const departementAdministratif = await getStructureDepartement(result.id);
 
-    if (!canUpdateStructure(session.user as SessionUser, existingStructure)) {
+    if (
+      !canUpdateDepartement(
+        session.user as SessionUser,
+        departementAdministratif
+      )
+    ) {
       return NextResponse.json({ error: "Droits insuffisants" }, { status: 403 });
     }
 

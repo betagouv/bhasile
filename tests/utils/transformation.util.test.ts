@@ -6,12 +6,12 @@ import {
   getPlacesSource,
   getReferenceStructureVersionTransformation,
   getStructureVersionTransformationDepartement,
+  getTransformationDefaultValues,
   getTransformationDepartement,
   getTransformationFormNavigation,
   getTransformationNounAvecArticle,
   getTransformationOriginRoute,
   getTransformationSteps,
-  getTransformationStructureVersionDefaultValues,
   isCreation,
   isTransformationSurStructureExistante,
   setStructureVersionTransformationFormStepStatus,
@@ -34,6 +34,7 @@ import {
 import {
   createStructureVersionTransformation,
   createTransformation,
+  createTransformationForm,
 } from "../test-utils/factories/transformation.factory";
 
 describe("transformation util", () => {
@@ -311,6 +312,75 @@ describe("transformation util", () => {
       expect(prevStep).toBeUndefined();
       expect(nextStep).toBeUndefined();
     });
+
+    it("devrait exposer un backLink vers la page de sélection quand l'étape est la toute première", () => {
+      // GIVEN
+      const transformationStructureType =
+        StructureVersionTransformationType.FERMETURE;
+      const transformationStructureId = 1;
+      const transformationStructureStep = "description";
+
+      // WHEN
+      const { backLink } = getTransformationFormNavigation({
+        transformationSteps,
+        transformationId: 5,
+        transformationStructureType,
+        transformationStructureId,
+        transformationStructureStep,
+      });
+
+      // THEN
+      expect(backLink).toEqual({
+        href: "/structures/transformation/5/selection",
+        label: "Modifier le cas de figure",
+      });
+    });
+
+    it("devrait exposer un backLink vers l'étape précédente au sein du même groupe", () => {
+      // GIVEN
+      const transformationStructureType =
+        StructureVersionTransformationType.EXTENSION;
+      const transformationStructureId = 2;
+      const transformationStructureStep = "places-et-hebergement";
+
+      // WHEN
+      const { backLink } = getTransformationFormNavigation({
+        transformationSteps,
+        transformationId: 5,
+        transformationStructureType,
+        transformationStructureId,
+        transformationStructureStep,
+      });
+
+      // THEN
+      expect(backLink).toEqual({
+        href: "/structures/transformation/5/extension/2/description",
+        label: "Étape précédente",
+      });
+    });
+
+    it("devrait exposer un backLink vers le groupe précédent en franchissant les frontières de structureVersionTransformation", () => {
+      // GIVEN
+      const transformationStructureType =
+        StructureVersionTransformationType.EXTENSION;
+      const transformationStructureId = 2;
+      const transformationStructureStep = "description";
+
+      // WHEN
+      const { backLink } = getTransformationFormNavigation({
+        transformationSteps,
+        transformationId: 5,
+        transformationStructureType,
+        transformationStructureId,
+        transformationStructureStep,
+      });
+
+      // THEN
+      expect(backLink).toEqual({
+        href: "/structures/transformation/5/fermeture/1/description",
+        label: "Étape précédente",
+      });
+    });
   });
 
   describe("getTransformationSteps", () => {
@@ -432,7 +502,7 @@ describe("transformation util", () => {
       }
     );
 
-    it("carries each form step status read from the structureVersionTransformation form", () => {
+    it("reporte le statut de chaque étape lu depuis le formulaire de la structureVersionTransformation", () => {
       // GIVEN — an extension whose form has only the description step validated
       const transformation: TransformationApiRead = {
         id: 5,
@@ -441,45 +511,9 @@ describe("transformation util", () => {
             id: 1,
             type: StructureVersionTransformationType.EXTENSION,
             structureVersion: { structureId: 1001 },
-            form: {
-              id: 100,
-              status: false,
-              formDefinition: {
-                id: 10,
-                name: "structure-transformation-extension",
-                slug: "structure-transformation-extension-v1",
-                version: 1,
-              },
-              formSteps: [
-                {
-                  id: 1001,
-                  status: StepStatus.VALIDE,
-                  stepDefinition: {
-                    id: 201,
-                    slug: "01-identification",
-                    label: "Description",
-                  },
-                },
-                {
-                  id: 1002,
-                  status: StepStatus.NON_COMMENCE,
-                  stepDefinition: {
-                    id: 202,
-                    slug: "02-places-hebergement",
-                    label: "Places et hébergement",
-                  },
-                },
-                {
-                  id: 1003,
-                  status: StepStatus.NON_COMMENCE,
-                  stepDefinition: {
-                    id: 203,
-                    slug: "03-actes-administratifs",
-                    label: "Actes administratifs",
-                  },
-                },
-              ],
-            },
+            form: createTransformationForm({
+              validatedSlugs: ["01-identification"],
+            }),
           } as StructureVersionTransformationApiRead,
         ],
       };
@@ -495,7 +529,7 @@ describe("transformation util", () => {
       ]);
     });
 
-    it("defaults each step status to NON_COMMENCE when the form is absent", () => {
+    it("met chaque statut d'étape à NON_COMMENCE par défaut quand le formulaire est absent", () => {
       // GIVEN
       const transformation: TransformationApiRead = {
         id: 5,
@@ -605,7 +639,7 @@ describe("transformation util", () => {
         StructureVersionTransformationType.FERMETURE,
       ],
     ])(
-      "returns the impacted structure page for %s",
+      "renvoie la page de la structure impactée pour %s",
       (transformationType, primaryType) => {
         // GIVEN
         const transformation = createTransformation({
@@ -627,7 +661,7 @@ describe("transformation util", () => {
       }
     );
 
-    it("picks the primary type's structure when several structureVersionTransformations exist", () => {
+    it("choisit la structure du type principal quand plusieurs structureVersionTransformations existent", () => {
       // GIVEN — a contraction with transfer: 1 contraction (primary) + 1 extension target
       const transformation = createTransformation({
         id: 5,
@@ -655,7 +689,7 @@ describe("transformation util", () => {
     it.each([
       TransformationType.OUVERTURE_EX_NIHILO,
       TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES,
-    ])("returns /structures for %s (no primary type)", (transformationType) => {
+    ])("renvoie /structures pour %s (pas de type principal)", (transformationType) => {
       // GIVEN
       const transformation = createTransformation({
         id: 5,
@@ -673,7 +707,7 @@ describe("transformation util", () => {
       expect(getTransformationOriginRoute(transformation)).toBe("/structures");
     });
 
-    it("falls back to /structures when the primary structureVersionTransformation has no structureId", () => {
+    it("se rabat sur /structures quand la structureVersionTransformation principale n'a pas de structureId", () => {
       // GIVEN
       const transformation = createTransformation({
         id: 5,
@@ -692,53 +726,13 @@ describe("transformation util", () => {
   });
 
   describe("setStructureVersionTransformationFormStepStatus", () => {
-    const buildCreationForm = (validatedSlugs: string[] = []): FormApiType => ({
-      id: 100,
-      status: false,
-      formDefinition: {
-        id: 10,
+    const buildCreationForm = (validatedSlugs: string[] = []): FormApiType =>
+      createTransformationForm({
         name: "structure-transformation-creation",
-        slug: "structure-transformation-creation-v1",
-        version: 1,
-      },
-      formSteps: [
-        {
-          id: 1001,
-          status: validatedSlugs.includes("01-identification")
-            ? StepStatus.VALIDE
-            : StepStatus.NON_COMMENCE,
-          stepDefinition: {
-            id: 201,
-            slug: "01-identification",
-            label: "Description",
-          },
-        },
-        {
-          id: 1002,
-          status: validatedSlugs.includes("02-places-hebergement")
-            ? StepStatus.VALIDE
-            : StepStatus.NON_COMMENCE,
-          stepDefinition: {
-            id: 202,
-            slug: "02-places-hebergement",
-            label: "Places et hébergement",
-          },
-        },
-        {
-          id: 1003,
-          status: validatedSlugs.includes("03-actes-administratifs")
-            ? StepStatus.VALIDE
-            : StepStatus.NON_COMMENCE,
-          stepDefinition: {
-            id: 203,
-            slug: "03-actes-administratifs",
-            label: "Actes administratifs",
-          },
-        },
-      ],
-    });
+        validatedSlugs,
+      });
 
-    it("flips only the targeted route step to the given status, mapping it to its form step slug", () => {
+    it("ne passe que l'étape de route ciblée au statut donné, en la mappant sur le slug de son étape de formulaire", () => {
       const form = setStructureVersionTransformationFormStepStatus(
         buildCreationForm(),
         StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
@@ -771,7 +765,7 @@ describe("transformation util", () => {
       expect(identificationStep?.status).toBe(StepStatus.VALIDE);
     });
 
-    it("downgrades a previously validated step when the given status is COMMENCE", () => {
+    it("rétrograde une étape déjà validée quand le statut donné est COMMENCE", () => {
       const form = setStructureVersionTransformationFormStepStatus(
         buildCreationForm(["01-identification"]),
         StructureVersionTransformationStep.DESCRIPTION,
@@ -834,7 +828,7 @@ describe("transformation util", () => {
       ).toBe(true);
     });
 
-    it("sets the form status to true once the last remaining step is validated", () => {
+    it("passe le statut du formulaire à true une fois la dernière étape restante validée", () => {
       const form = setStructureVersionTransformationFormStepStatus(
         buildCreationForm(["01-identification", "02-places-hebergement"]),
         StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
@@ -849,7 +843,7 @@ describe("transformation util", () => {
       expect(form.status).toBe(true);
     });
 
-    it("keeps the form status false while at least one step is not validated", () => {
+    it("garde le statut du formulaire à false tant qu'au moins une étape n'est pas validée", () => {
       const form = setStructureVersionTransformationFormStepStatus(
         buildCreationForm(["01-identification"]),
         StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
@@ -857,57 +851,6 @@ describe("transformation util", () => {
       );
 
       expect(form.status).toBe(false);
-    });
-  });
-
-  describe("getTransformationStructureVersionDefaultValues", () => {
-    it("spreads the structureVersion fields and coerces adresse typologie booleans", () => {
-      const result = getTransformationStructureVersionDefaultValues({
-        id: 5,
-        nom: "Les Iris",
-        adresses: [
-          {
-            id: 1,
-            adresse: "12 rue des Lilas",
-            adresseTypologies: [
-              {
-                year: 2024,
-                placesAutorisees: 10,
-                qpv: null,
-                logementSocial: 1,
-              },
-            ],
-          },
-        ],
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
-
-      expect(result).toMatchObject({ id: 5, nom: "Les Iris" });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const adresses = (result as any).adresses;
-      expect(adresses[0].adresseTypologies[0]).toMatchObject({
-        year: 2024,
-        placesAutorisees: 10,
-        qpv: false,
-        logementSocial: true,
-      });
-    });
-
-    it("returns undefined adresses when the structureVersion is undefined", () => {
-      expect(getTransformationStructureVersionDefaultValues(undefined)).toEqual({
-        adresses: undefined,
-      });
-    });
-
-    it("leaves adresses undefined when the structureVersion has none", () => {
-      const result = getTransformationStructureVersionDefaultValues({
-        id: 5,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
-
-      expect(result).toMatchObject({ id: 5 });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((result as any).adresses).toBeUndefined();
     });
   });
 
@@ -1066,14 +1009,14 @@ describe("transformation util", () => {
       expect(getPlacesSource(structureVersionTransformation)).toBe(47);
     });
 
-    it("retourne 0 quand la structure source n'a pas de typologie", () => {
+    it("retourne undefined quand la structure source n'a pas de typologie", () => {
       const structureVersionTransformation: StructureVersionTransformationApiRead =
         {
           id: 1,
           type: StructureVersionTransformationType.EXTENSION,
         };
 
-      expect(getPlacesSource(structureVersionTransformation)).toBe(0);
+      expect(getPlacesSource(structureVersionTransformation)).toBeUndefined();
     });
   });
 
@@ -1173,6 +1116,94 @@ describe("transformation util", () => {
         lgbt: undefined,
         fvvTeh: undefined,
       });
+    });
+  });
+
+  describe("getTransformationDefaultValues", () => {
+    type DefaultValues = {
+      operateur?: { id: number; name: string };
+      isMultiAntenne?: boolean;
+      structureTypologies?: {
+        year: number;
+        placesAutorisees: number | null;
+        pmr: number | null;
+        lgbt: number | null;
+        fvvTeh: number | null;
+      }[];
+      actesAdministratifs?: { category: string }[];
+    };
+
+    const buildStructureVersionTransformation = (
+      type: StructureVersionTransformationType
+    ): StructureVersionTransformationApiRead => ({
+      id: 1,
+      type,
+      operateur: { id: 9, name: "Opérateur Test" },
+      structureVersion: {
+        isMultiAntenne: true,
+        antennes: [],
+        effectiveDate: "2025-08-25T12:00:00.000Z",
+        adresses: [],
+        structureTypologies: [
+          { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
+        ],
+      } as StructureVersionApiRead,
+    });
+
+    const getDefaultValuesFor = (
+      type: StructureVersionTransformationType
+    ): DefaultValues =>
+      getTransformationDefaultValues({
+        transformation: createTransformation(),
+        structureVersionTransformation:
+          buildStructureVersionTransformation(type),
+      }) as DefaultValues;
+
+    it("passe operateur depuis la structureVersionTransformation", () => {
+      expect(
+        getDefaultValuesFor(StructureVersionTransformationType.EXTENSION)
+          .operateur
+      ).toEqual({ id: 9, name: "Opérateur Test" });
+    });
+
+    it("utilise isMultiAntenne porté par le spread (valeur serveur) sans le recalculer depuis antennes", () => {
+      // structureVersion.isMultiAntenne vaut true alors que antennes est vide :
+      // on doit obtenir true, ce qui prouve qu'on ne recalcule plus côté client.
+      expect(
+        getDefaultValuesFor(StructureVersionTransformationType.EXTENSION)
+          .isMultiAntenne
+      ).toBe(true);
+    });
+
+    it("résout structureTypologies pour l'année de l'effectiveDate", () => {
+      expect(
+        getDefaultValuesFor(StructureVersionTransformationType.EXTENSION)
+          .structureTypologies
+      ).toEqual([
+        { year: 2025, placesAutorisees: 47, pmr: 2, lgbt: 1, fvvTeh: 0 },
+      ]);
+    });
+
+    it("calcule les actesAdministratifs avec les règles de catégorie de la fermeture", () => {
+      const categories = getDefaultValuesFor(
+        StructureVersionTransformationType.FERMETURE
+      ).actesAdministratifs?.map(
+        (acteAdministratif) => acteAdministratif.category
+      );
+
+      expect(categories).toEqual(["AUTRE"]);
+    });
+
+    it("calcule les actesAdministratifs avec les règles de catégorie de l'extension", () => {
+      const categories = getDefaultValuesFor(
+        StructureVersionTransformationType.EXTENSION
+      ).actesAdministratifs?.map(
+        (acteAdministratif) => acteAdministratif.category
+      );
+
+      expect(categories?.slice().sort()).toEqual(
+        ["ARRETE_EXTENSION", "AUTRE", "CONVENTION"].sort()
+      );
     });
   });
 

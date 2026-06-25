@@ -4,6 +4,7 @@ import {
   CategoryDisplayRules,
 } from "@/config/acte-administratif.config";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 import { StructureType } from "@/types/structure.type";
 import {
   StructureVersionTransformationStep,
@@ -309,6 +310,20 @@ const CONVENTION_RULE: CategoryDisplayRule = {
   addFileButtonLabel: "Ajouter une convention",
 };
 
+const CONVENTION_WITH_AVENANT_RULE: CategoryDisplayRule = {
+  ...CONVENTION_RULE,
+  avenantAlternative: {
+    parentCategory: "CONVENTION",
+    avenantLabel: "Avenant convention",
+  },
+};
+
+const HUDA_CADA_CONVENTION_RULE: CategoryDisplayRule = {
+  ...CONVENTION_RULE,
+  notice:
+    "Une nouvelle convention doit être signée tel que publié par décret le 3 janvier 2026. Sa durée doit être équivalente au temps restant de la précédente convention.",
+};
+
 const AUTRE_RULE: CategoryDisplayRule = {
   categoryShortName: "autre",
   title: "Autres documents",
@@ -327,7 +342,9 @@ const getCreationActesAdministratifsCategoryToDisplay = (
   ARRETE_AUTORISATION: {
     categoryShortName: "arrêté",
     title:
-      transformationType === TransformationType.OUVERTURE_EX_NIHILO
+      transformationType === TransformationType.OUVERTURE_EX_NIHILO ||
+      transformationType ===
+        TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
         ? "Arrêté d'autorisation"
         : "Arrêté d'autorisation ou arrêté de fusion des structures",
     canAddFile: false,
@@ -338,22 +355,28 @@ const getCreationActesAdministratifsCategoryToDisplay = (
     documentLabel: "Document",
     addFileButtonLabel: "Ajouter un arrêté d'autorisation",
     alternativeCategories:
-      transformationType === TransformationType.OUVERTURE_EX_NIHILO
+      transformationType === TransformationType.OUVERTURE_EX_NIHILO ||
+      transformationType ===
+        TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR
         ? undefined
         : ["ARRETE_FUSION"],
   },
   CONVENTION: CONVENTION_RULE,
-  ARRETE_TARIFICATION: {
-    categoryShortName: "arrêté",
-    title: "Arrêté de tarification",
-    canAddFile: false,
-    canAddAvenant: false,
-    isOptional: false,
-    shouldShow: true,
-    additionalFieldsType: AdditionalFieldsType.DATE_START_END,
-    documentLabel: "Document",
-    addFileButtonLabel: "Ajouter un arrêté de tarification",
-  },
+  ...(transformationType === TransformationType.OUVERTURE_EX_NIHILO
+    ? {
+        ARRETE_TARIFICATION: {
+          categoryShortName: "arrêté",
+          title: "Arrêté de tarification",
+          canAddFile: false,
+          canAddAvenant: false,
+          isOptional: false,
+          shouldShow: true,
+          additionalFieldsType: AdditionalFieldsType.DATE_START_END,
+          documentLabel: "Document",
+          addFileButtonLabel: "Ajouter un arrêté de tarification",
+        },
+      }
+    : {}),
   AUTRE: {
     ...AUTRE_RULE,
     notice: `Dans cette catégorie, vous avez la possibilité d'importer d'autres documents utiles à l'analyse de la structure (ex: Plans Pluriannuels d'Investissements)`,
@@ -376,7 +399,7 @@ export const fermetureActesAdministratifsCategoryToDisplay: CategoryDisplayRules
   };
 
 const extensionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
-  CONVENTION: CONVENTION_RULE,
+  CONVENTION: CONVENTION_WITH_AVENANT_RULE,
   ARRETE_EXTENSION: {
     categoryShortName: "arrêté",
     title: "Arrêté d'extension",
@@ -389,6 +412,10 @@ const extensionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
     addFileButtonLabel: "Ajouter un arrêté d'extension",
     notice:
       "Pour rappel, les dates de l'arrêté d'autorisation n'ont pas vocation à changer pour cette transformation.",
+    avenantAlternative: {
+      parentCategory: "ARRETE_AUTORISATION",
+      avenantLabel: "Avenant arrêté d'autorisation",
+    },
   },
   AUTRE: {
     ...AUTRE_RULE,
@@ -397,8 +424,23 @@ const extensionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
   },
 };
 
+const getExtensionActesAdministratifsCategoryToDisplay = (
+  transformationType: TransformationType | undefined
+): CategoryDisplayRules => {
+  if (
+    transformationType ===
+    TransformationType.TRANSFO_HUDA_VERS_CADA_EXISTANT_MEME_OPERATEUR
+  ) {
+    return {
+      ...extensionActesAdministratifsCategoryToDisplay,
+      CONVENTION: HUDA_CADA_CONVENTION_RULE,
+    };
+  }
+  return extensionActesAdministratifsCategoryToDisplay;
+};
+
 const contractionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
-  CONVENTION: CONVENTION_RULE,
+  CONVENTION: CONVENTION_WITH_AVENANT_RULE,
   ARRETE_CONTRACTION: {
     categoryShortName: "arrêté",
     title: "Arrêté actant la contraction",
@@ -409,6 +451,10 @@ const contractionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
     additionalFieldsType: AdditionalFieldsType.DATE,
     documentLabel: "Document",
     addFileButtonLabel: "Ajouter un arrêté",
+    avenantAlternative: {
+      parentCategory: "ARRETE_AUTORISATION",
+      avenantLabel: "Avenant arrêté d'autorisation",
+    },
   },
   AUTRE: {
     ...AUTRE_RULE,
@@ -417,13 +463,29 @@ const contractionActesAdministratifsCategoryToDisplay: CategoryDisplayRules = {
   },
 };
 
+const collectAvenantParentCategories = (
+  ruleSets: CategoryDisplayRules[]
+): ActeAdministratifCategory[] => {
+  const categories = new Set<ActeAdministratifCategory>();
+  for (const ruleSet of ruleSets) {
+    for (const rule of Object.values(ruleSet)) {
+      if (rule?.avenantAlternative) {
+        categories.add(rule.avenantAlternative.parentCategory);
+      }
+    }
+  }
+  return [...categories];
+};
+
 export const getTransformationActesAdministratifsCategoryToDisplay = (
   structureVersionTransformationType: StructureVersionTransformationType,
   transformationType: TransformationType | undefined
 ): CategoryDisplayRules => {
   switch (structureVersionTransformationType) {
     case StructureVersionTransformationType.EXTENSION:
-      return extensionActesAdministratifsCategoryToDisplay;
+      return getExtensionActesAdministratifsCategoryToDisplay(
+        transformationType
+      );
     case StructureVersionTransformationType.CONTRACTION:
       return contractionActesAdministratifsCategoryToDisplay;
     case StructureVersionTransformationType.FERMETURE:
@@ -434,6 +496,16 @@ export const getTransformationActesAdministratifsCategoryToDisplay = (
       );
   }
 };
+
+export const AVENANT_PARENT_CATEGORIES = collectAvenantParentCategories(
+  Object.values(StructureVersionTransformationType).map(
+    (structureVersionTransformationType) =>
+      getTransformationActesAdministratifsCategoryToDisplay(
+        structureVersionTransformationType,
+        undefined
+      )
+  )
+);
 
 export const STRUCTURE_VERSION_TRANSFORMATION_FORM_NAME: Record<
   StructureVersionTransformationType,

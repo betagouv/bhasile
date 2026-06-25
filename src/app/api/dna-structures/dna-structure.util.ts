@@ -10,10 +10,10 @@ export const getDnaStructuresApiRead = (
 ) =>
   dnaStructures?.map((dnaStructure) => ({
     id: dnaStructure.id,
+    description: dnaStructure.description ?? undefined,
     startDate: dnaStructure.startDate ?? undefined,
     endDate: dnaStructure.endDate ?? undefined,
     dna: {
       code: dnaStructure.dna.code,
-      description: dnaStructure.dna.description ?? undefined,
     },
   }));

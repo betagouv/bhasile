@@ -15,11 +15,11 @@ import {
 
 import { antennesSchema } from "../base/antenne.schema";
 import { dnaStructuresSchema } from "../base/dna.schema";
-import { finessesSchema } from "../base/finess.schema";
+import { structureFinessesSchema } from "../base/finess.schema";
 
 export const finalisationIdentificationSchema = identificationSchemaWithContacts
   .and(dnaStructuresSchema)
-  .and(finessesSchema)
+  .and(structureFinessesSchema)
   .and(adresseAdministrativeSchema)
   .and(antennesSchema)
   .and(structureTypologiesSchema);
@@ -27,7 +27,7 @@ export const finalisationIdentificationSchema = identificationSchemaWithContacts
 export const finalisationIdentificationAutoSaveSchema =
   identificationSchemaWithContactsAutoSaveSchema
     .and(dnaStructuresSchema)
-    .and(finessesSchema)
+    .and(structureFinessesSchema)
     .and(adresseAdministrativeAutoSaveSchema)
     .and(antennesSchema)
     .and(structureTypologiesAutoSaveSchema);

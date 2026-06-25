@@ -2,7 +2,7 @@
 
 import { TransformationAdresseAdministrative } from "@/app/components/forms/adresseAdministrativeAndAntenne/TransformationAdresseAdministrative";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
-import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
+import { TransformationDnaAndFiness } from "@/app/components/forms/dnaAndFiness/TransformationDnaAndFiness";
 import { EffectiveDateInput } from "@/app/components/forms/EffectiveDateInput";
 import FormWrapper, {
   FooterButtonType,
@@ -11,8 +11,9 @@ import { TransformationFormController } from "@/app/components/forms/Transformat
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import {
   getAdresseSource,
+  getInitialAntennes,
+  getTransformationDefaultValues,
   getTransformationNounAvecArticle,
-  getTransformationStructureVersionDefaultValues,
 } from "@/app/utils/transformation.util";
 import {
   StructureVersionTransformationApiRead,
@@ -37,17 +38,16 @@ export const ExistingStructureIdentificationForm = ({
   structureVersionTransformation,
   formKind,
 }: Props) => {
-  const { goToNextStep, handleSave, shouldShowIncompleteSteps } =
+  const { goToNextStep, handleSave, backLink, shouldShowIncompleteSteps } =
     useTransformationFormHandling();
 
-  const defaultValues = {
-    ...getTransformationStructureVersionDefaultValues<TransformationIdentificationDraftFormValues>(
-      structureVersionTransformation.structureVersion
-    ),
-    isMultiAntenne:
-      (structureVersionTransformation.structureVersion?.antennes?.length ?? 0) >
-      0,
-  };
+  const defaultValues =
+    getTransformationDefaultValues<TransformationIdentificationDraftFormValues>(
+      {
+        transformation,
+        structureVersionTransformation,
+      }
+    );
 
   const buildStructureVersionTransformation = (
     data: TransformationIdentificationDraftFormValues
@@ -68,7 +68,6 @@ export const ExistingStructureIdentificationForm = ({
 
   return (
     <FormWrapper
-      key={shouldShowIncompleteSteps ? "strict" : "draft"}
       schema={
         shouldShowIncompleteSteps
           ? transformationIdentificationSchema
@@ -78,6 +77,7 @@ export const ExistingStructureIdentificationForm = ({
       onSubmit={goToNextStep}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
+      backLink={backLink}
       showContactInfos={false}
     >
       <TransformationFormController
@@ -102,12 +102,15 @@ export const ExistingStructureIdentificationForm = ({
       <TransformationAdresseAdministrative
         formKind={formKind}
         originalAdresse={getAdresseSource(structureVersionTransformation)}
+        originalAntennes={getInitialAntennes(
+          transformation,
+          structureVersionTransformation
+        )}
       />
 
       <hr />
 
-      <DnaAndFiness
-        formKind={formKind}
+      <TransformationDnaAndFiness
         entityId={{
           structureVersionId:
             structureVersionTransformation.structureVersion?.id,

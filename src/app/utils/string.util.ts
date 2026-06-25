@@ -13,3 +13,12 @@ export const capitalizeFirstLetter = (
   }
   return String(value).charAt(0).toUpperCase() + String(value).slice(1);
 };
+
+export const lowercaseFirstLetter = (
+  value: string | null | undefined
+): string => {
+  if (!value) {
+    return "";
+  }
+  return String(value).charAt(0).toLowerCase() + String(value).slice(1);
+};

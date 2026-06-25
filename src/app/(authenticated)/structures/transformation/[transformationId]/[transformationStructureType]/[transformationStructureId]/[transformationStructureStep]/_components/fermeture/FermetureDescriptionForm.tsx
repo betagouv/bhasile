@@ -7,7 +7,7 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
-import { getActesAdministratifsDefaultValues } from "@/app/utils/acteAdministratif.util";
+import { getTransformationDefaultValues } from "@/app/utils/transformation.util";
 import { fermetureActesAdministratifsCategoryToDisplay } from "@/config/transformation.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import {
@@ -30,21 +30,19 @@ export const FermetureDescriptionForm = ({
   transformation,
   structureVersionTransformation,
 }: Props) => {
-  const { goToNextStep, handleSave, prevStep, shouldShowIncompleteSteps } =
+  const { goToNextStep, handleSave, backLink, shouldShowIncompleteSteps } =
     useTransformationFormHandling();
 
   const categoryDisplayRules = fermetureActesAdministratifsCategoryToDisplay;
   const codeBhasile =
     structureVersionTransformation.structureVersion?.structure?.codeBhasile;
 
-  const defaultValues = {
-    effectiveDate:
-      structureVersionTransformation.structureVersion?.effectiveDate,
-    actesAdministratifs: getActesAdministratifsDefaultValues(
-      structureVersionTransformation.actesAdministratifs,
-      categoryDisplayRules
-    ),
-  };
+  const defaultValues = getTransformationDefaultValues<FermetureDraftFormValues>(
+    {
+      transformation,
+      structureVersionTransformation,
+    }
+  );
 
   const buildStructureVersionTransformation = (
     data: FermetureDraftFormValues
@@ -61,7 +59,6 @@ export const FermetureDescriptionForm = ({
 
   return (
     <FormWrapper
-      key={shouldShowIncompleteSteps ? "strict" : "draft"}
       schema={
         shouldShowIncompleteSteps ? fermetureSchema : fermetureDraftSchema
       }
@@ -69,7 +66,7 @@ export const FermetureDescriptionForm = ({
       onSubmit={goToNextStep}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
-      previousStep={prevStep?.route}
+      backLink={backLink}
       showContactInfos={false}
     >
       <TransformationFormController

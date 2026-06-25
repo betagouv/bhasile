@@ -5,7 +5,7 @@ import { useStructureContext } from "../../_context/StructureClientContext";
 export const Codes = (): ReactElement => {
   const { structure } = useStructureContext();
 
-  const { dnaStructures, finesses } = structure;
+  const { dnaStructures, structureFinesses } = structure;
 
   return (
     <>
@@ -21,25 +21,29 @@ export const Codes = (): ReactElement => {
                 className="border-b border-default-grey last:border-b-0"
               >
                 <td className="py-3 pr-8 italic">{dnaStructure.dna.code}</td>
-                <td className="py-3 w-full">{dnaStructure.dna.description}</td>
+                <td className="py-3 w-full">{dnaStructure.description}</td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
-      {finesses && finesses.length > 0 && (
+      {structureFinesses && structureFinesses.length > 0 && (
         <table className="whitespace-nowrap">
           <caption className="text-title-blue-france text-lg mb-3 text-left font-bold">
             Codes FINESS
           </caption>
           <tbody>
-            {finesses.map((finess) => (
+            {structureFinesses.map((structureFiness) => (
               <tr
-                key={finess.id}
+                key={structureFiness.id}
                 className="border-b border-default-grey last:border-b-0"
               >
-                <td className="py-3 pr-8 italic">{finess.code}</td>
-                <td className="py-3 w-full">{finess.description}</td>
+                <td className="py-3 pr-8 italic">
+                  {structureFiness.finess?.code}
+                </td>
+                <td className="py-3 w-full">
+                  {structureFiness.description}
+                </td>
               </tr>
             ))}
           </tbody>

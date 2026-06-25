@@ -1,13 +1,141 @@
 import { describe, expect, it } from "vitest";
 
-import type { StructureVersionDbDetails } from "@/app/api/structure-versions/structure-version.db.type";
+import type {
+  StructureVersionDbDetails,
+  StructureVersionDbTransformation,
+} from "@/app/api/structure-versions/structure-version.db.type";
 import {
   copyStructureVersion,
   dbStructureVersionToApiRead,
+  resolveCurrentVersion,
 } from "@/app/api/structure-versions/structure-version.service";
 import type { StructureDbDetails } from "@/app/api/structures/structure.db.type";
 import { Repartition } from "@/types/adresse.type";
 import { PublicType, StructureType } from "@/types/structure.type";
+
+const buildVersion = (
+  overrides: Partial<StructureVersionDbDetails>
+): StructureVersionDbDetails =>
+  ({
+    id: 1,
+    effectiveDate: new Date("2026-01-01T00:00:00.000Z"),
+    structureVersionTransformationId: null,
+    structureVersionTransformation: null,
+    ...overrides,
+  }) as unknown as StructureVersionDbDetails;
+
+const finalisedTransfo = (status: boolean) =>
+  ({
+    transformation: { form: { status } },
+  }) as StructureVersionDbDetails["structureVersionTransformation"];
+
+describe("resolveCurrentVersion", () => {
+  const now = new Date("2026-06-15T00:00:00.000Z");
+
+  it("retient la version valide la plus récente (effectiveDate ≤ now)", () => {
+    const older = buildVersion({
+      id: 1,
+      effectiveDate: new Date("2026-02-01T00:00:00.000Z"),
+    });
+    const recent = buildVersion({
+      id: 2,
+      effectiveDate: new Date("2026-05-01T00:00:00.000Z"),
+    });
+
+    expect(resolveCurrentVersion([older, recent], now)?.id).toBe(2);
+  });
+
+  it("ignore les versions futures", () => {
+    const past = buildVersion({
+      id: 1,
+      effectiveDate: new Date("2026-05-01T00:00:00.000Z"),
+    });
+    const future = buildVersion({
+      id: 2,
+      effectiveDate: new Date("2026-12-01T00:00:00.000Z"),
+    });
+
+    expect(resolveCurrentVersion([past, future], now)?.id).toBe(1);
+  });
+
+  it("retient une version effective aujourd'hui même si l'heure courante précède son horodatage", () => {
+    const todayMorning = new Date("2026-06-15T08:00:00.000Z");
+    const yesterday = buildVersion({
+      id: 1,
+      effectiveDate: new Date("2026-06-14T12:00:00.000Z"),
+    });
+    const todayAtNoon = buildVersion({
+      id: 2,
+      effectiveDate: new Date("2026-06-15T12:00:00.000Z"),
+    });
+
+    expect(
+      resolveCurrentVersion([yesterday, todayAtNoon], todayMorning)?.id
+    ).toBe(2);
+  });
+
+  it("ignore une version qui ne prend effet que demain", () => {
+    const todayMorning = new Date("2026-06-15T08:00:00.000Z");
+    const today = buildVersion({
+      id: 1,
+      effectiveDate: new Date("2026-06-15T12:00:00.000Z"),
+    });
+    const tomorrow = buildVersion({
+      id: 2,
+      effectiveDate: new Date("2026-06-16T12:00:00.000Z"),
+    });
+
+    expect(resolveCurrentVersion([today, tomorrow], todayMorning)?.id).toBe(1);
+  });
+
+  it("ignore une version de transfo dont le form n'est pas finalisé", () => {
+    const rolling = buildVersion({
+      id: 1,
+      effectiveDate: new Date("2026-02-01T00:00:00.000Z"),
+    });
+    const draftTransfo = buildVersion({
+      id: 2,
+      effectiveDate: new Date("2026-05-01T00:00:00.000Z"),
+      structureVersionTransformationId: 99,
+      structureVersionTransformation: finalisedTransfo(false),
+    });
+
+    expect(resolveCurrentVersion([rolling, draftTransfo], now)?.id).toBe(1);
+  });
+
+  it("retient une version de transfo dont le form est finalisé", () => {
+    const rolling = buildVersion({
+      id: 1,
+      effectiveDate: new Date("2026-02-01T00:00:00.000Z"),
+    });
+    const validTransfo = buildVersion({
+      id: 2,
+      effectiveDate: new Date("2026-05-01T00:00:00.000Z"),
+      structureVersionTransformationId: 99,
+      structureVersionTransformation: finalisedTransfo(true),
+    });
+
+    expect(resolveCurrentVersion([rolling, validTransfo], now)?.id).toBe(2);
+  });
+
+  it("départage deux versions du même jour par id décroissant", () => {
+    const sameDay = new Date("2026-05-01T00:00:00.000Z");
+    const first = buildVersion({ id: 1, effectiveDate: sameDay });
+    const second = buildVersion({ id: 2, effectiveDate: sameDay });
+
+    expect(resolveCurrentVersion([first, second], now)?.id).toBe(2);
+  });
+
+  it("renvoie undefined quand aucune version n'est valide", () => {
+    const future = buildVersion({
+      id: 1,
+      effectiveDate: new Date("2026-12-01T00:00:00.000Z"),
+    });
+
+    expect(resolveCurrentVersion([future], now)).toBeUndefined();
+    expect(resolveCurrentVersion([], now)).toBeUndefined();
+  });
+});
 
 const buildStructure = (): StructureDbDetails =>
   ({
@@ -76,13 +204,14 @@ const buildStructure = (): StructureDbDetails =>
         ],
       },
     ],
-    finesses: [
+    structureFinesses: [
       {
         id: 10,
         structureId: 1,
         structureVersionId: null,
-        code: "FIN-1",
-        description: null,
+        finessId: 20,
+        description: "FINESS toute la structure",
+        finess: { id: 20, code: "FIN-1", description: null },
       },
     ],
     structureTypologies: [
@@ -107,6 +236,7 @@ const buildStructure = (): StructureDbDetails =>
         structureId: 1,
         structureVersionId: null,
         dnaId: 50,
+        description: "DNA site d'Avranches",
         startDate: null,
         endDate: null,
         dna: { id: 50, code: "DNA-1", description: null },
@@ -152,19 +282,24 @@ describe("copyStructureVersion", () => {
       logementSocial: 0,
     });
 
-    // Les finesses ne sont pas recopiées : le code FINESS est unique en base.
-    expect(result.finesses).toBeUndefined();
+    // structureFinesses : table de passage recopiée sans id, en réutilisant le Finess via son code unique.
+    // La description est portée par le lien, pas par l'entité référentielle.
+    expect(result.structureFinesses).toEqual([
+      {
+        description: "FINESS toute la structure",
+        finess: { code: "FIN-1" },
+      },
+    ]);
     expect(result.structureTypologies?.[0]).toMatchObject({
       year: 2024,
       placesAutorisees: 10,
     });
 
     // dnaStructures : table de passage recopiée, en réutilisant le Dna via son code.
+    // La description est portée par le lien, pas par l'entité référentielle.
     expect(result.dnaStructures?.[0]).not.toHaveProperty("id");
-    expect(result.dnaStructures?.[0]?.dna).toEqual({
-      code: "DNA-1",
-      description: undefined,
-    });
+    expect(result.dnaStructures?.[0]?.description).toBe("DNA site d'Avranches");
+    expect(result.dnaStructures?.[0]?.dna).toEqual({ code: "DNA-1" });
   });
 
   it("lets overrides win over the structure scalars", () => {
@@ -178,7 +313,7 @@ describe("copyStructureVersion", () => {
 
 const buildStructureVersion = (
   repartitions: Repartition[]
-): StructureVersionDbDetails =>
+): StructureVersionDbTransformation =>
   ({
     type: "CADA",
     public: "TOUT_PUBLIC",
@@ -198,7 +333,7 @@ const buildStructureVersion = (
     directionTerritoriale: null,
     effectiveDate: null,
     antennes: [],
-    finesses: [],
+    structureFinesses: [],
     dnaStructures: [],
     structureTypologies: [],
     contacts: [],
@@ -215,7 +350,7 @@ const buildStructureVersion = (
       logementSocial: 0,
       adresseTypologies: [],
     })),
-  }) as unknown as StructureVersionDbDetails;
+  }) as unknown as StructureVersionDbTransformation;
 
 describe("dbStructureVersionToApiRead", () => {
   it("computes adresseComplete on the version addresses", () => {

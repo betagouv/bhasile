@@ -1,19 +1,54 @@
 import z from "zod";
 
+import { areCodesUnique } from "@/app/utils/common.util";
 import { zId } from "@/app/utils/zodCustomFields";
 
 const finessSchema = z.object({
   id: zId(),
   code: z.string().min(1, "Le code FINESS est obligatoire"),
+});
+
+const structureFinessSchema = z.object({
+  id: zId(),
   description: z.string().optional(),
+  finess: finessSchema,
 });
 
-export const finessesSchema = z.object({
-  finesses: z.array(finessSchema).optional(),
-});
+const uniqueFinessCodesError = {
+  message: "Les codes FINESS doivent être uniques",
+  path: ["structureFinesses"],
+};
 
-export const finessesAutoSaveSchema = z.object({
-  finesses: z.array(finessSchema.partial()).optional(),
-});
+export const structureFinessesSchema = z
+  .object({
+    structureFinesses: z.array(structureFinessSchema).optional(),
+  })
+  .refine(
+    (data) =>
+      areCodesUnique(
+        data.structureFinesses,
+        (structureFiness) => structureFiness.finess?.code
+      ),
+    uniqueFinessCodesError
+  );
 
-export type FinessFormValues = z.infer<typeof finessSchema>;
+export const structureFinessesAutoSaveSchema = z
+  .object({
+    structureFinesses: z
+      .array(
+        structureFinessSchema
+          .extend({ finess: finessSchema.partial() })
+          .partial()
+      )
+      .optional(),
+  })
+  .refine(
+    (data) =>
+      areCodesUnique(
+        data.structureFinesses,
+        (structureFiness) => structureFiness.finess?.code
+      ),
+    uniqueFinessCodesError
+  );
+
+export type StructureFinessFormValues = z.infer<typeof structureFinessSchema>;

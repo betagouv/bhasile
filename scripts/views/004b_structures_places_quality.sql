@@ -18,6 +18,8 @@ WITH
       st."year"
     FROM
       public."StructureTypologie" st
+    WHERE
+      st."placesAutorisees" IS NOT NULL
     ORDER BY
       st."structureId",
       st."year" DESC
@@ -34,6 +36,8 @@ WITH
     FROM
       public."AdresseTypologie" aty
       JOIN public."Adresse" a ON a."id" = aty."adresseId"
+    WHERE
+      aty."placesAutorisees" IS NOT NULL
     ORDER BY
       aty."adresseId",
       aty."year" DESC

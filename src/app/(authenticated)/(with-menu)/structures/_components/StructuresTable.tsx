@@ -1,13 +1,13 @@
 "use client";
 
 import { subject } from "@casl/ability";
+import { useAbility } from "@casl/react";
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { useRouter } from "next/navigation";
-import { ReactElement, useContext, useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { Pagination } from "@/app/components/common/Pagination";
 import { ListTableHeadings } from "@/app/components/lists/ListTableHeadings";
-import { AbilityContext } from "@/app/context/AbilityContext";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { ListColumn } from "@/types/ListColumn";
 
@@ -73,7 +73,7 @@ export const StructuresTable = ({
   ariaLabelledBy,
 }: Props): ReactElement => {
   const router = useRouter();
-  const ability = useContext(AbilityContext);
+  const ability = useAbility();
 
   const [selectedStructure, setSelectedStructure] =
     useState<StructureApiRead | null>(null);

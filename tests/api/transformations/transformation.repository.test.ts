@@ -7,7 +7,11 @@ import {
   findOne,
   updateOne,
 } from "@/app/api/transformations/transformation.repository";
-import { createTransformation } from "@/app/api/transformations/transformation.service";
+import {
+  createTransformation,
+  getTransformation,
+} from "@/app/api/transformations/transformation.service";
+import { getNormalizedRegionCodeFromDepartement } from "@/app/utils/bhasile.util";
 import prisma from "@/lib/prisma";
 import { Repartition } from "@/types/adresse.type";
 import { PublicType } from "@/types/structure.type";
@@ -76,6 +80,34 @@ describe("transformation.repository db integration", () => {
       structureVersionId: structureVersionTransformation.structureVersion.id,
       structureId: structure.id,
     };
+  };
+
+  const findDepartementWithRegionCode = () =>
+    prisma.departement.findFirstOrThrow({
+      where: { regionAdministrative: { code: { not: "" } } },
+    });
+
+  const finalizeTransformation = async (transformationId: number) => {
+    const formRow = await prisma.form.findFirstOrThrow({
+      where: { transformationId },
+    });
+    const formDefinition = await prisma.formDefinition.findUniqueOrThrow({
+      where: { id: formRow.formDefinitionId },
+    });
+    return updateOne({
+      id: transformationId,
+      form: {
+        id: formRow.id,
+        status: true,
+        formDefinition: {
+          id: formDefinition.id,
+          slug: formDefinition.slug,
+          name: formDefinition.name,
+          version: formDefinition.version,
+        },
+        formSteps: [],
+      },
+    });
   };
 
   beforeAll(async () => {
@@ -366,14 +398,15 @@ describe("transformation.repository db integration", () => {
   it("should replace structureVersion finesses on updateOne", async () => {
     const { transformationId, structureVersionTransformationId, structureVersionId } =
       await createBareTransformation();
-    await prisma.finess.create({
+    await prisma.structureFiness.create({
       data: {
-        structureVersionId,
-        code: `FIN-OLD-TF-${Date.now()}-${randomUUID()}`,
+        structureVersion: { connect: { id: structureVersionId } },
+        finess: {
+          create: { code: `FIN-OLD-TF-${Date.now()}-${randomUUID()}` },
+        },
       },
     });
     const newCode = `FIN-NEW-TF-${Date.now()}-${randomUUID()}`;
-    const newFiness = { code: newCode, description: "finess transfo" };
     await updateOne({
       id: transformationId,
       structureVersionTransformations: [
@@ -381,16 +414,20 @@ describe("transformation.repository db integration", () => {
           id: structureVersionTransformationId,
           structureVersion: {
             id: structureVersionId,
-            finesses: [newFiness],
+            structureFinesses: [
+              { description: "finess transfo", finess: { code: newCode } },
+            ],
           },
         },
       ],
     });
-    const finesses = await prisma.finess.findMany({
+    const structureFinesses = await prisma.structureFiness.findMany({
       where: { structureVersionId },
+      include: { finess: true },
     });
-    expect(finesses).toHaveLength(1);
-    expect(finesses[0]).toMatchObject(newFiness);
+    expect(structureFinesses).toHaveLength(1);
+    expect(structureFinesses[0].finess.code).toBe(newCode);
+    expect(structureFinesses[0].description).toBe("finess transfo");
   });
 
   it("should upsert structureVersion structureTypologies by year on updateOne", async () => {
@@ -453,7 +490,7 @@ describe("transformation.repository db integration", () => {
           structureVersion: {
             id: structureVersionId,
             dnaStructures: [
-              { dna: { code: newCode, description: "Desc transfo" } },
+              { description: "Desc transfo", dna: { code: newCode } },
             ],
           },
         },
@@ -465,7 +502,7 @@ describe("transformation.repository db integration", () => {
     });
     expect(links).toHaveLength(1);
     expect(links[0].dna.code).toBe(newCode);
-    expect(links[0].dna.description).toBe("Desc transfo");
+    expect(links[0].description).toBe("Desc transfo");
   });
 
   it("should upsert transformation form status on updateOne", async () => {
@@ -874,11 +911,12 @@ describe("transformation.repository db integration", () => {
     await prisma.dnaStructure.create({
       data: { structureId: structure.id, dnaId: dna.id },
     });
-    // Le FINESS (code unique en base) ne doit pas être recopié ni faire échouer la création.
-    await prisma.finess.create({
+    const structureFiness = await prisma.structureFiness.create({
       data: {
-        structureId: structure.id,
-        code: `FIN-TF-TEST-${randomUUID()}`,
+        structure: { connect: { id: structure.id } },
+        finess: {
+          create: { code: `FIN-TF-TEST-${randomUUID()}` },
+        },
       },
     });
     return {
@@ -886,6 +924,7 @@ describe("transformation.repository db integration", () => {
       contactId: contact.id,
       antenneId: antenne.id,
       dnaId: dna.id,
+      finessId: structureFiness.finessId,
     };
   };
 
@@ -896,13 +935,13 @@ describe("transformation.repository db integration", () => {
         antennes: true,
         adresses: { include: { adresseTypologies: true } },
         dnaStructures: true,
-        finesses: true,
+        structureFinesses: true,
       },
     },
   } as const;
 
   it("should copy the source structure data into the new structureVersion on createOne (layer A)", async () => {
-    const { structure, contactId, antenneId, dnaId } =
+    const { structure, contactId, antenneId, dnaId, finessId } =
       await seedRichStructure();
 
     const transformationId = await createTransformation({
@@ -941,8 +980,12 @@ describe("transformation.repository db integration", () => {
     const dnaCount = await prisma.dna.count({ where: { id: dnaId } });
     expect(dnaCount).toBe(1);
 
-    // finesses : non recopiées (code unique en base).
-    expect(version.finesses).toHaveLength(0);
+    // structureFinesses : nouvelle ligne de jonction, mais même Finess réutilisé.
+    expect(version.structureFinesses).toHaveLength(1);
+    expect(version.structureFinesses[0].finessId).toBe(finessId);
+    expect(version.structureFinesses[0].structureId).toBeNull();
+    const finessCount = await prisma.finess.count({ where: { id: finessId } });
+    expect(finessCount).toBe(1);
 
     // La structure source n'est pas modifiée.
     const sourceContacts = await prisma.contact.findMany({
@@ -1033,5 +1076,307 @@ describe("transformation.repository db integration", () => {
         "03-actes-administratifs",
       ])
     );
+  });
+
+  it("should create a Structure and link the floating structureVersion when finalizing a CREATION block", async () => {
+    const operateur = await createOperateur();
+    const departement = await findDepartementWithRegionCode();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.CREATION,
+          operateurId: operateur.id,
+          structureVersion: {
+            departementAdministratif: departement.numero,
+            nom: "Nouvelle structure issue d'une transfo",
+          },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const structureVersionTransformation =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: { transformationId },
+        include: { structureVersion: true },
+      });
+    const structureId =
+      structureVersionTransformation.structureVersion?.structureId;
+    if (!structureId) {
+      throw new Error(
+        "La structureVersion devrait être rattachée à une structure"
+      );
+    }
+
+    const structure = await prisma.structure.findUniqueOrThrow({
+      where: { id: structureId },
+    });
+    createdStructureIds.push(structure.id);
+    expect(structure.operateurId).toBe(operateur.id);
+    const expectedRegionCode = getNormalizedRegionCodeFromDepartement(
+      departement.numero
+    );
+    expect(expectedRegionCode).toBeTruthy();
+    expect(structure.codeBhasile.split("-")).toEqual([
+      "BHA",
+      expectedRegionCode,
+      expect.stringMatching(/^\d{3}$/),
+    ]);
+  });
+
+  it("should reject any update on an already finalized transformation", async () => {
+    const operateur = await createOperateur();
+    const departement = await findDepartementWithRegionCode();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.CREATION,
+          operateurId: operateur.id,
+          structureVersion: { departementAdministratif: departement.numero },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+    const finalizedBlock =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: { transformationId },
+        include: { structureVersion: true },
+      });
+    if (finalizedBlock.structureVersion?.structureId) {
+      createdStructureIds.push(finalizedBlock.structureVersion.structureId);
+    }
+
+    await expect(
+      updateOne({
+        id: transformationId,
+        type: TransformationType.EXTENSION_EX_NIHILO,
+      })
+    ).rejects.toThrow("finalisée");
+  });
+
+  it("should abort and roll back the finalization when a CREATION block has no operateur", async () => {
+    const departement = await findDepartementWithRegionCode();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.CREATION,
+          structureVersion: { departementAdministratif: departement.numero },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await expect(finalizeTransformation(transformationId)).rejects.toThrow(
+      "opérateur"
+    );
+
+    const form = await prisma.form.findFirstOrThrow({
+      where: { transformationId },
+    });
+    expect(form.status).toBe(false);
+    const block = await prisma.structureVersionTransformation.findFirstOrThrow({
+      where: { transformationId },
+      include: { structureVersion: true },
+    });
+    expect(block.structureVersion?.structureId).toBeNull();
+  });
+
+  it("should ignore non-CREATION blocks when finalizing", async () => {
+    const sourceStructure = await createStructure();
+    const transformationId = await createOne({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { structureId: sourceStructure.id },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const fermetureBlock =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: { transformationId },
+        include: { structureVersion: true },
+      });
+    expect(fermetureBlock.structureVersion?.structureId).toBe(
+      sourceStructure.id
+    );
+  });
+
+  it("should generate distinct bhasile codes for multiple CREATION blocks in the same region", async () => {
+    const operateur = await createOperateur();
+    const departement = await findDepartementWithRegionCode();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.CREATION,
+          operateurId: operateur.id,
+          structureVersion: { departementAdministratif: departement.numero },
+        },
+        {
+          type: StructureVersionTransformationType.CREATION,
+          operateurId: operateur.id,
+          structureVersion: { departementAdministratif: departement.numero },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const creationBlocks = await prisma.structureVersionTransformation.findMany({
+      where: {
+        transformationId,
+        type: StructureVersionTransformationType.CREATION,
+      },
+      include: { structureVersion: true },
+    });
+    const structureIds = creationBlocks
+      .map((creationBlock) => creationBlock.structureVersion?.structureId)
+      .filter((structureId): structureId is number => structureId != null);
+    expect(structureIds).toHaveLength(2);
+    expect(new Set(structureIds).size).toBe(2);
+
+    const structures = await prisma.structure.findMany({
+      where: { id: { in: structureIds } },
+    });
+    structures.forEach((structure) => createdStructureIds.push(structure.id));
+    const codesBhasile = structures.map((structure) => structure.codeBhasile);
+    expect(new Set(codesBhasile).size).toBe(2);
+    codesBhasile.forEach((codeBhasile) =>
+      expect(codeBhasile.split("-")).toHaveLength(3)
+    );
+  });
+
+  it("should not create a second Structure when a finalized transformation is re-submitted", async () => {
+    const operateur = await createOperateur();
+    const departement = await findDepartementWithRegionCode();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.CREATION,
+          operateurId: operateur.id,
+          structureVersion: { departementAdministratif: departement.numero },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+    const blockAfterFirstFinalize =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: { transformationId },
+        include: { structureVersion: true },
+      });
+    const linkedStructureId =
+      blockAfterFirstFinalize.structureVersion?.structureId;
+    if (!linkedStructureId) {
+      throw new Error("La première finalisation aurait dû créer une structure");
+    }
+    createdStructureIds.push(linkedStructureId);
+
+    await expect(finalizeTransformation(transformationId)).rejects.toThrow(
+      "finalisée"
+    );
+
+    const blockAfterSecondFinalize =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: { transformationId },
+        include: { structureVersion: true },
+      });
+    expect(blockAfterSecondFinalize.structureVersion?.structureId).toBe(
+      linkedStructureId
+    );
+    const structureCountForOperateur = await prisma.structure.count({
+      where: { operateurId: operateur.id },
+    });
+    expect(structureCountForOperateur).toBe(1);
+  });
+
+  // --- Lecture transfo : la source résolue = le prédécesseur de la transfo ---
+
+  const createStructureWithInitVersion = async (
+    effectiveDate: string,
+    versionData: Record<string, unknown> = {}
+  ) => {
+    const structure = await createStructure();
+    const version = await prisma.structureVersion.create({
+      data: {
+        structureId: structure.id,
+        effectiveDate: new Date(effectiveDate),
+        ...versionData,
+      },
+    });
+    return { structure, version };
+  };
+
+  const createExtensionTransfo = async (
+    structureId: number,
+    effectiveDate: string
+  ) => {
+    const transformationId = await createOne({
+      type: TransformationType.EXTENSION_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: { structureId, effectiveDate },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+    return transformationId;
+  };
+
+  it("should resolve the predecessor (init) onto structureVersion.structure when the transfo is dated after it", async () => {
+    const { structure, version } = await createStructureWithInitVersion(
+      "2024-01-01T12:00:00.000Z",
+      { nom: "Nom de la version source" }
+    );
+    await prisma.structureTypologie.create({
+      data: { structureVersionId: version.id, year: 2024, placesAutorisees: 30 },
+    });
+
+    const transformationId = await createExtensionTransfo(
+      structure.id,
+      "2024-06-01T12:00:00.000Z"
+    );
+
+    const transformation = await getTransformation(transformationId);
+    const sourceStructure =
+      transformation?.structureVersionTransformations[0].structureVersion
+        ?.structure;
+    expect(sourceStructure?.nom).toBe("Nom de la version source");
+    expect(sourceStructure?.structureTypologies?.[0]?.placesAutorisees).toBe(30);
+  });
+
+  it("should resolve no predecessor when the transfo is dated before the init version", async () => {
+    const { structure } = await createStructureWithInitVersion(
+      "2024-09-01T12:00:00.000Z",
+      { nom: "Nom de la version source" }
+    );
+
+    const transformationId = await createExtensionTransfo(
+      structure.id,
+      "2024-03-01T12:00:00.000Z"
+    );
+
+    const transformation = await getTransformation(transformationId);
+    const sourceStructure =
+      transformation?.structureVersionTransformations[0].structureVersion
+        ?.structure;
+    expect(sourceStructure?.nom ?? null).toBeNull();
+    expect(sourceStructure?.structureTypologies ?? []).toHaveLength(0);
   });
 });

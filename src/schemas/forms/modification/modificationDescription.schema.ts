@@ -5,11 +5,11 @@ import { identificationSchemaWithContacts } from "@/schemas/forms/base/identific
 
 import { antennesSchema } from "../base/antenne.schema";
 import { dnaStructuresSchema } from "../base/dna.schema";
-import { finessesSchema } from "../base/finess.schema";
+import { structureFinessesSchema } from "../base/finess.schema";
 
 export const modificationDescriptionSchema = identificationSchemaWithContacts
   .and(dnaStructuresSchema)
-  .and(finessesSchema)
+  .and(structureFinessesSchema)
   .and(adresseAdministrativeSchema)
   .and(antennesSchema);
 

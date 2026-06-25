@@ -3,6 +3,11 @@ import { randomUUID } from "node:crypto";
 import { afterAll, describe, expect, it } from "vitest";
 
 import { updateOne } from "@/app/api/structures/structure.repository";
+import {
+  getFullStructure,
+  getFullStructures,
+  type SearchProps,
+} from "@/app/api/structures/structure.service";
 import prisma from "@/lib/prisma";
 import { Repartition } from "@/types/adresse.type";
 import { ControleType } from "@/types/controle.type";
@@ -17,6 +22,9 @@ describe("structure.repository db integration", () => {
     const structure = await prisma.structure.create({
       data: {
         codeBhasile: `BHA-DB-TEST-${Date.now()}-${Math.random()}`,
+        structureVersions: {
+          create: { effectiveDate: new Date("2020-01-01T12:00:00.000Z") },
+        },
       },
     });
     createdStructureIds.push(structure.id);
@@ -45,6 +53,23 @@ describe("structure.repository db integration", () => {
     });
     return fetchData();
   };
+
+  const fetchCurrentVersion = (structureId: number) =>
+    prisma.structureVersion.findFirstOrThrow({
+      where: {
+        structureId,
+        structureVersionTransformationId: null,
+      },
+      orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
+      include: {
+        contacts: true,
+        adresses: { include: { adresseTypologies: true } },
+        antennes: true,
+        structureFinesses: { include: { finess: true } },
+        structureTypologies: true,
+        dnaStructures: { include: { dna: true } },
+      },
+    });
 
   afterAll(async () => {
     if (createdStructureIds.length > 0) {
@@ -95,26 +120,28 @@ describe("structure.repository db integration", () => {
       directionTerritoriale: "DT75",
     });
 
-    // THEN: every scalar field is persisted
+    // THEN: les scalaires versionnés sont sur le rolling, filiale reste sur Structure
+    const version = await fetchCurrentVersion(structure.id);
+    expect(version.public).toBe("FAMILLE");
+    expect(version.adresseAdministrative).toBe("10 rue de la Paix");
+    expect(version.codePostalAdministratif).toBe("75001");
+    expect(version.communeAdministrative).toBe("Paris");
+    expect(version.type).toBe(StructureType.CADA);
+    expect(version.latitude?.toString()).toBe("48.8566");
+    expect(version.longitude?.toString()).toBe("2.3522");
+    expect(version.nom).toBe("Structure test complete");
+    expect(version.date303?.toISOString()).toBe(date303);
+    expect(version.creationDate?.toISOString()).toBe(creationDate);
+    expect(version.lgbt).toBe(true);
+    expect(version.fvvTeh).toBe(false);
+    expect(version.notes).toBe("Notes de test");
+    expect(version.nomOfii).toBe("Nom OFII");
+    expect(version.directionTerritoriale).toBe("DT75");
+
     const updated = await prisma.structure.findUniqueOrThrow({
       where: { id: structure.id },
     });
-    expect(updated.public).toBe("FAMILLE");
-    expect(updated.adresseAdministrative).toBe("10 rue de la Paix");
-    expect(updated.codePostalAdministratif).toBe("75001");
-    expect(updated.communeAdministrative).toBe("Paris");
     expect(updated.filiale).toBe("Filiale test");
-    expect(updated.type).toBe(StructureType.CADA);
-    expect(updated.latitude?.toString()).toBe("48.8566");
-    expect(updated.longitude?.toString()).toBe("2.3522");
-    expect(updated.nom).toBe("Structure test complete");
-    expect(updated.date303?.toISOString()).toBe(date303);
-    expect(updated.creationDate?.toISOString()).toBe(creationDate);
-    expect(updated.lgbt).toBe(true);
-    expect(updated.fvvTeh).toBe(false);
-    expect(updated.notes).toBe("Notes de test");
-    expect(updated.nomOfii).toBe("Nom OFII");
-    expect(updated.directionTerritoriale).toBe("DT75");
   });
 
   it("should update departementAdministratif relation", async () => {
@@ -128,11 +155,9 @@ describe("structure.repository db integration", () => {
       departementAdministratif: departement.numero,
     });
 
-    // THEN: structure references the expected department
-    const updated = await prisma.structure.findUniqueOrThrow({
-      where: { id: structure.id },
-    });
-    expect(updated.departementAdministratif).toBe(departement.numero);
+    // THEN: le rolling référence le département attendu
+    const version = await fetchCurrentVersion(structure.id);
+    expect(version.departementAdministratif).toBe(departement.numero);
   });
 
   it("should update operateur relation", async () => {
@@ -156,30 +181,14 @@ describe("structure.repository db integration", () => {
     expect(updated.operateurId).toBe(operateur.id);
   });
 
-  it("should replace structure contacts on update", async () => {
-    // GIVEN: a structure with two existing contacts
+  it("should replace structure contacts on the rolling version", async () => {
+    // GIVEN: a structure whose rolling version already holds two contacts
     const structure = await createStructure();
-
-    await prisma.contact.createMany({
-      data: [
-        {
-          structureId: structure.id,
-          prenom: "Alice",
-          nom: "Legacy",
-          email: "alice.legacy@example.test",
-          telephone: "0100000001",
-          role: "Ancien role",
-          perimetre: "Ancien perimetre",
-        },
-        {
-          structureId: structure.id,
-          prenom: "Bob",
-          nom: "Legacy",
-          email: "bob.legacy@example.test",
-          telephone: "0100000002",
-          role: "Ancien role",
-          perimetre: "Ancien perimetre",
-        },
+    await updateOne({
+      id: structure.id,
+      contacts: [
+        { prenom: "Alice", nom: "Legacy", email: "alice.legacy@example.test" },
+        { prenom: "Bob", nom: "Legacy", email: "bob.legacy@example.test" },
       ],
     });
 
@@ -192,24 +201,18 @@ describe("structure.repository db integration", () => {
       role: "Direction",
       perimetre: "National",
     };
-    const contacts = await updateStructureAndFetch(
+    const version = await updateStructureAndFetch(
       structure.id,
-      {
-        contacts: [newContact],
-      },
-      () =>
-        prisma.contact.findMany({
-          where: { structureId: structure.id },
-          orderBy: { id: "asc" },
-        })
+      { contacts: [newContact] },
+      () => fetchCurrentVersion(structure.id)
     );
 
-    expect(contacts).toHaveLength(1);
-    expect(contacts[0]).toMatchObject(newContact);
+    expect(version.contacts).toHaveLength(1);
+    expect(version.contacts[0]).toMatchObject(newContact);
   });
 
-  it("should not modify contacts when updating only scalar fields", async () => {
-    // GIVEN: a structure with existing contacts
+  it("should not modify the rolling version contacts when updating only scalar fields", async () => {
+    // GIVEN: a rolling version that already holds a contact
     const structure = await createStructure();
     const existingContact = {
       prenom: "Contact",
@@ -219,26 +222,70 @@ describe("structure.repository db integration", () => {
       role: "Coordination",
       perimetre: "Regional",
     };
-    await prisma.contact.create({
-      data: {
-        structureId: structure.id,
-        ...existingContact,
-      },
-    });
+    await updateOne({ id: structure.id, contacts: [existingContact] });
 
-    const contacts = await updateStructureAndFetch(
+    // WHEN: only a scalar field is updated (no contacts in the payload)
+    const version = await updateStructureAndFetch(
       structure.id,
-      {
-        nom: "Nom mis à jour sans contacts",
-      },
-      () =>
-        prisma.contact.findMany({
-          where: { structureId: structure.id },
-        })
+      { nom: "Nom mis à jour sans contacts" },
+      () => fetchCurrentVersion(structure.id)
     );
 
-    expect(contacts).toHaveLength(1);
-    expect(contacts[0]).toMatchObject(existingContact);
+    // THEN: the scalar is updated and the contacts are preserved
+    expect(version.nom).toBe("Nom mis à jour sans contacts");
+    expect(version.contacts).toHaveLength(1);
+    expect(version.contacts[0]).toMatchObject(existingContact);
+  });
+
+  it("does not create a new version when the payload has no versioned field", async () => {
+    // GIVEN: a structure with only its initial version
+    const structure = await createStructure();
+
+    // WHEN: an update carries only non-versioned data (e.g. a budget)
+    await updateOne({ id: structure.id, budgets: [{ year: 2024 }] });
+
+    // THEN: no extra version is created — only the initial one remains
+    const versionCount = await prisma.structureVersion.count({
+      where: { structureId: structure.id },
+    });
+    expect(versionCount).toBe(1);
+  });
+
+  it("applies a correction in place and preserves the current version effectiveDate", async () => {
+    // GIVEN: a structure with its initial version (effectiveDate 2020-01-01)
+    const structure = await createStructure();
+
+    // WHEN: a correction updates a versioned scalar
+    await updateOne({ id: structure.id, nom: "Nom corrigé" });
+
+    // THEN: the scalar is updated on the same version, its effectiveDate untouched
+    const version = await fetchCurrentVersion(structure.id);
+    expect(version.nom).toBe("Nom corrigé");
+    expect(version.effectiveDate.toISOString()).toBe(
+      "2020-01-01T12:00:00.000Z"
+    );
+    const versionCount = await prisma.structureVersion.count({
+      where: { structureId: structure.id },
+    });
+    expect(versionCount).toBe(1);
+  });
+
+  it("throws when correcting a structure that has no current version (future-only)", async () => {
+    // GIVEN: a structure whose only version is effective in the future
+    const structure = await prisma.structure.create({
+      data: {
+        codeBhasile: `BHA-DB-TEST-${Date.now()}-${Math.random()}`,
+        structureVersions: {
+          create: { effectiveDate: new Date("2099-01-01T12:00:00.000Z") },
+        },
+      },
+    });
+    createdStructureIds.push(structure.id);
+
+    // WHEN/THEN: a versioned correction has no current version to land on → throws
+    await expect(
+      updateOne({ id: structure.id, nom: "Tentative de correction" })
+    ).rejects.toThrow("Aucune version courante");
   });
 
   it("should upsert structure budgets by year", async () => {
@@ -350,45 +397,42 @@ describe("structure.repository db integration", () => {
     expect(rows[0]).toMatchObject(newIndicateurFinancier);
   });
 
-  it("should upsert structureTypologies by year", async () => {
-    // GIVEN: one existing structure typology
+  it("should upsert structureTypologies by year on the rolling version", async () => {
+    // GIVEN: a rolling version with one typology for 2024
     const structure = await createStructure();
-    await prisma.structureTypologie.create({
-      data: {
-        structureId: structure.id,
-        year: 2024,
-        placesAutorisees: 10,
-      },
+    await updateOne({
+      id: structure.id,
+      structureTypologies: [{ year: 2024, placesAutorisees: 10 }],
     });
 
     // WHEN: same year receives new values
     const newStructureTypologie = { year: 2024, placesAutorisees: 25, pmr: 2 };
-    const rows = await updateStructureAndFetch(
+    const version = await updateStructureAndFetch(
       structure.id,
-      {
-        structureTypologies: [newStructureTypologie],
-      },
-      () =>
-        prisma.structureTypologie.findMany({
-          where: { structureId: structure.id },
-        })
+      { structureTypologies: [newStructureTypologie] },
+      () => fetchCurrentVersion(structure.id)
     );
 
-    expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject(newStructureTypologie);
+    expect(version.structureTypologies).toHaveLength(1);
+    expect(version.structureTypologies[0]).toMatchObject(newStructureTypologie);
   });
 
-  it("should replace adresses list and typologies", async () => {
-    // GIVEN: one existing address
+  it("should replace adresses list and typologies on the rolling version", async () => {
+    // GIVEN: a rolling version with one address
     const structure = await createStructure();
-    const oldAdresse = await prisma.adresse.create({
-      data: {
-        structureId: structure.id,
-        adresse: "Ancienne adresse",
-        codePostal: "13000",
-        commune: "Marseille",
-      },
+    await updateOne({
+      id: structure.id,
+      adresses: [
+        {
+          adresse: "Ancienne adresse",
+          codePostal: "13000",
+          commune: "Marseille",
+          repartition: Repartition.COLLECTIF,
+        },
+      ],
     });
+    const initialVersion = await fetchCurrentVersion(structure.id);
+    const oldAdresseId = initialVersion.adresses[0].id;
 
     // WHEN: update receives a new address list
     const newAdresse = {
@@ -406,29 +450,27 @@ describe("structure.repository db integration", () => {
     });
 
     // THEN: old address is removed and new one created with typology
-    const adresses = await prisma.adresse.findMany({
-      where: { structureId: structure.id },
-      include: { adresseTypologies: true },
-    });
-    expect(adresses).toHaveLength(1);
-    expect(adresses[0].id).not.toBe(oldAdresse.id);
-    expect(adresses[0]).toMatchObject({
+    const version = await fetchCurrentVersion(structure.id);
+    expect(version.adresses).toHaveLength(1);
+    expect(version.adresses[0].id).not.toBe(oldAdresseId);
+    expect(version.adresses[0]).toMatchObject({
       adresse: newAdresse.adresse,
       codePostal: newAdresse.codePostal,
       commune: newAdresse.commune,
       repartition: "DIFFUS",
     });
-    expect(adresses[0].adresseTypologies).toHaveLength(1);
-    expect(adresses[0].adresseTypologies[0]).toMatchObject(
+    expect(version.adresses[0].adresseTypologies).toHaveLength(1);
+    expect(version.adresses[0].adresseTypologies[0]).toMatchObject(
       newAdresse.adresseTypologies[0]
     );
   });
 
-  it("should replace antennes list", async () => {
-    // GIVEN: one existing antenne
+  it("should replace antennes list on the rolling version", async () => {
+    // GIVEN: a rolling version with one antenne
     const structure = await createStructure();
-    await prisma.antenne.create({
-      data: { structureId: structure.id, name: "old-antenne" },
+    await updateOne({
+      id: structure.id,
+      antennes: [{ name: "old-antenne" }],
     });
 
     // WHEN: one different antenne is sent
@@ -437,73 +479,131 @@ describe("structure.repository db integration", () => {
       commune: "Lyon",
       departement: "69",
     };
-    const antennes = await updateStructureAndFetch(
+    const version = await updateStructureAndFetch(
       structure.id,
-      {
-        antennes: [newAntenne],
-      },
-      () =>
-        prisma.antenne.findMany({
-          where: { structureId: structure.id },
-        })
+      { antennes: [newAntenne] },
+      () => fetchCurrentVersion(structure.id)
     );
 
-    expect(antennes).toHaveLength(1);
-    expect(antennes[0]).toMatchObject(newAntenne);
+    expect(version.antennes).toHaveLength(1);
+    expect(version.antennes[0]).toMatchObject(newAntenne);
   });
 
-  it("should replace dnaStructures list", async () => {
-    // GIVEN: one existing dna link
+  it("should replace dnaStructures list on the rolling version", async () => {
+    // GIVEN: a rolling version with one dna link
     const structure = await createStructure();
-    const oldDna = await prisma.dna.create({
-      data: { code: `DNA-OLD-${Date.now()}-${randomUUID()}` },
-    });
-    await prisma.dnaStructure.create({
-      data: { structureId: structure.id, dnaId: oldDna.id },
+    const oldCode = `DNA-OLD-${Date.now()}-${randomUUID()}`;
+    await updateOne({
+      id: structure.id,
+      dnaStructures: [{ dna: { code: oldCode } }],
     });
 
     // WHEN: a different dna code is provided
     const newCode = `DNA-NEW-${Date.now()}-${randomUUID()}`;
     await updateOne({
       id: structure.id,
-      dnaStructures: [{ dna: { code: newCode, description: "New DNA" } }],
+      dnaStructures: [{ description: "New DNA", dna: { code: newCode } }],
     });
 
-    // THEN: only the new DNA link remains on structure
-    const links = await prisma.dnaStructure.findMany({
-      where: { structureId: structure.id },
-      include: { dna: true },
-    });
-    expect(links).toHaveLength(1);
-    expect(links[0].dna.code).toBe(newCode);
+    // THEN: only the new DNA link remains on the rolling version
+    const version = await fetchCurrentVersion(structure.id);
+    expect(version.dnaStructures).toHaveLength(1);
+    expect(version.dnaStructures[0].dna.code).toBe(newCode);
+    expect(version.dnaStructures[0].description).toBe("New DNA");
   });
 
-  it("should replace finesses list", async () => {
-    // GIVEN: one existing FINESS
+  it("should collapse duplicate DNA codes into a single link instead of crashing", async () => {
+    // GIVEN: an empty structure
     const structure = await createStructure();
-    await prisma.finess.create({
-      data: {
-        structureId: structure.id,
-        code: `FIN-OLD-${Date.now()}-${randomUUID()}`,
-      },
+    const duplicatedCode = `DNA-DUP-${Date.now()}-${randomUUID()}`;
+
+    // WHEN: the same DNA code is sent twice in one update (e.g. an autosaved draft)
+    await updateOne({
+      id: structure.id,
+      dnaStructures: [
+        { description: "Premier", dna: { code: duplicatedCode } },
+        { description: "Doublon", dna: { code: duplicatedCode } },
+      ],
     });
 
-    // WHEN: a new FINESS list is sent
+    // THEN: the save succeeds (no P2002) and a single link survives on the current version
+    const version = await fetchCurrentVersion(structure.id);
+    expect(version.dnaStructures).toHaveLength(1);
+    expect(version.dnaStructures[0].dna.code).toBe(duplicatedCode);
+  });
+
+  it("getFullStructure resolves the rolling version into the read model", async () => {
+    // GIVEN: a structure edited via the rolling write
+    const structure = await createStructure();
+    await updateOne({
+      id: structure.id,
+      type: StructureType.CADA,
+      nom: "Nom versionné",
+      adresses: [
+        {
+          adresse: "1 rue Versionnée",
+          codePostal: "75001",
+          commune: "Paris",
+          repartition: Repartition.DIFFUS,
+        },
+      ],
+    });
+
+
+    // WHEN: the fiche is read end-to-end (findOne + résolution + merge)
+    const read = await getFullStructure(structure.id);
+
+    // THEN: the read model reflects the rolling version, not the frozen shell
+    expect(read?.nom).toBe("Nom versionné");
+    expect(read?.type).toBe(StructureType.CADA);
+    expect(read?.adresses?.[0]?.commune).toBe("Paris");
+  });
+
+  it("should replace finesses list on the rolling version", async () => {
+    // GIVEN: a rolling version with one FINESS link
+    const structure = await createStructure();
+    await updateOne({
+      id: structure.id,
+      structureFinesses: [
+        { finess: { code: `FIN-OLD-${Date.now()}-${randomUUID()}` } },
+      ],
+    });
+
+    // WHEN: a new FINESS list is sent (description portée par le lien)
     const newCode = `FIN-NEW-${Date.now()}-${randomUUID()}`;
-    const newFiness = { code: newCode, description: "new finess" };
-    const finesses = await updateStructureAndFetch(
+    const version = await updateStructureAndFetch(
       structure.id,
       {
-        finesses: [newFiness],
+        structureFinesses: [
+          { description: "new finess", finess: { code: newCode } },
+        ],
       },
-      () =>
-        prisma.finess.findMany({
-          where: { structureId: structure.id },
-        })
+      () => fetchCurrentVersion(structure.id)
     );
 
-    expect(finesses).toHaveLength(1);
-    expect(finesses[0]).toMatchObject(newFiness);
+    expect(version.structureFinesses).toHaveLength(1);
+    expect(version.structureFinesses[0].finess.code).toBe(newCode);
+    expect(version.structureFinesses[0].description).toBe("new finess");
+  });
+
+  it("should collapse duplicate FINESS codes into a single link instead of crashing", async () => {
+    // GIVEN: an empty structure
+    const structure = await createStructure();
+    const duplicatedCode = `FIN-DUP-${Date.now()}-${randomUUID()}`;
+
+    // WHEN: the same FINESS code is sent twice in one update (e.g. an autosaved draft)
+    await updateOne({
+      id: structure.id,
+      structureFinesses: [
+        { description: "Premier", finess: { code: duplicatedCode } },
+        { description: "Doublon", finess: { code: duplicatedCode } },
+      ],
+    });
+
+    // THEN: the save succeeds (no P2002) and a single link survives on the current version
+    const version = await fetchCurrentVersion(structure.id);
+    expect(version.structureFinesses).toHaveLength(1);
+    expect(version.structureFinesses[0].finess.code).toBe(duplicatedCode);
   });
 
   it("should upsert actesAdministratifs and delete missing ones", async () => {
@@ -873,5 +973,228 @@ describe("structure.repository db integration", () => {
 
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject(newStructureMillesime);
+  });
+
+  describe("résolution liste/carte", () => {
+    const createdTransformationIds: number[] = [];
+    const createdSvtIds: number[] = [];
+
+    const baseSearch: SearchProps = {
+      search: null,
+      page: null,
+      type: null,
+      bati: null,
+      placesAutorisees: null,
+      departements: null,
+      operateurs: null,
+      column: null,
+      direction: null,
+      map: false,
+      selection: true,
+      finalised: false,
+    };
+
+    const listStructures = async (overrides: Partial<SearchProps>) => {
+      const { structures } = await getFullStructures({
+        ...baseSearch,
+        ...overrides,
+      });
+      return structures;
+    };
+
+    const createTransfoVersion = async (
+      structureId: number,
+      {
+        type,
+        nom,
+        effectiveDate,
+        formStatus,
+      }: {
+        type: StructureType;
+        nom: string;
+        effectiveDate: string;
+        formStatus: boolean;
+      }
+    ) => {
+      const formDefinition = await prisma.formDefinition.findFirstOrThrow();
+      const transformation = await prisma.transformation.create({
+        data: { type: "EXTENSION_EX_NIHILO" },
+      });
+      createdTransformationIds.push(transformation.id);
+      const form = await prisma.form.create({
+        data: {
+          transformationId: transformation.id,
+          formDefinitionId: formDefinition.id,
+          status: formStatus,
+        },
+      });
+      const svt = await prisma.structureVersionTransformation.create({
+        data: { transformationId: transformation.id, type: "EXTENSION" },
+      });
+      createdSvtIds.push(svt.id);
+      await prisma.structureVersion.create({
+        data: {
+          structureId,
+          structureVersionTransformationId: svt.id,
+          effectiveDate,
+          type,
+          nom,
+        },
+      });
+      return { form };
+    };
+
+    afterAll(async () => {
+      if (createdSvtIds.length > 0) {
+        await prisma.structureVersionTransformation.deleteMany({
+          where: { id: { in: createdSvtIds } },
+        });
+      }
+      if (createdTransformationIds.length > 0) {
+        await prisma.transformation.deleteMany({
+          where: { id: { in: createdTransformationIds } },
+        });
+      }
+    });
+
+    it("la liste reflète les scalaires et relations de la version résolue", async () => {
+      // GIVEN: a structure edited via the rolling write (scalars + relations on the version)
+      const structure = await createStructure();
+      const nom = `Liste-Nom-${randomUUID()}`;
+      const dnaCode = `DNA-LST-${randomUUID()}`;
+      await updateOne({
+        id: structure.id,
+        type: StructureType.HUDA,
+        nom,
+        adresses: [
+          {
+            adresse: "1 rue Résolue",
+            codePostal: "75001",
+            commune: "Paris",
+            repartition: Repartition.DIFFUS,
+            adresseTypologies: [
+              { year: 2026, placesAutorisees: 42, qpv: 0, logementSocial: 0 },
+            ],
+          },
+        ],
+        structureTypologies: [{ year: 2026, placesAutorisees: 42 }],
+        dnaStructures: [{ dna: { code: dnaCode } }],
+      });
+
+      // WHEN: the structure is read through the list path
+      const structures = await listStructures({ search: structure.codeBhasile });
+      const row = structures.find(
+        (structureApiRead) => structureApiRead.codeBhasile === structure.codeBhasile
+      );
+
+      // THEN: the list reflects the resolved version, not the frozen (null) shell
+      expect(row).toBeDefined();
+      expect(row?.type).toBe(StructureType.HUDA);
+      expect(row?.nom).toBe(nom);
+      expect(row?.typeBati).toBe(Repartition.DIFFUS);
+      expect(row?.currentPlaces?.placesAutorisees).toBe(42);
+      expect(
+        row?.dnaStructures?.some((dnaStructure) => dnaStructure.dna.code === dnaCode)
+      ).toBe(true);
+    });
+
+    it("la recherche et le filtre type portent sur la version résolue", async () => {
+      // GIVEN: a structure whose versioned nom/type live only on the rolling version
+      const structure = await createStructure();
+      const nom = `Recherche-${randomUUID()}`;
+      await updateOne({ id: structure.id, type: StructureType.CADA, nom });
+
+      // WHEN/THEN: searching by the resolved nom finds the structure
+      const byNom = await listStructures({ search: nom });
+      expect(
+        byNom.some(
+          (structureApiRead) =>
+            structureApiRead.codeBhasile === structure.codeBhasile
+        )
+      ).toBe(true);
+
+      // AND: filtering by the resolved type includes it
+      const byType = await listStructures({
+        search: structure.codeBhasile,
+        type: StructureType.CADA,
+      });
+      expect(
+        byType.some(
+          (structureApiRead) =>
+            structureApiRead.codeBhasile === structure.codeBhasile
+        )
+      ).toBe(true);
+
+      // AND: filtering by another type excludes it
+      const byOtherType = await listStructures({
+        search: structure.codeBhasile,
+        type: StructureType.HUDA,
+      });
+      expect(
+        byOtherType.some(
+          (structureApiRead) =>
+            structureApiRead.codeBhasile === structure.codeBhasile
+        )
+      ).toBe(false);
+    });
+
+    it("fiche et liste résolvent la même version", async () => {
+      // GIVEN: a structure edited via the rolling write
+      const structure = await createStructure();
+      const nom = `Coherence-${randomUUID()}`;
+      await updateOne({ id: structure.id, type: StructureType.HUDA, nom });
+
+      // WHEN: read through both the fiche and the list
+      const fiche = await getFullStructure(structure.id);
+      const [listRow] = await listStructures({ search: structure.codeBhasile });
+
+      // THEN: both resolve the version identically
+      expect(fiche?.type).toBe(StructureType.HUDA);
+      expect(listRow?.type).toBe(fiche?.type);
+      expect(listRow?.nom).toBe(fiche?.nom);
+    });
+
+    it("fiche et liste ignorent une transfo en brouillon et retiennent la transfo une fois finalisée", async () => {
+      // GIVEN: a rolling version (CADA) dated in the past
+      const structure = await createStructure();
+      const rollingNom = `Rolling-${randomUUID()}`;
+      const transfoNom = `Transfo-${randomUUID()}`;
+      await updateOne({
+        id: structure.id,
+        type: StructureType.CADA,
+        nom: rollingNom,
+      });
+      const rolling = await fetchCurrentVersion(structure.id);
+      await prisma.structureVersion.update({
+        where: { id: rolling.id },
+        data: { effectiveDate: new Date("2026-01-01T00:00:00.000Z") },
+      });
+
+      // AND: a more recent transfo version (HUDA) whose form is not finalised
+      const { form } = await createTransfoVersion(structure.id, {
+        type: StructureType.HUDA,
+        nom: transfoNom,
+        effectiveDate: "2026-03-01T00:00:00.000Z",
+        formStatus: false,
+      });
+
+      // WHEN: the transfo form is a draft -> it is ignored, the rolling wins
+      const ficheDraft = await getFullStructure(structure.id);
+      const [listDraft] = await listStructures({ search: structure.codeBhasile });
+      expect(ficheDraft?.type).toBe(StructureType.CADA);
+      expect(listDraft?.type).toBe(StructureType.CADA);
+      expect(listDraft?.nom).toBe(rollingNom);
+
+      // WHEN: the transfo form is finalised -> the more recent transfo version wins
+      await prisma.form.update({
+        where: { id: form.id },
+        data: { status: true },
+      });
+      const ficheFinal = await getFullStructure(structure.id);
+      const [listFinal] = await listStructures({ search: structure.codeBhasile });
+      expect(ficheFinal?.type).toBe(StructureType.HUDA);
+      expect(listFinal?.type).toBe(StructureType.HUDA);
+      expect(listFinal?.nom).toBe(transfoNom);
+    });
   });
 });

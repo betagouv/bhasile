@@ -32,7 +32,7 @@ yarn test:e2e -g notes # filtre par grep
 - **Seeding direct Prisma** (`seed/`) — pas d'aller-retour via l'UI ni l'API HTTP pour préparer les données.
 - **Isolation par identifiant unique** (`data/ids.ts`) : chaque test génère un `codeBhasile` préfixé `E2E-` + uuid court → suite parallélisable.
 - **POM léger** (`pages/`) : une classe par page, méthodes nommées par intention métier, pas d'héritage. Sélecteurs sémantiques (`getByRole`, `getByLabel`).
-- **Aucun import depuis `tests/e2e-legacy/`**. Seules dépendances autorisées : `src/types/*`, `@/generated/prisma/client`, `@/prisma-client`.
+- **Aucun import depuis `tests/e2e-legacy/`**. Dépendances `src/` autorisées : `src/types/*`, `@/generated/prisma/client`, `@/prisma-client`, ainsi que les **constantes et utilitaires purs** servant de source de vérité partagée avec l'app (`@/constants`, `@/app/utils/date.util`) — à privilégier plutôt que de dupliquer une valeur (plages d'années, etc.). Ne jamais importer de code à effet de bord (accès DB, `server-only`, composants React).
 
 ## 🧹 Cleanup orphelins
 

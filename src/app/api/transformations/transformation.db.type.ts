@@ -1,4 +1,7 @@
+import { AVENANT_PARENT_CATEGORIES } from "@/config/transformation.config";
 import { Prisma } from "@/generated/prisma/client";
+
+import { structureVersionDetailsInclude } from "../structure-versions/structure-version.db.type";
 
 export const transformationInclude = {
   form: {
@@ -31,8 +34,26 @@ export const transformationInclude = {
           structure: {
             include: {
               operateur: { select: { id: true, name: true } },
+              antennes: true,
+              actesAdministratifs: {
+                where: {
+                  parentId: null,
+                  category: { in: AVENANT_PARENT_CATEGORIES },
+                },
+                orderBy: { startDate: "desc" },
+                select: {
+                  id: true,
+                  category: true,
+                  startDate: true,
+                  endDate: true,
+                  children: { select: { endDate: true } },
+                },
+              },
               structureTypologies: {
                 orderBy: { year: "desc" },
+              },
+              structureVersions: {
+                include: structureVersionDetailsInclude,
               },
             },
           },
@@ -44,7 +65,9 @@ export const transformationInclude = {
               },
             },
           },
-          finesses: true,
+          structureFinesses: {
+            include: { finess: true },
+          },
           antennes: true,
           dnaStructures: {
             include: { dna: true },

@@ -10,11 +10,16 @@ import {
 import { SessionUser } from "@/types/global";
 
 import { buildAdresseAdministrativeComplete } from "../adresses/adresse.util";
+import { getAntennesApiRead } from "../antennes/antenne.util";
 import {
   copyStructureVersion,
   dbStructureVersionToApiRead,
+  resolvePredecessor,
 } from "../structure-versions/structure-version.service";
-import { getStructure } from "../structures/structure.service";
+import {
+  getResolvedStructure,
+  mergeStructureWithVersion,
+} from "../structures/structure.service";
 import { TransformationDbDetails } from "./transformation.db.type";
 import {
   createOne,
@@ -33,19 +38,34 @@ const dbTransformationToApiRead = (
     structureVersionTransformations: transformation.structureVersionTransformations.map(
       (structureVersionTransformation) => {
         const structureVersion = structureVersionTransformation.structureVersion;
+        const sourceStructure = structureVersion?.structure;
+        const predecessor =
+          sourceStructure && structureVersion
+            ? resolvePredecessor(
+                sourceStructure.structureVersions,
+                structureVersion.effectiveDate
+              )
+            : undefined;
+        const resolvedSourceStructure =
+          sourceStructure && predecessor
+            ? mergeStructureWithVersion(sourceStructure, predecessor)
+            : sourceStructure;
         return {
           ...structureVersionTransformation,
           operateur: structureVersionTransformation.operateur ?? undefined,
           structureVersion: structureVersion
             ? {
                 ...dbStructureVersionToApiRead(structureVersion),
-                structure: structureVersion.structure
+                structure: resolvedSourceStructure
                   ? {
-                      ...structureVersion.structure,
+                      ...resolvedSourceStructure,
                       adresseAdministrativeComplete:
                         buildAdresseAdministrativeComplete(
-                          structureVersion.structure
+                          resolvedSourceStructure
                         ) || undefined,
+                      antennes: getAntennesApiRead(
+                        resolvedSourceStructure.antennes
+                      ),
                     }
                   : undefined,
               }
@@ -101,7 +121,10 @@ const enrichStructureVersionTransformationFromSource = async (
     return structureVersionTransformation;
   }
 
-  const structure = await getStructure(structureId);
+  const structure = await getResolvedStructure(structureId);
+  if (!structure) {
+    return structureVersionTransformation;
+  }
 
   return {
     ...structureVersionTransformation,

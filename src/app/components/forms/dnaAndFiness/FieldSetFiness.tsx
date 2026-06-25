@@ -2,38 +2,42 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { FinessFormValues } from "@/schemas/forms/base/finess.schema";
+import { StructureFinessFormValues } from "@/schemas/forms/base/finess.schema";
 
 import { DeleteButton } from "../../common/DeleteButton";
 import InputWithValidation from "../InputWithValidation";
 
-const emptyFiness: FinessFormValues = {
-  code: "",
+const emptyStructureFiness: StructureFinessFormValues = {
   description: "",
+  finess: {
+    code: "",
+  },
 };
 
 export const FieldSetFiness = () => {
   const { control, watch, setValue } = useFormContext();
 
-  const finesses = (watch("finesses") || [emptyFiness]) as FinessFormValues[];
+  const structureFinesses = (watch("structureFinesses") || [
+    emptyStructureFiness,
+  ]) as StructureFinessFormValues[];
 
   const isMultiDna = watch("isMultiDna");
 
   useEffect(() => {
     if (!isMultiDna) {
-      setValue("finesses", [watch("finesses")?.[0]]);
+      setValue("structureFinesses", [watch("structureFinesses")?.[0]]);
     }
   }, [isMultiDna, setValue, watch]);
 
   const handleDeleteFiness = (index: number) => {
     setValue(
-      "finesses",
-      finesses.filter((_, i) => i !== index)
+      "structureFinesses",
+      structureFinesses.filter((_s, i) => i !== index)
     );
   };
 
   const handleAddNewFiness = () => {
-    setValue("finesses", [...finesses, emptyFiness]);
+    setValue("structureFinesses", [...structureFinesses, emptyStructureFiness]);
   };
 
   return (
@@ -41,13 +45,13 @@ export const FieldSetFiness = () => {
       <legend className="text-lg font-bold mb-2 text-title-blue-france">
         Codes FINESS
       </legend>
-      {finesses.map((_, index) => (
+      {structureFinesses.map((_, index) => (
         <div key={index} className="flex gap-6 items-start">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1">
             <div className="flex flex-col gap-1">
               <InputWithValidation
-                name={`finesses.${index}.code`}
-                id={`finesses.${index}.code`}
+                name={`structureFinesses.${index}.finess.code`}
+                id={`structureFinesses.${index}.finess.code`}
                 control={control}
                 type="text"
                 label="Code"
@@ -55,8 +59,8 @@ export const FieldSetFiness = () => {
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
               <InputWithValidation
-                name={`finesses.${index}.description`}
-                id={`finesses.${index}.description`}
+                name={`structureFinesses.${index}.description`}
+                id={`structureFinesses.${index}.description`}
                 control={control}
                 type="text"
                 label="Description"

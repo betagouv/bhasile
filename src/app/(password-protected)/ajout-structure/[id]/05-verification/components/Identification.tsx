@@ -75,19 +75,19 @@ export const Identification = () => {
           key={dnaStructure.dna.code}
         >
           <span className="italic">{dnaStructure.dna.code}</span>{" "}
-          <span>{dnaStructure.dna.description}</span>
+          <span>{dnaStructure.description}</span>
         </div>
       ))}
       <h3 className="text-title-blue-france w-full flex justify-between text-lg mt-10">
         Codes FINESS
       </h3>
-      {localStorageValues?.finesses?.map((finess) => (
+      {localStorageValues?.structureFinesses?.map((structureFiness) => (
         <div
           className="border-b border-default-grey flex gap-4 pb-2 mb-3"
-          key={finess.code}
+          key={structureFiness.finess?.code}
         >
-          <span className="italic">{finess.code}</span>{" "}
-          <span>{finess.description}</span>
+          <span className="italic">{structureFiness.finess?.code}</span>{" "}
+          <span>{structureFiness.description}</span>
         </div>
       ))}
       <h3 className="text-title-blue-france w-full flex justify-between text-lg mt-10">

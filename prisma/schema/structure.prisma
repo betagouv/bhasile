@@ -1,6 +1,6 @@
 model Structure {
-  id                       Int                       @id @default(autoincrement())
-  codeBhasile              String                    @unique
+  id                       Int                   @id @default(autoincrement())
+  codeBhasile              String                @unique
   filiale                  String? // TODO: remove after first filling is complete, filiales via Operateur are connected in app and DB is backfilled
   // TODO: remove after backfill of structure version — champs migrés sur StructureVersion
   type                     StructureType? // TODO: remove after backfill of structure version
@@ -35,13 +35,13 @@ model Structure {
   structureMillesimes      StructureMillesime[]
   budgets                  Budget[] // TODO: remove after backfill of structure version — via StructureMillesime uniquement
   indicateursFinanciers    IndicateurFinancier[] // TODO: remove after backfill of structure version
-  operateur                Operateur?                @relation(fields: [operateurId], references: [id])
+  operateur                Operateur?            @relation(fields: [operateurId], references: [id])
   operateurId              Int?
   forms                    Form[]
-  campaigns                Campaign[]
   antennes                 Antenne[] // TODO: remove after backfill of structure version
-  finesses                 Finess[] // TODO: remove after backfill of structure version
-  departement              Departement?              @relation(fields: [departementAdministratif], references: [numero]) // TODO: remove after backfill of structure version
+  structureFinesses        StructureFiness[] // TODO: remove after backfill of structure version
+  finesses                 Finess[] // TODO: remove after backfill structure finess
+  departement              Departement?          @relation(fields: [departementAdministratif], references: [numero]) // TODO: remove after backfill of structure version
   userActions              UserAction[]
   userNotes                Note[]
   structureVersions        StructureVersion[]
@@ -110,51 +110,40 @@ enum StructureType {
   @@schema("public")
 }
 
-view ComparaisonPlaces {
-  dnaCode                  String?
-  total_places_autorisees  Int?
-  places_autorisees        Int?
-  total_places_activite    Int?
-  diff_places              Int?
-  diff_places_activite     Int?
-  pct_diff_places          Float?
-  pct_diff_places_activite Float?
-
-  @@schema("reporting")
-}
-
 view StructuresAggregates {
-  dnaCode                     String?
-  places_autorisees_structure Int?
-  pmr_structure               Int?
-  lgbt_structure              Int?
-  fvv_teh_structure           Int?
-  places_autorisees_adresse   Int?
-  qpv_adresse                 Int?
-  logement_social_adresse     Int?
-  date_adresse                DateTime?
-  nb_adresses                 Int?
-  date_structure              DateTime?
-  nb_places_activite          Int?
-  diff_places_adresse         Int?
-  pct_diff_places_adresse     Float?
-  diff_places_activite        Int?
-  pct_diff_places_activite    Float?
-  created_at                  DateTime?
+  id                          Int       @unique
+  code_bhasile                String?
+  dna_codes                   String?
+  departement_administratif   String?
+  departement                 String?
+  region                      String?
+  operateur                   String?
+  structure_type              String?
+  public                      String?
+  latitude                    Decimal?
+  longitude                   Decimal?
   updated_at                  DateTime?
+  finalisation_status         String?
+  finalisation_status_detail  String?
+  places_autorisees_structure Int?
+  dotation_derniere_annee     Float?
 
+  @@map("structures_aggregates")
   @@schema("reporting")
 }
 
 view StructuresFilling {
-  dnaCode             String?
-  finalisation_status String?
-  operateur           String?
-  type                String?
-  public              String?
-  region              String?
-  created_at          DateTime?
-  updated_at          DateTime?
+  id                         Int       @unique
+  code_bhasile               String?
+  finalisation_status        String?
+  finalisation_status_detail String?
+  operateur                  String?
+  structure_type             String?
+  public                     String?
+  region                     String?
+  created_at                 DateTime?
+  updated_at                 DateTime?
 
+  @@map("structures_filling")
   @@schema("reporting")
 }

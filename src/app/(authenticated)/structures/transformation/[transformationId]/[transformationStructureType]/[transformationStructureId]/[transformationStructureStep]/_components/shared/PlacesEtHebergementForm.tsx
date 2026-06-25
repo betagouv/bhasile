@@ -8,10 +8,7 @@ import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTyp
 import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
 import { FieldSetTransformationPlaces } from "@/app/components/forms/typePlace/FieldSetTransformationPlaces";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
-import {
-  buildTransformationTypologie,
-  getTransformationStructureVersionDefaultValues,
-} from "@/app/utils/transformation.util";
+import { getTransformationDefaultValues } from "@/app/utils/transformation.util";
 import {
   StructureVersionTransformationApiRead,
   StructureVersionTransformationApiUpdateClient,
@@ -22,7 +19,7 @@ import {
   creationPlacesEtHebergementDraftSchema,
   getPlacesEtHebergementSchema,
 } from "@/schemas/forms/transformation/creationPlacesEtHebergement.schema";
-import { DeepPartial, FormKind } from "@/types/global";
+import { FormKind } from "@/types/global";
 
 type Props = {
   transformation: TransformationApiRead;
@@ -37,22 +34,16 @@ export const PlacesEtHebergementForm = ({
   formKind,
   originalPlaces,
 }: Props) => {
-  const { goToNextStep, handleSave, shouldShowIncompleteSteps } =
+  const { goToNextStep, handleSave, backLink, shouldShowIncompleteSteps } =
     useTransformationFormHandling();
 
   const strictSchema = getPlacesEtHebergementSchema(formKind, originalPlaces);
 
-  const defaultValues: DeepPartial<CreationPlacesEtHebergementDraftFormValues> =
-    {
-      ...getTransformationStructureVersionDefaultValues<CreationPlacesEtHebergementDraftFormValues>(
-        structureVersionTransformation.structureVersion
-      ),
-      structureTypologies: [
-        buildTransformationTypologie(
-          structureVersionTransformation.structureVersion
-        ),
-      ],
-    };
+  const defaultValues =
+    getTransformationDefaultValues<CreationPlacesEtHebergementDraftFormValues>({
+      transformation,
+      structureVersionTransformation,
+    });
 
   const buildStructureVersionTransformation = (
     data: CreationPlacesEtHebergementDraftFormValues
@@ -69,7 +60,6 @@ export const PlacesEtHebergementForm = ({
 
   return (
     <FormWrapper
-      key={shouldShowIncompleteSteps ? "strict" : "draft"}
       schema={
         shouldShowIncompleteSteps
           ? strictSchema
@@ -79,6 +69,7 @@ export const PlacesEtHebergementForm = ({
       onSubmit={goToNextStep}
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
+      backLink={backLink}
       showContactInfos={false}
     >
       <TransformationFormController
