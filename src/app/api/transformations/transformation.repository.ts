@@ -166,7 +166,7 @@ const moveActesAdministratifsToStructures = async (
 
     if (!structureId) {
       throw new Error(
-        `Transformation ${transformationId}, SVT ${structureVersionTransformation.id} : structure cible introuvable, actes non basculables`
+        `Transformation ${transformationId}, Structure Version Transformation ${structureVersionTransformation.id} : structure cible introuvable, actes non basculables`
       );
     }
 
