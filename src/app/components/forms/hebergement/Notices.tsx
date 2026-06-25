@@ -24,6 +24,7 @@ export const Notices = ({
             <ManualOptionNotices />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <ImportOptionNotices typeBati={typeBati} />
               <div className="rounded-lg bg-default-grey-hover p-6 flex flex-col gap-5">
                 <div>
                   <h3 className="text-lg text-title-blue-france mb-0">
@@ -38,7 +39,6 @@ export const Notices = ({
                 </p>
                 <ManualOptionNotices />
               </div>
-              <ImportOptionNotices typeBati={typeBati} />
             </div>
           )}
         </div>

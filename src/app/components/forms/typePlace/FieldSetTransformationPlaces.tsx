@@ -39,7 +39,7 @@ export const FieldSetTransformationPlaces = ({
             className="mb-0"
           />
           {originalPlaces !== undefined && (
-            <p className="flex items-center gap-1 text-sm text-action-high-blue-france">
+            <p className="flex items-center gap-1 mt-1 text-sm text-action-high-blue-france">
               <span
                 className="fr-icon-information-line fr-icon--sm"
                 aria-hidden="true"

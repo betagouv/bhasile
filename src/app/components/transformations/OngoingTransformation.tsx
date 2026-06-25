@@ -23,7 +23,8 @@ export const OngoingTransformation = ({
     (departement) => departement.numero === departementNumero
   )?.name;
 
-  const operateurName = referenceStructureVersionTransformation?.operateur?.name;
+  const operateurName =
+    referenceStructureVersionTransformation?.operateur?.name;
 
   const structureCount = transformation.structureVersionTransformations.length;
   const structureTypes = [
@@ -38,24 +39,24 @@ export const OngoingTransformation = ({
   ];
 
   return (
-    <li className="grid grid-cols-6 items-center gap-4 px-4 py-3 border-t border-default-grey text-sm">
-      <span>
+    <li className="flex items-center gap-4 px-4 py-3 border-t border-default-grey text-sm whitespace-nowrap">
+      <span className="flex-1">
         {departementName} {departementNumero && `(${departementNumero})`}
       </span>
       <span className="font-bold">{operateurName}</span>
-      <span>
+      <span className="flex-1">
         <strong>
           {structureCount} {structureCount > 1 ? "structures" : "structure"}
         </strong>
         {structureTypes.length > 0 && ` (${structureTypes.join(", ")})`}
       </span>
-      <span>
+      <span className="flex-1">
         Initiée le{" "}
         <span className="font-bold">
           {formatDate(transformation.createdAt)}
         </span>
       </span>
-      <span>
+      <span className="flex-1">
         Modifiée le{" "}
         <span className="font-bold">
           {formatDate(transformation.updatedAt)}

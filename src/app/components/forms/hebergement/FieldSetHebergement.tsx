@@ -153,11 +153,13 @@ export const FieldSetHebergement = ({
         </h2>
       )}
       <fieldset className="flex flex-col gap-6">
-        <Notices
-          typeBati={typeBati}
-          hebergementsContainerRef={hebergementsContainerRef}
-          formKind={formKind}
-        />
+        {isTransformationSurStructureExistante(formKind) && (
+          <Notices
+            typeBati={typeBati}
+            hebergementsContainerRef={hebergementsContainerRef}
+            formKind={formKind}
+          />
+        )}
 
         {typeBati === Repartition.COLLECTIF &&
           formKind !== FormKind.ADRESSES_RECOVERY && (
@@ -174,7 +176,6 @@ export const FieldSetHebergement = ({
               <p className="pl-2">{sameAddress ? "Oui" : "Non"}</p>
             </div>
           )}
-
         {fields.map((field, index) => {
           const adresse =
             (watchedAdresses[index] as FormAdresse | undefined) ??

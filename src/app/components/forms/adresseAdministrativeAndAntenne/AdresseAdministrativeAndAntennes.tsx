@@ -111,7 +111,7 @@ export const AdresseAdministrativeAndAntennes = ({
               </div>
             </>
           )}
-          <Antennes />
+          <Antennes showTitle={false} />
         </>
       )}
     </>
