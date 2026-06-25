@@ -14,7 +14,7 @@ export const TransformationStructureHeader = ({
       <span className="flex items-center justify-center w-10 h-10 rounded-full bg-white text-title-blue-france">
         <StructureEventIcon
           kind={structureVersionTransformation.type}
-          large
+          size="lg"
         />
       </span>
       {getStructureVersionTransformationLabel(

@@ -11,7 +11,9 @@ import { getYearRange } from "@/app/utils/date.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ButtonAffectations } from "../ButtonAffectations";
+import { FinanceTransformationMarkers } from "./FinanceTransformationMarkers";
 import { getBudgetStaticTableLines } from "./getBudgetStaticTableLines";
+import { getFinanceTransformationMarkers } from "./getFinanceTransformationMarkers";
 
 export const StructureStaticTable = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -20,6 +22,8 @@ export const StructureStaticTable = (): ReactElement => {
   const isSubventionnee = structure?.isSubventionnee ?? false;
 
   const { years } = getYearRange({ order: "desc" });
+
+  const markers = getFinanceTransformationMarkers(structure?.history, years);
 
   const [isAffectationOpen, setIsAffectationOpen] = useState(false);
 
@@ -59,6 +63,11 @@ export const StructureStaticTable = (): ReactElement => {
         headings={getBudgetTableHeading({ years, structure })}
         enableBorders
         stickFirstColumn
+        overlay={
+          markers.length > 0 && (
+            <FinanceTransformationMarkers markers={markers} years={years} />
+          )
+        }
       >
         <BudgetTableLines
           years={years}

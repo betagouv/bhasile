@@ -11,6 +11,7 @@ export const getBudgetTableHeading = ({ years, structure }: Props) => {
       <th
         scope="col"
         key={year}
+        data-year={year}
         className={cn("bg-white", !structure && "h-12")}
       >
         <span className={cn("block text-sm", structure && "mb-1")}>{year}</span>
