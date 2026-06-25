@@ -155,7 +155,7 @@ export const ActeAdministratif = ({
             hintText="32 caractères maximum"
           />
         )}
-        <div className="flex flex-col flex-1 pr-12">
+        <div className="flex flex-col pr-12">
           <label className="mb-2">{documentLabel}</label>
           <UploadWithValidation
             name={`actesAdministratifs.${index}.fileUploads.0.key`}
