@@ -15,18 +15,17 @@ export const TransformationFinessSection = () => {
     <TransformationCodeSection
       fieldArrayName="structureFinesses"
       emptyItem={emptyStructureFiness}
-      singleCodeLabel="Code FINESS"
       addButtonLabel="Ajouter un code FINESS"
       descriptionHint="ex : Toute la structure"
       getDescriptionFieldName={(index) =>
         `structureFinesses.${index}.description`
       }
-      renderCodeInput={(index, label) => (
+      renderCodeInput={(index) => (
         <InputWithValidation
           name={`structureFinesses.${index}.finess.code`}
           id={`structureFinesses.${index}.finess.code`}
           type="text"
-          label={label}
+          label="Code"
         />
       )}
       title={
