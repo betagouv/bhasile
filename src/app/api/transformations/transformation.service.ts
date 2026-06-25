@@ -6,8 +6,10 @@ import {
   TransformationApiCreate,
   TransformationApiRead,
   TransformationApiUpdate,
+  TransformationSelectionApiUpdate,
 } from "@/schemas/api/transformation.schema";
 import { SessionUser } from "@/types/global";
+import { TransformationType } from "@/types/transformation.type";
 
 import { buildAdresseAdministrativeComplete } from "../adresses/adresse.util";
 import { getAntennesApiRead } from "../antennes/antenne.util";
@@ -26,6 +28,7 @@ import {
   deleteOne,
   findAll,
   findOne,
+  resetSelection,
   updateOne,
 } from "./transformation.repository";
 import { applyPrefill } from "./transformation.util";
@@ -96,21 +99,41 @@ export const getOngoingTransformationsForUser = async (
     );
 };
 
-export const createTransformation = async (
-  transformation: TransformationApiCreate
-): Promise<number> => {
+const prepareStructureVersionTransformations = async (
+  type: TransformationType,
+  structureVersionTransformations: StructureVersionTransformationApiCreate[]
+): Promise<StructureVersionTransformationApiCreate[]> => {
   const structureVersionTransformationsWithSource = await Promise.all(
-    transformation.structureVersionTransformations.map(
+    structureVersionTransformations.map(
       enrichStructureVersionTransformationFromSource
     )
   );
 
-  const structureVersionTransformations = applyPrefill(
-    transformation.type,
-    structureVersionTransformationsWithSource
-  );
+  return applyPrefill(type, structureVersionTransformationsWithSource);
+};
+
+export const createTransformation = async (
+  transformation: TransformationApiCreate
+): Promise<number> => {
+  const structureVersionTransformations =
+    await prepareStructureVersionTransformations(
+      transformation.type,
+      transformation.structureVersionTransformations
+    );
 
   return createOne({ ...transformation, structureVersionTransformations });
+};
+
+export const resetTransformationSelection = async (
+  input: TransformationSelectionApiUpdate
+): Promise<number> => {
+  const structureVersionTransformations =
+    await prepareStructureVersionTransformations(
+      input.type,
+      input.structureVersionTransformations
+    );
+
+  return resetSelection({ ...input, structureVersionTransformations });
 };
 
 const enrichStructureVersionTransformationFromSource = async (

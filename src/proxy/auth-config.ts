@@ -120,6 +120,12 @@ export const protectedApiRoutes: ApiRoute[] = [
       DELETE: "proconnect",
     },
   },
+  {
+    pattern: /^\/api\/transformations\/[^/]+\/selection$/,
+    routes: {
+      PUT: "proconnect",
+    },
+  },
 ];
 
 export const proConnectProtectedPages = [

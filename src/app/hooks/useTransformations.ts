@@ -1,10 +1,12 @@
 import { useFetchState } from "@/app/context/FetchStateContext";
 import {
+  StructureVersionTransformationApiCreate,
   TransformationApiCreate,
   TransformationApiRead,
   TransformationApiUpdateClient,
 } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
+import { TransformationType } from "@/types/transformation.type";
 
 const createOrUpdateTransformation = async (
   url: string,
@@ -60,11 +62,50 @@ export const useTransformations = () => {
       );
       const res = await fetch(`/api/transformations/${transformationId}`);
       if (!res.ok) {
-        throw new Error(`Failed to fetch transformation: ${res.status}`);
+        throw new Error(
+          `Échec de récupération de la transformation : ${res.status}`
+        );
       }
       setTransformation(await res.json());
       setFetchState("transformation-save", FetchState.IDLE);
       return transformationId;
+    } catch (error) {
+      setFetchState("transformation-save", FetchState.ERROR);
+      throw error;
+    }
+  };
+
+  const resetTransformationSelection = async (
+    id: number,
+    input: {
+      type: TransformationType;
+      structureVersionTransformations: StructureVersionTransformationApiCreate[];
+    },
+    setTransformation: (transformation: TransformationApiRead) => void
+  ): Promise<TransformationApiRead> => {
+    setFetchState("transformation-save", FetchState.LOADING);
+    try {
+      const response = await fetch(`/api/transformations/${id}/selection`, {
+        method: "PUT",
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(
+          body.error ??
+            `Erreur lors de la réinitialisation : ${response.status}`
+        );
+      }
+      const refreshed = await fetch(`/api/transformations/${id}`);
+      if (!refreshed.ok) {
+        throw new Error(
+          `Échec de récupération de la transformation : ${refreshed.status}`
+        );
+      }
+      const transformation = await refreshed.json();
+      setTransformation(transformation);
+      setFetchState("transformation-save", FetchState.IDLE);
+      return transformation;
     } catch (error) {
       setFetchState("transformation-save", FetchState.ERROR);
       throw error;
@@ -93,6 +134,7 @@ export const useTransformations = () => {
   return {
     createTransformation,
     updateTransformation,
+    resetTransformationSelection,
     deleteTransformation,
   };
 };

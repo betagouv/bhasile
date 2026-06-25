@@ -1,6 +1,17 @@
 "use client";
 
+import { Button } from "@codegouvfr/react-dsfr/Button";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import { TransformationTypeForms } from "@/app/components/forms/transformation-types/TransformationTypeForms";
+import { useFetchState } from "@/app/context/FetchStateContext";
+import { useTransformations } from "@/app/hooks/useTransformations";
+import {
+  getTransformationFormNavigation,
+  getTransformationSteps,
+  getTransformationTitle,
+} from "@/app/utils/transformation.util";
 import { TRANSFORMATION_TYPE_SPECS } from "@/config/transformation.config";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import {
@@ -9,9 +20,28 @@ import {
 } from "@/types/transformation.type";
 
 import { useTransformationContext } from "../_context/TransformationClientContext";
+import {
+  ReinitialiserSelectionModal,
+  reinitialiserSelectionModal,
+} from "./_components/ReinitialiserSelectionModal";
+import { TransformationSelectionSummary } from "./_components/TransformationSelectionSummary";
 
 export default function TransformationSelectionsPage() {
-  const { transformation } = useTransformationContext();
+  const router = useRouter();
+
+  const { transformation, setTransformation } = useTransformationContext();
+
+  const { resetTransformationSelection } = useTransformations();
+
+  const { getFetchState } = useFetchState();
+  const saveState = getFetchState("transformation-save");
+
+  const [isEditing, setIsEditing] = useState(false);
+
+  const [pendingSelection, setPendingSelection] = useState<{
+    type: TransformationType;
+    structureVersionTransformations: StructureVersionTransformationApiCreate[];
+  } | null>(null);
 
   const formType = getFormByType(transformation.type);
 
@@ -23,27 +53,87 @@ export default function TransformationSelectionsPage() {
     primaryStructureVersionTransformationType &&
     transformation.structureVersionTransformations?.find(
       (structureVersionTransformation) =>
-        structureVersionTransformation.type === primaryStructureVersionTransformationType
+        structureVersionTransformation.type ===
+        primaryStructureVersionTransformationType
     );
+  const sourceStructureId = primaryStructureVersionTransformation
+    ? primaryStructureVersionTransformation.structureVersion?.structureId
+    : undefined;
 
   const handleSubmit = (
     transformationType: TransformationType,
     structureVersionTransformations: StructureVersionTransformationApiCreate[]
   ) => {
-    console.log(transformationType, structureVersionTransformations);
+    setPendingSelection({
+      type: transformationType,
+      structureVersionTransformations,
+    });
+    reinitialiserSelectionModal.open();
   };
+
+  const handleConfirmReset = async () => {
+    if (!pendingSelection) {
+      return;
+    }
+    try {
+      const freshTransformation = await resetTransformationSelection(
+        transformation.id,
+        pendingSelection,
+        setTransformation
+      );
+      reinitialiserSelectionModal.close();
+      const { firstStep } = getTransformationFormNavigation({
+        transformationSteps: getTransformationSteps(freshTransformation),
+        transformationId: freshTransformation.id,
+      });
+      router.push(firstStep.route);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  if (!isEditing) {
+    return (
+      <div className="flex flex-col gap-8 max-w-4xl mx-auto mt-20 mb-10">
+        <h1 className="mb-0 text-xl font-bold text-title-blue-france text-center">
+          {getTransformationTitle(transformation.type)}
+        </h1>
+        <TransformationSelectionSummary
+          structureVersionTransformations={
+            transformation.structureVersionTransformations
+          }
+        />
+        <div className="flex justify-center">
+          <Button
+            priority="secondary"
+            iconId="fr-icon-edit-line"
+            iconPosition="left"
+            onClick={() => setIsEditing(true)}
+          >
+            Modifier le cas de figure
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <TransformationTypeForms
-      formType={formType}
-      structureId={
-        primaryStructureVersionTransformation
-          ? primaryStructureVersionTransformation.structureVersion?.structureId
-          : undefined
-      }
-      initialTransformationType={transformation.type}
-      initialStructureVersionTransformations={transformation.structureVersionTransformations}
-      onSubmit={handleSubmit}
-    />
+    <>
+      <TransformationTypeForms
+        formType={formType}
+        structureId={sourceStructureId}
+        onSubmit={handleSubmit}
+      />
+      <div className="flex justify-center mb-10">
+        <Button priority="secondary" onClick={() => setIsEditing(false)}>
+          Annuler
+        </Button>
+      </div>
+      <ReinitialiserSelectionModal
+        saveState={saveState}
+        onConfirm={handleConfirmReset}
+      />
+    </>
   );
 }
 
