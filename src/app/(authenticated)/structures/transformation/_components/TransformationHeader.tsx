@@ -122,7 +122,7 @@ export const TransformationHeader = () => {
                     disabled={saveState === FetchState.LOADING}
                     onClick={handleSaveProgress}
                   >
-                    Enregistrer l&apos;avancée
+                    Enregistrer l’avancée
                   </Button>
                 )}
               </>

@@ -41,7 +41,7 @@ export const QuitterModal = ({ saveState, onQuit, onSaveAndQuit }: Props) => (
       <p>
         Voulez-vous enregistrer votre avancée ? Vous retrouverez toutes les
         structures en cours de création ou de transformation enregistrées dans
-        l&apos;onglet « à finaliser ».
+        l’onglet « à finaliser ».
       </p>
       {saveState === FetchState.ERROR && (
         <SubmitError backendError="Une erreur est survenue lors de l'enregistrement. Veuillez réessayer." />

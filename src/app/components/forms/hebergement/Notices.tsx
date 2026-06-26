@@ -14,10 +14,9 @@ export const Notices = ({
       {formKind !== FormKind.MODIFICATION && (
         <div className="flex flex-col gap-6" ref={hebergementsContainerRef}>
           <p className="mb-0">
-            Veuillez d&apos;abord renseigner le type de bâti puis
-            l&apos;ensemble des adresses d&apos;hébergement de la structure, et
-            les informations associées,{" "}
-            <strong>au 1er janvier de l&apos;année en cours.</strong>
+            Veuillez d’abord renseigner le type de bâti puis l’ensemble des
+            adresses d’hébergement de la structure, et les informations
+            associées, <strong>au 1er janvier de l’année en cours.</strong>
           </p>
 
           {typeBati === Repartition.COLLECTIF ? (
