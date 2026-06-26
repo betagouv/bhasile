@@ -92,6 +92,28 @@ tests/                       # Même arborescence que src/
 - Les tests de repository (`*.repository.test.ts`) sont exclus du `yarn test` standard — ils nécessitent une vraie base via `.env.test`
 - Nommage : `*.test.ts` pour unitaire/intégration, `*.repository.test.ts` pour les tests BDD
 
+### Nommage des types (schemas Zod)
+
+Convention : `<Entité><Suffixe>` en PascalCase (ex : `OperateurApiRead`, `TransformationApiUpdate`, `ContactFormValues`).
+
+| Suffixe      | Quand l'utiliser                                                |
+| ------------ | --------------------------------------------------------------- |
+| `FormValues` | Types utilisés dans l'UI des formulaires (`src/schemas/forms/`) |
+| `ApiType`    | Type API quand lecture et écriture ne sont pas différenciées    |
+| `ApiRead`    | Type API en lecture (lecture/écriture différenciées)            |
+| `ApiWrite`   | Type API en écriture (création/update non différenciées)        |
+| `ApiCreate`  | Type API en création (création/update différenciées)            |
+| `ApiUpdate`  | Type API en update (création/update différenciées)              |
+
+Quand un schéma `Api*` applique une transformation (coercition, `.transform()`, défaut, etc.), ce que le client envoie diffère du type inféré côté serveur. Ajouter alors un type parallèle suffixé `Client`, basé sur `z.input` au lieu de `z.infer` :
+
+| Suffixe           | Pendant de  |
+| ----------------- | ----------- |
+| `ApiClient`       | `ApiType`   |
+| `ApiWriteClient`  | `ApiWrite`  |
+| `ApiCreateClient` | `ApiCreate` |
+| `ApiUpdateClient` | `ApiUpdate` |
+
 ## Authentification
 
 - **ProConnect** : agents DREETS/DDETS uniquement, donne accès au dashboard

@@ -21,7 +21,7 @@ const buildBornFromCreationSql = (now: Date): Prisma.Sql => Prisma.sql`
   )
 `;
 
-const buildCurrentVersionCteSql = (now: Date): Prisma.Sql => Prisma.sql`
+export const buildCurrentVersionCteSql = (now: Date): Prisma.Sql => Prisma.sql`
   current_version AS (
     SELECT DISTINCT ON (sv."structureId")
       sv."structureId",

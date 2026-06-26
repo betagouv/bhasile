@@ -15,7 +15,10 @@ import {
 } from "../forms/form.repository";
 import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
-import { currentVersionWhere } from "../structure-versions/structure-version.db.type";
+import {
+  currentVersionArgs,
+  currentVersionWhere,
+} from "../structure-versions/structure-version.db.type";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
@@ -25,7 +28,6 @@ import {
   structureDetailsInclude,
   structureListInclude,
   structureListVersionInclude,
-  structureOperateurSelect,
 } from "./structure.db.type";
 import { SearchProps } from "./structure.service";
 import {
@@ -55,9 +57,7 @@ export const findBySearch = async (
       select: {
         id: true,
         structureVersions: {
-          where: currentVersionWhere(now),
-          orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
-          take: 1,
+          ...currentVersionArgs(now),
           select: { latitude: true, longitude: true },
         },
       },
@@ -74,9 +74,7 @@ export const findBySearch = async (
     include: {
       ...structureListInclude,
       structureVersions: {
-        where: currentVersionWhere(now),
-        orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
-        take: 1,
+        ...currentVersionArgs(now),
         include: structureListVersionInclude,
       },
     },
@@ -126,21 +124,46 @@ export const getLatestPlacesAutoriseesPerStructure = async (
 };
 
 export const findOneOperateur = async (
-  id: number
+  id: number,
+  now: Date
 ): Promise<StructureDbOperateur> => {
-  return await prisma.structure.findUniqueOrThrow({
+  const structure = await prisma.structure.findUniqueOrThrow({
     where: { id },
-    select: structureOperateurSelect,
+    select: {
+      id: true,
+      codeBhasile: true,
+      forms: true,
+      structureVersions: {
+        ...currentVersionArgs(now),
+        select: { type: true },
+      },
+    },
   });
+  return {
+    id: structure.id,
+    codeBhasile: structure.codeBhasile,
+    forms: structure.forms,
+    type: structure.structureVersions[0]?.type ?? null,
+  };
 };
 
 export const findStructureDepartement = async (
-  id: number
+  id: number,
+  now: Date
 ): Promise<{ departementAdministratif: string | null }> => {
-  return await prisma.structure.findUniqueOrThrow({
+  const structure = await prisma.structure.findUniqueOrThrow({
     where: { id },
-    select: { departementAdministratif: true },
+    select: {
+      structureVersions: {
+        ...currentVersionArgs(now),
+        select: { departementAdministratif: true },
+      },
+    },
   });
+  return {
+    departementAdministratif:
+      structure.structureVersions[0]?.departementAdministratif ?? null,
+  };
 };
 
 export const findOne = async (id: number) => {

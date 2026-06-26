@@ -26,7 +26,7 @@ import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
 import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
-import { resolveCurrentVersion } from "../structure-versions/structure-version.service";
+import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   StructureDbDetails,
@@ -156,6 +156,7 @@ export const getFullStructures = async (
       : dbStructure;
     const structure = dbStructureToApiRead(
       resolvedStructure,
+      now,
       true,
       dbStructure.bornFromCreation
     );
@@ -167,7 +168,8 @@ export const getFullStructures = async (
 };
 
 export const getResolvedStructure = async (
-  id: number
+  id: number,
+  now: Date = new Date()
 ): Promise<StructureDbDetails | null> => {
   const dbStructure = await findOne(id);
   if (!dbStructure) {
@@ -175,7 +177,7 @@ export const getResolvedStructure = async (
   }
   const currentVersion = resolveCurrentVersion(
     dbStructure.structureVersions,
-    new Date()
+    now
   );
   return currentVersion
     ? mergeStructureWithVersion(dbStructure, currentVersion)
@@ -186,7 +188,8 @@ export const getFullStructure = async (
   id: number,
   user?: SessionUser
 ): Promise<StructureApiRead | null> => {
-  const resolvedDbStructure = await getResolvedStructure(id);
+  const now = new Date();
+  const resolvedDbStructure = await getResolvedStructure(id, now);
 
   if (!resolvedDbStructure) {
     return null;
@@ -194,8 +197,9 @@ export const getFullStructure = async (
 
   const structure = dbStructureToApiRead(
     resolvedDbStructure,
+    now,
     false,
-    isBornFromCreation(resolvedDbStructure.structureVersions, new Date())
+    isBornFromCreation(resolvedDbStructure.structureVersions, now)
   );
   structure.adresses = getReadableAdresses(structure, user);
 
@@ -222,18 +226,15 @@ const getReadableAdresses = (
 
 export const getStructureForOperateur = async (
   id: number
-): Promise<StructureDbOperateur> => {
-  const dbStructure = await findOneOperateur(id);
-  if (!dbStructure) {
-    throw new Error(`Structure avec l'identifiant ${id} non trouvée`);
-  }
-  return dbStructure;
-};
+): Promise<StructureDbOperateur> => findOneOperateur(id, new Date());
 
 export const getStructureDepartement = async (
   id: number
 ): Promise<string | null> => {
-  const { departementAdministratif } = await findStructureDepartement(id);
+  const { departementAdministratif } = await findStructureDepartement(
+    id,
+    new Date()
+  );
   return departementAdministratif;
 };
 
@@ -274,6 +275,7 @@ const isBornFromCreation = (
 
 const dbStructureToApiRead = (
   dbStructure: StructureDbDetails | StructureDbList,
+  now: Date,
   simple: boolean = false,
   bornFromCreation: boolean = false
 ): StructureApiRead => {
@@ -309,7 +311,7 @@ const dbStructureToApiRead = (
   const isMultiDna =
     (dnaStructures?.length ?? 0) > 1 || (structureFinesses?.length ?? 0) > 1;
 
-  const cpomStructures = getCpomStructuresWithDates(dbStructure);
+  const cpomStructures = getCpomStructuresWithDates(dbStructure, now);
 
   const history = simple
     ? undefined
