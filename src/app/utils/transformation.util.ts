@@ -134,6 +134,23 @@ export const getTransformationFormNavigation = ({
   return { firstStep, currentStep, prevStep, nextStep, backLink };
 };
 
+export const getStructureVersionTransformationGroupLabel = (
+  type: StructureVersionTransformationType,
+  count: number
+): string => {
+  const isPlural = count > 1;
+  switch (type) {
+    case StructureVersionTransformationType.CREATION:
+      return isPlural ? "Nouvelles structures" : "Nouvelle structure";
+    case StructureVersionTransformationType.EXTENSION:
+      return isPlural ? "Extensions" : "Extension";
+    case StructureVersionTransformationType.CONTRACTION:
+      return isPlural ? "Contractions" : "Contraction";
+    case StructureVersionTransformationType.FERMETURE:
+      return isPlural ? "Fermetures" : "Fermeture";
+  }
+};
+
 export const sortStructureVersionTransformationsByType = <
   T extends { type?: StructureVersionTransformationType },
 >(

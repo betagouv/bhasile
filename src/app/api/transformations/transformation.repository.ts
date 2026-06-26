@@ -8,6 +8,7 @@ import {
   StructureVersionTransformationApiUpdate,
   TransformationApiCreate,
   TransformationApiUpdate,
+  TransformationSelectionApiUpdate,
 } from "@/schemas/api/transformation.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
@@ -64,12 +65,12 @@ export const updateOne = async (
   input: TransformationApiUpdate
 ): Promise<number> => {
   return await prisma.$transaction(async (tx) => {
-    const existingTransformation = await tx.transformation.findUniqueOrThrow({
+    const finalisedTransformation = await tx.transformation.findUniqueOrThrow({
       where: { id: input.id },
       select: { form: { select: { status: true } } },
     });
 
-    if (existingTransformation.form?.status === true) {
+    if (finalisedTransformation.form?.status === true) {
       throw new Error("Impossible de modifier une transformation finalisée");
     }
 
@@ -108,6 +109,40 @@ export const updateOne = async (
     if (isFinalizing) {
       await createStructuresForCreationBlocks(tx, input.id);
       await moveActesAdministratifsToStructures(tx, input.id);
+    }
+
+    return input.id;
+  });
+};
+
+export const resetSelection = async (
+  input: TransformationSelectionApiUpdate
+): Promise<number> => {
+  return await prisma.$transaction(async (tx) => {
+    const finalisedTransformation = await tx.transformation.findUniqueOrThrow({
+      where: { id: input.id },
+      select: { form: { select: { status: true } } },
+    });
+
+    if (finalisedTransformation.form?.status === true) {
+      throw new Error("Impossible de modifier une transformation finalisée");
+    }
+
+    await tx.structureVersionTransformation.deleteMany({
+      where: { transformationId: input.id },
+    });
+
+    await tx.transformation.update({
+      where: { id: input.id },
+      data: { type: input.type },
+    });
+
+    for (const structureVersionTransformation of input.structureVersionTransformations) {
+      await createOrUpdateStructureVersionTransformation(
+        tx,
+        input.id,
+        structureVersionTransformation
+      );
     }
 
     return input.id;

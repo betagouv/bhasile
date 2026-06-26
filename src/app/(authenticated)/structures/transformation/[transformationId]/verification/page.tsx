@@ -6,6 +6,7 @@ import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { TransformationFakeSaver } from "@/app/components/forms/TransformationFakeSaver";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useTransformationFormNavigation } from "@/app/hooks/useTransformationFormNavigation";
@@ -83,6 +84,7 @@ export default function TransformationVerificationPage() {
 
   return (
     <div className="flex flex-col gap-8 max-w-4xl mx-auto mt-6 mb-10 px-6">
+      <TransformationFakeSaver />
       {prevStep && (
         <Link
           href={prevStep.route}

@@ -20,6 +20,7 @@ type TransformationContextInternalType = {
   setTransformation: (t: TransformationApiRead | null) => void;
   registerSaver: (saver: SaveCurrentFormFn | null) => void;
   saveCurrentForm: SaveCurrentFormFn;
+  isSaverRegistered: boolean;
   shouldShowIncompleteSteps: boolean;
   setShouldShowIncompleteSteps: (value: boolean) => void;
 };
@@ -30,6 +31,7 @@ const TransformationContextInternal =
     setTransformation: () => {},
     registerSaver: () => {},
     saveCurrentForm: async () => false,
+    isSaverRegistered: false,
     shouldShowIncompleteSteps: false,
     setShouldShowIncompleteSteps: () => {},
   });
@@ -47,9 +49,11 @@ export function TransformationClientProvider({
     useState(false);
 
   const saverRef = useRef<SaveCurrentFormFn | null>(null);
+  const [isSaverRegistered, setIsSaverRegistered] = useState(false);
 
   const registerSaver = useCallback((saver: SaveCurrentFormFn | null) => {
     saverRef.current = saver;
+    setIsSaverRegistered(saver !== null);
   }, []);
 
   const saveCurrentForm = useCallback<SaveCurrentFormFn>(async () => {
@@ -66,6 +70,7 @@ export function TransformationClientProvider({
         setTransformation,
         registerSaver,
         saveCurrentForm,
+        isSaverRegistered,
         shouldShowIncompleteSteps,
         setShouldShowIncompleteSteps,
       }}
@@ -80,6 +85,7 @@ export function useOptionalTransformationContext(): {
   setTransformation: (t: TransformationApiRead) => void;
   registerSaver: (saver: SaveCurrentFormFn | null) => void;
   saveCurrentForm: SaveCurrentFormFn;
+  isSaverRegistered: boolean;
   shouldShowIncompleteSteps: boolean;
   setShouldShowIncompleteSteps: (value: boolean) => void;
 } {
@@ -91,6 +97,7 @@ export function useOptionalTransformationContext(): {
     ) => void,
     registerSaver: context.registerSaver,
     saveCurrentForm: context.saveCurrentForm,
+    isSaverRegistered: context.isSaverRegistered,
     shouldShowIncompleteSteps: context.shouldShowIncompleteSteps,
     setShouldShowIncompleteSteps: context.setShouldShowIncompleteSteps,
   };
@@ -100,6 +107,7 @@ export function useTransformationContext(): TransformationContextType & {
   setTransformation: (t: TransformationApiRead) => void;
   registerSaver: (saver: SaveCurrentFormFn | null) => void;
   saveCurrentForm: SaveCurrentFormFn;
+  isSaverRegistered: boolean;
   shouldShowIncompleteSteps: boolean;
   setShouldShowIncompleteSteps: (value: boolean) => void;
 } {
@@ -119,6 +127,7 @@ export function useTransformationContext(): TransformationContextType & {
     setTransformation: context.setTransformation,
     registerSaver: context.registerSaver,
     saveCurrentForm: context.saveCurrentForm,
+    isSaverRegistered: context.isSaverRegistered,
     shouldShowIncompleteSteps: context.shouldShowIncompleteSteps,
     setShouldShowIncompleteSteps: context.setShouldShowIncompleteSteps,
   };

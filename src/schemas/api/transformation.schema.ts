@@ -56,6 +56,14 @@ export const transformationApiCreateSchema = z.object({
     .min(1, "Au moins une structureVersionTransformation est requise"),
 });
 
+export const transformationSelectionApiUpdateSchema = z.object({
+  id: z.number(),
+  type: z.nativeEnum(TransformationType),
+  structureVersionTransformations: z
+    .array(structureVersionTransformationApiCreateSchema)
+    .min(1, "Au moins une structureVersionTransformation est requise"),
+});
+
 export type StructureVersionTransformationApiUpdate = z.infer<
   typeof structureVersionTransformationApiUpdateSchema
 >;
@@ -78,7 +86,10 @@ export type StructureVersionTransformationApiRead =
         departementAdministratif?: string | null;
         antennes?: AntenneApiType[];
         actesAdministratifs?: StructureParentActe[];
-        structureTypologies?: { year: number; placesAutorisees: number | null }[];
+        structureTypologies?: {
+          year: number;
+          placesAutorisees: number | null;
+        }[];
       };
     };
   };
@@ -89,6 +100,10 @@ export type TransformationApiUpdate = z.infer<
 
 export type TransformationApiCreate = z.infer<
   typeof transformationApiCreateSchema
+>;
+
+export type TransformationSelectionApiUpdate = z.infer<
+  typeof transformationSelectionApiUpdateSchema
 >;
 
 export type TransformationApiUpdateClient = z.input<
