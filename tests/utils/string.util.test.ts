@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   capitalizeFirstLetter,
+  formatPlural,
   normalizeAccents,
 } from "@/app/utils/string.util";
 
@@ -55,6 +56,18 @@ describe("string util", () => {
     });
     it("returns empty string when given undefined", () => {
       expect(capitalizeFirstLetter(undefined)).toBe("");
+    });
+  });
+  describe("formatPlural", () => {
+    it("ne met pas de 's' au singulier ni à zéro", () => {
+      expect(formatPlural(0, "entrée")).toBe("0 entrée");
+      expect(formatPlural(1, "entrée")).toBe("1 entrée");
+    });
+    it("met un 's' au pluriel", () => {
+      expect(formatPlural(2, "entrée")).toBe("2 entrées");
+    });
+    it("traite undefined comme zéro", () => {
+      expect(formatPlural(undefined, "entrée")).toBe("0 entrée");
     });
   });
 });

@@ -6,6 +6,7 @@ import { ReactElement } from "react";
 import { Filters } from "@/app/components/filters/Filters";
 import { ListLoader } from "@/app/components/lists/ListLoader";
 import { useCpomsSearch } from "@/app/hooks/useCpomsSearch";
+import { formatPlural } from "@/app/utils/string.util";
 
 import { CpomsTable } from "./_components/CpomsTable";
 
@@ -28,8 +29,7 @@ export default function Structures(): ReactElement {
       <div className="flex gap-2 justify-end items-center py-3.5 px-6 z-2">
         <Filters showFilters={false} showLocation={true} />
         <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
-          {totalCpoms ?? 0} entrée
-          {(totalCpoms ?? 0) > 1 ? "s" : ""}
+          {formatPlural(totalCpoms, "entrée")}
         </p>
       </div>
       <ListLoader

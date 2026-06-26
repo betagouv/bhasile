@@ -22,3 +22,11 @@ export const lowercaseFirstLetter = (
   }
   return String(value).charAt(0).toLowerCase() + String(value).slice(1);
 };
+
+export const formatPlural = (
+  count: number | undefined,
+  noun: string
+): string => {
+  const safeCount = count ?? 0;
+  return `${safeCount} ${noun}${safeCount > 1 ? "s" : ""}`;
+};
