@@ -263,7 +263,7 @@ describe("structure.repository db integration", () => {
     // THEN: the scalar is updated on the same version, its effectiveDate untouched
     const version = await fetchCurrentVersion(structure.id);
     expect(version.nom).toBe("Nom corrigé");
-    expect(version.effectiveDate.toISOString()).toBe(
+    expect(version.effectiveDate?.toISOString()).toBe(
       "2020-01-01T12:00:00.000Z"
     );
     const versionCount = await prisma.structureVersion.count({

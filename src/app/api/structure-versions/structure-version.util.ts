@@ -8,7 +8,7 @@ type VersionFields = {
 
 type ResolvableVersion = {
   id: number;
-  effectiveDate: Date;
+  effectiveDate: Date | null;
   structureVersionTransformationId: number | null;
   structureVersionTransformation:
     | {
@@ -34,12 +34,14 @@ const sortValidVersionsBefore = <TVersion extends ResolvableVersion>(
   versions
     .filter(
       (version) =>
+        version.effectiveDate !== null &&
         version.effectiveDate.getTime() < upperBoundMs &&
         isVersionValid(version)
     )
     .sort((first, second) => {
       const dateDiff =
-        second.effectiveDate.getTime() - first.effectiveDate.getTime();
+        (second.effectiveDate?.getTime() ?? 0) -
+        (first.effectiveDate?.getTime() ?? 0);
       if (dateDiff !== 0) {
         return dateDiff;
       }

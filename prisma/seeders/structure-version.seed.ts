@@ -510,7 +510,7 @@ const persistTransformation = async (
   if (!version) {
     throw new Error("StructureVersion non créée par la transformation");
   }
-  return version;
+  return { ...version, effectiveDate: version.effectiveDate! };
 };
 
 const resolveCurrentVersionId = (
@@ -598,7 +598,12 @@ export const seedStructureWithVersions = async (
       },
     });
     structureId = structure.id;
-    versionRefs.push(...structure.structureVersions);
+    versionRefs.push(
+      ...structure.structureVersions.map((structureVersion) => ({
+        id: structureVersion.id,
+        effectiveDate: structureVersion.effectiveDate!,
+      }))
+    );
   } else {
     const structureData: Prisma.StructureUncheckedCreateInput = {
       codeBhasile: params.codeBhasile,

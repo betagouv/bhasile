@@ -76,6 +76,21 @@ export const updateOne = async (
 
     const isFinalizing = input.form?.status === true;
     if (isFinalizing) {
+      const structureVersionTransformations =
+        await tx.structureVersionTransformation.findMany({
+          where: { transformationId: input.id },
+          select: { structureVersion: { select: { effectiveDate: true } } },
+        });
+      if (
+        structureVersionTransformations.some(
+          (brique) => !brique.structureVersion?.effectiveDate
+        )
+      ) {
+        throw new Error(
+          "Chaque transformation doit avoir une date d'effet avant la finalisation"
+        );
+      }
+
       const finalized = await tx.form.updateMany({
         where: { transformationId: input.id, status: false },
         data: { status: true },

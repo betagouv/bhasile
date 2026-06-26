@@ -89,6 +89,13 @@ describe("transformation.repository db integration", () => {
     });
 
   const finalizeTransformation = async (transformationId: number) => {
+    await prisma.structureVersion.updateMany({
+      where: {
+        structureVersionTransformation: { transformationId },
+        effectiveDate: null,
+      },
+      data: { effectiveDate: new Date("2024-01-01T00:00:00.000Z") },
+    });
     const formRow = await prisma.form.findFirstOrThrow({
       where: { transformationId },
     });
@@ -274,7 +281,7 @@ describe("transformation.repository db integration", () => {
     const structureVersion = await prisma.structureVersion.findUniqueOrThrow({
       where: { id: structureVersionId },
     });
-    expect(structureVersion.effectiveDate.toISOString()).toBe(fermetureDate);
+    expect(structureVersion.effectiveDate?.toISOString()).toBe(fermetureDate);
   });
 
   it("should replace structureVersion contacts on updateOne", async () => {
@@ -516,21 +523,7 @@ describe("transformation.repository db integration", () => {
     });
     expect(formDefinition.slug).toBe("transformation-v1");
 
-    const newForm = {
-      id: formRow.id,
-      status: true,
-      formDefinition: {
-        id: formDefinition.id,
-        slug: formDefinition.slug,
-        name: formDefinition.name,
-        version: formDefinition.version,
-      },
-      formSteps: [],
-    };
-    await updateOne({
-      id: transformationId,
-      form: newForm,
-    });
+    await finalizeTransformation(transformationId);
     const form = await prisma.form.findUniqueOrThrow({
       where: {
         transformationId_formDefinitionId: {
@@ -541,6 +534,38 @@ describe("transformation.repository db integration", () => {
     });
     expect(form.status).toBe(true);
     expect(form.formDefinitionId).toBe(formDefinition.id);
+  });
+
+  it("should reject finalization when a structureVersion has no effectiveDate", async () => {
+    const { transformationId } = await createBareTransformation();
+    const formRow = await prisma.form.findFirstOrThrow({
+      where: { transformationId },
+    });
+    const formDefinition = await prisma.formDefinition.findUniqueOrThrow({
+      where: { id: formRow.formDefinitionId },
+    });
+
+    await expect(
+      updateOne({
+        id: transformationId,
+        form: {
+          id: formRow.id,
+          status: true,
+          formDefinition: {
+            id: formDefinition.id,
+            slug: formDefinition.slug,
+            name: formDefinition.name,
+            version: formDefinition.version,
+          },
+          formSteps: [],
+        },
+      })
+    ).rejects.toThrow("date d'effet");
+
+    const form = await prisma.form.findFirstOrThrow({
+      where: { transformationId },
+    });
+    expect(form.status).toBe(false);
   });
 
   it("should persist operateurId on structureVersionTransformation when creating", async () => {

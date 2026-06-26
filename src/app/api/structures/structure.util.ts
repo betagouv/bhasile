@@ -207,7 +207,7 @@ export const isFinalisationFormValidated = (
 export const isBornFromCreation = (
   versions:
     | {
-        effectiveDate: Date;
+        effectiveDate: Date | null;
         structureVersionTransformation?: {
           type: StructureVersionTransformationType;
           transformation?: { form?: { status: boolean } | null } | null;
@@ -222,6 +222,7 @@ export const isBornFromCreation = (
     return (
       transformation?.type === StructureVersionTransformationType.CREATION &&
       transformation.transformation?.form?.status === true &&
+      version.effectiveDate !== null &&
       version.effectiveDate < startOfNextUtcDay(now)
     );
   }) ?? false;
@@ -567,7 +568,7 @@ const buildCreationEvent = (
       StructureVersionTransformationType.CREATION
   );
 
-  if (creationVersion) {
+  if (creationVersion?.effectiveDate) {
     const { id: ownTransformationId, transformation } =
       creationVersion.structureVersionTransformation!;
     return {
@@ -594,7 +595,7 @@ const buildTransformationEvent = (
   version: StructureVersionDbDetails
 ): HistoryEvent | null => {
   const structureVersionTransformation = version.structureVersionTransformation;
-  if (!structureVersionTransformation) {
+  if (!structureVersionTransformation || !version.effectiveDate) {
     return null;
   }
 
