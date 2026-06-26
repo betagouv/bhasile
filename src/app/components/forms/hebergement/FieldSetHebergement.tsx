@@ -146,7 +146,7 @@ export const FieldSetHebergement = ({
   return (
     <div>
       {isTransformationSurStructureExistante(formKind) && (
-        <h2 className="text-xl font-bold mb-4 text-title-blue-france">
+        <h2 className="text-xl font-bold mb-4 text-title-blue-france max-w-3xl">
           {`Veuillez conserver uniquement les adresses d’hébergement qui composent l’ensemble de la structure une fois ${getTransformationNounAvecArticle(
             formKind
           )} effective et actualiser le nombre de place attribué à chacune d’entre elles ainsi que leurs particularités.`}

@@ -21,7 +21,7 @@ export const FieldSetTypeBati = ({
   return (
     <fieldset className="flex flex-col gap-6">
       {isTransformationSurStructureExistante(formKind) && (
-        <legend className="text-xl font-bold mb-4 text-title-blue-france">
+        <legend className="text-xl font-bold mb-4 text-title-blue-france max-w-3xl">
           {`Veuillez renseigner les champs suivants en considérant l’ensemble de la structure une fois ${getTransformationNounAvecArticle(
             formKind
           )} effective.`}

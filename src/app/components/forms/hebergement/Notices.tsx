@@ -13,7 +13,7 @@ export const Notices = ({
     <div className="flex flex-col gap-6">
       {formKind !== FormKind.MODIFICATION && (
         <div className="flex flex-col gap-6" ref={hebergementsContainerRef}>
-          <p className="mb-0">
+          <p className="mb-0 max-w-3xl">
             Veuillez d’abord renseigner le type de bâti puis l’ensemble des
             adresses d’hébergement de la structure, et les informations
             associées, <strong>au 1er janvier de l’année en cours.</strong>

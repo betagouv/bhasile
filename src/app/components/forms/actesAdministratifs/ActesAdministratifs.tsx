@@ -8,9 +8,11 @@ export const ActesAdministratifs = ({ categoryDisplayRules }: Props) => {
     ([, rules]) => rules.shouldShow
   );
 
+  const hasMoreThanOneCategory = filteredCategories.length > 1;
+
   return (
     <>
-      <MaxSizeNotice />
+      {hasMoreThanOneCategory && <MaxSizeNotice />}
       {filteredCategories.map(([category, rules], index) => (
         <div key={category}>
           <FieldSetActeAdministratif
@@ -24,7 +26,9 @@ export const ActesAdministratifs = ({ categoryDisplayRules }: Props) => {
             additionalFieldsType={rules.additionalFieldsType}
             documentLabel={rules.documentLabel}
             addFileButtonLabel={rules.addFileButtonLabel}
-            notice={rules.notice}
+            notice={
+              rules.notice ?? (!hasMoreThanOneCategory && <MaxSizeNotice />)
+            }
             alternativeCategories={rules.alternativeCategories}
             avenantAlternative={rules.avenantAlternative}
           />
