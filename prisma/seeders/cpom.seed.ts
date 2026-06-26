@@ -24,7 +24,8 @@ export const createFakeCpoms = async (
   maxCpoms: number = 10,
   minStructuresPerCpom: number = 2
 ): Promise<void> => {
-  const currentYear = new Date().getFullYear();
+  const now = new Date();
+  const currentYear = now.getFullYear();
 
   console.log(`📋 Création de ${maxCpoms} CPOM maximum...`);
 
@@ -34,6 +35,12 @@ export const createFakeCpoms = async (
       structures: {
         include: {
           operateur: true,
+          structureVersions: {
+            where: { effectiveDate: { lte: now } },
+            orderBy: { effectiveDate: "desc" },
+            take: 1,
+            select: { departementAdministratif: true, type: true },
+          },
         },
       },
     },
@@ -65,7 +72,7 @@ export const createFakeCpoms = async (
   for (const operateur of operateurs) {
     for (const structure of operateur.structures) {
       const region = departementToRegion.get(
-        structure.departementAdministratif ?? ""
+        structure.structureVersions[0]?.departementAdministratif ?? ""
       );
 
       if (!region) {
@@ -133,12 +140,23 @@ export const createFakeCpoms = async (
       where: {
         id: { in: selectedStructures },
       },
+      include: {
+        structureVersions: {
+          where: { effectiveDate: { lte: now } },
+          orderBy: { effectiveDate: "desc" },
+          take: 1,
+          select: { type: true },
+        },
+      },
     });
     const structureTypes = [
       ...new Set(
-        structuresOfCpom.map((structure) => structure.type as StructureType)
+        structuresOfCpom.map(
+          (structure) =>
+            structure.structureVersions[0]?.type as StructureType | undefined
+        )
       ),
-    ].filter((type) => type !== null);
+    ].filter((type): type is StructureType => type != null);
 
     // Create budgets for each year of the CPOM and each structure type
     const budgetYears = [...Array(dureeAnnees)].map(
@@ -260,11 +278,6 @@ export const createFakeCpoms = async (
         structureId: true,
         dateStart: true,
         dateEnd: true,
-        structure: {
-          select: {
-            type: true,
-          },
-        },
       },
     });
 

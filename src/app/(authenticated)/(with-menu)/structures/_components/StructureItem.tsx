@@ -5,20 +5,28 @@ import Link from "next/link";
 import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { formatCityName } from "@/app/utils/adresse.util";
 import { formatDate } from "@/app/utils/date.util";
-import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
-import { getPlacesByCommunes } from "@/app/utils/structure.util";
+import {
+  getFermetureEvent,
+  getPlacesByCommunes,
+} from "@/app/utils/structure.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { TypeBatiBadge } from "./TypeBatiBadge";
 
-export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
-  const isStructureFinalisee = getFinalisationFormStatus(structure);
+export const StructureItem = ({
+  structure,
+  index,
+  handleOpenModal,
+  isClosed,
+}: Props) => {
+  const isStructureFinalisee = structure.isFinalised;
+  const fermetureEvent = isClosed ? getFermetureEvent(structure) : undefined;
 
   return (
     <tr
       id={`table-row-key-${index}`}
       data-row-key={index}
-      className={`border-t border-default-grey ${isStructureFinalisee ? "bg-transparent" : "bg-alt-blue-france"}`}
+      className={`border-t border-default-grey ${getBackgroundColor(isStructureFinalisee, isClosed)}`}
     >
       <td className="text-left! whitespace-nowrap">{structure.codeBhasile}</td>
       <td className="text-left! whitespace-nowrap">{structure.type}</td>
@@ -30,18 +38,29 @@ export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
       <td className="text-left! whitespace-nowrap">
         <TypeBatiBadge typeBati={structure.typeBati} />
       </td>
-      <td className="text-left!">
-        {structure.structureTypologies?.[0]?.placesAutorisees}
-      </td>
-      <td className="text-left!">
-        {structure.finConvention ? (
-          formatDate(structure.finConvention)
-        ) : (
-          <EmptyCell />
-        )}
-      </td>
+      {isClosed ? (
+        <>
+          <td className="text-left!">
+            {fermetureEvent ? formatDate(fermetureEvent.date) : <EmptyCell />}
+          </td>
+          <td className="text-left!">{fermetureEvent?.motif ?? <EmptyCell />}</td>
+        </>
+      ) : (
+        <>
+          <td className="text-left!">
+            {structure.structureTypologies?.[0]?.placesAutorisees}
+          </td>
+          <td className="text-left!">
+            {structure.finConvention ? (
+              formatDate(structure.finConvention)
+            ) : (
+              <EmptyCell />
+            )}
+          </td>
+        </>
+      )}
       <td>
-        {isStructureFinalisee ? (
+        {isClosed || isStructureFinalisee ? (
           <Link
             className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-line before:w-[20] before:h-[20]"
             title={`Détails de la structure ${structure.codeBhasile}`}
@@ -60,6 +79,19 @@ export const StructureItem = ({ structure, index, handleOpenModal }: Props) => {
       </td>
     </tr>
   );
+};
+
+const getBackgroundColor = (
+  isFinalised: boolean,
+  isClosed: boolean
+): string => {
+  if (isClosed) {
+    return "bg-contrast-grey";
+  }
+  if (!isFinalised) {
+    return "bg-alt-blue-france";
+  }
+  return "bg-transparent";
 };
 
 const getCommuneLabel = (structure: StructureApiRead) => {
@@ -90,4 +122,5 @@ type Props = {
   structure: StructureApiRead;
   index: number;
   handleOpenModal: (structure: StructureApiRead) => void;
+  isClosed: boolean;
 };

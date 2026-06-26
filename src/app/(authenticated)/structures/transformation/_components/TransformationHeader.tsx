@@ -23,7 +23,7 @@ import { ErrorModal, errorModal } from "./ErrorModal";
 import { QuitterModal, quitterModal } from "./QuitterModal";
 
 export const TransformationHeader = () => {
-  const { transformation, saveCurrentForm } =
+  const { transformation, saveCurrentForm, isSaverRegistered } =
     useOptionalTransformationContext();
   const { deleteTransformation } = useTransformations();
   const router = useRouter();
@@ -114,15 +114,17 @@ export const TransformationHeader = () => {
                 >
                   Annuler la démarche
                 </Button>
-                <Button
-                  priority="secondary"
-                  iconId="fr-icon-save-line"
-                  iconPosition="left"
-                  disabled={saveState === FetchState.LOADING}
-                  onClick={handleSaveProgress}
-                >
-                  Enregistrer l&apos;avancée
-                </Button>
+                {isSaverRegistered && (
+                  <Button
+                    priority="secondary"
+                    iconId="fr-icon-save-line"
+                    iconPosition="left"
+                    disabled={saveState === FetchState.LOADING}
+                    onClick={handleSaveProgress}
+                  >
+                    Enregistrer l’avancée
+                  </Button>
+                )}
               </>
             )}
             <Button
@@ -130,7 +132,7 @@ export const TransformationHeader = () => {
               iconId="fr-icon-close-line"
               iconPosition="left"
               onClick={() => {
-                if (transformation) {
+                if (transformation && isSaverRegistered) {
                   quitterModal.open();
                 } else {
                   router.push("/structures");

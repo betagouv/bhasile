@@ -1,24 +1,30 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
 import {
+  FINALISATION_FORM_SLUG,
+  STRUCTURE_VERSION_TRANSFORMATION_FORM_SLUGS,
+  TRANSFORMATION_FORM_SLUG,
+} from "@/app/api/forms/form.constants";
+import {
   Form,
   FormDefinition,
   FormStep,
   FormStepDefinition,
   StepStatus,
 } from "@/generated/prisma/client";
+import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 
 export const createFakeFormTransformation = (): Omit<FormDefinition, "id"> => {
   return {
     name: "transformation",
-    slug: "transformation-v1",
+    slug: TRANSFORMATION_FORM_SLUG,
     version: 1,
   };
 };
 export const createFakeFormFinalisation = (): Omit<FormDefinition, "id"> => {
   return {
     name: "finalisation",
-    slug: "finalisation-v1",
+    slug: FINALISATION_FORM_SLUG,
     version: 1,
   };
 };
@@ -28,7 +34,9 @@ export const createFakeFormStructureVersionTransformationCreation = (): Omit<
 > => {
   return {
     name: "structure-transformation-creation",
-    slug: "structure-transformation-creation-v1",
+    slug: STRUCTURE_VERSION_TRANSFORMATION_FORM_SLUGS[
+      StructureVersionTransformationType.CREATION
+    ],
     version: 1,
   };
 };
@@ -38,7 +46,9 @@ export const createFakeFormStructureVersionTransformationExtension = (): Omit<
 > => {
   return {
     name: "structure-transformation-extension",
-    slug: "structure-transformation-extension-v1",
+    slug: STRUCTURE_VERSION_TRANSFORMATION_FORM_SLUGS[
+      StructureVersionTransformationType.EXTENSION
+    ],
     version: 1,
   };
 };
@@ -48,7 +58,9 @@ export const createFakeFormStructureVersionTransformationContraction = (): Omit<
 > => {
   return {
     name: "structure-transformation-contraction",
-    slug: "structure-transformation-contraction-v1",
+    slug: STRUCTURE_VERSION_TRANSFORMATION_FORM_SLUGS[
+      StructureVersionTransformationType.CONTRACTION
+    ],
     version: 1,
   };
 };
@@ -58,7 +70,9 @@ export const createFakeFormStructureVersionTransformationFermeture = (): Omit<
 > => {
   return {
     name: "structure-transformation-fermeture",
-    slug: "structure-transformation-fermeture-v1",
+    slug: STRUCTURE_VERSION_TRANSFORMATION_FORM_SLUGS[
+      StructureVersionTransformationType.FERMETURE
+    ],
     version: 1,
   };
 };

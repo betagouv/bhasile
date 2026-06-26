@@ -6,6 +6,7 @@ import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { TransformationFakeSaver } from "@/app/components/forms/TransformationFakeSaver";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useTransformationFormNavigation } from "@/app/hooks/useTransformationFormNavigation";
@@ -83,6 +84,7 @@ export default function TransformationVerificationPage() {
 
   return (
     <>
+      <TransformationFakeSaver />
       {prevStep && (
         <Link
           href={prevStep.route}

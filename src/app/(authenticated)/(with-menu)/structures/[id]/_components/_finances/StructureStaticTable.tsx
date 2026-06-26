@@ -6,6 +6,8 @@ import { Table } from "@/app/components/common/Table";
 import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-tables/BudgetTableCommentLine";
 import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/BudgetTableLines";
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
+import { getTransformationMarkers } from "@/app/components/transformation-markers/getTransformationMarkers";
+import { TransformationMarkers } from "@/app/components/transformation-markers/TransformationMarkers";
 import { computeResultatNet } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
 
@@ -20,6 +22,8 @@ export const StructureStaticTable = (): ReactElement => {
   const isSubventionnee = structure?.isSubventionnee ?? false;
 
   const { years } = getYearRange({ order: "desc" });
+
+  const markers = getTransformationMarkers(structure?.history, years);
 
   const [isAffectationOpen, setIsAffectationOpen] = useState(false);
 
@@ -59,6 +63,11 @@ export const StructureStaticTable = (): ReactElement => {
         headings={getBudgetTableHeading({ years, structure })}
         enableBorders
         stickFirstColumn
+        overlay={
+          markers.length > 0 && (
+            <TransformationMarkers markers={markers} years={years} />
+          )
+        }
       >
         <BudgetTableLines
           years={years}

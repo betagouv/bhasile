@@ -11,3 +11,9 @@ export const RepartitionLabel: Record<Repartition, string> = {
   DIFFUS: "Diffus",
   MIXTE: "Mixte",
 };
+
+export const REPARTITION_DISPLAY_ORDER: Repartition[] = [
+  Repartition.DIFFUS,
+  Repartition.COLLECTIF,
+  Repartition.MIXTE,
+];

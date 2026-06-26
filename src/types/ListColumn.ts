@@ -6,7 +6,9 @@ export type StructureColumn =
   | "bati"
   | "communes"
   | "placesAutorisees"
-  | "finConvention";
+  | "finConvention"
+  | "effectiveDate"
+  | "motif";
 
 export type CpomColumn =
   | "operateur"

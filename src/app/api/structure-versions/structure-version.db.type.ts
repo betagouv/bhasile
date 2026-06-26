@@ -15,6 +15,16 @@ export const currentVersionWhere = (
   ],
 });
 
+export const currentVersionArgs = (now: Date) =>
+  ({
+    where: currentVersionWhere(now),
+    orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
+    take: 1,
+  }) satisfies Pick<
+    Prisma.StructureVersionFindManyArgs,
+    "where" | "orderBy" | "take"
+  >;
+
 export const structureVersionDetailsInclude = {
   contacts: true,
   adresses: {
@@ -49,7 +59,20 @@ export const structureVersionDetailsInclude = {
   structureVersionTransformation: {
     include: {
       transformation: {
-        include: { form: true },
+        include: {
+          form: true,
+          structureVersionTransformations: {
+            include: {
+              structureVersion: {
+                select: {
+                  structure: {
+                    select: { id: true, codeBhasile: true },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
   },
