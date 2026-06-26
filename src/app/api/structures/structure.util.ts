@@ -244,6 +244,9 @@ export type StructureListComputedRow = {
   latitude: StructureListLightVersion["latitude"];
   longitude: StructureListLightVersion["longitude"];
   searchValues: string[];
+  isClosed: boolean;
+  fermetureDate: Date | null;
+  fermetureMotif: string | null;
 };
 
 export const computeStructureListRow = (
@@ -273,10 +276,18 @@ export const computeStructureListRow = (
     ),
   ].filter((value): value is string => Boolean(value));
 
+  const fermetureTransformation = currentVersion.structureVersionTransformation;
+  const isClosed =
+    fermetureTransformation?.type ===
+    StructureVersionTransformationType.FERMETURE;
+
   return {
     id: structure.id,
     codeBhasile: structure.codeBhasile,
     currentVersionId: currentVersion.id,
+    isClosed,
+    fermetureDate: isClosed ? currentVersion.effectiveDate : null,
+    fermetureMotif: isClosed ? (fermetureTransformation?.motif ?? null) : null,
     bornFromCreation,
     hasForm: structure.forms.length > 0,
     finalised: bornFromCreation || isFinalisationFormValidated(structure.forms),
@@ -297,6 +308,20 @@ export const computeStructureListRow = (
     searchValues,
   };
 };
+
+export const getFermetureHistory = (
+  row: StructureListComputedRow
+): HistoryEvent[] =>
+  row.isClosed && row.fermetureDate
+    ? [
+        {
+          kind: "FERMETURE",
+          date: row.fermetureDate.toISOString(),
+          motif: row.fermetureMotif,
+          targets: [],
+        },
+      ]
+    : [];
 
 const parsePlacesRange = (
   value: string | null | undefined
@@ -329,6 +354,12 @@ export const filterStructureRows = (
 
   return rows.filter((row) => {
     if (!includeNonVisible && !row.hasForm && !row.bornFromCreation) {
+      return false;
+    }
+    if (filters.isClosed && !row.isClosed) {
+      return false;
+    }
+    if (!filters.isClosed && row.isClosed) {
       return false;
     }
     if (filters.finalised && !row.finalised) {

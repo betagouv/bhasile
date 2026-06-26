@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
   StructureDbList,
   StructureListLight,
@@ -8,6 +9,7 @@ import {
 import { SearchProps } from "@/app/api/structures/structure.service";
 import {
   computeStructureListRow,
+  fermetureHistory,
   filterStructureRows,
   getDatesConvention,
   getDatesPeriodeAutorisation,
@@ -252,6 +254,9 @@ const buildRow = (
   latitude: null,
   longitude: null,
   searchValues: ["A-001"],
+  isClosed: false,
+  fermetureDate: null,
+  fermetureMotif: null,
   ...overrides,
 });
 
@@ -381,5 +386,128 @@ describe("sortStructureRows", () => {
         (row) => row.codeBhasile
       )
     ).toEqual(["A", "B"]);
+  });
+});
+
+const fermetureVersion = (overrides: Partial<StructureListLightVersion> = {}) =>
+  buildVersion({
+    id: 20,
+    effectiveDate: new Date("2025-03-10T00:00:00.000Z"),
+    structureVersionTransformationId: 7,
+    structureVersionTransformation: {
+      type: StructureVersionTransformationType.FERMETURE,
+      motif: "Fin de prise en charge",
+      transformation: { form: { status: true } },
+    } as unknown as StructureListLightVersion["structureVersionTransformation"],
+    ...overrides,
+  });
+
+describe("computeStructureListRow closure derivation", () => {
+  it("flags a finalised fermeture as closed with its date and motif", () => {
+    const version = fermetureVersion();
+    const row = computeStructureListRow(
+      buildLightStructure({}, version),
+      version,
+      now
+    );
+
+    expect(row?.isClosed).toBe(true);
+    expect(row?.fermetureDate).toEqual(new Date("2025-03-10T00:00:00.000Z"));
+    expect(row?.fermetureMotif).toBe("Fin de prise en charge");
+  });
+
+  it("leaves a non-fermeture current version open with null date and motif", () => {
+    const version = buildVersion();
+    const row = computeStructureListRow(
+      buildLightStructure({}, version),
+      version,
+      now
+    );
+
+    expect(row?.isClosed).toBe(false);
+    expect(row?.fermetureDate).toBe(null);
+    expect(row?.fermetureMotif).toBe(null);
+  });
+});
+
+describe("filterStructureRows closed toggle", () => {
+  const rows = [
+    buildRow({ id: 1, isClosed: false }),
+    buildRow({ id: 2, isClosed: true }),
+  ];
+
+  it("keeps only closed rows when isClosed is true", () => {
+    const filtered = filterStructureRows(
+      rows,
+      { ...emptyFilters, isClosed: true },
+      { includeNonVisible: false }
+    );
+    expect(filtered.map((row) => row.id)).toEqual([2]);
+  });
+
+  it("keeps only open rows when isClosed is false or absent", () => {
+    expect(
+      filterStructureRows(
+        rows,
+        { ...emptyFilters, isClosed: false },
+        { includeNonVisible: false }
+      ).map((row) => row.id)
+    ).toEqual([1]);
+    expect(
+      filterStructureRows(rows, emptyFilters, {
+        includeNonVisible: false,
+      }).map((row) => row.id)
+    ).toEqual([1]);
+  });
+});
+
+describe("fermetureHistory", () => {
+  it("builds a single FERMETURE event for a closed row", () => {
+    const row = buildRow({
+      isClosed: true,
+      fermetureDate: new Date("2025-03-10T00:00:00.000Z"),
+      fermetureMotif: "Fin de prise en charge",
+    });
+
+    expect(fermetureHistory(row)).toEqual([
+      {
+        kind: "FERMETURE",
+        date: "2025-03-10T00:00:00.000Z",
+        motif: "Fin de prise en charge",
+        targets: [],
+      },
+    ]);
+  });
+
+  it("returns no events for an open row", () => {
+    expect(fermetureHistory(buildRow({ isClosed: false }))).toEqual([]);
+  });
+});
+
+describe("closed means currently-closed, not ever-closed", () => {
+  it("is closed when the fermeture is the latest valid version", () => {
+    const versions = [buildVersion(), fermetureVersion()];
+    const structure = buildLightStructure({ structureVersions: versions });
+    const current = resolveCurrentVersion(structure.structureVersions, now);
+
+    expect(computeStructureListRow(structure, current, now)?.isClosed).toBe(
+      true
+    );
+  });
+
+  it("is open again when a later valid version supersedes the fermeture", () => {
+    const reopen = buildVersion({
+      id: 30,
+      effectiveDate: new Date("2025-09-01T00:00:00.000Z"),
+      structureVersionTransformationId: null,
+      structureVersionTransformation: null,
+    });
+    const versions = [fermetureVersion(), reopen];
+    const structure = buildLightStructure({ structureVersions: versions });
+    const current = resolveCurrentVersion(structure.structureVersions, now);
+
+    expect(computeStructureListRow(structure, current, now)?.isClosed).toBe(
+      false
+    );
   });
 });

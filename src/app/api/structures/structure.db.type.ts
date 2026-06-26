@@ -16,6 +16,7 @@ export const structureListLightVersionSelect = {
   structureVersionTransformation: {
     select: {
       type: true,
+      motif: true,
       transformation: { select: { form: { select: { status: true } } } },
     },
   },

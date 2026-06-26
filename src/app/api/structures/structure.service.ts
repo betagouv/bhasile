@@ -47,6 +47,7 @@ import {
   getCurrentPlacesQpv,
   getDatesConvention,
   getDatesPeriodeAutorisation,
+  getFermetureHistory,
   getOperateurLabel,
   getTypeBati,
   isBornFromCreation,
@@ -71,6 +72,7 @@ export type SearchProps = {
   map?: boolean;
   selection?: boolean;
   finalised?: boolean;
+  isClosed?: boolean;
 };
 
 export const updateStructureAgent = async (
@@ -177,6 +179,9 @@ export const getFullStructures = async (
         row.bornFromCreation
       );
       structure.adresses = getReadableAdresses(structure, user);
+      if (row.isClosed) {
+        structure.history = getFermetureHistory(row);
+      }
       return structure;
     })
     .filter(
