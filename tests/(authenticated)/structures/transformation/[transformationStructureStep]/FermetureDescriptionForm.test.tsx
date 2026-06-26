@@ -128,13 +128,19 @@ describe("FermetureDescriptionForm (intégration jusqu'au fetch)", () => {
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    // THEN the incomplete step is saved (PUT) and the user moves on (no blocking)
+    // THEN the incomplete step is saved (PUT) without a closure date and the user moves on (no blocking)
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
         `/api/transformations/${TRANSFORMATION_ID}`,
         expect.objectContaining({ method: "PUT" })
       )
     );
+    const structureVersionTransformation = savedStructureVersionTransformation();
+    expect(structureVersionTransformation.structureVersion).toEqual({
+      id: 12,
+      structureId: 104,
+    });
+    expect(structureVersionTransformation.actesAdministratifs).toEqual([]);
     await waitFor(() =>
       expect(mockRouterPush).toHaveBeenCalledWith(
         "/structures/transformation/12/verification"
