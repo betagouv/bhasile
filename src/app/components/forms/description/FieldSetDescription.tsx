@@ -34,20 +34,6 @@ export const FieldSetDescription = ({
 
   return (
     <>
-      {isCreation ? (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <InputWithValidation
-              name="creationDate"
-              control={control}
-              type="date"
-              label="Date d’ouverture"
-              id="creationDate"
-            />
-          </div>
-          <hr />
-        </>
-      ) : null}
       <fieldset className="flex flex-col gap-6">
         <legend className="text-xl font-bold mb-10 text-title-blue-france">
           {title}
