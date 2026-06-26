@@ -27,7 +27,8 @@ export const ActesAdministratifs = ({ categoryDisplayRules }: Props) => {
             documentLabel={rules.documentLabel}
             addFileButtonLabel={rules.addFileButtonLabel}
             notice={
-              rules.notice ?? (!hasMoreThanOneCategory && <MaxSizeNotice />)
+              rules.notice ??
+              (!hasMoreThanOneCategory ? <MaxSizeNotice /> : undefined)
             }
             alternativeCategories={rules.alternativeCategories}
             avenantAlternative={rules.avenantAlternative}
