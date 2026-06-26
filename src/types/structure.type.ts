@@ -11,3 +11,11 @@ export enum StructureType {
   CAES = "CAES",
   PRAHDA = "PRAHDA",
 }
+
+export const STRUCTURE_TYPES_DISPLAY_ORDER: StructureType[] = [
+  StructureType.CADA,
+  StructureType.CAES,
+  StructureType.CPH,
+  StructureType.HUDA,
+  StructureType.PRAHDA,
+];

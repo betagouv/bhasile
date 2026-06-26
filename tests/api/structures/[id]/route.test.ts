@@ -49,6 +49,7 @@ vi.mock("@/app/api/activites/activite.service", () => ({
 vi.mock("@/app/api/structures/structure.util", () => ({
   getAdresseAdministrativeCoordinates: (...args: unknown[]) =>
     mockGetAdresseAdministrativeCoordinates(...args),
+  buildStructureHistory: vi.fn().mockReturnValue([]),
   getCpomStructuresWithDates: vi.fn().mockReturnValue([]),
   getCurrentPlacesAutorisees: vi.fn().mockReturnValue(10),
   getCurrentPlacesLogementsSociaux: vi.fn().mockReturnValue(2),
@@ -136,6 +137,7 @@ describe("GET /api/structures/[id]", () => {
       contacts: [],
       documentsFinanciers: [],
       cpomStructures: [],
+      history: [],
       creationDate: "2020-01-01T00:00:00.000Z",
       date303: undefined,
       debutConvention: null,

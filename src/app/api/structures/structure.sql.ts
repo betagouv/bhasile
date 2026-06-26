@@ -86,7 +86,8 @@ export const buildStructuresOrderSql = (
   direction: "asc" | "desc"
 ): Prisma.Sql => {
   const dir = direction === "desc" ? Prisma.sql`DESC` : Prisma.sql`ASC`;
-  const byColumn: Record<StructureColumn, Prisma.Sql> = {
+
+  const byColumn: Partial<Record<StructureColumn, Prisma.Sql>> = {
     codeBhasile: Prisma.sql`s."codeBhasile"`,
     type: Prisma.sql`sv."type"`,
     operateur: Prisma.sql`o."name"`,
@@ -96,7 +97,8 @@ export const buildStructuresOrderSql = (
     placesAutorisees: Prisma.sql`st."placesAutorisees"`,
     finConvention: Prisma.sql`s."finConvention"`,
   };
-  return Prisma.sql`${byColumn[column]} ${dir}, s."codeBhasile" ASC`;
+  const orderExpression = byColumn[column] ?? Prisma.sql`s."codeBhasile"`;
+  return Prisma.sql`${orderExpression} ${dir}, s."codeBhasile" ASC`;
 };
 
 export const buildStructuresWhereSql = (

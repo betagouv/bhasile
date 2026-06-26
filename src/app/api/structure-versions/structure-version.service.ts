@@ -29,10 +29,10 @@ const isVersionValid = (version: StructureVersionDbDetails): boolean => {
   );
 };
 
-const resolveLatestValidBefore = (
+const sortValidVersionsBefore = (
   versions: StructureVersionDbDetails[],
   upperBoundMs: number
-): StructureVersionDbDetails | undefined =>
+): StructureVersionDbDetails[] =>
   versions
     .filter(
       (version) =>
@@ -46,19 +46,24 @@ const resolveLatestValidBefore = (
         return dateDiff;
       }
       return second.id - first.id;
-    })[0];
+    });
+
+export const getValidVersions = (
+  versions: StructureVersionDbDetails[],
+  now: Date
+): StructureVersionDbDetails[] =>
+  sortValidVersionsBefore(versions, startOfNextUtcDay(now).getTime());
 
 export const resolveCurrentVersion = (
   versions: StructureVersionDbDetails[],
   now: Date
-): StructureVersionDbDetails | undefined =>
-  resolveLatestValidBefore(versions, startOfNextUtcDay(now).getTime());
+): StructureVersionDbDetails | undefined => getValidVersions(versions, now)[0];
 
 export const resolvePredecessor = (
   versions: StructureVersionDbDetails[],
   effectiveDate: Date
 ): StructureVersionDbDetails | undefined =>
-  resolveLatestValidBefore(versions, effectiveDate.getTime());
+  sortValidVersionsBefore(versions, effectiveDate.getTime())[0];
 
 const mapVersionScalars = (
   source: StructureDbDetails | StructureVersionDbTransformation

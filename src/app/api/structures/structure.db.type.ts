@@ -134,6 +134,9 @@ export const structureDetailsInclude = {
             },
           },
           operateur: true,
+          departements: {
+            include: { departement: true },
+          },
           actesAdministratifs: {
             include: { fileUploads: true },
           },
