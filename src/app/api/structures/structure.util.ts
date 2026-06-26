@@ -1,32 +1,46 @@
-import { getDatesOfCurrentActeAdministratif } from "@/app/api/actes-administratifs/acte-administratif.util";
+import {
+  ActeAdministratifDates,
+  getDatesOfCurrentActeAdministratif,
+} from "@/app/api/actes-administratifs/acte-administratif.util";
 import { getDatesConvention as getCpomDatesConvention } from "@/app/api/cpoms/cpom.util";
 import { getCoordinates } from "@/app/utils/adresse.util";
 import {
   getYearFromDate,
   getYearRange,
   recursivelySerializeDates,
+  startOfNextUtcDay,
 } from "@/app/utils/date.util";
-import { CURRENT_YEAR } from "@/constants";
+import { normalizeAccents, parseCommaList } from "@/app/utils/string.util";
+import { CURRENT_YEAR, DEFAULT_PAGE_SIZE } from "@/constants";
 import {
   PublicType,
+  StructureType,
   StructureVersionTransformationType,
 } from "@/generated/prisma/client";
 import { AdresseTypologieApiType } from "@/schemas/api/adresse.schema";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
+import { StructureColumn } from "@/types/ListColumn";
 import {
   CpomRef,
   HistoryEvent,
   StructureRef,
 } from "@/types/structure-history.type";
 
+import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
+import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import {
-  StructureVersionDbDetails,
-  StructureVersionDbTransformation,
-} from "../structure-versions/structure-version.db.type";
-import { getValidVersions } from "../structure-versions/structure-version.service";
-import { StructureDbDetails, StructureDbList } from "./structure.db.type";
+  getValidVersions,
+  resolveCurrentVersionFields,
+} from "../structure-versions/structure-version.util";
+import {
+  StructureDbDetails,
+  StructureDbList,
+  StructureListLight,
+  StructureListLightVersion,
+} from "./structure.db.type";
+import type { SearchProps } from "./structure.service";
 
 const typesPublic: Record<string, PublicType> = {
   "tout public": PublicType.TOUT_PUBLIC,
@@ -81,42 +95,38 @@ export const getAdresseAdministrativeCoordinates = async (
   };
 };
 
-export const getTypeBati = (
-  structure: StructureDbDetails | StructureDbList | StructureVersionDbTransformation
-): Repartition | undefined => {
-  const repartitions = structure.adresses?.map(
-    (adresse) => adresse.repartition
-  );
-  const isDiffus = repartitions?.some(
-    (repartition) => repartition === Repartition.DIFFUS
-  );
-  const isCollectif = repartitions?.some(
-    (repartition) => repartition === Repartition.COLLECTIF
-  );
+export const getTypeBati = (structure: {
+  adresses?: { repartition: Repartition | null }[] | null;
+}): Repartition | undefined => {
+  const repartitions = (structure.adresses ?? [])
+    .map((adresse) => adresse.repartition)
+    .filter((repartition): repartition is Repartition => repartition !== null);
 
-  if (isDiffus && isCollectif) {
-    return Repartition.MIXTE;
+  if (repartitions.length === 0) {
+    return undefined;
   }
-  if (isDiffus) {
-    return Repartition.DIFFUS;
-  }
-  if (isCollectif) {
+  if (
+    repartitions.every((repartition) => repartition === Repartition.COLLECTIF)
+  ) {
     return Repartition.COLLECTIF;
   }
-  return undefined;
+  if (repartitions.every((repartition) => repartition === Repartition.DIFFUS)) {
+    return Repartition.DIFFUS;
+  }
+  return Repartition.MIXTE;
 };
 
-export const getDatesConvention = (
-  structure: StructureDbDetails | StructureDbList
-): [Date | null, Date | null] =>
+export const getDatesConvention = (structure: {
+  actesAdministratifs: ActeAdministratifDates[];
+}): [Date | null, Date | null] =>
   getDatesOfCurrentActeAdministratif(
     structure.actesAdministratifs,
     "CONVENTION"
   );
 
-export const getDatesPeriodeAutorisation = (
-  structure: StructureDbDetails | StructureDbList
-): [Date | null, Date | null] =>
+export const getDatesPeriodeAutorisation = (structure: {
+  actesAdministratifs: ActeAdministratifDates[];
+}): [Date | null, Date | null] =>
   getDatesOfCurrentActeAdministratif(
     structure.actesAdministratifs,
     "ARRETE_AUTORISATION"
@@ -184,36 +194,339 @@ export const isStructureInCpomPerYear = (
   );
 };
 
+export const isFinalisationFormValidated = (
+  forms:
+    | { status: boolean; formDefinition: { slug: string } }[]
+    | null
+    | undefined
+): boolean =>
+  forms?.some(
+    (form) => form.formDefinition.slug === FINALISATION_FORM_SLUG && form.status
+  ) ?? false;
+
+export const isBornFromCreation = (
+  versions:
+    | {
+        effectiveDate: Date;
+        structureVersionTransformation?: {
+          type: StructureVersionTransformationType;
+          transformation?: { form?: { status: boolean } | null } | null;
+        } | null;
+      }[]
+    | null
+    | undefined,
+  now: Date
+): boolean =>
+  versions?.some((version) => {
+    const transformation = version.structureVersionTransformation;
+    return (
+      transformation?.type === StructureVersionTransformationType.CREATION &&
+      transformation.transformation?.form?.status === true &&
+      version.effectiveDate < startOfNextUtcDay(now)
+    );
+  }) ?? false;
+
+export type StructureListComputedRow = {
+  id: number;
+  codeBhasile: string | null;
+  currentVersionId: number;
+  bornFromCreation: boolean;
+  hasForm: boolean;
+  finalised: boolean;
+  type: StructureType | null;
+  operateurName: string | null;
+  departementAdministratif: string | null;
+  communeAdministrative: string | null;
+  bati: Repartition | undefined;
+  placesAutorisees: number | null;
+  latestNonNullPlacesAutorisees: number | null;
+  finConvention: Date | null;
+  latitude: StructureListLightVersion["latitude"];
+  longitude: StructureListLightVersion["longitude"];
+  searchValues: string[];
+};
+
+export const computeStructureListRow = (
+  structure: StructureListLight,
+  currentVersion: StructureListLightVersion | undefined,
+  now: Date
+): StructureListComputedRow | null => {
+  if (!currentVersion) {
+    return null;
+  }
+
+  const bornFromCreation = isBornFromCreation(structure.structureVersions, now);
+  const operateurName = structure.operateur?.name ?? null;
+
+  const searchValues = [
+    structure.codeBhasile,
+    currentVersion.nom,
+    currentVersion.departementAdministratif,
+    currentVersion.communeAdministrative,
+    currentVersion.codePostalAdministratif,
+    operateurName,
+    ...currentVersion.dnaStructures.map(
+      (dnaStructure) => dnaStructure.dna.code
+    ),
+    ...currentVersion.structureFinesses.map(
+      (structureFiness) => structureFiness.finess.code
+    ),
+  ].filter((value): value is string => Boolean(value));
+
+  return {
+    id: structure.id,
+    codeBhasile: structure.codeBhasile,
+    currentVersionId: currentVersion.id,
+    bornFromCreation,
+    hasForm: structure.forms.length > 0,
+    finalised: bornFromCreation || isFinalisationFormValidated(structure.forms),
+    type: currentVersion.type,
+    operateurName,
+    departementAdministratif: currentVersion.departementAdministratif,
+    communeAdministrative: currentVersion.communeAdministrative,
+    bati: getTypeBati(currentVersion),
+    placesAutorisees:
+      currentVersion.structureTypologies[0]?.placesAutorisees ?? null,
+    latestNonNullPlacesAutorisees:
+      currentVersion.structureTypologies.find(
+        (typologie) => typologie.placesAutorisees !== null
+      )?.placesAutorisees ?? null,
+    finConvention: getDatesConvention(structure)[1],
+    latitude: currentVersion.latitude,
+    longitude: currentVersion.longitude,
+    searchValues,
+  };
+};
+
+const parsePlacesRange = (
+  value: string | null | undefined
+): [number | null, number | null] => {
+  if (!value) {
+    return [null, null];
+  }
+  const [minString, maxString] = value.split(",");
+  const min = minString ? Number(minString) : null;
+  const max = maxString ? Number(maxString) : null;
+  if (min === null || max === null || Number.isNaN(min) || Number.isNaN(max)) {
+    return [null, null];
+  }
+  return [min, max];
+};
+
+export const filterStructureRows = (
+  rows: StructureListComputedRow[],
+  filters: SearchProps,
+  { includeNonVisible }: { includeNonVisible: boolean }
+): StructureListComputedRow[] => {
+  const typeList = parseCommaList(filters.type);
+  const departementList = parseCommaList(filters.departements);
+  const operateurList = parseCommaList(filters.operateurs);
+  const batiList = parseCommaList(filters.bati).map((value) =>
+    value.toUpperCase()
+  );
+  const search = filters.search ? normalizeAccents(filters.search) : null;
+  const [placesMin, placesMax] = parsePlacesRange(filters.placesAutorisees);
+
+  return rows.filter((row) => {
+    if (!includeNonVisible && !row.hasForm && !row.bornFromCreation) {
+      return false;
+    }
+    if (filters.finalised && !row.finalised) {
+      return false;
+    }
+    if (typeList.length > 0 && (!row.type || !typeList.includes(row.type))) {
+      return false;
+    }
+    if (
+      departementList.length > 0 &&
+      (!row.departementAdministratif ||
+        !departementList.includes(row.departementAdministratif))
+    ) {
+      return false;
+    }
+    if (
+      operateurList.length > 0 &&
+      (!row.operateurName || !operateurList.includes(row.operateurName))
+    ) {
+      return false;
+    }
+    if (
+      batiList.length > 0 &&
+      (!row.bati || !batiList.includes(row.bati.toUpperCase()))
+    ) {
+      return false;
+    }
+    if (
+      placesMin !== null &&
+      placesMax !== null &&
+      (row.placesAutorisees === null ||
+        row.placesAutorisees < placesMin ||
+        row.placesAutorisees > placesMax)
+    ) {
+      return false;
+    }
+    if (
+      search &&
+      !row.searchValues.some((value) =>
+        normalizeAccents(value).includes(search)
+      )
+    ) {
+      return false;
+    }
+    return true;
+  });
+};
+
+type SortValue = string | number | null;
+
+const sortValueForColumn = (
+  row: StructureListComputedRow,
+  column: StructureColumn
+): { value: SortValue; kind: "text" | "number" } => {
+  switch (column) {
+    case "codeBhasile":
+      return { value: row.codeBhasile, kind: "text" };
+    case "type":
+      return { value: row.type, kind: "text" };
+    case "operateur":
+      return { value: row.operateurName, kind: "text" };
+    case "departementAdministratif":
+      return { value: row.departementAdministratif, kind: "text" };
+    case "bati":
+      return { value: row.bati ?? null, kind: "text" };
+    case "communes":
+      return { value: row.communeAdministrative, kind: "text" };
+    case "placesAutorisees":
+      return { value: row.placesAutorisees, kind: "number" };
+    case "finConvention":
+      return {
+        value: row.finConvention ? row.finConvention.getTime() : null,
+        kind: "number",
+      };
+    default:
+      return { value: row.codeBhasile, kind: "text" };
+  }
+};
+
+const compareSortValues = (
+  first: SortValue,
+  second: SortValue,
+  direction: "asc" | "desc",
+  kind: "text" | "number"
+): number => {
+  const firstIsNull = first === null;
+  const secondIsNull = second === null;
+  if (firstIsNull && secondIsNull) {
+    return 0;
+  }
+  if (firstIsNull) {
+    return direction === "asc" ? 1 : -1;
+  }
+  if (secondIsNull) {
+    return direction === "asc" ? -1 : 1;
+  }
+  const comparison =
+    kind === "text"
+      ? String(first).localeCompare(String(second), "fr")
+      : (first as number) - (second as number);
+  return direction === "asc" ? comparison : -comparison;
+};
+
+export const sortStructureRows = (
+  rows: StructureListComputedRow[],
+  column: StructureColumn,
+  direction: "asc" | "desc"
+): StructureListComputedRow[] =>
+  [...rows].sort((first, second) => {
+    const firstValue = sortValueForColumn(first, column);
+    const secondValue = sortValueForColumn(second, column);
+    const primary = compareSortValues(
+      firstValue.value,
+      secondValue.value,
+      direction,
+      firstValue.kind
+    );
+    if (primary !== 0) {
+      return primary;
+    }
+    const secondary = compareSortValues(
+      first.codeBhasile,
+      second.codeBhasile,
+      "asc",
+      "text"
+    );
+    return secondary;
+  });
+
+export const paginateRows = <T>(rows: T[], page: number): T[] =>
+  rows.slice(
+    page * DEFAULT_PAGE_SIZE,
+    page * DEFAULT_PAGE_SIZE + DEFAULT_PAGE_SIZE
+  );
+
 export const getCpomStructuresWithDates = (
-  structure: StructureDbDetails | StructureDbList
+  structure: StructureDbDetails | StructureDbList,
+  now: Date
 ): CpomStructureApiRead[] | undefined => {
   const cpomStructures = structure.cpomStructures?.map((cpomStructure) => {
     const [cpomDateStart, cpomDateEnd] = getCpomDatesConvention(
       cpomStructure.cpom
     );
 
+    const cpom = cpomStructure.cpom;
+    const linkedStructures =
+      cpom && "structures" in cpom ? cpom.structures : undefined;
+
     return recursivelySerializeDates({
       ...cpomStructure,
-      cpom: cpomStructure.cpom
+      cpom: cpom
         ? {
-            ...cpomStructure.cpom,
+            ...cpom,
             dateStart: cpomDateStart,
             dateEnd: cpomDateEnd,
-            granularity: cpomStructure.cpom.granularity,
+            granularity: cpom.granularity,
             actesAdministratifs:
-              cpomStructure.cpom.actesAdministratifs?.map(
-                (acteAdministratif) => ({
-                  ...acteAdministratif,
-                  startDate: acteAdministratif.startDate ?? undefined,
-                  endDate: acteAdministratif.endDate ?? undefined,
-                  date: acteAdministratif.date ?? undefined,
-                })
-              ) ?? [],
+              cpom.actesAdministratifs?.map((acteAdministratif) => ({
+                ...acteAdministratif,
+                startDate: acteAdministratif.startDate ?? undefined,
+                endDate: acteAdministratif.endDate ?? undefined,
+                date: acteAdministratif.date ?? undefined,
+              })) ?? [],
+            ...(linkedStructures
+              ? {
+                  structures: linkedStructures.map((linkedStructure) =>
+                    resolveLinkedStructureFields(linkedStructure, now)
+                  ),
+                }
+              : {}),
           }
-        : cpomStructure.cpom,
+        : cpom,
     }) as CpomStructureApiRead;
   });
   return cpomStructures;
+};
+
+type CpomDetailsView = NonNullable<
+  NonNullable<StructureDbDetails["cpomStructures"]>[number]["cpom"]
+>;
+
+type CpomLinkedStructureRow = CpomDetailsView extends {
+  structures: (infer Row)[];
+}
+  ? Row
+  : never;
+
+const resolveLinkedStructureFields = (
+  linkedStructure: CpomLinkedStructureRow,
+  now: Date
+) => {
+  if (!linkedStructure.structure) {
+    return linkedStructure;
+  }
+  return {
+    ...linkedStructure,
+    structure: resolveCurrentVersionFields(linkedStructure.structure, now),
+  };
 };
 
 type SiblingTransformation = NonNullable<
@@ -381,10 +694,5 @@ export const buildStructureHistory = (
     ...buildCpomEvents(cpomStructures),
   ].filter((event): event is HistoryEvent => event !== null);
 
-  return events.sort((first, second) => {
-    if (first.date === second.date) {
-      return 0;
-    }
-    return first.date < second.date ? 1 : -1;
-  });
+  return events.sort((first, second) => second.date.localeCompare(first.date));
 };

@@ -4,6 +4,10 @@ import { EntityId } from "@/types/Entity.type";
 import { StepStatus } from "@/types/form.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
+import {
+  FINALISATION_FORM_SLUG,
+  STRUCTURE_VERSION_TRANSFORMATION_FORM_SLUGS,
+} from "./form.constants";
 import { convertToStepStatus } from "./form.util";
 
 export const createOrUpdateForms = async (
@@ -154,12 +158,14 @@ export const initializeStructureDefaultForms = async (
   }
 
   const formDefinition = await tx.formDefinition.findUnique({
-    where: { slug: "finalisation-v1" },
+    where: { slug: FINALISATION_FORM_SLUG },
     include: { stepsDefinition: true },
   });
 
   if (!formDefinition) {
-    throw new Error("FormDefinition with slug finalisation-v1 not found");
+    throw new Error(
+      `FormDefinition with slug ${FINALISATION_FORM_SLUG} not found`
+    );
   }
 
   const formEntity = await tx.form.create({
@@ -196,26 +202,18 @@ export const initializeStructureVersionTransformationDefaultForms = async (
   structureVersionTransformationId: number,
   structureVersionTransformationType: StructureVersionTransformationType
 ): Promise<void> => {
-  const slugs = {
-    [StructureVersionTransformationType.FERMETURE]:
-      "structure-transformation-fermeture-v1",
-    [StructureVersionTransformationType.EXTENSION]:
-      "structure-transformation-extension-v1",
-    [StructureVersionTransformationType.CONTRACTION]:
-      "structure-transformation-contraction-v1",
-    [StructureVersionTransformationType.CREATION]:
-      "structure-transformation-creation-v1",
-  };
+  const slug =
+    STRUCTURE_VERSION_TRANSFORMATION_FORM_SLUGS[
+      structureVersionTransformationType
+    ];
 
   const formDefinition = await tx.formDefinition.findUnique({
-    where: { slug: slugs[structureVersionTransformationType] },
+    where: { slug },
     include: { stepsDefinition: true },
   });
 
   if (!formDefinition) {
-    throw new Error(
-      `FormDefinition with slug ${slugs[structureVersionTransformationType]} not found`
-    );
+    throw new Error(`FormDefinition with slug ${slug} not found`);
   }
 
   const formEntity = await tx.form.create({

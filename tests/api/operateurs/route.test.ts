@@ -55,10 +55,13 @@ describe("GET /api/operateurs", () => {
       ],
       totalOperateurs: 1,
     });
-    expect(mockGetPaginatedOperateurs).toHaveBeenCalledWith({
-      page: "1",
-      search: "Adoma",
-    });
+    expect(mockGetPaginatedOperateurs).toHaveBeenCalledWith(
+      {
+        page: "1",
+        search: "Adoma",
+      },
+      expect.any(Date)
+    );
     expect(mockCountOperateurs).toHaveBeenCalledWith({ search: "Adoma" });
   });
 });

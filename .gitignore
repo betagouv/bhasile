@@ -59,3 +59,5 @@ next-env.d.ts
 /playwright/.cache/
 /playwright/.auth/
 
+# Private tests
+/tmp/

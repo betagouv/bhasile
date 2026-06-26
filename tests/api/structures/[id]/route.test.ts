@@ -60,6 +60,8 @@ vi.mock("@/app/api/structures/structure.util", () => ({
   isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
   getDatesConvention: vi.fn().mockReturnValue([null, null]),
   getDatesPeriodeAutorisation: vi.fn().mockReturnValue([null, null]),
+  isBornFromCreation: vi.fn().mockReturnValue(false),
+  isFinalisationFormValidated: vi.fn().mockReturnValue(false),
 }));
 
 vi.mock("@/app/api/antennes/antenne.util", () => ({
@@ -165,6 +167,7 @@ describe("GET /api/structures/[id]", () => {
       },
       isInCpom: false,
       isInCpomPerYear: {},
+      isFinalised: false,
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);
     expect(mockFindOneOperateur).not.toHaveBeenCalled();
@@ -226,7 +229,7 @@ describe("GET /api/structures/[id]", () => {
     // THEN
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual(structure);
-    expect(mockFindOneOperateur).toHaveBeenCalledWith(1);
+    expect(mockFindOneOperateur).toHaveBeenCalledWith(1, expect.any(Date));
     expect(mockFindOne).not.toHaveBeenCalled();
   });
 
