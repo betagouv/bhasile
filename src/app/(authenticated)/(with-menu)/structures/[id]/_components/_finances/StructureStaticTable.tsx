@@ -6,14 +6,14 @@ import { Table } from "@/app/components/common/Table";
 import { BudgetTableCommentLine } from "@/app/components/forms/finance/budget-tables/BudgetTableCommentLine";
 import { BudgetTableLines } from "@/app/components/forms/finance/budget-tables/BudgetTableLines";
 import { getBudgetTableHeading } from "@/app/components/forms/finance/budget-tables/getBudgetTableHeading";
+import { getTransformationMarkers } from "@/app/components/transformation-markers/getTransformationMarkers";
+import { TransformationMarkers } from "@/app/components/transformation-markers/TransformationMarkers";
 import { computeResultatNet } from "@/app/utils/budget.util";
 import { getYearRange } from "@/app/utils/date.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ButtonAffectations } from "../ButtonAffectations";
-import { FinanceTransformationMarkers } from "./FinanceTransformationMarkers";
 import { getBudgetStaticTableLines } from "./getBudgetStaticTableLines";
-import { getFinanceTransformationMarkers } from "./getFinanceTransformationMarkers";
 
 export const StructureStaticTable = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -23,7 +23,7 @@ export const StructureStaticTable = (): ReactElement => {
 
   const { years } = getYearRange({ order: "desc" });
 
-  const markers = getFinanceTransformationMarkers(structure?.history, years);
+  const markers = getTransformationMarkers(structure?.history, years);
 
   const [isAffectationOpen, setIsAffectationOpen] = useState(false);
 
@@ -65,7 +65,7 @@ export const StructureStaticTable = (): ReactElement => {
         stickFirstColumn
         overlay={
           markers.length > 0 && (
-            <FinanceTransformationMarkers markers={markers} years={years} />
+            <TransformationMarkers markers={markers} years={years} />
           )
         }
       >
