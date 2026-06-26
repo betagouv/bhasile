@@ -50,7 +50,7 @@ export const FieldSetHebergement = ({
         typeBati === Repartition.MIXTE ? Repartition.DIFFUS : typeBati,
       adresseTypologies: [
         {
-          placesAutorisees: undefined as number | undefined,
+          placesAutorisees: null,
           year: CURRENT_YEAR,
           logementSocial: false,
           qpv: false,
