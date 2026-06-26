@@ -132,18 +132,19 @@ describe("structure.repository db integration", () => {
     expect(version.latitude?.toString()).toBe("48.8566");
     expect(version.longitude?.toString()).toBe("2.3522");
     expect(version.nom).toBe("Structure test complete");
-    expect(version.date303?.toISOString()).toBe(date303);
-    expect(version.creationDate?.toISOString()).toBe(creationDate);
     expect(version.lgbt).toBe(true);
     expect(version.fvvTeh).toBe(false);
     expect(version.notes).toBe("Notes de test");
     expect(version.nomOfii).toBe("Nom OFII");
     expect(version.directionTerritoriale).toBe("DT75");
 
+    // creationDate / date303 sont immuables : ils vivent sur Structure, pas sur la version
     const updated = await prisma.structure.findUniqueOrThrow({
       where: { id: structure.id },
     });
     expect(updated.filiale).toBe("Filiale test");
+    expect(updated.creationDate?.toISOString()).toBe(creationDate);
+    expect(updated.date303?.toISOString()).toBe(date303);
   });
 
   it("should update departementAdministratif relation", async () => {

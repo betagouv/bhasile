@@ -100,13 +100,13 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
     localStorage.clear();
   });
 
-  it("enregistre le structureVersion et reporte creationDate sur effectiveDate jusqu'au fetch", async () => {
-    // GIVEN a creation seeded from a structureVersion (id, nom, creationDate)
+  it("lit la date depuis effectiveDate de la version et la renvoie sur effectiveDate (plus de creationDate sur la version)", async () => {
+    // GIVEN a creation seeded from a structureVersion whose effectiveDate carries the creation date
     renderForm(FormKind.OUVERTURE_EX_NIHILO, {
       id: 999,
       structureId: 42,
       nom: "Les Coquelicots",
-      creationDate: "2024-01-01T00:00:00.000Z",
+      effectiveDate: "2024-01-01T00:00:00.000Z",
     });
 
     // WHEN the agent submits the step
@@ -131,13 +131,16 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
     expect(structureVersionTransformation.type).toBe(
       StructureVersionTransformationType.CREATION
     );
-    // creationDate passes through frenchDateToISO (draft schema) → normalised to noon
+    // the date input passes through frenchDateToISO (draft schema) → normalised to noon,
+    // and lands only on effectiveDate (creationDate n'est plus écrit sur la version)
     expect(structureVersionTransformation.structureVersion).toMatchObject({
       id: 999,
       nom: "Les Coquelicots",
-      creationDate: "2024-01-01T12:00:00.000Z",
       effectiveDate: "2024-01-01T12:00:00.000Z",
     });
+    expect(structureVersionTransformation.structureVersion).not.toHaveProperty(
+      "creationDate"
+    );
   });
 
   it("affiche DnaAndFiness pour une ouverture ex nihilo", () => {

@@ -1128,6 +1128,47 @@ describe("transformation.repository db integration", () => {
     ]);
   });
 
+  it("should set the new Structure creationDate from the version effectiveDate when finalizing a CREATION block", async () => {
+    const operateur = await createOperateur();
+    const departement = await findDepartementWithRegionCode();
+    const creationDate = "2022-05-04T00:00:00.000Z";
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.CREATION,
+          operateurId: operateur.id,
+          structureVersion: {
+            departementAdministratif: departement.numero,
+            effectiveDate: creationDate,
+          },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const block = await prisma.structureVersionTransformation.findFirstOrThrow({
+      where: { transformationId },
+      include: { structureVersion: true },
+    });
+    const structureId = block.structureVersion?.structureId;
+    if (!structureId) {
+      throw new Error(
+        "La structureVersion devrait être rattachée à une structure"
+      );
+    }
+
+    const structure = await prisma.structure.findUniqueOrThrow({
+      where: { id: structureId },
+    });
+    createdStructureIds.push(structure.id);
+    // creationDate immuable : dérivée de l'effectiveDate de la version, posée sur la Structure
+    expect(structure.creationDate?.toISOString()).toBe(creationDate);
+    expect(structure.date303).toBeNull();
+  });
+
   it("should reject any update on an already finalized transformation", async () => {
     const operateur = await createOperateur();
     const departement = await findDepartementWithRegionCode();

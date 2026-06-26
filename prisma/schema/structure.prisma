@@ -13,8 +13,8 @@ model Structure {
   nom                      String? // TODO: remove after backfill of structure version
   debutConvention          DateTime? // TODO: remove after quality check
   finConvention            DateTime? // TODO: remove after quality check
-  creationDate             DateTime? // TODO: remove after backfill of structure version
-  date303                  DateTime? // TODO: remove after backfill of structure version
+  creationDate             DateTime?
+  date303                  DateTime?
   lgbt                     Boolean? // TODO: remove after backfill of structure version
   fvvTeh                   Boolean? // TODO: remove after backfill of structure version
   public                   PublicType? // TODO: remove after backfill of structure version

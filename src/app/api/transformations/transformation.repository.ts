@@ -253,7 +253,7 @@ const createStructureFromCreationBlock = async (
   );
 
   const structure = await tx.structure.create({
-    data: { codeBhasile, operateurId },
+    data: { codeBhasile, operateurId, creationDate: structureVersion.effectiveDate },
   });
 
   await tx.structureVersion.update({

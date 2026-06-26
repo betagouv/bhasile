@@ -167,13 +167,11 @@ type VersionScalars = {
   nomOfii: string;
   departementAdministratif: string;
   directionTerritoriale: string;
-  creationDate: Date;
   adresseAdministrative?: string | null;
   codePostalAdministratif?: string | null;
   communeAdministrative?: string | null;
   latitude?: Prisma.Decimal | null;
   longitude?: Prisma.Decimal | null;
-  date303?: Date | null;
   lgbt?: boolean | null;
   fvvTeh?: boolean | null;
   public?: PublicType | null;
@@ -183,8 +181,7 @@ type VersionScalars = {
 const buildVersionScalars = (
   type: StructureType,
   departementAdministratif: string,
-  ofii: boolean,
-  creationDate: Date
+  ofii: boolean
 ): VersionScalars => {
   const base: VersionScalars = {
     type,
@@ -192,7 +189,6 @@ const buildVersionScalars = (
     nomOfii: faker.lorem.words(2),
     departementAdministratif,
     directionTerritoriale: "DT " + faker.location.city(),
-    creationDate,
   };
 
   if (ofii) {
@@ -210,7 +206,6 @@ const buildVersionScalars = (
     longitude: new Prisma.Decimal(
       faker.location.longitude({ min: -0.851371, max: 5.843377 })
     ),
-    date303: null,
     lgbt: faker.datatype.boolean(),
     fvvTeh: faker.datatype.boolean(),
     public: faker.helpers.enumValue(PublicType),
@@ -537,8 +532,7 @@ export const seedStructureWithVersions = async (
   const scalars = buildVersionScalars(
     params.type,
     params.departementAdministratif,
-    params.ofii,
-    plan.creationDate
+    params.ofii
   );
   const contacts: StableContacts = params.ofii
     ? []
@@ -585,6 +579,7 @@ export const seedStructureWithVersions = async (
     const structureData: Prisma.StructureUncheckedCreateInput = {
       codeBhasile: params.codeBhasile,
       operateurId: params.operateurId,
+      creationDate: plan.creationDate,
       ...convertToPrismaObject(nonVersioned),
       structureVersions: {
         create: [{ campaignId: campaign.id, ...versionCommon }],
@@ -603,6 +598,7 @@ export const seedStructureWithVersions = async (
     const structureData: Prisma.StructureUncheckedCreateInput = {
       codeBhasile: params.codeBhasile,
       operateurId: params.operateurId,
+      creationDate: plan.creationDate,
       ...convertToPrismaObject(nonVersioned),
     };
     const structure = await prisma.structure.create({

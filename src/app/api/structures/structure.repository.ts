@@ -206,7 +206,7 @@ const updateStructure = async (
   tx: PrismaTransaction,
   structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
-  const { operateur, filiale } = structure;
+  const { operateur, filiale, creationDate, date303 } = structure;
 
   const updatedStructure = await tx.structure.update({
     where: {
@@ -214,6 +214,8 @@ const updateStructure = async (
     },
     data: {
       filiale,
+      creationDate: creationDate ?? undefined,
+      date303,
       operateur: {
         connect: operateur
           ? {

@@ -23,8 +23,8 @@ model StructureVersion {
   latitude                 Decimal?
   longitude                Decimal?
   nom                      String?
-  creationDate             DateTime?
-  date303                  DateTime?
+  creationDate             DateTime? // TODO: drop — immutable, remis sur Structure
+  date303                  DateTime? // TODO: drop — immutable, remis sur Structure
   lgbt                     Boolean?
   fvvTeh                   Boolean?
   public                   PublicType?

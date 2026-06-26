@@ -36,6 +36,8 @@ export const CreationIdentificationForm = ({
       transformation,
       structureVersionTransformation,
     });
+  defaultValues.creationDate =
+    structureVersionTransformation.structureVersion?.effectiveDate ?? undefined;
 
   const buildStructureVersionTransformation = (
     data: CreationIdentificationDraftFormValues
@@ -50,7 +52,6 @@ export const CreationIdentificationForm = ({
         dnaStructures: rest.dnaStructures?.filter(
           (dnaStructure) => dnaStructure.dna?.code
         ),
-        creationDate,
         effectiveDate: creationDate,
       } as StructureVersionTransformationApiUpdateClient["structureVersion"],
     };
