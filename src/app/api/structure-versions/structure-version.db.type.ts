@@ -59,7 +59,20 @@ export const structureVersionDetailsInclude = {
   structureVersionTransformation: {
     include: {
       transformation: {
-        include: { form: true },
+        include: {
+          form: true,
+          structureVersionTransformations: {
+            include: {
+              structureVersion: {
+                select: {
+                  structure: {
+                    select: { id: true, codeBhasile: true },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
   },

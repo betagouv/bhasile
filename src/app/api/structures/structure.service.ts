@@ -38,6 +38,7 @@ import {
   updateOne,
 } from "./structure.repository";
 import {
+  buildStructureHistory,
   getAdresseAdministrativeCoordinates,
   getCpomStructuresWithDates,
   getCurrentPlacesAutorisees,
@@ -268,13 +269,23 @@ const dbStructureToApiRead = (
   const isMultiDna =
     (dnaStructures?.length ?? 0) > 1 || (structureFinesses?.length ?? 0) > 1;
 
+  const cpomStructures = getCpomStructuresWithDates(dbStructure, now);
+
+  const history = simple
+    ? undefined
+    : buildStructureHistory(
+        dbStructure as StructureDbDetails,
+        cpomStructures ?? []
+      );
+
   return recursivelySerializeDates({
     ...dbStructure,
     debutConvention,
     finConvention,
     debutPeriodeAutorisation,
     finPeriodeAutorisation,
-    cpomStructures: getCpomStructuresWithDates(dbStructure, now),
+    cpomStructures,
+    history,
     latitude: dbStructure.latitude?.toString(),
     longitude: dbStructure.longitude?.toString(),
     activites,

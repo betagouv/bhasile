@@ -2,6 +2,7 @@ model Departement {
   id                   Int                @id @default(autoincrement())
   numero               String             @unique
   name                 String
+  population           Int?
   structures           Structure[]
   structureVersions    StructureVersion[]
   roleDepartements     RoleDepartement[]

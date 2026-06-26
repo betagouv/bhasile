@@ -27,10 +27,10 @@ const isVersionValid = (version: ResolvableVersion): boolean => {
   );
 };
 
-const resolveLatestValidBefore = <TVersion extends ResolvableVersion>(
+const sortValidVersionsBefore = <TVersion extends ResolvableVersion>(
   versions: TVersion[],
   upperBoundMs: number
-): TVersion | undefined =>
+): TVersion[] =>
   versions
     .filter(
       (version) =>
@@ -44,19 +44,24 @@ const resolveLatestValidBefore = <TVersion extends ResolvableVersion>(
         return dateDiff;
       }
       return second.id - first.id;
-    })[0];
+    });
+
+export const getValidVersions = <TVersion extends ResolvableVersion>(
+  versions: TVersion[],
+  now: Date
+): TVersion[] =>
+  sortValidVersionsBefore(versions, startOfNextUtcDay(now).getTime());
 
 export const resolveCurrentVersion = <TVersion extends ResolvableVersion>(
   versions: TVersion[],
   now: Date
-): TVersion | undefined =>
-  resolveLatestValidBefore(versions, startOfNextUtcDay(now).getTime());
+): TVersion | undefined => getValidVersions(versions, now)[0];
 
 export const resolvePredecessor = <TVersion extends ResolvableVersion>(
   versions: TVersion[],
   effectiveDate: Date
 ): TVersion | undefined =>
-  resolveLatestValidBefore(versions, effectiveDate.getTime());
+  sortValidVersionsBefore(versions, effectiveDate.getTime())[0];
 
 export const resolveCurrentVersionFields = <
   TStructure extends { structureVersions: (ResolvableVersion & VersionFields)[] },

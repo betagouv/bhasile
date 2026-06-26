@@ -22,3 +22,9 @@ export const lowercaseFirstLetter = (
   }
   return String(value).charAt(0).toLowerCase() + String(value).slice(1);
 };
+
+export const pluralize = (count: number | undefined, noun: string): string =>
+  `${noun}${(count ?? 0) > 1 ? "s" : ""}`;
+
+export const formatPlural = (count: number | undefined, noun: string): string =>
+  `${count ?? 0} ${pluralize(count, noun)}`;
