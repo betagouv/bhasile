@@ -9,10 +9,10 @@ import {
 import { SearchProps } from "@/app/api/structures/structure.service";
 import {
   computeStructureListRow,
-  fermetureHistory,
   filterStructureRows,
   getDatesConvention,
   getDatesPeriodeAutorisation,
+  getFermetureHistory,
   isBornFromCreation,
   sortStructureRows,
   StructureListComputedRow,
@@ -202,7 +202,9 @@ describe("computeStructureListRow", () => {
 });
 
 describe("isBornFromCreation", () => {
-  const creationVersion = (overrides: Partial<StructureListLightVersion> = {}) =>
+  const creationVersion = (
+    overrides: Partial<StructureListLightVersion> = {}
+  ) =>
     buildVersion({
       structureVersionTransformationId: 5,
       structureVersionTransformation: {
@@ -461,7 +463,7 @@ describe("filterStructureRows closed toggle", () => {
   });
 });
 
-describe("fermetureHistory", () => {
+describe("getFermetureHistory", () => {
   it("builds a single FERMETURE event for a closed row", () => {
     const row = buildRow({
       isClosed: true,
@@ -469,7 +471,7 @@ describe("fermetureHistory", () => {
       fermetureMotif: "Fin de prise en charge",
     });
 
-    expect(fermetureHistory(row)).toEqual([
+    expect(getFermetureHistory(row)).toEqual([
       {
         kind: "FERMETURE",
         date: "2025-03-10T00:00:00.000Z",
@@ -480,7 +482,7 @@ describe("fermetureHistory", () => {
   });
 
   it("returns no events for an open row", () => {
-    expect(fermetureHistory(buildRow({ isClosed: false }))).toEqual([]);
+    expect(getFermetureHistory(buildRow({ isClosed: false }))).toEqual([]);
   });
 });
 
