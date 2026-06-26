@@ -5,7 +5,7 @@ import { StructureColumn } from "@/types/ListColumn";
 
 import type { SearchProps } from "./structure.service";
 
-const buildCurrentVersionCteSql = (now: Date): Prisma.Sql => Prisma.sql`
+export const buildCurrentVersionCteSql = (now: Date): Prisma.Sql => Prisma.sql`
   current_version AS (
     SELECT DISTINCT ON (sv."structureId")
       sv."structureId",

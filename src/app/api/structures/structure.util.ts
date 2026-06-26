@@ -25,7 +25,10 @@ import {
   StructureVersionDbDetails,
   StructureVersionDbTransformation,
 } from "../structure-versions/structure-version.db.type";
-import { getValidVersions } from "../structure-versions/structure-version.service";
+import {
+  getValidVersions,
+  resolveCurrentVersionFields,
+} from "../structure-versions/structure-version.util";
 import { StructureDbDetails, StructureDbList } from "./structure.db.type";
 
 const typesPublic: Record<string, PublicType> = {
@@ -185,35 +188,68 @@ export const isStructureInCpomPerYear = (
 };
 
 export const getCpomStructuresWithDates = (
-  structure: StructureDbDetails | StructureDbList
+  structure: StructureDbDetails | StructureDbList,
+  now: Date
 ): CpomStructureApiRead[] | undefined => {
   const cpomStructures = structure.cpomStructures?.map((cpomStructure) => {
     const [cpomDateStart, cpomDateEnd] = getCpomDatesConvention(
       cpomStructure.cpom
     );
 
+    const cpom = cpomStructure.cpom;
+    const linkedStructures =
+      cpom && "structures" in cpom ? cpom.structures : undefined;
+
     return recursivelySerializeDates({
       ...cpomStructure,
-      cpom: cpomStructure.cpom
+      cpom: cpom
         ? {
-            ...cpomStructure.cpom,
+            ...cpom,
             dateStart: cpomDateStart,
             dateEnd: cpomDateEnd,
-            granularity: cpomStructure.cpom.granularity,
+            granularity: cpom.granularity,
             actesAdministratifs:
-              cpomStructure.cpom.actesAdministratifs?.map(
-                (acteAdministratif) => ({
-                  ...acteAdministratif,
-                  startDate: acteAdministratif.startDate ?? undefined,
-                  endDate: acteAdministratif.endDate ?? undefined,
-                  date: acteAdministratif.date ?? undefined,
-                })
-              ) ?? [],
+              cpom.actesAdministratifs?.map((acteAdministratif) => ({
+                ...acteAdministratif,
+                startDate: acteAdministratif.startDate ?? undefined,
+                endDate: acteAdministratif.endDate ?? undefined,
+                date: acteAdministratif.date ?? undefined,
+              })) ?? [],
+            ...(linkedStructures
+              ? {
+                  structures: linkedStructures.map((linkedStructure) =>
+                    resolveLinkedStructureFields(linkedStructure, now)
+                  ),
+                }
+              : {}),
           }
-        : cpomStructure.cpom,
+        : cpom,
     }) as CpomStructureApiRead;
   });
   return cpomStructures;
+};
+
+type CpomDetailsView = NonNullable<
+  NonNullable<StructureDbDetails["cpomStructures"]>[number]["cpom"]
+>;
+
+type CpomLinkedStructureRow = CpomDetailsView extends {
+  structures: (infer Row)[];
+}
+  ? Row
+  : never;
+
+const resolveLinkedStructureFields = (
+  linkedStructure: CpomLinkedStructureRow,
+  now: Date
+) => {
+  if (!linkedStructure.structure) {
+    return linkedStructure;
+  }
+  return {
+    ...linkedStructure,
+    structure: resolveCurrentVersionFields(linkedStructure.structure, now),
+  };
 };
 
 type SiblingTransformation = NonNullable<

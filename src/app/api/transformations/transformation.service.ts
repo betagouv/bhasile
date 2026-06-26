@@ -14,8 +14,8 @@ import { getAntennesApiRead } from "../antennes/antenne.util";
 import {
   copyStructureVersion,
   dbStructureVersionToApiRead,
-  resolvePredecessor,
 } from "../structure-versions/structure-version.service";
+import { resolvePredecessor } from "../structure-versions/structure-version.util";
 import {
   getResolvedStructure,
   mergeStructureWithVersion,

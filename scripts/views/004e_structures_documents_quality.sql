@@ -15,24 +15,24 @@ WITH
       AND COALESCE(aa."isMissing", FALSE) = FALSE
   )
 SELECT
-  s."id" AS "id",
+  sc."id" AS "id",
   NOT EXISTS (
     SELECT
       1
     FROM
       acte_with_file awf
     WHERE
-      awf."structureId" = s."id"
+      awf."structureId" = sc."id"
       AND awf."category" = 'CONVENTION'
   ) AS "has_issue_missing_convention_document",
   CASE
-    WHEN s."type" IN ('CADA', 'CPH') THEN NOT EXISTS (
+    WHEN sc."structure_type" IN ('CADA', 'CPH') THEN NOT EXISTS (
       SELECT
         1
       FROM
         acte_with_file awf
       WHERE
-        awf."structureId" = s."id"
+        awf."structureId" = sc."id"
         AND awf."category" = 'ARRETE_AUTORISATION'
     )
     ELSE FALSE
@@ -44,7 +44,7 @@ SELECT
       FROM
         public."CpomStructure" cs
       WHERE
-        cs."structureId" = s."id"
+        cs."structureId" = sc."id"
         AND NOT EXISTS (
           SELECT
             1
@@ -58,4 +58,4 @@ SELECT
     FALSE
   ) AS "has_issue_missing_cpom_document"
 FROM
-  public."Structure" s;
+:"SCHEMA"."structures_core" sc;

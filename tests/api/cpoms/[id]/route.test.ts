@@ -23,7 +23,7 @@ describe("GET /api/cpoms/[id]", () => {
 
   it("should return cpom when found", async () => {
     // GIVEN
-    const cpom = { id: 1 };
+    const cpom = { id: 1, structures: [] };
     mockFindOne.mockResolvedValueOnce(cpom);
 
     const request = new NextRequest("http://localhost/api/cpoms/1");
@@ -37,6 +37,7 @@ describe("GET /api/cpoms/[id]", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
       id: 1,
+      structures: [],
       dateStart: null,
       dateEnd: null,
     });

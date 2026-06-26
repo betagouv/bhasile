@@ -1,4 +1,4 @@
-import { Prisma } from "@/generated/prisma/client";
+import { Form, Prisma, StructureType } from "@/generated/prisma/client";
 
 import { structureVersionDetailsInclude } from "../structure-versions/structure-version.db.type";
 
@@ -6,13 +6,6 @@ export const structureMapSelect = {
   id: true,
   latitude: true,
   longitude: true,
-} satisfies Prisma.StructureSelect;
-
-export const structureOperateurSelect = {
-  id: true,
-  type: true,
-  codeBhasile: true,
-  forms: true,
 } satisfies Prisma.StructureSelect;
 
 export const structureListVersionInclude = {
@@ -123,12 +116,26 @@ export const structureDetailsInclude = {
                 select: {
                   id: true,
                   codeBhasile: true,
-                  type: true,
-                  communeAdministrative: true,
                   operateur: {
                     select: { name: true },
                   },
                   forms: true,
+                  structureVersions: {
+                    select: {
+                      id: true,
+                      effectiveDate: true,
+                      type: true,
+                      communeAdministrative: true,
+                      structureVersionTransformationId: true,
+                      structureVersionTransformation: {
+                        select: {
+                          transformation: {
+                            select: { form: { select: { status: true } } },
+                          },
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -197,6 +204,9 @@ export type StructureDbDetails = Prisma.StructureGetPayload<{
   include: typeof structureDetailsInclude;
 }>;
 
-export type StructureDbOperateur = Prisma.StructureGetPayload<{
-  select: typeof structureOperateurSelect;
-}>;
+export type StructureDbOperateur = {
+  id: number;
+  type: StructureType | null;
+  codeBhasile: string;
+  forms: Form[];
+};

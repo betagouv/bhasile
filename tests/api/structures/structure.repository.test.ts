@@ -6,6 +6,8 @@ import { updateOne } from "@/app/api/structures/structure.repository";
 import {
   getFullStructure,
   getFullStructures,
+  getStructureDepartement,
+  getStructureForOperateur,
   type SearchProps,
 } from "@/app/api/structures/structure.service";
 import prisma from "@/lib/prisma";
@@ -549,7 +551,6 @@ describe("structure.repository db integration", () => {
       ],
     });
 
-
     // WHEN: the fiche is read end-to-end (findOne + résolution + merge)
     const read = await getFullStructure(structure.id);
 
@@ -1082,9 +1083,12 @@ describe("structure.repository db integration", () => {
       });
 
       // WHEN: the structure is read through the list path
-      const structures = await listStructures({ search: structure.codeBhasile });
+      const structures = await listStructures({
+        search: structure.codeBhasile,
+      });
       const row = structures.find(
-        (structureApiRead) => structureApiRead.codeBhasile === structure.codeBhasile
+        (structureApiRead) =>
+          structureApiRead.codeBhasile === structure.codeBhasile
       );
 
       // THEN: the list reflects the resolved version, not the frozen (null) shell
@@ -1094,7 +1098,9 @@ describe("structure.repository db integration", () => {
       expect(row?.typeBati).toBe(Repartition.DIFFUS);
       expect(row?.currentPlaces?.placesAutorisees).toBe(42);
       expect(
-        row?.dnaStructures?.some((dnaStructure) => dnaStructure.dna.code === dnaCode)
+        row?.dnaStructures?.some(
+          (dnaStructure) => dnaStructure.dna.code === dnaCode
+        )
       ).toBe(true);
     });
 
@@ -1154,7 +1160,7 @@ describe("structure.repository db integration", () => {
       expect(listRow?.nom).toBe(fiche?.nom);
     });
 
-    it("fiche et liste ignorent une transfo en brouillon et retiennent la transfo une fois finalisée", async () => {
+    it("gate transfo : brouillon ignoré, finalisé gagnant — fiche et liste d'accord", async () => {
       // GIVEN: a rolling version (CADA) dated in the past
       const structure = await createStructure();
       const rollingNom = `Rolling-${randomUUID()}`;
@@ -1180,7 +1186,9 @@ describe("structure.repository db integration", () => {
 
       // WHEN: the transfo form is a draft -> it is ignored, the rolling wins
       const ficheDraft = await getFullStructure(structure.id);
-      const [listDraft] = await listStructures({ search: structure.codeBhasile });
+      const [listDraft] = await listStructures({
+        search: structure.codeBhasile,
+      });
       expect(ficheDraft?.type).toBe(StructureType.CADA);
       expect(listDraft?.type).toBe(StructureType.CADA);
       expect(listDraft?.nom).toBe(rollingNom);
@@ -1191,10 +1199,209 @@ describe("structure.repository db integration", () => {
         data: { status: true },
       });
       const ficheFinal = await getFullStructure(structure.id);
-      const [listFinal] = await listStructures({ search: structure.codeBhasile });
+      const [listFinal] = await listStructures({
+        search: structure.codeBhasile,
+      });
       expect(ficheFinal?.type).toBe(StructureType.HUDA);
       expect(listFinal?.type).toBe(StructureType.HUDA);
       expect(listFinal?.nom).toBe(transfoNom);
+    });
+  });
+
+  describe("résolution lectures scalaires", () => {
+    const createdTransformationIds: number[] = [];
+    const createdSvtIds: number[] = [];
+    const createdCpomIds: number[] = [];
+
+    const createTransfoVersion = async (
+      structureId: number,
+      {
+        effectiveDate,
+        formStatus,
+        ...scalars
+      }: {
+        effectiveDate: string;
+        formStatus: boolean;
+        type?: StructureType;
+        nom?: string;
+        departementAdministratif?: string;
+        communeAdministrative?: string;
+      }
+    ) => {
+      const formDefinition = await prisma.formDefinition.findFirstOrThrow();
+      const transformation = await prisma.transformation.create({
+        data: { type: "EXTENSION_EX_NIHILO" },
+      });
+      createdTransformationIds.push(transformation.id);
+      const form = await prisma.form.create({
+        data: {
+          transformationId: transformation.id,
+          formDefinitionId: formDefinition.id,
+          status: formStatus,
+        },
+      });
+      const svt = await prisma.structureVersionTransformation.create({
+        data: { transformationId: transformation.id, type: "EXTENSION" },
+      });
+      createdSvtIds.push(svt.id);
+      await prisma.structureVersion.create({
+        data: {
+          structureId,
+          structureVersionTransformationId: svt.id,
+          effectiveDate,
+          ...scalars,
+        },
+      });
+      return { form };
+    };
+
+    afterAll(async () => {
+      if (createdSvtIds.length > 0) {
+        await prisma.structureVersionTransformation.deleteMany({
+          where: { id: { in: createdSvtIds } },
+        });
+      }
+      if (createdTransformationIds.length > 0) {
+        await prisma.transformation.deleteMany({
+          where: { id: { in: createdTransformationIds } },
+        });
+      }
+      if (createdCpomIds.length > 0) {
+        await prisma.cpom.deleteMany({
+          where: { id: { in: createdCpomIds } },
+        });
+      }
+    });
+
+    it("getStructureDepartement résout le département de la version courante", async () => {
+      // GIVEN: a structure whose departement lives only on its current version
+      const structure = await createStructure();
+      const departement = await prisma.departement.findFirstOrThrow();
+      await updateOne({
+        id: structure.id,
+        departementAdministratif: departement.numero,
+      });
+
+      // WHEN: the PUT gate resolves the structure departement
+      const resolved = await getStructureDepartement(structure.id);
+
+      // THEN: it reflects the version, not the frozen (null) scalar on Structure
+      expect(resolved).toBe(departement.numero);
+    });
+
+    it("getStructureDepartement suit une transfo finalisée et ignore un brouillon", async () => {
+      // GIVEN: a current version (effective 2020) in an initial departement
+      const structure = await createStructure();
+      const firstDepartement = await prisma.departement.findFirstOrThrow();
+      const secondDepartement = await prisma.departement.findFirstOrThrow({
+        where: { numero: { not: firstDepartement.numero } },
+      });
+      await updateOne({
+        id: structure.id,
+        departementAdministratif: firstDepartement.numero,
+      });
+
+      // AND: a more recent (but still past) transfo version in another
+      // departement, not finalised
+      const { form } = await createTransfoVersion(structure.id, {
+        effectiveDate: "2021-01-01T00:00:00.000Z",
+        formStatus: false,
+        departementAdministratif: secondDepartement.numero,
+      });
+
+      // WHEN: the transfo is a draft -> the gate keeps the initial departement
+      expect(await getStructureDepartement(structure.id)).toBe(
+        firstDepartement.numero
+      );
+
+      // WHEN: the transfo is finalised -> the gate follows the new departement
+      await prisma.form.update({
+        where: { id: form.id },
+        data: { status: true },
+      });
+      expect(await getStructureDepartement(structure.id)).toBe(
+        secondDepartement.numero
+      );
+    });
+
+    it("getStructureForOperateur résout le type de la version courante", async () => {
+      // GIVEN: a structure whose type lives only on its current version
+      const structure = await createStructure();
+      await updateOne({ id: structure.id, type: StructureType.CADA });
+
+      // WHEN: the operateur read resolves the structure
+      const result = await getStructureForOperateur(structure.id);
+
+      // THEN: type comes from the version, identity fields stay intact
+      expect(result.type).toBe(StructureType.CADA);
+      expect(result.id).toBe(structure.id);
+      expect(result.codeBhasile).toBe(structure.codeBhasile);
+    });
+
+    it("getFullStructure résout type/commune des structures liées d'un CPOM via leur version courante", async () => {
+      // GIVEN: a host and a partner sharing a CPOM, the partner's type/commune
+      // living only on its current version
+      const hostStructure = await createStructure();
+      const partnerStructure = await createStructure();
+      await updateOne({
+        id: partnerStructure.id,
+        type: StructureType.CADA,
+        communeAdministrative: "Lyon",
+      });
+      const operateur = await prisma.operateur.create({
+        data: { name: `Operateur-cpom-${randomUUID()}` },
+      });
+      createdOperateurIds.push(operateur.id);
+      const cpom = await prisma.cpom.create({
+        data: {
+          operateurId: operateur.id,
+          structures: {
+            create: [
+              { structureId: hostStructure.id },
+              { structureId: partnerStructure.id },
+            ],
+          },
+        },
+      });
+      createdCpomIds.push(cpom.id);
+
+      // WHEN: the host fiche is read
+      const fiche = await getFullStructure(hostStructure.id);
+
+      // THEN: the linked partner reflects its version, not the frozen scalar
+      const linkedPartner = fiche?.cpomStructures
+        ?.flatMap((cpomStructure) => cpomStructure.cpom?.structures ?? [])
+        .find((linked) => linked.structure?.id === partnerStructure.id);
+      expect(linkedPartner?.structure?.type).toBe(StructureType.CADA);
+      expect(linkedPartner?.structure?.communeAdministrative).toBe("Lyon");
+    });
+
+    it("les chemins SQL (opérateur) et JS (fiche) résolvent la même version courante", async () => {
+      // GIVEN: a structure corrected to CADA, then a more recent draft transfo (HUDA)
+      const structure = await createStructure();
+      await updateOne({ id: structure.id, type: StructureType.CADA });
+      const { form } = await createTransfoVersion(structure.id, {
+        effectiveDate: "2021-01-01T00:00:00.000Z",
+        formStatus: false,
+        type: StructureType.HUDA,
+      });
+
+      // WHEN: the transfo is a draft -> the SQL read (operateur) and the JS read
+      // (fiche) both keep the corrected version
+      const operateurDraft = await getStructureForOperateur(structure.id);
+      const ficheDraft = await getFullStructure(structure.id);
+      expect(operateurDraft.type).toBe(StructureType.CADA);
+      expect(ficheDraft?.type).toBe(operateurDraft.type);
+
+      // WHEN: the transfo is finalised -> both paths follow it identically
+      await prisma.form.update({
+        where: { id: form.id },
+        data: { status: true },
+      });
+      const operateurFinal = await getStructureForOperateur(structure.id);
+      const ficheFinal = await getFullStructure(structure.id);
+      expect(operateurFinal.type).toBe(StructureType.HUDA);
+      expect(ficheFinal?.type).toBe(operateurFinal.type);
     });
   });
 });
