@@ -1,7 +1,4 @@
-import {
-  recursivelySerializeDates,
-  startOfNextUtcDay,
-} from "@/app/utils/date.util";
+import { recursivelySerializeDates } from "@/app/utils/date.util";
 import {
   isStructureAutorisee,
   isStructureSubventionnee,
@@ -15,7 +12,6 @@ import {
 import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 import { PublicType } from "@/types/structure.type";
-import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 import { processActivitesForStructure } from "../activites/activite.service";
 import {
@@ -25,26 +21,25 @@ import {
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
-import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
 import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   StructureDbDetails,
   StructureDbList,
-  StructureDbListItem,
   StructureDbOperateur,
 } from "./structure.db.type";
 import {
-  countBySearch,
-  findBySearch,
+  findAllStructures,
   findOne,
   findOneOperateur,
   findStructureDepartement,
-  getLatestPlacesAutoriseesPerStructure,
+  findStructuresByIds,
   updateOne,
 } from "./structure.repository";
 import {
   buildStructureHistory,
+  computeStructureListRow,
+  filterStructureRows,
   getAdresseAdministrativeCoordinates,
   getCpomStructuresWithDates,
   getCurrentPlacesAutorisees,
@@ -54,8 +49,13 @@ import {
   getDatesPeriodeAutorisation,
   getOperateurLabel,
   getTypeBati,
+  isBornFromCreation,
+  isFinalisationFormValidated,
   isStructureInCpom,
   isStructureInCpomPerYear,
+  paginateRows,
+  sortStructureRows,
+  StructureListComputedRow,
 } from "./structure.util";
 
 export type SearchProps = {
@@ -98,73 +98,92 @@ export const updateStructureOperateur = async (
   );
 };
 
+const computeAllStructureRows = async (
+  now: Date
+): Promise<StructureListComputedRow[]> => {
+  const structures = await findAllStructures();
+  return structures
+    .map((structure) =>
+      computeStructureListRow(
+        structure,
+        resolveCurrentVersion(structure.structureVersions, now),
+        now
+      )
+    )
+    .filter((row): row is StructureListComputedRow => row !== null);
+};
+
 export const getFullStructures = async (
-  {
-    search,
-    page,
-    type,
-    bati,
-    placesAutorisees,
-    departements,
-    map,
-    column,
-    direction,
-    operateurs,
-    selection,
-    finalised,
-  }: SearchProps,
+  props: SearchProps,
   user?: SessionUser
 ): Promise<{
   structures: StructureApiRead[];
   totalStructures: number;
 }> => {
   const now = new Date();
-  const dbStructures = (await findBySearch(
-    {
-      search,
-      page,
-      type,
-      bati,
-      placesAutorisees,
-      departements,
-      map,
-      column,
-      direction,
-      operateurs,
-      selection,
-      finalised,
-    },
-    now
-  )) as StructureDbListItem[];
-  const totalStructures = await countBySearch(
-    {
-      search,
-      page,
-      type,
-      bati,
-      placesAutorisees,
-      departements,
-      operateurs,
-    },
-    now
-  );
+  const rows = await computeAllStructureRows(now);
 
-  const structures = dbStructures.map((dbStructure) => {
-    const resolvedVersion = dbStructure.structureVersions?.[0];
-    const resolvedStructure = resolvedVersion
-      ? mergeStructureWithVersion(dbStructure, resolvedVersion)
-      : dbStructure;
-    const structure = dbStructureToApiRead(
-      resolvedStructure,
-      now,
-      true,
-      dbStructure.bornFromCreation
-    );
-    structure.adresses = getReadableAdresses(structure, user);
-    return structure;
+  const filtered = filterStructureRows(rows, props, {
+    includeNonVisible: Boolean(props.selection),
   });
 
-  return { structures, totalStructures };
+  const sorted = sortStructureRows(
+    filtered,
+    props.column ?? "departementAdministratif",
+    props.direction ?? "asc"
+  );
+
+  if (props.map) {
+    const structures = sorted.map((row) =>
+      dbStructureToApiRead(
+        {
+          id: row.id,
+          latitude: row.latitude,
+          longitude: row.longitude,
+        } as unknown as StructureDbList,
+        now,
+        true
+      )
+    );
+    return { structures, totalStructures: sorted.length };
+  }
+
+  const pageRows = props.selection
+    ? sorted
+    : paginateRows(sorted, props.page ?? 0);
+
+  const dbStructures = await findStructuresByIds(
+    pageRows.map((row) => row.id),
+    pageRows.map((row) => row.currentVersionId)
+  );
+  const dbStructuresById = new Map(
+    dbStructures.map((dbStructure) => [dbStructure.id, dbStructure])
+  );
+
+  const structures = pageRows
+    .map((row) => {
+      const dbStructure = dbStructuresById.get(row.id);
+      if (!dbStructure) {
+        return undefined;
+      }
+      const currentVersion = dbStructure.structureVersions[0];
+      const resolvedStructure = currentVersion
+        ? mergeStructureWithVersion(dbStructure, currentVersion)
+        : dbStructure;
+      const structure = dbStructureToApiRead(
+        resolvedStructure,
+        now,
+        true,
+        row.bornFromCreation
+      );
+      structure.adresses = getReadableAdresses(structure, user);
+      return structure;
+    })
+    .filter(
+      (structure): structure is StructureApiRead => structure !== undefined
+    );
+
+  return { structures, totalStructures: sorted.length };
 };
 
 export const getResolvedStructure = async (
@@ -247,31 +266,6 @@ export const mergeStructureWithVersion = <T>(
   ) as Partial<T>;
   return { ...dbStructure, ...versionedOverlay };
 };
-
-const isFinalisationFormValidated = (
-  forms:
-    | { status: boolean; formDefinition: { slug: string } }[]
-    | null
-    | undefined
-): boolean =>
-  forms?.some(
-    (form) => form.formDefinition.slug === FINALISATION_FORM_SLUG && form.status
-  ) ?? false;
-
-const isBornFromCreation = (
-  structureVersions: StructureDbDetails["structureVersions"] | null | undefined,
-  now: Date
-): boolean =>
-  structureVersions?.some((structureVersion) => {
-    const structureVersionTransformation =
-      structureVersion.structureVersionTransformation;
-    return (
-      structureVersionTransformation?.type ===
-        StructureVersionTransformationType.CREATION &&
-      structureVersionTransformation.transformation?.form?.status === true &&
-      structureVersion.effectiveDate < startOfNextUtcDay(now)
-    );
-  }) ?? false;
 
 const dbStructureToApiRead = (
   dbStructure: StructureDbDetails | StructureDbList,
@@ -374,13 +368,16 @@ const dbStructureToApiRead = (
 export const getBoundsPlacesAutorisees = async (
   now: Date
 ): Promise<{ min: number; max: number }> => {
-  const latestPlacesAutoriseesOfEveryStructure =
-    await getLatestPlacesAutoriseesPerStructure(now);
-  if (latestPlacesAutoriseesOfEveryStructure.length === 0) {
+  const rows = await computeAllStructureRows(now);
+  const places = rows
+    .map((row) => row.latestNonNullPlacesAutorisees)
+    .filter(
+      (placesAutorisees): placesAutorisees is number =>
+        placesAutorisees !== null
+    );
+
+  if (places.length === 0) {
     return { min: 0, max: 0 };
   }
-  return {
-    min: Math.min(...latestPlacesAutoriseesOfEveryStructure),
-    max: Math.max(...latestPlacesAutoriseesOfEveryStructure),
-  };
+  return { min: Math.min(...places), max: Math.max(...places) };
 };

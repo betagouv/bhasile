@@ -60,6 +60,8 @@ vi.mock("@/app/api/structures/structure.util", () => ({
   isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
   getDatesConvention: vi.fn().mockReturnValue([null, null]),
   getDatesPeriodeAutorisation: vi.fn().mockReturnValue([null, null]),
+  isBornFromCreation: vi.fn().mockReturnValue(false),
+  isFinalisationFormValidated: vi.fn().mockReturnValue(false),
 }));
 
 vi.mock("@/app/api/antennes/antenne.util", () => ({
