@@ -214,4 +214,63 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
     );
     expect(getPutPayloadPlaces()).toBe(ORIGINAL_PLACES - 7);
   });
+
+  it("sauvegarde même quand tous les champs sont vides (null venant de la BDD)", async () => {
+    // GIVEN a version whose public / typeBati / places columns are still null
+    const structureVersionTransformation = createStructureVersionTransformation({
+      id: STRUCTURE_VERSION_TRANSFORMATION_ID,
+      type: StructureVersionTransformationType.EXTENSION,
+      structureVersion: {
+        id: 999,
+        public: null,
+        typeBati: null,
+        adresses: [],
+        structureTypologies: [
+          {
+            year: CURRENT_YEAR,
+            placesAutorisees: null,
+            pmr: null,
+            lgbt: null,
+            fvvTeh: null,
+          },
+        ],
+      } as unknown as NonNullable<
+        StructureVersionTransformationApiRead["structureVersion"]
+      >,
+    });
+    const transformation = createTransformation({
+      id: TRANSFORMATION_ID,
+      type: TransformationType.EXTENSION_EX_NIHILO,
+      structureVersionTransformations: [structureVersionTransformation],
+    });
+
+    mockUseParams.mockReturnValue({
+      transformationId: String(TRANSFORMATION_ID),
+      transformationStructureType: StructureVersionTransformationType.EXTENSION,
+      transformationStructureId: String(STRUCTURE_VERSION_TRANSFORMATION_ID),
+      transformationStructureStep:
+        StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
+    });
+
+    renderTransformationForm(
+      transformation,
+      <PlacesEtHebergementForm
+        transformation={transformation}
+        structureVersionTransformation={structureVersionTransformation}
+        formKind={FormKind.EXTENSION}
+        originalPlaces={ORIGINAL_PLACES}
+      />
+    );
+
+    // WHEN submitting without filling anything
+    await submit();
+
+    // THEN the draft save is not blocked: the PUT still leaves
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+  });
 });

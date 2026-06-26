@@ -127,4 +127,32 @@ describe("ExistingStructureIdentificationForm (intégration jusqu'au fetch)", ()
       structureVersionTransformation.structureVersion.creationDate
     ).toBeUndefined();
   });
+
+  it("sauvegarde même quand tous les champs sont vides (null venant de la BDD)", async () => {
+    // GIVEN a source version whose nullable columns are still null
+    renderForm({
+      id: 999,
+      type: null,
+      codeBhasile: null,
+      nom: null,
+      effectiveDate: null,
+      adresseAdministrative: null,
+      codePostalAdministratif: null,
+      communeAdministrative: null,
+      departementAdministratif: null,
+    } as unknown as StructureVersionTransformationApiRead["structureVersion"]);
+
+    // WHEN submitting without filling anything
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
+    );
+
+    // THEN the draft save is not blocked: the PUT still leaves
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+  });
 });

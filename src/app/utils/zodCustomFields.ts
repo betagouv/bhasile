@@ -93,18 +93,18 @@ export const zId = () =>
     z.number().optional()
   );
 
-export const blankStringsToUndefined = (value: unknown): unknown => {
-  if (value === "") {
+export const emptyValuesToUndefined = (value: unknown): unknown => {
+  if (value === "" || value === null) {
     return undefined;
   }
   if (Array.isArray(value)) {
-    return value.map(blankStringsToUndefined);
+    return value.map(emptyValuesToUndefined);
   }
   if (value && typeof value === "object") {
     return Object.fromEntries(
       Object.entries(value).map(([key, nestedValue]) => [
         key,
-        blankStringsToUndefined(nestedValue),
+        emptyValuesToUndefined(nestedValue),
       ])
     );
   }
