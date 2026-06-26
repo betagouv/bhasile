@@ -1,4 +1,4 @@
-import { TransformationStructureIcon } from "@/app/components/transformations/TransformationStructureIcon";
+import { StructureEventIcon } from "@/app/components/structures/StructureEventIcon";
 import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
@@ -16,7 +16,7 @@ export const StructureVersionTransformationGroup = ({
   return (
     <div className="bg-white p-6 rounded-lg flex flex-col gap-6">
       <div className="flex items-center gap-2 text-title-blue-france font-bold">
-        <TransformationStructureIcon type={type} />
+        <StructureEventIcon kind={type} />
         <span>{getGroupLabel(type, structureVersionTransformations.length)}</span>
       </div>
       {structureVersionTransformations.map((structureVersionTransformation) => (
