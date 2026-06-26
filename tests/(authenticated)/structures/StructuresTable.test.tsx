@@ -68,6 +68,7 @@ describe("StructuresTable", () => {
             structures={structures}
             totalStructures={structures.length}
             ariaLabelledBy={ariaLabelledBy}
+            isClosed={false}
           />
         </AppAbilityProvider>
       </SessionProvider>
