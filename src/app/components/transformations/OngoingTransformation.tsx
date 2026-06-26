@@ -64,10 +64,12 @@ export const OngoingTransformation = ({
       </span>
       <Link
         href={`/structures/transformation/${transformation.id}`}
-        className="fr-icon-edit-line fr-icon--sm text-title-blue-france justify-self-end"
+        className=" text-title-blue-france justify-self-end"
         aria-label="Modifier la transformation"
         title="Modifier la transformation"
-      />
+      >
+        <i className="fr-icon-edit-line [&::before]:[--icon-size:20px]!" />
+      </Link>
     </li>
   );
 };
