@@ -3,38 +3,57 @@ import Image from "next/image";
 import { cn } from "@/app/utils/classname.util";
 import { HistoryEventKind } from "@/types/structure-history.type";
 
-const iconClassByKind: Record<Exclude<HistoryEventKind, "FERMETURE">, string> = {
+const iconClassByKind: Record<
+  Exclude<StructureEventIconKind, "FERMETURE">,
+  string
+> = {
   CREATION: "fr-icon-add-line",
   EXTENSION: "ri-expand-diagonal-line",
   CONTRACTION: "ri-collapse-diagonal-line",
   CPOM_ENTRY: "ri-links-line",
   CPOM_EXIT: "ri-link-unlink-m",
+  MIXED: "fr-icon-more-line",
 };
 
-export const StructureEventIcon = ({ kind, large = false }: Props) => {
-  const sizeClass = large ? "fr-icon--md" : "fr-icon--sm";
+const iconClassBySize: Record<IconSize, string> = {
+  sm: "[&::before]:[--icon-size:12px]!",
+  md: "[&::before]:[--icon-size:16px]!",
+  lg: "[&::before]:[--icon-size:24px]!",
+};
 
+const imagePixelsBySize: Record<IconSize, number> = {
+  sm: 12,
+  md: 16,
+  lg: 24,
+};
+
+export const StructureEventIcon = ({ kind, size }: Props) => {
   if (!kind) {
     return null;
   }
 
   if (kind === "FERMETURE") {
+    const pixels = imagePixelsBySize[size];
     return (
       <Image
         src="/transformation-fermeture.svg"
         alt=""
         aria-hidden="true"
-        width={large ? 24 : 18}
-        height={large ? 24 : 18}
+        width={pixels}
+        height={pixels}
         loading="lazy"
       />
     );
   }
 
-  return <i className={cn(iconClassByKind[kind], sizeClass)} />;
+  return <i className={cn(iconClassByKind[kind], iconClassBySize[size])} />;
 };
 
+type IconSize = "sm" | "md" | "lg";
+
+type StructureEventIconKind = HistoryEventKind | "MIXED";
+
 type Props = {
-  kind?: HistoryEventKind;
-  large?: boolean;
+  kind?: StructureEventIconKind;
+  size: IconSize;
 };

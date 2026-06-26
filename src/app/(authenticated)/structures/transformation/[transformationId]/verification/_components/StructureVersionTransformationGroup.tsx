@@ -16,7 +16,7 @@ export const StructureVersionTransformationGroup = ({
   return (
     <div className="bg-white p-6 rounded-lg flex flex-col gap-6">
       <div className="flex items-center gap-2 text-title-blue-france font-bold">
-        <StructureEventIcon kind={type} />
+        <StructureEventIcon kind={type} size="md" />
         <span>{getGroupLabel(type, structureVersionTransformations.length)}</span>
       </div>
       {structureVersionTransformations.map((structureVersionTransformation) => (
