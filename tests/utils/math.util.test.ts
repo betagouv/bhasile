@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { sumValues, weightedAverage } from "@/app/utils/math.util";
+import {
+  aggregateValues,
+  sumValues,
+  weightedAverage,
+} from "@/app/utils/math.util";
 
 describe("math util", () => {
   describe("sum", () => {
@@ -43,6 +47,13 @@ describe("math util", () => {
           { weight: 0, value: 1 },
         ])
       ).toBe(null);
+    });
+  });
+
+  describe("aggregateValues", () => {
+    it("should delegate to mean or median", () => {
+      expect(aggregateValues([1, 2, 9], "moyenne")).toBe(4);
+      expect(aggregateValues([1, 2, 9], "mediane")).toBe(2);
     });
   });
 });

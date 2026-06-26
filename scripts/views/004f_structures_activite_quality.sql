@@ -20,7 +20,7 @@ WITH
   ),
   activite_par_structure AS (
     SELECT
-      ds."structureId" AS "structureId",
+      sc."id" AS "structureId",
       BOOL_OR(
         ad."placesAutorisees" IS NOT NULL
         AND ad."placesAutorisees" > 0
@@ -38,17 +38,18 @@ WITH
       activite_dernier_millesime_par_dna ad
       JOIN public."Dna" d ON d."code" = ad."dnaCode"
       JOIN public."DnaStructure" ds ON ds."dnaId" = d."id"
+      JOIN:"SCHEMA"."structures_core" sc ON sc."structure_version_id" = ds."structureVersionId"
     GROUP BY
-      ds."structureId"
+      sc."id"
   )
 SELECT
-  s."id" AS "id",
+  sc."id" AS "id",
   COALESCE(act."has_issue_places_indisponibles_gt_3pct", FALSE) AS "has_issue_places_indisponibles_gt_3pct",
   -- Présences indues total > 7% : CADA + HUDA uniquement
   CASE
-    WHEN s."type" IN ('CADA', 'HUDA') THEN COALESCE(act."has_issue_presences_indues_gt_7pct", FALSE)
+    WHEN sc."structure_type" IN ('CADA', 'HUDA') THEN COALESCE(act."has_issue_presences_indues_gt_7pct", FALSE)
     ELSE FALSE
   END AS "has_issue_presences_indues_gt_7pct"
 FROM
-  public."Structure" s
-  LEFT JOIN activite_par_structure act ON act."structureId" = s."id";
+:"SCHEMA"."structures_core" sc
+  LEFT JOIN activite_par_structure act ON act."structureId" = sc."id";

@@ -4,6 +4,7 @@ import { ReactElement } from "react";
 
 import { Badge, BadgeType } from "@/app/components/common/Badge";
 import { NumberDisplay } from "@/app/components/common/NumberDisplay";
+import { pluralize } from "@/app/utils/string.util";
 import { FileUploadApiType } from "@/schemas/api/file.schema";
 import { StructureType } from "@/types/structure.type";
 
@@ -66,7 +67,7 @@ export const OperateurItem = ({
               <NumberDisplay value={nbStructures} />
             </h3>
             <span className="text-xs text-mention-grey text-center">
-              structure{nbStructures > 1 ? "s" : ""} en France
+              {pluralize(nbStructures, "structure")} en France
             </span>
           </div>
           <div className="border-r border-default-grey px-4 flex flex-col items-center max-w-[140px]">

@@ -21,7 +21,7 @@ import {
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
-import { resolveCurrentVersion } from "../structure-versions/structure-version.service";
+import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   StructureDbDetails,
@@ -29,16 +29,17 @@ import {
   StructureDbOperateur,
 } from "./structure.db.type";
 import {
-  countBySearch,
-  findBySearch,
+  findAllStructures,
   findOne,
   findOneOperateur,
   findStructureDepartement,
-  getLatestPlacesAutoriseesPerStructure,
+  findStructuresByIds,
   updateOne,
 } from "./structure.repository";
 import {
   buildStructureHistory,
+  computeStructureListRow,
+  filterStructureRows,
   getAdresseAdministrativeCoordinates,
   getCpomStructuresWithDates,
   getCurrentPlacesAutorisees,
@@ -48,8 +49,13 @@ import {
   getDatesPeriodeAutorisation,
   getOperateurLabel,
   getTypeBati,
+  isBornFromCreation,
+  isFinalisationFormValidated,
   isStructureInCpom,
   isStructureInCpomPerYear,
+  paginateRows,
+  sortStructureRows,
+  StructureListComputedRow,
 } from "./structure.util";
 
 export type SearchProps = {
@@ -92,72 +98,97 @@ export const updateStructureOperateur = async (
   );
 };
 
+const computeAllStructureRows = async (
+  now: Date
+): Promise<StructureListComputedRow[]> => {
+  const structures = await findAllStructures();
+  return structures
+    .map((structure) =>
+      computeStructureListRow(
+        structure,
+        resolveCurrentVersion(structure.structureVersions, now),
+        now
+      )
+    )
+    .filter((row): row is StructureListComputedRow => row !== null);
+};
+
 export const getFullStructures = async (
-  {
-    search,
-    page,
-    type,
-    bati,
-    placesAutorisees,
-    departements,
-    map,
-    column,
-    direction,
-    operateurs,
-    selection,
-    finalised,
-  }: SearchProps,
+  props: SearchProps,
   user?: SessionUser
 ): Promise<{
   structures: StructureApiRead[];
   totalStructures: number;
 }> => {
   const now = new Date();
-  const dbStructures = (await findBySearch(
-    {
-      search,
-      page,
-      type,
-      bati,
-      placesAutorisees,
-      departements,
-      map,
-      column,
-      direction,
-      operateurs,
-      selection,
-      finalised,
-    },
-    now
-  )) as StructureDbList[];
-  const totalStructures = await countBySearch(
-    {
-      search,
-      page,
-      type,
-      bati,
-      placesAutorisees,
-      departements,
-      operateurs,
-    },
-    now
-  );
+  const rows = await computeAllStructureRows(now);
 
-  const structures = dbStructures.map((dbStructure) => {
-    const resolvedVersion = dbStructure.structureVersions?.[0];
-    const resolvedStructure = resolvedVersion
-      ? mergeStructureWithVersion(dbStructure, resolvedVersion)
-      : dbStructure;
-    const structure = dbStructureToApiRead(resolvedStructure, true);
-    structure.adresses = getReadableAdresses(structure, user);
-    return structure;
+  const filtered = filterStructureRows(rows, props, {
+    includeNonVisible: Boolean(props.selection),
   });
 
-  return { structures, totalStructures };
+  const sorted = sortStructureRows(
+    filtered,
+    props.column ?? "departementAdministratif",
+    props.direction ?? "asc"
+  );
+
+  if (props.map) {
+    const structures = sorted.map((row) =>
+      dbStructureToApiRead(
+        {
+          id: row.id,
+          latitude: row.latitude,
+          longitude: row.longitude,
+        } as unknown as StructureDbList,
+        now,
+        true
+      )
+    );
+    return { structures, totalStructures: sorted.length };
+  }
+
+  const pageRows = props.selection
+    ? sorted
+    : paginateRows(sorted, props.page ?? 0);
+
+  const dbStructures = await findStructuresByIds(
+    pageRows.map((row) => row.id),
+    pageRows.map((row) => row.currentVersionId)
+  );
+  const dbStructuresById = new Map(
+    dbStructures.map((dbStructure) => [dbStructure.id, dbStructure])
+  );
+
+  const structures = pageRows
+    .map((row) => {
+      const dbStructure = dbStructuresById.get(row.id);
+      if (!dbStructure) {
+        return undefined;
+      }
+      const currentVersion = dbStructure.structureVersions[0];
+      const resolvedStructure = currentVersion
+        ? mergeStructureWithVersion(dbStructure, currentVersion)
+        : dbStructure;
+      const structure = dbStructureToApiRead(
+        resolvedStructure,
+        now,
+        true,
+        row.bornFromCreation
+      );
+      structure.adresses = getReadableAdresses(structure, user);
+      return structure;
+    })
+    .filter(
+      (structure): structure is StructureApiRead => structure !== undefined
+    );
+
+  return { structures, totalStructures: sorted.length };
 };
 
 export const getResolvedStructure = async (
-  id: number
+  id: number,
+  now: Date = new Date()
 ): Promise<StructureDbDetails | null> => {
   const dbStructure = await findOne(id);
   if (!dbStructure) {
@@ -165,7 +196,7 @@ export const getResolvedStructure = async (
   }
   const currentVersion = resolveCurrentVersion(
     dbStructure.structureVersions,
-    new Date()
+    now
   );
   return currentVersion
     ? mergeStructureWithVersion(dbStructure, currentVersion)
@@ -176,13 +207,19 @@ export const getFullStructure = async (
   id: number,
   user?: SessionUser
 ): Promise<StructureApiRead | null> => {
-  const resolvedDbStructure = await getResolvedStructure(id);
+  const now = new Date();
+  const resolvedDbStructure = await getResolvedStructure(id, now);
 
   if (!resolvedDbStructure) {
     return null;
   }
 
-  const structure = dbStructureToApiRead(resolvedDbStructure);
+  const structure = dbStructureToApiRead(
+    resolvedDbStructure,
+    now,
+    false,
+    isBornFromCreation(resolvedDbStructure.structureVersions, now)
+  );
   structure.adresses = getReadableAdresses(structure, user);
 
   return structure;
@@ -208,18 +245,15 @@ const getReadableAdresses = (
 
 export const getStructureForOperateur = async (
   id: number
-): Promise<StructureDbOperateur> => {
-  const dbStructure = await findOneOperateur(id);
-  if (!dbStructure) {
-    throw new Error(`Structure avec l'identifiant ${id} non trouvée`);
-  }
-  return dbStructure;
-};
+): Promise<StructureDbOperateur> => findOneOperateur(id, new Date());
 
 export const getStructureDepartement = async (
   id: number
 ): Promise<string | null> => {
-  const { departementAdministratif } = await findStructureDepartement(id);
+  const { departementAdministratif } = await findStructureDepartement(
+    id,
+    new Date()
+  );
   return departementAdministratif;
 };
 
@@ -235,7 +269,9 @@ export const mergeStructureWithVersion = <T>(
 
 const dbStructureToApiRead = (
   dbStructure: StructureDbDetails | StructureDbList,
-  simple: boolean = false
+  now: Date,
+  simple: boolean = false,
+  bornFromCreation: boolean = false
 ): StructureApiRead => {
   const [debutConvention, finConvention] = getDatesConvention(dbStructure);
   const [debutPeriodeAutorisation, finPeriodeAutorisation] =
@@ -269,7 +305,7 @@ const dbStructureToApiRead = (
   const isMultiDna =
     (dnaStructures?.length ?? 0) > 1 || (structureFinesses?.length ?? 0) > 1;
 
-  const cpomStructures = getCpomStructuresWithDates(dbStructure);
+  const cpomStructures = getCpomStructuresWithDates(dbStructure, now);
 
   const history = simple
     ? undefined
@@ -322,6 +358,9 @@ const dbStructureToApiRead = (
     dnaStructures,
     structureFinesses,
     adresses,
+    isFinalised:
+      bornFromCreation || isFinalisationFormValidated(dbStructure.forms),
+    bornFromCreation: undefined,
     structureVersions: undefined,
   }) as StructureApiRead;
 };
@@ -329,13 +368,16 @@ const dbStructureToApiRead = (
 export const getBoundsPlacesAutorisees = async (
   now: Date
 ): Promise<{ min: number; max: number }> => {
-  const latestPlacesAutoriseesOfEveryStructure =
-    await getLatestPlacesAutoriseesPerStructure(now);
-  if (latestPlacesAutoriseesOfEveryStructure.length === 0) {
+  const rows = await computeAllStructureRows(now);
+  const places = rows
+    .map((row) => row.latestNonNullPlacesAutorisees)
+    .filter(
+      (placesAutorisees): placesAutorisees is number =>
+        placesAutorisees !== null
+    );
+
+  if (places.length === 0) {
     return { min: 0, max: 0 };
   }
-  return {
-    min: Math.min(...latestPlacesAutoriseesOfEveryStructure),
-    max: Math.max(...latestPlacesAutoriseesOfEveryStructure),
-  };
+  return { min: Math.min(...places), max: Math.max(...places) };
 };

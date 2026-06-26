@@ -8,13 +8,13 @@ CREATE OR REPLACE VIEW:"SCHEMA"."structures_finance_quality" AS
 WITH
   structures AS (
     SELECT
-      s."id",
-      s."type" AS "structureType",
-      s."creationDate" AS "creationDate",
-      s."date303" AS "date303",
-      s."departementAdministratif" AS "departementAdministratif"
+      sc."id",
+      sc."structure_type" AS "structureType",
+      sc."creation_date" AS "creationDate",
+      sc."date_303" AS "date303",
+      sc."departement_administratif" AS "departementAdministratif"
     FROM
-      public."Structure" s
+:"SCHEMA"."structures_core" sc
   ),
   bound_dates AS (
     SELECT

@@ -34,8 +34,7 @@ export const TransformationStep = ({ step }: Props) => {
         {step.steps.map((stepItem) => {
           const isActive = stepItem.route && pathname.includes(stepItem.route);
           const showIncompleteBadge =
-            shouldShowIncompleteSteps &&
-            stepItem.status !== StepStatus.VALIDE;
+            shouldShowIncompleteSteps && stepItem.status !== StepStatus.VALIDE;
           return (
             <Link
               key={stepItem.route}
@@ -43,7 +42,7 @@ export const TransformationStep = ({ step }: Props) => {
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex items-center gap-2 py-2 pl-19 pr-4 hover:font-bold text-sm hover:bg-white",
-                isActive ? "bg-white" : ""
+                isActive ? "bg-white font-bold" : ""
               )}
             >
               {stepItem.label}

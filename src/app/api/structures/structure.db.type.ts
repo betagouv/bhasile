@@ -1,18 +1,50 @@
-import { Prisma } from "@/generated/prisma/client";
+import { Form, Prisma, StructureType } from "@/generated/prisma/client";
 
 import { structureVersionDetailsInclude } from "../structure-versions/structure-version.db.type";
 
-export const structureMapSelect = {
+export const structureListLightVersionSelect = {
   id: true,
+  effectiveDate: true,
+  structureVersionTransformationId: true,
+  type: true,
+  nom: true,
+  departementAdministratif: true,
+  communeAdministrative: true,
+  codePostalAdministratif: true,
   latitude: true,
   longitude: true,
-} satisfies Prisma.StructureSelect;
+  structureVersionTransformation: {
+    select: {
+      type: true,
+      transformation: { select: { form: { select: { status: true } } } },
+    },
+  },
+  adresses: { select: { repartition: true } },
+  structureTypologies: {
+    orderBy: { year: "desc" },
+    select: { year: true, placesAutorisees: true },
+  },
+  dnaStructures: { select: { dna: { select: { code: true } } } },
+  structureFinesses: { select: { finess: { select: { code: true } } } },
+} satisfies Prisma.StructureVersionSelect;
 
-export const structureOperateurSelect = {
+export const structureListLightSelect = {
   id: true,
-  type: true,
   codeBhasile: true,
-  forms: true,
+  operateur: { select: { name: true } },
+  forms: {
+    select: { status: true, formDefinition: { select: { slug: true } } },
+  },
+  actesAdministratifs: {
+    select: {
+      id: true,
+      category: true,
+      parentId: true,
+      startDate: true,
+      endDate: true,
+    },
+  },
+  structureVersions: { select: structureListLightVersionSelect },
 } satisfies Prisma.StructureSelect;
 
 export const structureListVersionInclude = {
@@ -123,12 +155,26 @@ export const structureDetailsInclude = {
                 select: {
                   id: true,
                   codeBhasile: true,
-                  type: true,
-                  communeAdministrative: true,
                   operateur: {
                     select: { name: true },
                   },
                   forms: true,
+                  structureVersions: {
+                    select: {
+                      id: true,
+                      effectiveDate: true,
+                      type: true,
+                      communeAdministrative: true,
+                      structureVersionTransformationId: true,
+                      structureVersionTransformation: {
+                        select: {
+                          transformation: {
+                            select: { form: { select: { status: true } } },
+                          },
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -183,9 +229,12 @@ export const structureDetailsInclude = {
   },
 } satisfies Prisma.StructureInclude;
 
-export type StructureDbMap = Prisma.StructureGetPayload<{
-  select: typeof structureMapSelect;
+export type StructureListLight = Prisma.StructureGetPayload<{
+  select: typeof structureListLightSelect;
 }>;
+
+export type StructureListLightVersion =
+  StructureListLight["structureVersions"][number];
 
 export type StructureDbList = Prisma.StructureGetPayload<{
   include: typeof structureListInclude & {
@@ -197,6 +246,9 @@ export type StructureDbDetails = Prisma.StructureGetPayload<{
   include: typeof structureDetailsInclude;
 }>;
 
-export type StructureDbOperateur = Prisma.StructureGetPayload<{
-  select: typeof structureOperateurSelect;
-}>;
+export type StructureDbOperateur = {
+  id: number;
+  type: StructureType | null;
+  codeBhasile: string;
+  forms: Form[];
+};
