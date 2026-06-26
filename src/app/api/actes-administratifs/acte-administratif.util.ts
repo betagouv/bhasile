@@ -2,10 +2,17 @@ import {
   getEffectiveEndDate,
   isCurrentlyInEffect,
 } from "@/app/utils/date.util";
-import { ActeAdministratif } from "@/generated/prisma/client";
 import { ActeAdministratifCategory } from "@/types/acte-administratif.type";
 
 export type ActeDateTuple = [Date | null, Date | null];
+
+export type ActeAdministratifDates = {
+  id: number;
+  category: string | null;
+  parentId: number | null;
+  startDate: Date | null;
+  endDate: Date | null;
+};
 
 const getMostRecentByEndDate = <ActeWithEndDate extends { endDate: Date | null }>(
   actes: ActeWithEndDate[]
@@ -23,7 +30,7 @@ const getMostRecentByEndDate = <ActeWithEndDate extends { endDate: Date | null }
 };
 
 export const getDatesOfCurrentActeAdministratif = (
-  actesAdministratifs: ActeAdministratif[],
+  actesAdministratifs: ActeAdministratifDates[],
   type: ActeAdministratifCategory,
   current: boolean = true
 ): ActeDateTuple => {

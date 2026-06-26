@@ -2,18 +2,45 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET } from "@/app/api/structures/stats/route";
 
-const mockGetLatestPlacesAutoriseesPerStructure = vi.fn();
+const mockfindAllStructures = vi.fn();
 const mockGetDepartementActivitesAverage = vi.fn();
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
-  getLatestPlacesAutoriseesPerStructure: (...args: unknown[]) =>
-    mockGetLatestPlacesAutoriseesPerStructure(...args),
+  findAllStructures: (...args: unknown[]) => mockfindAllStructures(...args),
 }));
 
 vi.mock("@/app/api/activites/activite.repository", () => ({
   getDepartementActivitesAverage: (...args: unknown[]) =>
     mockGetDepartementActivitesAverage(...args),
 }));
+
+const lightStructureWithPlaces = (id: number, placesAutorisees: number) =>
+  ({
+    id,
+    codeBhasile: `S-${id}`,
+    operateur: { name: "Op" },
+    forms: [],
+    actesAdministratifs: [],
+    structureVersions: [
+      {
+        id: id * 10,
+        effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
+        structureVersionTransformationId: null,
+        type: "CADA",
+        nom: "x",
+        departementAdministratif: "75",
+        communeAdministrative: "Paris",
+        codePostalAdministratif: "75001",
+        latitude: null,
+        longitude: null,
+        structureVersionTransformation: null,
+        adresses: [],
+        structureTypologies: [{ year: 2024, placesAutorisees }],
+        dnaStructures: [],
+        structureFinesses: [],
+      },
+    ],
+  }) as unknown;
 
 describe("GET /api/structures/stats", () => {
   beforeEach(() => {
@@ -22,7 +49,10 @@ describe("GET /api/structures/stats", () => {
 
   it("should return min and max places autorisées", async () => {
     // GIVEN
-    mockGetLatestPlacesAutoriseesPerStructure.mockResolvedValue([500, 10]);
+    mockfindAllStructures.mockResolvedValue([
+      lightStructureWithPlaces(1, 500),
+      lightStructureWithPlaces(2, 10),
+    ]);
 
     // WHEN
     const response = await GET();
@@ -33,6 +63,6 @@ describe("GET /api/structures/stats", () => {
       maxPlacesAutorisees: 500,
       minPlacesAutorisees: 10,
     });
-    expect(mockGetLatestPlacesAutoriseesPerStructure).toHaveBeenCalledTimes(1);
+    expect(mockfindAllStructures).toHaveBeenCalledTimes(1);
   });
 });

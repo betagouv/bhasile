@@ -2,10 +2,49 @@ import { Form, Prisma, StructureType } from "@/generated/prisma/client";
 
 import { structureVersionDetailsInclude } from "../structure-versions/structure-version.db.type";
 
-export const structureMapSelect = {
+export const structureListLightVersionSelect = {
   id: true,
+  effectiveDate: true,
+  structureVersionTransformationId: true,
+  type: true,
+  nom: true,
+  departementAdministratif: true,
+  communeAdministrative: true,
+  codePostalAdministratif: true,
   latitude: true,
   longitude: true,
+  structureVersionTransformation: {
+    select: {
+      type: true,
+      transformation: { select: { form: { select: { status: true } } } },
+    },
+  },
+  adresses: { select: { repartition: true } },
+  structureTypologies: {
+    orderBy: { year: "desc" },
+    select: { year: true, placesAutorisees: true },
+  },
+  dnaStructures: { select: { dna: { select: { code: true } } } },
+  structureFinesses: { select: { finess: { select: { code: true } } } },
+} satisfies Prisma.StructureVersionSelect;
+
+export const structureListLightSelect = {
+  id: true,
+  codeBhasile: true,
+  operateur: { select: { name: true } },
+  forms: {
+    select: { status: true, formDefinition: { select: { slug: true } } },
+  },
+  actesAdministratifs: {
+    select: {
+      id: true,
+      category: true,
+      parentId: true,
+      startDate: true,
+      endDate: true,
+    },
+  },
+  structureVersions: { select: structureListLightVersionSelect },
 } satisfies Prisma.StructureSelect;
 
 export const structureListVersionInclude = {
@@ -190,19 +229,18 @@ export const structureDetailsInclude = {
   },
 } satisfies Prisma.StructureInclude;
 
-export type StructureDbMap = Prisma.StructureGetPayload<{
-  select: typeof structureMapSelect;
+export type StructureListLight = Prisma.StructureGetPayload<{
+  select: typeof structureListLightSelect;
 }>;
+
+export type StructureListLightVersion =
+  StructureListLight["structureVersions"][number];
 
 export type StructureDbList = Prisma.StructureGetPayload<{
   include: typeof structureListInclude & {
     structureVersions: { include: typeof structureListVersionInclude };
   };
 }>;
-
-export type StructureDbListItem = StructureDbList & {
-  bornFromCreation: boolean;
-};
 
 export type StructureDbDetails = Prisma.StructureGetPayload<{
   include: typeof structureDetailsInclude;

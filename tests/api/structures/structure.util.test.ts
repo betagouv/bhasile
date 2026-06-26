@@ -1,11 +1,23 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { StructureDbList } from "@/app/api/structures/structure.db.type";
-import { buildStructuresWhereSql } from "@/app/api/structures/structure.sql";
 import {
+  StructureDbList,
+  StructureListLight,
+  StructureListLightVersion,
+} from "@/app/api/structures/structure.db.type";
+import { SearchProps } from "@/app/api/structures/structure.service";
+import {
+  computeStructureListRow,
+  filterStructureRows,
   getDatesConvention,
   getDatesPeriodeAutorisation,
+  isBornFromCreation,
+  sortStructureRows,
+  StructureListComputedRow,
 } from "@/app/api/structures/structure.util";
+import { Repartition } from "@/types/adresse.type";
+import { StructureType } from "@/types/structure.type";
+import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 type ActeAdministratifStub = {
   id?: number;
@@ -56,8 +68,196 @@ describe("structure dates from actes administratifs", () => {
   });
 });
 
-const emptyFilters = {
+const buildVersion = (
+  overrides: Partial<StructureListLightVersion> = {}
+): StructureListLightVersion =>
+  ({
+    id: 10,
+    effectiveDate: new Date("2024-01-01T00:00:00.000Z"),
+    structureVersionTransformationId: null,
+    type: StructureType.CADA,
+    nom: "Centre",
+    departementAdministratif: "75",
+    communeAdministrative: "Paris",
+    codePostalAdministratif: "75001",
+    latitude: null,
+    longitude: null,
+    structureVersionTransformation: null,
+    adresses: [{ repartition: Repartition.COLLECTIF }],
+    structureTypologies: [{ year: 2024, placesAutorisees: 30 }],
+    dnaStructures: [{ dna: { code: "DNA-1" } }],
+    structureFinesses: [{ finess: { code: "FIN-1" } }],
+    ...overrides,
+  }) as unknown as StructureListLightVersion;
+
+const buildLightStructure = (
+  overrides: Partial<StructureListLight> = {},
+  version: StructureListLightVersion = buildVersion()
+): StructureListLight =>
+  ({
+    id: 1,
+    codeBhasile: "A-001",
+    operateur: { name: "Operateur Alpha" },
+    forms: [],
+    actesAdministratifs: [],
+    structureVersions: [version],
+    ...overrides,
+  }) as unknown as StructureListLight;
+
+const now = new Date("2026-06-24T00:00:00.000Z");
+
+describe("computeStructureListRow", () => {
+  it("returns null when no current version is resolved", () => {
+    expect(computeStructureListRow(buildLightStructure(), undefined, now)).toBe(
+      null
+    );
+  });
+
+  it("derives bati MIXTE, latest places and search values", () => {
+    const version = buildVersion({
+      adresses: [
+        { repartition: Repartition.COLLECTIF },
+        { repartition: Repartition.DIFFUS },
+      ] as unknown as StructureListLightVersion["adresses"],
+      structureTypologies: [
+        { year: 2025, placesAutorisees: 42 },
+        { year: 2024, placesAutorisees: 30 },
+      ] as unknown as StructureListLightVersion["structureTypologies"],
+    });
+    const row = computeStructureListRow(
+      buildLightStructure({}, version),
+      version,
+      now
+    );
+
+    expect(row?.bati).toBe(Repartition.MIXTE);
+    expect(row?.placesAutorisees).toBe(42);
+    expect(row?.searchValues).toEqual(
+      expect.arrayContaining(["A-001", "Operateur Alpha", "DNA-1", "FIN-1"])
+    );
+  });
+
+  it("treats addresses stored as MIXTE (or any mix) as bati MIXTE", () => {
+    const allMixte = buildVersion({
+      adresses: [
+        { repartition: Repartition.MIXTE },
+      ] as unknown as StructureListLightVersion["adresses"],
+    });
+    expect(
+      computeStructureListRow(buildLightStructure({}, allMixte), allMixte, now)
+        ?.bati
+    ).toBe(Repartition.MIXTE);
+
+    const collectifPlusMixte = buildVersion({
+      adresses: [
+        { repartition: Repartition.COLLECTIF },
+        { repartition: Repartition.MIXTE },
+      ] as unknown as StructureListLightVersion["adresses"],
+    });
+    expect(
+      computeStructureListRow(
+        buildLightStructure({}, collectifPlusMixte),
+        collectifPlusMixte,
+        now
+      )?.bati
+    ).toBe(Repartition.MIXTE);
+  });
+
+  it("computes finConvention from the current convention acte, not a scalar", () => {
+    const structure = buildLightStructure({
+      actesAdministratifs: [
+        {
+          id: 1,
+          category: "CONVENTION",
+          parentId: null,
+          startDate: new Date("2024-01-01T00:00:00.000Z"),
+          endDate: new Date("2027-12-31T00:00:00.000Z"),
+        },
+      ],
+    } as unknown as Partial<StructureListLight>);
+
+    const row = computeStructureListRow(structure, buildVersion(), now);
+
+    expect(row?.finConvention).toEqual(new Date("2027-12-31T00:00:00.000Z"));
+  });
+
+  it("exposes the latest non-null places for bounds even when the newest year is null", () => {
+    const version = buildVersion({
+      structureTypologies: [
+        { year: 2025, placesAutorisees: null },
+        { year: 2024, placesAutorisees: 30 },
+      ] as unknown as StructureListLightVersion["structureTypologies"],
+    });
+    const row = computeStructureListRow(
+      buildLightStructure({}, version),
+      version,
+      now
+    );
+
+    expect(row?.placesAutorisees).toBe(null);
+    expect(row?.latestNonNullPlacesAutorisees).toBe(30);
+  });
+});
+
+describe("isBornFromCreation", () => {
+  const creationVersion = (overrides: Partial<StructureListLightVersion> = {}) =>
+    buildVersion({
+      structureVersionTransformationId: 5,
+      structureVersionTransformation: {
+        type: StructureVersionTransformationType.CREATION,
+        transformation: { form: { status: true } },
+      } as unknown as StructureListLightVersion["structureVersionTransformation"],
+      ...overrides,
+    });
+
+  it("is true for a validated CREATION effective in the past", () => {
+    expect(isBornFromCreation([creationVersion()], now)).toBe(true);
+  });
+
+  it("is false when the creation form is not validated", () => {
+    const version = creationVersion({
+      structureVersionTransformation: {
+        type: StructureVersionTransformationType.CREATION,
+        transformation: { form: { status: false } },
+      } as unknown as StructureListLightVersion["structureVersionTransformation"],
+    });
+    expect(isBornFromCreation([version], now)).toBe(false);
+  });
+
+  it("is false when the creation is effective in the future", () => {
+    const version = creationVersion({
+      effectiveDate: new Date("2099-01-01T00:00:00.000Z"),
+    });
+    expect(isBornFromCreation([version], now)).toBe(false);
+  });
+});
+
+const buildRow = (
+  overrides: Partial<StructureListComputedRow> = {}
+): StructureListComputedRow => ({
+  id: 1,
+  codeBhasile: "A-001",
+  currentVersionId: 10,
+  bornFromCreation: false,
+  hasForm: true,
+  finalised: false,
+  type: StructureType.CADA,
+  operateurName: "Operateur Alpha",
+  departementAdministratif: "75",
+  communeAdministrative: "Paris",
+  bati: Repartition.COLLECTIF,
+  placesAutorisees: 10,
+  latestNonNullPlacesAutorisees: 10,
+  finConvention: null,
+  latitude: null,
+  longitude: null,
+  searchValues: ["A-001"],
+  ...overrides,
+});
+
+const emptyFilters: SearchProps = {
   search: null,
+  page: null,
   type: null,
   bati: null,
   placesAutorisees: null,
@@ -65,34 +265,121 @@ const emptyFilters = {
   operateurs: null,
 };
 
-const buildWhere = (filters: Parameters<typeof buildStructuresWhereSql>[0]) =>
-  buildStructuresWhereSql(filters, new Date());
+describe("filterStructureRows", () => {
+  it("hides non-visible rows unless includeNonVisible is set", () => {
+    const hidden = buildRow({ hasForm: false, bornFromCreation: false });
 
-describe("buildStructuresWhereSql finalised filter", () => {
-  it("restricts to structures whose finalisation form is finalised", () => {
-    const where = buildWhere({
-      ...emptyFilters,
-      selection: true,
-      finalised: true,
-    });
-
-    expect(where.strings.join(" ")).toContain(`fd."slug" =`);
-    expect(where.strings.join(" ")).toContain(`f."status" = true`);
-    // The slug is passed as a bound parameter, never inlined into the SQL text.
-    expect(where.values).toContain("finalisation-v1");
+    expect(
+      filterStructureRows([hidden], emptyFilters, { includeNonVisible: false })
+    ).toHaveLength(0);
+    expect(
+      filterStructureRows([hidden], emptyFilters, { includeNonVisible: true })
+    ).toHaveLength(1);
   });
 
-  it("adds no finalisation condition when finalised is not requested", () => {
-    // The slug is now a bound value, so it never appears in the raw SQL text:
-    // assert over `values` to actually detect a stray finalised clause.
-    const selection = buildWhere({ ...emptyFilters, selection: true });
-    expect(selection.values).not.toContain("finalisation-v1");
+  it("matches search accent-insensitively", () => {
+    const row = buildRow({ searchValues: ["Créteil"] });
 
-    const list = buildWhere({ ...emptyFilters, selection: false });
-    expect(list.values).not.toContain("finalisation-v1");
-    // The non-selection list keeps its "has a Form" filter, unchanged.
-    expect(list.strings.join(" ")).toContain(
-      `EXISTS (SELECT 1 FROM public."Form" f`
-    );
+    expect(
+      filterStructureRows(
+        [row],
+        { ...emptyFilters, search: "creteil" },
+        { includeNonVisible: false }
+      )
+    ).toHaveLength(1);
+  });
+
+  it("filters on type, places range and bati", () => {
+    const rows = [
+      buildRow({ id: 1, type: StructureType.CADA, placesAutorisees: 10 }),
+      buildRow({ id: 2, type: StructureType.HUDA, placesAutorisees: 100 }),
+    ];
+
+    expect(
+      filterStructureRows(
+        rows,
+        { ...emptyFilters, type: "CADA" },
+        { includeNonVisible: false }
+      )
+    ).toHaveLength(1);
+    expect(
+      filterStructureRows(
+        rows,
+        { ...emptyFilters, placesAutorisees: "0,50" },
+        { includeNonVisible: false }
+      )
+    ).toHaveLength(1);
+    expect(
+      filterStructureRows(
+        rows,
+        { ...emptyFilters, bati: "diffus" },
+        { includeNonVisible: false }
+      )
+    ).toHaveLength(0);
+  });
+
+  it("restricts to finalised rows when requested", () => {
+    const rows = [
+      buildRow({ id: 1, finalised: true }),
+      buildRow({ id: 2, finalised: false }),
+    ];
+
+    expect(
+      filterStructureRows(
+        rows,
+        { ...emptyFilters, finalised: true },
+        { includeNonVisible: false }
+      )
+    ).toHaveLength(1);
+  });
+});
+
+describe("sortStructureRows", () => {
+  it("sorts enum types alphabetically (no longer by declaration order)", () => {
+    const rows = [
+      buildRow({ id: 1, codeBhasile: "A", type: StructureType.HUDA }),
+      buildRow({ id: 2, codeBhasile: "B", type: StructureType.CADA }),
+      buildRow({ id: 3, codeBhasile: "C", type: StructureType.CAES }),
+    ];
+
+    const sorted = sortStructureRows(rows, "type", "asc");
+
+    expect(sorted.map((row) => row.type)).toEqual([
+      StructureType.CADA,
+      StructureType.CAES,
+      StructureType.HUDA,
+    ]);
+  });
+
+  it("places nulls last on asc and first on desc", () => {
+    const rows = [
+      buildRow({ id: 1, codeBhasile: "A", placesAutorisees: 10 }),
+      buildRow({ id: 2, codeBhasile: "B", placesAutorisees: null }),
+      buildRow({ id: 3, codeBhasile: "C", placesAutorisees: 5 }),
+    ];
+
+    expect(
+      sortStructureRows(rows, "placesAutorisees", "asc").map(
+        (row) => row.placesAutorisees
+      )
+    ).toEqual([5, 10, null]);
+    expect(
+      sortStructureRows(rows, "placesAutorisees", "desc").map(
+        (row) => row.placesAutorisees
+      )
+    ).toEqual([null, 10, 5]);
+  });
+
+  it("breaks ties on codeBhasile then id", () => {
+    const rows = [
+      buildRow({ id: 2, codeBhasile: "B", departementAdministratif: "75" }),
+      buildRow({ id: 1, codeBhasile: "A", departementAdministratif: "75" }),
+    ];
+
+    expect(
+      sortStructureRows(rows, "departementAdministratif", "asc").map(
+        (row) => row.codeBhasile
+      )
+    ).toEqual(["A", "B"]);
   });
 });

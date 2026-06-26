@@ -6,8 +6,8 @@ import { PublicType } from "@/types/structure.type";
 
 import { createStructure } from "../../test-utils/structure.factory";
 
-const mockFindBySearch = vi.fn();
-const mockCountBySearch = vi.fn();
+const mockfindAllStructures = vi.fn();
+const mockFindStructuresByIds = vi.fn();
 const mockUpdateOne = vi.fn();
 const mockGetAdresseAdministrativeCoordinates = vi.fn();
 const mockCreateUserAction = vi.fn();
@@ -23,9 +23,8 @@ vi.mock("@/lib/next-auth/auth", () => ({
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
   updateOne: (...args: unknown[]) => mockUpdateOne(...args),
-  getLatestPlacesAutoriseesPerStructure: vi.fn(),
-  findBySearch: (...args: unknown[]) => mockFindBySearch(...args),
-  countBySearch: (...args: unknown[]) => mockCountBySearch(...args),
+  findAllStructures: (...args: unknown[]) => mockfindAllStructures(...args),
+  findStructuresByIds: (...args: unknown[]) => mockFindStructuresByIds(...args),
   findOneOperateur: vi.fn(),
 }));
 
@@ -39,6 +38,12 @@ vi.mock("@/app/api/structures/structure.util", () => ({
   getTypeBati: vi.fn().mockReturnValue("DIFFUS"),
   isStructureInCpom: vi.fn().mockReturnValue(false),
   isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
+  computeStructureListRow: vi.fn(),
+  filterStructureRows: vi.fn((rows: unknown[]) => rows),
+  sortStructureRows: vi.fn((rows: unknown[]) => rows),
+  paginateRows: vi.fn((rows: unknown[]) => rows),
+  isBornFromCreation: vi.fn().mockReturnValue(false),
+  isFinalisationFormValidated: vi.fn().mockReturnValue(false),
 }));
 
 vi.mock("@/app/api/activites/activite.repository", () => ({
@@ -56,8 +61,8 @@ describe("GET /api/structures", () => {
 
   it("should return structures and total", async () => {
     // GIVEN
-    mockFindBySearch.mockResolvedValueOnce([]);
-    mockCountBySearch.mockResolvedValueOnce(0);
+    mockfindAllStructures.mockResolvedValueOnce([]);
+    mockFindStructuresByIds.mockResolvedValueOnce([]);
 
     const request = new NextRequest("http://localhost/api/structures");
 
@@ -119,4 +124,3 @@ describe("POST /api/structures", () => {
     expect(mockUpdateOne).not.toHaveBeenCalled();
   });
 });
-
