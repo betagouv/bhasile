@@ -5,7 +5,6 @@ import Link from "next/link";
 import { EmptyCell } from "@/app/components/common/EmptyCell";
 import { formatCityName } from "@/app/utils/adresse.util";
 import { formatDate } from "@/app/utils/date.util";
-import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 import {
   getFermetureEvent,
   getPlacesByCommunes,
@@ -20,7 +19,7 @@ export const StructureItem = ({
   handleOpenModal,
   isClosed,
 }: Props) => {
-  const isStructureFinalisee = getFinalisationFormStatus(structure);
+  const isStructureFinalisee = structure.isFinalised;
   const fermetureEvent = isClosed ? getFermetureEvent(structure) : undefined;
 
   return (

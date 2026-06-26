@@ -13,14 +13,13 @@ import { PrismaTransaction } from "@/types/prisma.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
+import { TRANSFORMATION_FORM_SLUG } from "../forms/form.constants";
 import {
   createOrUpdateForm,
   initializeStructureVersionTransformationDefaultForms,
 } from "../forms/form.repository";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 import { transformationInclude } from "./transformation.db.type";
-
-const TRANSFORMATION_FORM_SLUG = "transformation-v1";
 
 export const findOne = async (id: number) => {
   return prisma.transformation.findUniqueOrThrow({

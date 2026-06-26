@@ -165,6 +165,7 @@ describe("GET /api/structures/[id]", () => {
       },
       isInCpom: false,
       isInCpomPerYear: {},
+      isFinalised: false,
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);
     expect(mockFindOneOperateur).not.toHaveBeenCalled();

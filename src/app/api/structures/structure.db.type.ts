@@ -200,6 +200,10 @@ export type StructureDbList = Prisma.StructureGetPayload<{
   };
 }>;
 
+export type StructureDbListItem = StructureDbList & {
+  bornFromCreation: boolean;
+};
+
 export type StructureDbDetails = Prisma.StructureGetPayload<{
   include: typeof structureDetailsInclude;
 }>;

@@ -1,4 +1,7 @@
-import { recursivelySerializeDates } from "@/app/utils/date.util";
+import {
+  recursivelySerializeDates,
+  startOfNextUtcDay,
+} from "@/app/utils/date.util";
 import {
   isStructureAutorisee,
   isStructureSubventionnee,
@@ -12,6 +15,7 @@ import {
 import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 import { PublicType } from "@/types/structure.type";
+import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 import { processActivitesForStructure } from "../activites/activite.service";
 import {
@@ -21,11 +25,13 @@ import {
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
+import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
 import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   StructureDbDetails,
   StructureDbList,
+  StructureDbListItem,
   StructureDbOperateur,
 } from "./structure.db.type";
 import {
@@ -129,7 +135,7 @@ export const getFullStructures = async (
       finalised,
     },
     now
-  )) as StructureDbList[];
+  )) as StructureDbListItem[];
   const totalStructures = await countBySearch(
     {
       search,
@@ -148,7 +154,12 @@ export const getFullStructures = async (
     const resolvedStructure = resolvedVersion
       ? mergeStructureWithVersion(dbStructure, resolvedVersion)
       : dbStructure;
-    const structure = dbStructureToApiRead(resolvedStructure, now, true);
+    const structure = dbStructureToApiRead(
+      resolvedStructure,
+      now,
+      true,
+      dbStructure.bornFromCreation
+    );
     structure.adresses = getReadableAdresses(structure, user);
     return structure;
   });
@@ -184,7 +195,12 @@ export const getFullStructure = async (
     return null;
   }
 
-  const structure = dbStructureToApiRead(resolvedDbStructure, now);
+  const structure = dbStructureToApiRead(
+    resolvedDbStructure,
+    now,
+    false,
+    isBornFromCreation(resolvedDbStructure.structureVersions, now)
+  );
   structure.adresses = getReadableAdresses(structure, user);
 
   return structure;
@@ -232,10 +248,36 @@ export const mergeStructureWithVersion = <T>(
   return { ...dbStructure, ...versionedOverlay };
 };
 
+const isFinalisationFormValidated = (
+  forms:
+    | { status: boolean; formDefinition: { slug: string } }[]
+    | null
+    | undefined
+): boolean =>
+  forms?.some(
+    (form) => form.formDefinition.slug === FINALISATION_FORM_SLUG && form.status
+  ) ?? false;
+
+const isBornFromCreation = (
+  structureVersions: StructureDbDetails["structureVersions"] | null | undefined,
+  now: Date
+): boolean =>
+  structureVersions?.some((structureVersion) => {
+    const structureVersionTransformation =
+      structureVersion.structureVersionTransformation;
+    return (
+      structureVersionTransformation?.type ===
+        StructureVersionTransformationType.CREATION &&
+      structureVersionTransformation.transformation?.form?.status === true &&
+      structureVersion.effectiveDate < startOfNextUtcDay(now)
+    );
+  }) ?? false;
+
 const dbStructureToApiRead = (
   dbStructure: StructureDbDetails | StructureDbList,
   now: Date,
-  simple: boolean = false
+  simple: boolean = false,
+  bornFromCreation: boolean = false
 ): StructureApiRead => {
   const [debutConvention, finConvention] = getDatesConvention(dbStructure);
   const [debutPeriodeAutorisation, finPeriodeAutorisation] =
@@ -322,6 +364,9 @@ const dbStructureToApiRead = (
     dnaStructures,
     structureFinesses,
     adresses,
+    isFinalised:
+      bornFromCreation || isFinalisationFormValidated(dbStructure.forms),
+    bornFromCreation: undefined,
     structureVersions: undefined,
   }) as StructureApiRead;
 };

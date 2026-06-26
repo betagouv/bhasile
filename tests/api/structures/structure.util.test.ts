@@ -65,28 +65,34 @@ const emptyFilters = {
   operateurs: null,
 };
 
-const whereSqlText = (filters: Parameters<typeof buildStructuresWhereSql>[0]) =>
-  buildStructuresWhereSql(filters).strings.join(" ");
+const buildWhere = (filters: Parameters<typeof buildStructuresWhereSql>[0]) =>
+  buildStructuresWhereSql(filters, new Date());
 
 describe("buildStructuresWhereSql finalised filter", () => {
   it("restricts to structures whose finalisation form is finalised", () => {
-    const sql = whereSqlText({
+    const where = buildWhere({
       ...emptyFilters,
       selection: true,
       finalised: true,
     });
 
-    expect(sql).toContain(`fd."slug" = 'finalisation-v1'`);
-    expect(sql).toContain(`f."status" = true`);
+    expect(where.strings.join(" ")).toContain(`fd."slug" =`);
+    expect(where.strings.join(" ")).toContain(`f."status" = true`);
+    // The slug is passed as a bound parameter, never inlined into the SQL text.
+    expect(where.values).toContain("finalisation-v1");
   });
 
   it("adds no finalisation condition when finalised is not requested", () => {
-    const selectionSql = whereSqlText({ ...emptyFilters, selection: true });
-    expect(selectionSql).not.toContain("finalisation-v1");
+    // The slug is now a bound value, so it never appears in the raw SQL text:
+    // assert over `values` to actually detect a stray finalised clause.
+    const selection = buildWhere({ ...emptyFilters, selection: true });
+    expect(selection.values).not.toContain("finalisation-v1");
 
-    const listSql = whereSqlText({ ...emptyFilters, selection: false });
-    expect(listSql).not.toContain("finalisation-v1");
+    const list = buildWhere({ ...emptyFilters, selection: false });
+    expect(list.values).not.toContain("finalisation-v1");
     // The non-selection list keeps its "has a Form" filter, unchanged.
-    expect(listSql).toContain(`EXISTS (SELECT 1 FROM public."Form" f`);
+    expect(list.strings.join(" ")).toContain(
+      `EXISTS (SELECT 1 FROM public."Form" f`
+    );
   });
 });
