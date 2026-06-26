@@ -215,7 +215,6 @@ async function getStatistiques(): Promise<StatistiquesApiType> {
       },
     ],
     finance: {
-      aggregation: "moyenne",
       byYear: [
         {
           year: 2024,

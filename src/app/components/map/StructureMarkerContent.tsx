@@ -5,7 +5,6 @@ import Link from "next/link";
 import { TypeBatiBadge } from "@/app/(authenticated)/(with-menu)/structures/_components/TypeBatiBadge";
 import { useFetchStructure } from "@/app/hooks/useFetchStructure";
 import { formatDate } from "@/app/utils/date.util";
-import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 import { getCommunesGroupedByDepartement } from "@/app/utils/structure.util";
 import { DEPARTEMENTS } from "@/constants";
 
@@ -16,7 +15,7 @@ export const StructureMarkerContent = ({ id }: { id: number }) => {
   }
   const { codeBhasile, type, operateurLabel, nom, finConvention } = structure;
 
-  const isStructureFinalisee = getFinalisationFormStatus(structure);
+  const isStructureFinalisee = structure.isFinalised;
 
   return (
     <div>

@@ -40,19 +40,19 @@ export const createDnaList = (count: number): Omit<Dna, "id">[] => {
 export const createDnaStructures = ({
   dnaList,
   dnaByCode,
-  perStructureCounts,
+  perVersionCounts,
 }: CreateDnaStructuresOptions) => {
   const dnaStructures: Array<{
     dnaId: number;
-    structureId: number;
-    structureVersionId: null;
+    structureId: null;
+    structureVersionId: number;
     description: string;
     startDate: Date | null;
     endDate: Date | null;
   }> = [];
 
   let cursor = 0;
-  for (const { structureId, count } of perStructureCounts) {
+  for (const { structureVersionId, count } of perVersionCounts) {
     for (let i = 0; i < count; i++) {
       const dna = dnaList[cursor++];
       const dnaId = dnaByCode.get(dna.code);
@@ -62,8 +62,8 @@ export const createDnaStructures = ({
 
       dnaStructures.push({
         dnaId,
-        structureId,
-        structureVersionId: null,
+        structureId: null,
+        structureVersionId,
         description: faker.lorem.words(2),
         startDate:
           faker.helpers.maybe(() => faker.date.past({ years: 2 }), {
@@ -82,5 +82,5 @@ export const createDnaStructures = ({
 type CreateDnaStructuresOptions = {
   dnaList: Omit<Dna, "id">[];
   dnaByCode: Map<string, number>;
-  perStructureCounts: { structureId: number; count: number }[];
+  perVersionCounts: { structureVersionId: number; count: number }[];
 };

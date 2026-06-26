@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 
 import { Logo } from "@/app/components/Logo";
+import { MenuFooter } from "@/app/components/MenuFooter";
 
 import { useOptionalTransformationContext } from "../[transformationId]/_context/TransformationClientContext";
 import { TransformationMenuItem } from "./TransformationMenuItem";
@@ -14,7 +15,7 @@ export const TransformationMenu = () => {
 
   return (
     <nav className="fr-sidemenu pe-0 h-screen sticky flex flex-col top-0 w-72 border-r border-default-grey bg-alt-blue-france shrink-0">
-      <div className="border-b border-default-grey min-h-[4.35rem] grid">
+      <div className="border-b border-default-grey bg-white min-h-[4.35rem] grid">
         <Logo />
       </div>
       <div className="flex flex-col gap-8 py-8">
@@ -51,6 +52,7 @@ export const TransformationMenu = () => {
           disabled={!transformation?.id}
         />
       </div>
+      <MenuFooter />
     </nav>
   );
 };

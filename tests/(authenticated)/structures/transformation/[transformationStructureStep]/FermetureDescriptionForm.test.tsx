@@ -1,12 +1,16 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   createStructureVersionTransformation,
   createTransformation,
 } from "tests/test-utils/factories/transformation.factory";
+import {
+  getSavedStructureVersionTransformation,
+  mockTransformationFetch,
+  renderTransformationForm,
+} from "tests/test-utils/transformationForm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { TransformationClientProvider } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { FermetureDescriptionForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/fermeture/FermetureDescriptionForm";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
@@ -16,7 +20,8 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
-const mockUpdateTransformation = vi.fn();
+const TRANSFORMATION_ID = 12;
+
 const mockRouterPush = vi.fn();
 
 vi.mock("next/navigation", () => ({
@@ -30,18 +35,14 @@ vi.mock("next/navigation", () => ({
   notFound: vi.fn(),
 }));
 
-vi.mock("@/app/hooks/useTransformations", () => ({
-  useTransformations: () => ({
-    updateTransformation: mockUpdateTransformation,
-  }),
-}));
+let fetchMock: ReturnType<typeof mockTransformationFetch>;
 
 const fermetureTransformation = (
   structureVersion: TransformationApiRead["structureVersionTransformations"][number]["structureVersion"],
   actesAdministratifs: ActeAdministratifApiType[] = []
 ) =>
   createTransformation({
-    id: 12,
+    id: TRANSFORMATION_ID,
     type: TransformationType.FERMETURE_SANS_TRANSFERT,
     structureVersionTransformations: [
       createStructureVersionTransformation({
@@ -56,13 +57,12 @@ const fermetureTransformation = (
 const renderForm = (transformation: TransformationApiRead) => {
   const [structureVersionTransformation] =
     transformation.structureVersionTransformations;
-  return render(
-    <TransformationClientProvider transformation={transformation}>
-      <FermetureDescriptionForm
-        transformation={transformation}
-        structureVersionTransformation={structureVersionTransformation}
-      />
-    </TransformationClientProvider>
+  return renderTransformationForm(
+    transformation,
+    <FermetureDescriptionForm
+      transformation={transformation}
+      structureVersionTransformation={structureVersionTransformation}
+    />
   );
 };
 
@@ -73,15 +73,13 @@ const fillClosureDate = (container: HTMLElement, htmlDate: string) => {
   fireEvent.change(dateInput, { target: { value: htmlDate } });
 };
 
-const getSavedStructureVersionTransformation = () => {
-  const [, payload] = mockUpdateTransformation.mock.calls[0];
-  return payload.structureVersionTransformations[0];
-};
+const savedStructureVersionTransformation = () =>
+  getSavedStructureVersionTransformation(fetchMock, TRANSFORMATION_ID);
 
-describe("FermetureDescriptionForm (intégration via FormWrapper)", () => {
+describe("FermetureDescriptionForm (intégration jusqu'au fetch)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUpdateTransformation.mockResolvedValue(12);
+    fetchMock = mockTransformationFetch(TRANSFORMATION_ID);
     localStorage.clear();
   });
 
@@ -102,8 +100,13 @@ describe("FermetureDescriptionForm (intégration via FormWrapper)", () => {
     );
 
     // THEN the date is forwarded as effectiveDate and the empty AUTRE row is filtered out
-    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
-    const structureVersionTransformation = getSavedStructureVersionTransformation();
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+    const structureVersionTransformation = savedStructureVersionTransformation();
     expect(structureVersionTransformation.id).toBe(7);
     expect(structureVersionTransformation.type).toBe(
       StructureVersionTransformationType.FERMETURE
@@ -125,10 +128,23 @@ describe("FermetureDescriptionForm (intégration via FormWrapper)", () => {
       screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    // THEN the incomplete step is saved and the user moves on (no blocking)
-    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
-    expect(mockRouterPush).toHaveBeenCalledWith(
-      "/structures/transformation/12/verification"
+    // THEN the incomplete step is saved (PUT) without a closure date and the user moves on (no blocking)
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+    const structureVersionTransformation = savedStructureVersionTransformation();
+    expect(structureVersionTransformation.structureVersion).toEqual({
+      id: 12,
+      structureId: 104,
+    });
+    expect(structureVersionTransformation.actesAdministratifs).toEqual([]);
+    await waitFor(() =>
+      expect(mockRouterPush).toHaveBeenCalledWith(
+        "/structures/transformation/12/verification"
+      )
     );
   });
 
@@ -152,9 +168,13 @@ describe("FermetureDescriptionForm (intégration via FormWrapper)", () => {
     );
 
     // THEN the document is forwarded alongside the closure date
-    await waitFor(() => expect(mockUpdateTransformation).toHaveBeenCalledTimes(1));
-    const actes =
-      getSavedStructureVersionTransformation().actesAdministratifs;
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+    const actes = savedStructureVersionTransformation().actesAdministratifs;
     expect(actes).toHaveLength(1);
     expect(actes[0].category).toBe("AUTRE");
     expect(actes[0].fileUploads).toMatchObject([{ key: "k-autre" }]);

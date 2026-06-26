@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { Repartition } from "@/types/adresse.type";
 import { PublicType, StructureType } from "@/types/structure.type";
+import { HistoryEvent } from "@/types/structure-history.type";
 
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
 import { activiteApiSchema } from "./activite.schema";
@@ -142,6 +143,7 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   debutPeriodeAutorisation: string | null;
   finPeriodeAutorisation: string | null;
   cpomStructures?: CpomStructureApiRead[];
+  history?: HistoryEvent[];
   operateurLabel: string;
   isAutorisee: boolean;
   isSubventionnee: boolean;
@@ -152,6 +154,7 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   };
   isInCpom: boolean;
   isInCpomPerYear: Record<number, boolean>;
+  isFinalised: boolean;
   nom: string;
   adresseAdministrativeComplete: string;
   isMultiAntenne: boolean;

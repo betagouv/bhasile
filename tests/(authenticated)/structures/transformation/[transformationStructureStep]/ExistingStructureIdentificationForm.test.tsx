@@ -1,6 +1,11 @@
-import { render } from "@testing-library/react";
-import { ReactNode } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import {
+  getSavedStructureVersionTransformation,
+  mockTransformationFetch,
+  renderTransformationForm,
+} from "tests/test-utils/transformationForm";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ExistingStructureIdentificationForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/ExistingStructureIdentificationForm";
 import {
@@ -9,59 +14,28 @@ import {
 } from "@/schemas/api/transformation.schema";
 import { FormKind } from "@/types/global";
 import {
+  StructureVersionTransformationStep,
   StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
 
-const mockGoToNextStep = vi.fn();
-const mockHandleSave = vi.fn();
+const TRANSFORMATION_ID = 12;
+const STRUCTURE_VERSION_TRANSFORMATION_ID = 7;
 
-vi.mock("@/app/hooks/useTransformationFormHandling", () => ({
-  useTransformationFormHandling: () => ({
-    goToNextStep: mockGoToNextStep,
-    handleSave: mockHandleSave,
-    shouldShowIncompleteSteps: false,
+vi.mock("next/navigation", () => ({
+  useParams: () => ({
+    transformationId: String(TRANSFORMATION_ID),
+    transformationStructureType: StructureVersionTransformationType.CONTRACTION,
+    transformationStructureId: String(STRUCTURE_VERSION_TRANSFORMATION_ID),
+    transformationStructureStep: StructureVersionTransformationStep.DESCRIPTION,
   }),
+  usePathname: () =>
+    "/structures/transformation/12/contraction/7/description",
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  notFound: vi.fn(),
 }));
 
-type CapturedProps = {
-  defaultValues?: Record<string, unknown>;
-  onSubmit?: (data: Record<string, unknown>) => void;
-};
-const captured: CapturedProps = {};
-
-vi.mock("@/app/components/forms/FormWrapper", () => ({
-  default: ({
-    defaultValues,
-    onSubmit,
-    children,
-  }: {
-    defaultValues?: Record<string, unknown>;
-    onSubmit?: (data: Record<string, unknown>) => void;
-    children: ReactNode;
-  }) => {
-    captured.defaultValues = defaultValues;
-    captured.onSubmit = onSubmit;
-    return <div data-testid="form-wrapper">{children}</div>;
-  },
-  FooterButtonType: { CANCEL: "cancel", SAVE: "save", SUBMIT: "submit" },
-}));
-
-const capturedSaver: {
-  onSave?: (data: Record<string, unknown>, values: unknown) => void;
-} = {};
-
-vi.mock("@/app/components/forms/TransformationFormController", () => ({
-  TransformationFormController: ({
-    onSave,
-  }: {
-    onSave: (data: Record<string, unknown>, values: unknown) => void;
-  }) => {
-    capturedSaver.onSave = onSave;
-    return null;
-  },
-}));
-
+// Leaf field sets are stubbed: the integration target is the save chain, not their internals.
 vi.mock("@/app/components/forms/EffectiveDateInput", () => ({
   EffectiveDateInput: () => null,
 }));
@@ -81,18 +55,23 @@ vi.mock("@/app/components/forms/contacts/FieldSetContacts", () => ({
   FieldSetContacts: () => null,
 }));
 
-const renderForm = () => {
+let fetchMock: ReturnType<typeof mockTransformationFetch>;
+
+const renderForm = (
+  structureVersion: StructureVersionTransformationApiRead["structureVersion"]
+) => {
   const structureVersionTransformation: StructureVersionTransformationApiRead = {
-    id: 7,
+    id: STRUCTURE_VERSION_TRANSFORMATION_ID,
     type: StructureVersionTransformationType.CONTRACTION,
-    structureVersion: { id: 999 },
+    structureVersion,
   };
   const transformation: TransformationApiRead = {
-    id: 12,
+    id: TRANSFORMATION_ID,
     type: TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES,
     structureVersionTransformations: [structureVersionTransformation],
   };
-  render(
+  renderTransformationForm(
+    transformation,
     <ExistingStructureIdentificationForm
       transformation={transformation}
       structureVersionTransformation={structureVersionTransformation}
@@ -101,88 +80,51 @@ const renderForm = () => {
   );
 };
 
-describe("ExistingStructureIdentificationForm", () => {
-  it("passe le structureVersion (et son id) en defaultValues", () => {
-    // GIVEN
-    const structureVersionTransformation: StructureVersionTransformationApiRead = {
-      id: 7,
-      type: StructureVersionTransformationType.EXTENSION,
-      structureVersion: {
-        id: 999,
-        structureId: 42,
-        nom: "Les Mimosas",
-        effectiveDate: "2026-08-25T00:00:00.000Z",
-      },
-    };
-    const transformation: TransformationApiRead = {
-      id: 12,
-      type: TransformationType.EXTENSION_EX_NIHILO,
-      structureVersionTransformations: [structureVersionTransformation],
-    };
+describe("ExistingStructureIdentificationForm (intégration jusqu'au fetch)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    fetchMock = mockTransformationFetch(TRANSFORMATION_ID);
+    localStorage.clear();
+  });
 
-    // WHEN
-    render(
-      <ExistingStructureIdentificationForm
-        transformation={transformation}
-        structureVersionTransformation={structureVersionTransformation}
-        formKind={FormKind.EXTENSION}
-      />
-    );
-
-    // THEN
-    expect(captured.defaultValues).toMatchObject({
+  it("enregistre le structureVersion (effectiveDate, sans creationDate) jusqu'au fetch", async () => {
+    // GIVEN an existing structure seeded from its source version
+    renderForm({
       id: 999,
       structureId: 42,
       nom: "Les Mimosas",
       effectiveDate: "2026-08-25T00:00:00.000Z",
     });
-  });
 
-  it("délègue la navigation à goToNextStep au submit", () => {
-    // GIVEN
-    renderForm();
-
-    // WHEN
-    captured.onSubmit?.({});
-
-    // THEN
-    expect(mockGoToNextStep).toHaveBeenCalledTimes(1);
-  });
-
-  it("construit le payload (effectiveDate, type, sans creationDate) et le transmet à handleSave avec le schema strict et les valeurs brutes", () => {
-    // GIVEN
-    renderForm();
-    const rawValues = {
-      id: 999,
-      nom: "Les Mimosas",
-      effectiveDate: "2026-08-25T00:00:00.000Z",
-    };
-
-    // WHEN — the shared saver runs with the parsed draft data and the raw values
-    capturedSaver.onSave?.(
-      {
-        id: 999,
-        nom: "Les Mimosas",
-        effectiveDate: "2026-08-25T00:00:00.000Z",
-      },
-      rawValues
+    // WHEN the agent submits the step
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
     );
 
-    // THEN
-    expect(mockHandleSave).toHaveBeenCalledWith({
-      transformationId: 12,
-      structureVersionTransformation: {
-        id: 7,
-        type: StructureVersionTransformationType.CONTRACTION,
-        structureVersion: {
-          id: 999,
-          nom: "Les Mimosas",
-          dnaStructures: undefined,
-          effectiveDate: "2026-08-25T00:00:00.000Z",
-        },
-      },
-      strictSchema: expect.anything(),
-      values: rawValues,
+    // THEN the built payload reaches the PUT, carrying effectiveDate (normalised to noon) and no creationDate
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+    const structureVersionTransformation = getSavedStructureVersionTransformation(
+      fetchMock,
+      TRANSFORMATION_ID
+    );
+    expect(structureVersionTransformation.id).toBe(
+      STRUCTURE_VERSION_TRANSFORMATION_ID
+    );
+    expect(structureVersionTransformation.type).toBe(
+      StructureVersionTransformationType.CONTRACTION
+    );
+    expect(structureVersionTransformation.structureVersion).toMatchObject({
+      id: 999,
+      nom: "Les Mimosas",
+      effectiveDate: "2026-08-25T12:00:00.000Z",
     });
+    expect(
+      structureVersionTransformation.structureVersion.creationDate
+    ).toBeUndefined();
   });
 });

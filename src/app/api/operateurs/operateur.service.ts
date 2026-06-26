@@ -21,7 +21,7 @@ export const getOperateurs = async ({
   page: number | null;
   search: string | null;
 }): Promise<{ operateurs: Partial<Operateur>[]; totalOperateurs: number }> => {
-  const dbOperateurs = await getPaginatedOperateurs({ page, search });
+  const dbOperateurs = await getPaginatedOperateurs({ page, search }, new Date());
 
   const operateurs = dbOperateurs.map((row) => ({
     id: row.id,

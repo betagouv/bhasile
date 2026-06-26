@@ -1,4 +1,4 @@
-import { TransformationStructureIcon } from "@/app/components/transformations/TransformationStructureIcon";
+import { StructureEventIcon } from "@/app/components/structures/StructureEventIcon";
 import {
   getStructureVersionTransformationGroupLabel,
   sortStructureVersionTransformationsByType,
@@ -30,7 +30,7 @@ export const TransformationSelectionSummary = ({
           className="bg-white p-6 rounded-lg flex flex-col gap-6"
         >
           <div className="flex items-center gap-2 text-title-blue-france font-bold">
-            <TransformationStructureIcon type={group.type} />
+            <StructureEventIcon kind={group.type} size="md" />
             <span>
               {getStructureVersionTransformationGroupLabel(
                 group.type,

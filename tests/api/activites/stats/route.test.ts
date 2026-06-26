@@ -32,7 +32,8 @@ describe("GET /api/activites/stats", () => {
     expect(mockGetDepartementActivitesAverage).toHaveBeenCalledWith(
       "75",
       "2023-01-01",
-      "2023-12-31"
+      "2023-12-31",
+      expect.any(Date)
     );
   });
 
@@ -51,7 +52,8 @@ describe("GET /api/activites/stats", () => {
     expect(mockGetDepartementActivitesAverage).toHaveBeenCalledWith(
       null,
       null,
-      null
+      null,
+      expect.any(Date)
     );
   });
 });

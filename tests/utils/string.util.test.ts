@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   capitalizeFirstLetter,
+  formatPlural,
   normalizeAccents,
+  pluralize,
 } from "@/app/utils/string.util";
 
 describe("string util", () => {
@@ -55,6 +57,30 @@ describe("string util", () => {
     });
     it("returns empty string when given undefined", () => {
       expect(capitalizeFirstLetter(undefined)).toBe("");
+    });
+  });
+  describe("formatPlural", () => {
+    it("ne met pas de 's' au singulier ni à zéro", () => {
+      expect(formatPlural(0, "entrée")).toBe("0 entrée");
+      expect(formatPlural(1, "entrée")).toBe("1 entrée");
+    });
+    it("met un 's' au pluriel", () => {
+      expect(formatPlural(2, "entrée")).toBe("2 entrées");
+    });
+    it("traite undefined comme zéro", () => {
+      expect(formatPlural(undefined, "entrée")).toBe("0 entrée");
+    });
+  });
+  describe("pluralize", () => {
+    it("ne met pas de 's' au singulier ni à zéro, sans préfixer le nombre", () => {
+      expect(pluralize(0, "structure")).toBe("structure");
+      expect(pluralize(1, "structure")).toBe("structure");
+    });
+    it("met un 's' au pluriel sans préfixer le nombre", () => {
+      expect(pluralize(2, "structure")).toBe("structures");
+    });
+    it("traite undefined comme zéro", () => {
+      expect(pluralize(undefined, "Département")).toBe("Département");
     });
   });
 });

@@ -11,7 +11,6 @@ import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
-import { getFinalisationFormStatus } from "@/app/utils/finalisationForm.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { AutoSaveStatus } from "./AutoSaveStatus";
@@ -30,7 +29,7 @@ const finalisationSuccessModal = createModal({
 export const StructureHeader = (): ReactElement | null => {
   const { structure } = useStructureContext();
 
-  const isStructureFinalisee = getFinalisationFormStatus(structure);
+  const isStructureFinalisee = structure.isFinalised;
 
   const router = useRouter();
 

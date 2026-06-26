@@ -12,7 +12,12 @@ import { PrismaTransaction } from "@/types/prisma.type";
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import { createOrUpdateBudgets } from "../budgets/budget.repository";
 import { CPOM_ORDER_CTE_SQL, CPOM_ORDER_JOINS_SQL } from "./cpom.constants";
-import { CpomDbDetails, CpomDbList } from "./cpom.db.type";
+import {
+  CpomDbDetails,
+  CpomDbList,
+  cpomDetailsInclude,
+  cpomListInclude,
+} from "./cpom.db.type";
 import { buildCpomsOrderSql, buildCpomsWhereSql } from "./cpom.util";
 
 type SearchProps = {
@@ -64,22 +69,7 @@ export const findBySearch = async ({
         in: cpomOrderIds.map((cpomOrder) => cpomOrder.id),
       },
     },
-    include: {
-      structures: true,
-      budgets: true,
-      operateur: true,
-      region: true,
-      departements: {
-        include: {
-          departement: true,
-        },
-      },
-      actesAdministratifs: {
-        include: {
-          fileUploads: true,
-        },
-      },
-    },
+    include: cpomListInclude,
   });
 
   const orderedCpoms = cpomOrderIds
@@ -105,39 +95,7 @@ export async function countBySearch({
 export const findOne = async (id: number): Promise<CpomDbDetails | null> => {
   const cpom = await prisma.cpom.findFirst({
     where: { id },
-    include: {
-      structures: {
-        include: {
-          structure: {
-            select: {
-              id: true,
-              codeBhasile: true,
-              type: true,
-              communeAdministrative: true,
-              operateur: {
-                select: {
-                  name: true,
-                },
-              },
-              forms: true,
-            },
-          },
-        },
-      },
-      budgets: true,
-      operateur: true,
-      region: true,
-      departements: {
-        include: {
-          departement: true,
-        },
-      },
-      actesAdministratifs: {
-        include: {
-          fileUploads: true,
-        },
-      },
-    },
+    include: cpomDetailsInclude,
   });
   return cpom;
 };
