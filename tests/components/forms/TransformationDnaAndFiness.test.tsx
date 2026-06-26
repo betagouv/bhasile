@@ -42,9 +42,9 @@ describe("TransformationDnaAndFiness", () => {
       );
 
       expect(
-        screen.getByRole("combobox", { name: "Code DNA" })
+        screen.getByRole("combobox", { name: "Code" })
       ).toBeInTheDocument();
-      expect(screen.getByRole("textbox", { name: "Code FINESS" })).toBeInTheDocument();
+      expect(screen.getByRole("textbox", { name: "Code" })).toBeInTheDocument();
       expect(
         screen.getByRole("button", { name: /Ajouter un code DNA/i })
       ).toBeInTheDocument();
@@ -90,7 +90,7 @@ describe("TransformationDnaAndFiness", () => {
       );
 
       expect(
-        screen.getByRole("combobox", { name: "Code DNA" })
+        screen.getByRole("combobox", { name: "Code" })
       ).toBeInTheDocument();
       expect(
         screen.queryByRole("textbox", { name: "Code FINESS" })

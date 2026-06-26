@@ -12,12 +12,13 @@ export const StructureVersionTransformationItem = ({
 }: Props) => {
   const cardProps = buildCardProps(structureVersionTransformation);
 
-  const effectiveDate = structureVersionTransformation.structureVersion?.effectiveDate;
+  const effectiveDate =
+    structureVersionTransformation.structureVersion?.effectiveDate;
 
   const placesAutorisees = getPlacesAutorisees(structureVersionTransformation);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {cardProps && <StructureCard {...cardProps} />}
       {effectiveDate && (
         <div className="flex items-center gap-2 text-sm">
@@ -48,7 +49,8 @@ const buildCardProps = (
   const codeBhasile = structureVersion?.structure?.codeBhasile;
   const structureType = structureVersion?.type;
   const operateur =
-    structureVersion?.structure?.operateur ?? structureVersionTransformation.operateur;
+    structureVersion?.structure?.operateur ??
+    structureVersionTransformation.operateur;
   const departementAdministratif = structureVersion?.departementAdministratif;
 
   if (!nom || !structureType || !operateur || !departementAdministratif) {
@@ -67,11 +69,15 @@ const buildCardProps = (
 const getPlacesAutorisees = (
   structureVersionTransformation: StructureVersionTransformationApiRead
 ): number | undefined => {
-  if (structureVersionTransformation.type === StructureVersionTransformationType.FERMETURE) {
+  if (
+    structureVersionTransformation.type ===
+    StructureVersionTransformationType.FERMETURE
+  ) {
     return undefined;
   }
 
-  const effectiveDate = structureVersionTransformation.structureVersion?.effectiveDate;
+  const effectiveDate =
+    structureVersionTransformation.structureVersion?.effectiveDate;
   if (!effectiveDate) {
     return undefined;
   }
@@ -83,7 +89,9 @@ const getPlacesAutorisees = (
   )?.placesAutorisees;
 };
 
-const getEffectiveDateLabel = (type: StructureVersionTransformationType): string => {
+const getEffectiveDateLabel = (
+  type: StructureVersionTransformationType
+): string => {
   switch (type) {
     case StructureVersionTransformationType.CREATION:
       return "ouverture";

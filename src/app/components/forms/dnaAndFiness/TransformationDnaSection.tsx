@@ -22,14 +22,11 @@ export const TransformationDnaSection = ({ entityId }: Props) => {
     <TransformationCodeSection
       fieldArrayName="dnaStructures"
       emptyItem={emptyDnaStructure}
-      singleCodeLabel="Code DNA"
       addButtonLabel="Ajouter un code DNA"
       descriptionHint="ex : Site d’Avranches Nord et Sud ou Extension 2022"
-      getDescriptionFieldName={(index) =>
-        `dnaStructures.${index}.description`
-      }
-      renderCodeInput={(index, label) => (
-        <DnaInput index={index} label={label} entityId={entityId} />
+      getDescriptionFieldName={(index) => `dnaStructures.${index}.description`}
+      renderCodeInput={(index) => (
+        <DnaInput index={index} label="Code" entityId={entityId} />
       )}
       title={
         <>

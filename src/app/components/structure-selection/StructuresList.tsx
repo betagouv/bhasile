@@ -34,7 +34,7 @@ export const StructuresList = ({
       <h3 className="text-base font-bold mb-4 text-title-blue-france">
         {structures ? label : ""}
       </h3>
-      <div className="flex flex-col gap-2 h-80 overflow-y-auto">
+      <div className="flex flex-col gap-2 max-h-80 overflow-y-auto">
         {structures && structures?.length === 0 && (
           <div className="text-sm text-default-grey">
             Aucun résultat ne correspond à votre recherche.

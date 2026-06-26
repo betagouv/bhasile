@@ -67,7 +67,9 @@ export const FieldSetContacts = ({
 
   return (
     <>
-      <h2 className="text-xl font-bold mb-0 text-title-blue-france">{title}</h2>
+      <h2 className="text-xl font-bold mb-0 text-title-blue-france max-w-3xl">
+        {title}
+      </h2>
 
       <CustomNotice severity="info" title="" description={notice} />
 

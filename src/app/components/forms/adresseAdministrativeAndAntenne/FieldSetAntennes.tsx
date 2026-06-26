@@ -21,8 +21,10 @@ export const MIN_ANTENNES = 2;
 
 export const FieldSetAntennes = ({
   locked = false,
+  showTitle = true,
 }: {
   locked?: boolean;
+  showTitle?: boolean;
 } = {}) => {
   const { control, watch, setValue } = useFormContext();
 
@@ -50,9 +52,11 @@ export const FieldSetAntennes = ({
 
   return (
     <fieldset className="flex flex-col gap-6">
-      <legend className="text-lg font-bold mb-2 text-title-blue-france">
-        Sites administratifs
-      </legend>
+      {showTitle && (
+        <legend className="text-lg font-bold mb-2 text-title-blue-france">
+          Sites administratifs
+        </legend>
+      )}
 
       {antennes.map((antenne, index) => (
         <div key={index} className="flex gap-6 items-end">

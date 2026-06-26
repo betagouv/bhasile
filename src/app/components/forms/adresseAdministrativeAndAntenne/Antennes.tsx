@@ -5,7 +5,7 @@ import { AntenneFormValues } from "@/schemas/forms/base/antenne.schema";
 
 import { emptyAntenne, FieldSetAntennes } from "./FieldSetAntennes";
 
-export const Antennes = () => {
+export const Antennes = ({ showTitle }: Props) => {
   const { watch, setValue } = useFormContext();
 
   const antennes = (watch("antennes") || []) as AntenneFormValues[];
@@ -26,5 +26,9 @@ export const Antennes = () => {
     return null;
   }
 
-  return <FieldSetAntennes />;
+  return <FieldSetAntennes showTitle={showTitle} />;
+};
+
+type Props = {
+  showTitle?: boolean;
 };

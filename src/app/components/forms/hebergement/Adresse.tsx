@@ -60,7 +60,7 @@ export const AdresseComponent = ({
         <label htmlFor={`adresses.${index}.adresseTypologies`}>
           Particularités
         </label>
-        <div className="flex w-full gap-4 items-center min-h-[2.6rem]">
+        <div className="flex w-full gap-4 items-center min-h-[2.6rem] [&_label]:whitespace-nowrap">
           <Controller
             control={control}
             name={`adresses.${index}.adresseTypologies.0.logementSocial`}

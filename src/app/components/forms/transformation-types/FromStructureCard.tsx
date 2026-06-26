@@ -9,7 +9,7 @@ export const FromStructureCard = ({ structureId }: Props) => {
   }
 
   return (
-    <div className="mb-8">
+    <div className="mb-6">
       <StructureCard
         nom={structure.nom}
         codeBhasile={structure.codeBhasile}

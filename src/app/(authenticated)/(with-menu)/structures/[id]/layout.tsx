@@ -47,7 +47,7 @@ export default async function StructureLayout({
     <StructureProvider structure={structure}>
       <div className="flex flex-col h-full bg-alt-grey gap-3 pb-4">
         <StructureHeader />
-        <div className="flex flex-col gap-3 max-w-6xl mx-auto px-3">
+        <div className="flex flex-col gap-3 max-w-7xl mx-auto px-3">
           {children}
         </div>
         <AutoSaveErrorToast />

@@ -109,18 +109,18 @@ export default function Structures(): ReactElement {
         {process.env.NEXT_PUBLIC_SHOW_TRANSFORMATION === "true" && ( //TODO: remove this once transformation is ready
           <div className="flex items-center gap-4">
             <Link
-              className="fr-btn fr-btn--secondary"
+              className="fr-btn fr-btn--secondary flex gap-2"
               href="/structures/transformation/type?type=huda"
             >
-              <span className="fr-icon-arrow-left-right-line fr-icon--sm" />{" "}
+              <span className="fr-icon-arrow-left-right-line fr-icon--sm" />
               Transformer HUDA en CADA
             </Link>
             <Link
-              className="fr-btn fr-btn--secondary"
+              className="fr-btn fr-btn--secondary flex gap-2"
               href="/structures/transformation/type?type=creation"
             >
-              <span className="fr-icon-add-line fr-icon--sm" /> Créer une
-              structure
+              <span className="fr-icon-add-line fr-icon--sm" />
+              Créer une structure
             </Link>
           </div>
         )}
