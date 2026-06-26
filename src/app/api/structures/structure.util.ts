@@ -381,10 +381,5 @@ export const buildStructureHistory = (
     ...buildCpomEvents(cpomStructures),
   ].filter((event): event is HistoryEvent => event !== null);
 
-  return events.sort((first, second) => {
-    if (first.date === second.date) {
-      return 0;
-    }
-    return first.date < second.date ? 1 : -1;
-  });
+  return events.sort((first, second) => second.date.localeCompare(first.date));
 };

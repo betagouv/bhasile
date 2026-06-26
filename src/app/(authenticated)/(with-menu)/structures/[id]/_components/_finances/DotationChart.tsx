@@ -4,17 +4,18 @@ import BarChart from "@/app/components/common/BarChart";
 import { getYearRange } from "@/app/utils/date.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
-
-export const DotationChart = (): ReactElement => {
-  const { structure } = useStructureContext();
+export const DotationChart = ({
+  budgets,
+  isAutorisee,
+  hideStructureTypeLabels = false,
+}: Props): ReactElement => {
   const { years } = getYearRange();
 
   const yearsWithBudget = years
     .map((year) => {
       return {
         year,
-        budget: structure.budgets?.find((budget) => budget.year === year),
+        budget: budgets?.find((budget) => budget.year === year),
       };
     })
     .reverse();
@@ -49,6 +50,24 @@ export const DotationChart = (): ReactElement => {
     axisX: { showGrid: false },
   };
 
+  const getDotationLabel = (): string => {
+    if (hideStructureTypeLabels) {
+      return "Fixation de la dotation";
+    }
+    return isAutorisee
+      ? "Fixation de la dotation (dans budget)"
+      : "Fixation de la dotation (dans demande subventions)";
+  };
+
+  const getEquilibreEconomiqueLabel = (): string => {
+    if (hideStructureTypeLabels) {
+      return "Équilibre économique";
+    }
+    return isAutorisee
+      ? "Équilibre économique (dans compte administratif)"
+      : "Équilibre économique (dans compte-rendu financier)";
+  };
+
   return (
     <div className="grid grid-cols-3 gap-10">
       <div className="col-span-2">
@@ -56,9 +75,7 @@ export const DotationChart = (): ReactElement => {
       </div>
       <div>
         <h5 className="text-title-blue-france text-sm font-medium mb-2">
-          {structure.isAutorisee
-            ? "Fixation de la dotation (dans budget)"
-            : "Fixation de la dotation (dans demande subventions)"}
+          {getDotationLabel()}
         </h5>
         <div className="flex items-center mb-2">
           <div className="h-3 w-3 bg-(--yellow-moutarde-850-200)" />
@@ -69,9 +86,7 @@ export const DotationChart = (): ReactElement => {
           <p className="pl-2 mb-0">Dotation totale accordée par l’État</p>
         </div>
         <h5 className="text-title-blue-france text-sm font-medium  mb-2">
-          {structure.isAutorisee
-            ? "Équilibre économique (dans compte administratif)"
-            : "Équilibre économique (dans compte-rendu financier)"}
+          {getEquilibreEconomiqueLabel()}
         </h5>
         <div className="flex items-center mb-2">
           <div className="h-3 w-3 bg-(--purple-glycine-850-200)" />
@@ -84,4 +99,10 @@ export const DotationChart = (): ReactElement => {
       </div>
     </div>
   );
+};
+
+type Props = {
+  budgets: BudgetApiType[] | undefined;
+  isAutorisee: boolean;
+  hideStructureTypeLabels?: boolean;
 };
