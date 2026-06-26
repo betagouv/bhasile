@@ -1,10 +1,17 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import {
+  createStructureVersionTransformation,
+  createTransformation,
+} from "tests/test-utils/factories/transformation.factory";
+import {
+  getSavedStructureVersionTransformation,
+  mockTransformationFetch,
+  renderTransformationForm,
+} from "tests/test-utils/transformationForm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { TransformationClientProvider } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { PlacesEtHebergementForm } from "@/app/(authenticated)/structures/transformation/[transformationId]/[transformationStructureType]/[transformationStructureId]/[transformationStructureStep]/_components/shared/PlacesEtHebergementForm";
-import { FetchStateProvider } from "@/app/context/FetchStateContext";
 import { CURRENT_YEAR } from "@/constants";
 import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import { Repartition } from "@/types/adresse.type";
@@ -15,11 +22,6 @@ import {
   StructureVersionTransformationType,
   TransformationType,
 } from "@/types/transformation.type";
-
-import {
-  createStructureVersionTransformation,
-  createTransformation,
-} from "../../../../test-utils/factories/transformation.factory";
 
 const TRANSFORMATION_ID = 12;
 const STRUCTURE_VERSION_TRANSFORMATION_ID = 7;
@@ -41,7 +43,7 @@ vi.mock("@/app/components/forms/hebergement/FieldSetHebergement", () => ({
   FieldSetHebergement: () => null,
 }));
 
-const mockFetch = vi.fn();
+let fetchMock: ReturnType<typeof mockTransformationFetch>;
 
 const buildStructureVersion = () =>
   ({
@@ -107,17 +109,14 @@ const renderForm = (structureType: StructureVersionTransformationType) => {
       ? FormKind.EXTENSION
       : FormKind.CONTRACTION;
 
-  render(
-    <FetchStateProvider>
-      <TransformationClientProvider transformation={transformation}>
-        <PlacesEtHebergementForm
-          transformation={transformation}
-          structureVersionTransformation={structureVersionTransformation}
-          formKind={formKind}
-          originalPlaces={ORIGINAL_PLACES}
-        />
-      </TransformationClientProvider>
-    </FetchStateProvider>
+  renderTransformationForm(
+    transformation,
+    <PlacesEtHebergementForm
+      transformation={transformation}
+      structureVersionTransformation={structureVersionTransformation}
+      formKind={formKind}
+      originalPlaces={ORIGINAL_PLACES}
+    />
   );
 };
 
@@ -132,46 +131,14 @@ const setPlaces = async (value: number) => {
 const submit = () =>
   userEvent.click(screen.getByRole("button", { name: "Étape suivante" }));
 
-const getPutPayloadPlaces = () => {
-  const putCall = mockFetch.mock.calls.find(
-    ([url, init]) =>
-      url === `/api/transformations/${TRANSFORMATION_ID}` &&
-      init?.method === "PUT"
-  );
-  const body = JSON.parse(putCall?.[1]?.body as string);
-  return body.structureVersionTransformations[0].structureVersion
-    .structureTypologies[0].placesAutorisees;
-};
+const getPutPayloadPlaces = () =>
+  getSavedStructureVersionTransformation(fetchMock, TRANSFORMATION_ID)
+    .structureVersion.structureTypologies[0].placesAutorisees;
 
 describe("PlacesEtHebergementForm — contrainte de variation des places", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    global.fetch = mockFetch;
-    mockFetch.mockImplementation((input, init) => {
-      const url = String(input);
-      if (
-        url === `/api/transformations/${TRANSFORMATION_ID}` &&
-        init?.method === "PUT"
-      ) {
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          json: () => Promise.resolve({ transformationId: TRANSFORMATION_ID }),
-        } as Response);
-      }
-      if (url === `/api/transformations/${TRANSFORMATION_ID}`) {
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          json: () =>
-            Promise.resolve({
-              id: TRANSFORMATION_ID,
-              structureVersionTransformations: [],
-            }),
-        } as Response);
-      }
-      return Promise.reject(new Error(`Unexpected fetch call: ${url}`));
-    });
+    fetchMock = mockTransformationFetch(TRANSFORMATION_ID);
   });
 
   it("enregistre une extension sans ajout de place sans bloquer la navigation", async () => {
@@ -182,7 +149,7 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
 
     // Le submit n'est plus bloqué : la sauvegarde part malgré la contrainte non respectée
     await waitFor(() =>
-      expect(mockFetch).toHaveBeenCalledWith(
+      expect(fetchMock).toHaveBeenCalledWith(
         `/api/transformations/${TRANSFORMATION_ID}`,
         expect.objectContaining({ method: "PUT" })
       )
@@ -203,7 +170,7 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
     await submit();
 
     await waitFor(() =>
-      expect(mockFetch).toHaveBeenCalledWith(
+      expect(fetchMock).toHaveBeenCalledWith(
         `/api/transformations/${TRANSFORMATION_ID}`,
         expect.objectContaining({ method: "PUT" })
       )
@@ -219,7 +186,7 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
 
     // Le submit n'est plus bloqué : la sauvegarde part malgré la contrainte non respectée
     await waitFor(() =>
-      expect(mockFetch).toHaveBeenCalledWith(
+      expect(fetchMock).toHaveBeenCalledWith(
         `/api/transformations/${TRANSFORMATION_ID}`,
         expect.objectContaining({ method: "PUT" })
       )
@@ -240,7 +207,7 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
     await submit();
 
     await waitFor(() =>
-      expect(mockFetch).toHaveBeenCalledWith(
+      expect(fetchMock).toHaveBeenCalledWith(
         `/api/transformations/${TRANSFORMATION_ID}`,
         expect.objectContaining({ method: "PUT" })
       )
