@@ -8,7 +8,7 @@ import {
   getGranularityLabel,
 } from "@/app/utils/cpom.util";
 import { formatDate } from "@/app/utils/date.util";
-import { formatPlural } from "@/app/utils/string.util";
+import { pluralize } from "@/app/utils/string.util";
 
 import { useCpomContext } from "../_context/CpomClientContext";
 
@@ -43,7 +43,7 @@ export const DescriptionBlock = () => {
         {cpom.granularity !== "REGIONALE" && (
           <div className="flex gap-2 mb-3">
             <strong>
-              {formatPlural(cpom.departements?.length, "Département")}
+              {pluralize(cpom.departements?.length, "Département")}
             </strong>
             {getDepartementsList(cpom.departements)}
           </div>

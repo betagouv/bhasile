@@ -4,6 +4,7 @@ import {
   capitalizeFirstLetter,
   formatPlural,
   normalizeAccents,
+  pluralize,
 } from "@/app/utils/string.util";
 
 describe("string util", () => {
@@ -68,6 +69,18 @@ describe("string util", () => {
     });
     it("traite undefined comme zéro", () => {
       expect(formatPlural(undefined, "entrée")).toBe("0 entrée");
+    });
+  });
+  describe("pluralize", () => {
+    it("ne met pas de 's' au singulier ni à zéro, sans préfixer le nombre", () => {
+      expect(pluralize(0, "structure")).toBe("structure");
+      expect(pluralize(1, "structure")).toBe("structure");
+    });
+    it("met un 's' au pluriel sans préfixer le nombre", () => {
+      expect(pluralize(2, "structure")).toBe("structures");
+    });
+    it("traite undefined comme zéro", () => {
+      expect(pluralize(undefined, "Département")).toBe("Département");
     });
   });
 });
