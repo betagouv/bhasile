@@ -64,7 +64,7 @@ export const OngoingTransformation = ({
       </span>
       <Link
         href={`/structures/transformation/${transformation.id}`}
-        className=" text-title-blue-france justify-self-end"
+        className="text-title-blue-france justify-self-end"
         aria-label="Modifier la transformation"
         title="Modifier la transformation"
       >
