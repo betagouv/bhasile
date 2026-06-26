@@ -83,7 +83,8 @@ export const updateOne = async (
         });
       if (
         structureVersionTransformations.some(
-          (brique) => !brique.structureVersion?.effectiveDate
+          (structureVersionTransformation) =>
+            !structureVersionTransformation.structureVersion?.effectiveDate
         )
       ) {
         throw new Error(
