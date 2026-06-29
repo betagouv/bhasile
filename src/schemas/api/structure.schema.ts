@@ -3,6 +3,7 @@ import { z } from "zod";
 import { Repartition } from "@/types/adresse.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 import { HistoryEvent } from "@/types/structure-history.type";
+import { UpcomingTransformation } from "@/types/transformation.type";
 
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
 import { activiteApiSchema } from "./activite.schema";
@@ -144,6 +145,7 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   finPeriodeAutorisation: string | null;
   cpomStructures?: CpomStructureApiRead[];
   history?: HistoryEvent[];
+  upcomingTransformations?: UpcomingTransformation[];
   operateurLabel: string;
   isAutorisee: boolean;
   isSubventionnee: boolean;
