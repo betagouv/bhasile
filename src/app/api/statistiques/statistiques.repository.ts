@@ -9,49 +9,15 @@ import type {
   StatistiqueDbDepartement,
   StatistiqueDbDnaLink,
   StatistiqueDbEffectiveStructureVersion,
-  StatistiqueDbStructure,
   StatistiqueDbTypologie,
 } from "./statistiques.db.type";
 
 const excludedStructureTypes = new Set<string>(EXCLUDED_STRUCTURE_TYPES);
 
-const buildTypeWhere = (
-  filters: StatistiquesFilters
-): Prisma.StructureVersionWhereInput["type"] => {
-  const typeList = filters.types?.split(",").filter(Boolean) ?? [];
-
-  if (typeList.length > 0) {
-    return {
-      not: null,
-      in: typeList.filter(
-        (type) => !excludedStructureTypes.has(type)
-      ) as StructureType[],
-    };
-  }
-
-  return {
-    not: null,
-    notIn: EXCLUDED_STRUCTURE_TYPES as unknown as StructureType[],
-  };
-};
-
-const resolveOperateurIdsWithFiliales = async (
-  operateurIds: number[]
-): Promise<number[]> => {
-  if (operateurIds.length === 0) {
-    return [];
-  }
-  const filiales = await prisma.operateur.findMany({
-    where: { parentId: { in: operateurIds } },
-    select: { id: true },
-  });
-  return [...new Set([...operateurIds, ...filiales.map((filiale) => filiale.id)])];
-};
-
-const buildEffectiveStructureVersionWhereAtDate = async (
+export const findEffectiveStructureVersionsAtDate = async (
   filters: StatistiquesFilters,
   atDate: Date
-): Promise<Prisma.StructureVersionWhereInput> => {
+): Promise<StatistiqueDbEffectiveStructureVersion[]> => {
   const where: Prisma.StructureVersionWhereInput = {
     effectiveDate: { lte: atDate },
   };
@@ -64,19 +30,30 @@ const buildEffectiveStructureVersionWhereAtDate = async (
   const operateurIds =
     filters.operateurs?.split(",").filter(Boolean).map(Number) ?? [];
   if (operateurIds.length > 0) {
-    const allOperateurIds = await resolveOperateurIdsWithFiliales(operateurIds);
+    const filiales = await prisma.operateur.findMany({
+      where: { parentId: { in: operateurIds } },
+      select: { id: true },
+    });
+    const allOperateurIds = [
+      ...new Set([...operateurIds, ...filiales.map((filiale) => filiale.id)]),
+    ];
     where.structure = { operateurId: { in: allOperateurIds } };
   }
 
-  // Types are evaluated on the effective version at date.
-  where.type = buildTypeWhere(filters);
+  const typeList = filters.types?.split(",").filter(Boolean) ?? [];
+  where.type =
+    typeList.length > 0
+      ? {
+          not: null,
+          in: typeList.filter(
+            (type) => !excludedStructureTypes.has(type)
+          ) as StructureType[],
+        }
+      : {
+          not: null,
+          notIn: EXCLUDED_STRUCTURE_TYPES as unknown as StructureType[],
+        };
 
-  return where;
-};
-
-export const findEffectiveStructureVersions = async (
-  where: Prisma.StructureVersionWhereInput
-): Promise<StatistiqueDbEffectiveStructureVersion[]> => {
   return prisma.structureVersion.findMany({
     where,
     select: {
@@ -93,37 +70,6 @@ export const findEffectiveStructureVersions = async (
     },
     orderBy: [{ structureId: "asc" }, { effectiveDate: "desc" }],
     distinct: ["structureId"],
-  });
-};
-
-export const findEffectiveStructureVersionsAtDate = async (
-  filters: StatistiquesFilters,
-  atDate: Date
-): Promise<StatistiqueDbEffectiveStructureVersion[]> => {
-  const where = await buildEffectiveStructureVersionWhereAtDate(filters, atDate);
-  return findEffectiveStructureVersions(where);
-};
-
-export const findStructureIds = async (
-  where: Prisma.StructureWhereInput
-): Promise<number[]> => {
-  const rows = await prisma.structure.findMany({
-    where,
-    select: { id: true },
-  });
-  return rows.map((row) => row.id);
-};
-
-export const findStructuresWithTypes = async (
-  structureIds: number[]
-): Promise<StatistiqueDbStructure[]> => {
-  return prisma.structure.findMany({
-    where: { id: { in: structureIds } },
-    select: {
-      id: true,
-      type: true,
-      departementAdministratif: true,
-    },
   });
 };
 
