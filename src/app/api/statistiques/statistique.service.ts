@@ -1,6 +1,3 @@
-import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
-import { Prisma, StructureType } from "@/generated/prisma/client";
-import prisma from "@/lib/prisma";
 import {
   StatistiqueApiRead,
   StatistiquesFilters,
@@ -15,94 +12,55 @@ import {
   findCpomStructures,
   findDepartementsWithPopulation,
   findDnaLinksByStructure,
+  findEffectiveStructureVersionsAtDate,
   findStructureAdresses,
-  findStructureIds,
-  findStructuresWithTypes,
   findStructureTypologies,
 } from "./statistiques.repository";
 import { getStructuresStatistiques } from "./structures/structures.service";
 
-const excludedStructureTypes = new Set<string>(EXCLUDED_STRUCTURE_TYPES);
-
-const buildTypeWhere = (
-  filters: StatistiquesFilters
-): Prisma.StructureWhereInput["type"] => {
-  const typeList = filters.types?.split(",").filter(Boolean) ?? [];
-
-  if (typeList.length > 0) {
-    return {
-      in: typeList.filter(
-        (type) => !excludedStructureTypes.has(type)
-      ) as StructureType[],
-    };
-  }
-
-  return { notIn: EXCLUDED_STRUCTURE_TYPES as unknown as StructureType[] };
-};
-
-const buildStructureWhere = async (
-  filters: StatistiquesFilters
-): Promise<Prisma.StructureWhereInput> => {
-  // TODO(structure-version): filtrer type/département sur version effective (typologie.utils)
-  // For now we filter hat finalised initialisation and remove prahdas/
-  const where: Prisma.StructureWhereInput = {
-    structureVersions: {
-      some: {
-        structureVersionTransformation: {
-          transformation: {
-            form: {
-              is: {
-                status: true,
-                formDefinition: { slug: "finalisation-v1" },
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-
-  where.type = buildTypeWhere(filters);
-
-  const depList = filters.departements?.split(",").filter(Boolean) ?? [];
-  if (depList.length > 0) {
-    where.departementAdministratif = { in: depList };
-  }
-
-  const operateurIds =
-    filters.operateurs?.split(",").filter(Boolean).map(Number) ?? [];
-  if (operateurIds.length > 0) {
-    const filiales = await prisma.operateur.findMany({
-      where: { parentId: { in: operateurIds } },
-      select: { id: true },
-    });
-    const allOperateurIds = [
-      ...new Set([...operateurIds, ...filiales.map((filiale) => filiale.id)]),
-    ];
-    where.operateurId = { in: allOperateurIds };
-  }
-
-  return where;
-};
-
 export const buildStatistiquesContext = async (
   filters: StatistiquesFilters
 ): Promise<StatistiquesContext | null> => {
-  const where = await buildStructureWhere(filters);
-  const structureIds = await findStructureIds(where);
+  const atDate = new Date();
+  const effectiveVersions = await findEffectiveStructureVersionsAtDate(
+    filters,
+    atDate
+  );
+
+  // A structure is considered closed if its effective version at date is linked to a FERMETURE block.
+  const openEffectiveVersions = effectiveVersions.filter(
+    (version) => version.structureVersionTransformation?.type !== "FERMETURE"
+  );
+
+  const structureIds = openEffectiveVersions
+    .map((version) => version.structureId)
+    .filter((id): id is number => id != null);
 
   if (structureIds.length === 0) {
     return null;
   }
 
-  const [structures, typologies, adresses, cpomLinks, dnaLinks] =
-    await Promise.all([
-      findStructuresWithTypes(structureIds),
-      findStructureTypologies(structureIds),
-      findStructureAdresses(structureIds),
-      findCpomStructures(structureIds),
-      findDnaLinksByStructure(structureIds),
-    ]);
+  const effectiveStructureVersionIds = openEffectiveVersions
+    .map((version) => version.id)
+    .filter((id): id is number => id != null);
+
+  const structures = openEffectiveVersions
+    .filter(
+      (version): version is typeof version & { structureId: number } =>
+        version.structureId != null
+    )
+    .map((version) => ({
+      id: version.structureId,
+      type: version.type,
+      departementAdministratif: version.departementAdministratif,
+    }));
+
+  const [typologies, adresses, cpomLinks, dnaLinks] = await Promise.all([
+    findStructureTypologies(structureIds),
+    findStructureAdresses(effectiveStructureVersionIds),
+    findCpomStructures(structureIds),
+    findDnaLinksByStructure(structureIds),
+  ]);
 
   const dnaCodes = [...new Set(dnaLinks.map((link) => link.dna.code))];
 

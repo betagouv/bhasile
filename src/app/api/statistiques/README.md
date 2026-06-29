@@ -1,16 +1,7 @@
 # API `GET /api/statistiques`
 
 Statistiques agrégées du parc hébergement.
-
-## TODO post chantier transformation
-
-Les éléments suivants seront à rebrancher post MEP du chantier amenant la notion de `Transformation` (et recongurant donc l'essentiel des liens à `Structure`)
-
-| ID                          | Sujet                                                                                                                                                                          |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **TODO(fermeture)**         | `filterStructuresActives` (`typologie.utils`) : exclure structures avec transfo FERMETURE effective (date de référence selon contexte : globale, `byYear`, `byMonth`...).      |
-| **TODO(actualisation)**     | `updatedAt` par bloc (sans doute implémentable après le chantier "formulaire d'actualisation").                                                                                |
-| **TODO(structure-version)** | Pivot `shared/` : dernière `StructureVersion` effective (`effectiveDate` ≤ aujourd'hui), plus `Structure.type` / `departementAdministratif` directs. Chantier transformations. |
+|
 
 ## Onglets
 
@@ -54,9 +45,9 @@ GET /api/statistiques?departements=01,02,03&types=CADA,CPH&operateurs=1,2
 
 ## Périmètre
 
-Filtre structures via `buildStructureWhere` (à rebaser sur `StructureVersion` post transfo).
+Filtre structures via `buildStructureWhere` (pivot sur `StructureVersion` effective).
 
-**Structures actives** : `filterStructuresActives` - passe-plat ; à implémenter post transfo (FERMETURE).
+**Structures actives** : aujourd'hui, on filtre déjà les versions `FERMETURE` à la construction du contexte ; `filterStructuresActives` reste un point d'extension si on doit gérer des règles temporelles plus fines.
 
 **Avec typologie** (≥1 `StructureTypologie`) : requis pour agrégats places, répartitions type/bâti, contrôle qualité. `structures.totalStructures` = structures actives (avec ou sans typologie).
 

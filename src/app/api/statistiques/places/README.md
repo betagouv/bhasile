@@ -1,12 +1,5 @@
 # `places`
 
-## TODO post Transfo
-
-Champs à l'adresse :
-
-- À filtrer sur la dernière `StructureVersion` déjà écoulée
-- À prendre dans "dernière transfo en cours d'année n" pour `byYear`
-
 > `AdresseTypologie` en cours de dépréciation : QPV et logements sociaux lus directement sur `Adresse`.
 
 ## Vue globale
@@ -24,7 +17,7 @@ Structures actives avec typologie. Dernière valeur non nulle par structure/cham
 ## `byYear`
 
 Millésime exact sur `StructureTypologie` (`totalPlaces`, `pmr`, etc.).
-`qpv` / `logementsSociaux` : valeurs courantes `Adresse` (pas de millésime adresse) : cf TODO
+`qpv` / `logementsSociaux` : valeurs courantes `Adresse` (pas de millésime adresse).
 
 ## Sources
 

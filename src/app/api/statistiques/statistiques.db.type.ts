@@ -8,6 +8,22 @@ export type StatistiqueDbStructure = Prisma.StructureGetPayload<{
   };
 }>;
 
+export type StatistiqueDbEffectiveStructureVersion =
+  Prisma.StructureVersionGetPayload<{
+    select: {
+      id: true;
+      structureId: true;
+      effectiveDate: true;
+      type: true;
+      departementAdministratif: true;
+      structureVersionTransformation: {
+        select: {
+          type: true;
+        };
+      };
+    };
+  }>;
+
 export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
   select: {
     id: true;

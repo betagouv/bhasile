@@ -1,9 +1,5 @@
 # `structures`
 
-## TODO post Transfo
-
-- Filtrer les places sur les `Adresses` liées à la dernière `StructureVersion` déjà écoulée
-
 ## Typologie (`StructureTypologie`)
 
 | Périmètre                              | Règle                                                            |
