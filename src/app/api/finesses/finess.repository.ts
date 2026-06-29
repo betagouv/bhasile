@@ -1,5 +1,5 @@
 import { Finess, Prisma } from "@/generated/prisma/client";
-import { StructureFinessApiType } from "@/schemas/api/finess.schema";
+import { StructureFinessApiPartialType } from "@/schemas/api/finess.schema";
 import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 
@@ -29,7 +29,7 @@ const buildStructureFinessWhere = (
 
 const deleteStructureFinesses = async (
   tx: PrismaTransaction,
-  structureFinessesToKeep: Partial<StructureFinessApiType>[],
+  structureFinessesToKeep: StructureFinessApiPartialType[],
   entityId: EntityId
 ): Promise<void> => {
   const everyStructureFinessesOfEntity = await tx.structureFiness.findMany({
@@ -67,7 +67,7 @@ const upsertFiness = async (
 
 export const createOrUpdateStructureFinesses = async (
   tx: PrismaTransaction,
-  structureFinesses: Partial<StructureFinessApiType>[] = [],
+  structureFinesses: StructureFinessApiPartialType[] = [],
   entityId: EntityId
 ): Promise<void> => {
   if (!structureFinesses || structureFinesses.length === 0) {
