@@ -1280,6 +1280,64 @@ describe("transformation.repository db integration", () => {
     );
   });
 
+  it("date les dnaStructures encore ouvertes d'une structure fermée à la finalisation, sans toucher celles déjà fermées", async () => {
+    const structure = await createStructure();
+    const openDna = await prisma.dna.create({
+      data: { code: `DNA-TF-TEST-OPEN-${randomUUID()}` },
+    });
+    const alreadyClosedDna = await prisma.dna.create({
+      data: { code: `DNA-TF-TEST-CLOSED-${randomUUID()}` },
+    });
+    const preexistingEndDate = new Date("2020-01-01T00:00:00.000Z");
+    await prisma.dnaStructure.create({
+      data: { structureId: structure.id, dnaId: openDna.id },
+    });
+    await prisma.dnaStructure.create({
+      data: {
+        structureId: structure.id,
+        dnaId: alreadyClosedDna.id,
+        endDate: preexistingEndDate,
+      },
+    });
+
+    const transformationId = await createTransformation({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { structureId: structure.id },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const fermeture =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: {
+          transformationId,
+          type: StructureVersionTransformationType.FERMETURE,
+        },
+        include: { structureVersion: true },
+      });
+    const fermetureVersionId = fermeture.structureVersion?.id;
+    if (!fermetureVersionId) {
+      throw new Error("La version de la fermeture devrait exister");
+    }
+
+    await finalizeTransformation(transformationId);
+
+    const links = await prisma.dnaStructure.findMany({
+      where: { structureVersionId: fermetureVersionId },
+    });
+    const effectiveDate = "2024-01-01T00:00:00.000Z";
+    const openLink = links.find((link) => link.dnaId === openDna.id);
+    const closedLink = links.find((link) => link.dnaId === alreadyClosedDna.id);
+    expect(openLink?.endDate?.toISOString()).toBe(effectiveDate);
+    expect(closedLink?.endDate?.toISOString()).toBe(
+      preexistingEndDate.toISOString()
+    );
+  });
+
   it("should move a CREATION block's actesAdministratifs onto the newly created structure on finalization", async () => {
     const operateur = await createOperateur();
     const departement = await findDepartementWithRegionCode();
