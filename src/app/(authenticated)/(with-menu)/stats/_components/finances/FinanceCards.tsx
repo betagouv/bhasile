@@ -14,19 +14,21 @@ export const FinanceCards = (): ReactElement => {
         <MultiInformationCard
           informations={[
             {
-              primaryInformation: formatCurrency(statistiques.dotationAnnuelle),
+              primaryInformation: formatCurrency(
+                statistiques.finance.byYear[0].total.dotationAccordee
+              ),
               secondaryInformation:
                 "dotation totale annuelle versée par l'Etat",
             },
             {
               primaryInformation: formatCurrency(
-                statistiques.dotationAutorisees
+                statistiques.finance.byYear[0].autorisees.dotationAccordee
               ),
               secondaryInformation: "pour les structures autorisées",
             },
             {
               primaryInformation: formatCurrency(
-                statistiques.dotationSubventionnees
+                statistiques.finance.byYear[0].subventionnees.dotationAccordee
               ),
               secondaryInformation: "pour les structures subventionnées",
             },
@@ -38,15 +40,17 @@ export const FinanceCards = (): ReactElement => {
           detailLabel="ensemble des employés de la structure"
           informations={[
             {
-              primaryInformation: statistiques.ETP,
+              primaryInformation: statistiques.finance.byYear[0].total.totalETP,
               secondaryInformation: "ETP au total",
             },
             {
-              primaryInformation: statistiques.ETPAutorisees,
+              primaryInformation:
+                statistiques.finance.byYear[0].autorisees.totalETP,
               secondaryInformation: "pour les structures autorisées",
             },
             {
-              primaryInformation: statistiques.ETPSubventionnees,
+              primaryInformation:
+                statistiques.finance.byYear[0].subventionnees.totalETP,
               secondaryInformation: "pour les structures subventionnées",
             },
           ]}
@@ -57,15 +61,18 @@ export const FinanceCards = (): ReactElement => {
           detailLabel="nombre de places gérées par un ETP"
           informations={[
             {
-              primaryInformation: statistiques.tauxEncadrement,
+              primaryInformation:
+                statistiques.finance.byYear[0].total.tauxEncadrement!,
               secondaryInformation: "taux encadrement moyen",
             },
             {
-              primaryInformation: statistiques.tauxEncadrementAutorisees,
+              primaryInformation:
+                statistiques.finance.byYear[0].autorisees.tauxEncadrement!,
               secondaryInformation: "pour les structures autorisées",
             },
             {
-              primaryInformation: statistiques.tauxEncadrementSubventionnees,
+              primaryInformation:
+                statistiques.finance.byYear[0].subventionnees.tauxEncadrement!,
               secondaryInformation: "pour les structures subventionnées",
             },
           ]}
@@ -76,18 +83,20 @@ export const FinanceCards = (): ReactElement => {
           detailLabel="coût de la structure pour une journée et pour une place"
           informations={[
             {
-              primaryInformation: formatCurrency(statistiques.coutJournalier),
+              primaryInformation: formatCurrency(
+                statistiques.finance.byYear[0].total.coutJournalier
+              ),
               secondaryInformation: "coût place journalier moyen",
             },
             {
               primaryInformation: formatCurrency(
-                statistiques.coutJournalierAutorisees
+                statistiques.finance.byYear[0].autorisees.coutJournalier
               ),
               secondaryInformation: "pour les structures autorisées",
             },
             {
               primaryInformation: formatCurrency(
-                statistiques.coutJournalierSubventionnees
+                statistiques.finance.byYear[0].subventionnees.coutJournalier
               ),
               secondaryInformation: "pour les structures subventionnées",
             },

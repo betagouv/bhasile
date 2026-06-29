@@ -3,6 +3,7 @@ import { ReactElement, useState } from "react";
 
 import PieChart from "@/app/components/common/PieChart";
 import { getPercentage } from "@/app/utils/common.util";
+import { BatiStat, TypeStructureStat } from "@/schemas/api/statistique.schema";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
@@ -14,7 +15,18 @@ export const GenericTypeChart = ({
   const { statistiques } = useStatistiquesContext();
   const [visualization, setVisualization] = useState("structures");
   const typeStructureAccessor =
-    visualization === "structures" ? "nbStructures" : "nbPlaces";
+    visualization === "structures" ? "structures" : "places";
+
+  const getStatItemLabel = (statItem: TypeStructureStat | BatiStat): string => {
+    const labelAccessor = visualization === "structures" ? "type" : "bati";
+    if (labelAccessor === "type" && "type" in statItem) {
+      return statItem.type;
+    }
+    if (labelAccessor === "bati" && "bati" in statItem) {
+      return statItem.bati;
+    }
+    return "";
+  };
 
   return (
     <div>
@@ -48,11 +60,11 @@ export const GenericTypeChart = ({
       <div className="flex">
         <PieChart
           data={{
-            labels: statistiques[typeAccessor].map(
-              (statItem) => statItem.label
+            labels: statistiques.structures[typeAccessor].map((statItem) =>
+              getStatItemLabel(statItem)
             ),
-            series: statistiques[typeAccessor].map(
-              (statItem) => statItem.byYear[0][typeStructureAccessor]
+            series: statistiques.structures[typeAccessor].map(
+              (statItem) => statItem[typeStructureAccessor]
             ),
           }}
           options={{ showLabel: false }}
@@ -60,7 +72,7 @@ export const GenericTypeChart = ({
           colors={colors}
         ></PieChart>
         <div>
-          {statistiques[typeAccessor].map((statItem, index) => (
+          {statistiques.structures[typeAccessor].map((statItem, index) => (
             <div className="pt-2" key={`${typeAccessor}-${index}`}>
               <div className="pb-2 flex items-center text-sm">
                 <div
@@ -68,17 +80,19 @@ export const GenericTypeChart = ({
                   style={{ backgroundColor: colors[index] }}
                 />
                 <span>
-                  <strong>{statItem.byYear[0][typeStructureAccessor]}</strong>
+                  <strong>{statItem[typeStructureAccessor]}</strong>
                   &nbsp;
                   {visualization === "structures"
                     ? "structures "
                     : "places en "}
-                  {statItem.label}&nbsp;
+                  {getStatItemLabel(statItem)}&nbsp;
                   <span className="text-mention-grey">
                     (
                     {getPercentage(
-                      statItem.byYear[0][typeStructureAccessor],
-                      statistiques[
+                      statItem[typeStructureAccessor],
+                      statistiques.structures.byYear[
+                        statistiques.structures.byYear.length - 1
+                      ][
                         visualization === "structures"
                           ? "totalStructures"
                           : "totalPlaces"
