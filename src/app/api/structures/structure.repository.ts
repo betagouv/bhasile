@@ -15,121 +15,81 @@ import {
 } from "../forms/form.repository";
 import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
 import { createOrUpdateStructureMillesimes } from "../structure-millesimes/structure-millesime.repository";
-import { currentVersionWhere } from "../structure-versions/structure-version.db.type";
+import {
+  currentVersionArgs,
+  currentVersionWhere,
+} from "../structure-versions/structure-version.db.type";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   StructureDbList,
-  StructureDbMap,
   StructureDbOperateur,
   structureDetailsInclude,
   structureListInclude,
+  StructureListLight,
+  structureListLightSelect,
   structureListVersionInclude,
-  structureOperateurSelect,
 } from "./structure.db.type";
-import { SearchProps } from "./structure.service";
-import {
-  buildCountStructuresQuery,
-  buildLatestPlacesAutoriseesQuery,
-  buildOrderedStructureIdsQuery,
-} from "./structure.sql";
 
-const getOrderedStructures = async (
-  props: SearchProps,
-  now: Date
-): Promise<{ id: number }[]> =>
-  prisma.$queryRaw<{ id: number }[]>(buildOrderedStructureIdsQuery(props, now));
+export const findAllStructures = (): Promise<StructureListLight[]> =>
+  prisma.structure.findMany({ select: structureListLightSelect });
 
-export const findBySearch = async (
-  props: SearchProps,
-  now: Date
-): Promise<StructureDbList[] | StructureDbMap[]> => {
-  const structuresIds = await getOrderedStructures(props, now);
-  const ids = structuresIds.map((structure) => structure.id);
-
-  if (props.map) {
-    const mapStructures = await prisma.structure.findMany({
-      where: { id: { in: ids } },
-      select: {
-        id: true,
-        structureVersions: {
-          where: currentVersionWhere(now),
-          orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
-          take: 1,
-          select: { latitude: true, longitude: true },
-        },
-      },
-    });
-    return mapStructures.map((structure) => ({
-      id: structure.id,
-      latitude: structure.structureVersions[0]?.latitude ?? null,
-      longitude: structure.structureVersions[0]?.longitude ?? null,
-    }));
-  }
-
-  const structures = await prisma.structure.findMany({
-    where: { id: { in: ids } },
+export const findStructuresByIds = (
+  structureIds: number[],
+  versionIds: number[]
+): Promise<StructureDbList[]> =>
+  prisma.structure.findMany({
+    where: { id: { in: structureIds } },
     include: {
       ...structureListInclude,
       structureVersions: {
-        where: currentVersionWhere(now),
-        orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
-        take: 1,
+        where: { id: { in: versionIds } },
         include: structureListVersionInclude,
       },
     },
   });
 
-  const orderedStructures = structuresIds
-    .map((orderedId) =>
-      structures.find((structure) => structure.id === orderedId.id)
-    )
-    .filter((structure) => structure !== undefined);
-
-  return orderedStructures;
-};
-
-export const countBySearch = async (
-  props: SearchProps,
-  now: Date
-): Promise<number> => {
-  const result = await prisma.$queryRaw<{ count: bigint }[]>(
-    buildCountStructuresQuery(props, now)
-  );
-  return Number(result[0]?.count ?? 0);
-};
-
-export const getLatestPlacesAutoriseesPerStructure = async (
-  now: Date
-): Promise<number[]> => {
-  const rows = await prisma.$queryRaw<{ placesAutorisees: number | null }[]>(
-    buildLatestPlacesAutoriseesQuery(now)
-  );
-
-  return rows
-    .map((row) => row.placesAutorisees)
-    .filter(
-      (placesAutorisees): placesAutorisees is number =>
-        placesAutorisees !== null
-    );
-};
-
 export const findOneOperateur = async (
-  id: number
+  id: number,
+  now: Date
 ): Promise<StructureDbOperateur> => {
-  return await prisma.structure.findUniqueOrThrow({
+  const structure = await prisma.structure.findUniqueOrThrow({
     where: { id },
-    select: structureOperateurSelect,
+    select: {
+      id: true,
+      codeBhasile: true,
+      forms: true,
+      structureVersions: {
+        ...currentVersionArgs(now),
+        select: { type: true },
+      },
+    },
   });
+  return {
+    id: structure.id,
+    codeBhasile: structure.codeBhasile,
+    forms: structure.forms,
+    type: structure.structureVersions[0]?.type ?? null,
+  };
 };
 
 export const findStructureDepartement = async (
-  id: number
+  id: number,
+  now: Date
 ): Promise<{ departementAdministratif: string | null }> => {
-  return await prisma.structure.findUniqueOrThrow({
+  const structure = await prisma.structure.findUniqueOrThrow({
     where: { id },
-    select: { departementAdministratif: true },
+    select: {
+      structureVersions: {
+        ...currentVersionArgs(now),
+        select: { departementAdministratif: true },
+      },
+    },
   });
+  return {
+    departementAdministratif:
+      structure.structureVersions[0]?.departementAdministratif ?? null,
+  };
 };
 
 export const findOne = async (id: number) => {
@@ -175,7 +135,7 @@ const writeToCurrentVersion = async (
   const versionPayload: StructureVersionApiType = {
     id: currentVersion.id,
     structureId: structure.id,
-    effectiveDate: currentVersion.effectiveDate.toISOString(),
+    effectiveDate: currentVersion.effectiveDate?.toISOString(),
     ...versionedData,
   };
 
@@ -246,7 +206,7 @@ const updateStructure = async (
   tx: PrismaTransaction,
   structure: StructureAgentUpdateApiType
 ): Promise<Structure> => {
-  const { operateur, filiale } = structure;
+  const { operateur, filiale, creationDate, date303 } = structure;
 
   const updatedStructure = await tx.structure.update({
     where: {
@@ -254,6 +214,8 @@ const updateStructure = async (
     },
     data: {
       filiale,
+      creationDate: creationDate ?? undefined,
+      date303,
       operateur: {
         connect: operateur
           ? {

@@ -41,18 +41,6 @@ export const getFinalisationForm = (
   );
 };
 
-export const getFinalisationFormStatus = (
-  structure: StructureApiRead
-): boolean => {
-  const finalisationForm = getFinalisationForm(structure);
-
-  if (!finalisationForm) {
-    return false;
-  }
-
-  return finalisationForm.status;
-};
-
 export const getFinalisationFormStepStatus = (
   route: string,
   structure: StructureApiRead

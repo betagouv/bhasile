@@ -11,7 +11,6 @@ export const TransformationCodeSection = ({
   noticeDescription,
   fieldArrayName,
   emptyItem,
-  singleCodeLabel,
   descriptionHint,
   addButtonLabel,
   getDescriptionFieldName,
@@ -45,12 +44,7 @@ export const TransformationCodeSection = ({
       {items.map((_, index) => (
         <div key={index} className="flex gap-6 items-start">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1">
-            <div className="flex flex-col gap-1">
-              {renderCodeInput(
-                index,
-                hasMultipleCodes ? "Code" : singleCodeLabel
-              )}
-            </div>
+            <div className="flex flex-col gap-1">{renderCodeInput(index)}</div>
             {hasMultipleCodes && (
               <div className="flex flex-col gap-1 md:col-span-2">
                 <InputWithValidation
@@ -98,9 +92,8 @@ type Props = {
   noticeDescription: ReactNode;
   fieldArrayName: string;
   emptyItem: FieldValues;
-  singleCodeLabel: string;
   descriptionHint: string;
   addButtonLabel: string;
   getDescriptionFieldName: (index: number) => string;
-  renderCodeInput: (index: number, label: string) => ReactNode;
+  renderCodeInput: (index: number) => ReactNode;
 };

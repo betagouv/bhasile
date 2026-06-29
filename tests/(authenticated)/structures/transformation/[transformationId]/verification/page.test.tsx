@@ -92,6 +92,10 @@ vi.mock("@/app/components/SubmitError", () => ({
   SubmitError: () => <div data-testid="submit-error" />,
 }));
 
+vi.mock("@/app/components/forms/TransformationFakeSaver", () => ({
+  TransformationFakeSaver: () => null,
+}));
+
 const buildForm = (status: boolean) => ({
   id: 100,
   status,

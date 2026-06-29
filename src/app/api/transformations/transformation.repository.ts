@@ -8,19 +8,19 @@ import {
   StructureVersionTransformationApiUpdate,
   TransformationApiCreate,
   TransformationApiUpdate,
+  TransformationSelectionApiUpdate,
 } from "@/schemas/api/transformation.schema";
 import { PrismaTransaction } from "@/types/prisma.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
+import { TRANSFORMATION_FORM_SLUG } from "../forms/form.constants";
 import {
   createOrUpdateForm,
   initializeStructureVersionTransformationDefaultForms,
 } from "../forms/form.repository";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
 import { transformationInclude } from "./transformation.db.type";
-
-const TRANSFORMATION_FORM_SLUG = "transformation-v1";
 
 export const findOne = async (id: number) => {
   return prisma.transformation.findUniqueOrThrow({
@@ -65,17 +65,33 @@ export const updateOne = async (
   input: TransformationApiUpdate
 ): Promise<number> => {
   return await prisma.$transaction(async (tx) => {
-    const existingTransformation = await tx.transformation.findUniqueOrThrow({
+    const finalisedTransformation = await tx.transformation.findUniqueOrThrow({
       where: { id: input.id },
       select: { form: { select: { status: true } } },
     });
 
-    if (existingTransformation.form?.status === true) {
+    if (finalisedTransformation.form?.status === true) {
       throw new Error("Impossible de modifier une transformation finalisée");
     }
 
     const isFinalizing = input.form?.status === true;
     if (isFinalizing) {
+      const structureVersionTransformations =
+        await tx.structureVersionTransformation.findMany({
+          where: { transformationId: input.id },
+          select: { structureVersion: { select: { effectiveDate: true } } },
+        });
+      if (
+        structureVersionTransformations.some(
+          (structureVersionTransformation) =>
+            !structureVersionTransformation.structureVersion?.effectiveDate
+        )
+      ) {
+        throw new Error(
+          "Chaque transformation doit avoir une date d'effet avant la finalisation"
+        );
+      }
+
       const finalized = await tx.form.updateMany({
         where: { transformationId: input.id, status: false },
         data: { status: true },
@@ -108,6 +124,41 @@ export const updateOne = async (
 
     if (isFinalizing) {
       await createStructuresForCreationBlocks(tx, input.id);
+      await moveActesAdministratifsToStructures(tx, input.id);
+    }
+
+    return input.id;
+  });
+};
+
+export const resetSelection = async (
+  input: TransformationSelectionApiUpdate
+): Promise<number> => {
+  return await prisma.$transaction(async (tx) => {
+    const finalisedTransformation = await tx.transformation.findUniqueOrThrow({
+      where: { id: input.id },
+      select: { form: { select: { status: true } } },
+    });
+
+    if (finalisedTransformation.form?.status === true) {
+      throw new Error("Impossible de modifier une transformation finalisée");
+    }
+
+    await tx.structureVersionTransformation.deleteMany({
+      where: { transformationId: input.id },
+    });
+
+    await tx.transformation.update({
+      where: { id: input.id },
+      data: { type: input.type },
+    });
+
+    for (const structureVersionTransformation of input.structureVersionTransformations) {
+      await createOrUpdateStructureVersionTransformation(
+        tx,
+        input.id,
+        structureVersionTransformation
+      );
     }
 
     return input.id;
@@ -146,6 +197,35 @@ const createStructuresForCreationBlocks = async (
       structureVersionTransformation,
       bhasileCounterCache
     );
+  }
+};
+
+const moveActesAdministratifsToStructures = async (
+  tx: PrismaTransaction,
+  transformationId: number
+): Promise<void> => {
+  const structureVersionTransformations =
+    await tx.structureVersionTransformation.findMany({
+      where: { transformationId },
+      select: { id: true, structureVersion: { select: { structureId: true } } },
+    });
+
+  for (const structureVersionTransformation of structureVersionTransformations) {
+    const structureId =
+      structureVersionTransformation.structureVersion?.structureId ?? null;
+
+    if (!structureId) {
+      throw new Error(
+        `Transformation ${transformationId}, Structure Version Transformation ${structureVersionTransformation.id} : structure cible introuvable, actes non basculables`
+      );
+    }
+
+    await tx.acteAdministratif.updateMany({
+      where: {
+        structureVersionTransformationId: structureVersionTransformation.id,
+      },
+      data: { structureId, structureVersionTransformationId: null },
+    });
   }
 };
 
@@ -189,7 +269,7 @@ const createStructureFromCreationBlock = async (
   );
 
   const structure = await tx.structure.create({
-    data: { codeBhasile, operateurId },
+    data: { codeBhasile, operateurId, creationDate: structureVersion.effectiveDate },
   });
 
   await tx.structureVersion.update({

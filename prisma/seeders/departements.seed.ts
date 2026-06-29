@@ -3,11 +3,12 @@ import { type Departement, type PrismaClient } from "@/generated/prisma/client";
 
 const createDepartements = (): Pick<
   Departement,
-  "numero" | "name"
+  "numero" | "name" | "population"
 >[] => {
   return DEPARTEMENTS.map((department) => ({
     numero: department.numero,
     name: department.name,
+    population: department.population,
   }));
 };
 

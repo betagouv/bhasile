@@ -3,6 +3,7 @@
 import { sendEvent } from "@socialgouv/matomo-next";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 
 import { SegmentedControl } from "@/app/components/common/SegmentedControl";
@@ -27,6 +28,11 @@ export default function Structures(): ReactElement {
     });
 
   usePersistStructuresSearchQuery();
+
+  const searchParams = useSearchParams();
+  const statut =
+    searchParams.get("statut") === "fermees" ? "fermees" : "actives";
+  const isClosed = statut === "fermees";
 
   const { structures, totalStructures } = useStructuresSearch({ map: false });
 
@@ -103,18 +109,18 @@ export default function Structures(): ReactElement {
         {process.env.NEXT_PUBLIC_SHOW_TRANSFORMATION === "true" && ( //TODO: remove this once transformation is ready
           <div className="flex items-center gap-4">
             <Link
-              className="fr-btn fr-btn--secondary"
+              className="fr-btn fr-btn--secondary flex gap-2"
               href="/structures/transformation/type?type=huda"
             >
-              <span className="fr-icon-arrow-left-right-line fr-icon--sm" />{" "}
+              <span className="fr-icon-arrow-left-right-line fr-icon--sm" />
               Transformer HUDA en CADA
             </Link>
             <Link
-              className="fr-btn fr-btn--secondary"
+              className="fr-btn fr-btn--secondary flex gap-2"
               href="/structures/transformation/type?type=creation"
             >
-              <span className="fr-icon-add-line fr-icon--sm" /> Créer une
-              structure
+              <span className="fr-icon-add-line fr-icon--sm" />
+              Créer une structure
             </Link>
           </div>
         )}
@@ -133,9 +139,11 @@ export default function Structures(): ReactElement {
             >
               {structures && (
                 <StructuresTable
+                  key={statut}
                   structures={structures}
                   totalStructures={totalStructures}
                   ariaLabelledBy="structures-titre"
+                  isClosed={isClosed}
                 />
               )}
             </ListLoader>

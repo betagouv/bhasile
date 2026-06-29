@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { blankStringsToUndefined } from "@/app/utils/zodCustomFields";
+import { emptyValuesToUndefined } from "@/app/utils/zodCustomFields";
 import {
   typeBatiAndAdressesAutoSaveSchema,
   typeBatiAndAdressesSchema,
@@ -20,7 +20,7 @@ export const creationPlacesEtHebergementSchema = typeBatiAndAdressesSchema.and(
 );
 
 export const creationPlacesEtHebergementDraftSchema = z.preprocess(
-  blankStringsToUndefined,
+  emptyValuesToUndefined,
   typeBatiAndAdressesAutoSaveSchema
     .and(z.object({ public: z.nativeEnum(PublicType).optional() }))
     .and(structureTypologiesAutoSaveSchema)

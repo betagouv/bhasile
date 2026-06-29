@@ -20,9 +20,8 @@ export const ImportOptionNotices = ({ typeBati }: Props) => {
         </p>
         <p className="mb-0">
           Veuillez télécharger le modèle et le compléter depuis un logiciel
-          tableur. Une fois enregistré, vous pourrez l&apos;importer puis
-          vérifier le remplissage qui s&apos;opérera automatiquement dans les
-          champs ci-dessous.
+          tableur. Une fois enregistré, vous pourrez l’importer puis vérifier le
+          remplissage qui s’opérera automatiquement dans les champs ci-dessous.
         </p>
       </div>
       <div className="flex flex-col gap-2">

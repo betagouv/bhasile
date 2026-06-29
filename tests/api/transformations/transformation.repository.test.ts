@@ -10,6 +10,7 @@ import {
 import {
   createTransformation,
   getTransformation,
+  resetTransformationSelection,
 } from "@/app/api/transformations/transformation.service";
 import { getNormalizedRegionCodeFromDepartement } from "@/app/utils/bhasile.util";
 import prisma from "@/lib/prisma";
@@ -88,6 +89,13 @@ describe("transformation.repository db integration", () => {
     });
 
   const finalizeTransformation = async (transformationId: number) => {
+    await prisma.structureVersion.updateMany({
+      where: {
+        structureVersionTransformation: { transformationId },
+        effectiveDate: null,
+      },
+      data: { effectiveDate: new Date("2024-01-01T00:00:00.000Z") },
+    });
     const formRow = await prisma.form.findFirstOrThrow({
       where: { transformationId },
     });
@@ -273,7 +281,7 @@ describe("transformation.repository db integration", () => {
     const structureVersion = await prisma.structureVersion.findUniqueOrThrow({
       where: { id: structureVersionId },
     });
-    expect(structureVersion.effectiveDate.toISOString()).toBe(fermetureDate);
+    expect(structureVersion.effectiveDate?.toISOString()).toBe(fermetureDate);
   });
 
   it("should replace structureVersion contacts on updateOne", async () => {
@@ -515,21 +523,7 @@ describe("transformation.repository db integration", () => {
     });
     expect(formDefinition.slug).toBe("transformation-v1");
 
-    const newForm = {
-      id: formRow.id,
-      status: true,
-      formDefinition: {
-        id: formDefinition.id,
-        slug: formDefinition.slug,
-        name: formDefinition.name,
-        version: formDefinition.version,
-      },
-      formSteps: [],
-    };
-    await updateOne({
-      id: transformationId,
-      form: newForm,
-    });
+    await finalizeTransformation(transformationId);
     const form = await prisma.form.findUniqueOrThrow({
       where: {
         transformationId_formDefinitionId: {
@@ -540,6 +534,38 @@ describe("transformation.repository db integration", () => {
     });
     expect(form.status).toBe(true);
     expect(form.formDefinitionId).toBe(formDefinition.id);
+  });
+
+  it("should reject finalization when a structureVersion has no effectiveDate", async () => {
+    const { transformationId } = await createBareTransformation();
+    const formRow = await prisma.form.findFirstOrThrow({
+      where: { transformationId },
+    });
+    const formDefinition = await prisma.formDefinition.findUniqueOrThrow({
+      where: { id: formRow.formDefinitionId },
+    });
+
+    await expect(
+      updateOne({
+        id: transformationId,
+        form: {
+          id: formRow.id,
+          status: true,
+          formDefinition: {
+            id: formDefinition.id,
+            slug: formDefinition.slug,
+            name: formDefinition.name,
+            version: formDefinition.version,
+          },
+          formSteps: [],
+        },
+      })
+    ).rejects.toThrow("date d'effet");
+
+    const form = await prisma.form.findFirstOrThrow({
+      where: { transformationId },
+    });
+    expect(form.status).toBe(false);
   });
 
   it("should persist operateurId on structureVersionTransformation when creating", async () => {
@@ -1127,6 +1153,47 @@ describe("transformation.repository db integration", () => {
     ]);
   });
 
+  it("should set the new Structure creationDate from the version effectiveDate when finalizing a CREATION block", async () => {
+    const operateur = await createOperateur();
+    const departement = await findDepartementWithRegionCode();
+    const creationDate = "2022-05-04T00:00:00.000Z";
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.CREATION,
+          operateurId: operateur.id,
+          structureVersion: {
+            departementAdministratif: departement.numero,
+            effectiveDate: creationDate,
+          },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const block = await prisma.structureVersionTransformation.findFirstOrThrow({
+      where: { transformationId },
+      include: { structureVersion: true },
+    });
+    const structureId = block.structureVersion?.structureId;
+    if (!structureId) {
+      throw new Error(
+        "La structureVersion devrait être rattachée à une structure"
+      );
+    }
+
+    const structure = await prisma.structure.findUniqueOrThrow({
+      where: { id: structureId },
+    });
+    createdStructureIds.push(structure.id);
+    // creationDate immuable : dérivée de l'effectiveDate de la version, posée sur la Structure
+    expect(structure.creationDate?.toISOString()).toBe(creationDate);
+    expect(structure.date303).toBeNull();
+  });
+
   it("should reject any update on an already finalized transformation", async () => {
     const operateur = await createOperateur();
     const departement = await findDepartementWithRegionCode();
@@ -1211,6 +1278,208 @@ describe("transformation.repository db integration", () => {
     expect(fermetureBlock.structureVersion?.structureId).toBe(
       sourceStructure.id
     );
+  });
+
+  it("should move a CREATION block's actesAdministratifs onto the newly created structure on finalization", async () => {
+    const operateur = await createOperateur();
+    const departement = await findDepartementWithRegionCode();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.CREATION,
+          operateurId: operateur.id,
+          structureVersion: { departementAdministratif: departement.numero },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const block = await prisma.structureVersionTransformation.findFirstOrThrow({
+      where: { transformationId },
+    });
+    const file = await createFileUpload("acte-creation");
+    await updateOne({
+      id: transformationId,
+      structureVersionTransformations: [
+        {
+          id: block.id,
+          actesAdministratifs: [
+            { category: "ARRETE_AUTORISATION", fileUploads: [{ key: file.key }] },
+          ],
+        },
+      ],
+    });
+
+    await finalizeTransformation(transformationId);
+
+    const refreshedBlock =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: { transformationId },
+        include: { structureVersion: true },
+      });
+    const structureId = refreshedBlock.structureVersion?.structureId;
+    if (!structureId) {
+      throw new Error(
+        "La structureVersion devrait être rattachée à une structure"
+      );
+    }
+    createdStructureIds.push(structureId);
+
+    const actes = await prisma.acteAdministratif.findMany({
+      where: { structureId },
+    });
+    expect(actes).toHaveLength(1);
+    expect(actes[0].category).toBe("ARRETE_AUTORISATION");
+    expect(actes[0].structureVersionTransformationId).toBeNull();
+    expect(
+      await prisma.acteAdministratif.count({
+        where: { structureVersionTransformationId: block.id },
+      })
+    ).toBe(0);
+  });
+
+  it("should move a non-CREATION block's actesAdministratifs onto its existing structure on finalization", async () => {
+    const sourceStructure = await createStructure();
+    const transformationId = await createOne({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { structureId: sourceStructure.id },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const block = await prisma.structureVersionTransformation.findFirstOrThrow({
+      where: { transformationId },
+    });
+    const file = await createFileUpload("acte-fermeture");
+    await updateOne({
+      id: transformationId,
+      structureVersionTransformations: [
+        {
+          id: block.id,
+          actesAdministratifs: [
+            { category: "CONVENTION", fileUploads: [{ key: file.key }] },
+          ],
+        },
+      ],
+    });
+
+    await finalizeTransformation(transformationId);
+
+    const actes = await prisma.acteAdministratif.findMany({
+      where: { structureId: sourceStructure.id },
+    });
+    expect(actes).toHaveLength(1);
+    expect(actes[0].category).toBe("CONVENTION");
+    expect(actes[0].structureVersionTransformationId).toBeNull();
+    expect(
+      await prisma.acteAdministratif.count({
+        where: { structureVersionTransformationId: block.id },
+      })
+    ).toBe(0);
+  });
+
+  it("should move avenants (children) along with their parent acte on finalization", async () => {
+    const sourceStructure = await createStructure();
+    const transformationId = await createOne({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { structureId: sourceStructure.id },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const block = await prisma.structureVersionTransformation.findFirstOrThrow({
+      where: { transformationId },
+    });
+    const parentFile = await createFileUpload("acte-parent");
+    const avenantFile = await createFileUpload("acte-avenant");
+    const parentUuid = randomUUID();
+    await updateOne({
+      id: transformationId,
+      structureVersionTransformations: [
+        {
+          id: block.id,
+          actesAdministratifs: [
+            {
+              uuid: parentUuid,
+              category: "ARRETE_AUTORISATION",
+              fileUploads: [{ key: parentFile.key }],
+            },
+            {
+              parentUuid,
+              category: "AUTRE",
+              fileUploads: [{ key: avenantFile.key }],
+            },
+          ],
+        },
+      ],
+    });
+
+    await finalizeTransformation(transformationId);
+
+    const actes = await prisma.acteAdministratif.findMany({
+      where: { structureId: sourceStructure.id },
+    });
+    expect(actes).toHaveLength(2);
+    expect(
+      actes.every((acte) => acte.structureVersionTransformationId === null)
+    ).toBe(true);
+    const parent = actes.find((acte) => acte.parentId === null);
+    const avenant = actes.find((acte) => acte.parentId !== null);
+    expect(parent).toBeDefined();
+    expect(avenant?.parentId).toBe(parent?.id);
+  });
+
+  it("should throw and roll back finalization when a block has actes but no resolvable target structure", async () => {
+    const departement = await findDepartementWithRegionCode();
+    const transformationId = await createOne({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { departementAdministratif: departement.numero },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const block = await prisma.structureVersionTransformation.findFirstOrThrow({
+      where: { transformationId },
+    });
+    const file = await createFileUpload("acte-orphan");
+    await updateOne({
+      id: transformationId,
+      structureVersionTransformations: [
+        {
+          id: block.id,
+          actesAdministratifs: [
+            { category: "AUTRE", fileUploads: [{ key: file.key }] },
+          ],
+        },
+      ],
+    });
+
+    await expect(finalizeTransformation(transformationId)).rejects.toThrow(
+      "non basculable"
+    );
+
+    const form = await prisma.form.findFirstOrThrow({
+      where: { transformationId },
+    });
+    expect(form.status).toBe(false);
+    expect(
+      await prisma.acteAdministratif.count({
+        where: { structureVersionTransformationId: block.id },
+      })
+    ).toBe(1);
   });
 
   it("should generate distinct bhasile codes for multiple CREATION blocks in the same region", async () => {
@@ -1379,4 +1648,211 @@ describe("transformation.repository db integration", () => {
     expect(sourceStructure?.nom ?? null).toBeNull();
     expect(sourceStructure?.structureTypologies ?? []).toHaveLength(0);
   });
+
+  // --- Reset de sélection : full replace + cascade ---
+
+  it("should wipe the previous selection subtree (svt, version, forms, actes) and recreate from the new selection", async () => {
+    const { transformationId, structureVersionTransformationId, structureVersionId } =
+      await createBareTransformation();
+    const oldActe = await prisma.acteAdministratif.create({
+      data: {
+        structureVersionTransformationId,
+        category: "ARRETE_AUTORISATION",
+      },
+    });
+    expect(
+      await prisma.form.count({
+        where: { structureVersionTransformationId },
+      })
+    ).toBeGreaterThan(0);
+
+    const closingStructure = await createStructure();
+    await resetTransformationSelection({
+      id: transformationId,
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { structureId: closingStructure.id },
+        },
+      ],
+    });
+
+    // Ancien sous-arbre effacé (cascade).
+    expect(
+      await prisma.structureVersionTransformation.findUnique({
+        where: { id: structureVersionTransformationId },
+      })
+    ).toBeNull();
+    expect(
+      await prisma.structureVersion.findUnique({
+        where: { id: structureVersionId },
+      })
+    ).toBeNull();
+    expect(
+      await prisma.form.count({
+        where: { structureVersionTransformationId },
+      })
+    ).toBe(0);
+    expect(
+      await prisma.acteAdministratif.findUnique({ where: { id: oldActe.id } })
+    ).toBeNull();
+
+    // Nouvelle sélection en place.
+    const transformation = await prisma.transformation.findUniqueOrThrow({
+      where: { id: transformationId },
+      include: {
+        structureVersionTransformations: { include: { structureVersion: true } },
+      },
+    });
+    expect(transformation.type).toBe(TransformationType.FERMETURE_SANS_TRANSFERT);
+    expect(transformation.structureVersionTransformations).toHaveLength(1);
+    expect(transformation.structureVersionTransformations[0].type).toBe(
+      StructureVersionTransformationType.FERMETURE
+    );
+    expect(
+      transformation.structureVersionTransformations[0].structureVersion
+        ?.structureId
+    ).toBe(closingStructure.id);
+  });
+
+  it("should rebuild the source block with a fresh version and forms (no leftover step data)", async () => {
+    const { structure } = await seedRichStructure();
+    const transformationId = await createTransformation({
+      type: TransformationType.EXTENSION_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: { structureId: structure.id },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const beforeBlock =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: { transformationId },
+        include: { structureVersion: true },
+      });
+    const oldVersionId = beforeBlock.structureVersion?.id;
+
+    await resetTransformationSelection({
+      id: transformationId,
+      type: TransformationType.EXTENSION_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: { structureId: structure.id },
+        },
+      ],
+    });
+
+    const afterBlock =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: { transformationId },
+        include: { structureVersion: { include: { contacts: true } } },
+      });
+
+    // Identité de la source préservée, ligne SVT + version reconstruites.
+    expect(afterBlock.id).not.toBe(beforeBlock.id);
+    expect(afterBlock.structureVersion?.id).not.toBe(oldVersionId);
+    expect(afterBlock.structureVersion?.structureId).toBe(structure.id);
+    if (oldVersionId) {
+      expect(
+        await prisma.structureVersion.findUnique({ where: { id: oldVersionId } })
+      ).toBeNull();
+    }
+    // Version fraîche re-copiée depuis la structure source.
+    expect(afterBlock.structureVersion?.contacts).toHaveLength(1);
+    expect(
+      await prisma.form.count({
+        where: { structureVersionTransformationId: afterBlock.id },
+      })
+    ).toBeGreaterThan(0);
+  });
+
+  it("should reject reset on an already finalized transformation", async () => {
+    const operateur = await createOperateur();
+    const departement = await findDepartementWithRegionCode();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.CREATION,
+          operateurId: operateur.id,
+          structureVersion: { departementAdministratif: departement.numero },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+    await finalizeTransformation(transformationId);
+    const finalizedBlock =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: { transformationId },
+        include: { structureVersion: true },
+      });
+    if (finalizedBlock.structureVersion?.structureId) {
+      createdStructureIds.push(finalizedBlock.structureVersion.structureId);
+    }
+
+    const closingStructure = await createStructure();
+    await expect(
+      resetTransformationSelection({
+        id: transformationId,
+        type: TransformationType.FERMETURE_SANS_TRANSFERT,
+        structureVersionTransformations: [
+          {
+            type: StructureVersionTransformationType.FERMETURE,
+            structureVersion: { structureId: closingStructure.id },
+          },
+        ],
+      })
+    ).rejects.toThrow("finalisée");
+  });
+
+  it("should be idempotent on selection state when replayed with the same input", async () => {
+    const { transformationId } = await createBareTransformation();
+    const closingStructure = await createStructure();
+    const selection = {
+      id: transformationId,
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { structureId: closingStructure.id },
+        },
+      ],
+    };
+
+    await resetTransformationSelection(selection);
+    const firstState = await readSelectionState(transformationId);
+
+    await resetTransformationSelection(selection);
+    const secondState = await readSelectionState(transformationId);
+
+    expect(secondState).toEqual(firstState);
+  });
 });
+
+const readSelectionState = async (transformationId: number) => {
+  const transformation = await prisma.transformation.findUniqueOrThrow({
+    where: { id: transformationId },
+    include: {
+      structureVersionTransformations: { include: { structureVersion: true } },
+    },
+  });
+  return {
+    type: transformation.type,
+    blocks: transformation.structureVersionTransformations
+      .map((structureVersionTransformation) => ({
+        type: structureVersionTransformation.type,
+        structureId:
+          structureVersionTransformation.structureVersion?.structureId ?? null,
+      }))
+      .sort((first, second) =>
+        `${first.type}:${first.structureId}`.localeCompare(
+          `${second.type}:${second.structureId}`
+        )
+      ),
+  };
+};

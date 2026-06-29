@@ -6,6 +6,7 @@ import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { TransformationFakeSaver } from "@/app/components/forms/TransformationFakeSaver";
 import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useTransformationFormNavigation } from "@/app/hooks/useTransformationFormNavigation";
@@ -82,74 +83,81 @@ export default function TransformationVerificationPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 max-w-4xl mx-auto mt-6 mb-10 px-6">
+    <>
+      <TransformationFakeSaver />
       {prevStep && (
         <Link
           href={prevStep.route}
-          className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line self-start"
+          className="absolute top-4 left-4 fr-link flex gap-2 border-b border-action-high-blue-france"
         >
+          <i className="fr-icon-arrow-left-s-line" />
           Retour
         </Link>
       )}
-      <h2 className="text-xl font-bold text-title-blue-france text-center mb-0">
-        Confirmez-vous les informations suivantes&nbsp;?
-      </h2>
-      <div className="flex flex-col gap-6">
-        {groups.map((group) => (
-          <StructureVersionTransformationGroup
-            key={group.type}
-            type={group.type}
-            structureVersionTransformations={group.items}
-          />
-        ))}
-      </div>
-      <div className="flex flex-col items-center gap-2">
-        <Button
-          disabled={saveState === FetchState.LOADING}
-          onClick={handleSubmit}
-          iconId="fr-icon-arrow-right-line"
-          iconPosition="right"
-        >
-          Je confirme et certifie les informations
-        </Button>
-        {shouldShowIncompleteSteps && !allChildFormsAreValidated && (
-          <p className="text-default-error m-0 flex items-center gap-1">
-            <i
-              className="fr-icon-error-fill text-default-error shrink-0"
-              aria-hidden="true"
+      <div className="flex flex-col gap-8 max-w-4xl mx-auto pt-20 mb-10  px-6">
+        <h2 className="text-xl font-bold text-title-blue-france text-center mb-0">
+          Confirmez-vous les informations suivantes&nbsp;?
+        </h2>
+        <div className="flex flex-col gap-4">
+          {groups.map((group) => (
+            <StructureVersionTransformationGroup
+              key={group.type}
+              type={group.type}
+              structureVersionTransformations={group.items}
             />
-            <span>
-              Certaines étapes ne sont pas encore complétées.
-              <br />
-              Veuillez compléter les étapes signalées avant de confirmer.
-            </span>
-          </p>
-        )}
-      </div>
-      {saveState === FetchState.ERROR && <SubmitError />}
+          ))}
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <Button
+            disabled={saveState === FetchState.LOADING}
+            onClick={handleSubmit}
+            iconId="fr-icon-arrow-right-line"
+            iconPosition="right"
+          >
+            Je confirme et certifie les informations
+          </Button>
+          {shouldShowIncompleteSteps && !allChildFormsAreValidated && (
+            <p className="text-xs text-default-error mb-0 mt-3 flex items-center gap-1">
+              <i
+                className="fr-icon-error-fill text-default-error shrink-0"
+                aria-hidden="true"
+              />
+              <span>
+                Certaines étapes ne sont pas encore complétées.
+                <br />
+                Veuillez compléter les étapes signalées avant de confirmer.
+              </span>
+            </p>
+          )}
+        </div>
+        {saveState === FetchState.ERROR && <SubmitError />}
 
-      <confirmationModal.Component
-        title={
-          <span className="flex items-center gap-2">
-            <span className="fr-icon-checkbox-circle-line" aria-hidden="true" />
-            Les données ont été prises en compte.
-          </span>
-        }
-        buttons={[
-          {
-            doClosesModal: true,
-            children: "J’ai compris",
-            type: "button",
-          },
-        ]}
-      >
-        Vous pouvez dès maintenant consulter les changements sur les pages des
-        structures concernées.
-        {transformation.type ===
-          TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES &&
-          " Aussi, si la ou les structures issues de la remise en concurrence des places ont déjà été définies, vous pouvez les déclarer en cliquant sur « Créer une structure » dans l’onglet structure."}
-      </confirmationModal.Component>
-    </div>
+        <confirmationModal.Component
+          title={
+            <span className="flex items-center gap-2">
+              <span
+                className="fr-icon-checkbox-circle-line"
+                aria-hidden="true"
+              />
+              Les données ont été prises en compte.
+            </span>
+          }
+          buttons={[
+            {
+              doClosesModal: true,
+              children: "J’ai compris",
+              type: "button",
+            },
+          ]}
+        >
+          Vous pouvez dès maintenant consulter les changements sur les pages des
+          structures concernées.
+          {transformation.type ===
+            TransformationType.TRANSFO_HUDA_REMISE_EN_CONCURRENCE_DES_PLACES &&
+            " Aussi, si la ou les structures issues de la remise en concurrence des places ont déjà été définies, vous pouvez les déclarer en cliquant sur « Créer une structure » dans l’onglet structure."}
+        </confirmationModal.Component>
+      </div>
+    </>
   );
 }
 

@@ -37,10 +37,10 @@ WITH
       aa."structureId"
   )
 SELECT
-  s."id" AS "id",
+  sc."id" AS "id",
   -- Authorized structures: authorization period must be 15 years (based on actes administratifs)
   CASE
-    WHEN s."type" IN ('CADA', 'CPH') THEN (
+    WHEN sc."structure_type" IN ('CADA', 'CPH') THEN (
       aaa."debutAutorisation" IS NOT NULL
       AND aaa."finAutorisation" IS NOT NULL
       AND (
@@ -59,7 +59,7 @@ SELECT
   END AS "has_issue_authorisation_period_not_15y",
   -- Authorized structures: convention should last 5 years (based on actes administratifs)
   CASE
-    WHEN s."type" IN ('CADA', 'CPH') THEN (
+    WHEN sc."structure_type" IN ('CADA', 'CPH') THEN (
       aaa."debutConvention" IS NOT NULL
       AND aaa."finConvention" IS NOT NULL
       AND (
@@ -78,7 +78,7 @@ SELECT
   END AS "has_issue_authorized_convention_not_5y",
   -- Authorized structures: convention must be within the authorization period (based on actes administratifs)
   CASE
-    WHEN s."type" IN ('CADA', 'CPH') THEN (
+    WHEN sc."structure_type" IN ('CADA', 'CPH') THEN (
       aaa."debutAutorisation" IS NOT NULL
       AND aaa."finAutorisation" IS NOT NULL
       AND aaa."debutConvention" IS NOT NULL
@@ -108,7 +108,7 @@ SELECT
   END AS "has_issue_authorized_convention_outside_authorisation_period",
   -- Authorized structures: missing convention in actes administratifs (convention is required)
   CASE
-    WHEN s."type" IN ('CADA', 'CPH') THEN (
+    WHEN sc."structure_type" IN ('CADA', 'CPH') THEN (
       aaa."debutConvention" IS NULL
       OR aaa."finConvention" IS NULL
     )
@@ -130,7 +130,7 @@ SELECT
   ) AS "has_issue_convention_dates_differ_from_actes_administratifs",
   COALESCE(
     (
-      s."type" IN ('CADA', 'CPH')
+      sc."structure_type" IN ('CADA', 'CPH')
       AND (
         aaa."debutAutorisation" IS NOT NULL
         OR aaa."finAutorisation" IS NOT NULL
@@ -145,14 +145,14 @@ SELECT
   -- Evaluation should be performed at least every 5 years, before the end of the convention.
   CASE
     WHEN aaa."finConvention" IS NULL THEN FALSE
-    WHEN s."type" IN ('HUDA', 'CAES') THEN FALSE
+    WHEN sc."structure_type" IN ('HUDA', 'CAES') THEN FALSE
     WHEN MAX(e."date") IS NULL THEN TRUE
     WHEN MAX(e."date") < (aaa."finConvention" - INTERVAL '5 years') THEN TRUE
     ELSE FALSE
   END AS "has_issue_evaluation_not_done_in_time",
   -- Subsidized structures: convention duration must be <= 3 years (based on actes administratifs)
   CASE
-    WHEN s."type" IN ('HUDA', 'CAES') THEN (
+    WHEN sc."structure_type" IN ('HUDA', 'CAES') THEN (
       aaa."debutConvention" IS NOT NULL
       AND aaa."finConvention" IS NOT NULL
       AND (
@@ -170,11 +170,17 @@ SELECT
     ELSE FALSE
   END AS "has_issue_subsidized_convention_gt_3y"
 FROM
-  public."Structure" s
-  LEFT JOIN actes_administratifs_aggregate aaa ON aaa."id" = s."id"
-  LEFT JOIN public."Evaluation" e ON e."structureId" = s."id"
+:"SCHEMA"."structures_core" sc
+  INNER JOIN public."Structure" s ON s."id" = sc."id"
+  LEFT JOIN actes_administratifs_aggregate aaa ON aaa."id" = sc."id"
+  LEFT JOIN public."Evaluation" e ON e."structureId" = sc."id"
 GROUP BY
-  s."id",
+  sc."id",
+  sc."structure_type",
+  s."debutConvention",
+  s."finConvention",
+  s."debutPeriodeAutorisation",
+  s."finPeriodeAutorisation",
   aaa."debutConvention",
   aaa."finConvention",
   aaa."debutAutorisation",

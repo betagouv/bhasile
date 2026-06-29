@@ -61,8 +61,8 @@ export const createStructureForTest = async (
     },
   });
 
-  // L'app lit/écrit désormais les champs versionnés via StructureVersion.
-  // On crée la version « rolling » courante que le parcours agent met à jour.
+  // L'app lit/écrit les champs versionnés via StructureVersion : on crée la
+  // version courante que le parcours agent met à jour.
   const structureVersion = await prisma.structureVersion.create({
     data: {
       structureId: structure.id,

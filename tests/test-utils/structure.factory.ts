@@ -38,8 +38,10 @@ export const createStructure = ({
   dnaStructures,
   structureFinesses,
   forms,
+  isFinalised,
 }: CreateStructuresArgs): StructureApiRead => {
   const structureType = type ?? StructureType.CADA;
+  const resolvedForms = forms ?? createDefaultForms();
   const currentStructureTypologies =
     structureTypologies ?? createStructureTypologies();
   const adresseAdministrativeValue =
@@ -76,7 +78,7 @@ export const createStructure = ({
     structureTypologies: currentStructureTypologies,
     structureMillesimes: structureMillesimes ?? [],
     cpomStructures: cpomStructures ?? [],
-    forms: forms ?? createDefaultForms(),
+    forms: resolvedForms,
     dnaStructures: dnaStructures ?? createDefaultDnaStructures(),
     structureFinesses: structureFinesses ?? createDefaultStructureFinesses(),
     contacts: [],
@@ -101,6 +103,14 @@ export const createStructure = ({
     currentPlaces: createCurrentPlaces(currentStructureTypologies),
     isInCpom: false,
     isInCpomPerYear: {},
+    isFinalised:
+      isFinalised ??
+      resolvedForms.some(
+        (form) =>
+          form.formDefinition.name === "finalisation" &&
+          form.formDefinition.version === 1 &&
+          form.status
+      ),
   };
 };
 
@@ -246,4 +256,5 @@ type CreateStructuresArgs = {
   dnaStructures?: DnaStructureApiType[];
   structureFinesses?: StructureFinessApiType[];
   forms?: FormApiType[];
+  isFinalised?: boolean;
 };

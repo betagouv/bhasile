@@ -5,6 +5,7 @@ import { ReactElement } from "react";
 import { ListLoader } from "@/app/components/lists/ListLoader";
 import { SearchBar } from "@/app/components/SearchBar";
 import { useOperateurSearch } from "@/app/hooks/useOperateurSearch";
+import { formatPlural } from "@/app/utils/string.util";
 
 import { OperateurList } from "./OperateursList";
 
@@ -26,8 +27,7 @@ export default function Operateurs(): ReactElement {
             inputId="operateurs-search"
           />
           <p className="pl-3 text-mention-grey mb-0 min-w-24 text-right">
-            {totalOperateurs ?? 0} entrée
-            {(totalOperateurs ?? 0) > 1 ? "s" : ""}
+            {formatPlural(totalOperateurs, "entrée")}
           </p>
         </div>
       </div>

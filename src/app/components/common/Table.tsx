@@ -2,6 +2,7 @@ import {
   Fragment,
   PropsWithChildren,
   ReactElement,
+  ReactNode,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -21,6 +22,7 @@ export const Table = ({
   hasErrors,
   stickFirstColumn,
   defaultScrollRight,
+  overlay,
 }: Props) => {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const scrollableAreaRef = useRef<HTMLDivElement>(null);
@@ -73,7 +75,7 @@ export const Table = ({
       <div
         ref={scrollableAreaRef}
         className={cn(
-          "w-full max-w-full min-w-0 overflow-x-auto",
+          "relative w-full max-w-full min-w-0 overflow-x-auto",
           stickFirstColumn && "pb-3"
         )}
         style={stickFirstColumn ? { contain: "inline-size" } : undefined}
@@ -127,6 +129,7 @@ export const Table = ({
             {children}
           </tbody>
         </table>
+        {overlay}
       </div>
     </div>
   );
@@ -144,4 +147,5 @@ type Props = PropsWithChildren<{
   hasErrors?: boolean;
   stickFirstColumn?: boolean;
   defaultScrollRight?: boolean;
+  overlay?: ReactNode;
 }>;

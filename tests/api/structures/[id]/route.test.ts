@@ -49,6 +49,7 @@ vi.mock("@/app/api/activites/activite.service", () => ({
 vi.mock("@/app/api/structures/structure.util", () => ({
   getAdresseAdministrativeCoordinates: (...args: unknown[]) =>
     mockGetAdresseAdministrativeCoordinates(...args),
+  buildStructureHistory: vi.fn().mockReturnValue([]),
   getCpomStructuresWithDates: vi.fn().mockReturnValue([]),
   getCurrentPlacesAutorisees: vi.fn().mockReturnValue(10),
   getCurrentPlacesLogementsSociaux: vi.fn().mockReturnValue(2),
@@ -59,6 +60,8 @@ vi.mock("@/app/api/structures/structure.util", () => ({
   isStructureInCpomPerYear: vi.fn().mockReturnValue({}),
   getDatesConvention: vi.fn().mockReturnValue([null, null]),
   getDatesPeriodeAutorisation: vi.fn().mockReturnValue([null, null]),
+  isBornFromCreation: vi.fn().mockReturnValue(false),
+  isFinalisationFormValidated: vi.fn().mockReturnValue(false),
 }));
 
 vi.mock("@/app/api/antennes/antenne.util", () => ({
@@ -136,6 +139,7 @@ describe("GET /api/structures/[id]", () => {
       contacts: [],
       documentsFinanciers: [],
       cpomStructures: [],
+      history: [],
       creationDate: "2020-01-01T00:00:00.000Z",
       date303: undefined,
       debutConvention: null,
@@ -163,6 +167,7 @@ describe("GET /api/structures/[id]", () => {
       },
       isInCpom: false,
       isInCpomPerYear: {},
+      isFinalised: false,
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);
     expect(mockFindOneOperateur).not.toHaveBeenCalled();
@@ -224,7 +229,7 @@ describe("GET /api/structures/[id]", () => {
     // THEN
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual(structure);
-    expect(mockFindOneOperateur).toHaveBeenCalledWith(1);
+    expect(mockFindOneOperateur).toHaveBeenCalledWith(1, expect.any(Date));
     expect(mockFindOne).not.toHaveBeenCalled();
   });
 

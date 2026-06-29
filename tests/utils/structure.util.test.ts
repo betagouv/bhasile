@@ -8,6 +8,7 @@ import {
 import {
   getCpomStructureIndexAndBudgetIndexForAYearAndAType,
   getCurrentCpomStructureDates,
+  getFermetureEvent,
   getLastVisitInMonths,
   getMillesimeIndexForAYear,
   getPlacesByCommunes,
@@ -18,9 +19,11 @@ import { AdresseApiType } from "@/schemas/api/adresse.schema";
 import { ControleApiType } from "@/schemas/api/controle.schema";
 import { CpomStructureApiRead } from "@/schemas/api/cpom.schema";
 import { EvaluationApiType } from "@/schemas/api/evaluation.schema";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { StructureMillesimeApiType } from "@/schemas/api/structure-millesime.schema";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 import { StructureType } from "@/types/structure.type";
+import { HistoryEvent } from "@/types/structure-history.type";
 
 import { Repartition } from "../../src/types/adresse.type";
 import { createAdresse } from "../test-utils/factories/adresse.factory";
@@ -1337,6 +1340,38 @@ describe("structure util", () => {
 
       // THEN
       expect(result).toEqual({ cpomStructureIndex: 0, budgetIndex: 0 });
+    });
+  });
+
+  describe("getFermetureEvent", () => {
+    const buildStructure = (history?: HistoryEvent[]): StructureApiRead =>
+      ({ history }) as StructureApiRead;
+
+    it("returns the FERMETURE event with its date and motif", () => {
+      const fermeture: HistoryEvent = {
+        kind: "FERMETURE",
+        date: "2025-03-19",
+        targets: [],
+        motif: "Absorption",
+      };
+      const structure = buildStructure([
+        { kind: "CREATION", date: "2020-01-01", sources: [] },
+        fermeture,
+      ]);
+
+      expect(getFermetureEvent(structure)).toEqual(fermeture);
+    });
+
+    it("returns undefined when there is no FERMETURE event", () => {
+      const structure = buildStructure([
+        { kind: "CREATION", date: "2020-01-01", sources: [] },
+      ]);
+
+      expect(getFermetureEvent(structure)).toBeUndefined();
+    });
+
+    it("returns undefined when history is absent", () => {
+      expect(getFermetureEvent(buildStructure())).toBeUndefined();
     });
   });
 });

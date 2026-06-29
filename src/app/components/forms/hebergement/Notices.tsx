@@ -13,17 +13,17 @@ export const Notices = ({
     <div className="flex flex-col gap-6">
       {formKind !== FormKind.MODIFICATION && (
         <div className="flex flex-col gap-6" ref={hebergementsContainerRef}>
-          <p className="mb-0">
-            Veuillez d&apos;abord renseigner le type de bâti puis
-            l&apos;ensemble des adresses d&apos;hébergement de la structure, et
-            les informations associées,{" "}
-            <strong>au 1er janvier de l&apos;année en cours.</strong>
+          <p className="mb-0 max-w-3xl">
+            Veuillez d’abord renseigner le type de bâti puis l’ensemble des
+            adresses d’hébergement de la structure, et les informations
+            associées, <strong>au 1er janvier de l’année en cours.</strong>
           </p>
 
           {typeBati === Repartition.COLLECTIF ? (
             <ManualOptionNotices />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <ImportOptionNotices typeBati={typeBati} />
               <div className="rounded-lg bg-default-grey-hover p-6 flex flex-col gap-5">
                 <div>
                   <h3 className="text-lg text-title-blue-france mb-0">
@@ -38,7 +38,6 @@ export const Notices = ({
                 </p>
                 <ManualOptionNotices />
               </div>
-              <ImportOptionNotices typeBati={typeBati} />
             </div>
           )}
         </div>

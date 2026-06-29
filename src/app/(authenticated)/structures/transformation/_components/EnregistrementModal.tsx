@@ -25,7 +25,7 @@ export const EnregistrementModal = ({ onQuit }: Props) => (
     ]}
     className="[&_h1]:text-left! [&_p]:text-left!"
   >
-    Vous retrouverez cette démarche dans l&apos;onglet « à finaliser ».
+    Vous retrouverez cette démarche dans l’onglet « à finaliser ».
   </enregistrementModal.Component>
 );
 
