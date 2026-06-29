@@ -93,7 +93,12 @@ describe("HistoryEventLabel", () => {
     renderLabel({
       kind: "CPOM_ENTRY",
       date: ISO,
-      cpom: { id: 7, operateurName: "Coallia", departements: ["92", "93"] },
+      cpom: {
+        id: 7,
+        operateurName: "Coallia",
+        departements: ["92", "93"],
+        regionName: null,
+      },
     });
 
     expect(screen.getByRole("link", { name: "Coallia 92, 93" })).toHaveAttribute(
@@ -106,9 +111,31 @@ describe("HistoryEventLabel", () => {
     const { container } = renderLabel({
       kind: "CPOM_EXIT",
       date: ISO,
-      cpom: { id: 7, operateurName: "Coallia", departements: ["92"] },
+      cpom: {
+        id: 7,
+        operateurName: "Coallia",
+        departements: ["92"],
+        regionName: null,
+      },
     });
 
     expect(container.textContent).toBe("Sortie du CPOM Coallia 92");
+  });
+
+  it("CPOM régional affiche le nom de la région", () => {
+    renderLabel({
+      kind: "CPOM_ENTRY",
+      date: ISO,
+      cpom: {
+        id: 7,
+        operateurName: "Coallia",
+        departements: ["92", "93"],
+        regionName: "Île-de-France",
+      },
+    });
+
+    expect(
+      screen.getByRole("link", { name: "Coallia Île-de-France" })
+    ).toHaveAttribute("href", "/cpoms/7");
   });
 });

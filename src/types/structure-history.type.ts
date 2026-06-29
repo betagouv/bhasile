@@ -7,6 +7,7 @@ export type CpomRef = {
   id: number;
   operateurName: string;
   departements: string[];
+  regionName: string | null;
 };
 
 export type HistoryEvent =

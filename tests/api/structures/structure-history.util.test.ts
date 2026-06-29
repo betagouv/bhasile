@@ -356,7 +356,12 @@ describe("buildStructureHistory — CPOM", () => {
     expect(entry).toEqual({
       kind: "CPOM_ENTRY",
       date: "2022-02-14T00:00:00.000Z",
-      cpom: { id: 7, operateurName: "Coallia", departements: ["92", "93"] },
+      cpom: {
+        id: 7,
+        operateurName: "Coallia",
+        departements: ["92", "93"],
+        regionName: null,
+      },
     });
   });
 
