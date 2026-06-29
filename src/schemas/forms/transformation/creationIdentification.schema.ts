@@ -1,7 +1,7 @@
 import z from "zod";
 
 import {
-  blankStringsToUndefined,
+  emptyValuesToUndefined,
   frenchDateToISO,
 } from "@/app/utils/zodCustomFields";
 import {
@@ -41,9 +41,10 @@ export const creationIdentificationSchema = baseCreationIdentificationSchema
   .and(contactsSchema);
 
 export const creationIdentificationDraftSchema = z.preprocess(
-  blankStringsToUndefined,
+  emptyValuesToUndefined,
   baseCreationIdentificationSchema
     .partial()
+    .extend({ operateur: operateurSchema.partial().optional() })
     .and(adresseAdministrativeAutoSaveSchema)
     .and(antennesAutoSaveSchema)
     .and(dnaStructuresAutoSaveSchema)

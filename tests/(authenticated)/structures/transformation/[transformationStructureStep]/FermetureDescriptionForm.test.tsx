@@ -179,4 +179,28 @@ describe("FermetureDescriptionForm (intégration jusqu'au fetch)", () => {
     expect(actes[0].category).toBe("AUTRE");
     expect(actes[0].fileUploads).toMatchObject([{ key: "k-autre" }]);
   });
+
+  it("sauvegarde même avec une date de fermeture null (venant de la BDD)", async () => {
+    // GIVEN a fermeture whose effectiveDate column is still null
+    renderForm(
+      fermetureTransformation({
+        id: 12,
+        structureId: 104,
+        effectiveDate: null,
+      } as unknown as TransformationApiRead["structureVersionTransformations"][number]["structureVersion"])
+    );
+
+    // WHEN submitting without filling the date
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
+    );
+
+    // THEN the draft save is not blocked: the PUT still leaves
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+  });
 });

@@ -1,7 +1,7 @@
 import z from "zod";
 
 import {
-  blankStringsToUndefined,
+  emptyValuesToUndefined,
   frenchDateToISO,
 } from "@/app/utils/zodCustomFields";
 import {
@@ -14,7 +14,7 @@ export const fermetureSchema = z
   .and(actesAdministratifsFermetureSchema);
 
 export const fermetureDraftSchema = z.preprocess(
-  blankStringsToUndefined,
+  emptyValuesToUndefined,
   z
     .object({ effectiveDate: frenchDateToISO().optional() })
     .and(actesAdministratifsAutoSaveSchema)

@@ -157,4 +157,52 @@ describe("CreationIdentificationForm (intégration jusqu'au fetch)", () => {
     ).toBeInTheDocument();
     expect(screen.queryByTestId("dna-and-finess")).not.toBeInTheDocument();
   });
+
+  it("sauvegarde même quand tous les champs sont vides, y compris les null venant de la BDD", async () => {
+    // GIVEN a freshly created version where the DB columns are still null and the
+    // operateur is a present-but-empty object (the autocomplete was never filled)
+    const structureVersionTransformation = {
+      id: STRUCTURE_VERSION_TRANSFORMATION_ID,
+      type: StructureVersionTransformationType.CREATION,
+      operateur: { id: null, name: null },
+      structureVersion: {
+        id: 999,
+        type: null,
+        codeBhasile: null,
+        nom: null,
+        creationDate: null,
+        adresseAdministrative: null,
+        codePostalAdministratif: null,
+        communeAdministrative: null,
+        departementAdministratif: null,
+      },
+    } as unknown as StructureVersionTransformationApiRead;
+    const transformation = {
+      id: TRANSFORMATION_ID,
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations: [structureVersionTransformation],
+    } as TransformationApiRead;
+
+    renderTransformationForm(
+      transformation,
+      <CreationIdentificationForm
+        transformation={transformation}
+        structureVersionTransformation={structureVersionTransformation}
+        formKind={FormKind.OUVERTURE_EX_NIHILO}
+      />
+    );
+
+    // WHEN the agent submits the step without filling anything
+    await userEvent.click(
+      screen.getByRole("button", { name: "Étape suivante" })
+    );
+
+    // THEN the draft save is not blocked: the PUT still leaves
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/transformations/${TRANSFORMATION_ID}`,
+        expect.objectContaining({ method: "PUT" })
+      )
+    );
+  });
 });

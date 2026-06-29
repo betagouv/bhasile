@@ -1,7 +1,7 @@
 import z from "zod";
 
 import {
-  blankStringsToUndefined,
+  emptyValuesToUndefined,
   frenchDateToISO,
 } from "@/app/utils/zodCustomFields";
 import {
@@ -39,7 +39,7 @@ export const transformationIdentificationSchema =
     .and(contactsSchema);
 
 export const transformationIdentificationDraftSchema = z.preprocess(
-  blankStringsToUndefined,
+  emptyValuesToUndefined,
   baseTransformationIdentificationSchema
     .partial()
     .and(adresseAdministrativeAutoSaveSchema)
