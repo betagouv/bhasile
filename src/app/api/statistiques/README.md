@@ -46,6 +46,12 @@ Exemple :
 GET /api/statistiques?departements=01,02,03&types=CADA,CPH&operateurs=1,2
 ```
 
+ou en local
+
+```
+curl -s "http://localhost:3000/api/statistiques?departements=01,02,03&types=CADA,CPH&operateurs=1,2" | jq
+```
+
 ## Périmètre
 
 Filtre structures via `findEffectiveStructureVersionsAtDate` (pivot sur `StructureVersion` effective).
