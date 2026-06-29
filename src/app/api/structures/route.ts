@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
   const map = request.nextUrl.searchParams.get("map") === "true";
   const selection = request.nextUrl.searchParams.get("selection") === "true";
   const finalised = request.nextUrl.searchParams.get("finalised") === "true";
+  const isClosed = request.nextUrl.searchParams.get("isClosed") === "true";
 
   const { structures, totalStructures } = await getFullStructures(
     {
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest) {
       operateurs,
       selection,
       finalised,
+      isClosed,
     },
     session?.user as SessionUser | undefined
   );
