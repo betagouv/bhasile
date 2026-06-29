@@ -60,7 +60,7 @@ export const tryFinalizeExpectingBlock = async (page: Page): Promise<void> => {
 };
 
 export const saveProgress = async (page: Page): Promise<void> => {
-  await clickAndWaitForPut(page, TRANSFO_API, "Enregistrer l'avancée");
+  await clickAndWaitForPut(page, TRANSFO_API, "Enregistrer l’avancée");
   await expect(
     page.getByText("Votre avancée a été enregistrée.")
   ).toBeVisible();

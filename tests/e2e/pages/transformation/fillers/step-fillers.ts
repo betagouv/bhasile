@@ -100,9 +100,10 @@ export const fillCreationIdentification = async (
   context: FillContext,
   options: FillOptions = {}
 ): Promise<void> => {
-  await page
-    .locator("#creationDate")
-    .fill(TRANSFORMATION_TEST_VALUES.effectiveDate);
+  await robustFill(
+    page.locator("#effectiveDate"),
+    TRANSFORMATION_TEST_VALUES.effectiveDate
+  );
 
   if (options.withFiliale) {
     // DSFR ToggleSwitch : l'`id` est sur le wrapper, la checkbox est `${id}-input`.
