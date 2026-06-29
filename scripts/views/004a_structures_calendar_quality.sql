@@ -92,7 +92,7 @@ WITH
         FALSE
       ) AS "hasAnyConventionOutsideAnyAutorisation"
     FROM
-      :"SCHEMA"."structures_core" sc
+:"SCHEMA"."structures_core" sc
       LEFT JOIN conventions c ON c."structureId" = sc."id"
       LEFT JOIN autorisations a ON a."structureId" = sc."id"
     GROUP BY
@@ -171,7 +171,7 @@ SELECT
     ELSE FALSE
   END AS "has_issue_subsidized_convention_gt_3y"
 FROM
-  :"SCHEMA"."structures_core" sc
+:"SCHEMA"."structures_core" sc
   INNER JOIN public."Structure" s ON s."id" = sc."id"
   LEFT JOIN actes_administratifs_aggregate aaa ON aaa."id" = sc."id"
   LEFT JOIN public."Evaluation" e ON e."structureId" = sc."id"

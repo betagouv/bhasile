@@ -17,7 +17,7 @@ WITH
       st."fvvTeh",
       st."year"
     FROM
-      :"SCHEMA"."structures_core" sc
+:"SCHEMA"."structures_core" sc
       INNER JOIN public."StructureTypologie" st ON st."structureVersionId" = sc."structure_version_id"
     WHERE
       st."placesAutorisees" IS NOT NULL
@@ -65,7 +65,7 @@ WITH
         0
       ) AS pct_diff_places_adresse
     FROM
-      :"SCHEMA"."structures_core" sc
+:"SCHEMA"."structures_core" sc
       LEFT JOIN structure_typologie_dernier_millesime sdm ON sdm."structureId" = sc."id"
       LEFT JOIN adresses_agregees aa ON aa."structureId" = sc."id"
   ),
@@ -76,7 +76,7 @@ WITH
       MAX(st."lgbt") AS "lgbt_places",
       MAX(st."fvvTeh") AS "fvvteh_places"
     FROM
-      :"SCHEMA"."structures_core" sc
+:"SCHEMA"."structures_core" sc
       INNER JOIN public."StructureTypologie" st ON st."structureVersionId" = sc."structure_version_id"
     GROUP BY
       sc."id"
@@ -91,7 +91,7 @@ WITH
         OR st."pmr" > st."placesAutorisees"
       ) AS "has_issue_specific_places_gt_places_autorisees"
     FROM
-      :"SCHEMA"."structures_core" sc
+:"SCHEMA"."structures_core" sc
       INNER JOIN public."StructureTypologie" st ON st."structureVersionId" = sc."structure_version_id"
     GROUP BY
       sc."id"
@@ -133,7 +133,7 @@ SELECT
   -- Places structure vs addresses: difference > 10%
   COALESCE(pc."pct_diff_places_adresse" > 10, FALSE) AS "has_issue_places_structure_vs_address_diff_gt_10pct"
 FROM
-  :"SCHEMA"."structures_core" sc
+:"SCHEMA"."structures_core" sc
   INNER JOIN public."StructureVersion" sv ON sv."id" = sc."structure_version_id"
   LEFT JOIN structure_typologie_places_max stpm ON stpm."structureId" = sc."id"
   LEFT JOIN specific_places_issues spi ON spi."structureId" = sc."id"
