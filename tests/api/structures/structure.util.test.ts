@@ -36,12 +36,12 @@ const createStructure = (
     actesAdministratifs,
   }) as unknown as StructureDbList;
 
-describe("structure dates from actes administratifs", () => {
+describe("dates de structure issues des actes administratifs", () => {
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  it("returns convention and autorisation dates through dedicated wrappers", () => {
+  it("retourne les dates de convention et d'autorisation via les wrappers dédiés", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-15T00:00:00.000Z"));
     const structure = createStructure([
@@ -106,16 +106,29 @@ const buildLightStructure = (
     ...overrides,
   }) as unknown as StructureListLight;
 
+const fermetureVersion = (overrides: Partial<StructureListLightVersion> = {}) =>
+  buildVersion({
+    id: 20,
+    effectiveDate: new Date("2025-03-10T00:00:00.000Z"),
+    structureVersionTransformationId: 7,
+    structureVersionTransformation: {
+      type: StructureVersionTransformationType.FERMETURE,
+      motif: "Fin de prise en charge",
+      transformation: { form: { status: true } },
+    } as unknown as StructureListLightVersion["structureVersionTransformation"],
+    ...overrides,
+  });
+
 const now = new Date("2026-06-24T00:00:00.000Z");
 
 describe("computeStructureListRow", () => {
-  it("returns null when no current version is resolved", () => {
+  it("retourne null quand aucune version courante n'est résolue", () => {
     expect(computeStructureListRow(buildLightStructure(), undefined, now)).toBe(
       null
     );
   });
 
-  it("derives bati MIXTE, latest places and search values", () => {
+  it("déduit le bâti MIXTE, les dernières places et les valeurs de recherche", () => {
     const version = buildVersion({
       adresses: [
         { repartition: Repartition.COLLECTIF },
@@ -139,7 +152,7 @@ describe("computeStructureListRow", () => {
     );
   });
 
-  it("treats addresses stored as MIXTE (or any mix) as bati MIXTE", () => {
+  it("considère les adresses stockées en MIXTE (ou tout mélange) comme bâti MIXTE", () => {
     const allMixte = buildVersion({
       adresses: [
         { repartition: Repartition.MIXTE },
@@ -165,7 +178,7 @@ describe("computeStructureListRow", () => {
     ).toBe(Repartition.MIXTE);
   });
 
-  it("computes finConvention from the current convention acte, not a scalar", () => {
+  it("calcule finConvention depuis l'acte de convention courant, pas depuis un scalaire", () => {
     const structure = buildLightStructure({
       actesAdministratifs: [
         {
@@ -183,7 +196,7 @@ describe("computeStructureListRow", () => {
     expect(row?.finConvention).toEqual(new Date("2027-12-31T00:00:00.000Z"));
   });
 
-  it("exposes the latest non-null places for bounds even when the newest year is null", () => {
+  it("expose les dernières places non nulles pour les bornes même quand l'année la plus récente est nulle", () => {
     const version = buildVersion({
       structureTypologies: [
         { year: 2025, placesAutorisees: null },
@@ -198,6 +211,74 @@ describe("computeStructureListRow", () => {
 
     expect(row?.placesAutorisees).toBe(null);
     expect(row?.latestNonNullPlacesAutorisees).toBe(30);
+  });
+
+  it("marque une fermeture finalisée comme fermée avec sa date et son motif", () => {
+    // GIVEN
+    const version = fermetureVersion();
+
+    // WHEN
+    const row = computeStructureListRow(
+      buildLightStructure({}, version),
+      version,
+      now
+    );
+
+    // THEN
+    expect(row?.isClosed).toBe(true);
+    expect(row?.fermetureDate).toEqual(new Date("2025-03-10T00:00:00.000Z"));
+    expect(row?.fermetureMotif).toBe("Fin de prise en charge");
+  });
+
+  it("laisse une version courante non-fermeture ouverte avec date et motif null", () => {
+    // GIVEN
+    const version = buildVersion();
+
+    // WHEN
+    const row = computeStructureListRow(
+      buildLightStructure({}, version),
+      version,
+      now
+    );
+
+    // THEN
+    expect(row?.isClosed).toBe(false);
+    expect(row?.fermetureDate).toBe(null);
+    expect(row?.fermetureMotif).toBe(null);
+  });
+
+  it("reste fermée quand la fermeture est la dernière version valide", () => {
+    // GIVEN
+    const versions = [buildVersion(), fermetureVersion()];
+    const structure = buildLightStructure({ structureVersions: versions });
+
+    // WHEN
+    const current = resolveCurrentVersion(structure.structureVersions, now);
+
+    // THEN
+    expect(computeStructureListRow(structure, current, now)?.isClosed).toBe(
+      true
+    );
+  });
+
+  it("est de nouveau ouverte quand une version valide ultérieure remplace la fermeture", () => {
+    // GIVEN
+    const reopen = buildVersion({
+      id: 30,
+      effectiveDate: new Date("2025-09-01T00:00:00.000Z"),
+      structureVersionTransformationId: null,
+      structureVersionTransformation: null,
+    });
+    const versions = [fermetureVersion(), reopen];
+    const structure = buildLightStructure({ structureVersions: versions });
+
+    // WHEN
+    const current = resolveCurrentVersion(structure.structureVersions, now);
+
+    // THEN
+    expect(computeStructureListRow(structure, current, now)?.isClosed).toBe(
+      false
+    );
   });
 });
 
@@ -214,11 +295,11 @@ describe("isBornFromCreation", () => {
       ...overrides,
     });
 
-  it("is true for a validated CREATION effective in the past", () => {
+  it("est vrai pour une CREATION validée prenant effet dans le passé", () => {
     expect(isBornFromCreation([creationVersion()], now)).toBe(true);
   });
 
-  it("is false when the creation form is not validated", () => {
+  it("est faux quand le formulaire de création n'est pas validé", () => {
     const version = creationVersion({
       structureVersionTransformation: {
         type: StructureVersionTransformationType.CREATION,
@@ -228,7 +309,7 @@ describe("isBornFromCreation", () => {
     expect(isBornFromCreation([version], now)).toBe(false);
   });
 
-  it("is false when the creation is effective in the future", () => {
+  it("est faux quand la création prend effet dans le futur", () => {
     const version = creationVersion({
       effectiveDate: new Date("2099-01-01T00:00:00.000Z"),
     });
@@ -273,7 +354,7 @@ const emptyFilters: SearchProps = {
 };
 
 describe("filterStructureRows", () => {
-  it("hides non-visible rows unless includeNonVisible is set", () => {
+  it("masque les lignes non visibles sauf si includeNonVisible est activé", () => {
     const hidden = buildRow({ hasForm: false, bornFromCreation: false });
 
     expect(
@@ -284,7 +365,7 @@ describe("filterStructureRows", () => {
     ).toHaveLength(1);
   });
 
-  it("matches search accent-insensitively", () => {
+  it("filtre la recherche sans tenir compte des accents", () => {
     const row = buildRow({ searchValues: ["Créteil"] });
 
     expect(
@@ -296,7 +377,7 @@ describe("filterStructureRows", () => {
     ).toHaveLength(1);
   });
 
-  it("filters on type, places range and bati", () => {
+  it("filtre sur le type, l'intervalle de places et le bâti", () => {
     const rows = [
       buildRow({ id: 1, type: StructureType.CADA, placesAutorisees: 10 }),
       buildRow({ id: 2, type: StructureType.HUDA, placesAutorisees: 100 }),
@@ -325,7 +406,7 @@ describe("filterStructureRows", () => {
     ).toHaveLength(0);
   });
 
-  it("restricts to finalised rows when requested", () => {
+  it("restreint aux lignes finalisées quand c'est demandé", () => {
     const rows = [
       buildRow({ id: 1, finalised: true }),
       buildRow({ id: 2, finalised: false }),
@@ -339,10 +420,50 @@ describe("filterStructureRows", () => {
       )
     ).toHaveLength(1);
   });
+
+  it("ne garde que les lignes fermées quand isClosed vaut true", () => {
+    // GIVEN
+    const rows = [
+      buildRow({ id: 1, isClosed: false }),
+      buildRow({ id: 2, isClosed: true }),
+    ];
+
+    // WHEN
+    const filtered = filterStructureRows(
+      rows,
+      { ...emptyFilters, isClosed: true },
+      { includeNonVisible: false }
+    );
+
+    // THEN
+    expect(filtered.map((row) => row.id)).toEqual([2]);
+  });
+
+  it("ne garde que les lignes ouvertes quand isClosed vaut false ou absent", () => {
+    // GIVEN
+    const rows = [
+      buildRow({ id: 1, isClosed: false }),
+      buildRow({ id: 2, isClosed: true }),
+    ];
+
+    // WHEN / THEN
+    expect(
+      filterStructureRows(
+        rows,
+        { ...emptyFilters, isClosed: false },
+        { includeNonVisible: false }
+      ).map((row) => row.id)
+    ).toEqual([1]);
+    expect(
+      filterStructureRows(rows, emptyFilters, {
+        includeNonVisible: false,
+      }).map((row) => row.id)
+    ).toEqual([1]);
+  });
 });
 
 describe("sortStructureRows", () => {
-  it("sorts enum types alphabetically (no longer by declaration order)", () => {
+  it("trie les types enum par ordre alphabétique (et non plus par ordre de déclaration)", () => {
     const rows = [
       buildRow({ id: 1, codeBhasile: "A", type: StructureType.HUDA }),
       buildRow({ id: 2, codeBhasile: "B", type: StructureType.CADA }),
@@ -358,7 +479,7 @@ describe("sortStructureRows", () => {
     ]);
   });
 
-  it("places nulls last on asc and first on desc", () => {
+  it("place les valeurs nulles en dernier en asc et en premier en desc", () => {
     const rows = [
       buildRow({ id: 1, codeBhasile: "A", placesAutorisees: 10 }),
       buildRow({ id: 2, codeBhasile: "B", placesAutorisees: null }),
@@ -377,7 +498,7 @@ describe("sortStructureRows", () => {
     ).toEqual([null, 10, 5]);
   });
 
-  it("breaks ties on codeBhasile then id", () => {
+  it("départage les égalités sur codeBhasile puis id", () => {
     const rows = [
       buildRow({ id: 2, codeBhasile: "B", departementAdministratif: "75" }),
       buildRow({ id: 1, codeBhasile: "A", departementAdministratif: "75" }),
@@ -391,87 +512,20 @@ describe("sortStructureRows", () => {
   });
 });
 
-const fermetureVersion = (overrides: Partial<StructureListLightVersion> = {}) =>
-  buildVersion({
-    id: 20,
-    effectiveDate: new Date("2025-03-10T00:00:00.000Z"),
-    structureVersionTransformationId: 7,
-    structureVersionTransformation: {
-      type: StructureVersionTransformationType.FERMETURE,
-      motif: "Fin de prise en charge",
-      transformation: { form: { status: true } },
-    } as unknown as StructureListLightVersion["structureVersionTransformation"],
-    ...overrides,
-  });
-
-describe("computeStructureListRow closure derivation", () => {
-  it("flags a finalised fermeture as closed with its date and motif", () => {
-    const version = fermetureVersion();
-    const row = computeStructureListRow(
-      buildLightStructure({}, version),
-      version,
-      now
-    );
-
-    expect(row?.isClosed).toBe(true);
-    expect(row?.fermetureDate).toEqual(new Date("2025-03-10T00:00:00.000Z"));
-    expect(row?.fermetureMotif).toBe("Fin de prise en charge");
-  });
-
-  it("leaves a non-fermeture current version open with null date and motif", () => {
-    const version = buildVersion();
-    const row = computeStructureListRow(
-      buildLightStructure({}, version),
-      version,
-      now
-    );
-
-    expect(row?.isClosed).toBe(false);
-    expect(row?.fermetureDate).toBe(null);
-    expect(row?.fermetureMotif).toBe(null);
-  });
-});
-
-describe("filterStructureRows closed toggle", () => {
-  const rows = [
-    buildRow({ id: 1, isClosed: false }),
-    buildRow({ id: 2, isClosed: true }),
-  ];
-
-  it("keeps only closed rows when isClosed is true", () => {
-    const filtered = filterStructureRows(
-      rows,
-      { ...emptyFilters, isClosed: true },
-      { includeNonVisible: false }
-    );
-    expect(filtered.map((row) => row.id)).toEqual([2]);
-  });
-
-  it("keeps only open rows when isClosed is false or absent", () => {
-    expect(
-      filterStructureRows(
-        rows,
-        { ...emptyFilters, isClosed: false },
-        { includeNonVisible: false }
-      ).map((row) => row.id)
-    ).toEqual([1]);
-    expect(
-      filterStructureRows(rows, emptyFilters, {
-        includeNonVisible: false,
-      }).map((row) => row.id)
-    ).toEqual([1]);
-  });
-});
-
 describe("getFermetureHistory", () => {
-  it("builds a single FERMETURE event for a closed row", () => {
+  it("construit un unique évènement FERMETURE pour une ligne fermée", () => {
+    // GIVEN
     const row = buildRow({
       isClosed: true,
       fermetureDate: new Date("2025-03-10T00:00:00.000Z"),
       fermetureMotif: "Fin de prise en charge",
     });
 
-    expect(getFermetureHistory(row)).toEqual([
+    // WHEN
+    const history = getFermetureHistory(row);
+
+    // THEN
+    expect(history).toEqual([
       {
         kind: "FERMETURE",
         date: "2025-03-10T00:00:00.000Z",
@@ -481,35 +535,11 @@ describe("getFermetureHistory", () => {
     ]);
   });
 
-  it("returns no events for an open row", () => {
-    expect(getFermetureHistory(buildRow({ isClosed: false }))).toEqual([]);
-  });
-});
+  it("ne retourne aucun évènement pour une ligne ouverte", () => {
+    // GIVEN
+    const row = buildRow({ isClosed: false });
 
-describe("closed means currently-closed, not ever-closed", () => {
-  it("is closed when the fermeture is the latest valid version", () => {
-    const versions = [buildVersion(), fermetureVersion()];
-    const structure = buildLightStructure({ structureVersions: versions });
-    const current = resolveCurrentVersion(structure.structureVersions, now);
-
-    expect(computeStructureListRow(structure, current, now)?.isClosed).toBe(
-      true
-    );
-  });
-
-  it("is open again when a later valid version supersedes the fermeture", () => {
-    const reopen = buildVersion({
-      id: 30,
-      effectiveDate: new Date("2025-09-01T00:00:00.000Z"),
-      structureVersionTransformationId: null,
-      structureVersionTransformation: null,
-    });
-    const versions = [fermetureVersion(), reopen];
-    const structure = buildLightStructure({ structureVersions: versions });
-    const current = resolveCurrentVersion(structure.structureVersions, now);
-
-    expect(computeStructureListRow(structure, current, now)?.isClosed).toBe(
-      false
-    );
+    // WHEN / THEN
+    expect(getFermetureHistory(row)).toEqual([]);
   });
 });
