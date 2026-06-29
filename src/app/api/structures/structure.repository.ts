@@ -135,7 +135,7 @@ const writeToCurrentVersion = async (
   const versionPayload: StructureVersionApiType = {
     id: currentVersion.id,
     structureId: structure.id,
-    effectiveDate: currentVersion.effectiveDate.toISOString(),
+    effectiveDate: currentVersion.effectiveDate?.toISOString(),
     ...versionedData,
   };
 

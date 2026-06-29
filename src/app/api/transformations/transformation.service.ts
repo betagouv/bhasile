@@ -43,7 +43,7 @@ const dbTransformationToApiRead = (
         const structureVersion = structureVersionTransformation.structureVersion;
         const sourceStructure = structureVersion?.structure;
         const predecessor =
-          sourceStructure && structureVersion
+          sourceStructure && structureVersion?.effectiveDate
             ? resolvePredecessor(
                 sourceStructure.structureVersions,
                 structureVersion.effectiveDate
