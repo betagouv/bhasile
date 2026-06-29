@@ -28,9 +28,7 @@ const finalisationSuccessModal = createModal({
 
 export const StructureHeader = (): ReactElement | null => {
   const { structure } = useStructureContext();
-
   const isStructureFinalisee = structure.isFinalised;
-
   const router = useRouter();
 
   const { handleFinalisation, isStructureReadyToFinalise } =
@@ -46,6 +44,10 @@ export const StructureHeader = (): ReactElement | null => {
     `/structures/${structure?.id}/finalisation`
   );
 
+  if (!structure) {
+    return null;
+  }
+
   const {
     codeBhasile,
     type,
@@ -55,15 +57,13 @@ export const StructureHeader = (): ReactElement | null => {
     departementAdministratif,
   } = structure;
 
-  return structure ? (
+  return (
     <>
       <div
-        className={`sticky top-0 z-50 bg-lifted-grey transition-transform duration-300 ease-in-out ${
-          isHidden ? "-translate-y-full" : "translate-y-0"
-        }`}
+        className="sticky top-0 z-50 bg-lifted-grey shadow-sm"
         ref={headerRef}
       >
-        <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center">
+        <div className="flex border-b border-b-border-default-grey px-6 py-3 items-center relative z-20">
           <Link
             href="/structures"
             className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
@@ -78,14 +78,14 @@ export const StructureHeader = (): ReactElement | null => {
             <h3 className="text-title-blue-france fr-h6 mb-0 flex items-center gap-4">
               <span className="flex items-center gap-2">
                 <strong>{codeBhasile}</strong>
-                {nom ? (
+                {nom && (
                   <>
                     –
                     <span className="mb-0 text-title-grey text-lg italic font-normal">
                       {nom}
                     </span>
                   </>
-                ) : null}
+                )}
               </span>
               <span className="flex items-center gap-2">
                 <Badge type="purple">{type}</Badge>{" "}
@@ -98,74 +98,86 @@ export const StructureHeader = (): ReactElement | null => {
           </div>
           <div className="grow" />
           {isFinalisationPath ? (
-            <>
-              <div className="flex items-center gap-3">
-                <AutoSaveStatus onStatusClick={() => autoSaveModal.open()} />
-
-                <Button
-                  disabled={!isStructureReadyToFinalise}
-                  onClick={async () => {
-                    await handleFinalisation();
-                    finalisationSuccessModal.open();
-                  }}
-                >
-                  Finaliser la création
-                </Button>
-              </div>
-            </>
+            <div className="flex items-center gap-3">
+              <AutoSaveStatus onStatusClick={() => autoSaveModal.open()} />
+              <Button
+                disabled={!isStructureReadyToFinalise}
+                onClick={async () => {
+                  await handleFinalisation();
+                  finalisationSuccessModal.open();
+                }}
+              >
+                Finaliser la création
+              </Button>
+            </div>
           ) : (
             <StructureMenu structureId={structure.id} />
           )}
         </div>
-        {isRootPath && (
-          <NavigationMenu
-            menuElements={[
-              {
-                label: "Description",
-                section: "#description",
-                isDisplayed: true,
-              },
-              {
-                label: "Calendrier",
-                section: "#calendrier",
-                isDisplayed: true,
-              },
-              {
-                label: "Type de places",
-                section: "#places",
-                isDisplayed: true,
-              },
-              {
-                label: "Finances",
-                section: "#finances",
-                isDisplayed:
-                  !!structure.budgets && structure.budgets?.length > 0,
-              },
-              {
-                label: "Contrôle qualité",
-                section: "#controle",
-                isDisplayed: true,
-              },
-              { label: "Activité", section: "#activite", isDisplayed: false },
-              {
-                label: "Actes administratifs",
-                section: "#actes-administratifs",
-                isDisplayed: true,
-              },
-              { label: "Notes", section: "#notes", isDisplayed: true },
-            ]}
-          />
-        )}
-        {isRootPath && !isStructureFinalisee && <FinalisationHeader />}
+
+        <div
+          className={`grid transition-all duration-300 ease-in-out relative z-10 ${
+            isHidden
+              ? "opacity-0 pointer-events-none"
+              : "opacity-100 pointer-events-auto"
+          }`}
+          style={{
+            gridTemplateRows: isHidden ? "0fr" : "1fr",
+          }}
+        >
+          <div className="overflow-hidden">
+            {isRootPath && (
+              <NavigationMenu
+                menuElements={[
+                  {
+                    label: "Description",
+                    section: "#description",
+                    isDisplayed: true,
+                  },
+                  {
+                    label: "Calendrier",
+                    section: "#calendrier",
+                    isDisplayed: true,
+                  },
+                  {
+                    label: "Type de places",
+                    section: "#places",
+                    isDisplayed: true,
+                  },
+                  {
+                    label: "Finances",
+                    section: "#finances",
+                    isDisplayed:
+                      !!structure.budgets && structure.budgets?.length > 0,
+                  },
+                  {
+                    label: "Contrôle qualité",
+                    section: "#controle",
+                    isDisplayed: true,
+                  },
+                  {
+                    label: "Activité",
+                    section: "#activite",
+                    isDisplayed: false,
+                  },
+                  {
+                    label: "Actes administratifs",
+                    section: "#actes-administratifs",
+                    isDisplayed: true,
+                  },
+                  { label: "Notes", section: "#notes", isDisplayed: true },
+                ]}
+              />
+            )}
+            {isRootPath && !isStructureFinalisee && <FinalisationHeader />}
+          </div>
+        </div>
       </div>
+
       <autoSaveModal.Component
         title="Votre progression est enregistrée automatiquement"
         buttons={[
-          {
-            doClosesModal: true,
-            children: "J’ai compris",
-            type: "button",
-          },
+          { doClosesModal: true, children: "J’ai compris", type: "button" },
         ]}
       >
         <p>
@@ -173,6 +185,7 @@ export const StructureHeader = (): ReactElement | null => {
           que vous avez saisies.
         </p>
       </autoSaveModal.Component>
+
       <finalisationSuccessModal.Component
         title="Vous avez terminé la création de cette structure !"
         buttons={[
@@ -192,5 +205,5 @@ export const StructureHeader = (): ReactElement | null => {
         </p>
       </finalisationSuccessModal.Component>
     </>
-  ) : null;
+  );
 };
