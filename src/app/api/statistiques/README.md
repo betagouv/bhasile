@@ -1,7 +1,6 @@
 # API `GET /api/statistiques`
 
 Statistiques agrégées du parc hébergement.
-|
 
 ## Onglets
 
@@ -19,7 +18,7 @@ Le service est découpé par "bloc fonctionnel" avec un socle commun
 
 ```
 route.ts -> statistique.service.ts
-        ├── shared/ (contexte BDD, typologie.utils)
+        ├── statistiques.repository.ts | statistiques.utils.ts
         ├── structures/ | places/ | finance/ | controle-qualite/ | activite/
 ```
 
@@ -49,11 +48,9 @@ Filtre structures via `findEffectiveStructureVersionsAtDate` (pivot sur `Structu
 
 **Structures actives (indicateurs globaux)** : dernière version à date sans bloc `FERMETURE`.
 
-**Structures actives par année (`yearContext`)** : une structure fermée en cours d'année N reste comptée pour N et les années antérieures, mais pas au-delà. Une structure est active sur une période si `openingDate ≤ fin de période` et (`closureDate` absente ou `closureDate ≥ début de période`).
+**Activité par période (`activityContext`)** : dates d'ouverture/fermeture + index `activeStructureIdsByPeriod` (mois, trimestre, année). Une structure fermée le 05/05 compte sur janvier à mai, pas sur juin.
 
-**`byMonth` / `byTrimester` (contrôle qualité)** : même règle sur le mois ou le trimestre concerné (au moins un jour d'activité sur la période pour le dénominateur des indicateurs type « structures sans déclaration EIG »).
-
-Le mapping `yearContext.structuresActivesByYear` est construit à la racine du contexte et réutilisé par les blocs `byYear`.
+Index construit une fois dans `buildStatistiquesContext` (années typologies + cycle de vie) et complété dans contrôle qualité (mois/trimestres/années des EIG et évaluations). Les blocs lisent via `getActiveStructureIds(activityContext, granularity, periodKey)`.
 
 **Avec typologie** (≥1 `StructureTypologie`) : requis pour agrégats places, répartitions type/bâti, contrôle qualité. `structures.totalStructures` = structures actives (avec ou sans typologie).
 

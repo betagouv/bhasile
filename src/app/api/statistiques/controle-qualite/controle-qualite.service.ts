@@ -6,6 +6,7 @@ import {
   computeTotalPlaces,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
+  indexActiveStructureIdsFromDates,
 } from "../statistiques.utils";
 import { findEigs, findEvaluations } from "./controle-qualite.repository";
 import { computeControleQualiteStatistiques } from "./controle-qualite-evaluation.util";
@@ -14,7 +15,7 @@ export const getControleQualiteStatistiques = async (
   context: StatistiquesContext,
   aggregation: NumericAggregation
 ): Promise<StatistiqueApiRead["controleQualite"]> => {
-  const { structures, yearContext, typologies, dnaLinks, dnaCodes } = context;
+  const { structures, activityContext, typologies, dnaLinks, dnaCodes } = context;
   const typologieMap = getLastTypologiePerStructure(typologies);
   const structuresWithTypologie = filterStructuresWithTypologie(
     structures,
@@ -23,8 +24,17 @@ export const getControleQualiteStatistiques = async (
 
   const [eigs, evaluations] = await Promise.all([
     findEigs(dnaCodes),
-    findEvaluations(yearContext.allStructureIds),
+    findEvaluations(activityContext.allStructureIds),
   ]);
+
+  indexActiveStructureIdsFromDates(
+    activityContext,
+    [
+      ...eigs.map((eig) => eig.evenementDate),
+      ...evaluations.map((evaluation) => evaluation.date),
+    ],
+    ["month", "trimester", "year"]
+  );
 
   return computeControleQualiteStatistiques(
     structuresWithTypologie.map((structure) => structure.id),
@@ -33,6 +43,6 @@ export const getControleQualiteStatistiques = async (
     evaluations,
     dnaLinks,
     aggregation,
-    yearContext
+    activityContext
   );
 };

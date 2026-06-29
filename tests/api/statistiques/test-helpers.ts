@@ -1,24 +1,22 @@
 import type { StatistiquesContext } from "@/app/api/statistiques/statistiques.db.type";
-import { buildStatistiquesYearContext } from "@/app/api/statistiques/statistiques.utils";
+import { buildStatistiquesActivityContext } from "@/app/api/statistiques/statistiques.utils";
 
-type BuildTestYearContextOptions = {
-  years?: number[];
+type BuildTestActivityContextOptions = {
   openingDate?: Date;
   closureDates?: Map<number, Date | null>;
 };
 
-export const buildTestYearContext = (
+export const buildTestActivityContext = (
   structureIds: number[],
-  options: BuildTestYearContextOptions = {}
-): StatistiquesContext["yearContext"] => {
+  options: BuildTestActivityContextOptions = {}
+): StatistiquesContext["activityContext"] => {
   const openingDate = options.openingDate ?? new Date("2000-01-01T00:00:00.000Z");
   const closureDates =
     options.closureDates ??
     new Map(structureIds.map((structureId) => [structureId, null]));
 
-  return buildStatistiquesYearContext(
+  return buildStatistiquesActivityContext(
     structureIds,
-    options.years ?? [],
     new Map(structureIds.map((structureId) => [structureId, openingDate])),
     closureDates
   );
@@ -32,7 +30,7 @@ export const buildTestStatistiquesContext = (
     Partial<
       Pick<
         StatistiquesContext,
-        "cpomLinks" | "dnaLinks" | "dnaCodes" | "allStructures" | "yearContext"
+        "cpomLinks" | "dnaLinks" | "dnaCodes" | "allStructures" | "activityContext"
       >
     >
 ): StatistiquesContext => {
@@ -43,11 +41,8 @@ export const buildTestStatistiquesContext = (
   return {
     structures,
     allStructures,
-    yearContext:
-      partial.yearContext ??
-      buildTestYearContext(allStructureIds, {
-        years: [...new Set(partial.typologies.map((typologie) => typologie.year))],
-      }),
+    activityContext:
+      partial.activityContext ?? buildTestActivityContext(allStructureIds),
     typologies: partial.typologies,
     adresses: partial.adresses,
     departements: partial.departements,

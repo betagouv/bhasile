@@ -22,6 +22,6 @@ Recalcul sur **toutes** données période - pas d'agrégation front.
 
 Clés : `date` (mois), `year`+`trimester`, `year`.
 
-**Périmètre structures** : pour chaque période, structures actives au moins un jour sur le mois/trimestre/année (`yearContext`, pas le périmètre ouvert global). Ex. structure fermée le 01/02 compte en février mais pas en mars.
+**Périmètre structures** : lookup dans `activityContext.activeStructureIdsByPeriod` (indexé avant calcul). Ex. fermée le 05/05 → compte jan–mai, pas juin.
 
 Indicateurs : déclarations EIG manquantes, comptes EIG, notes évaluations (moyenne/médiane globale période).

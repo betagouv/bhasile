@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { computeControleQualiteStatistiques } from "@/app/api/statistiques/controle-qualite/controle-qualite-evaluation.util";
 
-import { buildTestYearContext } from "./test-helpers";
+import { buildTestActivityContext } from "./test-helpers";
 
 vi.mock("@/constants", async () => {
   const actual =
@@ -55,7 +55,7 @@ describe("quality control statistics util", () => {
       ],
       [],
       "moyenne",
-      buildTestYearContext([1])
+      buildTestActivityContext([1])
     );
 
     const trimester2025Q1 = result.byTrimester.find(
@@ -106,7 +106,7 @@ describe("quality control statistics util", () => {
       [],
       dnaLinks,
       "moyenne",
-      buildTestYearContext([1])
+      buildTestActivityContext([1])
     );
 
     const january = result.byMonth.find(
@@ -141,7 +141,7 @@ describe("quality control statistics util", () => {
       [],
       dnaLinks,
       "moyenne",
-      buildTestYearContext([1, 2, 3])
+      buildTestActivityContext([1, 2, 3])
     );
 
     const march = result.byMonth.find(
@@ -154,7 +154,7 @@ describe("quality control statistics util", () => {
   });
 
   it("should use period-specific structure perimeter for month and trimester", () => {
-    const yearContext = buildTestYearContext([1, 2, 3], {
+    const activityContext = buildTestActivityContext([1, 2, 3], {
       closureDates: new Map([
         [1, null],
         [2, null],
@@ -186,7 +186,7 @@ describe("quality control statistics util", () => {
       ],
       dnaLinks,
       "moyenne",
-      yearContext
+      activityContext
     );
 
     const february = result.byMonth.find(
@@ -244,7 +244,7 @@ describe("quality control statistics util", () => {
       ],
       [],
       "mediane",
-      buildTestYearContext([1])
+      buildTestActivityContext([1])
     );
 
     expect(result.byMonth[0]?.noteGenerale).toBe(4);

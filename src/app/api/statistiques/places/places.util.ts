@@ -11,11 +11,11 @@ import type {
   StatistiqueDbTypologie,
   StatistiqueDbTypologieValues,
   StatistiquesContext,
-  StatistiquesYearContext,
+  StatistiquesActivityContext,
 } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
-  filterStructuresForYear,
+  filterStructuresForPeriod,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
@@ -132,16 +132,17 @@ const computePlacesIndicators = (
 
 const computeByYearStats = (
   allStructures: StatistiqueDbStructure[],
-  yearContext: StatistiquesYearContext,
+  activityContext: StatistiquesActivityContext,
   typologies: StatistiqueDbTypologie[],
   adresses: StatistiqueDbAdresse[],
   departements: StatistiqueDbDepartement[]
 ): PlacesByYearStat[] =>
   getTypologieYears(typologies).map((year) => {
-    const structuresForYear = filterStructuresForYear(
+    const structuresForYear = filterStructuresForPeriod(
       allStructures,
-      year,
-      yearContext
+      "year",
+      String(year),
+      activityContext
     );
 
     return {
@@ -158,7 +159,7 @@ const computeByYearStats = (
 export const computePlacesStatistiques = (
   context: StatistiquesContext
 ): StatistiqueApiRead["places"] => {
-  const { structures, allStructures, yearContext, typologies, adresses, departements } =
+  const { structures, allStructures, activityContext, typologies, adresses, departements } =
     context;
   const typologieMap = getLastTypologiePerStructure(typologies);
 
@@ -171,7 +172,7 @@ export const computePlacesStatistiques = (
     ),
     byYear: computeByYearStats(
       allStructures,
-      yearContext,
+      activityContext,
       typologies,
       adresses,
       departements

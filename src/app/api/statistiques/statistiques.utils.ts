@@ -5,12 +5,17 @@ import type {
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
   StatistiqueDbTypologieValues,
-  StatistiquesYearContext,
+  StatistiquesActivityContext,
+  StatistiquesPeriodGranularity,
 } from "./statistiques.db.type";
 
-export const getYearFromDate = (
-  date: Date | string | null | undefined
-): number | null => {
+const emptyActiveStructureIdsByPeriod = (): StatistiquesActivityContext["activeStructureIdsByPeriod"] => ({
+  month: new Map(),
+  trimester: new Map(),
+  year: new Map(),
+});
+
+const yearFromDate = (date: Date | string | null | undefined): number | null => {
   if (date == null) {
     return null;
   }
@@ -55,18 +60,19 @@ export const buildClosureDateByStructureId = (
   return closureDateByStructureId;
 };
 
-export const isStructureActiveInPeriod = (
+const isStructureActiveInPeriod = (
   structureId: number,
   periodStart: Date,
   periodEnd: Date,
-  yearContext: StatistiquesYearContext
+  activityContext: StatistiquesActivityContext
 ): boolean => {
-  const openingDate = yearContext.openingDateByStructureId.get(structureId);
+  const openingDate = activityContext.openingDateByStructureId.get(structureId);
   if (openingDate != null && openingDate >= periodEnd) {
     return false;
   }
 
-  const closureDate = yearContext.closureDateByStructureId.get(structureId) ?? null;
+  const closureDate =
+    activityContext.closureDateByStructureId.get(structureId) ?? null;
   if (closureDate != null && closureDate < periodStart) {
     return false;
   }
@@ -74,14 +80,28 @@ export const isStructureActiveInPeriod = (
   return true;
 };
 
-export const getYearPeriodBounds = (year: number): { start: Date; end: Date } => ({
-  start: new Date(Date.UTC(year, 0, 1)),
-  end: new Date(Date.UTC(year + 1, 0, 1)),
-});
+export const toMonthKey = (date: Date): string =>
+  date.toISOString().slice(0, 7);
 
-export const getMonthPeriodBounds = (
-  monthKey: string
-): { start: Date; end: Date } => {
+export const toYearKey = (date: Date): string => date.toISOString().slice(0, 4);
+
+export const toTrimesterKey = (date: Date): string => {
+  const month = Number(date.toISOString().slice(5, 7));
+  const year = date.toISOString().slice(0, 4);
+  return `${year}-Q${Math.ceil(month / 3)}`;
+};
+
+export const parseTrimesterKey = (
+  trimesterKey: string
+): { year: number; trimester: number } => {
+  const [year, trimesterPart] = trimesterKey.split("-Q");
+  return { year: Number(year), trimester: Number(trimesterPart) };
+};
+
+export const monthKeyToDate = (monthKey: string): Date =>
+  new Date(`${monthKey}-01`);
+
+const getMonthPeriodBounds = (monthKey: string): { start: Date; end: Date } => {
   const [year, month] = monthKey.split("-").map(Number);
   return {
     start: new Date(Date.UTC(year, month - 1, 1)),
@@ -89,7 +109,7 @@ export const getMonthPeriodBounds = (
   };
 };
 
-export const getTrimesterPeriodBounds = (
+const getTrimesterPeriodBounds = (
   year: number,
   trimester: number
 ): { start: Date; end: Date } => {
@@ -100,75 +120,39 @@ export const getTrimesterPeriodBounds = (
   };
 };
 
-export const isStructureActiveInYear = (
-  structureId: number,
-  year: number,
-  yearContext: StatistiquesYearContext
-): boolean => {
-  const { start, end } = getYearPeriodBounds(year);
-  return isStructureActiveInPeriod(structureId, start, end, yearContext);
-};
-
-export const collectCandidateYears = (
-  structureIds: number[],
-  typologieYears: number[],
-  openingDateByStructureId: Map<number, Date>,
-  closureDateByStructureId: Map<number, Date | null>,
-  referenceYear: number
-): number[] => {
-  const years = new Set(typologieYears);
-
-  for (const structureId of structureIds) {
-    const openingYear =
-      getYearFromDate(openingDateByStructureId.get(structureId)) ??
-      referenceYear;
-    const closureYear =
-      getYearFromDate(closureDateByStructureId.get(structureId) ?? null) ??
-      referenceYear;
-    const maxYear = Math.max(openingYear, closureYear, referenceYear);
-
-    for (let year = Math.min(openingYear, closureYear); year <= maxYear; year += 1) {
-      years.add(year);
+export const getPeriodBounds = (
+  granularity: StatistiquesPeriodGranularity,
+  periodKey: string
+): { start: Date; end: Date } => {
+  switch (granularity) {
+    case "month":
+      return getMonthPeriodBounds(periodKey);
+    case "trimester": {
+      const { year, trimester } = parseTrimesterKey(periodKey);
+      return getTrimesterPeriodBounds(year, trimester);
     }
+    case "year":
+      return {
+        start: new Date(Date.UTC(Number(periodKey), 0, 1)),
+        end: new Date(Date.UTC(Number(periodKey) + 1, 0, 1)),
+      };
   }
-
-  return [...years].sort((yearA, yearB) => yearA - yearB);
 };
 
-export const buildStatistiquesYearContext = (
-  structureIds: number[],
-  years: number[],
-  openingDateByStructureId: Map<number, Date>,
-  closureDateByStructureId: Map<number, Date | null>
-): StatistiquesYearContext => {
-  const yearContext: StatistiquesYearContext = {
-    allStructureIds: structureIds,
-    openingDateByStructureId,
-    closureDateByStructureId,
-    structuresActivesByYear: new Map(),
-  };
-
-  for (const year of years) {
-    getActiveStructureIdsForYear(yearContext, year);
-  }
-
-  return yearContext;
-};
-
-export const getActiveStructureIdsForPeriod = (
-  yearContext: StatistiquesYearContext,
+const computeActiveStructureIdsForBounds = (
+  activityContext: StatistiquesActivityContext,
   periodStart: Date,
   periodEnd: Date
 ): Set<number> => {
   const activeStructureIds = new Set<number>();
 
-  for (const structureId of yearContext.allStructureIds) {
+  for (const structureId of activityContext.allStructureIds) {
     if (
       isStructureActiveInPeriod(
         structureId,
         periodStart,
         periodEnd,
-        yearContext
+        activityContext
       )
     ) {
       activeStructureIds.add(structureId);
@@ -178,33 +162,151 @@ export const getActiveStructureIdsForPeriod = (
   return activeStructureIds;
 };
 
-export const getActiveStructureIdsForYear = (
-  yearContext: StatistiquesYearContext,
-  year: number
+export const indexActiveStructureIds = (
+  activityContext: StatistiquesActivityContext,
+  granularity: StatistiquesPeriodGranularity,
+  periodKeys: Iterable<string>
+): void => {
+  const index = activityContext.activeStructureIdsByPeriod[granularity];
+
+  for (const periodKey of periodKeys) {
+    if (index.has(periodKey)) {
+      continue;
+    }
+
+    const { start, end } = getPeriodBounds(granularity, periodKey);
+    index.set(
+      periodKey,
+      computeActiveStructureIdsForBounds(activityContext, start, end)
+    );
+  }
+};
+
+export const getActiveStructureIds = (
+  activityContext: StatistiquesActivityContext,
+  granularity: StatistiquesPeriodGranularity,
+  periodKey: string
 ): Set<number> => {
-  const cached = yearContext.structuresActivesByYear.get(year);
+  const cached = activityContext.activeStructureIdsByPeriod[granularity].get(
+    periodKey
+  );
   if (cached) {
     return cached;
   }
 
-  const { start, end } = getYearPeriodBounds(year);
-  const activeStructureIds = getActiveStructureIdsForPeriod(
-    yearContext,
-    start,
-    end
-  );
-
-  yearContext.structuresActivesByYear.set(year, activeStructureIds);
-  return activeStructureIds;
+  indexActiveStructureIds(activityContext, granularity, [periodKey]);
+  return activityContext.activeStructureIdsByPeriod[granularity].get(
+    periodKey
+  )!;
 };
 
-export const filterStructuresForYear = (
+const collectActivityYearKeys = (
+  structureIds: number[],
+  typologieYears: number[],
+  openingDateByStructureId: Map<number, Date>,
+  closureDateByStructureId: Map<number, Date | null>,
+  referenceYear: number
+): string[] => {
+  const years = new Set(typologieYears);
+
+  for (const structureId of structureIds) {
+    const openingYear =
+      yearFromDate(openingDateByStructureId.get(structureId)) ?? referenceYear;
+    const closureYear =
+      yearFromDate(closureDateByStructureId.get(structureId) ?? null) ??
+      referenceYear;
+    const maxYear = Math.max(openingYear, closureYear, referenceYear);
+
+    for (
+      let year = Math.min(openingYear, closureYear);
+      year <= maxYear;
+      year += 1
+    ) {
+      years.add(year);
+    }
+  }
+
+  return [...years].sort((yearA, yearB) => yearA - yearB).map(String);
+};
+
+export const indexActiveStructureIdsFromDates = (
+  activityContext: StatistiquesActivityContext,
+  dates: (Date | string | null | undefined)[],
+  granularities: StatistiquesPeriodGranularity[]
+): void => {
+  const keys: Record<StatistiquesPeriodGranularity, Set<string>> = {
+    month: new Set(),
+    trimester: new Set(),
+    year: new Set(),
+  };
+
+  for (const date of dates) {
+    if (date == null) {
+      continue;
+    }
+    const parsedDate = new Date(date);
+    if (granularities.includes("month")) {
+      keys.month.add(toMonthKey(parsedDate));
+    }
+    if (granularities.includes("trimester")) {
+      keys.trimester.add(toTrimesterKey(parsedDate));
+    }
+    if (granularities.includes("year")) {
+      keys.year.add(toYearKey(parsedDate));
+    }
+  }
+
+  for (const granularity of granularities) {
+    indexActiveStructureIds(
+      activityContext,
+      granularity,
+      [...keys[granularity]].sort()
+    );
+  }
+};
+
+export const filterStructuresForPeriod = (
   structures: StatistiqueDbStructure[],
-  year: number,
-  yearContext: StatistiquesYearContext
+  granularity: StatistiquesPeriodGranularity,
+  periodKey: string,
+  activityContext: StatistiquesActivityContext
 ): StatistiqueDbStructure[] => {
-  const activeStructureIds = getActiveStructureIdsForYear(yearContext, year);
+  const activeStructureIds = getActiveStructureIds(
+    activityContext,
+    granularity,
+    periodKey
+  );
   return structures.filter((structure) => activeStructureIds.has(structure.id));
+};
+
+export const buildStatistiquesActivityContext = (
+  structureIds: number[],
+  openingDateByStructureId: Map<number, Date>,
+  closureDateByStructureId: Map<number, Date | null>
+): StatistiquesActivityContext => ({
+  allStructureIds: structureIds,
+  openingDateByStructureId,
+  closureDateByStructureId,
+  activeStructureIdsByPeriod: emptyActiveStructureIdsByPeriod(),
+});
+
+export const indexTypologieActivityYears = (
+  activityContext: StatistiquesActivityContext,
+  structureIds: number[],
+  typologieYears: number[],
+  referenceYear: number
+): void => {
+  indexActiveStructureIds(
+    activityContext,
+    "year",
+    collectActivityYearKeys(
+      structureIds,
+      typologieYears,
+      activityContext.openingDateByStructureId,
+      activityContext.closureDateByStructureId,
+      referenceYear
+    )
+  );
 };
 
 const TYPOLOGIE_AGGREGATE_FIELDS = [
@@ -301,26 +403,3 @@ export const computeTotalPlaces = (
       (structure) => typologieMap.get(structure.id)?.placesAutorisees
     )
   ) ?? 0;
-
-// TODO: réemployer ces utils temporels pour les indicateurs RMU à implémenter.
-
-export const toMonthKey = (date: Date): string =>
-  date.toISOString().slice(0, 7);
-
-export const toYearKey = (date: Date): string => date.toISOString().slice(0, 4);
-
-export const toTrimesterKey = (date: Date): string => {
-  const month = Number(date.toISOString().slice(5, 7));
-  const year = date.toISOString().slice(0, 4);
-  return `${year}-Q${Math.ceil(month / 3)}`;
-};
-
-export const parseTrimesterKey = (
-  trimesterKey: string
-): { year: number; trimester: number } => {
-  const [year, trimesterPart] = trimesterKey.split("-Q");
-  return { year: Number(year), trimester: Number(trimesterPart) };
-};
-
-export const monthKeyToDate = (monthKey: string): Date =>
-  new Date(`${monthKey}-01`);

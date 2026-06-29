@@ -152,11 +152,17 @@ export type StatistiqueDbCpomStructure = Prisma.CpomStructureGetPayload<{
   };
 }>;
 
-export type StatistiquesYearContext = {
+/** Dates d'ouverture/fermeture + index des structures actives par période. */
+export type StatistiquesPeriodGranularity = "month" | "trimester" | "year";
+
+export type StatistiquesActivityContext = {
   allStructureIds: number[];
   openingDateByStructureId: Map<number, Date>;
   closureDateByStructureId: Map<number, Date | null>;
-  structuresActivesByYear: Map<number, Set<number>>;
+  activeStructureIdsByPeriod: Record<
+    StatistiquesPeriodGranularity,
+    Map<string, Set<number>>
+  >;
 };
 
 export type StatistiquesContext = {
@@ -164,7 +170,7 @@ export type StatistiquesContext = {
   structures: StatistiqueDbStructure[];
   /** Toutes les structures du périmètre filtré (ouvertes + fermées). */
   allStructures: StatistiqueDbStructure[];
-  yearContext: StatistiquesYearContext;
+  activityContext: StatistiquesActivityContext;
   typologies: StatistiqueDbTypologie[];
   adresses: StatistiqueDbAdresse[];
   cpomLinks: StatistiqueDbCpomStructure[];

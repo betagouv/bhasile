@@ -20,10 +20,10 @@ import type {
   StatistiqueDbTypologie,
   StatistiqueDbTypologieValues,
   StatistiquesContext,
-  StatistiquesYearContext,
+  StatistiquesActivityContext,
 } from "../statistiques.db.type";
 import {
-  filterStructuresForYear,
+  filterStructuresForPeriod,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
@@ -280,16 +280,17 @@ const countStructuresByBati = (
 
 const computeByYearStats = (
   allStructures: StatistiqueDbStructure[],
-  yearContext: StatistiquesYearContext,
+  activityContext: StatistiquesActivityContext,
   typologies: StatistiqueDbTypologie[],
   batiMap: Map<number, Repartition>,
   cpomLinks: StatistiqueDbCpomStructure[]
 ): StructuresByYearStat[] =>
   getTypologieYears(typologies).map((year) => {
-    const structuresActives = filterStructuresForYear(
+    const structuresActives = filterStructuresForPeriod(
       allStructures,
-      year,
-      yearContext
+      "year",
+      String(year),
+      activityContext
     );
     const structuresWithTypologie = filterStructuresWithTypologie(
       structuresActives,
@@ -344,7 +345,7 @@ const computeByYearStats = (
 export const computeStructuresStatistiques = (
   context: StatistiquesContext
 ): StatistiqueApiRead["structures"] => {
-  const { structures, allStructures, yearContext, typologies, adresses, cpomLinks } =
+  const { structures, allStructures, activityContext, typologies, adresses, cpomLinks } =
     context;
   const typologieMap = getLastTypologiePerStructure(typologies);
   const structuresWithTypologie = filterStructuresWithTypologie(
@@ -374,7 +375,7 @@ export const computeStructuresStatistiques = (
     ),
     byYear: computeByYearStats(
       allStructures,
-      yearContext,
+      activityContext,
       typologies,
       batiMap,
       cpomLinks

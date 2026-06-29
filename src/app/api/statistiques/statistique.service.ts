@@ -19,9 +19,9 @@ import {
 } from "./statistiques.repository";
 import {
   buildClosureDateByStructureId,
-  buildStatistiquesYearContext,
-  collectCandidateYears,
+  buildStatistiquesActivityContext,
   getTypologieYears,
+  indexTypologieActivityYears,
   mapVersionsToStructures,
 } from "./statistiques.utils";
 import { getStructuresStatistiques } from "./structures/structures.service";
@@ -66,17 +66,16 @@ export const buildStatistiquesContext = async (
 
   const closureDateByStructureId =
     buildClosureDateByStructureId(effectiveVersions);
-  const yearContext = buildStatistiquesYearContext(
+  const activityContext = buildStatistiquesActivityContext(
     allStructureIds,
-    collectCandidateYears(
-      allStructureIds,
-      getTypologieYears(typologies),
-      openingDateByStructureId,
-      closureDateByStructureId,
-      referenceYear
-    ),
     openingDateByStructureId,
     closureDateByStructureId
+  );
+  indexTypologieActivityYears(
+    activityContext,
+    allStructureIds,
+    getTypologieYears(typologies),
+    referenceYear
   );
 
   const dnaCodes = [...new Set(dnaLinks.map((link) => link.dna.code))];
@@ -93,7 +92,7 @@ export const buildStatistiquesContext = async (
   return {
     structures,
     allStructures,
-    yearContext,
+    activityContext,
     typologies,
     adresses,
     cpomLinks,
