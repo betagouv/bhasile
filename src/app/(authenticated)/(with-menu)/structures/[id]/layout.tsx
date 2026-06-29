@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { StructureHeader } from "./_components/_header/StructureHeader";
-import { AutoSaveErrorToast } from "./_components/AutoSaveErrorToast";
 import { StructureProvider } from "./_context/StructureContext";
 
 async function getStructure(id: string): Promise<StructureApiRead> {
@@ -50,7 +49,6 @@ export default async function StructureLayout({
         <div className="flex flex-col gap-3 max-w-7xl mx-auto px-3">
           {children}
         </div>
-        <AutoSaveErrorToast />
       </div>
     </StructureProvider>
   );

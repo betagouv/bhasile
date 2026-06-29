@@ -4,11 +4,14 @@ import { useFetchState } from "@/app/context/FetchStateContext";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
 import { FetchState } from "@/types/fetch-state.type";
 
-export const AutoSaveErrorToast = () => {
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("structure-save");
+export const ErrorToast = () => {
+  const { fetchStates } = useFetchState();
 
-  if (saveState !== FetchState.ERROR) {
+  const hasSaveError = [...fetchStates].some(
+    ([key, state]) => key.endsWith("-save") && state === FetchState.ERROR
+  );
+
+  if (!hasSaveError) {
     return null;
   }
 
@@ -17,20 +20,21 @@ export const AutoSaveErrorToast = () => {
       role="alert"
       aria-live="assertive"
       aria-atomic="true"
-      className="flex gap-4 items-center w-lg fixed bottom-11 left-1/2 -translate-x-1/2 border border-action-high-error px-6 py-3 rounded-lg bg-contrast-error "
+      className="flex gap-4 items-center w-lg fixed bottom-11 left-1/2 -translate-x-1/2 border border-action-high-error px-6 py-3 rounded-lg bg-contrast-error z-50"
     >
       <i className="fr-icon-error-fill text-default-error" aria-hidden="true" />
       <span>
-        Votre avancée n’a pas pu être sauvegardée, vérifiez votre connexion. Si
-        cela persiste,{" "}
+        Vos données n’ont pas pu être sauvegardées, vérifiez votre connexion et
+        réessayez. Si cela persiste,{" "}
         <a
           href={`mailto:${BHASILE_CONTACT_EMAIL}`}
           target="_blank"
           rel="noopener noreferrer"
           className="underline"
         >
-          prévenez-nous.
+          contactez-nous
         </a>
+        .
       </span>
     </div>
   );

@@ -44,6 +44,7 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
   handleCancel,
   showSubmitButton = true,
   backLink,
+  onBackNavigate,
   availableFooterButtons = [
     FooterButtonType.CANCEL,
     FooterButtonType.SAVE,
@@ -144,6 +145,14 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
           {backLink && (
             <Link
               href={backLink.href}
+              onNavigate={
+                onBackNavigate
+                  ? (event) => {
+                      event.preventDefault();
+                      onBackNavigate(backLink.href);
+                    }
+                  : undefined
+              }
               className="flex gap-2 fr-link fr-icon  w-fit text-title-blue-france"
             >
               <i className="fr-icon-arrow-left-s-line before:w-4"></i>
@@ -240,6 +249,7 @@ type FormWrapperProps<TSchema extends z.ZodTypeAny> = {
   handleCancel?: () => void;
   showSubmitButton?: boolean;
   backLink?: { href: string; label: string };
+  onBackNavigate?: (href: string) => void;
   availableFooterButtons?: Array<FooterButtonType>;
   showAutoSaveMention?: boolean;
   showContactInfos?: boolean;
