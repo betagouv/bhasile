@@ -319,30 +319,6 @@ export const getTransformationOriginRoute = (
   return originStructureId ? `/structures/${originStructureId}` : "/structures";
 };
 
-export type AdresseSource = {
-  nom: string;
-  adresseAdministrative: string;
-  adresseAdministrativeComplete: string;
-  codePostalAdministratif: string;
-  communeAdministrative: string;
-  departementAdministratif: string;
-};
-
-export const getAdresseSource = (
-  structureVersionTransformation: StructureVersionTransformationApiRead
-): AdresseSource => {
-  const structure = structureVersionTransformation.structureVersion?.structure;
-  return {
-    nom: structure?.nom ?? "",
-    adresseAdministrative: structure?.adresseAdministrative ?? "",
-    adresseAdministrativeComplete:
-      structure?.adresseAdministrativeComplete ?? "",
-    codePostalAdministratif: structure?.codePostalAdministratif ?? "",
-    communeAdministrative: structure?.communeAdministrative ?? "",
-    departementAdministratif: structure?.departementAdministratif ?? "",
-  };
-};
-
 const getSourceStructureAntennes = (
   structureVersionTransformation: StructureVersionTransformationApiRead
 ): AntenneFormValues[] =>

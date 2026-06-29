@@ -1,5 +1,5 @@
 import Button from "@codegouvfr/react-dsfr/Button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { cn } from "@/app/utils/classname.util";
@@ -13,20 +13,12 @@ import { ManualAddressInputs } from "./ManualAddressInputs";
 
 export const FieldSetAdresseAdministrative = ({
   formKind = FormKind.FINALISATION,
-  locked = false,
 }: {
   formKind?: FormKind;
-  locked?: boolean;
 }) => {
   const { control, watch, setValue, getValues } = useFormContext();
 
   const [isManualAddress, setIsManualAddress] = useState(false);
-
-  useEffect(() => {
-    if (locked && isManualAddress) {
-      setIsManualAddress(false);
-    }
-  }, [locked, isManualAddress]);
 
   const handleAddressAdministrativeChange = () => {
     if (watch("typeBati") === Repartition.COLLECTIF && watch("sameAddress")) {
@@ -83,7 +75,6 @@ export const FieldSetAdresseAdministrative = ({
             type="text"
             label="Nom de la structure (optionnel)"
             className="mb-0"
-            disabled={locked}
           />
           <span className="text-[#666666] text-sm">ex. Les Coquelicots</span>
         </div>
@@ -98,7 +89,7 @@ export const FieldSetAdresseAdministrative = ({
             department="departementAdministratif"
             label="Adresse principale de la structure"
             onSelectSuggestion={handleAddressAdministrativeChange}
-            disabled={isManualAddress || locked}
+            disabled={isManualAddress}
           />
           <span className="text-[#666666] text-sm">
             indiquée dans les documents de contractualisation
@@ -124,7 +115,6 @@ export const FieldSetAdresseAdministrative = ({
       <Button
         priority="tertiary no outline"
         type="button"
-        disabled={locked}
         iconId={
           isManualAddress ? "fr-icon-arrow-go-back-line" : "fr-icon-edit-line"
         }
