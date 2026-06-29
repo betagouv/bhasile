@@ -13,6 +13,7 @@ const mockUseOptionalTransformationContext = vi.fn<
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
+  usePathname: () => "/",
 }));
 
 vi.mock(
