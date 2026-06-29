@@ -25,8 +25,6 @@ export const structureVersionApiSchema = z.object({
   latitude: z.string().nullish(),
   longitude: z.string().nullish(),
   nom: z.string().nullish(),
-  creationDate: z.string().datetime().nullish(),
-  date303: z.string().datetime().nullish(),
   lgbt: z.boolean().nullish(),
   fvvTeh: z.boolean().nullish(),
   notes: z.string().nullish(),

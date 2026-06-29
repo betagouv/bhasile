@@ -26,8 +26,6 @@ const mapVersionFields = (
   | "latitude"
   | "longitude"
   | "nom"
-  | "creationDate"
-  | "date303"
   | "lgbt"
   | "fvvTeh"
   | "notes"
@@ -47,8 +45,6 @@ const mapVersionFields = (
   latitude: source.latitude?.toString() ?? undefined,
   longitude: source.longitude?.toString() ?? undefined,
   nom: source.nom ?? undefined,
-  creationDate: source.creationDate?.toISOString() ?? undefined,
-  date303: source.date303?.toISOString() ?? undefined,
   lgbt: source.lgbt ?? undefined,
   fvvTeh: source.fvvTeh ?? undefined,
   notes: source.notes ?? undefined,

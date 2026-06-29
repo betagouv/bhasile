@@ -5,6 +5,7 @@ import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContac
 import { FieldSetDescription } from "@/app/components/forms/description/FieldSetDescription";
 import { DnaAndFiness } from "@/app/components/forms/dnaAndFiness/DnaAndFiness";
 import { TransformationDnaAndFiness } from "@/app/components/forms/dnaAndFiness/TransformationDnaAndFiness";
+import { EffectiveDateInput } from "@/app/components/forms/EffectiveDateInput";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
@@ -40,7 +41,7 @@ export const CreationIdentificationForm = ({
   const buildStructureVersionTransformation = (
     data: CreationIdentificationDraftFormValues
   ): StructureVersionTransformationApiUpdateClient => {
-    const { creationDate, operateur, ...rest } = data;
+    const { effectiveDate, operateur, ...rest } = data;
     return {
       id: structureVersionTransformation.id,
       type: structureVersionTransformation.type,
@@ -50,8 +51,7 @@ export const CreationIdentificationForm = ({
         dnaStructures: rest.dnaStructures?.filter(
           (dnaStructure) => dnaStructure.dna?.code
         ),
-        creationDate,
-        effectiveDate: creationDate,
+        effectiveDate,
       } as StructureVersionTransformationApiUpdateClient["structureVersion"],
     };
   };
@@ -82,6 +82,8 @@ export const CreationIdentificationForm = ({
           })
         }
       />
+      <EffectiveDateInput label="Date d’ouverture" />
+      <hr />
       <FieldSetDescription formKind={formKind} />
       <hr />
       <AdresseAdministrativeAndAntennes formKind={formKind} />
