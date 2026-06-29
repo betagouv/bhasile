@@ -66,6 +66,7 @@ hr {
   width: 100%;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .fr-notice__desc {
   color: var(--text-default-grey);
 }
