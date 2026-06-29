@@ -85,7 +85,8 @@ export const FieldSetDescription = ({
               <OperateurAutocompleteRhf
                 disabled={
                   formKind ===
-                  FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES
+                    FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES &&
+                  !!watch("operateur.id")
                 }
               />
 
