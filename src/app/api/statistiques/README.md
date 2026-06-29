@@ -19,8 +19,12 @@ Le service est découpé par "bloc fonctionnel" avec un socle commun
 ```
 route.ts -> statistique.service.ts
         ├── statistiques.repository.ts | statistiques.utils.ts
-        ├── structures/ | places/ | finance/ | controle-qualite/ | activite/
+        └── structures/ | places/ | finance/ | controle-qualite/ | activite/
+              └── *.util.ts   compute*(context[, aggregation])
 ```
+
+- **repository** : uniquement à la racine — chargement dans `buildStatistiquesContext`
+- **util** : `computeXStatistiques(context[, aggregation])` — lecture de l'activité via `lookupActiveStructureIds` / `mapTypologieYears`
 
 Schéma : `src/schemas/api/statistique.schema.ts`.
 
@@ -48,9 +52,9 @@ Filtre structures via `findEffectiveStructureVersionsAtDate` (pivot sur `Structu
 
 **Structures actives (indicateurs globaux)** : dernière version à date sans bloc `FERMETURE`.
 
-**Activité par période (`activityContext`)** : dates d'ouverture/fermeture + index `activeStructureIdsByPeriod` (mois, trimestre, année). Une structure fermée le 05/05 compte sur janvier à mai, pas sur juin.
+**Activité par période** : index `activeStructureIdsByPeriod` sur `StatistiquesContext` (`month`, `trimester`, `year` → `Set` d'IDs actifs). Une structure fermée le 05/05 compte sur janvier à mai, pas sur juin.
 
-Index construit une fois dans `buildStatistiquesContext` (années typologies + cycle de vie) et complété dans contrôle qualité (mois/trimestres/années des EIG et évaluations). Les blocs lisent via `getActiveStructureIds(activityContext, granularity, periodKey)`.
+L'index est construit **une seule fois** dans `buildStatistiquesContext` via `buildActivityIndex`. Les sous-modules lisent via `lookupActiveStructureIds` — ils ne recalculent jamais l'activité.
 
 **Avec typologie** (≥1 `StructureTypologie`) : requis pour agrégats places, répartitions type/bâti, contrôle qualité. `structures.totalStructures` = structures actives (avec ou sans typologie).
 

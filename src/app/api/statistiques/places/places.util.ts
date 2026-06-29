@@ -8,18 +8,15 @@ import type {
   StatistiqueDbAdresse,
   StatistiqueDbDepartement,
   StatistiqueDbStructure,
-  StatistiqueDbTypologie,
   StatistiqueDbTypologieValues,
   StatistiquesContext,
-  StatistiquesActivityContext,
 } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
-  filterStructuresForPeriod,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
-  getTypologieYears,
+  mapTypologieYears,
 } from "../statistiques.utils";
 
 type PlacesIndicators = Pick<
@@ -131,36 +128,28 @@ const computePlacesIndicators = (
 };
 
 const computeByYearStats = (
-  allStructures: StatistiqueDbStructure[],
-  activityContext: StatistiquesActivityContext,
-  typologies: StatistiqueDbTypologie[],
-  adresses: StatistiqueDbAdresse[],
-  departements: StatistiqueDbDepartement[]
+  context: Pick<
+    StatistiquesContext,
+    "allStructures" | "activeStructureIdsByPeriod" | "typologies" | "adresses" | "departements"
+  >
 ): PlacesByYearStat[] =>
-  getTypologieYears(typologies).map((year) => {
-    const structuresForYear = filterStructuresForPeriod(
-      allStructures,
-      "year",
-      String(year),
-      activityContext
-    );
-
-    return {
-      year,
-      ...computePlacesIndicators(
+  mapTypologieYears<PlacesByYearStat>(
+    context.allStructures,
+    context.activeStructureIdsByPeriod,
+    context.typologies,
+    (year, structuresForYear) =>
+      computePlacesIndicators(
         structuresForYear,
-        getTypologieMapForExactYear(typologies, year),
-        adresses,
-        departements
-      ),
-    };
-  });
+        getTypologieMapForExactYear(context.typologies, year),
+        context.adresses,
+        context.departements
+      )
+  );
 
 export const computePlacesStatistiques = (
   context: StatistiquesContext
 ): StatistiqueApiRead["places"] => {
-  const { structures, allStructures, activityContext, typologies, adresses, departements } =
-    context;
+  const { structures, typologies, adresses, departements } = context;
   const typologieMap = getLastTypologiePerStructure(typologies);
 
   return {
@@ -170,12 +159,6 @@ export const computePlacesStatistiques = (
       adresses,
       departements
     ),
-    byYear: computeByYearStats(
-      allStructures,
-      activityContext,
-      typologies,
-      adresses,
-      departements
-    ),
+    byYear: computeByYearStats(context),
   };
 };

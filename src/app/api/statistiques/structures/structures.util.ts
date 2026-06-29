@@ -20,14 +20,12 @@ import type {
   StatistiqueDbTypologie,
   StatistiqueDbTypologieValues,
   StatistiquesContext,
-  StatistiquesActivityContext,
 } from "../statistiques.db.type";
 import {
-  filterStructuresForPeriod,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
-  getTypologieYears,
+  mapTypologieYears,
 } from "../statistiques.utils";
 
 const getRepartitionFromRepartitions = (
@@ -278,75 +276,83 @@ const countStructuresByBati = (
     (structure) => (batiMap.get(structure.id) ?? Repartition.COLLECTIF) === bati
   ).length;
 
-const computeByYearStats = (
-  allStructures: StatistiqueDbStructure[],
-  activityContext: StatistiquesActivityContext,
+const buildYearStructuresStat = (
+  year: number,
+  structuresActives: StatistiqueDbStructure[],
   typologies: StatistiqueDbTypologie[],
   batiMap: Map<number, Repartition>,
   cpomLinks: StatistiqueDbCpomStructure[]
-): StructuresByYearStat[] =>
-  getTypologieYears(typologies).map((year) => {
-    const structuresActives = filterStructuresForPeriod(
-      allStructures,
-      "year",
-      String(year),
-      activityContext
-    );
-    const structuresWithTypologie = filterStructuresWithTypologie(
-      structuresActives,
-      getTypologieMapForExactYear(typologies, year)
-    );
-    const structureIdsWithTypologie = structuresWithTypologie.map(
-      (structure) => structure.id
-    );
+): Omit<StructuresByYearStat, "year"> => {
+  const structuresWithTypologie = filterStructuresWithTypologie(
+    structuresActives,
+    getTypologieMapForExactYear(typologies, year)
+  );
+  const structureIdsWithTypologie = new Set(
+    structuresWithTypologie.map((structure) => structure.id)
+  );
 
-    return {
-      year,
-      totalStructures: structuresWithTypologie.length,
-      totalCpoms: countActiveCpoms(
-        cpomLinks,
-        new Set(structureIdsWithTypologie),
-        year
-      ),
-      structuresCada: countStructuresByType(
-        structuresWithTypologie,
-        StructureType.CADA
-      ),
-      structuresCph: countStructuresByType(
-        structuresWithTypologie,
-        StructureType.CPH
-      ),
-      structuresHuda: countStructuresByType(
-        structuresWithTypologie,
-        StructureType.HUDA
-      ),
-      structuresCaes: countStructuresByType(
-        structuresWithTypologie,
-        StructureType.CAES
-      ),
-      structuresBatiCollectif: countStructuresByBati(
-        structuresWithTypologie,
+  return {
+    totalStructures: structuresWithTypologie.length,
+    totalCpoms: countActiveCpoms(cpomLinks, structureIdsWithTypologie, year),
+    structuresCada: countStructuresByType(
+      structuresWithTypologie,
+      StructureType.CADA
+    ),
+    structuresCph: countStructuresByType(
+      structuresWithTypologie,
+      StructureType.CPH
+    ),
+    structuresHuda: countStructuresByType(
+      structuresWithTypologie,
+      StructureType.HUDA
+    ),
+    structuresCaes: countStructuresByType(
+      structuresWithTypologie,
+      StructureType.CAES
+    ),
+    structuresBatiCollectif: countStructuresByBati(
+      structuresWithTypologie,
+      batiMap,
+      Repartition.COLLECTIF
+    ),
+    structuresBatiDiffus: countStructuresByBati(
+      structuresWithTypologie,
+      batiMap,
+      Repartition.DIFFUS
+    ),
+    structuresBatiMixte: countStructuresByBati(
+      structuresWithTypologie,
+      batiMap,
+      Repartition.MIXTE
+    ),
+  };
+};
+
+const computeByYearStats = (
+  context: Pick<
+    StatistiquesContext,
+    "allStructures" | "activeStructureIdsByPeriod" | "typologies" | "cpomLinks"
+  >,
+  batiMap: Map<number, Repartition>
+): StructuresByYearStat[] =>
+  mapTypologieYears<StructuresByYearStat>(
+    context.allStructures,
+    context.activeStructureIdsByPeriod,
+    context.typologies,
+    (year, structuresForYear) =>
+      buildYearStructuresStat(
+        year,
+        structuresForYear,
+        context.typologies,
         batiMap,
-        Repartition.COLLECTIF
-      ),
-      structuresBatiDiffus: countStructuresByBati(
-        structuresWithTypologie,
-        batiMap,
-        Repartition.DIFFUS
-      ),
-      structuresBatiMixte: countStructuresByBati(
-        structuresWithTypologie,
-        batiMap,
-        Repartition.MIXTE
-      ),
-    };
-  });
+        context.cpomLinks
+      )
+  );
 
 export const computeStructuresStatistiques = (
   context: StatistiquesContext
 ): StatistiqueApiRead["structures"] => {
-  const { structures, allStructures, activityContext, typologies, adresses, cpomLinks } =
-    context;
+  const { structures, typologies, adresses, cpomLinks } = context;
   const typologieMap = getLastTypologiePerStructure(typologies);
   const structuresWithTypologie = filterStructuresWithTypologie(
     structures,
@@ -373,12 +379,6 @@ export const computeStructuresStatistiques = (
       batiMap,
       adresses
     ),
-    byYear: computeByYearStats(
-      allStructures,
-      activityContext,
-      typologies,
-      batiMap,
-      cpomLinks
-    ),
+    byYear: computeByYearStats(context, batiMap),
   };
 };

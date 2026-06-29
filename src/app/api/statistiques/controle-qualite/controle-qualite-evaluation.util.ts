@@ -15,11 +15,15 @@ import type {
   StatistiqueDbDnaLink,
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
-  StatistiquesActivityContext,
+  StatistiquesContext,
   StatistiquesPeriodGranularity,
 } from "../statistiques.db.type";
 import {
-  getActiveStructureIds,
+  computeTotalPlaces,
+  filterStructuresWithTypologie,
+  getLastTypologiePerStructure,
+  groupByPeriodKey,
+  lookupActiveStructureIds,
   monthKeyToDate,
   parseTrimesterKey,
   toMonthKey,
@@ -33,25 +37,19 @@ import {
   filterRecentEigs,
 } from "./controle-qualite-eig.util";
 
-const groupByPeriodKey = <Item>(
-  items: Item[],
-  getDate: (item: Item) => Date | null | undefined,
-  getPeriodKey: (date: Date) => string
-): Map<string, Item[]> => {
-  const byPeriod = new Map<string, Item[]>();
+type SeriesContext = {
+  activeStructureIdSet: Set<number>;
+  totalStructures: number;
+  dnaCodeToStructureIds: Map<string, Set<number>>;
+  aggregation: NumericAggregation;
+};
 
-  for (const item of items) {
-    const date = getDate(item);
-    if (!date) {
-      continue;
-    }
-    const periodKey = getPeriodKey(date);
-    const itemsForPeriod = byPeriod.get(periodKey) ?? [];
-    itemsForPeriod.push(item);
-    byPeriod.set(periodKey, itemsForPeriod);
-  }
-
-  return byPeriod;
+type PeriodSeriesConfig<Entry extends ControleQualitePeriodStat> = {
+  granularity: StatistiquesPeriodGranularity;
+  toPeriodKey: (date: Date) => string;
+  toEntryMeta: (
+    periodKey: string
+  ) => Omit<Entry, keyof ControleQualitePeriodStat>;
 };
 
 const filterEvaluationsForYear = (
@@ -137,85 +135,33 @@ const computeEvaluationNotes = (
   };
 };
 
-const computeControleQualitePeriodStat = (
+const computePeriodStat = (
   eigsForPeriod: StatistiqueDbEig[],
   evaluationsForPeriod: StatistiqueDbEvaluation[],
-  activeStructureIdSet: Set<number>,
-  totalStructures: number,
-  dnaCodeToStructureIds: Map<string, Set<number>>,
-  aggregation: NumericAggregation
+  seriesContext: SeriesContext
 ): ControleQualitePeriodStat => {
   const evaluationsActives = evaluationsForPeriod.filter(
     (evaluation) =>
       evaluation.structureId !== null &&
-      activeStructureIdSet.has(evaluation.structureId)
+      seriesContext.activeStructureIdSet.has(evaluation.structureId)
   );
 
   return {
     ...computeEigPeriodMetrics(
       eigsForPeriod,
-      activeStructureIdSet,
-      totalStructures,
-      dnaCodeToStructureIds
+      seriesContext.activeStructureIdSet,
+      seriesContext.totalStructures,
+      seriesContext.dnaCodeToStructureIds
     ),
-    ...computeEvaluationNotes(evaluationsActives, aggregation),
+    ...computeEvaluationNotes(evaluationsActives, seriesContext.aggregation),
   };
-};
-
-type ControleQualiteSeriesContext = {
-  activeStructureIdSet: Set<number>;
-  totalStructures: number;
-  dnaCodeToStructureIds: Map<string, Set<number>>;
-  aggregation: NumericAggregation;
-};
-
-const computeControleQualiteByPeriod = <
-  Entry extends ControleQualitePeriodStat,
->(
-  eigs: StatistiqueDbEig[],
-  evaluations: StatistiqueDbEvaluation[],
-  context: ControleQualiteSeriesContext,
-  getPeriodKey: (date: Date) => string,
-  mapPeriodKey: (
-    periodKey: string
-  ) => Omit<Entry, keyof ControleQualitePeriodStat>,
-  getPeriodContext?: (periodKey: string) => ControleQualiteSeriesContext
-): Entry[] => {
-  const eigsByPeriod = groupByPeriodKey(
-    eigs,
-    (eig) => eig.evenementDate,
-    getPeriodKey
-  );
-  const evaluationsByPeriod = groupByPeriodKey(
-    evaluations,
-    (evaluation) => evaluation.date,
-    getPeriodKey
-  );
-
-  return [...new Set([...eigsByPeriod.keys(), ...evaluationsByPeriod.keys()])]
-    .sort()
-    .map((periodKey) => {
-      const periodContext = getPeriodContext?.(periodKey) ?? context;
-
-      return {
-        ...mapPeriodKey(periodKey),
-        ...computeControleQualitePeriodStat(
-          eigsByPeriod.get(periodKey) ?? [],
-          evaluationsByPeriod.get(periodKey) ?? [],
-          periodContext.activeStructureIdSet,
-          periodContext.totalStructures,
-          periodContext.dnaCodeToStructureIds,
-          periodContext.aggregation
-        ),
-      } as Entry;
-    });
 };
 
 const buildSeriesContext = (
   activeStructureIdSet: Set<number>,
   dnaLinks: StatistiqueDbDnaLink[],
   aggregation: NumericAggregation
-): ControleQualiteSeriesContext => ({
+): SeriesContext => ({
   activeStructureIdSet,
   totalStructures: activeStructureIdSet.size,
   dnaCodeToStructureIds: buildDnaCodeToStructureIds(
@@ -229,57 +175,72 @@ const buildSeriesContext = (
 });
 
 const buildSeriesContextForPeriod = (
-  activityContext: StatistiquesActivityContext,
+  context: StatistiquesContext,
   granularity: StatistiquesPeriodGranularity,
   periodKey: string,
-  dnaLinks: StatistiqueDbDnaLink[],
   aggregation: NumericAggregation
-): ControleQualiteSeriesContext =>
+): SeriesContext =>
   buildSeriesContext(
-    getActiveStructureIds(activityContext, granularity, periodKey),
-    dnaLinks,
+    lookupActiveStructureIds(
+      context.activeStructureIdsByPeriod,
+      granularity,
+      periodKey
+    ),
+    context.dnaLinks,
     aggregation
   );
 
-const computeControleQualiteSeries = <Entry extends ControleQualitePeriodStat>(
-  granularity: StatistiquesPeriodGranularity,
-  getPeriodKey: (date: Date) => string,
-  mapPeriodKey: (
-    periodKey: string
-  ) => Omit<Entry, keyof ControleQualitePeriodStat>,
-  eigs: StatistiqueDbEig[],
-  evaluations: StatistiqueDbEvaluation[],
-  seriesContext: ControleQualiteSeriesContext,
-  activityContext: StatistiquesActivityContext,
-  dnaLinks: StatistiqueDbDnaLink[],
-  aggregation: NumericAggregation
-): Entry[] =>
-  computeControleQualiteByPeriod<Entry>(
+const computePeriodSeries = <Entry extends ControleQualitePeriodStat>(
+  context: StatistiquesContext,
+  globalContext: SeriesContext,
+  config: PeriodSeriesConfig<Entry>
+): Entry[] => {
+  const { eigs, evaluations } = context;
+  const eigsByPeriod = groupByPeriodKey(
     eigs,
+    (eig) => eig.evenementDate,
+    config.toPeriodKey
+  );
+  const evaluationsByPeriod = groupByPeriodKey(
     evaluations,
-    seriesContext,
-    getPeriodKey,
-    mapPeriodKey,
-    (periodKey) =>
-      buildSeriesContextForPeriod(
-        activityContext,
-        granularity,
-        periodKey,
-        dnaLinks,
-        aggregation
-      )
+    (evaluation) => evaluation.date,
+    config.toPeriodKey
   );
 
+  return [...new Set([...eigsByPeriod.keys(), ...evaluationsByPeriod.keys()])]
+    .sort()
+    .map((periodKey) => {
+      const periodContext = buildSeriesContextForPeriod(
+        context,
+        config.granularity,
+        periodKey,
+        globalContext.aggregation
+      );
+
+      return {
+        ...config.toEntryMeta(periodKey),
+        ...computePeriodStat(
+          eigsByPeriod.get(periodKey) ?? [],
+          evaluationsByPeriod.get(periodKey) ?? [],
+          periodContext
+        ),
+      } as Entry;
+    });
+};
+
 export const computeControleQualiteStatistiques = (
-  activeStructureIds: number[],
-  totalPlacesAutorisees: number,
-  eigs: StatistiqueDbEig[],
-  evaluations: StatistiqueDbEvaluation[],
-  dnaLinks: StatistiqueDbDnaLink[],
-  aggregation: NumericAggregation,
-  activityContext: StatistiquesActivityContext
+  context: StatistiquesContext,
+  aggregation: NumericAggregation
 ): StatistiqueApiRead["controleQualite"] => {
-  const activeStructureIdSet = new Set(activeStructureIds);
+  const { structures, typologies, eigs, evaluations } = context;
+  const typologieMap = getLastTypologiePerStructure(typologies);
+  const structuresWithTypologie = filterStructuresWithTypologie(
+    structures,
+    typologieMap
+  );
+  const activeStructureIdSet = new Set(
+    structuresWithTypologie.map((structure) => structure.id)
+  );
   const evaluationsActives = evaluations.filter(
     (evaluation) =>
       evaluation.structureId !== null &&
@@ -287,50 +248,44 @@ export const computeControleQualiteStatistiques = (
   );
   const seriesContext = buildSeriesContext(
     activeStructureIdSet,
-    dnaLinks,
+    context.dnaLinks,
     aggregation
   );
 
   return {
     eig: computeEigSummary(
       eigs,
-      totalPlacesAutorisees,
+      computeTotalPlaces(structuresWithTypologie, typologieMap),
       evaluationsActives,
       activeStructureIdSet,
       aggregation
     ),
-    byMonth: computeControleQualiteSeries<ControleQualiteByMonthStat>(
-      "month",
-      toMonthKey,
-      (monthKey) => ({ date: monthKeyToDate(monthKey) }),
-      eigs,
-      evaluations,
+    byMonth: computePeriodSeries<ControleQualiteByMonthStat>(
+      context,
       seriesContext,
-      activityContext,
-      dnaLinks,
-      aggregation
+      {
+        granularity: "month",
+        toPeriodKey: toMonthKey,
+        toEntryMeta: (monthKey) => ({ date: monthKeyToDate(monthKey) }),
+      }
     ),
-    byTrimester: computeControleQualiteSeries<ControleQualiteByTrimesterStat>(
-      "trimester",
-      toTrimesterKey,
-      parseTrimesterKey,
-      eigs,
-      evaluations,
+    byTrimester: computePeriodSeries<ControleQualiteByTrimesterStat>(
+      context,
       seriesContext,
-      activityContext,
-      dnaLinks,
-      aggregation
+      {
+        granularity: "trimester",
+        toPeriodKey: toTrimesterKey,
+        toEntryMeta: parseTrimesterKey,
+      }
     ),
-    byYear: computeControleQualiteSeries<ControleQualiteByYearStat>(
-      "year",
-      toYearKey,
-      (yearKey) => ({ year: Number(yearKey) }),
-      eigs,
-      evaluations,
+    byYear: computePeriodSeries<ControleQualiteByYearStat>(
+      context,
       seriesContext,
-      activityContext,
-      dnaLinks,
-      aggregation
+      {
+        granularity: "year",
+        toPeriodKey: toYearKey,
+        toEntryMeta: (yearKey) => ({ year: Number(yearKey) }),
+      }
     ),
   };
 };

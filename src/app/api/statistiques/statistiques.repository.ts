@@ -4,11 +4,16 @@ import prisma from "@/lib/prisma";
 import type { StatistiquesFilters } from "@/schemas/api/statistique.schema";
 
 import type {
+  StatistiqueDbActivite,
   StatistiqueDbAdresse,
+  StatistiqueDbBudget,
   StatistiqueDbCpomStructure,
   StatistiqueDbDepartement,
   StatistiqueDbDnaLink,
   StatistiqueDbEffectiveStructureVersion,
+  StatistiqueDbEig,
+  StatistiqueDbEvaluation,
+  StatistiqueDbIndicateurFinancier,
   StatistiqueDbTypologie,
 } from "./statistiques.db.type";
 
@@ -229,5 +234,127 @@ export const findCpomStructures = async (
         },
       },
     },
+  });
+};
+
+export const findEigs = async (
+  dnaCodes: string[]
+): Promise<StatistiqueDbEig[]> => {
+  if (dnaCodes.length === 0) {
+    return [];
+  }
+  return prisma.evenementIndesirableGrave.findMany({
+    where: { dnaCode: { in: dnaCodes } },
+    select: { id: true, dnaCode: true, type: true, evenementDate: true },
+    orderBy: { evenementDate: "asc" },
+  });
+};
+
+export const findEvaluations = async (
+  structureIds: number[]
+): Promise<StatistiqueDbEvaluation[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+  return prisma.evaluation.findMany({
+    where: { structureId: { in: structureIds } },
+    select: {
+      id: true,
+      structureId: true,
+      date: true,
+      note: true,
+      notePersonne: true,
+      notePro: true,
+      noteStructure: true,
+    },
+    orderBy: { date: "asc" },
+  });
+};
+
+export const findBudgets = async (
+  structureIds: number[]
+): Promise<StatistiqueDbBudget[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+
+  const budgets = await prisma.budget.findMany({
+    where: {
+      structureId: { in: structureIds },
+      OR: [{ isMissing: null }, { isMissing: false }],
+    },
+    select: {
+      id: true,
+      structureId: true,
+      year: true,
+      dotationDemandee: true,
+      dotationAccordee: true,
+      totalProduits: true,
+      totalCharges: true,
+    },
+    orderBy: [{ year: "asc" }, { structureId: "asc" }],
+  });
+
+  return budgets.flatMap((budget) => {
+    if (budget.structureId === null) {
+      return [];
+    }
+
+    return [
+      {
+        id: budget.id,
+        structureId: budget.structureId,
+        year: budget.year,
+        dotationDemandee: budget.dotationDemandee ?? 0,
+        dotationAccordee: budget.dotationAccordee ?? 0,
+        totalProduits: budget.totalProduits ?? 0,
+        totalCharges: budget.totalCharges ?? 0,
+      },
+    ];
+  });
+};
+
+export const findIndicateursFinanciers = async (
+  structureIds: number[]
+): Promise<StatistiqueDbIndicateurFinancier[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+  return prisma.indicateurFinancier.findMany({
+    where: {
+      structureId: { in: structureIds },
+      OR: [{ isMissing: null }, { isMissing: false }],
+      type: { in: ["REALISE", "PREVISIONNEL"] },
+    },
+    select: {
+      id: true,
+      structureId: true,
+      year: true,
+      type: true,
+      ETP: true,
+      tauxEncadrement: true,
+      coutJournalier: true,
+    },
+  });
+};
+
+export const findActivites = async (
+  dnaCodes: string[]
+): Promise<StatistiqueDbActivite[]> => {
+  if (dnaCodes.length === 0) {
+    return [];
+  }
+  return prisma.activite.findMany({
+    where: { dnaCode: { in: dnaCodes } },
+    select: {
+      id: true,
+      dnaCode: true,
+      date: true,
+      placesAutorisees: true,
+      placesIndisponibles: true,
+      presencesInduesBPI: true,
+      presencesInduesDeboutees: true,
+    },
+    orderBy: { date: "asc" },
   });
 };

@@ -10,9 +10,9 @@ import {
 } from "@/schemas/api/statistique.schema";
 
 import type {
-  StatistiqueDbActivite,
   StatistiqueDbDnaLink,
   StatistiqueDbStructure,
+  StatistiquesContext,
 } from "../statistiques.db.type";
 import { monthKeyToDate, toMonthKey } from "../statistiques.utils";
 
@@ -107,11 +107,10 @@ const toMonthStat = (
 };
 
 export const computeActiviteStatistiques = (
-  activites: StatistiqueDbActivite[],
-  dnaLinks: StatistiqueDbDnaLink[],
-  structures: StatistiqueDbStructure[]
+  context: StatistiquesContext
 ): StatistiqueApiRead["activite"] => {
-  const eligibility = buildDnaEligibilityByActiviteScope(dnaLinks, structures);
+  const { activites, dnaLinks, allStructures } = context;
+  const eligibility = buildDnaEligibilityByActiviteScope(dnaLinks, allStructures);
   const byMonth = new Map<string, MonthAccumulator>();
 
   for (const activite of activites) {

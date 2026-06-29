@@ -3,28 +3,35 @@ import {
   StatistiquesFilters,
 } from "@/schemas/api/statistique.schema";
 
-import { getActiviteStatistiques } from "./activite/activite.service";
-import { getControleQualiteStatistiques } from "./controle-qualite/controle-qualite.service";
-import { getFinanceStatistiques } from "./finance/finance.service";
-import { getPlacesStatistiques } from "./places/places.service";
+import { computeActiviteStatistiques } from "./activite/activite.util";
+import { computeControleQualiteStatistiques } from "./controle-qualite/controle-qualite-evaluation.util";
+import { computeFinanceStatistiques } from "./finance/finance.util";
+import { computePlacesStatistiques } from "./places/places.util";
 import type { StatistiquesContext } from "./statistiques.db.type";
 import {
+  findActivites,
+  findBudgets,
   findCpomStructures,
   findDepartementsWithPopulation,
   findDnaLinksByStructure,
   findEffectiveStructureVersionsAtDate,
+  findEigs,
+  findEvaluations,
   findFirstEffectiveDateByStructure,
+  findIndicateursFinanciers,
   findStructureAdresses,
   findStructureTypologies,
 } from "./statistiques.repository";
 import {
+  buildActivityIndex,
   buildClosureDateByStructureId,
   buildStatistiquesActivityContext,
+  collectDistinctYears,
+  createEmptyActiveStructureIdsByPeriod,
   getTypologieYears,
-  indexTypologieActivityYears,
   mapVersionsToStructures,
 } from "./statistiques.utils";
-import { getStructuresStatistiques } from "./structures/structures.service";
+import { computeStructuresStatistiques } from "./structures/structures.util";
 
 export const buildStatistiquesContext = async (
   filters: StatistiquesFilters
@@ -64,41 +71,55 @@ export const buildStatistiquesContext = async (
       findFirstEffectiveDateByStructure(allStructureIds),
     ]);
 
-  const closureDateByStructureId =
-    buildClosureDateByStructureId(effectiveVersions);
   const activityContext = buildStatistiquesActivityContext(
     allStructureIds,
     openingDateByStructureId,
-    closureDateByStructureId
+    buildClosureDateByStructureId(effectiveVersions)
   );
-  indexTypologieActivityYears(
-    activityContext,
-    allStructureIds,
-    getTypologieYears(typologies),
-    referenceYear
-  );
-
+  const activeStructureIdsByPeriod = createEmptyActiveStructureIdsByPeriod();
   const dnaCodes = [...new Set(dnaLinks.map((link) => link.dna.code))];
 
-  const deptNumeros = [
-    ...new Set(
-      structures
-        .map((structure) => structure.departementAdministratif)
-        .filter((departement): departement is string => departement !== null)
-    ),
-  ];
-  const departements = await findDepartementsWithPopulation(deptNumeros);
+  const [departements, eigs, evaluations, budgets, indicateurs, activites] =
+    await Promise.all([
+      findDepartementsWithPopulation([
+        ...new Set(
+          structures
+            .map((structure) => structure.departementAdministratif)
+            .filter((departement): departement is string => departement !== null)
+        ),
+      ]),
+      findEigs(dnaCodes),
+      findEvaluations(allStructureIds),
+      findBudgets(allStructureIds),
+      findIndicateursFinanciers(allStructureIds),
+      findActivites(dnaCodes),
+    ]);
+
+  buildActivityIndex(activityContext, activeStructureIdsByPeriod, {
+    typologieYears: getTypologieYears(typologies),
+    referenceYear,
+    periodDates: [
+      ...eigs.map((eig) => eig.evenementDate),
+      ...evaluations.map((evaluation) => evaluation.date),
+      ...activites.map((activite) => activite.date),
+    ],
+    financeYears: collectDistinctYears(budgets, indicateurs),
+  });
 
   return {
     structures,
     allStructures,
-    activityContext,
+    activeStructureIdsByPeriod,
+    eigs,
+    evaluations,
     typologies,
     adresses,
     cpomLinks,
     dnaLinks,
-    dnaCodes,
     departements,
+    budgets,
+    indicateurs,
+    activites,
   };
 };
 
@@ -112,20 +133,11 @@ export const getStatistiques = async (
 
   const { aggregation } = filters;
 
-  const [structures, places, finance, controleQualite, activite] =
-    await Promise.all([
-      getStructuresStatistiques(context),
-      getPlacesStatistiques(context),
-      getFinanceStatistiques(context, aggregation),
-      getControleQualiteStatistiques(context, aggregation),
-      getActiviteStatistiques(context),
-    ]);
-
   return {
-    structures,
-    places,
-    finance,
-    controleQualite,
-    activite,
+    structures: computeStructuresStatistiques(context),
+    places: computePlacesStatistiques(context),
+    finance: computeFinanceStatistiques(context, aggregation),
+    controleQualite: computeControleQualiteStatistiques(context, aggregation),
+    activite: computeActiviteStatistiques(context),
   };
 };

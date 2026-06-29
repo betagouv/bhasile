@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { computeActiviteStatistiques } from "@/app/api/statistiques/activite/activite.util";
 import { StructureType } from "@/types/structure.type";
 
+import { buildTestStatistiquesContext } from "./test-helpers";
+
 describe("activite statistics util", () => {
   const structures = [
     { id: 1, type: StructureType.CADA, departementAdministratif: "75" },
@@ -18,37 +20,43 @@ describe("activite statistics util", () => {
 
   it("should apply type scoping to rate denominators", () => {
     const result = computeActiviteStatistiques(
-      [
-        {
-          id: 1,
-          dnaCode: "DNA01",
-          date: new Date("2025-03-15"),
-          placesAutorisees: 100,
-          placesIndisponibles: 10,
-          presencesInduesBPI: 5,
-          presencesInduesDeboutees: 2,
-        },
-        {
-          id: 2,
-          dnaCode: "DNA02",
-          date: new Date("2025-03-15"),
-          placesAutorisees: 50,
-          placesIndisponibles: 20,
-          presencesInduesBPI: 4,
-          presencesInduesDeboutees: 1,
-        },
-        {
-          id: 3,
-          dnaCode: "DNA03",
-          date: new Date("2025-03-15"),
-          placesAutorisees: 40,
-          placesIndisponibles: 4,
-          presencesInduesBPI: 2,
-          presencesInduesDeboutees: 3,
-        },
-      ],
-      dnaLinks,
-      structures
+      buildTestStatistiquesContext({
+        structures,
+        allStructures: structures,
+        typologies: [],
+        adresses: [],
+        departements: [],
+        dnaLinks,
+        activites: [
+          {
+            id: 1,
+            dnaCode: "DNA01",
+            date: new Date("2025-03-15"),
+            placesAutorisees: 100,
+            placesIndisponibles: 10,
+            presencesInduesBPI: 5,
+            presencesInduesDeboutees: 2,
+          },
+          {
+            id: 2,
+            dnaCode: "DNA02",
+            date: new Date("2025-03-15"),
+            placesAutorisees: 50,
+            placesIndisponibles: 20,
+            presencesInduesBPI: 4,
+            presencesInduesDeboutees: 1,
+          },
+          {
+            id: 3,
+            dnaCode: "DNA03",
+            date: new Date("2025-03-15"),
+            placesAutorisees: 40,
+            placesIndisponibles: 4,
+            presencesInduesBPI: 2,
+            presencesInduesDeboutees: 3,
+          },
+        ],
+      })
     );
 
     const march2025 = result.byMonth[0];
@@ -60,36 +68,40 @@ describe("activite statistics util", () => {
       presencesInduesDeboutees: 2,
       presencesInduesTotal: 7,
     });
-    // Indispo denominator: CADA + CPH only (100 + 40 places, 10 + 4 indispo)
     expect(march2025?.tauxIndisponibilite).toBe(0.1);
-    // Presences indues denominator: CADA only (100 places)
     expect(march2025?.tauxPresencesInduesTotal).toBe(0.07);
   });
 
   it("should aggregate months independently", () => {
     const result = computeActiviteStatistiques(
-      [
-        {
-          id: 1,
-          dnaCode: "DNA01",
-          date: new Date("2025-02-10"),
-          placesAutorisees: 80,
-          placesIndisponibles: 8,
-          presencesInduesBPI: 0,
-          presencesInduesDeboutees: 0,
-        },
-        {
-          id: 4,
-          dnaCode: "DNA01",
-          date: new Date("2025-03-10"),
-          placesAutorisees: 100,
-          placesIndisponibles: 5,
-          presencesInduesBPI: 0,
-          presencesInduesDeboutees: 0,
-        },
-      ],
-      [{ id: 1, structureId: 1, dna: { code: "DNA01" } }],
-      [structures[0]]
+      buildTestStatistiquesContext({
+        structures: [structures[0]],
+        allStructures: [structures[0]],
+        typologies: [],
+        adresses: [],
+        departements: [],
+        dnaLinks: [dnaLinks[0]],
+        activites: [
+          {
+            id: 1,
+            dnaCode: "DNA01",
+            date: new Date("2025-02-10"),
+            placesAutorisees: 80,
+            placesIndisponibles: 8,
+            presencesInduesBPI: 0,
+            presencesInduesDeboutees: 0,
+          },
+          {
+            id: 4,
+            dnaCode: "DNA01",
+            date: new Date("2025-03-10"),
+            placesAutorisees: 100,
+            placesIndisponibles: 5,
+            presencesInduesBPI: 0,
+            presencesInduesDeboutees: 0,
+          },
+        ],
+      })
     );
 
     expect(result.byMonth).toHaveLength(2);

@@ -152,29 +152,35 @@ export type StatistiqueDbCpomStructure = Prisma.CpomStructureGetPayload<{
   };
 }>;
 
-/** Dates d'ouverture/fermeture + index des structures actives par période. */
-export type StatistiquesPeriodGranularity = "month" | "trimester" | "year";
-
+/** Dates d'ouverture/fermeture du périmètre filtré. */
 export type StatistiquesActivityContext = {
   allStructureIds: number[];
   openingDateByStructureId: Map<number, Date>;
   closureDateByStructureId: Map<number, Date | null>;
-  activeStructureIdsByPeriod: Record<
-    StatistiquesPeriodGranularity,
-    Map<string, Set<number>>
-  >;
 };
+
+export type StatistiquesPeriodGranularity = "month" | "trimester" | "year";
+
+/** Index construit une seule fois à la racine — lecture seule dans les sous-modules. */
+export type StatistiquesActiveStructureIdsByPeriod = Record<
+  StatistiquesPeriodGranularity,
+  Map<string, Set<number>>
+>;
 
 export type StatistiquesContext = {
   /** Structures ouvertes à la date de référence (indicateurs globaux). */
   structures: StatistiqueDbStructure[];
   /** Toutes les structures du périmètre filtré (ouvertes + fermées). */
   allStructures: StatistiqueDbStructure[];
-  activityContext: StatistiquesActivityContext;
+  activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod;
+  eigs: StatistiqueDbEig[];
+  evaluations: StatistiqueDbEvaluation[];
   typologies: StatistiqueDbTypologie[];
   adresses: StatistiqueDbAdresse[];
   cpomLinks: StatistiqueDbCpomStructure[];
   dnaLinks: StatistiqueDbDnaLink[];
-  dnaCodes: string[];
   departements: StatistiqueDbDepartement[];
+  budgets: StatistiqueDbBudget[];
+  indicateurs: StatistiqueDbIndicateurFinancier[];
+  activites: StatistiqueDbActivite[];
 };

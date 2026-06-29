@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
-  getActiveStructureIds,
+  buildActivityIndex,
   getPeriodBounds,
-  indexActiveStructureIds,
+  lookupActiveStructureIds,
 } from "@/app/api/statistiques/statistiques.utils";
 
 import { buildTestActivityContext } from "./test-helpers";
@@ -14,44 +14,63 @@ describe("statistiques period utils", () => {
     openingDate: new Date("2020-01-01T00:00:00.000Z"),
     closureDates: new Map([[1, closureMarch2024]]),
   });
+  const activeStructureIdsByPeriod = {
+    month: new Map<string, Set<number>>(),
+    trimester: new Map<string, Set<number>>(),
+    year: new Map<string, Set<number>>(),
+  };
 
   beforeEach(() => {
-    indexActiveStructureIds(activityContext, "year", ["2024", "2025"]);
-    indexActiveStructureIds(activityContext, "month", [
-      "2024-02",
-      "2024-03",
-      "2024-04",
-    ]);
-    indexActiveStructureIds(activityContext, "trimester", ["2024-Q1", "2024-Q2"]);
+    activeStructureIdsByPeriod.month.clear();
+    activeStructureIdsByPeriod.trimester.clear();
+    activeStructureIdsByPeriod.year.clear();
+
+    buildActivityIndex(activityContext, activeStructureIdsByPeriod, {
+      typologieYears: [2024, 2025],
+      referenceYear: 2026,
+      periodDates: [
+        new Date("2024-02-15"),
+        new Date("2024-03-15"),
+        new Date("2024-04-15"),
+      ],
+    });
   });
 
   it("should count structure active in year of closure but not after", () => {
-    expect(getActiveStructureIds(activityContext, "year", "2024")).toEqual(
-      new Set([1])
-    );
-    expect(getActiveStructureIds(activityContext, "year", "2025")).toEqual(
-      new Set()
-    );
+    expect(
+      lookupActiveStructureIds(activeStructureIdsByPeriod, "year", "2024")
+    ).toEqual(new Set([1]));
+    expect(
+      lookupActiveStructureIds(activeStructureIdsByPeriod, "year", "2025")
+    ).toEqual(new Set());
   });
 
   it("should count structure active in month of closure but not after", () => {
-    expect(getActiveStructureIds(activityContext, "month", "2024-02")).toEqual(
-      new Set([1])
-    );
-    expect(getActiveStructureIds(activityContext, "month", "2024-03")).toEqual(
-      new Set([1])
-    );
-    expect(getActiveStructureIds(activityContext, "month", "2024-04")).toEqual(
-      new Set()
-    );
+    expect(
+      lookupActiveStructureIds(activeStructureIdsByPeriod, "month", "2024-02")
+    ).toEqual(new Set([1]));
+    expect(
+      lookupActiveStructureIds(activeStructureIdsByPeriod, "month", "2024-03")
+    ).toEqual(new Set([1]));
+    expect(
+      lookupActiveStructureIds(activeStructureIdsByPeriod, "month", "2024-04")
+    ).toEqual(new Set());
   });
 
   it("should count structure active in trimester of closure but not after", () => {
     expect(
-      getActiveStructureIds(activityContext, "trimester", "2024-Q1")
+      lookupActiveStructureIds(
+        activeStructureIdsByPeriod,
+        "trimester",
+        "2024-Q1"
+      )
     ).toEqual(new Set([1]));
     expect(
-      getActiveStructureIds(activityContext, "trimester", "2024-Q2")
+      lookupActiveStructureIds(
+        activeStructureIdsByPeriod,
+        "trimester",
+        "2024-Q2"
+      )
     ).toEqual(new Set());
   });
 

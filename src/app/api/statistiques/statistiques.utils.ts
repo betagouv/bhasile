@@ -5,15 +5,17 @@ import type {
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
   StatistiqueDbTypologieValues,
+  StatistiquesActiveStructureIdsByPeriod,
   StatistiquesActivityContext,
   StatistiquesPeriodGranularity,
 } from "./statistiques.db.type";
 
-const emptyActiveStructureIdsByPeriod = (): StatistiquesActivityContext["activeStructureIdsByPeriod"] => ({
-  month: new Map(),
-  trimester: new Map(),
-  year: new Map(),
-});
+export const createEmptyActiveStructureIdsByPeriod =
+  (): StatistiquesActiveStructureIdsByPeriod => ({
+    month: new Map(),
+    trimester: new Map(),
+    year: new Map(),
+  });
 
 const yearFromDate = (date: Date | string | null | undefined): number | null => {
   if (date == null) {
@@ -162,12 +164,13 @@ const computeActiveStructureIdsForBounds = (
   return activeStructureIds;
 };
 
-export const indexActiveStructureIds = (
+const indexActiveStructureIds = (
   activityContext: StatistiquesActivityContext,
+  activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod,
   granularity: StatistiquesPeriodGranularity,
   periodKeys: Iterable<string>
 ): void => {
-  const index = activityContext.activeStructureIdsByPeriod[granularity];
+  const index = activeStructureIdsByPeriod[granularity];
 
   for (const periodKey of periodKeys) {
     if (index.has(periodKey)) {
@@ -182,23 +185,64 @@ export const indexActiveStructureIds = (
   }
 };
 
-export const getActiveStructureIds = (
-  activityContext: StatistiquesActivityContext,
+export const lookupActiveStructureIds = (
+  activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod,
   granularity: StatistiquesPeriodGranularity,
   periodKey: string
-): Set<number> => {
-  const cached = activityContext.activeStructureIdsByPeriod[granularity].get(
+): Set<number> =>
+  activeStructureIdsByPeriod[granularity].get(periodKey) ?? new Set();
+
+export const structuresActiveInPeriod = (
+  structures: StatistiqueDbStructure[],
+  activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod,
+  granularity: StatistiquesPeriodGranularity,
+  periodKey: string
+): StatistiqueDbStructure[] => {
+  const activeIds = lookupActiveStructureIds(
+    activeStructureIdsByPeriod,
+    granularity,
     periodKey
   );
-  if (cached) {
-    return cached;
+  return structures.filter((structure) => activeIds.has(structure.id));
+};
+
+export const groupByPeriodKey = <Item>(
+  items: Item[],
+  getDate: (item: Item) => Date | null | undefined,
+  getPeriodKey: (date: Date) => string
+): Map<string, Item[]> => {
+  const byPeriod = new Map<string, Item[]>();
+
+  for (const item of items) {
+    const date = getDate(item);
+    if (!date) {
+      continue;
+    }
+    const periodKey = getPeriodKey(date);
+    const bucket = byPeriod.get(periodKey) ?? [];
+    bucket.push(item);
+    byPeriod.set(periodKey, bucket);
   }
 
-  indexActiveStructureIds(activityContext, granularity, [periodKey]);
-  return activityContext.activeStructureIdsByPeriod[granularity].get(
-    periodKey
-  )!;
+  return byPeriod;
 };
+
+export const collectDistinctYears = (
+  ...rows: { year: number }[][]
+): number[] =>
+  [
+    ...new Set(rows.flat().map((row) => row.year)),
+  ].sort((yearA, yearB) => yearA - yearB);
+
+export const buildStatistiquesActivityContext = (
+  structureIds: number[],
+  openingDateByStructureId: Map<number, Date>,
+  closureDateByStructureId: Map<number, Date | null>
+): StatistiquesActivityContext => ({
+  allStructureIds: structureIds,
+  openingDateByStructureId,
+  closureDateByStructureId,
+});
 
 const collectActivityYearKeys = (
   structureIds: number[],
@@ -229,8 +273,9 @@ const collectActivityYearKeys = (
   return [...years].sort((yearA, yearB) => yearA - yearB).map(String);
 };
 
-export const indexActiveStructureIdsFromDates = (
+const indexActiveStructureIdsFromDates = (
   activityContext: StatistiquesActivityContext,
+  activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod,
   dates: (Date | string | null | undefined)[],
   granularities: StatistiquesPeriodGranularity[]
 ): void => {
@@ -259,53 +304,50 @@ export const indexActiveStructureIdsFromDates = (
   for (const granularity of granularities) {
     indexActiveStructureIds(
       activityContext,
+      activeStructureIdsByPeriod,
       granularity,
       [...keys[granularity]].sort()
     );
   }
 };
 
-export const filterStructuresForPeriod = (
-  structures: StatistiqueDbStructure[],
-  granularity: StatistiquesPeriodGranularity,
-  periodKey: string,
-  activityContext: StatistiquesActivityContext
-): StatistiqueDbStructure[] => {
-  const activeStructureIds = getActiveStructureIds(
-    activityContext,
-    granularity,
-    periodKey
-  );
-  return structures.filter((structure) => activeStructureIds.has(structure.id));
-};
-
-export const buildStatistiquesActivityContext = (
-  structureIds: number[],
-  openingDateByStructureId: Map<number, Date>,
-  closureDateByStructureId: Map<number, Date | null>
-): StatistiquesActivityContext => ({
-  allStructureIds: structureIds,
-  openingDateByStructureId,
-  closureDateByStructureId,
-  activeStructureIdsByPeriod: emptyActiveStructureIdsByPeriod(),
-});
-
-export const indexTypologieActivityYears = (
+export const buildActivityIndex = (
   activityContext: StatistiquesActivityContext,
-  structureIds: number[],
-  typologieYears: number[],
-  referenceYear: number
+  activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod,
+  params: {
+    typologieYears: number[];
+    referenceYear: number;
+    periodDates: (Date | string | null | undefined)[];
+    financeYears?: number[];
+  }
 ): void => {
   indexActiveStructureIds(
     activityContext,
+    activeStructureIdsByPeriod,
     "year",
     collectActivityYearKeys(
-      structureIds,
-      typologieYears,
+      activityContext.allStructureIds,
+      params.typologieYears,
       activityContext.openingDateByStructureId,
       activityContext.closureDateByStructureId,
-      referenceYear
+      params.referenceYear
     )
+  );
+
+  if (params.financeYears?.length) {
+    indexActiveStructureIds(
+      activityContext,
+      activeStructureIdsByPeriod,
+      "year",
+      params.financeYears.map(String)
+    );
+  }
+
+  indexActiveStructureIdsFromDates(
+    activityContext,
+    activeStructureIdsByPeriod,
+    params.periodDates,
+    ["month", "trimester", "year"]
   );
 };
 
@@ -387,6 +429,28 @@ export const getTypologieYears = (
   [...new Set(typologies.map((typologie) => typologie.year))].sort(
     (yearA, yearB) => yearA - yearB
   );
+
+export const mapTypologieYears = <Entry extends { year: number }>(
+  allStructures: StatistiqueDbStructure[],
+  activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod,
+  typologies: StatistiqueDbTypologie[],
+  buildEntry: (
+    year: number,
+    structuresForYear: StatistiqueDbStructure[]
+  ) => Omit<Entry, "year">
+): Entry[] =>
+  getTypologieYears(typologies).map((year) => ({
+    year,
+    ...buildEntry(
+      year,
+      structuresActiveInPeriod(
+        allStructures,
+        activeStructureIdsByPeriod,
+        "year",
+        String(year)
+      )
+    ),
+  })) as Entry[];
 
 export const filterStructuresWithTypologie = (
   structures: StatistiqueDbStructure[],

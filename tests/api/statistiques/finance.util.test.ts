@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  computeFinanceStatistiques,
-  getStructureIdsByFinanceScope,
-} from "@/app/api/statistiques/finance/finance.util";
+import { computeFinanceStatistiques } from "@/app/api/statistiques/finance/finance.util";
 import type { StatistiqueDbBudget } from "@/app/api/statistiques/statistiques.db.type";
 import { StructureType } from "@/types/structure.type";
 
-import { buildTestActivityContext } from "./test-helpers";
+import {
+  buildTestActiveStructureIdsByPeriod,
+  buildTestStatistiquesContext,
+} from "./test-helpers";
 
 const budgetRow = (
   id: number,
@@ -31,28 +31,41 @@ describe("finance statistics util", () => {
     { id: 2, type: StructureType.CAES, departementAdministratif: "75" },
   ];
 
+  const buildFinanceContext = (
+    budgets: StatistiqueDbBudget[],
+    indicateurs = buildTestStatistiquesContext({
+      structures,
+      typologies: [],
+      adresses: [],
+      departements: [],
+    }).indicateurs
+  ) =>
+    buildTestStatistiquesContext({
+      structures,
+      typologies: [],
+      adresses: [],
+      departements: [],
+      budgets,
+      indicateurs,
+      activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod(
+        structures.map((structure) => structure.id),
+        { financeYears: [...new Set(budgets.map((budget) => budget.year))] }
+      ),
+    });
+
   it("should split excess and deficit per structure before cumulating", () => {
-    const scopeIds = getStructureIdsByFinanceScope(structures);
     const budgets = [
       budgetRow(1, 1, 2023, 200, 100),
       budgetRow(2, 2, 2023, 50, 90),
     ];
 
     const result = computeFinanceStatistiques(
-      scopeIds,
-      buildTestActivityContext(scopeIds.total),
-      {
-        total: budgets,
-        autorisees: [budgets[0]],
-        subventionnees: [budgets[1]],
-      },
-      [],
+      buildFinanceContext(budgets),
       "moyenne"
     );
 
     const year2023 = result.byYear.find((entry) => entry.year === 2023);
 
-    // RN agrégé = +60, mais excédent 100 + déficit 40
     expect(year2023?.total.resultatNet).toBe(60);
     expect(year2023?.total.excedentCumule).toBe(100);
     expect(year2023?.total.deficitCumule).toBe(40);
@@ -64,101 +77,76 @@ describe("finance statistics util", () => {
   });
 
   it("should cumulate excess and deficit across years", () => {
-    const scopeIds = getStructureIdsByFinanceScope([structures[0]]);
     const budgets = [
       budgetRow(1, 1, 2023, 150, 100),
       budgetRow(2, 1, 2024, 80, 110),
     ];
 
     const result = computeFinanceStatistiques(
-      scopeIds,
-      buildTestActivityContext(scopeIds.total),
-      {
-        total: budgets,
-        autorisees: budgets,
-        subventionnees: [],
-      },
-      [],
+      buildFinanceContext(budgets),
       "moyenne"
     );
 
     const year2024 = result.byYear.find((entry) => entry.year === 2024);
 
-    // 2023 : +50 excédent ; 2024 : -30 déficit → solde cumulé 20
     expect(year2024?.total.excedentCumule).toBe(50);
     expect(year2024?.total.deficitCumule).toBe(30);
     expect(year2024?.total.soldeCumule).toBe(20);
   });
 
   it("should carry forward cumulative balances without later budget", () => {
-    const scopeIds = getStructureIdsByFinanceScope(structures);
-    const budgetsTotal = [
+    const budgets = [
       budgetRow(1, 1, 2024, 100, 80),
       budgetRow(2, 2, 2024, 60, 90),
       budgetRow(3, 1, 2025, 0, 0),
     ];
 
     const result = computeFinanceStatistiques(
-      scopeIds,
-      buildTestActivityContext(scopeIds.total),
-      {
-        total: budgetsTotal,
-        autorisees: [budgetsTotal[0], budgetsTotal[2]],
-        subventionnees: [budgetsTotal[1]],
-      },
-      [],
+      buildFinanceContext(budgets),
       "moyenne"
     );
 
     const year2025 = result.byYear.find((entry) => entry.year === 2025);
 
-    // 2025 existe côté total/autorisées mais pas subventionnées : cumuls reportés
     expect(year2025?.subventionnees.excedentCumule).toBe(0);
     expect(year2025?.subventionnees.deficitCumule).toBe(30);
     expect(year2025?.subventionnees.soldeCumule).toBe(-30);
   });
 
   it("should prefer REALISE over PREVISIONNEL per field", () => {
-    const scopeIds = getStructureIdsByFinanceScope([structures[0], structures[1]]);
     const budgets = [budgetRow(1, 1, 2024, 0, 0)];
+    const indicateurs = [
+      {
+        id: 1,
+        structureId: 1,
+        year: 2024,
+        type: "REALISE" as const,
+        ETP: 10,
+        tauxEncadrement: null,
+        coutJournalier: 50,
+      },
+      {
+        id: 2,
+        structureId: 1,
+        year: 2024,
+        type: "PREVISIONNEL" as const,
+        ETP: 99,
+        tauxEncadrement: 0.8,
+        coutJournalier: 99,
+      },
+      {
+        id: 3,
+        structureId: 2,
+        year: 2024,
+        type: "PREVISIONNEL" as const,
+        ETP: 5,
+        tauxEncadrement: 0.5,
+        coutJournalier: 40,
+      },
+    ];
 
     const result = computeFinanceStatistiques(
-      scopeIds,
-      buildTestActivityContext(scopeIds.total),
-      {
-        total: budgets,
-        autorisees: budgets,
-        subventionnees: [],
-      },
-      [
-        {
-          id: 1,
-          structureId: 1,
-          year: 2024,
-          type: "REALISE",
-          ETP: 10,
-          tauxEncadrement: null,
-          coutJournalier: 50,
-        },
-        {
-          id: 2,
-          structureId: 1,
-          year: 2024,
-          type: "PREVISIONNEL",
-          ETP: 99,
-          tauxEncadrement: 0.8,
-          coutJournalier: 99,
-        },
-        {
-          id: 3,
-          structureId: 2,
-          year: 2024,
-          type: "PREVISIONNEL",
-          ETP: 5,
-          tauxEncadrement: 0.5,
-          coutJournalier: 40,
-        },
-      ],
+      buildFinanceContext(budgets, indicateurs),
       "moyenne"
     );
 
