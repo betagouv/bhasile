@@ -6,8 +6,8 @@ import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 
+import { HeaderFilters } from "../../../../components/header-filters/HeaderFilters";
 import { useStatistiquesContext } from "../_context/StatistiquesClientContext";
-import { StatistiquesFilters } from "./StatistiquesFilters";
 
 export const StatistiquesHeader = (): ReactElement | null => {
   const { statistiques } = useStatistiquesContext();
@@ -27,7 +27,7 @@ export const StatistiquesHeader = (): ReactElement | null => {
           <h2 className="text-title-blue-france fr-h5 mr-4 mb-0">
             Statistiques
           </h2>
-          <StatistiquesFilters />
+          <HeaderFilters />
         </div>
       </div>
       <NavigationMenu
@@ -47,17 +47,14 @@ export const StatistiquesHeader = (): ReactElement | null => {
           {
             label: "Contrôle qualité",
             section: "#controle-qualite",
-            isDisplayed: true,
           },
           {
             label: "Activité",
             section: "#activite",
-            isDisplayed: true,
           },
           {
             label: "RMU",
             section: "#rmu",
-            isDisplayed: true,
           },
         ]}
       />

@@ -1,13 +1,17 @@
+import Badge from "@codegouvfr/react-dsfr/Badge";
+import { useSearchParams } from "next/navigation";
 import { PropsWithChildren, useEffect, useRef, useState } from "react";
 
 export const FilterDropdown = ({
   label,
   placeholder = "Sélectionner une...",
+  filterId,
   children,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const selectedValue: Option | null = null;
+  const searchParams = useSearchParams();
+  const appliedFilters = searchParams.get(filterId)?.split(",");
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -25,7 +29,7 @@ export const FilterDropdown = ({
   return (
     <div
       ref={dropdownRef}
-      className="w-[200px] border-x border-default-grey relative"
+      className="w-[220px] border-x border-default-grey relative"
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -37,7 +41,13 @@ export const FilterDropdown = ({
           </div>
           <div className="flex">
             <div className="truncate">
-              {selectedValue ? (selectedValue as Option).label : placeholder}
+              {Number(appliedFilters?.length) > 0 ? (
+                <Badge className="rounded" severity="info" small noIcon>
+                  {appliedFilters?.length} filtre(s) sélectionné(s)
+                </Badge>
+              ) : (
+                placeholder
+              )}
             </div>
             <span className="fr-icon-arrow-down-s-line" />
           </div>
@@ -56,9 +66,5 @@ export const FilterDropdown = ({
 type Props = PropsWithChildren<{
   label: string;
   placeholder?: string;
+  filterId: string;
 }>;
-
-export type Option = {
-  label: string;
-  value: string;
-};

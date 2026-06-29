@@ -1,6 +1,6 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -11,19 +11,19 @@ import {
 export const FilterOperateur = () => {
   const searchParams = useSearchParams();
   const [allOperateurs, setAllOperateurs] = useState<OperateurSuggestion[]>([]);
+  const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const fetchSuggestions = useOperateurSuggestion();
+  const { getAllOperateurs } = useOperateurSuggestion();
 
   useEffect(() => {
     const fetchOperateurs = async () => {
-      // TODO : mettre une vraie recherche
-      const operateurs = await fetchSuggestions("opér");
+      const operateurs = await getAllOperateurs();
       setAllOperateurs(operateurs);
     };
     fetchOperateurs();
-  }, [fetchSuggestions]);
+  }, [getAllOperateurs]);
 
   const [selectedIds, setSelectedIds] = useState<string[]>(() => {
     return searchParams.get("operateurs")?.split(",").filter(Boolean) || [];
@@ -79,13 +79,8 @@ export const FilterOperateur = () => {
       params.delete("operateurs");
     }
 
-    const newUrl = `${window.location.pathname}?${params.toString()}`;
-    window.history.replaceState(
-      { ...window.history.state, as: newUrl, url: newUrl },
-      "",
-      newUrl
-    );
-  }, [selectedIds]);
+    router.replace(`?${params.toString()}`);
+  }, [selectedIds, router]);
 
   return (
     <div className="p-4 flex flex-col gap-2">
