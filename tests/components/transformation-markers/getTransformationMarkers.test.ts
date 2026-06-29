@@ -31,7 +31,7 @@ describe("getTransformationMarkers", () => {
       {
         kind: "CPOM_ENTRY",
         date: "2023-08-01",
-        cpom: { id: 1, operateurName: "X", departements: [] },
+        cpom: { id: 1, operateurName: "X", departements: [], regionName: null },
       },
     ];
 

@@ -47,7 +47,8 @@ export const HistoryEventLabel = ({ event }: Props): ReactElement => {
             : "Sortie du CPOM"}
         </strong>{" "}
         <Link href={`/cpoms/${event.cpom.id}`}>
-          {event.cpom.operateurName} {event.cpom.departements.join(", ")}
+          {event.cpom.operateurName}{" "}
+          {event.cpom.regionName ?? event.cpom.departements.join(", ")}
         </Link>
       </span>
     );

@@ -698,6 +698,8 @@ const buildCpomEvents = (
         cpom.departements
           ?.map((cpomDepartement) => cpomDepartement.departement?.numero)
           .filter((numero): numero is string => Boolean(numero)) ?? [],
+      regionName:
+        cpom.granularity === "REGIONALE" ? (cpom.region?.name ?? null) : null,
     };
 
     if (entryDate && entryDate <= now) {
