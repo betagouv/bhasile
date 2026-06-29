@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { computeControleQualiteStatistiques } from "@/app/api/statistiques/controle-qualite/controle-qualite-evaluation.util";
 
+import { buildTestYearContext } from "./test-helpers";
+
 vi.mock("@/constants", async () => {
   const actual =
     await vi.importActual<typeof import("@/constants")>("@/constants");
@@ -52,7 +54,8 @@ describe("quality control statistics util", () => {
         })),
       ],
       [],
-      "moyenne"
+      "moyenne",
+      buildTestYearContext([1])
     );
 
     const trimester2025Q1 = result.byTrimester.find(
@@ -102,7 +105,8 @@ describe("quality control statistics util", () => {
       ],
       [],
       dnaLinks,
-      "moyenne"
+      "moyenne",
+      buildTestYearContext([1])
     );
 
     const january = result.byMonth.find(
@@ -136,7 +140,8 @@ describe("quality control statistics util", () => {
       ],
       [],
       dnaLinks,
-      "moyenne"
+      "moyenne",
+      buildTestYearContext([1, 2, 3])
     );
 
     const march = result.byMonth.find(
@@ -146,6 +151,61 @@ describe("quality control statistics util", () => {
     // 2 structures sur 3 sans déclaration EIG sur le mois
     expect(march?.nbStructuresSansDeclarationEig).toBe(2);
     expect(march?.partStructuresSansDeclarationEig).toBe(0.667);
+  });
+
+  it("should use period-specific structure perimeter for month and trimester", () => {
+    const yearContext = buildTestYearContext([1, 2, 3], {
+      closureDates: new Map([
+        [1, null],
+        [2, null],
+        [3, new Date("2025-02-01T00:00:00.000Z")],
+      ]),
+    });
+
+    const result = computeControleQualiteStatistiques(
+      [1, 2, 3],
+      300,
+      [
+        {
+          id: 1,
+          dnaCode: "DNA01",
+          type: "autre",
+          evenementDate: new Date("2025-03-01"),
+        },
+      ],
+      [
+        {
+          id: 1,
+          structureId: 1,
+          date: new Date("2025-02-15"),
+          note: 3,
+          notePersonne: null,
+          notePro: null,
+          noteStructure: null,
+        },
+      ],
+      dnaLinks,
+      "moyenne",
+      yearContext
+    );
+
+    const february = result.byMonth.find(
+      (entry) => entry.date.toISOString().slice(0, 7) === "2025-02"
+    );
+    const march = result.byMonth.find(
+      (entry) => entry.date.toISOString().slice(0, 7) === "2025-03"
+    );
+    const trimesterQ1 = result.byTrimester.find(
+      (entry) => entry.year === 2025 && entry.trimester === 1
+    );
+
+    // Février : structure 3 encore active au moins un jour (évaluation force la série)
+    expect(february?.nbStructuresSansDeclarationEig).toBe(3);
+    // Mars : structure 3 fermée avant le mois
+    expect(march?.nbStructuresSansDeclarationEig).toBe(1);
+    expect(march?.partStructuresSansDeclarationEig).toBe(0.5);
+    // Trimestre Q1 2025 : union des structures actives sur jan–mar
+    expect(trimesterQ1?.nbStructuresSansDeclarationEig).toBe(2);
   });
 
   it("should use median aggregation for evaluation notes", () => {
@@ -183,7 +243,8 @@ describe("quality control statistics util", () => {
         },
       ],
       [],
-      "mediane"
+      "mediane",
+      buildTestYearContext([1])
     );
 
     expect(result.byMonth[0]?.noteGenerale).toBe(4);

@@ -7,8 +7,8 @@ import { computeActiviteStatistiques } from "./activite.util";
 export const getActiviteStatistiques = async (
   context: StatistiquesContext
 ): Promise<StatistiqueApiRead["activite"]> => {
-  const { structures, dnaLinks, dnaCodes } = context;
+  const { allStructures, dnaLinks, dnaCodes } = context;
   const activites = await findActivites(dnaCodes);
 
-  return computeActiviteStatistiques(activites, dnaLinks, structures);
+  return computeActiviteStatistiques(activites, dnaLinks, allStructures);
 };

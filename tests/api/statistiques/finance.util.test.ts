@@ -7,6 +7,8 @@ import {
 import type { StatistiqueDbBudget } from "@/app/api/statistiques/statistiques.db.type";
 import { StructureType } from "@/types/structure.type";
 
+import { buildTestYearContext } from "./test-helpers";
+
 const budgetRow = (
   id: number,
   structureId: number,
@@ -38,6 +40,7 @@ describe("finance statistics util", () => {
 
     const result = computeFinanceStatistiques(
       scopeIds,
+      buildTestYearContext(scopeIds.total),
       {
         total: budgets,
         autorisees: [budgets[0]],
@@ -69,6 +72,7 @@ describe("finance statistics util", () => {
 
     const result = computeFinanceStatistiques(
       scopeIds,
+      buildTestYearContext(scopeIds.total),
       {
         total: budgets,
         autorisees: budgets,
@@ -96,6 +100,7 @@ describe("finance statistics util", () => {
 
     const result = computeFinanceStatistiques(
       scopeIds,
+      buildTestYearContext(scopeIds.total),
       {
         total: budgetsTotal,
         autorisees: [budgetsTotal[0], budgetsTotal[2]],
@@ -119,6 +124,7 @@ describe("finance statistics util", () => {
 
     const result = computeFinanceStatistiques(
       scopeIds,
+      buildTestYearContext(scopeIds.total),
       {
         total: budgets,
         autorisees: budgets,

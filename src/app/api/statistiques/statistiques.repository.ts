@@ -73,6 +73,35 @@ export const findEffectiveStructureVersionsAtDate = async (
   });
 };
 
+export const findFirstEffectiveDateByStructure = async (
+  structureIds: number[]
+): Promise<Map<number, Date>> => {
+  if (structureIds.length === 0) {
+    return new Map();
+  }
+
+  const rows = await prisma.structureVersion.groupBy({
+    by: ["structureId"],
+    where: {
+      structureId: { in: structureIds },
+      effectiveDate: { not: null },
+    },
+    _min: { effectiveDate: true },
+  });
+
+  const openingDateByStructureId = new Map<number, Date>();
+  for (const row of rows) {
+    if (row.structureId != null && row._min.effectiveDate != null) {
+      openingDateByStructureId.set(
+        row.structureId,
+        new Date(row._min.effectiveDate)
+      );
+    }
+  }
+
+  return openingDateByStructureId;
+};
+
 export const findStructureTypologies = async (
   structureIds: number[]
 ): Promise<StatistiqueDbTypologie[]> => {

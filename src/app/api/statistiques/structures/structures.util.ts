@@ -19,9 +19,11 @@ import type {
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
   StatistiqueDbTypologieValues,
+  StatistiquesContext,
+  StatistiquesYearContext,
 } from "../statistiques.db.type";
 import {
-  filterStructuresActives,
+  filterStructuresForYear,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
@@ -277,13 +279,18 @@ const countStructuresByBati = (
   ).length;
 
 const computeByYearStats = (
-  structures: StatistiqueDbStructure[],
+  allStructures: StatistiqueDbStructure[],
+  yearContext: StatistiquesYearContext,
   typologies: StatistiqueDbTypologie[],
   batiMap: Map<number, Repartition>,
   cpomLinks: StatistiqueDbCpomStructure[]
 ): StructuresByYearStat[] =>
   getTypologieYears(typologies).map((year) => {
-    const structuresActives = filterStructuresActives(structures);
+    const structuresActives = filterStructuresForYear(
+      allStructures,
+      year,
+      yearContext
+    );
     const structuresWithTypologie = filterStructuresWithTypologie(
       structuresActives,
       getTypologieMapForExactYear(typologies, year)
@@ -335,30 +342,28 @@ const computeByYearStats = (
   });
 
 export const computeStructuresStatistiques = (
-  structures: StatistiqueDbStructure[],
-  typologies: StatistiqueDbTypologie[],
-  adresses: StatistiqueDbAdresse[],
-  cpomLinks: StatistiqueDbCpomStructure[]
+  context: StatistiquesContext
 ): StatistiqueApiRead["structures"] => {
-  const structuresActives = filterStructuresActives(structures);
+  const { structures, allStructures, yearContext, typologies, adresses, cpomLinks } =
+    context;
   const typologieMap = getLastTypologiePerStructure(typologies);
   const structuresWithTypologie = filterStructuresWithTypologie(
-    structuresActives,
+    structures,
     typologieMap
   );
   const batiMap = getBatiPerStructure(adresses);
-  const structureIds = structuresActives.map((structure) => structure.id);
+  const activeStructureIds = structures.map((structure) => structure.id);
 
   return {
-    totalStructures: structuresActives.length,
+    totalStructures: structures.length,
     totalCpoms: countActiveCpoms(
       cpomLinks,
-      new Set(structureIds),
+      new Set(activeStructureIds),
       CURRENT_YEAR
     ),
     structuresAvecCpom: countStructuresWithActiveCpom(
       cpomLinks,
-      structureIds,
+      activeStructureIds,
       CURRENT_YEAR
     ),
     structureTypes: computeTypeStats(structuresWithTypologie, typologieMap),
@@ -367,6 +372,12 @@ export const computeStructuresStatistiques = (
       batiMap,
       adresses
     ),
-    byYear: computeByYearStats(structures, typologies, batiMap, cpomLinks),
+    byYear: computeByYearStats(
+      allStructures,
+      yearContext,
+      typologies,
+      batiMap,
+      cpomLinks
+    ),
   };
 };

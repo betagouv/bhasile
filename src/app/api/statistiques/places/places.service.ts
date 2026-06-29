@@ -5,13 +5,4 @@ import { computePlacesStatistiques } from "./places.util";
 
 export const getPlacesStatistiques = (
   context: StatistiquesContext
-): StatistiqueApiRead["places"] => {
-  const { structures, typologies, adresses, departements } = context;
-
-  return computePlacesStatistiques(
-    structures,
-    typologies,
-    adresses,
-    departements
-  );
-};
+): StatistiqueApiRead["places"] => computePlacesStatistiques(context);

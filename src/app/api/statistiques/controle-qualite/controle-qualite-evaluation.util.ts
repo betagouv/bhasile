@@ -15,8 +15,13 @@ import type {
   StatistiqueDbDnaLink,
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
+  StatistiquesYearContext,
 } from "../statistiques.db.type";
 import {
+  getActiveStructureIdsForPeriod,
+  getActiveStructureIdsForYear,
+  getMonthPeriodBounds,
+  getTrimesterPeriodBounds,
   monthKeyToDate,
   parseTrimesterKey,
   toMonthKey,
@@ -141,15 +146,23 @@ const computeControleQualitePeriodStat = (
   totalStructures: number,
   dnaCodeToStructureIds: Map<string, Set<number>>,
   aggregation: NumericAggregation
-): ControleQualitePeriodStat => ({
-  ...computeEigPeriodMetrics(
-    eigsForPeriod,
-    activeStructureIdSet,
-    totalStructures,
-    dnaCodeToStructureIds
-  ),
-  ...computeEvaluationNotes(evaluationsForPeriod, aggregation),
-});
+): ControleQualitePeriodStat => {
+  const evaluationsActives = evaluationsForPeriod.filter(
+    (evaluation) =>
+      evaluation.structureId !== null &&
+      activeStructureIdSet.has(evaluation.structureId)
+  );
+
+  return {
+    ...computeEigPeriodMetrics(
+      eigsForPeriod,
+      activeStructureIdSet,
+      totalStructures,
+      dnaCodeToStructureIds
+    ),
+    ...computeEvaluationNotes(evaluationsActives, aggregation),
+  };
+};
 
 type ControleQualiteSeriesContext = {
   activeStructureIdSet: Set<number>;
@@ -167,7 +180,8 @@ const computeControleQualiteByPeriod = <
   getPeriodKey: (date: Date) => string,
   mapPeriodKey: (
     periodKey: string
-  ) => Omit<Entry, keyof ControleQualitePeriodStat>
+  ) => Omit<Entry, keyof ControleQualitePeriodStat>,
+  getPeriodContext?: (periodKey: string) => ControleQualiteSeriesContext
 ): Entry[] => {
   const eigsByPeriod = groupByPeriodKey(
     eigs,
@@ -182,21 +196,51 @@ const computeControleQualiteByPeriod = <
 
   return [...new Set([...eigsByPeriod.keys(), ...evaluationsByPeriod.keys()])]
     .sort()
-    .map(
-      (periodKey) =>
-        ({
-          ...mapPeriodKey(periodKey),
-          ...computeControleQualitePeriodStat(
-            eigsByPeriod.get(periodKey) ?? [],
-            evaluationsByPeriod.get(periodKey) ?? [],
-            context.activeStructureIdSet,
-            context.totalStructures,
-            context.dnaCodeToStructureIds,
-            context.aggregation
-          ),
-        }) as Entry
-    );
+    .map((periodKey) => {
+      const periodContext = getPeriodContext?.(periodKey) ?? context;
+
+      return {
+        ...mapPeriodKey(periodKey),
+        ...computeControleQualitePeriodStat(
+          eigsByPeriod.get(periodKey) ?? [],
+          evaluationsByPeriod.get(periodKey) ?? [],
+          periodContext.activeStructureIdSet,
+          periodContext.totalStructures,
+          periodContext.dnaCodeToStructureIds,
+          periodContext.aggregation
+        ),
+      } as Entry;
+    });
 };
+
+const buildSeriesContextForPeriod = (
+  activeStructureIdSet: Set<number>,
+  dnaLinks: StatistiqueDbDnaLink[],
+  aggregation: NumericAggregation
+): ControleQualiteSeriesContext => ({
+  activeStructureIdSet,
+  totalStructures: activeStructureIdSet.size,
+  dnaCodeToStructureIds: buildDnaCodeToStructureIds(
+    dnaLinks.filter(
+      (link) =>
+        link.structureId !== null &&
+        activeStructureIdSet.has(link.structureId)
+    )
+  ),
+  aggregation,
+});
+
+const buildSeriesContextForYear = (
+  year: number,
+  yearContext: StatistiquesYearContext,
+  dnaLinks: StatistiqueDbDnaLink[],
+  aggregation: NumericAggregation
+): ControleQualiteSeriesContext =>
+  buildSeriesContextForPeriod(
+    getActiveStructureIdsForYear(yearContext, year),
+    dnaLinks,
+    aggregation
+  );
 
 const buildSeriesContext = (
   activeStructureIds: number[],
@@ -215,7 +259,8 @@ export const computeControleQualiteStatistiques = (
   eigs: StatistiqueDbEig[],
   evaluations: StatistiqueDbEvaluation[],
   dnaLinks: StatistiqueDbDnaLink[],
-  aggregation: NumericAggregation
+  aggregation: NumericAggregation,
+  yearContext: StatistiquesYearContext
 ): StatistiqueApiRead["controleQualite"] => {
   const activeStructureIdSet = new Set(activeStructureIds);
   const evaluationsActives = evaluations.filter(
@@ -239,24 +284,48 @@ export const computeControleQualiteStatistiques = (
     ),
     byMonth: computeControleQualiteByPeriod<ControleQualiteByMonthStat>(
       eigs,
-      evaluationsActives,
+      evaluations,
       seriesContext,
       toMonthKey,
-      (monthKey) => ({ date: monthKeyToDate(monthKey) })
+      (monthKey) => ({ date: monthKeyToDate(monthKey) }),
+      (monthKey) => {
+        const { start, end } = getMonthPeriodBounds(monthKey);
+        return buildSeriesContextForPeriod(
+          getActiveStructureIdsForPeriod(yearContext, start, end),
+          dnaLinks,
+          aggregation
+        );
+      }
     ),
     byTrimester: computeControleQualiteByPeriod<ControleQualiteByTrimesterStat>(
       eigs,
-      evaluationsActives,
+      evaluations,
       seriesContext,
       toTrimesterKey,
-      parseTrimesterKey
+      parseTrimesterKey,
+      (trimesterKey) => {
+        const { year, trimester } = parseTrimesterKey(trimesterKey);
+        const { start, end } = getTrimesterPeriodBounds(year, trimester);
+        return buildSeriesContextForPeriod(
+          getActiveStructureIdsForPeriod(yearContext, start, end),
+          dnaLinks,
+          aggregation
+        );
+      }
     ),
     byYear: computeControleQualiteByPeriod<ControleQualiteByYearStat>(
       eigs,
-      evaluationsActives,
+      evaluations,
       seriesContext,
       toYearKey,
-      (yearKey) => ({ year: Number(yearKey) })
+      (yearKey) => ({ year: Number(yearKey) }),
+      (yearKey) =>
+        buildSeriesContextForYear(
+          Number(yearKey),
+          yearContext,
+          dnaLinks,
+          aggregation
+        )
     ),
   };
 };

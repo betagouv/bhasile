@@ -5,13 +5,4 @@ import { computeStructuresStatistiques } from "./structures.util";
 
 export const getStructuresStatistiques = (
   context: StatistiquesContext
-): StatistiqueApiRead["structures"] => {
-  const { structures, typologies, adresses, cpomLinks } = context;
-
-  return computeStructuresStatistiques(
-    structures,
-    typologies,
-    adresses,
-    cpomLinks
-  );
-};
+): StatistiqueApiRead["structures"] => computeStructuresStatistiques(context);

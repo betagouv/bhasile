@@ -13,54 +13,71 @@ import {
   findDepartementsWithPopulation,
   findDnaLinksByStructure,
   findEffectiveStructureVersionsAtDate,
+  findFirstEffectiveDateByStructure,
   findStructureAdresses,
   findStructureTypologies,
 } from "./statistiques.repository";
+import {
+  buildClosureDateByStructureId,
+  buildStatistiquesYearContext,
+  collectCandidateYears,
+  getTypologieYears,
+  mapVersionsToStructures,
+} from "./statistiques.utils";
 import { getStructuresStatistiques } from "./structures/structures.service";
 
 export const buildStatistiquesContext = async (
   filters: StatistiquesFilters
 ): Promise<StatistiquesContext | null> => {
   const atDate = new Date();
+  const referenceYear = atDate.getFullYear();
   const effectiveVersions = await findEffectiveStructureVersionsAtDate(
     filters,
     atDate
   );
 
-  // A structure is considered closed if its effective version at date is linked to a FERMETURE block.
+  const allStructureIds = effectiveVersions
+    .map((version) => version.structureId)
+    .filter((id): id is number => id != null);
+
+  if (allStructureIds.length === 0) {
+    return null;
+  }
+
   const openEffectiveVersions = effectiveVersions.filter(
     (version) => version.structureVersionTransformation?.type !== "FERMETURE"
   );
 
-  const structureIds = openEffectiveVersions
-    .map((version) => version.structureId)
-    .filter((id): id is number => id != null);
-
-  if (structureIds.length === 0) {
-    return null;
-  }
-
-  const effectiveStructureVersionIds = openEffectiveVersions
+  const effectiveStructureVersionIds = effectiveVersions
     .map((version) => version.id)
     .filter((id): id is number => id != null);
 
-  const structures = openEffectiveVersions
-    .filter(
-      (version): version is typeof version & { structureId: number } =>
-        version.structureId != null
-    )
-    .map((version) => ({
-      id: version.structureId,
-      type: version.type,
-      departementAdministratif: version.departementAdministratif,
-    }));
+  const allStructures = mapVersionsToStructures(effectiveVersions);
+  const structures = mapVersionsToStructures(openEffectiveVersions);
 
-  const [typologies, adresses, cpomLinks, dnaLinks] = await Promise.all([
-    findStructureTypologies(structureIds),
-    findStructureAdresses(effectiveStructureVersionIds),
-    findCpomStructures(structureIds),
-    findDnaLinksByStructure(structureIds),
-  ]);
+  const [typologies, adresses, cpomLinks, dnaLinks, openingDateByStructureId] =
+    await Promise.all([
+      findStructureTypologies(allStructureIds),
+      findStructureAdresses(effectiveStructureVersionIds),
+      findCpomStructures(allStructureIds),
+      findDnaLinksByStructure(allStructureIds),
+      findFirstEffectiveDateByStructure(allStructureIds),
+    ]);
+
+  const closureDateByStructureId =
+    buildClosureDateByStructureId(effectiveVersions);
+  const yearContext = buildStatistiquesYearContext(
+    allStructureIds,
+    collectCandidateYears(
+      allStructureIds,
+      getTypologieYears(typologies),
+      openingDateByStructureId,
+      closureDateByStructureId,
+      referenceYear
+    ),
+    openingDateByStructureId,
+    closureDateByStructureId
+  );
 
   const dnaCodes = [...new Set(dnaLinks.map((link) => link.dna.code))];
 
@@ -74,8 +91,9 @@ export const buildStatistiquesContext = async (
   const departements = await findDepartementsWithPopulation(deptNumeros);
 
   return {
-    structureIds,
     structures,
+    allStructures,
+    yearContext,
     typologies,
     adresses,
     cpomLinks,

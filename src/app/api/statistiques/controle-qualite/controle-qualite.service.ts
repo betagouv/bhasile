@@ -4,7 +4,6 @@ import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 import type { StatistiquesContext } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
-  filterStructuresActives,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
 } from "../statistiques.utils";
@@ -15,16 +14,16 @@ export const getControleQualiteStatistiques = async (
   context: StatistiquesContext,
   aggregation: NumericAggregation
 ): Promise<StatistiqueApiRead["controleQualite"]> => {
-  const { structureIds, structures, typologies, dnaLinks, dnaCodes } = context;
+  const { structures, yearContext, typologies, dnaLinks, dnaCodes } = context;
   const typologieMap = getLastTypologiePerStructure(typologies);
   const structuresWithTypologie = filterStructuresWithTypologie(
-    filterStructuresActives(structures),
+    structures,
     typologieMap
   );
 
   const [eigs, evaluations] = await Promise.all([
     findEigs(dnaCodes),
-    findEvaluations(structureIds),
+    findEvaluations(yearContext.allStructureIds),
   ]);
 
   return computeControleQualiteStatistiques(
@@ -33,6 +32,7 @@ export const getControleQualiteStatistiques = async (
     eigs,
     evaluations,
     dnaLinks,
-    aggregation
+    aggregation,
+    yearContext
   );
 };

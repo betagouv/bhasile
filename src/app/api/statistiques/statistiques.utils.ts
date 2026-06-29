@@ -1,15 +1,211 @@
 import { sumValues } from "@/app/utils/math.util";
 
 import type {
+  StatistiqueDbEffectiveStructureVersion,
   StatistiqueDbStructure,
   StatistiqueDbTypologie,
   StatistiqueDbTypologieValues,
+  StatistiquesYearContext,
 } from "./statistiques.db.type";
 
-// TODO(post-transfo) : exclure les structures avec transfo FERMETURE effective.
-export const filterStructuresActives = (
-  structures: StatistiqueDbStructure[]
-): StatistiqueDbStructure[] => structures;
+export const getYearFromDate = (
+  date: Date | string | null | undefined
+): number | null => {
+  if (date == null) {
+    return null;
+  }
+  return new Date(date).getFullYear();
+};
+
+export const mapVersionsToStructures = (
+  versions: StatistiqueDbEffectiveStructureVersion[]
+): StatistiqueDbStructure[] =>
+  versions
+    .filter(
+      (version): version is typeof version & { structureId: number } =>
+        version.structureId != null
+    )
+    .map((version) => ({
+      id: version.structureId,
+      type: version.type,
+      departementAdministratif: version.departementAdministratif,
+    }));
+
+export const buildClosureDateByStructureId = (
+  effectiveVersions: StatistiqueDbEffectiveStructureVersion[]
+): Map<number, Date | null> => {
+  const closureDateByStructureId = new Map<number, Date | null>();
+
+  for (const version of effectiveVersions) {
+    if (version.structureId == null) {
+      continue;
+    }
+
+    if (version.structureVersionTransformation?.type === "FERMETURE") {
+      closureDateByStructureId.set(
+        version.structureId,
+        version.effectiveDate != null ? new Date(version.effectiveDate) : null
+      );
+      continue;
+    }
+
+    closureDateByStructureId.set(version.structureId, null);
+  }
+
+  return closureDateByStructureId;
+};
+
+export const isStructureActiveInPeriod = (
+  structureId: number,
+  periodStart: Date,
+  periodEnd: Date,
+  yearContext: StatistiquesYearContext
+): boolean => {
+  const openingDate = yearContext.openingDateByStructureId.get(structureId);
+  if (openingDate != null && openingDate >= periodEnd) {
+    return false;
+  }
+
+  const closureDate = yearContext.closureDateByStructureId.get(structureId) ?? null;
+  if (closureDate != null && closureDate < periodStart) {
+    return false;
+  }
+
+  return true;
+};
+
+export const getYearPeriodBounds = (year: number): { start: Date; end: Date } => ({
+  start: new Date(Date.UTC(year, 0, 1)),
+  end: new Date(Date.UTC(year + 1, 0, 1)),
+});
+
+export const getMonthPeriodBounds = (
+  monthKey: string
+): { start: Date; end: Date } => {
+  const [year, month] = monthKey.split("-").map(Number);
+  return {
+    start: new Date(Date.UTC(year, month - 1, 1)),
+    end: new Date(Date.UTC(year, month, 1)),
+  };
+};
+
+export const getTrimesterPeriodBounds = (
+  year: number,
+  trimester: number
+): { start: Date; end: Date } => {
+  const startMonth = (trimester - 1) * 3;
+  return {
+    start: new Date(Date.UTC(year, startMonth, 1)),
+    end: new Date(Date.UTC(year, startMonth + 3, 1)),
+  };
+};
+
+export const isStructureActiveInYear = (
+  structureId: number,
+  year: number,
+  yearContext: StatistiquesYearContext
+): boolean => {
+  const { start, end } = getYearPeriodBounds(year);
+  return isStructureActiveInPeriod(structureId, start, end, yearContext);
+};
+
+export const collectCandidateYears = (
+  structureIds: number[],
+  typologieYears: number[],
+  openingDateByStructureId: Map<number, Date>,
+  closureDateByStructureId: Map<number, Date | null>,
+  referenceYear: number
+): number[] => {
+  const years = new Set(typologieYears);
+
+  for (const structureId of structureIds) {
+    const openingYear =
+      getYearFromDate(openingDateByStructureId.get(structureId)) ??
+      referenceYear;
+    const closureYear =
+      getYearFromDate(closureDateByStructureId.get(structureId) ?? null) ??
+      referenceYear;
+    const maxYear = Math.max(openingYear, closureYear, referenceYear);
+
+    for (let year = Math.min(openingYear, closureYear); year <= maxYear; year += 1) {
+      years.add(year);
+    }
+  }
+
+  return [...years].sort((yearA, yearB) => yearA - yearB);
+};
+
+export const buildStatistiquesYearContext = (
+  structureIds: number[],
+  years: number[],
+  openingDateByStructureId: Map<number, Date>,
+  closureDateByStructureId: Map<number, Date | null>
+): StatistiquesYearContext => {
+  const yearContext: StatistiquesYearContext = {
+    allStructureIds: structureIds,
+    openingDateByStructureId,
+    closureDateByStructureId,
+    structuresActivesByYear: new Map(),
+  };
+
+  for (const year of years) {
+    getActiveStructureIdsForYear(yearContext, year);
+  }
+
+  return yearContext;
+};
+
+export const getActiveStructureIdsForPeriod = (
+  yearContext: StatistiquesYearContext,
+  periodStart: Date,
+  periodEnd: Date
+): Set<number> => {
+  const activeStructureIds = new Set<number>();
+
+  for (const structureId of yearContext.allStructureIds) {
+    if (
+      isStructureActiveInPeriod(
+        structureId,
+        periodStart,
+        periodEnd,
+        yearContext
+      )
+    ) {
+      activeStructureIds.add(structureId);
+    }
+  }
+
+  return activeStructureIds;
+};
+
+export const getActiveStructureIdsForYear = (
+  yearContext: StatistiquesYearContext,
+  year: number
+): Set<number> => {
+  const cached = yearContext.structuresActivesByYear.get(year);
+  if (cached) {
+    return cached;
+  }
+
+  const { start, end } = getYearPeriodBounds(year);
+  const activeStructureIds = getActiveStructureIdsForPeriod(
+    yearContext,
+    start,
+    end
+  );
+
+  yearContext.structuresActivesByYear.set(year, activeStructureIds);
+  return activeStructureIds;
+};
+
+export const filterStructuresForYear = (
+  structures: StatistiqueDbStructure[],
+  year: number,
+  yearContext: StatistiquesYearContext
+): StatistiqueDbStructure[] => {
+  const activeStructureIds = getActiveStructureIdsForYear(yearContext, year);
+  return structures.filter((structure) => activeStructureIds.has(structure.id));
+};
 
 const TYPOLOGIE_AGGREGATE_FIELDS = [
   "placesAutorisees",

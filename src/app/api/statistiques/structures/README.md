@@ -4,14 +4,14 @@
 
 | Périmètre                              | Règle                                                            |
 | -------------------------------------- | ---------------------------------------------------------------- |
-| `totalStructures`                      | Structures actives (`filterStructuresActives`)                   |
+| `totalStructures`                      | Structures ouvertes à la date de référence (`context.structures`) |
 | `structureTypes[]`, `structureBatis[]` | Structures actives **avec** typologie (>=1 `StructureTypologie`) |
 
 ## Vue globale
 
 | Champ                | Calcul                                                                                                                                     |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `totalStructures`    | Structures actives (`filterStructuresActives`)                                                                                             |
+| `totalStructures`    | Structures ouvertes à la date de référence (`context.structures`)                                                                                             |
 | `totalCpoms`         | CPOM distincts actifs année courante, avec réemploi de `isStructureInCpom`                                                                 |
 | `structuresAvecCpom` | Structures avec ≥1 CPOM actif année courante                                                                                               |
 | `structureTypes[]`   | Par `Structure.type` - structures actives ; places = somme `placesAutorisees` résolues                                                     |

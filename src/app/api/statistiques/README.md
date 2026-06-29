@@ -45,9 +45,15 @@ GET /api/statistiques?departements=01,02,03&types=CADA,CPH&operateurs=1,2
 
 ## Périmètre
 
-Filtre structures via `buildStructureWhere` (pivot sur `StructureVersion` effective).
+Filtre structures via `findEffectiveStructureVersionsAtDate` (pivot sur `StructureVersion` effective).
 
-**Structures actives** : aujourd'hui, on filtre déjà les versions `FERMETURE` à la construction du contexte ; `filterStructuresActives` reste un point d'extension si on doit gérer des règles temporelles plus fines.
+**Structures actives (indicateurs globaux)** : dernière version à date sans bloc `FERMETURE`.
+
+**Structures actives par année (`yearContext`)** : une structure fermée en cours d'année N reste comptée pour N et les années antérieures, mais pas au-delà. Une structure est active sur une période si `openingDate ≤ fin de période` et (`closureDate` absente ou `closureDate ≥ début de période`).
+
+**`byMonth` / `byTrimester` (contrôle qualité)** : même règle sur le mois ou le trimestre concerné (au moins un jour d'activité sur la période pour le dénominateur des indicateurs type « structures sans déclaration EIG »).
+
+Le mapping `yearContext.structuresActivesByYear` est construit à la racine du contexte et réutilisé par les blocs `byYear`.
 
 **Avec typologie** (≥1 `StructureTypologie`) : requis pour agrégats places, répartitions type/bâti, contrôle qualité. `structures.totalStructures` = structures actives (avec ou sans typologie).
 

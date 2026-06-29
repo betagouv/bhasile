@@ -19,7 +19,9 @@ import type {
   StatistiqueDbIndicateurFinancier,
   StatistiqueDbIndicateurFinancierMetriques,
   StatistiqueDbStructure,
+  StatistiquesYearContext,
 } from "../statistiques.db.type";
+import { getActiveStructureIdsForYear } from "../statistiques.utils";
 
 type FinanceScopeIds = {
   total: number[];
@@ -164,24 +166,35 @@ const getResolvedIndicateursForYear = (
 };
 
 const computeScopeYearStats = (
-  structureIds: number[],
+  structureIdsInScope: number[],
+  yearContext: StatistiquesYearContext,
   budgets: StatistiqueDbBudget[],
   indicateurs: StatistiqueDbIndicateurFinancier[],
   aggregation: NumericAggregation
 ): Array<FinanceByYearScopeStat & { year: number }> => {
-  const structureIdSet = new Set(structureIds);
+  const structureIdSet = new Set(structureIdsInScope);
   const scopedIndicateurs = indicateurs.filter(
     (indicateur) =>
       indicateur.structureId !== null &&
       structureIdSet.has(indicateur.structureId)
   );
-  const budgetsByYear = aggregateBudgetsByYear(budgets);
+  const scopedBudgets = budgets.filter((budget) =>
+    structureIdSet.has(budget.structureId)
+  );
 
   let excedentCumule = 0;
   let deficitCumule = 0;
 
-  return getFinanceYears(budgets, scopedIndicateurs).map((year) => {
-    const budget = budgetsByYear.get(year);
+  return getFinanceYears(scopedBudgets, scopedIndicateurs).map((year) => {
+    const activeStructureIds = getActiveStructureIdsForYear(yearContext, year);
+    const structureIds = structureIdsInScope.filter((structureId) =>
+      activeStructureIds.has(structureId)
+    );
+    const budgetsForYear = scopedBudgets.filter(
+      (budget) =>
+        budget.year === year && activeStructureIds.has(budget.structureId)
+    );
+    const budget = aggregateBudgetsByYear(budgetsForYear).get(year);
     const indicateursForYear = getResolvedIndicateursForYear(
       structureIds,
       scopedIndicateurs,
@@ -190,7 +203,7 @@ const computeScopeYearStats = (
     const totalProduits = budget?.totalProduits ?? 0;
     const totalCharges = budget?.totalCharges ?? 0;
     const resultatNet = totalProduits - totalCharges;
-    const { excedent, deficit } = getYearExcedentAndDeficit(budgets, year);
+    const { excedent, deficit } = getYearExcedentAndDeficit(budgetsForYear, year);
 
     excedentCumule += excedent;
     deficitCumule += deficit;
@@ -264,6 +277,7 @@ const scopeStatForYear = (
 
 const buildByYearFinanceStats = (
   scopeIds: FinanceScopeIds,
+  yearContext: StatistiquesYearContext,
   budgets: {
     total: StatistiqueDbBudget[];
     autorisees: StatistiqueDbBudget[];
@@ -274,18 +288,21 @@ const buildByYearFinanceStats = (
 ): FinanceByYearStat[] => {
   const totalStats = computeScopeYearStats(
     scopeIds.total,
+    yearContext,
     budgets.total,
     indicateurs,
     aggregation
   );
   const autoriseesStats = computeScopeYearStats(
     scopeIds.autorisees,
+    yearContext,
     budgets.autorisees,
     indicateurs,
     aggregation
   );
   const subventionneesStats = computeScopeYearStats(
     scopeIds.subventionnees,
+    yearContext,
     budgets.subventionnees,
     indicateurs,
     aggregation
@@ -309,6 +326,7 @@ const buildByYearFinanceStats = (
 
 export const computeFinanceStatistiques = (
   scopeIds: FinanceScopeIds,
+  yearContext: StatistiquesYearContext,
   budgets: {
     total: StatistiqueDbBudget[];
     autorisees: StatistiqueDbBudget[];
@@ -317,5 +335,11 @@ export const computeFinanceStatistiques = (
   indicateurs: StatistiqueDbIndicateurFinancier[],
   aggregation: NumericAggregation
 ): StatistiqueApiRead["finance"] => ({
-  byYear: buildByYearFinanceStats(scopeIds, budgets, indicateurs, aggregation),
+  byYear: buildByYearFinanceStats(
+    scopeIds,
+    yearContext,
+    budgets,
+    indicateurs,
+    aggregation
+  ),
 });

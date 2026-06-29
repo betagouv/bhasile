@@ -17,8 +17,8 @@ export const getFinanceStatistiques = async (
   context: StatistiquesContext,
   aggregation: StatistiquesAggregation
 ): Promise<StatistiqueApiRead["finance"]> => {
-  const { structures } = context;
-  const scopeIds = getStructureIdsByFinanceScope(structures);
+  const { allStructures, yearContext } = context;
+  const scopeIds = getStructureIdsByFinanceScope(allStructures);
 
   const [budgetsTotal, budgetsAutorisees, budgetsSubventionnees, indicateurs] =
     await Promise.all([
@@ -30,6 +30,7 @@ export const getFinanceStatistiques = async (
 
   return computeFinanceStatistiques(
     scopeIds,
+    yearContext,
     {
       total: budgetsTotal,
       autorisees: budgetsAutorisees,

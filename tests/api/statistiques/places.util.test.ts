@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { computePlacesStatistiques } from "@/app/api/statistiques/places/places.util";
 import { StructureType } from "@/types/structure.type";
 
+import { buildTestStatistiquesContext } from "./test-helpers";
+
 describe("places statistics util", () => {
   const structures = [
     { id: 1, type: StructureType.CADA, departementAdministratif: "01" },
@@ -17,29 +19,31 @@ describe("places statistics util", () => {
 
   it("should compute equipment rate from places and population", () => {
     const result = computePlacesStatistiques(
-      structures.slice(0, 2),
-      [
-        {
-          id: 1,
-          structureId: 1,
-          year: 2024,
-          placesAutorisees: 100,
-          pmr: 0,
-          lgbt: 0,
-          fvvTeh: 0,
-        },
-        {
-          id: 2,
-          structureId: 2,
-          year: 2024,
-          placesAutorisees: 50,
-          pmr: 0,
-          lgbt: 0,
-          fvvTeh: 0,
-        },
-      ],
-      [],
-      departements
+      buildTestStatistiquesContext({
+        structures: structures.slice(0, 2),
+        typologies: [
+          {
+            id: 1,
+            structureId: 1,
+            year: 2024,
+            placesAutorisees: 100,
+            pmr: 0,
+            lgbt: 0,
+            fvvTeh: 0,
+          },
+          {
+            id: 2,
+            structureId: 2,
+            year: 2024,
+            placesAutorisees: 50,
+            pmr: 0,
+            lgbt: 0,
+            fvvTeh: 0,
+          },
+        ],
+        adresses: [],
+        departements,
+      })
     );
 
     expect(result.totalPlaces).toBe(150);
@@ -48,51 +52,55 @@ describe("places statistics util", () => {
 
   it("should return null equipment rate without population", () => {
     const result = computePlacesStatistiques(
-      [structures[0]],
-      [
-        {
-          id: 1,
-          structureId: 1,
-          year: 2024,
-          placesAutorisees: 100,
-          pmr: 0,
-          lgbt: 0,
-          fvvTeh: 0,
-        },
-      ],
-      [],
-      [{ id: 1, numero: "01", name: "Ain", population: null }]
+      buildTestStatistiquesContext({
+        structures: [structures[0]],
+        typologies: [
+          {
+            id: 1,
+            structureId: 1,
+            year: 2024,
+            placesAutorisees: 100,
+            pmr: 0,
+            lgbt: 0,
+            fvvTeh: 0,
+          },
+        ],
+        adresses: [],
+        departements: [{ id: 1, numero: "01", name: "Ain", population: null }],
+      })
     );
 
     expect(result.tauxEquipement).toBeNull();
     expect(result.population).toBeNull();
   });
 
-  it("should resolve indicators from latest non-null typology per field", () => {
+  it("should resolve indicators from latest non-null typologie per field", () => {
     const result = computePlacesStatistiques(
-      [structures[0]],
-      [
-        {
-          id: 1,
-          structureId: 1,
-          year: 2023,
-          placesAutorisees: 80,
-          pmr: 10,
-          lgbt: 1,
-          fvvTeh: 0,
-        },
-        {
-          id: 2,
-          structureId: 1,
-          year: 2024,
-          placesAutorisees: 100,
-          pmr: null,
-          lgbt: 3,
-          fvvTeh: 2,
-        },
-      ],
-      [],
-      departements.slice(0, 1)
+      buildTestStatistiquesContext({
+        structures: [structures[0]],
+        typologies: [
+          {
+            id: 1,
+            structureId: 1,
+            year: 2023,
+            placesAutorisees: 80,
+            pmr: 10,
+            lgbt: 1,
+            fvvTeh: 0,
+          },
+          {
+            id: 2,
+            structureId: 1,
+            year: 2024,
+            placesAutorisees: 100,
+            pmr: null,
+            lgbt: 3,
+            fvvTeh: 2,
+          },
+        ],
+        adresses: [],
+        departements: departements.slice(0, 1),
+      })
     );
 
     expect(result.totalPlaces).toBe(100);
@@ -103,20 +111,22 @@ describe("places statistics util", () => {
 
   it("should exclude structures without typologie from totals", () => {
     const result = computePlacesStatistiques(
-      structures,
-      [
-        {
-          id: 1,
-          structureId: 1,
-          year: 2024,
-          placesAutorisees: 100,
-          pmr: 0,
-          lgbt: 0,
-          fvvTeh: 0,
-        },
-      ],
-      [],
-      departements.slice(0, 1)
+      buildTestStatistiquesContext({
+        structures,
+        typologies: [
+          {
+            id: 1,
+            structureId: 1,
+            year: 2024,
+            placesAutorisees: 100,
+            pmr: 0,
+            lgbt: 0,
+            fvvTeh: 0,
+          },
+        ],
+        adresses: [],
+        departements: departements.slice(0, 1),
+      })
     );
 
     expect(result.totalPlaces).toBe(100);
