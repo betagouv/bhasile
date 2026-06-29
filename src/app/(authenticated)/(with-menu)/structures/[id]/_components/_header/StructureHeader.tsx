@@ -44,10 +44,6 @@ export const StructureHeader = (): ReactElement | null => {
     `/structures/${structure?.id}/finalisation`
   );
 
-  if (!structure) {
-    return null;
-  }
-
   const {
     codeBhasile,
     type,
@@ -78,14 +74,14 @@ export const StructureHeader = (): ReactElement | null => {
             <h3 className="text-title-blue-france fr-h6 mb-0 flex items-center gap-4">
               <span className="flex items-center gap-2">
                 <strong>{codeBhasile}</strong>
-                {nom && (
+                {nom ? (
                   <>
                     –
                     <span className="mb-0 text-title-grey text-lg italic font-normal">
                       {nom}
                     </span>
                   </>
-                )}
+                ) : null}
               </span>
               <span className="flex items-center gap-2">
                 <Badge type="purple">{type}</Badge>{" "}
@@ -132,17 +128,14 @@ export const StructureHeader = (): ReactElement | null => {
                   {
                     label: "Description",
                     section: "#description",
-                    isDisplayed: true,
                   },
                   {
                     label: "Calendrier",
                     section: "#calendrier",
-                    isDisplayed: true,
                   },
                   {
                     label: "Type de places",
                     section: "#places",
-                    isDisplayed: true,
                   },
                   {
                     label: "Finances",
@@ -153,19 +146,16 @@ export const StructureHeader = (): ReactElement | null => {
                   {
                     label: "Contrôle qualité",
                     section: "#controle",
-                    isDisplayed: true,
                   },
                   {
                     label: "Activité",
                     section: "#activite",
-                    isDisplayed: false,
                   },
                   {
                     label: "Actes administratifs",
                     section: "#actes-administratifs",
-                    isDisplayed: true,
                   },
-                  { label: "Notes", section: "#notes", isDisplayed: true },
+                  { label: "Notes", section: "#notes" },
                 ]}
               />
             )}

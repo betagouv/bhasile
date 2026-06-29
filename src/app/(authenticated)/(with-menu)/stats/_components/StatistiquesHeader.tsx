@@ -33,17 +33,14 @@ export const StatistiquesHeader = (): ReactElement | null => {
           {
             label: "Structures",
             section: "#structures",
-            isDisplayed: true,
           },
           {
             label: "Types de places",
             section: "#types-places",
-            isDisplayed: true,
           },
           {
             label: "Finance",
             section: "#finance",
-            isDisplayed: true,
           },
         ]}
       />

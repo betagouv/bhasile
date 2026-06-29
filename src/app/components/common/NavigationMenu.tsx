@@ -6,7 +6,7 @@ export const NavigationMenu = ({ menuElements }: Props): ReactElement => {
     <nav className="fr-nav border-b border-b-border-default-grey">
       <ul className="fr-nav__list">
         {menuElements
-          .filter((menuElement) => menuElement.isDisplayed)
+          .filter((menuElement) => menuElement.isDisplayed ?? true)
           .map((menuElement) => (
             <li key={menuElement.label} className="fr-nav__item">
               <Link
@@ -26,6 +26,6 @@ type Props = {
   menuElements: {
     label: string;
     section: string;
-    isDisplayed: boolean;
+    isDisplayed?: boolean;
   }[];
 };

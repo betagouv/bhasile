@@ -85,18 +85,15 @@ export const CpomHeader = (): ReactElement | null => {
             {
               label: "Description",
               section: "#description",
-              isDisplayed: true,
             },
             {
               label: "Composition",
               section: "#composition",
-              isDisplayed: true,
             },
-            { label: "Finances", section: "#finances", isDisplayed: true },
+            { label: "Finances", section: "#finances" },
             {
               label: "Actes administratifs",
               section: "#actes-administratifs",
-              isDisplayed: true,
             },
           ]}
         />

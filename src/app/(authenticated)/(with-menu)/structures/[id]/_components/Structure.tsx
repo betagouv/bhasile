@@ -29,7 +29,7 @@ export const Structure = (): ReactElement => {
       <Section id="controle">
         <ControlesBlock />
       </Section>
-      <Section id="activites">
+      <Section id="activite">
         <ActiviteBlock />
       </Section>
       <Section id="actes-administratifs">
