@@ -49,17 +49,14 @@ export const OperateurHeader = (): ReactElement | null => {
             {
               label: "Description",
               section: "#description",
-              isDisplayed: true,
             },
             {
               label: "Contacts",
               section: "#contacts",
-              isDisplayed: true,
             },
             {
               label: "Documents",
               section: "#documents",
-              isDisplayed: true,
             },
           ]}
         />
