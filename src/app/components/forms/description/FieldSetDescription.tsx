@@ -82,7 +82,13 @@ export const FieldSetDescription = ({
                   ))}
               </SelectWithValidation>
 
-              <OperateurAutocompleteRhf />
+              <OperateurAutocompleteRhf
+                disabled={
+                  formKind ===
+                    FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES &&
+                  !!watch("operateur.id")
+                }
+              />
 
               <div ref={filialesContainerRef}>
                 {isManagedByAFiliale && (
