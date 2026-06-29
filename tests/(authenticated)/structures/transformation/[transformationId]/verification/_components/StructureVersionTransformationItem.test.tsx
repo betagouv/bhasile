@@ -227,10 +227,19 @@ describe("StructureVersionTransformationItem", () => {
     expect(screen.queryByText(/places autorisées/)).not.toBeInTheDocument();
   });
 
-  it("should hide the placesAutorisees line for FERMETURE even when the typology exists", () => {
-    // GIVEN
+  it("should render the closed places line for FERMETURE from the structure-level typology", () => {
+    // GIVEN — a closure: places come from the predecessor (structure-level)
+    // typology resolved at the effective year, not the version-level one
     const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       type: StructureVersionTransformationType.FERMETURE,
+      structureVersion: {
+        ...buildCompleteStructureVersionTransformation().structureVersion,
+        structure: {
+          codeBhasile: "BHA-NOR-025",
+          operateur: { id: 10, name: "Groupe SOS" },
+          structureTypologies: [{ year: 2026, placesAutorisees: 47 }],
+        },
+      },
     });
 
     // WHEN
@@ -241,7 +250,36 @@ describe("StructureVersionTransformationItem", () => {
     );
 
     // THEN
+    expect(
+      screen.getByText("47 place(s) fermée(s)")
+    ).toBeInTheDocument();
     expect(screen.queryByText(/places autorisées/)).not.toBeInTheDocument();
+  });
+
+  it("should hide the closed places line for FERMETURE when the most recent structure-level typology is already at zero", () => {
+    // GIVEN — no typology for the closure year (2026); the most-recent
+    // millesime fallback lands on a post-closure year zeroed at 0 places
+    const structureVersionTransformation = buildCompleteStructureVersionTransformation({
+      type: StructureVersionTransformationType.FERMETURE,
+      structureVersion: {
+        ...buildCompleteStructureVersionTransformation().structureVersion,
+        structure: {
+          codeBhasile: "BHA-NOR-025",
+          operateur: { id: 10, name: "Groupe SOS" },
+          structureTypologies: [{ year: 2027, placesAutorisees: 0 }],
+        },
+      },
+    });
+
+    // WHEN
+    render(
+      <StructureVersionTransformationItem
+        structureVersionTransformation={structureVersionTransformation}
+      />
+    );
+
+    // THEN
+    expect(screen.queryByText(/place\(s\) fermée\(s\)/)).not.toBeInTheDocument();
   });
 
   it.each([
@@ -264,10 +302,9 @@ describe("StructureVersionTransformationItem", () => {
       );
 
       // THEN
-      const placesElement = screen.getByText("47 places autorisées");
-      expect(placesElement.parentElement?.textContent).toBe(
-        "47 places autorisées au total"
-      );
+      expect(
+        screen.getByText("47 places autorisées au total")
+      ).toBeInTheDocument();
     }
   );
 
