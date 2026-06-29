@@ -50,6 +50,46 @@ describe("applyPrefill", () => {
     expect(fermetures[0].structureVersion?.contacts).toHaveLength(1);
   });
 
+  it("inherits the operateur from the first FERMETURE source on the CREATION", () => {
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
+      {
+        type: StructureVersionTransformationType.FERMETURE,
+        operateurId: 42,
+        structureVersion: {},
+      },
+      {
+        type: StructureVersionTransformationType.FERMETURE,
+        operateurId: 42,
+        structureVersion: {},
+      },
+      { type: StructureVersionTransformationType.CREATION },
+    ];
+
+    const result = applyPrefill(
+      TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
+      structureVersionTransformations
+    );
+
+    const creation = result.find(
+      (structureVersionTransformation) =>
+        structureVersionTransformation.type === StructureVersionTransformationType.CREATION
+    );
+    expect(creation?.operateurId).toBe(42);
+  });
+
+  it("leaves the CREATION operateur undefined when the type has no prefill config", () => {
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
+      { type: StructureVersionTransformationType.CREATION },
+    ];
+
+    const result = applyPrefill(
+      TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations
+    );
+
+    expect(result[0].operateurId).toBeUndefined();
+  });
+
   it("keeps the target's own data and appends the sources (additive)", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
       {

@@ -22,7 +22,7 @@ export type StructureSelectionBlock = {
   label?: string;
 };
 
-export type PrefillField = "contacts" | "antennes" | "adresses";
+export type PrefillField = "contacts" | "antennes" | "adresses" | "operateur";
 
 export type PrefillRule = {
   from: StructureVersionTransformationType;
@@ -80,7 +80,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         from: StructureVersionTransformationType.FERMETURE,
         to: StructureVersionTransformationType.CREATION,
-        fields: ["contacts", "antennes", "adresses"],
+        fields: ["contacts", "antennes", "adresses", "operateur"],
       },
     ],
   },
@@ -279,7 +279,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         from: StructureVersionTransformationType.FERMETURE,
         to: StructureVersionTransformationType.CREATION,
-        fields: ["contacts", "antennes", "adresses"],
+        fields: ["contacts", "antennes", "adresses", "operateur"],
       },
     ],
   },

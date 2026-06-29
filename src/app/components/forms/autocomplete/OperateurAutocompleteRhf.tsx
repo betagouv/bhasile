@@ -5,7 +5,9 @@ import { useController, useFormContext } from "react-hook-form";
 
 import { OperateurAutocomplete } from "./OperateurAutocomplete";
 
-export const OperateurAutocompleteRhf = (): ReactElement => {
+export const OperateurAutocompleteRhf = ({
+  disabled,
+}: Props): ReactElement => {
   const { field, fieldState } = useController({
     name: "operateur.name",
     rules: { required: true },
@@ -26,8 +28,13 @@ export const OperateurAutocompleteRhf = (): ReactElement => {
         onBlurExtra={field.onBlur}
         externalInvalid={fieldState.invalid}
         externalError={fieldState.error?.message}
+        disabled={disabled}
       />
       <input aria-hidden="true" type="hidden" {...idField} />
     </>
   );
+};
+
+type Props = {
+  disabled?: boolean;
 };

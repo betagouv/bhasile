@@ -151,6 +151,7 @@ const enrichStructureVersionTransformationFromSource = async (
 
   return {
     ...structureVersionTransformation,
+    operateurId: structure.operateurId ?? undefined,
     structureVersion: copyStructureVersion(
       structure,
       structureVersionTransformation.structureVersion
