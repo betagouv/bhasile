@@ -11,15 +11,8 @@ import { Antennes } from "./Antennes";
 import { FieldSetAdresseAdministrative } from "./FieldSetAdresseAdministrative";
 import { TransformationAntennesSection } from "./TransformationAntennesSection";
 
-type Props = {
-  formKind?: FormKind;
-  isAdresseAdministrativeLocked?: boolean;
-  originalAntennes?: AntenneFormValues[];
-};
-
 export const AdresseAdministrativeAndAntennes = ({
   formKind = FormKind.FINALISATION,
-  isAdresseAdministrativeLocked = false,
   originalAntennes = [],
 }: Props) => {
   const { watch, setValue } = useFormContext();
@@ -63,10 +56,7 @@ export const AdresseAdministrativeAndAntennes = ({
           />
         </>
       )}
-      <FieldSetAdresseAdministrative
-        formKind={formKind}
-        locked={isAdresseAdministrativeLocked}
-      />
+      <FieldSetAdresseAdministrative formKind={formKind} />
       {isExtensionOrContraction ? (
         <TransformationAntennesSection
           formKind={formKind}
@@ -123,4 +113,9 @@ const getTitle = (formKind: FormKind): string => {
     return "Veuillez saisir l’adresse administrative principale de la structure.";
   }
   return "Adresses administratives";
+};
+
+type Props = {
+  formKind?: FormKind;
+  originalAntennes?: AntenneFormValues[];
 };

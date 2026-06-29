@@ -10,7 +10,6 @@ import FormWrapper, {
 import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import {
-  getAdresseSource,
   getInitialAntennes,
   getTransformationDefaultValues,
   getTransformationNounAvecArticle,
@@ -101,7 +100,6 @@ export const ExistingStructureIdentificationForm = ({
 
       <TransformationAdresseAdministrative
         formKind={formKind}
-        originalAdresse={getAdresseSource(structureVersionTransformation)}
         originalAntennes={getInitialAntennes(
           transformation,
           structureVersionTransformation
