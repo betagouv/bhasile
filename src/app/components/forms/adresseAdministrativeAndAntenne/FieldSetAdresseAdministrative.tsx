@@ -56,9 +56,14 @@ export const FieldSetAdresseAdministrative = ({
     setValue("adresseAdministrativeComplete", "");
   };
 
+  const shouldShowTitle =
+    formKind !== FormKind.EXTENSION &&
+    formKind !== FormKind.CONTRACTION &&
+    formKind !== FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES;
+
   return (
     <fieldset className="flex flex-col gap-3">
-      {formKind !== FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES && (
+      {shouldShowTitle && (
         <legend className="text-lg font-bold mb-2 text-title-blue-france">
           Structure
         </legend>
@@ -121,7 +126,7 @@ export const FieldSetAdresseAdministrative = ({
         type="button"
         disabled={locked}
         iconId={
-          isManualAddress ? "fr-icon-arrow-go-back-line" : "fr-icon-add-line"
+          isManualAddress ? "fr-icon-arrow-go-back-line" : "fr-icon-edit-line"
         }
         className="underline font-normal p-0"
         onClick={handleManualAddressChange}
