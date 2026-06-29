@@ -16,7 +16,7 @@ export const TypePlaceBlock = (): ReactElement => {
 
   const router = useRouter();
 
-  const { structureTypologies, adresses } = structure;
+  const { structureTypologies } = structure;
 
   const {
     placesACreer,
@@ -74,10 +74,7 @@ export const TypePlaceBlock = (): ReactElement => {
         />
       </div>
       <div className="pt-6">
-        <TypePlaceHistory
-          adresses={adresses || []}
-          structureTypologies={structureTypologies || []}
-        />
+        <TypePlaceHistory />
       </div>
     </Block>
   );

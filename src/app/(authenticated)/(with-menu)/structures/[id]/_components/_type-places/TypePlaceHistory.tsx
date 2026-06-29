@@ -1,149 +1,123 @@
-import { Table } from "@codegouvfr/react-dsfr/Table";
+"use client";
+
 import { ReactElement } from "react";
 
 import { CustomAccordion } from "@/app/components/common/CustomAccordion";
-import {
-  AdresseApiType,
-  AdresseTypologieApiType,
-} from "@/schemas/api/adresse.schema";
-import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
+import { EmptyCell } from "@/app/components/common/EmptyCell";
+import { Table } from "@/app/components/common/Table";
+import { getTransformationMarkers } from "@/app/components/transformation-markers/getTransformationMarkers";
+import { TransformationMarkers } from "@/app/components/transformation-markers/TransformationMarkers";
+import { getTypePlacesYearRange } from "@/app/utils/date.util";
 
-export const TypePlaceHistory = ({
-  adresses,
-  structureTypologies,
-}: Props): ReactElement => {
-  const getCurrentStructureTypologie = (year: number | undefined) => {
-    if (year === undefined) {
-      return undefined;
-    }
-    return structureTypologies.find((structureTypologie) => {
-      return year === structureTypologie?.year;
-    });
-  };
+import { useStructureContext } from "../../_context/StructureClientContext";
+import { getTypePlaceHistoryHeadings } from "./getTypePlaceHistoryHeadings";
 
-  const getYearsFromTypologie = (
-    typologies:
-      | (AdresseTypologieApiType | undefined)[]
-      | StructureTypologieApiType[]
-  ) => {
-    return typologies.map((typologie) =>
-      typologie?.year ? typologie.year : undefined
-    );
-  };
+export const TypePlaceHistory = (): ReactElement => {
+  const { structure } = useStructureContext();
+  const years = [...getTypePlacesYearRange().years].sort(
+    (firstYear, secondYear) => firstYear - secondYear
+  );
+  const markers = getTransformationMarkers(structure.history, years);
 
-  const getTableData = () => {
-    const adresseTypologies =
-      adresses?.flatMap((adresse) => adresse.adresseTypologies) ?? [];
+  const structureTypologies = structure.structureTypologies ?? [];
+  const adresseTypologies = (structure.adresses ?? []).flatMap(
+    (adresse) => adresse.adresseTypologies
+  );
 
-    const allYears = Array.from(
-      new Set([
-        ...getYearsFromTypologie(adresseTypologies),
-        ...getYearsFromTypologie(structureTypologies),
-      ])
-    ).sort((firstElement, secondElement) =>
-      firstElement === undefined
-        ? 1
-        : secondElement === undefined
-          ? -1
-          : secondElement - firstElement
+  const adressePlacesByYear = new Map<
+    number,
+    { qpv: number; logementSocial: number }
+  >();
+  for (const adresseTypologie of adresseTypologies) {
+    const aggregated = adressePlacesByYear.get(adresseTypologie.year) ?? {
+      qpv: 0,
+      logementSocial: 0,
+    };
+    aggregated.qpv += adresseTypologie.qpv;
+    aggregated.logementSocial += adresseTypologie.logementSocial;
+    adressePlacesByYear.set(adresseTypologie.year, aggregated);
+  }
+
+  const getStructureTypologie = (year: number) =>
+    structureTypologies.find(
+      (structureTypologie) => structureTypologie.year === year
     );
 
-    const groupedByYear = adresseTypologies.reduce(
-      (aggregatedTypePlaces: AggregatedTypePlaces, adresseTypologie) => {
-        const year = adresseTypologie?.year ? adresseTypologie.year : undefined;
-        if (!year) {
-          return aggregatedTypePlaces;
-        }
-
-        if (!aggregatedTypePlaces[year]) {
-          aggregatedTypePlaces[year] = {
-            placesAutorisees: 0,
-            qpv: 0,
-            logementSocial: 0,
-          };
-        }
-
-        aggregatedTypePlaces[year as number].placesAutorisees +=
-          adresseTypologie?.placesAutorisees || 0;
-        aggregatedTypePlaces[year as number].qpv += adresseTypologie?.qpv || 0;
-        aggregatedTypePlaces[year as number].logementSocial +=
-          adresseTypologie?.logementSocial || 0;
-        return aggregatedTypePlaces;
-      },
-      {}
-    );
-
-    return allYears.map((year) => {
-      const data = groupedByYear[year as number] || {
-        placesAutorisees: 0,
-        qpv: 0,
-        logementSocial: 0,
-      };
-      const currentStructureTypologie = getCurrentStructureTypologie(
-        year !== undefined ? year : undefined
-      );
-
-      return [
-        year,
-        <span className="inline-block text-center w-full" key={year}>
-          {currentStructureTypologie?.placesAutorisees ?? "N/A"}
-        </span>,
-        <span className="inline-block text-center w-full" key={year}>
-          {currentStructureTypologie?.pmr ?? "N/A"}
-        </span>,
-        <span className="inline-block text-center w-full" key={year}>
-          {currentStructureTypologie?.lgbt ?? "N/A"}
-        </span>,
-        <span className="inline-block text-center w-full" key={year}>
-          {currentStructureTypologie?.fvvTeh ?? "N/A"}
-        </span>,
-        <span key={year} className="inline-block text-center w-full">
-          {data.qpv ?? "N/A"}
-        </span>,
-        <span key={year} className="inline-block w-20 text-center">
-          {data.logementSocial ?? "N/A"}
-        </span>,
-      ];
-    });
-  };
+  const rows: PlaceRow[] = [
+    {
+      label: "Places autorisées",
+      getValue: (year) => getStructureTypologie(year)?.placesAutorisees,
+    },
+    {
+      label: "Places PMR",
+      getValue: (year) => getStructureTypologie(year)?.pmr,
+    },
+    {
+      label: "Places LGBT",
+      subLabel: "(spécialisées)",
+      getValue: (year) => getStructureTypologie(year)?.lgbt,
+    },
+    {
+      label: "Places FVV/TEH",
+      subLabel: "(labelisées)",
+      getValue: (year) => getStructureTypologie(year)?.fvvTeh,
+    },
+    {
+      label: "Places en QPV",
+      getValue: (year) => adressePlacesByYear.get(year)?.qpv,
+    },
+    {
+      label: "Places en logements sociaux",
+      getValue: (year) => adressePlacesByYear.get(year)?.logementSocial,
+    },
+  ];
 
   return (
     <CustomAccordion label="Historique">
+      <h3 id="type-places-historique-title" className="sr-only">
+        Historique des types de places
+      </h3>
       <Table
-        bordered={true}
-        className={`m-0 [&>table]:w-[unset]
-           text-mention-grey [&>table>thead]:text-mention-grey [&>table>tbody>tr>td]:p-3 [&>table>thead>tr>th]:text-xs 
-           [&>table>thead>tr>th]:whitespace-nowrap [&>table>thead>tr>th]:border-b-grey-300 [&>table>thead>tr>th:last-child]:w-full`}
-        caption=""
-        data={getTableData()}
-        headers={[
-          "ANNÉE",
-          "AUTORISÉES",
-          "PMR",
-          "LGBT",
-          "FVV-TEH",
-          "QPV",
-          "LOG. SOCIAL",
-        ]}
-      />
+        ariaLabelledBy="type-places-historique-title"
+        headings={getTypePlaceHistoryHeadings(years)}
+        className="text-mention-grey [&_thead_tr]:bg-transparent!"
+        enableBorders
+        stickFirstColumn
+        overlay={
+          markers.length > 0 && (
+            <TransformationMarkers markers={markers} years={years} />
+          )
+        }
+      >
+        {rows.map((row) => (
+          <tr key={row.label}>
+            <td className="text-left! min-w-[240px]">
+              <strong>{row.label}</strong>
+              {row.subLabel && (
+                <>
+                  <br />
+                  <span className="text-xs">{row.subLabel}</span>
+                </>
+              )}
+            </td>
+            {years.map((year) => (
+              <td key={year} className="min-w-[100px] whitespace-nowrap">
+                {row.getValue(year) ?? <EmptyCell />}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </Table>
       <span className="italic block border-t border-default-grey text-mention-grey py-2 px-4 text-xs">
-        Les places correspondent aux nombres de places au 1er janvier de chaque
-        année
+        Les chiffres correspondent aux nombres de places au 31 décembre de
+        chaque année.
       </span>
     </CustomAccordion>
   );
 };
 
-type Props = {
-  adresses: AdresseApiType[];
-  structureTypologies: StructureTypologieApiType[];
+type PlaceRow = {
+  label: string;
+  subLabel?: string;
+  getValue: (year: number) => number | undefined;
 };
-
-type AggregatedTypePlaces = Record<
-  number,
-  {
-    placesAutorisees: number;
-    qpv: number;
-    logementSocial: number;
-  }
->;
