@@ -5,75 +5,109 @@
 -- - Calendar dates are derived now from Actes Administratifs
 CREATE OR REPLACE VIEW:"SCHEMA"."structures_calendar_quality" AS
 WITH
-  actes_administratifs_aggregate AS (
+  actes_administratifs_base AS (
     SELECT
-      aa."structureId" AS "id",
-      MIN(
-        CASE
-          WHEN aa."category" = 'CONVENTION' THEN aa."startDate"
-        END
-      ) AS "debutConvention",
-      MAX(
-        CASE
-          WHEN aa."category" = 'CONVENTION' THEN aa."endDate"
-        END
-      ) AS "finConvention",
-      MIN(
-        CASE
-          WHEN aa."category" = 'ARRETE_AUTORISATION' THEN aa."startDate"
-        END
-      ) AS "debutAutorisation",
-      MAX(
-        CASE
-          WHEN aa."category" = 'ARRETE_AUTORISATION' THEN aa."endDate"
-        END
-      ) AS "finAutorisation"
+      aa."structureId" AS "structureId",
+      aa."id" AS "acteId",
+      aa."category" AS "category",
+      aa."startDate" AS "startDate",
+      aa."endDate" AS "endDate"
     FROM
       public."ActeAdministratif" aa
     WHERE
       aa."category" IN ('CONVENTION', 'ARRETE_AUTORISATION')
       AND aa."isMissing" IS NOT TRUE
+  ),
+  conventions AS (
+    SELECT
+      aab."structureId" AS "structureId",
+      aab."acteId" AS "acteId",
+      aab."startDate" AS "startDate",
+      aab."endDate" AS "endDate",
+      (
+        EXTRACT(
+          YEAR
+          FROM
+            aab."endDate"
+        )::int - EXTRACT(
+          YEAR
+          FROM
+            aab."startDate"
+        )::int
+      ) AS "durationYears"
+    FROM
+      actes_administratifs_base aab
+    WHERE
+      aab."category" = 'CONVENTION'
+      AND aab."startDate" IS NOT NULL
+      AND aab."endDate" IS NOT NULL
+  ),
+  autorisations AS (
+    SELECT
+      aab."structureId" AS "structureId",
+      aab."acteId" AS "acteId",
+      aab."startDate" AS "startDate",
+      aab."endDate" AS "endDate",
+      (
+        EXTRACT(
+          YEAR
+          FROM
+            aab."endDate"
+        )::int - EXTRACT(
+          YEAR
+          FROM
+            aab."startDate"
+        )::int
+      ) AS "durationYears"
+    FROM
+      actes_administratifs_base aab
+    WHERE
+      aab."category" = 'ARRETE_AUTORISATION'
+      AND aab."startDate" IS NOT NULL
+      AND aab."endDate" IS NOT NULL
+  ),
+  actes_administratifs_aggregate AS (
+    SELECT
+      sc."id" AS "id",
+      MIN(c."startDate") AS "debutConvention",
+      MAX(c."endDate") AS "finConvention",
+      MIN(a."startDate") AS "debutAutorisation",
+      MAX(a."endDate") AS "finAutorisation",
+      COALESCE(BOOL_OR(a."durationYears" <> 15), FALSE) AS "hasAnyAutorisationNot15y",
+      COALESCE(BOOL_OR(c."durationYears" <> 5), FALSE) AS "hasAnyConventionNot5y",
+      COALESCE(BOOL_OR(c."durationYears" > 3), FALSE) AS "hasAnyConventionGt3y",
+      COALESCE(
+        BOOL_OR(
+          NOT EXISTS (
+            SELECT
+              1
+            FROM
+              autorisations au
+            WHERE
+              au."structureId" = c."structureId"
+              AND c."startDate" >= au."startDate"
+              AND c."endDate" <= au."endDate"
+          )
+        ),
+        FALSE
+      ) AS "hasAnyConventionOutsideAnyAutorisation"
+    FROM
+:"SCHEMA"."structures_core" sc
+      LEFT JOIN conventions c ON c."structureId" = sc."id"
+      LEFT JOIN autorisations a ON a."structureId" = sc."id"
     GROUP BY
-      aa."structureId"
+      sc."id"
   )
 SELECT
   sc."id" AS "id",
   -- Authorized structures: authorization period must be 15 years (based on actes administratifs)
   CASE
-    WHEN sc."structure_type" IN ('CADA', 'CPH') THEN (
-      aaa."debutAutorisation" IS NOT NULL
-      AND aaa."finAutorisation" IS NOT NULL
-      AND (
-        EXTRACT(
-          YEAR
-          FROM
-            aaa."finAutorisation"
-        )::int - EXTRACT(
-          YEAR
-          FROM
-            aaa."debutAutorisation"
-        )::int
-      ) <> 15
-    )
+    WHEN sc."structure_type" IN ('CADA', 'CPH') THEN (aaa."hasAnyAutorisationNot15y" IS TRUE)
     ELSE FALSE
   END AS "has_issue_authorisation_period_not_15y",
   -- Authorized structures: convention should last 5 years (based on actes administratifs)
   CASE
-    WHEN sc."structure_type" IN ('CADA', 'CPH') THEN (
-      aaa."debutConvention" IS NOT NULL
-      AND aaa."finConvention" IS NOT NULL
-      AND (
-        EXTRACT(
-          YEAR
-          FROM
-            aaa."finConvention"
-        )::int - EXTRACT(
-          YEAR
-          FROM
-            aaa."debutConvention"
-        )::int
-      ) <> 5
-    )
+    WHEN sc."structure_type" IN ('CADA', 'CPH') THEN (aaa."hasAnyConventionNot5y" IS TRUE)
     ELSE FALSE
   END AS "has_issue_authorized_convention_not_5y",
   -- Authorized structures: convention must be within the authorization period (based on actes administratifs)
@@ -83,26 +117,7 @@ SELECT
       AND aaa."finAutorisation" IS NOT NULL
       AND aaa."debutConvention" IS NOT NULL
       AND aaa."finConvention" IS NOT NULL
-      AND (
-        EXTRACT(
-          YEAR
-          FROM
-            aaa."debutConvention"
-        )::int < EXTRACT(
-          YEAR
-          FROM
-            aaa."debutAutorisation"
-        )::int
-        OR EXTRACT(
-          YEAR
-          FROM
-            aaa."finConvention"
-        )::int > EXTRACT(
-          YEAR
-          FROM
-            aaa."finAutorisation"
-        )::int
-      )
+      AND aaa."hasAnyConventionOutsideAnyAutorisation" IS TRUE
     )
     ELSE FALSE
   END AS "has_issue_authorized_convention_outside_authorisation_period",
@@ -152,21 +167,7 @@ SELECT
   END AS "has_issue_evaluation_not_done_in_time",
   -- Subsidized structures: convention duration must be <= 3 years (based on actes administratifs)
   CASE
-    WHEN sc."structure_type" IN ('HUDA', 'CAES') THEN (
-      aaa."debutConvention" IS NOT NULL
-      AND aaa."finConvention" IS NOT NULL
-      AND (
-        EXTRACT(
-          YEAR
-          FROM
-            aaa."finConvention"
-        )::int - EXTRACT(
-          YEAR
-          FROM
-            aaa."debutConvention"
-        )::int
-      ) > 3
-    )
+    WHEN sc."structure_type" IN ('HUDA', 'CAES') THEN (aaa."hasAnyConventionGt3y" IS TRUE)
     ELSE FALSE
   END AS "has_issue_subsidized_convention_gt_3y"
 FROM
@@ -184,4 +185,8 @@ GROUP BY
   aaa."debutConvention",
   aaa."finConvention",
   aaa."debutAutorisation",
-  aaa."finAutorisation";
+  aaa."finAutorisation",
+  aaa."hasAnyAutorisationNot15y",
+  aaa."hasAnyConventionNot5y",
+  aaa."hasAnyConventionGt3y",
+  aaa."hasAnyConventionOutsideAnyAutorisation";

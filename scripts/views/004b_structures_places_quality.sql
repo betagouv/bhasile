@@ -69,6 +69,18 @@ WITH
       LEFT JOIN structure_typologie_dernier_millesime sdm ON sdm."structureId" = sc."id"
       LEFT JOIN adresses_agregees aa ON aa."structureId" = sc."id"
   ),
+  -- Aggregate specific places counts across all years (structure typology history)
+  structure_typologie_places_max AS (
+    SELECT
+      sc."id" AS "structureId",
+      MAX(st."lgbt") AS "lgbt_places",
+      MAX(st."fvvTeh") AS "fvvteh_places"
+    FROM
+:"SCHEMA"."structures_core" sc
+      INNER JOIN public."StructureTypologie" st ON st."structureVersionId" = sc."structure_version_id"
+    GROUP BY
+      sc."id"
+  ),
   -- Specific places issues (year by year)
   specific_places_issues AS (
     SELECT
@@ -86,11 +98,43 @@ WITH
   )
 SELECT
   sc."id" AS "id",
+  -- Places counts (max across all millésimes)
+  stpm."lgbt_places" AS "lgbt_places",
+  stpm."fvvteh_places" AS "fvvteh_places",
   -- Specific places > authorized places
   COALESCE(spi."has_issue_specific_places_gt_places_autorisees", FALSE) AS "has_issue_specific_places_gt_places_autorisees",
+  -- Incoherence between boolean flags (StructureVersion) and places counts (StructureTypologie history)
+  COALESCE(
+    (
+      (
+        sv."lgbt" IS TRUE
+        AND COALESCE(stpm."lgbt_places", 0) = 0
+      )
+      OR (
+        sv."lgbt" IS NOT TRUE
+        AND COALESCE(stpm."lgbt_places", 0) > 0
+      )
+    ),
+    FALSE
+  ) AS "has_issue_incoherence_lgbt_places",
+  COALESCE(
+    (
+      (
+        sv."fvvTeh" IS TRUE
+        AND COALESCE(stpm."fvvteh_places", 0) = 0
+      )
+      OR (
+        sv."fvvTeh" IS NOT TRUE
+        AND COALESCE(stpm."fvvteh_places", 0) > 0
+      )
+    ),
+    FALSE
+  ) AS "has_issue_incoherence_fvvteh_places",
   -- Places structure vs addresses: difference > 10%
   COALESCE(pc."pct_diff_places_adresse" > 10, FALSE) AS "has_issue_places_structure_vs_address_diff_gt_10pct"
 FROM
 :"SCHEMA"."structures_core" sc
+  INNER JOIN public."StructureVersion" sv ON sv."id" = sc."structure_version_id"
+  LEFT JOIN structure_typologie_places_max stpm ON stpm."structureId" = sc."id"
   LEFT JOIN specific_places_issues spi ON spi."structureId" = sc."id"
   LEFT JOIN places_comparison pc ON pc."id" = sc."id";

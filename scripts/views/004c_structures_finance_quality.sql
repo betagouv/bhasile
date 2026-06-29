@@ -133,19 +133,15 @@ WITH
       s."id",
       -- Résultat net = 0 is considered an issue (exclut les NULL)
       BOOL_OR(be."resultat_net" = 0) AS "has_issue_resultat_net_eq_0",
-      -- Authorized structures: affectationReservesFondsDedies is filled but breakdown detail is missing, when resultat_net is non-zero
+      -- Authorized structures: affectationReservesFondsDedies is filled but breakdown detail is missing
       BOOL_OR(
         s."structureType" IN ('CADA', 'CPH')
-        AND be."resultat_net" IS NOT NULL
-        AND be."resultat_net" <> 0
         AND COALESCE(be."affectationReservesFondsDedies", 0) <> 0
         AND be."sum_breakdown_affectations" IS NULL
       ) AS "has_issue_authorized_affectations_breakdown_missing",
       -- Authorized structures: breakdown detail sum does not match affectationReservesFondsDedies (within epsilon)
       BOOL_OR(
         s."structureType" IN ('CADA', 'CPH')
-        AND be."resultat_net" IS NOT NULL
-        AND be."resultat_net" <> 0
         AND COALESCE(be."affectationReservesFondsDedies", 0) <> 0
         AND be."sum_breakdown_affectations" IS NOT NULL
         AND ABS(be."sum_breakdown_affectations" - be."affectationReservesFondsDedies") > 0.01

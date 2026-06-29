@@ -30,6 +30,12 @@ SELECT
   -- Places indicators
   -- Places: specific places (LGBT/FVV TEH/PMR) exceed authorized places
   COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE) AS "has_issue_specific_places_gt_places_autorisees",
+  -- Places: incoherence between boolean flags and places counts
+  COALESCE(pl."has_issue_incoherence_lgbt_places", FALSE) AS "has_issue_incoherence_lgbt_places",
+  COALESCE(pl."has_issue_incoherence_fvvteh_places", FALSE) AS "has_issue_incoherence_fvvteh_places",
+  -- Places: expose latest places counts for debugging
+  pl."lgbt_places" AS "lgbt_places",
+  pl."fvvteh_places" AS "fvvteh_places",
   -- Places: structure places differ from sum of address places by > 10%
   COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE) AS "has_issue_places_structure_vs_address_diff_gt_10pct",
   -- Characteristics indicators
@@ -79,7 +85,7 @@ SELECT
       COALESCE(cal."has_issue_convention_dates_differ_from_actes_administratifs", FALSE)::int
     ) + (
       COALESCE(cal."has_issue_authorisation_dates_differ_from_actes_administratifs", FALSE)::int
-    ) + (COALESCE(cal."has_issue_evaluation_not_done_in_time", FALSE)::int) + (COALESCE(cal."has_issue_subsidized_convention_gt_3y", FALSE)::int) + (COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE)::int) + (COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE)::int) + (COALESCE(ch."has_issue_dept_code", FALSE)::int) + (COALESCE(ch."has_issue_multi_dna", FALSE)::int) + (COALESCE(ch."has_issue_cpom_mono_structure", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_max_gt_threshold", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_min_lt_2", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_max_gt_tarif_cible", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_resultat_net_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_authorized_affectations_breakdown_missing", FALSE)::int) + (
+    ) + (COALESCE(cal."has_issue_evaluation_not_done_in_time", FALSE)::int) + (COALESCE(cal."has_issue_subsidized_convention_gt_3y", FALSE)::int) + (COALESCE(pl."has_issue_specific_places_gt_places_autorisees", FALSE)::int) + (COALESCE(pl."has_issue_incoherence_lgbt_places", FALSE)::int) + (COALESCE(pl."has_issue_incoherence_fvvteh_places", FALSE)::int) + (COALESCE(pl."has_issue_places_structure_vs_address_diff_gt_10pct", FALSE)::int) + (COALESCE(ch."has_issue_dept_code", FALSE)::int) + (COALESCE(ch."has_issue_multi_dna", FALSE)::int) + (COALESCE(ch."has_issue_cpom_mono_structure", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_max_gt_threshold", FALSE)::int) + (COALESCE(fin."has_issue_taux_encadrement_min_lt_2", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_max_gt_tarif_cible", FALSE)::int) + (COALESCE(fin."has_issue_cout_journalier_min_lt_15", FALSE)::int) + (COALESCE(fin."has_issue_resultat_net_eq_0", FALSE)::int) + (COALESCE(fin."has_issue_authorized_affectations_breakdown_missing", FALSE)::int) + (
       COALESCE(fin."has_issue_authorized_affectations_breakdown_mismatch", FALSE)::int
     ) + (
       COALESCE(fin."has_issue_authorized_reprise_plus_affectations_mismatch", FALSE)::int

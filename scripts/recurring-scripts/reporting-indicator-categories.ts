@@ -29,6 +29,8 @@ export const INDICATEURS_NON_CLASSIFIES = [
   "has_issue_convention_dates_differ_from_actes_administratifs",
   "has_issue_authorisation_dates_differ_from_actes_administratifs",
   "has_issue_specific_places_gt_places_autorisees",
+  "has_issue_incoherence_lgbt_places",
+  "has_issue_incoherence_fvvteh_places",
   "has_issue_places_structure_vs_address_diff_gt_10pct",
   "has_issue_taux_encadrement_min_lt_2",
   "has_issue_cout_journalier_min_lt_15",
