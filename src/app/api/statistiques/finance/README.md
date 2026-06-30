@@ -14,12 +14,12 @@ Le front choisit l'année affichée dans `byYear`.
 
 Budgets et indicateurs sont agrégés **indépendamment** pour chaque année : structures actives du scope ayant respectivement un budget ou un indicateur sur l'année.
 
-| Champ                                                                   | Calcul                                          |
-| ----------------------------------------------------------------------- | ----------------------------------------------- |
-| `dotationDemandee`, `dotationAccordee`, `totalProduits`, `totalCharges` | Sommes (`Budget`, structures actives)           |
-| `totalETP`                                                              | Somme (indicateurs résolus, structures actives) |
-| `tauxEncadrement`, `coutJournalier`                                     | Moyenne ou médiane (indicateurs résolus)        |
-| `resultatNet`                                                           | `totalProduits − totalCharges` (agrégat scope)  |
+| Champ                                                                   | Calcul                                              |
+| ----------------------------------------------------------------------- | --------------------------------------------------- |
+| `dotationDemandee`, `dotationAccordee`, `totalProduits`, `totalCharges` | Sommes (`Budget`, structures actives)               |
+| `totalETP`                                                              | Somme (indicateurs résolus, structures actives)     |
+| `tauxEncadrement`, `coutJournalier`                                     | Moyenne ou médiane (indicateurs résolus)            |
+| `resultatNet`                                                           | `totalProduits − totalCharges` (agrégat scope)      |
 | `excedentCumule`                                                        | Somme des RN **positifs** par structure sur l'année |
 | `deficitCumule`                                                         | Somme des \|RN négatifs\| par structure sur l'année |
 | `soldeCumule`                                                           | `excedentCumule − deficitCumule` sur l'année        |

@@ -3,7 +3,10 @@ import {
   NumericAggregation,
   sumValues,
 } from "@/app/utils/math.util";
-import { roundStatsNumber, roundStatsRate } from "@/app/utils/statistiques-format.util";
+import {
+  roundStatsNumber,
+  roundStatsRate,
+} from "@/app/utils/statistiques-format.util";
 import {
   isStructureAutorisee,
   isStructureSubventionnee,
@@ -26,27 +29,11 @@ import {
 
 type FinanceScope = "total" | "autorisees" | "subventionnees";
 
-type ScopeYearStat = FinanceByYearScopeStat & { year: number };
-
 const FINANCE_SCOPES: FinanceScope[] = [
   "total",
   "autorisees",
   "subventionnees",
 ];
-
-const emptyScopeStat = (): FinanceByYearScopeStat => ({
-  dotationDemandee: 0,
-  dotationAccordee: 0,
-  totalETP: 0,
-  tauxEncadrement: null,
-  coutJournalier: null,
-  totalProduits: 0,
-  totalCharges: 0,
-  resultatNet: 0,
-  excedentCumule: 0,
-  deficitCumule: 0,
-  soldeCumule: 0,
-});
 
 const getStructureIdsByFinanceScope = (
   structures: StatistiqueDbStructure[]
@@ -135,15 +122,14 @@ const sumIndicateursForYear = (
     }
   }
 
-  const structureIds = new Set([
-    ...realiseByStructureId.keys(),
-    ...previsionnelByStructureId.keys(),
-  ]);
   const etpValues: (number | null)[] = [];
   const tauxValues: (number | null)[] = [];
   const coutValues: (number | null)[] = [];
 
-  for (const structureId of structureIds) {
+  for (const structureId of new Set([
+    ...realiseByStructureId.keys(),
+    ...previsionnelByStructureId.keys(),
+  ])) {
     const realise = realiseByStructureId.get(structureId);
     const previsionnel = previsionnelByStructureId.get(structureId);
     etpValues.push(
@@ -173,8 +159,9 @@ const sumIndicateursForYear = (
 const computeScopeByYear = (
   structureIdsInScope: number[],
   context: StatistiquesContext,
-  aggregation: NumericAggregation
-): ScopeYearStat[] => {
+  aggregation: NumericAggregation,
+  years: number[]
+): FinanceByYearScopeStat[] => {
   const { activeStructureIdsByPeriod, budgets, indicateurs } = context;
   const structureIdSet = new Set(structureIdsInScope);
   const scopedBudgets = budgets.filter((budget) =>
@@ -185,7 +172,6 @@ const computeScopeByYear = (
       indicateur.structureId !== null &&
       structureIdSet.has(indicateur.structureId)
   );
-  const years = collectDistinctYears(scopedBudgets, scopedIndicateurs);
 
   return years.map((year) => {
     const activeStructureIds = lookupActiveStructureIds(
@@ -193,63 +179,43 @@ const computeScopeByYear = (
       "year",
       String(year)
     );
+    const isActive = (structureId: number) =>
+      activeStructureIds.has(structureId);
 
     const budgetsForYear = scopedBudgets.filter(
-      (budget) =>
-        budget.year === year && activeStructureIds.has(budget.structureId)
+      (budget) => budget.year === year && isActive(budget.structureId)
     );
-    const budgetStats = sumBudgetsForYear(budgetsForYear);
-    const indicateurStats = sumIndicateursForYear(
-      scopedIndicateurs.filter(
-        (indicateur) =>
-          indicateur.year === year &&
-          indicateur.structureId !== null &&
-          activeStructureIds.has(indicateur.structureId)
-      ),
-      aggregation
+    const indicateursForYear = scopedIndicateurs.filter(
+      (indicateur) =>
+        indicateur.year === year && isActive(indicateur.structureId!)
     );
 
     return {
-      year,
-      ...indicateurStats,
-      ...budgetStats,
+      ...sumIndicateursForYear(indicateursForYear, aggregation),
+      ...sumBudgetsForYear(budgetsForYear),
     };
   });
-};
-
-const scopeStatForYear = (
-  stats: ScopeYearStat[],
-  year: number
-): FinanceByYearScopeStat => {
-  const scopeStat = stats.find((yearStat) => yearStat.year === year);
-  if (!scopeStat) {
-    return emptyScopeStat();
-  }
-
-  const { year: _year, ...stat } = scopeStat;
-  return stat;
 };
 
 export const computeFinanceStatistiques = (
   context: StatistiquesContext,
   aggregation: NumericAggregation
 ): StatistiqueApiRead["finance"] => {
+  const years = collectDistinctYears(context.budgets, context.indicateurs);
   const scopeIds = getStructureIdsByFinanceScope(context.allStructures);
   const statsByScope = Object.fromEntries(
     FINANCE_SCOPES.map((scope) => [
       scope,
-      computeScopeByYear(scopeIds[scope], context, aggregation),
+      computeScopeByYear(scopeIds[scope], context, aggregation, years),
     ])
-  ) as Record<FinanceScope, ScopeYearStat[]>;
-
-  const years = collectDistinctYears(context.budgets, context.indicateurs);
+  ) as Record<FinanceScope, FinanceByYearScopeStat[]>;
 
   return {
-    byYear: years.map((year) => ({
+    byYear: years.map((year, index) => ({
       year,
-      total: scopeStatForYear(statsByScope.total, year),
-      autorisees: scopeStatForYear(statsByScope.autorisees, year),
-      subventionnees: scopeStatForYear(statsByScope.subventionnees, year),
+      total: statsByScope.total[index],
+      autorisees: statsByScope.autorisees[index],
+      subventionnees: statsByScope.subventionnees[index],
     })),
   };
 };

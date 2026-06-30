@@ -53,7 +53,7 @@ describe("finance statistics util", () => {
       ),
     });
 
-  it("should split excess and deficit per structure before cumulating", () => {
+  it("should split excess and deficit per structure", () => {
     const budgets = [
       budgetRow(1, 1, 2023, 200, 100),
       budgetRow(2, 2, 2023, 50, 90),
