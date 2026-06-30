@@ -20,13 +20,15 @@ import type {
 
 const excludedStructureTypes = new Set<string>(EXCLUDED_STRUCTURE_TYPES);
 
-export const findEffectiveStructureVersionsAtDate = async (
+const buildStructureVersionWhereFromFilters = async (
   filters: StatistiquesFilters,
-  reference: Date = new Date()
-): Promise<StatistiqueDbEffectiveStructureVersion[]> => {
-  const where: Prisma.StructureVersionWhereInput = {
-    effectiveDate: { lt: startOfNextUtcDay(reference) },
-  };
+  reference?: Date
+): Promise<Prisma.StructureVersionWhereInput> => {
+  const where: Prisma.StructureVersionWhereInput = {};
+
+  if (reference) {
+    where.effectiveDate = { lt: startOfNextUtcDay(reference) };
+  }
 
   const depList = filters.departements?.split(",").filter(Boolean) ?? [];
   if (depList.length > 0) {
@@ -59,6 +61,31 @@ export const findEffectiveStructureVersionsAtDate = async (
           not: null,
           notIn: [...EXCLUDED_STRUCTURE_TYPES] as StructureType[],
         };
+
+  return where;
+};
+
+export const findAllStructureIdsMatchingFilters = async (
+  filters: StatistiquesFilters
+): Promise<number[]> => {
+  const where = await buildStructureVersionWhereFromFilters(filters);
+
+  const rows = await prisma.structureVersion.findMany({
+    where,
+    select: { structureId: true },
+    distinct: ["structureId"],
+  });
+
+  return rows
+    .map((row) => row.structureId)
+    .filter((id): id is number => id != null);
+};
+
+export const findEffectiveStructureVersionsAtDate = async (
+  filters: StatistiquesFilters,
+  reference: Date = new Date()
+): Promise<StatistiqueDbEffectiveStructureVersion[]> => {
+  const where = await buildStructureVersionWhereFromFilters(filters, reference);
 
   return prisma.structureVersion.findMany({
     where,
@@ -318,7 +345,6 @@ export const findIndicateursFinanciers = async (
     where: {
       structureId: { in: structureIds },
       OR: [{ isMissing: null }, { isMissing: false }],
-      type: { in: ["REALISE", "PREVISIONNEL"] },
     },
     select: {
       id: true,

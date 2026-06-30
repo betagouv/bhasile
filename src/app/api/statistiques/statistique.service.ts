@@ -13,6 +13,7 @@ import {
   findBudgets,
   findCpomStructures,
   findDepartementsWithPopulation,
+  findAllStructureIdsMatchingFilters,
   findDnaLinks,
   findEffectiveStructureVersionsAtDate,
   findEigs,
@@ -38,18 +39,16 @@ export const buildStatistiquesContext = async (
 ): Promise<StatistiquesContext | null> => {
   const now = new Date();
   const referenceYear = now.getUTCFullYear();
+
+  const allStructureIds = await findAllStructureIdsMatchingFilters(filters);
+  if (allStructureIds.length === 0) {
+    return null;
+  }
+
   const effectiveVersions = await findEffectiveStructureVersionsAtDate(
     filters,
     now
   );
-
-  const allStructureIds = effectiveVersions
-    .map((version) => version.structureId)
-    .filter((id): id is number => id != null);
-
-  if (allStructureIds.length === 0) {
-    return null;
-  }
 
   const openEffectiveVersions = effectiveVersions.filter(
     (version) => version.structureVersionTransformation?.type !== "FERMETURE"
@@ -83,7 +82,7 @@ export const buildStatistiquesContext = async (
     await Promise.all([
       findDepartementsWithPopulation([
         ...new Set(
-          structures
+          allStructures
             .map((structure) => structure.departementAdministratif)
             .filter((departement): departement is string => departement !== null)
         ),
