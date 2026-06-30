@@ -159,9 +159,8 @@ describe("finance statistics util", () => {
 
     const year2024 = result.byYear.find((entry) => entry.year === 2024);
 
-    // Only structures having a Budget for the year are included in the scope.
-    expect(year2024?.total.totalETP).toBe(10);
-    expect(year2024?.total.tauxEncadrement).toBe(0.8);
-    expect(year2024?.total.coutJournalier).toBe(50);
+    expect(year2024?.total.totalETP).toBe(15);
+    expect(year2024?.total.tauxEncadrement).toBe(0.7);
+    expect(year2024?.total.coutJournalier).toBe(45);
   });
 });

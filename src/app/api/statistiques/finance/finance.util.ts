@@ -113,7 +113,6 @@ const sumBudgetsForYear = (budgetsForYear: StatistiqueDbBudget[]) => {
 };
 
 const resolveIndicateursForYear = (
-  structureIds: number[],
   indicateursForYear: StatistiqueDbIndicateurFinancier[]
 ): StatistiqueDbIndicateurFinancierMetriques[] => {
   const byStructureId = new Map<
@@ -137,16 +136,13 @@ const resolveIndicateursForYear = (
     byStructureId.set(indicateur.structureId, current);
   }
 
-  return structureIds.map((structureId) => {
-    const row = byStructureId.get(structureId);
-    return {
-      ETP: row?.realise?.ETP ?? row?.previsionnel?.ETP ?? null,
-      tauxEncadrement:
-        row?.realise?.tauxEncadrement ?? row?.previsionnel?.tauxEncadrement ?? null,
-      coutJournalier:
-        row?.realise?.coutJournalier ?? row?.previsionnel?.coutJournalier ?? null,
-    };
-  });
+  return [...byStructureId.entries()].map(([, row]) => ({
+    ETP: row.realise?.ETP ?? row.previsionnel?.ETP ?? null,
+    tauxEncadrement:
+      row.realise?.tauxEncadrement ?? row.previsionnel?.tauxEncadrement ?? null,
+    coutJournalier:
+      row.realise?.coutJournalier ?? row.previsionnel?.coutJournalier ?? null,
+  }));
 };
 
 const sumIndicateursForYear = (
@@ -186,7 +182,7 @@ const computeScopeByYear = (
       indicateur.structureId !== null &&
       structureIdSet.has(indicateur.structureId)
   );
-  const years = collectDistinctYears(scopedBudgets);
+  const years = collectDistinctYears(scopedBudgets, scopedIndicateurs);
 
   return years.map((year) => {
     const activeStructureIds = lookupActiveStructureIds(
@@ -194,16 +190,18 @@ const computeScopeByYear = (
       "year",
       String(year)
     );
+
     const budgetsForYear = scopedBudgets.filter(
       (budget) =>
         budget.year === year && activeStructureIds.has(budget.structureId)
     );
-    const structureIds = [
-      ...new Set(budgetsForYear.map((budget) => budget.structureId)),
-    ];
     const indicateursForYear = resolveIndicateursForYear(
-      structureIds,
-      scopedIndicateurs.filter((indicateur) => indicateur.year === year)
+      scopedIndicateurs.filter(
+        (indicateur) =>
+          indicateur.year === year &&
+          indicateur.structureId !== null &&
+          activeStructureIds.has(indicateur.structureId)
+      )
     );
 
     const budgetStats = sumBudgetsForYear(budgetsForYear);
@@ -245,7 +243,7 @@ export const computeFinanceStatistiques = (
     ])
   ) as Record<FinanceScope, ScopeYearStat[]>;
 
-  const years = collectDistinctYears(context.budgets);
+  const years = collectDistinctYears(context.budgets, context.indicateurs);
 
   return {
     byYear: years.map((year) => ({
