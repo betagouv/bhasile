@@ -1,24 +1,82 @@
 import { NumericAggregation } from "@/app/utils/math.util";
-import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
+import {
+  ControleQualitePeriodBase,
+  StatistiqueApiRead,
+} from "@/schemas/api/statistique.schema";
 
-import type { StatistiquesContext } from "../statistiques.db.type";
+import type {
+  StatistiquesContext,
+  StatistiquesPeriodGranularity,
+} from "../statistiques.db.type";
 import {
   computeTotalPlaces,
   filterByTwelveMonthWindow,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
+  groupByPeriodKey,
+  lookupActiveStructureIds,
   monthKeyToDate,
   parseTrimesterKey,
   toMonthKey,
   toTrimesterKey,
   toYearKey,
 } from "../statistiques.utils";
-import { computeEigRates } from "./controle-qualite-eig.util";
+import { computeEigPeriodMetrics, computeEigRates } from "./controle-qualite-eig.util";
 import {
   computeEvaluationGlobalSummary,
-  computePeriodSeries,
   filterEvaluationsInScope,
+  sumEvaluationNotes,
 } from "./controle-qualite-evaluation.util";
+
+type PeriodSeriesConfig<Period> = {
+  granularity: StatistiquesPeriodGranularity;
+  toPeriodKey: (date: Date) => string;
+  toPeriod: (periodKey: string) => Period;
+};
+
+const computePeriodSeries = <Period>(
+  context: StatistiquesContext,
+  aggregation: NumericAggregation,
+  config: PeriodSeriesConfig<Period>
+): (ControleQualitePeriodBase & Period)[] => {
+  const { eigs, evaluations, dnaLinks, structureVersionTimeline, activeStructureIdsByPeriod } =
+    context;
+  const eigsByPeriod = groupByPeriodKey(
+    eigs,
+    (eig) => eig.evenementDate,
+    config.toPeriodKey
+  );
+  const evaluationsByPeriod = groupByPeriodKey(
+    evaluations,
+    (evaluation) => evaluation.date,
+    config.toPeriodKey
+  );
+
+  return [...new Set([...eigsByPeriod.keys(), ...evaluationsByPeriod.keys()])]
+    .sort()
+    .map((periodKey) => {
+      const activeStructureIds = lookupActiveStructureIds(
+        activeStructureIdsByPeriod,
+        config.granularity,
+        periodKey
+      );
+      const evaluationsForPeriod = filterEvaluationsInScope(
+        evaluationsByPeriod.get(periodKey) ?? [],
+        activeStructureIds
+      );
+
+      return {
+        ...config.toPeriod(periodKey),
+        ...computeEigPeriodMetrics(
+          eigsByPeriod.get(periodKey) ?? [],
+          activeStructureIds,
+          dnaLinks,
+          structureVersionTimeline
+        ),
+        ...sumEvaluationNotes(evaluationsForPeriod, aggregation),
+      };
+    });
+};
 
 export const computeControleQualiteStatistiques = (
   context: StatistiquesContext,
