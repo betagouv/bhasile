@@ -96,7 +96,7 @@ describe("quality control statistics util", () => {
     );
 
     const trimester2025Q1 = result.byTrimester.find(
-      (entry) => entry.year === 2025 && entry.trimester === 1
+      (entry) => entry.date.toISOString().slice(0, 10) === "2025-01-01"
     );
 
     expect(trimester2025Q1?.noteGenerale).toBe(3.8);
@@ -158,7 +158,7 @@ describe("quality control statistics util", () => {
       (entry) => entry.date.toISOString().slice(0, 7) === "2025-02"
     );
     const trimester = result.byTrimester.find(
-      (entry) => entry.year === 2025 && entry.trimester === 1
+      (entry) => entry.date.toISOString().slice(0, 10) === "2025-01-01"
     );
 
     expect(january?.tauxEigComportementViolent).toBe(1);
@@ -238,7 +238,7 @@ describe("quality control statistics util", () => {
       (entry) => entry.date.toISOString().slice(0, 7) === "2025-03"
     );
     const trimesterQ1 = result.byTrimester.find(
-      (entry) => entry.year === 2025 && entry.trimester === 1
+      (entry) => entry.date.toISOString().slice(0, 10) === "2025-01-01"
     );
 
     expect(february?.nbStructuresSansDeclarationEig).toBe(3);

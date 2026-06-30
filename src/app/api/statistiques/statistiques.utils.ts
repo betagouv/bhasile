@@ -108,6 +108,12 @@ export const parseTrimesterKey = (
 export const monthKeyToDate = (monthKey: string): Date =>
   new Date(`${monthKey}-01`);
 
+export const trimesterKeyToDate = (trimesterKey: string): Date =>
+  getPeriodBounds("trimester", trimesterKey).start;
+
+export const yearKeyToDate = (yearKey: string): Date =>
+  new Date(Date.UTC(Number(yearKey), 0, 1));
+
 const getMonthPeriodBounds = (monthKey: string): { start: Date; end: Date } => {
   const [year, month] = monthKey.split("-").map(Number);
   return {

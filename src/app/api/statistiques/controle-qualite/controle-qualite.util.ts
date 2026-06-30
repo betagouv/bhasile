@@ -1,6 +1,6 @@
 import { NumericAggregation } from "@/app/utils/math.util";
 import {
-  ControleQualitePeriodBase,
+  ControleQualitePeriodStat,
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
@@ -16,10 +16,11 @@ import {
   groupByPeriodKey,
   lookupActiveStructureIds,
   monthKeyToDate,
-  parseTrimesterKey,
   toMonthKey,
   toTrimesterKey,
   toYearKey,
+  trimesterKeyToDate,
+  yearKeyToDate,
 } from "../statistiques.utils";
 import { computeEigPeriodMetrics, computeEigRates } from "./controle-qualite-eig.util";
 import {
@@ -28,17 +29,19 @@ import {
   sumEvaluationNotes,
 } from "./controle-qualite-evaluation.util";
 
-type PeriodSeriesConfig<Period> = {
+type PeriodSeriesConfig = {
   granularity: StatistiquesPeriodGranularity;
   toPeriodKey: (date: Date) => string;
-  toPeriod: (periodKey: string) => Period;
+  toDate: (periodKey: string) => Date;
 };
 
-const computePeriodSeries = <Period>(
+// TODO: confirmer métier — `date` = 1er jour du mois / trimestre / année,
+// plutôt que `year` + `trimester` (ou `year` + `month`) en champs séparés.
+const computePeriodSeries = (
   context: StatistiquesContext,
   aggregation: NumericAggregation,
-  config: PeriodSeriesConfig<Period>
-): (ControleQualitePeriodBase & Period)[] => {
+  config: PeriodSeriesConfig
+): ControleQualitePeriodStat[] => {
   const { eigs, evaluations, dnaLinks, structureVersionTimeline, activeStructureIdsByPeriod } =
     context;
   const eigsByPeriod = groupByPeriodKey(
@@ -66,7 +69,7 @@ const computePeriodSeries = <Period>(
       );
 
       return {
-        ...config.toPeriod(periodKey),
+        date: config.toDate(periodKey),
         ...computeEigPeriodMetrics(
           eigsByPeriod.get(periodKey) ?? [],
           activeStructureIds,
@@ -105,24 +108,20 @@ export const computeControleQualiteStatistiques = (
       ...computeEigRates(recentEigs, totalPlaces),
       ...computeEvaluationGlobalSummary(recentEvaluations, aggregation),
     },
-    byMonth: computePeriodSeries<{ date: Date }>(context, aggregation, {
+    byMonth: computePeriodSeries(context, aggregation, {
       granularity: "month",
       toPeriodKey: toMonthKey,
-      toPeriod: (monthKey) => ({ date: monthKeyToDate(monthKey) }),
+      toDate: monthKeyToDate,
     }),
-    byTrimester: computePeriodSeries<{ year: number; trimester: number }>(
-      context,
-      aggregation,
-      {
-        granularity: "trimester",
-        toPeriodKey: toTrimesterKey,
-        toPeriod: parseTrimesterKey,
-      }
-    ),
-    byYear: computePeriodSeries<{ year: number }>(context, aggregation, {
+    byTrimester: computePeriodSeries(context, aggregation, {
+      granularity: "trimester",
+      toPeriodKey: toTrimesterKey,
+      toDate: trimesterKeyToDate,
+    }),
+    byYear: computePeriodSeries(context, aggregation, {
       granularity: "year",
       toPeriodKey: toYearKey,
-      toPeriod: (yearKey) => ({ year: Number(yearKey) }),
+      toDate: yearKeyToDate,
     }),
   };
 };

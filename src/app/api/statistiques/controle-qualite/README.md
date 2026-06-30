@@ -26,7 +26,9 @@ Confirmer que `moyenneEvaluationsCurrentYear` doit bien être sur **12 mois glis
 
 Recalcul sur **toutes** données période — pas d'agrégation front.
 
-Clés : `date` (mois), `year`+`trimester`, `year`.
+Clés de période : `date` (1er jour du mois, du trimestre ou de l'année).
+
+TODO : confirmer métier — ce format unifié plutôt que `year` + `trimester` (ou `year` + `month`) en champs séparés.
 
 **Périmètre structures** : lookup dans `activeStructureIdsByPeriod` (index racine, construit dans `buildStatistiquesContext`). Ex. fermée le 05/05 → compte jan–mai, pas juin.
 

@@ -5,7 +5,6 @@ import {
 } from "@/app/utils/math.util";
 import {
   roundStatsNumber,
-  roundStatsRate,
 } from "@/app/utils/statistiques-format.util";
 import {
   isStructureAutorisee,
@@ -89,7 +88,6 @@ const sumBudgetsForYear = (budgetsForYear: StatistiqueDbBudget[]) => {
     resultatNet: totalProduits - totalCharges,
     excedentCumule: excedent,
     deficitCumule: deficit,
-    soldeCumule: excedent - deficit,
   };
 };
 
@@ -127,24 +125,18 @@ const sumIndicateursForYear = (
   ])) {
     const realise = realiseByStructureId.get(structureId);
     const previsionnel = previsionnelByStructureId.get(structureId);
-    etpValues.push(
-      roundStatsNumber(realise?.ETP ?? previsionnel?.ETP ?? null)
-    );
+    etpValues.push(realise?.ETP ?? previsionnel?.ETP ?? null);
     tauxValues.push(
-      roundStatsRate(
-        realise?.tauxEncadrement ?? previsionnel?.tauxEncadrement ?? null
-      )
+      realise?.tauxEncadrement ?? previsionnel?.tauxEncadrement ?? null
     );
     coutValues.push(
-      roundStatsNumber(
-        realise?.coutJournalier ?? previsionnel?.coutJournalier ?? null
-      )
+      realise?.coutJournalier ?? previsionnel?.coutJournalier ?? null
     );
   }
 
   return {
     totalETP: roundStatsNumber(sumValues(etpValues) ?? 0) ?? 0,
-    tauxEncadrement: roundStatsRate(aggregateValues(tauxValues, aggregation)),
+    tauxEncadrement: roundStatsNumber(aggregateValues(tauxValues, aggregation)),
     coutJournalier: roundStatsNumber(
       aggregateValues(coutValues, aggregation)
     ),

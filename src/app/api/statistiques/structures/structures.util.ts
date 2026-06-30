@@ -1,6 +1,7 @@
 import type { StructureDbList } from "@/app/api/structures/structure.db.type";
 import { isStructureInCpom } from "@/app/api/structures/structure.util";
 import { getDatesOfCurrentActeAdministratif } from "@/app/api/actes-administratifs/acte-administratif.util";
+import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
 import {
   BatiStat,
   StatistiqueApiRead,
@@ -182,7 +183,12 @@ const fillStructureTypes = (
       )
       .map((stat) => [stat.type, stat])
   );
-  return STRUCTURE_TYPES_DISPLAY_ORDER.map((structureType) => ({
+  return STRUCTURE_TYPES_DISPLAY_ORDER.filter(
+    (structureType) =>
+      !EXCLUDED_STRUCTURE_TYPES.includes(
+        structureType as (typeof EXCLUDED_STRUCTURE_TYPES)[number]
+      )
+  ).map((structureType) => ({
     type: structureType,
     structures: statsByType.get(structureType)?.structures ?? 0,
     places: statsByType.get(structureType)?.places ?? 0,

@@ -69,7 +69,6 @@ describe("finance statistics util", () => {
     expect(year2023?.total.resultatNet).toBe(60);
     expect(year2023?.total.excedentCumule).toBe(100);
     expect(year2023?.total.deficitCumule).toBe(40);
-    expect(year2023?.total.soldeCumule).toBe(60);
     expect(year2023?.autorisees.excedentCumule).toBe(100);
     expect(year2023?.autorisees.deficitCumule).toBe(0);
     expect(year2023?.subventionnees.excedentCumule).toBe(0);
@@ -92,10 +91,10 @@ describe("finance statistics util", () => {
 
     expect(year2023?.total.excedentCumule).toBe(50);
     expect(year2023?.total.deficitCumule).toBe(0);
-    expect(year2023?.total.soldeCumule).toBe(50);
+    expect(year2023?.total.resultatNet).toBe(50);
     expect(year2024?.total.excedentCumule).toBe(0);
     expect(year2024?.total.deficitCumule).toBe(30);
-    expect(year2024?.total.soldeCumule).toBe(-30);
+    expect(year2024?.total.resultatNet).toBe(-30);
   });
 
   it("should not infer subventionnee budgets from a previous year", () => {
@@ -117,7 +116,6 @@ describe("finance statistics util", () => {
     expect(year2025?.subventionnees.resultatNet).toBe(0);
     expect(year2025?.subventionnees.excedentCumule).toBe(0);
     expect(year2025?.subventionnees.deficitCumule).toBe(0);
-    expect(year2025?.subventionnees.soldeCumule).toBe(0);
   });
 
   it("should prefer REALISE over PREVISIONNEL per field", () => {
@@ -160,7 +158,7 @@ describe("finance statistics util", () => {
     const year2024 = result.byYear.find((entry) => entry.year === 2024);
 
     expect(year2024?.total.totalETP).toBe(15);
-    expect(year2024?.total.tauxEncadrement).toBe(0.65);
+    expect(year2024?.total.tauxEncadrement).toBe(0.7);
     expect(year2024?.total.coutJournalier).toBe(45);
   });
 });

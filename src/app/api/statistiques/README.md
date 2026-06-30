@@ -50,6 +50,7 @@ ou en local
 
 ```
 curl -s "http://localhost:3000/api/statistiques?departements=01,02,03&types=CADA,CPH&operateurs=1,2" | jq
+curl -s "http://localhost:3000/api/statistiques" | jq > tmp/statistiques.json
 ```
 
 ## Périmètre

@@ -58,6 +58,9 @@ describe("structures statistics util", () => {
     );
 
     expect(result.totalStructures).toBe(2);
+    expect(result.structureTypes).not.toContainEqual(
+      expect.objectContaining({ type: StructureType.PRAHDA })
+    );
     expect(result.structureTypes).toContainEqual({
       type: StructureType.CADA,
       structures: 1,

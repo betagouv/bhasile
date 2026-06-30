@@ -70,7 +70,6 @@ export type FinanceByYearScopeStat = {
   resultatNet: number;
   excedentCumule: number;
   deficitCumule: number;
-  soldeCumule: number;
 };
 
 export type FinanceByYearStat = {
@@ -152,7 +151,6 @@ const financeByYearScopeStatSchema = z.object({
   resultatNet: z.number(),
   excedentCumule: z.number(),
   deficitCumule: z.number(),
-  soldeCumule: z.number(),
 });
 
 const financeByYearStatSchema = z.object({
@@ -204,21 +202,13 @@ const controleQualitePeriodBaseSchema = eigPeriodStatSchema.merge(
   controleQualiteEvaluationStatSchema
 );
 
-const controleQualiteByMonthStatSchema = controleQualitePeriodBaseSchema.merge(
+const controleQualiteByPeriodStatSchema = controleQualitePeriodBaseSchema.merge(
   z.object({ date: z.coerce.date() })
 );
 
-const controleQualiteByTrimesterStatSchema =
-  controleQualitePeriodBaseSchema.merge(
-    z.object({
-      year: z.number(),
-      trimester: z.number(),
-    })
-  );
-
-const controleQualiteByYearStatSchema = controleQualitePeriodBaseSchema.merge(
-  z.object({ year: z.number() })
-);
+const controleQualiteByMonthStatSchema = controleQualiteByPeriodStatSchema;
+const controleQualiteByTrimesterStatSchema = controleQualiteByPeriodStatSchema;
+const controleQualiteByYearStatSchema = controleQualiteByPeriodStatSchema;
 
 export type EigCountTotalsStat = z.infer<typeof eigCountTotalsStatSchema>;
 export type EigCountsStat = z.infer<typeof eigCountsStatSchema>;
@@ -237,15 +227,12 @@ export type ControleQualiteEvaluationStat = z.infer<
 export type ControleQualitePeriodBase = z.infer<
   typeof controleQualitePeriodBaseSchema
 >;
-export type ControleQualiteByMonthStat = z.infer<
-  typeof controleQualiteByMonthStatSchema
+export type ControleQualitePeriodStat = z.infer<
+  typeof controleQualiteByPeriodStatSchema
 >;
-export type ControleQualiteByTrimesterStat = z.infer<
-  typeof controleQualiteByTrimesterStatSchema
->;
-export type ControleQualiteByYearStat = z.infer<
-  typeof controleQualiteByYearStatSchema
->;
+export type ControleQualiteByMonthStat = ControleQualitePeriodStat;
+export type ControleQualiteByTrimesterStat = ControleQualitePeriodStat;
+export type ControleQualiteByYearStat = ControleQualitePeriodStat;
 
 const activiteMotifsIndisponibiliteStatSchema = z.object({
   desinsectisation: z.number(),
