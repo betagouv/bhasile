@@ -19,22 +19,32 @@ import {
   mapTypologieYears,
 } from "../statistiques.utils";
 
-type PlacesIndicators = Pick<
-  StatistiqueApiRead["places"],
-  | "totalPlaces"
-  | "population"
-  | "tauxEquipement"
-  | "pmr"
-  | "lgbt"
-  | "fvvTeh"
-  | "qpv"
-  | "logementsSociaux"
->;
+type PlacesSpeciales = {
+  pmr: number;
+  lgbt: number;
+  fvvTeh: number;
+};
+
+type PlacesSpecialesAdresse = {
+  qpv: number;
+  logementsSociaux: number;
+};
+
+type TauxEquipement = {
+  population: number | null;
+  tauxEquipement: number | null;
+};
+
+type PlacesIndicators = PlacesSpeciales &
+  PlacesSpecialesAdresse &
+  TauxEquipement & {
+    totalPlaces: number;
+  };
 
 const sumStructureTypologiePlacesSpeciales = (
   structures: StatistiqueDbStructure[],
   typologieMap: Map<number, StatistiqueDbTypologieValues>
-): Pick<PlacesIndicators, "pmr" | "lgbt" | "fvvTeh"> => {
+): PlacesSpeciales => {
   let pmr = 0;
   let lgbt = 0;
   let fvvTeh = 0;
@@ -55,7 +65,7 @@ const sumStructureTypologiePlacesSpeciales = (
 const sumAdressePlacesSpeciales = (
   adresses: StatistiqueDbAdresse[],
   structureIds: Set<number>
-): Pick<PlacesIndicators, "qpv" | "logementsSociaux"> => {
+): PlacesSpecialesAdresse => {
   let qpv = 0;
   let logementsSociaux = 0;
 
@@ -76,7 +86,7 @@ const sumAdressePlacesSpeciales = (
 const computeTauxEquipementAgrege = (
   totalPlaces: number,
   departements: StatistiqueDbDepartement[]
-): Pick<PlacesIndicators, "population" | "tauxEquipement"> => {
+): TauxEquipement => {
   if (departements.length === 0) {
     return { population: null, tauxEquipement: null };
   }
@@ -127,29 +137,17 @@ const computePlacesIndicators = (
   };
 };
 
-const computeByYearStats = (
-  context: Pick<
-    StatistiquesContext,
-    "allStructures" | "activeStructureIdsByPeriod" | "typologies" | "adresses" | "departements"
-  >
-): PlacesByYearStat[] =>
-  mapTypologieYears<PlacesByYearStat>(
-    context.allStructures,
-    context.activeStructureIdsByPeriod,
-    context.typologies,
-    (year, structuresForYear) =>
-      computePlacesIndicators(
-        structuresForYear,
-        getTypologieMapForExactYear(context.typologies, year),
-        context.adresses,
-        context.departements
-      )
-  );
-
 export const computePlacesStatistiques = (
   context: StatistiquesContext
 ): StatistiqueApiRead["places"] => {
-  const { structures, typologies, adresses, departements } = context;
+  const {
+    structures,
+    allStructures,
+    activeStructureIdsByPeriod,
+    typologies,
+    adresses,
+    departements,
+  } = context;
   const typologieMap = getLastTypologiePerStructure(typologies);
 
   return {
@@ -159,6 +157,17 @@ export const computePlacesStatistiques = (
       adresses,
       departements
     ),
-    byYear: computeByYearStats(context),
+    byYear: mapTypologieYears<PlacesByYearStat>(
+      allStructures,
+      activeStructureIdsByPeriod,
+      typologies,
+      (year, structuresForYear) =>
+        computePlacesIndicators(
+          structuresForYear,
+          getTypologieMapForExactYear(typologies, year),
+          adresses,
+          departements
+        )
+    ),
   };
 };
