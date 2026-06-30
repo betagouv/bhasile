@@ -5,8 +5,10 @@ import { BudgetApiType } from "@/schemas/api/budget.schema";
 
 const OPEN_YEAR = 2025;
 
-const budget = (year: number, dotationAccordee: number | null): BudgetApiType =>
-  ({ year, dotationAccordee }) as BudgetApiType;
+const budget = (
+  year: number,
+  dotationAccordee: number | null | undefined
+): BudgetApiType => ({ year, dotationAccordee }) as BudgetApiType;
 
 describe("budget util", () => {
   describe("getLatestBudgetExecutoireYear", () => {
@@ -19,14 +21,18 @@ describe("budget util", () => {
       expect(getLatestBudgetExecutoireYear(budgets, OPEN_YEAR)).toBe(2024);
     });
 
-    it("ignore les années dont la dotation est null", () => {
-      const budgets = [budget(2025, null), budget(2024, null), budget(2023, 50)];
+    it("ignore les années dont la dotation est null ou undefined", () => {
+      const budgets = [
+        budget(2025, null),
+        budget(2024, undefined),
+        budget(2023, 50),
+      ];
       expect(getLatestBudgetExecutoireYear(budgets, OPEN_YEAR)).toBe(2023);
     });
 
-    it("considère une dotation de 0 comme renseignée", () => {
+    it("ne considère pas une dotation de 0 comme renseignée", () => {
       const budgets = [budget(2025, 0), budget(2024, 100)];
-      expect(getLatestBudgetExecutoireYear(budgets, OPEN_YEAR)).toBe(2025);
+      expect(getLatestBudgetExecutoireYear(budgets, OPEN_YEAR)).toBe(2024);
     });
 
     it("ne dépend pas de l'ordre du tableau", () => {

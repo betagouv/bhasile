@@ -142,7 +142,7 @@ export const getLatestBudgetExecutoireYear = (
   openYear: number
 ): number => {
   const filledYears = (budgets ?? [])
-    .filter((budget) => !isNullOrUndefined(budget.dotationAccordee))
+    .filter((budget) => Boolean(budget.dotationAccordee))
     .map((budget) => budget.year);
   return filledYears.length > 0 ? Math.max(...filledYears) : openYear;
 };
