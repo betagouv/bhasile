@@ -69,46 +69,28 @@ const getStructureIdsByFinanceScope = (
   return scopes;
 };
 
-const aggregateBudgetsByYear = (
-  budgets: StatistiqueDbBudget[]
-): Map<number, Omit<StatistiqueDbBudget, "id" | "structureId">> => {
-  const budgetsByYear = new Map<
-    number,
-    Omit<StatistiqueDbBudget, "id" | "structureId">
-  >();
-
-  for (const budget of budgets) {
-    const current = budgetsByYear.get(budget.year) ?? {
-      year: budget.year,
-      dotationDemandee: 0,
-      dotationAccordee: 0,
-      totalProduits: 0,
-      totalCharges: 0,
-    };
-
-    budgetsByYear.set(budget.year, {
-      year: budget.year,
-      dotationDemandee: current.dotationDemandee + budget.dotationDemandee,
-      dotationAccordee: current.dotationAccordee + budget.dotationAccordee,
-      totalProduits: current.totalProduits + budget.totalProduits,
-      totalCharges: current.totalCharges + budget.totalCharges,
-    });
-  }
-
-  return budgetsByYear;
-};
-
-const getYearExcedentAndDeficit = (
-  budgets: StatistiqueDbBudget[],
-  year: number
-): { excedent: number; deficit: number } => {
+const computeBudgetStatsForYear = (
+  budgetsForYear: StatistiqueDbBudget[]
+): {
+  dotationDemandee: number;
+  dotationAccordee: number;
+  totalProduits: number;
+  totalCharges: number;
+  excedent: number;
+  deficit: number;
+} => {
+  let dotationDemandee = 0;
+  let dotationAccordee = 0;
+  let totalProduits = 0;
+  let totalCharges = 0;
   let excedent = 0;
   let deficit = 0;
 
-  for (const budget of budgets) {
-    if (budget.year !== year) {
-      continue;
-    }
+  for (const budget of budgetsForYear) {
+    dotationDemandee += budget.dotationDemandee;
+    dotationAccordee += budget.dotationAccordee;
+    totalProduits += budget.totalProduits;
+    totalCharges += budget.totalCharges;
 
     const resultatNet = budget.totalProduits - budget.totalCharges;
     if (resultatNet > 0) {
@@ -118,46 +100,52 @@ const getYearExcedentAndDeficit = (
     }
   }
 
-  return { excedent, deficit };
+  return {
+    dotationDemandee,
+    dotationAccordee,
+    totalProduits,
+    totalCharges,
+    excedent,
+    deficit,
+  };
 };
-
-const resolveIndicateurFinancier = (
-  realise: StatistiqueDbIndicateurFinancier | undefined,
-  previsionnel: StatistiqueDbIndicateurFinancier | undefined
-): StatistiqueDbIndicateurFinancierMetriques => ({
-  ETP: realise?.ETP ?? previsionnel?.ETP ?? null,
-  tauxEncadrement:
-    realise?.tauxEncadrement ?? previsionnel?.tauxEncadrement ?? null,
-  coutJournalier:
-    realise?.coutJournalier ?? previsionnel?.coutJournalier ?? null,
-});
 
 const getResolvedIndicateursForYear = (
   structureIds: number[],
   indicateurs: StatistiqueDbIndicateurFinancier[],
   year: number
 ): StatistiqueDbIndicateurFinancierMetriques[] => {
-  const byStructureAndType = new Map<
-    string,
-    StatistiqueDbIndicateurFinancier
+  const byStructureId = new Map<
+    number,
+    {
+      realise?: StatistiqueDbIndicateurFinancier;
+      previsionnel?: StatistiqueDbIndicateurFinancier;
+    }
   >();
 
   for (const indicateur of indicateurs) {
     if (indicateur.structureId === null || indicateur.year !== year) {
       continue;
     }
-    byStructureAndType.set(
-      `${indicateur.structureId}-${indicateur.type}`,
-      indicateur
-    );
+    const current = byStructureId.get(indicateur.structureId) ?? {};
+    if (indicateur.type === "REALISE") {
+      current.realise = indicateur;
+    } else {
+      current.previsionnel = indicateur;
+    }
+    byStructureId.set(indicateur.structureId, current);
   }
 
-  return structureIds.map((structureId) =>
-    resolveIndicateurFinancier(
-      byStructureAndType.get(`${structureId}-REALISE`),
-      byStructureAndType.get(`${structureId}-PREVISIONNEL`)
-    )
-  );
+  return structureIds.map((structureId) => {
+    const row = byStructureId.get(structureId);
+    return {
+      ETP: row?.realise?.ETP ?? row?.previsionnel?.ETP ?? null,
+      tauxEncadrement:
+        row?.realise?.tauxEncadrement ?? row?.previsionnel?.tauxEncadrement ?? null,
+      coutJournalier:
+        row?.realise?.coutJournalier ?? row?.previsionnel?.coutJournalier ?? null,
+    };
+  });
 };
 
 const computeScopeYearStats = (
@@ -192,24 +180,24 @@ const computeScopeYearStats = (
       (budget) =>
         budget.year === year && activeStructureIds.has(budget.structureId)
     );
-    const budget = aggregateBudgetsByYear(budgetsForYear).get(year);
+    const budgetStats = computeBudgetStatsForYear(budgetsForYear);
     const indicateursForYear = getResolvedIndicateursForYear(
       structureIds,
       scopedIndicateurs,
       year
     );
-    const totalProduits = budget?.totalProduits ?? 0;
-    const totalCharges = budget?.totalCharges ?? 0;
+    const totalProduits = budgetStats.totalProduits;
+    const totalCharges = budgetStats.totalCharges;
     const resultatNet = totalProduits - totalCharges;
-    const { excedent, deficit } = getYearExcedentAndDeficit(budgetsForYear, year);
+    const { excedent, deficit } = budgetStats;
 
     excedentCumule += excedent;
     deficitCumule += deficit;
 
     return {
       year,
-      dotationDemandee: budget?.dotationDemandee ?? 0,
-      dotationAccordee: budget?.dotationAccordee ?? 0,
+      dotationDemandee: budgetStats.dotationDemandee,
+      dotationAccordee: budgetStats.dotationAccordee,
       totalETP:
         roundStatsNumber(
           sumValues(indicateursForYear.map((indicateur) => indicateur.ETP)) ?? 0
