@@ -114,8 +114,7 @@ const sumBudgetsForYear = (budgetsForYear: StatistiqueDbBudget[]) => {
 
 const resolveIndicateursForYear = (
   structureIds: number[],
-  indicateurs: StatistiqueDbIndicateurFinancier[],
-  year: number
+  indicateursForYear: StatistiqueDbIndicateurFinancier[]
 ): StatistiqueDbIndicateurFinancierMetriques[] => {
   const byStructureId = new Map<
     number,
@@ -125,8 +124,8 @@ const resolveIndicateursForYear = (
     }
   >();
 
-  for (const indicateur of indicateurs) {
-    if (indicateur.structureId === null || indicateur.year !== year) {
+  for (const indicateur of indicateursForYear) {
+    if (indicateur.structureId === null) {
       continue;
     }
     const current = byStructureId.get(indicateur.structureId) ?? {};
@@ -202,10 +201,14 @@ const computeScopeByYear = (
     const structureIds = [
       ...new Set(budgetsForYear.map((budget) => budget.structureId)),
     ];
+    const indicateursForYear = resolveIndicateursForYear(
+      structureIds,
+      scopedIndicateurs.filter((indicateur) => indicateur.year === year)
+    );
 
     const budgetStats = sumBudgetsForYear(budgetsForYear);
     const indicateurStats = sumIndicateursForYear(
-      resolveIndicateursForYear(structureIds, scopedIndicateurs, year),
+      indicateursForYear,
       aggregation
     );
 

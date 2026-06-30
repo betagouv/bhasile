@@ -35,11 +35,11 @@ Puis agrégation scope : somme (`ETP`), moyenne ou médiane (taux).
 | `totalETP`                                                              | Somme (indicateurs résolus)                     |
 | `tauxEncadrement`, `coutJournalier`                                     | Moyenne ou médiane (indicateurs résolus)        |
 | `resultatNet`                                                           | `totalProduits − totalCharges` (agrégat scope)  |
-| `excedentCumule`                                                        | Cumul RN **positifs** par structure, puis somme |
-| `deficitCumule`                                                         | Cumul \|RN négatifs\| par structure, puis somme |
-| `soldeCumule`                                                           | `excedentCumule − deficitCumule`                |
+| `excedentCumule`                                                        | Somme des RN **positifs** par structure sur l'année |
+| `deficitCumule`                                                         | Somme des \|RN négatifs\| par structure sur l'année |
+| `soldeCumule`                                                           | `excedentCumule − deficitCumule` sur l'année        |
 
-Cumuls par scope, chronologiques, sur les années où le scope a des données.
+Par scope et par année (pas de cumul multi-années). Année absente dans un scope -> zéros.
 
 ## Sources
 
