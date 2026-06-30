@@ -6,10 +6,13 @@ import {
 } from "@/app/utils/structure.util";
 import {
   ActiviteByMonthStat,
+  ActiviteSummaryStat,
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
 import type {
+  StatistiqueDbActivite,
+  StatistiqueDbStructure,
   StatistiquesContext,
 } from "../statistiques.db.type";
 import {
@@ -18,60 +21,169 @@ import {
   toMonthKey,
 } from "../statistiques.utils";
 
-type MonthAccumulator = {
+type ActiviteTotals = {
   placesEnregistreesDna: number;
   placesAutoriseesIndispo: number;
   placesIndisponibles: number;
   placesAutoriseesPresencesIndues: number;
   presencesInduesBPI: number;
   presencesInduesDeboutees: number;
+  desinsectisation: number;
+  remiseEnEtat: number;
+  sousOccupation: number;
+  travaux: number;
 };
 
-const emptyMonthAccumulator = (): MonthAccumulator => ({
+const emptyActiviteTotals = (): ActiviteTotals => ({
   placesEnregistreesDna: 0,
   placesAutoriseesIndispo: 0,
   placesIndisponibles: 0,
   placesAutoriseesPresencesIndues: 0,
   presencesInduesBPI: 0,
   presencesInduesDeboutees: 0,
+  desinsectisation: 0,
+  remiseEnEtat: 0,
+  sousOccupation: 0,
+  travaux: 0,
 });
 
-const toMonthStat = (
-  monthKey: string,
-  monthTotals: MonthAccumulator
-): ActiviteByMonthStat => {
+const toActiviteSummary = (totals: ActiviteTotals): ActiviteSummaryStat => {
   const presencesInduesTotal =
-    monthTotals.presencesInduesBPI + monthTotals.presencesInduesDeboutees;
+    totals.presencesInduesBPI + totals.presencesInduesDeboutees;
 
   return {
-    date: monthKeyToDate(monthKey),
-    placesEnregistreesDna: monthTotals.placesEnregistreesDna,
-    placesIndisponibles: monthTotals.placesIndisponibles,
+    placesEnregistreesDna: totals.placesEnregistreesDna,
+    placesIndisponibles: totals.placesIndisponibles,
+    placesDisponibles: totals.placesEnregistreesDna - totals.placesIndisponibles,
     tauxIndisponibilite: roundStatsRate(
-      ratio(
-        monthTotals.placesIndisponibles,
-        monthTotals.placesAutoriseesIndispo
-      )
+      ratio(totals.placesIndisponibles, totals.placesAutoriseesIndispo)
     ),
-    presencesInduesBPI: monthTotals.presencesInduesBPI,
+    motifsIndisponibilite: {
+      desinsectisation: totals.desinsectisation,
+      remiseEnEtat: totals.remiseEnEtat,
+      sousOccupation: totals.sousOccupation,
+      travaux: totals.travaux,
+    },
+    presencesInduesBPI: totals.presencesInduesBPI,
     tauxPresencesInduesBPI: roundStatsRate(
-      ratio(
-        monthTotals.presencesInduesBPI,
-        monthTotals.placesAutoriseesPresencesIndues
-      )
+      ratio(totals.presencesInduesBPI, totals.placesAutoriseesPresencesIndues)
     ),
-    presencesInduesDeboutees: monthTotals.presencesInduesDeboutees,
+    presencesInduesDeboutees: totals.presencesInduesDeboutees,
     tauxPresencesInduesDeboutees: roundStatsRate(
       ratio(
-        monthTotals.presencesInduesDeboutees,
-        monthTotals.placesAutoriseesPresencesIndues
+        totals.presencesInduesDeboutees,
+        totals.placesAutoriseesPresencesIndues
       )
     ),
     presencesInduesTotal,
     tauxPresencesInduesTotal: roundStatsRate(
-      ratio(presencesInduesTotal, monthTotals.placesAutoriseesPresencesIndues)
+      ratio(presencesInduesTotal, totals.placesAutoriseesPresencesIndues)
     ),
   };
+};
+
+const toActiviteByMonthStat = (
+  monthKey: string,
+  totals: ActiviteTotals
+): ActiviteByMonthStat => {
+  const summary = toActiviteSummary(totals);
+
+  return {
+    date: monthKeyToDate(monthKey),
+    placesEnregistreesDna: summary.placesEnregistreesDna,
+    placesIndisponibles: summary.placesIndisponibles,
+    tauxIndisponibilite: summary.tauxIndisponibilite,
+    presencesInduesBPI: summary.presencesInduesBPI,
+    tauxPresencesInduesBPI: summary.tauxPresencesInduesBPI,
+    presencesInduesDeboutees: summary.presencesInduesDeboutees,
+    tauxPresencesInduesDeboutees: summary.tauxPresencesInduesDeboutees,
+    presencesInduesTotal: summary.presencesInduesTotal,
+    tauxPresencesInduesTotal: summary.tauxPresencesInduesTotal,
+  };
+};
+
+const resolveActiviteStructureIds = (
+  activite: StatistiqueDbActivite,
+  dnaLinks: StatistiquesContext["dnaLinks"],
+  structureVersionTimeline: StatistiquesContext["structureVersionTimeline"],
+  structureIdsInScope: Set<number>
+): number[] => {
+  if (!activite.dnaCode || !activite.date) {
+    return [];
+  }
+
+  return lookupStructureIdsForDnaAtDate(
+    activite.dnaCode,
+    new Date(activite.date),
+    dnaLinks,
+    structureVersionTimeline,
+    structureIdsInScope
+  );
+};
+
+const accumulateActivite = (
+  totals: ActiviteTotals,
+  activite: StatistiqueDbActivite,
+  structureIds: number[],
+  structureTypeById: Map<number, StatistiqueDbStructure["type"]>
+): void => {
+  const placesAutorisees = activite.placesAutorisees ?? 0;
+
+  totals.placesEnregistreesDna += placesAutorisees;
+
+  if (
+    structureIds.some((structureId) =>
+      isStructureEligibleForActiviteIndisponibilite(
+        structureTypeById.get(structureId)
+      )
+    )
+  ) {
+    totals.placesAutoriseesIndispo += placesAutorisees;
+    totals.placesIndisponibles += activite.placesIndisponibles ?? 0;
+    totals.desinsectisation += activite.desinsectisation ?? 0;
+    totals.remiseEnEtat += activite.remiseEnEtat ?? 0;
+    totals.sousOccupation += activite.sousOccupation ?? 0;
+    totals.travaux += activite.travaux ?? 0;
+  }
+
+  if (
+    structureIds.some((structureId) =>
+      isStructureEligibleForActivitePresencesIndues(
+        structureTypeById.get(structureId)
+      )
+    )
+  ) {
+    totals.placesAutoriseesPresencesIndues += placesAutorisees;
+    totals.presencesInduesBPI += activite.presencesInduesBPI ?? 0;
+    totals.presencesInduesDeboutees += activite.presencesInduesDeboutees ?? 0;
+  }
+};
+
+const buildLatestActiviteByStructureId = (
+  activites: StatistiqueDbActivite[],
+  dnaLinks: StatistiquesContext["dnaLinks"],
+  structureVersionTimeline: StatistiquesContext["structureVersionTimeline"],
+  structureIdsInScope: Set<number>
+): Map<number, StatistiqueDbActivite> => {
+  const latestByStructureId = new Map<number, StatistiqueDbActivite>();
+
+  for (const activite of [...activites].sort(
+    (activiteA, activiteB) =>
+      new Date(activiteB.date).getTime() - new Date(activiteA.date).getTime()
+  )) {
+    for (const structureId of resolveActiviteStructureIds(
+      activite,
+      dnaLinks,
+      structureVersionTimeline,
+      structureIdsInScope
+    )) {
+      if (!latestByStructureId.has(structureId)) {
+        latestByStructureId.set(structureId, activite);
+      }
+    }
+  }
+
+  return latestByStructureId;
 };
 
 export const computeActiviteStatistiques = (
@@ -88,16 +200,29 @@ export const computeActiviteStatistiques = (
     allStructures.map((structure) => [structure.id, structure.type])
   );
   const structureIdsInScope = new Set(structures.map((structure) => structure.id));
-  const byMonth = new Map<string, MonthAccumulator>();
+
+  const summaryTotals = emptyActiviteTotals();
+  const latestActiviteByStructureId = buildLatestActiviteByStructureId(
+    activites,
+    dnaLinks,
+    structureVersionTimeline,
+    structureIdsInScope
+  );
+
+  for (const [structureId, activite] of latestActiviteByStructureId) {
+    accumulateActivite(
+      summaryTotals,
+      activite,
+      [structureId],
+      structureTypeById
+    );
+  }
+
+  const byMonth = new Map<string, ActiviteTotals>();
 
   for (const activite of activites) {
-    if (!activite.dnaCode || !activite.date) {
-      continue;
-    }
-
-    const structureIds = lookupStructureIdsForDnaAtDate(
-      activite.dnaCode,
-      new Date(activite.date),
+    const structureIds = resolveActiviteStructureIds(
+      activite,
       dnaLinks,
       structureVersionTimeline,
       structureIdsInScope
@@ -107,44 +232,15 @@ export const computeActiviteStatistiques = (
     }
 
     const monthKey = toMonthKey(new Date(activite.date));
-    const monthTotals = byMonth.get(monthKey) ?? emptyMonthAccumulator();
-    const placesAutorisees = activite.placesAutorisees ?? 0;
-
-    monthTotals.placesEnregistreesDna += placesAutorisees;
-
-    let inIndisponibiliteScope = false;
-    let inPresencesInduesScope = false;
-    for (const structureId of structureIds) {
-      const structureType = structureTypeById.get(structureId);
-      if (!structureType) {
-        continue;
-      }
-      if (isStructureEligibleForActiviteIndisponibilite(structureType)) {
-        inIndisponibiliteScope = true;
-      }
-      if (isStructureEligibleForActivitePresencesIndues(structureType)) {
-        inPresencesInduesScope = true;
-      }
-    }
-
-    if (inIndisponibiliteScope) {
-      monthTotals.placesAutoriseesIndispo += placesAutorisees;
-      monthTotals.placesIndisponibles += activite.placesIndisponibles ?? 0;
-    }
-
-    if (inPresencesInduesScope) {
-      monthTotals.placesAutoriseesPresencesIndues += placesAutorisees;
-      monthTotals.presencesInduesBPI += activite.presencesInduesBPI ?? 0;
-      monthTotals.presencesInduesDeboutees +=
-        activite.presencesInduesDeboutees ?? 0;
-    }
-
+    const monthTotals = byMonth.get(monthKey) ?? emptyActiviteTotals();
+    accumulateActivite(monthTotals, activite, structureIds, structureTypeById);
     byMonth.set(monthKey, monthTotals);
   }
 
   return {
+    summary: toActiviteSummary(summaryTotals),
     byMonth: [...byMonth.entries()]
       .sort(([monthKeyA], [monthKeyB]) => monthKeyA.localeCompare(monthKeyB))
-      .map(([monthKey, monthTotals]) => toMonthStat(monthKey, monthTotals)),
+      .map(([monthKey, monthTotals]) => toActiviteByMonthStat(monthKey, monthTotals)),
   };
 };

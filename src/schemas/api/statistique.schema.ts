@@ -80,6 +80,27 @@ export type FinanceByYearStat = {
   subventionnees: FinanceByYearScopeStat;
 };
 
+export type ActiviteMotifsIndisponibiliteStat = {
+  desinsectisation: number;
+  remiseEnEtat: number;
+  sousOccupation: number;
+  travaux: number;
+};
+
+export type ActiviteSummaryStat = {
+  placesEnregistreesDna: number;
+  placesIndisponibles: number;
+  placesDisponibles: number;
+  tauxIndisponibilite: number | null;
+  motifsIndisponibilite: ActiviteMotifsIndisponibiliteStat;
+  presencesInduesBPI: number;
+  tauxPresencesInduesBPI: number | null;
+  presencesInduesDeboutees: number;
+  tauxPresencesInduesDeboutees: number | null;
+  presencesInduesTotal: number;
+  tauxPresencesInduesTotal: number | null;
+};
+
 export type ActiviteByMonthStat = {
   date: Date;
   placesEnregistreesDna: number;
@@ -226,6 +247,27 @@ export type ControleQualiteByYearStat = z.infer<
   typeof controleQualiteByYearStatSchema
 >;
 
+const activiteMotifsIndisponibiliteStatSchema = z.object({
+  desinsectisation: z.number(),
+  remiseEnEtat: z.number(),
+  sousOccupation: z.number(),
+  travaux: z.number(),
+});
+
+const activiteSummaryStatSchema = z.object({
+  placesEnregistreesDna: z.number(),
+  placesIndisponibles: z.number(),
+  placesDisponibles: z.number(),
+  tauxIndisponibilite: z.number().nullable(),
+  motifsIndisponibilite: activiteMotifsIndisponibiliteStatSchema,
+  presencesInduesBPI: z.number(),
+  tauxPresencesInduesBPI: z.number().nullable(),
+  presencesInduesDeboutees: z.number(),
+  tauxPresencesInduesDeboutees: z.number().nullable(),
+  presencesInduesTotal: z.number(),
+  tauxPresencesInduesTotal: z.number().nullable(),
+});
+
 const activiteByMonthStatSchema = z.object({
   date: z.coerce.date(),
   placesEnregistreesDna: z.number(),
@@ -274,6 +316,7 @@ export const statistiqueApiReadSchema = z.object({
     byYear: z.array(controleQualiteByYearStatSchema),
   }),
   activite: z.object({
+    summary: activiteSummaryStatSchema,
     byMonth: z.array(activiteByMonthStatSchema),
   }),
 });

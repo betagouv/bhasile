@@ -88,6 +88,10 @@ export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
     dnaCode: true;
     date: true;
     placesAutorisees: true;
+    desinsectisation: true;
+    remiseEnEtat: true;
+    sousOccupation: true;
+    travaux: true;
     placesIndisponibles: true;
     presencesInduesBPI: true;
     presencesInduesDeboutees: true;

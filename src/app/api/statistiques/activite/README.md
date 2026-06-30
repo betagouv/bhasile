@@ -1,29 +1,30 @@
 # `activite`
 
-Liée à la structure par ses codes DNA (`DnaStructure` sur `StructureVersion`).
+Deux vues distinctes
 
-Résolution à date : `lookupStructureIdsForDnaAtDate` — le DNA est rattaché à la structure dont la version est effective à la date de l'activité.
+## `summary` — camembert + motifs
 
-## TODO
+Pour chaque structure **ouverte à la date de référence** (`context.structures`) :
 
-Les dénominateurs de taux diffèrent selon les scopes (toutes structures vs hors CAES vs hors CAES+CPH) alors que `placesEnregistreesDna` agrège tout : à garder en tête pour l'interprétation des seuils agrégés.
+1. Résoudre le DNA à la date de l'activité (`lookupStructureIdsForDnaAtDate`)
+2. Prendre la **dernière** activité connue pour cette structure
+3. Sommer les indicateurs (places, motifs, présences indues)
 
-## Scopes
+Une structure sans activité n'entre pas dans les totaux.
 
-| Indicateur              | Structures                                       |
-| ----------------------- | ------------------------------------------------ |
-| `placesEnregistreesDna` | Toutes                                           |
-| Indisponibilités        | Toutes sauf CAES                                 |
-| Présences indues        | Toutes sauf CAES et CPH (en pratique CADA, HUDA) |
+## `byMonth` — tableau mensuel
 
-`dnaCode` dans scope si ≥1 structure liée (version effective à la date) a le bon type.
+Somme des activités **effectivement déclarées** pour chaque mois.
 
-## `byMonth`
+- Pas d'inférence : si une structure ouverte n'a pas d'activité pour un mois donné, elle ne compte pas dans ce mois
+- Les taux sont calculés sur les dénominateurs du mois (scopes type identiques à `summary`)
 
-| Champ                                        | Calcul                                             |
-| -------------------------------------------- | -------------------------------------------------- |
-| `placesEnregistreesDna`                      | Somme `placesAutorisees`                           |
-| `placesIndisponibles`, `tauxIndisponibilite` | Scope hors CAES                                    |
-| `presencesIndues*`, `tauxPresencesIndues*`   | Scope hors CAES et CPH ; `Total` = BPI + déboutées |
+## Scopes type
+
+| Indicateur                | Structures              |
+| ------------------------- | ----------------------- |
+| `placesEnregistreesDna`   | Toutes                  |
+| Indisponibilités + motifs | Toutes sauf CAES        |
+| Présences indues          | Toutes sauf CAES et CPH |
 
 Taux = ratio 0-1, `null` si dénominateur nul.
