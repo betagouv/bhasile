@@ -140,6 +140,8 @@ describe("structures statistics util", () => {
   });
 
   it("should count active CPOMs for current year only", () => {
+    vi.setSystemTime(new Date("2025-06-15T12:00:00.000Z"));
+
     const result = computeStructuresStatistiques(
       buildTestStatistiquesContext({
         structures: [
@@ -181,5 +183,7 @@ describe("structures statistics util", () => {
 
     expect(result.totalCpoms).toBe(1);
     expect(result.structuresAvecCpom).toBe(1);
+
+    vi.useRealTimers();
   });
 });
