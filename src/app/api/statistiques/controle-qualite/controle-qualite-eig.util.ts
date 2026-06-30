@@ -13,20 +13,8 @@ import type {
   StatistiqueDbStructureVersionTimeline,
 } from "../statistiques.db.type";
 import {
-  getTwelveMonthCutoffKey,
   lookupStructureIdsForDnaAtDate,
-  toMonthKey,
 } from "../statistiques.utils";
-
-export const filterRecentEigs = (
-  eigs: StatistiqueDbEig[]
-): StatistiqueDbEig[] => {
-  const cutoff = getTwelveMonthCutoffKey();
-  return eigs.filter(
-    (eig) =>
-      eig.evenementDate && toMonthKey(new Date(eig.evenementDate)) >= cutoff
-  );
-};
 
 const sumEigCounts = (eigs: StatistiqueDbEig[]): EigCountTotalsStat => {
   let nbEigComportementViolent = 0;

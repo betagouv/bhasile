@@ -146,10 +146,21 @@ export const getPeriodBounds = (
   }
 };
 
-export const getTwelveMonthCutoffKey = (): string => {
+export const filterByTwelveMonthWindow = <Item>(
+  items: Item[],
+  getDate: (item: Item) => Date | string | null | undefined
+): Item[] => {
   const twelveMonthsAgo = startOfUtcDay();
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
-  return toMonthKey(twelveMonthsAgo);
+  const cutoff = toMonthKey(twelveMonthsAgo);
+
+  return items.filter((item) => {
+    const date = getDate(item);
+    if (date == null) {
+      return false;
+    }
+    return toMonthKey(new Date(date)) >= cutoff;
+  });
 };
 
 export const getEffectiveStructureVersionAtDate = (

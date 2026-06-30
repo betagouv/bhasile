@@ -11,11 +11,12 @@ Structures actives avec typologie (≥1 `StructureTypologie`). Places EIG = somm
 
 ## Vue globale `eig` (12 mois glissants)
 
+Fenêtre 12 mois : `filterByTwelveMonthWindow` (`statistiques.utils`).
+
 | Champ                                                             | Calcul                                  |
 | ----------------------------------------------------------------- | --------------------------------------- |
-| `tauxEig`                                                         | `nbEig / places autorisées`             |
-| `nbEig`, `nbEigComportementViolent`, `tauxEigComportementViolent` | Comptages / ratios                      |
-| `moyenneEvaluationsCurrentYear`                                   | Moyenne ou médiane notes sur 12 mois glissants |
+| `tauxEig`, `nbEig`, `nbEigComportementViolent`, `tauxEigComportementViolent` | `computeEigRates` |
+| `moyenneEvaluationsCurrentYear`                                   | `computeEvaluationGlobalSummary` |
 
 ## TODO (métier)
 

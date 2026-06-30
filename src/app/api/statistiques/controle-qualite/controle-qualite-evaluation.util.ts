@@ -3,7 +3,6 @@ import { roundStatsNumber } from "@/app/utils/statistiques-format.util";
 import {
   ControleQualiteEvaluationStat,
   ControleQualitePeriodBase,
-  StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
 import type {
@@ -11,24 +10,30 @@ import type {
   StatistiquesContext,
   StatistiquesPeriodGranularity,
 } from "../statistiques.db.type";
-import {
-  computeTotalPlaces,
-  filterStructuresWithTypologie,
-  getLastTypologiePerStructure,
-  getTwelveMonthCutoffKey,
-  groupByPeriodKey,
-  lookupActiveStructureIds,
-  monthKeyToDate,
-  parseTrimesterKey,
-  toMonthKey,
-  toTrimesterKey,
-  toYearKey,
-} from "../statistiques.utils";
-import {
-  computeEigPeriodMetrics,
-  computeEigRates,
-  filterRecentEigs,
-} from "./controle-qualite-eig.util";
+import { groupByPeriodKey, lookupActiveStructureIds } from "../statistiques.utils";
+import { computeEigPeriodMetrics } from "./controle-qualite-eig.util";
+
+export const filterEvaluationsInScope = (
+  evaluations: StatistiqueDbEvaluation[],
+  activeStructureIds: Set<number>
+): StatistiqueDbEvaluation[] =>
+  evaluations.filter(
+    (evaluation) =>
+      evaluation.structureId !== null &&
+      activeStructureIds.has(evaluation.structureId)
+  );
+
+export const computeEvaluationGlobalSummary = (
+  evaluations: StatistiqueDbEvaluation[],
+  aggregation: NumericAggregation
+): { moyenneEvaluationsCurrentYear: number | null } => ({
+  moyenneEvaluationsCurrentYear: roundStatsNumber(
+    aggregateValues(
+      evaluations.map((evaluation) => evaluation.note),
+      aggregation
+    )
+  ),
+});
 
 type PeriodSeriesConfig<Period> = {
   granularity: StatistiquesPeriodGranularity;
@@ -77,7 +82,7 @@ const sumEvaluationNotes = (
   };
 };
 
-const computePeriodSeries = <Period>(
+export const computePeriodSeries = <Period>(
   context: StatistiquesContext,
   aggregation: NumericAggregation,
   config: PeriodSeriesConfig<Period>
@@ -103,12 +108,9 @@ const computePeriodSeries = <Period>(
         config.granularity,
         periodKey
       );
-      const evaluationsForPeriod = (
-        evaluationsByPeriod.get(periodKey) ?? []
-      ).filter(
-        (evaluation) =>
-          evaluation.structureId !== null &&
-          activeStructureIds.has(evaluation.structureId)
+      const evaluationsForPeriod = filterEvaluationsInScope(
+        evaluationsByPeriod.get(periodKey) ?? [],
+        activeStructureIds
       );
 
       return {
@@ -122,67 +124,4 @@ const computePeriodSeries = <Period>(
         ...sumEvaluationNotes(evaluationsForPeriod, aggregation),
       };
     });
-};
-
-export const computeControleQualiteStatistiques = (
-  context: StatistiquesContext,
-  aggregation: NumericAggregation
-): StatistiqueApiRead["controleQualite"] => {
-  const { structures, typologies, eigs, evaluations } = context;
-  const typologieMap = getLastTypologiePerStructure(typologies);
-  const structuresWithTypologie = filterStructuresWithTypologie(
-    structures,
-    typologieMap
-  );
-  const activeStructureIds = new Set(
-    structuresWithTypologie.map((structure) => structure.id)
-  );
-  const evaluationsInScope = evaluations.filter(
-    (evaluation) =>
-      evaluation.structureId !== null &&
-      activeStructureIds.has(evaluation.structureId)
-  );
-
-  // TODO: confirmer métier — fenêtre glissante 12 mois vs année civile (ex. 2026).
-  // Même jour il y a 1 an dans les deux cas pour l'instant.
-  const twelveMonthCutoff = getTwelveMonthCutoffKey();
-  const recentEvaluations = evaluationsInScope.filter(
-    (evaluation) =>
-      evaluation.date !== null &&
-      toMonthKey(new Date(evaluation.date)) >= twelveMonthCutoff
-  );
-
-  return {
-    eig: {
-      ...computeEigRates(
-        filterRecentEigs(eigs),
-        computeTotalPlaces(structuresWithTypologie, typologieMap)
-      ),
-      moyenneEvaluationsCurrentYear: roundStatsNumber(
-        aggregateValues(
-          recentEvaluations.map((evaluation) => evaluation.note),
-          aggregation
-        )
-      ),
-    },
-    byMonth: computePeriodSeries<{ date: Date }>(context, aggregation, {
-      granularity: "month",
-      toPeriodKey: toMonthKey,
-      toPeriod: (monthKey) => ({ date: monthKeyToDate(monthKey) }),
-    }),
-    byTrimester: computePeriodSeries<{ year: number; trimester: number }>(
-      context,
-      aggregation,
-      {
-        granularity: "trimester",
-        toPeriodKey: toTrimesterKey,
-        toPeriod: parseTrimesterKey,
-      }
-    ),
-    byYear: computePeriodSeries<{ year: number }>(context, aggregation, {
-      granularity: "year",
-      toPeriodKey: toYearKey,
-      toPeriod: (yearKey) => ({ year: Number(yearKey) }),
-    }),
-  };
 };

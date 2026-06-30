@@ -4,7 +4,7 @@ import {
 } from "@/schemas/api/statistique.schema";
 
 import { computeActiviteStatistiques } from "./activite/activite.util";
-import { computeControleQualiteStatistiques } from "./controle-qualite/controle-qualite-evaluation.util";
+import { computeControleQualiteStatistiques } from "./controle-qualite/controle-qualite.util";
 import { computeFinanceStatistiques } from "./finance/finance.util";
 import { computePlacesStatistiques } from "./places/places.util";
 import type { StatistiquesContext } from "./statistiques.db.type";

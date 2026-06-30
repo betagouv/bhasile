@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { computeControleQualiteStatistiques } from "@/app/api/statistiques/controle-qualite/controle-qualite-evaluation.util";
+import { computeControleQualiteStatistiques } from "@/app/api/statistiques/controle-qualite/controle-qualite.util";
 import type { StatistiquesContext } from "@/app/api/statistiques/statistiques.db.type";
 import { StructureType } from "@/types/structure.type";
 
