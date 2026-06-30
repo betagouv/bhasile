@@ -141,6 +141,7 @@ export type StructureApiWrite = z.infer<typeof structureApiSchema>;
 export type StructureApiWriteClient = z.input<typeof structureApiSchema>;
 
 export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
+  fermetureDate: string | null;
   debutConvention: string | null;
   finConvention: string | null;
   debutPeriodeAutorisation: string | null;
