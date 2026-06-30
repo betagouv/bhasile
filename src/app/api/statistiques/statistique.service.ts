@@ -50,6 +50,7 @@ export const buildStatistiquesContext = async (
     now
   );
 
+  // TODO simplify when structure.fermetureDate is back as a scalar
   const openEffectiveVersions = effectiveVersions.filter(
     (version) => version.structureVersionTransformation?.type !== "FERMETURE"
   );
@@ -84,7 +85,9 @@ export const buildStatistiquesContext = async (
         ...new Set(
           allStructures
             .map((structure) => structure.departementAdministratif)
-            .filter((departement): departement is string => departement !== null)
+            .filter(
+              (departement): departement is string => departement !== null
+            )
         ),
       ]),
       findEigs(dnaCodes),
