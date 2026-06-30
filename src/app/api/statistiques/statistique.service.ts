@@ -10,19 +10,19 @@ import { computePlacesStatistiques } from "./places/places.util";
 import type { StatistiquesContext } from "./statistiques.db.type";
 import {
   findActivites,
+  findAllStructureIdsMatchingFilters,
   findBudgets,
   findCpomStructures,
   findDepartementsWithPopulation,
-  findAllStructureIdsMatchingFilters,
   findDnaLinks,
   findEffectiveStructureVersionsAtDate,
-  findStructureVersionTimeline,
   findEigs,
   findEvaluations,
   findIndicateursFinanciers,
   findStructureActivityDates,
   findStructureAdresses,
   findStructureTypologies,
+  findStructureVersionTimeline,
 } from "./statistiques.repository";
 import {
   buildActivityIndex,

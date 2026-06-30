@@ -1,5 +1,5 @@
-import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
+import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
 import { Prisma, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import type { StatistiquesFilters } from "@/schemas/api/statistique.schema";
@@ -12,11 +12,11 @@ import type {
   StatistiqueDbDepartement,
   StatistiqueDbDnaLink,
   StatistiqueDbEffectiveStructureVersion,
-  StatistiqueDbStructureActivity,
-  StatistiqueDbStructureVersionTimeline,
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
   StatistiqueDbIndicateurFinancier,
+  StatistiqueDbStructureActivity,
+  StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologie,
 } from "./statistiques.db.type";
 

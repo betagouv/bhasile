@@ -1,7 +1,7 @@
 import type {
   StatistiqueDbDnaLink,
-  StatistiquesActivityContext,
   StatistiqueDbStructureVersionTimeline,
+  StatistiquesActivityContext,
   StatistiquesContext,
 } from "@/app/api/statistiques/statistiques.db.type";
 import {

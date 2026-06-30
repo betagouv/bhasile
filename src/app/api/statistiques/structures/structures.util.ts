@@ -1,6 +1,7 @@
+import { getDatesOfCurrentActeAdministratif } from "@/app/api/actes-administratifs/acte-administratif.util";
 import type { StructureDbList } from "@/app/api/structures/structure.db.type";
 import { isStructureInCpom } from "@/app/api/structures/structure.util";
-import { getDatesOfCurrentActeAdministratif } from "@/app/api/actes-administratifs/acte-administratif.util";
+import { startOfUtcDay } from "@/app/utils/date.util";
 import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
 import {
   BatiStat,
@@ -27,7 +28,6 @@ import {
   getTypologieMapForExactYear,
   mapTypologieYears,
 } from "../statistiques.utils";
-import { startOfUtcDay } from "@/app/utils/date.util";
 
 const getRepartitionFromRepartitions = (
   repartitions: (Repartition | null | undefined)[]

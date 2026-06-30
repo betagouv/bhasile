@@ -1,5 +1,5 @@
-import { sumValues } from "@/app/utils/math.util";
 import { startOfNextUtcDay, startOfUtcDay } from "@/app/utils/date.util";
+import { sumValues } from "@/app/utils/math.util";
 
 import type {
   StatistiqueDbDnaLink,
