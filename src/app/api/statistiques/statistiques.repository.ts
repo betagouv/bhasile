@@ -1,4 +1,5 @@
 import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
+import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { Prisma, StructureType } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import type { StatistiquesFilters } from "@/schemas/api/statistique.schema";
@@ -21,10 +22,10 @@ const excludedStructureTypes = new Set<string>(EXCLUDED_STRUCTURE_TYPES);
 
 export const findEffectiveStructureVersionsAtDate = async (
   filters: StatistiquesFilters,
-  atDate: Date
+  reference: Date = new Date()
 ): Promise<StatistiqueDbEffectiveStructureVersion[]> => {
   const where: Prisma.StructureVersionWhereInput = {
-    effectiveDate: { lte: atDate },
+    effectiveDate: { lt: startOfNextUtcDay(reference) },
   };
 
   const depList = filters.departements?.split(",").filter(Boolean) ?? [];
@@ -56,7 +57,7 @@ export const findEffectiveStructureVersionsAtDate = async (
         }
       : {
           not: null,
-          notIn: EXCLUDED_STRUCTURE_TYPES as unknown as StructureType[],
+          notIn: [...EXCLUDED_STRUCTURE_TYPES] as StructureType[],
         };
 
   return prisma.structureVersion.findMany({
@@ -131,7 +132,8 @@ export const findStructureTypologies = async (
   });
   // Normalise structureId post-migration (via structureVersion).
   return rows.map((row) => {
-    const structureId = row.structureId ?? row.structureVersion?.structureId ?? null;
+    const structureId =
+      row.structureId ?? row.structureVersion?.structureId ?? null;
     // Drop the helper join field from the returned shape to match StatistiqueDbTypologie.
     return {
       id: row.id,
@@ -165,7 +167,8 @@ export const findStructureAdresses = async (
   });
   // Normalise structureId post-migration (via structureVersion).
   return rows.map((row) => {
-    const structureId = row.structureId ?? row.structureVersion?.structureId ?? null;
+    const structureId =
+      row.structureId ?? row.structureVersion?.structureId ?? null;
     // Drop the helper join field from the returned shape to match StatistiqueDbAdresse.
     return {
       id: row.id,

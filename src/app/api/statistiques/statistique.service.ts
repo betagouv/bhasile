@@ -36,11 +36,11 @@ import { computeStructuresStatistiques } from "./structures/structures.util";
 export const buildStatistiquesContext = async (
   filters: StatistiquesFilters
 ): Promise<StatistiquesContext | null> => {
-  const atDate = new Date();
-  const referenceYear = atDate.getFullYear();
+  const now = new Date();
+  const referenceYear = now.getUTCFullYear();
   const effectiveVersions = await findEffectiveStructureVersionsAtDate(
     filters,
-    atDate
+    now
   );
 
   const allStructureIds = effectiveVersions
