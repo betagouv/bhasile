@@ -1,19 +1,12 @@
 import { aggregateValues, NumericAggregation } from "@/app/utils/math.util";
 import { roundStatsNumber } from "@/app/utils/statistiques-format.util";
-import { CURRENT_YEAR } from "@/constants";
 import {
-  ControleQualiteByMonthStat,
-  ControleQualiteByTrimesterStat,
-  ControleQualiteByYearStat,
   ControleQualiteEvaluationStat,
-  ControleQualitePeriodStat,
-  EigStat,
+  ControleQualitePeriodBase,
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
 import type {
-  StatistiqueDbDnaLink,
-  StatistiqueDbEig,
   StatistiqueDbEvaluation,
   StatistiquesContext,
   StatistiquesPeriodGranularity,
@@ -22,6 +15,7 @@ import {
   computeTotalPlaces,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
+  getTwelveMonthCutoffKey,
   groupByPeriodKey,
   lookupActiveStructureIds,
   monthKeyToDate,
@@ -37,74 +31,23 @@ import {
   filterRecentEigs,
 } from "./controle-qualite-eig.util";
 
-type SeriesContext = {
-  activeStructureIdSet: Set<number>;
-  totalStructures: number;
-  dnaCodeToStructureIds: Map<string, Set<number>>;
-  aggregation: NumericAggregation;
-};
-
-type PeriodSeriesConfig<Entry extends ControleQualitePeriodStat> = {
+type PeriodSeriesConfig<Period> = {
   granularity: StatistiquesPeriodGranularity;
   toPeriodKey: (date: Date) => string;
-  toEntryMeta: (
-    periodKey: string
-  ) => Omit<Entry, keyof ControleQualitePeriodStat>;
+  toPeriod: (periodKey: string) => Period;
 };
 
-const filterEvaluationsForYear = (
-  evaluations: StatistiqueDbEvaluation[],
-  activeStructureIds: Set<number>,
-  year: number
-): StatistiqueDbEvaluation[] =>
-  evaluations.filter(
-    (evaluation) =>
-      evaluation.structureId !== null &&
-      activeStructureIds.has(evaluation.structureId) &&
-      evaluation.date !== null &&
-      new Date(evaluation.date).getFullYear() === year
-  );
-
-const computeMoyenneEvaluationsCurrentYear = (
-  evaluations: StatistiqueDbEvaluation[],
-  activeStructureIds: Set<number>,
-  aggregation: NumericAggregation
-): number | null =>
-  roundStatsNumber(
-    aggregateValues(
-      filterEvaluationsForYear(
-        evaluations,
-        activeStructureIds,
-        CURRENT_YEAR
-      ).map((evaluation) => evaluation.note),
-      aggregation
-    )
-  );
-
-const computeEigSummary = (
-  eigs: StatistiqueDbEig[],
-  totalPlacesAutorisees: number,
-  evaluations: StatistiqueDbEvaluation[],
-  activeStructureIds: Set<number>,
-  aggregation: NumericAggregation
-): EigStat => ({
-  ...computeEigRates(filterRecentEigs(eigs), totalPlacesAutorisees),
-  moyenneEvaluationsCurrentYear: computeMoyenneEvaluationsCurrentYear(
-    evaluations,
-    activeStructureIds,
-    aggregation
-  ),
-});
-
-const computeEvaluationNotes = (
+const sumEvaluationNotes = (
   evaluations: StatistiqueDbEvaluation[],
   aggregation: NumericAggregation
 ): ControleQualiteEvaluationStat => {
-  const structureIds = new Set(
-    evaluations
-      .map((evaluation) => evaluation.structureId)
-      .filter((structureId): structureId is number => structureId !== null)
-  );
+  const structureIds = new Set<number>();
+
+  for (const evaluation of evaluations) {
+    if (evaluation.structureId !== null) {
+      structureIds.add(evaluation.structureId);
+    }
+  }
 
   return {
     nbStructuresEvaluees: structureIds.size,
@@ -135,67 +78,12 @@ const computeEvaluationNotes = (
   };
 };
 
-const computePeriodStat = (
-  eigsForPeriod: StatistiqueDbEig[],
-  evaluationsForPeriod: StatistiqueDbEvaluation[],
-  seriesContext: SeriesContext
-): ControleQualitePeriodStat => {
-  const evaluationsActives = evaluationsForPeriod.filter(
-    (evaluation) =>
-      evaluation.structureId !== null &&
-      seriesContext.activeStructureIdSet.has(evaluation.structureId)
-  );
-
-  return {
-    ...computeEigPeriodMetrics(
-      eigsForPeriod,
-      seriesContext.activeStructureIdSet,
-      seriesContext.totalStructures,
-      seriesContext.dnaCodeToStructureIds
-    ),
-    ...computeEvaluationNotes(evaluationsActives, seriesContext.aggregation),
-  };
-};
-
-const buildSeriesContext = (
-  activeStructureIdSet: Set<number>,
-  dnaLinks: StatistiqueDbDnaLink[],
-  aggregation: NumericAggregation
-): SeriesContext => ({
-  activeStructureIdSet,
-  totalStructures: activeStructureIdSet.size,
-  dnaCodeToStructureIds: buildDnaCodeToStructureIds(
-    dnaLinks.filter(
-      (link) =>
-        link.structureId !== null &&
-        activeStructureIdSet.has(link.structureId)
-    )
-  ),
-  aggregation,
-});
-
-const buildSeriesContextForPeriod = (
+const computePeriodSeries = <Period>(
   context: StatistiquesContext,
-  granularity: StatistiquesPeriodGranularity,
-  periodKey: string,
-  aggregation: NumericAggregation
-): SeriesContext =>
-  buildSeriesContext(
-    lookupActiveStructureIds(
-      context.activeStructureIdsByPeriod,
-      granularity,
-      periodKey
-    ),
-    context.dnaLinks,
-    aggregation
-  );
-
-const computePeriodSeries = <Entry extends ControleQualitePeriodStat>(
-  context: StatistiquesContext,
-  globalContext: SeriesContext,
-  config: PeriodSeriesConfig<Entry>
-): Entry[] => {
-  const { eigs, evaluations } = context;
+  aggregation: NumericAggregation,
+  config: PeriodSeriesConfig<Period>
+): (ControleQualitePeriodBase & Period)[] => {
+  const { eigs, evaluations, dnaLinks, activeStructureIdsByPeriod } = context;
   const eigsByPeriod = groupByPeriodKey(
     eigs,
     (eig) => eig.evenementDate,
@@ -210,21 +98,36 @@ const computePeriodSeries = <Entry extends ControleQualitePeriodStat>(
   return [...new Set([...eigsByPeriod.keys(), ...evaluationsByPeriod.keys()])]
     .sort()
     .map((periodKey) => {
-      const periodContext = buildSeriesContextForPeriod(
-        context,
+      const activeStructureIds = lookupActiveStructureIds(
+        activeStructureIdsByPeriod,
         config.granularity,
-        periodKey,
-        globalContext.aggregation
+        periodKey
+      );
+      const dnaCodeToStructureIds = buildDnaCodeToStructureIds(
+        dnaLinks.filter(
+          (link) =>
+            link.structureId !== null &&
+            activeStructureIds.has(link.structureId)
+        )
+      );
+      const evaluationsForPeriod = (
+        evaluationsByPeriod.get(periodKey) ?? []
+      ).filter(
+        (evaluation) =>
+          evaluation.structureId !== null &&
+          activeStructureIds.has(evaluation.structureId)
       );
 
       return {
-        ...config.toEntryMeta(periodKey),
-        ...computePeriodStat(
+        ...config.toPeriod(periodKey),
+        ...computeEigPeriodMetrics(
           eigsByPeriod.get(periodKey) ?? [],
-          evaluationsByPeriod.get(periodKey) ?? [],
-          periodContext
+          activeStructureIds,
+          activeStructureIds.size,
+          dnaCodeToStructureIds
         ),
-      } as Entry;
+        ...sumEvaluationNotes(evaluationsForPeriod, aggregation),
+      };
     });
 };
 
@@ -238,54 +141,55 @@ export const computeControleQualiteStatistiques = (
     structures,
     typologieMap
   );
-  const activeStructureIdSet = new Set(
+  const activeStructureIds = new Set(
     structuresWithTypologie.map((structure) => structure.id)
   );
-  const evaluationsActives = evaluations.filter(
+  const evaluationsInScope = evaluations.filter(
     (evaluation) =>
       evaluation.structureId !== null &&
-      activeStructureIdSet.has(evaluation.structureId)
+      activeStructureIds.has(evaluation.structureId)
   );
-  const seriesContext = buildSeriesContext(
-    activeStructureIdSet,
-    context.dnaLinks,
-    aggregation
+
+  // TODO: confirmer métier — fenêtre glissante 12 mois vs année civile (ex. 2026).
+  // Même jour il y a 1 an dans les deux cas pour l'instant.
+  const twelveMonthCutoff = getTwelveMonthCutoffKey();
+  const recentEvaluations = evaluationsInScope.filter(
+    (evaluation) =>
+      evaluation.date !== null &&
+      toMonthKey(new Date(evaluation.date)) >= twelveMonthCutoff
   );
 
   return {
-    eig: computeEigSummary(
-      eigs,
-      computeTotalPlaces(structuresWithTypologie, typologieMap),
-      evaluationsActives,
-      activeStructureIdSet,
-      aggregation
-    ),
-    byMonth: computePeriodSeries<ControleQualiteByMonthStat>(
+    eig: {
+      ...computeEigRates(
+        filterRecentEigs(eigs),
+        computeTotalPlaces(structuresWithTypologie, typologieMap)
+      ),
+      moyenneEvaluationsCurrentYear: roundStatsNumber(
+        aggregateValues(
+          recentEvaluations.map((evaluation) => evaluation.note),
+          aggregation
+        )
+      ),
+    },
+    byMonth: computePeriodSeries<{ date: Date }>(context, aggregation, {
+      granularity: "month",
+      toPeriodKey: toMonthKey,
+      toPeriod: (monthKey) => ({ date: monthKeyToDate(monthKey) }),
+    }),
+    byTrimester: computePeriodSeries<{ year: number; trimester: number }>(
       context,
-      seriesContext,
-      {
-        granularity: "month",
-        toPeriodKey: toMonthKey,
-        toEntryMeta: (monthKey) => ({ date: monthKeyToDate(monthKey) }),
-      }
-    ),
-    byTrimester: computePeriodSeries<ControleQualiteByTrimesterStat>(
-      context,
-      seriesContext,
+      aggregation,
       {
         granularity: "trimester",
         toPeriodKey: toTrimesterKey,
-        toEntryMeta: parseTrimesterKey,
+        toPeriod: parseTrimesterKey,
       }
     ),
-    byYear: computePeriodSeries<ControleQualiteByYearStat>(
-      context,
-      seriesContext,
-      {
-        granularity: "year",
-        toPeriodKey: toYearKey,
-        toEntryMeta: (yearKey) => ({ year: Number(yearKey) }),
-      }
-    ),
+    byYear: computePeriodSeries<{ year: number }>(context, aggregation, {
+      granularity: "year",
+      toPeriodKey: toYearKey,
+      toPeriod: (yearKey) => ({ year: Number(yearKey) }),
+    }),
   };
 };

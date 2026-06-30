@@ -80,50 +80,6 @@ export type FinanceByYearStat = {
   subventionnees: FinanceByYearScopeStat;
 };
 
-export type EigStat = {
-  /** Ratio EIG / places autorisées sur les 12 derniers mois glissants. */
-  tauxEig: number | null;
-  nbEig: number;
-  nbEigComportementViolent: number;
-  tauxEigComportementViolent: number | null;
-  moyenneEvaluationsCurrentYear: number | null;
-};
-
-export type ControleQualitePeriodStat = {
-  nbStructuresSansDeclarationEig: number;
-  partStructuresSansDeclarationEig: number | null;
-  nbEig: number;
-  nbEigComportementViolent: number;
-  tauxEigComportementViolent: number | null;
-  nbStructuresEvaluees: number;
-  noteGenerale: number | null;
-  notePersonne: number | null;
-  notePro: number | null;
-  noteStructure: number | null;
-};
-
-export type ControleQualiteEvaluationStat = Omit<
-  ControleQualitePeriodStat,
-  | "nbStructuresSansDeclarationEig"
-  | "partStructuresSansDeclarationEig"
-  | "nbEig"
-  | "nbEigComportementViolent"
-  | "tauxEigComportementViolent"
->;
-
-export type ControleQualiteByMonthStat = ControleQualitePeriodStat & {
-  date: Date;
-};
-
-export type ControleQualiteByTrimesterStat = ControleQualitePeriodStat & {
-  year: number;
-  trimester: number;
-};
-
-export type ControleQualiteByYearStat = ControleQualitePeriodStat & {
-  year: number;
-};
-
 export type ActiviteByMonthStat = {
   date: Date;
   placesEnregistreesDna: number;
@@ -185,20 +141,37 @@ const financeByYearStatSchema = z.object({
   subventionnees: financeByYearScopeStatSchema,
 });
 
-const eigStatSchema = z.object({
-  tauxEig: z.number().nullable(),
+const eigCountTotalsStatSchema = z.object({
   nbEig: z.number(),
   nbEigComportementViolent: z.number(),
+});
+
+const eigCountsStatSchema = eigCountTotalsStatSchema.extend({
   tauxEigComportementViolent: z.number().nullable(),
+});
+
+const eigRatesStatSchema = eigCountsStatSchema.extend({
+  tauxEig: z.number().nullable(),
+});
+
+const controleQualiteEvaluationSummaryStatSchema = z.object({
   moyenneEvaluationsCurrentYear: z.number().nullable(),
 });
 
-const controleQualitePeriodStatSchema = z.object({
+const eigStatSchema = eigRatesStatSchema.merge(
+  controleQualiteEvaluationSummaryStatSchema
+);
+
+const eigPeriodDeclarationStatSchema = z.object({
   nbStructuresSansDeclarationEig: z.number(),
   partStructuresSansDeclarationEig: z.number().nullable(),
-  nbEig: z.number(),
-  nbEigComportementViolent: z.number(),
-  tauxEigComportementViolent: z.number().nullable(),
+});
+
+const eigPeriodStatSchema = eigPeriodDeclarationStatSchema.merge(
+  eigCountsStatSchema
+);
+
+const controleQualiteEvaluationStatSchema = z.object({
   nbStructuresEvaluees: z.number(),
   noteGenerale: z.number().nullable(),
   notePersonne: z.number().nullable(),
@@ -206,19 +179,52 @@ const controleQualitePeriodStatSchema = z.object({
   noteStructure: z.number().nullable(),
 });
 
-const controleQualiteByMonthStatSchema = controleQualitePeriodStatSchema.extend({
-  date: z.coerce.date(),
-});
+const controleQualitePeriodBaseSchema = eigPeriodStatSchema.merge(
+  controleQualiteEvaluationStatSchema
+);
+
+const controleQualiteByMonthStatSchema = controleQualitePeriodBaseSchema.merge(
+  z.object({ date: z.coerce.date() })
+);
 
 const controleQualiteByTrimesterStatSchema =
-  controleQualitePeriodStatSchema.extend({
-    year: z.number(),
-    trimester: z.number(),
-  });
+  controleQualitePeriodBaseSchema.merge(
+    z.object({
+      year: z.number(),
+      trimester: z.number(),
+    })
+  );
 
-const controleQualiteByYearStatSchema = controleQualitePeriodStatSchema.extend({
-  year: z.number(),
-});
+const controleQualiteByYearStatSchema = controleQualitePeriodBaseSchema.merge(
+  z.object({ year: z.number() })
+);
+
+export type EigCountTotalsStat = z.infer<typeof eigCountTotalsStatSchema>;
+export type EigCountsStat = z.infer<typeof eigCountsStatSchema>;
+export type EigRatesStat = z.infer<typeof eigRatesStatSchema>;
+export type ControleQualiteEvaluationSummaryStat = z.infer<
+  typeof controleQualiteEvaluationSummaryStatSchema
+>;
+export type EigStat = z.infer<typeof eigStatSchema>;
+export type EigPeriodDeclarationStat = z.infer<
+  typeof eigPeriodDeclarationStatSchema
+>;
+export type EigPeriodStat = z.infer<typeof eigPeriodStatSchema>;
+export type ControleQualiteEvaluationStat = z.infer<
+  typeof controleQualiteEvaluationStatSchema
+>;
+export type ControleQualitePeriodBase = z.infer<
+  typeof controleQualitePeriodBaseSchema
+>;
+export type ControleQualiteByMonthStat = z.infer<
+  typeof controleQualiteByMonthStatSchema
+>;
+export type ControleQualiteByTrimesterStat = z.infer<
+  typeof controleQualiteByTrimesterStatSchema
+>;
+export type ControleQualiteByYearStat = z.infer<
+  typeof controleQualiteByYearStatSchema
+>;
 
 const activiteByMonthStatSchema = z.object({
   date: z.coerce.date(),

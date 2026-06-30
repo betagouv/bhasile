@@ -1,4 +1,5 @@
 import { sumValues } from "@/app/utils/math.util";
+import { startOfUtcDay } from "@/app/utils/date.util";
 
 import type {
   StatistiqueDbEffectiveStructureVersion,
@@ -17,7 +18,9 @@ export const createEmptyActiveStructureIdsByPeriod =
     year: new Map(),
   });
 
-const yearFromDate = (date: Date | string | null | undefined): number | null => {
+const yearFromDate = (
+  date: Date | string | null | undefined
+): number | null => {
   if (date == null) {
     return null;
   }
@@ -141,6 +144,12 @@ export const getPeriodBounds = (
   }
 };
 
+export const getTwelveMonthCutoffKey = (): string => {
+  const twelveMonthsAgo = startOfUtcDay();
+  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+  return toMonthKey(twelveMonthsAgo);
+};
+
 const computeActiveStructureIdsForBounds = (
   activityContext: StatistiquesActivityContext,
   periodStart: Date,
@@ -227,12 +236,10 @@ export const groupByPeriodKey = <Item>(
   return byPeriod;
 };
 
-export const collectDistinctYears = (
-  ...rows: { year: number }[][]
-): number[] =>
-  [
-    ...new Set(rows.flat().map((row) => row.year)),
-  ].sort((yearA, yearB) => yearA - yearB);
+export const collectDistinctYears = (...rows: { year: number }[][]): number[] =>
+  [...new Set(rows.flat().map((row) => row.year))].sort(
+    (yearA, yearB) => yearA - yearB
+  );
 
 export const buildStatistiquesActivityContext = (
   structureIds: number[],

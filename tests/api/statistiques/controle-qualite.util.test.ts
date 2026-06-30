@@ -9,15 +9,6 @@ import {
   buildTestStatistiquesContext,
 } from "./test-helpers";
 
-vi.mock("@/constants", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/constants")>("@/constants");
-  return {
-    ...actual,
-    CURRENT_YEAR: 2025,
-  };
-});
-
 describe("quality control statistics util", () => {
   beforeEach(() => {
     vi.useFakeTimers();

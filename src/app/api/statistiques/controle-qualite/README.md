@@ -14,11 +14,15 @@ Structures actives avec typologie (≥1 `StructureTypologie`). Places EIG = somm
 | ----------------------------------------------------------------- | --------------------------------------- |
 | `tauxEig`                                                         | `nbEig / places autorisées`             |
 | `nbEig`, `nbEigComportementViolent`, `tauxEigComportementViolent` | Comptages / ratios                      |
-| `moyenneEvaluationsCurrentYear`                                   | Moyenne ou médiane notes `CURRENT_YEAR` |
+| `moyenneEvaluationsCurrentYear`                                   | Moyenne ou médiane notes sur 12 mois glissants |
+
+## TODO (métier)
+
+Confirmer que `moyenneEvaluationsCurrentYear` doit bien être sur **12 mois glissants** (comme les EIG) et non sur l'année civile en cours (ex. 2026). À date, même jour − 1 an dans les deux cas.
 
 ## `byMonth` / `byTrimester` / `byYear`
 
-Recalcul sur **toutes** données période - pas d'agrégation front.
+Recalcul sur **toutes** données période — pas d'agrégation front.
 
 Clés : `date` (mois), `year`+`trimester`, `year`.
 
