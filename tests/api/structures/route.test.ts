@@ -45,10 +45,6 @@ vi.mock("@/app/api/structures/structure.util", () => ({
   isFinalisationFormValidated: vi.fn().mockReturnValue(false),
 }));
 
-vi.mock("@/app/api/activites/activite.repository", () => ({
-  getDepartementActivitesAverage: vi.fn(),
-}));
-
 vi.mock("@/app/api/user-action/user-action.repository", () => ({
   createUserAction: (...args: unknown[]) => mockCreateUserAction(...args),
 }));

@@ -14,7 +14,7 @@ import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 import { PublicType } from "@/types/structure.type";
 
-import { processActivitesForStructure } from "../activites/activite.service";
+import { processActivitesForStructure } from "../activites/activite.util";
 import {
   buildAdresseAdministrativeComplete,
   getAdressesApiRead,

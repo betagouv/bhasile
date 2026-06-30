@@ -11,7 +11,6 @@ const mockFindOneOperateur = vi.fn();
 const mockFindStructureDepartement = vi.fn();
 const mockUpdateOne = vi.fn();
 const mockCreateStructureEvent = vi.fn();
-const mockGetDepartementActivitesAverage = vi.fn();
 const mockGetAdresseAdministrativeCoordinates = vi.fn();
 const mockGetAdressesApiRead = vi.fn();
 
@@ -37,12 +36,7 @@ vi.mock("@/app/api/structures/structure.repository", () => ({
   updateOne: (...args: unknown[]) => mockUpdateOne(...args),
 }));
 
-vi.mock("@/app/api/activites/activite.repository", () => ({
-  getDepartementActivitesAverage: (...args: unknown[]) =>
-    mockGetDepartementActivitesAverage(...args),
-}));
-
-vi.mock("@/app/api/activites/activite.service", () => ({
+vi.mock("@/app/api/activites/activite.util", () => ({
   processActivitesForStructure: vi.fn().mockReturnValue([]),
 }));
 

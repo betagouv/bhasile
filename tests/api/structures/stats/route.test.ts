@@ -3,15 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "@/app/api/structures/stats/route";
 
 const mockfindAllStructures = vi.fn();
-const mockGetDepartementActivitesAverage = vi.fn();
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
   findAllStructures: (...args: unknown[]) => mockfindAllStructures(...args),
-}));
-
-vi.mock("@/app/api/activites/activite.repository", () => ({
-  getDepartementActivitesAverage: (...args: unknown[]) =>
-    mockGetDepartementActivitesAverage(...args),
 }));
 
 const lightStructureWithPlaces = (id: number, placesAutorisees: number) =>
