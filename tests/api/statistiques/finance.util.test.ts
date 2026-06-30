@@ -160,7 +160,7 @@ describe("finance statistics util", () => {
     const year2024 = result.byYear.find((entry) => entry.year === 2024);
 
     expect(year2024?.total.totalETP).toBe(15);
-    expect(year2024?.total.tauxEncadrement).toBe(0.7);
+    expect(year2024?.total.tauxEncadrement).toBe(0.65);
     expect(year2024?.total.coutJournalier).toBe(45);
   });
 });

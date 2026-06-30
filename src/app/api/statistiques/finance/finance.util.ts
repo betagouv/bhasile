@@ -3,7 +3,7 @@ import {
   NumericAggregation,
   sumValues,
 } from "@/app/utils/math.util";
-import { roundStatsNumber } from "@/app/utils/statistiques-format.util";
+import { roundStatsNumber, roundStatsRate } from "@/app/utils/statistiques-format.util";
 import {
   isStructureAutorisee,
   isStructureSubventionnee,
@@ -16,7 +16,6 @@ import {
 import type {
   StatistiqueDbBudget,
   StatistiqueDbIndicateurFinancier,
-  StatistiqueDbIndicateurFinancierMetriques,
   StatistiqueDbStructure,
   StatistiquesContext,
 } from "../statistiques.db.type";
@@ -112,60 +111,64 @@ const sumBudgetsForYear = (budgetsForYear: StatistiqueDbBudget[]) => {
   };
 };
 
-const resolveIndicateursForYear = (
-  indicateursForYear: StatistiqueDbIndicateurFinancier[]
-): StatistiqueDbIndicateurFinancierMetriques[] => {
-  const byStructureId = new Map<
+const sumIndicateursForYear = (
+  indicateursForYear: StatistiqueDbIndicateurFinancier[],
+  aggregation: NumericAggregation
+) => {
+  const realiseByStructureId = new Map<
     number,
-    {
-      realise?: StatistiqueDbIndicateurFinancier;
-      previsionnel?: StatistiqueDbIndicateurFinancier;
-    }
+    StatistiqueDbIndicateurFinancier
+  >();
+  const previsionnelByStructureId = new Map<
+    number,
+    StatistiqueDbIndicateurFinancier
   >();
 
   for (const indicateur of indicateursForYear) {
     if (indicateur.structureId === null) {
       continue;
     }
-    const current = byStructureId.get(indicateur.structureId) ?? {};
     if (indicateur.type === "REALISE") {
-      current.realise = indicateur;
+      realiseByStructureId.set(indicateur.structureId, indicateur);
     } else {
-      current.previsionnel = indicateur;
+      previsionnelByStructureId.set(indicateur.structureId, indicateur);
     }
-    byStructureId.set(indicateur.structureId, current);
   }
 
-  return [...byStructureId.entries()].map(([, row]) => ({
-    ETP: row.realise?.ETP ?? row.previsionnel?.ETP ?? null,
-    tauxEncadrement:
-      row.realise?.tauxEncadrement ?? row.previsionnel?.tauxEncadrement ?? null,
-    coutJournalier:
-      row.realise?.coutJournalier ?? row.previsionnel?.coutJournalier ?? null,
-  }));
-};
+  const structureIds = new Set([
+    ...realiseByStructureId.keys(),
+    ...previsionnelByStructureId.keys(),
+  ]);
+  const etpValues: (number | null)[] = [];
+  const tauxValues: (number | null)[] = [];
+  const coutValues: (number | null)[] = [];
 
-const sumIndicateursForYear = (
-  indicateursForYear: StatistiqueDbIndicateurFinancierMetriques[],
-  aggregation: NumericAggregation
-) => ({
-  totalETP:
-    roundStatsNumber(
-      sumValues(indicateursForYear.map((indicateur) => indicateur.ETP)) ?? 0
-    ) ?? 0,
-  tauxEncadrement: roundStatsNumber(
-    aggregateValues(
-      indicateursForYear.map((indicateur) => indicateur.tauxEncadrement),
-      aggregation
-    )
-  ),
-  coutJournalier: roundStatsNumber(
-    aggregateValues(
-      indicateursForYear.map((indicateur) => indicateur.coutJournalier),
-      aggregation
-    )
-  ),
-});
+  for (const structureId of structureIds) {
+    const realise = realiseByStructureId.get(structureId);
+    const previsionnel = previsionnelByStructureId.get(structureId);
+    etpValues.push(
+      roundStatsNumber(realise?.ETP ?? previsionnel?.ETP ?? null)
+    );
+    tauxValues.push(
+      roundStatsRate(
+        realise?.tauxEncadrement ?? previsionnel?.tauxEncadrement ?? null
+      )
+    );
+    coutValues.push(
+      roundStatsNumber(
+        realise?.coutJournalier ?? previsionnel?.coutJournalier ?? null
+      )
+    );
+  }
+
+  return {
+    totalETP: roundStatsNumber(sumValues(etpValues) ?? 0) ?? 0,
+    tauxEncadrement: roundStatsRate(aggregateValues(tauxValues, aggregation)),
+    coutJournalier: roundStatsNumber(
+      aggregateValues(coutValues, aggregation)
+    ),
+  };
+};
 
 const computeScopeByYear = (
   structureIdsInScope: number[],
@@ -195,18 +198,14 @@ const computeScopeByYear = (
       (budget) =>
         budget.year === year && activeStructureIds.has(budget.structureId)
     );
-    const indicateursForYear = resolveIndicateursForYear(
+    const budgetStats = sumBudgetsForYear(budgetsForYear);
+    const indicateurStats = sumIndicateursForYear(
       scopedIndicateurs.filter(
         (indicateur) =>
           indicateur.year === year &&
           indicateur.structureId !== null &&
           activeStructureIds.has(indicateur.structureId)
-      )
-    );
-
-    const budgetStats = sumBudgetsForYear(budgetsForYear);
-    const indicateurStats = sumIndicateursForYear(
-      indicateursForYear,
+      ),
       aggregation
     );
 
