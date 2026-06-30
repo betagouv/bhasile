@@ -34,6 +34,7 @@ export const StructureVersionTransformationItem = ({
           <span className="fr-icon-check-line fr-icon--sm text-title-blue-france" />
           <span>
             <strong>{placesAutorisees} places autorisées</strong> au total
+            après {getEffectiveDateLabel(structureVersionTransformation.type)}
           </span>
         </div>
       )}
