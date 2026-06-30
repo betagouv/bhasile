@@ -108,19 +108,21 @@ export const findFirstEffectiveDateByStructure = async (
   return openingDateByStructureId;
 };
 
+const structureVersionScope = (structureIds: number[]) => ({
+  structureVersion: { structureId: { in: structureIds } },
+});
+
+const structureIdFromVersion = (row: {
+  structureVersion: { structureId: number | null } | null;
+}): number => row.structureVersion!.structureId!;
+
 export const findStructureTypologies = async (
   structureIds: number[]
 ): Promise<StatistiqueDbTypologie[]> => {
   const rows = await prisma.structureTypologie.findMany({
-    where: {
-      OR: [
-        { structureId: { in: structureIds } },
-        { structureVersion: { structureId: { in: structureIds } } },
-      ],
-    },
+    where: structureVersionScope(structureIds),
     select: {
       id: true,
-      structureId: true,
       structureVersion: { select: { structureId: true } },
       year: true,
       placesAutorisees: true,
@@ -130,34 +132,25 @@ export const findStructureTypologies = async (
     },
     orderBy: { year: "asc" },
   });
-  // Normalise structureId post-migration (via structureVersion).
-  return rows.map((row) => {
-    const structureId =
-      row.structureId ?? row.structureVersion?.structureId ?? null;
-    // Drop the helper join field from the returned shape to match StatistiqueDbTypologie.
-    return {
-      id: row.id,
-      structureId,
-      year: row.year,
-      placesAutorisees: row.placesAutorisees,
-      pmr: row.pmr,
-      lgbt: row.lgbt,
-      fvvTeh: row.fvvTeh,
-    };
-  });
+
+  return rows.map((row) => ({
+    id: row.id,
+    structureId: structureIdFromVersion(row),
+    year: row.year,
+    placesAutorisees: row.placesAutorisees,
+    pmr: row.pmr,
+    lgbt: row.lgbt,
+    fvvTeh: row.fvvTeh,
+  }));
 };
 
 export const findStructureAdresses = async (
   structureVersionIds: number[]
 ): Promise<StatistiqueDbAdresse[]> => {
-  if (structureVersionIds.length === 0) {
-    return [];
-  }
   const rows = await prisma.adresse.findMany({
     where: { structureVersionId: { in: structureVersionIds } },
     select: {
       id: true,
-      structureId: true,
       structureVersion: { select: { structureId: true } },
       repartition: true,
       placesAutorisees: true,
@@ -165,36 +158,34 @@ export const findStructureAdresses = async (
       logementSocial: true,
     },
   });
-  // Normalise structureId post-migration (via structureVersion).
-  return rows.map((row) => {
-    const structureId =
-      row.structureId ?? row.structureVersion?.structureId ?? null;
-    // Drop the helper join field from the returned shape to match StatistiqueDbAdresse.
-    return {
-      id: row.id,
-      structureId,
-      repartition: row.repartition,
-      placesAutorisees: row.placesAutorisees,
-      qpv: row.qpv,
-      logementSocial: row.logementSocial,
-    };
-  });
+
+  return rows.map((row) => ({
+    id: row.id,
+    structureId: structureIdFromVersion(row),
+    repartition: row.repartition,
+    placesAutorisees: row.placesAutorisees,
+    qpv: row.qpv,
+    logementSocial: row.logementSocial,
+  }));
 };
 
-export const findDnaLinksByStructure = async (
+export const findDnaLinks = async (
   structureIds: number[]
 ): Promise<StatistiqueDbDnaLink[]> => {
-  if (structureIds.length === 0) {
-    return [];
-  }
-  return prisma.dnaStructure.findMany({
-    where: { structureId: { in: structureIds } },
+  const rows = await prisma.dnaStructure.findMany({
+    where: structureVersionScope(structureIds),
     select: {
       id: true,
-      structureId: true,
+      structureVersion: { select: { structureId: true } },
       dna: { select: { code: true } },
     },
   });
+
+  return rows.map((row) => ({
+    id: row.id,
+    structureId: structureIdFromVersion(row),
+    dna: row.dna,
+  }));
 };
 
 export const findDepartementsWithPopulation = async (

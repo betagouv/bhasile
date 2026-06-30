@@ -13,7 +13,7 @@ import {
   findBudgets,
   findCpomStructures,
   findDepartementsWithPopulation,
-  findDnaLinksByStructure,
+  findDnaLinks,
   findEffectiveStructureVersionsAtDate,
   findEigs,
   findEvaluations,
@@ -67,7 +67,7 @@ export const buildStatistiquesContext = async (
       findStructureTypologies(allStructureIds),
       findStructureAdresses(effectiveStructureVersionIds),
       findCpomStructures(allStructureIds),
-      findDnaLinksByStructure(allStructureIds),
+      findDnaLinks(allStructureIds),
       findFirstEffectiveDateByStructure(allStructureIds),
     ]);
 
