@@ -105,8 +105,10 @@ const sumBudgetsForYear = (budgetsForYear: StatistiqueDbBudget[]) => {
     dotationAccordee,
     totalProduits,
     totalCharges,
-    excedent,
-    deficit,
+    resultatNet: totalProduits - totalCharges,
+    excedentCumule: excedent,
+    deficitCumule: deficit,
+    soldeCumule: excedent - deficit,
   };
 };
 
@@ -148,6 +150,28 @@ const resolveIndicateursForYear = (
   });
 };
 
+const sumIndicateursForYear = (
+  indicateursForYear: StatistiqueDbIndicateurFinancierMetriques[],
+  aggregation: NumericAggregation
+) => ({
+  totalETP:
+    roundStatsNumber(
+      sumValues(indicateursForYear.map((indicateur) => indicateur.ETP)) ?? 0
+    ) ?? 0,
+  tauxEncadrement: roundStatsNumber(
+    aggregateValues(
+      indicateursForYear.map((indicateur) => indicateur.tauxEncadrement),
+      aggregation
+    )
+  ),
+  coutJournalier: roundStatsNumber(
+    aggregateValues(
+      indicateursForYear.map((indicateur) => indicateur.coutJournalier),
+      aggregation
+    )
+  ),
+});
+
 const computeScopeByYear = (
   structureIdsInScope: number[],
   context: StatistiquesContext,
@@ -165,9 +189,6 @@ const computeScopeByYear = (
   );
   const years = collectDistinctYears(scopedBudgets);
 
-  let excedentCumule = 0;
-  let deficitCumule = 0;
-
   return years.map((year) => {
     const activeStructureIds = lookupActiveStructureIds(
       activeStructureIdsByPeriod,
@@ -183,41 +204,15 @@ const computeScopeByYear = (
     ];
 
     const budgetStats = sumBudgetsForYear(budgetsForYear);
-    const indicateursForYear = resolveIndicateursForYear(
-      structureIds,
-      scopedIndicateurs,
-      year
+    const indicateurStats = sumIndicateursForYear(
+      resolveIndicateursForYear(structureIds, scopedIndicateurs, year),
+      aggregation
     );
-
-    excedentCumule += budgetStats.excedent;
-    deficitCumule += budgetStats.deficit;
 
     return {
       year,
-      dotationDemandee: budgetStats.dotationDemandee,
-      dotationAccordee: budgetStats.dotationAccordee,
-      totalETP:
-        roundStatsNumber(
-          sumValues(indicateursForYear.map((indicateur) => indicateur.ETP)) ?? 0
-        ) ?? 0,
-      tauxEncadrement: roundStatsNumber(
-        aggregateValues(
-          indicateursForYear.map((indicateur) => indicateur.tauxEncadrement),
-          aggregation
-        )
-      ),
-      coutJournalier: roundStatsNumber(
-        aggregateValues(
-          indicateursForYear.map((indicateur) => indicateur.coutJournalier),
-          aggregation
-        )
-      ),
-      totalProduits: budgetStats.totalProduits,
-      totalCharges: budgetStats.totalCharges,
-      resultatNet: budgetStats.totalProduits - budgetStats.totalCharges,
-      excedentCumule,
-      deficitCumule,
-      soldeCumule: excedentCumule - deficitCumule,
+      ...indicateurStats,
+      ...budgetStats,
     };
   });
 };

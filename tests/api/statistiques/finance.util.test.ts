@@ -76,7 +76,7 @@ describe("finance statistics util", () => {
     expect(year2023?.subventionnees.deficitCumule).toBe(40);
   });
 
-  it("should cumulate excess and deficit across years", () => {
+  it("should compute excess and deficit per year only", () => {
     const budgets = [
       budgetRow(1, 1, 2023, 150, 100),
       budgetRow(2, 1, 2024, 80, 110),
@@ -87,11 +87,15 @@ describe("finance statistics util", () => {
       "moyenne"
     );
 
+    const year2023 = result.byYear.find((entry) => entry.year === 2023);
     const year2024 = result.byYear.find((entry) => entry.year === 2024);
 
-    expect(year2024?.total.excedentCumule).toBe(50);
+    expect(year2023?.total.excedentCumule).toBe(50);
+    expect(year2023?.total.deficitCumule).toBe(0);
+    expect(year2023?.total.soldeCumule).toBe(50);
+    expect(year2024?.total.excedentCumule).toBe(0);
     expect(year2024?.total.deficitCumule).toBe(30);
-    expect(year2024?.total.soldeCumule).toBe(20);
+    expect(year2024?.total.soldeCumule).toBe(-30);
   });
 
   it("should not infer subventionnee budgets from a previous year", () => {
