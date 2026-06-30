@@ -5,6 +5,7 @@ import type {
   StatistiqueDbDnaLink,
   StatistiqueDbEffectiveStructureVersion,
   StatistiqueDbStructure,
+  StatistiqueDbStructureActivity,
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologie,
   StatistiqueDbTypologieValues,
@@ -43,28 +44,33 @@ export const mapVersionsToStructures = (
       departementAdministratif: version.departementAdministratif,
     }));
 
-export const buildClosureDateByStructureId = (
-  effectiveVersions: StatistiqueDbEffectiveStructureVersion[]
-): Map<number, Date | null> => {
+export const buildStatistiquesActivityContext = (
+  structureIds: number[],
+  structureActivityDates: StatistiqueDbStructureActivity[]
+): StatistiquesActivityContext => {
+  const openingDateByStructureId = new Map<number, Date>();
   const closureDateByStructureId = new Map<number, Date | null>();
 
-  for (const version of effectiveVersions) {
-    if (version.structureId == null) {
-      continue;
-    }
-
-    if (version.structureVersionTransformation?.type === "FERMETURE") {
-      closureDateByStructureId.set(
-        version.structureId,
-        version.effectiveDate != null ? new Date(version.effectiveDate) : null
+  for (const structure of structureActivityDates) {
+    if (structure.creationDate != null) {
+      openingDateByStructureId.set(
+        structure.id,
+        new Date(structure.creationDate)
       );
-      continue;
     }
-
-    closureDateByStructureId.set(version.structureId, null);
+    closureDateByStructureId.set(
+      structure.id,
+      structure.fermetureDate != null
+        ? new Date(structure.fermetureDate)
+        : null
+    );
   }
 
-  return closureDateByStructureId;
+  return {
+    allStructureIds: structureIds,
+    openingDateByStructureId,
+    closureDateByStructureId,
+  };
 };
 
 const isStructureActiveInPeriod = (
@@ -232,6 +238,17 @@ export const lookupStructureIdsForDnaAtDate = (
   return [...structureIds];
 };
 
+/** Structures ouvertes à un instant (jour UTC de référence). */
+const getActiveStructureIdsAtDate = (
+  activityContext: StatistiquesActivityContext,
+  date: Date
+): Set<number> =>
+  computeActiveStructureIdsForBounds(
+    activityContext,
+    startOfUtcDay(date),
+    startOfNextUtcDay(date)
+  );
+
 const computeActiveStructureIdsForBounds = (
   activityContext: StatistiquesActivityContext,
   periodStart: Date,
@@ -323,16 +340,6 @@ export const collectDistinctYears = (...rows: { year: number }[][]): number[] =>
     (yearA, yearB) => yearA - yearB
   );
 
-export const buildStatistiquesActivityContext = (
-  structureIds: number[],
-  openingDateByStructureId: Map<number, Date>,
-  closureDateByStructureId: Map<number, Date | null>
-): StatistiquesActivityContext => ({
-  allStructureIds: structureIds,
-  openingDateByStructureId,
-  closureDateByStructureId,
-});
-
 const collectActivityYearKeys = (
   structureIds: number[],
   typologieYears: number[],
@@ -404,12 +411,13 @@ export const buildActivityIndex = (
   activityContext: StatistiquesActivityContext,
   activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod,
   params: {
+    referenceDate: Date;
     typologieYears: number[];
     referenceYear: number;
     periodDates: (Date | string | null | undefined)[];
     financeYears?: number[];
   }
-): void => {
+): Set<number> => {
   indexActiveStructureIds(
     activityContext,
     activeStructureIdsByPeriod,
@@ -435,9 +443,11 @@ export const buildActivityIndex = (
   indexActiveStructureIdsFromDates(
     activityContext,
     activeStructureIdsByPeriod,
-    params.periodDates,
+    [params.referenceDate, ...params.periodDates],
     ["month", "trimester", "year"]
   );
+
+  return getActiveStructureIdsAtDate(activityContext, params.referenceDate);
 };
 
 const TYPOLOGIE_AGGREGATE_FIELDS = [

@@ -33,6 +33,7 @@ describe("statistiques period utils", () => {
     activeStructureIdsByPeriod.year.clear();
 
     buildActivityIndex(activityContext, activeStructureIdsByPeriod, {
+      referenceDate: new Date("2026-06-30T12:00:00.000Z"),
       typologieYears: [2024, 2025],
       referenceYear: 2026,
       periodDates: [

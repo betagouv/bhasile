@@ -12,6 +12,7 @@ import type {
   StatistiqueDbDepartement,
   StatistiqueDbDnaLink,
   StatistiqueDbEffectiveStructureVersion,
+  StatistiqueDbStructureActivity,
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
@@ -96,44 +97,27 @@ export const findEffectiveStructureVersionsAtDate = async (
       effectiveDate: true,
       type: true,
       departementAdministratif: true,
-      structureVersionTransformation: {
-        select: {
-          type: true,
-        },
-      },
     },
     orderBy: [{ structureId: "asc" }, { effectiveDate: "desc" }],
     distinct: ["structureId"],
   });
 };
 
-export const findFirstEffectiveDateByStructure = async (
+export const findStructureActivityDates = async (
   structureIds: number[]
-): Promise<Map<number, Date>> => {
+): Promise<StatistiqueDbStructureActivity[]> => {
   if (structureIds.length === 0) {
-    return new Map();
+    return [];
   }
 
-  const rows = await prisma.structureVersion.groupBy({
-    by: ["structureId"],
-    where: {
-      structureId: { in: structureIds },
-      effectiveDate: { not: null },
+  return prisma.structure.findMany({
+    where: { id: { in: structureIds } },
+    select: {
+      id: true,
+      creationDate: true,
+      fermetureDate: true,
     },
-    _min: { effectiveDate: true },
   });
-
-  const openingDateByStructureId = new Map<number, Date>();
-  for (const row of rows) {
-    if (row.structureId != null && row._min.effectiveDate != null) {
-      openingDateByStructureId.set(
-        row.structureId,
-        new Date(row._min.effectiveDate)
-      );
-    }
-  }
-
-  return openingDateByStructureId;
 };
 
 const structureVersionScope = (structureIds: number[]) => ({

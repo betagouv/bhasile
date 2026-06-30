@@ -71,8 +71,11 @@ export const buildTestActivityContext = (
 
   return buildStatistiquesActivityContext(
     structureIds,
-    new Map(structureIds.map((structureId) => [structureId, openingDate])),
-    closureDates
+    structureIds.map((structureId) => ({
+      id: structureId,
+      creationDate: openingDate,
+      fermetureDate: closureDates.get(structureId) ?? null,
+    }))
   );
 };
 
@@ -92,6 +95,7 @@ export const buildTestActiveStructureIdsByPeriod = (
   const activeStructureIdsByPeriod = createEmptyActiveStructureIdsByPeriod();
 
   buildActivityIndex(activityContext, activeStructureIdsByPeriod, {
+    referenceDate: new Date(),
     typologieYears: options.typologieYears ?? [2023, 2024, 2025, 2026],
     referenceYear: options.referenceYear ?? 2026,
     periodDates: options.periodDates ?? [],
@@ -113,6 +117,7 @@ export const buildTestStatistiquesContext = (
         | "dnaLinks"
         | "structureVersionTimeline"
         | "allStructures"
+        | "activeStructureIdsNow"
         | "activeStructureIdsByPeriod"
         | "eigs"
         | "evaluations"
@@ -126,21 +131,26 @@ export const buildTestStatistiquesContext = (
   const allStructures = partial.allStructures ?? structures;
   const allStructureIds = allStructures.map((structure) => structure.id);
 
+  const referenceDate = new Date();
   const activeStructureIdsByPeriod =
-    partial.activeStructureIdsByPeriod ??
-    (() => {
-      const index = createEmptyActiveStructureIdsByPeriod();
-      buildActivityIndex(buildTestActivityContext(allStructureIds), index, {
+    partial.activeStructureIdsByPeriod ?? createEmptyActiveStructureIdsByPeriod();
+  const activeStructureIdsNow =
+    partial.activeStructureIdsNow ??
+    buildActivityIndex(
+      buildTestActivityContext(allStructureIds),
+      activeStructureIdsByPeriod,
+      {
+        referenceDate,
         typologieYears: getTypologieYears(partial.typologies),
         referenceYear: 2026,
         periodDates: [],
-      });
-      return index;
-    })();
+      }
+    );
 
   return {
     structures,
     allStructures,
+    activeStructureIdsNow,
     activeStructureIdsByPeriod,
     eigs: partial.eigs ?? [],
     evaluations: partial.evaluations ?? [],

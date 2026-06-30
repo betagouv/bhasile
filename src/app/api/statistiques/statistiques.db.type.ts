@@ -8,6 +8,14 @@ export type StatistiqueDbStructure = Prisma.StructureGetPayload<{
   };
 }>;
 
+export type StatistiqueDbStructureActivity = Prisma.StructureGetPayload<{
+  select: {
+    id: true;
+    creationDate: true;
+    fermetureDate: true;
+  };
+}>;
+
 export type StatistiqueDbEffectiveStructureVersion =
   Prisma.StructureVersionGetPayload<{
     select: {
@@ -16,11 +24,6 @@ export type StatistiqueDbEffectiveStructureVersion =
       effectiveDate: true;
       type: true;
       departementAdministratif: true;
-      structureVersionTransformation: {
-        select: {
-          type: true;
-        };
-      };
     };
   }>;
 
@@ -160,7 +163,7 @@ export type StatistiqueDbCpomStructure = Prisma.CpomStructureGetPayload<{
   };
 }>;
 
-/** Dates d'ouverture/fermeture du périmètre filtré. */
+/** Dates d'ouverture/fermeture du périmètre filtré (`Structure.creationDate` / `fermetureDate`). */
 export type StatistiquesActivityContext = {
   allStructureIds: number[];
   openingDateByStructureId: Map<number, Date>;
@@ -180,6 +183,9 @@ export type StatistiquesContext = {
   structures: StatistiqueDbStructure[];
   /** Toutes les structures du périmètre filtré (ouvertes + fermées). */
   allStructures: StatistiqueDbStructure[];
+  /** IDs des structures ouvertes à la date de référence (indicateurs agrégés). */
+  activeStructureIdsNow: Set<number>;
+  /** Index des structures actives par période (séries temporelles). */
   activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod;
   eigs: StatistiqueDbEig[];
   evaluations: StatistiqueDbEvaluation[];

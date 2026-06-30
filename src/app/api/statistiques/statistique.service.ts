@@ -19,14 +19,13 @@ import {
   findStructureVersionTimeline,
   findEigs,
   findEvaluations,
-  findFirstEffectiveDateByStructure,
   findIndicateursFinanciers,
+  findStructureActivityDates,
   findStructureAdresses,
   findStructureTypologies,
 } from "./statistiques.repository";
 import {
   buildActivityIndex,
-  buildClosureDateByStructureId,
   buildStatistiquesActivityContext,
   collectDistinctYears,
   createEmptyActiveStructureIdsByPeriod,
@@ -46,14 +45,14 @@ export const buildStatistiquesContext = async (
     return null;
   }
 
-  const effectiveVersions = await findEffectiveStructureVersionsAtDate(
-    filters,
-    now
-  );
+  const [effectiveVersions, structureActivityDates] = await Promise.all([
+    findEffectiveStructureVersionsAtDate(filters, now),
+    findStructureActivityDates(allStructureIds),
+  ]);
 
-  // TODO simplify when structure.fermetureDate is back as a scalar
-  const openEffectiveVersions = effectiveVersions.filter(
-    (version) => version.structureVersionTransformation?.type !== "FERMETURE"
+  const activityContext = buildStatistiquesActivityContext(
+    allStructureIds,
+    structureActivityDates
   );
 
   const effectiveStructureVersionIds = effectiveVersions
@@ -61,29 +60,16 @@ export const buildStatistiquesContext = async (
     .filter((id): id is number => id != null);
 
   const allStructures = mapVersionsToStructures(effectiveVersions);
-  const structures = mapVersionsToStructures(openEffectiveVersions);
 
-  const [
-    typologies,
-    adresses,
-    cpomLinks,
-    dnaLinks,
-    structureVersionTimeline,
-    openingDateByStructureId,
-  ] = await Promise.all([
-    findStructureTypologies(allStructureIds),
-    findStructureAdresses(effectiveStructureVersionIds),
-    findCpomStructures(allStructureIds),
-    findDnaLinks(allStructureIds),
-    findStructureVersionTimeline(allStructureIds),
-    findFirstEffectiveDateByStructure(allStructureIds),
-  ]);
+  const [typologies, adresses, cpomLinks, dnaLinks, structureVersionTimeline] =
+    await Promise.all([
+      findStructureTypologies(allStructureIds),
+      findStructureAdresses(effectiveStructureVersionIds),
+      findCpomStructures(allStructureIds),
+      findDnaLinks(allStructureIds),
+      findStructureVersionTimeline(allStructureIds),
+    ]);
 
-  const activityContext = buildStatistiquesActivityContext(
-    allStructureIds,
-    openingDateByStructureId,
-    buildClosureDateByStructureId(effectiveVersions)
-  );
   const activeStructureIdsByPeriod = createEmptyActiveStructureIdsByPeriod();
   const dnaCodes = [...new Set(dnaLinks.map((link) => link.dna.code))];
 
@@ -105,20 +91,29 @@ export const buildStatistiquesContext = async (
       findActivites(dnaCodes),
     ]);
 
-  buildActivityIndex(activityContext, activeStructureIdsByPeriod, {
-    typologieYears: getTypologieYears(typologies),
-    referenceYear,
-    periodDates: [
-      ...eigs.map((eig) => eig.evenementDate),
-      ...evaluations.map((evaluation) => evaluation.date),
-      ...activites.map((activite) => activite.date),
-    ],
-    financeYears: collectDistinctYears(budgets, indicateurs),
-  });
+  const activeStructureIdsNow = buildActivityIndex(
+    activityContext,
+    activeStructureIdsByPeriod,
+    {
+      referenceDate: now,
+      typologieYears: getTypologieYears(typologies),
+      referenceYear,
+      periodDates: [
+        ...eigs.map((eig) => eig.evenementDate),
+        ...evaluations.map((evaluation) => evaluation.date),
+        ...activites.map((activite) => activite.date),
+      ],
+      financeYears: collectDistinctYears(budgets, indicateurs),
+    }
+  );
+  const structures = allStructures.filter((structure) =>
+    activeStructureIdsNow.has(structure.id)
+  );
 
   return {
     structures,
     allStructures,
+    activeStructureIdsNow,
     activeStructureIdsByPeriod,
     eigs,
     evaluations,

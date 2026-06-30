@@ -57,11 +57,11 @@ curl -s "http://localhost:3000/api/statistiques" | jq > tmp/statistiques.json
 
 Filtre structures via `findEffectiveStructureVersionsAtDate` (pivot sur `StructureVersion` effective).
 
-**Structures actives (indicateurs globaux)** : dernière version à date sans bloc `FERMETURE`.
+**Structures actives (indicateurs globaux)** : `activeStructureIdsNow` sur `StatistiquesContext` — structures ouvertes au jour de référence (`Structure.creationDate` / `fermetureDate`). `context.structures` en est la projection typée.
 
-**Activité par période** : index `activeStructureIdsByPeriod` sur `StatistiquesContext` (`month`, `trimester`, `year` → `Set` d'IDs actifs). Une structure fermée le 05/05 compte sur janvier à mai, pas sur juin.
+**Activité par période (séries temporelles)** : index `activeStructureIdsByPeriod` (`month`, `trimester`, `year` → `Set` d'IDs actifs). Une structure fermée le 05/05 compte sur janvier à mai, pas sur juin.
 
-L'index est construit **une seule fois** dans `buildStatistiquesContext` via `buildActivityIndex`. Les sous-modules lisent via `lookupActiveStructureIds` — ils ne recalculent jamais l'activité.
+Les deux sont construits **une seule fois** dans `buildStatistiquesContext` via `buildActivityIndex`. Les sous-modules lisent `activeStructureIdsNow` ou `lookupActiveStructureIds` — ils ne recalculent jamais l'activité.
 
 **Avec typologie** (≥1 `StructureTypologie`) : requis pour agrégats places, répartitions type/bâti, contrôle qualité. `structures.totalStructures` = structures actives (avec ou sans typologie).
 
