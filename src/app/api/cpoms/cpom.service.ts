@@ -1,16 +1,16 @@
 import { recursivelySerializeDates } from "@/app/utils/date.util";
+import { paginateRows, sortRows } from "@/app/utils/list.util";
 import { CpomApiRead, CpomApiWrite } from "@/schemas/api/cpom.schema";
 import { CpomColumn } from "@/types/ListColumn";
 
 import { resolveCurrentVersionFields } from "../structure-versions/structure-version.util";
 import { CpomDbDetails, CpomDbList } from "./cpom.db.type";
+import { createOrUpdateCpom, findAllCpoms, findOne } from "./cpom.repository";
 import {
-  countBySearch,
-  createOrUpdateCpom,
-  findBySearch,
-  findOne,
-} from "./cpom.repository";
-import { getDatesConvention } from "./cpom.util";
+  filterCpomsByDepartement,
+  getDatesConvention,
+  sortValueForCpomColumn,
+} from "./cpom.util";
 
 const resolveCpomStructureFields = (
   cpomStructure: CpomDbDetails["structures"][number],
@@ -50,21 +50,19 @@ export const getCpoms = async ({
   column: CpomColumn | null;
   direction: "asc" | "desc" | null;
 }): Promise<{ cpoms: CpomApiRead[]; totalCpoms: number }> => {
-  const [cpoms, totalCpoms] = await Promise.all([
-    findBySearch({
-      page,
-      departements,
-      column,
-      direction,
-    }),
-    countBySearch({
-      departements,
-    }),
-  ]);
+  const allCpoms = await findAllCpoms();
+  const filtered = filterCpomsByDepartement(allCpoms, departements);
+  const sorted = sortRows(
+    filtered,
+    (cpom) => sortValueForCpomColumn(cpom, column ?? "region"),
+    (cpom) => ({ value: cpom.id, kind: "number" }),
+    direction ?? "asc"
+  );
+  const pageCpoms = paginateRows(sorted, page ?? 0);
 
   return {
-    cpoms: cpoms.map(getFullCpom),
-    totalCpoms,
+    cpoms: pageCpoms.map(getFullCpom),
+    totalCpoms: filtered.length,
   };
 };
 
