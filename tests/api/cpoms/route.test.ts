@@ -23,7 +23,7 @@ describe("GET /api/cpoms", () => {
     vi.clearAllMocks();
   });
 
-  it("should return cpoms and total", async () => {
+  it("retourne les cpoms et le total", async () => {
     // GIVEN
     const cpoms = [{ id: 1 }];
     const totalCpoms = 5;
@@ -50,7 +50,7 @@ describe("GET /api/cpoms", () => {
     expect(mockCountBySearch).toHaveBeenCalledWith({ departements: null });
   });
 
-  it("should return 500 when repository throws", async () => {
+  it("retourne 500 quand le repository lève une erreur", async () => {
     // GIVEN
     mockFindBySearch.mockRejectedValueOnce(new Error("DB error"));
     mockCountBySearch.mockResolvedValueOnce(0);
@@ -70,7 +70,7 @@ describe("POST /api/cpoms", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 201 with cpomId on success", async () => {
+  it("retourne 201 avec le cpomId en cas de succès", async () => {
     // GIVEN
     const payload = { id: 1, operateur: { name: "Opérateur Test" } };
     mockCreateOrUpdateCpom.mockResolvedValueOnce(1);
@@ -89,7 +89,7 @@ describe("POST /api/cpoms", () => {
     expect(mockCreateCpomEvent).toHaveBeenCalledWith("POST", 1);
   });
 
-  it("should return 400 when operateur name is missing", async () => {
+  it("retourne 400 quand le nom de l'opérateur est manquant", async () => {
     // GIVEN
     const request = new Request("http://localhost/api/cpoms", {
       method: "POST",

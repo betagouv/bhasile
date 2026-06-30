@@ -17,7 +17,7 @@ describe("GET /api/operateurs", () => {
     vi.clearAllMocks();
   });
 
-  it("should return operateurs and total", async () => {
+  it("retourne les opérateurs et le total", async () => {
     // GIVEN
     mockGetPaginatedOperateurs.mockResolvedValueOnce([
       {

@@ -19,7 +19,7 @@ vi.mock("@formkit/auto-animate", () => ({
 
 describe("FieldSetDescription", () => {
   describe("Rendering finalisation form", () => {
-    it("should render all fields correctly", () => {
+    it("rend tous les champs correctement", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -64,7 +64,7 @@ describe("FieldSetDescription", () => {
       expect(screen.getByLabelText("FVV et TEH")).toBeInTheDocument();
     });
 
-    it("should have all public type options", () => {
+    it("propose toutes les options de type de public", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -86,7 +86,7 @@ describe("FieldSetDescription", () => {
   });
 
   describe("Rendering modification form", () => {
-    it("should render with Général legend", () => {
+    it("rend avec la légende Général", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -101,7 +101,7 @@ describe("FieldSetDescription", () => {
       expect(screen.getByText("Général")).toBeInTheDocument();
     });
 
-    it("should not render filiale toggle and creation date", () => {
+    it("ne rend pas l'interrupteur filiale ni la date de création", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -123,7 +123,7 @@ describe("FieldSetDescription", () => {
   });
 
   describe("Filiale toggle interaction", () => {
-    it("should show filiale input when toggle is activated", async () => {
+    it("affiche le champ filiale quand l'interrupteur est activé", async () => {
       const user = userEvent.setup();
 
       render(
@@ -150,7 +150,7 @@ describe("FieldSetDescription", () => {
       });
     });
 
-    it("should hide filiale input when toggle is deactivated", async () => {
+    it("masque le champ filiale quand l'interrupteur est désactivé", async () => {
       const user = userEvent.setup();
 
       render(
@@ -186,7 +186,7 @@ describe("FieldSetDescription", () => {
   });
 
   describe("LGBT and FVV/TEH checkboxes", () => {
-    it("should toggle LGBT checkbox", async () => {
+    it("bascule la case à cocher LGBT", async () => {
       const user = userEvent.setup();
 
       render(
@@ -211,7 +211,7 @@ describe("FieldSetDescription", () => {
       });
     });
 
-    it("should toggle FVV/TEH checkbox", async () => {
+    it("bascule la case à cocher FVV/TEH", async () => {
       const user = userEvent.setup();
 
       render(
@@ -240,7 +240,7 @@ describe("FieldSetDescription", () => {
   });
 
   describe("Type selection", () => {
-    it("should have all structure types except PRAHDA", () => {
+    it("propose tous les types de structure sauf PRAHDA", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -264,7 +264,7 @@ describe("FieldSetDescription", () => {
       expect(options).not.toContain(StructureType.PRAHDA);
     });
 
-    it("should have type select with structure types", () => {
+    it("présélectionne le type de structure courant dans le sélecteur", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -285,7 +285,7 @@ describe("FieldSetDescription", () => {
   });
 
   describe("Notice display", () => {
-    it("should display LGBT/FVV/TEH explanation notice", () => {
+    it("affiche la note explicative LGBT/FVV/TEH", () => {
       render(
         <FormTestWrapper
           defaultValues={{

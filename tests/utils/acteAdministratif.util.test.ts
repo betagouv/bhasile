@@ -43,13 +43,13 @@ const arreteExtensionRule: CategoryDisplayRule = {
 };
 
 describe("getCategoryGroup", () => {
-  it("includes the avenant parent category and dedupes", () => {
+  it("inclut la catégorie parente de l'avenant et déduplique", () => {
     expect(
       getCategoryGroup("ARRETE_EXTENSION", undefined, "ARRETE_AUTORISATION")
     ).toEqual(["ARRETE_EXTENSION", "ARRETE_AUTORISATION"]);
   });
 
-  it("does not duplicate when the parent category equals the block category", () => {
+  it("ne duplique pas quand la catégorie parente est égale à la catégorie du bloc", () => {
     expect(getCategoryGroup("CONVENTION", undefined, "CONVENTION")).toEqual([
       "CONVENTION",
     ]);
@@ -57,7 +57,7 @@ describe("getCategoryGroup", () => {
 });
 
 describe("getCurrentStructureParentActe", () => {
-  it("returns the parent acte in effect at the reference date, with its start/end years", () => {
+  it("retourne l'acte parent en vigueur à la date de référence, avec ses années de début et de fin", () => {
     const resolved = getCurrentStructureParentActe(
       [
         parentActe({ id: 7, category: "ARRETE_AUTORISATION" }),
@@ -69,7 +69,7 @@ describe("getCurrentStructureParentActe", () => {
     expect(resolved).toEqual({ id: 7, startYear: 2020, endYear: 2030 });
   });
 
-  it("picks the most recent (latest startDate) when several actes are in effect at once", () => {
+  it("choisit le plus récent (startDate la plus tardive) quand plusieurs actes sont en vigueur en même temps", () => {
     // Two ARRETE_AUTORISATION both span the reference date (e.g. a renewal entered before
     // the previous one expired). The later-starting one must win, regardless of array order.
     const resolved = getCurrentStructureParentActe(
@@ -91,7 +91,7 @@ describe("getCurrentStructureParentActe", () => {
     expect(resolved).toEqual({ id: 2, startYear: 2023, endYear: 2032 });
   });
 
-  it("uses the most future avenant endDate as the effective end (max children ?? parent)", () => {
+  it("utilise l'endDate d'avenant la plus lointaine comme fin effective (max children ?? parent)", () => {
     const resolved = getCurrentStructureParentActe(
       [
         parentActe({
@@ -109,7 +109,7 @@ describe("getCurrentStructureParentActe", () => {
     expect(resolved?.endYear).toBe(2035);
   });
 
-  it("treats an acte as current when an avenant extends its end past the reference date", () => {
+  it("considère un acte comme courant quand un avenant prolonge sa fin au-delà de la date de référence", () => {
     const resolved = getCurrentStructureParentActe(
       [
         parentActe({
@@ -124,7 +124,7 @@ describe("getCurrentStructureParentActe", () => {
     expect(resolved).toEqual({ id: 7, startYear: 2020, endYear: 2030 });
   });
 
-  it("returns undefined for an expired or not-yet-started acte", () => {
+  it("retourne undefined pour un acte expiré ou pas encore commencé", () => {
     expect(
       getCurrentStructureParentActe(
         [
@@ -151,7 +151,7 @@ describe("getCurrentStructureParentActe", () => {
     ).toBeUndefined();
   });
 
-  it("returns undefined when no acte of the category exists", () => {
+  it("retourne undefined quand aucun acte de la catégorie n'existe", () => {
     expect(
       getCurrentStructureParentActe(
         [parentActe({ category: "CONVENTION" })],
@@ -172,7 +172,7 @@ describe("getCurrentStructureParentActe", () => {
 describe("resolveAvenantParentIds", () => {
   const rules: CategoryDisplayRules = { ARRETE_EXTENSION: arreteExtensionRule };
 
-  it("injects the resolved parent (id + years) when a current parent exists", () => {
+  it("injecte le parent résolu (id + années) quand un parent courant existe", () => {
     const resolved = resolveAvenantParentIds(
       rules,
       [parentActe({ id: 42, category: "ARRETE_AUTORISATION" })],
@@ -183,7 +183,7 @@ describe("resolveAvenantParentIds", () => {
     ).toEqual({ id: 42, startYear: 2020, endYear: 2030 });
   });
 
-  it("keeps the avenantAlternative but leaves resolvedParent undefined when no current parent exists", () => {
+  it("conserve l'avenantAlternative mais laisse resolvedParent undefined quand aucun parent courant n'existe", () => {
     const resolved = resolveAvenantParentIds(rules, [], REFERENCE_DATE);
     expect(resolved.ARRETE_EXTENSION?.avenantAlternative).toBeDefined();
     expect(
@@ -191,7 +191,7 @@ describe("resolveAvenantParentIds", () => {
     ).toBeUndefined();
   });
 
-  it("leaves rules without an avenantAlternative untouched", () => {
+  it("laisse intactes les règles sans avenantAlternative", () => {
     const plainRules: CategoryDisplayRules = {
       AUTRE: { ...arreteExtensionRule, avenantAlternative: undefined },
     };
@@ -203,7 +203,7 @@ describe("resolveAvenantParentIds", () => {
 describe("getActesAdministratifsDefaultValues with avenant blocks", () => {
   const rules: CategoryDisplayRules = { ARRETE_EXTENSION: arreteExtensionRule };
 
-  it("does not seed a duplicate placeholder for a saved avenant", () => {
+  it("ne crée pas de placeholder en double pour un avenant déjà enregistré", () => {
     const defaults = getActesAdministratifsDefaultValues(
       [
         {
@@ -221,7 +221,7 @@ describe("getActesAdministratifsDefaultValues with avenant blocks", () => {
     expect(defaults[0].parentId).toBe(99);
   });
 
-  it("seeds a standalone placeholder when the block is empty", () => {
+  it("crée un placeholder autonome quand le bloc est vide", () => {
     const defaults = getActesAdministratifsDefaultValues([], rules);
     expect(defaults).toHaveLength(1);
     expect(defaults[0].category).toBe("ARRETE_EXTENSION");

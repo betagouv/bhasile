@@ -17,7 +17,7 @@ dayjs.locale("fr");
 
 describe("date util", () => {
   describe("formatDate", () => {
-    it("should return the string of a formatted date with a string input", () => {
+    it("retourne la chaîne d'une date formatée à partir d'une entrée chaîne", () => {
       // GIVEN
       const date = "01/01/2023";
 
@@ -27,7 +27,7 @@ describe("date util", () => {
       // THEN
       expect(formattedDate).toBe("01/01/2023");
     });
-    it("should return the string of a formatted date with a date input", () => {
+    it("retourne la chaîne d'une date formatée à partir d'une entrée Date", () => {
       // GIVEN
       const date = new Date("01/01/2023");
 
@@ -37,7 +37,7 @@ describe("date util", () => {
       // THEN
       expect(formattedDate).toBe("01/01/2023");
     });
-    it("should return the string of a formatted date with an iso string input", () => {
+    it("retourne la chaîne d'une date formatée à partir d'une entrée chaîne ISO", () => {
       // GIVEN
       const date = "2023-01-01T12:00:00.000Z";
 
@@ -48,7 +48,7 @@ describe("date util", () => {
       expect(formattedDate).toBe("01/01/2023");
     });
 
-    it("should return the string of a formatted date with an iso string input at 00:00:00", () => {
+    it("retourne la chaîne d'une date formatée à partir d'une entrée chaîne ISO à 00:00:00", () => {
       // GIVEN
       const date = "2023-01-01T00:00:00.000Z";
 
@@ -60,7 +60,7 @@ describe("date util", () => {
     });
   });
   describe("formatDateToIsoString", () => {
-    it("should return undefined for null date", () => {
+    it("retourne undefined pour une date null", () => {
       // GIVEN
       const date = null;
 
@@ -71,7 +71,7 @@ describe("date util", () => {
       expect(result).toBeUndefined();
     });
 
-    it("should return undefined for invalid date", () => {
+    it("retourne undefined pour une date invalide", () => {
       // GIVEN
       const date = "invalid date";
 
@@ -82,7 +82,7 @@ describe("date util", () => {
       expect(result).toBeUndefined();
     });
 
-    it("should return correct value for 01/01/2023", () => {
+    it("retourne la bonne valeur pour 01/01/2023", () => {
       // GIVEN
       const date = "01/01/2023";
 
@@ -93,7 +93,7 @@ describe("date util", () => {
       expect(result).toBe("2023-01-01T12:00:00.000Z");
     });
 
-    it("should return correct value for iso date", () => {
+    it("retourne la bonne valeur pour une date ISO", () => {
       // GIVEN
       const date = "2023-01-01";
 
@@ -103,7 +103,7 @@ describe("date util", () => {
       // THEN
       expect(result).toBe("2023-01-01T12:00:00.000Z");
     });
-    it("should return correct value for iso datetime", () => {
+    it("retourne la bonne valeur pour un datetime ISO", () => {
       // GIVEN
       const date = "2023-01-01T00:00:00.000Z";
 
@@ -115,7 +115,7 @@ describe("date util", () => {
     });
   });
   describe("getMonthsBetween", () => {
-    it("should return an empty array for invalid start or end date", () => {
+    it("retourne un tableau vide pour une date de début ou de fin invalide", () => {
       // GIVEN
       const invalidDateStartNull = null;
       const invalidDateEndNull = null;
@@ -137,7 +137,7 @@ describe("date util", () => {
       expect(result4).toEqual([]);
     });
 
-    it("should return an empty array if start date is after end date", () => {
+    it("retourne un tableau vide quand la date de début est postérieure à la date de fin", () => {
       // GIVEN
       const dateStart = "2025-03-01";
       const dateEnd = "2025-01-01";
@@ -149,7 +149,7 @@ describe("date util", () => {
       expect(result).toEqual([]);
     });
 
-    it("should return a single month if start and end dates are in the same month", () => {
+    it("retourne un seul mois quand les dates de début et de fin sont dans le même mois", () => {
       // GIVEN
       const dateStart = "2025-02-10";
       const dateEnd = "2025-02-20";
@@ -161,7 +161,7 @@ describe("date util", () => {
       expect(result).toEqual([dayjs("2025-02-01")]);
     });
 
-    it("should return the correct months between two dates", () => {
+    it("retourne les bons mois entre deux dates", () => {
       // GIVEN
       const dateStart1 = "2024-12-15";
       const dateEnd1 = "2025-03-01";
@@ -190,7 +190,7 @@ describe("date util", () => {
       ]);
     });
 
-    it("should handle Date objects as input", () => {
+    it("gère les objets Date en entrée", () => {
       // GIVEN
       const dateStart = new Date("2025-01-15");
       const dateEnd = new Date("2025-03-10");
@@ -211,7 +211,7 @@ describe("date util", () => {
   });
 
   describe("getLastMonths", () => {
-    it("should return an empty array if numberOfMonths is zero or negative", () => {
+    it("retourne un tableau vide quand numberOfMonths est nul ou négatif", () => {
       // GIVEN
       const zeroMonths = 0;
       const negativeMonths = -3;
@@ -225,7 +225,7 @@ describe("date util", () => {
       expect(resultNegative).toEqual([]);
     });
 
-    it("should return the last N months including the current month", () => {
+    it("retourne les N derniers mois en incluant le mois en cours", () => {
       // GIVEN
       const mockedDate = dayjs("2025-04-10");
       vi.useFakeTimers();
@@ -259,7 +259,7 @@ describe("date util", () => {
   });
 
   describe("formatForCharts", () => {
-    it("should format a date in french when given a valid date", () => {
+    it("formate une date en français quand on passe une date valide", () => {
       // GIVEN
       const date = dayjs("02-02-2025");
 
@@ -273,7 +273,7 @@ describe("date util", () => {
 
   describe("getYearFromDate", () => {
     describe("when input is a string with DD/MM/YYYY format", () => {
-      it("should extract the year from a valid DD/MM/YYYY string", () => {
+      it("extrait l'année d'une chaîne DD/MM/YYYY valide", () => {
         // GIVEN
         const date = "25/12/2022";
 
@@ -286,7 +286,7 @@ describe("date util", () => {
     });
 
     describe("when input is a string with other valid date formats", () => {
-      it("should parse ISO date string and return the correct year", () => {
+      it("parse une chaîne de date ISO et retourne la bonne année", () => {
         // GIVEN
         const date = "2024-01-01T12:00:00.000Z";
 
@@ -297,7 +297,7 @@ describe("date util", () => {
         expect(result).toBe(2024);
       });
 
-      it("should parse ISO date string at 00:00:00 and return the correct year", () => {
+      it("parse une chaîne de date ISO à 00:00:00 et retourne la bonne année", () => {
         // GIVEN
         const date = "2024-01-01T00:00:00.000Z";
 
@@ -308,7 +308,7 @@ describe("date util", () => {
         expect(result).toBe(2024);
       });
 
-      it("should parse YYYY-MM-DD format and return the year", () => {
+      it("parse le format YYYY-MM-DD et retourne l'année", () => {
         // GIVEN
         const date = "2025-12-31";
 
@@ -319,7 +319,7 @@ describe("date util", () => {
         expect(result).toBe(2025);
       });
 
-      it("should parse GMT date string and return the year", () => {
+      it("parse une chaîne de date GMT et retourne l'année", () => {
         // GIVEN
         const date = "Mon, 01 Jan 2024 00:00:00 GMT";
 
@@ -330,7 +330,7 @@ describe("date util", () => {
         expect(result).toBe(2024);
       });
 
-      it("should parse single digit day/month format by falling back to Date parsing", () => {
+      it("parse un format jour/mois à un seul chiffre en se rabattant sur le parsing Date", () => {
         // GIVEN
         const date = "1/1/2025";
 
@@ -341,7 +341,7 @@ describe("date util", () => {
         expect(result).toBe(2025);
       });
 
-      it("should parse really late ISO date string and return the correct year", () => {
+      it("parse une chaîne de date ISO en toute fin de journée et retourne la bonne année", () => {
         // GIVEN
         const date = "2024-12-31T23:59:59.999Z";
 
@@ -354,7 +354,7 @@ describe("date util", () => {
     });
 
     describe("when input is a string with invalid date", () => {
-      it("should return 0 for invalid date string", () => {
+      it("retourne 0 pour une chaîne de date invalide", () => {
         // GIVEN
         const date = "not-a-date";
 
@@ -365,7 +365,7 @@ describe("date util", () => {
         expect(result).toBe(0);
       });
 
-      it("should return 0 for empty string", () => {
+      it("retourne 0 pour une chaîne vide", () => {
         // GIVEN
         const date = "";
 
@@ -378,7 +378,7 @@ describe("date util", () => {
     });
 
     describe("when input is a Date instance", () => {
-      it("should return the full year from a Date object", () => {
+      it("retourne l'année complète à partir d'un objet Date", () => {
         // GIVEN
         const date = new Date("2024-06-15T10:30:00Z");
 
@@ -389,7 +389,7 @@ describe("date util", () => {
         expect(result).toBe(2024);
       });
 
-      it("should return the full year from a Date created with year, month, day", () => {
+      it("retourne l'année complète à partir d'une Date créée avec année, mois, jour", () => {
         // GIVEN
         const date = new Date(2025, 0, 1);
 
@@ -402,7 +402,7 @@ describe("date util", () => {
     });
 
     describe("when input is a number", () => {
-      it("should return the number as-is", () => {
+      it("retourne le nombre tel quel", () => {
         // GIVEN
         const year = 2024;
 
@@ -420,7 +420,7 @@ describe("date util", () => {
       vi.useRealTimers();
     });
 
-    it("should return 0 when now is before the start date", () => {
+    it("retourne 0 quand maintenant est avant la date de début", () => {
       // GIVEN
       const mockedNow = dayjs("2025-01-01T00:00:00Z");
       vi.useFakeTimers();
@@ -436,7 +436,7 @@ describe("date util", () => {
       expect(result).toBe(0);
     });
 
-    it("should return 100 when now is after the end date", () => {
+    it("retourne 100 quand maintenant est après la date de fin", () => {
       // GIVEN
       const mockedNow = dayjs("2025-04-01T00:00:00Z");
       vi.useFakeTimers();
@@ -452,7 +452,7 @@ describe("date util", () => {
       expect(result).toBe(100);
     });
 
-    it("should return an intermediate percentage when now is between start and end", () => {
+    it("retourne un pourcentage intermédiaire quand maintenant est entre le début et la fin", () => {
       // GIVEN
       const mockedNow = dayjs("2025-02-15T12:00:00Z");
       vi.useFakeTimers();
@@ -474,7 +474,7 @@ describe("date util", () => {
       expect(result).toBeCloseTo(expected, 3);
     });
 
-    it("should return 0 when now equals the start date", () => {
+    it("retourne 0 quand maintenant est égal à la date de début", () => {
       // GIVEN
       const mockedNow = dayjs("2025-02-01T00:00:00Z");
       vi.useFakeTimers();
@@ -490,7 +490,7 @@ describe("date util", () => {
       expect(result).toBe(0);
     });
 
-    it("should return 100 when now equals the end date", () => {
+    it("retourne 100 quand maintenant est égal à la date de fin", () => {
       // GIVEN
       const mockedNow = dayjs("2025-03-01T00:00:00Z");
       vi.useFakeTimers();
@@ -508,7 +508,7 @@ describe("date util", () => {
   });
 
   describe("recursivelySerializeDates", () => {
-    it("should correctly convert a Date at the first moment of the year", () => {
+    it("convertit correctement une Date au premier instant de l'année", () => {
       // GIVEN
       const date = new Date("2024-01-01T00:00:00.000Z");
 
@@ -519,7 +519,7 @@ describe("date util", () => {
       expect(result).toBe("2024-01-01T00:00:00.000Z");
     });
 
-    it("should correctly convert a Date at the last moment of the year", () => {
+    it("convertit correctement une Date au dernier instant de l'année", () => {
       // GIVEN
       const date = new Date("2024-12-31T23:59:59.999Z");
 
@@ -530,7 +530,7 @@ describe("date util", () => {
       expect(result).toBe("2024-12-31T23:59:59.999Z");
     });
 
-    it("should correctly convert Dates inside deeply nested objects and arrays", () => {
+    it("convertit correctement les Dates au sein d'objets et de tableaux profondément imbriqués", () => {
       // GIVEN
       const input = {
         name: "test",
@@ -571,7 +571,7 @@ describe("date util", () => {
       });
     });
 
-    it("should return the value unchanged when it is not a Date", () => {
+    it("retourne la valeur inchangée quand ce n'est pas une Date", () => {
       // GIVEN
       const input = "not a date";
 

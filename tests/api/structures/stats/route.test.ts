@@ -47,7 +47,7 @@ describe("GET /api/structures/stats", () => {
     vi.clearAllMocks();
   });
 
-  it("should return min and max places autorisées", async () => {
+  it("retourne le minimum et le maximum de places autorisées", async () => {
     // GIVEN
     mockfindAllStructures.mockResolvedValue([
       lightStructureWithPlaces(1, 500),

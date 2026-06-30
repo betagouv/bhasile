@@ -28,7 +28,7 @@ describe("FinalisationNotes page integration", () => {
     global.fetch = vi.fn();
   });
 
-  it("should submit and send updated finalisation step in PUT payload", async () => {
+  it("valide l'étape des notes et envoie l'étape de finalisation à jour dans le payload PUT", async () => {
     // GIVEN
     const structure = createFinalisationValidStructure(77);
     const mockedFetch = mockStructurePageFetch(structure);
@@ -58,7 +58,7 @@ describe("FinalisationNotes page integration", () => {
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
-  it("should autosave notes after debounce and send updated data in PUT payload", async () => {
+  it("sauvegarde automatiquement les notes après le debounce et envoie les données à jour dans le payload PUT", async () => {
     // GIVEN
     const structure = createFinalisationValidStructure(78);
     const mockedFetch = mockStructurePageFetch(structure);

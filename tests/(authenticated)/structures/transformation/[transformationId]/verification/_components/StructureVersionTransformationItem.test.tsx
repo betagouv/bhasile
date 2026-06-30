@@ -58,7 +58,7 @@ const buildCompleteStructureVersionTransformation = (
 });
 
 describe("StructureVersionTransformationItem", () => {
-  it("should render the StructureCard with values derived from structureVersion + structure", () => {
+  it("affiche la StructureCard avec les valeurs dérivées de structureVersion + structure", () => {
     // GIVEN
     const structureVersionTransformation = buildCompleteStructureVersionTransformation();
 
@@ -83,7 +83,7 @@ describe("StructureVersionTransformationItem", () => {
     ["type", { type: undefined }],
     ["departementAdministratif", { departementAdministratif: undefined }],
   ])(
-    "should hide the StructureCard when structureVersion.%s is missing",
+    "masque la StructureCard quand structureVersion.%s est absent",
     (_label, structureVersionOverride) => {
       // GIVEN
       const structureVersionTransformation = buildCompleteStructureVersionTransformation({
@@ -105,7 +105,7 @@ describe("StructureVersionTransformationItem", () => {
     }
   );
 
-  it("should render the StructureCard without codeBhasile when the structure is not created yet", () => {
+  it("affiche la StructureCard sans codeBhasile quand la structure n'est pas encore créée", () => {
     // GIVEN — a CREATION block: the structure (and its codeBhasile) does not exist
     // yet, and the operateur is carried by the structureVersionTransformation itself
     const structureVersionTransformation = buildCompleteStructureVersionTransformation({
@@ -133,7 +133,7 @@ describe("StructureVersionTransformationItem", () => {
     expect(card).toHaveAttribute("data-dept", "Manche");
   });
 
-  it("should hide the StructureCard when no operateur is resolvable", () => {
+  it("masque la StructureCard quand aucun opérateur n'est résolvable", () => {
     // GIVEN — structureVersion.structure.operateur missing AND structureVersionTransformation.operateur missing
     const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       operateur: undefined,
@@ -154,7 +154,7 @@ describe("StructureVersionTransformationItem", () => {
     expect(screen.queryByTestId("structure-card")).not.toBeInTheDocument();
   });
 
-  it("should fall back to structureVersionTransformation.operateur when structureVersion.structure.operateur is missing", () => {
+  it("se rabat sur structureVersionTransformation.operateur quand structureVersion.structure.operateur est absent", () => {
     // GIVEN
     const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       operateur: { id: 99, name: "Opérateur fallback" },
@@ -184,7 +184,7 @@ describe("StructureVersionTransformationItem", () => {
     [StructureVersionTransformationType.CONTRACTION, "contraction"],
     [StructureVersionTransformationType.FERMETURE, "fermeture"],
   ])(
-    "should render the verb '%s' for type %s",
+    "affiche le verbe '%s' pour le type %s",
     (structureVersionTransformationType, expectedVerb) => {
       // GIVEN
       const structureVersionTransformation = buildCompleteStructureVersionTransformation({
@@ -206,7 +206,7 @@ describe("StructureVersionTransformationItem", () => {
     }
   );
 
-  it("should hide the effectiveDate line and placesAutorisees line when effectiveDate is missing", () => {
+  it("masque la ligne effectiveDate et la ligne placesAutorisees quand effectiveDate est absent", () => {
     // GIVEN
     const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       structureVersion: {
@@ -227,7 +227,7 @@ describe("StructureVersionTransformationItem", () => {
     expect(screen.queryByText(/places autorisées/)).not.toBeInTheDocument();
   });
 
-  it("should hide the placesAutorisees line for FERMETURE even when the typology exists", () => {
+  it("masque la ligne placesAutorisees pour FERMETURE même quand la typologie existe", () => {
     // GIVEN
     const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       type: StructureVersionTransformationType.FERMETURE,
@@ -249,7 +249,7 @@ describe("StructureVersionTransformationItem", () => {
     StructureVersionTransformationType.EXTENSION,
     StructureVersionTransformationType.CONTRACTION,
   ])(
-    "should render the placesAutorisees line for type %s",
+    "affiche la ligne placesAutorisees pour le type %s",
     (structureVersionTransformationType) => {
       // GIVEN
       const structureVersionTransformation = buildCompleteStructureVersionTransformation({
@@ -271,7 +271,7 @@ describe("StructureVersionTransformationItem", () => {
     }
   );
 
-  it("should hide the placesAutorisees line when no typology matches the effectiveDate year", () => {
+  it("masque la ligne placesAutorisees quand aucune typologie ne correspond à l'année d'effectiveDate", () => {
     // GIVEN — effectiveDate is 2026 but typology is for 2025
     const structureVersionTransformation = buildCompleteStructureVersionTransformation({
       structureVersion: {

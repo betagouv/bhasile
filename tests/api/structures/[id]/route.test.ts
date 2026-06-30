@@ -94,7 +94,7 @@ describe("GET /api/structures/[id]", () => {
     mockGetAdressesApiRead.mockReturnValue([]);
   });
 
-  it("should return full structure when authenticated with edit rights", async () => {
+  it("retourne la structure complète quand l'utilisateur est authentifié avec des droits d'édition", async () => {
     // GIVEN
     const dbStructure = {
       id: 1,
@@ -173,7 +173,7 @@ describe("GET /api/structures/[id]", () => {
     expect(mockFindOneOperateur).not.toHaveBeenCalled();
   });
 
-  it("should redact the exact adresse but keep the commune when authenticated user lacks edit rights", async () => {
+  it("masque l'adresse exacte mais conserve la commune quand l'utilisateur authentifié n'a pas les droits d'édition", async () => {
     // GIVEN
     const dbStructure = {
       id: 1,
@@ -215,7 +215,7 @@ describe("GET /api/structures/[id]", () => {
     ]);
   });
 
-  it("should return limited structure when not authenticated", async () => {
+  it("retourne une structure limitée quand l'utilisateur n'est pas authentifié", async () => {
     // GIVEN
     const structure = { id: 1 };
     mockGetServerSession.mockResolvedValueOnce(null);
@@ -233,7 +233,7 @@ describe("GET /api/structures/[id]", () => {
     expect(mockFindOne).not.toHaveBeenCalled();
   });
 
-  it("should return 404 when structure is not found", async () => {
+  it("retourne 404 quand la structure est introuvable", async () => {
     // GIVEN
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindOne.mockResolvedValueOnce(null);
@@ -248,7 +248,7 @@ describe("GET /api/structures/[id]", () => {
     expect(mockCreateStructureEvent).not.toHaveBeenCalled();
   });
 
-  it("should return 500 when service throws", async () => {
+  it("retourne 500 quand le service lève une erreur", async () => {
     // GIVEN
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindOne.mockRejectedValueOnce(new Error("Database error"));
@@ -269,7 +269,7 @@ describe("PUT /api/structures/[id]", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 401 when user is not authenticated", async () => {
+  it("retourne 401 quand l'utilisateur n'est pas authentifié", async () => {
     // GIVEN
     mockGetServerSession.mockResolvedValueOnce(null);
     const request = new Request("http://localhost/api/structures/1", {
@@ -288,7 +288,7 @@ describe("PUT /api/structures/[id]", () => {
     expect(mockUpdateOne).not.toHaveBeenCalled();
   });
 
-  it("should return 403 when user has insufficient rights", async () => {
+  it("retourne 403 quand l'utilisateur a des droits insuffisants", async () => {
     // GIVEN
     const session = { user: { id: 1 } };
 
@@ -314,7 +314,7 @@ describe("PUT /api/structures/[id]", () => {
     expect(mockUpdateOne).not.toHaveBeenCalled();
   });
 
-  it("should return 200 and call repository with enriched payload", async () => {
+  it("retourne 200 et appelle le repository avec le payload enrichi", async () => {
     // GIVEN
     const session = { user: { id: 1 } };
     const coordinates = { latitude: 48.86, longitude: 2.34 };
@@ -347,7 +347,7 @@ describe("PUT /api/structures/[id]", () => {
     );
   });
 
-  it("should convert adresse qpv/logementSocial booleans to numbers via the schema transform", async () => {
+  it("convertit les booléens qpv/logementSocial de l'adresse en nombres via le transform du schéma", async () => {
     // GIVEN
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
     mockFindStructureDepartement.mockResolvedValueOnce({
@@ -406,7 +406,7 @@ describe("PUT /api/structures/[id]", () => {
     );
   });
 
-  it("should return 400 when payload does not match schema", async () => {
+  it("retourne 400 quand le payload ne correspond pas au schéma", async () => {
     // GIVEN
     mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
 

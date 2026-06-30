@@ -29,7 +29,7 @@ describe("finance statistics util", () => {
     { id: 2, type: StructureType.CAES, departementAdministratif: "75" },
   ];
 
-  it("should split excess and deficit per structure before cumulating", () => {
+  it("ventile excédent et déficit par structure avant de cumuler", () => {
     const scopeIds = getStructureIdsByFinanceScope(structures);
     const budgets = [
       budgetRow(1, 1, 2023, 200, 100),
@@ -60,7 +60,7 @@ describe("finance statistics util", () => {
     expect(year2023?.subventionnees.deficitCumule).toBe(40);
   });
 
-  it("should cumulate excess and deficit across years", () => {
+  it("cumule excédent et déficit d'une année sur l'autre", () => {
     const scopeIds = getStructureIdsByFinanceScope([structures[0]]);
     const budgets = [
       budgetRow(1, 1, 2023, 150, 100),
@@ -86,7 +86,7 @@ describe("finance statistics util", () => {
     expect(year2024?.total.soldeCumule).toBe(20);
   });
 
-  it("should carry forward cumulative balances without later budget", () => {
+  it("reporte les soldes cumulés en l'absence de budget ultérieur", () => {
     const scopeIds = getStructureIdsByFinanceScope(structures);
     const budgetsTotal = [
       budgetRow(1, 1, 2024, 100, 80),
@@ -113,7 +113,7 @@ describe("finance statistics util", () => {
     expect(year2025?.subventionnees.soldeCumule).toBe(-30);
   });
 
-  it("should prefer REALISE over PREVISIONNEL per field", () => {
+  it("privilégie REALISE sur PREVISIONNEL champ par champ", () => {
     const scopeIds = getStructureIdsByFinanceScope([structures[0], structures[1]]);
     const budgets = [budgetRow(1, 1, 2024, 0, 0)];
 

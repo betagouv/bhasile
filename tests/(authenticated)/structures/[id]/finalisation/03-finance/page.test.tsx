@@ -28,7 +28,7 @@ describe("FinalisationFinance page integration", () => {
     global.fetch = vi.fn();
   });
 
-  it("should submit and send updated finalisation step in PUT payload", async () => {
+  it("valide l'étape finance et envoie l'étape de finalisation à jour dans le payload PUT", async () => {
     // GIVEN
     const structure = createFinalisationFinanceValidStructure(77);
     const mockedFetch = mockStructurePageFetch(structure);
@@ -57,7 +57,7 @@ describe("FinalisationFinance page integration", () => {
     });
   });
 
-  it("should block submit when financial indicators are missing", async () => {
+  it("bloque la validation quand les indicateurs financiers sont manquants", async () => {
     // GIVEN
     const structure = {
       ...createFinalisationFinanceValidStructure(78),
@@ -74,7 +74,7 @@ describe("FinalisationFinance page integration", () => {
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
-  it("should autosave finance data after debounce", async () => {
+  it("sauvegarde automatiquement les données finance après le debounce", async () => {
     // GIVEN
     const structure = createFinalisationFinanceValidStructure(79);
     const mockedFetch = mockStructurePageFetch(structure);

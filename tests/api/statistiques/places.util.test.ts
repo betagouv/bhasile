@@ -15,7 +15,7 @@ describe("places statistics util", () => {
     { id: 2, numero: "02", name: "Aisne", population: 50_000 },
   ];
 
-  it("should compute equipment rate from places and population", () => {
+  it("calcule le taux d'équipement à partir des places et de la population", () => {
     const result = computePlacesStatistiques(
       structures.slice(0, 2),
       [
@@ -46,7 +46,7 @@ describe("places statistics util", () => {
     expect(result.population).toBe(150_000);
   });
 
-  it("should return null equipment rate without population", () => {
+  it("retourne un taux d'équipement null en l'absence de population", () => {
     const result = computePlacesStatistiques(
       [structures[0]],
       [
@@ -68,7 +68,7 @@ describe("places statistics util", () => {
     expect(result.population).toBeNull();
   });
 
-  it("should resolve indicators from latest non-null typology per field", () => {
+  it("résout les indicateurs depuis la dernière typologie non nulle champ par champ", () => {
     const result = computePlacesStatistiques(
       [structures[0]],
       [
@@ -101,7 +101,7 @@ describe("places statistics util", () => {
     expect(result.fvvTeh).toBe(2);
   });
 
-  it("should exclude structures without typologie from totals", () => {
+  it("exclut des totaux les structures sans typologie", () => {
     const result = computePlacesStatistiques(
       structures,
       [

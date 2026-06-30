@@ -14,7 +14,7 @@ describe("GET /api/operateurs/suggestions", () => {
     vi.clearAllMocks();
   });
 
-  it("should return operateurs matching search term", async () => {
+  it("retourne les opérateurs correspondant au terme de recherche", async () => {
     // GIVEN
     const operateurs = [{ id: 1, name: "Adoma" }];
     mockFindBySearchTerm.mockResolvedValueOnce(operateurs);
@@ -32,7 +32,7 @@ describe("GET /api/operateurs/suggestions", () => {
     expect(mockFindBySearchTerm).toHaveBeenCalledWith("Ado");
   });
 
-  it("should return all operateurs when no search term", async () => {
+  it("retourne tous les opérateurs en l'absence de terme de recherche", async () => {
     // GIVEN
     const operateurs = [{ id: 1, name: "Adoma" }, { id: 2, name: "Forum Réfugiés" }];
     mockFindBySearchTerm.mockResolvedValueOnce(operateurs);

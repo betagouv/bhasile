@@ -23,7 +23,7 @@ describe("ModificationControleQualite page integration", () => {
     global.fetch = vi.fn();
   });
 
-  it("should submit and navigate back to the structure page", async () => {
+  it("soumet le contrôle qualité et redirige vers la page de la structure", async () => {
     // GIVEN
     const structure = createFinalisationControlesValidStructure(77);
     const mockedFetch = mockStructurePageFetch(structure);

@@ -16,7 +16,7 @@ describe("activite statistics util", () => {
     { id: 3, structureId: 3, dna: { code: "DNA03" } },
   ];
 
-  it("should apply type scoping to rate denominators", () => {
+  it("applique le périmètre par type aux dénominateurs des taux", () => {
     const result = computeActiviteStatistiques(
       [
         {
@@ -66,7 +66,7 @@ describe("activite statistics util", () => {
     expect(march2025?.tauxPresencesInduesTotal).toBe(0.07);
   });
 
-  it("should aggregate months independently", () => {
+  it("agrège chaque mois indépendamment", () => {
     const result = computeActiviteStatistiques(
       [
         {

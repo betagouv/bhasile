@@ -53,7 +53,7 @@ describe("FieldSetHebergement", () => {
   });
 
   describe("Delete button visibility", () => {
-    it("should hide the delete button when the only address is empty", () => {
+    it("masque le bouton supprimer quand l'unique adresse est vide", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -70,7 +70,7 @@ describe("FieldSetHebergement", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("should show the delete button when the only address has data", () => {
+    it("affiche le bouton supprimer quand l'unique adresse est renseignée", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -87,7 +87,7 @@ describe("FieldSetHebergement", () => {
       ).toBeInTheDocument();
     });
 
-    it("should show a delete button on every address when there is more than one, even pristine ones", () => {
+    it("affiche un bouton supprimer sur chaque adresse dès qu'il y en a plusieurs, même les vierges", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -106,7 +106,7 @@ describe("FieldSetHebergement", () => {
   });
 
   describe("Delete button behavior", () => {
-    it("should remove the clicked address when there is more than one", async () => {
+    it("supprime l'adresse cliquée quand il y en a plusieurs", async () => {
       const user = userEvent.setup();
 
       render(
@@ -143,7 +143,7 @@ describe("FieldSetHebergement", () => {
       );
     });
 
-    it("should reset the address to empty when clicking delete on the only address", async () => {
+    it("réinitialise l'adresse à vide au clic sur supprimer quand c'est la seule", async () => {
       const user = userEvent.setup();
 
       render(
@@ -175,7 +175,7 @@ describe("FieldSetHebergement", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("should shift remaining address values up when deleting an earlier row", async () => {
+    it("décale les adresses restantes vers le haut quand on supprime une ligne antérieure", async () => {
       const user = userEvent.setup();
 
       render(

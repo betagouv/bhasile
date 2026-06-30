@@ -344,7 +344,7 @@ describe("useTransformationFormHandling", () => {
     });
   });
 
-  it("should redirect to the firstStep when currentStep is not found", () => {
+  it("redirige vers firstStep quand currentStep est introuvable", () => {
     // GIVEN — invalid step in URL
     mockUseParams.mockReturnValue({
       transformationStructureType: StructureVersionTransformationType.CREATION,

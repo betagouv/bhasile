@@ -21,7 +21,7 @@ describe("useStructures integration", () => {
   });
 
   describe("addStructure", () => {
-    it("should call POST /api/structures with transformed payload", async () => {
+    it("appelle POST /api/structures avec le payload transformé", async () => {
       // GIVEN
       const values = {
         id: 123,
@@ -50,7 +50,7 @@ describe("useStructures integration", () => {
       expect(response).toBe("OK");
     });
 
-    it("should return serialized API error when POST fails", async () => {
+    it("retourne l'erreur API sérialisée quand le POST échoue", async () => {
       // GIVEN
       const values: AjoutFormValues = { id: 456 };
       const apiError = { error: "Invalid payload" };
@@ -71,7 +71,7 @@ describe("useStructures integration", () => {
   });
 
   describe("transformAjoutFormStructureToApiStructure", () => {
-    it("should transform dates, french numbers and contacts", async () => {
+    it("transforme les dates, les nombres au format français et les contacts", async () => {
       // GIVEN
       const values = JSON.parse(
         JSON.stringify({
@@ -179,7 +179,7 @@ describe("useStructures integration", () => {
   });
 
   describe("updateAndRefreshStructure", () => {
-    it("should update then refetch structure and call setStructure", async () => {
+    it("met à jour puis recharge la structure et appelle setStructure", async () => {
       // GIVEN
       const structureId = 12;
       const partialUpdate = { nom: "Structure mise à jour" };
@@ -226,7 +226,7 @@ describe("useStructures integration", () => {
       expect(response).toBe("OK");
     });
 
-    it("should not refetch structure when update fails", async () => {
+    it("ne recharge pas la structure quand la mise à jour échoue", async () => {
       // GIVEN
       const structureId = 99;
       const apiError = { error: "Update failed" };

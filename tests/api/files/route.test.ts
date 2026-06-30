@@ -39,7 +39,7 @@ describe("POST /api/files", () => {
     mockUuidV4.mockReturnValue("fixed-uuid");
   });
 
-  it("should return 400 when file validation fails", async () => {
+  it("retourne 400 quand la validation du fichier échoue", async () => {
     // GIVEN
     const file = new File(["content"], "test.exe", { type: "application/exe" });
     const request = createFileRequest(file);
@@ -55,7 +55,7 @@ describe("POST /api/files", () => {
     expect(mockPutObject).not.toHaveBeenCalled();
   });
 
-  it("should return upload result on success", async () => {
+  it("retourne le résultat de l'upload en cas de succès", async () => {
     // GIVEN
     mockCheckBucket.mockResolvedValueOnce(undefined);
     mockPutObject.mockResolvedValueOnce(undefined);

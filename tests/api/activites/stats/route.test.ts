@@ -15,7 +15,7 @@ describe("GET /api/activites/stats", () => {
     vi.clearAllMocks();
   });
 
-  it("should return average departement places with query params", async () => {
+  it("retourne la moyenne des places du département avec des query params", async () => {
     // GIVEN
     mockGetDepartementActivitesAverage.mockResolvedValueOnce({ average: 42 });
 
@@ -37,7 +37,7 @@ describe("GET /api/activites/stats", () => {
     );
   });
 
-  it("should return average departement places without query params", async () => {
+  it("retourne la moyenne des places du département sans query params", async () => {
     // GIVEN
     mockGetDepartementActivitesAverage.mockResolvedValueOnce({ average: 0 });
 

@@ -26,7 +26,7 @@ describe("quality control statistics util", () => {
     { id: 3, structureId: 3, dna: { code: "DNA03" } },
   ];
 
-  it("should aggregate trimester notes from raw evaluations", () => {
+  it("agrège les notes trimestrielles à partir des évaluations brutes", () => {
     const result = computeControleQualiteStatistiques(
       [1],
       100,
@@ -64,7 +64,7 @@ describe("quality control statistics util", () => {
     expect(result.byYear[0]?.noteGenerale).toBe(3.8);
   });
 
-  it("should compute trimester EIG rate from period totals", () => {
+  it("calcule le taux d'EIG trimestriel à partir des totaux de la période", () => {
     const result = computeControleQualiteStatistiques(
       [1],
       100,
@@ -122,7 +122,7 @@ describe("quality control statistics util", () => {
     expect(trimester?.nbEig).toBe(10);
   });
 
-  it("should count structures without EIG declaration", () => {
+  it("compte les structures sans déclaration d'EIG", () => {
     const result = computeControleQualiteStatistiques(
       [1, 2, 3],
       300,
@@ -148,7 +148,7 @@ describe("quality control statistics util", () => {
     expect(march?.partStructuresSansDeclarationEig).toBe(0.667);
   });
 
-  it("should use median aggregation for evaluation notes", () => {
+  it("utilise l'agrégation médiane pour les notes d'évaluation", () => {
     const result = computeControleQualiteStatistiques(
       [1],
       100,

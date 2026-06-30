@@ -23,7 +23,7 @@ describe("ModificationActesAdministratifs page integration", () => {
     global.fetch = vi.fn();
   });
 
-  it("should submit and navigate back to the structure page", async () => {
+  it("soumet les actes administratifs et redirige vers la page de la structure", async () => {
     // GIVEN
     // Provide valid actesAdministratifs so the autorisee schema passes validation
     const base = createStructure({ id: 77 });

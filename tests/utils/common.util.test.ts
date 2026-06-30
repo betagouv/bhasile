@@ -13,14 +13,14 @@ import {
 describe("common util", () => {
   describe("isEmptyValue", () => {
     it.each([undefined, null, "", []])(
-      "should return true for %s",
+      "retourne true pour %s",
       (value) => {
         expect(isEmptyValue(value)).toStrictEqual(true);
       }
     );
 
     it.each(["text", 0, 42, false, ["item"]])(
-      "should return false for %s",
+      "retourne false pour %s",
       (value) => {
         expect(isEmptyValue(value)).toStrictEqual(false);
       }
@@ -28,23 +28,23 @@ describe("common util", () => {
   });
 
   describe("areAllValuesEmpty", () => {
-    it("should return true when every value is empty", () => {
+    it("retourne true quand toutes les valeurs sont vides", () => {
       expect(
         areAllValuesEmpty({ prenom: "", nom: "", telephone: "" })
       ).toStrictEqual(true);
     });
 
-    it("should return true for an object with no values", () => {
+    it("retourne true pour un objet sans valeurs", () => {
       expect(areAllValuesEmpty({})).toStrictEqual(true);
     });
 
-    it("should return false when at least one value is filled", () => {
+    it("retourne false quand au moins une valeur est renseignée", () => {
       expect(
         areAllValuesEmpty({ prenom: "Jean", nom: "", telephone: "" })
       ).toStrictEqual(false);
     });
 
-    it("should return false when only an id is present", () => {
+    it("retourne false quand seul un id est présent", () => {
       expect(areAllValuesEmpty({ id: 42, prenom: "", nom: "" })).toStrictEqual(
         false
       );
@@ -52,7 +52,7 @@ describe("common util", () => {
   });
 
   describe("sortKeysByValue", () => {
-    it("should return an empty object when given an empty object", () => {
+    it("retourne un objet vide quand on passe un objet vide", () => {
       // GIVEN
       const unsortedObject = {};
 
@@ -62,7 +62,7 @@ describe("common util", () => {
       // THEN
       expect(sortedObject).toStrictEqual({});
     });
-    it("should return a sorted object by value when given an unsorted object", () => {
+    it("retourne un objet trié par valeur quand on passe un objet non trié", () => {
       // GIVEN
       const unsortedObject = {
         a: 3,
@@ -82,7 +82,7 @@ describe("common util", () => {
     });
   });
   describe("getPercentage", () => {
-    it("should return < 1% if percentage is below 1", () => {
+    it("retourne < 1% quand le pourcentage est inférieur à 1", () => {
       // GIVEN
       const partialValue = 1;
       const totalValue = 300;
@@ -93,7 +93,7 @@ describe("common util", () => {
       // THEN
       expect(percentage).toBe("< 1%");
     });
-    it("should return correct percentage if percentage is more than 1", () => {
+    it("retourne le bon pourcentage quand il est supérieur à 1", () => {
       // GIVEN
       const partialValue = 100;
       const totalValue = 300;
@@ -106,7 +106,7 @@ describe("common util", () => {
     });
   });
   describe("computeAverage", () => {
-    it("should return 0 when given an empty array", () => {
+    it("retourne 0 quand on passe un tableau vide", () => {
       // GIVEN
       const array: number[] = [];
 
@@ -116,7 +116,7 @@ describe("common util", () => {
       // THEN
       expect(result).toBe(0);
     });
-    it("should return the average when given a correct array of numbers", () => {
+    it("retourne la moyenne quand on passe un tableau de nombres valides", () => {
       // GIVEN
       const array = [3, 8, 5, 1, 0];
 
@@ -126,7 +126,7 @@ describe("common util", () => {
       // THEN
       expect(result).toBe(3.4);
     });
-    it("should return the average when given an array of null and numbers", () => {
+    it("retourne la moyenne quand on passe un tableau mêlant null et nombres", () => {
       // GIVEN
       const array = [3, 8, 5, 1, 0, null, null];
 
@@ -136,7 +136,7 @@ describe("common util", () => {
       // THEN
       expect(result).toBe(3.4);
     });
-    it("should return 0 when given an array of null only", () => {
+    it("retourne 0 quand on passe un tableau composé uniquement de null", () => {
       // GIVEN
       const array = [null, null, null, null];
 
@@ -148,7 +148,7 @@ describe("common util", () => {
     });
   });
   describe("reverseObjectKeyValues", () => {
-    it("should return an empty object when given an empty object", () => {
+    it("retourne un objet vide quand on passe un objet vide", () => {
       // GIVEN
       const objectToReverse = {};
 
@@ -159,7 +159,7 @@ describe("common util", () => {
       expect(reversed).toStrictEqual({});
     });
 
-    it("should reverse keys and values for a simple object", () => {
+    it("inverse les clés et les valeurs d'un objet simple", () => {
       // GIVEN
       const objectToReverse = {
         a: 1,
@@ -178,7 +178,7 @@ describe("common util", () => {
       });
     });
 
-    it("should handle string and number keys and values", () => {
+    it("gère les clés et valeurs de type chaîne et nombre", () => {
       // GIVEN
       const objectToReverse = {
         42: "answer",
@@ -195,7 +195,7 @@ describe("common util", () => {
       });
     });
 
-    it("should overwrite keys if values are not unique", () => {
+    it("écrase les clés quand les valeurs ne sont pas uniques", () => {
       // GIVEN
       const objectToReverse = {
         a: 1,
@@ -215,7 +215,7 @@ describe("common util", () => {
   });
 
   describe("convertObjectToArray", () => {
-    it("should return an empty array when given an empty object", () => {
+    it("retourne un tableau vide quand on passe un objet vide", () => {
       // GIVEN
       const objectToConvert = {};
 
@@ -226,7 +226,7 @@ describe("common util", () => {
       expect(result).toStrictEqual([]);
     });
 
-    it("should convert values of a simple object to array", () => {
+    it("convertit les valeurs d'un objet simple en tableau", () => {
       // GIVEN
       const objectToConvert = {
         a: 1,
@@ -241,7 +241,7 @@ describe("common util", () => {
       expect(result).toStrictEqual([1, 2, 3]);
     });
 
-    it("should work with number keys", () => {
+    it("fonctionne avec des clés numériques", () => {
       // GIVEN
       const objectToConvert = {
         1: "one",
@@ -258,7 +258,7 @@ describe("common util", () => {
   });
 
   describe("isNullOrUndefined", () => {
-    it("should return true if value is undefined", () => {
+    it("retourne true quand la valeur est undefined", () => {
       // GIVEN
       const value = undefined;
 
@@ -268,7 +268,7 @@ describe("common util", () => {
       // THEN
       expect(result).toStrictEqual(true);
     });
-    it("should return true if value is null", () => {
+    it("retourne true quand la valeur est null", () => {
       // GIVEN
       const value = null;
 
@@ -278,7 +278,7 @@ describe("common util", () => {
       // THEN
       expect(result).toStrictEqual(true);
     });
-    it("should return false if value is 0", () => {
+    it("retourne false quand la valeur est 0", () => {
       // GIVEN
       const value = 0;
 
@@ -289,7 +289,7 @@ describe("common util", () => {
       expect(result).toStrictEqual(false);
     });
 
-    it("should return false if value is an emptys string", () => {
+    it("retourne false quand la valeur est une chaîne vide", () => {
       // GIVEN
       const value = "";
 
@@ -302,7 +302,7 @@ describe("common util", () => {
   });
 
   describe("areCodesUnique", () => {
-    it("should return true when all extracted codes are distinct", () => {
+    it("retourne true quand tous les codes extraits sont distincts", () => {
       // GIVEN
       const items = [{ code: "C-001" }, { code: "H-002" }];
 
@@ -313,7 +313,7 @@ describe("common util", () => {
       expect(result).toStrictEqual(true);
     });
 
-    it("should return false when two extracted codes are equal", () => {
+    it("retourne false quand deux codes extraits sont égaux", () => {
       // GIVEN
       const items = [{ code: "C-001" }, { code: "C-001" }];
 
@@ -324,7 +324,7 @@ describe("common util", () => {
       expect(result).toStrictEqual(false);
     });
 
-    it("should treat codes differing only by whitespace as equal", () => {
+    it("considère comme égaux des codes qui ne diffèrent que par des espaces", () => {
       // GIVEN
       const items = [{ code: "C-001" }, { code: "  C-001  " }];
 
@@ -335,7 +335,7 @@ describe("common util", () => {
       expect(result).toStrictEqual(false);
     });
 
-    it("should ignore blank, null and undefined codes", () => {
+    it("ignore les codes vides, null et undefined", () => {
       // GIVEN
       const items = [
         { code: "C-001" },
@@ -352,7 +352,7 @@ describe("common util", () => {
       expect(result).toStrictEqual(true);
     });
 
-    it("should return true for an empty array", () => {
+    it("retourne true pour un tableau vide", () => {
       // GIVEN
       const items: { code: string }[] = [];
 
@@ -363,7 +363,7 @@ describe("common util", () => {
       expect(result).toStrictEqual(true);
     });
 
-    it("should return true when the items list is undefined", () => {
+    it("retourne true quand la liste d'éléments est undefined", () => {
       // WHEN
       const result = areCodesUnique(
         undefined,
@@ -374,7 +374,7 @@ describe("common util", () => {
       expect(result).toStrictEqual(true);
     });
 
-    it("should work with any item shape thanks to the extractor", () => {
+    it("fonctionne avec n'importe quelle forme d'élément grâce à l'extracteur", () => {
       // GIVEN
       const items = [{ siret: "111" }, { siret: "222" }, { siret: "111" }];
 

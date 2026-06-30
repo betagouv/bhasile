@@ -31,7 +31,7 @@ describe("FinalisationIdentification page integration", () => {
     global.fetch = vi.fn();
   });
 
-  it("should submit and send updated finalisation step in PUT payload", async () => {
+  it("valide l'étape d'identification et envoie l'étape de finalisation à jour dans le payload PUT", async () => {
     // GIVEN
     const structure = createStructure({ id: 77, type: StructureType.CADA });
     const mockedFetch = mockStructurePageFetch(structure);
@@ -70,7 +70,7 @@ describe("FinalisationIdentification page integration", () => {
     });
   });
 
-  it("should autosave form data and send full expected payload", async () => {
+  it("sauvegarde automatiquement les données du formulaire et envoie le payload complet attendu", async () => {
     // GIVEN
     const structure = createStructure({ id: 78, type: StructureType.CADA });
     const mockedFetch = mockStructurePageFetch(structure);

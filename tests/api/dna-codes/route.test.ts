@@ -14,7 +14,7 @@ describe("GET /api/dna-codes", () => {
     vi.clearAllMocks();
   });
 
-  it("should return unassigned dna codes when structureId is missing", async () => {
+  it("retourne les dna-codes non attribués quand structureId est absent", async () => {
     // GIVEN
     const dnaCodes = [{ code: "C0001" }];
     mockFindAll.mockResolvedValueOnce(dnaCodes);
@@ -33,7 +33,7 @@ describe("GET /api/dna-codes", () => {
     });
   });
 
-  it("should fall back to unassigned codes when structureId is not a number", async () => {
+  it("se rabat sur les codes non attribués quand structureId n'est pas un nombre", async () => {
     // GIVEN
     const dnaCodes = [{ code: "C0001" }];
     mockFindAll.mockResolvedValueOnce(dnaCodes);
@@ -54,7 +54,7 @@ describe("GET /api/dna-codes", () => {
     });
   });
 
-  it("should return dna codes for a valid structureId", async () => {
+  it("retourne les dna-codes pour un structureId valide", async () => {
     // GIVEN
     const dnaCodes = [{ id: 1, code: "C0001" }];
     mockFindAll.mockResolvedValueOnce(dnaCodes);
@@ -75,7 +75,7 @@ describe("GET /api/dna-codes", () => {
     });
   });
 
-  it("should return dna codes for a valid structureVersionId", async () => {
+  it("retourne les dna-codes pour un structureVersionId valide", async () => {
     // GIVEN
     const dnaCodes = [{ id: 1, code: "C0001" }];
     mockFindAll.mockResolvedValueOnce(dnaCodes);
@@ -96,7 +96,7 @@ describe("GET /api/dna-codes", () => {
     });
   });
 
-  it("should return 500 when repository throws", async () => {
+  it("retourne 500 quand le repository lève une erreur", async () => {
     // GIVEN
     mockFindAll.mockRejectedValueOnce(new Error("DB error"));
 

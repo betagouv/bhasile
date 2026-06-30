@@ -15,7 +15,7 @@ vi.mock("@/constants", async () => {
 });
 
 describe("structures statistics util", () => {
-  it("should count type and bati only with typologie", () => {
+  it("ne compte le type et le bâti que pour les structures avec typologie", () => {
     const result = computeStructuresStatistiques(
       [
         { id: 1, type: StructureType.CADA, departementAdministratif: "75" },
@@ -76,7 +76,7 @@ describe("structures statistics util", () => {
     });
   });
 
-  it("should split bati places by address repartition", () => {
+  it("ventile les places de bâti selon la répartition des adresses", () => {
     const result = computeStructuresStatistiques(
       [{ id: 1, type: StructureType.CADA, departementAdministratif: "75" }],
       [
@@ -128,7 +128,7 @@ describe("structures statistics util", () => {
     });
   });
 
-  it("should count active CPOMs for current year only", () => {
+  it("ne compte que les CPOM actifs sur l'année courante", () => {
     const result = computeStructuresStatistiques(
       [{ id: 1, type: StructureType.CADA, departementAdministratif: "75" }],
       [

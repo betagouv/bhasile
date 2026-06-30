@@ -26,7 +26,7 @@ describe("ModificationDescription page integration", () => {
     global.fetch = vi.fn();
   });
 
-  it("should submit and navigate back to the structure page", async () => {
+  it("soumet la description et redirige vers la page de la structure", async () => {
     // GIVEN
     const structure = createStructure({ id: 77, type: StructureType.CADA });
     const mockedFetch = mockStructurePageFetch(structure);

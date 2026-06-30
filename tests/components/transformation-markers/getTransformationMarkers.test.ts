@@ -17,13 +17,13 @@ const contraction = (date: string): HistoryEvent => ({
 });
 
 describe("getTransformationMarkers", () => {
-  it("returns [] for missing or empty input", () => {
+  it("renvoie [] pour une entrée absente ou vide", () => {
     expect(getTransformationMarkers(undefined, years)).toEqual([]);
     expect(getTransformationMarkers([], years)).toEqual([]);
     expect(getTransformationMarkers([extension("2023-05-01")], [])).toEqual([]);
   });
 
-  it("keeps only extension/contraction events", () => {
+  it("ne conserve que les événements d'extension et de contraction", () => {
     const history: HistoryEvent[] = [
       extension("2023-05-01"),
       { kind: "CREATION", date: "2023-06-01", sources: [] },
@@ -41,7 +41,7 @@ describe("getTransformationMarkers", () => {
     expect(markers[0].events).toHaveLength(1);
   });
 
-  it("drops the first displayed year and out-of-range years", () => {
+  it("écarte la première année affichée et les années hors plage", () => {
     const history = [
       extension("2021-03-01"), // first displayed year -> skip
       extension("2019-03-01"), // before range -> skip
@@ -53,7 +53,7 @@ describe("getTransformationMarkers", () => {
     expect(markers.map((marker) => marker.year)).toEqual([2024]);
   });
 
-  it("groups same-year events, sorts them ascending, and flags MIXED", () => {
+  it("regroupe les événements d'une même année, les trie par ordre croissant et marque MIXED", () => {
     const history = [contraction("2023-09-15"), extension("2023-02-10")];
 
     const markers = getTransformationMarkers(history, years);
@@ -65,7 +65,7 @@ describe("getTransformationMarkers", () => {
     ]);
   });
 
-  it("returns markers ordered by year", () => {
+  it("renvoie les marqueurs ordonnés par année", () => {
     const markers = getTransformationMarkers(
       [extension("2025-01-01"), contraction("2022-01-01")],
       years

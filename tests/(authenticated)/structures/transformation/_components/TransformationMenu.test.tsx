@@ -39,7 +39,7 @@ describe("TransformationMenu", () => {
 
   describe("when there is no transformationId", () => {
 
-    it("should mark 'Cas de figure' as active on /type pathname", () => {
+    it("marque 'Cas de figure' comme actif sur le pathname /type", () => {
       // GIVEN
       mockUsePathname.mockReturnValue("/structures/transformation/type");
 
@@ -53,7 +53,7 @@ describe("TransformationMenu", () => {
       expect(casDeFigure).toHaveAttribute("aria-current", "page");
     });
 
-    it("should disable 'Saisie des données' and 'Vérification'", () => {
+    it("désactive 'Saisie des données' et 'Vérification'", () => {
       // GIVEN
       mockUsePathname.mockReturnValue("/structures/transformation/type");
 
@@ -69,7 +69,7 @@ describe("TransformationMenu", () => {
       ).toBeDisabled();
     });
 
-    it("should navigate to /type when clicking 'Cas de figure'", async () => {
+    it("navigue vers /type au clic sur 'Cas de figure'", async () => {
       // GIVEN
       mockUsePathname.mockReturnValue("/structures/transformation/type");
       const user = userEvent.setup();
@@ -84,7 +84,7 @@ describe("TransformationMenu", () => {
       );
     });
 
-    it("should not render any transformation step when no transformation is loaded", () => {
+    it("n'affiche aucune étape de transformation quand aucune transformation n'est chargée", () => {
       // GIVEN
       mockUsePathname.mockReturnValue("/structures/transformation/type");
 
@@ -109,7 +109,7 @@ describe("TransformationMenu", () => {
       });
     });
 
-    it("should mark 'Cas de figure' as active on /selection pathname", () => {
+    it("marque 'Cas de figure' comme actif sur le pathname /selection", () => {
       // GIVEN
       mockUsePathname.mockReturnValue(
         "/structures/transformation/42/selection"
@@ -125,7 +125,7 @@ describe("TransformationMenu", () => {
       expect(casDeFigure).toHaveAttribute("aria-current", "page");
     });
 
-    it("should mark 'Saisie des données' as active on a /contraction pathname", () => {
+    it("marque 'Saisie des données' comme actif sur un pathname /contraction", () => {
       // GIVEN
       mockUsePathname.mockReturnValue(
         "/structures/transformation/42/contraction/1/description"
@@ -145,7 +145,7 @@ describe("TransformationMenu", () => {
       ["/structures/transformation/42/ouverture/1/description"],
       ["/structures/transformation/42/fermeture/1/description"],
     ])(
-      "should mark 'Saisie des données' as active on %s",
+      "marque 'Saisie des données' comme actif sur %s",
       (pathname: string) => {
         // GIVEN
         mockUsePathname.mockReturnValue(pathname);
@@ -160,7 +160,7 @@ describe("TransformationMenu", () => {
       }
     );
 
-    it("should mark 'Vérification' as active on /verification pathname", () => {
+    it("marque 'Vérification' comme actif sur le pathname /verification", () => {
       // GIVEN
       mockUsePathname.mockReturnValue(
         "/structures/transformation/42/verification"
@@ -175,7 +175,7 @@ describe("TransformationMenu", () => {
       ).toHaveAttribute("aria-current", "page");
     });
 
-    it("should keep 'Saisie des données' disabled even with a transformationId", () => {
+    it("garde 'Saisie des données' désactivé même avec un transformationId", () => {
       // GIVEN
       mockUsePathname.mockReturnValue(
         "/structures/transformation/42/selection"
@@ -190,7 +190,7 @@ describe("TransformationMenu", () => {
       ).toBeDisabled();
     });
 
-    it("should enable 'Vérification' when a transformationId is provided", () => {
+    it("active 'Vérification' quand un transformationId est fourni", () => {
       // GIVEN
       mockUsePathname.mockReturnValue(
         "/structures/transformation/42/selection"
@@ -205,7 +205,7 @@ describe("TransformationMenu", () => {
       ).toBeEnabled();
     });
 
-    it("should navigate to /selection when clicking 'Cas de figure'", async () => {
+    it("navigue vers /selection au clic sur 'Cas de figure'", async () => {
       // GIVEN
       mockUsePathname.mockReturnValue(
         "/structures/transformation/42/selection"
@@ -222,7 +222,7 @@ describe("TransformationMenu", () => {
       );
     });
 
-    it("should navigate to /verification when clicking 'Vérification'", async () => {
+    it("navigue vers /verification au clic sur 'Vérification'", async () => {
       // GIVEN
       mockUsePathname.mockReturnValue(
         "/structures/transformation/42/selection"
@@ -239,7 +239,7 @@ describe("TransformationMenu", () => {
       );
     });
 
-    it("should render the substeps of the loaded transformation", () => {
+    it("affiche les sous-étapes de la transformation chargée", () => {
       // GIVEN
       mockUsePathname.mockReturnValue(
         "/structures/transformation/42/selection"

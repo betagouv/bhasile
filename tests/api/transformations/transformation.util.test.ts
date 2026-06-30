@@ -8,7 +8,7 @@ import {
 } from "@/types/transformation.type";
 
 describe("applyPrefill", () => {
-  it("adds FERMETURE contacts/antennes/adresses to the CREATION (OUVERTURE_DEPUIS)", () => {
+  it("ajoute les contacts/antennes/adresses des FERMETURE à la CREATION (OUVERTURE_DEPUIS)", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
       {
         type: StructureVersionTransformationType.FERMETURE,
@@ -50,7 +50,7 @@ describe("applyPrefill", () => {
     expect(fermetures[0].structureVersion?.contacts).toHaveLength(1);
   });
 
-  it("keeps the target's own data and appends the sources (additive)", () => {
+  it("conserve les données propres de la cible et ajoute celles des sources (additif)", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
       {
         type: StructureVersionTransformationType.FERMETURE,
@@ -81,7 +81,7 @@ describe("applyPrefill", () => {
     ]);
   });
 
-  it("returns the structureVersionTransformations unchanged when the type has no prefill config", () => {
+  it("retourne les structureVersionTransformations inchangées quand le type n'a pas de config de préremplissage", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
       {
         type: StructureVersionTransformationType.CREATION,

@@ -27,7 +27,7 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
     global.fetch = vi.fn();
   });
 
-  it("should submit and send updated finalisation step in PUT payload", async () => {
+  it("valide l'étape des documents financiers et envoie l'étape de finalisation à jour dans le payload PUT", async () => {
     // GIVEN
     const structure = createFinalisationDocumentsFinanciersValidStructure(77);
     const mockedFetch = mockStructurePageFetch(structure);
@@ -59,7 +59,7 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
     });
   });
 
-  it("should block submit when required financial documents are missing", async () => {
+  it("bloque la validation quand les documents financiers requis sont manquants", async () => {
     // GIVEN
     const structure = {
       ...createFinalisationDocumentsFinanciersValidStructure(78),
@@ -78,7 +78,7 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
-  it("should autosave and keep only upload-ready financial documents", async () => {
+  it("sauvegarde automatiquement et ne conserve que les documents financiers prêts à être téléversés", async () => {
     // GIVEN
     const structure = createFinalisationDocumentsFinanciersValidStructure(79);
     const mockedFetch = mockStructurePageFetch(structure);
