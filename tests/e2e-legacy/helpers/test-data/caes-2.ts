@@ -313,12 +313,6 @@ export const caes2: TestStructureScenario = {
         filePath: "tests/e2e/fixtures/sample.csv",
       },
     ],
-    ouvertureFermeture: {
-      placesACreer: "4",
-      echeancePlacesACreer: "2025-09-01",
-      placesAFermer: "1",
-      echeancePlacesAFermer: "2025-11-15",
-    },
     actesAdministratifs: [
       {
         category: "CONVENTION",
@@ -336,12 +330,6 @@ export const caes2: TestStructureScenario = {
     fvvTeh: false,
     contacts: [{ email: "modif-caes2@example.com" }],
     notes: "Notes modification CAES 2 - mixte.",
-    ouvertureFermeture: {
-      placesACreer: "7",
-      echeancePlacesACreer: "2026-06-01",
-      placesAFermer: "1",
-      echeancePlacesAFermer: "2026-09-01",
-    },
     structureTypologies: [
       { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
       { placesAutorisees: 50, pmr: 6, lgbt: 11, fvvTeh: 9 },

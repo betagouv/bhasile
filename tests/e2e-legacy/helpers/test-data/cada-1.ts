@@ -336,12 +336,6 @@ export const cada1: TestStructureScenario = {
         filePath: "tests/e2e/fixtures/sample.csv",
       },
     ],
-    ouvertureFermeture: {
-      placesACreer: "4",
-      echeancePlacesACreer: "2025-09-01",
-      placesAFermer: "1",
-      echeancePlacesAFermer: "2025-11-15",
-    },
     actesAdministratifs: [
       {
         category: "ARRETE_AUTORISATION",
@@ -376,12 +370,6 @@ export const cada1: TestStructureScenario = {
     fvvTeh: false,
     contacts: [{ email: "modif-cada1@example.com" }],
     notes: "Notes modification CADA 1 - suivi renforcé.",
-    ouvertureFermeture: {
-      placesACreer: "6",
-      echeancePlacesACreer: "2026-03-01",
-      placesAFermer: "2",
-      echeancePlacesAFermer: "2026-06-15",
-    },
     structureTypologies: [
       { placesAutorisees: 52, pmr: 6, lgbt: 12, fvvTeh: 9 },
       { placesAutorisees: 50, pmr: 6, lgbt: 11, fvvTeh: 8 },

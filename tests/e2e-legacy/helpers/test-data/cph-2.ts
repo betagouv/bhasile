@@ -346,12 +346,6 @@ export const cph2: TestStructureScenario = {
       },
     ],
     controles: [],
-    ouvertureFermeture: {
-      placesACreer: "4",
-      echeancePlacesACreer: "2025-09-01",
-      placesAFermer: "1",
-      echeancePlacesAFermer: "2025-11-15",
-    },
     actesAdministratifs: [
       {
         category: "ARRETE_AUTORISATION",
@@ -375,12 +369,6 @@ export const cph2: TestStructureScenario = {
     fvvTeh: true,
     contacts: [{ email: "modif-cph2@example.com" }],
     notes: "Notes modification CPH 2 - mixte.",
-    ouvertureFermeture: {
-      placesACreer: "4",
-      echeancePlacesACreer: "2026-05-15",
-      placesAFermer: "0",
-      echeancePlacesAFermer: "2026-08-01",
-    },
     structureTypologies: [
       { placesAutorisees: 54, pmr: 7, lgbt: 12, fvvTeh: 10 },
       { placesAutorisees: 50, pmr: 6, lgbt: 11, fvvTeh: 9 },

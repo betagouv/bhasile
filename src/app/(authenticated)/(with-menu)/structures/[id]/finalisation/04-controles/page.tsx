@@ -6,7 +6,6 @@ import { Evaluations } from "@/app/components/forms/evaluations/Evaluations";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { FieldSetOuvertureFermeture } from "@/app/components/forms/ouvertureFermeture/FieldSetOuvertureFermeture";
 import { SubmitError } from "@/app/components/SubmitError";
 import { InformationBar } from "@/app/components/ui/InformationBar";
 import { useFetchState } from "@/app/context/FetchStateContext";
@@ -22,7 +21,6 @@ import {
 } from "@/schemas/forms/finalisation/finalisationQualite.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import { StepStatus } from "@/types/form.type";
-import { FormKind } from "@/types/global";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { Tabs } from "../_components/Tabs";
@@ -113,8 +111,6 @@ export default function ModificationControleForm() {
           </>
         )}
         <Controles />
-        <hr />
-        <FieldSetOuvertureFermeture formKind={FormKind.FINALISATION} />
         {saveState === FetchState.ERROR && (
           <SubmitError
             codeBhasile={structure.codeBhasile}

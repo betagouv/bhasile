@@ -7,7 +7,7 @@ import {
 } from "@/schemas/forms/base/adresse.schema";
 import {
   structureTypologiesAutoSaveSchema,
-  structureTypologieWithoutEvolutionSchema,
+  structureTypologieSchema,
 } from "@/schemas/forms/base/structureTypologie.schema";
 import { FormKind } from "@/types/global";
 import { PublicType } from "@/types/structure.type";
@@ -15,7 +15,7 @@ import { PublicType } from "@/types/structure.type";
 export const creationPlacesEtHebergementSchema = typeBatiAndAdressesSchema.and(
   z.object({
     public: z.nativeEnum(PublicType),
-    structureTypologies: z.tuple([structureTypologieWithoutEvolutionSchema]),
+    structureTypologies: z.tuple([structureTypologieSchema]),
   })
 );
 
