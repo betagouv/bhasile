@@ -27,13 +27,15 @@ import {
 
 type FinanceScope = "total" | "autorisees" | "subventionnees";
 
+type ScopeYearStat = FinanceByYearScopeStat & { year: number };
+
 const FINANCE_SCOPES: FinanceScope[] = [
   "total",
   "autorisees",
   "subventionnees",
 ];
 
-const emptyByYearScopeStat = (): FinanceByYearScopeStat => ({
+const emptyScopeStat = (): FinanceByYearScopeStat => ({
   dotationDemandee: 0,
   dotationAccordee: 0,
   totalETP: 0,
@@ -69,22 +71,12 @@ const getStructureIdsByFinanceScope = (
   return scopes;
 };
 
-const computeBudgetStatsForYear = (
-  budgetsForYear: StatistiqueDbBudget[]
-): {
-  dotationDemandee: number;
-  dotationAccordee: number;
-  totalProduits: number;
-  totalCharges: number;
-  excedent: number;
-  deficit: number;
-} => {
+const sumBudgetsForYear = (budgetsForYear: StatistiqueDbBudget[]) => {
   let dotationDemandee = 0;
   let dotationAccordee = 0;
   let totalProduits = 0;
   let totalCharges = 0;
-  let excedent = 0;
-  let deficit = 0;
+  const resultatNetByStructureId = new Map<number, number>();
 
   for (const budget of budgetsForYear) {
     dotationDemandee += budget.dotationDemandee;
@@ -92,7 +84,15 @@ const computeBudgetStatsForYear = (
     totalProduits += budget.totalProduits;
     totalCharges += budget.totalCharges;
 
-    const resultatNet = budget.totalProduits - budget.totalCharges;
+    resultatNetByStructureId.set(
+      budget.structureId,
+      budget.totalProduits - budget.totalCharges
+    );
+  }
+
+  let excedent = 0;
+  let deficit = 0;
+  for (const resultatNet of resultatNetByStructureId.values()) {
     if (resultatNet > 0) {
       excedent += resultatNet;
     } else if (resultatNet < 0) {
@@ -110,7 +110,7 @@ const computeBudgetStatsForYear = (
   };
 };
 
-const getResolvedIndicateursForYear = (
+const resolveIndicateursForYear = (
   structureIds: number[],
   indicateurs: StatistiqueDbIndicateurFinancier[],
   year: number
@@ -148,51 +148,49 @@ const getResolvedIndicateursForYear = (
   });
 };
 
-const computeScopeYearStats = (
+const computeScopeByYear = (
   structureIdsInScope: number[],
   context: StatistiquesContext,
   aggregation: NumericAggregation
-): Array<FinanceByYearScopeStat & { year: number }> => {
+): ScopeYearStat[] => {
   const { activeStructureIdsByPeriod, budgets, indicateurs } = context;
   const structureIdSet = new Set(structureIdsInScope);
+  const scopedBudgets = budgets.filter((budget) =>
+    structureIdSet.has(budget.structureId)
+  );
   const scopedIndicateurs = indicateurs.filter(
     (indicateur) =>
       indicateur.structureId !== null &&
       structureIdSet.has(indicateur.structureId)
   );
-  const scopedBudgets = budgets.filter((budget) =>
-    structureIdSet.has(budget.structureId)
-  );
+  const years = collectDistinctYears(scopedBudgets);
 
   let excedentCumule = 0;
   let deficitCumule = 0;
 
-  return collectDistinctYears(scopedBudgets, scopedIndicateurs).map((year) => {
+  return years.map((year) => {
     const activeStructureIds = lookupActiveStructureIds(
       activeStructureIdsByPeriod,
       "year",
       String(year)
     );
-    const structureIds = structureIdsInScope.filter((structureId) =>
-      activeStructureIds.has(structureId)
-    );
     const budgetsForYear = scopedBudgets.filter(
       (budget) =>
         budget.year === year && activeStructureIds.has(budget.structureId)
     );
-    const budgetStats = computeBudgetStatsForYear(budgetsForYear);
-    const indicateursForYear = getResolvedIndicateursForYear(
+    const structureIds = [
+      ...new Set(budgetsForYear.map((budget) => budget.structureId)),
+    ];
+
+    const budgetStats = sumBudgetsForYear(budgetsForYear);
+    const indicateursForYear = resolveIndicateursForYear(
       structureIds,
       scopedIndicateurs,
       year
     );
-    const totalProduits = budgetStats.totalProduits;
-    const totalCharges = budgetStats.totalCharges;
-    const resultatNet = totalProduits - totalCharges;
-    const { excedent, deficit } = budgetStats;
 
-    excedentCumule += excedent;
-    deficitCumule += deficit;
+    excedentCumule += budgetStats.excedent;
+    deficitCumule += budgetStats.deficit;
 
     return {
       year,
@@ -214,9 +212,9 @@ const computeScopeYearStats = (
           aggregation
         )
       ),
-      totalProduits,
-      totalCharges,
-      resultatNet,
+      totalProduits: budgetStats.totalProduits,
+      totalCharges: budgetStats.totalCharges,
+      resultatNet: budgetStats.totalProduits - budgetStats.totalCharges,
       excedentCumule,
       deficitCumule,
       soldeCumule: excedentCumule - deficitCumule,
@@ -225,29 +223,16 @@ const computeScopeYearStats = (
 };
 
 const scopeStatForYear = (
-  stats: Array<FinanceByYearScopeStat & { year: number }>,
+  stats: ScopeYearStat[],
   year: number
 ): FinanceByYearScopeStat => {
   const scopeStat = stats.find((yearStat) => yearStat.year === year);
-  if (scopeStat) {
-    const { year: _year, ...stat } = scopeStat;
-    return stat;
+  if (!scopeStat) {
+    return emptyScopeStat();
   }
 
-  const previousStat = [...stats]
-    .filter((yearStat) => yearStat.year < year)
-    .at(-1);
-
-  if (previousStat) {
-    return {
-      ...emptyByYearScopeStat(),
-      excedentCumule: previousStat.excedentCumule,
-      deficitCumule: previousStat.deficitCumule,
-      soldeCumule: previousStat.soldeCumule,
-    };
-  }
-
-  return emptyByYearScopeStat();
+  const { year: _year, ...stat } = scopeStat;
+  return stat;
 };
 
 export const computeFinanceStatistiques = (
@@ -258,11 +243,11 @@ export const computeFinanceStatistiques = (
   const statsByScope = Object.fromEntries(
     FINANCE_SCOPES.map((scope) => [
       scope,
-      computeScopeYearStats(scopeIds[scope], context, aggregation),
+      computeScopeByYear(scopeIds[scope], context, aggregation),
     ])
-  ) as Record<FinanceScope, Array<FinanceByYearScopeStat & { year: number }>>;
+  ) as Record<FinanceScope, ScopeYearStat[]>;
 
-  const years = collectDistinctYears(...FINANCE_SCOPES.map((s) => statsByScope[s]));
+  const years = collectDistinctYears(context.budgets);
 
   return {
     byYear: years.map((year) => ({

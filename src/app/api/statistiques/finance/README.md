@@ -6,10 +6,7 @@ Valider le comportement fallback de `REALISE` vers `PREVISIONNEL`
 
 ## Millésimes
 
-Union des années présentes dans :
-
-- `Budget` (hors `isMissing`)
-- `IndicateurFinancier` `REALISE` ou `PREVISIONNEL` (hors `isMissing`)
+Années présentes dans `Budget` (hors `isMissing`).
 
 Le front choisit l'année affichée dans `byYear`.
 
@@ -42,7 +39,7 @@ Puis agrégation scope : somme (`ETP`), moyenne ou médiane (taux).
 | `deficitCumule`                                                         | Cumul \|RN négatifs\| par structure, puis somme |
 | `soldeCumule`                                                           | `excedentCumule − deficitCumule`                |
 
-Cumuls par scope, chronologiques. Année absente dans un scope -> report cumuls.
+Cumuls par scope, chronologiques, sur les années où le scope a des données.
 
 ## Sources
 

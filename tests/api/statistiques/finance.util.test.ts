@@ -94,7 +94,7 @@ describe("finance statistics util", () => {
     expect(year2024?.total.soldeCumule).toBe(20);
   });
 
-  it("should carry forward cumulative balances without later budget", () => {
+  it("should not infer subventionnee budgets from a previous year", () => {
     const budgets = [
       budgetRow(1, 1, 2024, 100, 80),
       budgetRow(2, 2, 2024, 60, 90),
@@ -108,9 +108,12 @@ describe("finance statistics util", () => {
 
     const year2025 = result.byYear.find((entry) => entry.year === 2025);
 
+    expect(year2025?.subventionnees.totalProduits).toBe(0);
+    expect(year2025?.subventionnees.totalCharges).toBe(0);
+    expect(year2025?.subventionnees.resultatNet).toBe(0);
     expect(year2025?.subventionnees.excedentCumule).toBe(0);
-    expect(year2025?.subventionnees.deficitCumule).toBe(30);
-    expect(year2025?.subventionnees.soldeCumule).toBe(-30);
+    expect(year2025?.subventionnees.deficitCumule).toBe(0);
+    expect(year2025?.subventionnees.soldeCumule).toBe(0);
   });
 
   it("should prefer REALISE over PREVISIONNEL per field", () => {
@@ -152,8 +155,9 @@ describe("finance statistics util", () => {
 
     const year2024 = result.byYear.find((entry) => entry.year === 2024);
 
-    expect(year2024?.total.totalETP).toBe(15);
-    expect(year2024?.total.tauxEncadrement).toBe(0.7);
-    expect(year2024?.total.coutJournalier).toBe(45);
+    // Only structures having a Budget for the year are included in the scope.
+    expect(year2024?.total.totalETP).toBe(10);
+    expect(year2024?.total.tauxEncadrement).toBe(0.8);
+    expect(year2024?.total.coutJournalier).toBe(50);
   });
 });
