@@ -13,6 +13,7 @@ import {
 } from "@/app/utils/structure.util";
 import {
   FinanceByYearScopeStat,
+  FinanceByYearStat,
   StatistiqueApiRead,
 } from "@/schemas/api/statistique.schema";
 
@@ -27,13 +28,7 @@ import {
   lookupActiveStructureIds,
 } from "../statistiques.utils";
 
-type FinanceScope = "total" | "autorisees" | "subventionnees";
-
-const FINANCE_SCOPES: FinanceScope[] = [
-  "total",
-  "autorisees",
-  "subventionnees",
-];
+type FinanceScope = keyof Omit<FinanceByYearStat, "year">;
 
 const getStructureIdsByFinanceScope = (
   structures: StatistiqueDbStructure[]
@@ -203,19 +198,31 @@ export const computeFinanceStatistiques = (
 ): StatistiqueApiRead["finance"] => {
   const years = collectDistinctYears(context.budgets, context.indicateurs);
   const scopeIds = getStructureIdsByFinanceScope(context.allStructures);
-  const statsByScope = Object.fromEntries(
-    FINANCE_SCOPES.map((scope) => [
-      scope,
-      computeScopeByYear(scopeIds[scope], context, aggregation, years),
-    ])
-  ) as Record<FinanceScope, FinanceByYearScopeStat[]>;
+  const total = computeScopeByYear(
+    scopeIds.total,
+    context,
+    aggregation,
+    years
+  );
+  const autorisees = computeScopeByYear(
+    scopeIds.autorisees,
+    context,
+    aggregation,
+    years
+  );
+  const subventionnees = computeScopeByYear(
+    scopeIds.subventionnees,
+    context,
+    aggregation,
+    years
+  );
 
   return {
     byYear: years.map((year, index) => ({
       year,
-      total: statsByScope.total[index],
-      autorisees: statsByScope.autorisees[index],
-      subventionnees: statsByScope.subventionnees[index],
+      total: total[index],
+      autorisees: autorisees[index],
+      subventionnees: subventionnees[index],
     })),
   };
 };
