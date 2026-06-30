@@ -245,12 +245,12 @@ describe("StructureVersionTransformationItem", () => {
   });
 
   it.each([
-    StructureVersionTransformationType.CREATION,
-    StructureVersionTransformationType.EXTENSION,
-    StructureVersionTransformationType.CONTRACTION,
+    [StructureVersionTransformationType.CREATION, "ouverture"],
+    [StructureVersionTransformationType.EXTENSION, "extension"],
+    [StructureVersionTransformationType.CONTRACTION, "contraction"],
   ])(
     "should render the placesAutorisees line for type %s",
-    (structureVersionTransformationType) => {
+    (structureVersionTransformationType, expectedSuffix) => {
       // GIVEN
       const structureVersionTransformation = buildCompleteStructureVersionTransformation({
         type: structureVersionTransformationType,
@@ -266,7 +266,7 @@ describe("StructureVersionTransformationItem", () => {
       // THEN
       const placesElement = screen.getByText("47 places autorisées");
       expect(placesElement.parentElement?.textContent).toBe(
-        "47 places autorisées au total"
+        `47 places autorisées au total après ${expectedSuffix}`
       );
     }
   );
