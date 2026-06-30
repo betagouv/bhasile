@@ -6,6 +6,7 @@ import { StructureType } from "@/types/structure.type";
 
 import {
   buildTestActiveStructureIdsByPeriod,
+  buildTestDnaLinks,
   buildTestStatistiquesContext,
 } from "./test-helpers";
 
@@ -19,11 +20,11 @@ describe("quality control statistics util", () => {
     vi.useRealTimers();
   });
 
-  const dnaLinks = [
-    { id: 1, structureId: 1, dna: { code: "DNA01" } },
-    { id: 2, structureId: 2, dna: { code: "DNA02" } },
-    { id: 3, structureId: 3, dna: { code: "DNA03" } },
-  ];
+  const dnaLinks = buildTestDnaLinks([
+    { structureId: 1, dnaCode: "DNA01" },
+    { structureId: 2, dnaCode: "DNA02" },
+    { structureId: 3, dnaCode: "DNA03" },
+  ]);
 
   const structure = (id: number) => ({
     id,

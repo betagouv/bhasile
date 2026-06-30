@@ -1,6 +1,8 @@
 # `activite`
 
-Liée à la structure par ses codes DNA liées (`DnaStructure`).
+Liée à la structure par ses codes DNA (`DnaStructure` sur `StructureVersion`).
+
+Résolution à date : `lookupStructureIdsForDnaAtDate` — le DNA est rattaché à la structure dont la version est effective à la date de l'activité.
 
 ## TODO
 
@@ -14,7 +16,7 @@ Les dénominateurs de taux diffèrent selon les scopes (toutes structures vs hor
 | Indisponibilités        | Toutes sauf CAES                                 |
 | Présences indues        | Toutes sauf CAES et CPH (en pratique CADA, HUDA) |
 
-`dnaCode` dans scope si ≥1 structure liée a le bon type.
+`dnaCode` dans scope si ≥1 structure liée (version effective à la date) a le bon type.
 
 ## `byMonth`
 

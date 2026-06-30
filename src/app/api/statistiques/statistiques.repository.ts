@@ -12,6 +12,7 @@ import type {
   StatistiqueDbDepartement,
   StatistiqueDbDnaLink,
   StatistiqueDbEffectiveStructureVersion,
+  StatistiqueDbStructureVersionTimeline,
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
   StatistiqueDbIndicateurFinancier,
@@ -203,16 +204,45 @@ export const findDnaLinks = async (
     where: structureVersionScope(structureIds),
     select: {
       id: true,
+      structureVersionId: true,
       structureVersion: { select: { structureId: true } },
       dna: { select: { code: true } },
     },
   });
 
-  return rows.map((row) => ({
-    id: row.id,
-    structureId: structureIdFromVersion(row),
-    dna: row.dna,
-  }));
+  return rows
+    .filter((row) => row.structureVersionId != null)
+    .map((row) => ({
+      id: row.id,
+      structureId: structureIdFromVersion(row),
+      structureVersionId: row.structureVersionId!,
+      dna: row.dna,
+    }));
+};
+
+export const findStructureVersionTimeline = async (
+  structureIds: number[]
+): Promise<StatistiqueDbStructureVersionTimeline[]> => {
+  if (structureIds.length === 0) {
+    return [];
+  }
+
+  return prisma.structureVersion.findMany({
+    where: { structureId: { in: structureIds } },
+    select: {
+      id: true,
+      structureId: true,
+      effectiveDate: true,
+      type: true,
+      departementAdministratif: true,
+      structureVersionTransformation: {
+        select: {
+          type: true,
+        },
+      },
+    },
+    orderBy: [{ structureId: "asc" }, { effectiveDate: "desc" }, { id: "desc" }],
+  });
 };
 
 export const findDepartementsWithPopulation = async (

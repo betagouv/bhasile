@@ -6,6 +6,7 @@ Structures actives avec typologie (≥1 `StructureTypologie`). Places EIG = somm
 
 - EIG : `EvenementIndesirableGrave` via `dnaCode`
 - Évaluations : `Evaluation` par `structureId`
+- Lien DNA : `lookupStructureIdsForDnaAtDate` (`statistiques.utils`) — version effective à la date de l'événement (`structureVersionTimeline`)
 - Violent : sous-chaîne `comportement violent` (insensible à la casse, espaces normalisés) - `isEigComportementViolent`
 
 ## Vue globale `eig` (12 mois glissants)

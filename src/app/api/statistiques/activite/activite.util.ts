@@ -10,16 +10,13 @@ import {
 } from "@/schemas/api/statistique.schema";
 
 import type {
-  StatistiqueDbDnaLink,
-  StatistiqueDbStructure,
   StatistiquesContext,
 } from "../statistiques.db.type";
-import { monthKeyToDate, toMonthKey } from "../statistiques.utils";
-
-type DnaEligibility = {
-  indisponibilite: Set<string>;
-  presencesIndues: Set<string>;
-};
+import {
+  lookupStructureIdsForDnaAtDate,
+  monthKeyToDate,
+  toMonthKey,
+} from "../statistiques.utils";
 
 type MonthAccumulator = {
   placesEnregistreesDna: number;
@@ -38,35 +35,6 @@ const emptyMonthAccumulator = (): MonthAccumulator => ({
   presencesInduesBPI: 0,
   presencesInduesDeboutees: 0,
 });
-
-const buildDnaEligibilityByActiviteScope = (
-  dnaLinks: StatistiqueDbDnaLink[],
-  structures: StatistiqueDbStructure[]
-): DnaEligibility => {
-  const structureTypeById = new Map(
-    structures.map((structure) => [structure.id, structure.type])
-  );
-  const indisponibilite = new Set<string>();
-  const presencesIndues = new Set<string>();
-
-  for (const link of dnaLinks) {
-    if (link.structureId === null) {
-      continue;
-    }
-    const structureType = structureTypeById.get(link.structureId);
-    if (!structureType) {
-      continue;
-    }
-    if (isStructureEligibleForActiviteIndisponibilite(structureType)) {
-      indisponibilite.add(link.dna.code);
-    }
-    if (isStructureEligibleForActivitePresencesIndues(structureType)) {
-      presencesIndues.add(link.dna.code);
-    }
-  }
-
-  return { indisponibilite, presencesIndues };
-};
 
 const toMonthStat = (
   monthKey: string,
@@ -109,12 +77,32 @@ const toMonthStat = (
 export const computeActiviteStatistiques = (
   context: StatistiquesContext
 ): StatistiqueApiRead["activite"] => {
-  const { activites, dnaLinks, allStructures } = context;
-  const eligibility = buildDnaEligibilityByActiviteScope(dnaLinks, allStructures);
+  const {
+    activites,
+    dnaLinks,
+    structureVersionTimeline,
+    allStructures,
+    structures,
+  } = context;
+  const structureTypeById = new Map(
+    allStructures.map((structure) => [structure.id, structure.type])
+  );
+  const structureIdsInScope = new Set(structures.map((structure) => structure.id));
   const byMonth = new Map<string, MonthAccumulator>();
 
   for (const activite of activites) {
-    if (!activite.dnaCode) {
+    if (!activite.dnaCode || !activite.date) {
+      continue;
+    }
+
+    const structureIds = lookupStructureIdsForDnaAtDate(
+      activite.dnaCode,
+      new Date(activite.date),
+      dnaLinks,
+      structureVersionTimeline,
+      structureIdsInScope
+    );
+    if (structureIds.length === 0) {
       continue;
     }
 
@@ -124,12 +112,27 @@ export const computeActiviteStatistiques = (
 
     monthTotals.placesEnregistreesDna += placesAutorisees;
 
-    if (eligibility.indisponibilite.has(activite.dnaCode)) {
+    let inIndisponibiliteScope = false;
+    let inPresencesInduesScope = false;
+    for (const structureId of structureIds) {
+      const structureType = structureTypeById.get(structureId);
+      if (!structureType) {
+        continue;
+      }
+      if (isStructureEligibleForActiviteIndisponibilite(structureType)) {
+        inIndisponibiliteScope = true;
+      }
+      if (isStructureEligibleForActivitePresencesIndues(structureType)) {
+        inPresencesInduesScope = true;
+      }
+    }
+
+    if (inIndisponibiliteScope) {
       monthTotals.placesAutoriseesIndispo += placesAutorisees;
       monthTotals.placesIndisponibles += activite.placesIndisponibles ?? 0;
     }
 
-    if (eligibility.presencesIndues.has(activite.dnaCode)) {
+    if (inPresencesInduesScope) {
       monthTotals.placesAutoriseesPresencesIndues += placesAutorisees;
       monthTotals.presencesInduesBPI += activite.presencesInduesBPI ?? 0;
       monthTotals.presencesInduesDeboutees +=

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { computeActiviteStatistiques } from "@/app/api/statistiques/activite/activite.util";
 import { StructureType } from "@/types/structure.type";
 
-import { buildTestStatistiquesContext } from "./test-helpers";
+import { buildTestDnaLinks, buildTestStatistiquesContext } from "./test-helpers";
 
 describe("activite statistics util", () => {
   const structures = [
@@ -12,11 +12,11 @@ describe("activite statistics util", () => {
     { id: 3, type: StructureType.CPH, departementAdministratif: "75" },
   ];
 
-  const dnaLinks = [
-    { id: 1, structureId: 1, dna: { code: "DNA01" } },
-    { id: 2, structureId: 2, dna: { code: "DNA02" } },
-    { id: 3, structureId: 3, dna: { code: "DNA03" } },
-  ];
+  const dnaLinks = buildTestDnaLinks([
+    { structureId: 1, dnaCode: "DNA01" },
+    { structureId: 2, dnaCode: "DNA02" },
+    { structureId: 3, dnaCode: "DNA03" },
+  ]);
 
   it("should apply type scoping to rate denominators", () => {
     const result = computeActiviteStatistiques(

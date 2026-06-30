@@ -2,11 +2,18 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import {
   buildActivityIndex,
+  getEffectiveStructureVersionAtDate,
   getPeriodBounds,
   lookupActiveStructureIds,
+  lookupStructureIdsForDnaAtDate,
 } from "@/app/api/statistiques/statistiques.utils";
+import { StructureType } from "@/types/structure.type";
 
-import { buildTestActivityContext } from "./test-helpers";
+import {
+  buildTestActivityContext,
+  buildTestDnaLinks,
+  buildTestStructureVersionTimeline,
+} from "./test-helpers";
 
 describe("statistiques period utils", () => {
   const closureMarch2024 = new Date("2024-03-01T00:00:00.000Z");
@@ -87,5 +94,83 @@ describe("statistiques period utils", () => {
       start: new Date(Date.UTC(2024, 0, 1)),
       end: new Date(Date.UTC(2025, 0, 1)),
     });
+  });
+});
+
+describe("DNA resolution at date", () => {
+  const timeline = buildTestStructureVersionTimeline([
+    {
+      structureId: 1,
+      structureVersionId: 10,
+      effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
+    },
+    {
+      structureId: 1,
+      structureVersionId: 11,
+      effectiveDate: new Date("2025-01-01T00:00:00.000Z"),
+    },
+    {
+      structureId: 2,
+      structureVersionId: 20,
+      effectiveDate: new Date("2025-01-01T00:00:00.000Z"),
+      type: StructureType.CAES,
+    },
+  ]);
+
+  const dnaLinks = buildTestDnaLinks([
+    { structureId: 1, structureVersionId: 10, dnaCode: "DNA-SHARED" },
+    { structureId: 2, structureVersionId: 20, dnaCode: "DNA-SHARED" },
+    { structureId: 1, structureVersionId: 10, dnaCode: "DNA-OLD" },
+  ]);
+
+  it("should pick the effective structure version at date", () => {
+    expect(
+      getEffectiveStructureVersionAtDate(
+        1,
+        new Date("2024-06-01"),
+        timeline
+      )?.id
+    ).toBe(10);
+    expect(
+      getEffectiveStructureVersionAtDate(
+        2,
+        new Date("2024-06-01"),
+        timeline
+      )
+    ).toBeNull();
+    expect(
+      getEffectiveStructureVersionAtDate(
+        2,
+        new Date("2025-06-01"),
+        timeline
+      )?.id
+    ).toBe(20);
+  });
+
+  it("should resolve DNA to the structure owning it on the effective version", () => {
+    expect(
+      lookupStructureIdsForDnaAtDate(
+        "DNA-SHARED",
+        new Date("2024-06-01"),
+        dnaLinks,
+        timeline
+      )
+    ).toEqual([1]);
+    expect(
+      lookupStructureIdsForDnaAtDate(
+        "DNA-SHARED",
+        new Date("2025-06-01"),
+        dnaLinks,
+        timeline
+      )
+    ).toEqual([2]);
+    expect(
+      lookupStructureIdsForDnaAtDate(
+        "DNA-OLD",
+        new Date("2025-06-01"),
+        dnaLinks,
+        timeline
+      )
+    ).toEqual([]);
   });
 });

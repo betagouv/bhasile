@@ -74,9 +74,13 @@ export type StatistiqueDbDnaLink = Prisma.DnaStructureGetPayload<{
   select: {
     id: true;
     structureId: true;
+    structureVersionId: true;
     dna: { select: { code: true } };
   };
 }>;
+
+export type StatistiqueDbStructureVersionTimeline =
+  StatistiqueDbEffectiveStructureVersion;
 
 export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
   select: {
@@ -179,6 +183,7 @@ export type StatistiquesContext = {
   adresses: StatistiqueDbAdresse[];
   cpomLinks: StatistiqueDbCpomStructure[];
   dnaLinks: StatistiqueDbDnaLink[];
+  structureVersionTimeline: StatistiqueDbStructureVersionTimeline[];
   departements: StatistiqueDbDepartement[];
   budgets: StatistiqueDbBudget[];
   indicateurs: StatistiqueDbIndicateurFinancier[];

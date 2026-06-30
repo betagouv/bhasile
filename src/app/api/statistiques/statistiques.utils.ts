@@ -1,9 +1,11 @@
 import { sumValues } from "@/app/utils/math.util";
-import { startOfUtcDay } from "@/app/utils/date.util";
+import { startOfNextUtcDay, startOfUtcDay } from "@/app/utils/date.util";
 
 import type {
+  StatistiqueDbDnaLink,
   StatistiqueDbEffectiveStructureVersion,
   StatistiqueDbStructure,
+  StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologie,
   StatistiqueDbTypologieValues,
   StatistiquesActiveStructureIdsByPeriod,
@@ -148,6 +150,69 @@ export const getTwelveMonthCutoffKey = (): string => {
   const twelveMonthsAgo = startOfUtcDay();
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
   return toMonthKey(twelveMonthsAgo);
+};
+
+export const getEffectiveStructureVersionAtDate = (
+  structureId: number,
+  date: Date,
+  timeline: StatistiqueDbStructureVersionTimeline[]
+): StatistiqueDbEffectiveStructureVersion | null => {
+  const cutoff = startOfNextUtcDay(date);
+  let effectiveVersion: StatistiqueDbStructureVersionTimeline | null = null;
+
+  for (const version of timeline) {
+    if (version.structureId !== structureId) {
+      continue;
+    }
+    if (version.effectiveDate == null || version.effectiveDate >= cutoff) {
+      continue;
+    }
+    if (effectiveVersion == null || effectiveVersion.effectiveDate == null) {
+      effectiveVersion = version;
+      continue;
+    }
+    if (
+      version.effectiveDate > effectiveVersion.effectiveDate ||
+      (version.effectiveDate.getTime() ===
+        effectiveVersion.effectiveDate.getTime() &&
+        version.id > effectiveVersion.id)
+    ) {
+      effectiveVersion = version;
+    }
+  }
+
+  return effectiveVersion;
+};
+
+export const lookupStructureIdsForDnaAtDate = (
+  dnaCode: string,
+  date: Date,
+  dnaLinks: StatistiqueDbDnaLink[],
+  timeline: StatistiqueDbStructureVersionTimeline[],
+  activeStructureIds?: Set<number>
+): number[] => {
+  const structureIds = new Set<number>();
+
+  for (const link of dnaLinks) {
+    if (link.dna.code !== dnaCode || link.structureId === null) {
+      continue;
+    }
+    const structureId = link.structureId;
+    const effectiveVersion = getEffectiveStructureVersionAtDate(
+      structureId,
+      date,
+      timeline
+    );
+    if (effectiveVersion?.id !== link.structureVersionId) {
+      continue;
+    }
+    if (activeStructureIds && !activeStructureIds.has(structureId)) {
+      continue;
+    }
+    structureIds.add(structureId);
+  }
+
+  return [...structureIds];
 };
 
 const computeActiveStructureIdsForBounds = (

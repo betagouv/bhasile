@@ -25,7 +25,6 @@ import {
   toYearKey,
 } from "../statistiques.utils";
 import {
-  buildDnaCodeToStructureIds,
   computeEigPeriodMetrics,
   computeEigRates,
   filterRecentEigs,
@@ -83,7 +82,8 @@ const computePeriodSeries = <Period>(
   aggregation: NumericAggregation,
   config: PeriodSeriesConfig<Period>
 ): (ControleQualitePeriodBase & Period)[] => {
-  const { eigs, evaluations, dnaLinks, activeStructureIdsByPeriod } = context;
+  const { eigs, evaluations, dnaLinks, structureVersionTimeline, activeStructureIdsByPeriod } =
+    context;
   const eigsByPeriod = groupByPeriodKey(
     eigs,
     (eig) => eig.evenementDate,
@@ -103,13 +103,6 @@ const computePeriodSeries = <Period>(
         config.granularity,
         periodKey
       );
-      const dnaCodeToStructureIds = buildDnaCodeToStructureIds(
-        dnaLinks.filter(
-          (link) =>
-            link.structureId !== null &&
-            activeStructureIds.has(link.structureId)
-        )
-      );
       const evaluationsForPeriod = (
         evaluationsByPeriod.get(periodKey) ?? []
       ).filter(
@@ -123,8 +116,8 @@ const computePeriodSeries = <Period>(
         ...computeEigPeriodMetrics(
           eigsByPeriod.get(periodKey) ?? [],
           activeStructureIds,
-          activeStructureIds.size,
-          dnaCodeToStructureIds
+          dnaLinks,
+          structureVersionTimeline
         ),
         ...sumEvaluationNotes(evaluationsForPeriod, aggregation),
       };

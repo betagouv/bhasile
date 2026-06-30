@@ -10,26 +10,13 @@ import type {
 import type {
   StatistiqueDbDnaLink,
   StatistiqueDbEig,
+  StatistiqueDbStructureVersionTimeline,
 } from "../statistiques.db.type";
-import { getTwelveMonthCutoffKey, toMonthKey } from "../statistiques.utils";
-
-export const buildDnaCodeToStructureIds = (
-  dnaLinks: StatistiqueDbDnaLink[]
-): Map<string, Set<number>> => {
-  const dnaCodeToStructureIds = new Map<string, Set<number>>();
-
-  for (const link of dnaLinks) {
-    if (link.structureId === null) {
-      continue;
-    }
-    const structureIds =
-      dnaCodeToStructureIds.get(link.dna.code) ?? new Set<number>();
-    structureIds.add(link.structureId);
-    dnaCodeToStructureIds.set(link.dna.code, structureIds);
-  }
-
-  return dnaCodeToStructureIds;
-};
+import {
+  getTwelveMonthCutoffKey,
+  lookupStructureIdsForDnaAtDate,
+  toMonthKey,
+} from "../statistiques.utils";
 
 export const filterRecentEigs = (
   eigs: StatistiqueDbEig[]
@@ -77,27 +64,28 @@ export const computeEigRates = (
 export const computeEigPeriodMetrics = (
   eigsForPeriod: StatistiqueDbEig[],
   activeStructureIds: Set<number>,
-  totalStructures: number,
-  dnaCodeToStructureIds: Map<string, Set<number>>
+  dnaLinks: StatistiqueDbDnaLink[],
+  structureVersionTimeline: StatistiqueDbStructureVersionTimeline[]
 ): EigPeriodStat => {
   const counts = sumEigCounts(eigsForPeriod);
   const structureIdsWithEig = new Set<number>();
 
   for (const eig of eigsForPeriod) {
-    if (!eig.dnaCode) {
+    if (!eig.dnaCode || !eig.evenementDate) {
       continue;
     }
-    const linkedStructureIds = dnaCodeToStructureIds.get(eig.dnaCode);
-    if (!linkedStructureIds) {
-      continue;
-    }
-    for (const structureId of linkedStructureIds) {
-      if (activeStructureIds.has(structureId)) {
-        structureIdsWithEig.add(structureId);
-      }
+    for (const structureId of lookupStructureIdsForDnaAtDate(
+      eig.dnaCode,
+      new Date(eig.evenementDate),
+      dnaLinks,
+      structureVersionTimeline,
+      activeStructureIds
+    )) {
+      structureIdsWithEig.add(structureId);
     }
   }
 
+  const totalStructures = activeStructureIds.size;
   const nbStructuresSansDeclarationEig =
     totalStructures - structureIdsWithEig.size;
 

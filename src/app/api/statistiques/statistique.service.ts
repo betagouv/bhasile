@@ -16,6 +16,7 @@ import {
   findAllStructureIdsMatchingFilters,
   findDnaLinks,
   findEffectiveStructureVersionsAtDate,
+  findStructureVersionTimeline,
   findEigs,
   findEvaluations,
   findFirstEffectiveDateByStructure,
@@ -62,14 +63,21 @@ export const buildStatistiquesContext = async (
   const allStructures = mapVersionsToStructures(effectiveVersions);
   const structures = mapVersionsToStructures(openEffectiveVersions);
 
-  const [typologies, adresses, cpomLinks, dnaLinks, openingDateByStructureId] =
-    await Promise.all([
-      findStructureTypologies(allStructureIds),
-      findStructureAdresses(effectiveStructureVersionIds),
-      findCpomStructures(allStructureIds),
-      findDnaLinks(allStructureIds),
-      findFirstEffectiveDateByStructure(allStructureIds),
-    ]);
+  const [
+    typologies,
+    adresses,
+    cpomLinks,
+    dnaLinks,
+    structureVersionTimeline,
+    openingDateByStructureId,
+  ] = await Promise.all([
+    findStructureTypologies(allStructureIds),
+    findStructureAdresses(effectiveStructureVersionIds),
+    findCpomStructures(allStructureIds),
+    findDnaLinks(allStructureIds),
+    findStructureVersionTimeline(allStructureIds),
+    findFirstEffectiveDateByStructure(allStructureIds),
+  ]);
 
   const activityContext = buildStatistiquesActivityContext(
     allStructureIds,
@@ -118,6 +126,7 @@ export const buildStatistiquesContext = async (
     adresses,
     cpomLinks,
     dnaLinks,
+    structureVersionTimeline,
     departements,
     budgets,
     indicateurs,
