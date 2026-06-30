@@ -12,8 +12,8 @@
 | Champ                | Calcul                                                                                                                                     |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `totalStructures`    | Structures ouvertes à la date de référence (`context.structures`)                                                                                             |
-| `totalCpoms`         | CPOM distincts actifs année courante, avec réemploi de `isStructureInCpom`                                                                 |
-| `structuresAvecCpom` | Structures avec ≥1 CPOM actif année courante                                                                                               |
+| `totalCpoms`         | CPOM distincts actifs **à date** (au jour près) sur les structures ouvertes à la date de référence                                         |
+| `structuresAvecCpom` | Structures avec ≥1 CPOM actif **à date** (au jour près)                                                                                    |
 | `structureTypes[]`   | Par `Structure.type` - structures actives ; places = somme `placesAutorisees` résolues                                                     |
 | `structureBatis[]`   | **Structures** : bâti agrégé (`getRepartitionFromRepartitions`). **Places** : somme par `Adresse.repartition` + `Adresse.placesAutorisees` |
 
