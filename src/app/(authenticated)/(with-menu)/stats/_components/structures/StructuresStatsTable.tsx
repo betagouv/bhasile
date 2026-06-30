@@ -1,7 +1,7 @@
 import { Fragment, ReactElement } from "react";
 
 import { Table } from "@/app/components/common/Table";
-import { StatistiquesApiType } from "@/schemas/api/statistiques.schema";
+import { StatistiquesApiType } from "@/schemas/api/statistique.schema";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
