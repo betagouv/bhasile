@@ -60,8 +60,11 @@ export const sortRows = <TRow>(
     );
   });
 
-export const paginateRows = <T>(rows: T[], page: number): T[] =>
-  rows.slice(
-    page * DEFAULT_PAGE_SIZE,
-    page * DEFAULT_PAGE_SIZE + DEFAULT_PAGE_SIZE
-  );
+export const paginateRows = <T>(
+  rows: T[],
+  page: number,
+  pageSize: number = DEFAULT_PAGE_SIZE
+): T[] => {
+  const safePage = Math.max(0, page);
+  return rows.slice(safePage * pageSize, safePage * pageSize + pageSize);
+};
