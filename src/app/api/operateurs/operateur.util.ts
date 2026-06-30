@@ -1,3 +1,4 @@
+import { roundTo } from "@/app/utils/math.util";
 import { normalizeAccents } from "@/app/utils/string.util";
 import { StructureType } from "@/generated/prisma/client";
 
@@ -77,9 +78,6 @@ export const groupStructureStatsByOperateur = (
   return { statsByOperateurId, globalPlaces };
 };
 
-const roundToTwoDecimals = (value: number): number =>
-  Math.round(value * 100) / 100;
-
 export const buildOperateurListItem = (
   operateur: OperateurListRow,
   stats: OperateurStats,
@@ -91,7 +89,7 @@ export const buildOperateurListItem = (
   totalPlaces: stats.totalPlaces,
   pourcentageParc:
     globalPlaces > 0
-      ? roundToTwoDecimals((stats.totalPlaces / globalPlaces) * 100)
+      ? roundTo((stats.totalPlaces / globalPlaces) * 100, 2)
       : 0,
   structureTypes: [...stats.structureTypes].sort(),
   logo: { key: operateur.logo?.key ?? null },
