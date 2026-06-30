@@ -19,6 +19,10 @@ Structures actives avec typologie. Dernière valeur non nulle par structure/cham
 Millésime exact sur `StructureTypologie` (`totalPlaces`, `pmr`, etc.).
 `qpv` / `logementsSociaux` : valeurs courantes `Adresse` (pas de millésime adresse).
 
+## TODO (à valider)
+
+En `byYear`, `qpv` et `logementsSociaux` restent les valeurs courantes `Adresse` : pas de millésime adresse ni reconstitution par transfo de l'année.
+
 ## Sources
 
 `StructureTypologie`, `Adresse`, `Departement`, `Structure.departementAdministratif`.

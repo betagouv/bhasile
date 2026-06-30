@@ -28,3 +28,7 @@ Somme des activités **effectivement déclarées** pour chaque mois.
 | Présences indues          | Toutes sauf CAES et CPH |
 
 Taux = ratio 0-1, `null` si dénominateur nul.
+
+## TODO (à valider)
+
+Les taux d'indispo / présences indues utilisent des dénominateurs filtrés par type (hors CAES ; hors CAES+CPH) alors que `placesEnregistreesDna` et `placesDisponibles` agrègent toutes les structures. À garder en tête pour les seuils agrégés et le camembert.

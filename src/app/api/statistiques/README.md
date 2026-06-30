@@ -89,3 +89,18 @@ Pour tous les `byYear` ou autres agrégations par date : millésime exact.
 ## Séries temporelles
 
 Indicateurs recalculés en back sur les données brutes de la période : le front ne peut en effet pas recombiner les sous-périodes de son côté (ex : moyenne de moyennes mensuelles).
+
+## TODO (à valider)
+
+Récap des points ouverts - le détail est dans le README de chaque bloc (sauf `updatedAt`, périmètre global).
+
+Points encore ouverts ou à garder en tête pour l'interprétation des chiffres. Les TODO « post transfo » traités (pivot `StructureVersion`, fermeture via `Structure.fermetureDate` / `activeStructureIdsNow`) ne sont plus listés ici.
+
+| Sujet                                      | Bloc              | Détail                                                                                                              |
+| ------------------------------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Dénominateurs activité**                 | `activite`        | [activite/README.md](./activite/README.md#todo-à-valider)                                                           |
+| **`updatedAt` par bloc**                   | global            | Horodatage « données mises à jour » par onglet : dépend du chantier formulaire d'actualisation, pas encore branché. |
+| **`qpv` / `logementsSociaux` en `byYear`** | `places`          | [places/README.md](./places/README.md#todo-à-valider)                                                               |
+| **Fallback `REALISE` → `PREVISIONNEL`**    | `finance`         | [finance/README.md](./finance/README.md#todo-hors-transfo)                                                          |
+| **Fenêtre évaluations vs EIG**             | `controleQualite` | [controle-qualite/README.md](./controle-qualite/README.md#todo-métier)                                              |
+| **Clés de période CQ**                     | `controleQualite` | [controle-qualite/README.md](./controle-qualite/README.md#todo-métier)                                              |
