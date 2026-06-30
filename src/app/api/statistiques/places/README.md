@@ -10,7 +10,7 @@ Structures actives avec typologie. Dernière valeur non nulle par structure/cham
 | ------------------------- | -------------------------------------------------------- |
 | `totalPlaces`             | Somme `placesAutorisees` résolues (`StructureTypologie`) |
 | `population`              | Somme `Departement.population` ; `null` si manque        |
-| `tauxEquipement`          | `totalPlaces / population` (ratio 0-1)                   |
+| `tauxEquipement`          | `totalPlaces / population` (ratio 0-1, `roundStatsRate`) |
 | `pmr`, `lgbt`, `fvvTeh`   | Somme dernières valeurs `StructureTypologie`             |
 | `qpv`, `logementsSociaux` | Somme `Adresse.qpv` / `Adresse.logementSocial`           |
 

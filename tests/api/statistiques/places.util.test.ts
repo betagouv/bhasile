@@ -48,6 +48,33 @@ describe("places statistics util", () => {
 
     expect(result.totalPlaces).toBe(150);
     expect(result.population).toBe(150_000);
+    expect(result.tauxEquipement).toBe(0.001);
+  });
+
+  it("should not round equipment rate to zero for small ratios", () => {
+    const result = computePlacesStatistiques(
+      buildTestStatistiquesContext({
+        structures: [structures[0]],
+        typologies: [
+          {
+            id: 1,
+            structureId: 1,
+            year: 2024,
+            placesAutorisees: 4155,
+            pmr: 0,
+            lgbt: 0,
+            fvvTeh: 0,
+          },
+        ],
+        adresses: [],
+        departements: [
+          { id: 1, numero: "75", name: "Paris", population: 59_931_329 },
+        ],
+      })
+    );
+
+    expect(result.tauxEquipement).toBe(0.000_069_3);
+    expect(result.tauxEquipement).not.toBe(0);
   });
 
   it("should return null equipment rate without population", () => {

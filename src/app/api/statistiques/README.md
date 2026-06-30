@@ -76,7 +76,7 @@ Utile dans `finance.aggregation` et `controleQualite.aggregation`.
 
 ## Format nombres
 
-- Taux (ratios) : limité à 3 décimales (le passage en % ou ‰ est à gérer en front)
+- Taux (ratios) : 3 chiffres significatifs via `roundStatsRate` (le passage en % ou ‰ est à gérer en front)
 - Décimaux : limité à 1 décimale
 - Comptages / montants : brut
 
