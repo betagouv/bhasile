@@ -171,38 +171,6 @@ const computeActiveCpomStats = (
   };
 };
 
-const aggregateByKey = <GroupKey>(
-  structures: StatistiqueDbStructure[],
-  typologieMap: Map<number, StatistiqueDbTypologieValues>,
-  getGroupKey: (structure: StatistiqueDbStructure) => GroupKey | null
-): Map<GroupKey, { structures: number; places: number }> => {
-  const statsByGroupKey = new Map<
-    GroupKey,
-    { structures: number; places: number }
-  >();
-
-  for (const structure of structures) {
-    const typologie = typologieMap.get(structure.id);
-    if (!typologie) {
-      continue;
-    }
-    const groupKey = getGroupKey(structure);
-    if (groupKey === null) {
-      continue;
-    }
-    const current = statsByGroupKey.get(groupKey) ?? {
-      structures: 0,
-      places: 0,
-    };
-    statsByGroupKey.set(groupKey, {
-      structures: current.structures + 1,
-      places: current.places + (typologie.placesAutorisees ?? 0),
-    });
-  }
-
-  return statsByGroupKey;
-};
-
 const fillStructureTypes = (
   stats: TypeStructureStat[]
 ): TypeStructureStat[] => {
@@ -233,28 +201,33 @@ const fillBatis = (stats: BatiStat[]): BatiStat[] => {
 const computeTypeStats = (
   structures: StatistiqueDbStructure[],
   typologieMap: Map<number, StatistiqueDbTypologieValues>
-): TypeStructureStat[] =>
-  fillStructureTypes(
-    Array.from(
-      aggregateByKey(
-        structures,
-        typologieMap,
-        (structure) => structure.type as StructureType
-      ).entries()
-    )
-      .filter(
-        (
-          groupEntry
-        ): groupEntry is [
-          StructureType,
-          { structures: number; places: number },
-        ] => groupEntry[0] !== null
-      )
-      .map(([structureType, typeStats]) => ({
-        type: structureType,
-        ...typeStats,
-      }))
+): TypeStructureStat[] => {
+  const statsByType = new Map<StructureType, { structures: number; places: number }>();
+
+  for (const structure of structures) {
+    const typologie = typologieMap.get(structure.id);
+    if (!typologie) {
+      continue;
+    }
+    const type = structure.type as StructureType | null;
+    if (type === null) {
+      continue;
+    }
+
+    const current = statsByType.get(type) ?? { structures: 0, places: 0 };
+    statsByType.set(type, {
+      structures: current.structures + 1,
+      places: current.places + (typologie.placesAutorisees ?? 0),
+    });
+  }
+
+  return fillStructureTypes(
+    Array.from(statsByType.entries()).map(([type, stats]) => ({
+      type,
+      ...stats,
+    }))
   );
+};
 
 const computeBatiStats = (
   structures: StatistiqueDbStructure[],
