@@ -101,17 +101,18 @@ export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
   };
 }>;
 
-export type StatistiqueDbIndicateurFinancier = Prisma.IndicateurFinancierGetPayload<{
-  select: {
-    id: true;
-    structureId: true;
-    year: true;
-    type: true;
-    ETP: true;
-    tauxEncadrement: true;
-    coutJournalier: true;
-  };
-}>;
+export type StatistiqueDbIndicateurFinancier =
+  Prisma.IndicateurFinancierGetPayload<{
+    select: {
+      id: true;
+      structureId: true;
+      year: true;
+      type: true;
+      ETP: true;
+      tauxEncadrement: true;
+      coutJournalier: true;
+    };
+  }>;
 
 export type StatistiqueDbIndicateurFinancierMetriques = Omit<
   StatistiqueDbIndicateurFinancier,
@@ -172,7 +173,7 @@ export type StatistiquesActivityContext = {
 
 export type StatistiquesPeriodGranularity = "month" | "trimester" | "year";
 
-/** Index construit une seule fois à la racine — lecture seule dans les sous-modules. */
+/** Index construit une seule fois à la racine - lecture seule dans les sous-modules. */
 export type StatistiquesActiveStructureIdsByPeriod = Record<
   StatistiquesPeriodGranularity,
   Map<string, Set<number>>

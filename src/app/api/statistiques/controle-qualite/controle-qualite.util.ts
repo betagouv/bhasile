@@ -22,7 +22,10 @@ import {
   trimesterKeyToDate,
   yearKeyToDate,
 } from "../statistiques.utils";
-import { computeEigPeriodMetrics, computeEigRates } from "./controle-qualite-eig.util";
+import {
+  computeEigPeriodMetrics,
+  computeEigRates,
+} from "./controle-qualite-eig.util";
 import {
   computeEvaluationGlobalSummary,
   filterEvaluationsInScope,
@@ -35,15 +38,20 @@ type PeriodSeriesConfig = {
   toDate: (periodKey: string) => Date;
 };
 
-// TODO: confirmer métier — `date` = 1er jour du mois / trimestre / année,
+// TODO: confirmer métier - `date` = 1er jour du mois / trimestre / année,
 // plutôt que `year` + `trimester` (ou `year` + `month`) en champs séparés.
 const computePeriodSeries = (
   context: StatistiquesContext,
   aggregation: NumericAggregation,
   config: PeriodSeriesConfig
 ): ControleQualitePeriodStat[] => {
-  const { eigs, evaluations, dnaLinks, structureVersionTimeline, activeStructureIdsByPeriod } =
-    context;
+  const {
+    eigs,
+    evaluations,
+    dnaLinks,
+    structureVersionTimeline,
+    activeStructureIdsByPeriod,
+  } = context;
   const eigsByPeriod = groupByPeriodKey(
     eigs,
     (eig) => eig.evenementDate,
@@ -96,8 +104,11 @@ export const computeControleQualiteStatistiques = (
   );
   const totalPlaces = computeTotalPlaces(structuresWithTypologie, typologieMap);
 
-  // TODO: confirmer métier — fenêtre glissante 12 mois vs année civile (ex. 2026).
-  const recentEigs = filterByTwelveMonthWindow(eigs, (eig) => eig.evenementDate);
+  // TODO: confirmer métier - fenêtre glissante 12 mois vs année civile (ex. 2026).
+  const recentEigs = filterByTwelveMonthWindow(
+    eigs,
+    (eig) => eig.evenementDate
+  );
   const recentEvaluations = filterByTwelveMonthWindow(
     filterEvaluationsInScope(evaluations, activeStructureIds),
     (evaluation) => evaluation.date

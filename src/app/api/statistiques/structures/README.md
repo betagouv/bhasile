@@ -2,16 +2,16 @@
 
 ## Typologie (`StructureTypologie`)
 
-| Périmètre                              | Règle                                                            |
-| -------------------------------------- | ---------------------------------------------------------------- |
+| Périmètre                              | Règle                                                             |
+| -------------------------------------- | ----------------------------------------------------------------- |
 | `totalStructures`                      | Structures ouvertes à la date de référence (`context.structures`) |
-| `structureTypes[]`, `structureBatis[]` | Structures actives **avec** typologie (>=1 `StructureTypologie`) |
+| `structureTypes[]`, `structureBatis[]` | Structures actives **avec** typologie (>=1 `StructureTypologie`)  |
 
 ## Vue globale
 
 | Champ                | Calcul                                                                                                                                     |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `totalStructures`    | Structures ouvertes à la date de référence (`context.structures`)                                                                                             |
+| `totalStructures`    | Structures ouvertes à la date de référence (`context.structures`)                                                                          |
 | `totalCpoms`         | CPOM distincts actifs **à date** (au jour près) sur les structures ouvertes à la date de référence                                         |
 | `structuresAvecCpom` | Structures avec ≥1 CPOM actif **à date** (au jour près)                                                                                    |
 | `structureTypes[]`   | Par `Structure.type` - structures actives ; places = somme `placesAutorisees` résolues                                                     |
@@ -19,13 +19,13 @@
 
 ### Bâti (`structureBatis[]`)
 
-**Comptage structures** : agrégation structure via `getRepartitionFromRepartitions` (COLLECTIF + DIFFUS → MIXTE).
+**Comptage structures** : agrégation structure via `getRepartitionFromRepartitions` (COLLECTIF + DIFFUS -> MIXTE).
 
 **Comptage places** : par adresse, selon son `repartition` + `Adresse.placesAutorisees`.
 
 > `AdresseTypologie` en cours de dépréciation : non utilisé dans les stats (voir onglet `places`).
 
-- `repartition` absente → COLLECTIF
+- `repartition` absente -> COLLECTIF
 
 ## `byYear`
 

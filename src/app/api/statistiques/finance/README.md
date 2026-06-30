@@ -14,14 +14,14 @@ Le front choisit l'année affichée dans `byYear`.
 
 Budgets et indicateurs sont agrégés **indépendamment** pour chaque année : structures actives du scope ayant respectivement un budget ou un indicateur sur l'année.
 
-| Champ                                                                   | Calcul                                              |
-| ----------------------------------------------------------------------- | --------------------------------------------------- |
-| `dotationDemandee`, `dotationAccordee`, `totalProduits`, `totalCharges` | Sommes (`Budget`, structures actives)               |
-| `totalETP`                                                              | Somme (indicateurs résolus, structures actives)     |
-| `tauxEncadrement`, `coutJournalier`                                     | Moyenne ou médiane (indicateurs résolus), arrondi 1 décimale (`roundStatsNumber`) |
-| `resultatNet`                                                           | `totalProduits − totalCharges` (agrégat scope) ; égal à `excedentCumule − deficitCumule` |
-| `excedentCumule`                                                        | Somme des RN **positifs** par structure sur l'année |
-| `deficitCumule`                                                         | Somme des \|RN négatifs\| par structure sur l'année |
+| Champ                                                                   | Calcul                                                                                   |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `dotationDemandee`, `dotationAccordee`, `totalProduits`, `totalCharges` | Sommes (`Budget`, structures actives)                                                    |
+| `totalETP`                                                              | Somme (indicateurs résolus, structures actives)                                          |
+| `tauxEncadrement`, `coutJournalier`                                     | Moyenne ou médiane (indicateurs résolus), arrondi 1 décimale (`roundStatsNumber`)        |
+| `resultatNet`                                                           | `totalProduits - totalCharges` (agrégat scope) ; égal à `excedentCumule - deficitCumule` |
+| `excedentCumule`                                                        | Somme des RN **positifs** par structure sur l'année                                      |
+| `deficitCumule`                                                         | Valeur absolue de la somme des RN négatifs par structure sur l'année                     |
 
 Par scope et par année (pas de cumul multi-années). Année absente dans un scope -> zéros.
 
