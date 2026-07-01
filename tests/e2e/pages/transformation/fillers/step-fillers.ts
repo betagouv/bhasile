@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
+import { Repartition } from "@/types/adresse.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 
 import { uniqueFinessCode } from "../../../data/ids";
@@ -82,7 +83,7 @@ export type FillOptions = {
   withUploadActe?: boolean;
   withFermetureDoc?: boolean;
   changeAddress?: boolean;
-  typeBati?: "COLLECTIF" | "DIFFUS" | "MIXTE";
+  typeBati?: Repartition;
 };
 
 const fillContact = async (page: Page, index: number): Promise<void> => {
@@ -194,7 +195,7 @@ export const fillPlacesHebergement = async (
     await page.locator("#public").selectOption(PublicType.TOUT_PUBLIC);
     await page
       .locator("#typeBati")
-      .selectOption(options.typeBati ?? "COLLECTIF");
+      .selectOption(options.typeBati ?? Repartition.COLLECTIF);
     await fillAutocompleteAddress(page, byId("adresses.0.adresseComplete"));
     await page
       .locator(byId("adresses.0.adresseTypologies.0.placesAutorisees"))
@@ -204,7 +205,7 @@ export const fillPlacesHebergement = async (
     // (donc jamais prérempli), il doit être sélectionné à chaque passage.
     await page
       .locator("#typeBati")
-      .selectOption(options.typeBati ?? "COLLECTIF");
+      .selectOption(options.typeBati ?? Repartition.COLLECTIF);
   }
 };
 
@@ -223,8 +224,8 @@ export const fillActesStep = async (
       TRANSFORMATION_TEST_VALUES.acteEndDate
     );
     await uploadActeDocument(fieldset);
-  } catch {
-    // ignore
+  } catch (error) {
+    console.error("Étape actes : remplissage de l'arrêté ignoré", error);
   }
 };
 
@@ -247,8 +248,11 @@ export const fillFermetureStep = async (
         .click();
       await fillActeName(fieldset, "Arrêté de fermeture E2E");
       await uploadActeDocument(fieldset);
-    } catch {
-      // ignore
+    } catch (error) {
+      console.error(
+        "Étape fermeture : ajout du document de fermeture ignoré",
+        error
+      );
     }
   }
 };

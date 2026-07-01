@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 
+import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 import { TransformationType } from "@/types/transformation.type";
 
@@ -81,7 +82,7 @@ const finishFlow = async (
   await finalizeTransformation(page);
 };
 
-/** Création ex-nihilo (kitchen-sink des champs optionnels + 1 upload). */
+/** Création ex-nihilo (remplit tous les champs optionnels + 1 upload). */
 export const runCreationExNihilo = async (
   page: Page,
   params: { dnaCodes: string[] }
@@ -98,7 +99,7 @@ export const runCreationExNihilo = async (
       withSecondContact: true,
       withFiliale: true,
     },
-    { typeBati: "DIFFUS", withQpvPmr: true },
+    { typeBati: Repartition.DIFFUS, withQpvPmr: true },
     { withUploadActe: true },
   ]);
   await finishFlow(page, transformationId);

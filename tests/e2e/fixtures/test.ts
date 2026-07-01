@@ -40,6 +40,19 @@ const teardownSource = async (
   await deleteStructureByCode(source.codeBhasile).catch(() => {});
 };
 
+const useCadaSource = async (
+  use: (source: SeededTransformationSource) => Promise<void>
+): Promise<void> => {
+  const source = await createTransformationSource({
+    type: StructureType.CADA,
+  });
+  try {
+    await use(source);
+  } finally {
+    await teardownSource(source);
+  }
+};
+
 export const test = base.extend<Fixtures>({
   seededStructure: async ({}, use) => {
     const structure = await createStructureForTest();
@@ -112,25 +125,11 @@ export const test = base.extend<Fixtures>({
   },
 
   closingStructure: async ({}, use) => {
-    const source = await createTransformationSource({
-      type: StructureType.CADA,
-    });
-    try {
-      await use(source);
-    } finally {
-      await teardownSource(source);
-    }
+    await useCadaSource(use);
   },
 
   extendedStructure: async ({}, use) => {
-    const source = await createTransformationSource({
-      type: StructureType.CADA,
-    });
-    try {
-      await use(source);
-    } finally {
-      await teardownSource(source);
-    }
+    await useCadaSource(use);
   },
 
   contractionSources: async ({}, use) => {
@@ -157,14 +156,7 @@ export const test = base.extend<Fixtures>({
   },
 
   cadaTarget: async ({}, use) => {
-    const source = await createTransformationSource({
-      type: StructureType.CADA,
-    });
-    try {
-      await use(source);
-    } finally {
-      await teardownSource(source);
-    }
+    await useCadaSource(use);
   },
 });
 
