@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
+import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import { authOptions } from "@/lib/next-auth/auth";
 import { structureAgentUpdateApiSchema } from "@/schemas/api/structure.schema";
@@ -44,14 +45,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(structure);
   } catch (error) {
-    console.error("Error in GET /api/structures/[id]", error);
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    );
+    return apiErrorResponse(error);
   }
 }
 
@@ -67,24 +61,30 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const result = structureAgentUpdateApiSchema.parse({ ...body, id: Number(id) });
+    const result = structureAgentUpdateApiSchema.parse({
+      ...body,
+      id: Number(id),
+    });
 
     const departementAdministratif = await getStructureDepartement(result.id);
-
     if (
       !canUpdateDepartement(
         session.user as SessionUser,
         departementAdministratif
       )
     ) {
-      return NextResponse.json({ error: "Droits insuffisants" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Droits insuffisants" },
+        { status: 403 }
+      );
     }
 
     const updatedStructure = await updateStructureAgent(result);
     createStructureEvent(request.method, updatedStructure.id);
-    return NextResponse.json("Structure mise à jour avec succès", { status: 200 });
+    return NextResponse.json("Structure mise à jour avec succès", {
+      status: 200,
+    });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(error, { status: 400 });
+    return apiErrorResponse(error);
   }
 }

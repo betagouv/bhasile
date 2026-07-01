@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
 import { cpomApiAjoutSchema } from "@/schemas/api/cpom.schema";
 import { CpomColumn } from "@/types/ListColumn";
 
@@ -29,11 +30,7 @@ export async function GET(request: NextRequest) {
       totalCpoms,
     });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to fetch cpoms" },
-      { status: 500 }
-    );
+    return apiErrorResponse(error);
   }
 }
 
@@ -45,8 +42,7 @@ export async function POST(request: NextRequest) {
     createCpomEvent(request.method, cpomId);
     return NextResponse.json({ cpomId }, { status: 201 });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(error, { status: 400 });
+    return apiErrorResponse(error);
   }
 }
 
