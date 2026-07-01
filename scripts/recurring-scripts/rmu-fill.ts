@@ -65,24 +65,24 @@ async function fillRmuFromRows(rows: RmuRow[]) {
       create: {
         departementNumero,
         date: row.date,
-        deboutesSortisSansMesureAdministrative:
-          row.deboutesSortisSansMesureAdministrative ?? undefined,
-        misesEnDemeureDeQuitterLesLieux:
-          row.misesEnDemeureDeQuitterLesLieux ?? undefined,
-        referesMesuresUtilesEngages:
-          row.referesMesuresUtilesEngages ?? undefined,
-        referesMesuresUtilesExecutes:
-          row.referesMesuresUtilesExecutes ?? undefined,
+        deboutesSansMesureAdministrative:
+          row.deboutesSansMesureAdministrative ?? undefined,
+        misesEnDemeure:
+          row.misesEnDemeure ?? undefined,
+        referesEngages:
+          row.referesEngages ?? undefined,
+        referesExecutes:
+          row.referesExecutes ?? undefined,
       },
       update: {
-        deboutesSortisSansMesureAdministrative:
-          row.deboutesSortisSansMesureAdministrative ?? undefined,
-        misesEnDemeureDeQuitterLesLieux:
-          row.misesEnDemeureDeQuitterLesLieux ?? undefined,
-        referesMesuresUtilesEngages:
-          row.referesMesuresUtilesEngages ?? undefined,
-        referesMesuresUtilesExecutes:
-          row.referesMesuresUtilesExecutes ?? undefined,
+        deboutesSansMesureAdministrative:
+          row.deboutesSansMesureAdministrative ?? undefined,
+        misesEnDemeure:
+          row.misesEnDemeure ?? undefined,
+        referesEngages:
+          row.referesEngages ?? undefined,
+        referesExecutes:
+          row.referesExecutes ?? undefined,
       },
     });
     upsertedCount += 1;

@@ -12,13 +12,13 @@ const createFakeRmu = (
 ): FakeRmu => ({
   departementNumero,
   date,
-  deboutesSortisSansMesureAdministrative: faker.number.int({
+  deboutesSansMesureAdministrative: faker.number.int({
     min: 0,
     max: 40,
   }),
-  misesEnDemeureDeQuitterLesLieux: faker.number.int({ min: 0, max: 5 }),
-  referesMesuresUtilesEngages: faker.number.int({ min: 0, max: 5 }),
-  referesMesuresUtilesExecutes: faker.number.int({ min: 0, max: 5 }),
+  misesEnDemeure: faker.number.int({ min: 0, max: 5 }),
+  referesEngages: faker.number.int({ min: 0, max: 5 }),
+  referesExecutes: faker.number.int({ min: 0, max: 5 }),
 });
 
 /**

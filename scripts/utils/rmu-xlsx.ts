@@ -13,18 +13,18 @@ import * as XLSX from "xlsx";
 import { normalizeCellValue } from "./xlsx-cell";
 
 export type RmuCategorieKey =
-  | "deboutesSortisSansMesureAdministrative"
-  | "misesEnDemeureDeQuitterLesLieux"
-  | "referesMesuresUtilesEngages"
-  | "referesMesuresUtilesExecutes";
+  | "deboutesSansMesureAdministrative"
+  | "misesEnDemeure"
+  | "referesEngages"
+  | "referesExecutes";
 
 const CATEGORIE_LABELS: Record<RmuCategorieKey, string> = {
-  deboutesSortisSansMesureAdministrative:
+  deboutesSansMesureAdministrative:
     "Nombre de déboutés sortis du DNA sans mesure administrative",
-  misesEnDemeureDeQuitterLesLieux:
+  misesEnDemeure:
     "Nombre de mises en demeure du préfet de quitter les lieux",
-  referesMesuresUtilesEngages: "Nombre de référés mesures utiles engagés",
-  referesMesuresUtilesExecutes: "Nombre de référés mesures utiles exécutés",
+  referesEngages: "Nombre de référés mesures utiles engagés",
+  referesExecutes: "Nombre de référés mesures utiles exécutés",
 };
 
 const categorieKeyByLabel = new Map<string, RmuCategorieKey>(
@@ -151,10 +151,10 @@ function parseSheet(sheet: WorkSheet): RmuRow[] {
       const rmuRow: RmuRow = existing ?? {
         departementNom: currentBlockName,
         date,
-        deboutesSortisSansMesureAdministrative: null,
-        misesEnDemeureDeQuitterLesLieux: null,
-        referesMesuresUtilesEngages: null,
-        referesMesuresUtilesExecutes: null,
+        deboutesSansMesureAdministrative: null,
+        misesEnDemeure: null,
+        referesEngages: null,
+        referesExecutes: null,
       };
       rmuRow[categorieKey] = Number(raw);
       if (!existing) {

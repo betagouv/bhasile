@@ -1,15 +1,15 @@
 // Suivi mensuel des "référés mesures utiles" (RMU) et sorties administratives, par département.
 // Remplissage mensuel manuel par les DREETS/DDETS, chargé depuis un fichier XLSX (cf. scripts/recurring-scripts/rmu-fill.ts).
 model Rmu {
-  id                 Int         @id @default(autoincrement())
-  departementNumero  String
-  departement        Departement @relation(fields: [departementNumero], references: [numero])
-  date               DateTime // 1er du mois à midi UTC
+  id                Int         @id @default(autoincrement())
+  departementNumero String
+  departement       Departement @relation(fields: [departementNumero], references: [numero])
+  date              DateTime // 1er du mois à midi UTC
 
-  deboutesSortisSansMesureAdministrative Int?
-  misesEnDemeureDeQuitterLesLieux        Int?
-  referesMesuresUtilesEngages            Int?
-  referesMesuresUtilesExecutes           Int?
+  deboutesSansMesureAdministrative Int?
+  misesEnDemeure                   Int?
+  referesEngages                   Int?
+  referesExecutes                  Int?
 
   @@unique([departementNumero, date])
   @@schema("public")
