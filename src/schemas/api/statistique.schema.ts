@@ -14,7 +14,8 @@ export const statistiquesFiltersSchema = z.object({
     .string()
     .nullable()
     .transform(
-      (value): NumericAggregation => (value === "mediane" ? "mediane" : "moyenne")
+      (value): NumericAggregation =>
+        value === "mediane" ? "mediane" : "moyenne"
     ),
 });
 
@@ -138,13 +139,13 @@ export type ActiviteByMonthStat = {
 };
 
 const typeStructureStatSchema = z.object({
-  type: z.nativeEnum(StructureType),
+  type: z.enum(StructureType),
   structures: z.number(),
   places: z.number(),
 });
 
 const batiStatSchema = z.object({
-  bati: z.nativeEnum(Repartition),
+  bati: z.enum(Repartition),
   structures: z.number(),
   places: z.number(),
 });
@@ -206,9 +207,11 @@ const controleQualitePeriodStatSchema = z.object({
   noteStructure: z.number().nullable(),
 });
 
-const controleQualiteByMonthStatSchema = controleQualitePeriodStatSchema.extend({
-  date: z.coerce.date(),
-});
+const controleQualiteByMonthStatSchema = controleQualitePeriodStatSchema.extend(
+  {
+    date: z.coerce.date(),
+  }
+);
 
 const controleQualiteByTrimesterStatSchema =
   controleQualitePeriodStatSchema.extend({

@@ -78,10 +78,14 @@ export const getFinanceSchema = (
     })
     .filter(Boolean) as [BudgetSchema, ...BudgetSchema[]];
 
+  const budgets = z.tuple(schema) as unknown as z.ZodType<
+    z.infer<BudgetSchema>[]
+  >;
+
   if (formKind === FormKind.FINALISATION) {
     return z
       .object({
-        budgets: z.tuple(schema),
+        budgets,
         cpomStructures: z.array(cpomStructureSchema),
       })
       .and(indicateursFinanciersSchema);
@@ -89,7 +93,7 @@ export const getFinanceSchema = (
 
   return z
     .object({
-      budgets: z.tuple(schema),
+      budgets,
       cpomStructures: z.array(cpomStructureSchema),
     })
     .and(indicateursFinanciersSchema)

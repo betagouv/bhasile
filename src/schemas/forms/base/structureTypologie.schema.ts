@@ -33,7 +33,7 @@ const mandatoryEvolutionRefine = (
     )
   ) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: "Le nombre de place à créer est obligatoire",
       path: [
         "structureTypologies",
@@ -52,7 +52,7 @@ const mandatoryEvolutionRefine = (
     )
   ) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: "Le nombre de place à fermer est obligatoire",
       path: [
         "structureTypologies",
@@ -71,7 +71,7 @@ const mandatoryEvolutionRefine = (
     )
   ) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: "Ce champ est obligatoire s'il y a au moins une place à créer",
       path: [
         "structureTypologies",
@@ -90,7 +90,7 @@ const mandatoryEvolutionRefine = (
     )
   ) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: "Ce champ est obligatoire s'il y a au moins une place à fermer",
       path: [
         "structureTypologies",
@@ -122,12 +122,13 @@ const structureTypologiesWithoutTypePlacesSchema = z.object({
   structureTypologies: z.array(placesEvolutionSchema),
 });
 export const structureTypologiesWithoutTypePlacesSchemaWithMandatoryEvolution =
-  structureTypologiesWithoutTypePlacesSchema.superRefine(
-    mandatoryEvolutionRefine
+  structureTypologiesWithoutTypePlacesSchema.check(
+    z.superRefine(mandatoryEvolutionRefine)
   );
 
-const structureTypologieSchema =
-  structureTypologieWithoutEvolutionSchema.and(placesEvolutionSchema);
+const structureTypologieSchema = structureTypologieWithoutEvolutionSchema.and(
+  placesEvolutionSchema
+);
 
 export const structureTypologiesSchema = z.object({
   structureTypologies: z.array(structureTypologieSchema),
@@ -143,7 +144,7 @@ export const structureTypologiesAutoSaveSchema = z.object({
 });
 
 export const structureTypologiesWithMandatoryEvolutionSchema =
-  structureTypologiesSchema.superRefine(mandatoryEvolutionRefine);
+  structureTypologiesSchema.check(z.superRefine(mandatoryEvolutionRefine));
 
 export type StructureTypologieWithoutEvolutionSchemaTypeFormValues = z.infer<
   typeof structureTypologieWithoutEvolutionSchema

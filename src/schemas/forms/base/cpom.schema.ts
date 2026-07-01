@@ -12,13 +12,16 @@ import { cpomDepartementApiSchema } from "@/schemas/api/cpom.schema";
 import { regionApiSchema } from "@/schemas/api/region.schema";
 import { StructureType } from "@/types/structure.type";
 
-import { acteAdministratifCpomSchema, filterActesWithKey } from "./acteAdministratif.schema";
+import {
+  acteAdministratifCpomSchema,
+  filterActesWithKey,
+} from "./acteAdministratif.schema";
 import { operateurSchema } from "./operateur.schema";
 
 const budgetCpomSchema = z.object({
   id: zId(),
   year: zSafeYear(),
-  cpomStructureType: z.nativeEnum(StructureType),
+  cpomStructureType: z.enum(StructureType),
   dotationDemandee: zSafePositiveDecimalsNullish(),
   dotationAccordee: zSafePositiveDecimalsNullish(),
   totalProduitsProposes: zSafePositiveDecimalsNullish(),
@@ -102,7 +105,7 @@ export const cpomSchema = descriptionCpomSchema
       return true;
     },
     {
-      message: "La région est obligatoire",
+      error: "La région est obligatoire",
       path: ["region.name"],
     }
   )
@@ -114,7 +117,7 @@ export const cpomSchema = descriptionCpomSchema
       return true;
     },
     {
-      message: "Au moins un département est obligatoire",
+      error: "Au moins un département est obligatoire",
       path: ["departements"],
     }
   )
@@ -126,7 +129,7 @@ export const cpomSchema = descriptionCpomSchema
       return true;
     },
     {
-      message: "La date de début du CPOM doit être antérieure à la date de fin",
+      error: "La date de début du CPOM doit être antérieure à la date de fin",
       path: ["actesAdministratifs.0.startDate"],
     }
   )
@@ -144,9 +147,10 @@ export const cpomSchema = descriptionCpomSchema
       if (!convention) {
         return true;
       }
-      const avenants = data.actesAdministratifs?.filter(
-        (acteAdministratif) => acteAdministratif.parentId
-      ) ?? [];
+      const avenants =
+        data.actesAdministratifs?.filter(
+          (acteAdministratif) => acteAdministratif.parentId
+        ) ?? [];
       for (const acteAdministratif of avenants) {
         const avenantEndDate = formatDateToIsoString(acteAdministratif.endDate);
 
@@ -161,7 +165,7 @@ export const cpomSchema = descriptionCpomSchema
       return true;
     },
     {
-      message:
+      error:
         "La date de fin de l'avenant doit être postérieure à la date de fin du CPOM",
       path: ["actesAdministratifs"],
     }
@@ -191,7 +195,7 @@ export const cpomSchema = descriptionCpomSchema
       return true;
     },
     {
-      message:
+      error:
         "Les dates de début et de fin pour chaque structure doivent être comprises dans la plage du CPOM",
       path: ["structures"],
     }

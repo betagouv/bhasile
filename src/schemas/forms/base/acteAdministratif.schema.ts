@@ -56,7 +56,7 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
       return true;
     },
     {
-      message: "Les dates de début et de fin sont obligatoires.",
+      error: "Les dates de début et de fin sont obligatoires.",
       path: ["startDate"],
     }
   )
@@ -73,7 +73,7 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
       return true;
     },
     {
-      message: "Les dates de début et de fin sont obligatoires.",
+      error: "Les dates de début et de fin sont obligatoires.",
       path: ["endDate"],
     }
   )
@@ -86,7 +86,7 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
       return true;
     },
     {
-      message: "La date est obligatoire pour les avenants.",
+      error: "La date est obligatoire pour les avenants.",
       path: ["date"],
     }
   )
@@ -101,7 +101,7 @@ const acteAdministratifSchema = acteAdministratifAutoSaveSchema
       return true;
     },
     {
-      message: "La date est obligatoire.",
+      error: "La date est obligatoire.",
       path: ["date"],
     }
   );
@@ -119,7 +119,7 @@ const acteAdministratifAutoriseesSchema = acteAdministratifSchema.refine(
     return true;
   },
   {
-    message: "Ces documents sont obligatoires.",
+    error: "Ces documents sont obligatoires.",
     path: ["fileUploads"],
   }
 );
@@ -133,7 +133,7 @@ const acteAdministratifSubventionneesSchema = acteAdministratifSchema.refine(
     return true;
   },
   {
-    message: "Ces documents sont obligatoires.",
+    error: "Ces documents sont obligatoires.",
     path: ["fileUploads"],
   }
 );
@@ -147,7 +147,7 @@ export const acteAdministratifCpomSchema = acteAdministratifSchema.refine(
     return true;
   },
   {
-    message: "Ces documents sont obligatoires.",
+    error: "Ces documents sont obligatoires.",
     path: ["fileUploads"],
   }
 );

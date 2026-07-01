@@ -10,7 +10,7 @@ import { structureBaseSchema } from "./structure.base.schema";
 const baseIdentificationSchema = structureBaseSchema.extend({
   operateur: operateurSchema,
   creationDate: frenchDateToISO(),
-  public: z.nativeEnum(PublicType),
+  public: z.enum(PublicType),
   filiale: z.string().optional(),
   lgbt: z.boolean(),
   fvvTeh: z.boolean(),

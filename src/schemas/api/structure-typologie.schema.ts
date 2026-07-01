@@ -11,8 +11,8 @@ export const structureTypologieApiSchema = z.object({
   fvvTeh: z.number().int(),
   placesACreer: z.number().int().nullish(),
   placesAFermer: z.number().int().nullish(),
-  echeancePlacesACreer: z.string().datetime().nullish(),
-  echeancePlacesAFermer: z.string().datetime().nullish(),
+  echeancePlacesACreer: z.iso.datetime().nullish(),
+  echeancePlacesAFermer: z.iso.datetime().nullish(),
 });
 
 export type StructureTypologieApiType = z.infer<

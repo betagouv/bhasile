@@ -14,6 +14,7 @@ import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
+import { StructureAgentUpdateApiClient } from "@/schemas/api/structure.schema";
 import {
   TypeBatiAndAdressesFormValues,
   typeBatiAndAdressesSchema,
@@ -38,7 +39,7 @@ export default function ModificationAdresses() {
     handleSubmit({
       ...data,
       id: structure.id,
-      adresses: data.adresses,
+      adresses: data.adresses as StructureAgentUpdateApiClient["adresses"],
     });
   };
   return (
