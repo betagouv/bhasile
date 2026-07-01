@@ -1,4 +1,4 @@
-// Lit un fichier XLSX "Suivi RMU" et remplit la table Rmu (par département).
+// Lit un fichier XLSX "Suivi RMU" et remplit la table Rmu par département.
 // Usage: yarn script rmu-fill <chemin_ou_clef_s3_du_xlsx>
 
 import "dotenv/config";
@@ -28,9 +28,6 @@ function buildDepartementNameToNumero(
   );
 }
 
-/**
- * Remplit/actualise la table Rmu pour un ensemble de lignes déjà parsées.
- */
 async function fillRmuFromRows(rows: RmuRow[]) {
   if (rows.length === 0) {
     console.log("❌ Aucune ligne à insérer.");
@@ -67,22 +64,16 @@ async function fillRmuFromRows(rows: RmuRow[]) {
         date: row.date,
         deboutesSansMesureAdministrative:
           row.deboutesSansMesureAdministrative ?? undefined,
-        misesEnDemeure:
-          row.misesEnDemeure ?? undefined,
-        referesEngages:
-          row.referesEngages ?? undefined,
-        referesExecutes:
-          row.referesExecutes ?? undefined,
+        misesEnDemeure: row.misesEnDemeure ?? undefined,
+        referesEngages: row.referesEngages ?? undefined,
+        referesExecutes: row.referesExecutes ?? undefined,
       },
       update: {
         deboutesSansMesureAdministrative:
           row.deboutesSansMesureAdministrative ?? undefined,
-        misesEnDemeure:
-          row.misesEnDemeure ?? undefined,
-        referesEngages:
-          row.referesEngages ?? undefined,
-        referesExecutes:
-          row.referesExecutes ?? undefined,
+        misesEnDemeure: row.misesEnDemeure ?? undefined,
+        referesEngages: row.referesEngages ?? undefined,
+        referesExecutes: row.referesExecutes ?? undefined,
       },
     });
     upsertedCount += 1;

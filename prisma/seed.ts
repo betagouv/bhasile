@@ -130,7 +130,7 @@ async function seed(): Promise<void> {
 
   await seedRegionsAndDepartements(prisma);
 
-  console.log("📊 Création des données RMU...");
+  console.log("🚓 Création des données RMU...");
   await createFakeRmus(prisma);
 
   console.log("🔢 Génération des codes Bhasile par région...");

@@ -7,7 +7,13 @@
 import type { WorkSheet } from "xlsx";
 import * as XLSX from "xlsx";
 
-import { normalizeCellValue } from "./xlsx-cell";
+import {
+  buildLabelLookup,
+  decodeSheetRange,
+  getCellValue,
+  normalizeCellValue,
+  parseNumericCell,
+} from "./xlsx-utils";
 
 const POSSIBLE_REF_COLUMNS: Record<keyof OfiiReferentialRow, string[]> = {
   dnaCode: ["Code"],
@@ -151,13 +157,11 @@ function parseFilenameDate(
 }
 
 function findHeaderRow(sheet: WorkSheet): number {
-  const range = XLSX.utils.decode_range(sheet["!ref"] ?? "A1");
+  const range = decodeSheetRange(sheet);
   for (let myRow = range.s.r; myRow <= range.e.r; myRow++) {
     const row: string[] = [];
     for (let myCol = range.s.c; myCol <= range.e.c; myCol++) {
-      const cell = sheet[XLSX.utils.encode_cell({ r: myRow, c: myCol })];
-      const val = cell && cell.v != null ? String(cell.v).trim() : "";
-      row.push(val);
+      row.push(normalizeCellValue(getCellValue(sheet, myRow, myCol)));
     }
     if (row.some((val) => possibleValuesSet.has(val))) {
       return myRow;
@@ -217,50 +221,24 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
     );
   }
 
-  const range = XLSX.utils.decode_range(sheet["!ref"]!);
+  const range = decodeSheetRange(sheet);
   const headerRow: string[] = [];
   for (let col = range.s.c; col <= range.e.c; col++) {
-    const cell = sheet[XLSX.utils.encode_cell({ r: headerRowIdx, c: col })];
-    headerRow.push(normalizeCellValue(cell?.v));
+    headerRow.push(normalizeCellValue(getCellValue(sheet, headerRowIdx, col)));
   }
+
+  const activiteKeyByLabel = buildLabelLookup(POSSIBLE_ACTIVITE_COLUMNS);
+  const referentialKeyByLabel = buildLabelLookup(POSSIBLE_REF_COLUMNS);
 
   const activiteKeyByIndex: (keyof ActiviteRow | "")[] = [];
   const referentialKeyByIndex: (keyof OfiiReferentialRow | "")[] = [];
 
   for (const header of headerRow) {
     const normalizedHeader = header.trim().toLowerCase();
-
-    // Colonnes d'activité
-    let matchedActiviteKey: keyof ActiviteRow | "" = "";
-    (
-      Object.entries(POSSIBLE_ACTIVITE_COLUMNS) as [
-        keyof ActiviteRow,
-        string[],
-      ][]
-    ).forEach(([key, labels]) => {
-      if (
-        labels.some((label) => label.trim().toLowerCase() === normalizedHeader)
-      ) {
-        matchedActiviteKey = key;
-      }
-    });
-    activiteKeyByIndex.push(matchedActiviteKey);
-
-    // Colonnes de référentiel
-    let matchedRefKey: keyof OfiiReferentialRow | "" = "";
-    (
-      Object.entries(POSSIBLE_REF_COLUMNS) as [
-        keyof OfiiReferentialRow,
-        string[],
-      ][]
-    ).forEach(([key, labels]) => {
-      if (
-        labels.some((label) => label.trim().toLowerCase() === normalizedHeader)
-      ) {
-        matchedRefKey = key;
-      }
-    });
-    referentialKeyByIndex.push(matchedRefKey);
+    activiteKeyByIndex.push(activiteKeyByLabel.get(normalizedHeader) ?? "");
+    referentialKeyByIndex.push(
+      referentialKeyByLabel.get(normalizedHeader) ?? ""
+    );
   }
 
   const rows: OfiiFullRow[] = [];
@@ -271,9 +249,7 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
     for (let columnIndex = 0; columnIndex < headerRow.length; columnIndex++) {
       const activiteKey = activiteKeyByIndex[columnIndex];
       const referentialKey = referentialKeyByIndex[columnIndex];
-      const cell =
-        sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })];
-      const rawCellValue = cell?.v;
+      const rawCellValue = getCellValue(sheet, rowIndex, columnIndex);
 
       if (activiteKey === "dnaCode") {
         const value = normalizeCellValue(rawCellValue);
@@ -282,13 +258,7 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
           isEmptyRow = false;
         }
       } else if (activiteKey) {
-        const num =
-          rawCellValue !== "" &&
-          rawCellValue != null &&
-          !Number.isNaN(Number(rawCellValue))
-            ? Number(rawCellValue)
-            : null;
-        (row as OfiiFullRow)[activiteKey] = num;
+        (row as OfiiFullRow)[activiteKey] = parseNumericCell(rawCellValue);
       } else if (referentialKey) {
         const value = normalizeCellValue(rawCellValue);
         if (value) {

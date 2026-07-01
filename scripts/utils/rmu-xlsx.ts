@@ -10,7 +10,13 @@
 import type { WorkSheet } from "xlsx";
 import * as XLSX from "xlsx";
 
-import { normalizeCellValue } from "./xlsx-cell";
+import {
+  buildLabelLookup,
+  decodeSheetRange,
+  getCellValue,
+  normalizeCellValue,
+  parseNumericCell,
+} from "./xlsx-utils";
 
 export type RmuCategorieKey =
   | "deboutesSansMesureAdministrative"
@@ -21,17 +27,12 @@ export type RmuCategorieKey =
 const CATEGORIE_LABELS: Record<RmuCategorieKey, string> = {
   deboutesSansMesureAdministrative:
     "Nombre de déboutés sortis du DNA sans mesure administrative",
-  misesEnDemeure:
-    "Nombre de mises en demeure du préfet de quitter les lieux",
+  misesEnDemeure: "Nombre de mises en demeure du préfet de quitter les lieux",
   referesEngages: "Nombre de référés mesures utiles engagés",
   referesExecutes: "Nombre de référés mesures utiles exécutés",
 };
 
-const categorieKeyByLabel = new Map<string, RmuCategorieKey>(
-  (Object.entries(CATEGORIE_LABELS) as [RmuCategorieKey, string][]).map(
-    ([key, label]) => [label.trim().toLowerCase(), key]
-  )
-);
+const categorieKeyByLabel = buildLabelLookup(CATEGORIE_LABELS);
 
 export type RmuRow = {
   departementNom: string;
@@ -55,14 +56,6 @@ function excelSerialToDate(serial: number): Date {
   return new Date(utcMidnight + 12 * 3600 * 1000);
 }
 
-function cellValueAt(
-  sheet: WorkSheet,
-  row: number,
-  col: number
-): unknown {
-  return sheet[XLSX.utils.encode_cell({ r: row, c: col })]?.v;
-}
-
 type HeaderInfo = {
   monthColumns: { col: number; date: Date }[];
 };
@@ -78,7 +71,9 @@ function readHeaderInfo(
   let commentairesCol = -1;
   let cumulCol = -1;
   for (let col = firstMonthCol; col <= lastCol; col++) {
-    const value = normalizeCellValue(cellValueAt(sheet, row, col)).toLowerCase();
+    const value = normalizeCellValue(
+      getCellValue(sheet, row, col)
+    ).toLowerCase();
     if (value === COMMENTAIRES_HEADER) {
       commentairesCol = col;
     }
@@ -93,7 +88,7 @@ function readHeaderInfo(
 
   const monthColumns: { col: number; date: Date }[] = [];
   for (let col = firstMonthCol; col < cumulCol; col++) {
-    const raw = cellValueAt(sheet, row, col);
+    const raw = getCellValue(sheet, row, col);
     if (typeof raw === "number") {
       monthColumns.push({ col, date: excelSerialToDate(raw) });
     }
@@ -104,7 +99,7 @@ function readHeaderInfo(
 
 /* Parse un onglet région : retourne une ligne par (bloc, mois) trouvé, quel que soit le nom du bloc */
 function parseSheet(sheet: WorkSheet): RmuRow[] {
-  const range = XLSX.utils.decode_range(sheet["!ref"] ?? "A1");
+  const range = decodeSheetRange(sheet);
   const rows: RmuRow[] = [];
   const departementCol = range.s.c + DEPARTEMENT_COL_OFFSET;
   const categorieCol = range.s.c + CATEGORIE_COL_OFFSET;
@@ -126,14 +121,14 @@ function parseSheet(sheet: WorkSheet): RmuRow[] {
     }
 
     const blockNameCell = normalizeCellValue(
-      cellValueAt(sheet, row, departementCol)
+      getCellValue(sheet, row, departementCol)
     );
     if (blockNameCell) {
       currentBlockName = blockNameCell;
     }
 
     const categorieLabel = normalizeCellValue(
-      cellValueAt(sheet, row, categorieCol)
+      getCellValue(sheet, row, categorieCol)
     );
     const categorieKey = categorieKeyByLabel.get(categorieLabel.toLowerCase());
     if (!categorieKey || !currentBlockName) {
@@ -141,8 +136,8 @@ function parseSheet(sheet: WorkSheet): RmuRow[] {
     }
 
     for (const { col, date } of currentHeader.monthColumns) {
-      const raw = cellValueAt(sheet, row, col);
-      if (raw === "" || raw == null || Number.isNaN(Number(raw))) {
+      const value = parseNumericCell(getCellValue(sheet, row, col));
+      if (value == null) {
         continue;
       }
 
@@ -156,7 +151,7 @@ function parseSheet(sheet: WorkSheet): RmuRow[] {
         referesEngages: null,
         referesExecutes: null,
       };
-      rmuRow[categorieKey] = Number(raw);
+      rmuRow[categorieKey] = value;
       if (!existing) {
         accByKey.set(key, rmuRow);
         rows.push(rmuRow);

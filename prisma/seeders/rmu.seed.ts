@@ -6,10 +6,7 @@ type FakeRmu = Omit<Rmu, "id" | "departementNumero"> & {
   departementNumero: string;
 };
 
-const createFakeRmu = (
-  departementNumero: string,
-  date: Date
-): FakeRmu => ({
+const createFakeRmu = (departementNumero: string, date: Date): FakeRmu => ({
   departementNumero,
   date,
   deboutesSansMesureAdministrative: faker.number.int({
@@ -21,9 +18,6 @@ const createFakeRmu = (
   referesExecutes: faker.number.int({ min: 0, max: 5 }),
 });
 
-/**
- * Crée des données RMU factices pour un sous-ensemble de départements, sur quelques mois de 2025.
- */
 export const createFakeRmus = async (prisma: PrismaClient): Promise<void> => {
   const departements = await prisma.departement.findMany({
     select: { numero: true },
@@ -34,8 +28,8 @@ export const createFakeRmus = async (prisma: PrismaClient): Promise<void> => {
       return [];
     }
 
-    const count = faker.number.int({ min: 1, max: 12 });
-    const startMonth = 12 - count; // 0..11
+    const startMonth = 5; // seed from june
+    const count = 12 - startMonth;
     return Array.from({ length: count }, (_, index) =>
       createFakeRmu(numero, new Date(2025, startMonth + index, 1, 13))
     );
