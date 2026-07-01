@@ -28,8 +28,6 @@ export const cph1: TestStructureScenario = {
       },
     ],
     public: "Tout public",
-    lgbt: true,
-    fvvTeh: true,
     contacts: [
       {
         prenom: "John",
@@ -363,8 +361,6 @@ export const cph1: TestStructureScenario = {
   },
   modificationData: {
     public: "Personnes isolées",
-    lgbt: true,
-    fvvTeh: true,
     contacts: [{ email: "modif-cph1@example.com" }],
     notes: "Notes modification CPH 1.",
     ouvertureFermeture: {

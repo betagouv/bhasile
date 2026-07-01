@@ -55,8 +55,6 @@ export const caes2: TestStructureScenario = {
         name: "Antenne 5",
       },
     ],
-    lgbt: true,
-    fvvTeh: true,
     contacts: [
       {
         prenom: "John",
@@ -332,8 +330,6 @@ export const caes2: TestStructureScenario = {
   },
   modificationData: {
     public: "Tout public",
-    lgbt: true,
-    fvvTeh: false,
     contacts: [{ email: "modif-caes2@example.com" }],
     notes: "Notes modification CAES 2 - mixte.",
     ouvertureFermeture: {

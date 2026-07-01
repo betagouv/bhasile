@@ -229,8 +229,6 @@ describe("transformation.repository db integration", () => {
             communeAdministrative: "Lyon",
             departementAdministratif: departement.numero,
             nom: "Nom post-transfo",
-            lgbt: true,
-            fvvTeh: false,
           },
         },
       ],
@@ -254,8 +252,6 @@ describe("transformation.repository db integration", () => {
       communeAdministrative: "Lyon",
       departementAdministratif: departement.numero,
       nom: "Nom post-transfo",
-      lgbt: true,
-      fvvTeh: false,
     });
   });
 

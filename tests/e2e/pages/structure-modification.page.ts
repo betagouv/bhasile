@@ -147,10 +147,6 @@ export class StructureModificationPage {
     );
   }
 
-  async toggleLgbt(): Promise<void> {
-    await this.page.getByLabel("LGBT").click();
-  }
-
   async submitAndWaitForSave(): Promise<void> {
     const savePromise = this.page.waitForResponse(
       (response) =>

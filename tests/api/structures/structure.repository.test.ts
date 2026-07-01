@@ -115,8 +115,6 @@ describe("structure.repository db integration", () => {
       nom: "Structure test complete",
       date303,
       creationDate,
-      lgbt: true,
-      fvvTeh: false,
       notes: "Notes de test",
       nomOfii: "Nom OFII",
       directionTerritoriale: "DT75",
@@ -132,8 +130,6 @@ describe("structure.repository db integration", () => {
     expect(version.latitude?.toString()).toBe("48.8566");
     expect(version.longitude?.toString()).toBe("2.3522");
     expect(version.nom).toBe("Structure test complete");
-    expect(version.lgbt).toBe(true);
-    expect(version.fvvTeh).toBe(false);
     expect(version.notes).toBe("Notes de test");
     expect(version.nomOfii).toBe("Nom OFII");
     expect(version.directionTerritoriale).toBe("DT75");

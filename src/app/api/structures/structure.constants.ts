@@ -12,8 +12,6 @@ export const VERSIONED_FIELD_KEYS = [
   "latitude",
   "longitude",
   "nom",
-  "lgbt",
-  "fvvTeh",
   "notes",
   "nomOfii",
   "directionTerritoriale",

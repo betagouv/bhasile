@@ -106,8 +106,6 @@ export const transformAjoutFormStructureToApiStructure = async (
     nom: values.nom,
     creationDate: formatDateToIsoString(values.creationDate),
     date303: formatDateToIsoString(values.date303),
-    lgbt: values.lgbt,
-    fvvTeh: values.fvvTeh,
     public: values.public,
     adresses: values.adresses,
     antennes: values.antennes,

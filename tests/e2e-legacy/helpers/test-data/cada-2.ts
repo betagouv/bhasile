@@ -28,8 +28,6 @@ export const cada2: TestStructureScenario = {
       },
     ],
     public: "Tout public",
-    lgbt: true,
-    fvvTeh: true,
     contacts: [
       {
         prenom: "John",
@@ -160,8 +158,6 @@ export const cada2: TestStructureScenario = {
   },
   modificationData: {
     public: "Personnes isolées",
-    lgbt: false,
-    fvvTeh: true,
     contacts: [{ email: "modif-cada2@example.com" }],
     notes: "Notes modification CADA 2 - évolution structure.",
     ouvertureFermeture: {

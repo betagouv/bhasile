@@ -12,8 +12,6 @@ export type StructureSeedInput = {
   communeAdministrative: string;
   departementAdministratif?: string;
   creationDate: string;
-  lgbt: boolean;
-  fvvTeh: boolean;
   public: "TOUT_PUBLIC" | "FAMILLE" | "PERSONNES_ISOLEES";
   dnaCodes: { code: string }[];
   finessCode: string;
@@ -33,8 +31,6 @@ export const buildStructureSeed = (
     communeAdministrative: "Paris",
     departementAdministratif: "75",
     creationDate: "2020-01-01",
-    lgbt: false,
-    fvvTeh: false,
     public: "TOUT_PUBLIC",
     dnaCodes: [{ code: uniqueDnaCode() }],
     finessCode: uniqueFinessCode(),

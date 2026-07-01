@@ -157,6 +157,8 @@ describe("GET /api/structures/[id]", () => {
       isMultiAntenne: false,
       isMultiDna: false,
       typeBati: "DIFFUS",
+      lgbt: false,
+      fvvTeh: false,
       antennes: undefined,
       structureFinesses: undefined,
       public: undefined,
@@ -171,6 +173,44 @@ describe("GET /api/structures/[id]", () => {
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);
     expect(mockFindOneOperateur).not.toHaveBeenCalled();
+  });
+
+  it("déduit les vulnérabilités lgbt/fvvTeh des places du dernier millésime", async () => {
+    // GIVEN : le millésime le plus récent (2024) a des places LGBT mais pas FVV/TEH,
+    // un millésime antérieur (2023) avait des places FVV/TEH -> ne doit pas fuiter.
+    const dbStructure = {
+      id: 2,
+      name: "Test",
+      filiale: null,
+      operateur: { id: 1, name: "Adoma" },
+      type: "CADA",
+      adresses: [],
+      cpomStructures: [],
+      creationDate: new Date("2020-01-01"),
+      date303: null,
+      dnaStructures: [],
+      latitude: 48.86,
+      longitude: 2.34,
+      structureVersions: [],
+      structureTypologies: [
+        { year: 2024, lgbt: 5, fvvTeh: 0 },
+        { year: 2023, lgbt: 0, fvvTeh: 9 },
+      ],
+    };
+    mockGetServerSession.mockResolvedValueOnce({ user: { id: 1 } });
+    mockFindOne.mockResolvedValueOnce(dbStructure);
+    mockCanUpdateStructure.mockReturnValueOnce(true);
+
+    const request = new NextRequest("http://localhost/api/structures/2");
+
+    // WHEN
+    const response = await GET(request);
+
+    // THEN
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.lgbt).toBe(true);
+    expect(body.fvvTeh).toBe(false);
   });
 
   it("should redact the exact adresse but keep the commune when authenticated user lacks edit rights", async () => {

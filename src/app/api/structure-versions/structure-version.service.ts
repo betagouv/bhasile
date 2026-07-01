@@ -26,8 +26,6 @@ const mapVersionFields = (
   | "latitude"
   | "longitude"
   | "nom"
-  | "lgbt"
-  | "fvvTeh"
   | "notes"
   | "nomOfii"
   | "directionTerritoriale"
@@ -45,8 +43,6 @@ const mapVersionFields = (
   latitude: source.latitude?.toString() ?? undefined,
   longitude: source.longitude?.toString() ?? undefined,
   nom: source.nom ?? undefined,
-  lgbt: source.lgbt ?? undefined,
-  fvvTeh: source.fvvTeh ?? undefined,
   notes: source.notes ?? undefined,
   nomOfii: source.nomOfii ?? undefined,
   directionTerritoriale: source.directionTerritoriale ?? undefined,

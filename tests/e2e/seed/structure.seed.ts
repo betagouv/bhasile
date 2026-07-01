@@ -33,8 +33,6 @@ export const createStructureForTest = async (
       communeAdministrative: input.communeAdministrative,
       departementAdministratif: input.departementAdministratif,
       creationDate: effectiveDate,
-      lgbt: input.lgbt,
-      fvvTeh: input.fvvTeh,
       public: input.public,
       dnaStructures: {
         create: input.dnaCodes.map(({ code }) => ({
@@ -75,8 +73,6 @@ export const createStructureForTest = async (
       communeAdministrative: input.communeAdministrative,
       departementAdministratif: input.departementAdministratif,
       creationDate: effectiveDate,
-      lgbt: input.lgbt,
-      fvvTeh: input.fvvTeh,
       dnaStructures: {
         create: input.dnaCodes.map(({ code }) => ({
           dna: {
