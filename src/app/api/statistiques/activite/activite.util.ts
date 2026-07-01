@@ -24,6 +24,7 @@ import {
 
 type ActiviteTotals = {
   placesEnregistreesDna: number;
+  placesOccupees: number;
   placesAutoriseesHorsCaes: number;
   placesIndisponibles: number;
   placesAutoriseesHorsCaesEtCph: number;
@@ -37,6 +38,7 @@ type ActiviteTotals = {
 
 const emptyActiviteTotals = (): ActiviteTotals => ({
   placesEnregistreesDna: 0,
+  placesOccupees: 0,
   placesAutoriseesHorsCaes: 0,
   placesIndisponibles: 0,
   placesAutoriseesHorsCaesEtCph: 0,
@@ -54,6 +56,7 @@ const toActiviteSummary = (totals: ActiviteTotals): ActiviteSummaryStat => {
 
   return {
     placesEnregistreesDna: totals.placesEnregistreesDna,
+    placesOccupees: totals.placesOccupees,
     placesIndisponibles: totals.placesIndisponibles,
     placesDisponibles:
       totals.placesAutoriseesHorsCaes - totals.placesIndisponibles,
@@ -93,6 +96,7 @@ const toActiviteByMonthStat = (
   return {
     date: monthKeyToDate(monthKey),
     placesEnregistreesDna: summary.placesEnregistreesDna,
+    placesOccupees: summary.placesOccupees,
     placesIndisponibles: summary.placesIndisponibles,
     tauxIndisponibilite: summary.tauxIndisponibilite,
     presencesInduesBPI: summary.presencesInduesBPI,
@@ -132,6 +136,7 @@ const accumulateActivite = (
   const placesAutorisees = activite.placesAutorisees ?? 0;
 
   totals.placesEnregistreesDna += placesAutorisees;
+  totals.placesOccupees += activite.placesOccupees ?? 0;
 
   // Exclusion CAES
   if (

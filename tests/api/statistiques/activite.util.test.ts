@@ -20,6 +20,7 @@ const activiteRow = (
   sousOccupation: null,
   travaux: null,
   placesIndisponibles: null,
+  placesOccupees: null,
   presencesInduesBPI: null,
   presencesInduesDeboutees: null,
   ...partial,

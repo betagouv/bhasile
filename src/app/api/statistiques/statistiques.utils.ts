@@ -13,6 +13,7 @@ import type {
   StatistiqueDbTypologieValues,
   StatistiquesActiveStructureIdsByPeriod,
   StatistiquesActivityContext,
+  StatistiquesContext,
   StatistiquesPeriodGranularity,
 } from "./statistiques.db.type";
 
@@ -649,3 +650,67 @@ export const computeTotalPlaces = (
       (structure) => typologieMap.get(structure.id)?.placesAutorisees
     )
   ) ?? 0;
+
+const intersectStructureIds = (
+  ids: Iterable<number>,
+  structureIdsInZone: Set<number>
+): Set<number> =>
+  new Set([...ids].filter((id) => structureIdsInZone.has(id)));
+
+const sliceActiveStructureIdsByPeriod = (
+  byPeriod: StatistiquesActiveStructureIdsByPeriod,
+  structureIdsInZone: Set<number>
+): StatistiquesActiveStructureIdsByPeriod => ({
+  month: new Map(
+    [...byPeriod.month].map(([periodKey, ids]) => [
+      periodKey,
+      intersectStructureIds(ids, structureIdsInZone),
+    ])
+  ),
+  trimester: new Map(
+    [...byPeriod.trimester].map(([periodKey, ids]) => [
+      periodKey,
+      intersectStructureIds(ids, structureIdsInZone),
+    ])
+  ),
+  year: new Map(
+    [...byPeriod.year].map(([periodKey, ids]) => [
+      periodKey,
+      intersectStructureIds(ids, structureIdsInZone),
+    ])
+  ),
+});
+
+/**
+ * Restreint un `StatistiquesContext` déjà chargé à une zone (ex. un département
+ * ou les départements d'une région), sans recharger de données. Les modules de
+ * calcul par bloc (structures/places/finance/contrôle-qualité/activité) dérivent
+ * toujours leur périmètre depuis `structures`/`allStructures`/
+ * `activeStructureIdsByPeriod`/`activeStructureIdsNow`/`departements` (jamais
+ * directement depuis `typologies`/`adresses`/`budgets`/`eigs`/etc.), donc ne
+ * restreindre que ces 5 champs suffit à propager la restriction à tous les calculs.
+ */
+export const sliceStatistiquesContext = (
+  context: StatistiquesContext,
+  structureIdsInZone: Set<number>,
+  departementNumerosInZone: Set<string>
+): StatistiquesContext => ({
+  ...context,
+  structures: context.structures.filter((structure) =>
+    structureIdsInZone.has(structure.id)
+  ),
+  allStructures: context.allStructures.filter((structure) =>
+    structureIdsInZone.has(structure.id)
+  ),
+  activeStructureIdsNow: intersectStructureIds(
+    context.activeStructureIdsNow,
+    structureIdsInZone
+  ),
+  activeStructureIdsByPeriod: sliceActiveStructureIdsByPeriod(
+    context.activeStructureIdsByPeriod,
+    structureIdsInZone
+  ),
+  departements: context.departements.filter((departement) =>
+    departementNumerosInZone.has(departement.numero)
+  ),
+});

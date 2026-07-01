@@ -97,6 +97,7 @@ export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
     sousOccupation: true;
     travaux: true;
     placesIndisponibles: true;
+    placesOccupees: true;
     presencesInduesBPI: true;
     presencesInduesDeboutees: true;
   };

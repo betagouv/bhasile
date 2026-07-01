@@ -129,6 +129,26 @@ const countActiveCpoms = (
   return activeCpomIds.size;
 };
 
+/* Nombre de structures (pas de contrats CPOM) couvertes par un CPOM actif l'année donnée. */
+const countStructuresAvecCpomForYear = (
+  cpomLinks: StatistiqueDbCpomStructure[],
+  structureIds: Set<number>,
+  year: number
+): number => {
+  const structuresWithActiveCpom = new Set<number>();
+
+  for (const link of cpomLinks) {
+    if (
+      structureIds.has(link.structureId) &&
+      isStructureInCpom({ cpomStructures: [link] } as StructureDbList, year)
+    ) {
+      structuresWithActiveCpom.add(link.structureId);
+    }
+  }
+
+  return structuresWithActiveCpom.size;
+};
+
 const isCpomLinkActiveNow = (
   link: StatistiqueDbCpomStructure,
   now: Date
@@ -297,6 +317,11 @@ const computeByYearStats = (
       return {
         totalStructures: structuresWithTypologie.length,
         totalCpoms: countActiveCpoms(
+          context.cpomLinks,
+          structureIdsWithTypologie,
+          year
+        ),
+        structuresAvecCpom: countStructuresAvecCpomForYear(
           context.cpomLinks,
           structureIdsWithTypologie,
           year
