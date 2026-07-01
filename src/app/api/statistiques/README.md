@@ -63,6 +63,8 @@ Filtre structures via `findEffectiveStructureVersionsAtDate` (pivot sur `Structu
 
 Les deux sont construits **une seule fois** dans `buildStatistiquesContext` via `buildActivityIndex`. Les sous-modules lisent `activeStructureIdsNow` ou `lookupActiveStructureIds` - ils ne recalculent jamais l'activité.
 
+**Données rattachées à une `StructureVersion` datée** (ex. `Adresse`) : `filterByEffectiveVersionAtDate` résout, pour une date donnée (plafonnée à aujourd'hui), la `StructureVersion` effective de chaque structure via `structureVersionTimeline`, puis ne garde que les lignes de cette version - même principe que `lookupStructureIdsForDnaAtDate` pour les liens DNA. Voir [places/README.md](./places/README.md) pour l'usage sur `qpv`/`logementsSociaux`.
+
 **Avec typologie** (≥1 `StructureTypologie`) : requis pour agrégats places, répartitions type/bâti, contrôle qualité. `structures.totalStructures` = structures actives (avec ou sans typologie).
 
 ## `aggregation`
@@ -98,9 +100,10 @@ Points encore ouverts ou à garder en tête pour l'interprétation des chiffres.
 
 | Sujet                                      | Bloc              | Détail                                                                                                              |
 | ------------------------------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Dénominateurs activité**                 | `activite`        | [activite/README.md](./activite/README.md#todo-à-valider)                                                           |
+| **Numérateurs activité**                   | `activite`        | [activite/README.md](./activite/README.md#todo-à-valider)                                                           |
 | **`updatedAt` par bloc**                   | global            | Horodatage « données mises à jour » par onglet : dépend du chantier formulaire d'actualisation, pas encore branché. |
-| **`qpv` / `logementsSociaux` en `byYear`** | `places`          | [places/README.md](./places/README.md#todo-à-valider)                                                               |
+| **Reconstitution `qpv`/`logementsSociaux` par année** | `places` | [places/README.md](./places/README.md#todo-à-valider)                                                               |
+| **Agrégation bâti `Mixte`**                | `structures`      | [structures/README.md](./structures/README.md#todo-à-valider)                                                       |
 | **Fallback `REALISE` → `PREVISIONNEL`**    | `finance`         | [finance/README.md](./finance/README.md#todo-hors-transfo)                                                          |
 | **Fenêtre évaluations vs EIG**             | `controleQualite` | [controle-qualite/README.md](./controle-qualite/README.md#todo-métier)                                              |
 | **Clés de période CQ**                     | `controleQualite` | [controle-qualite/README.md](./controle-qualite/README.md#todo-métier)                                              |

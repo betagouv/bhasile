@@ -31,6 +31,10 @@
 
 Millésime exact `StructureTypologie`. `totalStructures` = structures actives **avec** typologie sur l'année. CPOM : `isStructureInCpom` par année.
 
+## TODO (à valider)
+
+Une structure avec des adresses en `Diffus` et en `Collectif` compte comme `Mixte` dans `structureBatis[].structures` (mais ses places sont bien ventilées par bâti réel de chaque adresse, pas de places "Mixte"). À confirmer avec le métier que cette convention (comptage structure agrégé vs comptage places par adresse) est bien celle attendue.
+
 ## Sources
 
 `Structure`, `StructureTypologie`, `Adresse`, `CpomStructure`, `ActeAdministratif` (convention CPOM).
