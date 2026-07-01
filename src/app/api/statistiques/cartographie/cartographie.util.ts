@@ -1,21 +1,24 @@
 import type { NumericAggregation } from "@/app/utils/math.util";
+import { FinanceByYearScopeStat } from "@/schemas/api/statistique.schema";
 import {
   CartographieEvolutionStat,
   CartographieIndicateur,
   CartographieSupportedGranularite,
   StatistiqueCartographieFilters,
 } from "@/schemas/api/statistique-cartographie.schema";
-import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
-import { computeActiviteStatistiques } from "../activite/activite.util";
-import { computeControleQualiteStatistiques } from "../controle-qualite/controle-qualite.util";
-import { computeFinanceStatistiques } from "../finance/finance.util";
-import { computePlacesStatistiques } from "../places/places.util";
+import { computeActiviteSummary } from "../activite/activite.util";
+import { computeControleQualiteByYear } from "../controle-qualite/controle-qualite.util";
+import { computeFinanceTotalValuesForYears } from "../finance/finance.util";
+import {
+  computeAdresseFieldForYear,
+  computeTypologieFieldForYear,
+} from "../places/places.util";
 import type {
   StatistiqueDbStructure,
   StatistiquesContext,
 } from "../statistiques.db.type";
-import { computeStructuresStatistiques } from "../structures/structures.util";
+import { computeStructuresIndicatorForYear } from "../structures/structures.util";
 import type {
   CartographieDbDepartement,
   CartographieDbRegion,
@@ -45,12 +48,13 @@ export const groupStructureIdsByDepartement = (
   return groups;
 };
 
-/** CSV `departements`/`regions` -> ensemble de numéros de départements, ou `null` si aucune restriction ("Toute la France"). */
+/** Resolves the departements/regions CSV filters into a set of departement numeros, or null if unrestricted. */
 export const resolveZoneDepartementNumeros = (
   filters: Pick<StatistiqueCartographieFilters, "departements" | "regions">,
   allDepartements: CartographieDbDepartement[]
 ): Set<string> | null => {
-  const departementList = filters.departements?.split(",").filter(Boolean) ?? [];
+  const departementList =
+    filters.departements?.split(",").filter(Boolean) ?? [];
   const regionList = filters.regions?.split(",").filter(Boolean) ?? [];
 
   if (departementList.length === 0 && regionList.length === 0) {
@@ -73,14 +77,14 @@ export const resolveZoneDepartementNumeros = (
     return new Set(departementsFromRegions);
   }
 
-  // Les deux filtres sont fournis : intersection (restriction la plus stricte).
+  // Both filters given: intersect them.
   const departementsFromRegionsSet = new Set(departementsFromRegions);
   return new Set(
     departementList.filter((numero) => departementsFromRegionsSet.has(numero))
   );
 };
 
-/** Liste canonique des zones à retourner pour le découpage choisi, y compris celles sans structure. */
+/** Builds the canonical zone list for the chosen granularite, including zones with no structure. */
 export const buildZoneDefinitions = (
   granularite: CartographieSupportedGranularite,
   allDepartements: CartographieDbDepartement[],
@@ -114,12 +118,13 @@ export const buildZoneDefinitions = (
       departement.regionCode,
       departement.regionName ?? departement.regionCode
     );
-    const numeros = departementNumerosByRegionCode.get(departement.regionCode) ?? [];
+    const numeros =
+      departementNumerosByRegionCode.get(departement.regionCode) ?? [];
     numeros.push(departement.numero);
     departementNumerosByRegionCode.set(departement.regionCode, numeros);
   }
 
-  // Sans restriction de zone, on complète avec les régions sans département rattaché (cas théorique).
+  // Unrestricted: also include regions with no departement attached.
   if (!departementNumerosRestriction) {
     for (const region of allRegions) {
       if (!departementNumerosByRegionCode.has(region.code)) {
@@ -155,195 +160,151 @@ export const computeEvolution = (
   };
 };
 
-type IndicateurEntry =
-  | {
-      bloc: "structures";
-      extract: (
-        stats: StatistiqueApiRead["structures"],
-        year: number
-      ) => number | null;
-    }
-  | {
-      bloc: "places";
-      extract: (
-        stats: StatistiqueApiRead["places"],
-        year: number
-      ) => number | null;
-    }
-  | {
-      bloc: "finance";
-      extract: (
-        stats: StatistiqueApiRead["finance"],
-        year: number
-      ) => number | null;
-    }
-  | {
-      bloc: "controleQualite";
-      extract: (
-        stats: StatistiqueApiRead["controleQualite"],
-        year: number
-      ) => number | null;
-    }
-  | {
-      bloc: "activite";
-      /** L'activité n'a pas d'agrégation par année civile pour l'instant (cf. README) : `year` est ignoré. */
-      extract: (stats: StatistiqueApiRead["activite"]) => number | null;
-    };
-
-const findByYear = <Entry extends { year: number }>(
-  entries: Entry[],
-  year: number
-): Entry | undefined => entries.find((entry) => entry.year === year);
-
-export const INDICATEUR_REGISTRY: Record<CartographieIndicateur, IndicateurEntry> = {
-  "structures.total": {
-    bloc: "structures",
-    extract: (stats, year) => findByYear(stats.byYear, year)?.totalStructures ?? null,
-  },
-  "structures.avecCpom": {
-    bloc: "structures",
-    extract: (stats, year) =>
-      findByYear(stats.byYear, year)?.structuresAvecCpom ?? null,
-  },
-  "places.autorisees": {
-    bloc: "places",
-    extract: (stats, year) => findByYear(stats.byYear, year)?.totalPlaces ?? null,
-  },
-  "places.pmr": {
-    bloc: "places",
-    extract: (stats, year) => findByYear(stats.byYear, year)?.pmr ?? null,
-  },
-  "places.lgbt": {
-    bloc: "places",
-    extract: (stats, year) => findByYear(stats.byYear, year)?.lgbt ?? null,
-  },
-  "places.fvvTeh": {
-    bloc: "places",
-    extract: (stats, year) => findByYear(stats.byYear, year)?.fvvTeh ?? null,
-  },
-  "places.qpv": {
-    bloc: "places",
-    extract: (stats, year) => findByYear(stats.byYear, year)?.qpv ?? null,
-  },
-  "places.logementsSociaux": {
-    bloc: "places",
-    extract: (stats, year) =>
-      findByYear(stats.byYear, year)?.logementsSociaux ?? null,
-  },
-  "finance.dotationAccordee": {
-    bloc: "finance",
-    extract: (stats, year) =>
-      findByYear(stats.byYear, year)?.total.dotationAccordee ?? null,
-  },
-  "finance.etp": {
-    bloc: "finance",
-    extract: (stats, year) => findByYear(stats.byYear, year)?.total.totalETP ?? null,
-  },
-  "finance.tauxEncadrement": {
-    bloc: "finance",
-    extract: (stats, year) =>
-      findByYear(stats.byYear, year)?.total.tauxEncadrement ?? null,
-  },
-  "finance.coutJournalier": {
-    bloc: "finance",
-    extract: (stats, year) =>
-      findByYear(stats.byYear, year)?.total.coutJournalier ?? null,
-  },
-  "finance.resultatNet": {
-    bloc: "finance",
-    extract: (stats, year) =>
-      findByYear(stats.byYear, year)?.total.resultatNet ?? null,
-  },
-  "controleQualite.nbEig": {
-    bloc: "controleQualite",
-    extract: (stats, year) =>
-      stats.byYear.find((entry) => entry.date.getUTCFullYear() === year)?.nbEig ??
-      null,
-  },
-  "controleQualite.tauxEigComportementViolent": {
-    bloc: "controleQualite",
-    extract: (stats, year) =>
-      stats.byYear.find((entry) => entry.date.getUTCFullYear() === year)
-        ?.tauxEigComportementViolent ?? null,
-  },
-  "controleQualite.moyenneEvaluations": {
-    bloc: "controleQualite",
-    extract: (stats, year) =>
-      stats.byYear.find((entry) => entry.date.getUTCFullYear() === year)
-        ?.noteGenerale ?? null,
-  },
-  "activite.placesDna": {
-    bloc: "activite",
-    extract: (stats) => stats.summary.placesEnregistreesDna,
-  },
-  "activite.placesIndisponibles": {
-    bloc: "activite",
-    extract: (stats) => stats.summary.placesIndisponibles,
-  },
-  "activite.placesOccupees": {
-    bloc: "activite",
-    extract: (stats) => stats.summary.placesOccupees,
-  },
-  "activite.presencesIndues": {
-    bloc: "activite",
-    extract: (stats) => stats.summary.presencesInduesTotal,
-  },
-};
-
 export type CartographieIndicateurValues = {
   value: number | null;
   previousValue: number | null;
 };
 
-/**
- * Calcule le bloc de statistiques concerné par l'indicateur (un seul, pas les 5)
- * et en extrait la valeur de `annee` et `annee - 1`. Pour le bloc `activite`,
- * `previousValue` est toujours `null` (pas d'agrégation par année civile pour
- * l'instant, cf. README du dossier).
- */
+/** One lean computer per indicator; `aggregation` (moyenne/médiane) is unrelated to `granularite` (region/departement). */
+type IndicateurValuesComputer = (
+  context: StatistiquesContext,
+  annee: number,
+  aggregation: NumericAggregation
+) => CartographieIndicateurValues;
+
+const financeValuesForYears = (
+  context: StatistiquesContext,
+  annee: number,
+  aggregation: NumericAggregation,
+  field: keyof FinanceByYearScopeStat
+): CartographieIndicateurValues => {
+  const [value, previousValue] = computeFinanceTotalValuesForYears(
+    context,
+    [annee, annee - 1],
+    aggregation,
+    field
+  );
+  return { value, previousValue };
+};
+
+const controleQualiteValuesForYears = (
+  context: StatistiquesContext,
+  annee: number,
+  aggregation: NumericAggregation,
+  field: "nbEig" | "tauxEigComportementViolent" | "noteGenerale"
+): CartographieIndicateurValues => {
+  const byYear = computeControleQualiteByYear(context, aggregation);
+  const findYear = (year: number) =>
+    byYear.find((entry) => entry.date.getUTCFullYear() === year)?.[field] ??
+    null;
+  return { value: findYear(annee), previousValue: findYear(annee - 1) };
+};
+
+/** Activite has no yearly aggregation yet, so this returns the current snapshot with no evolution. TODO. */
+const activiteSnapshotValue = (
+  context: StatistiquesContext,
+  field:
+    | "placesEnregistreesDna"
+    | "placesIndisponibles"
+    | "placesOccupees"
+    | "presencesInduesTotal"
+): CartographieIndicateurValues => ({
+  value: computeActiviteSummary(context)[field],
+  previousValue: null,
+});
+
+export const INDICATEUR_COMPUTERS: Record<
+  CartographieIndicateur,
+  IndicateurValuesComputer
+> = {
+  "structures.total": (context, annee) => ({
+    value: computeStructuresIndicatorForYear(context, annee, "totalStructures"),
+    previousValue: computeStructuresIndicatorForYear(
+      context,
+      annee - 1,
+      "totalStructures"
+    ),
+  }),
+  "structures.avecCpom": (context, annee) => ({
+    value: computeStructuresIndicatorForYear(
+      context,
+      annee,
+      "structuresAvecCpom"
+    ),
+    previousValue: computeStructuresIndicatorForYear(
+      context,
+      annee - 1,
+      "structuresAvecCpom"
+    ),
+  }),
+  "places.autorisees": (context, annee) => ({
+    value: computeTypologieFieldForYear(context, annee, "placesAutorisees"),
+    previousValue: computeTypologieFieldForYear(
+      context,
+      annee - 1,
+      "placesAutorisees"
+    ),
+  }),
+  "places.pmr": (context, annee) => ({
+    value: computeTypologieFieldForYear(context, annee, "pmr"),
+    previousValue: computeTypologieFieldForYear(context, annee - 1, "pmr"),
+  }),
+  "places.lgbt": (context, annee) => ({
+    value: computeTypologieFieldForYear(context, annee, "lgbt"),
+    previousValue: computeTypologieFieldForYear(context, annee - 1, "lgbt"),
+  }),
+  "places.fvvTeh": (context, annee) => ({
+    value: computeTypologieFieldForYear(context, annee, "fvvTeh"),
+    previousValue: computeTypologieFieldForYear(context, annee - 1, "fvvTeh"),
+  }),
+  "places.qpv": (context, annee) => ({
+    value: computeAdresseFieldForYear(context, annee, "qpv"),
+    previousValue: computeAdresseFieldForYear(context, annee - 1, "qpv"),
+  }),
+  "places.logementsSociaux": (context, annee) => ({
+    value: computeAdresseFieldForYear(context, annee, "logementSocial"),
+    previousValue: computeAdresseFieldForYear(
+      context,
+      annee - 1,
+      "logementSocial"
+    ),
+  }),
+  "finance.dotationAccordee": (context, annee, aggregation) =>
+    financeValuesForYears(context, annee, aggregation, "dotationAccordee"),
+  "finance.etp": (context, annee, aggregation) =>
+    financeValuesForYears(context, annee, aggregation, "totalETP"),
+  "finance.tauxEncadrement": (context, annee, aggregation) =>
+    financeValuesForYears(context, annee, aggregation, "tauxEncadrement"),
+  "finance.coutJournalier": (context, annee, aggregation) =>
+    financeValuesForYears(context, annee, aggregation, "coutJournalier"),
+  "finance.resultatNet": (context, annee, aggregation) =>
+    financeValuesForYears(context, annee, aggregation, "resultatNet"),
+  "controleQualite.nbEig": (context, annee, aggregation) =>
+    controleQualiteValuesForYears(context, annee, aggregation, "nbEig"),
+  "controleQualite.tauxEigComportementViolent": (context, annee, aggregation) =>
+    controleQualiteValuesForYears(
+      context,
+      annee,
+      aggregation,
+      "tauxEigComportementViolent"
+    ),
+  "controleQualite.moyenneEvaluations": (context, annee, aggregation) =>
+    controleQualiteValuesForYears(context, annee, aggregation, "noteGenerale"),
+  "activite.placesDna": (context) =>
+    activiteSnapshotValue(context, "placesEnregistreesDna"),
+  "activite.placesIndisponibles": (context) =>
+    activiteSnapshotValue(context, "placesIndisponibles"),
+  "activite.placesOccupees": (context) =>
+    activiteSnapshotValue(context, "placesOccupees"),
+  "activite.presencesIndues": (context) =>
+    activiteSnapshotValue(context, "presencesInduesTotal"),
+};
+
+/** Computes only the requested indicator, for `annee` and `annee - 1`. */
 export const computeIndicateurValues = (
   context: StatistiquesContext,
   indicateur: CartographieIndicateur,
   annee: number,
   aggregation: NumericAggregation
-): CartographieIndicateurValues => {
-  const entry = INDICATEUR_REGISTRY[indicateur];
-
-  switch (entry.bloc) {
-    case "structures": {
-      const stats = computeStructuresStatistiques(context);
-      return {
-        value: entry.extract(stats, annee),
-        previousValue: entry.extract(stats, annee - 1),
-      };
-    }
-    case "places": {
-      const stats = computePlacesStatistiques(context);
-      return {
-        value: entry.extract(stats, annee),
-        previousValue: entry.extract(stats, annee - 1),
-      };
-    }
-    case "finance": {
-      const stats = computeFinanceStatistiques(context, aggregation);
-      return {
-        value: entry.extract(stats, annee),
-        previousValue: entry.extract(stats, annee - 1),
-      };
-    }
-    case "controleQualite": {
-      const stats = computeControleQualiteStatistiques(context, aggregation);
-      return {
-        value: entry.extract(stats, annee),
-        previousValue: entry.extract(stats, annee - 1),
-      };
-    }
-    case "activite": {
-      const stats = computeActiviteStatistiques(context);
-      return {
-        value: entry.extract(stats),
-        previousValue: null,
-      };
-    }
-  }
-};
+): CartographieIndicateurValues =>
+  INDICATEUR_COMPUTERS[indicateur](context, annee, aggregation);

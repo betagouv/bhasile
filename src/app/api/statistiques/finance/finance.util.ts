@@ -3,9 +3,7 @@ import {
   NumericAggregation,
   sumValues,
 } from "@/app/utils/math.util";
-import {
-  roundStatsNumber,
-} from "@/app/utils/statistiques-format.util";
+import { roundStatsNumber } from "@/app/utils/statistiques-format.util";
 import {
   isStructureAutorisee,
   isStructureSubventionnee,
@@ -138,13 +136,11 @@ const sumIndicateursForYear = (
   return {
     totalETP: roundStatsNumber(sumValues(etpValues) ?? 0) ?? 0,
     tauxEncadrement: roundStatsNumber(aggregateValues(tauxValues, aggregation)),
-    coutJournalier: roundStatsNumber(
-      aggregateValues(coutValues, aggregation)
-    ),
+    coutJournalier: roundStatsNumber(aggregateValues(coutValues, aggregation)),
   };
 };
 
-const computeScopeByYear = (
+export const computeScopeByYear = (
   structureIdsInScope: number[],
   context: StatistiquesContext,
   aggregation: NumericAggregation,
@@ -171,7 +167,8 @@ const computeScopeByYear = (
       (budget) => budget.year === year && isActive(budget.structureId)
     );
     const indicateursForYear = scopedIndicateurs.filter(
-      (indicateur) => indicateur.year === year && isActive(indicateur.structureId)
+      (indicateur) =>
+        indicateur.year === year && isActive(indicateur.structureId)
     );
 
     return {
@@ -187,12 +184,7 @@ export const computeFinanceStatistiques = (
 ): StatistiqueApiRead["finance"] => {
   const years = collectDistinctYears(context.budgets, context.indicateurs);
   const scopeIds = getStructureIdsByFinanceScope(context.allStructures);
-  const total = computeScopeByYear(
-    scopeIds.total,
-    context,
-    aggregation,
-    years
-  );
+  const total = computeScopeByYear(scopeIds.total, context, aggregation, years);
   const autorisees = computeScopeByYear(
     scopeIds.autorisees,
     context,
@@ -214,4 +206,23 @@ export const computeFinanceStatistiques = (
       subventionnees: subventionnees[index],
     })),
   };
+};
+
+/** Computes a single `total`-scope field for given years, for the cartographie one-indicator requests. */
+export const computeFinanceTotalValuesForYears = (
+  context: StatistiquesContext,
+  years: number[],
+  aggregation: NumericAggregation,
+  field: keyof FinanceByYearScopeStat
+): (number | null)[] => {
+  const structureIdsInScope = context.allStructures.map(
+    (structure) => structure.id
+  );
+
+  return computeScopeByYear(
+    structureIdsInScope,
+    context,
+    aggregation,
+    years
+  ).map((scopeStat) => scopeStat[field]);
 };

@@ -1,3 +1,4 @@
+import { sumValues } from "@/app/utils/math.util";
 import { roundStatsRate } from "@/app/utils/statistiques-format.util";
 import {
   PlacesByYearStat,
@@ -19,7 +20,9 @@ import {
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
+  getTypologieYears,
   mapTypologieYears,
+  structuresActiveInPeriod,
 } from "../statistiques.utils";
 
 type PlacesSpeciales = {
@@ -181,4 +184,87 @@ export const computePlacesStatistiques = (
         )
     ),
   };
+};
+
+type PlacesTypologieField = "placesAutorisees" | "pmr" | "lgbt" | "fvvTeh";
+
+/** Computes a single typologie field for one year, for the cartographie one-indicator requests. */
+export const computeTypologieFieldForYear = (
+  context: Pick<
+    StatistiquesContext,
+    "allStructures" | "activeStructureIdsByPeriod" | "typologies"
+  >,
+  year: number,
+  field: PlacesTypologieField
+): number | null => {
+  if (!getTypologieYears(context.typologies).includes(year)) {
+    return null;
+  }
+
+  const typologieMapForYear = getTypologieMapForExactYear(
+    context.typologies,
+    year
+  );
+  const structuresForYear = structuresActiveInPeriod(
+    context.allStructures,
+    context.activeStructureIdsByPeriod,
+    "year",
+    String(year)
+  );
+  const structuresWithTypologie = filterStructuresWithTypologie(
+    structuresForYear,
+    typologieMapForYear
+  );
+
+  return (
+    sumValues(
+      structuresWithTypologie.map(
+        (structure) => typologieMapForYear.get(structure.id)?.[field]
+      )
+    ) ?? 0
+  );
+};
+
+type PlacesAdresseField = "qpv" | "logementSocial";
+
+/** Computes a single adresse field (qpv/logementSocial) for one year, for cartographie one-indicator requests. */
+export const computeAdresseFieldForYear = (
+  context: Pick<
+    StatistiquesContext,
+    | "allStructures"
+    | "activeStructureIdsByPeriod"
+    | "typologies"
+    | "adresses"
+    | "structureVersionTimeline"
+  >,
+  year: number,
+  field: PlacesAdresseField
+): number | null => {
+  if (!getTypologieYears(context.typologies).includes(year)) {
+    return null;
+  }
+
+  const typologieMapForYear = getTypologieMapForExactYear(
+    context.typologies,
+    year
+  );
+  const structuresForYear = structuresActiveInPeriod(
+    context.allStructures,
+    context.activeStructureIdsByPeriod,
+    "year",
+    String(year)
+  );
+  const structuresWithTypologie = filterStructuresWithTypologie(
+    structuresForYear,
+    typologieMapForYear
+  );
+  const adressesInScope = filterByEffectiveVersionAtDate(
+    context.adresses,
+    structuresWithTypologie.map((structure) => structure.id),
+    endOfYearUtc(year),
+    context.structureVersionTimeline,
+    new Date()
+  );
+
+  return sumValues(adressesInScope.map((adresse) => adresse[field])) ?? 0;
 };

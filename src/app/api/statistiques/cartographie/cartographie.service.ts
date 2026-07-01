@@ -1,10 +1,10 @@
+import { StatistiquesFilters } from "@/schemas/api/statistique.schema";
 import {
   CartographieApiRead,
   CartographieSupportedGranularite,
   CartographieZoneStat,
   StatistiqueCartographieFilters,
 } from "@/schemas/api/statistique-cartographie.schema";
-import { StatistiquesFilters } from "@/schemas/api/statistique.schema";
 
 import { buildStatistiquesContext } from "../statistique.service";
 import { sliceStatistiquesContext } from "../statistiques.utils";
@@ -53,7 +53,7 @@ export const getCartographieStatistiques = async (
     departementNumerosRestriction
   );
 
-  // Restriction de zone qui ne correspond à aucun département connu (ex. code région invalide) : rien à retourner.
+  // Zone restriction matches no known departement: nothing to return.
   if (departementNumerosRestriction && departementNumerosRestriction.size === 0) {
     return { granularite, indicateur, annee, zones: [] };
   }

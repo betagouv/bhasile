@@ -90,6 +90,38 @@ describe("activité - agrégés et série mensuelle", () => {
     expect(result.summary.placesDisponibles).toBe(90);
   });
 
+  it("somme placesOccupees comme placesEnregistreesDna, sans filtre par type de structure", () => {
+    const result = computeActiviteStatistiques(
+      buildTestStatistiquesContext({
+        structures: allStructures,
+        allStructures,
+        typologies: [],
+        adresses: [],
+        departements: [],
+        dnaLinks,
+        activites: [
+          activiteRow({
+            id: 1,
+            dnaCode: "DNA01",
+            date: new Date("2025-03-10"),
+            placesOccupees: 90,
+            placesIndisponibles: 10,
+          }),
+          activiteRow({
+            id: 2,
+            dnaCode: "DNA02", // structure 2 is CAES
+            date: new Date("2025-03-10"),
+            placesOccupees: 40,
+            placesIndisponibles: 5,
+          }),
+        ],
+      })
+    );
+
+    expect(result.summary.placesOccupees).toBe(130);
+    expect(result.summary.placesIndisponibles).toBe(10);
+  });
+
   it("par mois, calcule les indicateurs et les taux sur les dénominateurs filtrés par type", () => {
     const structuresInScope = allStructures.slice(0, 3);
 

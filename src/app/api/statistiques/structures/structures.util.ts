@@ -29,7 +29,9 @@ import {
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
+  getTypologieYears,
   mapTypologieYears,
+  structuresActiveInPeriod,
 } from "../statistiques.utils";
 
 const getRepartitionFromRepartitions = (
@@ -129,8 +131,8 @@ const countActiveCpoms = (
   return activeCpomIds.size;
 };
 
-/* Nombre de structures (pas de contrats CPOM) couvertes par un CPOM actif l'année donnée. */
-const countStructuresAvecCpomForYear = (
+/** Counts structures (not CPOM contracts) covered by an active CPOM for the year. */
+export const countStructuresAvecCpomForYear = (
   cpomLinks: StatistiqueDbCpomStructure[],
   structureIds: Set<number>,
   year: number
@@ -406,4 +408,47 @@ export const computeStructuresStatistiques = (
     structureBatis,
     byYear: computeByYearStats(context, batiMap),
   };
+};
+
+export type StructuresYearIndicatorField =
+  | "totalStructures"
+  | "structuresAvecCpom";
+
+/** Computes a single byYear field for one year, for the cartographie one-indicator requests. */
+export const computeStructuresIndicatorForYear = (
+  context: Pick<
+    StatistiquesContext,
+    "allStructures" | "activeStructureIdsByPeriod" | "typologies" | "cpomLinks"
+  >,
+  year: number,
+  field: StructuresYearIndicatorField
+): number | null => {
+  if (!getTypologieYears(context.typologies).includes(year)) {
+    return null;
+  }
+
+  const typologieMapForYear = getTypologieMapForExactYear(
+    context.typologies,
+    year
+  );
+  const structuresForYear = structuresActiveInPeriod(
+    context.allStructures,
+    context.activeStructureIdsByPeriod,
+    "year",
+    String(year)
+  );
+  const structuresWithTypologie = filterStructuresWithTypologie(
+    structuresForYear,
+    typologieMapForYear
+  );
+
+  if (field === "totalStructures") {
+    return structuresWithTypologie.length;
+  }
+
+  return countStructuresAvecCpomForYear(
+    context.cpomLinks,
+    new Set(structuresWithTypologie.map((structure) => structure.id)),
+    year
+  );
 };

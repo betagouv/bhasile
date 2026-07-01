@@ -2,12 +2,7 @@ import { z } from "zod";
 
 import type { NumericAggregation } from "@/app/utils/math.util";
 
-/**
- * Clé stable identifiant un indicateur affichable sur la carte. Chaque clé est
- * reliée à un champ précis de `StatistiqueApiRead` dans `cartographie.util.ts`
- * (`INDICATEUR_EXTRACTORS`) — voir le README du dossier `cartographie/` pour le
- * détail du mapping et les indicateurs volontairement absents.
- */
+/** Stable indicator keys shown on the map; see the cartographie/ README for the full mapping. */
 export const CARTOGRAPHIE_INDICATEURS = [
   "structures.total",
   "structures.avecCpom",
@@ -47,7 +42,7 @@ export type CartographieGranularite = z.infer<
   typeof cartographieGranulariteSchema
 >;
 
-/** Granularités effectivement supportées côté calcul (l'arrondissement n'existe pas en base, cf. route.ts). */
+/** Granularities actually supported by the computation (arrondissement has no data model yet). */
 export type CartographieSupportedGranularite = Exclude<
   CartographieGranularite,
   "arrondissement"
@@ -86,7 +81,7 @@ export type CartographieZoneStat = {
   code: string;
   name: string;
   value: number | null;
-  /** `null` quand l'évolution n'est pas calculable pour cet indicateur (cf. `CARTOGRAPHIE_INDICATEURS_SANS_EVOLUTION`) ou pour l'année N-1 (pas de donnée). */
+  /** null when the evolution isn't computable for this indicator or year. */
   evolution: CartographieEvolutionStat | null;
 };
 

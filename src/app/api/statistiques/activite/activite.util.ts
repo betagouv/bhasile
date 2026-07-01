@@ -194,16 +194,23 @@ const buildLatestActiviteByStructureId = (
   return latestByStructureId;
 };
 
-export const computeActiviteStatistiques = (
-  context: StatistiquesContext
-): StatistiqueApiRead["activite"] => {
+/** Computes the current activite snapshot only, for the cartographie one-indicator requests. TODO: no yearly aggregation yet. */
+export const computeActiviteSummary = (
+  context: Pick<
+    StatistiquesContext,
+    | "activites"
+    | "dnaLinks"
+    | "structureVersionTimeline"
+    | "allStructures"
+    | "structures"
+  >
+): ActiviteSummaryStat => {
   const {
     activites,
     dnaLinks,
     structureVersionTimeline,
     allStructures,
     structures,
-    activeStructureIdsByPeriod,
   } = context;
   const structureTypeById = new Map(
     allStructures.map((structure) => [structure.id, structure.type])
@@ -226,6 +233,23 @@ export const computeActiviteStatistiques = (
       structureTypeById
     );
   }
+
+  return toActiviteSummary(summaryTotals);
+};
+
+export const computeActiviteStatistiques = (
+  context: StatistiquesContext
+): StatistiqueApiRead["activite"] => {
+  const {
+    activites,
+    dnaLinks,
+    structureVersionTimeline,
+    allStructures,
+    activeStructureIdsByPeriod,
+  } = context;
+  const structureTypeById = new Map(
+    allStructures.map((structure) => [structure.id, structure.type])
+  );
 
   const byMonth = new Map<string, ActiviteTotals>();
 
@@ -252,7 +276,7 @@ export const computeActiviteStatistiques = (
   }
 
   return {
-    summary: toActiviteSummary(summaryTotals),
+    summary: computeActiviteSummary(context),
     byMonth: [...byMonth.entries()]
       .sort(([monthKeyA], [monthKeyB]) => monthKeyA.localeCompare(monthKeyB))
       .map(([monthKey, monthTotals]) =>

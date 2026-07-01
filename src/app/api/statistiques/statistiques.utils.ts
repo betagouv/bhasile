@@ -681,15 +681,7 @@ const sliceActiveStructureIdsByPeriod = (
   ),
 });
 
-/**
- * Restreint un `StatistiquesContext` déjà chargé à une zone (ex. un département
- * ou les départements d'une région), sans recharger de données. Les modules de
- * calcul par bloc (structures/places/finance/contrôle-qualité/activité) dérivent
- * toujours leur périmètre depuis `structures`/`allStructures`/
- * `activeStructureIdsByPeriod`/`activeStructureIdsNow`/`departements` (jamais
- * directement depuis `typologies`/`adresses`/`budgets`/`eigs`/etc.), donc ne
- * restreindre que ces 5 champs suffit à propager la restriction à tous les calculs.
- */
+/** Restricts an already-loaded StatistiquesContext to a zone's structures, without refetching. */
 export const sliceStatistiquesContext = (
   context: StatistiquesContext,
   structureIdsInZone: Set<number>,

@@ -13,9 +13,7 @@ export type CartographieDbRegion = {
   name: string;
 };
 
-/** Source de vérité géographique : relation Prisma `Departement.regionId -> Region`
- * (contrairement aux constantes `DEPARTEMENTS`/`REGIONS` qui n'ont qu'un nom de
- * région en texte libre, non fiable pour un regroupement par code). */
+/** Uses the Prisma Departement/Region relation, not the free-text DEPARTEMENTS/REGIONS constants. */
 export const findAllDepartementsWithRegion = async (): Promise<
   CartographieDbDepartement[]
 > => {
@@ -37,6 +35,6 @@ export const findAllDepartementsWithRegion = async (): Promise<
   }));
 };
 
-/** Couvre le cas (théorique) d'une région sans département rattaché. */
+/** Covers the theoretical case of a region with no departement attached. */
 export const findAllRegions = async (): Promise<CartographieDbRegion[]> =>
   prisma.region.findMany({ select: { code: true, name: true } });
