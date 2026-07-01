@@ -125,6 +125,7 @@ export const updateOne = async (
     if (isFinalizing) {
       await createStructuresForCreationBlocks(tx, input.id);
       await moveActesAdministratifsToStructures(tx, input.id);
+      await endDnaStructuresForFermetureBlocks(tx, input.id);
       await setFermetureDates(tx, input.id);
     }
 
@@ -198,6 +199,33 @@ const createStructuresForCreationBlocks = async (
       structureVersionTransformation,
       bhasileCounterCache
     );
+  }
+};
+
+const endDnaStructuresForFermetureBlocks = async (
+  tx: PrismaTransaction,
+  transformationId: number
+): Promise<void> => {
+  const fermetureBlocks = await tx.structureVersionTransformation.findMany({
+    where: {
+      transformationId,
+      type: StructureVersionTransformationType.FERMETURE,
+    },
+    select: {
+      structureVersion: { select: { id: true, effectiveDate: true } },
+    },
+  });
+
+  for (const fermetureBlock of fermetureBlocks) {
+    const { structureVersion } = fermetureBlock;
+    if (!structureVersion?.effectiveDate) {
+      continue;
+    }
+
+    await tx.dnaStructure.updateMany({
+      where: { structureVersionId: structureVersion.id, endDate: null },
+      data: { endDate: structureVersion.effectiveDate },
+    });
   }
 };
 

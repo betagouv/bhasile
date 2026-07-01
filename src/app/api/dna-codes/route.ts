@@ -12,9 +12,11 @@ export async function GET(request: NextRequest) {
       Number(request.nextUrl.searchParams.get("structureVersionId")) ||
       undefined,
   };
+  const transformationId =
+    Number(request.nextUrl.searchParams.get("transformationId")) || undefined;
 
   try {
-    const dnaCodes = await getDnaCodes(entityId);
+    const dnaCodes = await getDnaCodes(entityId, transformationId);
     return NextResponse.json(dnaCodes);
   } catch (error) {
     console.error(error);
