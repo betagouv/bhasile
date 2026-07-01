@@ -2,6 +2,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { isBlank } from "@/app/utils/common.util";
 import { StructureFinessFormValues } from "@/schemas/forms/base/finess.schema";
 
 import { DeleteButton } from "../../common/DeleteButton";
@@ -13,6 +14,10 @@ const emptyStructureFiness: StructureFinessFormValues = {
     code: "",
   },
 };
+
+const isFinessEmpty = (structureFiness: StructureFinessFormValues): boolean =>
+  isBlank(structureFiness?.finess?.code) &&
+  isBlank(structureFiness?.description);
 
 export const FieldSetFiness = () => {
   const { control, watch, setValue } = useFormContext();
@@ -30,10 +35,14 @@ export const FieldSetFiness = () => {
   }, [isMultiDna, setValue, watch]);
 
   const handleDeleteFiness = (index: number) => {
-    setValue(
-      "structureFinesses",
-      structureFinesses.filter((_s, i) => i !== index)
-    );
+    if (structureFinesses.length > 1) {
+      setValue(
+        "structureFinesses",
+        structureFinesses.filter((_, finessIndex) => finessIndex !== index)
+      );
+      return;
+    }
+    setValue("structureFinesses", [emptyStructureFiness]);
   };
 
   const handleAddNewFiness = () => {
@@ -45,7 +54,7 @@ export const FieldSetFiness = () => {
       <legend className="text-lg font-bold mb-2 text-title-blue-france">
         Codes FINESS
       </legend>
-      {structureFinesses.map((_, index) => (
+      {structureFinesses.map((structureFiness, index) => (
         <div key={index} className="flex gap-6 items-start">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1">
             <div className="flex flex-col gap-1">
@@ -72,7 +81,8 @@ export const FieldSetFiness = () => {
             </div>
           </div>
           <div className="w-8 mt-9">
-            {index >= 1 && (
+            {(structureFinesses.length > 1 ||
+              !isFinessEmpty(structureFiness)) && (
               <DeleteButton
                 onClick={() => handleDeleteFiness(index)}
                 size="small"

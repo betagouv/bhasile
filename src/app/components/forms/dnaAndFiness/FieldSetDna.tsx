@@ -2,6 +2,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { isBlank } from "@/app/utils/common.util";
 import { DnaStructureFormValues } from "@/schemas/forms/base/dna.schema";
 import { EntityId } from "@/types/Entity.type";
 import { FormKind } from "@/types/global";
@@ -16,6 +17,9 @@ const emptyDnaStructure: DnaStructureFormValues = {
     code: "",
   },
 };
+
+const isDnaEmpty = (dnaStructure: DnaStructureFormValues): boolean =>
+  isBlank(dnaStructure?.dna?.code) && isBlank(dnaStructure?.description);
 
 export const FieldSetDna = ({
   formKind = FormKind.FINALISATION,
@@ -35,10 +39,14 @@ export const FieldSetDna = ({
   }, [isMultiDna, setValue, watch]);
 
   const handleDeleteDna = (index: number) => {
-    setValue(
-      "dnaStructures",
-      dnaStructures.filter((_, i) => i !== index)
-    );
+    if (dnaStructures.length > 1) {
+      setValue(
+        "dnaStructures",
+        dnaStructures.filter((_, dnaIndex) => dnaIndex !== index)
+      );
+      return;
+    }
+    setValue("dnaStructures", [emptyDnaStructure]);
   };
 
   const handleAddNewDna = () => {
@@ -50,7 +58,7 @@ export const FieldSetDna = ({
       <legend className="text-lg font-bold mb-2 text-title-blue-france">
         Codes DNA
       </legend>
-      {dnaStructures.map((_, index) => (
+      {dnaStructures.map((dnaStructure, index) => (
         <div key={index} className="flex gap-6 items-start">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1">
             <div className="flex flex-col gap-1">
@@ -76,7 +84,8 @@ export const FieldSetDna = ({
             </div>
           </div>
           <div className="w-8 mt-9">
-            {index >= 1 && formKind !== FormKind.MODIFICATION && (
+            {formKind !== FormKind.MODIFICATION &&
+              (dnaStructures.length > 1 || !isDnaEmpty(dnaStructure)) && (
               <DeleteButton
                 onClick={() => handleDeleteDna(index)}
                 size="small"
