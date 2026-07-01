@@ -10,7 +10,6 @@ import { computePlacesStatistiques } from "./places/places.util";
 import type { StatistiquesContext } from "./statistiques.db.type";
 import {
   findActivites,
-  findAllStructureIdsMatchingFilters,
   findBudgets,
   findCpomStructures,
   findDepartementsWithPopulation,
@@ -40,15 +39,19 @@ export const buildStatistiquesContext = async (
   const now = new Date();
   const referenceYear = now.getUTCFullYear();
 
-  const allStructureIds = await findAllStructureIdsMatchingFilters(filters);
+  const effectiveVersions = await findEffectiveStructureVersionsAtDate(
+    filters,
+    now
+  );
+  const allStructureIds = effectiveVersions
+    .map((version) => version.structureId)
+    .filter((id): id is number => id != null);
   if (allStructureIds.length === 0) {
     return null;
   }
 
-  const [effectiveVersions, structureActivityDates] = await Promise.all([
-    findEffectiveStructureVersionsAtDate(filters, now),
-    findStructureActivityDates(allStructureIds),
-  ]);
+  const structureActivityDates =
+    await findStructureActivityDates(allStructureIds);
 
   const activityContext = buildStatistiquesActivityContext(
     allStructureIds,

@@ -16,6 +16,7 @@ import type {
   StatistiquesContext,
 } from "../statistiques.db.type";
 import {
+  lookupActiveStructureIds,
   lookupStructureIdsForDnaAtDate,
   monthKeyToDate,
   toMonthKey,
@@ -195,18 +196,19 @@ export const computeActiviteStatistiques = (
     structureVersionTimeline,
     allStructures,
     structures,
+    activeStructureIdsByPeriod,
   } = context;
   const structureTypeById = new Map(
     allStructures.map((structure) => [structure.id, structure.type])
   );
-  const structureIdsInScope = new Set(structures.map((structure) => structure.id));
+  const structureIdsNow = new Set(structures.map((structure) => structure.id));
 
   const summaryTotals = emptyActiviteTotals();
   const latestActiviteByStructureId = buildLatestActiviteByStructureId(
     activites,
     dnaLinks,
     structureVersionTimeline,
-    structureIdsInScope
+    structureIdsNow
   );
 
   for (const [structureId, activite] of latestActiviteByStructureId) {
@@ -221,17 +223,22 @@ export const computeActiviteStatistiques = (
   const byMonth = new Map<string, ActiviteTotals>();
 
   for (const activite of activites) {
+    const monthKey = toMonthKey(new Date(activite.date));
+    const activeStructureIdsForMonth = lookupActiveStructureIds(
+      activeStructureIdsByPeriod,
+      "month",
+      monthKey
+    );
     const structureIds = resolveActiviteStructureIds(
       activite,
       dnaLinks,
       structureVersionTimeline,
-      structureIdsInScope
+      activeStructureIdsForMonth
     );
     if (structureIds.length === 0) {
       continue;
     }
 
-    const monthKey = toMonthKey(new Date(activite.date));
     const monthTotals = byMonth.get(monthKey) ?? emptyActiviteTotals();
     accumulateActivite(monthTotals, activite, structureIds, structureTypeById);
     byMonth.set(monthKey, monthTotals);

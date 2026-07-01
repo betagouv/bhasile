@@ -5,6 +5,7 @@ import type { StatistiqueDbActivite } from "@/app/api/statistiques/statistiques.
 import { StructureType } from "@/types/structure.type";
 
 import {
+  buildTestActiveStructureIdsByPeriod,
   buildTestDnaLinks,
   buildTestStatistiquesContext,
 } from "./test-helpers";
@@ -99,6 +100,10 @@ describe("activité - agrégés et série mensuelle", () => {
         adresses: [],
         departements: [],
         dnaLinks,
+        activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod(
+          structuresInScope.map((structure) => structure.id),
+          { periodDates: [new Date("2025-03-15")] }
+        ),
         activites: [
           activiteRow({
             id: 1,
@@ -157,6 +162,10 @@ describe("activité - agrégés et série mensuelle", () => {
         adresses: [],
         departements: [],
         dnaLinks: [dnaLinks[0]],
+        activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod(
+          structuresInScope.map((structure) => structure.id),
+          { periodDates: [new Date("2025-02-10"), new Date("2025-03-10")] }
+        ),
         activites: [
           activiteRow({
             id: 1,
@@ -186,5 +195,44 @@ describe("activité - agrégés et série mensuelle", () => {
 
     expect(result.summary.placesEnregistreesDna).toBe(100);
     expect(result.summary.placesIndisponibles).toBe(5);
+  });
+
+  it("par mois, compte une structure depuis fermée sur les mois où elle était encore active", () => {
+    const closedStructure = {
+      id: 5,
+      type: StructureType.CADA,
+      departementAdministratif: "75",
+    };
+    const closedDnaLinks = buildTestDnaLinks([
+      { structureId: 5, dnaCode: "DNA05" },
+    ]);
+
+    const result = computeActiviteStatistiques(
+      buildTestStatistiquesContext({
+        structures: [], // fermée : absente du périmètre "actif maintenant"
+        allStructures: [closedStructure],
+        typologies: [],
+        adresses: [],
+        departements: [],
+        dnaLinks: closedDnaLinks,
+        activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod([5], {
+          periodDates: [new Date("2025-01-10")],
+        }),
+        activites: [
+          activiteRow({
+            id: 1,
+            dnaCode: "DNA05",
+            date: new Date("2025-01-10"),
+            placesAutorisees: 30,
+            placesIndisponibles: 3,
+          }),
+        ],
+      })
+    );
+
+    expect(result.summary.placesEnregistreesDna).toBe(0);
+    expect(result.byMonth).toHaveLength(1);
+    expect(result.byMonth[0]?.placesEnregistreesDna).toBe(30);
+    expect(result.byMonth[0]?.placesIndisponibles).toBe(3);
   });
 });

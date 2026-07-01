@@ -1,5 +1,6 @@
 import { startOfNextUtcDay, startOfUtcDay } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
+import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
 
 import type {
   StatistiqueDbDnaLink,
@@ -20,6 +21,51 @@ export const createEmptyActiveStructureIdsByPeriod =
     trimester: new Map(),
     year: new Map(),
   });
+
+const excludedStructureTypes = new Set<string>(EXCLUDED_STRUCTURE_TYPES);
+
+export type StatistiquesResolvedPerimeterFilters = {
+  departements: Set<string> | null;
+  types: Set<string>;
+  operateurIds: Set<number> | null;
+};
+
+export type StatistiquesResolvableStructureVersion = {
+  type: string | null;
+  departementAdministratif: string | null;
+  structure: { operateurId: number | null } | null;
+};
+
+/**
+ * Applique les filtres (département/type/opérateur) sur une version déjà résolue
+ * comme "effective" (par ex. la version la plus récente finalisée).
+ */
+export const matchesStatistiquesPerimeterFilters = (
+  version: StatistiquesResolvableStructureVersion,
+  resolved: StatistiquesResolvedPerimeterFilters
+): boolean => {
+  if (version.type == null || excludedStructureTypes.has(version.type)) {
+    return false;
+  }
+  if (resolved.types.size > 0 && !resolved.types.has(version.type)) {
+    return false;
+  }
+  if (
+    resolved.departements &&
+    (version.departementAdministratif == null ||
+      !resolved.departements.has(version.departementAdministratif))
+  ) {
+    return false;
+  }
+  if (
+    resolved.operateurIds &&
+    (version.structure?.operateurId == null ||
+      !resolved.operateurIds.has(version.structure.operateurId))
+  ) {
+    return false;
+  }
+  return true;
+};
 
 const yearFromDate = (
   date: Date | string | null | undefined
@@ -60,9 +106,7 @@ export const buildStatistiquesActivityContext = (
     }
     closureDateByStructureId.set(
       structure.id,
-      structure.fermetureDate != null
-        ? new Date(structure.fermetureDate)
-        : null
+      structure.fermetureDate != null ? new Date(structure.fermetureDate) : null
     );
   }
 
@@ -350,16 +394,19 @@ const collectActivityYearKeys = (
   const years = new Set(typologieYears);
 
   for (const structureId of structureIds) {
-    const openingYear =
-      yearFromDate(openingDateByStructureId.get(structureId)) ?? referenceYear;
-    const closureYear =
+    const openingYear = Math.min(
+      yearFromDate(openingDateByStructureId.get(structureId)) ?? referenceYear,
+      referenceYear
+    );
+    const closureYear = Math.min(
       yearFromDate(closureDateByStructureId.get(structureId) ?? null) ??
-      referenceYear;
-    const maxYear = Math.max(openingYear, closureYear, referenceYear);
+        referenceYear,
+      referenceYear
+    );
 
     for (
       let year = Math.min(openingYear, closureYear);
-      year <= maxYear;
+      year <= referenceYear;
       year += 1
     ) {
       years.add(year);

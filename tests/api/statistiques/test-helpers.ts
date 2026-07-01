@@ -36,7 +36,6 @@ export const buildTestStructureVersionTimeline = (
     effectiveDate: entry.effectiveDate ?? defaultEffectiveDate,
     type: entry.type ?? StructureType.CADA,
     departementAdministratif: entry.departementAdministratif ?? "01",
-    structureVersionTransformation: null,
   }));
 };
 

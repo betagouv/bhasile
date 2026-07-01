@@ -49,7 +49,6 @@ export const formatDateToIsoString = (
 export const startOfUtcDay = (reference: Date = new Date()): Date => {
   const startDay = new Date(reference);
   startDay.setUTCHours(0, 0, 0, 0);
-  startDay.setUTCDate(startDay.getUTCDate());
   return startDay;
 };
 

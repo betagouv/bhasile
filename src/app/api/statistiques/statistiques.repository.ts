@@ -1,6 +1,7 @@
+import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
-import { Prisma, StructureType } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import type { StatistiquesFilters } from "@/schemas/api/statistique.schema";
 
@@ -19,88 +20,99 @@ import type {
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologie,
 } from "./statistiques.db.type";
+import {
+  matchesStatistiquesPerimeterFilters,
+  type StatistiquesResolvedPerimeterFilters,
+} from "./statistiques.utils";
 
 const excludedStructureTypes = new Set<string>(EXCLUDED_STRUCTURE_TYPES);
 
-const buildStructureVersionWhereFromFilters = async (
-  filters: StatistiquesFilters,
-  reference?: Date
-): Promise<Prisma.StructureVersionWhereInput> => {
-  const where: Prisma.StructureVersionWhereInput = {};
+/** Une version liée à une transformation non finalisée n'est jamais "effective". */
+const FINALIZED_VERSION_WHERE: Prisma.StructureVersionWhereInput = {
+  OR: [
+    { structureVersionTransformationId: null },
+    {
+      structureVersionTransformation: {
+        transformation: {
+          form: {
+            status: true,
+            formDefinition: { slug: FINALISATION_FORM_SLUG },
+          },
+        },
+      },
+    },
+  ],
+};
 
-  if (reference) {
-    where.effectiveDate = { lt: startOfNextUtcDay(reference) };
-  }
-
+const resolveStatistiquesFilters = async (
+  filters: StatistiquesFilters
+): Promise<StatistiquesResolvedPerimeterFilters> => {
   const depList = filters.departements?.split(",").filter(Boolean) ?? [];
-  if (depList.length > 0) {
-    where.departementAdministratif = { in: depList };
-  }
+  const typeList = (filters.types?.split(",").filter(Boolean) ?? []).filter(
+    (type) => !excludedStructureTypes.has(type)
+  );
 
   const operateurIds =
     filters.operateurs?.split(",").filter(Boolean).map(Number) ?? [];
+  let allOperateurIds: Set<number> | null = null;
   if (operateurIds.length > 0) {
     const filiales = await prisma.operateur.findMany({
       where: { parentId: { in: operateurIds } },
       select: { id: true },
     });
-    const allOperateurIds = [
-      ...new Set([...operateurIds, ...filiales.map((filiale) => filiale.id)]),
-    ];
-    where.structure = { operateurId: { in: allOperateurIds } };
+    allOperateurIds = new Set([
+      ...operateurIds,
+      ...filiales.map((filiale) => filiale.id),
+    ]);
   }
 
-  const typeList = filters.types?.split(",").filter(Boolean) ?? [];
-  where.type =
-    typeList.length > 0
-      ? {
-          not: null,
-          in: typeList.filter(
-            (type) => !excludedStructureTypes.has(type)
-          ) as StructureType[],
-        }
-      : {
-          not: null,
-          notIn: [...EXCLUDED_STRUCTURE_TYPES] as StructureType[],
-        };
-
-  return where;
+  return {
+    departements: depList.length > 0 ? new Set(depList) : null,
+    types: new Set(typeList),
+    operateurIds: allOperateurIds,
+  };
 };
 
-export const findAllStructureIdsMatchingFilters = async (
-  filters: StatistiquesFilters
-): Promise<number[]> => {
-  const where = await buildStructureVersionWhereFromFilters(filters);
-
-  const rows = await prisma.structureVersion.findMany({
-    where,
-    select: { structureId: true },
-    distinct: ["structureId"],
-  });
-
-  return rows
-    .map((row) => row.structureId)
-    .filter((id): id is number => id != null);
-};
-
+/**
+ * Résout d'abord la version réellement effective de chaque structure à `reference`
+ * (dernière version finalisée), puis applique les filtres sur cet état résolu.
+ */
 export const findEffectiveStructureVersionsAtDate = async (
   filters: StatistiquesFilters,
   reference: Date = new Date()
 ): Promise<StatistiqueDbEffectiveStructureVersion[]> => {
-  const where = await buildStructureVersionWhereFromFilters(filters, reference);
+  const resolved = await resolveStatistiquesFilters(filters);
 
-  return prisma.structureVersion.findMany({
-    where,
+  const versions = await prisma.structureVersion.findMany({
+    where: {
+      ...FINALIZED_VERSION_WHERE,
+      effectiveDate: { lt: startOfNextUtcDay(reference) },
+    },
     select: {
       id: true,
       structureId: true,
       effectiveDate: true,
       type: true,
       departementAdministratif: true,
+      structure: { select: { operateurId: true } },
     },
-    orderBy: [{ structureId: "asc" }, { effectiveDate: "desc" }],
+    orderBy: [
+      { structureId: "asc" },
+      { effectiveDate: "desc" },
+      { id: "desc" },
+    ],
     distinct: ["structureId"],
   });
+
+  return versions
+    .filter((version) => matchesStatistiquesPerimeterFilters(version, resolved))
+    .map((version) => ({
+      id: version.id,
+      structureId: version.structureId,
+      effectiveDate: version.effectiveDate,
+      type: version.type,
+      departementAdministratif: version.departementAdministratif,
+    }));
 };
 
 export const findStructureActivityDates = async (
@@ -219,13 +231,12 @@ export const findStructureVersionTimeline = async (
       effectiveDate: true,
       type: true,
       departementAdministratif: true,
-      structureVersionTransformation: {
-        select: {
-          type: true,
-        },
-      },
     },
-    orderBy: [{ structureId: "asc" }, { effectiveDate: "desc" }, { id: "desc" }],
+    orderBy: [
+      { structureId: "asc" },
+      { effectiveDate: "desc" },
+      { id: "desc" },
+    ],
   });
 };
 

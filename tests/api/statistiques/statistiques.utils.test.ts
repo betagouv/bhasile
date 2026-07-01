@@ -7,6 +7,8 @@ import {
   lookupStructureIdsForDnaAtDate,
   mapTypologieYears,
   mapVersionsToStructures,
+  matchesStatistiquesPerimeterFilters,
+  type StatistiquesResolvedPerimeterFilters,
   structuresActiveInPeriod,
 } from "@/app/api/statistiques/statistiques.utils";
 import { StructureType } from "@/types/structure.type";
@@ -391,5 +393,95 @@ describe("socle - résolution DNA à date", () => {
         new Set([1])
       )
     ).toEqual([]);
+  });
+});
+
+describe("matchesStatistiquesPerimeterFilters - filtres appliqués sur la version déjà résolue", () => {
+  const noFilters: StatistiquesResolvedPerimeterFilters = {
+    departements: null,
+    types: new Set(),
+    operateurIds: null,
+  };
+
+  const version = (
+    overrides: Partial<{
+      type: string | null;
+      departementAdministratif: string | null;
+      operateurId: number | null;
+    }> = {}
+  ) => ({
+    type: overrides.type === undefined ? StructureType.CADA : overrides.type,
+    departementAdministratif: overrides.departementAdministratif ?? "01",
+    structure:
+      overrides.operateurId === undefined
+        ? { operateurId: 1 }
+        : { operateurId: overrides.operateurId },
+  });
+
+  it("accepte une version valide sans filtre", () => {
+    expect(matchesStatistiquesPerimeterFilters(version(), noFilters)).toBe(
+      true
+    );
+  });
+
+  it("rejette un type exclu du périmètre (PRAHDA) même sans filtre de type", () => {
+    expect(
+      matchesStatistiquesPerimeterFilters(
+        version({ type: StructureType.PRAHDA }),
+        noFilters
+      )
+    ).toBe(false);
+  });
+
+  it("rejette une version sans type", () => {
+    expect(
+      matchesStatistiquesPerimeterFilters(version({ type: null }), noFilters)
+    ).toBe(false);
+  });
+
+  it("filtre par type", () => {
+    const filters = { ...noFilters, types: new Set([StructureType.CPH]) };
+    expect(
+      matchesStatistiquesPerimeterFilters(
+        version({ type: StructureType.CADA }),
+        filters
+      )
+    ).toBe(false);
+    expect(
+      matchesStatistiquesPerimeterFilters(
+        version({ type: StructureType.CPH }),
+        filters
+      )
+    ).toBe(true);
+  });
+
+  it("compare le filtre département à l'état résolu (courant), pas à un ancien état", () => {
+    // Régression : une structure transformée du département 01 vers 02 ne doit
+    // plus matcher un filtre "01", même si son ancienne version matchait.
+    const filters = { ...noFilters, departements: new Set(["01"]) };
+    const currentVersion = version({ departementAdministratif: "02" });
+
+    expect(matchesStatistiquesPerimeterFilters(currentVersion, filters)).toBe(
+      false
+    );
+    expect(
+      matchesStatistiquesPerimeterFilters(
+        version({ departementAdministratif: "01" }),
+        filters
+      )
+    ).toBe(true);
+  });
+
+  it("filtre par opérateur (filiales déjà résolues en amont)", () => {
+    const filters = { ...noFilters, operateurIds: new Set([10, 11]) };
+    expect(
+      matchesStatistiquesPerimeterFilters(version({ operateurId: 99 }), filters)
+    ).toBe(false);
+    expect(
+      matchesStatistiquesPerimeterFilters(version({ operateurId: 10 }), filters)
+    ).toBe(true);
+    expect(
+      matchesStatistiquesPerimeterFilters(version({ operateurId: null }), filters)
+    ).toBe(false);
   });
 });
