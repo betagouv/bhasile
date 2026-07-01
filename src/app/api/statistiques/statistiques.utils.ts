@@ -73,7 +73,7 @@ const yearFromDate = (
   if (date == null) {
     return null;
   }
-  return new Date(date).getFullYear();
+  return new Date(date).getUTCFullYear();
 };
 
 export const mapVersionsToStructures = (
@@ -207,7 +207,7 @@ export const filterByTwelveMonthWindow = <Item>(
   getDate: (item: Item) => Date | string | null | undefined
 ): Item[] => {
   const twelveMonthsAgo = startOfUtcDay();
-  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+  twelveMonthsAgo.setUTCMonth(twelveMonthsAgo.getUTCMonth() - 12);
   const cutoff = toMonthKey(twelveMonthsAgo);
 
   return items.filter((item) => {

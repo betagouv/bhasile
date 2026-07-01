@@ -113,7 +113,7 @@ export const getYearFromDate = (
     return 0;
   }
   if (date instanceof Date) {
-    return date.getFullYear();
+    return date.getUTCFullYear();
   }
   if (typeof date === "number") {
     return date;
