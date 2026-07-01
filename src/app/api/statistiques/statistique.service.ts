@@ -58,16 +58,12 @@ export const buildStatistiquesContext = async (
     structureActivityDates
   );
 
-  const effectiveStructureVersionIds = effectiveVersions
-    .map((version) => version.id)
-    .filter((id): id is number => id != null);
-
   const allStructures = mapVersionsToStructures(effectiveVersions);
 
   const [typologies, adresses, cpomLinks, dnaLinks, structureVersionTimeline] =
     await Promise.all([
       findStructureTypologies(allStructureIds),
-      findStructureAdresses(effectiveStructureVersionIds),
+      findStructureAdresses(allStructureIds),
       findCpomStructures(allStructureIds),
       findDnaLinks(allStructureIds),
       findStructureVersionTimeline(allStructureIds),

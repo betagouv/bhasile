@@ -13,6 +13,7 @@ import { StructureType } from "@/types/structure.type";
 import {
   buildTestActivityIndex,
   buildTestStatistiquesContext,
+  buildTestStructureVersionTimeline,
 } from "./test-helpers";
 
 const REFERENCE_DATE = new Date("2025-06-15T12:00:00.000Z");
@@ -45,10 +46,12 @@ const testAdresse = (
   id: number,
   structureId: number,
   repartition: Repartition,
-  placesAutorisees: number
+  placesAutorisees: number,
+  structureVersionId: number = structureId
 ): StatistiqueDbAdresse => ({
   id,
   structureId,
+  structureVersionId,
   repartition,
   placesAutorisees,
   qpv: 0,
@@ -263,6 +266,45 @@ describe("structures - répartition par type et bâti", () => {
       structures: 1,
       places: 60,
     });
+  });
+
+  it("ne mélange pas une ancienne adresse (version révolue) avec l'adresse courante pour le bâti", () => {
+    // Structure transformée : ancienne StructureVersion (101, COLLECTIF) remplacée
+    // par une nouvelle (102, DIFFUS). Seule la version courante doit compter.
+    const structureVersionTimeline = buildTestStructureVersionTimeline([
+      {
+        structureId: 1,
+        structureVersionId: 101,
+        effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
+      },
+      {
+        structureId: 1,
+        structureVersionId: 102,
+        effectiveDate: new Date("2023-06-01T00:00:00.000Z"),
+      },
+    ]);
+
+    const result = computeStructuresStatistiques(
+      buildTestStatistiquesContext({
+        structures: [testStructure(1)],
+        structureVersionTimeline,
+        typologies: [testTypologie(1, 1, 2024, 100)],
+        adresses: [
+          testAdresse(10, 1, Repartition.COLLECTIF, 60, 101),
+          testAdresse(11, 1, Repartition.DIFFUS, 40, 102),
+        ],
+        departements: [],
+      })
+    );
+
+    expect(result.structureBatis).toContainEqual({
+      bati: Repartition.DIFFUS,
+      structures: 1,
+      places: 40,
+    });
+    expect(result.structureBatis).not.toContainEqual(
+      expect.objectContaining({ bati: Repartition.MIXTE, structures: 1 })
+    );
   });
 });
 

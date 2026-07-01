@@ -164,6 +164,9 @@ export const trimesterKeyToDate = (trimesterKey: string): Date =>
 export const yearKeyToDate = (yearKey: string): Date =>
   new Date(Date.UTC(Number(yearKey), 0, 1));
 
+export const endOfYearUtc = (year: number): Date =>
+  new Date(Date.UTC(year, 11, 31));
+
 const getMonthPeriodBounds = (monthKey: string): { start: Date; end: Date } => {
   const [year, month] = monthKey.split("-").map(Number);
   return {
@@ -249,6 +252,43 @@ export const getEffectiveStructureVersionAtDate = (
   }
 
   return effectiveVersion;
+};
+
+/**
+ * Ne garde que les lignes (adresses, typologies, …) rattachées à la
+ * StructureVersion effective de leur structure à `date` (plafonnée à `now`
+ * pour ne jamais anticiper une version pas encore effective). Généralise le
+ * pivot déjà utilisé pour les liens DNA (`lookupStructureIdsForDnaAtDate`) à
+ * n'importe quelle donnée rattachée à une `structureVersionId`.
+ */
+export const filterByEffectiveVersionAtDate = <
+  Row extends { structureId: number; structureVersionId: number | null },
+>(
+  rows: Row[],
+  structureIds: Iterable<number>,
+  date: Date,
+  timeline: StatistiqueDbStructureVersionTimeline[],
+  now: Date = new Date()
+): Row[] => {
+  const cappedDate = date < now ? date : now;
+  const effectiveVersionIdByStructureId = new Map<number, number>();
+
+  for (const structureId of structureIds) {
+    const effectiveVersion = getEffectiveStructureVersionAtDate(
+      structureId,
+      cappedDate,
+      timeline
+    );
+    if (effectiveVersion?.id != null) {
+      effectiveVersionIdByStructureId.set(structureId, effectiveVersion.id);
+    }
+  }
+
+  return rows.filter(
+    (row) =>
+      effectiveVersionIdByStructureId.get(row.structureId) ===
+      row.structureVersionId
+  );
 };
 
 export const lookupStructureIdsForDnaAtDate = (

@@ -168,13 +168,15 @@ export const findStructureTypologies = async (
   }));
 };
 
+/** Historique complet (toutes versions) - la résolution "à quelle date" se fait en aval. */
 export const findStructureAdresses = async (
-  structureVersionIds: number[]
+  structureIds: number[]
 ): Promise<StatistiqueDbAdresse[]> => {
   const rows = await prisma.adresse.findMany({
-    where: { structureVersionId: { in: structureVersionIds } },
+    where: structureVersionScope(structureIds),
     select: {
       id: true,
+      structureVersionId: true,
       structureVersion: { select: { structureId: true } },
       repartition: true,
       placesAutorisees: true,
@@ -186,6 +188,7 @@ export const findStructureAdresses = async (
   return rows.map((row) => ({
     id: row.id,
     structureId: structureIdFromVersion(row),
+    structureVersionId: row.structureVersionId!,
     repartition: row.repartition,
     placesAutorisees: row.placesAutorisees,
     qpv: row.qpv,

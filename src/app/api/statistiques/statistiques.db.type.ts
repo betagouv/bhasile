@@ -41,16 +41,24 @@ export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
 
 export type StatistiqueDbTypologieValues = Omit<StatistiqueDbTypologie, "id">;
 
-export type StatistiqueDbAdresse = Prisma.AdresseGetPayload<{
-  select: {
-    id: true;
-    structureId: true;
-    repartition: true;
-    placesAutorisees: true;
-    qpv: true;
-    logementSocial: true;
-  };
-}>;
+/** `structureId` / `structureVersionId` : garantis non nuls par le scope de la requête (`findStructureAdresses`). */
+export type StatistiqueDbAdresse = Omit<
+  Prisma.AdresseGetPayload<{
+    select: {
+      id: true;
+      structureId: true;
+      structureVersionId: true;
+      repartition: true;
+      placesAutorisees: true;
+      qpv: true;
+      logementSocial: true;
+    };
+  }>,
+  "structureId" | "structureVersionId"
+> & {
+  structureId: number;
+  structureVersionId: number;
+};
 
 export type StatistiqueDbEvaluation = Prisma.EvaluationGetPayload<{
   select: {

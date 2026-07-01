@@ -13,6 +13,7 @@ import { StructureType } from "@/types/structure.type";
 import {
   buildTestActivityIndex,
   buildTestStatistiquesContext,
+  buildTestStructureVersionTimeline,
 } from "./test-helpers";
 
 const REFERENCE_DATE = new Date("2025-06-15T12:00:00.000Z");
@@ -48,10 +49,13 @@ const testTypologie = (
 const testAdresse = (
   id: number,
   structureId: number,
-  overrides: Partial<Pick<StatistiqueDbAdresse, "qpv" | "logementSocial">> = {}
+  overrides: Partial<
+    Pick<StatistiqueDbAdresse, "qpv" | "logementSocial" | "structureVersionId">
+  > = {}
 ): StatistiqueDbAdresse => ({
   id,
   structureId,
+  structureVersionId: overrides.structureVersionId ?? structureId,
   repartition: Repartition.COLLECTIF,
   placesAutorisees: 0,
   qpv: overrides.qpv ?? 0,
@@ -346,5 +350,50 @@ describe("places - indicateurs annuels (byYear)", () => {
     expect(year2024?.qpv).toBe(7);
     expect(year2023?.totalPlaces).toBe(80);
     expect(year2024?.totalPlaces).toBe(100);
+  });
+
+  it("reconstitue qpv/logementsSociaux par année depuis l'historique des StructureVersion, sans se figer sur l'adresse courante", () => {
+    // Structure transformée le 01/06/2023 : nouvelle StructureVersion (102) avec une
+    // nouvelle adresse. Avant cette date, la version (101) et son adresse s'appliquent.
+    const structureVersionTimeline = buildTestStructureVersionTimeline([
+      {
+        structureId: 1,
+        structureVersionId: 101,
+        effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
+      },
+      {
+        structureId: 1,
+        structureVersionId: 102,
+        effectiveDate: new Date("2023-06-01T00:00:00.000Z"),
+      },
+    ]);
+
+    const result = computePlacesStatistiques(
+      buildTestStatistiquesContext({
+        structures: [testStructure(1)],
+        structureVersionTimeline,
+        typologies: [
+          testTypologie(1, 1, 2021, 100),
+          testTypologie(2, 1, 2022, 100),
+          testTypologie(3, 1, 2023, 100),
+        ],
+        adresses: [
+          testAdresse(10, 1, { qpv: 5, structureVersionId: 101 }),
+          testAdresse(11, 1, { qpv: 9, structureVersionId: 102 }),
+        ],
+        departements: testDepartements().slice(0, 1),
+      })
+    );
+
+    const year2021 = result.byYear.find((entry) => entry.year === 2021);
+    const year2022 = result.byYear.find((entry) => entry.year === 2022);
+    const year2023 = result.byYear.find((entry) => entry.year === 2023);
+
+    expect(year2021?.qpv).toBe(5);
+    expect(year2022?.qpv).toBe(5);
+    expect(year2023?.qpv).toBe(9);
+
+    // Vue globale (aujourd'hui) : uniquement la version courante, pas la somme historique (5+9).
+    expect(result.qpv).toBe(9);
   });
 });

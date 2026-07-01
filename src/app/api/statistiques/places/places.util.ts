@@ -8,12 +8,14 @@ import type {
   StatistiqueDbAdresse,
   StatistiqueDbDepartement,
   StatistiqueDbStructure,
+  StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologieValues,
   StatistiquesContext,
 } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
-  filterByActiveStructureId,
+  endOfYearUtc,
+  filterByEffectiveVersionAtDate,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
@@ -64,13 +66,12 @@ const sumStructureTypologiePlacesSpeciales = (
 };
 
 const sumAdressePlacesSpeciales = (
-  adresses: StatistiqueDbAdresse[],
-  structureIds: Set<number>
+  adressesInScope: StatistiqueDbAdresse[]
 ): PlacesSpecialesAdresse => {
   let qpv = 0;
   let logementsSociaux = 0;
 
-  for (const adresse of filterByActiveStructureId(adresses, structureIds)) {
+  for (const adresse of adressesInScope) {
     qpv += adresse.qpv ?? 0;
     logementsSociaux += adresse.logementSocial ?? 0;
   }
@@ -110,16 +111,23 @@ const computePlacesIndicators = (
   structures: StatistiqueDbStructure[],
   typologieMap: Map<number, StatistiqueDbTypologieValues>,
   adresses: StatistiqueDbAdresse[],
-  departements: StatistiqueDbDepartement[]
+  departements: StatistiqueDbDepartement[],
+  structureVersionTimeline: StatistiqueDbStructureVersionTimeline[],
+  referenceDate: Date,
+  now: Date
 ): PlacesIndicators => {
   const structuresWithTypologie = filterStructuresWithTypologie(
     structures,
     typologieMap
   );
-  const structureIds = new Set(
-    structuresWithTypologie.map((structure) => structure.id)
-  );
   const totalPlaces = computeTotalPlaces(structuresWithTypologie, typologieMap);
+  const adressesInScope = filterByEffectiveVersionAtDate(
+    adresses,
+    structuresWithTypologie.map((structure) => structure.id),
+    referenceDate,
+    structureVersionTimeline,
+    now
+  );
 
   return {
     totalPlaces,
@@ -128,7 +136,7 @@ const computePlacesIndicators = (
       structuresWithTypologie,
       typologieMap
     ),
-    ...sumAdressePlacesSpeciales(adresses, structureIds),
+    ...sumAdressePlacesSpeciales(adressesInScope),
   };
 };
 
@@ -142,15 +150,20 @@ export const computePlacesStatistiques = (
     typologies,
     adresses,
     departements,
+    structureVersionTimeline,
   } = context;
   const typologieMap = getLastTypologiePerStructure(typologies);
+  const now = new Date();
 
   return {
     ...computePlacesIndicators(
       structures,
       typologieMap,
       adresses,
-      departements
+      departements,
+      structureVersionTimeline,
+      now,
+      now
     ),
     byYear: mapTypologieYears<PlacesByYearStat>(
       allStructures,
@@ -161,7 +174,10 @@ export const computePlacesStatistiques = (
           structuresForYear,
           getTypologieMapForExactYear(typologies, year),
           adresses,
-          departements
+          departements,
+          structureVersionTimeline,
+          endOfYearUtc(year),
+          now
         )
     ),
   };

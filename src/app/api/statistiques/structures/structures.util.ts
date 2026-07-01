@@ -24,6 +24,7 @@ import type {
 } from "../statistiques.db.type";
 import {
   filterByActiveStructureId,
+  filterByEffectiveVersionAtDate,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
@@ -328,13 +329,24 @@ const computeByYearStats = (
 export const computeStructuresStatistiques = (
   context: StatistiquesContext
 ): StatistiqueApiRead["structures"] => {
-  const { structures, typologies, adresses, cpomLinks } = context;
+  const { structures, typologies, adresses, cpomLinks, structureVersionTimeline } =
+    context;
   const typologieMap = getLastTypologiePerStructure(typologies);
   const structuresWithTypologie = filterStructuresWithTypologie(
     structures,
     typologieMap
   );
-  const batiMap = getBatiPerStructure(adresses);
+  const now = new Date();
+  // Le bâti (vue globale et byYear) reflète l'adresse actuelle : `adresses` remonte
+  // désormais tout l'historique des versions, on résout ici la version effective à date.
+  const currentAdresses = filterByEffectiveVersionAtDate(
+    adresses,
+    structures.map((structure) => structure.id),
+    now,
+    structureVersionTimeline,
+    now
+  );
+  const batiMap = getBatiPerStructure(currentAdresses);
   const activeStructureIds = structures.map((structure) => structure.id);
   const { totalCpoms, structuresAvecCpom } = computeActiveCpomStats(
     cpomLinks,
@@ -349,7 +361,7 @@ export const computeStructuresStatistiques = (
     structureBatis: computeBatiStats(
       structuresWithTypologie,
       batiMap,
-      adresses
+      currentAdresses
     ),
     byYear: computeByYearStats(context, batiMap),
   };
