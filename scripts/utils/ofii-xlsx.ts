@@ -7,6 +7,8 @@
 import type { WorkSheet } from "xlsx";
 import * as XLSX from "xlsx";
 
+import { normalizeCellValue } from "./xlsx-cell";
+
 const POSSIBLE_REF_COLUMNS: Record<keyof OfiiReferentialRow, string[]> = {
   dnaCode: ["Code"],
   nom: ["Nom du centre", "Nom"],
@@ -162,13 +164,6 @@ function findHeaderRow(sheet: WorkSheet): number {
     }
   }
   return -1;
-}
-
-function normalizeCellValue(val: unknown): string {
-  if (val == null) {
-    return "";
-  }
-  return String(val).trim();
 }
 
 /* Charge les données référentiel + activité (onglet le plus récent ou "Liste" si présent) */
