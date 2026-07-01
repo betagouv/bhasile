@@ -1,4 +1,5 @@
 import type { NumericAggregation } from "@/app/utils/math.util";
+import { parseCommaList } from "@/app/utils/string.util";
 import { FinanceByYearScopeStat } from "@/schemas/api/statistique.schema";
 import {
   CartographieEvolutionStat,
@@ -53,9 +54,8 @@ export const resolveZoneDepartementNumeros = (
   filters: Pick<StatistiqueCartographieFilters, "departements" | "regions">,
   allDepartements: CartographieDbDepartement[]
 ): Set<string> | null => {
-  const departementList =
-    filters.departements?.split(",").filter(Boolean) ?? [];
-  const regionList = filters.regions?.split(",").filter(Boolean) ?? [];
+  const departementList = parseCommaList(filters.departements);
+  const regionList = parseCommaList(filters.regions);
 
   if (departementList.length === 0 && regionList.length === 0) {
     return null;
@@ -172,6 +172,16 @@ type IndicateurValuesComputer = (
   aggregation: NumericAggregation
 ) => CartographieIndicateurValues;
 
+/** Wraps a single-year compute function into a value/previousValue pair for `annee` and `annee - 1`. */
+const yearOverYear =
+  (
+    compute: (context: StatistiquesContext, year: number) => number | null
+  ): IndicateurValuesComputer =>
+  (context, annee) => ({
+    value: compute(context, annee),
+    previousValue: compute(context, annee - 1),
+  });
+
 const financeValuesForYears = (
   context: StatistiquesContext,
   annee: number,
@@ -217,58 +227,30 @@ export const INDICATEUR_COMPUTERS: Record<
   CartographieIndicateur,
   IndicateurValuesComputer
 > = {
-  "structures.total": (context, annee) => ({
-    value: computeStructuresIndicatorForYear(context, annee, "totalStructures"),
-    previousValue: computeStructuresIndicatorForYear(
-      context,
-      annee - 1,
-      "totalStructures"
-    ),
-  }),
-  "structures.avecCpom": (context, annee) => ({
-    value: computeStructuresIndicatorForYear(
-      context,
-      annee,
-      "structuresAvecCpom"
-    ),
-    previousValue: computeStructuresIndicatorForYear(
-      context,
-      annee - 1,
-      "structuresAvecCpom"
-    ),
-  }),
-  "places.autorisees": (context, annee) => ({
-    value: computeTypologieFieldForYear(context, annee, "placesAutorisees"),
-    previousValue: computeTypologieFieldForYear(
-      context,
-      annee - 1,
-      "placesAutorisees"
-    ),
-  }),
-  "places.pmr": (context, annee) => ({
-    value: computeTypologieFieldForYear(context, annee, "pmr"),
-    previousValue: computeTypologieFieldForYear(context, annee - 1, "pmr"),
-  }),
-  "places.lgbt": (context, annee) => ({
-    value: computeTypologieFieldForYear(context, annee, "lgbt"),
-    previousValue: computeTypologieFieldForYear(context, annee - 1, "lgbt"),
-  }),
-  "places.fvvTeh": (context, annee) => ({
-    value: computeTypologieFieldForYear(context, annee, "fvvTeh"),
-    previousValue: computeTypologieFieldForYear(context, annee - 1, "fvvTeh"),
-  }),
-  "places.qpv": (context, annee) => ({
-    value: computeAdresseFieldForYear(context, annee, "qpv"),
-    previousValue: computeAdresseFieldForYear(context, annee - 1, "qpv"),
-  }),
-  "places.logementsSociaux": (context, annee) => ({
-    value: computeAdresseFieldForYear(context, annee, "logementSocial"),
-    previousValue: computeAdresseFieldForYear(
-      context,
-      annee - 1,
-      "logementSocial"
-    ),
-  }),
+  "structures.total": yearOverYear((context, year) =>
+    computeStructuresIndicatorForYear(context, year, "totalStructures")
+  ),
+  "structures.avecCpom": yearOverYear((context, year) =>
+    computeStructuresIndicatorForYear(context, year, "structuresAvecCpom")
+  ),
+  "places.autorisees": yearOverYear((context, year) =>
+    computeTypologieFieldForYear(context, year, "placesAutorisees")
+  ),
+  "places.pmr": yearOverYear((context, year) =>
+    computeTypologieFieldForYear(context, year, "pmr")
+  ),
+  "places.lgbt": yearOverYear((context, year) =>
+    computeTypologieFieldForYear(context, year, "lgbt")
+  ),
+  "places.fvvTeh": yearOverYear((context, year) =>
+    computeTypologieFieldForYear(context, year, "fvvTeh")
+  ),
+  "places.qpv": yearOverYear((context, year) =>
+    computeAdresseFieldForYear(context, year, "qpv")
+  ),
+  "places.logementsSociaux": yearOverYear((context, year) =>
+    computeAdresseFieldForYear(context, year, "logementSocial")
+  ),
   "finance.dotationAccordee": (context, annee, aggregation) =>
     financeValuesForYears(context, annee, aggregation, "dotationAccordee"),
   "finance.etp": (context, annee, aggregation) =>

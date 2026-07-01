@@ -13,19 +13,13 @@ import type {
   StatistiqueDbBudget,
   StatistiqueDbCpomStructure,
   StatistiqueDbEig,
-  StatistiqueDbStructure,
   StatistiqueDbTypologie,
 } from "@/app/api/statistiques/statistiques.db.type";
 import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
 import { buildTestActivityIndex, buildTestStatistiquesContext } from "../test-helpers";
-
-const testStructure = (
-  id: number,
-  departementAdministratif: string,
-  type: StructureType = StructureType.CADA
-): StatistiqueDbStructure => ({ id, type, departementAdministratif });
+import { testStructure } from "./cartographie.test-helpers";
 
 const testTypologie = (
   id: number,

@@ -6,9 +6,9 @@ import type {
   StatistiqueDbStructure,
   StatistiquesContext,
 } from "@/app/api/statistiques/statistiques.db.type";
-import { StructureType } from "@/types/structure.type";
 
 import { buildTestActivityIndex } from "../test-helpers";
+import { testStructure } from "./cartographie.test-helpers";
 
 const mockBuildStatistiquesContext = vi.fn();
 const mockFindAllDepartementsWithRegion = vi.fn();
@@ -24,15 +24,6 @@ vi.mock("@/app/api/statistiques/cartographie/cartographie.repository", () => ({
     mockFindAllDepartementsWithRegion(...args),
   findAllRegions: (...args: unknown[]) => mockFindAllRegions(...args),
 }));
-
-const testStructure = (
-  id: number,
-  departementAdministratif: string
-): StatistiqueDbStructure => ({
-  id,
-  type: StructureType.CADA,
-  departementAdministratif,
-});
 
 const ALL_DEPARTEMENTS: CartographieDbDepartement[] = [
   {

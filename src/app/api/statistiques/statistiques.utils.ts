@@ -641,6 +641,35 @@ export const filterStructuresWithTypologie = (
 ): StatistiqueDbStructure[] =>
   structures.filter((structure) => typologieMap.has(structure.id));
 
+/** Shared prologue for the cartographie one-year indicator computers: null when the year has no typologie data. */
+export const resolveStructuresWithTypologieForYear = (
+  context: Pick<
+    StatistiquesContext,
+    "allStructures" | "activeStructureIdsByPeriod" | "typologies"
+  >,
+  year: number
+): {
+  structures: StatistiqueDbStructure[];
+  typologieMap: Map<number, StatistiqueDbTypologieValues>;
+} | null => {
+  if (!getTypologieYears(context.typologies).includes(year)) {
+    return null;
+  }
+
+  const typologieMap = getTypologieMapForExactYear(context.typologies, year);
+  const structuresForYear = structuresActiveInPeriod(
+    context.allStructures,
+    context.activeStructureIdsByPeriod,
+    "year",
+    String(year)
+  );
+
+  return {
+    structures: filterStructuresWithTypologie(structuresForYear, typologieMap),
+    typologieMap,
+  };
+};
+
 export const computeTotalPlaces = (
   structures: StatistiqueDbStructure[],
   typologieMap: Map<number, StatistiqueDbTypologieValues>

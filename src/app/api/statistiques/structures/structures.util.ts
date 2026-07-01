@@ -29,9 +29,8 @@ import {
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
-  getTypologieYears,
   mapTypologieYears,
-  structuresActiveInPeriod,
+  resolveStructuresWithTypologieForYear,
 } from "../statistiques.utils";
 
 const getRepartitionFromRepartitions = (
@@ -423,32 +422,18 @@ export const computeStructuresIndicatorForYear = (
   year: number,
   field: StructuresYearIndicatorField
 ): number | null => {
-  if (!getTypologieYears(context.typologies).includes(year)) {
+  const resolved = resolveStructuresWithTypologieForYear(context, year);
+  if (!resolved) {
     return null;
   }
 
-  const typologieMapForYear = getTypologieMapForExactYear(
-    context.typologies,
-    year
-  );
-  const structuresForYear = structuresActiveInPeriod(
-    context.allStructures,
-    context.activeStructureIdsByPeriod,
-    "year",
-    String(year)
-  );
-  const structuresWithTypologie = filterStructuresWithTypologie(
-    structuresForYear,
-    typologieMapForYear
-  );
-
   if (field === "totalStructures") {
-    return structuresWithTypologie.length;
+    return resolved.structures.length;
   }
 
   return countStructuresAvecCpomForYear(
     context.cpomLinks,
-    new Set(structuresWithTypologie.map((structure) => structure.id)),
+    new Set(resolved.structures.map((structure) => structure.id)),
     year
   );
 };

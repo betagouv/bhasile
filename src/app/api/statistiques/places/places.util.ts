@@ -20,9 +20,8 @@ import {
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
-  getTypologieYears,
   mapTypologieYears,
-  structuresActiveInPeriod,
+  resolveStructuresWithTypologieForYear,
 } from "../statistiques.utils";
 
 type PlacesSpeciales = {
@@ -197,29 +196,15 @@ export const computeTypologieFieldForYear = (
   year: number,
   field: PlacesTypologieField
 ): number | null => {
-  if (!getTypologieYears(context.typologies).includes(year)) {
+  const resolved = resolveStructuresWithTypologieForYear(context, year);
+  if (!resolved) {
     return null;
   }
 
-  const typologieMapForYear = getTypologieMapForExactYear(
-    context.typologies,
-    year
-  );
-  const structuresForYear = structuresActiveInPeriod(
-    context.allStructures,
-    context.activeStructureIdsByPeriod,
-    "year",
-    String(year)
-  );
-  const structuresWithTypologie = filterStructuresWithTypologie(
-    structuresForYear,
-    typologieMapForYear
-  );
-
   return (
     sumValues(
-      structuresWithTypologie.map(
-        (structure) => typologieMapForYear.get(structure.id)?.[field]
+      resolved.structures.map(
+        (structure) => resolved.typologieMap.get(structure.id)?.[field]
       )
     ) ?? 0
   );
@@ -240,27 +225,14 @@ export const computeAdresseFieldForYear = (
   year: number,
   field: PlacesAdresseField
 ): number | null => {
-  if (!getTypologieYears(context.typologies).includes(year)) {
+  const resolved = resolveStructuresWithTypologieForYear(context, year);
+  if (!resolved) {
     return null;
   }
 
-  const typologieMapForYear = getTypologieMapForExactYear(
-    context.typologies,
-    year
-  );
-  const structuresForYear = structuresActiveInPeriod(
-    context.allStructures,
-    context.activeStructureIdsByPeriod,
-    "year",
-    String(year)
-  );
-  const structuresWithTypologie = filterStructuresWithTypologie(
-    structuresForYear,
-    typologieMapForYear
-  );
   const adressesInScope = filterByEffectiveVersionAtDate(
     context.adresses,
-    structuresWithTypologie.map((structure) => structure.id),
+    resolved.structures.map((structure) => structure.id),
     endOfYearUtc(year),
     context.structureVersionTimeline,
     new Date()
