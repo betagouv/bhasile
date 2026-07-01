@@ -1,9 +1,5 @@
 /**
  * Charge un fichier XLSX "Suivi RMU" (référés mesures utiles / sorties administratives).
- * Le fichier contient un onglet par région, chaque onglet étant composé de blocs répétés
- * par département : une ligne d'en-tête (dates mensuelles + "Cumul" + "Commentaires"),
- * suivie d'une ligne par catégorie de suivi. Le bloc de total région (nom de bloc = nom
- * de la région) est ignoré au moment du rapprochement avec les départements en base.
  * Dépendance : npm install xlsx
  */
 
@@ -41,8 +37,7 @@ export type RmuRow = {
 
 const COMMENTAIRES_HEADER = "commentaires";
 const CUMUL_HEADER_PREFIX = "cumul";
-// Décalage des colonnes (département, catégorie, premier mois) par rapport à la
-// première colonne utilisée dans la feuille (qui n'est pas forcément la colonne A).
+// Décalage des colonnes
 const DEPARTEMENT_COL_OFFSET = 0;
 const CATEGORIE_COL_OFFSET = 1;
 const FIRST_MONTH_COL_OFFSET = 2;
@@ -60,7 +55,6 @@ type HeaderInfo = {
   monthColumns: { col: number; date: Date }[];
 };
 
-/* Une ligne d'en-tête de bloc contient la colonne "Commentaires" (les dates de mois varient). */
 function readHeaderInfo(
   sheet: WorkSheet,
   row: number,
@@ -97,7 +91,6 @@ function readHeaderInfo(
   return { monthColumns };
 }
 
-/* Parse un onglet région : retourne une ligne par (bloc, mois) trouvé, quel que soit le nom du bloc */
 function parseSheet(sheet: WorkSheet): RmuRow[] {
   const range = decodeSheetRange(sheet);
   const rows: RmuRow[] = [];
@@ -162,8 +155,12 @@ function parseSheet(sheet: WorkSheet): RmuRow[] {
   return rows;
 }
 
-/* Charge toutes les lignes RMU (tous départements, tous onglets/régions) d'un fichier "Suivi RMU" */
+/* Un fichier "Suivi RMU" ne contient qu'un seul onglet, pour une seule région. */
 export function loadRmuFile(buffer: Buffer): RmuRow[] {
   const wb = XLSX.read(buffer, { type: "buffer", raw: true });
-  return wb.SheetNames.flatMap((sheetName) => parseSheet(wb.Sheets[sheetName]));
+  const sheetName = wb.SheetNames[0];
+  if (!sheetName) {
+    throw new Error("Le fichier XLSX RMU ne contient aucun onglet.");
+  }
+  return parseSheet(wb.Sheets[sheetName]);
 }
