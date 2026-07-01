@@ -92,7 +92,7 @@ const buildFinanceContext = (args: {
   });
 };
 
-describe("finance — périmètres autorisées / subventionnées / total", () => {
+describe("finance - périmètres autorisées / subventionnées / total", () => {
   it("répartit les budgets et les résultats nets sur les trois scopes", () => {
     const structures = [
       testStructure(1, StructureType.CADA),
@@ -153,7 +153,7 @@ describe("finance — périmètres autorisées / subventionnées / total", () =>
   });
 });
 
-describe("finance — fallback réalisé vers prévisionnel", () => {
+describe("finance - fallback réalisé vers prévisionnel", () => {
   it("prend le réalisé si présent, sinon repli prévisionnel, champ par champ", () => {
     const structures = [
       testStructure(1, StructureType.CADA),
@@ -190,7 +190,7 @@ describe("finance — fallback réalisé vers prévisionnel", () => {
   });
 });
 
-describe("finance — moyenne et médiane", () => {
+describe("finance - moyenne et médiane", () => {
   it("applique moyenne ou médiane sur taux et coût (après résolution réalisé/prévisionnel)", () => {
     const structures = [
       testStructure(1, StructureType.CADA),

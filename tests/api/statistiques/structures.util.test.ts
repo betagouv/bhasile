@@ -70,7 +70,7 @@ const cpomLink = (
   cpom: { actesAdministratifs: [] },
 });
 
-describe("structures — CPOM actifs à la date de référence", () => {
+describe("structures - CPOM actifs à la date de référence", () => {
   beforeEach(() => {
     vi.setSystemTime(REFERENCE_DATE);
   });
@@ -91,13 +91,7 @@ describe("structures — CPOM actifs à la date de référence", () => {
         adresses: [],
         departements: [],
         cpomLinks: [1, 2, 3].map((structureId) =>
-          cpomLink(
-            structureId,
-            100,
-            structureId,
-            "2024-01-01",
-            "2025-12-31"
-          )
+          cpomLink(structureId, 100, structureId, "2024-01-01", "2025-12-31")
         ),
       })
     );
@@ -164,7 +158,7 @@ describe("structures — CPOM actifs à la date de référence", () => {
   });
 });
 
-describe("structures — répartition par type et bâti", () => {
+describe("structures - répartition par type et bâti", () => {
   it("ne compte par type que les structures ouvertes disposant d'une typologie", () => {
     const result = computeStructuresStatistiques(
       buildTestStatistiquesContext({
@@ -272,7 +266,7 @@ describe("structures — répartition par type et bâti", () => {
   });
 });
 
-describe("structures — indicateurs annuels (byYear)", () => {
+describe("structures - indicateurs annuels (byYear)", () => {
   beforeEach(() => {
     vi.setSystemTime(REFERENCE_DATE);
   });
@@ -313,8 +307,12 @@ describe("structures — indicateurs annuels (byYear)", () => {
   };
 
   it("distingue le total annuel du total au jour de référence", () => {
-    const { openStructures, allStructures, activeStructureIdsNow, activeStructureIdsByPeriod } =
-      buildClosureContext();
+    const {
+      openStructures,
+      allStructures,
+      activeStructureIdsNow,
+      activeStructureIdsByPeriod,
+    } = buildClosureContext();
 
     const result = computeStructuresStatistiques(
       buildTestStatistiquesContext({
@@ -337,8 +335,12 @@ describe("structures — indicateurs annuels (byYear)", () => {
   });
 
   it("compte les CPOM actifs sur l'année civile, pas seulement au jour de référence", () => {
-    const { openStructures, allStructures, activeStructureIdsNow, activeStructureIdsByPeriod } =
-      buildClosureContext();
+    const {
+      openStructures,
+      allStructures,
+      activeStructureIdsNow,
+      activeStructureIdsByPeriod,
+    } = buildClosureContext();
 
     const result = computeStructuresStatistiques(
       buildTestStatistiquesContext({

@@ -4,7 +4,10 @@ import { computeActiviteStatistiques } from "@/app/api/statistiques/activite/act
 import type { StatistiqueDbActivite } from "@/app/api/statistiques/statistiques.db.type";
 import { StructureType } from "@/types/structure.type";
 
-import { buildTestDnaLinks, buildTestStatistiquesContext } from "./test-helpers";
+import {
+  buildTestDnaLinks,
+  buildTestStatistiquesContext,
+} from "./test-helpers";
 
 const activiteRow = (
   partial: Partial<StatistiqueDbActivite> &
@@ -21,7 +24,7 @@ const activiteRow = (
   ...partial,
 });
 
-describe("activité — agrégés et série mensuelle", () => {
+describe("activité - agrégés et série mensuelle", () => {
   const allStructures = [
     { id: 1, type: StructureType.CADA, departementAdministratif: "75" },
     { id: 2, type: StructureType.CAES, departementAdministratif: "75" },

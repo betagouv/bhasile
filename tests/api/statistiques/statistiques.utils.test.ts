@@ -46,7 +46,7 @@ const testStructure = (
   departementAdministratif: "01",
 });
 
-describe("socle — ouverture / fermeture par période", () => {
+describe("socle - ouverture / fermeture par période", () => {
   const { referenceDate, structureIds, activityOptions } =
     FEBRUARY_2025_CLOSURE_FIXTURE;
 
@@ -118,7 +118,7 @@ describe("socle — ouverture / fermeture par période", () => {
   });
 });
 
-describe("socle — périmètre général vs séries temporelles", () => {
+describe("socle - périmètre général vs séries temporelles", () => {
   const { structureIds, activityOptions } = FEBRUARY_2025_CLOSURE_FIXTURE;
   const allStructures = structureIds.map((id) => testStructure(id));
   const activeStructureIdsByPeriod = buildTestActivityIndex(structureIds, {
@@ -188,7 +188,7 @@ describe("socle — périmètre général vs séries temporelles", () => {
   });
 });
 
-describe("socle — version effective et périmètre général", () => {
+describe("socle - version effective et périmètre général", () => {
   const timeline = buildTestStructureVersionTimeline([
     {
       structureId: 1,
@@ -328,7 +328,7 @@ describe("socle — version effective et périmètre général", () => {
   });
 });
 
-describe("socle — résolution DNA à date", () => {
+describe("socle - résolution DNA à date", () => {
   const timeline = buildTestStructureVersionTimeline([
     {
       structureId: 1,

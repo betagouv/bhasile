@@ -57,7 +57,7 @@ const buildControleQualiteContext = (
       buildTestActiveStructureIdsByPeriod(structureIds),
   });
 
-describe("contrôle qualité — agrégats de référence (12 derniers mois)", () => {
+describe("contrôle qualité - agrégats de référence (12 derniers mois)", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(NOW);
@@ -108,7 +108,7 @@ describe("contrôle qualité — agrégats de référence (12 derniers mois)", (
   });
 });
 
-describe("contrôle qualité — regroupements mois / trimestre / année", () => {
+describe("contrôle qualité - regroupements mois / trimestre / année", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(NOW);
@@ -140,6 +140,12 @@ describe("contrôle qualité — regroupements mois / trimestre / année", () =>
             type: "comportement violent",
             evenementDate: new Date("2025-02-20T00:00:00.000Z"),
           },
+          {
+            id: 4,
+            dnaCode: "DNA01",
+            type: "comportement violent",
+            evenementDate: new Date("2025-07-20T00:00:00.000Z"),
+          },
         ],
         activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod([1], {
           periodDates: [
@@ -168,11 +174,11 @@ describe("contrôle qualité — regroupements mois / trimestre / année", () =>
     expect(january?.nbEig).toBe(1);
     expect(february?.nbEig).toBe(2);
     expect(trimester2025Q1?.nbEig).toBe(3);
-    expect(year2025?.nbEig).toBe(3);
+    expect(year2025?.nbEig).toBe(4);
   });
 });
 
-describe("contrôle qualité — structures actives sans déclaration EIG", () => {
+describe("contrôle qualité - structures actives sans déclaration EIG", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(NOW);

@@ -63,7 +63,7 @@ const testDepartements = (): StatistiqueDbDepartement[] => [
   { id: 2, numero: "02", name: "Aisne", population: 50_000 },
 ];
 
-describe("places — agrégés sur le périmètre ouvert à la date de référence", () => {
+describe("places - agrégés sur le périmètre ouvert à la date de référence", () => {
   const closureFixture = {
     referenceDate: REFERENCE_DATE,
     structureIds: [1, 2, 3],
@@ -185,7 +185,7 @@ describe("places — agrégés sur le périmètre ouvert à la date de référen
   });
 });
 
-describe("places — taux d'équipement", () => {
+describe("places - taux d'équipement", () => {
   it("calcule le ratio places autorisées sur la population des départements filtrés", () => {
     const result = computePlacesStatistiques(
       buildTestStatistiquesContext({
@@ -238,7 +238,7 @@ describe("places — taux d'équipement", () => {
   });
 });
 
-describe("places — indicateurs annuels (byYear)", () => {
+describe("places - indicateurs annuels (byYear)", () => {
   const closureFixture = {
     referenceDate: REFERENCE_DATE,
     structureIds: [1, 2, 3],
