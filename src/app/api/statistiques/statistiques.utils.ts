@@ -1,6 +1,7 @@
 import { startOfNextUtcDay, startOfUtcDay } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
 import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
+import type { StatistiquesFilters } from "@/schemas/api/statistique.schema";
 
 import type {
   StatistiqueDbDnaLink,
@@ -28,6 +29,30 @@ export type StatistiquesResolvedPerimeterFilters = {
   departements: Set<string> | null;
   types: Set<string>;
   operateurIds: Set<number> | null;
+};
+
+/** Filtres parsés mais pas encore résolus : les filiales des `operateurIds` ne sont pas encore ajoutées (accès BDD, cf. service). */
+export type StatistiquesParsedPerimeterFilters = {
+  departements: Set<string> | null;
+  types: Set<string>;
+  operateurIds: number[];
+};
+
+export const parseStatistiquesPerimeterFilters = (
+  filters: StatistiquesFilters
+): StatistiquesParsedPerimeterFilters => {
+  const depList = filters.departements?.split(",").filter(Boolean) ?? [];
+  const typeList = (filters.types?.split(",").filter(Boolean) ?? []).filter(
+    (type) => !excludedStructureTypes.has(type)
+  );
+  const operateurIds =
+    filters.operateurs?.split(",").filter(Boolean).map(Number) ?? [];
+
+  return {
+    departements: depList.length > 0 ? new Set(depList) : null,
+    types: new Set(typeList),
+    operateurIds,
+  };
 };
 
 export type StatistiquesResolvableStructureVersion = {

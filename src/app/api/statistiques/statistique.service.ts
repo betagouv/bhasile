@@ -18,6 +18,7 @@ import {
   findEigs,
   findEvaluations,
   findIndicateursFinanciers,
+  findOperateurFiliales,
   findStructureActivityDates,
   findStructureAdresses,
   findStructureTypologies,
@@ -30,8 +31,27 @@ import {
   createEmptyActiveStructureIdsByPeriod,
   getTypologieYears,
   mapVersionsToStructures,
+  parseStatistiquesPerimeterFilters,
+  type StatistiquesResolvedPerimeterFilters,
 } from "./statistiques.utils";
 import { computeStructuresStatistiques } from "./structures/structures.util";
+
+/** Résout les filiales des `operateurs` filtrés (seul point d'accès BDD du filtrage). */
+const resolveStatistiquesPerimeterFilters = async (
+  filters: StatistiquesFilters
+): Promise<StatistiquesResolvedPerimeterFilters> => {
+  const parsed = parseStatistiquesPerimeterFilters(filters);
+  const filiales = await findOperateurFiliales(parsed.operateurIds);
+
+  return {
+    departements: parsed.departements,
+    types: parsed.types,
+    operateurIds:
+      parsed.operateurIds.length > 0
+        ? new Set([...parsed.operateurIds, ...filiales.map((filiale) => filiale.id)])
+        : null,
+  };
+};
 
 export const buildStatistiquesContext = async (
   filters: StatistiquesFilters
@@ -39,8 +59,9 @@ export const buildStatistiquesContext = async (
   const now = new Date();
   const referenceYear = now.getUTCFullYear();
 
+  const resolvedFilters = await resolveStatistiquesPerimeterFilters(filters);
   const effectiveVersions = await findEffectiveStructureVersionsAtDate(
-    filters,
+    resolvedFilters,
     now
   );
   const allStructureIds = effectiveVersions

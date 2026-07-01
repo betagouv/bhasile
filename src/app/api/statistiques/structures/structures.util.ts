@@ -23,6 +23,7 @@ import type {
   StatistiquesContext,
 } from "../statistiques.db.type";
 import {
+  computeTotalPlaces,
   filterByActiveStructureId,
   filterByEffectiveVersionAtDate,
   filterStructuresWithTypologie,
@@ -276,9 +277,13 @@ const computeByYearStats = (
     context.activeStructureIdsByPeriod,
     context.typologies,
     (year, structuresForYear) => {
+      const typologieMapForYear = getTypologieMapForExactYear(
+        context.typologies,
+        year
+      );
       const structuresWithTypologie = filterStructuresWithTypologie(
         structuresForYear,
-        getTypologieMapForExactYear(context.typologies, year)
+        typologieMapForYear
       );
       const structureIdsWithTypologie = new Set(
         structuresWithTypologie.map((structure) => structure.id)
@@ -286,6 +291,10 @@ const computeByYearStats = (
 
       return {
         totalStructures: structuresWithTypologie.length,
+        totalPlaces: computeTotalPlaces(
+          structuresWithTypologie,
+          typologieMapForYear
+        ),
         totalCpoms: countActiveCpoms(
           context.cpomLinks,
           structureIdsWithTypologie,

@@ -372,7 +372,7 @@ describe("structures - indicateurs annuels (byYear)", () => {
 
     expect(result.totalStructures).toBe(2);
     expect(result.byYear).toContainEqual(
-      expect.objectContaining({ year: 2025, totalStructures: 3 })
+      expect.objectContaining({ year: 2025, totalStructures: 3, totalPlaces: 30 })
     );
   });
 

@@ -23,210 +23,175 @@ export const statistiquesFiltersSchema = z.object({
 
 export type StatistiquesFilters = z.infer<typeof statistiquesFiltersSchema>;
 
-const typeStructureStatSchema = z.object({
-  type: z.nativeEnum(StructureType),
-  structures: z.number(),
-  places: z.number(),
-});
+// Types de lecture pure (pas d'input à valider) : pas de schéma zod, juste des types.
 
-const batiStatSchema = z.object({
-  bati: z.nativeEnum(Repartition),
-  structures: z.number(),
-  places: z.number(),
-});
+export type TypeStructureStat = {
+  type: StructureType;
+  structures: number;
+  places: number;
+};
 
-const structuresByYearStatSchema = z.object({
-  year: z.number(),
-  totalStructures: z.number(),
-  totalCpoms: z.number(),
-  structuresCada: z.number(),
-  structuresCph: z.number(),
-  structuresHuda: z.number(),
-  structuresCaes: z.number(),
-  structuresBatiCollectif: z.number(),
-  structuresBatiDiffus: z.number(),
-  structuresBatiMixte: z.number(),
-});
+export type BatiStat = {
+  bati: Repartition;
+  structures: number;
+  places: number;
+};
 
-const placesIndicatorsSchema = z.object({
-  totalPlaces: z.number(),
-  population: z.number().nullable(),
-  tauxEquipement: z.number().nullable(),
-  pmr: z.number(),
-  lgbt: z.number(),
-  fvvTeh: z.number(),
-  qpv: z.number(),
-  logementsSociaux: z.number(),
-});
+export type StructuresByYearStat = {
+  year: number;
+  totalStructures: number;
+  totalPlaces: number;
+  totalCpoms: number;
+  structuresCada: number;
+  structuresCph: number;
+  structuresHuda: number;
+  structuresCaes: number;
+  structuresBatiCollectif: number;
+  structuresBatiDiffus: number;
+  structuresBatiMixte: number;
+};
 
-const placesByYearStatSchema = placesIndicatorsSchema.extend({
-  year: z.number(),
-});
+export type PlacesIndicatorsStat = {
+  totalPlaces: number;
+  population: number | null;
+  tauxEquipement: number | null;
+  pmr: number;
+  lgbt: number;
+  fvvTeh: number;
+  qpv: number;
+  logementsSociaux: number;
+};
 
-const financeByYearScopeStatSchema = z.object({
-  dotationDemandee: z.number(),
-  dotationAccordee: z.number(),
-  totalETP: z.number(),
-  tauxEncadrement: z.number().nullable(),
-  coutJournalier: z.number().nullable(),
-  totalProduits: z.number(),
-  totalCharges: z.number(),
-  resultatNet: z.number(),
-  excedentCumule: z.number(),
-  deficitCumule: z.number(),
-});
+export type PlacesByYearStat = PlacesIndicatorsStat & {
+  year: number;
+};
 
-const financeByYearStatSchema = z.object({
-  year: z.number(),
-  total: financeByYearScopeStatSchema,
-  autorisees: financeByYearScopeStatSchema,
-  subventionnees: financeByYearScopeStatSchema,
-});
+export type FinanceByYearScopeStat = {
+  dotationDemandee: number;
+  dotationAccordee: number;
+  totalETP: number;
+  tauxEncadrement: number | null;
+  coutJournalier: number | null;
+  totalProduits: number;
+  totalCharges: number;
+  resultatNet: number;
+  excedentCumule: number;
+  deficitCumule: number;
+};
 
-const eigCountTotalsStatSchema = z.object({
-  nbEig: z.number(),
-  nbEigComportementViolent: z.number(),
-});
+export type FinanceByYearStat = {
+  year: number;
+  total: FinanceByYearScopeStat;
+  autorisees: FinanceByYearScopeStat;
+  subventionnees: FinanceByYearScopeStat;
+};
 
-const eigCountsStatSchema = eigCountTotalsStatSchema.extend({
-  tauxEigComportementViolent: z.number().nullable(),
-});
+export type EigCountTotalsStat = {
+  nbEig: number;
+  nbEigComportementViolent: number;
+};
 
-const eigRatesStatSchema = eigCountsStatSchema.extend({
-  tauxEig: z.number().nullable(),
-});
+export type EigCountsStat = EigCountTotalsStat & {
+  tauxEigComportementViolent: number | null;
+};
 
-const controleQualiteEvaluationSummaryStatSchema = z.object({
-  moyenneEvaluationsCurrentYear: z.number().nullable(),
-});
+export type EigRatesStat = EigCountsStat & {
+  tauxEig: number | null;
+};
 
-const eigStatSchema = eigRatesStatSchema.merge(
-  controleQualiteEvaluationSummaryStatSchema
-);
+export type ControleQualiteEvaluationSummaryStat = {
+  moyenneEvaluationsCurrentYear: number | null;
+};
 
-const eigPeriodDeclarationStatSchema = z.object({
-  nbStructuresSansDeclarationEig: z.number(),
-  partStructuresSansDeclarationEig: z.number().nullable(),
-});
+export type EigStat = EigRatesStat & ControleQualiteEvaluationSummaryStat;
 
-const eigPeriodStatSchema =
-  eigPeriodDeclarationStatSchema.merge(eigCountsStatSchema);
+export type EigPeriodDeclarationStat = {
+  nbStructuresSansDeclarationEig: number;
+  partStructuresSansDeclarationEig: number | null;
+};
 
-const controleQualiteEvaluationStatSchema = z.object({
-  nbStructuresEvaluees: z.number(),
-  noteGenerale: z.number().nullable(),
-  notePersonne: z.number().nullable(),
-  notePro: z.number().nullable(),
-  noteStructure: z.number().nullable(),
-});
+export type EigPeriodStat = EigPeriodDeclarationStat & EigCountsStat;
 
-const controleQualitePeriodBaseSchema = eigPeriodStatSchema.merge(
-  controleQualiteEvaluationStatSchema
-);
+export type ControleQualiteEvaluationStat = {
+  nbStructuresEvaluees: number;
+  noteGenerale: number | null;
+  notePersonne: number | null;
+  notePro: number | null;
+  noteStructure: number | null;
+};
 
-const controleQualiteByPeriodStatSchema = controleQualitePeriodBaseSchema.merge(
-  z.object({ date: z.coerce.date() })
-);
+export type ControleQualitePeriodBase = EigPeriodStat &
+  ControleQualiteEvaluationStat;
 
-const activiteMotifsIndisponibiliteStatSchema = z.object({
-  desinsectisation: z.number(),
-  remiseEnEtat: z.number(),
-  sousOccupation: z.number(),
-  travaux: z.number(),
-});
+export type ControleQualitePeriodStat = ControleQualitePeriodBase & {
+  date: Date;
+};
 
-const activiteSummaryStatSchema = z.object({
-  placesEnregistreesDna: z.number(),
-  placesIndisponibles: z.number(),
-  placesDisponibles: z.number(),
-  tauxIndisponibilite: z.number().nullable(),
-  motifsIndisponibilite: activiteMotifsIndisponibiliteStatSchema,
-  presencesInduesBPI: z.number(),
-  tauxPresencesInduesBPI: z.number().nullable(),
-  presencesInduesDeboutees: z.number(),
-  tauxPresencesInduesDeboutees: z.number().nullable(),
-  presencesInduesTotal: z.number(),
-  tauxPresencesInduesTotal: z.number().nullable(),
-});
-
-const activiteByMonthStatSchema = z.object({
-  date: z.coerce.date(),
-  placesEnregistreesDna: z.number(),
-  placesIndisponibles: z.number(),
-  tauxIndisponibilite: z.number().nullable(),
-  presencesInduesBPI: z.number(),
-  tauxPresencesInduesBPI: z.number().nullable(),
-  presencesInduesDeboutees: z.number(),
-  tauxPresencesInduesDeboutees: z.number().nullable(),
-  presencesInduesTotal: z.number(),
-  tauxPresencesInduesTotal: z.number().nullable(),
-});
-
-export const statistiqueApiReadSchema = z.object({
-  structures: z.object({
-    totalStructures: z.number(),
-    totalCpoms: z.number(),
-    structuresAvecCpom: z.number(),
-    structureTypes: z.array(typeStructureStatSchema),
-    structureBatis: z.array(batiStatSchema),
-    byYear: z.array(structuresByYearStatSchema),
-  }),
-  places: placesIndicatorsSchema.extend({
-    byYear: z.array(placesByYearStatSchema),
-  }),
-  finance: z.object({
-    byYear: z.array(financeByYearStatSchema),
-  }),
-  controleQualite: z.object({
-    eig: eigStatSchema,
-    byMonth: z.array(controleQualiteByPeriodStatSchema),
-    byTrimester: z.array(controleQualiteByPeriodStatSchema),
-    byYear: z.array(controleQualiteByPeriodStatSchema),
-  }),
-  activite: z.object({
-    summary: activiteSummaryStatSchema,
-    byMonth: z.array(activiteByMonthStatSchema),
-  }),
-});
-
-export type TypeStructureStat = z.infer<typeof typeStructureStatSchema>;
-export type BatiStat = z.infer<typeof batiStatSchema>;
-export type StructuresByYearStat = z.infer<typeof structuresByYearStatSchema>;
-export type PlacesByYearStat = z.infer<typeof placesByYearStatSchema>;
-export type FinanceByYearScopeStat = z.infer<
-  typeof financeByYearScopeStatSchema
->;
-export type FinanceByYearStat = z.infer<typeof financeByYearStatSchema>;
-export type ActiviteMotifsIndisponibiliteStat = z.infer<
-  typeof activiteMotifsIndisponibiliteStatSchema
->;
-export type ActiviteSummaryStat = z.infer<typeof activiteSummaryStatSchema>;
-export type ActiviteByMonthStat = z.infer<typeof activiteByMonthStatSchema>;
-export type EigCountTotalsStat = z.infer<typeof eigCountTotalsStatSchema>;
-export type EigCountsStat = z.infer<typeof eigCountsStatSchema>;
-export type EigRatesStat = z.infer<typeof eigRatesStatSchema>;
-export type ControleQualiteEvaluationSummaryStat = z.infer<
-  typeof controleQualiteEvaluationSummaryStatSchema
->;
-export type EigStat = z.infer<typeof eigStatSchema>;
-export type EigPeriodDeclarationStat = z.infer<
-  typeof eigPeriodDeclarationStatSchema
->;
-export type EigPeriodStat = z.infer<typeof eigPeriodStatSchema>;
-export type ControleQualiteEvaluationStat = z.infer<
-  typeof controleQualiteEvaluationStatSchema
->;
-export type ControleQualitePeriodBase = z.infer<
-  typeof controleQualitePeriodBaseSchema
->;
-export type ControleQualitePeriodStat = z.infer<
-  typeof controleQualiteByPeriodStatSchema
->;
 export type ControleQualiteByMonthStat = ControleQualitePeriodStat;
 export type ControleQualiteByTrimesterStat = ControleQualitePeriodStat;
 export type ControleQualiteByYearStat = ControleQualitePeriodStat;
 
-export type StatistiqueApiRead = z.infer<typeof statistiqueApiReadSchema>;
+export type ActiviteMotifsIndisponibiliteStat = {
+  desinsectisation: number;
+  remiseEnEtat: number;
+  sousOccupation: number;
+  travaux: number;
+};
+
+export type ActiviteSummaryStat = {
+  placesEnregistreesDna: number;
+  placesIndisponibles: number;
+  placesDisponibles: number;
+  tauxIndisponibilite: number | null;
+  motifsIndisponibilite: ActiviteMotifsIndisponibiliteStat;
+  presencesInduesBPI: number;
+  tauxPresencesInduesBPI: number | null;
+  presencesInduesDeboutees: number;
+  tauxPresencesInduesDeboutees: number | null;
+  presencesInduesTotal: number;
+  tauxPresencesInduesTotal: number | null;
+};
+
+export type ActiviteByMonthStat = {
+  date: Date;
+  placesEnregistreesDna: number;
+  placesIndisponibles: number;
+  tauxIndisponibilite: number | null;
+  presencesInduesBPI: number;
+  tauxPresencesInduesBPI: number | null;
+  presencesInduesDeboutees: number;
+  tauxPresencesInduesDeboutees: number | null;
+  presencesInduesTotal: number;
+  tauxPresencesInduesTotal: number | null;
+};
+
+export type StatistiqueApiRead = {
+  structures: {
+    totalStructures: number;
+    totalCpoms: number;
+    structuresAvecCpom: number;
+    structureTypes: TypeStructureStat[];
+    structureBatis: BatiStat[];
+    byYear: StructuresByYearStat[];
+  };
+  places: PlacesIndicatorsStat & {
+    byYear: PlacesByYearStat[];
+  };
+  finance: {
+    byYear: FinanceByYearStat[];
+  };
+  controleQualite: {
+    eig: EigStat;
+    byMonth: ControleQualitePeriodStat[];
+    byTrimester: ControleQualitePeriodStat[];
+    byYear: ControleQualitePeriodStat[];
+  };
+  activite: {
+    summary: ActiviteSummaryStat;
+    byMonth: ActiviteByMonthStat[];
+  };
+};
+
 export type StatistiqueApiResponse = StatistiqueApiRead | null;
 
 /** @deprecated Ancien type du mock page `/stats`

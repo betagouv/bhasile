@@ -1,9 +1,7 @@
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
-import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
-import type { StatistiquesFilters } from "@/schemas/api/statistique.schema";
 
 import type {
   StatistiqueDbActivite,
@@ -25,8 +23,6 @@ import {
   type StatistiquesResolvedPerimeterFilters,
 } from "./statistiques.utils";
 
-const excludedStructureTypes = new Set<string>(EXCLUDED_STRUCTURE_TYPES);
-
 /** Une version liée à une transformation non finalisée n'est jamais "effective". */
 const FINALIZED_VERSION_WHERE: Prisma.StructureVersionWhereInput = {
   OR: [
@@ -44,45 +40,27 @@ const FINALIZED_VERSION_WHERE: Prisma.StructureVersionWhereInput = {
   ],
 };
 
-const resolveStatistiquesFilters = async (
-  filters: StatistiquesFilters
-): Promise<StatistiquesResolvedPerimeterFilters> => {
-  const depList = filters.departements?.split(",").filter(Boolean) ?? [];
-  const typeList = (filters.types?.split(",").filter(Boolean) ?? []).filter(
-    (type) => !excludedStructureTypes.has(type)
-  );
-
-  const operateurIds =
-    filters.operateurs?.split(",").filter(Boolean).map(Number) ?? [];
-  let allOperateurIds: Set<number> | null = null;
-  if (operateurIds.length > 0) {
-    const filiales = await prisma.operateur.findMany({
-      where: { parentId: { in: operateurIds } },
-      select: { id: true },
-    });
-    allOperateurIds = new Set([
-      ...operateurIds,
-      ...filiales.map((filiale) => filiale.id),
-    ]);
+/** Filiales directes des opérateurs donnés (résolution du filtre `operateurs`, cf. statistique.service). */
+export const findOperateurFiliales = async (
+  parentIds: number[]
+): Promise<{ id: number }[]> => {
+  if (parentIds.length === 0) {
+    return [];
   }
-
-  return {
-    departements: depList.length > 0 ? new Set(depList) : null,
-    types: new Set(typeList),
-    operateurIds: allOperateurIds,
-  };
+  return prisma.operateur.findMany({
+    where: { parentId: { in: parentIds } },
+    select: { id: true },
+  });
 };
 
 /**
- * Résout d'abord la version réellement effective de chaque structure à `reference`
- * (dernière version finalisée), puis applique les filtres sur cet état résolu.
+ * Résout la version réellement effective de chaque structure à `reference`
+ * (dernière version finalisée), puis applique `resolved` sur cet état résolu.
  */
 export const findEffectiveStructureVersionsAtDate = async (
-  filters: StatistiquesFilters,
+  resolved: StatistiquesResolvedPerimeterFilters,
   reference: Date = new Date()
 ): Promise<StatistiqueDbEffectiveStructureVersion[]> => {
-  const resolved = await resolveStatistiquesFilters(filters);
-
   const versions = await prisma.structureVersion.findMany({
     where: {
       ...FINALIZED_VERSION_WHERE,
