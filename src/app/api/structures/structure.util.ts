@@ -27,11 +27,13 @@ import {
   HistoryEvent,
   StructureRef,
 } from "@/types/structure-history.type";
+import { UpcomingTransformation } from "@/types/transformation.type";
 
 import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
 import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import {
   getValidVersions,
+  isVersionValid,
   resolveCurrentVersionFields,
 } from "../structure-versions/structure-version.util";
 import {
@@ -677,9 +679,9 @@ const buildTransformationEvent = (
 };
 
 const buildCpomEvents = (
-  cpomStructures: CpomStructureApiRead[]
+  cpomStructures: CpomStructureApiRead[],
+  now: string
 ): HistoryEvent[] => {
-  const now = new Date().toISOString();
   const events: HistoryEvent[] = [];
 
   cpomStructures.forEach((cpomStructure) => {
@@ -715,18 +717,40 @@ const buildCpomEvents = (
 
 export const buildStructureHistory = (
   structure: StructureDbDetails,
-  cpomStructures: CpomStructureApiRead[]
+  cpomStructures: CpomStructureApiRead[],
+  now: Date = new Date()
 ): HistoryEvent[] => {
   const validVersions = getValidVersions(
     structure.structureVersions ?? [],
-    new Date()
+    now
   );
 
   const events = [
     buildCreationEvent(structure, validVersions),
     ...validVersions.map(buildTransformationEvent),
-    ...buildCpomEvents(cpomStructures),
+    ...buildCpomEvents(cpomStructures, now.toISOString()),
   ].filter((event): event is HistoryEvent => event !== null);
 
   return events.sort((first, second) => second.date.localeCompare(first.date));
+};
+
+export const buildUpcomingTransformations = (
+  structure: StructureDbDetails,
+  now: Date = new Date()
+): UpcomingTransformation[] => {
+  const lowerBound = startOfNextUtcDay(now);
+
+  return (structure.structureVersions ?? [])
+    .filter(
+      (version) =>
+        version.structureVersionTransformationId !== null &&
+        version.effectiveDate !== null &&
+        version.effectiveDate >= lowerBound &&
+        isVersionValid(version)
+    )
+    .map((version) => ({
+      kind: version.structureVersionTransformation!.type,
+      date: version.effectiveDate!.toISOString(),
+    }))
+    .sort((first, second) => first.date.localeCompare(second.date));
 };
