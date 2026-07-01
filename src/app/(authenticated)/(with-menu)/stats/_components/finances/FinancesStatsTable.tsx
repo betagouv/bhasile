@@ -2,7 +2,7 @@ import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Fragment, ReactElement, useState } from "react";
 
 import { Table } from "@/app/components/common/Table";
-import { StatistiquesApiType } from "@/schemas/api/statistiques.schema";
+import { StatistiquesApiType } from "@/schemas/api/statistique.schema";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 import { FinanceTypeSelector } from "./FinanceTypeSelector";

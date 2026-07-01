@@ -2,7 +2,7 @@
 
 import { createContext, ReactNode, useContext, useState } from "react";
 
-import { StatistiquesApiType } from "@/schemas/api/statistiques.schema";
+import { StatistiquesApiType } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesContextType } from "./StatistiquesContext";
 

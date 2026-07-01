@@ -1,129 +1,151 @@
-import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
-import { Prisma, StructureType } from "@/generated/prisma/client";
-import prisma from "@/lib/prisma";
 import {
   StatistiqueApiRead,
   StatistiquesFilters,
 } from "@/schemas/api/statistique.schema";
 
-import { getActiviteStatistiques } from "./activite/activite.service";
-import { getControleQualiteStatistiques } from "./controle-qualite/controle-qualite.service";
-import { getFinanceStatistiques } from "./finance/finance.service";
-import { getPlacesStatistiques } from "./places/places.service";
+import { computeActiviteStatistiques } from "./activite/activite.util";
+import { computeControleQualiteStatistiques } from "./controle-qualite/controle-qualite.util";
+import { computeFinanceStatistiques } from "./finance/finance.util";
+import { computePlacesStatistiques } from "./places/places.util";
 import type { StatistiquesContext } from "./statistiques.db.type";
 import {
+  findActivites,
+  findBudgets,
   findCpomStructures,
   findDepartementsWithPopulation,
-  findDnaLinksByStructure,
+  findDnaLinks,
+  findEffectiveStructureVersionsAtDate,
+  findEigs,
+  findEvaluations,
+  findIndicateursFinanciers,
+  findOperateurFiliales,
+  findStructureActivityDates,
   findStructureAdresses,
-  findStructureIds,
-  findStructuresWithTypes,
   findStructureTypologies,
+  findStructureVersionTimeline,
 } from "./statistiques.repository";
-import { getStructuresStatistiques } from "./structures/structures.service";
+import {
+  buildActivityIndex,
+  buildStatistiquesActivityContext,
+  collectDistinctYears,
+  createEmptyActiveStructureIdsByPeriod,
+  getTypologieYears,
+  mapVersionsToStructures,
+  parseStatistiquesPerimeterFilters,
+  type StatistiquesResolvedPerimeterFilters,
+} from "./statistiques.utils";
+import { computeStructuresStatistiques } from "./structures/structures.util";
 
-const excludedStructureTypes = new Set<string>(EXCLUDED_STRUCTURE_TYPES);
-
-const buildTypeWhere = (
+/** Résout les filiales des `operateurs` filtrés (seul point d'accès BDD du filtrage). */
+const resolveStatistiquesPerimeterFilters = async (
   filters: StatistiquesFilters
-): Prisma.StructureWhereInput["type"] => {
-  const typeList = filters.types?.split(",").filter(Boolean) ?? [];
+): Promise<StatistiquesResolvedPerimeterFilters> => {
+  const parsed = parseStatistiquesPerimeterFilters(filters);
+  const filiales = await findOperateurFiliales(parsed.operateurIds);
 
-  if (typeList.length > 0) {
-    return {
-      in: typeList.filter(
-        (type) => !excludedStructureTypes.has(type)
-      ) as StructureType[],
-    };
-  }
-
-  return { notIn: EXCLUDED_STRUCTURE_TYPES as unknown as StructureType[] };
-};
-
-const buildStructureWhere = async (
-  filters: StatistiquesFilters
-): Promise<Prisma.StructureWhereInput> => {
-  // TODO(structure-version): filtrer type/département sur version effective (typologie.utils)
-  // For now we filter hat finalised initialisation and remove prahdas/
-  const where: Prisma.StructureWhereInput = {
-    structureVersions: {
-      some: {
-        structureVersionTransformation: {
-          transformation: {
-            form: {
-              is: {
-                status: true,
-                formDefinition: { slug: "finalisation-v1" },
-              },
-            },
-          },
-        },
-      },
-    },
+  return {
+    departements: parsed.departements,
+    types: parsed.types,
+    operateurIds:
+      parsed.operateurIds.length > 0
+        ? new Set([...parsed.operateurIds, ...filiales.map((filiale) => filiale.id)])
+        : null,
   };
-
-  where.type = buildTypeWhere(filters);
-
-  const depList = filters.departements?.split(",").filter(Boolean) ?? [];
-  if (depList.length > 0) {
-    where.departementAdministratif = { in: depList };
-  }
-
-  const operateurIds =
-    filters.operateurs?.split(",").filter(Boolean).map(Number) ?? [];
-  if (operateurIds.length > 0) {
-    const filiales = await prisma.operateur.findMany({
-      where: { parentId: { in: operateurIds } },
-      select: { id: true },
-    });
-    const allOperateurIds = [
-      ...new Set([...operateurIds, ...filiales.map((filiale) => filiale.id)]),
-    ];
-    where.operateurId = { in: allOperateurIds };
-  }
-
-  return where;
 };
 
 export const buildStatistiquesContext = async (
   filters: StatistiquesFilters
 ): Promise<StatistiquesContext | null> => {
-  const where = await buildStructureWhere(filters);
-  const structureIds = await findStructureIds(where);
+  const now = new Date();
+  const referenceYear = now.getUTCFullYear();
 
-  if (structureIds.length === 0) {
+  const resolvedFilters = await resolveStatistiquesPerimeterFilters(filters);
+  const effectiveVersions = await findEffectiveStructureVersionsAtDate(
+    resolvedFilters,
+    now
+  );
+  const allStructureIds = effectiveVersions
+    .map((version) => version.structureId)
+    .filter((id): id is number => id != null);
+  if (allStructureIds.length === 0) {
     return null;
   }
 
-  const [structures, typologies, adresses, cpomLinks, dnaLinks] =
+  const structureActivityDates =
+    await findStructureActivityDates(allStructureIds);
+
+  const activityContext = buildStatistiquesActivityContext(
+    allStructureIds,
+    structureActivityDates
+  );
+
+  const allStructures = mapVersionsToStructures(effectiveVersions);
+
+  const [typologies, adresses, cpomLinks, dnaLinks, structureVersionTimeline] =
     await Promise.all([
-      findStructuresWithTypes(structureIds),
-      findStructureTypologies(structureIds),
-      findStructureAdresses(structureIds),
-      findCpomStructures(structureIds),
-      findDnaLinksByStructure(structureIds),
+      findStructureTypologies(allStructureIds),
+      findStructureAdresses(allStructureIds),
+      findCpomStructures(allStructureIds),
+      findDnaLinks(allStructureIds),
+      findStructureVersionTimeline(allStructureIds),
     ]);
 
+  const activeStructureIdsByPeriod = createEmptyActiveStructureIdsByPeriod();
   const dnaCodes = [...new Set(dnaLinks.map((link) => link.dna.code))];
 
-  const deptNumeros = [
-    ...new Set(
-      structures
-        .map((structure) => structure.departementAdministratif)
-        .filter((departement): departement is string => departement !== null)
-    ),
-  ];
-  const departements = await findDepartementsWithPopulation(deptNumeros);
+  const [departements, eigs, evaluations, budgets, indicateurs, activites] =
+    await Promise.all([
+      findDepartementsWithPopulation([
+        ...new Set(
+          allStructures
+            .map((structure) => structure.departementAdministratif)
+            .filter(
+              (departement): departement is string => departement !== null
+            )
+        ),
+      ]),
+      findEigs(dnaCodes),
+      findEvaluations(allStructureIds),
+      findBudgets(allStructureIds),
+      findIndicateursFinanciers(allStructureIds),
+      findActivites(dnaCodes),
+    ]);
+
+  const activeStructureIdsNow = buildActivityIndex(
+    activityContext,
+    activeStructureIdsByPeriod,
+    {
+      referenceDate: now,
+      typologieYears: getTypologieYears(typologies),
+      referenceYear,
+      periodDates: [
+        ...eigs.map((eig) => eig.evenementDate),
+        ...evaluations.map((evaluation) => evaluation.date),
+        ...activites.map((activite) => activite.date),
+      ],
+      financeYears: collectDistinctYears(budgets, indicateurs),
+    }
+  );
+  const structures = allStructures.filter((structure) =>
+    activeStructureIdsNow.has(structure.id)
+  );
 
   return {
-    structureIds,
     structures,
+    allStructures,
+    activeStructureIdsNow,
+    activeStructureIdsByPeriod,
+    eigs,
+    evaluations,
     typologies,
     adresses,
     cpomLinks,
     dnaLinks,
-    dnaCodes,
+    structureVersionTimeline,
     departements,
+    budgets,
+    indicateurs,
+    activites,
   };
 };
 
@@ -137,20 +159,11 @@ export const getStatistiques = async (
 
   const { aggregation } = filters;
 
-  const [structures, places, finance, controleQualite, activite] =
-    await Promise.all([
-      getStructuresStatistiques(context),
-      getPlacesStatistiques(context),
-      getFinanceStatistiques(context, aggregation),
-      getControleQualiteStatistiques(context, aggregation),
-      getActiviteStatistiques(context),
-    ]);
-
   return {
-    structures,
-    places,
-    finance,
-    controleQualite,
-    activite,
+    structures: computeStructuresStatistiques(context),
+    places: computePlacesStatistiques(context),
+    finance: computeFinanceStatistiques(context, aggregation),
+    controleQualite: computeControleQualiteStatistiques(context, aggregation),
+    activite: computeActiviteStatistiques(context),
   };
 };

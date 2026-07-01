@@ -2,7 +2,7 @@
 // import { notFound } from "next/navigation";
 import { ReactNode } from "react";
 
-import { StatistiquesApiType } from "@/schemas/api/statistiques.schema";
+import { StatistiquesApiType } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesHeader } from "./_components/StatistiquesHeader";
 import { StatistiquesProvider } from "./_context/StatistiquesContext";
