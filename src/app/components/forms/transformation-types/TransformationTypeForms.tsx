@@ -9,7 +9,6 @@ import {
   TransformationType,
 } from "@/types/transformation.type";
 
-import { SubmitError } from "../../SubmitError";
 import { CreationTransformationForm } from "./CreationTransformationForm";
 import { FromStructureVersionTransformationForm } from "./FromStructureVersionTransformationForm";
 import { HudaTransformationForm } from "./HudaTransformationForm";
@@ -98,7 +97,6 @@ export const TransformationTypeForms = ({
           Je valide
         </Button>
       </div>
-      {saveState === FetchState.ERROR && <SubmitError />}
     </div>
   );
 };

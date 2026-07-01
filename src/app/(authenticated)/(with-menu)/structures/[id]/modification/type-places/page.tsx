@@ -10,26 +10,20 @@ import { LeaveModificationModal } from "@/app/components/forms/LeaveModification
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { FieldSetOuvertureFermeture } from "@/app/components/forms/ouvertureFermeture/FieldSetOuvertureFermeture";
 import { FieldSetTypePlaces } from "@/app/components/forms/typePlace/FieldSetTypePlaces";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { structureTypologiesWithMandatoryEvolutionSchema } from "@/schemas/forms/base/structureTypologie.schema";
-import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
 
 export default function ModificationTypePlaces() {
   const { structure } = useStructureContext();
 
-  const { handleSubmit, backendError } = useAgentFormHandling({
+  const { handleSubmit } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,
   });
   const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const defaultValues = getDefaultValues({ structure });
-
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("structure-save");
 
   return (
     <>
@@ -66,12 +60,6 @@ export default function ModificationTypePlaces() {
         shouldOpen={shouldOpenModal}
         setShouldOpen={setShouldOpenModal}
       />
-      {saveState === FetchState.ERROR && (
-        <SubmitError
-          codeBhasile={structure.codeBhasile}
-          backendError={backendError}
-        />
-      )}
     </>
   );
 }

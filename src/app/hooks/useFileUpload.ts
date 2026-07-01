@@ -1,5 +1,7 @@
 import { useCallback } from "react";
 
+import { ApiError, extractApiError } from "../utils/apiError.util";
+
 export type FileUploadResponse = {
   key: string;
   mimeType: string;
@@ -21,8 +23,7 @@ export const useFileUpload = () => {
       body: formData,
     });
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Envoi du fichier échoué");
+      throw new ApiError(await extractApiError(response), response.status);
     }
     const result = await response.json();
     return {
@@ -58,8 +59,7 @@ export const useFileUpload = () => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Erreur lors de la suppression");
+      throw new ApiError(await extractApiError(response), response.status);
     }
 
     return await response.json();

@@ -10,8 +10,6 @@ import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSet
 import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTypeBati";
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { StructureAgentUpdateApiClient } from "@/schemas/api/structure.schema";
@@ -19,21 +17,17 @@ import {
   TypeBatiAndAdressesFormValues,
   typeBatiAndAdressesSchema,
 } from "@/schemas/forms/base/adresse.schema";
-import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
 
 export default function ModificationAdresses() {
   const { structure } = useStructureContext();
 
-  const { handleSubmit, backendError } = useAgentFormHandling({
+  const { handleSubmit } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,
   });
   const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const defaultValues = getDefaultValues({ structure });
-
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("structure-save");
 
   const onSubmit = (data: TypeBatiAndAdressesFormValues) => {
     handleSubmit({
@@ -69,12 +63,6 @@ export default function ModificationAdresses() {
         shouldOpen={shouldOpenModal}
         setShouldOpen={setShouldOpenModal}
       />
-      {saveState === FetchState.ERROR && (
-        <SubmitError
-          codeBhasile={structure.codeBhasile}
-          backendError={backendError}
-        />
-      )}
     </>
   );
 }

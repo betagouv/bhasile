@@ -52,7 +52,11 @@ vi.mock("@/app/hooks/useTransformations", () => ({
 }));
 
 vi.mock("@/app/context/FetchStateContext", () => ({
-  useFetchState: () => ({ getFetchState: () => FetchState.IDLE }),
+  useFetchState: () => ({
+    getFetchState: () => FetchState.IDLE,
+    setFetchState: vi.fn(),
+    getErrorMessage: () => undefined,
+  }),
 }));
 
 const setTransformation = vi.fn();
