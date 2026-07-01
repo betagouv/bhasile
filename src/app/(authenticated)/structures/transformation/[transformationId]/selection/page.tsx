@@ -6,8 +6,8 @@ import { useState } from "react";
 
 import { TransformationTypeForms } from "@/app/components/forms/transformation-types/TransformationTypeForms";
 import { useFetchState } from "@/app/context/FetchStateContext";
+import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { useTransformations } from "@/app/hooks/useTransformations";
-import { ApiError } from "@/app/utils/apiError.util";
 import {
   getTransformationFormNavigation,
   getTransformationSteps,
@@ -15,7 +15,6 @@ import {
 } from "@/app/utils/transformation.util";
 import { TRANSFORMATION_TYPE_SPECS } from "@/config/transformation.config";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
-import { FetchState } from "@/types/fetch-state.type";
 import {
   TransformationFormType,
   TransformationType,
@@ -35,8 +34,15 @@ export default function TransformationSelectionsPage() {
 
   const { resetTransformationSelection } = useTransformations();
 
-  const { getFetchState, setFetchState } = useFetchState();
+  const { getFetchState } = useFetchState();
   const saveState = getFetchState("transformation-save");
+  const { mutate: resetSelection } = useSaveMutation(
+    "transformation-save",
+    (input: {
+      type: TransformationType;
+      structureVersionTransformations: StructureVersionTransformationApiCreate[];
+    }) => resetTransformationSelection(transformation.id, input, setTransformation)
+  );
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -77,26 +83,14 @@ export default function TransformationSelectionsPage() {
     if (!pendingSelection) {
       return;
     }
-    setFetchState("transformation-save", FetchState.LOADING);
-    try {
-      const freshTransformation = await resetTransformationSelection(
-        transformation.id,
-        pendingSelection,
-        setTransformation
-      );
-      setFetchState("transformation-save", FetchState.IDLE);
+    const freshTransformation = await resetSelection(pendingSelection);
+    if (freshTransformation !== null) {
       reinitialiserSelectionModal.close();
       const { firstStep } = getTransformationFormNavigation({
         transformationSteps: getTransformationSteps(freshTransformation),
         transformationId: freshTransformation.id,
       });
       router.push(firstStep.route);
-    } catch (error) {
-      setFetchState(
-        "transformation-save",
-        FetchState.ERROR,
-        error instanceof ApiError ? error.message : undefined
-      );
     }
   };
 

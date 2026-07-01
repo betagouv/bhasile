@@ -1,12 +1,10 @@
 import { useRouter } from "next/navigation";
 
 import { OperateurUpdateFormValues } from "@/schemas/forms/base/operateur.schema";
-import { FetchState } from "@/types/fetch-state.type";
 
 import { useOperateurContext } from "../(authenticated)/(with-menu)/operateurs/[id]/_context/OperateurClientContext";
-import { useFetchState } from "../context/FetchStateContext";
-import { ApiError } from "../utils/apiError.util";
 import { useOperateur } from "./useOperateur";
+import { useSaveMutation } from "./useSaveMutation";
 
 export const useOperateurFormHandling = ({
   operateurId,
@@ -19,25 +17,21 @@ export const useOperateurFormHandling = ({
 
   const { updateOperateur } = useOperateur();
 
-  const { setFetchState } = useFetchState();
+  const { mutate: saveOperateur } = useSaveMutation(
+    "operateur-save",
+    (data: Partial<OperateurUpdateFormValues>) =>
+      updateOperateur({ id: operateurId, ...data }, setOperateur)
+  );
 
   const handleSubmit = async (data: Partial<OperateurUpdateFormValues>) => {
-    setFetchState("operateur-save", FetchState.LOADING);
-    try {
-      await updateOperateur({ id: operateurId, ...data }, setOperateur);
-      setFetchState("operateur-save", FetchState.IDLE);
+    const result = await saveOperateur(data);
+    if (result !== null) {
       if (nextRoute) {
         router.push(nextRoute);
       }
       if (callBack) {
         callBack();
       }
-    } catch (error) {
-      setFetchState(
-        "operateur-save",
-        FetchState.ERROR,
-        error instanceof ApiError ? error.message : undefined
-      );
     }
   };
 
