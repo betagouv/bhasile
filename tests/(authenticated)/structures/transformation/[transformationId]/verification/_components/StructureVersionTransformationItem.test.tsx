@@ -227,7 +227,7 @@ describe("StructureVersionTransformationItem", () => {
     expect(screen.queryByText(/places autorisées/)).not.toBeInTheDocument();
   });
 
-  it("should render the closed places line for FERMETURE from the structure-level typology", () => {
+  it("affiche la ligne des places fermées pour une FERMETURE à partir de la typologie au niveau structure", () => {
     // GIVEN — a closure: places come from the predecessor (structure-level)
     // typology resolved at the effective year, not the version-level one
     const structureVersionTransformation = buildCompleteStructureVersionTransformation({
@@ -256,7 +256,7 @@ describe("StructureVersionTransformationItem", () => {
     expect(screen.queryByText(/places autorisées/)).not.toBeInTheDocument();
   });
 
-  it("should hide the closed places line for FERMETURE when the most recent structure-level typology is already at zero", () => {
+  it("masque la ligne des places fermées pour une FERMETURE quand la typologie structure la plus récente est déjà à zéro", () => {
     // GIVEN — no typology for the closure year (2026); the most-recent
     // millesime fallback lands on a post-closure year zeroed at 0 places
     const structureVersionTransformation = buildCompleteStructureVersionTransformation({

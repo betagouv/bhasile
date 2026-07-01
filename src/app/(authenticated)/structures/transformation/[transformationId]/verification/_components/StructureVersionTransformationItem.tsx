@@ -17,7 +17,6 @@ export const StructureVersionTransformationItem = ({
     structureVersionTransformation.structureVersion?.effectiveDate;
 
   const placesLine = getPlacesLine(structureVersionTransformation);
-  console.log(placesLine);
   return (
     <div className="flex flex-col gap-3">
       {cardProps && <StructureCard {...cardProps} />}
