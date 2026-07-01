@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { StatistiqueDbStructure } from "@/app/api/statistiques/statistiques.db.type";
 import {
+  filterByActiveStructureId,
   getEffectiveStructureVersionAtDate,
   lookupActiveStructureIds,
   lookupStructureIdsForDnaAtDate,
@@ -483,5 +484,31 @@ describe("matchesStatistiquesPerimeterFilters - filtres appliqués sur la versio
     expect(
       matchesStatistiquesPerimeterFilters(version({ operateurId: null }), filters)
     ).toBe(false);
+  });
+});
+
+describe("filterByActiveStructureId", () => {
+  it("ne garde que les lignes dont le structureId est dans le périmètre actif", () => {
+    const rows = [
+      { structureId: 1, value: "a" },
+      { structureId: 2, value: "b" },
+      { structureId: 3, value: "c" },
+    ];
+
+    expect(filterByActiveStructureId(rows, new Set([1, 3]))).toEqual([
+      { structureId: 1, value: "a" },
+      { structureId: 3, value: "c" },
+    ]);
+  });
+
+  it("exclut les lignes sans structureId", () => {
+    const rows = [
+      { structureId: null, value: "orphan" },
+      { structureId: 1, value: "a" },
+    ];
+
+    expect(filterByActiveStructureId(rows, new Set([1]))).toEqual([
+      { structureId: 1, value: "a" },
+    ]);
   });
 });

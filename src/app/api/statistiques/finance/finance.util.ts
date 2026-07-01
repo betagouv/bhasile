@@ -24,6 +24,7 @@ import type {
 } from "../statistiques.db.type";
 import {
   collectDistinctYears,
+  filterByActiveStructureId,
   lookupActiveStructureIds,
 } from "../statistiques.utils";
 
@@ -151,13 +152,10 @@ const computeScopeByYear = (
 ): FinanceByYearScopeStat[] => {
   const { activeStructureIdsByPeriod, budgets, indicateurs } = context;
   const structureIdSet = new Set(structureIdsInScope);
-  const scopedBudgets = budgets.filter((budget) =>
-    structureIdSet.has(budget.structureId)
-  );
-  const scopedIndicateurs = indicateurs.filter(
-    (indicateur) =>
-      indicateur.structureId !== null &&
-      structureIdSet.has(indicateur.structureId)
+  const scopedBudgets = filterByActiveStructureId(budgets, structureIdSet);
+  const scopedIndicateurs = filterByActiveStructureId(
+    indicateurs,
+    structureIdSet
   );
 
   return years.map((year) => {
@@ -173,8 +171,7 @@ const computeScopeByYear = (
       (budget) => budget.year === year && isActive(budget.structureId)
     );
     const indicateursForYear = scopedIndicateurs.filter(
-      (indicateur) =>
-        indicateur.year === year && isActive(indicateur.structureId!)
+      (indicateur) => indicateur.year === year && isActive(indicateur.structureId)
     );
 
     return {

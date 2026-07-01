@@ -13,6 +13,7 @@ import type {
 } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
+  filterByActiveStructureId,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
@@ -69,13 +70,7 @@ const sumAdressePlacesSpeciales = (
   let qpv = 0;
   let logementsSociaux = 0;
 
-  for (const adresse of adresses) {
-    if (
-      adresse.structureId === null ||
-      !structureIds.has(adresse.structureId)
-    ) {
-      continue;
-    }
+  for (const adresse of filterByActiveStructureId(adresses, structureIds)) {
     qpv += adresse.qpv ?? 0;
     logementsSociaux += adresse.logementSocial ?? 0;
   }

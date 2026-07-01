@@ -3,16 +3,13 @@ import { roundStatsNumber } from "@/app/utils/statistiques-format.util";
 import { ControleQualiteEvaluationStat } from "@/schemas/api/statistique.schema";
 
 import type { StatistiqueDbEvaluation } from "../statistiques.db.type";
+import { filterByActiveStructureId } from "../statistiques.utils";
 
 export const filterEvaluationsInScope = (
   evaluations: StatistiqueDbEvaluation[],
   activeStructureIds: Set<number>
 ): StatistiqueDbEvaluation[] =>
-  evaluations.filter(
-    (evaluation) =>
-      evaluation.structureId !== null &&
-      activeStructureIds.has(evaluation.structureId)
-  );
+  filterByActiveStructureId(evaluations, activeStructureIds);
 
 export const computeEvaluationGlobalSummary = (
   evaluations: StatistiqueDbEvaluation[],

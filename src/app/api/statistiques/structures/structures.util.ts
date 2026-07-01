@@ -23,6 +23,7 @@ import type {
   StatistiquesContext,
 } from "../statistiques.db.type";
 import {
+  filterByActiveStructureId,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
@@ -66,14 +67,7 @@ const sumPlacesPerBati = (
 ): Map<Repartition, number> => {
   const placesByBati = new Map<Repartition, number>();
 
-  for (const adresse of adresses) {
-    if (
-      adresse.structureId === null ||
-      !activeStructureIds.has(adresse.structureId)
-    ) {
-      continue;
-    }
-
+  for (const adresse of filterByActiveStructureId(adresses, activeStructureIds)) {
     const bati = (adresse.repartition ?? Repartition.COLLECTIF) as Repartition;
     const places = adresse.placesAutorisees ?? 0;
 

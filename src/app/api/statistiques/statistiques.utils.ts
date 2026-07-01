@@ -358,6 +358,18 @@ export const structuresActiveInPeriod = (
   return structures.filter((structure) => activeIds.has(structure.id));
 };
 
+/** Ne garde que les lignes dont le `structureId` (nullable) est dans le périmètre actif. */
+export const filterByActiveStructureId = <
+  Item extends { structureId: number | null },
+>(
+  items: Item[],
+  activeStructureIds: Set<number>
+): (Item & { structureId: number })[] =>
+  items.filter(
+    (item): item is Item & { structureId: number } =>
+      item.structureId != null && activeStructureIds.has(item.structureId)
+  );
+
 export const groupByPeriodKey = <Item>(
   items: Item[],
   getDate: (item: Item) => Date | null | undefined,
