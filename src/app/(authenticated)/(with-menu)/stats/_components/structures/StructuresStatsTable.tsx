@@ -24,7 +24,7 @@ export const StructuresStatsTable = (): ReactElement => {
     },
     {
       id: "cpoms",
-      label: "CPOMs complets ou partiels",
+      label: "CPOM complets ou partiels",
       value: statistiques.structureTypes?.[0]?.byYear
         .map((_, yearIndex) =>
           statistiques.structureTypes.reduce(
