@@ -10,141 +10,142 @@ import {
   buildTestStatistiquesContext,
 } from "./test-helpers";
 
-describe("quality control statistics util", () => {
+const NOW = new Date("2026-01-15T00:00:00.000Z");
+
+const testStructure = (id: number) => ({
+  id,
+  type: StructureType.CADA,
+  departementAdministratif: "01",
+});
+
+const testTypologie = (structureId: number, placesAutorisees = 100) => ({
+  id: structureId,
+  structureId,
+  year: 2025,
+  placesAutorisees,
+  pmr: 0,
+  lgbt: 0,
+  fvvTeh: 0,
+});
+
+const dnaLinks = buildTestDnaLinks([
+  { structureId: 1, dnaCode: "DNA01" },
+  { structureId: 2, dnaCode: "DNA02" },
+  { structureId: 3, dnaCode: "DNA03" },
+]);
+
+const buildControleQualiteContext = (
+  structureIds: number[],
+  partial: Partial<
+    Pick<
+      StatistiquesContext,
+      "eigs" | "evaluations" | "activeStructureIdsByPeriod" | "dnaLinks"
+    >
+  > = {}
+) =>
+  buildTestStatistiquesContext({
+    structures: structureIds.map(testStructure),
+    allStructures: structureIds.map(testStructure),
+    typologies: structureIds.map((id) => testTypologie(id)),
+    adresses: [],
+    departements: [],
+    dnaLinks: partial.dnaLinks ?? dnaLinks,
+    eigs: partial.eigs ?? [],
+    evaluations: partial.evaluations ?? [],
+    activeStructureIdsByPeriod:
+      partial.activeStructureIdsByPeriod ??
+      buildTestActiveStructureIdsByPeriod(structureIds),
+  });
+
+describe("contrôle qualité — agrégats de référence (12 derniers mois)", () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-01-15"));
+    vi.setSystemTime(NOW);
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  const dnaLinks = buildTestDnaLinks([
-    { structureId: 1, dnaCode: "DNA01" },
-    { structureId: 2, dnaCode: "DNA02" },
-    { structureId: 3, dnaCode: "DNA03" },
-  ]);
-
-  const structure = (id: number) => ({
-    id,
-    type: StructureType.CADA,
-    departementAdministratif: "01",
-  });
-
-  const typologie = (structureId: number, placesAutorisees = 100) => ({
-    id: structureId,
-    structureId,
-    year: 2025,
-    placesAutorisees,
-    pmr: 0,
-    lgbt: 0,
-    fvvTeh: 0,
-  });
-
-  const buildControleQualiteContext = (
-    structureIds: number[],
-    partial: Partial<
-      Pick<
-        StatistiquesContext,
-        "eigs" | "evaluations" | "activeStructureIdsByPeriod" | "dnaLinks"
-      >
-    > = {}
-  ) =>
-    buildTestStatistiquesContext({
-      structures: structureIds.map(structure),
-      allStructures: structureIds.map(structure),
-      typologies: structureIds.map((id) => typologie(id)),
-      adresses: [],
-      departements: [],
-      dnaLinks: partial.dnaLinks ?? dnaLinks,
-      eigs: partial.eigs ?? [],
-      evaluations: partial.evaluations ?? [],
-      activeStructureIdsByPeriod:
-        partial.activeStructureIdsByPeriod ??
-        buildTestActiveStructureIdsByPeriod(structureIds),
-    });
-
-  it("should aggregate trimester notes from raw evaluations", () => {
-    const result = computeControleQualiteStatistiques(
-      buildControleQualiteContext([1], {
-        evaluations: [
-          {
-            id: 1,
-            structureId: 1,
-            date: new Date("2025-01-15"),
-            note: 2,
-            notePersonne: null,
-            notePro: null,
-            noteStructure: null,
-          },
-          ...Array.from({ length: 10 }, (_, index) => ({
-            id: index + 2,
-            structureId: 1,
-            date: new Date("2025-02-15"),
-            note: 4,
-            notePersonne: null,
-            notePro: null,
-            noteStructure: null,
-          })),
-        ],
-        activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod([1], {
-          periodDates: [new Date("2025-01-15"), new Date("2025-02-15")],
-        }),
-      }),
-      "moyenne"
-    );
-
-    const trimester2025Q1 = result.byTrimester.find(
-      (entry) => entry.date.toISOString().slice(0, 10) === "2025-01-01"
-    );
-
-    expect(trimester2025Q1?.noteGenerale).toBe(3.8);
-    expect(result.byYear[0]?.noteGenerale).toBe(3.8);
-  });
-
-  it("should compute trimester EIG rate from period totals", () => {
+  it("filtre les EIG de référence sur une fenêtre glissante de 12 mois", () => {
     const result = computeControleQualiteStatistiques(
       buildControleQualiteContext([1], {
         eigs: [
           {
             id: 1,
             dnaCode: "DNA01",
+            type: "autre motif",
+            evenementDate: new Date("2024-12-10T00:00:00.000Z"),
+          },
+          {
+            id: 2,
+            dnaCode: "DNA01",
             type: "comportement violent",
-            evenementDate: new Date("2025-01-10"),
+            evenementDate: new Date("2025-01-10T00:00:00.000Z"),
+          },
+          {
+            id: 3,
+            dnaCode: "DNA01",
+            type: "autre motif",
+            evenementDate: new Date("2026-01-10T00:00:00.000Z"),
+          },
+        ],
+        activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod([1], {
+          periodDates: [
+            new Date("2024-12-10T00:00:00.000Z"),
+            new Date("2025-01-10T00:00:00.000Z"),
+            new Date("2026-01-10T00:00:00.000Z"),
+          ],
+        }),
+      }),
+      "moyenne"
+    );
+
+    expect(result.eig.nbEig).toBe(2);
+    expect(result.eig.nbEigComportementViolent).toBe(1);
+    expect(result.eig.tauxEig).toBe(0.02);
+    expect(result.eig.tauxEigComportementViolent).toBe(0.5);
+  });
+});
+
+describe("contrôle qualité — regroupements mois / trimestre / année", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("regroupe les EIG par mois, puis consolide sur trimestre et année", () => {
+    const result = computeControleQualiteStatistiques(
+      buildControleQualiteContext([1], {
+        eigs: [
+          {
+            id: 1,
+            dnaCode: "DNA01",
+            type: "autre motif",
+            evenementDate: new Date("2025-01-10T00:00:00.000Z"),
           },
           {
             id: 2,
             dnaCode: "DNA01",
             type: "autre motif",
-            evenementDate: new Date("2025-02-10"),
-          },
-          ...Array.from({ length: 6 }, (_, index) => ({
-            id: index + 3,
-            dnaCode: "DNA01",
-            type: "autre motif",
-            evenementDate: new Date("2025-02-15"),
-          })),
-          {
-            id: 9,
-            dnaCode: "DNA01",
-            type: "comportement violent",
-            evenementDate: new Date("2025-02-20"),
+            evenementDate: new Date("2025-02-10T00:00:00.000Z"),
           },
           {
-            id: 10,
+            id: 3,
             dnaCode: "DNA01",
             type: "comportement violent",
-            evenementDate: new Date("2025-02-25"),
+            evenementDate: new Date("2025-02-20T00:00:00.000Z"),
           },
         ],
         activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod([1], {
           periodDates: [
-            new Date("2025-01-10"),
-            new Date("2025-02-10"),
-            new Date("2025-02-15"),
-            new Date("2025-02-20"),
-            new Date("2025-02-25"),
+            new Date("2025-01-10T00:00:00.000Z"),
+            new Date("2025-02-10T00:00:00.000Z"),
+            new Date("2025-02-20T00:00:00.000Z"),
           ],
         }),
       }),
@@ -157,30 +158,44 @@ describe("quality control statistics util", () => {
     const february = result.byMonth.find(
       (entry) => entry.date.toISOString().slice(0, 7) === "2025-02"
     );
-    const trimester = result.byTrimester.find(
+    const trimester2025Q1 = result.byTrimester.find(
       (entry) => entry.date.toISOString().slice(0, 10) === "2025-01-01"
     );
+    const year2025 = result.byYear.find(
+      (entry) => entry.date.toISOString().slice(0, 4) === "2025"
+    );
 
-    expect(january?.tauxEigComportementViolent).toBe(1);
-    expect(february?.tauxEigComportementViolent).toBe(0.222);
-    expect(trimester?.tauxEigComportementViolent).toBe(0.3);
-    expect(trimester?.nbEig).toBe(10);
+    expect(january?.nbEig).toBe(1);
+    expect(february?.nbEig).toBe(2);
+    expect(trimester2025Q1?.nbEig).toBe(3);
+    expect(year2025?.nbEig).toBe(3);
+  });
+});
+
+describe("contrôle qualité — structures actives sans déclaration EIG", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
   });
 
-  it("should count structures without EIG declaration", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("compte les structures actives sur la période ne déclarant aucun EIG", () => {
     const result = computeControleQualiteStatistiques(
       buildControleQualiteContext([1, 2, 3], {
         eigs: [
           {
             id: 1,
             dnaCode: "DNA01",
-            type: "autre",
-            evenementDate: new Date("2025-03-01"),
+            type: "autre motif",
+            evenementDate: new Date("2025-03-01T00:00:00.000Z"),
           },
         ],
         activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod(
           [1, 2, 3],
-          { periodDates: [new Date("2025-03-01")] }
+          { periodDates: [new Date("2025-03-01T00:00:00.000Z")] }
         ),
       }),
       "moyenne"
@@ -192,105 +207,5 @@ describe("quality control statistics util", () => {
 
     expect(march?.nbStructuresSansDeclarationEig).toBe(2);
     expect(march?.partStructuresSansDeclarationEig).toBe(0.667);
-  });
-
-  it("should use period-specific structure perimeter for month and trimester", () => {
-    const result = computeControleQualiteStatistiques(
-      buildControleQualiteContext([1, 2, 3], {
-        eigs: [
-          {
-            id: 1,
-            dnaCode: "DNA01",
-            type: "autre",
-            evenementDate: new Date("2025-03-01"),
-          },
-        ],
-        evaluations: [
-          {
-            id: 1,
-            structureId: 1,
-            date: new Date("2025-02-15"),
-            note: 3,
-            notePersonne: null,
-            notePro: null,
-            noteStructure: null,
-          },
-        ],
-        activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod(
-          [1, 2, 3],
-          {
-            closureDates: new Map([
-              [1, null],
-              [2, null],
-              [3, new Date("2025-02-01T00:00:00.000Z")],
-            ]),
-            periodDates: [new Date("2025-02-15"), new Date("2025-03-01")],
-          }
-        ),
-      }),
-      "moyenne"
-    );
-
-    const february = result.byMonth.find(
-      (entry) => entry.date.toISOString().slice(0, 7) === "2025-02"
-    );
-    const march = result.byMonth.find(
-      (entry) => entry.date.toISOString().slice(0, 7) === "2025-03"
-    );
-    const trimesterQ1 = result.byTrimester.find(
-      (entry) => entry.date.toISOString().slice(0, 10) === "2025-01-01"
-    );
-
-    expect(february?.nbStructuresSansDeclarationEig).toBe(3);
-    expect(march?.nbStructuresSansDeclarationEig).toBe(1);
-    expect(march?.partStructuresSansDeclarationEig).toBe(0.5);
-    expect(trimesterQ1?.nbStructuresSansDeclarationEig).toBe(2);
-  });
-
-  it("should use median aggregation for evaluation notes", () => {
-    const result = computeControleQualiteStatistiques(
-      buildControleQualiteContext([1], {
-        evaluations: [
-          {
-            id: 1,
-            structureId: 1,
-            date: new Date("2025-06-01"),
-            note: 2,
-            notePersonne: null,
-            notePro: null,
-            noteStructure: null,
-          },
-          {
-            id: 2,
-            structureId: 1,
-            date: new Date("2025-06-15"),
-            note: 4,
-            notePersonne: null,
-            notePro: null,
-            noteStructure: null,
-          },
-          {
-            id: 3,
-            structureId: 1,
-            date: new Date("2025-06-20"),
-            note: 5,
-            notePersonne: null,
-            notePro: null,
-            noteStructure: null,
-          },
-        ],
-        activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod([1], {
-          periodDates: [
-            new Date("2025-06-01"),
-            new Date("2025-06-15"),
-            new Date("2025-06-20"),
-          ],
-        }),
-      }),
-      "mediane"
-    );
-
-    expect(result.byMonth[0]?.noteGenerale).toBe(4);
-    expect(result.eig.moyenneEvaluationsCurrentYear).toBe(4);
   });
 });

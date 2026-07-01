@@ -1,104 +1,334 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import type { StatistiqueDbStructure } from "@/app/api/statistiques/statistiques.db.type";
 import {
-  buildActivityIndex,
   getEffectiveStructureVersionAtDate,
-  getPeriodBounds,
   lookupActiveStructureIds,
   lookupStructureIdsForDnaAtDate,
+  mapTypologieYears,
+  mapVersionsToStructures,
+  structuresActiveInPeriod,
 } from "@/app/api/statistiques/statistiques.utils";
 import { StructureType } from "@/types/structure.type";
 
 import {
-  buildTestActivityContext,
+  buildTestActivityIndex,
   buildTestDnaLinks,
   buildTestStructureVersionTimeline,
 } from "./test-helpers";
 
-describe("statistiques period utils", () => {
-  const closureMarch2024 = new Date("2024-03-01T00:00:00.000Z");
-  const activityContext = buildTestActivityContext([1], {
+/** Structure 3 closed on 2025-02-01; reference date 2025-06-15. */
+const FEBRUARY_2025_CLOSURE_FIXTURE = {
+  referenceDate: new Date("2025-06-15T12:00:00.000Z"),
+  structureIds: [1, 2, 3],
+  activityOptions: {
     openingDate: new Date("2020-01-01T00:00:00.000Z"),
-    closureDates: new Map([[1, closureMarch2024]]),
-  });
-  const activeStructureIdsByPeriod = {
-    month: new Map<string, Set<number>>(),
-    trimester: new Map<string, Set<number>>(),
-    year: new Map<string, Set<number>>(),
-  };
+    closureDates: new Map<number, Date | null>([
+      [1, null],
+      [2, null],
+      [3, new Date("2025-02-01T00:00:00.000Z")],
+    ]),
+    typologieYears: [2025, 2026],
+    referenceYear: 2026,
+    periodDates: [
+      new Date("2025-02-15T00:00:00.000Z"),
+      new Date("2025-03-15T00:00:00.000Z"),
+    ],
+  },
+};
 
-  beforeEach(() => {
-    activeStructureIdsByPeriod.month.clear();
-    activeStructureIdsByPeriod.trimester.clear();
-    activeStructureIdsByPeriod.year.clear();
+const testStructure = (
+  id: number,
+  type: StructureType = StructureType.CADA
+): StatistiqueDbStructure => ({
+  id,
+  type,
+  departementAdministratif: "01",
+});
 
-    buildActivityIndex(activityContext, activeStructureIdsByPeriod, {
-      referenceDate: new Date("2026-06-30T12:00:00.000Z"),
-      typologieYears: [2024, 2025],
-      referenceYear: 2026,
-      periodDates: [
-        new Date("2024-02-15"),
-        new Date("2024-03-15"),
-        new Date("2024-04-15"),
-      ],
+describe("socle — ouverture / fermeture par période", () => {
+  const { referenceDate, structureIds, activityOptions } =
+    FEBRUARY_2025_CLOSURE_FIXTURE;
+
+  const { activeStructureIdsNow, activeStructureIdsByPeriod } =
+    buildTestActivityIndex(structureIds, {
+      referenceDate,
+      ...activityOptions,
     });
+
+  it("expose les structures ouvertes au jour de référence via buildActivityIndex", () => {
+    expect(activeStructureIdsNow).toEqual(new Set([1, 2]));
   });
 
-  it("should count structure active in year of closure but not after", () => {
-    expect(
-      lookupActiveStructureIds(activeStructureIdsByPeriod, "year", "2024")
-    ).toEqual(new Set([1]));
+  it("décline une fermeture sur année, mois et trimestre via lookupActiveStructureIds", () => {
     expect(
       lookupActiveStructureIds(activeStructureIdsByPeriod, "year", "2025")
-    ).toEqual(new Set());
-  });
+    ).toEqual(new Set([1, 2, 3]));
+    expect(
+      lookupActiveStructureIds(activeStructureIdsByPeriod, "year", "2026")
+    ).toEqual(new Set([1, 2]));
 
-  it("should count structure active in month of closure but not after", () => {
     expect(
-      lookupActiveStructureIds(activeStructureIdsByPeriod, "month", "2024-02")
-    ).toEqual(new Set([1]));
+      lookupActiveStructureIds(activeStructureIdsByPeriod, "month", "2025-02")
+    ).toEqual(new Set([1, 2, 3]));
     expect(
-      lookupActiveStructureIds(activeStructureIdsByPeriod, "month", "2024-03")
-    ).toEqual(new Set([1]));
-    expect(
-      lookupActiveStructureIds(activeStructureIdsByPeriod, "month", "2024-04")
-    ).toEqual(new Set());
-  });
+      lookupActiveStructureIds(activeStructureIdsByPeriod, "month", "2025-03")
+    ).toEqual(new Set([1, 2]));
 
-  it("should count structure active in trimester of closure but not after", () => {
     expect(
       lookupActiveStructureIds(
         activeStructureIdsByPeriod,
         "trimester",
-        "2024-Q1"
+        "2025-Q1"
       )
-    ).toEqual(new Set([1]));
+    ).toEqual(new Set([1, 2, 3]));
     expect(
       lookupActiveStructureIds(
         activeStructureIdsByPeriod,
         "trimester",
-        "2024-Q2"
+        "2025-Q2"
       )
-    ).toEqual(new Set());
+    ).toEqual(new Set([1, 2]));
   });
 
-  it("should resolve consistent bounds for each granularity", () => {
-    expect(getPeriodBounds("month", "2024-03")).toEqual({
-      start: new Date(Date.UTC(2024, 2, 1)),
-      end: new Date(Date.UTC(2024, 3, 1)),
-    });
-    expect(getPeriodBounds("trimester", "2024-Q1")).toEqual({
-      start: new Date(Date.UTC(2024, 0, 1)),
-      end: new Date(Date.UTC(2024, 3, 1)),
-    });
-    expect(getPeriodBounds("year", "2024")).toEqual({
-      start: new Date(Date.UTC(2024, 0, 1)),
-      end: new Date(Date.UTC(2025, 0, 1)),
-    });
+  it("exclut une structure pas encore ouverte au jour de référence", () => {
+    const { activeStructureIdsNow: openStructureIds } = buildTestActivityIndex(
+      [4],
+      {
+        referenceDate,
+        openingDate: new Date("2025-12-01T00:00:00.000Z"),
+        closureDates: new Map([[4, null]]),
+      }
+    );
+
+    expect(openStructureIds).toEqual(new Set());
+  });
+
+  it("exclut une structure déjà fermée avant le jour de référence", () => {
+    const { activeStructureIdsNow: openStructureIds } = buildTestActivityIndex(
+      [5],
+      {
+        referenceDate,
+        openingDate: new Date("2020-01-01T00:00:00.000Z"),
+        closureDates: new Map([[5, new Date("2025-01-01T00:00:00.000Z")]]),
+      }
+    );
+
+    expect(openStructureIds).toEqual(new Set());
   });
 });
 
-describe("DNA resolution at date", () => {
+describe("socle — périmètre général vs séries temporelles", () => {
+  const { structureIds, activityOptions } = FEBRUARY_2025_CLOSURE_FIXTURE;
+  const allStructures = structureIds.map((id) => testStructure(id));
+  const activeStructureIdsByPeriod = buildTestActivityIndex(structureIds, {
+    referenceDate: FEBRUARY_2025_CLOSURE_FIXTURE.referenceDate,
+    ...activityOptions,
+  }).activeStructureIdsByPeriod;
+
+  it("résout les séries temporelles via structuresActiveInPeriod", () => {
+    expect(
+      structuresActiveInPeriod(
+        allStructures,
+        activeStructureIdsByPeriod,
+        "year",
+        "2025"
+      ).map((structure) => structure.id)
+    ).toEqual([1, 2, 3]);
+
+    expect(
+      structuresActiveInPeriod(
+        allStructures,
+        activeStructureIdsByPeriod,
+        "month",
+        "2025-03"
+      ).map((structure) => structure.id)
+    ).toEqual([1, 2]);
+  });
+
+  it("construit le byYear via mapTypologieYears sur le périmètre annuel", () => {
+    const byYear = mapTypologieYears(
+      allStructures,
+      activeStructureIdsByPeriod,
+      [
+        {
+          id: 1,
+          structureId: 1,
+          year: 2025,
+          placesAutorisees: 10,
+          pmr: 0,
+          lgbt: 0,
+          fvvTeh: 0,
+        },
+        {
+          id: 2,
+          structureId: 2,
+          year: 2025,
+          placesAutorisees: 20,
+          pmr: 0,
+          lgbt: 0,
+          fvvTeh: 0,
+        },
+        {
+          id: 3,
+          structureId: 3,
+          year: 2025,
+          placesAutorisees: 30,
+          pmr: 0,
+          lgbt: 0,
+          fvvTeh: 0,
+        },
+      ],
+      (_year, structuresForYear) => ({
+        structureIds: structuresForYear.map((structure) => structure.id),
+      })
+    );
+
+    expect(byYear).toEqual([{ year: 2025, structureIds: [1, 2, 3] }]);
+  });
+});
+
+describe("socle — version effective et périmètre général", () => {
+  const timeline = buildTestStructureVersionTimeline([
+    {
+      structureId: 1,
+      structureVersionId: 10,
+      effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
+      type: StructureType.CADA,
+      departementAdministratif: "01",
+    },
+    {
+      structureId: 1,
+      structureVersionId: 11,
+      effectiveDate: new Date("2025-01-01T00:00:00.000Z"),
+      type: StructureType.CPH,
+      departementAdministratif: "75",
+    },
+  ]);
+
+  const activityWithoutClosure = {
+    openingDate: new Date("2020-01-01T00:00:00.000Z"),
+    closureDates: new Map<number, Date | null>([[1, null]]),
+  };
+
+  it("sélectionne la version effective à la date via getEffectiveStructureVersionAtDate", () => {
+    expect(
+      getEffectiveStructureVersionAtDate(
+        1,
+        new Date("2024-06-15T12:00:00.000Z"),
+        timeline
+      )
+    ).toMatchObject({
+      id: 10,
+      type: StructureType.CADA,
+      departementAdministratif: "01",
+    });
+    expect(
+      getEffectiveStructureVersionAtDate(
+        1,
+        new Date("2025-06-15T12:00:00.000Z"),
+        timeline
+      )
+    ).toMatchObject({
+      id: 11,
+      type: StructureType.CPH,
+      departementAdministratif: "75",
+    });
+  });
+
+  it("projette la version effective via mapVersionsToStructures", () => {
+    const effectiveVersion = getEffectiveStructureVersionAtDate(
+      1,
+      new Date("2025-06-15T12:00:00.000Z"),
+      timeline
+    );
+
+    expect(mapVersionsToStructures([effectiveVersion!])).toEqual([
+      {
+        id: 1,
+        type: StructureType.CPH,
+        departementAdministratif: "75",
+      },
+    ]);
+  });
+
+  it("forme context.structures comme dans statistique.service (versions + activeStructureIdsNow)", () => {
+    const referenceDate = new Date("2025-06-15T12:00:00.000Z");
+    const effectiveVersion = getEffectiveStructureVersionAtDate(
+      1,
+      referenceDate,
+      timeline
+    );
+    const allStructures = mapVersionsToStructures([effectiveVersion!]);
+    const { activeStructureIdsNow } = buildTestActivityIndex([1], {
+      referenceDate,
+      openingDate: new Date("2020-01-01T00:00:00.000Z"),
+      closureDates: new Map([[1, new Date("2025-02-01T00:00:00.000Z")]]),
+    });
+
+    const structures = allStructures.filter((structure) =>
+      activeStructureIdsNow.has(structure.id)
+    );
+
+    expect(structures).toEqual([]);
+  });
+
+  it("garde la structure au général si fermeture postérieure à la date de référence", () => {
+    const referenceDate = new Date("2025-06-15T12:00:00.000Z");
+    const effectiveVersion = getEffectiveStructureVersionAtDate(
+      1,
+      referenceDate,
+      timeline
+    );
+    const allStructures = mapVersionsToStructures([effectiveVersion!]);
+    const { activeStructureIdsNow } = buildTestActivityIndex([1], {
+      referenceDate,
+      ...activityWithoutClosure,
+      closureDates: new Map([[1, new Date("2025-12-01T00:00:00.000Z")]]),
+    });
+
+    const structures = allStructures.filter((structure) =>
+      activeStructureIdsNow.has(structure.id)
+    );
+
+    expect(structures).toEqual([
+      {
+        id: 1,
+        type: StructureType.CPH,
+        departementAdministratif: "75",
+      },
+    ]);
+  });
+
+  it("combine version antérieure à la transfo et fermeture future", () => {
+    const referenceDate = new Date("2024-06-15T12:00:00.000Z");
+    const effectiveVersion = getEffectiveStructureVersionAtDate(
+      1,
+      referenceDate,
+      timeline
+    );
+    const allStructures = mapVersionsToStructures([effectiveVersion!]);
+    const { activeStructureIdsNow } = buildTestActivityIndex([1], {
+      referenceDate,
+      openingDate: new Date("2020-01-01T00:00:00.000Z"),
+      closureDates: new Map([[1, new Date("2025-12-01T00:00:00.000Z")]]),
+    });
+
+    const structures = allStructures.filter((structure) =>
+      activeStructureIdsNow.has(structure.id)
+    );
+
+    expect(structures).toEqual([
+      {
+        id: 1,
+        type: StructureType.CADA,
+        departementAdministratif: "01",
+      },
+    ]);
+  });
+});
+
+describe("socle — résolution DNA à date", () => {
   const timeline = buildTestStructureVersionTimeline([
     {
       structureId: 1,
@@ -124,31 +354,7 @@ describe("DNA resolution at date", () => {
     { structureId: 1, structureVersionId: 10, dnaCode: "DNA-OLD" },
   ]);
 
-  it("should pick the effective structure version at date", () => {
-    expect(
-      getEffectiveStructureVersionAtDate(
-        1,
-        new Date("2024-06-01"),
-        timeline
-      )?.id
-    ).toBe(10);
-    expect(
-      getEffectiveStructureVersionAtDate(
-        2,
-        new Date("2024-06-01"),
-        timeline
-      )
-    ).toBeNull();
-    expect(
-      getEffectiveStructureVersionAtDate(
-        2,
-        new Date("2025-06-01"),
-        timeline
-      )?.id
-    ).toBe(20);
-  });
-
-  it("should resolve DNA to the structure owning it on the effective version", () => {
+  it("rattache un DNA via lookupStructureIdsForDnaAtDate sur la version effective", () => {
     expect(
       lookupStructureIdsForDnaAtDate(
         "DNA-SHARED",
@@ -171,6 +377,18 @@ describe("DNA resolution at date", () => {
         new Date("2025-06-01"),
         dnaLinks,
         timeline
+      )
+    ).toEqual([]);
+  });
+
+  it("restreint lookupStructureIdsForDnaAtDate au Set de structures actives fourni", () => {
+    expect(
+      lookupStructureIdsForDnaAtDate(
+        "DNA-SHARED",
+        new Date("2025-06-01"),
+        dnaLinks,
+        timeline,
+        new Set([1])
       )
     ).toEqual([]);
   });

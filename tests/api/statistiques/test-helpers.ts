@@ -79,31 +79,46 @@ export const buildTestActivityContext = (
   );
 };
 
-type BuildTestActiveStructureIdsByPeriodOptions =
+export type BuildTestActiveStructureIdsByPeriodOptions =
   BuildTestActivityContextOptions & {
+    referenceDate?: Date;
     typologieYears?: number[];
     referenceYear?: number;
     periodDates?: (Date | string | null | undefined)[];
     financeYears?: number[];
   };
 
+export const buildTestActivityIndex = (
+  structureIds: number[],
+  options: BuildTestActiveStructureIdsByPeriodOptions = {}
+): {
+  activeStructureIdsNow: Set<number>;
+  activeStructureIdsByPeriod: StatistiquesContext["activeStructureIdsByPeriod"];
+} => {
+  const activityContext = buildTestActivityContext(structureIds, options);
+  const activeStructureIdsByPeriod = createEmptyActiveStructureIdsByPeriod();
+  const referenceDate = options.referenceDate ?? new Date();
+
+  const activeStructureIdsNow = buildActivityIndex(
+    activityContext,
+    activeStructureIdsByPeriod,
+    {
+      referenceDate,
+      typologieYears: options.typologieYears ?? [2023, 2024, 2025, 2026],
+      referenceYear: options.referenceYear ?? referenceDate.getUTCFullYear(),
+      periodDates: options.periodDates ?? [],
+      financeYears: options.financeYears,
+    }
+  );
+
+  return { activeStructureIdsNow, activeStructureIdsByPeriod };
+};
+
 export const buildTestActiveStructureIdsByPeriod = (
   structureIds: number[],
   options: BuildTestActiveStructureIdsByPeriodOptions = {}
-): StatistiquesContext["activeStructureIdsByPeriod"] => {
-  const activityContext = buildTestActivityContext(structureIds, options);
-  const activeStructureIdsByPeriod = createEmptyActiveStructureIdsByPeriod();
-
-  buildActivityIndex(activityContext, activeStructureIdsByPeriod, {
-    referenceDate: new Date(),
-    typologieYears: options.typologieYears ?? [2023, 2024, 2025, 2026],
-    referenceYear: options.referenceYear ?? 2026,
-    periodDates: options.periodDates ?? [],
-    financeYears: options.financeYears,
-  });
-
-  return activeStructureIdsByPeriod;
-};
+): StatistiquesContext["activeStructureIdsByPeriod"] =>
+  buildTestActivityIndex(structureIds, options).activeStructureIdsByPeriod;
 
 export const buildTestStatistiquesContext = (
   partial: Pick<
