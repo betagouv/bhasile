@@ -15,9 +15,10 @@ export const FilterTypeStructure = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [types, setTypes] = useState<string[]>(
-    searchParams.get("type")?.split(",").filter(Boolean) || []
-  );
+  const [types, setTypes] = useState<string[]>(() => {
+    const urlTypes = searchParams.get("type")?.split(",").filter(Boolean);
+    return urlTypes && urlTypes.length > 0 ? urlTypes : ALL_STRUCTURE_TYPES;
+  });
 
   const isAllChecked = types.length === ALL_STRUCTURE_TYPES.length;
 

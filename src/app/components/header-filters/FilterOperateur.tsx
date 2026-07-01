@@ -12,9 +12,7 @@ export const FilterOperateur = () => {
   const searchParams = useSearchParams();
   const [allOperateurs, setAllOperateurs] = useState<OperateurSuggestion[]>([]);
   const router = useRouter();
-
   const [searchQuery, setSearchQuery] = useState("");
-
   const { getAllOperateurs } = useOperateurSuggestion();
 
   useEffect(() => {
@@ -37,7 +35,9 @@ export const FilterOperateur = () => {
 
   const isAllChecked =
     filteredOperateurs.length > 0 &&
-    filteredOperateurs.every((op) => selectedIds.includes(op.id));
+    filteredOperateurs.every((operateur) =>
+      selectedIds.includes(String(operateur.id))
+    );
 
   const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const operateurId = event.target.value;
@@ -51,19 +51,19 @@ export const FilterOperateur = () => {
   const handleSelectAllChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
+    const filteredIds = filteredOperateurs.map((operateur) =>
+      String(operateur.id)
+    );
+
     if (event.target.checked) {
-      const filteredIds = filteredOperateurs.map((operateur) => operateur.id);
       setSelectedIds([...new Set([...selectedIds, ...filteredIds])]);
     } else {
-      const filteredIds: string[] = filteredOperateurs.map(
-        (operateur) => operateur.id
-      );
       setSelectedIds(selectedIds.filter((id) => !filteredIds.includes(id)));
     }
   };
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(searchParams.toString());
     const newValue = selectedIds.join(",");
 
     if (
@@ -80,7 +80,7 @@ export const FilterOperateur = () => {
     }
 
     router.replace(`?${params.toString()}`);
-  }, [selectedIds, router]);
+  }, [selectedIds, router, searchParams]);
 
   return (
     <div className="p-4 flex flex-col gap-2">
@@ -121,8 +121,8 @@ export const FilterOperateur = () => {
               label: operateur.label,
               nativeInputProps: {
                 name: `operateur-${operateur.id}`,
-                value: operateur.id,
-                checked: selectedIds.includes(operateur.id),
+                value: String(operateur.id),
+                checked: selectedIds.includes(String(operateur.id)),
                 onChange: handleTypeChange,
               },
             },
