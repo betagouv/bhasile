@@ -1,6 +1,8 @@
-import Button from "@codegouvfr/react-dsfr/Button";
-import { useRouter } from "next/navigation";
+"use client";
 
+import Button from "@codegouvfr/react-dsfr/Button";
+
+import { useTransformationNavigateWithSave } from "@/app/hooks/useTransformationNavigateWithSave";
 import { cn } from "@/app/utils/classname.util";
 
 export const TransformationMenuItem = ({
@@ -11,7 +13,7 @@ export const TransformationMenuItem = ({
   disabled,
   children,
 }: Props) => {
-  const router = useRouter();
+  const { navigateWithSave } = useTransformationNavigateWithSave();
 
   return (
     <div>
@@ -24,7 +26,7 @@ export const TransformationMenuItem = ({
         priority="tertiary no outline"
         onClick={() => {
           if (url) {
-            router.push(url);
+            navigateWithSave(url);
           }
         }}
         disabled={disabled}

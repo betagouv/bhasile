@@ -34,8 +34,13 @@ export const PlacesEtHebergementForm = ({
   formKind,
   originalPlaces,
 }: Props) => {
-  const { goToNextStep, handleSave, backLink, shouldShowIncompleteSteps } =
-    useTransformationFormHandling();
+  const {
+    goToNextStep,
+    navigateWithSave,
+    handleSave,
+    backLink,
+    shouldShowIncompleteSteps,
+  } = useTransformationFormHandling();
 
   const strictSchema = getPlacesEtHebergementSchema(formKind, originalPlaces);
 
@@ -70,6 +75,7 @@ export const PlacesEtHebergementForm = ({
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       backLink={backLink}
+      onBackNavigate={navigateWithSave}
       showContactInfos={false}
     >
       <TransformationFormController
