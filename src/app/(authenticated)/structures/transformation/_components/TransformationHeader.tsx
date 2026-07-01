@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { useOptionalTransformationContext } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { useFetchState } from "@/app/context/FetchStateContext";
+import { useTransformationNavigateWithSave } from "@/app/hooks/useTransformationNavigateWithSave";
 import { useTransformations } from "@/app/hooks/useTransformations";
 import { getTransformationTitle } from "@/app/utils/transformation.util";
 import { FetchState } from "@/types/fetch-state.type";
@@ -26,6 +27,7 @@ export const TransformationHeader = () => {
   const { transformation, saveCurrentForm, isSaverRegistered } =
     useOptionalTransformationContext();
   const { deleteTransformation } = useTransformations();
+  const { navigateWithSave } = useTransformationNavigateWithSave();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { getFetchState } = useFetchState();
@@ -90,6 +92,10 @@ export const TransformationHeader = () => {
           <div className="flex items-center gap-2">
             <Link
               href="/structures"
+              onNavigate={(event) => {
+                event.preventDefault();
+                navigateWithSave("/structures");
+              }}
               className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-left-s-line"
               title="Retour"
             >

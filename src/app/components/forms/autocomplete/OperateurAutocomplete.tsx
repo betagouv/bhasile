@@ -14,6 +14,7 @@ export const OperateurAutocomplete = ({
   externalError,
   inputRef,
   onBlurExtra,
+  disabled,
 }: Props): ReactElement => {
   const fetchSuggestions = useOperateurSuggestion();
 
@@ -36,6 +37,7 @@ export const OperateurAutocomplete = ({
       fetchSuggestions={fetchSuggestions}
       externalInvalid={externalInvalid}
       externalError={externalError}
+      disabled={disabled}
     />
   );
 };
@@ -48,6 +50,7 @@ type Props = {
   externalError?: string;
   inputRef?: Ref<HTMLInputElement>;
   onBlurExtra?: () => void;
+  disabled?: boolean;
 };
 
 const LABELS = {

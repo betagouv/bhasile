@@ -82,7 +82,13 @@ export const FieldSetDescription = ({
                   ))}
               </SelectWithValidation>
 
-              <OperateurAutocompleteRhf />
+              <OperateurAutocompleteRhf
+                disabled={
+                  formKind ===
+                    FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES &&
+                  !!watch("operateur.id")
+                }
+              />
 
               <div ref={filialesContainerRef}>
                 {isManagedByAFiliale && (
@@ -130,7 +136,6 @@ export const FieldSetDescription = ({
             <CustomNotice
               severity="info"
               title=""
-              className="rounded [&_p]:flex [&_p]:items-center"
               description="LGBT : Lesbiennes, Gays, Bisexuels et Transgenres – FVV : Femmes Victimes de Violences–TEH : Traîte des Êtres Humains"
             />
             <label className="flex gap-6">

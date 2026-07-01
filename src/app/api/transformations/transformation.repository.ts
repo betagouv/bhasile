@@ -126,6 +126,7 @@ export const updateOne = async (
       await createStructuresForCreationBlocks(tx, input.id);
       await moveActesAdministratifsToStructures(tx, input.id);
       await endDnaStructuresForFermetureBlocks(tx, input.id);
+      await setFermetureDates(tx, input.id);
     }
 
     return input.id;
@@ -253,6 +254,41 @@ const moveActesAdministratifsToStructures = async (
         structureVersionTransformationId: structureVersionTransformation.id,
       },
       data: { structureId, structureVersionTransformationId: null },
+    });
+  }
+};
+
+const setFermetureDates = async (
+  tx: PrismaTransaction,
+  transformationId: number
+): Promise<void> => {
+  const fermetureBlocks = await tx.structureVersionTransformation.findMany({
+    where: {
+      transformationId,
+      type: StructureVersionTransformationType.FERMETURE,
+    },
+    select: {
+      id: true,
+      structureVersion: {
+        select: { structureId: true, effectiveDate: true },
+      },
+    },
+  });
+
+  for (const fermetureBlock of fermetureBlocks) {
+    const structureId = fermetureBlock.structureVersion?.structureId ?? null;
+    const effectiveDate =
+      fermetureBlock.structureVersion?.effectiveDate ?? null;
+
+    if (!structureId || !effectiveDate) {
+      throw new Error(
+        `Transformation ${transformationId}, Structure Version Transformation ${fermetureBlock.id} : fermeture sans structure ou date d'effet`
+      );
+    }
+
+    await tx.structure.updateMany({
+      where: { id: structureId, fermetureDate: null },
+      data: { fermetureDate: effectiveDate },
     });
   }
 };

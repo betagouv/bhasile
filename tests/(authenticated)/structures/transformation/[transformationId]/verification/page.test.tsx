@@ -24,6 +24,7 @@ const mockSetTransformation = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
+  usePathname: () => "/",
 }));
 
 vi.mock("@codegouvfr/react-dsfr/Modal", () => ({

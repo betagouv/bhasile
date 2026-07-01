@@ -505,6 +505,14 @@ const persistTransformation = async (
   if (!version) {
     throw new Error("StructureVersion non créée par la transformation");
   }
+
+  if (params.svtType === "FERMETURE") {
+    await prisma.structure.update({
+      where: { id: params.structureId },
+      data: { fermetureDate: params.effectiveDate },
+    });
+  }
+
   return { ...version, effectiveDate: version.effectiveDate! };
 };
 

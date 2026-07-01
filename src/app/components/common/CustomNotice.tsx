@@ -14,8 +14,8 @@ export const CustomNotice = ({
       severity={severity}
       title={title}
       className={cn(
+        "[&_p]:flex [&_p]:items-center rounded-lg",
         "[&_div_div]:px-4 [&_div_div]:py-3 [&_div]:px-0 py-0",
-        severity === "info" && "[&_.fr-notice\_\_desc]:text-text-default-grey",
         className
       )}
       description={description}

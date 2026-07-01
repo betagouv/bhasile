@@ -10,7 +10,7 @@ export const HistoryEventItem = ({ event, isLast }: Props): ReactElement => {
   const [day, month, year] = formatDate(event.date).split("/");
 
   return (
-    <li className="flex gap-3">
+    <li className="flex gap-3 p-0">
       <div className="flex w-12 shrink-0 flex-col items-end pt-0.5 leading-tight text-title-blue-france">
         <span className="text-xs">
           {day}/{month}
@@ -18,13 +18,13 @@ export const HistoryEventItem = ({ event, isLast }: Props): ReactElement => {
         <span className="font-bold">{year}</span>
       </div>
       <div className="flex flex-col items-center">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-title-blue-france">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-alt-blue-france text-title-blue-france">
           <StructureEventIcon kind={event.kind} size="md" />
         </span>
         {!isLast && (
           <span
             aria-hidden
-            className="my-1 w-px grow bg-[var(--border-default-grey)]"
+            className="w-px grow bg-[var(--border-default-grey)]"
           />
         )}
       </div>

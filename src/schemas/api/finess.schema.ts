@@ -13,5 +13,12 @@ export const structureFinessApiSchema = z.object({
   finess: finessApiSchema,
 });
 
+export const structureFinessApiPartialSchema = structureFinessApiSchema
+  .partial()
+  .extend({ finess: finessApiSchema.partial().optional() });
+
 export type FinessApiType = z.infer<typeof finessApiSchema>;
 export type StructureFinessApiType = z.infer<typeof structureFinessApiSchema>;
+export type StructureFinessApiPartialType = z.infer<
+  typeof structureFinessApiPartialSchema
+>;

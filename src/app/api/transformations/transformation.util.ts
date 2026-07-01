@@ -15,30 +15,40 @@ export const applyPrefill = (
     return structureVersionTransformations;
   }
 
-  return structureVersionTransformations.map((structureVersionTransformation) => {
-    const applicableRules = rules.filter(
-      (rule) => rule.to === structureVersionTransformation.type
-    );
-    if (applicableRules.length === 0) {
-      return structureVersionTransformation;
-    }
-
-    let structureVersion: StructureVersionApiType = {
-      ...structureVersionTransformation.structureVersion,
-    };
-    for (const rule of applicableRules) {
-      const sources = structureVersionTransformations.filter(
-        (candidate) => candidate.type === rule.from
+  return structureVersionTransformations.map(
+    (structureVersionTransformation) => {
+      const applicableRules = rules.filter(
+        (rule) => rule.to === structureVersionTransformation.type
       );
-      structureVersion = appendPrefillFields(
+      if (applicableRules.length === 0) {
+        return structureVersionTransformation;
+      }
+
+      let structureVersion: StructureVersionApiType = {
+        ...structureVersionTransformation.structureVersion,
+      };
+      let operateurId = structureVersionTransformation.operateurId;
+      for (const rule of applicableRules) {
+        const sources = structureVersionTransformations.filter(
+          (candidate) => candidate.type === rule.from
+        );
+        structureVersion = appendPrefillFields(
+          structureVersion,
+          sources,
+          rule.fields
+        );
+        if (rule.fields.includes("operateur")) {
+          operateurId = sources[0]?.operateurId ?? operateurId;
+        }
+      }
+
+      return {
+        ...structureVersionTransformation,
+        operateurId,
         structureVersion,
-        sources,
-        rule.fields
-      );
+      };
     }
-
-    return { ...structureVersionTransformation, structureVersion };
-  });
+  );
 };
 
 const appendPrefillFields = (

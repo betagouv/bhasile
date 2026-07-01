@@ -98,7 +98,6 @@ export default function StepVerification() {
         <CustomNotice
           severity="info"
           title=""
-          className="rounded [&_p]:flex [&_p]:items-center"
           description="Veuillez vérifier les informations saisies méticuleusement : une fois validées, il ne sera plus possible de les modifier."
         />
         <StepResume

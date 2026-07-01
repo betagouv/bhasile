@@ -25,6 +25,7 @@ export type AutocompleteFieldProps<T extends AutocompleteSuggestion> = {
   emptyMessage?: string;
   externalError?: string;
   externalInvalid?: boolean;
+  disabled?: boolean;
 };
 
 export const AutocompleteField = <T extends AutocompleteSuggestion>({
@@ -44,6 +45,7 @@ export const AutocompleteField = <T extends AutocompleteSuggestion>({
   emptyMessage,
   externalError,
   externalInvalid,
+  disabled,
 }: AutocompleteFieldProps<T>) => {
   const ui = useAutocompleteFieldUi<T>({
     value,
@@ -80,6 +82,7 @@ export const AutocompleteField = <T extends AutocompleteSuggestion>({
             : undefined,
           role: "combobox",
         }}
+        disabled={disabled}
         label={label}
         state={externalInvalid || ui.manualError ? "error" : "default"}
         stateRelatedMessage={externalError || ui.manualError}

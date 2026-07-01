@@ -30,8 +30,13 @@ export const FermetureDescriptionForm = ({
   transformation,
   structureVersionTransformation,
 }: Props) => {
-  const { goToNextStep, handleSave, backLink, shouldShowIncompleteSteps } =
-    useTransformationFormHandling();
+  const {
+    goToNextStep,
+    navigateWithSave,
+    handleSave,
+    backLink,
+    shouldShowIncompleteSteps,
+  } = useTransformationFormHandling();
 
   const categoryDisplayRules = fermetureActesAdministratifsCategoryToDisplay;
   const codeBhasile =
@@ -67,6 +72,7 @@ export const FermetureDescriptionForm = ({
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       backLink={backLink}
+      onBackNavigate={navigateWithSave}
       showContactInfos={false}
     >
       <TransformationFormController

@@ -181,6 +181,7 @@ export const structureDetailsInclude = {
             },
           },
           operateur: true,
+          region: true,
           departements: {
             include: { departement: true },
           },

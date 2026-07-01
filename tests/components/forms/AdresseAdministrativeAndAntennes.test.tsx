@@ -21,10 +21,7 @@ const ADRESSE = {
   departementAdministratif: "50",
 };
 
-const renderComponent = (props: {
-  formKind: FormKind;
-  isAdresseAdministrativeLocked?: boolean;
-}) =>
+const renderComponent = (props: { formKind: FormKind }) =>
   render(
     <FormTestWrapper defaultValues={ADRESSE}>
       <AdresseAdministrativeAndAntennes {...props} />
@@ -41,38 +38,22 @@ describe("AdresseAdministrativeAndAntennes", () => {
     mockUseAddressSuggestion.mockResolvedValue([]);
   });
 
-  it("verrouille nom + adresse quand isAdresseAdministrativeLocked est vrai", () => {
-    renderComponent({
-      formKind: FormKind.EXTENSION,
-      isAdresseAdministrativeLocked: true,
-    });
-
-    expect(getNomInput()).toBeDisabled();
-    expect(getAdresseInput()).toBeDisabled();
-  });
-
-  it("laisse les champs éditables quand isAdresseAdministrativeLocked est faux", () => {
-    renderComponent({
-      formKind: FormKind.EXTENSION,
-      isAdresseAdministrativeLocked: false,
-    });
+  it("laisse les champs éditables en transformation", () => {
+    renderComponent({ formKind: FormKind.EXTENSION });
 
     expect(getNomInput()).not.toBeDisabled();
     expect(getAdresseInput()).not.toBeDisabled();
   });
 
-  it("ne rend plus la question « adresse a changé » (remontée dans le composant parent)", () => {
-    renderComponent({
-      formKind: FormKind.EXTENSION,
-      isAdresseAdministrativeLocked: true,
-    });
+  it("ne rend plus la question « adresse a changé » (supprimée)", () => {
+    renderComponent({ formKind: FormKind.EXTENSION });
 
     expect(
       screen.queryByText(/Est-ce que le nom d.usage de la structure/i)
     ).not.toBeInTheDocument();
   });
 
-  it("hors transformation : pas de verrou par défaut", () => {
+  it("hors transformation : champs éditables", () => {
     renderComponent({ formKind: FormKind.FINALISATION });
 
     expect(getNomInput()).not.toBeDisabled();
