@@ -27,6 +27,7 @@ export const GenericTypeChart = ({
     if (labelAccessor === "bati" && "bati" in statItem) {
       return statItem.bati;
     }
+    console.log(">>>>>>>>>>", labelAccessor, statItem);
     return "";
   };
 
