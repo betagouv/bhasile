@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   getActesAdministratifsDefaultValues,
+  getActesCategoriesToDisplay,
   getCategoryGroup,
   getCurrentStructureParentActe,
   resolveAvenantParentIds,
@@ -11,7 +12,11 @@ import {
   CategoryDisplayRule,
   CategoryDisplayRules,
 } from "@/config/acte-administratif.config";
-import { StructureParentActe } from "@/types/acte-administratif.type";
+import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
+import {
+  ActeAdministratifCategory,
+  StructureParentActe,
+} from "@/types/acte-administratif.type";
 
 const REFERENCE_DATE = new Date("2025-06-01T12:00:00.000Z");
 
@@ -197,6 +202,55 @@ describe("resolveAvenantParentIds", () => {
     };
     const resolved = resolveAvenantParentIds(plainRules, [], REFERENCE_DATE);
     expect(resolved.AUTRE?.avenantAlternative).toBeUndefined();
+  });
+});
+
+describe("getActesCategoriesToDisplay", () => {
+  const acte = (
+    category: ActeAdministratifCategory,
+    parentId?: number
+  ): ActeAdministratifApiType => ({ category, parentId });
+
+  it("inclut une catégorie transférée absente de la config structure", () => {
+    expect(
+      getActesCategoriesToDisplay([acte("ARRETE_EXTENSION"), acte("CONVENTION")])
+    ).toContain("ARRETE_EXTENSION");
+  });
+
+  it("omet une catégorie sans acte", () => {
+    expect(getActesCategoriesToDisplay([acte("CONVENTION")])).not.toContain(
+      "AUTRE"
+    );
+  });
+
+  it("respecte l'ordre canonique du label map", () => {
+    expect(
+      getActesCategoriesToDisplay([
+        acte("CONVENTION"),
+        acte("ARRETE_AUTORISATION"),
+        acte("AUTRE"),
+        acte("ARRETE_EXTENSION"),
+      ])
+    ).toEqual([
+      "ARRETE_AUTORISATION",
+      "ARRETE_EXTENSION",
+      "CONVENTION",
+      "AUTRE",
+    ]);
+  });
+
+  it("ignore les avenants et ne garde que les actes de premier niveau", () => {
+    expect(
+      getActesCategoriesToDisplay([
+        acte("ARRETE_AUTORISATION"),
+        acte("ARRETE_EXTENSION", 5),
+      ])
+    ).toEqual(["ARRETE_AUTORISATION"]);
+  });
+
+  it("retourne une liste vide sans acte", () => {
+    expect(getActesCategoriesToDisplay([])).toEqual([]);
+    expect(getActesCategoriesToDisplay(undefined)).toEqual([]);
   });
 });
 
