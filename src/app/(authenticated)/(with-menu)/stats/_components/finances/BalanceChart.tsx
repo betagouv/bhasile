@@ -41,11 +41,14 @@ export const BalanceChart = (): ReactElement => {
     const cumul = excendentCumule.map(
       (excedent, index) => excedent - deficitCumule[index]
     );
-    const series = [excendentCumule, deficitCumule, cumul];
+    const series = {
+      barsSeries: [excendentCumule, deficitCumule],
+      lineSeries: cumul,
+    };
 
     return {
       labels,
-      series,
+      ...series,
     };
   };
 
@@ -56,7 +59,13 @@ export const BalanceChart = (): ReactElement => {
       </h4>
       <div className="grid grid-cols-3 gap-10">
         <div className="col-span-2">
-          <StackedBarLineChart data={getChartData()} />
+          <StackedBarLineChart
+            data={getChartData()}
+            colors={{
+              bars: ["#18753CB2", "#CE0500B2"],
+              line: "var(--blue-france-sun-113-625)",
+            }}
+          />
         </div>
         <div>
           <div className="flex items-center pb-6">

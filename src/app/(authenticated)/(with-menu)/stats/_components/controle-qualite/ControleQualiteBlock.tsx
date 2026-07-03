@@ -1,6 +1,19 @@
-import { WorkInProgress } from "@/app/components/WorkInProgress";
+"use client";
 
-export const ControleQualiteBlock = () => {
+import { ReactElement } from "react";
+
+import { InformationCard } from "@/app/components/InformationCard";
+import { InformationCardBridge } from "@/app/components/InformationCardBridge";
+import { CURRENT_YEAR } from "@/constants";
+
+import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
+import { ControleQualiteStatsTable } from "./ControleQualiteStatsTable";
+import { EIGChart } from "./EIGChart";
+import { EvaluationChart } from "./EvaluationChart";
+
+export const ControleQualiteBlock = (): ReactElement => {
+  const { statistiques } = useStatistiquesContext();
+
   return (
     <div className="bg-white pt-6 px-6 pb-8 border border-default-grey rounded-[10px] border-solid">
       <div className="flex justify-between items-start">
@@ -11,7 +24,30 @@ export const ControleQualiteBlock = () => {
           </h3>
         </div>
       </div>
-      <WorkInProgress />
+      <div className="flex pb-16">
+        <InformationCard
+          primaryInformation={`${statistiques.controleQualite.eig.nbEig} EIG`}
+          secondaryInformation="pour 1000 places sur les 12 derniers mois"
+        />
+        <InformationCardBridge />
+        <div className="pr-4">
+          <InformationCard
+            primaryInformation={`dont ${statistiques.controleQualite.eig.nbEigComportementViolent} (${Number(statistiques.controleQualite.eig.tauxEigComportementViolent).toFixed(1)}%)`}
+            secondaryInformation="au motif de comportements violents"
+          />
+        </div>
+        <InformationCard
+          primaryInformation={`${statistiques.controleQualite.eig.moyenneEvaluationsCurrentYear} / 4`}
+          secondaryInformation={`moyenne aux évaluations menées en ${CURRENT_YEAR}`}
+        />
+      </div>
+      <div className="pb-16">
+        <EIGChart />
+      </div>
+      <div className="pb-16">
+        <EvaluationChart />
+      </div>
+      <ControleQualiteStatsTable />
     </div>
   );
 };

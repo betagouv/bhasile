@@ -5,7 +5,23 @@ import "chartist/dist/index.css";
 import * as Chartist from "chartist";
 import { useEffect, useId, useRef } from "react";
 
-export const StackedBarLineChart = ({ data }: Props) => {
+type ChartData = {
+  labels: string[];
+  barsSeries: number[][];
+  lineSeries: number[];
+};
+
+type ChartColors = {
+  bars: string[];
+  line: string;
+};
+
+type Props = {
+  data: ChartData;
+  colors: ChartColors;
+};
+
+export const StackedBarLineChart = ({ data, colors }: Props) => {
   const barChartRef = useRef<HTMLDivElement>(null);
   const lineChartRef = useRef<HTMLDivElement>(null);
   const id = useId();
@@ -16,7 +32,7 @@ export const StackedBarLineChart = ({ data }: Props) => {
     let lineChart: Chartist.LineChart | null = null;
 
     if (barChartRef.current && lineChartRef.current) {
-      const allValues = (data.series.flat() as number[]) || [];
+      const allValues = [...data.barsSeries.flat(), ...data.lineSeries];
       const maxValue = Math.max(...allValues, 0);
       const minValue = Math.min(...allValues, 0);
 
@@ -28,12 +44,12 @@ export const StackedBarLineChart = ({ data }: Props) => {
 
       const barData = {
         labels: data.labels,
-        series: [data.series[0], data.series[1]],
+        series: data.barsSeries,
       };
 
       const lineData = {
         labels: data.labels,
-        series: [data.series[2]],
+        series: [data.lineSeries],
       };
 
       const barOptions = {
@@ -72,15 +88,12 @@ export const StackedBarLineChart = ({ data }: Props) => {
           if (ctx.index === 0) {
             barX0 = ctx.x1;
           }
-          if (ctx.seriesIndex === 0) {
-            ctx.element.attr({
-              style: "stroke: #CE0500B2 !important; stroke-width: 25px;",
-            });
-          } else if (ctx.seriesIndex === 1) {
-            ctx.element.attr({
-              style: "stroke: #18753CB2 !important; stroke-width: 25px;",
-            });
-          }
+
+          const barColor = colors.bars[ctx.seriesIndex] || "#000000";
+
+          ctx.element.attr({
+            style: `stroke: ${barColor} !important; stroke-width: 25px;`,
+          });
         }
       });
 
@@ -89,14 +102,12 @@ export const StackedBarLineChart = ({ data }: Props) => {
 
         if (ctx.type === "line") {
           ctx.element.attr({
-            style:
-              "stroke: var(--blue-france-sun-113-625) !important; stroke-width: 2px;",
+            style: `stroke: ${colors.line} !important; stroke-width: 2px;`,
             transform: `translate(${dx}, 0)`,
           });
         } else if (ctx.type === "point") {
           ctx.element.attr({
-            style:
-              "stroke: var(--blue-france-sun-113-625) !important; fill: var(--blue-france-sun-113-625); stroke-width: 6px;",
+            style: `stroke: ${colors.line} !important; fill: ${colors.line}; stroke-width: 6px;`,
             transform: `translate(${dx}, 0)`,
           });
         }
@@ -111,8 +122,7 @@ export const StackedBarLineChart = ({ data }: Props) => {
         lineChart.detach();
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [data, colors]);
 
   return (
     <div className={chartClass} style={{ position: "relative", height: 340 }}>
@@ -140,11 +150,4 @@ export const StackedBarLineChart = ({ data }: Props) => {
       />
     </div>
   );
-};
-
-type Props = {
-  data: {
-    labels: string[];
-    series: number[][];
-  };
 };

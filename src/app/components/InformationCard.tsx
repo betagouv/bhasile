@@ -11,7 +11,7 @@ export const InformationCard = ({
   const [showDetails, setShowDetails] = useState(false);
 
   return (
-    <div className="px-6 py-3 rounded-xl bg-alt-blue-france flex-col w-[220] h-full flex justify-center items-center">
+    <div className="px-6 py-3 rounded-xl bg-alt-blue-france flex-col min-w-[220px] max-w-[240px] h-full flex justify-center items-center">
       {tertiaryInformation && (
         <div className="flex justify-end w-full">
           <Button
