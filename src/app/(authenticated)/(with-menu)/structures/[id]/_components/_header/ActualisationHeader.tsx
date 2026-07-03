@@ -16,11 +16,10 @@ export const ActualisationHeader = ({
       label="J’actualise cette structure"
       message={
         <>
-          La campagne d’actualisation {actualisationYear} est ouverte :{" "}
           <strong>
-            merci de mettre à jour les données financières et les documents de
-            cette structure pour l’année {actualisationYear}.
-          </strong>
+            La campagne d’actualisation {actualisationYear} est ouverte :
+          </strong>{" "}
+          merci de mettre à jour les données de cette structure.
         </>
       }
     />
