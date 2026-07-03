@@ -24,6 +24,7 @@ import {
   StructureCampaignApiRead,
 } from "@/schemas/api/structure.schema";
 import { Repartition } from "@/types/adresse.type";
+import { StepStatus } from "@/types/form.type";
 import { StructureColumn } from "@/types/ListColumn";
 import {
   CpomRef,
@@ -212,7 +213,13 @@ export const isFinalisationFormValidated = (
 export const buildStructureCampaigns = (
   versions: {
     campaign?: {
-      form: { status: boolean } | null;
+      form: {
+        status: boolean;
+        formSteps: {
+          status: string;
+          stepDefinition: { slug: string };
+        }[];
+      } | null;
       campaignDefinition: { slug: string } | null;
     } | null;
   }[]
@@ -226,6 +233,11 @@ export const buildStructureCampaigns = (
       {
         slug: campaign.campaignDefinition.slug,
         isValidated: campaign.form?.status === true,
+        formSteps:
+          campaign.form?.formSteps.map((formStep) => ({
+            slug: formStep.stepDefinition.slug,
+            status: formStep.status as StepStatus,
+          })) ?? [],
       },
     ];
   });

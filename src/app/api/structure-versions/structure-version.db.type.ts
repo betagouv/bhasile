@@ -79,7 +79,11 @@ export const structureVersionDetailsInclude = {
   campaign: {
     include: {
       campaignDefinition: true,
-      form: true,
+      form: {
+        include: {
+          formSteps: { include: { stepDefinition: true } },
+        },
+      },
     },
   },
 } satisfies Prisma.StructureVersionInclude;

@@ -13,7 +13,7 @@ import { convertToPublicType } from "../structures/structure.util";
 
 type StructureVersionParent = Pick<
   EntityId,
-  "structureId" | "structureVersionTransformationId"
+  "structureId" | "structureVersionTransformationId" | "campaignId"
 >;
 
 const getScalarData = (version: StructureVersionApiType) => ({
@@ -52,6 +52,7 @@ const createOneStructureVersion = async (
     ...getScalarData(version),
     structureId: parent.structureId,
     structureVersionTransformationId: parent.structureVersionTransformationId,
+    campaignId: parent.campaignId,
   };
 
   const created = await tx.structureVersion.create({ data });

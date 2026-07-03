@@ -6,7 +6,10 @@ import {
   actualisationCampaignDefinitionSlug,
   INITIALISATION_CAMPAIGN_DEFINITION_SLUG,
 } from "@/app/api/campaigns/campaign.constants";
-import { ACTUALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
+import {
+  ACTUALISATION_FORM_SLUG,
+  ACTUALISATION_FORM_STEP_SLUGS,
+} from "@/app/api/forms/form.constants";
 import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
@@ -119,8 +122,15 @@ async function seed(): Promise<void> {
     `✅ ${formFinalisationStepDefinitions.count} FormStepDefinitions créées pour le formulaire finalisation`
   );
 
-  await prisma.formDefinition.create({
+  const actualisationFormDefinition = await prisma.formDefinition.create({
     data: { name: "actualisation", slug: ACTUALISATION_FORM_SLUG, version: 1 },
+  });
+  await prisma.formStepDefinition.createMany({
+    data: ACTUALISATION_FORM_STEP_SLUGS.map((slug) => ({
+      formDefinitionId: actualisationFormDefinition.id,
+      label: slug,
+      slug,
+    })),
   });
 
   const initialisationCampaignDefinition =

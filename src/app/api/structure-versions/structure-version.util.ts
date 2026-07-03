@@ -10,21 +10,29 @@ type ResolvableVersion = {
   id: number;
   effectiveDate: Date | null;
   structureVersionTransformationId: number | null;
-  structureVersionTransformation:
-    | {
-        transformation: { form: { status: boolean | null } | null } | null;
-      }
-    | null;
+  structureVersionTransformation: {
+    transformation: { form: { status: boolean | null } | null } | null;
+  } | null;
+  campaignId: number | null;
+  campaign: {
+    form: { status: boolean | null } | null;
+  } | null;
 };
 
 export const isVersionValid = (version: ResolvableVersion): boolean => {
-  if (version.structureVersionTransformationId === null) {
-    return true;
+  if (version.structureVersionTransformationId !== null) {
+    return (
+      version.structureVersionTransformation?.transformation?.form?.status ===
+      true
+    );
   }
-  return (
-    version.structureVersionTransformation?.transformation?.form?.status ===
-    true
-  );
+  if (version.campaignId != null) {
+    //TODO: use only form status after backfill
+    return version.campaign?.form
+      ? version.campaign.form.status === true
+      : true;
+  }
+  return true;
 };
 
 const sortValidVersionsBefore = <TVersion extends ResolvableVersion>(
@@ -66,7 +74,9 @@ export const resolvePredecessor = <TVersion extends ResolvableVersion>(
   sortValidVersionsBefore(versions, effectiveDate.getTime())[0];
 
 export const resolveCurrentVersionFields = <
-  TStructure extends { structureVersions: (ResolvableVersion & VersionFields)[] },
+  TStructure extends {
+    structureVersions: (ResolvableVersion & VersionFields)[];
+  },
 >(
   structure: TStructure,
   now: Date
