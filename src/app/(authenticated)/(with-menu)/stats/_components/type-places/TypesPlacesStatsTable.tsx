@@ -1,6 +1,7 @@
 import { Fragment, ReactElement } from "react";
 
 import { Table } from "@/app/components/common/Table";
+import { formatNumber } from "@/app/utils/number.util";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
@@ -16,7 +17,7 @@ export const TypesPlacesStatsTable = (): ReactElement => {
     {
       label: "Taux d'équipement",
       value: statistiques.places.byYear.map((yearItem) =>
-        (Number(yearItem.tauxEquipement) * 1000).toFixed(2)
+        formatNumber(Number(yearItem.tauxEquipement) * 1000)
       ),
     },
   ];
@@ -31,12 +32,12 @@ export const TypesPlacesStatsTable = (): ReactElement => {
         },
         {
           label: "Places LGBT",
-          subLabel: "(spécialisées)",
+          subLabel: "(labellisées)",
           value: statistiques.places.byYear.map((yearItem) => yearItem.lgbt),
         },
         {
           label: "Places FVV/TEH",
-          subLabel: "(labellisées)",
+          subLabel: "(spécialisées)",
           value: statistiques.places.byYear.map((yearItem) => yearItem.fvvTeh),
         },
         {
@@ -127,15 +128,13 @@ export const TypesPlacesStatsTable = (): ReactElement => {
 
 const getHeadings = (statistiques: StatistiqueApiRead) => {
   const dates =
-    statistiques.places.byYear
-      .map((yearItem) => {
-        return (
-          <th scope="col" key={yearItem.year}>
-            {yearItem.year}
-          </th>
-        );
-      })
-      .reverse() ?? [];
+    statistiques.places.byYear.map((yearItem) => {
+      return (
+        <th scope="col" key={yearItem.year}>
+          {yearItem.year}
+        </th>
+      );
+    }) ?? [];
 
   return [
     <th scope="col" key="heading-label" className="min-w-[240px]">

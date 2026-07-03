@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Fragment, ReactElement, useState } from "react";
 

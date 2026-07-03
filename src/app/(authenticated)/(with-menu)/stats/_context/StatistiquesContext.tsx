@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactNode } from "react";
 
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";

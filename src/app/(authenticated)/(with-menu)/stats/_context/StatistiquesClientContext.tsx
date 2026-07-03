@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext } from "react";
 
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
@@ -22,10 +22,10 @@ export function StatistiquesClientProvider({
   children: ReactNode;
   statistiques: StatistiqueApiRead | null;
 }) {
-  const [statistiques] = useState(initialStatistiques);
-
   return (
-    <StatistiquesContextInternal.Provider value={{ statistiques }}>
+    <StatistiquesContextInternal.Provider
+      value={{ statistiques: initialStatistiques }}
+    >
       {children}
     </StatistiquesContextInternal.Provider>
   );

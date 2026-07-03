@@ -1,3 +1,5 @@
+"use client";
+
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { ReactElement, useState } from "react";
 
@@ -18,13 +20,14 @@ export const GenericTypeChart = ({
     visualization === "structures" ? "structures" : "places";
 
   const getStatItemLabel = (statItem: TypeStructureStat | BatiStat): string => {
-    const labelAccessor = visualization === "structures" ? "type" : "bati";
+    const labelAccessor = typeAccessor === "structureTypes" ? "type" : "bati";
     if (labelAccessor === "type" && "type" in statItem) {
       return statItem.type;
     }
     if (labelAccessor === "bati" && "bati" in statItem) {
       return statItem.bati;
     }
+    console.log(">>>>>>>>>>", labelAccessor, statItem);
     return "";
   };
 
@@ -79,13 +82,12 @@ export const GenericTypeChart = ({
                   className="w-[15px] h-[15px] mr-2 shrink-0 grow-0"
                   style={{ backgroundColor: colors[index] }}
                 />
-                <span>
-                  <strong>{statItem[typeStructureAccessor]}</strong>
-                  &nbsp;
+                <span className="whitespace-nowrap">
+                  <strong>{statItem[typeStructureAccessor]}</strong>{" "}
                   {visualization === "structures"
                     ? "structures "
                     : "places en "}
-                  {getStatItemLabel(statItem)}&nbsp;
+                  {getStatItemLabel(statItem)}{" "}
                   <span className="text-mention-grey">
                     (
                     {getPercentage(

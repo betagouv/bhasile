@@ -1,6 +1,9 @@
+"use client";
+
 import { ReactElement } from "react";
 
 import { InformationCard } from "@/app/components/InformationCard";
+import { formatNumber } from "@/app/utils/number.util";
 
 import { TypePlaceCharts } from "../../../structures/[id]/_components/_type-places/TypePlaceCharts";
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
@@ -27,7 +30,7 @@ export const TypesPlacesBlock = (): ReactElement => {
           />
         </div>
         <InformationCard
-          primaryInformation={`${(Number(statistiques.places.tauxEquipement) * 1000).toFixed(2)} ‰`}
+          primaryInformation={`${formatNumber(Number(statistiques.places.tauxEquipement) * 1000)} ‰`}
           secondaryInformation="taux d'équipement"
           tertiaryInformation="nombre de places divisé par le nombre d'habitants"
         />

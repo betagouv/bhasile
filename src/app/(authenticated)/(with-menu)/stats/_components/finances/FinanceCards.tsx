@@ -7,6 +7,8 @@ import { useStatistiquesContext } from "../../_context/StatistiquesClientContext
 
 export const FinanceCards = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
+  const currentYear =
+    statistiques.finance.byYear[statistiques.finance.byYear.length - 1];
 
   return (
     <>
@@ -15,20 +17,20 @@ export const FinanceCards = (): ReactElement => {
           informations={[
             {
               primaryInformation: formatCurrency(
-                statistiques.finance.byYear[0].total.dotationAccordee
+                currentYear.total.dotationAccordee
               ),
               secondaryInformation:
                 "dotation totale annuelle versée par l'Etat",
             },
             {
               primaryInformation: formatCurrency(
-                statistiques.finance.byYear[0].autorisees.dotationAccordee
+                currentYear.autorisees.dotationAccordee
               ),
               secondaryInformation: "pour les structures autorisées",
             },
             {
               primaryInformation: formatCurrency(
-                statistiques.finance.byYear[0].subventionnees.dotationAccordee
+                currentYear.subventionnees.dotationAccordee
               ),
               secondaryInformation: "pour les structures subventionnées",
             },
@@ -40,17 +42,15 @@ export const FinanceCards = (): ReactElement => {
           detailLabel="ensemble des employés de la structure"
           informations={[
             {
-              primaryInformation: statistiques.finance.byYear[0].total.totalETP,
+              primaryInformation: currentYear.total.totalETP,
               secondaryInformation: "ETP au total",
             },
             {
-              primaryInformation:
-                statistiques.finance.byYear[0].autorisees.totalETP,
+              primaryInformation: currentYear.autorisees.totalETP,
               secondaryInformation: "pour les structures autorisées",
             },
             {
-              primaryInformation:
-                statistiques.finance.byYear[0].subventionnees.totalETP,
+              primaryInformation: currentYear.subventionnees.totalETP,
               secondaryInformation: "pour les structures subventionnées",
             },
           ]}
@@ -61,18 +61,15 @@ export const FinanceCards = (): ReactElement => {
           detailLabel="nombre de places gérées par un ETP"
           informations={[
             {
-              primaryInformation:
-                statistiques.finance.byYear[0].total.tauxEncadrement!,
+              primaryInformation: currentYear.total.tauxEncadrement!,
               secondaryInformation: "taux encadrement moyen",
             },
             {
-              primaryInformation:
-                statistiques.finance.byYear[0].autorisees.tauxEncadrement!,
+              primaryInformation: currentYear.autorisees.tauxEncadrement!,
               secondaryInformation: "pour les structures autorisées",
             },
             {
-              primaryInformation:
-                statistiques.finance.byYear[0].subventionnees.tauxEncadrement!,
+              primaryInformation: currentYear.subventionnees.tauxEncadrement!,
               secondaryInformation: "pour les structures subventionnées",
             },
           ]}
@@ -84,19 +81,19 @@ export const FinanceCards = (): ReactElement => {
           informations={[
             {
               primaryInformation: formatCurrency(
-                statistiques.finance.byYear[0].total.coutJournalier
+                currentYear.total.coutJournalier
               ),
               secondaryInformation: "coût place journalier moyen",
             },
             {
               primaryInformation: formatCurrency(
-                statistiques.finance.byYear[0].autorisees.coutJournalier
+                currentYear.autorisees.coutJournalier
               ),
               secondaryInformation: "pour les structures autorisées",
             },
             {
               primaryInformation: formatCurrency(
-                statistiques.finance.byYear[0].subventionnees.coutJournalier
+                currentYear.subventionnees.coutJournalier
               ),
               secondaryInformation: "pour les structures subventionnées",
             },

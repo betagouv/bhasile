@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactElement } from "react";
 
 import { DOCUMENTS_FINANCIERS_OPEN_YEAR } from "@/constants";
