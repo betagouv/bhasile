@@ -10,10 +10,6 @@ export const ControleQualiteBlock = () => {
             Contrôle qualité
           </h3>
         </div>
-        {/* TODO : à mettre à jour quand on aura les campagnes d'actualisation */}
-        {/* <div className="flex items-center text-right text-xs text-title-blue-france">
-            Données mises à jour le {formatDate(new Date())}
-          </div> */}
       </div>
       <WorkInProgress />
     </div>

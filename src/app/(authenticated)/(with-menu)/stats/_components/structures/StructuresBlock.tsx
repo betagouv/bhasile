@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactElement } from "react";
 
 import { InformationCard } from "@/app/components/InformationCard";
@@ -17,20 +19,16 @@ export const StructuresBlock = (): ReactElement => {
           <span className="text-title-blue-france mr-3 fr-icon-community-line" />
           <h3 className="text-title-blue-france fr-h6 mb-12">Structures</h3>
         </div>
-        {/* TODO : à mettre à jour quand on aura les campagnes d'actualisation */}
-        {/* <div className="flex items-center text-right text-xs text-title-blue-france">
-          Données mises à jour le {new Date().toLocaleDateString()}
-        </div> */}
       </div>
       <div className="flex pb-16">
         <div className="pr-4">
           <InformationCard
-            primaryInformation={statistiques.totalStructures}
+            primaryInformation={statistiques.structures.totalStructures}
             secondaryInformation="structures"
           />
         </div>
         <InformationCard
-          primaryInformation={statistiques.totalCpoms}
+          primaryInformation={statistiques.structures.totalCpoms}
           secondaryInformation="CPOM"
         />
         <div className="relative flex flex-col justify-between self-center w-[16px] h-[44px] bg-slate-100">
@@ -38,7 +36,7 @@ export const StructuresBlock = (): ReactElement => {
           <div className="absolute bottom-0 left-0 right-0 h-[8px] bg-white rounded-t-full" />
         </div>
         <InformationCard
-          primaryInformation={statistiques.structuresAvecCpom}
+          primaryInformation={statistiques.structures.structuresAvecCpom}
           secondaryInformation="structures concernées"
         />
       </div>

@@ -1,11 +1,13 @@
+"use client";
+
 import { ReactNode } from "react";
 
-import { StatistiquesApiType } from "@/schemas/api/statistique.schema";
+import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesClientProvider } from "./StatistiquesClientContext";
 
 export type StatistiquesContextType = {
-  statistiques: StatistiquesApiType;
+  statistiques: StatistiqueApiRead;
 };
 
 export function StatistiquesProvider({
@@ -13,7 +15,7 @@ export function StatistiquesProvider({
   statistiques,
 }: {
   children: ReactNode;
-  statistiques: StatistiquesApiType | null;
+  statistiques: StatistiqueApiRead | null;
 }) {
   return (
     <StatistiquesClientProvider statistiques={statistiques}>

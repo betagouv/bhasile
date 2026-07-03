@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 
 import { StackedBarLineChart } from "@/app/components/common/StackedBarLineChart";
 import { getYearRange } from "@/app/utils/date.util";
-import { BudgetApiType } from "@/schemas/api/budget.schema";
+import { FinanceByYearScopeStat } from "@/schemas/api/statistique.schema";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
@@ -15,32 +15,33 @@ export const BalanceChart = (): ReactElement => {
     .map((year) => {
       return {
         year,
-        budget: statistiques.budgets?.find((budget) => budget.year === year),
+        budget: statistiques.finance.byYear?.find(
+          (budget) => budget.year === year
+        ),
       };
     })
     .reverse();
 
   const getPropertySerie = (
-    propertyName: keyof (BudgetApiType & {
-      excedentCumule: number;
-      deficitCumule: number;
-      soldeCumule: number;
-    })
+    propertyName: keyof FinanceByYearScopeStat
   ): number[] => {
     return (
       yearsWithBudget.map((budget) =>
-        Number(budget.budget?.[propertyName as keyof BudgetApiType])
+        Number(
+          budget.budget?.total[propertyName as keyof FinanceByYearScopeStat]
+        )
       ) || []
     );
   };
 
   const getChartData = () => {
     const labels = yearsWithBudget.map((budget) => budget.year.toString());
-    const series = [
-      getPropertySerie("excedentCumule"),
-      getPropertySerie("deficitCumule"),
-      getPropertySerie("soldeCumule"),
-    ];
+    const excendentCumule = getPropertySerie("excedentCumule");
+    const deficitCumule = getPropertySerie("deficitCumule");
+    const cumul = excendentCumule.map(
+      (excedent, index) => excedent - deficitCumule[index]
+    );
+    const series = [excendentCumule, deficitCumule, cumul];
 
     return {
       labels,
