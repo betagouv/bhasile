@@ -76,6 +76,12 @@ export const structureVersionDetailsInclude = {
       },
     },
   },
+  campaign: {
+    include: {
+      campaignDefinition: true,
+      form: true,
+    },
+  },
 } satisfies Prisma.StructureVersionInclude;
 
 export type StructureVersionDbDetails = Prisma.StructureVersionGetPayload<{
