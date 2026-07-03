@@ -1,6 +1,10 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
+import {
+  getActualisationYear,
+  hasValidatedActualisation,
+} from "@/app/api/campaigns/campaign.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
 import { StructureHeader } from "./_components/_header/StructureHeader";
@@ -42,10 +46,19 @@ export default async function StructureLayout({
     notFound();
   }
 
+  const actualisationYear = getActualisationYear();
+  const showActualisation =
+    actualisationYear !== null &&
+    structure.isFinalised &&
+    !hasValidatedActualisation(structure.campaigns, actualisationYear);
+
   return (
     <StructureProvider structure={structure}>
       <div className="flex flex-col h-full bg-alt-grey gap-3 pb-4">
-        <StructureHeader />
+        <StructureHeader
+          actualisationYear={actualisationYear}
+          showActualisation={showActualisation}
+        />
         <div className="flex flex-col gap-3 max-w-7xl mx-auto px-3">
           {children}
         </div>
