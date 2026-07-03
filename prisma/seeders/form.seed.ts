@@ -114,39 +114,37 @@ export const createFakeFinalisationFormStepDefinition = (
   ];
 };
 
-export const createFakeStructureVersionTransformationCreationFormStepDefinition = (
-  formDefinitionId: number
-): Omit<FormStepDefinition, "id">[] => {
-  return [
-    {
-      formDefinitionId,
-      label: "01-identification",
-      slug: "01-identification",
-    },
-    {
-      formDefinitionId,
-      label: "02-places-hebergement",
-      slug: "02-places-hebergement",
-    },
-    {
-      formDefinitionId,
-      label: "03-actes-administratifs",
-      slug: "03-actes-administratifs",
-    },
-  ];
-};
+export const createFakeStructureVersionTransformationCreationFormStepDefinition =
+  (formDefinitionId: number): Omit<FormStepDefinition, "id">[] => {
+    return [
+      {
+        formDefinitionId,
+        label: "01-identification",
+        slug: "01-identification",
+      },
+      {
+        formDefinitionId,
+        label: "02-places-hebergement",
+        slug: "02-places-hebergement",
+      },
+      {
+        formDefinitionId,
+        label: "03-actes-administratifs",
+        slug: "03-actes-administratifs",
+      },
+    ];
+  };
 
-export const createFakeStructureVersionTransformationFermetureFormStepDefinition = (
-  formDefinitionId: number
-): Omit<FormStepDefinition, "id">[] => {
-  return [
-    {
-      formDefinitionId,
-      label: "01-identification",
-      slug: "01-identification",
-    },
-  ];
-};
+export const createFakeStructureVersionTransformationFermetureFormStepDefinition =
+  (formDefinitionId: number): Omit<FormStepDefinition, "id">[] => {
+    return [
+      {
+        formDefinitionId,
+        label: "01-identification",
+        slug: "01-identification",
+      },
+    ];
+  };
 
 export const createFakeForm = (
   formDefinitionId: number
@@ -156,6 +154,7 @@ export const createFakeForm = (
   | "structureCodeDna"
   | "structureId"
   | "transformationId"
+  | "campaignId"
   | "structureVersionTransformationId"
 > => {
   return {
@@ -192,6 +191,7 @@ export const createFakeFormWithSteps = (
   | "structureCodeDna"
   | "structureId"
   | "transformationId"
+  | "campaignId"
   | "structureVersionTransformationId"
 > => {
   const fakeForm = createFakeForm(formDefinitionId);
