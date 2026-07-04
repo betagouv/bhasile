@@ -1,6 +1,6 @@
 // Ouvre la campagne d'actualisation de l'année : crée les templates (CampaignDefinition
-// "Actualisation <année>" + FormDefinition actualisation) puis matérialise une coquille de
-// campagne par structure éligible (finalisée et non fermée).
+// "Actualisation <année>" + FormDefinition actualisation) puis matérialise, par structure
+// éligible (finalisée et non fermée), une campagne + une StructureVersion (effectiveDate = maintenant).
 // L'année vient de l'argument CLI, sinon de ACTUALISATION_YEAR. No-op hors période.
 // One-shot idempotent : re-jouable pour recovery (les structures ayant déjà une campagne sont sautées).
 // Usage : yarn script create-actualisation-campaigns [année]
@@ -14,12 +14,17 @@ import {
   ACTUALISATION_FORM_SLUG,
   ACTUALISATION_FORM_STEP_SLUGS,
 } from "@/app/api/forms/form.constants";
+import { createOrUpdateStructureVersion } from "@/app/api/structure-versions/structure-version.repository";
+import { copyStructureVersion } from "@/app/api/structure-versions/structure-version.service";
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
+import { StructureDbDetails } from "@/app/api/structures/structure.db.type";
+import { getResolvedStructure } from "@/app/api/structures/structure.service";
 import {
   isBornFromCreation,
   isFinalisationFormValidated,
 } from "@/app/api/structures/structure.util";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
+import apiPrisma from "@/lib/prisma";
 import { createPrismaClient } from "@/prisma-client";
 import { StepStatus } from "@/types/form.type";
 
@@ -30,17 +35,22 @@ type ActualisationPrismaClient = typeof prisma;
 export const createActualisationCampaignShell = async (
   client: ActualisationPrismaClient,
   input: {
-    structureId: number;
+    structure: StructureDbDetails;
     campaignDefinitionId: number;
     formDefinitionId: number;
+    effectiveDate: Date;
   }
 ): Promise<void> => {
   await client.$transaction(async (tx) => {
     const campaign = await tx.campaign.create({
       data: { campaignDefinitionId: input.campaignDefinitionId },
     });
-    await tx.structureVersion.create({
-      data: { structureId: input.structureId, campaignId: campaign.id },
+    const version = copyStructureVersion(input.structure, {
+      effectiveDate: input.effectiveDate.toISOString(),
+    });
+    await createOrUpdateStructureVersion(tx, version, {
+      structureId: input.structure.id,
+      campaignId: campaign.id,
     });
     const form = await tx.form.create({
       data: {
@@ -166,10 +176,16 @@ const run = async () => {
         continue;
       }
 
+      const resolvedStructure = await getResolvedStructure(structure.id, now);
+      if (!resolvedStructure) {
+        continue;
+      }
+
       await createActualisationCampaignShell(prisma, {
-        structureId: structure.id,
+        structure: resolvedStructure,
         campaignDefinitionId: campaignDefinition.id,
         formDefinitionId: formDefinition.id,
+        effectiveDate: now,
       });
       createdCount++;
     }
@@ -182,9 +198,13 @@ const run = async () => {
     process.exitCode = 1;
   } finally {
     await prisma.$disconnect();
+    await apiPrisma.$disconnect();
   }
 };
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   run();
 }

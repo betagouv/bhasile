@@ -11,12 +11,12 @@ export const getActualisationYear = (): number | null => {
   return Number.isInteger(year) && year > 0 ? year : null;
 };
 
-export const hasValidatedActualisation = (
+export const hasOpenActualisation = (
   campaigns: StructureCampaignApiRead[],
   year: number
 ): boolean =>
   campaigns.some(
     (campaign) =>
       campaign.slug === actualisationCampaignDefinitionSlug(year) &&
-      campaign.isValidated
+      !campaign.isValidated
   );

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import {
   getActualisationYear,
-  hasValidatedActualisation,
+  hasOpenActualisation,
 } from "@/app/api/campaigns/campaign.util";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
@@ -50,7 +50,7 @@ export default async function StructureLayout({
   const showActualisation =
     actualisationYear !== null &&
     structure.isFinalised &&
-    !hasValidatedActualisation(structure.campaigns, actualisationYear);
+    hasOpenActualisation(structure.campaigns, actualisationYear);
 
   return (
     <StructureProvider structure={structure}>
