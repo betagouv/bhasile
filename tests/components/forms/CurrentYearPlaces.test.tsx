@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { FieldSetTransformationPlaces } from "@/app/components/forms/typePlace/FieldSetTransformationPlaces";
+import { CurrentYearPlaces } from "@/app/components/forms/typePlace/CurrentYearPlaces";
 import { FormKind } from "@/types/global";
 
 import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
@@ -16,11 +16,11 @@ const renderWithTotal = (
         structureTypologies: [{ placesAutorisees: total, year: 2026 }],
       }}
     >
-      <FieldSetTransformationPlaces {...props} />
+      <CurrentYearPlaces {...props} />
     </FormTestWrapper>
   );
 
-describe("FieldSetTransformationPlaces", () => {
+describe("CurrentYearPlaces", () => {
   it("affiche le delta « nouvelle(s) place(s) » pour une extension", () => {
     renderWithTotal({ formKind: FormKind.EXTENSION, originalPlaces: 47 }, 50);
 
@@ -39,5 +39,18 @@ describe("FieldSetTransformationPlaces", () => {
     renderWithTotal({ formKind: FormKind.OUVERTURE_EX_NIHILO }, 50);
 
     expect(screen.queryByText(/soit .* place/)).not.toBeInTheDocument();
+  });
+
+  it("désactive les places autorisées et affiche la notice en actualisation", () => {
+    renderWithTotal({ formKind: FormKind.ACTUALISATION }, 50);
+
+    expect(
+      screen.getByLabelText(/Nombre total de places autorisées/)
+    ).toBeDisabled();
+    expect(
+      screen.getByText(
+        /doit obligatoirement passer par une contraction ou une extension/
+      )
+    ).toBeInTheDocument();
   });
 });

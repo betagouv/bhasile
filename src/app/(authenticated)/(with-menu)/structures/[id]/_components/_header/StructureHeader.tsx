@@ -9,9 +9,14 @@ import { ReactElement } from "react";
 import { Badge } from "@/app/components/common/Badge";
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { UpcomingTransformationBadge } from "@/app/components/structures/UpcomingTransformationBadge";
+import {
+  CAMPAIGN_SAVE_KEY,
+  useActualisationFormHandling,
+} from "@/app/hooks/useActualisationFormHandling";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
+import { isActualisationReadyToValidate } from "@/app/utils/actualisationForm.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ActualisationHeader } from "./ActualisationHeader";
@@ -25,6 +30,10 @@ const autoSaveModal = createModal({
 });
 const finalisationSuccessModal = createModal({
   id: "finalisation-success-modal",
+  isOpenedByDefault: false,
+});
+const actualisationSuccessModal = createModal({
+  id: "actualisation-success-modal",
   isOpenedByDefault: false,
 });
 
@@ -42,6 +51,10 @@ export const StructureHeader = ({
   const { handleFinalisation, isStructureReadyToFinalise } =
     useAgentFormHandling();
 
+  const { handleValidateActualisation } = useActualisationFormHandling({
+    year: actualisationYear ?? 0,
+  });
+
   const { headerRef } = useHeaderHeight();
   const { isHidden } = useHideOnScroll();
 
@@ -51,6 +64,13 @@ export const StructureHeader = ({
   const isFinalisationPath = pathname.startsWith(
     `/structures/${structure?.id}/finalisation`
   );
+  const isActualisationPath = pathname.startsWith(
+    `/structures/${structure?.id}/actualisation`
+  );
+
+  const isReadyToValidateActualisation = actualisationYear
+    ? isActualisationReadyToValidate(structure, actualisationYear)
+    : false;
 
   const {
     codeBhasile,
@@ -60,6 +80,54 @@ export const StructureHeader = ({
     communeAdministrative,
     departementAdministratif,
   } = structure;
+
+  let headerActions: ReactElement;
+  if (isFinalisationPath) {
+    headerActions = (
+      <div className="flex items-center gap-3">
+        <AutoSaveStatus onStatusClick={() => autoSaveModal.open()} />
+        <Button
+          disabled={!isStructureReadyToFinalise}
+          onClick={async () => {
+            await handleFinalisation();
+            finalisationSuccessModal.open();
+          }}
+        >
+          Finaliser la création
+        </Button>
+      </div>
+    );
+  } else if (isActualisationPath) {
+    headerActions = (
+      <div className="flex items-center gap-3">
+        <AutoSaveStatus
+          fetchStateKey={CAMPAIGN_SAVE_KEY}
+          onStatusClick={() => autoSaveModal.open()}
+        />
+        <Button
+          disabled={!isReadyToValidateActualisation}
+          onClick={async () => {
+            await handleValidateActualisation();
+            actualisationSuccessModal.open();
+          }}
+        >
+          Valider l’actualisation
+        </Button>
+      </div>
+    );
+  } else {
+    headerActions = (
+      <div className="flex items-center gap-2">
+        {structure.upcomingTransformations?.map((transformation) => (
+          <UpcomingTransformationBadge
+            key={`${transformation.kind}-${transformation.date}`}
+            transformation={transformation}
+          />
+        ))}
+        <StructureMenu structureId={structure.id} />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -101,30 +169,7 @@ export const StructureHeader = ({
             </h3>
           </div>
           <div className="grow" />
-          {isFinalisationPath ? (
-            <div className="flex items-center gap-3">
-              <AutoSaveStatus onStatusClick={() => autoSaveModal.open()} />
-              <Button
-                disabled={!isStructureReadyToFinalise}
-                onClick={async () => {
-                  await handleFinalisation();
-                  finalisationSuccessModal.open();
-                }}
-              >
-                Finaliser la création
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              {structure.upcomingTransformations?.map((transformation) => (
-                <UpcomingTransformationBadge
-                  key={`${transformation.kind}-${transformation.date}`}
-                  transformation={transformation}
-                />
-              ))}
-              <StructureMenu structureId={structure.id} />
-            </div>
-          )}
+          {headerActions}
         </div>
 
         <div
@@ -213,6 +258,25 @@ export const StructureHeader = ({
           qui va rendre l’outil plus précis.
         </p>
       </finalisationSuccessModal.Component>
+
+      <actualisationSuccessModal.Component
+        title="L’actualisation de cette structure est validée !"
+        buttons={[
+          {
+            doClosesModal: true,
+            children: "J’ai compris",
+            type: "button",
+            onClick: () => {
+              router.push(`/structures/${structure?.id}`);
+            },
+          },
+        ]}
+      >
+        <p>
+          Les données ont bien été enregistrées. Merci pour votre contribution
+          qui va rendre l’outil plus précis.
+        </p>
+      </actualisationSuccessModal.Component>
     </>
   );
 };

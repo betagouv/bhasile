@@ -12,7 +12,7 @@ export const ActualisationHeader = ({
 
   return (
     <StructureCallToActionHeader
-      href={`/structures/${structure.id}/actualisation/${actualisationYear}`}
+      href={`/structures/${structure.id}/actualisation/${actualisationYear}/01-places`}
       label="J’actualise cette structure"
       message={
         <>

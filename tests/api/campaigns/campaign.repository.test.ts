@@ -188,7 +188,7 @@ describe("campaign.repository db integration", () => {
     });
   });
 
-  it("à la validation clone la version courante, applique la typologie, date et valide", async () => {
+  it("à la validation clone les relations du prédécesseur, préserve la typologie éditée, date et valide", async () => {
     const structure = await createFinalisedStructure();
     await openCampaignFor(structure.id);
     const resolved = await getResolvedStructure(structure.id);
@@ -206,8 +206,12 @@ describe("campaign.repository db integration", () => {
             fvvTeh: 0,
           },
         ],
-        validate: true,
       },
+      resolved as StructureDbDetails
+    );
+
+    await updateActualisationCampaign(
+      { structureId: structure.id, year: ACTUALISATION_YEAR, validate: true },
       resolved as StructureDbDetails
     );
 
@@ -232,5 +236,24 @@ describe("campaign.repository db integration", () => {
     });
     expect(validated).not.toBeNull();
     expect(resolveCurrentVersion(allVersions, new Date())?.id).toBe(version.id);
+  });
+
+  it("à la validation sans édition préalable, retombe sur la typologie du prédécesseur", async () => {
+    const structure = await createFinalisedStructure();
+    await openCampaignFor(structure.id);
+    const resolved = await getResolvedStructure(structure.id);
+
+    await updateActualisationCampaign(
+      { structureId: structure.id, year: ACTUALISATION_YEAR, validate: true },
+      resolved as StructureDbDetails
+    );
+
+    const version = await findCampaignVersion(structure.id);
+    expect(version.effectiveDate).not.toBeNull();
+    expect(version.structureTypologies).toHaveLength(1);
+    expect(version.structureTypologies[0]).toMatchObject({
+      year: 2024,
+      placesAutorisees: 10,
+    });
   });
 });

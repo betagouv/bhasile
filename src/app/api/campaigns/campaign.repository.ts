@@ -57,11 +57,21 @@ export const updateActualisationCampaign = async (
     const parent = { structureId: input.structureId, campaignId: campaign.id };
 
     if (input.validate) {
+      // Le bouton de validation est dans le header, hors contexte de form : il ne
+      // porte pas la typologie. On clone les relations non-typologie du prédécesseur
+      // (édits agent frais). Pour la typologie : si la coquille a été éditée on la
+      // garde (undefined = persistRelations n'y touche pas) ; si elle est vide
+      // (jamais éditée), on retombe sur la typologie du prédécesseur plutôt que de
+      // valider une version sans places.
+      const stub = await tx.structureVersion.findUniqueOrThrow({
+        where: { id: structureVersionId },
+        select: { structureTypologies: { select: { id: true } } },
+      });
       const version = copyStructureVersion(structure, {
         id: structureVersionId,
         effectiveDate: now.toISOString(),
-        ...(input.structureTypologies
-          ? { structureTypologies: input.structureTypologies }
+        ...(stub.structureTypologies.length > 0
+          ? { structureTypologies: undefined }
           : {}),
       });
       await createOrUpdateStructureVersion(tx, version, parent);

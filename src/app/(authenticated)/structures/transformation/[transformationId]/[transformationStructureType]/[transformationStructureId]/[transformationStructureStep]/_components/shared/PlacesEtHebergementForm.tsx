@@ -6,7 +6,7 @@ import FormWrapper, {
 import { FieldSetHebergement } from "@/app/components/forms/hebergement/FieldSetHebergement";
 import { FieldSetTypeBati } from "@/app/components/forms/hebergement/FieldSetTypeBati";
 import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
-import { FieldSetTransformationPlaces } from "@/app/components/forms/typePlace/FieldSetTransformationPlaces";
+import { CurrentYearPlaces } from "@/app/components/forms/typePlace/CurrentYearPlaces";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import { getTransformationDefaultValues } from "@/app/utils/transformation.util";
 import {
@@ -91,10 +91,7 @@ export const PlacesEtHebergementForm = ({
         }
       />
 
-      <FieldSetTransformationPlaces
-        formKind={formKind}
-        originalPlaces={originalPlaces}
-      />
+      <CurrentYearPlaces formKind={formKind} originalPlaces={originalPlaces} />
 
       <hr />
 

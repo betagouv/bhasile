@@ -1,3 +1,4 @@
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { useFormContext } from "react-hook-form";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
@@ -12,7 +13,7 @@ type Props = {
   originalPlaces?: number;
 };
 
-export const FieldSetTransformationPlaces = ({
+export const CurrentYearPlaces = ({
   formKind = FormKind.FINALISATION,
   originalPlaces,
 }: Props) => {
@@ -20,6 +21,7 @@ export const FieldSetTransformationPlaces = ({
 
   const totalPlaces =
     Number(watch("structureTypologies.0.placesAutorisees")) || 0;
+  const isActualisation = formKind === FormKind.ACTUALISATION;
 
   return (
     <fieldset className="flex flex-col gap-6">
@@ -37,6 +39,7 @@ export const FieldSetTransformationPlaces = ({
             min={0}
             label="Nombre total de places autorisées"
             className="mb-0"
+            disabled={isActualisation}
           />
           {originalPlaces !== undefined && (
             <p className="flex items-center gap-1 mt-1 text-sm text-action-high-blue-france">
@@ -49,6 +52,14 @@ export const FieldSetTransformationPlaces = ({
           )}
         </div>
       </div>
+
+      {isActualisation && (
+        <Alert
+          severity="error"
+          small
+          description="La modification du nombre de places autorisées doit obligatoirement passer par une contraction ou une extension de la structure."
+        />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <InputWithValidation
