@@ -53,14 +53,14 @@ describe("isVersionValid", () => {
     ).toBe(true);
   });
 
-  it("invalide une actualisation en brouillon (form status false)", () => {
+  it("valide une SV de campagne quel que soit le statut du form (form.status n'est qu'une métrique)", () => {
     expect(
       isVersionValid({
         ...baseVersion,
         campaignId: 3,
         campaign: { form: { status: false } },
       })
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("valide une actualisation validée (form status true)", () => {

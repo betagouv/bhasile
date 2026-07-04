@@ -11,14 +11,12 @@ import {
   setCampaignFormStepStatus,
 } from "../forms/form.repository";
 import { createOrUpdateIndicateursFinanciers } from "../indicateurs-financiers/indicateur-financier.repository";
+import { currentVersionWhere } from "../structure-versions/structure-version.db.type";
 import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
-import { copyStructureVersion } from "../structure-versions/structure-version.service";
-import { StructureDbDetails } from "../structures/structure.db.type";
 import { actualisationCampaignDefinitionSlug } from "./campaign.constants";
 
 export const updateActualisationCampaign = async (
-  input: CampaignApiWrite,
-  structure: StructureDbDetails
+  input: CampaignApiWrite
 ): Promise<StructureCampaignApiRead> => {
   const now = new Date();
   const slug = actualisationCampaignDefinitionSlug(input.year);
@@ -29,19 +27,13 @@ export const updateActualisationCampaign = async (
         campaignDefinition: { slug },
         structureVersion: { structureId: input.structureId },
       },
-      include: {
-        form: { select: { id: true, status: true } },
-        structureVersion: { select: { id: true } },
-      },
+      include: { form: { select: { id: true, status: true } } },
     });
 
     if (!campaign) {
       throw new Error(
         `Aucune campagne d'actualisation ${input.year} pour la structure ${input.structureId}`
       );
-    }
-    if (!campaign.structureVersion) {
-      throw new Error(`Campagne ${campaign.id} sans StructureVersion`);
     }
     if (!campaign.form) {
       throw new Error(`Campagne ${campaign.id} sans Form`);
@@ -51,25 +43,29 @@ export const updateActualisationCampaign = async (
         `Structure ${input.structureId} déjà actualisée pour ${input.year}`
       );
     }
-
-    const structureVersionId = campaign.structureVersion.id;
     const formId = campaign.form.id;
-    const parent = { structureId: input.structureId, campaignId: campaign.id };
 
-    if (input.validate) {
-      const version = copyStructureVersion(structure, {
-        id: structureVersionId,
-        effectiveDate: now.toISOString(),
-        ...(input.structureTypologies
-          ? { structureTypologies: input.structureTypologies }
-          : {}),
+    if (input.structureTypologies) {
+      const currentVersion = await tx.structureVersion.findFirst({
+        where: {
+          structureId: input.structureId,
+          ...currentVersionWhere(now),
+        },
+        orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
+        select: { id: true },
       });
-      await createOrUpdateStructureVersion(tx, version, parent);
-    } else if (input.structureTypologies) {
+      if (!currentVersion) {
+        throw new Error(
+          `Aucune version courante pour la structure ${input.structureId}`
+        );
+      }
       await createOrUpdateStructureVersion(
         tx,
-        { id: structureVersionId, structureTypologies: input.structureTypologies },
-        parent
+        {
+          id: currentVersion.id,
+          structureTypologies: input.structureTypologies,
+        },
+        { structureId: input.structureId }
       );
     }
 

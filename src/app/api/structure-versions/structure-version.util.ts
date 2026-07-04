@@ -26,12 +26,6 @@ export const isVersionValid = (version: ResolvableVersion): boolean => {
       true
     );
   }
-  if (version.campaignId != null) {
-    //TODO: use only form status after backfill
-    return version.campaign?.form
-      ? version.campaign.form.status === true
-      : true;
-  }
   return true;
 };
 

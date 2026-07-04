@@ -43,10 +43,12 @@ describe("campaign.repository db integration", () => {
   };
 
   const openCampaignFor = async (structureId: number) => {
+    const resolved = await getResolvedStructure(structureId);
     await createActualisationCampaignShell(prisma, {
-      structureId,
+      structure: resolved as StructureDbDetails,
       campaignDefinitionId,
       formDefinitionId,
+      effectiveDate: new Date(),
     });
   };
 
@@ -54,6 +56,17 @@ describe("campaign.repository db integration", () => {
     prisma.structureVersion.findFirstOrThrow({
       where: { structureId, campaignId: { not: null } },
       include: { contacts: true, structureTypologies: true },
+    });
+
+  const findAllResolvableVersions = (structureId: number) =>
+    prisma.structureVersion.findMany({
+      where: { structureId },
+      include: {
+        structureVersionTransformation: {
+          include: { transformation: { include: { form: true } } },
+        },
+        campaign: { include: { form: true } },
+      },
     });
 
   beforeAll(async () => {
@@ -100,7 +113,7 @@ describe("campaign.repository db integration", () => {
     });
   });
 
-  it("crée une coquille : campagne + SV liée vide + form non validé + steps non commencés", async () => {
+  it("crée une campagne + une version valide clonée qui devient courante", async () => {
     const structure = await createFinalisedStructure();
     await openCampaignFor(structure.id);
 
@@ -110,13 +123,16 @@ describe("campaign.repository db integration", () => {
         structureVersion: { structureId: structure.id },
       },
       include: {
-        structureVersion: true,
+        structureVersion: {
+          include: { contacts: true, structureTypologies: true },
+        },
         form: { include: { formSteps: true } },
       },
     });
 
-    expect(campaign.structureVersion?.effectiveDate).toBeNull();
-    expect(campaign.structureVersion?.type).toBeNull();
+    expect(campaign.structureVersion?.effectiveDate).not.toBeNull();
+    expect(campaign.structureVersion?.contacts).toHaveLength(1);
+    expect(campaign.structureVersion?.structureTypologies).toHaveLength(1);
     expect(campaign.form?.status).toBe(false);
     expect(campaign.form?.formSteps).toHaveLength(
       ACTUALISATION_FORM_STEP_SLUGS.length
@@ -126,16 +142,21 @@ describe("campaign.repository db integration", () => {
         (formStep) => formStep.status === StepStatus.NON_COMMENCE
       )
     ).toBe(true);
+
+    const allVersions = await findAllResolvableVersions(structure.id);
+    expect(resolveCurrentVersion(allVersions, new Date())?.id).toBe(
+      campaign.structureVersion?.id
+    );
   });
 
   it("rejette une structure sans campagne ouverte", async () => {
     const structure = await createFinalisedStructure();
 
     await expect(
-      updateActualisationCampaign(
-        { structureId: structure.id, year: ACTUALISATION_YEAR },
-        {} as StructureDbDetails
-      )
+      updateActualisationCampaign({
+        structureId: structure.id,
+        year: ACTUALISATION_YEAR,
+      })
     ).rejects.toThrow(/Aucune campagne/);
   });
 
@@ -148,89 +169,61 @@ describe("campaign.repository db integration", () => {
     });
 
     await expect(
-      updateActualisationCampaign(
-        { structureId: structure.id, year: ACTUALISATION_YEAR },
-        {} as StructureDbDetails
-      )
+      updateActualisationCampaign({
+        structureId: structure.id,
+        year: ACTUALISATION_YEAR,
+      })
     ).rejects.toThrow(/déjà actualisée/);
   });
 
-  it("écrit la typologie sur la coquille sans cloner les autres relations ni dater la version", async () => {
+  it("écrit la typologie sur la version courante (= la SV campagne), visible immédiatement", async () => {
     const structure = await createFinalisedStructure();
     await openCampaignFor(structure.id);
-    const resolved = await getResolvedStructure(structure.id);
-    expect(resolved).not.toBeNull();
 
-    await updateActualisationCampaign(
-      {
-        structureId: structure.id,
-        year: ACTUALISATION_YEAR,
-        structureTypologies: [
-          {
-            year: ACTUALISATION_YEAR,
-            placesAutorisees: 55,
-            pmr: 0,
-            lgbt: 0,
-            fvvTeh: 0,
-          },
-        ],
-      },
-      resolved as StructureDbDetails
-    );
+    await updateActualisationCampaign({
+      structureId: structure.id,
+      year: ACTUALISATION_YEAR,
+      structureTypologies: [
+        {
+          year: ACTUALISATION_YEAR,
+          placesAutorisees: 55,
+          pmr: 0,
+          lgbt: 0,
+          fvvTeh: 0,
+        },
+      ],
+    });
 
     const version = await findCampaignVersion(structure.id);
-    expect(version.effectiveDate).toBeNull();
-    expect(version.contacts).toHaveLength(0);
-    expect(version.structureTypologies).toHaveLength(1);
-    expect(version.structureTypologies[0]).toMatchObject({
+    // relations clonées préservées (l'écriture typologie ne les touche pas)
+    expect(version.contacts).toHaveLength(1);
+    const typology = version.structureTypologies.find(
+      (structureTypology) => structureTypology.year === ACTUALISATION_YEAR
+    );
+    expect(typology).toMatchObject({
       year: ACTUALISATION_YEAR,
       placesAutorisees: 55,
     });
+
+    // la SV campagne reste la version courante → l'édition est visible
+    const allVersions = await findAllResolvableVersions(structure.id);
+    expect(resolveCurrentVersion(allVersions, new Date())?.id).toBe(version.id);
   });
 
-  it("à la validation clone la version courante, applique la typologie, date et valide", async () => {
+  it("à la validation, ne fait que passer form.status à true (pas de clone)", async () => {
     const structure = await createFinalisedStructure();
     await openCampaignFor(structure.id);
-    const resolved = await getResolvedStructure(structure.id);
+    const before = await findCampaignVersion(structure.id);
 
-    await updateActualisationCampaign(
-      {
-        structureId: structure.id,
-        year: ACTUALISATION_YEAR,
-        structureTypologies: [
-          {
-            year: ACTUALISATION_YEAR,
-            placesAutorisees: 60,
-            pmr: 0,
-            lgbt: 0,
-            fvvTeh: 0,
-          },
-        ],
-        validate: true,
-      },
-      resolved as StructureDbDetails
-    );
-
-    const version = await findCampaignVersion(structure.id);
-    expect(version.effectiveDate).not.toBeNull();
-    expect(version.contacts).toHaveLength(1);
-    expect(version.contacts[0]).toMatchObject({ nom: "Dupont" });
-    expect(version.structureTypologies[0]).toMatchObject({
+    const result = await updateActualisationCampaign({
+      structureId: structure.id,
       year: ACTUALISATION_YEAR,
-      placesAutorisees: 60,
+      validate: true,
     });
 
-    const validated = await getResolvedStructure(structure.id);
-    const allVersions = await prisma.structureVersion.findMany({
-      where: { structureId: structure.id },
-      include: {
-        structureVersionTransformation: {
-          include: { transformation: { include: { form: true } } },
-        },
-        campaign: { include: { form: true } },
-      },
-    });
-    expect(validated).not.toBeNull();
-    expect(resolveCurrentVersion(allVersions, new Date())?.id).toBe(version.id);
+    expect(result.isValidated).toBe(true);
+    const after = await findCampaignVersion(structure.id);
+    expect(after.id).toBe(before.id);
+    expect(after.effectiveDate).toEqual(before.effectiveDate);
   });
 });
