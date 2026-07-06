@@ -4,7 +4,7 @@ import { isEigComportementViolent } from "@/app/utils/eig.util";
 
 describe("eig util", () => {
   describe("isEigComportementViolent", () => {
-    it("should match comportement violent variants", () => {
+    it("reconnaît les variantes de comportement violent", () => {
       expect(isEigComportementViolent("Comportement violent")).toBe(true);
       expect(isEigComportementViolent("Agression - comportement violent")).toBe(
         true
@@ -21,7 +21,7 @@ describe("eig util", () => {
       ).toBe(true);
     });
 
-    it("should not match other motifs", () => {
+    it("ne reconnaît pas les autres motifs", () => {
       expect(isEigComportementViolent("Décès")).toBe(false);
       expect(isEigComportementViolent("comportement")).toBe(false);
     });

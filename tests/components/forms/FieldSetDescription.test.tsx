@@ -19,7 +19,7 @@ vi.mock("@formkit/auto-animate", () => ({
 
 describe("FieldSetDescription", () => {
   describe("Rendering finalisation form", () => {
-    it("should render all fields correctly", () => {
+    it("rend tous les champs correctement", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -55,7 +55,7 @@ describe("FieldSetDescription", () => {
       expect(screen.getByLabelText("Public")).toBeInTheDocument();
     });
 
-    it("should have all public type options", () => {
+    it("rend avec la légende Général", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -77,7 +77,7 @@ describe("FieldSetDescription", () => {
   });
 
   describe("Rendering modification form", () => {
-    it("should render with Général legend", () => {
+    it("rend avec la légende Général", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -92,7 +92,7 @@ describe("FieldSetDescription", () => {
       expect(screen.getByText("Général")).toBeInTheDocument();
     });
 
-    it("should not render filiale toggle and creation date", () => {
+    it("rend avec la légende Général", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -114,7 +114,7 @@ describe("FieldSetDescription", () => {
   });
 
   describe("Filiale toggle interaction", () => {
-    it("should show filiale input when toggle is activated", async () => {
+    it("affiche le champ filiale quand l'interrupteur est activé", async () => {
       const user = userEvent.setup();
 
       render(
@@ -141,7 +141,7 @@ describe("FieldSetDescription", () => {
       });
     });
 
-    it("should hide filiale input when toggle is deactivated", async () => {
+    it("affiche le champ filiale quand l'interrupteur est activé", async () => {
       const user = userEvent.setup();
 
       render(
@@ -177,7 +177,7 @@ describe("FieldSetDescription", () => {
   });
 
   describe("Type selection", () => {
-    it("should have all structure types except PRAHDA", () => {
+    it("rend avec la légende Général", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -201,7 +201,7 @@ describe("FieldSetDescription", () => {
       expect(options).not.toContain(StructureType.PRAHDA);
     });
 
-    it("should have type select with structure types", () => {
+    it("présélectionne le type de structure courant dans le sélecteur", () => {
       render(
         <FormTestWrapper
           defaultValues={{

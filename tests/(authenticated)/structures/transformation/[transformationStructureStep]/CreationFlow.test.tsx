@@ -82,7 +82,7 @@ describe("CreationFlow", () => {
         FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
       ],
     ])(
-      "passes %s as formKind %s to the identification form",
+      "passe %s en formKind %s au formulaire d'identification",
       (transformationType, expectedFormKind) => {
         mockUseParams.mockReturnValue({
           transformationStructureStep: StructureVersionTransformationStep.DESCRIPTION,
@@ -97,7 +97,7 @@ describe("CreationFlow", () => {
   });
 
   describe("step routing", () => {
-    it("renders the places et hebergement form on the PLACES_ET_HEBERGEMENT step", () => {
+    it("affiche le formulaire places et hébergement à l'étape PLACES_ET_HEBERGEMENT", () => {
       mockUseParams.mockReturnValue({
         transformationStructureStep:
           StructureVersionTransformationStep.PLACES_ET_HEBERGEMENT,
@@ -108,7 +108,7 @@ describe("CreationFlow", () => {
       expect(screen.getByTestId("places-form")).toBeInTheDocument();
     });
 
-    it("renders the actes administratifs form on the ACTES_ADMINISTRATIFS step", () => {
+    it("affiche le formulaire actes administratifs à l'étape ACTES_ADMINISTRATIFS", () => {
       mockUseParams.mockReturnValue({
         transformationStructureStep:
           StructureVersionTransformationStep.ACTES_ADMINISTRATIFS,
@@ -119,7 +119,7 @@ describe("CreationFlow", () => {
       expect(screen.getByTestId("actes-form")).toBeInTheDocument();
     });
 
-    it("renders nothing for an unknown step", () => {
+    it("n'affiche rien pour une étape inconnue", () => {
       mockUseParams.mockReturnValue({
         transformationStructureStep: "unknown-step",
       });

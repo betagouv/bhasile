@@ -8,7 +8,7 @@ import {
 } from "@/types/transformation.type";
 
 describe("applyPrefill", () => {
-  it("adds FERMETURE contacts/antennes/adresses to the CREATION (OUVERTURE_DEPUIS)", () => {
+  it("ajoute les contacts/antennes/adresses des FERMETURE à la CREATION (OUVERTURE_DEPUIS)", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
       {
         type: StructureVersionTransformationType.FERMETURE,
@@ -50,7 +50,7 @@ describe("applyPrefill", () => {
     expect(fermetures[0].structureVersion?.contacts).toHaveLength(1);
   });
 
-  it("inherits the operateur from the first FERMETURE source on the CREATION", () => {
+  it("ajoute les contacts/antennes/adresses des FERMETURE à la CREATION (OUVERTURE_DEPUIS)", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
       {
         type: StructureVersionTransformationType.FERMETURE,
@@ -77,7 +77,7 @@ describe("applyPrefill", () => {
     expect(creation?.operateurId).toBe(42);
   });
 
-  it("leaves the CREATION operateur undefined when the type has no prefill config", () => {
+  it("ajoute les contacts/antennes/adresses des FERMETURE à la CREATION (OUVERTURE_DEPUIS)", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
       { type: StructureVersionTransformationType.CREATION },
     ];
@@ -90,7 +90,7 @@ describe("applyPrefill", () => {
     expect(result[0].operateurId).toBeUndefined();
   });
 
-  it("keeps the target's own data and appends the sources (additive)", () => {
+  it("ajoute les contacts/antennes/adresses des FERMETURE à la CREATION (OUVERTURE_DEPUIS)", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
       {
         type: StructureVersionTransformationType.FERMETURE,
@@ -121,7 +121,7 @@ describe("applyPrefill", () => {
     ]);
   });
 
-  it("returns the structureVersionTransformations unchanged when the type has no prefill config", () => {
+  it("ajoute les contacts/antennes/adresses des FERMETURE à la CREATION (OUVERTURE_DEPUIS)", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
       {
         type: StructureVersionTransformationType.CREATION,

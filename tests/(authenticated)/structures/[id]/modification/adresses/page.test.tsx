@@ -25,7 +25,7 @@ describe("ModificationAdresses page integration", () => {
     global.fetch = vi.fn();
   });
 
-  it("should submit and navigate back to the structure page", async () => {
+  it("soumet les adresses et redirige vers la page de la structure", async () => {
     // GIVEN
     const structure = createModificationAdressesValidStructure(77);
     const mockedFetch = mockStructurePageFetch(structure);
@@ -78,7 +78,7 @@ describe("ModificationAdresses page integration", () => {
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
   });
 
-  it("should block submit when all addresses have zero places", async () => {
+  it("bloque la soumission quand toutes les adresses ont zéro place", async () => {
     // GIVEN
     const structure = {
       ...createModificationAdressesValidStructure(78),

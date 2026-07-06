@@ -8,29 +8,29 @@ import {
 
 describe("number util", () => {
   describe("formatNumber", () => {
-    it("should format positive integers correctly", () => {
+    it("formate correctement les entiers positifs", () => {
       expect(formatNumber(1234)).toBe("1\u202f234");
       expect(formatNumber(1000000)).toBe("1\u202f000\u202f000");
       expect(formatNumber(42)).toBe("42");
     });
 
-    it("should format positive decimals correctly", () => {
+    it("formate correctement les décimaux positifs", () => {
       expect(formatNumber(1234.56)).toBe("1\u202f234,56");
       expect(formatNumber(0.5)).toBe("0,5");
       expect(formatNumber(3.14159)).toBe("3,142");
     });
 
-    it("should format negative numbers correctly", () => {
+    it("formate correctement les nombres négatifs", () => {
       expect(formatNumber(-1234)).toBe("-1\u202f234");
       expect(formatNumber(-1234.56)).toBe("-1\u202f234,56");
     });
 
-    it("should handle zero", () => {
+    it("gère le zéro", () => {
       expect(formatNumber(0)).toBe("0");
       expect(formatNumber(-0)).toBe("-0"); // Intl.NumberFormat preserves -0
     });
 
-    it("should handle null, undefined and NaN values", () => {
+    it("gère les valeurs null, undefined et NaN", () => {
       expect(formatNumber(null)).toBe("0");
       expect(formatNumber(undefined)).toBe("0");
       expect(formatNumber(NaN)).toBe("0");
@@ -43,7 +43,7 @@ describe("number util", () => {
   });
 
   describe("formatCurrency", () => {
-    it("should format positive integers as currency", () => {
+    it("formate les entiers positifs en devise", () => {
       const result1234 = formatCurrency(1234);
       const result1000000 = formatCurrency(1000000);
       const result42 = formatCurrency(42);
@@ -59,7 +59,7 @@ describe("number util", () => {
       expect(result42).toContain("€");
     });
 
-    it("should format positive decimals as currency", () => {
+    it("formate les décimaux positifs en devise", () => {
       const result1234_56 = formatCurrency(1234.56);
       const result0_5 = formatCurrency(0.5);
       const result3_14159 = formatCurrency(3.14159);
@@ -74,7 +74,7 @@ describe("number util", () => {
       expect(result3_14159).toContain("€");
     });
 
-    it("should format negative numbers as currency", () => {
+    it("formate les nombres négatifs en devise", () => {
       const resultNeg1234 = formatCurrency(-1234);
       const resultNeg1234_56 = formatCurrency(-1234.56);
 
@@ -89,7 +89,7 @@ describe("number util", () => {
       expect(resultNeg1234_56).toContain("€");
     });
 
-    it("should handle zero as currency", () => {
+    it("gère le zéro en devise", () => {
       const result0 = formatCurrency(0);
       const resultNeg0 = formatCurrency(-0);
 
@@ -99,13 +99,13 @@ describe("number util", () => {
       expect(resultNeg0).toContain("€");
     });
 
-    it("should handle null, undefined and NaN values as currency", () => {
+    it("gère les valeurs null, undefined et NaN en devise", () => {
       expect(formatCurrency(null)).toBe("0 €");
       expect(formatCurrency(undefined)).toBe("0 €");
       expect(formatCurrency(NaN)).toBe("0 €");
     });
 
-    it("should handle decimal precision correctly", () => {
+    it("gère correctement la précision décimale", () => {
       const result1234_1 = formatCurrency(1234.1);
       const result1234_12 = formatCurrency(1234.12);
       const result1234_123 = formatCurrency(1234.123);
@@ -127,68 +127,68 @@ describe("number util", () => {
   });
 
   describe("parseFrenchNumber", () => {
-    it("should parse French formatted numbers with comma decimal separator", () => {
+    it("parse les nombres au format français avec la virgule comme séparateur décimal", () => {
       expect(parseFrenchNumber("1234,56")).toBe(1234.56);
       expect(parseFrenchNumber("0,5")).toBe(0.5);
       expect(parseFrenchNumber("3,14")).toBe(3.14);
     });
 
-    it("should parse French formatted numbers with spaces as thousands separator", () => {
+    it("parse les nombres au format français avec des espaces comme séparateur de milliers", () => {
       expect(parseFrenchNumber("1 234,56")).toBe(1234.56);
       expect(parseFrenchNumber("1 000 000,00")).toBe(1000000);
       expect(parseFrenchNumber("12 345")).toBe(12345);
     });
 
-    it("should parse English formatted numbers with dot decimal separator", () => {
+    it("parse les nombres au format anglais avec le point comme séparateur décimal", () => {
       expect(parseFrenchNumber("1234.56")).toBe(1234.56);
       expect(parseFrenchNumber("0.5")).toBe(0.5);
       expect(parseFrenchNumber("3.14")).toBe(3.14);
     });
 
-    it("should parse integers without decimal separator", () => {
+    it("parse les entiers sans séparateur décimal", () => {
       expect(parseFrenchNumber("1234")).toBe(1234);
       expect(parseFrenchNumber("42")).toBe(42);
       expect(parseFrenchNumber("0")).toBe(0);
     });
 
-    it("should parse negative numbers", () => {
+    it("parse les nombres négatifs", () => {
       expect(parseFrenchNumber("-1234,56")).toBe(-1234.56);
       expect(parseFrenchNumber("-1 234")).toBe(-1234);
       expect(parseFrenchNumber("-0,5")).toBe(-0.5);
     });
 
-    it("should handle numbers with currency symbols", () => {
+    it("gère les nombres avec symboles monétaires", () => {
       expect(parseFrenchNumber("1234,56 €")).toBe(1234.56);
       expect(parseFrenchNumber("€ 1234,56")).toBe(1234.56);
       expect(parseFrenchNumber("1 234,56€")).toBe(1234.56);
     });
 
-    it("should handle numbers with extra spaces", () => {
+    it("gère les nombres avec des espaces superflus", () => {
       expect(parseFrenchNumber("  1234,56  ")).toBe(1234.56);
       expect(parseFrenchNumber("1 234 , 56")).toBe(1234.56);
       expect(parseFrenchNumber(" 1 000 000 ")).toBe(1000000);
     });
 
-    it("should return null for invalid inputs", () => {
+    it("retourne null pour des entrées invalides", () => {
       expect(parseFrenchNumber("")).toBe(null);
       expect(parseFrenchNumber("abc")).toBe(null);
       expect(parseFrenchNumber("12,34,56")).toBe(12.34); // Current implementation parses first part, might want to improve
       expect(parseFrenchNumber("not a number")).toBe(null);
     });
 
-    it("should return null for null and undefined", () => {
+    it("retourne null pour null et undefined", () => {
       expect(parseFrenchNumber(null as unknown as string)).toBe(null);
       expect(parseFrenchNumber(undefined as unknown as string)).toBe(null);
     });
 
-    it("should handle edge cases", () => {
+    it("gère les cas limites", () => {
       expect(parseFrenchNumber("0")).toBe(0);
       expect(parseFrenchNumber("0,0")).toBe(0);
       expect(parseFrenchNumber("0,00")).toBe(0);
       expect(parseFrenchNumber("-0")).toBe(-0);
     });
 
-    it("should handle complex French formatting", () => {
+    it("gère un formatage français complexe", () => {
       expect(parseFrenchNumber("1 234 567,89")).toBe(1234567.89);
       expect(parseFrenchNumber("999 999,99 €")).toBe(999999.99);
       expect(parseFrenchNumber("-1 000,50")).toBe(-1000.5);
@@ -197,7 +197,7 @@ describe("number util", () => {
   });
 
   describe("Integration tests", () => {
-    it("should be able to format and parse back to the same value", () => {
+    it("formate puis reparse vers la même valeur", () => {
       const testValues = [0, 42, 1234, 1234.56, -1000, -1234.56];
 
       testValues.forEach((value) => {
@@ -207,7 +207,7 @@ describe("number util", () => {
       });
     });
 
-    it("should handle currency formatting and parsing cycle", () => {
+    it("gère le cycle de formatage et de parsing en devise", () => {
       const testValues = [0, 42, 1234, 1234.56, -1000, -1234.56];
 
       testValues.forEach((value) => {

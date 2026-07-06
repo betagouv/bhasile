@@ -28,7 +28,7 @@ describe("POST /api/transformations", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 201 and transformation id when body is valid", async () => {
+  it("retourne 201 et l'id de la transformation quand le corps est valide", async () => {
     mockCreateTransformation.mockResolvedValueOnce(99);
     const body = {
       type: TransformationType.OUVERTURE_EX_NIHILO,
@@ -52,7 +52,7 @@ describe("POST /api/transformations", () => {
     expect(mockCreateTransformation).toHaveBeenCalledWith(body);
   });
 
-  it("should return 400 when body does not match schema", async () => {
+  it("retourne 400 quand le corps ne respecte pas le schéma", async () => {
     const request = new Request("http://localhost/api/transformations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -74,7 +74,7 @@ describe("GET /api/transformations", () => {
     vi.clearAllMocks();
   });
 
-  it("returns ongoing transformations the agent can access", async () => {
+  it("retourne les transformations en cours accessibles par l'agent", async () => {
     mockGetServerSession.mockResolvedValueOnce({
       user: {
         id: "1",
@@ -93,7 +93,7 @@ describe("GET /api/transformations", () => {
     expect(mockGetOngoingTransformationsForUser).toHaveBeenCalledTimes(1);
   });
 
-  it("returns an empty list when unauthenticated", async () => {
+  it("retourne une liste vide quand l'utilisateur n'est pas authentifié", async () => {
     mockGetServerSession.mockResolvedValueOnce(null);
 
     const response = await GET();

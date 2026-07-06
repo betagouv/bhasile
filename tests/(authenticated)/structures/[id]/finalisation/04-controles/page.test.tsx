@@ -29,7 +29,7 @@ describe("FinalisationControles page integration", () => {
     global.fetch = vi.fn();
   });
 
-  it("should submit and send updated finalisation step in PUT payload", async () => {
+  it("valide l'étape des contrôles et envoie l'étape de finalisation à jour dans le payload PUT", async () => {
     // GIVEN
     const structure = createFinalisationControlesValidStructure(77);
     const mockedFetch = mockStructurePageFetch(structure);
@@ -58,7 +58,7 @@ describe("FinalisationControles page integration", () => {
     });
   });
 
-  it("should block submit when evaluation is missing its required date", async () => {
+  it("bloque la validation quand une évaluation n'a pas sa date requise", async () => {
     // GIVEN
     const structure = {
       ...createFinalisationControlesValidStructure(78),
@@ -83,7 +83,7 @@ describe("FinalisationControles page integration", () => {
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
-  it("should autosave controles data after debounce", async () => {
+  it("sauvegarde automatiquement les données des contrôles après le debounce", async () => {
     // GIVEN
     const structure = createFinalisationControlesValidStructure(79);
     const mockedFetch = mockStructurePageFetch(structure);

@@ -1,7 +1,7 @@
 import { parseDate } from "../../scripts/utils/parse-date";
 
 describe("parseDate util", () => {
-  it("should trim the value and throw when the string is empty", () => {
+  it("nettoie la valeur et lève une erreur quand la chaîne est vide", () => {
     // GIVEN
     const value = "   ";
     const context = "date_debut";
@@ -12,7 +12,7 @@ describe("parseDate util", () => {
     );
   });
 
-  it("should parse a 4-digit year as January 1st at 12:00:00 of that year", () => {
+  it("interprète une année à 4 chiffres comme le 1er janvier à 12:00:00 de cette année", () => {
     // GIVEN
     const value = "2021";
     const context = "year";
@@ -30,7 +30,7 @@ describe("parseDate util", () => {
     expect(result.getSeconds()).toBe(0);
   });
 
-  it("should parse a valid ISO-like date string", () => {
+  it("interprète une chaîne de date valide au format ISO", () => {
     // GIVEN
     const value = "2024-03-15T10:30:00.000Z";
     const context = "iso";
@@ -43,7 +43,7 @@ describe("parseDate util", () => {
     expect(result.toISOString()).toBe("2024-03-15T10:30:00.000Z");
   });
 
-  it("should throw an error for an invalid non-empty date string", () => {
+  it("lève une erreur pour une chaîne de date non vide invalide", () => {
     // GIVEN
     const value = "not-a-date";
     const context = "date_fin";
