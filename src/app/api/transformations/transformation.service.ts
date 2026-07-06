@@ -32,51 +32,56 @@ import {
   resetSelection,
   updateOne,
 } from "./transformation.repository";
-import { applyPrefill } from "./transformation.util";
+import {
+  applyPrefill,
+  checkNoDuplicateStructureIds,
+} from "./transformation.util";
 
 const dbTransformationToApiRead = (
   transformation: TransformationDbDetails
 ): TransformationApiRead =>
   recursivelySerializeDates({
     ...transformation,
-    structureVersionTransformations: transformation.structureVersionTransformations.map(
-      (structureVersionTransformation) => {
-        const structureVersion = structureVersionTransformation.structureVersion;
-        const sourceStructure = structureVersion?.structure;
-        const predecessor =
-          sourceStructure && structureVersion?.effectiveDate
-            ? resolvePredecessor(
-                sourceStructure.structureVersions,
-                structureVersion.effectiveDate
-              )
-            : undefined;
-        const resolvedSourceStructure =
-          sourceStructure && predecessor
-            ? mergeStructureWithVersion(sourceStructure, predecessor)
-            : sourceStructure;
-        return {
-          ...structureVersionTransformation,
-          operateur: structureVersionTransformation.operateur ?? undefined,
-          structureVersion: structureVersion
-            ? {
-                ...dbStructureVersionToApiRead(structureVersion),
-                structure: resolvedSourceStructure
-                  ? {
-                      ...resolvedSourceStructure,
-                      adresseAdministrativeComplete:
-                        buildAdresseAdministrativeComplete(
-                          resolvedSourceStructure
-                        ) || undefined,
-                      antennes: getAntennesApiRead(
-                        resolvedSourceStructure.antennes
-                      ),
-                    }
-                  : undefined,
-              }
-            : undefined,
-        };
-      }
-    ),
+    structureVersionTransformations:
+      transformation.structureVersionTransformations.map(
+        (structureVersionTransformation) => {
+          const structureVersion =
+            structureVersionTransformation.structureVersion;
+          const sourceStructure = structureVersion?.structure;
+          const predecessor =
+            sourceStructure && structureVersion?.effectiveDate
+              ? resolvePredecessor(
+                  sourceStructure.structureVersions,
+                  structureVersion.effectiveDate
+                )
+              : undefined;
+          const resolvedSourceStructure =
+            sourceStructure && predecessor
+              ? mergeStructureWithVersion(sourceStructure, predecessor)
+              : sourceStructure;
+          return {
+            ...structureVersionTransformation,
+            operateur: structureVersionTransformation.operateur ?? undefined,
+            structureVersion: structureVersion
+              ? {
+                  ...dbStructureVersionToApiRead(structureVersion),
+                  structure: resolvedSourceStructure
+                    ? {
+                        ...resolvedSourceStructure,
+                        adresseAdministrativeComplete:
+                          buildAdresseAdministrativeComplete(
+                            resolvedSourceStructure
+                          ) || undefined,
+                        antennes: getAntennesApiRead(
+                          resolvedSourceStructure.antennes
+                        ),
+                      }
+                    : undefined,
+                }
+              : undefined,
+          };
+        }
+      ),
   }) as TransformationApiRead;
 
 export const getTransformation = async (
@@ -104,6 +109,8 @@ const prepareStructureVersionTransformations = async (
   type: TransformationType,
   structureVersionTransformations: StructureVersionTransformationApiCreate[]
 ): Promise<StructureVersionTransformationApiCreate[]> => {
+  checkNoDuplicateStructureIds(structureVersionTransformations);
+
   const structureVersionTransformationsWithSource = await Promise.all(
     structureVersionTransformations.map(
       enrichStructureVersionTransformationFromSource
@@ -140,7 +147,8 @@ export const resetTransformationSelection = async (
 const enrichStructureVersionTransformationFromSource = async (
   structureVersionTransformation: StructureVersionTransformationApiCreate
 ): Promise<StructureVersionTransformationApiCreate> => {
-  const structureId = structureVersionTransformation.structureVersion?.structureId;
+  const structureId =
+    structureVersionTransformation.structureVersion?.structureId;
   if (!structureId) {
     return structureVersionTransformation;
   }
