@@ -21,6 +21,7 @@ import type {
   StatistiqueDbStructure,
   StatistiqueDbTypologieValues,
   StatistiquesContext,
+  StatistiquesCpomYearContext,
 } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
@@ -292,10 +293,7 @@ const countStructuresByBati = (
   structures.filter((structure) => batiMap.get(structure.id) === bati).length;
 
 const computeByYearStats = (
-  context: Pick<
-    StatistiquesContext,
-    "allStructures" | "activeStructureIdsByPeriod" | "typologies" | "cpomLinks"
-  >,
+  context: StatistiquesCpomYearContext,
   batiMap: Map<number, Repartition>
 ): StructuresByYearStat[] =>
   mapTypologieYears<StructuresByYearStat>(
@@ -415,10 +413,7 @@ export type StructuresYearIndicatorField =
 
 /** Computes a single byYear field for one year, for the cartographie one-indicator requests. */
 export const computeStructuresIndicatorForYear = (
-  context: Pick<
-    StatistiquesContext,
-    "allStructures" | "activeStructureIdsByPeriod" | "typologies" | "cpomLinks"
-  >,
+  context: StatistiquesCpomYearContext,
   year: number,
   field: StructuresYearIndicatorField
 ): number | null => {

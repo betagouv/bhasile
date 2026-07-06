@@ -73,41 +73,14 @@ describe("groupStructureIdsByDepartement", () => {
 });
 
 describe("resolveZoneDepartementNumeros", () => {
-  const allDepartements: CartographieDbDepartement[] = [
-    { numero: "01", name: "Ain", population: 100, regionCode: "ARA", regionName: "Auvergne-Rhône-Alpes" },
-    { numero: "75", name: "Paris", population: 100, regionCode: "IDF", regionName: "Île-de-France" },
-    { numero: "92", name: "Hauts-de-Seine", population: 100, regionCode: "IDF", regionName: "Île-de-France" },
-  ];
-
-  it("ne restreint pas ('Toute la France') sans filtre departements ni regions", () => {
-    expect(resolveZoneDepartementNumeros({ departements: null, regions: null }, allDepartements)).toBeNull();
+  it("ne restreint pas ('Toute la France') sans filtre departements", () => {
+    expect(resolveZoneDepartementNumeros({ departements: null })).toBeNull();
   });
 
   it("restreint aux départements listés en CSV", () => {
     expect(
-      resolveZoneDepartementNumeros({ departements: "01,75", regions: null }, allDepartements)
+      resolveZoneDepartementNumeros({ departements: "01,75" })
     ).toEqual(new Set(["01", "75"]));
-  });
-
-  it("résout une région en ses départements", () => {
-    expect(
-      resolveZoneDepartementNumeros({ departements: null, regions: "IDF" }, allDepartements)
-    ).toEqual(new Set(["75", "92"]));
-  });
-
-  it("intersecte quand departements et regions sont fournis ensemble", () => {
-    expect(
-      resolveZoneDepartementNumeros(
-        { departements: "01,75", regions: "IDF" },
-        allDepartements
-      )
-    ).toEqual(new Set(["75"]));
-  });
-
-  it("retourne un Set vide pour un code région inconnu", () => {
-    expect(
-      resolveZoneDepartementNumeros({ departements: null, regions: "XX" }, allDepartements)
-    ).toEqual(new Set());
   });
 });
 
@@ -117,14 +90,9 @@ describe("buildZoneDefinitions", () => {
     { numero: "75", name: "Paris", population: 100, regionCode: "IDF", regionName: "Île-de-France" },
     { numero: "92", name: "Hauts-de-Seine", population: 100, regionCode: "IDF", regionName: "Île-de-France" },
   ];
-  const allRegions = [
-    { code: "ARA", name: "Auvergne-Rhône-Alpes" },
-    { code: "IDF", name: "Île-de-France" },
-    { code: "COR", name: "Corse" },
-  ];
 
   it("découpage département : une zone par département, triée par code", () => {
-    const zones = buildZoneDefinitions("departement", allDepartements, allRegions, null);
+    const zones = buildZoneDefinitions("departement", allDepartements, null);
 
     expect(zones).toEqual([
       { code: "01", name: "Ain", departementNumeros: ["01"] },
@@ -137,15 +105,14 @@ describe("buildZoneDefinitions", () => {
     const zones = buildZoneDefinitions(
       "departement",
       allDepartements,
-      allRegions,
       new Set(["75", "92"])
     );
 
     expect(zones.map((zone) => zone.code)).toEqual(["75", "92"]);
   });
 
-  it("découpage région : regroupe les départements par région et inclut les régions sans département (sans restriction)", () => {
-    const zones = buildZoneDefinitions("region", allDepartements, allRegions, null);
+  it("découpage région : regroupe les départements par région", () => {
+    const zones = buildZoneDefinitions("region", allDepartements, null);
 
     expect(zones).toContainEqual({
       code: "IDF",
@@ -157,15 +124,12 @@ describe("buildZoneDefinitions", () => {
       name: "Auvergne-Rhône-Alpes",
       departementNumeros: ["01"],
     });
-    // Corse has no departement in the fixture, but still appears unrestricted.
-    expect(zones).toContainEqual({ code: "COR", name: "Corse", departementNumeros: [] });
   });
 
-  it("découpage région restreint à une zone : ne complète pas avec les régions sans département de la restriction", () => {
+  it("découpage région restreint à une zone : ne regroupe que les départements de la zone", () => {
     const zones = buildZoneDefinitions(
       "region",
       allDepartements,
-      allRegions,
       new Set(["01"])
     );
 

@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
     indicateur: searchParams.get("indicateur"),
     annee: searchParams.get("annee"),
     departements: searchParams.get("departements"),
-    regions: searchParams.get("regions"),
     operateurs: searchParams.get("operateurs"),
     types: searchParams.get("types"),
     aggregation: searchParams.get("aggregation"),

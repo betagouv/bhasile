@@ -15,6 +15,7 @@ import type {
   StatistiquesActivityContext,
   StatistiquesContext,
   StatistiquesPeriodGranularity,
+  StatistiquesTypologieYearContext,
 } from "./statistiques.db.type";
 
 export const createEmptyActiveStructureIdsByPeriod =
@@ -643,10 +644,7 @@ export const filterStructuresWithTypologie = (
 
 /** Shared prologue for the cartographie one-year indicator computers: null when the year has no typologie data. */
 export const resolveStructuresWithTypologieForYear = (
-  context: Pick<
-    StatistiquesContext,
-    "allStructures" | "activeStructureIdsByPeriod" | "typologies"
-  >,
+  context: StatistiquesTypologieYearContext,
   year: number
 ): {
   structures: StatistiqueDbStructure[];

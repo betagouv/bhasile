@@ -12,7 +12,6 @@ import { testStructure } from "./cartographie.test-helpers";
 
 const mockBuildStatistiquesContext = vi.fn();
 const mockFindAllDepartementsWithRegion = vi.fn();
-const mockFindAllRegions = vi.fn();
 
 vi.mock("@/app/api/statistiques/statistique.service", () => ({
   buildStatistiquesContext: (...args: unknown[]) =>
@@ -22,7 +21,6 @@ vi.mock("@/app/api/statistiques/statistique.service", () => ({
 vi.mock("@/app/api/statistiques/cartographie/cartographie.repository", () => ({
   findAllDepartementsWithRegion: (...args: unknown[]) =>
     mockFindAllDepartementsWithRegion(...args),
-  findAllRegions: (...args: unknown[]) => mockFindAllRegions(...args),
 }));
 
 const ALL_DEPARTEMENTS: CartographieDbDepartement[] = [
@@ -95,10 +93,6 @@ describe("getCartographieStatistiques", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockFindAllDepartementsWithRegion.mockResolvedValue(ALL_DEPARTEMENTS);
-    mockFindAllRegions.mockResolvedValue([
-      { code: "ARA", name: "Auvergne-Rhône-Alpes" },
-      { code: "IDF", name: "Île-de-France" },
-    ]);
   });
 
   it("découpage département : une valeur par département, null pour un département sans structure", async () => {
@@ -111,7 +105,6 @@ describe("getCartographieStatistiques", () => {
       indicateur: "places.autorisees",
       annee: 2025,
       departements: null,
-      regions: null,
       operateurs: null,
       types: null,
       aggregation: "moyenne",
@@ -139,7 +132,6 @@ describe("getCartographieStatistiques", () => {
       indicateur: "places.autorisees",
       annee: 2025,
       departements: null,
-      regions: null,
       operateurs: null,
       types: null,
       aggregation: "moyenne",
@@ -153,7 +145,7 @@ describe("getCartographieStatistiques", () => {
     );
   });
 
-  it("restreint la zone (regions=ARA) : ne retourne que les départements de la région, et propage la restriction au contexte", async () => {
+  it("restreint la zone (departements=01,38, déjà résolus côté front) : ne retourne que ces départements, et propage la restriction au contexte", async () => {
     mockBuildStatistiquesContext.mockResolvedValue(
       buildContext([testStructure(1, "01")])
     );
@@ -162,8 +154,7 @@ describe("getCartographieStatistiques", () => {
       granularite: "departement",
       indicateur: "places.autorisees",
       annee: 2025,
-      departements: null,
-      regions: "ARA",
+      departements: "01,38",
       operateurs: null,
       types: null,
       aggregation: "moyenne",
@@ -171,24 +162,8 @@ describe("getCartographieStatistiques", () => {
 
     expect(result.zones.map((zone) => zone.code).sort()).toEqual(["01", "38"]);
     expect(mockBuildStatistiquesContext).toHaveBeenCalledWith(
-      expect.objectContaining({ departements: expect.stringMatching(/^(01,38|38,01)$/) })
+      expect.objectContaining({ departements: "01,38" })
     );
-  });
-
-  it("code région inconnu : ne retourne aucune zone et n'appelle pas buildStatistiquesContext (pas de round-trip inutile)", async () => {
-    const result = await getCartographieStatistiques({
-      granularite: "region",
-      indicateur: "places.autorisees",
-      annee: 2025,
-      departements: null,
-      regions: "XX",
-      operateurs: null,
-      types: null,
-      aggregation: "moyenne",
-    });
-
-    expect(result.zones).toEqual([]);
-    expect(mockBuildStatistiquesContext).not.toHaveBeenCalled();
   });
 
   it("aucune structure dans tout le périmètre (buildStatistiquesContext -> null) : toutes les zones à value null", async () => {
@@ -199,7 +174,6 @@ describe("getCartographieStatistiques", () => {
       indicateur: "places.autorisees",
       annee: 2025,
       departements: null,
-      regions: null,
       operateurs: null,
       types: "CAES",
       aggregation: "moyenne",

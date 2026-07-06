@@ -2,16 +2,12 @@ import { StatistiquesFilters } from "@/schemas/api/statistique.schema";
 import {
   CartographieApiRead,
   CartographieSupportedGranularite,
-  CartographieZoneStat,
   StatistiqueCartographieFilters,
 } from "@/schemas/api/statistique-cartographie.schema";
 
 import { buildStatistiquesContext } from "../statistique.service";
 import { sliceStatistiquesContext } from "../statistiques.utils";
-import {
-  findAllDepartementsWithRegion,
-  findAllRegions,
-} from "./cartographie.repository";
+import { findAllDepartementsWithRegion } from "./cartographie.repository";
 import {
   buildZoneDefinitions,
   computeEvolution,
@@ -20,15 +16,6 @@ import {
   resolveZoneDepartementNumeros,
 } from "./cartographie.util";
 
-const buildEmptyZoneStat = (
-  zone: { code: string; name: string }
-): CartographieZoneStat => ({
-  code: zone.code,
-  name: zone.name,
-  value: null,
-  evolution: null,
-});
-
 export const getCartographieStatistiques = async (
   filters: StatistiqueCartographieFilters & {
     granularite: CartographieSupportedGranularite;
@@ -36,27 +23,16 @@ export const getCartographieStatistiques = async (
 ): Promise<CartographieApiRead> => {
   const { granularite, indicateur, annee, aggregation } = filters;
 
-  const [allDepartements, allRegions] = await Promise.all([
-    findAllDepartementsWithRegion(),
-    findAllRegions(),
-  ]);
+  const allDepartements = await findAllDepartementsWithRegion();
 
-  const departementNumerosRestriction = resolveZoneDepartementNumeros(
-    filters,
-    allDepartements
-  );
+  const departementNumerosRestriction =
+    resolveZoneDepartementNumeros(filters);
 
   const zoneDefinitions = buildZoneDefinitions(
     granularite,
     allDepartements,
-    allRegions,
     departementNumerosRestriction
   );
-
-  // Zone restriction matches no known departement: nothing to return.
-  if (departementNumerosRestriction && departementNumerosRestriction.size === 0) {
-    return { granularite, indicateur, annee, zones: [] };
-  }
 
   const perimeterFilters: StatistiquesFilters = {
     departements: departementNumerosRestriction
@@ -74,7 +50,12 @@ export const getCartographieStatistiques = async (
       granularite,
       indicateur,
       annee,
-      zones: zoneDefinitions.map(buildEmptyZoneStat),
+      zones: zoneDefinitions.map((zone) => ({
+        code: zone.code,
+        name: zone.name,
+        value: null,
+        evolution: null,
+      })),
     };
   }
 
@@ -85,14 +66,15 @@ export const getCartographieStatistiques = async (
   const zones = zoneDefinitions.map((zone) => {
     const zoneStructureIds = new Set<number>();
     for (const departementNumero of zone.departementNumeros) {
-      for (const structureId of structureIdsByDepartement.get(departementNumero) ??
-        []) {
+      for (const structureId of structureIdsByDepartement.get(
+        departementNumero
+      ) ?? []) {
         zoneStructureIds.add(structureId);
       }
     }
 
     if (zoneStructureIds.size === 0) {
-      return buildEmptyZoneStat(zone);
+      return { code: zone.code, name: zone.name, value: null, evolution: null };
     }
 
     const zoneContext = sliceStatistiquesContext(

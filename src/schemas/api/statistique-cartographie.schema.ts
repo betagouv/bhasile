@@ -28,7 +28,9 @@ export const CARTOGRAPHIE_INDICATEURS = [
 
 export const cartographieIndicateurSchema = z.enum(CARTOGRAPHIE_INDICATEURS);
 
-export type CartographieIndicateur = z.infer<typeof cartographieIndicateurSchema>;
+export type CartographieIndicateur = z.infer<
+  typeof cartographieIndicateurSchema
+>;
 
 export const CARTOGRAPHIE_GRANULARITES = [
   "region",
@@ -53,7 +55,6 @@ export const statistiqueCartographieFiltersSchema = z.object({
   indicateur: cartographieIndicateurSchema,
   annee: z.coerce.number().int(),
   departements: z.string().nullable(),
-  regions: z.string().nullable(),
   operateurs: z.string().nullable(),
   types: z.string().nullable(),
   aggregation: z
@@ -81,7 +82,6 @@ export type CartographieZoneStat = {
   code: string;
   name: string;
   value: number | null;
-  /** null when the evolution isn't computable for this indicator or year. */
   evolution: CartographieEvolutionStat | null;
 };
 

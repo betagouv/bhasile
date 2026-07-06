@@ -11,9 +11,12 @@ liste de zones plutôt qu'un objet global.
 - `granularite` : `region` | `departement` | `arrondissement`
 - `indicateur` : voir catalogue ci-dessous
 - `annee` : année de référence (l'évolution compare à `annee - 1`)
-- `departements`, `regions` : restriction de zone (CSV, indépendante de
-  `granularite` - on peut restreindre à une région et découper par département
-  pour zoomer dessus)
+- `departements` : restriction de zone (numéros séparés par des virgules, indépendante de
+  `granularite` — on peut restreindre à une poignée de départements et
+  découper par région pour les regrouper, ou l'inverse). Comme partout
+  ailleurs dans l'app (structures, `/api/statistiques`), le front résout une
+  sélection de région en numéros de département avant l'appel réseau : pas de
+  paramètre `regions` séparé.
 - `operateurs`, `types`, `aggregation` : identiques à `/api/statistiques`
 
 `granularite=arrondissement` retourne `501 { error: "NOT_IMPLEMENTED" }` : aucun

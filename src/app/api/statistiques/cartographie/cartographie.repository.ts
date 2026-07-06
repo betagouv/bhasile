@@ -8,12 +8,6 @@ export type CartographieDbDepartement = {
   regionName: string | null;
 };
 
-export type CartographieDbRegion = {
-  code: string;
-  name: string;
-};
-
-/** Uses the Prisma Departement/Region relation, not the free-text DEPARTEMENTS/REGIONS constants. */
 export const findAllDepartementsWithRegion = async (): Promise<
   CartographieDbDepartement[]
 > => {
@@ -34,7 +28,3 @@ export const findAllDepartementsWithRegion = async (): Promise<
     regionName: departement.regionAdministrative?.name ?? null,
   }));
 };
-
-/** Covers the theoretical case of a region with no departement attached. */
-export const findAllRegions = async (): Promise<CartographieDbRegion[]> =>
-  prisma.region.findMany({ select: { code: true, name: true } });

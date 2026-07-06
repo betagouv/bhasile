@@ -213,3 +213,23 @@ export type StatistiquesContext = {
   activites: StatistiqueDbActivite[];
   rmus: StatistiqueDbRmu[] | null;
 };
+
+/** Minimal slice of StatistiquesContext needed to resolve structures + typologie for a given year. */
+export type StatistiquesTypologieYearContext = Pick<
+  StatistiquesContext,
+  "allStructures" | "activeStructureIdsByPeriod" | "typologies"
+>;
+
+/** Adds CPOM links, for indicators counting structures covered by an active CPOM per year. */
+export type StatistiquesCpomYearContext = StatistiquesTypologieYearContext &
+  Pick<StatistiquesContext, "cpomLinks">;
+
+/** Adds adresses + version timeline, for indicators resolved from the effective adresse of a year. */
+export type StatistiquesAdresseYearContext = StatistiquesTypologieYearContext &
+  Pick<StatistiquesContext, "adresses" | "structureVersionTimeline">;
+
+/** Minimal slice of StatistiquesContext needed to compute the current activite snapshot. */
+export type StatistiquesActiviteSummaryContext = Pick<
+  StatistiquesContext,
+  "activites" | "dnaLinks" | "structureVersionTimeline" | "allStructures" | "structures"
+>;

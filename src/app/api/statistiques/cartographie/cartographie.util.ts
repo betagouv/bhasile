@@ -20,10 +20,7 @@ import type {
   StatistiquesContext,
 } from "../statistiques.db.type";
 import { computeStructuresIndicatorForYear } from "../structures/structures.util";
-import type {
-  CartographieDbDepartement,
-  CartographieDbRegion,
-} from "./cartographie.repository";
+import type { CartographieDbDepartement } from "./cartographie.repository";
 
 export type CartographieZoneDefinition = {
   code: string;
@@ -49,46 +46,18 @@ export const groupStructureIdsByDepartement = (
   return groups;
 };
 
-/** Resolves the departements/regions CSV filters into a set of departement numeros, or null if unrestricted. */
+/** Resolves the `departements` filter into a set of departement numeros, or null if unrestricted. */
 export const resolveZoneDepartementNumeros = (
-  filters: Pick<StatistiqueCartographieFilters, "departements" | "regions">,
-  allDepartements: CartographieDbDepartement[]
+  filters: Pick<StatistiqueCartographieFilters, "departements">
 ): Set<string> | null => {
   const departementList = parseCommaList(filters.departements);
-  const regionList = parseCommaList(filters.regions);
-
-  if (departementList.length === 0 && regionList.length === 0) {
-    return null;
-  }
-
-  if (regionList.length === 0) {
-    return new Set(departementList);
-  }
-
-  const regionSet = new Set(regionList);
-  const departementsFromRegions = allDepartements
-    .filter(
-      (departement) =>
-        departement.regionCode && regionSet.has(departement.regionCode)
-    )
-    .map((departement) => departement.numero);
-
-  if (departementList.length === 0) {
-    return new Set(departementsFromRegions);
-  }
-
-  // Both filters given: intersect them.
-  const departementsFromRegionsSet = new Set(departementsFromRegions);
-  return new Set(
-    departementList.filter((numero) => departementsFromRegionsSet.has(numero))
-  );
+  return departementList.length > 0 ? new Set(departementList) : null;
 };
 
 /** Builds the canonical zone list for the chosen granularite, including zones with no structure. */
 export const buildZoneDefinitions = (
   granularite: CartographieSupportedGranularite,
   allDepartements: CartographieDbDepartement[],
-  allRegions: CartographieDbRegion[],
   departementNumerosRestriction: Set<string> | null
 ): CartographieZoneDefinition[] => {
   const departementsInScope = departementNumerosRestriction
@@ -122,16 +91,6 @@ export const buildZoneDefinitions = (
       departementNumerosByRegionCode.get(departement.regionCode) ?? [];
     numeros.push(departement.numero);
     departementNumerosByRegionCode.set(departement.regionCode, numeros);
-  }
-
-  // Unrestricted: also include regions with no departement attached.
-  if (!departementNumerosRestriction) {
-    for (const region of allRegions) {
-      if (!departementNumerosByRegionCode.has(region.code)) {
-        departementNumerosByRegionCode.set(region.code, []);
-        regionNameByCode.set(region.code, region.name);
-      }
-    }
   }
 
   return [...departementNumerosByRegionCode.entries()]

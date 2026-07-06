@@ -11,7 +11,9 @@ import type {
   StatistiqueDbStructure,
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologieValues,
+  StatistiquesAdresseYearContext,
   StatistiquesContext,
+  StatistiquesTypologieYearContext,
 } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
@@ -189,10 +191,7 @@ type PlacesTypologieField = "placesAutorisees" | "pmr" | "lgbt" | "fvvTeh";
 
 /** Computes a single typologie field for one year, for the cartographie one-indicator requests. */
 export const computeTypologieFieldForYear = (
-  context: Pick<
-    StatistiquesContext,
-    "allStructures" | "activeStructureIdsByPeriod" | "typologies"
-  >,
+  context: StatistiquesTypologieYearContext,
   year: number,
   field: PlacesTypologieField
 ): number | null => {
@@ -214,14 +213,7 @@ type PlacesAdresseField = "qpv" | "logementSocial";
 
 /** Computes a single adresse field (qpv/logementSocial) for one year, for cartographie one-indicator requests. */
 export const computeAdresseFieldForYear = (
-  context: Pick<
-    StatistiquesContext,
-    | "allStructures"
-    | "activeStructureIdsByPeriod"
-    | "typologies"
-    | "adresses"
-    | "structureVersionTimeline"
-  >,
+  context: StatistiquesAdresseYearContext,
   year: number,
   field: PlacesAdresseField
 ): number | null => {

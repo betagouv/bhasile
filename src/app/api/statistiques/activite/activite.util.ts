@@ -13,6 +13,7 @@ import {
 import type {
   StatistiqueDbActivite,
   StatistiqueDbStructure,
+  StatistiquesActiviteSummaryContext,
   StatistiquesContext,
 } from "../statistiques.db.type";
 import {
@@ -196,14 +197,7 @@ const buildLatestActiviteByStructureId = (
 
 /** Computes the current activite snapshot only, for the cartographie one-indicator requests. TODO: no yearly aggregation yet. */
 export const computeActiviteSummary = (
-  context: Pick<
-    StatistiquesContext,
-    | "activites"
-    | "dnaLinks"
-    | "structureVersionTimeline"
-    | "allStructures"
-    | "structures"
-  >
+  context: StatistiquesActiviteSummaryContext
 ): ActiviteSummaryStat => {
   const {
     activites,
