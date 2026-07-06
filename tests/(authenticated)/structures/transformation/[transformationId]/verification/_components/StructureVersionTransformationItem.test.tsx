@@ -83,7 +83,7 @@ describe("StructureVersionTransformationItem", () => {
     ["type", { type: undefined }],
     ["departementAdministratif", { departementAdministratif: undefined }],
   ])(
-    "should hide the StructureCard when structureVersion.%s is missing",
+    "masque la StructureCard quand structureVersion.%s est absent",
     (_label, structureVersionOverride) => {
       // GIVEN
       const structureVersionTransformation = buildCompleteStructureVersionTransformation({
@@ -184,7 +184,7 @@ describe("StructureVersionTransformationItem", () => {
     [StructureVersionTransformationType.CONTRACTION, "contraction"],
     [StructureVersionTransformationType.FERMETURE, "fermeture"],
   ])(
-    "should render the verb '%s' for type %s",
+    "affiche le verbe '%s' pour le type %s",
     (structureVersionTransformationType, expectedVerb) => {
       // GIVEN
       const structureVersionTransformation = buildCompleteStructureVersionTransformation({
@@ -287,7 +287,7 @@ describe("StructureVersionTransformationItem", () => {
     [StructureVersionTransformationType.EXTENSION, "extension"],
     [StructureVersionTransformationType.CONTRACTION, "contraction"],
   ])(
-    "should render the placesAutorisees line for type %s",
+    "affiche la ligne placesAutorisees pour le type %s",
     (structureVersionTransformationType, expectedSuffix) => {
       // GIVEN
       const structureVersionTransformation = buildCompleteStructureVersionTransformation({
