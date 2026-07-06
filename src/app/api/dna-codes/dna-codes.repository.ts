@@ -6,9 +6,11 @@ import { PrismaTransaction } from "@/types/prisma.type";
 export const findAll = async ({
   entityId = {},
   operateurId,
+  transformationId,
 }: {
   entityId?: EntityId;
   operateurId?: number;
+  transformationId?: number;
 } = {}): Promise<{ code: string }[]> => {
   const { structureId, structureVersionId } = entityId;
 
@@ -23,6 +25,17 @@ export const findAll = async ({
       dnaStructures: { some: { structureVersionId } },
     });
   }
+  if (transformationId) {
+    ownershipFilters.push({
+      dnaStructures: {
+        some: {
+          structureVersion: {
+            structureVersionTransformation: { transformationId },
+          },
+        },
+      },
+    });
+  }
   const structureFilter: Prisma.DnaWhereInput = { OR: ownershipFilters };
 
   const operateurFilter =
@@ -35,6 +48,7 @@ export const findAll = async ({
       ? { AND: [structureFilter, operateurFilter] }
       : structureFilter,
     select: { code: true },
+    distinct: ["code"],
   });
 };
 

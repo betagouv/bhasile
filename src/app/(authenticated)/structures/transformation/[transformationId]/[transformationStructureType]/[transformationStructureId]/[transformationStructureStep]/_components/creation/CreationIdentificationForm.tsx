@@ -29,8 +29,13 @@ export const CreationIdentificationForm = ({
   structureVersionTransformation,
   formKind,
 }: Props) => {
-  const { goToNextStep, handleSave, backLink, shouldShowIncompleteSteps } =
-    useTransformationFormHandling();
+  const {
+    goToNextStep,
+    navigateWithSave,
+    handleSave,
+    backLink,
+    shouldShowIncompleteSteps,
+  } = useTransformationFormHandling();
 
   const defaultValues =
     getTransformationDefaultValues<CreationIdentificationDraftFormValues>({
@@ -68,6 +73,7 @@ export const CreationIdentificationForm = ({
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       backLink={backLink}
+      onBackNavigate={navigateWithSave}
       showContactInfos={false}
     >
       <TransformationFormController

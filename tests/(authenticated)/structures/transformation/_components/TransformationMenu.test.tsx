@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TransformationMenu } from "@/app/(authenticated)/structures/transformation/_components/TransformationMenu";
 import { TransformationApiRead } from "@/schemas/api/transformation.schema";
+import { FetchState } from "@/types/fetch-state.type";
 import {
   StructureVersionTransformationType,
   TransformationType,
@@ -28,6 +29,10 @@ vi.mock(
       mockUseOptionalTransformationContext(),
   })
 );
+
+vi.mock("@/app/context/FetchStateContext", () => ({
+  useFetchState: () => ({ getFetchState: () => FetchState.IDLE }),
+}));
 
 describe("TransformationMenu", () => {
   beforeEach(() => {

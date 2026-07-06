@@ -2,6 +2,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { StructureEventIcon } from "@/app/components/structures/StructureEventIcon";
+import { useTransformationNavigateWithSave } from "@/app/hooks/useTransformationNavigateWithSave";
 import { cn } from "@/app/utils/classname.util";
 import {
   getStructureVersionTransformationLabel,
@@ -14,6 +15,7 @@ import { useOptionalTransformationContext } from "../[transformationId]/_context
 export const TransformationStep = ({ step }: Props) => {
   const pathname = usePathname();
   const { shouldShowIncompleteSteps } = useOptionalTransformationContext();
+  const { navigateWithSave } = useTransformationNavigateWithSave();
   return (
     <div className="relative">
       <span
@@ -39,6 +41,10 @@ export const TransformationStep = ({ step }: Props) => {
             <Link
               key={stepItem.route}
               href={stepItem.route}
+              onNavigate={(event) => {
+                event.preventDefault();
+                navigateWithSave(stepItem.route);
+              }}
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex items-center gap-2 py-2 pl-19 pr-4 hover:font-bold text-sm hover:bg-white",

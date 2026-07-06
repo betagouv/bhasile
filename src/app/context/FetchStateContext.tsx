@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useCallback, useContext, useState } from "react";
 
+import { ErrorToast } from "@/app/components/ErrorToast";
 import { FetchState } from "@/types/fetch-state.type";
 
 const FetchStateContext = createContext<FetchStateContextType | undefined>(
@@ -29,6 +30,7 @@ export function FetchStateProvider({
       value={{ fetchStates, setFetchState, getFetchState }}
     >
       {children}
+      <ErrorToast />
     </FetchStateContext.Provider>
   );
 }

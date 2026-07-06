@@ -389,15 +389,26 @@ describe("date util", () => {
         expect(result).toBe(2024);
       });
 
-      it("should return the full year from a Date created with year, month, day", () => {
+      it("should return the full year from a Date created with UTC year, month, day", () => {
         // GIVEN
-        const date = new Date(2025, 0, 1);
+        const date = new Date(Date.UTC(2025, 0, 1));
 
         // WHEN
         const result = getYearFromDate(date);
 
         // THEN
         expect(result).toBe(2025);
+      });
+
+      it("should use the UTC year, not the runner's local year, right at a year boundary", () => {
+        // GIVEN
+        const date = new Date("2024-12-31T23:30:00.000Z");
+
+        // WHEN
+        const result = getYearFromDate(date);
+
+        // THEN
+        expect(result).toBe(2024);
       });
     });
 

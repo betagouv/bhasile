@@ -11,7 +11,11 @@ export const TransformationFormController = <TSchema extends z.ZodTypeAny>({
   schema: TSchema;
   onSave: (data: z.infer<TSchema>, values: z.infer<TSchema>) => Promise<void>;
 }) => {
-  const { getValues, trigger } = useFormContext<z.infer<TSchema>>();
+  const {
+    getValues,
+    trigger,
+    formState: { isDirty },
+  } = useFormContext<z.infer<TSchema>>();
   const { registerSaver, shouldShowIncompleteSteps } =
     useOptionalTransformationContext();
 
@@ -28,6 +32,7 @@ export const TransformationFormController = <TSchema extends z.ZodTypeAny>({
           "TransformationFormController: données invalides",
           result.error
         );
+        trigger();
         return false;
       }
       await onSaveRef.current(result.data, getValues());
@@ -37,7 +42,19 @@ export const TransformationFormController = <TSchema extends z.ZodTypeAny>({
     registerSaver(saveCurrentForm);
 
     return () => registerSaver(null);
-  }, [registerSaver, schema, getValues]);
+  }, [registerSaver, schema, getValues, trigger]);
+
+  useEffect(() => {
+    if (!isDirty) {
+      return;
+    }
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
 
   useEffect(() => {
     if (shouldShowIncompleteSteps) {

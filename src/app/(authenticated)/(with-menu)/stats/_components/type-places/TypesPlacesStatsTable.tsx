@@ -1,33 +1,56 @@
 import { Fragment, ReactElement } from "react";
 
 import { Table } from "@/app/components/common/Table";
-import { StatistiquesApiType } from "@/schemas/api/statistiques.schema";
+import { formatNumber } from "@/app/utils/number.util";
+import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
 export const TypesPlacesStatsTable = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
-  const topLevelStats: StructureStat[] = statistiques.typesPlaces
-    .slice(0, 2)
-    .map((typePlace) => ({
-      label: typePlace.label,
-      value: typePlace.byYear.map((yearItem) => yearItem.nbPlaces).reverse(),
-    }));
+  const topLevelStats: StructureStat[] = [
+    {
+      label: "Places autorisées",
+      value: statistiques.places.byYear.map((yearItem) => yearItem.totalPlaces),
+    },
+    {
+      label: "Taux d'équipement",
+      value: statistiques.places.byYear.map((yearItem) =>
+        formatNumber(Number(yearItem.tauxEquipement) * 1000)
+      ),
+    },
+  ];
 
-  const structureStats = [
+  const typePlacesStats = [
     {
       title: "Types de places",
-      rows: statistiques.typesPlaces
-        .slice(2, statistiques.typesPlaces.length)
-        .map((typePlace) => ({
-          id: `typePlace-${typePlace.label}`,
-          label: typePlace.label,
-          subLabel: typePlace.subLabel,
-          value: typePlace.byYear
-            .map((yearItem) => yearItem.nbPlaces)
-            .reverse(),
-        })),
+      rows: [
+        {
+          label: "Places PMR",
+          value: statistiques.places.byYear.map((yearItem) => yearItem.pmr),
+        },
+        {
+          label: "Places LGBT",
+          subLabel: "(labellisées)",
+          value: statistiques.places.byYear.map((yearItem) => yearItem.lgbt),
+        },
+        {
+          label: "Places FVV/TEH",
+          subLabel: "(spécialisées)",
+          value: statistiques.places.byYear.map((yearItem) => yearItem.fvvTeh),
+        },
+        {
+          label: "Places en QPV",
+          value: statistiques.places.byYear.map((yearItem) => yearItem.qpv),
+        },
+        {
+          label: "Places en logements sociaux",
+          value: statistiques.places.byYear.map(
+            (yearItem) => yearItem.logementsSociaux
+          ),
+        },
+      ],
     },
   ];
 
@@ -65,12 +88,12 @@ export const TypesPlacesStatsTable = (): ReactElement => {
             ))}
           </tr>
         ))}
-        {structureStats.map((section) => (
+        {typePlacesStats.map((section) => (
           <Fragment key={section.title}>
             <tr>
               <td
                 className="text-left! text-xs! font-bold uppercase bg-default-grey-hover!"
-                colSpan={statistiques.typesPlaces?.[0]?.byYear.length + 1}
+                colSpan={statistiques.places.byYear.length + 1}
               >
                 <span className="sticky left-4 inline-block">
                   {section.title}
@@ -103,17 +126,15 @@ export const TypesPlacesStatsTable = (): ReactElement => {
   );
 };
 
-const getHeadings = (statistiques: StatistiquesApiType) => {
+const getHeadings = (statistiques: StatistiqueApiRead) => {
   const dates =
-    statistiques.typesPlaces[0].byYear
-      .map((yearItem) => {
-        return (
-          <th scope="col" key={yearItem.year}>
-            {yearItem.year}
-          </th>
-        );
-      })
-      .reverse() ?? [];
+    statistiques.places.byYear.map((yearItem) => {
+      return (
+        <th scope="col" key={yearItem.year}>
+          {yearItem.year}
+        </th>
+      );
+    }) ?? [];
 
   return [
     <th scope="col" key="heading-label" className="min-w-[240px]">

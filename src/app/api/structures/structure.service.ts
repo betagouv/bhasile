@@ -38,6 +38,7 @@ import {
 } from "./structure.repository";
 import {
   buildStructureHistory,
+  buildUpcomingTransformations,
   computeStructureListRow,
   filterStructureRows,
   getAdresseAdministrativeCoordinates,
@@ -316,8 +317,13 @@ const dbStructureToApiRead = (
     ? undefined
     : buildStructureHistory(
         dbStructure as StructureDbDetails,
-        cpomStructures ?? []
+        cpomStructures ?? [],
+        now
       );
+
+  const upcomingTransformations = simple
+    ? undefined
+    : buildUpcomingTransformations(dbStructure as StructureDbDetails, now);
 
   return recursivelySerializeDates({
     ...dbStructure,
@@ -327,6 +333,7 @@ const dbStructureToApiRead = (
     finPeriodeAutorisation,
     cpomStructures,
     history,
+    upcomingTransformations,
     latitude: dbStructure.latitude?.toString(),
     longitude: dbStructure.longitude?.toString(),
     activites,

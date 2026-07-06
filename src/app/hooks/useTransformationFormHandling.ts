@@ -8,18 +8,16 @@ import { StepStatus } from "@/types/form.type";
 import { useTransformationContext } from "../(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { setStructureVersionTransformationFormStepStatus } from "../utils/transformation.util";
 import { useTransformationFormNavigation } from "./useTransformationFormNavigation";
+import { useTransformationNavigateWithSave } from "./useTransformationNavigateWithSave";
 import { useTransformations } from "./useTransformations";
 
 export const useTransformationFormHandling = () => {
   const router = useRouter();
 
-  const {
-    transformation,
-    setTransformation,
-    saveCurrentForm,
-    shouldShowIncompleteSteps,
-  } = useTransformationContext();
+  const { transformation, setTransformation, shouldShowIncompleteSteps } =
+    useTransformationContext();
   const { updateTransformation } = useTransformations();
+  const { navigateWithSave } = useTransformationNavigateWithSave();
 
   const { firstStep, currentStep, nextStep, backLink } =
     useTransformationFormNavigation();
@@ -74,24 +72,17 @@ export const useTransformationFormHandling = () => {
   };
 
   const goToNextStep = async () => {
-    if (!currentStep) {
+    if (!currentStep || !nextStep) {
       return;
     }
-
-    try {
-      const saved = await saveCurrentForm();
-      if (saved && nextStep) {
-        router.push(nextStep.route);
-      }
-    } catch (error) {
-      console.error(error);
-    }
+    return navigateWithSave(nextStep.route);
   };
 
   return {
     nextStep,
     backLink,
     goToNextStep,
+    navigateWithSave,
     handleSave,
     shouldShowIncompleteSteps,
   };

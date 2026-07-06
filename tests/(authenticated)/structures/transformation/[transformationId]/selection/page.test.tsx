@@ -19,6 +19,7 @@ const mockModalClose = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
+  usePathname: () => "/",
 }));
 
 vi.mock(

@@ -129,8 +129,72 @@ describe("TransformationDnaAndFiness", () => {
         screen.queryByRole("combobox", { name: "Code DNA" })
       ).not.toBeInTheDocument();
       expect(
+        screen.getAllByRole("button", { name: "Supprimer" })
+      ).toHaveLength(2);
+    });
+  });
+
+  describe("Suppression du dernier code DNA", () => {
+    it("affiche la poubelle dès le premier code renseigné et vide le champ sans retirer la ligne", async () => {
+      const user = userEvent.setup();
+
+      render(
+        <FormTestWrapper
+          defaultValues={{
+            ...defaultValuesSubventionnee,
+            dnaStructures: [{ dna: { code: "C0001" }, description: "" }],
+          }}
+        >
+          <TransformationDnaAndFiness />
+        </FormTestWrapper>
+      );
+
+      expect(
         screen.getByRole("button", { name: "Supprimer" })
       ).toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: "Supprimer" }));
+
+      expect(screen.getByRole("combobox", { name: "Code" })).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Supprimer" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("supprime la ligne ciblée et non la première", async () => {
+      const user = userEvent.setup();
+      mockedUseFetchFreeDnaCodes.mockReturnValue({
+        freeDnaCodes: [{ code: "C0001" }, { code: "C0002" }, { code: "C0003" }],
+      });
+
+      render(
+        <FormTestWrapper
+          defaultValues={{
+            ...defaultValuesSubventionnee,
+            dnaStructures: [
+              { dna: { code: "C0001" }, description: "D0" },
+              { dna: { code: "C0002" }, description: "D1" },
+              { dna: { code: "C0003" }, description: "D2" },
+            ],
+          }}
+        >
+          <TransformationDnaAndFiness />
+        </FormTestWrapper>
+      );
+
+      const codesBefore = screen
+        .getAllByRole("combobox", { name: "Code" })
+        .map((select) => (select as HTMLSelectElement).value);
+      expect(codesBefore).toEqual(["C0001", "C0002", "C0003"]);
+
+      await user.click(
+        screen.getAllByRole("button", { name: "Supprimer" })[1]
+      );
+
+      const codesAfter = screen
+        .getAllByRole("combobox", { name: "Code" })
+        .map((select) => (select as HTMLSelectElement).value);
+      expect(codesAfter).toEqual(["C0001", "C0003"]);
     });
   });
 });

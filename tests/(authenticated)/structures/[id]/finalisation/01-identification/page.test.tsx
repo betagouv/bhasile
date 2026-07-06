@@ -21,6 +21,8 @@ import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mo
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
+  useParams: () => ({}),
+  usePathname: () => "/",
 }));
 
 describe("FinalisationIdentification page integration", () => {

@@ -7,6 +7,7 @@ import {
   StructureVersionTransformationApiRead,
   StructureVersionTransformationApiUpdateClient,
 } from "@/schemas/api/transformation.schema";
+import { FetchState } from "@/types/fetch-state.type";
 import { StepStatus } from "@/types/form.type";
 import {
   StructureVersionTransformationStep,
@@ -37,6 +38,10 @@ vi.mock(
   "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext",
   () => ({
     useTransformationContext: () => mockUseTransformationContext(),
+    useOptionalTransformationContext: () => ({
+      saveCurrentForm: mockSaveCurrentForm,
+      isSaverRegistered: true,
+    }),
   })
 );
 
@@ -44,6 +49,10 @@ vi.mock("@/app/hooks/useTransformations", () => ({
   useTransformations: () => ({
     updateTransformation: mockUpdateTransformation,
   }),
+}));
+
+vi.mock("@/app/context/FetchStateContext", () => ({
+  useFetchState: () => ({ getFetchState: () => FetchState.IDLE }),
 }));
 
 const setTransformation = vi.fn();
