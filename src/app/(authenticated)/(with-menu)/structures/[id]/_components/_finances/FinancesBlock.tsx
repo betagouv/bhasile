@@ -2,6 +2,7 @@ import { useRouter } from "next/navigation";
 import { ReactElement, useState } from "react";
 
 import { Block } from "@/app/components/common/Block";
+import { getLatestBudgetExecutoireYear } from "@/app/utils/budget.util";
 import { AUTORISEE_OPEN_YEAR, SUBVENTIONNEE_OPEN_YEAR } from "@/constants";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
@@ -22,9 +23,11 @@ export const FinancesBlock = (): ReactElement => {
 
   const { isAutorisee, isSubventionnee } = structure;
 
-  const budgetExecutoireYear = isAutorisee
-    ? AUTORISEE_OPEN_YEAR
-    : SUBVENTIONNEE_OPEN_YEAR;
+  const openYear = isAutorisee ? AUTORISEE_OPEN_YEAR : SUBVENTIONNEE_OPEN_YEAR;
+  const budgetExecutoireYear = getLatestBudgetExecutoireYear(
+    structure.budgets,
+    openYear
+  );
 
   const wasInCpom = Object.values(structure.isInCpomPerYear).some(Boolean);
 

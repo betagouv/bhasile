@@ -9,6 +9,7 @@ import { ReactNode, useEffect, useState } from "react";
 import {
   FieldErrors,
   FormProvider as HookFormProvider,
+  Resolver,
   useForm,
   UseFormReturn,
   useWatch,
@@ -19,6 +20,7 @@ import { FormProvider } from "@/app/context/FormContext";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { cn } from "@/app/utils/classname.util";
 import { BHASILE_CONTACT_EMAIL, BHASILE_PHONE_NUMBERS } from "@/constants";
+import { AnyZodSchema } from "@/types/form.type";
 import { DeepPartial } from "@/types/global";
 
 // Define enum for footer buttons
@@ -28,7 +30,7 @@ export enum FooterButtonType {
   SUBMIT = "submit",
 }
 
-export default function FormWrapper<TSchema extends z.ZodTypeAny>({
+export default function FormWrapper<TSchema extends AnyZodSchema>({
   schema,
   localStorageKey = "",
   children,
@@ -44,6 +46,7 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
   handleCancel,
   showSubmitButton = true,
   backLink,
+  onBackNavigate,
   availableFooterButtons = [
     FooterButtonType.CANCEL,
     FooterButtonType.SAVE,
@@ -66,7 +69,7 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
   } as z.infer<TSchema>;
 
   const methods = useForm<z.infer<TSchema>>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as Resolver<z.infer<TSchema>>,
     mode,
     defaultValues: mergedDefaultValues as z.infer<TSchema>,
     criteriaMode: "all",
@@ -144,6 +147,14 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
           {backLink && (
             <Link
               href={backLink.href}
+              onNavigate={
+                onBackNavigate
+                  ? (event) => {
+                      event.preventDefault();
+                      onBackNavigate(backLink.href);
+                    }
+                  : undefined
+              }
               className="flex gap-2 fr-link fr-icon  w-fit text-title-blue-france"
             >
               <i className="fr-icon-arrow-left-s-line before:w-4"></i>
@@ -221,7 +232,7 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
   );
 }
 
-type FormWrapperProps<TSchema extends z.ZodTypeAny> = {
+type FormWrapperProps<TSchema extends AnyZodSchema> = {
   schema: TSchema;
   localStorageKey?: string;
   children: ReactNode | ((form: UseFormReturn<z.infer<TSchema>>) => ReactNode);
@@ -240,6 +251,7 @@ type FormWrapperProps<TSchema extends z.ZodTypeAny> = {
   handleCancel?: () => void;
   showSubmitButton?: boolean;
   backLink?: { href: string; label: string };
+  onBackNavigate?: (href: string) => void;
   availableFooterButtons?: Array<FooterButtonType>;
   showAutoSaveMention?: boolean;
   showContactInfos?: boolean;

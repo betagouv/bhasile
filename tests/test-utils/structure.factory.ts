@@ -65,6 +65,7 @@ export const createStructure = ({
     longitude: "2.3612011",
     nom: "Les Mimosas",
     creationDate: new Date("01/02/2007").toISOString(),
+    fermetureDate: null,
     debutConvention: new Date("01/02/2024").toISOString(),
     finConvention: new Date("01/02/2027").toISOString(),
     debutPeriodeAutorisation: new Date("01/02/2022").toISOString(),

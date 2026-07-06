@@ -6,7 +6,7 @@ import { StructureType } from "@/types/structure.type";
 export const budgetApiSchema = z.object({
   id: z.number().optional(),
   year: zSafeYear(),
-  cpomStructureType: z.nativeEnum(StructureType).optional(),
+  cpomStructureType: z.enum(StructureType).optional(),
   dotationDemandee: z.number().nullish(),
   dotationAccordee: z.number().nullish(),
   totalProduitsProposes: z.number().nullish(),

@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { areCodesUnique } from "@/app/utils/common.util";
+import { areAllValuesEmpty, areCodesUnique } from "@/app/utils/common.util";
 import { zId } from "@/app/utils/zodCustomFields";
 
 const finessSchema = z.object({
@@ -15,13 +15,28 @@ const structureFinessSchema = z.object({
 });
 
 const uniqueFinessCodesError = {
-  message: "Les codes FINESS doivent être uniques",
+  error: "Les codes FINESS doivent être uniques",
   path: ["structureFinesses"],
+};
+
+const dropBlankFinessRows = (value: unknown): unknown => {
+  if (!Array.isArray(value)) {
+    return value;
+  }
+  return value.filter(
+    (structureFiness) =>
+      !areAllValuesEmpty({
+        description: structureFiness?.description,
+        code: structureFiness?.finess?.code,
+      })
+  );
 };
 
 export const structureFinessesSchema = z
   .object({
-    structureFinesses: z.array(structureFinessSchema).optional(),
+    structureFinesses: z
+      .preprocess(dropBlankFinessRows, z.array(structureFinessSchema))
+      .optional(),
   })
   .refine(
     (data) =>

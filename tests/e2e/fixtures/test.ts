@@ -3,12 +3,21 @@ import { test as base } from "@playwright/test";
 
 import { StructureType } from "@/types/structure.type";
 
-import { deleteCpomById, deleteStructureByCode } from "../seed/cleanup";
+import {
+  deleteCpomById,
+  deleteStructureByCode,
+  deleteTransformationGraph,
+} from "../seed/cleanup";
 import { createCpomForTest, SeededCpom } from "../seed/cpom.seed";
 import {
   createStructureForTest,
   SeededStructure,
 } from "../seed/structure.seed";
+import {
+  createTransformationSource,
+  type SeededTransformationSource,
+  seedKnownDnaCodes,
+} from "../seed/transformation-source.seed";
 
 export type Fixtures = {
   seededStructure: SeededStructure;
@@ -16,6 +25,32 @@ export type Fixtures = {
   seededCpom: SeededCpom;
   seededCpomWithDates: SeededCpom;
   structuresPool: SeededStructure[];
+  registerTransformation: (transformationId: number) => void;
+  knownDnaCodes: string[];
+  closingStructure: SeededTransformationSource;
+  extendedStructure: SeededTransformationSource;
+  contractionSources: SeededTransformationSource[];
+  hudaSources: SeededTransformationSource[];
+  cadaTarget: SeededTransformationSource;
+};
+
+const teardownSource = async (
+  source: SeededTransformationSource
+): Promise<void> => {
+  await deleteStructureByCode(source.codeBhasile).catch(() => {});
+};
+
+const useCadaSource = async (
+  use: (source: SeededTransformationSource) => Promise<void>
+): Promise<void> => {
+  const source = await createTransformationSource({
+    type: StructureType.CADA,
+  });
+  try {
+    await use(source);
+  } finally {
+    await teardownSource(source);
+  }
 };
 
 export const test = base.extend<Fixtures>({
@@ -72,6 +107,56 @@ export const test = base.extend<Fixtures>({
         created.map((structure) => deleteStructureByCode(structure.codeBhasile))
       );
     }
+  },
+
+  registerTransformation: async ({}, use) => {
+    const transformationIds: number[] = [];
+    await use((transformationId: number) => {
+      transformationIds.push(transformationId);
+    });
+    for (const transformationId of transformationIds) {
+      await deleteTransformationGraph(transformationId).catch(() => {});
+    }
+  },
+
+  knownDnaCodes: async ({}, use) => {
+    const codes = await seedKnownDnaCodes(2);
+    await use(codes);
+  },
+
+  closingStructure: async ({}, use) => {
+    await useCadaSource(use);
+  },
+
+  extendedStructure: async ({}, use) => {
+    await useCadaSource(use);
+  },
+
+  contractionSources: async ({}, use) => {
+    const sources = [
+      await createTransformationSource({ type: StructureType.CADA }),
+    ];
+    try {
+      await use(sources);
+    } finally {
+      await Promise.allSettled(sources.map(teardownSource));
+    }
+  },
+
+  hudaSources: async ({}, use) => {
+    const sources = [
+      await createTransformationSource({ type: StructureType.HUDA }),
+      await createTransformationSource({ type: StructureType.HUDA }),
+    ];
+    try {
+      await use(sources);
+    } finally {
+      await Promise.allSettled(sources.map(teardownSource));
+    }
+  },
+
+  cadaTarget: async ({}, use) => {
+    await useCadaSource(use);
   },
 });
 

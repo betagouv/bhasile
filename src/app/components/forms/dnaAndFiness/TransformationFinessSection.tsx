@@ -1,3 +1,4 @@
+import { isBlank } from "@/app/utils/common.util";
 import { StructureFinessFormValues } from "@/schemas/forms/base/finess.schema";
 
 import InputWithValidation from "../InputWithValidation";
@@ -15,6 +16,9 @@ export const TransformationFinessSection = () => {
     <TransformationCodeSection
       fieldArrayName="structureFinesses"
       emptyItem={emptyStructureFiness}
+      isEmptyItem={(item) =>
+        isBlank(item.finess?.code) && isBlank(item.description)
+      }
       addButtonLabel="Ajouter un code FINESS"
       descriptionHint="ex : Toute la structure"
       getDescriptionFieldName={(index) =>

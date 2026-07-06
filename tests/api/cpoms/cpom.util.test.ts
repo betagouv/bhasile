@@ -33,31 +33,31 @@ describe("filterCpomsByDepartement", () => {
     withDepartements(3, ["75", "77"]),
   ];
 
-  it("returns everything when no departement filter", () => {
+  it("retourne tout quand aucun filtre département n'est appliqué", () => {
     expect(filterCpomsByDepartement(cpoms, null)).toHaveLength(3);
     expect(filterCpomsByDepartement(cpoms, "")).toHaveLength(3);
   });
 
-  it("keeps cpoms whose departement set contains a filtered numero", () => {
+  it("garde les cpoms dont l'ensemble de départements contient un numéro filtré", () => {
     expect(
       filterCpomsByDepartement(cpoms, "75").map((cpom) => cpom.id)
     ).toEqual([1, 3]);
   });
 
-  it("matches any numero when several are filtered", () => {
+  it("correspond à n'importe quel numéro filtré quand plusieurs sont fournis", () => {
     expect(
       filterCpomsByDepartement(cpoms, "92,77").map((cpom) => cpom.id)
     ).toEqual([2, 3]);
   });
 
-  it("uses exact membership, not substring (71 must not match 971)", () => {
+  it("utilise une appartenance exacte, pas une sous-chaîne (71 ne doit pas correspondre à 971)", () => {
     const domCpoms = [withDepartements(1, ["971"]), withDepartements(2, ["71"])];
     expect(
       filterCpomsByDepartement(domCpoms, "71").map((cpom) => cpom.id)
     ).toEqual([2]);
   });
 
-  it("distinguishes Corsican codes 2A and 2B", () => {
+  it("distingue les codes corses 2A et 2B", () => {
     const corsica = [withDepartements(1, ["2A"]), withDepartements(2, ["2B"])];
     expect(
       filterCpomsByDepartement(corsica, "2A").map((cpom) => cpom.id)
@@ -66,7 +66,7 @@ describe("filterCpomsByDepartement", () => {
 });
 
 describe("sortValueForCpomColumn", () => {
-  it("reads text columns", () => {
+  it("lit les colonnes de texte", () => {
     const cpom = makeCpom({
       operateur: { name: "Acme" },
       region: { name: "Bretagne" },
@@ -86,7 +86,7 @@ describe("sortValueForCpomColumn", () => {
     });
   });
 
-  it("returns null for a missing region", () => {
+  it("retourne null pour une région absente", () => {
     const cpom = makeCpom({ region: null });
     expect(sortValueForCpomColumn(cpom, "region")).toEqual({
       value: null,
@@ -94,7 +94,7 @@ describe("sortValueForCpomColumn", () => {
     });
   });
 
-  it("counts structures numerically", () => {
+  it("compte les structures numériquement", () => {
     const cpom = makeCpom({ structures: [{ id: 1 }, { id: 2 }, { id: 3 }] });
     expect(sortValueForCpomColumn(cpom, "structures")).toEqual({
       value: 3,
@@ -102,7 +102,7 @@ describe("sortValueForCpomColumn", () => {
     });
   });
 
-  it("joins departement numeros in sorted order", () => {
+  it("joint les numéros de département dans l'ordre trié", () => {
     const cpom = withDepartements(1, ["77", "75", "92"]);
     expect(sortValueForCpomColumn(cpom, "departements")).toEqual({
       value: "75, 77, 92",
@@ -110,7 +110,7 @@ describe("sortValueForCpomColumn", () => {
     });
   });
 
-  it("derives date columns from the CONVENTION acte as epoch millis", () => {
+  it("dérive les colonnes de date de l'acte CONVENTION en millisecondes epoch", () => {
     const startDate = new Date("2023-01-01T00:00:00.000Z");
     const endDate = new Date("2026-01-01T00:00:00.000Z");
     const cpom = makeCpom({
@@ -128,7 +128,7 @@ describe("sortValueForCpomColumn", () => {
     });
   });
 
-  it("returns null dates when there is no CONVENTION acte", () => {
+  it("retourne des dates nulles quand il n'y a pas d'acte CONVENTION", () => {
     const cpom = makeCpom({ actesAdministratifs: [] });
     expect(sortValueForCpomColumn(cpom, "dateStart")).toEqual({
       value: null,
@@ -136,7 +136,7 @@ describe("sortValueForCpomColumn", () => {
     });
   });
 
-  it("falls back to a null text value for an unknown column", () => {
+  it("retombe sur une valeur texte nulle pour une colonne inconnue", () => {
     const cpom = makeCpom({});
     expect(
       sortValueForCpomColumn(cpom, "unknown" as CpomColumn)

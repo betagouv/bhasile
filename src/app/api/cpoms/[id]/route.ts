@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
 import { cpomApiSchema } from "@/schemas/api/cpom.schema";
 
 import { createCpomEvent } from "../../user-action/user-action.service";
@@ -18,14 +19,7 @@ export async function GET(
 
     return NextResponse.json(cpom);
   } catch (error) {
-    console.error("Error in GET /api/cpoms/[id]", error);
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    );
+    return apiErrorResponse(error);
   }
 }
 
@@ -41,7 +35,6 @@ export async function PUT(
     createCpomEvent(request.method, cpomId);
     return NextResponse.json({ cpomId }, { status: 200 });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(error, { status: 400 });
+    return apiErrorResponse(error);
   }
 }

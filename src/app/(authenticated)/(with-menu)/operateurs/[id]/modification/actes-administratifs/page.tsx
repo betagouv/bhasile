@@ -8,8 +8,6 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useOperateurFormHandling } from "@/app/hooks/useOperateurFormHandling";
 import { getOperateurDefaultValues } from "@/app/utils/operateur.util";
 import { operateurActesAdministratifsCategoryToDisplay } from "@/config/operateur.config";
@@ -18,14 +16,13 @@ import {
   ActesAdministratifsFormValues,
   actesAdministratifsOperateurSchema,
 } from "@/schemas/forms/base/acteAdministratif.schema";
-import { FetchState } from "@/types/fetch-state.type";
 
 import { useOperateurContext } from "../../_context/OperateurClientContext";
 
 export default function OperateurModificationActesAdministratifs() {
   const { operateur } = useOperateurContext();
 
-  const { handleSubmit, backendError } = useOperateurFormHandling({
+  const { handleSubmit } = useOperateurFormHandling({
     operateurId: operateur.id,
     nextRoute: `/operateurs/${operateur.id}`,
   });
@@ -45,9 +42,6 @@ export default function OperateurModificationActesAdministratifs() {
       actesAdministratifs,
     });
   };
-
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("operateur-save");
 
   const key = operateur.actesAdministratifs
     ?.map((acteAdministratif) => acteAdministratif.id ?? acteAdministratif.uuid)
@@ -75,9 +69,6 @@ export default function OperateurModificationActesAdministratifs() {
         <ActesAdministratifs
           categoryDisplayRules={operateurActesAdministratifsCategoryToDisplay}
         />
-        {saveState === FetchState.ERROR && (
-          <SubmitError operateurId={operateur.id} backendError={backendError} />
-        )}
       </FormWrapper>
       <LeaveModificationModal
         resetRoute={`/operateurs/${operateur.id}`}

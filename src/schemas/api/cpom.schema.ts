@@ -35,13 +35,13 @@ export const cpomApiSchema = z.object({
         id: z.number().optional(),
         cpomId: z.number().optional(),
         structureId: z.number(),
-        dateStart: z.string().datetime().nullish(),
-        dateEnd: z.string().datetime().nullish(),
+        dateStart: z.iso.datetime().nullish(),
+        dateEnd: z.iso.datetime().nullish(),
         structure: z
           .object({
             id: z.number().optional(),
             codeBhasile: z.string(),
-            type: z.nativeEnum(StructureType),
+            type: z.enum(StructureType),
             communeAdministrative: z.string(),
             operateur: operateurSuggestionApiSchema,
             forms: z.array(formApiSchema),
@@ -57,8 +57,8 @@ export const cpomStructureApiSchema = z.object({
   cpomId: z.number().optional(),
   cpom: cpomApiSchema.optional(),
   structureId: z.number(),
-  dateStart: z.string().datetime().nullish(),
-  dateEnd: z.string().datetime().nullish(),
+  dateStart: z.iso.datetime().nullish(),
+  dateEnd: z.iso.datetime().nullish(),
 });
 
 export const cpomApiAjoutSchema = cpomApiSchema.extend({

@@ -6,10 +6,7 @@ import { Evaluations } from "@/app/components/forms/evaluations/Evaluations";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { FieldSetOuvertureFermeture } from "@/app/components/forms/ouvertureFermeture/FieldSetOuvertureFermeture";
-import { SubmitError } from "@/app/components/SubmitError";
 import { InformationBar } from "@/app/components/ui/InformationBar";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { transformFormControlesToApiControles } from "@/app/utils/controle.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
@@ -20,9 +17,7 @@ import {
   finalisationQualiteAutoSaveSchema,
   finalisationQualiteSchema,
 } from "@/schemas/forms/finalisation/finalisationQualite.schema";
-import { FetchState } from "@/types/fetch-state.type";
 import { StepStatus } from "@/types/form.type";
-import { FormKind } from "@/types/global";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { Tabs } from "../_components/Tabs";
@@ -37,10 +32,9 @@ export default function ModificationControleForm() {
     structure
   );
 
-  const { handleValidation, handleAutoSave, backendError } =
-    useAgentFormHandling({
-      currentStep,
-    });
+  const { handleValidation, handleAutoSave } = useAgentFormHandling({
+    currentStep,
+  });
 
   const defaultValues = getDefaultValues({
     structure,
@@ -60,8 +54,6 @@ export default function ModificationControleForm() {
       id: structure.id,
     });
   };
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("structure-save");
 
   // We check if one of the evaluations or controles has been updated (and now has an id).
   // If so, we need to update the form key to force a re-render of the form.
@@ -113,14 +105,6 @@ export default function ModificationControleForm() {
           </>
         )}
         <Controles />
-        <hr />
-        <FieldSetOuvertureFermeture formKind={FormKind.FINALISATION} />
-        {saveState === FetchState.ERROR && (
-          <SubmitError
-            codeBhasile={structure.codeBhasile}
-            backendError={backendError}
-          />
-        )}
       </FormWrapper>
     </div>
   );

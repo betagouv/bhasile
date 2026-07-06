@@ -1,3 +1,4 @@
+import { isBlank } from "@/app/utils/common.util";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
 import { DnaStructureFormValues } from "@/schemas/forms/base/dna.schema";
 import { EntityId } from "@/types/Entity.type";
@@ -22,6 +23,9 @@ export const TransformationDnaSection = ({ entityId }: Props) => {
     <TransformationCodeSection
       fieldArrayName="dnaStructures"
       emptyItem={emptyDnaStructure}
+      isEmptyItem={(item) =>
+        isBlank(item.dna?.code) && isBlank(item.description)
+      }
       addButtonLabel="Ajouter un code DNA"
       descriptionHint="ex : Site d’Avranches Nord et Sud ou Extension 2022"
       getDescriptionFieldName={(index) => `dnaStructures.${index}.description`}
@@ -32,7 +36,7 @@ export const TransformationDnaSection = ({ entityId }: Props) => {
         <>
           Veuillez ne retenir qu’un seul code DNA pour l’ensemble de la
           structure (sauf cas exceptionnels). Si vous ne trouvez pas votre code
-          DNA dans les suggestions,{" "}
+          DNA dans le menu déroulant,{" "}
           <a href={`mailto:${BHASILE_CONTACT_EMAIL}`} className="underline">
             contactez-nous
           </a>

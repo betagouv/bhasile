@@ -3,12 +3,13 @@
 import { useState } from "react";
 
 import RadioCardGroup from "@/app/components/forms/RadioCardGroup";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { TransformationType } from "@/types/transformation.type";
 
 import { FromStructureCard } from "./FromStructureCard";
 
 export const FromStructureVersionTransformationForm = ({
-  structureId,
+  structure,
   transformationType,
   setTransformationType,
 }: Props) => {
@@ -17,7 +18,7 @@ export const FromStructureVersionTransformationForm = ({
   >(undefined);
   return (
     <>
-      <FromStructureCard structureId={structureId} />
+      <FromStructureCard structure={structure} />
       <div className="flex flex-col gap-2">
         <RadioCardGroup
           name="firstSelectedOption"
@@ -58,7 +59,7 @@ export const FromStructureVersionTransformationForm = ({
 };
 
 type Props = {
-  structureId: number;
+  structure?: StructureApiRead;
   transformationType?: TransformationType;
   setTransformationType: (
     transformationType: TransformationType | undefined

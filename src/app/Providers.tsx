@@ -1,6 +1,6 @@
 "use client";
 
-import "@/app/utils/zodErrorMap";
+import "@/app/utils/zodConfig";
 
 import { SessionProvider } from "next-auth/react";
 import { PropsWithChildren, ReactElement, Suspense } from "react";

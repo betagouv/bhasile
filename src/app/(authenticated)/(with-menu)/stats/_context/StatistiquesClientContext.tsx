@@ -1,13 +1,13 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext } from "react";
 
-import { StatistiquesApiType } from "@/schemas/api/statistiques.schema";
+import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { StatistiquesContextType } from "./StatistiquesContext";
 
 type StatistiquesContextInternalType = {
-  statistiques: StatistiquesApiType | null;
+  statistiques: StatistiqueApiRead | null;
 };
 
 const StatistiquesContextInternal =
@@ -20,12 +20,12 @@ export function StatistiquesClientProvider({
   statistiques: initialStatistiques,
 }: {
   children: ReactNode;
-  statistiques: StatistiquesApiType | null;
+  statistiques: StatistiqueApiRead | null;
 }) {
-  const [statistiques] = useState(initialStatistiques);
-
   return (
-    <StatistiquesContextInternal.Provider value={{ statistiques }}>
+    <StatistiquesContextInternal.Provider
+      value={{ statistiques: initialStatistiques }}
+    >
       {children}
     </StatistiquesContextInternal.Provider>
   );

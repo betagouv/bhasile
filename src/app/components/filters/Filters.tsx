@@ -100,9 +100,7 @@ export const Filters = ({ showFilters = true, showLocation = true }: Props) => {
             onClick={() => handleTogglePanel("filters")}
             className={cn(
               "flex gap-1",
-              isFiltersActive
-                ? "bg-[var(--blue-france-975-sun-113)]"
-                : "bg-white"
+              isFiltersActive ? "bg-(--blue-france-975-sun-113)" : "bg-white"
             )}
             aria-label={`Filtres ${isFiltersActive ? "actifs" : "inactifs"}`}
             aria-pressed={isFiltersActive}
@@ -132,9 +130,7 @@ export const Filters = ({ showFilters = true, showLocation = true }: Props) => {
             onClick={() => handleTogglePanel("location")}
             className={cn(
               "flex gap-1 whitespace-nowrap",
-              isLocationActive
-                ? "bg-[var(--blue-france-975-sun-113)]"
-                : "bg-white"
+              isLocationActive ? "bg-(--blue-france-975-sun-113)" : "bg-white"
             )}
             aria-label={`Filtres par région / département ${isLocationActive ? "actifs" : "inactifs"}`}
             aria-pressed={isLocationActive}

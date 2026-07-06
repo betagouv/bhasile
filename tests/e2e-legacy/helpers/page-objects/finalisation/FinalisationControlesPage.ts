@@ -4,7 +4,6 @@ import { TIMEOUTS, URLS } from "../../constants";
 import {
   fillControlesForm,
   fillEvaluationsForm,
-  fillOuvertureFermetureForm,
 } from "../../controles-form-helper";
 import { FormHelper } from "../../form-helper";
 import { SELECTORS } from "../../selectors";
@@ -30,7 +29,6 @@ export class FinalisationControlesPage extends BasePage {
       .waitForLoadState("networkidle", { timeout: TIMEOUTS.FILE_UPLOAD })
       .catch(() => {});
     await fillControlesForm(this.page, this.formHelper, data.controles ?? []);
-    await fillOuvertureFermetureForm(this.page, data.ouvertureFermeture);
     const waitHelper = new WaitHelper(this.page);
     await waitHelper.waitForAutosave();
   }

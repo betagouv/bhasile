@@ -21,6 +21,8 @@ import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mo
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
+  useParams: () => ({}),
+  usePathname: () => "/",
 }));
 
 describe("FinalisationIdentification page integration", () => {
@@ -125,8 +127,6 @@ describe("FinalisationIdentification page integration", () => {
       },
       creationDate: "2007-01-01T12:00:00.000Z",
       public: "Tout public",
-      lgbt: true,
-      fvvTeh: false,
       contacts: [newContact],
       dnaStructures: [
         {
@@ -165,8 +165,6 @@ describe("FinalisationIdentification page integration", () => {
           lgbt: 0,
           fvvTeh: 0,
           year: CURRENT_YEAR,
-          placesACreer: 0,
-          placesAFermer: 0,
         },
         {
           id: 2,
@@ -175,8 +173,6 @@ describe("FinalisationIdentification page integration", () => {
           lgbt: 0,
           fvvTeh: 0,
           year: CURRENT_YEAR - 1,
-          placesACreer: 0,
-          placesAFermer: 0,
         },
         {
           id: 3,
@@ -185,8 +181,6 @@ describe("FinalisationIdentification page integration", () => {
           lgbt: 0,
           fvvTeh: 0,
           year: CURRENT_YEAR - 2,
-          placesACreer: 0,
-          placesAFermer: 0,
         },
         {
           id: 4,
@@ -195,8 +189,6 @@ describe("FinalisationIdentification page integration", () => {
           lgbt: 0,
           fvvTeh: 0,
           year: CURRENT_YEAR - 3,
-          placesACreer: 0,
-          placesAFermer: 0,
         },
       ],
     };
