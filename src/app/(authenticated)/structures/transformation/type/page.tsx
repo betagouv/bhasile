@@ -4,11 +4,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { TransformationHeader } from "@/app/(authenticated)/structures/transformation/_components/TransformationHeader";
 import { TransformationTypeForms } from "@/app/components/forms/transformation-types/TransformationTypeForms";
-import { useFetchState } from "@/app/context/FetchStateContext";
+import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { useTransformations } from "@/app/hooks/useTransformations";
-import { ApiError } from "@/app/utils/apiError.util";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
-import { FetchState } from "@/types/fetch-state.type";
 import {
   TransformationFormType,
   TransformationType,
@@ -24,26 +22,21 @@ export default function TransformationSelectionPage() {
   const router = useRouter();
 
   const { createTransformation } = useTransformations();
-  const { setFetchState } = useFetchState();
+  const { mutate: saveTransformation } = useSaveMutation(
+    "transformation-save",
+    createTransformation
+  );
 
   const handleSubmit = async (
     transformationType: TransformationType,
     structureVersionTransformations: StructureVersionTransformationApiCreate[]
   ) => {
-    setFetchState("transformation-save", FetchState.LOADING);
-    try {
-      const transformationId = await createTransformation({
-        type: transformationType,
-        structureVersionTransformations,
-      });
-      setFetchState("transformation-save", FetchState.IDLE);
+    const transformationId = await saveTransformation({
+      type: transformationType,
+      structureVersionTransformations,
+    });
+    if (transformationId !== null) {
       router.push(`/structures/transformation/${transformationId}`);
-    } catch (error) {
-      setFetchState(
-        "transformation-save",
-        FetchState.ERROR,
-        error instanceof ApiError ? error.message : undefined
-      );
     }
   };
 

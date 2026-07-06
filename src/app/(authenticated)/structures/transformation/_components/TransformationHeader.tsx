@@ -6,9 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { useOptionalTransformationContext } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { useFetchState } from "@/app/context/FetchStateContext";
+import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { useTransformationNavigateWithSave } from "@/app/hooks/useTransformationNavigateWithSave";
 import { useTransformations } from "@/app/hooks/useTransformations";
-import { ApiError } from "@/app/utils/apiError.util";
 import { getTransformationTitle } from "@/app/utils/transformation.util";
 import { FetchState } from "@/types/fetch-state.type";
 import { TransformationFormType } from "@/types/transformation.type";
@@ -31,9 +31,13 @@ export const TransformationHeader = () => {
   const { navigateWithSave } = useTransformationNavigateWithSave();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { getFetchState, setFetchState, getErrorMessage } = useFetchState();
+  const { getFetchState, getErrorMessage } = useFetchState();
   const saveState = getFetchState("transformation-save");
   const deleteState = getFetchState("transformation-delete");
+  const { mutate: deleteCurrentTransformation } = useSaveMutation(
+    "transformation-delete",
+    (id: number) => deleteTransformation(id)
+  );
 
   const title = getTransformationTitle(
     transformation?.type ??
@@ -78,17 +82,9 @@ export const TransformationHeader = () => {
     if (!transformation) {
       return;
     }
-    setFetchState("transformation-delete", FetchState.LOADING);
-    try {
-      await deleteTransformation(transformation.id);
-      setFetchState("transformation-delete", FetchState.IDLE);
+    const result = await deleteCurrentTransformation(transformation.id);
+    if (result !== null) {
       router.push("/structures");
-    } catch (error) {
-      setFetchState(
-        "transformation-delete",
-        FetchState.ERROR,
-        error instanceof ApiError ? error.message : undefined
-      );
     }
   };
 

@@ -2,18 +2,16 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { StructureAgentUpdateApiClient } from "@/schemas/api/structure.schema";
-import { FetchState } from "@/types/fetch-state.type";
 import { StepStatus } from "@/types/form.type";
 
 import { useStructureContext } from "../(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
-import { useFetchState } from "../context/FetchStateContext";
-import { ApiError } from "../utils/apiError.util";
 import {
   FINALISATION_FORM_LABEL,
   FINALISATION_FORM_VERSION,
   getFinalisationForm,
   getFinalisationFormNextStepToValidate,
 } from "../utils/finalisationForm.util";
+import { useSaveMutation } from "./useSaveMutation";
 import { useStructures } from "./useStructures";
 
 export const useAgentFormHandling = ({
@@ -26,29 +24,14 @@ export const useAgentFormHandling = ({
 
   const { updateAndRefreshStructure } = useStructures();
 
-  const { setFetchState } = useFetchState();
-
-  const updateStructure = async (
-    data: StructureAgentUpdateApiClient
-  ): Promise<boolean> => {
-    setFetchState("structure-save", FetchState.LOADING);
-
-    try {
-      await updateAndRefreshStructure(structure.id, data, setStructure);
-      setFetchState("structure-save", FetchState.IDLE);
-      return true;
-    } catch (error) {
-      setFetchState(
-        "structure-save",
-        FetchState.ERROR,
-        error instanceof ApiError ? error.message : undefined
-      );
-      return false;
-    }
-  };
+  const { mutate: saveStructure } = useSaveMutation(
+    "structure-save",
+    (data: StructureAgentUpdateApiClient) =>
+      updateAndRefreshStructure(structure.id, data, setStructure)
+  );
 
   const handleAutoSave = async (data: StructureAgentUpdateApiClient) => {
-    await updateStructure(data);
+    await saveStructure(data);
   };
 
   const handleValidation = async () => {
@@ -75,11 +58,11 @@ export const useAgentFormHandling = ({
       }
     });
 
-    const saved = await updateStructure({
+    const result = await saveStructure({
       id: structure.id,
       forms,
     });
-    if (!saved) {
+    if (result === null) {
       return;
     }
 
@@ -112,15 +95,16 @@ export const useAgentFormHandling = ({
       }
     });
 
-    return updateStructure({
+    const result = await saveStructure({
       id: structure.id,
       forms,
     });
+    return result !== null;
   };
 
   const handleSubmit = async (data: StructureAgentUpdateApiClient) => {
-    const saved = await updateStructure(data);
-    if (saved && nextRoute) {
+    const result = await saveStructure(data);
+    if (result !== null && nextRoute) {
       router.push(nextRoute);
     }
   };
