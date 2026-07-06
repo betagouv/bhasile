@@ -2,6 +2,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useState } from "react";
 
 import { useFetchState } from "@/app/context/FetchStateContext";
+import { useFetchStructure } from "@/app/hooks/useFetchStructure";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { FetchState } from "@/types/fetch-state.type";
 import {
@@ -24,6 +25,8 @@ export const TransformationTypeForms = ({
 }: Props) => {
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("transformation-save");
+
+  const { structure: departureStructure } = useFetchStructure(structureId);
 
   const [transformationType, setTransformationType] = useState<
     TransformationType | undefined
@@ -73,7 +76,7 @@ export const TransformationTypeForms = ({
         )}
         {structureId && !formType ? (
           <FromStructureVersionTransformationForm
-            structureId={structureId}
+            structure={departureStructure}
             transformationType={transformationType}
             setTransformationType={setTransformationType}
           />
@@ -83,6 +86,7 @@ export const TransformationTypeForms = ({
         <StructureSelections
           transformationType={transformationType}
           structureId={structureId}
+          departureType={departureStructure?.type}
           onChange={setSelectionsState}
         />
       ) : null}
