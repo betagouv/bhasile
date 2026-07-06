@@ -10,11 +10,19 @@ import { sliceStatistiquesContext } from "../statistiques.utils";
 import { findAllDepartementsWithRegion } from "./cartographie.repository";
 import {
   buildZoneDefinitions,
+  CartographieZoneDefinition,
   computeEvolution,
   computeIndicateurValues,
   groupStructureIdsByDepartement,
   resolveZoneDepartementNumeros,
 } from "./cartographie.util";
+
+const emptyZoneResult = (zone: CartographieZoneDefinition) => ({
+  code: zone.code,
+  name: zone.name,
+  value: null,
+  evolution: null,
+});
 
 export const getCartographieStatistiques = async (
   filters: StatistiqueCartographieFilters & {
@@ -50,12 +58,7 @@ export const getCartographieStatistiques = async (
       granularite,
       indicateur,
       annee,
-      zones: zoneDefinitions.map((zone) => ({
-        code: zone.code,
-        name: zone.name,
-        value: null,
-        evolution: null,
-      })),
+      zones: zoneDefinitions.map(emptyZoneResult),
     };
   }
 
@@ -74,7 +77,7 @@ export const getCartographieStatistiques = async (
     }
 
     if (zoneStructureIds.size === 0) {
-      return { code: zone.code, name: zone.name, value: null, evolution: null };
+      return emptyZoneResult(zone);
     }
 
     const zoneContext = sliceStatistiquesContext(

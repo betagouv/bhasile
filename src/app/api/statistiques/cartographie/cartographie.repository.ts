@@ -3,7 +3,6 @@ import prisma from "@/lib/prisma";
 export type CartographieDbDepartement = {
   numero: string;
   name: string;
-  population: number | null;
   regionCode: string | null;
   regionName: string | null;
 };
@@ -15,7 +14,6 @@ export const findAllDepartementsWithRegion = async (): Promise<
     select: {
       numero: true,
       name: true,
-      population: true,
       regionAdministrative: { select: { code: true, name: true } },
     },
   });
@@ -23,7 +21,6 @@ export const findAllDepartementsWithRegion = async (): Promise<
   return departements.map((departement) => ({
     numero: departement.numero,
     name: departement.name,
-    population: departement.population,
     regionCode: departement.regionAdministrative?.code ?? null,
     regionName: departement.regionAdministrative?.name ?? null,
   }));

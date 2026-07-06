@@ -27,21 +27,18 @@ const ALL_DEPARTEMENTS: CartographieDbDepartement[] = [
   {
     numero: "01",
     name: "Ain",
-    population: 100,
     regionCode: "ARA",
     regionName: "Auvergne-Rhône-Alpes",
   },
   {
     numero: "38",
     name: "Isère",
-    population: 100,
     regionCode: "ARA",
     regionName: "Auvergne-Rhône-Alpes",
   },
   {
     numero: "75",
     name: "Paris",
-    population: 100,
     regionCode: "IDF",
     regionName: "Île-de-France",
   },

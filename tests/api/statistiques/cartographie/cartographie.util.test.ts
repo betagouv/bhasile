@@ -86,9 +86,9 @@ describe("resolveZoneDepartementNumeros", () => {
 
 describe("buildZoneDefinitions", () => {
   const allDepartements: CartographieDbDepartement[] = [
-    { numero: "01", name: "Ain", population: 100, regionCode: "ARA", regionName: "Auvergne-Rhône-Alpes" },
-    { numero: "75", name: "Paris", population: 100, regionCode: "IDF", regionName: "Île-de-France" },
-    { numero: "92", name: "Hauts-de-Seine", population: 100, regionCode: "IDF", regionName: "Île-de-France" },
+    { numero: "01", name: "Ain", regionCode: "ARA", regionName: "Auvergne-Rhône-Alpes" },
+    { numero: "75", name: "Paris", regionCode: "IDF", regionName: "Île-de-France" },
+    { numero: "92", name: "Hauts-de-Seine", regionCode: "IDF", regionName: "Île-de-France" },
   ];
 
   it("découpage département : une zone par département, triée par code", () => {

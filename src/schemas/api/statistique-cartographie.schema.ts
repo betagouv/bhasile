@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { NumericAggregation } from "@/app/utils/math.util";
+import { statistiquesFiltersSchema } from "@/schemas/api/statistique.schema";
 
 /** Stable indicator keys shown on the map; see the cartographie/ README for the full mapping. */
 export const CARTOGRAPHIE_INDICATEURS = [
@@ -50,20 +50,10 @@ export type CartographieSupportedGranularite = Exclude<
   "arrondissement"
 >;
 
-export const statistiqueCartographieFiltersSchema = z.object({
+export const statistiqueCartographieFiltersSchema = statistiquesFiltersSchema.extend({
   granularite: cartographieGranulariteSchema,
   indicateur: cartographieIndicateurSchema,
   annee: z.coerce.number().int(),
-  departements: z.string().nullable(),
-  operateurs: z.string().nullable(),
-  types: z.string().nullable(),
-  aggregation: z
-    .string()
-    .nullable()
-    .transform(
-      (value): NumericAggregation =>
-        value === "mediane" ? "mediane" : "moyenne"
-    ),
 });
 
 export type StatistiqueCartographieFilters = z.infer<
