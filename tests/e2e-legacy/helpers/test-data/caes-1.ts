@@ -22,8 +22,6 @@ export const caes1: TestStructureScenario = {
       },
     ],
     public: "Tout public",
-    lgbt: true,
-    fvvTeh: true,
     contacts: [
       {
         prenom: "John",
@@ -249,12 +247,6 @@ export const caes1: TestStructureScenario = {
       },
     },
     controles: [],
-    ouvertureFermeture: {
-      placesACreer: "4",
-      echeancePlacesACreer: "2025-09-01",
-      placesAFermer: "1",
-      echeancePlacesAFermer: "2025-11-15",
-    },
     actesAdministratifs: [
       {
         category: "CONVENTION",
@@ -268,16 +260,8 @@ export const caes1: TestStructureScenario = {
   },
   modificationData: {
     public: "Famille",
-    lgbt: false,
-    fvvTeh: true,
     contacts: [{ email: "modif-caes1@example.com" }],
     notes: "Notes modification CAES 1.",
-    ouvertureFermeture: {
-      placesACreer: "5",
-      echeancePlacesACreer: "2026-04-01",
-      placesAFermer: "2",
-      echeancePlacesAFermer: "2026-07-15",
-    },
     structureTypologies: [
       { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
       { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },

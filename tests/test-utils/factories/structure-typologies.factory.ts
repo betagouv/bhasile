@@ -9,8 +9,4 @@ export const createStructureTypologies = (): StructureTypologieApiType[] =>
     pmr: 0,
     lgbt: 0,
     fvvTeh: 0,
-    placesACreer: 0,
-    placesAFermer: 0,
-    echeancePlacesACreer: undefined,
-    echeancePlacesAFermer: undefined,
   }));
