@@ -12,7 +12,7 @@ import {
 } from "@/types/transformation.type";
 
 describe("applyPrefill", () => {
-  it("adds FERMETURE contacts/antennes/adresses to the CREATION (OUVERTURE_DEPUIS)", () => {
+  it("ajoute les contacts/antennes/adresses des FERMETURE à la CREATION (OUVERTURE_DEPUIS)", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
       [
         {
@@ -57,7 +57,7 @@ describe("applyPrefill", () => {
     expect(fermetures[0].structureVersion?.contacts).toHaveLength(1);
   });
 
-  it("inherits the operateur from the first FERMETURE source on the CREATION", () => {
+  it("hérite de l'operateur de la première source FERMETURE sur la CREATION", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
       [
         {
@@ -86,7 +86,7 @@ describe("applyPrefill", () => {
     expect(creation?.operateurId).toBe(42);
   });
 
-  it("leaves the CREATION operateur undefined when the type has no prefill config", () => {
+  it("laisse l'operateur de la CREATION indéfini quand le type n'a pas de config de prefill", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
       [{ type: StructureVersionTransformationType.CREATION }];
 
@@ -98,7 +98,7 @@ describe("applyPrefill", () => {
     expect(result[0].operateurId).toBeUndefined();
   });
 
-  it("keeps the target's own data and appends the sources (additive)", () => {
+  it("conserve les données propres de la cible et ajoute les sources (additif)", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
       [
         {
@@ -131,7 +131,7 @@ describe("applyPrefill", () => {
     ]);
   });
 
-  it("returns the structureVersionTransformations unchanged when the type has no prefill config", () => {
+  it("retourne les structureVersionTransformations inchangées quand le type n'a pas de config de prefill", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
       [
         {

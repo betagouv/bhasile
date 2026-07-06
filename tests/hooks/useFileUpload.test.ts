@@ -41,7 +41,7 @@ describe("useFileUpload", () => {
   });
 
   describe("uploadFile", () => {
-    it("should upload a file successfully", async () => {
+    it("téléverse un fichier avec succès", async () => {
       // GIVEN
       const mockFile = new File(["test content"], "test.txt", {
         type: "text/plain",
@@ -97,7 +97,7 @@ describe("useFileUpload", () => {
       });
     });
 
-    it("should throw an error when upload fails", async () => {
+    it("lève une erreur quand le téléversement échoue", async () => {
       // GIVEN
       const mockFile = new File(["test content"], "test.txt", {
         type: "text/plain",
@@ -121,7 +121,7 @@ describe("useFileUpload", () => {
   });
 
   describe("getFile", () => {
-    it("should get a file successfully", async () => {
+    it("récupère un fichier avec succès", async () => {
       // GIVEN
       const fileKey = "file-123";
 
@@ -169,7 +169,7 @@ describe("useFileUpload", () => {
   });
 
   describe("getDownloadLink", () => {
-    it("should get a download link successfully", async () => {
+    it("récupère un lien de téléchargement avec succès", async () => {
       // GIVEN
       const fileName = "file-123";
       const mockDownloadUrl = "https://example.com/files/file-123";
@@ -196,7 +196,7 @@ describe("useFileUpload", () => {
   });
 
   describe("deleteFile", () => {
-    it("should delete a file successfully", async () => {
+    it("supprime un fichier avec succès", async () => {
       // GIVEN
       const fileKey = "file-123";
 
@@ -222,7 +222,7 @@ describe("useFileUpload", () => {
       );
     });
 
-    it("should throw an error when delete fails", async () => {
+    it("lève une erreur quand la suppression échoue", async () => {
       // GIVEN
       const fileKey = "file-123";
 

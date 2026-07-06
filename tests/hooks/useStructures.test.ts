@@ -68,7 +68,7 @@ describe("useStructures integration", () => {
   });
 
   describe("transformAjoutFormStructureToApiStructure", () => {
-    it("should transform dates, french numbers and contacts", async () => {
+    it("transforme les dates, les nombres au format français et les contacts", async () => {
       // GIVEN
       const values = JSON.parse(
         JSON.stringify({

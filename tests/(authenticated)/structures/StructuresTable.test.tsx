@@ -34,7 +34,7 @@ vi.mock("next-auth/react", async (importOriginal) => {
 });
 
 describe("StructuresTable", () => {
-  it("should show table headings and content elements when rendered", () => {
+  it("affiche les en-têtes de colonnes et le contenu des lignes au rendu", () => {
     // GIVEN
     const adresse1 = createAdresse({});
     const adresse2 = createAdresse({});

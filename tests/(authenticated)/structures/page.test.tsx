@@ -45,7 +45,7 @@ describe("Structures page (hash)", () => {
     window.location.hash = "";
   });
 
-  it("should select 'Carte' when url hash is #carte", async () => {
+  it("sélectionne « Carte » quand le hash de l'URL est #carte", async () => {
     // GIVEN
     window.location.hash = "#carte";
 

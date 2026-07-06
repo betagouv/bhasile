@@ -37,7 +37,7 @@ describe("GET /api/transformations/[id]", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 200 with serialized transformation", async () => {
+  it("retourne 200 avec la transformation sérialisée", async () => {
     const payload = {
       id: 5,
       type: TransformationType.EXTENSION_EX_NIHILO,
@@ -55,7 +55,7 @@ describe("GET /api/transformations/[id]", () => {
     expect(mockGetTransformation).toHaveBeenCalledWith(5);
   });
 
-  it("should return 404 when transformation is not found", async () => {
+  it("retourne 404 quand la transformation est introuvable", async () => {
     mockGetTransformation.mockResolvedValueOnce(null);
     const request = new Request("http://localhost/api/transformations/404");
 
@@ -95,7 +95,7 @@ describe("PUT /api/transformations/[id]", () => {
     });
   });
 
-  it("should return 201 when body is valid and user is authorized", async () => {
+  it("retourne 201 quand le corps est valide et que l'utilisateur est autorisé", async () => {
     mockUpdateTransformation.mockResolvedValueOnce(7);
 
     const response = await PUT(buildRequest(validBody));
@@ -105,7 +105,7 @@ describe("PUT /api/transformations/[id]", () => {
     expect(mockUpdateTransformation).toHaveBeenCalledWith(validBody);
   });
 
-  it("should return 401 when not authenticated", async () => {
+  it("retourne 401 quand l'utilisateur n'est pas authentifié", async () => {
     mockGetServerSession.mockResolvedValueOnce(null);
 
     const response = await PUT(buildRequest(validBody));
@@ -114,7 +114,7 @@ describe("PUT /api/transformations/[id]", () => {
     expect(mockUpdateTransformation).not.toHaveBeenCalled();
   });
 
-  it("should return 403 when the user cannot update the transformation department", async () => {
+  it("retourne 403 quand l'utilisateur ne peut pas modifier le département de la transformation", async () => {
     mockCanUpdateTransformation.mockReturnValueOnce(false);
 
     const response = await PUT(buildRequest(validBody));
@@ -123,7 +123,7 @@ describe("PUT /api/transformations/[id]", () => {
     expect(mockUpdateTransformation).not.toHaveBeenCalled();
   });
 
-  it("should return 404 when the transformation does not exist", async () => {
+  it("retourne 404 quand la transformation n'existe pas", async () => {
     mockGetTransformation.mockResolvedValueOnce(null);
 
     const response = await PUT(buildRequest(validBody));
@@ -132,14 +132,14 @@ describe("PUT /api/transformations/[id]", () => {
     expect(mockUpdateTransformation).not.toHaveBeenCalled();
   });
 
-  it("should return 400 when body does not match schema", async () => {
+  it("retourne 400 quand le corps ne respecte pas le schéma", async () => {
     const response = await PUT(buildRequest({ id: "not-a-number" }));
 
     expect(response.status).toBe(400);
     expect(mockUpdateTransformation).not.toHaveBeenCalled();
   });
 
-  it("should surface the error message in the body when an update is refused", async () => {
+  it("expose le message d'erreur dans le corps quand une modification est refusée", async () => {
     mockUpdateTransformation.mockRejectedValueOnce(
       new ApiDomainError("Impossible de modifier une transformation finalisée")
     );

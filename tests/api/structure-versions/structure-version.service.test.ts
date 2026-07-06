@@ -241,7 +241,7 @@ const buildStructure = (): StructureDbDetails =>
   }) as unknown as StructureDbDetails;
 
 describe("copyStructureVersion", () => {
-  it("copies scalars and converts Prisma enum keys to the app enum values", () => {
+  it("copie les scalaires et convertit les clés d'enum Prisma vers les valeurs d'enum de l'app", () => {
     const result = copyStructureVersion(buildStructure());
 
     expect(result.type).toBe(StructureType.CADA);
@@ -250,7 +250,7 @@ describe("copyStructureVersion", () => {
     expect(result.adresseAdministrative).toBe("1 rue de la Source");
   });
 
-  it("copies relations without their ids so they are recreated fresh", () => {
+  it("copie les relations sans leurs ids pour qu'elles soient recréées à neuf", () => {
     const result = copyStructureVersion(buildStructure());
 
     expect(result.contacts).toEqual([
@@ -294,7 +294,7 @@ describe("copyStructureVersion", () => {
     expect(result.dnaStructures?.[0]?.dna).toEqual({ code: "DNA-1" });
   });
 
-  it("lets overrides win over the structure scalars", () => {
+  it("donne la priorité aux overrides sur les scalaires de la structure", () => {
     const result = copyStructureVersion(buildStructure(), {
       type: StructureType.HUDA,
     });
@@ -345,7 +345,7 @@ const buildStructureVersion = (
   }) as unknown as StructureVersionDbTransformation;
 
 describe("dbStructureVersionToApiRead", () => {
-  it("computes adresseComplete on the version addresses", () => {
+  it("calcule adresseComplete sur les adresses de la version", () => {
     const result = dbStructureVersionToApiRead(
       buildStructureVersion([Repartition.COLLECTIF])
     );

@@ -36,7 +36,7 @@ describe("DnaAndFiness", () => {
   });
 
   describe("Single mode (autorisée)", () => {
-    it("should show one Code DNA select and one Code FINESS input", () => {
+    it("affiche un select Code DNA et un champ Code FINESS", () => {
       render(
         <FormTestWrapper defaultValues={defaultValuesAutorisee}>
           <DnaAndFiness />
@@ -51,7 +51,7 @@ describe("DnaAndFiness", () => {
   });
 
   describe("Single mode (subventionnée)", () => {
-    it("should show only Code DNA, no Code FINESS", () => {
+    it("affiche uniquement Code DNA, sans Code FINESS", () => {
       render(
         <FormTestWrapper defaultValues={defaultValuesSubventionnee}>
           <DnaAndFiness />
@@ -64,7 +64,7 @@ describe("DnaAndFiness", () => {
   });
 
   describe("Multi mode (autorisée)", () => {
-    it("should show Codes DNA and Codes FINESS sections", () => {
+    it("affiche les sections Codes DNA et Codes FINESS", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -96,7 +96,7 @@ describe("DnaAndFiness", () => {
   });
 
   describe("Toggling multi checkbox", () => {
-    it("should switch from single to multi UI when checkbox is checked", async () => {
+    it("bascule de l'UI simple à l'UI multi quand la case est cochée", async () => {
       const user = userEvent.setup();
 
       render(
@@ -123,7 +123,7 @@ describe("DnaAndFiness", () => {
   });
 
   describe("Changing data in multi mode", () => {
-    it("should add a new DNA row when clicking Ajouter un code DNA", async () => {
+    it("ajoute une nouvelle ligne DNA au clic sur Ajouter un code DNA", async () => {
       const user = userEvent.setup();
 
       render(
