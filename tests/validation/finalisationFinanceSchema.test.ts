@@ -119,7 +119,7 @@ describe("finalisationFinanceSchema", () => {
         expect(result.success).toBe(false);
 
         if (!result.success) {
-          const errors = result.error.errors;
+          const errors = result.error.issues;
           expect(errors.length).toBeGreaterThan(0);
 
           // Check that the right fields are in error
@@ -173,7 +173,7 @@ describe("finalisationFinanceSchema", () => {
         expect(result.success).toBe(false);
 
         if (!result.success) {
-          const errors = result.error.errors;
+          const errors = result.error.issues;
           expect(errors.length).toBeGreaterThan(0);
 
           const errorMessages = errors.map((e) => e.message);

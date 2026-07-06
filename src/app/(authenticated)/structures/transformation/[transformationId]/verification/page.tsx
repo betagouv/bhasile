@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { TransformationFakeSaver } from "@/app/components/forms/TransformationFakeSaver";
-import { SubmitError } from "@/app/components/SubmitError";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useTransformationFormNavigation } from "@/app/hooks/useTransformationFormNavigation";
 import { useTransformations } from "@/app/hooks/useTransformations";
@@ -130,7 +129,6 @@ export default function TransformationVerificationPage() {
             </p>
           )}
         </div>
-        {saveState === FetchState.ERROR && <SubmitError />}
 
         <confirmationModal.Component
           title={

@@ -229,8 +229,6 @@ describe("transformation.repository db integration", () => {
             communeAdministrative: "Lyon",
             departementAdministratif: departement.numero,
             nom: "Nom post-transfo",
-            lgbt: true,
-            fvvTeh: false,
           },
         },
       ],
@@ -254,8 +252,6 @@ describe("transformation.repository db integration", () => {
       communeAdministrative: "Lyon",
       departementAdministratif: departement.numero,
       nom: "Nom post-transfo",
-      lgbt: true,
-      fvvTeh: false,
     });
   });
 
@@ -1194,6 +1190,141 @@ describe("transformation.repository db integration", () => {
     expect(structure.date303).toBeNull();
   });
 
+  it("définit Structure.fermetureDate à partir de l'effectiveDate de la version lors de la finalisation d'un bloc FERMETURE", async () => {
+    const sourceStructure = await createStructure();
+    const fermetureDate = "2024-09-30T00:00:00.000Z";
+    const transformationId = await createOne({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: {
+            structureId: sourceStructure.id,
+            effectiveDate: fermetureDate,
+          },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const structure = await prisma.structure.findUniqueOrThrow({
+      where: { id: sourceStructure.id },
+    });
+    expect(structure.fermetureDate?.toISOString()).toBe(fermetureDate);
+  });
+
+  it("définit fermetureDate sur chaque structure fermée avec sa propre effectiveDate", async () => {
+    const firstStructure = await createStructure();
+    const secondStructure = await createStructure();
+    const firstDate = "2024-03-01T00:00:00.000Z";
+    const secondDate = "2025-07-15T00:00:00.000Z";
+    const transformationId = await createOne({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: {
+            structureId: firstStructure.id,
+            effectiveDate: firstDate,
+          },
+        },
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: {
+            structureId: secondStructure.id,
+            effectiveDate: secondDate,
+          },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const [first, second] = await Promise.all([
+      prisma.structure.findUniqueOrThrow({ where: { id: firstStructure.id } }),
+      prisma.structure.findUniqueOrThrow({ where: { id: secondStructure.id } }),
+    ]);
+    expect(first.fermetureDate?.toISOString()).toBe(firstDate);
+    expect(second.fermetureDate?.toISOString()).toBe(secondDate);
+  });
+
+  it("conserve la première fermetureDate quand une seconde transformation ferme la même structure", async () => {
+    const sourceStructure = await createStructure();
+    const firstDate = "2024-09-30T00:00:00.000Z";
+    const secondDate = "2025-12-31T00:00:00.000Z";
+
+    const firstTransformationId = await createOne({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: {
+            structureId: sourceStructure.id,
+            effectiveDate: firstDate,
+          },
+        },
+      ],
+    });
+    createdTransformationIds.push(firstTransformationId);
+    await finalizeTransformation(firstTransformationId);
+
+    const secondTransformationId = await createOne({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: {
+            structureId: sourceStructure.id,
+            effectiveDate: secondDate,
+          },
+        },
+      ],
+    });
+    createdTransformationIds.push(secondTransformationId);
+    await finalizeTransformation(secondTransformationId);
+
+    const structure = await prisma.structure.findUniqueOrThrow({
+      where: { id: sourceStructure.id },
+    });
+    expect(structure.fermetureDate?.toISOString()).toBe(firstDate);
+  });
+
+  it("laisse fermetureDate à null sur la nouvelle structure d'un bloc CREATION", async () => {
+    const operateur = await createOperateur();
+    const departement = await findDepartementWithRegionCode();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.CREATION,
+          operateurId: operateur.id,
+          structureVersion: { departementAdministratif: departement.numero },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const block = await prisma.structureVersionTransformation.findFirstOrThrow({
+      where: { transformationId },
+      include: { structureVersion: true },
+    });
+    const structureId = block.structureVersion?.structureId;
+    if (!structureId) {
+      throw new Error("La structureVersion devrait être rattachée à une structure");
+    }
+    createdStructureIds.push(structureId);
+
+    const structure = await prisma.structure.findUniqueOrThrow({
+      where: { id: structureId },
+    });
+    expect(structure.fermetureDate).toBeNull();
+  });
+
   it("should reject any update on an already finalized transformation", async () => {
     const operateur = await createOperateur();
     const departement = await findDepartementWithRegionCode();
@@ -1277,6 +1408,64 @@ describe("transformation.repository db integration", () => {
       });
     expect(fermetureBlock.structureVersion?.structureId).toBe(
       sourceStructure.id
+    );
+  });
+
+  it("date les dnaStructures encore ouvertes d'une structure fermée à la finalisation, sans toucher celles déjà fermées", async () => {
+    const structure = await createStructure();
+    const openDna = await prisma.dna.create({
+      data: { code: `DNA-TF-TEST-OPEN-${randomUUID()}` },
+    });
+    const alreadyClosedDna = await prisma.dna.create({
+      data: { code: `DNA-TF-TEST-CLOSED-${randomUUID()}` },
+    });
+    const preexistingEndDate = new Date("2020-01-01T00:00:00.000Z");
+    await prisma.dnaStructure.create({
+      data: { structureId: structure.id, dnaId: openDna.id },
+    });
+    await prisma.dnaStructure.create({
+      data: {
+        structureId: structure.id,
+        dnaId: alreadyClosedDna.id,
+        endDate: preexistingEndDate,
+      },
+    });
+
+    const transformationId = await createTransformation({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { structureId: structure.id },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    const fermeture =
+      await prisma.structureVersionTransformation.findFirstOrThrow({
+        where: {
+          transformationId,
+          type: StructureVersionTransformationType.FERMETURE,
+        },
+        include: { structureVersion: true },
+      });
+    const fermetureVersionId = fermeture.structureVersion?.id;
+    if (!fermetureVersionId) {
+      throw new Error("La version de la fermeture devrait exister");
+    }
+
+    await finalizeTransformation(transformationId);
+
+    const links = await prisma.dnaStructure.findMany({
+      where: { structureVersionId: fermetureVersionId },
+    });
+    const effectiveDate = "2024-01-01T00:00:00.000Z";
+    const openLink = links.find((link) => link.dnaId === openDna.id);
+    const closedLink = links.find((link) => link.dnaId === alreadyClosedDna.id);
+    expect(openLink?.endDate?.toISOString()).toBe(effectiveDate);
+    expect(closedLink?.endDate?.toISOString()).toBe(
+      preexistingEndDate.toISOString()
     );
   });
 

@@ -1,7 +1,10 @@
 "use client";
 import { createContext, useCallback, useContext, useState } from "react";
 
+import { ErrorToast } from "@/app/components/ErrorToast";
 import { FetchState } from "@/types/fetch-state.type";
+
+type FetchEntry = { state: FetchState; errorMessage?: string };
 
 const FetchStateContext = createContext<FetchStateContextType | undefined>(
   undefined
@@ -12,23 +15,33 @@ export function FetchStateProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [fetchStates, setFetchStates] = useState<Map<string, FetchState>>(
+  const [fetchStates, setFetchStates] = useState<Map<string, FetchEntry>>(
     new Map()
   );
 
-  const setFetchState = useCallback((key: string, state: FetchState) => {
-    setFetchStates((prev) => new Map(prev).set(key, state));
-  }, []);
+  const setFetchState = useCallback(
+    (key: string, state: FetchState, errorMessage?: string) => {
+      setFetchStates((prev) =>
+        new Map(prev).set(key, {
+          state,
+          errorMessage: state === FetchState.ERROR ? errorMessage : undefined,
+        })
+      );
+    },
+    []
+  );
 
-  const getFetchState = (key: string) => {
-    return fetchStates.get(key) || FetchState.IDLE;
-  };
+  const getFetchState = (key: string) =>
+    fetchStates.get(key)?.state ?? FetchState.IDLE;
+
+  const getErrorMessage = (key: string) => fetchStates.get(key)?.errorMessage;
 
   return (
     <FetchStateContext.Provider
-      value={{ fetchStates, setFetchState, getFetchState }}
+      value={{ fetchStates, setFetchState, getFetchState, getErrorMessage }}
     >
       {children}
+      <ErrorToast />
     </FetchStateContext.Provider>
   );
 }
@@ -42,7 +55,8 @@ export const useFetchState = () => {
 };
 
 type FetchStateContextType = {
-  fetchStates: Map<string, FetchState>;
-  setFetchState: (key: string, state: FetchState) => void;
+  fetchStates: Map<string, FetchEntry>;
+  setFetchState: (key: string, state: FetchState, errorMessage?: string) => void;
   getFetchState: (key: string) => FetchState;
+  getErrorMessage: (key: string) => string | undefined;
 };

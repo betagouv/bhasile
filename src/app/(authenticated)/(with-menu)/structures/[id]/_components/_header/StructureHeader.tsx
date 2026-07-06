@@ -8,6 +8,7 @@ import { ReactElement } from "react";
 
 import { Badge } from "@/app/components/common/Badge";
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
+import { UpcomingTransformationBadge } from "@/app/components/structures/UpcomingTransformationBadge";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
@@ -99,15 +100,24 @@ export const StructureHeader = (): ReactElement | null => {
               <Button
                 disabled={!isStructureReadyToFinalise}
                 onClick={async () => {
-                  await handleFinalisation();
-                  finalisationSuccessModal.open();
+                  if (await handleFinalisation()) {
+                    finalisationSuccessModal.open();
+                  }
                 }}
               >
                 Finaliser la création
               </Button>
             </div>
           ) : (
-            <StructureMenu structureId={structure.id} />
+            <div className="flex items-center gap-2">
+              {structure.upcomingTransformations?.map((transformation) => (
+                <UpcomingTransformationBadge
+                  key={`${transformation.kind}-${transformation.date}`}
+                  transformation={transformation}
+                />
+              ))}
+              <StructureMenu structureId={structure.id} />
+            </div>
           )}
         </div>
 

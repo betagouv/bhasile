@@ -77,7 +77,7 @@ describe("cpom.repository db integration", () => {
     }
   });
 
-  it("hydrates every cpomListInclude relation the TS compute depends on", async () => {
+  it("hydrate toutes les relations de cpomListInclude dont dépend le calcul TS", async () => {
     const cpoms = await findAllCpoms();
     const cpom = cpoms.find((candidate) => candidate.id === cpomId);
 

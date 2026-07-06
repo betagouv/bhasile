@@ -16,6 +16,8 @@ import { mockRouterPush } from "../../../../../test-utils/structure-page-test.mo
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
+  useParams: () => ({}),
+  usePathname: () => "/",
 }));
 
 describe("ModificationDescription page integration", () => {
@@ -50,8 +52,6 @@ describe("ModificationDescription page integration", () => {
       codeBhasile: string;
       nom: string;
       public: string;
-      lgbt: boolean;
-      fvvTeh: boolean;
       adresseAdministrative: string;
       codePostalAdministratif: string;
       communeAdministrative: string;
@@ -71,8 +71,6 @@ describe("ModificationDescription page integration", () => {
     expect(body.codeBhasile).toBe("BHA-77");
     expect(body.nom).toBe(structure.nom);
     expect(body.public).toBe("Tout public");
-    expect(body.lgbt).toBe(structure.lgbt);
-    expect(body.fvvTeh).toBe(structure.fvvTeh);
     expect(body.adresseAdministrative).toBe(structure.adresseAdministrative);
     expect(body.codePostalAdministratif).toBe(
       structure.codePostalAdministratif

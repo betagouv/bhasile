@@ -8,28 +8,21 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
-import { FieldSetOuvertureFermeture } from "@/app/components/forms/ouvertureFermeture/FieldSetOuvertureFermeture";
 import { FieldSetTypePlaces } from "@/app/components/forms/typePlace/FieldSetTypePlaces";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
-import { structureTypologiesWithMandatoryEvolutionSchema } from "@/schemas/forms/base/structureTypologie.schema";
-import { FetchState } from "@/types/fetch-state.type";
+import { structureTypologiesSchema } from "@/schemas/forms/base/structureTypologie.schema";
 import { FormKind } from "@/types/global";
 
 export default function ModificationTypePlaces() {
   const { structure } = useStructureContext();
 
-  const { handleSubmit, backendError } = useAgentFormHandling({
+  const { handleSubmit } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,
   });
   const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const defaultValues = getDefaultValues({ structure });
-
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("structure-save");
 
   return (
     <>
@@ -38,7 +31,7 @@ export default function ModificationTypePlaces() {
         handleCancel={() => setShouldOpenModal(true)}
       />
       <FormWrapper
-        schema={structureTypologiesWithMandatoryEvolutionSchema}
+        schema={structureTypologiesSchema}
         defaultValues={defaultValues}
         onSubmit={(data) =>
           handleSubmit({
@@ -55,7 +48,6 @@ export default function ModificationTypePlaces() {
         ]}
         className="border-2 border-solid border-(--text-title-blue-france)"
       >
-        <FieldSetOuvertureFermeture formKind={FormKind.MODIFICATION} />
         <FieldSetTypePlaces
           structure={structure}
           formKind={FormKind.MODIFICATION}
@@ -66,12 +58,6 @@ export default function ModificationTypePlaces() {
         shouldOpen={shouldOpenModal}
         setShouldOpen={setShouldOpenModal}
       />
-      {saveState === FetchState.ERROR && (
-        <SubmitError
-          codeBhasile={structure.codeBhasile}
-          backendError={backendError}
-        />
-      )}
     </>
   );
 }

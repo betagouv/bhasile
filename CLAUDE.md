@@ -90,7 +90,8 @@ tests/                       # Même arborescence que src/
 ### Tests
 
 - Les tests de repository (`*.repository.test.ts`) sont exclus du `yarn test` standard — ils nécessitent une vraie base via `.env.test`
-- Nommage : `*.test.ts` pour unitaire/intégration, `*.repository.test.ts` pour les tests BDD
+- Nommage des fichiers : `*.test.ts` pour unitaire/intégration, `*.repository.test.ts` pour les tests BDD
+- Nommage des cas (`it`) : **en français**, en complétant naturellement « it … » → commencer par un verbe à la 3e personne (ex : `it("date les dnaStructures encore ouvertes à la finalisation")`, `it("rejette une transformation déjà finalisée")`). Pas de `it("should …")`.
 
 ### Nommage des types (schemas Zod)
 
@@ -126,6 +127,7 @@ Quand un schéma `Api*` applique une transformation (coercition, `.transform()`,
 - [Base de données](docs/database.md) — migrations, vues SQL, process recommandé
 - [Scripts](docs/scripts.md) — scripts one-off et récurrents (Scalingo)
 - [Référentiel OFII](docs/ofii_referential.md) — mise à jour mensuelle du référentiel OFII
+- [Tests](docs/tests.md) — outils, nommage des fichiers et des cas (`it` en français)
 
 ## Specs par chantier
 

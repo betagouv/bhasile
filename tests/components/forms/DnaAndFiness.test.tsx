@@ -154,5 +154,37 @@ describe("DnaAndFiness", () => {
       });
       expect(codeSelectsAfter).toHaveLength(2);
     });
+
+    it("affiche la poubelle dès le premier code FINESS renseigné et vide le champ sans retirer la ligne", async () => {
+      const user = userEvent.setup();
+
+      render(
+        <FormTestWrapper
+          defaultValues={{
+            ...defaultValuesAutorisee,
+            isMultiDna: true,
+            dnaStructures: [{ description: "", dna: { code: "" } }],
+            structureFinesses: [
+              { description: "", finess: { code: "123456789" } },
+            ],
+          }}
+        >
+          <DnaAndFiness />
+        </FormTestWrapper>
+      );
+
+      const finessCode = screen.getByRole("textbox", { name: "Code" });
+      expect(finessCode).toHaveValue("123456789");
+      expect(
+        screen.getByRole("button", { name: "Supprimer" })
+      ).toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: "Supprimer" }));
+
+      expect(screen.getByRole("textbox", { name: "Code" })).toHaveValue("");
+      expect(
+        screen.queryByRole("button", { name: "Supprimer" })
+      ).not.toBeInTheDocument();
+    });
   });
 });

@@ -42,15 +42,6 @@ export class IdentificationPage extends BasePage {
       await this.formHelper.selectOption(SELECTORS.PUBLIC_SELECT, data.public);
     }
 
-    if (data.lgbt) {
-      await this.checkboxHelper.check('input[name="lgbt"]', { useLabel: true });
-    }
-    if (data.fvvTeh) {
-      await this.checkboxHelper.check('input[name="fvvTeh"]', {
-        useLabel: true,
-      });
-    }
-
     if (data.nom) {
       await this.formHelper.fillInput('input[name="nom"]', data.nom);
     }

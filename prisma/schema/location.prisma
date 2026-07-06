@@ -10,6 +10,7 @@ model Departement {
   regionId             Int?
   cpoms                CpomDepartement[]
   dnas                 Dna[]
+  rmus                 Rmu[]
 
   @@schema("public")
 }

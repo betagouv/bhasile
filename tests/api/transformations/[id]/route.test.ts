@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET, PUT } from "@/app/api/transformations/[id]/route";
+import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
 import { TransformationType } from "@/types/transformation.type";
 
 const mockGetTransformation = vi.fn();
@@ -140,7 +141,7 @@ describe("PUT /api/transformations/[id]", () => {
 
   it("should surface the error message in the body when an update is refused", async () => {
     mockUpdateTransformation.mockRejectedValueOnce(
-      new Error("Impossible de modifier une transformation finalisée")
+      new ApiDomainError("Impossible de modifier une transformation finalisée")
     );
 
     const response = await PUT(buildRequest(validBody));

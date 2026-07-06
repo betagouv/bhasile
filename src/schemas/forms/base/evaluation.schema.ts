@@ -41,7 +41,7 @@ const evaluationSchema = evaluationAutoSaveSchema
       return true;
     },
     {
-      message: "Les notes doivent être renseignées",
+      error: "Les notes doivent être renseignées",
       path: ["notePersonne", "notePro", "noteStructure", "note"],
     }
   )
@@ -56,7 +56,7 @@ const evaluationSchema = evaluationAutoSaveSchema
       return true;
     },
     {
-      message: "Les fichiers doivent être renseignés",
+      error: "Les fichiers doivent être renseignés",
       path: ["fileUploads"],
     }
   );
@@ -72,21 +72,23 @@ export const evaluationsAutoSaveSchema = z.object({
 });
 
 export const evaluationsSchemaWithConditionalValidation =
-  evaluationsSchema.superRefine((data, ctx) => {
-    if (data.noEvaluationStructure === true) {
-      return;
-    }
-    if (
-      data.evaluations?.length !== 0 &&
-      !data.evaluations?.find((evaluation) => evaluation.date)
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Au moins une évaluation est obligatoire",
-        path: ["evaluations"],
-      });
-    }
-  });
+  evaluationsSchema.check(
+    z.superRefine((data, ctx) => {
+      if (data.noEvaluationStructure === true) {
+        return;
+      }
+      if (
+        data.evaluations?.length !== 0 &&
+        !data.evaluations?.find((evaluation) => evaluation.date)
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Au moins une évaluation est obligatoire",
+          path: ["evaluations"],
+        });
+      }
+    })
+  );
 
 export type EvaluationFormValues = z.infer<typeof evaluationSchema>;
 export type EvaluationsFormValues = z.infer<typeof evaluationsSchema>;

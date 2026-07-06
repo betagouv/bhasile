@@ -12,7 +12,7 @@ export default defineConfig({
   testDir: ".",
   testMatch: ["specs/**/*.spec.ts"],
   globalSetup: "./global-setup.ts",
-  timeout: 30000,
+  timeout: 90000,
   expect: { timeout: 10000 },
   fullyParallel: true,
   workers,

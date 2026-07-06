@@ -1,12 +1,10 @@
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 import { OperateurUpdateFormValues } from "@/schemas/forms/base/operateur.schema";
-import { FetchState } from "@/types/fetch-state.type";
 
 import { useOperateurContext } from "../(authenticated)/(with-menu)/operateurs/[id]/_context/OperateurClientContext";
-import { useFetchState } from "../context/FetchStateContext";
 import { useOperateur } from "./useOperateur";
+import { useSaveMutation } from "./useSaveMutation";
 
 export const useOperateurFormHandling = ({
   operateurId,
@@ -19,42 +17,26 @@ export const useOperateurFormHandling = ({
 
   const { updateOperateur } = useOperateur();
 
-  const { setFetchState } = useFetchState();
-
-  const [backendError, setBackendError] = useState<string | undefined>(
-    undefined
+  const { mutate: saveOperateur } = useSaveMutation(
+    "operateur-save",
+    (data: Partial<OperateurUpdateFormValues>) =>
+      updateOperateur({ id: operateurId, ...data }, setOperateur)
   );
 
   const handleSubmit = async (data: Partial<OperateurUpdateFormValues>) => {
-    setFetchState("operateur-save", FetchState.LOADING);
-    try {
-      const result = await updateOperateur(
-        { id: operateurId, ...data },
-        setOperateur
-      );
-      if (typeof result === "object" && "operateurId" in result) {
-        setFetchState("operateur-save", FetchState.IDLE);
-        if (nextRoute) {
-          router.push(nextRoute);
-        }
-        if (callBack) {
-          callBack();
-        }
-      } else {
-        setFetchState("operateur-save", FetchState.ERROR);
-        setBackendError(result);
-        console.error(result);
+    const result = await saveOperateur(data);
+    if (result !== null) {
+      if (nextRoute) {
+        router.push(nextRoute);
       }
-    } catch (error) {
-      setFetchState("operateur-save", FetchState.ERROR);
-      setBackendError(String(error));
-      console.error(error);
+      if (callBack) {
+        callBack();
+      }
     }
   };
 
   return {
     handleSubmit,
-    backendError,
   };
 };
 
