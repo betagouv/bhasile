@@ -1,3 +1,4 @@
+import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
 import {
   getNextBhasileCode,
   getNormalizedRegionCodeFromDepartement,
@@ -71,7 +72,9 @@ export const updateOne = async (
     });
 
     if (finalisedTransformation.form?.status === true) {
-      throw new Error("Impossible de modifier une transformation finalisée");
+      throw new ApiDomainError(
+        "Impossible de modifier une transformation finalisée"
+      );
     }
 
     const isFinalizing = input.form?.status === true;
@@ -87,7 +90,7 @@ export const updateOne = async (
             !structureVersionTransformation.structureVersion?.effectiveDate
         )
       ) {
-        throw new Error(
+        throw new ApiDomainError(
           "Chaque transformation doit avoir une date d'effet avant la finalisation"
         );
       }
@@ -97,7 +100,9 @@ export const updateOne = async (
         data: { status: true },
       });
       if (finalized.count === 0) {
-        throw new Error("Impossible de modifier une transformation finalisée");
+        throw new ApiDomainError(
+        "Impossible de modifier une transformation finalisée"
+      );
       }
     }
 
@@ -126,6 +131,7 @@ export const updateOne = async (
       await createStructuresForCreationBlocks(tx, input.id);
       await moveActesAdministratifsToStructures(tx, input.id);
       await endDnaStructuresForFermetureBlocks(tx, input.id);
+      await setFermetureDates(tx, input.id);
     }
 
     return input.id;
@@ -142,7 +148,9 @@ export const resetSelection = async (
     });
 
     if (finalisedTransformation.form?.status === true) {
-      throw new Error("Impossible de modifier une transformation finalisée");
+      throw new ApiDomainError(
+        "Impossible de modifier une transformation finalisée"
+      );
     }
 
     await tx.structureVersionTransformation.deleteMany({
@@ -253,6 +261,41 @@ const moveActesAdministratifsToStructures = async (
         structureVersionTransformationId: structureVersionTransformation.id,
       },
       data: { structureId, structureVersionTransformationId: null },
+    });
+  }
+};
+
+const setFermetureDates = async (
+  tx: PrismaTransaction,
+  transformationId: number
+): Promise<void> => {
+  const fermetureBlocks = await tx.structureVersionTransformation.findMany({
+    where: {
+      transformationId,
+      type: StructureVersionTransformationType.FERMETURE,
+    },
+    select: {
+      id: true,
+      structureVersion: {
+        select: { structureId: true, effectiveDate: true },
+      },
+    },
+  });
+
+  for (const fermetureBlock of fermetureBlocks) {
+    const structureId = fermetureBlock.structureVersion?.structureId ?? null;
+    const effectiveDate =
+      fermetureBlock.structureVersion?.effectiveDate ?? null;
+
+    if (!structureId || !effectiveDate) {
+      throw new Error(
+        `Transformation ${transformationId}, Structure Version Transformation ${fermetureBlock.id} : fermeture sans structure ou date d'effet`
+      );
+    }
+
+    await tx.structure.updateMany({
+      where: { id: structureId, fermetureDate: null },
+      data: { fermetureDate: effectiveDate },
     });
   }
 };

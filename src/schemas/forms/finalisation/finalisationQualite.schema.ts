@@ -5,14 +5,11 @@ import {
   evaluationsAutoSaveSchema,
   evaluationsSchemaWithConditionalValidation,
 } from "../base/evaluation.schema";
-import {
-  structureTypologiesAutoSaveSchema,
-  structureTypologiesWithoutTypePlacesSchemaWithMandatoryEvolution,
-} from "../base/structureTypologie.schema";
+import { structureTypologiesAutoSaveSchema } from "../base/structureTypologie.schema";
 
-export const finalisationQualiteSchema = controlesAutoSaveSchema
-  .and(evaluationsSchemaWithConditionalValidation)
-  .and(structureTypologiesWithoutTypePlacesSchemaWithMandatoryEvolution);
+export const finalisationQualiteSchema = controlesAutoSaveSchema.and(
+  evaluationsSchemaWithConditionalValidation
+);
 
 export const finalisationQualiteAutoSaveSchema = controlesAutoSaveSchema
   .and(evaluationsAutoSaveSchema)

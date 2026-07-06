@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-type ZodObjectShape = Record<string, z.ZodTypeAny>;
+type ZodObjectShape = Record<string, z.ZodType>;
 
 export function useFieldValidator<T extends z.ZodObject<ZodObjectShape>>(
   schema: T
@@ -19,7 +19,7 @@ export function useFieldValidator<T extends z.ZodObject<ZodObjectShape>>(
     const result = fieldSchema.safeParse(value);
 
     if (!result.success) {
-      return result.error.errors.map((err: z.ZodIssue) => err.message);
+      return result.error.issues.map((issue: z.ZodIssue) => issue.message);
     }
     return;
   };

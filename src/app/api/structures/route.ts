@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
+import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
 import { authOptions } from "@/lib/next-auth/auth";
 import { structureOperateurUpdateApiSchema } from "@/schemas/api/structure.schema";
 import { SessionUser } from "@/types/global";
@@ -65,8 +66,7 @@ export async function POST(request: NextRequest) {
     createStructureEvent(request.method, createdStructure.id);
     return NextResponse.json("Structure créée avec succès", { status: 201 });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(error, { status: 400 });
+    return apiErrorResponse(error);
   }
 }
 

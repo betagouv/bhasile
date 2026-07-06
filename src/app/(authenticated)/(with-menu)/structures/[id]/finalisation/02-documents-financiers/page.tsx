@@ -6,9 +6,7 @@ import { DocumentsFinanciers } from "@/app/components/forms/finance/documents/Do
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { SubmitError } from "@/app/components/SubmitError";
 import { InformationBar } from "@/app/components/ui/InformationBar";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
@@ -18,7 +16,6 @@ import {
   DocumentsFinanciersFlexibleSchema,
   DocumentsFinanciersStrictSchema,
 } from "@/schemas/forms/base/documentFinancier.schema";
-import { FetchState } from "@/types/fetch-state.type";
 import { StepStatus } from "@/types/form.type";
 import { FormKind } from "@/types/global";
 
@@ -36,8 +33,9 @@ export default function FinalisationDocumentsFinanciers() {
 
   const defaultValues = getDefaultValues({ structure });
 
-  const { handleValidation, handleAutoSave, backendError } =
-    useAgentFormHandling({ currentStep });
+  const { handleValidation, handleAutoSave } = useAgentFormHandling({
+    currentStep,
+  });
 
   const onAutoSave = async (data: DocumentsFinanciersFlexibleFormValues) => {
     const documentsFinanciers = (data.documentsFinanciers?.filter(
@@ -59,9 +57,6 @@ export default function FinalisationDocumentsFinanciers() {
       structureMillesimes,
     });
   };
-
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("structure-save");
 
   return (
     <div>
@@ -95,13 +90,6 @@ export default function FinalisationDocumentsFinanciers() {
           className="mb-6"
           formKind={FormKind.FINALISATION}
         />
-
-        {saveState === FetchState.ERROR && (
-          <SubmitError
-            codeBhasile={structure.codeBhasile}
-            backendError={backendError}
-          />
-        )}
       </FormWrapper>
     </div>
   );

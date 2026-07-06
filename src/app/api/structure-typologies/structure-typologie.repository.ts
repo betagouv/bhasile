@@ -58,18 +58,6 @@ export const createOrUpdateStructureTypologies = async (
           ...(typologie.pmr !== undefined && { pmr: typologie.pmr }),
           ...(typologie.lgbt !== undefined && { lgbt: typologie.lgbt }),
           ...(typologie.fvvTeh !== undefined && { fvvTeh: typologie.fvvTeh }),
-          ...(typologie.placesACreer !== undefined && {
-            placesACreer: typologie.placesACreer,
-          }),
-          ...(typologie.placesAFermer !== undefined && {
-            placesAFermer: typologie.placesAFermer,
-          }),
-          ...(typologie.echeancePlacesACreer !== undefined && {
-            echeancePlacesACreer: typologie.echeancePlacesACreer,
-          }),
-          ...(typologie.echeancePlacesAFermer !== undefined && {
-            echeancePlacesAFermer: typologie.echeancePlacesAFermer,
-          }),
         },
         create: {
           ...entityId,
@@ -78,10 +66,6 @@ export const createOrUpdateStructureTypologies = async (
           pmr: typologie.pmr,
           lgbt: typologie.lgbt,
           fvvTeh: typologie.fvvTeh,
-          placesACreer: typologie.placesACreer,
-          placesAFermer: typologie.placesAFermer,
-          echeancePlacesACreer: typologie.echeancePlacesACreer,
-          echeancePlacesAFermer: typologie.echeancePlacesAFermer,
         },
       });
     })

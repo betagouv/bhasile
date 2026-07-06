@@ -32,8 +32,13 @@ export const TransformationActesAdministratifsForm = ({
   structureVersionTransformation,
   transformation,
 }: Props) => {
-  const { goToNextStep, handleSave, backLink, shouldShowIncompleteSteps } =
-    useTransformationFormHandling();
+  const {
+    goToNextStep,
+    navigateWithSave,
+    handleSave,
+    backLink,
+    shouldShowIncompleteSteps,
+  } = useTransformationFormHandling();
 
   const effectiveDate =
     structureVersionTransformation.structureVersion?.effectiveDate;
@@ -77,6 +82,7 @@ export const TransformationActesAdministratifsForm = ({
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       backLink={backLink}
+      onBackNavigate={navigateWithSave}
       showContactInfos={false}
     >
       <TransformationFormController

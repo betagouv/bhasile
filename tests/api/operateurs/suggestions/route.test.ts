@@ -9,12 +9,16 @@ vi.mock("@/app/api/operateurs/operateur.repository", () => ({
   findBySearchTerm: (...args: unknown[]) => mockFindBySearchTerm(...args),
 }));
 
+vi.mock("@/app/api/structures/structure.repository", () => ({
+  findAllStructures: vi.fn(),
+}));
+
 describe("GET /api/operateurs/suggestions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("retourne les opérateurs correspondant au terme de recherche", async () => {
+  it("renvoie les opérateurs correspondant au terme de recherche", async () => {
     // GIVEN
     const operateurs = [{ id: 1, name: "Adoma" }];
     mockFindBySearchTerm.mockResolvedValueOnce(operateurs);
@@ -32,7 +36,7 @@ describe("GET /api/operateurs/suggestions", () => {
     expect(mockFindBySearchTerm).toHaveBeenCalledWith("Ado");
   });
 
-  it("retourne tous les opérateurs en l'absence de terme de recherche", async () => {
+  it("renvoie tous les opérateurs quand pas de terme de recherche", async () => {
     // GIVEN
     const operateurs = [{ id: 1, name: "Adoma" }, { id: 2, name: "Forum Réfugiés" }];
     mockFindBySearchTerm.mockResolvedValueOnce(operateurs);

@@ -1,13 +1,11 @@
 "use client";
 
-import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import autoAnimate from "@formkit/auto-animate";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { AdresseAdministrativeAndAntennes } from "@/app/components/forms/adresseAdministrativeAndAntenne/AdresseAdministrativeAndAntennes";
 import { OperateurAutocompleteRhf } from "@/app/components/forms/autocomplete/OperateurAutocompleteRhf";
 import { FieldSetContacts } from "@/app/components/forms/contacts/FieldSetContacts";
@@ -76,7 +74,7 @@ export default function FormIdentification() {
         isEditMode ? "Modifier et revenir à la vérification" : "Étape suivante"
       }
     >
-      {({ register, control }) => {
+      {({ control }) => {
         return (
           <>
             <Link
@@ -177,36 +175,6 @@ export default function FormIdentification() {
                   ))}
                 </SelectWithValidation>
               </div>
-              <CustomNotice
-                severity="info"
-                title=""
-                className="rounded [&_p]:flex [&_p]:items-center"
-                description="LGBT : Lesbiennes, Gays, Bisexuels et Transgenres – FVV : Femmes Victimes de Violences–TEH : Traîte des Êtres Humains"
-              />
-              <label className="flex gap-6">
-                Actuellement, la structure dispose-t-elle de places labellisées
-                / spécialisées ?
-                <Checkbox
-                  options={[
-                    {
-                      label: "LGBT",
-                      nativeInputProps: {
-                        ...register("lgbt"),
-                      },
-                    },
-                  ]}
-                />
-                <Checkbox
-                  options={[
-                    {
-                      label: "FVV et TEH",
-                      nativeInputProps: {
-                        ...register("fvvTeh"),
-                      },
-                    },
-                  ]}
-                />
-              </label>
             </fieldset>
 
             <hr />

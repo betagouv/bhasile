@@ -1,5 +1,6 @@
 import { StructureCard } from "@/app/components/StructureCard";
 import { formatDate, getYearFromDate } from "@/app/utils/date.util";
+import { getPlacesSource } from "@/app/utils/transformation.util";
 import { StructureVersionTransformationApiRead } from "@/schemas/api/transformation.schema";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
@@ -15,8 +16,7 @@ export const StructureVersionTransformationItem = ({
   const effectiveDate =
     structureVersionTransformation.structureVersion?.effectiveDate;
 
-  const placesAutorisees = getPlacesAutorisees(structureVersionTransformation);
-
+  const placesLine = getPlacesLine(structureVersionTransformation);
   return (
     <div className="flex flex-col gap-3">
       {cardProps && <StructureCard {...cardProps} />}
@@ -29,17 +29,23 @@ export const StructureVersionTransformationItem = ({
           </span>
         </div>
       )}
-      {effectiveDate && placesAutorisees !== undefined && (
+      {effectiveDate && placesLine && (
         <div className="flex items-center gap-2 text-sm">
-          <span className="fr-icon-check-line fr-icon--sm text-title-blue-france" />
+          <span
+            className={`${placesLine.icon} fr-icon--sm text-title-blue-france`}
+          />
           <span>
-            <strong>{placesAutorisees} places autorisées</strong> au total
+            <strong>
+              {placesLine.count} {placesLine.label}
+            </strong>
           </span>
         </div>
       )}
     </div>
   );
 };
+
+type PlacesLine = { count: number; label: string; icon: string };
 
 const buildCardProps = (
   structureVersionTransformation: StructureVersionTransformationApiRead
@@ -66,27 +72,46 @@ const buildCardProps = (
   };
 };
 
-const getPlacesAutorisees = (
+const getPlacesLine = (
   structureVersionTransformation: StructureVersionTransformationApiRead
-): number | undefined => {
+): PlacesLine | null => {
+  const effectiveDate =
+    structureVersionTransformation.structureVersion?.effectiveDate;
+  if (!effectiveDate) {
+    return null;
+  }
+
   if (
     structureVersionTransformation.type ===
     StructureVersionTransformationType.FERMETURE
   ) {
-    return undefined;
-  }
-
-  const effectiveDate =
-    structureVersionTransformation.structureVersion?.effectiveDate;
-  if (!effectiveDate) {
-    return undefined;
+    const placesFermees = getPlacesSource(structureVersionTransformation);
+    if (placesFermees === undefined || placesFermees <= 0) {
+      return null;
+    }
+    return {
+      count: placesFermees,
+      label: "place(s) fermée(s)",
+      icon: "fr-icon-close-line",
+    };
   }
 
   const year = getYearFromDate(effectiveDate);
+  const placesAutorisees =
+    structureVersionTransformation.structureVersion?.structureTypologies?.find(
+      (structureTypology) => structureTypology.year === year
+    )?.placesAutorisees;
+  if (placesAutorisees === undefined) {
+    return null;
+  }
 
-  return structureVersionTransformation.structureVersion?.structureTypologies?.find(
-    (structureTypology) => structureTypology.year === year
-  )?.placesAutorisees;
+  return {
+    count: placesAutorisees,
+    label: `places autorisées au total après ${getEffectiveDateLabel(
+      structureVersionTransformation.type
+    )}`,
+    icon: "fr-icon-check-line",
+  };
 };
 
 const getEffectiveDateLabel = (

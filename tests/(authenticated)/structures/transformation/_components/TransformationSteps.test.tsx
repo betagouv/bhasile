@@ -2,6 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TransformationSteps } from "@/app/(authenticated)/structures/transformation/_components/TransformationSteps";
+import { FetchState } from "@/types/fetch-state.type";
 import { StructureVersionTransformationType } from "@/types/transformation.type";
 
 import {
@@ -16,6 +17,7 @@ const mockUseOptionalTransformationContext = vi.fn<
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockUsePathname(),
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
 vi.mock(
@@ -25,6 +27,10 @@ vi.mock(
       mockUseOptionalTransformationContext(),
   })
 );
+
+vi.mock("@/app/context/FetchStateContext", () => ({
+  useFetchState: () => ({ getFetchState: () => FetchState.IDLE }),
+}));
 
 describe("TransformationSteps", () => {
   beforeEach(() => {

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { Repartition } from "@/types/adresse.type";
 import { PublicType, StructureType } from "@/types/structure.type";
 import { HistoryEvent } from "@/types/structure-history.type";
+import { UpcomingTransformation } from "@/types/transformation.type";
 
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
 import { activiteApiSchema } from "./activite.schema";
@@ -17,7 +18,10 @@ import { dnaStructureApiSchema } from "./dna-structure.schema";
 import { documentFinancierApiSchema } from "./documentFinancier.schema";
 import { evaluationApiSchema } from "./evaluation.schema";
 import { evenementIndesirableGraveApiSchema } from "./evenement-indesirable-grave.schema";
-import { structureFinessApiSchema } from "./finess.schema";
+import {
+  structureFinessApiPartialSchema,
+  structureFinessApiSchema,
+} from "./finess.schema";
 import { formApiSchema } from "./form.schema";
 import { indicateurFinancierApiSchema } from "./indicateurFinancier.schema";
 import { operateurSuggestionApiSchema } from "./operateur.schema";
@@ -28,14 +32,14 @@ const structureMinimalApiSchema = z.object({
   id: z.number(),
   codeBhasile: z.string().optional(),
   operateur: operateurSuggestionApiSchema,
-  type: z.nativeEnum(StructureType),
+  type: z.enum(StructureType),
   nom: z.string().optional(),
   structureMillesimes: z.array(structureMillesimeApiSchema).optional(),
   cpomStructures: z.array(cpomStructureApiSchema).optional(),
   nomOfii: z.string().optional(),
   directionTerritoriale: z.string().optional(),
-  activeInOfiiFileSince: z.string().datetime().nullish(),
-  inactiveInOfiiFileSince: z.string().datetime().nullish(),
+  activeInOfiiFileSince: z.iso.datetime().nullish(),
+  inactiveInOfiiFileSince: z.iso.datetime().nullish(),
   departementAdministratif: z
     .string()
     .min(1, "Le département de l'adresse administrative est requis"),
@@ -59,18 +63,12 @@ export const structureOperateurUpdateApiSchema =
       .min(1, "Le département de l'adresse administrative est requis"),
     latitude: z.string().optional(),
     longitude: z.string().optional(),
-    creationDate: z
-      .string()
-      .datetime({ message: "La date de création est requise" }),
-    date303: z.string().datetime().nullish(),
+    creationDate: z.iso.datetime({
+      error: "La date de création est requise",
+    }),
+    date303: z.iso.datetime().nullish(),
     finessCode: z.string().optional(),
-    lgbt: z.boolean({
-      message: "L'accueil de LGBT dans la structure est requis",
-    }),
-    fvvTeh: z.boolean({
-      message: "L'accueil de FVV-TEH dans la structure est requis",
-    }),
-    public: z.nativeEnum(PublicType),
+    public: z.enum(PublicType),
     adresses: z.array(adresseApiSchema),
     antennes: z.array(antenneApiSchema).optional(),
     dnaStructures: z.array(dnaStructureApiSchema).optional(),
@@ -87,7 +85,7 @@ const partialStructureOperateurUpdateApiSchema =
     codeBhasile: z.string().optional(),
     adresses: z.array(adresseApiSchema.partial()).optional(),
     dnaStructures: z.array(dnaStructureApiSchema.partial()).optional(),
-    structureFinesses: z.array(structureFinessApiSchema.partial()).optional(),
+    structureFinesses: z.array(structureFinessApiPartialSchema).optional(),
     forms: z.array(formApiSchema.partial()).optional(),
     contacts: z.array(contactApiSchema.partial()).optional(),
     documentsFinanciers: z.array(documentFinancierApiSchema).optional(),
@@ -138,12 +136,14 @@ export type StructureApiWrite = z.infer<typeof structureApiSchema>;
 export type StructureApiWriteClient = z.input<typeof structureApiSchema>;
 
 export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
+  fermetureDate: string | null;
   debutConvention: string | null;
   finConvention: string | null;
   debutPeriodeAutorisation: string | null;
   finPeriodeAutorisation: string | null;
   cpomStructures?: CpomStructureApiRead[];
   history?: HistoryEvent[];
+  upcomingTransformations?: UpcomingTransformation[];
   operateurLabel: string;
   isAutorisee: boolean;
   isSubventionnee: boolean;
@@ -160,4 +160,6 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   isMultiAntenne: boolean;
   isMultiDna: boolean;
   typeBati?: Repartition;
+  lgbt: boolean;
+  fvvTeh: boolean;
 };

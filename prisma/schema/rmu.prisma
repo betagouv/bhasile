@@ -1,0 +1,14 @@
+model Rmu {
+  id                Int         @id @default(autoincrement())
+  departementNumero String
+  departement       Departement @relation(fields: [departementNumero], references: [numero])
+  date              DateTime // 1er du mois à midi UTC
+
+  deboutesSansMesureAdministrative Int?
+  misesEnDemeure                   Int?
+  referesEngages                   Int?
+  referesExecutes                  Int?
+
+  @@unique([departementNumero, date])
+  @@schema("public")
+}

@@ -3,11 +3,13 @@ import { useEffect } from "react";
 import { StructureSearch } from "@/app/components/structure-selection/StructureSearch";
 import { useStructureSelections } from "@/app/hooks/useStructureSelections";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
+import { StructureType } from "@/types/structure.type";
 import { TransformationType } from "@/types/transformation.type";
 
 export const StructureSelections = ({
   transformationType,
   structureId,
+  departureType,
   onChange,
 }: Props) => {
   const {
@@ -18,12 +20,13 @@ export const StructureSelections = ({
     setOperateurName,
     setDepartementNumero,
     setStructureType,
+    getFixedType,
     getEffectiveStructureType,
     getInheritedOperateurName,
     getInheritedDepartementNumero,
     structureVersionTransformations,
     areSelectionsComplete,
-  } = useStructureSelections({ transformationType, structureId });
+  } = useStructureSelections({ transformationType, structureId, departureType });
 
   useEffect(() => {
     onChange({ structureVersionTransformations, areSelectionsComplete });
@@ -46,7 +49,7 @@ export const StructureSelections = ({
           <StructureSearch
             key={block.id}
             multiple={block.multiple}
-            fixedType={block.fixedType}
+            fixedType={getFixedType(block)}
             finalisedOnly
             label={block.label}
             structureType={getEffectiveStructureType(block)}
@@ -71,6 +74,7 @@ export const StructureSelections = ({
 type Props = {
   transformationType: TransformationType;
   structureId?: number;
+  departureType?: StructureType;
   onChange: (state: {
     structureVersionTransformations: StructureVersionTransformationApiCreate[];
     areSelectionsComplete: boolean;

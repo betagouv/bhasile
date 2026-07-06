@@ -1,8 +1,41 @@
 import { E2E_PREFIX } from "../data/ids";
+import { deleteTransformationGraph } from "./cleanup";
 import { prisma } from "./prisma";
 
 export const cleanupOrphans = async (): Promise<void> => {
   const errors: string[] = [];
+
+  const e2eStructureVersionTransformations =
+    await prisma.structureVersionTransformation.findMany({
+      where: {
+        OR: [
+          {
+            structureVersion: {
+              structure: { codeBhasile: { startsWith: E2E_PREFIX } },
+            },
+          },
+          { structureVersion: { nom: { startsWith: E2E_PREFIX } } },
+        ],
+      },
+      select: { transformationId: true },
+    });
+  const transformationIds = [
+    ...new Set(
+      e2eStructureVersionTransformations.map(
+        (structureVersionTransformation) =>
+          structureVersionTransformation.transformationId
+      )
+    ),
+  ];
+  for (const transformationId of transformationIds) {
+    try {
+      await deleteTransformationGraph(transformationId);
+    } catch (err) {
+      errors.push(
+        `transformation ${transformationId}: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
+  }
 
   const cpoms = await prisma.cpom.findMany({
     where: { name: { startsWith: E2E_PREFIX } },

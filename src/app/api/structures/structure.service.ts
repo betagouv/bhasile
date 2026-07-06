@@ -1,4 +1,5 @@
 import { recursivelySerializeDates } from "@/app/utils/date.util";
+import { paginateRows } from "@/app/utils/list.util";
 import {
   isStructureAutorisee,
   isStructureSubventionnee,
@@ -38,6 +39,7 @@ import {
 } from "./structure.repository";
 import {
   buildStructureHistory,
+  buildUpcomingTransformations,
   computeStructureListRow,
   filterStructureRows,
   getAdresseAdministrativeCoordinates,
@@ -54,7 +56,6 @@ import {
   isFinalisationFormValidated,
   isStructureInCpom,
   isStructureInCpomPerYear,
-  paginateRows,
   sortStructureRows,
   StructureListComputedRow,
 } from "./structure.util";
@@ -306,6 +307,10 @@ const dbStructureToApiRead = (
     buildAdresseAdministrativeComplete(dbStructure);
   const typeBati = getTypeBati(dbStructure);
 
+  const latestTypologie = dbStructure.structureTypologies?.[0];
+  const lgbt = (latestTypologie?.lgbt ?? 0) > 0;
+  const fvvTeh = (latestTypologie?.fvvTeh ?? 0) > 0;
+
   const isMultiAntenne = (antennes?.length ?? 0) > 0;
   const isMultiDna =
     (dnaStructures?.length ?? 0) > 1 || (structureFinesses?.length ?? 0) > 1;
@@ -316,8 +321,13 @@ const dbStructureToApiRead = (
     ? undefined
     : buildStructureHistory(
         dbStructure as StructureDbDetails,
-        cpomStructures ?? []
+        cpomStructures ?? [],
+        now
       );
+
+  const upcomingTransformations = simple
+    ? undefined
+    : buildUpcomingTransformations(dbStructure as StructureDbDetails, now);
 
   return recursivelySerializeDates({
     ...dbStructure,
@@ -327,6 +337,7 @@ const dbStructureToApiRead = (
     finPeriodeAutorisation,
     cpomStructures,
     history,
+    upcomingTransformations,
     latitude: dbStructure.latitude?.toString(),
     longitude: dbStructure.longitude?.toString(),
     activites,
@@ -359,6 +370,8 @@ const dbStructureToApiRead = (
     isMultiAntenne,
     isMultiDna,
     typeBati,
+    lgbt,
+    fvvTeh,
     antennes,
     dnaStructures,
     structureFinesses,

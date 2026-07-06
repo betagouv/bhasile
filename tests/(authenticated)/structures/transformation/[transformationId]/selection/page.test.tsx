@@ -19,6 +19,7 @@ const mockModalClose = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
+  usePathname: () => "/",
 }));
 
 vi.mock(
@@ -38,6 +39,7 @@ vi.mock("@/app/context/FetchStateContext", () => ({
   useFetchState: () => ({
     getFetchState: () => FetchState.IDLE,
     setFetchState: vi.fn(),
+    getErrorMessage: () => undefined,
   }),
 }));
 

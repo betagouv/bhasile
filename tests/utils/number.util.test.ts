@@ -35,6 +35,11 @@ describe("number util", () => {
       expect(formatNumber(undefined)).toBe("0");
       expect(formatNumber(NaN)).toBe("0");
     });
+    it("gère le passage d'options pour la gestion des décimales  ", () => {
+      expect(formatNumber(12.345, { maximumFractionDigits: 1 })).toBe("12,3");
+      expect(formatNumber(12.345, { maximumFractionDigits: 3 })).toBe("12,345");
+      expect(formatNumber(12.345, { maximumFractionDigits: 0 })).toBe("12");
+    });
   });
 
   describe("formatCurrency", () => {

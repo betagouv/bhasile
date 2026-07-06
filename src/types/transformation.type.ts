@@ -32,6 +32,11 @@ export const StructureVersionTransformationType = {
 export type StructureVersionTransformationType =
   (typeof StructureVersionTransformationType)[keyof typeof StructureVersionTransformationType];
 
+export type UpcomingTransformation = {
+  kind: StructureVersionTransformationType;
+  date: string;
+};
+
 export const TransformationFormType = {
   CREATION: "creation",
   HUDA: "huda",

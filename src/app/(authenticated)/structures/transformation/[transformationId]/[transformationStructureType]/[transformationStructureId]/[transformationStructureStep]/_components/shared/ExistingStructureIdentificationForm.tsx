@@ -10,7 +10,6 @@ import FormWrapper, {
 import { TransformationFormController } from "@/app/components/forms/TransformationFormController";
 import { useTransformationFormHandling } from "@/app/hooks/useTransformationFormHandling";
 import {
-  getAdresseSource,
   getInitialAntennes,
   getTransformationDefaultValues,
   getTransformationNounAvecArticle,
@@ -38,8 +37,13 @@ export const ExistingStructureIdentificationForm = ({
   structureVersionTransformation,
   formKind,
 }: Props) => {
-  const { goToNextStep, handleSave, backLink, shouldShowIncompleteSteps } =
-    useTransformationFormHandling();
+  const {
+    goToNextStep,
+    navigateWithSave,
+    handleSave,
+    backLink,
+    shouldShowIncompleteSteps,
+  } = useTransformationFormHandling();
 
   const defaultValues =
     getTransformationDefaultValues<TransformationIdentificationDraftFormValues>(
@@ -61,6 +65,9 @@ export const ExistingStructureIdentificationForm = ({
         dnaStructures: rest.dnaStructures?.filter(
           (dnaStructure) => dnaStructure.dna?.code
         ),
+        structureFinesses: rest.structureFinesses?.filter(
+          (structureFiness) => structureFiness.finess?.code
+        ),
         effectiveDate,
       } as StructureVersionTransformationApiUpdateClient["structureVersion"],
     };
@@ -78,6 +85,7 @@ export const ExistingStructureIdentificationForm = ({
       submitButtonText="Étape suivante"
       availableFooterButtons={[FooterButtonType.SUBMIT]}
       backLink={backLink}
+      onBackNavigate={navigateWithSave}
       showContactInfos={false}
     >
       <TransformationFormController
@@ -101,7 +109,6 @@ export const ExistingStructureIdentificationForm = ({
 
       <TransformationAdresseAdministrative
         formKind={formKind}
-        originalAdresse={getAdresseSource(structureVersionTransformation)}
         originalAntennes={getInitialAntennes(
           transformation,
           structureVersionTransformation

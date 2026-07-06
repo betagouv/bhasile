@@ -2,17 +2,16 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { StructureAgentUpdateApiClient } from "@/schemas/api/structure.schema";
-import { FetchState } from "@/types/fetch-state.type";
 import { StepStatus } from "@/types/form.type";
 
 import { useStructureContext } from "../(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
-import { useFetchState } from "../context/FetchStateContext";
 import {
   FINALISATION_FORM_LABEL,
   FINALISATION_FORM_VERSION,
   getFinalisationForm,
   getFinalisationFormNextStepToValidate,
 } from "../utils/finalisationForm.util";
+import { useSaveMutation } from "./useSaveMutation";
 import { useStructures } from "./useStructures";
 
 export const useAgentFormHandling = ({
@@ -25,41 +24,14 @@ export const useAgentFormHandling = ({
 
   const { updateAndRefreshStructure } = useStructures();
 
-  const { setFetchState } = useFetchState();
-
-  const [backendError, setBackendError] = useState<string | undefined>(
-    undefined
+  const { mutate: saveStructure } = useSaveMutation(
+    "structure-save",
+    (data: StructureAgentUpdateApiClient) =>
+      updateAndRefreshStructure(structure.id, data, setStructure)
   );
 
-  const updateStructure = async (
-    data: StructureAgentUpdateApiClient
-  ): Promise<void> => {
-    setFetchState("structure-save", FetchState.LOADING);
-
-    try {
-      const result = await updateAndRefreshStructure(
-        structure.id,
-        data,
-        setStructure
-      );
-
-      if (result !== "OK") {
-        throw new Error(result?.toString());
-      }
-
-      setFetchState("structure-save", FetchState.IDLE);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      console.error(errorMessage);
-      setFetchState("structure-save", FetchState.ERROR);
-      setBackendError(errorMessage);
-      throw error;
-    }
-  };
-
   const handleAutoSave = async (data: StructureAgentUpdateApiClient) => {
-    await updateStructure(data);
+    await saveStructure(data);
   };
 
   const handleValidation = async () => {
@@ -86,10 +58,13 @@ export const useAgentFormHandling = ({
       }
     });
 
-    await updateStructure({
+    const result = await saveStructure({
       id: structure.id,
       forms,
     });
+    if (result === null) {
+      return;
+    }
 
     const nextStepToValidate = getFinalisationFormNextStepToValidate(
       structure,
@@ -120,15 +95,16 @@ export const useAgentFormHandling = ({
       }
     });
 
-    await updateStructure({
+    const result = await saveStructure({
       id: structure.id,
       forms,
     });
+    return result !== null;
   };
 
   const handleSubmit = async (data: StructureAgentUpdateApiClient) => {
-    await updateStructure(data);
-    if (nextRoute) {
+    const result = await saveStructure(data);
+    if (result !== null && nextRoute) {
       router.push(nextRoute);
     }
   };
@@ -152,7 +128,6 @@ export const useAgentFormHandling = ({
     handleAutoSave,
     handleValidation,
     handleFinalisation,
-    backendError,
     isStructureReadyToFinalise,
   };
 };

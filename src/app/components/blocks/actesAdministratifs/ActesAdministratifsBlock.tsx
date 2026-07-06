@@ -1,7 +1,8 @@
 import { useRouter } from "next/navigation";
 
 import { Block } from "@/app/components/common/Block";
-import { CategoryDisplayRules } from "@/config/acte-administratif.config";
+import { getActesCategoriesToDisplay } from "@/app/utils/acteAdministratif.util";
+import { ACTE_ADMINISTRATIF_CATEGORY_LABELS } from "@/config/acte-administratif.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { OperateurApiRead } from "@/schemas/api/operateur.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
@@ -15,20 +16,16 @@ export const ActesAdministratifsBlock = ({
   structure,
   operateur,
   actesAdministratifs,
-  categoriesRules,
   editRoute,
   cpomActesAdministratifs,
   title = "Actes administratifs",
 }: Props) => {
   const router = useRouter();
 
-  const filteredActesAdministratifs = actesAdministratifs?.filter(
-    (acteAdministratif) =>
-      Object.keys(categoriesRules).includes(acteAdministratif.category)
-  );
+  const categoriesToDisplay = getActesCategoriesToDisplay(actesAdministratifs);
 
   const hasDocuments =
-    cpomActesAdministratifs?.length || filteredActesAdministratifs?.length;
+    cpomActesAdministratifs?.length || categoriesToDisplay.length;
 
   if (!structure && !operateur) {
     return null;
@@ -46,17 +43,14 @@ export const ActesAdministratifsBlock = ({
         <>Aucun document importé</>
       ) : (
         <>
-          {Object.entries(categoriesRules).map(
-            ([category, rules]) =>
-              rules.shouldShow && (
-                <ActesAdministratifsCategory
-                  key={category}
-                  category={category as ActeAdministratifCategory}
-                  title={rules.title}
-                  actesAdministratifs={actesAdministratifs ?? []}
-                />
-              )
-          )}
+          {categoriesToDisplay.map((category) => (
+            <ActesAdministratifsCategory
+              key={category}
+              category={category}
+              title={ACTE_ADMINISTRATIF_CATEGORY_LABELS[category]}
+              actesAdministratifs={actesAdministratifs ?? []}
+            />
+          ))}
           {cpomActesAdministratifs?.length ? (
             <ActesAdministratifsCategory
               category={CPOM_CATEGORY}
@@ -75,7 +69,6 @@ type Props = {
   structure?: StructureApiRead;
   operateur?: OperateurApiRead;
   actesAdministratifs: ActeAdministratifApiType[] | undefined;
-  categoriesRules: CategoryDisplayRules;
   editRoute: string;
   cpomActesAdministratifs?: ActeAdministratifApiType[];
   title?: string;

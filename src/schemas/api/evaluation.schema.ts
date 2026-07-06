@@ -5,7 +5,7 @@ import { fileApiSchema } from "./file.schema";
 export const evaluationApiSchema = z.object({
   id: z.number().optional(),
   structureDnaCode: z.string().optional(),
-  date: z.string().datetime().optional(),
+  date: z.iso.datetime().optional(),
   notePersonne: z.number().nullish(),
   notePro: z.number().nullish(),
   noteStructure: z.number().nullish(),

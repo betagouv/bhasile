@@ -1,6 +1,6 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { ReactNode } from "react";
-import { FieldValues, useFieldArray, useFormContext } from "react-hook-form";
+import { FieldValues, useFormContext } from "react-hook-form";
 
 import { CustomNotice } from "../../common/CustomNotice";
 import { DeleteButton } from "../../common/DeleteButton";
@@ -15,24 +15,31 @@ export const TransformationCodeSection = ({
   addButtonLabel,
   getDescriptionFieldName,
   renderCodeInput,
+  isEmptyItem,
 }: Props) => {
-  const { control, watch } = useFormContext();
-  const { append, remove } = useFieldArray({ control, name: fieldArrayName });
+  const { control, watch, setValue } = useFormContext();
 
-  const savedItems = watch(fieldArrayName) as unknown[] | undefined;
+  const savedItems = watch(fieldArrayName) as FieldValues[] | undefined;
   const items = savedItems && savedItems.length > 0 ? savedItems : [emptyItem];
   const hasMultipleCodes = items.length > 1;
 
   const handleAdd = () => {
     if (savedItems && savedItems.length > 0) {
-      append(emptyItem);
+      setValue(fieldArrayName, [...savedItems, emptyItem]);
     } else {
-      append([emptyItem, emptyItem]);
+      setValue(fieldArrayName, [emptyItem, emptyItem]);
     }
   };
 
   const handleDelete = (indexToDelete: number) => {
-    remove(indexToDelete);
+    if (items.length > 1) {
+      setValue(
+        fieldArrayName,
+        items.filter((_, itemIndex) => itemIndex !== indexToDelete)
+      );
+      return;
+    }
+    setValue(fieldArrayName, [emptyItem]);
   };
 
   return (
@@ -41,7 +48,7 @@ export const TransformationCodeSection = ({
         {title}
       </h2>
       <CustomNotice severity="info" title="" description={noticeDescription} />
-      {items.map((_, index) => (
+      {items.map((item, index) => (
         <div key={index} className="flex gap-6 items-start">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1">
             <div className="flex flex-col gap-1">{renderCodeInput(index)}</div>
@@ -61,17 +68,15 @@ export const TransformationCodeSection = ({
               </div>
             )}
           </div>
-          {hasMultipleCodes && (
-            <div className="w-8 mt-9">
-              {index >= 1 && (
-                <DeleteButton
-                  onClick={() => handleDelete(index)}
-                  size="small"
-                  backgroundColor="grey"
-                />
-              )}
-            </div>
-          )}
+          <div className="w-8 mt-9">
+            {(items.length > 1 || !isEmptyItem(item)) && (
+              <DeleteButton
+                onClick={() => handleDelete(index)}
+                size="small"
+                backgroundColor="grey"
+              />
+            )}
+          </div>
         </div>
       ))}
       <Button
@@ -96,4 +101,5 @@ type Props = {
   addButtonLabel: string;
   getDescriptionFieldName: (index: number) => string;
   renderCodeInput: (index: number) => ReactNode;
+  isEmptyItem: (item: FieldValues) => boolean;
 };

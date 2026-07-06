@@ -3,65 +3,106 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET } from "@/app/api/operateurs/route";
 
-const mockGetPaginatedOperateurs = vi.fn();
-const mockCountOperateurs = vi.fn();
+const mockFindAllStructures = vi.fn();
+const mockFindAllOperateurs = vi.fn();
+
+vi.mock("@/app/api/structures/structure.repository", () => ({
+  findAllStructures: () => mockFindAllStructures(),
+}));
 
 vi.mock("@/app/api/operateurs/operateur.repository", () => ({
-  getPaginatedOperateurs: (...args: unknown[]) =>
-    mockGetPaginatedOperateurs(...args),
-  countOperateurs: (...args: unknown[]) => mockCountOperateurs(...args),
+  findAllOperateurs: () => mockFindAllOperateurs(),
 }));
+
+let versionIdSeq = 0;
+
+const structureFixture = (
+  id: number,
+  operateurId: number | null,
+  placesAutorisees: number,
+  type: string
+) => {
+  versionIdSeq += 1;
+  return {
+    id,
+    operateurId,
+    structureVersions: [
+      {
+        id: versionIdSeq,
+        effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
+        structureVersionTransformationId: null,
+        structureVersionTransformation: null,
+        type,
+        structureTypologies: [{ year: 2024, placesAutorisees }],
+      },
+    ],
+  };
+};
 
 describe("GET /api/operateurs", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("retourne les opérateurs et le total", async () => {
-    // GIVEN
-    mockGetPaginatedOperateurs.mockResolvedValueOnce([
+  it("remonte les structures de filiale dans la mère, garde le dénominateur global, et exclut les opérateurs sans structure", async () => {
+    mockFindAllStructures.mockResolvedValueOnce([
+      structureFixture(1, 1, 20, "CADA"),
+      structureFixture(2, 1, 10, "HUDA"),
+      structureFixture(3, 2, 30, "CADA"),
+      structureFixture(4, 99, 40, "CADA"),
+    ]);
+    mockFindAllOperateurs.mockResolvedValueOnce([
+      { id: 1, name: "Alpha", parentId: null, logo: { key: "logo-a" } },
+      { id: 2, name: "Beta", parentId: null, logo: null },
+      { id: 5, name: "Gamma", parentId: null, logo: null },
+      { id: 99, name: "Alpha Filiale", parentId: 1, logo: null },
+    ]);
+
+    const response = await GET(new NextRequest("http://localhost/api/operateurs"));
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.totalOperateurs).toBe(2);
+    expect(body.operateurs).toEqual([
       {
         id: 1,
-        name: "Adoma",
-        nb_structures: 2,
-        total_places: 20,
-        pourcentage_parc: 5.4,
-        structure_types: "{CADA,HUDA}",
-        logo: {},
+        name: "Alpha",
+        nbStructures: 3,
+        totalPlaces: 70,
+        pourcentageParc: 70,
+        structureTypes: ["CADA", "HUDA"],
+        logo: { key: "logo-a" },
+      },
+      {
+        id: 2,
+        name: "Beta",
+        nbStructures: 1,
+        totalPlaces: 30,
+        pourcentageParc: 30,
+        structureTypes: ["CADA"],
+        logo: { key: null },
       },
     ]);
-    mockCountOperateurs.mockResolvedValueOnce(1);
+  });
 
-    const request = new NextRequest(
-      "http://localhost/api/operateurs?page=1&search=Adoma"
+  it("filtre par recherche (insensible à la casse et aux accents)", async () => {
+    mockFindAllStructures.mockResolvedValueOnce([
+      structureFixture(1, 1, 20, "CADA"),
+      structureFixture(2, 2, 30, "CADA"),
+    ]);
+    mockFindAllOperateurs.mockResolvedValueOnce([
+      { id: 1, name: "Forum réfugiés", parentId: null, logo: null },
+      { id: 2, name: "Adoma", parentId: null, logo: null },
+    ]);
+
+    const response = await GET(
+      new NextRequest("http://localhost/api/operateurs?search=refugies")
     );
 
-    // WHEN
-    const response = await GET(request);
-
-    // THEN
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({
-      operateurs: [
-        {
-          id: 1,
-          name: "Adoma",
-          nbStructures: 2,
-          totalPlaces: 20,
-          pourcentageParc: 5.4,
-          structureTypes: ["CADA", "HUDA"],
-          logo: {},
-        },
-      ],
-      totalOperateurs: 1,
-    });
-    expect(mockGetPaginatedOperateurs).toHaveBeenCalledWith(
-      {
-        page: "1",
-        search: "Adoma",
-      },
-      expect.any(Date)
-    );
-    expect(mockCountOperateurs).toHaveBeenCalledWith({ search: "Adoma" });
+    const body = await response.json();
+    expect(body.totalOperateurs).toBe(1);
+    expect(body.operateurs.map((operateur: { name: string }) => operateur.name)).toEqual([
+      "Forum réfugiés",
+    ]);
   });
 });

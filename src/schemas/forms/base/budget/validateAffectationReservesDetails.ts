@@ -37,7 +37,7 @@ export const validateAffectationReservesDetails = (
     requiredFields.forEach(({ field, value }) => {
       if (value === null || value === undefined) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           path: [field],
           message:
             "Ce champ est requis si l'affectation des réserves et fonds dédiés est supérieure à 0.",

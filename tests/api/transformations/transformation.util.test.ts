@@ -50,7 +50,47 @@ describe("applyPrefill", () => {
     expect(fermetures[0].structureVersion?.contacts).toHaveLength(1);
   });
 
-  it("conserve les données propres de la cible et ajoute celles des sources (additif)", () => {
+  it("ajoute les contacts/antennes/adresses des FERMETURE à la CREATION (OUVERTURE_DEPUIS)", () => {
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
+      {
+        type: StructureVersionTransformationType.FERMETURE,
+        operateurId: 42,
+        structureVersion: {},
+      },
+      {
+        type: StructureVersionTransformationType.FERMETURE,
+        operateurId: 42,
+        structureVersion: {},
+      },
+      { type: StructureVersionTransformationType.CREATION },
+    ];
+
+    const result = applyPrefill(
+      TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
+      structureVersionTransformations
+    );
+
+    const creation = result.find(
+      (structureVersionTransformation) =>
+        structureVersionTransformation.type === StructureVersionTransformationType.CREATION
+    );
+    expect(creation?.operateurId).toBe(42);
+  });
+
+  it("ajoute les contacts/antennes/adresses des FERMETURE à la CREATION (OUVERTURE_DEPUIS)", () => {
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
+      { type: StructureVersionTransformationType.CREATION },
+    ];
+
+    const result = applyPrefill(
+      TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations
+    );
+
+    expect(result[0].operateurId).toBeUndefined();
+  });
+
+  it("ajoute les contacts/antennes/adresses des FERMETURE à la CREATION (OUVERTURE_DEPUIS)", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
       {
         type: StructureVersionTransformationType.FERMETURE,
@@ -81,7 +121,7 @@ describe("applyPrefill", () => {
     ]);
   });
 
-  it("retourne les structureVersionTransformations inchangées quand le type n'a pas de config de préremplissage", () => {
+  it("ajoute les contacts/antennes/adresses des FERMETURE à la CREATION (OUVERTURE_DEPUIS)", () => {
     const structureVersionTransformations: StructureVersionTransformationApiCreate[] = [
       {
         type: StructureVersionTransformationType.CREATION,

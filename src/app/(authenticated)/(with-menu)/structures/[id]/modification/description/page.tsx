@@ -13,8 +13,6 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { transformAgentFormContactsToApiContacts } from "@/app/utils/contacts.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
@@ -23,21 +21,17 @@ import {
   ModificationDescriptionFormValues,
   modificationDescriptionSchema,
 } from "@/schemas/forms/modification/modificationDescription.schema";
-import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
 
 export default function ModificationDescription() {
   const { structure } = useStructureContext();
 
-  const { handleSubmit, backendError } = useAgentFormHandling({
+  const { handleSubmit } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,
   });
   const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const defaultValues = getDefaultValues({ structure });
-
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("structure-save");
 
   const onSubmit = (data: ModificationDescriptionFormValues) => {
     handleSubmit({
@@ -86,12 +80,6 @@ export default function ModificationDescription() {
         shouldOpen={shouldOpenModal}
         setShouldOpen={setShouldOpenModal}
       />
-      {saveState === FetchState.ERROR && (
-        <SubmitError
-          codeBhasile={structure.codeBhasile}
-          backendError={backendError}
-        />
-      )}
     </>
   );
 }

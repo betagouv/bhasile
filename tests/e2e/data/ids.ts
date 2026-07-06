@@ -14,4 +14,7 @@ export const uniqueDnaCode = (): string => `${PREFIX}DNA-${shortId()}`;
 
 export const uniqueFinessCode = (): string => `${PREFIX}FIN-${shortId()}`;
 
+export const uniqueTransformationNom = (suffix = ""): string =>
+  `${PREFIX}TRANSFO-${shortId()}${suffix ? `-${suffix}` : ""}`;
+
 export const E2E_PREFIX = PREFIX;

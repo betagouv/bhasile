@@ -17,12 +17,13 @@ export type StructureSelectionBlock = {
   multiple: boolean;
   type: StructureVersionTransformationType;
   fixedType?: StructureType;
+  matchDepartureType?: boolean;
   inheritOperateurFrom?: string;
   inheritDepartementFrom?: string;
   label?: string;
 };
 
-export type PrefillField = "contacts" | "antennes" | "adresses";
+export type PrefillField = "contacts" | "antennes" | "adresses" | "operateur";
 
 export type PrefillRule = {
   from: StructureVersionTransformationType;
@@ -80,7 +81,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         from: StructureVersionTransformationType.FERMETURE,
         to: StructureVersionTransformationType.CREATION,
-        fields: ["contacts", "antennes", "adresses"],
+        fields: ["contacts", "antennes", "adresses", "operateur"],
       },
     ],
   },
@@ -103,6 +104,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         id: "main",
         multiple: true,
         type: StructureVersionTransformationType.CONTRACTION,
+        matchDepartureType: true,
         label:
           "Veuillez sélectionner la ou les structures dont sont issues les places",
       },
@@ -130,6 +132,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         id: "main",
         multiple: true,
         type: StructureVersionTransformationType.FERMETURE,
+        matchDepartureType: true,
         label:
           "Veuillez sélectionner la ou les structures dont sont issues les places",
       },
@@ -157,6 +160,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
         id: "main",
         multiple: true,
         type: StructureVersionTransformationType.EXTENSION,
+        matchDepartureType: true,
         label:
           "Veuillez sélectionner la ou les structures vers lesquelles les places sont transférées",
       },
@@ -197,6 +201,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
           id: "main",
           multiple: true,
           type: StructureVersionTransformationType.EXTENSION,
+          matchDepartureType: true,
           label:
             "Veuillez sélectionner la ou les structures vers lesquelles les places sont transférées",
         },
@@ -279,7 +284,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
       {
         from: StructureVersionTransformationType.FERMETURE,
         to: StructureVersionTransformationType.CREATION,
-        fields: ["contacts", "antennes", "adresses"],
+        fields: ["contacts", "antennes", "adresses", "operateur"],
       },
     ],
   },

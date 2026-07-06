@@ -224,10 +224,6 @@ const buildStructure = (): StructureDbDetails =>
         pmr: 0,
         lgbt: 0,
         fvvTeh: 0,
-        placesACreer: null,
-        placesAFermer: null,
-        echeancePlacesACreer: null,
-        echeancePlacesAFermer: null,
       },
     ],
     dnaStructures: [

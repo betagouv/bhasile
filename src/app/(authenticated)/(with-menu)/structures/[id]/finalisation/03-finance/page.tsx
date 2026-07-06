@@ -9,9 +9,7 @@ import { IndicateursFinanciers } from "@/app/components/forms/finance/Indicateur
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { SubmitError } from "@/app/components/SubmitError";
 import { InformationBar } from "@/app/components/ui/InformationBar";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
@@ -20,7 +18,6 @@ import {
   budgetsAutoSaveSchema,
 } from "@/schemas/forms/base/budget.schema";
 import { getFinanceSchema } from "@/schemas/forms/base/budget/getFinanceSchema";
-import { FetchState } from "@/types/fetch-state.type";
 import { StepStatus } from "@/types/form.type";
 
 import { Tabs } from "../_components/Tabs";
@@ -39,8 +36,9 @@ export default function FinalisationFinance(): ReactElement {
 
   const defaultValues = getDefaultValues({ structure });
 
-  const { handleValidation, handleAutoSave, backendError } =
-    useAgentFormHandling({ currentStep });
+  const { handleValidation, handleAutoSave } = useAgentFormHandling({
+    currentStep,
+  });
 
   const onAutoSave = async (data: BudgetsAutoSaveFormValues) => {
     await handleAutoSave({
@@ -49,9 +47,6 @@ export default function FinalisationFinance(): ReactElement {
       id: structure.id,
     });
   };
-
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("structure-save");
 
   return (
     <div>
@@ -83,12 +78,6 @@ export default function FinalisationFinance(): ReactElement {
         <hr />
 
         <BudgetTables />
-        {saveState === FetchState.ERROR && (
-          <SubmitError
-            codeBhasile={structure.codeBhasile}
-            backendError={backendError}
-          />
-        )}
       </FormWrapper>
     </div>
   );

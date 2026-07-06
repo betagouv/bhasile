@@ -391,13 +391,24 @@ describe("date util", () => {
 
       it("retourne l'année complète à partir d'une Date créée avec année, mois, jour", () => {
         // GIVEN
-        const date = new Date(2025, 0, 1);
+        const date = new Date(Date.UTC(2025, 0, 1));
 
         // WHEN
         const result = getYearFromDate(date);
 
         // THEN
         expect(result).toBe(2025);
+      });
+
+      it("utilise l'année UTC, pas l'année locale du runner, juste à une bordure d'année", () => {
+        // GIVEN
+        const date = new Date("2024-12-31T23:30:00.000Z");
+
+        // WHEN
+        const result = getYearFromDate(date);
+
+        // THEN
+        expect(result).toBe(2024);
       });
     });
 

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildTransformationTypologie,
-  getAdresseSource,
   getPlacesSource,
   getReferenceStructureVersionTransformation,
   getStructureVersionTransformationDepartement,
@@ -877,54 +876,6 @@ describe("transformation util", () => {
       [FormKind.FINALISATION, false],
     ])("retourne %s → %s", (formKind, expected) => {
       expect(isTransformationSurStructureExistante(formKind)).toBe(expected);
-    });
-  });
-
-  describe("getAdresseSource", () => {
-    it("projette l'adresse de la structure source (stable, pré-transformation)", () => {
-      const structureVersionTransformation: StructureVersionTransformationApiRead =
-        {
-          id: 1,
-          type: StructureVersionTransformationType.EXTENSION,
-          structureVersion: {
-            structure: {
-              codeBhasile: "BHA-NOR-001",
-              nom: "Les Mimosas",
-              adresseAdministrative: "58 boulevard Vauban",
-              adresseAdministrativeComplete:
-                "58 boulevard Vauban 50300 Avranches",
-              codePostalAdministratif: "50300",
-              communeAdministrative: "Avranches",
-              departementAdministratif: "50",
-            },
-          },
-        };
-
-      expect(getAdresseSource(structureVersionTransformation)).toEqual({
-        nom: "Les Mimosas",
-        adresseAdministrative: "58 boulevard Vauban",
-        adresseAdministrativeComplete: "58 boulevard Vauban 50300 Avranches",
-        codePostalAdministratif: "50300",
-        communeAdministrative: "Avranches",
-        departementAdministratif: "50",
-      });
-    });
-
-    it("normalise les champs absents en chaîne vide", () => {
-      const structureVersionTransformation: StructureVersionTransformationApiRead =
-        {
-          id: 1,
-          type: StructureVersionTransformationType.EXTENSION,
-        };
-
-      expect(getAdresseSource(structureVersionTransformation)).toEqual({
-        nom: "",
-        adresseAdministrative: "",
-        adresseAdministrativeComplete: "",
-        codePostalAdministratif: "",
-        communeAdministrative: "",
-        departementAdministratif: "",
-      });
     });
   });
 

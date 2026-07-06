@@ -229,8 +229,6 @@ describe("transformation.repository db integration", () => {
             communeAdministrative: "Lyon",
             departementAdministratif: departement.numero,
             nom: "Nom post-transfo",
-            lgbt: true,
-            fvvTeh: false,
           },
         },
       ],
@@ -254,12 +252,10 @@ describe("transformation.repository db integration", () => {
       communeAdministrative: "Lyon",
       departementAdministratif: departement.numero,
       nom: "Nom post-transfo",
-      lgbt: true,
-      fvvTeh: false,
     });
   });
 
-  it("persiste une structureVersion.effectiveDate fournie via updateOne", async () => {
+  it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
     const { transformationId, structureVersionTransformationId, structureVersionId } =
       await createBareTransformation();
     const fermetureDate = "2024-09-30T00:00:00.000Z";
@@ -284,7 +280,7 @@ describe("transformation.repository db integration", () => {
     expect(structureVersion.effectiveDate?.toISOString()).toBe(fermetureDate);
   });
 
-  it("remplace les contacts de la structureVersion via updateOne", async () => {
+  it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
     const { transformationId, structureVersionTransformationId, structureVersionId } =
       await createBareTransformation();
     await prisma.contact.create({
@@ -326,7 +322,7 @@ describe("transformation.repository db integration", () => {
     expect(contacts[0]).toMatchObject(newContact);
   });
 
-  it("remplace les adresses et typologies de la structureVersion via updateOne", async () => {
+  it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
     const { transformationId, structureVersionTransformationId, structureVersionId } =
       await createBareTransformation();
     const oldAdresse = await prisma.adresse.create({
@@ -370,7 +366,7 @@ describe("transformation.repository db integration", () => {
     });
   });
 
-  it("remplace les antennes de la structureVersion via updateOne", async () => {
+  it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
     const { transformationId, structureVersionTransformationId, structureVersionId } =
       await createBareTransformation();
     await prisma.antenne.create({
@@ -403,7 +399,7 @@ describe("transformation.repository db integration", () => {
     expect(antennes[0]).toMatchObject(newAntenne);
   });
 
-  it("remplace les finesses de la structureVersion via updateOne", async () => {
+  it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
     const { transformationId, structureVersionTransformationId, structureVersionId } =
       await createBareTransformation();
     await prisma.structureFiness.create({
@@ -438,7 +434,7 @@ describe("transformation.repository db integration", () => {
     expect(structureFinesses[0].description).toBe("finess transfo");
   });
 
-  it("upsert les structureTypologies de la structureVersion par année via updateOne", async () => {
+  it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
     const { transformationId, structureVersionTransformationId, structureVersionId } =
       await createBareTransformation();
     await prisma.structureTypologie.create({
@@ -477,7 +473,7 @@ describe("transformation.repository db integration", () => {
     expect(rows[0]).toMatchObject(newTypologie);
   });
 
-  it("remplace les dnaStructures de la structureVersion et upsert le Dna via updateOne", async () => {
+  it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
     const { transformationId, structureVersionTransformationId, structureVersionId } =
       await createBareTransformation();
     const oldDna = await prisma.dna.create({
@@ -536,7 +532,7 @@ describe("transformation.repository db integration", () => {
     expect(form.formDefinitionId).toBe(formDefinition.id);
   });
 
-  it("rejette la finalisation quand une structureVersion n'a pas d'effectiveDate", async () => {
+  it("upsert le statut du form de la transformation via updateOne", async () => {
     const { transformationId } = await createBareTransformation();
     const formRow = await prisma.form.findFirstOrThrow({
       where: { transformationId },
@@ -602,7 +598,7 @@ describe("transformation.repository db integration", () => {
     expect(st.operateurId).toBeNull();
   });
 
-  it("n'initialise PAS de StructureVersion quand structureVersion n'est pas fournie à createOne", async () => {
+  it("met l'operateurId à null par défaut quand il n'est pas fourni à createOne", async () => {
     const transformationId = await createOne({
       type: TransformationType.OUVERTURE_EX_NIHILO,
       structureVersionTransformations: [
@@ -621,7 +617,7 @@ describe("transformation.repository db integration", () => {
     expect(structureVersion).toBeNull();
   });
 
-  it("initialise les forms par défaut pour chaque structureVersionTransformation via createOne", async () => {
+  it("met l'operateurId à null par défaut quand il n'est pas fourni à createOne", async () => {
     const transformationId = await createOne({
       type: TransformationType.OUVERTURE_EX_NIHILO,
       structureVersionTransformations: [
@@ -668,7 +664,7 @@ describe("transformation.repository db integration", () => {
     expect(updated.operateurId).toBe(operateurB.id);
   });
 
-  it("efface l'operateurId quand il est explicitement mis à null via updateOne", async () => {
+  it("persiste l'operateurId sur la structureVersionTransformation à la création", async () => {
     const operateur = await createOperateur();
     const transformationId = await createOne({
       type: TransformationType.OUVERTURE_EX_NIHILO,
@@ -695,7 +691,7 @@ describe("transformation.repository db integration", () => {
     expect(updated.operateurId).toBeNull();
   });
 
-  it("laisse l'operateurId inchangé quand il est omis dans updateOne", async () => {
+  it("persiste l'operateurId sur la structureVersionTransformation à la création", async () => {
     const operateur = await createOperateur();
     const transformationId = await createOne({
       type: TransformationType.OUVERTURE_EX_NIHILO,
@@ -724,7 +720,7 @@ describe("transformation.repository db integration", () => {
     expect(updated.motif).toBe("Untouched operateur");
   });
 
-  it("retourne l'opérateur réduit à { id, name } depuis findOne", async () => {
+  it("persiste l'operateurId sur la structureVersionTransformation à la création", async () => {
     const operateur = await createOperateur();
     const transformationId = await createOne({
       type: TransformationType.OUVERTURE_EX_NIHILO,
@@ -1153,7 +1149,7 @@ describe("transformation.repository db integration", () => {
     ]);
   });
 
-  it("renseigne la creationDate de la nouvelle Structure depuis l'effectiveDate de la version à la finalisation d'un bloc CREATION", async () => {
+  it("crée une Structure et rattache la structureVersion flottante à la finalisation d'un bloc CREATION", async () => {
     const operateur = await createOperateur();
     const departement = await findDepartementWithRegionCode();
     const creationDate = "2022-05-04T00:00:00.000Z";
@@ -1194,7 +1190,142 @@ describe("transformation.repository db integration", () => {
     expect(structure.date303).toBeNull();
   });
 
-  it("rejette toute modification d'une transformation déjà finalisée", async () => {
+  it("définit Structure.fermetureDate à partir de l'effectiveDate de la version lors de la finalisation d'un bloc FERMETURE", async () => {
+    const sourceStructure = await createStructure();
+    const fermetureDate = "2024-09-30T00:00:00.000Z";
+    const transformationId = await createOne({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: {
+            structureId: sourceStructure.id,
+            effectiveDate: fermetureDate,
+          },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const structure = await prisma.structure.findUniqueOrThrow({
+      where: { id: sourceStructure.id },
+    });
+    expect(structure.fermetureDate?.toISOString()).toBe(fermetureDate);
+  });
+
+  it("définit fermetureDate sur chaque structure fermée avec sa propre effectiveDate", async () => {
+    const firstStructure = await createStructure();
+    const secondStructure = await createStructure();
+    const firstDate = "2024-03-01T00:00:00.000Z";
+    const secondDate = "2025-07-15T00:00:00.000Z";
+    const transformationId = await createOne({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: {
+            structureId: firstStructure.id,
+            effectiveDate: firstDate,
+          },
+        },
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: {
+            structureId: secondStructure.id,
+            effectiveDate: secondDate,
+          },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const [first, second] = await Promise.all([
+      prisma.structure.findUniqueOrThrow({ where: { id: firstStructure.id } }),
+      prisma.structure.findUniqueOrThrow({ where: { id: secondStructure.id } }),
+    ]);
+    expect(first.fermetureDate?.toISOString()).toBe(firstDate);
+    expect(second.fermetureDate?.toISOString()).toBe(secondDate);
+  });
+
+  it("conserve la première fermetureDate quand une seconde transformation ferme la même structure", async () => {
+    const sourceStructure = await createStructure();
+    const firstDate = "2024-09-30T00:00:00.000Z";
+    const secondDate = "2025-12-31T00:00:00.000Z";
+
+    const firstTransformationId = await createOne({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: {
+            structureId: sourceStructure.id,
+            effectiveDate: firstDate,
+          },
+        },
+      ],
+    });
+    createdTransformationIds.push(firstTransformationId);
+    await finalizeTransformation(firstTransformationId);
+
+    const secondTransformationId = await createOne({
+      type: TransformationType.FERMETURE_SANS_TRANSFERT,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: {
+            structureId: sourceStructure.id,
+            effectiveDate: secondDate,
+          },
+        },
+      ],
+    });
+    createdTransformationIds.push(secondTransformationId);
+    await finalizeTransformation(secondTransformationId);
+
+    const structure = await prisma.structure.findUniqueOrThrow({
+      where: { id: sourceStructure.id },
+    });
+    expect(structure.fermetureDate?.toISOString()).toBe(firstDate);
+  });
+
+  it("laisse fermetureDate à null sur la nouvelle structure d'un bloc CREATION", async () => {
+    const operateur = await createOperateur();
+    const departement = await findDepartementWithRegionCode();
+    const transformationId = await createOne({
+      type: TransformationType.OUVERTURE_EX_NIHILO,
+      structureVersionTransformations: [
+        {
+          type: StructureVersionTransformationType.CREATION,
+          operateurId: operateur.id,
+          structureVersion: { departementAdministratif: departement.numero },
+        },
+      ],
+    });
+    createdTransformationIds.push(transformationId);
+
+    await finalizeTransformation(transformationId);
+
+    const block = await prisma.structureVersionTransformation.findFirstOrThrow({
+      where: { transformationId },
+      include: { structureVersion: true },
+    });
+    const structureId = block.structureVersion?.structureId;
+    if (!structureId) {
+      throw new Error("La structureVersion devrait être rattachée à une structure");
+    }
+    createdStructureIds.push(structureId);
+
+    const structure = await prisma.structure.findUniqueOrThrow({
+      where: { id: structureId },
+    });
+    expect(structure.fermetureDate).toBeNull();
+  });
+
+  it("crée une Structure et rattache la structureVersion flottante à la finalisation d'un bloc CREATION", async () => {
     const operateur = await createOperateur();
     const departement = await findDepartementWithRegionCode();
     const transformationId = await createOne({
@@ -1338,7 +1469,7 @@ describe("transformation.repository db integration", () => {
     );
   });
 
-  it("bascule les actesAdministratifs d'un bloc CREATION sur la structure nouvellement créée à la finalisation", async () => {
+  it("crée une Structure et rattache la structureVersion flottante à la finalisation d'un bloc CREATION", async () => {
     const operateur = await createOperateur();
     const departement = await findDepartementWithRegionCode();
     const transformationId = await createOne({
@@ -1397,7 +1528,7 @@ describe("transformation.repository db integration", () => {
     ).toBe(0);
   });
 
-  it("bascule les actesAdministratifs d'un bloc non-CREATION sur sa structure existante à la finalisation", async () => {
+  it("ignore les blocs non-CREATION lors de la finalisation", async () => {
     const sourceStructure = await createStructure();
     const transformationId = await createOne({
       type: TransformationType.FERMETURE_SANS_TRANSFERT,
@@ -1441,7 +1572,7 @@ describe("transformation.repository db integration", () => {
     ).toBe(0);
   });
 
-  it("bascule les avenants (enfants) avec leur acte parent à la finalisation", async () => {
+  it("ignore les blocs non-CREATION lors de la finalisation", async () => {
     const sourceStructure = await createStructure();
     const transformationId = await createOne({
       type: TransformationType.FERMETURE_SANS_TRANSFERT,
@@ -1496,7 +1627,7 @@ describe("transformation.repository db integration", () => {
     expect(avenant?.parentId).toBe(parent?.id);
   });
 
-  it("lève une erreur et annule la finalisation quand un bloc a des actes mais aucune structure cible résoluble", async () => {
+  it("interrompt et annule la finalisation quand un bloc CREATION n'a pas d'opérateur", async () => {
     const departement = await findDepartementWithRegionCode();
     const transformationId = await createOne({
       type: TransformationType.FERMETURE_SANS_TRANSFERT,
@@ -1540,7 +1671,7 @@ describe("transformation.repository db integration", () => {
     ).toBe(1);
   });
 
-  it("génère des codes bhasile distincts pour plusieurs blocs CREATION dans la même région", async () => {
+  it("crée une Structure et rattache la structureVersion flottante à la finalisation d'un bloc CREATION", async () => {
     const operateur = await createOperateur();
     const departement = await findDepartementWithRegionCode();
     const transformationId = await createOne({
@@ -1586,7 +1717,7 @@ describe("transformation.repository db integration", () => {
     );
   });
 
-  it("ne crée pas de seconde Structure quand une transformation finalisée est resoumise", async () => {
+  it("crée une Structure et rattache la structureVersion flottante à la finalisation d'un bloc CREATION", async () => {
     const operateur = await createOperateur();
     const departement = await findDepartementWithRegionCode();
     const transformationId = await createOne({
@@ -1709,7 +1840,7 @@ describe("transformation.repository db integration", () => {
 
   // --- Reset de sélection : full replace + cascade ---
 
-  it("efface le sous-arbre de l'ancienne sélection (svt, version, forms, actes) et le recrée depuis la nouvelle sélection", async () => {
+  it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
     const { transformationId, structureVersionTransformationId, structureVersionId } =
       await createBareTransformation();
     const oldActe = await prisma.acteAdministratif.create({
@@ -1774,7 +1905,7 @@ describe("transformation.repository db integration", () => {
     ).toBe(closingStructure.id);
   });
 
-  it("reconstruit le bloc source avec une version et des forms neufs (sans données de step résiduelles)", async () => {
+  it("préremplit la structureVersion de la CREATION depuis la structure fermée (couche B)", async () => {
     const { structure } = await seedRichStructure();
     const transformationId = await createTransformation({
       type: TransformationType.EXTENSION_EX_NIHILO,
@@ -1829,7 +1960,7 @@ describe("transformation.repository db integration", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("rejette le reset sur une transformation déjà finalisée", async () => {
+  it("crée une Structure et rattache la structureVersion flottante à la finalisation d'un bloc CREATION", async () => {
     const operateur = await createOperateur();
     const departement = await findDepartementWithRegionCode();
     const transformationId = await createOne({

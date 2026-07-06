@@ -9,6 +9,7 @@ import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { useRedirectStructureCreation } from "@/app/hooks/useRedirectStructureCreation";
 import { useStructures } from "@/app/hooks/useStructures";
+import { ApiError } from "@/app/utils/apiError.util";
 import { getErrorEmail } from "@/app/utils/errorMail.util";
 import { BHASILE_CONTACT_EMAIL } from "@/constants";
 import { AjoutIdentificationFormValues } from "@/schemas/forms/ajout/ajoutIdentification.schema";
@@ -57,12 +58,13 @@ export default function StepVerification() {
       ...documentsFinanciersValues,
     };
 
-    const result = await addStructure(allValues);
-
-    if (result === "OK") {
+    try {
+      await addStructure(allValues);
       router.push(`/ajout-structure/${params.id}/06-confirmation`);
-    } else {
-      setBackendError(result);
+    } catch (error) {
+      setBackendError(
+        error instanceof ApiError ? error.message : "Une erreur est survenue."
+      );
       setState("error");
     }
   };
@@ -98,7 +100,6 @@ export default function StepVerification() {
         <CustomNotice
           severity="info"
           title=""
-          className="rounded [&_p]:flex [&_p]:items-center"
           description="Veuillez vérifier les informations saisies méticuleusement : une fois validées, il ne sera plus possible de les modifier."
         />
         <StepResume

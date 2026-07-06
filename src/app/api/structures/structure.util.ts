@@ -10,8 +10,13 @@ import {
   recursivelySerializeDates,
   startOfNextUtcDay,
 } from "@/app/utils/date.util";
+import {
+  type SortKind,
+  sortRows,
+  type SortValue,
+} from "@/app/utils/list.util";
 import { normalizeAccents, parseCommaList } from "@/app/utils/string.util";
-import { CURRENT_YEAR, DEFAULT_PAGE_SIZE } from "@/constants";
+import { CURRENT_YEAR } from "@/constants";
 import {
   PublicType,
   StructureType,
@@ -27,11 +32,13 @@ import {
   HistoryEvent,
   StructureRef,
 } from "@/types/structure-history.type";
+import { UpcomingTransformation } from "@/types/transformation.type";
 
 import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
 import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import {
   getValidVersions,
+  isVersionValid,
   resolveCurrentVersionFields,
 } from "../structure-versions/structure-version.util";
 import {
@@ -409,12 +416,10 @@ export const filterStructureRows = (
   });
 };
 
-type SortValue = string | number | null;
-
 const sortValueForColumn = (
   row: StructureListComputedRow,
   column: StructureColumn
-): { value: SortValue; kind: "text" | "number" } => {
+): { value: SortValue; kind: SortKind } => {
   switch (column) {
     case "codeBhasile":
       return { value: row.codeBhasile, kind: "text" };
@@ -440,60 +445,16 @@ const sortValueForColumn = (
   }
 };
 
-const compareSortValues = (
-  first: SortValue,
-  second: SortValue,
-  direction: "asc" | "desc",
-  kind: "text" | "number"
-): number => {
-  const firstIsNull = first === null;
-  const secondIsNull = second === null;
-  if (firstIsNull && secondIsNull) {
-    return 0;
-  }
-  if (firstIsNull) {
-    return direction === "asc" ? 1 : -1;
-  }
-  if (secondIsNull) {
-    return direction === "asc" ? -1 : 1;
-  }
-  const comparison =
-    kind === "text"
-      ? String(first).localeCompare(String(second), "fr")
-      : (first as number) - (second as number);
-  return direction === "asc" ? comparison : -comparison;
-};
-
 export const sortStructureRows = (
   rows: StructureListComputedRow[],
   column: StructureColumn,
   direction: "asc" | "desc"
 ): StructureListComputedRow[] =>
-  [...rows].sort((first, second) => {
-    const firstValue = sortValueForColumn(first, column);
-    const secondValue = sortValueForColumn(second, column);
-    const primary = compareSortValues(
-      firstValue.value,
-      secondValue.value,
-      direction,
-      firstValue.kind
-    );
-    if (primary !== 0) {
-      return primary;
-    }
-    const secondary = compareSortValues(
-      first.codeBhasile,
-      second.codeBhasile,
-      "asc",
-      "text"
-    );
-    return secondary;
-  });
-
-export const paginateRows = <T>(rows: T[], page: number): T[] =>
-  rows.slice(
-    page * DEFAULT_PAGE_SIZE,
-    page * DEFAULT_PAGE_SIZE + DEFAULT_PAGE_SIZE
+  sortRows(
+    rows,
+    (row) => sortValueForColumn(row, column),
+    (row) => ({ value: row.codeBhasile, kind: "text" }),
+    direction
   );
 
 export const getCpomStructuresWithDates = (
@@ -677,9 +638,9 @@ const buildTransformationEvent = (
 };
 
 const buildCpomEvents = (
-  cpomStructures: CpomStructureApiRead[]
+  cpomStructures: CpomStructureApiRead[],
+  now: string
 ): HistoryEvent[] => {
-  const now = new Date().toISOString();
   const events: HistoryEvent[] = [];
 
   cpomStructures.forEach((cpomStructure) => {
@@ -698,6 +659,8 @@ const buildCpomEvents = (
         cpom.departements
           ?.map((cpomDepartement) => cpomDepartement.departement?.numero)
           .filter((numero): numero is string => Boolean(numero)) ?? [],
+      regionName:
+        cpom.granularity === "REGIONALE" ? (cpom.region?.name ?? null) : null,
     };
 
     if (entryDate && entryDate <= now) {
@@ -713,18 +676,40 @@ const buildCpomEvents = (
 
 export const buildStructureHistory = (
   structure: StructureDbDetails,
-  cpomStructures: CpomStructureApiRead[]
+  cpomStructures: CpomStructureApiRead[],
+  now: Date = new Date()
 ): HistoryEvent[] => {
   const validVersions = getValidVersions(
     structure.structureVersions ?? [],
-    new Date()
+    now
   );
 
   const events = [
     buildCreationEvent(structure, validVersions),
     ...validVersions.map(buildTransformationEvent),
-    ...buildCpomEvents(cpomStructures),
+    ...buildCpomEvents(cpomStructures, now.toISOString()),
   ].filter((event): event is HistoryEvent => event !== null);
 
   return events.sort((first, second) => second.date.localeCompare(first.date));
+};
+
+export const buildUpcomingTransformations = (
+  structure: StructureDbDetails,
+  now: Date = new Date()
+): UpcomingTransformation[] => {
+  const lowerBound = startOfNextUtcDay(now);
+
+  return (structure.structureVersions ?? [])
+    .filter(
+      (version) =>
+        version.structureVersionTransformationId !== null &&
+        version.effectiveDate !== null &&
+        version.effectiveDate >= lowerBound &&
+        isVersionValid(version)
+    )
+    .map((version) => ({
+      kind: version.structureVersionTransformation!.type,
+      date: version.effectiveDate!.toISOString(),
+    }))
+    .sort((first, second) => first.date.localeCompare(second.date));
 };

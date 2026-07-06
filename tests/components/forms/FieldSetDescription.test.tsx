@@ -29,8 +29,6 @@ describe("FieldSetDescription", () => {
             filiale: "",
             creationDate: "01/01/2020",
             public: PublicType.TOUT_PUBLIC,
-            lgbt: false,
-            fvvTeh: false,
             cpom: false,
           }}
         >
@@ -55,16 +53,9 @@ describe("FieldSetDescription", () => {
       ).toBeInTheDocument();
 
       expect(screen.getByLabelText("Public")).toBeInTheDocument();
-
-      const lgbtTexts = screen.getAllByText(/LGBT/i);
-      expect(lgbtTexts.length).toBeGreaterThan(0);
-
-      expect(screen.getByLabelText("LGBT")).toBeInTheDocument();
-
-      expect(screen.getByLabelText("FVV et TEH")).toBeInTheDocument();
     });
 
-    it("propose toutes les options de type de public", () => {
+    it("rend avec la légende Général", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -101,7 +92,7 @@ describe("FieldSetDescription", () => {
       expect(screen.getByText("Général")).toBeInTheDocument();
     });
 
-    it("ne rend pas l'interrupteur filiale ni la date de création", () => {
+    it("rend avec la légende Général", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -150,7 +141,7 @@ describe("FieldSetDescription", () => {
       });
     });
 
-    it("masque le champ filiale quand l'interrupteur est désactivé", async () => {
+    it("affiche le champ filiale quand l'interrupteur est activé", async () => {
       const user = userEvent.setup();
 
       render(
@@ -185,62 +176,8 @@ describe("FieldSetDescription", () => {
     });
   });
 
-  describe("LGBT and FVV/TEH checkboxes", () => {
-    it("bascule la case à cocher LGBT", async () => {
-      const user = userEvent.setup();
-
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            type: StructureType.CADA,
-            operateur: { id: 1, name: "Adoma" },
-            lgbt: false,
-          }}
-        >
-          <FieldSetDescription formKind={FormKind.FINALISATION} />
-        </FormTestWrapper>
-      );
-
-      const lgbtCheckbox = screen.getByLabelText("LGBT") as HTMLInputElement;
-      expect(lgbtCheckbox.checked).toBe(false);
-
-      await user.click(lgbtCheckbox);
-
-      await waitFor(() => {
-        expect(lgbtCheckbox.checked).toBe(true);
-      });
-    });
-
-    it("bascule la case à cocher FVV/TEH", async () => {
-      const user = userEvent.setup();
-
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            type: StructureType.CADA,
-            operateur: { id: 1, name: "Adoma" },
-            fvvTeh: false,
-          }}
-        >
-          <FieldSetDescription formKind={FormKind.FINALISATION} />
-        </FormTestWrapper>
-      );
-
-      const fvvTehCheckbox = screen.getByLabelText(
-        "FVV et TEH"
-      ) as HTMLInputElement;
-      expect(fvvTehCheckbox.checked).toBe(false);
-
-      await user.click(fvvTehCheckbox);
-
-      await waitFor(() => {
-        expect(fvvTehCheckbox.checked).toBe(true);
-      });
-    });
-  });
-
   describe("Type selection", () => {
-    it("propose tous les types de structure sauf PRAHDA", () => {
+    it("rend avec la légende Général", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -284,28 +221,4 @@ describe("FieldSetDescription", () => {
     });
   });
 
-  describe("Notice display", () => {
-    it("affiche la note explicative LGBT/FVV/TEH", () => {
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            type: StructureType.CADA,
-            operateur: { id: 1, name: "Adoma" },
-          }}
-        >
-          <FieldSetDescription formKind={FormKind.FINALISATION} />
-        </FormTestWrapper>
-      );
-
-      expect(
-        screen.getByText(/LGBT : Lesbiennes, Gays, Bisexuels et Transgenres/i)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/FVV : Femmes Victimes de Violences/i)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/TEH : Traîte des Êtres Humains/i)
-      ).toBeInTheDocument();
-    });
-  });
 });

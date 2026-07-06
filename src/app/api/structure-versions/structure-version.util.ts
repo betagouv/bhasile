@@ -17,7 +17,7 @@ type ResolvableVersion = {
     | null;
 };
 
-const isVersionValid = (version: ResolvableVersion): boolean => {
+export const isVersionValid = (version: ResolvableVersion): boolean => {
   if (version.structureVersionTransformationId === null) {
     return true;
   }

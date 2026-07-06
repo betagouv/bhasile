@@ -52,7 +52,7 @@ export const DocumentsFinanciersFlexibleSchema =
       return true;
     },
     {
-      message:
+      error:
         "La date de création de la structure doit être antérieure à la date de rattachement au programme 303",
       path: ["date303"],
     }
@@ -62,7 +62,7 @@ export const DocumentsFinanciersStrictSchema = DocumentsFinanciersSchema.extend(
   {
     type: z.preprocess(
       (val) => (val === "" ? undefined : val),
-      z.nativeEnum(StructureType)
+      z.enum(StructureType)
     ),
   }
 )
@@ -74,46 +74,48 @@ export const DocumentsFinanciersStrictSchema = DocumentsFinanciersSchema.extend(
       return true;
     },
     {
-      message:
+      error:
         "La date de création de la structure doit être antérieure à la date de rattachement au programme 303",
       path: ["date303"],
     }
   )
-  .superRefine((data, ctx) => {
-    const isAutorisee = isStructureAutorisee(data.type);
-    const documents = isAutorisee
-      ? structureAutoriseesDocuments
-      : structureSubventionneesDocuments;
+  .check(
+    z.superRefine((data, ctx) => {
+      const isAutorisee = isStructureAutorisee(data.type);
+      const documents = isAutorisee
+        ? structureAutoriseesDocuments
+        : structureSubventionneesDocuments;
 
-    const { years } = getYearRange();
+      const { years } = getYearRange();
 
-    const referenceYear = Number(
-      getYearFromDate(data.date303 ?? data.creationDate)
-    );
+      const referenceYear = Number(
+        getYearFromDate(data.date303 ?? data.creationDate)
+      );
 
-    years.forEach((year, index) => {
-      if (year >= referenceYear) {
-        documents.forEach((document) => {
-          const documentIsRequired =
-            document.required && index >= document.yearIndex;
-          if (documentIsRequired) {
-            const requiredDocument = data.documentsFinanciers?.find(
-              (documentFinancier) =>
-                documentFinancier.category === document.value &&
-                documentFinancier.year === year
-            );
-            if (!requiredDocument) {
-              ctx.addIssue({
-                path: ["documentsFinanciers", year],
-                code: z.ZodIssueCode.custom,
-                message: "Ce champ est requis",
-              });
+      years.forEach((year, index) => {
+        if (year >= referenceYear) {
+          documents.forEach((document) => {
+            const documentIsRequired =
+              document.required && index >= document.yearIndex;
+            if (documentIsRequired) {
+              const requiredDocument = data.documentsFinanciers?.find(
+                (documentFinancier) =>
+                  documentFinancier.category === document.value &&
+                  documentFinancier.year === year
+              );
+              if (!requiredDocument) {
+                ctx.addIssue({
+                  path: ["documentsFinanciers", year],
+                  code: "custom",
+                  message: "Ce champ est requis",
+                });
+              }
             }
-          }
-        });
-      }
-    });
-  });
+          });
+        }
+      });
+    })
+  );
 
 export type DocumentFinancierFlexibleFormValues = z.infer<
   typeof DocumentFinancierSchema

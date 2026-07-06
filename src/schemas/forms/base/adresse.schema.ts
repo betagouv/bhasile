@@ -22,12 +22,12 @@ const adresseSchema = z.object({
   codePostal: z.string().min(1),
   commune: z.string().min(1),
   departement: z.string().optional(),
-  repartition: z.nativeEnum(Repartition),
+  repartition: z.enum(Repartition),
   adresseTypologies: z.array(adresseTypologieSchema).optional(),
 });
 
-const adresseWithPlacesRequired = adresseSchema.superRefine(
-  (adresse, ctx) => {
+const adresseWithPlacesRequired = adresseSchema.check(
+  z.superRefine((adresse, ctx) => {
     if (
       adresse.adresseComplete &&
       adresse.adresseComplete.trim() !== "" &&
@@ -36,16 +36,16 @@ const adresseWithPlacesRequired = adresseSchema.superRefine(
         adresse.adresseTypologies?.[0]?.placesAutorisees === 0)
     ) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Requis",
         path: ["placesAutorisees"],
       });
     }
-  }
+  })
 );
 
 const typeBatiSchema = z.object({
-  typeBati: z.nativeEnum(Repartition),
+  typeBati: z.enum(Repartition),
   sameAddress: z.boolean().optional(),
 });
 
@@ -63,24 +63,26 @@ export const typeBatiAndAdressesSchema = typeBatiSchema
         adresse.adresseTypologies?.[0]?.placesAutorisees !== 0
     );
   }, "Au moins une adresse doit avoir des places")
-  .superRefine((data, ctx) => {
-    if (data.typeBati !== Repartition.MIXTE) {
-      return;
-    }
-
-    data.adresses.forEach((adresse, index) => {
-      if (
-        adresse.repartition !== Repartition.DIFFUS &&
-        adresse.repartition !== Repartition.COLLECTIF
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Type de bâti requis",
-          path: ["adresses", index, "repartition"],
-        });
+  .check(
+    z.superRefine((data, ctx) => {
+      if (data.typeBati !== Repartition.MIXTE) {
+        return;
       }
-    });
-  });
+
+      data.adresses.forEach((adresse, index) => {
+        if (
+          adresse.repartition !== Repartition.DIFFUS &&
+          adresse.repartition !== Repartition.COLLECTIF
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Type de bâti requis",
+            path: ["adresses", index, "repartition"],
+          });
+        }
+      });
+    })
+  );
 
 const adresseAutoSaveSchema = z.object({
   id: zId(),
@@ -90,12 +92,12 @@ const adresseAutoSaveSchema = z.object({
   codePostal: z.string().optional(),
   commune: z.string().optional(),
   departement: z.string().optional(),
-  repartition: z.nativeEnum(Repartition).optional(),
+  repartition: z.enum(Repartition).optional(),
   adresseTypologies: z.array(adresseTypologieSchema.partial()).optional(),
 });
 
 export const typeBatiAndAdressesAutoSaveSchema = z.object({
-  typeBati: z.nativeEnum(Repartition).optional(),
+  typeBati: z.enum(Repartition).optional(),
   sameAddress: z.boolean().optional(),
   adresses: z.array(adresseAutoSaveSchema).optional(),
 });

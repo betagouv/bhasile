@@ -1,63 +1,30 @@
 import { normalizeAccents } from "@/app/utils/string.util";
-import { Operateur, StructureType } from "@/generated/prisma/client";
+import { Operateur } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import { OperateurApiWrite } from "@/schemas/api/operateur.schema";
 
 import { createOrUpdateActesAdministratifs } from "../actes-administratifs/acte-administratif.repository";
 import { createOrUpdateContacts } from "../contacts/contact.repository";
-import { OperateurDbDetail } from "./operateur.db.type";
-import { buildPaginatedOperateursQuery } from "./operateur.sql";
+import {
+  OperateurDbDetail,
+  OperateurListRow,
+  operateurListSelect,
+} from "./operateur.db.type";
 
 export const findBySearchTerm = async (
   searchTerm: string | null
 ): Promise<Operateur[]> => {
-  if (!searchTerm) {
-    return [];
-  }
-
   const operateurs = await prisma.operateur.findMany({});
+  if (!searchTerm) {
+    return operateurs;
+  }
   return operateurs.filter((operateur) =>
     normalizeAccents(operateur.name).includes(normalizeAccents(searchTerm))
   );
 };
 
-export const getPaginatedOperateurs = async (
-  {
-    page,
-    search,
-  }: {
-    page: number | null;
-    search: string | null;
-  },
-  now: Date
-): Promise<OperateurStat[]> => {
-  return prisma.$queryRaw<OperateurStat[]>(
-    buildPaginatedOperateursQuery({ page, search }, now)
-  );
-};
-
-export const countOperateurs = async ({
-  search,
-}: {
-  search: string | null;
-}): Promise<number> => {
-  return prisma.operateur.count({
-    where: {
-      parentId: null,
-      structures: {
-        some: {},
-      },
-      ...(search
-        ? {
-            name: {
-              contains: search,
-              mode: "insensitive",
-            },
-          }
-        : undefined),
-    },
-  });
-};
+export const findAllOperateurs = (): Promise<OperateurListRow[]> =>
+  prisma.operateur.findMany({ select: operateurListSelect });
 
 export const findOne = async (id: number): Promise<OperateurDbDetail> => {
   return prisma.operateur.findFirstOrThrow({
@@ -96,14 +63,4 @@ export const updateOne = async (
 
     return updated;
   });
-};
-
-type OperateurStat = {
-  id: number;
-  name: string;
-  nb_structures: number;
-  total_places: number;
-  pourcentage_parc: number;
-  structure_types: StructureType[];
-  logo_key: string;
 };

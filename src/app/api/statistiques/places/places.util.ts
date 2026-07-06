@@ -8,34 +8,46 @@ import type {
   StatistiqueDbAdresse,
   StatistiqueDbDepartement,
   StatistiqueDbStructure,
-  StatistiqueDbTypologie,
+  StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologieValues,
+  StatistiquesContext,
 } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
-  filterStructuresActives,
+  endOfYearUtc,
+  filterByEffectiveVersionAtDate,
   filterStructuresWithTypologie,
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
-  getTypologieYears,
+  mapTypologieYears,
 } from "../statistiques.utils";
 
-type PlacesIndicators = Pick<
-  StatistiqueApiRead["places"],
-  | "totalPlaces"
-  | "population"
-  | "tauxEquipement"
-  | "pmr"
-  | "lgbt"
-  | "fvvTeh"
-  | "qpv"
-  | "logementsSociaux"
->;
+type PlacesSpeciales = {
+  pmr: number;
+  lgbt: number;
+  fvvTeh: number;
+};
+
+type PlacesSpecialesAdresse = {
+  qpv: number;
+  logementsSociaux: number;
+};
+
+type TauxEquipement = {
+  population: number | null;
+  tauxEquipement: number | null;
+};
+
+type PlacesIndicators = PlacesSpeciales &
+  PlacesSpecialesAdresse &
+  TauxEquipement & {
+    totalPlaces: number;
+  };
 
 const sumStructureTypologiePlacesSpeciales = (
   structures: StatistiqueDbStructure[],
   typologieMap: Map<number, StatistiqueDbTypologieValues>
-): Pick<PlacesIndicators, "pmr" | "lgbt" | "fvvTeh"> => {
+): PlacesSpeciales => {
   let pmr = 0;
   let lgbt = 0;
   let fvvTeh = 0;
@@ -54,19 +66,12 @@ const sumStructureTypologiePlacesSpeciales = (
 };
 
 const sumAdressePlacesSpeciales = (
-  adresses: StatistiqueDbAdresse[],
-  structureIds: Set<number>
-): Pick<PlacesIndicators, "qpv" | "logementsSociaux"> => {
+  adressesInScope: StatistiqueDbAdresse[]
+): PlacesSpecialesAdresse => {
   let qpv = 0;
   let logementsSociaux = 0;
 
-  for (const adresse of adresses) {
-    if (
-      adresse.structureId === null ||
-      !structureIds.has(adresse.structureId)
-    ) {
-      continue;
-    }
+  for (const adresse of adressesInScope) {
     qpv += adresse.qpv ?? 0;
     logementsSociaux += adresse.logementSocial ?? 0;
   }
@@ -77,7 +82,7 @@ const sumAdressePlacesSpeciales = (
 const computeTauxEquipementAgrege = (
   totalPlaces: number,
   departements: StatistiqueDbDepartement[]
-): Pick<PlacesIndicators, "population" | "tauxEquipement"> => {
+): TauxEquipement => {
   if (departements.length === 0) {
     return { population: null, tauxEquipement: null };
   }
@@ -106,17 +111,23 @@ const computePlacesIndicators = (
   structures: StatistiqueDbStructure[],
   typologieMap: Map<number, StatistiqueDbTypologieValues>,
   adresses: StatistiqueDbAdresse[],
-  departements: StatistiqueDbDepartement[]
+  departements: StatistiqueDbDepartement[],
+  structureVersionTimeline: StatistiqueDbStructureVersionTimeline[],
+  referenceDate: Date,
+  now: Date
 ): PlacesIndicators => {
-  const structuresActives = filterStructuresActives(structures);
   const structuresWithTypologie = filterStructuresWithTypologie(
-    structuresActives,
+    structures,
     typologieMap
   );
-  const structureIds = new Set(
-    structuresWithTypologie.map((structure) => structure.id)
-  );
   const totalPlaces = computeTotalPlaces(structuresWithTypologie, typologieMap);
+  const adressesInScope = filterByEffectiveVersionAtDate(
+    adresses,
+    structuresWithTypologie.map((structure) => structure.id),
+    referenceDate,
+    structureVersionTimeline,
+    now
+  );
 
   return {
     totalPlaces,
@@ -125,41 +136,49 @@ const computePlacesIndicators = (
       structuresWithTypologie,
       typologieMap
     ),
-    ...sumAdressePlacesSpeciales(adresses, structureIds),
+    ...sumAdressePlacesSpeciales(adressesInScope),
   };
 };
 
-const computeByYearStats = (
-  structures: StatistiqueDbStructure[],
-  typologies: StatistiqueDbTypologie[],
-  adresses: StatistiqueDbAdresse[],
-  departements: StatistiqueDbDepartement[]
-): PlacesByYearStat[] =>
-  getTypologieYears(typologies).map((year) => ({
-    year,
-    ...computePlacesIndicators(
-      structures,
-      getTypologieMapForExactYear(typologies, year),
-      adresses,
-      departements
-    ),
-  }));
-
 export const computePlacesStatistiques = (
-  structures: StatistiqueDbStructure[],
-  typologies: StatistiqueDbTypologie[],
-  adresses: StatistiqueDbAdresse[],
-  departements: StatistiqueDbDepartement[]
+  context: StatistiquesContext
 ): StatistiqueApiRead["places"] => {
+  const {
+    structures,
+    allStructures,
+    activeStructureIdsByPeriod,
+    typologies,
+    adresses,
+    departements,
+    structureVersionTimeline,
+  } = context;
   const typologieMap = getLastTypologiePerStructure(typologies);
+  const now = new Date();
 
   return {
     ...computePlacesIndicators(
       structures,
       typologieMap,
       adresses,
-      departements
+      departements,
+      structureVersionTimeline,
+      now,
+      now
     ),
-    byYear: computeByYearStats(structures, typologies, adresses, departements),
+    byYear: mapTypologieYears<PlacesByYearStat>(
+      allStructures,
+      activeStructureIdsByPeriod,
+      typologies,
+      (year, structuresForYear) =>
+        computePlacesIndicators(
+          structuresForYear,
+          getTypologieMapForExactYear(typologies, year),
+          adresses,
+          departements,
+          structureVersionTimeline,
+          endOfYearUtc(year),
+          now
+        )
+    ),
   };
 };

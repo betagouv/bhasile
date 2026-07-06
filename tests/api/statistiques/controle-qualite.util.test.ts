@@ -1,107 +1,160 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { computeControleQualiteStatistiques } from "@/app/api/statistiques/controle-qualite/controle-qualite-evaluation.util";
+import { computeControleQualiteStatistiques } from "@/app/api/statistiques/controle-qualite/controle-qualite.util";
+import type { StatistiquesContext } from "@/app/api/statistiques/statistiques.db.type";
+import { StructureType } from "@/types/structure.type";
 
-vi.mock("@/constants", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/constants")>("@/constants");
-  return {
-    ...actual,
-    CURRENT_YEAR: 2025,
-  };
+import {
+  buildTestActiveStructureIdsByPeriod,
+  buildTestDnaLinks,
+  buildTestStatistiquesContext,
+} from "./test-helpers";
+
+const NOW = new Date("2026-01-15T00:00:00.000Z");
+
+const testStructure = (id: number) => ({
+  id,
+  type: StructureType.CADA,
+  departementAdministratif: "01",
 });
 
-describe("quality control statistics util", () => {
+const testTypologie = (structureId: number, placesAutorisees = 100) => ({
+  id: structureId,
+  structureId,
+  year: 2025,
+  placesAutorisees,
+  pmr: 0,
+  lgbt: 0,
+  fvvTeh: 0,
+});
+
+const dnaLinks = buildTestDnaLinks([
+  { structureId: 1, dnaCode: "DNA01" },
+  { structureId: 2, dnaCode: "DNA02" },
+  { structureId: 3, dnaCode: "DNA03" },
+]);
+
+const buildControleQualiteContext = (
+  structureIds: number[],
+  partial: Partial<
+    Pick<
+      StatistiquesContext,
+      "eigs" | "evaluations" | "activeStructureIdsByPeriod" | "dnaLinks"
+    >
+  > = {}
+) =>
+  buildTestStatistiquesContext({
+    structures: structureIds.map(testStructure),
+    allStructures: structureIds.map(testStructure),
+    typologies: structureIds.map((id) => testTypologie(id)),
+    adresses: [],
+    departements: [],
+    dnaLinks: partial.dnaLinks ?? dnaLinks,
+    eigs: partial.eigs ?? [],
+    evaluations: partial.evaluations ?? [],
+    activeStructureIdsByPeriod:
+      partial.activeStructureIdsByPeriod ??
+      buildTestActiveStructureIdsByPeriod(structureIds),
+  });
+
+describe("contrôle qualité - agrégats de référence (12 derniers mois)", () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-01-15"));
+    vi.setSystemTime(NOW);
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
-  const dnaLinks = [
-    { id: 1, structureId: 1, dna: { code: "DNA01" } },
-    { id: 2, structureId: 2, dna: { code: "DNA02" } },
-    { id: 3, structureId: 3, dna: { code: "DNA03" } },
-  ];
 
-  it("agrège les notes trimestrielles à partir des évaluations brutes", () => {
+  it("filtre les EIG de référence sur une fenêtre glissante de 12 mois", () => {
     const result = computeControleQualiteStatistiques(
-      [1],
-      100,
-      [],
-      [
-        {
-          id: 1,
-          structureId: 1,
-          date: new Date("2025-01-15"),
-          note: 2,
-          notePersonne: null,
-          notePro: null,
-          noteStructure: null,
-        },
-        ...Array.from({ length: 10 }, (_, index) => ({
-          id: index + 2,
-          structureId: 1,
-          date: new Date("2025-02-15"),
-          note: 4,
-          notePersonne: null,
-          notePro: null,
-          noteStructure: null,
-        })),
-      ],
-      [],
+      buildControleQualiteContext([1], {
+        eigs: [
+          {
+            id: 1,
+            dnaCode: "DNA01",
+            type: "autre motif",
+            evenementDate: new Date("2024-12-10T00:00:00.000Z"),
+          },
+          {
+            id: 2,
+            dnaCode: "DNA01",
+            type: "comportement violent",
+            evenementDate: new Date("2025-01-10T00:00:00.000Z"),
+          },
+          {
+            id: 3,
+            dnaCode: "DNA01",
+            type: "autre motif",
+            evenementDate: new Date("2026-01-10T00:00:00.000Z"),
+          },
+        ],
+        activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod([1], {
+          periodDates: [
+            new Date("2024-12-10T00:00:00.000Z"),
+            new Date("2025-01-10T00:00:00.000Z"),
+            new Date("2026-01-10T00:00:00.000Z"),
+          ],
+        }),
+      }),
       "moyenne"
     );
 
-    const trimester2025Q1 = result.byTrimester.find(
-      (entry) => entry.year === 2025 && entry.trimester === 1
-    );
+    expect(result.eig.nbEig).toBe(2);
+    expect(result.eig.nbEigComportementViolent).toBe(1);
+    expect(result.eig.tauxEig).toBe(0.02);
+    expect(result.eig.tauxEigComportementViolent).toBe(0.5);
+  });
+});
 
-    // (2 + 10×4) / 11 ≈ 3,8 - pas la moyenne de 2 et 4
-    expect(trimester2025Q1?.noteGenerale).toBe(3.8);
-    expect(result.byYear[0]?.noteGenerale).toBe(3.8);
+describe("contrôle qualité - regroupements mois / trimestre / année", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
   });
 
-  it("calcule le taux d'EIG trimestriel à partir des totaux de la période", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("regroupe les EIG par mois, puis consolide sur trimestre et année", () => {
     const result = computeControleQualiteStatistiques(
-      [1],
-      100,
-      [
-        {
-          id: 1,
-          dnaCode: "DNA01",
-          type: "comportement violent",
-          evenementDate: new Date("2025-01-10"),
-        },
-        {
-          id: 2,
-          dnaCode: "DNA01",
-          type: "autre motif",
-          evenementDate: new Date("2025-02-10"),
-        },
-        ...Array.from({ length: 6 }, (_, index) => ({
-          id: index + 3,
-          dnaCode: "DNA01",
-          type: "autre motif",
-          evenementDate: new Date("2025-02-15"),
-        })),
-        {
-          id: 9,
-          dnaCode: "DNA01",
-          type: "comportement violent",
-          evenementDate: new Date("2025-02-20"),
-        },
-        {
-          id: 10,
-          dnaCode: "DNA01",
-          type: "comportement violent",
-          evenementDate: new Date("2025-02-25"),
-        },
-      ],
-      [],
-      dnaLinks,
+      buildControleQualiteContext([1], {
+        eigs: [
+          {
+            id: 1,
+            dnaCode: "DNA01",
+            type: "autre motif",
+            evenementDate: new Date("2025-01-10T00:00:00.000Z"),
+          },
+          {
+            id: 2,
+            dnaCode: "DNA01",
+            type: "autre motif",
+            evenementDate: new Date("2025-02-10T00:00:00.000Z"),
+          },
+          {
+            id: 3,
+            dnaCode: "DNA01",
+            type: "comportement violent",
+            evenementDate: new Date("2025-02-20T00:00:00.000Z"),
+          },
+          {
+            id: 4,
+            dnaCode: "DNA01",
+            type: "comportement violent",
+            evenementDate: new Date("2025-07-20T00:00:00.000Z"),
+          },
+        ],
+        activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod([1], {
+          periodDates: [
+            new Date("2025-01-10T00:00:00.000Z"),
+            new Date("2025-02-10T00:00:00.000Z"),
+            new Date("2025-02-20T00:00:00.000Z"),
+          ],
+        }),
+      }),
       "moyenne"
     );
 
@@ -111,31 +164,46 @@ describe("quality control statistics util", () => {
     const february = result.byMonth.find(
       (entry) => entry.date.toISOString().slice(0, 7) === "2025-02"
     );
-    const trimester = result.byTrimester.find(
-      (entry) => entry.year === 2025 && entry.trimester === 1
+    const trimester2025Q1 = result.byTrimester.find(
+      (entry) => entry.date.toISOString().slice(0, 10) === "2025-01-01"
+    );
+    const year2025 = result.byYear.find(
+      (entry) => entry.date.toISOString().slice(0, 4) === "2025"
     );
 
-    expect(january?.tauxEigComportementViolent).toBe(1);
-    expect(february?.tauxEigComportementViolent).toBe(0.222);
-    // Trimestre : 3 violents / 10 EIG = 0,3 (pas la moyenne de 1 et 0,222)
-    expect(trimester?.tauxEigComportementViolent).toBe(0.3);
-    expect(trimester?.nbEig).toBe(10);
+    expect(january?.nbEig).toBe(1);
+    expect(february?.nbEig).toBe(2);
+    expect(trimester2025Q1?.nbEig).toBe(3);
+    expect(year2025?.nbEig).toBe(4);
+  });
+});
+
+describe("contrôle qualité - structures actives sans déclaration EIG", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
   });
 
-  it("compte les structures sans déclaration d'EIG", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("compte les structures actives sur la période ne déclarant aucun EIG", () => {
     const result = computeControleQualiteStatistiques(
-      [1, 2, 3],
-      300,
-      [
-        {
-          id: 1,
-          dnaCode: "DNA01",
-          type: "autre",
-          evenementDate: new Date("2025-03-01"),
-        },
-      ],
-      [],
-      dnaLinks,
+      buildControleQualiteContext([1, 2, 3], {
+        eigs: [
+          {
+            id: 1,
+            dnaCode: "DNA01",
+            type: "autre motif",
+            evenementDate: new Date("2025-03-01T00:00:00.000Z"),
+          },
+        ],
+        activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod(
+          [1, 2, 3],
+          { periodDates: [new Date("2025-03-01T00:00:00.000Z")] }
+        ),
+      }),
       "moyenne"
     );
 
@@ -143,50 +211,7 @@ describe("quality control statistics util", () => {
       (entry) => entry.date.toISOString().slice(0, 7) === "2025-03"
     );
 
-    // 2 structures sur 3 sans déclaration EIG sur le mois
     expect(march?.nbStructuresSansDeclarationEig).toBe(2);
     expect(march?.partStructuresSansDeclarationEig).toBe(0.667);
-  });
-
-  it("utilise l'agrégation médiane pour les notes d'évaluation", () => {
-    const result = computeControleQualiteStatistiques(
-      [1],
-      100,
-      [],
-      [
-        {
-          id: 1,
-          structureId: 1,
-          date: new Date("2025-06-01"),
-          note: 2,
-          notePersonne: null,
-          notePro: null,
-          noteStructure: null,
-        },
-        {
-          id: 2,
-          structureId: 1,
-          date: new Date("2025-06-15"),
-          note: 4,
-          notePersonne: null,
-          notePro: null,
-          noteStructure: null,
-        },
-        {
-          id: 3,
-          structureId: 1,
-          date: new Date("2025-06-20"),
-          note: 5,
-          notePersonne: null,
-          notePro: null,
-          noteStructure: null,
-        },
-      ],
-      [],
-      "mediane"
-    );
-
-    expect(result.byMonth[0]?.noteGenerale).toBe(4);
-    expect(result.eig.moyenneEvaluationsCurrentYear).toBe(4);
   });
 });
