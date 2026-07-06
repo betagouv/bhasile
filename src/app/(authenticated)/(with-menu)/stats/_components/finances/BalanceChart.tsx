@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ReactElement, useMemo } from "react";
 
 import { StackedBarLineChart } from "@/app/components/common/StackedBarLineChart";
 import { getYearRange } from "@/app/utils/date.util";
@@ -52,6 +52,14 @@ export const BalanceChart = (): ReactElement => {
     };
   };
 
+  const colors = useMemo(
+    () => ({
+      bars: ["#18753CB2", "#CE0500B2"],
+      line: "var(--blue-france-sun-113-625)",
+    }),
+    []
+  );
+
   return (
     <>
       <h4 className="text-title-blue-france text-lg" id="structure-stats-table">
@@ -59,13 +67,7 @@ export const BalanceChart = (): ReactElement => {
       </h4>
       <div className="grid grid-cols-3 gap-10">
         <div className="col-span-2">
-          <StackedBarLineChart
-            data={getChartData()}
-            colors={{
-              bars: ["#18753CB2", "#CE0500B2"],
-              line: "var(--blue-france-sun-113-625)",
-            }}
-          />
+          <StackedBarLineChart data={getChartData()} colors={colors} />
         </div>
         <div>
           <div className="flex items-center pb-6">

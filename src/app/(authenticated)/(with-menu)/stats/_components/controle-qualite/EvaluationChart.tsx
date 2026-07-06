@@ -64,6 +64,14 @@ export const EvaluationChart = (): ReactElement => {
     };
   }, [statistiques, timePeriod]);
 
+  const colors = useMemo(
+    () => ({
+      bars: ["#FA7659"],
+      line: "var(--blue-france-sun-113-625)",
+    }),
+    []
+  );
+
   return (
     <>
       <h4 className="text-title-blue-france text-lg" id="structure-stats-table">
@@ -71,13 +79,7 @@ export const EvaluationChart = (): ReactElement => {
       </h4>
       <div className="grid grid-cols-3 gap-10">
         <div className="col-span-2">
-          <StackedBarLineChart
-            data={chartData}
-            colors={{
-              bars: ["#FA7659"],
-              line: "var(--blue-france-sun-113-625)",
-            }}
-          />
+          <StackedBarLineChart data={chartData} colors={colors} />
         </div>
         <div>
           <TimePeriodSelector

@@ -22,7 +22,9 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
           <span>
             {Number(value)}{" "}
             <span className="text-disabled-grey pl-2">
-              {Number(periodItem.partStructuresSansDeclarationEig).toFixed(2)}
+              {new Intl.NumberFormat("fr-FR", {
+                maximumFractionDigits: 2,
+              }).format(Number(periodItem.partStructuresSansDeclarationEig))}
               &nbsp;%
             </span>
           </span>
@@ -39,7 +41,10 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
       {
         label: "Taux d'EIG “comportement violent“",
         key: "tauxEigComportementViolent",
-        format: (value) => `${Number(value).toFixed(2)} %`,
+        format: (value) =>
+          `${new Intl.NumberFormat("fr-FR", {
+            maximumFractionDigits: 2,
+          }).format(Number(value))} %`,
       },
     ],
   },

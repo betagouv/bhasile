@@ -64,6 +64,8 @@ export const EIGChart = (): ReactElement => {
     };
   }, [statistiques, timePeriod]);
 
+  const colors = useMemo(() => ["#4F9D91", "#73E0CF"], []);
+
   return (
     <>
       <h4 className="text-title-blue-france text-lg">
@@ -71,11 +73,7 @@ export const EIGChart = (): ReactElement => {
       </h4>
       <div className="grid grid-cols-3 gap-10">
         <div className="col-span-2">
-          <StackedBarChart
-            data={chartData}
-            colors={["#4F9D91", "#73E0CF"]}
-            axisYLabel="EIG"
-          />
+          <StackedBarChart data={chartData} colors={colors} axisYLabel="EIG" />
         </div>
         <div>
           <TimePeriodSelector
