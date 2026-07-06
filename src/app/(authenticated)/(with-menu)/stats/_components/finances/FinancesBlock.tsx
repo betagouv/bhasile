@@ -32,7 +32,10 @@ export const FinancesBlock = (): ReactElement => {
       </h4>
       <div className="pb-12">
         <DotationChart
-          budgets={statistiques.finance.byYear}
+          budgets={statistiques.finance.byYear.map((yearItem) => ({
+            year: yearItem.year,
+            ...yearItem.total,
+          }))}
           isAutorisee={false}
           hideStructureTypeLabels={true}
         />

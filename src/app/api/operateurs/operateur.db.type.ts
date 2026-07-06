@@ -8,3 +8,14 @@ export type OperateurDbDetail = Prisma.OperateurGetPayload<{
     };
   };
 }>;
+
+export const operateurListSelect = {
+  id: true,
+  name: true,
+  parentId: true,
+  logo: { select: { key: true } },
+} satisfies Prisma.OperateurSelect;
+
+export type OperateurListRow = Prisma.OperateurGetPayload<{
+  select: typeof operateurListSelect;
+}>;

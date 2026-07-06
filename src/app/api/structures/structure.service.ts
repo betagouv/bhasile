@@ -1,4 +1,5 @@
 import { recursivelySerializeDates } from "@/app/utils/date.util";
+import { paginateRows } from "@/app/utils/list.util";
 import {
   isStructureAutorisee,
   isStructureSubventionnee,
@@ -55,7 +56,6 @@ import {
   isFinalisationFormValidated,
   isStructureInCpom,
   isStructureInCpomPerYear,
-  paginateRows,
   sortStructureRows,
   StructureListComputedRow,
 } from "./structure.util";

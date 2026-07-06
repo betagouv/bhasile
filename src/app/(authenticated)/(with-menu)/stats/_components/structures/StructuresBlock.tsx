@@ -3,6 +3,7 @@
 import { ReactElement } from "react";
 
 import { InformationCard } from "@/app/components/InformationCard";
+import { InformationCardBridge } from "@/app/components/InformationCardBridge";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 import { StructuresStatsTable } from "./StructuresStatsTable";
@@ -31,10 +32,7 @@ export const StructuresBlock = (): ReactElement => {
           primaryInformation={statistiques.structures.totalCpoms}
           secondaryInformation="CPOM"
         />
-        <div className="relative flex flex-col justify-between self-center w-[16px] h-[44px] bg-slate-100">
-          <div className="absolute top-0 left-0 right-0 h-[8px] bg-white rounded-b-full" />
-          <div className="absolute bottom-0 left-0 right-0 h-[8px] bg-white rounded-t-full" />
-        </div>
+        <InformationCardBridge />
         <InformationCard
           primaryInformation={statistiques.structures.structuresAvecCpom}
           secondaryInformation="structures concernées"

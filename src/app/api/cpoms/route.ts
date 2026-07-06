@@ -8,7 +8,8 @@ import { createCpomEvent } from "../user-action/user-action.service";
 import { getCpoms, saveCpom } from "./cpom.service";
 
 export async function GET(request: NextRequest) {
-  const page = request.nextUrl.searchParams.get("page") as number | null;
+  const pageParam = Number(request.nextUrl.searchParams.get("page"));
+  const page = Number.isInteger(pageParam) ? pageParam : null;
   const departements = request.nextUrl.searchParams.get("departements");
   const column = request.nextUrl.searchParams.get(
     "column"

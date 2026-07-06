@@ -1,40 +1,9 @@
-import { Prisma } from "@/generated/prisma/client";
+import { type SortKind, type SortValue } from "@/app/utils/list.util";
+import { parseCommaList } from "@/app/utils/string.util";
 import { CpomColumn } from "@/types/ListColumn";
 
 import { getDatesOfCurrentActeAdministratif } from "../actes-administratifs/acte-administratif.util";
 import { CpomDbDetails, CpomDbList } from "./cpom.db.type";
-
-type CpomQueryFilters = {
-  departements: string | null;
-};
-
-export function buildCpomsOrderSql(
-  column: CpomColumn,
-  direction: "asc" | "desc"
-): Prisma.Sql {
-  const dir = direction === "desc" ? Prisma.sql`DESC` : Prisma.sql`ASC`;
-  const byColumn: Record<CpomColumn, Prisma.Sql> = {
-    operateur: Prisma.sql`o.name`,
-    structures: Prisma.sql`COALESCE(cs.structures, 0)`,
-    granularity: Prisma.sql`c.granularity`,
-    region: Prisma.sql`r.name`,
-    departements: Prisma.sql`COALESCE(cd.departements, '')`,
-    dateStart: Prisma.sql`sd."dateStart"`,
-    dateEnd: Prisma.sql`ed."dateEnd"`,
-  };
-  return Prisma.sql`${byColumn[column]} ${dir}, c.id ASC`;
-}
-
-export function buildCpomsWhereSql({
-  departements,
-}: CpomQueryFilters): Prisma.Sql {
-  const departementList = departements?.split(",").filter(Boolean) ?? [];
-  if (departementList.length === 0) {
-    return Prisma.sql``;
-  }
-  const patterns = departementList.map((departement) => `%${departement}%`);
-  return Prisma.sql`WHERE COALESCE(cd.departements, '') ILIKE ANY (ARRAY[${Prisma.join(patterns)}])`;
-}
 
 export const getDatesConvention = (cpom?: {
   actesAdministratifs: (CpomDbDetails | CpomDbList)["actesAdministratifs"];
@@ -48,4 +17,58 @@ export const getDatesConvention = (cpom?: {
     "CONVENTION",
     false
   );
+};
+
+export const filterCpomsByDepartement = (
+  cpoms: CpomDbList[],
+  departements: string | null
+): CpomDbList[] => {
+  const departementList = parseCommaList(departements);
+  if (departementList.length === 0) {
+    return cpoms;
+  }
+  return cpoms.filter((cpom) =>
+    cpom.departements.some((cpomDepartement) =>
+      departementList.includes(cpomDepartement.departement.numero)
+    )
+  );
+};
+
+const getSortableTime = (date: Date | null): SortValue =>
+  date ? date.getTime() : null;
+
+export const sortValueForCpomColumn = (
+  cpom: CpomDbList,
+  column: CpomColumn
+): { value: SortValue; kind: SortKind } => {
+  switch (column) {
+    case "operateur":
+      return { value: cpom.operateur.name, kind: "text" };
+    case "structures":
+      return { value: cpom.structures.length, kind: "number" };
+    case "granularity":
+      return { value: cpom.granularity, kind: "text" };
+    case "region":
+      return { value: cpom.region?.name ?? null, kind: "text" };
+    case "departements":
+      return {
+        value: cpom.departements
+          .map((cpomDepartement) => cpomDepartement.departement.numero)
+          .sort()
+          .join(", "),
+        kind: "text",
+      };
+    case "dateStart":
+      return {
+        value: getSortableTime(getDatesConvention(cpom)[0]),
+        kind: "number",
+      };
+    case "dateEnd":
+      return {
+        value: getSortableTime(getDatesConvention(cpom)[1]),
+        kind: "number",
+      };
+    default:
+      return { value: null, kind: "text" };
+  }
 };
