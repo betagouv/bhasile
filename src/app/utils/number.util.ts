@@ -3,11 +3,14 @@
  * @param value - The number to format
  * @returns Formatted number string (e.g., "1 234,56")
  */
-export const formatNumber = (value: number | null | undefined): string => {
+export const formatNumber = (
+  value: number | null | undefined,
+  options?: Intl.NumberFormatOptions
+): string => {
   if (value === null || value === undefined || isNaN(value)) {
     return "0";
   }
-  return new Intl.NumberFormat("fr-FR").format(value);
+  return new Intl.NumberFormat("fr-FR", options).format(value);
 };
 
 /**

@@ -3,6 +3,7 @@
 import { Fragment, ReactElement, useState } from "react";
 
 import { Table } from "@/app/components/common/Table";
+import { formatNumber } from "@/app/utils/number.util";
 import {
   ControleQualitePeriodStat,
   StatistiqueApiRead,
@@ -22,9 +23,12 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
           <span>
             {Number(value)}{" "}
             <span className="text-disabled-grey pl-2">
-              {new Intl.NumberFormat("fr-FR", {
-                maximumFractionDigits: 2,
-              }).format(Number(periodItem.partStructuresSansDeclarationEig))}
+              {formatNumber(
+                Number(periodItem.partStructuresSansDeclarationEig),
+                {
+                  maximumFractionDigits: 2,
+                }
+              )}
               &nbsp;%
             </span>
           </span>
@@ -42,9 +46,9 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
         label: "Taux d'EIG “comportement violent“",
         key: "tauxEigComportementViolent",
         format: (value) =>
-          `${new Intl.NumberFormat("fr-FR", {
+          `${formatNumber(Number(value), {
             maximumFractionDigits: 2,
-          }).format(Number(value))} %`,
+          })} %`,
       },
     ],
   },

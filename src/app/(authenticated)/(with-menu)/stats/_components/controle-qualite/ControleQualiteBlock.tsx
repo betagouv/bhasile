@@ -4,6 +4,7 @@ import { ReactElement } from "react";
 
 import { InformationCard } from "@/app/components/InformationCard";
 import { InformationCardBridge } from "@/app/components/InformationCardBridge";
+import { formatNumber } from "@/app/utils/number.util";
 import { CURRENT_YEAR } from "@/constants";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
@@ -14,10 +15,11 @@ import { EvaluationChart } from "./EvaluationChart";
 export const ControleQualiteBlock = (): ReactElement => {
   const { statistiques } = useStatistiquesContext();
 
-  const tauxEigComportementViolent = new Intl.NumberFormat("fr-FR", {
-    maximumFractionDigits: 1,
-  }).format(
-    Number(statistiques.controleQualite.eig.tauxEigComportementViolent)
+  const tauxEigComportementViolent = formatNumber(
+    Number(statistiques.controleQualite.eig.tauxEigComportementViolent),
+    {
+      maximumFractionDigits: 1,
+    }
   );
 
   return (
