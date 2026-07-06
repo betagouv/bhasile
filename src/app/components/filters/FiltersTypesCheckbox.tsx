@@ -29,7 +29,7 @@ export const FiltersTypesCheckbox = ({
 
 type Props = {
   label: string;
-  value: StructureType;
+  value: StructureType | "all";
   checked: boolean;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };

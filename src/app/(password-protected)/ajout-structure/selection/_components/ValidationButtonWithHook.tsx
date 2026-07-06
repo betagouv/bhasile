@@ -13,7 +13,7 @@ import {
   FormAdresseTypologie,
 } from "@/schemas/forms/base/adresse.schema";
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
-import { StructureTypologieWithoutEvolutionSchemaTypeFormValues } from "@/schemas/forms/base/structureTypologie.schema";
+import { StructureTypologieSchemaTypeFormValues } from "@/schemas/forms/base/structureTypologie.schema";
 
 export const ValidationButtonWithHook = ({
   structuresId,
@@ -85,9 +85,9 @@ export const ValidationButtonWithHook = ({
     updateTypePlaces({
       ...localTypePlacesValue,
       typologies: localTypePlacesValue?.typologies?.map(
-        (typologie: StructureTypologieWithoutEvolutionSchemaTypeFormValues) => {
+        (typologie: StructureTypologieSchemaTypeFormValues) => {
           const typedTypologie =
-            typologie as StructureTypologieWithoutEvolutionSchemaTypeFormValues & {
+            typologie as StructureTypologieSchemaTypeFormValues & {
               date: string;
             };
           return {

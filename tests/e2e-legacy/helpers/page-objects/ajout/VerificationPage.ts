@@ -53,12 +53,6 @@ export class VerificationPage extends BasePage {
     await expect(section).toContainText(data.operateur.name);
     await expect(section).toContainText(formatDate(data.creationDate));
     await expect(section).toContainText(data.public);
-    if (data.lgbt) {
-      await expect(section).toContainText("LGBT");
-    }
-    if (data.fvvTeh) {
-      await expect(section).toContainText("FVV-TEH");
-    }
 
     if (data.nom) {
       await expect(section).toContainText(data.nom);

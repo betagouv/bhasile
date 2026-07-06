@@ -11,10 +11,6 @@ export const createStructureTypologie = ({
     lgbt: 4,
     placesAutorisees: 10,
     pmr: 3,
-    placesACreer: 1,
-    placesAFermer: 2,
-    echeancePlacesACreer: new Date("2026-01-02").toISOString(),
-    echeancePlacesAFermer: new Date("2027-01-02").toISOString(),
     ...props,
   };
 };

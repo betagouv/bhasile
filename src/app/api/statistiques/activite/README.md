@@ -1,27 +1,34 @@
 # `activite`
 
-Liée à la structure par ses codes DNA liées (`DnaStructure`).
+Deux vues distinctes
 
-## TODO
+## `summary` - camembert + motifs
 
-Les dénominateurs de taux diffèrent selon les scopes (toutes structures vs hors CAES vs hors CAES+CPH) alors que `placesEnregistreesDna` agrège tout : à garder en tête pour l'interprétation des seuils agrégés.
+Pour chaque structure **ouverte à la date de référence** (`context.structures`) :
 
-## Scopes
+1. Résoudre le DNA à la date de l'activité (`lookupStructureIdsForDnaAtDate`)
+2. Prendre la **dernière** activité connue pour cette structure
+3. Sommer les indicateurs (places, motifs, présences indues)
 
-| Indicateur              | Structures                                       |
-| ----------------------- | ------------------------------------------------ |
-| `placesEnregistreesDna` | Toutes                                           |
-| Indisponibilités        | Toutes sauf CAES                                 |
-| Présences indues        | Toutes sauf CAES et CPH (en pratique CADA, HUDA) |
+Une structure sans activité n'entre pas dans les totaux.
 
-`dnaCode` dans scope si ≥1 structure liée a le bon type.
+## `byMonth` - tableau mensuel
 
-## `byMonth`
+Somme des activités **effectivement déclarées** pour chaque mois.
 
-| Champ                                        | Calcul                                             |
-| -------------------------------------------- | -------------------------------------------------- |
-| `placesEnregistreesDna`                      | Somme `placesAutorisees`                           |
-| `placesIndisponibles`, `tauxIndisponibilite` | Scope hors CAES                                    |
-| `presencesIndues*`, `tauxPresencesIndues*`   | Scope hors CAES et CPH ; `Total` = BPI + déboutées |
+- Pas d'inférence : si une structure ouverte n'a pas d'activité pour un mois donné, elle ne compte pas dans ce mois
+- Les taux sont calculés sur les dénominateurs du mois (scopes type identiques à `summary`)
+
+## Scopes type
+
+| Indicateur                | Structures              |
+| ------------------------- | ----------------------- |
+| `placesEnregistreesDna`   | Toutes                  |
+| Indisponibilités + motifs | Toutes sauf CAES        |
+| Présences indues          | Toutes sauf CAES et CPH |
 
 Taux = ratio 0-1, `null` si dénominateur nul.
+
+## TODO (à valider)
+
+Les taux d'indispo / présences indues utilisent des numérateurs filtrés par type (hors CAES ; hors CAES+CPH) alors que `placesEnregistreesDna` et `placesDisponibles` agrègent toutes les structures. À garder en tête pour les seuils agrégés et le camembert.
