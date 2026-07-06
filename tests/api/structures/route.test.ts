@@ -41,7 +41,6 @@ vi.mock("@/app/api/structures/structure.util", () => ({
   computeStructureListRow: vi.fn(),
   filterStructureRows: vi.fn((rows: unknown[]) => rows),
   sortStructureRows: vi.fn((rows: unknown[]) => rows),
-  paginateRows: vi.fn((rows: unknown[]) => rows),
   isBornFromCreation: vi.fn().mockReturnValue(false),
   isFinalisationFormValidated: vi.fn().mockReturnValue(false),
 }));
