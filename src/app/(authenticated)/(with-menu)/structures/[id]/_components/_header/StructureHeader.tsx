@@ -1,41 +1,19 @@
 "use client";
 
-import Button from "@codegouvfr/react-dsfr/Button";
-import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
 import { Badge } from "@/app/components/common/Badge";
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
-import { UpcomingTransformationBadge } from "@/app/components/structures/UpcomingTransformationBadge";
-import {
-  CAMPAIGN_SAVE_KEY,
-  useActualisationFormHandling,
-} from "@/app/hooks/useActualisationFormHandling";
-import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
-import { isActualisationReadyToValidate } from "@/app/utils/actualisationForm.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ActualisationHeader } from "./ActualisationHeader";
-import { AutoSaveStatus } from "./AutoSaveStatus";
 import { FinalisationHeader } from "./FinalisationHeader";
-import { StructureMenu } from "./StructureMenu";
-
-const autoSaveModal = createModal({
-  id: "autosave-modal",
-  isOpenedByDefault: false,
-});
-const finalisationSuccessModal = createModal({
-  id: "finalisation-success-modal",
-  isOpenedByDefault: false,
-});
-const actualisationSuccessModal = createModal({
-  id: "actualisation-success-modal",
-  isOpenedByDefault: false,
-});
+import { StructureHeaderActions } from "./StructureHeaderActions";
+import { StructureHeaderModals } from "./StructureHeaderModals";
 
 export const StructureHeader = ({
   actualisationYear,
@@ -46,31 +24,12 @@ export const StructureHeader = ({
 }): ReactElement | null => {
   const { structure } = useStructureContext();
   const isStructureFinalisee = structure.isFinalised;
-  const router = useRouter();
-
-  const { handleFinalisation, isStructureReadyToFinalise } =
-    useAgentFormHandling();
-
-  const { handleValidateActualisation } = useActualisationFormHandling({
-    year: actualisationYear ?? 0,
-  });
 
   const { headerRef } = useHeaderHeight();
   const { isHidden } = useHideOnScroll();
 
   const pathname = usePathname();
-
   const isRootPath = pathname === `/structures/${structure?.id}`;
-  const isFinalisationPath = pathname.startsWith(
-    `/structures/${structure?.id}/finalisation`
-  );
-  const isActualisationPath = pathname.startsWith(
-    `/structures/${structure?.id}/actualisation`
-  );
-
-  const isReadyToValidateActualisation = actualisationYear
-    ? isActualisationReadyToValidate(structure, actualisationYear)
-    : false;
 
   const {
     codeBhasile,
@@ -80,54 +39,6 @@ export const StructureHeader = ({
     communeAdministrative,
     departementAdministratif,
   } = structure;
-
-  let headerActions: ReactElement;
-  if (isFinalisationPath) {
-    headerActions = (
-      <div className="flex items-center gap-3">
-        <AutoSaveStatus onStatusClick={() => autoSaveModal.open()} />
-        <Button
-          disabled={!isStructureReadyToFinalise}
-          onClick={async () => {
-            await handleFinalisation();
-            finalisationSuccessModal.open();
-          }}
-        >
-          Finaliser la création
-        </Button>
-      </div>
-    );
-  } else if (isActualisationPath) {
-    headerActions = (
-      <div className="flex items-center gap-3">
-        <AutoSaveStatus
-          fetchStateKey={CAMPAIGN_SAVE_KEY}
-          onStatusClick={() => autoSaveModal.open()}
-        />
-        <Button
-          disabled={!isReadyToValidateActualisation}
-          onClick={async () => {
-            await handleValidateActualisation();
-            actualisationSuccessModal.open();
-          }}
-        >
-          Valider l’actualisation
-        </Button>
-      </div>
-    );
-  } else {
-    headerActions = (
-      <div className="flex items-center gap-2">
-        {structure.upcomingTransformations?.map((transformation) => (
-          <UpcomingTransformationBadge
-            key={`${transformation.kind}-${transformation.date}`}
-            transformation={transformation}
-          />
-        ))}
-        <StructureMenu structureId={structure.id} />
-      </div>
-    );
-  }
 
   return (
     <>
@@ -169,7 +80,7 @@ export const StructureHeader = ({
             </h3>
           </div>
           <div className="grow" />
-          {headerActions}
+          <StructureHeaderActions actualisationYear={actualisationYear} />
         </div>
 
         <div
@@ -186,32 +97,17 @@ export const StructureHeader = ({
             {isRootPath && (
               <NavigationMenu
                 menuElements={[
-                  {
-                    label: "Description",
-                    section: "#description",
-                  },
-                  {
-                    label: "Calendrier",
-                    section: "#calendrier",
-                  },
-                  {
-                    label: "Type de places",
-                    section: "#places",
-                  },
+                  { label: "Description", section: "#description" },
+                  { label: "Calendrier", section: "#calendrier" },
+                  { label: "Type de places", section: "#places" },
                   {
                     label: "Finances",
                     section: "#finances",
                     isDisplayed:
                       !!structure.budgets && structure.budgets?.length > 0,
                   },
-                  {
-                    label: "Contrôle qualité",
-                    section: "#controle",
-                  },
-                  {
-                    label: "Activité",
-                    section: "#activite",
-                  },
+                  { label: "Contrôle qualité", section: "#controle" },
+                  { label: "Activité", section: "#activite" },
                   {
                     label: "Actes administratifs",
                     section: "#actes-administratifs",
@@ -228,55 +124,7 @@ export const StructureHeader = ({
         </div>
       </div>
 
-      <autoSaveModal.Component
-        title="Votre progression est enregistrée automatiquement"
-        buttons={[
-          { doClosesModal: true, children: "J’ai compris", type: "button" },
-        ]}
-      >
-        <p>
-          Aucune action n’est requise de votre part pour enregistrer les données
-          que vous avez saisies.
-        </p>
-      </autoSaveModal.Component>
-
-      <finalisationSuccessModal.Component
-        title="Vous avez terminé la création de cette structure !"
-        buttons={[
-          {
-            doClosesModal: true,
-            children: "J’ai compris",
-            type: "button",
-            onClick: () => {
-              router.push(`/structures/${structure?.id}`);
-            },
-          },
-        ]}
-      >
-        <p>
-          Les données ont bien été enregistrées. Merci pour votre contribution
-          qui va rendre l’outil plus précis.
-        </p>
-      </finalisationSuccessModal.Component>
-
-      <actualisationSuccessModal.Component
-        title="L’actualisation de cette structure est validée !"
-        buttons={[
-          {
-            doClosesModal: true,
-            children: "J’ai compris",
-            type: "button",
-            onClick: () => {
-              router.push(`/structures/${structure?.id}`);
-            },
-          },
-        ]}
-      >
-        <p>
-          Les données ont bien été enregistrées. Merci pour votre contribution
-          qui va rendre l’outil plus précis.
-        </p>
-      </actualisationSuccessModal.Component>
+      <StructureHeaderModals structureId={structure.id} />
     </>
   );
 };
