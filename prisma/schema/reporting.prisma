@@ -100,8 +100,8 @@ model MonthlyStructuresGlobalQualityCount {
   has_issue_evaluation_not_done_in_time                          Int?
   has_issue_subsidized_convention_gt_3y                          Int?
   has_issue_specific_places_gt_places_autorisees                 Int?
-  has_issue_incoherence_lgbt_places                             Int?
-  has_issue_incoherence_fvvteh_places                           Int?
+  has_issue_incoherence_lgbt_places                              Int?
+  has_issue_incoherence_fvvteh_places                            Int?
   has_issue_places_structure_vs_address_diff_gt_10pct            Int?
   has_issue_dept_code                                            Int?
   has_issue_multi_dna                                            Int?
