@@ -11,11 +11,10 @@ import { buildPaginatedOperateursQuery } from "./operateur.sql";
 export const findBySearchTerm = async (
   searchTerm: string | null
 ): Promise<Operateur[]> => {
-  if (!searchTerm) {
-    return [];
-  }
-
   const operateurs = await prisma.operateur.findMany({});
+  if (!searchTerm) {
+    return operateurs;
+  }
   return operateurs.filter((operateur) =>
     normalizeAccents(operateur.name).includes(normalizeAccents(searchTerm))
   );

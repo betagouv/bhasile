@@ -28,12 +28,6 @@ export const Identification = () => {
         <p className="flex gap-4 mb-0">
           <b>Public</b> {localStorageValues?.public}
         </p>
-        {(localStorageValues?.lgbt || localStorageValues?.fvvTeh) && (
-          <p className="flex gap-4 mb-0">
-            <b>Vulnérabilité</b> {localStorageValues?.lgbt && "LGBT"}{" "}
-            {localStorageValues?.fvvTeh && "FVV-TEH"}
-          </p>
-        )}
       </div>
       <div className="grid grid-cols-2 border-b border-default-grey pb-2 mb-3">
         <p className="flex gap-4 mb-0">

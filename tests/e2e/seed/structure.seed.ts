@@ -1,5 +1,4 @@
 import { getTypePlacesYearRange, getYearRange } from "@/app/utils/date.util";
-import { CURRENT_YEAR } from "@/constants";
 
 import {
   buildStructureSeed,
@@ -33,8 +32,6 @@ export const createStructureForTest = async (
       communeAdministrative: input.communeAdministrative,
       departementAdministratif: input.departementAdministratif,
       creationDate: effectiveDate,
-      lgbt: input.lgbt,
-      fvvTeh: input.fvvTeh,
       public: input.public,
       dnaStructures: {
         create: input.dnaCodes.map(({ code }) => ({
@@ -75,8 +72,6 @@ export const createStructureForTest = async (
       communeAdministrative: input.communeAdministrative,
       departementAdministratif: input.departementAdministratif,
       creationDate: effectiveDate,
-      lgbt: input.lgbt,
-      fvvTeh: input.fvvTeh,
       dnaStructures: {
         create: input.dnaCodes.map(({ code }) => ({
           dna: {
@@ -126,8 +121,6 @@ export const seedValidStructureTypologies = async (
       pmr: 0,
       lgbt: 0,
       fvvTeh: 0,
-      placesACreer: year === CURRENT_YEAR ? 0 : null,
-      placesAFermer: year === CURRENT_YEAR ? 0 : null,
     })),
   });
 };

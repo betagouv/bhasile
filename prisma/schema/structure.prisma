@@ -79,10 +79,10 @@ model StructureTypologie {
   pmr                   Int?
   lgbt                  Int?
   fvvTeh                Int?
-  placesACreer          Int?
-  placesAFermer         Int?
-  echeancePlacesACreer  DateTime?
-  echeancePlacesAFermer DateTime?
+  placesACreer          Int? // TODO: remove after quality check
+  placesAFermer         Int? // TODO: remove after quality check
+  echeancePlacesACreer  DateTime? // TODO: remove after quality check
+  echeancePlacesAFermer DateTime? // TODO: remove after quality check
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

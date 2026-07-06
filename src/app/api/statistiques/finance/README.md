@@ -6,12 +6,24 @@ Valider le comportement fallback de `REALISE` vers `PREVISIONNEL`
 
 ## Millésimes
 
-Union des années présentes dans :
-
-- `Budget` (hors `isMissing`)
-- `IndicateurFinancier` `REALISE` ou `PREVISIONNEL` (hors `isMissing`)
+Union des années présentes dans `Budget` ou `IndicateurFinancier` (hors `isMissing`).
 
 Le front choisit l'année affichée dans `byYear`.
+
+## `byYear` (par scope)
+
+Budgets et indicateurs sont agrégés **indépendamment** pour chaque année : structures actives du scope ayant respectivement un budget ou un indicateur sur l'année.
+
+| Champ                                                                   | Calcul                                                                                   |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `dotationDemandee`, `dotationAccordee`, `totalProduits`, `totalCharges` | Sommes (`Budget`, structures actives)                                                    |
+| `totalETP`                                                              | Somme (indicateurs résolus, structures actives)                                          |
+| `tauxEncadrement`, `coutJournalier`                                     | Moyenne ou médiane (indicateurs résolus), arrondi 1 décimale (`roundStatsNumber`)        |
+| `resultatNet`                                                           | `totalProduits - totalCharges` (agrégat scope) ; égal à `excedentCumule - deficitCumule` |
+| `excedentCumule`                                                        | Somme des RN **positifs** par structure sur l'année                                      |
+| `deficitCumule`                                                         | Valeur absolue de la somme des RN négatifs par structure sur l'année                     |
+
+Par scope et par année (pas de cumul multi-années). Année absente dans un scope -> zéros.
 
 ## Indicateurs financiers (`ETP`, `tauxEncadrement`, `coutJournalier`)
 
@@ -20,8 +32,6 @@ Par structure et par année, **par champ** :
 1. valeur `REALISE` si renseignée ;
 2. sinon repli `PREVISIONNEL`.
 
-Puis agrégation scope : somme (`ETP`), moyenne ou médiane (taux).
-
 ## Scopes
 
 | Scope            | Types             |
@@ -29,20 +39,6 @@ Puis agrégation scope : somme (`ETP`), moyenne ou médiane (taux).
 | `autorisees`     | CADA, CPH         |
 | `subventionnees` | HUDA, CAES        |
 | `total`          | Tout le périmètre |
-
-## `byYear` (par scope)
-
-| Champ                                                                   | Calcul                                          |
-| ----------------------------------------------------------------------- | ----------------------------------------------- |
-| `dotationDemandee`, `dotationAccordee`, `totalProduits`, `totalCharges` | Sommes (`Budget`)                               |
-| `totalETP`                                                              | Somme (indicateurs résolus)                     |
-| `tauxEncadrement`, `coutJournalier`                                     | Moyenne ou médiane (indicateurs résolus)        |
-| `resultatNet`                                                           | `totalProduits − totalCharges` (agrégat scope)  |
-| `excedentCumule`                                                        | Cumul RN **positifs** par structure, puis somme |
-| `deficitCumule`                                                         | Cumul \|RN négatifs\| par structure, puis somme |
-| `soldeCumule`                                                           | `excedentCumule − deficitCumule`                |
-
-Cumuls par scope, chronologiques. Année absente dans un scope -> report cumuls.
 
 ## Sources
 

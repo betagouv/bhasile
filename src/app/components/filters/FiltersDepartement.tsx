@@ -16,8 +16,10 @@ export const FiltersDepartement = () => {
     searchParams.get("departements")?.split(",") || []
   );
 
-  const handleDepartementToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const handleDepartementToggle = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = event.target.value;
     if (departements.includes(value)) {
       setDepartements(
         departements.filter((departement) => departement !== value)

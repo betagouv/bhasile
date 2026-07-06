@@ -17,11 +17,13 @@ type BlockFilters = {
 type Props = {
   transformationType: TransformationType;
   structureId?: number;
+  departureType?: StructureType;
 };
 
 export const useStructureSelections = ({
   transformationType,
   structureId,
+  departureType,
 }: Props) => {
   const transformationSpec = TRANSFORMATION_TYPE_SPECS[transformationType];
 
@@ -109,10 +111,15 @@ export const useStructureSelections = ({
     }));
   };
 
+  const getFixedType = (
+    block: StructureSelectionBlock
+  ): StructureType | undefined =>
+    block.fixedType ?? (block.matchDepartureType ? departureType : undefined);
+
   const getEffectiveStructureType = (
     block: StructureSelectionBlock
   ): StructureType | undefined =>
-    block.fixedType ?? filtersByBlock[block.id]?.structureType;
+    getFixedType(block) ?? filtersByBlock[block.id]?.structureType;
 
   const getInheritedOperateurName = (
     block: StructureSelectionBlock
@@ -157,6 +164,7 @@ export const useStructureSelections = ({
     setOperateurName,
     setDepartementNumero,
     setStructureType,
+    getFixedType,
     getEffectiveStructureType,
     getInheritedOperateurName,
     getInheritedDepartementNumero,
