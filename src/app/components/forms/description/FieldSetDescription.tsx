@@ -1,10 +1,8 @@
-import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import ToggleSwitch from "@codegouvfr/react-dsfr/ToggleSwitch";
 import autoAnimate from "@formkit/auto-animate";
 import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { CustomNotice } from "@/app/components/common/CustomNotice";
 import { isCreation as isCreationFormKind } from "@/app/utils/transformation.util";
 import { FormKind } from "@/types/global";
 import { PublicType, StructureType } from "@/types/structure.type";
@@ -17,7 +15,7 @@ export const FieldSetDescription = ({
   formKind = FormKind.FINALISATION,
 }: Props) => {
   const filialesContainerRef = useRef(null);
-  const { register, control, setValue, watch } = useFormContext();
+  const { control, setValue, watch } = useFormContext();
   const [isManagedByAFiliale, setIsManagedByAFiliale] = useState(
     () => !!watch("filiale")
   );
@@ -131,39 +129,6 @@ export const FieldSetDescription = ({
             </SelectWithValidation>
           ) : null}
         </div>
-        {!isCreation && (
-          <>
-            <CustomNotice
-              severity="info"
-              title=""
-              description="LGBT : Lesbiennes, Gays, Bisexuels et Transgenres – FVV : Femmes Victimes de Violences–TEH : Traîte des Êtres Humains"
-            />
-            <label className="flex gap-6">
-              Actuellement, la structure dispose-t-elle de places labellisées /
-              spécialisées ?
-              <Checkbox
-                options={[
-                  {
-                    label: "LGBT",
-                    nativeInputProps: {
-                      ...register("lgbt"),
-                    },
-                  },
-                ]}
-              />
-              <Checkbox
-                options={[
-                  {
-                    label: "FVV et TEH",
-                    nativeInputProps: {
-                      ...register("fvvTeh"),
-                    },
-                  },
-                ]}
-              />
-            </label>
-          </>
-        )}
       </fieldset>
     </>
   );

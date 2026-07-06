@@ -8,6 +8,25 @@ export type StatistiqueDbStructure = Prisma.StructureGetPayload<{
   };
 }>;
 
+export type StatistiqueDbStructureActivity = Prisma.StructureGetPayload<{
+  select: {
+    id: true;
+    creationDate: true;
+    fermetureDate: true;
+  };
+}>;
+
+export type StatistiqueDbEffectiveStructureVersion =
+  Prisma.StructureVersionGetPayload<{
+    select: {
+      id: true;
+      structureId: true;
+      effectiveDate: true;
+      type: true;
+      departementAdministratif: true;
+    };
+  }>;
+
 export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
   select: {
     id: true;
@@ -22,16 +41,24 @@ export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
 
 export type StatistiqueDbTypologieValues = Omit<StatistiqueDbTypologie, "id">;
 
-export type StatistiqueDbAdresse = Prisma.AdresseGetPayload<{
-  select: {
-    id: true;
-    structureId: true;
-    repartition: true;
-    placesAutorisees: true;
-    qpv: true;
-    logementSocial: true;
-  };
-}>;
+/** `structureId` / `structureVersionId` : garantis non nuls par le scope de la requête (`findStructureAdresses`). */
+export type StatistiqueDbAdresse = Omit<
+  Prisma.AdresseGetPayload<{
+    select: {
+      id: true;
+      structureId: true;
+      structureVersionId: true;
+      repartition: true;
+      placesAutorisees: true;
+      qpv: true;
+      logementSocial: true;
+    };
+  }>,
+  "structureId" | "structureVersionId"
+> & {
+  structureId: number;
+  structureVersionId: number;
+};
 
 export type StatistiqueDbEvaluation = Prisma.EvaluationGetPayload<{
   select: {
@@ -58,9 +85,13 @@ export type StatistiqueDbDnaLink = Prisma.DnaStructureGetPayload<{
   select: {
     id: true;
     structureId: true;
+    structureVersionId: true;
     dna: { select: { code: true } };
   };
 }>;
+
+export type StatistiqueDbStructureVersionTimeline =
+  StatistiqueDbEffectiveStructureVersion;
 
 export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
   select: {
@@ -68,23 +99,28 @@ export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
     dnaCode: true;
     date: true;
     placesAutorisees: true;
+    desinsectisation: true;
+    remiseEnEtat: true;
+    sousOccupation: true;
+    travaux: true;
     placesIndisponibles: true;
     presencesInduesBPI: true;
     presencesInduesDeboutees: true;
   };
 }>;
 
-export type StatistiqueDbIndicateurFinancier = Prisma.IndicateurFinancierGetPayload<{
-  select: {
-    id: true;
-    structureId: true;
-    year: true;
-    type: true;
-    ETP: true;
-    tauxEncadrement: true;
-    coutJournalier: true;
-  };
-}>;
+export type StatistiqueDbIndicateurFinancier =
+  Prisma.IndicateurFinancierGetPayload<{
+    select: {
+      id: true;
+      structureId: true;
+      year: true;
+      type: true;
+      ETP: true;
+      tauxEncadrement: true;
+      coutJournalier: true;
+    };
+  }>;
 
 export type StatistiqueDbIndicateurFinancierMetriques = Omit<
   StatistiqueDbIndicateurFinancier,
@@ -136,13 +172,39 @@ export type StatistiqueDbCpomStructure = Prisma.CpomStructureGetPayload<{
   };
 }>;
 
+/** Dates d'ouverture/fermeture du périmètre filtré (`Structure.creationDate` / `fermetureDate`). */
+export type StatistiquesActivityContext = {
+  allStructureIds: number[];
+  openingDateByStructureId: Map<number, Date>;
+  closureDateByStructureId: Map<number, Date | null>;
+};
+
+export type StatistiquesPeriodGranularity = "month" | "trimester" | "year";
+
+/** Index construit une seule fois à la racine - lecture seule dans les sous-modules. */
+export type StatistiquesActiveStructureIdsByPeriod = Record<
+  StatistiquesPeriodGranularity,
+  Map<string, Set<number>>
+>;
+
 export type StatistiquesContext = {
-  structureIds: number[];
+  /** Structures ouvertes à la date de référence (indicateurs globaux). */
   structures: StatistiqueDbStructure[];
+  /** Toutes les structures du périmètre filtré (ouvertes + fermées). */
+  allStructures: StatistiqueDbStructure[];
+  /** IDs des structures ouvertes à la date de référence (indicateurs agrégés). */
+  activeStructureIdsNow: Set<number>;
+  /** Index des structures actives par période (séries temporelles). */
+  activeStructureIdsByPeriod: StatistiquesActiveStructureIdsByPeriod;
+  eigs: StatistiqueDbEig[];
+  evaluations: StatistiqueDbEvaluation[];
   typologies: StatistiqueDbTypologie[];
   adresses: StatistiqueDbAdresse[];
   cpomLinks: StatistiqueDbCpomStructure[];
   dnaLinks: StatistiqueDbDnaLink[];
-  dnaCodes: string[];
+  structureVersionTimeline: StatistiqueDbStructureVersionTimeline[];
   departements: StatistiqueDbDepartement[];
+  budgets: StatistiqueDbBudget[];
+  indicateurs: StatistiqueDbIndicateurFinancier[];
+  activites: StatistiqueDbActivite[];
 };

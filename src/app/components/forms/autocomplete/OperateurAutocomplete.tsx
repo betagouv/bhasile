@@ -16,7 +16,7 @@ export const OperateurAutocomplete = ({
   onBlurExtra,
   disabled,
 }: Props): ReactElement => {
-  const fetchSuggestions = useOperateurSuggestion();
+  const { searchOperateurs } = useOperateurSuggestion();
 
   return (
     <AutocompleteField
@@ -34,7 +34,7 @@ export const OperateurAutocomplete = ({
         }
       }}
       onClear={() => setOperateurId?.(undefined)}
-      fetchSuggestions={fetchSuggestions}
+      fetchSuggestions={searchOperateurs}
       externalInvalid={externalInvalid}
       externalError={externalError}
       disabled={disabled}

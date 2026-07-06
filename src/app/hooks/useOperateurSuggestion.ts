@@ -1,14 +1,14 @@
+import { useCallback } from "react";
+
 import { OperateurSuggestionApiRead } from "@/schemas/api/operateur.schema";
 
-export function useOperateurSuggestion() {
-  return async (query: string): Promise<OperateurSuggestion[]> => {
-    if (!query || query.length < 3) {
-      return [];
-    }
-
+export const useOperateurSuggestion = () => {
+  const fetchSuggestions = async (query: string) => {
     try {
+      const params = new URLSearchParams();
+      params.append("search", String(query));
       const response = await fetch(
-        `/api/operateurs/suggestions?search=${query}`
+        `/api/operateurs/suggestions?${params.toString()}`
       );
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
@@ -25,9 +25,28 @@ export function useOperateurSuggestion() {
       return [];
     }
   };
-}
 
-type OperateurSuggestion = OperateurSuggestionApiRead & {
+  const searchOperateurs = useCallback(
+    async (query: string): Promise<OperateurSuggestion[]> => {
+      if (!query || query.length < 3) {
+        return [];
+      }
+
+      return fetchSuggestions(query);
+    },
+    []
+  );
+
+  const getAllOperateurs = useCallback(async (): Promise<
+    OperateurSuggestion[]
+  > => {
+    return fetchSuggestions("");
+  }, []);
+
+  return { searchOperateurs, getAllOperateurs };
+};
+
+export type OperateurSuggestion = OperateurSuggestionApiRead & {
   id: string;
   label: string;
   key: string;

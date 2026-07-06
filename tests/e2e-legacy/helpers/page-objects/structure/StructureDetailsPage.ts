@@ -83,13 +83,6 @@ export class StructureDetailsPage extends BasePage {
     ).toContainText(publicValue);
   }
 
-  async expectVulnerabilite(vulnerabiliteValue: string) {
-    const block = this.getBlockByTitle("Description");
-    await expect(
-      block.getByText("Vulnérabilité", { exact: true }).locator("..")
-    ).toContainText(vulnerabiliteValue);
-  }
-
   async expectContactEmail(email: string) {
     const block = this.getBlockByTitle("Description");
     await expect(block.getByText(email, { exact: true })).toBeVisible();
@@ -128,16 +121,6 @@ export class StructureDetailsPage extends BasePage {
     const publicValue = overrides.public ?? data.public;
     const publicLabel =
       PublicType[publicValue as keyof typeof PublicType] ?? publicValue;
-    const lgbt = overrides.lgbt ?? data.lgbt;
-    const fvvTeh = overrides.fvvTeh ?? data.fvvTeh;
-    const vulnerabilites: string[] = [];
-    if (lgbt) {
-      vulnerabilites.push("LGBT");
-    }
-    if (fvvTeh) {
-      vulnerabilites.push("FVV", "TEH");
-    }
-    const vulnerabiliteLabel = vulnerabilites.join(", ") || "N/A";
     await expect(
       block.getByText("Date de création", { exact: true }).locator("..")
     ).toContainText(formatDate(data.creationDate));
@@ -157,9 +140,6 @@ export class StructureDetailsPage extends BasePage {
     await expect(
       block.getByText("Public", { exact: true }).locator("..")
     ).toContainText(publicLabel);
-    await expect(
-      block.getByText("Vulnérabilité", { exact: true }).locator("..")
-    ).toContainText(vulnerabiliteLabel);
 
     const adresseAdmin =
       overrides.adresseAdministrative ?? data.adresseAdministrative;

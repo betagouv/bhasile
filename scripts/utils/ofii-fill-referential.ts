@@ -9,6 +9,7 @@ import type { PrismaClient } from "@/generated/prisma/client";
 import { StructureType } from "@/generated/prisma/client";
 import { checkBucket, getObject } from "@/lib/minio";
 
+import { normalizeDepartementName } from "./departement-name";
 import { type OfiiReferentialRow } from "./ofii-xlsx";
 
 type OperateurMapping = Record<string, string>;
@@ -57,17 +58,6 @@ function deptCodeFromCode(code: string | null | undefined): string {
   const three = code.slice(1, 4);
   const n = parseInt(two, 10);
   return n > 96 ? three : two;
-}
-
-function normalizeDepartementName(value: string | null | undefined): string {
-  let departementName = value?.trim() ?? "";
-
-  // Typo courante dans certains fichiers OFII
-  if (departementName.toLowerCase() === "alpes-de-hautes-provence") {
-    departementName = "Alpes-de-Haute-Provence";
-  }
-
-  return departementName;
 }
 
 function resolveDepartementNumero(

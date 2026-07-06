@@ -1,6 +1,9 @@
+"use client";
+
 import { ReactElement } from "react";
 
 import { InformationCard } from "@/app/components/InformationCard";
+import { formatNumber } from "@/app/utils/number.util";
 
 import { TypePlaceCharts } from "../../../structures/[id]/_components/_type-places/TypePlaceCharts";
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
@@ -18,32 +21,28 @@ export const TypesPlacesBlock = (): ReactElement => {
             Types de places
           </h3>
         </div>
-        {/* TODO : à mettre à jour quand on aura les campagnes d'actualisation */}
-        {/* <div className="flex items-center text-right text-xs text-title-blue-france">
-          Données mises à jour le {new Date().toLocaleDateString()}
-        </div> */}
       </div>
       <div className="flex pb-16">
         <div className="pr-4">
           <InformationCard
-            primaryInformation={statistiques.totalPlaces}
+            primaryInformation={statistiques.places.totalPlaces}
             secondaryInformation="places autorisées"
           />
         </div>
         <InformationCard
-          primaryInformation={`${statistiques.tauxEquipement} ‰`}
+          primaryInformation={`${formatNumber(Number(statistiques.places.tauxEquipement) * 1000)} ‰`}
           secondaryInformation="taux d'équipement"
           tertiaryInformation="nombre de places divisé par le nombre d'habitants"
         />
       </div>
       <div className="pb-16">
         <TypePlaceCharts
-          placesAutorisees={statistiques.placesAutorisees}
-          placesPmr={statistiques.placesPmr}
-          placesLgbt={statistiques.placesLgbt}
-          placesFvvTeh={statistiques.placesFvvTeh}
-          placesQPV={statistiques.placesQPV}
-          placesLogementsSociaux={statistiques.placesLogementsSociaux}
+          placesAutorisees={statistiques.places.totalPlaces}
+          placesPmr={statistiques.places.pmr}
+          placesLgbt={statistiques.places.lgbt}
+          placesFvvTeh={statistiques.places.fvvTeh}
+          placesQPV={statistiques.places.qpv}
+          placesLogementsSociaux={statistiques.places.logementsSociaux}
         />
       </div>
       <TypesPlacesStatsTable />

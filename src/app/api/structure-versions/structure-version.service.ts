@@ -26,8 +26,6 @@ const mapVersionFields = (
   | "latitude"
   | "longitude"
   | "nom"
-  | "lgbt"
-  | "fvvTeh"
   | "notes"
   | "nomOfii"
   | "directionTerritoriale"
@@ -45,8 +43,6 @@ const mapVersionFields = (
   latitude: source.latitude?.toString() ?? undefined,
   longitude: source.longitude?.toString() ?? undefined,
   nom: source.nom ?? undefined,
-  lgbt: source.lgbt ?? undefined,
-  fvvTeh: source.fvvTeh ?? undefined,
   notes: source.notes ?? undefined,
   nomOfii: source.nomOfii ?? undefined,
   directionTerritoriale: source.directionTerritoriale ?? undefined,
@@ -134,10 +130,6 @@ export const copyStructureVersion = (
     pmr: typologie.pmr ?? undefined,
     lgbt: typologie.lgbt ?? undefined,
     fvvTeh: typologie.fvvTeh ?? undefined,
-    placesACreer: typologie.placesACreer,
-    placesAFermer: typologie.placesAFermer,
-    echeancePlacesACreer: typologie.echeancePlacesACreer?.toISOString(),
-    echeancePlacesAFermer: typologie.echeancePlacesAFermer?.toISOString(),
   })),
   dnaStructures: structure.dnaStructures.map((dnaStructure) => ({
     description: dnaStructure.description ?? undefined,

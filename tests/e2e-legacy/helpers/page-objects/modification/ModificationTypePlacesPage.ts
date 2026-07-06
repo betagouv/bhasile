@@ -19,45 +19,6 @@ export class ModificationTypePlacesPage extends BasePage {
   }
 
   async fillForm(data: ModificationData) {
-    if (data.ouvertureFermeture) {
-      const placesACreer = this.page.getByLabel("Nombre de places à créer");
-      if (
-        data.ouvertureFermeture.placesACreer !== undefined &&
-        (await placesACreer.count()) > 0
-      ) {
-        await placesACreer
-          .first()
-          .fill(String(data.ouvertureFermeture.placesACreer));
-      }
-      const echeancePlacesACreer = this.page.getByLabel("Echéance").first();
-      if (
-        data.ouvertureFermeture.echeancePlacesACreer &&
-        (await echeancePlacesACreer.count()) > 0
-      ) {
-        await echeancePlacesACreer.fill(
-          data.ouvertureFermeture.echeancePlacesACreer
-        );
-      }
-      const placesAFermer = this.page.getByLabel("Nombre de places à fermer");
-      if (
-        data.ouvertureFermeture.placesAFermer !== undefined &&
-        (await placesAFermer.count()) > 0
-      ) {
-        await placesAFermer
-          .first()
-          .fill(String(data.ouvertureFermeture.placesAFermer));
-      }
-      const echeancePlacesAFermer = this.page.getByLabel("Echéance").nth(1);
-      if (
-        data.ouvertureFermeture.echeancePlacesAFermer &&
-        (await echeancePlacesAFermer.count()) > 0
-      ) {
-        await echeancePlacesAFermer.fill(
-          data.ouvertureFermeture.echeancePlacesAFermer
-        );
-      }
-    }
-
     if (data.structureTypologies?.length) {
       for (let i = 0; i < data.structureTypologies.length; i++) {
         const structureTypology = data.structureTypologies[i];
