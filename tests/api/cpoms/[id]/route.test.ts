@@ -21,7 +21,7 @@ describe("GET /api/cpoms/[id]", () => {
     vi.clearAllMocks();
   });
 
-  it("should return cpom when found", async () => {
+  it("retourne le cpom quand il est trouvé", async () => {
     // GIVEN
     const cpom = { id: 1, structures: [] };
     mockFindOne.mockResolvedValueOnce(cpom);
@@ -44,7 +44,7 @@ describe("GET /api/cpoms/[id]", () => {
     expect(mockFindOne).toHaveBeenCalledWith(1);
   });
 
-  it("should return 404 when cpom is not found", async () => {
+  it("retourne 404 quand le cpom est introuvable", async () => {
     // GIVEN
     mockFindOne.mockResolvedValueOnce(null);
 
@@ -61,7 +61,7 @@ describe("GET /api/cpoms/[id]", () => {
     expect(mockFindOne).toHaveBeenCalledWith(99);
   });
 
-  it("should return 500 when repository throws", async () => {
+  it("retourne 500 quand le repository lève une erreur", async () => {
     // GIVEN
     mockFindOne.mockRejectedValueOnce(new Error("DB error"));
 
@@ -83,7 +83,7 @@ describe("PUT /api/cpoms/[id]", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 200 with cpomId on success", async () => {
+  it("retourne 200 avec le cpomId en cas de succès", async () => {
     // GIVEN
     mockCreateOrUpdateCpom.mockResolvedValueOnce(2);
 
@@ -106,7 +106,7 @@ describe("PUT /api/cpoms/[id]", () => {
     );
   });
 
-  it("should return 400 when body is invalid", async () => {
+  it("retourne 400 quand le corps de la requête est invalide", async () => {
     // GIVEN
     const request = new Request("http://localhost/api/cpoms/1", {
       method: "PUT",

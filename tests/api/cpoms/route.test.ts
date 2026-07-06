@@ -32,7 +32,7 @@ describe("GET /api/cpoms", () => {
     vi.clearAllMocks();
   });
 
-  it("returns cpoms with derived dates and the filtered total", async () => {
+  it("retourne les cpoms avec les dates dérivées et le total filtré", async () => {
     mockFindAllCpoms.mockResolvedValueOnce([
       makeCpom({ id: 1 }),
       makeCpom({ id: 2 }),
@@ -47,7 +47,7 @@ describe("GET /api/cpoms", () => {
     expect(body.cpoms[0]).toMatchObject({ dateStart: null, dateEnd: null });
   });
 
-  it("filters by departement membership and reflects it in the total", async () => {
+  it("filtre par appartenance à un département et le reflète dans le total", async () => {
     mockFindAllCpoms.mockResolvedValueOnce([
       makeCpom({ id: 1, departements: [{ departement: { numero: "75" } }] }),
       makeCpom({ id: 2, departements: [{ departement: { numero: "92" } }] }),
@@ -63,7 +63,7 @@ describe("GET /api/cpoms", () => {
     expect(body.cpoms.map((cpom: { id: number }) => cpom.id)).toEqual([1, 3]);
   });
 
-  it("sorts by the requested column and direction", async () => {
+  it("trie selon la colonne et la direction demandées", async () => {
     mockFindAllCpoms.mockResolvedValueOnce([
       makeCpom({ id: 1, operateur: { name: "Charlie" } }),
       makeCpom({ id: 2, operateur: { name: "Alpha" } }),
@@ -82,7 +82,7 @@ describe("GET /api/cpoms", () => {
     ).toEqual(["Alpha", "Bravo", "Charlie"]);
   });
 
-  it("returns 500 when the repository throws", async () => {
+  it("retourne 500 quand le repository lève une erreur", async () => {
     mockFindAllCpoms.mockRejectedValueOnce(new Error("DB error"));
 
     const response = await GET(new NextRequest("http://localhost/api/cpoms"));
@@ -96,7 +96,7 @@ describe("POST /api/cpoms", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 201 with cpomId on success", async () => {
+  it("retourne 201 avec le cpomId en cas de succès", async () => {
     const payload = { id: 1, operateur: { name: "Opérateur Test" } };
     mockCreateOrUpdateCpom.mockResolvedValueOnce(1);
 
@@ -112,7 +112,7 @@ describe("POST /api/cpoms", () => {
     expect(mockCreateCpomEvent).toHaveBeenCalledWith("POST", 1);
   });
 
-  it("should return 400 when operateur name is missing", async () => {
+  it("retourne 400 quand le nom de l'opérateur est manquant", async () => {
     const request = new Request("http://localhost/api/cpoms", {
       method: "POST",
       body: JSON.stringify({ id: 1, operateur: { name: "" } }),

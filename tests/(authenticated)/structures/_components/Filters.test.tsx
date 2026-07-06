@@ -13,7 +13,7 @@ describe("Filters", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
-  it("should show active indicator when filters are applied", () => {
+  it("affiche l'indicateur actif quand des filtres sont appliqués", () => {
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams("type=CADA&bati=DIFFUS")
     );
@@ -25,7 +25,7 @@ describe("Filters", () => {
     expect(filterButton).toHaveAttribute("aria-label", "Filtres actifs");
   });
 
-  it("should show active indicator when places filter is applied", () => {
+  it("affiche l'indicateur actif quand le filtre sur les places est appliqué", () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams("places=10"));
 
     render(<Filters />);
@@ -35,7 +35,7 @@ describe("Filters", () => {
     expect(filterButton).toHaveAttribute("aria-label", "Filtres actifs");
   });
 
-  it("should show active indicator when location filters are applied", () => {
+  it("affiche l'indicateur actif quand des filtres de localisation sont appliqués", () => {
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams("departements=75,92")
     );
@@ -52,7 +52,7 @@ describe("Filters", () => {
     );
   });
 
-  it("should not show active indicator when no filters are applied", () => {
+  it("n'affiche pas l'indicateur actif quand aucun filtre n'est appliqué", () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
 
     render(<Filters />);

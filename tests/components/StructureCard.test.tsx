@@ -12,7 +12,7 @@ const baseProps = {
 };
 
 describe("StructureCard", () => {
-  it("should render the codeBhasile prefix when it is provided", () => {
+  it("affiche le préfixe codeBhasile quand il est fourni", () => {
     // WHEN
     render(<StructureCard {...baseProps} codeBhasile="75001001" />);
 
@@ -22,7 +22,7 @@ describe("StructureCard", () => {
     ).toBeInTheDocument();
   });
 
-  it("should omit the codeBhasile prefix when it is absent", () => {
+  it("omet le préfixe codeBhasile quand il est absent", () => {
     // WHEN
     render(<StructureCard {...baseProps} />);
 

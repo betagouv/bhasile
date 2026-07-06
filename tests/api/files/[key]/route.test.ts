@@ -26,7 +26,7 @@ describe("GET /api/files/[key]", () => {
     vi.clearAllMocks();
   });
 
-  it("should return download link when getLink param is set", async () => {
+  it("retourne le lien de téléchargement quand le param getLink est présent", async () => {
     // GIVEN
     mockPresignedGetObject.mockResolvedValueOnce(
       "https://s3.example.com/test.pdf"
@@ -49,7 +49,7 @@ describe("GET /api/files/[key]", () => {
     expect(mockDeleteOneByKey).not.toHaveBeenCalled();
   });
 
-  it("should return 404 when file is not found", async () => {
+  it("retourne 404 quand le fichier est introuvable", async () => {
     // GIVEN
     mockFindOneByKey.mockResolvedValueOnce(null);
 
@@ -65,7 +65,7 @@ describe("GET /api/files/[key]", () => {
     expect(mockDeleteOneByKey).not.toHaveBeenCalled();
   });
 
-  it("should return file metadata when found", async () => {
+  it("retourne les métadonnées du fichier quand il est trouvé", async () => {
     // GIVEN
     const file = { id: 1, key: "test.pdf", mimeType: "application/pdf" };
     mockFindOneByKey.mockResolvedValueOnce(file);
@@ -87,7 +87,7 @@ describe("DELETE /api/files/[key]", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 404 when file is not found", async () => {
+  it("retourne 404 quand le fichier est introuvable", async () => {
     // GIVEN
     mockFindOneByKey.mockResolvedValueOnce(null);
 
@@ -105,7 +105,7 @@ describe("DELETE /api/files/[key]", () => {
     expect(mockDeleteOneByKey).not.toHaveBeenCalled();
   });
 
-  it("should return deleted file on success", async () => {
+  it("retourne le fichier supprimé en cas de succès", async () => {
     // GIVEN
     const file = { id: 1, key: "test.pdf" };
     mockFindOneByKey.mockResolvedValueOnce(file);
@@ -126,7 +126,7 @@ describe("DELETE /api/files/[key]", () => {
     expect(mockDeleteOneByKey).toHaveBeenCalledWith("test.pdf");
   });
 
-  it("should return 500 when deletion fails", async () => {
+  it("retourne 500 quand la suppression échoue", async () => {
     // GIVEN
     const file = { id: 1, key: "test.pdf" };
     mockFindOneByKey.mockResolvedValueOnce(file);

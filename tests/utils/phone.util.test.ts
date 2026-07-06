@@ -2,61 +2,61 @@ import { formatPhoneNumber } from "@/app/utils/phone.util";
 
 describe("phone util", () => {
   describe("formatPhoneNumber", () => {
-    it("should format French mobile number with 0", () => {
+    it("formate un numéro de mobile français commençant par 0", () => {
       expect(formatPhoneNumber("0612345678")).toBe(`06 12 34 56 78`);
     });
 
-    it("should format French landline number with 0", () => {
+    it("formate un numéro fixe français commençant par 0", () => {
       expect(formatPhoneNumber("0123456789")).toBe(`01 23 45 67 89`);
     });
 
-    it("should format international number with +", () => {
+    it("formate un numéro international commençant par +", () => {
       expect(formatPhoneNumber("+33612345678")).toBe(`06 12 34 56 78`);
     });
 
-    it("should format number without 0", () => {
+    it("formate un numéro sans 0 initial", () => {
       expect(formatPhoneNumber("612345678")).toBe(`06 12 34 56 78`);
     });
 
-    it("should format French number with dots", () => {
+    it("formate un numéro français avec des points", () => {
       expect(formatPhoneNumber("06.12.34.56.78")).toBe(`06 12 34 56 78`);
     });
 
-    it("should format French number with spaces", () => {
+    it("formate un numéro français avec des espaces", () => {
       expect(formatPhoneNumber("06 12 34 56 78")).toBe(`06 12 34 56 78`);
     });
 
-    it("should format French number with mixed separators", () => {
+    it("formate un numéro français avec des séparateurs mélangés", () => {
       expect(formatPhoneNumber("06-12.34 56 78")).toBe(`06 12 34 56 78`);
     });
 
-    it("should format number with country code 33 prefix", () => {
+    it("formate un numéro préfixé par l'indicatif pays 33", () => {
       expect(formatPhoneNumber("33612345678")).toBe(`06 12 34 56 78`);
     });
 
-    it("should handle number with parentheses", () => {
+    it("gère un numéro avec des parenthèses", () => {
       expect(formatPhoneNumber("(06) 12 34 56 78")).toBe(`06 12 34 56 78`);
     });
 
-    it("should handle number with leading/trailing spaces", () => {
+    it("gère un numéro avec des espaces en début et en fin", () => {
       expect(formatPhoneNumber("  0612345678  ")).toBe(`06 12 34 56 78`);
     });
 
-    it("should handle very short number", () => {
+    it("gère un numéro très court", () => {
       expect(formatPhoneNumber("123")).toBe(`12 3`);
     });
 
-    it("should handle very long number", () => {
+    it("gère un numéro très long", () => {
       expect(formatPhoneNumber("+331234567890123")).toBe(
         `01 23 45 67 89 01 23`
       );
     });
 
-    it("should handle empty string", () => {
+    it("gère une chaîne vide", () => {
       expect(formatPhoneNumber("")).toBe("");
     });
 
-    it("should handle invalid input", () => {
+    it("gère une entrée invalide", () => {
       expect(formatPhoneNumber("abc")).toBe("");
     });
   });

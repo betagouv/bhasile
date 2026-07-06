@@ -61,7 +61,7 @@ describe("TransformationStructureStepPage", () => {
     mockUseParams.mockReturnValue({ transformationStructureId: "7" });
   });
 
-  it("should render FermetureFlow when structureVersionTransformation.type is FERMETURE", () => {
+  it("affiche FermetureFlow quand structureVersionTransformation.type vaut FERMETURE", () => {
     // GIVEN
     const structureVersionTransformation: StructureVersionTransformationApiRead = {
       id: 7,
@@ -91,7 +91,7 @@ describe("TransformationStructureStepPage", () => {
       TransformationType.CONTRACTION_SANS_TRANSFERT_DE_PLACES,
     ],
   ])(
-    "should render ExistingStructureFlow when structureVersionTransformation.type is %s",
+    "affiche ExistingStructureFlow quand structureVersionTransformation.type vaut %s",
     (structureVersionTransformationType, transformationType) => {
       // GIVEN
       const structureVersionTransformation: StructureVersionTransformationApiRead = {
@@ -120,7 +120,7 @@ describe("TransformationStructureStepPage", () => {
     TransformationType.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES,
     TransformationType.TRANSFO_HUDA_VERS_CADA_NOUVEAU_MEME_OPERATEUR,
   ])(
-    "should render CreationFlow when CREATION and transformation.type is %s",
+    "affiche CreationFlow quand le type est CREATION et que transformation.type vaut %s",
     (transformationType) => {
       // GIVEN
       const structureVersionTransformation: StructureVersionTransformationApiRead = {
@@ -142,7 +142,7 @@ describe("TransformationStructureStepPage", () => {
     }
   );
 
-  it("should render the TransformationStructureHeader above the flow", () => {
+  it("affiche le TransformationStructureHeader au-dessus du flow", () => {
     // GIVEN
     const structureVersionTransformation: StructureVersionTransformationApiRead = {
       id: 7,
@@ -164,7 +164,7 @@ describe("TransformationStructureStepPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("should call notFound when transformation is missing", () => {
+  it("appelle notFound quand la transformation est absente", () => {
     // GIVEN
     mockUseTransformationContext.mockReturnValue({ transformation: null });
 
@@ -175,7 +175,7 @@ describe("TransformationStructureStepPage", () => {
     expect(mockNotFound).toHaveBeenCalled();
   });
 
-  it("should call notFound when structureVersionTransformation id does not match", () => {
+  it("appelle notFound quand l'id de la structureVersionTransformation ne correspond pas", () => {
     // GIVEN
     mockUseParams.mockReturnValue({ transformationStructureId: "999" });
     const structureVersionTransformation: StructureVersionTransformationApiRead = {

@@ -37,7 +37,7 @@ describe("useLocalStorage", () => {
     vi.stubGlobal("localStorage", originalLocalStorage);
   });
 
-  it("should use the initial value when localStorage is empty", () => {
+  it("utilise la valeur initiale quand le localStorage est vide", () => {
     // GIVEN
     const key = "testKey";
     const initialValue = { name: "John", age: 30 };
@@ -50,7 +50,7 @@ describe("useLocalStorage", () => {
     expect(localStorageMock.getItem).toHaveBeenCalledWith(key);
   });
 
-  it("should retrieve value from localStorage if it exists", () => {
+  it("récupère la valeur du localStorage si elle existe", () => {
     // GIVEN
     const key = "testKey";
     const storedValue = { name: "Jane", age: 25 };
@@ -67,7 +67,7 @@ describe("useLocalStorage", () => {
     expect(localStorageMock.getItem).toHaveBeenCalledWith(key);
   });
 
-  it("should update localStorage when value changes", () => {
+  it("met à jour le localStorage quand la valeur change", () => {
     // GIVEN
     const key = "testKey";
     const initialValue = { name: "John", age: 30 };
@@ -88,7 +88,7 @@ describe("useLocalStorage", () => {
     );
   });
 
-  it("should handle localStorage errors when getting data", () => {
+  it("gère les erreurs du localStorage lors de la lecture", () => {
     // GIVEN
     const key = "testKey";
     const initialValue = { name: "John", age: 30 };
@@ -114,7 +114,7 @@ describe("useLocalStorage", () => {
     console.error = originalConsoleError;
   });
 
-  it("should handle localStorage errors when setting data", () => {
+  it("gère les erreurs du localStorage lors de l'écriture", () => {
     // GIVEN
     const key = "testKey";
     const initialValue = { name: "John", age: 30 };
@@ -144,7 +144,7 @@ describe("useLocalStorage", () => {
     console.error = originalConsoleError;
   });
 
-  it("should handle null key properly", () => {
+  it("gère proprement une clé null", () => {
     // GIVEN
     const key = null;
     const initialValue = { name: "John", age: 30 };

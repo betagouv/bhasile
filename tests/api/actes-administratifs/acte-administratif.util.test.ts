@@ -18,7 +18,7 @@ describe("acte-administratif util", () => {
     vi.useRealTimers();
   });
 
-  it("returns null dates when no acte matches category", () => {
+  it("retourne des dates nulles quand aucun acte ne correspond à la catégorie", () => {
     const actesAdministratifs: ActeAdministratifStub[] = [];
 
     expect(
@@ -29,7 +29,7 @@ describe("acte-administratif util", () => {
     ).toEqual([null, null]);
   });
 
-  it("ignores non-current actes and returns the current one", () => {
+  it("ignore les actes non courants et retourne l'acte courant", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-15T00:00:00.000Z"));
     const actesAdministratifs: ActeAdministratifStub[] = [
@@ -64,7 +64,7 @@ describe("acte-administratif util", () => {
     ]);
   });
 
-  it("excludes actes without endDate", () => {
+  it("exclut les actes sans endDate", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-15T00:00:00.000Z"));
     const actesAdministratifs: ActeAdministratifStub[] = [
@@ -83,7 +83,7 @@ describe("acte-administratif util", () => {
     ).toEqual([null, null]);
   });
 
-  it("uses the furthest avenant endDate when available", () => {
+  it("utilise l'endDate de l'avenant le plus lointain quand elle est disponible", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-15T00:00:00.000Z"));
     const actesAdministratifs: ActeAdministratifStub[] = [
@@ -127,7 +127,7 @@ describe("acte-administratif util", () => {
     ]);
   });
 
-  it("treats equality with now as current boundary", () => {
+  it("traite l'égalité avec now comme une borne courante", () => {
     const now = new Date("2026-01-15T00:00:00.000Z");
     vi.useFakeTimers();
     vi.setSystemTime(now);
@@ -154,7 +154,7 @@ describe("acte-administratif util", () => {
     ).toEqual([now, new Date("2026-02-01T00:00:00.000Z")]);
   });
 
-  it("ignores orphan avenants with unknown parentId", () => {
+  it("ignore les avenants orphelins dont le parentId est inconnu", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-15T00:00:00.000Z"));
     const actesAdministratifs: ActeAdministratifStub[] = [
@@ -184,7 +184,7 @@ describe("acte-administratif util", () => {
     ]);
   });
 
-  it("falls back to the expired acte when none is currently in range", () => {
+  it("se rabat sur l'acte expiré quand aucun n'est actuellement dans l'intervalle", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-15T00:00:00.000Z"));
     const actesAdministratifs: ActeAdministratifStub[] = [
@@ -207,7 +207,7 @@ describe("acte-administratif util", () => {
     ]);
   });
 
-  it("falls back to the most recent expired acte when several are expired", () => {
+  it("se rabat sur l'acte expiré le plus récent quand plusieurs sont expirés", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-15T00:00:00.000Z"));
     const actesAdministratifs: ActeAdministratifStub[] = [

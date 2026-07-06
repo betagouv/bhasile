@@ -95,7 +95,7 @@ describe("structure.repository db integration", () => {
     }
   });
 
-  it("should update all structure scalar fields in one call", async () => {
+  it("met à jour tous les champs scalaires de la structure en un seul appel", async () => {
     // GIVEN: an empty structure
     const structure = await createStructure();
     const creationDate = "2020-02-02T00:00:00.000Z";
@@ -143,7 +143,7 @@ describe("structure.repository db integration", () => {
     expect(updated.date303?.toISOString()).toBe(date303);
   });
 
-  it("should update departementAdministratif relation", async () => {
+  it("met à jour la relation departementAdministratif", async () => {
     // GIVEN: a structure and an existing department
     const structure = await createStructure();
     const departement = await prisma.departement.findFirstOrThrow();
@@ -159,7 +159,7 @@ describe("structure.repository db integration", () => {
     expect(version.departementAdministratif).toBe(departement.numero);
   });
 
-  it("should update operateur relation", async () => {
+  it("met à jour la relation operateur", async () => {
     // GIVEN: a structure and a dedicated operateur
     const structure = await createStructure();
     const operateur = await prisma.operateur.create({
@@ -180,7 +180,7 @@ describe("structure.repository db integration", () => {
     expect(updated.operateurId).toBe(operateur.id);
   });
 
-  it("should replace structure contacts on the rolling version", async () => {
+  it("remplace les contacts de la structure sur la version courante", async () => {
     // GIVEN: a structure whose rolling version already holds two contacts
     const structure = await createStructure();
     await updateOne({
@@ -210,7 +210,7 @@ describe("structure.repository db integration", () => {
     expect(version.contacts[0]).toMatchObject(newContact);
   });
 
-  it("should not modify the rolling version contacts when updating only scalar fields", async () => {
+  it("ne modifie pas les contacts de la version courante quand seuls des champs scalaires sont mis à jour", async () => {
     // GIVEN: a rolling version that already holds a contact
     const structure = await createStructure();
     const existingContact = {
@@ -236,7 +236,7 @@ describe("structure.repository db integration", () => {
     expect(version.contacts[0]).toMatchObject(existingContact);
   });
 
-  it("does not create a new version when the payload has no versioned field", async () => {
+  it("ne crée pas de nouvelle version quand le payload n'a aucun champ versionné", async () => {
     // GIVEN: a structure with only its initial version
     const structure = await createStructure();
 
@@ -250,7 +250,7 @@ describe("structure.repository db integration", () => {
     expect(versionCount).toBe(1);
   });
 
-  it("applies a correction in place and preserves the current version effectiveDate", async () => {
+  it("applique une correction sur place et préserve l'effectiveDate de la version courante", async () => {
     // GIVEN: a structure with its initial version (effectiveDate 2020-01-01)
     const structure = await createStructure();
 
@@ -269,7 +269,7 @@ describe("structure.repository db integration", () => {
     expect(versionCount).toBe(1);
   });
 
-  it("throws when correcting a structure that has no current version (future-only)", async () => {
+  it("lève une erreur en corrigeant une structure sans version courante (future uniquement)", async () => {
     // GIVEN: a structure whose only version is effective in the future
     const structure = await prisma.structure.create({
       data: {
@@ -287,7 +287,7 @@ describe("structure.repository db integration", () => {
     ).rejects.toThrow("Aucune version courante");
   });
 
-  it("should upsert structure budgets by year", async () => {
+  it("upsert les budgets de la structure par année", async () => {
     // GIVEN: an existing budget
     const structure = await createStructure();
     await prisma.budget.create({
@@ -315,7 +315,7 @@ describe("structure.repository db integration", () => {
     expect(budgets[0]).toMatchObject(newBudget);
   });
 
-  it("should keep existing budgets and add a new one for another year", async () => {
+  it("conserve les budgets existants et en ajoute un nouveau pour une autre année", async () => {
     // GIVEN: existing budgets for multiple years
     const structure = await createStructure();
     const existingBudgets = [
@@ -362,7 +362,7 @@ describe("structure.repository db integration", () => {
     );
   });
 
-  it("should upsert indicateursFinanciers by year and type", async () => {
+  it("upsert les indicateursFinanciers par année et par type", async () => {
     // GIVEN: one existing indicateur
     const structure = await createStructure();
     await prisma.indicateurFinancier.create({
@@ -396,7 +396,7 @@ describe("structure.repository db integration", () => {
     expect(rows[0]).toMatchObject(newIndicateurFinancier);
   });
 
-  it("should upsert structureTypologies by year on the rolling version", async () => {
+  it("upsert les structureTypologies par année sur la version courante", async () => {
     // GIVEN: a rolling version with one typology for 2024
     const structure = await createStructure();
     await updateOne({
@@ -416,7 +416,7 @@ describe("structure.repository db integration", () => {
     expect(version.structureTypologies[0]).toMatchObject(newStructureTypologie);
   });
 
-  it("should replace adresses list and typologies on the rolling version", async () => {
+  it("remplace la liste des adresses et leurs typologies sur la version courante", async () => {
     // GIVEN: a rolling version with one address
     const structure = await createStructure();
     await updateOne({
@@ -464,7 +464,7 @@ describe("structure.repository db integration", () => {
     );
   });
 
-  it("should replace antennes list on the rolling version", async () => {
+  it("remplace la liste des antennes sur la version courante", async () => {
     // GIVEN: a rolling version with one antenne
     const structure = await createStructure();
     await updateOne({
@@ -488,7 +488,7 @@ describe("structure.repository db integration", () => {
     expect(version.antennes[0]).toMatchObject(newAntenne);
   });
 
-  it("should replace dnaStructures list on the rolling version", async () => {
+  it("remplace la liste des dnaStructures sur la version courante", async () => {
     // GIVEN: a rolling version with one dna link
     const structure = await createStructure();
     const oldCode = `DNA-OLD-${Date.now()}-${randomUUID()}`;
@@ -511,7 +511,7 @@ describe("structure.repository db integration", () => {
     expect(version.dnaStructures[0].description).toBe("New DNA");
   });
 
-  it("should collapse duplicate DNA codes into a single link instead of crashing", async () => {
+  it("fusionne les codes DNA en doublon en un seul lien au lieu de planter", async () => {
     // GIVEN: an empty structure
     const structure = await createStructure();
     const duplicatedCode = `DNA-DUP-${Date.now()}-${randomUUID()}`;
@@ -531,7 +531,7 @@ describe("structure.repository db integration", () => {
     expect(version.dnaStructures[0].dna.code).toBe(duplicatedCode);
   });
 
-  it("getFullStructure resolves the rolling version into the read model", async () => {
+  it("getFullStructure résout la version courante dans le modèle de lecture", async () => {
     // GIVEN: a structure edited via the rolling write
     const structure = await createStructure();
     await updateOne({
@@ -557,7 +557,7 @@ describe("structure.repository db integration", () => {
     expect(read?.adresses?.[0]?.commune).toBe("Paris");
   });
 
-  it("should replace finesses list on the rolling version", async () => {
+  it("remplace la liste des finesses sur la version courante", async () => {
     // GIVEN: a rolling version with one FINESS link
     const structure = await createStructure();
     await updateOne({
@@ -584,7 +584,7 @@ describe("structure.repository db integration", () => {
     expect(version.structureFinesses[0].description).toBe("new finess");
   });
 
-  it("should collapse duplicate FINESS codes into a single link instead of crashing", async () => {
+  it("fusionne les codes FINESS en doublon en un seul lien au lieu de planter", async () => {
     // GIVEN: an empty structure
     const structure = await createStructure();
     const duplicatedCode = `FIN-DUP-${Date.now()}-${randomUUID()}`;
@@ -604,7 +604,7 @@ describe("structure.repository db integration", () => {
     expect(version.structureFinesses[0].finess.code).toBe(duplicatedCode);
   });
 
-  it("should upsert actesAdministratifs and delete missing ones", async () => {
+  it("upsert les actesAdministratifs et supprime ceux qui manquent", async () => {
     // GIVEN: one existing acte with a file
     const structure = await createStructure();
     const oldFile = await createFileUpload("old-acte");
@@ -642,7 +642,7 @@ describe("structure.repository db integration", () => {
     expect(actes[0].fileUploads).toMatchObject([{ key: keptFile.key }]);
   });
 
-  it("should keep an avenant added to an existing fileless acte", async () => {
+  it("conserve un avenant ajouté à un acte existant sans fichier", async () => {
     // GIVEN: a convention already in base WITHOUT any file
     const structure = await createStructure();
     const conventionWithoutFile = await prisma.acteAdministratif.create({
@@ -701,7 +701,7 @@ describe("structure.repository db integration", () => {
     ]);
   });
 
-  it("should not update an acte owned by another structure when its id is sent", async () => {
+  it("ne met pas à jour un acte appartenant à une autre structure quand son id est envoyé", async () => {
     // GIVEN: an acte owned by another structure
     const otherStructure = await createStructure();
     const otherFile = await createFileUpload("other-acte");
@@ -756,7 +756,7 @@ describe("structure.repository db integration", () => {
     ]);
   });
 
-  it("should upsert documentsFinanciers and delete missing ones", async () => {
+  it("upsert les documentsFinanciers et supprime ceux qui manquent", async () => {
     // GIVEN: one existing document financier with file
     const structure = await createStructure();
     const oldFile = await createFileUpload("old-doc");
@@ -799,7 +799,7 @@ describe("structure.repository db integration", () => {
     expect(docs[0].fileUploads).toMatchObject([{ key: newFile.key }]);
   });
 
-  it("should replace controles list", async () => {
+  it("remplace la liste des controles", async () => {
     // GIVEN: one existing controle
     const structure = await createStructure();
     await prisma.controle.create({
@@ -836,7 +836,7 @@ describe("structure.repository db integration", () => {
     ).toContain(file.key);
   });
 
-  it("should replace evaluations list", async () => {
+  it("remplace la liste des evaluations", async () => {
     // GIVEN: one existing evaluation
     const structure = await createStructure();
     await prisma.evaluation.create({
@@ -881,7 +881,7 @@ describe("structure.repository db integration", () => {
     ).toContain(file.key);
   });
 
-  it("should upsert forms and formSteps by definition/step slugs", async () => {
+  it("upsert les forms et formSteps par slugs de définition/étape", async () => {
     // GIVEN: a structure and one existing form bound to a definition
     const structure = await createStructure();
     const formDefinition = await prisma.formDefinition.findFirstOrThrow({
@@ -941,7 +941,7 @@ describe("structure.repository db integration", () => {
     expect(form.formSteps[0].status).toBe(newForm.formSteps[0].status);
   });
 
-  it("should upsert structureMillesimes by year", async () => {
+  it("upsert les structureMillesimes par année", async () => {
     // GIVEN: one existing millesime
     const structure = await createStructure();
     await prisma.structureMillesime.create({

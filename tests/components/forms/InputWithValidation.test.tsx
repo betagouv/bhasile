@@ -8,7 +8,7 @@ import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
 
 describe("InputWithValidation", () => {
   describe("Edge cases - null and undefined values", () => {
-    it("should handle null text values gracefully", () => {
+    it("gère proprement une valeur texte null", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -28,7 +28,7 @@ describe("InputWithValidation", () => {
       expect(input).toHaveValue("");
     });
 
-    it("should handle undefined text values gracefully", () => {
+    it("gère proprement une valeur texte undefined", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -48,7 +48,7 @@ describe("InputWithValidation", () => {
       expect(input).toHaveValue("");
     });
 
-    it("should handle null date values gracefully", () => {
+    it("gère proprement une valeur date null", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -68,7 +68,7 @@ describe("InputWithValidation", () => {
       expect(input).toHaveValue("");
     });
 
-    it("should handle undefined date values gracefully", () => {
+    it("gère proprement une valeur date undefined", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -88,7 +88,7 @@ describe("InputWithValidation", () => {
       expect(input).toHaveValue("");
     });
 
-    it("should handle null number values gracefully", () => {
+    it("gère proprement une valeur numérique null", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -110,7 +110,7 @@ describe("InputWithValidation", () => {
   });
 
   describe("Edge cases - empty values", () => {
-    it("should handle empty string text values", () => {
+    it("gère une chaîne texte vide", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -130,7 +130,7 @@ describe("InputWithValidation", () => {
       expect(input).toHaveValue("");
     });
 
-    it("should handle empty string date values", () => {
+    it("gère une chaîne date vide", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -152,7 +152,7 @@ describe("InputWithValidation", () => {
   });
 
   describe("Date format handling", () => {
-    it("should handle DD/MM/YYYY format for dates", () => {
+    it("gère le format JJ/MM/AAAA pour les dates", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -172,7 +172,7 @@ describe("InputWithValidation", () => {
       expect(input).toHaveValue("2024-01-15");
     });
 
-    it("should handle YYYY-MM-DD format for dates", () => {
+    it("gère le format AAAA-MM-JJ pour les dates", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -192,7 +192,7 @@ describe("InputWithValidation", () => {
       expect(input).toHaveValue("2024-01-15");
     });
 
-    it("should convert date input from HTML format to DD/MM/YYYY", async () => {
+    it("convertit la saisie de date du format HTML vers JJ/MM/AAAA", async () => {
       const user = userEvent.setup();
 
       render(
@@ -220,7 +220,7 @@ describe("InputWithValidation", () => {
   });
 
   describe("Number input handling", () => {
-    it("should handle empty number input", async () => {
+    it("gère une saisie numérique vide", async () => {
       const user = userEvent.setup();
 
       render(
@@ -249,7 +249,7 @@ describe("InputWithValidation", () => {
       });
     });
 
-    it("should handle number input correctly", async () => {
+    it("gère correctement une saisie numérique", async () => {
       const user = userEvent.setup();
 
       render(
@@ -277,7 +277,7 @@ describe("InputWithValidation", () => {
   });
 
   describe("Text input handling", () => {
-    it("should handle text input correctly", async () => {
+    it("gère correctement une saisie de texte", async () => {
       const user = userEvent.setup();
 
       render(
