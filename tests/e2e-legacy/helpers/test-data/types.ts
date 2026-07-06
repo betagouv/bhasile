@@ -23,8 +23,6 @@ export type TestStructureData = {
     description: string;
   }>;
   public: string;
-  lgbt: boolean;
-  fvvTeh: boolean;
   contacts?: Array<{
     prenom?: string;
     nom?: string;

@@ -12,8 +12,6 @@ const baseIdentificationSchema = structureBaseSchema.extend({
   creationDate: frenchDateToISO(),
   public: z.nativeEnum(PublicType),
   filiale: z.string().optional(),
-  lgbt: z.boolean(),
-  fvvTeh: z.boolean(),
 });
 
 export const identificationSchema = structureBaseSchema.and(

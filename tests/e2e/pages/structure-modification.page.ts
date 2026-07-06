@@ -136,10 +136,6 @@ export class StructureModificationPage {
     await uploadActeDocument(this.autreFieldset(), filePath);
   }
 
-  async toggleLgbt(): Promise<void> {
-    await this.page.getByLabel("LGBT").click();
-  }
-
   async submitAndWaitForSave(): Promise<void> {
     const savePromise = this.page.waitForResponse(
       (response) =>

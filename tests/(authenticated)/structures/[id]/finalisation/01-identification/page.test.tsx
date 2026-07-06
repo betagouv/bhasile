@@ -127,8 +127,6 @@ describe("FinalisationIdentification page integration", () => {
       },
       creationDate: "2007-01-01T12:00:00.000Z",
       public: "Tout public",
-      lgbt: true,
-      fvvTeh: false,
       contacts: [newContact],
       dnaStructures: [
         {

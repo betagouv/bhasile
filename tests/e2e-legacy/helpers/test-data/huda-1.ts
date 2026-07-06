@@ -26,8 +26,6 @@ export const huda1: TestStructureScenario = {
         description: "DNA 2",
       },
     ],
-    lgbt: true,
-    fvvTeh: true,
     contacts: [
       {
         prenom: "John",
@@ -269,8 +267,6 @@ export const huda1: TestStructureScenario = {
   },
   modificationData: {
     public: "Personnes isolées",
-    lgbt: true,
-    fvvTeh: false,
     contacts: [{ email: "modif-huda1@example.com" }],
     notes: "Notes modification HUDA 1 - convention.",
     structureTypologies: [

@@ -172,8 +172,6 @@ type VersionScalars = {
   communeAdministrative?: string | null;
   latitude?: Prisma.Decimal | null;
   longitude?: Prisma.Decimal | null;
-  lgbt?: boolean | null;
-  fvvTeh?: boolean | null;
   public?: PublicType | null;
   notes?: string | null;
 };
@@ -206,8 +204,6 @@ const buildVersionScalars = (
     longitude: new Prisma.Decimal(
       faker.location.longitude({ min: -0.851371, max: 5.843377 })
     ),
-    lgbt: faker.datatype.boolean(),
-    fvvTeh: faker.datatype.boolean(),
     public: faker.helpers.enumValue(PublicType),
     notes: faker.lorem.lines(2),
   };

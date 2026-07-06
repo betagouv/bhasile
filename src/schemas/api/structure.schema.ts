@@ -68,12 +68,6 @@ export const structureOperateurUpdateApiSchema =
       .datetime({ message: "La date de création est requise" }),
     date303: z.string().datetime().nullish(),
     finessCode: z.string().optional(),
-    lgbt: z.boolean({
-      message: "L'accueil de LGBT dans la structure est requis",
-    }),
-    fvvTeh: z.boolean({
-      message: "L'accueil de FVV-TEH dans la structure est requis",
-    }),
     public: z.nativeEnum(PublicType),
     adresses: z.array(adresseApiSchema),
     antennes: z.array(antenneApiSchema).optional(),
@@ -166,4 +160,6 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   isMultiAntenne: boolean;
   isMultiDna: boolean;
   typeBati?: Repartition;
+  lgbt: boolean;
+  fvvTeh: boolean;
 };

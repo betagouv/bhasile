@@ -32,8 +32,6 @@ export const cada1: TestStructureScenario = {
       },
     ],
     public: "Tout public",
-    lgbt: true,
-    fvvTeh: true,
     contacts: [
       {
         prenom: "John",
@@ -366,8 +364,6 @@ export const cada1: TestStructureScenario = {
   },
   modificationData: {
     public: "Famille",
-    lgbt: true,
-    fvvTeh: false,
     contacts: [{ email: "modif-cada1@example.com" }],
     notes: "Notes modification CADA 1 - suivi renforcé.",
     structureTypologies: [

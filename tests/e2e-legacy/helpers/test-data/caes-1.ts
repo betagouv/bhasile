@@ -22,8 +22,6 @@ export const caes1: TestStructureScenario = {
       },
     ],
     public: "Tout public",
-    lgbt: true,
-    fvvTeh: true,
     contacts: [
       {
         prenom: "John",
@@ -262,8 +260,6 @@ export const caes1: TestStructureScenario = {
   },
   modificationData: {
     public: "Famille",
-    lgbt: false,
-    fvvTeh: true,
     contacts: [{ email: "modif-caes1@example.com" }],
     notes: "Notes modification CAES 1.",
     structureTypologies: [
