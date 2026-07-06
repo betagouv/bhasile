@@ -5,6 +5,7 @@ import "dotenv/config";
 
 import { createPrismaClient } from "@/prisma-client";
 
+import { normalizeDepartementName } from "../utils/departement-name";
 import { loadRmuFile, type RmuRow } from "../utils/rmu-xlsx";
 import { loadXlsxBufferFromS3 } from "../utils/xlsx-loader";
 
@@ -44,7 +45,7 @@ async function fillRmuFromRows(rows: RmuRow[]) {
 
   for (const row of rows) {
     const departementNumero = nameToNumero.get(
-      row.departementNom.trim().toLowerCase()
+      normalizeDepartementName(row.departementNom).toLowerCase()
     );
 
     if (!departementNumero) {

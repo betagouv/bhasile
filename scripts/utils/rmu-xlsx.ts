@@ -83,9 +83,12 @@ function readHeaderInfo(
   const monthColumns: { col: number; date: Date }[] = [];
   for (let col = firstMonthCol; col < cumulCol; col++) {
     const raw = getCellValue(sheet, row, col);
-    if (typeof raw === "number") {
-      monthColumns.push({ col, date: excelSerialToDate(raw) });
+    if (typeof raw !== "number") {
+      throw new Error(
+        `En-tête de mois invalide (ligne ${row + 1}, colonne ${col + 1}) : valeur non numérique "${raw}"`
+      );
     }
+    monthColumns.push({ col, date: excelSerialToDate(raw) });
   }
 
   return { monthColumns };
@@ -130,7 +133,7 @@ function parseSheet(sheet: WorkSheet): RmuRow[] {
 
     for (const { col, date } of currentHeader.monthColumns) {
       const value = parseNumericCell(getCellValue(sheet, row, col));
-      if (value == null) {
+      if (value === null) {
         continue;
       }
 

@@ -31,7 +31,10 @@ export const createFakeRmus = async (prisma: PrismaClient): Promise<void> => {
     const startMonth = 5; // seed from june
     const count = 12 - startMonth;
     return Array.from({ length: count }, (_, index) =>
-      createFakeRmu(numero, new Date(2025, startMonth + index, 1, 13))
+      createFakeRmu(
+        numero,
+        new Date(Date.UTC(2025, startMonth + index, 1, 13))
+      )
     );
   });
 

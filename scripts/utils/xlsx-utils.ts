@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 
 /* Normalise la valeur d'une cellule */
 export function normalizeCellValue(val: unknown): string {
-  if (val == null) {
+  if (val === null || val === undefined) {
     return "";
   }
   return String(val).trim();
@@ -25,7 +25,12 @@ export function getCellValue(
 
 /* Convertit une valeur de cellule en nombre, ou null si vide/non numérique. */
 export function parseNumericCell(raw: unknown): number | null {
-  if (raw === "" || raw == null || Number.isNaN(Number(raw))) {
+  if (
+    raw === "" ||
+    raw === null ||
+    raw === undefined ||
+    Number.isNaN(Number(raw))
+  ) {
     return null;
   }
   return Number(raw);
