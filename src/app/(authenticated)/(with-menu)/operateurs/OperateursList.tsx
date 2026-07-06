@@ -15,7 +15,7 @@ export const OperateurList = ({
     <>
       {operateurs.map((operateur) => (
         <Link
-          title={`Détails de la structure ${operateur.name}`}
+          title={`Détails de l'operateur ${operateur.name}`}
           className="px-3 pt-3 block"
           key={operateur.id}
           href={`operateurs/${operateur.id}`}
