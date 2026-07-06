@@ -66,12 +66,16 @@ export const EIGChart = (): ReactElement => {
 
   return (
     <>
-      <h4 className="text-title-blue-france text-lg" id="structure-stats-table">
+      <h4 className="text-title-blue-france text-lg">
         Événements indésirables graves
       </h4>
       <div className="grid grid-cols-3 gap-10">
         <div className="col-span-2">
-          <StackedBarChart data={chartData} colors={["#4F9D91", "#73E0CF"]} />
+          <StackedBarChart
+            data={chartData}
+            colors={["#4F9D91", "#73E0CF"]}
+            axisYLabel="EIG"
+          />
         </div>
         <div>
           <TimePeriodSelector

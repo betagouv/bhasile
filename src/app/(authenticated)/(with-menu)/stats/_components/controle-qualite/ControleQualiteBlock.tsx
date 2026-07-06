@@ -37,7 +37,7 @@ export const ControleQualiteBlock = (): ReactElement => {
           />
         </div>
         <InformationCard
-          primaryInformation={`${statistiques.controleQualite.eig.moyenneEvaluationsCurrentYear} / 4`}
+          primaryInformation={`${statistiques.controleQualite.eig.moyenneEvaluationsCurrentYear || "N/A"} / 4`}
           secondaryInformation={`moyenne aux évaluations menées en ${CURRENT_YEAR}`}
         />
       </div>

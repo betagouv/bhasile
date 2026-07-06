@@ -22,7 +22,8 @@ const sectionsConfig: ControleQualiteSectionConfig[] = [
           <span>
             {Number(value)}{" "}
             <span className="text-disabled-grey pl-2">
-              {Number(periodItem.partStructuresSansDeclarationEig).toFixed(2)}%
+              {Number(periodItem.partStructuresSansDeclarationEig).toFixed(2)}
+              &nbsp;%
             </span>
           </span>
         ),
