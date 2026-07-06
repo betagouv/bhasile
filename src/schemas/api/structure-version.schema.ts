@@ -14,10 +14,10 @@ export const structureVersionApiSchema = z.object({
   structureId: z.number().optional(),
   structureVersionTransformationId: z.number().optional(),
 
-  effectiveDate: z.string().datetime().nullish(),
+  effectiveDate: z.iso.datetime().nullish(),
 
-  type: z.nativeEnum(StructureType).nullish(),
-  public: z.nativeEnum(PublicType).nullish(),
+  type: z.enum(StructureType).nullish(),
+  public: z.enum(PublicType).nullish(),
   adresseAdministrative: z.string().nullish(),
   codePostalAdministratif: z.string().nullish(),
   communeAdministrative: z.string().nullish(),

@@ -8,7 +8,7 @@ export const structureBaseSchema = z.object({
   codeBhasile: z.string().optional(),
   type: z.preprocess(
     (val) => (val === "" ? undefined : val),
-    z.nativeEnum(StructureType)
+    z.enum(StructureType)
   ),
 });
 

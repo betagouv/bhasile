@@ -3,8 +3,9 @@ import { useFormContext } from "react-hook-form";
 import { z } from "zod";
 
 import { useOptionalTransformationContext } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
+import { AnyZodSchema } from "@/types/form.type";
 
-export const TransformationFormController = <TSchema extends z.ZodTypeAny>({
+export const TransformationFormController = <TSchema extends AnyZodSchema>({
   schema,
   onSave,
 }: {

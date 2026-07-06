@@ -1,9 +1,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { z } from "zod";
 
 import { StructureVersionTransformationApiUpdateClient } from "@/schemas/api/transformation.schema";
-import { StepStatus } from "@/types/form.type";
+import { AnyZodSchema, StepStatus } from "@/types/form.type";
 
 import { useTransformationContext } from "../(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { setStructureVersionTransformationFormStepStatus } from "../utils/transformation.util";
@@ -36,7 +35,7 @@ export const useTransformationFormHandling = () => {
   }: {
     transformationId: number;
     structureVersionTransformation: StructureVersionTransformationApiUpdateClient;
-    strictSchema: z.ZodTypeAny;
+    strictSchema: AnyZodSchema;
     values: unknown;
   }) => {
     const currentStructureVersionTransformation =

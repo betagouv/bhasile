@@ -15,7 +15,7 @@ const structureFinessSchema = z.object({
 });
 
 const uniqueFinessCodesError = {
-  message: "Les codes FINESS doivent être uniques",
+  error: "Les codes FINESS doivent être uniques",
   path: ["structureFinesses"],
 };
 
