@@ -85,9 +85,6 @@ type StructureDefaultValues = Omit<
   adresses: FormAdresse[];
 };
 
-// Valeurs par défaut du formulaire d'actualisation : construites depuis les sous-fonctions
-// (pas un wrap de getDefaultValues). La typologie de l'année cible est reprise de l'année
-// précédente disponible ; on ne charge PAS les actes existants, seul un acte vide est semé.
 export const getActualisationDefaultValues = ({
   structure,
   year,

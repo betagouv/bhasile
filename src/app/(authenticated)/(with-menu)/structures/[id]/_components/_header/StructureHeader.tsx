@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
+import { hasOpenActualisation } from "@/app/api/campaigns/campaign.util";
 import { Badge } from "@/app/components/common/Badge";
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
@@ -17,13 +18,16 @@ import { StructureHeaderModals } from "./StructureHeaderModals";
 
 export const StructureHeader = ({
   actualisationYear,
-  showActualisation,
 }: {
   actualisationYear: number | null;
-  showActualisation: boolean;
 }): ReactElement | null => {
   const { structure } = useStructureContext();
   const isStructureFinalisee = structure.isFinalised;
+
+  const showActualisation =
+    actualisationYear !== null &&
+    structure.isFinalised &&
+    hasOpenActualisation(structure.campaigns, actualisationYear);
 
   const { headerRef } = useHeaderHeight();
   const { isHidden } = useHideOnScroll();
