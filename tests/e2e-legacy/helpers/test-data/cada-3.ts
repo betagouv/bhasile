@@ -404,12 +404,6 @@ export const cada3: TestStructureScenario = {
         filePath: "tests/e2e/fixtures/sample.csv",
       },
     ],
-    ouvertureFermeture: {
-      placesACreer: "4",
-      echeancePlacesACreer: "2025-09-01",
-      placesAFermer: "1",
-      echeancePlacesAFermer: "2025-11-15",
-    },
     actesAdministratifs: [
       {
         category: "ARRETE_AUTORISATION",
@@ -439,12 +433,6 @@ export const cada3: TestStructureScenario = {
     fvvTeh: true,
     contacts: [{ email: "modif-cada3@example.com" }],
     notes: "Notes modification CADA 3 - 10 adresses.",
-    ouvertureFermeture: {
-      placesACreer: "5",
-      echeancePlacesACreer: "2026-05-01",
-      placesAFermer: "3",
-      echeancePlacesAFermer: "2026-08-15",
-    },
     structureTypologies: [
       { placesAutorisees: 55, pmr: 7, lgbt: 13, fvvTeh: 11 },
       { placesAutorisees: 62, pmr: 7, lgbt: 13, fvvTeh: 11 },

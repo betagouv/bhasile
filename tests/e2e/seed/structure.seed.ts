@@ -1,5 +1,4 @@
 import { getTypePlacesYearRange, getYearRange } from "@/app/utils/date.util";
-import { CURRENT_YEAR } from "@/constants";
 
 import {
   buildStructureSeed,
@@ -126,8 +125,6 @@ export const seedValidStructureTypologies = async (
       pmr: 0,
       lgbt: 0,
       fvvTeh: 0,
-      placesACreer: year === CURRENT_YEAR ? 0 : null,
-      placesAFermer: year === CURRENT_YEAR ? 0 : null,
     })),
   });
 };

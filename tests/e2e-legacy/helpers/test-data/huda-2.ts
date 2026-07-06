@@ -262,12 +262,6 @@ export const huda2: TestStructureScenario = {
         filePath: "tests/e2e/fixtures/sample.csv",
       },
     ],
-    ouvertureFermeture: {
-      placesACreer: "4",
-      echeancePlacesACreer: "2025-09-01",
-      placesAFermer: "1",
-      echeancePlacesAFermer: "2025-11-15",
-    },
     actesAdministratifs: [
       {
         category: "CONVENTION",
@@ -290,12 +284,6 @@ export const huda2: TestStructureScenario = {
     fvvTeh: true,
     contacts: [{ email: "modif-huda2@example.com" }],
     notes: "Notes modification HUDA 2 - mixte.",
-    ouvertureFermeture: {
-      placesACreer: "4",
-      echeancePlacesACreer: "2026-04-01",
-      placesAFermer: "3",
-      echeancePlacesAFermer: "2026-07-15",
-    },
     structureTypologies: [
       { placesAutorisees: 54, pmr: 7, lgbt: 12, fvvTeh: 10 },
       { placesAutorisees: 50, pmr: 6, lgbt: 11, fvvTeh: 9 },

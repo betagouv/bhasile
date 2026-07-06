@@ -134,10 +134,6 @@ export const copyStructureVersion = (
     pmr: typologie.pmr ?? undefined,
     lgbt: typologie.lgbt ?? undefined,
     fvvTeh: typologie.fvvTeh ?? undefined,
-    placesACreer: typologie.placesACreer,
-    placesAFermer: typologie.placesAFermer,
-    echeancePlacesACreer: typologie.echeancePlacesACreer?.toISOString(),
-    echeancePlacesAFermer: typologie.echeancePlacesAFermer?.toISOString(),
   })),
   dnaStructures: structure.dnaStructures.map((dnaStructure) => ({
     description: dnaStructure.description ?? undefined,

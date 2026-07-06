@@ -167,8 +167,6 @@ describe("FinalisationIdentification page integration", () => {
           lgbt: 0,
           fvvTeh: 0,
           year: CURRENT_YEAR,
-          placesACreer: 0,
-          placesAFermer: 0,
         },
         {
           id: 2,
@@ -177,8 +175,6 @@ describe("FinalisationIdentification page integration", () => {
           lgbt: 0,
           fvvTeh: 0,
           year: CURRENT_YEAR - 1,
-          placesACreer: 0,
-          placesAFermer: 0,
         },
         {
           id: 3,
@@ -187,8 +183,6 @@ describe("FinalisationIdentification page integration", () => {
           lgbt: 0,
           fvvTeh: 0,
           year: CURRENT_YEAR - 2,
-          placesACreer: 0,
-          placesAFermer: 0,
         },
         {
           id: 4,
@@ -197,8 +191,6 @@ describe("FinalisationIdentification page integration", () => {
           lgbt: 0,
           fvvTeh: 0,
           year: CURRENT_YEAR - 3,
-          placesACreer: 0,
-          placesAFermer: 0,
         },
       ],
     };
