@@ -7,6 +7,7 @@ import { StepStatus } from "@/types/form.type";
 
 import { useStructureContext } from "../(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { useFetchState } from "../context/FetchStateContext";
+import { ApiError } from "../utils/apiError.util";
 import {
   FINALISATION_FORM_LABEL,
   FINALISATION_FORM_VERSION,
@@ -27,34 +28,22 @@ export const useAgentFormHandling = ({
 
   const { setFetchState } = useFetchState();
 
-  const [backendError, setBackendError] = useState<string | undefined>(
-    undefined
-  );
-
   const updateStructure = async (
     data: StructureAgentUpdateApiClient
-  ): Promise<void> => {
+  ): Promise<boolean> => {
     setFetchState("structure-save", FetchState.LOADING);
 
     try {
-      const result = await updateAndRefreshStructure(
-        structure.id,
-        data,
-        setStructure
-      );
-
-      if (result !== "OK") {
-        throw new Error(result?.toString());
-      }
-
+      await updateAndRefreshStructure(structure.id, data, setStructure);
       setFetchState("structure-save", FetchState.IDLE);
+      return true;
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      console.error(errorMessage);
-      setFetchState("structure-save", FetchState.ERROR);
-      setBackendError(errorMessage);
-      throw error;
+      setFetchState(
+        "structure-save",
+        FetchState.ERROR,
+        error instanceof ApiError ? error.message : undefined
+      );
+      return false;
     }
   };
 
@@ -86,10 +75,13 @@ export const useAgentFormHandling = ({
       }
     });
 
-    await updateStructure({
+    const saved = await updateStructure({
       id: structure.id,
       forms,
     });
+    if (!saved) {
+      return;
+    }
 
     const nextStepToValidate = getFinalisationFormNextStepToValidate(
       structure,
@@ -120,15 +112,15 @@ export const useAgentFormHandling = ({
       }
     });
 
-    await updateStructure({
+    return updateStructure({
       id: structure.id,
       forms,
     });
   };
 
   const handleSubmit = async (data: StructureAgentUpdateApiClient) => {
-    await updateStructure(data);
-    if (nextRoute) {
+    const saved = await updateStructure(data);
+    if (saved && nextRoute) {
       router.push(nextRoute);
     }
   };
@@ -152,7 +144,6 @@ export const useAgentFormHandling = ({
     handleAutoSave,
     handleValidation,
     handleFinalisation,
-    backendError,
     isStructureReadyToFinalise,
   };
 };

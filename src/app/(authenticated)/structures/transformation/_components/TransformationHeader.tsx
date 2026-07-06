@@ -8,6 +8,7 @@ import { useOptionalTransformationContext } from "@/app/(authenticated)/structur
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { useTransformationNavigateWithSave } from "@/app/hooks/useTransformationNavigateWithSave";
 import { useTransformations } from "@/app/hooks/useTransformations";
+import { ApiError } from "@/app/utils/apiError.util";
 import { getTransformationTitle } from "@/app/utils/transformation.util";
 import { FetchState } from "@/types/fetch-state.type";
 import { TransformationFormType } from "@/types/transformation.type";
@@ -30,7 +31,7 @@ export const TransformationHeader = () => {
   const { navigateWithSave } = useTransformationNavigateWithSave();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { getFetchState } = useFetchState();
+  const { getFetchState, setFetchState, getErrorMessage } = useFetchState();
   const saveState = getFetchState("transformation-save");
   const deleteState = getFetchState("transformation-delete");
 
@@ -77,11 +78,17 @@ export const TransformationHeader = () => {
     if (!transformation) {
       return;
     }
+    setFetchState("transformation-delete", FetchState.LOADING);
     try {
       await deleteTransformation(transformation.id);
+      setFetchState("transformation-delete", FetchState.IDLE);
       router.push("/structures");
     } catch (error) {
-      console.error(error);
+      setFetchState(
+        "transformation-delete",
+        FetchState.ERROR,
+        error instanceof ApiError ? error.message : undefined
+      );
     }
   };
 
@@ -160,6 +167,7 @@ export const TransformationHeader = () => {
           <EnregistrementModal onQuit={() => router.push("/structures")} />
           <QuitterModal
             saveState={saveState}
+            errorMessage={getErrorMessage("transformation-save")}
             onQuit={() => router.push("/structures")}
             onSaveAndQuit={handleSaveAndQuit}
           />

@@ -8,8 +8,6 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getStructureActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
@@ -19,7 +17,6 @@ import {
   ActesAdministratifsFormValues,
   actesAdministratifsSubventionneesSchema,
 } from "@/schemas/forms/base/acteAdministratif.schema";
-import { FetchState } from "@/types/fetch-state.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
@@ -33,7 +30,7 @@ export default function ModificationQualiteForm() {
     schema = actesAdministratifsSubventionneesSchema;
   }
 
-  const { handleSubmit, backendError } = useAgentFormHandling({
+  const { handleSubmit } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,
   });
 
@@ -56,9 +53,6 @@ export default function ModificationQualiteForm() {
       id: structure.id,
     });
   };
-
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("structure-save");
 
   const key = structure?.actesAdministratifs
     ?.map((acteAdministratif) => acteAdministratif.id ?? acteAdministratif.uuid)
@@ -87,12 +81,6 @@ export default function ModificationQualiteForm() {
         key={key}
       >
         <ActesAdministratifs categoryDisplayRules={categoriesRules} />
-        {saveState === FetchState.ERROR && (
-          <SubmitError
-            codeBhasile={structure.codeBhasile}
-            backendError={backendError}
-          />
-        )}
       </FormWrapper>
       <LeaveModificationModal
         resetRoute={`/structures/${structure.id}`}

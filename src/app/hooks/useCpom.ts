@@ -1,7 +1,8 @@
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { CpomApiRead } from "@/schemas/api/cpom.schema";
 import { CpomFormValues } from "@/schemas/forms/base/cpom.schema";
-import { FetchState } from "@/types/fetch-state.type";
+
+import { ApiError, extractApiError } from "../utils/apiError.util";
+import { refreshBestEffort } from "../utils/refresh.util";
 
 const createOrUpdateCpom = async (
   url: string,
@@ -12,10 +13,10 @@ const createOrUpdateCpom = async (
     method,
     body: JSON.stringify(data),
   });
-  const body = await response.json();
   if (!response.ok) {
-    throw new Error(JSON.stringify(body));
+    throw new ApiError(await extractApiError(response), response.status);
   }
+  const body = await response.json();
   if (typeof body.cpomId !== "number") {
     throw new Error("Réponse invalide : cpomId manquant");
   }
@@ -23,18 +24,8 @@ const createOrUpdateCpom = async (
 };
 
 export const useCpom = () => {
-  const { setFetchState } = useFetchState();
-
   const addCpom = async (data: CpomFormValues): Promise<number> => {
-    setFetchState("cpom-save", FetchState.LOADING);
-    try {
-      const cpomId = await createOrUpdateCpom("/api/cpoms", "POST", data);
-      setFetchState("cpom-save", FetchState.IDLE);
-      return cpomId;
-    } catch (error) {
-      setFetchState("cpom-save", FetchState.ERROR);
-      throw error;
-    }
+    return createOrUpdateCpom("/api/cpoms", "POST", data);
   };
 
   const updateCpom = async (
@@ -42,20 +33,9 @@ export const useCpom = () => {
     data: Partial<CpomFormValues>,
     setCpom: (cpom: CpomApiRead) => void
   ): Promise<number> => {
-    setFetchState("cpom-save", FetchState.LOADING);
-    try {
-      const cpomId = await createOrUpdateCpom(`/api/cpoms/${id}`, "PUT", data);
-      const res = await fetch(`/api/cpoms/${cpomId}`);
-      if (!res.ok) {
-        throw new Error(`Failed to fetch cpom: ${res.status}`);
-      }
-      setCpom(await res.json());
-      setFetchState("cpom-save", FetchState.IDLE);
-      return cpomId;
-    } catch (error) {
-      setFetchState("cpom-save", FetchState.ERROR);
-      throw error;
-    }
+    const cpomId = await createOrUpdateCpom(`/api/cpoms/${id}`, "PUT", data);
+    await refreshBestEffort(`/api/cpoms/${cpomId}`, setCpom);
+    return cpomId;
   };
 
   return { addCpom, updateCpom };

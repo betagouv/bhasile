@@ -21,7 +21,7 @@ describe("useStructures integration", () => {
   });
 
   describe("addStructure", () => {
-    it("should call POST /api/structures with transformed payload", async () => {
+    it("appelle POST /api/structures avec le payload transformé", async () => {
       // GIVEN
       const values = {
         id: 123,
@@ -31,10 +31,9 @@ describe("useStructures integration", () => {
 
       // WHEN
       const { result } = renderHook(() => useStructures());
-      let response = "";
 
       await act(async () => {
-        response = await result.current.addStructure(values);
+        await result.current.addStructure(values);
       });
 
       // THEN
@@ -46,27 +45,25 @@ describe("useStructures integration", () => {
           body: expect.any(String),
         })
       );
-      expect(typeof response).toBe("string");
-      expect(response).toBe("OK");
     });
 
-    it("should return serialized API error when POST fails", async () => {
+    it("rejette avec le message serveur quand le POST échoue", async () => {
       // GIVEN
       const values: AjoutFormValues = { id: 456 };
-      const apiError = { error: "Invalid payload" };
-      mockFetch.mockResolvedValueOnce(toJsonResponse(400, apiError));
+      mockFetch.mockResolvedValueOnce(
+        toJsonResponse(400, { error: "Invalid payload" })
+      );
 
       // WHEN
       const { result } = renderHook(() => useStructures());
-      let response = "";
-
-      await act(async () => {
-        response = await result.current.addStructure(values);
-      });
 
       // THEN
+      await act(async () => {
+        await expect(result.current.addStructure(values)).rejects.toThrow(
+          "Invalid payload"
+        );
+      });
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      expect(response).toBe(JSON.stringify(apiError));
     });
   });
 
@@ -171,7 +168,7 @@ describe("useStructures integration", () => {
   });
 
   describe("updateAndRefreshStructure", () => {
-    it("should update then refetch structure and call setStructure", async () => {
+    it("met à jour puis recharge la structure et appelle setStructure", async () => {
       // GIVEN
       const structureId = 12;
       const partialUpdate = { nom: "Structure mise à jour" };
@@ -187,10 +184,9 @@ describe("useStructures integration", () => {
 
       // WHEN
       const { result } = renderHook(() => useStructures());
-      let response = "";
 
       await act(async () => {
-        response = await result.current.updateAndRefreshStructure(
+        await result.current.updateAndRefreshStructure(
           structureId,
           partialUpdate,
           setStructure
@@ -215,32 +211,31 @@ describe("useStructures integration", () => {
         `/api/structures/${structureId}`
       );
       expect(setStructure).toHaveBeenCalledWith(updatedStructure);
-      expect(response).toBe("OK");
     });
 
-    it("should not refetch structure when update fails", async () => {
+    it("ne recharge pas la structure quand la mise à jour échoue", async () => {
       // GIVEN
       const structureId = 99;
-      const apiError = { error: "Update failed" };
       const setStructure = vi.fn();
-      mockFetch.mockResolvedValueOnce(toJsonResponse(400, apiError));
+      mockFetch.mockResolvedValueOnce(
+        toJsonResponse(400, { error: "Update failed" })
+      );
 
       // WHEN
       const { result } = renderHook(() => useStructures());
-      let response = "";
-
-      await act(async () => {
-        response = await result.current.updateAndRefreshStructure(
-          structureId,
-          { nom: "ko" },
-          setStructure
-        );
-      });
 
       // THEN
+      await act(async () => {
+        await expect(
+          result.current.updateAndRefreshStructure(
+            structureId,
+            { nom: "ko" },
+            setStructure
+          )
+        ).rejects.toThrow("Update failed");
+      });
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(setStructure).not.toHaveBeenCalled();
-      expect(response).toBe(JSON.stringify(apiError));
     });
   });
 });

@@ -7,10 +7,6 @@ vi.mock(
   () => ({ Tabs: () => <div>Tabs</div> })
 );
 
-vi.mock("@/app/components/SubmitError", () => ({
-  SubmitError: () => <div>Submit error</div>,
-}));
-
 vi.mock("@/app/components/ui/InformationBar", () => ({
   InformationBar: () => <div>Information bar</div>,
 }));

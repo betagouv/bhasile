@@ -8,22 +8,16 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useOperateurFormHandling } from "@/app/hooks/useOperateurFormHandling";
 import { getOperateurDefaultValues } from "@/app/utils/operateur.util";
 import { operateurUpdateSchema } from "@/schemas/forms/base/operateur.schema";
-import { FetchState } from "@/types/fetch-state.type";
 
 import { useOperateurContext } from "../../_context/OperateurClientContext";
 
 export default function OperateurModificationContacts() {
   const { operateur } = useOperateurContext();
 
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("operateur-save");
-
-  const { handleSubmit, backendError } = useOperateurFormHandling({
+  const { handleSubmit } = useOperateurFormHandling({
     operateurId: operateur.id,
     nextRoute: `/operateurs/${operateur.id}`,
   });
@@ -52,9 +46,6 @@ export default function OperateurModificationContacts() {
       >
         <FieldSetContacts displayPerimetre={true} />
         <hr />
-        {saveState === FetchState.ERROR && (
-          <SubmitError operateurId={operateur.id} backendError={backendError} />
-        )}
       </FormWrapper>
       <LeaveModificationModal
         resetRoute={`/operateurs/${operateur.id}`}

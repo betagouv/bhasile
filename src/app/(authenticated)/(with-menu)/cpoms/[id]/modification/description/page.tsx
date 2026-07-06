@@ -9,22 +9,16 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useCpomFormHandling } from "@/app/hooks/useCpomFormHandling";
 import { getCpomDefaultValues } from "@/app/utils/cpom.util";
 import { descriptionCpomSchema } from "@/schemas/forms/base/cpom.schema";
-import { FetchState } from "@/types/fetch-state.type";
 
 import { useCpomContext } from "../../_context/CpomClientContext";
 
 export default function CpomModificationDescription() {
   const { cpom } = useCpomContext();
 
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("cpom-save");
-
-  const { handleSubmit, backendError } = useCpomFormHandling({
+  const { handleSubmit } = useCpomFormHandling({
     cpomId: cpom.id,
     nextRoute: `/cpoms/${cpom.id}`,
   });
@@ -56,9 +50,6 @@ export default function CpomModificationDescription() {
           description="Les dates de début et de fin du CPOM se modifient dans le bloc “Document de convention du CPOM”."
         />
         <FieldSetGeneral />
-        {saveState === FetchState.ERROR && (
-          <SubmitError cpomId={cpom.id} backendError={backendError} />
-        )}
       </FormWrapper>
       <LeaveModificationModal
         resetRoute={`/cpoms/${cpom.id}`}

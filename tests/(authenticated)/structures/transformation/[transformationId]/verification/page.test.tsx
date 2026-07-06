@@ -89,10 +89,6 @@ vi.mock(
   })
 );
 
-vi.mock("@/app/components/SubmitError", () => ({
-  SubmitError: () => <div data-testid="submit-error" />,
-}));
-
 vi.mock("@/app/components/forms/TransformationFakeSaver", () => ({
   TransformationFakeSaver: () => null,
 }));
@@ -346,25 +342,6 @@ describe("TransformationVerificationPage", () => {
 
     // THEN
     expect(screen.queryByText(/Créer une structure/)).toBeNull();
-  });
-
-  it("affiche SubmitError quand fetchState vaut ERROR", () => {
-    // GIVEN
-    mockGetFetchState.mockReturnValue(FetchState.ERROR);
-    mockContext(
-      buildTransformation({
-        form: buildForm(false),
-        structureVersionTransformations: [
-          buildStructureVersionTransformation(true),
-        ],
-      })
-    );
-
-    // WHEN
-    render(<TransformationVerificationPage />);
-
-    // THEN
-    expect(screen.getByTestId("submit-error")).toBeInTheDocument();
   });
 
   it("affiche un groupe par StructureVersionTransformationType, trié FERMETURE → CREATION", () => {

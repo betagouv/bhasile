@@ -2,9 +2,12 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { StructureVersionTransformationApiUpdateClient } from "@/schemas/api/transformation.schema";
+import { FetchState } from "@/types/fetch-state.type";
 import { AnyZodSchema, StepStatus } from "@/types/form.type";
 
 import { useTransformationContext } from "../(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
+import { useFetchState } from "../context/FetchStateContext";
+import { ApiError } from "../utils/apiError.util";
 import { setStructureVersionTransformationFormStepStatus } from "../utils/transformation.util";
 import { useTransformationFormNavigation } from "./useTransformationFormNavigation";
 import { useTransformationNavigateWithSave } from "./useTransformationNavigateWithSave";
@@ -17,6 +20,7 @@ export const useTransformationFormHandling = () => {
     useTransformationContext();
   const { updateTransformation } = useTransformations();
   const { navigateWithSave } = useTransformationNavigateWithSave();
+  const { setFetchState } = useFetchState();
 
   const { firstStep, currentStep, nextStep, backLink } =
     useTransformationFormNavigation();
@@ -37,7 +41,7 @@ export const useTransformationFormHandling = () => {
     structureVersionTransformation: StructureVersionTransformationApiUpdateClient;
     strictSchema: AnyZodSchema;
     values: unknown;
-  }) => {
+  }): Promise<boolean> => {
     const currentStructureVersionTransformation =
       transformation.structureVersionTransformations.find(
         (structureVersionTransformationItem) =>
@@ -48,26 +52,38 @@ export const useTransformationFormHandling = () => {
       ? StepStatus.VALIDE
       : StepStatus.COMMENCE;
 
-    await updateTransformation(
-      transformationId,
-      {
-        id: transformationId,
-        structureVersionTransformations: [
-          {
-            ...structureVersionTransformation,
-            form:
-              currentStructureVersionTransformation?.form && currentStep
-                ? setStructureVersionTransformationFormStepStatus(
-                    currentStructureVersionTransformation.form,
-                    currentStep.name,
-                    stepStatus
-                  )
-                : structureVersionTransformation.form,
-          },
-        ],
-      },
-      setTransformation
-    );
+    setFetchState("transformation-save", FetchState.LOADING);
+    try {
+      await updateTransformation(
+        transformationId,
+        {
+          id: transformationId,
+          structureVersionTransformations: [
+            {
+              ...structureVersionTransformation,
+              form:
+                currentStructureVersionTransformation?.form && currentStep
+                  ? setStructureVersionTransformationFormStepStatus(
+                      currentStructureVersionTransformation.form,
+                      currentStep.name,
+                      stepStatus
+                    )
+                  : structureVersionTransformation.form,
+            },
+          ],
+        },
+        setTransformation
+      );
+      setFetchState("transformation-save", FetchState.IDLE);
+      return true;
+    } catch (error) {
+      setFetchState(
+        "transformation-save",
+        FetchState.ERROR,
+        error instanceof ApiError ? error.message : undefined
+      );
+      return false;
+    }
   };
 
   const goToNextStep = async () => {

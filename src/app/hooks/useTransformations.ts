@@ -1,12 +1,13 @@
-import { useFetchState } from "@/app/context/FetchStateContext";
 import {
   StructureVersionTransformationApiCreate,
   TransformationApiCreate,
   TransformationApiRead,
   TransformationApiUpdateClient,
 } from "@/schemas/api/transformation.schema";
-import { FetchState } from "@/types/fetch-state.type";
 import { TransformationType } from "@/types/transformation.type";
+
+import { ApiError, extractApiError } from "../utils/apiError.util";
+import { refreshBestEffort } from "../utils/refresh.util";
 
 const createOrUpdateTransformation = async (
   url: string,
@@ -17,10 +18,10 @@ const createOrUpdateTransformation = async (
     method,
     body: JSON.stringify(transformation),
   });
-  const body = await response.json();
   if (!response.ok) {
-    throw new Error(JSON.stringify(body));
+    throw new ApiError(await extractApiError(response), response.status);
   }
+  const body = await response.json();
   if (typeof body.transformationId !== "number") {
     throw new Error("Réponse invalide : transformationId manquant");
   }
@@ -28,24 +29,14 @@ const createOrUpdateTransformation = async (
 };
 
 export const useTransformations = () => {
-  const { setFetchState } = useFetchState();
-
   const createTransformation = async (
     transformation: TransformationApiCreate
   ): Promise<number> => {
-    setFetchState("transformation-save", FetchState.LOADING);
-    try {
-      const transformationId = await createOrUpdateTransformation(
-        "/api/transformations",
-        "POST",
-        transformation
-      );
-      setFetchState("transformation-save", FetchState.IDLE);
-      return transformationId;
-    } catch (error) {
-      setFetchState("transformation-save", FetchState.ERROR);
-      throw error;
-    }
+    return createOrUpdateTransformation(
+      "/api/transformations",
+      "POST",
+      transformation
+    );
   };
 
   const updateTransformation = async (
@@ -53,26 +44,16 @@ export const useTransformations = () => {
     transformation: TransformationApiUpdateClient,
     setTransformation: (transformation: TransformationApiRead) => void
   ): Promise<number> => {
-    setFetchState("transformation-save", FetchState.LOADING);
-    try {
-      const transformationId = await createOrUpdateTransformation(
-        `/api/transformations/${id}`,
-        "PUT",
-        transformation
-      );
-      const res = await fetch(`/api/transformations/${transformationId}`);
-      if (!res.ok) {
-        throw new Error(
-          `Échec de récupération de la transformation : ${res.status}`
-        );
-      }
-      setTransformation(await res.json());
-      setFetchState("transformation-save", FetchState.IDLE);
-      return transformationId;
-    } catch (error) {
-      setFetchState("transformation-save", FetchState.ERROR);
-      throw error;
-    }
+    const transformationId = await createOrUpdateTransformation(
+      `/api/transformations/${id}`,
+      "PUT",
+      transformation
+    );
+    await refreshBestEffort(
+      `/api/transformations/${transformationId}`,
+      setTransformation
+    );
+    return transformationId;
   };
 
   const resetTransformationSelection = async (
@@ -83,51 +64,28 @@ export const useTransformations = () => {
     },
     setTransformation: (transformation: TransformationApiRead) => void
   ): Promise<TransformationApiRead> => {
-    setFetchState("transformation-save", FetchState.LOADING);
-    try {
-      const response = await fetch(`/api/transformations/${id}/selection`, {
-        method: "PUT",
-        body: JSON.stringify(input),
-      });
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        throw new Error(
-          body.error ??
-            `Erreur lors de la réinitialisation : ${response.status}`
-        );
-      }
-      const refreshed = await fetch(`/api/transformations/${id}`);
-      if (!refreshed.ok) {
-        throw new Error(
-          `Échec de récupération de la transformation : ${refreshed.status}`
-        );
-      }
-      const transformation = await refreshed.json();
-      setTransformation(transformation);
-      setFetchState("transformation-save", FetchState.IDLE);
-      return transformation;
-    } catch (error) {
-      setFetchState("transformation-save", FetchState.ERROR);
-      throw error;
+    const response = await fetch(`/api/transformations/${id}/selection`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    });
+    if (!response.ok) {
+      throw new ApiError(await extractApiError(response), response.status);
     }
+    const refreshed = await fetch(`/api/transformations/${id}`);
+    if (!refreshed.ok) {
+      throw new ApiError(await extractApiError(refreshed), refreshed.status);
+    }
+    const transformation = await refreshed.json();
+    setTransformation(transformation);
+    return transformation;
   };
 
   const deleteTransformation = async (id: number): Promise<void> => {
-    setFetchState("transformation-delete", FetchState.LOADING);
-    try {
-      const response = await fetch(`/api/transformations/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        throw new Error(
-          body.error ?? `Erreur lors de la suppression : ${response.status}`
-        );
-      }
-      setFetchState("transformation-delete", FetchState.IDLE);
-    } catch (error) {
-      setFetchState("transformation-delete", FetchState.ERROR);
-      throw error;
+    const response = await fetch(`/api/transformations/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) {
+      throw new ApiError(await extractApiError(response), response.status);
     }
   };
 

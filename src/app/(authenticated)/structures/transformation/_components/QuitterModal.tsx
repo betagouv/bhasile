@@ -2,7 +2,7 @@
 
 import { createModal } from "@codegouvfr/react-dsfr/Modal";
 
-import { SubmitError } from "@/app/components/SubmitError";
+import { ErrorNotice } from "@/app/components/ErrorNotice";
 import { FetchState } from "@/types/fetch-state.type";
 
 export const quitterModal = createModal({
@@ -10,7 +10,12 @@ export const quitterModal = createModal({
   isOpenedByDefault: false,
 });
 
-export const QuitterModal = ({ saveState, onQuit, onSaveAndQuit }: Props) => (
+export const QuitterModal = ({
+  saveState,
+  errorMessage,
+  onQuit,
+  onSaveAndQuit,
+}: Props) => (
   <quitterModal.Component
     title="Vous êtes sur le point de quitter un formulaire en cours de modification."
     buttons={[
@@ -44,7 +49,7 @@ export const QuitterModal = ({ saveState, onQuit, onSaveAndQuit }: Props) => (
         l’onglet « à finaliser ».
       </p>
       {saveState === FetchState.ERROR && (
-        <SubmitError backendError="Une erreur est survenue lors de l'enregistrement. Veuillez réessayer." />
+        <ErrorNotice message={errorMessage} />
       )}
     </>
   </quitterModal.Component>
@@ -52,6 +57,7 @@ export const QuitterModal = ({ saveState, onQuit, onSaveAndQuit }: Props) => (
 
 type Props = {
   saveState: FetchState | undefined;
+  errorMessage?: string;
   onQuit: () => void;
   onSaveAndQuit: () => Promise<void>;
 };

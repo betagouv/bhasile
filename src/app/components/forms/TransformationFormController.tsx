@@ -10,7 +10,7 @@ export const TransformationFormController = <TSchema extends AnyZodSchema>({
   onSave,
 }: {
   schema: TSchema;
-  onSave: (data: z.infer<TSchema>, values: z.infer<TSchema>) => Promise<void>;
+  onSave: (data: z.infer<TSchema>, values: z.infer<TSchema>) => Promise<boolean>;
 }) => {
   const {
     getValues,
@@ -36,8 +36,7 @@ export const TransformationFormController = <TSchema extends AnyZodSchema>({
         trigger();
         return false;
       }
-      await onSaveRef.current(result.data, getValues());
-      return true;
+      return onSaveRef.current(result.data, getValues());
     };
 
     registerSaver(saveCurrentForm);

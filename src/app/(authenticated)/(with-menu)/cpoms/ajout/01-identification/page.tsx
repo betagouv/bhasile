@@ -2,7 +2,6 @@
 
 import Stepper from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 import { FieldSetActesAdministratifs } from "@/app/components/forms/cpom/FieldSetActesAdministratifs";
 import { FieldSetGeneral } from "@/app/components/forms/cpom/FieldSetGeneral";
@@ -11,12 +10,9 @@ import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
 import { PreviousPageLink } from "@/app/components/forms/PreviousPageLink";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useCpom } from "@/app/hooks/useCpom";
 import { getCpomDefaultValues } from "@/app/utils/cpom.util";
 import { CpomFormValues, cpomSchema } from "@/schemas/forms/base/cpom.schema";
-import { FetchState } from "@/types/fetch-state.type";
 
 export default function CpomAjoutIdentification() {
   const router = useRouter();
@@ -25,19 +21,11 @@ export default function CpomAjoutIdentification() {
 
   const defaultValues = getCpomDefaultValues();
 
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("cpom-save");
-
-  const [backendError, setBackendError] = useState<string | undefined>(
-    undefined
-  );
-
   const handleSubmit = async (data: CpomFormValues) => {
     try {
       const cpomId = await addCpom(data);
       router.push(`/cpoms/${cpomId}/ajout/02-finances`);
     } catch (error) {
-      setBackendError(String(error));
       console.error(error);
     }
   };
@@ -62,9 +50,6 @@ export default function CpomAjoutIdentification() {
         <FieldSetGeneral />
         <FieldSetActesAdministratifs />
         <FieldSetStructures />
-        {saveState === FetchState.ERROR && (
-          <SubmitError backendError={backendError} />
-        )}
       </FormWrapper>
     </>
   );
