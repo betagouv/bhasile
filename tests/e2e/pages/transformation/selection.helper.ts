@@ -29,12 +29,13 @@ export const selectFirstOption = async (
 
 export const pickStructureById = async (
   page: Page,
-  structureId: number
+  structureId: number,
+  maxAttempts = 5
 ): Promise<void> => {
   const label = page.locator(`label[for="structure-${structureId}"]`);
   const checkbox = page.locator(`#structure-${structureId}`);
   await label.waitFor({ state: "visible", timeout: 20_000 });
-  for (let attempt = 0; attempt < 5; attempt++) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     await label.click();
     if (await checkbox.isChecked().catch(() => false)) {
       return;
