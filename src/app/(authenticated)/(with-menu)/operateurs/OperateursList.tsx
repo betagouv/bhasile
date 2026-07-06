@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ReactElement } from "react";
 
 import { Pagination } from "@/app/components/common/Pagination";
@@ -13,7 +14,12 @@ export const OperateurList = ({
   return (
     <>
       {operateurs.map((operateur) => (
-        <div className="px-3 pt-3" key={operateur.id}>
+        <Link
+          title={`Détails de la structure ${operateur.name}`}
+          className="px-3 pt-3 block"
+          key={operateur.id}
+          href={`operateurs/${operateur.id}`}
+        >
           <OperateurItem
             id={operateur.id}
             name={operateur.name}
@@ -23,7 +29,7 @@ export const OperateurList = ({
             structureTypes={operateur.structureTypes}
             logo={operateur.logo}
           />
-        </div>
+        </Link>
       ))}
       <div className="pt-4 flex justify-center items-center">
         <Pagination

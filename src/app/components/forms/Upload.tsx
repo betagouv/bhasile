@@ -163,22 +163,20 @@ const Upload = ({
     <>
       <div
         className={cn(
-          "grid items-center justify-center bg-alt-blue-france p-4 rounded min-h-[4rem] h-full w-md",
+          "grid items-center justify-center bg-alt-blue-france py-4 px-8 rounded min-h-16 h-full w-md",
           state === "error" &&
-            "border-plain-error !border-l-2  border-0 rounded-l-none",
+            "border-plain-error border-l-2!  border-0 rounded-l-none",
           className
         )}
         ref={fileInputContainerRef}
       >
         {currentState === "idle" || currentState === "loading" ? (
-          <span className="upload-idle flex items-center justify-center gap-2">
-            <i className="fr-icon-close-circle-fill text-disabled-grey" />
+          <span className="upload-idle flex items-center justify-center gap-4">
             {currentState === "idle" ? "Pas de fichier" : "Chargement..."}
-
             <Button
               size="small"
               priority="tertiary no outline"
-              className="bg-white"
+              className="bg-white rounded"
               onClick={handleBrowse}
               disabled={currentState === "loading"}
               ref={buttonRef}
@@ -211,7 +209,7 @@ const Upload = ({
               iconId="fr-icon-eye-line"
               priority="tertiary no outline"
               size="small"
-              className="!rounded-full !bg-white"
+              className="rounded-full! bg-white!"
               title="Télécharger le fichier"
               onClick={() =>
                 window.open(file?.fileUrl, "_blank", "noopener,noreferrer")
@@ -226,7 +224,9 @@ const Upload = ({
         ) : null}
         {currentState === "error" ? (
           <div className="upload-error flex items-center justify-center gap-2">
-            <span className="fr-error-text mt-0">{currentErrorMessage}</span>
+            <span className="fr-error-text mt-0 pr-2">
+              {currentErrorMessage}
+            </span>
             <Button
               size="small"
               priority="tertiary no outline"
@@ -278,12 +278,7 @@ const Upload = ({
 export default Upload;
 
 type UploadState =
-  | "idle"
-  | "loading"
-  | "success"
-  | "error"
-  | "uploaded"
-  | "deleting";
+  "idle" | "loading" | "success" | "error" | "uploaded" | "deleting";
 
 type UploadProps = Omit<InputHTMLAttributes<HTMLInputElement>, "multiple"> & {
   fileData?: FileDataType;
