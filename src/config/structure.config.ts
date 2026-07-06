@@ -54,9 +54,6 @@ export const getStructureActesAdministratifsCategoryToDisplay = (
   },
 });
 
-// Actes de l'actualisation : autorisée → un unique arrêté de tarification (obligatoire, sans
-// avenant ni ajout) ; subventionnée → une convention (obligatoire) + des « autres » documents
-// (facultatifs, multiples) ; ni l'un ni l'autre (PRAHDA/NH) → aucun acte.
 export const getActualisationActesAdministratifsCategoryToDisplay = (
   structure?: StructureApiRead
 ): CategoryDisplayRules => {
@@ -65,7 +62,7 @@ export const getActualisationActesAdministratifsCategoryToDisplay = (
       ARRETE_TARIFICATION: {
         categoryShortName: "arrêté",
         title: "Arrêtés de tarification",
-        canAddFile: false,
+        canAddFile: true,
         canAddAvenant: false,
         isOptional: false,
         shouldShow: true,
@@ -81,7 +78,7 @@ export const getActualisationActesAdministratifsCategoryToDisplay = (
       CONVENTION: {
         categoryShortName: "convention",
         title: "Conventions",
-        canAddFile: false,
+        canAddFile: true,
         canAddAvenant: false,
         isOptional: false,
         shouldShow: true,

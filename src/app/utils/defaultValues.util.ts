@@ -112,13 +112,20 @@ export const getActualisationDefaultValues = ({
     structure?.structureMillesimes || [],
     structureCreationYear
   );
+  const actualisationActesRules =
+    getActualisationActesAdministratifsCategoryToDisplay(structure);
+  const shownActeCategories = Object.entries(actualisationActesRules)
+    .filter(([, rules]) => rules?.shouldShow)
+    .map(([category]) => category);
   const actesAdministratifs = getActesAdministratifsDefaultValues(
-    [],
-    getActualisationActesAdministratifsCategoryToDisplay(structure)
+    (structure.actesAdministratifs ?? []).filter(
+      (acteAdministratif) =>
+        acteAdministratif.category !== undefined &&
+        shownActeCategories.includes(acteAdministratif.category)
+    ),
+    actualisationActesRules
   );
 
-  // adresses/controles/evaluations sont re-typés en form values par StructureDefaultValues ;
-  // l'actualisation ne les rend pas, on les laisse vides plutôt que de propager la forme API brute.
   return {
     ...structure,
     adresses: [],

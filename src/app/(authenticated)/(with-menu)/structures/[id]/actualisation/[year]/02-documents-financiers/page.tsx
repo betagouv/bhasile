@@ -16,7 +16,7 @@ import {
   useActualisationFormHandling,
 } from "@/app/hooks/useActualisationFormHandling";
 import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
-import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { filterDocumentsFinanciersForApi } from "@/app/utils/file-upload.util";
 import {
   DocumentsFinanciersFlexibleFormValues,
   DocumentsFinanciersFlexibleSchema,
@@ -38,19 +38,13 @@ export default function ActualisationDocumentsFinanciers() {
   const { handleAutoSave, handleValidateStep, backendError } =
     useActualisationFormHandling({ year, currentStep });
 
-  const toDocumentsFinanciers = (
-    data: DocumentsFinanciersFlexibleFormValues
-  ): DocumentFinancierApiType[] =>
-    (data.documentsFinanciers?.filter(
-      (documentFinancier) =>
-        documentFinancier.fileUploads?.[0]?.key &&
-        documentFinancier.category &&
-        documentFinancier.granularity
-    ) ?? []) as DocumentFinancierApiType[];
-
   const onAutoSave = async (data: DocumentsFinanciersFlexibleFormValues) => {
     await handleAutoSave(
-      { documentsFinanciers: toDocumentsFinanciers(data) },
+      {
+        documentsFinanciers: filterDocumentsFinanciersForApi(
+          data.documentsFinanciers
+        ),
+      },
       DocumentsFinanciersStrictSchema,
       data
     );
@@ -60,8 +54,8 @@ export default function ActualisationDocumentsFinanciers() {
     data: z.infer<typeof DocumentsFinanciersStrictSchema>
   ) => {
     await handleValidateStep({
-      documentsFinanciers: toDocumentsFinanciers(
-        data as DocumentsFinanciersFlexibleFormValues
+      documentsFinanciers: filterDocumentsFinanciersForApi(
+        (data as DocumentsFinanciersFlexibleFormValues).documentsFinanciers
       ),
     });
   };
@@ -85,7 +79,10 @@ export default function ActualisationDocumentsFinanciers() {
           schema={DocumentsFinanciersFlexibleSchema}
           onSave={onAutoSave}
         />
-        <DocumentsFinanciers className="mb-6" formKind={FormKind.ACTUALISATION} />
+        <DocumentsFinanciers
+          className="mb-6"
+          formKind={FormKind.ACTUALISATION}
+        />
         {saveState === FetchState.ERROR && (
           <SubmitError
             codeBhasile={structure.codeBhasile}

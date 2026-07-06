@@ -28,6 +28,13 @@ export const CurrentYearPlaces = ({
       <legend className="text-xl font-bold mb-4 text-title-blue-france max-w-3xl">
         {getLegend(formKind)}
       </legend>
+      {isActualisation && (
+        <Alert
+          severity="error"
+          small
+          description="La modification du nombre de places autorisées doit obligatoirement passer par une contraction ou une extension de la structure."
+        />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="flex flex-col gap-1">
@@ -52,14 +59,6 @@ export const CurrentYearPlaces = ({
           )}
         </div>
       </div>
-
-      {isActualisation && (
-        <Alert
-          severity="error"
-          small
-          description="La modification du nombre de places autorisées doit obligatoirement passer par une contraction ou une extension de la structure."
-        />
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <InputWithValidation
