@@ -70,6 +70,17 @@ export const getActualisationActesAdministratifsCategoryToDisplay = (
         documentLabel: "Document",
         addFileButtonLabel: "Ajouter un arrêté de tarification",
       },
+      CONVENTION: {
+        categoryShortName: "convention",
+        title: "Conventions",
+        canAddFile: true,
+        canAddAvenant: false,
+        isOptional: true,
+        shouldShow: true,
+        additionalFieldsType: AdditionalFieldsType.DATE_START_END,
+        documentLabel: "Document",
+        addFileButtonLabel: "Ajouter une convention",
+      },
     };
   }
 
