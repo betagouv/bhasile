@@ -148,58 +148,52 @@ export const updateOne = async (
   structure: StructureAgentUpdateApiType,
   isOperateurUpdate: boolean = false
 ): Promise<Structure> => {
-  try {
-    const {
-      budgets,
-      indicateursFinanciers,
-      actesAdministratifs,
-      documentsFinanciers,
-      controles,
-      evaluations,
-      forms,
-      structureMillesimes,
-    } = structure;
+  const {
+    budgets,
+    indicateursFinanciers,
+    actesAdministratifs,
+    documentsFinanciers,
+    controles,
+    evaluations,
+    forms,
+    structureMillesimes,
+  } = structure;
 
-    return await prisma.$transaction(
-      async (tx) => {
-        const updatedStructure = await updateStructure(tx, structure);
+  return await prisma.$transaction(
+    async (tx) => {
+      const updatedStructure = await updateStructure(tx, structure);
 
-        await initializeStructureDefaultForms(
-          tx,
-          isOperateurUpdate,
-          structure.id
-        );
+      await initializeStructureDefaultForms(
+        tx,
+        isOperateurUpdate,
+        structure.id
+      );
 
-        await writeToCurrentVersion(tx, structure);
-        await createOrUpdateBudgets(tx, budgets, { structureId: structure.id });
-        await createOrUpdateIndicateursFinanciers(tx, indicateursFinanciers, {
-          structureId: structure.id,
-        });
-        await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
-          structureId: structure.id,
-        });
-        await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
-          structureId: structure.id,
-        });
-        await createOrUpdateControles(tx, controles, structure.id);
-        await createOrUpdateForms(tx, forms, { structureId: structure.id });
-        await createOrUpdateEvaluations(tx, evaluations, structure.id);
-        await createOrUpdateStructureMillesimes(tx, structureMillesimes, {
-          structureId: structure.id,
-        });
+      await writeToCurrentVersion(tx, structure);
+      await createOrUpdateBudgets(tx, budgets, { structureId: structure.id });
+      await createOrUpdateIndicateursFinanciers(tx, indicateursFinanciers, {
+        structureId: structure.id,
+      });
+      await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
+        structureId: structure.id,
+      });
+      await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
+        structureId: structure.id,
+      });
+      await createOrUpdateControles(tx, controles, structure.id);
+      await createOrUpdateForms(tx, forms, { structureId: structure.id });
+      await createOrUpdateEvaluations(tx, evaluations, structure.id);
+      await createOrUpdateStructureMillesimes(tx, structureMillesimes, {
+        structureId: structure.id,
+      });
 
-        return updatedStructure;
-      },
-      {
-        maxWait: 5000,
-        timeout: 10000,
-      }
-    );
-  } catch (error) {
-    throw new Error(
-      `Impossible de mettre à jour la structure avec l'id ${structure.id}: ${error}`
-    );
-  }
+      return updatedStructure;
+    },
+    {
+      maxWait: 5000,
+      timeout: 10000,
+    }
+  );
 };
 
 const updateStructure = async (

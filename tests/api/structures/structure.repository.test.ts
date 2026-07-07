@@ -10,6 +10,7 @@ import {
   getStructureForOperateur,
   type SearchProps,
 } from "@/app/api/structures/structure.service";
+import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
 import prisma from "@/lib/prisma";
 import { Repartition } from "@/types/adresse.type";
 import { ControleType } from "@/types/controle.type";
@@ -157,6 +158,73 @@ describe("structure.repository db integration", () => {
     // THEN: le rolling référence le département attendu
     const version = await fetchCurrentVersion(structure.id);
     expect(version.departementAdministratif).toBe(departement.numero);
+  });
+
+  describe("invariant département administratif", () => {
+    const createStructureWithDepartement = async (numero: string) => {
+      const structure = await prisma.structure.create({
+        data: {
+          codeBhasile: `BHA-DB-TEST-${Date.now()}-${randomUUID()}`,
+          departementAdministratif: numero,
+          structureVersions: {
+            create: {
+              effectiveDate: new Date("2020-01-01T12:00:00.000Z"),
+              departementAdministratif: numero,
+            },
+          },
+        },
+      });
+      createdStructureIds.push(structure.id);
+      return structure;
+    };
+
+    it("rejette avec une ApiDomainError le changement de département de la version courante", async () => {
+      // GIVEN: a structure whose invariant departement is set (OFII-born)
+      const premier = await prisma.departement.findFirstOrThrow();
+      const second = await prisma.departement.findFirstOrThrow({
+        where: { numero: { not: premier.numero } },
+      });
+      const structure = await createStructureWithDepartement(premier.numero);
+
+      // WHEN/THEN: moving the current version to another departement is refused,
+      // and the ApiDomainError propagates unwrapped so the route maps it to a 400.
+      await expect(
+        updateOne({ id: structure.id, departementAdministratif: second.numero })
+      ).rejects.toThrow(ApiDomainError);
+    });
+
+    it("laisse changer d'adresse tant que le département reste identique", async () => {
+      // GIVEN: a structure with its invariant departement set
+      const departement = await prisma.departement.findFirstOrThrow();
+      const structure = await createStructureWithDepartement(departement.numero);
+
+      // WHEN: the admin address changes but the departement stays the same
+      await updateOne({
+        id: structure.id,
+        departementAdministratif: departement.numero,
+        communeAdministrative: "Nouvelle commune",
+        adresseAdministrative: "2 rue Déménagée",
+      });
+
+      // THEN: the move is accepted
+      const version = await fetchCurrentVersion(structure.id);
+      expect(version.departementAdministratif).toBe(departement.numero);
+      expect(version.communeAdministrative).toBe("Nouvelle commune");
+    });
+
+    it("laisse passer une mise à jour qui ne touche pas au département", async () => {
+      // GIVEN: a structure with its invariant departement set
+      const departement = await prisma.departement.findFirstOrThrow();
+      const structure = await createStructureWithDepartement(departement.numero);
+
+      // WHEN: an update carries no departement field
+      await updateOne({ id: structure.id, nom: "Sans toucher au département" });
+
+      // THEN: the scalar is updated, the departement untouched
+      const version = await fetchCurrentVersion(structure.id);
+      expect(version.nom).toBe("Sans toucher au département");
+      expect(version.departementAdministratif).toBe(departement.numero);
+    });
   });
 
   it("met à jour la relation operateur", async () => {

@@ -1,5 +1,23 @@
+import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
 import { StructureType } from "@/generated/prisma/client";
+
+export const checkNoDepartementAdministratifChange = (
+  structureDepartement: string | null | undefined,
+  versionDepartement: string | null | undefined
+): void => {
+  if (structureDepartement == null) {
+    return;
+  }
+  if (versionDepartement == null) {
+    return;
+  }
+  if (versionDepartement !== structureDepartement) {
+    throw new ApiDomainError(
+      "Une structure ne peut pas changer de département administratif."
+    );
+  }
+};
 
 type VersionFields = {
   type: StructureType | null;

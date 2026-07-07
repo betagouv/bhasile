@@ -10,6 +10,7 @@ import { createOrUpdateDnaStructures } from "../dna-structures/dna-structure.rep
 import { createOrUpdateStructureFinesses } from "../finesses/finess.repository";
 import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import { convertToPublicType } from "../structures/structure.util";
+import { checkNoDepartementAdministratifChange } from "./structure-version.util";
 
 type StructureVersionParent = Pick<
   EntityId,
@@ -85,6 +86,18 @@ export const createOrUpdateStructureVersion = async (
   version: StructureVersionApiType,
   parent: StructureVersionParent
 ): Promise<number> => {
+  const structureId = version.structureId ?? parent.structureId;
+  if (structureId !== undefined) {
+    const structure = await tx.structure.findUnique({
+      where: { id: structureId },
+      select: { departementAdministratif: true },
+    });
+    checkNoDepartementAdministratifChange(
+      structure?.departementAdministratif,
+      version.departementAdministratif
+    );
+  }
+
   if (version.id) {
     return updateOneStructureVersion(tx, version);
   }
@@ -101,7 +114,11 @@ const persistRelations = async (
   await createOrUpdateContacts(tx, version.contacts, entityId);
   await createOrUpdateAdresses(tx, version.adresses, entityId);
   await createOrUpdateAntennes(tx, version.antennes, entityId);
-  await createOrUpdateStructureFinesses(tx, version.structureFinesses, entityId);
+  await createOrUpdateStructureFinesses(
+    tx,
+    version.structureFinesses,
+    entityId
+  );
   await createOrUpdateStructureTypologies(
     tx,
     version.structureTypologies,
