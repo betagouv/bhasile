@@ -1,6 +1,7 @@
 import { AbilityBuilder, PureAbility, subject } from "@casl/ability";
 import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
 
+import type { FileWithParents } from "@/app/api/files/file.db.type";
 import { getTransformationDepartement } from "@/app/utils/transformation.util";
 import { Cpom, Operateur, Structure, User } from "@/generated/prisma/client";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
@@ -88,3 +89,57 @@ export const canUpdateTransformation = (
   user: SessionUser,
   transformation: TransformationApiRead
 ) => canUpdateDepartement(user, getTransformationDepartement(transformation));
+
+export const canDeleteFile = (
+  user: SessionUser,
+  file: FileWithParents
+): boolean => {
+  const ability = defineAbilityFor(user);
+
+  if (file.acteAdministratifId) {
+    const acte = file.acteAdministratif;
+    if (!acte) {
+      return false;
+    }
+    if (acte.structureVersionTransformationId) {
+      return true;
+    }
+    if (acte.structureId) {
+      return canUpdateDepartement(
+        user,
+        acte.structure?.departementAdministratif
+      );
+    }
+    if (acte.cpom) {
+      return ability.can("update", subject("Cpom", acte.cpom));
+    }
+    if (acte.operateur) {
+      return ability.can("update", subject("Operateur", acte.operateur));
+    }
+    return false;
+  }
+
+  if (file.documentFinancierId) {
+    return canUpdateDepartement(
+      user,
+      file.documentFinancier?.structure?.departementAdministratif
+    );
+  }
+  if (file.controleId) {
+    return canUpdateDepartement(
+      user,
+      file.controle?.structure?.departementAdministratif
+    );
+  }
+  if (file.evaluationId) {
+    return canUpdateDepartement(
+      user,
+      file.evaluation?.structure?.departementAdministratif
+    );
+  }
+  if (file.operateur) {
+    return ability.can("update", subject("Operateur", file.operateur));
+  }
+
+  return false;
+};

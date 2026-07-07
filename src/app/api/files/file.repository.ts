@@ -1,6 +1,8 @@
 import { FileUpload } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 
+import { FileWithParents, fileWithParentsInclude } from "./file.db.type";
+
 export const createOne = async ({
   key,
   mimeType,
@@ -19,11 +21,12 @@ type CreateOneArgs = {
   fileSize: number;
 };
 
-export const findOneByKey = async (key: string): Promise<FileUpload | null> => {
-  return prisma.fileUpload.findFirst({
-    where: {
-      key,
-    },
+export const findOneByKeyWithParents = async (
+  key: string
+): Promise<FileWithParents | null> => {
+  return prisma.fileUpload.findUnique({
+    where: { key },
+    include: fileWithParentsInclude,
   });
 };
 
