@@ -1,3 +1,4 @@
+import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
 import {
   PrefillField,
   TRANSFORMATION_TYPE_SPECS,
@@ -5,6 +6,22 @@ import {
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import { TransformationType } from "@/types/transformation.type";
+
+export const checkNoDuplicateStructureIds = (
+  structureVersionTransformations: StructureVersionTransformationApiCreate[]
+): void => {
+  const structureIds = structureVersionTransformations
+    .map(
+      (structureVersionTransformation) =>
+        structureVersionTransformation.structureVersion?.structureId
+    )
+    .filter((structureId): structureId is number => structureId != null);
+  if (new Set(structureIds).size !== structureIds.length) {
+    throw new ApiDomainError(
+      "Une structure ne peut pas à la fois céder et recevoir des places dans une même transformation."
+    );
+  }
+};
 
 export const applyPrefill = (
   transformationType: TransformationType,

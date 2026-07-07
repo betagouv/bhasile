@@ -39,6 +39,7 @@ vi.mock("@/app/context/FetchStateContext", () => ({
   useFetchState: () => ({
     getFetchState: () => FetchState.IDLE,
     setFetchState: vi.fn(),
+    getErrorMessage: () => undefined,
   }),
 }));
 

@@ -18,7 +18,7 @@ const dnaStructureSchema = z.object({
 });
 
 const uniqueDnaCodesError = {
-  message: "Les codes DNA doivent être uniques",
+  error: "Les codes DNA doivent être uniques",
   path: ["dnaStructures"],
 };
 
@@ -31,13 +31,16 @@ export const dnaStructuresSchema = z
       return data.dnaStructures && data.dnaStructures.length > 0;
     },
     {
-      message: "Au moins un code DNA est requis",
+      error: "Au moins un code DNA est requis",
       path: ["dnaStructures"],
     }
   )
   .refine(
     (data) =>
-      areCodesUnique(data.dnaStructures, (dnaStructure) => dnaStructure.dna?.code),
+      areCodesUnique(
+        data.dnaStructures,
+        (dnaStructure) => dnaStructure.dna?.code
+      ),
     uniqueDnaCodesError
   );
 
@@ -49,7 +52,10 @@ export const dnaStructuresAutoSaveSchema = z
   })
   .refine(
     (data) =>
-      areCodesUnique(data.dnaStructures, (dnaStructure) => dnaStructure.dna?.code),
+      areCodesUnique(
+        data.dnaStructures,
+        (dnaStructure) => dnaStructure.dna?.code
+      ),
     uniqueDnaCodesError
   );
 

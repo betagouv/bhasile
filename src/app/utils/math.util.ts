@@ -68,3 +68,6 @@ export const weightedAverage = (
 
 export const ratio = (numerator: number, denominator: number): number | null =>
   denominator > 0 ? numerator / denominator : null;
+
+export const roundTo = (value: number, decimals: number): number =>
+  Number(value.toFixed(decimals));

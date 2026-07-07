@@ -23,8 +23,6 @@ export type TestStructureData = {
     description: string;
   }>;
   public: string;
-  lgbt: boolean;
-  fvvTeh: boolean;
   contacts?: Array<{
     prenom?: string;
     nom?: string;
@@ -74,7 +72,6 @@ export type TestStructureData = {
   finances?: Record<number, FinanceYearData>;
   evaluations?: EvaluationData[];
   controles?: ControleData[];
-  ouvertureFermeture?: OuvertureFermetureData;
   actesAdministratifs?: ActeAdministratifData[];
   finalisationNotes?: string;
   notes?: string;
@@ -120,13 +117,6 @@ export type ControleData = {
   date: string;
   type: ControleType[number];
   filePath?: string;
-};
-
-export type OuvertureFermetureData = {
-  placesACreer?: FinanceValue;
-  echeancePlacesACreer?: string;
-  placesAFermer?: FinanceValue;
-  echeancePlacesAFermer?: string;
 };
 
 export type ActeAdministratifData = {

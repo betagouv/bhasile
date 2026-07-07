@@ -30,7 +30,7 @@ describe("useStructuresSearch", () => {
     vi.resetAllMocks();
   });
 
-  it("should fetch structures with column and direction params", async () => {
+  it("récupère les structures avec les paramètres column et direction", async () => {
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams("column=dnaCode&direction=asc")
     );
@@ -54,7 +54,7 @@ describe("useStructuresSearch", () => {
     expect(fetchCall).toContain("direction=asc");
   });
 
-  it("should fetch structures with filter params", async () => {
+  it("récupère les structures avec les paramètres de filtre", async () => {
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams("type=CADA&departements=75,92&bati=DIFFUS")
     );
@@ -80,7 +80,7 @@ describe("useStructuresSearch", () => {
     expect(fetchCall).toContain("bati=DIFFUS");
   });
 
-  it("should read column and direction params from URL", async () => {
+  it("lit les paramètres column et direction depuis l'URL", async () => {
     // Test that the hook correctly reads params from URL
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams("column=type&direction=desc")
@@ -104,7 +104,7 @@ describe("useStructuresSearch", () => {
     expect(fetchCall).toContain("direction=desc");
   });
 
-  it("should set structures and totalStructures from API response", async () => {
+  it("renseigne structures et totalStructures depuis la réponse de l'API", async () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
 
     const mockStructures = [

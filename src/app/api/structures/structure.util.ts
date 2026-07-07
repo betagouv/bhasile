@@ -10,8 +10,13 @@ import {
   recursivelySerializeDates,
   startOfNextUtcDay,
 } from "@/app/utils/date.util";
+import {
+  type SortKind,
+  sortRows,
+  type SortValue,
+} from "@/app/utils/list.util";
 import { normalizeAccents, parseCommaList } from "@/app/utils/string.util";
-import { CURRENT_YEAR, DEFAULT_PAGE_SIZE } from "@/constants";
+import { CURRENT_YEAR } from "@/constants";
 import {
   PublicType,
   StructureType,
@@ -447,12 +452,10 @@ export const filterStructureRows = (
   });
 };
 
-type SortValue = string | number | null;
-
 const sortValueForColumn = (
   row: StructureListComputedRow,
   column: StructureColumn
-): { value: SortValue; kind: "text" | "number" } => {
+): { value: SortValue; kind: SortKind } => {
   switch (column) {
     case "codeBhasile":
       return { value: row.codeBhasile, kind: "text" };
@@ -478,60 +481,16 @@ const sortValueForColumn = (
   }
 };
 
-const compareSortValues = (
-  first: SortValue,
-  second: SortValue,
-  direction: "asc" | "desc",
-  kind: "text" | "number"
-): number => {
-  const firstIsNull = first === null;
-  const secondIsNull = second === null;
-  if (firstIsNull && secondIsNull) {
-    return 0;
-  }
-  if (firstIsNull) {
-    return direction === "asc" ? 1 : -1;
-  }
-  if (secondIsNull) {
-    return direction === "asc" ? -1 : 1;
-  }
-  const comparison =
-    kind === "text"
-      ? String(first).localeCompare(String(second), "fr")
-      : (first as number) - (second as number);
-  return direction === "asc" ? comparison : -comparison;
-};
-
 export const sortStructureRows = (
   rows: StructureListComputedRow[],
   column: StructureColumn,
   direction: "asc" | "desc"
 ): StructureListComputedRow[] =>
-  [...rows].sort((first, second) => {
-    const firstValue = sortValueForColumn(first, column);
-    const secondValue = sortValueForColumn(second, column);
-    const primary = compareSortValues(
-      firstValue.value,
-      secondValue.value,
-      direction,
-      firstValue.kind
-    );
-    if (primary !== 0) {
-      return primary;
-    }
-    const secondary = compareSortValues(
-      first.codeBhasile,
-      second.codeBhasile,
-      "asc",
-      "text"
-    );
-    return secondary;
-  });
-
-export const paginateRows = <T>(rows: T[], page: number): T[] =>
-  rows.slice(
-    page * DEFAULT_PAGE_SIZE,
-    page * DEFAULT_PAGE_SIZE + DEFAULT_PAGE_SIZE
+  sortRows(
+    rows,
+    (row) => sortValueForColumn(row, column),
+    (row) => ({ value: row.codeBhasile, kind: "text" }),
+    direction
   );
 
 export const getCpomStructuresWithDates = (

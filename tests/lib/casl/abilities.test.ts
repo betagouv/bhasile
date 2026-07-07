@@ -21,7 +21,7 @@ describe("Permissions : canUpdateStructure", () => {
     departementAdministratif: "69",
   } as Structure;
 
-  it("should allow a user with role NATIONAL to update structure if department in allowedDepartments", () => {
+  it("autorise un agent NATIONAL à modifier une structure si son département est dans allowedDepartements", () => {
     const user = {
       id: "user1",
       role: "NATIONAL",
@@ -31,7 +31,7 @@ describe("Permissions : canUpdateStructure", () => {
     expect(canUpdateStructure(user, structure69)).toBe(true);
   });
 
-  it("should allow a user with role DEPARTEMENT to update structure if department in allowedDepartments", () => {
+  it("autorise un agent DEPARTEMENT à modifier une structure si son département est dans allowedDepartements", () => {
     const user = {
       id: "user2",
       role: "DEPARTEMENT_AIN",
@@ -41,7 +41,7 @@ describe("Permissions : canUpdateStructure", () => {
     expect(canUpdateStructure(user, structure1)).toBe(true);
   });
 
-  it("should not allow a user with role DEPARTEMENT to update structure if department is not in allowedDepartments", () => {
+  it("refuse à un agent DEPARTEMENT de modifier une structure si son département n'est pas dans allowedDepartements", () => {
     const user = {
       id: "user3",
       role: "DEPARTEMENT_RHONE",
@@ -51,7 +51,7 @@ describe("Permissions : canUpdateStructure", () => {
     expect(canUpdateStructure(user, structure13)).toBe(false);
   });
 
-  it("should allow a user with role REGION to update structure if department in allowedDepartments", () => {
+  it("autorise un agent REGION à modifier une structure si son département est dans allowedDepartements", () => {
     const user = {
       id: "user4",
       role: "REGION_PAC",
@@ -61,7 +61,7 @@ describe("Permissions : canUpdateStructure", () => {
     expect(canUpdateStructure(user, structure13)).toBe(true);
   });
 
-  it("should not allow a user with role ANONYMOUS to update structure", () => {
+  it("refuse à un agent ANONYMOUS de modifier une structure", () => {
     const user = {
       id: "user5",
       role: "ANONYMOUS",
@@ -71,7 +71,7 @@ describe("Permissions : canUpdateStructure", () => {
     expect(canUpdateStructure(user, structure69)).toBe(false);
   });
 
-  it("should not allow a disconnected user to update structure", () => {
+  it("refuse à un utilisateur déconnecté de modifier une structure", () => {
     expect(
       canUpdateStructure(undefined as unknown as SessionUser, structure69)
     ).toBe(false);
@@ -91,18 +91,18 @@ describe("Permissions : canUpdateDepartement", () => {
     allowedDepartements: ["50"],
   } as SessionUser;
 
-  it("allows NATIONAL on any departement, including an undefined one", () => {
+  it("autorise un agent NATIONAL sur n'importe quel département, y compris un département undefined", () => {
     expect(canUpdateDepartement(nationalUser, "50")).toBe(true);
     expect(canUpdateDepartement(nationalUser, "13")).toBe(true);
     expect(canUpdateDepartement(nationalUser, undefined)).toBe(true);
   });
 
-  it("allows DEPARTEMENT only on its own departement", () => {
+  it("autorise un agent DEPARTEMENT uniquement sur son propre département", () => {
     expect(canUpdateDepartement(departementUser, "50")).toBe(true);
     expect(canUpdateDepartement(departementUser, "13")).toBe(false);
   });
 
-  it("hides departement-less transformations from a DEPARTEMENT agent", () => {
+  it("masque les transformations sans département à un agent DEPARTEMENT", () => {
     expect(canUpdateDepartement(departementUser, undefined)).toBe(false);
     expect(canUpdateDepartement(departementUser, null)).toBe(false);
   });

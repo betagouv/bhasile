@@ -33,14 +33,14 @@ const structureMinimalApiSchema = z.object({
   id: z.number(),
   codeBhasile: z.string().optional(),
   operateur: operateurSuggestionApiSchema,
-  type: z.nativeEnum(StructureType),
+  type: z.enum(StructureType),
   nom: z.string().optional(),
   structureMillesimes: z.array(structureMillesimeApiSchema).optional(),
   cpomStructures: z.array(cpomStructureApiSchema).optional(),
   nomOfii: z.string().optional(),
   directionTerritoriale: z.string().optional(),
-  activeInOfiiFileSince: z.string().datetime().nullish(),
-  inactiveInOfiiFileSince: z.string().datetime().nullish(),
+  activeInOfiiFileSince: z.iso.datetime().nullish(),
+  inactiveInOfiiFileSince: z.iso.datetime().nullish(),
   departementAdministratif: z
     .string()
     .min(1, "Le département de l'adresse administrative est requis"),
@@ -64,18 +64,12 @@ export const structureOperateurUpdateApiSchema =
       .min(1, "Le département de l'adresse administrative est requis"),
     latitude: z.string().optional(),
     longitude: z.string().optional(),
-    creationDate: z
-      .string()
-      .datetime({ message: "La date de création est requise" }),
-    date303: z.string().datetime().nullish(),
+    creationDate: z.iso.datetime({
+      error: "La date de création est requise",
+    }),
+    date303: z.iso.datetime().nullish(),
     finessCode: z.string().optional(),
-    lgbt: z.boolean({
-      message: "L'accueil de LGBT dans la structure est requis",
-    }),
-    fvvTeh: z.boolean({
-      message: "L'accueil de FVV-TEH dans la structure est requis",
-    }),
-    public: z.nativeEnum(PublicType),
+    public: z.enum(PublicType),
     adresses: z.array(adresseApiSchema),
     antennes: z.array(antenneApiSchema).optional(),
     dnaStructures: z.array(dnaStructureApiSchema).optional(),
@@ -174,4 +168,6 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   isMultiAntenne: boolean;
   isMultiDna: boolean;
   typeBati?: Repartition;
+  lgbt: boolean;
+  fvvTeh: boolean;
 };

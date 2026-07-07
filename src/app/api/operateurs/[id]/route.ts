@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
 import { operateurWriteApiSchema } from "@/schemas/api/operateur.schema";
 
 import { createOperateurEvent } from "../../user-action/user-action.service";
@@ -23,14 +24,7 @@ export async function GET(
 
     return NextResponse.json(operateur);
   } catch (error) {
-    console.error("Error in GET /api/operateurs/[id]", error);
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    );
+    return apiErrorResponse(error);
   }
 }
 
@@ -46,13 +40,6 @@ export async function PUT(
     createOperateurEvent(request.method, operateur.id);
     return NextResponse.json({ operateurId: operateur.id }, { status: 200 });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 400 }
-    );
+    return apiErrorResponse(error);
   }
 }

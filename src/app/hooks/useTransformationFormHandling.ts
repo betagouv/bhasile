@@ -1,12 +1,15 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { z } from "zod";
 
-import { StructureVersionTransformationApiUpdateClient } from "@/schemas/api/transformation.schema";
-import { StepStatus } from "@/types/form.type";
+import {
+  StructureVersionTransformationApiUpdateClient,
+  TransformationApiUpdateClient,
+} from "@/schemas/api/transformation.schema";
+import { AnyZodSchema, StepStatus } from "@/types/form.type";
 
 import { useTransformationContext } from "../(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { setStructureVersionTransformationFormStepStatus } from "../utils/transformation.util";
+import { useSaveMutation } from "./useSaveMutation";
 import { useTransformationFormNavigation } from "./useTransformationFormNavigation";
 import { useTransformationNavigateWithSave } from "./useTransformationNavigateWithSave";
 import { useTransformations } from "./useTransformations";
@@ -18,6 +21,11 @@ export const useTransformationFormHandling = () => {
     useTransformationContext();
   const { updateTransformation } = useTransformations();
   const { navigateWithSave } = useTransformationNavigateWithSave();
+  const { mutate: saveTransformation } = useSaveMutation(
+    "transformation-save",
+    (id: number, payload: TransformationApiUpdateClient) =>
+      updateTransformation(id, payload, setTransformation)
+  );
 
   const { firstStep, currentStep, nextStep, backLink } =
     useTransformationFormNavigation();
@@ -36,9 +44,9 @@ export const useTransformationFormHandling = () => {
   }: {
     transformationId: number;
     structureVersionTransformation: StructureVersionTransformationApiUpdateClient;
-    strictSchema: z.ZodTypeAny;
+    strictSchema: AnyZodSchema;
     values: unknown;
-  }) => {
+  }): Promise<boolean> => {
     const currentStructureVersionTransformation =
       transformation.structureVersionTransformations.find(
         (structureVersionTransformationItem) =>
@@ -49,26 +57,23 @@ export const useTransformationFormHandling = () => {
       ? StepStatus.VALIDE
       : StepStatus.COMMENCE;
 
-    await updateTransformation(
-      transformationId,
-      {
-        id: transformationId,
-        structureVersionTransformations: [
-          {
-            ...structureVersionTransformation,
-            form:
-              currentStructureVersionTransformation?.form && currentStep
-                ? setStructureVersionTransformationFormStepStatus(
-                    currentStructureVersionTransformation.form,
-                    currentStep.name,
-                    stepStatus
-                  )
-                : structureVersionTransformation.form,
-          },
-        ],
-      },
-      setTransformation
-    );
+    const result = await saveTransformation(transformationId, {
+      id: transformationId,
+      structureVersionTransformations: [
+        {
+          ...structureVersionTransformation,
+          form:
+            currentStructureVersionTransformation?.form && currentStep
+              ? setStructureVersionTransformationFormStepStatus(
+                  currentStructureVersionTransformation.form,
+                  currentStep.name,
+                  stepStatus
+                )
+              : structureVersionTransformation.form,
+        },
+      ],
+    });
+    return result !== null;
   };
 
   const goToNextStep = async () => {

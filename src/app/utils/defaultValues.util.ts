@@ -6,7 +6,7 @@ import { FormAdresse } from "@/schemas/forms/base/adresse.schema";
 import { anyBudgetFormValues } from "@/schemas/forms/base/budget.schema";
 import { ControleFormValues } from "@/schemas/forms/base/controle.schema";
 import { EvaluationFormValues } from "@/schemas/forms/base/evaluation.schema";
-import { structureTypologieSchemaTypeFormValues } from "@/schemas/forms/base/structureTypologie.schema";
+import { StructureTypologieSchemaTypeFormValues } from "@/schemas/forms/base/structureTypologie.schema";
 
 import { getActesAdministratifsDefaultValues } from "./acteAdministratif.util";
 import { transformApiAdressesToFormAdresses } from "./adresse.util";
@@ -78,6 +78,6 @@ type StructureDefaultValues = Omit<
   controles: ControleFormValues[];
   evaluations: EvaluationFormValues[];
   budgets: anyBudgetFormValues;
-  structureTypologies: structureTypologieSchemaTypeFormValues[];
+  structureTypologies: StructureTypologieSchemaTypeFormValues[];
   adresses: FormAdresse[];
 };

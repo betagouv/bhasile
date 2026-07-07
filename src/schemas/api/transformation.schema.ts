@@ -26,7 +26,7 @@ export type StructureVersionApiRead =
 
 const structureVersionTransformationApiUpdateSchema = z.object({
   id: z.number().optional(),
-  type: z.nativeEnum(StructureVersionTransformationType).optional(),
+  type: z.enum(StructureVersionTransformationType).optional(),
   motif: z.string().nullish(),
   form: formApiSchema.optional(),
   actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
@@ -37,12 +37,12 @@ const structureVersionTransformationApiUpdateSchema = z.object({
 
 export const structureVersionTransformationApiCreateSchema =
   structureVersionTransformationApiUpdateSchema.extend({
-    type: z.nativeEnum(StructureVersionTransformationType),
+    type: z.enum(StructureVersionTransformationType),
   });
 
 export const transformationApiUpdateSchema = z.object({
   id: z.number(),
-  type: z.nativeEnum(TransformationType).optional(),
+  type: z.enum(TransformationType).optional(),
   form: formApiSchema.optional(),
   structureVersionTransformations: z
     .array(structureVersionTransformationApiUpdateSchema)
@@ -50,7 +50,7 @@ export const transformationApiUpdateSchema = z.object({
 });
 
 export const transformationApiCreateSchema = z.object({
-  type: z.nativeEnum(TransformationType),
+  type: z.enum(TransformationType),
   structureVersionTransformations: z
     .array(structureVersionTransformationApiCreateSchema)
     .min(1, "Au moins une structureVersionTransformation est requise"),
@@ -58,7 +58,7 @@ export const transformationApiCreateSchema = z.object({
 
 export const transformationSelectionApiUpdateSchema = z.object({
   id: z.number(),
-  type: z.nativeEnum(TransformationType),
+  type: z.enum(TransformationType),
   structureVersionTransformations: z
     .array(structureVersionTransformationApiCreateSchema)
     .min(1, "Au moins une structureVersionTransformation est requise"),

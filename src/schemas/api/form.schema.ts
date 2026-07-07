@@ -16,7 +16,7 @@ const stepDefinitionApiSchema = z.object({
 });
 const formStepApiSchema = z.object({
   id: z.number(),
-  status: z.nativeEnum(StepStatus),
+  status: z.enum(StepStatus),
   stepDefinition: stepDefinitionApiSchema,
 });
 

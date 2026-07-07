@@ -1,6 +1,6 @@
 "use client";
 
-import "@/app/utils/zodErrorMap";
+import "@/app/utils/zodConfig";
 
 import { trackAppRouter } from "@socialgouv/matomo-next";
 import { usePathname, useSearchParams } from "next/navigation";

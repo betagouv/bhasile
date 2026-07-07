@@ -27,8 +27,6 @@ const getScalarData = (version: StructureVersionApiType) => ({
   latitude: version.latitude ?? undefined,
   longitude: version.longitude ?? undefined,
   nom: version.nom ?? undefined,
-  lgbt: version.lgbt ?? undefined,
-  fvvTeh: version.fvvTeh ?? undefined,
   notes: version.notes ?? undefined,
   nomOfii: version.nomOfii ?? undefined,
   directionTerritoriale: version.directionTerritoriale ?? undefined,

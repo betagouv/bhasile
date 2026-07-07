@@ -24,6 +24,7 @@ export const StructureSearch = ({
   fixedOperateurName,
   fixedDepartementNumero,
   finalisedOnly,
+  excludedStructureId,
 }: Props): ReactElement => {
   const effectiveStructureType = fixedType ?? structureType;
   const effectiveOperateurName = fixedOperateurName ?? operateurName;
@@ -36,6 +37,10 @@ export const StructureSearch = ({
     types: effectiveStructureType,
     finalisedOnly,
   });
+
+  const visibleStructures = structures?.filter(
+    (structure) => structure.id !== excludedStructureId
+  );
 
   const prevStructures = useRef<StructureMinimalApiType[] | undefined>(
     undefined
@@ -94,7 +99,7 @@ export const StructureSearch = ({
         )}
       </div>
       <StructuresList
-        structures={structures}
+        structures={visibleStructures}
         selectedStructureIds={selectedStructureIds}
         setSelectedStructureIds={setSelectedStructureIds}
         multiple={multiple}
@@ -119,6 +124,7 @@ export type StructureSearchProps = {
   fixedOperateurName?: string;
   fixedDepartementNumero?: string;
   finalisedOnly?: boolean;
+  excludedStructureId?: number;
 };
 
 type Props = StructureSearchProps;

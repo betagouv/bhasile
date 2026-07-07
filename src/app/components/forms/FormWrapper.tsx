@@ -9,6 +9,7 @@ import { ReactNode, useEffect, useState } from "react";
 import {
   FieldErrors,
   FormProvider as HookFormProvider,
+  Resolver,
   useForm,
   UseFormReturn,
   useWatch,
@@ -19,6 +20,7 @@ import { FormProvider } from "@/app/context/FormContext";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { cn } from "@/app/utils/classname.util";
 import { BHASILE_CONTACT_EMAIL, BHASILE_PHONE_NUMBERS } from "@/constants";
+import { AnyZodSchema } from "@/types/form.type";
 import { DeepPartial } from "@/types/global";
 
 // Define enum for footer buttons
@@ -28,7 +30,7 @@ export enum FooterButtonType {
   SUBMIT = "submit",
 }
 
-export default function FormWrapper<TSchema extends z.ZodTypeAny>({
+export default function FormWrapper<TSchema extends AnyZodSchema>({
   schema,
   localStorageKey = "",
   children,
@@ -67,7 +69,7 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
   } as z.infer<TSchema>;
 
   const methods = useForm<z.infer<TSchema>>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as Resolver<z.infer<TSchema>>,
     mode,
     defaultValues: mergedDefaultValues as z.infer<TSchema>,
     criteriaMode: "all",
@@ -230,7 +232,7 @@ export default function FormWrapper<TSchema extends z.ZodTypeAny>({
   );
 }
 
-type FormWrapperProps<TSchema extends z.ZodTypeAny> = {
+type FormWrapperProps<TSchema extends AnyZodSchema> = {
   schema: TSchema;
   localStorageKey?: string;
   children: ReactNode | ((form: UseFormReturn<z.infer<TSchema>>) => ReactNode);

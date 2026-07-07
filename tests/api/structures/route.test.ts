@@ -41,13 +41,8 @@ vi.mock("@/app/api/structures/structure.util", () => ({
   computeStructureListRow: vi.fn(),
   filterStructureRows: vi.fn((rows: unknown[]) => rows),
   sortStructureRows: vi.fn((rows: unknown[]) => rows),
-  paginateRows: vi.fn((rows: unknown[]) => rows),
   isBornFromCreation: vi.fn().mockReturnValue(false),
   isFinalisationFormValidated: vi.fn().mockReturnValue(false),
-}));
-
-vi.mock("@/app/api/activites/activite.repository", () => ({
-  getDepartementActivitesAverage: vi.fn(),
 }));
 
 vi.mock("@/app/api/user-action/user-action.repository", () => ({
@@ -59,7 +54,7 @@ describe("GET /api/structures", () => {
     vi.clearAllMocks();
   });
 
-  it("should return structures and total", async () => {
+  it("retourne les structures et leur total", async () => {
     // GIVEN
     mockfindAllStructures.mockResolvedValueOnce([]);
     mockFindStructuresByIds.mockResolvedValueOnce([]);
@@ -83,7 +78,7 @@ describe("POST /api/structures", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 201 on success", async () => {
+  it("retourne 201 en cas de succès", async () => {
     // GIVEN
     const payload = {
       ...createStructure({ id: 1 }),
@@ -109,7 +104,7 @@ describe("POST /api/structures", () => {
     });
   });
 
-  it("should return 400 when payload is invalid", async () => {
+  it("retourne 400 quand le payload est invalide", async () => {
     // GIVEN
     const request = new Request("http://localhost/api/structures", {
       method: "POST",

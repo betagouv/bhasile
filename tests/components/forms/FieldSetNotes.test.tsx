@@ -7,7 +7,7 @@ import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
 
 describe("FieldSetNotes", () => {
   describe("Rendering", () => {
-    it("should render textarea for notes", () => {
+    it("rend la zone de texte des notes", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -23,7 +23,7 @@ describe("FieldSetNotes", () => {
       expect(textarea).toHaveAttribute("id", "notes");
     });
 
-    it("should render helper text example", () => {
+    it("affiche l'exemple en texte d'aide", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -40,7 +40,7 @@ describe("FieldSetNotes", () => {
       expect(screen.getByText(/dialogue de gestion/i)).toBeInTheDocument();
     });
 
-    it("should have 8 rows for textarea", () => {
+    it("dimensionne la zone de texte à 8 lignes", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -57,7 +57,7 @@ describe("FieldSetNotes", () => {
   });
 
   describe("Text input", () => {
-    it("should handle text input", async () => {
+    it("gère la saisie de texte", async () => {
       const historicalNotes =
         "10/12/2024 - Visite sur site effectuée\n" +
         "15/12/2024 - Réception des documents\n" +
@@ -80,7 +80,7 @@ describe("FieldSetNotes", () => {
   });
 
   describe("Form field attributes", () => {
-    it("should have correct name attribute", () => {
+    it("définit le bon attribut name", () => {
       const { container } = render(
         <FormTestWrapper
           defaultValues={{

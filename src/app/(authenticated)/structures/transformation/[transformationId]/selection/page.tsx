@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { TransformationTypeForms } from "@/app/components/forms/transformation-types/TransformationTypeForms";
 import { useFetchState } from "@/app/context/FetchStateContext";
+import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { useTransformations } from "@/app/hooks/useTransformations";
 import {
   getTransformationFormNavigation,
@@ -35,6 +36,13 @@ export default function TransformationSelectionsPage() {
 
   const { getFetchState } = useFetchState();
   const saveState = getFetchState("transformation-save");
+  const { mutate: resetSelection } = useSaveMutation(
+    "transformation-save",
+    (input: {
+      type: TransformationType;
+      structureVersionTransformations: StructureVersionTransformationApiCreate[];
+    }) => resetTransformationSelection(transformation.id, input, setTransformation)
+  );
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -75,20 +83,14 @@ export default function TransformationSelectionsPage() {
     if (!pendingSelection) {
       return;
     }
-    try {
-      const freshTransformation = await resetTransformationSelection(
-        transformation.id,
-        pendingSelection,
-        setTransformation
-      );
+    const freshTransformation = await resetSelection(pendingSelection);
+    if (freshTransformation !== null) {
       reinitialiserSelectionModal.close();
       const { firstStep } = getTransformationFormNavigation({
         transformationSteps: getTransformationSteps(freshTransformation),
         transformationId: freshTransformation.id,
       });
       router.push(firstStep.route);
-    } catch (error) {
-      console.error(error);
     }
   };
 

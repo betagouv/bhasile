@@ -28,8 +28,6 @@ export const cada2: TestStructureScenario = {
       },
     ],
     public: "Tout public",
-    lgbt: true,
-    fvvTeh: true,
     contacts: [
       {
         prenom: "John",
@@ -135,12 +133,6 @@ export const cada2: TestStructureScenario = {
       },
     ],
     controles: [],
-    ouvertureFermeture: {
-      placesACreer: "4",
-      echeancePlacesACreer: "2025-09-01",
-      placesAFermer: "1",
-      echeancePlacesAFermer: "2025-11-15",
-    },
     actesAdministratifs: [
       {
         category: "ARRETE_AUTORISATION",
@@ -160,16 +152,8 @@ export const cada2: TestStructureScenario = {
   },
   modificationData: {
     public: "Personnes isolées",
-    lgbt: false,
-    fvvTeh: true,
     contacts: [{ email: "modif-cada2@example.com" }],
     notes: "Notes modification CADA 2 - évolution structure.",
-    ouvertureFermeture: {
-      placesACreer: "8",
-      echeancePlacesACreer: "2026-09-15",
-      placesAFermer: "0",
-      echeancePlacesAFermer: "2026-12-01",
-    },
     structureTypologies: [
       { placesAutorisees: 55, pmr: 7, lgbt: 11, fvvTeh: 9 },
       { placesAutorisees: 53, pmr: 7, lgbt: 11, fvvTeh: 9 },

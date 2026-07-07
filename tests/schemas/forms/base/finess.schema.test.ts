@@ -6,7 +6,7 @@ import {
 } from "@/schemas/forms/base/finess.schema";
 
 describe("structureFinessesSchema", () => {
-  it("accepts distinct FINESS codes", () => {
+  it("accepte des codes FINESS distincts", () => {
     const result = structureFinessesSchema.safeParse({
       structureFinesses: [
         { description: "Site A", finess: { code: "123456789" } },
@@ -17,7 +17,7 @@ describe("structureFinessesSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects duplicate FINESS codes", () => {
+  it("rejette des codes FINESS en doublon", () => {
     const result = structureFinessesSchema.safeParse({
       structureFinesses: [
         { description: "Site A", finess: { code: "123456789" } },
@@ -31,7 +31,7 @@ describe("structureFinessesSchema", () => {
     );
   });
 
-  it("ignores surrounding whitespace when comparing codes", () => {
+  it("ignore les espaces autour des codes lors de la comparaison", () => {
     const result = structureFinessesSchema.safeParse({
       structureFinesses: [
         { finess: { code: "123456789" } },
@@ -42,7 +42,7 @@ describe("structureFinessesSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("accepts an empty list", () => {
+  it("accepte une liste vide", () => {
     const result = structureFinessesSchema.safeParse({ structureFinesses: [] });
 
     expect(result.success).toBe(true);
@@ -50,7 +50,7 @@ describe("structureFinessesSchema", () => {
 });
 
 describe("structureFinessesAutoSaveSchema", () => {
-  it("rejects duplicate FINESS codes while saving a draft", () => {
+  it("rejette des codes FINESS en doublon lors de la sauvegarde d'un brouillon", () => {
     const result = structureFinessesAutoSaveSchema.safeParse({
       structureFinesses: [
         { finess: { code: "123456789" } },
@@ -64,7 +64,7 @@ describe("structureFinessesAutoSaveSchema", () => {
     );
   });
 
-  it("tolerates blank or incomplete rows being filled in", () => {
+  it("tolère des lignes vides ou incomplètes en cours de saisie", () => {
     const result = structureFinessesAutoSaveSchema.safeParse({
       structureFinesses: [
         { finess: { code: "123456789" } },

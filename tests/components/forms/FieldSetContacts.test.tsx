@@ -9,7 +9,7 @@ import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
 
 describe("FieldSetContacts", () => {
   describe("Rendering", () => {
-    it("should render all contact fields for each contact", () => {
+    it("affiche tous les champs pour chaque contact", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -44,7 +44,7 @@ describe("FieldSetContacts", () => {
       expect(screen.getAllByLabelText("Téléphone")[2]).toBeInTheDocument();
     });
 
-    it("should display guidance notice", () => {
+    it("affiche la note d'aide", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -65,7 +65,7 @@ describe("FieldSetContacts", () => {
   });
 
   describe("Delete button visibility", () => {
-    it("should hide the delete button when the only contact is pristine", () => {
+    it("masque le bouton de suppression quand l'unique contact est vierge", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -81,7 +81,7 @@ describe("FieldSetContacts", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("should show the delete button when the only contact has data", () => {
+    it("affiche le bouton de suppression quand l'unique contact est renseigné", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -97,7 +97,7 @@ describe("FieldSetContacts", () => {
       ).toBeInTheDocument();
     });
 
-    it("should show a delete button on every contact when above the minimum, even pristine ones", () => {
+    it("affiche un bouton de suppression sur chaque contact au-dessus du minimum, même vierge", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -115,7 +115,7 @@ describe("FieldSetContacts", () => {
   });
 
   describe("Form interactions", () => {
-    it("should update prenom field value", async () => {
+    it("met à jour la valeur du champ prenom", async () => {
       const user = userEvent.setup();
 
       render(
@@ -136,7 +136,7 @@ describe("FieldSetContacts", () => {
       });
     });
 
-    it("should update nom field value", async () => {
+    it("met à jour la valeur du champ nom", async () => {
       const user = userEvent.setup();
 
       render(
@@ -157,7 +157,7 @@ describe("FieldSetContacts", () => {
       });
     });
 
-    it("should update role field value", async () => {
+    it("met à jour la valeur du champ role", async () => {
       const user = userEvent.setup();
 
       render(
@@ -178,7 +178,7 @@ describe("FieldSetContacts", () => {
       });
     });
 
-    it("should update email field value", async () => {
+    it("met à jour la valeur du champ email", async () => {
       const user = userEvent.setup();
 
       render(
@@ -199,7 +199,7 @@ describe("FieldSetContacts", () => {
       });
     });
 
-    it("should update telephone field value", async () => {
+    it("met à jour la valeur du champ telephone", async () => {
       const user = userEvent.setup();
 
       render(
@@ -222,7 +222,7 @@ describe("FieldSetContacts", () => {
   });
 
   describe("Form interactions - another contact", () => {
-    it("should update all fields independently from principal contact", async () => {
+    it("met à jour tous les champs indépendamment du contact principal", async () => {
       const user = userEvent.setup();
 
       render(
@@ -273,7 +273,7 @@ describe("FieldSetContacts", () => {
   });
 
   describe("Hidden ID fields", () => {
-    it("should have hidden id field for each contact", () => {
+    it("rend un champ id caché pour chaque contact", () => {
       const { container } = render(
         <FormTestWrapper
           defaultValues={{
@@ -292,7 +292,7 @@ describe("FieldSetContacts", () => {
   });
 
   describe("Edge cases", () => {
-    it("should handle partial contact data", () => {
+    it("gère des données de contact partielles", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -317,7 +317,7 @@ describe("FieldSetContacts", () => {
   });
 
   describe("Form field names", () => {
-    it("should have correct name attributes for each contact", () => {
+    it("définit les bons attributs name pour chaque contact", () => {
       const { container } = render(
         <FormTestWrapper
           defaultValues={{
@@ -345,7 +345,7 @@ describe("FieldSetContacts", () => {
       ).toBeInTheDocument();
     });
 
-    it("should have correct name attributes for secondary contact", () => {
+    it("définit les bons attributs name pour le contact secondaire", () => {
       const { container } = render(
         <FormTestWrapper
           defaultValues={{

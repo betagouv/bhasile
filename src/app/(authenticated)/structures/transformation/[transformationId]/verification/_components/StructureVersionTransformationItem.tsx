@@ -107,7 +107,9 @@ const getPlacesLine = (
 
   return {
     count: placesAutorisees,
-    label: "places autorisées au total",
+    label: `places autorisées au total après ${getEffectiveDateLabel(
+      structureVersionTransformation.type
+    )}`,
     icon: "fr-icon-check-line",
   };
 };

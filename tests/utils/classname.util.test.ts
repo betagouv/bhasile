@@ -2,7 +2,7 @@ import { cn } from "@/app/utils/classname.util";
 
 describe("classname util", () => {
   describe("cn", () => {
-    it("should concatenate to one string when given two strings", () => {
+    it("concatène en une seule chaîne quand on passe deux chaînes", () => {
       // GIVEN
       const class1 = "text-red-500";
       const class2 = "bg-blue-200";
@@ -14,7 +14,7 @@ describe("classname util", () => {
       expect(result).toBe("text-red-500 bg-blue-200");
     });
 
-    it("should contextually input classes", () => {
+    it("intègre les classes de façon conditionnelle selon le contexte", () => {
       // GIVEN
       const isPrimary = true;
 
@@ -29,7 +29,7 @@ describe("classname util", () => {
       expect(result).toBe("btn btn-primary");
     });
 
-    it("should return a concatenated string when given classes, arrays and objects", () => {
+    it("retourne une chaîne concaténée quand on passe des classes, des tableaux et des objets", () => {
       // GIVEN
       const hasShadow = true;
 
@@ -40,7 +40,7 @@ describe("classname util", () => {
       expect(result).toBe("card p-4 rounded shadow-lg");
     });
 
-    it("should return the last string when there are conflicts", () => {
+    it("retourne la dernière classe en cas de conflit", () => {
       // GIVEN
       const class1 = "px-4 text-sm";
       const class2 = "px-6 text-lg";

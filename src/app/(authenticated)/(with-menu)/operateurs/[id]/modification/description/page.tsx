@@ -10,22 +10,16 @@ import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { FieldSetDescription } from "@/app/components/forms/operateur/FieldSetDescription";
 import { FieldSetDirectionGenerale } from "@/app/components/forms/operateur/FieldSetDirectionGenerale";
 import { FieldSetSiegeSocial } from "@/app/components/forms/operateur/FieldSetSiegeSocial";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useOperateurFormHandling } from "@/app/hooks/useOperateurFormHandling";
 import { getOperateurDefaultValues } from "@/app/utils/operateur.util";
 import { operateurUpdateSchema } from "@/schemas/forms/base/operateur.schema";
-import { FetchState } from "@/types/fetch-state.type";
 
 import { useOperateurContext } from "../../_context/OperateurClientContext";
 
 export default function OperateurModificationDescription() {
   const { operateur } = useOperateurContext();
 
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("operateur-save");
-
-  const { handleSubmit, backendError } = useOperateurFormHandling({
+  const { handleSubmit } = useOperateurFormHandling({
     operateurId: operateur.id,
     nextRoute: `/operateurs/${operateur.id}`,
   });
@@ -57,9 +51,6 @@ export default function OperateurModificationDescription() {
         <FieldSetDirectionGenerale />
         <hr />
         <FieldSetSiegeSocial />
-        {saveState === FetchState.ERROR && (
-          <SubmitError operateurId={operateur.id} backendError={backendError} />
-        )}
       </FormWrapper>
       <LeaveModificationModal
         resetRoute={`/operateurs/${operateur.id}`}
