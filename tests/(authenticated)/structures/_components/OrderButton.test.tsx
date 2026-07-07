@@ -25,7 +25,7 @@ export const getOrderButton = (column: StructureColumn) => {
 };
 
 describe("OrderButton", () => {
-  it("should call handleOrdering when clicked", async () => {
+  it("appelle handleOrdering au clic", async () => {
     const user = userEvent.setup();
     const handleOrdering = vi.fn();
 
@@ -44,7 +44,7 @@ describe("OrderButton", () => {
     expect(handleOrdering).toHaveBeenCalledWith("codeBhasile");
   });
 
-  it("should highlight ascending arrow when column is active and direction is asc", () => {
+  it("met en évidence la flèche ascendante quand la colonne est active et le tri ascendant", () => {
     render(
       <OrderButton
         column="codeBhasile"
@@ -62,7 +62,7 @@ describe("OrderButton", () => {
     expect(ascendingArrow).toHaveClass("text-title-blue-france");
   });
 
-  it("should highlight descending arrow when column is active and direction is desc", () => {
+  it("met en évidence la flèche descendante quand la colonne est active et le tri descendant", () => {
     render(
       <OrderButton
         column="type"
@@ -80,7 +80,7 @@ describe("OrderButton", () => {
     expect(descendingArrow).toHaveClass("text-title-blue-france");
   });
 
-  it("should not highlight arrows when column is not active", () => {
+  it("ne met aucune flèche en évidence quand la colonne n'est pas active", () => {
     render(
       <OrderButton
         column="type"

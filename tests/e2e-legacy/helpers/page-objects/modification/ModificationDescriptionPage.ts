@@ -1,6 +1,5 @@
 import { Page } from "@playwright/test";
 
-import { CheckboxHelper } from "../../checkbox-helper";
 import { URLS } from "../../constants";
 import { FormHelper } from "../../form-helper";
 import { SELECTORS } from "../../selectors";
@@ -9,13 +8,11 @@ import { WaitHelper } from "../../wait-helper";
 import { BasePage } from "../BasePage";
 
 export class ModificationDescriptionPage extends BasePage {
-  private checkboxHelper: CheckboxHelper;
   private formHelper: FormHelper;
   private waitHelper: WaitHelper;
 
   constructor(page: Page) {
     super(page);
-    this.checkboxHelper = new CheckboxHelper(page);
     this.formHelper = new FormHelper(page);
     this.waitHelper = new WaitHelper(page);
   }
@@ -27,11 +24,6 @@ export class ModificationDescriptionPage extends BasePage {
 
   async fillForm(data: ModificationData) {
     await this.updatePublic(data.public);
-
-    await this.setVulnerabilites({
-      lgbt: data.lgbt,
-      fvvTeh: data.fvvTeh,
-    });
 
     await this.updateFirstContactEmail(data.contacts?.[0]?.email);
 
@@ -46,25 +38,6 @@ export class ModificationDescriptionPage extends BasePage {
     }
 
     await this.waitHelper.waitForUIUpdate();
-  }
-
-  async setVulnerabilites({
-    lgbt,
-    fvvTeh,
-  }: {
-    lgbt?: boolean;
-    fvvTeh?: boolean;
-  }) {
-    if (lgbt !== undefined) {
-      await this.checkboxHelper.toggleCheckbox('input[name="lgbt"]', lgbt, {
-        useLabel: true,
-      });
-    }
-    if (fvvTeh !== undefined) {
-      await this.checkboxHelper.toggleCheckbox('input[name="fvvTeh"]', fvvTeh, {
-        useLabel: true,
-      });
-    }
   }
 
   async updateFirstContactEmail(email?: string) {

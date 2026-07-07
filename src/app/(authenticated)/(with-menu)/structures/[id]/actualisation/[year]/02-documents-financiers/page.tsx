@@ -9,12 +9,7 @@ import { DocumentsFinanciers } from "@/app/components/forms/finance/documents/Do
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
-import {
-  CAMPAIGN_SAVE_KEY,
-  useActualisationFormHandling,
-} from "@/app/hooks/useActualisationFormHandling";
+import { useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
 import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
 import { filterDocumentsFinanciersForApi } from "@/app/utils/file-upload.util";
 import {
@@ -22,7 +17,6 @@ import {
   DocumentsFinanciersFlexibleSchema,
   DocumentsFinanciersStrictSchema,
 } from "@/schemas/forms/base/documentFinancier.schema";
-import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
 
 import { ActualisationTabs } from "../_components/ActualisationTabs";
@@ -35,8 +29,10 @@ export default function ActualisationDocumentsFinanciers() {
 
   const defaultValues = getActualisationDefaultValues({ structure, year });
 
-  const { handleAutoSave, handleValidateStep, backendError } =
-    useActualisationFormHandling({ year, currentStep });
+  const { handleAutoSave, handleValidateStep } = useActualisationFormHandling({
+    year,
+    currentStep,
+  });
 
   const onAutoSave = async (data: DocumentsFinanciersFlexibleFormValues) => {
     await handleAutoSave(
@@ -60,9 +56,6 @@ export default function ActualisationDocumentsFinanciers() {
     });
   };
 
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState(CAMPAIGN_SAVE_KEY);
-
   return (
     <div>
       <ActualisationTabs currentStep={currentStep} year={year} />
@@ -83,12 +76,6 @@ export default function ActualisationDocumentsFinanciers() {
           className="mb-6"
           formKind={FormKind.ACTUALISATION}
         />
-        {saveState === FetchState.ERROR && (
-          <SubmitError
-            codeBhasile={structure.codeBhasile}
-            backendError={backendError}
-          />
-        )}
       </FormWrapper>
     </div>
   );

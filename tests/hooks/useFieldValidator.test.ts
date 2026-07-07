@@ -12,7 +12,7 @@ describe("useFieldValidator", () => {
     age: z.number().min(18, "Doit avoir au moins 18 ans"),
   });
 
-  it("should return undefined for valid field values", () => {
+  it("retourne undefined pour des valeurs de champ valides", () => {
     // GIVEN
     const { result } = renderHook(() => useFieldValidator(testSchema));
 
@@ -30,7 +30,7 @@ describe("useFieldValidator", () => {
     expect(ageErrors).toBeUndefined();
   });
 
-  it("should return error messages for invalid field values", () => {
+  it("retourne les messages d'erreur pour des valeurs de champ invalides", () => {
     // GIVEN
     const { result } = renderHook(() => useFieldValidator(testSchema));
 
@@ -45,7 +45,7 @@ describe("useFieldValidator", () => {
     expect(ageErrors).toEqual(["Doit avoir au moins 18 ans"]);
   });
 
-  it("should handle undefined values", () => {
+  it("gère les valeurs undefined", () => {
     // GIVEN
     const { result } = renderHook(() => useFieldValidator(testSchema));
 
@@ -58,7 +58,7 @@ describe("useFieldValidator", () => {
     expect(emailErrors).toBeDefined();
   });
 
-  it("should handle non-existent fields", () => {
+  it("gère les champs inexistants", () => {
     // GIVEN
     const originalConsoleError = console.error;
     console.error = vi.fn();
@@ -79,7 +79,7 @@ describe("useFieldValidator", () => {
     console.error = originalConsoleError;
   });
 
-  it("should validate different types correctly", () => {
+  it("valide correctement différents types", () => {
     // GIVEN
     const { result } = renderHook(() => useFieldValidator(testSchema));
 
@@ -92,7 +92,7 @@ describe("useFieldValidator", () => {
     expect(ageErrors).toBeDefined();
   });
 
-  it("should handle complex validation scenarios", () => {
+  it("gère des scénarios de validation complexes", () => {
     // GIVEN
     const complexSchema = z.object({
       password: z

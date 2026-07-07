@@ -1,5 +1,4 @@
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { z } from "zod";
 
 import { CampaignApiWrite } from "@/schemas/api/campaign.schema";
@@ -23,9 +22,6 @@ export const useActualisationFormHandling = ({ year, currentStep }: Props) => {
   const { structure, setStructure } = useStructureContext();
   const { updateAndRefreshCampaign } = useCampaigns();
   const { setFetchState } = useFetchState();
-  const [backendError, setBackendError] = useState<string | undefined>(
-    undefined
-  );
 
   const save = async (payload: CampaignApiWrite): Promise<void> => {
     setFetchState(CAMPAIGN_SAVE_KEY, FetchState.LOADING);
@@ -42,8 +38,7 @@ export const useActualisationFormHandling = ({ year, currentStep }: Props) => {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error(message);
-      setFetchState(CAMPAIGN_SAVE_KEY, FetchState.ERROR);
-      setBackendError(message);
+      setFetchState(CAMPAIGN_SAVE_KEY, FetchState.ERROR, message);
       throw error;
     }
   };
@@ -96,7 +91,6 @@ export const useActualisationFormHandling = ({ year, currentStep }: Props) => {
     handleAutoSave,
     handleValidateStep,
     handleValidateActualisation,
-    backendError,
   };
 };
 

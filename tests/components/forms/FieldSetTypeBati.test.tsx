@@ -14,7 +14,7 @@ const renderFieldSet = (formKind?: FormKind) =>
   );
 
 describe("FieldSetTypeBati", () => {
-  it("renders the type de bâti select with every répartition option", () => {
+  it("affiche le select type de bâti avec toutes les options de répartition", () => {
     renderFieldSet();
 
     const select = screen.getByRole("combobox", { name: "Type de bâti" });
@@ -29,7 +29,7 @@ describe("FieldSetTypeBati", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows the transformation banner and the public select for an extension", () => {
+  it("affiche le bandeau de transformation et le select public pour une extension", () => {
     renderFieldSet(FormKind.EXTENSION);
 
     expect(screen.getByText(/extension effective/i)).toBeInTheDocument();
@@ -38,13 +38,13 @@ describe("FieldSetTypeBati", () => {
     ).toBeInTheDocument();
   });
 
-  it("uses the contraction wording in the banner for a contraction", () => {
+  it("emploie le libellé contraction dans le bandeau pour une contraction", () => {
     renderFieldSet(FormKind.CONTRACTION);
 
     expect(screen.getByText(/contraction effective/i)).toBeInTheDocument();
   });
 
-  it("hides the banner and the public select outside transformation/creation", () => {
+  it("masque le bandeau et le select public hors transformation/création", () => {
     renderFieldSet(FormKind.FINALISATION);
 
     expect(screen.queryByText(/effective/i)).not.toBeInTheDocument();

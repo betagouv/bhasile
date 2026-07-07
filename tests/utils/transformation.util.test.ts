@@ -79,7 +79,7 @@ describe("transformation util", () => {
       },
     ];
 
-    it("should return defined prevStep and nextStep when step is in the middle of its group", () => {
+    it("retourne un prevStep et un nextStep définis quand l'étape est au milieu de son groupe", () => {
       // GIVEN
       const transformationStructureType =
         StructureVersionTransformationType.EXTENSION;
@@ -119,7 +119,7 @@ describe("transformation util", () => {
       });
     });
 
-    it("should return undefined prevStep when step is the very first one", () => {
+    it("retourne un prevStep undefined quand l'étape est la toute première", () => {
       // GIVEN
       const transformationStructureType =
         StructureVersionTransformationType.FERMETURE;
@@ -150,7 +150,7 @@ describe("transformation util", () => {
       });
     });
 
-    it("should return the verification step as nextStep when on the last form step", () => {
+    it("retourne l'étape de vérification comme nextStep quand on est sur la dernière étape du formulaire", () => {
       // GIVEN
       const transformationStructureType =
         StructureVersionTransformationType.EXTENSION;
@@ -184,7 +184,7 @@ describe("transformation util", () => {
       });
     });
 
-    it("should resolve the verification step and expose the last form step as prevStep", () => {
+    it("résout l'étape de vérification et expose la dernière étape du formulaire comme prevStep", () => {
       // WHEN
       const { currentStep, prevStep, nextStep } =
         getTransformationFormNavigation({
@@ -206,7 +206,7 @@ describe("transformation util", () => {
       expect(nextStep).toBeUndefined();
     });
 
-    it("should compute prevStep from a previous group when crossing structureVersionTransformation boundaries", () => {
+    it("calcule prevStep depuis un groupe précédent en franchissant les frontières de structureVersionTransformation", () => {
       // GIVEN
       const transformationStructureType =
         StructureVersionTransformationType.EXTENSION;
@@ -235,7 +235,7 @@ describe("transformation util", () => {
       });
     });
 
-    it("should return undefined currentStep/prevStep/nextStep when step is not found, but keep firstStep", () => {
+    it("retourne currentStep/prevStep/nextStep undefined quand l'étape est introuvable, mais conserve firstStep", () => {
       // GIVEN
       const transformationStructureType =
         StructureVersionTransformationType.EXTENSION;
@@ -263,7 +263,7 @@ describe("transformation util", () => {
       expect(nextStep).toBeUndefined();
     });
 
-    it("should match the step type case-insensitively", () => {
+    it("fait correspondre le type d'étape sans tenir compte de la casse", () => {
       // GIVEN
       const transformationStructureType =
         "fermeture" as unknown as StructureVersionTransformationType;
@@ -287,7 +287,7 @@ describe("transformation util", () => {
       });
     });
 
-    it("should return only the verification step as firstStep when transformationSteps is empty", () => {
+    it("retourne uniquement l'étape de vérification comme firstStep quand transformationSteps est vide", () => {
       // GIVEN
       const emptySteps: Step[] = [];
 
@@ -383,7 +383,7 @@ describe("transformation util", () => {
   });
 
   describe("getTransformationSteps", () => {
-    it("should return an empty array when transformation is undefined", () => {
+    it("retourne un tableau vide quand la transformation est undefined", () => {
       // WHEN
       const result = getTransformationSteps(undefined);
 
@@ -391,7 +391,7 @@ describe("transformation util", () => {
       expect(result).toEqual([]);
     });
 
-    it("should return an empty array when transformation has no structureVersionTransformations", () => {
+    it("retourne un tableau vide quand la transformation n'a pas de structureVersionTransformations", () => {
       // GIVEN
       const transformation: TransformationApiRead = {
         id: 5,
@@ -406,7 +406,7 @@ describe("transformation util", () => {
       expect(result).toEqual([]);
     });
 
-    it("should sort structure transformations FERMETURE → CONTRACTION → EXTENSION → CREATION", () => {
+    it("trie les transformations de structure FERMETURE → CONTRACTION → EXTENSION → CREATION", () => {
       // GIVEN
       const transformation: TransformationApiRead = {
         id: 5,
@@ -452,7 +452,7 @@ describe("transformation util", () => {
       ]);
     });
 
-    it("should return only the 'description' step for FERMETURE", () => {
+    it("retourne uniquement l'étape 'description' pour une FERMETURE", () => {
       // GIVEN
       const transformation: TransformationApiRead = {
         id: 5,
@@ -478,7 +478,7 @@ describe("transformation util", () => {
       StructureVersionTransformationType.CONTRACTION,
       StructureVersionTransformationType.CREATION,
     ])(
-      "should return the description / places-et-hebergement / actes-administratifs steps for %s",
+      "retourne les étapes description / places-et-hebergement / actes-administratifs pour %s",
       (type) => {
         // GIVEN
         const transformation: TransformationApiRead = {
@@ -556,7 +556,7 @@ describe("transformation util", () => {
       [StructureVersionTransformationType.FERMETURE, "fermeture"],
       [StructureVersionTransformationType.CREATION, "creation"],
     ])(
-      "should build routes with the URL segment '%s' for %s",
+      "construit les routes avec le segment d'URL '%s' pour %s",
       (type, urlSegment) => {
         // GIVEN
         const transformation: TransformationApiRead = {
@@ -578,7 +578,7 @@ describe("transformation util", () => {
       }
     );
 
-    it("should build the full route pattern transformationId / type / idStep / step name", () => {
+    it("construit le motif de route complet transformationId / type / idStep / nom d'étape", () => {
       // GIVEN
       const transformation: TransformationApiRead = {
         id: 7,
@@ -602,7 +602,7 @@ describe("transformation util", () => {
       ]);
     });
 
-    it("should return empty routes when structureVersionTransformation has no id", () => {
+    it("retourne des routes vides quand la structureVersionTransformation n'a pas d'id", () => {
       // GIVEN
       const transformation: TransformationApiRead = {
         id: 5,
@@ -751,7 +751,7 @@ describe("transformation util", () => {
       });
     });
 
-    it("maps the description route step to the 01-identification form step", () => {
+    it("mappe l'étape de route description sur l'étape de formulaire 01-identification", () => {
       const form = setStructureVersionTransformationFormStepStatus(
         buildCreationForm(),
         StructureVersionTransformationStep.DESCRIPTION,
@@ -778,7 +778,7 @@ describe("transformation util", () => {
       expect(form.status).toBe(false);
     });
 
-    it("preserves the form and step ids read from the database", () => {
+    it("préserve les ids de formulaire et d'étape lus depuis la base de données", () => {
       const form = setStructureVersionTransformationFormStepStatus(
         buildCreationForm(),
         StructureVersionTransformationStep.DESCRIPTION,
@@ -792,7 +792,7 @@ describe("transformation util", () => {
       ]);
     });
 
-    it("returns the form unchanged when the step does not belong to the form", () => {
+    it("retourne le formulaire inchangé quand l'étape n'appartient pas au formulaire", () => {
       const form = buildCreationForm();
       // a fermeture form only exposes the description step
       form.formDefinition.name = "structure-transformation-fermeture";
@@ -810,7 +810,7 @@ describe("transformation util", () => {
       ).toBe(true);
     });
 
-    it("returns the form unchanged for an unknown form name", () => {
+    it("retourne le formulaire inchangé pour un nom de formulaire inconnu", () => {
       const form = buildCreationForm();
       form.formDefinition.name = "unknown-form";
 
@@ -861,7 +861,7 @@ describe("transformation util", () => {
       [FormKind.CONTRACTION, false],
       [FormKind.MODIFICATION, false],
       [FormKind.FINALISATION, false],
-    ])("returns %s → %s", (formKind, expected) => {
+    ])("retourne %s → %s", (formKind, expected) => {
       expect(isCreation(formKind)).toBe(expected);
     });
   });
@@ -874,7 +874,7 @@ describe("transformation util", () => {
       [FormKind.OUVERTURE_DEPUIS_UNE_OU_PLUSIEURS_STRUCTURES, false],
       [FormKind.MODIFICATION, false],
       [FormKind.FINALISATION, false],
-    ])("returns %s → %s", (formKind, expected) => {
+    ])("retourne %s → %s", (formKind, expected) => {
       expect(isTransformationSurStructureExistante(formKind)).toBe(expected);
     });
   });
@@ -1164,7 +1164,7 @@ describe("transformation util", () => {
       [FormKind.CONTRACTION, "la contraction"],
       [FormKind.OUVERTURE_EX_NIHILO, ""],
       [FormKind.FINALISATION, ""],
-    ])("returns %s → '%s'", (formKind, expected) => {
+    ])("retourne %s → '%s'", (formKind, expected) => {
       expect(getTransformationNounAvecArticle(formKind)).toBe(expected);
     });
   });

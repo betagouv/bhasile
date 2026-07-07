@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { useOptionalTransformationContext } from "@/app/(authenticated)/structures/transformation/[transformationId]/_context/TransformationClientContext";
 import { useFetchState } from "@/app/context/FetchStateContext";
+import { useSaveMutation } from "@/app/hooks/useSaveMutation";
 import { useTransformationNavigateWithSave } from "@/app/hooks/useTransformationNavigateWithSave";
 import { useTransformations } from "@/app/hooks/useTransformations";
 import { getTransformationTitle } from "@/app/utils/transformation.util";
@@ -30,9 +31,13 @@ export const TransformationHeader = () => {
   const { navigateWithSave } = useTransformationNavigateWithSave();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { getFetchState } = useFetchState();
+  const { getFetchState, getErrorMessage } = useFetchState();
   const saveState = getFetchState("transformation-save");
   const deleteState = getFetchState("transformation-delete");
+  const { mutate: deleteCurrentTransformation } = useSaveMutation(
+    "transformation-delete",
+    (id: number) => deleteTransformation(id)
+  );
 
   const title = getTransformationTitle(
     transformation?.type ??
@@ -77,11 +82,9 @@ export const TransformationHeader = () => {
     if (!transformation) {
       return;
     }
-    try {
-      await deleteTransformation(transformation.id);
+    const result = await deleteCurrentTransformation(transformation.id);
+    if (result !== null) {
       router.push("/structures");
-    } catch (error) {
-      console.error(error);
     }
   };
 
@@ -160,6 +163,7 @@ export const TransformationHeader = () => {
           <EnregistrementModal onQuit={() => router.push("/structures")} />
           <QuitterModal
             saveState={saveState}
+            errorMessage={getErrorMessage("transformation-save")}
             onQuit={() => router.push("/structures")}
             onSaveAndQuit={handleSaveAndQuit}
           />

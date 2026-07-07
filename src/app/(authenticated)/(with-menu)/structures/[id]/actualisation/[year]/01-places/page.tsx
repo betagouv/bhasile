@@ -9,19 +9,13 @@ import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
 import { CurrentYearPlaces } from "@/app/components/forms/typePlace/CurrentYearPlaces";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
-import {
-  CAMPAIGN_SAVE_KEY,
-  useActualisationFormHandling,
-} from "@/app/hooks/useActualisationFormHandling";
+import { useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
 import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 import {
   structureTypologiesAutoSaveSchema,
   structureTypologiesSchema,
 } from "@/schemas/forms/base/structureTypologie.schema";
-import { FetchState } from "@/types/fetch-state.type";
 import { FormKind } from "@/types/global";
 
 import { ActualisationTabs } from "../_components/ActualisationTabs";
@@ -34,8 +28,10 @@ export default function ActualisationPlaces() {
 
   const defaultValues = getActualisationDefaultValues({ structure, year });
 
-  const { handleAutoSave, handleValidateStep, backendError } =
-    useActualisationFormHandling({ year, currentStep });
+  const { handleAutoSave, handleValidateStep } = useActualisationFormHandling({
+    year,
+    currentStep,
+  });
 
   const onAutoSave = async (
     data: z.infer<typeof structureTypologiesAutoSaveSchema>
@@ -57,9 +53,6 @@ export default function ActualisationPlaces() {
     });
   };
 
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState(CAMPAIGN_SAVE_KEY);
-
   return (
     <div>
       <ActualisationTabs currentStep={currentStep} year={year} />
@@ -77,12 +70,6 @@ export default function ActualisationPlaces() {
           onSave={onAutoSave}
         />
         <CurrentYearPlaces formKind={FormKind.ACTUALISATION} />
-        {saveState === FetchState.ERROR && (
-          <SubmitError
-            codeBhasile={structure.codeBhasile}
-            backendError={backendError}
-          />
-        )}
       </FormWrapper>
     </div>
   );

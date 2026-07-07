@@ -3,10 +3,11 @@ import { useFormContext } from "react-hook-form";
 import { z } from "zod";
 
 import { useDebounceCallback } from "@/app/hooks/useDebounceCallback";
+import { AnyZodSchema } from "@/types/form.type";
 
 const DEBOUNCE_TIME = 500;
 
-export const AutoSave = <TSchema extends z.ZodTypeAny>({
+export const AutoSave = <TSchema extends AnyZodSchema>({
   schema,
   onSave,
 }: {

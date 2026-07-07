@@ -1,7 +1,7 @@
 import { Fragment, ReactElement } from "react";
 
 import { Table } from "@/app/components/common/Table";
-import { StatistiquesApiType } from "@/schemas/api/statistique.schema";
+import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
@@ -10,53 +10,71 @@ export const StructuresStatsTable = (): ReactElement => {
 
   const topLevelStats: StructureStat[] = [
     {
-      id: "structures",
       label: "Structures",
-      value: statistiques.structureTypes?.[0]?.byYear
-        .map((_, yearIndex) =>
-          statistiques.structureTypes.reduce(
-            (sum, structureType) =>
-              sum + (structureType.byYear[yearIndex]?.nbStructures ?? 0),
-            0
-          )
-        )
-        .reverse(),
+      value: statistiques.structures.byYear.map(
+        (yearItem) => yearItem.totalStructures
+      ),
     },
     {
-      id: "cpoms",
-      label: "CPOM complets ou partiels",
-      value: statistiques.structureTypes?.[0]?.byYear
-        .map((_, yearIndex) =>
-          statistiques.structureTypes.reduce(
-            (sum, structureType) =>
-              sum + (structureType.byYear[yearIndex]?.nbCpoms ?? 0),
-            0
-          )
-        )
-        .reverse(),
+      label: "CPOMs complets ou partiels",
+      value: statistiques.structures.byYear.map(
+        (yearItem) => yearItem.totalCpoms
+      ),
     },
   ];
 
   const structureStats = [
     {
       title: "Types de structures",
-      rows: statistiques.structureTypes.map((structureType) => ({
-        id: `structureType-${structureType.label}`,
-        label: structureType.label,
-        value: structureType.byYear
-          .map((yearItem) => yearItem.nbStructures)
-          .reverse(),
-      })),
+      rows: [
+        {
+          label: "CADA",
+          value: statistiques.structures.byYear.map(
+            (yearItem) => yearItem.structuresCada
+          ),
+        },
+        {
+          label: "CPH",
+          value: statistiques.structures.byYear.map(
+            (yearItem) => yearItem.structuresCph
+          ),
+        },
+        {
+          label: "HUDA",
+          value: statistiques.structures.byYear.map(
+            (yearItem) => yearItem.structuresHuda
+          ),
+        },
+        {
+          label: "CAES",
+          value: statistiques.structures.byYear.map(
+            (yearItem) => yearItem.structuresCaes
+          ),
+        },
+      ],
     },
     {
       title: "Types de bâtis",
-      rows: statistiques.structureBatis.map((structureBati) => ({
-        id: `structureBati-${structureBati.label}`,
-        label: structureBati.label,
-        value: structureBati.byYear
-          .map((yearItem) => yearItem.nbStructures)
-          .reverse(),
-      })),
+      rows: [
+        {
+          label: "Collectif",
+          value: statistiques.structures.byYear.map(
+            (yearItem) => yearItem.structuresBatiCollectif
+          ),
+        },
+        {
+          label: "Diffus",
+          value: statistiques.structures.byYear.map(
+            (yearItem) => yearItem.structuresBatiDiffus
+          ),
+        },
+        {
+          label: "Mixte",
+          value: statistiques.structures.byYear.map(
+            (yearItem) => yearItem.structuresBatiMixte
+          ),
+        },
+      ],
     },
   ];
 
@@ -96,7 +114,7 @@ export const StructuresStatsTable = (): ReactElement => {
             <tr>
               <td
                 className="text-left! text-xs! font-bold uppercase bg-default-grey-hover!"
-                colSpan={statistiques.structureTypes[0].byYear.length + 1}
+                colSpan={statistiques.structures.byYear.length + 1}
               >
                 <span className="sticky left-4 inline-block">
                   {section.title}
@@ -128,17 +146,15 @@ export const StructuresStatsTable = (): ReactElement => {
   );
 };
 
-const getHeadings = (statistiques: StatistiquesApiType) => {
+const getHeadings = (statistiques: StatistiqueApiRead) => {
   const dates =
-    statistiques.structureTypes[0].byYear
-      .map((yearItem) => {
-        return (
-          <th scope="col" key={yearItem.year}>
-            {yearItem.year}
-          </th>
-        );
-      })
-      .reverse() ?? [];
+    statistiques.structures.byYear.map((yearItem) => {
+      return (
+        <th scope="col" key={yearItem.year}>
+          {yearItem.year}
+        </th>
+      );
+    }) ?? [];
 
   return [
     <th scope="col" key="heading-label" className="min-w-[240px]">
@@ -149,7 +165,6 @@ const getHeadings = (statistiques: StatistiquesApiType) => {
 };
 
 type StructureStat = {
-  id: string;
   label: string;
   value?: (string | number | null)[];
 };

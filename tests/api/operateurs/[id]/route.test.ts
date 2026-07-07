@@ -12,6 +12,10 @@ vi.mock("@/app/api/operateurs/operateur.repository", () => ({
   updateOne: (...args: unknown[]) => mockUpdateOne(...args),
 }));
 
+vi.mock("@/app/api/structures/structure.repository", () => ({
+  findAllStructures: vi.fn(),
+}));
+
 vi.mock("@/app/api/user-action/user-action.service", () => ({
   createOperateurEvent: (...args: unknown[]) =>
     mockCreateOperateurEvent(...args),
@@ -22,7 +26,7 @@ describe("GET /api/operateurs/[id]", () => {
     vi.clearAllMocks();
   });
 
-  it("should return operateur when found", async () => {
+  it("renvoie l'opérateur quand il est trouvé", async () => {
     // GIVEN
     const operateur = {
       id: 1,
@@ -57,7 +61,7 @@ describe("GET /api/operateurs/[id]", () => {
     expect(mockCreateOperateurEvent).toHaveBeenCalledWith("GET", 1);
   });
 
-  it("should return 500 when operateur is not found", async () => {
+  it("renvoie 500 quand l'opérateur n'est pas trouvé", async () => {
     // GIVEN
     mockFindOne.mockRejectedValueOnce(new Error("Not found"));
 
@@ -73,7 +77,7 @@ describe("GET /api/operateurs/[id]", () => {
     expect(mockCreateOperateurEvent).not.toHaveBeenCalled();
   });
 
-  it("should return 500 when service throws", async () => {
+  it("renvoie 500 quand le service jette", async () => {
     // GIVEN
     mockFindOne.mockRejectedValueOnce(new Error("DB error"));
 
@@ -95,7 +99,7 @@ describe("PUT /api/operateurs/[id]", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 200 with operateurId on success", async () => {
+  it("renvoie 200 avec operateurId en cas de succès", async () => {
     // GIVEN
     const body = {
       name: "Adoma Modifié",
@@ -137,7 +141,7 @@ describe("PUT /api/operateurs/[id]", () => {
     expect(mockCreateOperateurEvent).toHaveBeenCalledWith("PUT", 1);
   });
 
-  it("should return 400 when url id is not a valid number", async () => {
+  it("renvoie 400 quand l'id d'url n'est pas un nombre valide", async () => {
     // GIVEN
     const request = new Request("http://localhost/api/operateurs/abc", {
       method: "PUT",
@@ -155,7 +159,7 @@ describe("PUT /api/operateurs/[id]", () => {
     expect(mockCreateOperateurEvent).not.toHaveBeenCalled();
   });
 
-  it("should accept actesAdministratifs in body and forward them to updateOne", async () => {
+  it("accepte les actesAdministratifs dans le body et les transmet à updateOne", async () => {
     // GIVEN
     mockUpdateOne.mockResolvedValueOnce({ id: 1 });
 
@@ -192,7 +196,7 @@ describe("PUT /api/operateurs/[id]", () => {
     );
   });
 
-  it("should return 400 when an acte has an invalid category", async () => {
+  it("renvoie 400 quand un acte a une catégorie invalide", async () => {
     // GIVEN
     const request = new Request("http://localhost/api/operateurs/1", {
       method: "PUT",

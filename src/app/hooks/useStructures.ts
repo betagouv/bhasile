@@ -13,46 +13,32 @@ import { TypeBatiAndAdressesFormValues } from "@/schemas/forms/base/adresse.sche
 import { DocumentsFinanciersFlexibleFormValues } from "@/schemas/forms/base/documentFinancier.schema";
 import { DeepPartial } from "@/types/global";
 
+import { ApiError, extractApiError } from "../utils/apiError.util";
 import { parseFrenchNumber } from "../utils/number.util";
+import { refreshBestEffort } from "../utils/refresh.util";
 
 dayjs.extend(customParseFormat);
 
 export const useStructures = (): UseStructureResult => {
-  const addStructure = async (values: AjoutFormValues): Promise<string> => {
+  const addStructure = async (values: AjoutFormValues): Promise<void> => {
     const structure = await transformAjoutFormStructureToApiStructure(values);
-    try {
-      const response = await fetch("/api/structures", {
-        method: "POST",
-        body: JSON.stringify(structure),
-      });
-      if (response.status < 400) {
-        return "OK";
-      } else {
-        const result = await response.json();
-        return JSON.stringify(result);
-      }
-    } catch (error) {
-      console.error(error);
-      return String(error);
+    const response = await fetch("/api/structures", {
+      method: "POST",
+      body: JSON.stringify(structure),
+    });
+    if (!response.ok) {
+      throw new ApiError(await extractApiError(response), response.status);
     }
   };
 
-  const updateStructure = async (structure: unknown): Promise<string> => {
-    try {
-      const id = (structure as { id?: number }).id;
-      const response = await fetch(`/api/structures/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(structure),
-      });
-      if (response.status < 400) {
-        return "OK";
-      } else {
-        const result = await response.json();
-        return JSON.stringify(result);
-      }
-    } catch (error) {
-      console.error(error);
-      throw new Error(error?.toString());
+  const updateStructure = async (structure: unknown): Promise<void> => {
+    const id = (structure as { id?: number }).id;
+    const response = await fetch(`/api/structures/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(structure),
+    });
+    if (!response.ok) {
+      throw new ApiError(await extractApiError(response), response.status);
     }
   };
 
@@ -60,17 +46,9 @@ export const useStructures = (): UseStructureResult => {
     structureId: number,
     structure: unknown,
     setStructure: (structure: StructureApiRead) => void
-  ): Promise<string> => {
-    const result = await updateStructure({
-      ...(structure as object),
-      id: structureId,
-    });
-    if (result === "OK") {
-      const res = await fetch(`/api/structures/${structureId}`);
-      const updatedStructure = await res.json();
-      setStructure(updatedStructure);
-    }
-    return result;
+  ): Promise<void> => {
+    await updateStructure({ ...(structure as object), id: structureId });
+    await refreshBestEffort(`/api/structures/${structureId}`, setStructure);
   };
 
   return {
@@ -81,13 +59,13 @@ export const useStructures = (): UseStructureResult => {
 };
 
 type UseStructureResult = {
-  addStructure: (values: AjoutFormValues) => Promise<string>;
-  updateStructure: (values: unknown) => Promise<string>;
+  addStructure: (values: AjoutFormValues) => Promise<void>;
+  updateStructure: (values: unknown) => Promise<void>;
   updateAndRefreshStructure: (
     structureId: number,
     values: unknown,
     setStructure: (structure: StructureApiRead) => void
-  ) => Promise<string>;
+  ) => Promise<void>;
 };
 
 export const transformAjoutFormStructureToApiStructure = async (
@@ -106,8 +84,6 @@ export const transformAjoutFormStructureToApiStructure = async (
     nom: values.nom,
     creationDate: formatDateToIsoString(values.creationDate),
     date303: formatDateToIsoString(values.date303),
-    lgbt: values.lgbt,
-    fvvTeh: values.fvvTeh,
     public: values.public,
     adresses: values.adresses,
     antennes: values.antennes,

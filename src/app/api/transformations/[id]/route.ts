@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
+import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
 import { canUpdateTransformation } from "@/lib/casl/abilities";
 import { authOptions } from "@/lib/next-auth/auth";
 import { transformationApiUpdateSchema } from "@/schemas/api/transformation.schema";
@@ -27,14 +28,7 @@ export async function GET(
     }
     return NextResponse.json(transformation);
   } catch (error) {
-    console.error("Error in GET /api/transformations/[id]", error);
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    );
+    return apiErrorResponse(error);
   }
 }
 
@@ -63,14 +57,7 @@ export async function DELETE(
     await deleteTransformation(Number(id));
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    console.error("Error in DELETE /api/transformations/[id]", error);
-    if (
-      error instanceof Error &&
-      error.message.includes("transformation finalisée")
-    ) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return apiErrorResponse(error);
   }
 }
 
@@ -98,13 +85,6 @@ export async function PUT(request: NextRequest) {
     const transformationId = await updateTransformation(result);
     return NextResponse.json({ transformationId }, { status: 201 });
   } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    return NextResponse.json(
-      { error: "Erreur interne du serveur" },
-      { status: 400 }
-    );
+    return apiErrorResponse(error);
   }
 }

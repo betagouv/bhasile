@@ -10,9 +10,7 @@ import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
 import { FieldSetTypePlaces } from "@/app/components/forms/typePlace/FieldSetTypePlaces";
-import { SubmitError } from "@/app/components/SubmitError";
 import { InformationBar } from "@/app/components/ui/InformationBar";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { transformAgentFormContactsToApiContacts } from "@/app/utils/contacts.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
@@ -22,7 +20,6 @@ import {
   finalisationIdentificationAutoSaveSchema,
   finalisationIdentificationSchema,
 } from "@/schemas/forms/finalisation/finalisationIdentification.schema";
-import { FetchState } from "@/types/fetch-state.type";
 import { StepStatus } from "@/types/form.type";
 import { FormKind } from "@/types/global";
 
@@ -41,8 +38,9 @@ export default function FinalisationIdentification(): ReactElement {
 
   const defaultValues = getDefaultValues({ structure });
 
-  const { handleValidation, handleAutoSave, backendError } =
-    useAgentFormHandling({ currentStep });
+  const { handleValidation, handleAutoSave } = useAgentFormHandling({
+    currentStep,
+  });
 
   const onAutoSave = async (
     data: FinalisationIdentificationAutoSaveFormValues
@@ -50,9 +48,6 @@ export default function FinalisationIdentification(): ReactElement {
     const contacts = transformAgentFormContactsToApiContacts(data.contacts);
     await handleAutoSave({ ...data, contacts, id: structure.id });
   };
-
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("structure-save");
 
   return (
     <div>
@@ -99,13 +94,6 @@ export default function FinalisationIdentification(): ReactElement {
           structure={structure}
           formKind={FormKind.FINALISATION}
         />
-
-        {saveState === FetchState.ERROR && (
-          <SubmitError
-            codeBhasile={structure.codeBhasile}
-            backendError={backendError}
-          />
-        )}
       </FormWrapper>
     </div>
   );

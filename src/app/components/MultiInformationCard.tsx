@@ -1,3 +1,5 @@
+"use client";
+
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Fragment, ReactElement, useState } from "react";
 

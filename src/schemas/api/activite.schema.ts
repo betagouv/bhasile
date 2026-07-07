@@ -3,7 +3,7 @@ import z from "zod";
 export const activiteApiSchema = z.object({
   id: z.number(),
   adresseId: z.number(),
-  date: z.string().datetime(),
+  date: z.iso.datetime(),
   placesAutorisees: z.number(),
   desinsectisation: z.number().nullable(),
   remiseEnEtat: z.number().nullable(),

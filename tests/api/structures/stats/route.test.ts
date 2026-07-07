@@ -3,15 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "@/app/api/structures/stats/route";
 
 const mockfindAllStructures = vi.fn();
-const mockGetDepartementActivitesAverage = vi.fn();
 
 vi.mock("@/app/api/structures/structure.repository", () => ({
   findAllStructures: (...args: unknown[]) => mockfindAllStructures(...args),
-}));
-
-vi.mock("@/app/api/activites/activite.repository", () => ({
-  getDepartementActivitesAverage: (...args: unknown[]) =>
-    mockGetDepartementActivitesAverage(...args),
 }));
 
 const lightStructureWithPlaces = (id: number, placesAutorisees: number) =>
@@ -47,7 +41,7 @@ describe("GET /api/structures/stats", () => {
     vi.clearAllMocks();
   });
 
-  it("should return min and max places autorisées", async () => {
+  it("retourne le minimum et le maximum de places autorisées", async () => {
     // GIVEN
     mockfindAllStructures.mockResolvedValue([
       lightStructureWithPlaces(1, 500),

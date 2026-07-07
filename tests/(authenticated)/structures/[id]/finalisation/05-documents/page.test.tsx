@@ -30,7 +30,7 @@ describe("FinalisationDocuments page integration", () => {
     global.fetch = vi.fn();
   });
 
-  it("should submit and send updated finalisation step in PUT payload", async () => {
+  it("valide l'étape des documents et envoie l'étape de finalisation à jour dans le payload PUT", async () => {
     // GIVEN
     // Provide valid actesAdministratifs so the autorisee schema passes validation
     const base = createFinalisationValidStructure(77);
@@ -100,7 +100,7 @@ describe("FinalisationDocuments page integration", () => {
     expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
-  it("should autosave documents data after debounce", async () => {
+  it("sauvegarde automatiquement les données des documents après le debounce", async () => {
     // GIVEN
     const base = createFinalisationValidStructure(79);
     const structure = {

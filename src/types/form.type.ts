@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export enum StepStatus {
   NON_COMMENCE = "NON_COMMENCE",
   COMMENCE = "COMMENCE",
@@ -5,3 +7,6 @@ export enum StepStatus {
   FINALISE = "FINALISE",
   VALIDE = "VALIDE",
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyZodSchema = z.ZodType<any, any>;

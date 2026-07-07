@@ -9,19 +9,13 @@ import { IndicateursFinanciers } from "@/app/components/forms/finance/Indicateur
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
-import {
-  CAMPAIGN_SAVE_KEY,
-  useActualisationFormHandling,
-} from "@/app/hooks/useActualisationFormHandling";
+import { useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
 import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
 import {
   BudgetsAutoSaveFormValues,
   budgetsAutoSaveSchema,
 } from "@/schemas/forms/base/budget.schema";
 import { getFinanceSchema } from "@/schemas/forms/base/budget/getFinanceSchema";
-import { FetchState } from "@/types/fetch-state.type";
 
 import { ActualisationTabs } from "../_components/ActualisationTabs";
 
@@ -34,8 +28,10 @@ export default function ActualisationAnalyseFinanciere() {
   const financeSchema = getFinanceSchema(structure);
   const defaultValues = getActualisationDefaultValues({ structure, year });
 
-  const { handleAutoSave, handleValidateStep, backendError } =
-    useActualisationFormHandling({ year, currentStep });
+  const { handleAutoSave, handleValidateStep } = useActualisationFormHandling({
+    year,
+    currentStep,
+  });
 
   const onAutoSave = async (data: BudgetsAutoSaveFormValues) => {
     await handleAutoSave(
@@ -55,9 +51,6 @@ export default function ActualisationAnalyseFinanciere() {
     });
   };
 
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState(CAMPAIGN_SAVE_KEY);
-
   return (
     <div>
       <ActualisationTabs currentStep={currentStep} year={year} />
@@ -74,12 +67,6 @@ export default function ActualisationAnalyseFinanciere() {
         <IndicateursFinanciers />
         <hr />
         <BudgetTables />
-        {saveState === FetchState.ERROR && (
-          <SubmitError
-            codeBhasile={structure.codeBhasile}
-            backendError={backendError}
-          />
-        )}
       </FormWrapper>
     </div>
   );

@@ -8,7 +8,7 @@ import { BHASILE_CONTACT_EMAIL } from "@/constants";
 vitest.mock("next-auth/react");
 
 describe("Menu", () => {
-  it("should show header elements when rendered", () => {
+  it("affiche les éléments de l'en-tête au rendu", () => {
     // GIVEN
     const mockSession = {
       expires: "1",

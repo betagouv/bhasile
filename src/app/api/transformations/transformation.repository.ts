@@ -1,3 +1,4 @@
+import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
 import {
   getNextBhasileCode,
   getNormalizedRegionCodeFromDepartement,
@@ -71,7 +72,9 @@ export const updateOne = async (
     });
 
     if (finalisedTransformation.form?.status === true) {
-      throw new Error("Impossible de modifier une transformation finalisée");
+      throw new ApiDomainError(
+        "Impossible de modifier une transformation finalisée"
+      );
     }
 
     const isFinalizing = input.form?.status === true;
@@ -87,7 +90,7 @@ export const updateOne = async (
             !structureVersionTransformation.structureVersion?.effectiveDate
         )
       ) {
-        throw new Error(
+        throw new ApiDomainError(
           "Chaque transformation doit avoir une date d'effet avant la finalisation"
         );
       }
@@ -97,7 +100,9 @@ export const updateOne = async (
         data: { status: true },
       });
       if (finalized.count === 0) {
-        throw new Error("Impossible de modifier une transformation finalisée");
+        throw new ApiDomainError(
+        "Impossible de modifier une transformation finalisée"
+      );
       }
     }
 
@@ -143,7 +148,9 @@ export const resetSelection = async (
     });
 
     if (finalisedTransformation.form?.status === true) {
-      throw new Error("Impossible de modifier une transformation finalisée");
+      throw new ApiDomainError(
+        "Impossible de modifier une transformation finalisée"
+      );
     }
 
     await tx.structureVersionTransformation.deleteMany({

@@ -5,7 +5,6 @@ import { ReactElement } from "react";
 
 import { Block } from "@/app/components/common/Block";
 import { InformationCard } from "@/app/components/InformationCard";
-import { formatDate } from "@/app/utils/date.util";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { TypePlaceCharts } from "./TypePlaceCharts";
@@ -17,13 +16,6 @@ export const TypePlaceBlock = (): ReactElement => {
   const router = useRouter();
 
   const { structureTypologies } = structure;
-
-  const {
-    placesACreer,
-    placesAFermer,
-    echeancePlacesACreer,
-    echeancePlacesAFermer,
-  } = structureTypologies?.[0] || {};
 
   return (
     <Block
@@ -44,24 +36,6 @@ export const TypePlaceBlock = (): ReactElement => {
             secondaryInformation="places autorisées"
           />
         </div>
-        {echeancePlacesACreer && (
-          <div className="pr-4">
-            <InformationCard
-              primaryInformation={`dont ${placesACreer}`}
-              secondaryInformation={`places à créer au ${formatDate(
-                echeancePlacesACreer
-              )}`}
-            />
-          </div>
-        )}
-        {echeancePlacesAFermer && (
-          <InformationCard
-            primaryInformation={`dont ${placesAFermer}`}
-            secondaryInformation={`places à fermer au ${formatDate(
-              echeancePlacesAFermer
-            )}`}
-          />
-        )}
       </div>
       <div className="pt-12 flex">
         <TypePlaceCharts

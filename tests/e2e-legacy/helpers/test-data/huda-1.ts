@@ -26,8 +26,6 @@ export const huda1: TestStructureScenario = {
         description: "DNA 2",
       },
     ],
-    lgbt: true,
-    fvvTeh: true,
     contacts: [
       {
         prenom: "John",
@@ -256,12 +254,6 @@ export const huda1: TestStructureScenario = {
       },
     },
     controles: [],
-    ouvertureFermeture: {
-      placesACreer: "4",
-      echeancePlacesACreer: "2025-09-01",
-      placesAFermer: "1",
-      echeancePlacesAFermer: "2025-11-15",
-    },
     actesAdministratifs: [
       {
         category: "CONVENTION",
@@ -275,16 +267,8 @@ export const huda1: TestStructureScenario = {
   },
   modificationData: {
     public: "Personnes isolées",
-    lgbt: true,
-    fvvTeh: false,
     contacts: [{ email: "modif-huda1@example.com" }],
     notes: "Notes modification HUDA 1 - convention.",
-    ouvertureFermeture: {
-      placesACreer: "6",
-      echeancePlacesACreer: "2026-03-15",
-      placesAFermer: "1",
-      echeancePlacesAFermer: "2026-06-01",
-    },
     structureTypologies: [
       { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
       { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },

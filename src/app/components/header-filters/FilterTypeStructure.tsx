@@ -1,5 +1,6 @@
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+"use client";
+
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { FiltersTypesCheckbox } from "@/app/components/filters/FiltersTypesCheckbox";
 import { StructureType } from "@/types/structure.type";
@@ -13,48 +14,46 @@ const ALL_STRUCTURE_TYPES: StructureType[] = [
 
 export const FilterTypeStructure = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [types, setTypes] = useState<string[]>(() => {
-    const urlTypes = searchParams.get("type")?.split(",").filter(Boolean);
-    return urlTypes && urlTypes.length > 0 ? urlTypes : ALL_STRUCTURE_TYPES;
-  });
+  const urlTypes = searchParams.get("type")?.split(",").filter(Boolean);
+  const currentTypes =
+    urlTypes && urlTypes.length > 0 ? urlTypes : ALL_STRUCTURE_TYPES;
 
-  const isAllChecked = types.length === ALL_STRUCTURE_TYPES.length;
+  const isAllChecked = currentTypes.length === ALL_STRUCTURE_TYPES.length;
+
+  const updateUrl = (newTypes: string[]) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (newTypes.length > 0 && newTypes.length < ALL_STRUCTURE_TYPES.length) {
+      params.set("type", newTypes.join(","));
+    } else {
+      params.delete("type");
+    }
+
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
   const handleSelectAllChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.checked) {
-      setTypes(ALL_STRUCTURE_TYPES);
+      updateUrl(ALL_STRUCTURE_TYPES);
     } else {
-      setTypes([]);
+      updateUrl([]);
     }
   };
 
   const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
 
-    if (types.includes(value)) {
-      setTypes(types.filter((type) => type !== value));
+    if (currentTypes.includes(value)) {
+      updateUrl(currentTypes.filter((type) => type !== value));
     } else {
-      setTypes([...types, value]);
+      updateUrl([...currentTypes, value]);
     }
   };
-
-  const previousType = useRef(types);
-  useEffect(() => {
-    if (previousType.current !== types) {
-      const params = new URLSearchParams(Array.from(searchParams.entries()));
-      if (types.length > 0 && types.length < ALL_STRUCTURE_TYPES.length) {
-        params.set("type", types.join(","));
-      } else {
-        params.delete("type");
-      }
-      router.replace(`?${params.toString()}`);
-      previousType.current = types;
-    }
-  }, [types, searchParams, router]);
 
   return (
     <div className="p-6 flex flex-col gap-2">
@@ -69,7 +68,7 @@ export const FilterTypeStructure = () => {
           key={structureType}
           label={structureType}
           value={structureType}
-          checked={types.includes(structureType)}
+          checked={currentTypes.includes(structureType)}
           onChange={handleTypeChange}
         />
       ))}

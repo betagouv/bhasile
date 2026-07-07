@@ -8,12 +8,7 @@ import { AutoSave } from "@/app/components/forms/AutoSave";
 import FormWrapper, {
   FooterButtonType,
 } from "@/app/components/forms/FormWrapper";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
-import {
-  CAMPAIGN_SAVE_KEY,
-  useActualisationFormHandling,
-} from "@/app/hooks/useActualisationFormHandling";
+import { useActualisationFormHandling } from "@/app/hooks/useActualisationFormHandling";
 import { getActualisationDefaultValues } from "@/app/utils/defaultValues.util";
 import { getActualisationActesAdministratifsCategoryToDisplay } from "@/config/structure.config";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
@@ -23,7 +18,6 @@ import {
   actesAdministratifsAutoSaveSchema,
   actesAdministratifsSubventionneesSchema,
 } from "@/schemas/forms/base/acteAdministratif.schema";
-import { FetchState } from "@/types/fetch-state.type";
 
 import { ActualisationTabs } from "../_components/ActualisationTabs";
 
@@ -39,8 +33,10 @@ export default function ActualisationActesAdministratifs() {
     ? actesAdministratifsAutoriseesSchema
     : actesAdministratifsSubventionneesSchema;
 
-  const { handleAutoSave, handleValidateStep, backendError } =
-    useActualisationFormHandling({ year, currentStep });
+  const { handleAutoSave, handleValidateStep } = useActualisationFormHandling({
+    year,
+    currentStep,
+  });
 
   const toActesAdministratifs = (
     data: ActesAdministratifsAutoSaveFormValues
@@ -62,9 +58,6 @@ export default function ActualisationActesAdministratifs() {
       actesAdministratifs: toActesAdministratifs(data),
     });
   };
-
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState(CAMPAIGN_SAVE_KEY);
 
   const categoriesRules =
     getActualisationActesAdministratifsCategoryToDisplay(structure);
@@ -94,12 +87,6 @@ export default function ActualisationActesAdministratifs() {
           onSave={onAutoSave}
         />
         <ActesAdministratifs categoryDisplayRules={categoriesRules} />
-        {saveState === FetchState.ERROR && (
-          <SubmitError
-            codeBhasile={structure.codeBhasile}
-            backendError={backendError}
-          />
-        )}
       </FormWrapper>
     </div>
   );

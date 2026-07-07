@@ -36,6 +36,7 @@ import {
   createFakeFiliale,
   createFakeOperateur,
 } from "./seeders/operateur.seed";
+import { createFakeRmus } from "./seeders/rmu.seed";
 import {
   FormDefLookup,
   SeededStructure,
@@ -164,6 +165,9 @@ async function seed(): Promise<void> {
   );
 
   await seedRegionsAndDepartements(prisma);
+
+  console.log("🚓 Création des données RMU...");
+  await createFakeRmus(prisma);
 
   console.log("🔢 Génération des codes Bhasile par région...");
   const bhasileCodesMap = generateAllBhasileCodes(seedNumber(5000)); // Not all codes will be used

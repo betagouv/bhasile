@@ -10,8 +10,6 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { LeaveModificationModal } from "@/app/components/forms/LeaveModificationModal";
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
-import { SubmitError } from "@/app/components/SubmitError";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { transformFormControlesToApiControles } from "@/app/utils/controle.util";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
@@ -21,14 +19,13 @@ import {
   ModificationQualiteFormValues,
   modificationQualiteSchema,
 } from "@/schemas/forms/modification/modificationQualite.schema";
-import { FetchState } from "@/types/fetch-state.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 
 export default function ModificationControleForm() {
   const { structure } = useStructureContext();
 
-  const { handleSubmit, backendError } = useAgentFormHandling({
+  const { handleSubmit } = useAgentFormHandling({
     nextRoute: `/structures/${structure.id}`,
   });
   const [shouldOpenModal, setShouldOpenModal] = useState(false);
@@ -50,9 +47,6 @@ export default function ModificationControleForm() {
       evaluations,
     });
   };
-
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("structure-save");
 
   return (
     <>
@@ -81,12 +75,6 @@ export default function ModificationControleForm() {
           </>
         )}
         <Controles />
-        {saveState === FetchState.ERROR && (
-          <SubmitError
-            codeBhasile={structure.codeBhasile}
-            backendError={backendError}
-          />
-        )}
       </FormWrapper>
       <LeaveModificationModal
         resetRoute={`/structures/${structure.id}`}

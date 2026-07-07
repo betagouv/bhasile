@@ -22,38 +22,38 @@ const makeEmptyAdresse = (
 
 describe("adresse util", () => {
   describe("getDepartementFromCodePostal", () => {
-    it("returns first two digits for mainland postal codes", () => {
+    it("retourne les deux premiers chiffres pour un code postal métropolitain", () => {
       expect(getDepartementFromCodePostal("75011")).toBe("75");
     });
 
-    it("returns first three digits for overseas postal codes", () => {
+    it("retourne les trois premiers chiffres pour un code postal d'outre-mer", () => {
       expect(getDepartementFromCodePostal("97100")).toBe("971");
       expect(getDepartementFromCodePostal("98630")).toBe("986");
     });
 
-    it("trims spaces before extracting department code", () => {
+    it("supprime les espaces avant d'extraire le code département", () => {
       expect(getDepartementFromCodePostal("  13008  ")).toBe("13");
     });
   });
 
   describe("formatCityName", () => {
-    it("formats names correctly with hyphens", () => {
+    it("formate correctement les noms avec des traits d'union", () => {
       expect(formatCityName("Gamaches en Vexin")).toBe("Gamaches-en-Vexin");
       expect(formatCityName("Ivry la Bataille")).toBe("Ivry-la-Bataille");
       expect(formatCityName("Neuilly sur Seine")).toBe("Neuilly-sur-Seine");
     });
 
-    it("handles articles at the beginning without hyphen", () => {
+    it("gère les articles en début de nom sans trait d'union", () => {
       expect(formatCityName("Les Andelys")).toBe("Les Andelys");
       expect(formatCityName("Le Grau du Roi")).toBe("Le Grau-du-Roi");
       expect(formatCityName("La Rochelle")).toBe("La Rochelle");
     });
 
-    it("handles names with multiple words", () => {
+    it("gère les noms composés de plusieurs mots", () => {
       expect(formatCityName("Rueil-malmaison")).toBe("Rueil-Malmaison");
     });
 
-    it("lowercases prepositions and inside articles", () => {
+    it("met en minuscule les prépositions et les articles internes", () => {
       expect(formatCityName("Neuilly Sur Seine")).toBe("Neuilly-sur-Seine");
       expect(formatCityName("Le Grau du Roi")).toBe("Le Grau-du-Roi");
       expect(formatCityName("Ville sous Bois")).toBe("Ville-sous-Bois");
@@ -61,33 +61,33 @@ describe("adresse util", () => {
       expect(formatCityName("Aulnay-Sous-Bois")).toBe("Aulnay-sous-Bois");
     });
 
-    it("capitalizes all other words correctly", () => {
+    it("capitalise correctement tous les autres mots", () => {
       expect(formatCityName("PARIS")).toBe("Paris");
       expect(formatCityName("lyon")).toBe("Lyon");
       expect(formatCityName("mArSeIlLe")).toBe("Marseille");
     });
 
-    it("handles multiple spaces", () => {
+    it("gère les espaces multiples", () => {
       expect(formatCityName("  Les   Andelys  ")).toBe("Les Andelys");
     });
 
-    it("handles empty strings and null", () => {
+    it("gère les chaînes vides et null", () => {
       expect(formatCityName("")).toBe(null);
       expect(formatCityName("   ")).toBe(null);
       expect(formatCityName("")).toBe(null);
     });
 
-    it("handles names with apostrophe", () => {
+    it("gère les noms avec apostrophe", () => {
       expect(formatCityName("L'Isle d'abeau")).toBe("L'Isle-d'Abeau");
     });
   });
 
   describe("isAdresseEmpty", () => {
-    it("returns true when every field is blank and there is no typologie", () => {
+    it("retourne true quand tous les champs sont vides et qu'il n'y a pas de typologie", () => {
       expect(isAdresseEmpty(makeEmptyAdresse())).toBe(true);
     });
 
-    it("returns true when the typologie is present but holds no value", () => {
+    it("retourne true quand la typologie est présente mais ne porte aucune valeur", () => {
       expect(
         isAdresseEmpty(
           makeEmptyAdresse({
@@ -104,7 +104,7 @@ describe("adresse util", () => {
       ).toBe(true);
     });
 
-    it("returns false when adresseComplete is filled", () => {
+    it("retourne false quand adresseComplete est renseigné", () => {
       expect(
         isAdresseEmpty(
           makeEmptyAdresse({
@@ -114,31 +114,31 @@ describe("adresse util", () => {
       ).toBe(false);
     });
 
-    it("returns false when adresse is filled", () => {
+    it("retourne false quand adresse est renseigné", () => {
       expect(
         isAdresseEmpty(makeEmptyAdresse({ adresse: "1 rue de la Paix" }))
       ).toBe(false);
     });
 
-    it("returns false when codePostal is filled", () => {
+    it("retourne false quand codePostal est renseigné", () => {
       expect(
         isAdresseEmpty(makeEmptyAdresse({ codePostal: "75002" }))
       ).toBe(false);
     });
 
-    it("returns false when commune is filled", () => {
+    it("retourne false quand commune est renseigné", () => {
       expect(isAdresseEmpty(makeEmptyAdresse({ commune: "Paris" }))).toBe(
         false
       );
     });
 
-    it("returns false when departement is filled", () => {
+    it("retourne false quand departement est renseigné", () => {
       expect(isAdresseEmpty(makeEmptyAdresse({ departement: "75" }))).toBe(
         false
       );
     });
 
-    it("returns false when placesAutorisees is set", () => {
+    it("retourne false quand placesAutorisees est renseigné", () => {
       expect(
         isAdresseEmpty(
           makeEmptyAdresse({
@@ -148,7 +148,7 @@ describe("adresse util", () => {
       ).toBe(false);
     });
 
-    it("treats a placesAutorisees of 0 as a filled value", () => {
+    it("considère une valeur placesAutorisees de 0 comme renseignée", () => {
       expect(
         isAdresseEmpty(
           makeEmptyAdresse({
@@ -158,7 +158,7 @@ describe("adresse util", () => {
       ).toBe(false);
     });
 
-    it("returns false when logementSocial is true", () => {
+    it("retourne false quand logementSocial est true", () => {
       expect(
         isAdresseEmpty(
           makeEmptyAdresse({
@@ -168,7 +168,7 @@ describe("adresse util", () => {
       ).toBe(false);
     });
 
-    it("returns false when qpv is true", () => {
+    it("retourne false quand qpv est true", () => {
       expect(
         isAdresseEmpty(
           makeEmptyAdresse({
