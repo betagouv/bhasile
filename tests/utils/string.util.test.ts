@@ -36,26 +36,26 @@ describe("string util", () => {
     });
   });
   describe("capitalizeFirstLetter", () => {
-    it("preserve already capitalized string", () => {
+    it("préserve une chaîne déjà capitalisée", () => {
       expect(capitalizeFirstLetter("Hello")).toBe("Hello");
     });
-    it("handle empty string", () => {
+    it("gère une chaîne vide", () => {
       expect(capitalizeFirstLetter("")).toBe("");
     });
-    it("handle strings starting with non-alphabetic character", () => {
+    it("gère les chaînes commençant par un caractère non alphabétique", () => {
       expect(capitalizeFirstLetter("1hello")).toBe("1hello");
     });
-    it("handle accented characters", () => {
+    it("gère les caractères accentués", () => {
       expect(capitalizeFirstLetter("école")).toBe("École");
       expect(capitalizeFirstLetter("été")).toBe("Été");
     });
-    it("capitalize first letter of multiword string", () => {
+    it("capitalise la première lettre d'une chaîne de plusieurs mots", () => {
       expect(capitalizeFirstLetter("hello world")).toBe("Hello world");
     });
-    it("returns empty string when given null", () => {
+    it("retourne une chaîne vide quand on passe null", () => {
       expect(capitalizeFirstLetter(null)).toBe("");
     });
-    it("returns empty string when given undefined", () => {
+    it("retourne une chaîne vide quand on passe undefined", () => {
       expect(capitalizeFirstLetter(undefined)).toBe("");
     });
   });

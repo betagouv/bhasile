@@ -3,7 +3,7 @@ import { z } from "zod";
 import { formatDateToIsoString } from "./date.util";
 
 export const frenchDateToISO = () =>
-  z.string().transform(formatDateToIsoString).pipe(z.string().datetime());
+  z.string().transform(formatDateToIsoString).pipe(z.iso.datetime());
 
 export const optionalFrenchDateToISO = () =>
   z
@@ -15,7 +15,7 @@ export const optionalFrenchDateToISO = () =>
       }
       return formatDateToIsoString(val);
     })
-    .pipe(z.string().datetime().optional());
+    .pipe(z.iso.datetime().optional());
 
 export const nullishFrenchDateToISO = () =>
   z
@@ -30,7 +30,7 @@ export const nullishFrenchDateToISO = () =>
       }
       return formatDateToIsoString(val);
     })
-    .pipe(z.string().datetime().nullish());
+    .pipe(z.iso.datetime().nullish());
 
 const numberPreprocess = (val: unknown): number | null | undefined => {
   if (val === "" || val === null) {

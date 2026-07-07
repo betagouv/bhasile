@@ -18,7 +18,7 @@ const renderAntennes = (antennes: Record<string, unknown>[]) =>
 
 describe("Antennes", () => {
   describe("Delete button visibility", () => {
-    it("hides the delete button on every antenne when at the minimum and all are pristine", () => {
+    it("masque le bouton supprimer sur chaque antenne au minimum quand toutes sont vierges", () => {
       renderAntennes([{}, {}]);
 
       expect(
@@ -26,7 +26,7 @@ describe("Antennes", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("shows the delete button only on the filled antenne when at the minimum", () => {
+    it("affiche le bouton supprimer uniquement sur l'antenne remplie quand on est au minimum", () => {
       renderAntennes([{ name: "Avranches Nord" }, {}]);
 
       expect(screen.getAllByRole("button", { name: "Supprimer" })).toHaveLength(
@@ -34,7 +34,7 @@ describe("Antennes", () => {
       );
     });
 
-    it("shows a delete button on every antenne when above the minimum, even pristine ones", () => {
+    it("affiche un bouton supprimer sur chaque antenne au-dessus du minimum, même les vierges", () => {
       renderAntennes([{}, {}, {}]);
 
       expect(screen.getAllByRole("button", { name: "Supprimer" })).toHaveLength(
@@ -44,7 +44,7 @@ describe("Antennes", () => {
   });
 
   describe("Rendering", () => {
-    it("renders nothing when isMultiAntenne is false", () => {
+    it("n'affiche rien quand isMultiAntenne est false", () => {
       render(
         <FormTestWrapper
           defaultValues={{ isMultiAntenne: false, antennes: [] }}

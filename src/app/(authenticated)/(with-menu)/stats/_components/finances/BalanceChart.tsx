@@ -1,8 +1,8 @@
-import { ReactElement } from "react";
+import { ReactElement, useMemo } from "react";
 
 import { StackedBarLineChart } from "@/app/components/common/StackedBarLineChart";
 import { getYearRange } from "@/app/utils/date.util";
-import { BudgetApiType } from "@/schemas/api/budget.schema";
+import { FinanceByYearScopeStat } from "@/schemas/api/statistique.schema";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
@@ -15,38 +15,50 @@ export const BalanceChart = (): ReactElement => {
     .map((year) => {
       return {
         year,
-        budget: statistiques.budgets?.find((budget) => budget.year === year),
+        budget: statistiques.finance.byYear?.find(
+          (budget) => budget.year === year
+        ),
       };
     })
     .reverse();
 
   const getPropertySerie = (
-    propertyName: keyof (BudgetApiType & {
-      excedentCumule: number;
-      deficitCumule: number;
-      soldeCumule: number;
-    })
+    propertyName: keyof FinanceByYearScopeStat
   ): number[] => {
     return (
       yearsWithBudget.map((budget) =>
-        Number(budget.budget?.[propertyName as keyof BudgetApiType])
+        Number(
+          budget.budget?.total[propertyName as keyof FinanceByYearScopeStat]
+        )
       ) || []
     );
   };
 
   const getChartData = () => {
     const labels = yearsWithBudget.map((budget) => budget.year.toString());
-    const series = [
-      getPropertySerie("excedentCumule"),
-      getPropertySerie("deficitCumule"),
-      getPropertySerie("soldeCumule"),
-    ];
+    const excendentCumule = getPropertySerie("excedentCumule");
+    const deficitCumule = getPropertySerie("deficitCumule");
+    const cumul = excendentCumule.map(
+      (excedent, index) => excedent - deficitCumule[index]
+    );
+    const series = {
+      barsSeries: [excendentCumule, deficitCumule],
+      lineSeries: cumul,
+    };
 
     return {
       labels,
-      series,
+      ...series,
     };
   };
+
+  const colors = useMemo(
+    () => ({
+      bars: ["#18753CB2", "#CE0500B2"],
+      line: "var(--blue-france-sun-113-625)",
+    }),
+    []
+  );
 
   return (
     <>
@@ -55,7 +67,7 @@ export const BalanceChart = (): ReactElement => {
       </h4>
       <div className="grid grid-cols-3 gap-10">
         <div className="col-span-2">
-          <StackedBarLineChart data={getChartData()} />
+          <StackedBarLineChart data={getChartData()} colors={colors} />
         </div>
         <div>
           <div className="flex items-center pb-6">

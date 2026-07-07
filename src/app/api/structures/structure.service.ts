@@ -1,4 +1,5 @@
 import { recursivelySerializeDates } from "@/app/utils/date.util";
+import { paginateRows } from "@/app/utils/list.util";
 import {
   isStructureAutorisee,
   isStructureSubventionnee,
@@ -13,7 +14,7 @@ import { SessionUser } from "@/types/global";
 import { StructureColumn } from "@/types/ListColumn";
 import { PublicType } from "@/types/structure.type";
 
-import { processActivitesForStructure } from "../activites/activite.service";
+import { processActivitesForStructure } from "../activites/activite.util";
 import {
   buildAdresseAdministrativeComplete,
   getAdressesApiRead,
@@ -55,7 +56,6 @@ import {
   isFinalisationFormValidated,
   isStructureInCpom,
   isStructureInCpomPerYear,
-  paginateRows,
   sortStructureRows,
   StructureListComputedRow,
 } from "./structure.util";
@@ -307,6 +307,10 @@ const dbStructureToApiRead = (
     buildAdresseAdministrativeComplete(dbStructure);
   const typeBati = getTypeBati(dbStructure);
 
+  const latestTypologie = dbStructure.structureTypologies?.[0];
+  const lgbt = (latestTypologie?.lgbt ?? 0) > 0;
+  const fvvTeh = (latestTypologie?.fvvTeh ?? 0) > 0;
+
   const isMultiAntenne = (antennes?.length ?? 0) > 0;
   const isMultiDna =
     (dnaStructures?.length ?? 0) > 1 || (structureFinesses?.length ?? 0) > 1;
@@ -366,6 +370,8 @@ const dbStructureToApiRead = (
     isMultiAntenne,
     isMultiDna,
     typeBati,
+    lgbt,
+    fvvTeh,
     antennes,
     dnaStructures,
     structureFinesses,

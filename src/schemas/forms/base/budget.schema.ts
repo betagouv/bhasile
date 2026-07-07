@@ -48,32 +48,31 @@ export const budgetAutoriseeOpenYear2Schema = budgetBaseSchema.extend({
   autre: zSafeDecimalsNullish(),
 });
 
-const budgetAutoriseeOpenSchemaWithoutRefinement =
-  budgetBaseSchema.extend({
-    dotationDemandee: zSafePositiveDecimals(),
-    dotationAccordee: zSafePositiveDecimals(),
+const budgetAutoriseeOpenSchemaWithoutRefinement = budgetBaseSchema.extend({
+  dotationDemandee: zSafePositiveDecimals(),
+  dotationAccordee: zSafePositiveDecimals(),
 
-    // Résultat
-    totalProduitsProposes: zSafePositiveDecimalsNullish(),
-    totalProduits: zSafePositiveDecimals(),
-    totalChargesProposees: zSafePositiveDecimals(),
-    totalCharges: zSafePositiveDecimals(),
-    repriseEtat: zSafeDecimals(),
-    affectationReservesFondsDedies: zSafeDecimals(),
+  // Résultat
+  totalProduitsProposes: zSafePositiveDecimalsNullish(),
+  totalProduits: zSafePositiveDecimals(),
+  totalChargesProposees: zSafePositiveDecimals(),
+  totalCharges: zSafePositiveDecimals(),
+  repriseEtat: zSafeDecimals(),
+  affectationReservesFondsDedies: zSafeDecimals(),
 
-    // Détail affectation
-    reserveInvestissement: zSafeDecimalsNullish(),
-    chargesNonReconductibles: zSafeDecimalsNullish(),
-    reserveCompensationDeficits: zSafeDecimalsNullish(),
-    reserveCompensationBFR: zSafeDecimalsNullish(),
-    reserveCompensationAmortissements: zSafeDecimalsNullish(),
-    reportANouveau: zSafeDecimalsNullish(),
-    autre: zSafeDecimalsNullish(),
-  });
+  // Détail affectation
+  reserveInvestissement: zSafeDecimalsNullish(),
+  chargesNonReconductibles: zSafeDecimalsNullish(),
+  reserveCompensationDeficits: zSafeDecimalsNullish(),
+  reserveCompensationBFR: zSafeDecimalsNullish(),
+  reserveCompensationAmortissements: zSafeDecimalsNullish(),
+  reportANouveau: zSafeDecimalsNullish(),
+  autre: zSafeDecimalsNullish(),
+});
 
 export const budgetAutoriseeOpenSchema =
   budgetAutoriseeOpenSchemaWithoutRefinement
-    .superRefine(validateAffectationReservesDetails)
+    .check(z.superRefine(validateAffectationReservesDetails))
     .refine(
       (data) => {
         if (data.year > 2023 && isNullOrUndefined(data.totalProduitsProposes)) {
@@ -82,7 +81,7 @@ export const budgetAutoriseeOpenSchema =
         return true;
       },
       {
-        message:
+        error:
           "Total produits proposés est obligatoire pour les années après 2023",
         path: ["totalProduitsProposes"],
       }

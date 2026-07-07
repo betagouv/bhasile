@@ -49,7 +49,7 @@ const adomaTransformation: TransformationApiRead = {
 };
 
 describe("OngoingTransformationsBanner", () => {
-  it("renders nothing when there is no ongoing transformation", () => {
+  it("n'affiche rien quand il n'y a aucune transformation en cours", () => {
     mockUseOngoingTransformations.mockReturnValue({ transformations: [] });
 
     const { container } = render(<OngoingTransformationsBanner />);
@@ -57,7 +57,7 @@ describe("OngoingTransformationsBanner", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("is collapsed by default: shows the count but hides the rows", () => {
+  it("est replié par défaut : affiche le compteur mais masque les lignes", () => {
     mockUseOngoingTransformations.mockReturnValue({
       transformations: [adomaTransformation],
     });
@@ -69,7 +69,7 @@ describe("OngoingTransformationsBanner", () => {
     expect(screen.queryByText("ADOMA")).not.toBeInTheDocument();
   });
 
-  it("expands on click and renders the transformation details", async () => {
+  it("se déplie au clic et affiche les détails de la transformation", async () => {
     mockUseOngoingTransformations.mockReturnValue({
       transformations: [adomaTransformation],
     });
@@ -95,7 +95,7 @@ describe("OngoingTransformationsBanner", () => {
     );
   });
 
-  it("uses the singular label when a transformation has a single structure", async () => {
+  it("utilise le libellé au singulier quand une transformation ne porte qu'une seule structure", async () => {
     mockUseOngoingTransformations.mockReturnValue({
       transformations: [
         {
@@ -126,7 +126,7 @@ describe("OngoingTransformationsBanner", () => {
     expect(screen.getByText(/\(CAES\)/)).toBeInTheDocument();
   });
 
-  it("resolves the departement from the linked structure when the version has none", async () => {
+  it("récupère le département depuis la structure liée quand la version n'en a pas", async () => {
     mockUseOngoingTransformations.mockReturnValue({
       transformations: [
         createTransformation({

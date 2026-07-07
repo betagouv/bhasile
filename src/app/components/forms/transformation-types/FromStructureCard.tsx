@@ -1,9 +1,7 @@
 import { StructureCard } from "@/app/components/StructureCard";
-import { useFetchStructure } from "@/app/hooks/useFetchStructure";
+import { StructureApiRead } from "@/schemas/api/structure.schema";
 
-export const FromStructureCard = ({ structureId }: Props) => {
-  const { structure } = useFetchStructure(structureId);
-
+export const FromStructureCard = ({ structure }: Props) => {
   if (!structure || !structure.codeBhasile) {
     return null;
   }
@@ -22,5 +20,5 @@ export const FromStructureCard = ({ structureId }: Props) => {
 };
 
 type Props = {
-  structureId: number;
+  structure?: StructureApiRead;
 };

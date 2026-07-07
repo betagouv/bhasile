@@ -7,7 +7,7 @@ const getDataYear = (heading: ReactElement): number | undefined =>
   (heading.props as { "data-year"?: number })["data-year"];
 
 describe("getTypePlaceHistoryHeadings", () => {
-  it("stamps data-year on every year column so the markers overlay can locate them", () => {
+  it("appose data-year sur chaque colonne d'année pour que la surcouche de marqueurs puisse les localiser", () => {
     const years = [2023, 2024, 2025];
 
     const headings = getTypePlaceHistoryHeadings(years);
@@ -18,7 +18,7 @@ describe("getTypePlaceHistoryHeadings", () => {
     expect(yearHeadings.map(getDataYear)).toEqual(years);
   });
 
-  it("prepends a single non-year label column", () => {
+  it("ajoute en tête une unique colonne de libellé sans année", () => {
     expect(getTypePlaceHistoryHeadings([2023])).toHaveLength(2);
   });
 });

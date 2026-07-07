@@ -111,7 +111,7 @@ SELECT
         AND COALESCE(stpm."lgbt_places", 0) = 0
       )
       OR (
-        sv."lgbt" IS NOT TRUE
+        sv."lgbt" IS FALSE
         AND COALESCE(stpm."lgbt_places", 0) > 0
       )
     ),
@@ -124,7 +124,7 @@ SELECT
         AND COALESCE(stpm."fvvteh_places", 0) = 0
       )
       OR (
-        sv."fvvTeh" IS NOT TRUE
+        sv."fvvTeh" IS FALSE
         AND COALESCE(stpm."fvvteh_places", 0) > 0
       )
     ),

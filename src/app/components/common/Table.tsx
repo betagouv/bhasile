@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Fragment,
   PropsWithChildren,

@@ -3,57 +3,77 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET } from "@/app/api/activites/stats/route";
 
-const mockGetDepartementActivitesAverage = vi.fn();
+const mockFindAllStructures = vi.fn();
+const mockFindActivitesByDnaCodesAndDate = vi.fn();
+
+vi.mock("@/app/api/structures/structure.repository", () => ({
+  findAllStructures: () => mockFindAllStructures(),
+}));
 
 vi.mock("@/app/api/activites/activite.repository", () => ({
-  getDepartementActivitesAverage: (...args: unknown[]) =>
-    mockGetDepartementActivitesAverage(...args),
+  findActivitesByDnaCodesAndDate: (...args: unknown[]) =>
+    mockFindActivitesByDnaCodesAndDate(...args),
 }));
+
+let versionIdSeq = 0;
+
+const structureInDepartement = (
+  departementAdministratif: string,
+  dnaCodes: string[]
+) => {
+  versionIdSeq += 1;
+  return {
+    structureVersions: [
+      {
+        id: versionIdSeq,
+        effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
+        structureVersionTransformationId: null,
+        structureVersionTransformation: null,
+        departementAdministratif,
+        dnaStructures: dnaCodes.map((code) => ({ dna: { code } })),
+      },
+    ],
+  };
+};
 
 describe("GET /api/activites/stats", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("should return average departement places with query params", async () => {
-    // GIVEN
-    mockGetDepartementActivitesAverage.mockResolvedValueOnce({ average: 42 });
+  it("calcule la moyenne du département à partir des activités de ses structures courantes", async () => {
+    mockFindAllStructures.mockResolvedValueOnce([
+      structureInDepartement("75", ["D1"]),
+      structureInDepartement("92", ["D2"]),
+    ]);
+    mockFindActivitesByDnaCodesAndDate.mockResolvedValueOnce([
+      { placesAutorisees: 10, placesIndisponibles: 2, tauxOccupation: 0.5 },
+      { placesAutorisees: 20, placesIndisponibles: 4, tauxOccupation: 0.5 },
+    ]);
 
-    const request = new NextRequest(
-      "http://localhost/api/activites/stats?departement=75&startDate=2023-01-01&endDate=2023-12-31"
+    const response = await GET(
+      new NextRequest(
+        "http://localhost/api/activites/stats?departement=75&startDate=2023-01-01&endDate=2023-12-31"
+      )
     );
 
-    // WHEN
-    const response = await GET(request);
-
-    // THEN
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ average: 42 });
-    expect(mockGetDepartementActivitesAverage).toHaveBeenCalledWith(
-      "75",
-      "2023-01-01",
-      "2023-12-31",
+    const body = await response.json();
+    expect(body.numero).toBe("75");
+    expect(body.averagePlacesAutorisees).toBe(15);
+    expect(mockFindActivitesByDnaCodesAndDate).toHaveBeenCalledWith(
+      ["D1"],
+      expect.any(Date),
       expect.any(Date)
     );
   });
 
-  it("should return average departement places without query params", async () => {
-    // GIVEN
-    mockGetDepartementActivitesAverage.mockResolvedValueOnce({ average: 0 });
-
-    const request = new NextRequest("http://localhost/api/activites/stats");
-
-    // WHEN
-    const response = await GET(request);
-
-    // THEN
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ average: 0 });
-    expect(mockGetDepartementActivitesAverage).toHaveBeenCalledWith(
-      null,
-      null,
-      null,
-      expect.any(Date)
+  it("renvoie null sans toucher la base quand les dates manquent", async () => {
+    const response = await GET(
+      new NextRequest("http://localhost/api/activites/stats?departement=75")
     );
+
+    expect(await response.json()).toBeNull();
+    expect(mockFindAllStructures).not.toHaveBeenCalled();
   });
 });

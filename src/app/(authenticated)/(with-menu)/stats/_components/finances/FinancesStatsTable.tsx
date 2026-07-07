@@ -1,8 +1,10 @@
+"use client";
+
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Fragment, ReactElement, useState } from "react";
 
 import { Table } from "@/app/components/common/Table";
-import { StatistiquesApiType } from "@/schemas/api/statistique.schema";
+import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 import { FinanceTypeSelector } from "./FinanceTypeSelector";
@@ -184,7 +186,7 @@ export const FinancesStatsTable = (): ReactElement => {
   );
 };
 
-const getHeadings = (statistiques: StatistiquesApiType) => {
+const getHeadings = (statistiques: StatistiqueApiRead) => {
   const financeYears = statistiques?.finance?.byYear ?? [];
 
   const dates = financeYears.map((yearItem) => (

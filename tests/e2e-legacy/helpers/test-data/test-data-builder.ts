@@ -21,8 +21,6 @@ export class TestStructureDataBuilder {
       finesses: [{ code: "123456789", description: "Finess 1" }],
       dnas: [{ code: "C1234", description: "DNA 1" }],
       public: "Tout public",
-      lgbt: false,
-      fvvTeh: false,
       contacts: [
         {
           prenom: "John",

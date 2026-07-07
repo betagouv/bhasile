@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
 import { cpomApiAjoutSchema } from "@/schemas/api/cpom.schema";
 import { CpomColumn } from "@/types/ListColumn";
 
@@ -7,7 +8,8 @@ import { createCpomEvent } from "../user-action/user-action.service";
 import { getCpoms, saveCpom } from "./cpom.service";
 
 export async function GET(request: NextRequest) {
-  const page = request.nextUrl.searchParams.get("page") as number | null;
+  const pageParam = Number(request.nextUrl.searchParams.get("page"));
+  const page = Number.isInteger(pageParam) ? pageParam : null;
   const departements = request.nextUrl.searchParams.get("departements");
   const column = request.nextUrl.searchParams.get(
     "column"
@@ -29,11 +31,7 @@ export async function GET(request: NextRequest) {
       totalCpoms,
     });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to fetch cpoms" },
-      { status: 500 }
-    );
+    return apiErrorResponse(error);
   }
 }
 
@@ -45,8 +43,7 @@ export async function POST(request: NextRequest) {
     createCpomEvent(request.method, cpomId);
     return NextResponse.json({ cpomId }, { status: 201 });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(error, { status: 400 });
+    return apiErrorResponse(error);
   }
 }
 

@@ -19,7 +19,7 @@ vi.mock("@formkit/auto-animate", () => ({
 
 describe("FieldSetDescription", () => {
   describe("Rendering finalisation form", () => {
-    it("should render all fields correctly", () => {
+    it("rend tous les champs correctement", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -29,8 +29,6 @@ describe("FieldSetDescription", () => {
             filiale: "",
             creationDate: "01/01/2020",
             public: PublicType.TOUT_PUBLIC,
-            lgbt: false,
-            fvvTeh: false,
             cpom: false,
           }}
         >
@@ -55,16 +53,9 @@ describe("FieldSetDescription", () => {
       ).toBeInTheDocument();
 
       expect(screen.getByLabelText("Public")).toBeInTheDocument();
-
-      const lgbtTexts = screen.getAllByText(/LGBT/i);
-      expect(lgbtTexts.length).toBeGreaterThan(0);
-
-      expect(screen.getByLabelText("LGBT")).toBeInTheDocument();
-
-      expect(screen.getByLabelText("FVV et TEH")).toBeInTheDocument();
     });
 
-    it("should have all public type options", () => {
+    it("rend avec la légende Général", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -86,7 +77,7 @@ describe("FieldSetDescription", () => {
   });
 
   describe("Rendering modification form", () => {
-    it("should render with Général legend", () => {
+    it("rend avec la légende Général", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -101,7 +92,7 @@ describe("FieldSetDescription", () => {
       expect(screen.getByText("Général")).toBeInTheDocument();
     });
 
-    it("should not render filiale toggle and creation date", () => {
+    it("rend avec la légende Général", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -123,7 +114,7 @@ describe("FieldSetDescription", () => {
   });
 
   describe("Filiale toggle interaction", () => {
-    it("should show filiale input when toggle is activated", async () => {
+    it("affiche le champ filiale quand l'interrupteur est activé", async () => {
       const user = userEvent.setup();
 
       render(
@@ -150,7 +141,7 @@ describe("FieldSetDescription", () => {
       });
     });
 
-    it("should hide filiale input when toggle is deactivated", async () => {
+    it("affiche le champ filiale quand l'interrupteur est activé", async () => {
       const user = userEvent.setup();
 
       render(
@@ -185,62 +176,8 @@ describe("FieldSetDescription", () => {
     });
   });
 
-  describe("LGBT and FVV/TEH checkboxes", () => {
-    it("should toggle LGBT checkbox", async () => {
-      const user = userEvent.setup();
-
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            type: StructureType.CADA,
-            operateur: { id: 1, name: "Adoma" },
-            lgbt: false,
-          }}
-        >
-          <FieldSetDescription formKind={FormKind.FINALISATION} />
-        </FormTestWrapper>
-      );
-
-      const lgbtCheckbox = screen.getByLabelText("LGBT") as HTMLInputElement;
-      expect(lgbtCheckbox.checked).toBe(false);
-
-      await user.click(lgbtCheckbox);
-
-      await waitFor(() => {
-        expect(lgbtCheckbox.checked).toBe(true);
-      });
-    });
-
-    it("should toggle FVV/TEH checkbox", async () => {
-      const user = userEvent.setup();
-
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            type: StructureType.CADA,
-            operateur: { id: 1, name: "Adoma" },
-            fvvTeh: false,
-          }}
-        >
-          <FieldSetDescription formKind={FormKind.FINALISATION} />
-        </FormTestWrapper>
-      );
-
-      const fvvTehCheckbox = screen.getByLabelText(
-        "FVV et TEH"
-      ) as HTMLInputElement;
-      expect(fvvTehCheckbox.checked).toBe(false);
-
-      await user.click(fvvTehCheckbox);
-
-      await waitFor(() => {
-        expect(fvvTehCheckbox.checked).toBe(true);
-      });
-    });
-  });
-
   describe("Type selection", () => {
-    it("should have all structure types except PRAHDA", () => {
+    it("rend avec la légende Général", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -264,7 +201,7 @@ describe("FieldSetDescription", () => {
       expect(options).not.toContain(StructureType.PRAHDA);
     });
 
-    it("should have type select with structure types", () => {
+    it("présélectionne le type de structure courant dans le sélecteur", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -284,28 +221,4 @@ describe("FieldSetDescription", () => {
     });
   });
 
-  describe("Notice display", () => {
-    it("should display LGBT/FVV/TEH explanation notice", () => {
-      render(
-        <FormTestWrapper
-          defaultValues={{
-            type: StructureType.CADA,
-            operateur: { id: 1, name: "Adoma" },
-          }}
-        >
-          <FieldSetDescription formKind={FormKind.FINALISATION} />
-        </FormTestWrapper>
-      );
-
-      expect(
-        screen.getByText(/LGBT : Lesbiennes, Gays, Bisexuels et Transgenres/i)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/FVV : Femmes Victimes de Violences/i)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/TEH : Traîte des Êtres Humains/i)
-      ).toBeInTheDocument();
-    });
-  });
 });

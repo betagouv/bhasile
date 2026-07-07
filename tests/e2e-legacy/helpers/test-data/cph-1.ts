@@ -28,8 +28,6 @@ export const cph1: TestStructureScenario = {
       },
     ],
     public: "Tout public",
-    lgbt: true,
-    fvvTeh: true,
     contacts: [
       {
         prenom: "John",
@@ -338,12 +336,6 @@ export const cph1: TestStructureScenario = {
         filePath: "tests/e2e/fixtures/sample.csv",
       },
     ],
-    ouvertureFermeture: {
-      placesACreer: "4",
-      echeancePlacesACreer: "2025-09-01",
-      placesAFermer: "1",
-      echeancePlacesAFermer: "2025-11-15",
-    },
     actesAdministratifs: [
       {
         category: "ARRETE_AUTORISATION",
@@ -363,16 +355,8 @@ export const cph1: TestStructureScenario = {
   },
   modificationData: {
     public: "Personnes isolées",
-    lgbt: true,
-    fvvTeh: true,
     contacts: [{ email: "modif-cph1@example.com" }],
     notes: "Notes modification CPH 1.",
-    ouvertureFermeture: {
-      placesACreer: "3",
-      echeancePlacesACreer: "2026-02-01",
-      placesAFermer: "2",
-      echeancePlacesAFermer: "2026-04-15",
-    },
     structureTypologies: [
       { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },
       { placesAutorisees: 52, pmr: 6, lgbt: 11, fvvTeh: 9 },

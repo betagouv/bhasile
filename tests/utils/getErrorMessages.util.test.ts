@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { getErrorMessages } from "@/app/utils/getErrorMessages.util";
 
 describe("getErrorMessages", () => {
-  it("collects messages from nested form error structure (e.g. form with user.name, user.email)", () => {
+  it("collecte les messages d'une structure d'erreurs de formulaire imbriquée (ex. formulaire avec user.name, user.email)", () => {
     const formState = {
       errors: {
         user: {
@@ -23,7 +23,7 @@ describe("getErrorMessages", () => {
     ]);
   });
 
-  it("filters to a specific field when fieldPath is provided", () => {
+  it("filtre sur un champ spécifique quand fieldPath est fourni", () => {
     const formState = {
       errors: {
         user: {

@@ -61,7 +61,7 @@ export const indicateursFinanciersSchema = z
       return true;
     },
     {
-      message:
+      error:
         "Pour chaque année, il doit y avoir au moins un indicateur (ETP, taux d'encadrement, coût journalier) de type REALISE ou PREVISIONNEL rempli.",
       path: ["indicateursFinanciers"],
     }

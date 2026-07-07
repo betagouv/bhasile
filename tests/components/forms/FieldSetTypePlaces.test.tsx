@@ -22,7 +22,7 @@ describe("FieldSetTypePlaces", () => {
     id: 1,
   });
   describe("Rendering finalisation form", () => {
-    it("should render with Types de place legend", () => {
+    it("affiche la légende Types de place", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -45,7 +45,7 @@ describe("FieldSetTypePlaces", () => {
       expect(screen.getByText("Types de place")).toBeInTheDocument();
     });
 
-    it("should render table headers", () => {
+    it("affiche les en-têtes du tableau", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -72,7 +72,7 @@ describe("FieldSetTypePlaces", () => {
       expect(screen.getByText("FVV/TEH")).toBeInTheDocument();
     });
 
-    it("should render rows for each year", () => {
+    it("affiche une ligne par année", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -97,7 +97,7 @@ describe("FieldSetTypePlaces", () => {
       });
     });
 
-    it("should display instruction text", () => {
+    it("affiche le texte d'instruction", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -118,7 +118,7 @@ describe("FieldSetTypePlaces", () => {
       ).toBeInTheDocument();
     });
 
-    it("should display PMR/LGBT/FVV notice", () => {
+    it("affiche la légende PMR/LGBT/FVV", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -145,7 +145,7 @@ describe("FieldSetTypePlaces", () => {
   });
 
   describe("Rendering modification form", () => {
-    it("should render with Détails et historique legend", () => {
+    it("affiche la légende Détails et historique", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -171,7 +171,7 @@ describe("FieldSetTypePlaces", () => {
   });
 
   describe("Form inputs", () => {
-    it("should render all input fields for each year", () => {
+    it("affiche tous les champs de saisie pour chaque année", () => {
       const { container } = render(
         <FormTestWrapper
           defaultValues={{
@@ -211,7 +211,7 @@ describe("FieldSetTypePlaces", () => {
       });
     });
 
-    it("should have hidden date fields for each year", () => {
+    it("rend des champs date cachés pour chaque année", () => {
       const { container } = render(
         <FormTestWrapper
           defaultValues={{
@@ -242,7 +242,7 @@ describe("FieldSetTypePlaces", () => {
   });
 
   describe("Number inputs", () => {
-    it("should accept numeric values for placesAutorisees", async () => {
+    it("accepte des valeurs numériques pour placesAutorisees", async () => {
       const user = userEvent.setup();
 
       const { container } = render(
@@ -280,7 +280,7 @@ describe("FieldSetTypePlaces", () => {
   });
 
   describe("Data for multiple years", () => {
-    it("should handle different values for each year", async () => {
+    it("gère des valeurs différentes pour chaque année", async () => {
       const { container } = render(
         <FormTestWrapper
           defaultValues={{
@@ -328,7 +328,7 @@ describe("FieldSetTypePlaces", () => {
   });
 
   describe("Hidden ID fields", () => {
-    it("should have hidden id fields when provided", () => {
+    it("rend des champs id cachés quand ils sont fournis", () => {
       const { container } = render(
         <FormTestWrapper
           defaultValues={{

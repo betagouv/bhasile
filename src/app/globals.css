@@ -4,6 +4,11 @@
 @import "tailwindcss";
 @import "./css/dsfr-tailwind.css";
 
+html,
+body {
+  overflow-anchor: none;
+}
+
 [href] {
   background-image: none;
 }

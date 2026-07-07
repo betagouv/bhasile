@@ -38,3 +38,20 @@ export type CategoryDisplayRule = {
 export type CategoryDisplayRules = Partial<
   Record<ActeAdministratifCategory, CategoryDisplayRule>
 >;
+
+export const ACTE_ADMINISTRATIF_CATEGORY_LABELS: Record<
+  ActeAdministratifCategory,
+  string
+> = {
+  ARRETE_AUTORISATION: "Arrêtés d'autorisation",
+  ARRETE_TARIFICATION: "Arrêtés de tarification",
+  ARRETE_EXTENSION: "Arrêtés d'extension",
+  ARRETE_CONTRACTION: "Arrêtés de contraction",
+  ARRETE_FUSION: "Arrêtés de fusion",
+  CONVENTION: "Conventions",
+  STATUTS: "Statuts",
+  FRAIS_DE_SIEGE: "Frais de siège",
+  RAPPORT_ACTIVITE_OPERATEUR: "Rapport d'activité",
+  CPOM: "CPOM",
+  AUTRE: "Autres documents",
+};
