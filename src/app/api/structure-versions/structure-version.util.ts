@@ -28,11 +28,9 @@ type ResolvableVersion = {
   id: number;
   effectiveDate: Date | null;
   structureVersionTransformationId: number | null;
-  structureVersionTransformation:
-    | {
-        transformation: { form: { status: boolean | null } | null } | null;
-      }
-    | null;
+  structureVersionTransformation: {
+    transformation: { form: { status: boolean | null } | null } | null;
+  } | null;
 };
 
 export const isVersionValid = (version: ResolvableVersion): boolean => {
@@ -84,7 +82,9 @@ export const resolvePredecessor = <TVersion extends ResolvableVersion>(
   sortValidVersionsBefore(versions, effectiveDate.getTime())[0];
 
 export const resolveCurrentVersionFields = <
-  TStructure extends { structureVersions: (ResolvableVersion & VersionFields)[] },
+  TStructure extends {
+    structureVersions: (ResolvableVersion & VersionFields)[];
+  },
 >(
   structure: TStructure,
   now: Date

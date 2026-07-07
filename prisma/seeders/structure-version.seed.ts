@@ -584,6 +584,7 @@ export const seedStructureWithVersions = async (
       codeBhasile: params.codeBhasile,
       operateurId: params.operateurId,
       creationDate: plan.creationDate,
+      departementAdministratif: params.departementAdministratif,
       ...convertToPrismaObject(nonVersioned),
       structureVersions: {
         create: [{ campaignId: campaign.id, ...versionCommon }],
@@ -608,6 +609,7 @@ export const seedStructureWithVersions = async (
       codeBhasile: params.codeBhasile,
       operateurId: params.operateurId,
       creationDate: plan.creationDate,
+      departementAdministratif: params.departementAdministratif,
       ...convertToPrismaObject(nonVersioned),
     };
     const structure = await prisma.structure.create({
