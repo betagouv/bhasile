@@ -291,6 +291,36 @@ describe("computeIndicateurValues - un seul indicateur calculé, pas le bloc ent
     expect(result.value).toBe(30);
   });
 
+  it("finance.dotationAccordee : previousValue null (pas 0) quand l'année N-1 n'a aucune donnée financière", () => {
+    const { activeStructureIdsNow, activeStructureIdsByPeriod } =
+      buildTestActivityIndex([1], { financeYears: [2025] });
+
+    const budgets: StatistiqueDbBudget[] = [
+      { id: 1, structureId: 1, year: 2025, dotationDemandee: 100, dotationAccordee: 90, totalProduits: 200, totalCharges: 150 },
+    ];
+
+    const context = buildTestStatistiquesContext({
+      structures: [testStructure(1, "01")],
+      allStructures: [testStructure(1, "01")],
+      activeStructureIdsNow,
+      activeStructureIdsByPeriod,
+      typologies: [],
+      adresses: [],
+      departements: [],
+      budgets,
+    });
+
+    const result = computeIndicateurValues(
+      context,
+      "finance.dotationAccordee",
+      2025,
+      "moyenne"
+    );
+
+    expect(result.value).toBe(90);
+    expect(result.previousValue).toBeNull(); // 2024 : aucune donnée -> null, pas 0
+  });
+
   it("controleQualite.nbEig : lit la série annuelle uniquement (pas mois/trimestre)", () => {
     const { activeStructureIdsNow, activeStructureIdsByPeriod } = buildTestActivityIndex([1], {
       periodDates: [new Date("2025-03-01"), new Date("2024-05-01")],

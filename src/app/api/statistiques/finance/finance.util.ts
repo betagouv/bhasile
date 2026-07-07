@@ -208,7 +208,7 @@ export const computeFinanceStatistiques = (
   };
 };
 
-/** Computes a single `total`-scope field for given years, for the cartographie one-indicator requests. */
+/** Computes a single total field for given years, for the cartographie one-indicator requests. */
 export const computeFinanceTotalValuesForYears = (
   context: StatistiquesContext,
   years: number[],
@@ -218,11 +218,43 @@ export const computeFinanceTotalValuesForYears = (
   const structureIdsInScope = context.allStructures.map(
     (structure) => structure.id
   );
+  const structureIdSet = new Set(structureIdsInScope);
+  const scopedBudgets = filterByActiveStructureId(
+    context.budgets,
+    structureIdSet
+  );
+  const scopedIndicateurs = filterByActiveStructureId(
+    context.indicateurs,
+    structureIdSet
+  );
 
-  return computeScopeByYear(
+  const hasFinanceDataForYear = (year: number): boolean => {
+    const activeStructureIds = lookupActiveStructureIds(
+      context.activeStructureIdsByPeriod,
+      "year",
+      String(year)
+    );
+    const isActive = (structureId: number) =>
+      activeStructureIds.has(structureId);
+    return (
+      scopedBudgets.some(
+        (budget) => budget.year === year && isActive(budget.structureId)
+      ) ||
+      scopedIndicateurs.some(
+        (indicateur) =>
+          indicateur.year === year && isActive(indicateur.structureId)
+      )
+    );
+  };
+
+  const scopeStats = computeScopeByYear(
     structureIdsInScope,
     context,
     aggregation,
     years
-  ).map((scopeStat) => scopeStat[field]);
+  );
+
+  return years.map((year, index) =>
+    hasFinanceDataForYear(year) ? scopeStats[index][field] : null
+  );
 };
