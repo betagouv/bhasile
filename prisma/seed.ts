@@ -45,8 +45,15 @@ import { wipeTables } from "./utils/wipe";
 
 const prisma = createPrismaClient();
 
-const seedNumber = (number: number): number =>
-  process.env.SMALL_SEED ? Math.floor(number / 10) : number;
+const seedNumber = (number: number): number => {
+  if (process.env.SMALL_SEED) {
+    return Math.floor(number / 10);
+  }
+  if (process.env.VERY_BIG_SEED) {
+    return number * 100;
+  }
+  return number;
+};
 
 async function seed(): Promise<void> {
   console.log("🗑️ Suppression des données existantes...");
