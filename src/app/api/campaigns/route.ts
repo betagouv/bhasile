@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
+import { apiErrorResponse } from "@/app/utils/apiErrorResponse.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
 import { authOptions } from "@/lib/next-auth/auth";
 import { campaignApiWriteSchema } from "@/schemas/api/campaign.schema";
@@ -45,10 +46,6 @@ export async function PUT(request: NextRequest) {
     const campaign = await saveActualisationCampaign(input);
     return NextResponse.json(campaign, { status: 200 });
   } catch (error) {
-    console.error("Error in PUT /api/campaigns", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : String(error) },
-      { status: 400 }
-    );
+    return apiErrorResponse(error);
   }
 }
