@@ -185,7 +185,7 @@ test.describe("Transformations — flux finalisés", () => {
       const version = creation.structureVersion;
       expect(version?.structure?.codeBhasile).toBeTruthy();
       expect(version?.nom).toContain("E2E-");
-      expect(version?.type).toBe(StructureType.CADA);
+      expect(creation.structureType).toBe(StructureType.CADA);
       expect(version?.public).toBeTruthy();
       expect(version?.adresseAdministrative).toBe(PARIS_ADDRESS.adresse);
       expect(version?.communeAdministrative).toBe(PARIS_ADDRESS.commune);
@@ -243,7 +243,7 @@ test.describe("Transformations — flux finalisés", () => {
       const creationVersion = creations[0]?.structureVersion;
       expect(creationVersion?.structure?.codeBhasile).toBeTruthy();
       expect(creationVersion?.nom).toContain("E2E-");
-      expect(creationVersion?.type).toBe(StructureType.CADA);
+      expect(creations[0]?.structureType).toBe(StructureType.CADA);
       expect(placesForEffectiveYear(creations[0])).toBe(
         TRANSFORMATION_TEST_VALUES.creationPlaces
       );

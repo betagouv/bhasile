@@ -36,7 +36,6 @@ export async function seedStructureForSelection(
   });
 
   await createMinimalStructureVersion(id, {
-    type,
     departementAdministratif: testData.departementAdministratif,
     communeAdministrative: adminAddress.city,
     codePostalAdministratif: adminAddress.postalCode,

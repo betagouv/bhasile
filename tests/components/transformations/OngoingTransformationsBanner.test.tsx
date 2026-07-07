@@ -33,14 +33,14 @@ const adomaTransformation: TransformationApiRead = {
       createStructureVersionTransformation({
         id: 1,
         operateur: { id: 1, name: "ADOMA" },
+        structureType: StructureType.CADA,
         structureVersion: {
           departementAdministratif: "50",
-          type: StructureType.CADA,
         },
       }),
       createStructureVersionTransformation({
         id: 2,
-        structureVersion: { type: StructureType.HUDA },
+        structureType: StructureType.HUDA,
       }),
     ],
   }),
@@ -105,9 +105,9 @@ describe("OngoingTransformationsBanner", () => {
               createStructureVersionTransformation({
                 id: 1,
                 operateur: { id: 2, name: "COALLIA" },
+                structureType: StructureType.CAES,
                 structureVersion: {
                   departementAdministratif: "50",
-                  type: StructureType.CAES,
                 },
               }),
             ],

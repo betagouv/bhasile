@@ -69,8 +69,8 @@ export const groupStructureStatsByOperateur = (
     };
     stats.nbStructures += 1;
     stats.totalPlaces += places;
-    if (currentVersion?.type) {
-      stats.structureTypes.add(currentVersion.type);
+    if (currentVersion && structure.type) {
+      stats.structureTypes.add(structure.type);
     }
     statsByOperateurId.set(topLevelId, stats);
   });

@@ -26,13 +26,13 @@ const structureFixture = (
   return {
     id,
     operateurId,
+    type,
     structureVersions: [
       {
         id: versionIdSeq,
         effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
         structureVersionTransformationId: null,
         structureVersionTransformation: null,
-        type,
         structureTypologies: [{ year: 2024, placesAutorisees }],
       },
     ],

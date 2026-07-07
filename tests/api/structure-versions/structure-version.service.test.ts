@@ -11,7 +11,7 @@ import {
 import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import type { StructureDbDetails } from "@/app/api/structures/structure.db.type";
 import { Repartition } from "@/types/adresse.type";
-import { PublicType, StructureType } from "@/types/structure.type";
+import { PublicType } from "@/types/structure.type";
 
 const buildVersion = (
   overrides: Partial<StructureVersionDbDetails>
@@ -244,7 +244,6 @@ describe("copyStructureVersion", () => {
   it("copie les scalaires et convertit les clés d'enum Prisma vers les valeurs d'enum de l'app", () => {
     const result = copyStructureVersion(buildStructure());
 
-    expect(result.type).toBe(StructureType.CADA);
     expect(result.public).toBe(PublicType.TOUT_PUBLIC);
     expect(result.nom).toBe("Structure source");
     expect(result.adresseAdministrative).toBe("1 rue de la Source");
@@ -296,10 +295,10 @@ describe("copyStructureVersion", () => {
 
   it("donne la priorité aux overrides sur les scalaires de la structure", () => {
     const result = copyStructureVersion(buildStructure(), {
-      type: StructureType.HUDA,
+      nom: "Nom override",
     });
 
-    expect(result.type).toBe(StructureType.HUDA);
+    expect(result.nom).toBe("Nom override");
   });
 });
 

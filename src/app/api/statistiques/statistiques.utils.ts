@@ -56,9 +56,8 @@ export const parseStatistiquesPerimeterFilters = (
 };
 
 export type StatistiquesResolvableStructureVersion = {
-  type: string | null;
   departementAdministratif: string | null;
-  structure: { operateurId: number | null } | null;
+  structure: { operateurId: number | null; type: string | null } | null;
 };
 
 /**
@@ -69,10 +68,11 @@ export const matchesStatistiquesPerimeterFilters = (
   version: StatistiquesResolvableStructureVersion,
   resolved: StatistiquesResolvedPerimeterFilters
 ): boolean => {
-  if (version.type == null || excludedStructureTypes.has(version.type)) {
+  const type = version.structure?.type ?? null;
+  if (type == null || excludedStructureTypes.has(type)) {
     return false;
   }
-  if (resolved.types.size > 0 && !resolved.types.has(version.type)) {
+  if (resolved.types.size > 0 && !resolved.types.has(type)) {
     return false;
   }
   if (

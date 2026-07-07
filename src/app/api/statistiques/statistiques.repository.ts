@@ -70,9 +70,8 @@ export const findEffectiveStructureVersionsAtDate = async (
       id: true,
       structureId: true,
       effectiveDate: true,
-      type: true,
       departementAdministratif: true,
-      structure: { select: { operateurId: true } },
+      structure: { select: { operateurId: true, type: true } },
     },
     orderBy: [
       { structureId: "asc" },
@@ -88,7 +87,7 @@ export const findEffectiveStructureVersionsAtDate = async (
       id: version.id,
       structureId: version.structureId,
       effectiveDate: version.effectiveDate,
-      type: version.type,
+      type: version.structure?.type ?? null,
       departementAdministratif: version.departementAdministratif,
     }));
 };
@@ -204,14 +203,14 @@ export const findStructureVersionTimeline = async (
     return [];
   }
 
-  return prisma.structureVersion.findMany({
+  const versions = await prisma.structureVersion.findMany({
     where: { structureId: { in: structureIds } },
     select: {
       id: true,
       structureId: true,
       effectiveDate: true,
-      type: true,
       departementAdministratif: true,
+      structure: { select: { type: true } },
     },
     orderBy: [
       { structureId: "asc" },
@@ -219,6 +218,14 @@ export const findStructureVersionTimeline = async (
       { id: "desc" },
     ],
   });
+
+  return versions.map((version) => ({
+    id: version.id,
+    structureId: version.structureId,
+    effectiveDate: version.effectiveDate,
+    type: version.structure?.type ?? null,
+    departementAdministratif: version.departementAdministratif,
+  }));
 };
 
 export const findDepartementsWithPopulation = async (

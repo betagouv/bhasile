@@ -1,7 +1,7 @@
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
 import { StructureVersionApiRead } from "@/schemas/api/transformation.schema";
-import { PublicType, StructureType } from "@/types/structure.type";
+import { PublicType } from "@/types/structure.type";
 
 import {
   buildAdresseAdministrativeComplete,
@@ -17,7 +17,6 @@ const mapVersionFields = (
   source: StructureDbDetails | StructureVersionDbTransformation
 ): Pick<
   StructureVersionApiType,
-  | "type"
   | "public"
   | "adresseAdministrative"
   | "codePostalAdministratif"
@@ -30,9 +29,6 @@ const mapVersionFields = (
   | "nomOfii"
   | "directionTerritoriale"
 > => ({
-  type: source.type
-    ? StructureType[source.type as keyof typeof StructureType]
-    : undefined,
   public: source.public
     ? PublicType[source.public as string as keyof typeof PublicType]
     : undefined,

@@ -305,7 +305,8 @@ const createStructureFromCreationBlock = async (
   structureVersionTransformation: CreationBlock,
   bhasileCounterCache: Map<string, number>
 ): Promise<void> => {
-  const { structureVersion, operateurId } = structureVersionTransformation;
+  const { structureVersion, operateurId, structureType } =
+    structureVersionTransformation;
 
   if (!structureVersion) {
     throw new Error(
@@ -318,8 +319,14 @@ const createStructureFromCreationBlock = async (
   }
 
   if (!operateurId) {
-    throw new Error(
-      `Bloc création ${structureVersionTransformation.id} : opérateur manquant`
+    throw new ApiDomainError(
+      "Un bloc de création doit avoir un opérateur avant la finalisation."
+    );
+  }
+
+  if (!structureType) {
+    throw new ApiDomainError(
+      "Un bloc de création doit avoir un type de structure avant la finalisation."
     );
   }
 
@@ -345,6 +352,7 @@ const createStructureFromCreationBlock = async (
       operateurId,
       creationDate: structureVersion.effectiveDate,
       departementAdministratif: structureVersion.departementAdministratif,
+      type: structureType,
     },
   });
 
@@ -437,6 +445,7 @@ const createStructureVersionTransformation = async (
       type: structureVersionTransformation.type,
       motif: structureVersionTransformation.motif,
       operateurId: structureVersionTransformation.operateurId,
+      structureType: structureVersionTransformation.structureType,
     },
   });
 
@@ -463,6 +472,7 @@ const updateStructureVersionTransformation = async (
       type: structureVersionTransformation.type,
       motif: structureVersionTransformation.motif,
       operateurId: structureVersionTransformation.operateurId,
+      structureType: structureVersionTransformation.structureType,
     },
   });
   return updated.id;

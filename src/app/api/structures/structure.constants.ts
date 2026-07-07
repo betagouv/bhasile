@@ -3,7 +3,6 @@ import { StructureAgentUpdateApiType } from "@/schemas/api/structure.schema";
 import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 
 export const VERSIONED_FIELD_KEYS = [
-  "type",
   "public",
   "adresseAdministrative",
   "codePostalAdministratif",

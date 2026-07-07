@@ -416,6 +416,7 @@ export const getTransformationDefaultValues = <T>({
 
   return {
     ...structureVersion,
+    type: structureVersionTransformation.structureType,
     adresses: transformApiAdressesToFormAdresses(structureVersion?.adresses),
     operateur: structureVersionTransformation.operateur,
     structureTypologies: [buildTransformationTypologie(structureVersion)],

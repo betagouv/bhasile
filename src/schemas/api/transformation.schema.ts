@@ -3,6 +3,7 @@ import { z } from "zod";
 import { StructureParentActe } from "@/types/acte-administratif.type";
 import { Repartition } from "@/types/adresse.type";
 import { ExcludeNullValues } from "@/types/global";
+import { StructureType } from "@/types/structure.type";
 import {
   StructureVersionTransformationType,
   TransformationType,
@@ -31,6 +32,7 @@ const structureVersionTransformationApiUpdateSchema = z.object({
   form: formApiSchema.optional(),
   actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
   operateurId: z.number().nullish(),
+  structureType: z.enum(StructureType).nullish(),
 
   structureVersion: structureVersionApiSchema.optional(),
 });

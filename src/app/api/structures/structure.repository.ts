@@ -50,8 +50,7 @@ export const findStructuresByIds = (
   });
 
 export const findOneOperateur = async (
-  id: number,
-  now: Date
+  id: number
 ): Promise<StructureDbOperateur> => {
   const structure = await prisma.structure.findUniqueOrThrow({
     where: { id },
@@ -59,17 +58,14 @@ export const findOneOperateur = async (
       id: true,
       codeBhasile: true,
       forms: true,
-      structureVersions: {
-        ...currentVersionArgs(now),
-        select: { type: true },
-      },
+      type: true,
     },
   });
   return {
     id: structure.id,
     codeBhasile: structure.codeBhasile,
     forms: structure.forms,
-    type: structure.structureVersions[0]?.type ?? null,
+    type: structure.type ?? null,
   };
 };
 
@@ -161,7 +157,11 @@ export const updateOne = async (
 
   return await prisma.$transaction(
     async (tx) => {
-      const updatedStructure = await updateStructure(tx, structure);
+      const updatedStructure = await updateStructure(
+        tx,
+        structure,
+        isOperateurUpdate
+      );
 
       await initializeStructureDefaultForms(
         tx,
@@ -198,7 +198,8 @@ export const updateOne = async (
 
 const updateStructure = async (
   tx: PrismaTransaction,
-  structure: StructureAgentUpdateApiType
+  structure: StructureAgentUpdateApiType,
+  isOperateurUpdate: boolean
 ): Promise<Structure> => {
   const { operateur, filiale, creationDate, date303 } = structure;
 
@@ -210,6 +211,7 @@ const updateStructure = async (
       filiale,
       creationDate: creationDate ?? undefined,
       date303,
+      type: isOperateurUpdate ? structure.type : undefined,
       operateur: {
         connect: operateur
           ? {
@@ -277,7 +279,6 @@ export const createMinimalStructure = async (
 export const createMinimalStructureVersion = async (
   structureId: number,
   version: {
-    type: StructureType;
     departementAdministratif?: string;
     communeAdministrative?: string;
     codePostalAdministratif?: string;
@@ -298,7 +299,6 @@ export const createMinimalStructureVersion = async (
     data: {
       structureId,
       effectiveDate: version.effectiveDate ?? new Date("2020-01-01"),
-      type: version.type,
       departementAdministratif: version.departementAdministratif,
       communeAdministrative: version.communeAdministrative,
       codePostalAdministratif: version.codePostalAdministratif,

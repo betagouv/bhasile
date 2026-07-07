@@ -14,9 +14,11 @@ model StructureVersionTransformation {
   transformationId Int
   transformation   Transformation                     @relation(fields: [transformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   type             StructureVersionTransformationType
-  motif            String? // Ne se retrouve que dans le cas d'une fermeture, voir en fonction des discussions avec Clara si c'est un enum, du champ libre, si ça doit être là ou dans Transformation...
+  motif            String?
   form             Form?
   structureVersion StructureVersion?
+
+  structureType StructureType?
 
   operateurId Int?
   operateur   Operateur? @relation(fields: [operateurId], references: [id])

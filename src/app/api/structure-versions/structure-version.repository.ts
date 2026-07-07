@@ -19,7 +19,6 @@ type StructureVersionParent = Pick<
 
 const getScalarData = (version: StructureVersionApiType) => ({
   effectiveDate: version.effectiveDate ?? undefined,
-  type: version.type ?? undefined,
   public: convertToPublicType(version.public),
   adresseAdministrative: version.adresseAdministrative ?? undefined,
   codePostalAdministratif: version.codePostalAdministratif ?? undefined,
@@ -101,6 +100,20 @@ export const createOrUpdateStructureVersion = async (
   if (version.id) {
     return updateOneStructureVersion(tx, version);
   }
+
+  if (parent.structureVersionTransformationId !== undefined) {
+    const existing = await tx.structureVersion.findUnique({
+      where: {
+        structureVersionTransformationId:
+          parent.structureVersionTransformationId,
+      },
+      select: { id: true },
+    });
+    if (existing) {
+      return updateOneStructureVersion(tx, { ...version, id: existing.id });
+    }
+  }
+
   return createOneStructureVersion(tx, version, parent);
 };
 

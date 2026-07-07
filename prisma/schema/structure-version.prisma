@@ -15,7 +15,6 @@ model StructureVersion {
 
   effectiveDate DateTime?
 
-  type                     StructureType?
   adresseAdministrative    String?
   codePostalAdministratif  String?
   communeAdministrative    String?

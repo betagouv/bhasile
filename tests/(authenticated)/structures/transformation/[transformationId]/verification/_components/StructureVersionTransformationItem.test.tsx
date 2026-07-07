@@ -38,9 +38,9 @@ const buildCompleteStructureVersionTransformation = (
 ): StructureVersionTransformationApiRead => ({
   id: 1,
   type: StructureVersionTransformationType.EXTENSION,
+  structureType: StructureType.CADA,
   structureVersion: {
     nom: "ACTION NORMANDIE",
-    type: StructureType.CADA,
     departementAdministratif: "Manche",
     effectiveDate: "2026-08-25T12:00:00.000Z",
     structure: {
@@ -78,32 +78,45 @@ describe("StructureVersionTransformationItem", () => {
     expect(card).toHaveAttribute("data-dept", "Manche");
   });
 
-  it.each([
-    ["nom", { nom: undefined }],
-    ["type", { type: undefined }],
-    ["departementAdministratif", { departementAdministratif: undefined }],
-  ])(
-    "masque la StructureCard quand structureVersion.%s est absent",
-    (_label, structureVersionOverride) => {
-      // GIVEN
-      const structureVersionTransformation = buildCompleteStructureVersionTransformation({
-        structureVersion: {
-          ...buildCompleteStructureVersionTransformation().structureVersion,
-          ...structureVersionOverride,
-        },
-      });
+  it.each<
+    [string, () => StructureVersionTransformationApiRead]
+  >([
+    [
+      "nom",
+      () =>
+        buildCompleteStructureVersionTransformation({
+          structureVersion: {
+            ...buildCompleteStructureVersionTransformation().structureVersion,
+            nom: undefined,
+          },
+        }),
+    ],
+    [
+      "structureType",
+      () =>
+        buildCompleteStructureVersionTransformation({ structureType: undefined }),
+    ],
+    [
+      "departementAdministratif",
+      () =>
+        buildCompleteStructureVersionTransformation({
+          structureVersion: {
+            ...buildCompleteStructureVersionTransformation().structureVersion,
+            departementAdministratif: undefined,
+          },
+        }),
+    ],
+  ])("masque la StructureCard quand %s est absent", (_label, build) => {
+    // WHEN
+    render(
+      <StructureVersionTransformationItem
+        structureVersionTransformation={build()}
+      />
+    );
 
-      // WHEN
-      render(
-        <StructureVersionTransformationItem
-          structureVersionTransformation={structureVersionTransformation}
-        />
-      );
-
-      // THEN
-      expect(screen.queryByTestId("structure-card")).not.toBeInTheDocument();
-    }
-  );
+    // THEN
+    expect(screen.queryByTestId("structure-card")).not.toBeInTheDocument();
+  });
 
   it("affiche la StructureCard sans codeBhasile quand la structure n'est pas encore créée", () => {
     // GIVEN — a CREATION block: the structure (and its codeBhasile) does not exist
