@@ -6,6 +6,10 @@ l'année précédente. C'est le pendant "carte" de `GET /api/statistiques`
 ("tableaux & graphiques") : même périmètre de filtres, mais la réponse est une
 liste de zones plutôt qu'un objet global.
 
+## TODO
+- [] Vérifier que le frot résout bien les régions -> départmeents et que donc le format est le bon (en l'état le mode de requête semble bof bof, à voir)
+- [] Vérifier que s'i une valeur n-1 est manquante on met un indicateur d'évolution nul et pas un indicateur vs n-2
+
 ## Paramètres
 
 - `granularite` : `region` | `departement` | `arrondissement`
@@ -22,6 +26,69 @@ liste de zones plutôt qu'un objet global.
 `granularite=arrondissement` retourne `501 { error: "NOT_IMPLEMENTED" }` : aucun
 modèle `Arrondissement` en base. Le paramètre est déjà validé côté schéma pour
 que le front puisse proposer l'option dans l'UI.
+
+Tous les paramètres passent en query string. Une valeur invalide (`indicateur`
+ou `granularite` hors énum) fait échouer le `parse` Zod → `500`, comme sur
+`/api/statistiques`.
+
+## Exemple de requête
+
+Bien entendu, s'assurer que le serveur est lancé si test en local
+
+Places autorisées 2025 par région, restreint à l'Auvergne-Rhône-Alpes (le front
+a résolu la région en numéros de département avant l'appel) :
+
+```
+GET /api/statistiques/cartographie
+  ?granularite=region
+  &indicateur=places.autorisees
+  &annee=2025
+  &departements=01,03,07,15,26,38,42,43,63,69,73,74
+  &aggregation=moyenne
+```
+
+Ou en curl
+
+```bash
+curl -G 'http://localhost:3000/api/statistiques/cartographie' \
+  -H 'x-dev-auth-bypass: 1' \
+  --data-urlencode 'granularite=region' \
+  --data-urlencode 'indicateur=places.autorisees' \
+  --data-urlencode 'annee=2025' \
+  --data-urlencode 'departements=01,03,07,15,26,38,42,43,63,69,73,74' \
+  --data-urlencode 'aggregation=moyenne'
+```
+
+Sans `departements`, toute la France ; sans `operateurs`/`types`, aucun filtre
+opérateur/type.
+
+## Forme de la réponse
+
+```jsonc
+{
+  "granularite": "region",
+  "indicateur": "places.autorisees",
+  "annee": 2025,
+  "zones": [
+    {
+      // numéro de département, ou code région (référentiel BDD) selon la granularité
+      "code": "84",
+      "name": "Auvergne-Rhône-Alpes",
+      "value": 1234, // null si la zone n'a aucune structure / donnée pour l'année
+      "evolution": {
+        "previousValue": 1180,
+        "delta": 54,
+        "direction": "hausse", // "hausse" | "baisse" | "stable"
+      },
+    },
+  ],
+}
+```
+
+`evolution` vaut `null` dès que `value` **ou** `previousValue` est `null` (zone
+sans donnée sur l'une des deux années, ou indicateur `activite.*` sans N-1 —
+cf. TODO). Le type exact est `CartographieApiRead` dans
+`src/schemas/api/statistique-cartographie.schema.ts`.
 
 ## Calcul
 
@@ -53,9 +120,10 @@ pour activité — cf. TODO).
 
 - **structures** : `total`, `avecCpom` (structures couvertes par un CPOM actif)
 - **places** : `autorisees`, `pmr`, `lgbt`, `fvvTeh`, `qpv`, `logementsSociaux`
-- **finance** (scope `total` uniquement, le filtre `types` structure suffit à
-  restreindre) : `dotationAccordee`, `etp`, `tauxEncadrement` (ratio),
-  `coutJournalier` (ratio), `resultatNet` (signé "excédents et déficits")
+- **finance** : scope `total` uniquement, le filtre `types` structure suffit à
+  restreindre, avec `dotationAccordee`, `etp`, `tauxEncadrement` (ratio),
+  `coutJournalier` (ratio), `resultatNet` (signé "excédents et déficits"). Une
+  année sans aucune donnée financière dans la zone renvoie `value: null` 
 - **controleQualite** : `nbEig`, `tauxEigComportementViolent` (ratio),
   `moyenneEvaluations` (ratio)
 - **activite** : `placesDna`, `placesIndisponibles`, `placesOccupees`,
