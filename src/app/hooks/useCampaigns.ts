@@ -1,6 +1,8 @@
 import { CampaignApiWrite } from "@/schemas/api/campaign.schema";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 
+import { extractApiError } from "../utils/apiError.util";
+
 export const useCampaigns = () => {
   const updateAndRefreshCampaign = async (
     structureId: number,
@@ -12,9 +14,8 @@ export const useCampaigns = () => {
       body: JSON.stringify(payload),
     });
 
-    if (response.status >= 400) {
-      const result = await response.json();
-      return JSON.stringify(result);
+    if (!response.ok) {
+      return await extractApiError(response);
     }
 
     const refreshed = await fetch(`/api/structures/${structureId}`);
