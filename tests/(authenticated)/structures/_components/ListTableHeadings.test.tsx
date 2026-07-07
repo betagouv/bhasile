@@ -68,7 +68,7 @@ describe("ListTableHeadings", () => {
     vi.clearAllMocks();
   });
 
-  it("should initialize column and direction from URL params", () => {
+  it("initialise la colonne et la direction de tri depuis les paramètres d'URL", () => {
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams("column=codeBhasile&direction=asc")
     );
@@ -87,7 +87,7 @@ describe("ListTableHeadings", () => {
     expect(codeBhasileButton).toBeInTheDocument();
   });
 
-  it("should update URL when ordering is clicked", async () => {
+  it("met à jour l'URL au clic sur le tri", async () => {
     const user = userEvent.setup();
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
 
@@ -111,7 +111,7 @@ describe("ListTableHeadings", () => {
     });
   });
 
-  it("should toggle direction from asc to desc when clicking same column", async () => {
+  it("bascule la direction d'ascendant à descendant en recliquant la même colonne", async () => {
     const user = userEvent.setup();
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams("column=codeBhasile&direction=asc")
@@ -137,7 +137,7 @@ describe("ListTableHeadings", () => {
     });
   });
 
-  it("should clear ordering when clicking same column in desc direction", async () => {
+  it("supprime le tri en recliquant la même colonne en direction descendante", async () => {
     const user = userEvent.setup();
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams("column=codeBhasile&direction=desc")
@@ -176,7 +176,7 @@ describe("ListTableHeadings", () => {
     });
   });
 
-  it("should set new column to asc when clicking different column", async () => {
+  it("trie la nouvelle colonne en ascendant au clic sur une colonne différente", async () => {
     const user = userEvent.setup();
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams("column=codeBhasile&direction=asc")

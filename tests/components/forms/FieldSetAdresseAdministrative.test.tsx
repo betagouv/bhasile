@@ -49,7 +49,7 @@ describe("FieldSetAdresseAdministrative", () => {
   });
 
   describe("Rendering finalisation form", () => {
-    it("should render all required fields", () => {
+    it("affiche tous les champs requis", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -74,7 +74,7 @@ describe("FieldSetAdresseAdministrative", () => {
       ).toBeInTheDocument();
     });
 
-    it("should display notice about address confidentiality", () => {
+    it("affiche la mention sur la confidentialité de l'adresse", () => {
       render(
         <FormTestWrapper defaultValues={{}}>
           <FieldSetAdresseAdministrative formKind={FormKind.FINALISATION} />
@@ -86,7 +86,7 @@ describe("FieldSetAdresseAdministrative", () => {
       ).toBeInTheDocument();
     });
 
-    it("should display helper text for structure name", () => {
+    it("affiche le texte d'aide pour le nom de la structure", () => {
       render(
         <FormTestWrapper defaultValues={{}}>
           <FieldSetAdresseAdministrative formKind={FormKind.FINALISATION} />
@@ -96,7 +96,7 @@ describe("FieldSetAdresseAdministrative", () => {
       expect(screen.getByText("ex. Les Coquelicots")).toBeInTheDocument();
     });
 
-    it("should display helper text for address", () => {
+    it("affiche le texte d'aide pour l'adresse", () => {
       render(
         <FormTestWrapper defaultValues={{}}>
           <FieldSetAdresseAdministrative formKind={FormKind.FINALISATION} />
@@ -108,7 +108,7 @@ describe("FieldSetAdresseAdministrative", () => {
       ).toBeInTheDocument();
     });
 
-    it("should not display Type de bâti field", () => {
+    it("n'affiche pas le champ Type de bâti", () => {
       render(
         <FormTestWrapper defaultValues={{}}>
           <FieldSetAdresseAdministrative formKind={FormKind.FINALISATION} />
@@ -120,7 +120,7 @@ describe("FieldSetAdresseAdministrative", () => {
   });
 
   describe("Rendering modification form", () => {
-    it("should not display notice about address confidentiality", () => {
+    it("n'affiche pas la mention sur la confidentialité de l'adresse", () => {
       render(
         <FormTestWrapper defaultValues={{}}>
           <FieldSetAdresseAdministrative formKind={FormKind.MODIFICATION} />
@@ -134,7 +134,7 @@ describe("FieldSetAdresseAdministrative", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("should display Type de bâti field", () => {
+    it("affiche le champ Type de bâti", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -148,7 +148,7 @@ describe("FieldSetAdresseAdministrative", () => {
       expect(screen.getByLabelText("Type de bâti")).toBeInTheDocument();
     });
 
-    it("should have all Repartition options in Type de bâti select", () => {
+    it("propose toutes les options de répartition dans le select Type de bâti", () => {
       render(
         <FormTestWrapper
           defaultValues={{
@@ -173,7 +173,7 @@ describe("FieldSetAdresseAdministrative", () => {
   });
 
   describe("Structure name field", () => {
-    it("should update name field value", async () => {
+    it("met à jour la valeur du champ nom", async () => {
       const user = userEvent.setup();
 
       render(
@@ -196,7 +196,7 @@ describe("FieldSetAdresseAdministrative", () => {
   });
 
   describe("Address autocomplete integration", () => {
-    it("should pass correct props to AddressWithValidation and display address", () => {
+    it("passe les bonnes props à AddressWithValidation et affiche l'adresse", () => {
       const testAddress = "1 rue de Paris, 75001 Paris";
       render(
         <FormTestWrapper
@@ -218,7 +218,7 @@ describe("FieldSetAdresseAdministrative", () => {
       expect(addressInput).toHaveValue(testAddress);
     });
 
-    it("should display address suggestions when typing", async () => {
+    it("affiche les suggestions d'adresse pendant la saisie", async () => {
       const user = userEvent.setup();
       mockUseAddressSuggestion.mockResolvedValue(mockAddressSuggestions);
 
@@ -255,7 +255,7 @@ describe("FieldSetAdresseAdministrative", () => {
       ).toBeInTheDocument();
     });
 
-    it("should fill address fields when selecting a suggestion", async () => {
+    it("remplit les champs d'adresse à la sélection d'une suggestion", async () => {
       const user = userEvent.setup();
       mockUseAddressSuggestion.mockResolvedValue(mockAddressSuggestions);
 
@@ -298,7 +298,7 @@ describe("FieldSetAdresseAdministrative", () => {
       });
     });
 
-    it("should not show suggestions for queries shorter than 3 characters", async () => {
+    it("n'affiche pas de suggestions pour les requêtes de moins de 3 caractères", async () => {
       const user = userEvent.setup();
       mockUseAddressSuggestion.mockResolvedValue(mockAddressSuggestions);
 
@@ -329,7 +329,7 @@ describe("FieldSetAdresseAdministrative", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("should show loading state while fetching suggestions", async () => {
+    it("affiche l'état de chargement pendant la récupération des suggestions", async () => {
       const user = userEvent.setup();
       let resolvePromise: (value: typeof mockAddressSuggestions) => void;
       const controlledPromise = new Promise<typeof mockAddressSuggestions>(
@@ -372,7 +372,7 @@ describe("FieldSetAdresseAdministrative", () => {
   });
 
   describe("Type de bâti field (MODIFICATION mode)", () => {
-    it("should update Type de bâti value", async () => {
+    it("met à jour la valeur du Type de bâti", async () => {
       const user = userEvent.setup();
 
       render(
@@ -393,7 +393,7 @@ describe("FieldSetAdresseAdministrative", () => {
       });
     });
 
-    it("should switch between repartition types", async () => {
+    it("bascule entre les types de répartition", async () => {
       const user = userEvent.setup();
 
       render(

@@ -15,7 +15,7 @@ describe("HEAD /api/structures/[id]/adresses", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 200 when adresses exist", async () => {
+  it("retourne 200 quand des adresses existent", async () => {
     // GIVEN
     mockCheckAdressesExistence.mockResolvedValueOnce(true);
 
@@ -34,7 +34,7 @@ describe("HEAD /api/structures/[id]/adresses", () => {
     expect(mockCheckAdressesExistence).toHaveBeenCalledWith(1);
   });
 
-  it("should return 404 when no adresses exist", async () => {
+  it("retourne 404 quand aucune adresse n'existe", async () => {
     // GIVEN
     mockCheckAdressesExistence.mockResolvedValueOnce(false);
 
@@ -52,7 +52,7 @@ describe("HEAD /api/structures/[id]/adresses", () => {
     expect(response.status).toBe(404);
   });
 
-  it("should return 500 when repository throws", async () => {
+  it("retourne 500 quand le repository lève une erreur", async () => {
     // GIVEN
     mockCheckAdressesExistence.mockRejectedValueOnce(new Error("DB error"));
 

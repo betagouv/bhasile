@@ -46,7 +46,7 @@ describe("structure util", () => {
     vi.useRealTimers();
   });
   describe("getPlacesByCommunes", () => {
-    it("should return an empty object when given an empty array", () => {
+    it("retourne un objet vide quand on passe un tableau vide", () => {
       // GIVEN
       const adresses: AdresseApiType[] = [];
 
@@ -56,7 +56,7 @@ describe("structure util", () => {
       // THEN
       expect(placesByCommune).toStrictEqual({});
     });
-    it("should return correct places by commune when given a adresses array", () => {
+    it("ventile correctement les places par commune quand on passe un tableau d'adresses", () => {
       // GIVEN
       const typologie1 = createAdresseTypologie({
         placesAutorisees: 2,
@@ -87,7 +87,7 @@ describe("structure util", () => {
   });
 
   describe("getTypeBati", () => {
-    it("should return undefined when given no adresses", () => {
+    it("retourne undefined quand aucune adresse n'est fournie", () => {
       // GIVEN
       const structure = createStructure({ id: 1, adresses: [] });
 
@@ -99,7 +99,7 @@ describe("structure util", () => {
       // THEN
       expect(typeBati).toBeUndefined();
     });
-    it("should return Collectif when given adresses with only collectif", () => {
+    it("retourne Collectif quand toutes les adresses sont en collectif", () => {
       // GIVEN
       const adresses = [
         createAdresse({ repartition: Repartition.COLLECTIF }),
@@ -115,7 +115,7 @@ describe("structure util", () => {
       // THEN
       expect(typeBati).toBe(Repartition.COLLECTIF);
     });
-    it("should return Diffus when given adresses with only diffus", () => {
+    it("retourne Diffus quand toutes les adresses sont en diffus", () => {
       // GIVEN
       const adresses = [
         createAdresse({ repartition: Repartition.DIFFUS }),
@@ -131,7 +131,7 @@ describe("structure util", () => {
       // THEN
       expect(typeBati).toBe(Repartition.DIFFUS);
     });
-    it("should return Mixte when given adresses with diffus and collectif", () => {
+    it("retourne Mixte quand les adresses mêlent diffus et collectif", () => {
       const adresses = [
         createAdresse({ repartition: Repartition.COLLECTIF }),
         createAdresse({ repartition: Repartition.DIFFUS }),
@@ -148,7 +148,7 @@ describe("structure util", () => {
     });
   });
   describe("getLastVisitInMonths", () => {
-    it("should return 0 when both arrays are empty", () => {
+    it("retourne 0 quand les deux tableaux sont vides", () => {
       // GIVEN
       const evaluations: EvaluationApiType[] = [];
       const controles: ControleApiType[] = [];
@@ -160,7 +160,7 @@ describe("structure util", () => {
       expect(result).toBe(0);
     });
 
-    it("should return the difference in months from the most recent evaluation when controles array is empty", () => {
+    it("retourne l'écart en mois depuis l'évaluation la plus récente quand le tableau de controles est vide", () => {
       // GIVEN
       const evaluations: EvaluationApiType[] = [
         createEvaluation({ date: dayjs().subtract(2, "month").toISOString() }),
@@ -174,7 +174,7 @@ describe("structure util", () => {
       expect(result).toBe(2);
     });
 
-    it("should return the difference in months from the most recent controle when evaluations array is empty", () => {
+    it("retourne l'écart en mois depuis le controle le plus récent quand le tableau d'évaluations est vide", () => {
       // GIVEN
       const evaluations: EvaluationApiType[] = [];
       const controles: ControleApiType[] = [
@@ -188,7 +188,7 @@ describe("structure util", () => {
       expect(result).toBe(1);
     });
 
-    it("should return the difference in months from the most recent evaluation when it is later than the last controle", () => {
+    it("retourne l'écart en mois depuis l'évaluation la plus récente quand elle est postérieure au dernier controle", () => {
       // GIVEN
       const evaluations: EvaluationApiType[] = [
         createEvaluation({ date: dayjs().subtract(1, "month").toISOString() }),
@@ -204,7 +204,7 @@ describe("structure util", () => {
       expect(result).toBe(1);
     });
 
-    it("should return the difference in months from the most recent controle when it is later than the last evaluation", () => {
+    it("retourne l'écart en mois depuis le controle le plus récent quand il est postérieur à la dernière évaluation", () => {
       // GIVEN
       const evaluations: EvaluationApiType[] = [
         createEvaluation({ date: dayjs().subtract(4, "month").toISOString() }),
@@ -221,35 +221,35 @@ describe("structure util", () => {
     });
   });
   describe("isStructureAutorisee", () => {
-    it("should return true when given a CADA", () => {
+    it("retourne true pour un CADA", () => {
       // WHEN
       const result = isStructureAutorisee(StructureType.CADA);
 
       // THEN
       expect(result).toBe(true);
     });
-    it("should return true when given a CPH", () => {
+    it("retourne true pour un CPH", () => {
       // WHEN
       const result = isStructureAutorisee(StructureType.CPH);
 
       // THEN
       expect(result).toBe(true);
     });
-    it("should return false when given a CAES", () => {
+    it("retourne false pour un CAES", () => {
       // WHEN
       const result = isStructureAutorisee(StructureType.CAES);
 
       // THEN
       expect(result).toBe(false);
     });
-    it("should return false when given a HUDA", () => {
+    it("retourne false pour un HUDA", () => {
       // WHEN
       const result = isStructureAutorisee(StructureType.HUDA);
 
       // THEN
       expect(result).toBe(false);
     });
-    it("should return false when given a PRAHDA", () => {
+    it("retourne false pour un PRAHDA", () => {
       // WHEN
       const result = isStructureAutorisee(StructureType.PRAHDA);
 
@@ -258,35 +258,35 @@ describe("structure util", () => {
     });
   });
   describe("isStructureSubventionnee", () => {
-    it("should return false when given a CADA", () => {
+    it("retourne false pour un CADA", () => {
       // WHEN
       const result = isStructureSubventionnee(StructureType.CADA);
 
       // THEN
       expect(result).toBe(false);
     });
-    it("should return false when given a CPH", () => {
+    it("retourne false pour un CPH", () => {
       // WHEN
       const result = isStructureSubventionnee(StructureType.CPH);
 
       // THEN
       expect(result).toBe(false);
     });
-    it("should return true when given a CAES", () => {
+    it("retourne true pour un CAES", () => {
       // WHEN
       const result = isStructureSubventionnee(StructureType.CAES);
 
       // THEN
       expect(result).toBe(true);
     });
-    it("should return true when given a HUDA", () => {
+    it("retourne true pour un HUDA", () => {
       // WHEN
       const result = isStructureSubventionnee(StructureType.HUDA);
 
       // THEN
       expect(result).toBe(true);
     });
-    it("should return false when given a PRAHDA", () => {
+    it("retourne false pour un PRAHDA", () => {
       // WHEN
       const result = isStructureSubventionnee(StructureType.PRAHDA);
 
@@ -299,7 +299,7 @@ describe("structure util", () => {
       vi.useRealTimers();
     });
 
-    it("should return true when cpom structure date range includes the current year", () => {
+    it("retourne true quand la plage de dates de la cpomStructure inclut l'année en cours", () => {
       // GIVEN
       const structure = createStructure({
         id: 1,
@@ -347,7 +347,7 @@ describe("structure util", () => {
       expect(result).toBe(true);
     });
 
-    it("should return false when date range does not include the current year", () => {
+    it("retourne false quand la plage de dates n'inclut pas l'année en cours", () => {
       // GIVEN - CPOM structure dates (2024-2024) do not include current year 2025
       const structure = createStructure({
         id: 2,
@@ -388,7 +388,7 @@ describe("structure util", () => {
       expect(result).toBe(false);
     });
 
-    it("should return false when cpomStructures is undefined", () => {
+    it("retourne false quand cpomStructures est undefined", () => {
       // GIVEN
       const structure = createStructure({
         id: 3,
@@ -405,7 +405,7 @@ describe("structure util", () => {
       expect(result).toBe(false);
     });
 
-    it("should return false when cpomStructures is an empty array", () => {
+    it("retourne false quand cpomStructures est un tableau vide", () => {
       // GIVEN
       const structure = createStructure({
         id: 4,
@@ -421,7 +421,7 @@ describe("structure util", () => {
       expect(result).toBe(false);
     });
 
-    it("should return true when there are multiple cpomStructures and one has a date range including the current year", () => {
+    it("retourne true quand plusieurs cpomStructures existent et que l'une couvre l'année en cours", () => {
       // GIVEN
       const structure = createStructure({
         id: 5,
@@ -500,7 +500,7 @@ describe("structure util", () => {
       expect(result).toBe(true);
     });
 
-    it("should return false when dateStart or dateEnd is missing", () => {
+    it("retourne false quand dateStart ou dateEnd est absente", () => {
       // GIVEN - cpomStructure has no dates, cpom omitted so no fallback
       const structure1 = createStructure({
         id: 6,
@@ -572,7 +572,7 @@ describe("structure util", () => {
       vi.useRealTimers();
     });
 
-    it("should return structure-specific dates when CPOM is currently active", () => {
+    it("retourne les dates propres à la structure quand le CPOM est actif à ce jour", () => {
       // GIVEN
       vi.useFakeTimers();
       vi.setSystemTime(new Date("2025-01-15T00:00:00.000Z"));
@@ -617,7 +617,7 @@ describe("structure util", () => {
       });
     });
 
-    it("should return CPOM fallback dates when structure-specific dates are null", () => {
+    it("retombe sur les dates du CPOM quand les dates propres à la structure sont null", () => {
       // GIVEN
       vi.useFakeTimers();
       vi.setSystemTime(new Date("2025-01-15T00:00:00.000Z"));
@@ -663,7 +663,7 @@ describe("structure util", () => {
       });
     });
 
-    it("should return empty object when no CPOM structure is currently active", () => {
+    it("retourne un objet vide quand aucune cpomStructure n'est active à ce jour", () => {
       // GIVEN
       const structure = createStructure({
         id: 3,
@@ -701,7 +701,7 @@ describe("structure util", () => {
       expect(result).toEqual({});
     });
 
-    it("should return empty object when cpomStructures is undefined or empty", () => {
+    it("retourne un objet vide quand cpomStructures est undefined ou vide", () => {
       // GIVEN
       const structure1 = createStructure({ id: 4 });
       structure1.cpomStructures = undefined;
@@ -717,7 +717,7 @@ describe("structure util", () => {
       expect(result2).toEqual({});
     });
 
-    it("should handle mixed null structure dates correctly", () => {
+    it("gère correctement un mélange de dates de structure null et renseignées", () => {
       // GIVEN
       vi.useFakeTimers();
       vi.setSystemTime(new Date("2025-05-15T00:00:00.000Z"));
@@ -764,7 +764,7 @@ describe("structure util", () => {
   });
 
   describe("getMillesimeIndexForAYear", () => {
-    it("should return the correct index when the year exists in the array", () => {
+    it("retourne le bon index quand l'année existe dans le tableau", () => {
       // GIVEN
       const structureTypologies = [
         createStructureTypologie(),
@@ -780,7 +780,7 @@ describe("structure util", () => {
       expect(result).toBe(1);
     });
 
-    it("should return -1 when the year does not exist in the array", () => {
+    it("retourne -1 quand l'année n'existe pas dans le tableau", () => {
       // GIVEN
       const structureTypologies = [
         createStructureTypologie(),
@@ -795,7 +795,7 @@ describe("structure util", () => {
       expect(result).toBe(-1);
     });
 
-    it("should use CURRENT_YEAR as default when no year is provided", () => {
+    it("utilise CURRENT_YEAR par défaut quand aucune année n'est fournie", () => {
       // GIVEN
       const structureTypologies = [
         createStructureTypologie({ year: 2024 }),
@@ -810,7 +810,7 @@ describe("structure util", () => {
       expect(result).toBe(1);
     });
 
-    it("should return -1 when the array is empty", () => {
+    it("retourne -1 quand le tableau est vide", () => {
       // GIVEN
       const structureTypologies: StructureTypologieApiType[] = [];
 
@@ -821,7 +821,7 @@ describe("structure util", () => {
       expect(result).toBe(-1);
     });
 
-    it("should return -1 when the array is undefined (watch() not yet hydrated)", () => {
+    it("retourne -1 quand le tableau est undefined (watch() pas encore hydraté)", () => {
       // WHEN
       const result = getMillesimeIndexForAYear(undefined, 2025);
 
@@ -831,7 +831,7 @@ describe("structure util", () => {
   });
 
   describe("getMillesimeIndexForAYear", () => {
-    it("should return the correct index when the year exists in the array", () => {
+    it("retourne le bon index quand l'année existe dans le tableau", () => {
       // GIVEN
       const structureMillesimes = [
         { year: 2023, cpom: false, operateurComment: null },
@@ -847,7 +847,7 @@ describe("structure util", () => {
       expect(result).toBe(1);
     });
 
-    it("should return -1 when the year does not exist in the array", () => {
+    it("retourne -1 quand l'année n'existe pas dans le tableau", () => {
       // GIVEN
       const structureMillesimes = [
         { year: 2023, cpom: false, operateurComment: null },
@@ -862,7 +862,7 @@ describe("structure util", () => {
       expect(result).toBe(-1);
     });
 
-    it("should use CURRENT_YEAR as default when no year is provided", () => {
+    it("utilise CURRENT_YEAR par défaut quand aucune année n'est fournie", () => {
       // GIVEN
       const structureMillesimes = [
         { year: 2024, cpom: false, operateurComment: null },
@@ -877,7 +877,7 @@ describe("structure util", () => {
       expect(result).toBe(1);
     });
 
-    it("should return -1 when the array is empty", () => {
+    it("retourne -1 quand le tableau est vide", () => {
       // GIVEN
       const structureMillesimes: StructureMillesimeApiType[] = [];
 
@@ -890,7 +890,7 @@ describe("structure util", () => {
   });
 
   describe("getCpomStructureIndexAndBudgetIndexForAYearAndAType", () => {
-    it("should return correct indices when finding matching structure and millesime", () => {
+    it("retourne les bons index quand une structure et un millésime correspondent", () => {
       // GIVEN
       const cpomStructures: CpomStructureApiRead[] = [
         {
@@ -937,7 +937,7 @@ describe("structure util", () => {
       expect(result).toEqual({ cpomStructureIndex: 0, budgetIndex: 0 });
     });
 
-    it("should return -1 for both indices when given empty array", () => {
+    it("retourne -1 pour les deux index quand on passe un tableau vide", () => {
       // GIVEN
       const cpomStructures: CpomStructureApiRead[] = [];
 
@@ -955,7 +955,7 @@ describe("structure util", () => {
       });
     });
 
-    it("should return -1 for both indices when no structure has matching year", () => {
+    it("retourne -1 pour les deux index quand aucune structure n'a l'année correspondante", () => {
       // GIVEN
       const cpomStructures: CpomStructureApiRead[] = [
         {
@@ -1010,7 +1010,7 @@ describe("structure util", () => {
       });
     });
 
-    it("should return indices for first structure when it has matching year", () => {
+    it("retourne les index de la première structure quand elle a l'année correspondante", () => {
       // GIVEN
       const cpomStructures: CpomStructureApiRead[] = [
         {
@@ -1088,7 +1088,7 @@ describe("structure util", () => {
       expect(result).toEqual({ cpomStructureIndex: 0, budgetIndex: 0 });
     });
 
-    it("should return indices for later structure when first does not match", () => {
+    it("retourne les index d'une structure ultérieure quand la première ne correspond pas", () => {
       // GIVEN
       const cpomStructures: CpomStructureApiRead[] = [
         {
@@ -1166,7 +1166,7 @@ describe("structure util", () => {
       expect(result).toEqual({ cpomStructureIndex: 1, budgetIndex: 0 });
     });
 
-    it("should skip structure undefined budgets", () => {
+    it("ignore les structures dont les budgets sont undefined", () => {
       // GIVEN
       const cpomStructures: CpomStructureApiRead[] = [
         {
@@ -1238,7 +1238,7 @@ describe("structure util", () => {
       expect(result).toEqual({ cpomStructureIndex: 1, budgetIndex: 0 });
     });
 
-    it("should return correct millesime index when structure has multiple millesimes", () => {
+    it("retourne le bon index de millésime quand la structure en a plusieurs", () => {
       // GIVEN
       const cpomStructures: CpomStructureApiRead[] = [
         {
@@ -1295,7 +1295,7 @@ describe("structure util", () => {
       expect(result).toEqual({ cpomStructureIndex: 0, budgetIndex: 1 });
     });
 
-    it("should use CURRENT_YEAR as default when no year is provided", () => {
+    it("utilise CURRENT_YEAR par défaut quand aucune année n'est fournie", () => {
       // GIVEN
       const cpomStructures: CpomStructureApiRead[] = [
         {
@@ -1347,7 +1347,7 @@ describe("structure util", () => {
     const buildStructure = (history?: HistoryEvent[]): StructureApiRead =>
       ({ history }) as StructureApiRead;
 
-    it("returns the FERMETURE event with its date and motif", () => {
+    it("retourne l'événement FERMETURE avec sa date et son motif", () => {
       const fermeture: HistoryEvent = {
         kind: "FERMETURE",
         date: "2025-03-19",
@@ -1362,7 +1362,7 @@ describe("structure util", () => {
       expect(getFermetureEvent(structure)).toEqual(fermeture);
     });
 
-    it("returns undefined when there is no FERMETURE event", () => {
+    it("retourne undefined quand il n'y a pas d'événement FERMETURE", () => {
       const structure = buildStructure([
         { kind: "CREATION", date: "2020-01-01", sources: [] },
       ]);
@@ -1370,7 +1370,7 @@ describe("structure util", () => {
       expect(getFermetureEvent(structure)).toBeUndefined();
     });
 
-    it("returns undefined when history is absent", () => {
+    it("retourne undefined quand history est absent", () => {
       expect(getFermetureEvent(buildStructure())).toBeUndefined();
     });
   });

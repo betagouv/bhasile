@@ -6,9 +6,7 @@ import FormWrapper, {
 } from "@/app/components/forms/FormWrapper";
 import { FieldSetNotes } from "@/app/components/forms/notes/FieldSetNotes";
 import { NoteDisclaimer } from "@/app/components/forms/notes/NoteDisclaimer";
-import { SubmitError } from "@/app/components/SubmitError";
 import { InformationBar } from "@/app/components/ui/InformationBar";
-import { useFetchState } from "@/app/context/FetchStateContext";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
@@ -17,7 +15,6 @@ import {
   notesAutoSaveSchema,
   notesSchema,
 } from "@/schemas/forms/base/notes.schema";
-import { FetchState } from "@/types/fetch-state.type";
 import { StepStatus } from "@/types/form.type";
 import { FormKind } from "@/types/global";
 
@@ -36,15 +33,13 @@ export default function FinalisationNotes() {
 
   const defaultValues = getDefaultValues({ structure });
 
-  const { handleValidation, handleAutoSave, backendError } =
-    useAgentFormHandling({ currentStep });
+  const { handleValidation, handleAutoSave } = useAgentFormHandling({
+    currentStep,
+  });
 
   const onAutoSave = async (data: NotesAutoSaveFormValues) => {
     await handleAutoSave({ ...data, id: structure.id });
   };
-
-  const { getFetchState } = useFetchState();
-  const saveState = getFetchState("structure-save");
 
   return (
     <div>
@@ -74,12 +69,6 @@ export default function FinalisationNotes() {
         <NoteDisclaimer formKind={FormKind.FINALISATION} />
 
         <FieldSetNotes />
-        {saveState === FetchState.ERROR && (
-          <SubmitError
-            codeBhasile={structure.codeBhasile}
-            backendError={backendError}
-          />
-        )}
       </FormWrapper>
     </div>
   );

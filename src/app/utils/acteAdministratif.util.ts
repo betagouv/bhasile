@@ -5,15 +5,32 @@ import {
   isCurrentlyInEffect,
 } from "@/app/utils/date.util";
 import {
+  ACTE_ADMINISTRATIF_CATEGORY_LABELS,
   CategoryDisplayRule,
   CategoryDisplayRules,
   ResolvedAvenantParent,
 } from "@/config/acte-administratif.config";
+import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { ActeAdministratifFormValues } from "@/schemas/forms/base/acteAdministratif.schema";
 import {
   ActeAdministratifCategory,
   StructureParentActe,
 } from "@/types/acte-administratif.type";
+
+export const getActesCategoriesToDisplay = (
+  actesAdministratifs: ActeAdministratifApiType[] | undefined
+): ActeAdministratifCategory[] => {
+  const presentCategories = new Set(
+    (actesAdministratifs ?? [])
+      .filter((acteAdministratif) => !acteAdministratif.parentId)
+      .map((acteAdministratif) => acteAdministratif.category)
+  );
+  return (
+    Object.keys(
+      ACTE_ADMINISTRATIF_CATEGORY_LABELS
+    ) as ActeAdministratifCategory[]
+  ).filter((category) => presentCategories.has(category));
+};
 
 const getCategoryRuleEntries = (
   categoryRules: CategoryDisplayRules

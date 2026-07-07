@@ -32,7 +32,7 @@ describe("FinalisationIdentification page integration", () => {
     global.fetch = vi.fn();
   });
 
-  it("should submit and send updated finalisation step in PUT payload", async () => {
+  it("valide l'étape d'identification et envoie l'étape de finalisation à jour dans le payload PUT", async () => {
     // GIVEN
     const structure = createStructure({ id: 77, type: StructureType.CADA });
     const mockedFetch = mockStructurePageFetch(structure);
@@ -71,7 +71,7 @@ describe("FinalisationIdentification page integration", () => {
     });
   });
 
-  it("should autosave form data and send full expected payload", async () => {
+  it("sauvegarde automatiquement les données du formulaire et envoie le payload complet attendu", async () => {
     // GIVEN
     const structure = createStructure({ id: 78, type: StructureType.CADA });
     const mockedFetch = mockStructurePageFetch(structure);
@@ -127,8 +127,6 @@ describe("FinalisationIdentification page integration", () => {
       },
       creationDate: "2007-01-01T12:00:00.000Z",
       public: "Tout public",
-      lgbt: true,
-      fvvTeh: false,
       contacts: [newContact],
       dnaStructures: [
         {
@@ -167,8 +165,6 @@ describe("FinalisationIdentification page integration", () => {
           lgbt: 0,
           fvvTeh: 0,
           year: CURRENT_YEAR,
-          placesACreer: 0,
-          placesAFermer: 0,
         },
         {
           id: 2,
@@ -177,8 +173,6 @@ describe("FinalisationIdentification page integration", () => {
           lgbt: 0,
           fvvTeh: 0,
           year: CURRENT_YEAR - 1,
-          placesACreer: 0,
-          placesAFermer: 0,
         },
         {
           id: 3,
@@ -187,8 +181,6 @@ describe("FinalisationIdentification page integration", () => {
           lgbt: 0,
           fvvTeh: 0,
           year: CURRENT_YEAR - 2,
-          placesACreer: 0,
-          placesAFermer: 0,
         },
         {
           id: 4,
@@ -197,8 +189,6 @@ describe("FinalisationIdentification page integration", () => {
           lgbt: 0,
           fvvTeh: 0,
           year: CURRENT_YEAR - 3,
-          placesACreer: 0,
-          placesAFermer: 0,
         },
       ],
     };

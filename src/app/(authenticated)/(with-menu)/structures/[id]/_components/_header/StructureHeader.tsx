@@ -107,8 +107,9 @@ export const StructureHeader = ({
               <Button
                 disabled={!isStructureReadyToFinalise}
                 onClick={async () => {
-                  await handleFinalisation();
-                  finalisationSuccessModal.open();
+                  if (await handleFinalisation()) {
+                    finalisationSuccessModal.open();
+                  }
                 }}
               >
                 Finaliser la création

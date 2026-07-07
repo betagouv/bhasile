@@ -36,6 +36,12 @@ export default function NotFound(): ReactElement {
             <Link className="fr-btn" href="/">
               Page d’accueil
             </Link>
+            <div className="pt-10">
+              <span className="pr-4">Un problème technique ?</span>
+              <Link className="fr-btn" href="/deconnexion">
+                Se déconnecter
+              </Link>
+            </div>
           </div>
           <div className="fr-col-12 fr-col-md-3 fr-col-offset-md-1 fr-px-6w fr-px-md-0 fr-py-0">
             <svg

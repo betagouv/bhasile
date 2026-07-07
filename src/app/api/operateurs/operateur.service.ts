@@ -1,4 +1,6 @@
 import { recursivelySerializeDates } from "@/app/utils/date.util";
+import { paginateRows, sortRows } from "@/app/utils/list.util";
+import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { Operateur } from "@/generated/prisma/client";
 import {
   OperateurApiRead,
@@ -6,13 +8,20 @@ import {
 } from "@/schemas/api/operateur.schema";
 
 import { getContactsApiRead } from "../contacts/contact.util";
+import { findAllStructures } from "../structures/structure.repository";
 import {
-  countOperateurs,
+  findAllOperateurs,
   findBySearchTerm,
   findOne,
-  getPaginatedOperateurs,
   updateOne,
 } from "./operateur.repository";
+import {
+  buildOperateurListItem,
+  buildTopLevelOperateurMap,
+  filterOperateursBySearch,
+  groupStructureStatsByOperateur,
+  OperateurListItem,
+} from "./operateur.util";
 
 export const getOperateurs = async ({
   page,
@@ -20,29 +29,41 @@ export const getOperateurs = async ({
 }: {
   page: number | null;
   search: string | null;
-}): Promise<{ operateurs: Partial<Operateur>[]; totalOperateurs: number }> => {
-  const dbOperateurs = await getPaginatedOperateurs({ page, search }, new Date());
+}): Promise<{ operateurs: OperateurListItem[]; totalOperateurs: number }> => {
+  const now = new Date();
+  const [structures, operateurs] = await Promise.all([
+    findAllStructures(),
+    findAllOperateurs(),
+  ]);
 
-  const operateurs = dbOperateurs.map((row) => ({
-    id: row.id,
-    name: row.name,
-    nbStructures: Number(row.nb_structures),
-    totalPlaces: Number(row.total_places),
-    pourcentageParc: Number(row.pourcentage_parc),
-    structureTypes: String(row.structure_types)
-      .replaceAll("{", "")
-      .replaceAll("}", "")
-      .split(","),
-    logo: {
-      key: row.logo_key,
-    },
-  }));
+  const topLevelByOperateurId = buildTopLevelOperateurMap(operateurs);
+  const { statsByOperateurId, globalPlaces } = groupStructureStatsByOperateur(
+    structures,
+    topLevelByOperateurId,
+    now
+  );
 
-  const totalOperateurs = await countOperateurs({ search });
+  const items = operateurs
+    .filter((operateur) => operateur.parentId === null)
+    .flatMap((operateur) => {
+      const stats = statsByOperateurId.get(operateur.id);
+      if (!stats) {
+        return [];
+      }
+      return [buildOperateurListItem(operateur, stats, globalPlaces)];
+    });
+
+  const filtered = filterOperateursBySearch(items, search);
+  const sorted = sortRows(
+    filtered,
+    (operateur) => ({ value: operateur.nbStructures, kind: "number" }),
+    (operateur) => ({ value: operateur.id, kind: "number" }),
+    "desc"
+  );
 
   return {
-    operateurs,
-    totalOperateurs,
+    operateurs: paginateRows(sorted, page ?? 0, MIDDLE_PAGE_SIZE),
+    totalOperateurs: filtered.length,
   };
 };
 

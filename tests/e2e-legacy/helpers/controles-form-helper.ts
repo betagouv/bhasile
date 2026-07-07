@@ -3,11 +3,7 @@ import { expect, Page } from "@playwright/test";
 import { TIMEOUTS } from "./constants";
 import { FormHelper } from "./form-helper";
 import { SELECTORS } from "./selectors";
-import {
-  ControleData,
-  EvaluationData,
-  OuvertureFermetureData,
-} from "./test-data/types";
+import { ControleData, EvaluationData } from "./test-data/types";
 
 /**
  * Sets a file input for evaluation or controle file uploads.
@@ -216,46 +212,5 @@ export async function fillControlesForm(
         controle.filePath
       );
     }
-  }
-}
-
-/**
- * Fills the ouverture/fermeture section (finalisation only).
- */
-export async function fillOuvertureFermetureForm(
-  page: Page,
-  ouvertureFermeture: OuvertureFermetureData | undefined
-): Promise<void> {
-  if (!ouvertureFermeture) {
-    return;
-  }
-
-  const placesACreer = page.getByLabel("Nombre de places à créer");
-  if (
-    ouvertureFermeture.placesACreer !== undefined &&
-    (await placesACreer.count()) > 0
-  ) {
-    await placesACreer.first().fill(String(ouvertureFermeture.placesACreer));
-  }
-  const echeancePlacesACreer = page.getByLabel("Echéance").first();
-  if (
-    ouvertureFermeture.echeancePlacesACreer &&
-    (await echeancePlacesACreer.count()) > 0
-  ) {
-    await echeancePlacesACreer.fill(ouvertureFermeture.echeancePlacesACreer);
-  }
-  const placesAFermer = page.getByLabel("Nombre de places à fermer");
-  if (
-    ouvertureFermeture.placesAFermer !== undefined &&
-    (await placesAFermer.count()) > 0
-  ) {
-    await placesAFermer.first().fill(String(ouvertureFermeture.placesAFermer));
-  }
-  const echeancePlacesAFermer = page.getByLabel("Echéance").nth(1);
-  if (
-    ouvertureFermeture.echeancePlacesAFermer &&
-    (await echeancePlacesAFermer.count()) > 0
-  ) {
-    await echeancePlacesAFermer.fill(ouvertureFermeture.echeancePlacesAFermer);
   }
 }

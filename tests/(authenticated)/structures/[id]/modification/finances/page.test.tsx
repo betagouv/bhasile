@@ -24,7 +24,7 @@ describe("ModificationFinances page integration", () => {
     global.fetch = vi.fn();
   });
 
-  it("should submit and navigate back to the structure page", async () => {
+  it("soumet les finances et redirige vers la page de la structure", async () => {
     // GIVEN
     const structure = createModificationFinancesValidStructure(77);
     const mockedFetch = mockStructurePageFetch(structure);
@@ -69,7 +69,7 @@ describe("ModificationFinances page integration", () => {
     expect(mockRouterPush).toHaveBeenCalledWith("/structures/77");
   });
 
-  it("should block submit when indicators are missing", async () => {
+  it("bloque la soumission quand les indicateurs financiers sont manquants", async () => {
     // GIVEN
     const structure = {
       ...createModificationFinancesValidStructure(78),

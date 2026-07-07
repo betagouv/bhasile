@@ -89,7 +89,7 @@ const subventionneeAvecCpomSchema = z
 describe("finalisationFinanceSchema", () => {
   describe("validateAffectationReservesDetails", () => {
     describe("when affectationReservesFondsDedies is 0", () => {
-      it("should pass validation even if detail fields are null", () => {
+      it("valide même si les champs de détail sont null", () => {
         const budget = createValidBudget({
           affectationReservesFondsDedies: 0,
           // All detail fields remain null
@@ -105,7 +105,7 @@ describe("finalisationFinanceSchema", () => {
     });
 
     describe("when affectationReservesFondsDedies is greater than 0", () => {
-      it("should fail validation if detail fields are null", () => {
+      it("échoue à la validation si les champs de détail sont null", () => {
         const budget = createValidBudget({
           affectationReservesFondsDedies: 1000,
           // Detail fields remain null - should fail
@@ -119,7 +119,7 @@ describe("finalisationFinanceSchema", () => {
         expect(result.success).toBe(false);
 
         if (!result.success) {
-          const errors = result.error.errors;
+          const errors = result.error.issues;
           expect(errors.length).toBeGreaterThan(0);
 
           // Check that the right fields are in error
@@ -136,7 +136,7 @@ describe("finalisationFinanceSchema", () => {
         }
       });
 
-      it("should pass validation if all detail fields are provided", () => {
+      it("valide si tous les champs de détail sont renseignés", () => {
         const budget = createValidBudget({
           affectationReservesFondsDedies: 1000,
           reserveInvestissement: 200,
@@ -157,7 +157,7 @@ describe("finalisationFinanceSchema", () => {
         expect(result.success).toBe(true);
       });
 
-      it("should fail validation if some detail fields are missing", () => {
+      it("échoue à la validation si certains champs de détail sont manquants", () => {
         const budget = createValidBudget({
           affectationReservesFondsDedies: 1000,
           reserveInvestissement: 200,
@@ -173,7 +173,7 @@ describe("finalisationFinanceSchema", () => {
         expect(result.success).toBe(false);
 
         if (!result.success) {
-          const errors = result.error.errors;
+          const errors = result.error.issues;
           expect(errors.length).toBeGreaterThan(0);
 
           const errorMessages = errors.map((e) => e.message);
@@ -185,7 +185,7 @@ describe("finalisationFinanceSchema", () => {
     });
 
     describe("when affectationReservesFondsDedies is 0", () => {
-      it("should pass validation", () => {
+      it("valide sans exiger les champs de détail", () => {
         const budget = createValidBudget({
           // affectationReservesFondsDedies defaults to 0 in createValidBudget
           // This should pass validation without requiring detail fields
@@ -202,7 +202,7 @@ describe("finalisationFinanceSchema", () => {
   });
 
   describe("schema variants", () => {
-    it("should validate autoriseeSchema correctly", () => {
+    it("valide correctement autoriseeSchema", () => {
       const result = autoriseeSchema.safeParse({
         budgets: [
           createBudgetAutoriseeCurrentYear(),
@@ -217,7 +217,7 @@ describe("finalisationFinanceSchema", () => {
       expect(result.success).toBe(true);
     });
 
-    it("should validate autoriseeAvecCpomSchema correctly", () => {
+    it("valide correctement autoriseeAvecCpomSchema", () => {
       const result = autoriseeAvecCpomSchema.safeParse({
         budgets: [
           createBudgetAutoriseeCurrentYear(),
@@ -232,7 +232,7 @@ describe("finalisationFinanceSchema", () => {
       expect(result.success).toBe(true);
     });
 
-    it("should validate subventionneeSchema correctly", () => {
+    it("valide correctement subventionneeSchema", () => {
       const firstYearBudget = {
         id: 1,
         year: 2024,
@@ -273,7 +273,7 @@ describe("finalisationFinanceSchema", () => {
       expect(result.success).toBe(true);
     });
 
-    it("should validate subventionneeAvecCpomSchema correctly", () => {
+    it("valide correctement subventionneeAvecCpomSchema", () => {
       const firstYearBudget = {
         id: 1,
         year: 2024,
@@ -316,7 +316,7 @@ describe("finalisationFinanceSchema", () => {
   });
 
   describe("conditional validation across schemas", () => {
-    it("should enforce conditional validation in autoriseeSchema", () => {
+    it("applique la validation conditionnelle dans autoriseeSchema", () => {
       const sansCpomWithAffectation = createBudgetSansCpom({
         affectationReservesFondsDedies: 1000,
         // Detail fields null - should fail because sansCpom has superRefine
@@ -336,7 +336,7 @@ describe("finalisationFinanceSchema", () => {
       expect(result.success).toBe(false);
     });
 
-    it("should enforce conditional validation in autoriseeAvecCpomSchema", () => {
+    it("applique la validation conditionnelle dans autoriseeAvecCpomSchema", () => {
       const avecCpomWithAffectation = createBudgetAvecCpom({
         affectationReservesFondsDedies: 1000,
         // Detail fields null - should fail because avecCpom has superRefine
@@ -356,7 +356,7 @@ describe("finalisationFinanceSchema", () => {
       expect(result.success).toBe(false);
     });
 
-    it("should enforce conditional validation in subventionneeAvecCpomSchema", () => {
+    it("applique la validation conditionnelle dans subventionneeAvecCpomSchema", () => {
       // Note: budgetSubventionneeOpenSchema doesn't have affectationReservesFondsDedies,
       // so this test validates that the schema correctly accepts valid subventionnee budgets
       const firstYearBudget = {
@@ -404,7 +404,7 @@ describe("finalisationFinanceSchema", () => {
   });
 
   describe("edge cases", () => {
-    it("should handle empty fileUploads array", () => {
+    it("gère un tableau fileUploads vide", () => {
       const budget = createValidBudget();
 
       const result = basicSchema.safeParse({

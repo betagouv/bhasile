@@ -6,7 +6,7 @@ import {
 } from "@/schemas/forms/base/dna.schema";
 
 describe("dnaStructuresSchema", () => {
-  it("accepts distinct DNA codes", () => {
+  it("accepte des codes DNA distincts", () => {
     const result = dnaStructuresSchema.safeParse({
       dnaStructures: [{ dna: { code: "C-001" } }, { dna: { code: "H-002" } }],
     });
@@ -14,7 +14,7 @@ describe("dnaStructuresSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects duplicate DNA codes", () => {
+  it("rejette des codes DNA en doublon", () => {
     const result = dnaStructuresSchema.safeParse({
       dnaStructures: [{ dna: { code: "C-001" } }, { dna: { code: "C-001" } }],
     });
@@ -27,7 +27,7 @@ describe("dnaStructuresSchema", () => {
 });
 
 describe("dnaStructuresAutoSaveSchema", () => {
-  it("rejects duplicate DNA codes while saving a draft", () => {
+  it("rejette des codes DNA en doublon lors de la sauvegarde d'un brouillon", () => {
     const result = dnaStructuresAutoSaveSchema.safeParse({
       dnaStructures: [{ dna: { code: "C-001" } }, { dna: { code: "C-001" } }],
     });
@@ -38,7 +38,7 @@ describe("dnaStructuresAutoSaveSchema", () => {
     );
   });
 
-  it("tolerates blank or incomplete rows being filled in", () => {
+  it("tolère des lignes vides ou incomplètes en cours de saisie", () => {
     const result = dnaStructuresAutoSaveSchema.safeParse({
       dnaStructures: [{ dna: { code: "C-001" } }, { dna: {} }, {}],
     });

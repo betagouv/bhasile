@@ -88,9 +88,8 @@ export const OperateurItem = ({
           </div>
           <Link
             className="fr-btn fr-btn--tertiary-no-outline fr-icon-arrow-right-line before:w-[20] before:h-[20]"
-            title={`Détails de la structure ${name}`}
+            title={`Détails de l'operateur ${name}`}
             href={`operateurs/${id}`}
-            aria-label={`Détails de la structure ${name}`}
           />
         </div>
       </div>

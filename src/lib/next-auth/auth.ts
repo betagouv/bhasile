@@ -4,7 +4,6 @@ import {
   NextApiResponse,
 } from "next";
 import { getServerSession, NextAuthOptions } from "next-auth";
-import { v4 as uuidv4 } from "uuid";
 
 import { createOrUpdateUser } from "@/app/api/user/user.service";
 
@@ -95,8 +94,6 @@ export const authOptions: NextAuthOptions = {
           acr_values: "eidas1",
           redirect_uri:
             process.env.NEXT_PUBLIC_URL + "/api/auth/callback/proconnect",
-          nonce: uuidv4(),
-          state: uuidv4(),
         },
       },
       client: {

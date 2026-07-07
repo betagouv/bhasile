@@ -40,7 +40,7 @@ export const adresseApiSchema = z.object({
   codePostal: z.string().optional(),
   commune: z.string().optional(),
   adresseComplete: z.string().optional(),
-  repartition: z.nativeEnum(Repartition).optional(),
+  repartition: z.enum(Repartition).optional(),
   adresseTypologies: z.array(adresseTypologieApiSchema),
 });
 

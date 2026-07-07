@@ -41,7 +41,7 @@ describe("TransformationSteps", () => {
     });
   });
 
-  it("should render nothing when there is no transformation", () => {
+  it("n'affiche rien quand il n'y a pas de transformation", () => {
     // WHEN
     const { container } = render(<TransformationSteps transformation={null} />);
 
@@ -49,7 +49,7 @@ describe("TransformationSteps", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("should render every structureVersionTransformation as a step group", () => {
+  it("affiche chaque structureVersionTransformation comme un groupe d'étapes", () => {
     // GIVEN
     const transformation = createTransformation({ structureVersionTransformations: [
       {
@@ -78,7 +78,7 @@ describe("TransformationSteps", () => {
     expect(screen.getByText("Nouvelle structure")).toBeInTheDocument();
   });
 
-  it("should sort steps in the order Fermeture, Contraction, Extension, Création", () => {
+  it("trie les étapes dans l'ordre Fermeture, Contraction, Extension, Création", () => {
     // GIVEN
     const transformation = createTransformation({ structureVersionTransformations: [
       {
@@ -118,7 +118,7 @@ describe("TransformationSteps", () => {
     ]);
   });
 
-  it("should render the three substeps for an EXTENSION step", () => {
+  it("affiche les trois sous-étapes pour une étape EXTENSION", () => {
     // GIVEN
     const transformation = createTransformation({ structureVersionTransformations: [
       {
@@ -143,7 +143,7 @@ describe("TransformationSteps", () => {
     ).toBeInTheDocument();
   });
 
-  it("should only render the Description substep for a FERMETURE step", () => {
+  it("n'affiche que la sous-étape Description pour une étape FERMETURE", () => {
     // GIVEN
     const transformation = createTransformation({ structureVersionTransformations: [
       {
@@ -162,7 +162,7 @@ describe("TransformationSteps", () => {
     expect(links[0]).toHaveAccessibleName("Description");
   });
 
-  it("should mark the substep matching the current pathname as the current page", () => {
+  it("marque la sous-étape correspondant au pathname courant comme page courante", () => {
     // GIVEN
     mockUsePathname.mockReturnValue(
       "/structures/transformation/42/extension/7/places-et-hebergement"
@@ -188,7 +188,7 @@ describe("TransformationSteps", () => {
     ).not.toHaveAttribute("aria-current");
   });
 
-  it("should build hrefs for each substep based on the transformation and step ids", () => {
+  it("construit les hrefs de chaque sous-étape à partir des ids de la transformation et de l'étape", () => {
     // GIVEN
     const transformation = createTransformation({ structureVersionTransformations: [
       {
@@ -225,7 +225,7 @@ describe("TransformationSteps", () => {
     [StructureVersionTransformationType.FERMETURE, "fermeture"],
     [StructureVersionTransformationType.CREATION, "creation"],
   ])(
-    "should use the segment matching a %s type in hrefs",
+    "utilise le segment correspondant à un type %s dans les hrefs",
     (type: StructureVersionTransformationType, segment: string) => {
       // GIVEN
       const transformation = createTransformation({ structureVersionTransformations: [

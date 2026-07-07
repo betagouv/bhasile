@@ -8,10 +8,7 @@ const requiredContactSchema = z.object({
   nom: z.string().nonempty("Le nom est requis"),
   role: z.string().nonempty("Le rôle est requis"),
   perimetre: z.string().nullish(),
-  email: z
-    .string()
-    .nonempty("Veuillez saisir une adresse email valide")
-    .email("Veuillez saisir une adresse email valide"),
+  email: z.email("Veuillez saisir une adresse email valide"),
   telephone: z
     .string()
     .nonempty("Le téléphone est requis")
@@ -28,57 +25,59 @@ const optionalContactSchema = z
     email: z.string().optional(),
     telephone: z.string().optional(),
   })
-  .superRefine((data, ctx) => {
-    if (!data) {
-      return;
-    }
+  .check(
+    z.superRefine((data, ctx) => {
+      if (!data) {
+        return;
+      }
 
-    const { prenom, nom, role, email, telephone } = data;
+      const { prenom, nom, role, email, telephone } = data;
 
-    const fields = [
-      { name: "prenom", value: prenom, message: "Le prénom est requis" },
-      { name: "nom", value: nom, message: "Le nom est requis" },
-      { name: "role", value: role, message: "Le rôle est requis" },
-      {
-        name: "email",
-        value: email,
-        message: "Veuillez saisir une adresse email valide",
-      },
-      {
-        name: "telephone",
-        value: telephone,
-        message: "Le téléphone est requis",
-      },
-    ];
+      const fields = [
+        { name: "prenom", value: prenom, message: "Le prénom est requis" },
+        { name: "nom", value: nom, message: "Le nom est requis" },
+        { name: "role", value: role, message: "Le rôle est requis" },
+        {
+          name: "email",
+          value: email,
+          message: "Veuillez saisir une adresse email valide",
+        },
+        {
+          name: "telephone",
+          value: telephone,
+          message: "Le téléphone est requis",
+        },
+      ];
 
-    const filledFields = fields.filter(
-      (field) => field.value !== undefined && field.value !== ""
-    );
+      const filledFields = fields.filter(
+        (field) => field.value !== undefined && field.value !== ""
+      );
 
-    if (filledFields.length === 0) {
-      return;
-    }
+      if (filledFields.length === 0) {
+        return;
+      }
 
-    if (filledFields.length > 0 && filledFields.length < fields.length) {
-      fields.forEach((field) => {
-        if (!field.value || field.value === "") {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: field.message,
-            path: [field.name],
-          });
-        }
-      });
-    }
+      if (filledFields.length > 0 && filledFields.length < fields.length) {
+        fields.forEach((field) => {
+          if (!field.value || field.value === "") {
+            ctx.addIssue({
+              code: "custom",
+              message: field.message,
+              path: [field.name],
+            });
+          }
+        });
+      }
 
-    if (filledFields.length > 0 && telephone && telephone.length < 10) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Le numéro de téléphone doit contenir 10 caractères",
-        path: ["telephone"],
-      });
-    }
-  });
+      if (filledFields.length > 0 && telephone && telephone.length < 10) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Le numéro de téléphone doit contenir 10 caractères",
+          path: ["telephone"],
+        });
+      }
+    })
+  );
 
 export const contactSchema = Object.assign(requiredContactSchema, {
   optional: () => optionalContactSchema,

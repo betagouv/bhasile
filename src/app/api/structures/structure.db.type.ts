@@ -32,6 +32,7 @@ export const structureListLightVersionSelect = {
 export const structureListLightSelect = {
   id: true,
   codeBhasile: true,
+  operateurId: true,
   operateur: { select: { name: true } },
   forms: {
     select: { status: true, formDefinition: { select: { slug: true } } },
