@@ -64,6 +64,7 @@ export const StructureSelections = ({
             setSelectedStructureIds={(ids) =>
               setSelectedStructureIds(block.id, ids)
             }
+            excludedStructureId={structureId}
           />
         );
       })}
