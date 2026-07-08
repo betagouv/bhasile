@@ -14,7 +14,7 @@ describe("useCampaigns.updateAndRefreshCampaign", () => {
     const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
     fetchMock
       .mockResolvedValueOnce({ ok: true })
-      .mockResolvedValueOnce({ json: async () => ({ id: 1, nom: "S" }) });
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 1, nom: "S" }) });
 
     const { result } = renderHook(() => useCampaigns());
     const outcome = await result.current.updateAndRefreshCampaign(
@@ -50,6 +50,28 @@ describe("useCampaigns.updateAndRefreshCampaign", () => {
     );
 
     expect(outcome).toBe("Année non ouverte");
+    expect(setStructure).not.toHaveBeenCalled();
+  });
+
+  it("n'écrase pas la structure si le refresh échoue après une sauvegarde OK", async () => {
+    const setStructure = vi.fn();
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock
+      .mockResolvedValueOnce({ ok: true })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({ error: "Structure indisponible" }),
+      });
+
+    const { result } = renderHook(() => useCampaigns());
+    const outcome = await result.current.updateAndRefreshCampaign(
+      1,
+      { structureId: 1, year: 2026 },
+      setStructure
+    );
+
+    expect(outcome).toBe("Structure indisponible");
     expect(setStructure).not.toHaveBeenCalled();
   });
 });
