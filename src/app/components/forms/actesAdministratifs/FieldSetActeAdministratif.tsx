@@ -102,9 +102,7 @@ export default function FieldSetActeAdministratif({
     <fieldset className="flex flex-col gap-6 w-full">
       {!noTitleLegend && (
         <legend className="flex items-center gap-4 text-xl font-bold mb-4 text-title-blue-france">
-          <span>
-            {legend} {isOptional && "(optionnel)"}
-          </span>
+          {legend} {isOptional && "(optionnel)"}
           {canAddFile && (
             <Button
               type="button"
