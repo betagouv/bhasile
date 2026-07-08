@@ -8,7 +8,6 @@ import {
 import type {
   StatistiqueDbRmu,
   StatistiquesContext,
-  StatistiquesPeriodGranularity,
 } from "../statistiques.db.type";
 import {
   groupByPeriodKey,
@@ -45,7 +44,6 @@ const toRmuPeriodStat = (date: Date, totals: RmuTotals): RmuPeriodStat => ({
 });
 
 type PeriodSeriesConfig = {
-  granularity: StatistiquesPeriodGranularity;
   toPeriodKey: (date: Date) => string;
   toDate: (periodKey: string) => Date;
 };
@@ -81,17 +79,14 @@ export const computeRmuStatistiques = (
 
   return {
     byMonth: computeRmuPeriodSeries(rmus, {
-      granularity: "month",
       toPeriodKey: toMonthKey,
       toDate: monthKeyToDate,
     }),
     byTrimester: computeRmuPeriodSeries(rmus, {
-      granularity: "trimester",
       toPeriodKey: toTrimesterKey,
       toDate: trimesterKeyToDate,
     }),
     byYear: computeRmuPeriodSeries(rmus, {
-      granularity: "year",
       toPeriodKey: toYearKey,
       toDate: yearKeyToDate,
     }),
