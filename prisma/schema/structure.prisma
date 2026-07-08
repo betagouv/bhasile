@@ -7,7 +7,7 @@ model Structure {
   adresseAdministrative    String? // TODO: remove after backfill of structure version
   codePostalAdministratif  String? // TODO: remove after backfill of structure version
   communeAdministrative    String? // TODO: remove after backfill of structure version
-  departementAdministratif String? // Conservé : invariant immuable du département, source de vérité de checkNoDepartementAdministratifChange (ne pas retirer au backfill)
+  departementAdministratif String?
   latitude                 Decimal? // TODO: remove after backfill of structure version
   longitude                Decimal? // TODO: remove after backfill of structure version
   nom                      String? // TODO: remove after backfill of structure version
@@ -42,7 +42,7 @@ model Structure {
   antennes                 Antenne[] // TODO: remove after backfill of structure version
   structureFinesses        StructureFiness[] // TODO: remove after backfill of structure version
   finesses                 Finess[] // TODO: remove after backfill structure finess
-  departement              Departement?          @relation(fields: [departementAdministratif], references: [numero]) // Conservé avec departementAdministratif (cf. ci-dessus)
+  departement              Departement?          @relation(fields: [departementAdministratif], references: [numero])
   userActions              UserAction[]
   userNotes                Note[]
   structureVersions        StructureVersion[]
