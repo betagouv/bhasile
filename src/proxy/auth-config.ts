@@ -141,6 +141,7 @@ export const protectedApiRoutes: ApiRoute[] = [
 ];
 
 export const proConnectProtectedPages = [
+  "/",
   "/structures",
   "/operateurs",
   "/statistiques",
