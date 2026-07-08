@@ -1,5 +1,6 @@
 import Button from "@codegouvfr/react-dsfr/Button";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
+import { useRef } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
@@ -53,14 +54,19 @@ export default function FieldSetActeAdministratif({
     avenantAlternative,
   });
 
-  const handleAddNewField = (e?: React.MouseEvent) => {
-    e?.preventDefault();
-    e?.stopPropagation();
+  const pendingScrollUuid = useRef<string | null>(null);
 
-    append({
-      uuid: uuidv4(),
-      category: category,
-    });
+  const scrollToNewRow = (node: HTMLDivElement) => {
+    node.scrollIntoView({ behavior: "smooth", block: "center" });
+    node
+      .querySelector<HTMLInputElement>('input:not([type="hidden"])')
+      ?.focus({ preventScroll: true });
+  };
+
+  const handleAddNewField = () => {
+    const uuid = uuidv4();
+    pendingScrollUuid.current = uuid;
+    append({ uuid, category });
   };
 
   const handleDeleteField = (index: number, shouldConfirm = true) => {
@@ -95,8 +101,22 @@ export default function FieldSetActeAdministratif({
   return (
     <fieldset className="flex flex-col gap-6 w-full">
       {!noTitleLegend && (
-        <legend className="text-xl font-bold mb-4 text-title-blue-france">
-          {legend} {isOptional && "(optionnel)"}
+        <legend className="flex items-center gap-4 text-xl font-bold mb-4 text-title-blue-france">
+          <span>
+            {legend} {isOptional && "(optionnel)"}
+          </span>
+          {canAddFile && (
+            <Button
+              type="button"
+              priority="secondary"
+              size="small"
+              iconId="fr-icon-add-line"
+              onClick={handleAddNewField}
+              aria-label={addFileButtonLabel ?? "Ajouter un fichier"}
+            >
+              Ajouter
+            </Button>
+          )}
         </legend>
       )}
       {typeof notice === "string" ? (
@@ -125,7 +145,16 @@ export default function FieldSetActeAdministratif({
       )}
       {actesOfCategory.length > 0 &&
         actesOfCategory.map((acte) => (
-          <div key={acte.id || acte.uuid} className="mb-4">
+          <div
+            key={acte.id || acte.uuid}
+            className="mb-4"
+            ref={(node) => {
+              if (node && acte.uuid && acte.uuid === pendingScrollUuid.current) {
+                scrollToNewRow(node);
+                pendingScrollUuid.current = null;
+              }
+            }}
+          >
             <ActeAdministratif
               categoryShortName={categoryShortName}
               acte={acte}
@@ -137,15 +166,6 @@ export default function FieldSetActeAdministratif({
             />
           </div>
         ))}
-      {canAddFile && (
-        <Button
-          onClick={handleAddNewField}
-          priority="tertiary no outline"
-          className="underline font-normal p-0"
-        >
-          + {addFileButtonLabel ?? "Ajouter un fichier"}
-        </Button>
-      )}
     </fieldset>
   );
 }
