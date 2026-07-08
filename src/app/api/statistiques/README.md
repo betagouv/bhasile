@@ -41,7 +41,7 @@ Schéma : `src/schemas/api/statistique.schema.ts`.
 Sans filtre l'API retourne tout le parc, et si le périmètre retourné est vide l'API retourne `null`.
 Les filtres sont en **ET**.
 
-> Exception `rmu` : donnée départementale, ce bloc ne suit **que** `departements` ; dès qu'un filtre `operateurs`/`types` est actif il vaut `null` (non différenciable). Cf. [rmu/README.md](./rmu/README.md#périmètre--departements-seul-sinon-null).
+> Exception `rmu` (donnée départementale) : ne suit que `departements`, et vaut `null` dès qu'un filtre `operateurs`/`types` est actif. Cf. [rmu/README.md](./rmu/README.md#périmètre).
 
 Exemple :
 
