@@ -46,11 +46,12 @@ export const CreationIdentificationForm = ({
   const buildStructureVersionTransformation = (
     data: CreationIdentificationDraftFormValues
   ): StructureVersionTransformationApiUpdateClient => {
-    const { effectiveDate, operateur, ...rest } = data;
+    const { effectiveDate, operateur, type, ...rest } = data;
     return {
       id: structureVersionTransformation.id,
       type: structureVersionTransformation.type,
       operateurId: operateur?.id,
+      structureType: type,
       structureVersion: {
         ...rest,
         dnaStructures: rest.dnaStructures?.filter(

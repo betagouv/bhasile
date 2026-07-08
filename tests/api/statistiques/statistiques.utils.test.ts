@@ -411,12 +411,11 @@ describe("matchesStatistiquesPerimeterFilters - filtres appliqués sur la versio
       operateurId: number | null;
     }> = {}
   ) => ({
-    type: overrides.type === undefined ? StructureType.CADA : overrides.type,
     departementAdministratif: overrides.departementAdministratif ?? "01",
-    structure:
-      overrides.operateurId === undefined
-        ? { operateurId: 1 }
-        : { operateurId: overrides.operateurId },
+    structure: {
+      operateurId: overrides.operateurId === undefined ? 1 : overrides.operateurId,
+      type: overrides.type === undefined ? StructureType.CADA : overrides.type,
+    },
   });
 
   it("accepte une version valide sans filtre", () => {

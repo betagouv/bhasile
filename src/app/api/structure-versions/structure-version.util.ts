@@ -1,6 +1,5 @@
 import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
-import { StructureType } from "@/generated/prisma/client";
 
 export const checkNoDepartementAdministratifChange = (
   structureDepartement: string | null | undefined,
@@ -20,7 +19,6 @@ export const checkNoDepartementAdministratifChange = (
 };
 
 type VersionFields = {
-  type: StructureType | null;
   communeAdministrative: string | null;
 };
 
@@ -93,7 +91,6 @@ export const resolveCurrentVersionFields = <
   const currentVersion = resolveCurrentVersion(structureVersions, now);
   return {
     ...structureRest,
-    type: currentVersion?.type ?? null,
     communeAdministrative: currentVersion?.communeAdministrative ?? null,
   };
 };

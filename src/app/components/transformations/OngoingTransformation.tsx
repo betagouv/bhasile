@@ -31,8 +31,8 @@ export const OngoingTransformation = ({
     ...new Set(
       transformation.structureVersionTransformations.flatMap(
         (structureVersionTransformation) =>
-          structureVersionTransformation.structureVersion?.type
-            ? [structureVersionTransformation.structureVersion.type]
+          structureVersionTransformation.structureType
+            ? [structureVersionTransformation.structureType]
             : []
       )
     ),

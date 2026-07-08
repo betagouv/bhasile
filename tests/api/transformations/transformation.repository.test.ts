@@ -15,7 +15,7 @@ import {
 import { getNormalizedRegionCodeFromDepartement } from "@/app/utils/bhasile.util";
 import prisma from "@/lib/prisma";
 import { Repartition } from "@/types/adresse.type";
-import { PublicType } from "@/types/structure.type";
+import { PublicType, StructureType } from "@/types/structure.type";
 import {
   StructureVersionTransformationType,
   TransformationType,
@@ -62,6 +62,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           structureVersion: { structureId: structure.id },
         },
       ],
@@ -206,6 +207,32 @@ describe("transformation.repository db integration", () => {
       row.structureVersionTransformations[0].structureVersion?.structure
     ).toBeDefined();
     expect(row.form?.formDefinition).toBeDefined();
+  });
+
+  it("met à jour la structureVersion existante d'un bloc quand l'id n'est pas renvoyé, sans créer de doublon", async () => {
+    // GIVEN: a transformation whose block already holds a structureVersion
+    const { transformationId, structureVersionTransformationId, structureId } =
+      await createBareTransformation();
+
+    // WHEN: the block is re-saved WITHOUT the structureVersion id (client lost it after the first save)
+    await updateOne({
+      id: transformationId,
+      structureVersionTransformations: [
+        {
+          id: structureVersionTransformationId,
+          type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
+          structureVersion: { structureId, nom: "Nom corrigé" },
+        },
+      ],
+    });
+
+    // THEN: no unique violation — the SVT still holds exactly one version, updated in place
+    const versions = await prisma.structureVersion.findMany({
+      where: { structureVersionTransformationId },
+    });
+    expect(versions).toHaveLength(1);
+    expect(versions[0].nom).toBe("Nom corrigé");
   });
 
   it("met à jour les champs scalaires de transformation, structureVersionTransformation et structureVersion en un seul appel updateOne", async () => {
@@ -571,6 +598,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           operateurId: operateur.id,
         },
       ],
@@ -644,6 +672,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           operateurId: operateurA.id,
         },
       ],
@@ -671,6 +700,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           operateurId: operateur.id,
         },
       ],
@@ -698,6 +728,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           operateurId: operateur.id,
         },
       ],
@@ -727,6 +758,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           operateurId: operateur.id,
         },
       ],
@@ -751,6 +783,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           structureVersion: { structureId: structureA.id },
         },
       ],
@@ -1108,6 +1141,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           operateurId: operateur.id,
           structureVersion: {
             departementAdministratif: departement.numero,
@@ -1158,6 +1192,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           operateurId: operateur.id,
           structureVersion: {
             departementAdministratif: departement.numero,
@@ -1300,6 +1335,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           operateurId: operateur.id,
           structureVersion: { departementAdministratif: departement.numero },
         },
@@ -1333,6 +1369,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           operateurId: operateur.id,
           structureVersion: { departementAdministratif: departement.numero },
         },
@@ -1365,6 +1402,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           structureVersion: { departementAdministratif: departement.numero },
         },
       ],
@@ -1477,6 +1515,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           operateurId: operateur.id,
           structureVersion: { departementAdministratif: departement.numero },
         },
@@ -1679,11 +1718,13 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           operateurId: operateur.id,
           structureVersion: { departementAdministratif: departement.numero },
         },
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           operateurId: operateur.id,
           structureVersion: { departementAdministratif: departement.numero },
         },
@@ -1697,6 +1738,7 @@ describe("transformation.repository db integration", () => {
       where: {
         transformationId,
         type: StructureVersionTransformationType.CREATION,
+        structureType: StructureType.CADA,
       },
       include: { structureVersion: true },
     });
@@ -1725,6 +1767,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           operateurId: operateur.id,
           structureVersion: { departementAdministratif: departement.numero },
         },
@@ -1968,6 +2011,7 @@ describe("transformation.repository db integration", () => {
       structureVersionTransformations: [
         {
           type: StructureVersionTransformationType.CREATION,
+          structureType: StructureType.CADA,
           operateurId: operateur.id,
           structureVersion: { departementAdministratif: departement.numero },
         },

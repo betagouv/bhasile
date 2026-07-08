@@ -10,6 +10,7 @@ import {
   TransformationSelectionApiUpdate,
 } from "@/schemas/api/transformation.schema";
 import { SessionUser } from "@/types/global";
+import { StructureType } from "@/types/structure.type";
 import { TransformationType } from "@/types/transformation.type";
 
 import { buildAdresseAdministrativeComplete } from "../adresses/adresse.util";
@@ -161,6 +162,9 @@ const enrichStructureVersionTransformationFromSource = async (
   return {
     ...structureVersionTransformation,
     operateurId: structure.operateurId ?? undefined,
+    structureType: structure.type
+      ? StructureType[structure.type as keyof typeof StructureType]
+      : undefined,
     structureVersion: copyStructureVersion(
       structure,
       structureVersionTransformation.structureVersion

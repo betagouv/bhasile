@@ -251,7 +251,7 @@ const getReadableAdresses = (
 
 export const getStructureForOperateur = async (
   id: number
-): Promise<StructureDbOperateur> => findOneOperateur(id, new Date());
+): Promise<StructureDbOperateur> => findOneOperateur(id);
 
 export const getStructureDepartement = async (
   id: number
