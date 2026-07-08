@@ -1,3 +1,4 @@
+import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
 import prisma from "@/lib/prisma";
 import { CampaignApiWrite } from "@/schemas/api/campaign.schema";
 import { StructureCampaignApiRead } from "@/schemas/api/structure.schema";
@@ -31,16 +32,18 @@ export const updateActualisationCampaign = async (
     });
 
     if (!campaign) {
-      throw new Error(
-        `Aucune campagne d'actualisation ${input.year} pour la structure ${input.structureId}`
+      throw new ApiDomainError(
+        `Aucune campagne d'actualisation ${input.year} pour la structure ${input.structureId}`,
+        404
       );
     }
     if (!campaign.form) {
       throw new Error(`Campagne ${campaign.id} sans Form`);
     }
     if (campaign.form.status === true) {
-      throw new Error(
-        `Structure ${input.structureId} déjà actualisée pour ${input.year}`
+      throw new ApiDomainError(
+        `Structure ${input.structureId} déjà actualisée pour ${input.year}`,
+        409
       );
     }
     const formId = campaign.form.id;
@@ -105,6 +108,22 @@ export const updateActualisationCampaign = async (
       );
     }
     if (input.validate) {
+      const formSteps = await tx.formStep.findMany({
+        where: { formId },
+        select: { status: true },
+      });
+      const allStepsValidated =
+        formSteps.length > 0 &&
+        formSteps.every(
+          (formStep) =>
+            (formStep.status as unknown as StepStatus) === StepStatus.VALIDE
+        );
+      if (!allStepsValidated) {
+        throw new ApiDomainError(
+          `Toutes les étapes doivent être validées avant de valider l'actualisation ${input.year}`,
+          409
+        );
+      }
       await setCampaignFormStatus(tx, formId, true);
     }
 

@@ -19,6 +19,9 @@ export const useCampaigns = () => {
     }
 
     const refreshed = await fetch(`/api/structures/${structureId}`);
+    if (!refreshed.ok) {
+      return await extractApiError(refreshed);
+    }
     setStructure(await refreshed.json());
     return "OK";
   };
