@@ -7,6 +7,8 @@
 import type { WorkSheet } from "xlsx";
 import * as XLSX from "xlsx";
 
+import { endOfMonthUtcFromMonth } from "@/app/utils/date.util";
+
 import {
   buildLabelLookup,
   decodeSheetRange,
@@ -68,7 +70,7 @@ export type ActiviteRow = {
 };
 
 export type OfiiActiviteSheet = {
-  date: Date; // 1er du mois à midi UTC
+  date: Date; // dernier jour du mois à midi UTC
   rows: ActiviteRow[];
 };
 
@@ -273,9 +275,7 @@ export function loadOfiiFile(buffer: Buffer, fileName: string): OfiiFullSheet {
     rows.push(row as OfiiFullRow);
   }
 
-  const date = new Date(
-    Date.UTC(sheetDate.year, sheetDate.month - 1, 1, 12, 0, 0, 0)
-  );
+  const date = endOfMonthUtcFromMonth(sheetDate.year, sheetDate.month);
 
   return { date, rows };
 }
