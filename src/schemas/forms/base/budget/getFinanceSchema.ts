@@ -5,6 +5,8 @@ import { getRealCreationYear } from "@/app/utils/structure.util";
 import {
   AUTORISEE_OPEN_YEAR,
   CURRENT_YEAR,
+  INDICATEUR_FINANCIER_CUTOFF_YEAR_AUTORISEE,
+  INDICATEUR_FINANCIER_CUTOFF_YEAR_SUBVENTIONNEE,
   SUBVENTIONNEE_OPEN_YEAR,
 } from "@/constants";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
@@ -23,7 +25,7 @@ import {
 } from "../budget.schema";
 import { cpomStructureSchema } from "../cpom.schema";
 import { DocumentsFinanciersFlexibleSchema } from "../documentFinancier.schema";
-import { indicateursFinanciersSchema } from "../indicateurFinancier.schema";
+import { getIndicateursFinanciersSchema } from "../indicateurFinancier.schema";
 
 export const getFinanceSchema = (
   structure: StructureApiRead,
@@ -32,6 +34,11 @@ export const getFinanceSchema = (
   const { years } = getYearRange();
   const { isAutorisee, isSubventionnee } = structure;
 
+  const indicateurCutoff = isAutorisee
+    ? INDICATEUR_FINANCIER_CUTOFF_YEAR_AUTORISEE
+    : INDICATEUR_FINANCIER_CUTOFF_YEAR_SUBVENTIONNEE;
+
+  console.log(indicateurCutoff, INDICATEUR_FINANCIER_CUTOFF_YEAR_SUBVENTIONNEE);
   const startYear = getRealCreationYear(structure);
 
   const schema = years
@@ -88,7 +95,7 @@ export const getFinanceSchema = (
         budgets,
         cpomStructures: z.array(cpomStructureSchema),
       })
-      .and(indicateursFinanciersSchema);
+      .and(getIndicateursFinanciersSchema(indicateurCutoff));
   }
 
   return z
@@ -96,7 +103,7 @@ export const getFinanceSchema = (
       budgets,
       cpomStructures: z.array(cpomStructureSchema),
     })
-    .and(indicateursFinanciersSchema)
+    .and(getIndicateursFinanciersSchema(indicateurCutoff))
     .and(DocumentsFinanciersFlexibleSchema);
 };
 

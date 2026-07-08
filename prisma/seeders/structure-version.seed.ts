@@ -383,7 +383,7 @@ const buildNonVersionedRelations = (params: {
   relations.indicateursFinanciers = [
     createFakeIndicateurFinancier({ year: 2026, type: "PREVISIONNEL" }),
     createFakeIndicateurFinancier({ year: 2025, type: "PREVISIONNEL" }),
-    createFakeIndicateurFinancier({ year: 2024, type: "PREVISIONNEL" }),
+    createFakeIndicateurFinancier({ year: 2024, type: "REALISE" }),
     createFakeIndicateurFinancier({ year: 2023, type: "REALISE" }),
     createFakeIndicateurFinancier({ year: 2022, type: "REALISE" }),
     createFakeIndicateurFinancier({ year: 2021, type: "REALISE" }),

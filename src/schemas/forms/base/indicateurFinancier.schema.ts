@@ -1,7 +1,9 @@
 import z from "zod";
 
-import { isNullOrUndefined } from "@/app/utils/common.util";
-import { isYearRealisee } from "@/app/utils/indicateurFinancier.util";
+import {
+  isYearPrevisionnelle,
+  isYearRealisee,
+} from "@/app/utils/indicateurFinancier.util";
 import {
   zSafePositiveDecimalsNullish,
   zSafeYear,
@@ -17,14 +19,20 @@ export const indicateurFinancierSchema = z.object({
   coutJournalier: zSafePositiveDecimalsNullish(),
 });
 
-export const indicateursFinanciersSchema = z
-  .object({
-    indicateursFinanciers: z.array(indicateurFinancierSchema),
-  })
-  .refine(
-    ({ indicateursFinanciers }) => {
+const indicateursFinanciersObjectSchema = z.object({
+  indicateursFinanciers: z.array(indicateurFinancierSchema),
+});
+
+export const getIndicateursFinanciersSchema = (cutoffYear: number) =>
+  indicateursFinanciersObjectSchema.check(
+    z.superRefine(({ indicateursFinanciers }, ctx) => {
       if (indicateursFinanciers.length === 0) {
-        return false;
+        ctx.addIssue({
+          code: "custom",
+          path: ["indicateursFinanciers"],
+          message: "Au moins un indicateur financier est requis.",
+        });
+        return;
       }
 
       const everyYears = [
@@ -32,43 +40,33 @@ export const indicateursFinanciersSchema = z
       ];
 
       for (const year of everyYears) {
-        const isIndicateurFinancierRealiseFilled = isYearRealisee(
-          indicateursFinanciers,
-          year
-        );
-
-        if (isIndicateurFinancierRealiseFilled) {
+        if (year <= cutoffYear) {
+          if (!isYearRealisee(indicateursFinanciers, year)) {
+            ctx.addIssue({
+              code: "custom",
+              path: ["indicateursFinanciers", year],
+              message: `Le réalisé ${year} (ETP, taux d'encadrement, coût journalier) est obligatoire.`,
+            });
+          }
           continue;
         }
 
-        const indicateurFinancierPrevisionnel = indicateursFinanciers.find(
-          (indicateurFinancier) =>
-            indicateurFinancier.year === year &&
-            indicateurFinancier.type === "PREVISIONNEL"
-        );
-        const isIndicateurFinancierPrevisionnelFilled =
-          !isNullOrUndefined(indicateurFinancierPrevisionnel?.ETP) &&
-          !isNullOrUndefined(
-            indicateurFinancierPrevisionnel?.tauxEncadrement
-          ) &&
-          !isNullOrUndefined(indicateurFinancierPrevisionnel?.coutJournalier);
-        if (isIndicateurFinancierPrevisionnelFilled) {
-          continue;
+        if (
+          !isYearRealisee(indicateursFinanciers, year) &&
+          !isYearPrevisionnelle(indicateursFinanciers, year)
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["indicateursFinanciers", year],
+            message: `Un indicateur réalisé ou prévisionnel ${year} (ETP, taux d'encadrement, coût journalier) est requis.`,
+          });
         }
-        return false;
       }
-
-      return true;
-    },
-    {
-      error:
-        "Pour chaque année, il doit y avoir au moins un indicateur (ETP, taux d'encadrement, coût journalier) de type REALISE ou PREVISIONNEL rempli.",
-      path: ["indicateursFinanciers"],
-    }
+    })
   );
 
 export type IndicateursFinanciersFormValues = z.infer<
-  typeof indicateursFinanciersSchema
+  typeof indicateursFinanciersObjectSchema
 >;
 
 export type IndicateurFinancierFormValues = z.infer<
