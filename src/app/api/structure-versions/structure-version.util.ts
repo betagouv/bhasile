@@ -1,8 +1,24 @@
+import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
-import { StructureType } from "@/generated/prisma/client";
+
+export const checkNoDepartementAdministratifChange = (
+  structureDepartement: string | null | undefined,
+  versionDepartement: string | null | undefined
+): void => {
+  if (structureDepartement == null) {
+    return;
+  }
+  if (versionDepartement == null) {
+    return;
+  }
+  if (versionDepartement !== structureDepartement) {
+    throw new ApiDomainError(
+      "Une structure ne peut pas changer de département administratif."
+    );
+  }
+};
 
 type VersionFields = {
-  type: StructureType | null;
   communeAdministrative: string | null;
 };
 
@@ -10,11 +26,9 @@ type ResolvableVersion = {
   id: number;
   effectiveDate: Date | null;
   structureVersionTransformationId: number | null;
-  structureVersionTransformation:
-    | {
-        transformation: { form: { status: boolean | null } | null } | null;
-      }
-    | null;
+  structureVersionTransformation: {
+    transformation: { form: { status: boolean | null } | null } | null;
+  } | null;
 };
 
 export const isVersionValid = (version: ResolvableVersion): boolean => {
@@ -66,7 +80,9 @@ export const resolvePredecessor = <TVersion extends ResolvableVersion>(
   sortValidVersionsBefore(versions, effectiveDate.getTime())[0];
 
 export const resolveCurrentVersionFields = <
-  TStructure extends { structureVersions: (ResolvableVersion & VersionFields)[] },
+  TStructure extends {
+    structureVersions: (ResolvableVersion & VersionFields)[];
+  },
 >(
   structure: TStructure,
   now: Date
@@ -75,7 +91,6 @@ export const resolveCurrentVersionFields = <
   const currentVersion = resolveCurrentVersion(structureVersions, now);
   return {
     ...structureRest,
-    type: currentVersion?.type ?? null,
     communeAdministrative: currentVersion?.communeAdministrative ?? null,
   };
 };

@@ -162,7 +162,6 @@ const planStructureHistory = (
 };
 
 type VersionScalars = {
-  type: StructureType;
   nom: string;
   nomOfii: string;
   departementAdministratif: string;
@@ -177,12 +176,10 @@ type VersionScalars = {
 };
 
 const buildVersionScalars = (
-  type: StructureType,
   departementAdministratif: string,
   ofii: boolean
 ): VersionScalars => {
   const base: VersionScalars = {
-    type,
     nom: faker.lorem.words(2),
     nomOfii: faker.lorem.words(2),
     departementAdministratif,
@@ -423,6 +420,7 @@ const persistTransformation = async (
   params: {
     structureId: number;
     operateurId: number;
+    structureType: StructureType;
     svtType: StructureVersionTransformationType;
     effectiveDate: Date;
     places: number;
@@ -460,6 +458,7 @@ const persistTransformation = async (
         {
           type: params.svtType,
           operateurId: params.operateurId,
+          structureType: params.structureType,
           motif: params.svtType === "FERMETURE" ? faker.lorem.sentence() : null,
           actesAdministratifs: {
             create: buildTransfoActesCreate(
@@ -534,7 +533,6 @@ export const seedStructureWithVersions = async (
 ): Promise<SeededStructure> => {
   const plan = planStructureHistory(params.ofii, params.now);
   const scalars = buildVersionScalars(
-    params.type,
     params.departementAdministratif,
     params.ofii
   );
@@ -584,6 +582,8 @@ export const seedStructureWithVersions = async (
       codeBhasile: params.codeBhasile,
       operateurId: params.operateurId,
       creationDate: plan.creationDate,
+      departementAdministratif: params.departementAdministratif,
+      type: params.type,
       ...convertToPrismaObject(nonVersioned),
       structureVersions: {
         create: [{ campaignId: campaign.id, ...versionCommon }],
@@ -608,6 +608,8 @@ export const seedStructureWithVersions = async (
       codeBhasile: params.codeBhasile,
       operateurId: params.operateurId,
       creationDate: plan.creationDate,
+      departementAdministratif: params.departementAdministratif,
+      type: params.type,
       ...convertToPrismaObject(nonVersioned),
     };
     const structure = await prisma.structure.create({
@@ -618,6 +620,7 @@ export const seedStructureWithVersions = async (
     const version = await persistTransformation(prisma, {
       structureId,
       operateurId: params.operateurId,
+      structureType: params.type,
       svtType: "CREATION",
       effectiveDate: initial.effectiveDate,
       places: initial.places,
@@ -637,6 +640,7 @@ export const seedStructureWithVersions = async (
     const version = await persistTransformation(prisma, {
       structureId,
       operateurId: params.operateurId,
+      structureType: params.type,
       svtType: transfo.transfoType,
       effectiveDate: transfo.effectiveDate,
       places: transfo.places,
