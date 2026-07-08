@@ -101,6 +101,12 @@ export default function FormWrapper<TSchema extends AnyZodSchema>({
       block: "center",
       behavior: prefersReducedMotion ? "auto" : "smooth",
     });
+    const focusable = firstError.matches("input, select, textarea, button")
+      ? firstError
+      : firstError.querySelector<HTMLElement>(
+          "input, select, textarea, button, [tabindex]"
+        );
+    focusable?.focus({ preventScroll: true });
   }, [submitCount]);
 
   const handleReset = () => {
