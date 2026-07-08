@@ -21,6 +21,13 @@ export const formatDate = (
   return dateObject.toLocaleDateString("fr-FR");
 };
 
+/** Dernier jour du mois à midi UTC (depuis date ou mois/année). */
+export const endOfMonthUtcFromMonth = (year: number, month: number): Date =>
+  new Date(Date.UTC(year, month, 0, 12, 0, 0, 0));
+
+export const endOfMonthUtcFromDate = (date: Date): Date =>
+  endOfMonthUtcFromMonth(date.getUTCFullYear(), date.getUTCMonth() + 1);
+
 export const formatDateToIsoString = (
   val: string | undefined | null
 ): string | undefined => {
