@@ -37,7 +37,7 @@ export default function Usage(): ReactElement {
   const isLoading = !iframeUrl || !iframeLoaded;
 
   return (
-    <div className="flex-1 w-full min-h-150 flex justify-center items-stretch py-8 relative">
+    <div className="flex-1 w-full min-h-[80vh] flex justify-center items-stretch pb-8 relative">
       {isLoading && (
         <div className="absolute inset-0 flex justify-center items-center">
           <div>
@@ -47,7 +47,7 @@ export default function Usage(): ReactElement {
         </div>
       )}
       {iframeUrl ? (
-        <div className="w-4/5">
+        <div className="w-full">
           <iframe
             src={iframeUrl}
             className="border-0 w-full h-full"
