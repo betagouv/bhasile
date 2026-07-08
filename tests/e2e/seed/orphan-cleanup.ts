@@ -53,6 +53,24 @@ export const cleanupOrphans = async (): Promise<void> => {
     }
   }
 
+  const campaigns = await prisma.campaign.findMany({
+    where: {
+      structureVersion: {
+        structure: { codeBhasile: { startsWith: E2E_PREFIX } },
+      },
+    },
+    select: { id: true },
+  });
+  for (const { id } of campaigns) {
+    try {
+      await prisma.campaign.delete({ where: { id } });
+    } catch (err) {
+      errors.push(
+        `campaign ${id}: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
+  }
+
   const structures = await prisma.structure.findMany({
     where: { codeBhasile: { startsWith: E2E_PREFIX } },
     select: { id: true, codeBhasile: true },

@@ -140,6 +140,9 @@ export const seedValidStructureBudgets = async (
       totalCharges: 1000,
       repriseEtat: 0,
       affectationReservesFondsDedies: 0,
+      excedentRecupere: 0,
+      excedentDeduit: 0,
+      fondsDedies: 0,
     })),
   });
 };
