@@ -44,8 +44,7 @@ export const ErrorToast = () => {
       />
       <div className="flex flex-col gap-1">
         <p role="alert" aria-atomic="true" className="text-sm m-0">
-          Vos données n’ont pas pu être sauvegardées, vérifiez votre connexion
-          et réessayez.{" "}
+          Vos données n’ont pas pu être sauvegardées. Veuillez réessayer{" "}
           <a
             href={getErrorEmail(message)}
             target="_blank"
