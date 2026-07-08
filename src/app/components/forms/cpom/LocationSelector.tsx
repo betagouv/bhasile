@@ -176,7 +176,7 @@ export const LocationSelector = () => {
         )}
       </div>
       {errorMessages?.length > 0 && (
-        <p className="text-default-error m-0 p-0 text-right">
+        <p className="text-default-error m-0 p-0 text-right" data-form-error>
           {errorMessages[0]}
         </p>
       )}

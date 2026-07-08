@@ -111,7 +111,7 @@ export const DatesAndDocuments = () => {
         notice={<MaxSizeNotice className="mb-0" />}
       />
       {errorMessages?.length > 0 && (
-        <p className="text-default-error m-0 p-0">
+        <p className="text-default-error m-0 p-0" data-form-error>
           {errorMessages?.length ? errorMessages[0] : ""}
         </p>
       )}

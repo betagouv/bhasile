@@ -106,7 +106,7 @@ export const FieldSetYearlyDocumentsFinanciers = ({
         <h2 className="text-title-blue-france text-xl mb-6">{year}</h2>
       )}
       {hasError && (
-        <p className=" text-default-error flex items-center gap-2">
+        <p className=" text-default-error flex items-center gap-2" data-form-error>
           <i
             className="fr-icon-error-fill text-default-error"
             aria-hidden="true"

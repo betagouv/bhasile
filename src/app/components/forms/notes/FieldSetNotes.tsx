@@ -28,7 +28,7 @@ export const FieldSetNotes = () => {
         dératisation. “
       </span>
       {fieldState.error?.message && (
-        <p className="text-default-error m-0 p-0 pt-2">
+        <p className="text-default-error m-0 p-0 pt-2" data-form-error>
           Ce champ est obligatoire
         </p>
       )}

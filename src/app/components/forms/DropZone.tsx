@@ -165,7 +165,7 @@ export const DropZone = ({ className, onChange, children }: Props) => {
           PDF, XLS, XLSX, XLSM, CSV et ODS seulement - Taille maximale : 10 Mo
         </span>
         {currentErrorMessage && (
-          <span className="text-center text-default-error text-sm">
+          <span className="text-center text-default-error text-sm" data-form-error>
             {currentErrorMessage}
           </span>
         )}

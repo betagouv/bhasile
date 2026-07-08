@@ -64,7 +64,7 @@ export const IndicateursFinanciers = () => {
       </Table>
       {errorMessages.length > 0 &&
         errorMessages.map((errorMessage) => (
-          <p className="text-label-red-marianne" key={errorMessage}>
+          <p className="text-label-red-marianne" key={errorMessage} data-form-error>
             {errorMessage}
           </p>
         ))}

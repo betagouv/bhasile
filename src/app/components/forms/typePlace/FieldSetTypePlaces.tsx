@@ -65,7 +65,7 @@ export const FieldSetTypePlaces = ({
         ))}
       </Table>
       {hasErrors && (
-        <p className="text-label-red-marianne">
+        <p className="text-label-red-marianne" data-form-error>
           Toutes les cases doivent être remplies
         </p>
       )}
