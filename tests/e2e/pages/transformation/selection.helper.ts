@@ -56,12 +56,9 @@ export const pickStructures = async (
 
 export const selectSources = async (
   page: Page,
-  params: { type?: string; structureIds: number[] }
+  params: { structureIds: number[] }
 ): Promise<void> => {
   await fillAutocomplete(page, "#operateur", OPERATEUR_SEARCH);
-  if (params.type) {
-    await page.locator("select.fr-select").first().selectOption(params.type);
-  }
   await fillAutocomplete(page, "#departement", FILTER_DEPARTEMENT_SEARCH);
   await pickStructures(page, params.structureIds);
 };
