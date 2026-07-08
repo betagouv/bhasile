@@ -365,11 +365,6 @@ export const findIndicateursFinanciers = async (
   });
 };
 
-/**
- * RMU du périmètre. La donnée est au département : on ne filtre que par
- * `departements` (les filtres `operateurs`/`types`, propres aux structures, ne
- * s'appliquent pas). `null` = tout le parc. Cf. rmu/README.md.
- */
 export const findRmus = async (
   departementNumeros: Set<string> | null
 ): Promise<StatistiqueDbRmu[]> => {

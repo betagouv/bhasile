@@ -201,7 +201,6 @@ export type StatistiqueApiRead = {
     summary: ActiviteSummaryStat;
     byMonth: ActiviteByMonthStat[];
   };
-  /** `null` si un filtre `operateurs`/`types` est actif : le RMU, départemental, n'est pas différenciable. */
   rmu: {
     byMonth: RmuPeriodStat[];
     byTrimester: RmuPeriodStat[];

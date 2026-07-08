@@ -116,9 +116,6 @@ export const buildStatistiquesContext = async (
     findBudgets(allStructureIds),
     findIndicateursFinanciers(allStructureIds),
     findActivites(dnaCodes),
-    // RMU : donnée départementale, filtrée uniquement par `departements`. Non
-    // applicable (donc `null`) dès qu'un filtre `operateurs`/`types` est actif,
-    // car le RMU ne se différencie pas par opérateur ou type. Cf. rmu/README.md.
     resolvedFilters.operateurIds === null && resolvedFilters.types.size === 0
       ? findRmus(resolvedFilters.departements)
       : Promise.resolve(null),

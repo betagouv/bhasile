@@ -15,8 +15,6 @@ const rmuRow = (
   ...partial,
 });
 
-// Le calcul RMU ne dépend que de `context.rmus` : les structures ne servent
-// qu'à construire un contexte valide.
 const contextWithRmus = (rmus: StatistiqueDbRmu[]) =>
   buildTestStatistiquesContext({
     structures: [{ id: 1, type: StructureType.CADA, departementAdministratif: "75" }],

@@ -217,10 +217,5 @@ export type StatistiquesContext = {
   budgets: StatistiqueDbBudget[];
   indicateurs: StatistiqueDbIndicateurFinancier[];
   activites: StatistiqueDbActivite[];
-  /**
-   * RMU du périmètre `departements` (indépendant des structures).
-   * `null` = non applicable : un filtre `operateurs`/`types` est actif et la
-   * donnée RMU, départementale, ne peut pas être différenciée. Cf. rmu/README.md.
-   */
   rmus: StatistiqueDbRmu[] | null;
 };
