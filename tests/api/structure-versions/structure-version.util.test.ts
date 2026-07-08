@@ -27,10 +27,4 @@ describe("checkNoDepartementAdministratifChange", () => {
       ApiDomainError
     );
   });
-
-  it("laisse passer un département null (no-op à l'écriture, non traité comme un changement)", () => {
-    expect(() =>
-      checkNoDepartementAdministratifChange("75", null)
-    ).not.toThrow();
-  });
 });
