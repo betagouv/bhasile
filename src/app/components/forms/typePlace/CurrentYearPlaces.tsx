@@ -21,12 +21,13 @@ export const CurrentYearPlaces = ({
 
   const totalPlaces =
     Number(watch("structureTypologies.0.placesAutorisees")) || 0;
+  const conventionYear = watch("structureTypologies.0.year");
   const isActualisation = formKind === FormKind.ACTUALISATION;
 
   return (
     <fieldset className="flex flex-col gap-6">
       <legend className="text-xl font-bold mb-4 text-title-blue-france max-w-3xl">
-        {getLegend(formKind)}
+        {getLegend(formKind, conventionYear)}
       </legend>
       {isActualisation && (
         <Alert
@@ -99,13 +100,13 @@ export const CurrentYearPlaces = ({
   );
 };
 
-const getLegend = (formKind: FormKind): string => {
+const getLegend = (formKind: FormKind, year: number): string => {
   if (isTransformationSurStructureExistante(formKind)) {
     return `Veuillez renseigner les nombres de places suivants à la suite de ${getTransformationNounAvecArticle(
       formKind
     )}, tels que prévu dans la nouvelle convention.`;
   }
-  return "Types de place (tels que prévus dans la convention)";
+  return `Types de place (tels que prévus dans la convention ${year})`;
 };
 
 const getPlacesDiffMessage = (

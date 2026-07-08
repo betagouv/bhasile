@@ -37,7 +37,6 @@ export const getFinanceSchema = (
     ? INDICATEUR_FINANCIER_CUTOFF_YEAR_AUTORISEE
     : INDICATEUR_FINANCIER_CUTOFF_YEAR_SUBVENTIONNEE;
 
-  console.log(indicateurCutoff, INDICATEUR_FINANCIER_CUTOFF_YEAR_SUBVENTIONNEE);
   const startYear = getRealCreationYear(structure);
 
   const schema = years
