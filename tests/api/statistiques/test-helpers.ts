@@ -138,6 +138,7 @@ export const buildTestStatistiquesContext = (
         | "budgets"
         | "indicateurs"
         | "activites"
+        | "rmus"
       >
     >
 ): StatistiquesContext => {
@@ -179,5 +180,6 @@ export const buildTestStatistiquesContext = (
     budgets: partial.budgets ?? [],
     indicateurs: partial.indicateurs ?? [],
     activites: partial.activites ?? [],
+    rmus: partial.rmus !== undefined ? partial.rmus : [],
   };
 };

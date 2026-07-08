@@ -14,6 +14,7 @@ import type {
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
   StatistiqueDbIndicateurFinancier,
+  StatistiqueDbRmu,
   StatistiqueDbStructureActivity,
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologie,
@@ -361,6 +362,29 @@ export const findIndicateursFinanciers = async (
       tauxEncadrement: true,
       coutJournalier: true,
     },
+  });
+};
+
+/**
+ * RMU du périmètre. La donnée est au département : on ne filtre que par
+ * `departements` (les filtres `operateurs`/`types`, propres aux structures, ne
+ * s'appliquent pas). `null` = tout le parc. Cf. rmu/README.md.
+ */
+export const findRmus = async (
+  departementNumeros: Set<string> | null
+): Promise<StatistiqueDbRmu[]> => {
+  return prisma.rmu.findMany({
+    where: departementNumeros
+      ? { departementNumero: { in: [...departementNumeros] } }
+      : undefined,
+    select: {
+      id: true,
+      departementNumero: true,
+      date: true,
+      referesEngages: true,
+      referesExecutes: true,
+    },
+    orderBy: { date: "asc" },
   });
 };
 

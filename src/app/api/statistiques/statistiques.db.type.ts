@@ -127,6 +127,16 @@ export type StatistiqueDbIndicateurFinancierMetriques = Omit<
   "id" | "structureId" | "year" | "type"
 >;
 
+export type StatistiqueDbRmu = Prisma.RmuGetPayload<{
+  select: {
+    id: true;
+    departementNumero: true;
+    date: true;
+    referesEngages: true;
+    referesExecutes: true;
+  };
+}>;
+
 export type StatistiqueDbDepartement = Prisma.DepartementGetPayload<{
   select: {
     id: true;
@@ -207,4 +217,10 @@ export type StatistiquesContext = {
   budgets: StatistiqueDbBudget[];
   indicateurs: StatistiqueDbIndicateurFinancier[];
   activites: StatistiqueDbActivite[];
+  /**
+   * RMU du périmètre `departements` (indépendant des structures).
+   * `null` = non applicable : un filtre `operateurs`/`types` est actif et la
+   * donnée RMU, départementale, ne peut pas être différenciée. Cf. rmu/README.md.
+   */
+  rmus: StatistiqueDbRmu[] | null;
 };
