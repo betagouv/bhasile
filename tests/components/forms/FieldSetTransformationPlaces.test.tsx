@@ -40,4 +40,34 @@ describe("FieldSetTransformationPlaces", () => {
 
     expect(screen.queryByText(/soit .* place/)).not.toBeInTheDocument();
   });
+
+  it("affiche une erreur et masque le delta quand une extension diminue les places", () => {
+    renderWithTotal({ formKind: FormKind.EXTENSION, originalPlaces: 47 }, 40);
+
+    expect(
+      screen.getByText(
+        /doit être supérieur au nombre de places précédent \(47\)/
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/soit .* place/)).not.toBeInTheDocument();
+  });
+
+  it("ne signale pas de contradiction quand le champ est vide", () => {
+    render(
+      <FormTestWrapper
+        defaultValues={{
+          structureTypologies: [{ placesAutorisees: "", year: 2026 }],
+        }}
+      >
+        <FieldSetTransformationPlaces
+          formKind={FormKind.EXTENSION}
+          originalPlaces={47}
+        />
+      </FormTestWrapper>
+    );
+
+    expect(
+      screen.queryByText(/doit être supérieur/)
+    ).not.toBeInTheDocument();
+  });
 });

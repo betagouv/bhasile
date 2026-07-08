@@ -36,6 +36,32 @@ export type CreationPlacesEtHebergementDraftFormValues = z.infer<
 
 const PLACES_AUTORISEES_PATH = ["structureTypologies", 0, "placesAutorisees"];
 
+export type PlacesDirection = "valid" | "contradiction" | "unchanged";
+
+export const getPlacesDirection = (
+  formKind: FormKind,
+  originalPlaces: number,
+  placesAutorisees: number | undefined
+): PlacesDirection => {
+  if (placesAutorisees === undefined || !Number.isFinite(placesAutorisees)) {
+    return "valid";
+  }
+  if (placesAutorisees === originalPlaces) {
+    return "unchanged";
+  }
+  const isIncreasing = placesAutorisees > originalPlaces;
+  const shouldIncrease = formKind === FormKind.EXTENSION;
+  return isIncreasing === shouldIncrease ? "valid" : "contradiction";
+};
+
+export const getPlacesDirectionMessage = (
+  formKind: FormKind,
+  originalPlaces: number
+): string =>
+  formKind === FormKind.EXTENSION
+    ? `Le nombre de places autorisées doit être supérieur au nombre de places précédent (${originalPlaces}).`
+    : `Le nombre de places autorisées doit être inférieur au nombre de places précédent (${originalPlaces}).`;
+
 export const getPlacesEtHebergementSchema = (
   formKind: FormKind,
   originalPlaces?: number
@@ -50,32 +76,21 @@ export const getPlacesEtHebergementSchema = (
   return creationPlacesEtHebergementSchema.check(
     z.superRefine((data, ctx) => {
       const placesAutorisees = data.structureTypologies?.[0]?.placesAutorisees;
+      const direction = getPlacesDirection(
+        formKind,
+        originalPlaces,
+        placesAutorisees
+      );
 
-      if (!Number.isFinite(placesAutorisees)) {
+      if (direction === "valid") {
         return;
       }
 
-      if (
-        formKind === FormKind.EXTENSION &&
-        placesAutorisees <= originalPlaces
-      ) {
-        ctx.addIssue({
-          code: "custom",
-          message: `Le nombre de places autorisées doit être supérieur au nombre de places précédent (${originalPlaces}).`,
-          path: PLACES_AUTORISEES_PATH,
-        });
-      }
-
-      if (
-        formKind === FormKind.CONTRACTION &&
-        placesAutorisees >= originalPlaces
-      ) {
-        ctx.addIssue({
-          code: "custom",
-          message: `Le nombre de places autorisées doit être inférieur au nombre de places précédent (${originalPlaces}).`,
-          path: PLACES_AUTORISEES_PATH,
-        });
-      }
+      ctx.addIssue({
+        code: "custom",
+        message: getPlacesDirectionMessage(formKind, originalPlaces),
+        path: PLACES_AUTORISEES_PATH,
+      });
     })
   );
 };
