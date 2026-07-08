@@ -69,6 +69,21 @@ describe("campaign.repository db integration", () => {
       },
     });
 
+  const markAllStepsValidated = (structureId: number) =>
+    prisma.formStep.updateMany({
+      where: {
+        form: {
+          campaign: {
+            campaignDefinition: {
+              slug: actualisationCampaignDefinitionSlug(ACTUALISATION_YEAR),
+            },
+            structureVersion: { structureId },
+          },
+        },
+      },
+      data: { status: StepStatus.VALIDE },
+    });
+
   beforeAll(async () => {
     const campaignDefinition = await prisma.campaignDefinition.upsert({
       where: { slug: actualisationCampaignDefinitionSlug(ACTUALISATION_YEAR) },
@@ -213,6 +228,7 @@ describe("campaign.repository db integration", () => {
   it("à la validation, ne fait que passer form.status à true (pas de clone)", async () => {
     const structure = await createFinalisedStructure();
     await openCampaignFor(structure.id);
+    await markAllStepsValidated(structure.id);
     const before = await findCampaignVersion(structure.id);
 
     const result = await updateActualisationCampaign({
@@ -225,5 +241,18 @@ describe("campaign.repository db integration", () => {
     const after = await findCampaignVersion(structure.id);
     expect(after.id).toBe(before.id);
     expect(after.effectiveDate).toEqual(before.effectiveDate);
+  });
+
+  it("refuse la validation tant que toutes les étapes ne sont pas validées", async () => {
+    const structure = await createFinalisedStructure();
+    await openCampaignFor(structure.id);
+
+    await expect(
+      updateActualisationCampaign({
+        structureId: structure.id,
+        year: ACTUALISATION_YEAR,
+        validate: true,
+      })
+    ).rejects.toThrow(/étapes doivent être validées/);
   });
 });
