@@ -12,7 +12,7 @@ export const TransformationSelectionSummaryItem = ({
   const structure = structureVersion?.structure;
 
   const nom = structureVersion?.nom ?? structure?.nom;
-  const type = structureVersion?.type;
+  const type = structureVersionTransformation.structureType;
   const operateur =
     structure?.operateur ?? structureVersionTransformation.operateur;
   const departementAdministratif =

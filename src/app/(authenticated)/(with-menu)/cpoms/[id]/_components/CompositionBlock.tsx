@@ -5,13 +5,16 @@ import { useRouter } from "next/navigation";
 
 import { Block } from "@/app/components/common/Block";
 import { Table } from "@/app/components/common/Table";
+import { InformationCard } from "@/app/components/InformationCard";
 import { formatDate } from "@/app/utils/date.util";
+import { pluralize } from "@/app/utils/string.util";
 
 import { useCpomContext } from "../_context/CpomClientContext";
 
 export const CompositionBlock = () => {
   const { cpom } = useCpomContext();
   const router = useRouter();
+  const structureCount = cpom.structures?.length ?? 0;
 
   return (
     <Block
@@ -23,6 +26,12 @@ export const CompositionBlock = () => {
       entity={cpom}
       entityType="Cpom"
     >
+      <div className="flex mb-6">
+        <InformationCard
+          primaryInformation={structureCount}
+          secondaryInformation={pluralize(structureCount, "structure")}
+        />
+      </div>
       <Table
         headings={["", "Entrée", "", "Sortie", ""]}
         ariaLabelledBy="composition"
