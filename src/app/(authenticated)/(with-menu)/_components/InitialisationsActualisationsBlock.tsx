@@ -58,7 +58,7 @@ export const InitialisationsActualisationsBlock = async ({
 
       {rows.length === 0 && (
         <p className="border-t border-default-grey px-4 py-6 text-sm text-mention-grey">
-          Aucune structure à traiter.
+          Aucune structure à actualiser.
         </p>
       )}
 

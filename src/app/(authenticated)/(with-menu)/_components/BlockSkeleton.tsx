@@ -14,7 +14,7 @@ export const BlockSkeleton = ({ title, icon }: Props): ReactElement => (
     <BlockTitle title={title} iconClassName={icon} />
     <p className="flex gap-2 items-center border-t border-default-grey px-4 py-6 text-sm text-mention-grey">
       <Loader />
-      Chargement
+      Chargement...
     </p>
   </section>
 );
