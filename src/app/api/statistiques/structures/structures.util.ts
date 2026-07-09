@@ -131,7 +131,7 @@ const countActiveCpoms = (
   return activeCpomIds.size;
 };
 
-/** Counts structures (not CPOM contracts) covered by an active CPOM for the year. */
+/** Counts structures covered by an active CPOM for the year. */
 export const countStructuresAvecCpomForYear = (
   cpomLinks: StatistiqueDbCpomStructure[],
   structureIds: Set<number>,
@@ -408,8 +408,7 @@ export const computeStructuresStatistiques = (
 };
 
 export type StructuresYearIndicatorField =
-  | "totalStructures"
-  | "structuresAvecCpom";
+  "totalStructures" | "structuresAvecCpom";
 
 /** Computes a single byYear field for one year, for the cartographie one-indicator requests. */
 export const computeStructuresIndicatorForYear = (

@@ -2,8 +2,7 @@ import { z } from "zod";
 
 import { statistiquesFiltersSchema } from "@/schemas/api/statistique.schema";
 
-/** Stable indicator keys shown on the map; see the cartographie/ README for the full mapping. */
-export const CARTOGRAPHIE_INDICATEURS = [
+const CARTOGRAPHIE_INDICATEURS = [
   "structures.total",
   "structures.avecCpom",
   "places.autorisees",
@@ -26,19 +25,19 @@ export const CARTOGRAPHIE_INDICATEURS = [
   "activite.presencesIndues",
 ] as const;
 
-export const cartographieIndicateurSchema = z.enum(CARTOGRAPHIE_INDICATEURS);
+const cartographieIndicateurSchema = z.enum(CARTOGRAPHIE_INDICATEURS);
 
 export type CartographieIndicateur = z.infer<
   typeof cartographieIndicateurSchema
 >;
 
-export const CARTOGRAPHIE_GRANULARITES = [
+const CARTOGRAPHIE_GRANULARITES = [
   "region",
   "departement",
   "arrondissement",
 ] as const;
 
-export const cartographieGranulariteSchema = z.enum(CARTOGRAPHIE_GRANULARITES);
+const cartographieGranulariteSchema = z.enum(CARTOGRAPHIE_GRANULARITES);
 
 export type CartographieGranularite = z.infer<
   typeof cartographieGranulariteSchema
@@ -60,8 +59,6 @@ export const statistiqueCartographieFiltersSchema =
 export type StatistiqueCartographieFilters = z.infer<
   typeof statistiqueCartographieFiltersSchema
 >;
-
-// Types de lecture pure (pas d'input à valider) : pas de schéma zod, juste des types.
 
 export type CartographieEvolutionStat = {
   previousValue: number;

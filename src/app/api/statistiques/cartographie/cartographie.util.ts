@@ -49,7 +49,7 @@ export const groupStructureIdsByDepartement = (
   return groups;
 };
 
-/** Resolves the `departements` filter into a set of departement numeros, or null if unrestricted. */
+/** Resolves the `departements` filter into a set of departement numeros. */
 export const resolveZoneDepartementNumeros = (
   filters: Pick<StatistiqueCartographieFilters, "departements">
 ): Set<string> | null => {
@@ -57,7 +57,7 @@ export const resolveZoneDepartementNumeros = (
   return departementList.length > 0 ? new Set(departementList) : null;
 };
 
-/** Builds the canonical zone list for the chosen granularite, including zones with no structure. */
+/** Builds the zone list for the chosen granularite. */
 export const buildZoneDefinitions = (
   granularite: CartographieSupportedGranularite,
   allDepartements: CartographieDbDepartement[],
@@ -127,18 +127,16 @@ export type CartographieIndicateurValues = {
   previousValue: number | null;
 };
 
-/** One lean computer per indicator; `aggregation` (moyenne/médiane) is unrelated to `granularite` (region/departement). */
-type IndicateurValuesComputer = (
+type IndicateurValuesCalculation = (
   context: StatistiquesContext,
   annee: number,
   aggregation: NumericAggregation
 ) => CartographieIndicateurValues;
 
-/** Wraps a single-year compute function into a value/previousValue pair for `annee` and `annee - 1`. */
-const yearOverYear =
+const yearOverPreviousYear =
   (
     compute: (context: StatistiquesContext, year: number) => number | null
-  ): IndicateurValuesComputer =>
+  ): IndicateurValuesCalculation =>
   (context, annee) => ({
     value: compute(context, annee),
     previousValue: compute(context, annee - 1),
@@ -187,69 +185,86 @@ const activiteValuesForYears = (
   return { value, previousValue };
 };
 
-export const INDICATEUR_COMPUTERS: Record<
-  CartographieIndicateur,
-  IndicateurValuesComputer
-> = {
-  "structures.total": yearOverYear((context, year) =>
-    computeStructuresIndicatorForYear(context, year, "totalStructures")
-  ),
-  "structures.avecCpom": yearOverYear((context, year) =>
-    computeStructuresIndicatorForYear(context, year, "structuresAvecCpom")
-  ),
-  "places.autorisees": yearOverYear((context, year) =>
-    computeTypologieFieldForYear(context, year, "placesAutorisees")
-  ),
-  "places.pmr": yearOverYear((context, year) =>
-    computeTypologieFieldForYear(context, year, "pmr")
-  ),
-  "places.lgbt": yearOverYear((context, year) =>
-    computeTypologieFieldForYear(context, year, "lgbt")
-  ),
-  "places.fvvTeh": yearOverYear((context, year) =>
-    computeTypologieFieldForYear(context, year, "fvvTeh")
-  ),
-  "places.qpv": yearOverYear((context, year) =>
-    computeAdresseFieldForYear(context, year, "qpv")
-  ),
-  "places.logementsSociaux": yearOverYear((context, year) =>
-    computeAdresseFieldForYear(context, year, "logementSocial")
-  ),
-  "finance.dotationAccordee": (context, annee, aggregation) =>
-    financeValuesForYears(context, annee, aggregation, "dotationAccordee"),
-  "finance.etp": (context, annee, aggregation) =>
-    financeValuesForYears(context, annee, aggregation, "totalETP"),
-  "finance.tauxEncadrement": (context, annee, aggregation) =>
-    financeValuesForYears(context, annee, aggregation, "tauxEncadrement"),
-  "finance.coutJournalier": (context, annee, aggregation) =>
-    financeValuesForYears(context, annee, aggregation, "coutJournalier"),
-  "finance.resultatNet": (context, annee, aggregation) =>
-    financeValuesForYears(context, annee, aggregation, "resultatNet"),
-  "controleQualite.nbEig": (context, annee, aggregation) =>
-    controleQualiteValuesForYears(context, annee, aggregation, "nbEig"),
-  "controleQualite.tauxEigComportementViolent": (context, annee, aggregation) =>
-    controleQualiteValuesForYears(
+const INDICATEURS: Record<CartographieIndicateur, IndicateurValuesCalculation> =
+  {
+    "structures.total": yearOverPreviousYear((context, year) =>
+      computeStructuresIndicatorForYear(context, year, "totalStructures")
+    ),
+    "structures.avecCpom": yearOverPreviousYear((context, year) =>
+      computeStructuresIndicatorForYear(context, year, "structuresAvecCpom")
+    ),
+    "places.autorisees": yearOverPreviousYear((context, year) =>
+      computeTypologieFieldForYear(context, year, "placesAutorisees")
+    ),
+    "places.pmr": yearOverPreviousYear((context, year) =>
+      computeTypologieFieldForYear(context, year, "pmr")
+    ),
+    "places.lgbt": yearOverPreviousYear((context, year) =>
+      computeTypologieFieldForYear(context, year, "lgbt")
+    ),
+    "places.fvvTeh": yearOverPreviousYear((context, year) =>
+      computeTypologieFieldForYear(context, year, "fvvTeh")
+    ),
+    "places.qpv": yearOverPreviousYear((context, year) =>
+      computeAdresseFieldForYear(context, year, "qpv")
+    ),
+    "places.logementsSociaux": yearOverPreviousYear((context, year) =>
+      computeAdresseFieldForYear(context, year, "logementSocial")
+    ),
+    "finance.dotationAccordee": (context, annee, aggregation) =>
+      financeValuesForYears(context, annee, aggregation, "dotationAccordee"),
+    "finance.etp": (context, annee, aggregation) =>
+      financeValuesForYears(context, annee, aggregation, "totalETP"),
+    "finance.tauxEncadrement": (context, annee, aggregation) =>
+      financeValuesForYears(context, annee, aggregation, "tauxEncadrement"),
+    "finance.coutJournalier": (context, annee, aggregation) =>
+      financeValuesForYears(context, annee, aggregation, "coutJournalier"),
+    "finance.resultatNet": (context, annee, aggregation) =>
+      financeValuesForYears(context, annee, aggregation, "resultatNet"),
+    "controleQualite.nbEig": (context, annee, aggregation) =>
+      controleQualiteValuesForYears(context, annee, aggregation, "nbEig"),
+    "controleQualite.tauxEigComportementViolent": (
       context,
       annee,
-      aggregation,
-      "tauxEigComportementViolent"
-    ),
-  "controleQualite.moyenneEvaluations": (context, annee, aggregation) =>
-    controleQualiteValuesForYears(context, annee, aggregation, "noteGenerale"),
-  "activite.placesDna": (context, annee, aggregation) =>
-    activiteValuesForYears(
-      context,
-      annee,
-      aggregation,
-      "placesEnregistreesDna"
-    ),
-  "activite.placesIndisponibles": (context, annee, aggregation) =>
-    activiteValuesForYears(context, annee, aggregation, "placesIndisponibles"),
-  "activite.placesOccupees": (context, annee, aggregation) =>
-    activiteValuesForYears(context, annee, aggregation, "placesOccupees"),
-  "activite.presencesIndues": (context, annee, aggregation) =>
-    activiteValuesForYears(context, annee, aggregation, "presencesInduesTotal"),
-};
+      aggregation
+    ) =>
+      controleQualiteValuesForYears(
+        context,
+        annee,
+        aggregation,
+        "tauxEigComportementViolent"
+      ),
+    "controleQualite.moyenneEvaluations": (context, annee, aggregation) =>
+      controleQualiteValuesForYears(
+        context,
+        annee,
+        aggregation,
+        "noteGenerale"
+      ),
+    "activite.placesDna": (context, annee, aggregation) =>
+      activiteValuesForYears(
+        context,
+        annee,
+        aggregation,
+        "placesEnregistreesDna"
+      ),
+    "activite.placesIndisponibles": (context, annee, aggregation) =>
+      activiteValuesForYears(
+        context,
+        annee,
+        aggregation,
+        "placesIndisponibles"
+      ),
+    "activite.placesOccupees": (context, annee, aggregation) =>
+      activiteValuesForYears(context, annee, aggregation, "placesOccupees"),
+    "activite.presencesIndues": (context, annee, aggregation) =>
+      activiteValuesForYears(
+        context,
+        annee,
+        aggregation,
+        "presencesInduesTotal"
+      ),
+  };
 
 /** Computes only the requested indicator, for `annee` and `annee - 1`. */
 export const computeIndicateurValues = (
@@ -258,4 +273,4 @@ export const computeIndicateurValues = (
   annee: number,
   aggregation: NumericAggregation
 ): CartographieIndicateurValues =>
-  INDICATEUR_COMPUTERS[indicateur](context, annee, aggregation);
+  INDICATEURS[indicateur](context, annee, aggregation);

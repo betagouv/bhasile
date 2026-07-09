@@ -77,7 +77,7 @@ Sans `departements`, toute la France ; sans aucun filtre opérateur/type.
 
 ## Calcul
 
-Une requête calcule **un seul indicateur à la fois**, jamais les fonctions "gros bloc" de `/api/statistiques` (`computeStructuresStatistiques` etc.), qui calculent tout un bloc même quand un seul champ est demandé. Chaque `*.util.ts` expose à la place une fonction ciblée à un champ/une année (`computeStructuresIndicatorForYear`, `computeTypologieFieldForYear`, `computeAdresseFieldForYear`, `computeFinanceTotalValuesForYears`, `computeControleQualiteByYear`, `computeActiviteFieldForYears`), référencées par le registre `INDICATEUR_COMPUTERS` dans `cartographie.util.ts`.
+Une requête calcule **un seul indicateur à la fois**, jamais les fonctions "gros bloc" de `/api/statistiques` (`computeStructuresStatistiques` etc.), qui calculent tout un bloc même quand un seul champ est demandé. Chaque `*.util.ts` expose à la place une fonction ciblée à un champ/une année (`computeStructuresIndicatorForYear`, `computeTypologieFieldForYear`, `computeAdresseFieldForYear`, `computeFinanceTotalValuesForYears`, `computeControleQualiteByYear`, `computeActiviteFieldForYears`), référencées par le registre `INDICATEURS` dans `cartographie.util.ts`.
 
 Ce qui est réutilisé sans recalcul : le `StatistiquesContext` déjà chargé par `buildStatistiquesContext`. `sliceStatistiquesContext` le restreint à une zone ; les autres modules de calcul dérivent déjà leur périmètre depuis les champs qu'elle tranche, pas besoin de filtrer le reste.
 

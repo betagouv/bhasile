@@ -642,7 +642,7 @@ export const filterStructuresWithTypologie = (
 ): StatistiqueDbStructure[] =>
   structures.filter((structure) => typologieMap.has(structure.id));
 
-/** Shared prologue for the cartographie one-year indicator computers: null when the year has no typologie data. */
+/** Resolves the structures with typologie for a given year. */
 export const resolveStructuresWithTypologieForYear = (
   context: StatistiquesTypologieYearContext,
   year: number
@@ -720,7 +720,7 @@ const sliceActiveStructureIdsByPeriod = (
   ),
 });
 
-/** Restricts an already-loaded StatistiquesContext to a zone's structures, without refetching. */
+/** Restricts a StatistiquesContext to a zone's structures. */
 export const sliceStatistiquesContext = (
   context: StatistiquesContext,
   structureIdsInZone: Set<number>,
