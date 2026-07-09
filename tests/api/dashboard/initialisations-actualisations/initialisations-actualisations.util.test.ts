@@ -4,8 +4,8 @@ import { actualisationCampaignDefinitionSlug } from "@/app/api/campaigns/campaig
 import {
   getActualisationStatus,
   getInitialisationStatus,
-  isOpen,
   getMostUrgentActionUrl,
+  isOpen,
 } from "@/app/api/dashboard/initialisations-actualisations/initialisations-actualisations.util";
 import { StructureCampaignApiRead } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
