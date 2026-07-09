@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { FieldSetTransformationPlaces } from "@/app/components/forms/typePlace/FieldSetTransformationPlaces";
@@ -41,11 +41,23 @@ describe("FieldSetTransformationPlaces", () => {
     expect(screen.queryByText(/soit .* place/)).not.toBeInTheDocument();
   });
 
-  it("affiche une erreur et masque le delta quand une extension diminue les places", () => {
+  it("ne signale pas la contradiction tant que le champ n'a pas été quitté", () => {
     renderWithTotal({ formKind: FormKind.EXTENSION, originalPlaces: 47 }, 40);
 
     expect(
-      screen.getByText(
+      screen.queryByText(/doit être supérieur/)
+    ).not.toBeInTheDocument();
+  });
+
+  it("affiche une erreur et masque le delta quand une extension diminue les places après un blur", async () => {
+    renderWithTotal({ formKind: FormKind.EXTENSION, originalPlaces: 47 }, 40);
+
+    fireEvent.blur(
+      screen.getByLabelText(/Nombre total de places autorisées/)
+    );
+
+    expect(
+      await screen.findByText(
         /doit être supérieur au nombre de places précédent \(47\)/
       )
     ).toBeInTheDocument();
