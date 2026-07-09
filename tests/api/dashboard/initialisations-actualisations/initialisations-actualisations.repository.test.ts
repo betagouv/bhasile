@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { INITIALISATION_CAMPAIGN_DEFINITION_SLUG } from "@/app/api/campaigns/campaign.constants";
 import {
   findCampaignDeadline,
   findDashboardStructures,
@@ -13,8 +12,10 @@ import { StructureType } from "@/types/structure.type";
 
 describe("initialisations-actualisations.repository db integration", () => {
   const createdStructureIds: number[] = [];
+  const deadlineSlug = `dashboard-test-deadline-${randomUUID()}`;
+  const deadline = new Date("2026-08-30T00:00:00.000Z");
   let finalisationFormDefinitionId: number;
-  const initialisationDeadline = new Date("2026-08-30T00:00:00.000Z");
+  let deadlineDefinitionId: number;
 
   beforeAll(async () => {
     const finalisationDefinition = await prisma.formDefinition.upsert({
@@ -24,21 +25,23 @@ describe("initialisations-actualisations.repository db integration", () => {
     });
     finalisationFormDefinitionId = finalisationDefinition.id;
 
-    await prisma.campaignDefinition.upsert({
-      where: { slug: INITIALISATION_CAMPAIGN_DEFINITION_SLUG },
-      update: { deadline: initialisationDeadline },
-      create: {
-        slug: INITIALISATION_CAMPAIGN_DEFINITION_SLUG,
-        name: "Initialisation",
+    const deadlineDefinition = await prisma.campaignDefinition.create({
+      data: {
+        slug: deadlineSlug,
+        name: "Test échéance dashboard",
         version: 1,
-        deadline: initialisationDeadline,
+        deadline,
       },
     });
+    deadlineDefinitionId = deadlineDefinition.id;
   });
 
   afterAll(async () => {
     await prisma.structure.deleteMany({
       where: { id: { in: createdStructureIds } },
+    });
+    await prisma.campaignDefinition.delete({
+      where: { id: deadlineDefinitionId },
     });
     await prisma.$disconnect();
   });
@@ -70,16 +73,13 @@ describe("initialisations-actualisations.repository db integration", () => {
     expect(found).toBeDefined();
     expect(found?.type).toBe(StructureType.CADA);
     expect(found?.forms).toEqual([{ status: true }]);
+    expect(found?.structureVersions).toHaveLength(1);
     expect(found?.structureVersions[0]?.communeAdministrative).toBe("Avranches");
   });
 
-  it("récupère l'échéance de la campagne d'initialisation", async () => {
-    const definition = await findCampaignDeadline(
-      INITIALISATION_CAMPAIGN_DEFINITION_SLUG
-    );
+  it("récupère l'échéance d'une campagne par slug", async () => {
+    const definition = await findCampaignDeadline(deadlineSlug);
 
-    expect(definition?.deadline?.toISOString()).toBe(
-      initialisationDeadline.toISOString()
-    );
+    expect(definition?.deadline?.toISOString()).toBe(deadline.toISOString());
   });
 });
