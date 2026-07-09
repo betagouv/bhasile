@@ -19,7 +19,7 @@ export const ActualisationHeader = ({
           <strong>
             La campagne d’actualisation {actualisationYear} est ouverte :
           </strong>{" "}
-          merci de mettre à jour les données de cette structure.
+          vous pouvez maintenant mettre à jour les données de la structure.
         </>
       }
     />

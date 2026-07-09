@@ -4,6 +4,7 @@ import { Prisma } from "@/generated/prisma/client";
 export const dashboardStructureSelect = {
   id: true,
   codeBhasile: true,
+  type: true,
   operateur: { select: { id: true, name: true } },
   forms: {
     where: { formDefinition: { slug: FINALISATION_FORM_SLUG } },
@@ -13,7 +14,6 @@ export const dashboardStructureSelect = {
     select: {
       id: true,
       effectiveDate: true,
-      type: true,
       communeAdministrative: true,
       departementAdministratif: true,
       structureVersionTransformationId: true,

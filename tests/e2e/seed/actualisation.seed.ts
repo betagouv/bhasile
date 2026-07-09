@@ -135,7 +135,6 @@ export const createActualisationStructureForTest = async ({
       structureId: base.id,
       campaignId: campaign.id,
       effectiveDate: new Date(),
-      type: baseVersion.type,
       public: baseVersion.public,
       nom: baseVersion.nom,
       adresseAdministrative: baseVersion.adresseAdministrative,

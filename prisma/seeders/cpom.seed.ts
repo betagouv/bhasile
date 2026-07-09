@@ -39,7 +39,7 @@ export const createFakeCpoms = async (
             where: { effectiveDate: { lte: now } },
             orderBy: { effectiveDate: "desc" },
             take: 1,
-            select: { departementAdministratif: true, type: true },
+            select: { departementAdministratif: true },
           },
         },
       },
@@ -140,20 +140,12 @@ export const createFakeCpoms = async (
       where: {
         id: { in: selectedStructures },
       },
-      include: {
-        structureVersions: {
-          where: { effectiveDate: { lte: now } },
-          orderBy: { effectiveDate: "desc" },
-          take: 1,
-          select: { type: true },
-        },
-      },
+      select: { type: true },
     });
     const structureTypes = [
       ...new Set(
         structuresOfCpom.map(
-          (structure) =>
-            structure.structureVersions[0]?.type as StructureType | undefined
+          (structure) => structure.type as StructureType | undefined
         )
       ),
     ].filter((type): type is StructureType => type != null);

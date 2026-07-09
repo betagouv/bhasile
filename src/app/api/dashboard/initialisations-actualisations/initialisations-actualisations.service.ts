@@ -76,7 +76,7 @@ export const getInitialisationsActualisations = async (
       continue;
     }
 
-    const type = currentVersion.type;
+    const type = structure.type;
     if (typeList.length > 0 && (type === null || !typeList.includes(type))) {
       continue;
     }
