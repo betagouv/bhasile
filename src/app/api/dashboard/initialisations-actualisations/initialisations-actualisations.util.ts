@@ -1,8 +1,15 @@
 import { actualisationCampaignDefinitionSlug } from "@/app/api/campaigns/campaign.constants";
+import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
+import { buildStructureCampaigns } from "@/app/api/structures/structure.util";
+import { paginateRows, sortRows } from "@/app/utils/list.util";
+import { MIDDLE_PAGE_SIZE } from "@/constants";
+import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { StructureCampaignApiRead } from "@/schemas/api/structure.schema";
 
+import { DashboardStructure } from "./initialisations-actualisations.db.type";
 import {
   ActualisationStatus,
+  DashboardStructureRow,
   InitialisationStatus,
 } from "./initialisations-actualisations.type";
 
@@ -50,7 +57,6 @@ export const getMostUrgentActionUrl = (
   actualisationStatus: ActualisationStatus,
   year: number | null
 ): string | null => {
-  // À initialiser = au tour de l'opérateur, l'agent n'a pas d'action à mener.
   if (initialisationStatus === "A_INITIALISER") {
     return null;
   }
@@ -61,4 +67,112 @@ export const getMostUrgentActionUrl = (
     return `/structures/${structureId}/actualisation/${year}/01-places`;
   }
   return null;
+};
+
+export type BuildDashboardRowsOptions = {
+  allowedDepartements: string[];
+  typeList: string[];
+  departementList: string[];
+  operateurList: string[];
+  year: number | null;
+  now: Date;
+};
+
+export const buildDashboardRows = (
+  structures: DashboardStructure[],
+  options: BuildDashboardRowsOptions
+): DashboardStructureRow[] => {
+  const rows: DashboardStructureRow[] = [];
+
+  for (const structure of structures) {
+    const currentVersion = resolveCurrentVersion(
+      structure.structureVersions,
+      options.now
+    );
+    if (!currentVersion) {
+      continue;
+    }
+
+    const isClosed =
+      currentVersion.structureVersionTransformation?.type ===
+      StructureVersionTransformationType.FERMETURE;
+    if (isClosed) {
+      continue;
+    }
+
+    const departement = currentVersion.departementAdministratif;
+    if (
+      departement === null ||
+      !options.allowedDepartements.includes(departement)
+    ) {
+      continue;
+    }
+    if (
+      options.departementList.length > 0 &&
+      !options.departementList.includes(departement)
+    ) {
+      continue;
+    }
+
+    const operateurId = structure.operateur?.id ?? null;
+    if (
+      options.operateurList.length > 0 &&
+      (operateurId === null ||
+        !options.operateurList.includes(String(operateurId)))
+    ) {
+      continue;
+    }
+
+    const type = structure.type;
+    if (
+      options.typeList.length > 0 &&
+      (type === null || !options.typeList.includes(type))
+    ) {
+      continue;
+    }
+
+    const initialisationStatus = getInitialisationStatus(structure.forms);
+    const campaigns = buildStructureCampaigns(structure.structureVersions);
+    const actualisationStatus = getActualisationStatus(campaigns, options.year);
+
+    if (!isOpen(initialisationStatus, actualisationStatus)) {
+      continue;
+    }
+
+    rows.push({
+      id: structure.id,
+      codeBhasile: structure.codeBhasile,
+      type,
+      operateurName: structure.operateur?.name ?? null,
+      communeAdministrative: currentVersion.communeAdministrative,
+      departementAdministratif: departement,
+      initialisationStatus,
+      actualisationStatus,
+      actionUrl: getMostUrgentActionUrl(
+        structure.id,
+        initialisationStatus,
+        actualisationStatus,
+        options.year
+      ),
+    });
+  }
+
+  return sortRows(
+    rows,
+    (row) => ({ value: row.codeBhasile, kind: "text" }),
+    (row) => ({ value: row.id, kind: "number" }),
+    "asc"
+  );
+};
+
+export const paginateDashboardRows = (
+  rows: DashboardStructureRow[],
+  page: number
+): { total: number; rows: DashboardStructureRow[] } => {
+  const total = rows.length;
+  const lastPage = Math.max(0, Math.ceil(total / MIDDLE_PAGE_SIZE) - 1);
+  return {
+    total,
+    rows: paginateRows(rows, Math.min(page, lastPage), MIDDLE_PAGE_SIZE),
+  };
 };
