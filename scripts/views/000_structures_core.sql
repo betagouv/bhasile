@@ -7,7 +7,6 @@ WITH
     SELECT DISTINCT
       ON (sv."structureId") sv."structureId",
       sv."id" AS "structure_version_id",
-      sv."type",
       sv."departementAdministratif",
       sv."latitude",
       sv."longitude",
@@ -52,7 +51,7 @@ SELECT
   s."id" AS "id",
   svc."structure_version_id" AS "structure_version_id",
   s."codeBhasile" AS "code_bhasile",
-  svc."type" AS "structure_type",
+  s."type" AS "structure_type",
   s."createdAt" AS "created_at",
   s."updatedAt" AS "updated_at",
   svc."creationDate" AS "creation_date",

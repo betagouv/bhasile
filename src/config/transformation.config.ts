@@ -277,7 +277,7 @@ export const TRANSFORMATION_TYPE_SPECS: Record<
     buildAutoTransformations: () => [
       {
         type: StructureVersionTransformationType.CREATION,
-        structureVersion: { type: StructureType.CADA },
+        structureType: StructureType.CADA,
       },
     ],
     prefill: [

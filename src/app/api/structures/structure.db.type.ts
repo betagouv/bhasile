@@ -6,7 +6,6 @@ export const structureListLightVersionSelect = {
   id: true,
   effectiveDate: true,
   structureVersionTransformationId: true,
-  type: true,
   nom: true,
   departementAdministratif: true,
   communeAdministrative: true,
@@ -32,6 +31,7 @@ export const structureListLightVersionSelect = {
 export const structureListLightSelect = {
   id: true,
   codeBhasile: true,
+  type: true,
   operateurId: true,
   operateur: { select: { name: true } },
   forms: {
@@ -157,6 +157,7 @@ export const structureDetailsInclude = {
                 select: {
                   id: true,
                   codeBhasile: true,
+                  type: true,
                   operateur: {
                     select: { name: true },
                   },
@@ -165,7 +166,6 @@ export const structureDetailsInclude = {
                     select: {
                       id: true,
                       effectiveDate: true,
-                      type: true,
                       communeAdministrative: true,
                       structureVersionTransformationId: true,
                       structureVersionTransformation: {

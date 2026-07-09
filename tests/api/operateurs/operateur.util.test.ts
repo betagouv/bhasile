@@ -29,6 +29,7 @@ const makeStructure = (
   return {
     id,
     operateurId,
+    type: version?.type ?? null,
     structureVersions: version
       ? [
           {
@@ -36,7 +37,6 @@ const makeStructure = (
             effectiveDate: version.effectiveDate,
             structureVersionTransformationId: null,
             structureVersionTransformation: null,
-            type: version.type,
             structureTypologies: [
               { year: 2024, placesAutorisees: version.placesAutorisees },
             ],

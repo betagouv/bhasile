@@ -5,7 +5,7 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import {
   FieldErrors,
   FormProvider as HookFormProvider,
@@ -73,10 +73,41 @@ export default function FormWrapper<TSchema extends AnyZodSchema>({
     mode,
     defaultValues: mergedDefaultValues as z.infer<TSchema>,
     criteriaMode: "all",
-    shouldFocusError: true,
+    shouldFocusError: false,
   });
 
   const { handleSubmit, control, reset } = methods;
+  const { submitCount, errors } = methods.formState;
+
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (submitCount === 0) {
+      return;
+    }
+    // DSFR génère lui-même le <p> de message d'erreur : impossible d'y poser
+    // data-form-error. On cible donc les champs DSFR par leur classe de groupe en
+    // erreur, et les rendus d'erreur maison par [data-form-error].
+    const firstError = formRef.current?.querySelector<HTMLElement>(
+      ".fr-input-group--error, .fr-select-group--error, .fr-fieldset--error, [data-form-error]"
+    );
+    if (!firstError) {
+      return;
+    }
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    firstError.scrollIntoView({
+      block: "center",
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+    const focusable = firstError.matches("input, select, textarea, button")
+      ? firstError
+      : firstError.querySelector<HTMLElement>(
+          "input, select, textarea, button, [tabindex]"
+        );
+    focusable?.focus({ preventScroll: true });
+  }, [submitCount]);
 
   const handleReset = () => {
     if (handleCancel) {
@@ -135,6 +166,7 @@ export default function FormWrapper<TSchema extends AnyZodSchema>({
     <HookFormProvider {...methods}>
       <FormProvider formMethods={methods}>
         <form
+          ref={formRef}
           onSubmit={handleSubmit(
             (data) => (onSubmit || defaultSubmitHandler)(data, methods),
             handleFormErrors
@@ -209,6 +241,14 @@ export default function FormWrapper<TSchema extends AnyZodSchema>({
                     <Button type="submit">{submitButtonText}</Button>
                   )}
                 </div>
+                {submitCount > 0 && Object.keys(errors).length > 0 && (
+                  <Alert
+                    className="mt-4 w-fit ml-auto"
+                    severity="error"
+                    small
+                    description="Certains champs sont manquants ou invalides. Corrigez-les avant de valider."
+                  />
+                )}
                 {showContactInfos && (
                   <p className="cta_message text-mention-grey text-sm mt-2 text-right">
                     Si vous ne parvenez pas à remplir certains champs,{" "}
