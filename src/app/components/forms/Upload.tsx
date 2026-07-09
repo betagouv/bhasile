@@ -223,7 +223,10 @@ const Upload = ({
           </div>
         ) : null}
         {currentState === "error" ? (
-          <div className="upload-error flex items-center justify-center gap-2">
+          <div
+            className="upload-error flex items-center justify-center gap-2"
+            data-form-error
+          >
             <span className="fr-error-text mt-0 pr-2">
               {currentErrorMessage}
             </span>

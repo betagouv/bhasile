@@ -44,7 +44,7 @@ export const OngoingTransformationsBanner = (): ReactElement | null => {
         </button>
 
         {isExpanded && (
-          <ul className="bg-white">
+          <ul className="bg-white grid grid-cols-[repeat(5,minmax(max-content,1fr))_auto] gap-x-4 px-4">
             {transformations.map((transformation) => (
               <OngoingTransformation
                 key={transformation.id}

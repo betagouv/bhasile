@@ -64,7 +64,6 @@ export const createStructureForTest = async (
     data: {
       structureId: structure.id,
       effectiveDate,
-      type: input.type,
       public: input.public,
       nom: input.nom,
       adresseAdministrative: input.adresseAdministrative,

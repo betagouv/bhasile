@@ -53,7 +53,7 @@ const buildCardProps = (
   const structureVersion = structureVersionTransformation.structureVersion;
   const nom = structureVersion?.nom;
   const codeBhasile = structureVersion?.structure?.codeBhasile;
-  const structureType = structureVersion?.type;
+  const structureType = structureVersionTransformation.structureType;
   const operateur =
     structureVersion?.structure?.operateur ??
     structureVersionTransformation.operateur;

@@ -3,11 +3,11 @@ model Structure {
   codeBhasile              String                @unique
   filiale                  String? // TODO: remove after first filling is complete, filiales via Operateur are connected in app and DB is backfilled
   // TODO: remove after backfill of structure version — champs migrés sur StructureVersion
-  type                     StructureType? // TODO: remove after backfill of structure version
+  type                     StructureType?
   adresseAdministrative    String? // TODO: remove after backfill of structure version
   codePostalAdministratif  String? // TODO: remove after backfill of structure version
   communeAdministrative    String? // TODO: remove after backfill of structure version
-  departementAdministratif String? // TODO: remove after backfill of structure version
+  departementAdministratif String?
   latitude                 Decimal? // TODO: remove after backfill of structure version
   longitude                Decimal? // TODO: remove after backfill of structure version
   nom                      String? // TODO: remove after backfill of structure version
@@ -42,7 +42,7 @@ model Structure {
   antennes                 Antenne[] // TODO: remove after backfill of structure version
   structureFinesses        StructureFiness[] // TODO: remove after backfill of structure version
   finesses                 Finess[] // TODO: remove after backfill structure finess
-  departement              Departement?          @relation(fields: [departementAdministratif], references: [numero]) // TODO: remove after backfill of structure version
+  departement              Departement?          @relation(fields: [departementAdministratif], references: [numero])
   userActions              UserAction[]
   userNotes                Note[]
   structureVersions        StructureVersion[]

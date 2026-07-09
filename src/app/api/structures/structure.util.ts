@@ -299,7 +299,7 @@ export const computeStructureListRow = (
     bornFromCreation,
     hasForm: structure.forms.length > 0,
     finalised: bornFromCreation || isFinalisationFormValidated(structure.forms),
-    type: currentVersion.type,
+    type: structure.type,
     operateurName,
     departementAdministratif: currentVersion.departementAdministratif,
     communeAdministrative: currentVersion.communeAdministrative,

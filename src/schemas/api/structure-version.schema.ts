@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PublicType, StructureType } from "@/types/structure.type";
+import { PublicType } from "@/types/structure.type";
 
 import { adresseApiSchema } from "./adresse.schema";
 import { antenneApiSchema } from "./antenne.schema";
@@ -16,7 +16,6 @@ export const structureVersionApiSchema = z.object({
 
   effectiveDate: z.iso.datetime().nullish(),
 
-  type: z.enum(StructureType).nullish(),
   public: z.enum(PublicType).nullish(),
   adresseAdministrative: z.string().nullish(),
   codePostalAdministratif: z.string().nullish(),
