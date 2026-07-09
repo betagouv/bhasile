@@ -22,7 +22,7 @@ type VersionFields = {
   communeAdministrative: string | null;
 };
 
-type ResolvableVersion = {
+export type ResolvableVersion = {
   id: number;
   effectiveDate: Date | null;
   structureVersionTransformationId: number | null;

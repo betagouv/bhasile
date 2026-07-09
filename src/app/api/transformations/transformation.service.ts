@@ -19,7 +19,11 @@ import {
   copyStructureVersion,
   dbStructureVersionToApiRead,
 } from "../structure-versions/structure-version.service";
-import { resolvePredecessor } from "../structure-versions/structure-version.util";
+import {
+  ResolvableVersion,
+  resolveCurrentVersion,
+  resolvePredecessor,
+} from "../structure-versions/structure-version.util";
 import {
   getResolvedStructure,
   mergeStructureWithVersion,
@@ -38,8 +42,20 @@ import {
   checkNoDuplicateStructureIds,
 } from "./transformation.util";
 
+const resolveReferenceVersion = <TVersion extends ResolvableVersion>(
+  versions: TVersion[],
+  effectiveDate: Date | null,
+  now: Date
+): TVersion | undefined => {
+  if (effectiveDate) {
+    return resolvePredecessor(versions, effectiveDate);
+  }
+  return resolveCurrentVersion(versions, now);
+};
+
 const dbTransformationToApiRead = (
-  transformation: TransformationDbDetails
+  transformation: TransformationDbDetails,
+  now: Date
 ): TransformationApiRead =>
   recursivelySerializeDates({
     ...transformation,
@@ -49,16 +65,16 @@ const dbTransformationToApiRead = (
           const structureVersion =
             structureVersionTransformation.structureVersion;
           const sourceStructure = structureVersion?.structure;
-          const predecessor =
-            sourceStructure && structureVersion?.effectiveDate
-              ? resolvePredecessor(
-                  sourceStructure.structureVersions,
-                  structureVersion.effectiveDate
-                )
-              : undefined;
+          const referenceVersion = sourceStructure
+            ? resolveReferenceVersion(
+                sourceStructure.structureVersions,
+                structureVersion?.effectiveDate ?? null,
+                now
+              )
+            : undefined;
           const resolvedSourceStructure =
-            sourceStructure && predecessor
-              ? mergeStructureWithVersion(sourceStructure, predecessor)
+            sourceStructure && referenceVersion
+              ? mergeStructureWithVersion(sourceStructure, referenceVersion)
               : sourceStructure;
           return {
             ...structureVersionTransformation,
@@ -92,15 +108,16 @@ export const getTransformation = async (
   if (!dbTransformation) {
     return null;
   }
-  return dbTransformationToApiRead(dbTransformation);
+  return dbTransformationToApiRead(dbTransformation, new Date());
 };
 
 export const getOngoingTransformationsForUser = async (
   user: SessionUser
 ): Promise<TransformationApiRead[]> => {
   const dbTransformations = await findAll();
+  const now = new Date();
   return dbTransformations
-    .map(dbTransformationToApiRead)
+    .map((dbTransformation) => dbTransformationToApiRead(dbTransformation, now))
     .filter((transformation) =>
       canUpdateDepartement(user, getTransformationDepartement(transformation))
     );

@@ -1,10 +1,14 @@
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import {
   getTransformationNounAvecArticle,
   isTransformationSurStructureExistante,
 } from "@/app/utils/transformation.util";
+import {
+  getPlacesDirection,
+  getPlacesDirectionMessage,
+} from "@/schemas/forms/transformation/creationPlacesEtHebergement.schema";
 import { FormKind } from "@/types/global";
 
 type Props = {
@@ -16,10 +20,32 @@ export const FieldSetTransformationPlaces = ({
   formKind = FormKind.FINALISATION,
   originalPlaces,
 }: Props) => {
-  const { control, register, watch } = useFormContext();
+  const { control, register, formState } = useFormContext();
 
-  const totalPlaces =
-    Number(watch("structureTypologies.0.placesAutorisees")) || 0;
+  const rawPlaces = useWatch({
+    control,
+    name: "structureTypologies.0.placesAutorisees",
+  });
+  const placesAutorisees =
+    rawPlaces === "" || rawPlaces === undefined || rawPlaces === null
+      ? undefined
+      : Number(rawPlaces);
+  const totalPlaces = placesAutorisees ?? 0;
+
+  const direction =
+    originalPlaces !== undefined
+      ? getPlacesDirection(formKind, originalPlaces, placesAutorisees)
+      : "valid";
+  const isTouched = Boolean(
+    formState.touchedFields.structureTypologies?.[0]?.placesAutorisees
+  );
+  const isDirty = Boolean(
+    formState.dirtyFields.structureTypologies?.[0]?.placesAutorisees
+  );
+  const hasIncoherence =
+    isTouched &&
+    (direction === "contradiction" ||
+      (direction === "unchanged" && isDirty));
 
   return (
     <fieldset className="flex flex-col gap-6">
@@ -37,8 +63,14 @@ export const FieldSetTransformationPlaces = ({
             min={0}
             label="Nombre total de places autorisées"
             className="mb-0"
+            state={hasIncoherence ? "error" : undefined}
+            stateRelatedMessage={
+              hasIncoherence && originalPlaces !== undefined
+                ? getPlacesDirectionMessage(formKind, originalPlaces)
+                : undefined
+            }
           />
-          {originalPlaces !== undefined && (
+          {originalPlaces !== undefined && direction === "valid" && (
             <p className="flex items-center gap-1 mt-1 text-sm text-action-high-blue-france">
               <span
                 className="fr-icon-information-line fr-icon--sm"
