@@ -86,7 +86,7 @@ export default async function StatistiquesPage({
 
   return (
     <StatistiquesProvider statistiques={statistiques}>
-      <div className="flex flex-col h-full bg-alt-grey gap-3 pb-4">
+      <div className="flex flex-col h-full gap-3 pb-4">
         <StatistiquesHeader />
         <div className="flex flex-col gap-3 px-3">
           <CustomNotice

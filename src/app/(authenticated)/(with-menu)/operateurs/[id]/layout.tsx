@@ -43,7 +43,7 @@ export default async function OperateurLayout({
 
   return (
     <OperateurProvider operateur={operateur}>
-      <div className="flex flex-col h-full bg-alt-grey gap-3 pb-4">
+      <div className="flex flex-col h-full gap-3 pb-4">
         <OperateurHeader />
         <div className="flex flex-col gap-3 max-w-7xl mx-auto px-3">
           {children}

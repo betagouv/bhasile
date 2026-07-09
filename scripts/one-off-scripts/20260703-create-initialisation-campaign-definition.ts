@@ -6,7 +6,10 @@
 
 import "dotenv/config";
 
-import { INITIALISATION_CAMPAIGN_DEFINITION_SLUG } from "@/app/api/campaigns/campaign.constants";
+import {
+  INITIALISATION_CAMPAIGN_DEFINITION_SLUG,
+  INITIALISATION_DEADLINE,
+} from "@/app/api/campaigns/campaign.constants";
 import { createPrismaClient } from "@/prisma-client";
 
 const prisma = createPrismaClient();
@@ -16,11 +19,12 @@ async function main() {
 
   const initialisationDefinition = await prisma.campaignDefinition.upsert({
     where: { slug: INITIALISATION_CAMPAIGN_DEFINITION_SLUG },
-    update: {},
+    update: { deadline: INITIALISATION_DEADLINE },
     create: {
       slug: INITIALISATION_CAMPAIGN_DEFINITION_SLUG,
       name: "Initialisation",
       version: 1,
+      deadline: INITIALISATION_DEADLINE,
     },
   });
 

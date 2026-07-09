@@ -5,6 +5,7 @@ import { fakerFR as faker } from "@faker-js/faker";
 import {
   actualisationCampaignDefinitionSlug,
   INITIALISATION_CAMPAIGN_DEFINITION_SLUG,
+  INITIALISATION_DEADLINE,
 } from "@/app/api/campaigns/campaign.constants";
 import {
   ACTUALISATION_FORM_SLUG,
@@ -140,6 +141,7 @@ async function seed(): Promise<void> {
         name: "Initialisation",
         slug: INITIALISATION_CAMPAIGN_DEFINITION_SLUG,
         version: 1,
+        deadline: INITIALISATION_DEADLINE,
       },
     });
   await prisma.campaignDefinition.create({
@@ -147,6 +149,7 @@ async function seed(): Promise<void> {
       name: "Actualisation 2026",
       slug: actualisationCampaignDefinitionSlug(2026),
       version: 1,
+      deadline: new Date(Date.UTC(2026, 11, 31)),
     },
   });
   console.log("✅ CampaignDefinitions créées (initialisation + actualisation)");

@@ -1,9 +1,9 @@
 // Ouvre la campagne d'actualisation de l'année : crée les templates (CampaignDefinition
 // "Actualisation <année>" + FormDefinition actualisation) puis matérialise, par structure
 // éligible (finalisée et non fermée), une campagne + une StructureVersion (effectiveDate = maintenant).
-// L'année vient de l'argument CLI, sinon de ACTUALISATION_YEAR. No-op hors période.
+// L'année vient de l'argument CLI (sinon ACTUALISATION_YEAR), la deadline du 2e argument (YYYY-MM-DD). No-op hors période.
 // One-shot idempotent : re-jouable pour recovery (les structures ayant déjà une campagne sont sautées).
-// Usage : yarn script create-actualisation-campaigns [année]
+// Usage : yarn script create-actualisation-campaigns <année> <deadline YYYY-MM-DD>
 
 import "dotenv/config";
 
@@ -72,6 +72,14 @@ export const createActualisationCampaignShell = async (
   });
 };
 
+const parseDeadline = (value: string | undefined): Date | null => {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+  const deadline = new Date(value);
+  return Number.isNaN(deadline.getTime()) ? null : deadline;
+};
+
 const run = async () => {
   try {
     const actualisationYear = Number(
@@ -85,13 +93,22 @@ const run = async () => {
       return;
     }
 
+    const deadline = parseDeadline(process.argv[3]);
+    if (!deadline) {
+      console.log(
+        "⏭️  Deadline manquante ou invalide (2e argument attendu au format YYYY-MM-DD) — rien à créer."
+      );
+      return;
+    }
+
     const campaignDefinition = await prisma.campaignDefinition.upsert({
       where: { slug: actualisationCampaignDefinitionSlug(actualisationYear) },
-      update: {},
+      update: { deadline },
       create: {
         slug: actualisationCampaignDefinitionSlug(actualisationYear),
         name: `Actualisation ${actualisationYear}`,
         version: 1,
+        deadline,
       },
     });
 
