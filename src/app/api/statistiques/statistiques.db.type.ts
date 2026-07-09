@@ -1,4 +1,4 @@
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma, StructureType } from "@/generated/prisma/client";
 
 export type StatistiqueDbStructure = Prisma.StructureGetPayload<{
   select: {
@@ -16,16 +16,13 @@ export type StatistiqueDbStructureActivity = Prisma.StructureGetPayload<{
   };
 }>;
 
-export type StatistiqueDbEffectiveStructureVersion =
-  Prisma.StructureVersionGetPayload<{
-    select: {
-      id: true;
-      structureId: true;
-      effectiveDate: true;
-      type: true;
-      departementAdministratif: true;
-    };
-  }>;
+export type StatistiqueDbEffectiveStructureVersion = {
+  id: number;
+  structureId: number | null;
+  effectiveDate: Date | null;
+  type: StructureType | null;
+  departementAdministratif: string | null;
+};
 
 export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
   select: {

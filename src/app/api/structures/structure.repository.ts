@@ -50,8 +50,7 @@ export const findStructuresByIds = (
   });
 
 export const findOneOperateur = async (
-  id: number,
-  now: Date
+  id: number
 ): Promise<StructureDbOperateur> => {
   const structure = await prisma.structure.findUniqueOrThrow({
     where: { id },
@@ -59,17 +58,14 @@ export const findOneOperateur = async (
       id: true,
       codeBhasile: true,
       forms: true,
-      structureVersions: {
-        ...currentVersionArgs(now),
-        select: { type: true },
-      },
+      type: true,
     },
   });
   return {
     id: structure.id,
     codeBhasile: structure.codeBhasile,
     forms: structure.forms,
-    type: structure.structureVersions[0]?.type ?? null,
+    type: structure.type ?? null,
   };
 };
 
@@ -148,63 +144,62 @@ export const updateOne = async (
   structure: StructureAgentUpdateApiType,
   isOperateurUpdate: boolean = false
 ): Promise<Structure> => {
-  try {
-    const {
-      budgets,
-      indicateursFinanciers,
-      actesAdministratifs,
-      documentsFinanciers,
-      controles,
-      evaluations,
-      forms,
-      structureMillesimes,
-    } = structure;
+  const {
+    budgets,
+    indicateursFinanciers,
+    actesAdministratifs,
+    documentsFinanciers,
+    controles,
+    evaluations,
+    forms,
+    structureMillesimes,
+  } = structure;
 
-    return await prisma.$transaction(
-      async (tx) => {
-        const updatedStructure = await updateStructure(tx, structure);
+  return await prisma.$transaction(
+    async (tx) => {
+      const updatedStructure = await updateStructure(
+        tx,
+        structure,
+        isOperateurUpdate
+      );
 
-        await initializeStructureDefaultForms(
-          tx,
-          isOperateurUpdate,
-          structure.id
-        );
+      await initializeStructureDefaultForms(
+        tx,
+        isOperateurUpdate,
+        structure.id
+      );
 
-        await writeToCurrentVersion(tx, structure);
-        await createOrUpdateBudgets(tx, budgets, { structureId: structure.id });
-        await createOrUpdateIndicateursFinanciers(tx, indicateursFinanciers, {
-          structureId: structure.id,
-        });
-        await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
-          structureId: structure.id,
-        });
-        await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
-          structureId: structure.id,
-        });
-        await createOrUpdateControles(tx, controles, structure.id);
-        await createOrUpdateForms(tx, forms, { structureId: structure.id });
-        await createOrUpdateEvaluations(tx, evaluations, structure.id);
-        await createOrUpdateStructureMillesimes(tx, structureMillesimes, {
-          structureId: structure.id,
-        });
+      await writeToCurrentVersion(tx, structure);
+      await createOrUpdateBudgets(tx, budgets, { structureId: structure.id });
+      await createOrUpdateIndicateursFinanciers(tx, indicateursFinanciers, {
+        structureId: structure.id,
+      });
+      await createOrUpdateActesAdministratifs(tx, actesAdministratifs, {
+        structureId: structure.id,
+      });
+      await createOrUpdateDocumentsFinanciers(tx, documentsFinanciers, {
+        structureId: structure.id,
+      });
+      await createOrUpdateControles(tx, controles, structure.id);
+      await createOrUpdateForms(tx, forms, { structureId: structure.id });
+      await createOrUpdateEvaluations(tx, evaluations, structure.id);
+      await createOrUpdateStructureMillesimes(tx, structureMillesimes, {
+        structureId: structure.id,
+      });
 
-        return updatedStructure;
-      },
-      {
-        maxWait: 5000,
-        timeout: 10000,
-      }
-    );
-  } catch (error) {
-    throw new Error(
-      `Impossible de mettre à jour la structure avec l'id ${structure.id}: ${error}`
-    );
-  }
+      return updatedStructure;
+    },
+    {
+      maxWait: 5000,
+      timeout: 10000,
+    }
+  );
 };
 
 const updateStructure = async (
   tx: PrismaTransaction,
-  structure: StructureAgentUpdateApiType
+  structure: StructureAgentUpdateApiType,
+  isOperateurUpdate: boolean
 ): Promise<Structure> => {
   const { operateur, filiale, creationDate, date303 } = structure;
 
@@ -216,6 +211,7 @@ const updateStructure = async (
       filiale,
       creationDate: creationDate ?? undefined,
       date303,
+      type: isOperateurUpdate ? structure.type : undefined,
       operateur: {
         connect: operateur
           ? {
@@ -283,7 +279,6 @@ export const createMinimalStructure = async (
 export const createMinimalStructureVersion = async (
   structureId: number,
   version: {
-    type: StructureType;
     departementAdministratif?: string;
     communeAdministrative?: string;
     codePostalAdministratif?: string;
@@ -304,7 +299,6 @@ export const createMinimalStructureVersion = async (
     data: {
       structureId,
       effectiveDate: version.effectiveDate ?? new Date("2020-01-01"),
-      type: version.type,
       departementAdministratif: version.departementAdministratif,
       communeAdministrative: version.communeAdministrative,
       codePostalAdministratif: version.codePostalAdministratif,

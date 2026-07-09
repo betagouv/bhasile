@@ -160,7 +160,7 @@ export const StructuresList = ({ structures }: Props) => {
         ))}
       </div>
       {hasErrors && (
-        <p className="text-default-error m-0 p-0">
+        <p className="text-default-error m-0 p-0" data-form-error>
           Les dates d’entrée et de sortie des structures doivent se situer dans
           l’intervalle de dates d’entrée et de sortie du CPOM
         </p>

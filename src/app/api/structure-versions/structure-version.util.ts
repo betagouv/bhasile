@@ -1,12 +1,28 @@
+import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
-import { StructureType } from "@/generated/prisma/client";
+
+export const checkNoDepartementAdministratifChange = (
+  structureDepartement: string | null | undefined,
+  versionDepartement: string | null | undefined
+): void => {
+  if (structureDepartement == null) {
+    return;
+  }
+  if (versionDepartement == null) {
+    return;
+  }
+  if (versionDepartement !== structureDepartement) {
+    throw new ApiDomainError(
+      "Une structure ne peut pas changer de département administratif."
+    );
+  }
+};
 
 type VersionFields = {
-  type: StructureType | null;
   communeAdministrative: string | null;
 };
 
-type ResolvableVersion = {
+export type ResolvableVersion = {
   id: number;
   effectiveDate: Date | null;
   structureVersionTransformationId: number | null;
@@ -79,7 +95,6 @@ export const resolveCurrentVersionFields = <
   const currentVersion = resolveCurrentVersion(structureVersions, now);
   return {
     ...structureRest,
-    type: currentVersion?.type ?? null,
     communeAdministrative: currentVersion?.communeAdministrative ?? null,
   };
 };

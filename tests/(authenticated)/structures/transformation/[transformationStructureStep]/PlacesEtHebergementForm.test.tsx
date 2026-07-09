@@ -141,13 +141,13 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
     fetchMock = mockTransformationFetch(TRANSFORMATION_ID);
   });
 
-  it("enregistre une extension sans ajout de place sans bloquer la navigation", async () => {
+  it("signale l'incohérence d'une extension sans ajout de place sans bloquer la navigation", async () => {
     renderForm(StructureVersionTransformationType.EXTENSION);
 
     await setPlaces(ORIGINAL_PLACES);
     await submit();
 
-    // Le submit n'est plus bloqué : la sauvegarde part malgré la contrainte non respectée
+    // Le submit n'est pas bloqué : la sauvegarde part malgré la contrainte non respectée
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
         `/api/transformations/${TRANSFORMATION_ID}`,
@@ -155,12 +155,12 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
       )
     );
     expect(getPutPayloadPlaces()).toBe(ORIGINAL_PLACES);
-    // Schema permissif : aucune erreur de contrainte affichée inline
+    // L'absence d'ajout de place est signalée inline, sans bloquer
     expect(
-      screen.queryByText(
+      await screen.findByText(
         `Le nombre de places autorisées doit être supérieur au nombre de places précédent (${ORIGINAL_PLACES}).`
       )
-    ).not.toBeInTheDocument();
+    ).toBeInTheDocument();
   });
 
   it("laisse passer une extension qui ajoute des places", async () => {
@@ -178,13 +178,13 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
     expect(getPutPayloadPlaces()).toBe(ORIGINAL_PLACES + 3);
   });
 
-  it("enregistre une contraction sans retrait de place sans bloquer la navigation", async () => {
+  it("signale l'incohérence d'une contraction sans retrait de place sans bloquer la navigation", async () => {
     renderForm(StructureVersionTransformationType.CONTRACTION);
 
     await setPlaces(ORIGINAL_PLACES);
     await submit();
 
-    // Le submit n'est plus bloqué : la sauvegarde part malgré la contrainte non respectée
+    // Le submit n'est pas bloqué : la sauvegarde part malgré la contrainte non respectée
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
         `/api/transformations/${TRANSFORMATION_ID}`,
@@ -192,12 +192,12 @@ describe("PlacesEtHebergementForm — contrainte de variation des places", () =>
       )
     );
     expect(getPutPayloadPlaces()).toBe(ORIGINAL_PLACES);
-    // Schema permissif : aucune erreur de contrainte affichée inline
+    // L'absence de retrait de place est signalée inline, sans bloquer
     expect(
-      screen.queryByText(
+      await screen.findByText(
         `Le nombre de places autorisées doit être inférieur au nombre de places précédent (${ORIGINAL_PLACES}).`
       )
-    ).not.toBeInTheDocument();
+    ).toBeInTheDocument();
   });
 
   it("laisse passer une contraction qui retire des places", async () => {
