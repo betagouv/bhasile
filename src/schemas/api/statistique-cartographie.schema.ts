@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { zSafeYear } from "@/app/utils/zodCustomFields";
 import { statistiquesFiltersSchema } from "@/schemas/api/statistique.schema";
 
 const CARTOGRAPHIE_INDICATEURS = [
@@ -53,7 +54,7 @@ export const statistiqueCartographieFiltersSchema =
   statistiquesFiltersSchema.extend({
     granularite: cartographieGranulariteSchema,
     indicateur: cartographieIndicateurSchema,
-    annee: z.coerce.number().int(),
+    annee: zSafeYear(),
   });
 
 export type StatistiqueCartographieFilters = z.infer<
