@@ -39,7 +39,13 @@ export const FieldSetTransformationPlaces = ({
   const isTouched = Boolean(
     formState.touchedFields.structureTypologies?.[0]?.placesAutorisees
   );
-  const isContradiction = direction === "contradiction" && isTouched;
+  const isDirty = Boolean(
+    formState.dirtyFields.structureTypologies?.[0]?.placesAutorisees
+  );
+  const hasIncoherence =
+    isTouched &&
+    (direction === "contradiction" ||
+      (direction === "unchanged" && isDirty));
 
   return (
     <fieldset className="flex flex-col gap-6">
@@ -57,14 +63,14 @@ export const FieldSetTransformationPlaces = ({
             min={0}
             label="Nombre total de places autorisées"
             className="mb-0"
-            state={isContradiction ? "error" : undefined}
+            state={hasIncoherence ? "error" : undefined}
             stateRelatedMessage={
-              isContradiction && originalPlaces !== undefined
+              hasIncoherence && originalPlaces !== undefined
                 ? getPlacesDirectionMessage(formKind, originalPlaces)
                 : undefined
             }
           />
-          {originalPlaces !== undefined && direction !== "contradiction" && (
+          {originalPlaces !== undefined && direction === "valid" && (
             <p className="flex items-center gap-1 mt-1 text-sm text-action-high-blue-france">
               <span
                 className="fr-icon-information-line fr-icon--sm"
