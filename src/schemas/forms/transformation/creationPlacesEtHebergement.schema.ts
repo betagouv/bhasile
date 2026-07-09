@@ -43,6 +43,11 @@ export const getPlacesDirection = (
   originalPlaces: number,
   placesAutorisees: number | undefined
 ): PlacesDirection => {
+  const isExtension = formKind === FormKind.EXTENSION;
+  const isContraction = formKind === FormKind.CONTRACTION;
+  if (!isExtension && !isContraction) {
+    return "valid";
+  }
   if (placesAutorisees === undefined || !Number.isFinite(placesAutorisees)) {
     return "valid";
   }
@@ -50,8 +55,8 @@ export const getPlacesDirection = (
     return "unchanged";
   }
   const isIncreasing = placesAutorisees > originalPlaces;
-  const shouldIncrease = formKind === FormKind.EXTENSION;
-  return isIncreasing === shouldIncrease ? "valid" : "contradiction";
+  const isCoherent = isExtension ? isIncreasing : !isIncreasing;
+  return isCoherent ? "valid" : "contradiction";
 };
 
 export const getPlacesDirectionMessage = (

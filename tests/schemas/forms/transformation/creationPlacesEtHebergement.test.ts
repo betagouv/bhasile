@@ -34,4 +34,11 @@ describe("getPlacesDirection", () => {
   it("ne juge pas une valeur non finie (NaN)", () => {
     expect(getPlacesDirection(FormKind.CONTRACTION, 50, NaN)).toBe("valid");
   });
+
+  it("ne juge pas un formKind qui n'est ni extension ni contraction", () => {
+    expect(getPlacesDirection(FormKind.FINALISATION, 50, 60)).toBe("valid");
+    expect(getPlacesDirection(FormKind.OUVERTURE_EX_NIHILO, 50, 40)).toBe(
+      "valid"
+    );
+  });
 });

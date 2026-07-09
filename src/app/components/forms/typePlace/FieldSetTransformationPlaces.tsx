@@ -20,7 +20,7 @@ export const FieldSetTransformationPlaces = ({
   formKind = FormKind.FINALISATION,
   originalPlaces,
 }: Props) => {
-  const { control, register } = useFormContext();
+  const { control, register, formState } = useFormContext();
 
   const rawPlaces = useWatch({
     control,
@@ -36,7 +36,10 @@ export const FieldSetTransformationPlaces = ({
     originalPlaces !== undefined
       ? getPlacesDirection(formKind, originalPlaces, placesAutorisees)
       : "valid";
-  const isContradiction = direction === "contradiction";
+  const isTouched = Boolean(
+    formState.touchedFields.structureTypologies?.[0]?.placesAutorisees
+  );
+  const isContradiction = direction === "contradiction" && isTouched;
 
   return (
     <fieldset className="flex flex-col gap-6">
@@ -61,7 +64,7 @@ export const FieldSetTransformationPlaces = ({
                 : undefined
             }
           />
-          {originalPlaces !== undefined && !isContradiction && (
+          {originalPlaces !== undefined && direction !== "contradiction" && (
             <p className="flex items-center gap-1 mt-1 text-sm text-action-high-blue-france">
               <span
                 className="fr-icon-information-line fr-icon--sm"
