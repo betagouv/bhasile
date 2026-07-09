@@ -1,5 +1,6 @@
 import { fakerFR as faker } from "@faker-js/faker";
 
+import { endOfMonthUtcFromMonth } from "@/app/utils/date.util";
 import { Activite, Prisma } from "@/generated/prisma/client";
 
 export const createFakeActivites = ({
@@ -14,7 +15,10 @@ export const createFakeActivites = ({
   const months = Array.from({ length: count }, (_, i) => startMonth + i);
 
   return months.map((month) =>
-    createFakeActivite({ dnaCode, date: new Date(2025, month, 1, 13) })
+    createFakeActivite({
+      dnaCode,
+      date: endOfMonthUtcFromMonth(2025, month + 1),
+    })
   );
 };
 

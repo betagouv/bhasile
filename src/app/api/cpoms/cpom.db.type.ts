@@ -24,6 +24,7 @@ export const cpomDetailsInclude = {
         select: {
           id: true,
           codeBhasile: true,
+          type: true,
           operateur: {
             select: {
               name: true,
@@ -34,7 +35,6 @@ export const cpomDetailsInclude = {
             select: {
               id: true,
               effectiveDate: true,
-              type: true,
               communeAdministrative: true,
               structureVersionTransformationId: true,
               structureVersionTransformation: {
