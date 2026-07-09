@@ -2,6 +2,7 @@ import { useFormContext } from "react-hook-form";
 
 import { useCpomContext } from "@/app/(authenticated)/(with-menu)/cpoms/[id]/_context/CpomClientContext";
 import { Table } from "@/app/components/common/Table";
+import { useClearAffectationDetails } from "@/app/hooks/useClearAffectationDetails";
 import { getYearFromDate, getYearRange } from "@/app/utils/date.util";
 import { parseFrenchNumber } from "@/app/utils/number.util";
 import { isStructureAutorisee } from "@/app/utils/structure.util";
@@ -14,8 +15,10 @@ import { getBudgetTableHeading } from "./getBudgetTableHeading";
 import { getBudgetTableLines } from "./getBudgetTableLines";
 
 export const CpomTable = ({ type, showTitle }: Props) => {
-  const { watch } = useFormContext();
+  const { watch, setValue } = useFormContext();
   const budgets = watch("budgets") as BudgetApiType[];
+
+  useClearAffectationDetails(budgets, setValue, type);
 
   const { cpom } = useCpomContext();
 

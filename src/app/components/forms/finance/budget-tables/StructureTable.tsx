@@ -2,6 +2,7 @@ import { useForm, useFormContext } from "react-hook-form";
 
 import { useStructureContext } from "@/app/(authenticated)/(with-menu)/structures/[id]/_context/StructureClientContext";
 import { Table } from "@/app/components/common/Table";
+import { useClearAffectationDetails } from "@/app/hooks/useClearAffectationDetails";
 import { getYearRange } from "@/app/utils/date.util";
 import { parseFrenchNumber } from "@/app/utils/number.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
@@ -22,7 +23,7 @@ export const StructureTable = ({ canEdit = true }: Props) => {
   const yearsToDisplay = years.filter((year) => year >= startYear);
 
   const localForm = useForm();
-  const { watch, formState } = parentFormContext || localForm;
+  const { watch, formState, setValue } = parentFormContext || localForm;
 
   const errors = formState.errors;
   const hasErrors =
@@ -43,6 +44,8 @@ export const StructureTable = ({ canEdit = true }: Props) => {
   const budgets = canEdit
     ? (watch("budgets") as BudgetApiType[])
     : structure.budgets;
+
+  useClearAffectationDetails(canEdit && budgets ? budgets : [], setValue);
 
   if (!budgets || budgets.length === 0) {
     return null;
