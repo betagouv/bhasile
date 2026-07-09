@@ -140,12 +140,17 @@ const sumIndicateursForYear = (
   };
 };
 
-export const computeScopeByYear = (
+type ScopeByYearResult = {
+  stat: FinanceByYearScopeStat;
+  hasData: boolean;
+};
+
+const computeScopeByYearWithData = (
   structureIdsInScope: number[],
   context: StatistiquesContext,
   aggregation: NumericAggregation,
   years: number[]
-): FinanceByYearScopeStat[] => {
+): ScopeByYearResult[] => {
   const { activeStructureIdsByPeriod, budgets, indicateurs } = context;
   const structureIdSet = new Set(structureIdsInScope);
   const scopedBudgets = filterByActiveStructureId(budgets, structureIdSet);
@@ -172,11 +177,27 @@ export const computeScopeByYear = (
     );
 
     return {
-      ...sumIndicateursForYear(indicateursForYear, aggregation),
-      ...sumBudgetsForYear(budgetsForYear),
+      stat: {
+        ...sumIndicateursForYear(indicateursForYear, aggregation),
+        ...sumBudgetsForYear(budgetsForYear),
+      },
+      hasData: budgetsForYear.length > 0 || indicateursForYear.length > 0,
     };
   });
 };
+
+export const computeScopeByYear = (
+  structureIdsInScope: number[],
+  context: StatistiquesContext,
+  aggregation: NumericAggregation,
+  years: number[]
+): FinanceByYearScopeStat[] =>
+  computeScopeByYearWithData(
+    structureIdsInScope,
+    context,
+    aggregation,
+    years
+  ).map((result) => result.stat);
 
 export const computeFinanceStatistiques = (
   context: StatistiquesContext,
@@ -218,43 +239,11 @@ export const computeFinanceTotalValuesForYears = (
   const structureIdsInScope = context.allStructures.map(
     (structure) => structure.id
   );
-  const structureIdSet = new Set(structureIdsInScope);
-  const scopedBudgets = filterByActiveStructureId(
-    context.budgets,
-    structureIdSet
-  );
-  const scopedIndicateurs = filterByActiveStructureId(
-    context.indicateurs,
-    structureIdSet
-  );
 
-  const hasFinanceDataForYear = (year: number): boolean => {
-    const activeStructureIds = lookupActiveStructureIds(
-      context.activeStructureIdsByPeriod,
-      "year",
-      String(year)
-    );
-    const isActive = (structureId: number) =>
-      activeStructureIds.has(structureId);
-    return (
-      scopedBudgets.some(
-        (budget) => budget.year === year && isActive(budget.structureId)
-      ) ||
-      scopedIndicateurs.some(
-        (indicateur) =>
-          indicateur.year === year && isActive(indicateur.structureId)
-      )
-    );
-  };
-
-  const scopeStats = computeScopeByYear(
+  return computeScopeByYearWithData(
     structureIdsInScope,
     context,
     aggregation,
     years
-  );
-
-  return years.map((year, index) =>
-    hasFinanceDataForYear(year) ? scopeStats[index][field] : null
-  );
+  ).map((result) => (result.hasData ? result.stat[field] : null));
 };

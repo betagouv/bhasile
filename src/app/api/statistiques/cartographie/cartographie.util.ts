@@ -8,7 +8,10 @@ import {
   StatistiqueCartographieFilters,
 } from "@/schemas/api/statistique-cartographie.schema";
 
-import { computeActiviteSummary } from "../activite/activite.util";
+import {
+  ActiviteYearField,
+  computeActiviteFieldForYears,
+} from "../activite/activite.util";
 import { computeControleQualiteByYear } from "../controle-qualite/controle-qualite.util";
 import { computeFinanceTotalValuesForYears } from "../finance/finance.util";
 import {
@@ -169,18 +172,20 @@ const controleQualiteValuesForYears = (
   return { value: findYear(annee), previousValue: findYear(annee - 1) };
 };
 
-/** Activite has no yearly aggregation yet, so this returns the current snapshot with no evolution. TODO. */
-const activiteSnapshotValue = (
+const activiteValuesForYears = (
   context: StatistiquesContext,
-  field:
-    | "placesEnregistreesDna"
-    | "placesIndisponibles"
-    | "placesOccupees"
-    | "presencesInduesTotal"
-): CartographieIndicateurValues => ({
-  value: computeActiviteSummary(context)[field],
-  previousValue: null,
-});
+  annee: number,
+  aggregation: NumericAggregation,
+  field: ActiviteYearField
+): CartographieIndicateurValues => {
+  const [value, previousValue] = computeActiviteFieldForYears(
+    context,
+    [annee, annee - 1],
+    aggregation,
+    field
+  );
+  return { value, previousValue };
+};
 
 export const INDICATEUR_COMPUTERS: Record<
   CartographieIndicateur,
@@ -231,14 +236,19 @@ export const INDICATEUR_COMPUTERS: Record<
     ),
   "controleQualite.moyenneEvaluations": (context, annee, aggregation) =>
     controleQualiteValuesForYears(context, annee, aggregation, "noteGenerale"),
-  "activite.placesDna": (context) =>
-    activiteSnapshotValue(context, "placesEnregistreesDna"),
-  "activite.placesIndisponibles": (context) =>
-    activiteSnapshotValue(context, "placesIndisponibles"),
-  "activite.placesOccupees": (context) =>
-    activiteSnapshotValue(context, "placesOccupees"),
-  "activite.presencesIndues": (context) =>
-    activiteSnapshotValue(context, "presencesInduesTotal"),
+  "activite.placesDna": (context, annee, aggregation) =>
+    activiteValuesForYears(
+      context,
+      annee,
+      aggregation,
+      "placesEnregistreesDna"
+    ),
+  "activite.placesIndisponibles": (context, annee, aggregation) =>
+    activiteValuesForYears(context, annee, aggregation, "placesIndisponibles"),
+  "activite.placesOccupees": (context, annee, aggregation) =>
+    activiteValuesForYears(context, annee, aggregation, "placesOccupees"),
+  "activite.presencesIndues": (context, annee, aggregation) =>
+    activiteValuesForYears(context, annee, aggregation, "presencesInduesTotal"),
 };
 
 /** Computes only the requested indicator, for `annee` and `annee - 1`. */

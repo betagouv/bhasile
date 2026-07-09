@@ -231,5 +231,19 @@ export type StatistiquesAdresseYearContext = StatistiquesTypologieYearContext &
 /** Minimal slice of StatistiquesContext needed to compute the current activite snapshot. */
 export type StatistiquesActiviteSummaryContext = Pick<
   StatistiquesContext,
-  "activites" | "dnaLinks" | "structureVersionTimeline" | "allStructures" | "structures"
+  | "activites"
+  | "dnaLinks"
+  | "structureVersionTimeline"
+  | "allStructures"
+  | "structures"
+>;
+
+/** Minimal slice of StatistiquesContext needed to compute the activite monthly series. */
+export type StatistiquesActiviteByMonthContext = Pick<
+  StatistiquesContext,
+  | "activites"
+  | "dnaLinks"
+  | "structureVersionTimeline"
+  | "allStructures"
+  | "activeStructureIdsByPeriod"
 >;

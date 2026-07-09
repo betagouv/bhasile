@@ -50,11 +50,12 @@ export type CartographieSupportedGranularite = Exclude<
   "arrondissement"
 >;
 
-export const statistiqueCartographieFiltersSchema = statistiquesFiltersSchema.extend({
-  granularite: cartographieGranulariteSchema,
-  indicateur: cartographieIndicateurSchema,
-  annee: z.coerce.number().int(),
-});
+export const statistiqueCartographieFiltersSchema =
+  statistiquesFiltersSchema.extend({
+    granularite: cartographieGranulariteSchema,
+    indicateur: cartographieIndicateurSchema,
+    annee: z.coerce.number().int(),
+  });
 
 export type StatistiqueCartographieFilters = z.infer<
   typeof statistiqueCartographieFiltersSchema
@@ -63,9 +64,9 @@ export type StatistiqueCartographieFilters = z.infer<
 // Types de lecture pure (pas d'input à valider) : pas de schéma zod, juste des types.
 
 export type CartographieEvolutionStat = {
-  previousValue: number | null;
-  delta: number | null;
-  direction: "hausse" | "baisse" | "stable" | null;
+  previousValue: number;
+  delta: number;
+  direction: "hausse" | "baisse" | "stable";
 };
 
 export type CartographieZoneStat = {

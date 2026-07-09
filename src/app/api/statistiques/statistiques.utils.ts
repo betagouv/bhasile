@@ -679,10 +679,22 @@ export const computeTotalPlaces = (
   ) ?? 0;
 
 const intersectStructureIds = (
-  ids: Iterable<number>,
+  ids: Set<number>,
   structureIdsInZone: Set<number>
-): Set<number> =>
-  new Set([...ids].filter((id) => structureIdsInZone.has(id)));
+): Set<number> => {
+  // Iterate the smaller set (performance optimization).
+  const [smaller, larger] =
+    ids.size < structureIdsInZone.size
+      ? [ids, structureIdsInZone]
+      : [structureIdsInZone, ids];
+  const intersection = new Set<number>();
+  for (const id of smaller) {
+    if (larger.has(id)) {
+      intersection.add(id);
+    }
+  }
+  return intersection;
+};
 
 const sliceActiveStructureIdsByPeriod = (
   byPeriod: StatistiquesActiveStructureIdsByPeriod,

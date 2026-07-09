@@ -1,5 +1,12 @@
-import { ratio } from "@/app/utils/math.util";
-import { roundStatsRate } from "@/app/utils/statistiques-format.util";
+import {
+  aggregateValues,
+  NumericAggregation,
+  ratio,
+} from "@/app/utils/math.util";
+import {
+  roundStatsNumber,
+  roundStatsRate,
+} from "@/app/utils/statistiques-format.util";
 import {
   isStructureEligibleForActiviteIndisponibilite,
   isStructureEligibleForActivitePresencesIndues,
@@ -13,6 +20,7 @@ import {
 import type {
   StatistiqueDbActivite,
   StatistiqueDbStructure,
+  StatistiquesActiviteByMonthContext,
   StatistiquesActiviteSummaryContext,
   StatistiquesContext,
 } from "../statistiques.db.type";
@@ -195,20 +203,12 @@ const buildLatestActiviteByStructureId = (
   return latestByStructureId;
 };
 
-/** Computes the current activite snapshot only, for the cartographie one-indicator requests. TODO: no yearly aggregation yet. */
-export const computeActiviteSummary = (
-  context: StatistiquesActiviteSummaryContext
-): ActiviteSummaryStat => {
-  const {
-    activites,
-    dnaLinks,
-    structureVersionTimeline,
-    allStructures,
-    structures,
-  } = context;
-  const structureTypeById = new Map(
-    allStructures.map((structure) => [structure.id, structure.type])
-  );
+/** Accumulates the current snapshot totals. */
+const accumulateActiviteSummaryTotals = (
+  context: StatistiquesActiviteSummaryContext,
+  structureTypeById: Map<number, StatistiqueDbStructure["type"]>
+): ActiviteTotals => {
+  const { activites, dnaLinks, structureVersionTimeline, structures } = context;
   const structureIdsNow = new Set(structures.map((structure) => structure.id));
 
   const summaryTotals = emptyActiviteTotals();
@@ -228,23 +228,24 @@ export const computeActiviteSummary = (
     );
   }
 
-  return toActiviteSummary(summaryTotals);
+  return summaryTotals;
 };
 
-export const computeActiviteStatistiques = (
-  context: StatistiquesContext
-): StatistiqueApiRead["activite"] => {
+const buildStructureTypeById = (
+  allStructures: StatistiqueDbStructure[]
+): Map<number, StatistiqueDbStructure["type"]> =>
+  new Map(allStructures.map((structure) => [structure.id, structure.type]));
+
+const computeActiviteByMonthTotals = (
+  context: StatistiquesActiviteByMonthContext,
+  structureTypeById: Map<number, StatistiqueDbStructure["type"]>
+): Map<string, ActiviteTotals> => {
   const {
     activites,
     dnaLinks,
     structureVersionTimeline,
-    allStructures,
     activeStructureIdsByPeriod,
   } = context;
-  const structureTypeById = new Map(
-    allStructures.map((structure) => [structure.id, structure.type])
-  );
-
   const byMonth = new Map<string, ActiviteTotals>();
 
   for (const activite of activites) {
@@ -269,12 +270,64 @@ export const computeActiviteStatistiques = (
     byMonth.set(monthKey, monthTotals);
   }
 
+  return byMonth;
+};
+
+const toActiviteByMonthStats = (
+  byMonth: Map<string, ActiviteTotals>
+): ActiviteByMonthStat[] =>
+  [...byMonth.entries()]
+    .sort(([monthKeyA], [monthKeyB]) => monthKeyA.localeCompare(monthKeyB))
+    .map(([monthKey, monthTotals]) =>
+      toActiviteByMonthStat(monthKey, monthTotals)
+    );
+
+export const computeActiviteByMonth = (
+  context: StatistiquesActiviteByMonthContext
+): ActiviteByMonthStat[] =>
+  toActiviteByMonthStats(
+    computeActiviteByMonthTotals(
+      context,
+      buildStructureTypeById(context.allStructures)
+    )
+  );
+
+export type ActiviteYearField =
+  | "placesEnregistreesDna"
+  | "placesOccupees"
+  | "placesIndisponibles"
+  | "presencesInduesTotal";
+
+export const computeActiviteFieldForYears = (
+  context: StatistiquesActiviteByMonthContext,
+  years: number[],
+  aggregation: NumericAggregation,
+  field: ActiviteYearField
+): (number | null)[] => {
+  const valuesByYear = new Map<number, number[]>();
+  for (const month of computeActiviteByMonth(context)) {
+    const year = month.date.getUTCFullYear();
+    const values = valuesByYear.get(year) ?? [];
+    values.push(month[field]);
+    valuesByYear.set(year, values);
+  }
+
+  return years.map((year) =>
+    roundStatsNumber(aggregateValues(valuesByYear.get(year) ?? [], aggregation))
+  );
+};
+
+export const computeActiviteStatistiques = (
+  context: StatistiquesContext
+): StatistiqueApiRead["activite"] => {
+  const structureTypeById = buildStructureTypeById(context.allStructures);
+
   return {
-    summary: computeActiviteSummary(context),
-    byMonth: [...byMonth.entries()]
-      .sort(([monthKeyA], [monthKeyB]) => monthKeyA.localeCompare(monthKeyB))
-      .map(([monthKey, monthTotals]) =>
-        toActiviteByMonthStat(monthKey, monthTotals)
-      ),
+    summary: toActiviteSummary(
+      accumulateActiviteSummaryTotals(context, structureTypeById)
+    ),
+    byMonth: toActiviteByMonthStats(
+      computeActiviteByMonthTotals(context, structureTypeById)
+    ),
   };
 };

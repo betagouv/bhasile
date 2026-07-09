@@ -10,7 +10,7 @@ import { getCartographieStatistiques } from "./cartographie.service";
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
 
-  const filters = statistiqueCartographieFiltersSchema.parse({
+  const parsed = statistiqueCartographieFiltersSchema.safeParse({
     granularite: searchParams.get("granularite"),
     indicateur: searchParams.get("indicateur"),
     annee: searchParams.get("annee"),
@@ -19,6 +19,15 @@ export async function GET(request: NextRequest) {
     types: searchParams.get("types"),
     aggregation: searchParams.get("aggregation"),
   });
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "INVALID_PARAMS", issues: parsed.error.issues },
+      { status: 400 }
+    );
+  }
+
+  const filters = parsed.data;
 
   if (filters.granularite === "arrondissement") {
     const body: CartographieNotImplementedApiRead = {
