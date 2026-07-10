@@ -5,9 +5,9 @@ import type { FileWithParents } from "@/app/api/files/file.db.type";
 import {
   authorizeFileAccess,
   getPrincipal,
-  Principal,
 } from "@/app/api/files/file.service";
 import { SessionUser } from "@/types/global";
+import { Principal } from "@/types/principal.type";
 
 const mockCanDeleteFile = vi.fn();
 
@@ -48,7 +48,7 @@ const agent: Principal = {
   type: "agent",
   user: { id: "1", role: "DEPARTEMENT_PARIS" } as SessionUser,
 };
-const operator: Principal = { type: "operator" };
+const operateur: Principal = { type: "operateur" };
 
 describe("getPrincipal", () => {
   it("identifie un agent quand la session contient un utilisateur", () => {
@@ -61,11 +61,11 @@ describe("getPrincipal", () => {
   });
 
   it("identifie un opérateur en l'absence de session", () => {
-    expect(getPrincipal(null)).toEqual({ type: "operator" });
+    expect(getPrincipal(null)).toEqual({ type: "operateur" });
   });
 
   it("identifie un opérateur quand la session n'a pas d'utilisateur", () => {
-    expect(getPrincipal({} as Session)).toEqual({ type: "operator" });
+    expect(getPrincipal({} as Session)).toEqual({ type: "operateur" });
   });
 });
 
@@ -75,11 +75,11 @@ describe("authorizeFileAccess", () => {
   });
 
   it("autorise un opérateur à lire un fichier orphelin", () => {
-    expect(authorizeFileAccess(operator, orphanFile, "read")).toBe(true);
+    expect(authorizeFileAccess(operateur, orphanFile, "read")).toBe(true);
   });
 
   it("autorise un opérateur à supprimer un fichier orphelin", () => {
-    expect(authorizeFileAccess(operator, orphanFile, "delete")).toBe(true);
+    expect(authorizeFileAccess(operateur, orphanFile, "delete")).toBe(true);
   });
 
   it("autorise un agent à supprimer un fichier orphelin sans consulter CASL", () => {
@@ -88,11 +88,11 @@ describe("authorizeFileAccess", () => {
   });
 
   it("refuse à un opérateur la lecture d'un fichier lié", () => {
-    expect(authorizeFileAccess(operator, linkedFile, "read")).toBe(false);
+    expect(authorizeFileAccess(operateur, linkedFile, "read")).toBe(false);
   });
 
   it("refuse à un opérateur la suppression d'un fichier lié", () => {
-    expect(authorizeFileAccess(operator, linkedFile, "delete")).toBe(false);
+    expect(authorizeFileAccess(operateur, linkedFile, "delete")).toBe(false);
   });
 
   it("autorise un agent à lire un fichier lié sans contrôle de périmètre", () => {

@@ -12,6 +12,7 @@ import { checkBucket, minioClient } from "@/lib/minio";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 import { SessionUser } from "@/types/global";
+import { Principal, PrincipalType } from "@/types/principal.type";
 
 import { FileWithParents } from "./file.db.type";
 import {
@@ -20,14 +21,10 @@ import {
   findOneByKeyWithParents,
 } from "./file.repository";
 
-export type Principal =
-  | { type: "agent"; user: SessionUser }
-  | { type: "operator" };
-
 export const getPrincipal = (session: Session | null): Principal =>
   session?.user
-    ? { type: "agent", user: session.user as SessionUser }
-    : { type: "operator" };
+    ? { type: PrincipalType.Agent, user: session.user as SessionUser }
+    : { type: PrincipalType.Operateur };
 
 const isOrphan = (file: FileWithParents): boolean =>
   file.acteAdministratifId == null &&
@@ -44,7 +41,7 @@ export const authorizeFileAccess = (
   if (isOrphan(file)) {
     return true;
   }
-  if (principal.type === "operator") {
+  if (principal.type === PrincipalType.Operateur) {
     return false;
   }
   if (action === "read") {

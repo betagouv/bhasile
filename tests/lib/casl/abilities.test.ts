@@ -147,7 +147,7 @@ describe("Permissions : canDeleteFile", () => {
       ...overrides,
     }) as unknown as FileWithParents;
 
-  it("autorise n'importe quel agent à supprimer un fichier d'une transformation en cours (acte lié à une SVT)", () => {
+  it("autorise n'importe quel agent à supprimer un fichier d'une transformation en cours (acte lié à une structureVersionTransformation)", () => {
     const file = buildFile({
       acteAdministratifId: 1,
       acteAdministratif: {

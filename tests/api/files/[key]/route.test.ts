@@ -43,7 +43,7 @@ const linkedFile = {
 describe("GET /api/files/[key]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetPrincipal.mockReturnValue({ type: "operator" });
+    mockGetPrincipal.mockReturnValue({ type: "operateur" });
   });
 
   it("vérifie l'existence et l'autorisation avant de générer le lien de téléchargement", async () => {
@@ -66,7 +66,7 @@ describe("GET /api/files/[key]", () => {
     });
     expect(mockGetFileWithParents).toHaveBeenCalledWith("test.pdf");
     expect(mockAuthorizeFileAccess).toHaveBeenCalledWith(
-      { type: "operator" },
+      { type: "operateur" },
       linkedFile,
       "read"
     );
@@ -143,7 +143,7 @@ describe("GET /api/files/[key]", () => {
 describe("DELETE /api/files/[key]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetPrincipal.mockReturnValue({ type: "operator" });
+    mockGetPrincipal.mockReturnValue({ type: "operateur" });
   });
 
   it("retourne 404 quand le fichier est introuvable", async () => {
