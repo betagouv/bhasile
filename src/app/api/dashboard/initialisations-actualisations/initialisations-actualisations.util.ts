@@ -4,7 +4,9 @@ import { buildStructureCampaigns } from "@/app/api/structures/structure.util";
 import { paginateRows, sortRows } from "@/app/utils/list.util";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
+import { canUpdateDepartement } from "@/lib/casl/abilities";
 import { StructureCampaignApiRead } from "@/schemas/api/structure.schema";
+import { SessionUser } from "@/types/global";
 
 import { DashboardStructure } from "./initialisations-actualisations.db.type";
 import {
@@ -70,7 +72,7 @@ export const getMostUrgentActionUrl = (
 };
 
 export type BuildDashboardRowsOptions = {
-  allowedDepartements: string[];
+  user: SessionUser | undefined;
   typeList: string[];
   departementList: string[];
   operateurList: string[];
@@ -103,7 +105,8 @@ export const buildDashboardRows = (
     const departement = currentVersion.departementAdministratif;
     if (
       departement === null ||
-      !options.allowedDepartements.includes(departement)
+      !options.user ||
+      !canUpdateDepartement(options.user, departement)
     ) {
       continue;
     }

@@ -14,9 +14,19 @@ import {
 import { StructureVersionTransformationType } from "@/generated/prisma/enums";
 import { StructureCampaignApiRead } from "@/schemas/api/structure.schema";
 import { StepStatus } from "@/types/form.type";
+import { SessionUser } from "@/types/global";
 import { StructureType } from "@/types/structure.type";
 
 const YEAR = 2026;
+
+const agentDepartement75: SessionUser = {
+  id: "1",
+  name: "Agent",
+  prenom: "Agent",
+  email: "agent@dep75.gouv.fr",
+  role: "DEPARTEMENT",
+  allowedDepartements: ["75"],
+};
 
 const actualisationCampaign = (
   steps: StructureCampaignApiRead["formSteps"],
@@ -149,7 +159,7 @@ const makeStructure = (
 });
 
 const baseOptions = {
-  allowedDepartements: ["75"],
+  user: agentDepartement75,
   typeList: [],
   departementList: [],
   operateurList: [],

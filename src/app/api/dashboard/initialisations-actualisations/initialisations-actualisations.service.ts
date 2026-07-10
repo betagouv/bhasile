@@ -28,7 +28,7 @@ export const getInitialisationsActualisations = async (
   const structures = await findDashboardStructures();
 
   const rows = buildDashboardRows(structures, {
-    allowedDepartements: user?.allowedDepartements ?? [],
+    user,
     typeList: parseCommaList(filters.type),
     departementList: parseCommaList(filters.departements),
     operateurList: parseCommaList(filters.operateurs),
