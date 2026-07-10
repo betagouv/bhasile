@@ -19,7 +19,6 @@ export default function FieldSetActeAdministratif({
   category,
   categoryShortName,
   title,
-  noTitleLegend = false,
   notice,
   isOptional,
   canAddFile,
@@ -100,23 +99,22 @@ export default function FieldSetActeAdministratif({
 
   return (
     <fieldset className="flex flex-col gap-6 w-full">
-      {!noTitleLegend && (
-        <legend className="flex items-center gap-4 text-xl font-bold mb-4 text-title-blue-france">
-          {legend} {isOptional && "(optionnel)"}
-          {canAddFile && (
-            <Button
-              type="button"
-              priority="secondary"
-              size="small"
-              iconId="fr-icon-add-line"
-              onClick={handleAddNewField}
-              aria-label={addFileButtonLabel ?? "Ajouter un fichier"}
-            >
-              Ajouter
-            </Button>
-          )}
-        </legend>
-      )}
+      <legend className="flex items-center gap-4 text-xl font-bold mb-4 text-title-blue-france">
+        {legend} {isOptional && "(optionnel)"}
+        {canAddFile && (
+          <Button
+            type="button"
+            priority="secondary"
+            size="small"
+            iconId="fr-icon-add-line"
+            onClick={handleAddNewField}
+            aria-label={addFileButtonLabel ?? "Ajouter un fichier"}
+          >
+            Ajouter
+          </Button>
+        )}
+      </legend>
+
       {typeof notice === "string" ? (
         <CustomNotice
           severity="info"
@@ -147,7 +145,11 @@ export default function FieldSetActeAdministratif({
             key={acte.id || acte.uuid}
             className="mb-4"
             ref={(node) => {
-              if (node && acte.uuid && acte.uuid === pendingScrollUuid.current) {
+              if (
+                node &&
+                acte.uuid &&
+                acte.uuid === pendingScrollUuid.current
+              ) {
                 scrollToNewRow(node);
                 pendingScrollUuid.current = null;
               }
@@ -172,7 +174,6 @@ type FieldSetActeAdministratifProps = {
   category: ActeAdministratifCategory;
   categoryShortName: string;
   title: string;
-  noTitleLegend?: boolean;
   notice?: string | React.ReactElement;
   isOptional?: boolean;
   canAddFile?: boolean;
