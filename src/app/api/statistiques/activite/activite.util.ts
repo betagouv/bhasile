@@ -24,9 +24,9 @@ import {
 
 type ActiviteTotals = {
   placesEnregistreesDna: number;
-  placesAutoriseesIndispo: number;
+  placesAutoriseesHorsCaes: number;
   placesIndisponibles: number;
-  placesAutoriseesPresencesIndues: number;
+  placesAutoriseesHorsCaesEtCph: number;
   presencesInduesBPI: number;
   presencesInduesDeboutees: number;
   desinsectisation: number;
@@ -37,9 +37,9 @@ type ActiviteTotals = {
 
 const emptyActiviteTotals = (): ActiviteTotals => ({
   placesEnregistreesDna: 0,
-  placesAutoriseesIndispo: 0,
+  placesAutoriseesHorsCaes: 0,
   placesIndisponibles: 0,
-  placesAutoriseesPresencesIndues: 0,
+  placesAutoriseesHorsCaesEtCph: 0,
   presencesInduesBPI: 0,
   presencesInduesDeboutees: 0,
   desinsectisation: 0,
@@ -55,9 +55,10 @@ const toActiviteSummary = (totals: ActiviteTotals): ActiviteSummaryStat => {
   return {
     placesEnregistreesDna: totals.placesEnregistreesDna,
     placesIndisponibles: totals.placesIndisponibles,
-    placesDisponibles: totals.placesEnregistreesDna - totals.placesIndisponibles,
+    placesDisponibles:
+      totals.placesAutoriseesHorsCaes - totals.placesIndisponibles,
     tauxIndisponibilite: roundStatsRate(
-      ratio(totals.placesIndisponibles, totals.placesAutoriseesIndispo)
+      ratio(totals.placesIndisponibles, totals.placesAutoriseesHorsCaes)
     ),
     motifsIndisponibilite: {
       desinsectisation: totals.desinsectisation,
@@ -67,18 +68,18 @@ const toActiviteSummary = (totals: ActiviteTotals): ActiviteSummaryStat => {
     },
     presencesInduesBPI: totals.presencesInduesBPI,
     tauxPresencesInduesBPI: roundStatsRate(
-      ratio(totals.presencesInduesBPI, totals.placesAutoriseesPresencesIndues)
+      ratio(totals.presencesInduesBPI, totals.placesAutoriseesHorsCaesEtCph)
     ),
     presencesInduesDeboutees: totals.presencesInduesDeboutees,
     tauxPresencesInduesDeboutees: roundStatsRate(
       ratio(
         totals.presencesInduesDeboutees,
-        totals.placesAutoriseesPresencesIndues
+        totals.placesAutoriseesHorsCaesEtCph
       )
     ),
     presencesInduesTotal,
     tauxPresencesInduesTotal: roundStatsRate(
-      ratio(presencesInduesTotal, totals.placesAutoriseesPresencesIndues)
+      ratio(presencesInduesTotal, totals.placesAutoriseesHorsCaesEtCph)
     ),
   };
 };
@@ -132,6 +133,8 @@ const accumulateActivite = (
 
   totals.placesEnregistreesDna += placesAutorisees;
 
+  // Exclusion CAES : numérateurs indispo ET leur dénominateur (placesAutoriseesHorsCaes)
+  // n'accumulent que si la structure est hors CAES → taux iso-périmètre.
   if (
     structureIds.some((structureId) =>
       isStructureEligibleForActiviteIndisponibilite(
@@ -139,7 +142,7 @@ const accumulateActivite = (
       )
     )
   ) {
-    totals.placesAutoriseesIndispo += placesAutorisees;
+    totals.placesAutoriseesHorsCaes += placesAutorisees;
     totals.placesIndisponibles += activite.placesIndisponibles ?? 0;
     totals.desinsectisation += activite.desinsectisation ?? 0;
     totals.remiseEnEtat += activite.remiseEnEtat ?? 0;
@@ -154,7 +157,7 @@ const accumulateActivite = (
       )
     )
   ) {
-    totals.placesAutoriseesPresencesIndues += placesAutorisees;
+    totals.placesAutoriseesHorsCaesEtCph += placesAutorisees;
     totals.presencesInduesBPI += activite.presencesInduesBPI ?? 0;
     totals.presencesInduesDeboutees += activite.presencesInduesDeboutees ?? 0;
   }
@@ -248,6 +251,8 @@ export const computeActiviteStatistiques = (
     summary: toActiviteSummary(summaryTotals),
     byMonth: [...byMonth.entries()]
       .sort(([monthKeyA], [monthKeyB]) => monthKeyA.localeCompare(monthKeyB))
-      .map(([monthKey, monthTotals]) => toActiviteByMonthStat(monthKey, monthTotals)),
+      .map(([monthKey, monthTotals]) =>
+        toActiviteByMonthStat(monthKey, monthTotals)
+      ),
   };
 };
