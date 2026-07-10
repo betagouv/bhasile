@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  getBudgetDetailPathsToClear,
-  getLatestBudgetExecutoireYear,
-} from "@/app/utils/budget.util";
+import { getLatestBudgetExecutoireYear } from "@/app/utils/budget.util";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
-import { StructureType } from "@/types/structure.type";
 
 const OPEN_YEAR = 2025;
 
@@ -17,11 +13,7 @@ const budget = (
 describe("budget util", () => {
   describe("getLatestBudgetExecutoireYear", () => {
     it("retourne l'année la plus récente dont la dotation est renseignée", () => {
-      const budgets = [
-        budget(2025, null),
-        budget(2024, 100),
-        budget(2023, 50),
-      ];
+      const budgets = [budget(2025, null), budget(2024, 100), budget(2023, 50)];
       expect(getLatestBudgetExecutoireYear(budgets, OPEN_YEAR)).toBe(2024);
     });
 
@@ -59,106 +51,6 @@ describe("budget util", () => {
       expect(getLatestBudgetExecutoireYear(undefined, OPEN_YEAR)).toBe(
         OPEN_YEAR
       );
-    });
-  });
-
-  describe("getBudgetDetailPathsToClear", () => {
-    const budgetWithDetails = (
-      overrides: Partial<BudgetApiType>
-    ): BudgetApiType =>
-      ({
-        year: 2024,
-        affectationReservesFondsDedies: 1000,
-        reserveInvestissement: 100,
-        chargesNonReconductibles: 200,
-        reserveCompensationDeficits: null,
-        reserveCompensationBFR: null,
-        reserveCompensationAmortissements: null,
-        reportANouveau: null,
-        autre: null,
-        ...overrides,
-      }) as BudgetApiType;
-
-    it("vide les détails renseignés quand l'affectation vaut 0", () => {
-      const budgets = [
-        budgetWithDetails({ affectationReservesFondsDedies: 0 }),
-      ];
-      expect(getBudgetDetailPathsToClear(budgets)).toEqual([
-        "budgets.0.reserveInvestissement",
-        "budgets.0.chargesNonReconductibles",
-      ]);
-    });
-
-    it("vide les détails renseignés quand l'affectation est null", () => {
-      const budgets = [
-        budgetWithDetails({
-          affectationReservesFondsDedies: null,
-          chargesNonReconductibles: null,
-        }),
-      ];
-      expect(getBudgetDetailPathsToClear(budgets)).toEqual([
-        "budgets.0.reserveInvestissement",
-      ]);
-    });
-
-    it("ne vide rien quand l'affectation est positive", () => {
-      const budgets = [
-        budgetWithDetails({ affectationReservesFondsDedies: 1000 }),
-      ];
-      expect(getBudgetDetailPathsToClear(budgets)).toEqual([]);
-    });
-
-    it("ne vide rien quand l'affectation est négative (déficit)", () => {
-      const budgets = [
-        budgetWithDetails({ affectationReservesFondsDedies: -500 }),
-      ];
-      expect(getBudgetDetailPathsToClear(budgets)).toEqual([]);
-    });
-
-    it("ne renvoie que les champs déjà nuls, donc rien à vider", () => {
-      const budgets = [
-        budgetWithDetails({
-          affectationReservesFondsDedies: 0,
-          reserveInvestissement: null,
-          chargesNonReconductibles: null,
-        }),
-      ];
-      expect(getBudgetDetailPathsToClear(budgets)).toEqual([]);
-    });
-
-    it("utilise l'index du tableau pour cibler la bonne année", () => {
-      const budgets = [
-        budgetWithDetails({ year: 2024, affectationReservesFondsDedies: 1000 }),
-        budgetWithDetails({
-          year: 2023,
-          affectationReservesFondsDedies: 0,
-          reserveInvestissement: 300,
-          chargesNonReconductibles: null,
-        }),
-      ];
-      expect(getBudgetDetailPathsToClear(budgets)).toEqual([
-        "budgets.1.reserveInvestissement",
-      ]);
-    });
-
-    it("filtre par type sans décaler l'index du tableau complet", () => {
-      const budgets = [
-        budgetWithDetails({
-          cpomStructureType: StructureType.CADA,
-          affectationReservesFondsDedies: 0,
-          reserveInvestissement: 50,
-          chargesNonReconductibles: null,
-        }),
-        budgetWithDetails({
-          cpomStructureType: StructureType.HUDA,
-          affectationReservesFondsDedies: 0,
-          reserveInvestissement: 70,
-          chargesNonReconductibles: null,
-        }),
-      ];
-      expect(getBudgetDetailPathsToClear(budgets, StructureType.HUDA)).toEqual([
-        "budgets.1.reserveInvestissement",
-      ]);
     });
   });
 });

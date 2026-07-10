@@ -1,4 +1,3 @@
-import { AFFECTATION_DETAIL_FIELDS } from "@/config/budget.config";
 import { BudgetApiType } from "@/schemas/api/budget.schema";
 import { CpomStructureApiWrite } from "@/schemas/api/cpom.schema";
 import { IndicateurFinancierApiType } from "@/schemas/api/indicateurFinancier.schema";
@@ -8,7 +7,6 @@ import { StructureType } from "@/types/structure.type";
 
 import { isNullOrUndefined } from "./common.util";
 import { getYearRange } from "./date.util";
-import { parseFrenchNumber } from "./number.util";
 import {
   getCpomStructureIndexAndBudgetIndexForAYearAndAType,
   getMillesimeIndexForAYear,
@@ -128,25 +126,6 @@ export const getName = (
   }
   return "";
 };
-
-export const getBudgetDetailPathsToClear = (
-  budgets: BudgetApiType[],
-  type?: StructureType
-): string[] =>
-  budgets.flatMap((budget, index) => {
-    if (type && budget?.cpomStructureType !== type) {
-      return [];
-    }
-    const affectation = parseFrenchNumber(
-      budget?.affectationReservesFondsDedies
-    );
-    if (affectation !== 0 && affectation !== null) {
-      return [];
-    }
-    return AFFECTATION_DETAIL_FIELDS.filter(
-      (field) => budget?.[field] != null
-    ).map((field) => `budgets.${index}.${field}`);
-  });
 
 export const computeResultatNet = (
   totalProduits: number | null | undefined,
