@@ -1,10 +1,7 @@
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
-import { CURRENT_YEAR } from "@/constants";
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
-
-const EIG_STATS_MIN_YEAR = 2015;
 
 import type {
   StatistiqueDbActivite,
@@ -23,6 +20,9 @@ import type {
   StatistiqueDbTypologie,
 } from "./statistiques.db.type";
 import type { StatistiquesResolvedPerimeterFilters } from "./statistiques.utils";
+
+/** Année plancher des EIG remontés dans les stats (borne haute = année courante). */
+const EIG_STATS_MIN_YEAR = 2015;
 
 /** Une version liée à une transformation non finalisée n'est jamais "effective". */
 const FINALIZED_VERSION_WHERE: Prisma.StructureVersionWhereInput = {
@@ -252,12 +252,13 @@ export const findEigs = async (
   if (dnaCodes.length === 0) {
     return [];
   }
+  const currentYear = new Date().getUTCFullYear();
   return prisma.evenementIndesirableGrave.findMany({
     where: {
       dnaCode: { in: dnaCodes },
       evenementDate: {
         gte: new Date(Date.UTC(EIG_STATS_MIN_YEAR, 0, 1)),
-        lt: new Date(Date.UTC(CURRENT_YEAR + 1, 0, 1)),
+        lt: new Date(Date.UTC(currentYear + 1, 0, 1)),
       },
     },
     select: { id: true, dnaCode: true, type: true, evenementDate: true },
