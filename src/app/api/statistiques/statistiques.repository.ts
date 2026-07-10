@@ -1,7 +1,10 @@
 import { FINALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
+import { CURRENT_YEAR } from "@/constants";
 import { Prisma } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
+
+const EIG_STATS_MIN_YEAR = 2015;
 
 import type {
   StatistiqueDbActivite,
@@ -257,7 +260,13 @@ export const findEigs = async (
     return [];
   }
   return prisma.evenementIndesirableGrave.findMany({
-    where: { dnaCode: { in: dnaCodes } },
+    where: {
+      dnaCode: { in: dnaCodes },
+      evenementDate: {
+        gte: new Date(Date.UTC(EIG_STATS_MIN_YEAR, 0, 1)),
+        lt: new Date(Date.UTC(CURRENT_YEAR + 1, 0, 1)),
+      },
+    },
     select: { id: true, dnaCode: true, type: true, evenementDate: true },
     orderBy: { evenementDate: "asc" },
   });
