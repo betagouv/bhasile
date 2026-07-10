@@ -19,6 +19,17 @@ export const GenericTypeChart = ({
   const typeStructureAccessor =
     visualization === "structures" ? "structures" : "places";
 
+  // Dénominateur iso au camembert affiché, pour que les parts somment à 100 % :
+  // places autorisées (types) vs places à l'adresse (bâtis).
+  const placesTotal =
+    typeAccessor === "structureTypes"
+      ? statistiques.structures.totalPlaces
+      : statistiques.structures.totalPlacesAdresse;
+  const ratioTotal =
+    visualization === "structures"
+      ? statistiques.structures.totalStructures
+      : placesTotal;
+
   const getStatItemLabel = (statItem: TypeStructureStat | BatiStat): string => {
     const labelAccessor = typeAccessor === "structureTypes" ? "type" : "bati";
     if (labelAccessor === "type" && "type" in statItem) {
@@ -89,16 +100,7 @@ export const GenericTypeChart = ({
                   {getStatItemLabel(statItem)}{" "}
                   <span className="text-mention-grey">
                     (
-                    {getPercentage(
-                      statItem[typeStructureAccessor],
-                      statistiques.structures.byYear[
-                        statistiques.structures.byYear.length - 1
-                      ][
-                        visualization === "structures"
-                          ? "totalStructures"
-                          : "totalPlaces"
-                      ]
-                    )}
+                    {getPercentage(statItem[typeStructureAccessor], ratioTotal)}
                     )
                   </span>
                 </span>
