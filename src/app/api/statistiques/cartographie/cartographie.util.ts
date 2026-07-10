@@ -184,6 +184,23 @@ const activiteValuesForYears = (
   return { value, previousValue };
 };
 
+/** Somme des RMU du périmètre sur l'année */
+const rmuValuesForYears = (
+  context: StatistiquesContext,
+  annee: number,
+  field: "referesEngages" | "referesExecutes"
+): CartographieIndicateurValues => {
+  const sumForYear = (year: number): number | null => {
+    const rmusForYear = (context.rmus ?? []).filter(
+      (rmu) => rmu.date.getUTCFullYear() === year
+    );
+    return rmusForYear.length === 0
+      ? null
+      : rmusForYear.reduce((total, rmu) => total + (rmu[field] ?? 0), 0);
+  };
+  return { value: sumForYear(annee), previousValue: sumForYear(annee - 1) };
+};
+
 const INDICATEURS: Record<CartographieIndicateur, IndicateurValuesCalculation> =
   {
     "structures.total": yearOverPreviousYear((context, year) =>
@@ -263,6 +280,10 @@ const INDICATEURS: Record<CartographieIndicateur, IndicateurValuesCalculation> =
         aggregation,
         "presencesInduesTotal"
       ),
+    "rmu.referesEngages": (context, annee) =>
+      rmuValuesForYears(context, annee, "referesEngages"),
+    "rmu.referesExecutes": (context, annee) =>
+      rmuValuesForYears(context, annee, "referesExecutes"),
   };
 
 /** Computes only the requested indicator, for `annee` and `annee - 1`. */

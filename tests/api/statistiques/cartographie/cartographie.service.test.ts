@@ -166,6 +166,40 @@ describe("getCartographieStatistiques", () => {
     );
   });
 
+  it("indicateur rmu : une zone sans structure mais avec des RMU affiche quand même sa somme, tranchée par département", async () => {
+    mockBuildStatistiquesContext.mockResolvedValue({
+      ...buildContext([testStructure(1, "01")]),
+      rmus: [
+        {
+          id: 1,
+          departementNumero: "38",
+          date: new Date("2025-05-31T12:00:00Z"),
+          referesEngages: 9,
+          referesExecutes: 3,
+        },
+      ],
+    });
+
+    const result = await getCartographieStatistiques({
+      granularite: "departement",
+      indicateur: "rmu.referesEngages",
+      annee: 2025,
+      departements: null,
+      operateurs: null,
+      types: null,
+      aggregation: "moyenne",
+    });
+
+    // 38 n'a aucune structure mais porte le RMU.
+    expect(result.zones).toContainEqual(
+      expect.objectContaining({ code: "38", value: 9 })
+    );
+    // 01 a une structure mais aucun RMU.
+    expect(result.zones).toContainEqual(
+      expect.objectContaining({ code: "01", value: null })
+    );
+  });
+
   it("aucune structure dans tout le périmètre (buildStatistiquesContext -> null) : toutes les zones à value null", async () => {
     mockBuildStatistiquesContext.mockResolvedValue(null);
 

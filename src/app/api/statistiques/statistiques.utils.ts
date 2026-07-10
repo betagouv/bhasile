@@ -744,4 +744,9 @@ export const sliceStatistiquesContext = (
   departements: context.departements.filter((departement) =>
     departementNumerosInZone.has(departement.numero)
   ),
+  // Les RMU sont rattachés à un département (pas à une structure)
+  rmus:
+    context.rmus?.filter((rmu) =>
+      departementNumerosInZone.has(rmu.departementNumero)
+    ) ?? null,
 });
