@@ -83,6 +83,7 @@ const buildContext = (
     budgets: [],
     indicateurs: [],
     activites: [],
+    rmus: [],
   };
 };
 
