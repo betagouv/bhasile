@@ -1,4 +1,4 @@
-import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import {
   PrefillField,
   TRANSFORMATION_TYPE_SPECS,
