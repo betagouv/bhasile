@@ -73,7 +73,7 @@ describe("GET /api/files/[key]", () => {
     expect(mockGetDownloadLink).toHaveBeenCalled();
   });
 
-  it("refuse le lien de téléchargement à un utilisateur non autorisé", async () => {
+  it("retourne 404 sur le lien de téléchargement à un utilisateur non autorisé pour ne pas révéler l'existence du fichier", async () => {
     // GIVEN
     mockGetFileWithParents.mockResolvedValueOnce(linkedFile);
     mockAuthorizeFileAccess.mockReturnValueOnce(false);
@@ -86,7 +86,7 @@ describe("GET /api/files/[key]", () => {
     const response = await GET(request);
 
     // THEN
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(404);
     expect(mockGetDownloadLink).not.toHaveBeenCalled();
   });
 
@@ -125,7 +125,7 @@ describe("GET /api/files/[key]", () => {
     });
   });
 
-  it("refuse la lecture des métadonnées à un utilisateur non autorisé", async () => {
+  it("retourne 404 sur les métadonnées à un utilisateur non autorisé pour ne pas révéler l'existence du fichier", async () => {
     // GIVEN
     mockGetFileWithParents.mockResolvedValueOnce(linkedFile);
     mockAuthorizeFileAccess.mockReturnValueOnce(false);
@@ -136,7 +136,7 @@ describe("GET /api/files/[key]", () => {
     const response = await GET(request);
 
     // THEN
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(404);
   });
 });
 
@@ -163,7 +163,7 @@ describe("DELETE /api/files/[key]", () => {
     expect(mockDeleteFile).not.toHaveBeenCalled();
   });
 
-  it("refuse la suppression à un utilisateur non autorisé", async () => {
+  it("retourne 404 sur la suppression à un utilisateur non autorisé pour ne pas révéler l'existence du fichier", async () => {
     // GIVEN
     mockGetFileWithParents.mockResolvedValueOnce(linkedFile);
     mockAuthorizeFileAccess.mockReturnValueOnce(false);
@@ -176,7 +176,7 @@ describe("DELETE /api/files/[key]", () => {
     const response = await DELETE(request);
 
     // THEN
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(404);
     expect(mockDeleteFile).not.toHaveBeenCalled();
     expect(mockDeleteFileByStorageKey).not.toHaveBeenCalled();
   });

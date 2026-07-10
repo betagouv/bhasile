@@ -36,11 +36,8 @@ export async function GET(request: NextRequest) {
   const principal = getPrincipal(session);
 
   const file = await getFileWithParents(key);
-  if (!file) {
+  if (!file || !authorizeFileAccess(principal, file, "read")) {
     return NextResponse.json({ error: "Aucun fichier trouvé" }, { status: 404 });
-  }
-  if (!authorizeFileAccess(principal, file, "read")) {
-    return NextResponse.json({ error: "Droits insuffisants" }, { status: 403 });
   }
 
   if (getLink) {
@@ -72,11 +69,8 @@ export async function DELETE(request: NextRequest) {
   const principal = getPrincipal(session);
 
   const file = await getFileWithParents(key);
-  if (!file) {
+  if (!file || !authorizeFileAccess(principal, file, "delete")) {
     return NextResponse.json({ error: "Aucun fichier trouvé" }, { status: 404 });
-  }
-  if (!authorizeFileAccess(principal, file, "delete")) {
-    return NextResponse.json({ error: "Droits insuffisants" }, { status: 403 });
   }
 
   try {
