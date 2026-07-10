@@ -1,4 +1,4 @@
-import { Prisma, StructureType } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 
 export type StatistiqueDbStructure = Prisma.StructureGetPayload<{
   select: {
@@ -15,14 +15,6 @@ export type StatistiqueDbStructureActivity = Prisma.StructureGetPayload<{
     fermetureDate: true;
   };
 }>;
-
-export type StatistiqueDbEffectiveStructureVersion = {
-  id: number;
-  structureId: number | null;
-  effectiveDate: Date | null;
-  type: StructureType | null;
-  departementAdministratif: string | null;
-};
 
 export type StatistiqueDbTypologie = Prisma.StructureTypologieGetPayload<{
   select: {
@@ -87,8 +79,17 @@ export type StatistiqueDbDnaLink = Prisma.DnaStructureGetPayload<{
   };
 }>;
 
-export type StatistiqueDbStructureVersionTimeline =
-  StatistiqueDbEffectiveStructureVersion;
+/**
+ * Timeline des `StructureVersion` d'une structure : sert uniquement à résoudre
+ * quelle version est effective à une date (adresses, typologies, liens DNA qui,
+ * eux, évoluent dans le temps). `type` / `operateur` / `departement` étant
+ * immuables et scalaires sur `Structure`, ils n'y figurent plus.
+ */
+export type StatistiqueDbStructureVersionTimeline = {
+  id: number;
+  structureId: number | null;
+  effectiveDate: Date | null;
+};
 
 export type StatistiqueDbActivite = Prisma.ActiviteGetPayload<{
   select: {

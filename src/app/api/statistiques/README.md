@@ -58,7 +58,7 @@ curl -s "http://localhost:3000/api/statistiques" | jq > tmp/statistiques.json
 
 ## Périmètre
 
-Filtre structures via `findEffectiveStructureVersionsAtDate` (pivot sur `StructureVersion` effective).
+Filtre structures via `findPerimeterStructures` : `type` / `operateurId` / `departementAdministratif` étant immuables et scalaires sur `Structure`, les filtres sont un simple `where` Prisma sur ces colonnes (plus de pivot sur `StructureVersion`). Seul le garde-fou « structure finalisée » reste adossé à `StructureVersion` (existence d'au moins une version finalisée et effective) pour exclure les structures en cours d'initialisation.
 
 **Structures actives (indicateurs globaux)** : `activeStructureIdsNow` sur `StatistiquesContext` - structures ouvertes au jour de référence (`Structure.creationDate` / `fermetureDate`). `context.structures` en est la projection typée.
 

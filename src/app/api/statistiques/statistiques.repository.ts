@@ -10,19 +10,16 @@ import type {
   StatistiqueDbCpomStructure,
   StatistiqueDbDepartement,
   StatistiqueDbDnaLink,
-  StatistiqueDbEffectiveStructureVersion,
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
   StatistiqueDbIndicateurFinancier,
   StatistiqueDbRmu,
+  StatistiqueDbStructure,
   StatistiqueDbStructureActivity,
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologie,
 } from "./statistiques.db.type";
-import {
-  matchesStatistiquesPerimeterFilters,
-  type StatistiquesResolvedPerimeterFilters,
-} from "./statistiques.utils";
+import type { StatistiquesResolvedPerimeterFilters } from "./statistiques.utils";
 
 /** Une version liée à une transformation non finalisée n'est jamais "effective". */
 const FINALIZED_VERSION_WHERE: Prisma.StructureVersionWhereInput = {
@@ -55,43 +52,34 @@ export const findOperateurFiliales = async (
 };
 
 /**
- * Résout la version réellement effective de chaque structure à `reference`
- * (dernière version finalisée), puis applique `resolved` sur cet état résolu.
+ * Périmètre des stats : filtre directement sur les scalaires immuables de
+ * `Structure` (`type` / `operateurId` / `departementAdministratif`). Le garde-fou
+ * « structure finalisée » subsiste via l'existence d'au moins une
+ * `StructureVersion` finalisée et effective à `reference` (une structure en
+ * initialisation ne remonte pas, cf. spec transformations).
  */
-export const findEffectiveStructureVersionsAtDate = async (
+export const findPerimeterStructures = async (
   resolved: StatistiquesResolvedPerimeterFilters,
   reference: Date = new Date()
-): Promise<StatistiqueDbEffectiveStructureVersion[]> => {
-  const versions = await prisma.structureVersion.findMany({
+): Promise<StatistiqueDbStructure[]> =>
+  prisma.structure.findMany({
     where: {
-      ...FINALIZED_VERSION_WHERE,
-      effectiveDate: { lt: startOfNextUtcDay(reference) },
+      type: { in: [...resolved.types] },
+      ...(resolved.departements
+        ? { departementAdministratif: { in: [...resolved.departements] } }
+        : {}),
+      ...(resolved.operateurIds
+        ? { operateurId: { in: [...resolved.operateurIds] } }
+        : {}),
+      structureVersions: {
+        some: {
+          ...FINALIZED_VERSION_WHERE,
+          effectiveDate: { lt: startOfNextUtcDay(reference) },
+        },
+      },
     },
-    select: {
-      id: true,
-      structureId: true,
-      effectiveDate: true,
-      departementAdministratif: true,
-      structure: { select: { operateurId: true, type: true } },
-    },
-    orderBy: [
-      { structureId: "asc" },
-      { effectiveDate: "desc" },
-      { id: "desc" },
-    ],
-    distinct: ["structureId"],
+    select: { id: true, type: true, departementAdministratif: true },
   });
-
-  return versions
-    .filter((version) => matchesStatistiquesPerimeterFilters(version, resolved))
-    .map((version) => ({
-      id: version.id,
-      structureId: version.structureId,
-      effectiveDate: version.effectiveDate,
-      type: version.structure?.type ?? null,
-      departementAdministratif: version.departementAdministratif,
-    }));
-};
 
 export const findStructureActivityDates = async (
   structureIds: number[]
@@ -204,14 +192,12 @@ export const findStructureVersionTimeline = async (
     return [];
   }
 
-  const versions = await prisma.structureVersion.findMany({
+  return prisma.structureVersion.findMany({
     where: { structureId: { in: structureIds } },
     select: {
       id: true,
       structureId: true,
       effectiveDate: true,
-      departementAdministratif: true,
-      structure: { select: { type: true } },
     },
     orderBy: [
       { structureId: "asc" },
@@ -219,14 +205,6 @@ export const findStructureVersionTimeline = async (
       { id: "desc" },
     ],
   });
-
-  return versions.map((version) => ({
-    id: version.id,
-    structureId: version.structureId,
-    effectiveDate: version.effectiveDate,
-    type: version.structure?.type ?? null,
-    departementAdministratif: version.departementAdministratif,
-  }));
 };
 
 export const findDepartementsWithPopulation = async (
