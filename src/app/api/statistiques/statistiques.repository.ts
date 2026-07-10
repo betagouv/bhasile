@@ -54,13 +54,6 @@ export const findOperateurFiliales = async (
   });
 };
 
-/**
- * Périmètre des stats : filtre directement sur les scalaires immuables de
- * `Structure` (`type` / `operateurId` / `departementAdministratif`). Le garde-fou
- * « structure finalisée » subsiste via l'existence d'au moins une
- * `StructureVersion` finalisée et effective à `reference` (une structure en
- * initialisation ne remonte pas, cf. spec transformations).
- */
 export const findPerimeterStructures = async (
   resolved: StatistiquesResolvedPerimeterFilters,
   reference: Date = new Date()

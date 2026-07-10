@@ -79,12 +79,7 @@ export type StatistiqueDbDnaLink = Prisma.DnaStructureGetPayload<{
   };
 }>;
 
-/**
- * Timeline des `StructureVersion` d'une structure : sert uniquement à résoudre
- * quelle version est effective à une date (adresses, typologies, liens DNA qui,
- * eux, évoluent dans le temps). `type` / `operateur` / `departement` étant
- * immuables et scalaires sur `Structure`, ils n'y figurent plus.
- */
+/** Timeline des `StructureVersion` d'une structure */
 export type StatistiqueDbStructureVersionTimeline = {
   id: number;
   structureId: number | null;

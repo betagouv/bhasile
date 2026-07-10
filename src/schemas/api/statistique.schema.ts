@@ -15,9 +15,8 @@ export const statistiquesFiltersSchema = z.object({
   aggregation: z
     .string()
     .nullable()
-    .transform(
-      (value): NumericAggregation =>
-        value === "mediane" ? "mediane" : "moyenne"
+    .transform((value): NumericAggregation =>
+      value === "mediane" ? "mediane" : "moyenne"
     ),
 });
 
@@ -178,9 +177,7 @@ export type RmuByYearStat = RmuPeriodStat;
 export type StatistiqueApiRead = {
   structures: {
     totalStructures: number;
-    /** Total des places autorisées (typologie) — dénominateur des ratios par type. */
     totalPlaces: number;
-    /** Total des places à l'adresse (dernière version) — dénominateur des ratios par bâti. */
     totalPlacesAdresse: number;
     totalCpoms: number;
     structuresAvecCpom: number;

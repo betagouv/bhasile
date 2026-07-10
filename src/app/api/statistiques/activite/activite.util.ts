@@ -133,8 +133,7 @@ const accumulateActivite = (
 
   totals.placesEnregistreesDna += placesAutorisees;
 
-  // Exclusion CAES : numérateurs indispo ET leur dénominateur (placesAutoriseesHorsCaes)
-  // n'accumulent que si la structure est hors CAES → taux iso-périmètre.
+  // Exclusion CAES
   if (
     structureIds.some((structureId) =>
       isStructureEligibleForActiviteIndisponibilite(

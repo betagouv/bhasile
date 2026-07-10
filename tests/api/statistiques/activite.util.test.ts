@@ -86,8 +86,6 @@ describe("activité - agrégés et série mensuelle", () => {
 
     expect(result.summary.placesEnregistreesDna).toBe(150);
     expect(result.summary.placesIndisponibles).toBe(10);
-    // placesDisponibles iso : la structure CAES (50 places) sort du périmètre indispo,
-    // donc disponibles = enregistrées hors CAES (100) − indisponibles (10).
     expect(result.summary.placesDisponibles).toBe(90);
   });
 

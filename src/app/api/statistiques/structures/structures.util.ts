@@ -56,8 +56,7 @@ const countStructuresPerBati = (
   const countsByBati = new Map<Repartition, number>();
 
   for (const structure of structures) {
-    // Bâti = répartition des adresses de la dernière version. Une structure dont
-    // la version courante n'a aucune adresse répartie n'a pas de bâti → hors camembert.
+    // Bâti = répartition des adresses de la dernière version
     const bati = batiMap.get(structure.id);
     if (bati == null) {
       continue;
@@ -74,7 +73,10 @@ const sumPlacesPerBati = (
 ): Map<Repartition, number> => {
   const placesByBati = new Map<Repartition, number>();
 
-  for (const adresse of filterByActiveStructureId(adresses, activeStructureIds)) {
+  for (const adresse of filterByActiveStructureId(
+    adresses,
+    activeStructureIds
+  )) {
     const bati = (adresse.repartition ?? Repartition.COLLECTIF) as Repartition;
     const places = adresse.placesAutorisees ?? 0;
 
@@ -209,15 +211,16 @@ const computeTypeStats = (
   structures: StatistiqueDbStructure[],
   typologieMap: Map<number, StatistiqueDbTypologieValues>
 ): TypeStructureStat[] => {
-  const statsByType = new Map<StructureType, { structures: number; places: number }>();
+  const statsByType = new Map<
+    StructureType,
+    { structures: number; places: number }
+  >();
 
   for (const structure of structures) {
     const type = structure.type as StructureType | null;
     if (type === null) {
       continue;
     }
-    // Toutes les structures ont un type → comptées ici (somme = totalStructures).
-    // Les places viennent de la typologie : 0 pour une structure sans millésime.
     const typologie = typologieMap.get(structure.id);
     const current = statsByType.get(type) ?? { structures: 0, places: 0 };
     statsByType.set(type, {
@@ -265,7 +268,6 @@ const countStructuresByBati = (
   bati: Repartition
 ): number =>
   // Aligné sur le global : une structure sans adresse répartie n'a pas de bâti
-  // et n'est comptée dans aucune catégorie (pas de défaut COLLECTIF).
   structures.filter((structure) => batiMap.get(structure.id) === bati).length;
 
 const computeByYearStats = (
@@ -337,8 +339,13 @@ const computeByYearStats = (
 export const computeStructuresStatistiques = (
   context: StatistiquesContext
 ): StatistiqueApiRead["structures"] => {
-  const { structures, typologies, adresses, cpomLinks, structureVersionTimeline } =
-    context;
+  const {
+    structures,
+    typologies,
+    adresses,
+    cpomLinks,
+    structureVersionTimeline,
+  } = context;
   const typologieMap = getLastTypologiePerStructure(typologies);
   const now = new Date();
   // Le bâti (vue globale et byYear) reflète l'adresse actuelle : `adresses` remonte
@@ -361,9 +368,9 @@ export const computeStructuresStatistiques = (
 
   return {
     totalStructures: structures.length,
-    // Places autorisées (typologie) — somme des `structureTypes[].places`.
+    // Places autorisées (typologie) - somme des `structureTypes[].places`.
     totalPlaces: computeTotalPlaces(structures, typologieMap),
-    // Places à l'adresse (dernière version) — somme des `structureBatis[].places`.
+    // Places à l'adresse (dernière version) - somme des `structureBatis[].places`.
     totalPlacesAdresse: structureBatis.reduce(
       (total, bati) => total + bati.places,
       0

@@ -30,12 +30,6 @@ const NON_EXCLUDED_STRUCTURE_TYPES: StructureType[] = Object.values(
   StructureType
 ).filter((type) => !excludedStructureTypes.has(type));
 
-/**
- * `type` / `operateur` / `departement` étant immuables et scalaires sur
- * `Structure`, les filtres se résolvent en un simple `where` Prisma sur ces
- * colonnes : `types` est l'ensemble concret des types à retenir (jamais vide,
- * exclus retirés), `null` signifiant « pas de contrainte » pour les autres.
- */
 export type StatistiquesResolvedPerimeterFilters = {
   departements: Set<string> | null;
   types: Set<StructureType>;

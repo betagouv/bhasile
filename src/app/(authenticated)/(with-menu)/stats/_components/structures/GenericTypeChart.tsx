@@ -19,8 +19,7 @@ export const GenericTypeChart = ({
   const typeStructureAccessor =
     visualization === "structures" ? "structures" : "places";
 
-  // Dénominateur iso au camembert affiché, pour que les parts somment à 100 % :
-  // places autorisées (types) vs places à l'adresse (bâtis).
+  // Dénominateur iso au camembert affiché
   const placesTotal =
     typeAccessor === "structureTypes"
       ? statistiques.structures.totalPlaces
