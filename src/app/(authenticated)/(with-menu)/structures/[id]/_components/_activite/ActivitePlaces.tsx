@@ -5,20 +5,17 @@ import { ReactElement } from "react";
 import PieChart from "@/app/components/common/PieChart";
 import { getPercentage } from "@/app/utils/common.util";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
-
 const pieChartOptions = {
   showLabel: false,
   donut: true,
   donutWidth: 30,
 };
 
-export const ActivitePlaces = (): ReactElement => {
-  const { structure } = useStructureContext();
-  const activite = structure.activites?.[0];
-  const placesAutorisees = activite?.placesAutorisees || 0;
-  const placesIndisponibles = activite?.placesIndisponibles || 0;
-  const placesDisponibles = activite?.placesDisponibles || 0;
+export const ActivitePlaces = ({
+  placesAutorisees = 0,
+  placesIndisponibles = 0,
+}: Props): ReactElement => {
+  const placesDisponibles = placesAutorisees - Number(placesIndisponibles);
 
   return (
     <div className="flex items-center pt-3">
@@ -41,15 +38,22 @@ export const ActivitePlaces = (): ReactElement => {
           <div>
             <strong>{placesIndisponibles}</strong> indisponibles{" "}
             <span className="text-mention-grey">
-              ({getPercentage(placesIndisponibles, placesAutorisees)})
+              ({getPercentage(placesIndisponibles || 0, placesAutorisees)})
             </span>
           </div>
           <div>
             <strong>{placesDisponibles}</strong> disponibles{" "}
-            <span className="text-mention-grey">({getPercentage(placesDisponibles, placesAutorisees)})</span>
+            <span className="text-mention-grey">
+              ({getPercentage(placesDisponibles || 0, placesAutorisees)})
+            </span>
           </div>
         </div>
       </div>
     </div>
   );
+};
+
+type Props = {
+  placesAutorisees?: number;
+  placesIndisponibles?: number | null;
 };

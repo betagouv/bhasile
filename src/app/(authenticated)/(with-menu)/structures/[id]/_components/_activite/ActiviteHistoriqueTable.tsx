@@ -4,22 +4,26 @@ import { ReactElement, ReactNode } from "react";
 import { Badge, BadgeType } from "@/app/components/common/Badge";
 import { Table } from "@/app/components/common/Table";
 import { ActiviteApiType } from "@/schemas/api/activite.schema";
+import { ActiviteByMonthStat } from "@/schemas/api/statistique.schema";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
 import { typesActivite } from "./activite.constants";
 
-export const ActiviteHistoriqueTable = (): ReactElement => {
-  const { structure } = useStructureContext();
-
-  const getActiviteFor = (key: keyof ActiviteApiType) => {
-    return structure.activites?.map((activite) => activite[key]).reverse();
+export const ActiviteHistoriqueTable = ({ activites }: Props): ReactElement => {
+  const getActiviteFor = (
+    key: keyof ActiviteApiType | keyof ActiviteByMonthStat
+  ) => {
+    return activites
+      ?.map((activite) => {
+        return (activite as Record<string, string | number | null>)[key];
+      })
+      .reverse();
   };
 
   const activiteTypes: ActiviteType[] = [
     {
       id: "placesEnregistrees",
       label: "Places enregistrées DNA",
-      activites: getActiviteFor("placesAutorisees"),
+      activites: getActiviteFor("placesEnregistreesDna"),
     },
     {
       id: "placesIndisponibles",
@@ -43,16 +47,16 @@ export const ActiviteHistoriqueTable = (): ReactElement => {
       seuil: typesActivite["presencesInduesDeboutees"]?.seuil,
     },
     {
-      id: "presencesIndues",
+      id: "presencesInduesTotal",
       label: "Présences indues totales",
-      activites: getActiviteFor("presencesIndues"),
-      seuil: typesActivite["presencesIndues"]?.seuil,
+      activites: getActiviteFor("presencesInduesTotal"),
+      seuil: typesActivite["presencesInduesTotal"]?.seuil,
     },
   ];
 
   const getHeadings = () => {
     const dates =
-      structure.activites
+      activites
         ?.map((activite) => {
           const date = dayjs(activite.date);
           const month = date.format("MMMM").toUpperCase();
@@ -93,7 +97,7 @@ export const ActiviteHistoriqueTable = (): ReactElement => {
     seuil: string,
     activiteType: ActiviteType
   ): BadgeType => {
-    if (activiteType.id === "presencesIndues") {
+    if (activiteType.id === "presencesInduesTotal") {
       return "disabled";
     }
     if (Number(seuil) > Number(activiteType.seuil)) {
@@ -150,4 +154,8 @@ type ActiviteType = {
   subLabel?: ReactNode;
   activites?: (string | number | null)[];
   seuil?: number | null;
+};
+
+type Props = {
+  activites: ActiviteApiType[] | ActiviteByMonthStat[];
 };
