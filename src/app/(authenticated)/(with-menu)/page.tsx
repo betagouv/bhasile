@@ -9,6 +9,7 @@ import { SessionUser } from "@/types/global";
 import { BlockSkeleton } from "./_components/BlockSkeleton";
 import { DashboardHeader } from "./_components/DashboardHeader";
 import { InitialisationsActualisationsBlock } from "./_components/InitialisationsActualisationsBlock";
+import { TransformationsBlock } from "./_components/TransformationsBlock";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -32,6 +33,16 @@ export default async function DashboardPage({
     <>
       <DashboardHeader prenom={user?.prenom} />
       <div className="flex flex-col gap-8 max-w-7xl mx-auto">
+        <Suspense
+          fallback={
+            <BlockSkeleton
+              title="Créations, transformations et fermetures de structures"
+              icon="fr-icon-building-line"
+            />
+          }
+        >
+          <TransformationsBlock filters={filters} user={user} />
+        </Suspense>
         <Suspense
           fallback={
             <BlockSkeleton

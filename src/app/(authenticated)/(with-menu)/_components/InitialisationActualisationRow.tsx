@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { ReactElement } from "react";
 
+import { Badge, BadgeType } from "@/app/components/common/Badge";
 import {
   ActualisationStatus,
   DashboardStructureRow,
   InitialisationStatus,
-} from "@/app/api/dashboard/initialisations-actualisations/initialisations-actualisations.type";
-import { Badge, BadgeType } from "@/app/components/common/Badge";
+} from "@/types/dashboard.type";
 
 export const InitialisationActualisationRow = ({
   row,

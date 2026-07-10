@@ -8,7 +8,6 @@ import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 
 import { SegmentedControl } from "@/app/components/common/SegmentedControl";
 import { ListLoader } from "@/app/components/lists/ListLoader";
-import { OngoingTransformationsBanner } from "@/app/components/transformations/OngoingTransformationsBanner";
 import { usePersistStructuresSearchQuery } from "@/app/hooks/usePersistStructuresSearchQuery";
 import { useStructuresSearch } from "@/app/hooks/useStructuresSearch";
 
@@ -125,8 +124,6 @@ export default function Structures(): ReactElement {
           </div>
         )}
       </div>
-
-      <OngoingTransformationsBanner />
 
       {selectedVisualization === "tableau" && (
         <>
