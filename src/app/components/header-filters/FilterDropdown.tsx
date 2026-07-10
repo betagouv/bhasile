@@ -11,7 +11,7 @@ export const FilterDropdown = ({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
-  const appliedFilters = searchParams.get(filterId)?.split(",");
+  const appliedFilters = searchParams.get(filterId)?.split(",").filter(Boolean);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
