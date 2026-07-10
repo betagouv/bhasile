@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test?schema=public
+
+jobs:
+  checks:
+    name: Lint, types, tests, SQL format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - name: Lint
+        if: ${{ !cancelled() }}
+        run: yarn lint
+      - name: Typecheck
+        if: ${{ !cancelled() }}
+        run: yarn check:ts
+      - name: Unit & integration tests
+        if: ${{ !cancelled() }}
+        run: yarn test
+      - name: SQL views formatting
+        if: ${{ !cancelled() }}
+        run: yarn sql:format:check
+
+  db-tests:
+    name: Repository tests (Postgres 17)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - name: Apply migrations
+        run: npx prisma migrate deploy
+      - name: Build test env file
+        run: |
+          cp .env.example .env.test
+          sed -i 's|^DATABASE_URL=.*|DATABASE_URL="postgresql://postgres:postgres@localhost:5432/test?schema=public"|' .env.test
+      - name: Repository tests
+        run: yarn test:db
