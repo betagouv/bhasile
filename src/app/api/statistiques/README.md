@@ -11,6 +11,7 @@ Statistiques agrégées du parc hébergement.
 | `finance`         | [finance/README.md](./finance/README.md)                   |
 | `controleQualite` | [controle-qualite/README.md](./controle-qualite/README.md) |
 | `activite`        | [activite/README.md](./activite/README.md)                 |
+| `rmu`             | [rmu/README.md](./rmu/README.md)                           |
 
 ## Architecture
 
@@ -19,7 +20,7 @@ Le service est découpé par "bloc fonctionnel" avec un socle commun
 ```
 route.ts -> statistique.service.ts
         ├── statistiques.repository.ts | statistiques.utils.ts
-        └── structures/ | places/ | finance/ | controle-qualite/ | activite/
+        └── structures/ | places/ | finance/ | controle-qualite/ | activite/ | rmu/
               └── *.util.ts   compute*(context[, aggregation])
 ```
 
@@ -39,6 +40,8 @@ Schéma : `src/schemas/api/statistique.schema.ts`.
 
 Sans filtre l'API retourne tout le parc, et si le périmètre retourné est vide l'API retourne `null`.
 Les filtres sont en **ET**.
+
+> Exception `rmu` (donnée départementale) : ne suit que `departements`, et vaut `null` dès qu'un filtre `operateurs`/`types` est actif. Cf. [rmu/README.md](./rmu/README.md#périmètre).
 
 Exemple :
 

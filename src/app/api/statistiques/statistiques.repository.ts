@@ -14,6 +14,7 @@ import type {
   StatistiqueDbEig,
   StatistiqueDbEvaluation,
   StatistiqueDbIndicateurFinancier,
+  StatistiqueDbRmu,
   StatistiqueDbStructureActivity,
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologie,
@@ -368,6 +369,24 @@ export const findIndicateursFinanciers = async (
       tauxEncadrement: true,
       coutJournalier: true,
     },
+  });
+};
+
+export const findRmus = async (
+  departementNumeros: Set<string> | null
+): Promise<StatistiqueDbRmu[]> => {
+  return prisma.rmu.findMany({
+    where: departementNumeros
+      ? { departementNumero: { in: [...departementNumeros] } }
+      : undefined,
+    select: {
+      id: true,
+      departementNumero: true,
+      date: true,
+      referesEngages: true,
+      referesExecutes: true,
+    },
+    orderBy: { date: "asc" },
   });
 };
 

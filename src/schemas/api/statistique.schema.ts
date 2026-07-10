@@ -165,6 +165,17 @@ export type ActiviteByMonthStat = {
   tauxPresencesInduesTotal: number | null;
 };
 
+export type RmuPeriodStat = {
+  date: Date;
+  referesEngages: number;
+  referesExecutes: number;
+  tauxExecute: number | null;
+};
+
+export type RmuByMonthStat = RmuPeriodStat;
+export type RmuByTrimesterStat = RmuPeriodStat;
+export type RmuByYearStat = RmuPeriodStat;
+
 export type StatistiqueApiRead = {
   structures: {
     totalStructures: number;
@@ -190,6 +201,11 @@ export type StatistiqueApiRead = {
     summary: ActiviteSummaryStat;
     byMonth: ActiviteByMonthStat[];
   };
+  rmu: {
+    byMonth: RmuPeriodStat[];
+    byTrimester: RmuPeriodStat[];
+    byYear: RmuPeriodStat[];
+  } | null;
 };
 
 export type StatistiqueApiResponse = StatistiqueApiRead | null;
