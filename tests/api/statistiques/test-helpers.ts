@@ -10,14 +10,11 @@ import {
   createEmptyActiveStructureIdsByPeriod,
   getTypologieYears,
 } from "@/app/api/statistiques/statistiques.utils";
-import { StructureType } from "@/types/structure.type";
 
 type BuildTestStructureVersionTimelineEntry = {
   structureId: number;
   structureVersionId?: number;
   effectiveDate?: Date;
-  type?: StructureType;
-  departementAdministratif?: string;
 };
 
 export const buildTestStructureVersionTimeline = (
@@ -34,8 +31,6 @@ export const buildTestStructureVersionTimeline = (
     id: entry.structureVersionId ?? entry.structureId,
     structureId: entry.structureId,
     effectiveDate: entry.effectiveDate ?? defaultEffectiveDate,
-    type: entry.type ?? StructureType.CADA,
-    departementAdministratif: entry.departementAdministratif ?? "01",
   }));
 };
 
@@ -138,6 +133,7 @@ export const buildTestStatistiquesContext = (
         | "budgets"
         | "indicateurs"
         | "activites"
+        | "rmus"
       >
     >
 ): StatistiquesContext => {
@@ -179,5 +175,6 @@ export const buildTestStatistiquesContext = (
     budgets: partial.budgets ?? [],
     indicateurs: partial.indicateurs ?? [],
     activites: partial.activites ?? [],
+    rmus: partial.rmus !== undefined ? partial.rmus : [],
   };
 };

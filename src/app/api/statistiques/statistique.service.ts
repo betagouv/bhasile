@@ -7,6 +7,7 @@ import { computeActiviteStatistiques } from "./activite/activite.util";
 import { computeControleQualiteStatistiques } from "./controle-qualite/controle-qualite.util";
 import { computeFinanceStatistiques } from "./finance/finance.util";
 import { computePlacesStatistiques } from "./places/places.util";
+import { computeRmuStatistiques } from "./rmu/rmu.util";
 import type { StatistiquesContext } from "./statistiques.db.type";
 import {
   findActivites,
@@ -14,11 +15,12 @@ import {
   findCpomStructures,
   findDepartementsWithPopulation,
   findDnaLinks,
-  findEffectiveStructureVersionsAtDate,
   findEigs,
   findEvaluations,
   findIndicateursFinanciers,
   findOperateurFiliales,
+  findPerimeterStructures,
+  findRmus,
   findStructureActivityDates,
   findStructureAdresses,
   findStructureTypologies,
@@ -30,7 +32,6 @@ import {
   collectDistinctYears,
   createEmptyActiveStructureIdsByPeriod,
   getTypologieYears,
-  mapVersionsToStructures,
   parseStatistiquesPerimeterFilters,
   type StatistiquesResolvedPerimeterFilters,
 } from "./statistiques.utils";
@@ -60,13 +61,8 @@ export const buildStatistiquesContext = async (
   const referenceYear = now.getUTCFullYear();
 
   const resolvedFilters = await resolveStatistiquesPerimeterFilters(filters);
-  const effectiveVersions = await findEffectiveStructureVersionsAtDate(
-    resolvedFilters,
-    now
-  );
-  const allStructureIds = effectiveVersions
-    .map((version) => version.structureId)
-    .filter((id): id is number => id != null);
+  const allStructures = await findPerimeterStructures(resolvedFilters, now);
+  const allStructureIds = allStructures.map((structure) => structure.id);
   if (allStructureIds.length === 0) {
     return null;
   }
@@ -78,8 +74,6 @@ export const buildStatistiquesContext = async (
     allStructureIds,
     structureActivityDates
   );
-
-  const allStructures = mapVersionsToStructures(effectiveVersions);
 
   const [typologies, adresses, cpomLinks, dnaLinks, structureVersionTimeline] =
     await Promise.all([
@@ -93,23 +87,31 @@ export const buildStatistiquesContext = async (
   const activeStructureIdsByPeriod = createEmptyActiveStructureIdsByPeriod();
   const dnaCodes = [...new Set(dnaLinks.map((link) => link.dna.code))];
 
-  const [departements, eigs, evaluations, budgets, indicateurs, activites] =
-    await Promise.all([
-      findDepartementsWithPopulation([
-        ...new Set(
-          allStructures
-            .map((structure) => structure.departementAdministratif)
-            .filter(
-              (departement): departement is string => departement !== null
-            )
-        ),
-      ]),
-      findEigs(dnaCodes),
-      findEvaluations(allStructureIds),
-      findBudgets(allStructureIds),
-      findIndicateursFinanciers(allStructureIds),
-      findActivites(dnaCodes),
-    ]);
+  const [
+    departements,
+    eigs,
+    evaluations,
+    budgets,
+    indicateurs,
+    activites,
+    rmus,
+  ] = await Promise.all([
+    findDepartementsWithPopulation([
+      ...new Set(
+        allStructures
+          .map((structure) => structure.departementAdministratif)
+          .filter((departement): departement is string => departement !== null)
+      ),
+    ]),
+    findEigs(dnaCodes),
+    findEvaluations(allStructureIds),
+    findBudgets(allStructureIds),
+    findIndicateursFinanciers(allStructureIds),
+    findActivites(dnaCodes),
+    resolvedFilters.operateurIds === null && resolvedFilters.types.size === 0
+      ? findRmus(resolvedFilters.departements)
+      : Promise.resolve(null),
+  ]);
 
   const activeStructureIdsNow = buildActivityIndex(
     activityContext,
@@ -146,6 +148,7 @@ export const buildStatistiquesContext = async (
     budgets,
     indicateurs,
     activites,
+    rmus,
   };
 };
 
@@ -165,5 +168,6 @@ export const getStatistiques = async (
     finance: computeFinanceStatistiques(context, aggregation),
     controleQualite: computeControleQualiteStatistiques(context, aggregation),
     activite: computeActiviteStatistiques(context),
+    rmu: computeRmuStatistiques(context),
   };
 };

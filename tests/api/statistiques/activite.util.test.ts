@@ -86,7 +86,7 @@ describe("activité - agrégés et série mensuelle", () => {
 
     expect(result.summary.placesEnregistreesDna).toBe(150);
     expect(result.summary.placesIndisponibles).toBe(10);
-    expect(result.summary.placesDisponibles).toBe(140);
+    expect(result.summary.placesDisponibles).toBe(90);
   });
 
   it("par mois, calcule les indicateurs et les taux sur les dénominateurs filtrés par type", () => {
@@ -147,6 +147,7 @@ describe("activité - agrégés et série mensuelle", () => {
       presencesInduesDeboutees: 2,
       presencesInduesTotal: 7,
     });
+    // Taux iso calculés en back : indispo 14 / 140 (hors CAES), total 7 / 100 (hors CAES+CPH).
     expect(march2025?.tauxIndisponibilite).toBe(0.1);
     expect(march2025?.tauxPresencesInduesTotal).toBe(0.07);
   });

@@ -5,7 +5,7 @@ import {
   checkNoDuplicateStructureIds,
   checkUniqueDepartement,
 } from "@/app/api/transformations/transformation.util";
-import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import {
   StructureVersionTransformationType,

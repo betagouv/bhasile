@@ -1,11 +1,11 @@
 import { startOfNextUtcDay, startOfUtcDay } from "@/app/utils/date.util";
 import { sumValues } from "@/app/utils/math.util";
 import { EXCLUDED_STRUCTURE_TYPES } from "@/constants";
+import { StructureType } from "@/generated/prisma/client";
 import type { StatistiquesFilters } from "@/schemas/api/statistique.schema";
 
 import type {
   StatistiqueDbDnaLink,
-  StatistiqueDbEffectiveStructureVersion,
   StatistiqueDbStructure,
   StatistiqueDbStructureActivity,
   StatistiqueDbStructureVersionTimeline,
@@ -25,16 +25,21 @@ export const createEmptyActiveStructureIdsByPeriod =
 
 const excludedStructureTypes = new Set<string>(EXCLUDED_STRUCTURE_TYPES);
 
+/** Types de structures retenus par défaut dans les stats (tous sauf exclus). */
+const NON_EXCLUDED_STRUCTURE_TYPES: StructureType[] = Object.values(
+  StructureType
+).filter((type) => !excludedStructureTypes.has(type));
+
 export type StatistiquesResolvedPerimeterFilters = {
   departements: Set<string> | null;
-  types: Set<string>;
+  types: Set<StructureType>;
   operateurIds: Set<number> | null;
 };
 
 /** Filtres parsés mais pas encore résolus : les filiales des `operateurIds` ne sont pas encore ajoutées (accès BDD, cf. service). */
 export type StatistiquesParsedPerimeterFilters = {
   departements: Set<string> | null;
-  types: Set<string>;
+  types: Set<StructureType>;
   operateurIds: number[];
 };
 
@@ -42,54 +47,22 @@ export const parseStatistiquesPerimeterFilters = (
   filters: StatistiquesFilters
 ): StatistiquesParsedPerimeterFilters => {
   const depList = filters.departements?.split(",").filter(Boolean) ?? [];
-  const typeList = (filters.types?.split(",").filter(Boolean) ?? []).filter(
-    (type) => !excludedStructureTypes.has(type)
+  const requestedTypes = new Set(
+    filters.types?.split(",").filter(Boolean) ?? []
+  );
+  const types = new Set(
+    NON_EXCLUDED_STRUCTURE_TYPES.filter(
+      (type) => requestedTypes.size === 0 || requestedTypes.has(type)
+    )
   );
   const operateurIds =
     filters.operateurs?.split(",").filter(Boolean).map(Number) ?? [];
 
   return {
     departements: depList.length > 0 ? new Set(depList) : null,
-    types: new Set(typeList),
+    types,
     operateurIds,
   };
-};
-
-export type StatistiquesResolvableStructureVersion = {
-  departementAdministratif: string | null;
-  structure: { operateurId: number | null; type: string | null } | null;
-};
-
-/**
- * Applique les filtres (département/type/opérateur) sur une version déjà résolue
- * comme "effective" (par ex. la version la plus récente finalisée).
- */
-export const matchesStatistiquesPerimeterFilters = (
-  version: StatistiquesResolvableStructureVersion,
-  resolved: StatistiquesResolvedPerimeterFilters
-): boolean => {
-  const type = version.structure?.type ?? null;
-  if (type == null || excludedStructureTypes.has(type)) {
-    return false;
-  }
-  if (resolved.types.size > 0 && !resolved.types.has(type)) {
-    return false;
-  }
-  if (
-    resolved.departements &&
-    (version.departementAdministratif == null ||
-      !resolved.departements.has(version.departementAdministratif))
-  ) {
-    return false;
-  }
-  if (
-    resolved.operateurIds &&
-    (version.structure?.operateurId == null ||
-      !resolved.operateurIds.has(version.structure.operateurId))
-  ) {
-    return false;
-  }
-  return true;
 };
 
 const yearFromDate = (
@@ -100,20 +73,6 @@ const yearFromDate = (
   }
   return new Date(date).getUTCFullYear();
 };
-
-export const mapVersionsToStructures = (
-  versions: StatistiqueDbEffectiveStructureVersion[]
-): StatistiqueDbStructure[] =>
-  versions
-    .filter(
-      (version): version is typeof version & { structureId: number } =>
-        version.structureId != null
-    )
-    .map((version) => ({
-      id: version.structureId,
-      type: version.type,
-      departementAdministratif: version.departementAdministratif,
-    }));
 
 export const buildStatistiquesActivityContext = (
   structureIds: number[],
@@ -251,7 +210,7 @@ export const getEffectiveStructureVersionAtDate = (
   structureId: number,
   date: Date,
   timeline: StatistiqueDbStructureVersionTimeline[]
-): StatistiqueDbEffectiveStructureVersion | null => {
+): StatistiqueDbStructureVersionTimeline | null => {
   const cutoff = startOfNextUtcDay(date);
   let effectiveVersion: StatistiqueDbStructureVersionTimeline | null = null;
 

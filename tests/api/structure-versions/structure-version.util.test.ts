@@ -4,7 +4,7 @@ import {
   checkCreatedStructureDepartement,
   checkNoDepartementAdministratifChange,
 } from "@/app/api/structure-versions/structure-version.util";
-import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 
 describe("checkNoDepartementAdministratifChange", () => {
   it("laisse passer quand le département de la version est identique à l'invariant", () => {

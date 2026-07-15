@@ -162,7 +162,7 @@ describe("structures - CPOM actifs à la date de référence", () => {
 });
 
 describe("structures - répartition par type et bâti", () => {
-  it("ne compte par type que les structures ouvertes disposant d'une typologie", () => {
+  it("compte toutes les structures par type scalaire (places = 0 sans typologie)", () => {
     const result = computeStructuresStatistiques(
       buildTestStatistiquesContext({
         structures: [
@@ -179,6 +179,7 @@ describe("structures - répartition par type et bâti", () => {
     );
 
     expect(result.totalStructures).toBe(2);
+    // La structure 2 (CPH) n'a pas de typologie : comptée quand même, 0 place.
     expect(result.structureTypes).toContainEqual({
       type: StructureType.CADA,
       structures: 1,
@@ -186,12 +187,44 @@ describe("structures - répartition par type et bâti", () => {
     });
     expect(result.structureTypes).toContainEqual({
       type: StructureType.CPH,
-      structures: 0,
+      structures: 1,
       places: 0,
     });
+    // totalPlaces (autorisées) = Σ structureTypes.places ; totalPlacesAdresse = Σ places bâti.
+    expect(result.totalPlaces).toBe(100);
+    expect(result.totalPlacesAdresse).toBe(150);
     expect(result.structureTypes).not.toContainEqual(
       expect.objectContaining({ type: StructureType.PRAHDA })
     );
+  });
+
+  it("exclut du bâti une structure dont la version courante n'a pas d'adresse répartie", () => {
+    const result = computeStructuresStatistiques(
+      buildTestStatistiquesContext({
+        structures: [
+          testStructure(1, StructureType.CADA),
+          testStructure(2, StructureType.CPH),
+        ],
+        typologies: [testTypologie(1, 1, 2024, 100)],
+        // Seule la structure 1 a une adresse répartie ; la 2 n'a pas de bâti.
+        adresses: [testAdresse(10, 1, Repartition.COLLECTIF, 100)],
+        departements: [],
+      })
+    );
+
+    expect(result.totalStructures).toBe(2);
+    // bâti × structures ne somme pas à 2 : la structure 2 est hors camembert bâti.
+    expect(result.structureBatis).toContainEqual({
+      bati: Repartition.COLLECTIF,
+      structures: 1,
+      places: 100,
+    });
+    expect(result.structureBatis).toContainEqual({
+      bati: Repartition.DIFFUS,
+      structures: 0,
+      places: 0,
+    });
+    expect(result.totalPlacesAdresse).toBe(100);
   });
 
   it("reflète le type de la version effective transmise dans context.structures", () => {
@@ -371,8 +404,10 @@ describe("structures - indicateurs annuels (byYear)", () => {
     );
 
     expect(result.totalStructures).toBe(2);
+    // totalPlaces global = structures ouvertes avec typologie (1 & 2) × 10 places.
+    expect(result.totalPlaces).toBe(20);
     expect(result.byYear).toContainEqual(
-      expect.objectContaining({ year: 2025, totalStructures: 3, totalPlaces: 30 })
+      expect.objectContaining({ year: 2025, totalStructures: 3 })
     );
   });
 
