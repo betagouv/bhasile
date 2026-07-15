@@ -81,9 +81,7 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
 
   it("sauvegarde automatiquement et ne conserve que les documents financiers prêts à être téléversés", async () => {
     // GIVEN
-    // `date303` renseignée pour que la checkbox "programme 303" démarre cochée :
-    // c'est le décochage qui déclenche l'autosave (setValue date303=null). Sans ça,
-    // l'état initial de la checkbox dépend de l'ordre des tests (source de flaky).
+    // date303 doit être renseignée pour que la checkbox "programme 303" démarre cochée et éviter les tests flaky
     const structure = {
       ...createFinalisationDocumentsFinanciersValidStructure(79),
       date303: new Date("2015-01-01").toISOString(),
