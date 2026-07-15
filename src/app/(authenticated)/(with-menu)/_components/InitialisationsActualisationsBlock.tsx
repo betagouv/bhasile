@@ -6,8 +6,8 @@ import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 
-import { ActualisationsPagination } from "./ActualisationsPagination";
 import { BlockTitle } from "./BlockTitle";
+import { DashboardPagination } from "./DashboardPagination";
 import { InitialisationActualisationRow } from "./InitialisationActualisationRow";
 
 type Props = {
@@ -64,7 +64,10 @@ export const InitialisationsActualisationsBlock = async ({
 
       {data.total > MIDDLE_PAGE_SIZE && (
         <div className="flex justify-center border-t border-default-grey p-4">
-          <ActualisationsPagination total={data.total} />
+          <DashboardPagination
+            total={data.total}
+            pageParam="actualisationsPage"
+          />
         </div>
       )}
     </section>

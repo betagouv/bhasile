@@ -30,3 +30,60 @@ export type DashboardTransformationRow = {
   updatedAt: string | null;
   actionUrl: string;
 };
+
+export type RappelEchelle = "STRUCTURE" | "CPOM";
+
+export type RappelCriticite = "IMPORTANT" | "URGENT";
+
+export type RappelTaskType =
+  | "RENOUVELLEMENT_AUTORISATION"
+  | "RENOUVELLEMENT_CONVENTION"
+  | "EVALUATION"
+  | "RENOUVELLEMENT_CPOM";
+
+export type RappelGroupBy = "STRUCTURE" | "CPOM" | "TASK" | "CRITICITE";
+
+export type DashboardRappel = {
+  id: string;
+  echelle: RappelEchelle;
+  taskType: RappelTaskType;
+  taskLabel: string;
+  deadline: string | null;
+  criticite: RappelCriticite;
+  actionUrl: string;
+
+  structureId: number | null;
+  structureCodeBhasile: string | null;
+  structureType: StructureType | null;
+  structureCommune: string | null;
+  structureDepartement: string | null;
+  operateurName: string | null;
+
+  cpomId: number | null;
+  cpomLabel: string | null;
+  cpomDepartements: string[];
+};
+
+export type RappelGroupHeader =
+  | {
+      kind: "STRUCTURE";
+      structureCodeBhasile: string | null;
+      structureType: StructureType | null;
+      operateurName: string | null;
+      structureCommune: string | null;
+      structureDepartement: string | null;
+    }
+  | { kind: "CPOM"; cpomLabel: string | null; cpomDepartements: string[] }
+  | { kind: "TASK"; taskType: RappelTaskType; taskLabel: string }
+  | { kind: "CRITICITE"; criticite: RappelCriticite };
+
+type RappelGroupNodeBase = {
+  key: string;
+  header: RappelGroupHeader;
+  importantCount: number;
+  urgentCount: number;
+};
+
+export type RappelGroupNode =
+  | (RappelGroupNodeBase & { children: RappelGroupNode[] })
+  | (RappelGroupNodeBase & { rappels: DashboardRappel[] });
