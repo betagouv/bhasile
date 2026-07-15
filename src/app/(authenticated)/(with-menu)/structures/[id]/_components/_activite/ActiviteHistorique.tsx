@@ -3,7 +3,8 @@
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { ReactElement, useState } from "react";
 
-import { ActiviteHistoriqueTable } from "../../../../../../components/activites/ActiviteHistoriqueTable";
+import { ActiviteHistoriqueTable } from "@/app/components/activites/ActiviteHistoriqueTable";
+
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ActiviteHistoriqueChart } from "./ActiviteHistoriqueChart";
 
