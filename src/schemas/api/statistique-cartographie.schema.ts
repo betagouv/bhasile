@@ -24,6 +24,8 @@ const CARTOGRAPHIE_INDICATEURS = [
   "activite.placesIndisponibles",
   "activite.placesOccupees",
   "activite.presencesIndues",
+  "rmu.referesEngages",
+  "rmu.referesExecutes",
 ] as const;
 
 const cartographieIndicateurSchema = z.enum(CARTOGRAPHIE_INDICATEURS);

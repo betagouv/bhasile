@@ -13,6 +13,7 @@ import type {
   StatistiqueDbBudget,
   StatistiqueDbCpomStructure,
   StatistiqueDbEig,
+  StatistiqueDbRmu,
 } from "@/app/api/statistiques/statistiques.db.type";
 import { StructureType } from "@/types/structure.type";
 
@@ -41,6 +42,20 @@ const testActivite = (
   placesOccupees,
   presencesInduesBPI: null,
   presencesInduesDeboutees: null,
+});
+
+const testRmu = (
+  id: number,
+  departementNumero: string,
+  date: Date,
+  referesEngages: number | null,
+  referesExecutes: number | null
+): StatistiqueDbRmu => ({
+  id,
+  departementNumero,
+  date,
+  referesEngages,
+  referesExecutes,
 });
 
 describe("groupStructureIdsByDepartement", () => {
@@ -523,6 +538,76 @@ describe("computeIndicateurValues - un seul indicateur calculé, pas le bloc ent
       context,
       "activite.placesOccupees",
       2020,
+      "moyenne"
+    );
+
+    expect(result.value).toBeNull();
+    expect(result.previousValue).toBeNull();
+  });
+
+  it("rmu.referesEngages : somme tous les RMU de l'année, sans moyenne ni structures", () => {
+    const context = buildTestStatistiquesContext({
+      structures: [],
+      allStructures: [],
+      typologies: [],
+      adresses: [],
+      departements: [],
+      rmus: [
+        testRmu(1, "01", new Date("2025-01-31T12:00:00Z"), 10, 4),
+        testRmu(2, "01", new Date("2025-06-30T12:00:00Z"), 5, 2),
+        testRmu(3, "38", new Date("2024-12-31T12:00:00Z"), 7, 3),
+      ],
+    });
+
+    const result = computeIndicateurValues(
+      context,
+      "rmu.referesEngages",
+      2025,
+      "moyenne"
+    );
+
+    expect(result.value).toBe(15); // 10 + 5, la médiane/moyenne n'entre pas en jeu
+    expect(result.previousValue).toBe(7); // 2024
+  });
+
+  it("rmu.referesExecutes : traite un champ null comme 0", () => {
+    const context = buildTestStatistiquesContext({
+      structures: [],
+      allStructures: [],
+      typologies: [],
+      adresses: [],
+      departements: [],
+      rmus: [
+        testRmu(1, "01", new Date("2025-03-31T12:00:00Z"), 10, 4),
+        testRmu(2, "01", new Date("2025-09-30T12:00:00Z"), 5, null),
+      ],
+    });
+
+    const result = computeIndicateurValues(
+      context,
+      "rmu.referesExecutes",
+      2025,
+      "moyenne"
+    );
+
+    expect(result.value).toBe(4);
+    expect(result.previousValue).toBeNull(); // aucun RMU en 2024
+  });
+
+  it("rmu.* : rmus null (filtre opérateur/type) => valeur null", () => {
+    const context = buildTestStatistiquesContext({
+      structures: [],
+      allStructures: [],
+      typologies: [],
+      adresses: [],
+      departements: [],
+      rmus: null,
+    });
+
+    const result = computeIndicateurValues(
+      context,
+      "rmu.referesEngages",
+      2025,
       "moyenne"
     );
 

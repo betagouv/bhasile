@@ -4,9 +4,8 @@
 
 ## TODO
 
-- [ ] Confirmer que la résolution région -> départements se fait
-      bien côté client avant l'appel (le format de requête actuel repose sur cette hypothèse).
-      Ca semble d'ailleurs discutable vu que l'on a du coup pour une région l'ensemble des départements qui sont "resommés" sur la région... Sans doute un impact sur les performances.
+- [ ] Confirmer que la résolution région -> départements se fait bien côté client avant l'appel (le format de requête actuel repose sur cette hypothèse). Ca semble d'ailleurs discutable vu que l'on a du coup pour une région l'ensemble des départements qui sont "resommés" sur la région... Sans doute un impact sur les performances.
+- [ ] Indicateurs `rmu.*` : la donnée RMU est stockée au niveau **département** (`Rmu.departementNumero`), il n'y a pas de RMU par arrondissement. La granularité `arrondissement` ne pourra donc jamais s'appliquer à ces indicateurs, même quand le modèle `Arrondissement` existera. Prévoir de désactiver l'option côté UI quand un indicateur `rmu.*` est sélectionné.
 
 ## Paramètres
 
@@ -95,6 +94,7 @@ Chaque clé lit un champ de `StatistiqueApiRead` pour l'année demandée
 - **controleQualite** : `nbEig`, `tauxEigComportementViolent` (ratio), `moyenneEvaluations` (ratio)
 - **activite** : `placesDna`, `placesIndisponibles`, `placesOccupees`,
   `presencesIndues`. La valeur d'une année est la moyenne (ou médiane) de sa série mensuelle, et l'évolution compare à
+- **rmu** : `referesEngages`, `referesExecutes`. _Somme_ de tous les RMU du périmètre sur l'année. Donnée au niveau département uniquement (voir TODO). `rmus` n'est chargé que sans filtre opérateur/type — avec un tel filtre, la valeur est `null` partout.
 
 Pour les ratios, la valeur d'une région est recalculée à partir des données brutes de tous ses départements, jamais une moyenne des ratios départementaux.
 

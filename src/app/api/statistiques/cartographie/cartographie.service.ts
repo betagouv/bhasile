@@ -33,8 +33,7 @@ export const getCartographieStatistiques = async (
 
   const allDepartements = await findAllDepartementsWithRegion();
 
-  const departementNumerosRestriction =
-    resolveZoneDepartementNumeros(filters);
+  const departementNumerosRestriction = resolveZoneDepartementNumeros(filters);
 
   const zoneDefinitions = buildZoneDefinitions(
     granularite,
@@ -66,6 +65,9 @@ export const getCartographieStatistiques = async (
     context.allStructures
   );
 
+  // Les indicateurs RMU sont rattachés au département, pas aux structures
+  const isRmuIndicateur = indicateur.startsWith("rmu.");
+
   const zones = zoneDefinitions.map((zone) => {
     const zoneStructureIds = new Set<number>();
     for (const departementNumero of zone.departementNumeros) {
@@ -76,7 +78,7 @@ export const getCartographieStatistiques = async (
       }
     }
 
-    if (zoneStructureIds.size === 0) {
+    if (zoneStructureIds.size === 0 && !isRmuIndicateur) {
       return emptyZoneResult(zone);
     }
 
