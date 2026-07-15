@@ -71,7 +71,7 @@ export const FieldSetContacts = ({
         {title}
       </h2>
 
-      <CustomNotice severity="info" title="" description={notice} />
+      <CustomNotice severity="info" description={notice} />
 
       {contacts.map((contact, index) => {
         const canDelete =

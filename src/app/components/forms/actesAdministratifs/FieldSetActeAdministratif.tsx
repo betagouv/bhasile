@@ -118,7 +118,6 @@ export default function FieldSetActeAdministratif({
       {typeof notice === "string" ? (
         <CustomNotice
           severity="info"
-          title=""
           className="rounded [&_p]:flex [&_p]:items-center w-fit"
           description={<>{notice}</>}
         />

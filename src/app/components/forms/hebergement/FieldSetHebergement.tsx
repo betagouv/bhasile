@@ -153,7 +153,7 @@ export const FieldSetHebergement = ({
         </h2>
       )}
       <fieldset className="flex flex-col gap-6">
-        {isTransformationSurStructureExistante(formKind) && (
+        {!isTransformationSurStructureExistante(formKind) && (
           <Notices
             typeBati={typeBati}
             hebergementsContainerRef={hebergementsContainerRef}

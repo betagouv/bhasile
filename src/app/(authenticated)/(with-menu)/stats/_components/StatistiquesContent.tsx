@@ -29,7 +29,6 @@ export const StatistiquesContent = (): ReactElement => {
         <div className="flex flex-col gap-3 px-3">
           <CustomNotice
             severity="warning"
-            title=""
             description="Les structures non finalisées et les PRAHDA ne sont pas comptabilisés ici."
             className="rounded-lg"
           />
