@@ -6,11 +6,6 @@ import { ReactElement, useTransition } from "react";
 import { SimplePagination } from "@/app/components/common/SimplePagination";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 
-type Props = {
-  total: number;
-  pageParam: string;
-};
-
 export const DashboardPagination = ({
   total,
   pageParam,
@@ -42,4 +37,9 @@ export const DashboardPagination = ({
       />
     </div>
   );
+};
+
+type Props = {
+  total: number;
+  pageParam: string;
 };

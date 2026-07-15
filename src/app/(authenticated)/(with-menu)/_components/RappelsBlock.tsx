@@ -16,14 +16,6 @@ import { DashboardPagination } from "./DashboardPagination";
 import { RappelsControls } from "./RappelsControls";
 import { RappelsGroupNode } from "./RappelsGroupNode";
 
-type SearchParams = { [key: string]: string | string[] | undefined };
-
-type Props = {
-  filters: Filters;
-  user: SessionUser | undefined;
-  searchParams: SearchParams;
-};
-
 export const RappelsBlock = async ({
   filters,
   user,
@@ -74,4 +66,12 @@ export const RappelsBlock = async ({
       )}
     </Block>
   );
+};
+
+type SearchParams = { [key: string]: string | string[] | undefined };
+
+type Props = {
+  filters: Filters;
+  user: SessionUser | undefined;
+  searchParams: SearchParams;
 };

@@ -10,11 +10,6 @@ import { Block } from "./Block";
 import { BlockTitle } from "./BlockTitle";
 import { DashboardPagination } from "./DashboardPagination";
 import { InitialisationActualisationRow } from "./InitialisationActualisationRow";
-type Props = {
-  filters: Filters;
-  user: SessionUser | undefined;
-  page: number;
-};
 
 export const InitialisationsActualisationsBlock = async ({
   filters,
@@ -70,4 +65,10 @@ export const InitialisationsActualisationsBlock = async ({
       )}
     </Block>
   );
+};
+
+type Props = {
+  filters: Filters;
+  user: SessionUser | undefined;
+  page: number;
 };

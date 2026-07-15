@@ -5,11 +5,6 @@ import Loader from "@/app/components/ui/Loader";
 import { Block } from "./Block";
 import { BlockTitle } from "./BlockTitle";
 
-type Props = {
-  title: string;
-  icon: string;
-};
-
 export const BlockSkeleton = ({ title, icon }: Props): ReactElement => (
   <Block>
     <BlockTitle title={title} iconClassName={icon} />
@@ -19,3 +14,8 @@ export const BlockSkeleton = ({ title, icon }: Props): ReactElement => (
     </p>
   </Block>
 );
+
+type Props = {
+  title: string;
+  icon: string;
+};

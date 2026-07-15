@@ -8,11 +8,6 @@ import { Block } from "./Block";
 import { BlockTitle } from "./BlockTitle";
 import { TransformationRow } from "./TransformationRow";
 
-type Props = {
-  filters: Filters;
-  user: SessionUser | undefined;
-};
-
 export const TransformationsBlock = async ({
   filters,
   user,
@@ -40,4 +35,9 @@ export const TransformationsBlock = async ({
       )}
     </Block>
   );
+};
+
+type Props = {
+  filters: Filters;
+  user: SessionUser | undefined;
 };

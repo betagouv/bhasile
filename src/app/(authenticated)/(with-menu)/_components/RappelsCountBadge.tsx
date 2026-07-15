@@ -4,11 +4,6 @@ import { Badge } from "@/app/components/common/Badge";
 import { getRappelCriticiteLabel } from "@/app/utils/rappel.util";
 import { RappelCriticite } from "@/types/dashboard.type";
 
-type Props = {
-  count: number;
-  criticite: RappelCriticite;
-};
-
 export const RappelsCountBadge = ({
   count,
   criticite,
@@ -27,4 +22,9 @@ export const RappelsCountBadge = ({
       </Badge>
     </span>
   );
+};
+
+type Props = {
+  count: number;
+  criticite: RappelCriticite;
 };

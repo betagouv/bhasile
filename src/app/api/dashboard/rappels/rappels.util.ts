@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 
 import { CpomDbList } from "@/app/api/cpoms/cpom.db.type";
+import { resolveCurrentVersion } from "@/app/api/structure-versions/structure-version.util";
 import {
   getDatesConvention,
   getDatesPeriodeAutorisation,
@@ -77,21 +78,21 @@ const computeEvaluationRappel = (
     return null;
   }
 
-  const periodStart = (index: number): Date =>
+  const getPeriodStart = (index: number): Date =>
     dayjs(debutAutorisation)
       .add(index * EVALUATION_PERIOD_YEARS, "year")
       .toDate();
-  const currentStart = periodStart(periodIndex);
-  const currentEnd = periodStart(periodIndex + 1);
+  const currentStart = getPeriodStart(periodIndex);
+  const currentEnd = getPeriodStart(periodIndex + 1);
   const lastEvaluation = getMaxEvaluationDate(structure.evaluations);
-  const noEvaluationInCurrent =
+  const hasNoEvaluationInCurrent =
     lastEvaluation === null || lastEvaluation < currentStart;
 
   if (periodIndex > 0) {
-    const previousStart = periodStart(periodIndex - 1);
-    const noEvaluationInPrevious =
+    const previousStart = getPeriodStart(periodIndex - 1);
+    const hasNoEvaluationInPrevious =
       lastEvaluation === null || lastEvaluation < previousStart;
-    if (noEvaluationInPrevious && noEvaluationInCurrent) {
+    if (hasNoEvaluationInPrevious && hasNoEvaluationInCurrent) {
       return { criticite: "URGENT", deadline: currentStart };
     }
   }
@@ -99,7 +100,7 @@ const computeEvaluationRappel = (
   const alertThreshold = dayjs(currentEnd)
     .subtract(EVALUATION_ADVANCE_MONTHS, "month")
     .toDate();
-  if (noEvaluationInCurrent && now > alertThreshold) {
+  if (hasNoEvaluationInCurrent && now > alertThreshold) {
     return { criticite: "IMPORTANT", deadline: currentEnd };
   }
 
@@ -182,7 +183,9 @@ export const buildRappels = (
       structureId: structure.id,
       structureCodeBhasile: structure.codeBhasile,
       structureType: structure.type,
-      structureCommune: structure.communeAdministrative,
+      structureCommune:
+        resolveCurrentVersion(structure.structureVersions, now)
+          ?.communeAdministrative ?? null,
       structureDepartement: departement,
       operateurName: structure.operateur?.name ?? null,
       cpomId: currentCpom?.id ?? null,

@@ -13,8 +13,22 @@ export const rappelStructureSelect = {
   id: true,
   codeBhasile: true,
   type: true,
-  communeAdministrative: true,
   departementAdministratif: true,
+  structureVersions: {
+    select: {
+      id: true,
+      effectiveDate: true,
+      communeAdministrative: true,
+      structureVersionTransformationId: true,
+      structureVersionTransformation: {
+        select: {
+          transformation: { select: { form: { select: { status: true } } } },
+        },
+      },
+      campaignId: true,
+      campaign: { select: { form: { select: { status: true } } } },
+    },
+  },
   operateur: { select: { id: true, name: true } },
   forms: {
     where: { formDefinition: { slug: FINALISATION_FORM_SLUG } },

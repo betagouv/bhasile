@@ -11,11 +11,6 @@ import {
 } from "@/app/utils/rappel.util";
 import { RappelEchelle, RappelGroupBy } from "@/types/dashboard.type";
 
-type Props = {
-  echelle: RappelEchelle;
-  groupBy: RappelGroupBy;
-};
-
 export const RappelsControls = ({ echelle, groupBy }: Props): ReactElement => {
   const router = useRouter();
   const pathname = usePathname();
@@ -79,4 +74,9 @@ export const RappelsControls = ({ echelle, groupBy }: Props): ReactElement => {
       </Select>
     </div>
   );
+};
+
+type Props = {
+  echelle: RappelEchelle;
+  groupBy: RappelGroupBy;
 };

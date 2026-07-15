@@ -54,7 +54,13 @@ const makeStructure = (
     id: overrides.id ?? 1,
     codeBhasile: "BHA-001",
     type: overrides.type ?? StructureType.CADA,
-    communeAdministrative: "Avranches",
+    structureVersions: [
+      {
+        effectiveDate: new Date("2020-01-01"),
+        communeAdministrative: "Avranches",
+        structureVersionTransformationId: null,
+      },
+    ],
     departementAdministratif: overrides.departementAdministratif ?? "50",
     operateur: overrides.operateur ?? { id: 1, name: "Adoma" },
     forms: overrides.forms ?? [{ status: true }],
