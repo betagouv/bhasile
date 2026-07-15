@@ -8,6 +8,7 @@ import {
   lookupStructureIdsForDnaAtDate,
   mapTypologieYears,
   parseStatistiquesPerimeterFilters,
+  sliceStatistiquesContext,
   structuresActiveInPeriod,
 } from "@/app/api/statistiques/statistiques.utils";
 import { StructureType } from "@/types/structure.type";
@@ -15,6 +16,7 @@ import { StructureType } from "@/types/structure.type";
 import {
   buildTestActivityIndex,
   buildTestDnaLinks,
+  buildTestStatistiquesContext,
   buildTestStructureVersionTimeline,
 } from "./test-helpers";
 
@@ -360,5 +362,64 @@ describe("filterByActiveStructureId", () => {
     expect(filterByActiveStructureId(rows, new Set([1]))).toEqual([
       { structureId: 1, value: "a" },
     ]);
+  });
+});
+
+describe("sliceStatistiquesContext - restriction à une zone", () => {
+  const structure1 = { id: 1, type: StructureType.CADA, departementAdministratif: "01" };
+  const structure2 = { id: 2, type: StructureType.CADA, departementAdministratif: "02" };
+
+  const { activeStructureIdsNow, activeStructureIdsByPeriod } =
+    buildTestActivityIndex([1, 2], {
+      referenceDate: new Date("2025-06-15T12:00:00.000Z"),
+      periodDates: [new Date("2025-03-15T00:00:00.000Z")],
+    });
+
+  const context = buildTestStatistiquesContext({
+    structures: [structure1, structure2],
+    allStructures: [structure1, structure2],
+    activeStructureIdsNow,
+    activeStructureIdsByPeriod,
+    typologies: [],
+    adresses: [],
+    departements: [
+      { id: 1, numero: "01", name: "Département 01", population: 100 },
+      { id: 2, numero: "02", name: "Département 02", population: 200 },
+    ],
+  });
+
+  const sliced = sliceStatistiquesContext(
+    context,
+    new Set([1]),
+    new Set(["01"])
+  );
+
+  it("ne garde que les structures de la zone dans structures et allStructures", () => {
+    expect(sliced.structures).toEqual([structure1]);
+    expect(sliced.allStructures).toEqual([structure1]);
+  });
+
+  it("restreint activeStructureIdsNow à la zone", () => {
+    expect(sliced.activeStructureIdsNow).toEqual(new Set([1]));
+  });
+
+  it("restreint chaque Set de activeStructureIdsByPeriod à la zone, sans perdre les clés de période", () => {
+    expect([...sliced.activeStructureIdsByPeriod.year.keys()]).toEqual(
+      [...context.activeStructureIdsByPeriod.year.keys()]
+    );
+    for (const ids of sliced.activeStructureIdsByPeriod.year.values()) {
+      expect(ids).toEqual(new Set([1]));
+    }
+  });
+
+  it("ne garde que les départements de la zone", () => {
+    expect(sliced.departements).toEqual([
+      { id: 1, numero: "01", name: "Département 01", population: 100 },
+    ]);
+  });
+
+  it("ne modifie pas le contexte d'origine", () => {
+    expect(context.structures).toEqual([structure1, structure2]);
+    expect(context.departements).toHaveLength(2);
   });
 });

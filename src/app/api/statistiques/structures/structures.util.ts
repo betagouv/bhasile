@@ -21,6 +21,7 @@ import type {
   StatistiqueDbStructure,
   StatistiqueDbTypologieValues,
   StatistiquesContext,
+  StatistiquesCpomYearContext,
 } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
@@ -30,6 +31,7 @@ import {
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
   mapTypologieYears,
+  resolveStructuresWithTypologieForYear,
 } from "../statistiques.utils";
 
 const getRepartitionFromRepartitions = (
@@ -127,6 +129,26 @@ const countActiveCpoms = (
   }
 
   return activeCpomIds.size;
+};
+
+/** Counts structures covered by an active CPOM for the year. */
+export const countStructuresAvecCpomForYear = (
+  cpomLinks: StatistiqueDbCpomStructure[],
+  structureIds: Set<number>,
+  year: number
+): number => {
+  const structuresWithActiveCpom = new Set<number>();
+
+  for (const link of cpomLinks) {
+    if (
+      structureIds.has(link.structureId) &&
+      isStructureInCpom({ cpomStructures: [link] } as StructureDbList, year)
+    ) {
+      structuresWithActiveCpom.add(link.structureId);
+    }
+  }
+
+  return structuresWithActiveCpom.size;
 };
 
 const isCpomLinkActiveNow = (
@@ -271,10 +293,7 @@ const countStructuresByBati = (
   structures.filter((structure) => batiMap.get(structure.id) === bati).length;
 
 const computeByYearStats = (
-  context: Pick<
-    StatistiquesContext,
-    "allStructures" | "activeStructureIdsByPeriod" | "typologies" | "cpomLinks"
-  >,
+  context: StatistiquesCpomYearContext,
   batiMap: Map<number, Repartition>
 ): StructuresByYearStat[] =>
   mapTypologieYears<StructuresByYearStat>(
@@ -297,6 +316,11 @@ const computeByYearStats = (
       return {
         totalStructures: structuresWithTypologie.length,
         totalCpoms: countActiveCpoms(
+          context.cpomLinks,
+          structureIdsWithTypologie,
+          year
+        ),
+        structuresAvecCpom: countStructuresAvecCpomForYear(
           context.cpomLinks,
           structureIdsWithTypologie,
           year
@@ -381,4 +405,29 @@ export const computeStructuresStatistiques = (
     structureBatis,
     byYear: computeByYearStats(context, batiMap),
   };
+};
+
+export type StructuresYearIndicatorField =
+  "totalStructures" | "structuresAvecCpom";
+
+/** Computes a single byYear field for one year, for the cartographie one-indicator requests. */
+export const computeStructuresIndicatorForYear = (
+  context: StatistiquesCpomYearContext,
+  year: number,
+  field: StructuresYearIndicatorField
+): number | null => {
+  const resolved = resolveStructuresWithTypologieForYear(context, year);
+  if (!resolved) {
+    return null;
+  }
+
+  if (field === "totalStructures") {
+    return resolved.structures.length;
+  }
+
+  return countStructuresAvecCpomForYear(
+    context.cpomLinks,
+    new Set(resolved.structures.map((structure) => structure.id)),
+    year
+  );
 };

@@ -13,7 +13,9 @@ import type {
   StatistiqueDbTypologieValues,
   StatistiquesActiveStructureIdsByPeriod,
   StatistiquesActivityContext,
+  StatistiquesContext,
   StatistiquesPeriodGranularity,
+  StatistiquesTypologieYearContext,
 } from "./statistiques.db.type";
 
 export const createEmptyActiveStructureIdsByPeriod =
@@ -640,6 +642,32 @@ export const filterStructuresWithTypologie = (
 ): StatistiqueDbStructure[] =>
   structures.filter((structure) => typologieMap.has(structure.id));
 
+/** Resolves the structures with typologie for a given year. */
+export const resolveStructuresWithTypologieForYear = (
+  context: StatistiquesTypologieYearContext,
+  year: number
+): {
+  structures: StatistiqueDbStructure[];
+  typologieMap: Map<number, StatistiqueDbTypologieValues>;
+} | null => {
+  if (!getTypologieYears(context.typologies).includes(year)) {
+    return null;
+  }
+
+  const typologieMap = getTypologieMapForExactYear(context.typologies, year);
+  const structuresForYear = structuresActiveInPeriod(
+    context.allStructures,
+    context.activeStructureIdsByPeriod,
+    "year",
+    String(year)
+  );
+
+  return {
+    structures: filterStructuresWithTypologie(structuresForYear, typologieMap),
+    typologieMap,
+  };
+};
+
 export const computeTotalPlaces = (
   structures: StatistiqueDbStructure[],
   typologieMap: Map<number, StatistiqueDbTypologieValues>
@@ -649,3 +677,71 @@ export const computeTotalPlaces = (
       (structure) => typologieMap.get(structure.id)?.placesAutorisees
     )
   ) ?? 0;
+
+const intersectStructureIds = (
+  ids: Set<number>,
+  structureIdsInZone: Set<number>
+): Set<number> => {
+  // Iterate the smaller set (performance optimization).
+  const [smaller, larger] =
+    ids.size < structureIdsInZone.size
+      ? [ids, structureIdsInZone]
+      : [structureIdsInZone, ids];
+  const intersection = new Set<number>();
+  for (const id of smaller) {
+    if (larger.has(id)) {
+      intersection.add(id);
+    }
+  }
+  return intersection;
+};
+
+const sliceActiveStructureIdsByPeriod = (
+  byPeriod: StatistiquesActiveStructureIdsByPeriod,
+  structureIdsInZone: Set<number>
+): StatistiquesActiveStructureIdsByPeriod => ({
+  month: new Map(
+    [...byPeriod.month].map(([periodKey, ids]) => [
+      periodKey,
+      intersectStructureIds(ids, structureIdsInZone),
+    ])
+  ),
+  trimester: new Map(
+    [...byPeriod.trimester].map(([periodKey, ids]) => [
+      periodKey,
+      intersectStructureIds(ids, structureIdsInZone),
+    ])
+  ),
+  year: new Map(
+    [...byPeriod.year].map(([periodKey, ids]) => [
+      periodKey,
+      intersectStructureIds(ids, structureIdsInZone),
+    ])
+  ),
+});
+
+/** Restricts a StatistiquesContext to a zone's structures. */
+export const sliceStatistiquesContext = (
+  context: StatistiquesContext,
+  structureIdsInZone: Set<number>,
+  departementNumerosInZone: Set<string>
+): StatistiquesContext => ({
+  ...context,
+  structures: context.structures.filter((structure) =>
+    structureIdsInZone.has(structure.id)
+  ),
+  allStructures: context.allStructures.filter((structure) =>
+    structureIdsInZone.has(structure.id)
+  ),
+  activeStructureIdsNow: intersectStructureIds(
+    context.activeStructureIdsNow,
+    structureIdsInZone
+  ),
+  activeStructureIdsByPeriod: sliceActiveStructureIdsByPeriod(
+    context.activeStructureIdsByPeriod,
+    structureIdsInZone
+  ),
+  departements: context.departements.filter((departement) =>
+    departementNumerosInZone.has(departement.numero)
+  ),
+});

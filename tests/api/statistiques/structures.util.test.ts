@@ -448,6 +448,40 @@ describe("structures - indicateurs annuels (byYear)", () => {
     expect(result.totalCpoms).toBe(1);
   });
 
+  it("compte structuresAvecCpom (structures, pas contrats) distinctement de totalCpoms", () => {
+    // One CPOM covering 2 structures: totalCpoms=1 but structuresAvecCpom=2.
+    const {
+      openStructures,
+      allStructures,
+      activeStructureIdsNow,
+      activeStructureIdsByPeriod,
+    } = buildClosureContext();
+
+    const result = computeStructuresStatistiques(
+      buildTestStatistiquesContext({
+        structures: openStructures,
+        allStructures,
+        activeStructureIdsNow,
+        activeStructureIdsByPeriod,
+        typologies: [
+          testTypologie(1, 1, 2024, 10),
+          testTypologie(2, 2, 2024, 10),
+        ],
+        adresses: [],
+        departements: [],
+        cpomLinks: [
+          cpomLink(1, 100, 1, "2023-01-01", "2024-12-31"),
+          cpomLink(2, 100, 2, "2023-01-01", "2024-12-31"),
+        ],
+      })
+    );
+
+    const year2024 = result.byYear.find((entry) => entry.year === 2024);
+
+    expect(year2024?.totalCpoms).toBe(1);
+    expect(year2024?.structuresAvecCpom).toBe(2);
+  });
+
   it("applique le millésime exact de typologie pour chaque année", () => {
     const result = computeStructuresStatistiques(
       buildTestStatistiquesContext({

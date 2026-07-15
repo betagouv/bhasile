@@ -389,6 +389,7 @@ export const findActivites = async (
       sousOccupation: true,
       travaux: true,
       placesIndisponibles: true,
+      placesOccupees: true,
       presencesInduesBPI: true,
       presencesInduesDeboutees: true,
     },

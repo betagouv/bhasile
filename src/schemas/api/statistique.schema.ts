@@ -40,6 +40,7 @@ export type StructuresByYearStat = {
   year: number;
   totalStructures: number;
   totalCpoms: number;
+  structuresAvecCpom: number;
   structuresCada: number;
   structuresCph: number;
   structuresHuda: number;
@@ -138,6 +139,7 @@ export type ActiviteMotifsIndisponibiliteStat = {
 
 export type ActiviteSummaryStat = {
   placesEnregistreesDna: number;
+  placesOccupees: number;
   placesIndisponibles: number;
   placesDisponibles: number;
   tauxIndisponibilite: number | null;
@@ -153,6 +155,7 @@ export type ActiviteSummaryStat = {
 export type ActiviteByMonthStat = {
   date: Date;
   placesEnregistreesDna: number;
+  placesOccupees: number;
   placesIndisponibles: number;
   tauxIndisponibilite: number | null;
   presencesInduesBPI: number;
