@@ -5,7 +5,15 @@ import "chartist/dist/index.css";
 import * as Chartist from "chartist";
 import { useEffect, useId, useRef } from "react";
 
-export default function BarChart({ data, options }: Props) {
+export default function BarChart({ data, options, colors }: Props) {
+  if (!colors) {
+    colors = [
+      "var(--yellow-moutarde-850-200)",
+      "var(--yellow-moutarde-main-679)",
+      "var(--purple-glycine-850-200)",
+      "var(--blue-cumulus-850-200)",
+    ];
+  }
   const chartRef = useRef(null);
   const id = useId();
   const chartClass = `barchart-${id.replace(/:/g, "-")}`;
@@ -37,10 +45,10 @@ export default function BarChart({ data, options }: Props) {
       <div ref={chartRef} style={{ height: 340 }} />
       <style>
         {`
-          .${chartClass} .ct-series-a .ct-bar { stroke: var(--yellow-moutarde-850-200) !important; }
-          .${chartClass} .ct-series-b .ct-bar { stroke: var(--yellow-moutarde-main-679) !important; }
-          .${chartClass} .ct-series-c .ct-bar { stroke: var(--purple-glycine-850-200) !important; }
-          .${chartClass} .ct-series-d .ct-bar { stroke: var(--blue-cumulus-850-200) !important; }
+          .${chartClass} .ct-series-a .ct-bar { stroke: ${colors[0]} !important; }
+          .${chartClass} .ct-series-b .ct-bar { stroke: ${colors[1]} !important; }
+          .${chartClass} .ct-series-c .ct-bar { stroke: ${colors[2]} !important; }
+          .${chartClass} .ct-series-d .ct-bar { stroke: ${colors[3]} !important; }
         `}
       </style>
     </div>
@@ -50,4 +58,5 @@ export default function BarChart({ data, options }: Props) {
 type Props = {
   data: Chartist.BarChartData;
   options: Chartist.BarChartOptions;
+  colors?: string[];
 };
