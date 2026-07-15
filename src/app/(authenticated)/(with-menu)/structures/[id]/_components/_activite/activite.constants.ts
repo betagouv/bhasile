@@ -1,7 +1,5 @@
-import { ActiviteApiType } from "@/schemas/api/activite.schema";
-
 export const typesActivite: Partial<
-  Record<keyof ActiviteApiType, { label: string; seuil: number | null }>
+  Record<TypeActiviteKey, { label: string; seuil: number | null }>
 > = {
   placesIndisponibles: {
     label: "Places indisponibles",
@@ -15,8 +13,14 @@ export const typesActivite: Partial<
     label: "Présences indues déboutées",
     seuil: 4,
   },
-  presencesIndues: {
+  presencesInduesTotal: {
     label: "Présences indues totales",
     seuil: 7,
   },
 };
+
+export type TypeActiviteKey =
+  | "placesIndisponibles"
+  | "presencesInduesBPI"
+  | "presencesInduesDeboutees"
+  | "presencesInduesTotal";

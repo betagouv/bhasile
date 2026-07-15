@@ -3,10 +3,12 @@
 import { SegmentedControl } from "@codegouvfr/react-dsfr/SegmentedControl";
 import { ReactElement, useState } from "react";
 
+import { useStructureContext } from "../../_context/StructureClientContext";
 import { ActiviteHistoriqueChart } from "./ActiviteHistoriqueChart";
-import { ActiviteHistoriqueTable } from "./ActiviteHistoriqueTable";
+import { ActiviteHistoriqueTable } from "../../../../../../components/activites/ActiviteHistoriqueTable";
 
 export const ActiviteHistorique = (): ReactElement => {
+  const { structure } = useStructureContext();
   const [visualization, setVisualization] = useState("tableau");
 
   return (
@@ -45,7 +47,9 @@ export const ActiviteHistorique = (): ReactElement => {
         />
       </div>
       <div className="flex pt-10 pb-4">
-        {visualization === "tableau" && <ActiviteHistoriqueTable />}
+        {visualization === "tableau" && (
+          <ActiviteHistoriqueTable activites={structure.activites || []} />
+        )}
         {visualization === "courbe" && <ActiviteHistoriqueChart />}
       </div>
     </div>

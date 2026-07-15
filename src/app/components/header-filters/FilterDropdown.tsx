@@ -29,7 +29,7 @@ export const FilterDropdown = ({
   return (
     <div
       ref={dropdownRef}
-      className="w-[220px] border-x border-default-grey relative"
+      className="w-[200px] border-x border-default-grey relative"
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -55,7 +55,7 @@ export const FilterDropdown = ({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 bg-white border border-default-grey overflow-y-auto shadow p-2 rounded-xs size-max max-h-[50vh]">
+        <div className="absolute left-0 right-0 bg-white border border-default-grey overflow-y-auto shadow p-2 rounded-xs size-max max-h-[50vh] max-w-[300px]">
           {children}
         </div>
       )}

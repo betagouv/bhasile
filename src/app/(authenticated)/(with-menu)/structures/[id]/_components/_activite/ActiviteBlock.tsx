@@ -6,8 +6,8 @@ import { StructureType } from "@/types/structure.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ActiviteHistorique } from "./ActiviteHistorique";
-import { ActiviteMotifsIndisponibilite } from "./ActiviteMotifsIndisponibilite";
-import { ActivitePlaces } from "./ActivitePlaces";
+import { ActiviteMotifsIndisponibilite } from "../../../../../../components/activites/ActiviteMotifsIndisponibilite";
+import { ActivitePlaces } from "../../../../../../components/activites/ActivitePlaces";
 
 export const ActiviteBlock = (): ReactElement => {
   const { structure } = useStructureContext();
@@ -55,9 +55,17 @@ export const ActiviteBlock = (): ReactElement => {
             Indisponibilités
           </h4>
           <div className="flex pt-10 pb-10">
-            <ActivitePlaces />
+            <ActivitePlaces
+              placesAutorisees={structure.activites?.[0].placesEnregistreesDna}
+              placesIndisponibles={structure.activites?.[0].placesIndisponibles}
+            />
             <div className="pl-20 w-100">
-              <ActiviteMotifsIndisponibilite />
+              <ActiviteMotifsIndisponibilite
+                desinsectisation={structure.activites?.[0].desinsectisation}
+                remiseEnEtat={structure.activites?.[0].remiseEnEtat}
+                sousOccupation={structure.activites?.[0].sousOccupation}
+                travaux={structure.activites?.[0].travaux}
+              />
             </div>
           </div>
           <hr className="pb-10!" />
