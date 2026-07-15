@@ -42,7 +42,7 @@ export const RappelsBlock = async ({
         <BlockTitle
           title="Rappels contractualisation et évaluations"
           total={rappelCount}
-          iconClassName="fr-icon-list-unordered"
+          iconClassName="ri-list-check-3"
         />
         <RappelsControls echelle={echelle} groupBy={groupBy} />
       </div>

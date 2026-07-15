@@ -38,7 +38,7 @@ export default async function DashboardPage({
           fallback={
             <BlockSkeleton
               title="Rappels contractualisation et évaluations"
-              icon="fr-icon-list-unordered"
+              icon="ri-list-check-3"
             />
           }
         >
