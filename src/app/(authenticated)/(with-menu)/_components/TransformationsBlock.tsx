@@ -4,6 +4,7 @@ import { getDashboardTransformations } from "@/app/api/dashboard/transformations
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 
+import { Block } from "./Block";
 import { BlockTitle } from "./BlockTitle";
 import { TransformationRow } from "./TransformationRow";
 
@@ -19,7 +20,7 @@ export const TransformationsBlock = async ({
   const rows = await getDashboardTransformations(filters, user);
 
   return (
-    <section className="m-6 rounded-lg border border-default-grey bg-white">
+    <Block>
       <div className="flex items-center gap-2 p-4">
         <BlockTitle
           title="Créations, transformations et fermetures de structures"
@@ -39,6 +40,6 @@ export const TransformationsBlock = async ({
           Aucune création, transformation ou fermeture en cours.
         </p>
       )}
-    </section>
+    </Block>
   );
 };

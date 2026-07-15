@@ -10,6 +10,7 @@ import { MIDDLE_PAGE_SIZE } from "@/constants";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 
+import { Block } from "./Block";
 import { BlockTitle } from "./BlockTitle";
 import { DashboardPagination } from "./DashboardPagination";
 import { RappelsControls } from "./RappelsControls";
@@ -28,7 +29,9 @@ export const RappelsBlock = async ({
   user,
   searchParams,
 }: Props): Promise<ReactElement> => {
-  const echelle = parseRappelEchelle(getFirstParam(searchParams.rappelsEchelle));
+  const echelle = parseRappelEchelle(
+    getFirstParam(searchParams.rappelsEchelle)
+  );
   const groupBy = resolveRappelGroupBy(
     echelle,
     getFirstParam(searchParams.rappelsGroupe)
@@ -42,8 +45,8 @@ export const RappelsBlock = async ({
   );
 
   return (
-    <section className="m-6 rounded-lg border border-default-grey bg-white">
-      <div className="flex flex-wrap items-center justify-between gap-4 pr-4">
+    <Block>
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <BlockTitle
           title="Rappels contractualisation et évaluations"
           total={rappelCount}
@@ -69,6 +72,6 @@ export const RappelsBlock = async ({
           <DashboardPagination total={totalNodes} pageParam="rappelsPage" />
         </div>
       )}
-    </section>
+    </Block>
   );
 };

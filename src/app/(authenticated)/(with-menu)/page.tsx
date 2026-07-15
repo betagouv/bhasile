@@ -33,7 +33,7 @@ export default async function DashboardPage({
   return (
     <>
       <DashboardHeader prenom={user?.prenom} />
-      <div className="flex flex-col gap-8 max-w-7xl mx-auto">
+      <div className="flex flex-col gap-3 max-w-7xl mx-auto p-3">
         <Suspense
           fallback={
             <BlockSkeleton
