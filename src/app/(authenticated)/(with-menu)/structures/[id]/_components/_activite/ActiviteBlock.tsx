@@ -1,13 +1,13 @@
 import Image from "next/image";
 import { ReactElement } from "react";
 
+import { ActiviteMotifsIndisponibilite } from "@/app/components/activites/ActiviteMotifsIndisponibilite";
+import { ActivitePlaces } from "@/app/components/activites/ActivitePlaces";
 import { formatDate } from "@/app/utils/date.util";
 import { StructureType } from "@/types/structure.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ActiviteHistorique } from "./ActiviteHistorique";
-import { ActiviteMotifsIndisponibilite } from "../../../../../../components/activites/ActiviteMotifsIndisponibilite";
-import { ActivitePlaces } from "../../../../../../components/activites/ActivitePlaces";
 
 export const ActiviteBlock = (): ReactElement => {
   const { structure } = useStructureContext();
