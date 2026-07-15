@@ -1,10 +1,10 @@
 import Image from "next/image";
 
+import { ActiviteHistoriqueTable } from "@/app/components/activites/ActiviteHistoriqueTable";
+import { ActiviteMotifsIndisponibilite } from "@/app/components/activites/ActiviteMotifsIndisponibilite";
+import { ActivitePlaces } from "@/app/components/activites/ActivitePlaces";
 import { formatDate } from "@/app/utils/date.util";
 
-import { ActiviteHistoriqueTable } from "../../../structures/[id]/_components/_activite/ActiviteHistoriqueTable";
-import { ActiviteMotifsIndisponibilite } from "../../../structures/[id]/_components/_activite/ActiviteMotifsIndisponibilite";
-import { ActivitePlaces } from "../../../structures/[id]/_components/_activite/ActivitePlaces";
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 import { ActiviteStatsChart } from "./ActiviteStatsChart";
 
@@ -23,10 +23,14 @@ export const ActiviteBlock = () => {
             Données mensuelles de l’OFII
             <span className="italic block">
               mises à jour le{" "}
-              {formatDate(statistiques.activite.byMonth[0].date)}
+              {formatDate(
+                statistiques.activite.byMonth[
+                  statistiques.activite.byMonth.length - 1
+                ]?.date
+              )}
             </span>
           </span>
-          <div className="relative h-[38] w-[68]">
+          <div className="relative h-[38px] w-[68px]">
             <Image
               src="/ofii.webp"
               alt="Logo de l'OFII"
@@ -65,15 +69,13 @@ export const ActiviteBlock = () => {
           />
         </div>
       </div>
-      <h4 className="text-lg text-title-blue-france" id="indisponibilite-title">
+      <h4 className="text-lg text-title-blue-france">
         Indisponibilité et présence indue
       </h4>
       <div className="pb-16">
         <ActiviteStatsChart />
       </div>
-      <h4 className="text-lg text-title-blue-france" id="indisponibilite-title">
-        Tableau de données
-      </h4>
+      <h4 className="text-lg text-title-blue-france">Tableau de données</h4>
       <ActiviteHistoriqueTable activites={statistiques.activite.byMonth} />
     </div>
   );

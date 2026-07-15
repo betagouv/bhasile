@@ -392,6 +392,6 @@ export const findActivites = async (
       presencesInduesBPI: true,
       presencesInduesDeboutees: true,
     },
-    orderBy: { date: "asc" },
+    orderBy: { date: "desc" },
   });
 };

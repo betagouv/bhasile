@@ -6,7 +6,7 @@ import { Table } from "@/app/components/common/Table";
 import { ActiviteApiType } from "@/schemas/api/activite.schema";
 import { ActiviteByMonthStat } from "@/schemas/api/statistique.schema";
 
-import { typesActivite } from "./activite.constants";
+import { typesActivite } from "../../(authenticated)/(with-menu)/structures/[id]/_components/_activite/activite.constants";
 
 export const ActiviteHistoriqueTable = ({ activites }: Props): ReactElement => {
   const getActiviteFor = (

@@ -6,8 +6,8 @@ import { StructureType } from "@/types/structure.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ActiviteHistorique } from "./ActiviteHistorique";
-import { ActiviteMotifsIndisponibilite } from "./ActiviteMotifsIndisponibilite";
-import { ActivitePlaces } from "./ActivitePlaces";
+import { ActiviteMotifsIndisponibilite } from "../../../../../../components/activites/ActiviteMotifsIndisponibilite";
+import { ActivitePlaces } from "../../../../../../components/activites/ActivitePlaces";
 
 export const ActiviteBlock = (): ReactElement => {
   const { structure } = useStructureContext();
