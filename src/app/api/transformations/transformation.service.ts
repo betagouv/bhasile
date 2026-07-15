@@ -40,6 +40,7 @@ import {
 import {
   applyPrefill,
   checkNoDuplicateStructureIds,
+  checkUniqueDepartement,
 } from "./transformation.util";
 
 const resolveReferenceVersion = <TVersion extends ResolvableVersion>(
@@ -134,6 +135,8 @@ const prepareStructureVersionTransformations = async (
       enrichStructureVersionTransformationFromSource
     )
   );
+
+  checkUniqueDepartement(structureVersionTransformationsWithSource);
 
   return applyPrefill(type, structureVersionTransformationsWithSource);
 };

@@ -10,7 +10,10 @@ import { createOrUpdateDnaStructures } from "../dna-structures/dna-structure.rep
 import { createOrUpdateStructureFinesses } from "../finesses/finess.repository";
 import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import { convertToPublicType } from "../structures/structure.util";
-import { checkNoDepartementAdministratifChange } from "./structure-version.util";
+import {
+  checkCreatedStructureDepartement,
+  checkNoDepartementAdministratifChange,
+} from "./structure-version.util";
 
 type StructureVersionParent = Pick<
   EntityId,
@@ -80,6 +83,45 @@ const updateOneStructureVersion = async (
   return version.id;
 };
 
+const resolveTransformationBaseDepartement = async (
+  tx: PrismaTransaction,
+  structureVersionTransformationId: number
+): Promise<string | null> => {
+  const current = await tx.structureVersionTransformation.findUniqueOrThrow({
+    where: { id: structureVersionTransformationId },
+    select: {
+      transformation: {
+        select: {
+          structureVersionTransformations: {
+            where: { id: { not: structureVersionTransformationId } },
+            select: {
+              structureVersion: {
+                select: {
+                  departementAdministratif: true,
+                  structure: { select: { departementAdministratif: true } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  for (const sibling of current.transformation
+    .structureVersionTransformations) {
+    const departement =
+      sibling.structureVersion?.departementAdministratif ??
+      sibling.structureVersion?.structure?.departementAdministratif ??
+      null;
+    if (departement != null) {
+      return departement;
+    }
+  }
+
+  return null;
+};
+
 export const createOrUpdateStructureVersion = async (
   tx: PrismaTransaction,
   version: StructureVersionApiType,
@@ -93,6 +135,15 @@ export const createOrUpdateStructureVersion = async (
     });
     checkNoDepartementAdministratifChange(
       structure?.departementAdministratif,
+      version.departementAdministratif
+    );
+  } else if (parent.structureVersionTransformationId !== undefined) {
+    const baseDepartement = await resolveTransformationBaseDepartement(
+      tx,
+      parent.structureVersionTransformationId
+    );
+    checkCreatedStructureDepartement(
+      baseDepartement,
       version.departementAdministratif
     );
   }

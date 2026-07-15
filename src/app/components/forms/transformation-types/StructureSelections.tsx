@@ -10,6 +10,7 @@ export const StructureSelections = ({
   transformationType,
   structureId,
   departureType,
+  departureDepartement,
   onChange,
 }: Props) => {
   const {
@@ -21,12 +22,18 @@ export const StructureSelections = ({
     setDepartementNumero,
     setStructureType,
     getFixedType,
+    getFixedDepartement,
     getEffectiveStructureType,
     getInheritedOperateurName,
     getInheritedDepartementNumero,
     structureVersionTransformations,
     areSelectionsComplete,
-  } = useStructureSelections({ transformationType, structureId, departureType });
+  } = useStructureSelections({
+    transformationType,
+    structureId,
+    departureType,
+    departureDepartement,
+  });
 
   useEffect(() => {
     onChange({ structureVersionTransformations, areSelectionsComplete });
@@ -37,11 +44,16 @@ export const StructureSelections = ({
       {blocks.map((block) => {
         const inheritedOperateur = getInheritedOperateurName(block);
         const inheritedDepartement = getInheritedDepartementNumero(block);
+        const fixedDepartement =
+          inheritedDepartement ?? getFixedDepartement(block);
 
         if (block.inheritOperateurFrom && !inheritedOperateur) {
           return null;
         }
         if (block.inheritDepartementFrom && !inheritedDepartement) {
+          return null;
+        }
+        if (block.matchDepartureDepartement && !departureDepartement) {
           return null;
         }
 
@@ -55,7 +67,7 @@ export const StructureSelections = ({
             structureType={getEffectiveStructureType(block)}
             setStructureType={(v) => setStructureType(block.id, v)}
             fixedOperateurName={inheritedOperateur}
-            fixedDepartementNumero={inheritedDepartement}
+            fixedDepartementNumero={fixedDepartement}
             operateurName={filtersByBlock[block.id]?.operateurName}
             setOperateurName={(v) => setOperateurName(block.id, v)}
             departementNumero={filtersByBlock[block.id]?.departementNumero}
@@ -76,6 +88,7 @@ type Props = {
   transformationType: TransformationType;
   structureId?: number;
   departureType?: StructureType;
+  departureDepartement?: string;
   onChange: (state: {
     structureVersionTransformations: StructureVersionTransformationApiCreate[];
     areSelectionsComplete: boolean;

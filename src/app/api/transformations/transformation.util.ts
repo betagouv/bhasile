@@ -23,6 +23,23 @@ export const checkNoDuplicateStructureIds = (
   }
 };
 
+export const checkUniqueDepartement = (
+  structureVersionTransformations: StructureVersionTransformationApiCreate[]
+): void => {
+  const departements = structureVersionTransformations
+    .map(
+      (structureVersionTransformation) =>
+        structureVersionTransformation.structureVersion
+          ?.departementAdministratif
+    )
+    .filter((departement): departement is string => departement != null);
+  if (new Set(departements).size > 1) {
+    throw new ApiDomainError(
+      "Toutes les structures d'une transformation doivent appartenir au même département."
+    );
+  }
+};
+
 export const applyPrefill = (
   transformationType: TransformationType,
   structureVersionTransformations: StructureVersionTransformationApiCreate[]
