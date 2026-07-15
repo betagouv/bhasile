@@ -15,11 +15,11 @@ import {
   findCpomStructures,
   findDepartementsWithPopulation,
   findDnaLinks,
-  findEffectiveStructureVersionsAtDate,
   findEigs,
   findEvaluations,
   findIndicateursFinanciers,
   findOperateurFiliales,
+  findPerimeterStructures,
   findRmus,
   findStructureActivityDates,
   findStructureAdresses,
@@ -32,7 +32,6 @@ import {
   collectDistinctYears,
   createEmptyActiveStructureIdsByPeriod,
   getTypologieYears,
-  mapVersionsToStructures,
   parseStatistiquesPerimeterFilters,
   type StatistiquesResolvedPerimeterFilters,
 } from "./statistiques.utils";
@@ -62,13 +61,8 @@ export const buildStatistiquesContext = async (
   const referenceYear = now.getUTCFullYear();
 
   const resolvedFilters = await resolveStatistiquesPerimeterFilters(filters);
-  const effectiveVersions = await findEffectiveStructureVersionsAtDate(
-    resolvedFilters,
-    now
-  );
-  const allStructureIds = effectiveVersions
-    .map((version) => version.structureId)
-    .filter((id): id is number => id != null);
+  const allStructures = await findPerimeterStructures(resolvedFilters, now);
+  const allStructureIds = allStructures.map((structure) => structure.id);
   if (allStructureIds.length === 0) {
     return null;
   }
@@ -80,8 +74,6 @@ export const buildStatistiquesContext = async (
     allStructureIds,
     structureActivityDates
   );
-
-  const allStructures = mapVersionsToStructures(effectiveVersions);
 
   const [typologies, adresses, cpomLinks, dnaLinks, structureVersionTimeline] =
     await Promise.all([

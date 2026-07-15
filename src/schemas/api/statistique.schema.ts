@@ -15,9 +15,8 @@ export const statistiquesFiltersSchema = z.object({
   aggregation: z
     .string()
     .nullable()
-    .transform(
-      (value): NumericAggregation =>
-        value === "mediane" ? "mediane" : "moyenne"
+    .transform((value): NumericAggregation =>
+      value === "mediane" ? "mediane" : "moyenne"
     ),
 });
 
@@ -40,7 +39,6 @@ export type BatiStat = {
 export type StructuresByYearStat = {
   year: number;
   totalStructures: number;
-  totalPlaces: number;
   totalCpoms: number;
   structuresCada: number;
   structuresCph: number;
@@ -179,6 +177,8 @@ export type RmuByYearStat = RmuPeriodStat;
 export type StatistiqueApiRead = {
   structures: {
     totalStructures: number;
+    totalPlaces: number;
+    totalPlacesAdresse: number;
     totalCpoms: number;
     structuresAvecCpom: number;
     structureTypes: TypeStructureStat[];
