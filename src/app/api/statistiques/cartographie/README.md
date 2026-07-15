@@ -52,24 +52,23 @@ Sans `departements`, toute la France ; sans aucun filtre opérateur/type.
 
 ## Forme de la réponse
 
-```jsonc
+```json
 {
   "granularite": "region",
   "indicateur": "places.autorisees",
   "annee": 2025,
   "zones": [
     {
-      // numéro de département, ou code région (référentiel BDD) selon la granularité
       "code": "84",
       "name": "Auvergne-Rhône-Alpes",
-      "value": 1234, // null si la zone n'a aucune structure / donnée pour l'année
+      "value": 1234,
       "evolution": {
         "previousValue": 1180,
         "delta": 54,
-        "direction": "hausse", // "hausse" | "baisse" | "stable"
-      },
-    },
-  ],
+        "direction": "hausse"
+      }
+    }
+  ]
 }
 ```
 

@@ -1,14 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { CartographieDbDepartement } from "@/app/api/statistiques/cartographie/cartographie.repository";
+import type { CartographieDbDepartement } from "@/app/api/statistiques/cartographie/cartographie.db.type";
 import { getCartographieStatistiques } from "@/app/api/statistiques/cartographie/cartographie.service";
 import type {
   StatistiqueDbStructure,
   StatistiquesContext,
 } from "@/app/api/statistiques/statistiques.db.type";
 
-import { buildTestActivityIndex } from "../test-helpers";
-import { testStructure } from "./cartographie.test-helpers";
+import { buildTestActivityIndex, testStructure } from "../test-helpers";
 
 const mockBuildStatistiquesContext = vi.fn();
 const mockFindAllDepartementsWithRegion = vi.fn();
@@ -25,18 +24,21 @@ vi.mock("@/app/api/statistiques/cartographie/cartographie.repository", () => ({
 
 const ALL_DEPARTEMENTS: CartographieDbDepartement[] = [
   {
+    id: 1,
     numero: "01",
     name: "Ain",
     regionCode: "ARA",
     regionName: "Auvergne-Rhône-Alpes",
   },
   {
+    id: 2,
     numero: "38",
     name: "Isère",
     regionCode: "ARA",
     regionName: "Auvergne-Rhône-Alpes",
   },
   {
+    id: 3,
     numero: "75",
     name: "Paris",
     regionCode: "IDF",

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { CartographieDbDepartement } from "@/app/api/statistiques/cartographie/cartographie.repository";
+import type { CartographieDbDepartement } from "@/app/api/statistiques/cartographie/cartographie.db.type";
 import {
   buildZoneDefinitions,
   computeEvolution,
@@ -10,50 +10,19 @@ import {
 } from "@/app/api/statistiques/cartographie/cartographie.util";
 import type {
   StatistiqueDbActivite,
-  StatistiqueDbAdresse,
   StatistiqueDbBudget,
   StatistiqueDbCpomStructure,
   StatistiqueDbEig,
-  StatistiqueDbTypologie,
 } from "@/app/api/statistiques/statistiques.db.type";
-import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
 
 import {
   buildTestActivityIndex,
   buildTestStatistiquesContext,
+  testAdresse,
+  testStructure,
+  testTypologie,
 } from "../test-helpers";
-import { testStructure } from "./cartographie.test-helpers";
-
-const testTypologie = (
-  id: number,
-  structureId: number,
-  year: number,
-  placesAutorisees: number,
-  pmr = 0
-): StatistiqueDbTypologie => ({
-  id,
-  structureId,
-  year,
-  placesAutorisees,
-  pmr,
-  lgbt: 0,
-  fvvTeh: 0,
-});
-
-const testAdresse = (
-  id: number,
-  structureId: number,
-  qpv: number
-): StatistiqueDbAdresse => ({
-  id,
-  structureId,
-  structureVersionId: structureId,
-  repartition: Repartition.COLLECTIF,
-  placesAutorisees: 0,
-  qpv,
-  logementSocial: 0,
-});
 
 const testActivite = (
   id: number,
@@ -110,18 +79,21 @@ describe("resolveZoneDepartementNumeros", () => {
 describe("buildZoneDefinitions", () => {
   const allDepartements: CartographieDbDepartement[] = [
     {
+      id: 1,
       numero: "01",
       name: "Ain",
       regionCode: "ARA",
       regionName: "Auvergne-Rhône-Alpes",
     },
     {
+      id: 2,
       numero: "75",
       name: "Paris",
       regionCode: "IDF",
       regionName: "Île-de-France",
     },
     {
+      id: 3,
       numero: "92",
       name: "Hauts-de-Seine",
       regionCode: "IDF",
@@ -338,7 +310,7 @@ describe("computeIndicateurValues - un seul indicateur calculé, pas le bloc ent
     expect(result.value).toBe(7);
   });
 
-  it("finance.resultatNet : ne calcule que le scope total, pas autorisées/subventionnées", () => {
+  it("finance.resultatNet : ne calcule que le scope total", () => {
     const { activeStructureIdsNow, activeStructureIdsByPeriod } =
       buildTestActivityIndex([1, 2], { financeYears: [2025] });
 

@@ -1,17 +1,13 @@
 import prisma from "@/lib/prisma";
 
-export type CartographieDbDepartement = {
-  numero: string;
-  name: string;
-  regionCode: string | null;
-  regionName: string | null;
-};
+import type { CartographieDbDepartement } from "./cartographie.db.type";
 
 export const findAllDepartementsWithRegion = async (): Promise<
   CartographieDbDepartement[]
 > => {
   const departements = await prisma.departement.findMany({
     select: {
+      id: true,
       numero: true,
       name: true,
       regionAdministrative: { select: { code: true, name: true } },
@@ -19,6 +15,7 @@ export const findAllDepartementsWithRegion = async (): Promise<
   });
 
   return departements.map((departement) => ({
+    id: departement.id,
     numero: departement.numero,
     name: departement.name,
     regionCode: departement.regionAdministrative?.code ?? null,

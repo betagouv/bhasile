@@ -203,7 +203,6 @@ const buildLatestActiviteByStructureId = (
   return latestByStructureId;
 };
 
-/** Accumulates the current snapshot totals. */
 const accumulateActiviteSummaryTotals = (
   context: StatistiquesActiviteSummaryContext,
   structureTypeById: Map<number, StatistiqueDbStructure["type"]>

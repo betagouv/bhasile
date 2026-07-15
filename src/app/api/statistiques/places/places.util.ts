@@ -226,8 +226,7 @@ export const computeAdresseFieldForYear = (
     context.adresses,
     resolved.structures.map((structure) => structure.id),
     endOfYearUtc(year),
-    context.structureVersionTimeline,
-    new Date()
+    context.structureVersionTimeline
   );
 
   return sumValues(adressesInScope.map((adresse) => adresse[field])) ?? 0;

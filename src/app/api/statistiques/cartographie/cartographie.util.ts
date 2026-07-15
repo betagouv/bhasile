@@ -23,7 +23,7 @@ import type {
   StatistiquesContext,
 } from "../statistiques.db.type";
 import { computeStructuresIndicatorForYear } from "../structures/structures.util";
-import type { CartographieDbDepartement } from "./cartographie.repository";
+import type { CartographieDbDepartement } from "./cartographie.db.type";
 
 export type CartographieZoneDefinition = {
   code: string;
@@ -49,7 +49,6 @@ export const groupStructureIdsByDepartement = (
   return groups;
 };
 
-/** Resolves the `departements` filter into a set of departement numeros. */
 export const resolveZoneDepartementNumeros = (
   filters: Pick<StatistiqueCartographieFilters, "departements">
 ): Set<string> | null => {
