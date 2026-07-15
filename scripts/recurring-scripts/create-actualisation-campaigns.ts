@@ -41,7 +41,7 @@ export const createActualisationCampaignShell = async (
     effectiveDate: Date;
   }
 ): Promise<void> => {
-  await client.$transaction(async (tx) => {
+  client.$transaction(async (tx) => {
     const campaign = await tx.campaign.create({
       data: { campaignDefinitionId: input.campaignDefinitionId },
     });
@@ -80,7 +80,7 @@ const run = async () => {
 
     if (!Number.isInteger(actualisationYear)) {
       console.log(
-        "⏭️  Aucune année d'actualisation valide (arg ou ACTUALISATION_YEAR) — rien à créer."
+        "⏭️ Aucune année d'actualisation valide (arg ou ACTUALISATION_YEAR) — rien à créer."
       );
       return;
     }
