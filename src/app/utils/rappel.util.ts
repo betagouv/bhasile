@@ -248,5 +248,5 @@ export const groupRappels = (
   return groupSingleLevel(scoped, getKeyedHeaderFor(groupBy));
 };
 
-export const rappelCriticiteLabel = (criticite: RappelCriticite): string =>
+export const getRappelCriticiteLabel = (criticite: RappelCriticite): string =>
   CRITICITE_LABEL[criticite];

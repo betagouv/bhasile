@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
 import { Badge } from "@/app/components/common/Badge";
-import { rappelCriticiteLabel } from "@/app/utils/rappel.util";
+import { getRappelCriticiteLabel } from "@/app/utils/rappel.util";
 import { RappelCriticite } from "@/types/dashboard.type";
 
 type Props = {
@@ -23,7 +23,7 @@ export const RappelsCountBadge = ({
         {count}
       </span>
       <Badge type={criticite === "URGENT" ? "warning" : "yellow"}>
-        {rappelCriticiteLabel(criticite)}
+        {getRappelCriticiteLabel(criticite)}
       </Badge>
     </span>
   );

@@ -2,7 +2,7 @@
 
 import { ReactElement, ReactNode, useState } from "react";
 
-import { rappelCriticiteLabel } from "@/app/utils/rappel.util";
+import { getRappelCriticiteLabel } from "@/app/utils/rappel.util";
 import { RappelGroupHeader, RappelGroupNode } from "@/types/dashboard.type";
 
 import { RappelRow } from "./RappelRow";
@@ -12,7 +12,9 @@ export const RappelsGroupNode = ({ node, depth = 0 }: Props): ReactElement => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border-t border-default-grey">
+    <div
+      className={`border-t border-default-grey${depth >= 1 ? " bg-alt-grey" : ""}`}
+    >
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex w-full items-center justify-between gap-4 py-3 text-left text-sm"
@@ -46,7 +48,7 @@ export const RappelsGroupNode = ({ node, depth = 0 }: Props): ReactElement => {
           </div>
         ) : (
           <div
-            className="border-l-2 border-active-blue-france"
+            className="border-l-2 border-active-blue-france mb-4"
             style={{ marginLeft: depth * 24 + 24, paddingLeft: 24 }}
           >
             {node.rappels.map((rappel) => (
@@ -83,7 +85,7 @@ const renderHeaderLabel = (header: RappelGroupHeader): ReactNode => {
     case "TASK":
       return <strong>{header.taskLabel}</strong>;
     case "CRITICITE":
-      return <strong>{rappelCriticiteLabel(header.criticite)}</strong>;
+      return <strong>{getRappelCriticiteLabel(header.criticite)}</strong>;
   }
 };
 

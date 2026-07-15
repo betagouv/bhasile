@@ -9,7 +9,7 @@ import {
   RAPPEL_GROUP_BY_OPTIONS,
   resolveRappelGroupBy,
 } from "@/app/utils/rappel.util";
-import { RappelEchelle,RappelGroupBy } from "@/types/dashboard.type";
+import { RappelEchelle, RappelGroupBy } from "@/types/dashboard.type";
 
 type Props = {
   echelle: RappelEchelle;
@@ -53,6 +53,7 @@ export const RappelsControls = ({ echelle, groupBy }: Props): ReactElement => {
           onChange: (event) =>
             handleEchelleChange(event.target.value as RappelEchelle),
         }}
+        className="mb-0 flex items-center gap-2 [&_select]:mt-0 [&_label]:whitespace-nowrap"
       >
         {RAPPEL_ECHELLE_OPTIONS.map((option) => (
           <option key={option.value} value={option.value}>
@@ -68,6 +69,7 @@ export const RappelsControls = ({ echelle, groupBy }: Props): ReactElement => {
           onChange: (event) =>
             updateParams({ rappelsGroupe: event.target.value }),
         }}
+        className="mb-0 flex items-center gap-2 [&_select]:mt-0 [&_label]:whitespace-nowrap"
       >
         {RAPPEL_GROUP_BY_OPTIONS[echelle].map((option) => (
           <option key={option.value} value={option.value}>

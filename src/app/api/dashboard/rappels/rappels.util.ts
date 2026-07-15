@@ -133,7 +133,7 @@ const findCurrentCpom = (
   return null;
 };
 
-const evaluationLabel = (criticite: RappelCriticite): string =>
+const getEvaluationLabel = (criticite: RappelCriticite): string =>
   criticite === "URGENT" ? "Évaluation à mener" : "Évaluation à lancer";
 
 export type BuildRappelsOptions = {
@@ -242,7 +242,7 @@ export const buildRappels = (
     if (evaluationRappel) {
       pushStructureRappel(
         "EVALUATION",
-        evaluationLabel(evaluationRappel.criticite),
+        getEvaluationLabel(evaluationRappel.criticite),
         evaluationRappel.deadline,
         evaluationRappel.criticite
       );
