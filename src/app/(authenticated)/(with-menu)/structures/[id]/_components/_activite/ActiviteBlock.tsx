@@ -4,10 +4,10 @@ import { ReactElement } from "react";
 import { formatDate } from "@/app/utils/date.util";
 import { StructureType } from "@/types/structure.type";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
-import { ActiviteHistorique } from "./ActiviteHistorique";
 import { ActiviteMotifsIndisponibilite } from "../../../../../../components/activites/ActiviteMotifsIndisponibilite";
 import { ActivitePlaces } from "../../../../../../components/activites/ActivitePlaces";
+import { useStructureContext } from "../../_context/StructureClientContext";
+import { ActiviteHistorique } from "./ActiviteHistorique";
 
 export const ActiviteBlock = (): ReactElement => {
   const { structure } = useStructureContext();
