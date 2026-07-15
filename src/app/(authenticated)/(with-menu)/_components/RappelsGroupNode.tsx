@@ -2,6 +2,7 @@
 
 import { ReactElement, ReactNode, useState } from "react";
 
+import { cn } from "@/app/utils/classname.util";
 import { getRappelCriticiteLabel } from "@/app/utils/rappel.util";
 import { RappelGroupHeader, RappelGroupNode } from "@/types/dashboard.type";
 
@@ -13,12 +14,15 @@ export const RappelsGroupNode = ({ node, depth = 0 }: Props): ReactElement => {
 
   return (
     <div
-      className={`border-t border-default-grey${depth >= 1 ? " bg-alt-grey" : ""}`}
+      className={cn(
+        "border-b border-default-grey [&:last-child]:border-none",
+        depth >= 1 ? "bg-alt-grey" : ""
+      )}
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between gap-4 py-3 text-left text-sm"
-        style={{ paddingLeft: depth * 24 }}
+        className="flex w-full items-center justify-between gap-4 py-3 px-6 text-left text-sm"
+        style={{ paddingLeft: depth * 24 + 24 }}
       >
         <span className="min-w-0">{renderHeaderLabel(node.header)}</span>
         <span className="flex items-center gap-4">

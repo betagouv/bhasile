@@ -15,7 +15,7 @@ export const TransformationRow = ({ row }: Props): ReactElement => {
   )?.name;
 
   return (
-    <div className="col-span-full grid grid-cols-subgrid items-center text-default-grey whitespace-nowrap border-t border-default-grey py-3 text-sm">
+    <div className="col-span-full grid grid-cols-subgrid items-center text-default-grey whitespace-nowrap border-b border-default-grey py-3 px-6 text-sm [&:last-child]:border-none">
       <span className="font-bold">{row.operateurName}</span>
       <span>
         {departementName} ({row.departementAdministratif})

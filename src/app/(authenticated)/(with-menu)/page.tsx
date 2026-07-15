@@ -48,7 +48,7 @@ export default async function DashboardPage({
           fallback={
             <BlockSkeleton
               title="Créations, transformations et fermetures de structures"
-              icon="fr-icon-building-line"
+              icon="fr-icon-community-line"
             />
           }
         >

@@ -61,7 +61,7 @@ export const InitialisationsActualisationsBlock = async ({
       )}
 
       {data.total > MIDDLE_PAGE_SIZE && (
-        <div className="flex justify-center border-t border-default-grey p-4">
+        <div className="flex justify-center mt-4">
           <DashboardPagination
             total={data.total}
             pageParam="actualisationsPage"

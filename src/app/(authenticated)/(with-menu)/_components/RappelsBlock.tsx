@@ -55,7 +55,7 @@ export const RappelsBlock = async ({
         <RappelsControls echelle={echelle} groupBy={groupBy} />
       </div>
 
-      <div className="px-4 pb-2">
+      <div>
         {nodes.map((node) => (
           <RappelsGroupNode key={node.key} node={node} />
         ))}
@@ -68,7 +68,7 @@ export const RappelsBlock = async ({
       </div>
 
       {totalNodes > MIDDLE_PAGE_SIZE && (
-        <div className="flex justify-center border-t border-default-grey p-4">
+        <div className="flex justify-center mt-4">
           <DashboardPagination total={totalNodes} pageParam="rappelsPage" />
         </div>
       )}
