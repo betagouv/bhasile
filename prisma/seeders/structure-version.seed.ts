@@ -38,6 +38,7 @@ export type SeedStructureParams = {
   formDefs: FormDefLookup;
   finalisationFormDefId: number;
   finalisationStepDefinitions: { id: number; slug: string }[];
+  initialisationCampaignDefinitionId: number;
 };
 
 export type SeededStructure = { structureId: number; currentVersionId: number };
@@ -568,7 +569,7 @@ export const seedStructureWithVersions = async (
 
   if (initial.provenance === "CAMPAIGN") {
     const campaign = await prisma.campaign.create({
-      data: { name: "initialisation" },
+      data: { campaignDefinitionId: params.initialisationCampaignDefinitionId },
     });
     const versionCommon = buildVersionCommon(
       scalars,

@@ -2,6 +2,11 @@ import "dotenv/config";
 
 import { fakerFR as faker } from "@faker-js/faker";
 
+import {
+  actualisationCampaignDefinitionSlug,
+  INITIALISATION_CAMPAIGN_DEFINITION_SLUG,
+} from "@/app/api/campaigns/campaign.constants";
+import { ACTUALISATION_FORM_SLUG } from "@/app/api/forms/form.constants";
 import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
@@ -115,6 +120,27 @@ async function seed(): Promise<void> {
     `✅ ${formFinalisationStepDefinitions.count} FormStepDefinitions créées pour le formulaire finalisation`
   );
 
+  await prisma.formDefinition.create({
+    data: { name: "actualisation", slug: ACTUALISATION_FORM_SLUG, version: 1 },
+  });
+
+  const initialisationCampaignDefinition =
+    await prisma.campaignDefinition.create({
+      data: {
+        name: "Initialisation",
+        slug: INITIALISATION_CAMPAIGN_DEFINITION_SLUG,
+        version: 1,
+      },
+    });
+  await prisma.campaignDefinition.create({
+    data: {
+      name: "Actualisation 2026",
+      slug: actualisationCampaignDefinitionSlug(2026),
+      version: 1,
+    },
+  });
+  console.log("✅ CampaignDefinitions créées (initialisation + actualisation)");
+
   const formDefinitions = await prisma.formDefinition.findMany({
     include: { stepsDefinition: { select: { id: true } } },
   });
@@ -202,6 +228,7 @@ async function seed(): Promise<void> {
         formDefs,
         finalisationFormDefId: formFinalisationDefinition.id,
         finalisationStepDefinitions: stepDefinitions,
+        initialisationCampaignDefinitionId: initialisationCampaignDefinition.id,
       });
       seededStructures.push(seeded);
       operateurStructureIds.push(seeded.structureId);
