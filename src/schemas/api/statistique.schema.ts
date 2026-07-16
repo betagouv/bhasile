@@ -99,7 +99,7 @@ export type EigRatesStat = EigCountsStat & {
 };
 
 export type ControleQualiteEvaluationSummaryStat = {
-  moyenneEvaluationsCurrentYear: number | null;
+  moyenneEvaluationsLast12Months: number | null;
 };
 
 export type EigStat = EigRatesStat & ControleQualiteEvaluationSummaryStat;

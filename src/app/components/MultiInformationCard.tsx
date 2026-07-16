@@ -10,9 +10,9 @@ export const MultiInformationCard = ({
   const [showDetails, setShowDetails] = useState(false);
 
   return (
-    <div className="px-6 py-3 rounded-xl bg-alt-blue-france flex-col w-[220px] h-full flex justify-center items-center">
+    <div className="px-6 py-3 rounded-xl bg-alt-blue-france flex-col h-full flex justify-center items-center relative">
       {detailLabel && (
-        <div className="flex justify-end w-full">
+        <div className="flex justify-end w-full absolute top-1 right-1">
           <Button
             onClick={() => setShowDetails(!showDetails)}
             iconId={

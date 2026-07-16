@@ -174,7 +174,7 @@ export const ControleQualiteStatsTable = (): ReactElement => {
                 className="text-left! text-xs! font-bold uppercase bg-default-grey-hover!"
                 colSpan={totalColumns}
               >
-                <span className="sticky left-4 inline-block">
+                <span className="sticky left-4 inline-block h-8 leading-8">
                   {section.title}
                 </span>
               </td>
