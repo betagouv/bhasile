@@ -12,7 +12,7 @@ import { LeaveModificationModal } from "@/app/components/forms/LeaveModification
 import { ModificationTitle } from "@/app/components/forms/ModificationTitle";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
-import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { filterDocumentsFinanciersForApi } from "@/app/utils/file-upload.util";
 import { getFinanceSchema } from "@/schemas/forms/base/budget/getFinanceSchema";
 import { anyModificationFinanceFormValues } from "@/schemas/forms/modification/modificationFinance.schema";
 import { FormKind } from "@/types/global";
@@ -30,12 +30,9 @@ export default function ModificationFinanceForm() {
   const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
   const onSubmit = async (data: anyModificationFinanceFormValues) => {
-    const documentsFinanciers = (data.documentsFinanciers?.filter(
-      (documentFinancier) =>
-        documentFinancier.fileUploads?.[0]?.key &&
-        documentFinancier.category &&
-        documentFinancier.granularity
-    ) ?? []) as DocumentFinancierApiType[];
+    const documentsFinanciers = filterDocumentsFinanciersForApi(
+      data.documentsFinanciers
+    );
 
     const structureMillesimes = data.structureMillesimes?.map((millesime) => ({
       ...millesime,

@@ -1,56 +1,39 @@
 "use client";
 
-import Button from "@codegouvfr/react-dsfr/Button";
-import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
+import { hasOpenActualisation } from "@/app/api/campaigns/campaign.util";
 import { Badge } from "@/app/components/common/Badge";
 import { NavigationMenu } from "@/app/components/common/NavigationMenu";
-import { UpcomingTransformationBadge } from "@/app/components/structures/UpcomingTransformationBadge";
-import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
 import { ActualisationHeader } from "./ActualisationHeader";
-import { AutoSaveStatus } from "./AutoSaveStatus";
 import { FinalisationHeader } from "./FinalisationHeader";
-import { StructureMenu } from "./StructureMenu";
-
-const autoSaveModal = createModal({
-  id: "autosave-modal",
-  isOpenedByDefault: false,
-});
-const finalisationSuccessModal = createModal({
-  id: "finalisation-success-modal",
-  isOpenedByDefault: false,
-});
+import { StructureHeaderActions } from "./StructureHeaderActions";
+import { StructureHeaderModals } from "./StructureHeaderModals";
 
 export const StructureHeader = ({
   actualisationYear,
-  showActualisation,
 }: {
   actualisationYear: number | null;
-  showActualisation: boolean;
 }): ReactElement | null => {
   const { structure } = useStructureContext();
   const isStructureFinalisee = structure.isFinalised;
-  const router = useRouter();
 
-  const { handleFinalisation, isStructureReadyToFinalise } =
-    useAgentFormHandling();
+  const showActualisation =
+    actualisationYear !== null &&
+    structure.isFinalised &&
+    hasOpenActualisation(structure.campaigns, actualisationYear);
 
   const { headerRef } = useHeaderHeight();
   const { isHidden } = useHideOnScroll();
 
   const pathname = usePathname();
-
   const isRootPath = pathname === `/structures/${structure?.id}`;
-  const isFinalisationPath = pathname.startsWith(
-    `/structures/${structure?.id}/finalisation`
-  );
 
   const {
     codeBhasile,
@@ -101,31 +84,7 @@ export const StructureHeader = ({
             </h3>
           </div>
           <div className="grow" />
-          {isFinalisationPath ? (
-            <div className="flex items-center gap-3">
-              <AutoSaveStatus onStatusClick={() => autoSaveModal.open()} />
-              <Button
-                disabled={!isStructureReadyToFinalise}
-                onClick={async () => {
-                  if (await handleFinalisation()) {
-                    finalisationSuccessModal.open();
-                  }
-                }}
-              >
-                Finaliser la création
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              {structure.upcomingTransformations?.map((transformation) => (
-                <UpcomingTransformationBadge
-                  key={`${transformation.kind}-${transformation.date}`}
-                  transformation={transformation}
-                />
-              ))}
-              <StructureMenu structureId={structure.id} />
-            </div>
-          )}
+          <StructureHeaderActions actualisationYear={actualisationYear} />
         </div>
 
         <div
@@ -142,32 +101,17 @@ export const StructureHeader = ({
             {isRootPath && (
               <NavigationMenu
                 menuElements={[
-                  {
-                    label: "Description",
-                    section: "#description",
-                  },
-                  {
-                    label: "Calendrier",
-                    section: "#calendrier",
-                  },
-                  {
-                    label: "Type de places",
-                    section: "#places",
-                  },
+                  { label: "Description", section: "#description" },
+                  { label: "Calendrier", section: "#calendrier" },
+                  { label: "Type de places", section: "#places" },
                   {
                     label: "Finances",
                     section: "#finances",
                     isDisplayed:
                       !!structure.budgets && structure.budgets?.length > 0,
                   },
-                  {
-                    label: "Contrôle qualité",
-                    section: "#controle",
-                  },
-                  {
-                    label: "Activité",
-                    section: "#activite",
-                  },
+                  { label: "Contrôle qualité", section: "#controle" },
+                  { label: "Activité", section: "#activite" },
                   {
                     label: "Actes administratifs",
                     section: "#actes-administratifs",
@@ -184,36 +128,7 @@ export const StructureHeader = ({
         </div>
       </div>
 
-      <autoSaveModal.Component
-        title="Votre progression est enregistrée automatiquement"
-        buttons={[
-          { doClosesModal: true, children: "J’ai compris", type: "button" },
-        ]}
-      >
-        <p>
-          Aucune action n’est requise de votre part pour enregistrer les données
-          que vous avez saisies.
-        </p>
-      </autoSaveModal.Component>
-
-      <finalisationSuccessModal.Component
-        title="Vous avez terminé la création de cette structure !"
-        buttons={[
-          {
-            doClosesModal: true,
-            children: "J’ai compris",
-            type: "button",
-            onClick: () => {
-              router.push(`/structures/${structure?.id}`);
-            },
-          },
-        ]}
-      >
-        <p>
-          Les données ont bien été enregistrées. Merci pour votre contribution
-          qui va rendre l’outil plus précis.
-        </p>
-      </finalisationSuccessModal.Component>
+      <StructureHeaderModals structureId={structure.id} />
     </>
   );
 };

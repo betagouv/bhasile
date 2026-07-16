@@ -2,32 +2,36 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import {
   getActualisationYear,
-  hasValidatedActualisation,
+  hasOpenActualisation,
 } from "@/app/api/campaigns/campaign.util";
 
-describe("hasValidatedActualisation", () => {
-  it("renvoie true quand la campagne d'actualisation de l'année est validée", () => {
+describe("hasOpenActualisation", () => {
+  it("renvoie true quand la campagne de l'année existe et n'est pas validée", () => {
     expect(
-      hasValidatedActualisation(
-        [{ slug: "actualisation-2026", isValidated: true, formSteps: [] }],
+      hasOpenActualisation(
+        [{ slug: "actualisation-2026", isValidated: false, formSteps: [] }],
         2026
       )
     ).toBe(true);
   });
 
-  it("renvoie false quand la campagne de l'année n'est pas validée", () => {
+  it("renvoie false quand la campagne de l'année est validée", () => {
     expect(
-      hasValidatedActualisation(
-        [{ slug: "actualisation-2026", isValidated: false, formSteps: [] }],
+      hasOpenActualisation(
+        [{ slug: "actualisation-2026", isValidated: true, formSteps: [] }],
         2026
       )
     ).toBe(false);
   });
 
+  it("renvoie false quand aucune campagne n'existe pour la structure", () => {
+    expect(hasOpenActualisation([], 2026)).toBe(false);
+  });
+
   it("renvoie false pour une autre année", () => {
     expect(
-      hasValidatedActualisation(
-        [{ slug: "actualisation-2026", isValidated: true, formSteps: [] }],
+      hasOpenActualisation(
+        [{ slug: "actualisation-2026", isValidated: false, formSteps: [] }],
         2027
       )
     ).toBe(false);
@@ -35,8 +39,8 @@ describe("hasValidatedActualisation", () => {
 
   it("ignore les campagnes d'initialisation", () => {
     expect(
-      hasValidatedActualisation(
-        [{ slug: "initialisation", isValidated: true, formSteps: [] }],
+      hasOpenActualisation(
+        [{ slug: "initialisation", isValidated: false, formSteps: [] }],
         2026
       )
     ).toBe(false);

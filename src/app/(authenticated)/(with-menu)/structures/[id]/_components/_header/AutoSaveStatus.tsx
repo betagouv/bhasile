@@ -4,9 +4,12 @@ import Image from "next/image";
 import { useFetchState } from "@/app/context/FetchStateContext";
 import { FetchState } from "@/types/fetch-state.type";
 
-export const AutoSaveStatus = ({ onStatusClick }: Props) => {
+export const AutoSaveStatus = ({
+  onStatusClick,
+  fetchStateKey = "structure-save",
+}: Props) => {
   const { getFetchState } = useFetchState();
-  const saveState = getFetchState("structure-save");
+  const saveState = getFetchState(fetchStateKey);
 
   return (
     <Button
@@ -37,4 +40,5 @@ export const AutoSaveStatus = ({ onStatusClick }: Props) => {
 
 type Props = {
   onStatusClick: () => void;
+  fetchStateKey?: string;
 };

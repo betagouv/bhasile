@@ -144,6 +144,12 @@ export const protectedApiRoutes: ApiRoute[] = [
       PUT: "proconnect",
     },
   },
+  {
+    pattern: /^\/api\/campaigns$/,
+    routes: {
+      PUT: "proconnect",
+    },
+  },
 ];
 
 export const proConnectProtectedPages = [

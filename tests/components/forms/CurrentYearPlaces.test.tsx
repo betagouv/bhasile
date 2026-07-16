@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { FieldSetTransformationPlaces } from "@/app/components/forms/typePlace/FieldSetTransformationPlaces";
+import { CurrentYearPlaces } from "@/app/components/forms/typePlace/CurrentYearPlaces";
 import { FormKind } from "@/types/global";
 
 import { FormTestWrapper } from "../../test-utils/form-test-wrapper";
@@ -16,11 +16,11 @@ const renderWithTotal = (
         structureTypologies: [{ placesAutorisees: total, year: 2026 }],
       }}
     >
-      <FieldSetTransformationPlaces {...props} />
+      <CurrentYearPlaces {...props} />
     </FormTestWrapper>
   );
 
-describe("FieldSetTransformationPlaces", () => {
+describe("CurrentYearPlaces", () => {
   it("affiche le delta « nouvelle(s) place(s) » pour une extension", () => {
     renderWithTotal({ formKind: FormKind.EXTENSION, originalPlaces: 47 }, 50);
 
@@ -41,20 +41,29 @@ describe("FieldSetTransformationPlaces", () => {
     expect(screen.queryByText(/soit .* place/)).not.toBeInTheDocument();
   });
 
+  it("désactive les places autorisées et affiche la notice en actualisation", () => {
+    renderWithTotal({ formKind: FormKind.ACTUALISATION }, 50);
+
+    expect(
+      screen.getByLabelText(/Nombre total de places autorisées/)
+    ).toBeDisabled();
+    expect(
+      screen.getByText(
+        /doit obligatoirement passer par une contraction ou une extension/
+      )
+    ).toBeInTheDocument();
+  });
+
   it("ne signale pas la contradiction tant que le champ n'a pas été quitté", () => {
     renderWithTotal({ formKind: FormKind.EXTENSION, originalPlaces: 47 }, 40);
 
-    expect(
-      screen.queryByText(/doit être supérieur/)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/doit être supérieur/)).not.toBeInTheDocument();
   });
 
   it("affiche une erreur et masque le delta quand une extension diminue les places après un blur", async () => {
     renderWithTotal({ formKind: FormKind.EXTENSION, originalPlaces: 47 }, 40);
 
-    fireEvent.blur(
-      screen.getByLabelText(/Nombre total de places autorisées/)
-    );
+    fireEvent.blur(screen.getByLabelText(/Nombre total de places autorisées/));
 
     expect(
       await screen.findByText(
@@ -81,13 +90,9 @@ describe("FieldSetTransformationPlaces", () => {
   it("ne signale pas l'égalité tant que le champ n'a pas été modifié", () => {
     renderWithTotal({ formKind: FormKind.EXTENSION, originalPlaces: 47 }, 47);
 
-    fireEvent.blur(
-      screen.getByLabelText(/Nombre total de places autorisées/)
-    );
+    fireEvent.blur(screen.getByLabelText(/Nombre total de places autorisées/));
 
-    expect(
-      screen.queryByText(/doit être supérieur/)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/doit être supérieur/)).not.toBeInTheDocument();
   });
 
   it("ne signale pas de contradiction quand le champ est vide", () => {
@@ -97,15 +102,10 @@ describe("FieldSetTransformationPlaces", () => {
           structureTypologies: [{ placesAutorisees: "", year: 2026 }],
         }}
       >
-        <FieldSetTransformationPlaces
-          formKind={FormKind.EXTENSION}
-          originalPlaces={47}
-        />
+        <CurrentYearPlaces formKind={FormKind.EXTENSION} originalPlaces={47} />
       </FormTestWrapper>
     );
 
-    expect(
-      screen.queryByText(/doit être supérieur/)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/doit être supérieur/)).not.toBeInTheDocument();
   });
 });

@@ -9,8 +9,8 @@ import FormWrapper, {
 import { InformationBar } from "@/app/components/ui/InformationBar";
 import { useAgentFormHandling } from "@/app/hooks/useAgentFormHandling";
 import { getDefaultValues } from "@/app/utils/defaultValues.util";
+import { filterDocumentsFinanciersForApi } from "@/app/utils/file-upload.util";
 import { getFinalisationFormStepStatus } from "@/app/utils/finalisationForm.util";
-import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 import {
   DocumentsFinanciersFlexibleFormValues,
   DocumentsFinanciersFlexibleSchema,
@@ -38,12 +38,9 @@ export default function FinalisationDocumentsFinanciers() {
   });
 
   const onAutoSave = async (data: DocumentsFinanciersFlexibleFormValues) => {
-    const documentsFinanciers = (data.documentsFinanciers?.filter(
-      (documentFinancier) =>
-        documentFinancier.fileUploads?.[0]?.key &&
-        documentFinancier.category &&
-        documentFinancier.granularity
-    ) ?? []) as DocumentFinancierApiType[];
+    const documentsFinanciers = filterDocumentsFinanciersForApi(
+      data.documentsFinanciers
+    );
 
     const structureMillesimes = data.structureMillesimes?.map((millesime) => ({
       ...millesime,
