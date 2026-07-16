@@ -24,7 +24,9 @@ export type SeededTransformationSource = SeededStructure & {
   placesAutorisees: number;
 };
 
-const seedFinalisationForm = async (structureId: number): Promise<void> => {
+export const seedFinalisationForm = async (
+  structureId: number
+): Promise<void> => {
   const formDefinition = await prisma.formDefinition.findUnique({
     where: { slug: FINALISATION_FORM_SLUG },
   });
