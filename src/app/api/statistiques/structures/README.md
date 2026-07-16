@@ -1,40 +1,25 @@
 # `structures`
 
-## Typologie (`StructureTypologie`)
-
-| Périmètre                              | Règle                                                             |
-| -------------------------------------- | ----------------------------------------------------------------- |
-| `totalStructures`                      | Structures ouvertes à la date de référence (`context.structures`) |
-| `structureTypes[]`, `structureBatis[]` | Structures actives **avec** typologie (>=1 `StructureTypologie`)  |
+Structures ouvertes à la date de référence (`context.structures`).
 
 ## Vue globale
 
-| Champ                | Calcul                                                                                                                                     |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `totalStructures`    | Structures ouvertes à la date de référence (`context.structures`)                                                                          |
-| `totalCpoms`         | CPOM distincts actifs **à date** (au jour près) sur les structures ouvertes à la date de référence                                         |
-| `structuresAvecCpom` | Structures avec ≥1 CPOM actif **à date** (au jour près)                                                                                    |
-| `structureTypes[]`   | Par `Structure.type` - structures actives ; places = somme `placesAutorisees` résolues                                                     |
-| `structureBatis[]`   | **Structures** : bâti agrégé (`getRepartitionFromRepartitions`). **Places** : somme par `Adresse.repartition` + `Adresse.placesAutorisees` |
+| Champ                | Contenu                                                                 |
+| -------------------- | ----------------------------------------------------------------------- |
+| `totalStructures`    | Nombre de structures ouvertes                                           |
+| `totalPlaces`        | Places autorisées (typologie) = Σ `structureTypes[].places`             |
+| `totalPlacesAdresse` | Places à l'adresse (dernière version) = somme `structureBatis[].places` |
+| `totalCpoms`         | CPOM distincts actifs à date                                            |
+| `structuresAvecCpom` | Structures avec ≥1 CPOM actif à date                                    |
+| `structureTypes[]`   | Comptage par `Structure.type` (toutes) ; places = typologie             |
+| `structureBatis[]`   | Comptage par bâti de la dernière version ; places par adresse           |
 
-### Bâti (`structureBatis[]`)
-
-**Comptage structures** : agrégation structure via `getRepartitionFromRepartitions` (COLLECTIF + DIFFUS -> MIXTE).
-
-**Comptage places** : par adresse, selon son `repartition` + `Adresse.placesAutorisees`.
-
-> `AdresseTypologie` en cours de dépréciation : non utilisé dans les stats (voir onglet `places`).
-
-- `repartition` absente -> COLLECTIF
+Bâti : COLLECTIF + DIFFUS -> MIXTE. Sans adresse répartie -> hors comptage bâti. Chaque camembert somme à 100 % de son total, sauf bâti × structures (structures sans adresse exclues).
 
 ## `byYear`
 
-Millésime exact `StructureTypologie`. `totalStructures` = structures actives **avec** typologie sur l'année. CPOM : `isStructureInCpom` par année.
-
-## TODO (à valider)
-
-Une structure avec des adresses en `Diffus` et en `Collectif` compte comme `Mixte` dans `structureBatis[].structures` (mais ses places sont bien ventilées par bâti réel de chaque adresse, pas de places "Mixte"). À confirmer avec le métier que cette convention (comptage structure agrégé vs comptage places par adresse) est bien celle attendue.
+Millésime exact `StructureTypologie` : structures **avec** typologie sur l'année. CPOM par année. Pas de `totalPlaces` (global uniquement).
 
 ## Sources
 
-`Structure`, `StructureTypologie`, `Adresse`, `CpomStructure`, `ActeAdministratif` (convention CPOM).
+`Structure`, `StructureTypologie`, `Adresse`, `CpomStructure`, `ActeAdministratif`. `AdresseTypologie` déprécié, non utilisé.

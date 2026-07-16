@@ -21,14 +21,21 @@ Somme des activités **effectivement déclarées** pour chaque mois.
 
 ## Scopes type
 
-| Indicateur                | Structures              |
-| ------------------------- | ----------------------- |
-| `placesEnregistreesDna`   | Toutes                  |
-| Indisponibilités + motifs | Toutes sauf CAES        |
-| Présences indues          | Toutes sauf CAES et CPH |
+| Indicateur                                     | Structures              |
+| ---------------------------------------------- | ----------------------- |
+| `placesEnregistreesDna`                        | Toutes                  |
+| Indisponibilités + motifs, `placesDisponibles` | Toutes sauf CAES        |
+| Présences indues                               | Toutes sauf CAES et CPH |
 
 Taux = ratio 0-1, `null` si dénominateur nul.
 
-## TODO (à valider)
+## Taux et dénominateurs iso-périmètre
 
-Les taux d'indispo / présences indues utilisent des numérateurs filtrés par type (hors CAES ; hors CAES+CPH) alors que `placesEnregistreesDna` et `placesDisponibles` agrègent toutes les structures. À garder en tête pour les seuils agrégés et le camembert.
+**Tous les taux sont calculés en back** : le front consomme uniquement les `taux*` (ratios 0-1), pas de dénominateur brut dans la réponse. Chaque taux divise le numérateur par un dénominateur restreint aux **mêmes types** que lui (calculé en interne dans `ActiviteTotals`, non exposé) :
+
+| Taux                                     | Numérateur / dénominateur                        | Périmètre               |
+| ---------------------------------------- | ------------------------------------------------ | ----------------------- |
+| `tauxIndisponibilite`                    | indisponibles / enregistrées hors CAES           | Toutes sauf CAES        |
+| `tauxPresencesInduesBPI/Deboutees/Total` | présences indues / enregistrées hors CAES et CPH | Toutes sauf CAES et CPH |
+
+Les seuils cibles (indispo 3 %, BPI 3 %, déboutées 4 %, total 7 %) sont consommables côté front via la constante définie ici : `stats/_components/activite/activite.constants.ts` (`ACTIVITE_SEUILS_CIBLES`).

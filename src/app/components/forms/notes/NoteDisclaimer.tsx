@@ -6,7 +6,6 @@ export const NoteDisclaimer = ({ formKind }: Props) => {
   return (
     <CustomNotice
       severity="info"
-      title=""
       description={
         formKind === FormKind.FINALISATION
           ? "Veuillez préciser votre nom et la date de l’information pour un meilleur suivi. Ces éléments ne seront pas communiqués aux structures et ne seront partagés qu'aux agents et agentes en charge. "

@@ -36,7 +36,7 @@ export const INDICATEUR_FINANCIER_CUTOFF_YEAR = 2024;
 export const AUTORISEE_OPEN_YEAR = 2025;
 export const SUBVENTIONNEE_OPEN_YEAR = 2024;
 
-export const EXCLUDED_STRUCTURE_TYPES = [StructureType.PRAHDA] as const;
+export const EXCLUDED_STRUCTURE_TYPES = [StructureType.PRAHDA, "NH"] as const;
 
 const IMAGE_MIME_TYPES = [
   "image/jpg",

@@ -51,6 +51,14 @@ function excelSerialToDate(serial: number): Date {
   return new Date(utcMidnight + 12 * 3600 * 1000);
 }
 
+/* Les RMU sont des données mensuelles : chaque colonne au dernier jour du mois */
+function excelSerialToMonthEnd(serial: number): Date {
+  const date = excelSerialToDate(serial);
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0, 12)
+  );
+}
+
 type HeaderInfo = {
   monthColumns: { col: number; date: Date }[];
 };
@@ -88,7 +96,7 @@ function readHeaderInfo(
         `En-tête de mois invalide (ligne ${row + 1}, colonne ${col + 1}) : valeur non numérique "${raw}"`
       );
     }
-    monthColumns.push({ col, date: excelSerialToDate(raw) });
+    monthColumns.push({ col, date: excelSerialToMonthEnd(raw) });
   }
 
   return { monthColumns };

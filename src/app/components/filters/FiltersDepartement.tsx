@@ -33,7 +33,11 @@ export const FiltersDepartement = () => {
   useEffect(() => {
     if (prevDepartements.current !== departements) {
       const params = new URLSearchParams(Array.from(searchParams.entries()));
-      params.set("departements", departements.join(","));
+      if (departements.length > 0) {
+        params.set("departements", departements.join(","));
+      } else {
+        params.delete("departements");
+      }
       router.replace(`?${params.toString()}`);
       prevDepartements.current = departements;
     }

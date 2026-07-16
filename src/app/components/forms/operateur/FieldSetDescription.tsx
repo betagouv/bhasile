@@ -14,7 +14,6 @@ export const FieldSetDescription = () => {
       </legend>
       <CustomNotice
         severity="info"
-        title=""
         description="Formats supportés pour le logo : jpg, png, webp et avif. Taille maximale par fichier : 2 Mo. "
       />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

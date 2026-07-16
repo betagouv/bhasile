@@ -1,3 +1,4 @@
+import { sumValues } from "@/app/utils/math.util";
 import { roundStatsRate } from "@/app/utils/statistiques-format.util";
 import {
   PlacesByYearStat,
@@ -10,7 +11,9 @@ import type {
   StatistiqueDbStructure,
   StatistiqueDbStructureVersionTimeline,
   StatistiqueDbTypologieValues,
+  StatistiquesAdresseYearContext,
   StatistiquesContext,
+  StatistiquesTypologieYearContext,
 } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
@@ -20,6 +23,7 @@ import {
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
   mapTypologieYears,
+  resolveStructuresWithTypologieForYear,
 } from "../statistiques.utils";
 
 type PlacesSpeciales = {
@@ -181,4 +185,49 @@ export const computePlacesStatistiques = (
         )
     ),
   };
+};
+
+type PlacesTypologieField = "placesAutorisees" | "pmr" | "lgbt" | "fvvTeh";
+
+/** Computes a single typologie field for one year, for the cartographie one-indicator requests. */
+export const computeTypologieFieldForYear = (
+  context: StatistiquesTypologieYearContext,
+  year: number,
+  field: PlacesTypologieField
+): number | null => {
+  const resolved = resolveStructuresWithTypologieForYear(context, year);
+  if (!resolved) {
+    return null;
+  }
+
+  return (
+    sumValues(
+      resolved.structures.map(
+        (structure) => resolved.typologieMap.get(structure.id)?.[field]
+      )
+    ) ?? 0
+  );
+};
+
+type PlacesAdresseField = "qpv" | "logementSocial";
+
+/** Computes a single adresse field (qpv/logementSocial) for one year, for cartographie one-indicator requests. */
+export const computeAdresseFieldForYear = (
+  context: StatistiquesAdresseYearContext,
+  year: number,
+  field: PlacesAdresseField
+): number | null => {
+  const resolved = resolveStructuresWithTypologieForYear(context, year);
+  if (!resolved) {
+    return null;
+  }
+
+  const adressesInScope = filterByEffectiveVersionAtDate(
+    context.adresses,
+    resolved.structures.map((structure) => structure.id),
+    endOfYearUtc(year),
+    context.structureVersionTimeline
+  );
+
+  return sumValues(adressesInScope.map((adresse) => adresse[field])) ?? 0;
 };

@@ -95,7 +95,9 @@ describe("TransformationAntennesSection", () => {
   it("prefill vide : message à la place des inputs par défaut, 2 lignes vides éditables sur Oui", () => {
     renderSection();
 
-    expect(screen.queryByText("Sites administratifs")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("textbox", { name: "Nom du site" })
+    ).not.toBeInTheDocument();
     expect(
       screen.getByText(/n.est pas répartie en plusieurs sites administratifs/i)
     ).toBeInTheDocument();
@@ -114,11 +116,15 @@ describe("TransformationAntennesSection", () => {
     renderSection();
 
     clickRadio("Oui");
-    expect(screen.getByText("Sites administratifs")).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("textbox", { name: "Nom du site" }).length
+    ).toBeGreaterThan(0);
 
     clickRadio("Non");
 
-    expect(screen.queryByText("Sites administratifs")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("textbox", { name: "Nom du site" })
+    ).not.toBeInTheDocument();
   });
 
   it("garde isMultiAntenne à true quand la structure a des antennes", () => {

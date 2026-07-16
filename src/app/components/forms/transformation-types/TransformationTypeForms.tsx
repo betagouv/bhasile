@@ -86,6 +86,7 @@ export const TransformationTypeForms = ({
           transformationType={transformationType}
           structureId={structureId}
           departureType={departureStructure?.type}
+          departureDepartement={departureStructure?.departementAdministratif}
           onChange={setSelectionsState}
         />
       ) : null}

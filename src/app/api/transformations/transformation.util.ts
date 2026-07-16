@@ -1,4 +1,4 @@
-import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import {
   PrefillField,
   TRANSFORMATION_TYPE_SPECS,
@@ -19,6 +19,23 @@ export const checkNoDuplicateStructureIds = (
   if (new Set(structureIds).size !== structureIds.length) {
     throw new ApiDomainError(
       "Une structure ne peut pas à la fois céder et recevoir des places dans une même transformation."
+    );
+  }
+};
+
+export const checkUniqueDepartement = (
+  structureVersionTransformations: StructureVersionTransformationApiCreate[]
+): void => {
+  const departements = structureVersionTransformations
+    .map(
+      (structureVersionTransformation) =>
+        structureVersionTransformation.structureVersion
+          ?.departementAdministratif
+    )
+    .filter((departement): departement is string => departement != null);
+  if (new Set(departements).size > 1) {
+    throw new ApiDomainError(
+      "Toutes les structures d'une transformation doivent appartenir au même département."
     );
   }
 };

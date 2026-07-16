@@ -23,7 +23,7 @@ export const FinancesStatsTable = (): ReactElement => {
       title: "Indicateurs généraux",
       rows: [
         {
-          label: "Nombre d’ETP prévisionnel",
+          label: "Nombre d’ETP",
           key: "totalETP",
           format: (value) => value ?? "•",
         },
