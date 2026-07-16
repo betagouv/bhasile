@@ -89,6 +89,17 @@ const computePeriodSeries = (
     });
 };
 
+/** Computes the yearly series only, for the cartographie one-indicator requests. */
+export const computeControleQualiteByYear = (
+  context: StatistiquesContext,
+  aggregation: NumericAggregation
+): ControleQualitePeriodStat[] =>
+  computePeriodSeries(context, aggregation, {
+    granularity: "year",
+    toPeriodKey: toYearKey,
+    toDate: yearKeyToDate,
+  });
+
 export const computeControleQualiteStatistiques = (
   context: StatistiquesContext,
   aggregation: NumericAggregation

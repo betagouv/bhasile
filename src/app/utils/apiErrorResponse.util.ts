@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-export class ApiDomainError extends Error {
-  constructor(
-    message: string,
-    readonly status: number = 400
-  ) {
-    super(message);
-    this.name = "ApiDomainError";
-  }
-}
+import { ApiDomainError } from "./apiDomainError.util";
 
 export const apiErrorResponse = (error: unknown): NextResponse => {
   if (error instanceof z.ZodError) {

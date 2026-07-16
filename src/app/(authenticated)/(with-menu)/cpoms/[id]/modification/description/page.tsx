@@ -46,7 +46,6 @@ export default function CpomModificationDescription() {
       >
         <CustomNotice
           severity="info"
-          title=""
           description="Les dates de début et de fin du CPOM se modifient dans le bloc “Document de convention du CPOM”."
         />
         <FieldSetGeneral />

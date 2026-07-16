@@ -42,12 +42,11 @@ export const FermetureDescriptionForm = ({
   const codeBhasile =
     structureVersionTransformation.structureVersion?.structure?.codeBhasile;
 
-  const defaultValues = getTransformationDefaultValues<FermetureDraftFormValues>(
-    {
+  const defaultValues =
+    getTransformationDefaultValues<FermetureDraftFormValues>({
       transformation,
       structureVersionTransformation,
-    }
-  );
+    });
 
   const buildStructureVersionTransformation = (
     data: FermetureDraftFormValues
@@ -92,6 +91,7 @@ export const FermetureDescriptionForm = ({
         label="Date de la fermeture"
         hintText={codeBhasile ? `de la structure ${codeBhasile}` : undefined}
       />
+      <hr />
       <ActesAdministratifs categoryDisplayRules={categoryDisplayRules} />
     </FormWrapper>
   );

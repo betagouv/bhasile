@@ -61,7 +61,6 @@ export default function ModificationDescription() {
       >
         <CustomNotice
           severity="warning"
-          title=""
           description={`Certaines données (date de création, code DNA, type de structure, opérateur) ne sont pas modifiables. Il y a une erreur ? Contactez-nous : ${BHASILE_CONTACT_EMAIL}`}
         />
         <FieldSetDescription formKind={FormKind.MODIFICATION} />

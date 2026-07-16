@@ -99,7 +99,6 @@ export default function StepVerification() {
         </Link>
         <CustomNotice
           severity="info"
-          title=""
           description="Veuillez vérifier les informations saisies méticuleusement : une fois validées, il ne sera plus possible de les modifier."
         />
         <StepResume
