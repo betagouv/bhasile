@@ -7,15 +7,18 @@ import { getKeysFromIncomingDocumentsOrActes } from "../files/file.service";
 export const createOrUpdateActesAdministratifs = async (
   tx: PrismaTransaction,
   actesAdministratifs: ActeAdministratifApiType[] | undefined,
-  entityId: EntityId
+  entityId: EntityId,
+  options: { skipOrphanDelete?: boolean } = {}
 ): Promise<void> => {
   if (!actesAdministratifs || actesAdministratifs.length === 0) {
     return;
   }
 
-  const deletedIds = new Set(
-    await deleteActesAdministratifs(tx, actesAdministratifs, entityId)
-  );
+  const deletedIds = options.skipOrphanDelete
+    ? new Set<number>()
+    : new Set(
+        await deleteActesAdministratifs(tx, actesAdministratifs, entityId)
+      );
 
   const { parents, avenants } =
     partitionParentsAndAvenants(actesAdministratifs);

@@ -19,6 +19,10 @@ export const structureListLightVersionSelect = {
       transformation: { select: { form: { select: { status: true } } } },
     },
   },
+  campaignId: true,
+  campaign: {
+    select: { form: { select: { status: true } } },
+  },
   adresses: { select: { repartition: true } },
   structureTypologies: {
     orderBy: { year: "desc" },
@@ -173,6 +177,12 @@ export const structureDetailsInclude = {
                           transformation: {
                             select: { form: { select: { status: true } } },
                           },
+                        },
+                      },
+                      campaignId: true,
+                      campaign: {
+                        select: {
+                          form: { select: { status: true } },
                         },
                       },
                     },

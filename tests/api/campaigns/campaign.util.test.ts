@@ -9,7 +9,7 @@ describe("hasValidatedActualisation", () => {
   it("renvoie true quand la campagne d'actualisation de l'année est validée", () => {
     expect(
       hasValidatedActualisation(
-        [{ slug: "actualisation-2026", isValidated: true }],
+        [{ slug: "actualisation-2026", isValidated: true, formSteps: [] }],
         2026
       )
     ).toBe(true);
@@ -18,7 +18,7 @@ describe("hasValidatedActualisation", () => {
   it("renvoie false quand la campagne de l'année n'est pas validée", () => {
     expect(
       hasValidatedActualisation(
-        [{ slug: "actualisation-2026", isValidated: false }],
+        [{ slug: "actualisation-2026", isValidated: false, formSteps: [] }],
         2026
       )
     ).toBe(false);
@@ -27,7 +27,7 @@ describe("hasValidatedActualisation", () => {
   it("renvoie false pour une autre année", () => {
     expect(
       hasValidatedActualisation(
-        [{ slug: "actualisation-2026", isValidated: true }],
+        [{ slug: "actualisation-2026", isValidated: true, formSteps: [] }],
         2027
       )
     ).toBe(false);
@@ -36,7 +36,7 @@ describe("hasValidatedActualisation", () => {
   it("ignore les campagnes d'initialisation", () => {
     expect(
       hasValidatedActualisation(
-        [{ slug: "initialisation", isValidated: true }],
+        [{ slug: "initialisation", isValidated: true, formSteps: [] }],
         2026
       )
     ).toBe(false);
