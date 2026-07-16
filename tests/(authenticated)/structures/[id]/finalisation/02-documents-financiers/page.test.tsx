@@ -81,7 +81,11 @@ describe("FinalisationDocumentsFinanciers page integration", () => {
 
   it("sauvegarde automatiquement et ne conserve que les documents financiers prêts à être téléversés", async () => {
     // GIVEN
-    const structure = createFinalisationDocumentsFinanciersValidStructure(79);
+    // date303 doit être renseignée pour que la checkbox "programme 303" démarre cochée et éviter les tests flaky
+    const structure = {
+      ...createFinalisationDocumentsFinanciersValidStructure(79),
+      date303: new Date("2015-01-01").toISOString(),
+    };
     const mockedFetch = mockStructurePageFetch(structure);
 
     renderWithStructurePageProviders(

@@ -14,7 +14,7 @@ import { ActiviteStats } from "./activite.type";
 export type StructureActiviteRow = {
   id: number;
   date: Date;
-  placesAutorisees: number;
+  placesEnregistreesDna: number;
   desinsectisation: number | null;
   remiseEnEtat: number | null;
   sousOccupation: number | null;
@@ -26,7 +26,7 @@ export type StructureActiviteRow = {
   placesVacantes: number | null;
   presencesInduesBPI: number | null;
   presencesInduesDeboutees: number | null;
-  presencesIndues: number | null;
+  presencesInduesTotal: number | null;
 };
 
 const computePlacesVacantesAndPlacesOccupees = (
@@ -57,7 +57,7 @@ const computePlacesVacantesAndPlacesOccupees = (
   return { placesDisponibles, placesVacantes, placesOccupees };
 };
 
-const computePresencesIndues = (
+const computePresencesInduesTotal = (
   presencesInduesBPI: number | null,
   presencesInduesDeboutees: number | null
 ): number | null =>
@@ -93,7 +93,7 @@ export const processActivitesForStructure = (
     .map(([, rows]) => {
       const { date, id } = rows[0];
 
-      const placesAutorisees = sumValues(
+      const placesEnregistreesDna = sumValues(
         rows.map((row) => row.placesAutorisees)
       );
       const desinsectisation = sumValues(
@@ -137,14 +137,14 @@ export const processActivitesForStructure = (
         }))
       );
 
-      if (placesAutorisees == null) {
+      if (placesEnregistreesDna == null) {
         return null;
       }
 
       return {
         id,
         date,
-        placesAutorisees,
+        placesEnregistreesDna,
         desinsectisation,
         remiseEnEtat,
         sousOccupation,
@@ -156,7 +156,7 @@ export const processActivitesForStructure = (
         placesVacantes,
         presencesInduesBPI,
         presencesInduesDeboutees,
-        presencesIndues: computePresencesIndues(
+        presencesInduesTotal: computePresencesInduesTotal(
           presencesInduesBPI,
           presencesInduesDeboutees
         ),
@@ -210,7 +210,7 @@ export const computeDepartementAverage = (
       placesVacantes,
       presencesInduesBPI: activite.presencesInduesBPI,
       presencesInduesDeboutees: activite.presencesInduesDeboutees,
-      presencesIndues: computePresencesIndues(
+      presencesInduesTotal: computePresencesInduesTotal(
         activite.presencesInduesBPI,
         activite.presencesInduesDeboutees
       ),
@@ -225,8 +225,12 @@ export const computeDepartementAverage = (
     averagePlacesIndisponibles: averageRounded(
       rows.map((row) => row.placesIndisponibles)
     ),
-    averagePlacesOccupees: averageRounded(rows.map((row) => row.placesOccupees)),
-    averagePlacesVacantes: averageRounded(rows.map((row) => row.placesVacantes)),
+    averagePlacesOccupees: averageRounded(
+      rows.map((row) => row.placesOccupees)
+    ),
+    averagePlacesVacantes: averageRounded(
+      rows.map((row) => row.placesVacantes)
+    ),
     averagePresencesInduesBPI: averageRounded(
       rows.map((row) => row.presencesInduesBPI)
     ),
@@ -234,7 +238,7 @@ export const computeDepartementAverage = (
       rows.map((row) => row.presencesInduesDeboutees)
     ),
     averagePresencesIndues: averageRounded(
-      rows.map((row) => row.presencesIndues)
+      rows.map((row) => row.presencesInduesTotal)
     ),
   };
 };
