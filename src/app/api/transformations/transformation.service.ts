@@ -1,4 +1,4 @@
-import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { recursivelySerializeDates } from "@/app/utils/date.util";
 import { getTransformationDepartement } from "@/app/utils/transformation.util";
 import { canUpdateDepartement } from "@/lib/casl/abilities";
@@ -40,6 +40,7 @@ import {
 import {
   applyPrefill,
   checkNoDuplicateStructureIds,
+  checkUniqueDepartement,
 } from "./transformation.util";
 
 const resolveReferenceVersion = <TVersion extends ResolvableVersion>(
@@ -134,6 +135,8 @@ const prepareStructureVersionTransformations = async (
       enrichStructureVersionTransformationFromSource
     )
   );
+
+  checkUniqueDepartement(structureVersionTransformationsWithSource);
 
   return applyPrefill(type, structureVersionTransformationsWithSource);
 };

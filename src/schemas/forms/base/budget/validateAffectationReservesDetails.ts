@@ -1,5 +1,7 @@
 import z from "zod";
 
+import { AFFECTATION_DETAIL_FIELDS } from "@/config/budget.config";
+
 /**
  * Checks that if the `affectationReservesFondsDedies` field is greater than 0 (or not null),
  * then the associated detail fields (reserves and dedicated funds) must not be empty.
@@ -15,26 +17,8 @@ export const validateAffectationReservesDetails = (
     data.affectationReservesFondsDedies !== null &&
     data.affectationReservesFondsDedies !== 0
   ) {
-    const requiredFields = [
-      { field: "reserveInvestissement", value: data.reserveInvestissement },
-      {
-        field: "chargesNonReconductibles",
-        value: data.chargesNonReconductibles,
-      },
-      {
-        field: "reserveCompensationDeficits",
-        value: data.reserveCompensationDeficits,
-      },
-      { field: "reserveCompensationBFR", value: data.reserveCompensationBFR },
-      {
-        field: "reserveCompensationAmortissements",
-        value: data.reserveCompensationAmortissements,
-      },
-      { field: "reportANouveau", value: data.reportANouveau },
-      { field: "autre", value: data.autre },
-    ];
-
-    requiredFields.forEach(({ field, value }) => {
+    AFFECTATION_DETAIL_FIELDS.forEach((field) => {
+      const value = data[field];
       if (value === null || value === undefined) {
         ctx.addIssue({
           code: "custom",

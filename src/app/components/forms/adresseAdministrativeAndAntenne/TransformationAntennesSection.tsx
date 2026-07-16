@@ -97,7 +97,7 @@ export const TransformationAntennesSection = ({
         />
       </div>
       {antennesLength > 0 && (
-        <FieldSetAntennes locked={!hasRepartitionChanged} />
+        <FieldSetAntennes locked={!hasRepartitionChanged} showTitle={false} />
       )}
       {antennesLength === 0 && !hasRepartitionChanged && (
         <p className="text-sm text-mention-grey italic">

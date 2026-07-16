@@ -36,7 +36,6 @@ export const IndicateursFinanciers = () => {
       </legend>
       <CustomNotice
         severity="info"
-        title=""
         className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
         description="Le taux d’encadrement s’obtient en divisant le nombre de places autorisées par le nombre d’ETP total (ex: “12 places gérées par un ETP” dans une structure de 96 places avec 8 ETP). Le coût journalier est le coût de la structure pour une journée et pour une place, défini dans les documents contractuels (ex: “23,50€ par jour par place”)."
       />

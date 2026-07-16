@@ -12,9 +12,7 @@ import type {
   StatistiqueDbEig,
   StatistiqueDbStructureVersionTimeline,
 } from "../statistiques.db.type";
-import {
-  lookupStructureIdsForDnaAtDate,
-} from "../statistiques.utils";
+import { lookupStructureIdsForDnaAtDate } from "../statistiques.utils";
 
 const sumEigCounts = (eigs: StatistiqueDbEig[]): EigCountTotalsStat => {
   let nbEigComportementViolent = 0;
@@ -55,24 +53,34 @@ export const computeEigPeriodMetrics = (
   dnaLinks: StatistiqueDbDnaLink[],
   structureVersionTimeline: StatistiqueDbStructureVersionTimeline[]
 ): EigPeriodStat => {
-  const counts = sumEigCounts(eigsForPeriod);
+  // Un EIG est rattaché à une zone via son dnaCode : on ne compte que ceux qui
+  // résolvent vers une structure active en scope à leur date. Sans ça, les
+  // comptes seraient ceux de tout le périmètre chargé (cf. cartographie, où le
+  // contexte est découpé par zone mais les EIG bruts, non).
   const structureIdsWithEig = new Set<number>();
+  const eigsInScope: StatistiqueDbEig[] = [];
 
   for (const eig of eigsForPeriod) {
     if (!eig.dnaCode || !eig.evenementDate) {
       continue;
     }
-    for (const structureId of lookupStructureIdsForDnaAtDate(
+    const structureIds = lookupStructureIdsForDnaAtDate(
       eig.dnaCode,
       new Date(eig.evenementDate),
       dnaLinks,
       structureVersionTimeline,
       activeStructureIds
-    )) {
+    );
+    if (structureIds.length === 0) {
+      continue;
+    }
+    eigsInScope.push(eig);
+    for (const structureId of structureIds) {
       structureIdsWithEig.add(structureId);
     }
   }
 
+  const counts = sumEigCounts(eigsInScope);
   const totalStructures = activeStructureIds.size;
   const nbStructuresSansDeclarationEig =
     totalStructures - structureIdsWithEig.size;

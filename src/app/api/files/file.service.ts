@@ -1,3 +1,4 @@
+import { Session } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -6,11 +7,48 @@ import {
   MAX_FILE_SIZE,
 } from "@/constants";
 import { FileUpload } from "@/generated/prisma/client";
+import { canDeleteFile } from "@/lib/casl/abilities";
 import { checkBucket, minioClient } from "@/lib/minio";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
+import { SessionUser } from "@/types/global";
+import { Principal, PrincipalType } from "@/types/principal.type";
 
-import { createOne, deleteOneByKey, findOneByKey } from "./file.repository";
+import { FileWithParents } from "./file.db.type";
+import {
+  createOne,
+  deleteOneByKey,
+  findOneByKeyWithParents,
+} from "./file.repository";
+
+export const getPrincipal = (session: Session | null): Principal =>
+  session?.user
+    ? { type: PrincipalType.Agent, user: session.user as SessionUser }
+    : { type: PrincipalType.Operateur };
+
+const isOrphan = (file: FileWithParents): boolean =>
+  file.acteAdministratifId == null &&
+  file.documentFinancierId == null &&
+  file.controleId == null &&
+  file.evaluationId == null &&
+  file.operateurId == null;
+
+export const authorizeFileAccess = (
+  principal: Principal,
+  file: FileWithParents,
+  action: "read" | "delete"
+): boolean => {
+  if (isOrphan(file)) {
+    return true;
+  }
+  if (principal.type === PrincipalType.Operateur) {
+    return false;
+  }
+  if (action === "read") {
+    return true;
+  }
+  return canDeleteFile(principal.user, file);
+};
 
 export const uploadFile = async (
   bucketName: string,
@@ -103,8 +141,10 @@ export const createUploadedFile = async ({
   return createOne({ key, mimeType, originalName, fileSize });
 };
 
-export const getFileByKey = async (key: string): Promise<FileUpload | null> => {
-  return findOneByKey(key);
+export const getFileWithParents = async (
+  key: string
+): Promise<FileWithParents | null> => {
+  return findOneByKeyWithParents(key);
 };
 
 export const deleteFileByStorageKey = async (
