@@ -5,7 +5,6 @@ import {
   isStructureSubventionnee,
 } from "@/app/utils/structure.util";
 import { Structure } from "@/generated/prisma/client";
-import { canUpdateStructure } from "@/lib/casl/abilities";
 import {
   StructureAgentUpdateApiType,
   StructureApiRead,
@@ -51,6 +50,8 @@ import {
   getDatesPeriodeAutorisation,
   getFermetureHistory,
   getOperateurLabel,
+  getReadableAdresses,
+  getReadableNotes,
   getTypeBati,
   isBornFromCreation,
   isFinalisationFormValidated,
@@ -180,6 +181,7 @@ export const getFullStructures = async (
         row.bornFromCreation
       );
       structure.adresses = getReadableAdresses(structure, user);
+      structure.notes = null;
       if (row.isClosed) {
         structure.history = getFermetureHistory(row);
       }
@@ -227,26 +229,9 @@ export const getFullStructure = async (
     isBornFromCreation(resolvedDbStructure.structureVersions, now)
   );
   structure.adresses = getReadableAdresses(structure, user);
+  structure.notes = getReadableNotes(structure, user);
 
   return structure;
-};
-
-const getReadableAdresses = (
-  structure: StructureApiRead,
-  user?: SessionUser
-): StructureApiRead["adresses"] => {
-  if (user && canUpdateStructure(user, structure)) {
-    return structure.adresses;
-  }
-
-  return structure.adresses?.map((adresse) => ({
-    ...adresse,
-    adresse: "",
-    adresseComplete: [adresse.codePostal, adresse.commune]
-      .filter(Boolean)
-      .join(" ")
-      .trim(),
-  }));
 };
 
 export const getStructureForOperateur = async (

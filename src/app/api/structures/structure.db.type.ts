@@ -110,10 +110,6 @@ export const structureListInclude = {
 } satisfies Prisma.StructureInclude;
 
 export const structureDetailsInclude = {
-  userNotes: {
-    orderBy: { createdAt: "desc" },
-    select: { text: true },
-  },
   dnaStructures: {
     orderBy: { dna: { code: "asc" } },
     include: {
