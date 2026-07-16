@@ -135,6 +135,11 @@ export type StructureApiWrite = z.infer<typeof structureApiSchema>;
 
 export type StructureApiWriteClient = z.input<typeof structureApiSchema>;
 
+export type StructureCampaignApiRead = {
+  slug: string;
+  isValidated: boolean;
+};
+
 export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   fermetureDate: string | null;
   debutConvention: string | null;
@@ -155,6 +160,7 @@ export type StructureApiRead = Omit<StructureApiWrite, "cpomStructures"> & {
   isInCpom: boolean;
   isInCpomPerYear: Record<number, boolean>;
   isFinalised: boolean;
+  campaigns: StructureCampaignApiRead[];
   nom: string;
   adresseAdministrativeComplete: string;
   isMultiAntenne: boolean;

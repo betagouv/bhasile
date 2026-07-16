@@ -14,6 +14,7 @@ import { useHeaderHeight } from "@/app/hooks/useHeaderHeight";
 import { useHideOnScroll } from "@/app/hooks/useHideOnScroll";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
+import { ActualisationHeader } from "./ActualisationHeader";
 import { AutoSaveStatus } from "./AutoSaveStatus";
 import { FinalisationHeader } from "./FinalisationHeader";
 import { StructureMenu } from "./StructureMenu";
@@ -27,7 +28,13 @@ const finalisationSuccessModal = createModal({
   isOpenedByDefault: false,
 });
 
-export const StructureHeader = (): ReactElement | null => {
+export const StructureHeader = ({
+  actualisationYear,
+  showActualisation,
+}: {
+  actualisationYear: number | null;
+  showActualisation: boolean;
+}): ReactElement | null => {
   const { structure } = useStructureContext();
   const isStructureFinalisee = structure.isFinalised;
   const router = useRouter();
@@ -170,6 +177,9 @@ export const StructureHeader = (): ReactElement | null => {
               />
             )}
             {isRootPath && !isStructureFinalisee && <FinalisationHeader />}
+            {isRootPath && showActualisation && actualisationYear && (
+              <ActualisationHeader actualisationYear={actualisationYear} />
+            )}
           </div>
         </div>
       </div>

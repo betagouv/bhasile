@@ -8,6 +8,7 @@ import {
 } from "@/app/api/structures/structure.db.type";
 import { SearchProps } from "@/app/api/structures/structure.service";
 import {
+  buildStructureCampaigns,
   computeStructureListRow,
   filterStructureRows,
   getDatesConvention,
@@ -541,5 +542,60 @@ describe("getFermetureHistory", () => {
 
     // WHEN / THEN
     expect(getFermetureHistory(row)).toEqual([]);
+  });
+});
+
+describe("buildStructureCampaigns", () => {
+  const version = (
+    campaign: {
+      form: { status: boolean } | null;
+      campaignDefinition: { slug: string } | null;
+    } | null
+  ) => ({ campaign });
+
+  it("projette slug + isValidated depuis la campagne d'une version", () => {
+    const campaigns = buildStructureCampaigns([
+      version({
+        form: { status: true },
+        campaignDefinition: { slug: "actualisation-2026" },
+      }),
+    ]);
+
+    expect(campaigns).toEqual([
+      { slug: "actualisation-2026", isValidated: true },
+    ]);
+  });
+
+  it("marque isValidated=false quand le form n'est pas validé", () => {
+    const campaigns = buildStructureCampaigns([
+      version({
+        form: { status: false },
+        campaignDefinition: { slug: "actualisation-2026" },
+      }),
+    ]);
+
+    expect(campaigns).toEqual([
+      { slug: "actualisation-2026", isValidated: false },
+    ]);
+  });
+
+  it("marque isValidated=false quand la campagne n'a pas de form", () => {
+    const campaigns = buildStructureCampaigns([
+      version({ form: null, campaignDefinition: { slug: "initialisation" } }),
+    ]);
+
+    expect(campaigns).toEqual([{ slug: "initialisation", isValidated: false }]);
+  });
+
+  it("ignore une version sans campagne", () => {
+    expect(buildStructureCampaigns([version(null)])).toEqual([]);
+  });
+
+  it("ignore une campagne sans définition", () => {
+    expect(
+      buildStructureCampaigns([
+        version({ form: { status: true }, campaignDefinition: null }),
+      ])
+    ).toEqual([]);
   });
 });
