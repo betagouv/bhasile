@@ -7,7 +7,7 @@ import {
   TimePeriod,
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
-import { getYearRange } from "@/app/utils/date.util";
+import { formatDate, getYearRange } from "@/app/utils/date.util";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
@@ -38,7 +38,7 @@ export const RMUChart = (): ReactElement => {
       const date = new Date(periodStat.date);
 
       if (timePeriod === "byMonth") {
-        return date.toLocaleDateString("fr-FR", {
+        return formatDate(date, {
           month: "short",
           year: "numeric",
         });
@@ -66,6 +66,17 @@ export const RMUChart = (): ReactElement => {
   }, [statistiques, timePeriod]);
 
   const colors = useMemo(() => ["#BD987A", "#EAC7AD"], []);
+  const options = useMemo(
+    () => ({
+      seriesBarDistance: 10,
+      axisY: {
+        offset: 70,
+        labelInterpolationFnc: (value: number) => value.toLocaleString(),
+      },
+      axisX: { showGrid: false },
+    }),
+    []
+  );
 
   return (
     <>
@@ -74,19 +85,7 @@ export const RMUChart = (): ReactElement => {
       </h4>
       <div className="grid grid-cols-3 gap-10">
         <div className="col-span-2">
-          <BarChart
-            data={chartData}
-            options={{
-              seriesBarDistance: 10,
-              axisY: {
-                offset: 70,
-                labelInterpolationFnc: (value: number) =>
-                  value.toLocaleString(),
-              },
-              axisX: { showGrid: false },
-            }}
-            colors={colors}
-          />
+          <BarChart data={chartData} options={options} colors={colors} />
         </div>
         <div>
           <TimePeriodSelector

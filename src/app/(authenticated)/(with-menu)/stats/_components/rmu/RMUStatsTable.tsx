@@ -7,6 +7,7 @@ import {
   TimePeriod,
   TimePeriodSelector,
 } from "@/app/components/common/TimePeriodSelector";
+import { formatDate } from "@/app/utils/date.util";
 import { formatNumber } from "@/app/utils/number.util";
 import {
   RmuPeriodStat,
@@ -43,7 +44,7 @@ export const RMUStatsTable = (): ReactElement => {
   const renderPeriodHeader = (period: RmuPeriodStat) => {
     const periodDate = new Date(period.date);
     if (timePeriod === "byMonth") {
-      return periodDate.toLocaleDateString("fr-FR", {
+      return formatDate(periodDate, {
         month: "short",
         year: "numeric",
       });

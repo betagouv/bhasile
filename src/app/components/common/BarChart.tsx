@@ -5,15 +5,18 @@ import "chartist/dist/index.css";
 import * as Chartist from "chartist";
 import { useEffect, useId, useRef } from "react";
 
-export default function BarChart({ data, options, colors }: Props) {
-  if (!colors) {
-    colors = [
-      "var(--yellow-moutarde-850-200)",
-      "var(--yellow-moutarde-main-679)",
-      "var(--purple-glycine-850-200)",
-      "var(--blue-cumulus-850-200)",
-    ];
-  }
+const defaultColors = [
+  "var(--yellow-moutarde-850-200)",
+  "var(--yellow-moutarde-main-679)",
+  "var(--purple-glycine-850-200)",
+  "var(--blue-cumulus-850-200)",
+];
+
+export default function BarChart({
+  data,
+  options,
+  colors = defaultColors,
+}: Props) {
   const chartRef = useRef(null);
   const id = useId();
   const chartClass = `barchart-${id.replace(/:/g, "-")}`;
