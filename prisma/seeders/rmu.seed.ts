@@ -33,7 +33,7 @@ export const createFakeRmus = async (prisma: PrismaClient): Promise<void> => {
     return Array.from({ length: count }, (_, index) =>
       createFakeRmu(
         numero,
-        new Date(Date.UTC(2025, startMonth + index, 1, 13))
+        new Date(Date.UTC(2025, startMonth + index + 1, 0, 12))
       )
     );
   });

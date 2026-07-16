@@ -1,5 +1,5 @@
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import InputWithValidation from "../../InputWithValidation";
@@ -9,6 +9,13 @@ export const Date303 = () => {
 
   const date303 = watch("date303");
   const [display303Date, setDisplay303Date] = useState<boolean>(!!date303);
+
+  // Resynchronise l'affichage quand date303 est (re)renseignée après le montage
+  useEffect(() => {
+    if (date303) {
+      setDisplay303Date(true);
+    }
+  }, [date303]);
 
   const handle303DateDisplay = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDisplay303Date(e.target.checked);

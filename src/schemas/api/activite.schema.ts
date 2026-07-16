@@ -4,7 +4,7 @@ export const activiteApiSchema = z.object({
   id: z.number(),
   adresseId: z.number(),
   date: z.iso.datetime(),
-  placesAutorisees: z.number(),
+  placesEnregistreesDna: z.number(),
   desinsectisation: z.number().nullable(),
   remiseEnEtat: z.number().nullable(),
   sousOccupation: z.number().nullable(),
@@ -15,7 +15,7 @@ export const activiteApiSchema = z.object({
   placesOccupees: z.number().nullable(),
   presencesInduesBPI: z.number().nullable(),
   presencesInduesDeboutees: z.number().nullable(),
-  presencesIndues: z.number().nullable(),
+  presencesInduesTotal: z.number().nullable(),
 });
 
 export type ActiviteApiType = z.infer<typeof activiteApiSchema>;

@@ -15,9 +15,8 @@ export const statistiquesFiltersSchema = z.object({
   aggregation: z
     .string()
     .nullable()
-    .transform(
-      (value): NumericAggregation =>
-        value === "mediane" ? "mediane" : "moyenne"
+    .transform((value): NumericAggregation =>
+      value === "mediane" ? "mediane" : "moyenne"
     ),
 });
 
@@ -40,8 +39,8 @@ export type BatiStat = {
 export type StructuresByYearStat = {
   year: number;
   totalStructures: number;
-  totalPlaces: number;
   totalCpoms: number;
+  structuresAvecCpom: number;
   structuresCada: number;
   structuresCph: number;
   structuresHuda: number;
@@ -140,6 +139,7 @@ export type ActiviteMotifsIndisponibiliteStat = {
 
 export type ActiviteSummaryStat = {
   placesEnregistreesDna: number;
+  placesOccupees: number;
   placesIndisponibles: number;
   placesDisponibles: number;
   tauxIndisponibilite: number | null;
@@ -155,6 +155,7 @@ export type ActiviteSummaryStat = {
 export type ActiviteByMonthStat = {
   date: Date;
   placesEnregistreesDna: number;
+  placesOccupees: number;
   placesIndisponibles: number;
   tauxIndisponibilite: number | null;
   presencesInduesBPI: number;
@@ -165,9 +166,22 @@ export type ActiviteByMonthStat = {
   tauxPresencesInduesTotal: number | null;
 };
 
+export type RmuPeriodStat = {
+  date: Date;
+  referesEngages: number;
+  referesExecutes: number;
+  tauxExecute: number | null;
+};
+
+export type RmuByMonthStat = RmuPeriodStat;
+export type RmuByTrimesterStat = RmuPeriodStat;
+export type RmuByYearStat = RmuPeriodStat;
+
 export type StatistiqueApiRead = {
   structures: {
     totalStructures: number;
+    totalPlaces: number;
+    totalPlacesAdresse: number;
     totalCpoms: number;
     structuresAvecCpom: number;
     structureTypes: TypeStructureStat[];
@@ -190,6 +204,11 @@ export type StatistiqueApiRead = {
     summary: ActiviteSummaryStat;
     byMonth: ActiviteByMonthStat[];
   };
+  rmu: {
+    byMonth: RmuPeriodStat[];
+    byTrimester: RmuPeriodStat[];
+    byYear: RmuPeriodStat[];
+  } | null;
 };
 
 export type StatistiqueApiResponse = StatistiqueApiRead | null;

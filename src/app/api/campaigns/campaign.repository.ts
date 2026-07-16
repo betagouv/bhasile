@@ -1,4 +1,4 @@
-import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import prisma from "@/lib/prisma";
 import { CampaignApiWrite } from "@/schemas/api/campaign.schema";
 import { StructureCampaignApiRead } from "@/schemas/api/structure.schema";

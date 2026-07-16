@@ -1,17 +1,9 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
-import { CustomNotice } from "@/app/components/common/CustomNotice";
-import { Section } from "@/app/components/common/Section";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
-import { ActiviteBlock } from "./_components/activite/ActiviteBlock";
-import { ControleQualiteBlock } from "./_components/controle-qualite/ControleQualiteBlock";
-import { FinancesBlock } from "./_components/finances/FinancesBlock";
-import { RMUBlock } from "./_components/rmu/RMUBlock";
-import { StatistiquesHeader } from "./_components/StatistiquesHeader";
-import { StructuresBlock } from "./_components/structures/StructuresBlock";
-import { TypesPlacesBlock } from "./_components/type-places/TypesPlacesBlock";
+import { StatistiquesContent } from "./_components/StatistiquesContent";
 import { StatistiquesProvider } from "./_context/StatistiquesContext";
 
 type GetStatistiquesArgs = {
@@ -87,33 +79,7 @@ export default async function StatistiquesPage({
   return (
     <StatistiquesProvider statistiques={statistiques}>
       <div className="flex flex-col h-full bg-alt-grey gap-3 pb-4">
-        <StatistiquesHeader />
-        <div className="flex flex-col gap-3 px-3">
-          <CustomNotice
-            severity="warning"
-            title=""
-            description="Les structures non finalisées et les PRAHDA ne sont pas comptabilisés ici."
-            className="rounded-lg"
-          />
-          <Section id="structures">
-            <StructuresBlock />
-          </Section>
-          <Section id="types-places">
-            <TypesPlacesBlock />
-          </Section>
-          <Section id="finance">
-            <FinancesBlock />
-          </Section>
-          <Section id="controle-qualite">
-            <ControleQualiteBlock />
-          </Section>
-          <Section id="activite">
-            <ActiviteBlock />
-          </Section>
-          <Section id="rmu">
-            <RMUBlock />
-          </Section>
-        </div>
+        <StatistiquesContent />
       </div>
     </StatistiquesProvider>
   );
