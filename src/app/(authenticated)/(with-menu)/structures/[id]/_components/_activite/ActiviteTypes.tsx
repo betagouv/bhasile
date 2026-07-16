@@ -1,16 +1,15 @@
 import { Tag } from "@codegouvfr/react-dsfr/Tag";
 import { ReactElement } from "react";
 
-import { StructureType } from "@/generated/prisma/enums";
 import { ActiviteApiType } from "@/schemas/api/activite.schema";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
+import { TypeActiviteKey } from "./activite.constants";
 
 export const ActiviteTypes = ({
   typeActivite,
   setTypeActivite,
+  isCphStructure,
 }: Props): ReactElement => {
-  const { structure } = useStructureContext();
   const tags: ActiviteTag[] = [
     {
       label: "Indisponibles",
@@ -20,17 +19,17 @@ export const ActiviteTypes = ({
     {
       label: "Présences indues BPI",
       value: "presencesInduesBPI",
-      isDisplayed: structure.type !== StructureType.CPH,
+      isDisplayed: !isCphStructure,
     },
     {
       label: "Présences indues déboutées",
       value: "presencesInduesDeboutees",
-      isDisplayed: structure.type !== StructureType.CPH,
+      isDisplayed: !isCphStructure,
     },
     {
       label: "Présences indues totales",
-      value: "presencesIndues",
-      isDisplayed: structure.type !== StructureType.CPH,
+      value: "presencesInduesTotal",
+      isDisplayed: !isCphStructure,
     },
   ];
 
@@ -47,7 +46,7 @@ export const ActiviteTypes = ({
                     event.preventDefault();
                     return;
                   }
-                  setTypeActivite(tag.value);
+                  setTypeActivite(tag.value as TypeActiviteKey);
                 },
                 style:
                   tag.value === typeActivite
@@ -68,8 +67,9 @@ export const ActiviteTypes = ({
 };
 
 type Props = {
-  typeActivite: keyof ActiviteApiType;
-  setTypeActivite: (typeActivite: keyof ActiviteApiType) => void;
+  typeActivite: TypeActiviteKey;
+  setTypeActivite: (typeActivite: TypeActiviteKey) => void;
+  isCphStructure: boolean;
 };
 
 type ActiviteTag = {

@@ -47,7 +47,7 @@ export default async function StructureLayout({
 
   return (
     <StructureProvider structure={structure}>
-      <div className="flex flex-col h-full gap-3 pb-4">
+      <div className="flex flex-col h-full bg-alt-grey gap-3 pb-4">
         <StructureHeader actualisationYear={actualisationYear} />
         <div className="flex flex-col gap-3 max-w-7xl mx-auto px-3">
           {children}

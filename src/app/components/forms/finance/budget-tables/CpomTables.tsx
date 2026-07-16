@@ -29,7 +29,6 @@ export const CpomTables = () => {
       {structureTypes.length > 1 && (
         <CustomNotice
           severity="info"
-          title=""
           description="Nous avons détecté dans la composition de votre CPOM différents types de structures. Veuillez donc remplir le tableau pour chacun d’eux, en prenant en compte toutes les structures du type correspondant à chaque fois."
         />
       )}

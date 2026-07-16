@@ -125,7 +125,6 @@ export const FieldSetYearlyDocumentsFinanciers = ({
       {isInCpom && (
         <CustomNotice
           severity="info"
-          title=""
           className="rounded [&_p]:flex [&_p]:items-center mb-10"
           description="Selon vos pratiques, les documents financiers de cette année peuvent être à l’échelle de la structure et/ou du CPOM et/ou regrouper les deux. Veuillez importer tous les documents en votre possession en précisant leur échelle."
         />

@@ -1,4 +1,4 @@
-import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { startOfNextUtcDay } from "@/app/utils/date.util";
 
 export const checkNoDepartementAdministratifChange = (
@@ -14,6 +14,20 @@ export const checkNoDepartementAdministratifChange = (
   if (versionDepartement !== structureDepartement) {
     throw new ApiDomainError(
       "Une structure ne peut pas changer de département administratif."
+    );
+  }
+};
+
+export const checkCreatedStructureDepartement = (
+  baseDepartement: string | null | undefined,
+  createdDepartement: string | null | undefined
+): void => {
+  if (!baseDepartement || !createdDepartement) {
+    return;
+  }
+  if (baseDepartement !== createdDepartement) {
+    throw new ApiDomainError(
+      `La structure créée doit appartenir au même département que les structures d'origine (${baseDepartement}).`
     );
   }
 };

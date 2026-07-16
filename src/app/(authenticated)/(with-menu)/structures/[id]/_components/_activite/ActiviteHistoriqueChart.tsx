@@ -13,9 +13,10 @@ import {
 } from "@/app/utils/date.util";
 import { capitalizeFirstLetter } from "@/app/utils/string.util";
 import { ActiviteApiType } from "@/schemas/api/activite.schema";
+import { StructureType } from "@/types/structure.type";
 
 import { useStructureContext } from "../../_context/StructureClientContext";
-import { typesActivite } from "./activite.constants";
+import { TypeActiviteKey, typesActivite } from "./activite.constants";
 import { ActiviteDurations } from "./ActiviteDurations";
 import { ActiviteTypes } from "./ActiviteTypes";
 
@@ -26,7 +27,7 @@ export const ActiviteHistoriqueChart = (): ReactElement => {
   const [selectedMonths, setSelectedMonths] = useState<dayjs.Dayjs[]>(
     getLastMonths(6)
   );
-  const [typeActivite, setTypeActivite] = useState<keyof ActiviteApiType>(
+  const [typeActivite, setTypeActivite] = useState<TypeActiviteKey>(
     "placesIndisponibles"
   );
 
@@ -68,12 +69,9 @@ export const ActiviteHistoriqueChart = (): ReactElement => {
     return selectedMonths.map((selectedMonth) => {
       const currentActivite = getCurrentActivite(activites, selectedMonth);
       if (currentActivite) {
-        if (typeActivite === "placesAutorisees") {
-          return currentActivite?.placesAutorisees;
-        }
         return (
           ((currentActivite?.[typeActivite] as number) /
-            currentActivite?.placesAutorisees) *
+            currentActivite?.placesEnregistreesDna) *
           100
         );
       }
@@ -108,6 +106,7 @@ export const ActiviteHistoriqueChart = (): ReactElement => {
         <ActiviteTypes
           typeActivite={typeActivite}
           setTypeActivite={setTypeActivite}
+          isCphStructure={structure.type === StructureType.CPH}
         />
       </div>
       <div className="pb-6">

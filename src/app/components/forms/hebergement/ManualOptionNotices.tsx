@@ -6,13 +6,11 @@ export const ManualOptionNotices = () => {
       <CustomNotice
         severity="info"
         className="!mb-0"
-        title="Pour le champ “places”,"
-        description="veuillez renseigner le nombre total de places autorisées pour l’adresse correspondante."
+        description="Pour le champ “places”, veuillez renseigner le nombre total de places autorisées pour l’adresse correspondante."
       />
       <CustomNotice
         severity="info"
         className="!mb-0"
-        title=""
         description={
           <>
             Concernant les particularités, les logements sociaux correspondent

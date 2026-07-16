@@ -2,17 +2,17 @@ import { ReactElement } from "react";
 
 import { Table } from "@/app/components/common/Table";
 
-import { useStructureContext } from "../../_context/StructureClientContext";
-
-export const ActiviteMotifsIndisponibilite = (): ReactElement => {
-  const { structure } = useStructureContext();
-  const activite = structure.activites?.[0];
-
+export const ActiviteMotifsIndisponibilite = ({
+  desinsectisation,
+  remiseEnEtat,
+  sousOccupation,
+  travaux,
+}: Props): ReactElement => {
   const motifsIndisponibilite = [
-    { label: "Désinsectisation", value: activite?.desinsectisation },
-    { label: "Remise en état de l'unité", value: activite?.remiseEnEtat },
-    { label: "Sous-occupation", value: activite?.sousOccupation },
-    { label: "Travaux", value: activite?.travaux },
+    { label: "Désinsectisation", value: desinsectisation },
+    { label: "Remise en état de l'unité", value: remiseEnEtat },
+    { label: "Sous-occupation", value: sousOccupation },
+    { label: "Travaux", value: travaux },
   ];
 
   return (
@@ -30,4 +30,11 @@ export const ActiviteMotifsIndisponibilite = (): ReactElement => {
       ))}
     </Table>
   );
+};
+
+type Props = {
+  desinsectisation?: number | null;
+  remiseEnEtat?: number | null;
+  sousOccupation?: number | null;
+  travaux?: number | null;
 };

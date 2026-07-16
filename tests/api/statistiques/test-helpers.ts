@@ -1,6 +1,9 @@
 import type {
+  StatistiqueDbAdresse,
   StatistiqueDbDnaLink,
+  StatistiqueDbStructure,
   StatistiqueDbStructureVersionTimeline,
+  StatistiqueDbTypologie,
   StatistiquesActivityContext,
   StatistiquesContext,
 } from "@/app/api/statistiques/statistiques.db.type";
@@ -10,14 +13,49 @@ import {
   createEmptyActiveStructureIdsByPeriod,
   getTypologieYears,
 } from "@/app/api/statistiques/statistiques.utils";
+import { Repartition } from "@/types/adresse.type";
 import { StructureType } from "@/types/structure.type";
+
+export const testStructure = (
+  id: number,
+  departementAdministratif: string,
+  type: StructureType = StructureType.CADA
+): StatistiqueDbStructure => ({ id, type, departementAdministratif });
+
+export const testTypologie = (
+  id: number,
+  structureId: number,
+  year: number,
+  placesAutorisees: number,
+  pmr = 0
+): StatistiqueDbTypologie => ({
+  id,
+  structureId,
+  year,
+  placesAutorisees,
+  pmr,
+  lgbt: 0,
+  fvvTeh: 0,
+});
+
+export const testAdresse = (
+  id: number,
+  structureId: number,
+  qpv: number
+): StatistiqueDbAdresse => ({
+  id,
+  structureId,
+  structureVersionId: structureId,
+  repartition: Repartition.COLLECTIF,
+  placesAutorisees: 0,
+  qpv,
+  logementSocial: 0,
+});
 
 type BuildTestStructureVersionTimelineEntry = {
   structureId: number;
   structureVersionId?: number;
   effectiveDate?: Date;
-  type?: StructureType;
-  departementAdministratif?: string;
 };
 
 export const buildTestStructureVersionTimeline = (
@@ -34,8 +72,6 @@ export const buildTestStructureVersionTimeline = (
     id: entry.structureVersionId ?? entry.structureId,
     structureId: entry.structureId,
     effectiveDate: entry.effectiveDate ?? defaultEffectiveDate,
-    type: entry.type ?? StructureType.CADA,
-    departementAdministratif: entry.departementAdministratif ?? "01",
   }));
 };
 
@@ -63,7 +99,8 @@ export const buildTestActivityContext = (
   structureIds: number[],
   options: BuildTestActivityContextOptions = {}
 ): StatistiquesActivityContext => {
-  const openingDate = options.openingDate ?? new Date("2000-01-01T00:00:00.000Z");
+  const openingDate =
+    options.openingDate ?? new Date("2000-01-01T00:00:00.000Z");
   const closureDates =
     options.closureDates ??
     new Map(structureIds.map((structureId) => [structureId, null]));
@@ -138,6 +175,7 @@ export const buildTestStatistiquesContext = (
         | "budgets"
         | "indicateurs"
         | "activites"
+        | "rmus"
       >
     >
 ): StatistiquesContext => {
@@ -147,7 +185,8 @@ export const buildTestStatistiquesContext = (
 
   const referenceDate = new Date();
   const activeStructureIdsByPeriod =
-    partial.activeStructureIdsByPeriod ?? createEmptyActiveStructureIdsByPeriod();
+    partial.activeStructureIdsByPeriod ??
+    createEmptyActiveStructureIdsByPeriod();
   const activeStructureIdsNow =
     partial.activeStructureIdsNow ??
     buildActivityIndex(
@@ -179,5 +218,6 @@ export const buildTestStatistiquesContext = (
     budgets: partial.budgets ?? [],
     indicateurs: partial.indicateurs ?? [],
     activites: partial.activites ?? [],
+    rmus: partial.rmus !== undefined ? partial.rmus : [],
   };
 };
