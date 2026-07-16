@@ -58,6 +58,19 @@ describe("date util", () => {
       // THEN
       expect(formattedDate).toBe("01/01/2023");
     });
+    it("retourne la chaîne d'une date formatée en prenant en compte les options", () => {
+      // GIVEN
+      const date = "2023-01-01T00:00:00.000Z";
+
+      // WHEN
+      const formattedDate = formatDate(date, {
+        month: "short",
+        year: "numeric",
+      });
+
+      // THEN
+      expect(formattedDate).toBe("janv. 2023");
+    });
   });
   describe("formatDateToIsoString", () => {
     it("retourne undefined pour une date null", () => {
