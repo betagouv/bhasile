@@ -31,16 +31,17 @@ model ActeAdministratif {
   structureVersionTransformationId Int?
   structureVersionTransformation   StructureVersionTransformation? @relation(fields: [structureVersionTransformationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  category    ActeAdministratifCategory?
-  date        DateTime?
-  startDate   DateTime?
-  endDate     DateTime?
-  name        String?
-  parent      ActeAdministratif?         @relation("ActeAdministratifToActeAdministratif", fields: [parentId], references: [id], onDelete: Cascade)
-  parentId    Int?
-  isMissing   Boolean?
-  children    ActeAdministratif[]        @relation("ActeAdministratifToActeAdministratif")
-  fileUploads FileUpload[]
+  category      ActeAdministratifCategory?
+  structureType StructureType?
+  date          DateTime?
+  startDate     DateTime?
+  endDate       DateTime?
+  name          String?
+  parent        ActeAdministratif?         @relation("ActeAdministratifToActeAdministratif", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId      Int?
+  isMissing     Boolean?
+  children      ActeAdministratif[]        @relation("ActeAdministratifToActeAdministratif")
+  fileUploads   FileUpload[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -49,15 +50,18 @@ model ActeAdministratif {
 }
 
 model DocumentFinancier {
-  id          Int                          @id @default(autoincrement())
-  structure   Structure?                   @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  structureId Int?
-  category    DocumentFinancierCategory?
-  year        Int
-  name        String?
-  isMissing   Boolean?
-  granularity DocumentFinancierGranularity @default(STRUCTURE)
-  fileUploads FileUpload[]
+  id            Int                          @id @default(autoincrement())
+  structure     Structure?                   @relation(fields: [structureId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  structureId   Int?
+  cpom          Cpom?                        @relation(fields: [cpomId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cpomId        Int?
+  structureType StructureType?
+  category      DocumentFinancierCategory?
+  year          Int
+  name          String?
+  isMissing     Boolean?
+  granularity   DocumentFinancierGranularity @default(STRUCTURE)
+  fileUploads   FileUpload[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -87,6 +91,7 @@ enum ActeAdministratifCategory {
   ARRETE_EXTENSION
   ARRETE_CONTRACTION
   CONVENTION
+  CONVENTION_CPOM
   ARRETE_TARIFICATION
   RAPPORT_ACTIVITE_OPERATEUR
   FRAIS_DE_SIEGE

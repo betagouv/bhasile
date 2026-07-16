@@ -157,7 +157,7 @@ const isCpomLinkActiveNow = (
 ): boolean => {
   const [cpomDateStart, cpomDateEnd] = getDatesOfCurrentActeAdministratif(
     link.cpom?.actesAdministratifs ?? [],
-    "CONVENTION",
+    "CONVENTION_CPOM",
     false
   );
   const dateStart = link.dateStart ?? cpomDateStart;

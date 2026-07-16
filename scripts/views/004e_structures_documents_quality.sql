@@ -52,7 +52,7 @@ SELECT
             acte_with_file awf
           WHERE
             awf."cpomId" = cs."cpomId"
-            AND awf."category" = 'CONVENTION'
+            AND awf."category" = 'CONVENTION_CPOM'
         )
     ),
     FALSE

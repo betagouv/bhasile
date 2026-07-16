@@ -103,7 +103,7 @@ test.describe("CPOM modification", () => {
       });
 
       const convention = actes.find(
-        (acte) => acte.category === "CONVENTION" && acte.parentId === null
+        (acte) => acte.category === "CONVENTION_CPOM" && acte.parentId === null
       );
       expect(convention).toBeDefined();
       expect(convention!.fileUploads[0]?.key).toBeTruthy();

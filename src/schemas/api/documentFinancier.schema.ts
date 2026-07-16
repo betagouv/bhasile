@@ -5,6 +5,7 @@ import {
   DocumentFinancierCategory,
   DocumentFinancierGranularity,
 } from "@/types/document-financier.type";
+import { StructureType } from "@/types/structure.type";
 
 import { fileApiSchema } from "./file.schema";
 
@@ -13,6 +14,7 @@ export const documentFinancierApiSchema = z.object({
   structureDnaCode: z.string().optional(),
   structureId: z.number().optional(),
   cpomId: zId(),
+  structureType: z.enum(StructureType).nullish(),
   year: zSafeYear(),
   granularity: z.enum(DocumentFinancierGranularity).optional(),
   category: z.enum(DocumentFinancierCategory),

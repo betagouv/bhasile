@@ -6,6 +6,7 @@ import { StructureType } from "@/types/structure.type";
 import { acteAdministratifApiSchema } from "./acteAdministratif.schema";
 import { budgetApiSchema } from "./budget.schema";
 import { departementApiSchema } from "./departement.schema";
+import { documentFinancierApiSchema } from "./documentFinancier.schema";
 import { formApiSchema } from "./form.schema";
 import { operateurSuggestionApiSchema } from "./operateur.schema";
 import { regionApiSchema } from "./region.schema";
@@ -29,6 +30,7 @@ export const cpomApiSchema = z.object({
     .optional(),
   budgets: z.array(budgetApiSchema).optional(),
   actesAdministratifs: z.array(acteAdministratifApiSchema).optional(),
+  documentsFinanciers: z.array(documentFinancierApiSchema).optional(),
   structures: z
     .array(
       z.object({

@@ -24,6 +24,7 @@ const DocumentFinancierSchema = z.object({
   year: zSafeYear(),
   category: z.enum(DocumentFinancierCategory).optional(),
   granularity: z.enum(DocumentFinancierGranularity).optional(),
+  structureType: z.enum(StructureType).nullish(),
   name: z.string().nullish(),
   fileUploads: z.array(fileApiSchema).optional(),
 });

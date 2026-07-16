@@ -26,41 +26,27 @@ export const createOrUpdateDocumentsFinanciers = async (
       select: { documentFinancierId: true },
     });
 
+    const data = {
+      ...entityId,
+      category: documentFinancier.category,
+      structureType: documentFinancier.structureType,
+      year: documentFinancier.year,
+      name: documentFinancier.name,
+      granularity: documentFinancier.granularity,
+      fileUploads: {
+        connect: (documentFinancier.fileUploads ?? []).map((fileUpload) => ({
+          key: fileUpload.key,
+        })),
+      },
+    };
+
     if (existingFileUpload?.documentFinancierId) {
       await tx.documentFinancier.update({
         where: { id: existingFileUpload.documentFinancierId },
-        data: {
-          ...entityId,
-          category: documentFinancier.category,
-          year: documentFinancier.year,
-          name: documentFinancier.name,
-          granularity: documentFinancier.granularity,
-          fileUploads: {
-            connect: (documentFinancier.fileUploads ?? []).map(
-              (fileUpload) => ({
-                key: fileUpload.key,
-              })
-            ),
-          },
-        },
+        data,
       });
     } else {
-      await tx.documentFinancier.create({
-        data: {
-          ...entityId,
-          category: documentFinancier.category,
-          year: documentFinancier.year,
-          name: documentFinancier.name,
-          granularity: documentFinancier.granularity,
-          fileUploads: {
-            connect: (documentFinancier.fileUploads ?? []).map(
-              (fileUpload) => ({
-                key: fileUpload.key,
-              })
-            ),
-          },
-        },
-      });
+      await tx.documentFinancier.create({ data });
     }
   }
 };

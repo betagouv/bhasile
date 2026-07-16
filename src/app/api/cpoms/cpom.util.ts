@@ -14,7 +14,7 @@ export const getDatesConvention = (cpom?: {
 
   return getDatesOfCurrentActeAdministratif(
     cpom.actesAdministratifs ?? [],
-    "CONVENTION",
+    "CONVENTION_CPOM",
     false
   );
 };
