@@ -21,7 +21,6 @@ export const SHORT_PAGE_SIZE = 6;
 
 // Cookie expiration times
 export const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7;
-export const THREE_MONTHS_IN_SECONDS = 60 * 60 * 24 * 31 * 3;
 
 export const FILE_UPLOAD_EXPIRATION_DELAY = 60 * 60; // 1 hour
 
