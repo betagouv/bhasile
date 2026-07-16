@@ -47,7 +47,7 @@ export const TransformationCodeSection = ({
       <h2 className="text-xl font-bold mb-0 text-title-blue-france max-w-3xl">
         {title}
       </h2>
-      <CustomNotice severity="info" title="" description={noticeDescription} />
+      <CustomNotice severity="info" description={noticeDescription} />
       {items.map((item, index) => (
         <div key={index} className="flex gap-6 items-start">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3 flex-1">

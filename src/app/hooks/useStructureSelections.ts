@@ -18,12 +18,14 @@ type Props = {
   transformationType: TransformationType;
   structureId?: number;
   departureType?: StructureType;
+  departureDepartement?: string;
 };
 
 export const useStructureSelections = ({
   transformationType,
   structureId,
   departureType,
+  departureDepartement,
 }: Props) => {
   const transformationSpec = TRANSFORMATION_TYPE_SPECS[transformationType];
 
@@ -116,6 +118,11 @@ export const useStructureSelections = ({
   ): StructureType | undefined =>
     block.fixedType ?? (block.matchDepartureType ? departureType : undefined);
 
+  const getFixedDepartement = (
+    block: StructureSelectionBlock
+  ): string | undefined =>
+    block.matchDepartureDepartement ? departureDepartement : undefined;
+
   const getEffectiveStructureType = (
     block: StructureSelectionBlock
   ): StructureType | undefined =>
@@ -166,6 +173,7 @@ export const useStructureSelections = ({
     setDepartementNumero,
     setStructureType,
     getFixedType,
+    getFixedDepartement,
     getEffectiveStructureType,
     getInheritedOperateurName,
     getInheritedDepartementNumero,

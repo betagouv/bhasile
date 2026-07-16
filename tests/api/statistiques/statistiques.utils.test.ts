@@ -7,9 +7,8 @@ import {
   lookupActiveStructureIds,
   lookupStructureIdsForDnaAtDate,
   mapTypologieYears,
-  mapVersionsToStructures,
-  matchesStatistiquesPerimeterFilters,
-  type StatistiquesResolvedPerimeterFilters,
+  parseStatistiquesPerimeterFilters,
+  sliceStatistiquesContext,
   structuresActiveInPeriod,
 } from "@/app/api/statistiques/statistiques.utils";
 import { StructureType } from "@/types/structure.type";
@@ -17,6 +16,7 @@ import { StructureType } from "@/types/structure.type";
 import {
   buildTestActivityIndex,
   buildTestDnaLinks,
+  buildTestStatistiquesContext,
   buildTestStructureVersionTimeline,
 } from "./test-helpers";
 
@@ -191,28 +191,19 @@ describe("socle - périmètre général vs séries temporelles", () => {
   });
 });
 
-describe("socle - version effective et périmètre général", () => {
+describe("socle - version effective à date (résolution adresses/typologies/DNA)", () => {
   const timeline = buildTestStructureVersionTimeline([
     {
       structureId: 1,
       structureVersionId: 10,
       effectiveDate: new Date("2020-01-01T00:00:00.000Z"),
-      type: StructureType.CADA,
-      departementAdministratif: "01",
     },
     {
       structureId: 1,
       structureVersionId: 11,
       effectiveDate: new Date("2025-01-01T00:00:00.000Z"),
-      type: StructureType.CPH,
-      departementAdministratif: "75",
     },
   ]);
-
-  const activityWithoutClosure = {
-    openingDate: new Date("2020-01-01T00:00:00.000Z"),
-    closureDates: new Map<number, Date | null>([[1, null]]),
-  };
 
   it("sélectionne la version effective à la date via getEffectiveStructureVersionAtDate", () => {
     expect(
@@ -221,113 +212,24 @@ describe("socle - version effective et périmètre général", () => {
         new Date("2024-06-15T12:00:00.000Z"),
         timeline
       )
-    ).toMatchObject({
-      id: 10,
-      type: StructureType.CADA,
-      departementAdministratif: "01",
-    });
+    ).toMatchObject({ id: 10 });
     expect(
       getEffectiveStructureVersionAtDate(
         1,
         new Date("2025-06-15T12:00:00.000Z"),
         timeline
       )
-    ).toMatchObject({
-      id: 11,
-      type: StructureType.CPH,
-      departementAdministratif: "75",
-    });
+    ).toMatchObject({ id: 11 });
   });
 
-  it("projette la version effective via mapVersionsToStructures", () => {
-    const effectiveVersion = getEffectiveStructureVersionAtDate(
-      1,
-      new Date("2025-06-15T12:00:00.000Z"),
-      timeline
-    );
-
-    expect(mapVersionsToStructures([effectiveVersion!])).toEqual([
-      {
-        id: 1,
-        type: StructureType.CPH,
-        departementAdministratif: "75",
-      },
-    ]);
-  });
-
-  it("forme context.structures comme dans statistique.service (versions + activeStructureIdsNow)", () => {
-    const referenceDate = new Date("2025-06-15T12:00:00.000Z");
-    const effectiveVersion = getEffectiveStructureVersionAtDate(
-      1,
-      referenceDate,
-      timeline
-    );
-    const allStructures = mapVersionsToStructures([effectiveVersion!]);
-    const { activeStructureIdsNow } = buildTestActivityIndex([1], {
-      referenceDate,
-      openingDate: new Date("2020-01-01T00:00:00.000Z"),
-      closureDates: new Map([[1, new Date("2025-02-01T00:00:00.000Z")]]),
-    });
-
-    const structures = allStructures.filter((structure) =>
-      activeStructureIdsNow.has(structure.id)
-    );
-
-    expect(structures).toEqual([]);
-  });
-
-  it("garde la structure au général si fermeture postérieure à la date de référence", () => {
-    const referenceDate = new Date("2025-06-15T12:00:00.000Z");
-    const effectiveVersion = getEffectiveStructureVersionAtDate(
-      1,
-      referenceDate,
-      timeline
-    );
-    const allStructures = mapVersionsToStructures([effectiveVersion!]);
-    const { activeStructureIdsNow } = buildTestActivityIndex([1], {
-      referenceDate,
-      ...activityWithoutClosure,
-      closureDates: new Map([[1, new Date("2025-12-01T00:00:00.000Z")]]),
-    });
-
-    const structures = allStructures.filter((structure) =>
-      activeStructureIdsNow.has(structure.id)
-    );
-
-    expect(structures).toEqual([
-      {
-        id: 1,
-        type: StructureType.CPH,
-        departementAdministratif: "75",
-      },
-    ]);
-  });
-
-  it("combine version antérieure à la transfo et fermeture future", () => {
-    const referenceDate = new Date("2024-06-15T12:00:00.000Z");
-    const effectiveVersion = getEffectiveStructureVersionAtDate(
-      1,
-      referenceDate,
-      timeline
-    );
-    const allStructures = mapVersionsToStructures([effectiveVersion!]);
-    const { activeStructureIdsNow } = buildTestActivityIndex([1], {
-      referenceDate,
-      openingDate: new Date("2020-01-01T00:00:00.000Z"),
-      closureDates: new Map([[1, new Date("2025-12-01T00:00:00.000Z")]]),
-    });
-
-    const structures = allStructures.filter((structure) =>
-      activeStructureIdsNow.has(structure.id)
-    );
-
-    expect(structures).toEqual([
-      {
-        id: 1,
-        type: StructureType.CADA,
-        departementAdministratif: "01",
-      },
-    ]);
+  it("retourne null avant la première version effective", () => {
+    expect(
+      getEffectiveStructureVersionAtDate(
+        1,
+        new Date("2019-06-15T12:00:00.000Z"),
+        timeline
+      )
+    ).toBeNull();
   });
 });
 
@@ -347,7 +249,6 @@ describe("socle - résolution DNA à date", () => {
       structureId: 2,
       structureVersionId: 20,
       effectiveDate: new Date("2025-01-01T00:00:00.000Z"),
-      type: StructureType.CAES,
     },
   ]);
 
@@ -397,92 +298,44 @@ describe("socle - résolution DNA à date", () => {
   });
 });
 
-describe("matchesStatistiquesPerimeterFilters - filtres appliqués sur la version déjà résolue", () => {
-  const noFilters: StatistiquesResolvedPerimeterFilters = {
-    departements: null,
-    types: new Set(),
-    operateurIds: null,
-  };
-
-  const version = (
+describe("parseStatistiquesPerimeterFilters - résolution des filtres scalaires", () => {
+  const filters = (
     overrides: Partial<{
-      type: string | null;
-      departementAdministratif: string | null;
-      operateurId: number | null;
+      departements: string | null;
+      operateurs: string | null;
+      types: string | null;
     }> = {}
   ) => ({
-    departementAdministratif: overrides.departementAdministratif ?? "01",
-    structure: {
-      operateurId: overrides.operateurId === undefined ? 1 : overrides.operateurId,
-      type: overrides.type === undefined ? StructureType.CADA : overrides.type,
-    },
+    departements: overrides.departements ?? null,
+    operateurs: overrides.operateurs ?? null,
+    types: overrides.types ?? null,
+    aggregation: "moyenne" as const,
   });
 
-  it("accepte une version valide sans filtre", () => {
-    expect(matchesStatistiquesPerimeterFilters(version(), noFilters)).toBe(
-      true
+  it("retient tous les types non exclus quand aucun filtre de type n'est fourni", () => {
+    const { types } = parseStatistiquesPerimeterFilters(filters());
+    expect(types.has(StructureType.CADA)).toBe(true);
+    expect(types.has(StructureType.HUDA)).toBe(true);
+    expect(types.has(StructureType.PRAHDA)).toBe(false);
+  });
+
+  it("restreint aux types demandés, exclus retirés", () => {
+    const { types } = parseStatistiquesPerimeterFilters(
+      filters({ types: "CPH,PRAHDA" })
     );
+    expect([...types]).toEqual([StructureType.CPH]);
   });
 
-  it("rejette un type exclu du périmètre (PRAHDA) même sans filtre de type", () => {
-    expect(
-      matchesStatistiquesPerimeterFilters(
-        version({ type: StructureType.PRAHDA }),
-        noFilters
-      )
-    ).toBe(false);
-  });
+  it("parse départements et opérateurs, null quand absents", () => {
+    const empty = parseStatistiquesPerimeterFilters(filters());
+    expect(empty.departements).toBeNull();
+    expect(empty.operateurIds).toEqual([]);
 
-  it("rejette une version sans type", () => {
-    expect(
-      matchesStatistiquesPerimeterFilters(version({ type: null }), noFilters)
-    ).toBe(false);
-  });
-
-  it("filtre par type", () => {
-    const filters = { ...noFilters, types: new Set([StructureType.CPH]) };
-    expect(
-      matchesStatistiquesPerimeterFilters(
-        version({ type: StructureType.CADA }),
-        filters
-      )
-    ).toBe(false);
-    expect(
-      matchesStatistiquesPerimeterFilters(
-        version({ type: StructureType.CPH }),
-        filters
-      )
-    ).toBe(true);
-  });
-
-  it("compare le filtre département à l'état résolu (courant), pas à un ancien état", () => {
-    // Régression : une structure transformée du département 01 vers 02 ne doit
-    // plus matcher un filtre "01", même si son ancienne version matchait.
-    const filters = { ...noFilters, departements: new Set(["01"]) };
-    const currentVersion = version({ departementAdministratif: "02" });
-
-    expect(matchesStatistiquesPerimeterFilters(currentVersion, filters)).toBe(
-      false
+    const parsed = parseStatistiquesPerimeterFilters(
+      filters({ departements: "01,02", operateurs: "10,11" })
     );
-    expect(
-      matchesStatistiquesPerimeterFilters(
-        version({ departementAdministratif: "01" }),
-        filters
-      )
-    ).toBe(true);
-  });
-
-  it("filtre par opérateur (filiales déjà résolues en amont)", () => {
-    const filters = { ...noFilters, operateurIds: new Set([10, 11]) };
-    expect(
-      matchesStatistiquesPerimeterFilters(version({ operateurId: 99 }), filters)
-    ).toBe(false);
-    expect(
-      matchesStatistiquesPerimeterFilters(version({ operateurId: 10 }), filters)
-    ).toBe(true);
-    expect(
-      matchesStatistiquesPerimeterFilters(version({ operateurId: null }), filters)
-    ).toBe(false);
+    expect(parsed.departements).toEqual(new Set(["01", "02"]));
+    expect(parsed.operateurIds).toEqual([10, 11]);
   });
 });
 
@@ -509,5 +362,64 @@ describe("filterByActiveStructureId", () => {
     expect(filterByActiveStructureId(rows, new Set([1]))).toEqual([
       { structureId: 1, value: "a" },
     ]);
+  });
+});
+
+describe("sliceStatistiquesContext - restriction à une zone", () => {
+  const structure1 = { id: 1, type: StructureType.CADA, departementAdministratif: "01" };
+  const structure2 = { id: 2, type: StructureType.CADA, departementAdministratif: "02" };
+
+  const { activeStructureIdsNow, activeStructureIdsByPeriod } =
+    buildTestActivityIndex([1, 2], {
+      referenceDate: new Date("2025-06-15T12:00:00.000Z"),
+      periodDates: [new Date("2025-03-15T00:00:00.000Z")],
+    });
+
+  const context = buildTestStatistiquesContext({
+    structures: [structure1, structure2],
+    allStructures: [structure1, structure2],
+    activeStructureIdsNow,
+    activeStructureIdsByPeriod,
+    typologies: [],
+    adresses: [],
+    departements: [
+      { id: 1, numero: "01", name: "Département 01", population: 100 },
+      { id: 2, numero: "02", name: "Département 02", population: 200 },
+    ],
+  });
+
+  const sliced = sliceStatistiquesContext(
+    context,
+    new Set([1]),
+    new Set(["01"])
+  );
+
+  it("ne garde que les structures de la zone dans structures et allStructures", () => {
+    expect(sliced.structures).toEqual([structure1]);
+    expect(sliced.allStructures).toEqual([structure1]);
+  });
+
+  it("restreint activeStructureIdsNow à la zone", () => {
+    expect(sliced.activeStructureIdsNow).toEqual(new Set([1]));
+  });
+
+  it("restreint chaque Set de activeStructureIdsByPeriod à la zone, sans perdre les clés de période", () => {
+    expect([...sliced.activeStructureIdsByPeriod.year.keys()]).toEqual(
+      [...context.activeStructureIdsByPeriod.year.keys()]
+    );
+    for (const ids of sliced.activeStructureIdsByPeriod.year.values()) {
+      expect(ids).toEqual(new Set([1]));
+    }
+  });
+
+  it("ne garde que les départements de la zone", () => {
+    expect(sliced.departements).toEqual([
+      { id: 1, numero: "01", name: "Département 01", population: 100 },
+    ]);
+  });
+
+  it("ne modifie pas le contexte d'origine", () => {
+    expect(context.structures).toEqual([structure1, structure2]);
+    expect(context.departements).toHaveLength(2);
   });
 });

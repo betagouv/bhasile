@@ -21,6 +21,7 @@ import type {
   StatistiqueDbStructure,
   StatistiqueDbTypologieValues,
   StatistiquesContext,
+  StatistiquesCpomYearContext,
 } from "../statistiques.db.type";
 import {
   computeTotalPlaces,
@@ -30,6 +31,7 @@ import {
   getLastTypologiePerStructure,
   getTypologieMapForExactYear,
   mapTypologieYears,
+  resolveStructuresWithTypologieForYear,
 } from "../statistiques.utils";
 
 const getRepartitionFromRepartitions = (
@@ -56,7 +58,11 @@ const countStructuresPerBati = (
   const countsByBati = new Map<Repartition, number>();
 
   for (const structure of structures) {
-    const bati = batiMap.get(structure.id) ?? Repartition.COLLECTIF;
+    // Bâti = répartition des adresses de la dernière version
+    const bati = batiMap.get(structure.id);
+    if (bati == null) {
+      continue;
+    }
     countsByBati.set(bati, (countsByBati.get(bati) ?? 0) + 1);
   }
 
@@ -69,7 +75,10 @@ const sumPlacesPerBati = (
 ): Map<Repartition, number> => {
   const placesByBati = new Map<Repartition, number>();
 
-  for (const adresse of filterByActiveStructureId(adresses, activeStructureIds)) {
+  for (const adresse of filterByActiveStructureId(
+    adresses,
+    activeStructureIds
+  )) {
     const bati = (adresse.repartition ?? Repartition.COLLECTIF) as Repartition;
     const places = adresse.placesAutorisees ?? 0;
 
@@ -120,6 +129,26 @@ const countActiveCpoms = (
   }
 
   return activeCpomIds.size;
+};
+
+/** Counts structures covered by an active CPOM for the year. */
+export const countStructuresAvecCpomForYear = (
+  cpomLinks: StatistiqueDbCpomStructure[],
+  structureIds: Set<number>,
+  year: number
+): number => {
+  const structuresWithActiveCpom = new Set<number>();
+
+  for (const link of cpomLinks) {
+    if (
+      structureIds.has(link.structureId) &&
+      isStructureInCpom({ cpomStructures: [link] } as StructureDbList, year)
+    ) {
+      structuresWithActiveCpom.add(link.structureId);
+    }
+  }
+
+  return structuresWithActiveCpom.size;
 };
 
 const isCpomLinkActiveNow = (
@@ -204,22 +233,21 @@ const computeTypeStats = (
   structures: StatistiqueDbStructure[],
   typologieMap: Map<number, StatistiqueDbTypologieValues>
 ): TypeStructureStat[] => {
-  const statsByType = new Map<StructureType, { structures: number; places: number }>();
+  const statsByType = new Map<
+    StructureType,
+    { structures: number; places: number }
+  >();
 
   for (const structure of structures) {
-    const typologie = typologieMap.get(structure.id);
-    if (!typologie) {
-      continue;
-    }
     const type = structure.type as StructureType | null;
     if (type === null) {
       continue;
     }
-
+    const typologie = typologieMap.get(structure.id);
     const current = statsByType.get(type) ?? { structures: 0, places: 0 };
     statsByType.set(type, {
       structures: current.structures + 1,
-      places: current.places + (typologie.placesAutorisees ?? 0),
+      places: current.places + (typologie?.placesAutorisees ?? 0),
     });
   }
 
@@ -261,15 +289,11 @@ const countStructuresByBati = (
   batiMap: Map<number, Repartition>,
   bati: Repartition
 ): number =>
-  structures.filter(
-    (structure) => (batiMap.get(structure.id) ?? Repartition.COLLECTIF) === bati
-  ).length;
+  // Aligné sur le global : une structure sans adresse répartie n'a pas de bâti
+  structures.filter((structure) => batiMap.get(structure.id) === bati).length;
 
 const computeByYearStats = (
-  context: Pick<
-    StatistiquesContext,
-    "allStructures" | "activeStructureIdsByPeriod" | "typologies" | "cpomLinks"
-  >,
+  context: StatistiquesCpomYearContext,
   batiMap: Map<number, Repartition>
 ): StructuresByYearStat[] =>
   mapTypologieYears<StructuresByYearStat>(
@@ -291,11 +315,12 @@ const computeByYearStats = (
 
       return {
         totalStructures: structuresWithTypologie.length,
-        totalPlaces: computeTotalPlaces(
-          structuresWithTypologie,
-          typologieMapForYear
-        ),
         totalCpoms: countActiveCpoms(
+          context.cpomLinks,
+          structureIdsWithTypologie,
+          year
+        ),
+        structuresAvecCpom: countStructuresAvecCpomForYear(
           context.cpomLinks,
           structureIdsWithTypologie,
           year
@@ -338,13 +363,14 @@ const computeByYearStats = (
 export const computeStructuresStatistiques = (
   context: StatistiquesContext
 ): StatistiqueApiRead["structures"] => {
-  const { structures, typologies, adresses, cpomLinks, structureVersionTimeline } =
-    context;
-  const typologieMap = getLastTypologiePerStructure(typologies);
-  const structuresWithTypologie = filterStructuresWithTypologie(
+  const {
     structures,
-    typologieMap
-  );
+    typologies,
+    adresses,
+    cpomLinks,
+    structureVersionTimeline,
+  } = context;
+  const typologieMap = getLastTypologiePerStructure(typologies);
   const now = new Date();
   // Le bâti (vue globale et byYear) reflète l'adresse actuelle : `adresses` remonte
   // désormais tout l'historique des versions, on résout ici la version effective à date.
@@ -362,16 +388,46 @@ export const computeStructuresStatistiques = (
     activeStructureIds
   );
 
+  const structureBatis = computeBatiStats(structures, batiMap, currentAdresses);
+
   return {
     totalStructures: structures.length,
+    // Places autorisées (typologie) - somme des `structureTypes[].places`.
+    totalPlaces: computeTotalPlaces(structures, typologieMap),
+    // Places à l'adresse (dernière version) - somme des `structureBatis[].places`.
+    totalPlacesAdresse: structureBatis.reduce(
+      (total, bati) => total + bati.places,
+      0
+    ),
     totalCpoms,
     structuresAvecCpom,
-    structureTypes: computeTypeStats(structuresWithTypologie, typologieMap),
-    structureBatis: computeBatiStats(
-      structuresWithTypologie,
-      batiMap,
-      currentAdresses
-    ),
+    structureTypes: computeTypeStats(structures, typologieMap),
+    structureBatis,
     byYear: computeByYearStats(context, batiMap),
   };
+};
+
+export type StructuresYearIndicatorField =
+  "totalStructures" | "structuresAvecCpom";
+
+/** Computes a single byYear field for one year, for the cartographie one-indicator requests. */
+export const computeStructuresIndicatorForYear = (
+  context: StatistiquesCpomYearContext,
+  year: number,
+  field: StructuresYearIndicatorField
+): number | null => {
+  const resolved = resolveStructuresWithTypologieForYear(context, year);
+  if (!resolved) {
+    return null;
+  }
+
+  if (field === "totalStructures") {
+    return resolved.structures.length;
+  }
+
+  return countStructuresAvecCpomForYear(
+    context.cpomLinks,
+    new Set(resolved.structures.map((structure) => structure.id)),
+    year
+  );
 };

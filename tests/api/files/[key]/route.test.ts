@@ -3,34 +3,54 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DELETE, GET } from "@/app/api/files/[key]/route";
 
-const mockFindOneByKey = vi.fn();
-const mockDeleteOneByKey = vi.fn();
-const mockPresignedGetObject = vi.fn();
-const mockRemoveObject = vi.fn();
+const mockGetServerSession = vi.fn();
+const mockGetPrincipal = vi.fn();
+const mockGetFileWithParents = vi.fn();
+const mockAuthorizeFileAccess = vi.fn();
+const mockGetDownloadLink = vi.fn();
+const mockDeleteFile = vi.fn();
+const mockDeleteFileByStorageKey = vi.fn();
 
-vi.mock("@/app/api/files/file.repository", () => ({
-  findOneByKey: (...args: unknown[]) => mockFindOneByKey(...args),
-  deleteOneByKey: (...args: unknown[]) => mockDeleteOneByKey(...args),
+vi.mock("next-auth", () => ({
+  getServerSession: (...args: unknown[]) => mockGetServerSession(...args),
 }));
 
-vi.mock("@/lib/minio", () => ({
-  checkBucket: vi.fn(),
-  minioClient: {
-    presignedGetObject: (...args: unknown[]) => mockPresignedGetObject(...args),
-    removeObject: (...args: unknown[]) => mockRemoveObject(...args),
-  },
+vi.mock("@/lib/next-auth/auth", () => ({
+  authOptions: {},
 }));
+
+vi.mock("@/app/api/files/file.service", () => ({
+  getPrincipal: (...args: unknown[]) => mockGetPrincipal(...args),
+  getFileWithParents: (...args: unknown[]) => mockGetFileWithParents(...args),
+  authorizeFileAccess: (...args: unknown[]) =>
+    mockAuthorizeFileAccess(...args),
+  getDownloadLink: (...args: unknown[]) => mockGetDownloadLink(...args),
+  deleteFile: (...args: unknown[]) => mockDeleteFile(...args),
+  deleteFileByStorageKey: (...args: unknown[]) =>
+    mockDeleteFileByStorageKey(...args),
+}));
+
+const linkedFile = {
+  id: 1,
+  key: "test.pdf",
+  mimeType: "application/pdf",
+  originalName: "test.pdf",
+  fileSize: 10,
+  documentFinancierId: 5,
+  documentFinancier: { structure: { departementAdministratif: "75" } },
+};
 
 describe("GET /api/files/[key]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetPrincipal.mockReturnValue({ type: "operateur" });
   });
 
-  it("retourne le lien de téléchargement quand le param getLink est présent", async () => {
+  it("vérifie l'existence et l'autorisation avant de générer le lien de téléchargement", async () => {
     // GIVEN
-    mockPresignedGetObject.mockResolvedValueOnce(
-      "https://s3.example.com/test.pdf"
-    );
+    mockGetFileWithParents.mockResolvedValueOnce(linkedFile);
+    mockAuthorizeFileAccess.mockReturnValueOnce(true);
+    mockGetDownloadLink.mockResolvedValueOnce("https://s3.example.com/test.pdf");
 
     const request = new NextRequest(
       "http://localhost/api/files/test.pdf?getLink=1"
@@ -44,14 +64,35 @@ describe("GET /api/files/[key]", () => {
     expect(await response.json()).toEqual({
       url: "https://s3.example.com/test.pdf",
     });
-    expect(mockPresignedGetObject).toHaveBeenCalled();
-    expect(mockFindOneByKey).not.toHaveBeenCalled();
-    expect(mockDeleteOneByKey).not.toHaveBeenCalled();
+    expect(mockGetFileWithParents).toHaveBeenCalledWith("test.pdf");
+    expect(mockAuthorizeFileAccess).toHaveBeenCalledWith(
+      { type: "operateur" },
+      linkedFile,
+      "read"
+    );
+    expect(mockGetDownloadLink).toHaveBeenCalled();
+  });
+
+  it("retourne 404 sur le lien de téléchargement à un utilisateur non autorisé pour ne pas révéler l'existence du fichier", async () => {
+    // GIVEN
+    mockGetFileWithParents.mockResolvedValueOnce(linkedFile);
+    mockAuthorizeFileAccess.mockReturnValueOnce(false);
+
+    const request = new NextRequest(
+      "http://localhost/api/files/test.pdf?getLink=1"
+    );
+
+    // WHEN
+    const response = await GET(request);
+
+    // THEN
+    expect(response.status).toBe(404);
+    expect(mockGetDownloadLink).not.toHaveBeenCalled();
   });
 
   it("retourne 404 quand le fichier est introuvable", async () => {
     // GIVEN
-    mockFindOneByKey.mockResolvedValueOnce(null);
+    mockGetFileWithParents.mockResolvedValueOnce(null);
 
     const request = new NextRequest("http://localhost/api/files/unknown.pdf");
 
@@ -60,15 +101,13 @@ describe("GET /api/files/[key]", () => {
 
     // THEN
     expect(response.status).toBe(404);
-    expect(await response.json()).toEqual({ error: "Aucun fichier trouvé" });
-    expect(mockPresignedGetObject).not.toHaveBeenCalled();
-    expect(mockDeleteOneByKey).not.toHaveBeenCalled();
+    expect(mockAuthorizeFileAccess).not.toHaveBeenCalled();
   });
 
-  it("retourne les métadonnées du fichier quand il est trouvé", async () => {
+  it("retourne uniquement les métadonnées scalaires du fichier sans exposer les parents", async () => {
     // GIVEN
-    const file = { id: 1, key: "test.pdf", mimeType: "application/pdf" };
-    mockFindOneByKey.mockResolvedValueOnce(file);
+    mockGetFileWithParents.mockResolvedValueOnce(linkedFile);
+    mockAuthorizeFileAccess.mockReturnValueOnce(true);
 
     const request = new NextRequest("http://localhost/api/files/test.pdf");
 
@@ -77,19 +116,39 @@ describe("GET /api/files/[key]", () => {
 
     // THEN
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual(file);
-    expect(mockFindOneByKey).toHaveBeenCalledWith("test.pdf");
+    expect(await response.json()).toEqual({
+      id: 1,
+      key: "test.pdf",
+      mimeType: "application/pdf",
+      originalName: "test.pdf",
+      fileSize: 10,
+    });
+  });
+
+  it("retourne 404 sur les métadonnées à un utilisateur non autorisé pour ne pas révéler l'existence du fichier", async () => {
+    // GIVEN
+    mockGetFileWithParents.mockResolvedValueOnce(linkedFile);
+    mockAuthorizeFileAccess.mockReturnValueOnce(false);
+
+    const request = new NextRequest("http://localhost/api/files/test.pdf");
+
+    // WHEN
+    const response = await GET(request);
+
+    // THEN
+    expect(response.status).toBe(404);
   });
 });
 
 describe("DELETE /api/files/[key]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetPrincipal.mockReturnValue({ type: "operateur" });
   });
 
   it("retourne 404 quand le fichier est introuvable", async () => {
     // GIVEN
-    mockFindOneByKey.mockResolvedValueOnce(null);
+    mockGetFileWithParents.mockResolvedValueOnce(null);
 
     const request = new NextRequest("http://localhost/api/files/unknown.pdf", {
       method: "DELETE",
@@ -100,17 +159,34 @@ describe("DELETE /api/files/[key]", () => {
 
     // THEN
     expect(response.status).toBe(404);
-    expect(await response.json()).toEqual({ error: "Aucun fichier trouvé" });
-    expect(mockRemoveObject).not.toHaveBeenCalled();
-    expect(mockDeleteOneByKey).not.toHaveBeenCalled();
+    expect(mockAuthorizeFileAccess).not.toHaveBeenCalled();
+    expect(mockDeleteFile).not.toHaveBeenCalled();
   });
 
-  it("retourne le fichier supprimé en cas de succès", async () => {
+  it("retourne 404 sur la suppression à un utilisateur non autorisé pour ne pas révéler l'existence du fichier", async () => {
     // GIVEN
-    const file = { id: 1, key: "test.pdf" };
-    mockFindOneByKey.mockResolvedValueOnce(file);
-    mockRemoveObject.mockResolvedValueOnce(undefined);
-    mockDeleteOneByKey.mockResolvedValueOnce(file);
+    mockGetFileWithParents.mockResolvedValueOnce(linkedFile);
+    mockAuthorizeFileAccess.mockReturnValueOnce(false);
+
+    const request = new NextRequest("http://localhost/api/files/test.pdf", {
+      method: "DELETE",
+    });
+
+    // WHEN
+    const response = await DELETE(request);
+
+    // THEN
+    expect(response.status).toBe(404);
+    expect(mockDeleteFile).not.toHaveBeenCalled();
+    expect(mockDeleteFileByStorageKey).not.toHaveBeenCalled();
+  });
+
+  it("supprime le fichier quand l'utilisateur est autorisé", async () => {
+    // GIVEN
+    mockGetFileWithParents.mockResolvedValueOnce(linkedFile);
+    mockAuthorizeFileAccess.mockReturnValueOnce(true);
+    mockDeleteFile.mockResolvedValueOnce(undefined);
+    mockDeleteFileByStorageKey.mockResolvedValueOnce(linkedFile);
 
     const request = new NextRequest("http://localhost/api/files/test.pdf", {
       method: "DELETE",
@@ -121,16 +197,15 @@ describe("DELETE /api/files/[key]", () => {
 
     // THEN
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual(file);
-    expect(mockRemoveObject).toHaveBeenCalled();
-    expect(mockDeleteOneByKey).toHaveBeenCalledWith("test.pdf");
+    expect(mockDeleteFile).toHaveBeenCalled();
+    expect(mockDeleteFileByStorageKey).toHaveBeenCalledWith("test.pdf");
   });
 
   it("retourne 500 quand la suppression échoue", async () => {
     // GIVEN
-    const file = { id: 1, key: "test.pdf" };
-    mockFindOneByKey.mockResolvedValueOnce(file);
-    mockRemoveObject.mockRejectedValueOnce(new Error("S3 error"));
+    mockGetFileWithParents.mockResolvedValueOnce(linkedFile);
+    mockAuthorizeFileAccess.mockReturnValueOnce(true);
+    mockDeleteFile.mockRejectedValueOnce(new Error("S3 error"));
 
     const request = new NextRequest("http://localhost/api/files/test.pdf", {
       method: "DELETE",
@@ -144,6 +219,6 @@ describe("DELETE /api/files/[key]", () => {
     expect(await response.json()).toEqual({
       error: "Erreur lors de la suppression du fichier",
     });
-    expect(mockDeleteOneByKey).not.toHaveBeenCalled();
+    expect(mockDeleteFileByStorageKey).not.toHaveBeenCalled();
   });
 });

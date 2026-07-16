@@ -11,6 +11,7 @@ Statistiques agrégées du parc hébergement.
 | `finance`         | [finance/README.md](./finance/README.md)                   |
 | `controleQualite` | [controle-qualite/README.md](./controle-qualite/README.md) |
 | `activite`        | [activite/README.md](./activite/README.md)                 |
+| `rmu`             | [rmu/README.md](./rmu/README.md)                           |
 
 ## Architecture
 
@@ -19,7 +20,7 @@ Le service est découpé par "bloc fonctionnel" avec un socle commun
 ```
 route.ts -> statistique.service.ts
         ├── statistiques.repository.ts | statistiques.utils.ts
-        └── structures/ | places/ | finance/ | controle-qualite/ | activite/
+        └── structures/ | places/ | finance/ | controle-qualite/ | activite/ | rmu/
               └── *.util.ts   compute*(context[, aggregation])
 ```
 
@@ -40,6 +41,8 @@ Schéma : `src/schemas/api/statistique.schema.ts`.
 Sans filtre l'API retourne tout le parc, et si le périmètre retourné est vide l'API retourne `null`.
 Les filtres sont en **ET**.
 
+> Exception `rmu` (donnée départementale) : ne suit que `departements`, et vaut `null` dès qu'un filtre `operateurs`/`types` est actif. Cf. [rmu/README.md](./rmu/README.md#périmètre).
+
 Exemple :
 
 ```
@@ -55,7 +58,7 @@ curl -s "http://localhost:3000/api/statistiques" | jq > tmp/statistiques.json
 
 ## Périmètre
 
-Filtre structures via `findEffectiveStructureVersionsAtDate` (pivot sur `StructureVersion` effective).
+Filtre structures via `findPerimeterStructures` : `type` / `operateurId` / `departementAdministratif`.
 
 **Structures actives (indicateurs globaux)** : `activeStructureIdsNow` sur `StatistiquesContext` - structures ouvertes au jour de référence (`Structure.creationDate` / `fermetureDate`). `context.structures` en est la projection typée.
 
@@ -98,12 +101,11 @@ Récap des points ouverts - le détail est dans le README de chaque bloc (sauf `
 
 Points encore ouverts ou à garder en tête pour l'interprétation des chiffres. Les TODO « post transfo » traités (pivot `StructureVersion`, fermeture via `Structure.fermetureDate` / `activeStructureIdsNow`) ne sont plus listés ici.
 
-| Sujet                                      | Bloc              | Détail                                                                                                              |
-| ------------------------------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Numérateurs activité**                   | `activite`        | [activite/README.md](./activite/README.md#todo-à-valider)                                                           |
-| **`updatedAt` par bloc**                   | global            | Horodatage « données mises à jour » par onglet : dépend du chantier formulaire d'actualisation, pas encore branché. |
-| **Reconstitution `qpv`/`logementsSociaux` par année** | `places` | [places/README.md](./places/README.md#todo-à-valider)                                                               |
-| **Agrégation bâti `Mixte`**                | `structures`      | [structures/README.md](./structures/README.md#todo-à-valider)                                                       |
-| **Fallback `REALISE` → `PREVISIONNEL`**    | `finance`         | [finance/README.md](./finance/README.md#todo-hors-transfo)                                                          |
-| **Fenêtre évaluations vs EIG**             | `controleQualite` | [controle-qualite/README.md](./controle-qualite/README.md#todo-métier)                                              |
-| **Clés de période CQ**                     | `controleQualite` | [controle-qualite/README.md](./controle-qualite/README.md#todo-métier)                                              |
+| Sujet                                                 | Bloc              | Détail                                                                                                              |
+| ----------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **`updatedAt` par bloc**                              | global            | Horodatage « données mises à jour » par onglet : dépend du chantier formulaire d'actualisation, pas encore branché. |
+| **Reconstitution `qpv`/`logementsSociaux` par année** | `places`          | [places/README.md](./places/README.md#todo-à-valider)                                                               |
+| **Agrégation bâti `Mixte`**                           | `structures`      | [structures/README.md](./structures/README.md#todo-à-valider)                                                       |
+| **Fallback `REALISE` → `PREVISIONNEL`**               | `finance`         | [finance/README.md](./finance/README.md#todo-hors-transfo)                                                          |
+| **Fenêtre évaluations vs EIG**                        | `controleQualite` | [controle-qualite/README.md](./controle-qualite/README.md#todo-métier)                                              |
+| **Clés de période CQ**                                | `controleQualite` | [controle-qualite/README.md](./controle-qualite/README.md#todo-métier)                                              |

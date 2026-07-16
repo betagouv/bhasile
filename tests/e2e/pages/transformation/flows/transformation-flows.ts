@@ -135,10 +135,7 @@ export const runExtensionFromContractions = async (
     page,
     TransformationType.EXTENSION_DEPUIS_STRUCTURES_QUI_CONTRACTENT
   );
-  await selectSources(page, {
-    type: StructureType.CADA,
-    structureIds: params.contractionSourceIds,
-  });
+  await selectSources(page, { structureIds: params.contractionSourceIds });
   await submitSelection(page);
   const transformationId = await captureTransformationId(page);
 

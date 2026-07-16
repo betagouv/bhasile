@@ -18,7 +18,6 @@ export const Adresses = (): ReactElement => {
     return (
       <CustomNotice
         severity="alert"
-        title=""
         description="Un problème technique a empêché l’enregistrement des hébergements liés à cette structure. La situation est en cours de correction, merci pour votre compréhension."
       />
     );
