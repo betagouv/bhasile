@@ -27,7 +27,9 @@ const makeActivite = (fields: {
     ...fields,
   }) as unknown as Activite;
 
-type Structure = Parameters<typeof collectCurrentDnaCodesInDepartement>[0][number];
+type Structure = Parameters<
+  typeof collectCurrentDnaCodesInDepartement
+>[0][number];
 
 let versionIdSeq = 0;
 
@@ -93,7 +95,10 @@ describe("computeDepartementAverage", () => {
     const stats = computeDepartementAverage(
       [
         makeActivite({ presencesInduesBPI: 4, presencesInduesDeboutees: 2 }),
-        makeActivite({ presencesInduesBPI: null, presencesInduesDeboutees: null }),
+        makeActivite({
+          presencesInduesBPI: null,
+          presencesInduesDeboutees: null,
+        }),
         makeActivite({ presencesInduesBPI: null, presencesInduesDeboutees: 3 }),
       ],
       "75"
@@ -107,10 +112,7 @@ describe("collectCurrentDnaCodesInDepartement", () => {
 
   it("collecte les dnaCodes des versions courantes du département, dédupliqués", () => {
     const codes = collectCurrentDnaCodesInDepartement(
-      [
-        makeStructure("75", ["D1", "D2"]),
-        makeStructure("75", ["D2", "D3"]),
-      ],
+      [makeStructure("75", ["D1", "D2"]), makeStructure("75", ["D2", "D3"])],
       "75",
       now
     );
@@ -149,7 +151,7 @@ describe("processActivitesForStructure", () => {
       }),
     ]);
     expect(rows).toHaveLength(1);
-    expect(rows[0].placesAutorisees).toBe(15);
+    expect(rows[0].placesEnregistreesDna).toBe(15);
   });
 
   it("renvoie un tableau vide quand il n'y a pas d'activité", () => {

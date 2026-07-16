@@ -82,7 +82,6 @@ export type FillOptions = {
   withQpvPmr?: boolean;
   withUploadActe?: boolean;
   withFermetureDoc?: boolean;
-  changeAddress?: boolean;
   typeBati?: Repartition;
 };
 
@@ -113,7 +112,12 @@ export const fillCreationIdentification = async (
   }
 
   await page.locator("#type").selectOption(context.structureType);
-  await fillAutocomplete(page, "#operateur", context.operateurSearch);
+
+  const operateurInput = page.locator("#operateur");
+  await operateurInput.waitFor({ state: "visible", timeout: 20_000 });
+  if (await operateurInput.isEnabled()) {
+    await fillAutocomplete(page, "#operateur", context.operateurSearch);
+  }
   await page.locator('input[name="nom"]').fill(context.creationNom);
   await fillAdminAddressManually(page);
 
@@ -148,23 +152,11 @@ export const fillCreationIdentification = async (
   }
 };
 
-export const fillExistingIdentification = async (
-  page: Page,
-  options: FillOptions = {}
-): Promise<void> => {
+export const fillExistingIdentification = async (page: Page): Promise<void> => {
   await robustFill(
     page.locator("#effectiveDate"),
     TRANSFORMATION_TEST_VALUES.effectiveDate
   );
-
-  const group = page.locator('[aria-labelledby="hasAdresseChanged-title"]');
-  await group.waitFor({ state: "visible", timeout: 15_000 });
-  await group
-    .getByRole("radio", { name: options.changeAddress ? "Oui" : "Non" })
-    .check({ force: true });
-  if (options.changeAddress) {
-    await fillAdminAddressManually(page);
-  }
 
   await fillEmptyFinessCodes(page);
   const perimetres = page.locator('input[name$=".perimetre"]');
@@ -277,6 +269,6 @@ export const fillCurrentStep = async (
   } else if (brique === "creation") {
     await fillCreationIdentification(page, context, options);
   } else {
-    await fillExistingIdentification(page, options);
+    await fillExistingIdentification(page);
   }
 };

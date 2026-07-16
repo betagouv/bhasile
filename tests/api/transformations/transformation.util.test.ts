@@ -3,8 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   applyPrefill,
   checkNoDuplicateStructureIds,
+  checkUniqueDepartement,
 } from "@/app/api/transformations/transformation.util";
-import { ApiDomainError } from "@/app/utils/apiErrorResponse.util";
+import { ApiDomainError } from "@/app/utils/apiDomainError.util";
 import { StructureVersionTransformationApiCreate } from "@/schemas/api/transformation.schema";
 import {
   StructureVersionTransformationType,
@@ -200,6 +201,64 @@ describe("checkNoDuplicateStructureIds", () => {
 
     expect(() =>
       checkNoDuplicateStructureIds(structureVersionTransformations)
+    ).not.toThrow();
+  });
+});
+
+describe("checkUniqueDepartement", () => {
+  it("rejette une sélection mêlant deux départements", () => {
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
+      [
+        {
+          type: StructureVersionTransformationType.CONTRACTION,
+          structureVersion: { departementAdministratif: "75" },
+        },
+        {
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: { departementAdministratif: "92" },
+        },
+      ];
+
+    expect(() =>
+      checkUniqueDepartement(structureVersionTransformations)
+    ).toThrow(ApiDomainError);
+    expect(() =>
+      checkUniqueDepartement(structureVersionTransformations)
+    ).toThrow(
+      "Toutes les structures d'une transformation doivent appartenir au même département."
+    );
+  });
+
+  it("laisse passer des structures du même département", () => {
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
+      [
+        {
+          type: StructureVersionTransformationType.CONTRACTION,
+          structureVersion: { departementAdministratif: "75" },
+        },
+        {
+          type: StructureVersionTransformationType.EXTENSION,
+          structureVersion: { departementAdministratif: "75" },
+        },
+      ];
+
+    expect(() =>
+      checkUniqueDepartement(structureVersionTransformations)
+    ).not.toThrow();
+  });
+
+  it("ignore les blocs de création sans département", () => {
+    const structureVersionTransformations: StructureVersionTransformationApiCreate[] =
+      [
+        {
+          type: StructureVersionTransformationType.FERMETURE,
+          structureVersion: { departementAdministratif: "75" },
+        },
+        { type: StructureVersionTransformationType.CREATION },
+      ];
+
+    expect(() =>
+      checkUniqueDepartement(structureVersionTransformations)
     ).not.toThrow();
   });
 });
