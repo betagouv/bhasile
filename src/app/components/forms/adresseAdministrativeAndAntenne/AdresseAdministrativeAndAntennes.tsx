@@ -36,7 +36,6 @@ export const AdresseAdministrativeAndAntennes = ({
         <>
           <CustomNotice
             severity="info"
-            title=""
             description="La structure représente l’ensemble de l’établissement, défini dans les documents de contractualisation et financiers. Il se peut que la structure soit répartie sur plusieurs sites administratifs géographiquement distants. Attention, on ne parle pas ici d’adresses d’hébergement (même dans le cas d’un bâti diffus ou mixte), celles-ci seront demandées à l’étape suivante."
           />
           <Checkbox

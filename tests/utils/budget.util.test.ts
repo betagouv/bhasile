@@ -13,11 +13,7 @@ const budget = (
 describe("budget util", () => {
   describe("getLatestBudgetExecutoireYear", () => {
     it("retourne l'année la plus récente dont la dotation est renseignée", () => {
-      const budgets = [
-        budget(2025, null),
-        budget(2024, 100),
-        budget(2023, 50),
-      ];
+      const budgets = [budget(2025, null), budget(2024, 100), budget(2023, 50)];
       expect(getLatestBudgetExecutoireYear(budgets, OPEN_YEAR)).toBe(2024);
     });
 

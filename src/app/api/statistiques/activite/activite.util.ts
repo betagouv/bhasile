@@ -1,5 +1,12 @@
-import { ratio } from "@/app/utils/math.util";
-import { roundStatsRate } from "@/app/utils/statistiques-format.util";
+import {
+  aggregateValues,
+  NumericAggregation,
+  ratio,
+} from "@/app/utils/math.util";
+import {
+  roundStatsNumber,
+  roundStatsRate,
+} from "@/app/utils/statistiques-format.util";
 import {
   isStructureEligibleForActiviteIndisponibilite,
   isStructureEligibleForActivitePresencesIndues,
@@ -13,6 +20,8 @@ import {
 import type {
   StatistiqueDbActivite,
   StatistiqueDbStructure,
+  StatistiquesActiviteByMonthContext,
+  StatistiquesActiviteSummaryContext,
   StatistiquesContext,
 } from "../statistiques.db.type";
 import {
@@ -24,9 +33,10 @@ import {
 
 type ActiviteTotals = {
   placesEnregistreesDna: number;
-  placesAutoriseesIndispo: number;
+  placesOccupees: number;
+  placesAutoriseesHorsCaes: number;
   placesIndisponibles: number;
-  placesAutoriseesPresencesIndues: number;
+  placesAutoriseesHorsCaesEtCph: number;
   presencesInduesBPI: number;
   presencesInduesDeboutees: number;
   desinsectisation: number;
@@ -37,9 +47,10 @@ type ActiviteTotals = {
 
 const emptyActiviteTotals = (): ActiviteTotals => ({
   placesEnregistreesDna: 0,
-  placesAutoriseesIndispo: 0,
+  placesOccupees: 0,
+  placesAutoriseesHorsCaes: 0,
   placesIndisponibles: 0,
-  placesAutoriseesPresencesIndues: 0,
+  placesAutoriseesHorsCaesEtCph: 0,
   presencesInduesBPI: 0,
   presencesInduesDeboutees: 0,
   desinsectisation: 0,
@@ -54,10 +65,12 @@ const toActiviteSummary = (totals: ActiviteTotals): ActiviteSummaryStat => {
 
   return {
     placesEnregistreesDna: totals.placesEnregistreesDna,
+    placesOccupees: totals.placesOccupees,
     placesIndisponibles: totals.placesIndisponibles,
-    placesDisponibles: totals.placesEnregistreesDna - totals.placesIndisponibles,
+    placesDisponibles:
+      totals.placesAutoriseesHorsCaes - totals.placesIndisponibles,
     tauxIndisponibilite: roundStatsRate(
-      ratio(totals.placesIndisponibles, totals.placesAutoriseesIndispo)
+      ratio(totals.placesIndisponibles, totals.placesAutoriseesHorsCaes)
     ),
     motifsIndisponibilite: {
       desinsectisation: totals.desinsectisation,
@@ -67,18 +80,18 @@ const toActiviteSummary = (totals: ActiviteTotals): ActiviteSummaryStat => {
     },
     presencesInduesBPI: totals.presencesInduesBPI,
     tauxPresencesInduesBPI: roundStatsRate(
-      ratio(totals.presencesInduesBPI, totals.placesAutoriseesPresencesIndues)
+      ratio(totals.presencesInduesBPI, totals.placesAutoriseesHorsCaesEtCph)
     ),
     presencesInduesDeboutees: totals.presencesInduesDeboutees,
     tauxPresencesInduesDeboutees: roundStatsRate(
       ratio(
         totals.presencesInduesDeboutees,
-        totals.placesAutoriseesPresencesIndues
+        totals.placesAutoriseesHorsCaesEtCph
       )
     ),
     presencesInduesTotal,
     tauxPresencesInduesTotal: roundStatsRate(
-      ratio(presencesInduesTotal, totals.placesAutoriseesPresencesIndues)
+      ratio(presencesInduesTotal, totals.placesAutoriseesHorsCaesEtCph)
     ),
   };
 };
@@ -92,6 +105,7 @@ const toActiviteByMonthStat = (
   return {
     date: monthKeyToDate(monthKey),
     placesEnregistreesDna: summary.placesEnregistreesDna,
+    placesOccupees: summary.placesOccupees,
     placesIndisponibles: summary.placesIndisponibles,
     tauxIndisponibilite: summary.tauxIndisponibilite,
     presencesInduesBPI: summary.presencesInduesBPI,
@@ -131,7 +145,9 @@ const accumulateActivite = (
   const placesAutorisees = activite.placesAutorisees ?? 0;
 
   totals.placesEnregistreesDna += placesAutorisees;
+  totals.placesOccupees += activite.placesOccupees ?? 0;
 
+  // Exclusion CAES
   if (
     structureIds.some((structureId) =>
       isStructureEligibleForActiviteIndisponibilite(
@@ -139,7 +155,7 @@ const accumulateActivite = (
       )
     )
   ) {
-    totals.placesAutoriseesIndispo += placesAutorisees;
+    totals.placesAutoriseesHorsCaes += placesAutorisees;
     totals.placesIndisponibles += activite.placesIndisponibles ?? 0;
     totals.desinsectisation += activite.desinsectisation ?? 0;
     totals.remiseEnEtat += activite.remiseEnEtat ?? 0;
@@ -154,7 +170,7 @@ const accumulateActivite = (
       )
     )
   ) {
-    totals.placesAutoriseesPresencesIndues += placesAutorisees;
+    totals.placesAutoriseesHorsCaesEtCph += placesAutorisees;
     totals.presencesInduesBPI += activite.presencesInduesBPI ?? 0;
     totals.presencesInduesDeboutees += activite.presencesInduesDeboutees ?? 0;
   }
@@ -187,20 +203,11 @@ const buildLatestActiviteByStructureId = (
   return latestByStructureId;
 };
 
-export const computeActiviteStatistiques = (
-  context: StatistiquesContext
-): StatistiqueApiRead["activite"] => {
-  const {
-    activites,
-    dnaLinks,
-    structureVersionTimeline,
-    allStructures,
-    structures,
-    activeStructureIdsByPeriod,
-  } = context;
-  const structureTypeById = new Map(
-    allStructures.map((structure) => [structure.id, structure.type])
-  );
+const accumulateActiviteSummaryTotals = (
+  context: StatistiquesActiviteSummaryContext,
+  structureTypeById: Map<number, StatistiqueDbStructure["type"]>
+): ActiviteTotals => {
+  const { activites, dnaLinks, structureVersionTimeline, structures } = context;
   const structureIdsNow = new Set(structures.map((structure) => structure.id));
 
   const summaryTotals = emptyActiviteTotals();
@@ -220,6 +227,24 @@ export const computeActiviteStatistiques = (
     );
   }
 
+  return summaryTotals;
+};
+
+const buildStructureTypeById = (
+  allStructures: StatistiqueDbStructure[]
+): Map<number, StatistiqueDbStructure["type"]> =>
+  new Map(allStructures.map((structure) => [structure.id, structure.type]));
+
+const computeActiviteByMonthTotals = (
+  context: StatistiquesActiviteByMonthContext,
+  structureTypeById: Map<number, StatistiqueDbStructure["type"]>
+): Map<string, ActiviteTotals> => {
+  const {
+    activites,
+    dnaLinks,
+    structureVersionTimeline,
+    activeStructureIdsByPeriod,
+  } = context;
   const byMonth = new Map<string, ActiviteTotals>();
 
   for (const activite of activites) {
@@ -244,10 +269,64 @@ export const computeActiviteStatistiques = (
     byMonth.set(monthKey, monthTotals);
   }
 
+  return byMonth;
+};
+
+const toActiviteByMonthStats = (
+  byMonth: Map<string, ActiviteTotals>
+): ActiviteByMonthStat[] =>
+  [...byMonth.entries()]
+    .sort(([monthKeyA], [monthKeyB]) => monthKeyA.localeCompare(monthKeyB))
+    .map(([monthKey, monthTotals]) =>
+      toActiviteByMonthStat(monthKey, monthTotals)
+    );
+
+export const computeActiviteByMonth = (
+  context: StatistiquesActiviteByMonthContext
+): ActiviteByMonthStat[] =>
+  toActiviteByMonthStats(
+    computeActiviteByMonthTotals(
+      context,
+      buildStructureTypeById(context.allStructures)
+    )
+  );
+
+export type ActiviteYearField =
+  | "placesEnregistreesDna"
+  | "placesOccupees"
+  | "placesIndisponibles"
+  | "presencesInduesTotal";
+
+export const computeActiviteFieldForYears = (
+  context: StatistiquesActiviteByMonthContext,
+  years: number[],
+  aggregation: NumericAggregation,
+  field: ActiviteYearField
+): (number | null)[] => {
+  const valuesByYear = new Map<number, number[]>();
+  for (const month of computeActiviteByMonth(context)) {
+    const year = month.date.getUTCFullYear();
+    const values = valuesByYear.get(year) ?? [];
+    values.push(month[field]);
+    valuesByYear.set(year, values);
+  }
+
+  return years.map((year) =>
+    roundStatsNumber(aggregateValues(valuesByYear.get(year) ?? [], aggregation))
+  );
+};
+
+export const computeActiviteStatistiques = (
+  context: StatistiquesContext
+): StatistiqueApiRead["activite"] => {
+  const structureTypeById = buildStructureTypeById(context.allStructures);
+
   return {
-    summary: toActiviteSummary(summaryTotals),
-    byMonth: [...byMonth.entries()]
-      .sort(([monthKeyA], [monthKeyB]) => monthKeyA.localeCompare(monthKeyB))
-      .map(([monthKey, monthTotals]) => toActiviteByMonthStat(monthKey, monthTotals)),
+    summary: toActiviteSummary(
+      accumulateActiviteSummaryTotals(context, structureTypeById)
+    ),
+    byMonth: toActiviteByMonthStats(
+      computeActiviteByMonthTotals(context, structureTypeById)
+    ),
   };
 };

@@ -6,7 +6,6 @@ export const MaxSizeNotice = ({ className }: { className?: string }) => {
   return (
     <CustomNotice
       severity="info"
-      title=""
       className={cn(
         "rounded [&_p]:flex [&_p]:items-center mb-8 w-fit",
         className

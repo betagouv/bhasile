@@ -2,7 +2,7 @@ model Rmu {
   id                Int         @id @default(autoincrement())
   departementNumero String
   departement       Departement @relation(fields: [departementNumero], references: [numero])
-  date              DateTime // 1er du mois à midi UTC
+  date              DateTime // dernier jour du mois à midi UTC
 
   deboutesSansMesureAdministrative Int?
   misesEnDemeure                   Int?

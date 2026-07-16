@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { computeControleQualiteStatistiques } from "@/app/api/statistiques/controle-qualite/controle-qualite.util";
+import {
+  computeControleQualiteByYear,
+  computeControleQualiteStatistiques,
+} from "@/app/api/statistiques/controle-qualite/controle-qualite.util";
 import type { StatistiquesContext } from "@/app/api/statistiques/statistiques.db.type";
 import { StructureType } from "@/types/structure.type";
 
@@ -175,6 +178,39 @@ describe("contrôle qualité - regroupements mois / trimestre / année", () => {
     expect(february?.nbEig).toBe(2);
     expect(trimester2025Q1?.nbEig).toBe(3);
     expect(year2025?.nbEig).toBe(4);
+  });
+
+  it("ne compte que les EIG résolvant vers une structure active en scope (pas le total du périmètre)", () => {
+    const result = computeControleQualiteByYear(
+      buildControleQualiteContext([1, 2], {
+        eigs: [
+          {
+            id: 1,
+            dnaCode: "DNA01", // structure 1 : en scope
+            type: "autre motif",
+            evenementDate: new Date("2025-03-10T00:00:00.000Z"),
+          },
+          {
+            id: 2,
+            dnaCode: "DNA02", // structure 2 : hors scope
+            type: "autre motif",
+            evenementDate: new Date("2025-03-10T00:00:00.000Z"),
+          },
+        ],
+        // seule la structure 1 est active dans le périmètre découpé
+        activeStructureIdsByPeriod: buildTestActiveStructureIdsByPeriod([1], {
+          periodDates: [new Date("2025-03-10T00:00:00.000Z")],
+        }),
+      }),
+      "moyenne"
+    );
+
+    const year2025 = result.find(
+      (entry) => entry.date.toISOString().slice(0, 4) === "2025"
+    );
+
+    // Avant le fix : 2 (les deux EIG du périmètre). Après : 1 (DNA02 exclu).
+    expect(year2025?.nbEig).toBe(1);
   });
 });
 

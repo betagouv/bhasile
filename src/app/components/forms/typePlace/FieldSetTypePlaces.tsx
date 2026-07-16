@@ -47,7 +47,6 @@ export const FieldSetTypePlaces = ({
       </p>
       <CustomNotice
         severity="info"
-        title=""
         className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
         description="PMR : Personnes à Mobilité Réduite – LGBT : Lesbiennes, Gays, Bisexuels et Transgenres (ici places définies comme spécialisées) – FVV : Femmes Victimes de Violences, TEH : Traîte des Êtres Humains (ici places définies comme labellisées)"
       />

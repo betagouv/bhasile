@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 
+import type { FileWithParents } from "@/app/api/files/file.db.type";
 // eslint-disable-next-line no-restricted-imports
 import { Structure } from "@/generated/prisma/client";
-import { canUpdateDepartement, canUpdateStructure } from "@/lib/casl/abilities";
+import {
+  canDeleteFile,
+  canUpdateDepartement,
+  canUpdateStructure,
+} from "@/lib/casl/abilities";
 import { SessionUser } from "@/types/global";
 
 describe("Permissions : canUpdateStructure", () => {
@@ -105,5 +110,146 @@ describe("Permissions : canUpdateDepartement", () => {
   it("masque les transformations sans département à un agent DEPARTEMENT", () => {
     expect(canUpdateDepartement(departementUser, undefined)).toBe(false);
     expect(canUpdateDepartement(departementUser, null)).toBe(false);
+  });
+});
+
+describe("Permissions : canDeleteFile", () => {
+  const nationalUser = {
+    id: "national",
+    role: "NATIONAL",
+    allowedDepartements: [] as string[],
+  } as SessionUser;
+
+  const dep75User = {
+    id: "dep75",
+    role: "DEPARTEMENT_PARIS",
+    allowedDepartements: ["75"],
+  } as SessionUser;
+
+  const dep92User = {
+    id: "dep92",
+    role: "DEPARTEMENT_HAUTS_DE_SEINE",
+    allowedDepartements: ["92"],
+  } as SessionUser;
+
+  const buildFile = (overrides: Partial<FileWithParents>): FileWithParents =>
+    ({
+      acteAdministratifId: null,
+      documentFinancierId: null,
+      controleId: null,
+      evaluationId: null,
+      operateurId: null,
+      acteAdministratif: null,
+      documentFinancier: null,
+      controle: null,
+      evaluation: null,
+      operateur: null,
+      ...overrides,
+    }) as unknown as FileWithParents;
+
+  it("autorise n'importe quel agent à supprimer un fichier d'une transformation en cours (acte lié à une structureVersionTransformation)", () => {
+    const file = buildFile({
+      acteAdministratifId: 1,
+      acteAdministratif: {
+        structureVersionTransformationId: 7,
+        structureId: null,
+        cpom: null,
+        operateur: null,
+        structure: null,
+      } as unknown as FileWithParents["acteAdministratif"],
+    });
+
+    expect(canDeleteFile(dep92User, file)).toBe(true);
+  });
+
+  it("cloisonne par département la suppression d'un fichier d'acte lié à une structure", () => {
+    const file = buildFile({
+      acteAdministratifId: 1,
+      acteAdministratif: {
+        structureVersionTransformationId: null,
+        structureId: 10,
+        cpom: null,
+        operateur: null,
+        structure: { departementAdministratif: "75" },
+      } as unknown as FileWithParents["acteAdministratif"],
+    });
+
+    expect(canDeleteFile(dep75User, file)).toBe(true);
+    expect(canDeleteFile(dep92User, file)).toBe(false);
+  });
+
+  it("autorise tout agent à supprimer un fichier d'acte lié à un CPOM (non scopé par département)", () => {
+    const file = buildFile({
+      acteAdministratifId: 1,
+      acteAdministratif: {
+        structureVersionTransformationId: null,
+        structureId: null,
+        cpom: { id: 3 },
+        operateur: null,
+        structure: null,
+      } as unknown as FileWithParents["acteAdministratif"],
+    });
+
+    expect(canDeleteFile(dep92User, file)).toBe(true);
+  });
+
+  it("cloisonne par département la suppression d'un document financier", () => {
+    const file = buildFile({
+      documentFinancierId: 5,
+      documentFinancier: {
+        structure: { departementAdministratif: "92" },
+      } as unknown as FileWithParents["documentFinancier"],
+    });
+
+    expect(canDeleteFile(dep92User, file)).toBe(true);
+    expect(canDeleteFile(dep75User, file)).toBe(false);
+  });
+
+  it("cloisonne par département la suppression d'un fichier de contrôle", () => {
+    const file = buildFile({
+      controleId: 8,
+      controle: {
+        structure: { departementAdministratif: "75" },
+      } as unknown as FileWithParents["controle"],
+    });
+
+    expect(canDeleteFile(dep75User, file)).toBe(true);
+    expect(canDeleteFile(dep92User, file)).toBe(false);
+  });
+
+  it("autorise tout agent à supprimer un logo d'opérateur (non scopé par département)", () => {
+    const file = buildFile({
+      operateurId: 4,
+      operateur: { id: 4 } as unknown as FileWithParents["operateur"],
+    });
+
+    expect(canDeleteFile(dep92User, file)).toBe(true);
+  });
+
+  it("refuse à un agent départemental un fichier dont la structure parente est introuvable, mais autorise un agent NATIONAL", () => {
+    const file = buildFile({
+      documentFinancierId: 5,
+      documentFinancier: {
+        structure: null,
+      } as unknown as FileWithParents["documentFinancier"],
+    });
+
+    expect(canDeleteFile(dep75User, file)).toBe(false);
+    expect(canDeleteFile(nationalUser, file)).toBe(true);
+  });
+
+  it("refuse par défaut la suppression d'un fichier d'acte rattaché à aucune entité résolvable", () => {
+    const file = buildFile({
+      acteAdministratifId: 1,
+      acteAdministratif: {
+        structureVersionTransformationId: null,
+        structureId: null,
+        cpom: null,
+        operateur: null,
+        structure: null,
+      } as unknown as FileWithParents["acteAdministratif"],
+    });
+
+    expect(canDeleteFile(nationalUser, file)).toBe(false);
   });
 });
