@@ -953,6 +953,11 @@
   dependencies:
     "@tybys/wasm-util" "^0.10.1"
 
+"@nazka/map-gl-js-spiderfy@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@nazka/map-gl-js-spiderfy/-/map-gl-js-spiderfy-2.0.0.tgz#7b9324625c12d42ed37528e4218e9186d5f2ecef"
+  integrity sha512-puFWuTXtsoFKEFlmaF1EcPhRZRIuvsGwuYmVPNT0nTbVHXC//jKJa57uxfwVps01AQJBiyewQ30ElUzv8Kp3fg==
+
 "@next/env@16.2.10":
   version "16.2.10"
   resolved "https://registry.yarnpkg.com/@next/env/-/env-16.2.10.tgz#0e9473a5577807292e11d3bf9e075d3bf036860f"

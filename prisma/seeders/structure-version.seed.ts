@@ -27,6 +27,22 @@ import { createFakeStructureTypologie } from "./structure-typologie.seed";
 export type FormDefInfo = { id: number; stepDefinitionIds: number[] };
 export type FormDefLookup = Map<string, FormDefInfo>;
 
+export type Coordinates = { latitude: number; longitude: number };
+
+const STRUCTURE_ZONE = {
+  minLatitude: 43.550851,
+  maxLatitude: 49.131627,
+  minLongitude: -0.851371,
+  maxLongitude: 5.843377,
+};
+
+export const COLOCATED_COORDINATES: Coordinates = {
+  latitude: STRUCTURE_ZONE.maxLatitude - 0.05,
+  longitude: STRUCTURE_ZONE.minLongitude + 0.05,
+};
+
+export const COLOCATED_STRUCTURES_COUNT = 4;
+
 export type SeedStructureParams = {
   operateurId: number;
   codeBhasile: string;
@@ -39,6 +55,7 @@ export type SeedStructureParams = {
   finalisationFormDefId: number;
   finalisationStepDefinitions: { id: number; slug: string }[];
   initialisationCampaignDefinitionId: number;
+  coordinates?: Coordinates;
 };
 
 export type SeededStructure = { structureId: number; currentVersionId: number };
@@ -178,7 +195,8 @@ type VersionScalars = {
 
 const buildVersionScalars = (
   departementAdministratif: string,
-  ofii: boolean
+  ofii: boolean,
+  coordinates?: Coordinates
 ): VersionScalars => {
   const base: VersionScalars = {
     nom: faker.lorem.words(2),
@@ -197,10 +215,18 @@ const buildVersionScalars = (
     communeAdministrative: faker.location.city(),
     codePostalAdministratif: faker.location.zipCode(),
     latitude: new Prisma.Decimal(
-      faker.location.latitude({ min: 43.550851, max: 49.131627 })
+      coordinates?.latitude ??
+        faker.location.latitude({
+          min: STRUCTURE_ZONE.minLatitude,
+          max: STRUCTURE_ZONE.maxLatitude,
+        })
     ),
     longitude: new Prisma.Decimal(
-      faker.location.longitude({ min: -0.851371, max: 5.843377 })
+      coordinates?.longitude ??
+        faker.location.longitude({
+          min: STRUCTURE_ZONE.minLongitude,
+          max: STRUCTURE_ZONE.maxLongitude,
+        })
     ),
     public: faker.helpers.enumValue(PublicType),
     notes: faker.lorem.lines(2),
@@ -535,7 +561,8 @@ export const seedStructureWithVersions = async (
   const plan = planStructureHistory(params.ofii, params.now);
   const scalars = buildVersionScalars(
     params.departementAdministratif,
-    params.ofii
+    params.ofii,
+    params.coordinates
   );
   const contacts: StableContacts = params.ofii
     ? []
