@@ -19,6 +19,7 @@ export const createFakeFormTransformation = (): Omit<FormDefinition, "id"> => {
     name: "transformation",
     slug: TRANSFORMATION_FORM_SLUG,
     version: 1,
+    deadline: null,
   };
 };
 export const createFakeFormFinalisation = (): Omit<FormDefinition, "id"> => {
@@ -26,6 +27,7 @@ export const createFakeFormFinalisation = (): Omit<FormDefinition, "id"> => {
     name: "finalisation",
     slug: FINALISATION_FORM_SLUG,
     version: 1,
+    deadline: null,
   };
 };
 export const createFakeFormStructureVersionTransformationCreation = (): Omit<
@@ -38,6 +40,7 @@ export const createFakeFormStructureVersionTransformationCreation = (): Omit<
       StructureVersionTransformationType.CREATION
     ],
     version: 1,
+    deadline: null,
   };
 };
 export const createFakeFormStructureVersionTransformationExtension = (): Omit<
@@ -50,6 +53,7 @@ export const createFakeFormStructureVersionTransformationExtension = (): Omit<
       StructureVersionTransformationType.EXTENSION
     ],
     version: 1,
+    deadline: null,
   };
 };
 export const createFakeFormStructureVersionTransformationContraction = (): Omit<
@@ -62,6 +66,7 @@ export const createFakeFormStructureVersionTransformationContraction = (): Omit<
       StructureVersionTransformationType.CONTRACTION
     ],
     version: 1,
+    deadline: null,
   };
 };
 export const createFakeFormStructureVersionTransformationFermeture = (): Omit<
@@ -74,6 +79,7 @@ export const createFakeFormStructureVersionTransformationFermeture = (): Omit<
       StructureVersionTransformationType.FERMETURE
     ],
     version: 1,
+    deadline: null,
   };
 };
 

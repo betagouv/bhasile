@@ -17,7 +17,7 @@ import {
 
 type StructureVersionParent = Pick<
   EntityId,
-  "structureId" | "structureVersionTransformationId" | "campaignId"
+  "structureId" | "structureVersionTransformationId"
 >;
 
 const getScalarData = (version: StructureVersionApiType) => ({
@@ -53,7 +53,6 @@ const createOneStructureVersion = async (
     ...getScalarData(version),
     structureId: parent.structureId,
     structureVersionTransformationId: parent.structureVersionTransformationId,
-    campaignId: parent.campaignId,
   };
 
   const created = await tx.structureVersion.create({ data });

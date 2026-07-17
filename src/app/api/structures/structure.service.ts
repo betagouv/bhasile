@@ -22,6 +22,7 @@ import {
 import { getAntennesApiRead } from "../antennes/antenne.util";
 import { getDnaStructuresApiRead } from "../dna-structures/dna-structure.util";
 import { getStructureFinessesApiRead } from "../finesses/finess.util";
+import { resolveTypologiesPlacesAutorisees } from "../structure-typologies/structure-typologie.util";
 import { resolveCurrentVersion } from "../structure-versions/structure-version.util";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
@@ -332,12 +333,19 @@ const dbStructureToApiRead = (
 
   const campaigns = simple
     ? []
-    : buildStructureCampaigns(
-        (dbStructure as StructureDbDetails).structureVersions
+    : buildStructureCampaigns((dbStructure as StructureDbDetails).forms);
+
+  const structureTypologies = simple
+    ? (dbStructure.structureTypologies ?? [])
+    : resolveTypologiesPlacesAutorisees(
+        dbStructure.structureTypologies ?? [],
+        (dbStructure as StructureDbDetails).structureVersions ?? [],
+        now
       );
 
   return recursivelySerializeDates({
     ...dbStructure,
+    structureTypologies,
     debutConvention,
     finConvention,
     debutPeriodeAutorisation,

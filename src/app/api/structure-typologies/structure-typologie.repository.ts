@@ -9,8 +9,8 @@ const getUniqueWhere = (
 ):
   | { structureId_year: { structureId: number; year: number } }
   | {
-      structureVersionId_year: {
-        structureVersionId: number;
+      structureVersionTransformationId_year: {
+        structureVersionTransformationId: number;
         year: number;
       };
     } => {
@@ -22,24 +22,24 @@ const getUniqueWhere = (
       },
     };
   }
-  if (entityId.structureVersionId !== undefined) {
+  if (entityId.structureVersionTransformationId !== undefined) {
     return {
-      structureVersionId_year: {
-        structureVersionId: entityId.structureVersionId,
+      structureVersionTransformationId_year: {
+        structureVersionTransformationId:
+          entityId.structureVersionTransformationId,
         year,
       },
     };
   }
   throw new Error(
-    "structureId ou structureVersionId est requis pour une structureTypologie"
+    "structureId ou structureVersionTransformationId est requis pour une structureTypologie"
   );
 };
 
 export const createOrUpdateStructureTypologies = async (
   tx: PrismaTransaction,
   structureTypologies:
-    | PartialExcept<StructureTypologieApiType, "year">[]
-    | undefined,
+    PartialExcept<StructureTypologieApiType, "year">[] | undefined,
   entityId: EntityId
 ): Promise<void> => {
   if (!structureTypologies || structureTypologies.length === 0) {

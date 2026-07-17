@@ -10,11 +10,7 @@ import {
   recursivelySerializeDates,
   startOfNextUtcDay,
 } from "@/app/utils/date.util";
-import {
-  type SortKind,
-  sortRows,
-  type SortValue,
-} from "@/app/utils/list.util";
+import { type SortKind, sortRows, type SortValue } from "@/app/utils/list.util";
 import { normalizeAccents, parseCommaList } from "@/app/utils/string.util";
 import { CURRENT_YEAR } from "@/constants";
 import {
@@ -38,7 +34,10 @@ import {
 } from "@/types/structure-history.type";
 import { UpcomingTransformation } from "@/types/transformation.type";
 
-import { FINALISATION_FORM_SLUG } from "../forms/form.constants";
+import {
+  ACTUALISATION_FORM_SLUG_PREFIX,
+  FINALISATION_FORM_SLUG,
+} from "../forms/form.constants";
 import { StructureVersionDbDetails } from "../structure-versions/structure-version.db.type";
 import {
   getValidVersions,
@@ -207,45 +206,34 @@ export const isStructureInCpomPerYear = (
 
 export const isFinalisationFormValidated = (
   forms:
-    | { status: boolean; formDefinition: { slug: string } }[]
-    | null
-    | undefined
+    { status: boolean; formDefinition: { slug: string } }[] | null | undefined
 ): boolean =>
   forms?.some(
     (form) => form.formDefinition.slug === FINALISATION_FORM_SLUG && form.status
   ) ?? false;
 
 export const buildStructureCampaigns = (
-  versions: {
-    campaign?: {
-      form: {
-        status: boolean;
-        formSteps: {
-          status: string;
-          stepDefinition: { slug: string };
-        }[];
-      } | null;
-      campaignDefinition: { slug: string } | null;
-    } | null;
+  forms: {
+    status: boolean;
+    formDefinition: { slug: string };
+    formSteps: {
+      status: string;
+      stepDefinition: { slug: string };
+    }[];
   }[]
 ): StructureCampaignApiRead[] =>
-  versions.flatMap((version) => {
-    const campaign = version.campaign;
-    if (!campaign || !campaign.campaignDefinition) {
-      return [];
-    }
-    return [
-      {
-        slug: campaign.campaignDefinition.slug,
-        isValidated: campaign.form?.status === true,
-        formSteps:
-          campaign.form?.formSteps.map((formStep) => ({
-            slug: formStep.stepDefinition.slug,
-            status: formStep.status as StepStatus,
-          })) ?? [],
-      },
-    ];
-  });
+  forms
+    .filter((form) =>
+      form.formDefinition.slug.startsWith(ACTUALISATION_FORM_SLUG_PREFIX)
+    )
+    .map((form) => ({
+      slug: form.formDefinition.slug,
+      isValidated: form.status === true,
+      formSteps: form.formSteps.map((formStep) => ({
+        slug: formStep.stepDefinition.slug,
+        status: formStep.status as StepStatus,
+      })),
+    }));
 
 export const isBornFromCreation = (
   versions:
@@ -340,12 +328,9 @@ export const computeStructureListRow = (
     departementAdministratif: currentVersion.departementAdministratif,
     communeAdministrative: currentVersion.communeAdministrative,
     bati: getTypeBati(currentVersion),
-    placesAutorisees:
-      currentVersion.structureTypologies[0]?.placesAutorisees ?? null,
-    latestNonNullPlacesAutorisees:
-      currentVersion.structureTypologies.find(
-        (typologie) => typologie.placesAutorisees !== null
-      )?.placesAutorisees ?? null,
+    placesAutorisees: currentVersion.placesAutorisees ?? null,
+    // TODO: redondant avec placesAutorisees depuis le scalaire de version — collapser en cleaning
+    latestNonNullPlacesAutorisees: currentVersion.placesAutorisees ?? null,
     finConvention: getDatesConvention(structure)[1],
     latitude: currentVersion.latitude,
     longitude: currentVersion.longitude,

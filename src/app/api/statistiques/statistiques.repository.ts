@@ -106,10 +106,10 @@ export const findStructureTypologies = async (
   structureIds: number[]
 ): Promise<StatistiqueDbTypologie[]> => {
   const rows = await prisma.structureTypologie.findMany({
-    where: structureVersionScope(structureIds),
+    where: { structureId: { in: structureIds } },
     select: {
       id: true,
-      structureVersion: { select: { structureId: true } },
+      structureId: true,
       year: true,
       placesAutorisees: true,
       pmr: true,
@@ -121,7 +121,7 @@ export const findStructureTypologies = async (
 
   return rows.map((row) => ({
     id: row.id,
-    structureId: structureIdFromVersion(row),
+    structureId: row.structureId!,
     year: row.year,
     placesAutorisees: row.placesAutorisees,
     pmr: row.pmr,

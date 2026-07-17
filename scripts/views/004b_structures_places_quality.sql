@@ -18,7 +18,7 @@ WITH
       st."year"
     FROM
 :"SCHEMA"."structures_core" sc
-      INNER JOIN public."StructureTypologie" st ON st."structureVersionId" = sc."structure_version_id"
+      INNER JOIN public."StructureTypologie" st ON st."structureId" = sc."id"
     WHERE
       st."placesAutorisees" IS NOT NULL
     ORDER BY
@@ -77,7 +77,7 @@ WITH
       MAX(st."fvvTeh") AS "fvvteh_places"
     FROM
 :"SCHEMA"."structures_core" sc
-      INNER JOIN public."StructureTypologie" st ON st."structureVersionId" = sc."structure_version_id"
+      INNER JOIN public."StructureTypologie" st ON st."structureId" = sc."id"
     GROUP BY
       sc."id"
   ),
@@ -92,7 +92,7 @@ WITH
       ) AS "has_issue_specific_places_gt_places_autorisees"
     FROM
 :"SCHEMA"."structures_core" sc
-      INNER JOIN public."StructureTypologie" st ON st."structureVersionId" = sc."structure_version_id"
+      INNER JOIN public."StructureTypologie" st ON st."structureId" = sc."id"
     GROUP BY
       sc."id"
   )

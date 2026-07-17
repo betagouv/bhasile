@@ -19,6 +19,5 @@ export const VERSIONED_FIELD_KEYS = [
   "antennes",
   "structureFinesses",
   "dnaStructures",
-  "structureTypologies",
 ] as const satisfies readonly (keyof StructureAgentUpdateApiType &
   keyof StructureVersionDbDetails)[];
