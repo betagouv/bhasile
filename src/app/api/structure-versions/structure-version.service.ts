@@ -120,13 +120,6 @@ export const copyStructureVersion = (
       logementSocial: typologie.logementSocial,
     })),
   })),
-  structureTypologies: structure.structureTypologies.map((typologie) => ({
-    year: typologie.year,
-    placesAutorisees: typologie.placesAutorisees ?? undefined,
-    pmr: typologie.pmr ?? undefined,
-    lgbt: typologie.lgbt ?? undefined,
-    fvvTeh: typologie.fvvTeh ?? undefined,
-  })),
   dnaStructures: structure.dnaStructures.map((dnaStructure) => ({
     description: dnaStructure.description ?? undefined,
     dna: {

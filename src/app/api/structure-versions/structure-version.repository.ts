@@ -8,7 +8,6 @@ import { createOrUpdateAntennes } from "../antennes/antenne.repository";
 import { createOrUpdateContacts } from "../contacts/contact.repository";
 import { createOrUpdateDnaStructures } from "../dna-structures/dna-structure.repository";
 import { createOrUpdateStructureFinesses } from "../finesses/finess.repository";
-import { createOrUpdateStructureTypologies } from "../structure-typologies/structure-typologie.repository";
 import { convertToPublicType } from "../structures/structure.util";
 import {
   checkCreatedStructureDepartement,
@@ -33,6 +32,7 @@ const getScalarData = (version: StructureVersionApiType) => ({
   notes: version.notes ?? undefined,
   nomOfii: version.nomOfii ?? undefined,
   directionTerritoriale: version.directionTerritoriale ?? undefined,
+  placesAutorisees: version.placesAutorisees ?? undefined,
 });
 
 const createOneStructureVersion = async (
@@ -181,11 +181,6 @@ const persistRelations = async (
   await createOrUpdateStructureFinesses(
     tx,
     version.structureFinesses,
-    entityId
-  );
-  await createOrUpdateStructureTypologies(
-    tx,
-    version.structureTypologies,
     entityId
   );
   await createOrUpdateDnaStructures(tx, version.dnaStructures, entityId);
