@@ -1,6 +1,8 @@
 model Transformation {
   id                              Int                              @id @default(autoincrement())
   type                            TransformationType
+  source                          TransformationSource             @default(AGENT)
+  numeroDossier                   String?                          @unique // Dossier Démarches Numériques d'origine
   form                            Form? // Pour le lien au bouton "Finaliser"
   createdAt                       DateTime                         @default(now())
   updatedAt                       DateTime                         @updatedAt
@@ -53,6 +55,13 @@ enum StructureVersionTransformationType {
   FERMETURE
   CONTRACTION
   EXTENSION
+
+  @@schema("public")
+}
+
+enum TransformationSource {
+  AGENT
+  DEMARCHES_NUMERIQUES
 
   @@schema("public")
 }
