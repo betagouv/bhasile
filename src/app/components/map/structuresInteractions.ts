@@ -32,6 +32,11 @@ const isNumberPair = (value: unknown): value is [number, number] => {
   );
 };
 
+const getCoordinates = (feature: { geometry: unknown }): LngLatTuple | null => {
+  const coords = (feature.geometry as { coordinates?: unknown }).coordinates;
+  return isNumberPair(coords) ? coords : null;
+};
+
 export const bindStructuresInteractions = ({
   map,
   pointsRef,
@@ -60,13 +65,6 @@ export const bindStructuresInteractions = ({
       .find((feature) =>
         feature.layer.id.startsWith(SPIDERFY_LEAF_LAYER_PREFIX)
       );
-  };
-
-  const getCoordinates = (feature: {
-    geometry: unknown;
-  }): LngLatTuple | null => {
-    const coords = (feature.geometry as { coordinates?: unknown }).coordinates;
-    return isNumberPair(coords) ? coords : null;
   };
 
   let hiddenClusterId: number | null = null;
@@ -120,18 +118,17 @@ export const bindStructuresInteractions = ({
   const getLeafAnchor = (
     leaf: maplibregl.MapGeoJSONFeature
   ): LngLatTuple | null => {
-    const coordsUnknown = (leaf.geometry as { coordinates?: unknown })
-      .coordinates;
-    if (!isNumberPair(coordsUnknown)) {
+    const coords = getCoordinates(leaf);
+    if (!coords) {
       return null;
     }
 
     const offset = map.getLayoutProperty(leaf.layer.id, "icon-offset");
     if (!isNumberPair(offset)) {
-      return coordsUnknown;
+      return coords;
     }
 
-    const projected = map.project(coordsUnknown);
+    const projected = map.project(coords);
     const anchor = map.unproject([
       projected.x + offset[0],
       projected.y + offset[1],
@@ -161,13 +158,12 @@ export const bindStructuresInteractions = ({
       return;
     }
 
-    const coordsUnknown = (feature.geometry as { coordinates?: unknown })
-      .coordinates;
-    if (!isNumberPair(coordsUnknown)) {
+    const coords = getCoordinates(feature);
+    if (!coords) {
       return;
     }
 
-    openPopup(String(feature.properties?.id ?? ""), coordsUnknown);
+    openPopup(String(feature.properties?.id ?? ""), coords);
   };
 
   const onMapClick = (event: maplibregl.MapMouseEvent) => {

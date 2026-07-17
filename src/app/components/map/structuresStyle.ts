@@ -73,7 +73,7 @@ const addClusterCircleImage = (
   });
 };
 
-export const addStructuresMarkerImage = async (
+export const addStructuresImages = async (
   map: maplibregl.Map
 ): Promise<void> => {
   await addSingleMarkerImage(map);
@@ -135,7 +135,7 @@ export const addStructuresLayers = (map: maplibregl.Map): void => {
     id: STRUCTURES_LAYER_UNCLUSTERED_ID,
     type: "symbol",
     source: STRUCTURES_SOURCE_ID,
-    filter: ["!", ["has", "point_count"]],
+    filter: ["!", STRUCTURES_CLUSTER_FILTER],
     layout: STRUCTURE_MARKER_LAYOUT,
   });
 };
