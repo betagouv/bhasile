@@ -1,7 +1,9 @@
 "use client";
 
 import Button from "@codegouvfr/react-dsfr/Button";
-import { ReactElement, useState } from "react";
+import { ReactElement, ReactNode, useState } from "react";
+
+import { NumberDisplay } from "./common/NumberDisplay";
 
 export const InformationCard = ({
   primaryInformation,
@@ -27,7 +29,13 @@ export const InformationCard = ({
       )}
       {!showDetails && (
         <>
-          <div className="text-2xl font-bold mb-0">{primaryInformation}</div>
+          <div className="text-2xl font-bold mb-0">
+            {typeof primaryInformation === "number" ? (
+              <NumberDisplay value={primaryInformation} />
+            ) : (
+              primaryInformation
+            )}
+          </div>
           <div className="text-center">{secondaryInformation}</div>
         </>
       )}
@@ -39,7 +47,7 @@ export const InformationCard = ({
 };
 
 type Props = {
-  primaryInformation: string | number;
-  secondaryInformation: string;
+  primaryInformation: ReactNode;
+  secondaryInformation: ReactNode;
   tertiaryInformation?: string;
 };

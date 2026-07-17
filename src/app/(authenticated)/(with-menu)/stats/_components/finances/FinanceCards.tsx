@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { MultiInformationCard } from "@/app/components/MultiInformationCard";
-import { formatCurrency } from "@/app/utils/number.util";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 
@@ -15,20 +15,32 @@ export const FinanceCards = (): ReactElement => {
       <MultiInformationCard
         informations={[
           {
-            primaryInformation: formatCurrency(
-              currentYear.total.dotationAccordee
+            primaryInformation: (
+              <NumberDisplay
+                value={currentYear.total.dotationAccordee}
+                type="currency"
+                compact={true}
+              />
             ),
             secondaryInformation: "dotation totale annuelle versée par l'Etat",
           },
           {
-            primaryInformation: formatCurrency(
-              currentYear.autorisees.dotationAccordee
+            primaryInformation: (
+              <NumberDisplay
+                value={currentYear.autorisees.dotationAccordee}
+                type="currency"
+                compact={true}
+              />
             ),
             secondaryInformation: "pour les structures autorisées",
           },
           {
-            primaryInformation: formatCurrency(
-              currentYear.subventionnees.dotationAccordee
+            primaryInformation: (
+              <NumberDisplay
+                value={currentYear.subventionnees.dotationAccordee}
+                type="currency"
+                compact={true}
+              />
             ),
             secondaryInformation: "pour les structures subventionnées",
           },
@@ -38,15 +50,21 @@ export const FinanceCards = (): ReactElement => {
         detailLabel="ensemble des employés de la structure"
         informations={[
           {
-            primaryInformation: currentYear.total.totalETP,
+            primaryInformation: (
+              <NumberDisplay value={currentYear.total.totalETP} />
+            ),
             secondaryInformation: "ETP au total",
           },
           {
-            primaryInformation: currentYear.autorisees.totalETP,
+            primaryInformation: (
+              <NumberDisplay value={currentYear.autorisees.totalETP} />
+            ),
             secondaryInformation: "pour les structures autorisées",
           },
           {
-            primaryInformation: currentYear.subventionnees.totalETP,
+            primaryInformation: (
+              <NumberDisplay value={currentYear.subventionnees.totalETP} />
+            ),
             secondaryInformation: "pour les structures subventionnées",
           },
         ]}
@@ -55,15 +73,23 @@ export const FinanceCards = (): ReactElement => {
         detailLabel="nombre de places gérées par un ETP"
         informations={[
           {
-            primaryInformation: currentYear.total.tauxEncadrement!,
+            primaryInformation: (
+              <NumberDisplay value={currentYear.total.tauxEncadrement!} />
+            ),
             secondaryInformation: "taux d'encadrement moyen",
           },
           {
-            primaryInformation: currentYear.autorisees.tauxEncadrement!,
+            primaryInformation: (
+              <NumberDisplay value={currentYear.autorisees.tauxEncadrement!} />
+            ),
             secondaryInformation: "pour les structures autorisées",
           },
           {
-            primaryInformation: currentYear.subventionnees.tauxEncadrement!,
+            primaryInformation: (
+              <NumberDisplay
+                value={currentYear.subventionnees.tauxEncadrement!}
+              />
+            ),
             secondaryInformation: "pour les structures subventionnées",
           },
         ]}
@@ -72,20 +98,29 @@ export const FinanceCards = (): ReactElement => {
         detailLabel="coût de la structure pour une journée et pour une place"
         informations={[
           {
-            primaryInformation: formatCurrency(
-              currentYear.total.coutJournalier
+            primaryInformation: (
+              <NumberDisplay
+                value={currentYear.total.coutJournalier}
+                type="currency"
+              />
             ),
             secondaryInformation: "coût place journalier moyen",
           },
           {
-            primaryInformation: formatCurrency(
-              currentYear.autorisees.coutJournalier
+            primaryInformation: (
+              <NumberDisplay
+                value={currentYear.autorisees.coutJournalier}
+                type="currency"
+              />
             ),
             secondaryInformation: "pour les structures autorisées",
           },
           {
-            primaryInformation: formatCurrency(
-              currentYear.subventionnees.coutJournalier
+            primaryInformation: (
+              <NumberDisplay
+                value={currentYear.subventionnees.coutJournalier}
+                type="currency"
+              />
             ),
             secondaryInformation: "pour les structures subventionnées",
           },

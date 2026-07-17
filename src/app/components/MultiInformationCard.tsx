@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@codegouvfr/react-dsfr/Button";
-import { Fragment, ReactElement, useState } from "react";
+import { Fragment, ReactElement, ReactNode, useState } from "react";
 
 export const MultiInformationCard = ({
   informations,
@@ -53,6 +53,6 @@ type Props = {
 };
 
 type Information = {
-  primaryInformation: string | number;
+  primaryInformation: ReactNode;
   secondaryInformation: string;
 };

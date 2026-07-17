@@ -3,6 +3,7 @@
 import { Badge } from "@codegouvfr/react-dsfr/Badge";
 import { Fragment, ReactElement, useState } from "react";
 
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
 
@@ -25,17 +26,32 @@ export const FinancesStatsTable = (): ReactElement => {
         {
           label: "Nombre d’ETP",
           key: "totalETP",
-          format: (value) => value ?? "•",
+          format: (value) =>
+            value !== null && value !== undefined ? (
+              <NumberDisplay value={value} />
+            ) : (
+              "•"
+            ),
         },
         {
           label: "Taux d’encadrement moyen",
           key: "tauxEncadrement",
-          format: (value) => value ?? "•",
+          format: (value) =>
+            value !== null && value !== undefined ? (
+              <NumberDisplay value={value} />
+            ) : (
+              "•"
+            ),
         },
         {
           label: "Coût journalier moyen",
           key: "coutJournalier",
-          format: (value) => (value ? `${value} €` : "•"),
+          format: (value) =>
+            value !== null && value !== undefined ? (
+              <NumberDisplay value={value} type="currency" />
+            ) : (
+              "•"
+            ),
         },
       ],
     },
@@ -46,13 +62,21 @@ export const FinancesStatsTable = (): ReactElement => {
           label: "Dotation demandée",
           key: "dotationDemandee",
           format: (value) =>
-            value ? `${value.toLocaleString("fr-FR")} €` : "•",
+            value !== null && value !== undefined ? (
+              <NumberDisplay value={value} type="currency" />
+            ) : (
+              "•"
+            ),
         },
         {
           label: "Dotation accordée",
           key: "dotationAccordee",
           format: (value) =>
-            value ? `${value.toLocaleString("fr-FR")} €` : "•",
+            value !== null && value !== undefined ? (
+              <NumberDisplay value={value} type="currency" />
+            ) : (
+              "•"
+            ),
         },
       ],
     },
@@ -64,21 +88,33 @@ export const FinancesStatsTable = (): ReactElement => {
           subLabel: "dont dotation État",
           key: "totalProduits",
           format: (value) =>
-            value ? `${value.toLocaleString("fr-FR")} €` : "•",
+            value !== null && value !== undefined ? (
+              <NumberDisplay value={value} type="currency" />
+            ) : (
+              "•"
+            ),
         },
         {
           label: "Total charges retenu",
           subLabel: "par les autorités tarifaires",
           key: "totalCharges",
           format: (value) =>
-            value ? `${value.toLocaleString("fr-FR")} €` : "•",
+            value !== null && value !== undefined ? (
+              <NumberDisplay value={value} type="currency" />
+            ) : (
+              "•"
+            ),
         },
         {
           label: "Résultat net retenu",
           subLabel: "par les autorités tarifaires",
           key: "resultatNet",
           format: (value) =>
-            value ? `${value.toLocaleString("fr-FR")} €` : "•",
+            value !== null && value !== undefined ? (
+              <NumberDisplay value={value} type="currency" />
+            ) : (
+              "•"
+            ),
           isBadge: true,
         },
       ],
@@ -91,15 +127,20 @@ export const FinancesStatsTable = (): ReactElement => {
       const values = financeYears.map((yearItem) => {
         const visualizationType = yearItem[visualization];
         const rawValue = visualizationType
-          ? visualizationType[row.key as keyof typeof visualizationType]
+          ? (visualizationType[row.key as keyof typeof visualizationType] as
+              number | null)
           : null;
-        return row.format(rawValue);
+
+        return {
+          display: row.format(rawValue),
+          raw: rawValue,
+        };
       });
 
       return {
         label: row.label,
         subLabel: row.subLabel,
-        value: values,
+        cells: values,
         isBadge: row.isBadge ?? false,
       };
     }),
@@ -154,26 +195,23 @@ export const FinancesStatsTable = (): ReactElement => {
                     </>
                   )}
                 </td>
-                {row.value.map((cellValue, index) => (
+                {row.cells.map((cell, index) => (
                   <td
                     key={`${row.label}-${index}`}
                     className="whitespace-nowrap align-middle"
                   >
-                    {row.isBadge && cellValue !== "•" ? (
+                    {row.isBadge &&
+                    cell.raw !== null &&
+                    cell.raw !== undefined ? (
                       <Badge
-                        severity={
-                          cellValue.toString().startsWith("-")
-                            ? "error"
-                            : "success"
-                        }
+                        severity={cell.raw < 0 ? "error" : "success"}
                         noIcon
                       >
-                        {cellValue.toString().startsWith("-")
-                          ? cellValue
-                          : `+ ${cellValue}`}
+                        {cell.raw < 0 ? "" : "+ "}
+                        {cell.display}
                       </Badge>
                     ) : (
-                      <span className="text-sm">{cellValue}</span>
+                      <span className="text-sm">{cell.display}</span>
                     )}
                   </td>
                 ))}
@@ -206,7 +244,7 @@ const getHeadings = (statistiques: StatistiqueApiRead) => {
 type FinanceRowConfig = {
   label: string;
   key: string;
-  format: (value?: number | null) => string | number;
+  format: (value?: number | null) => ReactElement | string;
   subLabel?: string;
   isBadge?: boolean;
 };

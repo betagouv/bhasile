@@ -1,5 +1,6 @@
 import { Fragment, ReactElement } from "react";
 
+import { NumberDisplay } from "@/app/components/common/NumberDisplay";
 import { Table } from "@/app/components/common/Table";
 import { formatNumber } from "@/app/utils/number.util";
 import { StatistiqueApiRead } from "@/schemas/api/statistique.schema";
@@ -113,7 +114,7 @@ export const TypesPlacesStatsTable = (): ReactElement => {
                     className="min-w-[132px] whitespace-nowrap"
                   >
                     <span className="inline-flex items-center gap-6">
-                      <span>{structureStatItem?.toString()}</span>
+                      <NumberDisplay value={structureStatItem} />
                     </span>
                   </td>
                 ))}
