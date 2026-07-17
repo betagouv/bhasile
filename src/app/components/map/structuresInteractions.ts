@@ -99,17 +99,19 @@ export const bindStructuresInteractions = ({
       return;
     }
 
-    const cluster = map.querySourceFeatures(STRUCTURES_SOURCE_ID).find((f) => {
-      if (!f.properties?.cluster) {
-        return false;
-      }
-      const coords = getCoordinates(f);
-      return (
-        coords !== null &&
-        Math.abs(coords[0] - spiderfied[0]) < SAME_POSITION_EPSILON &&
-        Math.abs(coords[1] - spiderfied[1]) < SAME_POSITION_EPSILON
-      );
-    });
+    const cluster = map
+      .querySourceFeatures(STRUCTURES_SOURCE_ID)
+      .find((feature) => {
+        if (!feature.properties?.cluster) {
+          return false;
+        }
+        const coords = getCoordinates(feature);
+        return (
+          coords !== null &&
+          Math.abs(coords[0] - spiderfied[0]) < SAME_POSITION_EPSILON &&
+          Math.abs(coords[1] - spiderfied[1]) < SAME_POSITION_EPSILON
+        );
+      });
 
     const clusterId = cluster?.properties?.cluster_id;
     hideCluster(typeof clusterId === "number" ? clusterId : null);
