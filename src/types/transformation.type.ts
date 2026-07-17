@@ -32,6 +32,13 @@ export const StructureVersionTransformationType = {
 export type StructureVersionTransformationType =
   (typeof StructureVersionTransformationType)[keyof typeof StructureVersionTransformationType];
 
+export const TransformationSource = {
+  AGENT: "AGENT",
+  DEMARCHES_NUMERIQUES: "DEMARCHES_NUMERIQUES",
+} as const;
+export type TransformationSource =
+  (typeof TransformationSource)[keyof typeof TransformationSource];
+
 export type UpcomingTransformation = {
   kind: StructureVersionTransformationType;
   date: string;

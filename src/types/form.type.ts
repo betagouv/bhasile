@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export enum StepStatus {
   NON_COMMENCE = "NON_COMMENCE",
+  PRE_REMPLI = "PRE_REMPLI",
   COMMENCE = "COMMENCE",
   A_VERIFIER = "A_VERIFIER",
   FINALISE = "FINALISE",
