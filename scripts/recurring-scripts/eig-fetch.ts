@@ -62,7 +62,7 @@ const getEIGsFromDN = async (): Promise<DNColumn[][]> => {
     );
     columns.push({
       label: NUMERO_DOSSIER_LABEL,
-      stringValue: dossier.number,
+      stringValue: String(dossier.number),
     });
     return columns;
   });
