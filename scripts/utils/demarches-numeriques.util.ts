@@ -1,7 +1,7 @@
 const DN_API_URL = "https://demarche.numerique.gouv.fr/api/v2/graphql";
 const PAGE_SIZE = 100;
 
-const daysAgo = (days: number): Date =>
+const getDaysAgo = (days: number): Date =>
   new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
 export type DNColumn = {
@@ -59,7 +59,7 @@ const resolveUpdatedSince = ({
     );
   }
 
-  return daysAgo(days);
+  return getDaysAgo(days);
 };
 
 const getQuery = (options: FetchAllDossiersOptions, after?: string) => {

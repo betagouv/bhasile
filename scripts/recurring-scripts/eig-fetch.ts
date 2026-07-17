@@ -48,11 +48,11 @@ const getEIGsFromDN = async (): Promise<DNColumn[][]> => {
   const dossiers = await fetchAllDossiers<EIGDossierNode>({
     demarcheNumber: EIG_DEMARCHE_NUMBER,
     champsFragment: `champs {
-					columns {
-						label
-						stringValue
-					}
-				}`,
+                      columns {
+                        label
+                        stringValue
+                      }
+                    }`,
     label: "EIGs",
   });
 
