@@ -5,7 +5,6 @@ import { ReactElement } from "react";
 import { InformationCard } from "@/app/components/InformationCard";
 import { InformationCardBridge } from "@/app/components/InformationCardBridge";
 import { formatNumber } from "@/app/utils/number.util";
-import { CURRENT_YEAR } from "@/constants";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
 import { ControleQualiteStatsTable } from "./ControleQualiteStatsTable";
@@ -48,8 +47,8 @@ export const ControleQualiteBlock = (): ReactElement => {
         </div>
         <div>
           <InformationCard
-            primaryInformation={`${statistiques.controleQualite.eig.moyenneEvaluationsCurrentYear || "N/A"} / 4`}
-            secondaryInformation={`moyenne aux évaluations menées en ${CURRENT_YEAR}`}
+            primaryInformation={`${statistiques.controleQualite.eig.moyenneEvaluationsLast12Months || "N/A"} / 4`}
+            secondaryInformation={`moyenne aux évaluations sur les 12 derniers mois`}
           />
         </div>
       </div>
