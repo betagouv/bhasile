@@ -28,8 +28,8 @@ import {
 import { MapLibreProvider, MapRegisteredPoint } from "./MapContext";
 import { bindStructuresInteractions } from "./structuresInteractions";
 import {
+  addStructuresImages,
   addStructuresLayers,
-  addStructuresMarkerImage,
   addStructuresSource,
   STRUCTURES_SOURCE_ID,
 } from "./structuresStyle";
@@ -153,7 +153,7 @@ export const Map = ({ children }: PropsWithChildren): ReactElement => {
       );
 
       addStructuresSource(createdMap);
-      await addStructuresMarkerImage(createdMap);
+      await addStructuresImages(createdMap);
       addStructuresLayers(createdMap);
 
       const cleanupInteractions = bindStructuresInteractions({
