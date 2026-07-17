@@ -1,12 +1,8 @@
 import { TransformationType } from "@/types/transformation.type";
 
-const BHASILE_CODE_PATTERN = /BHA[\s-]*([A-Z]{3})[\s-]*([0-9O]{3})(?![0-9O])/;
-
-/**
- * Le dernier segment d'un code Bhasile est numérique : un O y est nécessairement un zéro,
- * la substitution est imposée par le format et non devinée.
- */
+/* Le dernier segment d'un code Bhasile est numérique : on change les O en 0 */
 export const normalizeBhasileCode = (raw: string): string | null => {
+  const BHASILE_CODE_PATTERN = /BHA[\s-]*([A-Z]{3})[\s-]*([0-9O]{3})(?![0-9O])/;
   const match = raw.toUpperCase().match(BHASILE_CODE_PATTERN);
   if (!match) {
     return null;
@@ -19,10 +15,7 @@ export const normalizeBhasileCode = (raw: string): string | null => {
 const DNA_CODE = /^[A-Z]\d{4}$/;
 const DNA_CODE_LIKE = /^[A-Z]\d+$/;
 
-/**
- * Recolle une lettre isolée aux chiffres qui la suivent (« H 0123 », « H 208 »). La lettre
- * doit être un token à elle seule : sinon « est le 326 » donnerait « E326 ».
- */
+/* Recolle une lettre isolée aux chiffres qui la suivent (« H 0123 », « H 208 »). */
 const collapseSpacedCodes = (text: string): string =>
   text.replace(/(^|[^A-Z0-9])([A-Z])\s+(?=\d)/g, "$1$2");
 
@@ -31,11 +24,7 @@ export type DnaCodesParseResult = {
   unparsed: string[];
 };
 
-/**
- * Les codes DNA arrivent avec des séparateurs libres (« et », tirets, espaces multiples) et
- * parfois noyés dans de la prose. `unparsed` remonte ce qui ressemble à un code sans en être
- * un (« H208 » et ses 3 chiffres) plutôt que de le laisser disparaître.
- */
+/* Les codes DNA arrivent avec des séparateurs libres */
 export const normalizeDnaCodes = (raw: string): DnaCodesParseResult => {
   const tokens = collapseSpacedCodes(raw.toUpperCase())
     .split(/[^A-Z0-9]+/)
@@ -92,10 +81,7 @@ export const parseFrenchDate = (raw: string): Date | null => {
   return date;
 };
 
-/**
- * Deux libellés coexistent pour chaque branche (ancienne et nouvelle formulation du
- * formulaire) : on matche sur le préfixe, pas sur l'égalité stricte.
- */
+/* Deux libellés coexistent pour chaque branche : on matche sur le préfixe */
 export const parseTransformationType = (
   raw: string
 ): TransformationType | null => {
