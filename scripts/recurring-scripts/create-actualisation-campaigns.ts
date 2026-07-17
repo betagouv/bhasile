@@ -88,7 +88,7 @@ const run = async () => {
 
     if (!Number.isInteger(actualisationYear)) {
       console.log(
-        "⏭️  Aucune année d'actualisation valide (arg ou ACTUALISATION_YEAR) — rien à créer."
+        "⏭️ Aucune année d'actualisation valide (arg ou ACTUALISATION_YEAR) — rien à créer."
       );
       return;
     }
@@ -96,7 +96,7 @@ const run = async () => {
     const deadline = parseDeadline(process.argv[3]);
     if (!deadline) {
       console.log(
-        "⏭️  Deadline manquante ou invalide (2e argument attendu au format YYYY-MM-DD) — rien à créer."
+        "⏭️ Deadline manquante ou invalide (2e argument attendu au format YYYY-MM-DD) — rien à créer."
       );
       return;
     }

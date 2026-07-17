@@ -1,11 +1,20 @@
 import type { StructureType } from "@/generated/prisma/client";
 
-export type InitialisationStatus =
-  | "A_INITIALISER"
-  | "A_FINALISER"
-  | "FINALISEE";
+export const InitialisationStatus = [
+  "A_INITIALISER",
+  "A_FINALISER",
+  "FINALISEE",
+] as const;
 
-export type ActualisationStatus = "A_DEBUTER" | "EN_COURS" | "FINALISEE";
+export type InitialisationStatus = (typeof InitialisationStatus)[number];
+
+export const ActualisationStatus = [
+  "A_DEBUTER",
+  "EN_COURS",
+  "FINALISEE",
+] as const;
+
+export type ActualisationStatus = (typeof ActualisationStatus)[number];
 
 export type DashboardStructureRow = {
   id: number;
