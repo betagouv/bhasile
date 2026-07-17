@@ -95,7 +95,7 @@ export const TypesPlacesStatsTable = (): ReactElement => {
                 className="text-left! text-xs! font-bold uppercase bg-default-grey-hover!"
                 colSpan={statistiques.places.byYear.length + 1}
               >
-                <span className="sticky left-4 inline-block">
+                <span className="sticky left-4 inline-block h-8 leading-8">
                   {section.title}
                 </span>
               </td>

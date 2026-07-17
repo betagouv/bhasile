@@ -89,6 +89,7 @@ export const FilterOperateur = () => {
       <Input
         label="Rechercher un opérateur"
         hideLabel
+        className="mb-0"
         nativeInputProps={{
           placeholder: "Rechercher",
           value: searchQuery,

@@ -7,7 +7,8 @@ import { CURRENT_YEAR, START_YEAR } from "@/constants";
 dayjs.locale("fr");
 
 export const formatDate = (
-  date: Date | string | number | undefined
+  date: Date | string | number | undefined,
+  options: Intl.DateTimeFormatOptions = {}
 ): string => {
   if (!date) {
     return "N/D";
@@ -18,7 +19,7 @@ export const formatDate = (
     }
   }
   const dateObject = date instanceof Date ? date : new Date(date);
-  return dateObject.toLocaleDateString("fr-FR");
+  return dateObject.toLocaleDateString("fr-FR", options);
 };
 
 /** Dernier jour du mois à midi UTC (depuis date ou mois/année). */

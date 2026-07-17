@@ -5,93 +5,20 @@ import "dotenv/config";
 
 import { createPrismaClient } from "@/prisma-client";
 
+import {
+  cleanDate,
+  DNColumn,
+  DNDossierNode,
+  fetchAllDossiers,
+  getValueByLabel,
+} from "../utils/demarches-numeriques.util";
+
 const prisma = createPrismaClient();
 
-type DNResponse = {
-  data: {
-    demarche: {
-      dossiers: {
-        pageInfo: {
-          endCursor: string;
-          hasNextPage: boolean;
-        };
-        nodes: DNDossierNode[];
-      };
-    };
-  };
-};
+const EIG_DEMARCHE_NUMBER = 98768;
 
-type DNColumn = {
-  label: string;
-  stringValue: string;
-};
-
-type DNChamp = {
-  columns: DNColumn[];
-};
-
-type DNDossierNode = {
-  number: string;
-  champs: DNChamp[];
-};
-
-const getQuery = (after?: string) => `
-{ 
-	demarche(number: 98768) {
-		id
-		title
-		dossiers (first: 100 ${after ? `after: "${after}"` : ""}) {
-			pageInfo {
-				endCursor
-        hasNextPage
-			}
-			nodes {
-        number
-				champs {
-					columns {
-						label
-						stringValue
-					}
-				}
-			}
-		}
-	}
-}
-`;
-
-const fetchEIGPage = async (after?: string): Promise<DNResponse> => {
-  const result = await fetch(
-    "https://demarche.numerique.gouv.fr/api/v2/graphql",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.DEMARCHES_SIMPLIFIEES_TOKEN}`,
-      },
-      body: JSON.stringify({ query: getQuery(after) }),
-    }
-  );
-  return result.json();
-};
-
-const fetchAllEigs = async (): Promise<DNDossierNode[]> => {
-  let hasNextPage = null;
-  let endCursor = undefined;
-  const eigNodes = [];
-  let index = 1;
-  while (hasNextPage !== false) {
-    console.log(
-      "📃 Récupération de la page",
-      index,
-      "des EIGs depuis Démarches Numériques"
-    );
-    const DNResponse = await fetchEIGPage(endCursor);
-    hasNextPage = DNResponse.data.demarche.dossiers.pageInfo.hasNextPage;
-    endCursor = DNResponse.data.demarche.dossiers.pageInfo.endCursor;
-    index++;
-    eigNodes.push(...DNResponse.data.demarche.dossiers.nodes);
-  }
-  return eigNodes;
+type EIGDossierNode = DNDossierNode & {
+  champs: { columns: DNColumn[] }[];
 };
 
 const DNA_CODE_LABEL = "Code du centre";
@@ -108,63 +35,37 @@ const fieldsToKeep = [
   TYPE_LABEL,
 ];
 
-const isIn303 = (dossier: DNDossierNode): boolean | null => {
-  const columns = dossier.champs.flatMap((champ) => champ.columns);
-  let is303 = null;
-  columns.forEach((column) => {
-    if (
-      column.label === "Type de structure" &&
-      column.stringValue.includes("303")
-    ) {
-      is303 = true;
-    }
-  });
-  return is303;
-};
+const isIn303 = (dossier: EIGDossierNode): boolean =>
+  dossier.champs
+    .flatMap((champ) => champ.columns)
+    .some(
+      (column) =>
+        column.label === "Type de structure" &&
+        column.stringValue.includes("303")
+    );
 
 const getEIGsFromDN = async (): Promise<DNColumn[][]> => {
-  const dossiers = await fetchAllEigs();
-  const EIGs = dossiers.filter(isIn303).map((dossier) => {
-    const columns = dossier.champs.flatMap((champ) => {
-      return champ.columns.filter((column) => {
-        return fieldsToKeep.includes(column.label);
-      });
-    });
-    columns.push({
-      label: "ID",
-      stringValue: dossier.number,
-    });
-    const values = columns.flatMap((column) => {
-      return column;
-    });
-    return values;
+  const dossiers = await fetchAllDossiers<EIGDossierNode>({
+    demarcheNumber: EIG_DEMARCHE_NUMBER,
+    champsFragment: `champs {
+                      columns {
+                        label
+                        stringValue
+                      }
+                    }`,
+    label: "EIGs",
   });
-  return EIGs;
-};
 
-const getValueByLabel = (DNEIG: DNColumn[], label: string): string => {
-  const field = DNEIG.find((DNEIGField) => DNEIGField.label === label);
-  return field?.stringValue || "";
-};
-
-const cleanDate = (dateValue: string): Date | null => {
-  if (!dateValue) {
-    return null;
-  }
-
-  const date = new Date(dateValue);
-
-  if (isNaN(date.getTime())) {
-    return null;
-  }
-
-  const year = date.getFullYear();
-
-  if (year < 1900 || year > 2100) {
-    return null;
-  }
-
-  return date;
+  return dossiers.filter(isIn303).map((dossier) => {
+    const columns = dossier.champs.flatMap((champ) =>
+      champ.columns.filter((column) => fieldsToKeep.includes(column.label))
+    );
+    columns.push({
+      label: NUMERO_DOSSIER_LABEL,
+      stringValue: String(dossier.number),
+    });
+    return columns;
+  });
 };
 
 type EIGFromAPI = {
@@ -179,17 +80,21 @@ const getAllEIGs = async (): Promise<EIGFromAPI[]> => {
   const DNEIGs = await getEIGsFromDN();
   const appEIGs = DNEIGs.map((DNEIG) => {
     const dnaCode = getValueByLabel(DNEIG, DNA_CODE_LABEL);
-    const evenementDate = getValueByLabel(DNEIG, EVENEMENT_DATE_LABEL);
-    const declarationDate = getValueByLabel(DNEIG, DECLARATION_DATE_LABEL);
+    const evenementDate = cleanDate(
+      getValueByLabel(DNEIG, EVENEMENT_DATE_LABEL)
+    );
+    const declarationDate = cleanDate(
+      getValueByLabel(DNEIG, DECLARATION_DATE_LABEL)
+    );
     if (!dnaCode || !evenementDate || !declarationDate) {
       return;
     }
     return {
       dnaCode,
-      numeroDossier: getValueByLabel(DNEIG, NUMERO_DOSSIER_LABEL).toString(),
-      evenementDate: new Date(cleanDate(evenementDate)!),
-      declarationDate: new Date(cleanDate(declarationDate)!),
-      type: getValueByLabel(DNEIG, TYPE_LABEL).toString(),
+      numeroDossier: getValueByLabel(DNEIG, NUMERO_DOSSIER_LABEL),
+      evenementDate,
+      declarationDate,
+      type: getValueByLabel(DNEIG, TYPE_LABEL),
     };
   })
     .filter((eig): eig is EIGFromAPI => eig !== undefined)
@@ -209,8 +114,11 @@ const existingDnaCodes = new Set(
   ).map((dna) => dna.code)
 );
 
+const ignoredDnaCodes = new Set<string>();
+
 for (const eig of eigs) {
   if (!existingDnaCodes.has(eig.dnaCode)) {
+    ignoredDnaCodes.add(eig.dnaCode);
     continue;
   }
   await prisma.evenementIndesirableGrave.upsert({
@@ -224,4 +132,11 @@ for (const eig of eigs) {
       type: eig.type,
     },
   });
+}
+
+if (ignoredDnaCodes.size) {
+  console.log(
+    `⚠️ ${ignoredDnaCodes.size} code(s) DNA absent(s) de la base, EIGs non importés :`,
+    [...ignoredDnaCodes].sort().join(", ")
+  );
 }

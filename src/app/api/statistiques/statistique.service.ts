@@ -49,7 +49,10 @@ const resolveStatistiquesPerimeterFilters = async (
     types: parsed.types,
     operateurIds:
       parsed.operateurIds.length > 0
-        ? new Set([...parsed.operateurIds, ...filiales.map((filiale) => filiale.id)])
+        ? new Set([
+            ...parsed.operateurIds,
+            ...filiales.map((filiale) => filiale.id),
+          ])
         : null,
   };
 };
@@ -108,7 +111,7 @@ export const buildStatistiquesContext = async (
     findBudgets(allStructureIds),
     findIndicateursFinanciers(allStructureIds),
     findActivites(dnaCodes),
-    resolvedFilters.operateurIds === null && resolvedFilters.types.size === 0
+    resolvedFilters.operateurIds === null && filters.types === null
       ? findRmus(resolvedFilters.departements)
       : Promise.resolve(null),
   ]);
