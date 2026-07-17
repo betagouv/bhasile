@@ -7,6 +7,7 @@ import {
   OperateurSuggestion,
   useOperateurSuggestion,
 } from "@/app/hooks/useOperateurSuggestion";
+import { deletePaginationParams } from "@/app/utils/searchParams.util";
 
 export const FilterOperateur = () => {
   const searchParams = useSearchParams();
@@ -79,6 +80,7 @@ export const FilterOperateur = () => {
       params.delete("operateurs");
     }
 
+    deletePaginationParams(params);
     router.replace(`?${params.toString()}`);
   }, [selectedIds, router, searchParams]);
 

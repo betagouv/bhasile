@@ -70,6 +70,10 @@ tests/                       # Même arborescence que src/
 - `repository.ts` : uniquement des requêtes Prisma, aucune logique
 - Ne jamais mettre de logique dans `repository.ts`, ne jamais faire d'accès BDD dans `service.ts`
 
+### Composants React
+
+- Le composant en premier dans le fichier. Le type `Props` (et tout autre type ou fonction spécifique au composant) se place **en dessous** du composant, pas au-dessus.
+
 ### Gestion des permissions
 
 - CASL est utilisé pour contrôler l'accès aux ressources selon le rôle de l'agent (DREETS/DDETS et département/région)

@@ -89,7 +89,7 @@ export default function Structures(): ReactElement {
   }, []);
 
   return (
-    <div className="h-full w-full flex flex-col bg-alt-grey">
+    <div className="h-full w-full flex flex-col">
       <div className="flex justify-between items-center px-6 border-b border-b-border-default-grey min-h-[4.35rem] sticky top-0 bg-lifted-grey z-10">
         <SegmentedControl
           key={selectedVisualization}

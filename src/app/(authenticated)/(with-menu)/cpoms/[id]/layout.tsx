@@ -42,7 +42,7 @@ export default async function CpomLayout({
 
   return (
     <CpomProvider cpom={cpom}>
-      <div className="flex flex-col h-full bg-alt-grey gap-3 pb-4">
+      <div className="flex flex-col h-full gap-3 pb-4">
         <CpomHeader />
         <div className="flex flex-col gap-3 w-full max-w-7xl mx-auto px-3">
           {children}

@@ -33,6 +33,7 @@ export type FormKind = (typeof FormKind)[keyof typeof FormKind];
 export type SessionUser = {
   id: string;
   name: string;
+  prenom: string;
   email: string;
   role: string;
   allowedDepartements: string[];

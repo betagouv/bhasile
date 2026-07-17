@@ -45,6 +45,7 @@ export type BadgeType =
   | "info"
   | "error"
   | "warning"
+  | "yellow"
   | "new"
   | "purple"
   | "brown"

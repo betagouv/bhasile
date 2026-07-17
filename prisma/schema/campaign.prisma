@@ -11,10 +11,11 @@ model Campaign {
 }
 
 model CampaignDefinition {
-  id      Int    @id @default(autoincrement())
-  name    String
-  version Int
-  slug    String @unique
+  id       Int       @id @default(autoincrement())
+  name     String
+  version  Int
+  slug     String    @unique
+  deadline DateTime?
 
   campaigns Campaign[]
 

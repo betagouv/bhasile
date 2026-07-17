@@ -3,6 +3,7 @@ import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { deletePaginationParams } from "@/app/utils/searchParams.util";
 import { DEPARTEMENTS, REGIONS } from "@/constants";
 
 import { FiltersRegion } from "./FiltersRegion";
@@ -38,6 +39,7 @@ export const FiltersDepartement = () => {
       } else {
         params.delete("departements");
       }
+      deletePaginationParams(params);
       router.replace(`?${params.toString()}`);
       prevDepartements.current = departements;
     }
