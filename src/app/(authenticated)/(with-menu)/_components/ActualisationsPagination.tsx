@@ -6,10 +6,6 @@ import { ReactElement, useTransition } from "react";
 import { SimplePagination } from "@/app/components/common/SimplePagination";
 import { MIDDLE_PAGE_SIZE } from "@/constants";
 
-type Props = {
-  total: number;
-};
-
 export const ActualisationsPagination = ({ total }: Props): ReactElement => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -37,4 +33,8 @@ export const ActualisationsPagination = ({ total }: Props): ReactElement => {
       />
     </div>
   );
+};
+
+type Props = {
+  total: number;
 };

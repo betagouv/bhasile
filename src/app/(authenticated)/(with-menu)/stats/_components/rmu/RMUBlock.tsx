@@ -1,4 +1,5 @@
-import { WorkInProgress } from "@/app/components/WorkInProgress";
+import { RMUChart } from "./RMUChart";
+import { RMUStatsTable } from "./RMUStatsTable";
 
 export const RMUBlock = () => {
   return (
@@ -11,7 +12,10 @@ export const RMUBlock = () => {
           </h3>
         </div>
       </div>
-      <WorkInProgress />
+      <div className="pb-16">
+        <RMUChart />
+      </div>
+      <RMUStatsTable />
     </div>
   );
 };

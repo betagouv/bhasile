@@ -1,10 +1,13 @@
 import { ReactElement, useMemo, useState } from "react";
 
 import { StackedBarLineChart } from "@/app/components/common/StackedBarLineChart";
+import {
+  TimePeriod,
+  TimePeriodSelector,
+} from "@/app/components/common/TimePeriodSelector";
 import { getYearRange } from "@/app/utils/date.util";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
-import { TimePeriod, TimePeriodSelector } from "./TimePeriodSelector";
 
 const MAX_DISPLAYED_TIME_PERIODS = 10;
 
