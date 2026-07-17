@@ -16,6 +16,7 @@ import {
   acteAdministratifCpomSchema,
   filterActesWithKey,
 } from "./acteAdministratif.schema";
+import { DocumentFinancierSchema } from "./documentFinancier.schema";
 import { operateurSchema } from "./operateur.schema";
 
 const budgetCpomSchema = z.object({
@@ -89,6 +90,14 @@ export const actesAdministratifsCpomSchema = z.object({
   ),
 });
 
+export const documentsFinanciersCpomSchema = z.object({
+  documentsFinanciers: z.array(DocumentFinancierSchema).optional(),
+});
+
+export const financesAndDocumentsCpomSchema = financesCpomSchema.and(
+  documentsFinanciersCpomSchema
+);
+
 export const compositionCpomSchema = z.object({
   structures: z.array(cpomStructureSchema),
 });
@@ -96,6 +105,7 @@ export const compositionCpomSchema = z.object({
 export const cpomSchema = descriptionCpomSchema
   .and(financesCpomSchema)
   .and(actesAdministratifsCpomSchema)
+  .and(documentsFinanciersCpomSchema)
   .and(compositionCpomSchema)
   .refine(
     (data) => {

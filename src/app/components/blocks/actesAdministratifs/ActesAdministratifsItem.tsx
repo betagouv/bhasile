@@ -20,11 +20,19 @@ export const ActesAdministratifsItem = ({
   return (
     <>
       <div>
-        <DownloadItem item={acteAdministratif} />
+        <DownloadItem
+          item={acteAdministratif}
+          cpomInherited={acteAdministratif.cpomId != null}
+        />
       </div>
       {avenantsOfItem.map((avenant) => (
         <div key={avenant.id}>
-          <DownloadItem key={avenant.id} item={avenant} index={avenant.index} />
+          <DownloadItem
+            key={avenant.id}
+            item={avenant}
+            index={avenant.index}
+            cpomInherited={avenant.cpomId != null}
+          />
         </div>
       ))}
     </>

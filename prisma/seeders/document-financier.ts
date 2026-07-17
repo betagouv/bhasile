@@ -3,7 +3,6 @@ import { fakerFR as faker } from "@faker-js/faker";
 import {
   DocumentFinancier,
   DocumentFinancierCategory,
-  DocumentFinancierGranularity,
 } from "@/generated/prisma/client";
 
 import { createFakeFileUpload } from "./file-upload.seed";
@@ -14,14 +13,13 @@ export type DocumentFinancierWithFileUploads = DocumentFinancier & {
 
 export const createFakeDocumentFinancier = (): Omit<
   DocumentFinancierWithFileUploads,
-  "id" | "structureDnaCode" | "cpomId" | "structureId"
+  "id" | "structureDnaCode" | "cpomId" | "structureId" | "granularity"
 > => {
   return {
     year: faker.number.int({ min: 2021, max: 2025 }),
     name: faker.lorem.word(),
     category: faker.helpers.enumValue(DocumentFinancierCategory),
     structureType: null,
-    granularity: faker.helpers.enumValue(DocumentFinancierGranularity),
     fileUploads: [createFakeFileUpload()],
     isMissing: false,
     createdAt: faker.date.past(),

@@ -189,6 +189,9 @@ export const structureDetailsInclude = {
           actesAdministratifs: {
             include: { fileUploads: true },
           },
+          documentsFinanciers: {
+            include: { fileUploads: true },
+          },
           budgets: {
             orderBy: { year: "desc" },
           },

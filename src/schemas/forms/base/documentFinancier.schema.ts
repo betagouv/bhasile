@@ -13,17 +13,13 @@ import {
   zSafeYear,
 } from "@/app/utils/zodCustomFields";
 import { fileApiSchema } from "@/schemas/api/file.schema";
-import {
-  DocumentFinancierCategory,
-  DocumentFinancierGranularity,
-} from "@/types/document-financier.type";
+import { DocumentFinancierCategory } from "@/types/document-financier.type";
 import { StructureType } from "@/types/structure.type";
 
-const DocumentFinancierSchema = z.object({
+export const DocumentFinancierSchema = z.object({
   id: zId(),
   year: zSafeYear(),
   category: z.enum(DocumentFinancierCategory).optional(),
-  granularity: z.enum(DocumentFinancierGranularity).optional(),
   structureType: z.enum(StructureType).nullish(),
   name: z.string().nullish(),
   fileUploads: z.array(fileApiSchema).optional(),

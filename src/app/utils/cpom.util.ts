@@ -36,6 +36,7 @@ export const getCpomDefaultValues = (cpom?: CpomApiRead): CpomFormValues => {
         dateEnd: structure.dateEnd ?? undefined,
       })) ?? [],
     budgets: getCpomBudgetsDefaultValues(cpom?.budgets || [], structureTypes),
+    documentsFinanciers: cpom?.documentsFinanciers ?? [],
     actesAdministratifs: cpom?.actesAdministratifs?.length
       ? cpom?.actesAdministratifs.map((acteAdministratif) => ({
           ...acteAdministratif,

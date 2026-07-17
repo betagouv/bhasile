@@ -3,17 +3,12 @@ import prettyBytes from "pretty-bytes";
 import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { getYearFromDate } from "@/app/utils/date.util";
 import { getCategoryLabel } from "@/app/utils/file-upload.util";
-import { DocumentFinancierGranularity } from "@/generated/prisma/enums";
 import { ActeAdministratifApiType } from "@/schemas/api/acteAdministratif.schema";
 import { DocumentFinancierApiType } from "@/schemas/api/documentFinancier.schema";
 
-import { DocumentGranularityBadge } from "./DocumentGranularityBadge";
+import { Badge } from "./Badge";
 
-export const DownloadItem = ({
-  item,
-  displayGranularity = false,
-  index,
-}: Props) => {
+export const DownloadItem = ({ item, cpomInherited = false, index }: Props) => {
   const { getDownloadLink } = useFileUpload();
 
   const getFileType = (filename: string): string => {
@@ -63,14 +58,9 @@ export const DownloadItem = ({
         </div>
       </button>
       <div>
-        {displayGranularity && (
+        {cpomInherited && (
           <div className="pr-1 inline">
-            <DocumentGranularityBadge
-              granularity={
-                (item as DocumentFinancierApiType)
-                  .granularity as DocumentFinancierGranularity
-              }
-            />
+            <Badge type="info">CPOM</Badge>
           </div>
         )}
         {getFileType(item.fileUploads?.[0].originalName || "")} -{" "}
@@ -82,6 +72,6 @@ export const DownloadItem = ({
 
 type Props = {
   item: ActeAdministratifApiType | DocumentFinancierApiType;
-  displayGranularity?: boolean;
+  cpomInherited?: boolean;
   index?: number;
 };
