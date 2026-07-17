@@ -10,7 +10,7 @@ export type DNColumn = {
 };
 
 export type DNDossierNode = {
-  number: string;
+  number: number;
 };
 
 type DNResponse<TNode extends DNDossierNode> = {
