@@ -47,6 +47,11 @@ export type DashboardTransformationRow = {
   actionUrl: string;
 };
 
+export type DashboardNotification = {
+  id: number;
+  content: string;
+};
+
 export type RappelEchelle = "STRUCTURE" | "CPOM";
 
 export type RappelCriticite = "IMPORTANT" | "URGENT";
