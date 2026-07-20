@@ -40,6 +40,8 @@ import {
 } from "./seeders/operateur.seed";
 import { createFakeRmus } from "./seeders/rmu.seed";
 import {
+  COLOCATED_COORDINATES,
+  COLOCATED_STRUCTURES_COUNT,
   FormDefLookup,
   SeededStructure,
   seedStructureWithVersions,
@@ -205,6 +207,7 @@ async function seed(): Promise<void> {
 
   const now = new Date();
   const seededStructures: SeededStructure[] = [];
+  let colocatedLeft = COLOCATED_STRUCTURES_COUNT;
 
   for (const operateurToInsert of operateursToInsert) {
     const createdOperateur = await prisma.operateur.create({
@@ -231,6 +234,11 @@ async function seed(): Promise<void> {
       const departementAdministratif = randomDepartement();
       const codeBhasile = nextCodeBhasile(departementAdministratif);
 
+      const colocated = !ofii && colocatedLeft > 0;
+      if (colocated) {
+        colocatedLeft--;
+      }
+
       const seeded = await seedStructureWithVersions(prisma, {
         operateurId: createdOperateur.id,
         codeBhasile,
@@ -243,6 +251,7 @@ async function seed(): Promise<void> {
         finalisationFormDefId: formFinalisationDefinition.id,
         finalisationStepDefinitions: stepDefinitions,
         initialisationCampaignDefinitionId: initialisationCampaignDefinition.id,
+        coordinates: colocated ? COLOCATED_COORDINATES : undefined,
       });
       seededStructures.push(seeded);
       operateurStructureIds.push(seeded.structureId);

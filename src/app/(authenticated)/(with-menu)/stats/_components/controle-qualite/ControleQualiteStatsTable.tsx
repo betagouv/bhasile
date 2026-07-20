@@ -3,6 +3,10 @@
 import { Fragment, ReactElement, useState } from "react";
 
 import { Table } from "@/app/components/common/Table";
+import {
+  TimePeriod,
+  TimePeriodSelector,
+} from "@/app/components/common/TimePeriodSelector";
 import { formatNumber } from "@/app/utils/number.util";
 import {
   ControleQualitePeriodStat,
@@ -10,7 +14,6 @@ import {
 } from "@/schemas/api/statistique.schema";
 
 import { useStatistiquesContext } from "../../_context/StatistiquesClientContext";
-import { TimePeriod, TimePeriodSelector } from "./TimePeriodSelector";
 
 const sectionsConfig: ControleQualiteSectionConfig[] = [
   {
@@ -171,7 +174,7 @@ export const ControleQualiteStatsTable = (): ReactElement => {
                 className="text-left! text-xs! font-bold uppercase bg-default-grey-hover!"
                 colSpan={totalColumns}
               >
-                <span className="sticky left-4 inline-block">
+                <span className="sticky left-4 inline-block h-8 leading-8">
                   {section.title}
                 </span>
               </td>

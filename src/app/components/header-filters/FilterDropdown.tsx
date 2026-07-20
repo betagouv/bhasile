@@ -1,4 +1,4 @@
-import Badge from "@codegouvfr/react-dsfr/Badge";
+import Tag from "@codegouvfr/react-dsfr/Tag";
 import { useSearchParams } from "next/navigation";
 import { PropsWithChildren, useEffect, useRef, useState } from "react";
 
@@ -29,7 +29,7 @@ export const FilterDropdown = ({
   return (
     <div
       ref={dropdownRef}
-      className="w-[200px] border-x border-default-grey relative"
+      className="w-[200px] border-l border-default-grey relative"
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -42,9 +42,15 @@ export const FilterDropdown = ({
           <div className="flex">
             <div className="truncate">
               {Number(appliedFilters?.length) > 0 ? (
-                <Badge className="rounded" severity="info" small noIcon>
+                <Tag
+                  linkProps={{
+                    href: "#",
+                  }}
+                  small
+                  className="pointer-none"
+                >
                   {appliedFilters?.length} filtre(s) sélectionné(s)
-                </Badge>
+                </Tag>
               ) : (
                 placeholder
               )}

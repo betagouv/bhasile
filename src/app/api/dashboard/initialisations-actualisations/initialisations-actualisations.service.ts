@@ -4,7 +4,7 @@ import {
 } from "@/app/api/campaigns/campaign.constants";
 import { getActualisationYear } from "@/app/api/campaigns/campaign.util";
 import { parseCommaList } from "@/app/utils/string.util";
-import { DashboardStructureRow } from "@/types/dashboard.type";
+import { InitialisationsActualisationsApiRead } from "@/types/dashboard.type";
 import { Filters } from "@/types/filters.type";
 import { SessionUser } from "@/types/global";
 
@@ -16,13 +16,6 @@ import {
   buildDashboardRows,
   paginateDashboardRows,
 } from "./initialisations-actualisations.util";
-
-type InitialisationsActualisationsApiRead = {
-  initialisationDeadline: string | null;
-  actualisationDeadline: string | null;
-  total: number;
-  rows: DashboardStructureRow[];
-};
 
 export const getInitialisationsActualisations = async (
   filters: Filters,
