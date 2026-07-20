@@ -45,8 +45,8 @@ export const FieldSetTypePlaces = ({
       <p>
         Veuillez renseigner l’historique du nombre de places pour chaque
         typologie au 31 décembre de ces dernières années.
-        <br /> À partir de {PLACES_VERSIONED_FROM_YEAR} inclus, la modification
-        du nombre de places autorisées doit obligatoirement passer par une
+        <br /> À partir de {PLACES_VERSIONED_FROM_YEAR}, la modification du
+        nombre de places autorisées doit obligatoirement passer par une
         contraction ou une extension de la structure.
       </p>
       <CustomNotice
