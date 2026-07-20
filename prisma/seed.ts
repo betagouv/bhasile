@@ -6,6 +6,7 @@ import {
   ACTUALISATION_FORM_STEP_SLUGS,
   getActualisationFormSlug,
 } from "@/app/api/forms/form.constants";
+import { mirrorLegacyPlacesToBaseVersions } from "@/app/api/structure-versions/structure-version.repository";
 import { StructureType } from "@/types/structure.type";
 
 import { createPrismaClient } from "./client";
@@ -268,6 +269,11 @@ async function seed(): Promise<void> {
   }
 
   console.log(`✅ ${seededStructures.length} structures créées avec versions`);
+
+  // État post-migration : la version de base reflète la dernière typologie legacy
+  // (invariant maintenu en prod par la cascade). Ainsi `prasd` seul produit un dev
+  // cohérent — les one-offs de shift/backfill sont la migration prod, PAS le dev.
+  await mirrorLegacyPlacesToBaseVersions(prisma);
 
   await createFakeCpoms(prisma);
 
