@@ -3,7 +3,7 @@ model FormDefinition {
   name            String
   version         Int
   slug            String               @unique
-  deadline        DateTime? // échéance de la campagne, pour les définitions annuelles (actualisation-<année>)
+  deadline        DateTime?
   stepsDefinition FormStepDefinition[]
 
   forms Form[]

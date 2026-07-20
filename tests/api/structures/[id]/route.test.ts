@@ -168,6 +168,7 @@ describe("GET /api/structures/[id]", () => {
       isInCpom: false,
       isInCpomPerYear: {},
       isFinalised: false,
+      isCurrentVersionFromTransformation: false,
       campaigns: [],
     });
     expect(mockFindOne).toHaveBeenCalledWith(1);

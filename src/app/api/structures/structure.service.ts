@@ -363,6 +363,13 @@ const dbStructureToApiRead = (
         now
       );
 
+  const isCurrentVersionFromTransformation = simple
+    ? false
+    : resolveCurrentVersion(
+        (dbStructure as StructureDbDetails).structureVersions ?? [],
+        now
+      )?.structureVersionTransformationId != null;
+
   return recursivelySerializeDates({
     ...dbStructure,
     structureTypologies,
@@ -413,6 +420,7 @@ const dbStructureToApiRead = (
     adresses,
     isFinalised:
       bornFromCreation || isFinalisationFormValidated(dbStructure.forms),
+    isCurrentVersionFromTransformation,
     campaigns,
     bornFromCreation: undefined,
     structureVersions: undefined,

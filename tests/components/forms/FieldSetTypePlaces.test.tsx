@@ -333,7 +333,10 @@ describe("FieldSetTypePlaces", () => {
           }}
         >
           <FieldSetTypePlaces
-            structure={structure}
+            structure={{
+              ...structure,
+              isCurrentVersionFromTransformation: true,
+            }}
             formKind={FormKind.FINALISATION}
           />
         </FormTestWrapper>
@@ -358,6 +361,40 @@ describe("FieldSetTypePlaces", () => {
       expect(inputs[0].pmr).toHaveValue("10");
       expect(inputs[1].placesAutorisees).toHaveValue("95");
       expect(inputs[2].lgbt).toHaveValue("3");
+    });
+
+    it("reflète l'année legacy sur la cellule ≥ seuil hors transfo", async () => {
+      const user = userEvent.setup();
+      const { container } = render(
+        <FormTestWrapper
+          defaultValues={{
+            structureTypologies: [
+              { year: 2026, placesAutorisees: 100, pmr: 0, lgbt: 0, fvvTeh: 0 },
+              { year: 2025, placesAutorisees: 95, pmr: 0, lgbt: 0, fvvTeh: 0 },
+            ],
+          }}
+        >
+          <FieldSetTypePlaces
+            structure={structure}
+            formKind={FormKind.FINALISATION}
+          />
+        </FormTestWrapper>
+      );
+
+      const places2026 = container.querySelector(
+        '[name="structureTypologies.0.placesAutorisees"]'
+      ) as HTMLInputElement;
+      const places2025 = container.querySelector(
+        '[name="structureTypologies.1.placesAutorisees"]'
+      ) as HTMLInputElement;
+
+      // Au montage, la cellule 2026 (verrouillée) suit déjà 2025.
+      expect(places2026).toHaveValue("95");
+
+      // Éditer 2025 met à jour 2026 en direct.
+      await user.clear(places2025);
+      await user.type(places2025, "120");
+      await waitFor(() => expect(places2026).toHaveValue("120"));
     });
   });
 

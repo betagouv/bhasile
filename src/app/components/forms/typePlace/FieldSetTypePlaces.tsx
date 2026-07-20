@@ -6,6 +6,7 @@ import { Table } from "@/app/components/common/Table";
 import { cn } from "@/app/utils/classname.util";
 import { getTypePlacesYearRange } from "@/app/utils/date.util";
 import { getRealCreationYear } from "@/app/utils/structure.util";
+import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { StructureApiRead } from "@/schemas/api/structure.schema";
 import { FormKind } from "@/types/global";
 
@@ -44,11 +45,14 @@ export const FieldSetTypePlaces = ({
       <p>
         Veuillez renseigner l’historique du nombre de places pour chaque
         typologie au 31 décembre de ces dernières années.
+        <br /> À partir de {PLACES_VERSIONED_FROM_YEAR} inclus, la modification
+        du nombre de places autorisées doit obligatoirement passer par une
+        contraction ou une extension de la structure.
       </p>
       <CustomNotice
         severity="info"
         className="rounded [&_p]:flex [&_p]:items-center mb-8 w-fit"
-        description="PMR : Personnes à Mobilité Réduite – LGBT : Lesbiennes, Gays, Bisexuels et Transgenres (ici places définies comme spécialisées) – FVV : Femmes Victimes de Violences, TEH : Traîte des Êtres Humains (ici places définies comme labellisées)"
+        description="PMR : Personnes à Mobilité Réduite – LGBT : Lesbiennes, Gays, Bisexuels et Transgenres (ici places définies comme labellisées) – FVV : Femmes Victimes de Violences, TEH : Traîte des Êtres Humains (ici places définies comme spécialisées)"
       />
 
       <Table
@@ -60,7 +64,11 @@ export const FieldSetTypePlaces = ({
         )}
       >
         {yearsToDisplay.map((year) => (
-          <YearlyTypePlace key={year} year={year} />
+          <YearlyTypePlace
+            key={year}
+            year={year}
+            isCapacityLocked={structure.isCurrentVersionFromTransformation}
+          />
         ))}
       </Table>
       {hasErrors && (
