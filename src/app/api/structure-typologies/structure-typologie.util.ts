@@ -28,6 +28,13 @@ export const resolvePlacesAutoriseesForYear = (
   );
 };
 
+export const resolveWritablePlacesForYear = (
+  year: number,
+  placesAutorisees: number | null | undefined,
+  versionedFromYear: number = PLACES_VERSIONED_FROM_YEAR
+): number | null | undefined =>
+  year >= versionedFromYear ? null : placesAutorisees;
+
 export const resolveTypologiesPlacesAutorisees = <
   TTypologie extends { year: number; placesAutorisees: number | null },
 >(

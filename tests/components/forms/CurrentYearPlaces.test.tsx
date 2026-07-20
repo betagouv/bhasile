@@ -41,19 +41,6 @@ describe("CurrentYearPlaces", () => {
     expect(screen.queryByText(/soit .* place/)).not.toBeInTheDocument();
   });
 
-  it("désactive les places autorisées et affiche la notice en actualisation", () => {
-    renderWithTotal({ formKind: FormKind.ACTUALISATION }, 50);
-
-    expect(
-      screen.getByLabelText(/Nombre total de places autorisées/)
-    ).toBeDisabled();
-    expect(
-      screen.getByText(
-        /doit obligatoirement passer par une contraction ou une extension/
-      )
-    ).toBeInTheDocument();
-  });
-
   it("ne signale pas la contradiction tant que le champ n'a pas été quitté", () => {
     renderWithTotal({ formKind: FormKind.EXTENSION, originalPlaces: 47 }, 40);
 

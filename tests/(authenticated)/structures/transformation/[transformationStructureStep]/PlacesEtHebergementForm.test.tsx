@@ -133,7 +133,7 @@ const submit = () =>
 
 const getPutPayloadPlaces = () =>
   getSavedStructureVersionTransformation(fetchMock, TRANSFORMATION_ID)
-    .structureVersion.structureTypologies[0].placesAutorisees;
+    .structureVersion.placesAutorisees;
 
 describe("PlacesEtHebergementForm — contrainte de variation des places", () => {
   beforeEach(() => {

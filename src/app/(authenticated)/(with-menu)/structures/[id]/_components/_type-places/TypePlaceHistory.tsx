@@ -46,7 +46,8 @@ export const TypePlaceHistory = (): ReactElement => {
   const rows: PlaceRow[] = [
     {
       label: "Places autorisées",
-      getValue: (year) => getStructureTypologie(year)?.placesAutorisees,
+      getValue: (year) =>
+        getStructureTypologie(year)?.placesAutorisees ?? undefined,
     },
     {
       label: "Places PMR",
@@ -54,12 +55,12 @@ export const TypePlaceHistory = (): ReactElement => {
     },
     {
       label: "Places LGBT",
-      subLabel: "(spécialisées)",
+      subLabel: "(labelisées)",
       getValue: (year) => getStructureTypologie(year)?.lgbt,
     },
     {
       label: "Places FVV/TEH",
-      subLabel: "(labelisées)",
+      subLabel: "(spécialisées)",
       getValue: (year) => getStructureTypologie(year)?.fvvTeh,
     },
     {

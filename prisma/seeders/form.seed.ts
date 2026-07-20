@@ -160,7 +160,6 @@ export const createFakeForm = (
   | "structureCodeDna"
   | "structureId"
   | "transformationId"
-  | "campaignId"
   | "structureVersionTransformationId"
 > => {
   return {
@@ -197,7 +196,6 @@ export const createFakeFormWithSteps = (
   | "structureCodeDna"
   | "structureId"
   | "transformationId"
-  | "campaignId"
   | "structureVersionTransformationId"
 > => {
   const fakeForm = createFakeForm(formDefinitionId);

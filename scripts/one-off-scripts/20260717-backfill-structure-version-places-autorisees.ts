@@ -1,90 +1,51 @@
 // One-off : dé-versionnement des typologies.
-// 1. Remplit StructureVersion.placesAutorisees (scalaire de version) depuis la
-//    dernière valeur connue sur StructureTypologie.
+// 1. Reporte StructureVersion.placesAutorisees (versions de base) depuis la
+//    typologie de l'année PLACES_VERSIONED_FROM_YEAR - 1 (dernière année legacy).
+//    Réutilise le MÊME helper que la cascade d'écriture (mirrorLegacyPlaces...),
+//    pour que backfill et maintien courant restent un seul invariant.
 // 2. Vide StructureTypologie.placesAutorisees à partir de PLACES_VERSIONED_FROM_YEAR :
-//    au-delà du seuil, la source de vérité est la timeline des versions.
-// Idempotent : relançable sans effet de bord.
+//    au-delà du seuil, la source de vérité est le scalaire de version.
+//
+// ⚠️ À lancer APRÈS 20260718-shift-typologie-years-to-december (l'année legacy de
+//    référence n'est correcte qu'une fois le décalage 1er-janv → 31-déc fait).
+// Idempotent : le report est une fonction pure de ST[seuil-1] ; le vidage ≥ seuil
+// est rejouable.
 // Usage: yarn one-off 20260717-backfill-structure-version-places-autorisees
 
 import "dotenv/config";
 
 import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
+import { mirrorLegacyPlacesToBaseVersions } from "@/app/api/structure-versions/structure-version.repository";
 import { createPrismaClient } from "@/prisma-client";
 
 const prisma = createPrismaClient();
 
 async function main() {
   console.log("🚀 Backfill des places autorisées sur StructureVersion...");
-  console.log(`   Seuil de versionnement : ${PLACES_VERSIONED_FROM_YEAR}`);
+  console.log(`   Année legacy de référence : ${PLACES_VERSIONED_FROM_YEAR - 1}`);
 
-  const structures = await prisma.structure.findMany({
-    select: {
-      id: true,
-      structureVersions: {
-        // Une FERMETURE ne porte aucune place (son formulaire n'en capte pas) :
-        // la laisser vide est ce qui rend l'historique vide après la clôture.
-        where: {
-          structureVersionTransformation: { type: { not: "FERMETURE" } },
-        },
-        select: { id: true, placesAutorisees: true },
-        orderBy: [{ effectiveDate: "desc" }, { id: "desc" }],
-      },
-      structureTypologies: {
-        where: { placesAutorisees: { not: null } },
-        select: { year: true, placesAutorisees: true },
-        orderBy: { year: "desc" },
-      },
-    },
-    orderBy: { id: "asc" },
+  const filledVersions = await mirrorLegacyPlacesToBaseVersions(prisma);
+  console.log(`✅ ${filledVersions} version(s) de base alignée(s).`);
+
+  const versionsStillEmpty = await prisma.structureVersion.count({
+    where: { structureVersionTransformationId: null, placesAutorisees: null },
   });
-  console.log(`📥 ${structures.length} structure(s) chargée(s).`);
-
-  let filledVersions = 0;
-  let skippedNoSource = 0;
-
-  for (const structure of structures) {
-    // Les places autorisées courantes = la dernière valeur renseignée, toutes
-    // années confondues (avant transfos, une structure n'a qu'une version de base).
-    const latestPlacesAutorisees =
-      structure.structureTypologies[0]?.placesAutorisees ?? null;
-
-    if (latestPlacesAutorisees === null) {
-      skippedNoSource += 1;
-      continue;
-    }
-
-    // Idempotence : on ne touche que les versions encore vides.
-    const versionsToFill = structure.structureVersions.filter(
-      (structureVersion) => structureVersion.placesAutorisees === null
-    );
-    if (versionsToFill.length === 0) {
-      continue;
-    }
-
-    await prisma.structureVersion.updateMany({
-      where: { id: { in: versionsToFill.map((version) => version.id) } },
-      data: { placesAutorisees: latestPlacesAutorisees },
-    });
-    filledVersions += versionsToFill.length;
-  }
-
-  console.log(`✅ ${filledVersions} version(s) remplie(s).`);
-  if (skippedNoSource > 0) {
+  if (versionsStillEmpty > 0) {
     console.log(
-      `⚠️  ${skippedNoSource} structure(s) sans aucune place connue — laissées vides.`
+      `⚠️  ${versionsStillEmpty} version(s) de base sans places (aucune typologie ${
+        PLACES_VERSIONED_FROM_YEAR - 1
+      }).`
     );
   }
 
-  // Invariant : StructureTypologie ne porte les places que pour les années legacy.
-  const cleared = await prisma.structureTypologie.updateMany({
-    where: {
-      year: { gte: PLACES_VERSIONED_FROM_YEAR },
-      placesAutorisees: { not: null },
-    },
-    data: { placesAutorisees: null },
-  });
+  const cleared = await prisma.$executeRaw`
+    UPDATE "StructureTypologie"
+    SET "placesAutorisees" = NULL
+    WHERE "year" >= ${PLACES_VERSIONED_FROM_YEAR}
+      AND "placesAutorisees" IS NOT NULL
+  `;
   console.log(
-    `🧹 ${cleared.count} typologie(s) ≥ ${PLACES_VERSIONED_FROM_YEAR} vidée(s) de leurs places.`
+    `🧹 ${cleared} typologie(s) ≥ ${PLACES_VERSIONED_FROM_YEAR} vidée(s) de leurs places.`
   );
 
   console.log("🏁 Terminé.");

@@ -27,7 +27,8 @@ ALTER TABLE "Form" DROP COLUMN "campaignId";
 
 -- AlterTable
 ALTER TABLE "StructureTypologie" DROP COLUMN "structureVersionId",
-ADD COLUMN     "structureVersionTransformationId" INTEGER;
+ADD COLUMN     "structureVersionTransformationId" INTEGER,
+ADD COLUMN     "yearOrigin" INTEGER;
 
 -- AlterTable
 ALTER TABLE "StructureVersion" DROP COLUMN "campaignId",

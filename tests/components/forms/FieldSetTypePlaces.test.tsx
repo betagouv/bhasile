@@ -242,7 +242,7 @@ describe("FieldSetTypePlaces", () => {
   });
 
   describe("Number inputs", () => {
-    it("accepte des valeurs numériques pour placesAutorisees", async () => {
+    it("accepte des valeurs numériques pour placesAutorisees des années legacy", async () => {
       const user = userEvent.setup();
 
       const { container } = render(
@@ -264,8 +264,9 @@ describe("FieldSetTypePlaces", () => {
         </FormTestWrapper>
       );
 
+      // index 1 = 2025 (< seuil, éditable) ; l'index 0 = 2026 est en lecture seule.
       const input = container.querySelector(
-        '[name="structureTypologies.0.placesAutorisees"]'
+        '[name="structureTypologies.1.placesAutorisees"]'
       ) as HTMLInputElement;
 
       expect(input).toHaveAttribute("min", "0");
@@ -276,6 +277,39 @@ describe("FieldSetTypePlaces", () => {
       await waitFor(() => {
         expect(input).toHaveValue("100");
       });
+    });
+
+    it("verrouille placesAutorisees à partir du seuil de versionnement", () => {
+      const { container } = render(
+        <FormTestWrapper
+          defaultValues={{
+            structureTypologies: years.map((year) => ({
+              year,
+              placesAutorisees: 0,
+              pmr: 0,
+              lgbt: 0,
+              fvvTeh: 0,
+            })),
+          }}
+        >
+          <FieldSetTypePlaces
+            structure={structure}
+            formKind={FormKind.FINALISATION}
+          />
+        </FormTestWrapper>
+      );
+
+      // index 0 = 2026 (≥ seuil) verrouillé, index 1 = 2025 éditable.
+      expect(
+        container.querySelector(
+          '[name="structureTypologies.0.placesAutorisees"]'
+        )
+      ).toBeDisabled();
+      expect(
+        container.querySelector(
+          '[name="structureTypologies.1.placesAutorisees"]'
+        )
+      ).not.toBeDisabled();
     });
   });
 

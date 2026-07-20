@@ -3,6 +3,8 @@ import { EntityId } from "@/types/Entity.type";
 import { PrismaTransaction } from "@/types/prisma.type";
 import { PartialExcept } from "@/types/utils.type";
 
+import { resolveWritablePlacesForYear } from "./structure-typologie.util";
+
 const getUniqueWhere = (
   entityId: EntityId,
   year: number
@@ -53,7 +55,10 @@ export const createOrUpdateStructureTypologies = async (
         update: {
           ...(typologie.year !== undefined && { year: typologie.year }),
           ...(typologie.placesAutorisees !== undefined && {
-            placesAutorisees: typologie.placesAutorisees,
+            placesAutorisees: resolveWritablePlacesForYear(
+              typologie.year!,
+              typologie.placesAutorisees
+            ),
           }),
           ...(typologie.pmr !== undefined && { pmr: typologie.pmr }),
           ...(typologie.lgbt !== undefined && { lgbt: typologie.lgbt }),
@@ -62,7 +67,10 @@ export const createOrUpdateStructureTypologies = async (
         create: {
           ...entityId,
           year: typologie.year!,
-          placesAutorisees: typologie.placesAutorisees,
+          placesAutorisees: resolveWritablePlacesForYear(
+            typologie.year!,
+            typologie.placesAutorisees
+          ),
           pmr: typologie.pmr,
           lgbt: typologie.lgbt,
           fvvTeh: typologie.fvvTeh,

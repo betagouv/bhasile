@@ -1,3 +1,4 @@
+import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { Prisma } from "@/generated/prisma/client";
 import { StructureVersionApiType } from "@/schemas/api/structure-version.schema";
 import { EntityId } from "@/types/Entity.type";
@@ -13,6 +14,35 @@ import {
   checkCreatedStructureDepartement,
   checkNoDepartementAdministratifChange,
 } from "./structure-version.util";
+
+export const mirrorLegacyPlacesToBaseVersions = async (
+  tx: PrismaTransaction,
+  options: { structureId?: number } = {}
+): Promise<number> => {
+  const legacyTypologies = await tx.structureTypologie.findMany({
+    where: {
+      year: PLACES_VERSIONED_FROM_YEAR - 1,
+      structureId: options.structureId ?? { not: null },
+    },
+    select: { structureId: true, placesAutorisees: true },
+  });
+
+  let alignedVersions = 0;
+  for (const legacyTypologie of legacyTypologies) {
+    if (legacyTypologie.structureId === null) {
+      continue;
+    }
+    const { count } = await tx.structureVersion.updateMany({
+      where: {
+        structureId: legacyTypologie.structureId,
+        structureVersionTransformationId: null,
+      },
+      data: { placesAutorisees: legacyTypologie.placesAutorisees },
+    });
+    alignedVersions += count;
+  }
+  return alignedVersions;
+};
 
 type StructureVersionParent = Pick<
   EntityId,

@@ -2,10 +2,13 @@ import { useFormContext } from "react-hook-form";
 
 import InputWithValidation from "@/app/components/forms/InputWithValidation";
 import { getMillesimeIndexForAYear } from "@/app/utils/structure.util";
+import { PLACES_VERSIONED_FROM_YEAR } from "@/constants";
 import { StructureTypologieApiType } from "@/schemas/api/structure-typologie.schema";
 
 export const YearlyTypePlace = ({ year }: Props) => {
   const { control, register, watch } = useFormContext();
+
+  const isPlacesAutoriseesReadOnly = year >= PLACES_VERSIONED_FROM_YEAR;
 
   const structureTypologies: StructureTypologieApiType[] = watch(
     "structureTypologies"
@@ -39,6 +42,7 @@ export const YearlyTypePlace = ({ year }: Props) => {
           type="number"
           min={0}
           label=""
+          disabled={isPlacesAutoriseesReadOnly}
           className="mb-0 mx-auto items-center [&_p]:hidden"
           variant="simple"
         />

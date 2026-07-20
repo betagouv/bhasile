@@ -20,7 +20,10 @@ import {
   currentVersionArgs,
   currentVersionWhere,
 } from "../structure-versions/structure-version.db.type";
-import { createOrUpdateStructureVersion } from "../structure-versions/structure-version.repository";
+import {
+  createOrUpdateStructureVersion,
+  mirrorLegacyPlacesToBaseVersions,
+} from "../structure-versions/structure-version.repository";
 import { VERSIONED_FIELD_KEYS } from "./structure.constants";
 import {
   StructureDbList,
@@ -189,6 +192,11 @@ export const updateOne = async (
       await createOrUpdateStructureTypologies(tx, structureTypologies, {
         structureId: structure.id,
       });
+      if (structureTypologies?.length) {
+        await mirrorLegacyPlacesToBaseVersions(tx, {
+          structureId: structure.id,
+        });
+      }
       await createOrUpdateControles(tx, controles, structure.id);
       await createOrUpdateForms(tx, forms, { structureId: structure.id });
       await createOrUpdateEvaluations(tx, evaluations, structure.id);

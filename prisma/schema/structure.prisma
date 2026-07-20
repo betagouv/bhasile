@@ -75,6 +75,7 @@ model StructureTypologie {
   structureVersionTransformation   StructureVersionTransformation? @relation(fields: [structureVersionTransformationId], references: [id], onDelete: Cascade, onUpdate: Cascade) // ce que la transfo a déclaré : brouillon pendant la saisie, registre permanent après finalisation
   structureVersionTransformationId Int?
   year                             Int
+  yearOrigin                       Int? // TEMP : année 1er-janvier saisie par l'opérateur, avant décalage au 31 déc. Drop en PR cleaning.
   placesAutorisees                 Int?
   pmr                              Int?
   lgbt                             Int?

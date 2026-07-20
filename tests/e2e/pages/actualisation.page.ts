@@ -87,18 +87,13 @@ export class ActualisationPage {
     // clic perdu sur re-render du header.
     await expect(button).toBeEnabled({ timeout: 20000 });
     await this.page.waitForLoadState("networkidle").catch(() => {});
-    // On confirme que le PUT de validation part bien et valide la campagne.
+    // On confirme que le PUT de validation de l'étape part bien.
     await Promise.all([
-      this.page.waitForResponse(async (response) => {
-        if (
-          !response.url().includes("/api/campaigns") ||
-          response.request().method() !== "PUT"
-        ) {
-          return false;
-        }
-        const body = await response.json().catch(() => ({}));
-        return body.isValidated === true;
-      }),
+      this.page.waitForResponse(
+        (response) =>
+          response.url().includes("/actualisation") &&
+          response.request().method() === "PUT"
+      ),
       button.click(),
     ]);
     await this.page.waitForLoadState("networkidle").catch(() => {});

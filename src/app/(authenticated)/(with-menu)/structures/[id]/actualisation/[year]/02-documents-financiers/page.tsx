@@ -27,7 +27,7 @@ export default function ActualisationDocumentsFinanciers() {
   const { structure } = useStructureContext();
   const year = Number(useParams().year);
 
-  const defaultValues = getActualisationDefaultValues({ structure, year });
+  const defaultValues = getActualisationDefaultValues({ structure });
 
   const { handleAutoSave, handleValidateStep } = useActualisationFormHandling({
     year,

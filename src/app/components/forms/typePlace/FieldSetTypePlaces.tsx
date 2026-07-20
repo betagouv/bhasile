@@ -43,7 +43,7 @@ export const FieldSetTypePlaces = ({
       </legend>
       <p>
         Veuillez renseigner l’historique du nombre de places pour chaque
-        typologie au 1er janvier de ces dernières années.
+        typologie au 31 décembre de ces dernières années.
       </p>
       <CustomNotice
         severity="info"
